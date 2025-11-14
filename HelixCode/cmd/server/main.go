@@ -34,16 +34,21 @@ func main() {
 		log.Fatalf("❌ Failed to load configuration: %v", err)
 	}
 
-	// Initialize database
-	db, err := database.New(cfg.Database)
-	if err != nil {
-		log.Fatalf("❌ Failed to initialize database: %v", err)
-	}
-	defer db.Close()
+	// Initialize database (optional for testing)
+	var db *database.Database
+	if cfg.Database.Host != "" {
+		db, err = database.New(cfg.Database)
+		if err != nil {
+			log.Printf("⚠️  Failed to initialize database (continuing without): %v", err)
+		} else {
+			defer db.Close()
 
-	// Initialize database schema
-	if err := db.InitializeSchema(); err != nil {
-		log.Fatalf("❌ Failed to initialize database schema: %v", err)
+			// Initialize database schema
+			if err := db.InitializeSchema(); err != nil {
+				log.Printf("⚠️  Failed to initialize database schema (continuing without): %v", err)
+				db = nil
+			}
+		}
 	}
 
 	// Initialize Redis
