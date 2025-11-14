@@ -9,7 +9,7 @@ server:
   shutdown_timeout: 30
 
 database:
-  host: "postgres"
+  host: ""
   port: 5432
   user: "helix"
   password: "helixpass"
