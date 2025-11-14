@@ -24,15 +24,14 @@ func NewAuthDB(db database.DatabaseInterface) *AuthDB {
 // CreateUser creates a new user in the database
 func (a *AuthDB) CreateUser(ctx context.Context, user *User, passwordHash string) error {
 	query := `
-		INSERT INTO users (id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+		INSERT INTO users (id, username, email, password_hash, is_active, is_verified, mfa_enabled, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 	_, err := a.db.Exec(ctx, query,
 		user.ID,
 		user.Username,
 		user.Email,
 		passwordHash,
-		user.DisplayName,
 		user.IsActive,
 		user.IsVerified,
 		user.MFAEnabled,
@@ -50,7 +49,7 @@ func (a *AuthDB) CreateUser(ctx context.Context, user *User, passwordHash string
 // GetUserByUsername retrieves a user by username
 func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User, string, error) {
 	query := `
-		SELECT id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
+		SELECT id, username, email, password_hash, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
 		FROM users
 		WHERE username = $1`
 
@@ -63,7 +62,6 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 		&user.Username,
 		&user.Email,
 		&passwordHash,
-		&user.DisplayName,
 		&user.IsActive,
 		&user.IsVerified,
 		&user.MFAEnabled,
@@ -71,6 +69,7 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
+	user.DisplayName = "" // Not stored in DB
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -89,7 +88,7 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 // GetUserByEmail retrieves a user by email
 func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, string, error) {
 	query := `
-		SELECT id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
+		SELECT id, username, email, password_hash, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
 		FROM users
 		WHERE email = $1`
 
@@ -102,7 +101,6 @@ func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, strin
 		&user.Username,
 		&user.Email,
 		&passwordHash,
-		&user.DisplayName,
 		&user.IsActive,
 		&user.IsVerified,
 		&user.MFAEnabled,
@@ -110,6 +108,7 @@ func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, strin
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
+	user.DisplayName = "" // Not stored in DB
 
 	if err != nil {
 		if err == sql.ErrNoRows {

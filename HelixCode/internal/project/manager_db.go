@@ -22,8 +22,8 @@ func NewDatabaseManager(db database.DatabaseInterface) *DatabaseManager {
 	}
 }
 
-// CreateProject creates a new project with database persistence
-func (m *DatabaseManager) CreateProject(ctx context.Context, name, description, path, projectType, ownerID string) (*Project, error) {
+// CreateProjectWithUser creates a new project with database persistence
+func (m *DatabaseManager) CreateProjectWithUser(ctx context.Context, name, description, path, projectType, ownerID string) (*Project, error) {
 	ownerUUID, err := uuid.Parse(ownerID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid owner ID: %v", err)
@@ -130,6 +130,71 @@ func (m *DatabaseManager) GetProject(ctx context.Context, id string) (*Project, 
 	return project, nil
 }
 
+// CreateProject creates a new project with database persistence (for compatibility with Manager interface)
+func (m *DatabaseManager) CreateProject(ctx context.Context, name, description, path, projectType string) (*Project, error) {
+	return m.CreateProjectWithUser(ctx, name, description, path, projectType, "default-user")
+}
+
+// detectProjectType detects project type and sets appropriate metadata
+func (m *DatabaseManager) detectProjectType(path, projectType string, metadata *Metadata) {
+	// This would implement actual project type detection
+	// For now, use the provided type and set default commands
+
+	switch projectType {
+	case "go":
+		metadata.BuildCommand = "go build"
+		metadata.TestCommand = "go test ./..."
+		metadata.LintCommand = "gofmt -l ."
+	case "node":
+		metadata.BuildCommand = "npm run build"
+		metadata.TestCommand = "npm test"
+		metadata.LintCommand = "npm run lint"
+	case "python":
+		metadata.BuildCommand = "python setup.py build"
+		metadata.TestCommand = "python -m pytest"
+		metadata.LintCommand = "flake8 ."
+	case "rust":
+		metadata.BuildCommand = "cargo build"
+		metadata.TestCommand = "cargo test"
+		metadata.LintCommand = "cargo clippy"
+	default:
+		metadata.BuildCommand = "echo 'No build command configured'"
+		metadata.TestCommand = "echo 'No test command configured'"
+		metadata.LintCommand = "echo 'No lint command configured'"
+	}
+}
+
+// convertToMetadata converts map to Metadata struct
+func (m *DatabaseManager) convertToMetadata(data map[string]interface{}) Metadata {
+	metadata := Metadata{
+		Environment: make(map[string]string),
+	}
+
+	if buildCmd, ok := data["build_command"].(string); ok {
+		metadata.BuildCommand = buildCmd
+	}
+	if testCmd, ok := data["test_command"].(string); ok {
+		metadata.TestCommand = testCmd
+	}
+	if lintCmd, ok := data["lint_command"].(string); ok {
+		metadata.LintCommand = lintCmd
+	}
+	if deps, ok := data["dependencies"].([]string); ok {
+		metadata.Dependencies = deps
+	}
+	if env, ok := data["environment"].(map[string]string); ok {
+		metadata.Environment = env
+	}
+	if framework, ok := data["framework"].(string); ok {
+		metadata.Framework = framework
+	}
+	if langVersion, ok := data["language_version"].(string); ok {
+		metadata.LanguageVersion = langVersion
+	}
+
+	return metadata
+}
+
 // ListProjects returns all projects for a user from database
 func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*Project, error) {
 	ownerUUID, err := uuid.Parse(ownerID)
@@ -195,122 +260,4 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 	}
 
 	return projects, nil
-}
-
-// UpdateProjectMetadata updates project metadata in database
-func (m *DatabaseManager) UpdateProjectMetadata(ctx context.Context, id string, metadata Metadata) error {
-	projectID, err := uuid.Parse(id)
-	if err != nil {
-		return fmt.Errorf("invalid project ID: %v", err)
-	}
-
-	// Get current config
-	var currentConfig map[string]interface{}
-	query := `SELECT config FROM projects WHERE id = $1`
-	err = m.db.QueryRow(ctx, query, projectID).Scan(&currentConfig)
-	if err != nil {
-		return fmt.Errorf("failed to get project config: %v", err)
-	}
-
-	// Update metadata in config
-	currentConfig["metadata"] = metadata
-
-	// Update database
-	updateQuery := `
-		UPDATE projects
-		SET config = $1, updated_at = NOW()
-		WHERE id = $2
-	`
-
-	_, err = m.db.Exec(ctx, updateQuery, currentConfig, projectID)
-	if err != nil {
-		return fmt.Errorf("failed to update project metadata: %v", err)
-	}
-
-	return nil
-}
-
-// DeleteProject soft deletes a project in database
-func (m *DatabaseManager) DeleteProject(ctx context.Context, id string) error {
-	projectID, err := uuid.Parse(id)
-	if err != nil {
-		return fmt.Errorf("invalid project ID: %v", err)
-	}
-
-	query := `
-		UPDATE projects
-		SET status = 'deleted', updated_at = NOW()
-		WHERE id = $1
-	`
-
-	result, err := m.db.Exec(ctx, query, projectID)
-	if err != nil {
-		return fmt.Errorf("failed to delete project: %v", err)
-	}
-
-	if result.RowsAffected() == 0 {
-		return fmt.Errorf("project not found: %s", id)
-	}
-
-	return nil
-}
-
-// detectProjectType detects project type and sets appropriate metadata
-func (m *DatabaseManager) detectProjectType(path, projectType string, metadata *Metadata) {
-	// This would implement actual project type detection
-	// For now, use the provided type and set default commands
-
-	switch projectType {
-	case "go":
-		metadata.BuildCommand = "go build"
-		metadata.TestCommand = "go test ./..."
-		metadata.LintCommand = "gofmt -l ."
-	case "node":
-		metadata.BuildCommand = "npm run build"
-		metadata.TestCommand = "npm test"
-		metadata.LintCommand = "npm run lint"
-	case "python":
-		metadata.BuildCommand = "python setup.py build"
-		metadata.TestCommand = "python -m pytest"
-		metadata.LintCommand = "flake8 ."
-	case "rust":
-		metadata.BuildCommand = "cargo build"
-		metadata.TestCommand = "cargo test"
-		metadata.LintCommand = "cargo clippy"
-	default:
-		metadata.BuildCommand = "echo 'No build command configured'"
-		metadata.TestCommand = "echo 'No test command configured'"
-		metadata.LintCommand = "echo 'No lint command configured'"
-	}
-}
-
-// convertToMetadata converts map to Metadata struct
-func (m *DatabaseManager) convertToMetadata(data map[string]interface{}) Metadata {
-	metadata := Metadata{
-		Environment: make(map[string]string),
-	}
-
-	if buildCmd, ok := data["build_command"].(string); ok {
-		metadata.BuildCommand = buildCmd
-	}
-	if testCmd, ok := data["test_command"].(string); ok {
-		metadata.TestCommand = testCmd
-	}
-	if lintCmd, ok := data["lint_command"].(string); ok {
-		metadata.LintCommand = lintCmd
-	}
-	if deps, ok := data["dependencies"].([]string); ok {
-		metadata.Dependencies = deps
-	}
-	if env, ok := data["environment"].(map[string]string); ok {
-		metadata.Environment = env
-	}
-	if framework, ok := data["framework"].(string); ok {
-		metadata.Framework = framework
-	}
-	if langVersion, ok := data["language_version"].(string); ok {
-		metadata.LanguageVersion = langVersion
-	}
-
-	return metadata
 }

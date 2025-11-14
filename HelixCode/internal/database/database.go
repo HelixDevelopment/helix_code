@@ -115,6 +115,28 @@ func (db *Database) InitializeSchema() error {
 	}
 
 	if schemaExists {
+		// Check if display_name column exists, add it if missing
+		var columnExists bool
+		err = db.Pool.QueryRow(ctx, `
+			SELECT EXISTS(
+				SELECT 1 FROM information_schema.columns
+				WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'display_name'
+			)
+		`).Scan(&columnExists)
+
+		if err != nil {
+			return fmt.Errorf("failed to check display_name column: %v", err)
+		}
+
+		if !columnExists {
+			log.Println("🔧 Adding missing display_name column...")
+			_, err = db.Pool.Exec(ctx, `ALTER TABLE users ADD COLUMN display_name VARCHAR(255)`)
+			if err != nil {
+				return fmt.Errorf("failed to add display_name column: %v", err)
+			}
+			log.Println("✅ Added display_name column")
+		}
+
 		log.Println("✅ Database schema already exists")
 		return nil
 	}
@@ -168,7 +190,6 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    display_name VARCHAR(255),
     avatar_url TEXT,
     is_active BOOLEAN NOT NULL DEFAULT true,
     is_verified BOOLEAN NOT NULL DEFAULT false,

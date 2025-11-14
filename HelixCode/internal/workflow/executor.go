@@ -9,13 +9,20 @@ import (
 	"dev.helix.code/internal/project"
 )
 
+// ProjectManager interface to support both Manager and DatabaseManager
+type ProjectManager interface {
+	GetProject(ctx context.Context, id string) (*project.Project, error)
+	ListProjects(ctx context.Context, ownerID string) ([]*project.Project, error)
+	CreateProject(ctx context.Context, name, description, path, projectType string) (*project.Project, error)
+}
+
 // Executor handles workflow execution
 type Executor struct {
-	projectManager *project.Manager
+	projectManager ProjectManager
 }
 
 // NewExecutor creates a new workflow executor
-func NewExecutor(projectManager *project.Manager) *Executor {
+func NewExecutor(projectManager ProjectManager) *Executor {
 	return &Executor{
 		projectManager: projectManager,
 	}

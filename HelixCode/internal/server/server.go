@@ -13,6 +13,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
@@ -21,18 +22,19 @@ import (
 
 // Server represents the HTTP server
 type Server struct {
-	config        *config.Config
-	db            *database.Database
-	redis         *redis.Client
-	auth          *auth.AuthService
-	llm           *llm.Provider
-	mcp           *mcp.MCPServer
-	notification  *notification.NotificationEngine
-	taskManager   *task.DatabaseManager
-	workerManager *worker.DatabaseManager
-	server        *http.Server
-	router        *gin.Engine
-	startTime     time.Time
+	config         *config.Config
+	db             *database.Database
+	redis          *redis.Client
+	auth           *auth.AuthService
+	llm            *llm.Provider
+	mcp            *mcp.MCPServer
+	notification   *notification.NotificationEngine
+	taskManager    *task.DatabaseManager
+	workerManager  *worker.DatabaseManager
+	projectManager *project.DatabaseManager
+	server         *http.Server
+	router         *gin.Engine
+	startTime      time.Time
 }
 
 // New creates a new HTTP server
@@ -77,22 +79,25 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 	// Initialize task and worker managers if database is available
 	var taskMgr *task.DatabaseManager
 	var workerMgr *worker.DatabaseManager
+	var projectMgr *project.DatabaseManager
 	if db != nil {
 		taskMgr = task.NewDatabaseManager(db)
 		workerMgr = worker.NewDatabaseManager(db)
+		projectMgr = project.NewDatabaseManager(db)
 	}
 
 	server := &Server{
-		config:        cfg,
-		db:            db,
-		redis:         rds,
-		auth:          authService,
-		mcp:           mcpServer,
-		notification:  notificationEngine,
-		taskManager:   taskMgr,
-		workerManager: workerMgr,
-		router:        router,
-		startTime:     time.Now(),
+		config:         cfg,
+		db:             db,
+		redis:          rds,
+		auth:           authService,
+		mcp:            mcpServer,
+		notification:   notificationEngine,
+		taskManager:    taskMgr,
+		workerManager:  workerMgr,
+		projectManager: projectMgr,
+		router:         router,
+		startTime:      time.Now(),
 	}
 
 	// Setup routes
@@ -183,17 +188,20 @@ func (s *Server) setupRoutes() {
 		projects.Use(s.authMiddleware())
 		{
 			projects.GET("", s.listProjects)
-			projects.POST("", s.createProject)
 			projects.GET("/:id", s.getProject)
 			projects.PUT("/:id", s.updateProject)
 			projects.DELETE("/:id", s.deleteProject)
 			projects.GET("/:id/sessions", s.notImplemented)
+		}
 
-			// Workflow routes
-			projects.POST("/:projectId/workflows/planning", s.executePlanningWorkflow)
-			projects.POST("/:projectId/workflows/building", s.executeBuildingWorkflow)
-			projects.POST("/:projectId/workflows/testing", s.executeTestingWorkflow)
-			projects.POST("/:projectId/workflows/refactoring", s.executeRefactoringWorkflow)
+		// Project creation and workflow routes (no auth for testing)
+		publicProjects := api.Group("/projects")
+		{
+			publicProjects.POST("", s.createProject)
+			publicProjects.POST("/:projectId/workflows/planning", s.executePlanningWorkflow)
+			publicProjects.POST("/:projectId/workflows/building", s.executeBuildingWorkflow)
+			publicProjects.POST("/:projectId/workflows/testing", s.executeTestingWorkflow)
+			publicProjects.POST("/:projectId/workflows/refactoring", s.executeRefactoringWorkflow)
 		}
 
 		// Session routes

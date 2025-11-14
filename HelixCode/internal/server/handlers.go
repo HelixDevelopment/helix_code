@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"dev.helix.code/internal/auth"
@@ -13,11 +14,25 @@ import (
 // Project Handlers
 
 func (s *Server) listProjects(c *gin.Context) {
-	// For now, return empty list until we have user authentication
-	// In production, this would use: projectManager := project.NewDatabaseManager(s.db)
+	// Get user ID from context
+	userID := c.GetString("user_id")
+	if userID == "" {
+		userID = "default-user" // For testing without full auth
+	}
+
+	projects, err := s.projectManager.ListProjects(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to list projects",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
-		"projects": []interface{}{},
+		"projects": projects,
 	})
 }
 
@@ -206,16 +221,24 @@ func (s *Server) createProject(c *gin.Context) {
 		return
 	}
 
-	// For now, return placeholder until we have user authentication
-	// In production, this would use: projectManager := project.NewDatabaseManager(s.db)
-	proj := gin.H{
-		"id":          "proj_placeholder",
-		"name":        req.Name,
-		"description": req.Description,
-		"path":        req.Path,
-		"type":        req.Type,
-		"created_at":  time.Now(),
-		"updated_at":  time.Now(),
+	// Create project directory if it doesn't exist
+	if err := os.MkdirAll(req.Path, 0755); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to create project directory",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	proj, err := s.projectManager.CreateProject(c.Request.Context(), req.Name, req.Description, req.Path, req.Type)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to create project",
+			"error":   err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -227,16 +250,14 @@ func (s *Server) createProject(c *gin.Context) {
 func (s *Server) getProject(c *gin.Context) {
 	id := c.Param("id")
 
-	// For now, return placeholder until we have user authentication
-	// In production, this would use: projectManager := project.NewDatabaseManager(s.db)
-	proj := gin.H{
-		"id":          id,
-		"name":        "Sample Project",
-		"description": "This is a sample project",
-		"path":        "/path/to/project",
-		"type":        "go",
-		"created_at":  time.Now(),
-		"updated_at":  time.Now(),
+	proj, err := s.projectManager.GetProject(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  "error",
+			"message": "Project not found",
+			"error":   err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -520,8 +541,7 @@ func (s *Server) getSystemStatus(c *gin.Context) {
 func (s *Server) executePlanningWorkflow(c *gin.Context) {
 	projectID := c.Param("projectId")
 
-	projectManager := project.NewManager()
-	workflowExecutor := workflow.NewExecutor(projectManager)
+	workflowExecutor := workflow.NewExecutor(s.projectManager)
 
 	wf, err := workflowExecutor.ExecutePlanningWorkflow(c.Request.Context(), projectID)
 	if err != nil {

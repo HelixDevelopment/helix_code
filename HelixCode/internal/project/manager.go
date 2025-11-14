@@ -102,8 +102,8 @@ func (m *Manager) GetProject(ctx context.Context, id string) (*Project, error) {
 	return project, nil
 }
 
-// ListProjects returns all projects
-func (m *Manager) ListProjects(ctx context.Context) ([]*Project, error) {
+// ListProjects returns all projects for a user (ownerID ignored for in-memory manager)
+func (m *Manager) ListProjects(ctx context.Context, ownerID string) ([]*Project, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -160,34 +160,9 @@ func (m *Manager) GetActiveProject(ctx context.Context) (*Project, error) {
 	return nil, fmt.Errorf("no active project found")
 }
 
-// UpdateProjectMetadata updates project metadata
-func (m *Manager) UpdateProjectMetadata(ctx context.Context, id string, metadata Metadata) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	// Look up project directly to avoid deadlock
-	project, exists := m.projects[id]
-	if !exists {
-		return fmt.Errorf("project not found: %s", id)
-	}
-
-	project.Metadata = metadata
-	project.UpdatedAt = time.Now()
-
-	return nil
-}
-
-// DeleteProject removes a project
-func (m *Manager) DeleteProject(ctx context.Context, id string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if m.activeProject != nil && m.activeProject.ID == id {
-		m.activeProject = nil
-	}
-
-	delete(m.projects, id)
-	return nil
+// CreateProjectWithUser creates a new project with user ID (for compatibility with DatabaseManager)
+func (m *Manager) CreateProjectWithUser(ctx context.Context, name, description, path, projectType, userID string) (*Project, error) {
+	return m.CreateProject(ctx, name, description, path, projectType)
 }
 
 // detectProjectType automatically detects project type and sets appropriate metadata
