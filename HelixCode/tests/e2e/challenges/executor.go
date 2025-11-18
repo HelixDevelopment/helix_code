@@ -198,6 +198,9 @@ func (e *ChallengeExecutor) executeCLI(ctx context.Context, spec *ChallengeSpec,
 	case "tic-tac-toe-tui-001":
 		e.log(logFile, "Generating mock Tic-Tac-Toe TUI game...")
 		err = mockGen.GenerateTicTacToeGame(ctx, execution.ResultDir)
+	case "ascii-art-generator-001":
+		e.log(logFile, "Generating mock ASCII Art Generator...")
+		err = mockGen.GenerateASCIIArtGenerator(ctx, execution.ResultDir)
 	default:
 		err = fmt.Errorf("mock generator not implemented for challenge: %s", spec.ID)
 	}

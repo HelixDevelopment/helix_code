@@ -1020,3 +1020,769 @@ go.work
 
 	return nil
 }
+
+// GenerateASCIIArtGenerator generates a mock ASCII Art Generator CLI tool
+func (g *MockGenerator) GenerateASCIIArtGenerator(ctx context.Context, outputDir string) error {
+	// Create directory structure
+	dirs := []string{
+		filepath.Join(outputDir, "generator"),
+		filepath.Join(outputDir, "tests"),
+	}
+
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		}
+	}
+
+	// Create go.mod
+	goMod := `module ascii-art-generator
+
+go 1.24
+
+require github.com/spf13/cobra v1.8.0
+
+require (
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+)
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "go.mod"), []byte(goMod), 0644); err != nil {
+		return err
+	}
+
+	// Create main.go with command-line parsing
+	mainGo := `package main
+
+import (
+	"ascii-art-generator/generator"
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
+
+var (
+	style      string
+	fontHeight int
+)
+
+func main() {
+	var rootCmd = &cobra.Command{
+		Use:   "ascii-art [text]",
+		Short: "ASCII art generator that converts text to ASCII art in markdown format",
+		Long: ` + "`" + `ASCII Art Generator CLI
+
+This tool generates ASCII art representations of input text in markdown format.
+It supports multiple ASCII art styles and outputs formatted markdown.` + "`" + `,
+		Args: cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			text := args[0]
+
+			// Generate ASCII art
+			art := generator.GenerateASCII(text, style, fontHeight)
+
+			// Output in markdown format
+			fmt.Println("` + "```" + `")
+			fmt.Println(art)
+			fmt.Println("` + "```" + `")
+		},
+	}
+
+	rootCmd.Flags().StringVarP(&style, "style", "s", "banner", "ASCII art style (banner, block, shadow, standard)")
+	rootCmd.Flags().IntVar(&fontHeight, "height", 5, "Font height in characters")
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "main.go"), []byte(mainGo), 0644); err != nil {
+		return err
+	}
+
+	// Create generator/ascii.go
+	asciiGo := `package generator
+
+import (
+	"strings"
+)
+
+// GenerateASCII generates ASCII art from input text
+func GenerateASCII(text, style string, height int) string {
+	// Get the style map
+	styleMap := GetStyle(style)
+	if styleMap == nil {
+		styleMap = GetStyle("standard")
+	}
+
+	// Generate ASCII art line by line
+	var result []string
+	for i := 0; i < height; i++ {
+		var line strings.Builder
+		for _, ch := range strings.ToUpper(text) {
+			if art, ok := styleMap[ch]; ok {
+				if i < len(art) {
+					line.WriteString(art[i])
+					line.WriteString(" ")
+				}
+			} else if ch == ' ' {
+				line.WriteString("  ")
+			}
+		}
+		result = append(result, strings.TrimRight(line.String(), " "))
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// ConvertToMarkdown wraps ASCII art in markdown code blocks
+func ConvertToMarkdown(art string) string {
+	return "` + "```" + `\n" + art + "\n` + "```" + `"
+}
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "generator", "ascii.go"), []byte(asciiGo), 0644); err != nil {
+		return err
+	}
+
+	// Create generator/styles.go with multiple ASCII art styles
+	stylesGo := `package generator
+
+// StyleMap maps characters to their ASCII art representation
+type StyleMap map[rune][]string
+
+// GetStyle returns the ASCII art style map for the given style name
+func GetStyle(name string) StyleMap {
+	styles := map[string]StyleMap{
+		"banner":   getBannerStyle(),
+		"block":    getBlockStyle(),
+		"shadow":   getShadowStyle(),
+		"standard": getStandardStyle(),
+	}
+
+	if style, ok := styles[name]; ok {
+		return style
+	}
+	return styles["standard"]
+}
+
+func getStandardStyle() StyleMap {
+	return StyleMap{
+		'A': []string{
+			"  ###  ",
+			" #   # ",
+			"#######",
+			"#     #",
+			"#     #",
+		},
+		'B': []string{
+			"###### ",
+			"#     #",
+			"###### ",
+			"#     #",
+			"###### ",
+		},
+		'C': []string{
+			" ##### ",
+			"#     #",
+			"#      ",
+			"#     #",
+			" ##### ",
+		},
+		'D': []string{
+			"###### ",
+			"#     #",
+			"#     #",
+			"#     #",
+			"###### ",
+		},
+		'E': []string{
+			"#######",
+			"#      ",
+			"#####  ",
+			"#      ",
+			"#######",
+		},
+		'F': []string{
+			"#######",
+			"#      ",
+			"#####  ",
+			"#      ",
+			"#      ",
+		},
+		'G': []string{
+			" ##### ",
+			"#      ",
+			"#  ####",
+			"#     #",
+			" ##### ",
+		},
+		'H': []string{
+			"#     #",
+			"#     #",
+			"#######",
+			"#     #",
+			"#     #",
+		},
+		'I': []string{
+			"#######",
+			"   #   ",
+			"   #   ",
+			"   #   ",
+			"#######",
+		},
+		'J': []string{
+			"#######",
+			"    #  ",
+			"    #  ",
+			"#   #  ",
+			" ###   ",
+		},
+		'K': []string{
+			"#    # ",
+			"#   #  ",
+			"####   ",
+			"#   #  ",
+			"#    # ",
+		},
+		'L': []string{
+			"#      ",
+			"#      ",
+			"#      ",
+			"#      ",
+			"#######",
+		},
+		'M': []string{
+			"#     #",
+			"##   ##",
+			"# # # #",
+			"#  #  #",
+			"#     #",
+		},
+		'N': []string{
+			"#     #",
+			"##    #",
+			"# #   #",
+			"#  #  #",
+			"#   ###",
+		},
+		'O': []string{
+			" ##### ",
+			"#     #",
+			"#     #",
+			"#     #",
+			" ##### ",
+		},
+		'P': []string{
+			"###### ",
+			"#     #",
+			"###### ",
+			"#      ",
+			"#      ",
+		},
+		'Q': []string{
+			" ##### ",
+			"#     #",
+			"#     #",
+			"#   # #",
+			" #### #",
+		},
+		'R': []string{
+			"###### ",
+			"#     #",
+			"###### ",
+			"#   #  ",
+			"#    # ",
+		},
+		'S': []string{
+			" ##### ",
+			"#      ",
+			" ##### ",
+			"      #",
+			" ##### ",
+		},
+		'T': []string{
+			"#######",
+			"   #   ",
+			"   #   ",
+			"   #   ",
+			"   #   ",
+		},
+		'U': []string{
+			"#     #",
+			"#     #",
+			"#     #",
+			"#     #",
+			" ##### ",
+		},
+		'V': []string{
+			"#     #",
+			"#     #",
+			"#     #",
+			" #   # ",
+			"  ###  ",
+		},
+		'W': []string{
+			"#     #",
+			"#  #  #",
+			"# # # #",
+			"##   ##",
+			"#     #",
+		},
+		'X': []string{
+			"#     #",
+			" #   # ",
+			"  ###  ",
+			" #   # ",
+			"#     #",
+		},
+		'Y': []string{
+			"#     #",
+			" #   # ",
+			"  ###  ",
+			"   #   ",
+			"   #   ",
+		},
+		'Z': []string{
+			"#######",
+			"    #  ",
+			"   #   ",
+			"  #    ",
+			"#######",
+		},
+		'0': []string{
+			" ##### ",
+			"#    ##",
+			"#   # #",
+			"##    #",
+			" ##### ",
+		},
+		'1': []string{
+			"  ##   ",
+			" # #   ",
+			"   #   ",
+			"   #   ",
+			"#######",
+		},
+		'2': []string{
+			" ##### ",
+			"#     #",
+			"    ## ",
+			"  ##   ",
+			"#######",
+		},
+		'3': []string{
+			" ##### ",
+			"      #",
+			"  #### ",
+			"      #",
+			" ##### ",
+		},
+		'4': []string{
+			"#     #",
+			"#     #",
+			"#######",
+			"      #",
+			"      #",
+		},
+		'5': []string{
+			"#######",
+			"#      ",
+			"###### ",
+			"      #",
+			"###### ",
+		},
+		'6': []string{
+			" ##### ",
+			"#      ",
+			"###### ",
+			"#     #",
+			" ##### ",
+		},
+		'7': []string{
+			"#######",
+			"     # ",
+			"    #  ",
+			"   #   ",
+			"  #    ",
+		},
+		'8': []string{
+			" ##### ",
+			"#     #",
+			" ##### ",
+			"#     #",
+			" ##### ",
+		},
+		'9': []string{
+			" ##### ",
+			"#     #",
+			" ######",
+			"      #",
+			" ##### ",
+		},
+		'!': []string{
+			"   #   ",
+			"   #   ",
+			"   #   ",
+			"       ",
+			"   #   ",
+		},
+	}
+}
+
+func getBannerStyle() StyleMap {
+	// Banner style (larger, bolder)
+	return StyleMap{
+		'H': []string{
+			"##     ##",
+			"##     ##",
+			"#########",
+			"##     ##",
+			"##     ##",
+		},
+		'E': []string{
+			"#########",
+			"##       ",
+			"#######  ",
+			"##       ",
+			"#########",
+		},
+		'L': []string{
+			"##       ",
+			"##       ",
+			"##       ",
+			"##       ",
+			"#########",
+		},
+		'O': []string{
+			" ####### ",
+			"##     ##",
+			"##     ##",
+			"##     ##",
+			" ####### ",
+		},
+	}
+}
+
+func getBlockStyle() StyleMap {
+	// Block style (filled blocks)
+	return StyleMap{
+		'H': []string{
+			"█   █",
+			"█   █",
+			"█████",
+			"█   █",
+			"█   █",
+		},
+		'E': []string{
+			"█████",
+			"█    ",
+			"████ ",
+			"█    ",
+			"█████",
+		},
+		'L': []string{
+			"█    ",
+			"█    ",
+			"█    ",
+			"█    ",
+			"█████",
+		},
+		'O': []string{
+			"█████",
+			"█   █",
+			"█   █",
+			"█   █",
+			"█████",
+		},
+	}
+}
+
+func getShadowStyle() StyleMap {
+	// Shadow style (with shadow effect)
+	return StyleMap{
+		'H': []string{
+			"#     #▓",
+			"#     #▓",
+			"#######▓",
+			"#     #▓",
+			"▓▓▓▓▓▓▓▓",
+		},
+		'E': []string{
+			"#######▓",
+			"#      ▓",
+			"#####  ▓",
+			"#      ▓",
+			"▓▓▓▓▓▓▓▓",
+		},
+		'L': []string{
+			"#      ▓",
+			"#      ▓",
+			"#      ▓",
+			"#      ▓",
+			"▓▓▓▓▓▓▓▓",
+		},
+		'O': []string{
+			" ##### ▓",
+			"#     #▓",
+			"#     #▓",
+			"#     #▓",
+			"▓▓▓▓▓▓▓▓",
+		},
+	}
+}
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "generator", "styles.go"), []byte(stylesGo), 0644); err != nil {
+		return err
+	}
+
+	// Create tests/ascii_test.go
+	testGo := `package tests
+
+import (
+	"ascii-art-generator/generator"
+	"strings"
+	"testing"
+)
+
+func TestGenerateASCII(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		style  string
+		height int
+	}{
+		{"Simple text", "HELLO", "standard", 5},
+		{"Banner style", "HELLO", "banner", 5},
+		{"Block style", "TEST", "block", 5},
+		{"Numbers", "123", "standard", 5},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := generator.GenerateASCII(tt.input, tt.style, tt.height)
+			if result == "" {
+				t.Error("Expected non-empty result")
+			}
+			lines := strings.Split(result, "\n")
+			if len(lines) != tt.height {
+				t.Errorf("Expected %d lines, got %d", tt.height, len(lines))
+			}
+		})
+	}
+}
+
+func TestGetStyle(t *testing.T) {
+	styles := []string{"standard", "banner", "block", "shadow"}
+
+	for _, style := range styles {
+		t.Run(style, func(t *testing.T) {
+			styleMap := generator.GetStyle(style)
+			if styleMap == nil {
+				t.Errorf("Style %s returned nil", style)
+			}
+		})
+	}
+}
+
+func TestConvertToMarkdown(t *testing.T) {
+	art := "test art"
+	result := generator.ConvertToMarkdown(art)
+
+	if !strings.Contains(result, "` + "```" + `") {
+		t.Error("Expected markdown code block delimiters")
+	}
+	if !strings.Contains(result, art) {
+		t.Error("Expected art to be in result")
+	}
+}
+
+func TestInvalidStyle(t *testing.T) {
+	result := generator.GenerateASCII("TEST", "invalid", 5)
+	if result == "" {
+		t.Error("Expected fallback to standard style")
+	}
+}
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "tests", "ascii_test.go"), []byte(testGo), 0644); err != nil {
+		return err
+	}
+
+	// Create README.md
+	readme := `# ASCII Art Generator CLI
+
+A command-line tool that generates ASCII art representations of text input in markdown format.
+
+## Features
+
+- Multiple ASCII art styles (banner, block, shadow, standard)
+- Customizable font height
+- Markdown formatted output
+- Support for letters (A-Z), numbers (0-9), and special characters
+- Command-line interface with flag parsing
+
+## Installation
+
+1. Install Go 1.24 or later
+
+2. Download dependencies:
+` + "```bash" + `
+go mod download
+` + "```" + `
+
+3. Build the tool from source:
+` + "```bash" + `
+go build -o ascii-art
+` + "```" + `
+
+## Usage
+
+Basic usage:
+
+` + "```bash" + `
+./ascii-art HELLO
+` + "```" + `
+
+With custom style:
+
+` + "```bash" + `
+./ascii-art --style banner HELLO
+` + "```" + `
+
+With custom height:
+
+` + "```bash" + `
+./ascii-art --height 7 --style block TEST
+` + "```" + `
+
+Show help:
+
+` + "```bash" + `
+./ascii-art --help
+` + "```" + `
+
+## Available Styles
+
+- **standard**: Classic ASCII art style
+- **banner**: Larger, bolder letters
+- **block**: Filled block characters (█)
+- **shadow**: Style with shadow effect (▓)
+
+## Examples
+
+### Standard Style
+` + "```bash" + `
+./ascii-art HELLO
+` + "```" + `
+
+Output:
+` + "```" + `
+#     #  #####  #      #      #####
+#     #  #      #      #      #   #
+#######  #####  #      #      #   #
+#     #  #      #      #      #   #
+#     #  #####  #####  #####  #####
+` + "```" + `
+
+### Banner Style
+` + "```bash" + `
+./ascii-art --style banner HELLO
+` + "```" + `
+
+### Block Style
+` + "```bash" + `
+./ascii-art --style block HELLO
+` + "```" + `
+
+## Testing
+
+Run the test suite:
+
+` + "```bash" + `
+go test -v ./tests/...
+` + "```" + `
+
+## Command-line Flags
+
+- ` + "`-s, --style`" + `: ASCII art style (default: "standard")
+- ` + "`--height`" + `: Font height in characters (default: 5)
+- ` + "`-h, --help`" + `: Show help information
+
+## Development
+
+The project structure:
+
+` + "```" + `
+.
+├── main.go              # CLI entry point
+├── generator/
+│   ├── ascii.go         # ASCII art generation logic
+│   └── styles.go        # Style definitions
+├── tests/
+│   └── ascii_test.go    # Unit tests
+├── go.mod               # Go module file
+└── README.md            # This file
+` + "```" + `
+
+## Cross-Platform Support
+
+Build for different platforms:
+
+` + "```bash" + `
+# Linux
+GOOS=linux GOARCH=amd64 go build -o ascii-art-linux
+
+# macOS
+GOOS=darwin GOARCH=amd64 go build -o ascii-art-macos
+
+# Windows
+GOOS=windows GOARCH=amd64 go build -o ascii-art.exe
+
+# Harmony OS (ARM64)
+GOOS=linux GOARCH=arm64 go build -o ascii-art-harmonyos
+` + "```" + `
+
+## License
+
+MIT License
+`
+	if err := os.WriteFile(filepath.Join(outputDir, "README.md"), []byte(readme), 0644); err != nil {
+		return err
+	}
+
+	// Create .gitignore
+	gitignore := `# Binaries
+ascii-art
+ascii-art-*
+*.exe
+
+# Build artifacts
+bin/
+dist/
+
+# Test
+*.test
+*.out
+
+# Go workspace
+go.work
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+`
+	if err := os.WriteFile(filepath.Join(outputDir, ".gitignore"), []byte(gitignore), 0644); err != nil {
+		return err
+	}
+
+	// Create go.sum (empty for now)
+	if err := os.WriteFile(filepath.Join(outputDir, "go.sum"), []byte(""), 0644); err != nil {
+		return err
+	}
+
+	return nil
+}

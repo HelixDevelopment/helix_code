@@ -1,0 +1,29 @@
+{
+  "id": "ascii-art-generator-001",
+  "name": "ASCII Art Generator CLI",
+  "description": "Command-line ASCII art generator that converts text input to ASCII art in markdown format",
+  "type": "cli",
+  "language": "go",
+  "tags": ["cli", "ascii-art", "text-processing", "markdown"],
+  "priority": 2,
+  "timeout": "30m",
+  "prompt": "Create a command-line ASCII art generator that takes a text string as input and generates ASCII art representations in markdown format. The tool should support multiple ASCII art styles (banner, block, shadow, etc.), allow customization of font size, and output the result in markdown code blocks. Include proper argument parsing, input validation, error handling, and examples in the documentation.",
+  "requirements": {
+    "files": [
+      "main.go",
+      "generator/ascii.go",
+      "generator/styles.go"
+    ],
+    "directories": [
+      "generator"
+    ],
+    "min_files": 4,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": false,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": true
+  }
+}

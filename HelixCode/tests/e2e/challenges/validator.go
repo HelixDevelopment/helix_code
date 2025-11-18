@@ -78,6 +78,12 @@ func (v *CodeValidator) ValidateAll(ctx context.Context, spec *ChallengeSpec, ex
 		results = append(results, functionalValidator.ValidateFunctional(ctx, spec, execution.ResultDir)...)
 	}
 
+	// Runtime validation (only if all critical validations passed)
+	if basicValidationsPassed && spec.Requirements.RunCheck {
+		runtimeValidator := NewRuntimeValidator(v.config)
+		results = append(results, runtimeValidator.ValidateRuntime(ctx, spec, execution.ResultDir)...)
+	}
+
 	// Count metrics
 	metrics := v.calculateMetrics(execution.ResultDir, spec.Language)
 	execution.Metrics = metrics
