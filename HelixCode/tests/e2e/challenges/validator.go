@@ -59,6 +59,25 @@ func (v *CodeValidator) ValidateAll(ctx context.Context, spec *ChallengeSpec, ex
 		results = append(results, v.validateRuns(ctx, execution.ResultDir, spec.Language))
 	}
 
+	// Validate use cases and documentation
+	useCaseValidator := NewUseCaseValidator(v.config)
+	results = append(results, useCaseValidator.ValidateUseCases(ctx, spec, execution.ResultDir)...)
+	results = append(results, useCaseValidator.ValidateCommonSenseFeatures(ctx, spec, execution.ResultDir)...)
+
+	// Functional validation (only if basic validations passed)
+	basicValidationsPassed := true
+	for _, r := range results {
+		if !r.Passed && (r.CheckName == "compilation" || r.CheckName == "tests_pass") {
+			basicValidationsPassed = false
+			break
+		}
+	}
+
+	if basicValidationsPassed {
+		functionalValidator := NewFunctionalValidator(v.config)
+		results = append(results, functionalValidator.ValidateFunctional(ctx, spec, execution.ResultDir)...)
+	}
+
 	// Count metrics
 	metrics := v.calculateMetrics(execution.ResultDir, spec.Language)
 	execution.Metrics = metrics
