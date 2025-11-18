@@ -26,6 +26,6 @@
     "has_ci": false,
     "compilation_check": true,
     "tests_pass": true,
-    "run_check": false
+    "run_check": true
   }
 }
