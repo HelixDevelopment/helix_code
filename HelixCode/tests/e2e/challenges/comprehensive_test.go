@@ -36,6 +36,9 @@ func TestAllProvidersAllChallenges(t *testing.T) {
 
 		// Cloud providers (require API keys)
 		{Provider: ProviderXAI, Model: "grok-beta", RequiresAPIKey: true},
+		{Provider: ProviderDeepSeek, Model: "deepseek-chat", RequiresAPIKey: true},
+		{Provider: ProviderDeepSeek, Model: "deepseek-coder", RequiresAPIKey: true},
+		{Provider: ProviderDeepSeek, Model: "deepseek-reasoner", RequiresAPIKey: true},
 	}
 
 	// Load challenge definitions

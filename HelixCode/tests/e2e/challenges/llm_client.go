@@ -60,6 +60,8 @@ func (c *LLMClient) Complete(ctx context.Context, req *CompletionRequest) (*Comp
 		return c.completeGroq(ctx, req)
 	case ProviderMistral:
 		return c.completeMistral(ctx, req)
+	case ProviderDeepSeek:
+		return c.completeDeepSeek(ctx, req)
 	case ProviderOllama:
 		return c.completeOllama(ctx, req)
 	default:
@@ -371,6 +373,86 @@ func (c *LLMClient) completeGroq(ctx context.Context, req *CompletionRequest) (*
 // Mistral API implementation (placeholder)
 func (c *LLMClient) completeMistral(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
 	return nil, fmt.Errorf("Mistral provider not yet implemented")
+}
+
+// DeepSeek API implementation
+func (c *LLMClient) completeDeepSeek(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderDeepSeek)
+	if err != nil {
+		return nil, err
+	}
+
+	// DeepSeek uses OpenAI-compatible API
+	payload := map[string]interface{}{
+		"model": c.model,
+		"messages": []map[string]string{
+			{
+				"role":    "system",
+				"content": req.SystemPrompt,
+			},
+			{
+				"role":    "user",
+				"content": req.Prompt,
+			},
+		},
+		"max_tokens":  req.MaxTokens,
+		"temperature": req.Temperature,
+		"stream":      false,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "https://api.deepseek.com/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("DeepSeek API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage struct {
+			TotalTokens int `json:"total_tokens"`
+		} `json:"usage"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResp.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in response")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp.Choices[0].Message.Content,
+		FinishReason: apiResp.Choices[0].FinishReason,
+		TokensUsed:   apiResp.Usage.TotalTokens,
+	}, nil
 }
 
 // Ollama local API implementation (for reference)

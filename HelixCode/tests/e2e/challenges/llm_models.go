@@ -1,6 +1,12 @@
 package challenges
 
-// GetSupportedModels returns all supported models for a given provider
+import (
+	"context"
+	"time"
+)
+
+// GetSupportedModels returns all supported models for a given provider (static list)
+// Use GetSupportedModelsWithDiscovery for dynamic model discovery
 func GetSupportedModels(provider LLMProviderType) []string {
 	switch provider {
 	case ProviderXAI:
@@ -54,6 +60,12 @@ func GetSupportedModels(provider LLMProviderType) []string {
 			"command",
 			"command-light",
 		}
+	case ProviderDeepSeek:
+		return []string{
+			"deepseek-chat",
+			"deepseek-coder",
+			"deepseek-reasoner",
+		}
 	case ProviderOllama:
 		// Common Ollama models - user may have others installed
 		return []string{
@@ -105,6 +117,8 @@ func GetProviderAPIEndpoint(provider LLMProviderType) string {
 		return "https://api.mistral.ai/v1"
 	case ProviderCohere:
 		return "https://api.cohere.ai/v1"
+	case ProviderDeepSeek:
+		return "https://api.deepseek.com/v1"
 	case ProviderOllama:
 		return "http://localhost:11434"
 	default:
@@ -135,10 +149,60 @@ func GetProviderRateLimits(provider LLMProviderType) map[string]int {
 			"requests_per_minute": 30,
 			"tokens_per_minute":   14400,
 		}
+	case ProviderDeepSeek:
+		return map[string]int{
+			"requests_per_minute": 60,
+			"tokens_per_minute":   100000,
+		}
 	default:
 		return map[string]int{
 			"requests_per_minute": 60,
 			"tokens_per_minute":   100000,
 		}
 	}
+}
+
+// GetSupportedModelsWithDiscovery attempts to fetch models dynamically from provider APIs
+// Falls back to static list if discovery fails or API keys are not available
+func GetSupportedModelsWithDiscovery(provider LLMProviderType, apiKeys *APIKeys) []string {
+	// Try dynamic discovery first for supported providers
+	if supportsDiscovery(provider) && apiKeys != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		discovery := NewModelDiscovery(apiKeys)
+		models, err := discovery.DiscoverModels(ctx, provider)
+		if err == nil && len(models) > 0 {
+			return GetModelIDs(models)
+		}
+		// If discovery fails, fall back to static list
+	}
+
+	// Fall back to static list
+	return GetSupportedModels(provider)
+}
+
+// supportsDiscovery returns true if the provider supports dynamic model discovery
+func supportsDiscovery(provider LLMProviderType) bool {
+	supportedProviders := map[LLMProviderType]bool{
+		ProviderOpenAI:   true,
+		ProviderXAI:      true,
+		ProviderDeepSeek: true,
+		ProviderGroq:     true,
+		ProviderOllama:   true,
+	}
+	return supportedProviders[provider]
+}
+
+// GetModelDetails fetches detailed information about available models
+func GetModelDetails(provider LLMProviderType, apiKeys *APIKeys) ([]ModelInfo, error) {
+	if !supportsDiscovery(provider) {
+		return nil, nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	discovery := NewModelDiscovery(apiKeys)
+	return discovery.DiscoverModels(ctx, provider)
 }

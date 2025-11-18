@@ -376,6 +376,11 @@ go run cmd/runner/main.go \
 - **Cohere**: Enterprise-grade language models
   - Models: `command-r-plus`, `command-r`, `command`
 
+- **DeepSeek**: Chinese AI models specialized for coding and reasoning
+  - Models: `deepseek-chat`, `deepseek-coder`, `deepseek-reasoner`
+  - Rate Limits: 60 requests/min, 100K tokens/min
+  - Endpoint: `https://api.deepseek.com/v1`
+
 - **Azure OpenAI**: Enterprise OpenAI deployment
   - Uses deployment names configured in Azure
 
@@ -422,6 +427,10 @@ For cloud providers, you need to configure API keys:
    # Cohere API
    cohere:
      api_key: "..."
+
+   # DeepSeek API
+   deepseek:
+     api_key: "sk-..."
    ```
 
 3. **Security**: The `api-keys.yaml` file is automatically gitignored and will never be committed.
@@ -492,6 +501,61 @@ requiresKey := IsCloudProvider(ProviderXAI)
 
 requiresKey = IsCloudProvider(ProviderOllama)
 // Returns: false
+```
+
+### Dynamic Model Discovery
+
+The framework supports dynamic model discovery from provider APIs, automatically fetching available models instead of relying on hardcoded lists:
+
+```go
+// Load API keys
+apiKeys, err := LoadAPIKeys("")
+if err != nil {
+    log.Fatal(err)
+}
+
+// Get models with dynamic discovery (falls back to static list if discovery fails)
+models := GetSupportedModelsWithDiscovery(ProviderOpenAI, apiKeys)
+// Dynamically fetches from OpenAI API, returns latest models
+
+// Get detailed model information
+modelDetails, err := GetModelDetails(ProviderDeepSeek, apiKeys)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, model := range modelDetails {
+    fmt.Printf("Model: %s\n", model.ID)
+    fmt.Printf("  Owned by: %s\n", model.OwnedBy)
+    fmt.Printf("  Created: %d\n", model.Created)
+}
+```
+
+**Supported Providers for Dynamic Discovery**:
+- ✅ OpenAI - `/v1/models` endpoint
+- ✅ xAI (Grok) - `/v1/models` endpoint
+- ✅ DeepSeek - `/v1/models` endpoint
+- ✅ Groq - `/openai/v1/models` endpoint
+- ✅ Ollama - `/api/tags` endpoint (local)
+- ⚠️ Anthropic - Uses hardcoded list (no models API)
+- ❌ Others - Fall back to static lists
+
+**Features**:
+- **Automatic Caching**: Models cached for 24 hours to reduce API calls
+- **Graceful Fallback**: Falls back to static lists if API discovery fails
+- **No API Key Required for Fallback**: Works without API keys by using static lists
+- **Thread-Safe**: Cache operations are protected with mutex locks
+
+**Example: Clear Cache**:
+```go
+discovery := NewModelDiscovery(apiKeys)
+
+// Clear cache for specific provider
+provider := ProviderOpenAI
+discovery.ClearCache(&provider)
+
+// Clear all caches
+discovery.ClearCache(nil)
 ```
 
 ## Results and Logging

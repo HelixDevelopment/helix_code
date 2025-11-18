@@ -93,6 +93,7 @@ const (
 	ProviderVertexAI   LLMProviderType = "vertexai"
 	ProviderOpenRouter LLMProviderType = "openrouter"
 	ProviderCohere     LLMProviderType = "cohere"
+	ProviderDeepSeek   LLMProviderType = "deepseek"
 )
 
 // ValidationCheck defines what to check in the generated code

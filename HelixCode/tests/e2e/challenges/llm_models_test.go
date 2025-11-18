@@ -46,6 +46,11 @@ func TestGetSupportedModels(t *testing.T) {
 			expectedFirst: "command-r-plus",
 		},
 		{
+			provider:      ProviderDeepSeek,
+			expectedCount: 3,
+			expectedFirst: "deepseek-chat",
+		},
+		{
 			provider:      ProviderOllama,
 			expectedCount: 10,
 			expectedFirst: "llama2",
@@ -100,6 +105,7 @@ func TestGetDefaultModel(t *testing.T) {
 		{ProviderGemini, "gemini-pro"},
 		{ProviderMistral, "mistral-large-latest"},
 		{ProviderCohere, "command-r-plus"},
+		{ProviderDeepSeek, "deepseek-chat"},
 		{ProviderOllama, "llama2"},
 		{ProviderAzure, "gpt-4"},
 	}
@@ -134,6 +140,7 @@ func TestGetProviderAPIEndpoint(t *testing.T) {
 		{ProviderGroq, "https://api.groq.com/openai/v1"},
 		{ProviderMistral, "https://api.mistral.ai/v1"},
 		{ProviderCohere, "https://api.cohere.ai/v1"},
+		{ProviderDeepSeek, "https://api.deepseek.com/v1"},
 		{ProviderOllama, "http://localhost:11434"},
 	}
 
@@ -165,6 +172,7 @@ func TestGetProviderRateLimits(t *testing.T) {
 		{ProviderOpenAI, 3500, 90000},
 		{ProviderAnthropic, 1000, 100000},
 		{ProviderGroq, 30, 14400},
+		{ProviderDeepSeek, 60, 100000},
 	}
 
 	for _, tt := range tests {
@@ -235,6 +243,7 @@ func TestAllProvidersHaveModels(t *testing.T) {
 		ProviderGroq,
 		ProviderMistral,
 		ProviderCohere,
+		ProviderDeepSeek,
 		ProviderOllama,
 		ProviderAzure,
 	}
@@ -259,6 +268,7 @@ func TestAllProvidersHaveDefaultModel(t *testing.T) {
 		ProviderGroq,
 		ProviderMistral,
 		ProviderCohere,
+		ProviderDeepSeek,
 		ProviderOllama,
 		ProviderAzure,
 	}
@@ -298,6 +308,7 @@ func TestCloudProvidersHaveEndpoints(t *testing.T) {
 		ProviderGroq,
 		ProviderMistral,
 		ProviderCohere,
+		ProviderDeepSeek,
 	}
 
 	for _, provider := range cloudProviders {
@@ -389,6 +400,28 @@ func TestAnthropicModels_Specific(t *testing.T) {
 		}
 		if !found {
 			t.Errorf("Expected Anthropic model '%s' not found", expected)
+		}
+	}
+}
+
+func TestDeepSeekModels_Specific(t *testing.T) {
+	// Test DeepSeek-specific models
+	models := GetSupportedModels(ProviderDeepSeek)
+
+	expectedModels := []string{"deepseek-chat", "deepseek-coder", "deepseek-reasoner"}
+
+	if len(models) != len(expectedModels) {
+		t.Errorf("Expected %d DeepSeek models, got %d", len(expectedModels), len(models))
+	}
+
+	for i, expected := range expectedModels {
+		if i >= len(models) {
+			t.Errorf("Missing expected model '%s'", expected)
+			continue
+		}
+		if models[i] != expected {
+			t.Errorf("Expected model '%s' at index %d, got '%s'",
+				expected, i, models[i])
 		}
 	}
 }

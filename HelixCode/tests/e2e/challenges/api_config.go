@@ -17,6 +17,7 @@ type APIKeys struct {
 	Groq      *GroqConfig      `yaml:"groq,omitempty"`
 	Mistral   *MistralConfig   `yaml:"mistral,omitempty"`
 	Cohere    *CohereConfig    `yaml:"cohere,omitempty"`
+	DeepSeek  *DeepSeekConfig  `yaml:"deepseek,omitempty"`
 	Vertex    *VertexConfig    `yaml:"vertex,omitempty"`
 	Azure     *AzureConfig     `yaml:"azure,omitempty"`
 	Bedrock   *BedrockConfig   `yaml:"bedrock,omitempty"`
@@ -55,6 +56,11 @@ type MistralConfig struct {
 
 // CohereConfig holds Cohere API configuration
 type CohereConfig struct {
+	APIKey string `yaml:"api_key"`
+}
+
+// DeepSeekConfig holds DeepSeek API configuration
+type DeepSeekConfig struct {
 	APIKey string `yaml:"api_key"`
 }
 
@@ -136,6 +142,10 @@ func (k *APIKeys) GetAPIKey(provider LLMProviderType) (string, error) {
 		if k.Cohere != nil {
 			return k.Cohere.APIKey, nil
 		}
+	case ProviderDeepSeek:
+		if k.DeepSeek != nil {
+			return k.DeepSeek.APIKey, nil
+		}
 	case ProviderAzure:
 		if k.Azure != nil {
 			return k.Azure.APIKey, nil
@@ -159,6 +169,7 @@ func IsCloudProvider(provider LLMProviderType) bool {
 		ProviderGroq:       true,
 		ProviderMistral:    true,
 		ProviderCohere:     true,
+		ProviderDeepSeek:   true,
 		ProviderAzure:      true,
 		ProviderBedrock:    true,
 		ProviderVertexAI:   true,
@@ -201,6 +212,9 @@ func SanitizeForLogging(text string, apiKeys *APIKeys) string {
 	}
 	if apiKeys.Cohere != nil && apiKeys.Cohere.APIKey != "" {
 		sanitized = strings.ReplaceAll(sanitized, apiKeys.Cohere.APIKey, MaskAPIKey(apiKeys.Cohere.APIKey))
+	}
+	if apiKeys.DeepSeek != nil && apiKeys.DeepSeek.APIKey != "" {
+		sanitized = strings.ReplaceAll(sanitized, apiKeys.DeepSeek.APIKey, MaskAPIKey(apiKeys.DeepSeek.APIKey))
 	}
 	if apiKeys.Azure != nil && apiKeys.Azure.APIKey != "" {
 		sanitized = strings.ReplaceAll(sanitized, apiKeys.Azure.APIKey, MaskAPIKey(apiKeys.Azure.APIKey))
