@@ -12,12 +12,12 @@ import (
 
 // ModelInfo represents detailed information about a model
 type ModelInfo struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name,omitempty"`
-	Created     int64    `json:"created,omitempty"`
-	OwnedBy     string   `json:"owned_by,omitempty"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name,omitempty"`
+	Created      int64    `json:"created,omitempty"`
+	OwnedBy      string   `json:"owned_by,omitempty"`
 	Capabilities []string `json:"capabilities,omitempty"`
-	Description string   `json:"description,omitempty"`
+	Description  string   `json:"description,omitempty"`
 }
 
 // ModelCache stores discovered models with expiration

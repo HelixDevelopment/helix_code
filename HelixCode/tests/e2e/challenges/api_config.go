@@ -10,17 +10,20 @@ import (
 
 // APIKeys holds all API key configurations
 type APIKeys struct {
-	OpenAI    *OpenAIConfig    `yaml:"openai,omitempty"`
-	Anthropic *AnthropicConfig `yaml:"anthropic,omitempty"`
-	XAI       *XAIConfig       `yaml:"xai,omitempty"`
-	Gemini    *GeminiConfig    `yaml:"gemini,omitempty"`
-	Groq      *GroqConfig      `yaml:"groq,omitempty"`
-	Mistral   *MistralConfig   `yaml:"mistral,omitempty"`
-	Cohere    *CohereConfig    `yaml:"cohere,omitempty"`
-	DeepSeek  *DeepSeekConfig  `yaml:"deepseek,omitempty"`
-	Vertex    *VertexConfig    `yaml:"vertex,omitempty"`
-	Azure     *AzureConfig     `yaml:"azure,omitempty"`
-	Bedrock   *BedrockConfig   `yaml:"bedrock,omitempty"`
+	OpenAI      *OpenAIConfig      `yaml:"openai,omitempty"`
+	Anthropic   *AnthropicConfig   `yaml:"anthropic,omitempty"`
+	XAI         *XAIConfig         `yaml:"xai,omitempty"`
+	Gemini      *GeminiConfig      `yaml:"gemini,omitempty"`
+	Groq        *GroqConfig        `yaml:"groq,omitempty"`
+	Mistral     *MistralConfig     `yaml:"mistral,omitempty"`
+	Cohere      *CohereConfig      `yaml:"cohere,omitempty"`
+	DeepSeek    *DeepSeekConfig    `yaml:"deepseek,omitempty"`
+	HuggingFace *HuggingFaceConfig `yaml:"huggingface,omitempty"`
+	OpenCode    *OpenCodeConfig    `yaml:"opencode,omitempty"`
+	OpenRouter  *OpenRouterConfig  `yaml:"openrouter,omitempty"`
+	Vertex      *VertexConfig      `yaml:"vertex,omitempty"`
+	Azure       *AzureConfig       `yaml:"azure,omitempty"`
+	Bedrock     *BedrockConfig     `yaml:"bedrock,omitempty"`
 }
 
 // OpenAIConfig holds OpenAI API configuration
@@ -61,6 +64,21 @@ type CohereConfig struct {
 
 // DeepSeekConfig holds DeepSeek API configuration
 type DeepSeekConfig struct {
+	APIKey string `yaml:"api_key"`
+}
+
+// HuggingFaceConfig holds Hugging Face API configuration
+type HuggingFaceConfig struct {
+	APIKey string `yaml:"api_key"`
+}
+
+// OpenCodeConfig holds OpenCode API configuration
+type OpenCodeConfig struct {
+	APIKey string `yaml:"api_key"`
+}
+
+// OpenRouterConfig holds OpenRouter API configuration
+type OpenRouterConfig struct {
 	APIKey string `yaml:"api_key"`
 }
 
@@ -146,6 +164,18 @@ func (k *APIKeys) GetAPIKey(provider LLMProviderType) (string, error) {
 		if k.DeepSeek != nil {
 			return k.DeepSeek.APIKey, nil
 		}
+	case ProviderHuggingFace:
+		if k.HuggingFace != nil {
+			return k.HuggingFace.APIKey, nil
+		}
+	case ProviderOpenCode:
+		if k.OpenCode != nil {
+			return k.OpenCode.APIKey, nil
+		}
+	case ProviderOpenRouter:
+		if k.OpenRouter != nil {
+			return k.OpenRouter.APIKey, nil
+		}
 	case ProviderAzure:
 		if k.Azure != nil {
 			return k.Azure.APIKey, nil
@@ -162,18 +192,20 @@ func (k *APIKeys) GetAPIKey(provider LLMProviderType) (string, error) {
 // IsCloudProvider returns true if the provider requires API keys
 func IsCloudProvider(provider LLMProviderType) bool {
 	cloudProviders := map[LLMProviderType]bool{
-		ProviderOpenAI:     true,
-		ProviderAnthropic:  true,
-		ProviderXAI:        true,
-		ProviderGemini:     true,
-		ProviderGroq:       true,
-		ProviderMistral:    true,
-		ProviderCohere:     true,
-		ProviderDeepSeek:   true,
-		ProviderAzure:      true,
-		ProviderBedrock:    true,
-		ProviderVertexAI:   true,
-		ProviderOpenRouter: true,
+		ProviderOpenAI:      true,
+		ProviderAnthropic:   true,
+		ProviderXAI:         true,
+		ProviderGemini:      true,
+		ProviderGroq:        true,
+		ProviderMistral:     true,
+		ProviderCohere:      true,
+		ProviderDeepSeek:    true,
+		ProviderHuggingFace: true,
+		ProviderOpenCode:    true,
+		ProviderAzure:       true,
+		ProviderBedrock:     true,
+		ProviderVertexAI:    true,
+		ProviderOpenRouter:  true,
 	}
 	return cloudProviders[provider]
 }
@@ -215,6 +247,15 @@ func SanitizeForLogging(text string, apiKeys *APIKeys) string {
 	}
 	if apiKeys.DeepSeek != nil && apiKeys.DeepSeek.APIKey != "" {
 		sanitized = strings.ReplaceAll(sanitized, apiKeys.DeepSeek.APIKey, MaskAPIKey(apiKeys.DeepSeek.APIKey))
+	}
+	if apiKeys.HuggingFace != nil && apiKeys.HuggingFace.APIKey != "" {
+		sanitized = strings.ReplaceAll(sanitized, apiKeys.HuggingFace.APIKey, MaskAPIKey(apiKeys.HuggingFace.APIKey))
+	}
+	if apiKeys.OpenCode != nil && apiKeys.OpenCode.APIKey != "" {
+		sanitized = strings.ReplaceAll(sanitized, apiKeys.OpenCode.APIKey, MaskAPIKey(apiKeys.OpenCode.APIKey))
+	}
+	if apiKeys.OpenRouter != nil && apiKeys.OpenRouter.APIKey != "" {
+		sanitized = strings.ReplaceAll(sanitized, apiKeys.OpenRouter.APIKey, MaskAPIKey(apiKeys.OpenRouter.APIKey))
 	}
 	if apiKeys.Azure != nil && apiKeys.Azure.APIKey != "" {
 		sanitized = strings.ReplaceAll(sanitized, apiKeys.Azure.APIKey, MaskAPIKey(apiKeys.Azure.APIKey))

@@ -47,15 +47,15 @@ func NewChallengeExecutor(config *ChallengeConfig) *ChallengeExecutor {
 // Execute runs a single challenge execution
 func (e *ChallengeExecutor) Execute(ctx context.Context, spec *ChallengeSpec, iface ChallengeInterface, dist ChallengeDistribution, provider LLMProviderType, model string) (*ChallengeExecution, error) {
 	execution := &ChallengeExecution{
-		ID:            uuid.New().String(),
-		ChallengeID:   spec.ID,
-		Interface:     iface,
-		Distribution:  dist,
-		Provider:      provider,
-		Model:         model,
-		StartTime:     time.Now(),
-		Status:        StatusRunning,
-		Metadata:      make(map[string]interface{}),
+		ID:           uuid.New().String(),
+		ChallengeID:  spec.ID,
+		Interface:    iface,
+		Distribution: dist,
+		Provider:     provider,
+		Model:        model,
+		StartTime:    time.Now(),
+		Status:       StatusRunning,
+		Metadata:     make(map[string]interface{}),
 	}
 
 	// Setup result directory
@@ -225,9 +225,9 @@ func (e *ChallengeExecutor) executeCLI(ctx context.Context, spec *ChallengeSpec,
 
 	// Log response
 	e.logResponse(requestLog, "CLI", map[string]interface{}{
-		"duration":   duration.String(),
-		"mock_mode":  true,
-		"generated":  true,
+		"duration":  duration.String(),
+		"mock_mode": true,
+		"generated": true,
 	})
 
 	execution.Metrics.Requests = 1
@@ -267,11 +267,11 @@ func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec
 	apiURL := fmt.Sprintf("http://%s:%d/api/v1/generate", e.config.HelixCodeHost, e.config.HelixCodePort)
 
 	requestBody := map[string]interface{}{
-		"prompt":   prompt,
-		"provider": execution.Provider,
-		"model":    execution.Model,
+		"prompt":     prompt,
+		"provider":   execution.Provider,
+		"model":      execution.Model,
 		"output_dir": execution.ResultDir,
-		"language": spec.Language,
+		"language":   spec.Language,
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
@@ -314,10 +314,10 @@ func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec
 
 	// Log response
 	e.logResponse(requestLog, "REST", map[string]interface{}{
-		"status_code":    resp.StatusCode,
-		"duration":       duration.String(),
-		"response_size":  len(responseBody),
-		"response_body":  string(responseBody),
+		"status_code":   resp.StatusCode,
+		"duration":      duration.String(),
+		"response_size": len(responseBody),
+		"response_body": string(responseBody),
 	})
 
 	if resp.StatusCode != http.StatusOK {

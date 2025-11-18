@@ -35,6 +35,18 @@ cohere:
 deepseek:
   api_key: "your-deepseek-api-key-here"
 
+# Hugging Face API
+huggingface:
+  api_key: "your-huggingface-api-key-here"
+
+# OpenCode API
+opencode:
+  api_key: "your-opencode-api-key-here"
+
+# OpenRouter API
+openrouter:
+  api_key: "your-openrouter-api-key-here"
+
 # Vertex AI (Google Cloud)
 vertex:
   project_id: "your-gcp-project-id"

@@ -12,8 +12,8 @@ import (
 
 // TestMatrix represents a test configuration
 type TestMatrix struct {
-	Provider LLMProviderType
-	Model    string
+	Provider       LLMProviderType
+	Model          string
 	RequiresAPIKey bool
 }
 
@@ -39,6 +39,12 @@ func TestAllProvidersAllChallenges(t *testing.T) {
 		{Provider: ProviderDeepSeek, Model: "deepseek-chat", RequiresAPIKey: true},
 		{Provider: ProviderDeepSeek, Model: "deepseek-coder", RequiresAPIKey: true},
 		{Provider: ProviderDeepSeek, Model: "deepseek-reasoner", RequiresAPIKey: true},
+
+		// New providers added 2025-11-18
+		{Provider: ProviderHuggingFace, Model: "bigcode/starcoder", RequiresAPIKey: true},
+		{Provider: ProviderOpenCode, Model: "opencode-7b", RequiresAPIKey: true},
+		{Provider: ProviderOpenRouter, Model: "meta-llama/codellama-34b-instruct:free", RequiresAPIKey: true},
+		{Provider: ProviderGemini, Model: "gemini-pro", RequiresAPIKey: true},
 	}
 
 	// Load challenge definitions

@@ -32,9 +32,9 @@ func NewLLMClient(provider LLMProviderType, model string, apiKeys *APIKeys) *LLM
 
 // CompletionRequest represents a request to an LLM
 type CompletionRequest struct {
-	Prompt      string
-	MaxTokens   int
-	Temperature float64
+	Prompt       string
+	MaxTokens    int
+	Temperature  float64
 	SystemPrompt string
 }
 
@@ -62,6 +62,12 @@ func (c *LLMClient) Complete(ctx context.Context, req *CompletionRequest) (*Comp
 		return c.completeMistral(ctx, req)
 	case ProviderDeepSeek:
 		return c.completeDeepSeek(ctx, req)
+	case ProviderHuggingFace:
+		return c.completeHuggingFace(ctx, req)
+	case ProviderOpenCode:
+		return c.completeOpenCode(ctx, req)
+	case ProviderOpenRouter:
+		return c.completeOpenRouter(ctx, req)
 	case ProviderOllama:
 		return c.completeOllama(ctx, req)
 	default:
@@ -426,6 +432,234 @@ func (c *LLMClient) completeDeepSeek(ctx context.Context, req *CompletionRequest
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("DeepSeek API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage struct {
+			TotalTokens int `json:"total_tokens"`
+		} `json:"usage"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResp.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in response")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp.Choices[0].Message.Content,
+		FinishReason: apiResp.Choices[0].FinishReason,
+		TokensUsed:   apiResp.Usage.TotalTokens,
+	}, nil
+}
+
+// Hugging Face Inference API implementation
+func (c *LLMClient) completeHuggingFace(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderHuggingFace)
+	if err != nil {
+		return nil, err
+	}
+
+	// Hugging Face Inference API format
+	payload := map[string]interface{}{
+		"inputs": fmt.Sprintf("%s\n\n%s", req.SystemPrompt, req.Prompt),
+		"parameters": map[string]interface{}{
+			"max_new_tokens":   req.MaxTokens,
+			"temperature":      req.Temperature,
+			"return_full_text": false,
+		},
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Use the model as part of the URL
+	url := fmt.Sprintf("https://api-inference.huggingface.co/models/%s", c.model)
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Hugging Face API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	// Response format: [{"generated_text": "..."}]
+	var apiResp []struct {
+		GeneratedText string `json:"generated_text"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResp) == 0 {
+		return nil, fmt.Errorf("no response from Hugging Face")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp[0].GeneratedText,
+		FinishReason: "stop",
+		TokensUsed:   0, // HF Inference API doesn't return token count
+	}, nil
+}
+
+// OpenCode API implementation (OpenAI-compatible)
+func (c *LLMClient) completeOpenCode(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderOpenCode)
+	if err != nil {
+		return nil, err
+	}
+
+	// OpenCode uses OpenAI-compatible API
+	payload := map[string]interface{}{
+		"model": c.model,
+		"messages": []map[string]string{
+			{
+				"role":    "system",
+				"content": req.SystemPrompt,
+			},
+			{
+				"role":    "user",
+				"content": req.Prompt,
+			},
+		},
+		"max_tokens":  req.MaxTokens,
+		"temperature": req.Temperature,
+		"stream":      false,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "https://api.opencode.com/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OpenCode API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage struct {
+			TotalTokens int `json:"total_tokens"`
+		} `json:"usage"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResp.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in response")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp.Choices[0].Message.Content,
+		FinishReason: apiResp.Choices[0].FinishReason,
+		TokensUsed:   apiResp.Usage.TotalTokens,
+	}, nil
+}
+
+// OpenRouter API implementation (OpenAI-compatible aggregator)
+func (c *LLMClient) completeOpenRouter(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderOpenRouter)
+	if err != nil {
+		return nil, err
+	}
+
+	// OpenRouter uses OpenAI-compatible API
+	payload := map[string]interface{}{
+		"model": c.model,
+		"messages": []map[string]string{
+			{
+				"role":    "system",
+				"content": req.SystemPrompt,
+			},
+			{
+				"role":    "user",
+				"content": req.Prompt,
+			},
+		},
+		"max_tokens":  req.MaxTokens,
+		"temperature": req.Temperature,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "https://openrouter.ai/api/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	httpReq.Header.Set("HTTP-Referer", "https://helixcode.dev") // Required by OpenRouter
+	httpReq.Header.Set("X-Title", "HelixCode Challenge Tests")  // Optional but recommended
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OpenRouter API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var apiResp struct {

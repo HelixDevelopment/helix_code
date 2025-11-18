@@ -66,6 +66,26 @@ func GetSupportedModels(provider LLMProviderType) []string {
 			"deepseek-coder",
 			"deepseek-reasoner",
 		}
+	case ProviderHuggingFace:
+		// Free stable coding models on Hugging Face
+		return []string{
+			"bigcode/starcoder",
+			"Salesforce/codegen-2B-mono",
+			"codellama/CodeLlama-7b-hf",
+		}
+	case ProviderOpenCode:
+		// OpenCode free coding models
+		return []string{
+			"opencode-7b",
+			"opencode-13b",
+		}
+	case ProviderOpenRouter:
+		// Free/cheap coding models on OpenRouter
+		return []string{
+			"meta-llama/codellama-34b-instruct:free",
+			"phind/phind-codellama-34b-v2",
+			"deepseek/deepseek-coder-6.7b-instruct:free",
+		}
 	case ProviderOllama:
 		// Common Ollama models - user may have others installed
 		return []string{
@@ -119,6 +139,12 @@ func GetProviderAPIEndpoint(provider LLMProviderType) string {
 		return "https://api.cohere.ai/v1"
 	case ProviderDeepSeek:
 		return "https://api.deepseek.com/v1"
+	case ProviderHuggingFace:
+		return "https://api-inference.huggingface.co/models"
+	case ProviderOpenCode:
+		return "https://api.opencode.com/v1"
+	case ProviderOpenRouter:
+		return "https://openrouter.ai/api/v1"
 	case ProviderOllama:
 		return "http://localhost:11434"
 	default:
@@ -152,6 +178,21 @@ func GetProviderRateLimits(provider LLMProviderType) map[string]int {
 	case ProviderDeepSeek:
 		return map[string]int{
 			"requests_per_minute": 60,
+			"tokens_per_minute":   100000,
+		}
+	case ProviderHuggingFace:
+		return map[string]int{
+			"requests_per_minute": 1000, // Free tier is generous
+			"tokens_per_minute":   100000,
+		}
+	case ProviderOpenCode:
+		return map[string]int{
+			"requests_per_minute": 100,
+			"tokens_per_minute":   100000,
+		}
+	case ProviderOpenRouter:
+		return map[string]int{
+			"requests_per_minute": 200, // Depends on model
 			"tokens_per_minute":   100000,
 		}
 	default:

@@ -347,11 +347,11 @@ func TestLLMClient_SpecialCharactersInPrompt(t *testing.T) {
 
 	// Test with special characters, unicode, etc.
 	specialPrompts := []string{
-		"Hello\nWorld",           // Newlines
-		"Test\tTab",              // Tabs
-		"Quote\"Test\"",          // Quotes
-		"Unicode: 你好世界",        // Unicode
-		"Emoji: 🚀🎉",             // Emoji
+		"Hello\nWorld",              // Newlines
+		"Test\tTab",                 // Tabs
+		"Quote\"Test\"",             // Quotes
+		"Unicode: 你好世界",             // Unicode
+		"Emoji: 🚀🎉",                 // Emoji
 		"JSON: {\"key\":\"value\"}", // JSON
 	}
 

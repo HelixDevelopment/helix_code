@@ -498,8 +498,8 @@ func getEmptyPatterns(language string) []string {
 	switch language {
 	case "go":
 		return []string{
-			`func\s+\w+\([^)]*\)\s*\([^)]*\)\s*\{\s*\}`,  // Empty function with return
-			`func\s+\w+\([^)]*\)\s*\{\s*\}`,               // Empty function
+			`func\s+\w+\([^)]*\)\s*\([^)]*\)\s*\{\s*\}`, // Empty function with return
+			`func\s+\w+\([^)]*\)\s*\{\s*\}`,             // Empty function
 		}
 	case "python":
 		return []string{

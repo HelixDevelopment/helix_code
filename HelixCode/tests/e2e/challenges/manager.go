@@ -303,7 +303,7 @@ func (m *ChallengeManager) ExportBatchReport(batchID, filename string) error {
 
 	// Gather all executions
 	report := struct {
-		Batch      *ChallengeBatch         `json:"batch"`
+		Batch      *ChallengeBatch       `json:"batch"`
 		Executions []*ChallengeExecution `json:"executions"`
 	}{
 		Batch:      batch,

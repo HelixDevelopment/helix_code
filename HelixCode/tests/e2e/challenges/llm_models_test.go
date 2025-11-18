@@ -164,9 +164,9 @@ func TestGetProviderAPIEndpoint_UnsupportedProvider(t *testing.T) {
 
 func TestGetProviderRateLimits(t *testing.T) {
 	tests := []struct {
-		provider        LLMProviderType
-		expectedReqMin  int
-		expectedTokMin  int
+		provider       LLMProviderType
+		expectedReqMin int
+		expectedTokMin int
 	}{
 		{ProviderXAI, 60, 100000},
 		{ProviderOpenAI, 3500, 90000},

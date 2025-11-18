@@ -77,9 +77,9 @@ func (v *UseCaseValidator) checkDocumentationSections(readme string) []Validatio
 	readmeLower := strings.ToLower(readme)
 
 	requiredSections := map[string]string{
-		"features":    "## Features",
-		"setup":       "## Setup|## Installation",
-		"usage":       "## Usage|## API Endpoints|## Commands",
+		"features": "## Features",
+		"setup":    "## Setup|## Installation",
+		"usage":    "## Usage|## API Endpoints|## Commands",
 	}
 
 	missingSections := []string{}
@@ -259,10 +259,10 @@ func (v *UseCaseValidator) checkSetupInstructions(readme string) []ValidationRes
 
 	// Check for common setup elements
 	setupElements := map[string]bool{
-		"install":      false,
-		"dependencies": false,
+		"install":       false,
+		"dependencies":  false,
 		"configuration": false,
-		"environment":  false,
+		"environment":   false,
 	}
 
 	for element := range setupElements {
@@ -584,4 +584,3 @@ func (v *UseCaseValidator) validateCLITaskManagerCommonFeatures(resultDir string
 		},
 	}
 }
-

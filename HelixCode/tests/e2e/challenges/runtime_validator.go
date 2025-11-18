@@ -77,7 +77,7 @@ func (v *RuntimeValidator) validateASCIIArtGenerator(ctx context.Context, result
 	// Check both stdout and stderr for help output (Cobra uses stdout for --help)
 	helpOutput := helpResult.Stdout + helpResult.Stderr
 	hasUsage := strings.Contains(helpOutput, "Usage") || strings.Contains(helpOutput, "usage") ||
-	            strings.Contains(helpOutput, "Use:") || strings.Contains(helpOutput, "use:")
+		strings.Contains(helpOutput, "Use:") || strings.Contains(helpOutput, "use:")
 
 	if helpResult.Error != "" && helpResult.ExitCode != 0 && helpResult.ExitCode != -1 {
 		// Non-zero exit is OK for --help in some CLI frameworks
@@ -203,9 +203,9 @@ func (v *RuntimeValidator) validateTicTacToeTUI(ctx context.Context, resultDir s
 	// Test 2: Simulate diverse game moves
 	// Test various move sequences to verify game logic
 	gameTests := []struct {
-		name   string
-		moves  string
-		desc   string
+		name  string
+		moves string
+		desc  string
 	}{
 		{"single_move", "5\nq\n", "Place move at center (5) then quit"},
 		{"corner_move", "1\nq\n", "Place move at corner (1) then quit"},
@@ -315,10 +315,10 @@ func (v *RuntimeValidator) validateNotesProject(ctx context.Context, resultDir s
 	// Server should at least attempt to start (even if it fails on DB connection)
 	serverOutput := serverStdout.String() + serverStderr.String()
 	attemptedStart := strings.Contains(serverOutput, "8081") ||
-	                  strings.Contains(serverOutput, "server") ||
-	                  strings.Contains(serverOutput, "Starting") ||
-	                  strings.Contains(serverOutput, "database") ||
-	                  processState == "running"
+		strings.Contains(serverOutput, "server") ||
+		strings.Contains(serverOutput, "Starting") ||
+		strings.Contains(serverOutput, "database") ||
+		processState == "running"
 
 	results = append(results, ValidationResult{
 		CheckName: "runtime_server_start",
