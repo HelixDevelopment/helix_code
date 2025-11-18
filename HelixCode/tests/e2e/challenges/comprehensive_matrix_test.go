@@ -76,27 +76,38 @@ func TestComprehensiveMatrix(t *testing.T) {
 
 	startTime := time.Now()
 
+	// Define ALL interface types
+	interfaces := []ChallengeInterface{
+		InterfaceCLI,
+		InterfaceTUI,
+		InterfaceREST,
+	}
+
 	t.Logf("\n%s", strings.Repeat("=", 100))
 	t.Logf("COMPREHENSIVE TEST MATRIX - ALL COMBINATIONS")
-	t.Logf("Models: %d × Distributions: %d × Challenges: %d = %d Total Test Executions",
-		len(models), len(distributions), len(challenges), len(models)*len(distributions)*len(challenges))
-	t.Logf("Estimated Time: %.0f minutes", float64(len(models)*len(distributions)*len(challenges))*0.33)
+	t.Logf("Interfaces: %d × Models: %d × Distributions: %d × Challenges: %d = %d Total Test Executions",
+		len(interfaces), len(models), len(distributions), len(challenges),
+		len(interfaces)*len(models)*len(distributions)*len(challenges))
+	t.Logf("Estimated Time: %.0f minutes", float64(len(interfaces)*len(models)*len(distributions)*len(challenges))*0.33)
 	t.Logf("%s\n", strings.Repeat("=", 100))
 
-	// PHASE 1: Single Distribution Mode (all models, all challenges)
+	// PHASE 1: Single Distribution Mode (all models, all challenges, all interfaces)
 	t.Run("Phase1_SingleDistribution", func(t *testing.T) {
-		t.Logf("\n=== PHASE 1: Single Distribution Mode ===")
-		t.Logf("Testing %d models × %d challenges = %d executions\n", len(models), len(challenges), len(models)*len(challenges))
+		t.Logf("\n=== PHASE 1: Single Distribution Mode - All Interfaces ===")
+		t.Logf("Testing %d models × %d challenges × %d interfaces = %d executions\n",
+			len(models), len(challenges), len(interfaces), len(models)*len(challenges)*len(interfaces))
 
-		for _, tm := range models {
-			testProvider(t, executor, tm, DistributionSingle, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
+		for _, iface := range interfaces {
+			for _, tm := range models {
+				testProvider(t, executor, tm, DistributionSingle, iface, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
+			}
 		}
 	})
 
-	// PHASE 2: Worker Distribution Modes (selected high-performance models)
+	// PHASE 2: Worker Distribution Modes (selected high-performance models, all interfaces)
 	t.Run("Phase2_WorkerDistributions", func(t *testing.T) {
-		t.Logf("\n=== PHASE 2: Worker Distribution Modes ===")
-		
+		t.Logf("\n=== PHASE 2: Worker Distribution Modes - All Interfaces ===")
+
 		// Select best performing models for worker tests
 		selectedModels := []ComprehensiveTestMatrix{
 			{Provider: ProviderOllama, Model: "llama2", Distribution: DistributionSingle, RequiresAPIKey: false},
@@ -111,13 +122,15 @@ func TestComprehensiveMatrix(t *testing.T) {
 			DistributionWorker10,
 		}
 
-		t.Logf("Testing %d models × %d distributions × %d challenges = %d executions\n",
-			len(selectedModels), len(workerDistributions), len(challenges),
-			len(selectedModels)*len(workerDistributions)*len(challenges))
+		t.Logf("Testing %d models × %d distributions × %d challenges × %d interfaces = %d executions\n",
+			len(selectedModels), len(workerDistributions), len(challenges), len(interfaces),
+			len(selectedModels)*len(workerDistributions)*len(challenges)*len(interfaces))
 
-		for _, dist := range workerDistributions {
-			for _, tm := range selectedModels {
-				testProvider(t, executor, tm, dist, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
+		for _, iface := range interfaces {
+			for _, dist := range workerDistributions {
+				for _, tm := range selectedModels {
+					testProvider(t, executor, tm, dist, iface, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
+				}
 			}
 		}
 	})
@@ -154,11 +167,11 @@ func TestComprehensiveMatrix(t *testing.T) {
 	}
 }
 
-// Helper function to test a provider with a specific distribution
+// Helper function to test a provider with a specific distribution and interface
 func testProvider(t *testing.T, executor *ChallengeExecutor, tm ComprehensiveTestMatrix, dist ChallengeDistribution,
-	challenges []string, totalTests, passedTests, failedTests, skippedTests *int, ctx context.Context) {
+	iface ChallengeInterface, challenges []string, totalTests, passedTests, failedTests, skippedTests *int, ctx context.Context) {
 
-	providerName := fmt.Sprintf("%s/%s/%s", tm.Provider, tm.Model, dist)
+	providerName := fmt.Sprintf("%s/%s/%s/%s", iface, tm.Provider, tm.Model, dist)
 
 	t.Run(providerName, func(t *testing.T) {
 		// Check if we have API key if needed
@@ -178,13 +191,13 @@ func testProvider(t *testing.T, executor *ChallengeExecutor, tm ComprehensiveTes
 				continue
 			}
 
-			testName := fmt.Sprintf("%s_%s_%s", spec.ID, tm.Model, dist)
+			testName := fmt.Sprintf("%s_%s_%s_%s", spec.ID, tm.Model, iface, dist)
 			t.Run(testName, func(t *testing.T) {
 				*totalTests++
 
 				t.Logf("\n%s", strings.Repeat("-", 80))
 				t.Logf("Challenge: %s", spec.Name)
-				t.Logf("Provider: %s | Model: %s", tm.Provider, tm.Model)
+				t.Logf("Interface: %s | Provider: %s | Model: %s", iface, tm.Provider, tm.Model)
 				t.Logf("Distribution: %s", dist)
 				t.Logf("%s", strings.Repeat("-", 80))
 
@@ -192,7 +205,7 @@ func testProvider(t *testing.T, executor *ChallengeExecutor, tm ComprehensiveTes
 				defer cancel()
 
 				startTime := time.Now()
-				execution, err := executor.Execute(execCtx, spec, InterfaceCLI, dist, tm.Provider, tm.Model)
+				execution, err := executor.Execute(execCtx, spec, iface, dist, tm.Provider, tm.Model)
 				duration := time.Since(startTime)
 
 				if err != nil {
@@ -274,10 +287,10 @@ func TestPhase1_Quick(t *testing.T) {
 	failedTests := 0
 	skippedTests := 0
 
-	t.Logf("Quick Test: 2 models × 2 challenges = 4 tests")
+	t.Logf("Quick Test: 2 models × 2 challenges × 1 interface (CLI) = 4 tests")
 
 	for _, tm := range models {
-		testProvider(t, executor, tm, DistributionSingle, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
+		testProvider(t, executor, tm, DistributionSingle, InterfaceCLI, challenges, &totalTests, &passedTests, &failedTests, &skippedTests, ctx)
 	}
 
 	t.Logf("\nQuick Test Summary: %d passed, %d failed, %d skipped", passedTests, failedTests, skippedTests)

@@ -253,14 +253,99 @@ func min(a, b int) int {
 
 // parseAndSaveCode parses LLM response and saves code files
 func (e *ChallengeExecutor) parseAndSaveCode(content, outputDir string, spec *ChallengeSpec) error {
-	// Try to extract code blocks from markdown format
-	// Pattern: ```filename\ncode\n```
-	codeBlockPattern := regexp.MustCompile("```([a-zA-Z0-9_./\\-]+)\\n([\\s\\S]*?)```")
-	matches := codeBlockPattern.FindAllStringSubmatch(content, -1)
+	filesCreated := 0
+
+	// Try JSON structure first: {"files": [{"name": "...", "content": "..."}]}
+	if strings.Contains(content, `"files"`) && strings.Contains(content, `"name"`) {
+		var jsonResp struct {
+			Files []struct {
+				Name    string `json:"name"`
+				Content string `json:"content"`
+			} `json:"files"`
+		}
+
+		if err := json.Unmarshal([]byte(content), &jsonResp); err == nil && len(jsonResp.Files) > 0 {
+			for _, file := range jsonResp.Files {
+				if file.Name == "" || file.Content == "" {
+					continue
+				}
+
+				// Create directory structure
+				fullPath := filepath.Join(outputDir, file.Name)
+				dir := filepath.Dir(fullPath)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					return fmt.Errorf("failed to create directory %s: %w", dir, err)
+				}
+
+				// Write file
+				if err := os.WriteFile(fullPath, []byte(file.Content), 0644); err != nil {
+					return fmt.Errorf("failed to write file %s: %w", fullPath, err)
+				}
+
+				filesCreated++
+			}
+
+			if filesCreated > 0 {
+				e.ensureBasicFiles(outputDir, spec)
+				return nil
+			}
+		}
+	}
+
+	// Try markdown blocks with proper filenames: ```filename.go\ncode\n```
+	fileBlockPattern := regexp.MustCompile("```([a-zA-Z0-9_./\\-]+\\.\\w+)\\n([\\s\\S]*?)```")
+	matches := fileBlockPattern.FindAllStringSubmatch(content, -1)
 
 	if len(matches) == 0 {
-		// No markdown blocks, try XML/structured format
-		// Pattern: <file path="...">content</file>
+		// Try language-tagged blocks and extract filenames from content or context
+		// Pattern: ```go\npackage main\n...```
+		langBlockPattern := regexp.MustCompile("```(\\w+)\\n([\\s\\S]*?)```")
+		langMatches := langBlockPattern.FindAllStringSubmatch(content, -1)
+
+		// Convert language blocks to file blocks
+		for i, match := range langMatches {
+			if len(match) < 3 {
+				continue
+			}
+
+			lang := strings.ToLower(match[1])
+			code := match[2]
+
+			// Determine filename based on language and content
+			var filename string
+			switch lang {
+			case "go", "golang":
+				// Check if it's a test file
+				if strings.Contains(code, "func Test") || strings.Contains(code, "testing.T") {
+					filename = fmt.Sprintf("main_test.go")
+				} else {
+					filename = "main.go"
+				}
+			case "json":
+				// Check if it's go.mod-like
+				if strings.Contains(code, "module ") && strings.Contains(code, "go ") {
+					filename = "go.mod"
+				} else {
+					filename = "config.json"
+				}
+			case "markdown", "md":
+				filename = "README.md"
+			case "yaml", "yml":
+				filename = "config.yaml"
+			case "dockerfile", "docker":
+				filename = "Dockerfile"
+			case "bash", "sh", "shell":
+				filename = "run.sh"
+			default:
+				filename = fmt.Sprintf("file_%d.%s", i+1, lang)
+			}
+
+			matches = append(matches, []string{match[0], filename, code})
+		}
+	}
+
+	if len(matches) == 0 {
+		// Try XML/structured format
 		xmlPattern := regexp.MustCompile(`<file path="([^"]+)">([\\s\\S]*?)</file>`)
 		matches = xmlPattern.FindAllStringSubmatch(content, -1)
 	}
@@ -271,7 +356,6 @@ func (e *ChallengeExecutor) parseAndSaveCode(content, outputDir string, spec *Ch
 	}
 
 	// Create files from matched blocks
-	filesCreated := 0
 	for _, match := range matches {
 		if len(match) < 3 {
 			continue
@@ -333,15 +417,157 @@ func (e *ChallengeExecutor) ensureBasicFiles(outputDir string, spec *ChallengeSp
 // executeTUI executes challenge via TUI interface
 func (e *ChallengeExecutor) executeTUI(ctx context.Context, spec *ChallengeSpec, execution *ChallengeExecution, logFile, requestLog *os.File) error {
 	e.log(logFile, "Executing via TUI interface")
-	// TUI uses same LLM-based generation as CLI
-	return e.executeCLI(ctx, spec, execution, logFile, requestLog)
+
+	// Get the prompt
+	prompt := spec.Prompt
+	if spec.PromptFile != "" {
+		content, err := os.ReadFile(spec.PromptFile)
+		if err != nil {
+			return fmt.Errorf("failed to read prompt file: %w", err)
+		}
+		prompt = string(content)
+	}
+
+	// Add TUI-specific requirements to prompt
+	tuiPrompt := fmt.Sprintf("%s\n\nIMPORTANT: This must be a Terminal User Interface (TUI) application with:\n- Interactive UI using bubbletea, tview, or similar TUI framework\n- Keyboard navigation and input handling\n- Visual components (menus, forms, tables, etc.)\n- Proper terminal rendering and event handling\n", prompt)
+
+	e.log(logFile, "Using REAL LLM API for TUI code generation")
+	e.log(logFile, fmt.Sprintf("Prompt length: %d characters", len(tuiPrompt)))
+	e.log(logFile, fmt.Sprintf("Provider: %s, Model: %s", execution.Provider, execution.Model))
+
+	// Log request
+	e.logRequest(requestLog, "TUI", map[string]interface{}{
+		"prompt":   tuiPrompt[:min(len(tuiPrompt), 500)],
+		"provider": execution.Provider,
+		"model":    execution.Model,
+		"output":   execution.ResultDir,
+	})
+
+	startTime := time.Now()
+
+	// Create LLM client with REAL API
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	e.log(logFile, "LLM client created successfully")
+
+	// Call REAL LLM API with TUI-specific system prompt
+	e.log(logFile, "Calling real LLM API...")
+	req := &CompletionRequest{
+		Prompt:       tuiPrompt,
+		SystemPrompt: "You are an expert software engineer specializing in Terminal User Interfaces (TUI). Generate complete, production-ready TUI applications using frameworks like bubbletea (charmbracelet/bubbletea), tview, or similar. The application must have interactive UI components, keyboard navigation, and proper event handling. Output ONLY valid code files in a structured format with proper imports for TUI libraries.",
+		MaxTokens:    8000,
+		Temperature:  0.7,
+	}
+
+	resp, err := client.Complete(ctx, req)
+	if err != nil {
+		e.log(logFile, fmt.Sprintf("LLM API call failed: %v", err))
+		return fmt.Errorf("LLM API call failed: %w", err)
+	}
+
+	duration := time.Since(startTime)
+	e.log(logFile, fmt.Sprintf("LLM API call completed in %v", duration))
+	e.log(logFile, fmt.Sprintf("Tokens used: %d", resp.TokensUsed))
+	e.log(logFile, fmt.Sprintf("Response length: %d characters", len(resp.Content)))
+
+	// Parse and save the generated code
+	err = e.parseAndSaveCode(resp.Content, execution.ResultDir, spec)
+	if err != nil {
+		e.log(logFile, fmt.Sprintf("Failed to parse/save code: %v", err))
+		return fmt.Errorf("failed to parse/save generated code: %w", err)
+	}
+
+	e.log(logFile, "TUI code successfully generated and saved")
+
+	// Log response
+	e.logResponse(requestLog, "TUI", map[string]interface{}{
+		"duration":      duration.String(),
+		"tokens_used":   resp.TokensUsed,
+		"finish_reason": resp.FinishReason,
+		"real_api":      true,
+		"interface":     "tui",
+	})
+
+	execution.Metrics.Requests = 1
+
+	return nil
 }
 
 // executeREST executes challenge via REST API
 func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec, execution *ChallengeExecution, logFile, requestLog *os.File) error {
 	e.log(logFile, "Executing via REST API")
-	// REST uses same LLM-based generation as CLI
-	return e.executeCLI(ctx, spec, execution, logFile, requestLog)
+
+	// Get the prompt
+	prompt := spec.Prompt
+	if spec.PromptFile != "" {
+		content, err := os.ReadFile(spec.PromptFile)
+		if err != nil {
+			return fmt.Errorf("failed to read prompt file: %w", err)
+		}
+		prompt = string(content)
+	}
+
+	// Add REST-specific requirements to prompt
+	restPrompt := fmt.Sprintf("%s\n\nIMPORTANT: This must be a REST API application with:\n- HTTP endpoints using frameworks like Gin, Echo, Fiber, or Chi\n- RESTful route handlers (GET, POST, PUT, DELETE)\n- JSON request/response handling\n- Proper error handling and status codes\n- API documentation (OpenAPI/Swagger comments)\n- Middleware support (CORS, logging, etc.)\n", prompt)
+
+	e.log(logFile, "Using REAL LLM API for REST API code generation")
+	e.log(logFile, fmt.Sprintf("Prompt length: %d characters", len(restPrompt)))
+	e.log(logFile, fmt.Sprintf("Provider: %s, Model: %s", execution.Provider, execution.Model))
+
+	// Log request
+	e.logRequest(requestLog, "REST", map[string]interface{}{
+		"prompt":   restPrompt[:min(len(restPrompt), 500)],
+		"provider": execution.Provider,
+		"model":    execution.Model,
+		"output":   execution.ResultDir,
+	})
+
+	startTime := time.Now()
+
+	// Create LLM client with REAL API
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	e.log(logFile, "LLM client created successfully")
+
+	// Call REAL LLM API with REST-specific system prompt
+	e.log(logFile, "Calling real LLM API...")
+	req := &CompletionRequest{
+		Prompt:       restPrompt,
+		SystemPrompt: "You are an expert software engineer specializing in REST API development. Generate complete, production-ready REST API applications using modern frameworks like Gin, Echo, Fiber, or Chi. The application must have proper HTTP handlers, JSON serialization, error handling, middleware, and follow REST best practices. Include OpenAPI/Swagger documentation comments. Output ONLY valid code files in a structured format with proper imports.",
+		MaxTokens:    8000,
+		Temperature:  0.7,
+	}
+
+	resp, err := client.Complete(ctx, req)
+	if err != nil {
+		e.log(logFile, fmt.Sprintf("LLM API call failed: %v", err))
+		return fmt.Errorf("LLM API call failed: %w", err)
+	}
+
+	duration := time.Since(startTime)
+	e.log(logFile, fmt.Sprintf("LLM API call completed in %v", duration))
+	e.log(logFile, fmt.Sprintf("Tokens used: %d", resp.TokensUsed))
+	e.log(logFile, fmt.Sprintf("Response length: %d characters", len(resp.Content)))
+
+	// Parse and save the generated code
+	err = e.parseAndSaveCode(resp.Content, execution.ResultDir, spec)
+	if err != nil {
+		e.log(logFile, fmt.Sprintf("Failed to parse/save code: %v", err))
+		return fmt.Errorf("failed to parse/save generated code: %w", err)
+	}
+
+	e.log(logFile, "REST API code successfully generated and saved")
+
+	// Log response
+	e.logResponse(requestLog, "REST", map[string]interface{}{
+		"duration":      duration.String(),
+		"tokens_used":   resp.TokensUsed,
+		"finish_reason": resp.FinishReason,
+		"real_api":      true,
+		"interface":     "rest",
+	})
+
+	execution.Metrics.Requests = 1
+
+	return nil
 }
 
 // executeWebSocket executes challenge via WebSocket interface
