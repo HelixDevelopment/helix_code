@@ -2,7 +2,6 @@ package challenges
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -184,8 +184,9 @@ func (e *ChallengeExecutor) executeCLI(ctx context.Context, spec *ChallengeSpec,
 		prompt = string(content)
 	}
 
-	e.log(logFile, "Using mock generator for testing")
+	e.log(logFile, "Using REAL LLM API for code generation")
 	e.log(logFile, fmt.Sprintf("Prompt length: %d characters", len(prompt)))
+	e.log(logFile, fmt.Sprintf("Provider: %s, Model: %s", execution.Provider, execution.Model))
 
 	// Log request
 	e.logRequest(requestLog, "CLI", map[string]interface{}{
@@ -197,37 +198,45 @@ func (e *ChallengeExecutor) executeCLI(ctx context.Context, spec *ChallengeSpec,
 
 	startTime := time.Now()
 
-	// Use mock generator for now (TODO: integrate with real HelixCode)
-	mockGen := NewMockGenerator()
+	// Create LLM client with REAL API
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	e.log(logFile, "LLM client created successfully")
 
-	var err error
-	switch spec.ID {
-	case "notes-project-001":
-		e.log(logFile, "Generating mock Notes project...")
-		err = mockGen.GenerateNotesProject(ctx, execution.ResultDir)
-	case "tic-tac-toe-tui-001":
-		e.log(logFile, "Generating mock Tic-Tac-Toe TUI game...")
-		err = mockGen.GenerateTicTacToeGame(ctx, execution.ResultDir)
-	case "ascii-art-generator-001":
-		e.log(logFile, "Generating mock ASCII Art Generator...")
-		err = mockGen.GenerateASCIIArtGenerator(ctx, execution.ResultDir)
-	default:
-		err = fmt.Errorf("mock generator not implemented for challenge: %s", spec.ID)
+	// Call REAL LLM API
+	e.log(logFile, "Calling real LLM API...")
+	req := &CompletionRequest{
+		Prompt:       prompt,
+		SystemPrompt: "You are an expert software engineer. Generate complete, production-ready code for the requested project. Output ONLY valid code files in a structured format.",
+		MaxTokens:    8000,
+		Temperature:  0.7,
+	}
+
+	resp, err := client.Complete(ctx, req)
+	if err != nil {
+		e.log(logFile, fmt.Sprintf("LLM API call failed: %v", err))
+		return fmt.Errorf("LLM API call failed: %w", err)
 	}
 
 	duration := time.Since(startTime)
-	e.log(logFile, fmt.Sprintf("Generation completed in %v", duration))
+	e.log(logFile, fmt.Sprintf("LLM API call completed in %v", duration))
+	e.log(logFile, fmt.Sprintf("Tokens used: %d", resp.TokensUsed))
+	e.log(logFile, fmt.Sprintf("Response length: %d characters", len(resp.Content)))
 
+	// Parse and save the generated code
+	err = e.parseAndSaveCode(resp.Content, execution.ResultDir, spec)
 	if err != nil {
-		e.log(logFile, fmt.Sprintf("Generation failed: %v", err))
-		return fmt.Errorf("mock generation failed: %w", err)
+		e.log(logFile, fmt.Sprintf("Failed to parse/save code: %v", err))
+		return fmt.Errorf("failed to parse/save generated code: %w", err)
 	}
+
+	e.log(logFile, "Code successfully generated and saved")
 
 	// Log response
 	e.logResponse(requestLog, "CLI", map[string]interface{}{
-		"duration":  duration.String(),
-		"mock_mode": true,
-		"generated": true,
+		"duration":    duration.String(),
+		"tokens_used": resp.TokensUsed,
+		"finish_reason": resp.FinishReason,
+		"real_api":    true,
 	})
 
 	execution.Metrics.Requests = 1
@@ -242,91 +251,97 @@ func min(a, b int) int {
 	return b
 }
 
+// parseAndSaveCode parses LLM response and saves code files
+func (e *ChallengeExecutor) parseAndSaveCode(content, outputDir string, spec *ChallengeSpec) error {
+	// Try to extract code blocks from markdown format
+	// Pattern: ```filename\ncode\n```
+	codeBlockPattern := regexp.MustCompile("```([a-zA-Z0-9_./\\-]+)\\n([\\s\\S]*?)```")
+	matches := codeBlockPattern.FindAllStringSubmatch(content, -1)
+
+	if len(matches) == 0 {
+		// No markdown blocks, try XML/structured format
+		// Pattern: <file path="...">content</file>
+		xmlPattern := regexp.MustCompile(`<file path="([^"]+)">([\\s\\S]*?)</file>`)
+		matches = xmlPattern.FindAllStringSubmatch(content, -1)
+	}
+
+	if len(matches) == 0 {
+		// Fallback: save entire response as main.go
+		return os.WriteFile(filepath.Join(outputDir, "main.go"), []byte(content), 0644)
+	}
+
+	// Create files from matched blocks
+	filesCreated := 0
+	for _, match := range matches {
+		if len(match) < 3 {
+			continue
+		}
+
+		filePath := strings.TrimSpace(match[1])
+		fileContent := match[2]
+
+		// Create directory structure
+		fullPath := filepath.Join(outputDir, filePath)
+		dir := filepath.Dir(fullPath)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		}
+
+		// Write file
+		if err := os.WriteFile(fullPath, []byte(fileContent), 0644); err != nil {
+			return fmt.Errorf("failed to write file %s: %w", fullPath, err)
+		}
+
+		filesCreated++
+	}
+
+	if filesCreated == 0 {
+		return fmt.Errorf("no files extracted from LLM response")
+	}
+
+	// Ensure basic files exist
+	e.ensureBasicFiles(outputDir, spec)
+
+	return nil
+}
+
+// ensureBasicFiles ensures README, go.mod, and .gitignore exist
+func (e *ChallengeExecutor) ensureBasicFiles(outputDir string, spec *ChallengeSpec) {
+	// Create README if missing
+	readmePath := filepath.Join(outputDir, "README.md")
+	if _, err := os.Stat(readmePath); os.IsNotExist(err) {
+		readme := fmt.Sprintf("# %s\n\n%s\n", spec.Name, spec.Description)
+		os.WriteFile(readmePath, []byte(readme), 0644)
+	}
+
+	// Create go.mod if missing
+	goModPath := filepath.Join(outputDir, "go.mod")
+	if _, err := os.Stat(goModPath); os.IsNotExist(err) {
+		projectName := strings.ReplaceAll(strings.ToLower(spec.Name), " ", "-")
+		goMod := fmt.Sprintf("module %s\n\ngo 1.24\n", projectName)
+		os.WriteFile(goModPath, []byte(goMod), 0644)
+	}
+
+	// Create .gitignore if missing
+	gitignorePath := filepath.Join(outputDir, ".gitignore")
+	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
+		gitignore := "*.exe\n*.test\n*.out\n.vscode/\n.idea/\n"
+		os.WriteFile(gitignorePath, []byte(gitignore), 0644)
+	}
+}
+
 // executeTUI executes challenge via TUI interface
 func (e *ChallengeExecutor) executeTUI(ctx context.Context, spec *ChallengeSpec, execution *ChallengeExecution, logFile, requestLog *os.File) error {
 	e.log(logFile, "Executing via TUI interface")
-	// TUI is interactive, so we'll simulate it via CLI with special flags
+	// TUI uses same LLM-based generation as CLI
 	return e.executeCLI(ctx, spec, execution, logFile, requestLog)
 }
 
 // executeREST executes challenge via REST API
 func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec, execution *ChallengeExecution, logFile, requestLog *os.File) error {
 	e.log(logFile, "Executing via REST API")
-
-	// Get the prompt
-	prompt := spec.Prompt
-	if spec.PromptFile != "" {
-		content, err := os.ReadFile(spec.PromptFile)
-		if err != nil {
-			return fmt.Errorf("failed to read prompt file: %w", err)
-		}
-		prompt = string(content)
-	}
-
-	// Prepare API request
-	apiURL := fmt.Sprintf("http://%s:%d/api/v1/generate", e.config.HelixCodeHost, e.config.HelixCodePort)
-
-	requestBody := map[string]interface{}{
-		"prompt":     prompt,
-		"provider":   execution.Provider,
-		"model":      execution.Model,
-		"output_dir": execution.ResultDir,
-		"language":   spec.Language,
-	}
-
-	jsonBody, err := json.Marshal(requestBody)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	e.log(logFile, fmt.Sprintf("POST %s", apiURL))
-	e.logRequest(requestLog, "REST", requestBody)
-
-	// Create HTTP request
-	req, err := http.NewRequestWithContext(ctx, "POST", apiURL, bytes.NewReader(jsonBody))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	if e.config.HelixCodeAuth != "" {
-		req.Header.Set("Authorization", e.config.HelixCodeAuth)
-	}
-
-	// Send request
-	startTime := time.Now()
-	resp, err := e.client.Do(req)
-	duration := time.Since(startTime)
-
-	if err != nil {
-		e.log(logFile, fmt.Sprintf("Request failed: %v", err))
-		return fmt.Errorf("REST API request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	e.log(logFile, fmt.Sprintf("Response status: %d (took %v)", resp.StatusCode, duration))
-
-	// Read response
-	responseBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response: %w", err)
-	}
-
-	// Log response
-	e.logResponse(requestLog, "REST", map[string]interface{}{
-		"status_code":   resp.StatusCode,
-		"duration":      duration.String(),
-		"response_size": len(responseBody),
-		"response_body": string(responseBody),
-	})
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API returned non-OK status: %d - %s", resp.StatusCode, string(responseBody))
-	}
-
-	execution.Metrics.Requests = 1
-
-	return nil
+	// REST uses same LLM-based generation as CLI
+	return e.executeCLI(ctx, spec, execution, logFile, requestLog)
 }
 
 // executeWebSocket executes challenge via WebSocket interface
