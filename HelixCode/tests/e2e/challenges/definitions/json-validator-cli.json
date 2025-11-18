@@ -1,0 +1,29 @@
+{
+  "id": "json-validator-cli-001",
+  "name": "JSON Validator CLI",
+  "description": "Build a command-line JSON validator and formatter with schema support",
+  "type": "cli",
+  "language": "go",
+  "tags": ["cli", "json", "validation", "beginner"],
+  "timeout": "15m",
+  "priority": 1,
+  "prompt": "Create a CLI JSON validator and formatter in Go:\n\n1. Commands:\n   - validate <file> - Validate JSON file\n   - format <file> [--indent 2|4] [--compact] - Format JSON\n   - schema validate <file> <schema> - Validate against JSON schema\n   - merge <file1> <file2> ... - Merge multiple JSON files\n   - diff <file1> <file2> - Show differences between JSON files\n\n2. Features:\n   - Syntax validation with detailed error messages\n   - Pretty printing and formatting\n   - JSON Schema (draft-07) validation\n   - Colorized output for errors\n   - Support for JSON Lines format\n   - Statistics (object count, depth, size)\n   - Streaming support for large files\n\n3. Requirements:\n   - Proper error messages with line/column numbers\n   - Support stdin and file input\n   - Exit codes (0=valid, 1=invalid)\n   - Unit tests with various JSON examples\n   - README with usage examples\n   - Help text for all commands\n\n4. Quality:\n   - Clean code structure\n   - No placeholders\n   - Edge case handling (empty files, malformed JSON)\n   - Performance for large files",
+  "requirements": {
+    "files": ["main.go", "go.mod", "README.md"],
+    "directories": ["cmd", "pkg"],
+    "min_files": 6,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": false,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": true
+  },
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time": "15m",
+    "category": "cli",
+    "data_format": "json"
+  }
+}
