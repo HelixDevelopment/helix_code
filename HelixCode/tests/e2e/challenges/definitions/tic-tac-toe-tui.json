@@ -1,0 +1,31 @@
+{
+  "id": "tic-tac-toe-tui-001",
+  "name": "Tic-Tac-Toe TUI Game",
+  "description": "Cross-platform terminal UI tic-tac-toe game for desktops and Harmony OS",
+  "type": "cli",
+  "language": "go",
+  "tags": ["game", "tui", "cross-platform", "harmony-os"],
+  "priority": 2,
+  "timeout": "30m",
+  "prompt": "Create a cross-platform tic-tac-toe game with a terminal user interface (TUI) that works on Linux, macOS, Windows, and Harmony OS. The game should support two-player mode with alternating turns, display the game board in the terminal, detect wins/draws, and allow players to make moves by entering coordinates. Use the bubbletea TUI framework for a polished terminal experience. Include game state management, input validation, win condition checking, and clear visual feedback.",
+  "requirements": {
+    "files": [
+      "main.go",
+      "game/board.go",
+      "game/player.go",
+      "ui/tui.go"
+    ],
+    "directories": [
+      "game",
+      "ui"
+    ],
+    "min_files": 5,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": false,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": false
+  }
+}

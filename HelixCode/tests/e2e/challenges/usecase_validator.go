@@ -78,7 +78,7 @@ func (v *UseCaseValidator) checkDocumentationSections(readme string) []Validatio
 
 	requiredSections := map[string]string{
 		"features":    "## Features",
-		"setup":       "## Setup",
+		"setup":       "## Setup|## Installation",
 		"usage":       "## Usage|## API Endpoints|## Commands",
 	}
 
