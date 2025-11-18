@@ -1,0 +1,50 @@
+# API Keys Configuration Example
+# Copy this file to api-keys.yaml and add your actual API keys
+# NEVER commit api-keys.yaml to version control!
+
+# OpenAI API
+openai:
+  api_key: "your-openai-api-key-here"
+  organization: "your-org-id-here"  # Optional
+
+# Anthropic Claude API
+anthropic:
+  api_key: "your-anthropic-api-key-here"
+
+# xAI (Grok) API
+xai:
+  api_key: "your-xai-api-key-here"
+
+# Google Gemini API
+gemini:
+  api_key: "your-gemini-api-key-here"
+
+# Groq API
+groq:
+  api_key: "your-groq-api-key-here"
+
+# Mistral AI API
+mistral:
+  api_key: "your-mistral-api-key-here"
+
+# Cohere API
+cohere:
+  api_key: "your-cohere-api-key-here"
+
+# Vertex AI (Google Cloud)
+vertex:
+  project_id: "your-gcp-project-id"
+  location: "us-central1"
+  credentials_file: "path/to/service-account.json"
+
+# Azure OpenAI
+azure:
+  api_key: "your-azure-openai-key"
+  endpoint: "https://your-resource.openai.azure.com"
+  deployment_name: "your-deployment-name"
+
+# AWS Bedrock
+bedrock:
+  region: "us-east-1"
+  access_key_id: "your-aws-access-key"
+  secret_access_key: "your-aws-secret-key"

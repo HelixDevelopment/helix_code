@@ -1,0 +1,28 @@
+# API Keys and Secrets - NEVER COMMIT THESE
+api-keys.yaml
+api-keys.yml
+.env
+.env.local
+*.key
+secrets.yaml
+secrets.yml
+
+# Test Results
+test-results/
+*.log
+
+# Build artifacts
+bin/
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

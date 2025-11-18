@@ -21,16 +21,26 @@ type ChallengeExecutor struct {
 	config    *ChallengeConfig
 	validator *CodeValidator
 	client    *http.Client
+	apiKeys   *APIKeys
 }
 
 // NewChallengeExecutor creates a new challenge executor
 func NewChallengeExecutor(config *ChallengeConfig) *ChallengeExecutor {
+	// Load API keys
+	apiKeys, err := LoadAPIKeys("")
+	if err != nil {
+		// Log warning but continue - will use local providers only
+		fmt.Printf("Warning: Failed to load API keys: %v\n", err)
+		apiKeys = &APIKeys{}
+	}
+
 	return &ChallengeExecutor{
 		config:    config,
 		validator: NewCodeValidator(config),
 		client: &http.Client{
 			Timeout: config.DefaultTimeout,
 		},
+		apiKeys: apiKeys,
 	}
 }
 
@@ -347,17 +357,51 @@ func (e *ChallengeExecutor) log(w io.Writer, message string) {
 	fmt.Fprintf(w, "[%s] %s\n", timestamp, message)
 }
 
+func (e *ChallengeExecutor) logWithExecution(w io.Writer, executionID string, message string) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
+	fmt.Fprintf(w, "[%s] [Execution: %s] %s\n", timestamp, executionID, message)
+}
+
 func (e *ChallengeExecutor) logRequest(w io.Writer, method string, request interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
 	fmt.Fprintf(w, "\n=== REQUEST [%s] %s ===\n", timestamp, method)
 	jsonData, _ := json.MarshalIndent(request, "", "  ")
-	fmt.Fprintf(w, "%s\n", string(jsonData))
+	// Sanitize API keys before logging
+	sanitized := SanitizeForLogging(string(jsonData), e.apiKeys)
+	fmt.Fprintf(w, "%s\n", sanitized)
+	fmt.Fprintf(w, "=== END REQUEST ===\n\n")
+}
+
+func (e *ChallengeExecutor) logRequestWithExecution(w io.Writer, executionID string, provider LLMProviderType, model string, method string, request interface{}) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
+	fmt.Fprintf(w, "\n=== REQUEST [%s] %s ===\n", timestamp, method)
+	fmt.Fprintf(w, "Execution ID: %s\n", executionID)
+	fmt.Fprintf(w, "Provider: %s\n", provider)
+	fmt.Fprintf(w, "Model: %s\n", model)
+	fmt.Fprintf(w, "Endpoint: %s\n", GetProviderAPIEndpoint(provider))
+	fmt.Fprintf(w, "---\n")
+	jsonData, _ := json.MarshalIndent(request, "", "  ")
+	// Sanitize API keys before logging
+	sanitized := SanitizeForLogging(string(jsonData), e.apiKeys)
+	fmt.Fprintf(w, "%s\n", sanitized)
 	fmt.Fprintf(w, "=== END REQUEST ===\n\n")
 }
 
 func (e *ChallengeExecutor) logResponse(w io.Writer, method string, response interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
 	fmt.Fprintf(w, "\n=== RESPONSE [%s] %s ===\n", timestamp, method)
+	jsonData, _ := json.MarshalIndent(response, "", "  ")
+	fmt.Fprintf(w, "%s\n", string(jsonData))
+	fmt.Fprintf(w, "=== END RESPONSE ===\n\n")
+}
+
+func (e *ChallengeExecutor) logResponseWithExecution(w io.Writer, executionID string, method string, response interface{}, tokensUsed int, duration time.Duration) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
+	fmt.Fprintf(w, "\n=== RESPONSE [%s] %s ===\n", timestamp, method)
+	fmt.Fprintf(w, "Execution ID: %s\n", executionID)
+	fmt.Fprintf(w, "Tokens Used: %d\n", tokensUsed)
+	fmt.Fprintf(w, "Duration: %v\n", duration)
+	fmt.Fprintf(w, "---\n")
 	jsonData, _ := json.MarshalIndent(response, "", "  ")
 	fmt.Fprintf(w, "%s\n", string(jsonData))
 	fmt.Fprintf(w, "=== END RESPONSE ===\n\n")

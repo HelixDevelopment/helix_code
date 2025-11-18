@@ -86,11 +86,13 @@ const (
 	ProviderGemini     LLMProviderType = "gemini"
 	ProviderMistral    LLMProviderType = "mistral"
 	ProviderQwen       LLMProviderType = "qwen"
+	ProviderXAI        LLMProviderType = "xai"
 	ProviderGroq       LLMProviderType = "groq"
 	ProviderAzure      LLMProviderType = "azure"
 	ProviderBedrock    LLMProviderType = "bedrock"
 	ProviderVertexAI   LLMProviderType = "vertexai"
 	ProviderOpenRouter LLMProviderType = "openrouter"
+	ProviderCohere     LLMProviderType = "cohere"
 )
 
 // ValidationCheck defines what to check in the generated code
