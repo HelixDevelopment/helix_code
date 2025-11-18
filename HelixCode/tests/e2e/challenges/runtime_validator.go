@@ -101,31 +101,52 @@ func (v *RuntimeValidator) validateASCIIArtGenerator(ctx context.Context, result
 		})
 	}
 
-	// Test 2: Run with simple text input
-	testResult := v.runCommand(ctx, exePath, []string{"HELLO"}, "", 5*time.Second)
-	if testResult.Error != "" {
+	// Test 2: Run with diverse text inputs
+	testCases := []struct {
+		input string
+		style string
+		name  string
+	}{
+		{"HELLO", "banner", "basic text"},
+		{"DIGITAL", "standard", "different word"},
+		{"VASIC", "block", "another word"},
+		{"TEST123", "standard", "alphanumeric"},
+		{"ABC", "shadow", "short text"},
+	}
+
+	allPassed := true
+	var failureDetails []string
+
+	for _, tc := range testCases {
+		args := []string{tc.input}
+		if tc.style != "" {
+			args = append([]string{"-s", tc.style}, args...)
+		}
+
+		testResult := v.runCommand(ctx, exePath, args, "", 5*time.Second)
+		if testResult.Error != "" {
+			allPassed = false
+			failureDetails = append(failureDetails, fmt.Sprintf("%s (%s style): failed - %s", tc.name, tc.style, testResult.Error))
+		} else if testResult.Stdout == "" || len(testResult.Stdout) < 10 {
+			allPassed = false
+			failureDetails = append(failureDetails, fmt.Sprintf("%s (%s style): no/insufficient output (got %d chars)", tc.name, tc.style, len(testResult.Stdout)))
+		}
+	}
+
+	if !allPassed {
 		results = append(results, ValidationResult{
 			CheckName: "runtime_basic_generation",
 			Passed:    false,
-			Error:     fmt.Sprintf("Failed to generate ASCII art: %s", testResult.Error),
-			Details:   testResult.Stderr,
-			Timestamp: time.Now(),
-		})
-	} else if testResult.Stdout == "" {
-		results = append(results, ValidationResult{
-			CheckName: "runtime_basic_generation",
-			Passed:    false,
-			Error:     "No output generated",
+			Error:     "Some test cases failed",
+			Details:   strings.Join(failureDetails, "\n"),
 			Timestamp: time.Now(),
 		})
 	} else {
-		// Verify output contains ASCII art or markdown
-		hasOutput := len(testResult.Stdout) > 0
 		results = append(results, ValidationResult{
 			CheckName: "runtime_basic_generation",
-			Passed:    hasOutput,
-			Message:   "ASCII art generated successfully",
-			Details:   fmt.Sprintf("Output length: %d characters", len(testResult.Stdout)),
+			Passed:    true,
+			Message:   fmt.Sprintf("All %d test cases passed with diverse inputs", len(testCases)),
+			Details:   "Tested: HELLO, DIGITAL, VASIC, TEST123, ABC with various styles",
 			Timestamp: time.Now(),
 		})
 	}

@@ -1432,8 +1432,11 @@ func getStandardStyle() StyleMap {
 }
 
 func getBannerStyle() StyleMap {
-	// Banner style (larger, bolder)
-	return StyleMap{
+	// Banner style (larger, bolder) - Falls back to standard for undefined chars
+	base := getStandardStyle()
+
+	// Override with banner-specific chars
+	banner := StyleMap{
 		'H': []string{
 			"##     ##",
 			"##     ##",
@@ -1463,11 +1466,23 @@ func getBannerStyle() StyleMap {
 			" ####### ",
 		},
 	}
+
+	// Merge with base
+	for k, v := range base {
+		if _, exists := banner[k]; !exists {
+			banner[k] = v
+		}
+	}
+
+	return banner
 }
 
 func getBlockStyle() StyleMap {
-	// Block style (filled blocks)
-	return StyleMap{
+	// Block style (filled blocks) - Falls back to standard for undefined chars
+	base := getStandardStyle()
+
+	// Override with block-specific chars
+	block := StyleMap{
 		'H': []string{
 			"█   █",
 			"█   █",
@@ -1497,11 +1512,23 @@ func getBlockStyle() StyleMap {
 			"█████",
 		},
 	}
+
+	// Merge with base
+	for k, v := range base {
+		if _, exists := block[k]; !exists {
+			block[k] = v
+		}
+	}
+
+	return block
 }
 
 func getShadowStyle() StyleMap {
-	// Shadow style (with shadow effect)
-	return StyleMap{
+	// Shadow style (with shadow effect) - Falls back to standard for undefined chars
+	base := getStandardStyle()
+
+	// Override with shadow-specific chars
+	shadow := StyleMap{
 		'H': []string{
 			"#     #▓",
 			"#     #▓",
@@ -1531,6 +1558,15 @@ func getShadowStyle() StyleMap {
 			"▓▓▓▓▓▓▓▓",
 		},
 	}
+
+	// Merge with base
+	for k, v := range base {
+		if _, exists := shadow[k]; !exists {
+			shadow[k] = v
+		}
+	}
+
+	return shadow
 }
 `
 	if err := os.WriteFile(filepath.Join(outputDir, "generator", "styles.go"), []byte(stylesGo), 0644); err != nil {
