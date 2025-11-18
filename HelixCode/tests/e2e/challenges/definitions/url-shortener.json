@@ -1,0 +1,29 @@
+{
+  "id": "url-shortener-001",
+  "name": "URL Shortener Service",
+  "description": "Build a URL shortener service with analytics and expiration support",
+  "type": "api",
+  "language": "go",
+  "tags": ["api", "redis", "microservice", "intermediate"],
+  "timeout": "45m",
+  "priority": 2,
+  "prompt": "Create a URL shortener microservice in Go with these features:\n\n1. API Endpoints:\n   - POST /shorten - Create short URL\n   - GET /:short_code - Redirect to original URL\n   - GET /stats/:short_code - Get URL statistics\n   - DELETE /:short_code - Delete short URL\n\n2. Features:\n   - Generate unique short codes (6-8 characters)\n   - Support custom short codes\n   - URL expiration (TTL)\n   - Click tracking and analytics\n   - Rate limiting\n   - URL validation\n\n3. Storage:\n   - Use Redis for fast lookups\n   - PostgreSQL for persistence and analytics\n   - Cache expiration handling\n\n4. Requirements:\n   - RESTful API design\n   - JSON responses\n   - Error handling with proper HTTP status codes\n   - Comprehensive tests\n   - Docker support\n   - API documentation (Swagger/OpenAPI)\n   - README with API examples\n\n5. Quality:\n   - Production-ready code\n   - No placeholders or TODOs\n   - Proper logging\n   - Graceful shutdown\n   - Health check endpoint",
+  "requirements": {
+    "files": ["main.go", "go.mod", "Dockerfile", "docker-compose.yml", "README.md"],
+    "directories": ["internal", "api", "pkg"],
+    "min_files": 12,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": true,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": true
+  },
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "45m",
+    "category": "microservices",
+    "database": "redis,postgresql"
+  }
+}

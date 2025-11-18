@@ -1,0 +1,158 @@
+version: '3.8'
+
+# Docker Compose configuration for challenge testing with distributed workers
+# This sets up HelixCode with multiple workers for distributed challenge execution
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: helixcode-challenge-db
+    environment:
+      POSTGRES_USER: helixcode
+      POSTGRES_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixcode_test}
+      POSTGRES_DB: helixcode_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helixcode"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - helixcode-network
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: helixcode-challenge-redis
+    ports:
+      - "6380:6379"
+    command: redis-server --requirepass ${HELIX_REDIS_PASSWORD:-helixcode_test}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - helixcode-network
+
+  # Main HelixCode server
+  helixcode-server:
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+    container_name: helixcode-challenge-server
+    environment:
+      HELIX_DATABASE_HOST: postgres
+      HELIX_DATABASE_PORT: 5432
+      HELIX_DATABASE_USER: helixcode
+      HELIX_DATABASE_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixcode_test}
+      HELIX_DATABASE_NAME: helixcode_test
+      HELIX_REDIS_HOST: redis
+      HELIX_REDIS_PORT: 6379
+      HELIX_REDIS_PASSWORD: ${HELIX_REDIS_PASSWORD:-helixcode_test}
+      HELIX_REDIS_ENABLED: "true"
+      HELIX_AUTH_JWT_SECRET: ${HELIX_AUTH_JWT_SECRET:-test_jwt_secret_12345}
+      HELIX_SERVER_PORT: 8080
+      HELIX_WORKER_MODE: "server"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./test-results:/app/test-results
+      - ./workspace:/app/workspace
+    networks:
+      - helixcode-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Worker 1
+  helixcode-worker-1:
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+    container_name: helixcode-challenge-worker-1
+    environment:
+      HELIX_WORKER_MODE: "worker"
+      HELIX_WORKER_ID: "worker-1"
+      HELIX_SERVER_URL: "http://helixcode-server:8080"
+      HELIX_DATABASE_HOST: postgres
+      HELIX_DATABASE_PORT: 5432
+      HELIX_DATABASE_USER: helixcode
+      HELIX_DATABASE_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixcode_test}
+      HELIX_REDIS_HOST: redis
+      HELIX_REDIS_PORT: 6379
+      HELIX_REDIS_PASSWORD: ${HELIX_REDIS_PASSWORD:-helixcode_test}
+    depends_on:
+      helixcode-server:
+        condition: service_healthy
+    volumes:
+      - ./workspace-worker-1:/app/workspace
+    networks:
+      - helixcode-network
+
+  # Worker 2
+  helixcode-worker-2:
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+    container_name: helixcode-challenge-worker-2
+    environment:
+      HELIX_WORKER_MODE: "worker"
+      HELIX_WORKER_ID: "worker-2"
+      HELIX_SERVER_URL: "http://helixcode-server:8080"
+      HELIX_DATABASE_HOST: postgres
+      HELIX_DATABASE_PORT: 5432
+      HELIX_DATABASE_USER: helixcode
+      HELIX_DATABASE_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixcode_test}
+      HELIX_REDIS_HOST: redis
+      HELIX_REDIS_PORT: 6379
+      HELIX_REDIS_PASSWORD: ${HELIX_REDIS_PASSWORD:-helixcode_test}
+    depends_on:
+      helixcode-server:
+        condition: service_healthy
+    volumes:
+      - ./workspace-worker-2:/app/workspace
+    networks:
+      - helixcode-network
+
+  # Additional workers can be scaled with docker-compose up --scale
+  helixcode-worker:
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+    environment:
+      HELIX_WORKER_MODE: "worker"
+      HELIX_SERVER_URL: "http://helixcode-server:8080"
+      HELIX_DATABASE_HOST: postgres
+      HELIX_DATABASE_PORT: 5432
+      HELIX_DATABASE_USER: helixcode
+      HELIX_DATABASE_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixcode_test}
+      HELIX_REDIS_HOST: redis
+      HELIX_REDIS_PORT: 6379
+      HELIX_REDIS_PASSWORD: ${HELIX_REDIS_PASSWORD:-helixcode_test}
+    depends_on:
+      helixcode-server:
+        condition: service_healthy
+    volumes:
+      - ./workspace-extra:/app/workspace
+    networks:
+      - helixcode-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  helixcode-network:
+    driver: bridge

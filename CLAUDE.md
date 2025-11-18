@@ -29,13 +29,15 @@ make build                    # Builds to bin/helixcode
 make test                     # Run all tests with go test -v ./...
 go test -v ./internal/auth    # Test specific package
 go test -cover ./...          # Run with coverage
+./run_tests.sh                # Run unit tests via script
+./run_all_tests.sh            # Run all tests (unit + integration + e2e)
 
 # Code quality
 make fmt                      # Format code with go fmt
 make lint                     # Lint with golangci-lint (if installed)
 
 # Development
-make dev                      # Build and run with config/dev/config.yaml
+make dev                      # Build and run (NOTE: config/dev/config.yaml doesn't exist, uses default config)
 make clean                    # Clean build artifacts (bin/, dist/, coverage.out)
 
 # Production builds (cross-platform)
@@ -80,7 +82,9 @@ make release                  # Full release: clean, logo-assets, docs, build, t
 - `internal/server`: HTTP server, routing, and API handlers
 - `internal/memory`: Long-term memory integration (Mem0, Zep, Memonto, BaseAI)
 - `internal/agent`: Multi-agent orchestration and coordination
-- `internal/tools`: Tool calling and code analysis capabilities
+- `internal/tools`: **Comprehensive tool ecosystem** - filesystem (read/write/edit/glob/grep), shell (exec/background), web (fetch/search), browser automation, codebase mapping, multi-file editing
+- `internal/editor`: **Multi-format code editing** - supports Diff, Whole file, Search/Replace, and Line-based formats optimized for different LLM models (GPT-4, Claude, Gemini, Llama, etc.)
+- `internal/context`: Context builder for AI conversations with fluent API
 - `internal/session`: Session tracking and context management
 - `internal/config`: Configuration management with Viper
 
@@ -117,9 +121,37 @@ make release                  # Full release: clean, logo-assets, docs, build, t
 
 **Workflow Execution**: Workflows consist of typed steps (analysis, generation, execution, validation) with actions (analyze_code, generate_code, run_tests, etc.). Steps can have dependencies, forming a DAG that executes in proper order.
 
+**Tool System** (`internal/tools`): Comprehensive tool ecosystem providing AI agents with capabilities including:
+- **Filesystem**: fs_read, fs_write, fs_edit, glob, grep with security boundaries and validation
+- **Shell**: Command execution (foreground/background), output monitoring, process management
+- **Web**: Web scraping, search, markdown parsing with rate limiting
+- **Browser**: Chromium-based automation for screenshots, navigation, interaction
+- **Codebase**: Mapping and analysis tools for understanding project structure
+- **MultiEdit**: Transactional multi-file editing with preview and rollback
+- All tools include schema validation, resource limits, timeout enforcement, and audit logging
+
+**Code Editor** (`internal/editor`): Multi-format editing system optimized for different LLM models:
+- **Diff Format**: Unix unified diff (best for GPT-4, Gemini Pro, Llama 70B+, DeepSeek)
+- **Whole File**: Complete file replacement (best for Gemini Pro, Llama 3 8B, O1 models)
+- **Search/Replace**: Pattern-based with regex (best for Claude, GPT-3.5, Mistral, Phi-3)
+- **Line-Based**: Specific line range edits (best for GPT-4, Claude, Gemini, CodeLlama)
+- Automatic format selection based on model capabilities and file size
+- Built-in validation, backup support, and syntax checking for Go/JSON/YAML
+
+**Context Builder** (`internal/context`): Fluent API for building AI conversation context with system roles, messages, metadata, and thread-safe operations. Integrates with memory system for conversation persistence.
+
 ## Configuration
 
 Primary configuration at `HelixCode/config/config.yaml`. The system uses Viper for configuration management with environment variable overrides.
+
+**Available Configuration Files**:
+- `config/config.yaml`: Main production configuration
+- `config/test-config.yaml`: Configuration for testing with simplified settings
+- `config/working-config.yaml`: Working configuration for development
+- `config/minimal-config.yaml`: Minimal configuration with essential settings only
+- `config/fixed-config.yaml`: Fixed configuration for specific environments
+- `config/azure_example.yaml`: Example Azure integration configuration
+- `config/model-aliases.example.yaml`: Example model alias configuration
 
 **Configuration File Locations** (searched in order):
 1. Path specified via command-line flag
@@ -171,6 +203,11 @@ export HELIX_DATABASE_PASSWORD=your_password
 # Tables: users, workers, tasks, projects, sessions, llm_providers, notifications, etc.
 ```
 
+**Note**: The database can be made optional for testing by:
+1. Leaving the `database.host` empty in config: `host: ""`
+2. Setting `database.enabled: false` (if supported in your config version)
+3. Using in-memory storage (project persistence will be disabled)
+
 ## CLI Usage
 
 The CLI client is at `cmd/cli/main.go`:
@@ -211,9 +248,11 @@ go build -o bin/cli ./cmd/cli
 │   │   └── cli/                  # CLI client
 │   ├── applications/             # Platform-specific apps
 │   │   ├── terminal-ui/          # Terminal UI (TUI)
-│   │   ├── desktop/              # Desktop GUI
-│   │   ├── aurora-os/            # Aurora OS client
-│   │   └── harmony-os/           # Harmony OS client
+│   │   ├── desktop/              # Desktop GUI (Fyne-based)
+│   │   ├── android/              # Android application
+│   │   ├── ios/                  # iOS application
+│   │   ├── aurora-os/            # Aurora OS client (Russian platform)
+│   │   └── harmony-os/           # Harmony OS client (Chinese platform)
 │   ├── internal/                 # Internal packages (not importable externally)
 │   │   ├── auth/                 # Authentication & authorization
 │   │   ├── worker/               # Worker pool & SSH management
@@ -273,18 +312,34 @@ Each workflow is defined with typed steps and dependencies in `internal/workflow
 - Mock interfaces for database and external services
 - Test with `go test -v ./...` from the `HelixCode/` directory
 
+## Key Package Documentation
+
+Several internal packages have detailed README files with comprehensive documentation:
+- `internal/editor/README.md`: Complete guide to the multi-format code editing system (276+ tests)
+- `internal/tools/README.md`: Tool ecosystem documentation with examples and security guidelines
+- `internal/context/README.md`: Context builder API reference and usage patterns
+
+These README files contain important implementation details, usage examples, and best practices that supplement this CLAUDE.md file.
+
 ## Module and Dependencies
 
 **Module name**: `dev.helix.code`
-**Go version**: 1.25.2
+**Go version**: 1.24.0
 
 **Core dependencies** (check `go.mod` for complete list):
+- `github.com/gin-gonic/gin`: HTTP web framework
 - `github.com/google/uuid`: UUID generation
-- `github.com/pkg/errors`: Error handling
-- `gopkg.in/yaml.v2`: YAML parsing
-- `github.com/spf13/viper`: Configuration management (referenced in code)
+- `github.com/spf13/viper`: Configuration management
+- `github.com/golang-jwt/jwt/v4`: JWT authentication
+- `github.com/gorilla/websocket`: WebSocket support
+- `github.com/jackc/pgx/v5`, `github.com/lib/pq`: PostgreSQL drivers
+- `github.com/go-redis/redis/v8`: Redis client
+- `github.com/stretchr/testify`: Testing framework
+- `github.com/chromedp/chromedp`: Browser automation
+- `golang.org/x/crypto`, `golang.org/x/net`: Crypto and networking
+- AWS, Azure, Google Cloud SDKs for cloud provider integrations
 
-**Note**: The project uses standard library packages extensively. Additional dependencies for HTTP frameworks, database drivers, JWT, WebSocket, and SSH are imported but may need to be added via `go get` or `go mod tidy` if not already in go.mod.
+**Note**: Run `go mod tidy` to ensure all dependencies are properly installed.
 
 ## Code Generation
 
@@ -315,9 +370,13 @@ The platform supports multiple deployment targets:
 - **Session Context**: Development sessions maintain context across interactions for continuity
 - **MCP Protocol**: Supports both stdio and SSE transports for Model Context Protocol
 - **Database Schema Auto-Init**: The server automatically creates database schema on startup via `db.InitializeSchema()`
+- **Database is Optional**: Database can be disabled for testing by leaving `database.host` empty or setting `database.enabled: false`
 - **Redis is Optional**: Redis can be disabled by setting `redis.enabled: false` in config; the system will function without it
 - **Environment Variables Override Config**: All `HELIX_*` environment variables take precedence over config file values
 - **Provider Selection Strategy**: Configurable via `llm.selection.strategy` (performance, cost, availability, round-robin)
+- **Editor Format Selection**: The code editor automatically selects the best edit format (Diff/Whole/Search-Replace/Line-based) based on the LLM model being used
+- **Tool Security**: All tools implement security boundaries - path validation, command blocklists, resource limits, and audit logging
+- **Multi-Edit Transactions**: Use the multiedit tools for atomic multi-file changes with preview and rollback capabilities
 
 ## Testing Infrastructure
 
@@ -325,6 +384,140 @@ The project includes multiple test levels:
 - **Unit tests**: Alongside source files (`*_test.go`), run with `go test -v ./internal/<package>`
 - **Integration tests**: In `tests/` directory
 - **E2E tests**: In `test/e2e/` directory
+- **Challenge tests**: In `tests/e2e/challenges/` directory (comprehensive system testing)
 - **Test helpers**: Mock implementations in `internal/mocks/`
-- **Test scripts**: `run_tests.sh`, `run_integration_tests.sh`, `run_all_tests.sh`
 - **Coverage**: Generate with `go test -cover ./...` or check `coverage.out`
+
+**Test Scripts** (run from `HelixCode/` directory):
+- `./run_tests.sh`: Run unit tests
+- `./run_integration_tests.sh`: Run integration tests
+- `./run_all_tests.sh`: Run all tests (unit + integration + e2e)
+- `./scripts/run-tests.sh`: Alternative test runner in scripts directory
+- `./scripts/run-docker-tests.sh`: Run tests in Docker containers
+- `./scripts/run-all-tests.sh`: Comprehensive test suite including Docker tests
+
+**Important Test Configurations**:
+- Use `config/test-config.yaml` for test environments
+- Use `config/minimal-config.yaml` for minimal testing setups
+- Database can be disabled in config for testing (set `database.enabled: false` or leave host empty)
+- Redis can be disabled with `redis.enabled: false` in config
+
+## Challenge Testing Framework
+
+**Purpose**: The Challenge Testing Framework validates HelixCode's ability to generate complete, working software projects from prompts. Each challenge represents a real-world project that HelixCode must implement end-to-end.
+
+**Location**: `tests/e2e/challenges/`
+
+### Key Features
+
+- **Comprehensive Validation**: Checks for no placeholders, successful compilation, passing tests, and working applications
+- **Multi-Interface Testing**: Tests via CLI, TUI, REST API, WebSocket, and Desktop interfaces
+- **Multi-Provider Support**: Tests with all LLM providers (Ollama, OpenAI, Anthropic, Gemini, etc.)
+- **Distributed Testing**: Supports single instance and distributed worker configurations (2, 5, 10 workers)
+- **Full Logging**: Records all requests, responses, and execution details
+- **Result Organization**: Structured storage of all generated code and iterations
+- **Batch Execution**: Run multiple challenges across all combinations of interfaces/providers/models
+
+### Challenge Definitions
+
+Three example challenges are included:
+- **notes-project-001**: Simple Notes Application (CRUD, PostgreSQL, REST API)
+- **url-shortener-001**: URL Shortener Service (Redis, PostgreSQL, Analytics)
+- **cli-task-manager-001**: CLI Task Manager (Cobra, Local Storage)
+
+Add challenges in `tests/e2e/challenges/definitions/` as JSON files.
+
+### Running Challenges
+
+```bash
+cd tests/e2e/challenges
+
+# List available challenges
+go run cmd/runner/main.go -list
+
+# Run single challenge
+go run cmd/runner/main.go \
+  -challenge notes-project-001 \
+  -interfaces cli \
+  -providers ollama \
+  -models llama2
+
+# Run full test suite
+go run cmd/runner/main.go \
+  -interfaces cli,tui,rest \
+  -distributions single,worker_2,worker_5 \
+  -providers ollama,openai,anthropic \
+  -models llama2,gpt-4,claude-3-sonnet \
+  -export-report ./results/full-report.json
+```
+
+### Distributed Worker Testing
+
+Start distributed workers with Docker Compose:
+
+```bash
+# 2 workers
+docker-compose -f tests/e2e/challenges/docker-compose-workers.yml up -d \
+  --scale helixcode-worker=2
+
+# 5 workers
+docker-compose -f tests/e2e/challenges/docker-compose-workers.yml up -d \
+  --scale helixcode-worker=5
+
+# 10 workers
+docker-compose -f tests/e2e/challenges/docker-compose-workers.yml up -d \
+  --scale helixcode-worker=10
+
+# Run distributed tests
+cd tests/e2e/challenges
+go run cmd/runner/main.go -distributions worker_2,worker_5,worker_10
+```
+
+### Validation Checks
+
+Each challenge execution is validated for:
+
+1. **Directory Structure**: Result directory exists with required files/directories
+2. **Code Quality**: No TODO/FIXME/placeholders, no empty implementations
+3. **Compilation**: Code compiles successfully without errors
+4. **Testing**: Tests exist and pass with adequate coverage
+5. **Functionality**: Application starts and runs correctly
+6. **Documentation**: README, Dockerfile, and other required files present
+
+### Results and Logging
+
+All challenge executions are logged and organized:
+
+```
+test-results/
+├── challenges/{challenge-id}/{interface}_{provider}_{model}_{timestamp}_{id}/
+│   ├── [Generated project files]
+│   └── execution-metadata.json
+├── logs/{execution-id}/
+│   ├── execution.log      # Main execution log
+│   ├── requests.log        # All LLM requests/responses
+│   └── validation.log      # Validation results
+└── state/
+    ├── challenges.json     # All challenge definitions
+    ├── executions.json     # All execution records
+    └── batches.json        # Batch execution records
+```
+
+### Key Implementation Files
+
+- `tests/e2e/challenges/types.go`: Core type definitions and enums
+- `tests/e2e/challenges/validator.go`: Code validation logic (placeholder detection, compilation, tests)
+- `tests/e2e/challenges/executor.go`: Challenge execution engine
+- `tests/e2e/challenges/manager.go`: Challenge and batch management
+- `tests/e2e/challenges/cmd/runner/main.go`: CLI test runner
+- `tests/e2e/challenges/docker-compose-workers.yml`: Distributed worker setup
+- `tests/e2e/challenges/definitions/*.json`: Challenge specifications
+
+### Creating New Challenges
+
+1. Create JSON definition in `tests/e2e/challenges/definitions/`
+2. Specify requirements (compilation, tests, files, etc.)
+3. Define detailed prompt
+4. Run with: `go run cmd/runner/main.go -challenge your-challenge-id`
+
+See `tests/e2e/challenges/README.md` for complete documentation.

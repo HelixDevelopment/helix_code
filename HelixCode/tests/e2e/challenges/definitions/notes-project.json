@@ -1,0 +1,44 @@
+{
+  "id": "notes-project-001",
+  "name": "Simple Notes Application",
+  "description": "Build a complete notes application with CRUD operations, search functionality, and persistent storage",
+  "type": "crud",
+  "language": "go",
+  "tags": ["crud", "web", "api", "database", "beginner"],
+  "timeout": "30m",
+  "priority": 1,
+  "prompt": "Create a simple notes application in Go with the following features:\n\n1. RESTful API with endpoints for:\n   - GET /notes - List all notes\n   - GET /notes/:id - Get a specific note\n   - POST /notes - Create a new note\n   - PUT /notes/:id - Update a note\n   - DELETE /notes/:id - Delete a note\n   - GET /notes/search?q=query - Search notes\n\n2. Data Model:\n   - Note should have: ID (UUID), Title, Content, CreatedAt, UpdatedAt, Tags\n   - Use PostgreSQL for persistence\n   - Include proper database migrations\n\n3. Requirements:\n   - Use Gin web framework\n   - Implement proper error handling\n   - Add input validation\n   - Include comprehensive unit tests\n   - Add integration tests\n   - Provide a Dockerfile\n   - Include docker-compose.yml with PostgreSQL\n   - Add README with setup and usage instructions\n   - Implement logging using a structured logger\n   - Add proper CORS handling\n\n4. Code Quality:\n   - Follow Go best practices\n   - Use proper package structure\n   - Add comments for public functions\n   - Handle edge cases\n   - No TODO or placeholder comments\n   - All functions should be fully implemented\n\n5. Testing:\n   - Unit tests for all handlers\n   - Integration tests for API endpoints\n   - Database tests with test fixtures\n   - Minimum 80% code coverage\n\nThe application should be production-ready and follow best practices for Go web development.",
+  "requirements": {
+    "files": [
+      "main.go",
+      "go.mod",
+      "go.sum",
+      "Dockerfile",
+      "docker-compose.yml",
+      "README.md",
+      ".gitignore"
+    ],
+    "directories": [
+      "internal",
+      "cmd",
+      "pkg",
+      "migrations",
+      "tests"
+    ],
+    "min_files": 15,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": true,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": true
+  },
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time": "30m",
+    "category": "web_development",
+    "framework": "gin",
+    "database": "postgresql"
+  }
+}

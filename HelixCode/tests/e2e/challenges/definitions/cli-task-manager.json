@@ -1,0 +1,29 @@
+{
+  "id": "cli-task-manager-001",
+  "name": "CLI Task Manager",
+  "description": "Build a command-line task management application with local storage",
+  "type": "cli",
+  "language": "go",
+  "tags": ["cli", "cobra", "storage", "beginner"],
+  "timeout": "20m",
+  "priority": 1,
+  "prompt": "Create a CLI task manager application in Go using Cobra:\n\n1. Commands:\n   - task add \"description\" [--priority high|medium|low] [--due YYYY-MM-DD]\n   - task list [--status all|pending|done] [--priority high|medium|low]\n   - task show <id>\n   - task complete <id>\n   - task delete <id>\n   - task update <id> [--description \"...\"] [--priority ...] [--due ...]\n\n2. Features:\n   - Task persistence using JSON or SQLite\n   - Task attributes: ID, Description, Priority, Status, DueDate, CreatedAt, CompletedAt\n   - Colored output for better UX\n   - Table formatting for list view\n   - Search/filter capabilities\n   - Statistics (task count by status/priority)\n\n3. Requirements:\n   - Use Cobra framework\n   - Proper error handling\n   - Help text for all commands\n   - Input validation\n   - Unit tests for all commands\n   - README with usage examples\n   - Build script or Makefile\n\n4. Quality:\n   - Clean code structure\n   - No placeholders\n   - Proper package organization\n   - Edge case handling\n   - Cross-platform compatibility (Linux, macOS, Windows)",
+  "requirements": {
+    "files": ["main.go", "go.mod", "README.md", "Makefile"],
+    "directories": ["cmd", "internal"],
+    "min_files": 8,
+    "has_tests": true,
+    "has_readme": true,
+    "has_dockerfile": false,
+    "has_ci": false,
+    "compilation_check": true,
+    "tests_pass": true,
+    "run_check": false
+  },
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time": "20m",
+    "category": "cli",
+    "framework": "cobra"
+  }
+}
