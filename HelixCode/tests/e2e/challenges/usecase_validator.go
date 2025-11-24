@@ -561,15 +561,65 @@ func (v *UseCaseValidator) validateDatabaseSetup(resultDir string) ValidationRes
 
 // validateURLShortenerCommonFeatures checks common features for URL shortener
 func (v *UseCaseValidator) validateURLShortenerCommonFeatures(resultDir string) []ValidationResult {
-	// TODO: Implement URL shortener common features validation
-	return []ValidationResult{
-		{
-			CheckName: "common_sense_features",
-			Passed:    false,
-			Message:   "URL shortener common features validation not yet implemented",
-			Timestamp: time.Now(),
-		},
+	var results []ValidationResult
+
+	// Check for basic required files
+	requiredFiles := []string{"main.go", "README.md"}
+	for _, file := range requiredFiles {
+		if _, err := os.Stat(filepath.Join(resultDir, file)); err != nil {
+			results = append(results, ValidationResult{
+				CheckName: fmt.Sprintf("required_file_%s", file),
+				Passed:    false,
+				Message:   fmt.Sprintf("Missing required file: %s", file),
+				Timestamp: time.Now(),
+			})
+		} else {
+			results = append(results, ValidationResult{
+				CheckName: fmt.Sprintf("required_file_%s", file),
+				Passed:    true,
+				Message:   fmt.Sprintf("Found required file: %s", file),
+				Timestamp: time.Now(),
+			})
+		}
 	}
+
+	// Check for basic URL shortener functionality in main.go
+	mainFile := filepath.Join(resultDir, "main.go")
+	if content, err := os.ReadFile(mainFile); err == nil {
+		contentStr := string(content)
+		
+		// Check for HTTP server
+		hasHTTPServer := strings.Contains(contentStr, "http.") || strings.Contains(contentStr, "gin.") || strings.Contains(contentStr, "mux.")
+		results = append(results, ValidationResult{
+			CheckName: "http_server",
+			Passed:    hasHTTPServer,
+			Message:   fmt.Sprintf("HTTP server implementation: %v", hasHTTPServer),
+			Timestamp: time.Now(),
+		})
+
+		// Check for URL storage
+		hasStorage := strings.Contains(contentStr, "map") || strings.Contains(contentStr, "database") || strings.Contains(contentStr, "redis")
+		results = append(results, ValidationResult{
+			CheckName: "url_storage",
+			Passed:    hasStorage,
+			Message:   fmt.Sprintf("URL storage mechanism: %v", hasStorage),
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Check for README documentation
+	readmeFile := filepath.Join(resultDir, "README.md")
+	if content, err := os.ReadFile(readmeFile); err == nil {
+		hasDocumentation := len(content) > 100 // Basic check for meaningful content
+		results = append(results, ValidationResult{
+			CheckName: "documentation",
+			Passed:    hasDocumentation,
+			Message:   fmt.Sprintf("README documentation: %v", hasDocumentation),
+			Timestamp: time.Now(),
+		})
+	}
+
+	return results
 }
 
 // validateCLITaskManagerCommonFeatures checks common features for CLI task manager

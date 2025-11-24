@@ -3,8 +3,8 @@
 PRODUCTION PERFORMANCE OPTIMIZATION REPORT
 ========================================
 
-Optimization Timestamp: 2025-11-14T09:09:45+03:00
-Optimization Duration: 1.20865725s
+Optimization Timestamp: 2025-11-24T11:24:23+03:00
+Optimization Duration: 1.211920834s
 Total Optimizations Applied: 4
 Successful Optimizations: 4
 Failed Optimizations: 0
@@ -25,7 +25,7 @@ POST-OPTIMIZATION METRICS:
 - Memory Usage: 0 MB
 - Throughput: 1000 ops/sec
 - Average Latency: 50ms
-- P95 Latency: 100ms
+- P95 Latency: 150ms
 - P99 Latency: 200ms
 - Cache Hit Rate: 85.00%
 - Error Rate: 1.00%
@@ -38,30 +38,6 @@ PERFORMANCE IMPROVEMENTS:
 - Overall Improvement Score: -1.1%
 
 OPTIMIZATION DETAILS:
-CPU Goroutine Pool:
-  Type: cpu
-  Priority: 1
-  Enabled: true
-  Applied: true
-  Improvement: 0.0%
-  Change: CPU utilization optimized
-
-Memory Profiling Optimization:
-  Type: memory
-  Priority: 2
-  Enabled: true
-  Applied: true
-  Improvement: -0.5%
-  Change: Memory usage optimized
-
-Memory Pool Optimization:
-  Type: memory
-  Priority: 1
-  Enabled: true
-  Applied: true
-  Improvement: -0.4%
-  Change: Memory usage optimized
-
 cpu_goroutine_pool:
   Type: cpu
   Priority: 1
@@ -82,6 +58,14 @@ memory_profiling_optimization:
   Priority: 2
   Enabled: true
 
+CPU Goroutine Pool:
+  Type: cpu
+  Priority: 1
+  Enabled: true
+  Applied: true
+  Improvement: 0.0%
+  Change: CPU utilization optimized
+
 CPU Benchmark Optimization:
   Type: cpu
   Priority: 2
@@ -89,6 +73,22 @@ CPU Benchmark Optimization:
   Applied: true
   Improvement: 0.0%
   Change: CPU utilization optimized
+
+Memory Pool Optimization:
+  Type: memory
+  Priority: 1
+  Enabled: true
+  Applied: true
+  Improvement: -0.4%
+  Change: Memory usage optimized
+
+Memory Profiling Optimization:
+  Type: memory
+  Priority: 2
+  Enabled: true
+  Applied: true
+  Improvement: -0.4%
+  Change: Memory usage optimized
 
 
 

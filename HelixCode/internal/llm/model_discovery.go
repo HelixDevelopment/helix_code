@@ -70,10 +70,10 @@ type UsageMatch struct {
 
 // UsageAnalytics tracks model usage patterns
 type UsageAnalytics struct {
-	modelUsageStats    map[string]*ModelUsageStats    `json:"model_usage_stats"`
-	taskPatterns       map[string]*TaskPattern        `json:"task_patterns"`
-	userPreferences    map[string]*UserPreferences    `json:"user_preferences"`
-	performanceHistory map[string]*PerformanceHistory `json:"performance_history"`
+	ModelUsageStats    map[string]*ModelUsageStats    `json:"model_usage_stats"`
+	TaskPatterns       map[string]*TaskPattern        `json:"task_patterns"`
+	UserPreferences    map[string]*UserPreferences    `json:"user_preferences"`
+	PerformanceHistory map[string]*PerformanceHistory `json:"performance_history"`
 	analyticsDir       string
 	mu                 sync.RWMutex
 }
@@ -146,30 +146,30 @@ type OptimizationRecord struct {
 
 // ModelRanker provides intelligent model ranking
 type ModelRanker struct {
-	weights        map[string]float64      `json:"weights"`
-	scoringFactors []string                `json:"scoring_factors"`
-	customScorers  map[string]CustomScorer `json:"custom_scorers"`
+	Weights        map[string]float64      `json:"weights"`
+	ScoringFactors []string                `json:"scoring_factors"`
+	CustomScorers  map[string]CustomScorer `json:"custom_scorers"`
 	mu             sync.RWMutex
 }
 
 // NewModelRanker creates a new model ranker with default weights
 func NewModelRanker() *ModelRanker {
 	return &ModelRanker{
-		weights: map[string]float64{
+		Weights: map[string]float64{
 			"performance":     0.3,
 			"compatibility":   0.25,
 			"cost_efficiency": 0.2,
 			"reliability":     0.15,
 			"features":        0.1,
 		},
-		scoringFactors: []string{
+		ScoringFactors: []string{
 			"context_size",
 			"max_tokens",
 			"response_time",
 			"cost_per_token",
 			"success_rate",
 		},
-		customScorers: make(map[string]CustomScorer),
+		CustomScorers:  make(map[string]CustomScorer),
 	}
 }
 

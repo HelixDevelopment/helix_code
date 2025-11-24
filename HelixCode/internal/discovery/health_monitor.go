@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -308,7 +309,15 @@ func (hm *HealthMonitor) getStrategy(serviceName string) HealthCheckStrategy {
 }
 
 func (hm *HealthMonitor) checkTCP(serviceInfo *ServiceInfo) error {
-	address := fmt.Sprintf("%s:%d", serviceInfo.Host, serviceInfo.Port)
+	// Create address with proper format for IPv6 compatibility
+	var address string
+	if strings.Contains(serviceInfo.Host, ":") {
+		// IPv6 address needs brackets
+		address = fmt.Sprintf("[%s]:%d", serviceInfo.Host, serviceInfo.Port)
+	} else {
+		// IPv4 address or hostname
+		address = fmt.Sprintf("%s:%d", serviceInfo.Host, serviceInfo.Port)
+	}
 
 	conn, err := net.DialTimeout("tcp", address, hm.config.CheckTimeout)
 	if err != nil {

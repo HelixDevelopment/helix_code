@@ -134,10 +134,10 @@ func (q *NotificationQueue) Clear() {
 }
 
 // GetStats returns queue statistics
-func (q *NotificationQueue) GetStats() QueueStats {
+func (q *NotificationQueue) GetStats() *QueueStats {
 	q.stats.mutex.Lock()
 	defer q.stats.mutex.Unlock()
-	return *q.stats
+	return q.stats
 }
 
 // ResetStats resets queue statistics

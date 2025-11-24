@@ -38,7 +38,7 @@ func TestDatabaseManager_CreateProjectSuccess(t *testing.T) {
 	mockRow := database.NewMockRowWithValues(now, now)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Test Project", "Test description", "/test/path", "go", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Test Project", "Test description", "/test/path", "go", ownerID.String())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
@@ -59,7 +59,7 @@ func TestDatabaseManager_CreateProjectInvalidOwnerID(t *testing.T) {
 
 	ctx := context.Background()
 
-	project, err := dm.CreateProject(ctx, "Test Project", "Test description", "/test/path", "go", "invalid-uuid")
+	project, err := dm.CreateProjectWithUser(ctx, "Test Project", "Test description", "/test/path", "go", "invalid-uuid")
 
 	assert.Error(t, err)
 	assert.Nil(t, project)
@@ -76,7 +76,7 @@ func TestDatabaseManager_CreateProjectDatabaseError(t *testing.T) {
 	mockRow := database.NewMockRowWithError(fmt.Errorf("database connection failed"))
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Test Project", "Test description", "/test/path", "go", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Test Project", "Test description", "/test/path", "go", ownerID.String())
 
 	assert.Error(t, err)
 	assert.Nil(t, project)
@@ -95,7 +95,7 @@ func TestDatabaseManager_CreateProjectNodeType(t *testing.T) {
 	mockRow := database.NewMockRowWithValues(now, now)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Node Project", "Node app", "/node/path", "node", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Node Project", "Node app", "/node/path", "node", ownerID.String())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
@@ -117,7 +117,7 @@ func TestDatabaseManager_CreateProjectPythonType(t *testing.T) {
 	mockRow := database.NewMockRowWithValues(now, now)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Python Project", "Python app", "/python/path", "python", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Python Project", "Python app", "/python/path", "python", ownerID.String())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
@@ -139,7 +139,7 @@ func TestDatabaseManager_CreateProjectRustType(t *testing.T) {
 	mockRow := database.NewMockRowWithValues(now, now)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Rust Project", "Rust app", "/rust/path", "rust", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Rust Project", "Rust app", "/rust/path", "rust", ownerID.String())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
@@ -161,7 +161,7 @@ func TestDatabaseManager_CreateProjectUnknownType(t *testing.T) {
 	mockRow := database.NewMockRowWithValues(now, now)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-	project, err := dm.CreateProject(ctx, "Unknown Project", "Unknown type", "/unknown/path", "unknown", ownerID.String())
+	project, err := dm.CreateProjectWithUser(ctx, "Unknown Project", "Unknown type", "/unknown/path", "unknown", ownerID.String())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, project)

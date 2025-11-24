@@ -85,7 +85,7 @@ func TestListProjects(t *testing.T) {
 	project2, err := manager.CreateProject(context.Background(), "test2", "desc2", tempDir2, "generic")
 	assert.NoError(t, err)
 
-	projects, err := manager.ListProjects(context.Background())
+	projects, err := manager.ListProjects(context.Background(), "test-owner")
 	assert.NoError(t, err)
 	assert.Len(t, projects, 2)
 	assert.Contains(t, projects, project1)

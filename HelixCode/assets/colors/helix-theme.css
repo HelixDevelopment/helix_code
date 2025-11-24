@@ -1,8 +1,8 @@
 /* HelixCode Theme - Generated from Logo */
 :root {
   --primary-color: #BDE743;
-  --secondary-color: #BCE63C;
-  --accent-color: #BCE63A;
+  --secondary-color: #C1E958;
+  --accent-color: #BDE742;
   --text-color: #2D3047;
   --background-color: #F5F5F5;
   --border-color: #BDE74380;
@@ -10,6 +10,6 @@
 }
 
 .helix-primary { color: #BDE743; }
-.helix-secondary { color: #BCE63C; }
-.helix-accent { color: #BCE63A; }
+.helix-secondary { color: #C1E958; }
+.helix-accent { color: #BDE742; }
 .helix-bg { background-color: #F5F5F5; }

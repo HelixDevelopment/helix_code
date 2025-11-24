@@ -92,7 +92,7 @@ type ModelInfo struct {
 }
 
 type ProviderConfigEntry struct {
-	Type       string                 `json:"type"`
+	Type       ProviderType           `json:"type"`
 	Endpoint   string                 `json:"endpoint"`
 	APIKey     string                 `json:"api_key"`
 	Models     []string               `json:"models"`

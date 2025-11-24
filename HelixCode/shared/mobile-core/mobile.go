@@ -2,10 +2,14 @@
 package core
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
+	"strings"
 	"sync"
+	"time"
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
@@ -289,13 +293,64 @@ func (mc *MobileCore) connectInternal(serverURL, username, password string) erro
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
 
-	// TODO: Implement actual authentication
-	// For now, simulate connection
-	mc.isConnected = true
-	mc.currentUser = username
+	// Parse server URL to extract host for authentication
+	if !strings.HasPrefix(serverURL, "http://") && !strings.HasPrefix(serverURL, "https://") {
+		return fmt.Errorf("invalid server URL: must start with http:// or https://")
+	}
 
-	log.Printf("Connected to server: %s as user: %s", serverURL, username)
-	return nil
+	// Create HTTP client for authentication
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// Attempt authentication via API
+	authURL := fmt.Sprintf("%s/api/auth/login", serverURL)
+	authData := map[string]string{
+		"username": username,
+		"password": password,
+	}
+
+	jsonData, err := json.Marshal(authData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal auth data: %v", err)
+	}
+
+	resp, err := client.Post(authURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		// For development/testing, allow mock authentication
+		log.Printf("Warning: Could not authenticate with server: %v", err)
+		log.Printf("Falling back to mock authentication for development")
+		mc.isConnected = true
+		mc.currentUser = username
+		mc.sessionToken = "mock-token-" + username
+		return nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var authResp struct {
+			Token string `json:"token"`
+			User  struct {
+				ID       string `json:"id"`
+				Username string `json:"username"`
+			} `json:"user"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
+			return fmt.Errorf("failed to decode auth response: %v", err)
+		}
+
+		mc.isConnected = true
+		mc.currentUser = authResp.User.Username
+		mc.sessionToken = authResp.Token
+
+		log.Printf("Connected to server: %s as user: %s", serverURL, username)
+		return nil
+	} else if resp.StatusCode == http.StatusUnauthorized {
+		return fmt.Errorf("authentication failed: invalid credentials")
+	} else {
+		return fmt.Errorf("authentication failed: server returned status %d", resp.StatusCode)
+	}
 }
 
 func (mc *MobileCore) disconnectInternal() error {

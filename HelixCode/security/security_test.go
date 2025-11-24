@@ -76,8 +76,6 @@ func TestTLSConfiguration(t *testing.T) {
 }
 
 func TestInputValidation(t *testing.T) {
-	ctx := context.Background()
-
 	// Test malicious input handling
 	maliciousInputs := []string{
 		"../../../etc/passwd",
@@ -90,9 +88,7 @@ func TestInputValidation(t *testing.T) {
 		"&echo 'malicious' > /tmp/bad",
 	}
 
-	// Create a mock manager to test input validation
-	manager := llm.NewLocalLLMManager("/tmp/test-local-llm")
-
+	// Test input validation
 	for _, input := range maliciousInputs {
 		// Test provider name validation
 		err := validateProviderName(input)

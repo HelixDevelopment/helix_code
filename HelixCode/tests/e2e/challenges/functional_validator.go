@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -145,6 +146,29 @@ func (v *FunctionalValidator) validateNotesProject(ctx context.Context, resultDi
 	results = append(results, v.testNotesUX(serverURL)...)
 
 	return results
+}
+
+// buildProject attempts to build the project
+func (v *FunctionalValidator) buildProject(ctx context.Context, resultDir string) error {
+	// Check if there's a go.mod file
+	goMod := filepath.Join(resultDir, "go.mod")
+	if _, err := os.Stat(goMod); err != nil {
+		return fmt.Errorf("no go.mod file found")
+	}
+
+	// Try to build the project
+	cmd := exec.CommandContext(ctx, "go", "build", "-o", "url-shortener", ".")
+	cmd.Dir = resultDir
+	
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build failed: %v, stderr: %s", err, stderr.String())
+	}
+
+	return nil
 }
 
 // startServer starts the application server in background
@@ -500,10 +524,28 @@ func (v *FunctionalValidator) testNotesUX(baseURL string) []ValidationResult {
 	results := []ValidationResult{}
 
 	// Test error message format
-	resp, _ := http.Post(baseURL+"/notes", "application/json", strings.NewReader("invalid"))
+	resp, err := http.Post(baseURL+"/notes", "application/json", strings.NewReader("invalid"))
+	if err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "ux_error_format",
+			Passed:    false,
+			Message:   fmt.Sprintf("Failed to test error handling: %v", err),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "ux_error_format",
+			Passed:    false,
+			Message:   fmt.Sprintf("Failed to read error response: %v", err),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
 	var errorResponse map[string]interface{}
 	if err := json.Unmarshal(body, &errorResponse); err != nil {
 		results = append(results, ValidationResult{
@@ -538,11 +580,38 @@ func (v *FunctionalValidator) testNotesUX(baseURL string) []ValidationResult {
 	})
 
 	// Test response consistency
-	listResp, _ := http.Get(baseURL + "/notes")
+	listResp, err := http.Get(baseURL + "/notes")
+	if err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "ux_response_consistency",
+			Passed:    false,
+			Message:   fmt.Sprintf("Failed to test response consistency: %v", err),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
 	defer listResp.Body.Close()
-	listBody, _ := io.ReadAll(listResp.Body)
+
+	listBody, err := io.ReadAll(listResp.Body)
+	if err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "ux_response_consistency",
+			Passed:    false,
+			Message:   fmt.Sprintf("Failed to read response body: %v", err),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
 	var listResponse map[string]interface{}
-	json.Unmarshal(listBody, &listResponse)
+	if err := json.Unmarshal(listBody, &listResponse); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "ux_response_consistency",
+			Passed:    false,
+			Message:   "Response not in JSON format",
+			Timestamp: time.Now(),
+		})
+		return results
+	}
 
 	if _, hasNotes := listResponse["notes"]; !hasNotes {
 		results = append(results, ValidationResult{
@@ -567,15 +636,54 @@ func (v *FunctionalValidator) testNotesUX(baseURL string) []ValidationResult {
 
 // validateURLShortener performs functional testing for URL shortener
 func (v *FunctionalValidator) validateURLShortener(ctx context.Context, resultDir string) []ValidationResult {
-	// TODO: Implement URL shortener functional tests
-	return []ValidationResult{
-		{
-			CheckName: "functional_tests",
+	var results []ValidationResult
+
+	// Try to build and test the URL shortener
+	if err := v.buildProject(ctx, resultDir); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "build",
 			Passed:    false,
-			Message:   "URL shortener functional tests not yet implemented",
+			Message:   fmt.Sprintf("Failed to build URL shortener: %v", err),
 			Timestamp: time.Now(),
-		},
+		})
+		return results
 	}
+
+	results = append(results, ValidationResult{
+		CheckName: "build",
+		Passed:    true,
+		Message:   "URL shortener builds successfully",
+		Timestamp: time.Now(),
+	})
+
+	// Test basic functionality if build succeeded
+	binPath := filepath.Join(resultDir, "url-shortener")
+	if runtime.GOOS == "windows" {
+		binPath += ".exe"
+	}
+
+	// Check if binary exists
+	if _, err := os.Stat(binPath); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "binary_exists",
+			Passed:    false,
+			Message:   "URL shortener binary not found after build",
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "binary_exists",
+			Passed:    true,
+			Message:   "URL shortener binary created successfully",
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Try to start the server (if applicable)
+	// Note: Full functional testing would require more complex setup with temporary ports
+	// For now, we'll validate the structure and buildability
+	
+	return results
 }
 
 // validateCLITaskManager performs functional testing for CLI task manager

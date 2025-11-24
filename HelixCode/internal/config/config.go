@@ -781,3 +781,32 @@ type TransformMapping struct {
 	Transform string
 	Priority  int
 }
+
+// ConfigurationOptions provides options for configuration management
+// This is a simplified interface for testing purposes
+type ConfigurationOptions struct {
+	ConfigPath       string
+	AutoSave         bool
+	AutoBackup       bool
+	EnableEncryption bool
+	EncryptionKey    string
+	SchemaPath       string
+	ValidationMode   string
+	TransformMode    string
+}
+
+// Configuration validation modes
+const (
+	ValidationModeStrict     = "strict"
+	ValidationModeLenient    = "lenient"
+	ValidationModeDisabled   = "disabled"
+	ValidationModeSchema     = "schema"
+)
+
+// Configuration transformation modes
+const (
+	TransformModeStrict  = "strict"
+	TransformModeLenient = "lenient"
+	TransformModeNone    = "none"
+	TransformModeSchema = "schema"
+)

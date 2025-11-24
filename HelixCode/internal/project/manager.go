@@ -210,6 +210,35 @@ func (m *Manager) detectProjectType(project *Project) error {
 	return nil
 }
 
+// UpdateProjectMetadata updates project metadata in memory
+func (m *Manager) UpdateProjectMetadata(ctx context.Context, projectID string, metadata Metadata) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	project, exists := m.projects[projectID]
+	if !exists {
+		return fmt.Errorf("project not found: %s", projectID)
+	}
+
+	project.Metadata = metadata
+	project.UpdatedAt = time.Now()
+
+	return nil
+}
+
+// DeleteProject removes a project from memory
+func (m *Manager) DeleteProject(ctx context.Context, projectID string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, exists := m.projects[projectID]; !exists {
+		return fmt.Errorf("project not found: %s", projectID)
+	}
+
+	delete(m.projects, projectID)
+	return nil
+}
+
 // generateProjectID creates a unique project ID
 func generateProjectID(name string) string {
 	return fmt.Sprintf("proj_%s_%d", name, time.Now().UnixNano())

@@ -149,10 +149,10 @@ func (r *RateLimitedChannel) GetConfig() map[string]interface{} {
 }
 
 // GetStats returns rate limiting statistics
-func (r *RateLimitedChannel) GetStats() RateLimitStats {
+func (r *RateLimitedChannel) GetStats() *RateLimitStats {
 	r.stats.mutex.Lock()
 	defer r.stats.mutex.Unlock()
-	return *r.stats
+	return r.stats
 }
 
 // ResetStats resets the statistics

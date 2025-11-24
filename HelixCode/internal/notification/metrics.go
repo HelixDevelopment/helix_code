@@ -165,7 +165,7 @@ func (m *Metrics) updateResponseTime(duration time.Duration) {
 }
 
 // GetMetrics returns a copy of current metrics
-func (m *Metrics) GetMetrics() Metrics {
+func (m *Metrics) GetMetrics() *Metrics {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -200,7 +200,7 @@ func (m *Metrics) GetMetrics() Metrics {
 		cm.mutex.Unlock()
 	}
 
-	return copy
+	return &copy
 }
 
 // Reset resets all metrics

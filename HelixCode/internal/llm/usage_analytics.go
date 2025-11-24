@@ -15,10 +15,10 @@ func NewUsageAnalytics(baseDir string) *UsageAnalytics {
 	os.MkdirAll(analyticsDir, 0755)
 
 	analytics := &UsageAnalytics{
-		modelUsageStats:    make(map[string]*ModelUsageStats),
-		taskPatterns:       make(map[string]*TaskPattern),
-		userPreferences:    make(map[string]*UserPreferences),
-		performanceHistory: make(map[string]*PerformanceHistory),
+		ModelUsageStats:    make(map[string]*ModelUsageStats),
+		TaskPatterns:       make(map[string]*TaskPattern),
+		UserPreferences:    make(map[string]*UserPreferences),
+		PerformanceHistory: make(map[string]*PerformanceHistory),
 		analyticsDir:       analyticsDir,
 	}
 
@@ -34,7 +34,7 @@ func (a *UsageAnalytics) RecordModelUsage(ctx context.Context, modelID, provider
 	defer a.mu.Unlock()
 
 	// Get or create model usage stats
-	stats, exists := a.modelUsageStats[modelID]
+	stats, exists := a.ModelUsageStats[modelID]
 	if !exists {
 		stats = &ModelUsageStats{
 			ModelID:           modelID,
@@ -48,7 +48,7 @@ func (a *UsageAnalytics) RecordModelUsage(ctx context.Context, modelID, provider
 			LastUsed:          time.Now(),
 			UsageTrend:        "stable",
 		}
-		a.modelUsageStats[modelID] = stats
+		a.ModelUsageStats[modelID] = stats
 	}
 
 	// Update statistics
@@ -131,7 +131,7 @@ func (a *UsageAnalytics) updateUsageTrend(modelID string, stats *ModelUsageStats
 // recordPerformanceDataPoint records a performance data point
 func (a *UsageAnalytics) recordPerformanceDataPoint(modelID, provider string, metrics *UsageMetrics) {
 	// Get or create performance history
-	history, exists := a.performanceHistory[modelID]
+	history, exists := a.PerformanceHistory[modelID]
 	if !exists {
 		history = &PerformanceHistory{
 			ModelID:             modelID,
@@ -140,7 +140,7 @@ func (a *UsageAnalytics) recordPerformanceDataPoint(modelID, provider string, me
 			AverageMetrics:      nil,
 			OptimizationHistory: []OptimizationRecord{},
 		}
-		a.performanceHistory[modelID] = history
+		a.PerformanceHistory[modelID] = history
 	}
 
 	// Create performance data point
@@ -211,7 +211,7 @@ func (a *UsageAnalytics) RecordTaskPattern(ctx context.Context, taskType, modelI
 	defer a.mu.Unlock()
 
 	// Get or create task pattern
-	pattern, exists := a.taskPatterns[taskType]
+	pattern, exists := a.TaskPatterns[taskType]
 	if !exists {
 		pattern = &TaskPattern{
 			TaskType:                taskType,
@@ -221,7 +221,7 @@ func (a *UsageAnalytics) RecordTaskPattern(ctx context.Context, taskType, modelI
 			PerformanceRequirements: make(map[string]float64),
 			RecommendedModelSizes:   []string{"7B", "13B"},
 		}
-		a.taskPatterns[taskType] = pattern
+		a.TaskPatterns[taskType] = pattern
 	}
 
 	// Update pattern
@@ -262,7 +262,7 @@ func (a *UsageAnalytics) SetUserPreferences(ctx context.Context, prefs *UserPref
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	a.userPreferences[prefs.UserID] = prefs
+	a.UserPreferences[prefs.UserID] = prefs
 	return a.saveAnalyticsData()
 }
 
@@ -271,7 +271,7 @@ func (a *UsageAnalytics) GetUserPreferences(ctx context.Context, userID string) 
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if prefs, exists := a.userPreferences[userID]; exists {
+	if prefs, exists := a.UserPreferences[userID]; exists {
 		return prefs, nil
 	}
 
@@ -292,7 +292,7 @@ func (a *UsageAnalytics) GetModelUsageStats(ctx context.Context, modelID string)
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if stats, exists := a.modelUsageStats[modelID]; exists {
+	if stats, exists := a.ModelUsageStats[modelID]; exists {
 		return stats, nil
 	}
 
@@ -305,7 +305,7 @@ func (a *UsageAnalytics) GetTopModelsByUsage(ctx context.Context, limit int) ([]
 	defer a.mu.RUnlock()
 
 	var models []*ModelUsageStats
-	for _, stats := range a.modelUsageStats {
+	for _, stats := range a.ModelUsageStats {
 		models = append(models, stats)
 	}
 
@@ -332,7 +332,7 @@ func (a *UsageAnalytics) GetTaskPatterns(ctx context.Context) (map[string]*TaskP
 
 	// Return a copy to prevent concurrent modification
 	copy := make(map[string]*TaskPattern)
-	for k, v := range a.taskPatterns {
+	for k, v := range a.TaskPatterns {
 		copy[k] = v
 	}
 
@@ -344,7 +344,7 @@ func (a *UsageAnalytics) GetPerformanceHistory(ctx context.Context, modelID stri
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if history, exists := a.performanceHistory[modelID]; exists {
+	if history, exists := a.PerformanceHistory[modelID]; exists {
 		return history, nil
 	}
 
@@ -357,7 +357,7 @@ func (a *UsageAnalytics) RecordOptimization(ctx context.Context, modelID, provid
 	defer a.mu.Unlock()
 
 	// Get performance history
-	history, exists := a.performanceHistory[modelID]
+	history, exists := a.PerformanceHistory[modelID]
 	if !exists {
 		history = &PerformanceHistory{
 			ModelID:             modelID,
@@ -366,7 +366,7 @@ func (a *UsageAnalytics) RecordOptimization(ctx context.Context, modelID, provid
 			AverageMetrics:      nil,
 			OptimizationHistory: []OptimizationRecord{},
 		}
-		a.performanceHistory[modelID] = history
+		a.PerformanceHistory[modelID] = history
 	}
 
 	// Calculate improvement
@@ -527,7 +527,7 @@ type UserRetention struct {
 
 func (a *UsageAnalytics) calculateUsageSummary() *UsageSummary {
 	summary := &UsageSummary{
-		TotalModels:         len(a.modelUsageStats),
+		TotalModels:         len(a.ModelUsageStats),
 		TotalRequests:       0,
 		AverageLatency:      0.0,
 		OverallSuccessRate:  0.0,
@@ -543,7 +543,7 @@ func (a *UsageAnalytics) calculateUsageSummary() *UsageSummary {
 	totalSatisfaction := 0.0
 	count := 0
 
-	for _, stats := range a.modelUsageStats {
+	for _, stats := range a.ModelUsageStats {
 		summary.TotalRequests += stats.TotalRequests
 		totalLatency += stats.AverageLatency
 		totalSuccess += stats.SuccessRate
@@ -571,7 +571,7 @@ func (a *UsageAnalytics) calculateUsageSummary() *UsageSummary {
 func (a *UsageAnalytics) analyzeTasks() map[string]*TaskAnalysis {
 	analysis := make(map[string]*TaskAnalysis)
 
-	for taskType, pattern := range a.taskPatterns {
+	for taskType, pattern := range a.TaskPatterns {
 		analysis[taskType] = &TaskAnalysis{
 			TaskType:          taskType,
 			Frequency:         int64(len(pattern.CommonModels)), // Simplified
@@ -613,7 +613,7 @@ func (a *UsageAnalytics) analyzePerformance() *PerformanceAnalysis {
 	totalTPS := 0.0
 	count := 0
 
-	for _, history := range a.performanceHistory {
+	for _, history := range a.PerformanceHistory {
 		if history.AverageMetrics != nil {
 			totalTPS += history.AverageMetrics.TokensPerSecond
 			count++
@@ -652,7 +652,7 @@ func (a *UsageAnalytics) analyzePerformance() *PerformanceAnalysis {
 
 func (a *UsageAnalytics) analyzeUsers() *UserAnalysis {
 	analysis := &UserAnalysis{
-		TotalUsers:             int64(len(a.userPreferences)),
+		TotalUsers:             int64(len(a.UserPreferences)),
 		AverageRequestsPerUser: 0.0,
 		UserSegments:           make(map[string]int64),
 		PreferredProviders:     make(map[string][]string),
@@ -666,7 +666,7 @@ func (a *UsageAnalytics) analyzeUsers() *UserAnalysis {
 	}
 
 	// Analyze user preferences
-	for userID, prefs := range a.userPreferences {
+	for userID, prefs := range a.UserPreferences {
 		for _, provider := range prefs.PreferredProviders {
 			if analysis.PreferredProviders[provider] == nil {
 				analysis.PreferredProviders[provider] = []string{}
@@ -738,22 +738,22 @@ func (a *UsageAnalytics) generateRecommendations(report *UsageReport) []string {
 func (a *UsageAnalytics) loadAnalyticsData(dir string) error {
 	// Load model usage stats
 	if data, err := os.ReadFile(filepath.Join(dir, "model_usage_stats.json")); err == nil {
-		json.Unmarshal(data, &a.modelUsageStats)
+		json.Unmarshal(data, &a.ModelUsageStats)
 	}
 
 	// Load task patterns
 	if data, err := os.ReadFile(filepath.Join(dir, "task_patterns.json")); err == nil {
-		json.Unmarshal(data, &a.taskPatterns)
+		json.Unmarshal(data, &a.TaskPatterns)
 	}
 
 	// Load user preferences
 	if data, err := os.ReadFile(filepath.Join(dir, "user_preferences.json")); err == nil {
-		json.Unmarshal(data, &a.userPreferences)
+		json.Unmarshal(data, &a.UserPreferences)
 	}
 
 	// Load performance history
 	if data, err := os.ReadFile(filepath.Join(dir, "performance_history.json")); err == nil {
-		json.Unmarshal(data, &a.performanceHistory)
+		json.Unmarshal(data, &a.PerformanceHistory)
 	}
 
 	return nil
@@ -768,22 +768,22 @@ func (a *UsageAnalytics) saveAnalyticsData() error {
 	os.MkdirAll(dir, 0755)
 
 	// Save model usage stats
-	if data, err := json.MarshalIndent(a.modelUsageStats, "", "  "); err == nil {
+	if data, err := json.MarshalIndent(a.ModelUsageStats, "", "  "); err == nil {
 		os.WriteFile(filepath.Join(dir, "model_usage_stats.json"), data, 0644)
 	}
 
 	// Save task patterns
-	if data, err := json.MarshalIndent(a.taskPatterns, "", "  "); err == nil {
+	if data, err := json.MarshalIndent(a.TaskPatterns, "", "  "); err == nil {
 		os.WriteFile(filepath.Join(dir, "task_patterns.json"), data, 0644)
 	}
 
 	// Save user preferences
-	if data, err := json.MarshalIndent(a.userPreferences, "", "  "); err == nil {
+	if data, err := json.MarshalIndent(a.UserPreferences, "", "  "); err == nil {
 		os.WriteFile(filepath.Join(dir, "user_preferences.json"), data, 0644)
 	}
 
 	// Save performance history
-	if data, err := json.MarshalIndent(a.performanceHistory, "", "  "); err == nil {
+	if data, err := json.MarshalIndent(a.PerformanceHistory, "", "  "); err == nil {
 		os.WriteFile(filepath.Join(dir, "performance_history.json"), data, 0644)
 	}
 

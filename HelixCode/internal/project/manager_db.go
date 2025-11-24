@@ -261,3 +261,35 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 
 	return projects, nil
 }
+
+// UpdateProjectMetadata updates project metadata in the database
+func (m *DatabaseManager) UpdateProjectMetadata(ctx context.Context, projectID string, metadata Metadata) error {
+	query := `
+		UPDATE projects
+		SET config = $1, updated_at = $2
+		WHERE id = $3
+	`
+
+	_, err := m.db.Exec(ctx, query, metadata, time.Now(), projectID)
+	if err != nil {
+		return fmt.Errorf("failed to update project metadata: %v", err)
+	}
+
+	return nil
+}
+
+// DeleteProject marks a project as deleted in the database
+func (m *DatabaseManager) DeleteProject(ctx context.Context, projectID string) error {
+	query := `
+		UPDATE projects
+		SET status = 'deleted', updated_at = $1
+		WHERE id = $2
+	`
+
+	_, err := m.db.Exec(ctx, query, time.Now(), projectID)
+	if err != nil {
+		return fmt.Errorf("failed to delete project: %v", err)
+	}
+
+	return nil
+}
