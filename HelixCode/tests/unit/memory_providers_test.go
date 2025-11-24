@@ -26,8 +26,8 @@ func TestMem0Provider(t *testing.T) {
 		t.Errorf("Expected name 'mem0', got '%s'", provider.GetName())
 	}
 
-	if provider.GetType() != memory.ProviderTypeMem0 {
-		t.Errorf("Expected type %s, got %s", memory.ProviderTypeMem0, provider.GetType())
+	if provider.GetType() != string(memory.ProviderTypeMem0) {
+		t.Errorf("Expected type %s, got %s", string(memory.ProviderTypeMem0), provider.GetType())
 	}
 
 	if !provider.IsCloud() {
@@ -54,8 +54,8 @@ func TestZepProvider(t *testing.T) {
 		t.Errorf("Expected name 'zep', got '%s'", provider.GetName())
 	}
 
-	if provider.GetType() != memory.ProviderTypeZep {
-		t.Errorf("Expected type %s, got %s", memory.ProviderTypeZep, provider.GetType())
+	if provider.GetType() != string(memory.ProviderTypeZep) {
+		t.Errorf("Expected type %s, got %s", string(memory.ProviderTypeZep), provider.GetType())
 	}
 
 	if !provider.IsCloud() {
@@ -82,8 +82,8 @@ func TestMemontoProvider(t *testing.T) {
 		t.Errorf("Expected name 'memonto', got '%s'", provider.GetName())
 	}
 
-	if provider.GetType() != memory.ProviderTypeMemonto {
-		t.Errorf("Expected type %s, got %s", memory.ProviderTypeMemonto, provider.GetType())
+	if provider.GetType() != string(memory.ProviderTypeMemonto) {
+		t.Errorf("Expected type %s, got %s", string(memory.ProviderTypeMemonto), provider.GetType())
 	}
 
 	if !provider.IsCloud() {
@@ -110,8 +110,8 @@ func TestBaseAIProvider(t *testing.T) {
 		t.Errorf("Expected name 'baseai', got '%s'", provider.GetName())
 	}
 
-	if provider.GetType() != memory.ProviderTypeBaseAI {
-		t.Errorf("Expected type %s, got %s", memory.ProviderTypeBaseAI, provider.GetType())
+	if provider.GetType() != string(memory.ProviderTypeBaseAI) {
+		t.Errorf("Expected type %s, got %s", string(memory.ProviderTypeBaseAI), provider.GetType())
 	}
 
 	if !provider.IsCloud() {

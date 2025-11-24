@@ -53,7 +53,7 @@ func (suite *CogneeRealLLMTestSuite) SetupSuite() {
 	suite.cogneeIntegration = memory.NewCogneeIntegration(suite.config.Cognee, suite.logger)
 
 	// Initialize Cognee
-	err = suite.cogneeIntegration.Initialize(suite.ctx, &suite.config.Cognee)
+	err = suite.cogneeIntegration.Initialize(suite.ctx, suite.config.Cognee)
 	require.NoError(suite.T(), err)
 
 	// Setup real LLM providers (only if API keys are available)
