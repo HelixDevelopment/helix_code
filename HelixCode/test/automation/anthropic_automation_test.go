@@ -226,12 +226,11 @@ func TestAnthropicProviderFullAutomation(t *testing.T) {
 		assert.NotNil(t, response2)
 
 		// Check for cache metadata
-		if metadata, ok := response2.ProviderMetadata.(map[string]interface{}); ok {
-			cacheReadTokens := metadata["cache_read_tokens"]
-			t.Logf("Cache read tokens: %v", cacheReadTokens)
-			if crt, ok := cacheReadTokens.(int); ok && crt > 0 {
-				t.Logf("✅ Prompt caching working! Read %d tokens from cache", crt)
-			}
+		metadata := response2.ProviderMetadata
+		cacheReadTokens := metadata["cache_read_tokens"]
+		t.Logf("Cache read tokens: %v", cacheReadTokens)
+		if crt, ok := cacheReadTokens.(int); ok && crt > 0 {
+			t.Logf("✅ Prompt caching working! Read %d tokens from cache", crt)
 		}
 
 		t.Logf("Second request usage: %d prompt, %d completion tokens",
@@ -246,7 +245,7 @@ func TestAnthropicProviderFullAutomation(t *testing.T) {
 		tools := []llm.Tool{
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "get_weather",
 					Description: "Get the current weather in a location",
 					Parameters: map[string]interface{}{

@@ -61,7 +61,7 @@ func TestAuthProjectIntegration(t *testing.T) {
 		mockRow := database.NewMockRowWithValues(time.Now(), time.Now())
 		mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)
 
-		proj, err := projectManager.CreateProject(ctx, "Test Project", "Integration test", "/test/path", "go", user.ID.String())
+		proj, err := projectManager.CreateProject(ctx, "Test Project", "Integration test", "/test/path", "go")
 
 		if err == nil {
 			require.NotNil(t, proj)
@@ -238,7 +238,7 @@ func TestProjectLifecycleIntegration(t *testing.T) {
 	mockRow1 := database.NewMockRowWithValues(time.Now(), time.Now())
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow1).Once()
 
-	proj, err := projectManager.CreateProject(ctx, "Lifecycle Project", "Test lifecycle", "/tmp/lifecycle", "go", ownerID.String())
+	proj, err := projectManager.CreateProject(ctx, "Lifecycle Project", "Test lifecycle", "/tmp/lifecycle", "go")
 	require.NoError(t, err)
 	require.NotNil(t, proj)
 	projectID := proj.ID

@@ -36,7 +36,7 @@ func (suite *CogneeRealLLMTestSuite) SetupSuite() {
 
 	// Load configuration
 	var err error
-	suite.config, err = config.LoadDefaultConfig()
+	suite.config, err = config.Load()
 	require.NoError(suite.T(), err)
 
 	// Initialize Cognee config
@@ -44,13 +44,13 @@ func (suite *CogneeRealLLMTestSuite) SetupSuite() {
 	cogneeConfig.Enabled = true
 	cogneeConfig.Mode = "local"
 	cogneeConfig.RemoteAPI.ServiceEndpoint = "http://localhost:8000"
-	suite.config.Cognee = *cogneeConfig
+	suite.config.Cognee = cogneeConfig
 
 	// Initialize model manager
 	suite.modelManager = llm.NewModelManager()
 
 	// Initialize Cognee integration
-	suite.cogneeIntegration = memory.NewCogneeIntegration(&suite.config.Cognee, suite.logger)
+	suite.cogneeIntegration = memory.NewCogneeIntegration(suite.config.Cognee, suite.logger)
 
 	// Initialize Cognee
 	err = suite.cogneeIntegration.Initialize(suite.ctx, &suite.config.Cognee)

@@ -414,7 +414,7 @@ func TestUsageAnalytics(t *testing.T) {
 		End:   time.Now(),
 	}
 
-	report, err := analytics.GenerateUsageReport(timeRange)
+	report, err := analytics.GenerateUsageReport(context.Background(), timeRange)
 	assert.NoError(t, err)
 	assert.NotNil(t, report)
 	assert.NotNil(t, report.Summary)
@@ -516,8 +516,9 @@ func TestLocalLLMManager_ResourceLimits(t *testing.T) {
 	err = manager.StartProvider(ctx, "vllm")
 	// Should return timeout error
 	if err != nil {
-		assert.Contains(t, err.Error(), "deadline exceeded") ||
+		found := assert.Contains(t, err.Error(), "deadline exceeded") ||
 			assert.Contains(t, err.Error(), "timeout")
+		_ = found // Use the boolean value
 	}
 }
 

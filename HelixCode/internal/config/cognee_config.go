@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+// Cognee operating modes
+const (
+	CogneeModeLocal = "local"
+	CogneeModeCloud = "cloud"
+	CogneeModeHybrid = "hybrid"
+)
+
 // CogneeConfig contains Cognee.ai configuration
 type CogneeConfig struct {
 	// Basic Settings
@@ -132,6 +139,31 @@ type CogneeMonitoringConfig struct {
 	LogLevel     string        `json:"log_level" yaml:"log_level"`
 	TraceEnabled bool          `json:"trace_enabled" yaml:"trace_enabled"`
 	AlertWebhook string        `json:"alert_webhook,omitempty" yaml:"alert_webhook,omitempty"`
+}
+
+// SecurityConfig contains security configuration for Cognee
+type SecurityConfig struct {
+	Encryption     bool `json:"encryption" yaml:"encryption"`
+	Authentication bool `json:"authentication" yaml:"authentication"`
+	Authorization  bool `json:"authorization" yaml:"authorization"`
+}
+
+// FallbackConfig contains fallback configuration
+type FallbackConfig struct {
+	Enabled   bool     `json:"enabled" yaml:"enabled"`
+	Strategy  string   `json:"strategy" yaml:"strategy"`
+	Providers []string `json:"providers" yaml:"providers"`
+	Timeout   time.Duration `json:"timeout" yaml:"timeout"`
+	RetryCount int      `json:"retry_count" yaml:"retry_count"`
+}
+
+// PerformanceConfig contains performance configuration
+type PerformanceConfig struct {
+	BatchSize       int  `json:"batch_size" yaml:"batch_size"`
+	MaxConcurrency  int  `json:"max_concurrency" yaml:"max_concurrency"`
+	CacheSize       int  `json:"cache_size" yaml:"cache_size"`
+	Prefetch        bool `json:"prefetch" yaml:"prefetch"`
+	AsyncProcessing bool `json:"async_processing" yaml:"async_processing"`
 }
 
 // DefaultCogneeConfig returns default Cognee configuration

@@ -281,6 +281,11 @@ func (m *LocalLLMManager) Initialize(ctx context.Context) error {
 	return nil
 }
 
+// GetBaseDir returns the base directory for the local LLM manager
+func (m *LocalLLMManager) GetBaseDir() string {
+	return m.baseDir
+}
+
 // createDirectories creates necessary directories
 func (m *LocalLLMManager) createDirectories() error {
 	dirs := []string{m.baseDir, m.binaryDir, m.configDir, m.dataDir}

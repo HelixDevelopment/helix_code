@@ -21,7 +21,7 @@ import (
 type CogneeIntegrationTestSuite struct {
 	suite.Suite
 	ctx               context.Context
-	logger            logging.Logger
+	logger            *logging.Logger
 	mockProvider      *mocks.MockVectorProvider
 	mockAPIKeyManager *mocks.MockAPIKeyManager
 	config            *config.CogneeConfig
@@ -40,11 +40,11 @@ func (suite *CogneeIntegrationTestSuite) SetupSuite() {
 		Mode:    config.CogneeModeLocal,
 		Host:    "localhost",
 		Port:    8000,
-		Optimization: &config.OptimizationConfig{
-			HostAware:     true,
-			ResearchBased: true,
-			AutoTune:      true,
-			TuneInterval:  time.Hour,
+		Optimization: &config.CogneeOptimizationConfig{
+			HostAware:       true,
+			CPUOptimization: true,
+			GPUOptimization: true,
+			AutoOptimization: true,
 		},
 		Fallback: &config.FallbackConfig{
 			Enabled:    true,

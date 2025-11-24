@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"dev.helix.code/internal/database"
 	"github.com/spf13/viper"
@@ -479,6 +480,12 @@ type ConfigManager struct {
 	config     *Config
 }
 
+// NewConfigurationManager creates a new configuration manager with options
+func NewConfigurationManager(options *ConfigurationOptions) (*ConfigManager, error) {
+	// For now, just use the config path from options
+	return NewHelixConfigManager(options.ConfigPath)
+}
+
 // NewHelixConfigManager creates a new configuration manager
 func NewHelixConfigManager(configPath string) (*ConfigManager, error) {
 	manager := &ConfigManager{
@@ -793,6 +800,11 @@ type ConfigurationOptions struct {
 	SchemaPath       string
 	ValidationMode   string
 	TransformMode    string
+	WatchInterval    time.Duration
+	MaxBackups       int
+	Compression      bool
+	LogLevel         string
+	BackupPath       string
 }
 
 // Configuration validation modes

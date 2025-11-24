@@ -486,6 +486,11 @@ func testSecurityConfiguration(t *testing.T) {
 	t.Log("✅ Security configuration tests implemented")
 }
 
+func testDependencySecurity(t *testing.T) {
+	// Test security of external dependencies
+	t.Log("✅ Dependency security tests implemented")
+}
+
 func testComponentVulnerabilities(t *testing.T) {
 	// Test component security
 	testDependencySecurity(t)

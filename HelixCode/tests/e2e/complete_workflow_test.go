@@ -3,10 +3,7 @@ package e2e
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"dev.helix.code/internal/llm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -467,7 +463,6 @@ func testModelOptimizationWorkflow(t *testing.T) {
 	t.Logf("HF model download result: %s (exit code: %d)", output, exitCode)
 
 	// Step 3: Optimize for different providers
-	providers := []string{"vllm", "llamacpp", "mlx"}
 	targets := []struct {
 		provider string
 		hardware string

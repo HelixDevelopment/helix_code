@@ -529,7 +529,7 @@ func selectModelsForHardware(hwInfo *HardwareInfo) []TestModel {
 
 	for _, model := range allModels {
 		if hwInfo.MemoryInfo.Total >= model.MinRAM {
-			if !model.GPURecommended || (hwInfo.GPUInfo.Available && hwInfo.GPUInfo.VRAM*1024*1024*1024 >= model.MinVRAM) {
+			if !model.GPURecommended || (hwInfo.GPUInfo.Available && int64(hwInfo.GPUInfo.VRAM)*1024*1024*1024 >= model.MinVRAM) {
 				suitableModels = append(suitableModels, model)
 			}
 		}
@@ -634,7 +634,7 @@ func testRealModelExecution(t *testing.T, hwInfo *HardwareInfo, model TestModel)
 	time.Sleep(10 * time.Second)
 
 	// Test model execution
-	success := testModelInference(t, provider, model, hwInfo)
+	success := testModelInference(t, provider, model.Name, hwInfo)
 	if success {
 		t.Logf("✅ Real model execution test passed for %s", model.Name)
 	} else {
@@ -909,7 +909,7 @@ type BenchmarkResults struct {
 	GPUUtilization float64
 }
 
-func runBenchmarks(t *testing.T, hwInfo *HardwareInfo, provider, model TestModel) BenchmarkResults {
+func runBenchmarks(t *testing.T, hwInfo *HardwareInfo, provider string, model TestModel) BenchmarkResults {
 	t.Logf("Running benchmarks for %s on %s", model.Name, provider)
 
 	// This would implement actual benchmarking
