@@ -5,6 +5,7 @@ type PlatformAdapter struct {
 	platformType string
 	features     []string
 	themes       map[string]PlatformTheme
+	currentTheme string
 }
 
 // PlatformTheme represents a platform theme
@@ -48,6 +49,7 @@ func NewBasePlatformAdapter(platformType string) *PlatformAdapter {
 				Foreground:  "#ffffff",
 			},
 		},
+		currentTheme: "system",
 	}
 }
 
@@ -199,8 +201,28 @@ type WebConfigForm struct {
 	Responsive bool
 	JavaScript []string
 	CSS        []string
+	Validation WebConfigValidation
+	SubmitAction WebConfigSubmit
 	Sections   []WebConfigSection
 	Actions    []WebConfigAction
+}
+
+// WebConfigValidation represents validation configuration
+type WebConfigValidation struct {
+	Enabled   bool
+	OnSubmit  bool
+	OnBlur    bool
+	Realtime  bool
+	Custom    []string
+}
+
+// WebConfigSubmit represents submit configuration
+type WebConfigSubmit struct {
+	URL     string
+	Method  string
+	Headers map[string]string
+	Success string
+	Error   string
 }
 
 // WebConfigSection represents a section in web config form
@@ -253,12 +275,12 @@ type MobileConfigForm struct {
 
 // MobileConfigSection represents a section in mobile config form
 type MobileConfigSection struct {
-	ID          string
-	Title       string
-	Icon        string
-	Type        string
-	Expanded    bool
-	Fields      []MobileConfigField
+	ID       string
+	Title    string
+	Icon     string
+	Type     string
+	Expanded bool
+	Fields   []MobileConfigField
 }
 
 // MobileConfigField represents a field in mobile config section
@@ -287,51 +309,37 @@ type MobileConfigAction struct {
 	Default bool
 }
 
-// TUIAdapter represents terminal UI adapter
-type TUIAdapter struct {
-	*PlatformAdapter
-}
-
-// NewTUIAdapter creates a new TUI adapter
-func NewTUIAdapter() *TUIAdapter {
-	base := NewBasePlatformAdapter("tui")
-	base.features = []string{
-		"terminal_colors",
-		"keyboard_navigation",
-		"mouse_support",
-		"terminal_fonts",
-		"unicode_support",
-		"screen_reader",
-		"clipboard_access",
-		"terminal_shortcuts",
-		"resize_handling",
-	}
-	return &TUIAdapter{
-		PlatformAdapter: base,
-	}
-}
-
 // TUIConfigForm represents TUI configuration form
 type TUIConfigForm struct {
-	ID           string
-	Title        string
-	Type         string
-	Layout       string
-	Theme        string
-	Features     []string
-	KeyBindings  map[string]string
-	Sections     []TUIConfigSection
-	Actions      []TUIConfigAction
+	ID          string
+	Title       string
+	Type        string
+	Layout      string
+	BorderStyle string
+	Colors      TUIColors
+	KeyBindings map[string]string
+	Sections    []TUIConfigSection
+	Actions     []TUIConfigAction
+}
+
+// TUIColors represents color configuration for TUI
+type TUIColors struct {
+	Title     string
+	Highlight string
+	Text      string
+	Border    string
+	Error     string
+	Success   string
 }
 
 // TUIConfigSection represents a section in TUI config form
 type TUIConfigSection struct {
-	ID          string
-	Title       string
-	Icon        string
-	Type        string
-	Expanded    bool
-	Fields      []TUIConfigField
+	ID       string
+	Title    string
+	Icon     string
+	Type     string
+	Expanded bool
+	Fields   []TUIConfigField
 }
 
 // TUIConfigField represents a field in TUI config section
@@ -361,14 +369,21 @@ type TUIConfigAction struct {
 }
 
 // RenderConfigForm renders configuration form for TUI platform
-func (a *TUIAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, error) {
+func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
 	form := TUIConfigForm{
 		ID:          "helix_config_form",
 		Title:       "HelixCode Configuration",
 		Type:        "tui_screens",
 		Layout:      "menu_driven",
-		Theme:       "terminal",
-		Features:    []string{"colors", "unicode", "mouse"},
+		BorderStyle: "single",
+		Colors: TUIColors{
+			Title:     "yellow",
+			Highlight: "cyan",
+			Text:      "white",
+			Border:    "blue",
+			Error:     "red",
+			Success:   "green",
+		},
 		KeyBindings: map[string]string{
 			"save":       "Ctrl+S",
 			"reset":      "Ctrl+R",
@@ -378,39 +393,10 @@ func (a *TUIAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, error) {
 			"select":     "Enter",
 			"cancel":     "Esc",
 		},
-		Sections: []TUIConfigSection{
-			{
-				ID:       "application",
-				Title:    "Application",
-				Icon:     "🚀",
-				Type:     "screen",
-				Expanded: true,
-				Fields: []TUIConfigField{
-					{
-						ID:          "name",
-						Label:       "Application Name",
-						Type:        "text",
-						Class:       "form-input",
-						Value:       configUI.config.Application.Name,
-						Required:    true,
-						Placeholder: "Enter application name",
-						Help:        "The name of HelixCode application",
-					},
-				},
-			},
-		},
-		Actions: []TUIConfigAction{
-			{
-				ID:      "save",
-				Label:   "Save",
-				Type:    "primary",
-				Icon:    "💾",
-				Default: true,
-			},
-		},
+		Sections: []TUIConfigSection{},
+		Actions:  []TUIConfigAction{},
 	}
-	
-	return form, nil
+	return form
 }
 
 // NewConfigUI creates a new configuration UI
@@ -452,6 +438,11 @@ func NewDesktopPlatformAdapter() *DesktopPlatformAdapter {
 	}
 }
 
+// WebPlatformAdapter represents web-specific adapter
+type WebPlatformAdapter struct {
+	*PlatformAdapter
+}
+
 // NewWebUIAdapter creates a new web UI adapter
 func NewWebUIAdapter() *WebPlatformAdapter {
 	return NewWebPlatformAdapter()
@@ -463,6 +454,11 @@ func NewWebPlatformAdapter() *WebPlatformAdapter {
 	return &WebPlatformAdapter{
 		PlatformAdapter: base,
 	}
+}
+
+// MobilePlatformAdapter represents mobile-specific adapter
+type MobilePlatformAdapter struct {
+	*PlatformAdapter
 }
 
 // NewMobileUIAdapter creates a new mobile UI adapter
@@ -478,6 +474,30 @@ func NewMobilePlatformAdapter() *MobilePlatformAdapter {
 	}
 }
 
+// TUIAdapter represents TUI-specific adapter
+type TUIAdapter struct {
+	*PlatformAdapter
+}
+
+// NewTUIAdapter creates a new TUI adapter
+func NewTUIAdapter() *TUIAdapter {
+	base := NewBasePlatformAdapter("tui")
+	base.features = []string{
+		"terminal_colors",
+		"keyboard_navigation",
+		"mouse_support",
+		"terminal_fonts",
+		"unicode_support",
+		"screen_reader",
+		"clipboard_access",
+		"resize_support",
+		"cursor_styles",
+	}
+	return &TUIAdapter{
+		PlatformAdapter: base,
+	}
+}
+
 // GetNativeMenuBarInfo returns native menu bar information
 func (a *DesktopPlatformAdapter) GetNativeMenuBarInfo() map[string]interface{} {
 	return map[string]interface{}{
@@ -489,82 +509,24 @@ func (a *DesktopPlatformAdapter) GetNativeMenuBarInfo() map[string]interface{} {
 	}
 }
 
-// RenderConfigForm renders configuration form for desktop platform
-func (a *DesktopPlatformAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, error) {
+// RenderConfigForm renders a configuration form for the desktop platform
+func (a *DesktopPlatformAdapter) RenderConfigForm(formType string) interface{} {
 	form := DesktopConfigForm{
-		ID:           "helix_config_form",
-		Title:        "HelixCode Configuration",
-		Type:         "native_window",
-		Layout:       "tabs",
-		Modal:        true,
-		Resizable:    true,
-		MinWidth:     800,
-		MinHeight:    600,
+		ID:            "helix_config_form",
+		Title:         "HelixCode Configuration",
+		Type:          "native_window",
+		Layout:        "tabs",
+		Modal:         true,
+		Resizable:     true,
+		MinWidth:      800,
+		MinHeight:     600,
 		DefaultWidth:  1200,
 		DefaultHeight: 800,
-		CenterScreen:   true,
-		Sections: []DesktopConfigSection{
-			{
-				ID:       "application",
-				Title:    "Application",
-				Icon:     "🚀",
-				Type:     "tab_page",
-				Expanded: true,
-				Fields: []DesktopConfigField{
-					{
-						ID:          "name",
-						Label:       "Application Name",
-						Type:        "text",
-						Class:       "form-control",
-						Value:       configUI.config.Application.Name,
-						Required:    true,
-						Keyboard:    "text",
-						Placeholder: "Enter application name",
-						Help:        "The name of the HelixCode application",
-					},
-					{
-						ID:          "version",
-						Label:       "Version",
-						Type:        "text",
-						Class:       "form-control",
-						Value:       configUI.config.Application.Version,
-						Required:    false,
-						Placeholder: "1.0.0",
-						Help:        "The version of the application",
-					},
-				},
-			},
-		},
-		Actions: []DesktopConfigAction{
-			{
-				ID:       "save",
-				Label:    "Save",
-				Type:     "primary",
-				Icon:     "💾",
-				Shortcut: "Ctrl+S",
-				Default:  true,
-				Cancel:   false,
-				Position: "right",
-			},
-			{
-				ID:       "cancel",
-				Label:    "Cancel",
-				Type:     "secondary",
-				Icon:     "✖",
-				Shortcut: "Escape",
-				Default:  false,
-				Cancel:   true,
-				Position: "left",
-			},
-		},
+		CenterScreen:  true,
+		Sections:      []DesktopConfigSection{},
+		Actions:       []DesktopConfigAction{},
 	}
-	
-	return form, nil
-}
-
-// WebPlatformAdapter represents web-specific adapter
-type WebPlatformAdapter struct {
-	*PlatformAdapter
+	return form
 }
 
 // GetBrowserInfo returns browser-specific information
@@ -582,8 +544,8 @@ func (a *WebPlatformAdapter) GetBrowserInfo() map[string]interface{} {
 	}
 }
 
-// RenderConfigForm renders configuration form for web platform
-func (a *WebPlatformAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, error) {
+// RenderConfigForm renders a configuration form for the web platform
+func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
 	form := WebConfigForm{
 		ID:         "helix_config_form",
 		Title:      "HelixCode Configuration",
@@ -592,55 +554,24 @@ func (a *WebPlatformAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, 
 		Responsive: true,
 		JavaScript: []string{"config.js", "validation.js"},
 		CSS:        []string{"config.css", "themes.css"},
-		Sections: []WebConfigSection{
-			{
-				ID:       "application",
-				Title:    "Application",
-				Icon:     "🚀",
-				Type:     "tab_page",
-				Expanded: true,
-				Fields: []WebConfigField{
-					{
-						ID:          "name",
-						Label:       "Application Name",
-						Type:        "text",
-						Class:       "form-control",
-						Value:       configUI.config.Application.Name,
-						Required:    true,
-						Keyboard:    "text",
-						Placeholder: "Enter application name",
-						Help:        "The name of the HelixCode application",
-					},
-					{
-						ID:          "version",
-						Label:       "Version",
-						Type:        "text",
-						Class:       "form-control",
-						Value:       configUI.config.Application.Version,
-						Required:    false,
-						Placeholder: "1.0.0",
-						Help:        "The version of the application",
-					},
-				},
-			},
+		Validation: WebConfigValidation{
+			Enabled:   true,
+			OnSubmit:  true,
+			OnBlur:    false,
+			Realtime:  false,
+			Custom:    []string{"emailValidator", "portValidator"},
 		},
-		Actions: []WebConfigAction{
-			{
-				ID:      "save",
-				Label:   "Save",
-				Type:    "primary",
-				Icon:    "💾",
-				Default: true,
-			},
+		SubmitAction: WebConfigSubmit{
+			URL:     "/api/config/save",
+			Method:  "POST",
+			Headers: map[string]string{"Content-Type": "application/json"},
+			Success: "Configuration saved successfully!",
+			Error:   "Failed to save configuration. Please try again.",
 		},
+		Sections:   []WebConfigSection{},
+		Actions:    []WebConfigAction{},
 	}
-	
-	return form, nil
-}
-
-// MobilePlatformAdapter represents mobile-specific adapter
-type MobilePlatformAdapter struct {
-	*PlatformAdapter
+	return form
 }
 
 // GetMobileInfo returns mobile-specific information
@@ -657,8 +588,8 @@ func (a *MobilePlatformAdapter) GetMobileInfo() map[string]interface{} {
 	}
 }
 
-// RenderConfigForm renders configuration form for mobile platform
-func (a *MobilePlatformAdapter) RenderConfigForm(configUI *ConfigUI) (interface{}, error) {
+// RenderConfigForm renders a configuration form for the mobile platform
+func (a *MobilePlatformAdapter) RenderConfigForm(formType string) interface{} {
 	form := MobileConfigForm{
 		ID:         "helix_config_form",
 		Title:      "HelixCode Configuration",
@@ -666,53 +597,11 @@ func (a *MobilePlatformAdapter) RenderConfigForm(configUI *ConfigUI) (interface{
 		Layout:     "carousel",
 		Responsive: true,
 		Gestures:   []string{"swipe", "tap", "double_tap", "pinch", "long_press"},
-		Sections: []MobileConfigSection{
-			{
-				ID:       "application",
-				Title:    "Application",
-				Icon:     "🚀",
-				Type:     "screen",
-				Expanded: true,
-				Fields: []MobileConfigField{
-					{
-						ID:          "name",
-						Label:       "Application Name",
-						Type:        "text",
-						Class:       "mobile-input",
-						Value:       configUI.config.Application.Name,
-						Required:    true,
-						Placeholder: "Enter application name",
-						Help:        "The name of HelixCode application",
-					},
-					{
-						ID:          "version",
-						Label:       "Version",
-						Type:        "text",
-						Class:       "mobile-input",
-						Value:       configUI.config.Application.Version,
-						Required:    false,
-						Placeholder: "1.0.0",
-						Help:        "The version of the application",
-					},
-				},
-			},
-		},
-		Actions: []MobileConfigAction{
-			{
-				ID:      "save",
-				Label:   "Save",
-				Type:    "primary",
-				Icon:    "💾",
-				Default: true,
-			},
-		},
+		Sections:   []MobileConfigSection{},
+		Actions:    []MobileConfigAction{},
 	}
-	
-	return form, nil
+	return form
 }
-
-
-
 
 // GetPlatformUIAdapter returns the appropriate UI adapter for the given platform
 func GetPlatformUIAdapter(platformType string) PlatformAdapterInterface {
@@ -730,98 +619,59 @@ func GetPlatformUIAdapter(platformType string) PlatformAdapterInterface {
 	}
 }
 
-// RenderConfigForm renders a configuration form for the desktop platform
-func (a *DesktopPlatformAdapter) RenderConfigForm(formType string) interface{} {
-	return DesktopConfigForm{
-		ID:            formType,
-		Title:         "Desktop Configuration",
-		Type:          "desktop",
-		Layout:        "tabbed",
-		Modal:         true,
-		Resizable:     true,
-		MinWidth:      600,
-		MinHeight:     400,
-		DefaultWidth:  800,
-		DefaultHeight: 600,
-		CenterScreen:  true,
-		Sections:      []DesktopConfigSection{},
-		Actions:       []DesktopConfigAction{},
-	}
-}
 
-// RenderConfigForm renders a configuration form for the web platform
-func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
-	return WebConfigForm{
-		ID:         formType,
-		Title:      "Web Configuration",
-		Type:       "web",
-		Layout:     "responsive",
-		Responsive: true,
-		JavaScript: []string{"jquery.min.js", "config.min.js"},
-		CSS:        []string{"config.min.css"},
-		Sections:   []WebConfigSection{},
-		Actions:    []WebConfigAction{},
-	}
-}
-
-// RenderConfigForm renders a configuration form for the mobile platform
-func (a *MobilePlatformAdapter) RenderConfigForm(formType string) interface{} {
-	return MobileConfigForm{
-		ID:         formType,
-		Title:      "Mobile Configuration",
-		Type:       "mobile",
-		Layout:     "scrollable",
-		Responsive: true,
-		Gestures:   []string{"tap", "swipe", "pinch"},
-		Sections:   []MobileConfigSection{},
-		Actions:    []MobileConfigAction{},
-	}
-}
-
-// RenderConfigForm renders a configuration form for the TUI platform
-func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
-	return TUIConfigForm{
-		ID:          formType,
-		Title:       "TUI Configuration",
-		Type:        "tui",
-		Layout:      "vertical",
-		BorderStyle: "single",
-		KeyBindings: map[string]string{
-			"save":     "Ctrl+S",
-			"cancel":   "Esc",
-			"next":     "Tab",
-			"prev":     "Shift+Tab",
-			"help":     "F1",
-			"submit":   "Enter",
-			"quit":     "Ctrl+Q",
-		},
-		Sections: []TUIConfigSection{},
-		Actions:  []TUIConfigAction{},
-	}
-}
-
-// GetPlatformType returns the platform type for desktop
-func (a *DesktopPlatformAdapter) GetPlatformType() string {
-	return "desktop"
-}
-
-// GetPlatformType returns the platform type for web
-func (a *WebPlatformAdapter) GetPlatformType() string {
-	return "web"
-}
-
-// GetPlatformType returns the platform type for mobile
-func (a *MobilePlatformAdapter) GetPlatformType() string {
-	return "mobile"
-}
-
-// GetPlatformType returns the platform type for TUI
-func (a *TUIAdapter) GetPlatformType() string {
-	return "tui"
-}
 
 // PlatformAdapterInterface defines the interface for platform adapters
 type PlatformAdapterInterface interface {
 	RenderConfigForm(formType string) interface{}
 	GetPlatformType() string
+	GetPlatformFeatures() []string
+	GetPlatformThemes() map[string]PlatformTheme
+}
+
+// Additional helper functions for platform adapters
+
+// SetTheme sets the theme for the platform adapter
+func (p *PlatformAdapter) SetTheme(themeName string) {
+	if _, exists := p.themes[themeName]; exists {
+		p.currentTheme = themeName
+	}
+}
+
+// GetTheme returns the current theme
+func (p *PlatformAdapter) GetTheme() PlatformTheme {
+	if p.currentTheme == "" {
+		p.currentTheme = "system"
+	}
+	return p.themes[p.currentTheme]
+}
+
+// AddFeature adds a feature to the platform adapter
+func (p *PlatformAdapter) AddFeature(feature string) {
+	for _, f := range p.features {
+		if f == feature {
+			return // Feature already exists
+		}
+	}
+	p.features = append(p.features, feature)
+}
+
+// HasFeature checks if the platform adapter has a specific feature
+func (p *PlatformAdapter) HasFeature(feature string) bool {
+	for _, f := range p.features {
+		if f == feature {
+			return true
+		}
+	}
+	return false
+}
+
+// SetCurrentTheme sets the current theme
+func (p *PlatformAdapter) SetCurrentTheme(theme string) {
+	p.currentTheme = theme
+}
+
+// GetCurrentTheme returns the current theme
+func (p *PlatformAdapter) GetCurrentTheme() string {
+	return p.currentTheme
 }
