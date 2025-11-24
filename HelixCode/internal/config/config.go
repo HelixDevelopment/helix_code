@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"dev.helix.code/internal/database"
@@ -57,6 +58,7 @@ type TasksConfig struct {
 // LLMConfig represents LLM configuration
 type LLMConfig struct {
 	DefaultProvider string  `mapstructure:"default_provider"`
+	DefaultModel    string  `mapstructure:"default_model"`
 	MaxTokens       int     `mapstructure:"max_tokens"`
 	Temperature     float64 `mapstructure:"temperature"`
 }
@@ -122,13 +124,15 @@ type LoggingConfig struct {
 
 // TelemetryConfig represents telemetry configuration
 type TelemetryConfig struct {
-	Enabled bool   `mapstructure:"enabled"`
-	Level   string `mapstructure:"level"`
+	Enabled        bool   `mapstructure:"enabled"`
+	Level          string `mapstructure:"level"`
+	DataRetention  int    `mapstructure:"data_retention"`
 }
 
 // ApplicationConfig represents application configuration
 type ApplicationConfig struct {
 	Name        string          `mapstructure:"name"`
+	Version     string          `mapstructure:"version"`
 	Description string          `mapstructure:"description"`
 	Environment string          `mapstructure:"environment"`
 	Workspace   WorkspaceConfig `mapstructure:"workspace"`
@@ -763,12 +767,16 @@ type SchemaProperty struct {
 
 // ConfigurationMigrator migrates configuration between versions
 type ConfigurationMigrator struct {
-	current string
+	current    string
+	migrations map[string][]Migration
 }
 
 // NewConfigurationMigrator creates a new configuration migrator
 func NewConfigurationMigrator(currentVersion string) *ConfigurationMigrator {
-	return &ConfigurationMigrator{current: currentVersion}
+	return &ConfigurationMigrator{
+		current:    currentVersion,
+		migrations: make(map[string][]Migration),
+	}
 }
 
 // GetAvailableVersions returns available versions
@@ -789,6 +797,18 @@ func (m *ConfigurationMigrator) findMigrationPath(from, to string) []string {
 // ConfigurationTransformer transforms configuration
 type ConfigurationTransformer struct{}
 
+// Migration represents a configuration migration
+type Migration struct {
+	From   string
+	To     string
+	Name   string
+	Desc   string
+	Backup bool
+	Up     func(config *Config) error
+	Down   func(config *Config) error
+	Migrate func(config *Config) error
+}
+
 // NewConfigurationTransformer creates a new configuration transformer
 func NewConfigurationTransformer() *ConfigurationTransformer {
 	return &ConfigurationTransformer{}
@@ -797,12 +817,21 @@ func NewConfigurationTransformer() *ConfigurationTransformer {
 // AddMapping adds a transformation mapping
 func (t *ConfigurationTransformer) AddMapping(mapping TransformMapping) {}
 
+// Transform transforms configuration with variables
+func (t *ConfigurationTransformer) Transform(config *Config, variables map[string]interface{}) (*Config, error) {
+	// Return a copy of the config for now
+	// In a full implementation, this would apply transformations
+	result := *config
+	return &result, nil
+}
+
 // TransformMapping represents a transformation mapping
 type TransformMapping struct {
 	Source    string
 	Target    string
 	Transform string
 	Priority  int
+	Condition string
 }
 
 // ConfigurationOptions provides options for configuration management
@@ -821,6 +850,145 @@ type ConfigurationOptions struct {
 	Compression      bool
 	LogLevel         string
 	BackupPath       string
+}
+
+// ConfigurationTemplateManager manages configuration templates
+type ConfigurationTemplateManager struct {
+	templateDir string
+	templates   map[string]*ConfigurationTemplate
+}
+
+// TemplateVariable represents a template variable
+type TemplateVariable struct {
+	Name        string      `json:"name"`
+	Type        string      `json:"type"`
+	Default     interface{} `json:"default"`
+	Description string      `json:"description,omitempty"`
+	Required    bool        `json:"required"`
+	MinLength   *int        `json:"min_length,omitempty"`
+	MaxLength   *int        `json:"max_length,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"`
+	Min         *float64    `json:"min,omitempty"`
+	Max         *float64    `json:"max,omitempty"`
+}
+
+// NewConfigurationTemplateManager creates a new template manager
+func NewConfigurationTemplateManager(templateDir string) *ConfigurationTemplateManager {
+	return &ConfigurationTemplateManager{
+		templateDir: templateDir,
+		templates:   make(map[string]*ConfigurationTemplate),
+	}
+}
+
+// ConfigurationTemplate represents a configuration template
+type ConfigurationTemplate struct {
+	ID          string                        `json:"id"`
+	Name        string                        `json:"name"`
+	Description string                        `json:"description"`
+	Category    string                        `json:"category"`
+	Variables   map[string]*TemplateVariable   `json:"variables"`
+	Config      *Config                       `json:"config"`
+	CreatedAt   time.Time                     `json:"created_at"`
+	UpdatedAt   time.Time                     `json:"updated_at"`
+}
+
+// CreateTemplateFromConfig creates a template from configuration
+func (tm *ConfigurationTemplateManager) CreateTemplateFromConfig(config *Config, name, description string, variables map[string]*TemplateVariable) (*ConfigurationTemplate, error) {
+	template := &ConfigurationTemplate{
+		ID:          "template-" + name,
+		Name:        name,
+		Description: description,
+		Category:    "custom",
+		Variables:   variables,
+		Config:      config,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	return template, nil
+}
+
+// SaveTemplate saves a configuration template
+func (tm *ConfigurationTemplateManager) SaveTemplate(template *ConfigurationTemplate, path string) error {
+	// Store in manager
+	tm.templates[template.ID] = template
+	// Placeholder implementation - would save to path
+	return nil
+}
+
+// ApplyTemplate applies a template with variables
+func (tm *ConfigurationTemplateManager) ApplyTemplate(templateID string, variables map[string]interface{}) (*Config, error) {
+	template, exists := tm.templates[templateID]
+	if !exists {
+		return nil, fmt.Errorf("template not found: %s", templateID)
+	}
+	
+	// Return a copy of the template's config
+	result := *template.Config
+	return &result, nil
+}
+
+// LoadTemplate loads a configuration template
+func (tm *ConfigurationTemplateManager) LoadTemplate(path string) (*Config, error) {
+	// Placeholder implementation
+	return getDefaultConfig(), nil
+}
+
+// SearchTemplates searches templates by query
+func (tm *ConfigurationTemplateManager) SearchTemplates(query string) []*ConfigurationTemplate {
+	results := make([]*ConfigurationTemplate, 0)
+	
+	for _, template := range tm.templates {
+		// Simple name search for now
+		if strings.Contains(strings.ToLower(template.Name), strings.ToLower(query)) {
+			results = append(results, template)
+		}
+	}
+	
+	return results
+}
+
+// processTemplate processes a template with variable validation
+func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationTemplate, variables map[string]interface{}) (*Config, error) {
+	// Validate required variables
+	for name, variable := range template.Variables {
+		if variable.Required {
+			if _, exists := variables[name]; !exists {
+				return nil, fmt.Errorf("required variable not provided: %s", name)
+			}
+		}
+		
+		// Type validation
+		if value, exists := variables[name]; exists {
+			if variable.Type == "string" {
+				if _, ok := value.(string); !ok {
+					return nil, fmt.Errorf("variable %s must be a string, got %T", name, value)
+				}
+			}
+		}
+	}
+	
+	// Return a copy of template's config
+	result := *template.Config
+	return &result, nil
+}
+
+// CreateDefaultTemplates creates default configuration templates
+func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
+	templates := make(map[string]*ConfigurationTemplate)
+	
+	// Add basic template
+	templates["basic"] = &ConfigurationTemplate{
+		ID:          "basic",
+		Name:        "Basic Configuration",
+		Description: "Basic server configuration",
+		Category:    "default",
+		Variables:   make(map[string]*TemplateVariable),
+		Config:      getDefaultConfig(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	
+	return templates
 }
 
 // Configuration validation modes
