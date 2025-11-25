@@ -7,6 +7,9 @@ import (
 
 	"dev.helix.code/tests/e2e/orchestrator/pkg"
 	"dev.helix.code/tests/e2e/test-bank/core"
+	"dev.helix.code/tests/e2e/test-bank/distributed"
+	"dev.helix.code/tests/e2e/test-bank/integration"
+	"dev.helix.code/tests/e2e/test-bank/platform"
 )
 
 // TestMetadata represents the metadata for a test case
@@ -62,16 +65,66 @@ func (tb *TestBank) LoadMetadata(metadataFile string) error {
 
 // LoadTests loads all test cases from different categories
 func (tb *TestBank) LoadTests() error {
-	// Load core tests
+	// Load core tests (TC-001 to TC-010)
 	coreTests := core.GetCoreTests()
 	for _, test := range coreTests {
 		tb.tests[test.ID] = test
 	}
 
-	// TODO: Load integration tests
-	// TODO: Load distributed tests
-	// TODO: Load platform tests
+	// Load integration tests (IT-001 to IT-010)
+	integrationTests := integration.GetIntegrationTests()
+	for _, test := range integrationTests {
+		tb.tests[test.ID] = test
+	}
 
+	// Load distributed tests (DT-001 to DT-010)
+	distributedTests := distributed.GetDistributedTests()
+	for _, test := range distributedTests {
+		tb.tests[test.ID] = test
+	}
+
+	// Load platform tests (PT-001 to PT-012)
+	platformTests := platform.GetPlatformTests()
+	for _, test := range platformTests {
+		tb.tests[test.ID] = test
+	}
+
+	return nil
+}
+
+// LoadCoreTests loads only core test cases
+func (tb *TestBank) LoadCoreTests() error {
+	coreTests := core.GetCoreTests()
+	for _, test := range coreTests {
+		tb.tests[test.ID] = test
+	}
+	return nil
+}
+
+// LoadIntegrationTests loads only integration test cases
+func (tb *TestBank) LoadIntegrationTests() error {
+	integrationTests := integration.GetIntegrationTests()
+	for _, test := range integrationTests {
+		tb.tests[test.ID] = test
+	}
+	return nil
+}
+
+// LoadDistributedTests loads only distributed test cases
+func (tb *TestBank) LoadDistributedTests() error {
+	distributedTests := distributed.GetDistributedTests()
+	for _, test := range distributedTests {
+		tb.tests[test.ID] = test
+	}
+	return nil
+}
+
+// LoadPlatformTests loads only platform test cases
+func (tb *TestBank) LoadPlatformTests() error {
+	platformTests := platform.GetPlatformTests()
+	for _, test := range platformTests {
+		tb.tests[test.ID] = test
+	}
 	return nil
 }
 
@@ -154,4 +207,65 @@ func (tb *TestBank) GetTestSuiteByCategory(category string) *pkg.TestSuite {
 		Description: fmt.Sprintf("%s test suite for the HelixCode platform", category),
 		Tests:       tb.GetTestsByCategory(category),
 	}
+}
+
+// GetCoreTestSuite returns a test suite with only core tests
+func (tb *TestBank) GetCoreTestSuite() *pkg.TestSuite {
+	tb.LoadCoreTests()
+	return &pkg.TestSuite{
+		Name:        "HelixCode Core Tests",
+		Description: "Core functionality test suite for the HelixCode platform",
+		Tests:       tb.GetTestsByCategory("core"),
+	}
+}
+
+// GetIntegrationTestSuite returns a test suite with only integration tests
+func (tb *TestBank) GetIntegrationTestSuite() *pkg.TestSuite {
+	tb.LoadIntegrationTests()
+	return &pkg.TestSuite{
+		Name:        "HelixCode Integration Tests",
+		Description: "Integration test suite for the HelixCode platform",
+		Tests:       tb.GetTestsByCategory("integration"),
+	}
+}
+
+// GetDistributedTestSuite returns a test suite with only distributed tests
+func (tb *TestBank) GetDistributedTestSuite() *pkg.TestSuite {
+	tb.LoadDistributedTests()
+	return &pkg.TestSuite{
+		Name:        "HelixCode Distributed Tests",
+		Description: "Distributed computing test suite for the HelixCode platform",
+		Tests:       tb.GetTestsByCategory("distributed"),
+	}
+}
+
+// GetPlatformTestSuite returns a test suite with only platform tests
+func (tb *TestBank) GetPlatformTestSuite() *pkg.TestSuite {
+	tb.LoadPlatformTests()
+	return &pkg.TestSuite{
+		Name:        "HelixCode Platform Tests",
+		Description: "Platform compatibility test suite for the HelixCode platform",
+		Tests:       tb.GetTestsByCategory("platform"),
+	}
+}
+
+// GetTestCount returns the total number of loaded tests
+func (tb *TestBank) GetTestCount() int {
+	return len(tb.tests)
+}
+
+// GetTestCountByCategory returns the number of tests in a category
+func (tb *TestBank) GetTestCountByCategory(category string) int {
+	return len(tb.GetTestsByCategory(category))
+}
+
+// GetTestSummary returns a summary of loaded tests
+func (tb *TestBank) GetTestSummary() map[string]int {
+	summary := make(map[string]int)
+	summary["total"] = len(tb.tests)
+	summary["core"] = tb.GetTestCountByCategory("core")
+	summary["integration"] = tb.GetTestCountByCategory("integration")
+	summary["distributed"] = tb.GetTestCountByCategory("distributed")
+	summary["platform"] = tb.GetTestCountByCategory("platform")
+	return summary
 }
