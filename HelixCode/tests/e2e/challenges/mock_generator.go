@@ -1467,7 +1467,7 @@ go 1.24
 
 require (
 	github.com/spf13/cobra v1.8.0
-	github.com/boltdb/bolt v1.3.7
+	go.etcd.io/bbolt v1.3.8
 )
 
 require (
@@ -1484,6 +1484,7 @@ require (
 
 import (
 	"fmt"
+	"os"
 	"cli-task-manager/task"
 	"cli-task-manager/storage"
 
@@ -1541,7 +1542,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/boltdb/bolt"
+	bolt "go.etcd.io/bbolt"
 )
 
 // Storage interface defines storage operations
@@ -2021,12 +2022,11 @@ func getPriorityIcon(priority string) string {
 	}
 
 	// Create tests/task_test.go
-	testGo := `package tests
+	testGo := `package main
 
 import (
 	"cli-task-manager/storage"
-	"cli-task-manager/task"
-	"os"
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -2041,8 +2041,6 @@ func TestTaskOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer store.Close()
-
-	tm := task.NewManager(store)
 
 	// Test adding a task
 	testTask := &storage.Task{
@@ -2320,6 +2318,19 @@ go build -o task-manager
 
 Tasks are stored in a BoltDB database (` + "`" + `tasks.db` + "`" + `) in the current directory.
 
+## Testing
+
+` + "```bash" + `
+# Run all tests
+go test ./...
+
+# Run tests with verbose output
+go test -v ./...
+
+# Run specific test
+go test -v ./tests -run TestAddTask
+` + "```" + `
+
 ## License
 
 MIT License
@@ -2548,7 +2559,7 @@ import (
 
 	"url-shortener/internal/models"
 
-	"github.com/boltdb/bolt"
+	"go.etcd.io/bbolt"
 )
 
 type Storage interface {
@@ -3237,9 +3248,9 @@ It supports multiple ASCII art styles and outputs formatted markdown.` + "`" + `
 			art := generator.GenerateASCII(text, style, fontHeight)
 
 			// Output in markdown format
-			fmt.Println("` + "```" + `")
+			fmt.Println("~~~")
 			fmt.Println(art)
-			fmt.Println("` + "```" + `")
+			fmt.Println("~~~")
 		},
 	}
 
@@ -3293,7 +3304,7 @@ func GenerateASCII(text, style string, height int) string {
 
 // ConvertToMarkdown wraps ASCII art in markdown code blocks
 func ConvertToMarkdown(art string) string {
-	return "` + "```" + `\n" + art + "\n` + "```" + `"
+	return "\n~~~\n" + art + "\n~~~\n"
 }
 `
 	if err := os.WriteFile(filepath.Join(outputDir, "generator", "ascii.go"), []byte(asciiGo), 0644); err != nil {
@@ -3780,7 +3791,7 @@ func TestConvertToMarkdown(t *testing.T) {
 	art := "test art"
 	result := generator.ConvertToMarkdown(art)
 
-	if !strings.Contains(result, "` + "```" + `") {
+	if !strings.Contains(result, "~~~") {
 		t.Error("Expected markdown code block delimiters")
 	}
 	if !strings.Contains(result, art) {

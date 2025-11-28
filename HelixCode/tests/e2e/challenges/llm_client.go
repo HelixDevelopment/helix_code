@@ -821,15 +821,7 @@ func (c *LLMClient) fallbackToMockGenerator(ctx context.Context, req *Completion
 		}
 
 		response.WriteString(fmt.Sprintf("### %s\n\n", relPath))
-		response.WriteString("```")
-		if strings.HasSuffix(relPath, ".go") {
-			response.WriteString("go")
-		} else if strings.HasSuffix(relPath, ".md") {
-			response.WriteString("markdown")
-		} else if strings.HasSuffix(relPath, ".yml") || strings.HasSuffix(relPath, ".yaml") {
-			response.WriteString("yaml")
-		}
-		response.WriteString("\n")
+		response.WriteString(fmt.Sprintf("```%s\n", relPath))
 		response.Write(content)
 		response.WriteString("\n```\n\n")
 
