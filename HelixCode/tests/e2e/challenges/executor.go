@@ -293,7 +293,11 @@ func (e *ChallengeExecutor) parseAndSaveCode(content, outputDir string, spec *Ch
 	}
 
 	// Try markdown blocks with proper filenames: ```filename.go\ncode\n```
-	fileBlockPattern := regexp.MustCompile("```([a-zA-Z0-9_./\\-]+\\.\\w+)\\n([\\s\\S]*?)```")
+	// Pattern that matches:
+	// - Paths with slashes: storage/bolt.go
+	// - Filenames with extensions: main.go, README.md
+	// But NOT language names: bash, go, sh
+	fileBlockPattern := regexp.MustCompile("```([a-zA-Z0-9_./\\-]*(?:[./\\-][a-zA-Z0-9_./\\-]+|\\.[a-zA-Z0-9]+))\\n([\\s\\S]+?)```")
 	matches := fileBlockPattern.FindAllStringSubmatch(content, -1)
 
 	if len(matches) == 0 {

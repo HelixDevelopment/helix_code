@@ -1381,6 +1381,7 @@ func TestPrettyPrintJSON(t *testing.T) {
 	}
 
 	// Create README.md
+	backticks := "```"
 	readme := `# JSON Validator CLI
 
 A fast and flexible JSON validation tool with schema support and multiple output formats.
@@ -1401,9 +1402,132 @@ A fast and flexible JSON validation tool with schema support and multiple output
 
 1. Clone the repository:
 
-` + "```bash" + `
+` + backticks + `bash
 git clone https://github.com/your-org/json-validator-cli.git
 cd json-validator-cli
+` + backticks + `
+
+2. Install dependencies:
+
+` + backticks + `bash
+go mod download
+` + backticks + `
+
+3. Build the tool:
+
+` + backticks + `bash
+go build -o json-validator
+` + backticks + `
+
+## Usage
+
+### Validate JSON Syntax
+
+` + backticks + `bash
+# Validate a single file
+json-validator validate data.json
+
+# Validate multiple files
+json-validator validate *.json
+
+# Verbose output
+json-validator validate --verbose data.json
+` + backticks + `
+
+### Validate with Schema
+
+` + backticks + `bash
+# Validate against a schema
+json-validator validate --schema schema.json data.json
+
+# Schema validation with verbose output
+json-validator validate --schema schema.json --verbose data.json
+` + backticks + `
+
+### Pretty-print JSON
+
+` + backticks + `bash
+# Pretty-print a JSON file
+json-validator pretty data.json
+
+# Pretty-print to a new file
+json-validator pretty --output pretty.json data.json
+` + backticks + `
+
+### Error Reporting
+
+The tool provides detailed error messages including:
+
+- Line and column numbers
+- Error description
+- Context around the error
+- Suggestions for fixes
+
+## Examples
+
+### Example 1: Basic Validation
+
+` + backticks + `bash
+$ json-validator validate data.json
+✓ data.json is valid JSON
+` + backticks + `
+
+### Example 2: Schema Validation
+
+` + backticks + `bash
+$ json-validator validate --schema user-schema.json user.json
+✗ user.json fails validation:
+  - Missing required field: "email"
+  - Invalid email format at line 5
+` + backticks + `
+
+### Example 3: Pretty-print
+
+` + backticks + `bash
+$ json-validator pretty data.json
+{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York"
+}
+` + backticks + `
+
+## JSON Schema Support
+
+The tool supports JSON Schema Draft 7 and provides:
+
+- Type validation
+- Required field validation
+- Pattern matching (regex)
+- Numeric constraints (minimum, maximum)
+- String constraints (minLength, maxLength)
+- Array constraints
+- Object property validation
+
+## Testing
+
+Run the test suite:
+
+` + backticks + `bash
+go test ./...
+` + backticks + `
+
+Run tests with coverage:
+
+` + backticks + `bash
+go test -cover ./...
+` + backticks + `
+
+## Command-line Options
+
+- ` + "`--schema`" + `: Path to JSON schema file
+- ` + "`--verbose, -v`" + `: Enable verbose output
+- ` + "`--output, -o`" + `: Output file for pretty-print
+- ` + "`--help, -h`" + `: Show help information
+
+## License
+
+MIT License
 `
 
 	// Create .gitignore
@@ -3811,6 +3935,7 @@ func TestInvalidStyle(t *testing.T) {
 	}
 
 	// Create README.md
+	backticks := "```"
 	readme := `# ASCII Art Generator CLI
 
 A command-line tool that generates ASCII art representations of text input in markdown format.
@@ -3828,40 +3953,42 @@ A command-line tool that generates ASCII art representations of text input in ma
 1. Install Go 1.24 or later
 
 2. Download dependencies:
-` + "```bash" + `
+
+` + backticks + `bash
 go mod download
-` + "```" + `
+` + backticks + `
 
 3. Build the tool from source:
-` + "```bash" + `
+
+` + backticks + `bash
 go build -o ascii-art
-` + "```" + `
+` + backticks + `
 
 ## Usage
 
 Basic usage:
 
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art HELLO
-` + "```" + `
+` + backticks + `
 
 With custom style:
 
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art --style banner HELLO
-` + "```" + `
+` + backticks + `
 
 With custom height:
 
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art --height 7 --style block TEST
-` + "```" + `
+` + backticks + `
 
 Show help:
 
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art --help
-` + "```" + `
+` + backticks + `
 
 ## Available Styles
 
@@ -3873,36 +4000,36 @@ Show help:
 ## Examples
 
 ### Standard Style
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art HELLO
-` + "```" + `
+` + backticks + `
 
 Output:
-` + "```" + `
+` + backticks + `
 #     #  #####  #      #      #####
 #     #  #      #      #      #   #
 #######  #####  #      #      #   #
 #     #  #      #      #      #   #
 #     #  #####  #####  #####  #####
-` + "```" + `
+` + backticks + `
 
 ### Banner Style
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art --style banner HELLO
-` + "```" + `
+` + backticks + `
 
 ### Block Style
-` + "```bash" + `
+` + backticks + `bash
 ./ascii-art --style block HELLO
-` + "```" + `
+` + backticks + `
 
 ## Testing
 
 Run the test suite:
 
-` + "```bash" + `
+` + backticks + `bash
 go test -v ./tests/...
-` + "```" + `
+` + backticks + `
 
 ## Command-line Flags
 
@@ -3914,7 +4041,7 @@ go test -v ./tests/...
 
 The project structure:
 
-` + "```" + `
+` + backticks + `
 .
 ├── main.go              # CLI entry point
 ├── generator/
@@ -3924,13 +4051,13 @@ The project structure:
 │   └── ascii_test.go    # Unit tests
 ├── go.mod               # Go module file
 └── README.md            # This file
-` + "```" + `
+` + backticks + `
 
 ## Cross-Platform Support
 
 Build for different platforms:
 
-` + "```bash" + `
+` + backticks + `bash
 # Linux
 GOOS=linux GOARCH=amd64 go build -o ascii-art-linux
 
@@ -3942,7 +4069,7 @@ GOOS=windows GOARCH=amd64 go build -o ascii-art.exe
 
 # Harmony OS (ARM64)
 GOOS=linux GOARCH=arm64 go build -o ascii-art-harmonyos
-` + "```" + `
+` + backticks + `
 
 ## License
 
