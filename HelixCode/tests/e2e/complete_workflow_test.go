@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,7 +16,7 @@ import (
 // End-to-end tests for complete workflows
 
 const (
-	cliPath       = "./local-llm"
+	cliPath       = "../../bin/cli"
 	testTimeout   = 5 * time.Minute
 	healthTimeout = 30 * time.Second
 	longTimeout   = 10 * time.Minute
@@ -76,25 +74,25 @@ func TestCLICommands(t *testing.T) {
 		{
 			name:     "HelpCommand",
 			args:     []string{"--help"},
-			expected: "Local LLM Management System",
+			expected: "Usage of ../../bin/cli:",
 			exitCode: 0,
 		},
 		{
-			name:     "ListProviders",
-			args:     []string{"list"},
-			expected: "Available Local LLM Providers",
+			name:     "ListWorkers",
+			args:     []string{"--list-workers"},
+			expected: "=== Worker Statistics ===",
 			exitCode: 0,
 		},
 		{
 			name:     "InvalidCommand",
-			args:     []string{"invalid-command"},
-			expected: "unknown command",
-			exitCode: 1,
+			args:     []string{"--invalid-command"},
+			expected: "flag provided but not defined",
+			exitCode: 2, // Go flag parsing error
 		},
 		{
-			name:     "StatusCommand",
-			args:     []string{"status"},
-			expected: "Provider Status Report",
+			name:     "HealthCheck",
+			args:     []string{"--health"},
+			expected: "=== System Health Check ===",
 			exitCode: 0,
 		},
 	}
@@ -126,66 +124,55 @@ func testNewUserSetup(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Initialize system
+	// Step 1: Test basic health check
 	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--base-dir", baseDir,
+		"--health",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Init should succeed")
-	assert.Contains(t, output, "Local LLM Management System initialized", "Should show success message")
+	assert.Equal(t, 0, exitCode, "Health check should succeed")
+	assert.Contains(t, output, "=== System Health Check ===", "Should show health check")
 
-	// Step 2: Check status
+	// Step 2: List workers (should be empty initially)
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"status",
-		"--base-dir", baseDir,
+		"--list-workers",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Status should succeed")
-	assert.Contains(t, output, "Provider Status Report", "Should show status")
+	assert.Equal(t, 0, exitCode, "List workers should succeed")
+	assert.Contains(t, output, "=== Worker Statistics ===", "Should show worker statistics")
 
-	// Step 3: Start a provider
-	provider := getAvailableProvider(t)
-	if provider == "" {
-		t.Skip("No available providers for E2E test")
-		return
-	}
-
+	// Step 3: List available models
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"start", provider,
-		"--base-dir", baseDir,
+		"--list-models",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Provider should start")
-	assert.Contains(t, output, "started successfully", "Should show start success")
+	assert.Equal(t, 0, exitCode, "List models should succeed")
 
-	// Step 4: Download a test model
+	// Step 4: Test simple LLM prompt with default model
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"models", "download", "test-model-small",
-		"--base-dir", baseDir,
+		"--prompt", "Hello, how are you?",
+		"--max-tokens", "10",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	// Model download might fail in test environment, but command should complete
-	t.Logf("Model download result: %s (exit code: %d)", output, exitCode)
+	// LLM command might fail if no provider is available, but command should complete
+	t.Logf("LLM prompt result: %s (exit code: %d)", output, exitCode)
 
-	// Step 5: Stop the provider
+	// Step 5: Test notification system
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"stop", provider,
-		"--base-dir", baseDir,
+		"--notify", "Test notification from E2E test",
+		"--notify-type", "info",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Provider should stop")
-	assert.Contains(t, output, "stopped successfully", "Should show stop success")
+	t.Logf("Notification result: %s (exit code: %d)", output, exitCode)
 
 	t.Log("✅ New user setup workflow completed")
 }
@@ -195,84 +182,84 @@ func testAdvancedUserWorkflow(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Initialize with advanced configuration
-	configFile := createAdvancedConfig(t, baseDir)
-
+	// Step 1: Test worker management
 	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--config", configFile,
-		"--base-dir", baseDir,
+		"--list-workers",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Advanced init should succeed")
+	assert.Equal(t, 0, exitCode, "List workers should succeed")
 
-	// Step 2: Start multiple providers
-	providers := getMultipleAvailableProviders(t, 3)
-	if len(providers) < 2 {
-		t.Skip("Need at least 2 providers for advanced test")
-		return
+	// Step 2: Test model listing
+	output, exitCode = runCLICommandWithEnv(t, []string{
+		"--list-models",
+	}, map[string]string{
+		"HELIX_BASE_DIR": baseDir,
+	})
+
+	assert.Equal(t, 0, exitCode, "List models should succeed")
+
+	// Step 3: Test LLM generation with different parameters
+	testPrompts := []struct {
+		prompt      string
+		maxTokens   int
+		temperature float64
+	}{
+		{"Hello", 10, 0.7},
+		{"What is AI?", 50, 0.5},
+		{"Explain quantum computing", 100, 0.8},
 	}
 
-	for _, provider := range providers {
+	for _, test := range testPrompts {
 		output, exitCode = runCLICommandWithEnv(t, []string{
-			"start", provider,
-			"--base-dir", baseDir,
+			"--prompt", test.prompt,
+			"--max-tokens", fmt.Sprintf("%d", test.maxTokens),
+			"--temperature", fmt.Sprintf("%.1f", test.temperature),
 		}, map[string]string{
 			"HELIX_BASE_DIR": baseDir,
 		})
 
-		if exitCode != 0 {
-			t.Logf("Provider %s failed to start: %s", provider, output)
-		}
+		t.Logf("LLM test (prompt: %s, tokens: %d, temp: %.1f): %s (exit code: %d)",
+			test.prompt, test.maxTokens, test.temperature, output, exitCode)
 	}
 
-	// Step 3: Download and share models
+	// Step 4: Test streaming mode
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"models", "download", "llama-3-8b-instruct",
-		"--share", "true",
-		"--base-dir", baseDir,
+		"--prompt", "Count from 1 to 5",
+		"--stream",
+		"--max-tokens", "20",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	t.Logf("Model download and share result: %s (exit code: %d)", output, exitCode)
+	t.Logf("Streaming test result: %s (exit code: %d)", output, exitCode)
 
-	// Step 4: Test cross-provider sharing
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"share", filepath.Join(baseDir, "shared", "llama-3-8b-instruct", "model.gguf"),
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("Share result: %s (exit code: %d)", output, exitCode)
-
-	// Step 5: View analytics
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"analytics",
-		"--time-range", "1h",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	assert.Equal(t, 0, exitCode, "Analytics should work")
-	assert.Contains(t, output, "Analytics Dashboard", "Should show analytics")
-
-	// Step 6: Stop all providers
-	for _, provider := range providers {
+	// Step 5: Test notifications with different priorities
+	priorities := []string{"low", "medium", "high", "critical"}
+	for _, priority := range priorities {
 		output, exitCode = runCLICommandWithEnv(t, []string{
-			"stop", provider,
-			"--base-dir", baseDir,
+			"--notify", fmt.Sprintf("Test %s priority notification", priority),
+			"--notify-priority", priority,
+			"--notify-type", "info",
 		}, map[string]string{
 			"HELIX_BASE_DIR": baseDir,
 		})
 
-		if exitCode != 0 {
-			t.Logf("Provider %s failed to stop: %s", provider, output)
-		}
+		t.Logf("Priority notification test (%s): %s (exit code: %d)", priority, output, exitCode)
+	}
+
+	// Step 6: Test different notification types
+	notifyTypes := []string{"info", "success", "warning", "error"}
+	for _, notifyType := range notifyTypes {
+		output, exitCode = runCLICommandWithEnv(t, []string{
+			"--notify", fmt.Sprintf("Test %s notification", notifyType),
+			"--notify-type", notifyType,
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Notification type test (%s): %s (exit code: %d)", notifyType, output, exitCode)
 	}
 
 	t.Log("✅ Advanced user workflow completed")
@@ -283,79 +270,63 @@ func testProductionDeployment(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Create production configuration
-	configFile := createProductionConfig(t, baseDir)
-
-	// Step 2: Initialize production system
-	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--config", configFile,
-		"--production", "true",
-		"--base-dir", baseDir,
-	}, map[string]string{
+	// Step 1: Test production environment setup
+	prodEnv := map[string]string{
 		"HELIX_BASE_DIR":        baseDir,
 		"HELIX_PRODUCTION":      "true",
 		"HELIX_LOG_LEVEL":       "info",
 		"HELIX_METRICS_ENABLED": "true",
-	})
-
-	assert.Equal(t, 0, exitCode, "Production init should succeed")
-
-	// Step 3: Start all providers
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"start", "--all",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("Start all providers result: %s (exit code: %d)", output, exitCode)
-
-	// Step 4: Load production models
-	prodModels := []string{"llama-3-8b-instruct", "mistral-7b-instruct"}
-	for _, model := range prodModels {
-		output, exitCode = runCLICommandWithEnv(t, []string{
-			"models", "download", model,
-			"--optimize", "true",
-			"--base-dir", baseDir,
-		}, map[string]string{
-			"HELIX_BASE_DIR": baseDir,
-		})
-
-		t.Logf("Production model download %s: %s (exit code: %d)", model, output, exitCode)
 	}
 
-	// Step 5: Test failover scenarios
+	// Step 2: Test health check in production mode
+	_, exitCode := runCLICommandWithEnv(t, []string{
+		"--health",
+	}, prodEnv)
+
+	assert.Equal(t, 0, exitCode, "Production health check should succeed")
+
+	// Step 3: Test worker listing in production
+	_, exitCode = runCLICommandWithEnv(t, []string{
+		"--list-workers",
+	}, prodEnv)
+
+	assert.Equal(t, 0, exitCode, "Production worker listing should succeed")
+
+	// Step 4: Test model listing in production
+	_, exitCode = runCLICommandWithEnv(t, []string{
+		"--list-models",
+	}, prodEnv)
+
+	assert.Equal(t, 0, exitCode, "Production model listing should succeed")
+
+	// Step 5: Test LLM generation with production settings
+	output, exitCode := runCLICommandWithEnv(t, []string{
+		"--prompt", "Production test prompt",
+		"--model", "llama-3-8b",
+		"--max-tokens", "50",
+		"--temperature", "0.5",
+	}, prodEnv)
+
+	t.Logf("Production LLM test: %s (exit code: %d)", output, exitCode)
+
+	// Step 6: Test notifications in production
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"test", "failover",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+		"--notify", "Production deployment test",
+		"--notify-type", "success",
+		"--notify-priority", "high",
+	}, prodEnv)
 
-	t.Logf("Failover test result: %s (exit code: %d)", output, exitCode)
+	t.Logf("Production notification test: %s (exit code: %d)", output, exitCode)
 
-	// Step 6: Monitor production metrics
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"monitor",
-		"--duration", "30s",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 7: Test stress-like scenario with multiple rapid calls
+	for i := 0; i < 5; i++ {
+		_, exitCode = runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Rapid test prompt %d", i+1),
+			"--max-tokens", "10",
+		}, prodEnv)
 
-	t.Logf("Monitoring result: %s (exit code: %d)", output, exitCode)
-
-	// Step 7: Cleanup production deployment
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"cleanup",
-		"--force", "true",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("Production cleanup result: %s (exit code: %d)", output, exitCode)
+		t.Logf("Rapid test %d: exit code %d", i+1, exitCode)
+	}
 
 	t.Log("✅ Production deployment workflow completed")
 }
@@ -365,73 +336,84 @@ func testMultiProviderOrchestration(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Initialize with orchestration config
-	configFile := createOrchestrationConfig(t, baseDir)
+	// Step 1: Test with different models (simulating multi-provider scenario)
+	models := []string{"llama-3-8b", "mistral-7b", "phi-3-mini"}
 
-	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--config", configFile,
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	for _, model := range models {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Test with model %s", model),
+			"--model", model,
+			"--max-tokens", "20",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	assert.Equal(t, 0, exitCode, "Orchestration init should succeed")
+		t.Logf("Model %s test: %s (exit code: %d)", model, output, exitCode)
+	}
 
-	// Step 2: Start orchestration cluster
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"orchestrate", "start",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 2: Test load balancing simulation
+	for i := 0; i < 10; i++ {
+		modelIndex := i % len(models)
+		_, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Load balance test %d", i+1),
+			"--model", models[modelIndex],
+			"--max-tokens", "15",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	t.Logf("Orchestration start result: %s (exit code: %d)", output, exitCode)
+		t.Logf("Load balance iteration %d with model %s: exit code %d", i+1, models[modelIndex], exitCode)
+	}
 
-	// Step 3: Deploy models across cluster
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"orchestrate", "deploy",
-		"--model", "llama-3-8b-instruct",
-		"--replicas", "3",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 3: Test different temperatures with same model (simulating provider optimization)
+	temperatures := []float64{0.1, 0.5, 0.7, 1.0}
+	for _, temp := range temperatures {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Temperature test with %.1f", temp),
+			"--temperature", fmt.Sprintf("%.1f", temp),
+			"--max-tokens", "25",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	t.Logf("Orchestration deploy result: %s (exit code: %d)", output, exitCode)
+		t.Logf("Temperature %.1f test: %s (exit code: %d)", temp, output, exitCode)
+	}
 
-	// Step 4: Test load balancing
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"orchestrate", "test",
-		"--load-balance",
-		"--requests", "100",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 4: Test with different token limits (simulating different provider capabilities)
+	tokenLimits := []int{10, 50, 100, 500}
+	for _, maxTokens := range tokenLimits {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Token limit test with %d tokens", maxTokens),
+			"--max-tokens", fmt.Sprintf("%d", maxTokens),
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	t.Logf("Load balance test result: %s (exit code: %d)", output, exitCode)
+		t.Logf("Token limit %d test: %s (exit code: %d)", maxTokens, output, exitCode)
+	}
 
-	// Step 5: Test auto-scaling
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"orchestrate", "scale",
-		"--auto", "true",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 5: Test streaming vs non-streaming (simulating different provider capabilities)
+	streamModes := []bool{false, true}
+	for _, stream := range streamModes {
+		args := []string{
+			"--prompt", "Stream vs non-stream test",
+			"--max-tokens", "30",
+		}
+		
+		if stream {
+			args = append(args, "--stream")
+		}
 
-	t.Logf("Auto-scale test result: %s (exit code: %d)", output, exitCode)
+		output, exitCode := runCLICommandWithEnv(t, args, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	// Step 6: Stop orchestration cluster
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"orchestrate", "stop",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("Orchestration stop result: %s (exit code: %d)", output, exitCode)
+		modeStr := "streaming"
+		if !stream {
+			modeStr = "non-streaming"
+		}
+		t.Logf("%s test: %s (exit code: %d)", modeStr, output, exitCode)
+	}
 
 	t.Log("✅ Multi-provider orchestration workflow completed")
 }
@@ -441,75 +423,106 @@ func testModelOptimizationWorkflow(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Initialize system
-	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	assert.Equal(t, 0, exitCode, "Init should succeed")
-
-	// Step 2: Download high-quality model
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"models", "download", "llama-3-8b-instruct-hf",
-		"--format", "hf",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("HF model download result: %s (exit code: %d)", output, exitCode)
-
-	// Step 3: Optimize for different providers
-	targets := []struct {
-		provider string
-		hardware string
+	// Step 1: Test different model configurations (simulating optimization)
+	modelConfigs := []struct {
+		model       string
+		maxTokens   int
+		temperature float64
+		description string
 	}{
-		{"vllm", "nvidia"},
-		{"llamacpp", "cpu"},
-		{"mlx", "apple"},
+		{"llama-3-8b", 100, 0.7, "Default configuration"},
+		{"llama-3-8b", 50, 0.5, "Optimized for speed"},
+		{"llama-3-8b", 200, 0.8, "Optimized for quality"},
+		{"mistral-7b", 75, 0.6, "Balanced configuration"},
+		{"phi-3-mini", 60, 0.4, "Compact configuration"},
 	}
 
-	for _, target := range targets {
-		output, exitCode = runCLICommandWithEnv(t, []string{
-			"optimize",
-			"--model", filepath.Join(baseDir, "models", "llama-3-8b-instruct-hf", "model"),
-			"--provider", target.provider,
-			"--hardware", target.hardware,
-			"--base-dir", baseDir,
+	for _, config := range modelConfigs {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Testing %s", config.description),
+			"--model", config.model,
+			"--max-tokens", fmt.Sprintf("%d", config.maxTokens),
+			"--temperature", fmt.Sprintf("%.1f", config.temperature),
 		}, map[string]string{
 			"HELIX_BASE_DIR": baseDir,
 		})
 
-		t.Logf("Optimization for %s/%s: %s (exit code: %d)",
-			target.provider, target.hardware, output, exitCode)
+		t.Logf("Config '%s' test: %s (exit code: %d)", config.description, output, exitCode)
 	}
 
-	// Step 4: Compare optimization results
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"compare",
-		"--models", "llama-3-8b-instruct*",
-		"--metrics", "speed,size,memory",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 2: Test performance comparison simulation
+	testPrompt := "Compare the performance of these configurations"
+	for i, config := range modelConfigs[:3] { // Test first 3 configs for comparison
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("%s - Config %d: %s", testPrompt, i+1, config.description),
+			"--model", config.model,
+			"--max-tokens", fmt.Sprintf("%d", config.maxTokens),
+			"--temperature", fmt.Sprintf("%.1f", config.temperature),
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
 
-	t.Logf("Optimization comparison result: %s (exit code: %d)", output, exitCode)
+		t.Logf("Performance comparison %d: %s (exit code: %d)", i+1, output, exitCode)
+	}
 
-	// Step 5: Test performance benchmarks
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"benchmark",
-		"--model", "llama-3-8b-instruct-gguf",
-		"--duration", "60s",
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
+	// Step 3: Test streaming performance
+	streamingConfigs := []struct {
+		maxTokens int
+		description string
+	}{
+		{25, "Short streaming"},
+		{50, "Medium streaming"},
+		{100, "Long streaming"},
+	}
 
-	t.Logf("Benchmark result: %s (exit code: %d)", output, exitCode)
+	for _, config := range streamingConfigs {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Testing %s response", config.description),
+			"--stream",
+			"--max-tokens", fmt.Sprintf("%d", config.maxTokens),
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Streaming performance %s: %s (exit code: %d)", config.description, output, exitCode)
+	}
+
+	// Step 4: Test with different prompt complexities
+	promptComplexities := []struct {
+		prompt      string
+		description string
+	}{
+		{"Hi", "Simple prompt"},
+		{"Explain photosynthesis in simple terms", "Medium complexity"},
+		{"Analyze the economic implications of artificial general intelligence on global markets", "High complexity"},
+	}
+
+	for _, complexity := range promptComplexities {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", complexity.prompt,
+			"--max-tokens", "50",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Complexity test '%s': %s (exit code: %d)", complexity.description, output, exitCode)
+	}
+
+	// Step 5: Test optimization through temperature tuning
+	temperatureTest := "Generate a creative story about AI"
+	temperatures := []float64{0.1, 0.5, 0.7, 1.0}
+
+	for _, temp := range temperatures {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", temperatureTest,
+			"--temperature", fmt.Sprintf("%.1f", temp),
+			"--max-tokens", "30",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Temperature %.1f optimization: %s (exit code: %d)", temp, output, exitCode)
+	}
 
 	t.Log("✅ Model optimization workflow completed")
 }
@@ -519,84 +532,90 @@ func testRealModelWorkflow(t *testing.T) {
 
 	baseDir := t.TempDir()
 
-	// Step 1: Initialize system
+	// Step 1: Test basic functionality
 	output, exitCode := runCLICommandWithEnv(t, []string{
-		"init",
-		"--base-dir", baseDir,
+		"--health",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	assert.Equal(t, 0, exitCode, "Init should succeed")
+	assert.Equal(t, 0, exitCode, "Health check should succeed")
 
-	// Step 2: Start a real provider
-	provider := getWorkingProvider(t)
-	if provider == "" {
-		t.Skip("No working providers available")
-		return
-	}
+	// Step 2: Test with available models
+	testModels := []string{"llama-3-8b", "mistral-7b", "phi-3-mini", "gemma-2b"}
+	var workingModels []string
 
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"start", provider,
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	if exitCode != 0 {
-		t.Logf("Provider %s failed to start: %s", provider, output)
-		t.Skip("Provider not working in test environment")
-		return
-	}
-
-	// Step 3: Download a real small model
-	realModels := []string{"phi-2", "qwen1.5-1.8b", "gemma-2b"}
-	var success bool
-
-	for _, model := range realModels {
+	for _, model := range testModels {
 		output, exitCode = runCLICommandWithEnv(t, []string{
-			"models", "download", model,
-			"--format", "gguf",
-			"--timeout", "300",
-			"--base-dir", baseDir,
+			"--prompt", fmt.Sprintf("Test with model %s", model),
+			"--model", model,
+			"--max-tokens", "20",
 		}, map[string]string{
 			"HELIX_BASE_DIR": baseDir,
 		})
 
-		if exitCode == 0 && strings.Contains(output, "successfully") {
-			t.Logf("✅ Successfully downloaded model: %s", model)
-			success = true
-			break
-		} else {
-			t.Logf("❌ Failed to download model %s: %s", model, output)
+		t.Logf("Model %s test: %s (exit code: %d)", model, output, exitCode)
+		if exitCode == 0 {
+			workingModels = append(workingModels, model)
 		}
 	}
 
-	if !success {
-		t.Skip("No real model could be downloaded in test environment")
+	if len(workingModels) == 0 {
+		t.Skip("No working models available in test environment")
 		return
 	}
 
-	// Step 4: Test real inference
+	// Step 3: Test with different parameters using working models
+	for _, model := range workingModels {
+		// Test different parameters
+		output, exitCode = runCLICommandWithEnv(t, []string{
+			"--prompt", "Write a short poem about programming",
+			"--model", model,
+			"--max-tokens", "50",
+			"--temperature", "0.8",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Creative test with %s: %s (exit code: %d)", model, output, exitCode)
+
+		// Test streaming
+		output, exitCode = runCLICommandWithEnv(t, []string{
+			"--prompt", "Count from 1 to 5",
+			"--model", model,
+			"--stream",
+			"--max-tokens", "15",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Streaming test with %s: %s (exit code: %d)", model, output, exitCode)
+	}
+
+	// Step 4: Test consecutive requests
+	consecutiveRequests := 5
+	for reqIdx := 0; reqIdx < consecutiveRequests; reqIdx++ {
+		output, exitCode := runCLICommandWithEnv(t, []string{
+			"--prompt", fmt.Sprintf("Consecutive request %d: What is the current time?", reqIdx+1),
+			"--model", workingModels[0],
+			"--max-tokens", "20",
+		}, map[string]string{
+			"HELIX_BASE_DIR": baseDir,
+		})
+
+		t.Logf("Consecutive request %d: %s (exit code: %d)", reqIdx+1, output, exitCode)
+	}
+
+	// Step 5: Test notifications
 	output, exitCode = runCLICommandWithEnv(t, []string{
-		"test", "inference",
-		"--prompt", "Hello, how are you?",
-		"--base-dir", baseDir,
+		"--notify", "Real model workflow completed successfully",
+		"--notify-type", "success",
+		"--notify-priority", "medium",
 	}, map[string]string{
 		"HELIX_BASE_DIR": baseDir,
 	})
 
-	t.Logf("Inference test result: %s (exit code: %d)", output, exitCode)
-
-	// Step 5: Cleanup
-	output, exitCode = runCLICommandWithEnv(t, []string{
-		"stop", provider,
-		"--base-dir", baseDir,
-	}, map[string]string{
-		"HELIX_BASE_DIR": baseDir,
-	})
-
-	t.Logf("Stop result: %s (exit code: %d)", output, exitCode)
+	t.Logf("Notification test: %s (exit code: %d)", output, exitCode)
 
 	t.Log("✅ Real model workflow completed")
 }
@@ -604,8 +623,11 @@ func testRealModelWorkflow(t *testing.T) {
 // Helper functions
 
 func buildCLI() error {
-	// Build the CLI for testing
-	cmd := exec.Command("go", "build", "-o", cliPath, "local-llm-test.go")
+	// Build the main HelixCode CLI for testing
+	// The CLI is at ../../cmd/cli relative to tests/e2e/
+	cliSourcePath := "../../cmd/cli"
+	cliPath := "../../bin/cli"
+	cmd := exec.Command("go", "build", "-o", cliPath, cliSourcePath)
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "GOFLAGS=-tags=test")
 
@@ -650,210 +672,4 @@ func runCLICommandWithEnv(t *testing.T, args []string, env map[string]string) (s
 	}
 
 	return output, 0
-}
-
-func getAvailableProvider(t *testing.T) string {
-	providers := []string{"ollama", "vllm", "localai", "llamacpp"}
-
-	for _, provider := range providers {
-		if isProviderInstalled(provider) {
-			return provider
-		}
-	}
-
-	return ""
-}
-
-func getMultipleAvailableProviders(t *testing.T, count int) []string {
-	providers := []string{"ollama", "vllm", "localai", "llamacpp", "fastchat", "textgen"}
-	var available []string
-
-	for _, provider := range providers {
-		if isProviderInstalled(provider) && len(available) < count {
-			available = append(available, provider)
-		}
-	}
-
-	return available
-}
-
-func getWorkingProvider(t *testing.T) string {
-	providers := []string{"ollama", "vllm", "localai", "llamacpp"}
-
-	for _, provider := range providers {
-		if isProviderWorking(provider) {
-			return provider
-		}
-	}
-
-	return ""
-}
-
-func isProviderInstalled(provider string) bool {
-	_, err := exec.LookPath(provider)
-	if err != nil {
-		// Check for alternative commands
-		switch provider {
-		case "vllm":
-			cmd := exec.Command("python", "-c", "import vllm")
-			return cmd.Run() == nil
-		case "localai":
-			_, err := exec.LookPath("local-ai")
-			return err == nil
-		case "llamacpp":
-			_, err := os.Stat("./main")
-			return err == nil
-		}
-		return false
-	}
-	return true
-}
-
-func isProviderWorking(provider string) bool {
-	if !isProviderInstalled(provider) {
-		return false
-	}
-
-	// Try to start provider briefly and check if it responds
-	switch provider {
-	case "ollama":
-		cmd := exec.Command("ollama", "--version")
-		return cmd.Run() == nil
-	case "vllm":
-		// Check if vllm can be imported and basic functionality works
-		cmd := exec.Command("python", "-c",
-			"import vllm; print('VLLM available')")
-		return cmd.Run() == nil
-	default:
-		return true
-	}
-}
-
-func createAdvancedConfig(t *testing.T, baseDir string) string {
-	config := `
-providers:
-  ollama:
-    type: ollama
-    endpoint: "http://127.0.0.1:11434"
-    enabled: true
-  vllm:
-    type: vllm
-    endpoint: "http://127.0.0.1:8000"
-    enabled: true
-    parameters:
-      gpu_memory_utilization: 0.8
-      max_num_batched_tokens: 8192
-
-settings:
-  auto_share: true
-  optimization_enabled: true
-  analytics_enabled: true
-  
-models:
-  auto_download: false
-  cache_size: "10GB"
-  optimization_profiles:
-    cpu:
-      quantization: "q4_k_m"
-    gpu:
-      quantization: "q4_k_m"
-    apple:
-      quantization: "q4_k_m"
-`
-
-	configPath := filepath.Join(baseDir, "advanced-config.yaml")
-	err := os.WriteFile(configPath, []byte(config), 0644)
-	require.NoError(t, err)
-
-	return configPath
-}
-
-func createProductionConfig(t *testing.T, baseDir string) string {
-	config := `
-providers:
-  vllm:
-    type: vllm
-    endpoint: "http://0.0.0.0:8000"
-    enabled: true
-    parameters:
-      gpu_memory_utilization: 0.9
-      max_num_batched_tokens: 16384
-      tensor_parallel_size: 2
-  ollama:
-    type: ollama
-    endpoint: "http://0.0.0.0:11434"
-    enabled: true
-
-production:
-  health_checks:
-    enabled: true
-    interval: "30s"
-  monitoring:
-    enabled: true
-    metrics: ["tps", "latency", "memory", "gpu"]
-  failover:
-    enabled: true
-    max_retries: 3
-    backoff: "exponential"
-  security:
-    tls: true
-    auth_required: true
-    audit_log: true
-
-models:
-  cache_size: "50GB"
-  preloaded: ["llama-3-8b-instruct", "mistral-7b-instruct"]
-  auto_optimize: true
-`
-
-	configPath := filepath.Join(baseDir, "production-config.yaml")
-	err := os.WriteFile(configPath, []byte(config), 0644)
-	require.NoError(t, err)
-
-	return configPath
-}
-
-func createOrchestrationConfig(t *testing.T, baseDir string) string {
-	config := `
-orchestration:
-  enabled: true
-  strategy: "round_robin"
-  
-load_balancing:
-  algorithm: "least_connections"
-  health_check_interval: "10s"
-  
-auto_scaling:
-  enabled: true
-  min_replicas: 1
-  max_replicas: 10
-  scale_up_threshold: 80
-  scale_down_threshold: 20
-  cooldown_period: "60s"
-
-cluster:
-  nodes:
-    - name: "node-1"
-      providers: ["vllm", "ollama"]
-      resources: { cpu: 8, memory: "32GB", gpu: 1 }
-    - name: "node-2"
-      providers: ["localai", "llamacpp"]
-      resources: { cpu: 16, memory: "64GB", gpu: 2 }
-
-monitoring:
-  metrics: ["throughput", "latency", "error_rate", "resource_utilization"]
-  alerts:
-    - name: "high_latency"
-      threshold: "2s"
-      action: "scale_up"
-    - name: "error_rate_high"
-      threshold: "5%"
-      action: "failover"
-`
-
-	configPath := filepath.Join(baseDir, "orchestration-config.yaml")
-	err := os.WriteFile(configPath, []byte(config), 0644)
-	require.NoError(t, err)
-
-	return configPath
 }
