@@ -85,7 +85,6 @@ func TestAuthDB_GetUserByUsernameSuccess(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
-		"Test User",
 		true,  // is_active
 		false, // is_verified
 		false, // mfa_enabled
@@ -137,7 +136,6 @@ func TestAuthDB_GetUserByUsernameNoLastLogin(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
-		"Test User",
 		true,
 		false,
 		false,
@@ -171,7 +169,6 @@ func TestAuthDB_GetUserByEmailSuccess(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
-		"Test User",
 		true,
 		true,
 		false,

@@ -3,8 +3,8 @@
 PRODUCTION PERFORMANCE OPTIMIZATION REPORT
 ========================================
 
-Optimization Timestamp: 2025-11-24T11:24:23+03:00
-Optimization Duration: 1.211920834s
+Optimization Timestamp: 2025-11-28T16:02:07+03:00
+Optimization Duration: 1.208581125s
 Total Optimizations Applied: 4
 Successful Optimizations: 4
 Failed Optimizations: 0
@@ -33,21 +33,11 @@ POST-OPTIMIZATION METRICS:
 PERFORMANCE IMPROVEMENTS:
 - Throughput Improvement: 0.0% (1000 → 1000 ops/sec)
 - Latency Improvement: -0.0% (50ms → 50ms)
-- Memory Improvement: -4.3% (0 → 0 MB)
+- Memory Improvement: -4.4% (0 → 0 MB)
 - CPU Improvement: -0.0% (45.5% → 45.5%)
 - Overall Improvement Score: -1.1%
 
 OPTIMIZATION DETAILS:
-cpu_goroutine_pool:
-  Type: cpu
-  Priority: 1
-  Enabled: true
-
-cpu_benchmark_optimization:
-  Type: cpu
-  Priority: 2
-  Enabled: true
-
 memory_pool_optimization:
   Type: memory
   Priority: 1
@@ -58,17 +48,17 @@ memory_profiling_optimization:
   Priority: 2
   Enabled: true
 
-CPU Goroutine Pool:
+CPU Benchmark Optimization:
   Type: cpu
-  Priority: 1
+  Priority: 2
   Enabled: true
   Applied: true
   Improvement: 0.0%
   Change: CPU utilization optimized
 
-CPU Benchmark Optimization:
+CPU Goroutine Pool:
   Type: cpu
-  Priority: 2
+  Priority: 1
   Enabled: true
   Applied: true
   Improvement: 0.0%
@@ -87,8 +77,18 @@ Memory Profiling Optimization:
   Priority: 2
   Enabled: true
   Applied: true
-  Improvement: -0.4%
+  Improvement: -0.5%
   Change: Memory usage optimized
+
+cpu_goroutine_pool:
+  Type: cpu
+  Priority: 1
+  Enabled: true
+
+cpu_benchmark_optimization:
+  Type: cpu
+  Priority: 2
+  Enabled: true
 
 
 

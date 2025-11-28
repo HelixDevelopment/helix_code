@@ -708,25 +708,228 @@ type ConfigWatcher interface {
 }
 
 // ConfigurationValidator validates configuration
-type ConfigurationValidator struct{}
+// ValidationRule represents a custom validation rule
+type ValidationRule struct {
+	Name      string
+	Validator func(interface{}) error
+	Message   string
+	Severity  string
+}
+
+type ConfigurationValidator struct {
+	strict bool
+	rules  map[string][]ValidationRule
+}
 
 // NewConfigurationValidator creates a new configuration validator
 func NewConfigurationValidator(strict bool) *ConfigurationValidator {
-	return &ConfigurationValidator{}
+	validator := &ConfigurationValidator{
+		strict: strict,
+		rules:  make(map[string][]ValidationRule),
+	}
+	
+	if strict {
+		validator.addDefaultRules()
+	}
+	
+	return validator
+}
+
+// AddRule adds a validation rule for a specific property
+func (cv *ConfigurationValidator) AddRule(property string, rule ValidationRule) {
+	if cv.rules[property] == nil {
+		cv.rules[property] = make([]ValidationRule, 0)
+	}
+	cv.rules[property] = append(cv.rules[property], rule)
+}
+
+// addDefaultRules adds default validation rules
+func (cv *ConfigurationValidator) addDefaultRules() {
+	cv.AddRule("server.port", ValidationRule{
+		Name: "port_range",
+		Validator: func(value interface{}) error {
+			port, ok := value.(int)
+			if !ok {
+				return fmt.Errorf("port must be an integer")
+			}
+			if port < 1 || port > 65535 {
+				return fmt.Errorf("port must be between 1 and 65535")
+			}
+			return nil
+		},
+		Message:  "Port must be between 1 and 65535",
+		Severity: "error",
+	})
+	
+	cv.AddRule("llm.temperature", ValidationRule{
+		Name: "temperature_range",
+		Validator: func(value interface{}) error {
+			temp, ok := value.(float64)
+			if !ok {
+				return fmt.Errorf("temperature must be a number")
+			}
+			if temp < 0.0 || temp > 2.0 {
+				return fmt.Errorf("temperature must be between 0.0 and 2.0")
+			}
+			return nil
+		},
+		Message:  "LLM temperature must be between 0.0 and 2.0",
+		Severity: "error",
+	})
 }
 
 // Validate validates the configuration
 func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
-	return ValidationResult{Valid: true}
+	result := ValidationResult{
+		Valid:  true,
+		Errors: make([]ValidationError, 0),
+	}
+	
+	// Validate server port
+	if config.Server.Port < 1 || config.Server.Port > 65535 {
+		result.Valid = false
+		result.Errors = append(result.Errors, ValidationError{
+			Property: "server.port",
+			Path:     "server.port",
+			Severity: "error",
+			Code:     "invalid_port",
+			Message:  "Port must be between 1 and 65535",
+		})
+	}
+	
+	// Validate LLM temperature
+	if config.LLM.Temperature < 0.0 || config.LLM.Temperature > 2.0 {
+		result.Valid = false
+		result.Errors = append(result.Errors, ValidationError{
+			Property: "llm.temperature",
+			Path:     "llm.temperature",
+			Severity: "error",
+			Code:     "invalid_temperature",
+			Message:  "LLM temperature must be between 0.0 and 2.0",
+		})
+	}
+	
+	// Validate database port
+	if config.Database.Port < 1 || config.Database.Port > 65535 {
+		result.Valid = false
+		result.Errors = append(result.Errors, ValidationError{
+			Property: "database.port",
+			Path:     "database.port",
+			Severity: "error",
+			Code:     "invalid_port",
+			Message:  "Database port must be between 1 and 65535",
+		})
+	}
+	
+	// Validate JWT secret
+	if len(config.Auth.JWTSecret) < 32 {
+		result.Valid = false
+		result.Errors = append(result.Errors, ValidationError{
+			Property: "auth.jwt_secret",
+			Path:     "auth.jwt_secret",
+			Severity: "error",
+			Code:     "invalid_jwt_secret",
+			Message:  "JWT secret must be at least 32 characters",
+		})
+	}
+	
+	// Validate custom rules
+	if v.rules != nil {
+		// Check application.name field
+		if rules, exists := v.rules["application.name"]; exists {
+			value := config.Application.Name
+			for _, rule := range rules {
+				if rule.Name == "custom" {
+					if err := rule.Validator(value); err != nil {
+						result.Valid = false
+						result.Errors = append(result.Errors, ValidationError{
+							Property: "application.name",
+							Path:     "application.name",
+							Severity: "error",
+							Code:     "CUSTOM_RULE_ERROR",
+							Message:  "Custom rule validation failed",
+						})
+					}
+				}
+			}
+		}
+	}
+	
+	return result
 }
 
 // ValidateField validates a specific field
 func (v *ConfigurationValidator) ValidateField(config *Config, field string) ValidationResult {
-	return ValidationResult{Valid: true}
+	result := ValidationResult{
+		Valid:  true,
+		Errors: make([]ValidationError, 0),
+		Path:   field,
+	}
+	
+	switch field {
+	case "server.port":
+		if config.Server.Port < 1 || config.Server.Port > 65535 {
+			result.Valid = false
+			result.Errors = append(result.Errors, ValidationError{
+				Property: "server.port",
+				Path:     "server.port",
+				Severity: "error",
+				Code:     "invalid_port",
+				Message:  "Port must be between 1 and 65535",
+			})
+		}
+	case "llm.temperature":
+		if config.LLM.Temperature < 0.0 || config.LLM.Temperature > 2.0 {
+			result.Valid = false
+			result.Errors = append(result.Errors, ValidationError{
+				Property: "llm.temperature",
+				Path:     "llm.temperature",
+				Severity: "error",
+				Code:     "invalid_temperature",
+				Message:  "LLM temperature must be between 0.0 and 2.0",
+			})
+		}
+	case "database.port":
+		if config.Database.Port < 1 || config.Database.Port > 65535 {
+			result.Valid = false
+			result.Errors = append(result.Errors, ValidationError{
+				Property: "database.port",
+				Path:     "database.port",
+				Severity: "error",
+				Code:     "invalid_port",
+				Message:  "Database port must be between 1 and 65535",
+			})
+		}
+	case "auth.jwt_secret":
+		if len(config.Auth.JWTSecret) < 32 {
+			result.Valid = false
+			result.Errors = append(result.Errors, ValidationError{
+				Property: "auth.jwt_secret",
+				Path:     "auth.jwt_secret",
+				Severity: "error",
+				Code:     "invalid_jwt_secret",
+				Message:  "JWT secret must be at least 32 characters",
+			})
+		}
+	}
+	
+	return result
 }
 
 // AddCustomRule adds a custom validation rule
-func (v *ConfigurationValidator) AddCustomRule(field string, rule func(interface{}) error) {}
+func (v *ConfigurationValidator) AddCustomRule(field string, rule func(interface{}) error) {
+	// Store custom rule - implementation depends on rules field existence
+	if v.rules == nil {
+		v.rules = make(map[string][]ValidationRule)
+	}
+	
+	v.rules[field] = append(v.rules[field], ValidationRule{
+		Name:      "custom",
+		Validator: rule,
+		Message:   "Custom rule validation failed",
+		Severity:  "error",
+	})
+}
 
 // ValidationResult represents validation result
 type ValidationResult struct {
