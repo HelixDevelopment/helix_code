@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"dev.helix.code/internal/memory/providers"
 )
 
 // =============================================================================
@@ -15,7 +16,7 @@ import (
 func TestNewVectorIntegration(t *testing.T) {
 	config := &VectorConfig{
 		DefaultProvider: "test-provider",
-		Providers:       make(map[string]*SingleProviderConfigWrapper),
+		Providers:       make(map[string]*providers.SingleProviderConfig),
 		LoadBalancing:   "",
 		FailoverEnabled: true,
 	}

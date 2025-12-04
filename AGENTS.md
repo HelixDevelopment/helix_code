@@ -2,26 +2,30 @@
 
 ## Project Overview
 
-HelixCode is a distributed AI development platform built in Go that enables intelligent task division, work preservation, and cross-platform development workflows.
+HelixCode is an enterprise-grade distributed AI development platform built in Go that enables intelligent task division, work preservation, and cross-platform development workflows.
 
 **Key Features:**
 - **Distributed Computing**: SSH-based worker pools with auto-installation and health monitoring
-- **Multi-Provider LLM Integration**: Support for local providers (Llama.cpp, Ollama, vLLM) and cloud APIs (OpenAI, Anthropic, Gemini, xAI, Groq, etc.)
+- **Multi-Provider LLM Integration**: Support for local providers (Llama.cpp, Ollama, vLLM) and cloud APIs (OpenAI, Anthropic Claude, Gemini, xAI, OpenRouter, GitHub Copilot, Azure Bedrock, AWS, VertexAI, Groq, Qwen, KoboldAI)
 - **Development Workflows**: Automated planning, building, testing, refactoring, debugging, and deployment
 - **Task Management**: Intelligent task division with dependency tracking, checkpointing, and rollback
-- **MCP Protocol**: Full Model Context Protocol implementation
-- **Multi-Client Architecture**: REST API, CLI, Terminal UI, Desktop, WebSocket, and mobile framework support
-- **Memory Systems**: Integration with Mem0, Zep, Memonto, and BaseAI for long-term memory
+- **MCP Protocol**: Full Model Context Protocol implementation with stdio and SSE transports
+- **Multi-Client Architecture**: REST API, CLI, Terminal UI (tview), Desktop GUI (Fyne), WebSocket, iOS/Android mobile, Aurora OS, Harmony OS
+- **Memory Systems**: Integration with Mem0, Zep, Memonto, BaseAI, Character.AI, ChromaDB, FAISS, Pinecone, Qdrant, Weaviate for long-term memory
+- **Advanced Editor**: Multi-format code editing (Diff, Whole File, Search/Replace, Line-based) optimized per LLM model
+- **Tools Ecosystem**: Comprehensive tools for filesystem, shell, web, browser automation, git, voice, multiedit
+- **Notifications**: Multi-channel support (Slack, Discord, Email, Telegram, Webhooks)
 
 ## Essential Build Commands
 
-**IMPORTANT**: All commands must be run from the `HelixCode/` subdirectory (not repository root).
+**CRITICAL**: All commands must be run from the `HelixCode/` subdirectory (not repository root).
 
 ### Core Commands
 - **Build**: `make build` (generates logo assets and builds to bin/helixcode)
 - **Test all**: `make test` or `go test -v ./...`
 - **Test single**: `go test -v -run TestName ./path/to/package`
 - **Test comprehensive**: `./run_tests.sh` (full test suite with multiple test types)
+- **Test all variants**: `./run_all_tests.sh` (comprehensive API key management tests)
 - **Lint**: `make lint` or `golangci-lint run ./...`
 - **Format**: `make fmt` or `go fmt ./...`
 - **Clean**: `make clean` (removes bin/, dist/, coverage.out)
@@ -30,12 +34,15 @@ HelixCode is a distributed AI development platform built in Go that enables inte
 - **Dev server**: `make dev` (builds and runs with config/dev/config.yaml)
 - **Logo assets**: `make logo-assets` (required before first build)
 - **Setup deps**: `make setup-deps` or `go mod tidy`
+- **Full dev setup**: `make dev-setup` (dependencies + logo processing)
 
 ### Specialized Builds
 - **Production**: `make prod` (cross-platform builds for Linux, macOS, Windows)
 - **Mobile**: `make mobile` (builds iOS framework and Android AAR)
+- **Mobile individual**: `make mobile-ios`, `make mobile-android`
 - **Aurora OS**: `make aurora-os` (Russian platform client)
 - **Harmony OS**: `make harmony-os` (Chinese platform client)
+- **Both specialized**: `make aurora-harmony` (both Aurora and Harmony OS)
 - **Full release**: `make release` (clean + assets + docs + build + test)
 
 ### Testing Variations
@@ -45,7 +52,11 @@ HelixCode is a distributed AI development platform built in Go that enables inte
 - **Coverage**: `./run_tests.sh --coverage` (generates HTML report)
 - **Benchmarks**: `./run_tests.sh --benchmarks`
 - **Security**: `./run_tests.sh --security`
+- **Hardware automation**: `./run_tests.sh --automation`
 - **Challenge tests**: `cd tests/e2e/challenges && go run cmd/runner/main.go`
+- **Specific timeout**: `export TEST_TIMEOUT=30s && ./run_tests.sh --unit`
+- **Skip expensive**: `./run_tests.sh --skip-expensive`
+- **Skip hardware**: `./run_tests.sh --skip-hardware`
 
 ## Architecture & Code Organization
 
@@ -54,7 +65,7 @@ HelixCode is a distributed AI development platform built in Go that enables inte
 HelixCode/
 ├── cmd/                    # Application entry points
 │   ├── server/            # Main HTTP server
-│   └── cli/               # CLI client
+│   └── cli/               # CLI client (with root.go commands)
 ├── internal/              # Internal packages (not importable externally)
 │   ├── auth/              # JWT authentication with session management
 │   ├── worker/            # SSH-based distributed worker pool
@@ -70,18 +81,49 @@ HelixCode/
 │   ├── tools/             # Comprehensive tool ecosystem
 │   ├── editor/            # Multi-format code editing system
 │   ├── memory/            # Long-term memory integration
+│   ├── notification/      # Multi-channel notifications
+│   ├── context/           # Context building with mentions
+│   ├── agent/             # AI agent coordination
+│   ├── commands/          # Built-in command system
+│   ├── discovery/         # Service discovery
+│   ├── deployment/        # Production deployment
+│   ├── event/             # Event bus
+│   ├── focus/             # Focus management
+│   ├── hardware/          # Hardware detection
+│   ├── hooks/             # System hooks
+│   ├── logging/           # Logging system
+│   ├── monitoring/        # Monitoring and metrics
+│   ├── performance/       # Performance optimization
+│   ├── persistence/       # Data persistence
+│   ├── providers/         # AI and vector providers
+│   ├── repomap/           # Repository mapping
+│   ├── rules/             # Rule system
+│   ├── security/          # Security management
+│   ├── session/           # Session management
+│   ├── template/          # Template system
+│   ├── version/           # Version management
 │   └── [... other services]
 ├── applications/          # Platform-specific apps
 │   ├── desktop/           # Desktop GUI (Fyne-based)
 │   ├── terminal-ui/       # Terminal UI (tview)
-│   ├── ios/               # iOS application
-│   ├── android/           # Android application
+│   ├── ios/               # iOS application (Swift bindings)
+│   ├── android/           # Android application (Kotlin)
 │   ├── aurora-os/         # Aurora OS client
 │   └── harmony-os/        # Harmony OS client
+├── shared/                # Shared mobile code
+│   └── mobile-core/       # Gomobile bindings
 ├── config/               # Configuration files
 ├── tests/                # Test suites and frameworks
-├── external/             # Git submodules (memory providers)
-└── go.mod                # Go module definition
+│   ├── e2e/challenges/   # Challenge testing framework
+│   ├── integration/       # Integration tests
+│   ├── unit/              # Unit tests
+│   ├── security/          # Security tests
+│   ├── automation/        # Hardware automation tests
+│   └── performance/       # Performance benchmarks
+├── scripts/              # Build and utility scripts
+├── docker/               # Docker configurations
+├── assets/               # Static assets (logos, themes)
+└── go.mod                # Go module definition (dev.helix.code)
 ```
 
 ### Key Patterns
@@ -123,8 +165,26 @@ HelixCode/
 - Use package-level error variables: `ErrInvalidCredentials`
 - Structured error responses in HTTP handlers
 
+### Testing Patterns
+- **Test files**: Alongside source files (`*_test.go`) or in `tests/` directory
+- **Assertions**: Use `github.com/stretchr/testify` - `require.NoError` for critical, `assert.Equal` for comparisons
+- **Mocks**: Interface-based mocking using `github.com/stretchr/testify/mock`
+- **Test structure**: Table-driven tests with subtests using `t.Run()`
+- **Test categories**: Unit, Integration, E2E, Security, Performance, Automation
+
 ### Dependencies
-Core dependencies: `github.com/gin-gonic/gin`, `github.com/jackc/pgx/v5`, `github.com/golang-jwt/jwt/v4`, `github.com/spf13/viper`, `github.com/stretchr/testify`
+Core dependencies: 
+- `github.com/gin-gonic/gin`: HTTP framework
+- `github.com/jackc/pgx/v5`: PostgreSQL driver  
+- `github.com/golang-jwt/jwt/v4`: JWT authentication
+- `github.com/spf13/viper`: Configuration management
+- `github.com/spf13/cobra`: CLI framework
+- `github.com/stretchr/testify`: Testing framework
+- `github.com/gorilla/websocket`: WebSocket support
+- `golang.org/x/crypto/ssh`: SSH client for workers
+- `fyne.io/fyne/v2`: Desktop GUI
+- `github.com/rivo/tview`: Terminal UI
+- `github.com/chromedp/chromedp`: Browser automation
 
 ## Configuration Management
 
@@ -137,153 +197,280 @@ server:
   port: 8080
 
 database:
-  host: "localhost"
+  host: ""  # Empty to disable for testing
   port: 5432
+  user: "helix"
   # Password via HELIX_DATABASE_PASSWORD
+  dbname: "helixcode_prod"
+  sslmode: "disable"
+
+redis:
+  host: "redis"
+  port: 6379
+  password: "redispass"
+  enabled: true
 
 auth:
-  # JWT secret via HELIX_AUTH_JWT_SECRET
+  jwt_secret: "QBHQ2paeBWWnOgniSQLqh1Dsd+pumKOcUTZbTXB+N0g="
+  # Or via HELIX_AUTH_JWT_SECRET
+  token_expiry: 86400
+  session_expiry: 604800
+  bcrypt_cost: 12
   
 workers:
   health_check_interval: 30
+  health_ttl: 120
+  max_concurrent_tasks: 10
+  
+tasks:
+  max_retries: 3
+  checkpoint_interval: 300
+  cleanup_interval: 3600
   
 llm:
   default_provider: "local"
   max_tokens: 4096
   temperature: 0.7
+  timeout: 30
+  max_retries: 3
+  
+  providers:
+    # Local providers: ollama, llamacpp, vllm
+    # Cloud providers: openai, anthropic, gemini, xai, openrouter, etc.
 ```
 
 ### Environment Variables
-**Required:**
+**Required for Production:**
 - `HELIX_DATABASE_PASSWORD`: PostgreSQL password
 - `HELIX_AUTH_JWT_SECRET`: JWT signing secret
 - `HELIX_REDIS_PASSWORD`: Redis password (if enabled)
 
-**Optional for LLM providers:**
-- `ANTHROPIC_API_KEY`: Claude
-- `GEMINI_API_KEY`: Google Gemini  
-- `OPENAI_API_KEY`: OpenAI
-- `XAI_API_KEY`: xAI/Grok
+**LLM Provider Keys:**
+```bash
+# Free providers (optional for higher limits)
+export GITHUB_TOKEN="ghp_your_github_token"         # GitHub Copilot
+export OPENROUTER_API_KEY="sk-or-your-key"          # OpenRouter
+export XAI_API_KEY="xai-your-key"                    # XAI/Grok
+
+# Premium providers
+export ANTHROPIC_API_KEY="sk-ant-your-key"          # Anthropic Claude
+export GEMINI_API_KEY="your-gemini-key"              # Google Gemini
+export OPENAI_API_KEY="sk-your-openai-key"           # OpenAI
+export AWS_ACCESS_KEY_ID="your-access-key"            # AWS Bedrock
+export AWS_SECRET_ACCESS_KEY="your-secret-key"        # AWS Bedrock
+export AZURE_CLIENT_ID="your-client-id"               # Azure
+export AZURE_CLIENT_SECRET="your-client-secret"       # Azure
+export AZURE_TENANT_ID="your-tenant-id"             # Azure
+```
+
+**Notification Channels:**
+```bash
+export HELIX_SLACK_WEBHOOK_URL="https://hooks.slack.com/..."
+export HELIX_TELEGRAM_BOT_TOKEN="your_bot_token"
+export HELIX_TELEGRAM_CHAT_ID="your_chat_id"
+export HELIX_EMAIL_SMTP_SERVER="smtp.gmail.com"
+export HELIX_EMAIL_USERNAME="your_email"
+export HELIX_EMAIL_PASSWORD="your_app_password"
+```
 
 ### Database Setup
 ```bash
-createdb helixcode
-createuser helixcode
+# Optional - can be disabled for testing
+createdb helixcode_prod
+createuser helix
 export HELIX_DATABASE_PASSWORD=your_password
 # Schema auto-created by application
 ```
 
-**Database is Optional**: Can be disabled for testing by leaving `database.host` empty or setting `database.enabled: false`.
+**Database is Optional**: Can be disabled for testing by setting `database.host: ""` in config.
 
 ## Testing Approach
 
 ### Test Categories
-- **Unit tests**: Alongside source files (`*_test.go`)
-- **Integration tests**: In `tests/` directory
-- **E2E tests**: Full workflow testing
-- **Challenge tests**: Comprehensive project generation validation
+- **Unit tests**: Alongside source files (`*_test.go`) or in `tests/unit/`
+- **Integration tests**: In `tests/integration/` directory  
+- **E2E tests**: Full workflow testing in `tests/e2e/`
+- **Security tests**: OWASP compliance in `tests/security/`
+- **Performance tests**: Benchmarking in `tests/performance/`
+- **Automation tests**: Hardware automation in `tests/automation/`
+- **Challenge tests**: Comprehensive project generation validation in `tests/e2e/challenges/`
 
 ### Key Test Files
-- `run_tests.sh`: Comprehensive test runner with multiple test types
-- `test_runner.go`: Test execution engine
-- `tests/e2e/challenges/`: Challenge testing framework
+- `run_tests.sh`: Comprehensive test runner with multiple test types and reporting
+- `run_all_tests.sh`: API key management test suite
+- `tests/e2e/challenges/`: Challenge testing framework for real project generation
+- Test helpers: `internal/mocks/memory_mocks.go`, `internal/notification/testutil/`
 
 ### Running Tests
 ```bash
 # Basic
 make test
+go test -v ./...
 
-# Comprehensive with coverage
+# Comprehensive with coverage and reporting
 ./run_tests.sh --all
 
 # Specific types
 ./run_tests.sh --unit --integration --coverage
+./run_tests.sh --security --automation
 
 # Challenge tests (validates complete project generation)
 cd tests/e2e/challenges
 go run cmd/runner/main.go -list
-go run cmd/runner/main.go -challenge notes-project-001
+go run cmd/runner/main.go -challenge notes-project-001 -interfaces cli -providers ollama
+
+# Custom timeout
+export TEST_TIMEOUT=30s
+./run_tests.sh --unit
+
+# Skip expensive tests
+./run_tests.sh --skip-expensive --skip-hardware
 ```
+
+### Test Results
+- Reports saved to `test-results/` directory with timestamps
+- Coverage reports: HTML and text formats
+- Comprehensive test reports with hardware information
+- Parallel execution support with configurable job count
 
 ## Key Subsystems
 
 ### Tools Package (`internal/tools/`)
-Comprehensive tool ecosystem for AI agents:
-- **Filesystem**: fs_read, fs_write, fs_edit, glob, grep
-- **Shell**: shell, shell_background, shell_output, shell_kill
-- **Web**: web_fetch, web_search
-- **Browser**: browser_launch, browser_navigate, browser_screenshot
-- **MultiEdit**: Transactional multi-file editing
-- All tools include security boundaries and validation
+Comprehensive tool ecosystem for AI agents with security boundaries:
+- **Filesystem** (`internal/tools/filesystem/`): fs_read, fs_write, fs_edit, glob, grep
+- **Shell** (`internal/tools/shell/`): shell, shell_background, shell_output, shell_kill with sandbox
+- **Web** (`internal/tools/web/`): web_fetch, web_search with rate limiting and caching
+- **Browser** (`internal/tools/browser/`): browser_launch, browser_navigate, browser_screenshot via chromedp
+- **MultiEdit** (`internal/tools/multiedit/`): Transactional multi-file editing with backup
+- **Mapping** (`internal/tools/mapping/`): Codebase analysis with treesitter support
+- **Git** (`internal/tools/git/`): Git automation, attribution, and smart commits
+- **Voice** (`internal/tools/voice/`): Voice input and transcription
+- **Confirmation** (`internal/tools/confirmation/`): User interaction with audit trails
+- **Notebook**: Jupyter notebook integration
 
 ### Editor Package (`internal/editor/`)
 Multi-format editing system optimized for different LLM models:
-- **Diff Format**: Unix unified diff (best for GPT-4, Gemini Pro)
-- **Whole File**: Complete file replacement (best for Claude, O1 models)
-- **Search/Replace**: Pattern-based with regex (best for Claude, Mistral)
-- **Line-Based**: Specific line range edits
-- Automatic format selection based on model capabilities
+- **Diff Format**: Unix unified diff (best for GPT-4, Gemini Pro, DeepSeek Coder)
+- **Whole File**: Complete file replacement (best for Claude, O1 models, Llama 3 8B)
+- **Search/Replace**: Pattern-based with regex (best for Claude, GPT-3.5, Mistral)
+- **Line-Based**: Specific line range edits (best for GPT-4, Claude, Gemini)
+- **Automatic format selection** based on model capabilities
+- **Thread-safe** concurrent editing with mutex protection
+- **Built-in validation** and backup support
+
+### LLM Package (`internal/llm/`)
+Extensive multi-provider integration:
+- **Providers**: OpenAI, Anthropic Claude, Gemini, xAI/Grok, OpenRouter, GitHub Copilot, Qwen, Ollama, Llama.cpp, vLLM, KoboldAI, Azure Bedrock, AWS, VertexAI, Groq
+- **Features**: Vision mode switching, cross-provider registry, health monitoring, compression, token budgeting, reasoning modes
+- **Free providers**: XAI (Grok), OpenRouter (free models), GitHub Copilot (with subscription), Qwen (2K/day)
+- **Advanced**: Anthropic Claude with extended thinking (200K context, 50K output), Gemini with 2M tokens
 
 ### Challenge Testing Framework
 Located at `tests/e2e/challenges/`:
 - Validates ability to generate complete working projects from prompts
 - Tests across multiple interfaces (CLI, TUI, REST, WebSocket, Desktop)
-- Supports distributed worker testing (2, 5, 10 workers)
-- Comprehensive validation (no placeholders, compiles, tests pass)
-- Detailed result organization and logging
+- Supports distributed worker testing (2, 5, 10+ workers)
+- Comprehensive validation (no placeholders, compiles, tests pass, runs correctly)
+- 6-layer validation: Directory structure, compilation, functionality, tests, README, Dockerfile
+- Challenge definitions in JSON format with metadata and requirements
+- Batch execution and detailed result reporting
+- Support for multiple providers and models in matrix testing
 
 ## Important Gotchas
 
 ### Critical Requirements
 - **Always work from HelixCode/ subdirectory** - not repository root
-- **Generate logo assets before first build** with `make logo-assets`
-- **Database/Redis are optional** - can be disabled for testing
-- **Environment variables override config file**
+- **Generate logo assets before first build** with `make logo-assets` 
+- **Database/Redis are optional** - can be disabled for testing by setting `database.host: ""`
+- **Environment variables override config file** - set in shell or `.env`
+- **Go version**: Requires Go 1.24.0 with toolchain go1.24.9
 
 ### SSH Worker Auto-Install
-- When adding workers via SSH, the system automatically installs Helix CLI
-- Requires SSH key-based authentication
+- When adding workers via SSH, the system automatically installs Helix CLI on remote machines
+- Requires SSH key-based authentication (passwordless)
 - Workers are health-checked every 30s by default
+- Workers can run on any platform with SSH access and Go installed
 
 ### Task Checkpointing
 - Long-running tasks automatically checkpoint at intervals (default 300s)
 - Enables work preservation and recovery from failures
 - Checkpoints stored in PostgreSQL for persistence
+- Task state includes dependencies, progress, and partial results
 
 ### Provider Fallback
 - LLM requests can fall back to alternative providers if primary fails
-- Configurable provider priority and retry logic
+- Configurable provider priority and retry logic (performance, cost, availability, round-robin)
 - Automatic rate limiting and quota management
+- Cross-provider request sharing and result caching
 
 ### Session Context
-- Development sessions maintain context across interactions
-- Context stored in Redis for fast access
+- Development sessions maintain context across interactions for continuity
+- Context stored in Redis for fast access with TTL
 - Automatic cleanup of expired sessions
+- Context includes file mentions, search results, and conversation history
+
+### MCP Protocol Implementation
+- Supports both stdio and SSE transports for Model Context Protocol
+- Tool integration and execution through standardized interface
+- Real-time bidirectional communication
+- Used by AI agents for tool execution and workflow management
+
+### Mobile & Specialized Platforms
+- **Gomobile**: iOS framework (.xcframework) and Android AAR from `shared/mobile-core/`
+- **Aurora OS**: Russian platform client with specialized UI
+- **Harmony OS**: Chinese platform client with native components
+- All mobile platforms use shared Go core with platform-specific UI
 
 ## Free AI Providers (No API Keys Required)
 
 The system includes multiple free providers out-of-the-box:
-- **XAI (Grok)**: grok-3-fast-beta, grok-3-mini-fast-beta
-- **OpenRouter**: deepseek-r1-free, meta-llama/llama-3.2-3b-instruct:free
-- **GitHub Copilot**: gpt-4o, claude-3.5-sonnet (free with GitHub subscription)
-- **Qwen**: 2,000 requests/day free tier with OAuth2
+- **XAI (Grok)**: grok-3-fast-beta, grok-3-mini-fast-beta, grok-3-beta - Fast and capable
+- **OpenRouter**: deepseek-r1-free, meta-llama/llama-3.2-3b-instruct:free - Free models from various providers  
+- **GitHub Copilot**: gpt-4o, claude-3.5-sonnet, claude-3.7-sonnet, o1, gemini-2.0-flash - Free with GitHub subscription
+- **Qwen**: 2,000 requests/day free tier with OAuth2 authentication
+
+## Premium AI Providers (Advanced Features)
+
+### Anthropic Claude ⭐ Industry-Leading
+- **Models**: Claude 4 Sonnet/Opus, Claude 3.7 Sonnet, Claude 3.5 Sonnet/Haiku, Claude 3 Opus/Sonnet/Haiku
+- **Context**: 200K tokens (all models)
+- **Max Output**: Up to 50K tokens (Claude 4/3.7)
+- **Advanced Features**: Extended thinking, prompt caching, 50K output, 200K context
+
+### Google Gemini (2M Token Context)  
+- **Models**: Gemini 2.5 Pro, Gemini 2.0 Flash, Gemini 1.5 Pro/Flash
+- **Context**: Up to 2M tokens (largest available)
+- **Features**: Multimodal, function calling, code execution
+
+### Other Premium Providers
+- **OpenAI**: GPT-4o, GPT-4 Turbo, O1 models
+- **Azure**: Enterprise-grade OpenAI models with Microsoft infrastructure
+- **AWS Bedrock**: Claude, Titan, Jurassic models via AWS
+- **VertexAI**: Google's enterprise models
+- **Groq**: Ultra-fast inference with Llama and Mixtral
 
 ## Memory Integration
 
-External memory providers are included as git submodules in `external/memory/`:
-- **Mem0**: Advanced memory management with embeddings
-- **Zep**: Long-term conversational memory
-- **Memonto**: Knowledge graph-based memory
-- **BaseAI**: Comprehensive memory platform with tools
+External memory providers are integrated via `internal/memory/`:
+- **Mem0**: Advanced memory management with embeddings and semantic search
+- **Zep**: Long-term conversational memory with message compression
+- **Memonto**: Knowledge graph-based memory with relationship mapping
+- **BaseAI**: Comprehensive memory platform with tools and analytics
+- **ChromaDB**: Vector database for similarity search
+- **FAISS**: Facebook AI's vector similarity library
+- **Pinecone**: Managed vector database service
+- **Qdrant**: Vector database for embeddings
+- **Weaviate**: Knowledge graph with vector search
+- **Character.AI**: Character-based memory system
 
 ## Docker Deployment
 
 ### Quick Start with Docker Compose
 
 ```bash
-# Clone repository
+# Clone repository  
 git clone https://github.com/your-org/helixcode.git
-cd helixcode/HelixCode
+cd HelixCode  # Important: work from HelixCode/ subdirectory
 
 # Configure environment
 cp .env.example .env
@@ -298,7 +485,7 @@ curl http://localhost/health
 ```
 
 ### Services Included
-- **helixcode-server**: Main application (ports 8080, 2222)
+- **helixcode-server**: Main application (ports 8080, 2222) 
 - **postgres**: PostgreSQL database (port 5432)
 - **redis**: Redis cache (port 6379)
 - **nginx**: Reverse proxy (ports 80, 443)
@@ -309,10 +496,17 @@ curl http://localhost/health
 Required in `.env`:
 ```bash
 HELIX_AUTH_JWT_SECRET=your-super-secure-jwt-secret
-HELIX_DATABASE_PASSWORD=your-secure-database-password
+HELIX_DATABASE_PASSWORD=your-secure-database-password  
 HELIX_REDIS_PASSWORD=your-secure-redis-password
 GRAFANA_ADMIN_PASSWORD=your-grafana-password
 ```
+
+### Docker Features
+- **Multi-stage build**: Builder stage with Go 1.24-alpine, production stage with minimal Alpine
+- **Health checks**: All services include health endpoints and monitoring
+- **Volume mounts**: Persistent data for PostgreSQL, Redis, logs, and SSH keys
+- **Non-root user**: Application runs as helixcode (uid: 1001) for security
+- **Asset generation**: Logo assets generated during build process
 
 ## Common Development Workflows
 

@@ -861,14 +861,3 @@ func (c *LLMClient) fallbackToMockGenerator(ctx context.Context, req *Completion
 		TokensUsed:   2580, // Mock token count
 	}, nil
 }
-
-	result := &CompletionResponse{
-		Content:      response.String(),
-		FinishReason: "stop",
-		TokensUsed:   2580, // Mock token count
-	}
-
-	}
-
-	return result, nil
-}
