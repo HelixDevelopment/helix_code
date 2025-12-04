@@ -389,27 +389,27 @@ func TestTUIAdapter(t *testing.T) {
 func TestPlatformUIAdapterFactory(t *testing.T) {
 	// Test desktop adapter
 	desktopAdapter := GetPlatformUIAdapter("desktop")
-	assert.IsType(t, &PlatformAdapter{}, desktopAdapter)
+	assert.IsType(t, &DesktopPlatformAdapter{}, desktopAdapter)
 	assert.Equal(t, "desktop", desktopAdapter.GetPlatformType())
 
 	// Test web adapter
 	webAdapter := GetPlatformUIAdapter("web")
-	assert.IsType(t, &PlatformAdapter{}, webAdapter)
+	assert.IsType(t, &WebPlatformAdapter{}, webAdapter)
 	assert.Equal(t, "web", webAdapter.GetPlatformType())
 
 	// Test mobile adapter
 	mobileAdapter := GetPlatformUIAdapter("mobile")
-	assert.IsType(t, &PlatformAdapter{}, mobileAdapter)
+	assert.IsType(t, &MobilePlatformAdapter{}, mobileAdapter)
 	assert.Equal(t, "mobile", mobileAdapter.GetPlatformType())
 
 	// Test TUI adapter
 	tuiAdapter := GetPlatformUIAdapter("tui")
-	assert.IsType(t, &PlatformAdapter{}, tuiAdapter)
+	assert.IsType(t, &TUIAdapter{}, tuiAdapter)
 	assert.Equal(t, "tui", tuiAdapter.GetPlatformType())
 
 	// Test default adapter (fallback to desktop)
 	defaultAdapter := GetPlatformUIAdapter("unknown")
-	assert.IsType(t, &PlatformAdapter{}, defaultAdapter)
+	assert.IsType(t, &DesktopPlatformAdapter{}, defaultAdapter)
 	assert.Equal(t, "desktop", defaultAdapter.GetPlatformType())
 }
 
@@ -805,8 +805,451 @@ func TestGetPlatformUIAdapterForCurrentPlatform(t *testing.T) {
 	assert.NotNil(t, adapter)
 
 	// Should be a desktop adapter by default
-	assert.IsType(t, &PlatformAdapter{}, adapter)
+	assert.IsType(t, &DesktopPlatformAdapter{}, adapter)
 	assert.Equal(t, "desktop", adapter.GetPlatformType())
+}
+
+// TestGetDefaultTheme tests GetDefaultTheme function
+func TestGetDefaultTheme(t *testing.T) {
+	tests := []struct {
+		platformType string
+		expected    string
+	}{
+		{"desktop", "system"},
+		{"web", "light"},
+		{"mobile", "system"},
+		{"unknown", "light"},
+		{"", "light"},
+		{"tui", "light"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.platformType, func(t *testing.T) {
+			adapter := NewBasePlatformAdapter(tt.platformType)
+			theme := adapter.GetDefaultTheme()
+			assert.Equal(t, tt.expected, theme)
+		})
+	}
+}
+
+// TestGetSupportedFormats tests GetSupportedFormats function
+func TestGetSupportedFormats(t *testing.T) {
+	tests := []struct {
+		platformType string
+		expected    []string
+	}{
+		{
+			"desktop",
+			[]string{"png", "jpg", "svg", "ico"},
+		},
+		{
+			"web",
+			[]string{"png", "svg", "webp"},
+		},
+		{
+			"mobile",
+			[]string{"png", "svg"},
+		},
+		{
+			"unknown",
+			[]string{"png"},
+		},
+		{
+			"tui",
+			[]string{"png"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.platformType, func(t *testing.T) {
+			adapter := NewBasePlatformAdapter(tt.platformType)
+			formats := adapter.GetSupportedFormats()
+			assert.Equal(t, tt.expected, formats)
+		})
+	}
+}
+
+// TestGetResolutionInfo tests GetResolutionInfo function
+func TestGetResolutionInfo(t *testing.T) {
+	tests := []struct {
+		platformType string
+		checkFunc   func(map[string]interface{}) bool
+	}{
+		{
+			"desktop",
+			func(info map[string]interface{}) bool {
+				dpi, ok := info["default_dpi"].(int)
+				if !ok || dpi != 96 {
+					return false
+				}
+				minWidth, ok := info["min_width"].(int)
+				if !ok || minWidth != 800 {
+					return false
+				}
+				minHeight, ok := info["min_height"].(int)
+				if !ok || minHeight != 600 {
+					return false
+				}
+				scaleFactors, ok := info["scale_factors"].([]float64)
+				if !ok || len(scaleFactors) != 4 {
+					return false
+				}
+				return true
+			},
+		},
+		{
+			"web",
+			func(info map[string]interface{}) bool {
+				dpi, ok := info["default_dpi"].(int)
+				if !ok || dpi != 96 {
+					return false
+				}
+				minWidth, ok := info["min_width"].(int)
+				if !ok || minWidth != 320 {
+					return false
+				}
+				minHeight, ok := info["min_height"].(int)
+				if !ok || minHeight != 568 {
+					return false
+				}
+				return true
+			},
+		},
+		{
+			"mobile",
+			func(info map[string]interface{}) bool {
+				dpi, ok := info["default_dpi"].(int)
+				if !ok || dpi != 160 {
+					return false
+				}
+				minWidth, ok := info["min_width"].(int)
+				if !ok || minWidth != 320 {
+					return false
+				}
+				minHeight, ok := info["min_height"].(int)
+				if !ok || minHeight != 480 {
+					return false
+				}
+				return true
+			},
+		},
+		{
+			"unknown",
+			func(info map[string]interface{}) bool {
+				dpi, ok := info["default_dpi"].(int)
+				if !ok || dpi != 96 {
+					return false
+				}
+				minWidth, ok := info["min_width"].(int)
+				if !ok || minWidth != 800 {
+					return false
+				}
+				minHeight, ok := info["min_height"].(int)
+				if !ok || minHeight != 600 {
+					return false
+				}
+				return true
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.platformType, func(t *testing.T) {
+			adapter := NewBasePlatformAdapter(tt.platformType)
+			info := adapter.GetResolutionInfo()
+			assert.True(t, tt.checkFunc(info), "Resolution info validation failed for platform: "+tt.platformType)
+		})
+	}
+}
+
+// TestNewConfigUI tests NewConfigUI function
+func TestNewConfigUI(t *testing.T) {
+	configPath := "/tmp/test_config.json"
+
+	ui, err := NewConfigUI(configPath)
+	require.NoError(t, err)
+	assert.NotNil(t, ui)
+
+	// Test that UI has expected properties
+	assert.Equal(t, configPath, ui.configPath)
+	assert.NotNil(t, ui.config)
+
+	// Test with empty path
+	ui, err = NewConfigUI("")
+	require.NoError(t, err)
+	assert.NotNil(t, ui)
+	assert.Equal(t, "", ui.configPath)
+}
+
+// TestGetNativeMenuBarInfo tests GetNativeMenuBarInfo function
+func TestGetNativeMenuBarInfo(t *testing.T) {
+	adapter := NewDesktopUIAdapter()
+	info := adapter.GetNativeMenuBarInfo()
+
+	assert.NotNil(t, info)
+
+	// Check expected properties
+	enabled, ok := info["enabled"].(bool)
+	assert.True(t, ok)
+	assert.True(t, enabled)
+
+	menuShortcuts, ok := info["menu_shortcuts"].(bool)
+	assert.True(t, ok)
+	assert.True(t, menuShortcuts)
+
+	globalMenu, ok := info["global_menu"].(bool)
+	assert.True(t, ok)
+	assert.True(t, globalMenu)
+
+	systemTray, ok := info["system_tray"].(bool)
+	assert.True(t, ok)
+	assert.True(t, systemTray)
+
+	dockIntegration, ok := info["dock_integration"].(bool)
+	assert.True(t, ok)
+	assert.True(t, dockIntegration)
+}
+
+// TestGetBrowserInfo tests GetBrowserInfo function
+func TestGetBrowserInfo(t *testing.T) {
+	adapter := NewWebUIAdapter()
+	info := adapter.GetBrowserInfo()
+
+	assert.NotNil(t, info)
+
+	// Check expected browser capabilities
+	localStorage, ok := info["local_storage"].(bool)
+	assert.True(t, ok)
+	assert.True(t, localStorage)
+
+	serviceWorkers, ok := info["service_workers"].(bool)
+	assert.True(t, ok)
+	assert.True(t, serviceWorkers)
+
+	webWorkers, ok := info["web_workers"].(bool)
+	assert.True(t, ok)
+	assert.True(t, webWorkers)
+
+	notifications, ok := info["notifications"].(bool)
+	assert.True(t, ok)
+	assert.True(t, notifications)
+
+	fullscreen, ok := info["fullscreen"].(bool)
+	assert.True(t, ok)
+	assert.True(t, fullscreen)
+
+	dragAndDrop, ok := info["drag_and_drop"].(bool)
+	assert.True(t, ok)
+	assert.True(t, dragAndDrop)
+
+	fileAPI, ok := info["file_api"].(bool)
+	assert.True(t, ok)
+	assert.True(t, fileAPI)
+
+	webgl, ok := info["webgl"].(bool)
+	assert.True(t, ok)
+	assert.True(t, webgl)
+
+	websocket, ok := info["websocket"].(bool)
+	assert.True(t, ok)
+	assert.True(t, websocket)
+}
+
+// TestGetMobileInfo tests GetMobileInfo function
+func TestGetMobileInfo(t *testing.T) {
+	adapter := NewMobileUIAdapter()
+	info := adapter.GetMobileInfo()
+
+	assert.NotNil(t, info)
+
+	// Check expected mobile capabilities
+	touch, ok := info["touch"].(bool)
+	assert.True(t, ok)
+	assert.True(t, touch)
+
+	accelerometer, ok := info["accelerometer"].(bool)
+	assert.True(t, ok)
+	assert.True(t, accelerometer)
+
+	geolocation, ok := info["geolocation"].(bool)
+	assert.True(t, ok)
+	assert.True(t, geolocation)
+
+	camera, ok := info["camera"].(bool)
+	assert.True(t, ok)
+	assert.True(t, camera)
+
+	vibration, ok := info["vibration"].(bool)
+	assert.True(t, ok)
+	assert.True(t, vibration)
+
+	offline, ok := info["offline"].(bool)
+	assert.True(t, ok)
+	assert.True(t, offline)
+
+	appCache, ok := info["app_cache"].(bool)
+	assert.True(t, ok)
+	assert.True(t, appCache)
+
+	nativeBridge, ok := info["native_bridge"].(bool)
+	assert.True(t, ok)
+	assert.True(t, nativeBridge)
+}
+
+// TestSetTheme tests SetTheme function
+func TestSetTheme(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Test setting to existing theme
+	adapter.SetTheme("dark")
+	assert.Equal(t, "dark", adapter.GetCurrentTheme())
+
+	// Test setting to existing theme
+	adapter.SetTheme("light")
+	assert.Equal(t, "light", adapter.GetCurrentTheme())
+
+	// Test setting to existing theme
+	adapter.SetTheme("system")
+	assert.Equal(t, "system", adapter.GetCurrentTheme())
+
+	// Test setting to non-existing theme (should not change current theme)
+	currentTheme := adapter.GetCurrentTheme()
+	adapter.SetTheme("nonexistent_theme")
+	assert.Equal(t, currentTheme, adapter.GetCurrentTheme()) // Should remain unchanged
+}
+
+// TestGetTheme tests GetTheme function
+func TestGetTheme(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Test getting theme when current is empty
+	theme := adapter.GetTheme()
+	assert.Equal(t, "system", theme.Name)
+	assert.Equal(t, "Matches system appearance", theme.Description)
+
+	// Test getting theme after setting one
+	adapter.SetCurrentTheme("dark")
+	theme = adapter.GetTheme()
+	assert.Equal(t, "dark", theme.Name)
+	assert.Equal(t, "Dark theme with dark background", theme.Description)
+	assert.Equal(t, "#0d6efd", theme.Primary)
+	assert.Equal(t, "#1a1a1a", theme.Background)
+	assert.Equal(t, "#ffffff", theme.Foreground)
+
+	// Test getting light theme
+	adapter.SetCurrentTheme("light")
+	theme = adapter.GetTheme()
+	assert.Equal(t, "light", theme.Name)
+	assert.Equal(t, "Light theme with bright background", theme.Description)
+	assert.Equal(t, "#007bff", theme.Primary)
+	assert.Equal(t, "#ffffff", theme.Background)
+	assert.Equal(t, "#000000", theme.Foreground)
+}
+
+// TestAddFeature tests AddFeature function
+func TestAddFeature(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+	originalFeatures := adapter.GetPlatformFeatures()
+	originalCount := len(originalFeatures)
+
+	// Test adding new feature
+	adapter.AddFeature("new_feature")
+	features := adapter.GetPlatformFeatures()
+	assert.Len(t, features, originalCount+1)
+	assert.Contains(t, features, "new_feature")
+
+	// Test adding duplicate feature (should not increase count)
+	adapter.AddFeature("new_feature")
+	features = adapter.GetPlatformFeatures()
+	assert.Len(t, features, originalCount+1) // Should remain same
+
+	// Test adding multiple new features
+	adapter.AddFeature("feature_1")
+	adapter.AddFeature("feature_2")
+	features = adapter.GetPlatformFeatures()
+	assert.Len(t, features, originalCount+3)
+	assert.Contains(t, features, "feature_1")
+	assert.Contains(t, features, "feature_2")
+}
+
+// TestHasFeature tests HasFeature function
+func TestHasFeature(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Test existing features
+	assert.True(t, adapter.HasFeature("native_menus"))
+	assert.True(t, adapter.HasFeature("system_tray"))
+	assert.True(t, adapter.HasFeature("file_dialogs"))
+	assert.True(t, adapter.HasFeature("notifications"))
+
+	// Test non-existing features
+	assert.False(t, adapter.HasFeature("nonexistent_feature"))
+	assert.False(t, adapter.HasFeature(""))
+	assert.False(t, adapter.HasFeature("fake_feature"))
+
+	// Test with custom added feature
+	adapter.AddFeature("custom_feature")
+	assert.True(t, adapter.HasFeature("custom_feature"))
+}
+
+// TestSetCurrentTheme tests SetCurrentTheme function
+func TestSetCurrentTheme(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Test setting current theme
+	adapter.SetCurrentTheme("light")
+	assert.Equal(t, "light", adapter.GetCurrentTheme())
+
+	adapter.SetCurrentTheme("dark")
+	assert.Equal(t, "dark", adapter.GetCurrentTheme())
+
+	// Test setting empty theme (should be allowed)
+	adapter.SetCurrentTheme("")
+	assert.Equal(t, "", adapter.GetCurrentTheme())
+
+	// Test setting non-existing theme (should be allowed)
+	adapter.SetCurrentTheme("custom_theme")
+	assert.Equal(t, "custom_theme", adapter.GetCurrentTheme())
+}
+
+// TestGetCurrentTheme tests GetCurrentTheme function
+func TestGetCurrentTheme(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Test default theme
+	assert.Equal(t, "system", adapter.GetCurrentTheme())
+
+	// Test after setting theme
+	adapter.SetCurrentTheme("light")
+	assert.Equal(t, "light", adapter.GetCurrentTheme())
+
+	adapter.SetCurrentTheme("dark")
+	assert.Equal(t, "dark", adapter.GetCurrentTheme())
+
+	// Test with empty theme
+	adapter.SetCurrentTheme("")
+	assert.Equal(t, "", adapter.GetCurrentTheme())
+}
+
+// TestThemeConsistency tests theme consistency across operations
+func TestThemeConsistency(t *testing.T) {
+	adapter := NewBasePlatformAdapter("desktop")
+
+	// Set theme using SetTheme (only works for existing themes)
+	adapter.SetTheme("light")
+	assert.Equal(t, "light", adapter.GetCurrentTheme())
+
+	// Get theme object
+	theme := adapter.GetTheme()
+	assert.Equal(t, "light", theme.Name)
+
+	// Set theme using SetCurrentTheme (allows any theme)
+	adapter.SetCurrentTheme("custom")
+	assert.Equal(t, "custom", adapter.GetCurrentTheme())
+
+	// GetTheme should return default theme for non-existing current theme
+	theme = adapter.GetTheme()
+	assert.Equal(t, "system", theme.Name) // Should return system as default
 }
 
 // BenchmarkPlatformUIAdapter benchmarks platform UI adapter operations

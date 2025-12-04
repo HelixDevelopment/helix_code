@@ -436,6 +436,35 @@ func (config *CogneeConfig) ToJSON() ([]byte, error) {
 
 // ToYAML converts configuration to YAML (basic implementation)
 func (config *CogneeConfig) ToYAML() ([]byte, error) {
+	if config == nil {
+		return nil, fmt.Errorf("config is nil")
+	}
+
+	// Initialize nil fields to avoid panics
+	if config.Optimization == nil {
+		config.Optimization = &CogneeOptimizationConfig{}
+	}
+	if config.Features == nil {
+		config.Features = &CogneeFeatureConfig{}
+	}
+	if config.RemoteAPI == nil {
+		config.RemoteAPI = &CogneeRemoteAPIConfig{}
+	}
+	if config.API == nil {
+		config.API = &CogneeServerConfig{}
+	}
+	if config.Performance == nil {
+		config.Performance = &CogneePerformanceConfig{}
+	}
+	if config.Cache == nil {
+		config.Cache = &CogneeCacheConfig{}
+	}
+	if config.Monitoring == nil {
+		config.Monitoring = &CogneeMonitoringConfig{}
+	}
+	if config.Providers == nil {
+		config.Providers = make(map[string]*CogneeProviderConfig)
+	}
 	// This is a basic YAML implementation
 	// In production, use a proper YAML library
 	yaml := fmt.Sprintf(`# Cognee.ai Configuration
@@ -612,14 +641,15 @@ func (config *CogneeConfig) Clone() *CogneeConfig {
 
 // Merge merges another configuration into this one
 func (config *CogneeConfig) Merge(other *CogneeConfig) {
-	if other.Enabled {
-		config.Enabled = other.Enabled
+	if other == nil {
+		return
 	}
 
-	if other.AutoStart {
-		config.AutoStart = other.AutoStart
-	}
+	// For simple fields, always override from other
+	config.Enabled = other.Enabled
+	config.AutoStart = other.AutoStart
 
+	// For string/int fields, only override if other has non-zero values (to preserve defaults)
 	if other.Host != "" {
 		config.Host = other.Host
 	}
@@ -706,6 +736,8 @@ func (config *CogneeConfig) Merge(other *CogneeConfig) {
 // Helper functions for merging
 
 func mergeRemoteAPIConfig(base, other *CogneeRemoteAPIConfig) {
+	// Always override booleans if other has them set
+	// For strings, only override if not empty (to preserve base values)
 	if other.ServiceEndpoint != "" {
 		base.ServiceEndpoint = other.ServiceEndpoint
 	}
@@ -718,18 +750,11 @@ func mergeRemoteAPIConfig(base, other *CogneeRemoteAPIConfig) {
 }
 
 func mergeOptimizationConfig(base, other *CogneeOptimizationConfig) {
-	if other.HostAware {
-		base.HostAware = other.HostAware
-	}
-	if other.CPUOptimization {
-		base.CPUOptimization = other.CPUOptimization
-	}
-	if other.GPUOptimization {
-		base.GPUOptimization = other.GPUOptimization
-	}
-	if other.MemoryOptimization {
-		base.MemoryOptimization = other.MemoryOptimization
-	}
+	// Always override booleans from other
+	base.HostAware = other.HostAware
+	base.CPUOptimization = other.CPUOptimization
+	base.GPUOptimization = other.GPUOptimization
+	base.MemoryOptimization = other.MemoryOptimization
 	if other.HostSpecific != nil {
 		if base.HostSpecific == nil {
 			base.HostSpecific = make(map[string]interface{})
@@ -741,27 +766,14 @@ func mergeOptimizationConfig(base, other *CogneeOptimizationConfig) {
 }
 
 func mergeFeatureConfig(base, other *CogneeFeatureConfig) {
-	if other.KnowledgeGraph {
-		base.KnowledgeGraph = other.KnowledgeGraph
-	}
-	if other.SemanticSearch {
-		base.SemanticSearch = other.SemanticSearch
-	}
-	if other.RealTimeProcessing {
-		base.RealTimeProcessing = other.RealTimeProcessing
-	}
-	if other.MultiModalSupport {
-		base.MultiModalSupport = other.MultiModalSupport
-	}
-	if other.GraphAnalytics {
-		base.GraphAnalytics = other.GraphAnalytics
-	}
-	if other.AdvancedInsights {
-		base.AdvancedInsights = other.AdvancedInsights
-	}
-	if other.AutoOptimization {
-		base.AutoOptimization = other.AutoOptimization
-	}
+	// Always override booleans from other
+	base.KnowledgeGraph = other.KnowledgeGraph
+	base.SemanticSearch = other.SemanticSearch
+	base.RealTimeProcessing = other.RealTimeProcessing
+	base.MultiModalSupport = other.MultiModalSupport
+	base.GraphAnalytics = other.GraphAnalytics
+	base.AdvancedInsights = other.AdvancedInsights
+	base.AutoOptimization = other.AutoOptimization
 }
 
 func mergeAPIConfig(base, other *CogneeServerConfig) {

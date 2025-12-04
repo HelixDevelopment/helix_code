@@ -393,8 +393,33 @@ func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
 			"select":     "Enter",
 			"cancel":     "Esc",
 		},
-		Sections: []TUIConfigSection{},
-		Actions:  []TUIConfigAction{},
+		Sections: []TUIConfigSection{
+			{
+				ID:          "application",
+				Title:       "Application",
+				Type:        "form",
+				Expanded:    true,
+				Fields: []TUIConfigField{
+					{
+						ID:          "app_name",
+						Type:        "text",
+						Label:       "Application Name",
+						HelpText:    "The name of the application",
+						Required:    true,
+						Placeholder: "My Application",
+					},
+					{
+						ID:          "app_version",
+						Type:        "text",
+						Label:       "Version",
+						HelpText:    "Application version",
+						Required:    true,
+						Placeholder: "1.0.0",
+					},
+				},
+			},
+		},
+		Actions: []TUIConfigAction{},
 	}
 	return form
 }
@@ -451,6 +476,24 @@ func NewWebUIAdapter() *WebPlatformAdapter {
 // NewWebPlatformAdapter creates a new web platform adapter
 func NewWebPlatformAdapter() *WebPlatformAdapter {
 	base := NewBasePlatformAdapter("web")
+	base.features = []string{
+		"responsive_design",
+		"pwa",
+		"websockets",
+		"offline_support",
+		"touch_support",
+		"browser_storage",
+		"push_notifications",
+		"service_worker",
+		"css_animations",
+		"local_storage",
+		"service_workers",
+		"web_workers",
+		"push_api",
+		"geolocation",
+		"camera_api",
+		"microphone_api",
+	}
 	return &WebPlatformAdapter{
 		PlatformAdapter: base,
 	}
@@ -469,6 +512,67 @@ func NewMobileUIAdapter() *MobilePlatformAdapter {
 // NewMobilePlatformAdapter creates a new mobile platform adapter
 func NewMobilePlatformAdapter() *MobilePlatformAdapter {
 	base := NewBasePlatformAdapter("mobile")
+	base.features = []string{
+		"touch_gestures",
+		"biometric_auth",
+		"push_notifications",
+		"offline_first",
+		"app_lifecycle",
+		"camera_access",
+		"location_services",
+		"device_orientation",
+		"native_plugins",
+		"gps_location",
+		"accelerometer",
+		"gyroscope",
+		"vibration",
+		"offline_mode",
+		"app_store_integration",
+	}
+	// Customize themes for mobile
+	base.themes = map[string]PlatformTheme{
+		"system": {
+			Name:        "System",
+			Description: "Matches system appearance",
+			Primary:     "",
+			Secondary:   "",
+			Background:  "",
+			Foreground:  "",
+		},
+		"light": {
+			Name:        "Light",
+			Description: "Light theme with bright background",
+			Primary:     "#007bff",
+			Secondary:   "#6c757d",
+			Background:  "#ffffff",
+			Foreground:  "#000000",
+		},
+		"dark": {
+			Name:        "Dark",
+			Description: "Dark theme with dark background",
+			Primary:     "#0d6efd",
+			Secondary:   "#6c757d",
+			Background:  "#1a1a1a",
+			Foreground:  "#ffffff",
+		},
+		"mobile_light": {
+			Name:        "Mobile Light",
+			Description: "Optimized light theme for mobile",
+			Primary:     "#007AFF",
+			Secondary:   "#5856D6",
+			Background:  "#F2F2F7",
+			Foreground:  "#000000",
+		},
+		"mobile_dark": {
+			Name:        "Mobile Dark",
+			Description: "Optimized dark theme for mobile",
+			Primary:     "#0A84FF",
+			Secondary:   "#5E5CE6",
+			Background:  "#000000",
+			Foreground:  "#FFFFFF",
+		},
+	}
+	base.currentTheme = "system"
 	return &MobilePlatformAdapter{
 		PlatformAdapter: base,
 	}
@@ -492,7 +596,45 @@ func NewTUIAdapter() *TUIAdapter {
 		"clipboard_access",
 		"resize_support",
 		"cursor_styles",
+		"terminal_shortcuts",
+		"resize_handling",
 	}
+	// Customize themes for TUI
+	base.themes = map[string]PlatformTheme{
+		"system": {
+			Name:        "System",
+			Description: "Matches system appearance",
+			Primary:     "#00ff00",
+			Secondary:   "#008000",
+			Background:  "#000000",
+			Foreground:  "#00ff00",
+		},
+		"light": {
+			Name:        "Light",
+			Description: "Light theme with bright background",
+			Primary:     "#000000",
+			Secondary:   "#666666",
+			Background:  "#ffffff",
+			Foreground:  "#000000",
+		},
+		"dark": {
+			Name:        "Dark",
+			Description: "Dark theme with dark background",
+			Primary:     "#00ff00",
+			Secondary:   "#008000",
+			Background:  "#1a1a1a",
+			Foreground:  "#00ff00",
+		},
+		"terminal": {
+			Name:        "Terminal",
+			Description: "Classic terminal theme",
+			Primary:     "#00ff00",
+			Secondary:   "#00ff00",
+			Background:  "#000000",
+			Foreground:  "#00ff00",
+		},
+	}
+	base.currentTheme = "dark"
 	return &TUIAdapter{
 		PlatformAdapter: base,
 	}

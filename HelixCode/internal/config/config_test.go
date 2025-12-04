@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"dev.helix.code/internal/database"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,19 +16,22 @@ func TestLoadConfig(t *testing.T) {
 	configPath := filepath.Join(tempDir, "config.yaml")
 	
 	// Write test config
-	content := `
-version: "1.0.0"
-server:
-  address: "0.0.0.0"
-  port: 8080
-database:
-  host: "localhost"
-  port: 5432
-  dbname: "test"
-  user: "test"
-auth:
-  jwt_secret: "test-jwt-secret-for-testing"
-`
+	content := `{
+  "version": "1.0.0",
+  "server": {
+    "address": "0.0.0.0",
+    "port": 8080
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "dbname": "test",
+    "user": "test"
+  },
+  "auth": {
+    "jwt_secret": "test-jwt-secret-for-testing"
+  }
+}`
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
 
@@ -58,9 +62,20 @@ func TestValidateConfig(t *testing.T) {
 		{
 			name: "valid config",
 			config: Config{
+				Version: "1.0.0",
+				Application: ApplicationConfig{
+					Environment: "development",
+				},
 				Server: ServerConfig{Port: 8080},
+				Database: database.Config{
+					Port: 5432,
+				},
 				Auth: AuthConfig{
-					JWTSecret: "test-secret",
+					JWTSecret: "test-jwt-secret-32-chars-long-!!!",
+				},
+				LLM: LLMConfig{
+					DefaultProvider: "local",
+					MaxTokens:      1000,
 				},
 			},
 			wantErr: false,
@@ -148,8 +163,19 @@ func TestConfigValidationEdgeCases(t *testing.T) {
 		{
 			name: "minimal valid config",
 			config: Config{
+				Version: "1.0.0",
+				Application: ApplicationConfig{
+					Environment: "development",
+				},
 				Server: ServerConfig{Port: 8080},
-				Auth:  AuthConfig{JWTSecret: "test-secret"},
+				Database: database.Config{
+					Port: 5432,
+				},
+				Auth: AuthConfig{JWTSecret: "test-jwt-secret-32-chars-long-!!!"},
+				LLM: LLMConfig{
+					DefaultProvider: "local",
+					MaxTokens:      1000,
+				},
 			},
 			valid: true,
 		},
@@ -190,4 +216,353 @@ func TestConfigValidationEdgeCases(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLoadFunction(t *testing.T) {
+	// Test Load function with environment setup
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	
+	// Create a valid config file
+	content := `version: "1.0.0"
+application:
+  name: "HelixCode"
+  environment: "development"
+server:
+  address: "0.0.0.0"
+  port: 8080
+database:
+  host: "localhost"
+  port: 5432
+  dbname: "helixcode"
+  user: "helixcode"
+auth:
+  jwt_secret: "test-jwt-secret-32-chars-long-for-testing"
+workers:
+  health_check_interval: 30
+  max_concurrent_tasks: 10
+tasks:
+  max_retries: 3
+  checkpoint_interval: 300
+llm:
+  default_provider: "local"
+  max_tokens: 4096
+  temperature: 0.7
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"
+`
+	err := os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	// Set environment to point to our test config
+	oldConfig := os.Getenv("HELIX_CONFIG")
+	oldJWT := os.Getenv("HELIX_AUTH_JWT_SECRET")
+	defer func() {
+		if oldConfig != "" {
+			os.Setenv("HELIX_CONFIG", oldConfig)
+		} else {
+			os.Unsetenv("HELIX_CONFIG")
+		}
+		if oldJWT != "" {
+			os.Setenv("HELIX_AUTH_JWT_SECRET", oldJWT)
+		} else {
+			os.Unsetenv("HELIX_AUTH_JWT_SECRET")
+		}
+	}()
+	os.Setenv("HELIX_CONFIG", configPath)
+
+	// Test Load function
+	config, err := Load()
+	require.NoError(t, err)
+	assert.NotNil(t, config)
+	assert.Equal(t, "1.0.0", config.Version)
+	assert.Equal(t, "HelixCode", config.Application.Name)
+	assert.Equal(t, 8080, config.Server.Port)
+}
+
+func TestCreateDefaultConfigFunction(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "default_config.yaml")
+
+	// Test CreateDefaultConfig function
+	err := CreateDefaultConfig(configPath)
+	require.NoError(t, err)
+
+	// Verify file was created
+	_, err = os.Stat(configPath)
+	assert.NoError(t, err)
+
+	// Verify content
+	content, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(content), "# HelixCode Server Configuration")
+	assert.Contains(t, string(content), "server:")
+	assert.Contains(t, string(content), "port: 8080")
+}
+
+func TestConfigUtilityFunctions(t *testing.T) {
+	// Test GetEnvOrDefault
+	oldVal := os.Getenv("TEST_VAR")
+	defer func() {
+		if oldVal != "" {
+			os.Setenv("TEST_VAR", oldVal)
+		} else {
+			os.Unsetenv("TEST_VAR")
+		}
+	}()
+
+	os.Setenv("TEST_VAR", "test_value")
+	assert.Equal(t, "test_value", GetEnvOrDefault("TEST_VAR", "default"))
+	assert.Equal(t, "default", GetEnvOrDefault("NONEXISTENT_VAR", "default"))
+
+	// Test GetEnvIntOrDefault
+	os.Setenv("TEST_INT_VAR", "123")
+	assert.Equal(t, 123, GetEnvIntOrDefault("TEST_INT_VAR", 0))
+	assert.Equal(t, 456, GetEnvIntOrDefault("NONEXISTENT_INT_VAR", 456))
+
+	// Test invalid int value
+	os.Setenv("TEST_INVALID_INT", "not_a_number")
+	assert.Equal(t, 789, GetEnvIntOrDefault("TEST_INVALID_INT", 789))
+}
+
+func TestConfigManagerInitialize(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+
+	// Create config manager
+	manager, err := NewHelixConfigManager(configPath)
+	require.NoError(t, err)
+
+	// Test Initialize method (should be no-op for compatibility)
+	err = manager.Initialize(nil)
+	assert.NoError(t, err)
+}
+
+func TestConfigManagerLifecycle(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+
+	// Test when config doesn't exist (creates default)
+	manager, err := NewHelixConfigManager(configPath)
+	require.NoError(t, err)
+	assert.True(t, manager.IsConfigPresent())
+
+	// Test GetConfig
+	config := manager.GetConfig()
+	assert.NotNil(t, config)
+
+	// Test UpdateConfig
+	originalPort := config.Server.Port
+	err = manager.UpdateConfig(func(cfg *Config) {
+		cfg.Server.Port = 9999
+	})
+	require.NoError(t, err)
+
+	// Verify update
+	updatedConfig := manager.GetConfig()
+	assert.Equal(t, 9999, updatedConfig.Server.Port)
+	assert.NotEqual(t, originalPort, updatedConfig.Server.Port)
+}
+
+func TestConfigManagerFileOperations(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	exportPath := filepath.Join(tempDir, "export.json")
+	backupPath := filepath.Join(tempDir, "backup.json")
+
+	manager, err := NewHelixConfigManager(configPath)
+	require.NoError(t, err)
+
+	// Test ExportConfig
+	err = manager.ExportConfig(exportPath)
+	require.NoError(t, err)
+	_, err = os.Stat(exportPath)
+	assert.NoError(t, err)
+
+	// Test ImportConfig
+	err = manager.ImportConfig(exportPath)
+	require.NoError(t, err)
+
+	// Test BackupConfig
+	err = manager.BackupConfig(backupPath)
+	require.NoError(t, err)
+	_, err = os.Stat(backupPath)
+	assert.NoError(t, err)
+
+	// Test ResetToDefaults
+	originalPort := manager.GetConfig().Server.Port
+	err = manager.ResetToDefaults()
+	require.NoError(t, err)
+	// Port should be reset to default (8080)
+	assert.Equal(t, 8080, manager.GetConfig().Server.Port)
+	assert.NotEqual(t, originalPort, manager.GetConfig().Server.Port)
+}
+
+func TestGlobalConfigFunctions(t *testing.T) {
+	tempDir := t.TempDir()
+	
+	// Set environment for testing
+	oldConfigPath := os.Getenv("HELIX_CONFIG_PATH")
+	defer func() {
+		if oldConfigPath != "" {
+			os.Setenv("HELIX_CONFIG_PATH", oldConfigPath)
+		} else {
+			os.Unsetenv("HELIX_CONFIG_PATH")
+		}
+	}()
+
+	testConfigPath := filepath.Join(tempDir, "test_config.json")
+	os.Setenv("HELIX_CONFIG_PATH", testConfigPath)
+
+	// Test GetConfigPath
+	assert.Equal(t, testConfigPath, GetConfigPath())
+
+	// Test IsConfigPresent (should be false initially)
+	assert.False(t, IsConfigPresent())
+
+	// Test SaveConfig
+	testConfig := &Config{
+		Version: "1.0.0",
+		Application: ApplicationConfig{
+			Name:        "Test App",
+			Environment: "test",
+		},
+		Server: ServerConfig{
+			Port: 9090,
+		},
+		Database: database.Config{
+			Host:   "localhost",
+			Port:   5432,
+			DBName: "test",
+		},
+		Auth: AuthConfig{
+			JWTSecret: "test-jwt-secret-32-chars-long-for-testing",
+		},
+		LLM: LLMConfig{
+			DefaultProvider: "local",
+			MaxTokens:      2048,
+		},
+	}
+
+	err := SaveConfig(testConfig)
+	require.NoError(t, err)
+
+	// Test IsConfigPresent (should be true now)
+	assert.True(t, IsConfigPresent())
+
+	// Test LoadConfig
+	loadedConfig, err := LoadConfig()
+	require.NoError(t, err)
+	assert.Equal(t, testConfig.Version, loadedConfig.Version)
+	assert.Equal(t, testConfig.Application.Name, loadedConfig.Application.Name)
+	assert.Equal(t, testConfig.Server.Port, loadedConfig.Server.Port)
+
+	// Test UpdateConfig
+	err = UpdateConfig(func(cfg *Config) {
+		cfg.Server.Port = 7777
+		cfg.Application.Name = "Updated App"
+	})
+	require.NoError(t, err)
+
+	// Verify update
+	updatedConfig, err := LoadConfig()
+	require.NoError(t, err)
+	assert.Equal(t, 7777, updatedConfig.Server.Port)
+	assert.Equal(t, "Updated App", updatedConfig.Application.Name)
+}
+
+func TestHelixConfigAliasFunctions(t *testing.T) {
+	tempDir := t.TempDir()
+	
+	// Set environment for testing
+	oldConfigPath := os.Getenv("HELIX_CONFIG_PATH")
+	defer func() {
+		if oldConfigPath != "" {
+			os.Setenv("HELIX_CONFIG_PATH", oldConfigPath)
+		} else {
+			os.Unsetenv("HELIX_CONFIG_PATH")
+		}
+	}()
+
+	testConfigPath := filepath.Join(tempDir, "helix_test_config.json")
+	os.Setenv("HELIX_CONFIG_PATH", testConfigPath)
+
+	// Test Helix aliases
+	assert.Equal(t, testConfigPath, GetHelixConfigPath())
+	assert.False(t, IsHelixConfigPresent())
+
+	// Test CreateDefaultHelixConfig
+	err := CreateDefaultHelixConfig()
+	require.NoError(t, err)
+	assert.True(t, IsHelixConfigPresent())
+
+	// Test LoadHelixConfig
+	config, err := LoadHelixConfig()
+	require.NoError(t, err)
+	assert.NotNil(t, config)
+
+	// Test SaveHelixConfig
+	config.Application.Name = "Helix Test"
+	err = SaveHelixConfig(config)
+	require.NoError(t, err)
+
+	// Test UpdateHelixConfig
+	err = UpdateHelixConfig(func(cfg *Config) {
+		cfg.Server.Port = 8888
+	})
+	require.NoError(t, err)
+
+	// Verify update
+	updatedConfig, err := LoadHelixConfig()
+	require.NoError(t, err)
+	assert.Equal(t, 8888, updatedConfig.Server.Port)
+}
+
+func TestConfigurationManagerWithOptions(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "options_config.json")
+
+	// Test NewConfigurationManager with options
+	options := &ConfigurationOptions{
+		ConfigPath:       configPath,
+		AutoSave:         true,
+		AutoBackup:       false,
+		EnableEncryption: false,
+		ValidationMode:   "lenient",
+		TransformMode:    "none",
+		MaxBackups:       5,
+		Compression:      false,
+		LogLevel:         "info",
+	}
+
+	manager, err := NewConfigurationManager(options)
+	require.NoError(t, err)
+	assert.NotNil(t, manager)
+	assert.Equal(t, configPath, manager.GetConfigPath())
+}
+
+func TestConfigWatcherAndInfo(t *testing.T) {
+	// Test NewConfigWatcher (returns nil for now)
+	watcher, err := NewConfigWatcher("/dummy/path")
+	assert.Nil(t, watcher)
+	assert.NoError(t, err)
+
+	// Test GetConfigInfo (returns empty struct for now)
+	info, err := GetConfigInfo()
+	assert.NotNil(t, info)
+	assert.NoError(t, err)
+}
+
+func TestConfigManagerWatcherSupport(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "watcher_config.json")
+
+	manager, err := NewHelixConfigManager(configPath)
+	require.NoError(t, err)
+
+	// Test AddWatcher (no-op for now)
+	manager.AddWatcher(nil) // Should not panic
+	// No assertions needed since it's a no-op
 }

@@ -543,8 +543,8 @@ func (c *cache) get() (string, bool) {
 
 // getWithKey gets cached context with specific key
 func (c *cache) getWithKey(key string) (string, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	// Check if exists
 	context, exists := c.data[key]

@@ -120,7 +120,7 @@ func (d *Detector) CanRunModel(modelSize string) bool {
 
 // GetCompilationFlags returns hardware-specific compilation flags
 func (d *Detector) GetCompilationFlags() []string {
-	var flags []string
+	flags := make([]string, 0)
 
 	// GPU acceleration flags
 	if d.info.GPU.SupportsCUDA {

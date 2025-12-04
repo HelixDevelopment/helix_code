@@ -44,6 +44,10 @@ func NewCogneeIntegration(config *config.CogneeConfig, logger *logging.Logger) *
 
 // Initialize initializes the Cognee integration
 func (ci *CogneeIntegration) Initialize(ctx context.Context, config *config.CogneeConfig) error {
+	if config == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
+	
 	ci.mu.Lock()
 	defer ci.mu.Unlock()
 
@@ -52,15 +56,25 @@ func (ci *CogneeIntegration) Initialize(ctx context.Context, config *config.Cogn
 	}
 
 	ci.config = config
-	ci.client = &CogneeClient{
-		baseURL: ci.config.RemoteAPI.ServiceEndpoint,
-		apiKey:  ci.config.RemoteAPI.APIKey,
-		timeout: ci.config.RemoteAPI.Timeout,
-		logger:  ci.logger,
+	
+	// Initialize client only if RemoteAPI config is provided
+	if config.RemoteAPI != nil {
+		ci.client = &CogneeClient{
+			baseURL: config.RemoteAPI.ServiceEndpoint,
+			apiKey:  config.RemoteAPI.APIKey,
+			timeout: config.RemoteAPI.Timeout,
+			logger:  ci.logger,
+		}
 	}
 
 	ci.isRunning = true
-	ci.logger.Info("Cognee integration initialized with mode=%s, endpoint=%s", ci.config.Mode, ci.client.baseURL)
+	
+	// Log appropriate message based on whether we have RemoteAPI config
+	if ci.client != nil {
+		ci.logger.Info("Cognee integration initialized with mode=%s, endpoint=%s", ci.config.Mode, ci.client.baseURL)
+	} else {
+		ci.logger.Info("Cognee integration initialized with mode=%s, no remote endpoint", ci.config.Mode)
+	}
 
 	return nil
 }
@@ -90,6 +104,10 @@ func (ci *CogneeIntegration) StoreMemory(ctx context.Context, memory *MemoryItem
 		return fmt.Errorf("Cognee integration not initialized")
 	}
 
+	if memory == nil {
+		return fmt.Errorf("memory item cannot be nil")
+	}
+
 	// Implementation would call Cognee API to store memory
 	ci.logger.Debug("Storing memory in Cognee id=%s, type=%s", memory.ID, memory.Type)
 
@@ -104,6 +122,10 @@ func (ci *CogneeIntegration) RetrieveMemory(ctx context.Context, query *Retrieva
 
 	if !ci.isRunning {
 		return nil, fmt.Errorf("Cognee integration not initialized")
+	}
+
+	if query == nil {
+		return nil, fmt.Errorf("query cannot be nil")
 	}
 
 	ci.logger.Debug("Retrieving memory from Cognee query=%s, limit=%d", query.Query, query.Limit)
@@ -183,6 +205,10 @@ func (ci *CogneeIntegration) ApplyOptimizations(ctx context.Context, recommendat
 
 	if !ci.isRunning {
 		return fmt.Errorf("Cognee integration not initialized")
+	}
+
+	if recommendations == nil {
+		return fmt.Errorf("recommendations cannot be nil")
 	}
 
 	ci.logger.Info("Applying optimizations count=%d", len(recommendations))

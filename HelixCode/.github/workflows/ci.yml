@@ -99,7 +99,31 @@ jobs:
           HELIX_AUTH_JWT_SECRET: test-secret-key
           HELIX_REDIS_PASSWORD: ""
         run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+          echo "Starting test execution at $(date)"
+          START_TIME=$(date +%s)
+          
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./... 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+          
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "Test execution completed in ${DURATION} seconds"
+          
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Duration: ${DURATION} seconds" >> $GITHUB_STEP_SUMMARY
+          echo "- Exit Code: ${TEST_EXIT_CODE}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ ${TEST_EXIT_CODE} -ne 0 ]; then
+            echo "## Failed Tests" >> $GITHUB_STEP_SUMMARY
+            grep -E "^--- FAIL:|FAIL\s+\w+" test-output.log >> $GITHUB_STEP_SUMMARY || true
+            exit ${TEST_EXIT_CODE}
+          fi
+          
+          # Performance gate - tests should complete within reasonable time
+          if [ ${DURATION} -gt 600 ]; then
+            echo "Warning: Test execution took ${DURATION} seconds (threshold: 600s)"
+            echo "⚠️ Test execution exceeded 10 minutes" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -108,6 +132,22 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+          verbose: true
+
+      - name: Coverage Summary
+        run: |
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
+          
+      - name: Coverage Quality Gate
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | tail -1 | grep -o '[0-9.]*%' | tr -d '%')
+          echo "Current coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 85" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% is below minimum threshold of 85%"
+            exit 1
+          fi
+          echo "Coverage ${COVERAGE}% meets minimum threshold"
 
   # Build main binary
   build-main:
@@ -278,3 +318,136 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
+
+  # Performance benchmarks
+  performance:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run performance benchmarks
+        run: |
+          echo "## Performance Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "Running benchmarks..." >> $GITHUB_STEP_SUMMARY
+          
+          # Run benchmarks with timeout
+          timeout 300s go test -bench=. -benchmem -run=^$ ./... 2>&1 | tee benchmark-output.log || {
+            echo "⚠️ Benchmarks timed out or failed" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          }
+          
+          # Extract key metrics
+          if grep -q "Benchmark" benchmark-output.log; then
+            echo "### Benchmark Results" >> $GITHUB_STEP_SUMMARY
+            grep -E "^Benchmark.*ns/op" benchmark-output.log | head -10 >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No benchmarks found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Documentation testing
+  docs:
+    name: Documentation Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Check documentation links
+        run: |
+          echo "## Documentation Check Results" >> $GITHUB_STEP_SUMMARY
+          
+          # Check README exists and is not empty
+          if [ -f README.md ] && [ -s README.md ]; then
+            echo "✅ README.md exists and is not empty" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ README.md is missing or empty" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          # Check for broken internal links
+          find . -name "*.md" -not -path "./vendor/*" -not -path "./.git/*" | while read file; do
+            echo "Checking $file..."
+            # Extract markdown links and check if files exist
+            grep -oE '\[.*\]\([^)]+\)' "$file" | while read link; do
+              # Extract the path part
+              path=$(echo "$link" | sed -E 's/\[.*\]\(([^)]+)\)/\1/')
+              # Remove URL fragments and external URLs
+              if [[ "$path" != http* ]] && [[ "$path" != "#"* ]]; then
+                path=$(echo "$path" | cut -d'#' -f1)
+                if [ -n "$path" ] && [ ! -f "$path" ] && [ ! -d "$path" ]; then
+                  echo "❌ Broken link in $file: $path" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            done
+          done
+          
+          echo "✅ Documentation link check completed" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate API documentation
+        run: |
+          echo "Generating API documentation..."
+          
+          # Check if there are public API endpoints
+          if grep -r "gin\." cmd/server/ > /dev/null 2>&1; then
+            echo "✅ Found Gin HTTP endpoints" >> $GITHUB_STEP_SUMMARY
+            
+            # Install swag if not present
+            go install github.com/swaggo/swag/cmd/swag@latest
+            
+            # Generate swagger documentation
+            if command -v swag &> /dev/null; then
+              cd cmd/server
+              swag init -g main.go -o ../../docs/api/ 2>/dev/null || {
+                echo "⚠️ Swagger generation failed (may need configuration)" >> $GITHUB_STEP_SUMMARY
+              }
+              cd ../..
+            fi
+          else
+            echo "ℹ️ No Gin endpoints found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check Go examples in documentation
+        run: |
+          echo "Checking Go code examples in documentation..."
+          
+          # Find all Go code blocks in markdown files
+          find . -name "*.md" -not -path "./vendor/*" | while read file; do
+            echo "Checking Go examples in $file"
+            
+            # Extract Go code blocks
+            awk '/```go/,/```/' "$file" | temp_code=$(mktemp)
+            awk '/```go/,/```/' "$file" > "$temp_code"
+            
+            # If we have Go code (not just the delimiters), try to validate it
+            if [ $(wc -l < "$temp_code") -gt 2 ]; then
+              # Remove the ```go and ``` markers
+              sed -i '/^```go$/d; /^```$/d' "$temp_code"
+              
+              # Try to gofmt the code to check syntax
+              if command -v gofmt &> /dev/null; then
+                if gofmt -l "$temp_code" > /dev/null 2>&1; then
+                  echo "✅ Go example syntax is valid in $file" >> $GITHUB_STEP_SUMMARY
+                else
+                  echo "⚠️ Go example has syntax issues in $file" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            fi
+            
+            rm -f "$temp_code"
+          done

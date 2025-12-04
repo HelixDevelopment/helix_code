@@ -35,13 +35,59 @@ test:
 	$(GO_TEST) -v ./...
 	@echo "✅ Tests complete"
 
+# Comprehensive test suite
+test-all: test test-coverage test-benchmark test-docs
+	@echo "🎉 All tests completed successfully!"
+
+# Run coverage analysis
+test-coverage:
+	@echo "📊 Running coverage analysis..."
+	@if [ -f scripts/coverage.sh ]; then \
+		./scripts/coverage.sh; \
+	else \
+		echo "⚠️ Coverage script not found, running basic coverage..."; \
+		$(GO_TEST) -v -race -coverprofile=coverage.out -covermode=atomic ./...; \
+		go tool cover -func=coverage.out | tail -1; \
+	fi
+
+# Run benchmarks
+test-benchmark:
+	@echo "⚡ Running benchmarks..."
+	@if [ -f scripts/benchmark.sh ]; then \
+		./scripts/benchmark.sh; \
+	else \
+		echo "⚠️ Benchmark script not found, running basic benchmarks..."; \
+		$(GO_TEST) -bench=. -benchmem ./... || true; \
+	fi
+
+# Run documentation tests
+test-docs:
+	@echo "📚 Testing documentation..."
+	@if [ -f scripts/docs-validate.sh ]; then \
+		./scripts/docs-validate.sh; \
+	else \
+		echo "⚠️ Documentation validation script not found, skipping..."; \
+	fi
+
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning build artifacts..."
 	rm -rf bin/
 	rm -rf dist/
 	rm -rf coverage.out
+	rm -rf coverage.html
+	rm -rf coverage-reports/
+	rm -rf benchmark-reports/
+	rm -rf doc-reports/
 	@echo "✅ Clean complete"
+
+# Clean all generated files including reports
+clean-all: clean
+	@echo "🧹 Cleaning all generated files..."
+	rm -rf *.out
+	rm -rf *.html
+	rm -rf -reports/
+	@echo "✅ All clean complete"
 
 # Generate logo assets
 logo-assets:
