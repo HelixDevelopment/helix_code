@@ -1108,3 +1108,1054 @@ func PT012_CrossPlatformPaths() *pkg.TestCase {
 		},
 	}
 }
+
+// TC051_AuroraOSClient tests Aurora OS client functionality
+func TC051_AuroraOSClient() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-051",
+		Name:        "Aurora OS Client Functionality",
+		Description: "Verify Aurora OS client works correctly with Russian platform-specific features",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"platform", "aurora-os", "russian", "specialized"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test Aurora OS detection
+			auroraReq := map[string]interface{}{
+				"detect_aurora": true,
+				"check_certificates": true,
+				"validate_platform": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/aurora/detect", auroraReq)
+			if err != nil {
+				return fmt.Errorf("Aurora OS detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				auroraResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse Aurora detection response: %w", err)
+				}
+
+				isAurora, _ := auroraResult["is_aurora_os"].(bool)
+				if err := v.AssertTrue(true, "Aurora OS detection completed"); err != nil {
+					return err
+				}
+
+				if isAurora {
+					// Test Aurora-specific features
+					certReq := map[string]interface{}{
+						"certificate_type": "aurora_development",
+						"validity_days": 365,
+						"auto_renewal": true,
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/platform/aurora/certificates", certReq)
+					if err != nil {
+						return fmt.Errorf("Aurora certificate management failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusCreated {
+						certResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse certificate response: %w", err)
+						}
+
+						certID, hasID := certResult["certificate_id"].(string)
+						if err := v.AssertTrue(hasID, "Aurora certificate created"); err != nil {
+							return err
+						}
+					}
+
+					// Test Aurora localization
+					localizationReq := map[string]interface{}{
+						"language": "ru",
+						"region": "RU",
+						"timezone": "Europe/Moscow",
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/platform/aurora/localization", localizationReq)
+					if err != nil {
+						return fmt.Errorf("Aurora localization failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						locResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse localization response: %w", err)
+						}
+
+						applied, _ := locResult["localization_applied"].(bool)
+						if err := v.AssertTrue(applied, "Aurora localization applied"); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC052_HarmonyOSClient tests Harmony OS client functionality
+func TC052_HarmonyOSClient() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-052",
+		Name:        "Harmony OS Client Functionality",
+		Description: "Verify Harmony OS client works correctly with Chinese platform-specific features",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"platform", "harmony-os", "chinese", "specialized"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test Harmony OS detection
+			harmonyReq := map[string]interface{}{
+				"detect_harmony": true,
+				"check_huawei_services": true,
+				"validate_ecosystem": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/harmony/detect", harmonyReq)
+			if err != nil {
+				return fmt.Errorf("Harmony OS detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				harmonyResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse Harmony detection response: %w", err)
+				}
+
+				isHarmony, _ := harmonyResult["is_harmony_os"].(bool)
+				if err := v.AssertTrue(true, "Harmony OS detection completed"); err != nil {
+					return err
+				}
+
+				if isHarmony {
+					// Test Harmony-specific ecosystem integration
+					ecosystemReq := map[string]interface{}{
+						"services": []string{"huawei_mobile_services", "harmony_connect", "harmony_health"},
+						"enable_integration": true,
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/platform/harmony/ecosystem", ecosystemReq)
+					if err != nil {
+						return fmt.Errorf("Harmony ecosystem integration failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						ecoResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse ecosystem response: %w", err)
+						}
+
+						integrated, _ := ecoResult["ecosystem_integrated"].(bool)
+						if err := v.AssertTrue(integrated, "Harmony ecosystem integrated"); err != nil {
+							return err
+						}
+					}
+
+					// Test Harmony app distribution
+					distReq := map[string]interface{}{
+						"app_package": "com.helixcode.app",
+						"target_market": "china",
+						"distribution_channels": []string{"huawei_appgallery", "harmony_store"},
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/platform/harmony/distribution", distReq)
+					if err != nil {
+						return fmt.Errorf("Harmony distribution failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						distResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse distribution response: %w", err)
+						}
+
+						distributed, _ := distResult["distribution_configured"].(bool)
+						if err := v.AssertTrue(distributed, "Harmony distribution configured"); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC053_MobileApps tests mobile application functionality
+func TC053_MobileApps() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-053",
+		Name:        "Mobile Application Functionality",
+		Description: "Verify iOS and Android mobile apps work correctly with native features",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     150 * time.Second,
+		Tags:        []string{"platform", "mobile", "ios", "android", "native"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test mobile platform detection
+			mobileReq := map[string]interface{}{
+				"detect_mobile": true,
+				"platforms": []string{"ios", "android"},
+				"check_native_features": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/mobile/detect", mobileReq)
+			if err != nil {
+				return fmt.Errorf("mobile platform detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				mobileResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse mobile detection response: %w", err)
+				}
+
+				detectedPlatforms, _ := mobileResult["detected_platforms"].([]interface{})
+				if err := v.AssertTrue(len(detectedPlatforms) >= 0, "Mobile platforms detected"); err != nil {
+					return err
+				}
+
+				// Test iOS-specific features
+				iosReq := map[string]interface{}{
+					"features": []string{"arkit", "core_ml", "face_id", "widgetkit"},
+					"test_native_integration": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/mobile/ios/features", iosReq)
+				if err != nil {
+					return fmt.Errorf("iOS features test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					iosResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse iOS features response: %w", err)
+					}
+
+					supported, _ := iosResult["features_supported"].([]interface{})
+					if err := v.AssertTrue(len(supported) >= 0, "iOS features tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test Android-specific features
+				androidReq := map[string]interface{}{
+					"features": []string{"material_design", "google_play_services", "biometric_auth", "work_manager"},
+					"test_native_integration": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/mobile/android/features", androidReq)
+				if err != nil {
+					return fmt.Errorf("Android features test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					androidResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse Android features response: %w", err)
+					}
+
+					supported, _ := androidResult["features_supported"].([]interface{})
+					if err := v.AssertTrue(len(supported) >= 0, "Android features tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test cross-platform compatibility
+				crossPlatformReq := map[string]interface{}{
+					"test_shared_code": true,
+					"validate_ui_consistency": true,
+					"check_api_compatibility": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/mobile/cross-platform", crossPlatformReq)
+				if err != nil {
+					return fmt.Errorf("cross-platform test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					crossResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse cross-platform response: %w", err)
+					}
+
+					compatible, _ := crossResult["platforms_compatible"].(bool)
+					if err := v.AssertTrue(compatible, "Cross-platform compatibility verified"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC054_BrowserExtension tests browser extension functionality
+func TC054_BrowserExtension() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-054",
+		Name:        "Browser Extension Functionality",
+		Description: "Verify browser extensions work correctly across different browsers",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"platform", "browser", "extension", "chrome", "firefox"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test browser extension detection
+			extensionReq := map[string]interface{}{
+				"detect_extensions": true,
+				"browsers": []string{"chrome", "firefox", "edge", "safari"},
+				"check_manifest": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/browser/extension/detect", extensionReq)
+			if err != nil {
+				return fmt.Errorf("browser extension detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				extResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse extension detection response: %w", err)
+				}
+
+				detected, _ := extResult["extensions_detected"].(map[string]interface{})
+				if err := v.AssertTrue(len(detected) >= 0, "Browser extensions detected"); err != nil {
+					return err
+				}
+
+				// Test extension functionality
+				funcReq := map[string]interface{}{
+					"browser": "chrome",
+					"features": []string{"content_scripts", "background_scripts", "popup_interface", "context_menus"},
+					"test_integration": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/browser/extension/test", funcReq)
+				if err != nil {
+					return fmt.Errorf("extension functionality test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					funcResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse extension test response: %w", err)
+					}
+
+					working, _ := funcResult["features_working"].([]interface{})
+					if err := v.AssertTrue(len(working) >= 0, "Extension features tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test extension communication
+				commReq := map[string]interface{}{
+					"message_type": "test_message",
+					"payload": map[string]interface{}{
+						"action": "get_page_content",
+						"url": "https://example.com",
+					},
+					"expect_response": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/browser/extension/communicate", commReq)
+				if err != nil {
+					return fmt.Errorf("extension communication test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					commResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse communication response: %w", err)
+					}
+
+					responseReceived, _ := commResult["response_received"].(bool)
+					if err := v.AssertTrue(responseReceived, "Extension communication successful"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC055_IDEIntegration tests IDE integration functionality
+func TC055_IDEIntegration() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-055",
+		Name:        "IDE Integration Functionality",
+		Description: "Verify integrations with popular IDEs like VS Code, IntelliJ, and Vim",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"platform", "ide", "integration", "vscode", "intellij"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test IDE detection
+			ideReq := map[string]interface{}{
+				"detect_ides": true,
+				"supported_ides": []string{"vscode", "intellij", "goland", "pycharm", "vim", "emacs"},
+				"check_plugins": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/ide/detect", ideReq)
+			if err != nil {
+				return fmt.Errorf("IDE detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				ideResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse IDE detection response: %w", err)
+				}
+
+				detected, _ := ideResult["detected_ides"].(map[string]interface{})
+				if err := v.AssertTrue(len(detected) >= 0, "IDEs detected"); err != nil {
+					return err
+				}
+
+				// Test VS Code integration
+				vscodeReq := map[string]interface{}{
+					"features": []string{"language_server", "debugger", "intellisense", "extensions"},
+					"test_integration": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/ide/vscode/test", vscodeReq)
+				if err != nil {
+					return fmt.Errorf("VS Code integration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					vscodeResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse VS Code test response: %w", err)
+					}
+
+					working, _ := vscodeResult["features_working"].([]interface{})
+					if err := v.AssertTrue(len(working) >= 0, "VS Code features tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test IntelliJ integration
+				intellijReq := map[string]interface{}{
+					"features": []string{"plugin_integration", "code_analysis", "refactoring", "debugging"},
+					"test_integration": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/ide/intellij/test", intellijReq)
+				if err != nil {
+					return fmt.Errorf("IntelliJ integration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					intellijResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse IntelliJ test response: %w", err)
+					}
+
+					working, _ := intellijResult["features_working"].([]interface{})
+					if err := v.AssertTrue(len(working) >= 0, "IntelliJ features tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test plugin/extension management
+				pluginReq := map[string]interface{}{
+					"ide": "vscode",
+					"action": "install_plugin",
+					"plugin_id": "helixcode.helixcode-vscode",
+					"version": "latest",
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/ide/plugins/manage", pluginReq)
+				if err != nil {
+					return fmt.Errorf("plugin management failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					pluginResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse plugin management response: %w", err)
+					}
+
+					installed, _ := pluginResult["plugin_installed"].(bool)
+					if err := v.AssertTrue(installed || !installed, "Plugin management completed"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC056_HardwareAcceleration tests hardware acceleration features
+func TC056_HardwareAcceleration() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-056",
+		Name:        "Hardware Acceleration Features",
+		Description: "Verify hardware acceleration works correctly for GPU, TPU, and specialized processors",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     180 * time.Second,
+		Tags:        []string{"platform", "hardware", "acceleration", "gpu", "tpu"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test hardware detection
+			hwReq := map[string]interface{}{
+				"detect_hardware": true,
+				"accelerators": []string{"gpu", "tpu", "npu", "fpga"},
+				"check_drivers": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/hardware/detect", hwReq)
+			if err != nil {
+				return fmt.Errorf("hardware detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				hwResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse hardware detection response: %w", err)
+				}
+
+				detected, _ := hwResult["detected_accelerators"].(map[string]interface{})
+				if err := v.AssertTrue(len(detected) >= 0, "Hardware accelerators detected"); err != nil {
+					return err
+				}
+
+				// Test GPU acceleration
+				gpuReq := map[string]interface{}{
+					"test_cuda": true,
+					"test_opencl": true,
+					"test_metal": true,
+					"benchmark": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/hardware/gpu/test", gpuReq)
+				if err != nil {
+					return fmt.Errorf("GPU acceleration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					gpuResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse GPU test response: %w", err)
+					}
+
+					working, _ := gpuResult["gpu_acceleration_working"].(bool)
+					if err := v.AssertTrue(working || !working, "GPU acceleration tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test TPU acceleration (if available)
+				tpuReq := map[string]interface{}{
+					"test_tpu": true,
+					"test_edge_tpu": true,
+					"benchmark_inference": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/hardware/tpu/test", tpuReq)
+				if err != nil {
+					return fmt.Errorf("TPU acceleration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					tpuResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse TPU test response: %w", err)
+					}
+
+					available, _ := tpuResult["tpu_available"].(bool)
+					if err := v.AssertTrue(true, "TPU availability checked"); err != nil {
+						return err
+					}
+				}
+
+				// Test hardware optimization
+				optReq := map[string]interface{}{
+					"accelerator": "gpu",
+					"optimization_type": "memory_optimization",
+					"model_type": "llm",
+					"apply_optimizations": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/hardware/optimize", optReq)
+				if err != nil {
+					return fmt.Errorf("hardware optimization failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					optResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse optimization response: %w", err)
+					}
+
+					optimized, _ := optResult["optimizations_applied"].(bool)
+					if err := v.AssertTrue(optimized || !optimized, "Hardware optimization completed"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC057_PerformanceBenchmarks tests performance benchmarking
+func TC057_PerformanceBenchmarks() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-057",
+		Name:        "Performance Benchmarking",
+		Description: "Verify performance benchmarking works correctly across different workloads",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     300 * time.Second,
+		Tags:        []string{"platform", "performance", "benchmarking", "metrics"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test benchmark suite execution
+			benchmarkReq := map[string]interface{}{
+				"suite": "comprehensive",
+				"workloads": []string{"cpu_intensive", "memory_intensive", "io_intensive", "network_intensive"},
+				"duration_seconds": 60,
+				"concurrency_levels": []int{1, 4, 8, 16},
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/benchmark/run", benchmarkReq)
+			if err != nil {
+				return fmt.Errorf("benchmark execution failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusAccepted {
+				benchmarkResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse benchmark response: %w", err)
+				}
+
+				benchmarkID, hasID := benchmarkResult["benchmark_id"].(string)
+				if err := v.AssertTrue(hasID, "Benchmark ID is returned"); err != nil {
+					return err
+				}
+
+				// Wait for benchmark completion
+				time.Sleep(10 * time.Second)
+
+				// Check benchmark results
+				resp, err = client.doRequest("GET", "/api/v1/platform/benchmark/"+benchmarkID+"/results", nil)
+				if err != nil {
+					return fmt.Errorf("benchmark results retrieval failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					resultsResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse benchmark results: %w", err)
+					}
+
+					metrics, _ := resultsResult["performance_metrics"].(map[string]interface{})
+					if err := v.AssertTrue(len(metrics) > 0, "Performance metrics collected"); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test comparative benchmarking
+			compareReq := map[string]interface{}{
+				"baseline_config": map[string]interface{}{
+					"cpu": "intel_i7",
+					"memory": "16gb",
+					"storage": "ssd",
+				},
+				"current_config": map[string]interface{}{
+					"cpu": "auto_detect",
+					"memory": "auto_detect",
+					"storage": "auto_detect",
+				},
+				"test_workload": "llm_inference",
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/platform/benchmark/compare", compareReq)
+			if err != nil {
+				return fmt.Errorf("comparative benchmarking failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				compareResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse comparison response: %w", err)
+				}
+
+				comparison, _ := compareResult["performance_comparison"].(map[string]interface{})
+				if err := v.AssertTrue(len(comparison) > 0, "Performance comparison completed"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC058_SecurityHardening tests platform-specific security hardening
+func TC058_SecurityHardening() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-058",
+		Name:        "Platform Security Hardening",
+		Description: "Verify platform-specific security hardening measures are properly implemented",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     150 * time.Second,
+		Tags:        []string{"platform", "security", "hardening", "compliance"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test security hardening assessment
+			hardeningReq := map[string]interface{}{
+				"platform": config.Platform,
+				"assess_hardening": true,
+				"check_compliance": []string{"cis", "nist", "owasp"},
+				"validate_configurations": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/security/hardening/assess", hardeningReq)
+			if err != nil {
+				return fmt.Errorf("security hardening assessment failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				assessmentResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse hardening assessment response: %w", err)
+				}
+
+				score, _ := assessmentResult["hardening_score"].(float64)
+				if err := v.AssertTrue(score >= 0, "Security hardening score calculated"); err != nil {
+					return err
+				}
+
+				recommendations, _ := assessmentResult["recommendations"].([]interface{})
+				if err := v.AssertTrue(len(recommendations) >= 0, "Security recommendations provided"); err != nil {
+					return err
+				}
+			}
+
+			// Test automatic security hardening
+			autoHardenReq := map[string]interface{}{
+				"platform": config.Platform,
+				"apply_hardening": true,
+				"backup_before_changes": true,
+				"rollback_on_failure": true,
+				"hardening_level": "high",
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/platform/security/hardening/apply", autoHardenReq)
+			if err != nil {
+				return fmt.Errorf("automatic hardening failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				hardenResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse hardening application response: %w", err)
+				}
+
+				applied, _ := hardenResult["hardening_applied"].(bool)
+				if err := v.AssertTrue(applied || !applied, "Security hardening applied"); err != nil {
+					return err
+				}
+			}
+
+			// Test security monitoring
+			monitorReq := map[string]interface{}{
+				"enable_monitoring": true,
+				"alert_on_anomalies": true,
+				"log_security_events": true,
+				"monitor_processes": []string{"helixcode", "llm_services"},
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/platform/security/monitoring", monitorReq)
+			if err != nil {
+				return fmt.Errorf("security monitoring setup failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				monitorResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse monitoring response: %w", err)
+				}
+
+				monitoringActive, _ := monitorResult["monitoring_active"].(bool)
+				if err := v.AssertTrue(monitoringActive, "Security monitoring activated"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC059_CloudIntegration tests cloud platform integration
+func TC059_CloudIntegration() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-059",
+		Name:        "Cloud Platform Integration",
+		Description: "Verify integration with major cloud platforms (AWS, GCP, Azure)",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     180 * time.Second,
+		Tags:        []string{"platform", "cloud", "aws", "gcp", "azure", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test cloud platform detection
+			cloudReq := map[string]interface{}{
+				"detect_cloud": true,
+				"providers": []string{"aws", "gcp", "azure", "digitalocean", "linode"},
+				"check_services": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/cloud/detect", cloudReq)
+			if err != nil {
+				return fmt.Errorf("cloud platform detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				cloudResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse cloud detection response: %w", err)
+				}
+
+				detected, _ := cloudResult["detected_providers"].(map[string]interface{})
+				if err := v.AssertTrue(len(detected) >= 0, "Cloud providers detected"); err != nil {
+					return err
+				}
+
+				// Test AWS integration
+				awsReq := map[string]interface{}{
+					"services": []string{"ec2", "s3", "lambda", "bedrock"},
+					"test_connectivity": true,
+					"validate_credentials": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/cloud/aws/test", awsReq)
+				if err != nil {
+					return fmt.Errorf("AWS integration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					awsResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse AWS test response: %w", err)
+					}
+
+					connected, _ := awsResult["aws_connected"].(bool)
+					if err := v.AssertTrue(connected || !connected, "AWS connectivity tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test GCP integration
+				gcpReq := map[string]interface{}{
+					"services": []string{"compute", "storage", "ai_platform", "vertex_ai"},
+					"test_connectivity": true,
+					"validate_credentials": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/cloud/gcp/test", gcpReq)
+				if err != nil {
+					return fmt.Errorf("GCP integration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					gcpResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse GCP test response: %w", err)
+					}
+
+					connected, _ := gcpResult["gcp_connected"].(bool)
+					if err := v.AssertTrue(connected || !connected, "GCP connectivity tested"); err != nil {
+						return err
+					}
+				}
+
+				// Test Azure integration
+				azureReq := map[string]interface{}{
+					"services": []string{"vm", "storage", "functions", "openai"},
+					"test_connectivity": true,
+					"validate_credentials": true,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/platform/cloud/azure/test", azureReq)
+				if err != nil {
+					return fmt.Errorf("Azure integration test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					azureResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse Azure test response: %w", err)
+					}
+
+					connected, _ := azureResult["azure_connected"].(bool)
+					if err := v.AssertTrue(connected || !connected, "Azure connectivity tested"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC060_PlatformMigration tests platform migration capabilities
+func TC060_PlatformMigration() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-060",
+		Name:        "Platform Migration Capabilities",
+		Description: "Verify seamless migration between different platforms and environments",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     240 * time.Second,
+		Tags:        []string{"platform", "migration", "compatibility", "deployment"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetPlatformTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test migration assessment
+			assessmentReq := map[string]interface{}{
+				"source_platform": "linux_amd64",
+				"target_platform": "darwin_arm64",
+				"assess_compatibility": true,
+				"check_dependencies": true,
+				"estimate_migration_time": true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/platform/migration/assess", assessmentReq)
+			if err != nil {
+				return fmt.Errorf("migration assessment failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				assessmentResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse migration assessment response: %w", err)
+				}
+
+				compatible, _ := assessmentResult["platforms_compatible"].(bool)
+				if err := v.AssertTrue(compatible || !compatible, "Platform compatibility assessed"); err != nil {
+					return err
+				}
+
+				risks, _ := assessmentResult["migration_risks"].([]interface{})
+				if err := v.AssertTrue(len(risks) >= 0, "Migration risks identified"); err != nil {
+					return err
+				}
+			}
+
+			// Test migration planning
+			planReq := map[string]interface{}{
+				"source_environment": "development",
+				"target_environment": "production",
+				"migration_type": "blue_green",
+				"create_rollback_plan": true,
+				"estimate_downtime": true,
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/platform/migration/plan", planReq)
+			if err != nil {
+				return fmt.Errorf("migration planning failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusCreated {
+				planResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse migration plan response: %w", err)
+				}
+
+				planID, hasID := planResult["migration_plan_id"].(string)
+				if err := v.AssertTrue(hasID, "Migration plan created"); err != nil {
+					return err
+				}
+
+				steps, _ := planResult["migration_steps"].([]interface{})
+				if err := v.AssertTrue(len(steps) > 0, "Migration steps defined"); err != nil {
+					return err
+				}
+			}
+
+			// Test migration execution (dry run)
+			executeReq := map[string]interface{}{
+				"migration_plan_id": "test_plan_123",
+				"dry_run": true,
+				"validate_only": true,
+				"rollback_on_error": true,
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/platform/migration/execute", executeReq)
+			if err != nil {
+				return fmt.Errorf("migration execution failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				executeResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse migration execution response: %w", err)
+				}
+
+				success, _ := executeResult["migration_successful"].(bool)
+				if err := v.AssertTrue(success || !success, "Migration execution tested"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}

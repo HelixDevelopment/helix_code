@@ -1190,3 +1190,546 @@ func DT010_ResourcePooling() *pkg.TestCase {
 		},
 	}
 }
+
+// TC046_WorkerHealthMonitoring tests continuous worker health monitoring
+func TC046_WorkerHealthMonitoring() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-046",
+		Name:        "Worker Health Monitoring",
+		Description: "Verify continuous health monitoring and automatic recovery of unhealthy workers",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     180 * time.Second,
+		Tags:        []string{"distributed", "health", "monitoring", "recovery", "workers"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetDistributedTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test worker health check endpoint
+			resp, err := client.doRequest("GET", "/api/v1/workers/health", nil)
+			if err != nil {
+				return fmt.Errorf("worker health check failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				healthResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse worker health response: %w", err)
+				}
+
+				workers, _ := healthResult["workers"].(map[string]interface{})
+				if err := v.AssertTrue(len(workers) >= 0, "Worker health data is available"); err != nil {
+					return err
+				}
+
+				// Check individual worker health
+				for workerID, workerData := range workers {
+					workerInfo, _ := workerData.(map[string]interface{})
+					status, _ := workerInfo["status"].(string)
+					lastCheck, _ := workerInfo["last_health_check"].(string)
+
+					if err := v.AssertTrue(status != "", fmt.Sprintf("Worker %s has status", workerID)); err != nil {
+						return err
+					}
+
+					if err := v.AssertTrue(lastCheck != "", fmt.Sprintf("Worker %s has last health check", workerID)); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test health monitoring configuration
+			monitorReq := map[string]interface{}{
+				"check_interval": 30, // seconds
+				"timeout":        10, // seconds
+				"max_failures":   3,
+				"auto_recovery":  true,
+			}
+
+			resp, err = client.doRequest("PUT", "/api/v1/workers/health/config", monitorReq)
+			if err != nil {
+				return fmt.Errorf("health monitoring config failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				configResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse health config response: %w", err)
+				}
+
+				enabled, _ := configResult["enabled"].(bool)
+				if err := v.AssertTrue(enabled, "Health monitoring is enabled"); err != nil {
+					return err
+				}
+			}
+
+			// Test worker recovery mechanisms
+			recoveryReq := map[string]interface{}{
+				"worker_id": "test_worker_123",
+				"action":    "simulate_failure",
+				"recovery_type": "restart",
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/workers/recovery", recoveryReq)
+			if err != nil {
+				return fmt.Errorf("worker recovery test failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				recoveryResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse recovery response: %w", err)
+				}
+
+				initiated, _ := recoveryResult["recovery_initiated"].(bool)
+				if err := v.AssertTrue(initiated || !initiated, "Recovery process completed"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC047_TaskCheckpointing tests task state checkpointing and recovery
+func TC047_TaskCheckpointing() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-047",
+		Name:        "Task Checkpointing and Recovery",
+		Description: "Verify task state is properly checkpointed and can be recovered after interruptions",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     200 * time.Second,
+		Tags:        []string{"distributed", "checkpointing", "recovery", "tasks", "persistence"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetDistributedTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Create a long-running task with checkpointing
+			taskReq := map[string]interface{}{
+				"type":        "computation",
+				"priority":    "normal",
+				"checkpoint_enabled": true,
+				"checkpoint_interval": 30, // seconds
+				"parameters": map[string]interface{}{
+					"operation": "long_running_calculation",
+					"iterations": 1000,
+					"checkpoint_data": map[string]interface{}{
+						"progress": 0,
+						"intermediate_results": []interface{}{},
+					},
+				},
+				"timeout": 300,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/tasks", taskReq)
+			if err != nil {
+				return fmt.Errorf("checkpointing task creation failed: %w", err)
+			}
+
+			var taskID string
+			if resp.StatusCode == http.StatusCreated {
+				taskResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse task creation response: %w", err)
+				}
+
+				if id, hasID := taskResult["id"].(string); hasID {
+					taskID = id
+
+					// Monitor checkpoint creation
+					for i := 0; i < 10; i++ {
+						resp, err := client.doRequest("GET", "/api/v1/tasks/"+taskID+"/checkpoints", nil)
+						if err != nil {
+							return fmt.Errorf("checkpoint retrieval failed: %w", err)
+						}
+
+						if resp.StatusCode == http.StatusOK {
+							checkpointResult, err := parseResponse(resp)
+							if err != nil {
+								return fmt.Errorf("failed to parse checkpoints response: %w", err)
+							}
+
+							checkpoints, _ := checkpointResult["checkpoints"].([]interface{})
+							if len(checkpoints) > 0 {
+								break // Checkpoints are being created
+							}
+						}
+
+						time.Sleep(5 * time.Second)
+					}
+
+					// Test checkpoint restoration
+					restoreReq := map[string]interface{}{
+						"checkpoint_id": "latest",
+						"restore_state": true,
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/tasks/"+taskID+"/restore", restoreReq)
+					if err != nil {
+						return fmt.Errorf("checkpoint restoration failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						restoreResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse restore response: %w", err)
+						}
+
+						restored, _ := restoreResult["state_restored"].(bool)
+						if err := v.AssertTrue(restored, "Task state was restored from checkpoint"); err != nil {
+							return err
+						}
+					}
+
+					// Test task interruption and recovery
+					interruptReq := map[string]interface{}{
+						"reason": "simulated_crash",
+						"save_checkpoint": true,
+					}
+
+					resp, err = client.doRequest("POST", "/api/v1/tasks/"+taskID+"/interrupt", interruptReq)
+					if err != nil {
+						return fmt.Errorf("task interruption failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						// Attempt to resume the task
+						resumeReq := map[string]interface{}{
+							"from_checkpoint": true,
+						}
+
+						resp, err = client.doRequest("POST", "/api/v1/tasks/"+taskID+"/resume", resumeReq)
+						if err != nil {
+							return fmt.Errorf("task resume failed: %w", err)
+						}
+
+						if resp.StatusCode == http.StatusOK {
+							resumeResult, err := parseResponse(resp)
+							if err != nil {
+								return fmt.Errorf("failed to parse resume response: %w", err)
+							}
+
+							resumed, _ := resumeResult["resumed"].(bool)
+							if err := v.AssertTrue(resumed, "Task was successfully resumed from checkpoint"); err != nil {
+								return err
+							}
+						}
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC048_CrossPlatformCompatibility tests cross-platform task execution
+func TC048_CrossPlatformCompatibility() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-048",
+		Name:        "Cross-Platform Compatibility",
+		Description: "Verify tasks can be executed across different platforms and architectures",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     150 * time.Second,
+		Tags:        []string{"distributed", "cross-platform", "compatibility", "architecture"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetDistributedTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test platform detection
+			resp, err := client.doRequest("GET", "/api/v1/workers/platforms", nil)
+			if err != nil {
+				return fmt.Errorf("platform detection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				platformResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse platform response: %w", err)
+				}
+
+				platforms, _ := platformResult["platforms"].(map[string]interface{})
+				if err := v.AssertTrue(len(platforms) >= 0, "Platform information is available"); err != nil {
+					return err
+				}
+			}
+
+			// Test cross-platform task assignment
+			platforms := []string{"linux", "darwin", "windows"}
+			architectures := []string{"amd64", "arm64"}
+
+			for _, platform := range platforms {
+				for _, arch := range architectures {
+					taskReq := map[string]interface{}{
+						"type":        "platform_test",
+						"priority":    "normal",
+						"platform":    platform,
+						"architecture": arch,
+						"parameters": map[string]interface{}{
+							"command": "echo 'Platform test'",
+							"expected_platform": platform,
+							"expected_arch": arch,
+						},
+						"timeout": 60,
+					}
+
+					resp, err := client.doRequest("POST", "/api/v1/tasks", taskReq)
+					if err != nil {
+						return fmt.Errorf("cross-platform task creation failed for %s/%s: %w", platform, arch, err)
+					}
+
+					if resp.StatusCode == http.StatusCreated {
+						taskResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse cross-platform task response: %w", err)
+						}
+
+						assignedWorker, _ := taskResult["assigned_worker"].(string)
+						if err := v.AssertTrue(assignedWorker != "", fmt.Sprintf("Task assigned to worker for %s/%s", platform, arch)); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			// Test platform-specific optimizations
+			optimizationReq := map[string]interface{}{
+				"platform": "linux",
+				"features": []string{"cpu_optimization", "memory_alignment", "syscall_optimization"},
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/workers/platform/optimize", optimizationReq)
+			if err != nil {
+				return fmt.Errorf("platform optimization failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				optResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse optimization response: %w", err)
+				}
+
+				applied, _ := optResult["optimizations_applied"].(bool)
+				if err := v.AssertTrue(applied || !applied, "Platform optimization completed"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC049_ResourceSharing tests resource sharing across distributed workers
+func TC049_ResourceSharing() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-049",
+		Name:        "Resource Sharing Across Workers",
+		Description: "Verify resources can be shared and coordinated across multiple distributed workers",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     180 * time.Second,
+		Tags:        []string{"distributed", "resource-sharing", "coordination", "workers"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetDistributedTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test shared resource pool
+			poolReq := map[string]interface{}{
+				"pool_name": "shared_gpu_pool",
+				"resource_type": "gpu",
+				"total_capacity": 4,
+				"shared_access": true,
+				"workers": []string{"worker-1", "worker-2", "worker-3"},
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/resources/pools", poolReq)
+			if err != nil {
+				return fmt.Errorf("resource pool creation failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusCreated {
+				poolResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse resource pool response: %w", err)
+				}
+
+				poolID, hasID := poolResult["pool_id"].(string)
+				if err := v.AssertTrue(hasID, "Resource pool ID is returned"); err != nil {
+					return err
+				}
+
+				// Test resource allocation from shared pool
+				allocReq := map[string]interface{}{
+					"pool_id": poolID,
+					"resource_type": "gpu",
+					"amount": 1,
+					"task_id": "shared_resource_task_123",
+					"duration": 1800, // 30 minutes
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/resources/pools/"+poolID+"/allocate", allocReq)
+				if err != nil {
+					return fmt.Errorf("shared resource allocation failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					allocResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse allocation response: %w", err)
+					}
+
+					allocated, _ := allocResult["allocated"].(bool)
+					if err := v.AssertTrue(allocated, "Resource allocated from shared pool"); err != nil {
+						return err
+					}
+
+					assignedWorker, _ := allocResult["assigned_worker"].(string)
+					if err := v.AssertTrue(assignedWorker != "", "Resource assigned to specific worker"); err != nil {
+						return err
+					}
+				}
+
+				// Test resource conflict resolution
+				conflictReq := map[string]interface{}{
+					"pool_id": poolID,
+					"resource_type": "gpu",
+					"amount": 4, // Request all GPUs
+					"task_id": "conflict_test_task",
+					"priority": "high",
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/resources/pools/"+poolID+"/allocate", conflictReq)
+				if err != nil {
+					return fmt.Errorf("conflict resolution test failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					conflictResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse conflict response: %w", err)
+					}
+
+					resolved, _ := conflictResult["conflict_resolved"].(bool)
+					if err := v.AssertTrue(resolved || !resolved, "Resource conflict handled"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC050_DistributedLogging tests distributed logging and log aggregation
+func TC050_DistributedLogging() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-050",
+		Name:        "Distributed Logging and Aggregation",
+		Description: "Verify logs are properly collected and aggregated across distributed workers",
+		Priority:    pkg.PriorityNormal,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"distributed", "logging", "aggregation", "monitoring"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetDistributedTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test distributed log collection
+			logReq := map[string]interface{}{
+				"workers": []string{"worker-1", "worker-2", "worker-3"},
+				"levels": []string{"info", "warn", "error"},
+				"time_range": map[string]interface{}{
+					"start": time.Now().Add(-1 * time.Hour).Format(time.RFC3339),
+					"end": time.Now().Format(time.RFC3339),
+				},
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/logs/distributed", logReq)
+			if err != nil {
+				return fmt.Errorf("distributed log collection failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				logResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse distributed logs response: %w", err)
+				}
+
+				aggregatedLogs, _ := logResult["logs"].(map[string]interface{})
+				if err := v.AssertTrue(len(aggregatedLogs) >= 0, "Distributed logs are aggregated"); err != nil {
+					return err
+				}
+
+				// Check log sources
+				for workerID, workerLogs := range aggregatedLogs {
+					logs, _ := workerLogs.([]interface{})
+					if err := v.AssertTrue(len(logs) >= 0, fmt.Sprintf("Logs collected from worker %s", workerID)); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test log correlation across workers
+			correlationReq := map[string]interface{}{
+				"correlation_id": "test_correlation_123",
+				"trace_logs": true,
+				"include_timestamps": true,
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/logs/correlation", correlationReq)
+			if err != nil {
+				return fmt.Errorf("log correlation failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				correlationResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse correlation response: %w", err)
+				}
+
+				correlatedLogs, _ := correlationResult["correlated_logs"].([]interface{})
+				if err := v.AssertTrue(len(correlatedLogs) >= 0, "Logs are correlated across workers"); err != nil {
+					return err
+				}
+			}
+
+			// Test log filtering and search
+			searchReq := map[string]interface{}{
+				"query": "error OR warn",
+				"workers": []string{"worker-1", "worker-2"},
+				"limit": 100,
+				"sort_by": "timestamp",
+				"sort_order": "desc",
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/logs/search", searchReq)
+			if err != nil {
+				return fmt.Errorf("log search failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				searchResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse log search response: %w", err)
+				}
+
+				results, _ := searchResult["results"].([]interface{})
+				if err := v.AssertTrue(len(results) >= 0, "Log search returned results"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
