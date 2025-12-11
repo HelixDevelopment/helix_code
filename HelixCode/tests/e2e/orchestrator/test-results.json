@@ -1,0 +1,54 @@
+{
+  "suite_name": "Sample E2E Test Suite",
+  "start_time": "2025-12-10T23:20:37.549205741+03:00",
+  "end_time": "2025-12-10T23:20:37.850305197+03:00",
+  "duration": 301099457,
+  "total_tests": 5,
+  "passed": 5,
+  "failed": 0,
+  "skipped": 0,
+  "timed_out": 0,
+  "success_rate": 100,
+  "results": [
+    {
+      "test_id": "TC-001",
+      "test_name": "Basic Health Check",
+      "status": "passed",
+      "start_time": "2025-12-10T23:20:37.549220067+03:00",
+      "end_time": "2025-12-10T23:20:37.649481969+03:00",
+      "duration": 100261901
+    },
+    {
+      "test_id": "TC-002",
+      "test_name": "Service Discovery",
+      "status": "passed",
+      "start_time": "2025-12-10T23:20:37.549217735+03:00",
+      "end_time": "2025-12-10T23:20:37.749864701+03:00",
+      "duration": 200646958
+    },
+    {
+      "test_id": "TC-003",
+      "test_name": "Database Connection",
+      "status": "passed",
+      "start_time": "2025-12-10T23:20:37.549276627+03:00",
+      "end_time": "2025-12-10T23:20:37.699666155+03:00",
+      "duration": 150389527
+    },
+    {
+      "test_id": "TC-004",
+      "test_name": "LLM Provider Test",
+      "status": "passed",
+      "start_time": "2025-12-10T23:20:37.549245748+03:00",
+      "end_time": "2025-12-10T23:20:37.850294638+03:00",
+      "duration": 301048894
+    },
+    {
+      "test_id": "TC-005",
+      "test_name": "Worker Pool Test",
+      "status": "passed",
+      "start_time": "2025-12-10T23:20:37.549216347+03:00",
+      "end_time": "2025-12-10T23:20:37.800117566+03:00",
+      "duration": 250901224
+    }
+  ]
+}

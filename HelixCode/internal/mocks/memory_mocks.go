@@ -836,7 +836,7 @@ func (m *MockVectorProviderManager) Retrieve(ctx context.Context, ids []string) 
 	if result := args.Get(0); result != nil {
 		return result.([]*memory.VectorData), args.Error(1)
 	}
-	return nil, args.Error(1)
+	return []*memory.VectorData{}, args.Error(1)
 }
 
 // Search mocks searching vectors
@@ -900,30 +900,15 @@ type APIKeyConfig struct {
 	PrimaryKeys []string `json:"primary_keys"`
 }
 
-// MemoryData represents memory data
-type MemoryData struct {
-	ID        string                 `json:"id"`
-	Content   string                 `json:"content"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	Type      string                 `json:"type"`
-	CreatedAt time.Time              `json:"created_at"`
-}
-
-// ConversationMessage represents a conversation message
-type ConversationMessage struct {
-	ID        string    `json:"id"`
-	Role      string    `json:"role"`
-	Content   string    `json:"content"`
-	Timestamp time.Time `json:"timestamp"`
-}
+// Note: Using memory.VectorData and memory.Message from memory package instead of custom types
 
 // MemoryType represents memory type
 type MemoryType string
 
 // SearchResult represents search result
 type SearchResult struct {
-	Data  []*MemoryData `json:"data"`
-	Score float64       `json:"score"`
+	Data  []*memory.VectorData `json:"data"`
+	Score float64              `json:"score"`
 }
 
 // ConversationSummary represents conversation summary
@@ -1089,9 +1074,9 @@ func CreateTestVectors(count int, collection string, size int) []*memory.VectorD
 // CreateTestMemory creates test memory data
 func CreateTestMemory(id, memType, content string) *memory.Message {
 	return &memory.Message{
-		ID:       id,
-		Role:     memory.Role(memType),
-		Content:  content,
+		ID:      id,
+		Role:    memory.Role(memType),
+		Content: content,
 		Metadata: map[string]string{
 			"test":    "true",
 			"created": time.Now().String(),
