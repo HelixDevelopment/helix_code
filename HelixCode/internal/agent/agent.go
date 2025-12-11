@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"dev.helix.code/internal/agent/task"
@@ -91,69 +90,6 @@ type AgentConfig struct {
 	Parameters   map[string]interface{} `json:"parameters"`
 }
 
-// BaseAgent provides common functionality for all agents
-type BaseAgent struct {
-	mu           sync.Mutex
-	id           string
-	agentType    AgentType
-	name         string
-	capabilities []Capability
-	status       AgentStatus
-	config       *AgentConfig
-	startTime    time.Time
-	taskCount    int
-	errorCount   int
-}
-
-// NewBaseAgent creates a new base agent
-func NewBaseAgent(config *AgentConfig) *BaseAgent {
-	return &BaseAgent{
-		id:           config.ID,
-		agentType:    config.Type,
-		name:         config.Name,
-		capabilities: config.Capabilities,
-		status:       StatusIdle,
-		config:       config,
-		startTime:    time.Now(),
-		taskCount:    0,
-		errorCount:   0,
-	}
-}
-
-// ID returns the agent's unique identifier
-func (a *BaseAgent) ID() string {
-	return a.id
-}
-
-// Type returns the agent's type
-func (a *BaseAgent) Type() AgentType {
-	return a.agentType
-}
-
-// Name returns the agent's name
-func (a *BaseAgent) Name() string {
-	return a.name
-}
-
-// Capabilities returns the agent's capabilities
-func (a *BaseAgent) Capabilities() []Capability {
-	return a.capabilities
-}
-
-// Status returns the agent's current status
-func (a *BaseAgent) Status() AgentStatus {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.status
-}
-
-// SetStatus updates the agent's status
-func (a *BaseAgent) SetStatus(status AgentStatus) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.status = status
-}
-
 // CanHandle checks if the agent can handle a task based on capabilities
 func (a *BaseAgent) CanHandle(task *task.Task) bool {
 	if task == nil {
@@ -175,45 +111,6 @@ func (a *BaseAgent) CanHandle(task *task.Task) bool {
 	}
 
 	return true
-}
-
-// IncrementTaskCount increments the task counter
-func (a *BaseAgent) IncrementTaskCount() {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.taskCount++
-}
-
-// IncrementErrorCount increments the error counter
-func (a *BaseAgent) IncrementErrorCount() {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.errorCount++
-}
-
-// Health returns health check information
-func (a *BaseAgent) Health() *HealthCheck {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-
-	uptime := time.Since(a.startTime)
-	errorRate := float64(0)
-	if a.taskCount > 0 {
-		errorRate = float64(a.errorCount) / float64(a.taskCount)
-	}
-
-	healthy := a.status != StatusError && a.status != StatusShutdown && errorRate < 0.2
-
-	return &HealthCheck{
-		AgentID:    a.id,
-		Healthy:    healthy,
-		Status:     a.status,
-		Uptime:     uptime,
-		TaskCount:  a.taskCount,
-		ErrorCount: a.errorCount,
-		ErrorRate:  errorRate,
-		Timestamp:  time.Now(),
-	}
 }
 
 // HealthCheck represents agent health information

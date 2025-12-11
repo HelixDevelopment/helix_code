@@ -6,41 +6,12 @@ import (
 	"sync"
 	"time"
 
+	"dev.helix.code/internal/agent/task"
 	"dev.helix.code/internal/config"
 )
 
-// AgentStatus represents the current status of an agent
-type AgentStatus string
-
-const (
-	// StatusIdle indicates the agent is idle and available
-	StatusIdle AgentStatus = "idle"
-	// StatusBusy indicates the agent is currently processing a task
-	StatusBusy AgentStatus = "busy"
-	// StatusError indicates the agent encountered an error
-	StatusError AgentStatus = "error"
-	// StatusOffline indicates the agent is offline
-	StatusOffline AgentStatus = "offline"
-)
-
-// Capability represents an agent capability
-type Capability struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Version     string                 `json:"version"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-}
-
 // Task represents a task that can be executed by an agent
-type Task struct {
-	ID        string                 `json:"id"`
-	Type      string                 `json:"type"`
-	Priority  int                    `json:"priority"`
-	Payload   map[string]interface{} `json:"payload"`
-	CreatedAt time.Time              `json:"created_at"`
-	Deadline  *time.Time             `json:"deadline,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
-}
+type Task = task.Task
 
 // TaskResult represents the result of a task execution
 type TaskResult struct {
@@ -158,20 +129,20 @@ func (a *BaseAgent) RemoveCapability(name string) {
 	defer a.mu.Unlock()
 
 	for i, cap := range a.capabilities {
-		if cap.Name == name {
+		if string(cap) == name {
 			a.capabilities = append(a.capabilities[:i], a.capabilities[i+1:]...)
 			break
 		}
 	}
 }
 
-// CanHandle checks if the agent can handle a specific task type
-func (a *BaseAgent) CanHandle(taskType string) bool {
+// CanHandleTaskType checks if the agent can handle a specific task type
+func (a *BaseAgent) CanHandleTaskType(taskType string) bool {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
 	for _, cap := range a.capabilities {
-		if cap.Name == taskType {
+		if string(cap) == taskType {
 			return true
 		}
 	}
@@ -185,7 +156,7 @@ func (a *BaseAgent) SubmitTask(ctx context.Context, task *Task) (*TaskResult, er
 	}
 
 	// Check if agent can handle this task type
-	if !a.CanHandle(task.Type) {
+	if !a.CanHandleTaskType(string(task.Type)) {
 		return nil, fmt.Errorf("agent cannot handle task type: %s", task.Type)
 	}
 

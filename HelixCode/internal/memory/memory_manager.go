@@ -5,9 +5,23 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"dev.helix.code/internal/config"
 )
+
+// MemoryConfig represents configuration for memory operations
+type MemoryConfig struct {
+	Enabled          bool          `json:"enabled"`
+	Provider         string        `json:"provider"`
+	MaxGenerations   int           `json:"max_generations"`
+	MaxConversations int           `json:"max_conversations"`
+	TTL              time.Duration `json:"ttl"`
+}
+
+// MemorySearchResult represents a search result from memory providers
+type MemorySearchResult struct {
+	Key   string      `json:"key"`
+	Data  interface{} `json:"data"`
+	Score float64     `json:"score"`
+}
 
 // MemoryProvider defines the interface for memory providers
 type MemoryProvider interface {
@@ -18,7 +32,7 @@ type MemoryProvider interface {
 	Retrieve(ctx context.Context, key string) (interface{}, error)
 
 	// Search searches for data in memory
-	Search(ctx context.Context, query string, limit int) ([]SearchResult, error)
+	Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error)
 
 	// Delete deletes data from memory
 	Delete(ctx context.Context, key string) error
@@ -36,23 +50,16 @@ type MemoryProvider interface {
 	Type() string
 }
 
-// SearchResult represents a search result
-type SearchResult struct {
-	Key   string      `json:"key"`
-	Data  interface{} `json:"data"`
-	Score float64     `json:"score"`
-}
-
 // MemoryManager manages memory operations across multiple providers
 type MemoryManager struct {
 	providers       map[string]MemoryProvider
 	defaultProvider string
-	config          *config.MemoryConfig
+	config          *MemoryConfig
 	mu              sync.RWMutex
 }
 
 // NewMemoryManager creates a new memory manager
-func NewMemoryManager(config *config.MemoryConfig) *MemoryManager {
+func NewMemoryManager(config *MemoryConfig) *MemoryManager {
 	return &MemoryManager{
 		providers: make(map[string]MemoryProvider),
 		config:    config,
@@ -174,7 +181,7 @@ func (mm *MemoryManager) Retrieve(ctx context.Context, key string) (interface{},
 }
 
 // Search searches data using the default provider
-func (mm *MemoryManager) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func (mm *MemoryManager) Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	provider, err := mm.GetDefaultProvider()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get default provider: %w", err)
@@ -304,11 +311,11 @@ func (p *InMemoryProvider) Retrieve(ctx context.Context, key string) (interface{
 }
 
 // Search searches for data (simple implementation)
-func (p *InMemoryProvider) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func (p *InMemoryProvider) Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	results := make([]SearchResult, 0, limit)
+	results := make([]MemorySearchResult, 0, limit)
 	count := 0
 
 	for key, data := range p.data {
@@ -318,7 +325,7 @@ func (p *InMemoryProvider) Search(ctx context.Context, query string, limit int) 
 
 		// Simple string matching for demo
 		if fmt.Sprintf("%v", data) == query || key == query {
-			results = append(results, SearchResult{
+			results = append(results, MemorySearchResult{
 				Key:   key,
 				Data:  data,
 				Score: 1.0,
@@ -392,7 +399,7 @@ func (p *RedisMemoryProvider) Retrieve(ctx context.Context, key string) (interfa
 }
 
 // Search searches data in Redis
-func (p *RedisMemoryProvider) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func (p *RedisMemoryProvider) Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	// Implementation would use Redis search
 	return nil, fmt.Errorf("Redis provider not fully implemented")
 }
@@ -448,7 +455,7 @@ func (p *MemcachedMemoryProvider) Retrieve(ctx context.Context, key string) (int
 }
 
 // Search searches data in Memcached
-func (p *MemcachedMemoryProvider) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func (p *MemcachedMemoryProvider) Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	return nil, fmt.Errorf("Memcached provider not fully implemented")
 }
 
@@ -500,7 +507,7 @@ func (p *FilesystemMemoryProvider) Retrieve(ctx context.Context, key string) (in
 }
 
 // Search searches data in filesystem
-func (p *FilesystemMemoryProvider) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func (p *FilesystemMemoryProvider) Search(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	return nil, fmt.Errorf("Filesystem provider not fully implemented")
 }
 
@@ -543,7 +550,7 @@ func SetGlobalManager(manager *MemoryManager) {
 }
 
 // InitializeGlobalManager initializes the global memory manager
-func InitializeGlobalManager(config *config.MemoryConfig) {
+func InitializeGlobalManager(config *MemoryConfig) {
 	globalManager = NewMemoryManager(config)
 
 	// Register default in-memory provider
@@ -568,7 +575,7 @@ func RetrieveGlobal(ctx context.Context, key string) (interface{}, error) {
 }
 
 // SearchGlobal searches data using the global manager
-func SearchGlobal(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func SearchGlobal(ctx context.Context, query string, limit int) ([]MemorySearchResult, error) {
 	if globalManager == nil {
 		return nil, fmt.Errorf("global memory manager not initialized")
 	}

@@ -2,14 +2,12 @@ package memory
 
 import (
 	"context"
+	"fmt"
 	"testing"
-	"time"
-
-	"dev.helix.code/internal/config"
 )
 
 func TestNewMemoryManager(t *testing.T) {
-	config := &config.MemoryConfig{}
+	config := &MemoryConfig{}
 	manager := NewMemoryManager(config)
 
 	if manager == nil {
@@ -26,7 +24,7 @@ func TestNewMemoryManager(t *testing.T) {
 }
 
 func TestMemoryManagerRegisterProvider(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 
 	err := manager.RegisterProvider("test-provider", provider)
@@ -50,7 +48,7 @@ func TestMemoryManagerRegisterProvider(t *testing.T) {
 }
 
 func TestMemoryManagerUnregisterProvider(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 
 	// Register
@@ -77,7 +75,7 @@ func TestMemoryManagerUnregisterProvider(t *testing.T) {
 }
 
 func TestMemoryManagerSetDefaultProvider(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 
 	// Register multiple providers
 	provider1, _ := NewInMemoryProvider(map[string]interface{}{})
@@ -98,7 +96,7 @@ func TestMemoryManagerSetDefaultProvider(t *testing.T) {
 }
 
 func TestMemoryManagerGetProvider(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 
 	manager.RegisterProvider("test-provider", provider)
@@ -121,7 +119,7 @@ func TestMemoryManagerGetProvider(t *testing.T) {
 }
 
 func TestMemoryManagerGetDefaultProvider(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 
 	// No providers
 	_, err := manager.GetDefaultProvider()
@@ -322,7 +320,7 @@ func TestMemoryProviderFactory(t *testing.T) {
 
 func TestGlobalManager(t *testing.T) {
 	// Initialize global manager
-	config := &config.MemoryConfig{}
+	config := &MemoryConfig{}
 	InitializeGlobalManager(config)
 
 	manager := GetGlobalManager()
@@ -361,7 +359,7 @@ func TestGlobalManager(t *testing.T) {
 }
 
 func TestMemoryManagerConcurrency(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 	manager.RegisterProvider("concurrency-test", provider)
 
@@ -413,7 +411,7 @@ func TestMemoryManagerConcurrency(t *testing.T) {
 }
 
 func TestMemoryManagerHealth(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 
 	// No providers
 	health := manager.Health(context.Background())
@@ -436,7 +434,7 @@ func TestMemoryManagerHealth(t *testing.T) {
 }
 
 func TestMemoryManagerStatistics(t *testing.T) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 
 	// Add providers
 	provider1, _ := NewInMemoryProvider(map[string]interface{}{})
@@ -467,7 +465,7 @@ func TestMemoryManagerStatistics(t *testing.T) {
 }
 
 func BenchmarkMemoryManagerStore(b *testing.B) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 	manager.RegisterProvider("bench", provider)
 
@@ -482,7 +480,7 @@ func BenchmarkMemoryManagerStore(b *testing.B) {
 }
 
 func BenchmarkMemoryManagerRetrieve(b *testing.B) {
-	manager := NewMemoryManager(&config.MemoryConfig{})
+	manager := NewMemoryManager(&MemoryConfig{})
 	provider, _ := NewInMemoryProvider(map[string]interface{}{})
 	manager.RegisterProvider("bench", provider)
 

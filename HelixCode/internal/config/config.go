@@ -126,9 +126,9 @@ type LoggingConfig struct {
 
 // TelemetryConfig represents telemetry configuration
 type TelemetryConfig struct {
-	Enabled        bool   `mapstructure:"enabled"`
-	Level          string `mapstructure:"level"`
-	DataRetention  int    `mapstructure:"data_retention"`
+	Enabled       bool   `mapstructure:"enabled"`
+	Level         string `mapstructure:"level"`
+	DataRetention int    `mapstructure:"data_retention"`
 }
 
 // ApplicationConfig represents application configuration
@@ -172,6 +172,22 @@ type SessionConfig struct {
 	MaxHistorySize     int                      `mapstructure:"max_history_size"`
 	AutoResume         bool                     `mapstructure:"auto_resume"`
 	ContextCompression ContextCompressionConfig `mapstructure:"context_compression"`
+}
+
+// AgentConfig represents agent configuration
+type AgentConfig struct {
+	MaxConcurrency int           `mapstructure:"max_concurrency"`
+	Timeout        time.Duration `mapstructure:"timeout"`
+	RetryCount     int           `mapstructure:"retry_count"`
+	Enabled        bool          `mapstructure:"enabled"`
+}
+
+// ContextConfig represents context configuration
+type ContextConfig struct {
+	Enabled         bool          `mapstructure:"enabled"`
+	MaxSize         int           `mapstructure:"max_size"`
+	RetentionPeriod time.Duration `mapstructure:"retention_period"`
+	Compression     bool          `mapstructure:"compression"`
 }
 
 // Load loads configuration from file and environment variables
@@ -740,11 +756,11 @@ func NewConfigurationValidator(strict bool) *ConfigurationValidator {
 		strict: strict,
 		rules:  make(map[string][]ValidationRule),
 	}
-	
+
 	if strict {
 		validator.addDefaultRules()
 	}
-	
+
 	return validator
 }
 
@@ -773,7 +789,7 @@ func (cv *ConfigurationValidator) addDefaultRules() {
 		Message:  "Port must be between 1 and 65535",
 		Severity: "error",
 	})
-	
+
 	cv.AddRule("llm.temperature", ValidationRule{
 		Name: "temperature_range",
 		Validator: func(value interface{}) error {
@@ -797,7 +813,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 		Valid:  true,
 		Errors: make([]ValidationError, 0),
 	}
-	
+
 	// Validate server port
 	if config.Server.Port < 1 || config.Server.Port > 65535 {
 		result.Valid = false
@@ -809,7 +825,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "Port must be between 1 and 65535",
 		})
 	}
-	
+
 	// Validate application environment
 	validEnvironments := []string{"development", "production", "testing", "staging"}
 	isValidEnv := false
@@ -829,7 +845,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "Environment must be one of: development, production, testing, staging",
 		})
 	}
-	
+
 	// Validate LLM provider
 	validProviders := []string{"local", "openai", "anthropic", "gemini", "xai", "openrouter", "copilot"}
 	isValidProvider := false
@@ -849,7 +865,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "LLM provider must be one of: local, openai, anthropic, gemini, xai, openrouter, copilot",
 		})
 	}
-	
+
 	// Validate LLM max tokens
 	if config.LLM.MaxTokens < 1 {
 		result.Valid = false
@@ -861,7 +877,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "LLM max tokens must be a positive integer",
 		})
 	}
-	
+
 	// Validate LLM temperature
 	if config.LLM.Temperature < 0.0 || config.LLM.Temperature > 2.0 {
 		result.Valid = false
@@ -873,7 +889,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "LLM temperature must be between 0.0 and 2.0",
 		})
 	}
-	
+
 	// Validate database port
 	if config.Database.Port < 1 || config.Database.Port > 65535 {
 		result.Valid = false
@@ -885,7 +901,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "Database port must be between 1 and 65535",
 		})
 	}
-	
+
 	// Validate JWT secret
 	if len(config.Auth.JWTSecret) < 32 {
 		result.Valid = false
@@ -897,7 +913,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Message:  "JWT secret must be at least 32 characters",
 		})
 	}
-	
+
 	// Validate custom rules
 	if v.rules != nil {
 		// Check application.name field
@@ -919,7 +935,7 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			}
 		}
 	}
-	
+
 	return result
 }
 
@@ -930,7 +946,7 @@ func (v *ConfigurationValidator) ValidateField(config *Config, field string) Val
 		Errors: make([]ValidationError, 0),
 		Path:   field,
 	}
-	
+
 	switch field {
 	case "server.port":
 		if config.Server.Port < 1 || config.Server.Port > 65535 {
@@ -977,7 +993,7 @@ func (v *ConfigurationValidator) ValidateField(config *Config, field string) Val
 			})
 		}
 	}
-	
+
 	return result
 }
 
@@ -987,7 +1003,7 @@ func (v *ConfigurationValidator) AddCustomRule(field string, rule func(interface
 	if v.rules == nil {
 		v.rules = make(map[string][]ValidationRule)
 	}
-	
+
 	v.rules[field] = append(v.rules[field], ValidationRule{
 		Name:      "custom",
 		Validator: rule,
@@ -1015,11 +1031,11 @@ type ValidationError struct {
 // createDefaultSchema creates the default validation schema
 func (v *ConfigurationValidator) createDefaultSchema() *ValidationSchema {
 	schema := &ValidationSchema{
-		Version:  "1.0",
+		Version:    "1.0",
 		Properties: make(map[string]*SchemaProperty),
-		Required: []string{"version", "application", "server"},
+		Required:   []string{"version", "application", "server"},
 	}
-	
+
 	// Application properties
 	schema.Properties["application"] = &SchemaProperty{
 		Type: "object",
@@ -1039,7 +1055,7 @@ func (v *ConfigurationValidator) createDefaultSchema() *ValidationSchema {
 		},
 		Required: []string{"name", "version"},
 	}
-	
+
 	// Server properties
 	schema.Properties["server"] = &SchemaProperty{
 		Type: "object",
@@ -1059,13 +1075,13 @@ func (v *ConfigurationValidator) createDefaultSchema() *ValidationSchema {
 		},
 		Required: []string{"address", "port"},
 	}
-	
+
 	// Version property
 	schema.Properties["version"] = &SchemaProperty{
-		Type: "string",
+		Type:      "string",
 		MinLength: intPtr(1),
 	}
-	
+
 	return schema
 }
 
@@ -1097,7 +1113,7 @@ func NewConfigurationMigrator(currentVersion string) *ConfigurationMigrator {
 		current:    currentVersion,
 		migrations: make(map[string][]Migration),
 	}
-	
+
 	// Register migrations
 	m.registerMigrations()
 	return m
@@ -1120,7 +1136,7 @@ func (m *ConfigurationMigrator) registerMigrations() {
 			return nil
 		},
 	})
-	
+
 	// 1.1.0 -> 1.2.0
 	m.addMigration("1.1.0", "1.2.0", Migration{
 		From: "1.1.0",
@@ -1156,12 +1172,12 @@ func (m *ConfigurationMigrator) Migrate(config *Config, targetVersion string) er
 	if config.Version == targetVersion {
 		return nil
 	}
-	
+
 	path := m.findMigrationPath(config.Version, targetVersion)
 	if path == nil {
 		return fmt.Errorf("no migration path from %s to %s", config.Version, targetVersion)
 	}
-	
+
 	// Execute migrations in sequence
 	currentVersion := config.Version
 	for _, nextVersion := range path {
@@ -1169,7 +1185,7 @@ func (m *ConfigurationMigrator) Migrate(config *Config, targetVersion string) er
 		if !exists {
 			return fmt.Errorf("no migrations from version %s", currentVersion)
 		}
-		
+
 		// Find the migration to the next version
 		var migration *Migration
 		for j := range migrations {
@@ -1178,29 +1194,29 @@ func (m *ConfigurationMigrator) Migrate(config *Config, targetVersion string) er
 				break
 			}
 		}
-		
+
 		if migration == nil {
 			return fmt.Errorf("no migration from %s to %s", currentVersion, nextVersion)
 		}
-		
+
 		// Create backup if required
 		if migration.Backup {
 			if err := m.createBackup(config, currentVersion); err != nil {
 				return fmt.Errorf("failed to create backup before migration from %s to %s: %w", currentVersion, nextVersion, err)
 			}
 		}
-		
+
 		// Execute the migration
 		if err := migration.Up(config); err != nil {
 			return fmt.Errorf("migration from %s to %s failed: %w", currentVersion, nextVersion, err)
 		}
-		
+
 		// Update the configuration version
 		config.Version = nextVersion
-		
+
 		currentVersion = nextVersion
 	}
-	
+
 	return nil
 }
 
@@ -1215,13 +1231,13 @@ func (m *ConfigurationMigrator) findMigrationPath(from, to string) []string {
 			}
 		}
 	}
-	
+
 	// Try multi-step paths
 	for _, version := range m.GetAvailableVersions() {
 		if version == from || version == to {
 			continue
 		}
-		
+
 		// Check if we can migrate from 'from' to 'version'
 		if m.canMigrate(from, version) {
 			// Check if we can then migrate from 'version' to 'to'
@@ -1231,13 +1247,13 @@ func (m *ConfigurationMigrator) findMigrationPath(from, to string) []string {
 			}
 		}
 	}
-	
+
 	// Check for reverse migration (downgrade)
 	if from > to {
 		// Simple downgrade path
 		return []string{to}
 	}
-	
+
 	return nil
 }
 
@@ -1247,7 +1263,7 @@ func (m *ConfigurationMigrator) canMigrate(from, to string) bool {
 	if !exists {
 		return false
 	}
-	
+
 	for _, migration := range migrations {
 		if migration.To == to {
 			return true
@@ -1261,16 +1277,16 @@ func (m *ConfigurationMigrator) createBackup(config *Config, version string) err
 	tempDir := os.TempDir()
 	timestamp := time.Now().Format("20060102_150405")
 	backupPath := filepath.Join(tempDir, fmt.Sprintf("helix_config_backup_%s_%s.json", version, timestamp))
-	
+
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal config for backup: %w", err)
 	}
-	
+
 	if err := os.WriteFile(backupPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write backup file: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -1281,13 +1297,13 @@ type ConfigurationTransformer struct {
 
 // Migration represents a configuration migration
 type Migration struct {
-	From   string
-	To     string
-	Name   string
-	Desc   string
-	Backup bool
-	Up     func(config *Config) error
-	Down   func(config *Config) error
+	From    string
+	To      string
+	Name    string
+	Desc    string
+	Backup  bool
+	Up      func(config *Config) error
+	Down    func(config *Config) error
 	Migrate func(config *Config) error
 }
 
@@ -1307,19 +1323,19 @@ func (t *ConfigurationTransformer) AddMapping(mapping TransformMapping) {
 func (t *ConfigurationTransformer) Transform(config *Config, variables map[string]interface{}) (*Config, error) {
 	// Create a copy of the config
 	result := *config
-	
+
 	// Sort mappings by priority
 	sort.Slice(t.mappings, func(i, j int) bool {
 		return t.mappings[i].Priority < t.mappings[j].Priority
 	})
-	
+
 	// Apply transformations
 	for _, mapping := range t.mappings {
 		// Skip if condition is specified and doesn't match
 		if mapping.Condition != "" && result.Application.Environment != mapping.Condition {
 			continue
 		}
-		
+
 		// Apply transformation based on type
 		switch mapping.Transform {
 		case "copy":
@@ -1355,7 +1371,7 @@ func (t *ConfigurationTransformer) Transform(config *Config, variables map[strin
 			}
 		}
 	}
-	
+
 	return &result, nil
 }
 
@@ -1416,14 +1432,14 @@ func NewConfigurationTemplateManager(templateDir string) *ConfigurationTemplateM
 
 // ConfigurationTemplate represents a configuration template
 type ConfigurationTemplate struct {
-	ID          string                        `json:"id"`
-	Name        string                        `json:"name"`
-	Description string                        `json:"description"`
-	Category    string                        `json:"category"`
-	Variables   map[string]*TemplateVariable   `json:"variables"`
-	Config      *Config                       `json:"config"`
-	CreatedAt   time.Time                     `json:"created_at"`
-	UpdatedAt   time.Time                     `json:"updated_at"`
+	ID          string                       `json:"id"`
+	Name        string                       `json:"name"`
+	Description string                       `json:"description"`
+	Category    string                       `json:"category"`
+	Variables   map[string]*TemplateVariable `json:"variables"`
+	Config      *Config                      `json:"config"`
+	CreatedAt   time.Time                    `json:"created_at"`
+	UpdatedAt   time.Time                    `json:"updated_at"`
 }
 
 // CreateTemplateFromConfig creates a template from configuration
@@ -1455,7 +1471,7 @@ func (tm *ConfigurationTemplateManager) ApplyTemplate(templateID string, variabl
 	if !exists {
 		return nil, fmt.Errorf("template not found: %s", templateID)
 	}
-	
+
 	// Return a copy of the template's config
 	result := *template.Config
 	return &result, nil
@@ -1471,18 +1487,18 @@ func (tm *ConfigurationTemplateManager) LoadTemplate(path string) (*Config, erro
 func (tm *ConfigurationTemplateManager) SearchTemplates(query string) []*ConfigurationTemplate {
 	results := make([]*ConfigurationTemplate, 0)
 	lowerQuery := strings.ToLower(query)
-	
+
 	for _, template := range tm.templates {
 		// Search in name, description, and category
 		nameMatch := strings.Contains(strings.ToLower(template.Name), lowerQuery)
 		descMatch := strings.Contains(strings.ToLower(template.Description), lowerQuery)
 		categoryMatch := strings.Contains(strings.ToLower(template.Category), lowerQuery)
-		
+
 		if nameMatch || descMatch || categoryMatch {
 			results = append(results, template)
 		}
 	}
-	
+
 	return results
 }
 
@@ -1500,7 +1516,7 @@ func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationT
 				return nil, fmt.Errorf("required variable not provided: %s", name)
 			}
 		}
-		
+
 		// Type validation and constraints
 		if value, exists := variables[name]; exists {
 			if variable.Type == "string" {
@@ -1508,7 +1524,7 @@ func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationT
 				if !ok {
 					return nil, fmt.Errorf("variable %s must be a string, got %T", name, value)
 				}
-				
+
 				// Length validation
 				if variable.MinLength != nil && len(strValue) < *variable.MinLength {
 					return nil, fmt.Errorf("variable %s is too short (min %d chars)", name, *variable.MinLength)
@@ -1516,7 +1532,7 @@ func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationT
 				if variable.MaxLength != nil && len(strValue) > *variable.MaxLength {
 					return nil, fmt.Errorf("variable %s is too long (max %d chars)", name, *variable.MaxLength)
 				}
-				
+
 				// Pattern validation
 				if variable.Pattern != "" {
 					matched, err := regexp.MatchString(variable.Pattern, strValue)
@@ -1530,41 +1546,41 @@ func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationT
 			}
 		}
 	}
-	
+
 	// Create a deep copy of template's config for manipulation
 	configBytes, err := json.Marshal(template.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal template config: %w", err)
 	}
-	
+
 	var result Config
 	if err := json.Unmarshal(configBytes, &result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal template config: %w", err)
 	}
-	
+
 	// Substitute variables using simple string replacement for now
 	// In a full implementation, this would use a proper template engine
 	configStr := string(configBytes)
-	
+
 	// Replace variables in the configuration
 	for name, value := range variables {
 		placeholder := "{{" + name + "}}"
 		replacement := fmt.Sprintf("%v", value)
 		configStr = strings.ReplaceAll(configStr, placeholder, replacement)
 	}
-	
+
 	// Unmarshal the substituted configuration
 	if err := json.Unmarshal([]byte(configStr), &result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal substituted config: %w", err)
 	}
-	
+
 	return &result, nil
 }
 
 // CreateDefaultTemplates creates default configuration templates
 func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
 	templates := make(map[string]*ConfigurationTemplate)
-	
+
 	// Add basic template
 	templates["basic"] = &ConfigurationTemplate{
 		ID:          "basic",
@@ -1576,13 +1592,13 @@ func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	// Add development template
 	devConfig := getDefaultConfig()
 	devConfig.Application.Environment = "development"
 	devConfig.Server.Port = 8080
 	devConfig.Server.Address = "0.0.0.0"
-	
+
 	templates["development"] = &ConfigurationTemplate{
 		ID:          "development",
 		Name:        "Development Environment",
@@ -1593,14 +1609,14 @@ func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	// Add production template
 	prodConfig := getDefaultConfig()
 	prodConfig.Application.Environment = "production"
 	prodConfig.Server.Port = 443
 	prodConfig.Server.Address = "0.0.0.0"
 	prodConfig.Logging.Level = "error"
-	
+
 	templates["production"] = &ConfigurationTemplate{
 		ID:          "production",
 		Name:        "Production Environment",
@@ -1611,17 +1627,17 @@ func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	// Add testing template
 	testConfig := getDefaultConfig()
 	testConfig.Application.Environment = "testing"
 	testConfig.Server.Port = 0
 	testConfig.Server.Address = "0.0.0.0"
 	testConfig.Logging.Level = "debug"
-	testConfig.Database.Host = ""  // Empty host disables database
+	testConfig.Database.Host = "" // Empty host disables database
 	testConfig.Redis.Enabled = false
 	testConfig.Workers.MaxConcurrentTasks = 10
-	
+
 	templates["testing"] = &ConfigurationTemplate{
 		ID:          "testing",
 		Name:        "Testing Environment",
@@ -1632,16 +1648,16 @@ func CreateDefaultTemplates() map[string]*ConfigurationTemplate {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	return templates
 }
 
 // Configuration validation modes
 const (
-	ValidationModeStrict     = "strict"
-	ValidationModeLenient    = "lenient"
-	ValidationModeDisabled   = "disabled"
-	ValidationModeSchema     = "schema"
+	ValidationModeStrict   = "strict"
+	ValidationModeLenient  = "lenient"
+	ValidationModeDisabled = "disabled"
+	ValidationModeSchema   = "schema"
 )
 
 // Configuration transformation modes
@@ -1649,5 +1665,5 @@ const (
 	TransformModeStrict  = "strict"
 	TransformModeLenient = "lenient"
 	TransformModeNone    = "none"
-	TransformModeSchema = "schema"
+	TransformModeSchema  = "schema"
 )
