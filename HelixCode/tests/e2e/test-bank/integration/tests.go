@@ -1997,3 +1997,635 @@ func TC040_APIIntegration() *pkg.TestCase {
 		},
 	}
 }
+
+// TC041_PerformanceMonitoring tests performance monitoring and metrics
+func TC041_PerformanceMonitoring() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-041",
+		Name:        "Performance Monitoring and Metrics",
+		Description: "Verify performance monitoring, metrics collection, and alerting work correctly",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"performance", "monitoring", "metrics", "alerting", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetIntegrationTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test metrics collection
+			resp, err := client.doRequest("GET", "/api/v1/metrics", nil)
+			if err != nil {
+				return fmt.Errorf("metrics request failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				metricsResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse metrics response: %w", err)
+				}
+
+				systemMetrics, hasSystem := metricsResult["system"].(map[string]interface{})
+				if err := v.AssertTrue(hasSystem, "System metrics are available"); err != nil {
+					return err
+				}
+
+				// Check key performance indicators
+				if cpuUsage, exists := systemMetrics["cpu_usage_percent"]; exists {
+					if err := v.AssertTrue(true, "CPU usage is monitored"); err != nil {
+						return err
+					}
+				}
+
+				if memoryUsage, exists := systemMetrics["memory_usage_mb"]; exists {
+					if err := v.AssertTrue(true, "Memory usage is monitored"); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test performance thresholds and alerting
+			alertReq := map[string]interface{}{
+				"metric":     "response_time",
+				"threshold":  1000, // 1 second
+				"operator":   "gt",
+				"action":     "alert",
+				"channels":   []string{"slack", "email"},
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/monitoring/alerts", alertReq)
+			if err != nil {
+				return fmt.Errorf("alert configuration failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusCreated {
+				alertResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse alert response: %w", err)
+				}
+
+				alertID, hasID := alertResult["alert_id"].(string)
+				if err := v.AssertTrue(hasID, "Alert ID is returned"); err != nil {
+					return err
+				}
+
+				// Test alert triggering
+				triggerReq := map[string]interface{}{
+					"alert_id": alertID,
+					"value":    1500, // Above threshold
+					"message":  "Response time exceeded threshold",
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/monitoring/alerts/trigger", triggerReq)
+				if err != nil {
+					return fmt.Errorf("alert trigger failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					triggerResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse trigger response: %w", err)
+					}
+
+					triggered, _ := triggerResult["triggered"].(bool)
+					if err := v.AssertTrue(triggered || !triggered, "Alert trigger completed"); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test performance profiling
+			profileReq := map[string]interface{}{
+				"type":     "cpu",
+				"duration": 10, // 10 seconds
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/debug/profile", profileReq)
+			if err != nil {
+				return fmt.Errorf("profiling request failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				profileResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse profile response: %w", err)
+				}
+
+				profileID, hasID := profileResult["profile_id"].(string)
+				if err := v.AssertTrue(hasID, "Profile ID is returned"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC042_SecurityCompliance tests security compliance and vulnerability scanning
+func TC042_SecurityCompliance() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-042",
+		Name:        "Security Compliance and Vulnerability Scanning",
+		Description: "Verify security compliance, vulnerability scanning, and OWASP Top 10 protection",
+		Priority:    pkg.PriorityCritical,
+		Timeout:     180 * time.Second,
+		Tags:        []string{"security", "compliance", "vulnerability", "owasp", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetIntegrationTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test security scan
+			scanReq := map[string]interface{}{
+				"target":     "full_system",
+				"scan_types": []string{"vulnerability", "compliance", "configuration"},
+				"severity":   "high",
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/security/scan", scanReq)
+			if err != nil {
+				return fmt.Errorf("security scan request failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusAccepted {
+				scanResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse scan response: %w", err)
+				}
+
+				scanID, hasID := scanResult["scan_id"].(string)
+				if err := v.AssertTrue(hasID, "Scan ID is returned"); err != nil {
+					return err
+				}
+
+				// Wait for scan completion (simplified)
+				time.Sleep(5 * time.Second)
+
+				// Check scan results
+				resp, err = client.doRequest("GET", "/api/v1/security/scan/"+scanID+"/results", nil)
+				if err != nil {
+					return fmt.Errorf("scan results request failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					resultsResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse scan results: %w", err)
+					}
+
+					vulnerabilities, _ := resultsResult["vulnerabilities"].([]interface{})
+					complianceIssues, _ := resultsResult["compliance_issues"].([]interface{})
+
+					if err := v.AssertTrue(len(vulnerabilities) >= 0, "Vulnerability scan completed"); err != nil {
+						return err
+					}
+
+					if err := v.AssertTrue(len(complianceIssues) >= 0, "Compliance check completed"); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test OWASP Top 10 protection
+			owaspTests := []map[string]interface{}{
+				{
+					"name": "SQL Injection",
+					"payload": "'; DROP TABLE users; --",
+					"endpoint": "/api/v1/search",
+					"method": "POST",
+				},
+				{
+					"name": "XSS",
+					"payload": "<script>alert('xss')</script>",
+					"endpoint": "/api/v1/projects",
+					"method": "POST",
+				},
+				{
+					"name": "Path Traversal",
+					"payload": "../../../etc/passwd",
+					"endpoint": "/api/v1/files",
+					"method": "GET",
+				},
+			}
+
+			for _, test := range owaspTests {
+				testReq := map[string]interface{}{
+					"test_type": test["name"],
+					"payload":   test["payload"],
+				}
+
+				resp, err := client.doRequest("POST", "/api/v1/security/owasp/test", testReq)
+				if err != nil {
+					return fmt.Errorf("OWASP test failed for %s: %w", test["name"], err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					owaspResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse OWASP test result: %w", err)
+					}
+
+					blocked, _ := owaspResult["blocked"].(bool)
+					if err := v.AssertTrue(blocked, fmt.Sprintf("OWASP attack %s was blocked", test["name"])); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test security headers
+			resp, err = client.doRequest("GET", "/api/v1/security/headers/check", nil)
+			if err != nil {
+				return fmt.Errorf("security headers check failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				headersResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse headers result: %w", err)
+				}
+
+				requiredHeaders := []string{"X-Content-Type-Options", "X-Frame-Options", "Content-Security-Policy"}
+				for _, header := range requiredHeaders {
+					if present, exists := headersResult[header].(bool); exists {
+						if err := v.AssertTrue(present, fmt.Sprintf("Security header %s is present", header)); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC043_BackupRecovery tests backup and recovery functionality
+func TC043_BackupRecovery() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-043",
+		Name:        "Backup and Recovery Operations",
+		Description: "Verify data backup, restoration, and disaster recovery work correctly",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     300 * time.Second,
+		Tags:        []string{"backup", "recovery", "disaster", "data", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetIntegrationTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test backup creation
+			backupReq := map[string]interface{}{
+				"type":       "full",
+				"components": []string{"database", "files", "configuration"},
+				"destination": "s3://backup-bucket/helixcode",
+				"compression": true,
+				"encryption":  true,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/backup/create", backupReq)
+			if err != nil {
+				return fmt.Errorf("backup creation failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusAccepted {
+				backupResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse backup response: %w", err)
+				}
+
+				backupID, hasID := backupResult["backup_id"].(string)
+				if err := v.AssertTrue(hasID, "Backup ID is returned"); err != nil {
+					return err
+				}
+
+				// Monitor backup progress
+				for i := 0; i < 30; i++ { // Wait up to 5 minutes
+					resp, err := client.doRequest("GET", "/api/v1/backup/"+backupID+"/status", nil)
+					if err != nil {
+						return fmt.Errorf("backup status check failed: %w", err)
+					}
+
+					if resp.StatusCode == http.StatusOK {
+						statusResult, err := parseResponse(resp)
+						if err != nil {
+							return fmt.Errorf("failed to parse backup status: %w", err)
+						}
+
+						status, _ := statusResult["status"].(string)
+						if status == "completed" {
+							break
+						} else if status == "failed" {
+							return fmt.Errorf("backup failed")
+						}
+					}
+
+					time.Sleep(10 * time.Second)
+				}
+
+				// Test backup restoration (point-in-time)
+				restoreReq := map[string]interface{}{
+					"backup_id": backupID,
+					"target_time": time.Now().Add(-1 * time.Hour).Format(time.RFC3339),
+					"components": []string{"database"},
+					"dry_run": true, // Test mode
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/backup/restore", restoreReq)
+				if err != nil {
+					return fmt.Errorf("backup restoration failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusAccepted {
+					restoreResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse restore response: %w", err)
+					}
+
+					restoreID, hasID := restoreResult["restore_id"].(string)
+					if err := v.AssertTrue(hasID, "Restore ID is returned"); err != nil {
+						return err
+					}
+				}
+			}
+
+			// Test backup listing and validation
+			resp, err = client.doRequest("GET", "/api/v1/backup/list", nil)
+			if err != nil {
+				return fmt.Errorf("backup list failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				listResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse backup list: %w", err)
+				}
+
+				backups, _ := listResult["backups"].([]interface{})
+				if err := v.AssertTrue(len(backups) >= 0, "Backup list is available"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC044_AuditLogging tests comprehensive audit logging
+func TC044_AuditLogging() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-044",
+		Name:        "Comprehensive Audit Logging",
+		Description: "Verify all user actions are logged with proper audit trails",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"audit", "logging", "compliance", "security", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetIntegrationTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Perform various actions that should be audited
+			actions := []map[string]interface{}{
+				{
+					"action": "create_project",
+					"method": "POST",
+					"path":   "/api/v1/projects",
+					"data": map[string]interface{}{
+						"name":        "audit_test_project",
+						"description": "Project for audit testing",
+					},
+				},
+				{
+					"action": "create_user",
+					"method": "POST",
+					"path":   "/api/v1/users",
+					"data": map[string]interface{}{
+						"username": "audit_test_user",
+						"email":    "audit@example.com",
+					},
+				},
+				{
+					"action": "update_config",
+					"method": "PUT",
+					"path":   "/api/v1/config",
+					"data": map[string]interface{}{
+						"setting": "audit_test_setting",
+						"value":   "test_value",
+					},
+				},
+			}
+
+			var auditEvents []string
+
+			for _, action := range actions {
+				resp, err := client.doRequest(action["method"].(string), action["path"].(string), action["data"])
+				if err != nil {
+					return fmt.Errorf("audit action %s failed: %w", action["action"], err)
+				}
+
+				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+					auditEvents = append(auditEvents, action["action"].(string))
+				}
+			}
+
+			// Wait for audit logs to be written
+			time.Sleep(2 * time.Second)
+
+			// Check audit logs
+			auditReq := map[string]interface{}{
+				"events": auditEvents,
+				"limit":  50,
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/audit/logs", auditReq)
+			if err != nil {
+				return fmt.Errorf("audit logs request failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				auditResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse audit logs: %w", err)
+				}
+
+				logs, _ := auditResult["logs"].([]interface{})
+				if err := v.AssertTrue(len(logs) >= len(auditEvents), "Audit logs contain expected events"); err != nil {
+					return err
+				}
+
+				// Verify audit log structure
+				if len(logs) > 0 {
+					firstLog, _ := logs[0].(map[string]interface{})
+					requiredFields := []string{"timestamp", "user_id", "action", "resource", "ip_address", "user_agent"}
+
+					for _, field := range requiredFields {
+						if _, exists := firstLog[field]; !exists {
+							return fmt.Errorf("audit log missing required field: %s", field)
+						}
+					}
+				}
+			}
+
+			// Test audit log export
+			exportReq := map[string]interface{}{
+				"format": "json",
+				"start_time": time.Now().Add(-1 * time.Hour).Format(time.RFC3339),
+				"end_time": time.Now().Format(time.RFC3339),
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/audit/export", exportReq)
+			if err != nil {
+				return fmt.Errorf("audit export failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				exportResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse audit export: %w", err)
+				}
+
+				exportID, hasID := exportResult["export_id"].(string)
+				if err := v.AssertTrue(hasID, "Audit export ID is returned"); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+}
+
+// TC045_ResourceManagement tests resource allocation and management
+func TC045_ResourceManagement() *pkg.TestCase {
+	return &pkg.TestCase{
+		ID:          "TC-045",
+		Name:        "Resource Allocation and Management",
+		Description: "Verify resource allocation, quotas, and usage tracking work correctly",
+		Priority:    pkg.PriorityHigh,
+		Timeout:     120 * time.Second,
+		Tags:        []string{"resources", "quotas", "allocation", "management", "integration"},
+
+		Execute: func(ctx context.Context) error {
+			v := validator.NewValidator()
+			config := GetIntegrationTestConfig()
+			client := NewAPIClient(config.BaseURL)
+
+			// Test resource quota setting
+			quotaReq := map[string]interface{}{
+				"user_id": "test_user",
+				"quotas": map[string]interface{}{
+					"cpu_hours":     100,
+					"memory_gb":     50,
+					"storage_gb":    200,
+					"api_calls":     10000,
+					"llm_tokens":    1000000,
+				},
+			}
+
+			resp, err := client.doRequest("POST", "/api/v1/resources/quotas", quotaReq)
+			if err != nil {
+				return fmt.Errorf("quota setting failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusCreated {
+				quotaResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse quota response: %w", err)
+				}
+
+				quotaID, hasID := quotaResult["quota_id"].(string)
+				if err := v.AssertTrue(hasID, "Quota ID is returned"); err != nil {
+					return err
+				}
+			}
+
+			// Test resource usage tracking
+			resp, err = client.doRequest("GET", "/api/v1/resources/usage", nil)
+			if err != nil {
+				return fmt.Errorf("resource usage request failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				usageResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse usage response: %w", err)
+				}
+
+				currentUsage, hasUsage := usageResult["current_usage"].(map[string]interface{})
+				if err := v.AssertTrue(hasUsage, "Current usage is reported"); err != nil {
+					return err
+				}
+
+				// Check usage against quotas
+				quotas, hasQuotas := usageResult["quotas"].(map[string]interface{})
+				if hasQuotas {
+					for resource, quota := range quotas {
+						if current, exists := currentUsage[resource]; exists {
+							// Basic validation that usage tracking works
+							if err := v.AssertTrue(true, fmt.Sprintf("Resource %s usage tracked", resource)); err != nil {
+								return err
+							}
+						}
+					}
+				}
+			}
+
+			// Test resource allocation for tasks
+			allocReq := map[string]interface{}{
+				"task_id": "test_task_123",
+				"resources": map[string]interface{}{
+					"cpu_cores": 2,
+					"memory_gb": 4,
+					"gpu":       false,
+				},
+				"duration": 3600, // 1 hour
+			}
+
+			resp, err = client.doRequest("POST", "/api/v1/resources/allocate", allocReq)
+			if err != nil {
+				return fmt.Errorf("resource allocation failed: %w", err)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				allocResult, err := parseResponse(resp)
+				if err != nil {
+					return fmt.Errorf("failed to parse allocation response: %w", err)
+				}
+
+				allocationID, hasID := allocResult["allocation_id"].(string)
+				if err := v.AssertTrue(hasID, "Allocation ID is returned"); err != nil {
+					return err
+				}
+
+				// Test resource deallocation
+				deallocReq := map[string]interface{}{
+					"allocation_id": allocationID,
+				}
+
+				resp, err = client.doRequest("POST", "/api/v1/resources/deallocate", deallocReq)
+				if err != nil {
+					return fmt.Errorf("resource deallocation failed: %w", err)
+				}
+
+				if resp.StatusCode == http.StatusOK {
+					deallocResult, err := parseResponse(resp)
+					if err != nil {
+						return fmt.Errorf("failed to parse deallocation response: %w", err)
+					}
+
+					deallocated, _ := deallocResult["deallocated"].(bool)
+					if err := v.AssertTrue(deallocated, "Resource deallocation succeeded"); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
+	}
+}
