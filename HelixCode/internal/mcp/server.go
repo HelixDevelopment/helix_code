@@ -22,10 +22,21 @@ type MCPServer struct {
 	toolMux    sync.RWMutex
 }
 
+// WebSocketConn defines the interface for WebSocket connections
+type WebSocketConn interface {
+	ReadJSON(v interface{}) error
+	WriteJSON(v interface{}) error
+	Close() error
+	SetReadDeadline(t time.Time) error
+	SetWriteDeadline(t time.Time) error
+	SetPongHandler(h func(string) error)
+	WriteMessage(messageType int, data []byte) error
+}
+
 // MCPSession represents an MCP session
 type MCPSession struct {
 	ID           uuid.UUID
-	Conn         *websocket.Conn
+	Conn         WebSocketConn
 	CreatedAt    time.Time
 	LastActivity time.Time
 	UserID       uuid.UUID

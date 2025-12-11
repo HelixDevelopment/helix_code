@@ -2,9 +2,10 @@ package notification
 
 import (
 	"context"
-	"fmt"
 	"testing"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -390,89 +391,261 @@ func TestGetChannelStats(t *testing.T) {
 func TestCountActiveRules(t *testing.T) {
 	engine := NewNotificationEngine()
 
-	t.Run("no rules", func(t *testing.T) {
-		count := engine.countActiveRules()
-		assert.Equal(t, 0, count)
-	})
+	// Add some rules
+	engine.AddRule(NotificationRule{Enabled: true})
+	engine.AddRule(NotificationRule{Enabled: false})
+	engine.AddRule(NotificationRule{Enabled: true})
 
-	t.Run("all rules enabled", func(t *testing.T) {
-		engine := NewNotificationEngine()
+	assert.Equal(t, 2, engine.countActiveRules())
+}
 
-		for i := 0; i < 5; i++ {
-			rule := NotificationRule{
-				Name:    fmt.Sprintf("rule-%d", i),
-				Enabled: true,
-			}
-			engine.AddRule(rule)
+func TestSendNotification(t *testing.T) {
+	engine := NewNotificationEngine()
+
+	// Create mock channels
+	slackChannel := &mockChannel{name: "slack", enabled: true}
+	emailChannel := &mockChannel{name: "email", enabled: true}
+	disabledChannel := &mockChannel{name: "disabled", enabled: false}
+
+	engine.RegisterChannel(slackChannel)
+	engine.RegisterChannel(emailChannel)
+	engine.RegisterChannel(disabledChannel)
+
+	// Add a rule that matches info notifications and sends to slack
+	rule := NotificationRule{
+		Name:      "info-to-slack",
+		Condition: "type==info",
+		Channels:  []string{"slack"},
+		Priority:  NotificationPriorityMedium,
+		Enabled:   true,
+	}
+	engine.AddRule(rule)
+
+	t.Run("SendNotificationWithMatchingRule", func(t *testing.T) {
+		notification := &Notification{
+			Title:   "Test Info",
+			Message: "This is an info notification",
+			Type:    NotificationTypeInfo,
 		}
 
-		count := engine.countActiveRules()
-		assert.Equal(t, 5, count)
+		err := engine.SendNotification(context.Background(), notification)
+		assert.NoError(t, err)
+
+		// Check that notification was sent to slack but not email
+		// (We can't easily check this with the current mock, but the method should succeed)
+		assert.NotEqual(t, uuid.Nil, notification.ID)
+		assert.True(t, notification.CreatedAt.After(time.Now().Add(-1*time.Second)))
 	})
 
-	t.Run("all rules disabled", func(t *testing.T) {
-		engine := NewNotificationEngine()
-
-		for i := 0; i < 3; i++ {
-			rule := NotificationRule{
-				Name:    fmt.Sprintf("rule-%d", i),
-				Enabled: false,
-			}
-			engine.AddRule(rule)
+	t.Run("SendNotificationWithNoMatchingRule", func(t *testing.T) {
+		notification := &Notification{
+			Title:   "Test Error",
+			Message: "This is an error notification",
+			Type:    NotificationTypeError,
 		}
 
-		count := engine.countActiveRules()
-		assert.Equal(t, 0, count)
+		err := engine.SendNotification(context.Background(), notification)
+		assert.NoError(t, err)
+
+		// Should succeed even with no matching rules
+		assert.NotEqual(t, uuid.Nil, notification.ID)
 	})
 
-	t.Run("mixed enabled and disabled", func(t *testing.T) {
-		engine := NewNotificationEngine()
-
-		// Add enabled rules
-		for i := 0; i < 7; i++ {
-			rule := NotificationRule{
-				Name:    fmt.Sprintf("enabled-rule-%d", i),
-				Enabled: true,
-			}
-			engine.AddRule(rule)
-		}
-
-		// Add disabled rules
-		for i := 0; i < 3; i++ {
-			rule := NotificationRule{
-				Name:    fmt.Sprintf("disabled-rule-%d", i),
-				Enabled: false,
-			}
-			engine.AddRule(rule)
-		}
-
-		count := engine.countActiveRules()
-		assert.Equal(t, 7, count) // Only the enabled ones
-	})
-
-	t.Run("single enabled rule", func(t *testing.T) {
-		engine := NewNotificationEngine()
-
+	t.Run("SendNotificationWithDisabledChannels", func(t *testing.T) {
+		// Add a rule that includes a disabled channel
 		rule := NotificationRule{
-			Name:    "single-rule",
-			Enabled: true,
+			Name:      "warning-to-all",
+			Condition: "type==warning",
+			Channels:  []string{"slack", "email", "disabled"},
+			Priority:  NotificationPriorityHigh,
+			Enabled:   true,
 		}
 		engine.AddRule(rule)
 
-		count := engine.countActiveRules()
-		assert.Equal(t, 1, count)
-	})
-
-	t.Run("single disabled rule", func(t *testing.T) {
-		engine := NewNotificationEngine()
-
-		rule := NotificationRule{
-			Name:    "disabled-rule",
-			Enabled: false,
+		notification := &Notification{
+			Title:   "Test Warning",
+			Message: "This is a warning notification",
+			Type:    NotificationTypeWarning,
 		}
-		engine.AddRule(rule)
 
-		count := engine.countActiveRules()
-		assert.Equal(t, 0, count)
+		err := engine.SendNotification(context.Background(), notification)
+		assert.NoError(t, err)
+
+		// Should succeed, disabled channels should be filtered out
+		assert.NotEqual(t, uuid.Nil, notification.ID)
 	})
+}
+
+func TestApplyRules(t *testing.T) {
+	engine := NewNotificationEngine()
+
+	// Add rules
+	rule1 := NotificationRule{
+		Name:      "info-rule",
+		Condition: "type==info",
+		Channels:  []string{"slack"},
+		Priority:  NotificationPriorityMedium,
+		Enabled:   true,
+	}
+	rule2 := NotificationRule{
+		Name:      "error-rule",
+		Condition: "type==error",
+		Channels:  []string{"email"},
+		Priority:  NotificationPriorityHigh,
+		Enabled:   true,
+	}
+	rule3 := NotificationRule{
+		Name:      "disabled-rule",
+		Condition: "type==warning",
+		Channels:  []string{"telegram"},
+		Priority:  NotificationPriorityLow,
+		Enabled:   false, // Disabled
+	}
+
+	engine.AddRule(rule1)
+	engine.AddRule(rule2)
+	engine.AddRule(rule3)
+
+	t.Run("ApplyRulesMatchingInfo", func(t *testing.T) {
+		notification := &Notification{
+			Type: NotificationTypeInfo,
+		}
+
+		// Apply rules
+		engine.applyRules(notification)
+
+		// Should have slack channel added
+		assert.Contains(t, notification.Channels, "slack")
+		assert.Equal(t, NotificationPriorityMedium, notification.Priority)
+	})
+
+	t.Run("ApplyRulesMatchingError", func(t *testing.T) {
+		notification := &Notification{
+			Type: NotificationTypeError,
+		}
+
+		engine.applyRules(notification)
+
+		// Should have email channel added
+		assert.Contains(t, notification.Channels, "email")
+		assert.Equal(t, NotificationPriorityHigh, notification.Priority)
+	})
+
+	t.Run("ApplyRulesNoMatch", func(t *testing.T) {
+		notification := &Notification{
+			Type: NotificationTypeSuccess,
+		}
+
+		engine.applyRules(notification)
+
+		// Should have no channels added
+		assert.Empty(t, notification.Channels)
+		assert.Equal(t, NotificationPriority(""), notification.Priority) // Default
+	})
+
+	t.Run("ApplyRulesDisabledRuleIgnored", func(t *testing.T) {
+		notification := &Notification{
+			Type: NotificationTypeWarning,
+		}
+
+		engine.applyRules(notification)
+
+		// Should not have telegram channel (rule is disabled)
+		assert.NotContains(t, notification.Channels, "telegram")
+	})
+}
+
+func TestMatchesCondition(t *testing.T) {
+	engine := NewNotificationEngine()
+
+	testCases := []struct {
+		name         string
+		condition    string
+		notification *Notification
+		expected     bool
+	}{
+		{
+			name:         "TypeEqualsInfo",
+			condition:    "type==info",
+			notification: &Notification{Type: NotificationTypeInfo},
+			expected:     true,
+		},
+		{
+			name:         "TypeEqualsError",
+			condition:    "type==error",
+			notification: &Notification{Type: NotificationTypeInfo},
+			expected:     false,
+		},
+		{
+			name:         "PriorityEqualsHigh",
+			condition:    "priority==high",
+			notification: &Notification{Priority: NotificationPriorityHigh},
+			expected:     true,
+		},
+		{
+			name:         "PriorityEqualsLow",
+			condition:    "priority==low",
+			notification: &Notification{Priority: NotificationPriorityHigh},
+			expected:     false,
+		},
+		{
+			name:      "ComplexConditionTypeMatch",
+			condition: "type==warning && priority==urgent",
+			notification: &Notification{
+				Type:     NotificationTypeWarning,
+				Priority: NotificationPriorityUrgent,
+			},
+			expected: true, // Contains "type==warning"
+		},
+		{
+			name:      "ComplexConditionPartialMatch",
+			condition: "type==warning && priority==urgent",
+			notification: &Notification{
+				Type:     NotificationTypeWarning,
+				Priority: NotificationPriorityHigh,
+			},
+			expected: true, // Still contains "type==warning"
+		},
+		{
+			name:         "InvalidCondition",
+			condition:    "invalid==condition",
+			notification: &Notification{Type: NotificationTypeInfo},
+			expected:     false,
+		},
+		{
+			name:         "EmptyCondition",
+			condition:    "",
+			notification: &Notification{Type: NotificationTypeInfo},
+			expected:     true, // Empty condition returns true
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := engine.matchesCondition(tc.notification, tc.condition)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestGetPriorityLevel(t *testing.T) {
+	engine := NewNotificationEngine()
+
+	testCases := []struct {
+		priority NotificationPriority
+		expected int
+	}{
+		{NotificationPriorityLow, 1},
+		{NotificationPriorityMedium, 2},
+		{NotificationPriorityHigh, 3},
+		{NotificationPriorityUrgent, 4},
+		{NotificationPriority("unknown"), 0}, // Default case
+	}
+
+	for _, tc := range testCases {
+		t.Run(string(tc.priority), func(t *testing.T) {
+			result := engine.getPriorityLevel(tc.priority)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
 }

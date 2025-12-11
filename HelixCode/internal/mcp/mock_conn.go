@@ -15,6 +15,7 @@ type MockConn struct {
 	readMessages []interface{}
 }
 
+// Ensure MockConn implements WebSocketConn interface
 func (m *MockConn) ReadJSON(v interface{}) error {
 	if len(m.readMessages) == 0 {
 		return &websocket.CloseError{Code: websocket.CloseNormalClosure}
