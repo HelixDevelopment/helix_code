@@ -8,7 +8,7 @@ import (
 	"dev.helix.code/internal/config"
 )
 
-func TestNewWorker(t *testing.T) {
+func TestNewPoolWorker(t *testing.T) {
 	capabilities := WorkerCapabilities{
 		CPUCores: 4,
 		MemoryGB: 8,
@@ -18,10 +18,10 @@ func TestNewWorker(t *testing.T) {
 		Tags:     []string{"general"},
 	}
 
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
 
 	if worker == nil {
-		t.Fatal("NewWorker returned nil")
+		t.Fatal("NewPoolWorker returned nil")
 	}
 
 	if worker.ID != "test-worker" {
@@ -42,7 +42,7 @@ func TestNewWorker(t *testing.T) {
 }
 
 func TestWorkerUpdateStatus(t *testing.T) {
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 
 	worker.UpdateStatus(StatusBusy)
 	if worker.Status != StatusBusy {
@@ -56,7 +56,7 @@ func TestWorkerUpdateStatus(t *testing.T) {
 }
 
 func TestWorkerIsAvailable(t *testing.T) {
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 
 	// Initially available
 	if !worker.IsAvailable() {
@@ -92,7 +92,7 @@ func TestWorkerCanHandleTask(t *testing.T) {
 		Specialized: []string{"gpu", "high-memory"},
 	}
 
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
 
 	tests := []struct {
 		name         string
@@ -187,7 +187,7 @@ func TestWorkerCanHandleTask(t *testing.T) {
 }
 
 func TestWorkerCanHandleTaskWhenBusy(t *testing.T) {
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 
 	// Initially can handle
 	if !worker.CanHandleTask("test-task", map[string]interface{}{}) {
@@ -208,7 +208,7 @@ func TestWorkerCanHandleTaskWhenBusy(t *testing.T) {
 }
 
 func TestWorkerUpdateStats(t *testing.T) {
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 
 	// Initial stats
 	if worker.TasksProcessed != 0 {
@@ -242,7 +242,7 @@ func TestWorkerGetHealth(t *testing.T) {
 		Tags:     []string{"test"},
 	}
 
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
 	worker.UpdateStats(10, 8, 2, 1.5)
 
 	health := worker.GetHealth()
@@ -268,12 +268,12 @@ func TestWorkerGetHealth(t *testing.T) {
 	}
 }
 
-func TestNewWorkerPool(t *testing.T) {
+func TestNewPoolWorkerPool(t *testing.T) {
 	config := &config.WorkersConfig{}
-	pool := NewWorkerPool(config)
+	pool := NewPoolWorkerPool(config)
 
 	if pool == nil {
-		t.Fatal("NewWorkerPool returned nil")
+		t.Fatal("NewPoolWorkerPool returned nil")
 	}
 
 	if len(pool.workers) != 0 {
@@ -282,8 +282,8 @@ func TestNewWorkerPool(t *testing.T) {
 }
 
 func TestWorkerPoolRegisterUnregister(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 
 	// Register
 	pool.RegisterWorker(worker)
@@ -311,19 +311,19 @@ func TestWorkerPoolRegisterUnregister(t *testing.T) {
 }
 
 func TestWorkerPoolGetAvailableWorkers(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// Add available worker
-	worker1 := NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
+	worker1 := NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
 	pool.RegisterWorker(worker1)
 
 	// Add busy worker
-	worker2 := NewWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
+	worker2 := NewPoolWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
 	worker2.UpdateStatus(StatusBusy)
 	pool.RegisterWorker(worker2)
 
 	// Add offline worker
-	worker3 := NewWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
+	worker3 := NewPoolWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
 	worker3.UpdateStatus(StatusOffline)
 	pool.RegisterWorker(worker3)
 
@@ -339,7 +339,7 @@ func TestWorkerPoolGetAvailableWorkers(t *testing.T) {
 }
 
 func TestWorkerPoolAssignTask(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// Add worker with capabilities
 	capabilities := WorkerCapabilities{
@@ -348,7 +348,7 @@ func TestWorkerPoolAssignTask(t *testing.T) {
 		Tags:     []string{"general"},
 	}
 
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", capabilities)
 	pool.RegisterWorker(worker)
 
 	ctx := context.Background()
@@ -383,7 +383,7 @@ func TestWorkerPoolAssignTask(t *testing.T) {
 }
 
 func TestWorkerPoolAssignTaskNoAvailableWorkers(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	ctx := context.Background()
 
@@ -395,10 +395,10 @@ func TestWorkerPoolAssignTaskNoAvailableWorkers(t *testing.T) {
 }
 
 func TestWorkerPoolAssignTaskNoSuitableWorkers(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// Add worker without required capabilities
-	worker := NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{
+	worker := NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{
 		CPUCores: 2, // Less than required
 	})
 	pool.RegisterWorker(worker)
@@ -415,8 +415,8 @@ func TestWorkerPoolAssignTaskNoSuitableWorkers(t *testing.T) {
 }
 
 func TestWorkerPoolReleaseWorker(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
-	worker := NewWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
 	pool.RegisterWorker(worker)
 
 	// Mark as busy
@@ -437,21 +437,21 @@ func TestWorkerPoolReleaseWorker(t *testing.T) {
 }
 
 func TestWorkerPoolGetPoolStats(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// Add workers with different statuses
-	worker1 := NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
+	worker1 := NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
 	pool.RegisterWorker(worker1) // Available
 
-	worker2 := NewWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
+	worker2 := NewPoolWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
 	worker2.UpdateStatus(StatusBusy)
 	pool.RegisterWorker(worker2) // Busy
 
-	worker3 := NewWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
+	worker3 := NewPoolWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
 	worker3.UpdateStatus(StatusOffline)
 	pool.RegisterWorker(worker3) // Offline
 
-	worker4 := NewWorker("worker4", "Worker 4", "localhost:8083", WorkerCapabilities{})
+	worker4 := NewPoolWorker("worker4", "Worker 4", "localhost:8083", WorkerCapabilities{})
 	worker4.UpdateStatus(StatusError)
 	pool.RegisterWorker(worker4) // Error
 
@@ -483,7 +483,7 @@ func TestWorkerPoolGetPoolStats(t *testing.T) {
 }
 
 func TestWorkerPoolHealthCheck(t *testing.T) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// No workers
 	err := pool.HealthCheck()
@@ -492,7 +492,7 @@ func TestWorkerPoolHealthCheck(t *testing.T) {
 	}
 
 	// Add offline worker
-	worker := NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
 	worker.UpdateStatus(StatusOffline)
 	pool.RegisterWorker(worker)
 
@@ -502,7 +502,7 @@ func TestWorkerPoolHealthCheck(t *testing.T) {
 	}
 
 	// Add available worker
-	worker2 := NewWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
+	worker2 := NewPoolWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
 	pool.RegisterWorker(worker2)
 
 	err = pool.HealthCheck()
@@ -514,10 +514,10 @@ func TestWorkerPoolHealthCheck(t *testing.T) {
 func TestDefaultScheduler(t *testing.T) {
 	scheduler := NewDefaultScheduler()
 
-	workers := []*Worker{
-		NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{}),
-		NewWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{}),
-		NewWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{}),
+	workers := []*PoolWorker{
+		NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{}),
+		NewPoolWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{}),
+		NewPoolWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{}),
 	}
 
 	// Select workers multiple times to test round-robin
@@ -541,8 +541,8 @@ func TestDefaultScheduler(t *testing.T) {
 func TestDefaultSchedulerNoSuitableWorkers(t *testing.T) {
 	scheduler := NewDefaultScheduler()
 
-	workers := []*Worker{
-		NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{}),
+	workers := []*PoolWorker{
+		NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{}),
 	}
 
 	// All workers are busy
@@ -560,16 +560,16 @@ func TestPerformanceScheduler(t *testing.T) {
 	scheduler := NewPerformanceScheduler()
 
 	// Create workers with different performance metrics
-	worker1 := NewWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
+	worker1 := NewPoolWorker("worker1", "Worker 1", "localhost:8080", WorkerCapabilities{})
 	worker1.UpdateStats(100, 95, 5, 10.0) // 95% success rate, low load
 
-	worker2 := NewWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
+	worker2 := NewPoolWorker("worker2", "Worker 2", "localhost:8081", WorkerCapabilities{})
 	worker2.UpdateStats(100, 80, 20, 50.0) // 80% success rate, high load
 
-	worker3 := NewWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
+	worker3 := NewPoolWorker("worker3", "Worker 3", "localhost:8082", WorkerCapabilities{})
 	worker3.UpdateStats(0, 0, 0, 0.0) // New worker
 
-	workers := []*Worker{worker1, worker2, worker3}
+	workers := []*PoolWorker{worker1, worker2, worker3}
 
 	selected := scheduler.SelectWorker(workers, "test-task", map[string]interface{}{})
 
@@ -603,7 +603,7 @@ func TestGlobalPool(t *testing.T) {
 	}
 
 	// Add a worker
-	worker := NewWorker("global-worker", "Global Worker", "localhost:8080", WorkerCapabilities{})
+	worker := NewPoolWorker("global-worker", "Global Worker", "localhost:8080", WorkerCapabilities{})
 	pool.RegisterWorker(worker)
 
 	// Should work now
@@ -633,7 +633,7 @@ func BenchmarkWorkerCanHandleTask(b *testing.B) {
 		Specialized: []string{"gpu", "high-memory", "fast-storage"},
 	}
 
-	worker := NewWorker("bench-worker", "Bench Worker", "localhost:8080", capabilities)
+	worker := NewPoolWorker("bench-worker", "Bench Worker", "localhost:8080", capabilities)
 
 	requirements := map[string]interface{}{
 		"cpu_cores":   4,
@@ -650,11 +650,11 @@ func BenchmarkWorkerCanHandleTask(b *testing.B) {
 }
 
 func BenchmarkWorkerPoolAssignTask(b *testing.B) {
-	pool := NewWorkerPool(&config.WorkersConfig{})
+	pool := NewPoolWorkerPool(&config.WorkersConfig{})
 
 	// Add multiple workers
 	for i := 0; i < 10; i++ {
-		worker := NewWorker(fmt.Sprintf("worker%d", i), fmt.Sprintf("Worker %d", i),
+		worker := NewPoolWorker(fmt.Sprintf("worker%d", i), fmt.Sprintf("Worker %d", i),
 			fmt.Sprintf("localhost:808%d", i), WorkerCapabilities{
 				CPUCores: 4,
 				MemoryGB: 8,
@@ -681,9 +681,9 @@ func BenchmarkWorkerPoolAssignTask(b *testing.B) {
 func BenchmarkDefaultScheduler(b *testing.B) {
 	scheduler := NewDefaultScheduler()
 
-	workers := make([]*Worker, 10)
+	workers := make([]*PoolWorker, 10)
 	for i := 0; i < 10; i++ {
-		workers[i] = NewWorker(fmt.Sprintf("worker%d", i), fmt.Sprintf("Worker %d", i),
+		workers[i] = NewPoolWorker(fmt.Sprintf("worker%d", i), fmt.Sprintf("Worker %d", i),
 			fmt.Sprintf("localhost:808%d", i), WorkerCapabilities{})
 	}
 

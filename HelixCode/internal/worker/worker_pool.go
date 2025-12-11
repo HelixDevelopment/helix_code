@@ -9,18 +9,18 @@ import (
 	"dev.helix.code/internal/config"
 )
 
-// WorkerStatus represents the status of a worker
-type WorkerStatus string
+// PoolWorkerStatus represents the status of a pool worker
+type PoolWorkerStatus string
 
 const (
 	// StatusAvailable indicates the worker is available for tasks
-	StatusAvailable WorkerStatus = "available"
+	StatusAvailable PoolWorkerStatus = "available"
 	// StatusBusy indicates the worker is currently executing a task
-	StatusBusy WorkerStatus = "busy"
+	StatusBusy PoolWorkerStatus = "busy"
 	// StatusOffline indicates the worker is offline
-	StatusOffline WorkerStatus = "offline"
+	StatusOffline PoolWorkerStatus = "offline"
 	// StatusError indicates the worker encountered an error
-	StatusError WorkerStatus = "error"
+	StatusError PoolWorkerStatus = "error"
 )
 
 // WorkerCapabilities represents the capabilities of a worker
@@ -35,12 +35,12 @@ type WorkerCapabilities struct {
 	Specialized []string `json:"specialized"` // e.g., "gpu", "high-memory", "fast-storage"
 }
 
-// Worker represents a distributed worker node
-type Worker struct {
+// PoolWorker represents a distributed worker node in the pool
+type PoolWorker struct {
 	ID             string             `json:"id"`
 	Name           string             `json:"name"`
 	Address        string             `json:"address"`
-	Status         WorkerStatus       `json:"status"`
+	Status         PoolWorkerStatus   `json:"status"`
 	Capabilities   WorkerCapabilities `json:"capabilities"`
 	LastSeen       time.Time          `json:"last_seen"`
 	TasksProcessed int                `json:"tasks_processed"`
@@ -50,9 +50,9 @@ type Worker struct {
 	mu             sync.RWMutex
 }
 
-// NewWorker creates a new worker
-func NewWorker(id, name, address string, capabilities WorkerCapabilities) *Worker {
-	return &Worker{
+// NewPoolWorker creates a new pool worker
+func NewPoolWorker(id, name, address string, capabilities WorkerCapabilities) *PoolWorker {
+	return &PoolWorker{
 		ID:           id,
 		Name:         name,
 		Address:      address,
@@ -63,7 +63,7 @@ func NewWorker(id, name, address string, capabilities WorkerCapabilities) *Worke
 }
 
 // UpdateStatus updates the worker status
-func (w *Worker) UpdateStatus(status WorkerStatus) {
+func (w *PoolWorker) UpdateStatus(status PoolWorkerStatus) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.Status = status
@@ -71,14 +71,14 @@ func (w *Worker) UpdateStatus(status WorkerStatus) {
 }
 
 // IsAvailable checks if the worker is available
-func (w *Worker) IsAvailable() bool {
+func (w *PoolWorker) IsAvailable() bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	return w.Status == StatusAvailable
 }
 
 // CanHandleTask checks if the worker can handle a specific task
-func (w *Worker) CanHandleTask(taskType string, requirements map[string]interface{}) bool {
+func (w *PoolWorker) CanHandleTask(taskType string, requirements map[string]interface{}) bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 
@@ -144,7 +144,7 @@ func (w *Worker) CanHandleTask(taskType string, requirements map[string]interfac
 }
 
 // UpdateStats updates worker statistics
-func (w *Worker) UpdateStats(processed, succeeded, failed int, loadAvg float64) {
+func (w *PoolWorker) UpdateStats(processed, succeeded, failed int, loadAvg float64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.TasksProcessed += processed
@@ -155,7 +155,7 @@ func (w *Worker) UpdateStats(processed, succeeded, failed int, loadAvg float64) 
 }
 
 // GetHealth returns worker health information
-func (w *Worker) GetHealth() map[string]interface{} {
+func (w *PoolWorker) GetHealth() map[string]interface{} {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 
@@ -181,7 +181,7 @@ func (w *Worker) GetHealth() map[string]interface{} {
 
 // WorkerPool manages a pool of workers
 type WorkerPool struct {
-	workers   map[string]*Worker
+	workers   map[string]*PoolWorker
 	scheduler Scheduler
 	config    *config.WorkersConfig
 	stopChan  chan struct{}
@@ -192,7 +192,7 @@ type WorkerPool struct {
 // NewWorkerPool creates a new worker pool
 func NewWorkerPool(config *config.WorkersConfig) *WorkerPool {
 	return &WorkerPool{
-		workers:   make(map[string]*Worker),
+		workers:   make(map[string]*PoolWorker),
 		scheduler: NewDefaultScheduler(),
 		config:    config,
 		stopChan:  make(chan struct{}),
@@ -200,7 +200,7 @@ func NewWorkerPool(config *config.WorkersConfig) *WorkerPool {
 }
 
 // RegisterWorker registers a worker with the pool
-func (wp *WorkerPool) RegisterWorker(worker *Worker) {
+func (wp *WorkerPool) RegisterWorker(worker *PoolWorker) {
 	wp.mu.Lock()
 	defer wp.mu.Unlock()
 	wp.workers[worker.ID] = worker
@@ -214,7 +214,7 @@ func (wp *WorkerPool) UnregisterWorker(workerID string) {
 }
 
 // GetWorker gets a worker by ID
-func (wp *WorkerPool) GetWorker(workerID string) (*Worker, bool) {
+func (wp *WorkerPool) GetWorker(workerID string) (*PoolWorker, bool) {
 	wp.mu.RLock()
 	defer wp.mu.RUnlock()
 	worker, exists := wp.workers[workerID]
@@ -222,11 +222,11 @@ func (wp *WorkerPool) GetWorker(workerID string) (*Worker, bool) {
 }
 
 // GetAvailableWorkers returns all available workers
-func (wp *WorkerPool) GetAvailableWorkers() []*Worker {
+func (wp *WorkerPool) GetAvailableWorkers() []*PoolWorker {
 	wp.mu.RLock()
 	defer wp.mu.RUnlock()
 
-	available := make([]*Worker, 0)
+	available := make([]*PoolWorker, 0)
 	for _, worker := range wp.workers {
 		if worker.IsAvailable() {
 			available = append(available, worker)
@@ -236,7 +236,7 @@ func (wp *WorkerPool) GetAvailableWorkers() []*Worker {
 }
 
 // AssignTask assigns a task to an appropriate worker
-func (wp *WorkerPool) AssignTask(ctx context.Context, taskType string, requirements map[string]interface{}) (*Worker, error) {
+func (wp *WorkerPool) AssignTask(ctx context.Context, taskType string, requirements map[string]interface{}) (*PoolWorker, error) {
 	wp.mu.RLock()
 	availableWorkers := wp.GetAvailableWorkers()
 	wp.mu.RUnlock()
@@ -356,7 +356,7 @@ func (wp *WorkerPool) healthCheckLoop(ctx context.Context) {
 // performHealthChecks performs health checks on all workers
 func (wp *WorkerPool) performHealthChecks() {
 	wp.mu.RLock()
-	workers := make([]*Worker, 0, len(wp.workers))
+	workers := make([]*PoolWorker, 0, len(wp.workers))
 	for _, worker := range wp.workers {
 		workers = append(workers, worker)
 	}
@@ -372,7 +372,7 @@ func (wp *WorkerPool) performHealthChecks() {
 
 // Scheduler defines the interface for worker selection
 type Scheduler interface {
-	SelectWorker(workers []*Worker, taskType string, requirements map[string]interface{}) *Worker
+	SelectWorker(workers []*PoolWorker, taskType string, requirements map[string]interface{}) *PoolWorker
 }
 
 // DefaultScheduler implements a simple round-robin scheduler
@@ -387,7 +387,7 @@ func NewDefaultScheduler() *DefaultScheduler {
 }
 
 // SelectWorker selects a worker using round-robin scheduling
-func (ds *DefaultScheduler) SelectWorker(workers []*Worker, taskType string, requirements map[string]interface{}) *Worker {
+func (ds *DefaultScheduler) SelectWorker(workers []*PoolWorker, taskType string, requirements map[string]interface{}) *PoolWorker {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
@@ -396,7 +396,7 @@ func (ds *DefaultScheduler) SelectWorker(workers []*Worker, taskType string, req
 	}
 
 	// Find suitable workers
-	suitableWorkers := make([]*Worker, 0)
+	suitableWorkers := make([]*PoolWorker, 0)
 	for _, worker := range workers {
 		if worker.CanHandleTask(taskType, requirements) {
 			suitableWorkers = append(suitableWorkers, worker)
@@ -423,8 +423,8 @@ func NewPerformanceScheduler() *PerformanceScheduler {
 }
 
 // SelectWorker selects the worker with the best performance metrics
-func (ps *PerformanceScheduler) SelectWorker(workers []*Worker, taskType string, requirements map[string]interface{}) *Worker {
-	var bestWorker *Worker
+func (ps *PerformanceScheduler) SelectWorker(workers []*PoolWorker, taskType string, requirements map[string]interface{}) *PoolWorker {
+	var bestWorker *PoolWorker
 	bestScore := -1.0
 
 	for _, worker := range workers {
@@ -477,7 +477,7 @@ func InitializeGlobalPool(config *config.WorkersConfig) {
 }
 
 // AssignTaskGlobal assigns a task using the global pool
-func AssignTaskGlobal(ctx context.Context, taskType string, requirements map[string]interface{}) (*Worker, error) {
+func AssignTaskGlobal(ctx context.Context, taskType string, requirements map[string]interface{}) (*PoolWorker, error) {
 	if globalPool == nil {
 		return nil, fmt.Errorf("global worker pool not initialized")
 	}

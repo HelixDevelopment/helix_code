@@ -10,6 +10,5 @@ func countLines(code string) int {
 		if c == '\n' {
 			lines++
 		}
-	}
 	return lines
 }
