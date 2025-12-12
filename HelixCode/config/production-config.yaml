@@ -1,0 +1,571 @@
+# Production configuration for Phase 3 - Enterprise deployment
+server:
+  address: "0.0.0.0"
+  port: 8080
+  read_timeout: 60
+  write_timeout: 60
+  idle_timeout: 600
+  shutdown_timeout: 30
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "helixcode_prod"
+  password: "${HELIX_DATABASE_PASSWORD}"
+  dbname: "helixcode_prod"
+  sslmode: "require"
+  max_connections: 100
+  min_connections: 10
+  max_conn_lifetime: "1h"
+  max_conn_idle_time: "30m"
+
+redis:
+  host: "${HELIX_REDIS_HOST}"
+  port: 6379
+  password: "${HELIX_REDIS_PASSWORD}"
+  db: 0
+  enabled: true
+  max_retries: 3
+  pool_size: 20
+  read_timeout: "5s"
+  write_timeout: "5s"
+
+auth:
+  jwt_secret: "${HELIX_AUTH_JWT_SECRET}"
+  token_expiry: 86400
+  session_expiry: 604800
+  bcrypt_cost: 14
+  refresh_token_expiry: 2592000
+
+workers:
+  health_check_interval: 30
+  health_ttl: 120
+  max_concurrent_tasks: 50
+  auto_install: true
+  ssh_timeout: 60
+  connection_timeout: 30
+  retry_interval: 5
+  max_retries: 3
+
+tasks:
+  max_retries: 5
+  checkpoint_interval: 300
+  cleanup_interval: 3600
+  timeout: 3600
+  priority_levels: ["low", "normal", "high", "critical"]
+
+llm:
+  default_provider: "production"
+  max_tokens: 8192
+  temperature: 0.7
+  timeout: 60
+  max_retries: 3
+  rate_limit_per_minute: 60
+  
+  providers:
+    # Production LLM providers
+    openai:
+      type: openai
+      endpoint: "https://api.openai.com/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${OPENAI_API_KEY}"
+        organization: "${OPENAI_ORG_ID}"
+        
+    anthropic:
+      type: anthropic
+      endpoint: "https://api.anthropic.com/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${ANTHROPIC_API_KEY}"
+        
+    gemini:
+      type: gemini
+      endpoint: "https://generativelanguage.googleapis.com/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${GEMINI_API_KEY}"
+        
+    xai:
+      type: xai
+      endpoint: "https://api.x.ai/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${XAI_API_KEY}"
+        
+    copilot:
+      type: copilot
+      endpoint: "https://api.githubcopilot.com/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${GITHUB_TOKEN}"
+        
+    openrouter:
+      type: openrouter
+      endpoint: "https://openrouter.ai/api/v1"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${OPENROUTER_API_KEY}"
+        
+    # Local providers
+    local:
+      type: ollama
+      endpoint: "http://localhost:11434"
+      enabled: true
+      parameters:
+        timeout: 60.0
+        max_retries: 3
+        streaming_support: true
+        
+    llamacpp:
+      type: llamacpp
+      endpoint: "http://localhost:8080"
+      enabled: false
+      parameters:
+        timeout: 60.0
+        max_retries: 3
+        streaming_support: true
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  
+  # Production logging configuration
+  file:
+    enabled: true
+    path: "/var/log/helixcode/helixcode.log"
+    max_size: 100
+    max_backups: 10
+    max_age: 30
+    compress: true
+  
+  # Structured logging
+  fields:
+    environment: "production"
+    version: "1.0.0"
+    deployment: "phase3"
+
+notifications:
+  enabled: true
+  
+  # Production notification channels
+  channels:
+    slack:
+      enabled: true
+      webhook_url: "${HELIX_SLACK_WEBHOOK_URL}"
+      channel: "#helix-alerts"
+      username: "HelixCode Bot"
+      timeout: 10
+      icon_emoji: ":robot:"
+    
+    email:
+      enabled: true
+      smtp:
+        server: "${HELIX_EMAIL_SMTP_SERVER}"
+        port: 587
+        username: "${HELIX_EMAIL_USERNAME}"
+        password: "${HELIX_EMAIL_PASSWORD}"
+        tls: true
+        timeout: 30
+      recipients:
+        default: "${HELIX_EMAIL_RECIPIENTS}"
+        critical: "${HELIX_EMAIL_CRITICAL_RECIPIENTS}"
+      templates:
+        enabled: true
+        directory: "/etc/helixcode/templates/"
+    
+    telegram:
+      enabled: true
+      bot_token: "${HELIX_TELEGRAM_BOT_TOKEN}"
+      chat_id: "${HELIX_TELEGRAM_CHAT_ID}"
+      timeout: 10
+      parse_mode: "Markdown"
+    
+    discord:
+      enabled: false
+      webhook_url: "${HELIX_DISCORD_WEBHOOK_URL}"
+      timeout: 10
+
+workers:
+  health_check_interval: 30
+  health_ttl: 120
+  max_concurrent_tasks: 50
+  auto_install: true
+  ssh_timeout: 60
+  connection_timeout: 30
+  retry_interval: 5
+  max_retries: 3
+
+tasks:
+  max_retries: 5
+  checkpoint_interval: 300
+  cleanup_interval: 3600
+  timeout: 3600
+  priority_levels: ["low", "normal", "high", "critical"]
+  max_concurrent_per_worker: 10
+  resource_limits:
+    cpu_percent: 80
+    memory_percent: 85
+    disk_percent: 90
+
+llm:
+  default_provider: "production"
+  max_tokens: 8192
+  temperature: 0.7
+  timeout: 60
+  max_retries: 3
+  rate_limit_per_minute: 60
+  batch_size: 10
+  
+  # Provider selection strategy
+  selection:
+    strategy: "performance"  # performance, cost, availability, round-robin
+    fallback_enabled: true
+    health_check_interval: 30
+    
+  # Provider-specific configurations
+  providers:
+    # Cloud providers with production settings
+    openai:
+      type: openai
+      endpoint: "https://api.openai.com/v1"
+      enabled: true
+      priority: 1
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${OPENAI_API_KEY}"
+        organization: "${OPENAI_ORG_ID}"
+        rate_limit:
+          requests_per_minute: 60
+          tokens_per_minute: 100000
+        
+    anthropic:
+      type: anthropic
+      endpoint: "https://api.anthropic.com/v1"
+      enabled: true
+      priority: 2
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${ANTHROPIC_API_KEY}"
+        rate_limit:
+          requests_per_minute: 40
+          tokens_per_minute: 80000
+        
+    gemini:
+      type: gemini
+      endpoint: "https://generativelanguage.googleapis.com/v1"
+      enabled: true
+      priority: 3
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${GEMINI_API_KEY}"
+        rate_limit:
+          requests_per_minute: 60
+          tokens_per_minute: 120000
+        
+    xai:
+      type: xai
+      endpoint: "https://api.x.ai/v1"
+      enabled: true
+      priority: 4
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${XAI_API_KEY}"
+        rate_limit:
+          requests_per_minute: 30
+          tokens_per_minute: 60000
+        
+    copilot:
+      type: copilot
+      endpoint: "https://api.githubcopilot.com/v1"
+      enabled: true
+      priority: 5
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${GITHUB_TOKEN}"
+        rate_limit:
+          requests_per_minute: 50
+          tokens_per_minute: 90000
+        
+    openrouter:
+      type: openrouter
+      endpoint: "https://openrouter.ai/api/v1"
+      enabled: true
+      priority: 6
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${OPENROUTER_API_KEY}"
+        rate_limit:
+          requests_per_minute: 100
+          tokens_per_minute: 150000
+        
+    # Local providers
+    local:
+      type: ollama
+      endpoint: "http://localhost:11434"
+      enabled: true
+      priority: 10
+      parameters:
+        timeout: 60.0
+        max_retries: 3
+        streaming_support: true
+        model_timeout: 30.0
+        
+    llamacpp:
+      type: llamacpp
+      endpoint: "http://localhost:8080"
+      enabled: false
+      priority: 11
+      parameters:
+        timeout: 60.0
+        max_retries: 3
+        streaming_support: true
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  
+  # Production logging configuration
+  file:
+    enabled: true
+    path: "/var/log/helixcode/helixcode.log"
+    max_size: 100
+    max_backups: 10
+    max_age: 30
+    compress: true
+  
+  # Structured logging
+  fields:
+    environment: "production"
+    version: "1.0.0"
+    deployment: "phase3"
+
+notifications:
+  enabled: true
+  
+  # Production notification channels
+  channels:
+    slack:
+      enabled: true
+      webhook_url: "${HELIX_SLACK_WEBHOOK_URL}"
+      channel: "#helix-alerts"
+      username: "HelixCode Bot"
+      timeout: 10
+      icon_emoji: ":robot:"
+    
+    email:
+      enabled: true
+      smtp:
+        server: "${HELIX_EMAIL_SMTP_SERVER}"
+        port: 587
+        username: "${HELIX_EMAIL_USERNAME}"
+        password: "${HELIX_EMAIL_PASSWORD}"
+        tls: true
+        timeout: 30
+      recipients:
+        default: "${HELIX_EMAIL_RECIPIENTS}"
+        critical: "${HELIX_EMAIL_CRITICAL_RECIPIENTS}"
+      templates:
+        enabled: true
+        directory: "/etc/helixcode/templates/"
+    
+    telegram:
+      enabled: true
+      bot_token: "${HELIX_TELEGRAM_BOT_TOKEN}"
+      chat_id: "${HELIX_TELEGRAM_CHAT_ID}"
+      timeout: 10
+      parse_mode: "Markdown"
+    
+    discord:
+      enabled: false
+      webhook_url: "${HELIX_DISCORD_WEBHOOK_URL}"
+      timeout: 10
+
+# Notification rules for production
+notifications:
+  enabled: true
+  
+  rules:
+    - name: "Critical System Failures"
+      condition: "type==error AND severity==critical"
+      channels: ["slack", "email"]
+      priority: urgent
+      enabled: true
+    
+    - name: "Worker Health Alerts"
+      condition: "type==worker_health AND status==failed"
+      channels: ["slack", "telegram"]
+      priority: high
+      enabled: true
+    
+    - name: "Task Completion Summary"
+      condition: "type==task_batch AND status==completed"
+      channels: ["slack"]
+      priority: medium
+      enabled: true
+    
+    - name: "Performance Degradation"
+      condition: "type==performance AND response_time>2000"
+      channels: ["email"]
+      priority: high
+      enabled: true
+    
+    - name: "Daily Summary"
+      condition: "type==daily_summary"
+      channels: ["slack"]
+      priority: low
+      enabled: true
+
+# Security configuration for production
+security:
+  cors:
+    enabled: true
+    allowed_origins: ["https://helixcode.com", "https://app.helixcode.com"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_headers: ["*"]
+    max_age: 86400
+  
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 1000
+    burst_size: 100
+    
+  headers:
+    x_frame_options: "DENY"
+    x_content_type_options: "nosniff"
+    x_xss_protection: "1; mode=block"
+    strict_transport_security: "max-age=31536000; includeSubDomains"
+    content_security_policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+  
+  authentication:
+    token_expiry: 86400
+    refresh_token_expiry: 2592000
+    password_policy:
+      min_length: 12
+      require_uppercase: true
+      require_lowercase: true
+      require_numbers: true
+      require_special_chars: true
+      max_age_days: 90
+    
+  session_management:
+    session_timeout: 3600
+    concurrent_sessions: 5
+    ip_binding: true
+    
+  audit_logging:
+    enabled: true
+    level: "info"
+    include_request_body: true
+    include_response_body: false
+    retention_days: 90
+
+# Performance tuning for production
+performance:
+  connection_pooling:
+    enabled: true
+    max_idle_connections: 100
+    max_open_connections: 200
+    connection_max_lifetime: "1h"
+    connection_max_idle_time: "30m"
+  
+  caching:
+    enabled: true
+    redis_ttl: 3600
+    local_cache_size: 1000
+    cache_prefix: "helix_prod"
+  
+  optimization:
+    gzip_compression: true
+    request_timeout: 60
+    idle_timeout: 600
+    max_request_size: "10MB"
+    
+  monitoring:
+    enabled: true
+    metrics_endpoint: "/metrics"
+    health_endpoint: "/health"
+    profiling_endpoint: "/debug/pprof"
+    
+# Feature flags for production
+features:
+  advanced_memory: true
+  multi_provider_llm: true
+  distributed_workers: true
+  real_time_notifications: true
+  advanced_analytics: true
+  mcp_integration: true
+  workflow_automation: true
+  
+# Environment-specific overrides
+environments:
+  production:
+    server:
+      debug: false
+      profiling: false
+    
+    logging:
+      level: "warn"
+    
+    notifications:
+      enabled: true
+    
+  staging:
+    server:
+      debug: true
+      profiling: true
+    
+    logging:
+      level: "info"
+    
+    notifications:
+      enabled: true
+      channels:
+        slack:
+          channel: "#helix-staging"
+    
+  development:
+    server:
+      debug: true
+      profiling: true
+    
+    logging:
+      level: "debug"
+    
+    notifications:
+      enabled: false
+```
+
+Now let me create the Phase 3 test implementation:<function_calls>invoke<invoke name=
