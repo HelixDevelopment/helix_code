@@ -26,7 +26,10 @@ make prod                     # Cross-platform builds (Linux, macOS, Windows)
 # Test
 make test                     # Run all tests (go test -v ./...)
 go test -v ./internal/auth    # Test single package
+go test -v ./internal/auth -run TestSpecific  # Run single test
 go test -cover ./...          # With coverage
+make test-coverage            # Coverage analysis with report
+make test-benchmark           # Run benchmarks
 ./run_tests.sh                # Unit tests only
 ./run_all_tests.sh            # All tests (unit + integration + e2e)
 
@@ -36,6 +39,8 @@ make lint                     # Lint with golangci-lint
 
 # Development
 make clean                    # Clean bin/, dist/, coverage.out
+make dev                      # Build and run development server
+make setup-deps               # Download and tidy Go dependencies
 
 # Mobile/Platform
 make mobile                   # iOS + Android bindings
@@ -104,7 +109,15 @@ make harmony-os               # Harmony OS client
 - Resource tracking (CPU, memory, GPU)
 - Capability-based task assignment
 
-**LLM Provider Interface**: All providers implement unified `llm.Provider` with `Generate`/`GenerateStream`:
+**LLM Provider Interface**: All providers implement unified `llm.Provider`:
+```go
+type Provider interface {
+    Generate(ctx, *LLMRequest) (*LLMResponse, error)
+    GenerateStream(ctx, *LLMRequest, chan<- LLMResponse) error
+    GetModels() []ModelInfo
+    IsAvailable(ctx) bool
+}
+```
 - Selection strategies: performance, cost, availability, round-robin
 - Automatic fallback when primary provider fails
 
@@ -154,9 +167,9 @@ go test -v ./internal/auth
 ## Module Info
 
 - **Module**: `dev.helix.code`
-- **Go version**: 1.24.0
+- **Go version**: 1.24.0 (toolchain go1.24.9)
 
-**Key dependencies**: gin (HTTP), viper (config), pgx/pq (PostgreSQL), redis, jwt, websocket, chromedp (browser), testify, cobra (CLI), fyne (desktop UI), tview (TUI).
+**Key dependencies**: gin (HTTP), viper (config), pgx/pq (PostgreSQL), redis, jwt, websocket, chromedp (browser), testify, cobra (CLI), fyne (desktop UI), tview (TUI), tree-sitter (parsing).
 
 ## Important Notes
 
@@ -171,9 +184,11 @@ go test -v ./internal/auth
 ## Package Documentation
 
 Detailed READMEs for complex packages:
-- `internal/editor/README.md`: Multi-format code editing (276+ tests)
-- `internal/tools/README.md`: Tool ecosystem with security guidelines
-- `internal/context/README.md`: Context builder API reference
+- `internal/editor/README.md`: Multi-format code editing (Diff/Whole/Search-Replace/Line) with 276+ tests
+- `internal/tools/README.md`: Tool ecosystem (filesystem, shell, web, browser, mapping, multiedit)
+- `internal/context/README.md`: Fluent API for building AI conversation context
+- `internal/llm/README.md`: LLM provider integration and selection strategies
+- `internal/llm/LOCAL_PROVIDERS.md`: Local provider setup (Ollama, Llama.cpp, vLLM)
 
 ## Challenge Testing Framework
 
