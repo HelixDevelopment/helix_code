@@ -90,6 +90,12 @@ func (dm *DiffManager) ApplyDiff(diff *Diff) ([]byte, error) {
 
 	// Join lines back
 	result := joinLines(lines)
+
+	// Preserve trailing newline from new content if present
+	if len(diff.NewContent) > 0 && diff.NewContent[len(diff.NewContent)-1] == '\n' {
+		result += "\n"
+	}
+
 	return []byte(result), nil
 }
 

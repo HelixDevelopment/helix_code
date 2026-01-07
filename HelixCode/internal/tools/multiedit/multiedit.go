@@ -308,7 +308,8 @@ func (mfe *MultiFileEditor) Commit(ctx context.Context, tx *EditTransaction) err
 			"tx_id", tx.ID,
 			"error", err,
 		)
-		return mfe.Rollback(ctx, tx)
+		// Use rollbackWithError directly to avoid deadlock (we already hold the lock)
+		return mfe.rollbackWithError(ctx, tx, err)
 	}
 
 	// Update state

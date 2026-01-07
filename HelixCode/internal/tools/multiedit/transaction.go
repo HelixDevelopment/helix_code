@@ -288,8 +288,8 @@ func isValidStateTransition(from, to TransactionState) bool {
 	// Define valid transitions
 	validTransitions := map[TransactionState][]TransactionState{
 		StatePending:     {StatePreview, StateAborted},
-		StatePreview:     {StateReady, StateAborted, StatePending},
-		StateReady:       {StateCommitting, StateAborted, StatePreview},
+		StatePreview:     {StateReady, StateAborted, StatePending, StateRollingBack},
+		StateReady:       {StateCommitting, StateAborted, StatePreview, StateRollingBack},
 		StateCommitting:  {StateCommitted, StateFailed, StateRollingBack},
 		StateRollingBack: {StateRolledBack, StateFailed},
 		// Terminal states can't transition

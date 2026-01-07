@@ -674,9 +674,23 @@ func TestCacheManager(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	path := "/test/file.txt"
+	// Create a real temporary file since Get() calls os.Stat() to verify file exists
+	tmpFile, err := os.CreateTemp(t.TempDir(), "cache_test_*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 	content := []byte("test content")
-	modTime := time.Now()
+	if _, err := tmpFile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+	tmpFile.Close()
+
+	path := tmpFile.Name()
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modTime := info.ModTime()
 
 	t.Run("set and get", func(t *testing.T) {
 		cache.Set(path, content, modTime)

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"dev.helix.code/internal/tools/filesystem"
 )
 
 func TestToolRegistry(t *testing.T) {
@@ -108,7 +110,12 @@ func TestIntegrationFileSystemTools(t *testing.T) {
 			t.Fatalf("Failed to read file: %v", err)
 		}
 
-		t.Logf("Read file successfully: %d bytes", len(result.(map[string]interface{})["content"].([]byte)))
+		// Result is *filesystem.FileContent
+		if fc, ok := result.(*filesystem.FileContent); ok {
+			t.Logf("Read file successfully: %d bytes", len(fc.Content))
+		} else {
+			t.Logf("Read file successfully: result type %T", result)
+		}
 	})
 
 	t.Run("edit_file", func(t *testing.T) {

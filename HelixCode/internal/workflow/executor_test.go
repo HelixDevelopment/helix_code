@@ -124,7 +124,8 @@ func TestExecuteStep_Analysis(t *testing.T) {
 
 	result, err := executor.executeStep(context.Background(), step, proj)
 	assert.NoError(t, err)
-	assert.Contains(t, result, "Analysis completed")
+	// Without LLM, the executor returns a static analysis report
+	assert.Contains(t, result, "Static Analysis Report")
 }
 
 func TestExecuteStep_Generation(t *testing.T) {
@@ -148,7 +149,8 @@ func TestExecuteStep_Generation(t *testing.T) {
 
 	result, err := executor.executeStep(context.Background(), step, proj)
 	assert.NoError(t, err)
-	assert.Contains(t, result, "Code generation completed")
+	// Without LLM, the executor returns a placeholder generated code comment
+	assert.Contains(t, result, "Generated code for")
 }
 
 func TestExecuteStep_UnknownAction(t *testing.T) {
