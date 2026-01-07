@@ -29,7 +29,7 @@ func NewTestingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistr
 	if toolRegistry == nil {
 		return nil, fmt.Errorf("tool registry is required for testing agent")
 	}
-	baseAgent := agent.NewBaseAgent("testing-agent", "Testing Agent", cfg)
+	baseAgent := agent.NewBaseAgent("testing-agent", "Testing Agent", agent.AgentTypeTesting, cfg)
 	return &TestingAgent{
 		BaseAgent:    baseAgent,
 		llmProvider:  provider,

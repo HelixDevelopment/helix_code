@@ -1,9 +1,3 @@
-//go:build ignore
-// +build ignore
-
-// NOTE: This test file is disabled because it uses an outdated API.
-// The mock agents use old interface signatures that have been updated.
-
 package agent
 
 import (
@@ -30,7 +24,7 @@ func newMockCoordAgent(id string, agentType AgentType, caps []Capability) *mockC
 		Name:         "Mock Coordinator Agent",
 		Capabilities: caps,
 	}
-	base := NewBaseAgent(config)
+	base := NewBaseAgentFromConfig(config)
 	return &mockCoordAgent{
 		BaseAgent: base,
 	}
@@ -43,7 +37,7 @@ func (m *mockCoordAgent) Execute(ctx context.Context, t *task.Task) (*task.Resul
 	}
 	return &task.Result{
 		TaskID:    t.ID,
-		AgentID:   m.id,
+		AgentID:   m.ID(),
 		Success:   true,
 		Output:    map[string]interface{}{"status": "completed"},
 		Timestamp: time.Now(),

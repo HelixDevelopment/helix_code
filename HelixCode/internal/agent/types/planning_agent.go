@@ -23,7 +23,7 @@ func NewPlanningAgent(cfg *config.AgentConfig, provider llm.Provider) (*Planning
 	if provider == nil {
 		return nil, fmt.Errorf("LLM provider is required for planning agent")
 	}
-	baseAgent := agent.NewBaseAgent("planning-agent", "Planning Agent", cfg)
+	baseAgent := agent.NewBaseAgent("planning-agent", "Planning Agent", agent.AgentTypePlanning, cfg)
 	return &PlanningAgent{
 		BaseAgent:   baseAgent,
 		llmProvider: provider,

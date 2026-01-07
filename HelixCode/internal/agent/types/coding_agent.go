@@ -28,7 +28,7 @@ func NewCodingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistry
 	if toolRegistry == nil {
 		return nil, fmt.Errorf("tool registry is required for coding agent")
 	}
-	baseAgent := agent.NewBaseAgent("coding-agent", "Coding Agent", cfg)
+	baseAgent := agent.NewBaseAgent("coding-agent", "Coding Agent", agent.AgentTypeCoding, cfg)
 	return &CodingAgent{
 		BaseAgent:    baseAgent,
 		llmProvider:  provider,

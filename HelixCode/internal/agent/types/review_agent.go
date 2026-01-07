@@ -29,7 +29,7 @@ func NewReviewAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistry
 	if toolRegistry == nil {
 		return nil, fmt.Errorf("tool registry is required for review agent")
 	}
-	baseAgent := agent.NewBaseAgent("review-agent", "Review Agent", cfg)
+	baseAgent := agent.NewBaseAgent("review-agent", "Review Agent", agent.AgentTypeReview, cfg)
 	return &ReviewAgent{
 		BaseAgent:    baseAgent,
 		llmProvider:  provider,

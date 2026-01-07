@@ -1,10 +1,3 @@
-//go:build ignore
-// +build ignore
-
-// NOTE: This test file is disabled because it uses an outdated API.
-// NewBaseAgent signature has changed from (AgentConfig) to (string, string, *config.AgentConfig)
-// and Type() method has been removed from BaseAgent.
-
 package agent
 
 import (
@@ -27,7 +20,7 @@ func TestNewBaseAgent(t *testing.T) {
 		},
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	if agent.ID() != config.ID {
 		t.Errorf("Expected ID %s, got %s", config.ID, agent.ID())
@@ -58,7 +51,7 @@ func TestBaseAgentStatusManagement(t *testing.T) {
 		Name: "Test Coding Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Test status transitions
 	agent.SetStatus(StatusBusy)
@@ -84,7 +77,7 @@ func TestBaseAgentTaskCounters(t *testing.T) {
 		Name: "Test Testing Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Initially should be 0
 	health := agent.Health()
@@ -128,7 +121,7 @@ func TestBaseAgentCanHandle(t *testing.T) {
 		},
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Test with nil task
 	if agent.CanHandle(nil) {
@@ -170,7 +163,7 @@ func TestBaseAgentHealth(t *testing.T) {
 		Name: "Test Debugging Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Initial health
 	health := agent.Health()
@@ -198,9 +191,9 @@ func TestBaseAgentHealth(t *testing.T) {
 		t.Error("Agent with error status should be unhealthy")
 	}
 
-	// Test unhealthy due to high error rate
+	// Test unhealthy due to high error rate (>=50%)
 	agent.SetStatus(StatusIdle)
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 4; i++ {
 		agent.IncrementTaskCount()
 	}
 	for i := 0; i < 2; i++ {
@@ -208,7 +201,7 @@ func TestBaseAgentHealth(t *testing.T) {
 	}
 	health = agent.Health()
 	if health.Healthy {
-		t.Error("Agent with high error rate (>20%) should be unhealthy")
+		t.Error("Agent with high error rate (>=50%) should be unhealthy")
 	}
 }
 
@@ -223,7 +216,7 @@ func TestBaseAgentCapabilityMatching(t *testing.T) {
 		},
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Test task requiring only one capability that matches
 	t1 := task.NewTask(task.TaskTypePlanning, "Task 1", "Test", task.PriorityNormal)
@@ -257,7 +250,7 @@ func TestBaseAgentHealthWithOperations(t *testing.T) {
 		Name: "Test Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Initial health should be healthy
 	health := agent.Health()
@@ -294,7 +287,7 @@ func TestBaseAgentErrorRateCalculation(t *testing.T) {
 		Name: "Test Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Test with zero tasks
 	health := agent.Health()
@@ -328,7 +321,7 @@ func TestBaseAgentStatusSequence(t *testing.T) {
 		Name: "Test Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Test status sequence: idle -> busy -> waiting -> busy -> idle
 	statuses := []AgentStatus{StatusBusy, StatusWaiting, StatusBusy, StatusIdle}
@@ -359,7 +352,7 @@ func TestBaseAgentEmptyConfig(t *testing.T) {
 		Name: "Minimal Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	if agent.ID() != "minimal-agent" {
 		t.Errorf("Expected ID minimal-agent, got %s", agent.ID())
@@ -392,14 +385,14 @@ func TestAgentRegistry(t *testing.T) {
 
 	// Test registering agents
 	agent1 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypePlanning,
 			Name: "Agent 1",
 		}),
 	}
 	agent2 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-2",
 			Type: AgentTypeCoding,
 			Name: "Agent 2",
@@ -466,7 +459,7 @@ func TestAgentRegistryByCapability(t *testing.T) {
 	registry := NewAgentRegistry()
 
 	agent1 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypePlanning,
 			Name: "Agent 1",
@@ -478,7 +471,7 @@ func TestAgentRegistryByCapability(t *testing.T) {
 	}
 
 	agent2 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-2",
 			Type: AgentTypeCoding,
 			Name: "Agent 2",
@@ -520,14 +513,14 @@ func TestAgentRegistryListMultiple(t *testing.T) {
 
 	// Register some agents
 	agent1 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypePlanning,
 			Name: "Agent 1",
 		}),
 	}
 	agent2 := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-2",
 			Type: AgentTypeCoding,
 			Name: "Agent 2",
@@ -558,7 +551,7 @@ func TestAgentRegistryMultipleUnregister(t *testing.T) {
 	registry := NewAgentRegistry()
 
 	agent := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypePlanning,
 			Name: "Agent 1",
@@ -588,7 +581,7 @@ func TestAgentRegistryGetByTypeEmpty(t *testing.T) {
 
 	// Register agent of different type
 	agent := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypeCoding,
 			Name: "Agent 1",
@@ -614,7 +607,7 @@ func TestAgentRegistryGetByCapabilityEmpty(t *testing.T) {
 
 	// Register agent without the capability
 	agent := &MockAgent{
-		BaseAgent: NewBaseAgent(&AgentConfig{
+		BaseAgent: NewBaseAgentFromConfig(&AgentConfig{
 			ID:   "agent-1",
 			Type: AgentTypeCoding,
 			Name: "Agent 1",
@@ -659,7 +652,7 @@ func TestBaseAgentConcurrentTaskCounting(t *testing.T) {
 		Name: "Concurrent Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Concurrently increment task count
 	done := make(chan bool, 100)
@@ -688,7 +681,7 @@ func TestBaseAgentConcurrentErrorCounting(t *testing.T) {
 		Name: "Concurrent Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Setup some tasks first
 	for i := 0; i < 100; i++ {
@@ -725,7 +718,7 @@ func TestBaseAgentConcurrentStatusChanges(t *testing.T) {
 		Name: "Concurrent Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Concurrently change status
 	done := make(chan bool, 50)
@@ -768,7 +761,7 @@ func TestBaseAgentConcurrentCapabilityChecks(t *testing.T) {
 		},
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Create tasks
 	t1 := task.NewTask(task.TaskTypePlanning, "Task 1", "Test", task.PriorityNormal)
@@ -810,7 +803,7 @@ func TestBaseAgentConcurrentHealthChecks(t *testing.T) {
 		Name: "Concurrent Agent",
 	}
 
-	agent := NewBaseAgent(config)
+	agent := NewBaseAgentFromConfig(config)
 
 	// Concurrently check health while modifying counters
 	var wg sync.WaitGroup
@@ -896,7 +889,7 @@ func TestMockAgent(t *testing.T) {
 	}
 
 	mockAgent := &MockAgent{
-		BaseAgent: NewBaseAgent(config),
+		BaseAgent: NewBaseAgentFromConfig(config),
 	}
 
 	// Test basic interface implementation

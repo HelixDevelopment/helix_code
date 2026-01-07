@@ -29,7 +29,7 @@ func NewDebuggingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegis
 	if toolRegistry == nil {
 		return nil, fmt.Errorf("tool registry is required for debugging agent")
 	}
-	baseAgent := agent.NewBaseAgent("debugging-agent", "Debugging Agent", cfg)
+	baseAgent := agent.NewBaseAgent("debugging-agent", "Debugging Agent", agent.AgentTypeDebugging, cfg)
 	return &DebuggingAgent{
 		BaseAgent:    baseAgent,
 		llmProvider:  provider,

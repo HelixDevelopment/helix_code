@@ -28,6 +28,7 @@ type TaskResult struct {
 type BaseAgent struct {
 	id           string
 	name         string
+	agentType    AgentType
 	status       AgentStatus
 	capabilities []Capability
 	taskQueue    chan *Task
@@ -42,6 +43,7 @@ type BaseAgent struct {
 	tasksFailed    int
 	totalDuration  time.Duration
 	lastActivity   time.Time
+	startTime      time.Time
 
 	// Configuration
 	maxConcurrency int
@@ -50,7 +52,7 @@ type BaseAgent struct {
 }
 
 // NewBaseAgent creates a new base agent
-func NewBaseAgent(id, name string, config *config.AgentConfig) *BaseAgent {
+func NewBaseAgent(id, name string, agentType AgentType, config *config.AgentConfig) *BaseAgent {
 	maxConcurrency := 1
 	timeout := 30 * time.Second
 	retryCount := 3
@@ -67,9 +69,11 @@ func NewBaseAgent(id, name string, config *config.AgentConfig) *BaseAgent {
 		}
 	}
 
+	now := time.Now()
 	return &BaseAgent{
 		id:             id,
 		name:           name,
+		agentType:      agentType,
 		status:         StatusIdle,
 		capabilities:   []Capability{},
 		taskQueue:      make(chan *Task, 100),
@@ -78,7 +82,8 @@ func NewBaseAgent(id, name string, config *config.AgentConfig) *BaseAgent {
 		maxConcurrency: maxConcurrency,
 		timeout:        timeout,
 		retryCount:     retryCount,
-		lastActivity:   time.Now(),
+		lastActivity:   now,
+		startTime:      now,
 	}
 }
 
@@ -90,6 +95,11 @@ func (a *BaseAgent) ID() string {
 // Name returns the agent name
 func (a *BaseAgent) Name() string {
 	return a.name
+}
+
+// Type returns the agent type
+func (a *BaseAgent) Type() AgentType {
+	return a.agentType
 }
 
 // Status returns the current agent status
@@ -262,7 +272,32 @@ func (a *BaseAgent) processTask(ctx context.Context, task *Task) {
 }
 
 // Health returns the agent health status
-func (a *BaseAgent) Health() map[string]interface{} {
+func (a *BaseAgent) Health() *HealthCheck {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
+	errorRate := float64(0)
+	if a.tasksProcessed > 0 {
+		errorRate = float64(a.tasksFailed) / float64(a.tasksProcessed)
+	}
+
+	// Determine if healthy based on status and error rate
+	healthy := a.status != StatusError && a.status != StatusShutdown && errorRate < 0.5
+
+	return &HealthCheck{
+		AgentID:    a.id,
+		Healthy:    healthy,
+		Status:     a.status,
+		Uptime:     time.Since(a.startTime),
+		TaskCount:  a.tasksProcessed,
+		ErrorCount: a.tasksFailed,
+		ErrorRate:  errorRate,
+		Timestamp:  time.Now(),
+	}
+}
+
+// HealthMap returns the agent health status as a map (for backward compatibility)
+func (a *BaseAgent) HealthMap() map[string]interface{} {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
@@ -393,4 +428,49 @@ func (a *BaseAgent) SetRetryCount(count int) {
 	if count >= 0 {
 		a.retryCount = count
 	}
+}
+
+// IncrementTaskCount increments the task counter
+func (a *BaseAgent) IncrementTaskCount() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.tasksProcessed++
+	a.lastActivity = time.Now()
+}
+
+// IncrementErrorCount increments the error counter
+func (a *BaseAgent) IncrementErrorCount() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.tasksFailed++
+	a.lastActivity = time.Now()
+}
+
+// NewBaseAgentFromConfig creates a new base agent from an AgentConfig (backward compatible constructor)
+func NewBaseAgentFromConfig(agentConfig *AgentConfig) *BaseAgent {
+	if agentConfig == nil {
+		return nil
+	}
+
+	now := time.Now()
+	agent := &BaseAgent{
+		id:             agentConfig.ID,
+		name:           agentConfig.Name,
+		agentType:      agentConfig.Type,
+		status:         StatusIdle,
+		capabilities:   make([]Capability, len(agentConfig.Capabilities)),
+		taskQueue:      make(chan *Task, 100),
+		resultChan:     make(chan *TaskResult, 100),
+		stopChan:       make(chan struct{}),
+		maxConcurrency: 1,
+		timeout:        30 * time.Second,
+		retryCount:     3,
+		lastActivity:   now,
+		startTime:      now,
+	}
+
+	// Copy capabilities
+	copy(agent.capabilities, agentConfig.Capabilities)
+
+	return agent
 }

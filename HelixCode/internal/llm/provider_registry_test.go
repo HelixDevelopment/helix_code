@@ -1,593 +1,423 @@
-//go:build ignore
-// +build ignore
-
-// NOTE: This test file is disabled because it tests an API (NewLLMProvider, NewLLMProviderRegistry)
-// that has not been implemented yet. Enable this file once the API is implemented.
-
 package llm
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"testing"
 	"time"
 
-	"dev.helix.code/internal/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestLLMProviderFactory(t *testing.T) {
+func TestNewProviderFactory(t *testing.T) {
 	tests := []struct {
 		name     string
-		provider string
-		config   map[string]interface{}
+		config   ProviderConfigEntry
 		hasError bool
 	}{
 		{
-			name:     "OpenAI provider",
-			provider: "openai",
-			config: map[string]interface{}{
-				"api_key": "test-key",
+			name: "OpenAI provider",
+			config: ProviderConfigEntry{
+				Type:    ProviderTypeOpenAI,
+				APIKey:  "test-key",
+				Enabled: true,
 			},
 			hasError: false,
 		},
 		{
-			name:     "Anthropic provider",
-			provider: "anthropic",
-			config: map[string]interface{}{
-				"api_key": "test-key",
+			name: "Anthropic provider",
+			config: ProviderConfigEntry{
+				Type:    ProviderTypeAnthropic,
+				APIKey:  "test-key",
+				Enabled: true,
 			},
 			hasError: false,
 		},
 		{
-			name:     "Invalid provider",
-			provider: "invalid",
-			config:   map[string]interface{}{},
+			name: "Gemini provider",
+			config: ProviderConfigEntry{
+				Type:    ProviderTypeGemini,
+				APIKey:  "test-key",
+				Enabled: true,
+			},
+			hasError: false,
+		},
+		{
+			name: "Ollama provider",
+			config: ProviderConfigEntry{
+				Type:     ProviderTypeOllama,
+				Endpoint: "http://localhost:11434",
+				Models:   []string{"llama2"},
+				Enabled:  true,
+			},
+			hasError: false,
+		},
+		{
+			name: "Invalid provider type",
+			config: ProviderConfigEntry{
+				Type:    ProviderType("invalid"),
+				Enabled: true,
+			},
 			hasError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			provider, err := NewLLMProvider(tt.provider, tt.config)
+			provider, err := NewProvider(tt.config)
 
 			if tt.hasError {
-				if err == nil {
-					t.Errorf("Expected error for provider %s, got nil", tt.provider)
-				}
+				assert.Error(t, err)
+				assert.Nil(t, provider)
 				return
 			}
 
-			if err != nil {
-				t.Errorf("Unexpected error for provider %s: %v", tt.provider, err)
-				return
-			}
-
-			if provider == nil {
-				t.Errorf("Expected provider instance, got nil")
-			}
+			assert.NoError(t, err)
+			assert.NotNil(t, provider)
 		})
 	}
 }
 
-func TestLLMProviderRegistry(t *testing.T) {
-	registry := NewLLMProviderRegistry()
+func TestModelManagerRegisterProvider(t *testing.T) {
+	manager := NewModelManager()
 
-	// Test registering a provider
-	config := map[string]interface{}{
-		"api_key": "test-key",
+	// Create a mock provider
+	mockProvider := &MockRegTestProvider{
+		name:         "test-provider",
+		providerType: ProviderTypeOpenAI,
+		models: []ModelInfo{
+			{Name: "test-model-1", Provider: ProviderTypeOpenAI},
+			{Name: "test-model-2", Provider: ProviderTypeOpenAI},
+		},
+		available: true,
 	}
-
-	err := registry.RegisterProvider("test-provider", "openai", config)
-	if err != nil {
-		t.Fatalf("Failed to register provider: %v", err)
-	}
-
-	// Test getting a provider
-	provider, err := registry.GetProvider("test-provider")
-	if err != nil {
-		t.Fatalf("Failed to get provider: %v", err)
-	}
-
-	if provider == nil {
-		t.Fatal("Expected provider instance, got nil")
-	}
-
-	// Test getting non-existent provider
-	_, err = registry.GetProvider("non-existent")
-	if err == nil {
-		t.Error("Expected error for non-existent provider")
-	}
-
-	// Test listing providers
-	providers := registry.ListProviders()
-	if len(providers) != 1 {
-		t.Errorf("Expected 1 provider, got %d", len(providers))
-	}
-
-	if providers[0] != "test-provider" {
-		t.Errorf("Expected provider name 'test-provider', got '%s'", providers[0])
-	}
-}
-
-func TestLLMProviderHealthCheck(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	config := map[string]interface{}{
-		"api_key": "test-key",
-	}
-
-	err := registry.RegisterProvider("health-test", "openai", config)
-	if err != nil {
-		t.Fatalf("Failed to register provider: %v", err)
-	}
-
-	// Test health check
-	health := registry.HealthCheck()
-
-	if health == nil {
-		t.Fatal("Expected health check result, got nil")
-	}
-
-	if len(health) == 0 {
-		t.Error("Expected health check to return results")
-	}
-
-	// Check health for our provider
-	providerHealth, exists := health["health-test"]
-	if !exists {
-		t.Error("Expected health check for test provider")
-	}
-
-	if providerHealth == nil {
-		t.Error("Expected health check data for test provider")
-	}
-}
-
-func TestLLMProviderLoadBalancing(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	// Register multiple providers of same type
-	for i := 0; i < 3; i++ {
-		config := map[string]interface{}{
-			"api_key": fmt.Sprintf("test-key-%d", i),
-		}
-
-		err := registry.RegisterProvider(fmt.Sprintf("openai-%d", i), "openai", config)
-		if err != nil {
-			t.Fatalf("Failed to register provider %d: %v", i, err)
-		}
-	}
-
-	// Test load balancing
-	requests := 10
-	providerCounts := make(map[string]int)
-
-	for i := 0; i < requests; i++ {
-		provider, err := registry.GetProviderByType("openai")
-		if err != nil {
-			t.Fatalf("Failed to get provider by type: %v", err)
-		}
-
-		if provider != nil {
-			providerCounts[provider.Name()]++
-		}
-	}
-
-	// Each provider should have been used at least once
-	if len(providerCounts) != 3 {
-		t.Errorf("Expected 3 providers to be used, got %d", len(providerCounts))
-	}
-
-	// Check that load is reasonably balanced
-	minCount := requests
-	maxCount := 0
-
-	for _, count := range providerCounts {
-		if count < minCount {
-			minCount = count
-		}
-		if count > maxCount {
-			maxCount = count
-		}
-	}
-
-	// Max difference should be reasonable (allowing for randomness)
-	if maxCount-minCount > 4 {
-		t.Errorf("Load balancing too uneven: min=%d, max=%d", minCount, maxCount)
-	}
-}
-
-func TestLLMProviderFallback(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	// Register providers with different priorities
-	providers := []struct {
-		name     string
-		provider string
-		config   map[string]interface{}
-	}{
-		{"primary", "openai", map[string]interface{}{"api_key": "primary-key"}},
-		{"secondary", "anthropic", map[string]interface{}{"api_key": "secondary-key"}},
-		{"tertiary", "gemini", map[string]interface{}{"api_key": "tertiary-key"}},
-	}
-
-	for _, p := range providers {
-		err := registry.RegisterProvider(p.name, p.provider, p.config)
-		if err != nil {
-			t.Fatalf("Failed to register provider %s: %v", p.name, err)
-		}
-	}
-
-	// Test fallback when primary fails
-	ctx := context.Background()
-
-	// Simulate primary provider failure
-	// This would normally be done by mocking, but for this test we'll just verify
-	// that we can get providers by type
-	provider, err := registry.GetProviderByType("openai")
-	if err != nil {
-		t.Fatalf("Failed to get OpenAI provider: %v", err)
-	}
-
-	if provider == nil {
-		t.Fatal("Expected OpenAI provider, got nil")
-	}
-
-	if provider.Name() != "primary" {
-		t.Errorf("Expected primary provider, got %s", provider.Name())
-	}
-}
-
-func TestLLMProviderMetrics(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	config := map[string]interface{}{
-		"api_key": "test-key",
-	}
-
-	err := registry.RegisterProvider("metrics-test", "openai", config)
-	if err != nil {
-		t.Fatalf("Failed to register provider: %v", err)
-	}
-
-	// Get metrics
-	metrics := registry.GetMetrics()
-
-	if metrics == nil {
-		t.Fatal("Expected metrics, got nil")
-	}
-
-	// Check that we have some basic metrics
-	if len(metrics) == 0 {
-		t.Error("Expected some metrics to be returned")
-	}
-
-	// Check for common metric types
-	hasRequestCount := false
-	hasErrorCount := false
-	hasLatency := false
-
-	for _, metric := range metrics {
-		switch metric.Name {
-		case "llm_requests_total":
-			hasRequestCount = true
-		case "llm_errors_total":
-			hasErrorCount = true
-		case "llm_request_duration_seconds":
-			hasLatency = true
-		}
-	}
-
-	if !hasRequestCount {
-		t.Error("Expected request count metric")
-	}
-
-	if !hasErrorCount {
-		t.Error("Expected error count metric")
-	}
-
-	if !hasLatency {
-		t.Error("Expected latency metric")
-	}
-}
-
-func TestLLMProviderConfiguration(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	// Test configuration validation
-	validConfig := map[string]interface{}{
-		"api_key":     "test-key",
-		"model":       "gpt-3.5-turbo",
-		"max_tokens":  1000,
-		"temperature": 0.7,
-	}
-
-	err := registry.RegisterProvider("config-test", "openai", validConfig)
-	if err != nil {
-		t.Fatalf("Failed to register with valid config: %v", err)
-	}
-
-	// Test invalid configuration
-	invalidConfig := map[string]interface{}{
-		// Missing required api_key
-		"model": "gpt-3.5-turbo",
-	}
-
-	err = registry.RegisterProvider("invalid-config", "openai", invalidConfig)
-	if err == nil {
-		t.Error("Expected error for invalid configuration")
-	}
-}
-
-func TestLLMProviderConcurrency(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	// Register a provider
-	config := map[string]interface{}{
-		"api_key": "test-key",
-	}
-
-	err := registry.RegisterProvider("concurrency-test", "openai", config)
-	if err != nil {
-		t.Fatalf("Failed to register provider: %v", err)
-	}
-
-	// Test concurrent access
-	done := make(chan bool, 10)
-
-	for i := 0; i < 10; i++ {
-		go func(id int) {
-			// Get provider
-			provider, err := registry.GetProvider("concurrency-test")
-			if err != nil {
-				t.Errorf("Goroutine %d: failed to get provider: %v", id, err)
-				done <- false
-				return
-			}
-
-			if provider == nil {
-				t.Errorf("Goroutine %d: got nil provider", id)
-				done <- false
-				return
-			}
-
-			// Check health
-			health := registry.HealthCheck()
-			if health == nil {
-				t.Errorf("Goroutine %d: health check returned nil", id)
-				done <- false
-				return
-			}
-
-			done <- true
-		}(i)
-	}
-
-	// Wait for all goroutines
-	allPassed := true
-	for i := 0; i < 10; i++ {
-		if !<-done {
-			allPassed = false
-		}
-	}
-
-	if !allPassed {
-		t.Error("Some concurrent operations failed")
-	}
-}
-
-func TestLLMProviderErrorHandling(t *testing.T) {
-	registry := NewLLMProviderRegistry()
-
-	// Test registering with invalid provider type
-	err := registry.RegisterProvider("error-test", "nonexistent", map[string]interface{}{})
-	if err == nil {
-		t.Error("Expected error for nonexistent provider type")
-	}
-
-	// Test getting non-existent provider
-	_, err = registry.GetProvider("non-existent-provider")
-	if err == nil {
-		t.Error("Expected error for non-existent provider")
-	}
-
-	// Test getting provider by invalid type
-	_, err = registry.GetProviderByType("invalid-type")
-	if err == nil {
-		t.Error("Expected error for invalid provider type")
-	}
-}
-
-func TestLLMProviderLifecycle(t *testing.T) {
-	registry := NewLLMProviderRegistry()
 
 	// Register provider
-	config := map[string]interface{}{
-		"api_key": "test-key",
+	err := manager.RegisterProvider(mockProvider)
+	require.NoError(t, err)
+
+	// Verify provider was registered
+	provider, err := manager.GetProviderForModel("test-model-1", ProviderTypeOpenAI)
+	require.NoError(t, err)
+	assert.NotNil(t, provider)
+	assert.Equal(t, "test-provider", provider.GetName())
+
+	// Test registering duplicate provider
+	err = manager.RegisterProvider(mockProvider)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "already registered")
+}
+
+func TestModelManagerGetAvailableModels(t *testing.T) {
+	manager := NewModelManager()
+
+	// Initially empty
+	models := manager.GetAvailableModels()
+	assert.Len(t, models, 0)
+
+	// Register provider with models
+	mockProvider := &MockRegTestProvider{
+		name:         "test-provider",
+		providerType: ProviderTypeOpenAI,
+		models: []ModelInfo{
+			{Name: "model-1", Provider: ProviderTypeOpenAI},
+			{Name: "model-2", Provider: ProviderTypeOpenAI},
+		},
+		available: true,
 	}
 
-	err := registry.RegisterProvider("lifecycle-test", "openai", config)
-	if err != nil {
-		t.Fatalf("Failed to register provider: %v", err)
+	err := manager.RegisterProvider(mockProvider)
+	require.NoError(t, err)
+
+	// Should now have models
+	models = manager.GetAvailableModels()
+	assert.Len(t, models, 2)
+}
+
+func TestModelManagerHealthCheck(t *testing.T) {
+	manager := NewModelManager()
+
+	// Register healthy provider
+	healthyProvider := &MockRegTestProvider{
+		name:         "healthy-provider",
+		providerType: ProviderTypeOpenAI,
+		models: []ModelInfo{
+			{Name: "test-model", Provider: ProviderTypeOpenAI},
+		},
+		available: true,
+		healthy:   true,
 	}
 
-	// Verify it's registered
-	provider, err := registry.GetProvider("lifecycle-test")
-	if err != nil {
-		t.Fatalf("Failed to get registered provider: %v", err)
+	err := manager.RegisterProvider(healthyProvider)
+	require.NoError(t, err)
+
+	// Perform health check
+	ctx := context.Background()
+	health := manager.HealthCheck(ctx)
+
+	assert.NotNil(t, health)
+	assert.Contains(t, health, ProviderTypeOpenAI)
+
+	providerHealth := health[ProviderTypeOpenAI]
+	assert.Equal(t, "healthy", providerHealth.Status)
+}
+
+func TestModelManagerSelectOptimalModel(t *testing.T) {
+	manager := NewModelManager()
+
+	// Register provider with multiple models
+	mockProvider := &MockRegTestProvider{
+		name:         "test-provider",
+		providerType: ProviderTypeOpenAI,
+		models: []ModelInfo{
+			{
+				Name:         "small-model",
+				Provider:     ProviderTypeOpenAI,
+				ContextSize:  4096,
+				Capabilities: []ModelCapability{CapabilityTextGeneration},
+			},
+			{
+				Name:         "large-model",
+				Provider:     ProviderTypeOpenAI,
+				ContextSize:  32000,
+				Capabilities: []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration},
+			},
+		},
+		available: true,
 	}
 
-	if provider == nil {
-		t.Fatal("Registered provider is nil")
+	err := manager.RegisterProvider(mockProvider)
+	require.NoError(t, err)
+
+	// Select model with criteria
+	criteria := ModelSelectionCriteria{
+		TaskType:             "code_generation",
+		RequiredCapabilities: []ModelCapability{CapabilityCodeGeneration},
+		MaxTokens:            8000,
 	}
 
-	// Test unregistering
-	err = registry.UnregisterProvider("lifecycle-test")
-	if err != nil {
-		t.Fatalf("Failed to unregister provider: %v", err)
+	model, err := manager.SelectOptimalModel(criteria)
+	require.NoError(t, err)
+	assert.NotNil(t, model)
+	assert.Equal(t, "large-model", model.Name)
+}
+
+func TestModelManagerGetModelsByCapability(t *testing.T) {
+	manager := NewModelManager()
+
+	// Register provider with models having different capabilities
+	mockProvider := &MockRegTestProvider{
+		name:         "test-provider",
+		providerType: ProviderTypeOpenAI,
+		models: []ModelInfo{
+			{
+				Name:         "text-model",
+				Provider:     ProviderTypeOpenAI,
+				Capabilities: []ModelCapability{CapabilityTextGeneration},
+			},
+			{
+				Name:         "code-model",
+				Provider:     ProviderTypeOpenAI,
+				Capabilities: []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration},
+			},
+		},
+		available: true,
 	}
 
-	// Verify it's unregistered
-	_, err = registry.GetProvider("lifecycle-test")
-	if err == nil {
-		t.Error("Expected error after unregistering provider")
+	err := manager.RegisterProvider(mockProvider)
+	require.NoError(t, err)
+
+	// Get models with code generation capability
+	models := manager.GetModelsByCapability([]ModelCapability{CapabilityCodeGeneration})
+	assert.Len(t, models, 1)
+	assert.Equal(t, "code-model", models[0].Name)
+
+	// Get models with text generation capability
+	models = manager.GetModelsByCapability([]ModelCapability{CapabilityTextGeneration})
+	assert.Len(t, models, 2)
+}
+
+func TestModelManagerNoModelsAvailable(t *testing.T) {
+	manager := NewModelManager()
+
+	// Try to select model when none available
+	criteria := ModelSelectionCriteria{
+		TaskType: "code_generation",
 	}
 
-	// Verify it's not in the list
+	model, err := manager.SelectOptimalModel(criteria)
+	assert.Error(t, err)
+	assert.Nil(t, model)
+	assert.Contains(t, err.Error(), "no models available")
+}
+
+func TestModelManagerProviderNotFound(t *testing.T) {
+	manager := NewModelManager()
+
+	// Try to get provider for non-existent model
+	_, err := manager.GetProviderForModel("non-existent-model", ProviderTypeOpenAI)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not found")
+}
+
+func TestInitializeModelManager(t *testing.T) {
+	// Test with empty configs
+	configs := []ProviderConfigEntry{}
+	manager, err := InitializeModelManager(configs)
+	require.NoError(t, err)
+	assert.NotNil(t, manager)
+
+	// Test with disabled provider
+	configs = []ProviderConfigEntry{
+		{
+			Type:    ProviderTypeOpenAI,
+			APIKey:  "test-key",
+			Enabled: false, // Disabled
+		},
+	}
+	manager, err = InitializeModelManager(configs)
+	require.NoError(t, err)
+	assert.NotNil(t, manager)
+	// Provider shouldn't be registered since it's disabled
+	models := manager.GetAvailableModels()
+	assert.Len(t, models, 0)
+}
+
+func TestCrossProviderRegistryBasic(t *testing.T) {
+	// Create temporary directory for registry
+	tmpDir := t.TempDir()
+
+	registry := NewCrossProviderRegistry(tmpDir)
+	require.NotNil(t, registry)
+
+	// List providers - should have defaults
 	providers := registry.ListProviders()
-	for _, p := range providers {
-		if p == "lifecycle-test" {
-			t.Error("Unregistered provider still in list")
-		}
-	}
+	assert.True(t, len(providers) > 0)
+
+	// Get compatible formats for a known provider
+	formats, err := registry.GetCompatibleFormats("llamacpp")
+	require.NoError(t, err)
+	assert.Contains(t, formats, FormatGGUF)
 }
 
-func TestLLMProviderTypeValidation(t *testing.T) {
-	validTypes := []string{
-		"openai",
-		"anthropic",
-		"gemini",
-		"xai",
-		"openrouter",
-		"copilot",
-		"ollama",
-		"llamacpp",
-		"vllm",
-		"koboldai",
+func TestCrossProviderRegistryCheckCompatibility(t *testing.T) {
+	tmpDir := t.TempDir()
+	registry := NewCrossProviderRegistry(tmpDir)
+
+	query := ModelCompatibilityQuery{
+		ModelID:        "test-model",
+		SourceFormat:   FormatGGUF,
+		TargetProvider: "llamacpp",
 	}
 
-	registry := NewLLMProviderRegistry()
-
-	for _, providerType := range validTypes {
-		t.Run(fmt.Sprintf("ValidType_%s", providerType), func(t *testing.T) {
-			config := map[string]interface{}{
-				"api_key": "test-key",
-			}
-
-			err := registry.RegisterProvider(fmt.Sprintf("test-%s", providerType), providerType, config)
-			// We expect this might fail due to missing dependencies, but not due to invalid type
-			// The important thing is that it's not rejected as an invalid type
-			if err != nil && strings.Contains(err.Error(), "unsupported provider") {
-				t.Errorf("Provider type %s should be supported", providerType)
-			}
-		})
-	}
+	result, err := registry.CheckCompatibility(query)
+	require.NoError(t, err)
+	assert.True(t, result.IsCompatible)
+	assert.Equal(t, 1.0, result.Confidence)
 }
 
-func TestLLMProviderConfigValidation(t *testing.T) {
-	registry := NewLLMProviderRegistry()
+func TestCrossProviderRegistryDownloadedModels(t *testing.T) {
+	tmpDir := t.TempDir()
+	registry := NewCrossProviderRegistry(tmpDir)
 
-	tests := []struct {
-		name        string
-		provider    string
-		config      map[string]interface{}
-		expectError bool
-	}{
-		{
-			name:     "OpenAI with API key",
-			provider: "openai",
-			config: map[string]interface{}{
-				"api_key": "test-key",
-			},
-			expectError: false,
-		},
-		{
-			name:        "OpenAI without API key",
-			provider:    "openai",
-			config:      map[string]interface{}{},
-			expectError: true,
-		},
-		{
-			name:        "Ollama without API key (should be OK)",
-			provider:    "ollama",
-			config:      map[string]interface{}{},
-			expectError: false,
-		},
-		{
-			name:     "Invalid temperature",
-			provider: "openai",
-			config: map[string]interface{}{
-				"api_key":     "test-key",
-				"temperature": 2.5, // Invalid: should be 0-2
-			},
-			expectError: true,
-		},
+	// Initially no downloaded models
+	models := registry.GetDownloadedModels()
+	assert.Len(t, models, 0)
+
+	// Register a downloaded model
+	model := &DownloadedModel{
+		ModelID:      "test-model",
+		Provider:     "ollama",
+		Format:       FormatGGUF,
+		Path:         "/path/to/model",
+		Size:         1024 * 1024 * 100, // 100MB
+		DownloadTime: time.Now(),
+		LastUsed:     time.Now(),
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := registry.RegisterProvider(fmt.Sprintf("config-test-%s", tt.name), tt.provider, tt.config)
+	err := registry.RegisterDownloadedModel(model)
+	require.NoError(t, err)
 
-			if tt.expectError && err == nil {
-				t.Errorf("Expected error for config %s, got nil", tt.name)
-			}
-
-			if !tt.expectError && err != nil {
-				t.Errorf("Unexpected error for config %s: %v", tt.name, err)
-			}
-		})
-	}
+	// Should now have one model
+	models = registry.GetDownloadedModels()
+	assert.Len(t, models, 1)
+	assert.Equal(t, "test-model", models[0].ModelID)
 }
 
-func BenchmarkLLMProviderRegistry(b *testing.B) {
-	registry := NewLLMProviderRegistry()
+func TestCrossProviderRegistryFindOptimalProvider(t *testing.T) {
+	tmpDir := t.TempDir()
+	registry := NewCrossProviderRegistry(tmpDir)
 
-	// Register some providers
-	for i := 0; i < 10; i++ {
-		config := map[string]interface{}{
-			"api_key": fmt.Sprintf("bench-key-%d", i),
-		}
-		registry.RegisterProvider(fmt.Sprintf("bench-provider-%d", i), "openai", config)
-	}
-
-	b.ResetTimer()
-
-	b.Run("GetProvider", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			_, err := registry.GetProvider("bench-provider-0")
-			if err != nil {
-				b.Fatalf("Failed to get provider: %v", err)
-			}
-		}
-	})
-
-	b.Run("ListProviders", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			providers := registry.ListProviders()
-			if len(providers) != 10 {
-				b.Fatalf("Expected 10 providers, got %d", len(providers))
-			}
-		}
-	})
-
-	b.Run("HealthCheck", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			health := registry.HealthCheck()
-			if health == nil {
-				b.Fatalf("Health check returned nil")
-			}
-		}
-	})
+	// Find optimal provider for GGUF format
+	provider, err := registry.FindOptimalProvider("test-model", FormatGGUF, nil)
+	require.NoError(t, err)
+	assert.NotNil(t, provider)
+	// Should be one of the providers that supports GGUF
+	assert.True(t, provider.Name == "Ollama" || provider.Name == "Llama.cpp" || provider.Name == "VLLM")
 }
 
-func BenchmarkLLMProviderLoadBalancing(b *testing.B) {
-	registry := NewLLMProviderRegistry()
+func TestCrossProviderRegistryProviderNotFound(t *testing.T) {
+	tmpDir := t.TempDir()
+	registry := NewCrossProviderRegistry(tmpDir)
 
-	// Register multiple providers
-	for i := 0; i < 5; i++ {
-		config := map[string]interface{}{
-			"api_key": fmt.Sprintf("lb-key-%d", i),
-		}
-		registry.RegisterProvider(fmt.Sprintf("lb-provider-%d", i), "openai", config)
+	// Try to get formats for non-existent provider
+	_, err := registry.GetCompatibleFormats("non-existent")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not found")
+}
+
+// MockRegTestProvider is a mock provider for testing (unique name to avoid conflicts)
+type MockRegTestProvider struct {
+	name         string
+	providerType ProviderType
+	models       []ModelInfo
+	available    bool
+	healthy      bool
+}
+
+func (m *MockRegTestProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	return &LLMResponse{
+		Content: "Test response",
+	}, nil
+}
+
+func (m *MockRegTestProvider) GenerateStream(ctx context.Context, request *LLMRequest, stream chan<- LLMResponse) error {
+	stream <- LLMResponse{Content: "Test response"}
+	close(stream)
+	return nil
+}
+
+func (m *MockRegTestProvider) GetModels() []ModelInfo {
+	return m.models
+}
+
+func (m *MockRegTestProvider) IsAvailable(ctx context.Context) bool {
+	return m.available
+}
+
+func (m *MockRegTestProvider) GetName() string {
+	return m.name
+}
+
+func (m *MockRegTestProvider) GetType() ProviderType {
+	return m.providerType
+}
+
+func (m *MockRegTestProvider) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration}
+}
+
+func (m *MockRegTestProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	status := "healthy"
+	if !m.healthy {
+		status = "unhealthy"
 	}
+	return &ProviderHealth{
+		Status:    status,
+		LastCheck: time.Now(),
+	}, nil
+}
 
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		_, err := registry.GetProviderByType("openai")
-		if err != nil {
-			b.Fatalf("Failed to get provider by type: %v", err)
-		}
-	}
+func (m *MockRegTestProvider) Close() error {
+	return nil
 }
