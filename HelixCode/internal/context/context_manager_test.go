@@ -106,22 +106,25 @@ func TestContextManagerStoreRetrieve(t *testing.T) {
 func TestContextManagerStoreRetrieveExpired(t *testing.T) {
 	manager := NewContextManager(&config.ContextConfig{})
 
-	ttl := 1 * time.Second
+	// Use a very short TTL so we can wait for expiration
+	ttl := 50 * time.Millisecond
 	item := &ContextItem{
-		ID:        "expired-item",
-		Type:      ContextTypeGlobal,
-		Key:       "expired-key",
-		Timestamp: time.Now().Add(-2 * time.Second), // Already expired
-		TTL:       &ttl,
+		ID:   "expired-item",
+		Type: ContextTypeGlobal,
+		Key:  "expired-key",
+		TTL:  &ttl,
 	}
 
 	ctx := context.Background()
 
-	// Store expired item
+	// Store item (Store sets Timestamp to time.Now())
 	err := manager.Store(ctx, item)
 	if err != nil {
-		t.Fatalf("Failed to store expired item: %v", err)
+		t.Fatalf("Failed to store item: %v", err)
 	}
+
+	// Wait for item to expire
+	time.Sleep(100 * time.Millisecond)
 
 	// Try to retrieve expired item
 	_, err = manager.Retrieve(ctx, "expired-item")

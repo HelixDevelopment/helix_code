@@ -161,7 +161,16 @@ func (r *CrossProviderRegistry) CheckCompatibility(query ModelCompatibilityQuery
 		return result, fmt.Errorf("provider %s not found", query.TargetProvider)
 	}
 
-	// Check if format is directly supported
+	// Check if format is in preferred formats (no conversion needed)
+	formatPreferred := false
+	for _, format := range compat.PreferredFormats {
+		if format == query.TargetFormat || (query.TargetFormat == "" && format == query.SourceFormat) {
+			formatPreferred = true
+			break
+		}
+	}
+
+	// Check if format is supported (may need conversion)
 	formatSupported := false
 	for _, format := range compat.SupportedFormats {
 		if format == query.TargetFormat || (query.TargetFormat == "" && format == query.SourceFormat) {
@@ -170,14 +179,27 @@ func (r *CrossProviderRegistry) CheckCompatibility(query ModelCompatibilityQuery
 		}
 	}
 
-	if formatSupported {
+	if formatPreferred {
+		// Preferred format - no conversion needed
 		result.IsCompatible = true
 		result.Confidence = 1.0
-	} else {
-		// Check if conversion is possible
+	} else if formatSupported {
+		// Supported but not preferred - check if conversion is recommended
 		if conversionPath := r.findConversionPath(query.SourceFormat, query.TargetProvider, query.TargetFormat); conversionPath != nil {
 			result.IsCompatible = true
+			result.Confidence = 0.9
+			result.ConversionRequired = true
+			result.ConversionPath = conversionPath
+			result.EstimatedTime = r.estimateConversionTime(query.SourceFormat, query.TargetFormat)
+		} else {
+			result.IsCompatible = true
 			result.Confidence = 0.8
+		}
+	} else {
+		// Check if conversion is possible for unsupported format
+		if conversionPath := r.findConversionPath(query.SourceFormat, query.TargetProvider, query.TargetFormat); conversionPath != nil {
+			result.IsCompatible = true
+			result.Confidence = 0.7
 			result.ConversionRequired = true
 			result.ConversionPath = conversionPath
 			result.EstimatedTime = r.estimateConversionTime(query.SourceFormat, query.TargetFormat)

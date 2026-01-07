@@ -52,9 +52,9 @@ func TestOpenAICompatibleProviderConfigDefaults(t *testing.T) {
 	provider, err := NewOpenAICompatibleProvider("test", config)
 	require.NoError(t, err)
 
-	// Should set default endpoints
-	assert.Equal(t, "/v1/models", config.ModelEndpoint)
-	assert.Equal(t, "/v1/chat/completions", config.ChatEndpoint)
+	// Should set default endpoints in provider's config
+	assert.Equal(t, "/v1/models", provider.config.ModelEndpoint)
+	assert.Equal(t, "/v1/chat/completions", provider.config.ChatEndpoint)
 
 	provider.Close()
 }

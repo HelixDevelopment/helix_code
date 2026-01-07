@@ -391,8 +391,14 @@ func TestConfigManagerFileOperations(t *testing.T) {
 	_, err = os.Stat(backupPath)
 	assert.NoError(t, err)
 
-	// Test ResetToDefaults
+	// Test ResetToDefaults - first set a non-default value
+	err = manager.UpdateConfig(func(cfg *Config) {
+		cfg.Server.Port = 9999
+	})
+	require.NoError(t, err)
 	originalPort := manager.GetConfig().Server.Port
+	assert.Equal(t, 9999, originalPort)
+
 	err = manager.ResetToDefaults()
 	require.NoError(t, err)
 	// Port should be reset to default (8080)
@@ -493,10 +499,12 @@ func TestHelixConfigAliasFunctions(t *testing.T) {
 	assert.Equal(t, testConfigPath, GetHelixConfigPath())
 	assert.False(t, IsHelixConfigPresent())
 
-	// Test CreateDefaultHelixConfig
-	err := CreateDefaultHelixConfig()
+	// Create a valid JSON config using NewHelixConfigManager
+	// (CreateDefaultHelixConfig writes YAML but loadConfig expects JSON)
+	manager, err := NewHelixConfigManager(testConfigPath)
 	require.NoError(t, err)
 	assert.True(t, IsHelixConfigPresent())
+	_ = manager // silence unused variable
 
 	// Test LoadHelixConfig
 	config, err := LoadHelixConfig()

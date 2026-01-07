@@ -99,6 +99,14 @@ type OpenAICompatibleModel struct {
 
 // NewOpenAICompatibleProvider creates a new OpenAI-compatible provider
 func NewOpenAICompatibleProvider(name string, config OpenAICompatibleConfig) (*OpenAICompatibleProvider, error) {
+	// Set default endpoints if not specified
+	if config.ModelEndpoint == "" {
+		config.ModelEndpoint = "/v1/models"
+	}
+	if config.ChatEndpoint == "" {
+		config.ChatEndpoint = "/v1/chat/completions"
+	}
+
 	provider := &OpenAICompatibleProvider{
 		name:   name,
 		config: config,
@@ -110,14 +118,6 @@ func NewOpenAICompatibleProvider(name string, config OpenAICompatibleConfig) (*O
 			Status:    "unknown",
 			LastCheck: time.Now(),
 		},
-	}
-
-	// Set default endpoints if not specified
-	if config.ModelEndpoint == "" {
-		config.ModelEndpoint = "/v1/models"
-	}
-	if config.ChatEndpoint == "" {
-		config.ChatEndpoint = "/v1/chat/completions"
 	}
 
 	// Discover available models

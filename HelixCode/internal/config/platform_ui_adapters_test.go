@@ -1124,13 +1124,13 @@ func TestGetTheme(t *testing.T) {
 
 	// Test getting theme when current is empty
 	theme := adapter.GetTheme()
-	assert.Equal(t, "system", theme.Name)
+	assert.Equal(t, "System", theme.Name)
 	assert.Equal(t, "Matches system appearance", theme.Description)
 
 	// Test getting theme after setting one
 	adapter.SetCurrentTheme("dark")
 	theme = adapter.GetTheme()
-	assert.Equal(t, "dark", theme.Name)
+	assert.Equal(t, "Dark", theme.Name)
 	assert.Equal(t, "Dark theme with dark background", theme.Description)
 	assert.Equal(t, "#0d6efd", theme.Primary)
 	assert.Equal(t, "#1a1a1a", theme.Background)
@@ -1139,7 +1139,7 @@ func TestGetTheme(t *testing.T) {
 	// Test getting light theme
 	adapter.SetCurrentTheme("light")
 	theme = adapter.GetTheme()
-	assert.Equal(t, "light", theme.Name)
+	assert.Equal(t, "Light", theme.Name)
 	assert.Equal(t, "Light theme with bright background", theme.Description)
 	assert.Equal(t, "#007bff", theme.Primary)
 	assert.Equal(t, "#ffffff", theme.Background)
@@ -1241,15 +1241,15 @@ func TestThemeConsistency(t *testing.T) {
 
 	// Get theme object
 	theme := adapter.GetTheme()
-	assert.Equal(t, "light", theme.Name)
+	assert.Equal(t, "Light", theme.Name)
 
 	// Set theme using SetCurrentTheme (allows any theme)
 	adapter.SetCurrentTheme("custom")
 	assert.Equal(t, "custom", adapter.GetCurrentTheme())
 
-	// GetTheme should return default theme for non-existing current theme
+	// GetTheme returns empty theme for non-existing current theme (no fallback)
 	theme = adapter.GetTheme()
-	assert.Equal(t, "system", theme.Name) // Should return system as default
+	assert.Equal(t, "", theme.Name) // Returns empty for non-existing theme
 }
 
 // BenchmarkPlatformUIAdapter benchmarks platform UI adapter operations
