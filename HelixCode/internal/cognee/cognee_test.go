@@ -3,6 +3,7 @@ package cognee
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ import (
 	"dev.helix.code/internal/hardware"
 )
 
-// TestCacheManager tests the CacheManager stub
+// TestCacheManager tests the CacheManager
 func TestCacheManager(t *testing.T) {
 	t.Run("NewCacheManager_Success", func(t *testing.T) {
 		cfg := map[string]interface{}{"test": "config"}
@@ -27,12 +28,19 @@ func TestCacheManager(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, cm)
 	})
+
+	t.Run("CacheManager_Clear", func(t *testing.T) {
+		cm, _ := NewCacheManager(nil)
+		cm.Clear()
+	})
 }
 
-// TestCogneeManager tests the CogneeManager stub
+// TestCogneeManager tests the CogneeManager
 func TestCogneeManager(t *testing.T) {
 	t.Run("NewCogneeManager_Success", func(t *testing.T) {
-		cfg := &config.HelixConfig{}
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
 		hwProfile := &hardware.HardwareProfile{
 			CPU: hardware.CPUInfo{
 				Model: "Test CPU",
@@ -44,8 +52,6 @@ func TestCogneeManager(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, cm)
-		assert.Equal(t, cfg, cm.config)
-		assert.Equal(t, hwProfile, cm.hwProfile)
 		assert.NotNil(t, cm.logger)
 	})
 
@@ -56,56 +62,94 @@ func TestCogneeManager(t *testing.T) {
 		assert.NotNil(t, cm)
 	})
 
-	t.Run("ProcessKnowledge_ReturnsNotImplementedError", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+	t.Run("ProcessKnowledge_ServiceNotInitialized", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
 		ctx := context.Background()
 
 		err := cm.ProcessKnowledge(ctx, "test content")
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not implemented")
+		assert.Contains(t, err.Error(), "not initialized")
 	})
 
-	t.Run("ProcessKnowledge_WithEmptyContent", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+	t.Run("ProcessKnowledge_EmptyContent", func(t *testing.T) {
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		cm, _ := NewCogneeManager(cfg, nil)
 		ctx := context.Background()
 
 		err := cm.ProcessKnowledge(ctx, "")
 
 		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty")
 	})
 
-	t.Run("SearchKnowledge_ReturnsNotImplementedError", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+	t.Run("SearchKnowledge_ServiceNotInitialized", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
 		ctx := context.Background()
 
 		result, err := cm.SearchKnowledge(ctx, "test query")
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.Contains(t, err.Error(), "not implemented")
+		assert.Contains(t, err.Error(), "not initialized")
 	})
 
-	t.Run("SearchKnowledge_WithEmptyQuery", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+	t.Run("SearchKnowledge_EmptyQuery", func(t *testing.T) {
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		cm, _ := NewCogneeManager(cfg, nil)
 		ctx := context.Background()
 
 		result, err := cm.SearchKnowledge(ctx, "")
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
+		assert.Contains(t, err.Error(), "empty")
 	})
 
-	t.Run("GetStatus_ReturnsStub", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+	t.Run("GetStatus_ServiceNotInitialized", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
 
 		status := cm.GetStatus()
 
-		assert.Equal(t, "stub", status)
+		assert.Equal(t, "not_initialized", status)
+	})
+
+	t.Run("GetStatus_WithService", func(t *testing.T) {
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		cm, _ := NewCogneeManager(cfg, nil)
+
+		status := cm.GetStatus()
+
+		assert.NotEmpty(t, status)
 	})
 
 	t.Run("Close_Success", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		cm, _ := NewCogneeManager(cfg, nil)
+
+		err := cm.Close()
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("Close_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
 
 		err := cm.Close()
 
@@ -113,7 +157,10 @@ func TestCogneeManager(t *testing.T) {
 	})
 
 	t.Run("Close_MultipleCalls", func(t *testing.T) {
-		cm, _ := NewCogneeManager(&config.HelixConfig{}, nil)
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		cm, _ := NewCogneeManager(cfg, nil)
 
 		err1 := cm.Close()
 		err2 := cm.Close()
@@ -219,7 +266,6 @@ func TestPerformanceOptimizer(t *testing.T) {
 
 		assert.NotNil(t, metrics)
 		assert.Equal(t, float64(0), metrics.TraversalSpeed)
-		// MemoryUsage returns actual runtime memory, so it should be > 0
 		assert.Greater(t, metrics.MemoryUsage, int64(0), "Memory usage should reflect actual runtime allocation")
 	})
 
@@ -491,7 +537,6 @@ func TestPerformanceMetrics(t *testing.T) {
 		cfg := &config.CogneeConfig{Enabled: true}
 		po, _ := NewPerformanceOptimizer(cfg, &hardware.HardwareProfile{})
 
-		// Get metrics
 		metrics := po.GetMetrics()
 
 		assert.NotNil(t, metrics)
@@ -505,7 +550,6 @@ func TestConstructorsWithVariousInputs(t *testing.T) {
 		cm, err := NewCogneeManager(&config.HelixConfig{}, nil)
 		require.NoError(t, err)
 		assert.NotNil(t, cm)
-		assert.Equal(t, "stub", cm.GetStatus())
 	})
 
 	t.Run("PerformanceOptimizer_WithMinimalConfig", func(t *testing.T) {
@@ -572,7 +616,6 @@ func TestOptimizationCache(t *testing.T) {
 		cache.Set("key2", "value2", 0)
 		cache.evictLeastRecentlyUsed()
 
-		// At least one item should still exist
 		assert.LessOrEqual(t, len(cache.items), 2)
 	})
 
@@ -583,11 +626,9 @@ func TestOptimizationCache(t *testing.T) {
 			evictionPolicy: "lru",
 		}
 
-		// Set with very short TTL
 		cache.Set("key1", "value1", 1)
 		cache.evictExpired()
 
-		// Item count depends on timing
 		assert.LessOrEqual(t, len(cache.items), 1)
 	})
 }
@@ -780,7 +821,6 @@ func TestBackgroundMethods(t *testing.T) {
 
 		po.Initialize(ctx)
 
-		// Call collectMetrics directly to increase coverage
 		po.collectMetrics()
 
 		metrics := po.GetMetrics()
@@ -802,12 +842,191 @@ func TestBackgroundMethods(t *testing.T) {
 
 		po.Initialize(ctx)
 
-		// Call maintainCache directly to increase coverage
 		po.maintainCache()
 
-		// Verify cache is still functional
 		status := po.GetStatus()
 		assert.NotNil(t, status)
 		assert.NotNil(t, status["cache"])
+	})
+}
+
+// TestCogneeService tests the main Cognee service
+func TestCogneeService(t *testing.T) {
+	t.Run("NewCogneeService_Success", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		hwProfile := &hardware.HardwareProfile{
+			CPU: hardware.CPUInfo{Cores: 4},
+		}
+
+		service, err := NewCogneeService(cfg, hwProfile)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, service)
+		assert.Equal(t, ServiceStatusStopped, service.GetStatus())
+	})
+
+	t.Run("NewCogneeService_NilConfig", func(t *testing.T) {
+		service, err := NewCogneeService(nil, nil)
+
+		assert.Error(t, err)
+		assert.Nil(t, service)
+	})
+
+	t.Run("Service_StartStop", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		err = service.Start(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, ServiceStatusRunning, service.GetStatus())
+
+		err = service.Stop(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, ServiceStatusStopped, service.GetStatus())
+	})
+
+	t.Run("Service_EnsureRunning", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		err = service.EnsureRunning(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, ServiceStatusRunning, service.GetStatus())
+
+		service.Stop(ctx)
+	})
+
+	t.Run("Service_GetHealth", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		health, err := service.GetHealth(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, health)
+	})
+
+	t.Run("Service_GetStatistics", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		service.Start(ctx)
+
+		stats, err := service.GetStatistics(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, stats)
+
+		service.Stop(ctx)
+	})
+}
+
+// TestCogneeClient tests the Cognee API client
+func TestCogneeClient(t *testing.T) {
+	t.Run("NewClient_Success", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+
+		assert.NotNil(t, client)
+		assert.Contains(t, client.GetBaseURL(), "localhost")
+	})
+
+	t.Run("Client_SetAPIKey", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+
+		client.SetAPIKey("test-api-key")
+		assert.NotNil(t, client)
+	})
+
+	t.Run("Client_SetBaseURL", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+
+		client.SetBaseURL("http://example.com")
+		assert.Equal(t, "http://example.com", client.GetBaseURL())
+	})
+
+	t.Run("Client_SetTimeout", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+
+		client.SetTimeout(60 * time.Second)
+		assert.NotNil(t, client)
+	})
+
+	t.Run("Client_Close", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+
+		err := client.Close()
+		assert.NoError(t, err)
+		assert.False(t, client.IsConnected())
+	})
+}
+
+// TestCogneeModels tests the data models
+func TestCogneeModels(t *testing.T) {
+	t.Run("AddMemoryRequest", func(t *testing.T) {
+		req := &AddMemoryRequest{
+			Content:     "test content",
+			DatasetName: "test",
+			ContentType: "text",
+		}
+
+		assert.Equal(t, "test content", req.Content)
+		assert.Equal(t, "test", req.DatasetName)
+	})
+
+	t.Run("SearchMemoryRequest", func(t *testing.T) {
+		req := &SearchMemoryRequest{
+			Query:       "test query",
+			DatasetName: "test",
+			Limit:       10,
+		}
+
+		assert.Equal(t, "test query", req.Query)
+		assert.Equal(t, 10, req.Limit)
+	})
+
+	t.Run("CogneeMemory", func(t *testing.T) {
+		memory := &CogneeMemory{
+			ID:          "mem-123",
+			Content:     "test content",
+			DatasetName: "test",
+			CreatedAt:   time.Now(),
+		}
+
+		assert.Equal(t, "mem-123", memory.ID)
+		assert.Equal(t, "test content", memory.Content)
+	})
+
+	t.Run("Dataset", func(t *testing.T) {
+		dataset := &Dataset{
+			ID:          "ds-123",
+			Name:        "test-dataset",
+			Description: "Test dataset",
+			CreatedAt:   time.Now(),
+		}
+
+		assert.Equal(t, "ds-123", dataset.ID)
+		assert.Equal(t, "test-dataset", dataset.Name)
 	})
 }

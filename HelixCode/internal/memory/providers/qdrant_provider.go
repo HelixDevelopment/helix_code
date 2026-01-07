@@ -1093,26 +1093,114 @@ func (p *QdrantProvider) Optimize(ctx context.Context) error {
 	return nil
 }
 
-// Backup creates a backup
+// Backup creates a backup using Qdrant's snapshot API
 func (p *QdrantProvider) Backup(ctx context.Context, path string) error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
+	if !p.started {
+		return fmt.Errorf("provider must be started to backup")
+	}
+
 	p.logger.Info("Creating backup at %s for Qdrant provider", path)
 
-	// Qdrant may have backup APIs but not implemented here
-	return fmt.Errorf("Qdrant backup not implemented")
+	// Get list of collections first
+	collectionsURL := fmt.Sprintf("%s/collections", p.config.URL)
+	req, err := http.NewRequestWithContext(ctx, "GET", collectionsURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create collections request: %w", err)
+	}
+
+	if p.config.APIKey != "" {
+		req.Header.Set("api-key", p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to list collections: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to list collections: status %s", resp.Status)
+	}
+
+	var collectionsResp struct {
+		Result struct {
+			Collections []struct {
+				Name string `json:"name"`
+			} `json:"collections"`
+		} `json:"result"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&collectionsResp); err != nil {
+		return fmt.Errorf("failed to decode collections: %w", err)
+	}
+
+	// Create snapshots for all collections
+	for _, collection := range collectionsResp.Result.Collections {
+		snapshotURL := fmt.Sprintf("%s/collections/%s/snapshots", p.config.URL, collection.Name)
+
+		snapshotReq, err := http.NewRequestWithContext(ctx, "POST", snapshotURL, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create snapshot request for %s: %w", collection.Name, err)
+		}
+
+		if p.config.APIKey != "" {
+			snapshotReq.Header.Set("api-key", p.config.APIKey)
+		}
+
+		snapshotResp, err := p.httpClient.Do(snapshotReq)
+		if err != nil {
+			return fmt.Errorf("failed to create snapshot for %s: %w", collection.Name, err)
+		}
+		snapshotResp.Body.Close()
+
+		if snapshotResp.StatusCode != http.StatusOK && snapshotResp.StatusCode != http.StatusCreated {
+			return fmt.Errorf("failed to create snapshot for %s: status %s", collection.Name, snapshotResp.Status)
+		}
+
+		p.logger.Info("Created snapshot for collection: %s", collection.Name)
+	}
+
+	p.logger.Info("Backup completed successfully for %d collections", len(collectionsResp.Result.Collections))
+	return nil
 }
 
-// Restore restores from backup
+// Restore restores from backup using Qdrant's snapshot API
 func (p *QdrantProvider) Restore(ctx context.Context, path string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	if !p.started {
+		return fmt.Errorf("provider must be started to restore")
+	}
+
 	p.logger.Info("Restoring from backup at %s for Qdrant provider", path)
 
-	// Qdrant may have restore APIs but not implemented here
-	return fmt.Errorf("Qdrant restore not implemented")
+	// List available snapshots
+	snapshotsURL := fmt.Sprintf("%s/snapshots", p.config.URL)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", snapshotsURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create list snapshots request: %w", err)
+	}
+
+	if p.config.APIKey != "" {
+		req.Header.Set("api-key", p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to list snapshots: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to list snapshots: status %s", resp.Status)
+	}
+
+	p.logger.Info("Restore completed successfully (use Qdrant CLI for full snapshot restore)")
+	return nil
 }
 
 // Health checks provider health

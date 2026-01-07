@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -74,7 +75,11 @@ func (app *DesktopApp) Initialize() error {
 
 	// Initialize components
 	app.taskManager = task.NewTaskManager(db, rds)
-	app.workerManager = &worker.WorkerManager{} // Placeholder
+
+	// Initialize worker manager with in-memory repository for standalone UI
+	workerRepo := worker.NewInMemoryWorkerRepository()
+	app.workerManager = worker.NewWorkerManager(workerRepo, 30*time.Second)
+
 	app.notificationEngine = notification.NewNotificationEngine()
 
 	// Initialize server for API calls

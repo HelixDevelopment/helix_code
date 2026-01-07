@@ -1,3 +1,15 @@
+# HelixCode Test Infrastructure
+# This docker-compose file provides all necessary services for running
+# integration, E2E, and automation tests.
+#
+# Usage:
+#   docker compose -f docker-compose.test.yml up -d
+#   # or with podman
+#   podman-compose -f docker-compose.test.yml up -d
+#
+# To tear down:
+#   docker compose -f docker-compose.test.yml down -v
+
 version: '3.8'
 
 services:
@@ -9,6 +21,7 @@ services:
       POSTGRES_DB: helix_test
       POSTGRES_USER: helix_test
       POSTGRES_PASSWORD: test_password_secure_123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
       - "5433:5432"
     healthcheck:
@@ -26,11 +39,11 @@ services:
   redis-test:
     image: redis:7-alpine
     container_name: helixcode-redis-test
-    command: redis-server --requirepass test_redis_password_123
+    command: redis-server --requirepass test_redis_password_123 --appendonly yes
     ports:
       - "6380:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "test_redis_password_123", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -39,7 +52,7 @@ services:
     volumes:
       - redis-test-data:/data
 
-  # Cognee.ai for memory testing
+  # Cognee.ai for memory and knowledge graph testing
   cognee-test:
     image: cognee/cognee:latest
     container_name: helixcode-cognee-test
@@ -48,6 +61,8 @@ services:
       - COGNEE_MODE=local
       - COGNEE_REDIS_URL=redis://:test_redis_password_123@redis-test:6379
       - COGNEE_POSTGRES_URL=postgresql://helix_test:test_password_secure_123@postgres-test:5432/helix_test
+      - COGNEE_ENV=development
+      - COGNEE_LOG_LEVEL=INFO
     ports:
       - "8001:8000"
     depends_on:
@@ -63,6 +78,106 @@ services:
       start_period: 30s
     networks:
       - helix-test
+    volumes:
+      - cognee-test-data:/app/data
+
+  # ChromaDB for vector storage testing
+  chromadb-test:
+    image: chromadb/chroma:latest
+    container_name: helixcode-chromadb-test
+    ports:
+      - "8002:8000"
+    volumes:
+      - chromadb-test-data:/chroma/chroma
+    networks:
+      - helix-test
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Qdrant Vector Database for testing
+  qdrant-test:
+    image: qdrant/qdrant:latest
+    container_name: helixcode-qdrant-test
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-test-data:/qdrant/storage
+    networks:
+      - helix-test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Ollama for local LLM testing (free, no API keys needed)
+  ollama-test:
+    image: ollama/ollama:latest
+    container_name: helixcode-ollama-test
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-test-data:/root/.ollama
+    networks:
+      - helix-test
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Prometheus Monitoring for testing
+  prometheus-test:
+    image: prom/prometheus:latest
+    container_name: helixcode-prometheus-test
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./config/prometheus-test.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-test-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=24h'
+      - '--web.enable-lifecycle'
+    networks:
+      - helix-test
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana Dashboard for testing
+  grafana-test:
+    image: grafana/grafana:latest
+    container_name: helixcode-grafana-test
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_USERS_ALLOW_SIGN_UP: false
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-test-data:/var/lib/grafana
+    networks:
+      - helix-test
+    depends_on:
+      - prometheus-test
+    restart: unless-stopped
+    profiles:
+      - monitoring
 
 networks:
   helix-test:
@@ -74,3 +189,15 @@ volumes:
     name: helix-test-postgres-data
   redis-test-data:
     name: helix-test-redis-data
+  cognee-test-data:
+    name: helix-test-cognee-data
+  chromadb-test-data:
+    name: helix-test-chromadb-data
+  qdrant-test-data:
+    name: helix-test-qdrant-data
+  ollama-test-data:
+    name: helix-test-ollama-data
+  prometheus-test-data:
+    name: helix-test-prometheus-data
+  grafana-test-data:
+    name: helix-test-grafana-data

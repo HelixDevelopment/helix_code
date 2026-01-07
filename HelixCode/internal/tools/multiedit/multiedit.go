@@ -472,8 +472,10 @@ func (mfe *MultiFileEditor) applyEdit(ctx context.Context, tx *EditTransaction, 
 			return fmt.Errorf("failed to delete %s: %w", edit.FilePath, err)
 		}
 	case OpRename:
-		// Rename not implemented yet
-		return fmt.Errorf("rename operation not yet implemented")
+		if err := mfe.executeRename(ctx, edit); err != nil {
+			edit.Error = err
+			return fmt.Errorf("failed to rename %s to %s: %w", edit.FilePath, edit.TargetPath, err)
+		}
 	default:
 		return fmt.Errorf("unknown operation: %v", edit.Operation)
 	}
@@ -524,11 +526,65 @@ func (mfe *MultiFileEditor) validateEdit(edit *FileEdit) error {
 	case OpDelete:
 		// No additional validation needed
 	case OpRename:
-		// Not implemented yet
-		return fmt.Errorf("rename operation not yet implemented")
+		if edit.TargetPath == "" {
+			return fmt.Errorf("target path is required for rename operation")
+		}
+		if edit.FilePath == edit.TargetPath {
+			return fmt.Errorf("source and target paths cannot be the same")
+		}
 	default:
 		return fmt.Errorf("invalid operation: %v", edit.Operation)
 	}
+
+	return nil
+}
+
+// executeRename performs a file rename operation
+func (mfe *MultiFileEditor) executeRename(ctx context.Context, edit *FileEdit) error {
+	// Read the source file content
+	content, err := mfe.fileSystem.Reader().Read(ctx, edit.FilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read source file: %w", err)
+	}
+
+	// Verify checksum if provided
+	if edit.Checksum != "" {
+		currentChecksum := calculateChecksum(content.Content)
+		if currentChecksum != edit.Checksum {
+			return &ConflictError{
+				Type:     ConflictModified,
+				FilePath: edit.FilePath,
+				Expected: edit.Checksum,
+				Actual:   currentChecksum,
+				Message:  "file was modified since transaction started",
+			}
+		}
+	}
+
+	// Use NewContent if provided (allows modifying content during rename)
+	// Otherwise, use the original content
+	contentToWrite := content.Content
+	if len(edit.NewContent) > 0 {
+		contentToWrite = edit.NewContent
+	}
+
+	// Write to the target path
+	if err := mfe.fileSystem.Writer().Write(ctx, edit.TargetPath, contentToWrite); err != nil {
+		return fmt.Errorf("failed to write to target path: %w", err)
+	}
+
+	// Delete the source file
+	if err := mfe.fileSystem.Writer().Delete(ctx, edit.FilePath, false); err != nil {
+		// Rollback: delete the target file we just created
+		_ = mfe.fileSystem.Writer().Delete(ctx, edit.TargetPath, false)
+		return fmt.Errorf("failed to delete source file: %w", err)
+	}
+
+	mfe.logger.Debug("file renamed",
+		"from", edit.FilePath,
+		"to", edit.TargetPath,
+		"size", len(contentToWrite),
+	)
 
 	return nil
 }

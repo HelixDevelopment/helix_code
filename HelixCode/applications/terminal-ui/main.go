@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
@@ -86,8 +87,11 @@ func (tui *TerminalUI) Initialize() error {
 
 	// Initialize components
 	tui.taskManager = task.NewTaskManager(db, rds)
-	// For now, create a simple worker manager - will be improved later
-	tui.workerManager = &worker.WorkerManager{} // Placeholder
+
+	// Initialize worker manager with in-memory repository for standalone UI
+	workerRepo := worker.NewInMemoryWorkerRepository()
+	tui.workerManager = worker.NewWorkerManager(workerRepo, 30*time.Second)
+
 	tui.notificationEngine = notification.NewNotificationEngine()
 
 	// Initialize server for API calls

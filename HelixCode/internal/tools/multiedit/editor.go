@@ -93,7 +93,8 @@ func (pe *PreviewEngine) previewFile(ctx context.Context, edit *FileEdit) (*File
 	}
 
 	// Generate diff
-	if edit.Operation == OpUpdate {
+	switch edit.Operation {
+	case OpUpdate:
 		diff, err := pe.diffManager.GenerateDiff(edit.OldContent, edit.NewContent, edit.FilePath)
 		if err != nil {
 			preview.Status = StatusError
@@ -106,15 +107,30 @@ func (pe *PreviewEngine) previewFile(ctx context.Context, edit *FileEdit) (*File
 			LinesChanged: diff.Stats.LinesAdded + diff.Stats.LinesDeleted,
 			SizeChange:   int64(len(edit.NewContent)) - int64(len(edit.OldContent)),
 		}
-	} else if edit.Operation == OpCreate {
+	case OpCreate:
 		preview.Stats = FileStats{
 			LinesAdded: len(splitLines(string(edit.NewContent))),
 			SizeChange: int64(len(edit.NewContent)),
 		}
-	} else if edit.Operation == OpDelete {
+	case OpDelete:
 		preview.Stats = FileStats{
 			LinesDeleted: len(splitLines(string(edit.OldContent))),
 			SizeChange:   -int64(len(edit.OldContent)),
+		}
+	case OpRename:
+		preview.TargetPath = edit.TargetPath
+		// If content is also being modified during rename
+		if len(edit.NewContent) > 0 && len(edit.OldContent) > 0 {
+			diff, err := pe.diffManager.GenerateDiff(edit.OldContent, edit.NewContent, edit.FilePath)
+			if err == nil {
+				preview.Diff = diff
+				preview.Stats = FileStats{
+					LinesAdded:   diff.Stats.LinesAdded,
+					LinesDeleted: diff.Stats.LinesDeleted,
+					LinesChanged: diff.Stats.LinesAdded + diff.Stats.LinesDeleted,
+					SizeChange:   int64(len(edit.NewContent)) - int64(len(edit.OldContent)),
+				}
+			}
 		}
 	}
 
@@ -132,6 +148,8 @@ func (pe *PreviewEngine) updateSummary(summary *PreviewSummary, preview *FilePre
 		summary.FilesModified++
 	case OpDelete:
 		summary.FilesDeleted++
+	case OpRename:
+		summary.FilesRenamed++
 	}
 
 	summary.TotalLinesAdded += preview.Stats.LinesAdded
@@ -148,11 +166,12 @@ type PreviewResult struct {
 
 // FilePreview contains preview for a single file
 type FilePreview struct {
-	FilePath  string
-	Operation EditOperation
-	Diff      *Diff
-	Stats     FileStats
-	Status    PreviewStatus
+	FilePath   string
+	TargetPath string // Used for rename operations - the new path
+	Operation  EditOperation
+	Diff       *Diff
+	Stats      FileStats
+	Status     PreviewStatus
 }
 
 // FileStats contains file statistics
@@ -192,6 +211,7 @@ type PreviewSummary struct {
 	FilesCreated      int
 	FilesModified     int
 	FilesDeleted      int
+	FilesRenamed      int
 	TotalLinesAdded   int
 	TotalLinesDeleted int
 	HasConflicts      bool

@@ -76,6 +76,7 @@ func (s TransactionState) String() string {
 // FileEdit represents a single file edit operation
 type FileEdit struct {
 	FilePath   string
+	TargetPath string        // Used for rename operations - the new path
 	Operation  EditOperation
 	OldContent []byte
 	NewContent []byte

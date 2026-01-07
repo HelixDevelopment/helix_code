@@ -463,16 +463,86 @@ func (p *CharacterAIProvider) BatchFindSimilar(ctx context.Context, queries [][]
 	return results, nil
 }
 
-// Delete deletes vectors by IDs
+// Delete deletes vectors by IDs (conversations or character memories)
 func (p *CharacterAIProvider) Delete(ctx context.Context, ids []string) error {
-	// Stub implementation
-	return fmt.Errorf("Delete not implemented for CharacterAI provider")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if !p.started {
+		return fmt.Errorf("provider must be started to delete")
+	}
+
+	if len(ids) == 0 {
+		return nil
+	}
+
+	p.logger.Debug("Deleting %d items", len(ids))
+
+	deletedCount := 0
+	for _, id := range ids {
+		// Try to delete as conversation first
+		if _, exists := p.conversations[id]; exists {
+			if p.client != nil {
+				if err := p.client.DeleteConversation(ctx, id); err != nil {
+					p.logger.Warn("Failed to delete conversation from API: %v", err)
+				}
+			}
+			delete(p.conversations, id)
+			deletedCount++
+			continue
+		}
+
+		// Try to delete as character
+		if _, exists := p.characters[id]; exists {
+			if p.client != nil {
+				if err := p.client.DeleteCharacter(ctx, id); err != nil {
+					p.logger.Warn("Failed to delete character from API: %v", err)
+				}
+			}
+			delete(p.characters, id)
+			deletedCount++
+		}
+	}
+
+	// Update stats
+	p.stats.TotalVectors -= int64(deletedCount)
+	p.stats.SuccessfulOps += int64(deletedCount)
+	p.stats.TotalOperations += int64(deletedCount)
+	p.stats.LastOperation = time.Now()
+
+	p.logger.Debug("Deleted %d items", deletedCount)
+	return nil
 }
 
-// DeleteIndex deletes an index
+// DeleteIndex deletes an index (character-specific memory index)
 func (p *CharacterAIProvider) DeleteIndex(ctx context.Context, collection string, indexName string) error {
-	// Stub implementation
-	return fmt.Errorf("DeleteIndex not implemented for CharacterAI provider")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if !p.started {
+		return fmt.Errorf("provider must be started to delete index")
+	}
+
+	// Check if collection (character) exists
+	character, exists := p.characters[collection]
+	if !exists {
+		return fmt.Errorf("character %s does not exist", collection)
+	}
+
+	p.logger.Debug("Deleting index %s from character %s", indexName, collection)
+
+	// Remove the index from character's metadata
+	// Since Character.Metadata is map[string]string, we store index info as a comma-separated string
+	if character.Metadata != nil {
+		delete(character.Metadata, "index_"+indexName)
+	}
+
+	p.stats.SuccessfulOps++
+	p.stats.TotalOperations++
+	p.stats.LastOperation = time.Now()
+
+	p.logger.Info("Deleted index %s from character %s", indexName, collection)
+	return nil
 }
 
 // CreateCollection creates a new collection (character or conversation space)

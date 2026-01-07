@@ -3,9 +3,15 @@ package workflow
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
 	"time"
 
+	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/project"
 )
 
@@ -16,16 +22,122 @@ type ProjectManager interface {
 	CreateProject(ctx context.Context, name, description, path, projectType string) (*project.Project, error)
 }
 
+// LLMProvider interface for LLM operations
+type LLMProvider interface {
+	Generate(ctx context.Context, request *llm.LLMRequest) (*llm.LLMResponse, error)
+	IsAvailable(ctx context.Context) bool
+}
+
+// ExecutorConfig holds executor configuration
+type ExecutorConfig struct {
+	MaxConcurrentSteps int
+	StepTimeout        time.Duration
+	EnableLLM          bool
+	EnableMetrics      bool
+}
+
+// DefaultExecutorConfig returns default configuration
+func DefaultExecutorConfig() *ExecutorConfig {
+	return &ExecutorConfig{
+		MaxConcurrentSteps: 4,
+		StepTimeout:        10 * time.Minute,
+		EnableLLM:          true,
+		EnableMetrics:      true,
+	}
+}
+
+// ExecutionMetrics tracks workflow execution metrics
+type ExecutionMetrics struct {
+	mu               sync.RWMutex
+	WorkflowsStarted int64
+	WorkflowsSuccess int64
+	WorkflowsFailed  int64
+	StepsExecuted    int64
+	StepsFailed      int64
+	TotalDuration    time.Duration
+	LLMCalls         int64
+	LLMTokensUsed    int64
+}
+
 // Executor handles workflow execution
 type Executor struct {
 	projectManager ProjectManager
+	llmProvider    LLMProvider
+	config         *ExecutorConfig
+	metrics        *ExecutionMetrics
+	mu             sync.RWMutex
+	activeFlows    map[string]*Workflow
 }
 
 // NewExecutor creates a new workflow executor
 func NewExecutor(projectManager ProjectManager) *Executor {
 	return &Executor{
 		projectManager: projectManager,
+		config:         DefaultExecutorConfig(),
+		metrics:        &ExecutionMetrics{},
+		activeFlows:    make(map[string]*Workflow),
 	}
+}
+
+// NewExecutorWithLLM creates an executor with LLM support
+func NewExecutorWithLLM(projectManager ProjectManager, llmProvider LLMProvider, config *ExecutorConfig) *Executor {
+	if config == nil {
+		config = DefaultExecutorConfig()
+	}
+	return &Executor{
+		projectManager: projectManager,
+		llmProvider:    llmProvider,
+		config:         config,
+		metrics:        &ExecutionMetrics{},
+		activeFlows:    make(map[string]*Workflow),
+	}
+}
+
+// SetLLMProvider sets the LLM provider for the executor
+func (e *Executor) SetLLMProvider(provider LLMProvider) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.llmProvider = provider
+}
+
+// GetMetrics returns execution metrics
+func (e *Executor) GetMetrics() *ExecutionMetrics {
+	return e.metrics
+}
+
+// GetActiveWorkflows returns currently running workflows
+func (e *Executor) GetActiveWorkflows() []*Workflow {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+
+	workflows := make([]*Workflow, 0, len(e.activeFlows))
+	for _, w := range e.activeFlows {
+		workflows = append(workflows, w)
+	}
+	return workflows
+}
+
+// GetWorkflow returns a workflow by ID
+func (e *Executor) GetWorkflow(id string) (*Workflow, bool) {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	w, ok := e.activeFlows[id]
+	return w, ok
+}
+
+// CancelWorkflow cancels a running workflow
+func (e *Executor) CancelWorkflow(id string) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	w, ok := e.activeFlows[id]
+	if !ok {
+		return fmt.Errorf("workflow not found: %s", id)
+	}
+
+	w.Status = WorkflowStatusFailed
+	w.UpdatedAt = time.Now()
+	return nil
 }
 
 // ExecutePlanningWorkflow executes a planning workflow
@@ -184,16 +296,388 @@ func (e *Executor) executeStep(ctx context.Context, step *Step, proj *project.Pr
 	}
 }
 
-// executeAnalysisStep executes an analysis step
+// executeAnalysisStep executes an analysis step using LLM
 func (e *Executor) executeAnalysisStep(ctx context.Context, step *Step, proj *project.Project) (string, error) {
-	// For now, return a placeholder result
-	return fmt.Sprintf("Analysis completed for: %s", step.Description), nil
+	// Gather project context
+	projectContext, err := e.gatherProjectContext(proj)
+	if err != nil {
+		return "", fmt.Errorf("failed to gather project context: %w", err)
+	}
+
+	// If LLM is available, use it for analysis
+	if e.llmProvider != nil && e.config.EnableLLM && e.llmProvider.IsAvailable(ctx) {
+		return e.performLLMAnalysis(ctx, step, proj, projectContext)
+	}
+
+	// Fallback to static analysis
+	return e.performStaticAnalysis(ctx, step, proj, projectContext)
 }
 
-// executeGenerationStep executes a code generation step
+// gatherProjectContext collects relevant context from the project
+func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext, error) {
+	ctx := &ProjectContext{
+		ProjectPath:  proj.Path,
+		ProjectType:  proj.Type,
+		Files:        make([]FileInfo, 0),
+		Dependencies: make([]string, 0),
+	}
+
+	// Walk project directory to collect file info
+	err := filepath.WalkDir(proj.Path, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil // Skip files we can't access
+		}
+
+		// Skip hidden directories and common non-code directories
+		if d.IsDir() {
+			name := d.Name()
+			if strings.HasPrefix(name, ".") || name == "node_modules" || name == "vendor" || name == "__pycache__" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Check for relevant source files
+		ext := filepath.Ext(path)
+		if isSourceFile(ext) {
+			relPath, _ := filepath.Rel(proj.Path, path)
+			info, _ := d.Info()
+			size := int64(0)
+			if info != nil {
+				size = info.Size()
+			}
+			ctx.Files = append(ctx.Files, FileInfo{
+				Path:    relPath,
+				Size:    size,
+				Type:    ext,
+				IsEntry: isEntryPoint(relPath, proj.Type),
+			})
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Detect dependencies
+	ctx.Dependencies = e.detectDependencies(proj)
+
+	return ctx, nil
+}
+
+// ProjectContext holds analysis context
+type ProjectContext struct {
+	ProjectPath  string
+	ProjectType  string
+	Files        []FileInfo
+	Dependencies []string
+	EntryPoints  []string
+}
+
+// FileInfo holds file metadata
+type FileInfo struct {
+	Path    string
+	Size    int64
+	Type    string
+	IsEntry bool
+}
+
+func isSourceFile(ext string) bool {
+	sourceExts := map[string]bool{
+		".go": true, ".py": true, ".js": true, ".ts": true, ".tsx": true, ".jsx": true,
+		".java": true, ".kt": true, ".rs": true, ".c": true, ".cpp": true, ".h": true,
+		".rb": true, ".php": true, ".swift": true, ".scala": true, ".cs": true,
+	}
+	return sourceExts[ext]
+}
+
+func isEntryPoint(path, projectType string) bool {
+	switch projectType {
+	case "go":
+		return strings.HasSuffix(path, "main.go") || strings.Contains(path, "cmd/")
+	case "node":
+		return path == "index.js" || path == "index.ts" || path == "app.js" || path == "server.js"
+	case "python":
+		return path == "main.py" || path == "__main__.py" || path == "app.py"
+	case "rust":
+		return strings.HasSuffix(path, "main.rs") || strings.HasSuffix(path, "lib.rs")
+	default:
+		return false
+	}
+}
+
+func (e *Executor) detectDependencies(proj *project.Project) []string {
+	deps := make([]string, 0)
+
+	// Check for dependency files
+	depFiles := map[string]string{
+		"go.mod":         "go",
+		"package.json":   "node",
+		"requirements.txt": "python",
+		"Cargo.toml":     "rust",
+		"pom.xml":        "java",
+	}
+
+	for file, lang := range depFiles {
+		depPath := filepath.Join(proj.Path, file)
+		if _, err := os.Stat(depPath); err == nil {
+			deps = append(deps, fmt.Sprintf("%s (%s)", file, lang))
+		}
+	}
+
+	return deps
+}
+
+// performLLMAnalysis uses LLM for code analysis
+func (e *Executor) performLLMAnalysis(ctx context.Context, step *Step, proj *project.Project, projectCtx *ProjectContext) (string, error) {
+	// Build analysis prompt
+	prompt := e.buildAnalysisPrompt(step, proj, projectCtx)
+
+	systemPrompt := `You are an expert software architect and code analyst.
+Analyze the provided codebase context and provide actionable insights.
+Focus on architecture, patterns, potential issues, and improvement suggestions.
+Be specific and reference actual files when possible.`
+
+	// Create LLM request with Messages
+	request := &llm.LLMRequest{
+		Messages: []llm.Message{
+			{Role: "system", Content: systemPrompt},
+			{Role: "user", Content: prompt},
+		},
+		MaxTokens:   4096,
+		Temperature: 0.2, // Low temperature for analytical tasks
+	}
+
+	// Execute LLM call
+	response, err := e.llmProvider.Generate(ctx, request)
+	if err != nil {
+		return "", fmt.Errorf("LLM analysis failed: %w", err)
+	}
+
+	// Update metrics
+	e.metrics.mu.Lock()
+	e.metrics.LLMCalls++
+	e.metrics.LLMTokensUsed += int64(response.Usage.TotalTokens)
+	e.metrics.mu.Unlock()
+
+	return response.Content, nil
+}
+
+func (e *Executor) buildAnalysisPrompt(step *Step, proj *project.Project, projectCtx *ProjectContext) string {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("# Code Analysis Request: %s\n\n", step.Name))
+	sb.WriteString(fmt.Sprintf("## Project Information\n"))
+	sb.WriteString(fmt.Sprintf("- Type: %s\n", proj.Type))
+	sb.WriteString(fmt.Sprintf("- Path: %s\n", proj.Path))
+	sb.WriteString(fmt.Sprintf("- Description: %s\n\n", proj.Description))
+
+	sb.WriteString("## Files in Project\n")
+	for _, f := range projectCtx.Files {
+		entry := ""
+		if f.IsEntry {
+			entry = " (entry point)"
+		}
+		sb.WriteString(fmt.Sprintf("- %s (%d bytes)%s\n", f.Path, f.Size, entry))
+	}
+
+	sb.WriteString("\n## Dependencies\n")
+	for _, d := range projectCtx.Dependencies {
+		sb.WriteString(fmt.Sprintf("- %s\n", d))
+	}
+
+	sb.WriteString(fmt.Sprintf("\n## Analysis Task\n%s\n", step.Description))
+	sb.WriteString("\nProvide a comprehensive analysis addressing the task above.")
+
+	return sb.String()
+}
+
+// performStaticAnalysis performs analysis without LLM
+func (e *Executor) performStaticAnalysis(ctx context.Context, step *Step, proj *project.Project, projectCtx *ProjectContext) (string, error) {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("# Static Analysis Report: %s\n\n", step.Name))
+	sb.WriteString(fmt.Sprintf("Project: %s (%s)\n\n", proj.Name, proj.Type))
+
+	sb.WriteString("## Project Structure\n")
+	sb.WriteString(fmt.Sprintf("- Total source files: %d\n", len(projectCtx.Files)))
+
+	// Count by type
+	typeCount := make(map[string]int)
+	for _, f := range projectCtx.Files {
+		typeCount[f.Type]++
+	}
+	for ext, count := range typeCount {
+		sb.WriteString(fmt.Sprintf("- %s files: %d\n", ext, count))
+	}
+
+	sb.WriteString("\n## Entry Points\n")
+	for _, f := range projectCtx.Files {
+		if f.IsEntry {
+			sb.WriteString(fmt.Sprintf("- %s\n", f.Path))
+		}
+	}
+
+	sb.WriteString("\n## Dependencies\n")
+	for _, d := range projectCtx.Dependencies {
+		sb.WriteString(fmt.Sprintf("- %s\n", d))
+	}
+
+	sb.WriteString("\n## Recommendations\n")
+	sb.WriteString("- Enable LLM analysis for deeper insights\n")
+	sb.WriteString("- Review entry points for optimization opportunities\n")
+
+	return sb.String(), nil
+}
+
+// executeGenerationStep executes a code generation step using LLM
 func (e *Executor) executeGenerationStep(ctx context.Context, step *Step, proj *project.Project) (string, error) {
-	// For now, return a placeholder result
-	return fmt.Sprintf("Code generation completed for: %s", step.Description), nil
+	// If LLM is available, use it for generation
+	if e.llmProvider != nil && e.config.EnableLLM && e.llmProvider.IsAvailable(ctx) {
+		return e.performLLMGeneration(ctx, step, proj)
+	}
+
+	// Fallback: Generate template-based code
+	return e.generateTemplateCode(ctx, step, proj)
+}
+
+// performLLMGeneration uses LLM for code generation
+func (e *Executor) performLLMGeneration(ctx context.Context, step *Step, proj *project.Project) (string, error) {
+	// Build generation prompt
+	prompt := e.buildGenerationPrompt(step, proj)
+
+	systemPrompt := `You are an expert software developer.
+Generate clean, well-documented, and production-ready code.
+Follow best practices for the project type and language.
+Include comments explaining complex logic.
+Provide complete, runnable code without placeholders.`
+
+	// Create LLM request with Messages
+	request := &llm.LLMRequest{
+		Messages: []llm.Message{
+			{Role: "system", Content: systemPrompt},
+			{Role: "user", Content: prompt},
+		},
+		MaxTokens:   8192,
+		Temperature: 0.3, // Slightly higher for generation creativity
+	}
+
+	// Execute LLM call
+	response, err := e.llmProvider.Generate(ctx, request)
+	if err != nil {
+		return "", fmt.Errorf("LLM generation failed: %w", err)
+	}
+
+	// Update metrics
+	e.metrics.mu.Lock()
+	e.metrics.LLMCalls++
+	e.metrics.LLMTokensUsed += int64(response.Usage.TotalTokens)
+	e.metrics.mu.Unlock()
+
+	return response.Content, nil
+}
+
+func (e *Executor) buildGenerationPrompt(step *Step, proj *project.Project) string {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("# Code Generation Request: %s\n\n", step.Name))
+	sb.WriteString(fmt.Sprintf("## Project Context\n"))
+	sb.WriteString(fmt.Sprintf("- Language/Type: %s\n", proj.Type))
+	sb.WriteString(fmt.Sprintf("- Project Path: %s\n", proj.Path))
+	sb.WriteString(fmt.Sprintf("- Description: %s\n\n", proj.Description))
+
+	sb.WriteString(fmt.Sprintf("## Generation Task\n%s\n\n", step.Description))
+	sb.WriteString("Generate the requested code following these guidelines:\n")
+	sb.WriteString("1. Use idiomatic patterns for the language\n")
+	sb.WriteString("2. Include proper error handling\n")
+	sb.WriteString("3. Add documentation comments\n")
+	sb.WriteString("4. Follow project conventions\n")
+
+	return sb.String()
+}
+
+// generateTemplateCode generates template-based code without LLM
+func (e *Executor) generateTemplateCode(ctx context.Context, step *Step, proj *project.Project) (string, error) {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("// Generated code for: %s\n", step.Name))
+	sb.WriteString(fmt.Sprintf("// Project: %s\n", proj.Name))
+	sb.WriteString(fmt.Sprintf("// Task: %s\n\n", step.Description))
+
+	switch proj.Type {
+	case "go":
+		sb.WriteString(e.generateGoTemplate(step))
+	case "node", "typescript":
+		sb.WriteString(e.generateNodeTemplate(step))
+	case "python":
+		sb.WriteString(e.generatePythonTemplate(step))
+	case "rust":
+		sb.WriteString(e.generateRustTemplate(step))
+	default:
+		sb.WriteString("// Enable LLM for code generation in this language\n")
+	}
+
+	return sb.String(), nil
+}
+
+func (e *Executor) generateGoTemplate(step *Step) string {
+	return `package main
+
+import (
+	"fmt"
+	"log"
+)
+
+// TODO: Implement based on task requirements
+// Task: ` + step.Description + `
+
+func main() {
+	fmt.Println("Implementation pending")
+	log.Println("Enable LLM for AI-powered code generation")
+}
+`
+}
+
+func (e *Executor) generateNodeTemplate(step *Step) string {
+	return `// TODO: Implement based on task requirements
+// Task: ` + step.Description + `
+
+async function main() {
+    console.log('Implementation pending');
+    console.log('Enable LLM for AI-powered code generation');
+}
+
+main().catch(console.error);
+`
+}
+
+func (e *Executor) generatePythonTemplate(step *Step) string {
+	return `#!/usr/bin/env python3
+"""
+TODO: Implement based on task requirements
+Task: ` + step.Description + `
+"""
+
+def main():
+    print("Implementation pending")
+    print("Enable LLM for AI-powered code generation")
+
+if __name__ == "__main__":
+    main()
+`
+}
+
+func (e *Executor) generateRustTemplate(step *Step) string {
+	return `// TODO: Implement based on task requirements
+// Task: ` + step.Description + `
+
+fn main() {
+    println!("Implementation pending");
+    println!("Enable LLM for AI-powered code generation");
+}
+`
 }
 
 // executeCommandStep executes a command execution step
