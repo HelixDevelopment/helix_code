@@ -97,6 +97,10 @@ func TestSSHSecurity_HostKeyVerification(t *testing.T) {
 
 // TestSSHSecurity_SandboxIsolation tests worker sandbox isolation
 func TestSSHSecurity_SandboxIsolation(t *testing.T) {
+	// Skip test if not running as root (required for user creation)
+	if os.Getuid() != 0 {
+		t.Skip("Skipping sandbox isolation test - requires root privileges")
+	}
 	ctx := context.Background()
 	wim := NewWorkerIsolationManager()
 	workerID := uuid.New()

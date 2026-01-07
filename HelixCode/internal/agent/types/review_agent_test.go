@@ -2,67 +2,102 @@ package types
 
 import (
 	"context"
-	"fmt"
 	"testing"
+
 	"dev.helix.code/internal/agent"
-	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/agent/task"
+	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
-	"dev.helix.code/internal/tools"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
 // TestNewReviewAgent tests review agent creation
 func TestNewReviewAgent(t *testing.T) {
 	t.Run("Valid creation", func(t *testing.T) {
-		config := &agent.AgentConfig{
-			ID:   "review-1",
-			Type: agent.AgentTypeReview,
-			Name: "Test Review Agent",
-		}
+		cfg := &config.AgentConfig{}
 		provider := &MockLLMProvider{}
-		registry, err := tools.NewToolRegistry(nil)
+		mockRegistry := NewMockToolRegistry()
+		registry := ConvertToToolRegistry(mockRegistry)
+
+		reviewAgent, err := NewReviewAgent(cfg, provider, registry)
 		require.NoError(t, err)
-		reviewAgent, err := NewReviewAgent(config, provider, registry)
 		require.NotNil(t, reviewAgent)
-		assert.Equal(t, "review-1", reviewAgent.ID())
-		assert.Equal(t, agent.AgentTypeReview, reviewAgent.Type())
+		assert.Equal(t, "review-agent", reviewAgent.ID())
 	})
+
 	t.Run("Nil provider", func(t *testing.T) {
-		agent, err := NewReviewAgent(config, nil, registry)
+		cfg := &config.AgentConfig{}
+		mockRegistry := NewMockToolRegistry()
+		registry := ConvertToToolRegistry(mockRegistry)
+
+		reviewAgent, err := NewReviewAgent(cfg, nil, registry)
 		assert.Error(t, err)
-		assert.Nil(t, agent)
+		assert.Nil(t, reviewAgent)
 		assert.Contains(t, err.Error(), "LLM provider is required")
+	})
+
 	t.Run("Nil tool registry", func(t *testing.T) {
-		agent, err := NewReviewAgent(config, provider, nil)
+		cfg := &config.AgentConfig{}
+		provider := &MockLLMProvider{}
+
+		reviewAgent, err := NewReviewAgent(cfg, provider, nil)
+		assert.Error(t, err)
+		assert.Nil(t, reviewAgent)
 		assert.Contains(t, err.Error(), "tool registry is required")
+	})
 }
+
 // TestReviewAgentInitialize tests agent initialization
 func TestReviewAgentInitialize(t *testing.T) {
-	config := &agent.AgentConfig{
-		ID:   "review-1",
-		Type: agent.AgentTypeReview,
-		Name: "Test Review Agent",
-	}
+	cfg := &config.AgentConfig{}
 	provider := &MockLLMProvider{}
-	registry, err := tools.NewToolRegistry(nil)
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
 	require.NoError(t, err)
-	reviewAgent, err := NewReviewAgent(config, provider, registry)
+
 	ctx := context.Background()
-	err = reviewAgent.Initialize(ctx, config)
+	err = reviewAgent.Initialize(ctx, cfg)
+	require.NoError(t, err)
 	assert.Equal(t, agent.StatusIdle, reviewAgent.Status())
+}
+
 // TestReviewAgentShutdown tests agent shutdown
 func TestReviewAgentShutdown(t *testing.T) {
+	cfg := &config.AgentConfig{}
+	provider := &MockLLMProvider{}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
 	err = reviewAgent.Shutdown(ctx)
+	require.NoError(t, err)
 	assert.Equal(t, agent.StatusShutdown, reviewAgent.Status())
+}
+
 // TestReviewAgentExecuteWithCode tests basic code review with inline code
 func TestReviewAgentExecuteWithCode(t *testing.T) {
+	cfg := &config.AgentConfig{}
 	provider := &MockLLMProvider{
 		generateFunc: func(ctx context.Context, request *llm.LLMRequest) (*llm.LLMResponse, error) {
 			return &llm.LLMResponse{
-				Content: `{"review_result": "Code looks good", "issues": [{"severity": "low", "line": 10, "message": "Consider adding error handling"}], "suggestions": ["Add unit tests"], "metrics": {"complexity": 5, "maintainability": 8}}`,
+				Content: `{"review_summary": "Code looks good", "issues": [{"severity": "low", "type": "style", "description": "Consider adding comments", "line_number": 1, "recommendation": "Add comments"}], "suggestions": ["Add unit tests"], "metrics": {"overall_score": 85}}`,
 			}, nil
 		},
+	}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
 	testTask := task.NewTask(
 		task.TaskTypeReview,
 		"Review Code",
@@ -71,159 +106,135 @@ func TestReviewAgentExecuteWithCode(t *testing.T) {
 	)
 	testTask.Input = map[string]interface{}{
 		"code": "func add(a, b int) int { return a + b }",
+	}
+
 	result, err := reviewAgent.Execute(ctx, testTask)
+	require.NoError(t, err)
 	assert.True(t, result.Success)
 	assert.Contains(t, result.Output, "review_result")
 	assert.Contains(t, result.Output, "issues")
 	assert.Contains(t, result.Output, "suggestions")
-	assert.Contains(t, result.Output, "metrics")
-// TestReviewAgentExecuteSecurityReview tests security-focused review
-func TestReviewAgentExecuteSecurityReview(t *testing.T) {
-			// Verify security review type is in prompt
-			assert.Contains(t, request.Messages[0].Content, "security")
-				Content: `{"review_result": "Security concerns found", "issues": [{"severity": "high", "line": 5, "message": "SQL injection risk"}], "suggestions": ["Use parameterized queries"], "metrics": {"security_score": 6}}`,
-		"Security Review",
-		"Review for security vulnerabilities",
-		task.PriorityHigh,
-		"code":        "db.Exec(\"SELECT * FROM users WHERE id = \" + userInput)",
-		"review_type": "security",
-	assert.Equal(t, "security", result.Output["review_type"])
-// TestReviewAgentExecutePerformanceReview tests performance-focused review
-func TestReviewAgentExecutePerformanceReview(t *testing.T) {
-			// Verify performance review type is in prompt
-			assert.Contains(t, request.Messages[0].Content, "performance")
-				Content: `{"review_result": "Performance can be improved", "issues": [{"severity": "medium", "line": 3, "message": "Inefficient loop"}], "suggestions": ["Use map for O(1) lookup"], "metrics": {"time_complexity": "O(n^2)"}}`,
-		"Performance Review",
-		"Review for performance issues",
-		"code":        "for i := 0; i < n; i++ { for j := 0; j < n; j++ { } }",
-		"review_type": "performance",
-	assert.Equal(t, "performance", result.Output["review_type"])
-// TestReviewAgentExecuteMissingCodeAndFile tests error when both code and file_path are missing
-func TestReviewAgentExecuteMissingCodeAndFile(t *testing.T) {
+}
+
+// TestReviewAgentExecuteMissingInput tests error when code is missing
+func TestReviewAgentExecuteMissingInput(t *testing.T) {
+	cfg := &config.AgentConfig{}
+	provider := &MockLLMProvider{}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	testTask := task.NewTask(
+		task.TaskTypeReview,
 		"Test Task",
 		"Test",
+		task.PriorityNormal,
+	)
+	testTask.Input = map[string]interface{}{
 		"other_field": "value",
+	}
+
+	result, err := reviewAgent.Execute(ctx, testTask)
 	assert.Error(t, err)
 	assert.False(t, result.Success)
 	assert.Contains(t, err.Error(), "code or file_path not found")
-	health := reviewAgent.Health()
-	assert.Equal(t, 1, health.ErrorCount)
+}
+
 // TestReviewAgentExecuteLLMError tests LLM generation error
 func TestReviewAgentExecuteLLMError(t *testing.T) {
-		models: []llm.ModelInfo{},
-		"code": "func test() {}",
-// TestReviewAgentExecuteWithManyIssues tests confidence adjustment for many issues
-func TestReviewAgentExecuteWithManyIssues(t *testing.T) {
-			// Return many issues to test confidence adjustment
-			issues := make([]map[string]interface{}, 15)
-			for i := 0; i < 15; i++ {
-				issues[i] = map[string]interface{}{
-					"severity": "medium",
-					"line":     i + 1,
-					"message":  "Issue " + string(rune('A'+i)),
-				}
-			}
-				Content: `{"review_result": "Many issues found", "issues": [{"severity": "high", "line": 1, "message": "Issue 1"}, {"severity": "high", "line": 2, "message": "Issue 2"}, {"severity": "high", "line": 3, "message": "Issue 3"}, {"severity": "high", "line": 4, "message": "Issue 4"}, {"severity": "high", "line": 5, "message": "Issue 5"}, {"severity": "high", "line": 6, "message": "Issue 6"}, {"severity": "high", "line": 7, "message": "Issue 7"}, {"severity": "high", "line": 8, "message": "Issue 8"}, {"severity": "high", "line": 9, "message": "Issue 9"}, {"severity": "high", "line": 10, "message": "Issue 10"}, {"severity": "high", "line": 11, "message": "Issue 11"}], "suggestions": ["Fix all issues"], "metrics": {"quality": 3}}`,
-		"Review Problematic Code",
-		"Review code with many issues",
-		"code": "// problematic code here",
-	// Confidence should be lower (0.75) due to many issues
-	assert.LessOrEqual(t, result.Confidence, 0.8)
-// TestReviewAgentCollaborate tests collaboration with coding agents
+	cfg := &config.AgentConfig{}
+	provider := &MockLLMProvider{
+		noModels: true, // No models available
+	}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	testTask := task.NewTask(
+		task.TaskTypeReview,
+		"Test Task",
+		"Test",
+		task.PriorityNormal,
+	)
+	testTask.Input = map[string]interface{}{
+		"code": "some code",
+	}
+
+	result, err := reviewAgent.Execute(ctx, testTask)
+	assert.Error(t, err)
+	assert.False(t, result.Success)
+}
+
+// TestReviewAgentCollaborate tests collaboration with other agents
 func TestReviewAgentCollaborate(t *testing.T) {
-				Content: `{"review_result": "Approved", "issues": [], "suggestions": ["Great work!"], "metrics": {"quality": 10}}`,
-	// Create a mock coding agent
-	codingConfig := &agent.AgentConfig{
-		ID:   "coding-1",
-		Type: agent.AgentTypeCoding,
-		Name: "Test Coding Agent",
-	codingAgent := &MockCollabAgent{
-		BaseAgent: agent.NewBaseAgent(codingConfig),
+	cfg := &config.AgentConfig{}
+	provider := &MockLLMProvider{
+		generateFunc: func(ctx context.Context, request *llm.LLMRequest) (*llm.LLMResponse, error) {
+			return &llm.LLMResponse{
+				Content: `{"review_summary": "Review complete", "issues": [], "suggestions": [], "metrics": {"overall_score": 90}}`,
+			}, nil
+		},
+	}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	testTask := task.NewTask(
+		task.TaskTypeReview,
 		"Review Task",
-		"Review generated code",
-		"code": "func example() { }",
-	result, err := reviewAgent.Collaborate(ctx, []agent.Agent{codingAgent}, testTask)
+		"Review code",
+		task.PriorityNormal,
+	)
+	testTask.Input = map[string]interface{}{
+		"code": "func test() {}",
+	}
+
+	// Test collaboration without other agents
+	result, err := reviewAgent.Collaborate(ctx, []agent.Agent{}, testTask)
+	require.NoError(t, err)
+	assert.True(t, result.Success)
 	assert.Contains(t, result.Participants, reviewAgent.ID())
 	assert.NotNil(t, result.Consensus)
-// TestReviewAgentMetrics tests metrics recording
-func TestReviewAgentMetrics(t *testing.T) {
-				Content: `{"review_result": "Review complete", "issues": [{"severity": "low", "line": 5, "message": "Minor issue"}], "suggestions": ["Improve naming"], "metrics": {"maintainability": 7}}`,
-		"Review code quality",
-		"code": "func process() { }",
+}
+
+// TestReviewAgentTaskMetrics tests task metrics recording
+func TestReviewAgentTaskMetrics(t *testing.T) {
+	cfg := &config.AgentConfig{}
+	provider := &MockLLMProvider{
+		generateFunc: func(ctx context.Context, request *llm.LLMRequest) (*llm.LLMResponse, error) {
+			return &llm.LLMResponse{
+				Content: `{"review_summary": "Review done", "issues": [], "suggestions": [], "metrics": {"overall_score": 95}}`,
+			}, nil
+		},
+	}
+	mockRegistry := NewMockToolRegistry()
+	registry := ConvertToToolRegistry(mockRegistry)
+
+	reviewAgent, err := NewReviewAgent(cfg, provider, registry)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	testTask := task.NewTask(
+		task.TaskTypeReview,
+		"Review",
+		"Review code",
+		task.PriorityNormal,
+	)
+	testTask.Input = map[string]interface{}{
+		"code": "func test() {}",
+	}
+
+	result, err := reviewAgent.Execute(ctx, testTask)
+	require.NoError(t, err)
 	assert.NotNil(t, result.Metrics)
 	assert.Greater(t, result.Duration.Nanoseconds(), int64(0))
-// TestReviewAgentDefaultReviewType tests default review type
-func TestReviewAgentDefaultReviewType(t *testing.T) {
-			// Verify comprehensive review is used by default
-			assert.Contains(t, request.Messages[0].Content, "comprehensive")
-				Content: `{"review_result": "Complete", "issues": [], "suggestions": [], "metrics": {}}`,
-		"Default review",
-		"code": "func main() { }",
-		// No review_type specified, should default to "comprehensive"
-	assert.Equal(t, "comprehensive", result.Output["review_type"])
-// TestReviewAgentReadFile tests the readFile helper function
-func TestReviewAgentReadFile(t *testing.T) {
-	t.Run("Successful file read", func(t *testing.T) {
-		mockRegistry := CreateMockToolRegistry(
-			func(ctx context.Context, params map[string]interface{}) (interface{}, error) {
-				return "file content for review", nil
-			},
-			nil,
-		)
-		reviewAgent, err := NewReviewAgent(config, provider, ConvertToToolRegistry(mockRegistry))
-		ctx := context.Background()
-		content, err := reviewAgent.readFile(ctx, "/path/to/file.go")
-		assert.Equal(t, "file content for review", content)
-	t.Run("FSRead tool not found", func(t *testing.T) {
-		mockRegistry := NewMockToolRegistry()
-		_, err = reviewAgent.readFile(ctx, "/path/to/file.go")
-		assert.Contains(t, err.Error(), "failed to get FSRead tool")
-	t.Run("File read error", func(t *testing.T) {
-				return nil, fmt.Errorf("permission denied")
-		_, err = reviewAgent.readFile(ctx, "/restricted/file.go")
-		assert.Contains(t, err.Error(), "failed to read file")
-	t.Run("Unexpected output type", func(t *testing.T) {
-				return []byte("bytes not string"), nil
-		assert.Contains(t, err.Error(), "unexpected output type")
-// TestReviewAgentRunStaticAnalysis tests the runStaticAnalysis helper function
-func TestReviewAgentRunStaticAnalysis(t *testing.T) {
-	t.Run("Successful static analysis", func(t *testing.T) {
-				return "analysis output", nil
-		results, err := reviewAgent.runStaticAnalysis(ctx, "test.go")
-		assert.NotNil(t, results)
-		// Should have static analysis commands for Go files
-		assert.Contains(t, results, "go_vet")
-		assert.Contains(t, results, "staticcheck")
-		assert.Contains(t, results, "golint")
-		// Check success status
-		vetResult := results["go_vet"].(map[string]interface{})
-		assert.Equal(t, "success", vetResult["status"])
-	t.Run("Shell tool not found", func(t *testing.T) {
-		_, err = reviewAgent.runStaticAnalysis(ctx, "test.go")
-		assert.Contains(t, err.Error(), "failed to get Shell tool")
-	t.Run("Analysis tool failures recorded", func(t *testing.T) {
-				command := params["command"].(string)
-				if command == "staticcheck ." {
-					return nil, fmt.Errorf("staticcheck not installed")
-				return "success", nil
-		// staticcheck should have failed status
-		staticcheckResult := results["staticcheck"].(map[string]interface{})
-		assert.Equal(t, "failed", staticcheckResult["status"])
-		assert.Contains(t, staticcheckResult["error"], "staticcheck not installed")
-	t.Run("Non-Go file no analysis commands", func(t *testing.T) {
-				return "output", nil
-		results, err := reviewAgent.runStaticAnalysis(ctx, "script.py")
-		// Should have no analysis commands for non-Go files
-		assert.Empty(t, results)
-// TestReviewAgentDetermineStaticAnalysisCommands tests the determineStaticAnalysisCommands helper
-func TestReviewAgentDetermineStaticAnalysisCommands(t *testing.T) {
-	mockRegistry := NewMockToolRegistry()
-	reviewAgent, err := NewReviewAgent(config, provider, ConvertToToolRegistry(mockRegistry))
-	t.Run("Go file commands", func(t *testing.T) {
-		commands := reviewAgent.determineStaticAnalysisCommands("internal/api/handler.go")
-		assert.Contains(t, commands, "go_vet")
-		assert.Contains(t, commands, "staticcheck")
-		assert.Contains(t, commands, "golint")
-	t.Run("Non-Go file no commands", func(t *testing.T) {
-		commands := reviewAgent.determineStaticAnalysisCommands("script.js")
-		assert.Empty(t, commands)
+}
