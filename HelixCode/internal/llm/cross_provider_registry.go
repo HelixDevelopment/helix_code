@@ -240,7 +240,7 @@ func (r *CrossProviderRegistry) GetDownloadedModels() []*DownloadedModel {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var models []*DownloadedModel
+	models := make([]*DownloadedModel, 0)
 	for _, model := range r.downloadedModels {
 		models = append(models, model)
 	}

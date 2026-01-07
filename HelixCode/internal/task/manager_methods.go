@@ -31,10 +31,10 @@ func (tm *TaskManager) SplitTask(parentTaskID uuid.UUID, strategy SplitStrategy)
 		return nil, fmt.Errorf("failed to generate subtasks: %v", err)
 	}
 
-	// Create subtasks
+	// Create subtasks using the unsafe version since we already hold the lock
 	var createdSubtasks []*Task
 	for _, subtaskData := range subtasks {
-		subtask, err := tm.CreateTask(
+		subtask, err := tm.createTaskUnsafe(
 			parentTask.Type,
 			subtaskData.Data,
 			parentTask.Priority,

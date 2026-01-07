@@ -96,12 +96,13 @@ func TestAssignTask(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a worker manually in the tasks map
+	// Note: TaskTypeBuilding requires ["compilation", "build_tools"] capabilities
 	workerID := uuid.New()
 	worker := &Worker{
 		ID:                 workerID,
 		Hostname:           "test-worker",
 		DisplayName:        "Test Worker",
-		Capabilities:       []string{"building"},
+		Capabilities:       []string{"compilation", "build_tools"},
 		Status:             "active",
 		HealthStatus:       "healthy",
 		MaxConcurrentTasks: 5,
@@ -397,7 +398,8 @@ func TestCanWorkerHandleTask(t *testing.T) {
 		{
 			name: "capable worker",
 			worker: &Worker{
-				Capabilities:       []string{"planning", "building", "testing"},
+				// TaskTypePlanning requires "general_computation" (default case)
+				Capabilities:       []string{"general_computation"},
 				MaxConcurrentTasks: 5,
 				CurrentTasksCount:  2,
 			},
@@ -412,6 +414,7 @@ func TestCanWorkerHandleTask(t *testing.T) {
 		{
 			name: "incapable worker - missing capability",
 			worker: &Worker{
+				// Worker lacks "general_computation" required for TaskTypePlanning
 				Capabilities:       []string{"testing"},
 				MaxConcurrentTasks: 5,
 				CurrentTasksCount:  2,

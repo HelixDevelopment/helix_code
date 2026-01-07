@@ -192,6 +192,13 @@ func (tm *TaskManager) CreateTask(taskType TaskType, data map[string]interface{}
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
 
+	return tm.createTaskUnsafe(taskType, data, priority, criticality, dependencies)
+}
+
+// createTaskUnsafe creates a new task without acquiring the lock.
+// Caller must hold tm.mu.Lock() before calling this method.
+func (tm *TaskManager) createTaskUnsafe(taskType TaskType, data map[string]interface{},
+	priority TaskPriority, criticality TaskCriticality, dependencies []uuid.UUID) (*Task, error) {
 	task := &Task{
 		ID:           uuid.New(),
 		Type:         taskType,

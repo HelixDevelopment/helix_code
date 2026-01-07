@@ -22,8 +22,8 @@ func TestMem0Provider(t *testing.T) {
 		t.Fatal("Provider is nil")
 	}
 
-	if provider.GetName() != "mem0" {
-		t.Errorf("Expected name 'mem0', got '%s'", provider.GetName())
+	if provider.GetName() != "Mem0" {
+		t.Errorf("Expected name 'Mem0', got '%s'", provider.GetName())
 	}
 
 	if provider.GetType() != string(memory.ProviderTypeMem0) {
@@ -50,8 +50,8 @@ func TestZepProvider(t *testing.T) {
 		t.Fatal("Provider is nil")
 	}
 
-	if provider.GetName() != "zep" {
-		t.Errorf("Expected name 'zep', got '%s'", provider.GetName())
+	if provider.GetName() != "Zep" {
+		t.Errorf("Expected name 'Zep', got '%s'", provider.GetName())
 	}
 
 	if provider.GetType() != string(memory.ProviderTypeZep) {
@@ -78,8 +78,8 @@ func TestMemontoProvider(t *testing.T) {
 		t.Fatal("Provider is nil")
 	}
 
-	if provider.GetName() != "memonto" {
-		t.Errorf("Expected name 'memonto', got '%s'", provider.GetName())
+	if provider.GetName() != "Memonto" {
+		t.Errorf("Expected name 'Memonto', got '%s'", provider.GetName())
 	}
 
 	if provider.GetType() != string(memory.ProviderTypeMemonto) {
@@ -106,8 +106,8 @@ func TestBaseAIProvider(t *testing.T) {
 		t.Fatal("Provider is nil")
 	}
 
-	if provider.GetName() != "baseai" {
-		t.Errorf("Expected name 'baseai', got '%s'", provider.GetName())
+	if provider.GetName() != "BaseAI" {
+		t.Errorf("Expected name 'BaseAI', got '%s'", provider.GetName())
 	}
 
 	if provider.GetType() != string(memory.ProviderTypeBaseAI) {

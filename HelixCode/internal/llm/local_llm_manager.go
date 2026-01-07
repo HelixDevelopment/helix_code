@@ -15,13 +15,14 @@ import (
 
 // LocalLLMManager manages all local LLM providers
 type LocalLLMManager struct {
-	baseDir       string
-	binaryDir     string
-	configDir     string
-	dataDir       string
-	providers     map[string]*LocalLLMProvider
-	httpClient    *http.Client
-	isInitialized bool
+	baseDir             string
+	binaryDir           string
+	configDir           string
+	dataDir             string
+	providers           map[string]*LocalLLMProvider
+	httpClient          *http.Client
+	isInitialized       bool
+	skipProviderInstall bool // Skip provider installation (for testing)
 }
 
 // LocalLLMProvider represents a local LLM provider instance
@@ -269,9 +270,11 @@ func (m *LocalLLMManager) Initialize(ctx context.Context) error {
 
 		m.providers[name] = provider
 
-		// Install provider
-		if err := m.installProvider(ctx, provider); err != nil {
-			log.Printf("⚠️  Failed to install %s: %v", name, err)
+		// Install provider (skip if in test mode)
+		if !m.skipProviderInstall {
+			if err := m.installProvider(ctx, provider); err != nil {
+				log.Printf("⚠️  Failed to install %s: %v", name, err)
+			}
 		}
 	}
 
@@ -284,6 +287,11 @@ func (m *LocalLLMManager) Initialize(ctx context.Context) error {
 // GetBaseDir returns the base directory for the local LLM manager
 func (m *LocalLLMManager) GetBaseDir() string {
 	return m.baseDir
+}
+
+// SetSkipProviderInstall sets whether to skip provider installation (for testing)
+func (m *LocalLLMManager) SetSkipProviderInstall(skip bool) {
+	m.skipProviderInstall = skip
 }
 
 // createDirectories creates necessary directories
@@ -604,7 +612,7 @@ func (m *LocalLLMManager) GetProviderStatus(ctx context.Context) map[string]*Loc
 
 // GetRunningProviders returns a list of running provider endpoints
 func (m *LocalLLMManager) GetRunningProviders(ctx context.Context) []string {
-	var running []string
+	running := make([]string, 0)
 	status := m.GetProviderStatus(ctx)
 
 	for _, provider := range status {
