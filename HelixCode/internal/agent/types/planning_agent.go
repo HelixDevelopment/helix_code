@@ -31,7 +31,7 @@ func NewPlanningAgent(cfg *config.AgentConfig, provider llm.Provider) (*Planning
 }
 
 // Initialize initializes the planning agent
-func (a *PlanningAgent) Initialize(ctx context.Context, cfg *config.AgentConfig) error {
+func (a *PlanningAgent) Initialize(ctx context.Context, cfg *agent.AgentConfig) error {
 	a.SetStatus(agent.StatusIdle)
 	return nil
 }

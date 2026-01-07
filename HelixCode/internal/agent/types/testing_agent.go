@@ -38,7 +38,7 @@ func NewTestingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistr
 }
 
 // Initialize initializes the testing agent
-func (a *TestingAgent) Initialize(ctx context.Context, cfg *config.AgentConfig) error {
+func (a *TestingAgent) Initialize(ctx context.Context, cfg *agent.AgentConfig) error {
 	a.SetStatus(agent.StatusIdle)
 	return nil
 }

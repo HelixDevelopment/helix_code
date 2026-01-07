@@ -60,7 +60,7 @@ func TestTestingAgentInitialize(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	err = testingAgent.Initialize(ctx, cfg)
+	err = testingAgent.Initialize(ctx, nil)
 	require.NoError(t, err)
 	assert.Equal(t, agent.StatusIdle, testingAgent.Status())
 }

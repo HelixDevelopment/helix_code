@@ -37,7 +37,7 @@ func NewCodingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistry
 }
 
 // Initialize initializes the coding agent
-func (a *CodingAgent) Initialize(ctx context.Context, cfg *config.AgentConfig) error {
+func (a *CodingAgent) Initialize(ctx context.Context, cfg *agent.AgentConfig) error {
 	a.SetStatus(agent.StatusIdle)
 	return nil
 }

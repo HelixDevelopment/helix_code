@@ -38,7 +38,7 @@ func NewDebuggingAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegis
 }
 
 // Initialize initializes the debugging agent
-func (a *DebuggingAgent) Initialize(ctx context.Context, cfg *config.AgentConfig) error {
+func (a *DebuggingAgent) Initialize(ctx context.Context, cfg *agent.AgentConfig) error {
 	a.SetStatus(agent.StatusIdle)
 	return nil
 }

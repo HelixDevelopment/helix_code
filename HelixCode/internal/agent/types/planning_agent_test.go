@@ -44,7 +44,7 @@ func TestPlanningAgentInitialize(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	err = planningAgent.Initialize(ctx, cfg)
+	err = planningAgent.Initialize(ctx, nil)
 	require.NoError(t, err)
 	assert.Equal(t, agent.StatusIdle, planningAgent.Status())
 }

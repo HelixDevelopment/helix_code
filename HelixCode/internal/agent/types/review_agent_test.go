@@ -60,7 +60,7 @@ func TestReviewAgentInitialize(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	err = reviewAgent.Initialize(ctx, cfg)
+	err = reviewAgent.Initialize(ctx, nil)
 	require.NoError(t, err)
 	assert.Equal(t, agent.StatusIdle, reviewAgent.Status())
 }

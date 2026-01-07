@@ -10,6 +10,7 @@ import (
 	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/agent/task"
 	"dev.helix.code/internal/agent/types"
+	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/logging"
 )
@@ -243,61 +244,77 @@ func main() {
 	ctx := context.Background()
 
 	// Planning Agent
-	planningAgent, err := types.NewPlanningAgent(&agent.AgentConfig{
-		ID:           "planning-001",
-		Type:         agent.AgentTypePlanning,
-		Name:         "Strategic Planner",
-		Capabilities: []agent.Capability{agent.CapabilityPlanning, agent.CapabilityCodeAnalysis},
+	planningAgent, err := types.NewPlanningAgent(&config.AgentConfig{
+		MaxConcurrency: 1,
+		Timeout:        30,
+		RetryCount:     3,
 	}, mockProvider)
 	if err != nil {
 		log.Fatalf("Failed to create planning agent: %v", err)
 	}
-	if err := planningAgent.Initialize(ctx, nil); err != nil {
+	if err := planningAgent.Initialize(ctx, &agent.AgentConfig{
+		ID:           "planning-001",
+		Type:         agent.AgentTypePlanning,
+		Name:         "Strategic Planner",
+		Capabilities: []agent.Capability{agent.CapabilityPlanning, agent.CapabilityCodeAnalysis},
+	}); err != nil {
 		log.Fatalf("Failed to initialize planning agent: %v", err)
 	}
 	registry.Register(planningAgent)
 
 	// Coding Agent
-	codingAgent, err := types.NewCodingAgent(&agent.AgentConfig{
-		ID:           "coding-001",
-		Type:         agent.AgentTypeCoding,
-		Name:         "Code Architect",
-		Capabilities: []agent.Capability{agent.CapabilityCodeGeneration, agent.CapabilityCodeAnalysis},
+	codingAgent, err := types.NewCodingAgent(&config.AgentConfig{
+		MaxConcurrency: 1,
+		Timeout:        30,
+		RetryCount:     3,
 	}, mockProvider, convertedToolRegistry)
 	if err != nil {
 		log.Fatalf("Failed to create coding agent: %v", err)
 	}
-	if err := codingAgent.Initialize(ctx, nil); err != nil {
+	if err := codingAgent.Initialize(ctx, &agent.AgentConfig{
+		ID:           "coding-001",
+		Type:         agent.AgentTypeCoding,
+		Name:         "Code Architect",
+		Capabilities: []agent.Capability{agent.CapabilityCodeGeneration, agent.CapabilityCodeAnalysis},
+	}); err != nil {
 		log.Fatalf("Failed to initialize coding agent: %v", err)
 	}
 	registry.Register(codingAgent)
 
 	// Testing Agent
-	testingAgent, err := types.NewTestingAgent(&agent.AgentConfig{
-		ID:           "testing-001",
-		Type:         agent.AgentTypeTesting,
-		Name:         "Quality Assurance",
-		Capabilities: []agent.Capability{agent.CapabilityTestGeneration, agent.CapabilityTestExecution},
+	testingAgent, err := types.NewTestingAgent(&config.AgentConfig{
+		MaxConcurrency: 1,
+		Timeout:        30,
+		RetryCount:     3,
 	}, mockProvider, convertedToolRegistry)
 	if err != nil {
 		log.Fatalf("Failed to create testing agent: %v", err)
 	}
-	if err := testingAgent.Initialize(ctx, nil); err != nil {
+	if err := testingAgent.Initialize(ctx, &agent.AgentConfig{
+		ID:           "testing-001",
+		Type:         agent.AgentTypeTesting,
+		Name:         "Quality Assurance",
+		Capabilities: []agent.Capability{agent.CapabilityTestGeneration, agent.CapabilityTestExecution},
+	}); err != nil {
 		log.Fatalf("Failed to initialize testing agent: %v", err)
 	}
 	registry.Register(testingAgent)
 
 	// Review Agent
-	reviewAgent, err := types.NewReviewAgent(&agent.AgentConfig{
-		ID:           "review-001",
-		Type:         agent.AgentTypeReview,
-		Name:         "Code Reviewer",
-		Capabilities: []agent.Capability{agent.CapabilityCodeReview, agent.CapabilitySecurityAudit},
+	reviewAgent, err := types.NewReviewAgent(&config.AgentConfig{
+		MaxConcurrency: 1,
+		Timeout:        30,
+		RetryCount:     3,
 	}, mockProvider, convertedToolRegistry)
 	if err != nil {
 		log.Fatalf("Failed to create review agent: %v", err)
 	}
-	if err := reviewAgent.Initialize(ctx, nil); err != nil {
+	if err := reviewAgent.Initialize(ctx, &agent.AgentConfig{
+		ID:           "review-001",
+		Type:         agent.AgentTypeReview,
+		Name:         "Code Reviewer",
+		Capabilities: []agent.Capability{agent.CapabilityCodeReview, agent.CapabilitySecurityAudit},
+	}); err != nil {
 		log.Fatalf("Failed to initialize review agent: %v", err)
 	}
 	registry.Register(reviewAgent)

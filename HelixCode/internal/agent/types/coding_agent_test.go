@@ -114,7 +114,7 @@ func TestCodingAgentInitialize(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	err = codingAgent.Initialize(ctx, cfg)
+	err = codingAgent.Initialize(ctx, nil)
 	require.NoError(t, err)
 	assert.Equal(t, agent.StatusIdle, codingAgent.Status())
 }

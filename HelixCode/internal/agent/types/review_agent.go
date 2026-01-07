@@ -38,7 +38,7 @@ func NewReviewAgent(cfg *config.AgentConfig, provider llm.Provider, toolRegistry
 }
 
 // Initialize initializes the review agent
-func (a *ReviewAgent) Initialize(ctx context.Context, cfg *config.AgentConfig) error {
+func (a *ReviewAgent) Initialize(ctx context.Context, cfg *agent.AgentConfig) error {
 	a.SetStatus(agent.StatusIdle)
 	return nil
 }
