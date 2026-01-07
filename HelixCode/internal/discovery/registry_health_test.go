@@ -365,19 +365,23 @@ func TestPerformHealthChecks_HeartbeatCheck(t *testing.T) {
 	}
 	registry := NewServiceRegistry(config)
 
-	// Register a service with old heartbeat
+	// Register a service (Register sets LastHeartbeat to now)
 	service := ServiceInfo{
-		Name:          "stale-service",
-		Host:          "localhost",
-		Port:          8080,
-		Protocol:      "http",
-		TTL:           10 * time.Second,
-		LastHeartbeat: time.Now().Add(-6 * time.Second), // More than TTL/2
-		Healthy:       true,
+		Name:     "stale-service",
+		Host:     "localhost",
+		Port:     8080,
+		Protocol: "http",
+		TTL:      10 * time.Second,
+		Healthy:  true,
 	}
 
 	err := registry.Register(service)
 	require.NoError(t, err)
+
+	// Set a stale heartbeat directly on the internal service (Register overwrites LastHeartbeat)
+	registry.mu.Lock()
+	registry.services["stale-service"].LastHeartbeat = time.Now().Add(-6 * time.Second) // More than TTL/2
+	registry.mu.Unlock()
 
 	// Perform health checks
 	registry.performHealthChecks()

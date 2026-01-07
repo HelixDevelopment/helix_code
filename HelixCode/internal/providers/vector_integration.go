@@ -222,6 +222,11 @@ func (vi *VectorIntegration) ListVectorIndexes(ctx context.Context) ([]*VectorIn
 
 // GetVectorStats returns statistics about vector storage
 func (vi *VectorIntegration) GetVectorStats(ctx context.Context) (*VectorStats, error) {
+	// Check if manager is initialized
+	if vi.manager == nil {
+		return &VectorStats{}, nil
+	}
+
 	// Get stats from provider manager
 	stats, err := vi.manager.GetStats()
 	if err != nil {

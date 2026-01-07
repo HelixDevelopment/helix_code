@@ -16,6 +16,8 @@ func TestFullServiceLifecycle(t *testing.T) {
 	registry := NewDefaultServiceRegistry()
 	allocator := NewDefaultPortAllocator()
 	config := DefaultDiscoveryClientConfig(registry, allocator)
+	// Only use registry strategy to test registration lifecycle without fallbacks
+	config.PreferredStrategies = []DiscoveryStrategy{StrategyRegistry}
 	client := NewDiscoveryClient(config)
 
 	// Register service with auto port allocation
@@ -497,6 +499,8 @@ func TestPortReallocationAfterDeregister(t *testing.T) {
 	registry := NewDefaultServiceRegistry()
 	allocator := NewDefaultPortAllocator()
 	config := DefaultDiscoveryClientConfig(registry, allocator)
+	// Override strategies to prioritize registry (for testing auto-allocation flow)
+	config.PreferredStrategies = []DiscoveryStrategy{StrategyRegistry, StrategyDefaultPort, StrategyDNS}
 	client := NewDiscoveryClient(config)
 
 	// Register first service with a known service type

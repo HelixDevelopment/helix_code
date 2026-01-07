@@ -235,6 +235,11 @@ func (m *Manager) DeleteProject(ctx context.Context, projectID string) error {
 		return fmt.Errorf("project not found: %s", projectID)
 	}
 
+	// Clear activeProject if we're deleting the active project
+	if m.activeProject != nil && m.activeProject.ID == projectID {
+		m.activeProject = nil
+	}
+
 	delete(m.projects, projectID)
 	return nil
 }

@@ -647,7 +647,8 @@ func (p *OpenAICompatibleProvider) supportsVisionModel(modelName string) bool {
 	modelName = strings.ToLower(modelName)
 	return strings.Contains(modelName, "vision") ||
 		strings.Contains(modelName, "multimodal") ||
-		strings.Contains(modelName, "clip")
+		strings.Contains(modelName, "clip") ||
+		strings.Contains(modelName, "llava")
 }
 
 // readSSELine reads a line from Server-Sent Events stream

@@ -70,27 +70,36 @@ func TestSaveColorScheme(t *testing.T) {
 }
 
 func TestGenerateThemeFiles(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "logo_test")
+	// Create a temp directory structure that mimics the project layout:
+	// baseDir/
+	//   assets/logo/  <- OutputDir
+	//   internal/theme/  <- where Go file will be generated
+	baseDir, err := os.MkdirTemp("", "logo_test")
 	assert.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(baseDir)
 
-	processor := NewLogoProcessor("test.png", tempDir)
+	// Create the expected directory structure
+	outputDir := filepath.Join(baseDir, "assets", "logo")
+	err = os.MkdirAll(outputDir, 0755)
+	assert.NoError(t, err)
 
 	// Create colors directory
-	colorsDir := filepath.Join(tempDir, "colors")
+	colorsDir := filepath.Join(outputDir, "colors")
 	err = os.MkdirAll(colorsDir, 0755)
 	assert.NoError(t, err)
+
+	processor := NewLogoProcessor("test.png", outputDir)
 
 	err = processor.GenerateThemeFiles()
 	assert.NoError(t, err)
 
 	// Check if CSS file was created
-	cssFile := filepath.Join(tempDir, "colors", "helix-theme.css")
+	cssFile := filepath.Join(outputDir, "colors", "helix-theme.css")
 	_, err = os.Stat(cssFile)
 	assert.NoError(t, err)
 
-	// Check if Go file was created
-	goFile := filepath.Join(tempDir, "..", "..", "internal", "theme", "theme.go")
+	// Check if Go file was created (path is relative: ../../internal/theme/theme.go)
+	goFile := filepath.Join(baseDir, "internal", "theme", "theme.go")
 	_, err = os.Stat(goFile)
 	assert.NoError(t, err)
 
