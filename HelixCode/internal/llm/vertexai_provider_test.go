@@ -136,7 +136,7 @@ func TestNewVertexAIProvider(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, provider)
-				assert.Equal(t, "vertexai", provider.GetType())
+				assert.Equal(t, ProviderTypeVertexAI, provider.GetType())
 				assert.Equal(t, "Vertex AI", provider.GetName())
 				assert.NotEmpty(t, provider.projectID)
 			}
@@ -146,7 +146,7 @@ func TestNewVertexAIProvider(t *testing.T) {
 
 func TestVertexAIProvider_GetType(t *testing.T) {
 	provider := createMockVertexAIProvider(t)
-	assert.Equal(t, "vertexai", provider.GetType())
+	assert.Equal(t, ProviderTypeVertexAI, provider.GetType())
 }
 
 func TestVertexAIProvider_GetName(t *testing.T) {
@@ -164,7 +164,7 @@ func TestVertexAIProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "vertexai", model.Provider)
+		assert.Equal(t, ProviderTypeVertexAI, model.Provider)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.NotEmpty(t, model.Description)
 	}

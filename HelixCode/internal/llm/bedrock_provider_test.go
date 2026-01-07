@@ -119,7 +119,7 @@ func TestNewBedrockProvider(t *testing.T) {
 				// May fail without AWS credentials, which is OK for this test
 				if err == nil {
 					assert.NotNil(t, provider)
-					assert.Equal(t, "bedrock", provider.GetType())
+					assert.Equal(t, ProviderTypeBedrock, provider.GetType())
 					assert.Equal(t, "AWS Bedrock", provider.GetName())
 				}
 			}
@@ -129,7 +129,7 @@ func TestNewBedrockProvider(t *testing.T) {
 
 func TestBedrockProvider_GetType(t *testing.T) {
 	provider := &BedrockProvider{}
-	assert.Equal(t, "bedrock", provider.GetType())
+	assert.Equal(t, ProviderTypeBedrock, provider.GetType())
 }
 
 func TestBedrockProvider_GetName(t *testing.T) {
@@ -149,7 +149,7 @@ func TestBedrockProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "bedrock", model.Provider)
+		assert.Equal(t, ProviderTypeBedrock, model.Provider)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.NotEmpty(t, model.Description)
 	}

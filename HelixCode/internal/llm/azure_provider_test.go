@@ -487,7 +487,7 @@ func TestAzureProvider_TypeAndName(t *testing.T) {
 	provider, err := NewAzureProvider(config)
 	require.NoError(t, err)
 
-	assert.Equal(t, "azure", provider.GetType())
+	assert.Equal(t, ProviderTypeAzure, provider.GetType())
 	assert.Equal(t, "Azure OpenAI", provider.GetName())
 }
 
@@ -513,7 +513,7 @@ func TestAzureProvider_ModelsAndCapabilities(t *testing.T) {
 	for _, model := range models {
 		if model.Name == "gpt-4-turbo" {
 			foundGPT4 = true
-			assert.Equal(t, "azure", model.Provider)
+			assert.Equal(t, ProviderTypeAzure, model.Provider)
 			assert.True(t, model.SupportsTools)
 		}
 		if model.Name == "gpt-35-turbo" {

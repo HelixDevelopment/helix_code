@@ -96,7 +96,7 @@ func TestNewGeminiProvider(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, provider)
-				assert.Equal(t, "gemini", provider.GetType())
+				assert.Equal(t, ProviderTypeGemini, provider.GetType())
 				assert.Equal(t, "Gemini", provider.GetName())
 			}
 		})
@@ -111,7 +111,7 @@ func TestGeminiProvider_GetType(t *testing.T) {
 	provider, err := NewGeminiProvider(config)
 	require.NoError(t, err)
 
-	assert.Equal(t, "gemini", provider.GetType())
+	assert.Equal(t, ProviderTypeGemini, provider.GetType())
 }
 
 func TestGeminiProvider_GetName(t *testing.T) {
@@ -140,7 +140,7 @@ func TestGeminiProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "gemini", model.Provider)
+		assert.Equal(t, ProviderTypeGemini, model.Provider)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.NotEmpty(t, model.Description)
 	}

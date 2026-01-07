@@ -80,7 +80,7 @@ func TestNewAnthropicProvider(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, provider)
-				assert.Equal(t, "anthropic", provider.GetType())
+				assert.Equal(t, ProviderTypeAnthropic, provider.GetType())
 				assert.Equal(t, "Anthropic", provider.GetName())
 			}
 		})
@@ -95,7 +95,7 @@ func TestAnthropicProvider_GetType(t *testing.T) {
 	provider, err := NewAnthropicProvider(config)
 	require.NoError(t, err)
 
-	assert.Equal(t, "anthropic", provider.GetType())
+	assert.Equal(t, ProviderTypeAnthropic, provider.GetType())
 }
 
 func TestAnthropicProvider_GetName(t *testing.T) {
@@ -124,7 +124,7 @@ func TestAnthropicProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "anthropic", model.Provider)
+		assert.Equal(t, ProviderTypeAnthropic, model.Provider)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.NotEmpty(t, model.Description)
 	}

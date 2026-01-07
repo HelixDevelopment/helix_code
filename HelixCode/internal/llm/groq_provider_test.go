@@ -81,7 +81,7 @@ func TestNewGroqProvider(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, provider)
-				assert.Equal(t, "groq", provider.GetType())
+				assert.Equal(t, ProviderTypeGroq, provider.GetType())
 				assert.Equal(t, "Groq", provider.GetName())
 				assert.NotNil(t, provider.latencyMetrics)
 			}
@@ -97,7 +97,7 @@ func TestGroqProvider_GetType(t *testing.T) {
 	provider, err := NewGroqProvider(config)
 	require.NoError(t, err)
 
-	assert.Equal(t, "groq", provider.GetType())
+	assert.Equal(t, ProviderTypeGroq, provider.GetType())
 }
 
 func TestGroqProvider_GetName(t *testing.T) {
@@ -127,7 +127,7 @@ func TestGroqProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "groq", model.Provider)
+		assert.Equal(t, ProviderTypeGroq, model.Provider)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.NotEmpty(t, model.Description)
 	}

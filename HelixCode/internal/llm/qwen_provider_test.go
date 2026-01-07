@@ -34,7 +34,8 @@ func TestNewQwenProvider(t *testing.T) {
 				Type:     "qwen",
 				Endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1",
 			},
-			expectError: false, // Now supports OAuth2 fallback
+			expectError: true, // Requires API key or OAuth2 credentials
+			errorMsg:    "failed to get Qwen API key",
 		},
 		{
 			name: "default endpoint",
@@ -57,7 +58,7 @@ func TestNewQwenProvider(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, provider)
-				assert.Equal(t, "qwen", provider.GetType())
+				assert.Equal(t, ProviderTypeQwen, provider.GetType())
 				assert.Equal(t, "Qwen", provider.GetName())
 			}
 		})
@@ -72,7 +73,7 @@ func TestQwenProvider_GetType(t *testing.T) {
 	provider, err := NewQwenProvider(config)
 	require.NoError(t, err)
 
-	assert.Equal(t, "qwen", provider.GetType())
+	assert.Equal(t, ProviderTypeQwen, provider.GetType())
 }
 
 func TestQwenProvider_GetName(t *testing.T) {
@@ -101,7 +102,7 @@ func TestQwenProvider_GetModels(t *testing.T) {
 	modelNames := make(map[string]bool)
 	for _, model := range models {
 		modelNames[model.Name] = true
-		assert.Equal(t, "qwen", model.Provider)
+		assert.Equal(t, ProviderTypeQwen, model.Provider)
 		assert.NotEmpty(t, model.Capabilities)
 		assert.Greater(t, model.ContextSize, 0)
 		assert.Greater(t, model.MaxTokens, 0)
