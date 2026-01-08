@@ -24,7 +24,7 @@ redis:
   enabled: true
 
 auth:
-  jwt_secret: "QBHQ2paeBWWnOgniSQLqh1Dsd+pumKOcUTZbTXB+N0g="
+  jwt_secret: "${HELIX_AUTH_JWT_SECRET}"  # REQUIRED: Set via environment variable - never commit real secrets
   token_expiry: 86400
   session_expiry: 604800
   bcrypt_cost: 12

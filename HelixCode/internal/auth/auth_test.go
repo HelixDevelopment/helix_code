@@ -275,6 +275,109 @@ func TestAuthService_VerifyJWT(t *testing.T) {
 	// This is harder to test without mocking time, so we'll skip for now
 }
 
+func TestAuthService_VerifyJWTWithDB(t *testing.T) {
+	ctx := context.Background()
+	config := DefaultConfig()
+	userID := uuid.New()
+
+	t.Run("valid token returns complete user from DB", func(t *testing.T) {
+		mockRepo := &MockAuthRepository{}
+		service := NewAuthService(config, mockRepo)
+
+		// Create a valid token
+		user := &User{
+			ID:       userID,
+			Username: "testuser",
+			Email:    "test@example.com",
+		}
+		token, err := service.GenerateJWT(user)
+		require.NoError(t, err)
+
+		// Mock DB to return complete user
+		completeUser := &User{
+			ID:          userID,
+			Username:    "testuser",
+			Email:       "test@example.com",
+			DisplayName: "Test User",
+			IsActive:    true,
+			IsVerified:  true,
+			MFAEnabled:  false,
+			LastLogin:   time.Now(),
+			CreatedAt:   time.Now().Add(-24 * time.Hour),
+			UpdatedAt:   time.Now(),
+		}
+		mockRepo.On("GetUserByID", ctx, userID).Return(completeUser, nil)
+
+		// Verify with DB lookup
+		result, err := service.VerifyJWTWithDB(ctx, token)
+		require.NoError(t, err)
+		assert.Equal(t, completeUser.ID, result.ID)
+		assert.Equal(t, completeUser.DisplayName, result.DisplayName)
+		assert.True(t, result.IsActive)
+		assert.True(t, result.IsVerified)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("invalid token returns error", func(t *testing.T) {
+		mockRepo := &MockAuthRepository{}
+		service := NewAuthService(config, mockRepo)
+
+		_, err := service.VerifyJWTWithDB(ctx, "invalid-token")
+		assert.Error(t, err)
+	})
+
+	t.Run("user not found in DB returns error", func(t *testing.T) {
+		mockRepo := &MockAuthRepository{}
+		service := NewAuthService(config, mockRepo)
+
+		// Create a valid token
+		user := &User{
+			ID:       userID,
+			Username: "testuser",
+			Email:    "test@example.com",
+		}
+		token, err := service.GenerateJWT(user)
+		require.NoError(t, err)
+
+		// Mock DB to return not found
+		mockRepo.On("GetUserByID", ctx, userID).Return(nil, ErrUserNotFound)
+
+		// Verify should fail
+		_, err = service.VerifyJWTWithDB(ctx, token)
+		assert.ErrorIs(t, err, ErrUserNotFound)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("inactive user returns error", func(t *testing.T) {
+		mockRepo := &MockAuthRepository{}
+		service := NewAuthService(config, mockRepo)
+
+		// Create a valid token
+		user := &User{
+			ID:       userID,
+			Username: "testuser",
+			Email:    "test@example.com",
+		}
+		token, err := service.GenerateJWT(user)
+		require.NoError(t, err)
+
+		// Mock DB to return inactive user
+		inactiveUser := &User{
+			ID:       userID,
+			Username: "testuser",
+			Email:    "test@example.com",
+			IsActive: false,
+		}
+		mockRepo.On("GetUserByID", ctx, userID).Return(inactiveUser, nil)
+
+		// Verify should fail
+		_, err = service.VerifyJWTWithDB(ctx, token)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "deactivated")
+		mockRepo.AssertExpectations(t)
+	})
+}
+
 func TestAuthService_generateSessionToken(t *testing.T) {
 	service := &AuthService{config: DefaultConfig()}
 

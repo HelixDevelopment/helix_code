@@ -142,10 +142,17 @@ if err != nil {
     // Handle token generation error
 }
 
-// Verify JWT
+// Verify JWT (returns minimal user from claims - fast)
 user, err := service.VerifyJWT(token)
 if err != nil {
     // Handle invalid token
+}
+
+// Verify JWT with database lookup (returns complete user - slower)
+// Use this when you need IsActive, IsVerified, MFAEnabled, DisplayName, etc.
+user, err := service.VerifyJWTWithDB(ctx, token)
+if err != nil {
+    // Handle invalid token or inactive user
 }
 ```
 

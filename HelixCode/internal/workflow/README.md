@@ -5,11 +5,11 @@ The `workflow` package provides workflow execution engine with step dependencies
 ## Overview
 
 This package handles:
-- Workflow definition and execution
+- Pre-built development workflows (planning, building, testing, refactoring)
 - Step dependencies (DAG execution)
 - Step types and actions
-- Workflow templates
-- Execution monitoring
+- LLM-powered analysis and code generation
+- Execution monitoring and metrics
 
 ## Key Types
 
@@ -17,14 +17,14 @@ This package handles:
 
 ```go
 type Workflow struct {
-    ID          string
-    Name        string
-    Description string
-    Steps       []*Step
-    Status      Status
-    CreatedAt   time.Time
-    StartedAt   *time.Time
-    CompletedAt *time.Time
+    ID          string         `json:"id"`
+    Name        string         `json:"name"`
+    Description string         `json:"description"`
+    Mode        string         `json:"mode"`
+    Steps       []Step         `json:"steps"`
+    CreatedAt   time.Time      `json:"created_at"`
+    UpdatedAt   time.Time      `json:"updated_at"`
+    Status      WorkflowStatus `json:"status"`
 }
 ```
 
@@ -32,13 +32,14 @@ type Workflow struct {
 
 ```go
 type Step struct {
-    ID           string
-    Type         StepType
-    Action       Action
-    Dependencies []string
-    Config       map[string]interface{}
-    Status       Status
-    Output       interface{}
+    ID           string     `json:"id"`
+    Name         string     `json:"name"`
+    Description  string     `json:"description"`
+    Type         StepType   `json:"type"`
+    Action       StepAction `json:"action"`
+    Dependencies []string   `json:"dependencies"`
+    Status       StepStatus `json:"status"`
+    Error        string     `json:"error,omitempty"`
 }
 ```
 
@@ -48,107 +49,104 @@ type Step struct {
 type StepType string
 
 const (
-    StepTypeAnalysis    StepType = "analysis"
-    StepTypeGeneration  StepType = "generation"
-    StepTypeExecution   StepType = "execution"
-    StepTypeValidation  StepType = "validation"
-    StepTypeDeployment  StepType = "deployment"
+    StepTypeAnalysis   StepType = "analysis"
+    StepTypeGeneration StepType = "generation"
+    StepTypeExecution  StepType = "execution"
+    StepTypeValidation StepType = "validation"
 )
 ```
 
-### Action
+### StepAction
 
 ```go
-type Action string
+type StepAction string
 
 const (
-    ActionAnalyzeCode     Action = "analyze_code"
-    ActionGenerateCode    Action = "generate_code"
-    ActionRunTests        Action = "run_tests"
-    ActionBuild           Action = "build"
-    ActionDeploy          Action = "deploy"
-    ActionLint            Action = "lint"
-    ActionFormat          Action = "format"
+    StepActionAnalyzeCode    StepAction = "analyze_code"
+    StepActionGenerateCode   StepAction = "generate_code"
+    StepActionExecuteCommand StepAction = "execute_command"
+    StepActionRunTests       StepAction = "run_tests"
+    StepActionLintCode       StepAction = "lint_code"
+    StepActionBuildProject   StepAction = "build_project"
 )
 ```
 
 ## Usage
 
-### Creating a Workflow
+### Creating an Executor
 
 ```go
 import "dev.helix.code/internal/workflow"
 
-engine := workflow.NewEngine(config, taskManager, llmProvider)
+// Basic executor (no LLM)
+executor := workflow.NewExecutor(projectManager)
 
-wf := &workflow.Workflow{
-    Name:        "Build and Test",
-    Description: "Build project and run tests",
-    Steps: []*workflow.Step{
-        {
-            ID:     "lint",
-            Type:   workflow.StepTypeAnalysis,
-            Action: workflow.ActionLint,
-        },
-        {
-            ID:           "build",
-            Type:         workflow.StepTypeExecution,
-            Action:       workflow.ActionBuild,
-            Dependencies: []string{"lint"},
-        },
-        {
-            ID:           "test",
-            Type:         workflow.StepTypeExecution,
-            Action:       workflow.ActionRunTests,
-            Dependencies: []string{"build"},
-        },
-    },
+// Executor with LLM support
+config := &workflow.ExecutorConfig{
+    MaxConcurrentSteps: 4,
+    StepTimeout:        10 * time.Minute,
+    EnableLLM:          true,
+    EnableMetrics:      true,
 }
-
-err := engine.CreateWorkflow(ctx, wf)
+executor := workflow.NewExecutorWithLLM(projectManager, llmProvider, config)
 ```
 
-### Executing a Workflow
+### Pre-built Workflows
+
+The executor provides pre-built workflows for common development tasks:
 
 ```go
-// Start workflow execution
-err := engine.ExecuteWorkflow(ctx, workflowID)
+// Planning workflow - generates architecture and design
+wf, err := executor.ExecutePlanningWorkflow(ctx, projectID)
 
-// Execute with parameters
-params := map[string]interface{}{
-    "target":  "production",
-    "verbose": true,
-}
-err := engine.ExecuteWorkflowWithParams(ctx, workflowID, params)
+// Building workflow - compiles and builds the project
+wf, err := executor.ExecuteBuildingWorkflow(ctx, projectID)
+
+// Testing workflow - runs unit and integration tests
+wf, err := executor.ExecuteTestingWorkflow(ctx, projectID)
+
+// Refactoring workflow - analyzes and improves code quality
+wf, err := executor.ExecuteRefactoringWorkflow(ctx, projectID)
 ```
 
 ### Monitoring Execution
 
 ```go
-// Get workflow status
-status, err := engine.GetWorkflowStatus(ctx, workflowID)
-
-// Get step status
-stepStatus, err := engine.GetStepStatus(ctx, workflowID, stepID)
-
-// Subscribe to updates
-updates := engine.Subscribe(workflowID)
-for update := range updates {
-    log.Info("Step %s: %s", update.StepID, update.Status)
+// Get a specific workflow by ID
+wf, exists := executor.GetWorkflow(workflowID)
+if exists {
+    fmt.Printf("Workflow status: %s\n", wf.Status)
 }
+
+// Get all active workflows
+activeWorkflows := executor.GetActiveWorkflows()
+for _, w := range activeWorkflows {
+    fmt.Printf("Active: %s - %s\n", w.ID, w.Name)
+}
+
+// Cancel a running workflow
+err := executor.CancelWorkflow(workflowID)
+
+// Get execution metrics
+metrics := executor.GetMetrics()
+fmt.Printf("LLM calls: %d, Tokens used: %d\n",
+    metrics.LLMCalls, metrics.LLMTokensUsed)
 ```
 
-### Built-in Workflows
+### LLM Integration
+
+When an LLM provider is configured, the executor uses it for:
+- Code analysis with contextual insights
+- Intelligent code generation
+- Architecture recommendations
+
+Without LLM, the executor falls back to:
+- Static analysis (file structure, dependencies)
+- Template-based code generation
 
 ```go
-// Development workflow
-devWorkflow := workflow.NewDevWorkflow()
-
-// CI/CD workflow
-ciWorkflow := workflow.NewCIWorkflow()
-
-// Deployment workflow
-deployWorkflow := workflow.NewDeployWorkflow()
+// Enable/disable LLM at runtime
+executor.SetLLMProvider(llmProvider)
 ```
 
 ## Step Dependencies
@@ -156,60 +154,28 @@ deployWorkflow := workflow.NewDeployWorkflow()
 Steps form a DAG (Directed Acyclic Graph):
 
 ```
-         ┌─────────┐
-         │  lint   │
-         └────┬────┘
-              │
-         ┌────▼────┐
-         │  build  │
-         └────┬────┘
-              │
-    ┌─────────┴─────────┐
-    │                   │
-┌───▼───┐         ┌─────▼─────┐
-│ test  │         │  analyze  │
-└───┬───┘         └─────┬─────┘
-    │                   │
-    └─────────┬─────────┘
-              │
-         ┌────▼────┐
-         │ deploy  │
-         └─────────┘
+         +-------------+
+         |   analyze   |
+         +------+------+
+                |
+         +------v------+
+         |   generate  |
+         +------+------+
+                |
+    +-----------+-----------+
+    |                       |
++---v---+             +-----v-----+
+| test  |             |   lint    |
++---+---+             +-----+-----+
+    |                       |
+    +-----------+-----------+
+                |
+         +------v------+
+         |   build     |
+         +-------------+
 ```
 
-```go
-steps := []*workflow.Step{
-    {ID: "lint", Type: StepTypeAnalysis, Action: ActionLint},
-    {ID: "build", Type: StepTypeExecution, Action: ActionBuild, Dependencies: []string{"lint"}},
-    {ID: "test", Type: StepTypeExecution, Action: ActionRunTests, Dependencies: []string{"build"}},
-    {ID: "analyze", Type: StepTypeAnalysis, Action: ActionAnalyzeCode, Dependencies: []string{"build"}},
-    {ID: "deploy", Type: StepTypeDeployment, Action: ActionDeploy, Dependencies: []string{"test", "analyze"}},
-}
-```
-
-## Configuration
-
-```yaml
-workflow:
-  parallel_steps: 4
-  step_timeout: 30m
-  retry_failed: true
-  max_retries: 2
-
-  templates:
-    build:
-      steps:
-        - lint
-        - build
-        - test
-
-    deploy:
-      steps:
-        - lint
-        - build
-        - test
-        - deploy
-```
+Steps with satisfied dependencies execute in order. Failed steps halt dependent steps.
 
 ## Workflow Status
 
@@ -217,22 +183,28 @@ workflow:
 |--------|-------------|
 | `pending` | Workflow not started |
 | `running` | Workflow executing |
-| `paused` | Workflow paused |
 | `completed` | All steps completed |
 | `failed` | Step failed |
-| `cancelled` | Workflow cancelled |
 
-## Error Handling
+## Step Status
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Step not started |
+| `running` | Step executing |
+| `completed` | Step finished successfully |
+| `failed` | Step encountered error |
+| `skipped` | Step skipped (dependencies not met) |
+
+## Configuration
 
 ```go
-// Retry failed step
-err := engine.RetryStep(ctx, workflowID, stepID)
-
-// Skip failed step
-err := engine.SkipStep(ctx, workflowID, stepID)
-
-// Cancel workflow
-err := engine.CancelWorkflow(ctx, workflowID)
+type ExecutorConfig struct {
+    MaxConcurrentSteps int           // Default: 4
+    StepTimeout        time.Duration // Default: 10 minutes
+    EnableLLM          bool          // Default: true
+    EnableMetrics      bool          // Default: true
+}
 ```
 
 ## Testing
@@ -243,7 +215,8 @@ go test -v ./internal/workflow/...
 
 ## Notes
 
-- Steps execute in parallel when dependencies allow
-- Failed steps can be retried or skipped
-- Use step outputs as inputs for downstream steps
-- Monitor execution for long-running workflows
+- Workflows execute asynchronously (returns immediately after starting)
+- Steps execute sequentially respecting dependencies
+- LLM analysis provides deeper insights when available
+- Template code generation is a fallback when LLM is unavailable
+- Metrics track workflow and LLM usage statistics

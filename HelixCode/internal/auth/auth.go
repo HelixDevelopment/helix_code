@@ -253,7 +253,8 @@ func (s *AuthService) GenerateJWT(user *User) (string, error) {
 	return token.SignedString([]byte(s.config.JWTSecret))
 }
 
-// VerifyJWT verifies a JWT token and returns the user
+// VerifyJWT verifies a JWT token and returns a minimal user from claims.
+// Use VerifyJWTWithDB for a complete user object from database.
 func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -277,13 +278,56 @@ func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
 			return nil, ErrTokenInvalid
 		}
 
-		// In a real implementation, you would fetch the user from the database
-		// For now, return a minimal user object
+		// Return minimal user object from JWT claims
+		// For complete user data, use VerifyJWTWithDB
 		return &User{
 			ID:       userID,
 			Username: claims["username"].(string),
 			Email:    claims["email"].(string),
 		}, nil
+	}
+
+	return nil, ErrTokenInvalid
+}
+
+// VerifyJWTWithDB verifies a JWT token and fetches the complete user from database.
+// This is slower than VerifyJWT but returns complete user data including
+// IsActive, IsVerified, MFAEnabled, DisplayName, LastLogin, and timestamps.
+func (s *AuthService) VerifyJWTWithDB(ctx context.Context, tokenString string) (*User, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.config.JWTSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userIDStr, ok := claims["user_id"].(string)
+		if !ok {
+			return nil, ErrTokenInvalid
+		}
+
+		userID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			return nil, ErrTokenInvalid
+		}
+
+		// Fetch complete user from database
+		user, err := s.db.GetUserByID(ctx, userID)
+		if err != nil {
+			return nil, ErrUserNotFound
+		}
+
+		// Verify user is still active
+		if !user.IsActive {
+			return nil, errors.New("account is deactivated")
+		}
+
+		return user, nil
 	}
 
 	return nil, ErrTokenInvalid

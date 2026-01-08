@@ -24,7 +24,7 @@ redis:
   enabled: true
 
 auth:
-  jwt_secret: "QBHQ2paeBWWnOgniSQLqh1Dsd+pumKOcUTZbTXB+N0g="
+  jwt_secret: "test-secret-do-not-use-in-production-minimum-32-bytes"  # TEST ONLY - use env var in production
   token_expiry: 86400
   session_expiry: 604800
   bcrypt_cost: 12

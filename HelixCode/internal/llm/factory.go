@@ -62,6 +62,39 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 		return NewVertexAIProvider(config)
 	case ProviderTypeGroq:
 		return NewGroqProvider(config)
+	case ProviderTypeVLLM:
+		return NewVLLMProvider(config)
+	case ProviderTypeLocalAI:
+		return NewLocalAIProvider(config)
+	case ProviderTypeFastChat:
+		return NewFastChatProvider(config)
+	case ProviderTypeTextGen:
+		return NewTextGenProvider(config)
+	case ProviderTypeLMStudio:
+		return NewLMStudioProvider(config)
+	case ProviderTypeJan:
+		return NewJanProvider(config)
+	case ProviderTypeGPT4All:
+		return NewGPT4AllProvider(config)
+	case ProviderTypeTabbyAPI:
+		return NewTabbyAPIProvider(config)
+	case ProviderTypeMLX:
+		return NewMLXProvider(config)
+	case ProviderTypeMistralRS:
+		return NewMistralRSProvider(config)
+	case ProviderTypeKoboldAI:
+		koboldConfig := KoboldAIConfig{
+			BaseURL: config.Endpoint,
+			APIKey:  config.APIKey,
+			Timeout: 120 * time.Second,
+		}
+		if len(config.Models) > 0 {
+			koboldConfig.DefaultModel = config.Models[0]
+		}
+		if val, ok := config.Parameters["timeout"].(float64); ok {
+			koboldConfig.Timeout = time.Duration(val) * time.Second
+		}
+		return NewKoboldAIProvider(koboldConfig)
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", config.Type)
 	}

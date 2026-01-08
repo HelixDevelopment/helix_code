@@ -793,10 +793,22 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 `
 }
 
-// executeCommandStep executes a command execution step
+// executeCommandStep executes a command execution step with security validation
 func (e *Executor) executeCommandStep(ctx context.Context, step *Step, proj *project.Project) (string, error) {
+	command := step.Description
+
+	// Validate command is not empty
+	if strings.TrimSpace(command) == "" {
+		return "", fmt.Errorf("command cannot be empty")
+	}
+
+	// Security check: validate command against dangerous patterns
+	if isDangerousCommand(command) {
+		return "", fmt.Errorf("command blocked: potentially dangerous operation detected")
+	}
+
 	// Execute command in project directory
-	cmd := exec.CommandContext(ctx, "bash", "-c", step.Description)
+	cmd := exec.CommandContext(ctx, "bash", "-c", command)
 	cmd.Dir = proj.Path
 
 	output, err := cmd.CombinedOutput()
@@ -805,6 +817,65 @@ func (e *Executor) executeCommandStep(ctx context.Context, step *Step, proj *pro
 	}
 
 	return string(output), nil
+}
+
+// isDangerousCommand checks if a command contains dangerous patterns
+// This is a security measure to prevent command injection attacks
+func isDangerousCommand(cmd string) bool {
+	// Normalize: trim whitespace and convert to lowercase for comparison
+	normalizedCmd := strings.TrimSpace(strings.ToLower(cmd))
+
+	// Dangerous command prefixes (destructive file/system operations)
+	dangerousPrefixes := []string{
+		"rm ", "rm\t",             // Remove files
+		"dd ",                     // Low-level disk operations
+		"mkfs", "mkfs.",           // Format filesystems
+		"fdisk",                   // Partition editing
+		"parted",                  // Partition manipulation
+		"wipefs",                  // Wipe filesystem signatures
+		"shred",                   // Secure deletion
+		"mv /", "mv ~/",           // Moving from root/home
+		"chmod 777 /",             // Dangerous permissions on root
+		"chown -r",                // Recursive ownership change
+		"kill -9", "killall",      // Process termination
+		"pkill",                   // Process killing
+		"shutdown", "reboot", "poweroff", "halt", // System control
+		"systemctl stop", "systemctl disable",    // Service control
+		"init 0", "init 6",        // Runlevel changes
+		"> /dev/", ">/dev/",       // Direct device writes
+	}
+
+	// Dangerous patterns anywhere in command
+	dangerousPatterns := []string{
+		"rm -rf /", "rm -fr /", "rm -r /", "rm -f /", // Root deletion
+		"rm -rf ~", "rm -fr ~", "rm -r ~",            // Home deletion
+		"rm -rf /*", "rm -rf ~/*",                    // Wildcard deletion
+		"rm -rf .", "rm -rf ..",                      // Current/parent dir deletion
+		"--no-preserve-root",                         // Bypass rm safety
+		"| sh", "| bash", "| zsh",                   // Piped shell execution
+		"|sh", "|bash", "|zsh",                      // No space variant
+		"`rm", "$(rm",                               // Command substitution with rm
+		"; rm", "&& rm", "|| rm",                    // Chained rm commands
+		"eval ", "exec ",                            // Dynamic execution
+		"/dev/sda", "/dev/nvme", "/dev/hd",          // Raw disk access
+		":(){ :|:& };:",                             // Fork bomb
+	}
+
+	// Check prefixes (command starts with dangerous prefix)
+	for _, prefix := range dangerousPrefixes {
+		if strings.HasPrefix(normalizedCmd, prefix) {
+			return true
+		}
+	}
+
+	// Check patterns (dangerous pattern anywhere in command)
+	for _, pattern := range dangerousPatterns {
+		if strings.Contains(normalizedCmd, pattern) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // executeTestStep executes a test execution step
