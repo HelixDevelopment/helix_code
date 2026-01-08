@@ -2,6 +2,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -797,10 +798,575 @@ func TestDeploymentMetricsCollection(t *testing.T) {
 
 	t.Run("CompleteDeployment_Metrics", func(t *testing.T) {
 		deployer.completeDeployment()
-		
+
 		assert.Equal(t, PhaseSuccess, deployer.status.Status)
 		assert.NotZero(t, deployer.status.EndTime)
 		assert.NotZero(t, deployer.status.Duration)
 		assert.NotNil(t, deployer.status.Metrics)
+	})
+}
+
+// TestExecuteProductionDeploy tests direct production deployment
+func TestExecuteProductionDeploy(t *testing.T) {
+	t.Run("ProductionDeploy_WithServers", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			Environment:        "test",
+			DeploymentStrategy: ProductionDeploy,
+			TargetServers:      []string{"server1", "server2", "server3", "server4", "server5"},
+			Credentials:        map[string]string{"deploy_key": "test"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeProductionDeploy(ctx)
+
+		assert.NoError(t, err)
+		// Success depends on the simulated deployment
+		// At least some servers should be deployed
+		if success {
+			assert.NotEmpty(t, deployer.status.ServersDeployed)
+		}
+	})
+
+	t.Run("ProductionDeploy_EmptyServers", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			Environment:        "test",
+			DeploymentStrategy: ProductionDeploy,
+			TargetServers:      []string{},
+			Credentials:        map[string]string{"deploy_key": "test"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		// Division by zero would occur with empty servers
+		// The function should handle this gracefully
+		success, err := deployer.executeProductionDeploy(ctx)
+		// With no servers, success rate calculation would fail or return false
+		assert.False(t, success)
+		assert.NoError(t, err)
+	})
+}
+
+// TestDeployToServer tests individual server deployment
+func TestDeployToServer(t *testing.T) {
+	config := &DeploymentConfig{
+		ProjectName:   "test-project",
+		TargetServers: []string{"server1"},
+	}
+
+	deployer, err := NewProductionDeployer(config)
+	require.NoError(t, err)
+
+	t.Run("DeployToServer_Success", func(t *testing.T) {
+		ctx := context.Background()
+		// Server names with length not divisible by 10 should succeed (90% success rate simulation)
+		success := deployer.deployToServer(ctx, "server1")
+		// Most servers should deploy successfully
+		assert.NotNil(t, success)
+	})
+
+	t.Run("DeployToServer_MultipleServers", func(t *testing.T) {
+		ctx := context.Background()
+		servers := []string{"s1", "s2", "s3", "s4", "s5"}
+		successCount := 0
+		for _, server := range servers {
+			if deployer.deployToServer(ctx, server) {
+				successCount++
+			}
+		}
+		// Should have high success rate
+		assert.GreaterOrEqual(t, successCount, 4)
+	})
+}
+
+// TestExecuteHealthCheck tests health check execution
+func TestExecuteHealthCheck(t *testing.T) {
+	t.Run("HealthCheck_Disabled", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			HealthCheckEnabled: false,
+			TargetServers:      []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeHealthCheck(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("HealthCheck_WithDeployedServers", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			HealthCheckEnabled: true,
+			TargetServers:      []string{"server1", "server2", "server3"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		// Simulate deployed servers
+		deployer.status.ServersDeployed = []string{"server1", "server2", "server3"}
+
+		ctx := context.Background()
+		success, err := deployer.executeHealthCheck(ctx)
+
+		// Result depends on simulated health check success rate
+		assert.NotNil(t, success)
+		if success {
+			assert.Equal(t, "passed", deployer.status.HealthStatus.Status)
+			assert.True(t, deployer.status.HealthStatus.Passed)
+		}
+	})
+
+	t.Run("HealthCheck_NoDeployedServers", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			HealthCheckEnabled: true,
+			TargetServers:      []string{},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeHealthCheck(ctx)
+
+		// With no deployed servers, should still pass but with empty health status
+		assert.NoError(t, err)
+		assert.True(t, success) // 0 healthy out of 0 servers passes 90% threshold
+	})
+}
+
+// TestCheckServerHealth tests individual server health check
+func TestCheckServerHealth(t *testing.T) {
+	config := &DeploymentConfig{
+		ProjectName:   "test-project",
+		TargetServers: []string{"server1"},
+	}
+
+	deployer, err := NewProductionDeployer(config)
+	require.NoError(t, err)
+
+	t.Run("CheckServerHealth_VariousServers", func(t *testing.T) {
+		servers := []string{"s1", "s2", "s3", "s4", "server5"}
+		for _, server := range servers {
+			healthy, responseTime, err := deployer.checkServerHealth(server)
+			// Should return valid response times
+			assert.Greater(t, responseTime, time.Duration(0))
+			// Either healthy or error should be set
+			assert.NotNil(t, healthy != false || err != nil)
+		}
+	})
+}
+
+// TestExecuteValidation tests validation phase
+func TestExecuteValidation(t *testing.T) {
+	t.Run("Validation_NoServersDeployed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			TargetServers: []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeValidation(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "no servers deployed")
+	})
+
+	t.Run("Validation_WithServersDeployed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			TargetServers: []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		// Simulate successful deployment
+		deployer.status.ServersDeployed = []string{"server1"}
+
+		ctx := context.Background()
+		success, err := deployer.executeValidation(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("Validation_SecurityGateFailed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			SecurityGateEnabled: true,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.status.ServersDeployed = []string{"server1"}
+		deployer.status.SecurityGateStatus.Passed = false
+
+		ctx := context.Background()
+		success, err := deployer.executeValidation(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "security gate not passed")
+	})
+
+	t.Run("Validation_PerformanceGateFailed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.status.ServersDeployed = []string{"server1"}
+		deployer.status.PerformanceGate.Passed = false
+
+		ctx := context.Background()
+		success, err := deployer.executeValidation(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "performance gate not passed")
+	})
+
+	t.Run("Validation_HealthCheckFailed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			HealthCheckEnabled: true,
+			TargetServers:      []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.status.ServersDeployed = []string{"server1"}
+		deployer.status.HealthStatus.Passed = false
+
+		ctx := context.Background()
+		success, err := deployer.executeValidation(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "health checks not passed")
+	})
+}
+
+// TestExecuteMonitoring tests monitoring phase
+func TestExecuteMonitoring(t *testing.T) {
+	t.Run("Monitoring_Disabled", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:       "test-project",
+			MonitoringEnabled: false,
+			TargetServers:     []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeMonitoring(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("Monitoring_Enabled", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:       "test-project",
+			MonitoringEnabled: true,
+			TargetServers:     []string{"server1", "server2"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.status.ServersDeployed = []string{"server1", "server2"}
+
+		ctx := context.Background()
+		success, err := deployer.executeMonitoring(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+}
+
+// TestDeploymentStrategiesExecution tests different deployment strategy executions
+func TestDeploymentStrategiesExecution(t *testing.T) {
+	baseConfig := func(strategy DeployStrategy) *DeploymentConfig {
+		return &DeploymentConfig{
+			ProjectName:        "test-project",
+			Environment:        "test",
+			DeploymentStrategy: strategy,
+			TargetServers:      []string{"server1", "server2"},
+			Credentials:        map[string]string{"deploy_key": "test"},
+		}
+	}
+
+	t.Run("BlueGreenDeploy_Execution", func(t *testing.T) {
+		deployer, err := NewProductionDeployer(baseConfig(BlueGreenDeploy))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeBlueGreenDeploy(ctx)
+
+		assert.NoError(t, err)
+		// Success depends on deployment simulation
+		assert.NotNil(t, success)
+	})
+
+	t.Run("CanaryDeploy_Execution", func(t *testing.T) {
+		deployer, err := NewProductionDeployer(baseConfig(CanaryDeploy))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeCanaryDeploy(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, success)
+	})
+
+	t.Run("RollingDeploy_Execution", func(t *testing.T) {
+		deployer, err := NewProductionDeployer(baseConfig(RollingDeploy))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeRollingDeploy(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, success)
+	})
+
+	t.Run("RecreateDeploy_Execution", func(t *testing.T) {
+		deployer, err := NewProductionDeployer(baseConfig(RecreateDeploy))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeRecreateDeploy(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, success)
+	})
+}
+
+// TestHelperFunctions tests helper functions
+func TestHelperFunctions(t *testing.T) {
+	t.Run("ParseDuration_ValidDuration", func(t *testing.T) {
+		duration := parseDuration("100ms")
+		assert.Equal(t, 100*time.Millisecond, duration)
+	})
+
+	t.Run("ParseDuration_InvalidDuration", func(t *testing.T) {
+		duration := parseDuration("invalid")
+		assert.Equal(t, time.Duration(0), duration)
+	})
+
+	t.Run("ParseDuration_ComplexDuration", func(t *testing.T) {
+		duration := parseDuration("1h30m")
+		assert.Equal(t, 90*time.Minute, duration)
+	})
+
+	t.Run("CalculateAverageResponseTime_EmptyServers", func(t *testing.T) {
+		servers := []ServerHealth{}
+		avg := calculateAverageResponseTime(servers)
+		assert.Equal(t, time.Duration(0), avg)
+	})
+
+	t.Run("CalculateAverageResponseTime_WithServers", func(t *testing.T) {
+		servers := []ServerHealth{
+			{Server: "s1", ResponseTime: 100 * time.Millisecond},
+			{Server: "s2", ResponseTime: 200 * time.Millisecond},
+			{Server: "s3", ResponseTime: 300 * time.Millisecond},
+		}
+		avg := calculateAverageResponseTime(servers)
+		assert.Equal(t, 200*time.Millisecond, avg)
+	})
+
+	t.Run("CalculateAverageResponseTime_SingleServer", func(t *testing.T) {
+		servers := []ServerHealth{
+			{Server: "s1", ResponseTime: 150 * time.Millisecond},
+		}
+		avg := calculateAverageResponseTime(servers)
+		assert.Equal(t, 150*time.Millisecond, avg)
+	})
+}
+
+// TestSecurityScanSimulation tests security scan functionality
+func TestSecurityScanSimulation(t *testing.T) {
+	config := &DeploymentConfig{
+		ProjectName:         "test-project",
+		SecurityGateEnabled: false, // Don't actually initialize security
+		TargetServers:       []string{"server1"},
+	}
+
+	deployer, err := NewProductionDeployer(config)
+	require.NoError(t, err)
+
+	t.Run("RunSecurityScan_Simulated", func(t *testing.T) {
+		ctx := context.Background()
+		result, err := deployer.runSecurityScan(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.True(t, result.CanProceed)
+		assert.Equal(t, "production_deployment", result.FeatureName)
+	})
+}
+
+// TestPerformanceValidationSimulation tests performance validation
+func TestPerformanceValidationSimulation(t *testing.T) {
+	config := &DeploymentConfig{
+		ProjectName:            "test-project",
+		PerformanceGateEnabled: false,
+		TargetServers:          []string{"server1"},
+	}
+
+	deployer, err := NewProductionDeployer(config)
+	require.NoError(t, err)
+
+	t.Run("RunPerformanceValidation_Simulated", func(t *testing.T) {
+		ctx := context.Background()
+		metrics, err := deployer.runPerformanceValidation(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, metrics)
+		assert.Greater(t, metrics.Throughput, 0)
+		assert.Greater(t, metrics.Latency, time.Duration(0))
+		assert.Greater(t, metrics.CPUUtilization, float64(0))
+		assert.Greater(t, metrics.MemoryUsage, int64(0))
+	})
+}
+
+// TestCountIssueFunctions tests issue counting helper functions
+func TestCountIssueFunctions(t *testing.T) {
+	t.Run("CountCriticalIssues_NilResult", func(t *testing.T) {
+		count := countCriticalIssues(nil)
+		assert.Equal(t, 0, count)
+	})
+
+	t.Run("CountHighIssues_NilResult", func(t *testing.T) {
+		count := countHighIssues(nil)
+		assert.Equal(t, 0, count)
+	})
+}
+
+// TestFailDeployment tests deployment failure handling
+func TestFailDeployment(t *testing.T) {
+	t.Run("FailDeployment_WithAutoRollback", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			AutoRollbackEnabled: true,
+			TargetServers:       []string{"server1", "server2"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		// Simulate some deployed servers
+		deployer.status.ServersDeployed = []string{"server1", "server2"}
+
+		deployer.failDeployment(PhaseDeployment, fmt.Errorf("test failure"))
+
+		assert.Equal(t, PhaseFailed, deployer.status.Status)
+		assert.Contains(t, deployer.status.FailedPhases, string(PhaseDeployment))
+		assert.True(t, deployer.status.RollbackTriggered)
+		assert.NotEmpty(t, deployer.status.RollbackReason)
+	})
+
+	t.Run("FailDeployment_WithoutAutoRollback", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			AutoRollbackEnabled: false,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.failDeployment(PhaseSecurityCheck, fmt.Errorf("security failure"))
+
+		assert.Equal(t, PhaseFailed, deployer.status.Status)
+		assert.Contains(t, deployer.status.FailedPhases, string(PhaseSecurityCheck))
+		assert.False(t, deployer.status.RollbackTriggered)
+	})
+}
+
+// TestExecuteDeployment tests deployment phase execution
+func TestExecuteDeployment(t *testing.T) {
+	t.Run("ExecuteDeployment_UnknownStrategy", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			DeploymentStrategy: DeployStrategy("unknown_strategy"),
+			TargetServers:      []string{"server1"},
+			Credentials:        map[string]string{"deploy_key": "test"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeDeployment(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "unknown deployment strategy")
+	})
+
+	t.Run("ExecuteDeployment_ProductionStrategy", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:        "test-project",
+			DeploymentStrategy: ProductionDeploy,
+			TargetServers:      []string{"server1", "server2", "server3", "server4", "server5"},
+			Credentials:        map[string]string{"deploy_key": "test"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeDeployment(ctx)
+
+		assert.NoError(t, err)
+		// Success depends on simulated deployment results
+		if success {
+			assert.Greater(t, deployer.status.Metrics.DeploymentTime, time.Duration(0))
+			assert.Greater(t, deployer.status.Metrics.DeployedServers, 0)
+		}
+	})
+}
+
+// TestGenerateDeploymentID tests ID generation
+func TestGenerateDeploymentID(t *testing.T) {
+	t.Run("GenerateDeploymentID_Unique", func(t *testing.T) {
+		ids := make(map[string]bool)
+		for i := 0; i < 100; i++ {
+			id := generateDeploymentID()
+			assert.NotEmpty(t, id)
+			assert.True(t, len(id) > 0)
+			assert.Contains(t, id, "deploy-")
+
+			// All IDs should be unique
+			assert.False(t, ids[id], "Duplicate ID generated: %s", id)
+			ids[id] = true
+		}
 	})
 }

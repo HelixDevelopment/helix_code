@@ -2,6 +2,10 @@ package cognee
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -1028,5 +1032,761 @@ func TestCogneeModels(t *testing.T) {
 
 		assert.Equal(t, "ds-123", dataset.ID)
 		assert.Equal(t, "test-dataset", dataset.Name)
+	})
+}
+
+// =====================================================
+// HTTP Mock Tests for Client
+// =====================================================
+
+// TestClientAddMemory tests the AddMemory method
+func TestClientAddMemory(t *testing.T) {
+	t.Run("AddMemory_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/memory", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+
+			var req AddMemoryRequest
+			json.NewDecoder(r.Body).Decode(&req)
+			assert.Equal(t, "test content", req.Content)
+
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(AddMemoryResponse{
+				ID:       "mem-123",
+				VectorID: "vec-123",
+				Message:  "Memory added successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.AddMemory(ctx, &AddMemoryRequest{
+			Content:     "test content",
+			DatasetName: "test",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, "mem-123", resp.ID)
+		assert.Equal(t, "vec-123", resp.VectorID)
+	})
+
+	t.Run("AddMemory_ServerError", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("internal server error"))
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.AddMemory(ctx, &AddMemoryRequest{
+			Content: "test content",
+		})
+
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+		assert.Contains(t, err.Error(), "cognee API error")
+	})
+}
+
+// TestClientSearchMemory tests the SearchMemory method
+func TestClientSearchMemory(t *testing.T) {
+	t.Run("SearchMemory_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/search", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			var req SearchMemoryRequest
+			json.NewDecoder(r.Body).Decode(&req)
+			assert.Equal(t, "test query", req.Query)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(SearchMemoryResponse{
+				Results: []MemorySource{
+					{ID: "result-1", Content: "result content", Score: 0.95},
+				},
+				TotalCount: 1,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SearchMemory(ctx, &SearchMemoryRequest{
+			Query:       "test query",
+			DatasetName: "test",
+			Limit:       10,
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 1, resp.TotalCount)
+		assert.Len(t, resp.Results, 1)
+		assert.Equal(t, "result-1", resp.Results[0].ID)
+	})
+
+	t.Run("SearchMemory_EmptyResults", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(SearchMemoryResponse{
+				Results:    []MemorySource{},
+				TotalCount: 0,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SearchMemory(ctx, &SearchMemoryRequest{
+			Query: "nonexistent",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 0, resp.TotalCount)
+	})
+
+	t.Run("SearchMemory_ServerError", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("service unavailable"))
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SearchMemory(ctx, &SearchMemoryRequest{
+			Query: "test query",
+		})
+
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
+}
+
+// TestClientCognify tests the Cognify method
+func TestClientCognify(t *testing.T) {
+	t.Run("Cognify_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/cognify", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			var req CognifyRequest
+			json.NewDecoder(r.Body).Decode(&req)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(CognifyResponse{
+				Status:  "processing",
+				Message: "Cognify started",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.Cognify(ctx, &CognifyRequest{
+			Datasets: []string{"test"},
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, "processing", resp.Status)
+	})
+
+	t.Run("Cognify_ServerError", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("bad request"))
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.Cognify(ctx, &CognifyRequest{})
+
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
+}
+
+// TestClientSearchInsights tests the SearchInsights method
+func TestClientSearchInsights(t *testing.T) {
+	t.Run("SearchInsights_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/search", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			var reqBody map[string]interface{}
+			json.NewDecoder(r.Body).Decode(&reqBody)
+			assert.Equal(t, "INSIGHTS", reqBody["search_type"])
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(InsightsResponse{
+				Insights: []Insight{
+					{ID: "ins-1", Content: "Test insight", Type: "summary", Confidence: 0.95},
+				},
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SearchInsights(ctx, &InsightsRequest{
+			Query:    "test query",
+			Datasets: []string{"test"},
+			Limit:    10,
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Len(t, resp.Insights, 1)
+	})
+}
+
+// TestClientSearchGraphCompletion tests the SearchGraphCompletion method
+func TestClientSearchGraphCompletion(t *testing.T) {
+	t.Run("SearchGraphCompletion_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/search", r.URL.Path)
+
+			var reqBody map[string]interface{}
+			json.NewDecoder(r.Body).Decode(&reqBody)
+			assert.Equal(t, "GRAPH_COMPLETION", reqBody["search_type"])
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(SearchMemoryResponse{
+				Results: []MemorySource{
+					{ID: "result-1", Content: "graph completion result"},
+				},
+				TotalCount: 1,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SearchGraphCompletion(ctx, "test query", []string{"test"}, 10)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 1, resp.TotalCount)
+	})
+}
+
+// TestClientDatasetOperations tests dataset CRUD operations
+func TestClientDatasetOperations(t *testing.T) {
+	t.Run("CreateDataset_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/datasets", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			var req CreateDatasetRequest
+			json.NewDecoder(r.Body).Decode(&req)
+
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(DatasetResponse{
+				Dataset: &Dataset{
+					ID:   "ds-123",
+					Name: req.Name,
+				},
+				Message: "Dataset created successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.CreateDataset(ctx, &CreateDatasetRequest{
+			Name:        "test-dataset",
+			Description: "Test description",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.NotNil(t, resp.Dataset)
+	})
+
+	t.Run("ListDatasets_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/datasets", r.URL.Path)
+			assert.Equal(t, "GET", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(DatasetsResponse{
+				Datasets: []Dataset{
+					{ID: "ds-1", Name: "dataset-1"},
+					{ID: "ds-2", Name: "dataset-2"},
+				},
+				Total: 2,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.ListDatasets(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 2, resp.Total)
+		assert.Len(t, resp.Datasets, 2)
+	})
+
+	t.Run("GetDataset_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/datasets/test-dataset", r.URL.Path)
+			assert.Equal(t, "GET", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(Dataset{
+				ID:   "ds-123",
+				Name: "test-dataset",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		dataset, err := client.GetDataset(ctx, "test-dataset")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, dataset)
+		assert.Equal(t, "test-dataset", dataset.Name)
+	})
+
+	t.Run("GetDataset_NotFound", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		dataset, err := client.GetDataset(ctx, "nonexistent")
+
+		assert.NoError(t, err)
+		assert.Nil(t, dataset)
+	})
+
+	t.Run("DeleteDataset_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/datasets/test-dataset", r.URL.Path)
+			assert.Equal(t, "DELETE", r.Method)
+
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		err := client.DeleteDataset(ctx, "test-dataset")
+
+		assert.NoError(t, err)
+	})
+}
+
+// TestClientProcessCodePipeline tests the ProcessCodePipeline method
+func TestClientProcessCodePipeline(t *testing.T) {
+	t.Run("ProcessCodePipeline_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/code-pipeline/index", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(CodePipelineResponse{
+				Processed: true,
+				Message:   "Code processed successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.ProcessCodePipeline(ctx, &CodePipelineRequest{
+			DatasetName: "test-code",
+			Code:        "func main() {}",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.True(t, resp.Processed)
+	})
+}
+
+// TestClientVisualizeGraph tests the VisualizeGraph method
+func TestClientVisualizeGraph(t *testing.T) {
+	t.Run("VisualizeGraph_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/visualize", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(GraphVisualizationResponse{
+				Graph: GraphData{
+					Nodes: []GraphNode{
+						{ID: "node-1", Label: "Node 1"},
+					},
+					Edges: []GraphEdge{
+						{Source: "node-1", Target: "node-2"},
+					},
+				},
+				NodeCount: 1,
+				EdgeCount: 1,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.VisualizeGraph(ctx, &GraphVisualizationRequest{
+			DatasetName: "test",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Len(t, resp.Graph.Nodes, 1)
+		assert.Len(t, resp.Graph.Edges, 1)
+	})
+}
+
+// TestClientDeleteData tests the DeleteData method
+func TestClientDeleteData(t *testing.T) {
+	t.Run("DeleteData_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/delete", r.URL.Path)
+			assert.Equal(t, "DELETE", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(DeleteDataResponse{
+				Deleted: 5,
+				Message: "Data deleted successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.DeleteData(ctx, &DeleteDataRequest{
+			DatasetName: "test",
+			DataIDs:     []string{"id-1", "id-2"},
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 5, resp.Deleted)
+	})
+}
+
+// TestClientGetHealth tests the GetHealth method
+func TestClientGetHealth(t *testing.T) {
+	t.Run("GetHealth_Healthy", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/health", r.URL.Path)
+			assert.Equal(t, "GET", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status": "healthy",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		health, err := client.GetHealth(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, health)
+		assert.Equal(t, "healthy", health.Status)
+		assert.True(t, client.IsConnected())
+	})
+
+	t.Run("GetHealth_Unhealthy", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status": "unhealthy",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		health, err := client.GetHealth(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, health)
+		assert.Equal(t, "unhealthy", health.Status)
+		assert.False(t, client.IsConnected())
+	})
+}
+
+// TestClientGetStatistics tests the GetStatistics method
+func TestClientGetStatistics(t *testing.T) {
+	t.Run("GetStatistics_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/stats", r.URL.Path)
+			assert.Equal(t, "GET", r.Method)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(CogneeStatistics{
+				TotalMemories:   100,
+				TotalDatasets:   5,
+				GraphNodeCount:  1000,
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		stats, err := client.GetStatistics(ctx)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, stats)
+		assert.Equal(t, int64(100), stats.TotalMemories)
+		assert.Equal(t, int64(5), stats.TotalDatasets)
+	})
+}
+
+// TestClientAddBatchMemory tests the AddBatchMemory method
+func TestClientAddBatchMemory(t *testing.T) {
+	t.Run("AddBatchMemory_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/memory/batch", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			var req BatchMemoryRequest
+			json.NewDecoder(r.Body).Decode(&req)
+			assert.Len(t, req.Memories, 2)
+
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(BatchMemoryResponse{
+				Processed: 2,
+				Failed:    0,
+				IDs:       []string{"mem-1", "mem-2"},
+				Message:   "Batch processed successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.AddBatchMemory(ctx, &BatchMemoryRequest{
+			Memories: []AddMemoryRequest{
+				{Content: "memory 1"},
+				{Content: "memory 2"},
+			},
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, 2, resp.Processed)
+		assert.Equal(t, 0, resp.Failed)
+	})
+}
+
+// TestClientSubmitFeedback tests the SubmitFeedback method
+func TestClientSubmitFeedback(t *testing.T) {
+	t.Run("SubmitFeedback_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/feedback", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(FeedbackResponse{
+				ID:      "fb-123",
+				Message: "Feedback received successfully",
+			})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		resp, err := client.SubmitFeedback(ctx, &FeedbackRequest{
+			QueryID:  "query-1",
+			ResultID: "result-1",
+			Rating:   5,
+			Comment:  "Great result!",
+		})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.Equal(t, "fb-123", resp.ID)
+	})
+}
+
+// TestClientTestConnection tests the TestConnection method
+func TestClientTestConnection(t *testing.T) {
+	t.Run("TestConnection_Success", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/health", r.URL.Path)
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		connected := client.TestConnection(ctx)
+
+		assert.True(t, connected)
+		assert.True(t, client.IsConnected())
+	})
+
+	t.Run("TestConnection_Failed", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL("http://localhost:99999") // Non-existent port
+
+		ctx := context.Background()
+		connected := client.TestConnection(ctx)
+
+		assert.False(t, connected)
+		assert.False(t, client.IsConnected())
+	})
+}
+
+// TestClientAPIKeyHeader tests that API key is properly set in headers
+func TestClientAPIKeyHeader(t *testing.T) {
+	t.Run("WithAPIKey", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			assert.Equal(t, "Bearer test-api-key", authHeader)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(DatasetsResponse{})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+		client.SetAPIKey("test-api-key")
+
+		ctx := context.Background()
+		_, err := client.ListDatasets(ctx)
+		assert.NoError(t, err)
+	})
+
+	t.Run("WithoutAPIKey", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			assert.Empty(t, authHeader)
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(DatasetsResponse{})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		ctx := context.Background()
+		_, err := client.ListDatasets(ctx)
+		assert.NoError(t, err)
+	})
+}
+
+// TestClientConcurrency tests concurrent client operations
+func TestClientConcurrency(t *testing.T) {
+	t.Run("ConcurrentRequests", func(t *testing.T) {
+		requestCount := 0
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestCount++
+			time.Sleep(10 * time.Millisecond)
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(DatasetsResponse{})
+		}))
+		defer server.Close()
+
+		cfg := config.DefaultCogneeConfig()
+		client := NewClient(cfg)
+		client.SetBaseURL(server.URL)
+
+		var wg sync.WaitGroup
+		for i := 0; i < 10; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				ctx := context.Background()
+				_, err := client.ListDatasets(ctx)
+				assert.NoError(t, err)
+			}()
+		}
+
+		wg.Wait()
+		assert.Equal(t, 10, requestCount)
 	})
 }
