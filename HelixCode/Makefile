@@ -69,6 +69,95 @@ test-docs:
 		echo "⚠️ Documentation validation script not found, skipping..."; \
 	fi
 
+# ============================================
+# FULL TEST INFRASTRUCTURE (Zero Skipped Tests)
+# ============================================
+
+.PHONY: test-infra-up test-infra-down test-infra-status test-full test-unit-full test-integration-full test-e2e-full test-security-full
+
+# Start full test infrastructure with all dependencies
+test-infra-up:
+	@echo "🚀 Starting full test infrastructure..."
+	@docker compose -f docker-compose.full-test.yml up -d
+	@echo "⏳ Waiting for services to be healthy..."
+	@sleep 30
+	@echo "📦 Pulling Ollama test model..."
+	@docker compose -f docker-compose.full-test.yml exec -T ollama ollama pull llama2:7b 2>/dev/null || echo "⚠️ Model pull skipped"
+	@echo "✅ Test infrastructure ready!"
+	@echo ""
+	@echo "To run all tests: make test-full"
+
+# Stop full test infrastructure
+test-infra-down:
+	@echo "🛑 Stopping full test infrastructure..."
+	@docker compose -f docker-compose.full-test.yml down -v
+	@echo "✅ Test infrastructure stopped"
+
+# Check test infrastructure status
+test-infra-status:
+	@echo "📊 Test infrastructure status:"
+	@docker compose -f docker-compose.full-test.yml ps
+
+# Run ALL tests with full infrastructure (ZERO skipped tests)
+test-full: test-infra-up
+	@echo "🧪 Running ALL tests (no skips)..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -v -count=1 -timeout=30m ./... && \
+	$(GO_TEST) -v -count=1 -tags=integration -timeout=30m ./... && \
+	echo "🎉 All tests passed with ZERO skips!"
+
+# Run unit tests with full infrastructure
+test-unit-full: test-infra-up
+	@echo "🧪 Running unit tests with full infrastructure..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -v -count=1 -timeout=15m ./internal/...
+
+# Run integration tests with full infrastructure
+test-integration-full: test-infra-up
+	@echo "🧪 Running integration tests..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -v -count=1 -tags=integration -timeout=20m ./...
+
+# Run E2E tests with full infrastructure
+test-e2e-full: test-infra-up
+	@echo "🧪 Running E2E challenge tests..."
+	@set -a && . ./.env.full-test && set +a && \
+	cd tests/e2e/challenges && $(GO) run cmd/runner/main.go -all
+
+# Run security tests with full infrastructure
+test-security-full: test-infra-up
+	@echo "🔒 Running security tests..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -v -count=1 -timeout=20m ./tests/security/...
+
+# Run load tests with full infrastructure
+test-load-full: test-infra-up
+	@echo "⚡ Running load tests..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -v -count=1 -timeout=30m ./test/load/...
+
+# Run all test types in sequence
+test-complete: test-unit-full test-integration-full test-e2e-full test-security-full test-load-full test-benchmark
+	@echo ""
+	@echo "🎉 ============================================="
+	@echo "🎉 ALL TESTS COMPLETED SUCCESSFULLY!"
+	@echo "🎉 ============================================="
+	@echo ""
+
+# Generate coverage report with full infrastructure
+coverage-full: test-infra-up
+	@echo "📊 Generating comprehensive coverage report..."
+	@set -a && . ./.env.full-test && set +a && \
+	$(GO_TEST) -coverprofile=coverage.out -covermode=atomic -timeout=30m ./... && \
+	go tool cover -func=coverage.out && \
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "✅ Coverage report: coverage.html"
+
+# Quick check that code compiles
+verify-compile:
+	@echo "🔍 Verifying code compilation..."
+	@$(GO) build ./... && echo "✅ All packages compile successfully"
+
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning build artifacts..."

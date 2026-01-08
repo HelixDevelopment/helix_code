@@ -1,0 +1,486 @@
+# HelixCode Complete Test Infrastructure
+# This docker-compose file provides ALL services needed to run every test
+# with ZERO skipped tests.
+#
+# Usage:
+#   docker compose -f docker-compose.full-test.yml up -d
+#   ./scripts/setup-full-test-env.sh
+#
+# To tear down:
+#   docker compose -f docker-compose.full-test.yml down -v
+
+version: '3.8'
+
+services:
+  # ============================================
+  # DATABASE SERVICES
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: helixcode-postgres-full
+    environment:
+      POSTGRES_DB: helixcode_test
+      POSTGRES_USER: helixcode
+      POSTGRES_PASSWORD: helixcode_test_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helixcode -d helixcode_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - helixcode-full-test
+    volumes:
+      - postgres-full-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: helixcode-redis-full
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - helixcode-full-test
+    volumes:
+      - redis-full-data:/data
+
+  # ============================================
+  # LLM PROVIDERS
+  # ============================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: helixcode-ollama-full
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-full-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=24h
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - helixcode-full-test
+
+  # Mock LLM server for cloud provider tests (OpenAI, Anthropic, Gemini, Azure, Bedrock)
+  mock-llm-server:
+    build:
+      context: ./tests/e2e/mocks
+      dockerfile: Dockerfile.llm-mock
+    container_name: helixcode-mock-llm
+    ports:
+      - "8090:8090"
+    environment:
+      - MOCK_PORT=8090
+      - MOCK_OPENAI=true
+      - MOCK_ANTHROPIC=true
+      - MOCK_GEMINI=true
+      - MOCK_AZURE=true
+      - MOCK_BEDROCK=true
+      - MOCK_GROQ=true
+      - MOCK_MISTRAL=true
+      - MOCK_COHERE=true
+      - LOG_LEVEL=debug
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # BROWSER TESTING
+  # ============================================
+  selenium-chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: helixcode-selenium-chrome
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: 2gb
+    environment:
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_SESSION_TIMEOUT=300
+      - SE_VNC_NO_PASSWORD=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/status"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  # Chromedp-compatible headless Chrome for browser automation tests
+  chromedp:
+    image: chromedp/headless-shell:latest
+    container_name: helixcode-chromedp
+    ports:
+      - "9222:9222"
+    command:
+      - --remote-debugging-address=0.0.0.0
+      - --remote-debugging-port=9222
+      - --disable-gpu
+      - --no-sandbox
+      - --disable-dev-shm-usage
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # SSH WORKER TESTING
+  # ============================================
+  ssh-server:
+    build:
+      context: ./tests/infrastructure
+      dockerfile: Dockerfile.ssh-server
+    container_name: helixcode-ssh-server
+    ports:
+      - "2222:22"
+    environment:
+      - SSH_USER=helixcode
+      - SSH_PASSWORD=test_password
+    volumes:
+      - ./tests/infrastructure/ssh_keys:/home/helixcode/.ssh:ro
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  ssh-worker-1:
+    build:
+      context: ./tests/infrastructure
+      dockerfile: Dockerfile.ssh-worker
+    container_name: helixcode-ssh-worker-1
+    ports:
+      - "2223:22"
+    environment:
+      - WORKER_ID=worker-1
+      - SSH_USER=helixcode
+    volumes:
+      - ./tests/infrastructure/ssh_keys:/home/helixcode/.ssh:ro
+      - worker1-data:/home/helixcode/workspace
+    depends_on:
+      - ssh-server
+    networks:
+      - helixcode-full-test
+
+  ssh-worker-2:
+    build:
+      context: ./tests/infrastructure
+      dockerfile: Dockerfile.ssh-worker
+    container_name: helixcode-ssh-worker-2
+    ports:
+      - "2224:22"
+    environment:
+      - WORKER_ID=worker-2
+      - SSH_USER=helixcode
+    volumes:
+      - ./tests/infrastructure/ssh_keys:/home/helixcode/.ssh:ro
+      - worker2-data:/home/helixcode/workspace
+    depends_on:
+      - ssh-server
+    networks:
+      - helixcode-full-test
+
+  ssh-worker-3:
+    build:
+      context: ./tests/infrastructure
+      dockerfile: Dockerfile.ssh-worker
+    container_name: helixcode-ssh-worker-3
+    ports:
+      - "2225:22"
+    environment:
+      - WORKER_ID=worker-3
+      - SSH_USER=helixcode
+    volumes:
+      - ./tests/infrastructure/ssh_keys:/home/helixcode/.ssh:ro
+      - worker3-data:/home/helixcode/workspace
+    depends_on:
+      - ssh-server
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # AUDIO/VOICE TESTING (Virtual Audio)
+  # ============================================
+  pulseaudio:
+    image: thewierdnut/pulseaudio:latest
+    container_name: helixcode-pulseaudio
+    environment:
+      - PULSE_SERVER=unix:/run/pulse/native
+    volumes:
+      - pulse-socket:/run/pulse
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # KNOWLEDGE GRAPH / MEMORY SERVICES
+  # ============================================
+  cognee:
+    image: cognee/cognee:latest
+    container_name: helixcode-cognee-full
+    environment:
+      - COGNEE_API_KEY=test_cognee_key_123
+      - COGNEE_MODE=local
+      - COGNEE_REDIS_URL=redis://redis:6379
+      - COGNEE_POSTGRES_URL=postgresql://helixcode:helixcode_test_password@postgres:5432/helixcode_test
+      - COGNEE_ENV=development
+      - COGNEE_LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - helixcode-full-test
+    volumes:
+      - cognee-full-data:/app/data
+
+  weaviate:
+    image: semitechnologies/weaviate:1.24.1
+    container_name: helixcode-weaviate-full
+    ports:
+      - "8081:8080"
+      - "50051:50051"
+    environment:
+      - QUERY_DEFAULTS_LIMIT=25
+      - AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true
+      - PERSISTENCE_DATA_PATH=/var/lib/weaviate
+      - DEFAULT_VECTORIZER_MODULE=none
+      - CLUSTER_HOSTNAME=node1
+    volumes:
+      - weaviate-full-data:/var/lib/weaviate
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: helixcode-chromadb-full
+    ports:
+      - "8082:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    volumes:
+      - chromadb-full-data:/chroma/chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: helixcode-qdrant-full
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-full-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # NOTIFICATION SERVICES (For notification tests)
+  # ============================================
+  mock-slack:
+    build:
+      context: ./tests/e2e/mocks
+      dockerfile: Dockerfile.slack-mock
+    container_name: helixcode-mock-slack
+    ports:
+      - "8091:8091"
+    environment:
+      - MOCK_PORT=8091
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
+  # ============================================
+  # NETWORK TESTING (Multicast Support)
+  # ============================================
+  multicast-router:
+    image: alpine:latest
+    container_name: helixcode-multicast-router
+    cap_add:
+      - NET_ADMIN
+    command: >
+      sh -c "
+        apk add --no-cache iproute2 >/dev/null 2>&1 &&
+        sysctl -w net.ipv4.ip_forward=1 >/dev/null 2>&1 &&
+        ip route add 224.0.0.0/4 dev eth0 2>/dev/null || true &&
+        tail -f /dev/null
+      "
+    networks:
+      helixcode-full-test:
+        ipv4_address: 172.28.0.254
+
+  # ============================================
+  # MONITORING (Optional, profile: monitoring)
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: helixcode-prometheus-full
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus-test.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-full-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=24h'
+      - '--web.enable-lifecycle'
+    networks:
+      - helixcode-full-test
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: helixcode-grafana-full
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_USERS_ALLOW_SIGN_UP: false
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-full-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - helixcode-full-test
+    profiles:
+      - monitoring
+
+  # ============================================
+  # HELIXCODE SERVER (Test Instance)
+  # ============================================
+  helixcode-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: helixcode-server-full
+    ports:
+      - "8080:8080"
+    environment:
+      - HELIX_AUTH_JWT_SECRET=test-jwt-secret-for-testing-only-minimum-32-characters
+      - HELIX_DATABASE_HOST=postgres
+      - HELIX_DATABASE_PORT=5432
+      - HELIX_DATABASE_USER=helixcode
+      - HELIX_DATABASE_PASSWORD=helixcode_test_password
+      - HELIX_DATABASE_NAME=helixcode_test
+      - HELIX_DATABASE_ENABLED=true
+      - HELIX_REDIS_HOST=redis
+      - HELIX_REDIS_PORT=6379
+      - HELIX_REDIS_ENABLED=true
+      - OLLAMA_HOST=http://ollama:11434
+      - CHROME_DEBUGGER_URL=ws://chromedp:9222
+      - SELENIUM_URL=http://selenium-chrome:4444
+      - SSH_TEST_HOST=ssh-server
+      - SSH_TEST_PORT=22
+      - COGNEE_ENDPOINT=http://cognee:8000
+      - WEAVIATE_ENDPOINT=http://weaviate:8080
+      - CHROMADB_ENDPOINT=http://chromadb:8000
+      - QDRANT_ENDPOINT=http://qdrant:6333
+      - MOCK_LLM_ENDPOINT=http://mock-llm-server:8090
+      - MOCK_SLACK_ENDPOINT=http://mock-slack:8091
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - helixcode-full-test
+    profiles:
+      - server
+
+networks:
+  helixcode-full-test:
+    driver: bridge
+    name: helixcode-full-test-network
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgres-full-data:
+    name: helixcode-full-postgres-data
+  redis-full-data:
+    name: helixcode-full-redis-data
+  ollama-full-data:
+    name: helixcode-full-ollama-data
+  cognee-full-data:
+    name: helixcode-full-cognee-data
+  weaviate-full-data:
+    name: helixcode-full-weaviate-data
+  chromadb-full-data:
+    name: helixcode-full-chromadb-data
+  qdrant-full-data:
+    name: helixcode-full-qdrant-data
+  prometheus-full-data:
+    name: helixcode-full-prometheus-data
+  grafana-full-data:
+    name: helixcode-full-grafana-data
+  pulse-socket:
+    name: helixcode-full-pulse-socket
+  worker1-data:
+    name: helixcode-full-worker1-data
+  worker2-data:
+    name: helixcode-full-worker2-data
+  worker3-data:
+    name: helixcode-full-worker3-data

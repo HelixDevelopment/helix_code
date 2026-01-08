@@ -222,6 +222,25 @@ func (s *Server) setupRoutes() {
 			system.GET("/stats", s.getSystemStats)
 			system.GET("/status", s.getSystemStatus)
 		}
+
+		// Server info routes (public)
+		api.GET("/server/info", s.getServerInfo)
+		api.GET("/metrics", s.getMetrics)
+
+		// LLM routes
+		llmRoutes := api.Group("/llm")
+		{
+			llmRoutes.GET("/providers", s.listLLMProviders)
+			llmRoutes.GET("/providers/:id", s.getLLMProvider)
+			llmRoutes.GET("/models", s.listLLMModels)
+		}
+
+		// Memory routes
+		memory := api.Group("/memory")
+		{
+			memory.GET("/systems", s.listMemorySystems)
+			memory.GET("/stats", s.getMemoryStats)
+		}
 	}
 
 	// WebSocket routes

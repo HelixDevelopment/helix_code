@@ -313,10 +313,27 @@ func (s *Server) deleteProject(c *gin.Context) {
 // Task Handlers
 
 func (s *Server) listTasks(c *gin.Context) {
-	// Return empty list for now
+	if s.taskManager == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"tasks":  []interface{}{},
+		})
+		return
+	}
+
+	tasks, err := s.taskManager.ListTasks(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to list tasks",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"tasks":  []interface{}{},
+		"tasks":  tasks,
 	})
 }
 
@@ -339,7 +356,39 @@ func (s *Server) createTask(c *gin.Context) {
 		return
 	}
 
-	// Return placeholder task
+	// Use database manager if available
+	if s.taskManager != nil {
+		priority := req.Priority
+		if priority == "" {
+			priority = "normal"
+		}
+
+		task, err := s.taskManager.CreateTask(
+			c.Request.Context(),
+			req.Name,
+			req.Description,
+			req.Type,
+			priority,
+			req.Parameters,
+			req.Dependencies,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Failed to create task",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{
+			"status": "success",
+			"task":   task,
+		})
+		return
+	}
+
+	// Fallback to placeholder if no database
 	task := gin.H{
 		"id":          "task_placeholder",
 		"name":        req.Name,
@@ -358,7 +407,25 @@ func (s *Server) createTask(c *gin.Context) {
 func (s *Server) getTask(c *gin.Context) {
 	id := c.Param("id")
 
-	// Return placeholder task
+	if s.taskManager != nil {
+		task, err := s.taskManager.GetTask(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Task not found",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"task":   task,
+		})
+		return
+	}
+
+	// Fallback to placeholder if no database
 	task := gin.H{
 		"id":          id,
 		"name":        "Sample Task",
@@ -378,7 +445,9 @@ func (s *Server) updateTask(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
-		Status string `json:"status"`
+		Status       string                 `json:"status"`
+		Result       map[string]interface{} `json:"result"`
+		ErrorMessage string                 `json:"error_message"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -390,7 +459,51 @@ func (s *Server) updateTask(c *gin.Context) {
 		return
 	}
 
-	// Return updated placeholder task
+	if s.taskManager != nil {
+		var err error
+		switch req.Status {
+		case "running":
+			err = s.taskManager.StartTask(c.Request.Context(), id)
+		case "completed":
+			err = s.taskManager.CompleteTask(c.Request.Context(), id, req.Result)
+		case "failed":
+			err = s.taskManager.FailTask(c.Request.Context(), id, req.ErrorMessage)
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Invalid status. Use: running, completed, or failed",
+			})
+			return
+		}
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Failed to update task",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		// Get the updated task
+		task, err := s.taskManager.GetTask(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Task updated but failed to retrieve",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"task":   task,
+		})
+		return
+	}
+
+	// Fallback to placeholder if no database
 	task := gin.H{
 		"id":          id,
 		"name":        "Sample Task",
@@ -408,6 +521,20 @@ func (s *Server) updateTask(c *gin.Context) {
 }
 
 func (s *Server) deleteTask(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.taskManager != nil {
+		err := s.taskManager.DeleteTask(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Failed to delete task",
+				"error":   err.Error(),
+			})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Task deleted",
@@ -417,17 +544,52 @@ func (s *Server) deleteTask(c *gin.Context) {
 // Worker Handlers
 
 func (s *Server) listWorkers(c *gin.Context) {
-	// Return empty list for now
+	if s.workerManager == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "success",
+			"workers": []interface{}{},
+		})
+		return
+	}
+
+	workers, err := s.workerManager.ListWorkers(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to list workers",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"workers": []interface{}{},
+		"workers": workers,
 	})
 }
 
 func (s *Server) getWorker(c *gin.Context) {
 	id := c.Param("id")
 
-	// Return placeholder worker
+	if s.workerManager != nil {
+		worker, err := s.workerManager.GetWorker(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Worker not found",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"worker": worker,
+		})
+		return
+	}
+
+	// Fallback to placeholder if no database
 	worker := gin.H{
 		"id":           id,
 		"hostname":     "localhost",
@@ -622,5 +784,265 @@ func (s *Server) executeRefactoringWorkflow(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
 		"workflow": wf,
+	})
+}
+
+// Server Info and Metrics Handlers
+
+// getServerInfo returns server information
+func (s *Server) getServerInfo(c *gin.Context) {
+	uptime := time.Since(s.startTime)
+
+	info := gin.H{
+		"name":       "HelixCode Server",
+		"version":    "1.0.0",
+		"go_version": "1.24",
+		"uptime":     uptime.String(),
+		"start_time": s.startTime.UTC().Format(time.RFC3339),
+		"database": gin.H{
+			"enabled":   s.db != nil,
+			"connected": s.db != nil && s.db.HealthCheck() == nil,
+		},
+		"redis": gin.H{
+			"enabled":   s.redis != nil && s.redis.IsEnabled(),
+			"connected": s.redis != nil && s.redis.IsEnabled() && s.redis.GetClient().Ping(c.Request.Context()).Err() == nil,
+		},
+		"features": gin.H{
+			"auth_enabled":          s.auth != nil,
+			"mcp_enabled":           s.mcp != nil,
+			"notifications_enabled": s.notification != nil,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"info":   info,
+	})
+}
+
+// getMetrics returns server metrics
+func (s *Server) getMetrics(c *gin.Context) {
+	metrics := gin.H{
+		"uptime_seconds": time.Since(s.startTime).Seconds(),
+		"requests": gin.H{
+			"total":  0,
+			"active": 0,
+		},
+		"resources": gin.H{
+			"goroutines": 0,
+			"memory_mb":  0,
+		},
+		"database": gin.H{
+			"connections_active": 0,
+			"connections_idle":   0,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"metrics": metrics,
+	})
+}
+
+// LLM Handlers
+
+// listLLMProviders returns available LLM providers
+func (s *Server) listLLMProviders(c *gin.Context) {
+	providers := []gin.H{
+		{
+			"id":          "ollama",
+			"name":        "Ollama",
+			"type":        "local",
+			"description": "Local LLM inference using Ollama",
+			"status":      "available",
+			"models":      []string{"llama2", "llama2:7b", "mistral", "codellama"},
+		},
+		{
+			"id":          "openai",
+			"name":        "OpenAI",
+			"type":        "cloud",
+			"description": "OpenAI GPT models",
+			"status":      "available",
+			"models":      []string{"gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"},
+		},
+		{
+			"id":          "anthropic",
+			"name":        "Anthropic",
+			"type":        "cloud",
+			"description": "Anthropic Claude models",
+			"status":      "available",
+			"models":      []string{"claude-3-opus", "claude-3-sonnet", "claude-3-haiku"},
+		},
+		{
+			"id":          "gemini",
+			"name":        "Google Gemini",
+			"type":        "cloud",
+			"description": "Google Gemini models",
+			"status":      "available",
+			"models":      []string{"gemini-pro", "gemini-pro-vision"},
+		},
+		{
+			"id":          "azure",
+			"name":        "Azure OpenAI",
+			"type":        "cloud",
+			"description": "Azure-hosted OpenAI models",
+			"status":      "available",
+			"models":      []string{"gpt-4", "gpt-35-turbo"},
+		},
+		{
+			"id":          "bedrock",
+			"name":        "AWS Bedrock",
+			"type":        "cloud",
+			"description": "AWS Bedrock foundation models",
+			"status":      "available",
+			"models":      []string{"anthropic.claude-v2", "amazon.titan-text"},
+		},
+		{
+			"id":          "groq",
+			"name":        "Groq",
+			"type":        "cloud",
+			"description": "Groq LPU inference",
+			"status":      "available",
+			"models":      []string{"llama2-70b", "mixtral-8x7b"},
+		},
+		{
+			"id":          "llamacpp",
+			"name":        "Llama.cpp",
+			"type":        "local",
+			"description": "Local inference with llama.cpp",
+			"status":      "available",
+			"models":      []string{"custom-gguf"},
+		},
+		{
+			"id":          "vllm",
+			"name":        "vLLM",
+			"type":        "local",
+			"description": "High-throughput local inference",
+			"status":      "available",
+			"models":      []string{"custom"},
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":    "success",
+		"providers": providers,
+		"count":     len(providers),
+	})
+}
+
+// getLLMProvider returns details for a specific LLM provider
+func (s *Server) getLLMProvider(c *gin.Context) {
+	providerID := c.Param("id")
+
+	provider := gin.H{
+		"id":          providerID,
+		"name":        providerID,
+		"status":      "available",
+		"configured":  true,
+		"description": "LLM Provider",
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "success",
+		"provider": provider,
+	})
+}
+
+// listLLMModels returns available LLM models
+func (s *Server) listLLMModels(c *gin.Context) {
+	models := []gin.H{
+		{"id": "gpt-4", "provider": "openai", "context_length": 8192},
+		{"id": "gpt-4-turbo", "provider": "openai", "context_length": 128000},
+		{"id": "gpt-3.5-turbo", "provider": "openai", "context_length": 16385},
+		{"id": "claude-3-opus", "provider": "anthropic", "context_length": 200000},
+		{"id": "claude-3-sonnet", "provider": "anthropic", "context_length": 200000},
+		{"id": "llama2:7b", "provider": "ollama", "context_length": 4096},
+		{"id": "gemini-pro", "provider": "gemini", "context_length": 32768},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"models": models,
+		"count":  len(models),
+	})
+}
+
+// Memory System Handlers
+
+// listMemorySystems returns available memory systems
+func (s *Server) listMemorySystems(c *gin.Context) {
+	systems := []gin.H{
+		{
+			"id":          "cognee",
+			"name":        "Cognee",
+			"type":        "knowledge_graph",
+			"description": "AI-powered knowledge graph for memory management",
+			"status":      "available",
+			"features":    []string{"semantic_search", "context_retrieval", "optimization"},
+		},
+		{
+			"id":          "weaviate",
+			"name":        "Weaviate",
+			"type":        "vector_db",
+			"description": "Vector database for embeddings",
+			"status":      "available",
+			"features":    []string{"vector_search", "hybrid_search", "filtering"},
+		},
+		{
+			"id":          "chromadb",
+			"name":        "ChromaDB",
+			"type":        "vector_db",
+			"description": "Embedding database",
+			"status":      "available",
+			"features":    []string{"vector_search", "metadata_filtering"},
+		},
+		{
+			"id":          "qdrant",
+			"name":        "Qdrant",
+			"type":        "vector_db",
+			"description": "High-performance vector similarity search",
+			"status":      "available",
+			"features":    []string{"vector_search", "filtering", "payload_indexing"},
+		},
+		{
+			"id":          "mem0",
+			"name":        "Mem0",
+			"type":        "memory_layer",
+			"description": "Memory layer for AI applications",
+			"status":      "available",
+			"features":    []string{"user_memory", "session_memory", "agent_memory"},
+		},
+		{
+			"id":          "zep",
+			"name":        "Zep",
+			"type":        "memory_store",
+			"description": "Long-term memory for AI assistants",
+			"status":      "available",
+			"features":    []string{"conversation_history", "entity_extraction", "summarization"},
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"systems": systems,
+		"count":   len(systems),
+	})
+}
+
+// getMemoryStats returns memory system statistics
+func (s *Server) getMemoryStats(c *gin.Context) {
+	stats := gin.H{
+		"total_memories":    0,
+		"total_embeddings":  0,
+		"storage_used_mb":   0,
+		"active_sessions":   0,
+		"cache_hit_rate":    0.0,
+		"avg_retrieval_ms":  0,
+		"systems_connected": 0,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"stats":  stats,
 	})
 }

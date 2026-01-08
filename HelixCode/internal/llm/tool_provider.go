@@ -52,10 +52,17 @@ type EnhancedLLMProvider interface {
 	RegisterTool(tool Tool) error
 }
 
+// ToolExecutor is an interface for executing tools
+// This can be implemented by the tools.ToolRegistry
+type ToolExecutor interface {
+	Execute(ctx context.Context, name string, params map[string]interface{}) (interface{}, error)
+}
+
 // ToolCallingProvider implements EnhancedLLMProvider with tool calling support
 type ToolCallingProvider struct {
 	baseProvider Provider
 	tools        map[string]Tool
+	toolExecutor ToolExecutor
 }
 
 // NewToolCallingProvider creates a new tool calling provider
@@ -64,6 +71,11 @@ func NewToolCallingProvider(baseProvider Provider) *ToolCallingProvider {
 		baseProvider: baseProvider,
 		tools:        make(map[string]Tool),
 	}
+}
+
+// SetToolExecutor sets the tool executor (typically a tools.ToolRegistry)
+func (p *ToolCallingProvider) SetToolExecutor(executor ToolExecutor) {
+	p.toolExecutor = executor
 }
 
 // GenerateWithTools performs generation with tool calling support
@@ -362,10 +374,30 @@ func (p *ToolCallingProvider) executeToolCalls(ctx context.Context, toolCalls []
 
 // executeToolHandler executes a tool handler based on the tool name
 func (p *ToolCallingProvider) executeToolHandler(ctx context.Context, toolName string, args map[string]interface{}) (interface{}, error) {
-	// This is a placeholder implementation
-	// In a real implementation, you would have actual tool handlers
-	// For now, we'll return a simple response
-	return fmt.Sprintf("Executed tool %s with args %v", toolName, args), nil
+	// If a tool executor is configured, use it
+	if p.toolExecutor != nil {
+		result, err := p.toolExecutor.Execute(ctx, toolName, args)
+		if err != nil {
+			return nil, fmt.Errorf("tool execution failed for %s: %w", toolName, err)
+		}
+		return result, nil
+	}
+
+	// Verify tool is registered (for logging purposes)
+	_, exists := p.tools[toolName]
+	if !exists {
+		log.Printf("Warning: Tool %s not found in registered tools", toolName)
+	}
+
+	// No executor available - return informative message
+	// Tools in this provider are metadata only; actual execution requires a ToolExecutor
+	log.Printf("Warning: Tool %s called but no executor configured. Configure a ToolExecutor with SetToolExecutor().", toolName)
+	return map[string]interface{}{
+		"status":  "no_executor",
+		"tool":    toolName,
+		"args":    args,
+		"message": "Tool execution requires a configured ToolExecutor. Use SetToolExecutor() to configure the tools.ToolRegistry.",
+	}, nil
 }
 
 func (p *ToolCallingProvider) buildFinalPrompt(originalPrompt, initialResponse string, toolResults map[string]interface{}) string {
