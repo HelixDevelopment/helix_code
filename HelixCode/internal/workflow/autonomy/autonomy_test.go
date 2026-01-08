@@ -2,6 +2,7 @@ package autonomy
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -1111,4 +1112,553 @@ func TestExtractBetween(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestAutonomyError tests the custom error type
+func TestAutonomyError(t *testing.T) {
+	t.Run("NewAutonomyError basic", func(t *testing.T) {
+		innerErr := errors.New("inner error")
+		err := NewAutonomyError("permission_check", ModeBasic, innerErr, "Permission denied for action")
+
+		if err == nil {
+			t.Fatal("NewAutonomyError should return non-nil error")
+		}
+
+		if err.Op != "permission_check" {
+			t.Errorf("Op = %s, want permission_check", err.Op)
+		}
+
+		if err.Mode != ModeBasic {
+			t.Errorf("Mode = %s, want ModeBasic", err.Mode)
+		}
+
+		if err.Reason != "Permission denied for action" {
+			t.Errorf("Reason = %s, want 'Permission denied for action'", err.Reason)
+		}
+
+		if err.Err != innerErr {
+			t.Error("Err should be the inner error")
+		}
+	})
+
+	t.Run("Error method", func(t *testing.T) {
+		innerErr := errors.New("test inner error")
+		err := NewAutonomyError("test_operation", ModeSemiAuto, innerErr, "Test error message")
+		errStr := err.Error()
+
+		if errStr == "" {
+			t.Error("Error() should return non-empty string")
+		}
+
+		// Should contain the operation and reason
+		if !contains(errStr, "test_operation") {
+			t.Errorf("Error() = %s, should contain operation", errStr)
+		}
+		// Mode is displayed with its description, e.g. "Semi Auto (Automated with Approval)"
+		if !contains(errStr, "Semi Auto") {
+			t.Errorf("Error() = %s, should contain mode", errStr)
+		}
+	})
+
+	t.Run("WithAction method", func(t *testing.T) {
+		action := NewAction(ActionLoadContext, "Test action", RiskLow)
+		innerErr := errors.New("test error")
+		err := NewAutonomyError("test_op", ModeBasic, innerErr, "Test").WithAction(action)
+
+		if err.Action != action {
+			t.Error("WithAction should set the action")
+		}
+
+		// Error string should contain action type
+		errStr := err.Error()
+		if !contains(errStr, "load_context") {
+			t.Errorf("Error() = %s, should contain action type", errStr)
+		}
+	})
+
+	t.Run("WithFixable method", func(t *testing.T) {
+		innerErr := errors.New("test error")
+		err := NewAutonomyError("test_op", ModeBasic, innerErr, "Test")
+
+		// Initially not fixable
+		if err.Fixable {
+			t.Error("Error should not be fixable by default")
+		}
+
+		// Set fixable
+		err = err.WithFixable(true)
+		if !err.Fixable {
+			t.Error("WithFixable(true) should set Fixable to true")
+		}
+
+		// Set not fixable
+		err = err.WithFixable(false)
+		if err.Fixable {
+			t.Error("WithFixable(false) should set Fixable to false")
+		}
+	})
+
+	t.Run("Unwrap method", func(t *testing.T) {
+		innerErr := errors.New("inner error")
+		outerErr := NewAutonomyError("test_op", ModeBasic, innerErr, "Outer error")
+
+		unwrapped := outerErr.Unwrap()
+		if unwrapped != innerErr {
+			t.Error("Unwrap should return the inner error")
+		}
+	})
+
+	t.Run("Unwrap nil inner", func(t *testing.T) {
+		err := NewAutonomyError("test_op", ModeBasic, nil, "Test")
+		unwrapped := err.Unwrap()
+		if unwrapped != nil {
+			t.Error("Unwrap should return nil when no inner error")
+		}
+	})
+}
+
+// TestGuardrailsAdditional tests additional guardrails functionality
+func TestGuardrailsAdditional(t *testing.T) {
+	t.Run("EnableRule", func(t *testing.T) {
+		checker := NewGuardrailsChecker()
+
+		// Disable a rule first
+		checker.DisableRule("prevent_destructive_commands")
+
+		// Now enable it
+		checker.EnableRule("prevent_destructive_commands")
+
+		// Check that it works again
+		ctx := context.Background()
+		action := &Action{
+			Type: ActionExecuteCmd,
+			Context: &ActionContext{
+				CommandToRun: "rm -rf /",
+			},
+		}
+
+		passed, _, _ := checker.Check(ctx, action)
+		if passed {
+			t.Error("Re-enabled rule should block dangerous command")
+		}
+	})
+
+	t.Run("GetRules", func(t *testing.T) {
+		checker := NewGuardrailsChecker()
+		rules := checker.GetRules()
+
+		if len(rules) == 0 {
+			t.Error("GetRules should return built-in rules")
+		}
+	})
+
+	t.Run("GetViolations", func(t *testing.T) {
+		checker := NewGuardrailsChecker()
+		violations := checker.GetViolations()
+
+		// Initially should be empty
+		if len(violations) != 0 {
+			t.Errorf("GetViolations should be empty initially, got %d", len(violations))
+		}
+	})
+}
+
+// TestModeParseAndAll tests mode parsing and listing
+func TestModeParseAndAll(t *testing.T) {
+	t.Run("ParseMode valid modes", func(t *testing.T) {
+		tests := []struct {
+			input    string
+			expected AutonomyMode
+			wantErr  bool
+		}{
+			{"none", ModeNone, false},
+			{"basic", ModeBasic, false},
+			{"basic_plus", ModeBasicPlus, false},
+			{"semi_auto", ModeSemiAuto, false},
+			{"full_auto", ModeFullAuto, false},
+			{"invalid", "", true},
+			{"", "", true},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.input, func(t *testing.T) {
+				mode, err := ParseMode(tt.input)
+				if tt.wantErr {
+					if err == nil {
+						t.Errorf("ParseMode(%q) should return error", tt.input)
+					}
+				} else {
+					if err != nil {
+						t.Errorf("ParseMode(%q) error = %v", tt.input, err)
+					}
+					if mode != tt.expected {
+						t.Errorf("ParseMode(%q) = %v, want %v", tt.input, mode, tt.expected)
+					}
+				}
+			})
+		}
+	})
+
+	t.Run("AllModes", func(t *testing.T) {
+		modes := AllModes()
+
+		if len(modes) != 5 {
+			t.Errorf("AllModes() returned %d modes, want 5", len(modes))
+		}
+
+		// Should contain all modes
+		expectedModes := []AutonomyMode{ModeNone, ModeBasic, ModeBasicPlus, ModeSemiAuto, ModeFullAuto}
+		for _, expected := range expectedModes {
+			found := false
+			for _, mode := range modes {
+				if mode == expected {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("AllModes() missing mode %v", expected)
+			}
+		}
+	})
+}
+
+// TestModeTransitions tests mode transition validation
+func TestModeTransitions(t *testing.T) {
+	t.Run("CanTransitionTo", func(t *testing.T) {
+		tests := []struct {
+			from      AutonomyMode
+			to        AutonomyMode
+			wantError bool
+		}{
+			// Can always transition to same mode
+			{ModeBasic, ModeBasic, false},
+			{ModeFullAuto, ModeFullAuto, false},
+
+			// Can transition to adjacent modes
+			{ModeNone, ModeBasic, false},
+			{ModeBasic, ModeBasicPlus, false},
+			{ModeBasicPlus, ModeSemiAuto, false},
+			{ModeSemiAuto, ModeFullAuto, false},
+
+			// Can transition down
+			{ModeFullAuto, ModeSemiAuto, false},
+			{ModeSemiAuto, ModeBasicPlus, false},
+			{ModeBasicPlus, ModeBasic, false},
+			{ModeBasic, ModeNone, false},
+
+			// Can skip levels going up (depends on implementation)
+			{ModeNone, ModeFullAuto, false}, // Allow escalation
+		}
+
+		for _, tt := range tests {
+			name := string(tt.from) + "_to_" + string(tt.to)
+			t.Run(name, func(t *testing.T) {
+				err := tt.from.CanTransitionTo(tt.to)
+				hasError := err != nil
+				if hasError != tt.wantError {
+					t.Errorf("%s.CanTransitionTo(%s) error = %v, wantError %v",
+						tt.from, tt.to, err, tt.wantError)
+				}
+			})
+		}
+	})
+}
+
+// TestMetricsAdditional tests additional metrics functionality
+func TestMetricsAdditional(t *testing.T) {
+	t.Run("RecordEscalation", func(t *testing.T) {
+		metrics := NewMetrics()
+		metrics.RecordEscalation()
+
+		stats := metrics.GetStats()
+		if stats.Escalations != 1 {
+			t.Errorf("Escalations = %d, want 1", stats.Escalations)
+		}
+	})
+
+	t.Run("Reset", func(t *testing.T) {
+		metrics := NewMetrics()
+
+		// Record some data
+		metrics.RecordPermissionCheck(1*time.Microsecond, true)
+		metrics.RecordModeChange()
+		metrics.RecordEscalation()
+
+		// Reset
+		metrics.Reset()
+
+		stats := metrics.GetStats()
+		if stats.PermissionChecks != 0 {
+			t.Error("Reset should clear PermissionChecks")
+		}
+		if stats.ModeChanges != 0 {
+			t.Error("Reset should clear ModeChanges")
+		}
+		if stats.Escalations != 0 {
+			t.Error("Reset should clear Escalations")
+		}
+	})
+}
+
+// TestExecutorAdditional tests additional executor functionality
+func TestExecutorAdditional(t *testing.T) {
+	t.Run("SetRetryConfig", func(t *testing.T) {
+		guardrails := NewGuardrailsChecker()
+		permManager := NewPermissionManager(ModeFullAuto, guardrails)
+		executor := NewActionExecutor(permManager)
+
+		// Set custom retry config (maxRetries, delay)
+		executor.SetRetryConfig(5, 100*time.Millisecond)
+
+		// Execute an action to ensure no panic
+		ctx := context.Background()
+		action := NewAction(ActionLoadContext, "Test", RiskNone)
+		_, err := executor.Execute(ctx, action)
+		if err != nil {
+			t.Fatalf("Execute error = %v", err)
+		}
+	})
+
+	t.Run("CanExecuteAutomatically", func(t *testing.T) {
+		guardrails := NewGuardrailsChecker()
+		permManager := NewPermissionManager(ModeFullAuto, guardrails)
+		executor := NewActionExecutor(permManager)
+
+		// Low risk action should be auto-executable in full auto mode
+		action := NewAction(ActionLoadContext, "Test", RiskNone)
+		canAuto := executor.CanExecuteAutomatically(action)
+		if !canAuto {
+			t.Error("Low risk action should be auto-executable in full auto mode")
+		}
+	})
+}
+
+// TestControllerAdditional tests additional controller functionality
+func TestControllerAdditional(t *testing.T) {
+	config := NewDefaultConfig()
+	config.DefaultMode = ModeBasic
+	config.PersistPath = ""
+
+	controller, err := NewAutonomyController(config)
+	if err != nil {
+		t.Fatalf("NewAutonomyController() error = %v", err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("GetConfig", func(t *testing.T) {
+		cfg := controller.GetConfig()
+		if cfg == nil {
+			t.Error("GetConfig should return non-nil config")
+		}
+		if cfg.DefaultMode != ModeBasic {
+			t.Errorf("Config.DefaultMode = %v, want %v", cfg.DefaultMode, ModeBasic)
+		}
+	})
+
+	t.Run("GetModeHistory", func(t *testing.T) {
+		history := controller.GetModeHistory()
+		if history == nil {
+			t.Error("GetModeHistory should return non-nil history")
+		}
+	})
+
+	t.Run("GetActiveEscalations", func(t *testing.T) {
+		escalations := controller.GetActiveEscalations()
+		// Initially should be empty
+		if len(escalations) != 0 {
+			t.Errorf("GetActiveEscalations should be empty initially, got %d", len(escalations))
+		}
+	})
+
+	t.Run("GetGuardrailViolations", func(t *testing.T) {
+		violations := controller.GetGuardrailViolations()
+		// Initially should be empty
+		if len(violations) != 0 {
+			t.Errorf("GetGuardrailViolations should be empty initially, got %d", len(violations))
+		}
+	})
+
+	t.Run("AddGuardrailRule", func(t *testing.T) {
+		rule := GuardrailRule{
+			Name:        "custom_rule",
+			Description: "Custom test rule",
+			Severity:    RiskLow,
+			Enabled:     true,
+		}
+		// AddGuardrailRule doesn't return error
+		controller.AddGuardrailRule(rule)
+	})
+
+	t.Run("DisableGuardrailRule", func(t *testing.T) {
+		// DisableGuardrailRule doesn't return error
+		controller.DisableGuardrailRule("custom_rule")
+	})
+
+	t.Run("EnableGuardrailRule", func(t *testing.T) {
+		// EnableGuardrailRule doesn't return error
+		controller.EnableGuardrailRule("custom_rule")
+	})
+
+	t.Run("UpdateConfig", func(t *testing.T) {
+		newConfig := NewDefaultConfig()
+		newConfig.BulkThreshold = 20
+		newConfig.MaxRetries = 10
+
+		err := controller.UpdateConfig(newConfig)
+		if err != nil {
+			t.Errorf("UpdateConfig error = %v", err)
+		}
+
+		// Verify update
+		cfg := controller.GetConfig()
+		if cfg.BulkThreshold != 20 {
+			t.Errorf("BulkThreshold = %d, want 20", cfg.BulkThreshold)
+		}
+	})
+
+	t.Run("Shutdown", func(t *testing.T) {
+		// Create a fresh controller for shutdown test
+		shutdownController, err := NewAutonomyController(NewDefaultConfig())
+		if err != nil {
+			t.Fatalf("NewAutonomyController error = %v", err)
+		}
+
+		err = shutdownController.Shutdown(ctx)
+		if err != nil {
+			t.Errorf("Shutdown error = %v", err)
+		}
+	})
+}
+
+// TestPermissionManagerAdditional tests additional permission manager functionality
+func TestPermissionManagerAdditional(t *testing.T) {
+	guardrails := NewGuardrailsChecker()
+	permManager := NewPermissionManager(ModeBasic, guardrails)
+
+	t.Run("GetPendingConfirmations", func(t *testing.T) {
+		pending := permManager.GetPendingConfirmations()
+		// Initially should be empty
+		if len(pending) != 0 {
+			t.Errorf("GetPendingConfirmations should be empty initially, got %d", len(pending))
+		}
+	})
+
+	t.Run("GrantPermission", func(t *testing.T) {
+		ctx := context.Background()
+		action := NewAction(ActionApplyChange, "Test grant", RiskLow)
+
+		// GrantPermission takes (ctx, action, duration)
+		err := permManager.GrantPermission(ctx, action, 1*time.Hour)
+		// This tests that the function exists and doesn't panic
+		_ = err
+	})
+
+	t.Run("RevokePermission", func(t *testing.T) {
+		ctx := context.Background()
+
+		// RevokePermission takes (ctx, actionType)
+		err := permManager.RevokePermission(ctx, ActionApplyChange)
+		// May return error if no cached permission
+		// This tests that the function exists and doesn't panic
+		_ = err
+	})
+}
+
+// TestEscalationEngine tests escalation engine functionality
+func TestEscalationEngine(t *testing.T) {
+	config := NewDefaultModeConfig()
+	config.PersistPath = ""
+
+	modeManager, err := NewModeManager(config)
+	if err != nil {
+		t.Fatalf("NewModeManager() error = %v", err)
+	}
+
+	escalationConfig := NewDefaultEscalationConfig()
+	engine := NewEscalationEngine(modeManager, escalationConfig)
+
+	t.Run("GetActive", func(t *testing.T) {
+		active := engine.GetActive()
+		// Initially should be empty
+		if len(active) != 0 {
+			t.Errorf("GetActive should be empty initially, got %d", len(active))
+		}
+	})
+
+	t.Run("GetAll", func(t *testing.T) {
+		all := engine.GetAll()
+		// Initially should be empty
+		if len(all) != 0 {
+			t.Errorf("GetAll should be empty initially, got %d", len(all))
+		}
+	})
+
+	t.Run("GetEscalation non-existent", func(t *testing.T) {
+		// GetEscalation returns (escalation, error)
+		esc, err := engine.GetEscalation("non-existent-id")
+		if err == nil {
+			t.Error("GetEscalation should return error for non-existent ID")
+		}
+		if esc != nil {
+			t.Error("GetEscalation should return nil for non-existent ID")
+		}
+	})
+
+	t.Run("Escalation struct fields", func(t *testing.T) {
+		// Test creating an Escalation struct with correct fields
+		esc := &Escalation{
+			ID:        "test-esc",
+			From:      ModeBasic,
+			To:        ModeFullAuto,
+			Reason:    "testing",
+			StartTime: time.Now(),
+			Duration:  1 * time.Hour,
+			ExpiresAt: time.Now().Add(1 * time.Hour),
+			Active:    true,
+			UserID:    "test-user",
+		}
+
+		if esc.ID != "test-esc" {
+			t.Errorf("Escalation.ID = %s, want test-esc", esc.ID)
+		}
+		if esc.From != ModeBasic {
+			t.Errorf("Escalation.From = %v, want ModeBasic", esc.From)
+		}
+		if esc.To != ModeFullAuto {
+			t.Errorf("Escalation.To = %v, want ModeFullAuto", esc.To)
+		}
+		if esc.Reason != "testing" {
+			t.Errorf("Escalation.Reason = %s, want testing", esc.Reason)
+		}
+		if !esc.Active {
+			t.Error("Escalation.Active should be true")
+		}
+
+		// Test expiry check using ExpiresAt field directly
+		if esc.ExpiresAt.Before(time.Now()) {
+			t.Error("Escalation should not be expired yet")
+		}
+
+		// Test expired escalation
+		esc.ExpiresAt = time.Now().Add(-1 * time.Hour)
+		if !esc.ExpiresAt.Before(time.Now()) {
+			t.Error("Escalation should be expired")
+		}
+	})
+}
+
+// helper function for string contains check
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
+}
+
+func containsHelper(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }
