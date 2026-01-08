@@ -10,11 +10,11 @@
 
 | Category | Open | In Progress | Fixed | Verified | Total |
 |----------|------|-------------|-------|----------|-------|
-| CRITICAL | 0 | 0 | 1 | 0 | 1 |
-| HIGH | 3 | 0 | 0 | 0 | 3 |
-| MEDIUM | 1 | 0 | 4 | 0 | 5 |
-| LOW | 3 | 0 | 1 | 0 | 4 |
-| **Total** | **7** | **0** | **6** | **0** | **13** |
+| CRITICAL | 1 | 0 | 1 | 0 | 2 |
+| HIGH | 7 | 0 | 3 | 0 | 10 |
+| MEDIUM | 9 | 0 | 8 | 0 | 17 |
+| LOW | 5 | 0 | 4 | 0 | 9 |
+| **Total** | **22** | **0** | **16** | **0** | **38** |
 
 ---
 
@@ -340,25 +340,615 @@ Status: FIXED
 
 ## Phase 1.2: task/ Package Issues
 
-*To be populated during task/ audit*
+### HELIX-014: Checkpoint Creates Fake WorkerID
+```
+ID: HELIX-014
+Category: STUB
+Severity: HIGH
+Package: internal/task
+File: checkpoint.go:22, manager_methods.go:179-195
+Status: FIXED
+```
+
+**Description**: The `CreateCheckpoint` function was generating a random worker ID instead of using the actual worker ID from task context.
+
+**Resolution**:
+1. Modified `CheckpointManager.CreateCheckpoint` to accept `workerID uuid.UUID` as a parameter
+2. Modified `TaskManager.CreateCheckpoint` to retrieve workerID from `task.AssignedWorker` field
+3. Updated all tests to pass the workerID parameter
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: Yes - COMPLETED (checkpoint_test.go updated)
+
+---
+
+### HELIX-015: RestoreFromCheckpoint Not Implemented
+```
+ID: HELIX-015
+Category: MISSING
+Severity: HIGH
+Package: internal/task
+File: README.md:121
+Status: FIXED
+```
+
+**Description**: README documented `manager.RestoreFromCheckpoint(ctx, taskID)` but this function does not exist in the codebase.
+
+**Resolution**: Removed non-existent function from README. Updated checkpointing section to show actual API: `GetLatestCheckpoint` and `GetCheckpoints`.
+
+**Fix Required**: Yes - COMPLETED (removed from README)
+**Test Required**: No (documentation only)
+
+---
+
+### HELIX-016: Automatic Checkpoint Interval Not Implemented
+```
+ID: HELIX-016
+Category: MISSING
+Severity: MEDIUM
+Package: internal/task
+File: README.md:114-115, 169
+Status: FIXED
+```
+
+**Description**: README claimed checkpoints are "saved automatically at configured intervals" (default 300 seconds) but no automatic checkpointing is implemented.
+
+**Resolution**: Removed false claim about automatic checkpointing from README. Updated to document only manual checkpoint creation.
+
+**Fix Required**: Yes - COMPLETED (removed from README)
+**Test Required**: No (documentation only)
+
+---
+
+### HELIX-017: Priority Values Mismatch
+```
+ID: HELIX-017
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/task
+File: README.md:55-60 vs manager.go:34-39
+Status: FIXED
+```
+
+**Description**: README showed different priority values than actual implementation.
+
+**Resolution**: Updated README to show correct TaskPriority values (1, 5, 10, 20) matching manager.go.
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
+
+---
+
+### HELIX-018: Checkpoint Struct Mismatch
+```
+ID: HELIX-018
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/task
+File: README.md:181-187 vs checkpoint.go:158-165
+Status: FIXED
+```
+
+**Description**: README showed different Checkpoint struct than actual implementation.
+
+**Resolution**: Updated README to show correct Checkpoint struct matching checkpoint.go with ID, CheckpointName, CheckpointData, WorkerID, CreatedAt fields.
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
+
+---
+
+### HELIX-019: Task Struct Incomplete in README
+```
+ID: HELIX-019
+Category: INCONSISTENT
+Severity: LOW
+Package: internal/task
+File: README.md:22-32 vs manager.go:75-95
+Status: FIXED
+```
+
+**Description**: README showed simplified Task struct missing many fields.
+
+**Resolution**: Updated README to show complete Task struct with all 18 fields matching manager.go.
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
+
+---
+
+### HELIX-020: TaskType Naming Convention Different
+```
+ID: HELIX-020
+Category: INCONSISTENT
+Severity: LOW
+Package: internal/task
+File: README.md:38-47 vs manager.go:19-29
+Status: FIXED
+```
+
+**Description**: README showed `TypePlanning` but actual code uses `TaskTypePlanning`.
+
+**Resolution**: Updated README to use correct naming convention (TaskTypePlanning, etc.) and added missing types: TaskTypeDesign, TaskTypeDiagram, TaskTypePorting.
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
+
+---
+
+### HELIX-021: Status Values Missing
+```
+ID: HELIX-021
+Category: INCONSISTENT
+Severity: LOW
+Package: internal/task
+File: README.md:66-75 vs manager.go:54-63
+Status: FIXED
+```
+
+**Description**: README showed `StatusCancelled` but actual code uses `TaskStatusPaused`, `TaskStatusWaitingForWorker`, `TaskStatusWaitingForDeps`.
+
+**Resolution**: Updated README to show correct TaskStatus values including TaskStatusPaused, TaskStatusWaitingForWorker, TaskStatusWaitingForDeps (removed non-existent cancelled).
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
 
 ---
 
 ## Phase 1.3: worker/ Package Issues
 
-*To be populated during worker/ audit*
+### HELIX-022: Hardcoded Helix CLI Download URL
+```
+ID: HELIX-022
+Category: STUB
+Severity: MEDIUM
+Package: internal/worker
+File: ssh_pool.go:562
+Status: OPEN
+```
+
+**Description**: The `installHelixCLI` function uses a hardcoded URL for downloading the Helix CLI binary.
+
+**Code**:
+```go
+curl -L https://github.com/helixdev/helix-cli/releases/latest/download/helix-linux-amd64 -o /tmp/helix
+```
+
+**Expected**: URL should be configurable via config or environment variable.
+
+**Fix Required**: Yes - make URL configurable
+**Test Required**: Yes - add test for configurable URL
+
+---
+
+### HELIX-023: installHelixCLI Called Before Worker ID Set
+```
+ID: HELIX-023
+Category: BROKEN
+Severity: HIGH
+Package: internal/worker
+File: ssh_pool.go:268-291
+Status: FIXED
+```
+
+**Description**: In `AddWorker`, `installHelixCLI` was called before `worker.ID` was assigned. The `installHelixCLI` method internally calls `ExecuteCommand(ctx, worker.ID, ...)` but `worker.ID` was zero UUID.
+
+**Resolution**: Moved worker ID assignment (and other initialization) BEFORE the auto-install and capability detection operations. Also added the worker to the pool map before these operations so `ExecuteCommand` can find it.
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: Yes - existing tests pass
+
+---
+
+### HELIX-024: README Documentation Complete Mismatch (FIXED)
+```
+ID: HELIX-024
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/worker
+File: README.md (entire file)
+Status: FIXED
+```
+
+**Description**: README documentation was completely mismatched with actual implementation. Wrong struct definitions, wrong status values, wrong function signatures, missing features.
+
+**Resolution**: Completely rewrote README to match actual implementation including:
+- Correct SSHWorkerPool struct
+- Correct SSHWorker and Worker structs
+- Correct Resources struct
+- Correct SSHWorkerConfig struct
+- Correct WorkerStatus values (active, inactive, maintenance, failed, offline)
+- Correct WorkerHealth values (healthy, degraded, unhealthy, unknown)
+- Documented isolation and consensus features
+- Updated usage examples
+
+**Fix Required**: Yes - COMPLETED
+**Test Required**: No
 
 ---
 
 ## Phase 1.4: llm/ Package Issues
 
-*To be populated during llm/ audit*
+### HELIX-025: Missing Factory Support for 10 Local Providers
+```
+ID: HELIX-025
+Category: MISSING
+Severity: HIGH
+Package: internal/llm
+File: factory.go
+Status: OPEN
+```
+
+**Description**: 10 local LLM providers have implementations in local_providers.go but are NOT registered in factory.go. Users cannot create these providers via `NewProvider()`.
+
+**Missing Factory Cases**:
+- ProviderTypeVLLM → NewVLLMProvider() exists but not in factory
+- ProviderTypeLocalAI → NewLocalAIProvider() exists but not in factory
+- ProviderTypeFastChat → NewFastChatProvider() exists but not in factory
+- ProviderTypeTextGen → NewTextGenProvider() exists but not in factory
+- ProviderTypeLMStudio → NewLMStudioProvider() exists but not in factory
+- ProviderTypeJan → NewJanProvider() exists but not in factory
+- ProviderTypeGPT4All → NewGPT4AllProvider() exists but not in factory
+- ProviderTypeTabbyAPI → NewTabbyAPIProvider() exists but not in factory
+- ProviderTypeMLX → NewMLXProvider() exists but not in factory
+- ProviderTypeMistralRS → NewMistralRSProvider() exists but not in factory
+
+**Consequence**: Calling `NewProvider()` for these types returns: "unsupported provider type: {type}"
+
+**Fix Required**: Yes - add switch cases in factory.go
+**Test Required**: Yes - add tests for each provider creation
+
+---
+
+### HELIX-026: README Type Names Mismatch
+```
+ID: HELIX-026
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/llm
+File: README.md
+Status: OPEN
+```
+
+**Description**: README documents types that don't exist or have wrong names.
+
+**Type Mismatches**:
+| README Type | Actual Type |
+|-------------|-------------|
+| GenerateRequest | LLMRequest |
+| GenerateResponse | LLMResponse |
+| ProviderConfig | ProviderConfigEntry |
+| StreamChunk | LLMResponse (sent to channel) |
+
+**Interface Mismatches**:
+- README: `Generate(ctx, *GenerateRequest) (*GenerateResponse, error)`
+- Actual: `Generate(ctx, *LLMRequest) (*LLMResponse, error)`
+- README: Response has `Text` field
+- Actual: Response has `Content` field
+
+**Fix Required**: Yes - update README to match actual types
+**Test Required**: No
+
+---
+
+### HELIX-027: Cost Tracking Not Implemented
+```
+ID: HELIX-027
+Category: MISSING
+Severity: MEDIUM
+Package: internal/llm
+File: README.md:192-196
+Status: OPEN
+```
+
+**Description**: README documents cost tracking features that don't exist.
+
+**README Claims**:
+```go
+cost := resp.Usage.Cost        // DOES NOT EXIST
+currency := resp.Usage.Currency // DOES NOT EXIST
+rates := provider.GetCostRates() // DOES NOT EXIST
+```
+
+**Actual Usage Struct**:
+```go
+type Usage struct {
+    PromptTokens     int
+    CompletionTokens int
+    TotalTokens      int
+    // No Cost, Currency, or rates
+}
+```
+
+**Fix Required**: Yes - implement or remove from README
+**Test Required**: Yes - if implementing
+
+---
+
+### HELIX-028: Provider Manager API Mismatch
+```
+ID: HELIX-028
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/llm
+File: README.md:134-145
+Status: OPEN
+```
+
+**Description**: README documents `NewProviderManager()` but this function doesn't exist.
+
+**README Claims**:
+```go
+manager := llm.NewProviderManager(config)
+manager.AddProvider("openai", openaiProvider)
+manager.GenerateWithProvider(ctx, "anthropic", req)
+```
+
+**Actual**: Use `NewModelManager()`, `AutoLLMManager`, or `IntegratedModelManager` instead.
+
+**Fix Required**: Yes - update README to show actual API
+**Test Required**: No
+
+---
+
+### HELIX-029: Hardcoded Model Alternatives in Discovery
+```
+ID: HELIX-029
+Category: STUB
+Severity: LOW
+Package: internal/llm
+File: model_discovery.go:1135-1156
+Status: OPEN
+```
+
+**Description**: `FindAlternativeModels` uses hardcoded map instead of dynamic discovery.
+
+**Code**:
+```go
+// For now, return some hardcoded alternatives
+alternativeMap := map[string][]string{
+    "llama-3-8b-instruct":   {"mistral-7b-instruct", "codellama-7b-instruct"},
+    "mistral-7b-instruct":   {"llama-3-8b-instruct", "zephyr-7b-beta"},
+    "codellama-7b-instruct": {"starcoder-7b", "deepseek-coder-6.7b"},
+}
+```
+
+**Fix Required**: Yes - implement dynamic discovery or document limitation
+**Test Required**: Yes - if implementing
+
+---
+
+### HELIX-030: Unused Provider Type Constants
+```
+ID: HELIX-030
+Category: INCOMPLETE
+Severity: LOW
+Package: internal/llm
+File: missing_types.go:37-77
+Status: OPEN
+```
+
+**Description**: 41 provider type constants are defined but only ~17 have implementations.
+
+**Unused Types (no implementation)**:
+- ProviderTypeMemGPT, ProviderTypeCrewAI, ProviderTypeCharacterAI
+- ProviderTypeReplika, ProviderTypeAnima, ProviderTypeGemma
+- ProviderTypeLlamaIndex, ProviderTypeCohere, ProviderTypeHuggingFace
+- ProviderTypeMistral, ProviderTypeClickHouse, ProviderTypeSupabase
+- ProviderTypeDeepLake, ProviderTypeChroma, ProviderTypeAgnostic
+- And others (~24 total)
+
+**Fix Required**: Yes - implement or remove unused constants
+**Test Required**: Yes - if implementing
 
 ---
 
 ## Phase 1.5: workflow/ Package Issues
 
-*To be populated during workflow/ audit*
+### HELIX-031: Command Injection Vulnerability
+```
+ID: HELIX-031
+Category: BROKEN
+Severity: CRITICAL
+Package: internal/workflow
+File: executor.go:796-808
+Status: OPEN
+```
+
+**Description**: `executeCommandStep()` passes user input directly to bash without validation.
+
+**Code**:
+```go
+cmd := exec.CommandContext(ctx, "bash", "-c", step.Description)
+```
+
+**Security Risks**:
+- No input validation or sanitization
+- Shell injection vulnerability
+- No command whitelist
+- No resource limits
+
+**Fix Required**: Yes - implement command validation and allowlist
+**Test Required**: Yes - add security tests
+
+---
+
+### HELIX-032: Template Generators Return TODO Placeholders
+```
+ID: HELIX-032
+Category: STUB
+Severity: HIGH
+Package: internal/workflow
+File: executor.go:660-794
+Status: OPEN
+```
+
+**Description**: Code template generators return TODO comments and "Task implementation pending" messages instead of actual code.
+
+**Generated Code Example**:
+```go
+// TODO: Implement the following task:
+// {step description}
+
+fmt.Println("Task implementation pending")
+fmt.Println("Configure an LLM provider in HelixCode for AI-powered code generation")
+```
+
+**Affected Templates**: Go, Node.js, Python, Rust
+
+**Fix Required**: Yes - integrate LLM or provide functional templates
+**Test Required**: Yes - verify generated code is functional
+
+---
+
+### HELIX-033: Static Analysis Returns Hardcoded Recommendations
+```
+ID: HELIX-033
+Category: STUB
+Severity: MEDIUM
+Package: internal/workflow
+File: executor.go:498-533
+Status: OPEN
+```
+
+**Description**: `performStaticAnalysis()` returns generic hardcoded recommendations regardless of actual project content.
+
+**Hardcoded Output**:
+```
+## Recommendations
+- Enable LLM analysis for deeper insights
+- Review entry points for optimization opportunities
+```
+
+**Fix Required**: Yes - implement actual code analysis
+**Test Required**: Yes - verify analysis is meaningful
+
+---
+
+### HELIX-034: Missing Documented API Methods
+```
+ID: HELIX-034
+Category: MISSING
+Severity: HIGH
+Package: internal/workflow
+File: executor.go
+Status: OPEN
+```
+
+**Description**: README documents API methods that don't exist.
+
+**Missing Methods**:
+- CreateWorkflow()
+- ExecuteWorkflow()
+- ExecuteWorkflowWithParams()
+- GetWorkflowStatus()
+- GetStepStatus()
+- Subscribe() (for live updates)
+- RetryStep()
+- SkipStep()
+
+**Available**: Only pre-built workflows (planning, building, testing, refactoring)
+
+**Fix Required**: Yes - implement or remove from README
+**Test Required**: Yes - if implementing
+
+---
+
+### HELIX-035: Missing Step Types and Actions
+```
+ID: HELIX-035
+Category: INCONSISTENT
+Severity: MEDIUM
+Package: internal/workflow
+File: workflow.go
+Status: OPEN
+```
+
+**Description**: README documents step types and actions that don't exist in code.
+
+**Missing**:
+- StepTypeDeployment (constant not defined)
+- StepActionDeploy (constant not defined)
+- StepActionFormat (constant not defined)
+
+**Fix Required**: Yes - implement or update README
+**Test Required**: No
+
+---
+
+### HELIX-036: Planmode Placeholder Implementations
+```
+ID: HELIX-036
+Category: STUB
+Severity: MEDIUM
+Package: internal/workflow/planmode
+File: executor.go:366-409
+Status: OPEN
+```
+
+**Description**: Multiple planmode step handlers are placeholders that only return formatted strings.
+
+**Placeholder Methods**:
+- executeFileOperation() - doesn't modify files
+- executeCodeGeneration() - no LLM integration
+- executeCodeAnalysis() - no actual analysis
+- executeValidation() - no checks performed
+- executeTesting() - no tests run
+
+**Fix Required**: Yes - implement actual functionality
+**Test Required**: Yes - verify each step type works
+
+---
+
+### HELIX-037: Inadequate Dangerous Command Detection
+```
+ID: HELIX-037
+Category: BROKEN
+Severity: HIGH
+Package: internal/workflow/autonomy
+File: executor.go:224-233
+Status: OPEN
+```
+
+**Description**: `containsDangerous()` only checks 4 commands with naive prefix matching.
+
+**Current Blocklist**: `rm`, `dd`, `mkfs`, `fdisk`
+
+**Bypass Examples**:
+- ` rm -rf /` (space prefix)
+- `bash -c "rm -rf /"`
+- Scripts with dangerous commands
+
+**Missing**: `mv`, `cp`, `chmod`, `chown`, `kill`, `systemctl`, etc.
+
+**Fix Required**: Yes - implement comprehensive command validation
+**Test Required**: Yes - add security bypass tests
+
+---
+
+### HELIX-038: Autonomy Executor Always Succeeds
+```
+ID: HELIX-038
+Category: BROKEN
+Severity: MEDIUM
+Package: internal/workflow/autonomy
+File: executor.go:131-165
+Status: OPEN
+```
+
+**Description**: `executeAction()` always sets `Success: true` regardless of actual execution.
+
+**Code**:
+```go
+result := &ActionResult{
+    Action:  action,
+    Success: true,  // Always true!
+    Output:  fmt.Sprintf("Executed: %s", action.Description),
+}
+```
+
+**Fix Required**: Yes - implement actual execution with proper error handling
+**Test Required**: Yes - verify failure cases are handled
 
 ---
 
@@ -373,3 +963,17 @@ Status: FIXED
 | 2026-01-08 | HELIX-006 | FIXED - Updated README Session struct | Audit |
 | 2026-01-08 | HELIX-007 | FIXED - Updated README constructor example | Audit |
 | 2026-01-08 | HELIX-013 | FIXED - Added Argon2 verification tests | Audit |
+| 2026-01-08 | HELIX-014 to HELIX-021 | Created (task/ package) | Audit |
+| 2026-01-08 | HELIX-014 | FIXED - Added workerID parameter to CreateCheckpoint | Audit |
+| 2026-01-08 | HELIX-015 | FIXED - Removed non-existent RestoreFromCheckpoint from README | Audit |
+| 2026-01-08 | HELIX-016 | FIXED - Removed false auto-checkpoint claim from README | Audit |
+| 2026-01-08 | HELIX-017 | FIXED - Updated README priority values | Audit |
+| 2026-01-08 | HELIX-018 | FIXED - Updated README Checkpoint struct | Audit |
+| 2026-01-08 | HELIX-019 | FIXED - Updated README Task struct (complete) | Audit |
+| 2026-01-08 | HELIX-020 | FIXED - Updated README TaskType naming convention | Audit |
+| 2026-01-08 | HELIX-021 | FIXED - Updated README TaskStatus values | Audit |
+| 2026-01-08 | HELIX-022 to HELIX-024 | Created (worker/ package) | Audit |
+| 2026-01-08 | HELIX-023 | FIXED - Worker ID assigned before installHelixCLI | Audit |
+| 2026-01-08 | HELIX-024 | FIXED - Completely rewrote worker README | Audit |
+| 2026-01-08 | HELIX-025 to HELIX-030 | Created (llm/ package) | Audit |
+| 2026-01-08 | HELIX-031 to HELIX-038 | Created (workflow/ package) | Audit |

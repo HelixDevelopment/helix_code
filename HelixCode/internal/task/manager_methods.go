@@ -175,16 +175,23 @@ func (tm *TaskManager) FailTask(taskID uuid.UUID, errorMessage string) error {
 }
 
 // CreateCheckpoint creates a checkpoint for a task
+// The workerID is automatically retrieved from the task's AssignedWorker field
 func (tm *TaskManager) CreateCheckpoint(taskID uuid.UUID, checkpointName string, checkpointData map[string]interface{}) error {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 
-	_, exists := tm.tasks[taskID]
+	task, exists := tm.tasks[taskID]
 	if !exists {
 		return fmt.Errorf("task not found: %s", taskID)
 	}
 
-	return tm.checkpointMgr.CreateCheckpoint(taskID, checkpointName, checkpointData)
+	// Get worker ID from task - use zero UUID if no worker assigned
+	var workerID uuid.UUID
+	if task.AssignedWorker != nil {
+		workerID = *task.AssignedWorker
+	}
+
+	return tm.checkpointMgr.CreateCheckpoint(taskID, workerID, checkpointName, checkpointData)
 }
 
 // GetTaskProgress returns progress information for a task

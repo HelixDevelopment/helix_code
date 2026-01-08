@@ -265,6 +265,16 @@ func (p *SSHWorkerPool) AddWorker(ctx context.Context, worker *SSHWorker) error 
 		return fmt.Errorf("SSH connection failed: %v", err)
 	}
 
+	// Assign worker ID and timestamps BEFORE any operations that might use it
+	worker.ID = uuid.New()
+	worker.CreatedAt = time.Now()
+	worker.UpdatedAt = time.Now()
+	worker.Status = WorkerStatusActive
+	worker.HealthStatus = WorkerHealthHealthy
+
+	// Add to pool map so ExecuteCommand can find it
+	p.workers[worker.ID] = worker
+
 	// Auto-install Helix CLI if enabled
 	if p.autoInstall {
 		if err := p.installHelixCLI(ctx, worker); err != nil {
@@ -277,13 +287,6 @@ func (p *SSHWorkerPool) AddWorker(ctx context.Context, worker *SSHWorker) error 
 		log.Printf("Warning: Failed to detect capabilities on %s: %v", worker.Hostname, err)
 	}
 
-	worker.ID = uuid.New()
-	worker.CreatedAt = time.Now()
-	worker.UpdatedAt = time.Now()
-	worker.Status = WorkerStatusActive
-	worker.HealthStatus = WorkerHealthHealthy
-
-	p.workers[worker.ID] = worker
 	log.Printf("SSH Worker added: %s (%s)", worker.Hostname, worker.ID)
 	return nil
 }

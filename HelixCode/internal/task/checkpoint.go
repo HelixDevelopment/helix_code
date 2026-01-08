@@ -18,7 +18,8 @@ func NewCheckpointManager(db database.DatabaseInterface) *CheckpointManager {
 }
 
 // CreateCheckpoint creates a checkpoint for a task
-func (cm *CheckpointManager) CreateCheckpoint(taskID uuid.UUID, checkpointName string, checkpointData map[string]interface{}) error {
+// workerID should be the ID of the worker currently executing the task
+func (cm *CheckpointManager) CreateCheckpoint(taskID uuid.UUID, workerID uuid.UUID, checkpointName string, checkpointData map[string]interface{}) error {
 	ctx := context.Background()
 
 	// Convert checkpoint data to JSON
@@ -26,9 +27,6 @@ func (cm *CheckpointManager) CreateCheckpoint(taskID uuid.UUID, checkpointName s
 	if err != nil {
 		return fmt.Errorf("failed to marshal checkpoint data: %v", err)
 	}
-
-	// Get the current worker ID (this would come from the task context)
-	workerID := uuid.New() // In real implementation, this would be the actual worker ID
 
 	// Insert checkpoint into database
 	_, err = cm.db.Exec(ctx, `

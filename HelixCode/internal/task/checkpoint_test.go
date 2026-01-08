@@ -21,6 +21,7 @@ func TestCheckpointManager_CreateCheckpointSuccess(t *testing.T) {
 	cm := NewCheckpointManager(mockDB)
 
 	taskID := uuid.New()
+	workerID := uuid.New()
 	checkpointName := "step-1-completed"
 	checkpointData := map[string]interface{}{
 		"progress": 50,
@@ -30,7 +31,7 @@ func TestCheckpointManager_CreateCheckpointSuccess(t *testing.T) {
 	// Mock successful Exec
 	mockDB.MockExecSuccess(1)
 
-	err := cm.CreateCheckpoint(taskID, checkpointName, checkpointData)
+	err := cm.CreateCheckpoint(taskID, workerID, checkpointName, checkpointData)
 
 	assert.NoError(t, err)
 	mockDB.AssertExpectations(t)
@@ -41,6 +42,7 @@ func TestCheckpointManager_CreateCheckpointMarshalError(t *testing.T) {
 	cm := NewCheckpointManager(mockDB)
 
 	taskID := uuid.New()
+	workerID := uuid.New()
 	checkpointName := "test-checkpoint"
 
 	// Create data that cannot be marshaled (channels, functions, etc.)
@@ -49,7 +51,7 @@ func TestCheckpointManager_CreateCheckpointMarshalError(t *testing.T) {
 		"channel": make(chan int),
 	}
 
-	err := cm.CreateCheckpoint(taskID, checkpointName, invalidData)
+	err := cm.CreateCheckpoint(taskID, workerID, checkpointName, invalidData)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to marshal checkpoint data")
@@ -60,13 +62,14 @@ func TestCheckpointManager_CreateCheckpointDatabaseError(t *testing.T) {
 	cm := NewCheckpointManager(mockDB)
 
 	taskID := uuid.New()
+	workerID := uuid.New()
 	checkpointName := "test-checkpoint"
 	checkpointData := map[string]interface{}{"key": "value"}
 
 	dbError := errors.New("database connection lost")
 	mockDB.MockExecError(dbError)
 
-	err := cm.CreateCheckpoint(taskID, checkpointName, checkpointData)
+	err := cm.CreateCheckpoint(taskID, workerID, checkpointName, checkpointData)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to create checkpoint")

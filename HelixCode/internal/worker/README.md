@@ -10,52 +10,102 @@ This package handles:
 - Health monitoring and heartbeats
 - Resource tracking (CPU, memory, GPU)
 - Capability-based task assignment
-- Connection pooling and retry logic
+- Connection pooling with host key verification
+- Worker isolation and sandboxing
+- Consensus management for distributed coordination
 
 ## Key Types
 
 ### SSHWorkerPool
 
-The main worker pool manager:
+The main SSH worker pool manager:
 
 ```go
 type SSHWorkerPool struct {
-    workers    map[string]*Worker
-    config     *PoolConfig
-    mu         sync.RWMutex
-    healthChan chan *HealthReport
+    workers     map[uuid.UUID]*SSHWorker
+    mutex       sync.RWMutex
+    autoInstall bool
+    hostKeys    *HostKeyManager
+    isolation   *WorkerIsolationManager
+    consensus   *ConsensusManager
+}
+```
+
+### SSHWorker
+
+Represents an SSH-accessible worker node:
+
+```go
+type SSHWorker struct {
+    ID           uuid.UUID
+    Hostname     string
+    DisplayName  string
+    SSHConfig    *SSHWorkerConfig
+    Capabilities []string
+    Resources    Resources
+    Status       WorkerStatus
+    HealthStatus WorkerHealth
+    LastCheck    time.Time
+    CreatedAt    time.Time
+    UpdatedAt    time.Time
 }
 ```
 
 ### Worker
 
-Represents a distributed worker:
+Represents a distributed worker (used by WorkerManager):
 
 ```go
 type Worker struct {
-    ID           string
-    Host         string
-    User         string
-    Port         int
-    Status       WorkerStatus
-    Capabilities []string
-    Resources    *ResourceInfo
-    LastSeen     time.Time
+    ID                 uuid.UUID              `json:"id"`
+    Hostname           string                 `json:"hostname"`
+    DisplayName        string                 `json:"display_name"`
+    SSHConfig          map[string]interface{} `json:"ssh_config"`
+    Capabilities       []string               `json:"capabilities"`
+    Resources          Resources              `json:"resources"`
+    Status             WorkerStatus           `json:"status"`
+    HealthStatus       WorkerHealth           `json:"health_status"`
+    LastHeartbeat      time.Time              `json:"last_heartbeat"`
+    CPUUsagePercent    float64                `json:"cpu_usage_percent"`
+    MemoryUsagePercent float64                `json:"memory_usage_percent"`
+    DiskUsagePercent   float64                `json:"disk_usage_percent"`
+    CurrentTasksCount  int                    `json:"current_tasks_count"`
+    MaxConcurrentTasks int                    `json:"max_concurrent_tasks"`
+    CreatedAt          time.Time              `json:"created_at"`
+    UpdatedAt          time.Time              `json:"updated_at"`
 }
 ```
 
-### ResourceInfo
+### Resources
 
-Worker resource information:
+Worker hardware resources:
 
 ```go
-type ResourceInfo struct {
-    CPUCores     int
-    MemoryTotal  int64
-    MemoryFree   int64
-    GPUAvailable bool
-    GPUMemory    int64
-    DiskFree     int64
+type Resources struct {
+    CPUCount    int    `json:"cpu_count"`
+    TotalMemory int64  `json:"total_memory"` // in bytes
+    TotalDisk   int64  `json:"total_disk"`   // in bytes
+    GPUCount    int    `json:"gpu_count"`
+    GPUModel    string `json:"gpu_model"`
+    GPUMemory   int64  `json:"gpu_memory"` // in bytes
+}
+```
+
+### SSHWorkerConfig
+
+SSH connection configuration:
+
+```go
+type SSHWorkerConfig struct {
+    Host                  string
+    Port                  int
+    Username              string
+    PrivateKey            string
+    Password              string
+    KeyPath               string
+    KnownHostsPath        string
+    HostKeyFingerprint    string
+    StrictHostKeyChecking bool
 }
 ```
 
@@ -66,27 +116,27 @@ type ResourceInfo struct {
 ```go
 import "dev.helix.code/internal/worker"
 
-config := &worker.PoolConfig{
-    MaxWorkers:          10,
-    HealthCheckInterval: 30 * time.Second,
-    ConnectionTimeout:   10 * time.Second,
-}
-
-pool := worker.NewSSHWorkerPool(config)
+// Create pool with auto-install enabled
+pool := worker.NewSSHWorkerPool(true)
 ```
 
 ### Adding Workers
 
 ```go
-// Add worker via SSH
-workerConfig := &worker.WorkerConfig{
-    Host:       "worker-host.example.com",
-    User:       "helix",
-    Port:       22,
-    PrivateKey: privateKeyPath,
+// Create SSH worker configuration
+sshWorker := &worker.SSHWorker{
+    Hostname:    "worker-host.example.com",
+    DisplayName: "Build Worker 1",
+    SSHConfig: &worker.SSHWorkerConfig{
+        Host:     "worker-host.example.com",
+        Port:     22,
+        Username: "helix",
+        KeyPath:  "/path/to/private/key",
+    },
+    Capabilities: []string{"docker-execution", "python-execution"},
 }
 
-err := pool.AddWorker(ctx, workerConfig)
+err := pool.AddWorker(ctx, sshWorker)
 if err != nil {
     return err
 }
@@ -94,68 +144,68 @@ if err != nil {
 
 ### Auto-Installation
 
-Workers automatically get the Helix CLI installed:
+Workers automatically get the Helix CLI installed when `autoInstall` is enabled:
 
 ```go
-// This happens automatically when adding a worker
-// The pool detects if Helix is installed and installs if needed
-pool.AddWorker(ctx, workerConfig)
+pool := worker.NewSSHWorkerPool(true) // Enable auto-install
+pool.AddWorker(ctx, worker)           // CLI is installed if missing
+```
+
+### Executing Commands
+
+```go
+// Execute command on worker (with sandbox isolation)
+output, err := pool.ExecuteCommand(ctx, workerID, "ls -la /tmp")
+if err != nil {
+    return err
+}
+fmt.Println(output)
 ```
 
 ### Health Monitoring
 
 ```go
-// Start health monitoring
-pool.StartHealthCheck(ctx)
+// Perform health check on all workers
+err := pool.HealthCheck(ctx)
 
-// Get worker health status
-health := pool.GetWorkerHealth(workerID)
-
-// Subscribe to health reports
-reports := pool.HealthReports()
-for report := range reports {
-    if report.Status == worker.StatusUnhealthy {
-        log.Warn("Worker unhealthy: %s", report.WorkerID)
-    }
-}
+// Get worker statistics
+stats := pool.GetWorkerStats(ctx)
+fmt.Printf("Active: %d, Healthy: %d\n", stats.ActiveWorkers, stats.HealthyWorkers)
 ```
 
-### Task Assignment
+### Using WorkerManager
 
 ```go
-// Get available worker with specific capability
-worker, err := pool.GetAvailableWorker(ctx, []string{"gpu", "python"})
-if err != nil {
-    return err
-}
+// Create worker manager with repository
+manager := worker.NewWorkerManager(repo, 30*time.Second) // 30s health TTL
 
-// Assign task to worker
-err = pool.AssignTask(ctx, worker.ID, task)
-```
+// Register a worker
+err := manager.RegisterWorker(ctx, worker)
 
-### Resource Tracking
+// Get available workers with capabilities
+workers, err := manager.GetAvailableWorkers(ctx, []string{"gpu", "python"})
 
-```go
-// Get worker resources
-resources := pool.GetWorkerResources(workerID)
-fmt.Printf("CPU: %d cores, Memory: %d GB\n",
-    resources.CPUCores,
-    resources.MemoryTotal/(1024*1024*1024))
-
-// Get pool-wide resources
-poolResources := pool.GetPoolResources()
+// Update heartbeat with metrics
+err := manager.UpdateWorkerHeartbeat(ctx, workerID, metrics)
 ```
 
 ## Configuration
 
 ```yaml
 workers:
-  max_workers: 10
-  health_check_interval: 30s
-  connection_timeout: 10s
-  retry_attempts: 3
-  retry_backoff: 5s
+  enabled: true
   auto_install: true
+  health_check_interval: 30
+  max_concurrent_tasks: 5
+  task_timeout: 3600
+  pool:
+    worker1:
+      host: "worker1.example.com"
+      port: 22
+      username: "helix"
+      key_path: "~/.ssh/id_rsa"
+      display_name: "Build Worker 1"
+      capabilities: ["docker-execution", "python-execution"]
 ```
 
 ## Worker Status
@@ -164,27 +214,50 @@ Workers can have the following statuses:
 
 | Status | Description |
 |--------|-------------|
-| `idle` | Worker available for tasks |
-| `busy` | Worker executing a task |
-| `unhealthy` | Health check failed |
+| `active` | Worker is active and available |
+| `inactive` | Worker is inactive |
+| `maintenance` | Worker is under maintenance |
+| `failed` | Worker has failed |
 | `offline` | Cannot connect to worker |
-| `installing` | Installing Helix CLI |
 
-## SSH Configuration
+## Worker Health
 
-Workers connect via SSH with these authentication methods:
+Health statuses for workers:
 
-1. SSH key (recommended)
-2. SSH agent forwarding
-3. Password (not recommended for production)
+| Health Status | Description |
+|---------------|-------------|
+| `healthy` | Worker is healthy |
+| `degraded` | Worker has high resource usage (>70%) |
+| `unhealthy` | Worker has critical resource usage (>90%) |
+| `unknown` | Health status unknown |
+
+## SSH Security
+
+Workers connect via SSH with proper security:
+
+1. **Host Key Verification**: Uses `HostKeyManager` with known_hosts file
+2. **SSH Keys**: Private key authentication (recommended)
+3. **Key File**: Load key from file path
+4. **Password**: Password authentication (not recommended)
 
 ```go
-config := &worker.WorkerConfig{
-    Host:       "worker.example.com",
-    User:       "helix",
-    PrivateKey: "~/.ssh/id_rsa",  // or use SSHAgent: true
+config := &worker.SSHWorkerConfig{
+    Host:                  "worker.example.com",
+    Port:                  22,
+    Username:              "helix",
+    KeyPath:               "~/.ssh/id_rsa",
+    StrictHostKeyChecking: true,
 }
 ```
+
+## Worker Isolation
+
+Commands are executed in sandboxed environments for security:
+
+- Namespace isolation (mount, PID, network, IPC, UTS)
+- Resource limits (CPU, memory)
+- Temporary workspaces
+- Automatic cleanup of expired sandboxes (24 hours)
 
 ## Testing
 
@@ -194,7 +267,9 @@ go test -v ./internal/worker/...
 
 ## Notes
 
-- Workers are health-checked every 30s by default
-- Unhealthy workers are automatically removed from active pool
+- Workers are health-checked based on configured interval
+- Unhealthy workers are automatically marked as offline
 - Use SSH keys for secure worker authentication
 - Monitor worker resources to prevent overloading
+- Host key verification prevents MITM attacks
+- Sandboxing provides process isolation for security

@@ -20,15 +20,25 @@ Represents a development task:
 
 ```go
 type Task struct {
-    ID           string
-    Type         TaskType
-    Priority     Priority
-    Status       Status
-    Dependencies []string
-    Checkpoint   *Checkpoint
-    CreatedAt    time.Time
-    StartedAt    *time.Time
-    CompletedAt  *time.Time
+    ID                uuid.UUID              `json:"id"`
+    Type              TaskType               `json:"type"`
+    Data              map[string]interface{} `json:"data"`
+    Status            TaskStatus             `json:"status"`
+    Priority          TaskPriority           `json:"priority"`
+    Criticality       TaskCriticality        `json:"criticality"`
+    AssignedWorker    *uuid.UUID             `json:"assigned_worker"`
+    OriginalWorker    *uuid.UUID             `json:"original_worker"`
+    Dependencies      []uuid.UUID            `json:"dependencies"`
+    RetryCount        int                    `json:"retry_count"`
+    MaxRetries        int                    `json:"max_retries"`
+    ErrorMessage      string                 `json:"error_message"`
+    ResultData        map[string]interface{} `json:"result_data"`
+    CheckpointData    map[string]interface{} `json:"checkpoint_data"`
+    EstimatedDuration time.Duration          `json:"estimated_duration"`
+    StartedAt         *time.Time             `json:"started_at"`
+    CompletedAt       *time.Time             `json:"completed_at"`
+    CreatedAt         time.Time              `json:"created_at"`
+    UpdatedAt         time.Time              `json:"updated_at"`
 }
 ```
 
@@ -38,41 +48,58 @@ type Task struct {
 type TaskType string
 
 const (
-    TypePlanning    TaskType = "planning"
-    TypeBuilding    TaskType = "building"
-    TypeTesting     TaskType = "testing"
-    TypeRefactoring TaskType = "refactoring"
-    TypeDebugging   TaskType = "debugging"
-    TypeDeployment  TaskType = "deployment"
+    TaskTypePlanning    TaskType = "planning"
+    TaskTypeBuilding    TaskType = "building"
+    TaskTypeTesting     TaskType = "testing"
+    TaskTypeRefactoring TaskType = "refactoring"
+    TaskTypeDebugging   TaskType = "debugging"
+    TaskTypeDesign      TaskType = "design"
+    TaskTypeDiagram     TaskType = "diagram"
+    TaskTypeDeployment  TaskType = "deployment"
+    TaskTypePorting     TaskType = "porting"
 )
 ```
 
-### Priority
+### TaskPriority
 
 ```go
-type Priority int
+type TaskPriority int
 
 const (
-    PriorityLow      Priority = 1
-    PriorityNormal   Priority = 2
-    PriorityHigh     Priority = 3
-    PriorityCritical Priority = 4
+    PriorityLow      TaskPriority = 1
+    PriorityNormal   TaskPriority = 5
+    PriorityHigh     TaskPriority = 10
+    PriorityCritical TaskPriority = 20
 )
 ```
 
-### Status
+### TaskStatus
 
 ```go
-type Status string
+type TaskStatus string
 
 const (
-    StatusPending   Status = "pending"
-    StatusAssigned  Status = "assigned"
-    StatusRunning   Status = "running"
-    StatusCompleted Status = "completed"
-    StatusFailed    Status = "failed"
-    StatusCancelled Status = "cancelled"
+    TaskStatusPending          TaskStatus = "pending"
+    TaskStatusAssigned         TaskStatus = "assigned"
+    TaskStatusRunning          TaskStatus = "running"
+    TaskStatusCompleted        TaskStatus = "completed"
+    TaskStatusFailed           TaskStatus = "failed"
+    TaskStatusPaused           TaskStatus = "paused"
+    TaskStatusWaitingForWorker TaskStatus = "waiting_for_worker"
+    TaskStatusWaitingForDeps   TaskStatus = "waiting_for_deps"
 )
+```
+
+### Checkpoint
+
+```go
+type Checkpoint struct {
+    ID             uuid.UUID              `json:"id"`
+    CheckpointName string                 `json:"checkpoint_name"`
+    CheckpointData map[string]interface{} `json:"checkpoint_data"`
+    WorkerID       uuid.UUID              `json:"worker_id"`
+    CreatedAt      time.Time              `json:"created_at"`
+}
 ```
 
 ## Usage
@@ -82,93 +109,84 @@ const (
 ```go
 import "dev.helix.code/internal/task"
 
-manager := task.NewManager(db, config)
+manager := task.NewTaskManager(db, redisClient)
 
-task := &task.Task{
-    Type:     task.TypeBuilding,
-    Priority: task.PriorityHigh,
-    Payload: &task.BuildPayload{
-        ProjectID: projectID,
-        Target:    "build",
+newTask, err := manager.CreateTask(
+    task.TaskTypeBuilding,
+    map[string]interface{}{
+        "project_id": projectID,
+        "target":     "build",
     },
-}
-
-err := manager.CreateTask(ctx, task)
+    task.PriorityHigh,
+    task.CriticalityNormal,
+    nil, // no dependencies
+)
 ```
 
 ### Task Dependencies
 
 ```go
 // Create task with dependencies
-task := &task.Task{
-    Type:         task.TypeTesting,
-    Dependencies: []string{buildTaskID}, // Run after build completes
-}
-
-manager.CreateTask(ctx, task)
+testTask, err := manager.CreateTask(
+    task.TaskTypeTesting,
+    map[string]interface{}{"test_suite": "unit"},
+    task.PriorityNormal,
+    task.CriticalityNormal,
+    []uuid.UUID{buildTaskID}, // Run after build completes
+)
 ```
 
 ### Checkpointing
 
 ```go
-// Checkpoints are saved automatically at configured intervals
-// Default: every 300 seconds (5 minutes)
-
 // Manual checkpoint
-err := manager.Checkpoint(ctx, taskID)
+err := manager.CreateCheckpoint(taskID, "step-1-completed", map[string]interface{}{
+    "progress": 50,
+    "status":   "processing",
+})
 
-// Restore from checkpoint
-err := manager.RestoreFromCheckpoint(ctx, taskID)
+// Get latest checkpoint
+checkpoint, err := manager.checkpointMgr.GetLatestCheckpoint(taskID)
+
+// Get all checkpoints
+checkpoints, err := manager.checkpointMgr.GetCheckpoints(taskID)
 ```
 
 ### Queue Operations
 
 ```go
 // Get next task from queue
-task, err := manager.DequeueTask(ctx)
+task := manager.queue.GetNextTask()
 
-// Get pending tasks by priority
-tasks, err := manager.GetPendingTasks(ctx, task.PriorityHigh)
-
-// Get task by ID
-task, err := manager.GetTask(ctx, taskID)
+// Get task by ID with caching
+task, err := manager.GetTaskWithCache(ctx, taskID)
 ```
 
 ### Task Lifecycle
 
 ```go
-// Start task
-err := manager.StartTask(ctx, taskID, workerID)
+// Assign task to worker
+err := manager.AssignTask(taskID, workerID)
 
 // Complete task
-err := manager.CompleteTask(ctx, taskID, result)
+err := manager.CompleteTask(taskID, resultData)
 
-// Fail task
-err := manager.FailTask(ctx, taskID, err)
-
-// Cancel task
-err := manager.CancelTask(ctx, taskID)
+// Fail task (auto-retries if retries remain)
+err := manager.FailTask(taskID, "error message")
 ```
 
 ### Retry Logic
 
 ```go
-// Configure retry behavior
-config := &task.ManagerConfig{
-    MaxRetries:   3,
-    RetryBackoff: 5 * time.Second,
-}
-
-// Failed tasks are automatically retried if retries remain
+// Tasks are created with MaxRetries = 3 by default
+// Failed tasks are automatically retried if RetryCount < MaxRetries
 ```
 
 ## Configuration
 
 ```yaml
 tasks:
-  checkpoint_interval: 300s
   max_retries: 3
-  retry_backoff: 5s
   queue_size: 1000
   cleanup_interval: 1h
 ```
@@ -176,16 +194,6 @@ tasks:
 ## Checkpoint System
 
 Checkpoints preserve work state for recovery:
-
-```go
-type Checkpoint struct {
-    TaskID      string
-    State       []byte
-    Progress    float64
-    CreatedAt   time.Time
-    Metadata    map[string]interface{}
-}
-```
 
 Benefits:
 - Resume long-running tasks after failures
@@ -201,7 +209,7 @@ Created -> Pending -> Assigned -> Running -> Completed
                   |                 Failed -> Retry -> Running
                   |                    |
                   v                    v
-               Cancelled           Cancelled
+              WaitingForDeps       Paused
 ```
 
 ## Testing
@@ -213,6 +221,6 @@ go test -v ./internal/task/...
 ## Notes
 
 - Tasks with dependencies wait for dependencies to complete
-- Checkpoints are compressed for storage efficiency
 - Use appropriate priority levels to prevent starvation
 - Monitor queue depth for capacity planning
+- Worker ID is tracked in checkpoints for audit purposes
