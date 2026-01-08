@@ -271,9 +271,52 @@ make mobile-android
 
 ### Testing
 
+#### Test Infrastructure (MANDATORY)
+
+Before running integration tests, you **MUST** start the test infrastructure containers. These provide PostgreSQL, Redis, ChromaDB, Qdrant, Cognee, and Ollama services needed for full test coverage.
+
+**Start Test Infrastructure:**
 ```bash
-# Run all tests
+# Using Docker Compose
+docker compose -f docker-compose.test.yml up -d
+
+# OR using Podman
+podman-compose -f docker-compose.test.yml up -d
+
+# Wait for all services to be healthy (check status)
+docker compose -f docker-compose.test.yml ps
+# OR
+podman-compose -f docker-compose.test.yml ps
+```
+
+**Test Infrastructure Services:**
+| Service | Port | Purpose |
+|---------|------|---------|
+| postgres-test | 5433 | PostgreSQL database for persistence tests |
+| redis-test | 6380 | Redis for caching and session tests |
+| chromadb-test | 8002 | ChromaDB vector storage tests |
+| qdrant-test | 6333/6334 | Qdrant vector database tests |
+| cognee-test | 8001 | Cognee.ai memory integration tests |
+| ollama-test | 11434 | Local LLM integration tests |
+
+**Stop Test Infrastructure:**
+```bash
+docker compose -f docker-compose.test.yml down -v
+# OR
+podman-compose -f docker-compose.test.yml down -v
+```
+
+#### Running Tests
+
+```bash
+# Run all tests (requires test infrastructure)
 make test
+
+# Run unit tests only (no infrastructure needed)
+./run_tests.sh
+
+# Run all tests including integration and e2e
+./run_all_tests.sh
 
 # Run specific test suites
 go test ./internal/auth/...
@@ -281,6 +324,9 @@ go test ./internal/worker/...
 
 # Run with coverage
 go test -cover ./...
+
+# Run with coverage report
+make test-coverage
 ```
 
 ### Code Quality

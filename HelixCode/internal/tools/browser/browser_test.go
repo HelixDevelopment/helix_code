@@ -649,11 +649,10 @@ func TestConsoleMessageTypeString(t *testing.T) {
 		expected string
 	}{
 		{ConsoleLog, "log"},
-		{ConsoleWarn, "warn"},
+		{ConsoleWarning, "warning"},
 		{ConsoleError, "error"},
 		{ConsoleInfo, "info"},
 		{ConsoleDebug, "debug"},
-		{ConsoleTrace, "trace"},
 		{ConsoleMessageType(999), "unknown"},
 	}
 
@@ -665,8 +664,8 @@ func TestConsoleMessageTypeString(t *testing.T) {
 	}
 }
 
-// TestChromeDiscovery tests Chrome discovery functions
-func TestChromeDiscovery(t *testing.T) {
+// TestChromeDiscoveryPaths tests Chrome discovery path functions
+func TestChromeDiscoveryPaths(t *testing.T) {
 	discovery := NewDefaultChromeDiscovery()
 
 	t.Run("get default paths returns non-empty", func(t *testing.T) {
@@ -684,22 +683,17 @@ func TestChromeDiscovery(t *testing.T) {
 		}
 	})
 
-	t.Run("find all returns array", func(t *testing.T) {
+	t.Run("find all returns array or error", func(t *testing.T) {
 		chromes, err := discovery.FindAll()
-		// May or may not find chrome, but shouldn't error
+		// May or may not find chrome
 		if err != nil {
 			// Some systems may not have any chrome installed
 			t.Logf("FindAll returned error: %v", err)
+			// When error, chromes might be nil, that's okay
+		} else {
+			// When no error, should have found at least one Chrome
+			assert.NotEmpty(t, chromes)
 		}
-		// Result should be a slice (possibly empty)
-		assert.NotNil(t, chromes)
-	})
-
-	t.Run("get preferred chrome", func(t *testing.T) {
-		// May or may not find chrome
-		path := discovery.GetPreferredChrome()
-		// path can be empty if no chrome is installed
-		_ = path
 	})
 }
 
@@ -708,9 +702,16 @@ func TestElementSelector(t *testing.T) {
 	discovery := NewDefaultChromeDiscovery()
 	controller := NewDefaultController(discovery)
 	executor := NewDefaultActionExecutor(controller)
+	capture := NewDefaultScreenshotCapture(controller, executor)
 
 	t.Run("create element selector", func(t *testing.T) {
-		selector := NewElementSelector(executor)
+		selector := NewElementSelector(executor, capture, nil)
+		assert.NotNil(t, selector)
+	})
+
+	t.Run("create element selector with annotator", func(t *testing.T) {
+		annotator := NewScreenshotAnnotator(nil)
+		selector := NewElementSelector(executor, capture, annotator)
 		assert.NotNil(t, selector)
 	})
 }
@@ -724,10 +725,10 @@ func TestBrowserToolsInitialization(t *testing.T) {
 
 	t.Run("create with custom config", func(t *testing.T) {
 		config := &Config{
-			DefaultHeadless: false,
-			DefaultWidth:    1920,
-			DefaultHeight:   1080,
-			Timeout:         60 * time.Second,
+			DefaultHeadless:       false,
+			DefaultWidth:          1920,
+			DefaultHeight:         1080,
+			MaxConcurrentBrowsers: 10,
 		}
 		tools := NewBrowserTools(config)
 		assert.NotNil(t, tools)
@@ -769,8 +770,9 @@ func TestConsoleMonitorOperations(t *testing.T) {
 		assert.Equal(t, 0, monitor.GetErrorCount())
 	})
 
-	t.Run("is running returns false initially", func(t *testing.T) {
+	t.Run("get messages returns empty initially", func(t *testing.T) {
 		monitor := NewConsoleMonitor(nil)
-		assert.False(t, monitor.IsRunning())
+		messages := monitor.GetMessages()
+		assert.Empty(t, messages)
 	})
 }
