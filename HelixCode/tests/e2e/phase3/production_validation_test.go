@@ -32,10 +32,11 @@ func TestProductionDeployment(t *testing.T) {
 		defer resp.Body.Close()
 		
 		assert.Equal(t, http.StatusOK, resp.StatusCode, "Server should be healthy")
-		
-		var healthResponse map[string]interface{}
-		// Parse response (simplified for this example)
-		
+
+		// Response body can be parsed if needed for detailed validation
+		// var healthResponse map[string]interface{}
+		// json.NewDecoder(resp.Body).Decode(&healthResponse)
+
 		t.Log("✅ Infrastructure health validated")
 	})
 	
