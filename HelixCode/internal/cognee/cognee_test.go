@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -2048,5 +2049,439 @@ func TestCogneeManagerRegisterEventHandler(t *testing.T) {
 
 		// Should not panic with nil service
 		cm.RegisterEventHandler(func(e *CogneeEvent) {})
+	})
+}
+
+// =====================================================
+// HTTP Handler Tests
+// =====================================================
+
+// TestNewHandler tests Handler constructors
+func TestNewHandler(t *testing.T) {
+	t.Run("NewHandler_WithService", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		if err != nil {
+			t.Skip("Could not create service")
+		}
+
+		handler := NewHandler(service)
+		assert.NotNil(t, handler)
+		assert.NotNil(t, handler.service)
+		assert.NotNil(t, handler.logger)
+	})
+
+	t.Run("NewHandler_NilService", func(t *testing.T) {
+		handler := NewHandler(nil)
+		assert.NotNil(t, handler)
+		assert.Nil(t, handler.service)
+		assert.NotNil(t, handler.logger)
+	})
+
+	t.Run("NewHandlerWithManager_NilManager", func(t *testing.T) {
+		handler := NewHandlerWithManager(nil)
+		assert.NotNil(t, handler)
+		assert.Nil(t, handler.service)
+		assert.Nil(t, handler.manager)
+		assert.NotNil(t, handler.logger)
+	})
+
+	t.Run("NewHandlerWithManager_WithManager", func(t *testing.T) {
+		cfg := &config.HelixConfig{
+			Cognee: config.DefaultCogneeConfig(),
+		}
+		manager, err := NewCogneeManager(cfg, nil)
+		if err != nil {
+			t.Skip("Could not create manager")
+		}
+
+		handler := NewHandlerWithManager(manager)
+		assert.NotNil(t, handler)
+		assert.NotNil(t, handler.manager)
+		assert.NotNil(t, handler.logger)
+	})
+}
+
+// TestHandlerRegisterRoutes tests route registration
+func TestHandlerRegisterRoutes(t *testing.T) {
+	t.Run("RegisterRoutes_Success", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		router := gin.New()
+		group := router.Group("/api")
+
+		handler.RegisterRoutes(group)
+
+		// Routes should be registered
+		routes := router.Routes()
+		assert.NotEmpty(t, routes)
+
+		// Check specific routes exist
+		routePaths := make([]string, len(routes))
+		for i, route := range routes {
+			routePaths[i] = route.Path
+		}
+
+		assert.Contains(t, routePaths, "/api/cognee/health")
+		assert.Contains(t, routePaths, "/api/cognee/stats")
+		assert.Contains(t, routePaths, "/api/cognee/memory")
+		assert.Contains(t, routePaths, "/api/cognee/search")
+		assert.Contains(t, routePaths, "/api/cognee/cognify")
+		assert.Contains(t, routePaths, "/api/cognee/datasets")
+	})
+}
+
+// TestHandlerGetHealth tests GET /cognee/health
+func TestHandlerGetHealth(t *testing.T) {
+	t.Run("GetHealth_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("GET", "/cognee/health", nil)
+		c.Request = req
+
+		handler.GetHealth(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("GetHealth_WithService", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		if err != nil {
+			t.Skip("Could not create service")
+		}
+		handler := NewHandler(service)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("GET", "/cognee/health", nil)
+		c.Request = req
+
+		handler.GetHealth(c)
+
+		// Should return a valid HTTP response (not panic)
+		// Service may be unavailable if external cognee is not running
+		assert.True(t, w.Code == http.StatusOK || w.Code == http.StatusServiceUnavailable)
+	})
+}
+
+// TestHandlerGetStatistics tests GET /cognee/stats
+func TestHandlerGetStatistics(t *testing.T) {
+	t.Run("GetStatistics_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("GET", "/cognee/stats", nil)
+		c.Request = req
+
+		handler.GetStatistics(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerAddMemory tests POST /cognee/memory
+func TestHandlerAddMemory(t *testing.T) {
+	t.Run("AddMemory_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/memory", nil)
+		c.Request = req
+
+		handler.AddMemory(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("AddMemory_InvalidBody", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		if err != nil {
+			t.Skip("Could not create service")
+		}
+		handler := NewHandler(service)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/memory", nil)
+		req.Header.Set("Content-Type", "application/json")
+		c.Request = req
+
+		handler.AddMemory(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+}
+
+// TestHandlerAddBatchMemory tests POST /cognee/memory/batch
+func TestHandlerAddBatchMemory(t *testing.T) {
+	t.Run("AddBatchMemory_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/memory/batch", nil)
+		c.Request = req
+
+		handler.AddBatchMemory(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("AddBatchMemory_InvalidBody", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		if err != nil {
+			t.Skip("Could not create service")
+		}
+		handler := NewHandler(service)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/memory/batch", nil)
+		req.Header.Set("Content-Type", "application/json")
+		c.Request = req
+
+		handler.AddBatchMemory(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+}
+
+// TestHandlerSearchMemory tests POST /cognee/search
+func TestHandlerSearchMemory(t *testing.T) {
+	t.Run("SearchMemory_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/search", nil)
+		c.Request = req
+
+		handler.SearchMemory(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerDeleteData tests DELETE /cognee/memory
+func TestHandlerDeleteData(t *testing.T) {
+	t.Run("DeleteData_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("DELETE", "/cognee/memory", nil)
+		c.Request = req
+
+		handler.DeleteData(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerCognify tests POST /cognee/cognify
+func TestHandlerCognify(t *testing.T) {
+	t.Run("Cognify_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/cognify", nil)
+		c.Request = req
+
+		handler.Cognify(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerGetInsights tests POST /cognee/insights
+func TestHandlerGetInsights(t *testing.T) {
+	t.Run("GetInsights_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/insights", nil)
+		c.Request = req
+
+		handler.GetInsights(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerGetGraphCompletion tests POST /cognee/graph/complete
+func TestHandlerGetGraphCompletion(t *testing.T) {
+	t.Run("GetGraphCompletion_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/graph/complete", nil)
+		c.Request = req
+
+		handler.GetGraphCompletion(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerProcessCode tests POST /cognee/code
+func TestHandlerProcessCode(t *testing.T) {
+	t.Run("ProcessCode_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/code", nil)
+		c.Request = req
+
+		handler.ProcessCode(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerListDatasets tests GET /cognee/datasets
+func TestHandlerListDatasets(t *testing.T) {
+	t.Run("ListDatasets_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("GET", "/cognee/datasets", nil)
+		c.Request = req
+
+		handler.ListDatasets(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerCreateDataset tests POST /cognee/datasets
+func TestHandlerCreateDataset(t *testing.T) {
+	t.Run("CreateDataset_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/datasets", nil)
+		c.Request = req
+
+		handler.CreateDataset(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerGetDataset tests GET /cognee/datasets/:name
+func TestHandlerGetDataset(t *testing.T) {
+	t.Run("GetDataset_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		c.Params = gin.Params{{Key: "name", Value: "test"}}
+		req, _ := http.NewRequest("GET", "/cognee/datasets/test", nil)
+		c.Request = req
+
+		handler.GetDataset(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerDeleteDataset tests DELETE /cognee/datasets/:name
+func TestHandlerDeleteDataset(t *testing.T) {
+	t.Run("DeleteDataset_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		c.Params = gin.Params{{Key: "name", Value: "test"}}
+		req, _ := http.NewRequest("DELETE", "/cognee/datasets/test", nil)
+		c.Request = req
+
+		handler.DeleteDataset(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerVisualizeGraph tests POST /cognee/visualize
+func TestHandlerVisualizeGraph(t *testing.T) {
+	t.Run("VisualizeGraph_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/visualize", nil)
+		c.Request = req
+
+		handler.VisualizeGraph(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestHandlerSubmitFeedback tests POST /cognee/feedback
+func TestHandlerSubmitFeedback(t *testing.T) {
+	t.Run("SubmitFeedback_ServiceUnavailable", func(t *testing.T) {
+		handler := NewHandler(nil)
+
+		gin.SetMode(gin.TestMode)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		req, _ := http.NewRequest("POST", "/cognee/feedback", nil)
+		c.Request = req
+
+		handler.SubmitFeedback(c)
+
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 	})
 }

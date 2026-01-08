@@ -643,3 +643,127 @@ func TestExecuteCommandStep_EmptyCommand(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "command cannot be empty")
 }
+
+// ========================================
+// Additional Executor Tests for Coverage
+// ========================================
+
+func TestNewExecutorWithLLM(t *testing.T) {
+	projectManager := project.NewManager()
+	// Test with nil LLM provider and nil config
+	executor := NewExecutorWithLLM(projectManager, nil, nil)
+	assert.NotNil(t, executor)
+	assert.Nil(t, executor.llmProvider)
+	assert.NotNil(t, executor.config)
+}
+
+func TestSetLLMProvider(t *testing.T) {
+	projectManager := project.NewManager()
+	executor := NewExecutor(projectManager)
+
+	// Initially nil
+	assert.Nil(t, executor.llmProvider)
+
+	// Set to nil (valid operation)
+	executor.SetLLMProvider(nil)
+	assert.Nil(t, executor.llmProvider)
+}
+
+func TestGetMetrics(t *testing.T) {
+	projectManager := project.NewManager()
+	executor := NewExecutor(projectManager)
+
+	metrics := executor.GetMetrics()
+	assert.NotNil(t, metrics)
+	assert.Equal(t, int64(0), metrics.WorkflowsStarted)
+	assert.Equal(t, int64(0), metrics.StepsExecuted)
+}
+
+func TestGetActiveWorkflows(t *testing.T) {
+	projectManager := project.NewManager()
+	executor := NewExecutor(projectManager)
+
+	// Initially empty
+	workflows := executor.GetActiveWorkflows()
+	assert.NotNil(t, workflows)
+}
+
+func TestGetWorkflow(t *testing.T) {
+	projectManager := project.NewManager()
+	executor := NewExecutor(projectManager)
+
+	// Get non-existent workflow
+	wf, found := executor.GetWorkflow("nonexistent")
+	assert.False(t, found)
+	assert.Nil(t, wf)
+}
+
+func TestCancelWorkflow(t *testing.T) {
+	projectManager := project.NewManager()
+	executor := NewExecutor(projectManager)
+
+	// Cancel non-existent workflow
+	err := executor.CancelWorkflow("nonexistent")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "workflow not found")
+}
+
+func TestIsSourceFile(t *testing.T) {
+	tests := []struct {
+		name     string
+		ext      string
+		expected bool
+	}{
+		{"go ext", ".go", true},
+		{"js ext", ".js", true},
+		{"ts ext", ".ts", true},
+		{"py ext", ".py", true},
+		{"rust ext", ".rs", true},
+		{"java ext", ".java", true},
+		{"c ext", ".c", true},
+		{"cpp ext", ".cpp", true},
+		{"h ext", ".h", true},
+		{"txt ext", ".txt", false},
+		{"json ext", ".json", false},
+		{"yaml ext", ".yaml", false},
+		{"md ext", ".md", false},
+		{"no extension", "", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isSourceFile(tt.ext)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestIsEntryPoint(t *testing.T) {
+	tests := []struct {
+		name        string
+		filename    string
+		projectType string
+		expected    bool
+	}{
+		{"go main", "main.go", "go", true},
+		{"go cmd", "cmd/app/main.go", "go", true},
+		{"go helper", "helper.go", "go", false},
+		{"python main", "main.py", "python", true},
+		{"python app", "app.py", "python", true},
+		{"python helper", "utils.py", "python", false},
+		{"node index", "index.js", "node", true},
+		{"node app", "app.js", "node", true},
+		{"node config", "config.js", "node", false},
+		{"rust main", "src/main.rs", "rust", true},
+		{"rust lib", "src/lib.rs", "rust", true},
+		{"rust module", "mod.rs", "rust", false},
+		{"generic", "main.go", "generic", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isEntryPoint(tt.filename, tt.projectType)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}

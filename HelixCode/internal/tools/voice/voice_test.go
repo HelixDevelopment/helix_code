@@ -470,3 +470,215 @@ func generateSineWave(samples int, frequency, sampleRate float64) []float64 {
 	}
 	return wave
 }
+
+// TestDeviceManager_ValidateDevice tests device validation
+func TestDeviceManager_ValidateDevice(t *testing.T) {
+	dm, err := NewDeviceManager()
+	if err != nil {
+		t.Fatalf("NewDeviceManager() error = %v", err)
+	}
+
+	t.Run("validate valid device", func(t *testing.T) {
+		devices, err := dm.ListDevices(context.Background())
+		if err != nil || len(devices) == 0 {
+			t.Skip("no devices available for testing")
+		}
+
+		// ValidateDevice takes *AudioDevice
+		device := &devices[0]
+		err = dm.ValidateDevice(device)
+		if err != nil {
+			t.Errorf("ValidateDevice() error = %v", err)
+		}
+	})
+
+	t.Run("validate nil device", func(t *testing.T) {
+		err := dm.ValidateDevice(nil)
+		if err == nil {
+			t.Error("expected error for nil device")
+		}
+	})
+
+	t.Run("validate unavailable device", func(t *testing.T) {
+		device := &AudioDevice{
+			ID:          "test",
+			Name:        "Test",
+			IsAvailable: false,
+		}
+		err := dm.ValidateDevice(device)
+		if err == nil {
+			t.Error("expected error for unavailable device")
+		}
+	})
+}
+
+// TestDeviceManager_RefreshDevices tests device refresh
+func TestDeviceManager_RefreshDevices(t *testing.T) {
+	dm, err := NewDeviceManager()
+	if err != nil {
+		t.Fatalf("NewDeviceManager() error = %v", err)
+	}
+
+	err = dm.RefreshDevices(context.Background())
+	if err != nil {
+		t.Errorf("RefreshDevices() error = %v", err)
+	}
+}
+
+// TestDeviceManager_GetDevice tests getting device by ID
+func TestDeviceManager_GetDevice(t *testing.T) {
+	dm, err := NewDeviceManager()
+	if err != nil {
+		t.Fatalf("NewDeviceManager() error = %v", err)
+	}
+
+	devices, err := dm.ListDevices(context.Background())
+	if err != nil || len(devices) == 0 {
+		t.Skip("no devices available for testing")
+	}
+
+	t.Run("get existing device", func(t *testing.T) {
+		device, err := dm.GetDevice(devices[0].ID)
+		if err != nil {
+			t.Errorf("GetDevice() error = %v", err)
+		}
+		if device == nil {
+			t.Error("expected non-nil device")
+		}
+	})
+
+	t.Run("get nonexistent device", func(t *testing.T) {
+		device, err := dm.GetDevice("nonexistent-id")
+		if err == nil {
+			t.Error("expected error for nonexistent device")
+		}
+		if device != nil {
+			t.Error("expected nil device")
+		}
+	})
+}
+
+// TestVoiceInputManager_SelectDevice tests device selection on manager
+func TestVoiceInputManager_SelectDevice(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "voice_test_*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	config := &VoiceConfig{
+		SampleRate:      16000,
+		Channels:        1,
+		BitDepth:        16,
+		Format:          FormatWAV,
+		OutputDirectory: tmpDir,
+		AutoSelect:      true,
+	}
+
+	manager, err := NewVoiceInputManager(config)
+	if err != nil {
+		t.Fatalf("NewVoiceInputManager() error = %v", err)
+	}
+
+	ctx := context.Background()
+	devices, err := manager.ListDevices(ctx)
+	if err != nil || len(devices) == 0 {
+		t.Skip("no devices available for testing")
+	}
+
+	t.Run("select valid device", func(t *testing.T) {
+		err := manager.SelectDevice(ctx, devices[0].ID)
+		if err != nil {
+			t.Errorf("SelectDevice() error = %v", err)
+		}
+	})
+
+	t.Run("select invalid device", func(t *testing.T) {
+		err := manager.SelectDevice(ctx, "nonexistent-device")
+		if err == nil {
+			t.Error("expected error for invalid device")
+		}
+	})
+}
+
+// TestVoiceConfig_Defaults tests default configuration values
+func TestVoiceConfig_Defaults(t *testing.T) {
+	config := &VoiceConfig{}
+
+	// Test that zero values are acceptable
+	if config.SampleRate != 0 {
+		t.Error("expected zero sample rate by default")
+	}
+}
+
+// TestAudioDevice_Fields tests AudioDevice struct fields
+func TestAudioDevice_Fields(t *testing.T) {
+	device := &AudioDevice{
+		ID:          "test-id",
+		Name:        "Test Device",
+		IsDefault:   true,
+		Channels:    2,
+		SampleRates: []int{44100, 48000},
+		IsAvailable: true,
+		Driver:      "ALSA",
+	}
+
+	if device.ID != "test-id" {
+		t.Error("unexpected device ID")
+	}
+	if device.Name != "Test Device" {
+		t.Error("unexpected device name")
+	}
+	if !device.IsDefault {
+		t.Error("expected device to be default")
+	}
+	if device.Channels != 2 {
+		t.Error("unexpected channel count")
+	}
+	if len(device.SampleRates) != 2 {
+		t.Error("unexpected sample rate count")
+	}
+	if !device.IsAvailable {
+		t.Error("expected device to be available")
+	}
+	if device.Driver != "ALSA" {
+		t.Error("unexpected driver")
+	}
+}
+
+// TestVoiceError_All tests all error types
+func TestVoiceError_All(t *testing.T) {
+	errors := []error{
+		ErrNoDevicesFound,
+		ErrDeviceNotFound,
+		ErrDeviceUnavailable,
+		ErrAlreadyRecording,
+		ErrNotRecording,
+		ErrTranscriptionFailed,
+		ErrInvalidFormat,
+	}
+
+	for _, err := range errors {
+		if err == nil {
+			t.Error("expected non-nil error")
+		}
+		if err.Error() == "" {
+			t.Error("expected non-empty error message")
+		}
+	}
+}
+
+// TestAudioFormat_String tests format string conversion
+func TestAudioFormat_String(t *testing.T) {
+	formats := []AudioFormat{
+		FormatWAV,
+		FormatMP3,
+	}
+
+	for _, format := range formats {
+		str := string(format)
+		if str == "" {
+			t.Error("expected non-empty format string")
+		}
+	}
+}

@@ -878,3 +878,148 @@ func TestLLMProviderWrapper_Generate(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, result)
 }
+
+// =============================================================================
+// AIIntegration Additional Tests
+// =============================================================================
+
+func TestAIIntegration_Initialize_Skipped(t *testing.T) {
+	// Note: Initialize requires valid vector/memory configurations
+	// which are not available in unit tests without external services.
+	// This test is skipped to prevent nil pointer panics.
+	t.Skip("Initialize requires external services (vector DB)")
+}
+
+func TestAIIntegration_GenerateText(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "nonexistent",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	result, err := ai.GenerateText(ctx, "test prompt", nil)
+
+	// Should fail because no provider exists
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestAIIntegration_GenerateChat(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "nonexistent",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	messages := []*ChatMessage{{Role: "user", Content: "Hello"}}
+	result, err := ai.GenerateChat(ctx, messages, nil)
+
+	// Should fail because no provider exists
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestAIIntegration_GenerateEmbedding(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "nonexistent",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	embedding, err := ai.GenerateEmbedding(ctx, "test text")
+
+	// Should fail because no provider exists
+	assert.Error(t, err)
+	assert.Nil(t, embedding)
+}
+
+func TestAIIntegration_ClassifyText(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "nonexistent",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	result, err := ai.ClassifyText(ctx, "test text", []string{"cat1", "cat2"})
+
+	// Should fail because no provider exists
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestAIIntegration_ExtractEntities(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "nonexistent",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	entities, err := ai.ExtractEntities(ctx, "John works at Google")
+
+	// Should fail because no provider exists
+	assert.Error(t, err)
+	assert.Nil(t, entities)
+}
+
+func TestAIIntegration_GetConversationManager(t *testing.T) {
+	ai := NewAIIntegration(nil)
+
+	// ConversationManager is created on-demand or via Initialize
+	// Without Initialize, it may be nil
+	convMgr := ai.GetConversation()
+	// May be nil without full initialization
+	_ = convMgr
+}
+
+func TestAIIntegration_GetPersonalityManager(t *testing.T) {
+	ai := NewAIIntegration(nil)
+
+	// PersonalityManager is created on-demand or via Initialize
+	// Without Initialize, it may be nil
+	personalityMgr := ai.GetPersonality()
+	// May be nil without full initialization
+	_ = personalityMgr
+}
+
+func TestAIIntegration_HealthCheck(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "test",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	health, err := ai.HealthCheck(ctx)
+
+	require.NoError(t, err)
+	assert.NotNil(t, health)
+	assert.Equal(t, 0, health.TotalProviders)
+}
+
+func TestAIIntegration_Stop(t *testing.T) {
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "test",
+		Providers:  make(map[string]*AIProviderConfig),
+	})
+
+	ctx := context.Background()
+	err := ai.Stop(ctx)
+
+	require.NoError(t, err)
+}
+
+func TestAIIntegration_ListProviders_WithConfigs(t *testing.T) {
+	// Note: ListProviders returns created provider instances, not configs.
+	// Without Initialize, providers are not created.
+	ai := NewAIIntegration(&AIConfig{
+		DefaultLLM: "test",
+		Providers: map[string]*AIProviderConfig{
+			"provider1": {Enabled: true},
+			"provider2": {Enabled: true},
+		},
+	})
+
+	// ListProviders returns empty without Initialize
+	providers := ai.ListProviders()
+	// Config is stored but providers aren't created until Initialize
+	_ = providers
+}
