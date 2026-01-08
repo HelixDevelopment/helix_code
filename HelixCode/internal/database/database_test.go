@@ -534,3 +534,355 @@ func formatConnectionString(config Config) string {
 		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
 	)
 }
+
+// ========================================
+// Mock Helper Tests
+// ========================================
+
+func TestMockExecErrorOnce(t *testing.T) {
+	mockDB := NewMockDatabase()
+
+	// Set up mock to return error once
+	mockDB.MockExecErrorOnce(fmt.Errorf("one-time error"))
+
+	ctx := context.Background()
+	_, err := mockDB.Exec(ctx, "INSERT INTO test VALUES ($1)", "value")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "one-time error")
+
+	mockDB.AssertExpectations(t)
+}
+
+func TestMockExecWithSQLAndArgs(t *testing.T) {
+	mockDB := NewMockDatabase()
+
+	// Set up mock to match specific SQL (uses MockExecWithSQL which is simpler)
+	mockDB.MockExecWithSQL("INSERT INTO users (name) VALUES ($1)", 1)
+
+	ctx := context.Background()
+	tag, err := mockDB.Exec(ctx, "INSERT INTO users (name) VALUES ($1)", "john")
+	assert.NoError(t, err)
+	assert.NotNil(t, tag)
+
+	mockDB.AssertExpectations(t)
+}
+
+func TestMockExecWithSQLAndArgs_DirectOn(t *testing.T) {
+	mockDB := NewMockDatabase()
+
+	// Test the MockExecWithSQLAndArgs function directly
+	// It expects the third argument to be a specific slice
+	call := mockDB.MockExecWithSQLAndArgs("INSERT INTO test VALUES ($1)", []interface{}{"value"}, 1)
+	assert.NotNil(t, call)
+}
+
+func TestMockAnyString(t *testing.T) {
+	mockDB := NewMockDatabase()
+
+	// Test AnyString helper
+	result := mockDB.AnyString()
+	assert.Equal(t, mock.Anything, result)
+}
+
+func TestMockAnyArgs(t *testing.T) {
+	mockDB := NewMockDatabase()
+
+	// Test AnyArgs helper
+	result := mockDB.AnyArgs()
+	assert.Equal(t, mock.Anything, result)
+}
+
+// ========================================
+// MockRows Tests
+// ========================================
+
+func TestMockRows_NewMockRowsWithError(t *testing.T) {
+	testErr := fmt.Errorf("test error")
+	rows := NewMockRowsWithError(testErr)
+
+	assert.NotNil(t, rows)
+	assert.Equal(t, testErr, rows.Err())
+	assert.False(t, rows.Next())
+}
+
+func TestMockRows_Close(t *testing.T) {
+	rows := NewMockRows([][]interface{}{
+		{"value1", "value2"},
+	})
+
+	// Before close, should be able to iterate
+	assert.True(t, rows.Next())
+
+	// Close the rows
+	rows.Close()
+
+	// After close, Next should return false
+	assert.False(t, rows.Next())
+}
+
+func TestMockRows_Err(t *testing.T) {
+	// Test with no error
+	rows := NewMockRows([][]interface{}{})
+	assert.Nil(t, rows.Err())
+
+	// Test with error
+	testErr := fmt.Errorf("test error")
+	errorRows := NewMockRowsWithError(testErr)
+	assert.Equal(t, testErr, errorRows.Err())
+}
+
+func TestMockRows_CommandTag(t *testing.T) {
+	rows := NewMockRows([][]interface{}{})
+	tag := rows.CommandTag()
+
+	// Should return empty command tag
+	assert.Equal(t, pgconn.CommandTag{}, tag)
+}
+
+func TestMockRows_FieldDescriptions(t *testing.T) {
+	rows := NewMockRows([][]interface{}{})
+	desc := rows.FieldDescriptions()
+
+	// Should return empty slice
+	assert.Empty(t, desc)
+}
+
+func TestMockRows_Values(t *testing.T) {
+	rows := NewMockRows([][]interface{}{
+		{"value1", 123, true},
+	})
+
+	// Before Next(), Values should return error
+	_, err := rows.Values()
+	assert.Error(t, err)
+
+	// After Next(), Values should return current row
+	rows.Next()
+	values, err := rows.Values()
+	assert.NoError(t, err)
+	assert.Equal(t, []interface{}{"value1", 123, true}, values)
+}
+
+func TestMockRows_Values_WithError(t *testing.T) {
+	testErr := fmt.Errorf("test error")
+	rows := NewMockRowsWithError(testErr)
+
+	values, err := rows.Values()
+	assert.Error(t, err)
+	assert.Nil(t, values)
+	assert.Equal(t, testErr, err)
+}
+
+func TestMockRows_RawValues(t *testing.T) {
+	rows := NewMockRows([][]interface{}{{"value"}})
+
+	// Should return nil for mock
+	rawValues := rows.RawValues()
+	assert.Nil(t, rawValues)
+}
+
+func TestMockRows_Conn(t *testing.T) {
+	rows := NewMockRows([][]interface{}{{"value"}})
+
+	// Should return nil for mock
+	conn := rows.Conn()
+	assert.Nil(t, conn)
+}
+
+func TestMockRows_ScanTypes(t *testing.T) {
+	t.Run("Scan_String", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{"hello"}})
+		rows.Next()
+
+		var result string
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, "hello", result)
+	})
+
+	t.Run("Scan_Int", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{42}})
+		rows.Next()
+
+		var result int
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, 42, result)
+	})
+
+	t.Run("Scan_Int64", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{int64(1234567890)}})
+		rows.Next()
+
+		var result int64
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1234567890), result)
+	})
+
+	t.Run("Scan_Bool", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{true}})
+		rows.Next()
+
+		var result bool
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.True(t, result)
+	})
+
+	t.Run("Scan_NilValue", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{nil}})
+		rows.Next()
+
+		var result string
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, "", result) // Zero value
+	})
+
+	t.Run("Scan_StringPointer", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{"pointer value"}})
+		rows.Next()
+
+		var result *string
+		err := rows.Scan(&result)
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Equal(t, "pointer value", *result)
+	})
+
+	t.Run("Scan_MismatchedColumns", func(t *testing.T) {
+		rows := NewMockRows([][]interface{}{{"value1", "value2"}})
+		rows.Next()
+
+		var result string
+		err := rows.Scan(&result) // Only one dest for two values
+		assert.Error(t, err)
+	})
+}
+
+func TestMockRows_Next_ClosedRows(t *testing.T) {
+	rows := NewMockRows([][]interface{}{{"value"}})
+	rows.Close()
+
+	// Next should return false on closed rows
+	assert.False(t, rows.Next())
+}
+
+func TestMockRows_Next_WithError(t *testing.T) {
+	testErr := fmt.Errorf("iteration error")
+	rows := NewMockRowsWithError(testErr)
+
+	// Next should return false when there's an error
+	assert.False(t, rows.Next())
+}
+
+func TestMockRows_Scan_WithError(t *testing.T) {
+	testErr := fmt.Errorf("scan error")
+	rows := NewMockRowsWithError(testErr)
+
+	var result string
+	err := rows.Scan(&result)
+	assert.Error(t, err)
+	assert.Equal(t, testErr, err)
+}
+
+func TestMockRows_Scan_BeforeNext(t *testing.T) {
+	rows := NewMockRows([][]interface{}{{"value"}})
+
+	// Scan before Next should fail
+	var result string
+	err := rows.Scan(&result)
+	assert.Error(t, err)
+}
+
+func TestMockRows_MultipleRows(t *testing.T) {
+	rows := NewMockRows([][]interface{}{
+		{"row1", 1},
+		{"row2", 2},
+		{"row3", 3},
+	})
+
+	count := 0
+	for rows.Next() {
+		var s string
+		var i int
+		err := rows.Scan(&s, &i)
+		assert.NoError(t, err)
+		count++
+	}
+
+	assert.Equal(t, 3, count)
+	assert.Nil(t, rows.Err())
+}
+
+// ========================================
+// MockRow Tests
+// ========================================
+
+func TestMockRow_Scan(t *testing.T) {
+	t.Run("Scan_Success", func(t *testing.T) {
+		// Use variadic form directly (not wrapped in slice)
+		row := NewMockRowWithValues("test", 42)
+
+		var s string
+		var i int
+		err := row.Scan(&s, &i)
+		assert.NoError(t, err)
+		assert.Equal(t, "test", s)
+		assert.Equal(t, 42, i)
+	})
+
+	t.Run("Scan_Error", func(t *testing.T) {
+		testErr := fmt.Errorf("scan error")
+		row := NewMockRowWithError(testErr)
+
+		var s string
+		err := row.Scan(&s)
+		assert.Error(t, err)
+		assert.Equal(t, testErr, err)
+	})
+}
+
+// ========================================
+// Database Method Edge Cases
+// ========================================
+
+func TestDatabase_InitializeSchema_EdgeCases(t *testing.T) {
+	// Test that method signature exists
+	db := &Database{Pool: nil}
+	assert.NotNil(t, db)
+
+	// InitializeSchema with nil pool should panic
+	assert.Panics(t, func() {
+		db.InitializeSchema()
+	})
+}
+
+func TestDatabase_GetDB_EdgeCases(t *testing.T) {
+	t.Run("NilPool_ReturnsError", func(t *testing.T) {
+		db := &Database{Pool: nil}
+		sqlDB, err := db.GetDB()
+		assert.Error(t, err)
+		assert.Nil(t, sqlDB)
+		assert.Contains(t, err.Error(), "database pool is not initialized")
+	})
+}
+
+func TestDatabase_HealthCheck_EdgeCases(t *testing.T) {
+	t.Run("NilPool_ReturnsError", func(t *testing.T) {
+		db := &Database{Pool: nil}
+		err := db.HealthCheck()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "database pool is not initialized")
+	})
+}
+
+func TestDatabase_Close_EdgeCases(t *testing.T) {
+	t.Run("NilPool_DoesNotPanic", func(t *testing.T) {
+		db := &Database{Pool: nil}
+		assert.NotPanics(t, func() {
+			db.Close()
+		})
+	})
+}

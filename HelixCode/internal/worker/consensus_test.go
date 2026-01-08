@@ -246,3 +246,91 @@ func TestConsensusManager_HeartbeatMechanism(t *testing.T) {
 
 	assert.True(t, cm.IsLeader())
 }
+
+func TestConsensusManager_GetCurrentTerm(t *testing.T) {
+	cm := NewConsensusManager(ConsensusConfig{
+		NodeID: "node-1",
+		Peers:  []string{},
+	})
+
+	// Initial term should be 0
+	assert.Equal(t, 0, cm.GetCurrentTerm())
+
+	// After election, term should increase
+	cm.currentTerm = 5
+	assert.Equal(t, 5, cm.GetCurrentTerm())
+}
+
+func TestConsensusManager_GetLeader_NoLeader(t *testing.T) {
+	cm := NewConsensusManager(ConsensusConfig{
+		NodeID: "node-1",
+		Peers:  []string{"node-2"},
+	})
+
+	// Initially no leader
+	leader := cm.GetLeader()
+	assert.Equal(t, "", leader)
+}
+
+func TestConsensusManager_VoteResponseHigherTerm(t *testing.T) {
+	cm := NewConsensusManager(ConsensusConfig{
+		NodeID: "node-1",
+		Peers:  []string{"node-2", "node-3"},
+	})
+
+	// Set up as candidate
+	cm.state = Candidate
+	cm.currentTerm = 1
+	cm.votes = make(map[string]bool)
+
+	// Test vote response with higher term (should revert to follower)
+	resp := VoteResponse{
+		Term:        5,
+		VoteGranted: false,
+	}
+
+	cm.handleVoteResponse(resp)
+
+	// Should become follower due to higher term
+	assert.Equal(t, Follower, cm.state)
+	assert.Equal(t, 5, cm.currentTerm)
+}
+
+func TestConsensusManager_BecomeLeader_WithPeers(t *testing.T) {
+	cm := NewConsensusManager(ConsensusConfig{
+		NodeID:            "node-1",
+		Peers:             []string{"node-2", "node-3"},
+		HeartbeatInterval: 10 * time.Millisecond,
+	})
+
+	// Start election
+	cm.startElection()
+	assert.Equal(t, Candidate, cm.state)
+
+	// Simulate receiving enough votes
+	cm.becomeLeader()
+
+	assert.Equal(t, Leader, cm.state)
+	// GetLeader() returns nodeID when state is Leader
+	assert.Equal(t, "node-1", cm.GetLeader())
+}
+
+func TestConsensusManager_SendHeartbeats(t *testing.T) {
+	cm := NewConsensusManager(ConsensusConfig{
+		NodeID:            "node-1",
+		Peers:             []string{"node-2"},
+		HeartbeatInterval: 10 * time.Millisecond,
+	})
+
+	cm.state = Leader
+	cm.currentTerm = 1
+
+	// sendHeartbeats should not panic with mock peers
+	// In real usage, this would send RPC to peers
+	cm.sendHeartbeats()
+
+	// Verify state unchanged
+	assert.Equal(t, Leader, cm.state)
+	// Leader should be identified via GetLeader()
+	assert.Equal(t, "node-1", cm.GetLeader())
+}
