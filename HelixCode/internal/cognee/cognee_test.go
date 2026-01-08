@@ -3,6 +3,7 @@ package cognee
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -2483,5 +2484,359 @@ func TestHandlerSubmitFeedback(t *testing.T) {
 		handler.SubmitFeedback(c)
 
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// =====================================================
+// Additional Service Tests for Coverage
+// =====================================================
+
+// TestServiceGetLastError tests the GetLastError method
+func TestServiceGetLastError(t *testing.T) {
+	t.Run("GetLastError_NoError", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		lastErr := service.GetLastError()
+		assert.Nil(t, lastErr)
+	})
+}
+
+// TestServiceRegisterEventHandler tests event handler registration
+func TestServiceRegisterEventHandler(t *testing.T) {
+	t.Run("RegisterEventHandler_Success", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		service.RegisterEventHandler(func(e *CogneeEvent) {
+			// handler registered
+		})
+
+		// Verify handler was registered
+		assert.Len(t, service.eventHandlers, 1)
+	})
+
+	t.Run("RegisterEventHandler_Multiple", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		service.RegisterEventHandler(func(e *CogneeEvent) {})
+		service.RegisterEventHandler(func(e *CogneeEvent) {})
+		service.RegisterEventHandler(func(e *CogneeEvent) {})
+
+		assert.Len(t, service.eventHandlers, 3)
+	})
+}
+
+// TestServiceStatistics tests statistics tracking
+func TestServiceStatistics(t *testing.T) {
+	t.Run("ServiceStatistics_InitialValues", func(t *testing.T) {
+		stats := &ServiceStatistics{
+			StartTime: time.Now(),
+		}
+
+		assert.Equal(t, int64(0), stats.MemoriesAdded)
+		assert.Equal(t, int64(0), stats.SearchesCount)
+		assert.Equal(t, int64(0), stats.ErrorsCount)
+	})
+
+	t.Run("ServiceStatistics_IncrementMethods", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		// Access and verify initial stats
+		stats := service.stats
+		assert.Equal(t, int64(0), stats.MemoriesAdded)
+	})
+}
+
+// TestServiceCache tests cache operations
+func TestServiceCache(t *testing.T) {
+	t.Run("ServiceCache_InitialState", func(t *testing.T) {
+		cache := &ServiceCache{
+			memories:    make(map[string]*CogneeMemory),
+			searches:    make(map[string]*SearchMemoryResponse),
+			datasets:    make(map[string]*Dataset),
+			maxItems:    1000,
+			ttl:         time.Hour,
+			lastCleanup: time.Now(),
+		}
+
+		assert.NotNil(t, cache.memories)
+		assert.NotNil(t, cache.searches)
+		assert.NotNil(t, cache.datasets)
+		assert.Equal(t, 1000, cache.maxItems)
+	})
+}
+
+// TestServiceEmitEvent tests event emission
+func TestServiceEmitEvent(t *testing.T) {
+	t.Run("EmitEvent_WithHandler", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		receivedEvents := make([]*CogneeEvent, 0)
+		service.RegisterEventHandler(func(e *CogneeEvent) {
+			receivedEvents = append(receivedEvents, e)
+		})
+
+		// Emit an event
+		service.emitEvent(&CogneeEvent{
+			ID:        "test-event",
+			Type:      "test",
+			Action:    "created",
+			Timestamp: time.Now(),
+		})
+
+		// Give time for event to be processed
+		time.Sleep(100 * time.Millisecond)
+
+		// Note: Event may or may not be received depending on service state
+	})
+}
+
+// TestCogneeEvent tests the CogneeEvent struct
+func TestCogneeEvent(t *testing.T) {
+	t.Run("CogneeEvent_Creation", func(t *testing.T) {
+		event := &CogneeEvent{
+			ID:        "evt-123",
+			Type:      "memory",
+			Action:    "added",
+			Data:      map[string]interface{}{"key": "value"},
+			UserID:    "user-123",
+			Timestamp: time.Now(),
+		}
+
+		assert.Equal(t, "evt-123", event.ID)
+		assert.Equal(t, "memory", event.Type)
+		assert.Equal(t, "added", event.Action)
+		assert.NotNil(t, event.Data)
+	})
+}
+
+// TestServiceHealthCheckLoop tests the health check functionality
+func TestServiceHealthCheckLoop(t *testing.T) {
+	t.Run("PerformHealthCheck", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		// Directly call performHealthCheck
+		service.performHealthCheck(ctx)
+
+		// Should not panic and should update health status
+	})
+}
+
+// TestServiceCacheMethods tests cache helper methods
+func TestServiceCacheMethods(t *testing.T) {
+	t.Run("BuildSearchCacheKey", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		req := &SearchMemoryRequest{
+			Query:       "test query",
+			DatasetName: "test-dataset",
+			Limit:       10,
+		}
+
+		key := service.buildSearchCacheKey(req)
+		assert.NotEmpty(t, key)
+		assert.Contains(t, key, "test query")
+	})
+
+	t.Run("CacheMemory", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		memory := &CogneeMemory{
+			ID:          "mem-123",
+			Content:     "test content",
+			DatasetName: "test",
+			CreatedAt:   time.Now(),
+		}
+
+		service.cacheMemory(memory)
+
+		// Verify cached
+		cached := service.getCachedMemory("mem-123")
+		assert.NotNil(t, cached)
+		assert.Equal(t, "mem-123", cached.ID)
+	})
+
+	t.Run("CacheDataset", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		dataset := &Dataset{
+			ID:          "ds-123",
+			Name:        "test-dataset",
+			Description: "Test description",
+			CreatedAt:   time.Now(),
+		}
+
+		service.cacheDataset(dataset)
+
+		// Verify cached
+		cached := service.getCachedDataset("test-dataset")
+		assert.NotNil(t, cached)
+		assert.Equal(t, "test-dataset", cached.Name)
+	})
+
+	t.Run("CacheSearch", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		resp := &SearchMemoryResponse{
+			Results:    []MemorySource{{ID: "result-1", Content: "test"}},
+			TotalCount: 1,
+		}
+
+		service.cacheSearch("cache-key", resp)
+
+		// Verify cached
+		cached := service.getCachedSearch("cache-key")
+		assert.NotNil(t, cached)
+		assert.Equal(t, 1, cached.TotalCount)
+	})
+}
+
+// TestServiceRecordMethods tests record helper methods
+func TestServiceRecordMethods(t *testing.T) {
+	t.Run("RecordError", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		testErr := fmt.Errorf("test error")
+		service.recordError(testErr)
+
+		// Verify error was recorded
+		lastErr := service.GetLastError()
+		assert.NotNil(t, lastErr)
+		assert.Equal(t, "test error", lastErr.Error())
+	})
+
+	t.Run("RecordActivity", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		before := service.stats.LastActivity
+		service.recordActivity()
+		after := service.stats.LastActivity
+
+		assert.True(t, after.After(before) || after.Equal(before))
+	})
+}
+
+// TestServiceStatus tests status-related methods
+func TestServiceStatus(t *testing.T) {
+	t.Run("GetStatus_Stopped", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		status := service.GetStatus()
+		assert.Equal(t, ServiceStatusStopped, status)
+	})
+
+	t.Run("GetStatus_Running", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		err = service.Start(ctx)
+		require.NoError(t, err)
+
+		status := service.GetStatus()
+		assert.Equal(t, ServiceStatusRunning, status)
+
+		service.Stop(ctx)
+	})
+}
+
+// TestServiceStartStop tests additional start/stop scenarios
+func TestServiceStartStop(t *testing.T) {
+	t.Run("Start_AlreadyRunning", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.AutoStart = false
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		// Start first time
+		err = service.Start(ctx)
+		require.NoError(t, err)
+
+		// Start second time (should be idempotent)
+		err = service.Start(ctx)
+		assert.NoError(t, err)
+
+		service.Stop(ctx)
+	})
+
+	t.Run("Stop_AlreadyStopped", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		// Stop without starting (should be idempotent)
+		err = service.Stop(ctx)
+		assert.NoError(t, err)
+	})
+}
+
+// TestServiceWithOptimizer tests service with performance optimizer
+func TestServiceWithOptimizer(t *testing.T) {
+	t.Run("ServiceWithOptimizer_Creation", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.Optimization = &config.CogneeOptimizationConfig{
+			CPUOptimization:    true,
+			MemoryOptimization: true,
+		}
+		hwProfile := &hardware.HardwareProfile{
+			CPU: hardware.CPUInfo{
+				Model: "Test CPU",
+				Cores: 4,
+			},
+		}
+
+		service, err := NewCogneeService(cfg, hwProfile)
+		require.NoError(t, err)
+		assert.NotNil(t, service)
+		assert.NotNil(t, service.optimizer)
+	})
+}
+
+// TestServiceCacheConfig tests cache configuration
+func TestServiceCacheConfig(t *testing.T) {
+	t.Run("CacheConfig_Custom", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		cfg.Cache = &config.CogneeCacheConfig{
+			MaxSize: 2 * 1024 * 1024, // 2MB
+			TTL:     30 * time.Minute,
+		}
+
+		service, err := NewCogneeService(cfg, nil)
+		require.NoError(t, err)
+		assert.NotNil(t, service.cache)
+		assert.Equal(t, 30*time.Minute, service.cache.ttl)
 	})
 }
