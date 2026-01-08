@@ -483,3 +483,81 @@ func TestAutoLLMManager_Start_AlreadyRunning(t *testing.T) {
 	err := manager.Start(context.Background())
 	assert.NoError(t, err)
 }
+
+func TestAutoLLMManager_StartBackgroundTasks_Disabled(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	manager.config.AutoMonitor = false
+	manager.config.Performance.AutoOptimize = false
+	manager.config.Updates.AutoCheck = false
+
+	err := manager.startBackgroundTasks()
+	assert.NoError(t, err)
+	assert.Empty(t, manager.backgroundTasks)
+}
+
+func TestAutoLLMManager_RunBackgroundTask(t *testing.T) {
+	manager := NewAutoLLMManager("")
+
+	callCount := 0
+	task := &BackgroundTask{
+		ID:       "test-task",
+		Name:     "Test Task",
+		Function: func() error { callCount++; return nil },
+		Interval: 50 * time.Millisecond,
+		StopChan: make(chan bool),
+	}
+
+	// Run in goroutine and stop after a short time
+	go func() {
+		time.Sleep(75 * time.Millisecond)
+		close(task.StopChan)
+	}()
+
+	manager.runBackgroundTask(task)
+	assert.False(t, task.IsRunning)
+}
+
+func TestAutoLLMManager_AutoPerformanceOptimization(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	manager.providers["test"] = &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+		Status:           "running",
+		Health:           &HealthStatus{IsHealthy: true},
+		Metrics: &PerformanceMetrics{
+			CPUUsage:    90.0, // High CPU
+			MemoryUsage: 10 * 1024 * 1024 * 1024, // 10GB
+		},
+	}
+
+	err := manager.autoPerformanceOptimization()
+	assert.NoError(t, err)
+}
+
+func TestAutoLLMManager_AutoHealthCheck_NoRunningProviders(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	manager.providers["stopped"] = &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "StoppedProvider"},
+		Status:           "stopped",
+		Health:           &HealthStatus{},
+	}
+
+	err := manager.autoHealthCheck()
+	assert.NoError(t, err)
+}
+
+func TestAutoLLMManager_PerformHealthCheck(t *testing.T) {
+	manager := NewAutoLLMManager("")
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:      "TestProvider",
+			HealthURL: "http://localhost:99999/invalid",
+		},
+		Health: &HealthStatus{},
+	}
+
+	isHealthy, responseTime, err := manager.performHealthCheck(provider)
+	assert.False(t, isHealthy)
+	assert.GreaterOrEqual(t, responseTime, 0)
+	assert.Error(t, err)
+}
