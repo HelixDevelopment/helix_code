@@ -620,3 +620,157 @@ func TestConsoleLogger(t *testing.T) {
 		assert.NotNil(t, logger)
 	})
 }
+
+// TestChromeTypeString tests ChromeType.String()
+func TestChromeTypeString(t *testing.T) {
+	tests := []struct {
+		chromeType ChromeType
+		expected   string
+	}{
+		{ChromeTypeChrome, "Chrome"},
+		{ChromeTypeChromium, "Chromium"},
+		{ChromeTypeEdge, "Edge"},
+		{ChromeTypeBrave, "Brave"},
+		{ChromeType(999), "Unknown"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			result := tt.chromeType.String()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// TestConsoleMessageTypeString tests ConsoleMessageType.String()
+func TestConsoleMessageTypeString(t *testing.T) {
+	tests := []struct {
+		msgType  ConsoleMessageType
+		expected string
+	}{
+		{ConsoleLog, "log"},
+		{ConsoleWarn, "warn"},
+		{ConsoleError, "error"},
+		{ConsoleInfo, "info"},
+		{ConsoleDebug, "debug"},
+		{ConsoleTrace, "trace"},
+		{ConsoleMessageType(999), "unknown"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			result := tt.msgType.String()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// TestChromeDiscovery tests Chrome discovery functions
+func TestChromeDiscovery(t *testing.T) {
+	discovery := NewDefaultChromeDiscovery()
+
+	t.Run("get default paths returns non-empty", func(t *testing.T) {
+		paths := discovery.GetDefaultPaths()
+		assert.NotEmpty(t, paths)
+	})
+
+	t.Run("find chrome may succeed or fail", func(t *testing.T) {
+		path, err := discovery.FindChrome()
+		// Chrome might or might not be installed
+		if err == nil {
+			assert.NotEmpty(t, path)
+		} else {
+			assert.Contains(t, err.Error(), "not found")
+		}
+	})
+
+	t.Run("find all returns array", func(t *testing.T) {
+		chromes, err := discovery.FindAll()
+		// May or may not find chrome, but shouldn't error
+		if err != nil {
+			// Some systems may not have any chrome installed
+			t.Logf("FindAll returned error: %v", err)
+		}
+		// Result should be a slice (possibly empty)
+		assert.NotNil(t, chromes)
+	})
+
+	t.Run("get preferred chrome", func(t *testing.T) {
+		// May or may not find chrome
+		path := discovery.GetPreferredChrome()
+		// path can be empty if no chrome is installed
+		_ = path
+	})
+}
+
+// TestElementSelector tests element selector creation
+func TestElementSelector(t *testing.T) {
+	discovery := NewDefaultChromeDiscovery()
+	controller := NewDefaultController(discovery)
+	executor := NewDefaultActionExecutor(controller)
+
+	t.Run("create element selector", func(t *testing.T) {
+		selector := NewElementSelector(executor)
+		assert.NotNil(t, selector)
+	})
+}
+
+// TestBrowserToolsInitialization tests BrowserTools initialization
+func TestBrowserToolsInitialization(t *testing.T) {
+	t.Run("create with nil config", func(t *testing.T) {
+		tools := NewBrowserTools(nil)
+		assert.NotNil(t, tools)
+	})
+
+	t.Run("create with custom config", func(t *testing.T) {
+		config := &Config{
+			DefaultHeadless: false,
+			DefaultWidth:    1920,
+			DefaultHeight:   1080,
+			Timeout:         60 * time.Second,
+		}
+		tools := NewBrowserTools(config)
+		assert.NotNil(t, tools)
+	})
+
+	t.Run("list browsers empty initially", func(t *testing.T) {
+		tools := NewBrowserTools(nil)
+		browsers := tools.ListBrowsers()
+		assert.Empty(t, browsers)
+	})
+
+	t.Run("get non-existent browser", func(t *testing.T) {
+		tools := NewBrowserTools(nil)
+		browser, err := tools.GetBrowser("non-existent")
+		assert.Error(t, err)
+		assert.Nil(t, browser)
+	})
+
+	t.Run("close non-existent browser", func(t *testing.T) {
+		tools := NewBrowserTools(nil)
+		err := tools.CloseBrowser("non-existent")
+		assert.Error(t, err)
+	})
+
+	t.Run("close all browsers when empty", func(t *testing.T) {
+		tools := NewBrowserTools(nil)
+		err := tools.CloseAllBrowsers()
+		assert.NoError(t, err)
+	})
+}
+
+// TestConsoleMonitorOperations tests console monitor operations
+func TestConsoleMonitorOperations(t *testing.T) {
+	t.Run("clear logs", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		// Should not panic
+		monitor.ClearLogs()
+		assert.Equal(t, 0, monitor.GetMessageCount())
+		assert.Equal(t, 0, monitor.GetErrorCount())
+	})
+
+	t.Run("is running returns false initially", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		assert.False(t, monitor.IsRunning())
+	})
+}
