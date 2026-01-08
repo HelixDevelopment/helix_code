@@ -698,13 +698,13 @@ func TestActionBuilderMethods(t *testing.T) {
 
 		// Add context with WithContext
 		ctx := &ActionContext{
-			TaskID:         "task-123",
-			StepNumber:     5,
-			FilesAffected:  []string{"file1.go", "file2.go"},
-			CommandToRun:   "go test",
+			TaskID:          "task-123",
+			StepNumber:      5,
+			FilesAffected:   []string{"file1.go", "file2.go"},
+			CommandToRun:    "go test",
 			ExpectedOutcome: "tests pass",
-			Reversible:     true,
-			IterationCount: 2,
+			Reversible:      true,
+			IterationCount:  2,
 		}
 
 		result := action.WithContext(ctx)
@@ -1090,11 +1090,11 @@ func TestContainsShellExploit(t *testing.T) {
 // TestExtractBetween tests the string extraction helper
 func TestExtractBetween(t *testing.T) {
 	tests := []struct {
-		name   string
-		s      string
-		start  string
-		end    string
-		want   string
+		name  string
+		s     string
+		start string
+		end   string
+		want  string
 	}{
 		{"basic extraction", "hello [world] test", "[", "]", "world"},
 		{"no start delimiter", "hello world", "[", "]", ""},

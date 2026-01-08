@@ -420,9 +420,9 @@ func TestCompressionRecord_Creation(t *testing.T) {
 
 func TestCompressionRecord_RatioCalculation(t *testing.T) {
 	tests := []struct {
-		name         string
-		before       int
-		after        int
+		name          string
+		before        int
+		after         int
 		expectedRatio float64
 	}{
 		{"50% compression", 10000, 5000, 0.5},

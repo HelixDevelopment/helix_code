@@ -727,11 +727,11 @@ func (p *WeaviateProvider) FindSimilar(ctx context.Context, embedding []float64,
 	results := make([]*VectorSimilarityResult, len(searchResult.Results))
 	for i, item := range searchResult.Results {
 		results[i] = &VectorSimilarityResult{
-			ID:         item.ID,
-			Score:      item.Score,
-			Distance:   item.Distance,
-			Metadata:   item.Metadata,
-			Vector:     nil, // Not included by default for performance
+			ID:       item.ID,
+			Score:    item.Score,
+			Distance: item.Distance,
+			Metadata: item.Metadata,
+			Vector:   nil, // Not included by default for performance
 		}
 	}
 

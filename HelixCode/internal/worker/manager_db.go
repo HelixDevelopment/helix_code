@@ -324,22 +324,22 @@ func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname,
 	`
 
 	var (
-		dbID               uuid.UUID
-		returnedHostname   string
+		dbID                uuid.UUID
+		returnedHostname    string
 		returnedDisplayName string
-		sshConfig          map[string]interface{}
-		returnedCaps       []string
-		resources          map[string]interface{}
-		status             string
-		healthStatus       string
-		lastHeartbeat      *time.Time
-		cpuUsagePercent    *float64
-		memoryUsagePercent *float64
-		diskUsagePercent   *float64
-		currentTasksCount  int
-		returnedMaxTasks   int
-		createdAt          time.Time
-		updatedAt          time.Time
+		sshConfig           map[string]interface{}
+		returnedCaps        []string
+		resources           map[string]interface{}
+		status              string
+		healthStatus        string
+		lastHeartbeat       *time.Time
+		cpuUsagePercent     *float64
+		memoryUsagePercent  *float64
+		diskUsagePercent    *float64
+		currentTasksCount   int
+		returnedMaxTasks    int
+		createdAt           time.Time
+		updatedAt           time.Time
 	)
 
 	err = m.db.QueryRow(ctx, query, hostname, displayName, capabilities, maxConcurrentTasks, workerID).Scan(

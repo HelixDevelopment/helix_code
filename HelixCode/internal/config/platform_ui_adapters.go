@@ -101,31 +101,31 @@ func (a *PlatformAdapter) GetResolutionInfo() map[string]interface{} {
 	switch a.platformType {
 	case "desktop":
 		return map[string]interface{}{
-			"default_dpi":  96,
+			"default_dpi":   96,
 			"scale_factors": []float64{1.0, 1.25, 1.5, 2.0},
-			"min_width":    800,
-			"min_height":   600,
+			"min_width":     800,
+			"min_height":    600,
 		}
 	case "web":
 		return map[string]interface{}{
-			"default_dpi":  96,
+			"default_dpi":   96,
 			"scale_factors": []float64{1.0, 1.5, 2.0},
-			"min_width":    320,
-			"min_height":   568,
+			"min_width":     320,
+			"min_height":    568,
 		}
 	case "mobile":
 		return map[string]interface{}{
-			"default_dpi":  160,
+			"default_dpi":   160,
 			"scale_factors": []float64{1.0, 2.0, 3.0},
-			"min_width":    320,
-			"min_height":   480,
+			"min_width":     320,
+			"min_height":    480,
 		}
 	default:
 		return map[string]interface{}{
-			"default_dpi":  96,
+			"default_dpi":   96,
 			"scale_factors": []float64{1.0},
-			"min_width":    800,
-			"min_height":   600,
+			"min_width":     800,
+			"min_height":    600,
 		}
 	}
 }
@@ -182,38 +182,38 @@ type DesktopConfigField struct {
 
 // DesktopConfigAction represents an action in desktop config form
 type DesktopConfigAction struct {
-	ID        string
-	Label     string
-	Type      string
-	Icon      string
-	Shortcut  string
-	Default   bool
-	Cancel    bool
-	Position  string
+	ID       string
+	Label    string
+	Type     string
+	Icon     string
+	Shortcut string
+	Default  bool
+	Cancel   bool
+	Position string
 }
 
 // WebConfigForm represents web configuration form
 type WebConfigForm struct {
-	ID         string
-	Title      string
-	Type       string
-	Layout     string
-	Responsive bool
-	JavaScript []string
-	CSS        []string
-	Validation WebConfigValidation
+	ID           string
+	Title        string
+	Type         string
+	Layout       string
+	Responsive   bool
+	JavaScript   []string
+	CSS          []string
+	Validation   WebConfigValidation
 	SubmitAction WebConfigSubmit
-	Sections   []WebConfigSection
-	Actions    []WebConfigAction
+	Sections     []WebConfigSection
+	Actions      []WebConfigAction
 }
 
 // WebConfigValidation represents validation configuration
 type WebConfigValidation struct {
-	Enabled   bool
-	OnSubmit  bool
-	OnBlur    bool
-	Realtime  bool
-	Custom    []string
+	Enabled  bool
+	OnSubmit bool
+	OnBlur   bool
+	Realtime bool
+	Custom   []string
 }
 
 // WebConfigSubmit represents submit configuration
@@ -227,12 +227,12 @@ type WebConfigSubmit struct {
 
 // WebConfigSection represents a section in web config form
 type WebConfigSection struct {
-	ID          string
-	Title       string
-	Icon        string
-	Type        string
-	Expanded    bool
-	Fields      []WebConfigField
+	ID       string
+	Title    string
+	Icon     string
+	Type     string
+	Expanded bool
+	Fields   []WebConfigField
 }
 
 // WebConfigField represents a field in web config section
@@ -395,10 +395,10 @@ func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
 		},
 		Sections: []TUIConfigSection{
 			{
-				ID:          "application",
-				Title:       "Application",
-				Type:        "form",
-				Expanded:    true,
+				ID:       "application",
+				Title:    "Application",
+				Type:     "form",
+				Expanded: true,
 				Fields: []TUIConfigField{
 					{
 						ID:          "app_name",
@@ -643,10 +643,10 @@ func NewTUIAdapter() *TUIAdapter {
 // GetNativeMenuBarInfo returns native menu bar information
 func (a *DesktopPlatformAdapter) GetNativeMenuBarInfo() map[string]interface{} {
 	return map[string]interface{}{
-		"enabled":         true,
-		"menu_shortcuts":  true,
-		"global_menu":     true,
-		"system_tray":     true,
+		"enabled":          true,
+		"menu_shortcuts":   true,
+		"global_menu":      true,
+		"system_tray":      true,
 		"dock_integration": true,
 	}
 }
@@ -674,15 +674,15 @@ func (a *DesktopPlatformAdapter) RenderConfigForm(formType string) interface{} {
 // GetBrowserInfo returns browser-specific information
 func (a *WebPlatformAdapter) GetBrowserInfo() map[string]interface{} {
 	return map[string]interface{}{
-		"local_storage":     true,
-		"service_workers":   true,
-		"web_workers":       true,
-		"notifications":     true,
-		"fullscreen":        true,
-		"drag_and_drop":     true,
-		"file_api":         true,
-		"webgl":            true,
-		"websocket":        true,
+		"local_storage":   true,
+		"service_workers": true,
+		"web_workers":     true,
+		"notifications":   true,
+		"fullscreen":      true,
+		"drag_and_drop":   true,
+		"file_api":        true,
+		"webgl":           true,
+		"websocket":       true,
 	}
 }
 
@@ -697,11 +697,11 @@ func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
 		JavaScript: []string{"config.js", "validation.js"},
 		CSS:        []string{"config.css", "themes.css"},
 		Validation: WebConfigValidation{
-			Enabled:   true,
-			OnSubmit:  true,
-			OnBlur:    false,
-			Realtime:  false,
-			Custom:    []string{"emailValidator", "portValidator"},
+			Enabled:  true,
+			OnSubmit: true,
+			OnBlur:   false,
+			Realtime: false,
+			Custom:   []string{"emailValidator", "portValidator"},
 		},
 		SubmitAction: WebConfigSubmit{
 			URL:     "/api/config/save",
@@ -710,8 +710,8 @@ func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
 			Success: "Configuration saved successfully!",
 			Error:   "Failed to save configuration. Please try again.",
 		},
-		Sections:   []WebConfigSection{},
-		Actions:    []WebConfigAction{},
+		Sections: []WebConfigSection{},
+		Actions:  []WebConfigAction{},
 	}
 	return form
 }
@@ -719,14 +719,14 @@ func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
 // GetMobileInfo returns mobile-specific information
 func (a *MobilePlatformAdapter) GetMobileInfo() map[string]interface{} {
 	return map[string]interface{}{
-		"touch":            true,
-		"accelerometer":     true,
-		"geolocation":      true,
-		"camera":           true,
-		"vibration":        true,
-		"offline":          true,
-		"app_cache":        true,
-		"native_bridge":    true,
+		"touch":         true,
+		"accelerometer": true,
+		"geolocation":   true,
+		"camera":        true,
+		"vibration":     true,
+		"offline":       true,
+		"app_cache":     true,
+		"native_bridge": true,
 	}
 }
 
@@ -760,8 +760,6 @@ func GetPlatformUIAdapter(platformType string) PlatformAdapterInterface {
 		return NewDesktopPlatformAdapter()
 	}
 }
-
-
 
 // PlatformAdapterInterface defines the interface for platform adapters
 type PlatformAdapterInterface interface {

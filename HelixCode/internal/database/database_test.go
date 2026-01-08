@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func TestConfig(t *testing.T) {
@@ -221,7 +221,7 @@ func TestConfig_Validation(t *testing.T) {
 			// Test connection string formatting
 			connString := formatConnectionString(tc.config)
 			assert.NotEmpty(t, connString)
-			
+
 			// Test config parsing
 			poolConfig, err := pgxpool.ParseConfig(connString)
 			if tc.valid {
@@ -350,16 +350,17 @@ func TestDatabase_Ping_Method(t *testing.T) {
 	assert.Panics(t, func() {
 		db.Ping(context.Background())
 	})
-	
-	// Test with mock setup - we can't easily mock pgxpool, 
+
+	// Test with mock setup - we can't easily mock pgxpool,
 	// but we can test that the method signature is correct
 	assert.NotNil(t, (*Database)(nil).Ping)
 }
+
 // TestDatabase_InitializeSchema_Method tests InitializeSchema method
 func TestDatabase_InitializeSchema_Method(t *testing.T) {
 	// Test with nil pool - this will panic
 	db := &Database{Pool: nil}
-	
+
 	// This will panic because InitializeSchema tries to use the pool
 	assert.Panics(t, func() {
 		db.InitializeSchema()
@@ -370,114 +371,114 @@ func TestDatabase_InitializeSchema_Method(t *testing.T) {
 
 // TestDatabase_InterfaceMethods tests database interface methods using mocks
 func TestDatabase_InterfaceMethods(t *testing.T) {
-	// Test with mock setup - we can't easily mock pgxpool, 
+	// Test with mock setup - we can't easily mock pgxpool,
 	// but we can test that method signature is correct
 	assert.NotNil(t, (*Database)(nil).Ping)
 	t.Run("Exec_Success", func(t *testing.T) {
 		mockDB := NewMockDatabase()
-		
+
 		// Set up mock expectation
 		mockDB.On("Exec", mock.Anything, mock.Anything, mock.Anything).
 			Return(pgconn.CommandTag{}, nil)
-		
+
 		ctx := context.Background()
 		_, err := mockDB.Exec(ctx, "INSERT INTO users (name) VALUES ($1)", "test")
 		assert.NoError(t, err)
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("Exec_Error", func(t *testing.T) {
 		mockDB := NewMockDatabase()
-		
+
 		// Set up mock to return error
 		mockDB.On("Exec", mock.Anything, mock.Anything, mock.Anything).
 			Return(pgconn.CommandTag{}, fmt.Errorf("database error"))
-		
+
 		ctx := context.Background()
 		_, err := mockDB.Exec(ctx, "INSERT INTO users (name) VALUES ($1)", "test")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "database error")
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("Query_Success", func(t *testing.T) {
 		mockDB := NewMockDatabase()
 		mockRows := NewMockRows([][]interface{}{
 			{"testuser", "test@example.com"},
 			{"user2", "user2@example.com"},
 		})
-		
+
 		// Set up mock expectation
 		mockDB.On("Query", mock.Anything, mock.Anything, mock.Anything).
 			Return(mockRows, nil)
-		
+
 		ctx := context.Background()
 		rows, err := mockDB.Query(ctx, "SELECT * FROM users")
 		assert.NoError(t, err)
 		assert.NotNil(t, rows)
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("Query_Error", func(t *testing.T) {
 		mockDB := NewMockDatabase()
-		
+
 		// Set up mock to return error
 		mockDB.On("Query", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, fmt.Errorf("query error"))
-		
+
 		ctx := context.Background()
 		rows, err := mockDB.Query(ctx, "SELECT * FROM users")
 		assert.Error(t, err)
 		assert.Nil(t, rows)
 		assert.Contains(t, err.Error(), "query error")
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("QueryRow_Success", func(t *testing.T) {
 		mockDB := NewMockDatabase()
 		mockRow := NewMockRowWithValues([]interface{}{"testuser", "test@example.com"})
-		
+
 		// Set up mock expectation
 		mockDB.On("QueryRow", mock.Anything, mock.Anything, mock.Anything).
 			Return(mockRow)
-		
+
 		ctx := context.Background()
 		row := mockDB.QueryRow(ctx, "SELECT username, email FROM users WHERE id = $1", "123")
 		assert.NotNil(t, row)
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("Ping_Success", func(t *testing.T) {
 		mockDB := NewMockDatabase()
-		
+
 		// Set up mock expectation
 		mockDB.On("Ping", mock.Anything).
 			Return(nil)
-		
+
 		ctx := context.Background()
 		err := mockDB.Ping(ctx)
 		assert.NoError(t, err)
-		
+
 		mockDB.AssertExpectations(t)
 	})
-	
+
 	t.Run("Ping_Error", func(t *testing.T) {
 		mockDB := NewMockDatabase()
-		
+
 		// Set up mock to return error
 		mockDB.On("Ping", mock.Anything).
 			Return(fmt.Errorf("connection failed"))
-		
+
 		ctx := context.Background()
 		err := mockDB.Ping(ctx)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "connection failed")
-		
+
 		mockDB.AssertExpectations(t)
 	})
 }
@@ -485,13 +486,13 @@ func TestDatabase_InterfaceMethods(t *testing.T) {
 // TestDatabase_Close_Method tests database close method
 func TestDatabase_Close_Method(t *testing.T) {
 	mockDB := NewMockDatabase()
-	
+
 	// Set up mock expectation
 	mockDB.On("Close").Return()
-	
+
 	// Call close
 	mockDB.Close()
-	
+
 	// Assert expectations
 	mockDB.AssertExpectations(t)
 }
@@ -500,28 +501,28 @@ func TestDatabase_Close_Method(t *testing.T) {
 func TestDatabase_WithRealMethods(t *testing.T) {
 	// We can't easily mock pgxpool.Pool, so we test error cases
 	db := &Database{Pool: nil}
-	
+
 	t.Run("Exec_NilPool", func(t *testing.T) {
 		ctx := context.Background()
-		
+
 		// This should panic because pool is nil
 		assert.Panics(t, func() {
 			db.Exec(ctx, "SELECT 1")
 		})
 	})
-	
+
 	t.Run("Query_NilPool", func(t *testing.T) {
 		ctx := context.Background()
-		
+
 		// This should panic because pool is nil
 		assert.Panics(t, func() {
 			db.Query(ctx, "SELECT 1")
 		})
 	})
-	
+
 	t.Run("QueryRow_NilPool", func(t *testing.T) {
 		ctx := context.Background()
-		
+
 		// This should panic because pool is nil
 		assert.Panics(t, func() {
 			db.QueryRow(ctx, "SELECT 1")

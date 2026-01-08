@@ -45,18 +45,18 @@ type MemontoRequest struct {
 }
 
 type MemontoResponse struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Success bool         `json:"success"`
+	Data    interface{}  `json:"data,omitempty"`
+	Error   string       `json:"error,omitempty"`
 	Meta    *MemontoMeta `json:"meta,omitempty"`
 }
 
 type MemontoMeta struct {
-	Nodes    int                    `json:"nodes"`
-	Edges    int                    `json:"edges"`
-	Concepts []string               `json:"concepts"`
-	Timing   map[string]float64     `json:"timing"`
-	Cost     float64                `json:"cost"`
+	Nodes    int                `json:"nodes"`
+	Edges    int                `json:"edges"`
+	Concepts []string           `json:"concepts"`
+	Timing   map[string]float64 `json:"timing"`
+	Cost     float64            `json:"cost"`
 }
 
 type MemontoKnowledgeGraph struct {
@@ -65,13 +65,13 @@ type MemontoKnowledgeGraph struct {
 }
 
 type MemontoNode struct {
-	ID          string                 `json:"id"`
-	Type        string                 `json:"type"`
-	Label       string                 `json:"label"`
-	Properties  map[string]interface{} `json:"properties"`
-	Embedding   []float64              `json:"embedding,omitempty"`
-	Created     time.Time              `json:"created"`
-	Updated     time.Time              `json:"updated"`
+	ID         string                 `json:"id"`
+	Type       string                 `json:"type"`
+	Label      string                 `json:"label"`
+	Properties map[string]interface{} `json:"properties"`
+	Embedding  []float64              `json:"embedding,omitempty"`
+	Created    time.Time              `json:"created"`
+	Updated    time.Time              `json:"updated"`
 }
 
 type MemontoEdge struct {
@@ -93,10 +93,10 @@ type MemontoConcept struct {
 
 // CostTracker tracks API costs
 type CostTracker struct {
-	TotalCost      float64 `json:"total_cost"`
-	Operations     int     `json:"operations"`
-	NodesCreated   int     `json:"nodes_created"`
-	EdgesCreated   int     `json:"edges_created"`
+	TotalCost       float64 `json:"total_cost"`
+	Operations      int     `json:"operations"`
+	NodesCreated    int     `json:"nodes_created"`
+	EdgesCreated    int     `json:"edges_created"`
 	ConceptsLearned int     `json:"concepts_learned"`
 }
 
@@ -255,9 +255,9 @@ func (p *MemontoProvider) Store(ctx context.Context, data []*VectorData) error {
 				conceptID := fmt.Sprintf("concept_%s", concept)
 				if _, exists := knowledgeGraph.Nodes[conceptID]; !exists {
 					conceptNode := &MemontoNode{
-						ID:     conceptID,
-						Type:   "concept",
-						Label:  concept,
+						ID:    conceptID,
+						Type:  "concept",
+						Label: concept,
 						Properties: map[string]interface{}{
 							"type": "concept",
 							"name": concept,
@@ -277,7 +277,7 @@ func (p *MemontoProvider) Store(ctx context.Context, data []*VectorData) error {
 					Weight: 1.0,
 					Properties: map[string]interface{}{
 						"relationship_type": "mentions",
-						"confidence": 0.8,
+						"confidence":        0.8,
 					},
 					Created: time.Now(),
 				}
@@ -324,7 +324,7 @@ func (p *MemontoProvider) Store(ctx context.Context, data []*VectorData) error {
 			coll.UpdatedAt = time.Now()
 		}
 
-		p.logger.Info("Successfully stored %d memories to Memonto (%d nodes, %d edges)", 
+		p.logger.Info("Successfully stored %d memories to Memonto (%d nodes, %d edges)",
 			len(data), len(knowledgeGraph.Nodes), len(knowledgeGraph.Edges))
 		return nil
 	} else {
@@ -351,15 +351,15 @@ func (p *MemontoProvider) Search(ctx context.Context, query *VectorQuery) (*Vect
 		Action: "search_knowledge",
 		UserID: p.userID,
 		Data: map[string]interface{}{
-			"query":      query.Text,
-			"vector":     query.Vector,
-			"top_k":      query.TopK,
-			"filters":    query.Filters,
+			"query":       query.Text,
+			"vector":      query.Vector,
+			"top_k":       query.TopK,
+			"filters":     query.Filters,
 			"search_type": "semantic",
 		},
 		Options: map[string]interface{}{
-			"include_concepts":   true,
-			"include_relations": true,
+			"include_concepts":     true,
+			"include_relations":    true,
 			"similarity_threshold": 0.7,
 		},
 	}
@@ -424,7 +424,7 @@ func (p *MemontoProvider) Retrieve(ctx context.Context, ids []string) ([]*Vector
 			"ids": ids,
 		},
 		Options: map[string]interface{}{
-			"include_concepts":   true,
+			"include_concepts":  true,
 			"include_relations": true,
 		},
 	}
@@ -485,7 +485,7 @@ func (p *MemontoProvider) Update(ctx context.Context, id string, vector *VectorD
 			"embedding":  vector.Vector,
 		},
 		Options: map[string]interface{}{
-			"update_concepts": true,
+			"update_concepts":  true,
 			"relearn_patterns": true,
 		},
 	}
@@ -590,7 +590,7 @@ func (p *MemontoProvider) FindSimilar(ctx context.Context, embedding []float64, 
 		},
 		Options: map[string]interface{}{
 			"similarity_threshold": 0.7,
-			"include_concepts":      true,
+			"include_concepts":     true,
 		},
 	}
 
@@ -1218,9 +1218,9 @@ func (p *MemontoProvider) Optimize(ctx context.Context) error {
 		Action: "optimize_knowledge",
 		UserID: p.userID,
 		Options: map[string]interface{}{
-			"compact_graph": true,
-			"merge_nodes":   true,
-			"cleanup_edges":  true,
+			"compact_graph":    true,
+			"merge_nodes":      true,
+			"cleanup_edges":    true,
 			"relearn_patterns": true,
 		},
 	}
@@ -1264,9 +1264,9 @@ func (p *MemontoProvider) Backup(ctx context.Context, path string) error {
 		Action: "export_knowledge",
 		UserID: p.userID,
 		Options: map[string]interface{}{
-			"format":      "json",
-			"export_path": path,
-			"include_edges": true,
+			"format":           "json",
+			"export_path":      path,
+			"include_edges":    true,
 			"include_concepts": true,
 		},
 	}
@@ -1310,10 +1310,10 @@ func (p *MemontoProvider) Restore(ctx context.Context, path string) error {
 		Action: "import_knowledge",
 		UserID: p.userID,
 		Options: map[string]interface{}{
-			"import_path":      path,
-			"merge_existing":   true,
-			"create_edges":     true,
-			"learn_concepts":    true,
+			"import_path":    path,
+			"merge_existing": true,
+			"create_edges":   true,
+			"learn_concepts": true,
 		},
 	}
 
@@ -1426,13 +1426,13 @@ func (p *MemontoProvider) Health(ctx context.Context) (*HealthStatus, error) {
 		LastCheck:    time.Now(),
 		ResponseTime: time.Since(start),
 		Details: map[string]interface{}{
-			"total_operations":   p.stats.TotalOperations,
-			"total_cost":         p.costTracker.TotalCost,
-			"nodes_created":       p.costTracker.NodesCreated,
-			"edges_created":       p.costTracker.EdgesCreated,
-			"concepts_learned":    p.costTracker.ConceptsLearned,
-			"collections_count":   len(p.collections),
-			"vectors_count":       p.stats.TotalVectors,
+			"total_operations":  p.stats.TotalOperations,
+			"total_cost":        p.costTracker.TotalCost,
+			"nodes_created":     p.costTracker.NodesCreated,
+			"edges_created":     p.costTracker.EdgesCreated,
+			"concepts_learned":  p.costTracker.ConceptsLearned,
+			"collections_count": len(p.collections),
+			"vectors_count":     p.stats.TotalVectors,
 		},
 	}, nil
 }
@@ -1577,7 +1577,7 @@ func getStringFromConfigMemonto(config *IndexConfig, key string) string {
 	if config == nil {
 		return ""
 	}
-	
+
 	switch key {
 	case "field":
 		// For Memonto, field is typically "vector" by default

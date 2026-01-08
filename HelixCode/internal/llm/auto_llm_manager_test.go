@@ -524,7 +524,7 @@ func TestAutoLLMManager_AutoPerformanceOptimization(t *testing.T) {
 		Status:           "running",
 		Health:           &HealthStatus{IsHealthy: true},
 		Metrics: &PerformanceMetrics{
-			CPUUsage:    90.0, // High CPU
+			CPUUsage:    90.0,                    // High CPU
 			MemoryUsage: 10 * 1024 * 1024 * 1024, // 10GB
 		},
 	}

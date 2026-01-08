@@ -11,8 +11,8 @@ import (
 
 // Cognee operating modes
 const (
-	CogneeModeLocal = "local"
-	CogneeModeCloud = "cloud"
+	CogneeModeLocal  = "local"
+	CogneeModeCloud  = "cloud"
 	CogneeModeHybrid = "hybrid"
 )
 
@@ -150,11 +150,11 @@ type SecurityConfig struct {
 
 // FallbackConfig contains fallback configuration
 type FallbackConfig struct {
-	Enabled   bool     `json:"enabled" yaml:"enabled"`
-	Strategy  string   `json:"strategy" yaml:"strategy"`
-	Providers []string `json:"providers" yaml:"providers"`
-	Timeout   time.Duration `json:"timeout" yaml:"timeout"`
-	RetryCount int      `json:"retry_count" yaml:"retry_count"`
+	Enabled    bool          `json:"enabled" yaml:"enabled"`
+	Strategy   string        `json:"strategy" yaml:"strategy"`
+	Providers  []string      `json:"providers" yaml:"providers"`
+	Timeout    time.Duration `json:"timeout" yaml:"timeout"`
+	RetryCount int           `json:"retry_count" yaml:"retry_count"`
 }
 
 // PerformanceConfig contains performance configuration

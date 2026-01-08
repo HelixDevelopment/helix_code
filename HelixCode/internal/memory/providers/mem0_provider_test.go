@@ -55,7 +55,7 @@ func TestNewMem0Provider(t *testing.T) {
 		}
 	}{
 		{
-			name:   "with all config values",
+			name: "with all config values",
 			config: map[string]interface{}{
 				"base_url": "https://custom.mem0.ai",
 				"api_key":  "my-api-key",
@@ -78,7 +78,7 @@ func TestNewMem0Provider(t *testing.T) {
 			},
 		},
 		{
-			name:   "with default base URL",
+			name: "with default base URL",
 			config: map[string]interface{}{
 				"api_key": "my-api-key",
 			},
@@ -1093,10 +1093,10 @@ func TestGetStringValue(t *testing.T) {
 
 func TestGetFloatValue(t *testing.T) {
 	data := map[string]interface{}{
-		"float_key": 1.5,
-		"int_key":   100,
+		"float_key":  1.5,
+		"int_key":    100,
 		"string_key": "not a number",
-		"nil_key":   nil,
+		"nil_key":    nil,
 	}
 
 	assert.Equal(t, 1.5, getFloatValue(data, "float_key"))

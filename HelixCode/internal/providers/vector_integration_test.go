@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"dev.helix.code/internal/memory/providers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"dev.helix.code/internal/memory/providers"
 )
 
 // =============================================================================

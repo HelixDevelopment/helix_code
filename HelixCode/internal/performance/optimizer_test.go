@@ -419,9 +419,9 @@ func TestApplyOptimizations(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name     string
-		optType  OptType
-		applyFn  func(context.Context, *Optimization, float64) (*OptResult, error)
+		name    string
+		optType OptType
+		applyFn func(context.Context, *Optimization, float64) (*OptResult, error)
 	}{
 		{"CPU", CPUOpt, po.applyCPUOptimization},
 		{"Memory", MemoryOpt, po.applyMemoryOptimization},
@@ -536,15 +536,15 @@ func TestOptimizationResult(t *testing.T) {
 		endTime := startTime.Add(5 * time.Minute)
 
 		result := OptimizationResult{
-			StartTime:      startTime,
-			EndTime:        endTime,
-			Duration:       5 * time.Minute,
-			TotalApplied:   10,
-			Successful:     8,
-			Failed:         2,
-			Baseline:       &PerformanceMetrics{Throughput: 1000},
+			StartTime:        startTime,
+			EndTime:          endTime,
+			Duration:         5 * time.Minute,
+			TotalApplied:     10,
+			Successful:       8,
+			Failed:           2,
+			Baseline:         &PerformanceMetrics{Throughput: 1000},
 			PostOptimization: &PerformanceMetrics{Throughput: 1500},
-			Optimizations:  make(map[string]Optimization),
+			Optimizations:    make(map[string]Optimization),
 			OverallImprovement: &OverallImprovement{
 				ThroughputImprovement: 50.0,
 				LatencyImprovement:    20.0,
@@ -737,11 +737,11 @@ func TestReportFunctions(t *testing.T) {
 	t.Run("EvaluateProductionReadiness_Ready", func(t *testing.T) {
 		result := &OptimizationResult{
 			PostOptimization: &PerformanceMetrics{
-				Throughput:      1500,
-				CPUUtilization:  65.0,
-				MemoryUsage:     400 * 1024 * 1024,
-				CacheHitRate:    0.96,
-				ErrorRate:       0.005,
+				Throughput:     1500,
+				CPUUtilization: 65.0,
+				MemoryUsage:    400 * 1024 * 1024,
+				CacheHitRate:   0.96,
+				ErrorRate:      0.005,
 			},
 		}
 
@@ -760,9 +760,9 @@ func TestReportFunctions(t *testing.T) {
 
 		result := &OptimizationResult{
 			PostOptimization: &PerformanceMetrics{
-				Throughput:      1000, // Below target
-				CPUUtilization:  80.0, // Above target
-				CacheHitRate:    0.90, // Below target
+				Throughput:     1000, // Below target
+				CPUUtilization: 80.0, // Above target
+				CacheHitRate:   0.90, // Below target
 			},
 		}
 
@@ -830,24 +830,24 @@ func TestGenerateOptimizationReport(t *testing.T) {
 			Successful:   8,
 			Failed:       2,
 			Baseline: &PerformanceMetrics{
-				CPUUtilization:  80.0,
-				MemoryUsage:     500 * 1024 * 1024,
-				Throughput:      800,
-				AverageLatency:  50 * time.Millisecond,
-				P95Latency:      100 * time.Millisecond,
-				P99Latency:      200 * time.Millisecond,
-				CacheHitRate:    0.85,
-				ErrorRate:       0.01,
+				CPUUtilization: 80.0,
+				MemoryUsage:    500 * 1024 * 1024,
+				Throughput:     800,
+				AverageLatency: 50 * time.Millisecond,
+				P95Latency:     100 * time.Millisecond,
+				P99Latency:     200 * time.Millisecond,
+				CacheHitRate:   0.85,
+				ErrorRate:      0.01,
 			},
 			PostOptimization: &PerformanceMetrics{
-				CPUUtilization:  60.0,
-				MemoryUsage:     400 * 1024 * 1024,
-				Throughput:      1200,
-				AverageLatency:  30 * time.Millisecond,
-				P95Latency:      60 * time.Millisecond,
-				P99Latency:      120 * time.Millisecond,
-				CacheHitRate:    0.95,
-				ErrorRate:       0.005,
+				CPUUtilization: 60.0,
+				MemoryUsage:    400 * 1024 * 1024,
+				Throughput:     1200,
+				AverageLatency: 30 * time.Millisecond,
+				P95Latency:     60 * time.Millisecond,
+				P99Latency:     120 * time.Millisecond,
+				CacheHitRate:   0.95,
+				ErrorRate:      0.005,
 			},
 			OverallImprovement: &OverallImprovement{
 				ThroughputImprovement: 50.0,

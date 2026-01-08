@@ -328,7 +328,7 @@ func TestTaskManager_CacheOperations(t *testing.T) {
 	t.Run("cacheTaskStats with nil Redis", func(t *testing.T) {
 		tm := NewTaskManager(MockDatabase(), nil)
 		stats := map[string]interface{}{
-			"total": 10,
+			"total":   10,
 			"pending": 5,
 		}
 

@@ -1232,9 +1232,9 @@ func TestEditorDiff(t *testing.T) {
 
 		ops := []EditOperation{
 			{
-				Type:    EditInsert,
+				Type:      EditInsert,
 				StartLine: 2,
-				Content: "New Line",
+				Content:   "New Line",
 			},
 		}
 

@@ -143,9 +143,9 @@ func TestExtractColors(t *testing.T) {
 		// Create a test image with distinct colors
 		testImage := filepath.Join(tempDir, "test.png")
 		testColors := []color.Color{
-			color.RGBA{255, 0, 0, 255},   // Red
-			color.RGBA{0, 255, 0, 255},   // Green
-			color.RGBA{0, 0, 255, 255},   // Blue
+			color.RGBA{255, 0, 0, 255}, // Red
+			color.RGBA{0, 255, 0, 255}, // Green
+			color.RGBA{0, 0, 255, 255}, // Blue
 		}
 		err := createTestPNG(testImage, 100, 150, testColors)
 		assert.NoError(t, err)

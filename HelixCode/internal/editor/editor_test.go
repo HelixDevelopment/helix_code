@@ -548,7 +548,7 @@ func TestCodeEditor_ApplyEditErrorPaths(t *testing.T) {
 		}
 
 		edit := Edit{
-			FilePath: "",  // Empty file path will fail validation
+			FilePath: "", // Empty file path will fail validation
 			Format:   EditFormatWhole,
 			Content:  "test",
 		}

@@ -14,31 +14,31 @@ import (
 // ========================================
 
 type MockProvider struct {
-	name          string
-	providerType  string
-	initialized   bool
-	started       bool
-	vectors       map[string]*VectorData
-	collections   map[string]*CollectionInfo
-	shouldFail    bool
+	name           string
+	providerType   string
+	initialized    bool
+	started        bool
+	vectors        map[string]*VectorData
+	collections    map[string]*CollectionInfo
+	shouldFail     bool
 	failOperations map[string]bool
 }
 
 func NewMockProvider(name string) *MockProvider {
 	return &MockProvider{
-		name:          name,
-		providerType:  "mock",
-		vectors:       make(map[string]*VectorData),
-		collections:   make(map[string]*CollectionInfo),
+		name:           name,
+		providerType:   "mock",
+		vectors:        make(map[string]*VectorData),
+		collections:    make(map[string]*CollectionInfo),
 		failOperations: make(map[string]bool),
 	}
 }
 
-func (m *MockProvider) GetName() string                          { return m.name }
-func (m *MockProvider) GetType() string                          { return m.providerType }
-func (m *MockProvider) GetCapabilities() []string                { return []string{"store", "search", "retrieve"} }
-func (m *MockProvider) GetConfiguration() interface{}            { return nil }
-func (m *MockProvider) IsCloud() bool                            { return false }
+func (m *MockProvider) GetName() string               { return m.name }
+func (m *MockProvider) GetType() string               { return m.providerType }
+func (m *MockProvider) GetCapabilities() []string     { return []string{"store", "search", "retrieve"} }
+func (m *MockProvider) GetConfiguration() interface{} { return nil }
+func (m *MockProvider) IsCloud() bool                 { return false }
 func (m *MockProvider) GetCostInfo() *CostInfo {
 	return &CostInfo{Currency: "USD", TotalCost: 0.0}
 }

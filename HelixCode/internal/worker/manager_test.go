@@ -217,7 +217,7 @@ func TestWorkerHealth_Constants(t *testing.T) {
 func TestResources_Structure(t *testing.T) {
 	resources := Resources{
 		CPUCount:    8,
-		TotalMemory: 16 * 1024 * 1024 * 1024, // 16GB
+		TotalMemory: 16 * 1024 * 1024 * 1024,  // 16GB
 		TotalDisk:   500 * 1024 * 1024 * 1024, // 500GB
 		GPUCount:    1,
 		GPUModel:    "NVIDIA RTX 3080",
@@ -624,10 +624,10 @@ func TestWorkerManager_GetWorkerStats(t *testing.T) {
 	assert.Equal(t, 3, stats.TotalWorkers)
 	assert.Equal(t, 2, stats.ActiveWorkers)
 	assert.Equal(t, 1, stats.HealthyWorkers)
-	assert.Equal(t, 10, stats.TotalTasks)                // 3 + 7 + 0
-	assert.Equal(t, 20, stats.AvailableTasks)            // (10-3) + (10-7) + (10-0)
-	assert.Equal(t, 40.0, stats.AverageCPUUsage)         // (40+80+0)/3
-	assert.Equal(t, 40.0, stats.AverageMemoryUsage)      // (50+70+0)/3
+	assert.Equal(t, 10, stats.TotalTasks)           // 3 + 7 + 0
+	assert.Equal(t, 20, stats.AvailableTasks)       // (10-3) + (10-7) + (10-0)
+	assert.Equal(t, 40.0, stats.AverageCPUUsage)    // (40+80+0)/3
+	assert.Equal(t, 40.0, stats.AverageMemoryUsage) // (50+70+0)/3
 }
 
 func TestWorkerManager_GetWorkerStats_Empty(t *testing.T) {

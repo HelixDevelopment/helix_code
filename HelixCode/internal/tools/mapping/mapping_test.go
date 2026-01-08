@@ -927,8 +927,8 @@ func TestCodebaseMap_GetTopLanguages(t *testing.T) {
 	// Get top 2 languages
 	top2 := cmap.GetTopLanguages(2)
 	assert.Len(t, top2, 2)
-	assert.Equal(t, "go", top2[0])       // 3 files
-	assert.Equal(t, "python", top2[1])   // 2 files
+	assert.Equal(t, "go", top2[0])     // 3 files
+	assert.Equal(t, "python", top2[1]) // 2 files
 
 	// Get top 10 (more than available)
 	top10 := cmap.GetTopLanguages(10)
@@ -1033,8 +1033,8 @@ func TestParsedTree_ExtractComments(t *testing.T) {
 			Type: "program",
 			Children: []*Node{
 				{
-					Type: "comment",
-					Text: "// This is a comment",
+					Type:       "comment",
+					Text:       "// This is a comment",
 					StartPoint: Point{Row: 0, Column: 0},
 				},
 				{

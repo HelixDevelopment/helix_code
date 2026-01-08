@@ -301,4 +301,3 @@ func (a *CodingAgent) Shutdown(ctx context.Context) error {
 	a.SetStatus(agent.StatusShutdown)
 	return nil
 }
-

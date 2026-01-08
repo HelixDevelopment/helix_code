@@ -684,10 +684,10 @@ type MemoryIntegration struct {
 func NewMemoryIntegration(config *MemoryConfig) *MemoryIntegration {
 	if config == nil {
 		config = &MemoryConfig{
-			Enabled:         true,
-			MaxGenerations:  10000,
+			Enabled:          true,
+			MaxGenerations:   10000,
 			MaxConversations: 1000,
-			TTL:             24 * time.Hour,
+			TTL:              24 * time.Hour,
 		}
 	}
 
@@ -819,13 +819,13 @@ func (mi *MemoryIntegration) GetMemoryStats(ctx context.Context) (*MemoryStats, 
 	defer mi.mu.RUnlock()
 
 	return &MemoryStats{
-		TotalGenerations:   mi.totalGenerations,
-		TotalConversations: mi.totalConversations,
-		TotalTokens:        mi.totalTokens,
-		TotalCost:          mi.totalCost,
-		StoredGenerations:  len(mi.generations),
+		TotalGenerations:    mi.totalGenerations,
+		TotalConversations:  mi.totalConversations,
+		TotalTokens:         mi.totalTokens,
+		TotalCost:           mi.totalCost,
+		StoredGenerations:   len(mi.generations),
 		StoredConversations: len(mi.conversations),
-		LastUpdate:         mi.lastUpdate,
+		LastUpdate:          mi.lastUpdate,
 	}, nil
 }
 
@@ -864,14 +864,14 @@ type ConversationManager struct {
 }
 
 type Conversation struct {
-	ID           string
-	Messages     []*ChatMessage
-	Context      map[string]interface{}
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	TotalTokens  int
-	TotalCost    float64
-	Compressed   bool
+	ID               string
+	Messages         []*ChatMessage
+	Context          map[string]interface{}
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	TotalTokens      int
+	TotalCost        float64
+	Compressed       bool
 	CompressionRatio float64
 }
 
@@ -1004,21 +1004,21 @@ func (w *LLMProviderWrapper) Generate(ctx context.Context, prompt string) (strin
 }
 
 type PersonalityManager struct {
-	mu                sync.RWMutex
-	logger            *logging.Logger
-	ai                *AIIntegration
-	config            *AIConfig
-	personalities     map[string]*Personality
-	activePersonality *Personality
+	mu                 sync.RWMutex
+	logger             *logging.Logger
+	ai                 *AIIntegration
+	config             *AIConfig
+	personalities      map[string]*Personality
+	activePersonality  *Personality
 	defaultPersonality string
-	lastUpdate        time.Time
+	lastUpdate         time.Time
 }
 
 type Personality struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Traits      map[string]interface{} `json:"traits"`
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name"`
+	Description  string                 `json:"description"`
+	Traits       map[string]interface{} `json:"traits"`
 	SystemPrompt string                 `json:"system_prompt"`
 	Temperature  float64                `json:"temperature"`
 	TopP         float64                `json:"top_p"`
@@ -1044,10 +1044,10 @@ func NewPersonalityManager(ai *AIIntegration, config *AIConfig) *PersonalityMana
 		Name:        "Default Assistant",
 		Description: "A helpful and professional AI assistant",
 		Traits: map[string]interface{}{
-			"helpfulness": 0.9,
+			"helpfulness":     0.9,
 			"professionalism": 0.8,
-			"creativity": 0.7,
-			"conciseness": 0.7,
+			"creativity":      0.7,
+			"conciseness":     0.7,
 		},
 		SystemPrompt: "You are a helpful, professional AI assistant. Provide clear and accurate responses.",
 		Temperature:  0.7,
@@ -1067,8 +1067,8 @@ func NewPersonalityManager(ai *AIIntegration, config *AIConfig) *PersonalityMana
 		Description: "A highly technical AI assistant for development tasks",
 		Traits: map[string]interface{}{
 			"technical_depth": 0.95,
-			"precision": 0.9,
-			"verbosity": 0.6,
+			"precision":       0.9,
+			"verbosity":       0.6,
 		},
 		SystemPrompt: "You are a technical expert specializing in software development. Provide detailed, accurate technical guidance.",
 		Temperature:  0.5,
@@ -1083,7 +1083,7 @@ func NewPersonalityManager(ai *AIIntegration, config *AIConfig) *PersonalityMana
 		Name:        "Creative Assistant",
 		Description: "A creative and imaginative AI assistant",
 		Traits: map[string]interface{}{
-			"creativity": 0.95,
+			"creativity":  0.95,
 			"imagination": 0.9,
 			"flexibility": 0.85,
 		},

@@ -169,7 +169,7 @@ func NewModelRanker() *ModelRanker {
 			"cost_per_token",
 			"success_rate",
 		},
-		CustomScorers:  make(map[string]CustomScorer),
+		CustomScorers: make(map[string]CustomScorer),
 	}
 }
 

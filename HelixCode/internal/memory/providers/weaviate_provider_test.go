@@ -199,8 +199,8 @@ func TestIsValidBackupBackend(t *testing.T) {
 		{"filesystem", true},
 		{"invalid", false},
 		{"", false},
-		{"S3", false},           // Case sensitive
-		{"file-system", false},  // Wrong format
+		{"S3", false},          // Case sensitive
+		{"file-system", false}, // Wrong format
 	}
 
 	for _, tt := range tests {

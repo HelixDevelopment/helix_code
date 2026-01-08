@@ -86,10 +86,11 @@ After applying fixes, the package performs validation to ensure:
 A fix operation is considered successful when:
 
   - At least one issue was fixed, AND
+
   - No critical issues remain after validation
 
-	result.Success = result.FixedIssues > 0 &&
-	    (result.Validation == nil || result.Validation.RemainingCriticalIssues == 0)
+    result.Success = result.FixedIssues > 0 &&
+    (result.Validation == nil || result.Validation.RemainingCriticalIssues == 0)
 
 # Integration with Security Package
 

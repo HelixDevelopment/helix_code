@@ -413,11 +413,11 @@ func (e *Executor) detectDependencies(proj *project.Project) []string {
 
 	// Check for dependency files
 	depFiles := map[string]string{
-		"go.mod":         "go",
-		"package.json":   "node",
+		"go.mod":           "go",
+		"package.json":     "node",
 		"requirements.txt": "python",
-		"Cargo.toml":     "rust",
-		"pom.xml":        "java",
+		"Cargo.toml":       "rust",
+		"pom.xml":          "java",
 	}
 
 	for file, lang := range depFiles {
@@ -827,38 +827,38 @@ func isDangerousCommand(cmd string) bool {
 
 	// Dangerous command prefixes (destructive file/system operations)
 	dangerousPrefixes := []string{
-		"rm ", "rm\t",             // Remove files
-		"dd ",                     // Low-level disk operations
-		"mkfs", "mkfs.",           // Format filesystems
-		"fdisk",                   // Partition editing
-		"parted",                  // Partition manipulation
-		"wipefs",                  // Wipe filesystem signatures
-		"shred",                   // Secure deletion
-		"mv /", "mv ~/",           // Moving from root/home
-		"chmod 777 /",             // Dangerous permissions on root
-		"chown -r",                // Recursive ownership change
-		"kill -9", "killall",      // Process termination
-		"pkill",                   // Process killing
+		"rm ", "rm\t", // Remove files
+		"dd ",           // Low-level disk operations
+		"mkfs", "mkfs.", // Format filesystems
+		"fdisk",         // Partition editing
+		"parted",        // Partition manipulation
+		"wipefs",        // Wipe filesystem signatures
+		"shred",         // Secure deletion
+		"mv /", "mv ~/", // Moving from root/home
+		"chmod 777 /",        // Dangerous permissions on root
+		"chown -r",           // Recursive ownership change
+		"kill -9", "killall", // Process termination
+		"pkill",                                  // Process killing
 		"shutdown", "reboot", "poweroff", "halt", // System control
-		"systemctl stop", "systemctl disable",    // Service control
-		"init 0", "init 6",        // Runlevel changes
-		"> /dev/", ">/dev/",       // Direct device writes
+		"systemctl stop", "systemctl disable", // Service control
+		"init 0", "init 6", // Runlevel changes
+		"> /dev/", ">/dev/", // Direct device writes
 	}
 
 	// Dangerous patterns anywhere in command
 	dangerousPatterns := []string{
 		"rm -rf /", "rm -fr /", "rm -r /", "rm -f /", // Root deletion
-		"rm -rf ~", "rm -fr ~", "rm -r ~",            // Home deletion
-		"rm -rf /*", "rm -rf ~/*",                    // Wildcard deletion
-		"rm -rf .", "rm -rf ..",                      // Current/parent dir deletion
-		"--no-preserve-root",                         // Bypass rm safety
-		"| sh", "| bash", "| zsh",                   // Piped shell execution
-		"|sh", "|bash", "|zsh",                      // No space variant
-		"`rm", "$(rm",                               // Command substitution with rm
-		"; rm", "&& rm", "|| rm",                    // Chained rm commands
-		"eval ", "exec ",                            // Dynamic execution
-		"/dev/sda", "/dev/nvme", "/dev/hd",          // Raw disk access
-		":(){ :|:& };:",                             // Fork bomb
+		"rm -rf ~", "rm -fr ~", "rm -r ~", // Home deletion
+		"rm -rf /*", "rm -rf ~/*", // Wildcard deletion
+		"rm -rf .", "rm -rf ..", // Current/parent dir deletion
+		"--no-preserve-root",      // Bypass rm safety
+		"| sh", "| bash", "| zsh", // Piped shell execution
+		"|sh", "|bash", "|zsh", // No space variant
+		"`rm", "$(rm", // Command substitution with rm
+		"; rm", "&& rm", "|| rm", // Chained rm commands
+		"eval ", "exec ", // Dynamic execution
+		"/dev/sda", "/dev/nvme", "/dev/hd", // Raw disk access
+		":(){ :|:& };:", // Fork bomb
 	}
 
 	// Check prefixes (command starts with dangerous prefix)

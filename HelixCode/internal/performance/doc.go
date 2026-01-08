@@ -155,21 +155,21 @@
 //
 // The optimizer generates detailed reports saved to reports/performance/:
 //
-//	- Baseline and post-optimization metrics
-//	- Per-optimization results and improvements
-//	- Recommendations for further optimization
-//	- Production readiness assessment
-//	- Key achievements summary
+//   - Baseline and post-optimization metrics
+//   - Per-optimization results and improvements
+//   - Recommendations for further optimization
+//   - Production readiness assessment
+//   - Key achievements summary
 //
 // # Production Readiness
 //
 // The optimizer evaluates whether targets are met:
 //
-//	- Throughput meets or exceeds target
-//	- CPU utilization within target
-//	- Memory usage within limits
-//	- Cache hit rate above minimum
-//	- Error rate below maximum
+//   - Throughput meets or exceeds target
+//   - CPU utilization within target
+//   - Memory usage within limits
+//   - Cache hit rate above minimum
+//   - Error rate below maximum
 //
 // # Thread Safety
 //

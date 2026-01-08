@@ -165,7 +165,7 @@ func TestTokenBudgetWarnings(t *testing.T) {
 		MaxTokensPerSession:  10000,
 		MaxCostPerSession:    10.0,
 		MaxCostPerDay:        50.0,
-		MaxRequestsPerMinute: 60, // Allow 60 requests per minute
+		MaxRequestsPerMinute: 60,   // Allow 60 requests per minute
 		WarnThreshold:        80.0, // Warn at 80%
 	}
 

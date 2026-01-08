@@ -18,7 +18,7 @@ type AnimaProvider struct {
 	initialized bool
 	started     bool
 	data        map[string]*VectorData
-	collections  map[string]*CollectionInfo
+	collections map[string]*CollectionInfo
 	indexes     map[string]map[string]*IndexInfo
 	metadata    map[string]map[string]interface{}
 	stats       *ProviderStats
@@ -1071,19 +1071,19 @@ func matchesFilters(vector *VectorData, filters map[string]interface{}) bool {
 	if len(filters) == 0 {
 		return true
 	}
-	
+
 	for key, filterValue := range filters {
 		vectorValue, exists := vector.Metadata[key]
 		if !exists {
 			return false
 		}
-		
+
 		// Simple equality check for now
 		// In a real implementation, this would support more complex filtering
 		if vectorValue != filterValue {
 			return false
 		}
 	}
-	
+
 	return true
 }

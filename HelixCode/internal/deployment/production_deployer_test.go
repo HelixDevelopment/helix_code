@@ -14,10 +14,10 @@ import (
 func TestNewProductionDeployer(t *testing.T) {
 	t.Run("NewProductionDeployer_MinimalConfig", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:        "test-project",
+			Environment:        "test",
 			DeploymentStrategy: ProductionDeploy,
-			TargetServers: []string{"server1", "server2"},
+			TargetServers:      []string{"server1", "server2"},
 		}
 
 		deployer, err := NewProductionDeployer(config)
@@ -33,10 +33,10 @@ func TestNewProductionDeployer(t *testing.T) {
 
 	t.Run("NewProductionDeployer_WithMonitoring", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "prod",
+			ProjectName:       "test-project",
+			Environment:       "prod",
 			MonitoringEnabled: true,
-			TargetServers: []string{"server1"},
+			TargetServers:     []string{"server1"},
 		}
 
 		deployer, err := NewProductionDeployer(config)
@@ -48,20 +48,20 @@ func TestNewProductionDeployer(t *testing.T) {
 
 	t.Run("NewProductionDeployer_FullConfig", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "production",
-			DeploymentStrategy: BlueGreenDeploy,
-			SecurityGateEnabled: false, // Skip security to avoid init issues
+			ProjectName:            "test-project",
+			Environment:            "production",
+			DeploymentStrategy:     BlueGreenDeploy,
+			SecurityGateEnabled:    false, // Skip security to avoid init issues
 			PerformanceGateEnabled: true,
-			AutoRollbackEnabled: true,
-			HealthCheckEnabled: true,
-			MonitoringEnabled: true,
-			CanaryDuration: 5 * time.Minute,
-			RollbackTimeout: 10 * time.Minute,
-			HealthCheckTimeout: 2 * time.Minute,
-			MaxRetries: 3,
-			TargetServers: []string{"server1", "server2", "server3"},
-			Credentials: map[string]string{"key": "value"},
+			AutoRollbackEnabled:    true,
+			HealthCheckEnabled:     true,
+			MonitoringEnabled:      true,
+			CanaryDuration:         5 * time.Minute,
+			RollbackTimeout:        10 * time.Minute,
+			HealthCheckTimeout:     2 * time.Minute,
+			MaxRetries:             3,
+			TargetServers:          []string{"server1", "server2", "server3"},
+			Credentials:            map[string]string{"key": "value"},
 			Notifications: NotificationConfig{
 				SlackEnabled: true,
 				EmailEnabled: true,
@@ -94,12 +94,12 @@ func TestDeploymentConfig(t *testing.T) {
 
 	t.Run("DeploymentConfig_WithValues", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "my-app",
-			Environment: "staging",
-			DeploymentStrategy: CanaryDeploy,
+			ProjectName:         "my-app",
+			Environment:         "staging",
+			DeploymentStrategy:  CanaryDeploy,
 			SecurityGateEnabled: true,
-			MaxRetries: 5,
-			TargetServers: []string{"server1", "server2"},
+			MaxRetries:          5,
+			TargetServers:       []string{"server1", "server2"},
 		}
 
 		assert.Equal(t, "my-app", config.ProjectName)
@@ -151,12 +151,12 @@ func TestDeploymentPhase(t *testing.T) {
 func TestDeploymentStatus(t *testing.T) {
 	t.Run("DeploymentStatus_Initialization", func(t *testing.T) {
 		status := &DeploymentStatus{
-			DeploymentID: "test-123",
-			Status: PhasePreparation,
-			StartTime: time.Now(),
+			DeploymentID:    "test-123",
+			Status:          PhasePreparation,
+			StartTime:       time.Now(),
 			CompletedPhases: []string{},
-			FailedPhases: []string{},
-			Metrics: &DeploymentMetrics{},
+			FailedPhases:    []string{},
+			Metrics:         &DeploymentMetrics{},
 		}
 
 		assert.Equal(t, "test-123", status.DeploymentID)
@@ -169,10 +169,10 @@ func TestDeploymentStatus(t *testing.T) {
 
 	t.Run("DeploymentStatus_WithPhases", func(t *testing.T) {
 		status := &DeploymentStatus{
-			DeploymentID: "test-456",
-			Status: PhaseDeployment,
+			DeploymentID:    "test-456",
+			Status:          PhaseDeployment,
 			CompletedPhases: []string{"preparation", "security_check"},
-			FailedPhases: []string{},
+			FailedPhases:    []string{},
 		}
 
 		assert.Len(t, status.CompletedPhases, 2)
@@ -187,7 +187,7 @@ func TestSecurityGateStatus(t *testing.T) {
 	t.Run("SecurityGateStatus_Initial", func(t *testing.T) {
 		status := &SecurityGateStatus{
 			Enabled: true,
-			Status: "pending",
+			Status:  "pending",
 		}
 
 		assert.True(t, status.Enabled)
@@ -197,12 +197,12 @@ func TestSecurityGateStatus(t *testing.T) {
 
 	t.Run("SecurityGateStatus_Passed", func(t *testing.T) {
 		status := &SecurityGateStatus{
-			Enabled: true,
-			Status: "passed",
-			CriticalIssues: 0,
-			HighIssues: 0,
+			Enabled:          true,
+			Status:           "passed",
+			CriticalIssues:   0,
+			HighIssues:       0,
 			ZeroToleranceMet: true,
-			Passed: true,
+			Passed:           true,
 		}
 
 		assert.True(t, status.Passed)
@@ -213,12 +213,12 @@ func TestSecurityGateStatus(t *testing.T) {
 
 	t.Run("SecurityGateStatus_Failed", func(t *testing.T) {
 		status := &SecurityGateStatus{
-			Enabled: true,
-			Status: "failed",
+			Enabled:        true,
+			Status:         "failed",
 			CriticalIssues: 2,
-			HighIssues: 5,
-			Passed: false,
-			Reason: "Critical vulnerabilities found",
+			HighIssues:     5,
+			Passed:         false,
+			Reason:         "Critical vulnerabilities found",
 		}
 
 		assert.False(t, status.Passed)
@@ -232,11 +232,11 @@ func TestSecurityGateStatus(t *testing.T) {
 func TestPerformanceGateStatus(t *testing.T) {
 	t.Run("PerformanceGateStatus_Initial", func(t *testing.T) {
 		status := &PerformanceGateStatus{
-			Enabled: true,
+			Enabled:          true,
 			ThroughputTarget: 1000,
-			LatencyTarget: "100ms",
-			CPUTarget: 80.0,
-			MemoryTarget: 1024 * 1024 * 1024, // 1GB
+			LatencyTarget:    "100ms",
+			CPUTarget:        80.0,
+			MemoryTarget:     1024 * 1024 * 1024, // 1GB
 		}
 
 		assert.True(t, status.Enabled)
@@ -248,11 +248,11 @@ func TestPerformanceGateStatus(t *testing.T) {
 
 	t.Run("PerformanceGateStatus_Passed", func(t *testing.T) {
 		status := &PerformanceGateStatus{
-			Enabled: true,
-			ThroughputTarget: 1000,
+			Enabled:           true,
+			ThroughputTarget:  1000,
 			CurrentThroughput: 1200,
-			AllTargetsMet: true,
-			Passed: true,
+			AllTargetsMet:     true,
+			Passed:            true,
 		}
 
 		assert.True(t, status.Passed)
@@ -265,11 +265,11 @@ func TestPerformanceGateStatus(t *testing.T) {
 func TestHealthCheckStatus(t *testing.T) {
 	t.Run("HealthCheckStatus_AllHealthy", func(t *testing.T) {
 		status := &HealthCheckStatus{
-			Enabled: true,
-			ServerCount: 3,
-			HealthyServers: 3,
+			Enabled:          true,
+			ServerCount:      3,
+			HealthyServers:   3,
 			UnhealthyServers: 0,
-			Passed: true,
+			Passed:           true,
 		}
 
 		assert.True(t, status.Passed)
@@ -280,12 +280,12 @@ func TestHealthCheckStatus(t *testing.T) {
 
 	t.Run("HealthCheckStatus_SomeUnhealthy", func(t *testing.T) {
 		status := &HealthCheckStatus{
-			Enabled: true,
-			ServerCount: 5,
-			HealthyServers: 3,
+			Enabled:          true,
+			ServerCount:      5,
+			HealthyServers:   3,
 			UnhealthyServers: 2,
-			Passed: false,
-			Reason: "2 servers unhealthy",
+			Passed:           false,
+			Reason:           "2 servers unhealthy",
 		}
 
 		assert.False(t, status.Passed)
@@ -307,13 +307,13 @@ func TestDeploymentMetrics(t *testing.T) {
 
 	t.Run("DeploymentMetrics_WithValues", func(t *testing.T) {
 		metrics := &DeploymentMetrics{
-			DeploymentTime: 15 * time.Minute,
-			DeployedServers: 5,
-			SecurityScans: 1,
+			DeploymentTime:   15 * time.Minute,
+			DeployedServers:  5,
+			SecurityScans:    1,
 			PerformanceTests: 1,
-			HealthChecks: 3,
-			Retries: 0,
-			Notifications: 10,
+			HealthChecks:     3,
+			Retries:          0,
+			Notifications:    10,
 		}
 
 		assert.Equal(t, 15*time.Minute, metrics.DeploymentTime)
@@ -330,8 +330,8 @@ func TestDeploymentMetrics(t *testing.T) {
 func TestNotificationConfig(t *testing.T) {
 	t.Run("NotificationConfig_AllDisabled", func(t *testing.T) {
 		config := &NotificationConfig{
-			SlackEnabled: false,
-			EmailEnabled: false,
+			SlackEnabled:   false,
+			EmailEnabled:   false,
 			WebhookEnabled: false,
 		}
 
@@ -342,12 +342,12 @@ func TestNotificationConfig(t *testing.T) {
 
 	t.Run("NotificationConfig_AllEnabled", func(t *testing.T) {
 		config := &NotificationConfig{
-			SlackEnabled: true,
-			EmailEnabled: true,
-			WebhookEnabled: true,
+			SlackEnabled:    true,
+			EmailEnabled:    true,
+			WebhookEnabled:  true,
 			SlackWebhookURL: "https://slack.webhook",
 			EmailRecipients: []string{"admin@example.com"},
-			WebhookURL: "https://webhook.url",
+			WebhookURL:      "https://webhook.url",
 		}
 
 		assert.True(t, config.SlackEnabled)
@@ -364,10 +364,10 @@ func TestNotificationEvent(t *testing.T) {
 	t.Run("NotificationEvent_Success", func(t *testing.T) {
 		event := &NotificationEvent{
 			Timestamp: time.Now(),
-			Type: "deployment_started",
-			Message: "Deployment started",
+			Type:      "deployment_started",
+			Message:   "Deployment started",
 			Recipient: "admin@example.com",
-			Status: "sent",
+			Status:    "sent",
 		}
 
 		assert.NotZero(t, event.Timestamp)
@@ -379,11 +379,11 @@ func TestNotificationEvent(t *testing.T) {
 	t.Run("NotificationEvent_Failed", func(t *testing.T) {
 		event := &NotificationEvent{
 			Timestamp: time.Now(),
-			Type: "deployment_failed",
-			Message: "Deployment failed",
+			Type:      "deployment_failed",
+			Message:   "Deployment failed",
 			Recipient: "admin@example.com",
-			Status: "failed",
-			Error: "Connection timeout",
+			Status:    "failed",
+			Error:     "Connection timeout",
 		}
 
 		assert.Equal(t, "failed", event.Status)
@@ -396,10 +396,10 @@ func TestNotificationEvent(t *testing.T) {
 func TestServerHealth(t *testing.T) {
 	t.Run("ServerHealth_Healthy", func(t *testing.T) {
 		health := &ServerHealth{
-			Server: "server1",
-			Status: "healthy",
+			Server:       "server1",
+			Status:       "healthy",
 			ResponseTime: 50 * time.Millisecond,
-			LastCheck: time.Now(),
+			LastCheck:    time.Now(),
 		}
 
 		assert.Equal(t, "healthy", health.Status)
@@ -409,11 +409,11 @@ func TestServerHealth(t *testing.T) {
 
 	t.Run("ServerHealth_Unhealthy", func(t *testing.T) {
 		health := &ServerHealth{
-			Server: "server2",
-			Status: "unhealthy",
+			Server:       "server2",
+			Status:       "unhealthy",
 			ResponseTime: 0,
-			LastCheck: time.Now(),
-			Error: "Connection refused",
+			LastCheck:    time.Now(),
+			Error:        "Connection refused",
 		}
 
 		assert.Equal(t, "unhealthy", health.Status)
@@ -426,8 +426,8 @@ func TestServerHealth(t *testing.T) {
 func TestProductionDeployerConcurrency(t *testing.T) {
 	t.Run("MultipleDeployment_Prevented", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:   "test-project",
+			Environment:   "test",
 			TargetServers: []string{"server1"},
 		}
 
@@ -472,8 +472,8 @@ func TestProductionDeployerConcurrency(t *testing.T) {
 func TestDeploymentConfigValidation(t *testing.T) {
 	t.Run("Config_WithEmptyServers", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:   "test-project",
+			Environment:   "test",
 			TargetServers: []string{},
 		}
 
@@ -487,11 +487,11 @@ func TestDeploymentConfigValidation(t *testing.T) {
 
 	t.Run("Config_WithTimeouts", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			CanaryDuration: 5 * time.Minute,
-			RollbackTimeout: 10 * time.Minute,
+			ProjectName:        "test-project",
+			CanaryDuration:     5 * time.Minute,
+			RollbackTimeout:    10 * time.Minute,
 			HealthCheckTimeout: 2 * time.Minute,
-			TargetServers: []string{"server1"},
+			TargetServers:      []string{"server1"},
 		}
 
 		deployer, err := NewProductionDeployer(config)
@@ -507,8 +507,8 @@ func TestDeploymentConfigValidation(t *testing.T) {
 func TestDeploymentStatusTracking(t *testing.T) {
 	t.Run("Status_PhaseTracking", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:   "test-project",
+			Environment:   "test",
 			TargetServers: []string{"server1"},
 		}
 
@@ -533,10 +533,10 @@ func TestDeploymentStatusTracking(t *testing.T) {
 func TestStartProductionDeployment(t *testing.T) {
 	t.Run("Deployment_MissingCredentials", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
-			TargetServers: []string{"server1"},
-			Credentials: nil, // Set to nil instead of empty
+			ProjectName:         "test-project",
+			Environment:         "test",
+			TargetServers:       []string{"server1"},
+			Credentials:         nil,  // Set to nil instead of empty
 			AutoRollbackEnabled: true, // Enable auto rollback
 		}
 
@@ -556,8 +556,8 @@ func TestStartProductionDeployment(t *testing.T) {
 
 	t.Run("Deployment_ConcurrentPrevention", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:   "test-project",
+			Environment:   "test",
 			TargetServers: []string{"server1"},
 			Credentials: map[string]string{
 				"deploy_key": "test_key",
@@ -581,17 +581,17 @@ func TestStartProductionDeployment(t *testing.T) {
 
 	t.Run("Deployment_SuccessfulFlow", func(t *testing.T) {
 		config := &DeploymentConfig{
-			ProjectName: "test-project",
-			Environment: "test",
+			ProjectName:   "test-project",
+			Environment:   "test",
 			TargetServers: []string{"server1"},
 			Credentials: map[string]string{
 				"deploy_key": "test_key",
-				"api_token": "test_token",
+				"api_token":  "test_token",
 			},
-			SecurityGateEnabled: false,
+			SecurityGateEnabled:    false,
 			PerformanceGateEnabled: false,
-			HealthCheckEnabled: false,
-			MonitoringEnabled: false,
+			HealthCheckEnabled:     false,
+			MonitoringEnabled:      false,
 		}
 
 		deployer, err := NewProductionDeployer(config)
@@ -610,8 +610,8 @@ func TestStartProductionDeployment(t *testing.T) {
 // TestExecutePhase tests individual phase execution
 func TestExecutePhase(t *testing.T) {
 	config := &DeploymentConfig{
-		ProjectName: "test-project",
-		Environment: "test",
+		ProjectName:   "test-project",
+		Environment:   "test",
 		TargetServers: []string{"server1"},
 		Credentials: map[string]string{
 			"deploy_key": "test_key",
@@ -650,8 +650,8 @@ func TestExecutePhase(t *testing.T) {
 // TestCheckPrerequisites tests prerequisite checking
 func TestCheckPrerequisites(t *testing.T) {
 	config := &DeploymentConfig{
-		ProjectName: "test-project",
-		Environment: "test",
+		ProjectName:   "test-project",
+		Environment:   "test",
 		TargetServers: []string{"server1"},
 	}
 
@@ -718,10 +718,10 @@ func TestDeploymentStrategies(t *testing.T) {
 	for _, strategy := range strategies {
 		t.Run("Strategy_"+string(strategy), func(t *testing.T) {
 			config := &DeploymentConfig{
-				ProjectName: "test-project",
-				Environment: "test",
+				ProjectName:        "test-project",
+				Environment:        "test",
 				DeploymentStrategy: strategy,
-				TargetServers: []string{"server1"},
+				TargetServers:      []string{"server1"},
 				Credentials: map[string]string{
 					"deploy_key": "test_key",
 				},
@@ -738,8 +738,8 @@ func TestDeploymentStrategies(t *testing.T) {
 // TestDeploymentNotifications tests notification functionality
 func TestDeploymentNotifications(t *testing.T) {
 	config := &DeploymentConfig{
-		ProjectName: "test-project",
-		Environment: "test",
+		ProjectName:   "test-project",
+		Environment:   "test",
 		TargetServers: []string{"server1"},
 	}
 
@@ -749,9 +749,9 @@ func TestDeploymentNotifications(t *testing.T) {
 	t.Run("AddNotification", func(t *testing.T) {
 		initialCount := len(deployer.status.Notifications)
 		deployer.addNotification("test_event", "test message", "test_recipient")
-		
+
 		assert.Len(t, deployer.status.Notifications, initialCount+1)
-		
+
 		notification := deployer.status.Notifications[len(deployer.status.Notifications)-1]
 		assert.Equal(t, "test_event", notification.Type)
 		assert.Equal(t, "test message", notification.Message)
@@ -763,9 +763,9 @@ func TestDeploymentNotifications(t *testing.T) {
 // TestRollbackFunctionality tests rollback mechanisms
 func TestRollbackFunctionality(t *testing.T) {
 	config := &DeploymentConfig{
-		ProjectName: "test-project",
-		Environment: "test",
-		TargetServers: []string{"server1"},
+		ProjectName:         "test-project",
+		Environment:         "test",
+		TargetServers:       []string{"server1"},
 		AutoRollbackEnabled: true,
 	}
 
@@ -777,7 +777,7 @@ func TestRollbackFunctionality(t *testing.T) {
 		deployer.status.Status = PhaseDeployment
 		reason := "test rollback reason"
 		deployer.triggerRollback(reason)
-		
+
 		assert.True(t, deployer.status.RollbackTriggered)
 		assert.Equal(t, reason, deployer.status.RollbackReason)
 		assert.Equal(t, string(PhaseRollback), deployer.status.CurrentPhase) // CurrentPhase is set, not Status
@@ -788,8 +788,8 @@ func TestRollbackFunctionality(t *testing.T) {
 // TestDeploymentMetricsCollection tests metrics collection
 func TestDeploymentMetricsCollection(t *testing.T) {
 	config := &DeploymentConfig{
-		ProjectName: "test-project",
-		Environment: "test",
+		ProjectName:   "test-project",
+		Environment:   "test",
 		TargetServers: []string{"server1", "server2"},
 	}
 
@@ -1455,9 +1455,9 @@ func TestExecutePerformanceCheck(t *testing.T) {
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
-				ThroughputTarget: 100,    // Low threshold for simulated pass
-				LatencyTarget:    "500ms", // High threshold for simulated pass
-				CPUTarget:        90.0,    // High threshold
+				ThroughputTarget: 100,                    // Low threshold for simulated pass
+				LatencyTarget:    "500ms",                // High threshold for simulated pass
+				CPUTarget:        90.0,                   // High threshold
 				MemoryTarget:     8 * 1024 * 1024 * 1024, // 8GB threshold
 			},
 		}

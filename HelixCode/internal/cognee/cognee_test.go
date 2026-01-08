@@ -1592,9 +1592,9 @@ func TestClientGetStatistics(t *testing.T) {
 
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(CogneeStatistics{
-				TotalMemories:   100,
-				TotalDatasets:   5,
-				GraphNodeCount:  1000,
+				TotalMemories:  100,
+				TotalDatasets:  5,
+				GraphNodeCount: 1000,
 			})
 		}))
 		defer server.Close()

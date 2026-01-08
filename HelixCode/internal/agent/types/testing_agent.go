@@ -325,4 +325,3 @@ func getTestDirectory(testFilePath string) string {
 	}
 	return "."
 }
-

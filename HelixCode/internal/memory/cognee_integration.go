@@ -129,7 +129,7 @@ func (ci *CogneeIntegration) Initialize(ctx context.Context, config *config.Cogn
 	if config == nil {
 		return fmt.Errorf("config cannot be nil")
 	}
-	
+
 	ci.mu.Lock()
 	defer ci.mu.Unlock()
 
@@ -138,7 +138,7 @@ func (ci *CogneeIntegration) Initialize(ctx context.Context, config *config.Cogn
 	}
 
 	ci.config = config
-	
+
 	// Initialize client only if RemoteAPI config is provided
 	if config.RemoteAPI != nil {
 		ci.client = &CogneeClient{
@@ -150,7 +150,7 @@ func (ci *CogneeIntegration) Initialize(ctx context.Context, config *config.Cogn
 	}
 
 	ci.isRunning = true
-	
+
 	// Log appropriate message based on whether we have RemoteAPI config
 	if ci.client != nil {
 		ci.logger.Info("Cognee integration initialized with mode=%s, endpoint=%s", ci.config.Mode, ci.client.baseURL)

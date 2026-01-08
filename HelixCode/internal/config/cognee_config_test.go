@@ -429,8 +429,8 @@ func TestCogneeConfigClone(t *testing.T) {
 	cloned.Host = "changed.com"
 	cloned.RemoteAPI.ServiceEndpoint = "https://changed.com"
 
-	assert.True(t, original.Enabled)  // Original should be unchanged
-	assert.False(t, cloned.Enabled)   // Clone should be changed
+	assert.True(t, original.Enabled) // Original should be unchanged
+	assert.False(t, cloned.Enabled)  // Clone should be changed
 	assert.NotEqual(t, original.Host, cloned.Host)
 	assert.NotEqual(t, original.RemoteAPI.ServiceEndpoint, cloned.RemoteAPI.ServiceEndpoint)
 }
@@ -458,11 +458,11 @@ func TestCogneeConfigMerge(t *testing.T) {
 	overlay := &CogneeConfig{
 		Enabled: false, // Should override
 		// AutoStart not set - should keep base value
-		Host:  "", // Empty - should not override
-		Port:  9000, // Should override
-		Mode:  "cloud", // Should override
+		Host: "",      // Empty - should not override
+		Port: 9000,    // Should override
+		Mode: "cloud", // Should override
 		RemoteAPI: &CogneeRemoteAPIConfig{
-			ServiceEndpoint: "", // Empty - should not override
+			ServiceEndpoint: "",            // Empty - should not override
 			APIKey:          "overlay-key", // Should override
 			// Timeout not set - should keep base value
 		},
@@ -482,23 +482,23 @@ func TestCogneeConfigMerge(t *testing.T) {
 	base.Merge(overlay)
 
 	// Verify merge results
-	assert.False(t, base.Enabled) // Overridden
-	assert.False(t, base.AutoStart) // Kept from base
+	assert.False(t, base.Enabled)                  // Overridden
+	assert.False(t, base.AutoStart)                // Kept from base
 	assert.Equal(t, "base.example.com", base.Host) // Kept (overlay was empty)
-	assert.Equal(t, 9000, base.Port) // Overridden
-	assert.Equal(t, "cloud", base.Mode) // Overridden
+	assert.Equal(t, 9000, base.Port)               // Overridden
+	assert.Equal(t, "cloud", base.Mode)            // Overridden
 
 	// RemoteAPI merge
 	assert.Equal(t, "https://base.api.com", base.RemoteAPI.ServiceEndpoint) // Kept
-	assert.Equal(t, "overlay-key", base.RemoteAPI.APIKey) // Overridden
-	assert.Equal(t, 30*time.Second, base.RemoteAPI.Timeout) // Kept
+	assert.Equal(t, "overlay-key", base.RemoteAPI.APIKey)                   // Overridden
+	assert.Equal(t, 30*time.Second, base.RemoteAPI.Timeout)                 // Kept
 
 	// Features merge
-	assert.False(t, base.Features.KnowledgeGraph) // Overridden
-	assert.False(t, base.Features.SemanticSearch) // Kept from base
+	assert.False(t, base.Features.KnowledgeGraph)     // Overridden
+	assert.False(t, base.Features.SemanticSearch)     // Kept from base
 	assert.False(t, base.Features.RealTimeProcessing) // Overridden
-	assert.True(t, base.Features.MultiModalSupport) // Overridden
-	assert.True(t, base.Features.GraphAnalytics) // Added from overlay
+	assert.True(t, base.Features.MultiModalSupport)   // Overridden
+	assert.True(t, base.Features.GraphAnalytics)      // Added from overlay
 
 	// New fields should be added
 	assert.NotNil(t, base.Optimization)
@@ -530,9 +530,9 @@ func TestCogneeConfigMergeScenarios(t *testing.T) {
 
 	originalHost = base.Host
 	originalPort = base.Port
-	
+
 	base.Merge(overlay)
-	assert.False(t, base.Enabled) // Should override
+	assert.False(t, base.Enabled)            // Should override
 	assert.Equal(t, originalHost, base.Host) // Should keep base
 	assert.Equal(t, originalPort, base.Port) // Should keep base
 
@@ -540,10 +540,10 @@ func TestCogneeConfigMergeScenarios(t *testing.T) {
 	baseComplex := &CogneeConfig{
 		Enabled: true,
 		API: &CogneeServerConfig{
-			Enabled:    true,
-			Host:       "api.base.com",
-			Port:       8080,
-			RateLimit:  1000,
+			Enabled:     true,
+			Host:        "api.base.com",
+			Port:        8080,
+			RateLimit:   1000,
 			DocsEnabled: true,
 		},
 		Performance: &CogneePerformanceConfig{
@@ -556,7 +556,7 @@ func TestCogneeConfigMergeScenarios(t *testing.T) {
 	overlayComplex := &CogneeConfig{
 		Enabled: false,
 		API: &CogneeServerConfig{
-			Enabled: false, // Override
+			Enabled: false,             // Override
 			Host:    "api.overlay.com", // Override
 			// Port not set - should keep base
 			RateLimit: 500, // Override
@@ -572,11 +572,11 @@ func TestCogneeConfigMergeScenarios(t *testing.T) {
 	baseComplex.Merge(overlayComplex)
 	assert.False(t, baseComplex.Enabled)
 	assert.Equal(t, "api.overlay.com", baseComplex.API.Host)
-	assert.Equal(t, 8080, baseComplex.API.Port) // Kept from base
-	assert.Equal(t, 500, baseComplex.API.RateLimit) // Overridden
-	assert.True(t, baseComplex.API.DocsEnabled) // Kept from base
+	assert.Equal(t, 8080, baseComplex.API.Port)              // Kept from base
+	assert.Equal(t, 500, baseComplex.API.RateLimit)          // Overridden
+	assert.True(t, baseComplex.API.DocsEnabled)              // Kept from base
 	assert.Equal(t, 60*time.Second, baseComplex.API.Timeout) // Added
-	assert.NotNil(t, baseComplex.Cache) // Added from overlay
+	assert.NotNil(t, baseComplex.Cache)                      // Added from overlay
 	assert.Equal(t, "redis", baseComplex.Cache.Type)
 	assert.Equal(t, 4, baseComplex.Performance.Workers) // Kept from base
 }

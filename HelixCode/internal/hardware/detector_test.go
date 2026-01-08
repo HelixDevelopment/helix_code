@@ -359,10 +359,10 @@ func TestHardwareProfileConsistency(t *testing.T) {
 
 func TestDetectCPUMacOS(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test detectCPUMacOS method
 	err := detector.detectCPUMacOS()
-	
+
 	// On non-macOS systems, this should fail gracefully
 	if runtime.GOOS != "darwin" {
 		if err == nil {
@@ -371,7 +371,7 @@ func TestDetectCPUMacOS(t *testing.T) {
 			t.Logf("detectCPUMacOS failed on non-macOS system as expected: %v", err)
 		}
 	}
-	
+
 	// Verify CPU info is populated
 	if detector.info.CPU.Model == "" {
 		detector.info.CPU.Model = "Unknown"
@@ -379,19 +379,19 @@ func TestDetectCPUMacOS(t *testing.T) {
 	if detector.info.CPU.Vendor == "" {
 		detector.info.CPU.Vendor = "Unknown"
 	}
-	
+
 	t.Log("✅ detectCPUMacOS test completed")
 }
 
 func TestDetectCPUGeneric(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test detectCPUGeneric method
 	err := detector.detectCPUGeneric()
 	if err != nil {
 		t.Errorf("detectCPUGeneric should not fail: %v", err)
 	}
-	
+
 	// Verify generic detection populates basic info
 	if detector.info.CPU.Model != "Unknown" {
 		t.Errorf("Expected CPU Model to be 'Unknown', got: %s", detector.info.CPU.Model)
@@ -399,16 +399,16 @@ func TestDetectCPUGeneric(t *testing.T) {
 	if detector.info.CPU.Vendor != "Unknown" {
 		t.Errorf("Expected CPU Vendor to be 'Unknown', got: %s", detector.info.CPU.Vendor)
 	}
-	
+
 	t.Log("✅ detectCPUGeneric test passed")
 }
 
 func TestDetectGPUMacOS(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test detectGPUMacOS method
 	err := detector.detectGPUMacOS()
-	
+
 	// On non-macOS systems, this should fail gracefully
 	if runtime.GOOS != "darwin" {
 		if err == nil {
@@ -417,16 +417,16 @@ func TestDetectGPUMacOS(t *testing.T) {
 			t.Logf("detectGPUMacOS failed on non-macOS system as expected: %v", err)
 		}
 	}
-	
+
 	t.Log("✅ detectGPUMacOS test completed")
 }
 
 func TestDetectNVIDIA(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test detectNVIDIA method
 	err := detector.detectNVIDIA()
-	
+
 	// NVIDIA detection may fail if nvidia-smi is not available
 	if err != nil {
 		t.Logf("detectNVIDIA failed (nvidia-smi may not be available): %v", err)
@@ -439,19 +439,19 @@ func TestDetectNVIDIA(t *testing.T) {
 			t.Error("SupportsCUDA should be true when detectNVIDIA succeeds")
 		}
 	}
-	
+
 	t.Log("✅ detectNVIDIA test completed")
 }
 
 func TestDetectPlatform(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test detectPlatform method
 	err := detector.detectPlatform()
 	if err != nil {
 		t.Errorf("detectPlatform should not fail: %v", err)
 	}
-	
+
 	// Verify platform info is populated
 	if detector.info.Platform.OS == "" {
 		t.Error("Platform OS should be populated")
@@ -459,7 +459,7 @@ func TestDetectPlatform(t *testing.T) {
 	if detector.info.Platform.Architecture == "" {
 		t.Error("Platform Architecture should be populated")
 	}
-	
+
 	// Should match runtime values
 	if detector.info.Platform.OS != runtime.GOOS {
 		t.Errorf("Expected OS %s, got: %s", runtime.GOOS, detector.info.Platform.OS)
@@ -467,13 +467,13 @@ func TestDetectPlatform(t *testing.T) {
 	if detector.info.Platform.Architecture != runtime.GOARCH {
 		t.Errorf("Expected Architecture %s, got: %s", runtime.GOARCH, detector.info.Platform.Architecture)
 	}
-	
+
 	t.Log("✅ detectPlatform test passed")
 }
 
 func TestHardwareDetectorEdgeCases(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test that detector works normally with non-nil info
 	hardwareInfo, err := detector.Detect()
 	if err != nil {
@@ -482,38 +482,38 @@ func TestHardwareDetectorEdgeCases(t *testing.T) {
 	if hardwareInfo == nil {
 		t.Error("Detect should return non-nil hardware info")
 	}
-	
+
 	// Test that the detector can handle edge cases gracefully
 	// Note: We cannot set info to nil as it causes panics in Detect()
 	// The internal methods should handle nil internal structs appropriately
-	
+
 	t.Log("✅ Hardware detector edge cases test passed")
 }
 
 func TestModelSizeCompatibility(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Get the optimal size first to understand the baseline
 	optimalSize := detector.GetOptimalModelSize()
 	t.Logf("Optimal model size for this hardware: %s", optimalSize)
-	
+
 	// Test various model sizes
 	testCases := []struct {
 		size     string
 		expected bool
 	}{
-		{"1B", true},    // Smaller should always be compatible
-		{"3B", true},    // Should be compatible (equal to optimal)
-		{"7B", false},   // May not be compatible if optimal is 3B
-		{"13B", false},   // Likely not compatible if optimal is 3B
-		{"34B", false},   // Should not be compatible
-		{"70B", false},   // Should not be compatible
-		{"", true},       // Empty should default to true
+		{"1B", true},       // Smaller should always be compatible
+		{"3B", true},       // Should be compatible (equal to optimal)
+		{"7B", false},      // May not be compatible if optimal is 3B
+		{"13B", false},     // Likely not compatible if optimal is 3B
+		{"34B", false},     // Should not be compatible
+		{"70B", false},     // Should not be compatible
+		{"", true},         // Empty should default to true
 		{"invalid", false}, // Invalid should not be compatible
-		{"100B", false},  // Too large should not be compatible
-		{"0.5B", true},  // Smaller should be compatible
+		{"100B", false},    // Too large should not be compatible
+		{"0.5B", true},     // Smaller should be compatible
 	}
-	
+
 	for _, tc := range testCases {
 		result := detector.CanRunModel(tc.size)
 		if result != tc.expected {
@@ -526,46 +526,46 @@ func TestModelSizeCompatibility(t *testing.T) {
 		}
 		t.Logf("Model size %s compatible: %v", tc.size, result)
 	}
-	
+
 	t.Log("✅ Model size compatibility test completed")
 }
 
 func TestGetOptimalModelSize(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test getting optimal model size
 	size := detector.GetOptimalModelSize()
 	if size == "" {
 		t.Error("GetOptimalModelSize should return a non-empty string")
 	}
-	
+
 	// The returned size should be a valid model size
 	if !detector.CanRunModel(size) {
 		t.Errorf("Optimal model size %s should be compatible", size)
 	}
-	
+
 	t.Logf("Optimal model size: %s", size)
 	t.Log("✅ GetOptimalModelSize test passed")
 }
 
 func TestGetCompilationFlags(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// Test getting compilation flags
 	flags := detector.GetCompilationFlags()
 	if flags == nil {
 		t.Error("GetCompilationFlags should return a non-nil slice")
 		t.FailNow()
 	}
-	
+
 	// In test environment, flags may be empty, which is acceptable
 	t.Logf("Compilation flags count: %d", len(flags))
-	
+
 	// Log the flags for inspection (may be empty in test environment)
 	for i, flag := range flags {
 		t.Logf("Compilation flag %d: %s", i, flag)
 	}
-	
+
 	// The test passes as long as we get a non-nil slice
 	// Note: In test environment, GetCompilationFlags may return empty slice
 	// which is acceptable behavior

@@ -25,19 +25,19 @@ const (
 
 // CogneeService is the main service for Cognee integration
 type CogneeService struct {
-	config            *config.CogneeConfig
-	hwProfile         *hardware.HardwareProfile
-	client            *Client
-	optimizer         *PerformanceOptimizer
-	logger            *logging.Logger
-	cache             *ServiceCache
-	stats             *ServiceStatistics
+	config    *config.CogneeConfig
+	hwProfile *hardware.HardwareProfile
+	client    *Client
+	optimizer *PerformanceOptimizer
+	logger    *logging.Logger
+	cache     *ServiceCache
+	stats     *ServiceStatistics
 
 	// State management
-	mu                sync.RWMutex
-	status            ServiceStatus
-	startTime         time.Time
-	lastError         error
+	mu        sync.RWMutex
+	status    ServiceStatus
+	startTime time.Time
+	lastError error
 
 	// Background processing
 	stopChan          chan struct{}
@@ -45,8 +45,8 @@ type CogneeService struct {
 	healthCheckTicker *time.Ticker
 
 	// Event handling
-	eventChan         chan *CogneeEvent
-	eventHandlers     []func(*CogneeEvent)
+	eventChan     chan *CogneeEvent
+	eventHandlers []func(*CogneeEvent)
 }
 
 // ServiceCache provides caching for Cognee operations
@@ -105,14 +105,14 @@ func NewCogneeService(cfg *config.CogneeConfig, hwProfile *hardware.HardwareProf
 	}
 
 	service := &CogneeService{
-		config:     cfg,
-		hwProfile:  hwProfile,
-		client:     client,
-		optimizer:  optimizer,
-		logger:     logger,
-		status:     ServiceStatusStopped,
-		stopChan:   make(chan struct{}),
-		eventChan:  make(chan *CogneeEvent, 100),
+		config:    cfg,
+		hwProfile: hwProfile,
+		client:    client,
+		optimizer: optimizer,
+		logger:    logger,
+		status:    ServiceStatusStopped,
+		stopChan:  make(chan struct{}),
+		eventChan: make(chan *CogneeEvent, 100),
 		cache: &ServiceCache{
 			memories:    make(map[string]*CogneeMemory),
 			searches:    make(map[string]*SearchMemoryResponse),

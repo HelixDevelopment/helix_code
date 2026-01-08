@@ -102,25 +102,25 @@ func TestDatabaseManager_GetTaskSuccess(t *testing.T) {
 
 	// Create mock row with all required fields
 	mockRow := database.NewMockRowWithValues(
-		taskID,                        // id
-		"planning",                    // task_type
-		map[string]interface{}{},      // task_data
-		"pending",                     // status
-		5,                             // priority
-		"normal",                      // criticality
-		nil,                           // assigned_worker_id
-		nil,                           // original_worker_id
-		[]uuid.UUID{},                 // dependencies
-		0,                             // retry_count
-		3,                             // max_retries
-		nil,                           // error_message
-		map[string]interface{}{},      // result_data
-		map[string]interface{}{},      // checkpoint_data
-		nil,                           // estimated_duration
-		nil,                           // started_at
-		nil,                           // completed_at
-		now,                           // created_at
-		now,                           // updated_at
+		taskID,                   // id
+		"planning",               // task_type
+		map[string]interface{}{}, // task_data
+		"pending",                // status
+		5,                        // priority
+		"normal",                 // criticality
+		nil,                      // assigned_worker_id
+		nil,                      // original_worker_id
+		[]uuid.UUID{},            // dependencies
+		0,                        // retry_count
+		3,                        // max_retries
+		nil,                      // error_message
+		map[string]interface{}{}, // result_data
+		map[string]interface{}{}, // checkpoint_data
+		nil,                      // estimated_duration
+		nil,                      // started_at
+		nil,                      // completed_at
+		now,                      // created_at
+		now,                      // updated_at
 	)
 
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow)

@@ -418,7 +418,7 @@ func TestConfigFieldTransformation(t *testing.T) {
 	// Test field transformation with basic field types
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Create test fields
 	fields := map[string]interface{}{
 		"string_field": "test_value",
@@ -426,25 +426,25 @@ func TestConfigFieldTransformation(t *testing.T) {
 		"bool_field":   true,
 		"float_field":  3.14,
 	}
-	
+
 	// Test that adapters can handle field transformations
 	// In simplified implementation, this just returns the fields as-is
 	desktopForm := desktopAdapter.RenderConfigForm("test")
 	webForm := webAdapter.RenderConfigForm("test")
-	
+
 	// Verify both adapters create forms successfully
 	assert.NotNil(t, desktopForm)
 	assert.NotNil(t, webForm)
-	
+
 	// Verify form structure
 	desktopConfigForm, ok := desktopForm.(DesktopConfigForm)
 	require.True(t, ok)
 	assert.Equal(t, "helix_config_form", desktopConfigForm.ID)
-	
+
 	webConfigForm, ok := webForm.(WebConfigForm)
 	require.True(t, ok)
 	assert.Equal(t, "helix_config_form", webConfigForm.ID)
-	
+
 	// Verify field count
 	assert.Equal(t, len(fields), 4)
 }
@@ -454,7 +454,7 @@ func TestConfigActionTransformation(t *testing.T) {
 	// Test action transformation with basic actions
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Create test actions
 	actions := []map[string]interface{}{
 		{
@@ -464,29 +464,29 @@ func TestConfigActionTransformation(t *testing.T) {
 		},
 		{
 			"id":    "cancel",
-			"label": "Cancel", 
+			"label": "Cancel",
 			"type":  "secondary",
 		},
 	}
-	
+
 	// Test that adapters can handle action transformations
 	// In simplified implementation, this creates basic forms
 	desktopForm := desktopAdapter.RenderConfigForm("test")
 	webForm := webAdapter.RenderConfigForm("test")
-	
+
 	// Verify both adapters create forms successfully
 	assert.NotNil(t, desktopForm)
 	assert.NotNil(t, webForm)
-	
+
 	// Verify form has action areas
 	desktopConfigForm, ok := desktopForm.(DesktopConfigForm)
 	require.True(t, ok)
 	assert.Equal(t, "native_window", desktopConfigForm.Type)
-	
+
 	webConfigForm, ok := webForm.(WebConfigForm)
 	require.True(t, ok)
 	assert.Equal(t, "spa_component", webConfigForm.Type)
-	
+
 	// Verify action count
 	assert.Equal(t, len(actions), 2)
 }
@@ -496,15 +496,15 @@ func TestConfigChangeHandling(t *testing.T) {
 	// Test configuration change handling in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Simulate configuration changes
 	configChanges := map[string]interface{}{
-		"server.port":     8080,
-		"server.address":   "localhost",
-		"database.host":    "localhost",
-		"database.port":    5432,
+		"server.port":    8080,
+		"server.address": "localhost",
+		"database.host":  "localhost",
+		"database.port":  5432,
 	}
-	
+
 	// Test that adapters can handle configuration changes
 	// In simplified implementation, this just updates internal state
 	for key, value := range configChanges {
@@ -512,11 +512,11 @@ func TestConfigChangeHandling(t *testing.T) {
 		assert.NotEmpty(t, key)
 		assert.NotNil(t, value)
 	}
-	
+
 	// Verify adapters are still functional after changes
 	desktopForm := desktopAdapter.RenderConfigForm("test")
 	webForm := webAdapter.RenderConfigForm("test")
-	
+
 	assert.NotNil(t, desktopForm)
 	assert.NotNil(t, webForm)
 }
@@ -526,7 +526,7 @@ func TestPlatformValidation(t *testing.T) {
 	// Test platform validation in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Test validation rules for desktop platform
 	desktopRules := map[string]string{
 		"window.min_width":  "800",
@@ -534,30 +534,30 @@ func TestPlatformValidation(t *testing.T) {
 		"font.min_size":     "8",
 		"font.max_size":     "72",
 	}
-	
+
 	// Test validation rules for web platform
 	webRules := map[string]string{
-		"responsive.min_width": "320",
+		"responsive.min_width":  "320",
 		"responsive.min_height": "480",
-		"browser.min_version": "chrome80",
+		"browser.min_version":   "chrome80",
 	}
-	
+
 	// Verify desktop validation rules
 	for rule, value := range desktopRules {
 		assert.NotEmpty(t, rule)
 		assert.NotEmpty(t, value)
 	}
-	
+
 	// Verify web validation rules
 	for rule, value := range webRules {
 		assert.NotEmpty(t, rule)
 		assert.NotEmpty(t, value)
 	}
-	
+
 	// Verify adapters have validation capabilities
 	desktopFeatures := desktopAdapter.GetPlatformFeatures()
 	webFeatures := webAdapter.GetPlatformFeatures()
-	
+
 	assert.NotEmpty(t, desktopFeatures)
 	assert.NotEmpty(t, webFeatures)
 }
@@ -629,11 +629,11 @@ func TestPlatformSpecificThemes(t *testing.T) {
 func TestFieldTransformationByType(t *testing.T) {
 	// Test field transformation with different field types in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
-	
+
 	// Test different field types
 	fieldTypes := []string{
 		"string",
-		"integer", 
+		"integer",
 		"boolean",
 		"float",
 		"select",
@@ -641,7 +641,7 @@ func TestFieldTransformationByType(t *testing.T) {
 		"textarea",
 		"password",
 	}
-	
+
 	// Test that adapter can handle different field types
 	for _, fieldType := range fieldTypes {
 		testField := map[string]interface{}{
@@ -649,13 +649,13 @@ func TestFieldTransformationByType(t *testing.T) {
 			"name":  "test_" + fieldType + "_field",
 			"label": "Test " + fieldType + " Field",
 		}
-		
+
 		// Verify field structure
 		assert.Equal(t, fieldType, testField["type"])
 		assert.NotEmpty(t, testField["name"])
 		assert.NotEmpty(t, testField["label"])
 	}
-	
+
 	// Test that adapter creates form successfully
 	form := desktopAdapter.RenderConfigForm("test")
 	assert.NotNil(t, form)
@@ -666,17 +666,17 @@ func TestShowConfigDialog(t *testing.T) {
 	// Test config dialog showing simulation in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Simulate showing config dialog
 	dialogProperties := map[string]interface{}{
-		"title":       "HelixCode Configuration",
-		"width":       1200,
-		"height":      800,
-		"center":      true,
-		"resizable":   true,
-		"modal":       false,
+		"title":     "HelixCode Configuration",
+		"width":     1200,
+		"height":    800,
+		"center":    true,
+		"resizable": true,
+		"modal":     false,
 	}
-	
+
 	// Verify dialog properties
 	assert.Equal(t, "HelixCode Configuration", dialogProperties["title"])
 	assert.Equal(t, 1200, dialogProperties["width"])
@@ -684,14 +684,14 @@ func TestShowConfigDialog(t *testing.T) {
 	assert.Equal(t, true, dialogProperties["center"])
 	assert.Equal(t, true, dialogProperties["resizable"])
 	assert.Equal(t, false, dialogProperties["modal"])
-	
+
 	// Test that adapters can create forms for dialog
 	desktopForm := desktopAdapter.RenderConfigForm("test")
 	webForm := webAdapter.RenderConfigForm("test")
-	
+
 	assert.NotNil(t, desktopForm)
 	assert.NotNil(t, webForm)
-	
+
 	// Verify form is suitable for dialog display
 	desktopConfigForm, ok := desktopForm.(DesktopConfigForm)
 	require.True(t, ok)
@@ -702,38 +702,38 @@ func TestShowConfigDialog(t *testing.T) {
 func TestComplexFieldTypes(t *testing.T) {
 	// Test complex field types in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
-	
+
 	// Test complex field configurations
 	complexFields := map[string]interface{}{
 		"server_config": map[string]interface{}{
-			"type":        "section",
-			"title":       "Server Configuration",
+			"type":  "section",
+			"title": "Server Configuration",
 			"fields": []map[string]interface{}{
 				{"name": "host", "type": "string", "default": "localhost"},
 				{"name": "port", "type": "integer", "default": 8080, "min": 1, "max": 65535},
 			},
 		},
 		"database_config": map[string]interface{}{
-			"type":        "section", 
-			"title":       "Database Configuration",
+			"type":  "section",
+			"title": "Database Configuration",
 			"fields": []map[string]interface{}{
 				{"name": "driver", "type": "select", "options": []string{"postgres", "mysql", "sqlite"}},
 				{"name": "ssl", "type": "boolean", "default": false},
 			},
 		},
 	}
-	
+
 	// Test that complex field structures are handled
 	for fieldName, fieldConfig := range complexFields {
 		assert.NotEmpty(t, fieldName)
-		
+
 		config, ok := fieldConfig.(map[string]interface{})
 		require.True(t, ok)
 		assert.Equal(t, "section", config["type"])
 		assert.NotEmpty(t, config["title"])
 		assert.Contains(t, config, "fields")
 	}
-	
+
 	// Test that adapter creates form successfully
 	form := desktopAdapter.RenderConfigForm("test")
 	assert.NotNil(t, form)
@@ -744,7 +744,7 @@ func TestValidationWithPlatformAdapter(t *testing.T) {
 	// Test validation with platform adapters in simplified implementation
 	desktopAdapter := NewDesktopUIAdapter()
 	webAdapter := NewWebUIAdapter()
-	
+
 	// Test validation rules
 	validationRules := map[string]interface{}{
 		"server": map[string]interface{}{
@@ -762,38 +762,38 @@ func TestValidationWithPlatformAdapter(t *testing.T) {
 			},
 		},
 	}
-	
+
 	// Test validation rules structure
 	for section, rules := range validationRules {
 		assert.NotEmpty(t, section)
-		
+
 		sectionRules, ok := rules.(map[string]interface{})
 		require.True(t, ok)
-		
+
 		// Check required fields
 		required, ok := sectionRules["required"].([]string)
 		if ok {
 			assert.NotEmpty(t, required)
 		}
-		
+
 		// Check validation rules
 		ruleMap, ok := sectionRules["rules"].(map[string]string)
 		if ok {
 			assert.NotEmpty(t, ruleMap)
 		}
 	}
-	
+
 	// Test that adapters work with validation
 	desktopForm := desktopAdapter.RenderConfigForm("test")
 	webForm := webAdapter.RenderConfigForm("test")
-	
+
 	assert.NotNil(t, desktopForm)
 	assert.NotNil(t, webForm)
-	
+
 	// Verify platform features include validation capabilities
 	desktopFeatures := desktopAdapter.GetPlatformFeatures()
 	webFeatures := webAdapter.GetPlatformFeatures()
-	
+
 	assert.NotEmpty(t, desktopFeatures)
 	assert.NotEmpty(t, webFeatures)
 }
@@ -801,7 +801,7 @@ func TestValidationWithPlatformAdapter(t *testing.T) {
 // TestGetPlatformUIAdapterForCurrentPlatform tests getting adapter for current platform
 func TestGetPlatformUIAdapterForCurrentPlatform(t *testing.T) {
 	// This test simulates getting adapter for current platform configuration
-	adapter := GetPlatformUIAdapter("desktop")  // Use GetPlatformUIAdapter instead
+	adapter := GetPlatformUIAdapter("desktop") // Use GetPlatformUIAdapter instead
 	assert.NotNil(t, adapter)
 
 	// Should be a desktop adapter by default
@@ -813,7 +813,7 @@ func TestGetPlatformUIAdapterForCurrentPlatform(t *testing.T) {
 func TestGetDefaultTheme(t *testing.T) {
 	tests := []struct {
 		platformType string
-		expected    string
+		expected     string
 	}{
 		{"desktop", "system"},
 		{"web", "light"},
@@ -836,7 +836,7 @@ func TestGetDefaultTheme(t *testing.T) {
 func TestGetSupportedFormats(t *testing.T) {
 	tests := []struct {
 		platformType string
-		expected    []string
+		expected     []string
 	}{
 		{
 			"desktop",
@@ -873,7 +873,7 @@ func TestGetSupportedFormats(t *testing.T) {
 func TestGetResolutionInfo(t *testing.T) {
 	tests := []struct {
 		platformType string
-		checkFunc   func(map[string]interface{}) bool
+		checkFunc    func(map[string]interface{}) bool
 	}{
 		{
 			"desktop",

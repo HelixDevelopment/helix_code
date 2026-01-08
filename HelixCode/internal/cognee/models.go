@@ -92,20 +92,20 @@ type InsightsRequest struct {
 
 // InsightsResponse represents an insights response
 type InsightsResponse struct {
-	Insights []Insight `json:"insights"`
-	Query    string    `json:"query"`
+	Insights []Insight     `json:"insights"`
+	Query    string        `json:"query"`
 	Duration time.Duration `json:"duration"`
 }
 
 // Insight represents a single insight from Cognee
 type Insight struct {
-	ID          string                 `json:"id"`
-	Content     string                 `json:"content"`
-	Type        string                 `json:"type"`
-	Confidence  float64                `json:"confidence"`
-	Sources     []string               `json:"sources,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	RelatedNodes []string              `json:"related_nodes,omitempty"`
+	ID           string                 `json:"id"`
+	Content      string                 `json:"content"`
+	Type         string                 `json:"type"`
+	Confidence   float64                `json:"confidence"`
+	Sources      []string               `json:"sources,omitempty"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	RelatedNodes []string               `json:"related_nodes,omitempty"`
 }
 
 // CodePipelineRequest represents a request to process code
@@ -167,10 +167,10 @@ type GraphVisualizationRequest struct {
 
 // GraphVisualizationResponse represents a graph visualization response
 type GraphVisualizationResponse struct {
-	Graph    GraphData `json:"graph"`
-	Format   string    `json:"format"`
-	NodeCount int      `json:"node_count"`
-	EdgeCount int      `json:"edge_count"`
+	Graph     GraphData `json:"graph"`
+	Format    string    `json:"format"`
+	NodeCount int       `json:"node_count"`
+	EdgeCount int       `json:"edge_count"`
 }
 
 // GraphData represents graph structure
@@ -198,12 +198,12 @@ type GraphEdge struct {
 
 // FeedbackRequest represents feedback on search results
 type FeedbackRequest struct {
-	QueryID    string  `json:"query_id" binding:"required"`
-	ResultID   string  `json:"result_id" binding:"required"`
-	Rating     int     `json:"rating" binding:"required,min=1,max=5"`
-	Comment    string  `json:"comment,omitempty"`
-	Relevant   bool    `json:"relevant"`
-	UserID     string  `json:"user_id,omitempty"`
+	QueryID  string `json:"query_id" binding:"required"`
+	ResultID string `json:"result_id" binding:"required"`
+	Rating   int    `json:"rating" binding:"required,min=1,max=5"`
+	Comment  string `json:"comment,omitempty"`
+	Relevant bool   `json:"relevant"`
+	UserID   string `json:"user_id,omitempty"`
 }
 
 // FeedbackResponse represents a feedback response
@@ -215,16 +215,16 @@ type FeedbackResponse struct {
 
 // CogneeStatistics represents Cognee usage statistics
 type CogneeStatistics struct {
-	TotalMemories    int64     `json:"total_memories"`
-	TotalDatasets    int64     `json:"total_datasets"`
-	TotalSearches    int64     `json:"total_searches"`
-	TotalCognifies   int64     `json:"total_cognifies"`
-	AverageScore     float64   `json:"average_score"`
-	CacheHitRate     float64   `json:"cache_hit_rate"`
-	LastUpdated      time.Time `json:"last_updated"`
-	ServiceUptime    time.Duration `json:"service_uptime"`
-	GraphNodeCount   int64     `json:"graph_node_count"`
-	GraphEdgeCount   int64     `json:"graph_edge_count"`
+	TotalMemories  int64         `json:"total_memories"`
+	TotalDatasets  int64         `json:"total_datasets"`
+	TotalSearches  int64         `json:"total_searches"`
+	TotalCognifies int64         `json:"total_cognifies"`
+	AverageScore   float64       `json:"average_score"`
+	CacheHitRate   float64       `json:"cache_hit_rate"`
+	LastUpdated    time.Time     `json:"last_updated"`
+	ServiceUptime  time.Duration `json:"service_uptime"`
+	GraphNodeCount int64         `json:"graph_node_count"`
+	GraphEdgeCount int64         `json:"graph_edge_count"`
 }
 
 // HealthStatus represents Cognee service health

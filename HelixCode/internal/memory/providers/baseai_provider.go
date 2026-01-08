@@ -32,25 +32,25 @@ type BaseAIProvider struct {
 
 // BaseAI API structures
 type BaseAICostTracker struct {
-	TotalCost      float64 `json:"total_cost"`
-	Operations     int     `json:"operations"`
-	RequestCount   int     `json:"request_count"`
-	LastUpdated    time.Time `json:"last_updated"`
+	TotalCost    float64   `json:"total_cost"`
+	Operations   int       `json:"operations"`
+	RequestCount int       `json:"request_count"`
+	LastUpdated  time.Time `json:"last_updated"`
 }
 
 type BaseAIRequest struct {
-	Action      string                 `json:"action"`
-	Collection  string                 `json:"collection,omitempty"`
-	Data        []BaseAIVectorData     `json:"data,omitempty"`
-	Query       BaseAIQuery            `json:"query,omitempty"`
-	Options     map[string]interface{} `json:"options,omitempty"`
+	Action     string                 `json:"action"`
+	Collection string                 `json:"collection,omitempty"`
+	Data       []BaseAIVectorData     `json:"data,omitempty"`
+	Query      BaseAIQuery            `json:"query,omitempty"`
+	Options    map[string]interface{} `json:"options,omitempty"`
 }
 
 type BaseAIResponse struct {
-	Success   bool        `json:"success"`
-	Data      interface{} `json:"data,omitempty"`
-	Error     string      `json:"error,omitempty"`
-	Meta      *BaseAIMeta `json:"meta,omitempty"`
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   string      `json:"error,omitempty"`
+	Meta    *BaseAIMeta `json:"meta,omitempty"`
 }
 
 type BaseAIMeta struct {
@@ -68,10 +68,10 @@ type BaseAIVectorData struct {
 }
 
 type BaseAIQuery struct {
-	Vector   []float64              `json:"vector,omitempty"`
-	Text     string                 `json:"text,omitempty"`
-	TopK     int                    `json:"top_k"`
-	Filters  map[string]interface{} `json:"filters,omitempty"`
+	Vector  []float64              `json:"vector,omitempty"`
+	Text    string                 `json:"text,omitempty"`
+	TopK    int                    `json:"top_k"`
+	Filters map[string]interface{} `json:"filters,omitempty"`
 }
 
 type BaseAICollection struct {
@@ -82,8 +82,6 @@ type BaseAICollection struct {
 	VectorCount int                    `json:"vector_count"`
 	Size        int64                  `json:"size"`
 }
-
-
 
 // NewBaseAIProvider creates a new BaseAI provider instance
 func NewBaseAIProvider(config map[string]interface{}) (*BaseAIProvider, error) {
@@ -200,7 +198,7 @@ func (p *BaseAIProvider) Store(ctx context.Context, data []*VectorData) error {
 	// Prepare API request
 	req := BaseAIRequest{
 		Action:     "store",
-		Collection:  "default",
+		Collection: "default",
 		Data:       baseAIData,
 		Options:    map[string]interface{}{},
 	}
@@ -472,7 +470,7 @@ func (p *BaseAIProvider) FindSimilar(ctx context.Context, embedding []float64, k
 
 	// Prepare API request
 	req := BaseAIRequest{
-		Action:    "similarity",
+		Action:     "similarity",
 		Collection: "default",
 		Query: BaseAIQuery{
 			Vector:  embedding,
@@ -757,9 +755,9 @@ func (p *BaseAIProvider) CreateIndex(ctx context.Context, collection string, con
 		Action:     "create_index",
 		Collection: collection,
 		Options: map[string]interface{}{
-			"field":    getStringFromConfig(config, "field"),
-			"index":    getStringFromConfig(config, "type"),
-			"metric":   config.Metric,
+			"field":  getStringFromConfig(config, "field"),
+			"index":  getStringFromConfig(config, "type"),
+			"metric": config.Metric,
 		},
 	}
 
@@ -1383,7 +1381,7 @@ func getStringFromConfig(config *IndexConfig, key string) string {
 	if config == nil {
 		return ""
 	}
-	
+
 	switch key {
 	case "field":
 		// For BaseAI, field is typically "vector" by default

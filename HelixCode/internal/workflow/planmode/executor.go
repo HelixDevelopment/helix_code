@@ -970,14 +970,14 @@ func (e *DefaultExecutor) runStaticAnalysisTools(ctx context.Context, targetPath
 // detectProjectType detects the type of project based on marker files
 func detectProjectType(path string) string {
 	markers := map[string]string{
-		"go.mod":          "go",
-		"package.json":    "node",
+		"go.mod":           "go",
+		"package.json":     "node",
 		"requirements.txt": "python",
-		"setup.py":        "python",
-		"pyproject.toml":  "python",
-		"Cargo.toml":      "rust",
-		"pom.xml":         "java",
-		"build.gradle":    "java",
+		"setup.py":         "python",
+		"pyproject.toml":   "python",
+		"Cargo.toml":       "rust",
+		"pom.xml":          "java",
+		"build.gradle":     "java",
 	}
 
 	for file, projectType := range markers {

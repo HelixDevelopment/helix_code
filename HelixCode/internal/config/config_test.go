@@ -14,7 +14,7 @@ func TestLoadConfig(t *testing.T) {
 	// Create temporary config file
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
-	
+
 	// Write test config
 	content := `{
   "version": "1.0.0",
@@ -46,7 +46,7 @@ func TestLoadConfig(t *testing.T) {
 	// Test that config file exists and can be read
 	_, err = os.Stat(configPath)
 	require.NoError(t, err)
-	
+
 	// Basic test - create a config manager and initialize it
 	manager, err := NewHelixConfigManager(configPath)
 	require.NoError(t, err)
@@ -75,7 +75,7 @@ func TestValidateConfig(t *testing.T) {
 				},
 				LLM: LLMConfig{
 					DefaultProvider: "local",
-					MaxTokens:      1000,
+					MaxTokens:       1000,
 				},
 			},
 			wantErr: false,
@@ -115,7 +115,7 @@ func TestFindConfigFile(t *testing.T) {
 	// Create temporary config file
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
-	
+
 	content := `
 server:
   port: 8080
@@ -174,7 +174,7 @@ func TestConfigValidationEdgeCases(t *testing.T) {
 				Auth: AuthConfig{JWTSecret: "test-jwt-secret-32-chars-long-!!!"},
 				LLM: LLMConfig{
 					DefaultProvider: "local",
-					MaxTokens:      1000,
+					MaxTokens:       1000,
 				},
 			},
 			valid: true,
@@ -197,7 +197,7 @@ func TestConfigValidationEdgeCases(t *testing.T) {
 			name: "missing auth secret",
 			config: Config{
 				Server: ServerConfig{Port: 8080},
-				Auth:  AuthConfig{JWTSecret: ""},
+				Auth:   AuthConfig{JWTSecret: ""},
 			},
 			valid: false,
 		},
@@ -222,7 +222,7 @@ func TestLoadFunction(t *testing.T) {
 	// Test Load function with environment setup
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
-	
+
 	// Create a valid config file
 	content := `version: "1.0.0"
 application:
@@ -408,7 +408,7 @@ func TestConfigManagerFileOperations(t *testing.T) {
 
 func TestGlobalConfigFunctions(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	// Set environment for testing
 	oldConfigPath := os.Getenv("HELIX_CONFIG_PATH")
 	defer func() {
@@ -448,7 +448,7 @@ func TestGlobalConfigFunctions(t *testing.T) {
 		},
 		LLM: LLMConfig{
 			DefaultProvider: "local",
-			MaxTokens:      2048,
+			MaxTokens:       2048,
 		},
 	}
 
@@ -481,7 +481,7 @@ func TestGlobalConfigFunctions(t *testing.T) {
 
 func TestHelixConfigAliasFunctions(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	// Set environment for testing
 	oldConfigPath := os.Getenv("HELIX_CONFIG_PATH")
 	defer func() {
