@@ -1370,3 +1370,374 @@ func TestGenerateDeploymentID(t *testing.T) {
 		}
 	})
 }
+
+// TestExecuteSecurityCheck tests security check execution
+func TestExecuteSecurityCheck(t *testing.T) {
+	t.Run("SecurityCheck_Disabled", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			SecurityGateEnabled: false,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeSecurityCheck(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("SecurityCheck_Enabled_Passed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			SecurityGateEnabled: true,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executeSecurityCheck(ctx)
+
+		// Simulated security scan should pass by default
+		assert.NoError(t, err)
+		assert.True(t, success)
+		assert.Equal(t, "passed", deployer.status.SecurityGateStatus.Status)
+		assert.True(t, deployer.status.SecurityGateStatus.Passed)
+		assert.True(t, deployer.status.SecurityGateStatus.ZeroToleranceMet)
+	})
+
+	t.Run("SecurityCheck_StatusUpdate", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			SecurityGateEnabled: true,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		_, _ = deployer.executeSecurityCheck(ctx)
+
+		// Verify status was updated
+		assert.True(t, deployer.status.SecurityGateStatus.Enabled)
+		assert.NotZero(t, deployer.status.SecurityGateStatus.LastCheckTime)
+	})
+}
+
+// TestExecutePerformanceCheck tests performance check execution
+func TestExecutePerformanceCheck(t *testing.T) {
+	t.Run("PerformanceCheck_Disabled", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: false,
+			TargetServers:          []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("PerformanceCheck_Enabled_Passed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100,    // Low threshold for simulated pass
+				LatencyTarget:    "500ms", // High threshold for simulated pass
+				CPUTarget:        90.0,    // High threshold
+				MemoryTarget:     8 * 1024 * 1024 * 1024, // 8GB threshold
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		// With lenient thresholds, should pass
+		assert.NoError(t, err)
+		assert.True(t, success)
+		assert.Equal(t, "passed", deployer.status.PerformanceGate.Status)
+		assert.True(t, deployer.status.PerformanceGate.Passed)
+	})
+
+	t.Run("PerformanceCheck_Enabled_Failed_Throughput", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100000, // Very high threshold - will fail
+				LatencyTarget:    "500ms",
+				CPUTarget:        90.0,
+				MemoryTarget:     8 * 1024 * 1024 * 1024,
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		// Should fail due to high throughput requirement
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Equal(t, "failed", deployer.status.PerformanceGate.Status)
+		assert.False(t, deployer.status.PerformanceGate.Passed)
+	})
+
+	t.Run("PerformanceCheck_Enabled_Failed_Latency", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100,
+				LatencyTarget:    "1ms", // Very low threshold - will fail
+				CPUTarget:        90.0,
+				MemoryTarget:     8 * 1024 * 1024 * 1024,
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		// Should fail due to strict latency requirement
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.False(t, deployer.status.PerformanceGate.Passed)
+	})
+
+	t.Run("PerformanceCheck_Enabled_Failed_CPU", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100,
+				LatencyTarget:    "500ms",
+				CPUTarget:        1.0, // Very low threshold - will fail
+				MemoryTarget:     8 * 1024 * 1024 * 1024,
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		// Should fail due to strict CPU requirement
+		assert.Error(t, err)
+		assert.False(t, success)
+	})
+
+	t.Run("PerformanceCheck_Enabled_Failed_Memory", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100,
+				LatencyTarget:    "500ms",
+				CPUTarget:        90.0,
+				MemoryTarget:     1024, // Very low threshold - will fail
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePerformanceCheck(ctx)
+
+		// Should fail due to strict memory requirement
+		assert.Error(t, err)
+		assert.False(t, success)
+	})
+
+	t.Run("PerformanceCheck_StatusMetrics", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:            "test-project",
+			PerformanceGateEnabled: true,
+			TargetServers:          []string{"server1"},
+			PerformanceGateStatus: PerformanceGateStatus{
+				ThroughputTarget: 100,
+				LatencyTarget:    "500ms",
+				CPUTarget:        90.0,
+				MemoryTarget:     8 * 1024 * 1024 * 1024,
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		_, _ = deployer.executePerformanceCheck(ctx)
+
+		// Verify metrics were captured
+		assert.True(t, deployer.status.PerformanceGate.Enabled)
+		assert.Greater(t, deployer.status.PerformanceGate.CurrentThroughput, 0)
+		assert.NotEmpty(t, deployer.status.PerformanceGate.CurrentLatency)
+		assert.Greater(t, deployer.status.PerformanceGate.CurrentCPU, float64(0))
+		assert.Greater(t, deployer.status.PerformanceGate.CurrentMemory, int64(0))
+		assert.NotZero(t, deployer.status.PerformanceGate.LastCheckTime)
+	})
+}
+
+// TestExecutePreparation tests preparation phase in more detail
+func TestExecutePreparation(t *testing.T) {
+	t.Run("Preparation_WithValidConfig", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			Environment:   "test",
+			TargetServers: []string{"server1", "server2"},
+			Credentials: map[string]string{
+				"deploy_key": "test_key",
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePreparation(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+	})
+
+	t.Run("Preparation_MissingCredentials", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			TargetServers: []string{"server1"},
+			Credentials:   nil,
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePreparation(ctx)
+
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "no deployment credentials provided")
+	})
+
+	t.Run("Preparation_WithMonitoring", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:       "test-project",
+			TargetServers:     []string{"server1"},
+			MonitoringEnabled: true,
+			Credentials: map[string]string{
+				"deploy_key": "test_key",
+			},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		success, err := deployer.executePreparation(ctx)
+
+		assert.NoError(t, err)
+		assert.True(t, success)
+		assert.NotNil(t, deployer.monitoring)
+	})
+}
+
+// TestRollbackTriggering tests rollback trigger functionality
+func TestRollbackTriggering(t *testing.T) {
+	t.Run("TriggerRollback_UpdatesStatus", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			AutoRollbackEnabled: true,
+			TargetServers:       []string{"server1", "server2", "server3"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		// Simulate deployed servers
+		deployer.status.ServersDeployed = []string{"server1", "server2", "server3"}
+		deployer.status.Status = PhaseDeployment
+
+		deployer.triggerRollback("test rollback reason")
+
+		assert.True(t, deployer.status.RollbackTriggered)
+		assert.Equal(t, "test rollback reason", deployer.status.RollbackReason)
+		assert.Equal(t, string(PhaseRollback), deployer.status.CurrentPhase)
+	})
+
+	t.Run("TriggerRollback_NoServersDeployed", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:         "test-project",
+			AutoRollbackEnabled: true,
+			TargetServers:       []string{"server1"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
+		deployer.triggerRollback("reason")
+
+		assert.True(t, deployer.status.RollbackTriggered)
+	})
+}
+
+// TestPhaseNotifications tests notification sending for different phases
+func TestPhaseNotifications(t *testing.T) {
+	config := &DeploymentConfig{
+		ProjectName:   "test-project",
+		TargetServers: []string{"server1"},
+		Notifications: NotificationConfig{
+			SlackEnabled: true,
+			EmailEnabled: true,
+		},
+	}
+
+	deployer, err := NewProductionDeployer(config)
+	require.NoError(t, err)
+
+	t.Run("NotifyPhaseStart", func(t *testing.T) {
+		initialCount := len(deployer.status.Notifications)
+		deployer.addNotification("phase_started", "Deployment phase started", "system")
+
+		assert.Len(t, deployer.status.Notifications, initialCount+1)
+	})
+
+	t.Run("NotifyPhaseComplete", func(t *testing.T) {
+		initialCount := len(deployer.status.Notifications)
+		deployer.addNotification("phase_complete", "Deployment phase completed", "system")
+
+		assert.Len(t, deployer.status.Notifications, initialCount+1)
+	})
+
+	t.Run("NotifyDeploymentComplete", func(t *testing.T) {
+		initialCount := len(deployer.status.Notifications)
+		deployer.addNotification("deployment_complete", "Deployment completed successfully", "admin@example.com")
+
+		assert.Len(t, deployer.status.Notifications, initialCount+1)
+		lastNotification := deployer.status.Notifications[len(deployer.status.Notifications)-1]
+		assert.Equal(t, "deployment_complete", lastNotification.Type)
+	})
+}
