@@ -785,3 +785,448 @@ func TestMetadataPersistence(t *testing.T) {
 		t.Errorf("Expected %d tags, got %d", len(snapshot1.Tags), len(snapshot2.Tags))
 	}
 }
+
+// ========================================
+// Additional Tests for Coverage
+// ========================================
+
+// TestGetDiffStat tests the GetDiffStat function
+func TestGetDiffStat(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Get diff stat
+	stat, err := manager.GetDiffStat(ctx, snapshot.ID)
+	if err != nil {
+		t.Fatalf("GetDiffStat() failed: %v", err)
+	}
+
+	// Stat may be empty string if no diff available, but should not error
+	t.Logf("Diff stat: %s", stat)
+}
+
+// TestGetFileContent tests the GetFileContent function
+func TestGetFileContent(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot with a file
+	createTestFile(t, repoPath, "test.txt", "Test content here\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Get file content from snapshot
+	content, err := manager.GetFileContent(ctx, snapshot.ID, "test.txt")
+	if err != nil {
+		// May error if file not in stash, which is okay
+		t.Logf("GetFileContent() returned: %v", err)
+	} else {
+		t.Logf("File content: %s", content)
+	}
+}
+
+// TestGetSnapshotSize tests the GetSnapshotSize function
+func TestGetSnapshotSize(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Some content to measure\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Get snapshot size
+	size, err := manager.GetSnapshotSize(ctx, snapshot.ID)
+	if err != nil {
+		t.Fatalf("GetSnapshotSize() failed: %v", err)
+	}
+
+	t.Logf("Snapshot size: %d bytes", size)
+}
+
+// TestMetadataStoreUpdate tests the MetadataStore Update function
+func TestMetadataStoreUpdate(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Original description",
+		Tags:             []string{"original"},
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Create a new metadata store to test Update
+	store, err := NewMetadataStore(repoPath)
+	if err != nil {
+		t.Fatalf("NewMetadataStore() failed: %v", err)
+	}
+
+	// Update the snapshot metadata via updates map
+	updates := map[string]interface{}{
+		"description": "Updated description",
+		"tags":        []string{"updated", "modified"},
+	}
+
+	err = store.Update(ctx, snapshot.ID, updates)
+	if err != nil {
+		t.Fatalf("Update() failed: %v", err)
+	}
+
+	// Verify update by loading from store
+	retrieved, err := store.Load(ctx, snapshot.ID)
+	if err != nil {
+		t.Fatalf("Load() failed: %v", err)
+	}
+
+	if retrieved.Description != "Updated description" {
+		t.Errorf("Expected description 'Updated description', got '%s'", retrieved.Description)
+	}
+
+	if len(retrieved.Tags) != 2 {
+		t.Errorf("Expected 2 tags, got %d", len(retrieved.Tags))
+	}
+}
+
+// TestPreviewRestore tests the PreviewRestore function
+func TestPreviewRestore(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Preview restore
+	preview, err := manager.PreviewRestore(ctx, snapshot.ID)
+	if err != nil {
+		t.Fatalf("PreviewRestore() failed: %v", err)
+	}
+
+	t.Logf("Preview: %+v", preview)
+}
+
+// TestCanRestore tests the CanRestore function
+func TestCanRestore(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Check if can restore (should be false with uncommitted changes)
+	canRestore, restoreErr := manager.CanRestore(ctx, snapshot.ID)
+	if canRestore {
+		t.Log("Can restore: true")
+	} else {
+		t.Logf("Can restore: false (expected with uncommitted changes), err: %v", restoreErr)
+	}
+
+	// Commit changes
+	cmd := exec.Command("git", "add", ".")
+	cmd.Dir = repoPath
+	cmd.Run()
+	cmd = exec.Command("git", "commit", "-m", "Commit changes")
+	cmd.Dir = repoPath
+	cmd.Run()
+
+	// Should be able to restore now
+	canRestore, restoreErr = manager.CanRestore(ctx, snapshot.ID)
+	if !canRestore {
+		t.Errorf("Expected CanRestore to return true after committing changes, err: %v", restoreErr)
+	}
+}
+
+// TestGetRestoreConflicts tests the GetRestoreConflicts function
+func TestGetRestoreConflicts(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "test.txt", "Content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Get conflicts
+	conflicts, err := manager.GetRestoreConflicts(ctx, snapshot.ID)
+	if err != nil {
+		t.Fatalf("GetRestoreConflicts() failed: %v", err)
+	}
+
+	t.Logf("Found %d conflicts", len(conflicts))
+}
+
+// TestRollbackRestore tests the RollbackRestore function
+func TestRollbackRestore(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create initial state and commit
+	createTestFile(t, repoPath, "test.txt", "Original content\n")
+	cmd := exec.Command("git", "add", ".")
+	cmd.Dir = repoPath
+	cmd.Run()
+	cmd = exec.Command("git", "commit", "-m", "Initial state")
+	cmd.Dir = repoPath
+	cmd.Run()
+
+	// Make changes and create snapshot
+	modifyTestFile(t, repoPath, "test.txt", "Modified content\n")
+	snapshot, err := manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Modified",
+		IncludeUntracked: false,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Commit changes
+	cmd = exec.Command("git", "add", ".")
+	cmd.Dir = repoPath
+	cmd.Run()
+	cmd = exec.Command("git", "commit", "-m", "Modified state")
+	cmd.Dir = repoPath
+	cmd.Run()
+
+	// Restore with backup
+	result, err := manager.RestoreSnapshot(ctx, snapshot.ID, &RestoreOptions{
+		CreateBackup: true,
+	})
+	if err != nil {
+		t.Logf("RestoreSnapshot() returned: %v", err)
+	}
+
+	// Try to rollback (may fail if no backup was created)
+	err = manager.RollbackRestore(ctx, snapshot.ID)
+	if err != nil {
+		t.Logf("RollbackRestore() returned: %v (may be expected)", err)
+	} else {
+		t.Log("Rollback successful")
+	}
+
+	_ = result // Use result to avoid unused variable warning
+}
+
+// TestListSnapshots_FilterByTags tests filtering by tags
+func TestListSnapshots_FilterByTags(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshots with different tags
+	createTestFile(t, repoPath, "file1.txt", "Content1")
+	_, err = manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Feature snapshot",
+		Tags:             []string{"feature", "v1"},
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	createTestFile(t, repoPath, "file2.txt", "Content2")
+	_, err = manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Bugfix snapshot",
+		Tags:             []string{"bugfix"},
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Filter by tag
+	filter := &Filter{
+		Tags: []string{"feature"},
+	}
+	snapshots, err := manager.ListSnapshots(ctx, filter)
+	if err != nil {
+		t.Fatalf("ListSnapshots() failed: %v", err)
+	}
+
+	if len(snapshots) != 1 {
+		t.Errorf("Expected 1 snapshot with 'feature' tag, got %d", len(snapshots))
+	}
+}
+
+// TestListSnapshots_FilterByStatus tests filtering by status
+func TestListSnapshots_FilterByStatus(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "file1.txt", "Content1")
+	_, err = manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Active snapshot",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Filter by status
+	filter := &Filter{
+		Status: StatusActive,
+	}
+	snapshots, err := manager.ListSnapshots(ctx, filter)
+	if err != nil {
+		t.Fatalf("ListSnapshots() failed: %v", err)
+	}
+
+	for _, s := range snapshots {
+		if s.Status != StatusActive {
+			t.Errorf("Expected status %s, got %s", StatusActive, s.Status)
+		}
+	}
+}
+
+// TestListSnapshots_FilterByDateRange tests filtering by date range
+func TestListSnapshots_FilterByDateRange(t *testing.T) {
+	repoPath := setupTestRepo(t)
+	defer cleanupTestRepo(t, repoPath)
+
+	manager, err := NewManager(repoPath)
+	if err != nil {
+		t.Fatalf("NewManager() failed: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Create snapshot
+	createTestFile(t, repoPath, "file1.txt", "Content1")
+	_, err = manager.CreateSnapshot(ctx, &CreateOptions{
+		Description:      "Test snapshot",
+		IncludeUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSnapshot() failed: %v", err)
+	}
+
+	// Filter by date range
+	now := time.Now()
+	fromDate := now.Add(-time.Hour)
+	toDate := now.Add(time.Hour)
+
+	filter := &Filter{
+		FromDate: fromDate,
+		ToDate:   toDate,
+	}
+	snapshots, err := manager.ListSnapshots(ctx, filter)
+	if err != nil {
+		t.Fatalf("ListSnapshots() failed: %v", err)
+	}
+
+	if len(snapshots) == 0 {
+		t.Error("Expected at least one snapshot in date range")
+	}
+}

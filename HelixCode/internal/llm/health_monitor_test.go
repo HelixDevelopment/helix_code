@@ -1,0 +1,257 @@
+package llm
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestNewHealthMonitor(t *testing.T) {
+	manager := NewAutoLLMManager("")
+
+	monitor := NewHealthMonitor(manager)
+
+	require.NotNil(t, monitor)
+	assert.Equal(t, manager, monitor.manager)
+	assert.Equal(t, 30*time.Second, monitor.checkInterval)
+	assert.False(t, monitor.isRunning)
+	assert.NotNil(t, monitor.stopChan)
+	assert.NotNil(t, monitor.client)
+	assert.NotNil(t, monitor.alertSystem)
+}
+
+func TestHealthMonitor_SetInterval(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	monitor := NewHealthMonitor(manager)
+
+	newInterval := 60 * time.Second
+	monitor.SetInterval(newInterval)
+
+	assert.Equal(t, newInterval, monitor.checkInterval)
+}
+
+func TestHealthMonitor_Stop(t *testing.T) {
+	t.Run("not running", func(t *testing.T) {
+		manager := NewAutoLLMManager("")
+		monitor := NewHealthMonitor(manager)
+
+		// Should not panic
+		monitor.Stop()
+	})
+
+	t.Run("running", func(t *testing.T) {
+		manager := NewAutoLLMManager("")
+		monitor := NewHealthMonitor(manager)
+		monitor.isRunning = true
+		monitor.stopChan = make(chan bool)
+
+		// Start a goroutine to consume the close signal
+		go func() {
+			<-monitor.stopChan
+		}()
+
+		// Should not panic
+		monitor.Stop()
+	})
+}
+
+func TestHealthMonitor_Start_AlreadyRunning(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	monitor := NewHealthMonitor(manager)
+	monitor.isRunning = true
+
+	err := monitor.Start(context.Background())
+	assert.NoError(t, err)
+}
+
+func TestHealthMonitor_Start_WithCancellation(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	monitor := NewHealthMonitor(manager)
+	monitor.checkInterval = 100 * time.Millisecond
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Start in goroutine
+	done := make(chan error)
+	go func() {
+		done <- monitor.Start(ctx)
+	}()
+
+	// Wait a bit then cancel
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+
+	// Wait for completion
+	err := <-done
+	assert.NoError(t, err)
+	assert.False(t, monitor.isRunning)
+}
+
+func TestHealthMonitor_CheckProviderHealth(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	monitor := NewHealthMonitor(manager)
+
+	t.Run("healthy provider", func(t *testing.T) {
+		// Create a test server that returns 200
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer server.Close()
+
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{
+				Name:      "TestProvider",
+				HealthURL: server.URL,
+			},
+			Health: &HealthStatus{},
+		}
+
+		isHealthy, responseTime, err := monitor.checkProviderHealth(provider)
+
+		assert.True(t, isHealthy)
+		assert.GreaterOrEqual(t, responseTime, 0) // May be 0 on fast systems
+		assert.NoError(t, err)
+	})
+
+	t.Run("unhealthy provider - bad status", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		}))
+		defer server.Close()
+
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{
+				Name:      "TestProvider",
+				HealthURL: server.URL,
+			},
+			Health: &HealthStatus{},
+		}
+
+		isHealthy, responseTime, err := monitor.checkProviderHealth(provider)
+
+		assert.False(t, isHealthy)
+		assert.GreaterOrEqual(t, responseTime, 0) // May be 0 on fast systems
+		assert.NoError(t, err)
+	})
+
+	t.Run("unreachable provider", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{
+				Name:      "TestProvider",
+				HealthURL: "http://localhost:99999/health",
+			},
+			Health: &HealthStatus{},
+		}
+
+		isHealthy, responseTime, err := monitor.checkProviderHealth(provider)
+
+		assert.False(t, isHealthy)
+		assert.GreaterOrEqual(t, responseTime, 0) // May be 0 on fast systems
+		assert.Error(t, err)
+	})
+}
+
+func TestHealthMonitor_UpdateProviderHealth(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	monitor := NewHealthMonitor(manager)
+
+	t.Run("healthy update", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+			Health:           &HealthStatus{},
+			RetryCount:       5,
+		}
+
+		monitor.updateProviderHealth(provider, true, 100, nil)
+
+		assert.Equal(t, "healthy", provider.Health.Status)
+		assert.True(t, provider.Health.IsHealthy)
+		assert.Equal(t, 100, provider.Health.ResponseTime)
+		assert.Empty(t, provider.Health.Error)
+		assert.Equal(t, 0, provider.RetryCount)
+	})
+
+	t.Run("unhealthy update with error", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+			Health:           &HealthStatus{},
+			RetryCount:       1,
+		}
+
+		err := assert.AnError
+		monitor.updateProviderHealth(provider, false, 500, err)
+
+		assert.Equal(t, "unhealthy", provider.Health.Status)
+		assert.False(t, provider.Health.IsHealthy)
+		assert.Equal(t, 500, provider.Health.ResponseTime)
+		assert.NotEmpty(t, provider.Health.Error)
+		assert.Equal(t, 2, provider.RetryCount)
+	})
+
+	t.Run("unhealthy update without error", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+			Health:           &HealthStatus{},
+			RetryCount:       0,
+		}
+
+		monitor.updateProviderHealth(provider, false, 200, nil)
+
+		assert.Equal(t, "unhealthy", provider.Health.Status)
+		assert.False(t, provider.Health.IsHealthy)
+		assert.Empty(t, provider.Health.Error)
+		assert.Equal(t, 1, provider.RetryCount)
+	})
+}
+
+func TestHealthMonitor_PerformHealthChecks(t *testing.T) {
+	manager := NewAutoLLMManager("")
+
+	// Add a test provider that's not running
+	manager.providers["stopped"] = &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "StoppedProvider"},
+		Status:           "stopped",
+		Health:           &HealthStatus{},
+		Metrics:          &PerformanceMetrics{},
+	}
+
+	monitor := NewHealthMonitor(manager)
+
+	// Should not panic with stopped providers
+	monitor.performHealthChecks()
+}
+
+func TestHealthMonitor_HandleUnhealthyProvider(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	manager.config.Health.MaxRetries = 3
+
+	monitor := NewHealthMonitor(manager)
+
+	t.Run("within retry limits", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{Name: "TestProvider", DataPath: tmpDir},
+			Health:           &HealthStatus{},
+			RetryCount:       1,
+		}
+
+		// Should not panic
+		monitor.handleUnhealthyProvider("test", provider, assert.AnError)
+	})
+
+	t.Run("max retries exceeded", func(t *testing.T) {
+		provider := &AutoProvider{
+			LocalLLMProvider: LocalLLMProvider{Name: "TestProvider", DataPath: tmpDir},
+			Health:           &HealthStatus{},
+			RetryCount:       5,
+		}
+
+		// Should not panic
+		monitor.handleUnhealthyProvider("test", provider, assert.AnError)
+	})
+}
