@@ -718,3 +718,261 @@ func BenchmarkDefaultScheduler(b *testing.B) {
 		scheduler.SelectWorker(workers, "bench-task", requirements)
 	}
 }
+
+// TestWorkerPool_StartStop tests the Start and Stop methods
+func TestWorkerPool_StartStop(t *testing.T) {
+	pool := NewWorkerPool(&config.WorkersConfig{
+		HealthCheckInterval: 1, // 1 second for testing
+	})
+
+	// Add a worker
+	worker := NewPoolWorker("test-worker", "Test Worker", "localhost:8080", WorkerCapabilities{})
+	pool.RegisterWorker(worker)
+
+	ctx := context.Background()
+
+	// Start the pool
+	err := pool.Start(ctx)
+	if err != nil {
+		t.Fatalf("Failed to start pool: %v", err)
+	}
+
+	// Verify pool is started
+	if pool.stopChan == nil {
+		t.Error("stopChan should be initialized after Start")
+	}
+
+	// Wait a moment for health check to potentially run
+	// We don't wait for the actual health check (60s default), just verify start/stop work
+
+	// Stop the pool
+	pool.Stop()
+}
+
+// TestWorkerPool_SetGlobalPool tests SetGlobalPool function
+func TestWorkerPool_SetGlobalPool(t *testing.T) {
+	// Create a custom pool
+	customPool := NewWorkerPool(&config.WorkersConfig{})
+	customPool.RegisterWorker(NewPoolWorker("custom-worker", "Custom Worker", "localhost:9000", WorkerCapabilities{}))
+
+	// Set as global pool
+	SetGlobalPool(customPool)
+
+	// Verify it was set
+	retrieved := GetGlobalPool()
+	if retrieved != customPool {
+		t.Error("SetGlobalPool did not set the global pool correctly")
+	}
+
+	// Verify the worker is in the global pool
+	_, exists := retrieved.GetWorker("custom-worker")
+	if !exists {
+		t.Error("Worker from custom pool should exist in global pool")
+	}
+}
+
+// TestWorkerCapabilities_Struct tests WorkerCapabilities struct
+func TestWorkerCapabilities_Struct(t *testing.T) {
+	caps := WorkerCapabilities{
+		CPUCores:    16,
+		MemoryGB:    64,
+		DiskGB:      1000,
+		GPUs:        4,
+		OS:          "linux",
+		Arch:        "amd64",
+		Tags:        []string{"gpu", "ml", "high-memory"},
+		Specialized: []string{"gpu-training", "large-models"},
+	}
+
+	if caps.CPUCores != 16 {
+		t.Errorf("Expected CPUCores=16, got %d", caps.CPUCores)
+	}
+	if caps.MemoryGB != 64 {
+		t.Errorf("Expected MemoryGB=64, got %d", caps.MemoryGB)
+	}
+	if caps.DiskGB != 1000 {
+		t.Errorf("Expected DiskGB=1000, got %d", caps.DiskGB)
+	}
+	if caps.GPUs != 4 {
+		t.Errorf("Expected GPUs=4, got %d", caps.GPUs)
+	}
+	if caps.OS != "linux" {
+		t.Errorf("Expected OS=linux, got %s", caps.OS)
+	}
+	if caps.Arch != "amd64" {
+		t.Errorf("Expected Arch=amd64, got %s", caps.Arch)
+	}
+	if len(caps.Tags) != 3 {
+		t.Errorf("Expected 3 tags, got %d", len(caps.Tags))
+	}
+	if len(caps.Specialized) != 2 {
+		t.Errorf("Expected 2 specialized, got %d", len(caps.Specialized))
+	}
+}
+
+// TestPoolWorkerStatus_Constants tests PoolWorkerStatus constants
+func TestPoolWorkerStatus_Constants(t *testing.T) {
+	tests := []struct {
+		status   PoolWorkerStatus
+		expected string
+	}{
+		{StatusAvailable, "available"},
+		{StatusBusy, "busy"},
+		{StatusOffline, "offline"},
+		{StatusError, "error"},
+	}
+
+	for _, tt := range tests {
+		if string(tt.status) != tt.expected {
+			t.Errorf("Expected status '%s', got '%s'", tt.expected, string(tt.status))
+		}
+	}
+}
+
+// TestPoolWorker_Clone tests PoolWorker cloning behavior
+func TestPoolWorker_Clone(t *testing.T) {
+	original := NewPoolWorker("original", "Original Worker", "localhost:8080", WorkerCapabilities{
+		CPUCores: 8,
+		MemoryGB: 16,
+		Tags:     []string{"test"},
+	})
+	original.UpdateStats(100, 95, 5, 2.5)
+
+	// Create a copy by creating a new worker with same config
+	clone := NewPoolWorker("clone", "Clone Worker", "localhost:8081", original.Capabilities)
+
+	// Verify they're independent
+	clone.UpdateStatus(StatusBusy)
+	if original.Status == StatusBusy {
+		t.Error("Original worker status should not change when clone changes")
+	}
+
+	clone.UpdateStats(50, 45, 5, 1.0)
+	if original.TasksProcessed == clone.TasksProcessed {
+		t.Error("Original worker stats should not change when clone changes")
+	}
+}
+
+// TestWorkerPoolConcurrentAccess tests concurrent access to worker pool
+func TestWorkerPoolConcurrentAccess(t *testing.T) {
+	pool := NewWorkerPool(&config.WorkersConfig{})
+
+	done := make(chan bool, 20)
+
+	// Concurrent registrations
+	for i := 0; i < 10; i++ {
+		go func(idx int) {
+			worker := NewPoolWorker(fmt.Sprintf("worker%d", idx), fmt.Sprintf("Worker %d", idx),
+				fmt.Sprintf("localhost:808%d", idx), WorkerCapabilities{})
+			pool.RegisterWorker(worker)
+			done <- true
+		}(i)
+	}
+
+	// Wait for all registrations
+	for i := 0; i < 10; i++ {
+		<-done
+	}
+
+	// Concurrent reads
+	for i := 0; i < 10; i++ {
+		go func() {
+			_ = pool.GetAvailableWorkers()
+			_ = pool.GetPoolStats()
+			done <- true
+		}()
+	}
+
+	// Wait for all reads
+	for i := 0; i < 10; i++ {
+		<-done
+	}
+
+	// Verify final state
+	stats := pool.GetPoolStats()
+	if stats["total_workers"] != 10 {
+		t.Errorf("Expected 10 workers, got %v", stats["total_workers"])
+	}
+}
+
+// TestWorkerPoolMultipleAssignments tests multiple task assignments
+func TestWorkerPoolMultipleAssignments(t *testing.T) {
+	pool := NewWorkerPool(&config.WorkersConfig{})
+
+	// Add multiple workers
+	for i := 0; i < 5; i++ {
+		worker := NewPoolWorker(fmt.Sprintf("worker%d", i), fmt.Sprintf("Worker %d", i),
+			fmt.Sprintf("localhost:808%d", i), WorkerCapabilities{CPUCores: 4, MemoryGB: 8})
+		pool.RegisterWorker(worker)
+	}
+
+	ctx := context.Background()
+
+	// Assign all 5 tasks
+	assigned := make([]*PoolWorker, 5)
+	for i := 0; i < 5; i++ {
+		worker, err := pool.AssignTask(ctx, fmt.Sprintf("task%d", i), map[string]interface{}{})
+		if err != nil {
+			t.Fatalf("Failed to assign task %d: %v", i, err)
+		}
+		assigned[i] = worker
+	}
+
+	// All workers should be busy
+	available := pool.GetAvailableWorkers()
+	if len(available) != 0 {
+		t.Errorf("Expected 0 available workers, got %d", len(available))
+	}
+
+	// 6th task should fail
+	_, err := pool.AssignTask(ctx, "task5", map[string]interface{}{})
+	if err == nil {
+		t.Error("Expected error when all workers are busy")
+	}
+
+	// Release all workers
+	for _, w := range assigned {
+		pool.ReleaseWorker(w.ID)
+	}
+
+	// All workers should be available again
+	available = pool.GetAvailableWorkers()
+	if len(available) != 5 {
+		t.Errorf("Expected 5 available workers after release, got %d", len(available))
+	}
+}
+
+// TestPoolWorker_GetHealthZeroTasks tests GetHealth with zero tasks processed
+func TestPoolWorker_GetHealthZeroTasks(t *testing.T) {
+	worker := NewPoolWorker("new-worker", "New Worker", "localhost:8080", WorkerCapabilities{})
+
+	health := worker.GetHealth()
+
+	// With 0 tasks, success rate should be 0
+	if health["success_rate"] != 0.0 {
+		t.Errorf("Expected 0%% success rate for new worker, got %v", health["success_rate"])
+	}
+
+	if health["tasks_processed"] != 0 {
+		t.Errorf("Expected 0 tasks processed, got %v", health["tasks_processed"])
+	}
+}
+
+// TestSchedulerWithEmptyWorkers tests schedulers with empty worker list
+func TestSchedulerWithEmptyWorkers(t *testing.T) {
+	t.Run("default scheduler", func(t *testing.T) {
+		scheduler := NewDefaultScheduler()
+		selected := scheduler.SelectWorker([]*PoolWorker{}, "task", map[string]interface{}{})
+		if selected != nil {
+			t.Error("Expected nil when no workers available")
+		}
+	})
+
+	t.Run("performance scheduler", func(t *testing.T) {
+		scheduler := NewPerformanceScheduler()
+		selected := scheduler.SelectWorker([]*PoolWorker{}, "task", map[string]interface{}{})
+		if selected != nil {
+			t.Error("Expected nil when no workers available")
+		}
+	})
+}

@@ -439,3 +439,194 @@ func TestSSHWorkerPool_ResourceManagement(t *testing.T) {
 	assert.Equal(t, 3, stats.ActiveWorkers)
 	assert.Equal(t, 3, stats.HealthyWorkers)
 }
+
+// TestSSHWorkerPool_AddWorker_EdgeCases tests additional AddWorker scenarios
+func TestSSHWorkerPool_AddWorker_EdgeCases(t *testing.T) {
+	pool := NewSSHWorkerPool(false)
+	ctx := context.Background()
+
+	t.Run("worker with empty hostname", func(t *testing.T) {
+		worker := &SSHWorker{
+			Hostname: "",
+			SSHConfig: &SSHWorkerConfig{
+				Host:     "localhost",
+				Port:     22,
+				Username: "user",
+			},
+		}
+		err := pool.AddWorker(ctx, worker)
+		assert.Error(t, err)
+	})
+
+	t.Run("worker with valid config but no connection", func(t *testing.T) {
+		worker := &SSHWorker{
+			Hostname:    "remote-worker",
+			DisplayName: "Remote Worker 1",
+			SSHConfig: &SSHWorkerConfig{
+				Host:     "192.168.1.100",
+				Port:     22,
+				Username: "admin",
+				KeyPath:  "/home/user/.ssh/id_rsa",
+			},
+		}
+		err := pool.AddWorker(ctx, worker)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "SSH connection failed")
+	})
+
+	t.Run("worker with password auth", func(t *testing.T) {
+		worker := &SSHWorker{
+			Hostname: "password-auth-worker",
+			SSHConfig: &SSHWorkerConfig{
+				Host:     "192.168.1.101",
+				Port:     22,
+				Username: "admin",
+				Password: "secret",
+			},
+		}
+		err := pool.AddWorker(ctx, worker)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "SSH connection failed")
+	})
+}
+
+// TestSSHWorkerPool_ExecuteCommand_EdgeCases tests additional ExecuteCommand scenarios
+func TestSSHWorkerPool_ExecuteCommand_EdgeCases(t *testing.T) {
+	pool := NewSSHWorkerPool(false)
+	ctx := context.Background()
+
+	t.Run("empty command", func(t *testing.T) {
+		workerID := uuid.New()
+		pool.workers[workerID] = &SSHWorker{
+			ID:       workerID,
+			Hostname: "test-worker",
+			SSHConfig: &SSHWorkerConfig{
+				Host:     "localhost",
+				Port:     22,
+				Username: "user",
+			},
+		}
+
+		output, err := pool.ExecuteCommand(ctx, workerID, "")
+		assert.Error(t, err)
+		assert.Empty(t, output)
+	})
+
+	t.Run("complex command", func(t *testing.T) {
+		workerID := uuid.New()
+		pool.workers[workerID] = &SSHWorker{
+			ID:       workerID,
+			Hostname: "test-worker",
+			SSHConfig: &SSHWorkerConfig{
+				Host:     "localhost",
+				Port:     22,
+				Username: "user",
+			},
+		}
+
+		output, err := pool.ExecuteCommand(ctx, workerID, "ls -la /tmp && echo done")
+		assert.Error(t, err) // Will fail due to SSH connection
+		assert.Empty(t, output)
+	})
+}
+
+// TestSSHWorkerConfig tests SSH configuration struct
+func TestSSHWorkerConfig(t *testing.T) {
+	t.Run("config with key path", func(t *testing.T) {
+		config := &SSHWorkerConfig{
+			Host:                  "remote.example.com",
+			Port:                  22,
+			Username:              "deploy",
+			KeyPath:               "/home/deploy/.ssh/id_ed25519",
+			KnownHostsPath:        "/home/deploy/.ssh/known_hosts",
+			StrictHostKeyChecking: true,
+		}
+
+		assert.Equal(t, "remote.example.com", config.Host)
+		assert.Equal(t, 22, config.Port)
+		assert.Equal(t, "deploy", config.Username)
+		assert.Equal(t, "/home/deploy/.ssh/id_ed25519", config.KeyPath)
+		assert.True(t, config.StrictHostKeyChecking)
+	})
+
+	t.Run("config with password", func(t *testing.T) {
+		config := &SSHWorkerConfig{
+			Host:     "internal.example.com",
+			Port:     2222,
+			Username: "admin",
+			Password: "secure_password",
+		}
+
+		assert.Equal(t, 2222, config.Port)
+		assert.Equal(t, "secure_password", config.Password)
+	})
+
+	t.Run("config with host key fingerprint", func(t *testing.T) {
+		config := &SSHWorkerConfig{
+			Host:               "secure.example.com",
+			Port:               22,
+			Username:           "helix",
+			PrivateKey:         "-----BEGIN OPENSSH PRIVATE KEY-----",
+			HostKeyFingerprint: "SHA256:abc123xyz",
+		}
+
+		assert.Equal(t, "secure.example.com", config.Host)
+		assert.Equal(t, "SHA256:abc123xyz", config.HostKeyFingerprint)
+		assert.NotEmpty(t, config.PrivateKey)
+	})
+}
+
+// TestSSHWorker_Struct tests SSHWorker struct
+func TestSSHWorker_Struct(t *testing.T) {
+	workerID := uuid.New()
+	worker := &SSHWorker{
+		ID:           workerID,
+		Hostname:     "production-worker-01",
+		DisplayName:  "Production Worker 1",
+		Status:       WorkerStatusActive,
+		HealthStatus: WorkerHealthHealthy,
+		Resources: Resources{
+			CPUCount:    16,
+			TotalMemory: 68719476736,   // 64GB
+			TotalDisk:   1099511627776, // 1TB
+			GPUCount:    2,
+			GPUMemory:   25769803776, // 24GB
+			GPUModel:    "NVIDIA RTX 3090",
+		},
+		SSHConfig: &SSHWorkerConfig{
+			Host:     "10.0.0.1",
+			Port:     22,
+			Username: "helix",
+		},
+	}
+
+	assert.Equal(t, workerID, worker.ID)
+	assert.Equal(t, "production-worker-01", worker.Hostname)
+	assert.Equal(t, "Production Worker 1", worker.DisplayName)
+	assert.Equal(t, WorkerStatusActive, worker.Status)
+	assert.Equal(t, WorkerHealthHealthy, worker.HealthStatus)
+	assert.Equal(t, 16, worker.Resources.CPUCount)
+	assert.Equal(t, int64(68719476736), worker.Resources.TotalMemory)
+	assert.Equal(t, int64(1099511627776), worker.Resources.TotalDisk)
+	assert.Equal(t, 2, worker.Resources.GPUCount)
+	assert.Equal(t, "NVIDIA RTX 3090", worker.Resources.GPUModel)
+}
+
+// TestResources_Struct tests Resources struct
+func TestResources_Struct(t *testing.T) {
+	resources := Resources{
+		CPUCount:    8,
+		TotalMemory: 34359738368,
+		TotalDisk:   549755813888,
+		GPUCount:    1,
+		GPUModel:    "NVIDIA Tesla V100",
+		GPUMemory:   17179869184,
+	}
+
+	assert.Equal(t, 8, resources.CPUCount)
+	assert.Equal(t, int64(34359738368), resources.TotalMemory)
+	assert.Equal(t, int64(549755813888), resources.TotalDisk)
+	assert.Equal(t, 1, resources.GPUCount)
+	assert.Equal(t, "NVIDIA Tesla V100", resources.GPUModel)
+	assert.Equal(t, int64(17179869184), resources.GPUMemory)
+}
