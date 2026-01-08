@@ -75,6 +75,19 @@ func (m *MockAuthRepository) DeleteUserSessions(ctx context.Context, userID uuid
 	return args.Error(0)
 }
 
+func (m *MockAuthRepository) UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error) {
+	args := m.Called(ctx, userID, displayName, email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*User), args.Error(1)
+}
+
+func (m *MockAuthRepository) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 	assert.NotEmpty(t, config.JWTSecret)

@@ -277,3 +277,72 @@ func (a *AuthDB) DeleteUserSessions(ctx context.Context, userID uuid.UUID) error
 
 	return nil
 }
+
+// UpdateUser updates user profile information
+func (a *AuthDB) UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error) {
+	query := `
+		UPDATE users
+		SET display_name = $1, email = $2, updated_at = $3
+		WHERE id = $4
+		RETURNING id, username, email, display_name, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
+	`
+
+	var user User
+	var displayNameResult sql.NullString
+	var lastLogin sql.NullTime
+
+	err := a.db.QueryRow(ctx, query, sql.NullString{String: displayName, Valid: displayName != ""}, email, time.Now(), userID).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&displayNameResult,
+		&user.IsActive,
+		&user.IsVerified,
+		&user.MFAEnabled,
+		&lastLogin,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrUserNotFound
+		}
+		return nil, fmt.Errorf("failed to update user: %v", err)
+	}
+
+	if displayNameResult.Valid {
+		user.DisplayName = displayNameResult.String
+	}
+	if lastLogin.Valid {
+		user.LastLogin = lastLogin.Time
+	}
+
+	return &user, nil
+}
+
+// DeleteUser soft-deletes a user by deactivating their account
+func (a *AuthDB) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	// First delete all user sessions
+	if err := a.DeleteUserSessions(ctx, userID); err != nil {
+		return fmt.Errorf("failed to delete user sessions: %v", err)
+	}
+
+	// Soft delete the user by deactivating
+	query := `
+		UPDATE users
+		SET is_active = false, updated_at = $1
+		WHERE id = $2
+	`
+
+	result, err := a.db.Exec(ctx, query, time.Now(), userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %v", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}

@@ -733,9 +733,17 @@ func (c *LLMClient) completeOllama(ctx context.Context, req *CompletionRequest) 
 	// DEBUG: Save the fallback response to a file for inspection
 	debugFile := "/tmp/fallback_response_debug.txt"
 	os.WriteFile(debugFile, []byte(fallbackResp.Content), 0644)
-	
-	return fallbackResp, nil
 
+	return fallbackResp, nil
+}
+
+// Note: The following code was previously unreachable and has been removed.
+// If additional response processing is needed in the future, it should be
+// added before the fallback return statement above.
+
+// processOllamaResponse handles the response from Ollama API (currently unused)
+// This function is kept for reference but is not currently called.
+func (c *LLMClient) processOllamaResponse(resp *http.Response, ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

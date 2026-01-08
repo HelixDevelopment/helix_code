@@ -77,8 +77,8 @@ func TestProductionDeployment(t *testing.T) {
 		loginResp, err := http.Post(
 			serverURL+"/api/v1/auth/login",
 			"application/json",
-			bytes.NewBuffer([]byte(fmt.Sprintf(`{"username":"%s","password":"%s"}`, 
-				loginData["username"], loginData["password"])))
+			bytes.NewBuffer([]byte(fmt.Sprintf(`{"username":"%s","password":"%s"}`,
+				loginData["username"], loginData["password"]))),
 		)
 		require.NoError(t, err, "Login request failed")
 		defer loginResp.Body.Close()

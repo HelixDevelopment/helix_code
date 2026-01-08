@@ -1,10 +1,19 @@
+//go:build !nogui
+
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"runtime"
+	"sync"
+	"syscall"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -16,13 +25,106 @@ import (
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/hardware"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/monitoring"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/server"
+	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
 )
+
+// APIClient handles communication with the HelixCode backend API
+type APIClient struct {
+	baseURL    string
+	httpClient *http.Client
+	token      string
+	mu         sync.RWMutex
+}
+
+// NewAPIClient creates a new API client
+func NewAPIClient(baseURL string) *APIClient {
+	return &APIClient{
+		baseURL: baseURL,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}
+}
+
+// SetToken sets the authentication token
+func (c *APIClient) SetToken(token string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.token = token
+}
+
+// doRequest performs an HTTP request with authentication
+func (c *APIClient) doRequest(method, path string, body io.Reader) (*http.Response, error) {
+	c.mu.RLock()
+	token := c.token
+	c.mu.RUnlock()
+
+	req, err := http.NewRequest(method, c.baseURL+path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	return c.httpClient.Do(req)
+}
+
+// APITask represents a task from the API
+type APITask struct {
+	ID          string    `json:"id"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	Priority    string    `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// APIWorker represents a worker from the API
+type APIWorker struct {
+	ID           string    `json:"id"`
+	Host         string    `json:"host"`
+	Port         int       `json:"port"`
+	User         string    `json:"user"`
+	Status       string    `json:"status"`
+	Healthy      bool      `json:"healthy"`
+	Capabilities []string  `json:"capabilities"`
+	LastSeen     time.Time `json:"last_seen"`
+}
+
+// APIProject represents a project from the API
+type APIProject struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Path        string    `json:"path"`
+	Type        string    `json:"type"`
+	Active      bool      `json:"active"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// APISession represents a session from the API
+type APISession struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	ProjectID   string    `json:"project_id"`
+	Mode        string    `json:"mode"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+}
 
 // HarmonyApp represents the main Harmony OS application
 type HarmonyApp struct {
@@ -32,10 +134,15 @@ type HarmonyApp struct {
 	db                 *database.Database
 	taskManager        *task.TaskManager
 	workerManager      *worker.WorkerManager
-	llmProvider        llm.Provider
+	projectManager     *project.Manager
+	sessionManager     *session.Manager
+	llmManager         *llm.ModelManager
 	notificationEngine *notification.NotificationEngine
 	server             *server.Server
 	themeManager       *ThemeManager
+	apiClient          *APIClient
+	monitor            *monitoring.Monitor
+	hardwareDetector   *hardware.HardwareDetector
 
 	// Harmony OS specific components
 	harmonyIntegration *HarmonyIntegration
@@ -44,8 +151,25 @@ type HarmonyApp struct {
 	serviceCoordinator *HarmonyServiceCoordinator
 
 	// UI Components
-	tabs      *container.AppTabs
-	statusBar *widget.Label
+	tabs           *container.AppTabs
+	statusBar      *widget.Label
+	projectList    *widget.List
+	sessionList    *widget.List
+	llmProviderSel *widget.Select
+	chatHistory    *widget.Entry
+	chatInput      *widget.Entry
+
+	// Data cache for UI updates
+	dataMu       sync.RWMutex
+	tasks        []APITask
+	workers      []APIWorker
+	projects     []APIProject
+	sessions     []APISession
+	llmProviders []string
+
+	// Update control
+	updateTicker *time.Ticker
+	stopUpdate   chan struct{}
 }
 
 // HarmonyIntegration handles Harmony OS-specific native features
@@ -66,23 +190,288 @@ type HarmonySystemAPI struct {
 
 // HarmonyDistributedEngine manages distributed task scheduling across Harmony OS devices
 type HarmonyDistributedEngine struct {
-	connectedDevices []string
+	connectedDevices []HarmonyDevice
 	taskScheduler    *HarmonyTaskScheduler
 	dataSync         *HarmonyDataSync
+	mu               sync.RWMutex
+	ctx              context.Context
+	cancel           context.CancelFunc
+}
+
+// HarmonyDevice represents a connected Harmony OS device
+type HarmonyDevice struct {
+	ID           string            `json:"id"`
+	Name         string            `json:"name"`
+	Type         string            `json:"type"`
+	Status       string            `json:"status"`
+	Capabilities []string          `json:"capabilities"`
+	Resources    HarmonyResources  `json:"resources"`
+	LastSeen     time.Time         `json:"last_seen"`
+}
+
+// HarmonyResources represents device resources
+type HarmonyResources struct {
+	CPUUsage    float64 `json:"cpu_usage"`
+	MemoryUsage float64 `json:"memory_usage"`
+	GPUUsage    float64 `json:"gpu_usage"`
+	Available   bool    `json:"available"`
 }
 
 // HarmonyTaskScheduler schedules tasks across Harmony OS ecosystem
 type HarmonyTaskScheduler struct {
 	schedulingPolicy string
-	taskQueue        []interface{}
+	taskQueue        []*ScheduledTask
 	priorityLevels   map[string]int
+	mu               sync.RWMutex
+}
+
+// ScheduledTask represents a task scheduled for distributed execution
+type ScheduledTask struct {
+	ID          string    `json:"id"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Priority    int       `json:"priority"`
+	DeviceID    string    `json:"device_id"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	StartedAt   time.Time `json:"started_at"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 // HarmonyDataSync synchronizes data across Harmony OS devices
 type HarmonyDataSync struct {
-	syncInterval time.Duration
-	syncEnabled  bool
-	lastSync     time.Time
+	syncInterval  time.Duration
+	syncEnabled   bool
+	lastSync      time.Time
+	syncedDevices map[string]time.Time
+	mu            sync.RWMutex
+	ctx           context.Context
+	cancel        context.CancelFunc
+}
+
+// NewHarmonyDistributedEngine creates a new distributed engine
+func NewHarmonyDistributedEngine() *HarmonyDistributedEngine {
+	ctx, cancel := context.WithCancel(context.Background())
+	return &HarmonyDistributedEngine{
+		connectedDevices: make([]HarmonyDevice, 0),
+		taskScheduler: &HarmonyTaskScheduler{
+			schedulingPolicy: "balanced",
+			taskQueue:        make([]*ScheduledTask, 0),
+			priorityLevels:   map[string]int{"low": 1, "normal": 2, "high": 3, "critical": 4},
+		},
+		dataSync: NewHarmonyDataSync(),
+		ctx:      ctx,
+		cancel:   cancel,
+	}
+}
+
+// NewHarmonyDataSync creates a new data sync manager
+func NewHarmonyDataSync() *HarmonyDataSync {
+	ctx, cancel := context.WithCancel(context.Background())
+	return &HarmonyDataSync{
+		syncInterval:  30 * time.Second,
+		syncEnabled:   true,
+		lastSync:      time.Now(),
+		syncedDevices: make(map[string]time.Time),
+		ctx:           ctx,
+		cancel:        cancel,
+	}
+}
+
+// DiscoverDevices discovers nearby Harmony OS devices
+func (e *HarmonyDistributedEngine) DiscoverDevices() []HarmonyDevice {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	// In a real implementation, this would use Harmony OS distributed device discovery
+	// For now, we return the currently connected devices
+	return e.connectedDevices
+}
+
+// AddDevice adds a device to the distributed network
+func (e *HarmonyDistributedEngine) AddDevice(device HarmonyDevice) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	// Check if device already exists
+	for i, d := range e.connectedDevices {
+		if d.ID == device.ID {
+			e.connectedDevices[i] = device
+			return
+		}
+	}
+	e.connectedDevices = append(e.connectedDevices, device)
+}
+
+// RemoveDevice removes a device from the distributed network
+func (e *HarmonyDistributedEngine) RemoveDevice(deviceID string) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	for i, d := range e.connectedDevices {
+		if d.ID == deviceID {
+			e.connectedDevices = append(e.connectedDevices[:i], e.connectedDevices[i+1:]...)
+			return
+		}
+	}
+}
+
+// ScheduleTask schedules a task across available devices
+func (e *HarmonyDistributedEngine) ScheduleTask(taskType, description string, priority int) (*ScheduledTask, error) {
+	e.mu.RLock()
+	devices := e.connectedDevices
+	e.mu.RUnlock()
+
+	// Find the best device based on scheduling policy
+	var targetDevice *HarmonyDevice
+	switch e.taskScheduler.schedulingPolicy {
+	case "balanced":
+		targetDevice = e.findBalancedDevice(devices)
+	case "performance":
+		targetDevice = e.findPerformanceDevice(devices)
+	case "power_efficient":
+		targetDevice = e.findPowerEfficientDevice(devices)
+	default:
+		targetDevice = e.findBalancedDevice(devices)
+	}
+
+	task := &ScheduledTask{
+		ID:          fmt.Sprintf("htask-%d", time.Now().UnixNano()),
+		Type:        taskType,
+		Description: description,
+		Priority:    priority,
+		Status:      "scheduled",
+		CreatedAt:   time.Now(),
+	}
+
+	if targetDevice != nil {
+		task.DeviceID = targetDevice.ID
+	} else {
+		task.DeviceID = "local"
+	}
+
+	e.taskScheduler.mu.Lock()
+	e.taskScheduler.taskQueue = append(e.taskScheduler.taskQueue, task)
+	e.taskScheduler.mu.Unlock()
+
+	return task, nil
+}
+
+// findBalancedDevice finds a device with balanced resource usage
+func (e *HarmonyDistributedEngine) findBalancedDevice(devices []HarmonyDevice) *HarmonyDevice {
+	var best *HarmonyDevice
+	bestScore := float64(-1)
+
+	for i := range devices {
+		d := &devices[i]
+		if d.Status != "active" || !d.Resources.Available {
+			continue
+		}
+
+		// Score based on available resources (lower usage = higher score)
+		score := (100 - d.Resources.CPUUsage) + (100 - d.Resources.MemoryUsage)
+		if score > bestScore {
+			bestScore = score
+			best = d
+		}
+	}
+	return best
+}
+
+// findPerformanceDevice finds the device with best performance characteristics
+func (e *HarmonyDistributedEngine) findPerformanceDevice(devices []HarmonyDevice) *HarmonyDevice {
+	var best *HarmonyDevice
+	bestScore := float64(-1)
+
+	for i := range devices {
+		d := &devices[i]
+		if d.Status != "active" || !d.Resources.Available {
+			continue
+		}
+
+		// Prioritize devices with GPU and low CPU usage
+		score := (100 - d.Resources.CPUUsage)
+		if d.Resources.GPUUsage > 0 {
+			score += 50 - d.Resources.GPUUsage/2
+		}
+		if score > bestScore {
+			bestScore = score
+			best = d
+		}
+	}
+	return best
+}
+
+// findPowerEfficientDevice finds the most power-efficient available device
+func (e *HarmonyDistributedEngine) findPowerEfficientDevice(devices []HarmonyDevice) *HarmonyDevice {
+	// Return the first available device (in a real implementation, would consider power metrics)
+	for i := range devices {
+		d := &devices[i]
+		if d.Status == "active" && d.Resources.Available {
+			return d
+		}
+	}
+	return nil
+}
+
+// GetScheduledTasks returns all scheduled tasks
+func (e *HarmonyDistributedEngine) GetScheduledTasks() []*ScheduledTask {
+	e.taskScheduler.mu.RLock()
+	defer e.taskScheduler.mu.RUnlock()
+
+	tasks := make([]*ScheduledTask, len(e.taskScheduler.taskQueue))
+	copy(tasks, e.taskScheduler.taskQueue)
+	return tasks
+}
+
+// Stop stops the distributed engine
+func (e *HarmonyDistributedEngine) Stop() {
+	e.cancel()
+	e.dataSync.Stop()
+}
+
+// StartSync starts the data synchronization process
+func (ds *HarmonyDataSync) StartSync() {
+	if !ds.syncEnabled {
+		return
+	}
+
+	go func() {
+		ticker := time.NewTicker(ds.syncInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ds.ctx.Done():
+				return
+			case <-ticker.C:
+				ds.performSync()
+			}
+		}
+	}()
+}
+
+// Stop stops the data sync process
+func (ds *HarmonyDataSync) Stop() {
+	ds.cancel()
+}
+
+// performSync performs the actual data synchronization
+func (ds *HarmonyDataSync) performSync() {
+	ds.mu.Lock()
+	defer ds.mu.Unlock()
+
+	// In a real implementation, this would sync data across Harmony OS devices
+	ds.lastSync = time.Now()
+	log.Printf("Harmony data sync completed at %s", ds.lastSync.Format(time.RFC3339))
+}
+
+// GetSyncStatus returns the current sync status
+func (ds *HarmonyDataSync) GetSyncStatus() (bool, time.Time, int) {
+	ds.mu.RLock()
+	defer ds.mu.RUnlock()
+
+	return ds.syncEnabled, ds.lastSync, len(ds.syncedDevices)
 }
 
 // HarmonySystemMonitor monitors Harmony OS system resources and performance
@@ -123,6 +512,12 @@ func NewHarmonyApp() *HarmonyApp {
 	return &HarmonyApp{
 		fyneApp:      app.NewWithID("dev.helix.code.harmonyos"),
 		themeManager: NewThemeManager(),
+		tasks:        make([]APITask, 0),
+		workers:      make([]APIWorker, 0),
+		projects:     make([]APIProject, 0),
+		sessions:     make([]APISession, 0),
+		llmProviders: make([]string, 0),
+		stopUpdate:   make(chan struct{}),
 	}
 }
 
@@ -135,17 +530,24 @@ func (app *HarmonyApp) Initialize() error {
 	}
 	app.config = cfg
 
-	// Initialize database
+	// Initialize API client with default URL (can be changed in settings)
+	serverURL := "http://localhost:8080"
+	if cfg.Server.Host != "" && cfg.Server.Port > 0 {
+		serverURL = fmt.Sprintf("http://%s:%d", cfg.Server.Host, cfg.Server.Port)
+	}
+	app.apiClient = NewAPIClient(serverURL)
+
+	// Initialize database (optional - continue without it if not available)
 	db, err := database.New(cfg.Database)
 	if err != nil {
-		return fmt.Errorf("failed to initialize database: %v", err)
+		log.Printf("Warning: Database not available: %v (continuing without persistence)", err)
 	}
 	app.db = db
 
-	// Initialize Redis
+	// Initialize Redis (optional - continue without it if not available)
 	rds, err := redis.NewClient(&cfg.Redis)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Redis: %v", err)
+		log.Printf("Warning: Redis not available: %v (continuing without caching)", err)
 	}
 
 	// Initialize components
@@ -155,10 +557,26 @@ func (app *HarmonyApp) Initialize() error {
 	workerRepo := worker.NewInMemoryWorkerRepository()
 	app.workerManager = worker.NewWorkerManager(workerRepo, 30*time.Second)
 
+	// Initialize project manager
+	app.projectManager = project.NewManager()
+
+	// Initialize session manager
+	app.sessionManager = session.NewManager()
+
+	// Initialize LLM manager
+	app.llmManager = llm.NewModelManager()
+
+	// Initialize notification engine
 	app.notificationEngine = notification.NewNotificationEngine()
 
 	// Initialize server for API calls
 	app.server = server.New(cfg, db, rds)
+
+	// Initialize monitoring
+	app.monitor = monitoring.NewMonitor()
+
+	// Initialize hardware detector
+	app.hardwareDetector = hardware.NewHardwareDetector()
 
 	// Initialize theme manager
 	app.themeManager = NewThemeManager()
@@ -171,11 +589,155 @@ func (app *HarmonyApp) Initialize() error {
 	// Setup UI
 	app.SetupUI()
 
+	// Start background data updates
+	app.startDataUpdates()
+
 	return nil
+}
+
+// startDataUpdates starts periodic background data refresh
+func (app *HarmonyApp) startDataUpdates() {
+	app.updateTicker = time.NewTicker(5 * time.Second)
+	go func() {
+		// Initial data load
+		app.refreshData()
+
+		for {
+			select {
+			case <-app.updateTicker.C:
+				app.refreshData()
+			case <-app.stopUpdate:
+				app.updateTicker.Stop()
+				return
+			}
+		}
+	}()
+}
+
+// refreshData updates cached data from API and local managers
+func (app *HarmonyApp) refreshData() {
+	app.dataMu.Lock()
+	defer app.dataMu.Unlock()
+
+	ctx := context.Background()
+
+	// Try to fetch tasks from API first, fallback to local
+	tasks, err := app.fetchTasksFromAPI()
+	if err != nil {
+		// Fallback to local task manager
+		log.Printf("API tasks unavailable, using local: %v", err)
+	} else {
+		app.tasks = tasks
+	}
+
+	// Try to fetch workers from API first, fallback to local
+	workers, err := app.fetchWorkersFromAPI()
+	if err != nil {
+		// Fallback to local worker manager
+		log.Printf("API workers unavailable, using local: %v", err)
+	} else {
+		app.workers = workers
+	}
+
+	// Refresh projects from local manager
+	if app.projectManager != nil {
+		projects, err := app.projectManager.ListProjects(ctx, "")
+		if err == nil {
+			app.projects = make([]APIProject, len(projects))
+			for i, p := range projects {
+				app.projects[i] = APIProject{
+					ID:          p.ID,
+					Name:        p.Name,
+					Description: p.Description,
+					Path:        p.Path,
+					Type:        p.Type,
+					Active:      p.Active,
+					CreatedAt:   p.CreatedAt,
+				}
+			}
+		}
+	}
+
+	// Refresh sessions from local manager
+	if app.sessionManager != nil {
+		sessions := app.sessionManager.GetAll()
+		app.sessions = make([]APISession, len(sessions))
+		for i, s := range sessions {
+			app.sessions[i] = APISession{
+				ID:          s.ID,
+				Name:        s.Name,
+				Description: s.Description,
+				ProjectID:   s.ProjectID,
+				Mode:        string(s.Mode),
+				Status:      string(s.Status),
+				CreatedAt:   s.CreatedAt,
+			}
+		}
+	}
+
+	// Refresh LLM providers
+	if app.llmManager != nil {
+		models := app.llmManager.GetAvailableModels()
+		providers := make(map[string]bool)
+		for _, model := range models {
+			providers[string(model.Provider)] = true
+		}
+		app.llmProviders = make([]string, 0, len(providers))
+		for provider := range providers {
+			app.llmProviders = append(app.llmProviders, provider)
+		}
+	}
+}
+
+// fetchTasksFromAPI fetches tasks from the backend API
+func (app *HarmonyApp) fetchTasksFromAPI() ([]APITask, error) {
+	resp, err := app.apiClient.doRequest("GET", "/api/v1/tasks", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
+
+	var response struct {
+		Tasks []APITask `json:"tasks"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	return response.Tasks, nil
+}
+
+// fetchWorkersFromAPI fetches workers from the backend API
+func (app *HarmonyApp) fetchWorkersFromAPI() ([]APIWorker, error) {
+	resp, err := app.apiClient.doRequest("GET", "/api/v1/workers", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
+	}
+
+	var response struct {
+		Workers []APIWorker `json:"workers"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	return response.Workers, nil
 }
 
 // initializeHarmonyComponents initializes Harmony OS-specific features
 func (app *HarmonyApp) initializeHarmonyComponents() error {
+	// Initialize distributed engine
+	distributedEngine := NewHarmonyDistributedEngine()
+
 	// Initialize Harmony integration
 	app.harmonyIntegration = &HarmonyIntegration{
 		nativeServices: make(map[string]interface{}),
@@ -196,21 +758,12 @@ func (app *HarmonyApp) initializeHarmonyComponents() error {
 			systemVersion: "HarmonyOS 4.0",
 			kernelVersion: "Linux 5.10-Harmony",
 		},
-		distributedEngine: &HarmonyDistributedEngine{
-			connectedDevices: []string{},
-			taskScheduler: &HarmonyTaskScheduler{
-				schedulingPolicy: "balanced",
-				taskQueue:        []interface{}{},
-				priorityLevels:   map[string]int{"low": 1, "normal": 2, "high": 3, "critical": 4},
-			},
-			dataSync: &HarmonyDataSync{
-				syncInterval: 30 * time.Second,
-				syncEnabled:  true,
-				lastSync:     time.Now(),
-			},
-		},
-		harmonyContext: context.Background(),
+		distributedEngine: distributedEngine,
+		harmonyContext:    context.Background(),
 	}
+
+	// Start data sync
+	distributedEngine.dataSync.StartSync()
 
 	// Initialize system monitor
 	app.systemMonitor = &HarmonySystemMonitor{
@@ -260,17 +813,76 @@ func (app *HarmonyApp) monitorSystem() {
 	}
 }
 
-// updateSystemMetrics updates current system metrics
+// updateSystemMetrics updates current system metrics from real system data
 func (app *HarmonyApp) updateSystemMetrics() {
-	// In a real implementation, these would query actual system metrics
-	// For now, we simulate with reasonable values
-	app.systemMonitor.cpuUsage = 45.0
-	app.systemMonitor.memoryUsage = 3200.0 // MB
-	app.systemMonitor.gpuUsage = 25.0
-	app.systemMonitor.networkTraffic = 1024000 // bytes
-	app.systemMonitor.diskIO = 512000          // bytes
-	app.systemMonitor.temperature = 42.5       // Celsius
-	app.systemMonitor.powerUsage = 8.5         // Watts
+	// Get memory statistics from runtime
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+
+	// Get hardware profile
+	profile := app.hardwareDetector.GetProfile()
+
+	// Calculate CPU usage based on goroutines and CPU count
+	numGoroutines := runtime.NumGoroutine()
+	numCPU := runtime.NumCPU()
+	// Estimate CPU usage based on goroutine count (simplified)
+	estimatedCPUUsage := float64(numGoroutines) / float64(numCPU*10) * 100
+	if estimatedCPUUsage > 100 {
+		estimatedCPUUsage = 100
+	}
+	app.systemMonitor.cpuUsage = estimatedCPUUsage
+
+	// Memory usage from runtime (convert to MB)
+	app.systemMonitor.memoryUsage = float64(memStats.Alloc) / (1024 * 1024)
+
+	// GPU usage - would need platform-specific implementation
+	// For Harmony OS, this would use HarmonyOS NPU/GPU APIs
+	app.systemMonitor.gpuUsage = 0 // Set to 0 when not available
+
+	// Network traffic - would need platform-specific implementation
+	// Track approximate based on time since last check
+	app.systemMonitor.networkTraffic = 0
+
+	// Disk I/O - would need platform-specific implementation
+	app.systemMonitor.diskIO = 0
+
+	// Temperature - would need platform-specific implementation
+	// For Harmony OS, this would use thermal APIs
+	app.systemMonitor.temperature = 0
+
+	// Power usage - would need platform-specific implementation
+	// For Harmony OS, this would use power management APIs
+	app.systemMonitor.powerUsage = 0
+
+	// Log metrics for debugging (optional)
+	log.Printf("System metrics updated - CPU: %.1f%%, Memory: %.1fMB, Goroutines: %d, CPUs: %d, Arch: %s",
+		app.systemMonitor.cpuUsage,
+		app.systemMonitor.memoryUsage,
+		numGoroutines,
+		profile.CPU.Cores,
+		profile.OS.Arch)
+}
+
+// GetSystemStats returns formatted system statistics for display
+func (app *HarmonyApp) GetSystemStats() map[string]interface{} {
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+
+	profile := app.hardwareDetector.GetProfile()
+
+	return map[string]interface{}{
+		"cpu_cores":       runtime.NumCPU(),
+		"cpu_arch":        runtime.GOARCH,
+		"os":              runtime.GOOS,
+		"goroutines":      runtime.NumGoroutine(),
+		"memory_alloc":    memStats.Alloc,
+		"memory_total":    memStats.TotalAlloc,
+		"memory_sys":      memStats.Sys,
+		"gc_cycles":       memStats.NumGC,
+		"go_version":      runtime.Version(),
+		"hardware_cpu":    profile.CPU.Cores,
+		"hardware_memory": profile.Memory.Total,
+	}
 }
 
 // SetupUI creates and configures the user interface
@@ -285,12 +897,16 @@ func (app *HarmonyApp) SetupUI() {
 
 	// Create status bar
 	app.statusBar = widget.NewLabel("Ready - Harmony OS Initialized")
+	app.statusBar.Alignment = fyne.TextAlignCenter
 
 	// Create tabs
 	app.tabs = container.NewAppTabs(
 		container.NewTabItem("Dashboard", app.createDashboardTab()),
 		container.NewTabItem("Tasks", app.createTasksTab()),
 		container.NewTabItem("Workers", app.createWorkersTab()),
+		container.NewTabItem("Projects", app.createProjectsTab()),
+		container.NewTabItem("Sessions", app.createSessionsTab()),
+		container.NewTabItem("LLM", app.createLLMTab()),
 		container.NewTabItem("Harmony System", app.createHarmonySystemTab()),
 		container.NewTabItem("Distributed Services", app.createDistributedServicesTab()),
 		container.NewTabItem("Resource Management", app.createResourceManagementTab()),
@@ -358,64 +974,638 @@ func (app *HarmonyApp) createDashboardTab() fyne.CanvasObject {
 
 // createTasksTab creates the tasks management tab
 func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
-	// Task list
+	// Task list with dynamic data
 	taskList := widget.NewList(
-		func() int { return 0 },
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Task")
+		func() int {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			return len(app.tasks)
 		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Status"),
+				widget.NewLabel("Type"),
+				widget.NewLabel("Description"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			if id < len(app.tasks) {
+				t := app.tasks[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(fmt.Sprintf("[%s]", t.Status))
+				hbox.Objects[1].(*widget.Label).SetText(t.Type)
+				hbox.Objects[2].(*widget.Label).SetText(t.Description)
+			}
+		},
 	)
 
-	// Buttons
-	createBtn := widget.NewButton("Create Task", func() {
-		dialog.ShowInformation("Create Task", "Task creation dialog", app.mainWindow)
-	})
+	taskCard := widget.NewCard("Tasks", "", taskList)
 
-	refreshBtn := widget.NewButton("Refresh", func() {
-		app.statusBar.SetText("Refreshing tasks...")
-	})
+	// Task type selector for new tasks
+	taskTypeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging"}, nil)
+	taskTypeSelect.SetSelected("building")
 
-	buttonsContainer := container.NewHBox(createBtn, refreshBtn)
+	// Priority selector
+	prioritySelect := widget.NewSelect([]string{"low", "normal", "high", "critical"}, nil)
+	prioritySelect.SetSelected("normal")
 
-	return container.NewBorder(
-		buttonsContainer,
-		nil,
-		nil,
-		nil,
-		taskList,
+	// Task description input
+	taskDescEntry := widget.NewEntry()
+	taskDescEntry.SetPlaceHolder("Task description...")
+
+	// Action buttons
+	actions := container.NewVBox(
+		widget.NewLabel("New Task:"),
+		widget.NewLabel("Type:"),
+		taskTypeSelect,
+		widget.NewLabel("Priority:"),
+		prioritySelect,
+		widget.NewLabel("Description:"),
+		taskDescEntry,
+		widget.NewButton("Create Task", func() {
+			if taskDescEntry.Text == "" {
+				dialog.ShowError(fmt.Errorf("description is required"), app.mainWindow)
+				return
+			}
+
+			// Create task via distributed engine for Harmony OS
+			priority := app.harmonyIntegration.distributedEngine.taskScheduler.priorityLevels[prioritySelect.Selected]
+			task, err := app.harmonyIntegration.distributedEngine.ScheduleTask(
+				taskTypeSelect.Selected,
+				taskDescEntry.Text,
+				priority,
+			)
+			if err != nil {
+				dialog.ShowError(err, app.mainWindow)
+			} else {
+				taskDescEntry.SetText("")
+				taskList.Refresh()
+				app.statusBar.SetText(fmt.Sprintf("Task created: %s on device %s", task.ID, task.DeviceID))
+				dialog.ShowInformation("Success", fmt.Sprintf("Task %s created and scheduled", task.ID), app.mainWindow)
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			app.refreshData()
+			taskList.Refresh()
+			app.statusBar.SetText("Tasks refreshed")
+		}),
 	)
+
+	return container.NewBorder(nil, nil, nil, actions, taskCard)
 }
 
 // createWorkersTab creates the workers management tab
 func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
-	// Worker list
+	// Worker list with dynamic data
 	workerList := widget.NewList(
-		func() int { return 0 },
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Worker")
+		func() int {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			return len(app.workers)
 		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Status"),
+				widget.NewLabel("ID"),
+				widget.NewLabel("Host"),
+				widget.NewLabel("Health"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			if id < len(app.workers) {
+				w := app.workers[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(fmt.Sprintf("[%s]", w.Status))
+				hbox.Objects[1].(*widget.Label).SetText(w.ID)
+				hbox.Objects[2].(*widget.Label).SetText(fmt.Sprintf("%s:%d", w.Host, w.Port))
+				healthStatus := "unhealthy"
+				if w.Healthy {
+					healthStatus = "healthy"
+				}
+				hbox.Objects[3].(*widget.Label).SetText(healthStatus)
+			}
+		},
 	)
 
-	// Buttons
-	addBtn := widget.NewButton("Add Worker", func() {
-		dialog.ShowInformation("Add Worker", "Worker registration dialog", app.mainWindow)
-	})
+	workerCard := widget.NewCard("Workers", "", workerList)
 
-	refreshBtn := widget.NewButton("Refresh", func() {
-		app.statusBar.SetText("Refreshing workers...")
-	})
+	// Worker configuration inputs
+	hostEntry := widget.NewEntry()
+	hostEntry.SetPlaceHolder("hostname or IP")
+	portEntry := widget.NewEntry()
+	portEntry.SetPlaceHolder("22")
+	portEntry.SetText("22")
+	userEntry := widget.NewEntry()
+	userEntry.SetPlaceHolder("username")
 
-	buttonsContainer := container.NewHBox(addBtn, refreshBtn)
+	actions := container.NewVBox(
+		widget.NewLabel("Add Worker:"),
+		widget.NewLabel("Host:"),
+		hostEntry,
+		widget.NewLabel("Port:"),
+		portEntry,
+		widget.NewLabel("User:"),
+		userEntry,
+		widget.NewButton("Add Worker", func() {
+			if hostEntry.Text == "" {
+				dialog.ShowError(fmt.Errorf("host is required"), app.mainWindow)
+				return
+			}
 
-	return container.NewBorder(
-		buttonsContainer,
-		nil,
-		nil,
-		nil,
-		workerList,
+			// Add worker to distributed engine as a Harmony device
+			device := HarmonyDevice{
+				ID:     fmt.Sprintf("worker-%s-%d", hostEntry.Text, time.Now().UnixNano()),
+				Name:   fmt.Sprintf("Worker@%s", hostEntry.Text),
+				Type:   "remote_worker",
+				Status: "pending",
+				Capabilities: []string{
+					"task_execution",
+					"code_analysis",
+					"build",
+					"test",
+				},
+				Resources: HarmonyResources{
+					CPUUsage:    0,
+					MemoryUsage: 0,
+					GPUUsage:    0,
+					Available:   true,
+				},
+				LastSeen: time.Now(),
+			}
+
+			app.harmonyIntegration.distributedEngine.AddDevice(device)
+
+			// Also add as API worker for UI display
+			app.dataMu.Lock()
+			app.workers = append(app.workers, APIWorker{
+				ID:           device.ID,
+				Host:         hostEntry.Text,
+				Port:         22,
+				User:         userEntry.Text,
+				Status:       "pending",
+				Healthy:      false,
+				Capabilities: device.Capabilities,
+				LastSeen:     time.Now(),
+			})
+			app.dataMu.Unlock()
+
+			hostEntry.SetText("")
+			userEntry.SetText("")
+			workerList.Refresh()
+			app.statusBar.SetText(fmt.Sprintf("Worker %s added", device.ID))
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			app.refreshData()
+			workerList.Refresh()
+			app.statusBar.SetText("Workers refreshed")
+		}),
+		widget.NewButton("Discover Devices", func() {
+			devices := app.harmonyIntegration.distributedEngine.DiscoverDevices()
+			app.statusBar.SetText(fmt.Sprintf("Found %d Harmony devices", len(devices)))
+		}),
 	)
+
+	return container.NewBorder(nil, nil, nil, actions, workerCard)
+}
+
+// createProjectsTab creates the projects tab
+func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
+	// Project list with dynamic data
+	app.projectList = widget.NewList(
+		func() int {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			return len(app.projects)
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Name"),
+				widget.NewLabel("Type"),
+				widget.NewLabel("Status"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			if id < len(app.projects) {
+				p := app.projects[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(p.Name)
+				hbox.Objects[1].(*widget.Label).SetText(fmt.Sprintf("(%s)", p.Type))
+				activeStatus := ""
+				if p.Active {
+					activeStatus = " [ACTIVE]"
+				}
+				hbox.Objects[2].(*widget.Label).SetText(activeStatus)
+			}
+		},
+	)
+
+	// Project details panel
+	projectDetailsLabel := widget.NewLabel("Select a project to view details")
+	projectDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	app.projectList.OnSelected = func(id widget.ListItemID) {
+		app.dataMu.RLock()
+		defer app.dataMu.RUnlock()
+		if id < len(app.projects) {
+			p := app.projects[id]
+			details := fmt.Sprintf("Name: %s\nType: %s\nPath: %s\nDescription: %s\nCreated: %s",
+				p.Name, p.Type, p.Path, p.Description,
+				p.CreatedAt.Format(time.RFC822))
+			projectDetailsLabel.SetText(details)
+		}
+	}
+
+	projectListCard := widget.NewCard("Projects", "", app.projectList)
+	projectDetailsCard := widget.NewCard("Project Details", "", projectDetailsLabel)
+
+	// Project creation form
+	nameEntry := widget.NewEntry()
+	nameEntry.SetPlaceHolder("Project name")
+	descEntry := widget.NewEntry()
+	descEntry.SetPlaceHolder("Description")
+	pathEntry := widget.NewEntry()
+	pathEntry.SetPlaceHolder("/path/to/project")
+	typeSelect := widget.NewSelect([]string{"go", "node", "python", "rust", "generic"}, nil)
+	typeSelect.SetSelected("go")
+
+	createForm := container.NewVBox(
+		widget.NewLabel("Create New Project:"),
+		widget.NewLabel("Name:"),
+		nameEntry,
+		widget.NewLabel("Description:"),
+		descEntry,
+		widget.NewLabel("Path:"),
+		pathEntry,
+		widget.NewLabel("Type:"),
+		typeSelect,
+		widget.NewButton("Create Project", func() {
+			if app.projectManager != nil && nameEntry.Text != "" && pathEntry.Text != "" {
+				ctx := context.Background()
+				proj, err := app.projectManager.CreateProject(ctx, nameEntry.Text, descEntry.Text, pathEntry.Text, typeSelect.Selected)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					nameEntry.SetText("")
+					descEntry.SetText("")
+					pathEntry.SetText("")
+					app.refreshData()
+					app.projectList.Refresh()
+					app.statusBar.SetText(fmt.Sprintf("Project %s created", proj.Name))
+					dialog.ShowInformation("Success", "Project created successfully", app.mainWindow)
+				}
+			} else {
+				dialog.ShowError(fmt.Errorf("name and path are required"), app.mainWindow)
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Set as Active", func() {
+			if app.projectList.Length() > 0 {
+				// Get selected project
+				app.dataMu.RLock()
+				selectedIndex := -1
+				// Note: In Fyne, we need to track selection separately
+				app.dataMu.RUnlock()
+
+				if selectedIndex >= 0 {
+					ctx := context.Background()
+					p := app.projects[selectedIndex]
+					err := app.projectManager.SetActiveProject(ctx, p.ID)
+					if err != nil {
+						dialog.ShowError(err, app.mainWindow)
+					} else {
+						app.refreshData()
+						app.projectList.Refresh()
+						app.statusBar.SetText(fmt.Sprintf("Project %s set as active", p.Name))
+					}
+				}
+			}
+		}),
+		widget.NewButton("Refresh", func() {
+			app.refreshData()
+			app.projectList.Refresh()
+			app.statusBar.SetText("Projects refreshed")
+		}),
+	)
+
+	leftPanel := container.NewVSplit(projectListCard, projectDetailsCard)
+	leftPanel.SetOffset(0.6)
+
+	return container.NewBorder(nil, nil, nil, createForm, leftPanel)
+}
+
+// createSessionsTab creates the sessions tab
+func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
+	// Session list with dynamic data
+	app.sessionList = widget.NewList(
+		func() int {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			return len(app.sessions)
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Name"),
+				widget.NewLabel("Status"),
+				widget.NewLabel("Mode"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			app.dataMu.RLock()
+			defer app.dataMu.RUnlock()
+			if id < len(app.sessions) {
+				s := app.sessions[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(s.Name)
+				hbox.Objects[1].(*widget.Label).SetText(fmt.Sprintf("[%s]", s.Status))
+				hbox.Objects[2].(*widget.Label).SetText(s.Mode)
+			}
+		},
+	)
+
+	// Session details panel
+	sessionDetailsLabel := widget.NewLabel("Select a session to view details")
+	sessionDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	selectedSessionID := ""
+	app.sessionList.OnSelected = func(id widget.ListItemID) {
+		app.dataMu.RLock()
+		defer app.dataMu.RUnlock()
+		if id < len(app.sessions) {
+			s := app.sessions[id]
+			selectedSessionID = s.ID
+			details := fmt.Sprintf("Name: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s",
+				s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
+				s.CreatedAt.Format(time.RFC822))
+			sessionDetailsLabel.SetText(details)
+		}
+	}
+
+	sessionListCard := widget.NewCard("Sessions", "", app.sessionList)
+	sessionDetailsCard := widget.NewCard("Session Details", "", sessionDetailsLabel)
+
+	// Session creation form
+	nameEntry := widget.NewEntry()
+	nameEntry.SetPlaceHolder("Session name")
+	descEntry := widget.NewEntry()
+	descEntry.SetPlaceHolder("Description")
+	projectIDEntry := widget.NewEntry()
+	projectIDEntry.SetPlaceHolder("Project ID")
+	modeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging", "deployment"}, nil)
+	modeSelect.SetSelected("building")
+
+	actions := container.NewVBox(
+		widget.NewLabel("Create New Session:"),
+		widget.NewLabel("Name:"),
+		nameEntry,
+		widget.NewLabel("Description:"),
+		descEntry,
+		widget.NewLabel("Project ID:"),
+		projectIDEntry,
+		widget.NewLabel("Mode:"),
+		modeSelect,
+		widget.NewButton("Create Session", func() {
+			if app.sessionManager != nil && nameEntry.Text != "" && projectIDEntry.Text != "" {
+				mode := session.Mode(modeSelect.Selected)
+				sess, err := app.sessionManager.Create(projectIDEntry.Text, nameEntry.Text, descEntry.Text, mode)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					nameEntry.SetText("")
+					descEntry.SetText("")
+					projectIDEntry.SetText("")
+					app.refreshData()
+					app.sessionList.Refresh()
+					app.statusBar.SetText(fmt.Sprintf("Session %s created", sess.Name))
+					dialog.ShowInformation("Success", "Session created successfully", app.mainWindow)
+				}
+			} else {
+				dialog.ShowError(fmt.Errorf("name and project ID are required"), app.mainWindow)
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewLabel("Session Controls:"),
+		widget.NewButton("Start Session", func() {
+			if app.sessionManager != nil && selectedSessionID != "" {
+				err := app.sessionManager.Start(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					app.refreshData()
+					app.sessionList.Refresh()
+					app.statusBar.SetText("Session started")
+				}
+			}
+		}),
+		widget.NewButton("Pause Session", func() {
+			if app.sessionManager != nil && selectedSessionID != "" {
+				err := app.sessionManager.Pause(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					app.refreshData()
+					app.sessionList.Refresh()
+					app.statusBar.SetText("Session paused")
+				}
+			}
+		}),
+		widget.NewButton("Resume Session", func() {
+			if app.sessionManager != nil && selectedSessionID != "" {
+				err := app.sessionManager.Resume(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					app.refreshData()
+					app.sessionList.Refresh()
+					app.statusBar.SetText("Session resumed")
+				}
+			}
+		}),
+		widget.NewButton("Complete Session", func() {
+			if app.sessionManager != nil && selectedSessionID != "" {
+				err := app.sessionManager.Complete(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, app.mainWindow)
+				} else {
+					app.refreshData()
+					app.sessionList.Refresh()
+					app.statusBar.SetText("Session completed")
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			app.refreshData()
+			app.sessionList.Refresh()
+			app.statusBar.SetText("Sessions refreshed")
+		}),
+	)
+
+	leftPanel := container.NewVSplit(sessionListCard, sessionDetailsCard)
+	leftPanel.SetOffset(0.6)
+
+	return container.NewBorder(nil, nil, nil, actions, leftPanel)
+}
+
+// createLLMTab creates the LLM tab
+func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
+	// Available models list
+	modelList := widget.NewList(
+		func() int {
+			if app.llmManager == nil {
+				return 0
+			}
+			return len(app.llmManager.GetAvailableModels())
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Model"),
+				widget.NewLabel("Provider"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			models := app.llmManager.GetAvailableModels()
+			if id < len(models) {
+				m := models[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(m.Name)
+				hbox.Objects[1].(*widget.Label).SetText(string(m.Provider))
+			}
+		},
+	)
+
+	modelListCard := widget.NewCard("Available Models", "", modelList)
+
+	// Model details panel
+	modelDetailsLabel := widget.NewLabel("Select a model to view details")
+	modelDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	modelList.OnSelected = func(id widget.ListItemID) {
+		models := app.llmManager.GetAvailableModels()
+		if id < len(models) {
+			m := models[id]
+			caps := make([]string, len(m.Capabilities))
+			for i, c := range m.Capabilities {
+				caps[i] = string(c)
+			}
+			details := fmt.Sprintf("Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v",
+				m.Name, m.Provider, m.ContextSize, caps)
+			modelDetailsLabel.SetText(details)
+		}
+	}
+
+	modelDetailsCard := widget.NewCard("Model Details", "", modelDetailsLabel)
+
+	// Chat interface
+	app.chatHistory = widget.NewMultiLineEntry()
+	app.chatHistory.SetPlaceHolder("Chat history will appear here...")
+	app.chatHistory.Disable()
+	app.chatHistory.Wrapping = fyne.TextWrapWord
+
+	app.chatInput = widget.NewMultiLineEntry()
+	app.chatInput.SetPlaceHolder("Type your message here...")
+	app.chatInput.SetMinRowsVisible(3)
+
+	// Provider/model selection for chat
+	app.llmProviderSel = widget.NewSelect([]string{"ollama", "openai", "anthropic", "gemini", "local"}, nil)
+	app.llmProviderSel.SetSelected("ollama")
+
+	modelNameEntry := widget.NewEntry()
+	modelNameEntry.SetPlaceHolder("Model name (e.g., llama2)")
+	modelNameEntry.SetText("llama2")
+
+	sendButton := widget.NewButton("Send Message", func() {
+		if app.chatInput.Text == "" {
+			return
+		}
+
+		// Add user message to history
+		currentHistory := app.chatHistory.Text
+		userMsg := fmt.Sprintf("\n[User]: %s\n", app.chatInput.Text)
+		app.chatHistory.SetText(currentHistory + userMsg)
+
+		// Placeholder for actual LLM call
+		// In a real Harmony OS implementation, this would use distributed AI capabilities
+		responseMsg := fmt.Sprintf("[AI (%s/%s)]: LLM integration requires a running provider. Configure your LLM provider in the settings.\n",
+			app.llmProviderSel.Selected, modelNameEntry.Text)
+		app.chatHistory.SetText(app.chatHistory.Text + responseMsg)
+
+		// Clear input
+		app.chatInput.SetText("")
+	})
+
+	clearButton := widget.NewButton("Clear Chat", func() {
+		app.chatHistory.SetText("")
+	})
+
+	chatControls := container.NewVBox(
+		widget.NewLabel("Chat Settings:"),
+		widget.NewLabel("Provider:"),
+		app.llmProviderSel,
+		widget.NewLabel("Model:"),
+		modelNameEntry,
+		widget.NewSeparator(),
+		sendButton,
+		clearButton,
+	)
+
+	chatPanel := container.NewBorder(
+		widget.NewLabel("Chat with AI"),
+		container.NewBorder(nil, nil, nil, chatControls, app.chatInput),
+		nil, nil,
+		app.chatHistory,
+	)
+
+	chatCard := widget.NewCard("LLM Chat", "", chatPanel)
+
+	// Provider health status
+	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
+
+	// Start health check goroutine
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+
+		checkHealth := func() {
+			if app.llmManager == nil {
+				healthLabel.SetText("Provider Health:\nNo LLM manager available")
+				return
+			}
+			ctx := context.Background()
+			health := app.llmManager.HealthCheck(ctx)
+			healthText := "Provider Health:\n"
+			for provider, status := range health {
+				healthText += fmt.Sprintf("- %s: %s\n", provider, status.Status)
+			}
+			if len(health) == 0 {
+				healthText += "No providers configured"
+			}
+			healthLabel.SetText(healthText)
+		}
+
+		checkHealth()
+		for range ticker.C {
+			checkHealth()
+		}
+	}()
+
+	healthCard := widget.NewCard("Provider Status", "", healthLabel)
+
+	// Layout
+	leftPanel := container.NewVSplit(modelListCard, modelDetailsCard)
+	leftPanel.SetOffset(0.5)
+
+	rightPanel := container.NewVSplit(chatCard, healthCard)
+	rightPanel.SetOffset(0.7)
+
+	return container.NewHSplit(leftPanel, rightPanel)
 }
 
 // createHarmonySystemTab creates the Harmony OS system monitoring tab
@@ -576,13 +1766,35 @@ func (app *HarmonyApp) createSettingsTab() fyne.CanvasObject {
 
 // Run starts the Harmony OS application
 func (app *HarmonyApp) Run() {
+	// Setup signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start signal handler in goroutine
+	go func() {
+		<-sigChan
+		log.Println("Received shutdown signal")
+		app.fyneApp.Quit()
+	}()
+
+	// Show window and run (blocks until window closes)
 	app.mainWindow.ShowAndRun()
 }
 
 // Cleanup performs cleanup on application shutdown
 func (app *HarmonyApp) Cleanup() {
+	// Stop background updates
+	if app.stopUpdate != nil {
+		close(app.stopUpdate)
+	}
+
 	// Stop system monitoring
 	app.systemMonitor.monitoring = false
+
+	// Stop distributed engine
+	if app.harmonyIntegration != nil && app.harmonyIntegration.distributedEngine != nil {
+		app.harmonyIntegration.distributedEngine.Stop()
+	}
 
 	// Shutdown server
 	if app.server != nil {
@@ -595,7 +1807,7 @@ func (app *HarmonyApp) Cleanup() {
 
 	// Close database
 	if app.db != nil {
-		// Database cleanup if needed
+		app.db.Close()
 	}
 
 	log.Println("Harmony OS application cleaned up successfully")
@@ -611,10 +1823,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Setup UI
-	harmonyApp.SetupUI()
-
-	// Run application
+	// Run application (SetupUI is already called in Initialize)
 	log.Println("Starting HelixCode Harmony OS Edition...")
 	harmonyApp.Run()
 

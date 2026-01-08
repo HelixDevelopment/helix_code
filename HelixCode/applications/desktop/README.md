@@ -11,7 +11,25 @@ The Desktop application offers:
 - Workflow execution with progress visualization
 - Worker management interface
 - LLM provider configuration GUI
+- Session management for development workflows
 - System tray integration
+
+## Build Modes
+
+The desktop application supports two build modes:
+
+1. **GUI Mode** (default): Full graphical interface using Fyne toolkit
+2. **NoGUI Mode**: Command-line interface alternative for headless environments
+
+### Building GUI Mode (default)
+```bash
+go build -o bin/helix-desktop ./applications/desktop
+```
+
+### Building NoGUI Mode (CLI)
+```bash
+go build -tags nogui -o bin/helix-desktop-cli ./applications/desktop
+```
 
 ## Requirements
 
@@ -19,26 +37,118 @@ The Desktop application offers:
 
 - Go 1.24+
 - C compiler (gcc on Linux/Windows, clang on macOS)
-- OpenGL development libraries
+- OpenGL development libraries (for GUI mode only)
 
-#### Linux (Debian/Ubuntu)
+### Linux Requirements
+
+#### Debian/Ubuntu
 ```bash
-sudo apt-get install gcc libgl1-mesa-dev xorg-dev
+# Essential build tools
+sudo apt-get update
+sudo apt-get install -y build-essential
+
+# GUI dependencies (required for GUI mode)
+sudo apt-get install -y \
+    libx11-dev \
+    libxcursor-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxi-dev \
+    libxxf86vm-dev \
+    libgl1-mesa-dev \
+    xorg-dev
+
+# Optional: For Wayland support
+sudo apt-get install -y libwayland-dev
 ```
 
-#### Linux (Fedora)
+#### Fedora/RHEL/CentOS
 ```bash
-sudo dnf install gcc mesa-libGL-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel
+# Essential build tools
+sudo dnf groupinstall -y "Development Tools"
+
+# GUI dependencies (required for GUI mode)
+sudo dnf install -y \
+    gcc \
+    mesa-libGL-devel \
+    libX11-devel \
+    libXcursor-devel \
+    libXrandr-devel \
+    libXinerama-devel \
+    libXi-devel \
+    libXxf86vm-devel
+
+# Optional: For Wayland support
+sudo dnf install -y wayland-devel
 ```
 
-#### macOS
+#### Arch Linux
 ```bash
+# GUI dependencies (required for GUI mode)
+sudo pacman -S \
+    base-devel \
+    libx11 \
+    libxcursor \
+    libxrandr \
+    libxinerama \
+    libxi \
+    libxxf86vm \
+    mesa
+```
+
+#### Alpine Linux
+```bash
+# GUI dependencies (required for GUI mode)
+apk add \
+    build-base \
+    libx11-dev \
+    libxcursor-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxi-dev \
+    mesa-dev
+```
+
+### macOS Requirements
+
+```bash
+# Install Xcode Command Line Tools (includes clang compiler)
 xcode-select --install
+
+# No additional dependencies required - macOS includes all necessary frameworks
 ```
 
-#### Windows
-- Install [TDM-GCC](https://jmeubank.github.io/tdm-gcc/)
-- Or use MSYS2 with `pacman -S mingw-w64-x86_64-gcc`
+**Note**: macOS uses native Cocoa frameworks. No additional GUI libraries needed.
+
+### Windows Requirements
+
+#### Option 1: TDM-GCC (Recommended)
+1. Download and install [TDM-GCC](https://jmeubank.github.io/tdm-gcc/)
+2. Ensure `gcc` is in your PATH
+3. No additional dependencies required
+
+#### Option 2: MSYS2
+```bash
+# Install MSYS2 from https://www.msys2.org/
+# Then in MSYS2 terminal:
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-pkg-config
+```
+
+#### Option 3: WSL2
+Use WSL2 with Ubuntu and follow Linux instructions above.
+
+**Note**: Windows uses native Win32 APIs. No additional GUI libraries needed after compiler setup.
+
+### Headless/Server Environments
+
+For headless servers or containers where GUI is not needed:
+
+```bash
+# Build without GUI dependencies
+go build -tags nogui -o bin/helix-desktop-cli ./applications/desktop
+```
+
+This builds a CLI-only version that does not require any X11/OpenGL libraries.
 
 ## Building
 

@@ -7,6 +7,7 @@ import (
 
 	"dev.helix.code/internal/auth"
 	"dev.helix.code/internal/project"
+	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/workflow"
 	"github.com/gin-gonic/gin"
 )
@@ -1044,5 +1045,765 @@ func (s *Server) getMemoryStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"stats":  stats,
+	})
+}
+
+// User Handlers
+
+// updateCurrentUser updates the current user's profile
+func (s *Server) updateCurrentUser(c *gin.Context) {
+	// Get current user from context
+	userValue, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": "User not authenticated",
+		})
+		return
+	}
+
+	user, ok := userValue.(*auth.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Invalid user context",
+		})
+		return
+	}
+
+	var req struct {
+		DisplayName string `json:"display_name"`
+		Email       string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Use existing email if not provided
+	if req.Email == "" {
+		req.Email = user.Email
+	}
+
+	updatedUser, err := s.auth.UpdateUser(c.Request.Context(), user.ID, req.DisplayName, req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update user",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"user":   updatedUser,
+	})
+}
+
+// deleteCurrentUser deletes the current user's account
+func (s *Server) deleteCurrentUser(c *gin.Context) {
+	// Get current user from context
+	userValue, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": "User not authenticated",
+		})
+		return
+	}
+
+	user, ok := userValue.(*auth.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Invalid user context",
+		})
+		return
+	}
+
+	err := s.auth.DeleteUser(c.Request.Context(), user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to delete user",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "User account deleted successfully",
+	})
+}
+
+// Worker Handlers
+
+// createWorker registers a new worker
+func (s *Server) createWorker(c *gin.Context) {
+	var req struct {
+		Hostname           string                 `json:"hostname" binding:"required"`
+		DisplayName        string                 `json:"display_name"`
+		SSHConfig          map[string]interface{} `json:"ssh_config"`
+		Capabilities       []string               `json:"capabilities"`
+		Resources          map[string]interface{} `json:"resources"`
+		MaxConcurrentTasks int                    `json:"max_concurrent_tasks"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.workerManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Worker manager not available",
+		})
+		return
+	}
+
+	worker, err := s.workerManager.RegisterWorker(c.Request.Context(), req.Hostname, req.DisplayName, req.SSHConfig, req.Capabilities, req.Resources)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to register worker",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"status": "success",
+		"worker": worker,
+	})
+}
+
+// updateWorker updates an existing worker
+func (s *Server) updateWorker(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Hostname           string   `json:"hostname"`
+		DisplayName        string   `json:"display_name"`
+		Capabilities       []string `json:"capabilities"`
+		MaxConcurrentTasks int      `json:"max_concurrent_tasks"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.workerManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Worker manager not available",
+		})
+		return
+	}
+
+	worker, err := s.workerManager.UpdateWorker(c.Request.Context(), id, req.Hostname, req.DisplayName, req.Capabilities, req.MaxConcurrentTasks)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update worker",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"worker": worker,
+	})
+}
+
+// deleteWorker removes a worker
+func (s *Server) deleteWorker(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.workerManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Worker manager not available",
+		})
+		return
+	}
+
+	err := s.workerManager.DeleteWorker(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to delete worker",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Worker deleted successfully",
+	})
+}
+
+// workerHeartbeat updates a worker's heartbeat
+func (s *Server) workerHeartbeat(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Metrics map[string]interface{} `json:"metrics"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.workerManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Worker manager not available",
+		})
+		return
+	}
+
+	err := s.workerManager.UpdateWorkerHeartbeat(c.Request.Context(), id, req.Metrics)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update heartbeat",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Heartbeat received",
+	})
+}
+
+// getWorkerMetrics retrieves metrics for a worker
+func (s *Server) getWorkerMetrics(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.workerManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Worker manager not available",
+		})
+		return
+	}
+
+	// Get metrics from the last hour
+	since := time.Now().Add(-1 * time.Hour)
+	metrics, err := s.workerManager.GetWorkerMetrics(c.Request.Context(), id, since)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to get worker metrics",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"metrics": metrics,
+	})
+}
+
+// Task Handlers
+
+// assignTask assigns a task to a worker
+func (s *Server) assignTask(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		WorkerID string `json:"worker_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.AssignTask(c.Request.Context(), id, req.WorkerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to assign task",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated task
+	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Task assigned successfully",
+		"task":    task,
+	})
+}
+
+// startTask starts a task
+func (s *Server) startTask(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.StartTask(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to start task",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated task
+	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Task started successfully",
+		"task":    task,
+	})
+}
+
+// completeTask marks a task as completed
+func (s *Server) completeTask(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Result map[string]interface{} `json:"result"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.CompleteTask(c.Request.Context(), id, req.Result)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to complete task",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated task
+	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Task completed successfully",
+		"task":    task,
+	})
+}
+
+// failTask marks a task as failed
+func (s *Server) failTask(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		ErrorMessage string `json:"error_message" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.FailTask(c.Request.Context(), id, req.ErrorMessage)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to mark task as failed",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated task
+	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Task marked as failed",
+		"task":    task,
+	})
+}
+
+// createTaskCheckpoint creates a checkpoint for a task
+func (s *Server) createTaskCheckpoint(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		CheckpointName string                 `json:"checkpoint_name" binding:"required"`
+		CheckpointData map[string]interface{} `json:"checkpoint_data"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.CreateCheckpoint(c.Request.Context(), id, req.CheckpointName, req.CheckpointData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to create checkpoint",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"status":  "success",
+		"message": "Checkpoint created successfully",
+	})
+}
+
+// getTaskCheckpoints retrieves all checkpoints for a task
+func (s *Server) getTaskCheckpoints(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	checkpoints, err := s.taskManager.GetCheckpoints(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to get checkpoints",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "success",
+		"checkpoints": checkpoints,
+	})
+}
+
+// retryTask retries a failed task
+func (s *Server) retryTask(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+		})
+		return
+	}
+
+	err := s.taskManager.RetryTask(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to retry task",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated task
+	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Task queued for retry",
+		"task":    task,
+	})
+}
+
+// Project Handlers
+
+// getProjectSessions retrieves all sessions for a project
+func (s *Server) getProjectSessions(c *gin.Context) {
+	projectID := c.Param("id")
+
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	sessions := s.sessionManager.GetByProject(projectID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "success",
+		"sessions": sessions,
+	})
+}
+
+// Session Handlers
+
+// listSessions returns all sessions
+func (s *Server) listSessions(c *gin.Context) {
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	sessions := s.sessionManager.GetAll()
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "success",
+		"sessions": sessions,
+	})
+}
+
+// createSession creates a new session
+func (s *Server) createSession(c *gin.Context) {
+	var req struct {
+		ProjectID   string `json:"project_id" binding:"required"`
+		Name        string `json:"name" binding:"required"`
+		Description string `json:"description"`
+		Mode        string `json:"mode" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	sess, err := s.sessionManager.Create(req.ProjectID, req.Name, req.Description, session.Mode(req.Mode))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to create session",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"status":  "success",
+		"session": sess,
+	})
+}
+
+// getSession retrieves a session by ID
+func (s *Server) getSession(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	sess, err := s.sessionManager.Get(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  "error",
+			"message": "Session not found",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"session": sess,
+	})
+}
+
+// updateSession updates a session
+func (s *Server) updateSession(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Action string `json:"action" binding:"required"` // start, pause, resume, complete, fail
+		Reason string `json:"reason"`                    // For fail action
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	var err error
+	switch req.Action {
+	case "start":
+		err = s.sessionManager.Start(id)
+	case "pause":
+		err = s.sessionManager.Pause(id)
+	case "resume":
+		err = s.sessionManager.Resume(id)
+	case "complete":
+		err = s.sessionManager.Complete(id)
+	case "fail":
+		err = s.sessionManager.Fail(id, req.Reason)
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid action. Use: start, pause, resume, complete, fail",
+		})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update session",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get the updated session
+	sess, _ := s.sessionManager.Get(id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Session updated successfully",
+		"session": sess,
+	})
+}
+
+// deleteSession deletes a session
+func (s *Server) deleteSession(c *gin.Context) {
+	id := c.Param("id")
+
+	if s.sessionManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Session manager not available",
+		})
+		return
+	}
+
+	err := s.sessionManager.Delete(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to delete session",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Session deleted successfully",
 	})
 }

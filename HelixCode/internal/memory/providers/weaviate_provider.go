@@ -29,15 +29,69 @@ type WeaviateConfig struct {
 	APIKey    string `json:"api_key"`
 	Class     string `json:"class"`
 	BatchSize int    `json:"batch_size"`
+	// Backup configuration
+	BackupBackend string `json:"backup_backend"` // s3, gcs, azure, filesystem
 }
+
+// BackupBackend represents the type of backup storage backend
+type BackupBackend string
+
+const (
+	// BackupBackendS3 uses AWS S3 or S3-compatible storage
+	BackupBackendS3 BackupBackend = "s3"
+	// BackupBackendGCS uses Google Cloud Storage
+	BackupBackendGCS BackupBackend = "gcs"
+	// BackupBackendAzure uses Microsoft Azure Blob Storage
+	BackupBackendAzure BackupBackend = "azure"
+	// BackupBackendFilesystem uses local filesystem storage
+	BackupBackendFilesystem BackupBackend = "filesystem"
+)
+
+// WeaviateBackupRequest represents a request to create a Weaviate backup
+type WeaviateBackupRequest struct {
+	ID               string   `json:"id"`
+	Include          []string `json:"include,omitempty"`
+	Exclude          []string `json:"exclude,omitempty"`
+	CPUPercentage    int      `json:"CPUPercentage,omitempty"`
+	ChunkSize        int      `json:"ChunkSize,omitempty"`
+	CompressionLevel string   `json:"CompressionLevel,omitempty"`
+}
+
+// WeaviateBackupResponse represents the response from a backup/restore operation
+type WeaviateBackupResponse struct {
+	ID        string   `json:"id"`
+	Backend   string   `json:"backend"`
+	Path      string   `json:"path"`
+	Status    string   `json:"status"`
+	Error     string   `json:"error,omitempty"`
+	Classes   []string `json:"classes,omitempty"`
+	StartTime string   `json:"startTime,omitempty"`
+	EndTime   string   `json:"endTime,omitempty"`
+}
+
+// WeaviateRestoreRequest represents a request to restore a Weaviate backup
+type WeaviateRestoreRequest struct {
+	Include       []string `json:"include,omitempty"`
+	Exclude       []string `json:"exclude,omitempty"`
+	CPUPercentage int      `json:"CPUPercentage,omitempty"`
+}
+
+// Backup status constants
+const (
+	BackupStatusStarted   = "STARTED"
+	BackupStatusSuccess   = "SUCCESS"
+	BackupStatusFailed    = "FAILED"
+	BackupStatusCancelled = "CANCELLED"
+)
 
 // NewWeaviateProvider creates a new Weaviate provider
 func NewWeaviateProvider(config map[string]interface{}) (VectorProvider, error) {
 	cfg := &WeaviateConfig{
-		URL:       getStringConfig(config, "url", "http://localhost:8080"),
-		APIKey:    getStringConfig(config, "api_key", ""),
-		Class:     getStringConfig(config, "class", "Vector"),
-		BatchSize: getIntConfig(config, "batch_size", 100),
+		URL:           getStringConfig(config, "url", "http://localhost:8080"),
+		APIKey:        getStringConfig(config, "api_key", ""),
+		Class:         getStringConfig(config, "class", "Vector"),
+		BatchSize:     getIntConfig(config, "batch_size", 100),
+		BackupBackend: getStringConfig(config, "backup_backend", "filesystem"),
 	}
 
 	logger := logging.NewLoggerWithName("weaviate_provider")
@@ -1206,7 +1260,26 @@ func (p *WeaviateProvider) Optimize(ctx context.Context) error {
 	return nil
 }
 
-// Backup creates a backup
+// Backup creates a backup using Weaviate's native backup API.
+//
+// The path parameter is used as the backup ID. The backup is created using the
+// configured backup backend (s3, gcs, azure, or filesystem).
+//
+// Weaviate Backup API Reference:
+//   - POST /v1/backups/{backend} - Create a backup
+//   - GET /v1/backups/{backend}/{backup_id} - Check backup status
+//
+// Supported backends:
+//   - s3: AWS S3 or S3-compatible storage (requires BACKUP_S3_* env vars)
+//   - gcs: Google Cloud Storage (requires BACKUP_GCS_* env vars)
+//   - azure: Microsoft Azure Blob Storage (requires BACKUP_AZURE_* env vars)
+//   - filesystem: Local filesystem (requires BACKUP_FILESYSTEM_PATH env var)
+//
+// Example configuration for filesystem backend:
+//
+//	BACKUP_FILESYSTEM_PATH=/var/weaviate/backups
+//
+// For more details, see: https://weaviate.io/developers/weaviate/configuration/backups
 func (p *WeaviateProvider) Backup(ctx context.Context, path string) error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -1215,17 +1288,181 @@ func (p *WeaviateProvider) Backup(ctx context.Context, path string) error {
 		return fmt.Errorf("provider not started")
 	}
 
-	p.logger.Info("Creating backup at %s for Weaviate provider", path)
+	if path == "" {
+		return fmt.Errorf("backup path/id cannot be empty")
+	}
 
-	// Weaviate has its own backup system via the backup API
-	// For simplicity, we log that backups should be done via Weaviate's native tools
-	p.logger.Info("Use Weaviate's native backup API or filesystem snapshots for backups")
-	p.logger.Info("Backup path: %s (not implemented - use Weaviate backup API)", path)
+	backend := p.config.BackupBackend
+	if backend == "" {
+		backend = "filesystem"
+	}
 
+	// Validate backend
+	if !isValidBackupBackend(backend) {
+		return fmt.Errorf("invalid backup backend: %s (supported: s3, gcs, azure, filesystem)", backend)
+	}
+
+	p.logger.Info("Creating backup with id=%s backend=%s for Weaviate provider", path, backend)
+
+	// Create backup request - include configured class if specified
+	backupReq := WeaviateBackupRequest{
+		ID: path,
+	}
+
+	// Include the configured class in the backup if specified
+	if p.config.Class != "" {
+		backupReq.Include = []string{p.config.Class}
+	}
+
+	jsonData, err := json.Marshal(backupReq)
+	if err != nil {
+		return fmt.Errorf("failed to marshal backup request: %w", err)
+	}
+
+	// Create backup via POST /v1/backups/{backend}
+	url := fmt.Sprintf("%s/v1/backups/%s", p.config.URL, backend)
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create backup request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if p.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to execute backup request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read backup response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("backup request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var backupResp WeaviateBackupResponse
+	if err := json.Unmarshal(body, &backupResp); err != nil {
+		return fmt.Errorf("failed to parse backup response: %w", err)
+	}
+
+	p.logger.Info("Backup initiated with id=%s status=%s", backupResp.ID, backupResp.Status)
+
+	// Wait for backup to complete by polling status
+	if err := p.waitForBackupCompletion(ctx, backend, path); err != nil {
+		return err
+	}
+
+	p.logger.Info("Backup completed successfully with id=%s", path)
 	return nil
 }
 
-// Restore restores from backup
+// waitForBackupCompletion polls the backup status until it completes or fails
+func (p *WeaviateProvider) waitForBackupCompletion(ctx context.Context, backend, backupID string) error {
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	timeout := time.After(10 * time.Minute)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout:
+			return fmt.Errorf("backup timed out after 10 minutes")
+		case <-ticker.C:
+			status, err := p.getBackupStatus(ctx, backend, backupID)
+			if err != nil {
+				return fmt.Errorf("failed to get backup status: %w", err)
+			}
+
+			switch status.Status {
+			case BackupStatusSuccess:
+				return nil
+			case BackupStatusFailed:
+				return fmt.Errorf("backup failed: %s", status.Error)
+			case BackupStatusCancelled:
+				return fmt.Errorf("backup was cancelled")
+			case BackupStatusStarted:
+				p.logger.Info("Backup in progress id=%s", backupID)
+				continue
+			default:
+				p.logger.Info("Backup status: %s", status.Status)
+				continue
+			}
+		}
+	}
+}
+
+// getBackupStatus retrieves the current status of a backup operation
+func (p *WeaviateProvider) getBackupStatus(ctx context.Context, backend, backupID string) (*WeaviateBackupResponse, error) {
+	url := fmt.Sprintf("%s/v1/backups/%s/%s", p.config.URL, backend, backupID)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if p.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get backup status: %s", string(body))
+	}
+
+	var statusResp WeaviateBackupResponse
+	if err := json.Unmarshal(body, &statusResp); err != nil {
+		return nil, err
+	}
+
+	return &statusResp, nil
+}
+
+// isValidBackupBackend checks if the given backend is valid
+func isValidBackupBackend(backend string) bool {
+	switch BackupBackend(backend) {
+	case BackupBackendS3, BackupBackendGCS, BackupBackendAzure, BackupBackendFilesystem:
+		return true
+	default:
+		return false
+	}
+}
+
+// Restore restores from a backup using Weaviate's native backup API.
+//
+// The path parameter is used as the backup ID. The restore operation uses the
+// configured backup backend (s3, gcs, azure, or filesystem).
+//
+// Weaviate Restore API Reference:
+//   - POST /v1/backups/{backend}/{backup_id}/restore - Restore from backup
+//   - GET /v1/backups/{backend}/{backup_id}/restore - Check restore status
+//
+// Supported backends:
+//   - s3: AWS S3 or S3-compatible storage (requires BACKUP_S3_* env vars)
+//   - gcs: Google Cloud Storage (requires BACKUP_GCS_* env vars)
+//   - azure: Microsoft Azure Blob Storage (requires BACKUP_AZURE_* env vars)
+//   - filesystem: Local filesystem (requires BACKUP_FILESYSTEM_PATH env var)
+//
+// IMPORTANT: If you are running Weaviate v1.23.12 or older, you must update to
+// v1.23.13 or higher before restoring a backup to prevent data corruption.
+//
+// For more details, see: https://weaviate.io/developers/weaviate/configuration/backups
 func (p *WeaviateProvider) Restore(ctx context.Context, path string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -1234,13 +1471,148 @@ func (p *WeaviateProvider) Restore(ctx context.Context, path string) error {
 		return fmt.Errorf("provider not initialized")
 	}
 
-	p.logger.Info("Restoring from backup at %s for Weaviate provider", path)
+	if path == "" {
+		return fmt.Errorf("restore backup id cannot be empty")
+	}
 
-	// Weaviate has its own restore system via the backup API
-	p.logger.Info("Use Weaviate's native backup API or filesystem snapshots for restore")
-	p.logger.Info("Restore path: %s (not implemented - use Weaviate backup API)", path)
+	backend := p.config.BackupBackend
+	if backend == "" {
+		backend = "filesystem"
+	}
 
+	// Validate backend
+	if !isValidBackupBackend(backend) {
+		return fmt.Errorf("invalid backup backend: %s (supported: s3, gcs, azure, filesystem)", backend)
+	}
+
+	p.logger.Info("Restoring backup with id=%s backend=%s for Weaviate provider", path, backend)
+
+	// Create restore request - include configured class if specified
+	restoreReq := WeaviateRestoreRequest{}
+
+	// Include the configured class in the restore if specified
+	if p.config.Class != "" {
+		restoreReq.Include = []string{p.config.Class}
+	}
+
+	jsonData, err := json.Marshal(restoreReq)
+	if err != nil {
+		return fmt.Errorf("failed to marshal restore request: %w", err)
+	}
+
+	// Create restore via POST /v1/backups/{backend}/{backup_id}/restore
+	url := fmt.Sprintf("%s/v1/backups/%s/%s/restore", p.config.URL, backend, path)
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create restore request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if p.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to execute restore request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read restore response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("restore request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var restoreResp WeaviateBackupResponse
+	if err := json.Unmarshal(body, &restoreResp); err != nil {
+		return fmt.Errorf("failed to parse restore response: %w", err)
+	}
+
+	p.logger.Info("Restore initiated with id=%s status=%s", restoreResp.ID, restoreResp.Status)
+
+	// Wait for restore to complete by polling status
+	if err := p.waitForRestoreCompletion(ctx, backend, path); err != nil {
+		return err
+	}
+
+	p.logger.Info("Restore completed successfully with id=%s", path)
 	return nil
+}
+
+// waitForRestoreCompletion polls the restore status until it completes or fails
+func (p *WeaviateProvider) waitForRestoreCompletion(ctx context.Context, backend, backupID string) error {
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	timeout := time.After(10 * time.Minute)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout:
+			return fmt.Errorf("restore timed out after 10 minutes")
+		case <-ticker.C:
+			status, err := p.getRestoreStatus(ctx, backend, backupID)
+			if err != nil {
+				return fmt.Errorf("failed to get restore status: %w", err)
+			}
+
+			switch status.Status {
+			case BackupStatusSuccess:
+				return nil
+			case BackupStatusFailed:
+				return fmt.Errorf("restore failed: %s", status.Error)
+			case BackupStatusCancelled:
+				return fmt.Errorf("restore was cancelled")
+			case BackupStatusStarted:
+				p.logger.Info("Restore in progress id=%s", backupID)
+				continue
+			default:
+				p.logger.Info("Restore status: %s", status.Status)
+				continue
+			}
+		}
+	}
+}
+
+// getRestoreStatus retrieves the current status of a restore operation
+func (p *WeaviateProvider) getRestoreStatus(ctx context.Context, backend, backupID string) (*WeaviateBackupResponse, error) {
+	url := fmt.Sprintf("%s/v1/backups/%s/%s/restore", p.config.URL, backend, backupID)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if p.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
+	}
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get restore status: %s", string(body))
+	}
+
+	var statusResp WeaviateBackupResponse
+	if err := json.Unmarshal(body, &statusResp); err != nil {
+		return nil, err
+	}
+
+	return &statusResp, nil
 }
 
 // Health checks provider health

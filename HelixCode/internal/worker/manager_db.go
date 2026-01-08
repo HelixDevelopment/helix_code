@@ -306,6 +306,190 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 	return nil
 }
 
+// UpdateWorker updates an existing worker in the database
+func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname, displayName string, capabilities []string, maxConcurrentTasks int) (*Worker, error) {
+	workerID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid worker ID: %v", err)
+	}
+
+	query := `
+		UPDATE workers
+		SET hostname = $1, display_name = $2, capabilities = $3, max_concurrent_tasks = $4, updated_at = NOW()
+		WHERE id = $5
+		RETURNING id, hostname, display_name, ssh_config, capabilities, resources,
+			status, health_status, last_heartbeat, cpu_usage_percent,
+			memory_usage_percent, disk_usage_percent, current_tasks_count,
+			max_concurrent_tasks, created_at, updated_at
+	`
+
+	var (
+		dbID               uuid.UUID
+		returnedHostname   string
+		returnedDisplayName string
+		sshConfig          map[string]interface{}
+		returnedCaps       []string
+		resources          map[string]interface{}
+		status             string
+		healthStatus       string
+		lastHeartbeat      *time.Time
+		cpuUsagePercent    *float64
+		memoryUsagePercent *float64
+		diskUsagePercent   *float64
+		currentTasksCount  int
+		returnedMaxTasks   int
+		createdAt          time.Time
+		updatedAt          time.Time
+	)
+
+	err = m.db.QueryRow(ctx, query, hostname, displayName, capabilities, maxConcurrentTasks, workerID).Scan(
+		&dbID, &returnedHostname, &returnedDisplayName, &sshConfig, &returnedCaps, &resources,
+		&status, &healthStatus, &lastHeartbeat, &cpuUsagePercent,
+		&memoryUsagePercent, &diskUsagePercent, &currentTasksCount,
+		&returnedMaxTasks, &createdAt, &updatedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to update worker: %v", err)
+	}
+
+	// Convert nullable fields
+	var lastHeartbeatTime time.Time
+	if lastHeartbeat != nil {
+		lastHeartbeatTime = *lastHeartbeat
+	}
+
+	var cpuUsage float64
+	if cpuUsagePercent != nil {
+		cpuUsage = *cpuUsagePercent
+	}
+
+	var memoryUsage float64
+	if memoryUsagePercent != nil {
+		memoryUsage = *memoryUsagePercent
+	}
+
+	var diskUsage float64
+	if diskUsagePercent != nil {
+		diskUsage = *diskUsagePercent
+	}
+
+	worker := &Worker{
+		ID:                 dbID,
+		Hostname:           returnedHostname,
+		DisplayName:        returnedDisplayName,
+		SSHConfig:          sshConfig,
+		Capabilities:       returnedCaps,
+		Resources:          parseResources(resources),
+		Status:             WorkerStatus(status),
+		HealthStatus:       WorkerHealth(healthStatus),
+		LastHeartbeat:      lastHeartbeatTime,
+		CPUUsagePercent:    cpuUsage,
+		MemoryUsagePercent: memoryUsage,
+		DiskUsagePercent:   diskUsage,
+		CurrentTasksCount:  currentTasksCount,
+		MaxConcurrentTasks: returnedMaxTasks,
+		CreatedAt:          createdAt,
+		UpdatedAt:          updatedAt,
+	}
+
+	return worker, nil
+}
+
+// DeleteWorker removes a worker from the database
+func (m *DatabaseManager) DeleteWorker(ctx context.Context, id string) error {
+	workerID, err := uuid.Parse(id)
+	if err != nil {
+		return fmt.Errorf("invalid worker ID: %v", err)
+	}
+
+	query := `DELETE FROM workers WHERE id = $1`
+
+	result, err := m.db.Exec(ctx, query, workerID)
+	if err != nil {
+		return fmt.Errorf("failed to delete worker: %v", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("worker not found: %s", id)
+	}
+
+	return nil
+}
+
+// GetWorkerMetrics retrieves metrics for a worker
+func (m *DatabaseManager) GetWorkerMetrics(ctx context.Context, id string, since time.Time) ([]*WorkerMetrics, error) {
+	workerID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid worker ID: %v", err)
+	}
+
+	query := `
+		SELECT
+			id, worker_id, cpu_usage_percent, memory_usage_percent, disk_usage_percent,
+			network_rx_bytes, network_tx_bytes, current_tasks_count, temperature_celsius, recorded_at
+		FROM worker_metrics
+		WHERE worker_id = $1 AND recorded_at >= $2
+		ORDER BY recorded_at DESC
+		LIMIT 100
+	`
+
+	rows, err := m.db.Query(ctx, query, workerID, since)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query worker metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []*WorkerMetrics
+	for rows.Next() {
+		var (
+			metricsID          uuid.UUID
+			returnedWorkerID   uuid.UUID
+			cpuUsagePercent    float64
+			memoryUsagePercent float64
+			diskUsagePercent   float64
+			networkRxBytes     int64
+			networkTxBytes     int64
+			currentTasksCount  int
+			temperatureCelsius *float64
+			recordedAt         time.Time
+		)
+
+		if err := rows.Scan(
+			&metricsID, &returnedWorkerID, &cpuUsagePercent, &memoryUsagePercent, &diskUsagePercent,
+			&networkRxBytes, &networkTxBytes, &currentTasksCount, &temperatureCelsius, &recordedAt,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan metrics row: %v", err)
+		}
+
+		var temp float64
+		if temperatureCelsius != nil {
+			temp = *temperatureCelsius
+		}
+
+		metric := &WorkerMetrics{
+			ID:                 metricsID,
+			WorkerID:           returnedWorkerID,
+			CPUUsagePercent:    cpuUsagePercent,
+			MemoryUsagePercent: memoryUsagePercent,
+			DiskUsagePercent:   diskUsagePercent,
+			NetworkRxBytes:     networkRxBytes,
+			NetworkTxBytes:     networkTxBytes,
+			CurrentTasksCount:  currentTasksCount,
+			TemperatureCelsius: temp,
+			RecordedAt:         recordedAt,
+		}
+
+		metrics = append(metrics, metric)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating metrics rows: %v", err)
+	}
+
+	return metrics, nil
+}
+
 // Helper functions for parsing
 
 func getStringDB(m map[string]interface{}, key, defaultValue string) string {

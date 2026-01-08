@@ -375,6 +375,160 @@ func (m *DatabaseManager) DeleteTask(ctx context.Context, id string) error {
 	return nil
 }
 
+// AssignTask assigns a task to a worker
+func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID string) error {
+	taskUUID, err := uuid.Parse(taskID)
+	if err != nil {
+		return fmt.Errorf("invalid task ID: %v", err)
+	}
+
+	workerUUID, err := uuid.Parse(workerID)
+	if err != nil {
+		return fmt.Errorf("invalid worker ID: %v", err)
+	}
+
+	query := `
+		UPDATE distributed_tasks
+		SET status = 'assigned', assigned_worker_id = $1, updated_at = NOW()
+		WHERE id = $2 AND status = 'pending'
+	`
+
+	result, err := m.db.Exec(ctx, query, workerUUID, taskUUID)
+	if err != nil {
+		return fmt.Errorf("failed to assign task: %v", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("task not found or not in pending state: %s", taskID)
+	}
+
+	return nil
+}
+
+// RetryTask resets a failed task for retry
+func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {
+	taskID, err := uuid.Parse(id)
+	if err != nil {
+		return fmt.Errorf("invalid task ID: %v", err)
+	}
+
+	query := `
+		UPDATE distributed_tasks
+		SET status = 'pending', retry_count = retry_count + 1, assigned_worker_id = NULL,
+			error_message = NULL, updated_at = NOW()
+		WHERE id = $1 AND status = 'failed' AND retry_count < max_retries
+	`
+
+	result, err := m.db.Exec(ctx, query, taskID)
+	if err != nil {
+		return fmt.Errorf("failed to retry task: %v", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("task not found, not in failed state, or max retries exceeded: %s", id)
+	}
+
+	return nil
+}
+
+// CreateCheckpoint creates a checkpoint for a task
+func (m *DatabaseManager) CreateCheckpoint(ctx context.Context, taskID string, checkpointName string, checkpointData map[string]interface{}) error {
+	taskUUID, err := uuid.Parse(taskID)
+	if err != nil {
+		return fmt.Errorf("invalid task ID: %v", err)
+	}
+
+	// First update the task's checkpoint_data field
+	query := `
+		UPDATE distributed_tasks
+		SET checkpoint_data = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	checkpointWithName := map[string]interface{}{
+		"name":       checkpointName,
+		"data":       checkpointData,
+		"created_at": time.Now(),
+	}
+
+	result, err := m.db.Exec(ctx, query, checkpointWithName, taskUUID)
+	if err != nil {
+		return fmt.Errorf("failed to create checkpoint: %v", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("task not found: %s", taskID)
+	}
+
+	// Also insert into task_checkpoints table if it exists
+	checkpointQuery := `
+		INSERT INTO task_checkpoints (id, task_id, checkpoint_name, checkpoint_data, created_at)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT DO NOTHING
+	`
+
+	_, _ = m.db.Exec(ctx, checkpointQuery,
+		uuid.New(), taskUUID, checkpointName, checkpointData, time.Now(),
+	)
+
+	return nil
+}
+
+// GetCheckpoints retrieves all checkpoints for a task
+func (m *DatabaseManager) GetCheckpoints(ctx context.Context, taskID string) ([]map[string]interface{}, error) {
+	taskUUID, err := uuid.Parse(taskID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid task ID: %v", err)
+	}
+
+	query := `
+		SELECT id, checkpoint_name, checkpoint_data, worker_id, created_at
+		FROM task_checkpoints
+		WHERE task_id = $1
+		ORDER BY created_at DESC
+	`
+
+	rows, err := m.db.Query(ctx, query, taskUUID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query checkpoints: %v", err)
+	}
+	defer rows.Close()
+
+	var checkpoints []map[string]interface{}
+	for rows.Next() {
+		var (
+			id             uuid.UUID
+			checkpointName string
+			checkpointData map[string]interface{}
+			workerID       *uuid.UUID
+			createdAt      time.Time
+		)
+
+		if err := rows.Scan(&id, &checkpointName, &checkpointData, &workerID, &createdAt); err != nil {
+			return nil, fmt.Errorf("failed to scan checkpoint row: %v", err)
+		}
+
+		checkpoint := map[string]interface{}{
+			"id":         id.String(),
+			"name":       checkpointName,
+			"data":       checkpointData,
+			"created_at": createdAt,
+		}
+
+		if workerID != nil {
+			checkpoint["worker_id"] = workerID.String()
+		}
+
+		checkpoints = append(checkpoints, checkpoint)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating checkpoint rows: %v", err)
+	}
+
+	return checkpoints, nil
+}
+
 // Helper function to convert pointer to string
 func getStringFromPtr(ptr *string) string {
 	if ptr == nil {

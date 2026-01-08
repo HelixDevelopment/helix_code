@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,24 +60,29 @@ func NewQwenProvider(config ProviderConfigEntry) (*QwenProvider, error) {
 	return provider, nil
 }
 
-// getAPIKey retrieves an API key, preferring OAuth2 over config
+// getAPIKey retrieves an API key, preferring config, then env var, then OAuth2
 func (qp *QwenProvider) getAPIKey() (string, error) {
-	// First try OAuth2
+	// First check config API key (highest priority when explicitly provided)
+	if qp.config.APIKey != "" {
+		return qp.config.APIKey, nil
+	}
+
+	// Then check environment variable
+	if envKey := os.Getenv("QWEN_API_KEY"); envKey != "" {
+		return envKey, nil
+	}
+
+	// Finally try OAuth2 cached credentials
 	if qp.oauthClient != nil {
 		token, err := qp.oauthClient.GetValidToken()
 		if err == nil && token != "" {
 			return token, nil
 		}
-		// OAuth2 failed, log but continue to fallback
-		log.Printf("OAuth2 authentication failed, falling back to API key: %v", err)
+		// OAuth2 failed, log but continue to error
+		log.Printf("OAuth2 authentication failed: %v", err)
 	}
 
-	// Fallback to config API key
-	if qp.config.APIKey != "" {
-		return qp.config.APIKey, nil
-	}
-
-	return "", fmt.Errorf("no API key available - configure QWEN_API_KEY or complete OAuth2 authentication")
+	return "", fmt.Errorf("no API key available - configure QWEN_API_KEY environment variable, provide APIKey in config, or complete OAuth2 authentication")
 }
 
 // AuthenticateWithOAuth2 performs OAuth2 authentication for Qwen

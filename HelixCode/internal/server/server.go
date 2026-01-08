@@ -15,6 +15,7 @@ import (
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
+	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,7 @@ type Server struct {
 	taskManager    *task.DatabaseManager
 	workerManager  *worker.DatabaseManager
 	projectManager *project.DatabaseManager
+	sessionManager *session.Manager
 	server         *http.Server
 	router         *gin.Engine
 	startTime      time.Time
@@ -86,6 +88,9 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		projectMgr = project.NewDatabaseManager(db)
 	}
 
+	// Initialize session manager
+	sessionMgr := session.NewManager()
+
 	server := &Server{
 		config:         cfg,
 		db:             db,
@@ -96,6 +101,7 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		taskManager:    taskMgr,
 		workerManager:  workerMgr,
 		projectManager: projectMgr,
+		sessionManager: sessionMgr,
 		router:         router,
 		startTime:      time.Now(),
 	}
@@ -148,8 +154,8 @@ func (s *Server) setupRoutes() {
 		users.Use(s.authMiddleware())
 		{
 			users.GET("/me", s.getCurrentUser)
-			users.PUT("/me", s.notImplemented)
-			users.DELETE("/me", s.notImplemented)
+			users.PUT("/me", s.updateCurrentUser)
+			users.DELETE("/me", s.deleteCurrentUser)
 		}
 
 		// Worker routes
@@ -157,12 +163,12 @@ func (s *Server) setupRoutes() {
 		workers.Use(s.authMiddleware())
 		{
 			workers.GET("", s.listWorkers)
-			workers.POST("", s.notImplemented)
+			workers.POST("", s.createWorker)
 			workers.GET("/:id", s.getWorker)
-			workers.PUT("/:id", s.notImplemented)
-			workers.DELETE("/:id", s.notImplemented)
-			workers.POST("/:id/heartbeat", s.notImplemented)
-			workers.GET("/:id/metrics", s.notImplemented)
+			workers.PUT("/:id", s.updateWorker)
+			workers.DELETE("/:id", s.deleteWorker)
+			workers.POST("/:id/heartbeat", s.workerHeartbeat)
+			workers.GET("/:id/metrics", s.getWorkerMetrics)
 		}
 
 		// Task routes
@@ -174,13 +180,13 @@ func (s *Server) setupRoutes() {
 			tasks.GET("/:id", s.getTask)
 			tasks.PUT("/:id", s.updateTask)
 			tasks.DELETE("/:id", s.deleteTask)
-			tasks.POST("/:id/assign", s.notImplemented)
-			tasks.POST("/:id/start", s.notImplemented)
-			tasks.POST("/:id/complete", s.notImplemented)
-			tasks.POST("/:id/fail", s.notImplemented)
-			tasks.POST("/:id/checkpoint", s.notImplemented)
-			tasks.GET("/:id/checkpoints", s.notImplemented)
-			tasks.POST("/:id/retry", s.notImplemented)
+			tasks.POST("/:id/assign", s.assignTask)
+			tasks.POST("/:id/start", s.startTask)
+			tasks.POST("/:id/complete", s.completeTask)
+			tasks.POST("/:id/fail", s.failTask)
+			tasks.POST("/:id/checkpoint", s.createTaskCheckpoint)
+			tasks.GET("/:id/checkpoints", s.getTaskCheckpoints)
+			tasks.POST("/:id/retry", s.retryTask)
 		}
 
 		// Project routes
@@ -191,7 +197,7 @@ func (s *Server) setupRoutes() {
 			projects.GET("/:id", s.getProject)
 			projects.PUT("/:id", s.updateProject)
 			projects.DELETE("/:id", s.deleteProject)
-			projects.GET("/:id/sessions", s.notImplemented)
+			projects.GET("/:id/sessions", s.getProjectSessions)
 		}
 
 		// Project creation and workflow routes (no auth for testing)
@@ -208,11 +214,11 @@ func (s *Server) setupRoutes() {
 		sessions := api.Group("/sessions")
 		sessions.Use(s.authMiddleware())
 		{
-			sessions.GET("", s.notImplemented)
-			sessions.POST("", s.notImplemented)
-			sessions.GET("/:id", s.notImplemented)
-			sessions.PUT("/:id", s.notImplemented)
-			sessions.DELETE("/:id", s.notImplemented)
+			sessions.GET("", s.listSessions)
+			sessions.POST("", s.createSession)
+			sessions.GET("/:id", s.getSession)
+			sessions.PUT("/:id", s.updateSession)
+			sessions.DELETE("/:id", s.deleteSession)
 		}
 
 		// System routes

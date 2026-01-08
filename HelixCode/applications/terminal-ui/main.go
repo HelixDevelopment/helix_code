@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -13,8 +15,10 @@ import (
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/server"
+	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
 
@@ -31,10 +35,14 @@ type TerminalUI struct {
 	db                 *database.Database
 	taskManager        *task.TaskManager
 	workerManager      *worker.WorkerManager
+	workerRepo         *worker.InMemoryWorkerRepository
 	llmProvider        llm.Provider
+	llmManager         *llm.ModelManager
 	notificationEngine *notification.NotificationEngine
 	server             *server.Server
 	themeManager       *ThemeManager
+	projectManager     *project.Manager
+	sessionManager     *session.Manager
 
 	// UI Components
 	pages     *tview.Pages
@@ -42,6 +50,11 @@ type TerminalUI struct {
 	sidebar   *tview.List
 	content   *tview.Pages
 	statusBar *tview.TextView
+
+	// LLM Chat state
+	chatHistory    []llm.Message
+	chatInput      *tview.InputField
+	chatOutput     *tview.TextView
 
 	// Current state
 	currentUser    string
@@ -90,9 +103,20 @@ func (tui *TerminalUI) Initialize() error {
 
 	// Initialize worker manager with in-memory repository for standalone UI
 	workerRepo := worker.NewInMemoryWorkerRepository()
+	tui.workerRepo = workerRepo
 	tui.workerManager = worker.NewWorkerManager(workerRepo, 30*time.Second)
 
 	tui.notificationEngine = notification.NewNotificationEngine()
+
+	// Initialize project manager
+	tui.projectManager = project.NewManager()
+
+	// Initialize session manager
+	tui.sessionManager = session.NewManager()
+
+	// Initialize LLM manager
+	tui.llmManager = llm.NewModelManager()
+	tui.chatHistory = make([]llm.Message, 0)
 
 	// Initialize server for API calls
 	tui.server = server.New(cfg, db, rds)
@@ -249,13 +273,26 @@ func (tui *TerminalUI) createWorkerStatsView() tview.Primitive {
 	view.SetBorder(true)
 	view.SetTitle("Workers")
 
-	// Get real worker stats - for now simulate with basic data
-	// In a real implementation, this would connect to the worker manager
+	// Get real worker stats from the worker repository
+	ctx := context.Background()
+	workers, err := tui.workerRepo.ListWorkers(ctx, "")
+
 	totalWorkers := 0
 	activeWorkers := 0
 	healthyWorkers := 0
 
-	// Simulate some basic stats for demonstration
+	if err == nil {
+		totalWorkers = len(workers)
+		for _, w := range workers {
+			if w.Status == worker.WorkerStatusActive {
+				activeWorkers++
+			}
+			if w.HealthStatus == worker.WorkerHealthHealthy {
+				healthyWorkers++
+			}
+		}
+	}
+
 	content := fmt.Sprintf("[green]Total: %d\n[white]Active: %d\n[yellow]Healthy: %d\n[red]Failed: %d",
 		totalWorkers, activeWorkers, healthyWorkers, totalWorkers-healthyWorkers)
 
@@ -270,15 +307,33 @@ func (tui *TerminalUI) createTaskStatsView() tview.Primitive {
 	view.SetBorder(true)
 	view.SetTitle("Tasks")
 
-	// Get real task stats - for now simulate with basic data
-	// In a real implementation, this would connect to the task manager
-	totalTasks := 0
-	completedTasks := 0
-	runningTasks := 0
-	failedTasks := 0
+	// Get real task stats from session manager (tasks are tracked through sessions)
+	sessions := tui.sessionManager.GetAll()
+	stats := tui.sessionManager.GetStatistics()
 
-	content := fmt.Sprintf("[blue]Total: %d\n[green]Completed: %d\n[yellow]Running: %d\n[red]Failed: %d",
-		totalTasks, completedTasks, runningTasks, failedTasks)
+	totalTasks := stats.Total
+	completedTasks := stats.ByStatus[session.StatusCompleted]
+	runningTasks := stats.ByStatus[session.StatusActive]
+	failedTasks := stats.ByStatus[session.StatusFailed]
+	pausedTasks := stats.ByStatus[session.StatusPaused]
+
+	// Also count by mode for more detailed stats
+	planningCount := 0
+	buildingCount := 0
+	testingCount := 0
+	for _, s := range sessions {
+		switch s.Mode {
+		case session.ModePlanning:
+			planningCount++
+		case session.ModeBuilding:
+			buildingCount++
+		case session.ModeTesting:
+			testingCount++
+		}
+	}
+
+	content := fmt.Sprintf("[blue]Total: %d\n[green]Completed: %d\n[yellow]Running: %d\n[gray]Paused: %d\n[red]Failed: %d",
+		totalTasks, completedTasks, runningTasks, pausedTasks, failedTasks)
 	view.SetText(content)
 	return view
 }
@@ -290,14 +345,37 @@ func (tui *TerminalUI) createSystemStatsView() tview.Primitive {
 	view.SetBorder(true)
 	view.SetTitle("System")
 
-	// Get real system stats
-	status := "[green]Status: Operational"
-	uptime := "[white]Uptime: Running"
-	memory := "[yellow]Memory: N/A"
-	cpu := "[blue]CPU: N/A"
+	// Get real system stats from various managers
+	ctx := context.Background()
 
-	// In a real implementation, this would get actual system metrics
-	content := fmt.Sprintf("%s\n%s\n%s\n%s", status, uptime, memory, cpu)
+	// Check database status
+	dbStatus := "[green]Connected"
+	if tui.db == nil {
+		dbStatus = "[red]Not Connected"
+	}
+
+	// Check LLM provider status
+	llmStatus := "[yellow]Not Configured"
+	if tui.llmProvider != nil {
+		if tui.llmProvider.IsAvailable(ctx) {
+			llmStatus = "[green]Available"
+		} else {
+			llmStatus = "[red]Unavailable"
+		}
+	}
+
+	// Get project count
+	projects, _ := tui.projectManager.ListProjects(ctx, "")
+	projectCount := len(projects)
+
+	// Get active project
+	activeProjectName := "None"
+	if activeProject, err := tui.projectManager.GetActiveProject(ctx); err == nil && activeProject != nil {
+		activeProjectName = activeProject.Name
+	}
+
+	content := fmt.Sprintf("[green]Status: Operational\n[white]Database: %s\n[yellow]LLM: %s\n[blue]Projects: %d\n[cyan]Active: %s",
+		dbStatus, llmStatus, projectCount, activeProjectName)
 	view.SetText(content)
 	return view
 }
@@ -309,18 +387,77 @@ func (tui *TerminalUI) createActivityView() tview.Primitive {
 	view.SetBorder(true)
 	view.SetTitle("Recent Activity")
 
-	content := "• System initialized\n• Worker pool started\n• Task manager ready\n• LLM providers loaded"
-	view.SetText(content)
+	var activities []string
+
+	// Add system initialization
+	activities = append(activities, "[green]+ System initialized")
+
+	// Add recent sessions
+	recentSessions := tui.sessionManager.GetRecent(3)
+	for _, s := range recentSessions {
+		statusIcon := "+"
+		color := "[white]"
+		switch s.Status {
+		case session.StatusActive:
+			statusIcon = ">"
+			color = "[green]"
+		case session.StatusPaused:
+			statusIcon = "||"
+			color = "[yellow]"
+		case session.StatusCompleted:
+			statusIcon = "+"
+			color = "[blue]"
+		case session.StatusFailed:
+			statusIcon = "x"
+			color = "[red]"
+		}
+		activities = append(activities, fmt.Sprintf("%s%s Session '%s' (%s)", color, statusIcon, s.Name, s.Status))
+	}
+
+	// Add worker info
+	ctx := context.Background()
+	workers, _ := tui.workerRepo.ListWorkers(ctx, "")
+	if len(workers) > 0 {
+		activities = append(activities, fmt.Sprintf("[cyan]+ %d workers registered", len(workers)))
+	}
+
+	// Add project info
+	projects, _ := tui.projectManager.ListProjects(ctx, "")
+	if len(projects) > 0 {
+		activities = append(activities, fmt.Sprintf("[blue]+ %d projects loaded", len(projects)))
+	}
+
+	// Add LLM status
+	models := tui.llmManager.GetAvailableModels()
+	if len(models) > 0 {
+		activities = append(activities, fmt.Sprintf("[magenta]+ %d LLM models available", len(models)))
+	} else {
+		activities = append(activities, "[yellow]! No LLM providers configured")
+	}
+
+	if len(activities) == 1 {
+		activities = append(activities, "[gray]No recent activity")
+	}
+
+	view.SetText(strings.Join(activities, "\n"))
 	return view
 }
 
 // createQuickActionsView creates the quick actions view
 func (tui *TerminalUI) createQuickActionsView() *tview.List {
 	list := tview.NewList().
-		AddItem("New Task", "Create a new distributed task", 'n', nil).
-		AddItem("Add Worker", "Register a new worker node", 'a', nil).
-		AddItem("LLM Chat", "Start AI conversation", 'c', nil).
-		AddItem("View Logs", "Check system logs", 'l', nil)
+		AddItem("New Task", "Create a new distributed task", 'n', func() {
+			tui.showNewTaskForm()
+		}).
+		AddItem("Add Worker", "Register a new worker node", 'a', func() {
+			tui.showAddWorkerForm()
+		}).
+		AddItem("New Project", "Create a new project", 'p', func() {
+			tui.showNewProjectForm()
+		}).
+		AddItem("LLM Chat", "Start AI conversation", 'c', func() {
+			tui.showLLM()
+		})
 
 	list.SetBorder(true).SetTitle("Quick Actions")
 	return list
@@ -374,54 +511,1131 @@ func (tui *TerminalUI) showWorkers() {
 		SetDynamicColors(true)
 	header.SetBorder(true)
 
-	// Worker list will be implemented in next phase
-	workerList := tview.NewTextView().
-		SetText("Worker list implementation pending...").
-		SetTextAlign(tview.AlignCenter)
-	workerList.SetBorder(true).SetTitle("Workers")
+	// Create worker table
+	workerTable := tview.NewTable().
+		SetBorders(true).
+		SetSelectable(true, false)
+	workerTable.SetBorder(true).SetTitle("Workers")
+
+	// Set headers
+	headers := []string{"ID", "Hostname", "Status", "Health", "CPU %", "Memory %", "Tasks", "Last Heartbeat"}
+	for col, h := range headers {
+		workerTable.SetCell(0, col, tview.NewTableCell(h).
+			SetTextColor(tcell.ColorYellow).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	}
+
+	// Get workers from repository
+	ctx := context.Background()
+	workers, err := tui.workerRepo.ListWorkers(ctx, "")
+	if err != nil {
+		log.Printf("Failed to list workers: %v", err)
+	}
+
+	if len(workers) == 0 {
+		workerTable.SetCell(1, 0, tview.NewTableCell("No workers registered").
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	} else {
+		for row, w := range workers {
+			statusColor := "[green]"
+			if w.Status == worker.WorkerStatusOffline {
+				statusColor = "[red]"
+			} else if w.Status == worker.WorkerStatusMaintenance {
+				statusColor = "[yellow]"
+			}
+
+			healthColor := "[green]"
+			if w.HealthStatus == worker.WorkerHealthUnhealthy {
+				healthColor = "[red]"
+			} else if w.HealthStatus == worker.WorkerHealthDegraded {
+				healthColor = "[yellow]"
+			}
+
+			workerTable.SetCell(row+1, 0, tview.NewTableCell(w.ID.String()[:8]).SetAlign(tview.AlignLeft))
+			workerTable.SetCell(row+1, 1, tview.NewTableCell(w.Hostname).SetAlign(tview.AlignLeft))
+			workerTable.SetCell(row+1, 2, tview.NewTableCell(statusColor+string(w.Status)).SetAlign(tview.AlignCenter))
+			workerTable.SetCell(row+1, 3, tview.NewTableCell(healthColor+string(w.HealthStatus)).SetAlign(tview.AlignCenter))
+			workerTable.SetCell(row+1, 4, tview.NewTableCell(fmt.Sprintf("%.1f%%", w.CPUUsagePercent)).SetAlign(tview.AlignRight))
+			workerTable.SetCell(row+1, 5, tview.NewTableCell(fmt.Sprintf("%.1f%%", w.MemoryUsagePercent)).SetAlign(tview.AlignRight))
+			workerTable.SetCell(row+1, 6, tview.NewTableCell(fmt.Sprintf("%d/%d", w.CurrentTasksCount, w.MaxConcurrentTasks)).SetAlign(tview.AlignCenter))
+			workerTable.SetCell(row+1, 7, tview.NewTableCell(w.LastHeartbeat.Format("15:04:05")).SetAlign(tview.AlignCenter))
+		}
+	}
+
+	// Worker stats panel
+	statsPanel := tui.createWorkerStatsPanel(workers)
+
+	// Action buttons
+	actions := tview.NewFlex().SetDirection(tview.FlexColumn)
+	addWorkerBtn := tview.NewButton("Add Worker").SetSelectedFunc(func() {
+		tui.showAddWorkerForm()
+	})
+	refreshBtn := tview.NewButton("Refresh").SetSelectedFunc(func() {
+		tui.showWorkers()
+	})
+	actions.AddItem(addWorkerBtn, 0, 1, false)
+	actions.AddItem(refreshBtn, 0, 1, false)
+
+	// Main content area
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+	contentFlex.AddItem(workerTable, 0, 3, true)
+	contentFlex.AddItem(statsPanel, 30, 0, false)
 
 	workersView.
 		AddItem(header, 3, 0, false).
-		AddItem(workerList, 0, 1, false)
+		AddItem(contentFlex, 0, 1, true).
+		AddItem(actions, 3, 0, false)
 
 	tui.content.SwitchToPage("workers")
 	tui.content.AddPage("workers", workersView, true, true)
 }
 
+// createWorkerStatsPanel creates a statistics panel for workers
+func (tui *TerminalUI) createWorkerStatsPanel(workers []*worker.Worker) *tview.TextView {
+	panel := tview.NewTextView().SetDynamicColors(true)
+	panel.SetBorder(true).SetTitle("Statistics")
+
+	totalWorkers := len(workers)
+	activeWorkers := 0
+	healthyWorkers := 0
+	totalTasks := 0
+	var totalCPU, totalMem float64
+
+	for _, w := range workers {
+		if w.Status == worker.WorkerStatusActive {
+			activeWorkers++
+		}
+		if w.HealthStatus == worker.WorkerHealthHealthy {
+			healthyWorkers++
+		}
+		totalTasks += w.CurrentTasksCount
+		totalCPU += w.CPUUsagePercent
+		totalMem += w.MemoryUsagePercent
+	}
+
+	avgCPU := 0.0
+	avgMem := 0.0
+	if totalWorkers > 0 {
+		avgCPU = totalCPU / float64(totalWorkers)
+		avgMem = totalMem / float64(totalWorkers)
+	}
+
+	content := fmt.Sprintf(`[::b]Worker Summary[white]
+
+[green]Total:[white] %d
+[green]Active:[white] %d
+[green]Healthy:[white] %d
+[red]Offline:[white] %d
+
+[::b]Resource Usage[white]
+
+[yellow]Avg CPU:[white] %.1f%%
+[yellow]Avg Memory:[white] %.1f%%
+[blue]Active Tasks:[white] %d`,
+		totalWorkers, activeWorkers, healthyWorkers, totalWorkers-activeWorkers,
+		avgCPU, avgMem, totalTasks)
+
+	panel.SetText(content)
+	return panel
+}
+
+// showAddWorkerForm displays a form for adding a new worker
+func (tui *TerminalUI) showAddWorkerForm() {
+	form := tview.NewForm()
+	form.SetBorder(true).SetTitle("Add New Worker").SetTitleAlign(tview.AlignLeft)
+
+	var hostname, displayName, sshHost, sshUser string
+	var sshPort int = 22
+	var maxTasks int = 4
+
+	form.AddInputField("Hostname", "", 30, nil, func(text string) {
+		hostname = text
+	})
+	form.AddInputField("Display Name", "", 30, nil, func(text string) {
+		displayName = text
+	})
+	form.AddInputField("SSH Host", "", 30, nil, func(text string) {
+		sshHost = text
+	})
+	form.AddInputField("SSH Port", "22", 10, tview.InputFieldInteger, func(text string) {
+		fmt.Sscanf(text, "%d", &sshPort)
+	})
+	form.AddInputField("SSH User", "", 20, nil, func(text string) {
+		sshUser = text
+	})
+	form.AddInputField("Max Concurrent Tasks", "4", 10, tview.InputFieldInteger, func(text string) {
+		fmt.Sscanf(text, "%d", &maxTasks)
+	})
+
+	form.AddButton("Add", func() {
+		ctx := context.Background()
+		newWorker := &worker.Worker{
+			ID:          uuid.New(),
+			Hostname:    hostname,
+			DisplayName: displayName,
+			SSHConfig: map[string]interface{}{
+				"host":     sshHost,
+				"port":     sshPort,
+				"username": sshUser,
+			},
+			Status:             worker.WorkerStatusActive,
+			HealthStatus:       worker.WorkerHealthHealthy,
+			MaxConcurrentTasks: maxTasks,
+			LastHeartbeat:      time.Now(),
+			CreatedAt:          time.Now(),
+			UpdatedAt:          time.Now(),
+		}
+
+		if err := tui.workerRepo.CreateWorker(ctx, newWorker); err != nil {
+			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to add worker: %v", err))
+		} else {
+			tui.statusBar.SetText(fmt.Sprintf("[green]Worker added: %s", hostname))
+			tui.showWorkers()
+		}
+
+		tui.pages.RemovePage("addWorkerForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	form.AddButton("Cancel", func() {
+		tui.pages.RemovePage("addWorkerForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(form, 22, 1, true).
+			AddItem(nil, 0, 1, false), 60, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	tui.pages.AddPage("addWorkerForm", modal, true, true)
+	tui.app.SetFocus(form)
+}
+
 // showProjects displays the project management interface
 func (tui *TerminalUI) showProjects() {
-	projectsView := tview.NewTextView().
-		SetText("[::b]Project Management\n\nImplementation pending...").
+	projectsView := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	header := tview.NewTextView().
+		SetText("[::b]Project Management").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true)
-	projectsView.SetBorder(true)
+	header.SetBorder(true)
+
+	// Create project table
+	projectTable := tview.NewTable().
+		SetBorders(true).
+		SetSelectable(true, false)
+	projectTable.SetBorder(true).SetTitle("Projects")
+
+	// Set headers
+	headers := []string{"Name", "Type", "Path", "Status", "Created", "Updated"}
+	for col, h := range headers {
+		projectTable.SetCell(0, col, tview.NewTableCell(h).
+			SetTextColor(tcell.ColorYellow).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	}
+
+	// Get projects from manager
+	ctx := context.Background()
+	projects, err := tui.projectManager.ListProjects(ctx, "")
+	if err != nil {
+		log.Printf("Failed to list projects: %v", err)
+	}
+
+	if len(projects) == 0 {
+		projectTable.SetCell(1, 0, tview.NewTableCell("No projects found. Click 'New Project' to create one.").
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	} else {
+		for row, p := range projects {
+			statusColor := "[white]"
+			statusText := "Inactive"
+			if p.Active {
+				statusColor = "[green]"
+				statusText = "Active"
+			}
+
+			projectTable.SetCell(row+1, 0, tview.NewTableCell(p.Name).SetAlign(tview.AlignLeft))
+			projectTable.SetCell(row+1, 1, tview.NewTableCell(p.Type).SetAlign(tview.AlignCenter))
+			projectTable.SetCell(row+1, 2, tview.NewTableCell(truncatePath(p.Path, 30)).SetAlign(tview.AlignLeft))
+			projectTable.SetCell(row+1, 3, tview.NewTableCell(statusColor+statusText).SetAlign(tview.AlignCenter))
+			projectTable.SetCell(row+1, 4, tview.NewTableCell(p.CreatedAt.Format("2006-01-02")).SetAlign(tview.AlignCenter))
+			projectTable.SetCell(row+1, 5, tview.NewTableCell(p.UpdatedAt.Format("2006-01-02")).SetAlign(tview.AlignCenter))
+		}
+	}
+
+	// Handle project selection
+	projectTable.SetSelectedFunc(func(row, col int) {
+		if row > 0 && row <= len(projects) {
+			selectedProject := projects[row-1]
+			tui.showProjectDetails(selectedProject)
+		}
+	})
+
+	// Project details panel
+	detailsPanel := tview.NewTextView().SetDynamicColors(true)
+	detailsPanel.SetBorder(true).SetTitle("Project Details")
+
+	activeProject, _ := tui.projectManager.GetActiveProject(ctx)
+	if activeProject != nil {
+		detailsPanel.SetText(tui.formatProjectDetails(activeProject))
+	} else {
+		detailsPanel.SetText("[gray]Select a project to view details")
+	}
+
+	// Action buttons
+	actions := tview.NewFlex().SetDirection(tview.FlexColumn)
+	newProjectBtn := tview.NewButton("New Project").SetSelectedFunc(func() {
+		tui.showNewProjectForm()
+	})
+	setActiveBtn := tview.NewButton("Set Active").SetSelectedFunc(func() {
+		row, _ := projectTable.GetSelection()
+		if row > 0 && row <= len(projects) {
+			selectedProject := projects[row-1]
+			if err := tui.projectManager.SetActiveProject(ctx, selectedProject.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to set active: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[green]Active project: %s", selectedProject.Name))
+				tui.showProjects()
+			}
+		}
+	})
+	refreshBtn := tview.NewButton("Refresh").SetSelectedFunc(func() {
+		tui.showProjects()
+	})
+	actions.AddItem(newProjectBtn, 0, 1, false)
+	actions.AddItem(setActiveBtn, 0, 1, false)
+	actions.AddItem(refreshBtn, 0, 1, false)
+
+	// Main content area
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+	contentFlex.AddItem(projectTable, 0, 2, true)
+	contentFlex.AddItem(detailsPanel, 40, 0, false)
+
+	projectsView.
+		AddItem(header, 3, 0, false).
+		AddItem(contentFlex, 0, 1, true).
+		AddItem(actions, 3, 0, false)
 
 	tui.content.SwitchToPage("projects")
 	tui.content.AddPage("projects", projectsView, true, true)
 }
 
+// formatProjectDetails formats project details for display
+func (tui *TerminalUI) formatProjectDetails(p *project.Project) string {
+	return fmt.Sprintf(`[::b]%s[white]
+
+[yellow]Type:[white] %s
+[yellow]Path:[white] %s
+[yellow]Description:[white] %s
+
+[::b]Build Commands[white]
+[green]Build:[white] %s
+[green]Test:[white] %s
+[green]Lint:[white] %s
+
+[::b]Metadata[white]
+[blue]Framework:[white] %s
+[blue]Language:[white] %s
+[blue]Created:[white] %s`,
+		p.Name, p.Type, p.Path, p.Description,
+		p.Metadata.BuildCommand, p.Metadata.TestCommand, p.Metadata.LintCommand,
+		p.Metadata.Framework, p.Metadata.LanguageVersion,
+		p.CreatedAt.Format("2006-01-02 15:04:05"))
+}
+
+// showProjectDetails shows detailed information about a project
+func (tui *TerminalUI) showProjectDetails(p *project.Project) {
+	modal := tview.NewModal()
+	modal.SetText(fmt.Sprintf("Project: %s\nType: %s\nPath: %s\n\nBuild: %s\nTest: %s",
+		p.Name, p.Type, p.Path, p.Metadata.BuildCommand, p.Metadata.TestCommand))
+	modal.AddButtons([]string{"Close", "Set Active", "Delete"})
+	modal.SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+		ctx := context.Background()
+		switch buttonLabel {
+		case "Set Active":
+			if err := tui.projectManager.SetActiveProject(ctx, p.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[green]Active: %s", p.Name))
+			}
+		case "Delete":
+			if err := tui.projectManager.DeleteProject(ctx, p.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[yellow]Deleted: %s", p.Name))
+			}
+		}
+		tui.pages.RemovePage("projectDetails")
+		tui.showProjects()
+	})
+
+	tui.pages.AddPage("projectDetails", modal, true, true)
+}
+
+// showNewProjectForm displays a form for creating a new project
+func (tui *TerminalUI) showNewProjectForm() {
+	form := tview.NewForm()
+	form.SetBorder(true).SetTitle("Create New Project").SetTitleAlign(tview.AlignLeft)
+
+	var name, description, path, projectType string
+
+	form.AddInputField("Name", "", 30, nil, func(text string) {
+		name = text
+	})
+	form.AddInputField("Description", "", 50, nil, func(text string) {
+		description = text
+	})
+	form.AddInputField("Path", "", 50, nil, func(text string) {
+		path = text
+	})
+	form.AddDropDown("Type", []string{"go", "node", "python", "rust", "generic"}, 0, func(option string, index int) {
+		projectType = option
+	})
+
+	form.AddButton("Create", func() {
+		ctx := context.Background()
+		if name == "" || path == "" {
+			tui.statusBar.SetText("[red]Name and path are required")
+			return
+		}
+
+		newProject, err := tui.projectManager.CreateProject(ctx, name, description, path, projectType)
+		if err != nil {
+			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to create project: %v", err))
+		} else {
+			tui.statusBar.SetText(fmt.Sprintf("[green]Project created: %s", newProject.Name))
+			tui.showProjects()
+		}
+
+		tui.pages.RemovePage("newProjectForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	form.AddButton("Cancel", func() {
+		tui.pages.RemovePage("newProjectForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(form, 18, 1, true).
+			AddItem(nil, 0, 1, false), 70, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	tui.pages.AddPage("newProjectForm", modal, true, true)
+	tui.app.SetFocus(form)
+}
+
+// truncatePath truncates a path for display
+func truncatePath(path string, maxLen int) string {
+	if len(path) <= maxLen {
+		return path
+	}
+	return "..." + path[len(path)-maxLen+3:]
+}
+
 // showSessions displays the session management interface
 func (tui *TerminalUI) showSessions() {
-	sessionsView := tview.NewTextView().
-		SetText("[::b]Session Management\n\nImplementation pending...").
+	sessionsView := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	header := tview.NewTextView().
+		SetText("[::b]Session Management").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true)
-	sessionsView.SetBorder(true)
+	header.SetBorder(true)
+
+	// Create session table
+	sessionTable := tview.NewTable().
+		SetBorders(true).
+		SetSelectable(true, false)
+	sessionTable.SetBorder(true).SetTitle("Development Sessions")
+
+	// Set headers
+	headers := []string{"Name", "Project", "Mode", "Status", "Duration", "Created"}
+	for col, h := range headers {
+		sessionTable.SetCell(0, col, tview.NewTableCell(h).
+			SetTextColor(tcell.ColorYellow).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	}
+
+	// Get sessions from manager
+	sessions := tui.sessionManager.GetAll()
+
+	if len(sessions) == 0 {
+		sessionTable.SetCell(1, 0, tview.NewTableCell("No sessions found. Click 'New Session' to create one.").
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	} else {
+		for row, s := range sessions {
+			statusColor := "[white]"
+			switch s.Status {
+			case session.StatusActive:
+				statusColor = "[green]"
+			case session.StatusPaused:
+				statusColor = "[yellow]"
+			case session.StatusCompleted:
+				statusColor = "[blue]"
+			case session.StatusFailed:
+				statusColor = "[red]"
+			}
+
+			modeColor := "[white]"
+			switch s.Mode {
+			case session.ModePlanning:
+				modeColor = "[cyan]"
+			case session.ModeBuilding:
+				modeColor = "[green]"
+			case session.ModeTesting:
+				modeColor = "[yellow]"
+			case session.ModeDebugging:
+				modeColor = "[red]"
+			case session.ModeRefactoring:
+				modeColor = "[magenta]"
+			}
+
+			duration := s.Duration
+			if s.Status == session.StatusActive && !s.StartedAt.IsZero() {
+				duration += time.Since(s.StartedAt)
+			}
+
+			sessionTable.SetCell(row+1, 0, tview.NewTableCell(s.Name).SetAlign(tview.AlignLeft))
+			sessionTable.SetCell(row+1, 1, tview.NewTableCell(s.ProjectID[:8]+"...").SetAlign(tview.AlignLeft))
+			sessionTable.SetCell(row+1, 2, tview.NewTableCell(modeColor+string(s.Mode)).SetAlign(tview.AlignCenter))
+			sessionTable.SetCell(row+1, 3, tview.NewTableCell(statusColor+string(s.Status)).SetAlign(tview.AlignCenter))
+			sessionTable.SetCell(row+1, 4, tview.NewTableCell(formatDuration(duration)).SetAlign(tview.AlignRight))
+			sessionTable.SetCell(row+1, 5, tview.NewTableCell(s.CreatedAt.Format("01-02 15:04")).SetAlign(tview.AlignCenter))
+		}
+	}
+
+	// Session statistics panel
+	statsPanel := tui.createSessionStatsPanel()
+
+	// Handle session selection
+	sessionTable.SetSelectedFunc(func(row, col int) {
+		if row > 0 && row <= len(sessions) {
+			selectedSession := sessions[row-1]
+			tui.showSessionActions(selectedSession)
+		}
+	})
+
+	// Action buttons
+	actions := tview.NewFlex().SetDirection(tview.FlexColumn)
+	newSessionBtn := tview.NewButton("New Session").SetSelectedFunc(func() {
+		tui.showNewSessionForm()
+	})
+	startBtn := tview.NewButton("Start").SetSelectedFunc(func() {
+		row, _ := sessionTable.GetSelection()
+		if row > 0 && row <= len(sessions) {
+			s := sessions[row-1]
+			if err := tui.sessionManager.Start(s.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to start: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[green]Started: %s", s.Name))
+				tui.showSessions()
+			}
+		}
+	})
+	pauseBtn := tview.NewButton("Pause").SetSelectedFunc(func() {
+		row, _ := sessionTable.GetSelection()
+		if row > 0 && row <= len(sessions) {
+			s := sessions[row-1]
+			if err := tui.sessionManager.Pause(s.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to pause: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[yellow]Paused: %s", s.Name))
+				tui.showSessions()
+			}
+		}
+	})
+	completeBtn := tview.NewButton("Complete").SetSelectedFunc(func() {
+		row, _ := sessionTable.GetSelection()
+		if row > 0 && row <= len(sessions) {
+			s := sessions[row-1]
+			if err := tui.sessionManager.Complete(s.ID); err != nil {
+				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to complete: %v", err))
+			} else {
+				tui.statusBar.SetText(fmt.Sprintf("[blue]Completed: %s", s.Name))
+				tui.showSessions()
+			}
+		}
+	})
+	refreshBtn := tview.NewButton("Refresh").SetSelectedFunc(func() {
+		tui.showSessions()
+	})
+
+	actions.AddItem(newSessionBtn, 0, 1, false)
+	actions.AddItem(startBtn, 0, 1, false)
+	actions.AddItem(pauseBtn, 0, 1, false)
+	actions.AddItem(completeBtn, 0, 1, false)
+	actions.AddItem(refreshBtn, 0, 1, false)
+
+	// Main content area
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+	contentFlex.AddItem(sessionTable, 0, 2, true)
+	contentFlex.AddItem(statsPanel, 35, 0, false)
+
+	sessionsView.
+		AddItem(header, 3, 0, false).
+		AddItem(contentFlex, 0, 1, true).
+		AddItem(actions, 3, 0, false)
 
 	tui.content.SwitchToPage("sessions")
 	tui.content.AddPage("sessions", sessionsView, true, true)
 }
 
+// createSessionStatsPanel creates session statistics panel
+func (tui *TerminalUI) createSessionStatsPanel() *tview.TextView {
+	panel := tview.NewTextView().SetDynamicColors(true)
+	panel.SetBorder(true).SetTitle("Statistics")
+
+	stats := tui.sessionManager.GetStatistics()
+	activeSession := tui.sessionManager.GetActive()
+
+	activeInfo := "[gray]None"
+	if activeSession != nil {
+		activeInfo = fmt.Sprintf("[green]%s[white] (%s)", activeSession.Name, activeSession.Mode)
+	}
+
+	content := fmt.Sprintf(`[::b]Session Summary[white]
+
+[green]Total:[white] %d
+[green]Active:[white] %d
+[yellow]Paused:[white] %d
+[blue]Completed:[white] %d
+[red]Failed:[white] %d
+
+[::b]Current Session[white]
+%s
+
+[::b]Average Duration[white]
+%s`,
+		stats.Total,
+		stats.ByStatus[session.StatusActive],
+		stats.ByStatus[session.StatusPaused],
+		stats.ByStatus[session.StatusCompleted],
+		stats.ByStatus[session.StatusFailed],
+		activeInfo,
+		formatDuration(stats.AverageDuration))
+
+	panel.SetText(content)
+	return panel
+}
+
+// showSessionActions shows actions for a specific session
+func (tui *TerminalUI) showSessionActions(s *session.Session) {
+	modal := tview.NewModal()
+	modal.SetText(fmt.Sprintf("Session: %s\nMode: %s\nStatus: %s\nDuration: %s",
+		s.Name, s.Mode, s.Status, formatDuration(s.Duration)))
+
+	buttons := []string{"Close"}
+	switch s.Status {
+	case session.StatusPaused:
+		buttons = append([]string{"Start", "Resume"}, buttons...)
+	case session.StatusActive:
+		buttons = append([]string{"Pause", "Complete"}, buttons...)
+	}
+	if s.Status != session.StatusActive {
+		buttons = append(buttons, "Delete")
+	}
+
+	modal.AddButtons(buttons)
+	modal.SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+		switch buttonLabel {
+		case "Start":
+			tui.sessionManager.Start(s.ID)
+		case "Resume":
+			tui.sessionManager.Resume(s.ID)
+		case "Pause":
+			tui.sessionManager.Pause(s.ID)
+		case "Complete":
+			tui.sessionManager.Complete(s.ID)
+		case "Delete":
+			tui.sessionManager.Delete(s.ID)
+		}
+		tui.pages.RemovePage("sessionActions")
+		tui.showSessions()
+	})
+
+	tui.pages.AddPage("sessionActions", modal, true, true)
+}
+
+// showNewSessionForm displays a form for creating a new session
+func (tui *TerminalUI) showNewSessionForm() {
+	form := tview.NewForm()
+	form.SetBorder(true).SetTitle("Create New Session").SetTitleAlign(tview.AlignLeft)
+
+	var name, description string
+	var mode session.Mode = session.ModePlanning
+
+	// Get active project for default project ID
+	ctx := context.Background()
+	activeProject, _ := tui.projectManager.GetActiveProject(ctx)
+	projectID := ""
+	if activeProject != nil {
+		projectID = activeProject.ID
+	}
+
+	form.AddInputField("Name", "", 30, nil, func(text string) {
+		name = text
+	})
+	form.AddInputField("Description", "", 50, nil, func(text string) {
+		description = text
+	})
+	form.AddInputField("Project ID", projectID, 40, nil, func(text string) {
+		projectID = text
+	})
+	form.AddDropDown("Mode", []string{
+		string(session.ModePlanning),
+		string(session.ModeBuilding),
+		string(session.ModeTesting),
+		string(session.ModeRefactoring),
+		string(session.ModeDebugging),
+		string(session.ModeDeployment),
+	}, 0, func(option string, index int) {
+		mode = session.Mode(option)
+	})
+
+	form.AddButton("Create", func() {
+		if name == "" {
+			tui.statusBar.SetText("[red]Session name is required")
+			return
+		}
+		if projectID == "" {
+			tui.statusBar.SetText("[red]Project ID is required (create or select a project first)")
+			return
+		}
+
+		newSession, err := tui.sessionManager.Create(projectID, name, description, mode)
+		if err != nil {
+			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to create session: %v", err))
+		} else {
+			tui.statusBar.SetText(fmt.Sprintf("[green]Session created: %s", newSession.Name))
+			tui.showSessions()
+		}
+
+		tui.pages.RemovePage("newSessionForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	form.AddButton("Cancel", func() {
+		tui.pages.RemovePage("newSessionForm")
+		tui.app.SetFocus(tui.content)
+	})
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(form, 18, 1, true).
+			AddItem(nil, 0, 1, false), 70, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	tui.pages.AddPage("newSessionForm", modal, true, true)
+	tui.app.SetFocus(form)
+}
+
+// formatDuration formats a duration for display
+func formatDuration(d time.Duration) string {
+	if d < time.Minute {
+		return fmt.Sprintf("%ds", int(d.Seconds()))
+	}
+	if d < time.Hour {
+		return fmt.Sprintf("%dm %ds", int(d.Minutes()), int(d.Seconds())%60)
+	}
+	return fmt.Sprintf("%dh %dm", int(d.Hours()), int(d.Minutes())%60)
+}
+
 // showLLM displays the LLM interaction interface
 func (tui *TerminalUI) showLLM() {
-	llmView := tview.NewTextView().
-		SetText("[::b]AI Model Interaction\n\nImplementation pending...").
+	llmView := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	header := tview.NewTextView().
+		SetText("[::b]AI Model Interaction").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true)
-	llmView.SetBorder(true)
+	header.SetBorder(true)
+
+	// Main content area - split between chat and info panels
+	mainContent := tview.NewFlex().SetDirection(tview.FlexColumn)
+
+	// Chat area
+	chatFlex := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	// Chat output/history
+	tui.chatOutput = tview.NewTextView().
+		SetDynamicColors(true).
+		SetScrollable(true).
+		SetWrap(true)
+	tui.chatOutput.SetBorder(true).SetTitle("Chat")
+	tui.chatOutput.SetText(tui.formatChatHistory())
+
+	// Chat input
+	tui.chatInput = tview.NewInputField().
+		SetLabel("You: ").
+		SetFieldWidth(0).
+		SetFieldBackgroundColor(tcell.ColorDarkSlateGray)
+	tui.chatInput.SetBorder(true).SetTitle("Message")
+
+	// Handle input submission
+	tui.chatInput.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			message := tui.chatInput.GetText()
+			if message != "" {
+				tui.sendChatMessage(message)
+				tui.chatInput.SetText("")
+			}
+		}
+	})
+
+	chatFlex.
+		AddItem(tui.chatOutput, 0, 1, false).
+		AddItem(tui.chatInput, 3, 0, true)
+
+	// Info panel
+	infoPanel := tui.createLLMInfoPanel()
+
+	mainContent.
+		AddItem(chatFlex, 0, 2, true).
+		AddItem(infoPanel, 40, 0, false)
+
+	// Action buttons
+	actions := tview.NewFlex().SetDirection(tview.FlexColumn)
+	selectModelBtn := tview.NewButton("Select Model").SetSelectedFunc(func() {
+		tui.showModelSelector()
+	})
+	clearChatBtn := tview.NewButton("Clear Chat").SetSelectedFunc(func() {
+		tui.chatHistory = make([]llm.Message, 0)
+		tui.chatOutput.SetText(tui.formatChatHistory())
+		tui.statusBar.SetText("[green]Chat cleared")
+	})
+	settingsBtn := tview.NewButton("Settings").SetSelectedFunc(func() {
+		tui.showLLMSettings()
+	})
+	actions.AddItem(selectModelBtn, 0, 1, false)
+	actions.AddItem(clearChatBtn, 0, 1, false)
+	actions.AddItem(settingsBtn, 0, 1, false)
+
+	llmView.
+		AddItem(header, 3, 0, false).
+		AddItem(mainContent, 0, 1, true).
+		AddItem(actions, 3, 0, false)
 
 	tui.content.SwitchToPage("llm")
 	tui.content.AddPage("llm", llmView, true, true)
+}
+
+// createLLMInfoPanel creates the LLM information panel
+func (tui *TerminalUI) createLLMInfoPanel() *tview.TextView {
+	panel := tview.NewTextView().SetDynamicColors(true)
+	panel.SetBorder(true).SetTitle("LLM Info")
+
+	// Get available models
+	models := tui.llmManager.GetAvailableModels()
+	modelCount := len(models)
+
+	// Get provider status
+	ctx := context.Background()
+	health := tui.llmManager.HealthCheck(ctx)
+	healthyProviders := 0
+	for _, h := range health {
+		if h.Status == "healthy" {
+			healthyProviders++
+		}
+	}
+
+	currentModel := "Not selected"
+	if tui.llmProvider != nil {
+		currentModel = tui.llmProvider.GetName()
+	}
+
+	content := fmt.Sprintf(`[::b]Current Model[white]
+%s
+
+[::b]Provider Status[white]
+[green]Healthy:[white] %d
+[red]Unhealthy:[white] %d
+
+[::b]Available Models[white]
+Total: %d
+
+[::b]Chat Statistics[white]
+Messages: %d
+Tokens Used: N/A
+
+[::b]Quick Commands[white]
+/help - Show help
+/clear - Clear chat
+/model - Change model
+/system - Set system prompt`,
+		currentModel,
+		healthyProviders,
+		len(health)-healthyProviders,
+		modelCount,
+		len(tui.chatHistory))
+
+	panel.SetText(content)
+	return panel
+}
+
+// formatChatHistory formats the chat history for display
+func (tui *TerminalUI) formatChatHistory() string {
+	if len(tui.chatHistory) == 0 {
+		return `[::b]Welcome to HelixCode AI Chat[white]
+
+Start a conversation by typing a message below.
+Use the buttons to select a model or configure settings.
+
+[::b]Tips:[white]
+- Type your message and press Enter to send
+- Use /help for available commands
+- Select a model before chatting for best results
+
+[gray]No messages yet...`
+	}
+
+	var sb strings.Builder
+	for _, msg := range tui.chatHistory {
+		switch msg.Role {
+		case "user":
+			sb.WriteString(fmt.Sprintf("[green]You:[white] %s\n\n", msg.Content))
+		case "assistant":
+			sb.WriteString(fmt.Sprintf("[cyan]AI:[white] %s\n\n", msg.Content))
+		case "system":
+			sb.WriteString(fmt.Sprintf("[yellow]System:[white] %s\n\n", msg.Content))
+		}
+	}
+	return sb.String()
+}
+
+// sendChatMessage sends a message to the LLM
+func (tui *TerminalUI) sendChatMessage(message string) {
+	// Handle commands
+	if strings.HasPrefix(message, "/") {
+		tui.handleChatCommand(message)
+		return
+	}
+
+	// Add user message to history
+	tui.chatHistory = append(tui.chatHistory, llm.Message{
+		Role:    "user",
+		Content: message,
+	})
+
+	// Update display
+	tui.chatOutput.SetText(tui.formatChatHistory())
+	tui.chatOutput.ScrollToEnd()
+
+	// Check if provider is available
+	if tui.llmProvider == nil {
+		// Add a simulated response for demo purposes when no provider is configured
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role:    "assistant",
+			Content: "[No LLM provider configured. Please configure a provider in Settings > System to enable AI responses.]\n\nThis is a placeholder response. In production, configure an LLM provider like Ollama, OpenAI, or Anthropic.",
+		})
+		tui.chatOutput.SetText(tui.formatChatHistory())
+		tui.chatOutput.ScrollToEnd()
+		tui.statusBar.SetText("[yellow]No LLM provider configured - showing placeholder response")
+		return
+	}
+
+	// Send to LLM provider
+	ctx := context.Background()
+	request := &llm.LLMRequest{
+		ID:          uuid.New(),
+		Messages:    tui.chatHistory,
+		MaxTokens:   2048,
+		Temperature: 0.7,
+	}
+
+	tui.statusBar.SetText("[yellow]Generating response...")
+	tui.app.Draw()
+
+	response, err := tui.llmProvider.Generate(ctx, request)
+	if err != nil {
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role:    "assistant",
+			Content: fmt.Sprintf("[Error: %v]", err),
+		})
+		tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", err))
+	} else {
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role:    "assistant",
+			Content: response.Content,
+		})
+		tui.statusBar.SetText(fmt.Sprintf("[green]Response received (tokens: %d)", response.Usage.TotalTokens))
+	}
+
+	tui.chatOutput.SetText(tui.formatChatHistory())
+	tui.chatOutput.ScrollToEnd()
+	tui.app.Draw()
+}
+
+// handleChatCommand handles chat commands
+func (tui *TerminalUI) handleChatCommand(cmd string) {
+	switch {
+	case cmd == "/help":
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role: "system",
+			Content: `Available Commands:
+/help - Show this help message
+/clear - Clear chat history
+/model - Show model selector
+/system <prompt> - Set system prompt
+/info - Show current model info`,
+		})
+	case cmd == "/clear":
+		tui.chatHistory = make([]llm.Message, 0)
+		tui.statusBar.SetText("[green]Chat cleared")
+	case cmd == "/model":
+		tui.showModelSelector()
+		return
+	case cmd == "/info":
+		info := "No model selected"
+		if tui.llmProvider != nil {
+			info = fmt.Sprintf("Provider: %s\nModels: %d available", tui.llmProvider.GetName(), len(tui.llmProvider.GetModels()))
+		}
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role:    "system",
+			Content: info,
+		})
+	case strings.HasPrefix(cmd, "/system "):
+		systemPrompt := strings.TrimPrefix(cmd, "/system ")
+		// Prepend system message to chat history
+		tui.chatHistory = append([]llm.Message{{Role: "system", Content: systemPrompt}}, tui.chatHistory...)
+		tui.statusBar.SetText("[green]System prompt set")
+	default:
+		tui.chatHistory = append(tui.chatHistory, llm.Message{
+			Role:    "system",
+			Content: fmt.Sprintf("Unknown command: %s. Type /help for available commands.", cmd),
+		})
+	}
+
+	tui.chatOutput.SetText(tui.formatChatHistory())
+	tui.chatOutput.ScrollToEnd()
+}
+
+// showModelSelector displays a modal for selecting LLM models
+func (tui *TerminalUI) showModelSelector() {
+	list := tview.NewList()
+	list.SetBorder(true).SetTitle("Select Model")
+
+	// Get available models
+	models := tui.llmManager.GetAvailableModels()
+
+	if len(models) == 0 {
+		list.AddItem("No models available", "Configure providers in Settings", 0, nil)
+		list.AddItem("Configure Ollama", "Local LLM provider", 'o', func() {
+			tui.statusBar.SetText("[yellow]Configure Ollama in Settings > System")
+			tui.pages.RemovePage("modelSelector")
+		})
+	} else {
+		for i, model := range models {
+			shortcut := rune('1' + i)
+			if i >= 9 {
+				shortcut = 0
+			}
+			modelInfo := model
+			list.AddItem(model.Name, fmt.Sprintf("Provider: %s, Context: %d", model.Provider, model.ContextSize), shortcut, func() {
+				tui.selectModel(modelInfo)
+				tui.pages.RemovePage("modelSelector")
+			})
+		}
+	}
+
+	list.AddItem("Cancel", "Return to chat", 'c', func() {
+		tui.pages.RemovePage("modelSelector")
+	})
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(list, 20, 1, true).
+			AddItem(nil, 0, 1, false), 60, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	tui.pages.AddPage("modelSelector", modal, true, true)
+	tui.app.SetFocus(list)
+}
+
+// selectModel selects an LLM model
+func (tui *TerminalUI) selectModel(model *llm.ModelInfo) {
+	ctx := context.Background()
+	provider, err := tui.llmManager.GetProviderForModel(model.Name, model.Provider)
+	if err != nil {
+		tui.statusBar.SetText(fmt.Sprintf("[red]Failed to get provider: %v", err))
+		return
+	}
+
+	tui.llmProvider = provider
+	tui.statusBar.SetText(fmt.Sprintf("[green]Selected model: %s (%s)", model.Name, model.Provider))
+
+	// Add system message about model selection
+	tui.chatHistory = append(tui.chatHistory, llm.Message{
+		Role:    "system",
+		Content: fmt.Sprintf("Model changed to: %s (Provider: %s)", model.Name, model.Provider),
+	})
+	tui.chatOutput.SetText(tui.formatChatHistory())
+
+	// Refresh LLM view if currently showing
+	if provider.IsAvailable(ctx) {
+		tui.showLLM()
+	}
+}
+
+// showLLMSettings displays LLM configuration settings
+func (tui *TerminalUI) showLLMSettings() {
+	form := tview.NewForm()
+	form.SetBorder(true).SetTitle("LLM Settings").SetTitleAlign(tview.AlignLeft)
+
+	var temperature float64 = 0.7
+	var maxTokens int = 2048
+	var systemPrompt string
+
+	form.AddInputField("Temperature", "0.7", 10, nil, func(text string) {
+		fmt.Sscanf(text, "%f", &temperature)
+	})
+	form.AddInputField("Max Tokens", "2048", 10, tview.InputFieldInteger, func(text string) {
+		fmt.Sscanf(text, "%d", &maxTokens)
+	})
+	form.AddInputField("System Prompt", "", 50, nil, func(text string) {
+		systemPrompt = text
+	})
+
+	form.AddButton("Apply", func() {
+		if systemPrompt != "" {
+			// Add system prompt to beginning of chat
+			tui.chatHistory = append([]llm.Message{{Role: "system", Content: systemPrompt}}, tui.chatHistory...)
+		}
+		tui.statusBar.SetText(fmt.Sprintf("[green]Settings applied: temp=%.2f, max_tokens=%d", temperature, maxTokens))
+		tui.pages.RemovePage("llmSettings")
+		tui.showLLM()
+	})
+
+	form.AddButton("Cancel", func() {
+		tui.pages.RemovePage("llmSettings")
+	})
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(form, 16, 1, true).
+			AddItem(nil, 0, 1, false), 60, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	tui.pages.AddPage("llmSettings", modal, true, true)
+	tui.app.SetFocus(form)
 }
 
 // showSettings displays the settings interface

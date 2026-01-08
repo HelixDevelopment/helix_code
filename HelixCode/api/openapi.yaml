@@ -1,0 +1,2631 @@
+openapi: 3.0.3
+info:
+  title: HelixCode API
+  description: |
+    HelixCode is an enterprise-grade distributed AI development platform.
+
+    This API provides access to:
+    - **Authentication**: User registration, login, and JWT token management
+    - **Projects**: Development project lifecycle management
+    - **Tasks**: Distributed task management with checkpointing and dependencies
+    - **Workers**: SSH-based distributed worker pool management
+    - **Sessions**: Development session tracking
+    - **Workflows**: Automated development workflows (planning, building, testing, refactoring)
+    - **LLM Providers**: Multi-provider LLM integration
+    - **Memory Systems**: AI memory and knowledge management
+    - **System**: Server status, metrics, and health checks
+  version: 1.0.0
+  contact:
+    name: HelixCode Team
+    url: https://helix.dev
+  license:
+    name: Proprietary
+    url: https://helix.dev/license
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: https://api.helix.dev/v1
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Projects
+    description: Development project management
+  - name: Tasks
+    description: Distributed task management
+  - name: Workers
+    description: Distributed worker pool management
+  - name: Sessions
+    description: Development session management
+  - name: Workflows
+    description: Automated development workflows
+  - name: LLM
+    description: LLM provider management
+  - name: Memory
+    description: AI memory system management
+  - name: System
+    description: System status and metrics
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the server is healthy and all dependencies are accessible
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                version: "1.0.0"
+                timestamp: "2024-01-15T10:30:00Z"
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Authentication endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: johndoe
+              email: john@example.com
+              password: securePassword123
+              display_name: John Doe
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid request or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and receive JWT token
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: johndoe
+              password: securePassword123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                status: success
+                user:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  username: johndoe
+                  email: john@example.com
+                  display_name: John Doe
+                  is_active: true
+                  is_verified: false
+                  mfa_enabled: false
+                  last_login: "2024-01-15T10:30:00Z"
+                  created_at: "2024-01-01T00:00:00Z"
+                  updated_at: "2024-01-15T10:30:00Z"
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                session:
+                  id: "660e8400-e29b-41d4-a716-446655440001"
+                  user_id: "550e8400-e29b-41d4-a716-446655440000"
+                  session_token: "abc123..."
+                  client_type: rest_api
+                  ip_address: "192.168.1.1"
+                  user_agent: "Mozilla/5.0..."
+                  expires_at: "2024-01-22T10:30:00Z"
+                  created_at: "2024-01-15T10:30:00Z"
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidate the current session
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT token
+      description: Generate a new JWT token using the current valid token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # User endpoints
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user
+      description: Retrieve the authenticated user's profile
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Users
+      summary: Update current user
+      description: Update the authenticated user's profile
+      operationId: updateCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Users
+      summary: Delete current user
+      description: Delete the authenticated user's account
+      operationId: deleteCurrentUser
+      responses:
+        '200':
+          description: User account deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Project endpoints
+  /projects:
+    get:
+      tags:
+        - Projects
+      summary: List projects
+      description: Retrieve all projects for the authenticated user
+      operationId: listProjects
+      responses:
+        '200':
+          description: Projects retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Projects
+      summary: Create project
+      description: Create a new development project
+      operationId: createProject
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+            example:
+              name: my-awesome-project
+              description: An awesome Go project
+              path: /home/user/projects/my-awesome-project
+              type: go
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags:
+        - Projects
+      summary: Get project
+      description: Retrieve a project by ID
+      operationId: getProject
+      responses:
+        '200':
+          description: Project retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Projects
+      summary: Update project
+      description: Update a project's details
+      operationId: updateProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Projects
+      summary: Delete project
+      description: Delete a project
+      operationId: deleteProject
+      responses:
+        '200':
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{id}/sessions:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags:
+        - Projects
+      summary: Get project sessions
+      description: Retrieve all sessions for a project
+      operationId: getProjectSessions
+      responses:
+        '200':
+          description: Sessions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Workflow endpoints
+  /projects/{projectId}/workflows/planning:
+    parameters:
+      - $ref: '#/components/parameters/ProjectIdPath'
+    post:
+      tags:
+        - Workflows
+      summary: Execute planning workflow
+      description: Execute the planning workflow for a project
+      operationId: executePlanningWorkflow
+      security: []
+      responses:
+        '200':
+          description: Workflow executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{projectId}/workflows/building:
+    parameters:
+      - $ref: '#/components/parameters/ProjectIdPath'
+    post:
+      tags:
+        - Workflows
+      summary: Execute building workflow
+      description: Execute the building workflow for a project
+      operationId: executeBuildingWorkflow
+      security: []
+      responses:
+        '200':
+          description: Workflow executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{projectId}/workflows/testing:
+    parameters:
+      - $ref: '#/components/parameters/ProjectIdPath'
+    post:
+      tags:
+        - Workflows
+      summary: Execute testing workflow
+      description: Execute the testing workflow for a project
+      operationId: executeTestingWorkflow
+      security: []
+      responses:
+        '200':
+          description: Workflow executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{projectId}/workflows/refactoring:
+    parameters:
+      - $ref: '#/components/parameters/ProjectIdPath'
+    post:
+      tags:
+        - Workflows
+      summary: Execute refactoring workflow
+      description: Execute the refactoring workflow for a project
+      operationId: executeRefactoringWorkflow
+      security: []
+      responses:
+        '200':
+          description: Workflow executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Task endpoints
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      summary: List tasks
+      description: Retrieve all tasks
+      operationId: listTasks
+      responses:
+        '200':
+          description: Tasks retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Tasks
+      summary: Create task
+      description: Create a new task
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+            example:
+              name: Build Application
+              description: Build the main application binary
+              type: building
+              priority: high
+              parameters:
+                target: linux-amd64
+                optimization: release
+              dependencies: []
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    get:
+      tags:
+        - Tasks
+      summary: Get task
+      description: Retrieve a task by ID
+      operationId: getTask
+      responses:
+        '200':
+          description: Task retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Tasks
+      summary: Update task
+      description: Update a task's status
+      operationId: updateTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Tasks
+      summary: Delete task
+      description: Delete a task
+      operationId: deleteTask
+      responses:
+        '200':
+          description: Task deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/assign:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Assign task to worker
+      description: Assign a task to a specific worker
+      operationId: assignTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTaskRequest'
+      responses:
+        '200':
+          description: Task assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Task manager not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/start:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Start task
+      description: Start executing a task
+      operationId: startTask
+      responses:
+        '200':
+          description: Task started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Failed to start task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/complete:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Complete task
+      description: Mark a task as completed
+      operationId: completeTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteTaskRequest'
+      responses:
+        '200':
+          description: Task completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/fail:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Fail task
+      description: Mark a task as failed
+      operationId: failTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FailTaskRequest'
+      responses:
+        '200':
+          description: Task marked as failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/checkpoint:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Create task checkpoint
+      description: Create a checkpoint for a task to preserve work
+      operationId: createTaskCheckpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckpointRequest'
+      responses:
+        '201':
+          description: Checkpoint created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/checkpoints:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    get:
+      tags:
+        - Tasks
+      summary: Get task checkpoints
+      description: Retrieve all checkpoints for a task
+      operationId: getTaskCheckpoints
+      responses:
+        '200':
+          description: Checkpoints retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointListResponse'
+        '500':
+          description: Failed to get checkpoints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}/retry:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    post:
+      tags:
+        - Tasks
+      summary: Retry task
+      description: Retry a failed task
+      operationId: retryTask
+      responses:
+        '200':
+          description: Task queued for retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Failed to retry task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Worker endpoints
+  /workers:
+    get:
+      tags:
+        - Workers
+      summary: List workers
+      description: Retrieve all registered workers
+      operationId: listWorkers
+      responses:
+        '200':
+          description: Workers retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerListResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Workers
+      summary: Create worker
+      description: Register a new worker
+      operationId: createWorker
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkerRequest'
+            example:
+              hostname: worker-01.example.com
+              display_name: Build Worker 1
+              ssh_config:
+                host: worker-01.example.com
+                port: 22
+                username: helix
+                key_path: /home/helix/.ssh/id_rsa
+              capabilities:
+                - build
+                - test
+                - go
+              resources:
+                cpu_count: 8
+                total_memory: 17179869184
+                gpu_count: 1
+              max_concurrent_tasks: 4
+      responses:
+        '201':
+          description: Worker registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkerId'
+    get:
+      tags:
+        - Workers
+      summary: Get worker
+      description: Retrieve a worker by ID
+      operationId: getWorker
+      responses:
+        '200':
+          description: Worker retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerResponse'
+        '404':
+          description: Worker not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Workers
+      summary: Update worker
+      description: Update a worker's configuration
+      operationId: updateWorker
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkerRequest'
+      responses:
+        '200':
+          description: Worker updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Workers
+      summary: Delete worker
+      description: Remove a worker from the pool
+      operationId: deleteWorker
+      responses:
+        '200':
+          description: Worker deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Failed to delete worker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workers/{id}/heartbeat:
+    parameters:
+      - $ref: '#/components/parameters/WorkerId'
+    post:
+      tags:
+        - Workers
+      summary: Worker heartbeat
+      description: Update a worker's heartbeat and metrics
+      operationId: workerHeartbeat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Heartbeat received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workers/{id}/metrics:
+    parameters:
+      - $ref: '#/components/parameters/WorkerId'
+    get:
+      tags:
+        - Workers
+      summary: Get worker metrics
+      description: Retrieve metrics for a worker (last hour)
+      operationId: getWorkerMetrics
+      responses:
+        '200':
+          description: Metrics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerMetricsResponse'
+        '500':
+          description: Failed to get metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Session endpoints
+  /sessions:
+    get:
+      tags:
+        - Sessions
+      summary: List sessions
+      description: Retrieve all development sessions
+      operationId: listSessions
+      responses:
+        '200':
+          description: Sessions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '503':
+          description: Session manager not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Sessions
+      summary: Create session
+      description: Create a new development session
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+            example:
+              project_id: proj_my-project_1234567890
+              name: Feature Development Session
+              description: Working on new feature implementation
+              mode: building
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sessions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/SessionId'
+    get:
+      tags:
+        - Sessions
+      summary: Get session
+      description: Retrieve a session by ID
+      operationId: getSession
+      responses:
+        '200':
+          description: Session retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Sessions
+      summary: Update session
+      description: Update a session's status (start, pause, resume, complete, fail)
+      operationId: updateSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSessionRequest'
+      responses:
+        '200':
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Sessions
+      summary: Delete session
+      description: Delete a session
+      operationId: deleteSession
+      responses:
+        '200':
+          description: Session deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Failed to delete session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # LLM endpoints
+  /llm/providers:
+    get:
+      tags:
+        - LLM
+      summary: List LLM providers
+      description: Retrieve all available LLM providers
+      operationId: listLLMProviders
+      security: []
+      responses:
+        '200':
+          description: Providers retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderListResponse'
+
+  /llm/providers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ProviderId'
+    get:
+      tags:
+        - LLM
+      summary: Get LLM provider
+      description: Retrieve details for a specific LLM provider
+      operationId: getLLMProvider
+      security: []
+      responses:
+        '200':
+          description: Provider retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderResponse'
+
+  /llm/models:
+    get:
+      tags:
+        - LLM
+      summary: List LLM models
+      description: Retrieve all available LLM models across providers
+      operationId: listLLMModels
+      security: []
+      responses:
+        '200':
+          description: Models retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMModelListResponse'
+
+  # Memory endpoints
+  /memory/systems:
+    get:
+      tags:
+        - Memory
+      summary: List memory systems
+      description: Retrieve all available memory systems
+      operationId: listMemorySystems
+      security: []
+      responses:
+        '200':
+          description: Memory systems retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemorySystemListResponse'
+
+  /memory/stats:
+    get:
+      tags:
+        - Memory
+      summary: Get memory stats
+      description: Retrieve memory system statistics
+      operationId: getMemoryStats
+      security: []
+      responses:
+        '200':
+          description: Memory stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStatsResponse'
+
+  # System endpoints
+  /system/stats:
+    get:
+      tags:
+        - System
+      summary: Get system stats
+      description: Retrieve system-wide statistics including tasks and workers
+      operationId: getSystemStats
+      responses:
+        '200':
+          description: System stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatsResponse'
+              example:
+                status: success
+                stats:
+                  tasks:
+                    total: 100
+                    pending: 25
+                    running: 10
+                    completed: 60
+                    failed: 5
+                  workers:
+                    total: 5
+                    active: 4
+                  system:
+                    uptime: "24h30m15s"
+
+  /system/status:
+    get:
+      tags:
+        - System
+      summary: Get system status
+      description: Retrieve system component health status
+      operationId: getSystemStatus
+      responses:
+        '200':
+          description: System status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatusResponse'
+
+  /server/info:
+    get:
+      tags:
+        - System
+      summary: Get server info
+      description: Retrieve server information and configuration
+      operationId: getServerInfo
+      security: []
+      responses:
+        '200':
+          description: Server info retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfoResponse'
+
+  /metrics:
+    get:
+      tags:
+        - System
+      summary: Get metrics
+      description: Retrieve server metrics
+      operationId: getMetrics
+      security: []
+      responses:
+        '200':
+          description: Metrics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT authentication token
+
+  parameters:
+    ProjectId:
+      name: id
+      in: path
+      required: true
+      description: Project ID
+      schema:
+        type: string
+      example: proj_my-project_1234567890
+
+    ProjectIdPath:
+      name: projectId
+      in: path
+      required: true
+      description: Project ID
+      schema:
+        type: string
+      example: proj_my-project_1234567890
+
+    TaskId:
+      name: id
+      in: path
+      required: true
+      description: Task ID
+      schema:
+        type: string
+        format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+
+    WorkerId:
+      name: id
+      in: path
+      required: true
+      description: Worker ID
+      schema:
+        type: string
+        format: uuid
+      example: 660e8400-e29b-41d4-a716-446655440001
+
+    SessionId:
+      name: id
+      in: path
+      required: true
+      description: Session ID
+      schema:
+        type: string
+      example: sess_1234567890
+
+    ProviderId:
+      name: id
+      in: path
+      required: true
+      description: LLM Provider ID
+      schema:
+        type: string
+      example: openai
+
+  schemas:
+    # Common response schemas
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: An error occurred
+        error:
+          type: string
+          example: Detailed error message
+
+    SuccessResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Operation completed successfully
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, error]
+          example: healthy
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    # Authentication schemas
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          minLength: 8
+          format: password
+          example: securePassword123
+        display_name:
+          type: string
+          example: John Doe
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username or email
+          example: johndoe
+        password:
+          type: string
+          format: password
+          example: securePassword123
+
+    LoginResponse:
+      type: object
+      required:
+        - status
+        - user
+        - token
+        - session
+      properties:
+        status:
+          type: string
+          example: success
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        session:
+          $ref: '#/components/schemas/AuthSession'
+
+    TokenResponse:
+      type: object
+      required:
+        - status
+        - token
+      properties:
+        status:
+          type: string
+          example: success
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    # User schemas
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - is_active
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        display_name:
+          type: string
+          example: John Doe
+        is_active:
+          type: boolean
+          example: true
+        is_verified:
+          type: boolean
+          example: false
+        mfa_enabled:
+          type: boolean
+          example: false
+        last_login:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    AuthSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        session_token:
+          type: string
+        client_type:
+          type: string
+          example: rest_api
+        ip_address:
+          type: string
+          example: "192.168.1.1"
+        user_agent:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      required:
+        - status
+        - user
+      properties:
+        status:
+          type: string
+          example: success
+        user:
+          $ref: '#/components/schemas/User'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          example: John Smith
+        email:
+          type: string
+          format: email
+          example: john.smith@example.com
+
+    # Project schemas
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - path
+        - type
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: proj_my-project_1234567890
+        name:
+          type: string
+          example: my-awesome-project
+        description:
+          type: string
+          example: An awesome Go project
+        path:
+          type: string
+          example: /home/user/projects/my-awesome-project
+        type:
+          type: string
+          enum: [go, node, python, rust, generic]
+          example: go
+        active:
+          type: boolean
+          example: false
+        metadata:
+          $ref: '#/components/schemas/ProjectMetadata'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProjectMetadata:
+      type: object
+      properties:
+        build_command:
+          type: string
+          example: go build
+        test_command:
+          type: string
+          example: go test ./...
+        lint_command:
+          type: string
+          example: gofmt -l .
+        dependencies:
+          type: array
+          items:
+            type: string
+        environment:
+          type: object
+          additionalProperties:
+            type: string
+        framework:
+          type: string
+        language_version:
+          type: string
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - name
+        - path
+      properties:
+        name:
+          type: string
+          example: my-awesome-project
+        description:
+          type: string
+          example: An awesome Go project
+        path:
+          type: string
+          example: /home/user/projects/my-awesome-project
+        type:
+          type: string
+          example: go
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    ProjectResponse:
+      type: object
+      required:
+        - status
+        - project
+      properties:
+        status:
+          type: string
+          example: success
+        project:
+          $ref: '#/components/schemas/Project'
+
+    ProjectListResponse:
+      type: object
+      required:
+        - status
+        - projects
+      properties:
+        status:
+          type: string
+          example: success
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+
+    # Task schemas
+    Task:
+      type: object
+      required:
+        - id
+        - type
+        - status
+        - priority
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Build Application
+        description:
+          type: string
+          example: Build the main application binary
+        type:
+          type: string
+          enum: [planning, building, testing, refactoring, debugging, design, diagram, deployment, porting]
+          example: building
+        status:
+          type: string
+          enum: [pending, assigned, running, completed, failed, paused, waiting_for_worker, waiting_for_deps]
+          example: pending
+        priority:
+          type: integer
+          enum: [1, 5, 10, 20]
+          description: "Priority levels: 1=low, 5=normal, 10=high, 20=critical"
+          example: 5
+        criticality:
+          type: string
+          enum: [low, normal, high, critical]
+          example: normal
+        assigned_worker:
+          type: string
+          format: uuid
+          nullable: true
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+        retry_count:
+          type: integer
+          example: 0
+        max_retries:
+          type: integer
+          example: 3
+        error_message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        result_data:
+          type: object
+          additionalProperties: true
+        checkpoint_data:
+          type: object
+          additionalProperties: true
+        estimated_duration:
+          type: string
+          example: "1h30m"
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          example: Build Application
+        description:
+          type: string
+          example: Build the main application binary
+        type:
+          type: string
+          enum: [planning, building, testing, refactoring, debugging]
+          example: building
+        priority:
+          type: string
+          enum: [low, normal, high, critical]
+          example: normal
+        parameters:
+          type: object
+          additionalProperties: true
+        dependencies:
+          type: array
+          items:
+            type: string
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [running, completed, failed]
+        result:
+          type: object
+          additionalProperties: true
+        error_message:
+          type: string
+
+    AssignTaskRequest:
+      type: object
+      required:
+        - worker_id
+      properties:
+        worker_id:
+          type: string
+          format: uuid
+          example: 660e8400-e29b-41d4-a716-446655440001
+
+    CompleteTaskRequest:
+      type: object
+      properties:
+        result:
+          type: object
+          additionalProperties: true
+
+    FailTaskRequest:
+      type: object
+      required:
+        - error_message
+      properties:
+        error_message:
+          type: string
+          example: Build failed due to missing dependency
+
+    CreateCheckpointRequest:
+      type: object
+      required:
+        - checkpoint_name
+      properties:
+        checkpoint_name:
+          type: string
+          example: after-parsing
+        checkpoint_data:
+          type: object
+          additionalProperties: true
+
+    TaskResponse:
+      type: object
+      required:
+        - status
+        - task
+      properties:
+        status:
+          type: string
+          example: success
+        task:
+          $ref: '#/components/schemas/Task'
+        message:
+          type: string
+
+    TaskListResponse:
+      type: object
+      required:
+        - status
+        - tasks
+      properties:
+        status:
+          type: string
+          example: success
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+
+    CheckpointListResponse:
+      type: object
+      required:
+        - status
+        - checkpoints
+      properties:
+        status:
+          type: string
+          example: success
+        checkpoints:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              data:
+                type: object
+              created_at:
+                type: string
+                format: date-time
+
+    # Worker schemas
+    Worker:
+      type: object
+      required:
+        - id
+        - hostname
+        - status
+        - health_status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 660e8400-e29b-41d4-a716-446655440001
+        hostname:
+          type: string
+          example: worker-01.example.com
+        display_name:
+          type: string
+          example: Build Worker 1
+        ssh_config:
+          type: object
+          properties:
+            host:
+              type: string
+            port:
+              type: integer
+            username:
+              type: string
+            key_path:
+              type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+          example: [build, test, go, docker]
+        resources:
+          $ref: '#/components/schemas/WorkerResources'
+        status:
+          type: string
+          enum: [active, inactive, maintenance, failed, offline]
+          example: active
+        health_status:
+          type: string
+          enum: [healthy, degraded, unhealthy, unknown]
+          example: healthy
+        last_heartbeat:
+          type: string
+          format: date-time
+        cpu_usage_percent:
+          type: number
+          format: float
+          example: 45.5
+        memory_usage_percent:
+          type: number
+          format: float
+          example: 62.3
+        disk_usage_percent:
+          type: number
+          format: float
+          example: 35.0
+        current_tasks_count:
+          type: integer
+          example: 2
+        max_concurrent_tasks:
+          type: integer
+          example: 4
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    WorkerResources:
+      type: object
+      properties:
+        cpu_count:
+          type: integer
+          example: 8
+        total_memory:
+          type: integer
+          format: int64
+          description: Total memory in bytes
+          example: 17179869184
+        total_disk:
+          type: integer
+          format: int64
+          description: Total disk space in bytes
+          example: 536870912000
+        gpu_count:
+          type: integer
+          example: 1
+        gpu_model:
+          type: string
+          example: NVIDIA RTX 4090
+        gpu_memory:
+          type: integer
+          format: int64
+          description: GPU memory in bytes
+          example: 25769803776
+
+    WorkerMetrics:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        worker_id:
+          type: string
+          format: uuid
+        cpu_usage_percent:
+          type: number
+          format: float
+        memory_usage_percent:
+          type: number
+          format: float
+        disk_usage_percent:
+          type: number
+          format: float
+        network_rx_bytes:
+          type: integer
+          format: int64
+        network_tx_bytes:
+          type: integer
+          format: int64
+        current_tasks_count:
+          type: integer
+        temperature_celsius:
+          type: number
+          format: float
+        recorded_at:
+          type: string
+          format: date-time
+
+    CreateWorkerRequest:
+      type: object
+      required:
+        - hostname
+      properties:
+        hostname:
+          type: string
+          example: worker-01.example.com
+        display_name:
+          type: string
+          example: Build Worker 1
+        ssh_config:
+          type: object
+          additionalProperties: true
+        capabilities:
+          type: array
+          items:
+            type: string
+        resources:
+          type: object
+          additionalProperties: true
+        max_concurrent_tasks:
+          type: integer
+          example: 4
+
+    UpdateWorkerRequest:
+      type: object
+      properties:
+        hostname:
+          type: string
+        display_name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        max_concurrent_tasks:
+          type: integer
+
+    HeartbeatRequest:
+      type: object
+      properties:
+        metrics:
+          type: object
+          additionalProperties: true
+
+    WorkerResponse:
+      type: object
+      required:
+        - status
+        - worker
+      properties:
+        status:
+          type: string
+          example: success
+        worker:
+          $ref: '#/components/schemas/Worker'
+
+    WorkerListResponse:
+      type: object
+      required:
+        - status
+        - workers
+      properties:
+        status:
+          type: string
+          example: success
+        workers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Worker'
+
+    WorkerMetricsResponse:
+      type: object
+      required:
+        - status
+        - metrics
+      properties:
+        status:
+          type: string
+          example: success
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkerMetrics'
+
+    # Session schemas
+    Session:
+      type: object
+      required:
+        - id
+        - project_id
+        - name
+        - mode
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: sess_1234567890
+        project_id:
+          type: string
+          example: proj_my-project_1234567890
+        name:
+          type: string
+          example: Feature Development Session
+        description:
+          type: string
+          example: Working on new feature implementation
+        mode:
+          type: string
+          enum: [planning, building, testing, refactoring, debugging, deployment]
+          example: building
+        status:
+          type: string
+          enum: [active, paused, completed, failed]
+          example: active
+        focus_chain_id:
+          type: string
+        context:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        duration:
+          type: string
+          example: "2h30m"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+
+    CreateSessionRequest:
+      type: object
+      required:
+        - project_id
+        - name
+        - mode
+      properties:
+        project_id:
+          type: string
+          example: proj_my-project_1234567890
+        name:
+          type: string
+          example: Feature Development Session
+        description:
+          type: string
+          example: Working on new feature implementation
+        mode:
+          type: string
+          enum: [planning, building, testing, refactoring, debugging, deployment]
+          example: building
+
+    UpdateSessionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [start, pause, resume, complete, fail]
+          example: start
+        reason:
+          type: string
+          description: Required for fail action
+          example: Build failed due to compilation error
+
+    SessionResponse:
+      type: object
+      required:
+        - status
+        - session
+      properties:
+        status:
+          type: string
+          example: success
+        session:
+          $ref: '#/components/schemas/Session'
+        message:
+          type: string
+
+    SessionListResponse:
+      type: object
+      required:
+        - status
+        - sessions
+      properties:
+        status:
+          type: string
+          example: success
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+
+    # Workflow schemas
+    WorkflowResponse:
+      type: object
+      required:
+        - status
+        - workflow
+      properties:
+        status:
+          type: string
+          example: success
+        workflow:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            status:
+              type: string
+            steps:
+              type: array
+              items:
+                type: object
+            started_at:
+              type: string
+              format: date-time
+            completed_at:
+              type: string
+              format: date-time
+
+    # LLM schemas
+    LLMProvider:
+      type: object
+      properties:
+        id:
+          type: string
+          example: openai
+        name:
+          type: string
+          example: OpenAI
+        type:
+          type: string
+          enum: [local, cloud]
+          example: cloud
+        description:
+          type: string
+          example: OpenAI GPT models
+        status:
+          type: string
+          enum: [available, unavailable, configuring]
+          example: available
+        configured:
+          type: boolean
+          example: true
+        models:
+          type: array
+          items:
+            type: string
+          example: [gpt-4, gpt-4-turbo, gpt-3.5-turbo]
+
+    LLMModel:
+      type: object
+      properties:
+        id:
+          type: string
+          example: gpt-4
+        provider:
+          type: string
+          example: openai
+        context_length:
+          type: integer
+          example: 8192
+
+    LLMProviderResponse:
+      type: object
+      required:
+        - status
+        - provider
+      properties:
+        status:
+          type: string
+          example: success
+        provider:
+          $ref: '#/components/schemas/LLMProvider'
+
+    LLMProviderListResponse:
+      type: object
+      required:
+        - status
+        - providers
+        - count
+      properties:
+        status:
+          type: string
+          example: success
+        providers:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMProvider'
+        count:
+          type: integer
+          example: 9
+
+    LLMModelListResponse:
+      type: object
+      required:
+        - status
+        - models
+        - count
+      properties:
+        status:
+          type: string
+          example: success
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMModel'
+        count:
+          type: integer
+          example: 7
+
+    # Memory schemas
+    MemorySystem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: cognee
+        name:
+          type: string
+          example: Cognee
+        type:
+          type: string
+          enum: [knowledge_graph, vector_db, memory_layer, memory_store]
+          example: knowledge_graph
+        description:
+          type: string
+          example: AI-powered knowledge graph for memory management
+        status:
+          type: string
+          enum: [available, unavailable]
+          example: available
+        features:
+          type: array
+          items:
+            type: string
+          example: [semantic_search, context_retrieval, optimization]
+
+    MemorySystemListResponse:
+      type: object
+      required:
+        - status
+        - systems
+        - count
+      properties:
+        status:
+          type: string
+          example: success
+        systems:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemorySystem'
+        count:
+          type: integer
+          example: 6
+
+    MemoryStatsResponse:
+      type: object
+      required:
+        - status
+        - stats
+      properties:
+        status:
+          type: string
+          example: success
+        stats:
+          type: object
+          properties:
+            total_memories:
+              type: integer
+              example: 0
+            total_embeddings:
+              type: integer
+              example: 0
+            storage_used_mb:
+              type: integer
+              example: 0
+            active_sessions:
+              type: integer
+              example: 0
+            cache_hit_rate:
+              type: number
+              format: float
+              example: 0.0
+            avg_retrieval_ms:
+              type: integer
+              example: 0
+            systems_connected:
+              type: integer
+              example: 0
+
+    # System schemas
+    SystemStatsResponse:
+      type: object
+      required:
+        - status
+        - stats
+      properties:
+        status:
+          type: string
+          example: success
+        stats:
+          type: object
+          properties:
+            tasks:
+              type: object
+              properties:
+                total:
+                  type: integer
+                pending:
+                  type: integer
+                running:
+                  type: integer
+                completed:
+                  type: integer
+                failed:
+                  type: integer
+            workers:
+              type: object
+              properties:
+                total:
+                  type: integer
+                active:
+                  type: integer
+            system:
+              type: object
+              properties:
+                uptime:
+                  type: string
+                  example: "24h30m15s"
+
+    SystemStatusResponse:
+      type: object
+      required:
+        - status
+        - system
+      properties:
+        status:
+          type: string
+          example: success
+        system:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+              example: healthy
+            api:
+              type: string
+              enum: [healthy, unhealthy]
+              example: healthy
+            version:
+              type: string
+              example: "1.0.0"
+
+    ServerInfoResponse:
+      type: object
+      required:
+        - status
+        - info
+      properties:
+        status:
+          type: string
+          example: success
+        info:
+          type: object
+          properties:
+            name:
+              type: string
+              example: HelixCode Server
+            version:
+              type: string
+              example: "1.0.0"
+            go_version:
+              type: string
+              example: "1.24"
+            uptime:
+              type: string
+              example: "24h30m15s"
+            start_time:
+              type: string
+              format: date-time
+            database:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                connected:
+                  type: boolean
+            redis:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                connected:
+                  type: boolean
+            features:
+              type: object
+              properties:
+                auth_enabled:
+                  type: boolean
+                mcp_enabled:
+                  type: boolean
+                notifications_enabled:
+                  type: boolean
+
+    MetricsResponse:
+      type: object
+      required:
+        - status
+        - metrics
+      properties:
+        status:
+          type: string
+          example: success
+        metrics:
+          type: object
+          properties:
+            uptime_seconds:
+              type: number
+              format: float
+              example: 88215.5
+            requests:
+              type: object
+              properties:
+                total:
+                  type: integer
+                active:
+                  type: integer
+            resources:
+              type: object
+              properties:
+                goroutines:
+                  type: integer
+                memory_mb:
+                  type: integer
+            database:
+              type: object
+              properties:
+                connections_active:
+                  type: integer
+                connections_idle:
+                  type: integer

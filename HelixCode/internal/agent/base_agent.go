@@ -2,12 +2,15 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
 	"dev.helix.code/internal/agent/task"
 	"dev.helix.code/internal/config"
+	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/tools"
 )
 
 // Task represents a task that can be executed by an agent
@@ -49,6 +52,10 @@ type BaseAgent struct {
 	maxConcurrency int
 	timeout        time.Duration
 	retryCount     int
+
+	// LLM and Tools integration (optional - can be nil for simple agents)
+	llmProvider  llm.Provider
+	toolRegistry *tools.ToolRegistry
 }
 
 // NewBaseAgent creates a new base agent
@@ -215,15 +222,767 @@ func (a *BaseAgent) SubmitTask(ctx context.Context, task *Task) (*TaskResult, er
 	}, nil
 }
 
-// executeTask executes a task (to be implemented by subclasses)
-func (a *BaseAgent) executeTask(ctx context.Context, task *Task) (interface{}, error) {
-	// This is a placeholder implementation
-	// Subclasses should override this method
+// executeTask executes a task using the configured LLM provider and tools
+func (a *BaseAgent) executeTask(ctx context.Context, t *Task) (interface{}, error) {
+	// If no LLM provider is configured, return basic execution result
+	if a.llmProvider == nil {
+		return a.executeTaskBasic(ctx, t)
+	}
+
+	// Execute with LLM assistance
+	return a.executeTaskWithLLM(ctx, t)
+}
+
+// executeTaskBasic provides basic task execution without LLM
+func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{}, error) {
+	// For basic execution without LLM, just process based on task type
+	switch t.Type {
+	case task.TaskTypePlanning:
+		return a.basicPlanning(t)
+	case task.TaskTypeAnalysis:
+		return a.basicAnalysis(t)
+	case task.TaskTypeCodeGeneration, task.TaskTypeCodeEdit:
+		return nil, fmt.Errorf("code tasks require LLM provider to be configured")
+	case task.TaskTypeTesting:
+		return a.basicTesting(ctx, t)
+	case task.TaskTypeDebugging:
+		return nil, fmt.Errorf("debugging tasks require LLM provider to be configured")
+	case task.TaskTypeReview:
+		return nil, fmt.Errorf("review tasks require LLM provider to be configured")
+	case task.TaskTypeRefactoring:
+		return nil, fmt.Errorf("refactoring tasks require LLM provider to be configured")
+	case task.TaskTypeDocumentation:
+		return nil, fmt.Errorf("documentation tasks require LLM provider to be configured")
+	default:
+		return map[string]interface{}{
+			"message":   "Task processed",
+			"task_id":   t.ID,
+			"task_type": t.Type,
+			"status":    "completed",
+		}, nil
+	}
+}
+
+// basicPlanning provides basic planning without LLM
+func (a *BaseAgent) basicPlanning(t *Task) (interface{}, error) {
+	requirements, _ := t.Input["requirements"].(string)
+	if requirements == "" {
+		return nil, fmt.Errorf("requirements not found in task input")
+	}
+
+	// Return a basic plan structure
 	return map[string]interface{}{
-		"message":   "Task executed successfully",
-		"task_id":   task.ID,
-		"task_type": task.Type,
+		"plan":        "Basic plan generated without LLM assistance",
+		"subtasks":    []map[string]interface{}{},
+		"total_tasks": 0,
+		"note":        "For detailed planning, configure an LLM provider",
 	}, nil
+}
+
+// basicAnalysis provides basic analysis without LLM
+func (a *BaseAgent) basicAnalysis(t *Task) (interface{}, error) {
+	content, _ := t.Input["content"].(string)
+	if content == "" {
+		return nil, fmt.Errorf("content not found in task input")
+	}
+
+	// Return basic analysis metrics
+	lineCount := countLinesInString(content)
+	return map[string]interface{}{
+		"analysis":   "Basic analysis without LLM",
+		"line_count": lineCount,
+		"char_count": len(content),
+	}, nil
+}
+
+// basicTesting provides basic test execution using shell tools
+func (a *BaseAgent) basicTesting(ctx context.Context, t *Task) (interface{}, error) {
+	if a.toolRegistry == nil {
+		return nil, fmt.Errorf("tool registry required for test execution")
+	}
+
+	// Get test command from input or use default
+	testCmd, ok := t.Input["test_command"].(string)
+	if !ok {
+		// Default to go test
+		testDir, _ := t.Input["test_directory"].(string)
+		if testDir == "" {
+			testDir = "."
+		}
+		testCmd = fmt.Sprintf("go test -v %s", testDir)
+	}
+
+	// Execute test using shell tool
+	shellTool, err := a.toolRegistry.Get("Shell")
+	if err != nil {
+		return nil, fmt.Errorf("shell tool not available: %w", err)
+	}
+
+	result, err := shellTool.Execute(ctx, map[string]interface{}{
+		"command": testCmd,
+		"timeout": 60000, // 60 second timeout
+	})
+	if err != nil {
+		return map[string]interface{}{
+			"status":  "failed",
+			"error":   err.Error(),
+			"command": testCmd,
+		}, err
+	}
+
+	return map[string]interface{}{
+		"status":  "completed",
+		"output":  result,
+		"command": testCmd,
+	}, nil
+}
+
+// executeTaskWithLLM executes a task using the LLM provider
+func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{}, error) {
+	// Build the prompt based on task type
+	prompt, err := a.buildPromptForTask(t)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build prompt: %w", err)
+	}
+
+	// Get available models
+	models := a.llmProvider.GetModels()
+	if len(models) == 0 {
+		return nil, fmt.Errorf("no models available from provider")
+	}
+
+	// Create LLM request
+	request := &llm.LLMRequest{
+		Model: models[0].Name,
+		Messages: []llm.Message{
+			{Role: "system", Content: a.getSystemPrompt()},
+			{Role: "user", Content: prompt},
+		},
+		MaxTokens:   4000,
+		Temperature: 0.3, // Low temperature for consistent results
+	}
+
+	// Execute LLM request
+	response, err := a.llmProvider.Generate(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("LLM generation failed: %w", err)
+	}
+
+	// Parse and process the response based on task type
+	result, err := a.processLLMResponse(ctx, t, response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to process LLM response: %w", err)
+	}
+
+	return result, nil
+}
+
+// buildPromptForTask builds an appropriate prompt for the task type
+func (a *BaseAgent) buildPromptForTask(t *Task) (string, error) {
+	switch t.Type {
+	case task.TaskTypePlanning:
+		requirements, _ := t.Input["requirements"].(string)
+		if requirements == "" {
+			return "", fmt.Errorf("requirements not found in task input")
+		}
+		return fmt.Sprintf(`Analyze the following requirements and create a detailed technical plan:
+
+Requirements:
+%s
+
+Provide:
+1. Brief analysis of requirements
+2. Key technical decisions
+3. Breakdown of subtasks with type, description, priority, and dependencies
+4. Potential risks and mitigations
+
+Format as JSON:
+{
+  "analysis": "requirement analysis",
+  "decisions": ["decision 1", "decision 2"],
+  "subtasks": [{"title": "...", "type": "...", "priority": 1-4, "depends_on": []}],
+  "risks": [{"risk": "...", "mitigation": "..."}]
+}`, requirements), nil
+
+	case task.TaskTypeCodeGeneration:
+		requirements, _ := t.Input["requirements"].(string)
+		if requirements == "" {
+			return "", fmt.Errorf("requirements not found in task input")
+		}
+		return fmt.Sprintf(`Generate code according to these requirements:
+
+Requirements:
+%s
+
+Format response as JSON:
+{
+  "code": "the complete code",
+  "explanation": "explanation of implementation"
+}`, requirements), nil
+
+	case task.TaskTypeCodeEdit:
+		requirements, _ := t.Input["requirements"].(string)
+		existingCode, _ := t.Input["existing_code"].(string)
+		if requirements == "" || existingCode == "" {
+			return "", fmt.Errorf("requirements and existing_code required for code editing")
+		}
+		return fmt.Sprintf(`Modify the following code according to requirements:
+
+Requirements:
+%s
+
+Existing Code:
+%s
+
+Format response as JSON:
+{
+  "code": "the complete modified code",
+  "explanation": "explanation of changes"
+}`, requirements, existingCode), nil
+
+	case task.TaskTypeDebugging:
+		errorMsg, _ := t.Input["error"].(string)
+		stackTrace, _ := t.Input["stack_trace"].(string)
+		codeContext, _ := t.Input["code_context"].(string)
+		if errorMsg == "" {
+			return "", fmt.Errorf("error message required for debugging")
+		}
+		return fmt.Sprintf(`Analyze this error and identify the root cause:
+
+Error:
+%s
+
+Stack Trace:
+%s
+
+Code Context:
+%s
+
+Format response as JSON:
+{
+  "analysis": "detailed analysis",
+  "root_cause": "root cause",
+  "suggested_fixes": ["fix 1", "fix 2"]
+}`, errorMsg, stackTrace, codeContext), nil
+
+	case task.TaskTypeReview:
+		code, _ := t.Input["code"].(string)
+		if code == "" {
+			return "", fmt.Errorf("code required for review")
+		}
+		return fmt.Sprintf(`Review this code for quality, security, and best practices:
+
+Code:
+%s
+
+Format response as JSON:
+{
+  "review_summary": "overall assessment",
+  "issues": [{"severity": "low/medium/high/critical", "description": "...", "recommendation": "..."}],
+  "suggestions": ["suggestion 1", "suggestion 2"],
+  "metrics": {"quality_score": 0-100}
+}`, code), nil
+
+	case task.TaskTypeRefactoring:
+		code, _ := t.Input["code"].(string)
+		goals, _ := t.Input["goals"].(string)
+		if code == "" {
+			return "", fmt.Errorf("code required for refactoring")
+		}
+		return fmt.Sprintf(`Refactor this code according to the goals:
+
+Code:
+%s
+
+Refactoring Goals:
+%s
+
+Format response as JSON:
+{
+  "refactored_code": "the refactored code",
+  "changes": ["change 1", "change 2"],
+  "improvements": ["improvement 1", "improvement 2"]
+}`, code, goals), nil
+
+	case task.TaskTypeDocumentation:
+		code, _ := t.Input["code"].(string)
+		if code == "" {
+			return "", fmt.Errorf("code required for documentation")
+		}
+		return fmt.Sprintf(`Generate documentation for this code:
+
+Code:
+%s
+
+Format response as JSON:
+{
+  "documentation": "the generated documentation in markdown",
+  "summary": "brief summary",
+  "functions": [{"name": "...", "description": "...", "params": [], "returns": "..."}]
+}`, code), nil
+
+	case task.TaskTypeTesting:
+		code, _ := t.Input["code"].(string)
+		if code == "" {
+			return "", fmt.Errorf("code required for test generation")
+		}
+		return fmt.Sprintf(`Generate comprehensive tests for this code:
+
+Code:
+%s
+
+Format response as JSON:
+{
+  "test_code": "complete test code",
+  "test_cases": ["TestCase1", "TestCase2"],
+  "coverage_notes": "notes about test coverage"
+}`, code), nil
+
+	case task.TaskTypeAnalysis:
+		content, _ := t.Input["content"].(string)
+		if content == "" {
+			return "", fmt.Errorf("content required for analysis")
+		}
+		return fmt.Sprintf(`Analyze the following content:
+
+Content:
+%s
+
+Format response as JSON:
+{
+  "analysis": "detailed analysis",
+  "findings": ["finding 1", "finding 2"],
+  "recommendations": ["recommendation 1", "recommendation 2"]
+}`, content), nil
+
+	default:
+		// Generic task handling
+		description := t.Description
+		if description == "" {
+			description = t.Title
+		}
+		return fmt.Sprintf(`Execute the following task:
+
+Task: %s
+Description: %s
+Input: %v
+
+Format response as JSON:
+{
+  "result": "task result",
+  "notes": "any relevant notes"
+}`, t.Title, description, t.Input), nil
+	}
+}
+
+// getSystemPrompt returns the system prompt for the agent
+func (a *BaseAgent) getSystemPrompt() string {
+	return fmt.Sprintf(`You are a %s agent named %s. Your capabilities include: %v.
+
+You are part of a multi-agent system for software development. Your responses should be:
+1. Precise and actionable
+2. Formatted as JSON as requested
+3. Focused on your area of expertise
+
+Always respond with valid JSON only, no additional text.`, a.agentType, a.name, a.capabilities)
+}
+
+// processLLMResponse processes the LLM response based on task type
+func (a *BaseAgent) processLLMResponse(ctx context.Context, t *Task, response *llm.LLMResponse) (interface{}, error) {
+	if response.Content == "" {
+		return nil, fmt.Errorf("empty response from LLM")
+	}
+
+	// Parse JSON response
+	var result map[string]interface{}
+	if err := json.Unmarshal([]byte(response.Content), &result); err != nil {
+		// If JSON parsing fails, wrap the content
+		result = map[string]interface{}{
+			"raw_response": response.Content,
+			"parse_error":  err.Error(),
+		}
+	}
+
+	// Add metadata
+	result["task_id"] = t.ID
+	result["task_type"] = string(t.Type)
+	result["agent_id"] = a.id
+	result["tokens_used"] = response.Usage.TotalTokens
+
+	// For code generation/edit tasks, optionally apply changes using tools
+	if a.toolRegistry != nil {
+		switch t.Type {
+		case task.TaskTypeCodeGeneration, task.TaskTypeCodeEdit:
+			if err := a.applyCodeChangesIfRequested(ctx, t, result); err != nil {
+				result["apply_error"] = err.Error()
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// applyCodeChangesIfRequested applies generated code to files if requested
+func (a *BaseAgent) applyCodeChangesIfRequested(ctx context.Context, t *Task, result map[string]interface{}) error {
+	// Check if auto_apply is requested
+	autoApply, _ := t.Input["auto_apply"].(bool)
+	if !autoApply {
+		return nil
+	}
+
+	filePath, _ := t.Input["file_path"].(string)
+	if filePath == "" {
+		return nil // No file path specified
+	}
+
+	code, _ := result["code"].(string)
+	if code == "" {
+		return fmt.Errorf("no code in result to apply")
+	}
+
+	// Get the write tool
+	writeTool, err := a.toolRegistry.Get("FSWrite")
+	if err != nil {
+		return fmt.Errorf("FSWrite tool not available: %w", err)
+	}
+
+	// Write the code
+	_, err = writeTool.Execute(ctx, map[string]interface{}{
+		"path":    filePath,
+		"content": code,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to write code: %w", err)
+	}
+
+	result["file_written"] = filePath
+	return nil
+}
+
+// countLinesInString counts lines in a string
+func countLinesInString(s string) int {
+	if s == "" {
+		return 0
+	}
+	lines := 1
+	for _, c := range s {
+		if c == '\n' {
+			lines++
+		}
+	}
+	return lines
+}
+
+// SetLLMProvider sets the LLM provider for the agent
+func (a *BaseAgent) SetLLMProvider(provider llm.Provider) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.llmProvider = provider
+}
+
+// GetLLMProvider returns the LLM provider
+func (a *BaseAgent) GetLLMProvider() llm.Provider {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.llmProvider
+}
+
+// SetToolRegistry sets the tool registry for the agent
+func (a *BaseAgent) SetToolRegistry(registry *tools.ToolRegistry) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.toolRegistry = registry
+}
+
+// GetToolRegistry returns the tool registry
+func (a *BaseAgent) GetToolRegistry() *tools.ToolRegistry {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.toolRegistry
+}
+
+// Execute implements the Agent interface Execute method
+// This method executes a task and returns a task.Result
+func (a *BaseAgent) Execute(ctx context.Context, t *task.Task) (*task.Result, error) {
+	a.SetStatus(StatusBusy)
+	defer a.SetStatus(StatusIdle)
+
+	startTime := time.Now()
+	result := task.NewResult(t.ID, a.ID())
+
+	// Execute the task
+	output, err := a.executeTask(ctx, t)
+	result.Duration = time.Since(startTime)
+
+	if err != nil {
+		result.SetFailure(err)
+		a.mu.Lock()
+		a.tasksFailed++
+		a.tasksProcessed++
+		a.totalDuration += result.Duration
+		a.lastActivity = time.Now()
+		a.mu.Unlock()
+		return result, err
+	}
+
+	// Convert output to map if possible
+	outputMap, ok := output.(map[string]interface{})
+	if !ok {
+		outputMap = map[string]interface{}{
+			"result": output,
+		}
+	}
+
+	// Determine confidence based on whether LLM was used
+	confidence := 0.7 // Default confidence for basic execution
+	if a.llmProvider != nil {
+		confidence = 0.85 // Higher confidence with LLM assistance
+	}
+
+	result.SetSuccess(outputMap, confidence)
+
+	// Update statistics
+	a.mu.Lock()
+	a.tasksSucceeded++
+	a.tasksProcessed++
+	a.totalDuration += result.Duration
+	a.lastActivity = time.Now()
+	a.mu.Unlock()
+
+	return result, nil
+}
+
+// Collaborate implements the Agent interface Collaborate method
+// This allows the agent to work with other agents on a task
+func (a *BaseAgent) Collaborate(ctx context.Context, agents []Agent, t *task.Task) (*CollaborationResult, error) {
+	startTime := time.Now()
+
+	collaborationResult := &CollaborationResult{
+		Success:      true,
+		Results:      make(map[string]*task.Result),
+		Participants: []string{a.ID()},
+		Messages:     []*CollaborationMessage{},
+	}
+
+	// First, execute our own task
+	myResult, err := a.Execute(ctx, t)
+	if err != nil {
+		collaborationResult.Success = false
+	}
+	collaborationResult.Results[a.ID()] = myResult
+
+	// Identify agents that can help based on task requirements
+	for _, other := range agents {
+		if other.ID() == a.ID() {
+			continue // Skip self
+		}
+
+		// Check if the other agent can contribute
+		shouldCollaborate, collaborationType := a.shouldCollaborateWith(other, t)
+		if !shouldCollaborate {
+			continue
+		}
+
+		collaborationResult.Participants = append(collaborationResult.Participants, other.ID())
+
+		// Create appropriate sub-task based on collaboration type
+		subTask := a.createCollaborationTask(t, collaborationType, myResult)
+		if subTask == nil {
+			continue
+		}
+
+		// Send collaboration message
+		msg := &CollaborationMessage{
+			ID:        fmt.Sprintf("msg-%d", time.Now().UnixNano()),
+			From:      a.ID(),
+			To:        other.ID(),
+			Type:      MessageTypeRequest,
+			Content:   fmt.Sprintf("Requesting %s collaboration on task: %s", collaborationType, t.Title),
+			Timestamp: time.Now(),
+		}
+		collaborationResult.Messages = append(collaborationResult.Messages, msg)
+
+		// Execute sub-task with the other agent
+		otherResult, err := other.Execute(ctx, subTask)
+		if err != nil {
+			// Record the failure but continue with other agents
+			responseMsg := &CollaborationMessage{
+				ID:        fmt.Sprintf("msg-%d", time.Now().UnixNano()),
+				From:      other.ID(),
+				To:        a.ID(),
+				Type:      MessageTypeResponse,
+				Content:   fmt.Sprintf("Collaboration failed: %s", err.Error()),
+				Timestamp: time.Now(),
+			}
+			collaborationResult.Messages = append(collaborationResult.Messages, responseMsg)
+			continue
+		}
+
+		collaborationResult.Results[other.ID()] = otherResult
+
+		// Record successful response
+		responseMsg := &CollaborationMessage{
+			ID:        fmt.Sprintf("msg-%d", time.Now().UnixNano()),
+			From:      other.ID(),
+			To:        a.ID(),
+			Type:      MessageTypeResponse,
+			Content:   "Collaboration completed successfully",
+			Timestamp: time.Now(),
+		}
+		collaborationResult.Messages = append(collaborationResult.Messages, responseMsg)
+	}
+
+	// Use our result as the consensus (could be enhanced with voting)
+	collaborationResult.Consensus = myResult
+	collaborationResult.Duration = time.Since(startTime)
+
+	return collaborationResult, nil
+}
+
+// shouldCollaborateWith determines if we should collaborate with another agent
+func (a *BaseAgent) shouldCollaborateWith(other Agent, t *task.Task) (bool, string) {
+	otherType := other.Type()
+
+	switch a.agentType {
+	case AgentTypeCoding:
+		// Coding agents benefit from review and testing
+		if otherType == AgentTypeReview {
+			return true, "review"
+		}
+		if otherType == AgentTypeTesting {
+			return true, "testing"
+		}
+
+	case AgentTypePlanning:
+		// Planning agents can consult other planning agents
+		if otherType == AgentTypePlanning {
+			return true, "consensus"
+		}
+
+	case AgentTypeDebugging:
+		// Debugging agents benefit from testing to verify fixes
+		if otherType == AgentTypeTesting {
+			return true, "verification"
+		}
+
+	case AgentTypeReview:
+		// Review agents can request refactoring for critical issues
+		if otherType == AgentTypeRefactoring {
+			return true, "refactoring"
+		}
+	}
+
+	return false, ""
+}
+
+// createCollaborationTask creates a sub-task for collaboration
+func (a *BaseAgent) createCollaborationTask(originalTask *task.Task, collaborationType string, myResult *task.Result) *task.Task {
+	switch collaborationType {
+	case "review":
+		// Create a code review task
+		code, _ := myResult.Output["code"].(string)
+		if code == "" {
+			return nil
+		}
+		subTask := task.NewTask(
+			task.TaskTypeReview,
+			"Code Review",
+			"Review the generated code",
+			task.PriorityNormal,
+		)
+		subTask.Input = map[string]interface{}{
+			"code":      code,
+			"file_path": myResult.Output["file_path"],
+		}
+		return subTask
+
+	case "testing":
+		// Create a testing task
+		code, _ := myResult.Output["code"].(string)
+		if code == "" {
+			return nil
+		}
+		subTask := task.NewTask(
+			task.TaskTypeTesting,
+			"Generate Tests",
+			"Generate tests for the code",
+			task.PriorityNormal,
+		)
+		subTask.Input = map[string]interface{}{
+			"code":      code,
+			"file_path": myResult.Output["file_path"],
+		}
+		return subTask
+
+	case "verification":
+		// Create a test execution task
+		subTask := task.NewTask(
+			task.TaskTypeTesting,
+			"Verify Fix",
+			"Verify that the fix works",
+			task.PriorityHigh,
+		)
+		subTask.Input = map[string]interface{}{
+			"file_path":     myResult.Output["file_path"],
+			"execute_tests": true,
+		}
+		return subTask
+
+	case "refactoring":
+		// Create a refactoring task for review issues
+		issues, _ := myResult.Output["issues"].([]map[string]interface{})
+		if len(issues) == 0 {
+			return nil
+		}
+		subTask := task.NewTask(
+			task.TaskTypeRefactoring,
+			"Address Review Issues",
+			"Refactor code to address review findings",
+			task.PriorityHigh,
+		)
+		subTask.Input = map[string]interface{}{
+			"file_path": myResult.Output["file_path"],
+			"issues":    issues,
+		}
+		return subTask
+
+	case "consensus":
+		// For consensus, just pass the same task
+		return originalTask
+
+	default:
+		return nil
+	}
+}
+
+// Initialize implements the Agent interface Initialize method
+func (a *BaseAgent) Initialize(ctx context.Context, cfg *AgentConfig) error {
+	if cfg != nil {
+		// Update agent configuration
+		if cfg.ID != "" {
+			a.id = cfg.ID
+		}
+		if cfg.Name != "" {
+			a.name = cfg.Name
+		}
+		if cfg.Type != "" {
+			a.agentType = cfg.Type
+		}
+		if len(cfg.Capabilities) > 0 {
+			a.capabilities = make([]Capability, len(cfg.Capabilities))
+			copy(a.capabilities, cfg.Capabilities)
+		}
+	}
+
+	a.SetStatus(StatusIdle)
+	return nil
+}
+
+// Shutdown implements the Agent interface Shutdown method
+func (a *BaseAgent) Shutdown(ctx context.Context) error {
+	a.SetStatus(StatusShutdown)
+	a.Stop()
+	return nil
 }
 
 // Start starts the agent

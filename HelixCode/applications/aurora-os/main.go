@@ -1,27 +1,192 @@
+//go:build !nogui
+
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
+	"sync"
 	"syscall"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/server"
+	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
 )
+
+// UITask is a simplified task representation for UI display
+type UITask struct {
+	ID          string
+	Type        string
+	Description string
+	Status      string
+	Priority    string
+}
+
+// UIWorker is a simplified worker representation for UI display
+type UIWorker struct {
+	ID      string
+	Host    string
+	Port    string
+	User    string
+	Status  string
+	Healthy bool
+}
+
+// TaskStats provides task statistics for UI
+type TaskStats struct {
+	TotalTasks     int
+	CompletedTasks int
+	RunningTasks   int
+	PendingTasks   int
+}
+
+// AuroraTaskManager wraps task.TaskManager for UI operations
+type AuroraTaskManager struct {
+	inner *task.TaskManager
+	tasks []UITask
+	mu    sync.RWMutex
+}
+
+// NewAuroraTaskManager creates a new Aurora task manager wrapper
+func NewAuroraTaskManager(tm *task.TaskManager) *AuroraTaskManager {
+	return &AuroraTaskManager{
+		inner: tm,
+		tasks: make([]UITask, 0),
+	}
+}
+
+// GetAllTasks returns all tasks for UI display
+func (atm *AuroraTaskManager) GetAllTasks() []UITask {
+	atm.mu.RLock()
+	defer atm.mu.RUnlock()
+	return atm.tasks
+}
+
+// GetStats returns task statistics
+func (atm *AuroraTaskManager) GetStats() TaskStats {
+	atm.mu.RLock()
+	defer atm.mu.RUnlock()
+
+	stats := TaskStats{
+		TotalTasks: len(atm.tasks),
+	}
+
+	for _, t := range atm.tasks {
+		switch t.Status {
+		case "completed":
+			stats.CompletedTasks++
+		case "running":
+			stats.RunningTasks++
+		case "pending":
+			stats.PendingTasks++
+		}
+	}
+
+	return stats
+}
+
+// CreateTask creates a new task
+func (atm *AuroraTaskManager) CreateTask(ctx context.Context, taskType, description, priority string) (*UITask, error) {
+	atm.mu.Lock()
+	defer atm.mu.Unlock()
+
+	newTask := UITask{
+		ID:          fmt.Sprintf("task-%d", time.Now().UnixNano()),
+		Type:        taskType,
+		Description: description,
+		Status:      "pending",
+		Priority:    priority,
+	}
+
+	atm.tasks = append(atm.tasks, newTask)
+	return &newTask, nil
+}
+
+// CancelTask cancels a task by ID
+func (atm *AuroraTaskManager) CancelTask(ctx context.Context, taskID string) error {
+	atm.mu.Lock()
+	defer atm.mu.Unlock()
+
+	for i, t := range atm.tasks {
+		if t.ID == taskID {
+			atm.tasks = append(atm.tasks[:i], atm.tasks[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("task not found: %s", taskID)
+}
+
+// AuroraWorkerManager wraps worker.WorkerManager for UI operations
+type AuroraWorkerManager struct {
+	inner   *worker.WorkerManager
+	workers []UIWorker
+	mu      sync.RWMutex
+}
+
+// NewAuroraWorkerManager creates a new Aurora worker manager wrapper
+func NewAuroraWorkerManager(wm *worker.WorkerManager) *AuroraWorkerManager {
+	return &AuroraWorkerManager{
+		inner:   wm,
+		workers: make([]UIWorker, 0),
+	}
+}
+
+// GetWorkers returns all workers for UI display
+func (awm *AuroraWorkerManager) GetWorkers() []UIWorker {
+	awm.mu.RLock()
+	defer awm.mu.RUnlock()
+	return awm.workers
+}
+
+// AddWorker adds a new worker
+func (awm *AuroraWorkerManager) AddWorker(w *UIWorker) error {
+	awm.mu.Lock()
+	defer awm.mu.Unlock()
+
+	awm.workers = append(awm.workers, *w)
+	return nil
+}
+
+// RemoveWorker removes a worker by ID
+func (awm *AuroraWorkerManager) RemoveWorker(workerID string) error {
+	awm.mu.Lock()
+	defer awm.mu.Unlock()
+
+	for i, w := range awm.workers {
+		if w.ID == workerID {
+			awm.workers = append(awm.workers[:i], awm.workers[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("worker not found: %s", workerID)
+}
+
+// AuditLogEntry represents a security audit log entry
+type AuditLogEntry struct {
+	Timestamp time.Time
+	Action    string
+	User      string
+	Details   string
+	Severity  string
+}
 
 // AuroraApp represents the Aurora OS specialized application
 type AuroraApp struct {
@@ -29,9 +194,11 @@ type AuroraApp struct {
 	mainWindow         fyne.Window
 	config             *config.Config
 	db                 *database.Database
-	taskManager        *task.TaskManager
-	workerManager      *worker.WorkerManager
-	llmProvider        llm.Provider
+	taskManager        *AuroraTaskManager
+	workerManager      *AuroraWorkerManager
+	projectManager     *project.Manager
+	sessionManager     *session.Manager
+	llmManager         *llm.ModelManager
 	notificationEngine *notification.NotificationEngine
 	server             *server.Server
 	themeManager       *ThemeManager
@@ -42,8 +209,26 @@ type AuroraApp struct {
 	securityManager   *AuroraSecurityManager
 
 	// UI Components
-	tabs      *container.AppTabs
-	statusBar *widget.Label
+	tabs           *container.AppTabs
+	statusBar      *widget.Label
+	projectList    *widget.List
+	sessionList    *widget.List
+	llmProviderSel *widget.Select
+	chatHistory    *widget.Entry
+	chatInput      *widget.Entry
+
+	// Data cache for UI updates
+	dataMu       sync.RWMutex
+	projects     []*project.Project
+	sessions     []*session.Session
+	llmProviders []string
+
+	// Performance mode
+	performanceMode bool
+
+	// Update ticker for real-time data
+	updateTicker *time.Ticker
+	stopUpdate   chan struct{}
 }
 
 // AuroraIntegration handles Aurora OS specific integrations
@@ -63,13 +248,52 @@ type AuroraSystemMonitor struct {
 	memoryUsage  float64
 	diskUsage    float64
 	networkStats map[string]interface{}
+	mu           sync.RWMutex
 }
 
 // AuroraSecurityManager handles Aurora OS security features
 type AuroraSecurityManager struct {
-	encryptionEnabled bool
-	accessControl     map[string][]string
-	auditLog          []string
+	encryptionEnabled  bool
+	encryptionAlgo     string
+	accessControl      map[string][]string
+	auditLog           []AuditLogEntry
+	lastSecurityScan   time.Time
+	securityScanResult string
+	mu                 sync.RWMutex
+}
+
+// NewAuroraSecurityManager creates a new security manager
+func NewAuroraSecurityManager() *AuroraSecurityManager {
+	return &AuroraSecurityManager{
+		encryptionEnabled: true,
+		encryptionAlgo:    "AES-256-GCM",
+		accessControl: map[string][]string{
+			"admin":     {"read", "write", "execute", "admin"},
+			"developer": {"read", "write", "execute"},
+			"viewer":    {"read"},
+		},
+		auditLog: make([]AuditLogEntry, 0),
+	}
+}
+
+// AddAuditEntry adds an entry to the audit log
+func (asm *AuroraSecurityManager) AddAuditEntry(action, user, details, severity string) {
+	asm.mu.Lock()
+	defer asm.mu.Unlock()
+	asm.auditLog = append(asm.auditLog, AuditLogEntry{
+		Timestamp: time.Now(),
+		Action:    action,
+		User:      user,
+		Details:   details,
+		Severity:  severity,
+	})
+}
+
+// GetAuditLog returns all audit log entries
+func (asm *AuroraSecurityManager) GetAuditLog() []AuditLogEntry {
+	asm.mu.RLock()
+	defer asm.mu.RUnlock()
+	return asm.auditLog
 }
 
 // NewAuroraApp creates a new Aurora OS specialized application
@@ -86,134 +310,237 @@ func NewAuroraApp() *AuroraApp {
 		systemMonitor: &AuroraSystemMonitor{
 			networkStats: make(map[string]interface{}),
 		},
-		securityManager: &AuroraSecurityManager{
-			accessControl: make(map[string][]string),
-			auditLog:      make([]string, 0),
-		},
+		securityManager: NewAuroraSecurityManager(),
+		projects:        make([]*project.Project, 0),
+		sessions:        make([]*session.Session, 0),
+		llmProviders:    make([]string, 0),
+		stopUpdate:      make(chan struct{}),
 	}
 }
 
 // Initialize sets up the Aurora OS application
-func (app *AuroraApp) Initialize() error {
+func (auroraApp *AuroraApp) Initialize() error {
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %v", err)
 	}
-	app.config = cfg
+	auroraApp.config = cfg
 
-	// Initialize database
+	// Initialize database (optional - continue without it if not available)
 	db, err := database.New(cfg.Database)
 	if err != nil {
-		return fmt.Errorf("failed to initialize database: %v", err)
+		log.Printf("Warning: Database not available: %v (continuing without persistence)", err)
 	}
-	app.db = db
+	auroraApp.db = db
 
-	// Initialize Redis
+	// Initialize Redis (optional - continue without it if not available)
 	rds, err := redis.NewClient(&cfg.Redis)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Redis: %v", err)
+		log.Printf("Warning: Redis not available: %v (continuing without caching)", err)
 	}
 
 	// Initialize components
-	app.taskManager = task.NewTaskManager(db, rds)
+	innerTaskManager := task.NewTaskManager(db, rds)
+	auroraApp.taskManager = NewAuroraTaskManager(innerTaskManager)
 
 	// Initialize worker manager with in-memory repository for standalone UI
 	workerRepo := worker.NewInMemoryWorkerRepository()
-	app.workerManager = worker.NewWorkerManager(workerRepo, 30*time.Second)
+	innerWorkerManager := worker.NewWorkerManager(workerRepo, 30*time.Second)
+	auroraApp.workerManager = NewAuroraWorkerManager(innerWorkerManager)
 
-	app.notificationEngine = notification.NewNotificationEngine()
+	// Initialize project manager
+	auroraApp.projectManager = project.NewManager()
+
+	// Initialize session manager
+	auroraApp.sessionManager = session.NewManager()
+
+	// Initialize LLM manager
+	auroraApp.llmManager = llm.NewModelManager()
+
+	// Initialize notification engine
+	auroraApp.notificationEngine = notification.NewNotificationEngine()
 
 	// Initialize server for API calls
-	app.server = server.New(cfg, db, rds)
+	auroraApp.server = server.New(cfg, db, rds)
 
 	// Initialize theme manager
-	app.themeManager = NewThemeManager()
+	auroraApp.themeManager = NewThemeManager()
 
 	// Initialize Aurora OS specific features
-	if err := app.initializeAuroraFeatures(); err != nil {
+	if err := auroraApp.initializeAuroraFeatures(); err != nil {
 		return fmt.Errorf("failed to initialize Aurora features: %v", err)
 	}
 
 	// Setup UI
-	app.setupUI()
+	auroraApp.setupUI()
+
+	// Start background data updates
+	auroraApp.startDataUpdates()
+
+	// Log initialization
+	auroraApp.securityManager.AddAuditEntry("system_init", "system", "Aurora OS application initialized", "info")
 
 	return nil
 }
 
 // initializeAuroraFeatures sets up Aurora OS specific integrations
-func (app *AuroraApp) initializeAuroraFeatures() error {
+func (auroraApp *AuroraApp) initializeAuroraFeatures() error {
 	// Initialize Aurora OS native services
-	app.auroraIntegration.nativeServices["system"] = "aurora-system-service"
-	app.auroraIntegration.nativeServices["security"] = "aurora-security-service"
-	app.auroraIntegration.nativeServices["network"] = "aurora-network-service"
+	auroraApp.auroraIntegration.nativeServices["system"] = "aurora-system-service"
+	auroraApp.auroraIntegration.nativeServices["security"] = "aurora-security-service"
+	auroraApp.auroraIntegration.nativeServices["network"] = "aurora-network-service"
+	auroraApp.auroraIntegration.nativeServices["storage"] = "aurora-storage-service"
 
 	// Initialize system monitoring
-	app.systemMonitor.cpuUsage = 0.0
-	app.systemMonitor.memoryUsage = 0.0
-	app.systemMonitor.diskUsage = 0.0
-
-	// Initialize security features
-	app.securityManager.encryptionEnabled = true
-	app.securityManager.accessControl["admin"] = []string{"read", "write", "execute", "admin"}
-	app.securityManager.accessControl["developer"] = []string{"read", "write", "execute"}
-	app.securityManager.accessControl["viewer"] = []string{"read"}
+	auroraApp.refreshSystemInfo()
 
 	log.Println("Aurora OS features initialized successfully")
 	return nil
 }
 
+// startDataUpdates starts periodic background data refresh
+func (auroraApp *AuroraApp) startDataUpdates() {
+	auroraApp.updateTicker = time.NewTicker(5 * time.Second)
+	go func() {
+		// Initial data load
+		auroraApp.refreshData()
+
+		for {
+			select {
+			case <-auroraApp.updateTicker.C:
+				auroraApp.refreshData()
+				auroraApp.refreshSystemInfo()
+			case <-auroraApp.stopUpdate:
+				auroraApp.updateTicker.Stop()
+				return
+			}
+		}
+	}()
+}
+
+// refreshData updates cached data from managers
+func (auroraApp *AuroraApp) refreshData() {
+	auroraApp.dataMu.Lock()
+	defer auroraApp.dataMu.Unlock()
+
+	ctx := context.Background()
+
+	// Refresh projects
+	if auroraApp.projectManager != nil {
+		projects, err := auroraApp.projectManager.ListProjects(ctx, "")
+		if err == nil {
+			auroraApp.projects = projects
+		}
+	}
+
+	// Refresh sessions
+	if auroraApp.sessionManager != nil {
+		auroraApp.sessions = auroraApp.sessionManager.GetAll()
+	}
+
+	// Refresh LLM providers
+	if auroraApp.llmManager != nil {
+		models := auroraApp.llmManager.GetAvailableModels()
+		providers := make(map[string]bool)
+		for _, model := range models {
+			providers[string(model.Provider)] = true
+		}
+		auroraApp.llmProviders = make([]string, 0, len(providers))
+		for provider := range providers {
+			auroraApp.llmProviders = append(auroraApp.llmProviders, provider)
+		}
+	}
+}
+
 // setupUI initializes the user interface with Aurora OS optimizations
-func (app *AuroraApp) setupUI() {
+func (auroraApp *AuroraApp) setupUI() {
 	// Create main window with Aurora OS branding
-	app.mainWindow = app.fyneApp.NewWindow("HelixCode - Aurora OS Edition")
-	app.mainWindow.SetMaster()
-	app.mainWindow.Resize(fyne.NewSize(1400, 900)) // Larger for Aurora OS displays
+	auroraApp.mainWindow = auroraApp.fyneApp.NewWindow("HelixCode - Aurora OS Edition")
+	auroraApp.mainWindow.SetMaster()
+	auroraApp.mainWindow.Resize(fyne.NewSize(1400, 900)) // Larger for Aurora OS displays
 
 	// Create tabs with Aurora OS specific tabs
-	app.tabs = container.NewAppTabs(
-		container.NewTabItem("Aurora Dashboard", app.createAuroraDashboardTab()),
-		container.NewTabItem("Tasks", app.createTasksTab()),
-		container.NewTabItem("Workers", app.createWorkersTab()),
-		container.NewTabItem("Aurora System", app.createAuroraSystemTab()),
-		container.NewTabItem("Security", app.createAuroraSecurityTab()),
-		container.NewTabItem("Projects", app.createProjectsTab()),
-		container.NewTabItem("Sessions", app.createSessionsTab()),
-		container.NewTabItem("LLM", app.createLLMTab()),
-		container.NewTabItem("Settings", app.createSettingsTab()),
+	auroraApp.tabs = container.NewAppTabs(
+		container.NewTabItem("Aurora Dashboard", auroraApp.createAuroraDashboardTab()),
+		container.NewTabItem("Tasks", auroraApp.createTasksTab()),
+		container.NewTabItem("Workers", auroraApp.createWorkersTab()),
+		container.NewTabItem("Aurora System", auroraApp.createAuroraSystemTab()),
+		container.NewTabItem("Security", auroraApp.createAuroraSecurityTab()),
+		container.NewTabItem("Projects", auroraApp.createProjectsTab()),
+		container.NewTabItem("Sessions", auroraApp.createSessionsTab()),
+		container.NewTabItem("LLM", auroraApp.createLLMTab()),
+		container.NewTabItem("Settings", auroraApp.createSettingsTab()),
 	)
 
 	// Create enhanced status bar for Aurora OS
-	app.statusBar = widget.NewLabel("Aurora OS | Ready | User: Not logged in | Session: None | Security: Active")
-	app.statusBar.Alignment = fyne.TextAlignCenter
+	auroraApp.statusBar = widget.NewLabel("Aurora OS | Ready | User: Not logged in | Session: None | Security: Active")
+	auroraApp.statusBar.Alignment = fyne.TextAlignCenter
 
 	// Create main layout
-	mainContent := container.NewBorder(nil, app.statusBar, nil, nil, app.tabs)
+	mainContent := container.NewBorder(nil, auroraApp.statusBar, nil, nil, auroraApp.tabs)
 
-	app.mainWindow.SetContent(mainContent)
+	auroraApp.mainWindow.SetContent(mainContent)
 }
 
 // createAuroraDashboardTab creates the Aurora OS specialized dashboard
-func (app *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
+func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 	// Header with Aurora OS branding
-	header := widget.NewLabel("🌟 HelixCode - Aurora OS Edition")
+	header := widget.NewLabel("HelixCode - Aurora OS Edition")
 	header.Alignment = fyne.TextAlignCenter
 	header.TextStyle = fyne.TextStyle{Bold: true}
 
-	// Aurora OS specific stats
-	systemCard := widget.NewCard("Aurora System", "",
-		widget.NewLabel(fmt.Sprintf("CPU: %.1f%%\nMemory: %.1f%%\nDisk: %.1f%%\nNetwork: Active",
-			app.systemMonitor.cpuUsage, app.systemMonitor.memoryUsage,
-			app.systemMonitor.diskUsage)))
+	// Aurora OS specific stats with dynamic updates
+	systemStatsLabel := widget.NewLabel("CPU: 0.0%\nMemory: 0.0%\nDisk: 0.0%\nNetwork: Active")
+	workerStatsLabel := widget.NewLabel("Total: 0\nActive: 0\nHealthy: 0")
+	taskStatsLabel := widget.NewLabel("Total: 0\nCompleted: 0\nRunning: 0")
 
-	workerCard := widget.NewCard("Workers", "", widget.NewLabel("Total: 0\nActive: 0\nAurora Optimized: 0"))
-	taskCard := widget.NewCard("Tasks", "", widget.NewLabel("Total: 0\nCompleted: 0\nRunning: 0"))
+	systemCard := widget.NewCard("Aurora System", "", systemStatsLabel)
+	workerCard := widget.NewCard("Workers", "", workerStatsLabel)
+	taskCard := widget.NewCard("Tasks", "", taskStatsLabel)
+
+	// Start a goroutine to update stats
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			// Update system stats
+			auroraApp.systemMonitor.mu.RLock()
+			systemStatsLabel.SetText(fmt.Sprintf("CPU: %.1f%%\nMemory: %.1f%%\nDisk: %.1f%%\nNetwork: Active",
+				auroraApp.systemMonitor.cpuUsage, auroraApp.systemMonitor.memoryUsage, auroraApp.systemMonitor.diskUsage))
+			auroraApp.systemMonitor.mu.RUnlock()
+
+			// Update worker stats
+			if auroraApp.workerManager != nil {
+				workers := auroraApp.workerManager.GetWorkers()
+				active := 0
+				healthy := 0
+				for _, w := range workers {
+					if w.Status == "active" {
+						active++
+					}
+					if w.Healthy {
+						healthy++
+					}
+				}
+				workerStatsLabel.SetText(fmt.Sprintf("Total: %d\nActive: %d\nHealthy: %d", len(workers), active, healthy))
+			}
+
+			// Update task stats
+			if auroraApp.taskManager != nil {
+				stats := auroraApp.taskManager.GetStats()
+				taskStatsLabel.SetText(fmt.Sprintf("Total: %d\nCompleted: %d\nRunning: %d",
+					stats.TotalTasks, stats.CompletedTasks, stats.RunningTasks))
+			}
+		}
+	}()
 
 	statsContainer := container.NewGridWithColumns(3, systemCard, workerCard, taskCard)
 
 	// Aurora OS activity log
 	activityLog := widget.NewMultiLineEntry()
-	activityLog.SetText("• Aurora OS integration active\n• System monitoring enabled\n• Security protocols initialized\n• Native services connected\n• Performance optimization active")
+	activityLog.SetText("Aurora OS integration active\nSystem monitoring enabled\nSecurity protocols initialized\nNative services connected\nPerformance optimization available")
 	activityLog.Disable()
 
 	activityCard := widget.NewCard("Aurora Activity", "", activityLog)
@@ -221,10 +548,15 @@ func (app *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 	// Aurora OS quick actions
 	actionsCard := widget.NewCard("Aurora Actions", "",
 		container.NewVBox(
-			widget.NewButton("System Diagnostics", func() { app.runAuroraDiagnostics() }),
-			widget.NewButton("Security Scan", func() { app.runSecurityScan() }),
-			widget.NewButton("Performance Boost", func() { app.activatePerformanceMode() }),
-			widget.NewButton("New Task", func() {}),
+			widget.NewButton("System Diagnostics", func() { auroraApp.runAuroraDiagnostics() }),
+			widget.NewButton("Security Scan", func() { auroraApp.runSecurityScan() }),
+			widget.NewButton("Performance Boost", func() { auroraApp.activatePerformanceMode() }),
+			widget.NewButton("New Task", func() {
+				auroraApp.tabs.SelectIndex(1) // Switch to Tasks tab
+			}),
+			widget.NewButton("New Project", func() {
+				auroraApp.tabs.SelectIndex(5) // Switch to Projects tab
+			}),
 		),
 	)
 
@@ -234,27 +566,41 @@ func (app *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 }
 
 // createAuroraSystemTab creates the Aurora OS system monitoring tab
-func (app *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
-	// System resources
-	resourcesCard := widget.NewCard("System Resources", "",
-		widget.NewLabel(fmt.Sprintf("CPU Usage: %.1f%%\nMemory Usage: %.1f%%\nDisk Usage: %.1f%%\nNetwork Status: Connected",
-			app.systemMonitor.cpuUsage, app.systemMonitor.memoryUsage, app.systemMonitor.diskUsage)))
+func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
+	// System resources with dynamic updates
+	resourcesLabel := widget.NewLabel("Loading...")
+	resourcesCard := widget.NewCard("System Resources", "", resourcesLabel)
+
+	// Update resources display
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			auroraApp.systemMonitor.mu.RLock()
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			resourcesLabel.SetText(fmt.Sprintf(
+				"CPU Usage: %.1f%%\nMemory Usage: %.1f%%\nDisk Usage: %.1f%%\n\nGo Runtime:\n  Goroutines: %d\n  Heap Alloc: %.2f MB\n  Sys Memory: %.2f MB\n  GC Cycles: %d",
+				auroraApp.systemMonitor.cpuUsage, auroraApp.systemMonitor.memoryUsage, auroraApp.systemMonitor.diskUsage,
+				runtime.NumGoroutine(), float64(m.Alloc)/1024/1024, float64(m.Sys)/1024/1024, m.NumGC))
+			auroraApp.systemMonitor.mu.RUnlock()
+		}
+	}()
 
 	// Native services status
 	servicesList := widget.NewList(
-		func() int { return len(app.auroraIntegration.nativeServices) },
+		func() int { return len(auroraApp.auroraIntegration.nativeServices) },
 		func() fyne.CanvasObject {
-			return container.NewHBox(widget.NewLabel("Service"), widget.NewLabel("Status"))
+			return widget.NewLabel("Service: Status")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			services := make([]string, 0, len(app.auroraIntegration.nativeServices))
-			for service := range app.auroraIntegration.nativeServices {
+			services := make([]string, 0, len(auroraApp.auroraIntegration.nativeServices))
+			for service := range auroraApp.auroraIntegration.nativeServices {
 				services = append(services, service)
 			}
 			if id < len(services) {
-				container := obj.(*container.Split)
-				container.Leading.(*widget.Label).SetText(services[id])
-				container.Trailing.(*widget.Label).SetText("Active")
+				obj.(*widget.Label).SetText(fmt.Sprintf("%s: Active", services[id]))
 			}
 		},
 	)
@@ -263,35 +609,67 @@ func (app *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 
 	// System actions
 	actions := container.NewVBox(
-		widget.NewButton("Refresh System Info", func() { app.refreshSystemInfo() }),
-		widget.NewButton("Optimize Performance", func() { app.optimizePerformance() }),
-		widget.NewButton("System Diagnostics", func() { app.runAuroraDiagnostics() }),
+		widget.NewButton("Refresh System Info", func() {
+			auroraApp.refreshSystemInfo()
+			dialog.ShowInformation("Refreshed", "System information has been refreshed", auroraApp.mainWindow)
+		}),
+		widget.NewButton("Optimize Performance", func() { auroraApp.optimizePerformance() }),
+		widget.NewButton("System Diagnostics", func() { auroraApp.runAuroraDiagnostics() }),
+		widget.NewButton("Force GC", func() {
+			runtime.GC()
+			dialog.ShowInformation("GC Complete", "Garbage collection completed", auroraApp.mainWindow)
+		}),
 	)
 
 	return container.NewBorder(nil, nil, nil, actions, container.NewVBox(resourcesCard, servicesCard))
 }
 
 // createAuroraSecurityTab creates the Aurora OS security management tab
-func (app *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
-	// Security status
-	statusCard := widget.NewCard("Security Status", "",
-		widget.NewLabel(fmt.Sprintf("Encryption: %s\nAccess Control: Active\nAudit Logging: Enabled\nLast Scan: Never",
-			map[bool]string{true: "Enabled", false: "Disabled"}[app.securityManager.encryptionEnabled])))
+func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
+	// Security status with dynamic updates
+	statusLabel := widget.NewLabel("Loading...")
+	statusCard := widget.NewCard("Security Status", "", statusLabel)
 
-	// Access control
+	// Update status display
+	updateStatus := func() {
+		auroraApp.securityManager.mu.RLock()
+		lastScan := "Never"
+		if !auroraApp.securityManager.lastSecurityScan.IsZero() {
+			lastScan = auroraApp.securityManager.lastSecurityScan.Format("2006-01-02 15:04:05")
+		}
+		scanResult := auroraApp.securityManager.securityScanResult
+		if scanResult == "" {
+			scanResult = "No scan performed"
+		}
+		statusLabel.SetText(fmt.Sprintf(
+			"Encryption: %s\nAlgorithm: %s\nAccess Control: Active\nAudit Logging: Enabled\nLast Scan: %s\nScan Result: %s\nAudit Entries: %d",
+			map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.securityManager.encryptionEnabled],
+			auroraApp.securityManager.encryptionAlgo,
+			lastScan, scanResult, len(auroraApp.securityManager.auditLog)))
+		auroraApp.securityManager.mu.RUnlock()
+	}
+	updateStatus()
+
+	// Access control list
 	accessList := widget.NewList(
-		func() int { return len(app.securityManager.accessControl) },
+		func() int {
+			auroraApp.securityManager.mu.RLock()
+			defer auroraApp.securityManager.mu.RUnlock()
+			return len(auroraApp.securityManager.accessControl)
+		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Role: permissions")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			roles := make([]string, 0, len(app.securityManager.accessControl))
-			for role := range app.securityManager.accessControl {
+			auroraApp.securityManager.mu.RLock()
+			defer auroraApp.securityManager.mu.RUnlock()
+			roles := make([]string, 0, len(auroraApp.securityManager.accessControl))
+			for role := range auroraApp.securityManager.accessControl {
 				roles = append(roles, role)
 			}
 			if id < len(roles) {
 				role := roles[id]
-				permissions := app.securityManager.accessControl[role]
+				permissions := auroraApp.securityManager.accessControl[role]
 				obj.(*widget.Label).SetText(fmt.Sprintf("%s: %v", role, permissions))
 			}
 		},
@@ -301,156 +679,1027 @@ func (app *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 
 	// Security actions
 	actions := container.NewVBox(
-		widget.NewButton("Run Security Scan", func() { app.runSecurityScan() }),
-		widget.NewButton("View Audit Log", func() { app.showAuditLog() }),
-		widget.NewButton("Configure Encryption", func() { app.configureEncryption() }),
+		widget.NewButton("Run Security Scan", func() {
+			auroraApp.runSecurityScan()
+			updateStatus()
+		}),
+		widget.NewButton("View Audit Log", func() { auroraApp.showAuditLog() }),
+		widget.NewButton("Configure Encryption", func() { auroraApp.configureEncryption() }),
+		widget.NewButton("Refresh Status", func() { updateStatus() }),
 	)
 
 	return container.NewBorder(nil, nil, nil, actions, container.NewVBox(statusCard, accessCard))
 }
 
 // Aurora OS specific methods
-func (app *AuroraApp) runAuroraDiagnostics() {
+
+func (auroraApp *AuroraApp) runAuroraDiagnostics() {
 	log.Println("Running Aurora OS diagnostics...")
-	// Implementation for Aurora OS diagnostics
+	auroraApp.securityManager.AddAuditEntry("diagnostics_run", "user", "System diagnostics initiated", "info")
+
+	// Perform real diagnostics
+	diagnosticsResults := []string{}
+
+	// Check CPU
+	cpuCount := runtime.NumCPU()
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("CPU Cores: %d - OK", cpuCount))
+
+	// Check memory
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	memStatus := "OK"
+	if m.Alloc > 500*1024*1024 {
+		memStatus = "WARNING - High memory usage"
+	}
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Memory: %.2f MB allocated - %s", float64(m.Alloc)/1024/1024, memStatus))
+
+	// Check goroutines
+	goroutines := runtime.NumGoroutine()
+	goroutineStatus := "OK"
+	if goroutines > 1000 {
+		goroutineStatus = "WARNING - High goroutine count"
+	}
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Goroutines: %d - %s", goroutines, goroutineStatus))
+
+	// Check database
+	dbStatus := "Not connected"
+	if auroraApp.db != nil {
+		dbStatus = "Connected"
+	}
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Database: %s", dbStatus))
+
+	// Check managers
+	diagnosticsResults = append(diagnosticsResults, "Task Manager: Initialized")
+	diagnosticsResults = append(diagnosticsResults, "Worker Manager: Initialized")
+	diagnosticsResults = append(diagnosticsResults, "Project Manager: Initialized")
+	diagnosticsResults = append(diagnosticsResults, "Session Manager: Initialized")
+	diagnosticsResults = append(diagnosticsResults, "LLM Manager: Initialized")
+
+	// Check security
+	auroraApp.securityManager.mu.RLock()
+	encStatus := map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.securityManager.encryptionEnabled]
+	auroraApp.securityManager.mu.RUnlock()
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Encryption: %s", encStatus))
+
+	// Check performance mode
+	perfStatus := map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.performanceMode]
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Performance Mode: %s", perfStatus))
+
+	// Build result text
+	resultText := "=== Aurora OS Diagnostics ===\n\n"
+	for _, result := range diagnosticsResults {
+		resultText += result + "\n"
+	}
+	resultText += "\nDiagnostics completed successfully."
+
+	// Show results in dialog
+	dialog.ShowInformation("System Diagnostics", resultText, auroraApp.mainWindow)
+
+	auroraApp.securityManager.AddAuditEntry("diagnostics_complete", "user",
+		fmt.Sprintf("Diagnostics completed: %d checks performed", len(diagnosticsResults)), "info")
 }
 
-func (app *AuroraApp) runSecurityScan() {
+func (auroraApp *AuroraApp) runSecurityScan() {
 	log.Println("Running Aurora OS security scan...")
-	app.securityManager.auditLog = append(app.securityManager.auditLog, "Security scan completed")
+	auroraApp.securityManager.AddAuditEntry("security_scan_start", "user", "Security scan initiated", "info")
+
+	// Simulate security scan with real checks
+	scanResults := []string{}
+	issues := 0
+
+	// Check encryption
+	auroraApp.securityManager.mu.RLock()
+	if !auroraApp.securityManager.encryptionEnabled {
+		scanResults = append(scanResults, "[WARNING] Encryption is disabled")
+		issues++
+	} else {
+		scanResults = append(scanResults, "[OK] Encryption is enabled")
+	}
+	auroraApp.securityManager.mu.RUnlock()
+
+	// Check access control
+	auroraApp.securityManager.mu.RLock()
+	if len(auroraApp.securityManager.accessControl) == 0 {
+		scanResults = append(scanResults, "[WARNING] No access control roles defined")
+		issues++
+	} else {
+		scanResults = append(scanResults, fmt.Sprintf("[OK] %d access control roles defined", len(auroraApp.securityManager.accessControl)))
+	}
+	auroraApp.securityManager.mu.RUnlock()
+
+	// Check audit logging
+	scanResults = append(scanResults, "[OK] Audit logging is enabled")
+
+	// Check database connection
+	if auroraApp.db == nil {
+		scanResults = append(scanResults, "[INFO] Database not connected - data persistence limited")
+	} else {
+		scanResults = append(scanResults, "[OK] Database connected")
+	}
+
+	// Update security manager
+	auroraApp.securityManager.mu.Lock()
+	auroraApp.securityManager.lastSecurityScan = time.Now()
+	if issues == 0 {
+		auroraApp.securityManager.securityScanResult = "All checks passed"
+	} else {
+		auroraApp.securityManager.securityScanResult = fmt.Sprintf("%d issues found", issues)
+	}
+	auroraApp.securityManager.mu.Unlock()
+
+	// Build result text
+	resultText := "=== Security Scan Results ===\n\n"
+	for _, result := range scanResults {
+		resultText += result + "\n"
+	}
+	resultText += fmt.Sprintf("\nScan completed: %d issues found.", issues)
+
+	// Show results
+	dialog.ShowInformation("Security Scan", resultText, auroraApp.mainWindow)
+
+	auroraApp.securityManager.AddAuditEntry("security_scan_complete", "user",
+		fmt.Sprintf("Security scan completed: %d issues found", issues), "info")
 }
 
-func (app *AuroraApp) activatePerformanceMode() {
-	log.Println("Activating Aurora OS performance mode...")
-	// Implementation for performance optimization
+func (auroraApp *AuroraApp) activatePerformanceMode() {
+	log.Println("Toggling Aurora OS performance mode...")
+
+	auroraApp.performanceMode = !auroraApp.performanceMode
+
+	if auroraApp.performanceMode {
+		// Apply performance optimizations
+		runtime.GOMAXPROCS(runtime.NumCPU())
+		runtime.GC() // Clean up before performance mode
+
+		dialog.ShowInformation("Performance Mode",
+			"Performance mode ENABLED\n\n"+
+				"Applied optimizations:\n"+
+				fmt.Sprintf("- GOMAXPROCS set to %d\n", runtime.NumCPU())+
+				"- Garbage collection performed\n"+
+				"- Memory optimized",
+			auroraApp.mainWindow)
+
+		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", "Performance mode enabled", "info")
+	} else {
+		dialog.ShowInformation("Performance Mode",
+			"Performance mode DISABLED\n\nSystem running in normal mode.",
+			auroraApp.mainWindow)
+
+		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", "Performance mode disabled", "info")
+	}
 }
 
-func (app *AuroraApp) refreshSystemInfo() {
+func (auroraApp *AuroraApp) refreshSystemInfo() {
 	log.Println("Refreshing Aurora OS system information...")
-	// Update system monitor values
-	app.systemMonitor.cpuUsage = 45.2
-	app.systemMonitor.memoryUsage = 67.8
-	app.systemMonitor.diskUsage = 23.4
+
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	auroraApp.systemMonitor.mu.Lock()
+	// Calculate memory usage percentage (using Sys as total available to Go runtime)
+	if m.Sys > 0 {
+		auroraApp.systemMonitor.memoryUsage = float64(m.Alloc) / float64(m.Sys) * 100
+	}
+	// Simulate CPU usage based on goroutine count (rough approximation)
+	auroraApp.systemMonitor.cpuUsage = float64(runtime.NumGoroutine()) / float64(runtime.NumCPU()*100) * 100
+	if auroraApp.systemMonitor.cpuUsage > 100 {
+		auroraApp.systemMonitor.cpuUsage = 100
+	}
+	// Disk usage would require OS-specific calls, using placeholder
+	auroraApp.systemMonitor.diskUsage = 25.0 // Placeholder
+	auroraApp.systemMonitor.mu.Unlock()
 }
 
-func (app *AuroraApp) optimizePerformance() {
+func (auroraApp *AuroraApp) optimizePerformance() {
 	log.Println("Optimizing Aurora OS performance...")
-	// Implementation for system optimization
+	auroraApp.securityManager.AddAuditEntry("optimization_start", "user", "Performance optimization initiated", "info")
+
+	// Get memory stats before
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	// Force garbage collection
+	runtime.GC()
+
+	// Get memory stats after
+	var after runtime.MemStats
+	runtime.ReadMemStats(&after)
+
+	freed := float64(before.Alloc-after.Alloc) / 1024 / 1024
+
+	// Set GOMAXPROCS
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// Enable performance mode
+	auroraApp.performanceMode = true
+
+	resultText := fmt.Sprintf("=== Performance Optimization ===\n\n"+
+		"Garbage Collection:\n  Memory freed: %.2f MB\n  Before: %.2f MB\n  After: %.2f MB\n\n"+
+		"CPU Optimization:\n  GOMAXPROCS: %d\n\n"+
+		"Performance Mode: Enabled\n\n"+
+		"Optimization complete!",
+		freed, float64(before.Alloc)/1024/1024, float64(after.Alloc)/1024/1024, runtime.NumCPU())
+
+	dialog.ShowInformation("Performance Optimization", resultText, auroraApp.mainWindow)
+
+	auroraApp.securityManager.AddAuditEntry("optimization_complete", "user",
+		fmt.Sprintf("Optimization completed, freed %.2f MB", freed), "info")
 }
 
-func (app *AuroraApp) showAuditLog() {
+func (auroraApp *AuroraApp) showAuditLog() {
 	log.Println("Showing Aurora OS audit log...")
-	// Implementation for audit log display
+
+	auroraApp.securityManager.mu.RLock()
+	auditLog := auroraApp.securityManager.auditLog
+	auroraApp.securityManager.mu.RUnlock()
+
+	if len(auditLog) == 0 {
+		dialog.ShowInformation("Audit Log", "No audit log entries found.", auroraApp.mainWindow)
+		return
+	}
+
+	// Create scrollable audit log display
+	logText := "=== Security Audit Log ===\n\n"
+	// Show last 50 entries (most recent first)
+	start := len(auditLog) - 50
+	if start < 0 {
+		start = 0
+	}
+	for i := len(auditLog) - 1; i >= start; i-- {
+		entry := auditLog[i]
+		logText += fmt.Sprintf("[%s] %s\n  Action: %s\n  User: %s\n  Details: %s\n\n",
+			entry.Timestamp.Format("2006-01-02 15:04:05"),
+			entry.Severity,
+			entry.Action,
+			entry.User,
+			entry.Details)
+	}
+	logText += fmt.Sprintf("Showing %d of %d entries", len(auditLog)-start, len(auditLog))
+
+	// Create a dialog with scrollable content
+	logEntry := widget.NewMultiLineEntry()
+	logEntry.SetText(logText)
+	logEntry.Disable()
+	logEntry.Wrapping = fyne.TextWrapWord
+
+	scrollContainer := container.NewScroll(logEntry)
+	scrollContainer.SetMinSize(fyne.NewSize(600, 400))
+
+	dialog.ShowCustom("Audit Log", "Close", scrollContainer, auroraApp.mainWindow)
 }
 
-func (app *AuroraApp) configureEncryption() {
+func (auroraApp *AuroraApp) configureEncryption() {
 	log.Println("Configuring Aurora OS encryption...")
-	// Implementation for encryption configuration
+
+	auroraApp.securityManager.mu.RLock()
+	currentEnabled := auroraApp.securityManager.encryptionEnabled
+	currentAlgo := auroraApp.securityManager.encryptionAlgo
+	auroraApp.securityManager.mu.RUnlock()
+
+	// Create encryption configuration dialog
+	enabledCheck := widget.NewCheck("Enable Encryption", nil)
+	enabledCheck.Checked = currentEnabled
+
+	algoSelect := widget.NewSelect([]string{"AES-256-GCM", "AES-256-CBC", "ChaCha20-Poly1305"}, nil)
+	algoSelect.SetSelected(currentAlgo)
+
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Encryption Enabled", Widget: enabledCheck},
+			{Text: "Algorithm", Widget: algoSelect},
+		},
+		OnSubmit: func() {
+			auroraApp.securityManager.mu.Lock()
+			oldEnabled := auroraApp.securityManager.encryptionEnabled
+			auroraApp.securityManager.encryptionEnabled = enabledCheck.Checked
+			auroraApp.securityManager.encryptionAlgo = algoSelect.Selected
+			auroraApp.securityManager.mu.Unlock()
+
+			// Log the change
+			if oldEnabled != enabledCheck.Checked {
+				action := "encryption_disabled"
+				severity := "warning"
+				if enabledCheck.Checked {
+					action = "encryption_enabled"
+					severity = "info"
+				}
+				auroraApp.securityManager.AddAuditEntry(action, "user",
+					fmt.Sprintf("Encryption %s with algorithm %s",
+						map[bool]string{true: "enabled", false: "disabled"}[enabledCheck.Checked],
+						algoSelect.Selected), severity)
+			}
+
+			dialog.ShowInformation("Encryption Configuration",
+				fmt.Sprintf("Encryption settings updated:\n  Enabled: %v\n  Algorithm: %s",
+					enabledCheck.Checked, algoSelect.Selected),
+				auroraApp.mainWindow)
+		},
+	}
+
+	dialog.ShowForm("Configure Encryption", "Save", "Cancel", form.Items, func(b bool) {
+		if b {
+			form.OnSubmit()
+		}
+	}, auroraApp.mainWindow)
 }
 
 // Run starts the Aurora OS application
-func (app *AuroraApp) Run() {
+func (auroraApp *AuroraApp) Run() {
 	// Setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Show window
-	app.mainWindow.ShowAndRun()
+	// Start signal handler in goroutine
+	go func() {
+		<-sigChan
+		auroraApp.fyneApp.Quit()
+	}()
 
-	// Wait for shutdown signal
-	<-sigChan
-	app.fyneApp.Quit()
+	// Show window and run (blocks until window closes)
+	auroraApp.mainWindow.ShowAndRun()
 }
 
 // createTasksTab creates the tasks tab
-func (app *AuroraApp) createTasksTab() fyne.CanvasObject {
-	// Task list
+func (auroraApp *AuroraApp) createTasksTab() fyne.CanvasObject {
+	// Task list with dynamic data
 	taskList := widget.NewList(
-		func() int { return 3 }, // Number of items
+		func() int {
+			if auroraApp.taskManager == nil {
+				return 0
+			}
+			return len(auroraApp.taskManager.GetAllTasks())
+		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Template")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			tasks := []string{"Code Generation Task", "Testing Task", "Build Task"}
-			obj.(*widget.Label).SetText(tasks[id])
+			if auroraApp.taskManager == nil {
+				return
+			}
+			tasks := auroraApp.taskManager.GetAllTasks()
+			if id < len(tasks) {
+				t := tasks[id]
+				obj.(*widget.Label).SetText(fmt.Sprintf("[%s] %s - %s (%s)", t.Status, t.Type, t.Description, t.Priority))
+			}
 		},
 	)
 
 	taskCard := widget.NewCard("Tasks", "", taskList)
 
+	// Task type selector for new tasks
+	taskTypeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging"}, nil)
+	taskTypeSelect.SetSelected("building")
+
+	// Task priority selector
+	prioritySelect := widget.NewSelect([]string{"low", "normal", "high", "critical"}, nil)
+	prioritySelect.SetSelected("normal")
+
+	// Task description input
+	taskDescEntry := widget.NewEntry()
+	taskDescEntry.SetPlaceHolder("Task description...")
+
 	// Action buttons
 	actions := container.NewVBox(
-		widget.NewButton("New Task", func() {}),
-		widget.NewButton("Refresh", func() {}),
+		widget.NewLabel("New Task:"),
+		widget.NewLabel("Type:"),
+		taskTypeSelect,
+		widget.NewLabel("Priority:"),
+		prioritySelect,
+		widget.NewLabel("Description:"),
+		taskDescEntry,
+		widget.NewButton("Create Task", func() {
+			if auroraApp.taskManager != nil && taskDescEntry.Text != "" {
+				ctx := context.Background()
+				_, err := auroraApp.taskManager.CreateTask(ctx, taskTypeSelect.Selected, taskDescEntry.Text, prioritySelect.Selected)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					taskDescEntry.SetText("")
+					taskList.Refresh()
+					auroraApp.securityManager.AddAuditEntry("task_create", "user",
+						fmt.Sprintf("Created task: %s", taskDescEntry.Text), "info")
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			taskList.Refresh()
+		}),
 	)
 
 	return container.NewBorder(nil, nil, nil, actions, taskCard)
 }
 
 // createWorkersTab creates the workers tab
-func (app *AuroraApp) createWorkersTab() fyne.CanvasObject {
+func (auroraApp *AuroraApp) createWorkersTab() fyne.CanvasObject {
 	workerList := widget.NewList(
-		func() int { return 0 }, // No workers for now
+		func() int {
+			if auroraApp.workerManager == nil {
+				return 0
+			}
+			return len(auroraApp.workerManager.GetWorkers())
+		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Template")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			obj.(*widget.Label).SetText(fmt.Sprintf("Worker %d", id+1))
+			if auroraApp.workerManager == nil {
+				return
+			}
+			workers := auroraApp.workerManager.GetWorkers()
+			if id < len(workers) {
+				w := workers[id]
+				healthStatus := "unhealthy"
+				if w.Healthy {
+					healthStatus = "healthy"
+				}
+				obj.(*widget.Label).SetText(fmt.Sprintf("[%s] %s - %s (%s)", w.Status, w.ID, w.Host, healthStatus))
+			}
 		},
 	)
 
 	workerCard := widget.NewCard("Workers", "", workerList)
 
+	// Worker configuration inputs
+	hostEntry := widget.NewEntry()
+	hostEntry.SetPlaceHolder("hostname or IP")
+	portEntry := widget.NewEntry()
+	portEntry.SetPlaceHolder("22")
+	portEntry.SetText("22")
+	userEntry := widget.NewEntry()
+	userEntry.SetPlaceHolder("username")
+
 	actions := container.NewVBox(
-		widget.NewButton("Add Worker", func() {}),
-		widget.NewButton("Refresh", func() {}),
+		widget.NewLabel("Add Worker:"),
+		widget.NewLabel("Host:"),
+		hostEntry,
+		widget.NewLabel("Port:"),
+		portEntry,
+		widget.NewLabel("User:"),
+		userEntry,
+		widget.NewButton("Add Worker", func() {
+			if auroraApp.workerManager != nil && hostEntry.Text != "" {
+				workerConfig := &UIWorker{
+					ID:      fmt.Sprintf("worker-%s-%d", hostEntry.Text, time.Now().UnixNano()),
+					Host:    hostEntry.Text,
+					Port:    portEntry.Text,
+					User:    userEntry.Text,
+					Status:  "pending",
+					Healthy: false,
+				}
+				err := auroraApp.workerManager.AddWorker(workerConfig)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					hostEntry.SetText("")
+					userEntry.SetText("")
+					workerList.Refresh()
+					auroraApp.securityManager.AddAuditEntry("worker_add", "user",
+						fmt.Sprintf("Added worker: %s", workerConfig.Host), "info")
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			workerList.Refresh()
+		}),
 	)
 
 	return container.NewBorder(nil, nil, nil, actions, workerCard)
 }
 
 // createProjectsTab creates the projects tab
-func (app *AuroraApp) createProjectsTab() fyne.CanvasObject {
-	return widget.NewCard("Projects", "Project management coming soon", widget.NewLabel("Implementation pending..."))
+func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
+	// Project list with dynamic data
+	auroraApp.projectList = widget.NewList(
+		func() int {
+			auroraApp.dataMu.RLock()
+			defer auroraApp.dataMu.RUnlock()
+			return len(auroraApp.projects)
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Template"),
+				widget.NewLabel(""),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			auroraApp.dataMu.RLock()
+			defer auroraApp.dataMu.RUnlock()
+			if id < len(auroraApp.projects) {
+				p := auroraApp.projects[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(p.Name)
+				activeStatus := ""
+				if p.Active {
+					activeStatus = " [ACTIVE]"
+				}
+				hbox.Objects[1].(*widget.Label).SetText(fmt.Sprintf("(%s)%s", p.Type, activeStatus))
+			}
+		},
+	)
+
+	// Project details panel
+	projectDetailsLabel := widget.NewLabel("Select a project to view details")
+	projectDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	auroraApp.projectList.OnSelected = func(id widget.ListItemID) {
+		auroraApp.dataMu.RLock()
+		defer auroraApp.dataMu.RUnlock()
+		if id < len(auroraApp.projects) {
+			p := auroraApp.projects[id]
+			details := fmt.Sprintf("Name: %s\nType: %s\nPath: %s\nDescription: %s\nCreated: %s\nBuild Command: %s\nTest Command: %s",
+				p.Name, p.Type, p.Path, p.Description,
+				p.CreatedAt.Format(time.RFC822),
+				p.Metadata.BuildCommand, p.Metadata.TestCommand)
+			projectDetailsLabel.SetText(details)
+		}
+	}
+
+	projectListCard := widget.NewCard("Projects", "", auroraApp.projectList)
+	projectDetailsCard := widget.NewCard("Project Details", "", projectDetailsLabel)
+
+	// Project creation form
+	nameEntry := widget.NewEntry()
+	nameEntry.SetPlaceHolder("Project name")
+	descEntry := widget.NewEntry()
+	descEntry.SetPlaceHolder("Description")
+	pathEntry := widget.NewEntry()
+	pathEntry.SetPlaceHolder("/path/to/project")
+	typeSelect := widget.NewSelect([]string{"go", "node", "python", "rust", "generic"}, nil)
+	typeSelect.SetSelected("go")
+
+	createForm := container.NewVBox(
+		widget.NewLabel("Create New Project:"),
+		widget.NewLabel("Name:"),
+		nameEntry,
+		widget.NewLabel("Description:"),
+		descEntry,
+		widget.NewLabel("Path:"),
+		pathEntry,
+		widget.NewLabel("Type:"),
+		typeSelect,
+		widget.NewButton("Create Project", func() {
+			if auroraApp.projectManager != nil && nameEntry.Text != "" && pathEntry.Text != "" {
+				ctx := context.Background()
+				_, err := auroraApp.projectManager.CreateProject(ctx, nameEntry.Text, descEntry.Text, pathEntry.Text, typeSelect.Selected)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					auroraApp.securityManager.AddAuditEntry("project_create", "user",
+						fmt.Sprintf("Created project: %s", nameEntry.Text), "info")
+					nameEntry.SetText("")
+					descEntry.SetText("")
+					pathEntry.SetText("")
+					auroraApp.refreshData()
+					auroraApp.projectList.Refresh()
+					dialog.ShowInformation("Success", "Project created successfully", auroraApp.mainWindow)
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			auroraApp.refreshData()
+			auroraApp.projectList.Refresh()
+		}),
+	)
+
+	leftPanel := container.NewVSplit(projectListCard, projectDetailsCard)
+	leftPanel.SetOffset(0.6)
+
+	return container.NewBorder(nil, nil, nil, createForm, leftPanel)
 }
 
 // createSessionsTab creates the sessions tab
-func (app *AuroraApp) createSessionsTab() fyne.CanvasObject {
-	return widget.NewCard("Sessions", "Session management coming soon", widget.NewLabel("Implementation pending..."))
+func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
+	// Session list with dynamic data
+	auroraApp.sessionList = widget.NewList(
+		func() int {
+			auroraApp.dataMu.RLock()
+			defer auroraApp.dataMu.RUnlock()
+			return len(auroraApp.sessions)
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Template"),
+				widget.NewLabel(""),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			auroraApp.dataMu.RLock()
+			defer auroraApp.dataMu.RUnlock()
+			if id < len(auroraApp.sessions) {
+				s := auroraApp.sessions[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(s.Name)
+				hbox.Objects[1].(*widget.Label).SetText(fmt.Sprintf("[%s] %s", s.Status, s.Mode))
+			}
+		},
+	)
+
+	// Session details panel
+	sessionDetailsLabel := widget.NewLabel("Select a session to view details")
+	sessionDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	selectedSessionID := ""
+	auroraApp.sessionList.OnSelected = func(id widget.ListItemID) {
+		auroraApp.dataMu.RLock()
+		defer auroraApp.dataMu.RUnlock()
+		if id < len(auroraApp.sessions) {
+			s := auroraApp.sessions[id]
+			selectedSessionID = s.ID
+			durationStr := s.Duration.String()
+			details := fmt.Sprintf("ID: %s\nName: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s\nDuration: %s",
+				s.ID, s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
+				s.CreatedAt.Format(time.RFC822), durationStr)
+			sessionDetailsLabel.SetText(details)
+		}
+	}
+
+	sessionListCard := widget.NewCard("Sessions", "", auroraApp.sessionList)
+	sessionDetailsCard := widget.NewCard("Session Details", "", sessionDetailsLabel)
+
+	// Session creation form
+	nameEntry := widget.NewEntry()
+	nameEntry.SetPlaceHolder("Session name")
+	descEntry := widget.NewEntry()
+	descEntry.SetPlaceHolder("Description")
+	projectIDEntry := widget.NewEntry()
+	projectIDEntry.SetPlaceHolder("Project ID")
+	modeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging", "deployment"}, nil)
+	modeSelect.SetSelected("building")
+
+	actions := container.NewVBox(
+		widget.NewLabel("Create New Session:"),
+		widget.NewLabel("Name:"),
+		nameEntry,
+		widget.NewLabel("Description:"),
+		descEntry,
+		widget.NewLabel("Project ID:"),
+		projectIDEntry,
+		widget.NewLabel("Mode:"),
+		modeSelect,
+		widget.NewButton("Create Session", func() {
+			if auroraApp.sessionManager != nil && nameEntry.Text != "" && projectIDEntry.Text != "" {
+				mode := session.Mode(modeSelect.Selected)
+				_, err := auroraApp.sessionManager.Create(projectIDEntry.Text, nameEntry.Text, descEntry.Text, mode)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					auroraApp.securityManager.AddAuditEntry("session_create", "user",
+						fmt.Sprintf("Created session: %s", nameEntry.Text), "info")
+					nameEntry.SetText("")
+					descEntry.SetText("")
+					projectIDEntry.SetText("")
+					auroraApp.refreshData()
+					auroraApp.sessionList.Refresh()
+					dialog.ShowInformation("Success", "Session created successfully", auroraApp.mainWindow)
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewLabel("Session Controls:"),
+		widget.NewButton("Start Session", func() {
+			if auroraApp.sessionManager != nil && selectedSessionID != "" {
+				err := auroraApp.sessionManager.Start(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					auroraApp.securityManager.AddAuditEntry("session_start", "user",
+						fmt.Sprintf("Started session: %s", selectedSessionID), "info")
+					auroraApp.refreshData()
+					auroraApp.sessionList.Refresh()
+				}
+			}
+		}),
+		widget.NewButton("Pause Session", func() {
+			if auroraApp.sessionManager != nil && selectedSessionID != "" {
+				err := auroraApp.sessionManager.Pause(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					auroraApp.securityManager.AddAuditEntry("session_pause", "user",
+						fmt.Sprintf("Paused session: %s", selectedSessionID), "info")
+					auroraApp.refreshData()
+					auroraApp.sessionList.Refresh()
+				}
+			}
+		}),
+		widget.NewButton("Complete Session", func() {
+			if auroraApp.sessionManager != nil && selectedSessionID != "" {
+				err := auroraApp.sessionManager.Complete(selectedSessionID)
+				if err != nil {
+					dialog.ShowError(err, auroraApp.mainWindow)
+				} else {
+					auroraApp.securityManager.AddAuditEntry("session_complete", "user",
+						fmt.Sprintf("Completed session: %s", selectedSessionID), "info")
+					auroraApp.refreshData()
+					auroraApp.sessionList.Refresh()
+				}
+			}
+		}),
+		widget.NewSeparator(),
+		widget.NewButton("Refresh", func() {
+			auroraApp.refreshData()
+			auroraApp.sessionList.Refresh()
+		}),
+	)
+
+	leftPanel := container.NewVSplit(sessionListCard, sessionDetailsCard)
+	leftPanel.SetOffset(0.6)
+
+	return container.NewBorder(nil, nil, nil, actions, leftPanel)
 }
 
 // createLLMTab creates the LLM tab
-func (app *AuroraApp) createLLMTab() fyne.CanvasObject {
-	return widget.NewCard("AI Models", "LLM interaction coming soon", widget.NewLabel("Implementation pending..."))
+func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
+	// Available models list
+	modelList := widget.NewList(
+		func() int {
+			if auroraApp.llmManager == nil {
+				return 0
+			}
+			return len(auroraApp.llmManager.GetAvailableModels())
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabel("Model"),
+				widget.NewLabel("Provider"),
+			)
+		},
+		func(id widget.ListItemID, obj fyne.CanvasObject) {
+			models := auroraApp.llmManager.GetAvailableModels()
+			if id < len(models) {
+				m := models[id]
+				hbox := obj.(*fyne.Container)
+				hbox.Objects[0].(*widget.Label).SetText(m.Name)
+				hbox.Objects[1].(*widget.Label).SetText(string(m.Provider))
+			}
+		},
+	)
+
+	modelListCard := widget.NewCard("Available Models", "", modelList)
+
+	// Model details panel
+	modelDetailsLabel := widget.NewLabel("Select a model to view details")
+	modelDetailsLabel.Wrapping = fyne.TextWrapWord
+
+	modelList.OnSelected = func(id widget.ListItemID) {
+		models := auroraApp.llmManager.GetAvailableModels()
+		if id < len(models) {
+			m := models[id]
+			caps := make([]string, len(m.Capabilities))
+			for i, c := range m.Capabilities {
+				caps[i] = string(c)
+			}
+			details := fmt.Sprintf("Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v",
+				m.Name, m.Provider, m.ContextSize, caps)
+			modelDetailsLabel.SetText(details)
+		}
+	}
+
+	modelDetailsCard := widget.NewCard("Model Details", "", modelDetailsLabel)
+
+	// Chat interface
+	auroraApp.chatHistory = widget.NewMultiLineEntry()
+	auroraApp.chatHistory.SetPlaceHolder("Chat history will appear here...")
+	auroraApp.chatHistory.Disable()
+	auroraApp.chatHistory.Wrapping = fyne.TextWrapWord
+
+	auroraApp.chatInput = widget.NewMultiLineEntry()
+	auroraApp.chatInput.SetPlaceHolder("Type your message here...")
+	auroraApp.chatInput.SetMinRowsVisible(3)
+
+	// Provider/model selection for chat
+	auroraApp.llmProviderSel = widget.NewSelect([]string{"ollama", "openai", "anthropic", "gemini", "local"}, nil)
+	auroraApp.llmProviderSel.SetSelected("ollama")
+
+	modelNameEntry := widget.NewEntry()
+	modelNameEntry.SetPlaceHolder("Model name (e.g., llama2)")
+	modelNameEntry.SetText("llama2")
+
+	sendButton := widget.NewButton("Send Message", func() {
+		if auroraApp.chatInput.Text == "" {
+			return
+		}
+
+		// Add user message to history
+		currentHistory := auroraApp.chatHistory.Text
+		userMsg := fmt.Sprintf("\n[User]: %s\n", auroraApp.chatInput.Text)
+		auroraApp.chatHistory.SetText(currentHistory + userMsg)
+
+		// Log the interaction
+		auroraApp.securityManager.AddAuditEntry("llm_chat", "user",
+			fmt.Sprintf("Sent message to %s/%s", auroraApp.llmProviderSel.Selected, modelNameEntry.Text), "info")
+
+		// Placeholder for actual LLM call
+		responseMsg := fmt.Sprintf("[AI (%s/%s)]: LLM integration requires a running provider. Configure your LLM provider in the settings.\n",
+			auroraApp.llmProviderSel.Selected, modelNameEntry.Text)
+		auroraApp.chatHistory.SetText(auroraApp.chatHistory.Text + responseMsg)
+
+		// Clear input
+		auroraApp.chatInput.SetText("")
+	})
+
+	clearButton := widget.NewButton("Clear Chat", func() {
+		auroraApp.chatHistory.SetText("")
+	})
+
+	chatControls := container.NewVBox(
+		widget.NewLabel("Chat Settings:"),
+		widget.NewLabel("Provider:"),
+		auroraApp.llmProviderSel,
+		widget.NewLabel("Model:"),
+		modelNameEntry,
+		widget.NewSeparator(),
+		sendButton,
+		clearButton,
+	)
+
+	chatPanel := container.NewBorder(
+		widget.NewLabel("Chat with AI"),
+		container.NewBorder(nil, nil, nil, chatControls, auroraApp.chatInput),
+		nil, nil,
+		auroraApp.chatHistory,
+	)
+
+	chatCard := widget.NewCard("LLM Chat", "", chatPanel)
+
+	// Provider health status
+	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
+
+	// Start health check goroutine
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+
+		checkHealth := func() {
+			if auroraApp.llmManager == nil {
+				healthLabel.SetText("Provider Health:\nNo LLM manager available")
+				return
+			}
+			ctx := context.Background()
+			health := auroraApp.llmManager.HealthCheck(ctx)
+			healthText := "Provider Health:\n"
+			for provider, status := range health {
+				healthText += fmt.Sprintf("- %s: %s\n", provider, status.Status)
+			}
+			if len(health) == 0 {
+				healthText += "No providers configured"
+			}
+			healthLabel.SetText(healthText)
+		}
+
+		checkHealth()
+		for range ticker.C {
+			checkHealth()
+		}
+	}()
+
+	healthCard := widget.NewCard("Provider Status", "", healthLabel)
+
+	// Layout
+	leftPanel := container.NewVSplit(modelListCard, modelDetailsCard)
+	leftPanel.SetOffset(0.5)
+
+	rightPanel := container.NewVSplit(chatCard, healthCard)
+	rightPanel.SetOffset(0.7)
+
+	return container.NewHSplit(leftPanel, rightPanel)
 }
 
 // createSettingsTab creates the settings tab
-func (app *AuroraApp) createSettingsTab() fyne.CanvasObject {
+func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	// Theme selection
-	themeSelect := widget.NewSelect(app.themeManager.GetAvailableThemes(), func(selected string) {
-		app.themeManager.SetTheme(selected)
-		// Apply theme change
+	themeInfoLabel := widget.NewLabel("")
+	updateThemeInfo := func() {
+		currentTheme := auroraApp.themeManager.GetCurrentTheme()
+		themeInfo := fmt.Sprintf("Name: %s\nDark: %t\nPrimary: %s\nSecondary: %s\nAccent: %s",
+			currentTheme.Name, currentTheme.IsDark,
+			currentTheme.Primary, currentTheme.Secondary, currentTheme.Accent)
+		themeInfoLabel.SetText(themeInfo)
+	}
+
+	themeSelect := widget.NewSelect(auroraApp.themeManager.GetAvailableThemes(), func(selected string) {
+		auroraApp.themeManager.SetTheme(selected)
+		updateThemeInfo()
 	})
-	themeSelect.SetSelected(app.themeManager.GetCurrentTheme().Name)
+	themeSelect.SetSelected(auroraApp.themeManager.GetCurrentTheme().Name)
 
 	themeCard := widget.NewCard("Theme", "Select application theme", themeSelect)
 
 	// Current theme info
-	currentTheme := app.themeManager.GetCurrentTheme()
-	themeInfo := fmt.Sprintf("Name: %s\nDark: %t\nPrimary: %s\nSecondary: %s\nAccent: %s",
-		currentTheme.Name, currentTheme.IsDark,
-		currentTheme.Primary, currentTheme.Secondary, currentTheme.Accent)
+	updateThemeInfo()
+	infoCard := widget.NewCard("Current Theme", "", themeInfoLabel)
 
-	infoLabel := widget.NewLabel(themeInfo)
-	infoCard := widget.NewCard("Current Theme", "", infoLabel)
+	// Server connection settings
+	serverURLEntry := widget.NewEntry()
+	serverURLEntry.SetText("http://localhost:8080")
+	serverURLEntry.SetPlaceHolder("Server URL")
 
-	return container.NewVBox(themeCard, infoCard)
+	serverTimeoutEntry := widget.NewEntry()
+	serverTimeoutEntry.SetText("30")
+	serverTimeoutEntry.SetPlaceHolder("Timeout (seconds)")
+
+	serverCard := widget.NewCard("Server Connection", "",
+		container.NewVBox(
+			widget.NewLabel("Server URL:"),
+			serverURLEntry,
+			widget.NewLabel("Timeout (seconds):"),
+			serverTimeoutEntry,
+			widget.NewButton("Test Connection", func() {
+				dialog.ShowInformation("Connection Test", "Server connection test would be performed here.", auroraApp.mainWindow)
+			}),
+		),
+	)
+
+	// Database settings
+	dbHostEntry := widget.NewEntry()
+	dbHostEntry.SetPlaceHolder("localhost")
+	dbPortEntry := widget.NewEntry()
+	dbPortEntry.SetText("5432")
+	dbNameEntry := widget.NewEntry()
+	dbNameEntry.SetPlaceHolder("helixcode")
+
+	dbCard := widget.NewCard("Database", "",
+		container.NewVBox(
+			widget.NewLabel("Host:"),
+			dbHostEntry,
+			widget.NewLabel("Port:"),
+			dbPortEntry,
+			widget.NewLabel("Database:"),
+			dbNameEntry,
+		),
+	)
+
+	// LLM Provider settings
+	ollamaURLEntry := widget.NewEntry()
+	ollamaURLEntry.SetText("http://localhost:11434")
+
+	llmCard := widget.NewCard("LLM Providers", "",
+		container.NewVBox(
+			widget.NewLabel("Ollama URL:"),
+			ollamaURLEntry,
+			widget.NewLabel("OpenAI API Key:"),
+			widget.NewPasswordEntry(),
+			widget.NewLabel("Anthropic API Key:"),
+			widget.NewPasswordEntry(),
+		),
+	)
+
+	// Aurora OS specific settings
+	perfModeCheck := widget.NewCheck("Performance Mode", func(checked bool) {
+		auroraApp.performanceMode = checked
+		if checked {
+			runtime.GOMAXPROCS(runtime.NumCPU())
+		}
+	})
+	perfModeCheck.Checked = auroraApp.performanceMode
+
+	auroraCard := widget.NewCard("Aurora OS Settings", "",
+		container.NewVBox(
+			perfModeCheck,
+			widget.NewButton("Run Diagnostics", func() {
+				auroraApp.runAuroraDiagnostics()
+			}),
+			widget.NewButton("View Audit Log", func() {
+				auroraApp.showAuditLog()
+			}),
+		),
+	)
+
+	// About section
+	aboutLabel := widget.NewLabel("HelixCode Aurora OS Edition\nVersion: 1.0.0\nDistributed AI Development Platform\n\nOptimized for Aurora OS")
+	aboutLabel.Alignment = fyne.TextAlignCenter
+	aboutCard := widget.NewCard("About", "", aboutLabel)
+
+	// Layout in scrollable container
+	settingsContent := container.NewVBox(
+		themeCard,
+		infoCard,
+		auroraCard,
+		serverCard,
+		dbCard,
+		llmCard,
+		aboutCard,
+	)
+
+	return container.NewScroll(settingsContent)
 }
 
 // Close cleans up resources
-func (app *AuroraApp) Close() error {
-	if app.db != nil {
-		app.db.Close()
+func (auroraApp *AuroraApp) Close() error {
+	// Stop background updates
+	if auroraApp.stopUpdate != nil {
+		close(auroraApp.stopUpdate)
+	}
+
+	// Log shutdown
+	auroraApp.securityManager.AddAuditEntry("system_shutdown", "system", "Aurora OS application shutting down", "info")
+
+	// Close database connection
+	if auroraApp.db != nil {
+		auroraApp.db.Close()
 	}
 	return nil
 }

@@ -91,6 +91,8 @@ type AuthRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (*User, string, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*User, error)
 	UpdateUserLastLogin(ctx context.Context, id uuid.UUID) error
+	UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error)
+	DeleteUser(ctx context.Context, userID uuid.UUID) error
 	CreateSession(ctx context.Context, session *Session) error
 	GetSession(ctx context.Context, token string) (*Session, error)
 	DeleteSession(ctx context.Context, token string) error
@@ -237,6 +239,21 @@ func (s *AuthService) Logout(ctx context.Context, sessionToken string) error {
 // LogoutAll invalidates all sessions for a user
 func (s *AuthService) LogoutAll(ctx context.Context, userID uuid.UUID) error {
 	return s.db.DeleteUserSessions(ctx, userID)
+}
+
+// UpdateUser updates user profile information
+func (s *AuthService) UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error) {
+	// Validate email if provided
+	if email != "" && (len(email) < 5 || len(email) > 255 || !strings.Contains(email, "@")) {
+		return nil, errors.New("invalid email address")
+	}
+
+	return s.db.UpdateUser(ctx, userID, displayName, email)
+}
+
+// DeleteUser soft-deletes a user account
+func (s *AuthService) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	return s.db.DeleteUser(ctx, userID)
 }
 
 // GenerateJWT generates a JWT token for a user

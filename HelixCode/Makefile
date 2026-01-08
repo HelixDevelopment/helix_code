@@ -277,6 +277,14 @@ help:
 	@echo "  make docs            - Build all documentation"
 	@echo "  make release         - Full release build (code + docs + tests)"
 	@echo ""
+	@echo "Desktop:"
+	@echo "  make desktop         - Build desktop GUI application"
+	@echo "  make desktop-nogui   - Build desktop CLI (no GUI dependencies)"
+	@echo "  make desktop-linux   - Build desktop for Linux (GUI + CLI)"
+	@echo "  make desktop-macos   - Build desktop for macOS (Intel + ARM)"
+	@echo "  make desktop-windows - Build desktop for Windows (GUI + CLI)"
+	@echo "  make desktop-all     - Build desktop for all platforms"
+	@echo ""
 	@echo "Mobile:"
 	@echo "  make mobile-init     - Initialize gomobile"
 	@echo "  make mobile-ios      - Build iOS framework"
@@ -289,6 +297,46 @@ help:
 	@echo "  make aurora-harmony  - Build Aurora and Harmony OS clients"
 	@echo ""
 	@echo "  make help            - Show this help"
+
+# Desktop build targets
+.PHONY: desktop desktop-nogui desktop-all desktop-linux desktop-macos desktop-windows
+
+# Build desktop GUI application (requires GUI dependencies)
+desktop:
+	@echo "🖥️ Building desktop GUI application..."
+	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/helix-desktop ./applications/desktop
+	@echo "✅ Desktop GUI built: bin/helix-desktop"
+
+# Build desktop CLI application (no GUI dependencies required)
+desktop-nogui:
+	@echo "🖥️ Building desktop CLI application (no GUI)..."
+	$(GO_BUILD) -tags nogui -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/helix-desktop-cli ./applications/desktop
+	@echo "✅ Desktop CLI built: bin/helix-desktop-cli"
+
+# Build desktop for Linux
+desktop-linux:
+	@echo "🐧 Building desktop for Linux..."
+	GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop-linux ./applications/desktop
+	GOOS=linux GOARCH=amd64 $(GO_BUILD) -tags nogui -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop-cli-linux ./applications/desktop
+	@echo "✅ Linux desktop builds complete"
+
+# Build desktop for macOS
+desktop-macos:
+	@echo "🍎 Building desktop for macOS..."
+	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop-macos ./applications/desktop
+	GOOS=darwin GOARCH=arm64 $(GO_BUILD) -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop-macos-arm64 ./applications/desktop
+	@echo "✅ macOS desktop builds complete"
+
+# Build desktop for Windows
+desktop-windows:
+	@echo "🪟 Building desktop for Windows..."
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop.exe ./applications/desktop
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -tags nogui -ldflags="-s -w -X main.version=$(VERSION)" -o bin/helix-desktop-cli.exe ./applications/desktop
+	@echo "✅ Windows desktop builds complete"
+
+# Build desktop for all platforms
+desktop-all: desktop-linux desktop-macos desktop-windows
+	@echo "🖥️ All desktop platform builds complete"
 
 # Mobile build targets
 mobile-init:
