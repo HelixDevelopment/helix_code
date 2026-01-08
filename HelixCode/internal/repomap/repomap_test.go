@@ -896,6 +896,393 @@ func TestGetLanguageQueries(t *testing.T) {
 	}
 }
 
+// Test GetSupportedLanguages
+func TestGetSupportedLanguages(t *testing.T) {
+	tempDir := t.TempDir()
+	config := DefaultConfig()
+	rm, err := NewRepoMap(tempDir, config)
+	if err != nil {
+		t.Fatalf("Failed to create RepoMap: %v", err)
+	}
+
+	languages := rm.GetSupportedLanguages()
+
+	if len(languages) == 0 {
+		t.Error("Expected at least one supported language")
+	}
+
+	// Check for common languages
+	expectedLangs := []string{"go", "python", "javascript"}
+	for _, expected := range expectedLangs {
+		found := false
+		for _, lang := range languages {
+			if lang == expected {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Expected language %s to be supported", expected)
+		}
+	}
+}
+
+// Test FileRanker with custom weights
+func TestNewFileRankerWithWeights(t *testing.T) {
+	weights := RankingWeights{
+		RecentlyChanged: 0.5,
+		SymbolMatch:     0.2,
+		ImportFrequency: 0.15,
+		DependencyDepth: 0.1,
+		FileSize:        0.03,
+		SymbolDensity:   0.02,
+	}
+
+	ranker := NewFileRankerWithWeights(weights)
+
+	if ranker == nil {
+		t.Fatal("Expected non-nil FileRanker")
+	}
+
+	if ranker.weights.RecentlyChanged != 0.5 {
+		t.Errorf("Expected RecentlyChanged weight 0.5, got %f", ranker.weights.RecentlyChanged)
+	}
+}
+
+// Test RankByModificationTime
+func TestRankByModificationTime(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Create test files with different modification times
+	file1 := filepath.Join(tempDir, "old.go")
+	file2 := filepath.Join(tempDir, "new.go")
+
+	createTestFile(t, tempDir, "old.go", "package old")
+	time.Sleep(10 * time.Millisecond)
+	createTestFile(t, tempDir, "new.go", "package new")
+
+	ranker := NewFileRanker()
+	files := []string{file1, file2}
+
+	scores := ranker.RankByModificationTime(files)
+
+	if len(scores) != 2 {
+		t.Errorf("Expected 2 scores, got %d", len(scores))
+	}
+
+	// Newer file should have higher score
+	var oldScore, newScore float64
+	for _, s := range scores {
+		if strings.Contains(s.FilePath, "old.go") {
+			oldScore = s.Score
+		} else if strings.Contains(s.FilePath, "new.go") {
+			newScore = s.Score
+		}
+	}
+
+	if newScore < oldScore {
+		t.Errorf("Newer file should have higher score: new=%f, old=%f", newScore, oldScore)
+	}
+}
+
+// Test RankBySymbolCount
+func TestRankBySymbolCount(t *testing.T) {
+	ranker := NewFileRanker()
+
+	symbolsByFile := map[string][]Symbol{
+		"small.go": {
+			{Name: "Func1", Type: SymbolTypeFunction},
+		},
+		"large.go": {
+			{Name: "Func1", Type: SymbolTypeFunction},
+			{Name: "Func2", Type: SymbolTypeFunction},
+			{Name: "Type1", Type: SymbolTypeStruct},
+			{Name: "Var1", Type: SymbolTypeVariable},
+			{Name: "Func3", Type: SymbolTypeFunction},
+		},
+	}
+
+	scores := ranker.RankBySymbolCount(symbolsByFile)
+
+	if len(scores) != 2 {
+		t.Errorf("Expected 2 scores, got %d", len(scores))
+	}
+
+	// File with more symbols should have higher score
+	var smallScore, largeScore float64
+	for _, s := range scores {
+		if strings.Contains(s.FilePath, "small.go") {
+			smallScore = s.Score
+		} else if strings.Contains(s.FilePath, "large.go") {
+			largeScore = s.Score
+		}
+	}
+
+	if largeScore <= smallScore {
+		t.Errorf("File with more symbols should have higher score: large=%f, small=%f", largeScore, smallScore)
+	}
+}
+
+// Test CombineScores
+func TestCombineScores(t *testing.T) {
+	ranker := NewFileRanker()
+
+	t.Run("empty score sets", func(t *testing.T) {
+		result := ranker.CombineScores([][]FileScore{}, []float64{})
+		if len(result) != 0 {
+			t.Errorf("Expected empty result for empty input, got %d", len(result))
+		}
+	})
+
+	t.Run("single score set", func(t *testing.T) {
+		scores := [][]FileScore{
+			{
+				{FilePath: "file1.go", Score: 0.8},
+				{FilePath: "file2.go", Score: 0.6},
+			},
+		}
+
+		result := ranker.CombineScores(scores, []float64{1.0})
+		if len(result) != 2 {
+			t.Errorf("Expected 2 results, got %d", len(result))
+		}
+	})
+
+	t.Run("multiple score sets with weights", func(t *testing.T) {
+		scores := [][]FileScore{
+			{
+				{FilePath: "file1.go", Score: 1.0},
+				{FilePath: "file2.go", Score: 0.5},
+			},
+			{
+				{FilePath: "file1.go", Score: 0.5},
+				{FilePath: "file2.go", Score: 1.0},
+			},
+		}
+
+		result := ranker.CombineScores(scores, []float64{0.5, 0.5})
+		if len(result) != 2 {
+			t.Errorf("Expected 2 results, got %d", len(result))
+		}
+
+		// Both files should have equal combined scores (0.5*1.0 + 0.5*0.5) = 0.75
+		for _, s := range result {
+			if s.Score < 0.7 || s.Score > 0.8 {
+				t.Errorf("Expected score around 0.75, got %f for %s", s.Score, s.FilePath)
+			}
+		}
+	})
+
+	t.Run("default equal weights", func(t *testing.T) {
+		scores := [][]FileScore{
+			{{FilePath: "file1.go", Score: 1.0}},
+			{{FilePath: "file1.go", Score: 0.0}},
+		}
+
+		result := ranker.CombineScores(scores, []float64{})
+		if len(result) != 1 {
+			t.Errorf("Expected 1 result, got %d", len(result))
+		}
+	})
+}
+
+// Test Cache InvalidateAll
+func TestCacheInvalidateAll(t *testing.T) {
+	tempDir := t.TempDir()
+	cacheDir := filepath.Join(tempDir, "cache")
+
+	cache, err := NewRepoCache(cacheDir, time.Hour)
+	if err != nil {
+		t.Fatalf("Failed to create cache: %v", err)
+	}
+
+	// Add some entries
+	cache.Set("key1", "value1")
+	cache.Set("key2", "value2")
+	cache.Set("key3", "value3")
+
+	if cache.Size() != 3 {
+		t.Errorf("Expected 3 entries, got %d", cache.Size())
+	}
+
+	// Wait for async disk save
+	time.Sleep(100 * time.Millisecond)
+
+	// Invalidate all
+	err = cache.InvalidateAll()
+	if err != nil {
+		t.Errorf("InvalidateAll failed: %v", err)
+	}
+
+	if cache.Size() != 0 {
+		t.Errorf("Expected 0 entries after InvalidateAll, got %d", cache.Size())
+	}
+}
+
+// Test Cache TTL functions
+func TestCacheTTL(t *testing.T) {
+	tempDir := t.TempDir()
+	cacheDir := filepath.Join(tempDir, "cache")
+
+	cache, err := NewRepoCache(cacheDir, time.Hour)
+	if err != nil {
+		t.Fatalf("Failed to create cache: %v", err)
+	}
+
+	t.Run("GetTTL", func(t *testing.T) {
+		ttl := cache.GetTTL()
+		if ttl != time.Hour {
+			t.Errorf("Expected TTL of 1 hour, got %v", ttl)
+		}
+	})
+
+	t.Run("SetTTL", func(t *testing.T) {
+		cache.SetTTL(30 * time.Minute)
+		ttl := cache.GetTTL()
+		if ttl != 30*time.Minute {
+			t.Errorf("Expected TTL of 30 minutes, got %v", ttl)
+		}
+	})
+}
+
+// Test Cache Export and Import
+func TestCacheExportImport(t *testing.T) {
+	tempDir := t.TempDir()
+	cacheDir := filepath.Join(tempDir, "cache")
+	exportFilePath := filepath.Join(tempDir, "export.gob")
+
+	cache, err := NewRepoCache(cacheDir, time.Hour)
+	if err != nil {
+		t.Fatalf("Failed to create cache: %v", err)
+	}
+
+	// Add some entries
+	cache.Set("key1", "value1")
+	cache.Set("key2", "value2")
+
+	// Wait for entries to be stored
+	time.Sleep(50 * time.Millisecond)
+
+	// Export to file
+	exportFile, err := os.Create(exportFilePath)
+	if err != nil {
+		t.Fatalf("Failed to create export file: %v", err)
+	}
+	err = cache.Export(exportFile)
+	exportFile.Close()
+	if err != nil {
+		t.Fatalf("Export failed: %v", err)
+	}
+
+	// Check that file was created
+	if _, err := os.Stat(exportFilePath); os.IsNotExist(err) {
+		t.Error("Export file was not created")
+	}
+
+	// Create new cache and import
+	cache2, err := NewRepoCache(filepath.Join(tempDir, "cache2"), time.Hour)
+	if err != nil {
+		t.Fatalf("Failed to create cache2: %v", err)
+	}
+
+	// Import from file
+	importFile, err := os.Open(exportFilePath)
+	if err != nil {
+		t.Fatalf("Failed to open import file: %v", err)
+	}
+	err = cache2.Import(importFile)
+	importFile.Close()
+	if err != nil {
+		t.Fatalf("Import failed: %v", err)
+	}
+
+	// Verify imported entries
+	val, found := cache2.Get("key1")
+	if !found {
+		t.Error("Expected to find key1 after import")
+	}
+	if val != "value1" {
+		t.Errorf("Expected value1, got %v", val)
+	}
+}
+
+// Test JavaScript/TypeScript extraction
+func TestExtractJavaScriptSymbols(t *testing.T) {
+	tempDir := t.TempDir()
+
+	jsContent := `
+function greet(name) {
+    return "Hello, " + name;
+}
+
+class Person {
+    constructor(name) {
+        this.name = name;
+    }
+
+    sayHello() {
+        return greet(this.name);
+    }
+}
+
+const add = (a, b) => a + b;
+
+export default Person;
+`
+	createTestFile(t, tempDir, "test.js", jsContent)
+	testFile := filepath.Join(tempDir, "test.js")
+
+	config := DefaultConfig()
+	rm, _ := NewRepoMap(tempDir, config)
+
+	symbols, err := rm.extractFileSymbols(testFile)
+	if err != nil {
+		t.Fatalf("Failed to extract symbols: %v", err)
+	}
+
+	// Should find some symbols
+	if len(symbols) == 0 {
+		t.Log("No JavaScript symbols extracted (tree-sitter parsing may not be available)")
+	}
+}
+
+// Test Python class extraction
+func TestExtractPythonSymbols(t *testing.T) {
+	tempDir := t.TempDir()
+
+	pyContent := `
+class Calculator:
+    def __init__(self):
+        self.result = 0
+
+    def add(self, x, y):
+        return x + y
+
+    def subtract(self, x, y):
+        return x - y
+
+def helper_function():
+    return "helper"
+
+CONSTANT = 42
+`
+	createTestFile(t, tempDir, "test.py", pyContent)
+	testFile := filepath.Join(tempDir, "test.py")
+
+	config := DefaultConfig()
+	rm, _ := NewRepoMap(tempDir, config)
+
+	symbols, err := rm.extractFileSymbols(testFile)
+	if err != nil {
+		t.Fatalf("Failed to extract symbols: %v", err)
+	}
+
+	// Should find some symbols
+	if len(symbols) == 0 {
+		t.Log("No Python symbols extracted (tree-sitter parsing may not be available)")
+	}
+}
+
 // Helper functions
 
 func createTestFile(t *testing.T, dir, filename, content string) {

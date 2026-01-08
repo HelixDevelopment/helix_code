@@ -1790,3 +1790,263 @@ func TestClientConcurrency(t *testing.T) {
 		assert.Equal(t, 10, requestCount)
 	})
 }
+
+// TestCacheManagerSetService tests CacheManager SetService
+func TestCacheManagerSetService(t *testing.T) {
+	cm, err := NewCacheManager(nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, cm)
+
+	// Initially service should be nil
+	assert.Nil(t, cm.service)
+
+	// Clear should not panic with nil service
+	cm.Clear()
+
+	// SetService should work
+	cfg := config.DefaultCogneeConfig()
+	service, err := NewCogneeService(cfg, nil)
+	if err == nil && service != nil {
+		cm.SetService(service)
+		assert.NotNil(t, cm.service)
+	}
+}
+
+// TestCogneeManagerStart tests CogneeManager Start
+func TestCogneeManagerStart(t *testing.T) {
+	t.Run("Start_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.Start(context.Background())
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerStop tests CogneeManager Stop
+func TestCogneeManagerStop(t *testing.T) {
+	t.Run("Stop_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.Stop(context.Background())
+		assert.NoError(t, err)
+	})
+}
+
+// TestCogneeManagerCognify tests CogneeManager Cognify
+func TestCogneeManagerCognify(t *testing.T) {
+	t.Run("Cognify_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.Cognify(context.Background(), []string{"test"})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerGetInsights tests CogneeManager GetInsights
+func TestCogneeManagerGetInsights(t *testing.T) {
+	t.Run("GetInsights_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		_, err := cm.GetInsights(context.Background(), "test query")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+
+	t.Run("GetInsights_EmptyQuery", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, _ := NewCogneeService(cfg, nil)
+		cm := &CogneeManager{
+			service: service,
+		}
+
+		_, err := cm.GetInsights(context.Background(), "")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot be empty")
+	})
+}
+
+// TestCogneeManagerProcessCode tests CogneeManager ProcessCode
+func TestCogneeManagerProcessCode(t *testing.T) {
+	t.Run("ProcessCode_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.ProcessCode(context.Background(), "func main() {}", "go")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+
+	t.Run("ProcessCode_EmptyCode", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, _ := NewCogneeService(cfg, nil)
+		cm := &CogneeManager{
+			service: service,
+		}
+
+		err := cm.ProcessCode(context.Background(), "", "go")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot be empty")
+	})
+}
+
+// TestCogneeManagerGetStatus tests CogneeManager GetStatus
+func TestCogneeManagerGetStatus(t *testing.T) {
+	t.Run("GetStatus_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		status := cm.GetStatus()
+		assert.Equal(t, "not_initialized", status)
+	})
+
+	t.Run("GetStatus_WithService", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, _ := NewCogneeService(cfg, nil)
+		if service != nil {
+			cm := &CogneeManager{
+				service: service,
+			}
+			status := cm.GetStatus()
+			assert.NotEmpty(t, status)
+		}
+	})
+}
+
+// TestCogneeManagerGetHealth tests CogneeManager GetHealth
+func TestCogneeManagerGetHealth(t *testing.T) {
+	t.Run("GetHealth_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		health, err := cm.GetHealth(context.Background())
+		assert.NoError(t, err)
+		assert.NotNil(t, health)
+		assert.Equal(t, "not_initialized", health.Status)
+	})
+}
+
+// TestCogneeManagerGetStatistics tests CogneeManager GetStatistics
+func TestCogneeManagerGetStatistics(t *testing.T) {
+	t.Run("GetStatistics_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		_, err := cm.GetStatistics(context.Background())
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerCreateDataset tests CogneeManager CreateDataset
+func TestCogneeManagerCreateDataset(t *testing.T) {
+	t.Run("CreateDataset_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.CreateDataset(context.Background(), "test", "description")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerListDatasets tests CogneeManager ListDatasets
+func TestCogneeManagerListDatasets(t *testing.T) {
+	t.Run("ListDatasets_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		_, err := cm.ListDatasets(context.Background())
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerDeleteDataset tests CogneeManager DeleteDataset
+func TestCogneeManagerDeleteDataset(t *testing.T) {
+	t.Run("DeleteDataset_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.DeleteDataset(context.Background(), "test")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerVisualizeGraph tests CogneeManager VisualizeGraph
+func TestCogneeManagerVisualizeGraph(t *testing.T) {
+	t.Run("VisualizeGraph_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		_, err := cm.VisualizeGraph(context.Background(), "test")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not initialized")
+	})
+}
+
+// TestCogneeManagerClose tests CogneeManager Close
+func TestCogneeManagerClose(t *testing.T) {
+	t.Run("Close_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		err := cm.Close()
+		assert.NoError(t, err)
+	})
+}
+
+// TestCogneeManagerGetService tests CogneeManager GetService
+func TestCogneeManagerGetService(t *testing.T) {
+	t.Run("GetService_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		service := cm.GetService()
+		assert.Nil(t, service)
+	})
+
+	t.Run("GetService_WithService", func(t *testing.T) {
+		cfg := config.DefaultCogneeConfig()
+		service, _ := NewCogneeService(cfg, nil)
+		if service != nil {
+			cm := &CogneeManager{
+				service: service,
+			}
+			svc := cm.GetService()
+			assert.NotNil(t, svc)
+		}
+	})
+}
+
+// TestCogneeManagerRegisterEventHandler tests CogneeManager RegisterEventHandler
+func TestCogneeManagerRegisterEventHandler(t *testing.T) {
+	t.Run("RegisterEventHandler_NilService", func(t *testing.T) {
+		cm := &CogneeManager{
+			service: nil,
+		}
+
+		// Should not panic with nil service
+		cm.RegisterEventHandler(func(e *CogneeEvent) {})
+	})
+}

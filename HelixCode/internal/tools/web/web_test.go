@@ -643,3 +643,249 @@ func BenchmarkCacheGetHit(b *testing.B) {
 		cm.Get("bench-key")
 	}
 }
+
+// Test 26: RateLimiter Reserve function
+func TestRateLimiter_Reserve(t *testing.T) {
+	rl := NewRateLimiter()
+
+	reservation := rl.Reserve("google")
+	assert.NotNil(t, reservation)
+	assert.True(t, reservation.OK())
+}
+
+// Test 27: RateLimiter GetLimit function
+func TestRateLimiter_GetLimit(t *testing.T) {
+	rl := NewRateLimiter()
+
+	t.Run("get known limit", func(t *testing.T) {
+		limit := rl.GetLimit("google")
+		assert.Equal(t, float64(10), limit.RequestsPerSecond)
+		assert.Equal(t, 20, limit.Burst)
+	})
+
+	t.Run("get unknown limit returns default", func(t *testing.T) {
+		limit := rl.GetLimit("unknown-provider")
+		assert.Equal(t, float64(1), limit.RequestsPerSecond)
+		assert.Equal(t, 3, limit.Burst)
+	})
+}
+
+// Test 28: RateLimiter RemoveLimit function
+func TestRateLimiter_RemoveLimit(t *testing.T) {
+	rl := NewRateLimiter()
+
+	// Set a custom limit
+	rl.SetLimit("custom", RateLimit{RequestsPerSecond: 100, Burst: 200})
+
+	// Verify it exists
+	limit := rl.GetLimit("custom")
+	assert.Equal(t, float64(100), limit.RequestsPerSecond)
+
+	// Remove the limit
+	rl.RemoveLimit("custom")
+
+	// Should now get default
+	limit = rl.GetLimit("custom")
+	assert.Equal(t, float64(1), limit.RequestsPerSecond)
+}
+
+// Test 29: RateLimiter Clear function
+func TestRateLimiter_Clear(t *testing.T) {
+	rl := NewRateLimiter()
+
+	// Use some limiters
+	rl.Allow("google")
+	rl.Allow("bing")
+
+	// Clear all
+	rl.Clear()
+
+	// Operations should still work after clear
+	assert.True(t, rl.Allow("google"))
+}
+
+// Test 30: SearchProvider String function
+func TestSearchProvider_String(t *testing.T) {
+	tests := []struct {
+		provider SearchProvider
+		expected string
+	}{
+		{ProviderGoogle, "google"},
+		{ProviderBing, "bing"},
+		{ProviderDuckDuckGo, "duckduckgo"},
+		{SearchProvider(999), "unknown"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			result := tt.provider.String()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// Test 31: WebTools ClearCache function
+func TestWebTools_ClearCache(t *testing.T) {
+	config := DefaultConfig()
+	config.CacheEnabled = true
+	wt, err := NewWebTools(config)
+	require.NoError(t, err)
+	defer wt.Close()
+
+	// Add something to cache via cache manager
+	wt.cacheManager.Set("test-key", []byte("test-value"))
+
+	// Verify it exists
+	_, ok := wt.cacheManager.Get("test-key")
+	assert.True(t, ok)
+
+	// Clear cache
+	err = wt.ClearCache()
+	require.NoError(t, err)
+
+	// Verify it's gone
+	_, ok = wt.cacheManager.Get("test-key")
+	assert.False(t, ok)
+}
+
+// Test 32: WebTools GetCacheStats function
+func TestWebTools_GetCacheStats(t *testing.T) {
+	config := DefaultConfig()
+	config.CacheEnabled = true
+	wt, err := NewWebTools(config)
+	require.NoError(t, err)
+	defer wt.Close()
+
+	stats := wt.GetCacheStats()
+	assert.NotNil(t, stats)
+}
+
+// Test 33: CacheManager Remove function
+func TestCacheManager_Remove(t *testing.T) {
+	tmpDir := t.TempDir()
+	cm := NewCacheManager(tmpDir, 15*time.Minute, 100*1024*1024)
+	defer cm.Close()
+
+	// Set a value
+	cm.Set("remove-key", []byte("remove-value"))
+
+	// Verify it exists
+	_, ok := cm.Get("remove-key")
+	assert.True(t, ok)
+
+	// Remove it
+	cm.Remove("remove-key")
+
+	// Verify it's gone
+	_, ok = cm.Get("remove-key")
+	assert.False(t, ok)
+}
+
+// Test 34: CacheManager Cleanup function
+func TestCacheManager_Cleanup(t *testing.T) {
+	tmpDir := t.TempDir()
+	// Use very short TTL
+	cm := NewCacheManager(tmpDir, 1*time.Millisecond, 100*1024*1024)
+	defer cm.Close()
+
+	// Set values
+	cm.Set("cleanup-key1", []byte("value1"))
+	cm.Set("cleanup-key2", []byte("value2"))
+
+	// Wait for TTL to expire
+	time.Sleep(10 * time.Millisecond)
+
+	// Run cleanup - it returns error, not count
+	err := cm.Cleanup()
+
+	// Should not error
+	assert.NoError(t, err)
+}
+
+// Test 35: DiskCache Remove function
+func TestDiskCache_Remove(t *testing.T) {
+	tmpDir := t.TempDir()
+	cm := NewCacheManager(tmpDir, 15*time.Minute, 100*1024*1024)
+	defer cm.Close()
+
+	// Set value in disk cache using proper CacheEntry
+	entry := &CacheEntry{
+		Key:       "disk-key",
+		Value:     []byte("disk-value"),
+		Timestamp: time.Now(),
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+		Size:      10,
+	}
+	err := cm.diskCache.Set("disk-key", entry)
+	require.NoError(t, err)
+
+	// Verify it exists
+	_, ok := cm.diskCache.Get("disk-key")
+	assert.True(t, ok)
+
+	// Remove it
+	err = cm.diskCache.Remove("disk-key")
+	require.NoError(t, err)
+
+	// Verify it's gone
+	_, ok = cm.diskCache.Get("disk-key")
+	assert.False(t, ok)
+}
+
+// Test 36: DiskCache Clear function
+func TestDiskCache_Clear(t *testing.T) {
+	tmpDir := t.TempDir()
+	cm := NewCacheManager(tmpDir, 15*time.Minute, 100*1024*1024)
+	defer cm.Close()
+
+	// Set values using proper CacheEntry
+	entry1 := &CacheEntry{
+		Key:       "clear-key1",
+		Value:     []byte("value1"),
+		Timestamp: time.Now(),
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+		Size:      6,
+	}
+	entry2 := &CacheEntry{
+		Key:       "clear-key2",
+		Value:     []byte("value2"),
+		Timestamp: time.Now(),
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+		Size:      6,
+	}
+	cm.diskCache.Set("clear-key1", entry1)
+	cm.diskCache.Set("clear-key2", entry2)
+
+	// Clear
+	err := cm.diskCache.Clear()
+	require.NoError(t, err)
+
+	// Verify entries are gone
+	_, ok := cm.diskCache.Get("clear-key1")
+	assert.False(t, ok)
+}
+
+// Test 37: DiskCache Cleanup function
+func TestDiskCache_Cleanup(t *testing.T) {
+	tmpDir := t.TempDir()
+	// Short TTL
+	cm := NewCacheManager(tmpDir, 1*time.Millisecond, 100*1024*1024)
+	defer cm.Close()
+
+	// Set value using proper CacheEntry
+	entry := &CacheEntry{
+		Key:       "expire-key",
+		Value:     []byte("value"),
+		Timestamp: time.Now(),
+		ExpiresAt: time.Now().Add(1 * time.Millisecond),
+		Size:      5,
+	}
+	cm.diskCache.Set("expire-key", entry)
+
+	// Wait for expiry
+	time.Sleep(10 * time.Millisecond)
+
+	// Run cleanup with TTL
+	err := cm.diskCache.Cleanup(1 * time.Millisecond)
+	assert.NoError(t, err)
+}

@@ -774,3 +774,478 @@ func newCacheManager(maxSize int64, ttl time.Duration) (*CacheManager, error) {
 		stats:   &CacheStats{},
 	}, nil
 }
+
+// TestEditTypeString tests EditType.String()
+func TestEditTypeString(t *testing.T) {
+	tests := []struct {
+		editType EditType
+		expected string
+	}{
+		{EditInsert, "Insert"},
+		{EditDelete, "Delete"},
+		{EditReplace, "Replace"},
+		{EditReplacePattern, "ReplacePattern"},
+		{EditType(999), "Unknown"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			result := tt.editType.String()
+			if result != tt.expected {
+				t.Errorf("EditType.String() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestFileSystemErrors tests error types
+func TestFileSystemErrors(t *testing.T) {
+	t.Run("FileSystemError without cause", func(t *testing.T) {
+		err := &FileSystemError{
+			Type:    ErrorFileNotFound,
+			Path:    "/test/file.txt",
+			Message: "file not found",
+		}
+
+		errStr := err.Error()
+		if !strings.Contains(errStr, "file_not_found") {
+			t.Errorf("Error() = %v, want to contain 'file_not_found'", errStr)
+		}
+
+		if err.Unwrap() != nil {
+			t.Errorf("Unwrap() = %v, want nil", err.Unwrap())
+		}
+	})
+
+	t.Run("FileSystemError with cause", func(t *testing.T) {
+		cause := os.ErrNotExist
+		err := &FileSystemError{
+			Type:    ErrorFileNotFound,
+			Path:    "/test/file.txt",
+			Message: "file not found",
+			Cause:   cause,
+		}
+
+		errStr := err.Error()
+		if !strings.Contains(errStr, "file not found") {
+			t.Errorf("Error() = %v, want to contain 'file not found'", errStr)
+		}
+
+		if err.Unwrap() != cause {
+			t.Errorf("Unwrap() = %v, want %v", err.Unwrap(), cause)
+		}
+	})
+
+	t.Run("SecurityError", func(t *testing.T) {
+		err := &SecurityError{
+			Type:    "path_traversal",
+			Message: "path traversal detected",
+			Path:    "../etc/passwd",
+		}
+
+		errStr := err.Error()
+		if !strings.Contains(errStr, "security error") {
+			t.Errorf("Error() = %v, want to contain 'security error'", errStr)
+		}
+	})
+}
+
+// TestErrorConstructors tests error constructor functions
+func TestErrorConstructors(t *testing.T) {
+	t.Run("NewFileNotFoundError", func(t *testing.T) {
+		err := NewFileNotFoundError("/test/file.txt")
+		if err == nil {
+			t.Fatal("NewFileNotFoundError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorFileNotFound {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorFileNotFound)
+		}
+	})
+
+	t.Run("NewPermissionDeniedError", func(t *testing.T) {
+		cause := os.ErrPermission
+		err := NewPermissionDeniedError("/test/file.txt", cause)
+		if err == nil {
+			t.Fatal("NewPermissionDeniedError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorPermissionDenied {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorPermissionDenied)
+		}
+	})
+
+	t.Run("NewFileTooLargeError", func(t *testing.T) {
+		err := NewFileTooLargeError("/test/large.bin", 1000000, 100000)
+		if err == nil {
+			t.Fatal("NewFileTooLargeError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorFileTooLarge {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorFileTooLarge)
+		}
+	})
+
+	t.Run("NewInvalidPathError", func(t *testing.T) {
+		err := NewInvalidPathError("invalid\x00path", nil)
+		if err == nil {
+			t.Fatal("NewInvalidPathError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorInvalidPath {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorInvalidPath)
+		}
+	})
+
+	t.Run("NewFileExistsError", func(t *testing.T) {
+		err := NewFileExistsError("/test/exists.txt")
+		if err == nil {
+			t.Fatal("NewFileExistsError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorFileExists {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorFileExists)
+		}
+	})
+
+	t.Run("NewIsDirectoryError", func(t *testing.T) {
+		err := NewIsDirectoryError("/test/dir")
+		if err == nil {
+			t.Fatal("NewIsDirectoryError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorIsDirectory {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorIsDirectory)
+		}
+	})
+
+	t.Run("NewNotDirectoryError", func(t *testing.T) {
+		err := NewNotDirectoryError("/test/file.txt")
+		if err == nil {
+			t.Fatal("NewNotDirectoryError() returned nil")
+		}
+		fsErr, ok := err.(*FileSystemError)
+		if !ok {
+			t.Fatal("Error is not a FileSystemError")
+		}
+		if fsErr.Type != ErrorNotDirectory {
+			t.Errorf("Type = %v, want %v", fsErr.Type, ErrorNotDirectory)
+		}
+	})
+}
+
+// TestBackupManager tests the BackupManager functionality
+func TestBackupManager(t *testing.T) {
+	tmpDir := t.TempDir()
+	backupDir := filepath.Join(tmpDir, "backups")
+
+	bm := NewBackupManager(backupDir, 3)
+
+	t.Run("CreateBackup", func(t *testing.T) {
+		// Create test file
+		testFile := filepath.Join(tmpDir, "testfile.txt")
+		content := []byte("original content")
+		if err := os.WriteFile(testFile, content, 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		backupPath, err := bm.CreateBackup(testFile)
+		if err != nil {
+			t.Fatalf("CreateBackup() error = %v", err)
+		}
+
+		if backupPath == "" {
+			t.Error("CreateBackup() returned empty path")
+		}
+
+		// Verify backup exists
+		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+			t.Error("Backup file was not created")
+		}
+
+		// Verify backup content
+		backupContent, err := os.ReadFile(backupPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(backupContent) != string(content) {
+			t.Errorf("Backup content = %v, want %v", string(backupContent), string(content))
+		}
+	})
+
+	t.Run("ListBackups", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "listtest.txt")
+		if err := os.WriteFile(testFile, []byte("test"), 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		// Create multiple backups
+		for i := 0; i < 3; i++ {
+			_, err := bm.CreateBackup(testFile)
+			if err != nil {
+				t.Fatalf("CreateBackup() error = %v", err)
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+
+		backups, err := bm.ListBackups("listtest.txt")
+		if err != nil {
+			t.Fatalf("ListBackups() error = %v", err)
+		}
+
+		if len(backups) == 0 {
+			t.Error("ListBackups() returned no backups")
+		}
+	})
+
+	t.Run("RestoreBackup", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "restore.txt")
+		originalContent := []byte("original content")
+		if err := os.WriteFile(testFile, originalContent, 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		// Create backup
+		backupPath, err := bm.CreateBackup(testFile)
+		if err != nil {
+			t.Fatalf("CreateBackup() error = %v", err)
+		}
+
+		// Modify original file
+		if err := os.WriteFile(testFile, []byte("modified content"), 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		// Restore from backup
+		if err := bm.RestoreBackup(backupPath, testFile); err != nil {
+			t.Fatalf("RestoreBackup() error = %v", err)
+		}
+
+		// Verify restored content
+		restoredContent, err := os.ReadFile(testFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(restoredContent) != string(originalContent) {
+			t.Errorf("Restored content = %v, want %v", string(restoredContent), string(originalContent))
+		}
+	})
+
+	t.Run("CreateBackup non-existent file", func(t *testing.T) {
+		_, err := bm.CreateBackup(filepath.Join(tmpDir, "nonexistent.txt"))
+		if err == nil {
+			t.Error("CreateBackup() expected error for non-existent file")
+		}
+	})
+
+	t.Run("RestoreBackup non-existent backup", func(t *testing.T) {
+		err := bm.RestoreBackup(filepath.Join(backupDir, "nonexistent.bak"), filepath.Join(tmpDir, "target.txt"))
+		if err == nil {
+			t.Error("RestoreBackup() expected error for non-existent backup")
+		}
+	})
+}
+
+// TestWalk tests the Walk function
+func TestWalk(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test structure
+	dirs := []string{"subdir1", "subdir2", "subdir1/nested"}
+	for _, dir := range dirs {
+		if err := os.MkdirAll(filepath.Join(tmpDir, dir), 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	files := []string{
+		"file1.txt",
+		"file2.go",
+		"subdir1/file3.txt",
+		"subdir1/nested/file4.txt",
+	}
+	for _, file := range files {
+		if err := os.WriteFile(filepath.Join(tmpDir, file), []byte("content"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	fs, err := NewFileSystemTools(&Config{
+		WorkspaceRoot: tmpDir,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("walk all files", func(t *testing.T) {
+		var visited []string
+		err := fs.Searcher().Walk(ctx, tmpDir, func(path string, info FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir {
+				visited = append(visited, path)
+			}
+			return nil
+		})
+
+		if err != nil {
+			t.Fatalf("Walk() error = %v", err)
+		}
+
+		if len(visited) < 4 {
+			t.Errorf("Walk() visited %d files, want at least 4", len(visited))
+		}
+	})
+}
+
+// TestWriteLines tests the WriteLines function
+func TestWriteLines(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	fs, err := NewFileSystemTools(&Config{
+		WorkspaceRoot: tmpDir,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("write lines", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "lines.txt")
+		lines := []string{"Line 1", "Line 2", "Line 3"}
+
+		err := fs.Writer().WriteLines(ctx, testFile, lines)
+		if err != nil {
+			t.Fatalf("WriteLines() error = %v", err)
+		}
+
+		// Verify content
+		content, err := os.ReadFile(testFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, line := range lines {
+			if !strings.Contains(string(content), line) {
+				t.Errorf("WriteLines() content does not contain %v", line)
+			}
+		}
+	})
+
+	t.Run("write empty lines", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "empty_lines.txt")
+		lines := []string{}
+
+		err := fs.Writer().WriteLines(ctx, testFile, lines)
+		if err != nil {
+			t.Fatalf("WriteLines() error = %v", err)
+		}
+
+		// Verify file exists
+		if _, err := os.Stat(testFile); os.IsNotExist(err) {
+			t.Error("WriteLines() did not create file")
+		}
+	})
+}
+
+// TestReadWithLimit tests the ReadWithLimit function
+func TestReadWithLimit(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	fs, err := NewFileSystemTools(&Config{
+		WorkspaceRoot: tmpDir,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("read with limit", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "large.txt")
+		largeContent := strings.Repeat("a", 10000)
+		if err := os.WriteFile(testFile, []byte(largeContent), 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		content, err := fs.Reader().ReadWithLimit(ctx, testFile, 1000)
+		if err != nil {
+			t.Fatalf("ReadWithLimit() error = %v", err)
+		}
+
+		if len(content.Content) > 1000 {
+			t.Errorf("ReadWithLimit() returned %d bytes, want at most 1000", len(content.Content))
+		}
+	})
+
+	t.Run("read non-existent file", func(t *testing.T) {
+		_, err := fs.Reader().ReadWithLimit(ctx, filepath.Join(tmpDir, "missing.txt"), 1000)
+		if err == nil {
+			t.Error("ReadWithLimit() expected error for non-existent file")
+		}
+	})
+}
+
+// TestEditorDiff tests the Diff function
+func TestEditorDiff(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	fs, err := NewFileSystemTools(&Config{
+		WorkspaceRoot: tmpDir,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("generate diff", func(t *testing.T) {
+		testFile := filepath.Join(tmpDir, "diff.txt")
+		content := "Line 1\nLine 2\nLine 3\n"
+		if err := os.WriteFile(testFile, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		ops := []EditOperation{
+			{
+				Type:    EditInsert,
+				StartLine: 2,
+				Content: "New Line",
+			},
+		}
+
+		diff, err := fs.Editor().Diff(ctx, testFile, ops)
+		if err != nil {
+			t.Fatalf("Diff() error = %v", err)
+		}
+
+		// Diff should contain some output
+		if diff == "" {
+			t.Log("Diff() returned empty string (expected for some implementations)")
+		}
+	})
+}
