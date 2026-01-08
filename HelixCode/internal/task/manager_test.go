@@ -267,124 +267,21 @@ func TestNewCheckpointManager(t *testing.T) {
 	}
 }
 
-func TestCheckpointManager_CreateCheckpoint(t *testing.T) {
-	// Skip these tests as they require a real database
-	// The functions will panic with nil database
-	t.Skip("Checkpoint tests require real database - skipping for coverage")
-}
-
-func TestCheckpointManager_GetCheckpoints(t *testing.T) {
-	// Skip these tests as they require a real database
-	t.Skip("Checkpoint tests require real database - skipping for coverage")
-}
-
-func TestCheckpointManager_GetLatestCheckpoint(t *testing.T) {
-	// Skip these tests as they require a real database
-	t.Skip("Checkpoint tests require real database - skipping for coverage")
-}
-
-func TestCheckpointManager_DeleteCheckpoint(t *testing.T) {
-	// Skip these tests as they require a real database
-	t.Skip("Checkpoint tests require real database - skipping for coverage")
-}
-
-func TestCheckpointManager_DeleteAllCheckpoints(t *testing.T) {
-	// Skip these tests as they require a real database
-	t.Skip("Checkpoint tests require real database - skipping for coverage")
-}
+// Note: Comprehensive CheckpointManager tests with mock database are in checkpoint_test.go
+// Tests cover: CreateCheckpoint, GetCheckpoints, GetLatestCheckpoint, DeleteCheckpoint, DeleteAllCheckpoints
 
 // ========================================
 // Dependency Manager Tests
 // ========================================
+// Note: Comprehensive DependencyManager tests with mock database are in dependency_test.go
+// Tests cover: ValidateDependencies, CheckDependenciesCompleted, GetBlockingDependencies,
+// DetectCircularDependencies, GetDependencyChain, GetDependentTasks
 
 func TestNewDependencyManager(t *testing.T) {
 	dm := NewDependencyManager(MockDatabase())
 	if dm == nil {
 		t.Fatal("Expected dependency manager, got nil")
 	}
-}
-
-func TestDependencyManager_ValidateDependencies(t *testing.T) {
-	t.Run("with empty dependencies", func(t *testing.T) {
-		dm := NewDependencyManager(MockDatabase())
-		err := dm.ValidateDependencies([]uuid.UUID{})
-		if err != nil {
-			t.Errorf("Expected no error with empty dependencies, got %v", err)
-		}
-	})
-
-	t.Run("with nil dependencies", func(t *testing.T) {
-		dm := NewDependencyManager(MockDatabase())
-		err := dm.ValidateDependencies(nil)
-		if err != nil {
-			t.Errorf("Expected no error with nil dependencies, got %v", err)
-		}
-	})
-
-	t.Run("with dependencies", func(t *testing.T) {
-		t.Skip("Requires real database connection")
-	})
-}
-
-func TestDependencyManager_CheckDependenciesCompleted(t *testing.T) {
-	t.Run("with empty dependencies", func(t *testing.T) {
-		dm := NewDependencyManager(MockDatabase())
-		completed, err := dm.CheckDependenciesCompleted([]uuid.UUID{})
-		if err != nil {
-			t.Errorf("Expected no error, got %v", err)
-		}
-		if !completed {
-			t.Error("Expected true for empty dependencies")
-		}
-	})
-
-	t.Run("with dependencies", func(t *testing.T) {
-		t.Skip("Requires real database connection")
-	})
-}
-
-func TestDependencyManager_GetBlockingDependencies(t *testing.T) {
-	t.Run("with empty dependencies", func(t *testing.T) {
-		dm := NewDependencyManager(MockDatabase())
-		blocking, err := dm.GetBlockingDependencies([]uuid.UUID{})
-		if err != nil {
-			t.Errorf("Expected no error, got %v", err)
-		}
-		if len(blocking) != 0 {
-			t.Errorf("Expected 0 blocking dependencies, got %d", len(blocking))
-		}
-	})
-
-	t.Run("with dependencies", func(t *testing.T) {
-		t.Skip("Requires real database connection")
-	})
-}
-
-func TestDependencyManager_DetectCircularDependencies(t *testing.T) {
-	t.Run("with empty dependencies", func(t *testing.T) {
-		dm := NewDependencyManager(MockDatabase())
-		taskID := uuid.New()
-
-		circular, err := dm.DetectCircularDependencies(taskID, []uuid.UUID{})
-		if err != nil {
-			t.Errorf("Expected no error, got %v", err)
-		}
-		if circular {
-			t.Error("Expected false for empty dependencies")
-		}
-	})
-
-	t.Run("with dependencies", func(t *testing.T) {
-		t.Skip("Requires real database connection")
-	})
-}
-
-func TestDependencyManager_GetDependencyChain(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDependencyManager_GetDependentTasks(t *testing.T) {
-	t.Skip("Requires real database connection")
 }
 
 // ========================================
@@ -699,42 +596,13 @@ func TestNewDatabaseManager(t *testing.T) {
 	}
 }
 
-func TestDatabaseManager_CreateTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_GetTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_ListTasks(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_StartTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_CompleteTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_FailTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
-
-func TestDatabaseManager_DeleteTask(t *testing.T) {
-	t.Skip("Requires real database connection")
-}
+// Note: Comprehensive DatabaseManager tests with mock database are in manager_db_test.go
+// Tests cover: CreateTask, GetTask, ListTasks, StartTask, CompleteTask, FailTask, DeleteTask
+// Note: CreateCheckpoint tests are in checkpoint_test.go
 
 // ========================================
 // Helper Function Tests
 // ========================================
-
-func TestTaskManager_CreateCheckpoint(t *testing.T) {
-	// Skip due to database requirement
-	t.Skip("CreateCheckpoint requires real database connection")
-}
 
 // Test queue sorting behavior
 func TestTaskQueue_PrioritySorting(t *testing.T) {

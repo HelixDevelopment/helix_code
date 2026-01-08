@@ -626,6 +626,57 @@ func TestMergeAliasConfigs(t *testing.T) {
 	}
 }
 
+// TestAliasManager_GetAlias tests getting a specific alias
+func TestAliasManager_GetAlias(t *testing.T) {
+	manager := NewAliasManager(0.7)
+
+	// Add test alias
+	alias := &ModelAlias{
+		Alias:       "gpt4",
+		TargetModel: "gpt-4",
+		Provider:    "openai",
+		Description: "GPT-4 model",
+	}
+	manager.AddAlias(alias)
+
+	tests := []struct {
+		name       string
+		aliasName  string
+		wantExists bool
+		wantModel  string
+	}{
+		{
+			name:       "existing alias lowercase",
+			aliasName:  "gpt4",
+			wantExists: true,
+			wantModel:  "gpt-4",
+		},
+		{
+			name:       "existing alias uppercase",
+			aliasName:  "GPT4",
+			wantExists: true,
+			wantModel:  "gpt-4",
+		},
+		{
+			name:       "non-existing alias",
+			aliasName:  "nonexistent",
+			wantExists: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, exists := manager.GetAlias(tt.aliasName)
+			if exists != tt.wantExists {
+				t.Errorf("GetAlias() exists = %v, want %v", exists, tt.wantExists)
+			}
+			if tt.wantExists && got.TargetModel != tt.wantModel {
+				t.Errorf("GetAlias() model = %v, want %v", got.TargetModel, tt.wantModel)
+			}
+		})
+	}
+}
+
 // TestLevenshteinDistance tests the Levenshtein distance function
 func TestLevenshteinDistance(t *testing.T) {
 	tests := []struct {
@@ -649,5 +700,120 @@ func TestLevenshteinDistance(t *testing.T) {
 				t.Errorf("levenshteinDistance(%q, %q) = %d, want %d", tt.s1, tt.s2, got, tt.want)
 			}
 		})
+	}
+}
+
+// TestLoadAliasManagerFromConfig tests loading alias manager from config file
+func TestLoadAliasManagerFromConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "test-aliases.yaml")
+
+	// Create test config
+	config := &AliasConfig{
+		Version:        "1.0",
+		FuzzyThreshold: 0.75,
+		Aliases: []*ModelAlias{
+			{Alias: "gpt4", TargetModel: "gpt-4", Provider: "openai"},
+			{Alias: "claude", TargetModel: "claude-3-opus", Provider: "anthropic"},
+		},
+	}
+
+	// Save config
+	err := SaveAliasConfig(config, configPath)
+	if err != nil {
+		t.Fatalf("SaveAliasConfig() error = %v", err)
+	}
+
+	// Load manager from config
+	manager, err := LoadAliasManagerFromConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadAliasManagerFromConfig() error = %v", err)
+	}
+
+	if manager == nil {
+		t.Fatal("LoadAliasManagerFromConfig() returned nil manager")
+	}
+
+	if manager.Count() != 2 {
+		t.Errorf("LoadAliasManagerFromConfig() count = %d, want 2", manager.Count())
+	}
+
+	if manager.GetFuzzyThreshold() != 0.75 {
+		t.Errorf("LoadAliasManagerFromConfig() threshold = %v, want 0.75", manager.GetFuzzyThreshold())
+	}
+
+	// Verify aliases are loaded
+	model, _, resolved := manager.Resolve("gpt4")
+	if !resolved || model != "gpt-4" {
+		t.Errorf("Resolve(gpt4) = %v, %v, want gpt-4, true", model, resolved)
+	}
+}
+
+// TestSaveAliasManagerToConfig tests saving alias manager to config file
+func TestSaveAliasManagerToConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "save-test.yaml")
+
+	// Create manager with aliases
+	manager := NewAliasManager(0.8)
+	manager.AddAlias(&ModelAlias{Alias: "test1", TargetModel: "model1", Provider: "provider1"})
+	manager.AddAlias(&ModelAlias{Alias: "test2", TargetModel: "model2", Provider: "provider2"})
+
+	// Save manager to config
+	err := SaveAliasManagerToConfig(manager, configPath)
+	if err != nil {
+		t.Fatalf("SaveAliasManagerToConfig() error = %v", err)
+	}
+
+	// Load config and verify
+	config, err := LoadAliasConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadAliasConfig() error = %v", err)
+	}
+
+	if config.FuzzyThreshold != 0.8 {
+		t.Errorf("Saved config threshold = %v, want 0.8", config.FuzzyThreshold)
+	}
+
+	if len(config.Aliases) != 2 {
+		t.Errorf("Saved config aliases = %d, want 2", len(config.Aliases))
+	}
+}
+
+// TestGetConfigPaths tests getting standard config paths
+func TestGetConfigPaths(t *testing.T) {
+	paths := GetConfigPaths()
+
+	if len(paths) == 0 {
+		t.Error("GetConfigPaths() returned empty slice")
+	}
+
+	// Should include workspace, user, and system paths
+	if len(paths) < 3 {
+		t.Errorf("GetConfigPaths() returned %d paths, expected at least 3", len(paths))
+	}
+
+	// First path should be workspace-relative
+	if paths[0] != ".helix/model-aliases.yaml" {
+		t.Errorf("First path = %v, want .helix/model-aliases.yaml", paths[0])
+	}
+}
+
+// TestLoadAliasManagerFromStandardPaths tests loading from standard paths
+func TestLoadAliasManagerFromStandardPaths(t *testing.T) {
+	// This test loads from standard paths - should return default config
+	// when no config files exist
+	manager, err := LoadAliasManagerFromStandardPaths()
+	if err != nil {
+		t.Fatalf("LoadAliasManagerFromStandardPaths() error = %v", err)
+	}
+
+	if manager == nil {
+		t.Fatal("LoadAliasManagerFromStandardPaths() returned nil manager")
+	}
+
+	// Should have default aliases loaded
+	if manager.Count() == 0 {
+		t.Error("LoadAliasManagerFromStandardPaths() returned empty manager")
 	}
 }

@@ -11,15 +11,15 @@ server:
 database:
   host: ""
   port: 5432
-  user: "helix"
-  password: "helixpass"
-  dbname: "helixcode_prod"
+  user: "${HELIX_DATABASE_USER:helix}"
+  password: "${HELIX_DATABASE_PASSWORD}"  # REQUIRED: Set via environment variable
+  dbname: "${HELIX_DATABASE_NAME:helixcode_prod}"
   sslmode: "disable"
 
 redis:
-  host: "redis"
+  host: "${HELIX_REDIS_HOST:redis}"
   port: 6379
-  password: "redispass"
+  password: "${HELIX_REDIS_PASSWORD}"  # REQUIRED: Set via environment variable
   db: 0
   enabled: true
 

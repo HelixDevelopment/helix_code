@@ -142,11 +142,40 @@ When an LLM provider is configured, the executor uses it for:
 
 Without LLM, the executor falls back to:
 - Static analysis (file structure, dependencies)
-- Template-based code generation
+- Scaffold template generation (see below)
 
 ```go
 // Enable/disable LLM at runtime
 executor.SetLLMProvider(llmProvider)
+```
+
+### Scaffold Templates (No LLM Mode)
+
+When LLM is not configured, the code generation step produces **scaffold templates** - production-ready starting points with best practices built in:
+
+| Language | Features Included |
+|----------|-------------------|
+| Go | Context cancellation, signal handling, structured logging |
+| Node.js | Async/await pattern, graceful shutdown, error handling |
+| Python | Logging module, signal handlers, main guard |
+| Rust | Error propagation, ctrlc handling, Result types |
+
+Each scaffold includes:
+- Task description embedded in comments
+- Signal handling for graceful shutdown (SIGINT/SIGTERM)
+- Proper error handling and exit codes
+- Clear guidance to enable LLM for AI-powered generation
+
+To enable AI-powered code generation, configure an LLM provider:
+
+```yaml
+llm:
+  providers:
+    openai:
+      type: openai
+      enabled: true
+      parameters:
+        api_key: "${OPENAI_API_KEY}"
 ```
 
 ## Step Dependencies

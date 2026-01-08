@@ -221,15 +221,13 @@ func TestQwenProviderIntegration(t *testing.T) {
 	// Test basic generation (if API is working)
 	if health.Status == "healthy" {
 		request := &LLMRequest{
-			ID:           generateTestID(),
-			ProviderType: ProviderTypeQwen,
-			Model:        "qwen-turbo", // Use a lightweight model for testing
+			ID:    generateTestID(),
+			Model: "qwen-turbo", // Use a lightweight model for testing
 			Messages: []Message{
 				{Role: "user", Content: "Hello, can you respond with just 'Hello World'?"},
 			},
 			MaxTokens:   50,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)

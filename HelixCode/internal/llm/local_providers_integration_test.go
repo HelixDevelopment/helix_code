@@ -145,16 +145,13 @@ func TestJanProviderIntegration(t *testing.T) {
 
 // TestKoboldAIProviderIntegration tests the KoboldAI provider with integration
 func TestKoboldAIProviderIntegration(t *testing.T) {
-	config := ProviderConfigEntry{
-		Type:     ProviderTypeKoboldAI,
-		Endpoint: getEnvOrDefault("KOBOLD_ENDPOINT", "http://localhost:5001"),
-		APIKey:   os.Getenv("KOBOLD_API_KEY"),
-		Models:   []string{"kobold-model"},
-		Parameters: map[string]interface{}{
-			"timeout":           30.0,
-			"max_retries":       3,
-			"streaming_support": true,
-		},
+	config := KoboldAIConfig{
+		BaseURL:          getEnvOrDefault("KOBOLD_ENDPOINT", "http://localhost:5001"),
+		APIKey:           os.Getenv("KOBOLD_API_KEY"),
+		DefaultModel:     "kobold-model",
+		Timeout:          30 * time.Second,
+		MaxRetries:       3,
+		StreamingSupport: true,
 	}
 
 	provider, err := NewKoboldAIProvider(config)
@@ -318,16 +315,14 @@ func TestLocalProviderStreaming(t *testing.T) {
 	// Test streaming
 	ch := make(chan LLMResponse, 10)
 	request := &LLMRequest{
-		ID:           uuid.New(),
-		ProviderType: ProviderTypeVLLM,
-		Model:        "test-model",
+		ID:    uuid.New(),
+		Model: "test-model",
 		Messages: []Message{
 			{Role: "user", Content: "Hello! Please respond with a short greeting."},
 		},
 		MaxTokens:   50,
 		Temperature: 0.1,
 		Stream:      true,
-		CreatedAt:   time.Now(),
 	}
 
 	err = provider.GenerateStream(ctx, request, ch)
@@ -389,7 +384,15 @@ func createTestProvider(t *testing.T, providerType ProviderType, envVar, default
 	case ProviderTypeJan:
 		provider, err = NewJanProvider(config)
 	case ProviderTypeKoboldAI:
-		provider, err = NewKoboldAIProvider(config)
+		koboldConfig := KoboldAIConfig{
+			BaseURL:          config.Endpoint,
+			APIKey:           config.APIKey,
+			DefaultModel:     "test-model",
+			Timeout:          30 * time.Second,
+			MaxRetries:       3,
+			StreamingSupport: true,
+		}
+		provider, err = NewKoboldAIProvider(koboldConfig)
 	case ProviderTypeGPT4All:
 		provider, err = NewGPT4AllProvider(config)
 	case ProviderTypeTabbyAPI:
@@ -447,15 +450,13 @@ func testLocalProvider(t *testing.T, provider Provider, providerName string) {
 	// Test basic generation (if provider is healthy)
 	if health.Status == "healthy" && len(models) > 0 {
 		request := &LLMRequest{
-			ID:           generateTestID(),
-			ProviderType: provider.GetType(),
-			Model:        models[0].Name, // Use first available model
+			ID:    generateTestID(),
+			Model: models[0].Name, // Use first available model
 			Messages: []Message{
 				{Role: "user", Content: "Hello! Please respond with just 'Hello World'."},
 			},
 			MaxTokens:   50,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)

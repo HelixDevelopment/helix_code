@@ -19,13 +19,18 @@ import (
 )
 
 // SSHWorkerPool manages SSH-based distributed workers
+// DefaultCLIDownloadURL is the default URL for downloading the Helix CLI binary.
+// Override via SSHWorkerPoolConfig or HELIX_CLI_DOWNLOAD_URL environment variable.
+const DefaultCLIDownloadURL = "https://github.com/helixdev/helix-cli/releases/latest/download/helix-linux-amd64"
+
 type SSHWorkerPool struct {
-	workers     map[uuid.UUID]*SSHWorker
-	mutex       sync.RWMutex
-	autoInstall bool
-	hostKeys    *HostKeyManager
-	isolation   *WorkerIsolationManager
-	consensus   *ConsensusManager
+	workers        map[uuid.UUID]*SSHWorker
+	mutex          sync.RWMutex
+	autoInstall    bool
+	cliDownloadURL string
+	hostKeys       *HostKeyManager
+	isolation      *WorkerIsolationManager
+	consensus      *ConsensusManager
 }
 
 // SSHWorker represents an SSH-accessible worker node
@@ -197,11 +202,27 @@ func (hkm *HostKeyManager) GetHostKeyFingerprint(key ssh.PublicKey) string {
 
 // NewSSHWorkerPool creates a new SSH worker pool
 func NewSSHWorkerPool(autoInstall bool) *SSHWorkerPool {
+	return NewSSHWorkerPoolWithConfig(autoInstall, "")
+}
+
+// NewSSHWorkerPoolWithConfig creates a new SSH worker pool with custom CLI download URL.
+// If cliDownloadURL is empty, it uses DefaultCLIDownloadURL or HELIX_CLI_DOWNLOAD_URL env var.
+func NewSSHWorkerPoolWithConfig(autoInstall bool, cliDownloadURL string) *SSHWorkerPool {
+	// Determine CLI download URL: parameter > env var > default
+	downloadURL := cliDownloadURL
+	if downloadURL == "" {
+		downloadURL = os.Getenv("HELIX_CLI_DOWNLOAD_URL")
+	}
+	if downloadURL == "" {
+		downloadURL = DefaultCLIDownloadURL
+	}
+
 	pool := &SSHWorkerPool{
-		workers:     make(map[uuid.UUID]*SSHWorker),
-		autoInstall: autoInstall,
-		hostKeys:    NewHostKeyManager(""),
-		isolation:   NewWorkerIsolationManager(),
+		workers:        make(map[uuid.UUID]*SSHWorker),
+		autoInstall:    autoInstall,
+		cliDownloadURL: downloadURL,
+		hostKeys:       NewHostKeyManager(""),
+		isolation:      NewWorkerIsolationManager(),
 	}
 
 	// Initialize consensus manager
@@ -557,26 +578,31 @@ func (p *SSHWorkerPool) installHelixCLI(ctx context.Context, worker *SSHWorker) 
 		return nil
 	}
 
-	// Installation script for Helix CLI
-	installScript := `#!/bin/bash
+	// Installation script for Helix CLI using configurable URL
+	installScript := fmt.Sprintf(`#!/bin/bash
 set -e
 
 # Download and install Helix CLI
-curl -L https://github.com/helixdev/helix-cli/releases/latest/download/helix-linux-amd64 -o /tmp/helix
+curl -L %s -o /tmp/helix
 chmod +x /tmp/helix
 sudo mv /tmp/helix /usr/local/bin/
 
 # Verify installation
 helix --version
-`
+`, p.cliDownloadURL)
 
 	_, err = p.ExecuteCommand(ctx, worker.ID, installScript)
 	if err != nil {
 		return fmt.Errorf("failed to install Helix CLI: %v", err)
 	}
 
-	log.Printf("Helix CLI installed on %s", worker.Hostname)
+	log.Printf("Helix CLI installed on %s from %s", worker.Hostname, p.cliDownloadURL)
 	return nil
+}
+
+// GetCLIDownloadURL returns the configured CLI download URL
+func (p *SSHWorkerPool) GetCLIDownloadURL() string {
+	return p.cliDownloadURL
 }
 
 func (p *SSHWorkerPool) detectWorkerCapabilities(ctx context.Context, worker *SSHWorker) error {

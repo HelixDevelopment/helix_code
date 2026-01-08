@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -16,6 +17,42 @@ func TestSSHWorkerPool_Creation(t *testing.T) {
 
 	pool2 := NewSSHWorkerPool(false)
 	assert.False(t, pool2.autoInstall)
+}
+
+// TestSSHWorkerPool_CLIDownloadURL tests configurable CLI download URL
+func TestSSHWorkerPool_CLIDownloadURL(t *testing.T) {
+	t.Run("default URL when no config", func(t *testing.T) {
+		// Clear any env var
+		os.Unsetenv("HELIX_CLI_DOWNLOAD_URL")
+
+		pool := NewSSHWorkerPool(false)
+		assert.Equal(t, DefaultCLIDownloadURL, pool.GetCLIDownloadURL())
+	})
+
+	t.Run("custom URL via constructor", func(t *testing.T) {
+		customURL := "https://custom.example.com/helix-cli"
+		pool := NewSSHWorkerPoolWithConfig(false, customURL)
+		assert.Equal(t, customURL, pool.GetCLIDownloadURL())
+	})
+
+	t.Run("URL from environment variable", func(t *testing.T) {
+		envURL := "https://env.example.com/helix-cli"
+		os.Setenv("HELIX_CLI_DOWNLOAD_URL", envURL)
+		defer os.Unsetenv("HELIX_CLI_DOWNLOAD_URL")
+
+		pool := NewSSHWorkerPool(false)
+		assert.Equal(t, envURL, pool.GetCLIDownloadURL())
+	})
+
+	t.Run("constructor URL takes precedence over env var", func(t *testing.T) {
+		envURL := "https://env.example.com/helix-cli"
+		customURL := "https://custom.example.com/helix-cli"
+		os.Setenv("HELIX_CLI_DOWNLOAD_URL", envURL)
+		defer os.Unsetenv("HELIX_CLI_DOWNLOAD_URL")
+
+		pool := NewSSHWorkerPoolWithConfig(false, customURL)
+		assert.Equal(t, customURL, pool.GetCLIDownloadURL())
+	})
 }
 
 // TestSSHWorkerPool_AddWorker tests adding workers to the pool

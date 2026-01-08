@@ -54,8 +54,8 @@ func TestProductionDeployment(t *testing.T) {
 		regResp, err := http.Post(
 			serverURL+"/api/v1/auth/register",
 			"application/json",
-			bytes.NewBuffer([]byte(fmt.Sprintf(`{"username":"%s","email":"%s","password":"%s","role":"%s"}`, 
-				registrationData["username"], registrationData["email"], registrationData["password"], registrationData["role"])))
+			bytes.NewBuffer([]byte(fmt.Sprintf(`{"username":"%s","email":"%s","password":"%s","role":"%s"}`,
+				registrationData["username"], registrationData["email"], registrationData["password"], registrationData["role"]))),
 		)
 		if err != nil {
 			t.Logf("⚠️ Registration may have failed (expected in some configs): %v", err)

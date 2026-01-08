@@ -235,3 +235,420 @@ func TestListWorkers(t *testing.T) {
 // ========================================
 
 // TestHealthCheck removed - requires redis initialization
+
+// ========================================
+// getServerInfo Handler Tests
+// ========================================
+
+func TestGetServerInfo(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/server/info", server.getServerInfo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/server/info", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	info := response["info"].(map[string]interface{})
+	assert.Equal(t, "HelixCode Server", info["name"])
+	assert.Equal(t, "1.0.0", info["version"])
+	assert.Contains(t, info, "uptime")
+	assert.Contains(t, info, "start_time")
+	assert.Contains(t, info, "database")
+	assert.Contains(t, info, "redis")
+	assert.Contains(t, info, "features")
+}
+
+// ========================================
+// getMetrics Handler Tests
+// ========================================
+
+func TestGetMetrics(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/metrics", server.getMetrics)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/metrics", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	metrics := response["metrics"].(map[string]interface{})
+	assert.Contains(t, metrics, "uptime_seconds")
+	assert.Contains(t, metrics, "requests")
+	assert.Contains(t, metrics, "resources")
+	assert.Contains(t, metrics, "database")
+}
+
+// ========================================
+// LLM Provider Handler Tests
+// ========================================
+
+func TestListLLMProviders(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/llm/providers", server.listLLMProviders)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/llm/providers", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	providers := response["providers"].([]interface{})
+	assert.Greater(t, len(providers), 0, "Should have LLM providers")
+
+	// Check first provider structure
+	firstProvider := providers[0].(map[string]interface{})
+	assert.Contains(t, firstProvider, "id")
+	assert.Contains(t, firstProvider, "name")
+	assert.Contains(t, firstProvider, "type")
+	assert.Contains(t, firstProvider, "status")
+}
+
+func TestGetLLMProvider(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/llm/providers/:id", server.getLLMProvider)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/llm/providers/openai", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	provider := response["provider"].(map[string]interface{})
+	assert.Equal(t, "openai", provider["id"])
+	assert.Contains(t, provider, "status")
+}
+
+func TestListLLMModels(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/llm/models", server.listLLMModels)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/llm/models", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	models := response["models"].([]interface{})
+	assert.Greater(t, len(models), 0, "Should have LLM models")
+
+	// Check first model structure
+	firstModel := models[0].(map[string]interface{})
+	assert.Contains(t, firstModel, "id")
+	assert.Contains(t, firstModel, "provider")
+	assert.Contains(t, firstModel, "context_length")
+}
+
+// ========================================
+// Memory System Handler Tests
+// ========================================
+
+func TestListMemorySystems(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/memory/systems", server.listMemorySystems)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/memory/systems", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+
+	systems := response["systems"].([]interface{})
+	assert.Greater(t, len(systems), 0, "Should have memory systems")
+}
+
+func TestGetMemoryStats(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/memory/stats", server.getMemoryStats)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/memory/stats", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "success", response["status"])
+	assert.Contains(t, response, "stats")
+}
+
+// ========================================
+// Workflow Handler Tests
+// ========================================
+
+func TestExecutePlanningWorkflow_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/workflows/planning", server.executePlanningWorkflow)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/workflows/planning", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	// Should fail without proper request body
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+}
+
+func TestExecuteBuildingWorkflow_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/workflows/building", server.executeBuildingWorkflow)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/workflows/building", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+}
+
+func TestExecuteTestingWorkflow_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/workflows/testing", server.executeTestingWorkflow)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/workflows/testing", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+}
+
+func TestExecuteRefactoringWorkflow_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/workflows/refactoring", server.executeRefactoringWorkflow)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/workflows/refactoring", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+}
+
+// ========================================
+// Task Handler Additional Tests
+// ========================================
+
+func TestCreateTask_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/tasks", server.createTask)
+
+	// Invalid JSON
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/tasks", bytes.NewBuffer([]byte("not json")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestCreateTask_EmptyBody(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/tasks", server.createTask)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/tasks", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	// Should fail without required fields
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+}
+
+func TestGetTask_NotFound(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/tasks/:id", server.getTask)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/tasks/nonexistent-id", nil)
+	router.ServeHTTP(w, req)
+
+	// Should return not found, ok (when manager is nil), or internal error
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+}
+
+func TestUpdateTask_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.PUT("/api/v1/tasks/:id", server.updateTask)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/api/v1/tasks/test-id", bytes.NewBuffer([]byte("not json")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestDeleteTask_NotFound(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.DELETE("/api/v1/tasks/:id", server.deleteTask)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/api/v1/tasks/nonexistent-id", nil)
+	router.ServeHTTP(w, req)
+
+	// Should return not found or internal error
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK}, w.Code)
+}
+
+// ========================================
+// Project Handler Additional Tests
+// ========================================
+
+func TestCreateProject_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.POST("/api/v1/projects", server.createProject)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/projects", bytes.NewBuffer([]byte("not json")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestGetProject_NotFound(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/projects/:id", server.getProject)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/projects/nonexistent-id", nil)
+	router.ServeHTTP(w, req)
+
+	// Should return not found or internal error
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+}
+
+func TestUpdateProject_InvalidRequest(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.PUT("/api/v1/projects/:id", server.updateProject)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/api/v1/projects/test-id", bytes.NewBuffer([]byte("not json")))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestDeleteProject_NotFound(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.DELETE("/api/v1/projects/:id", server.deleteProject)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/api/v1/projects/nonexistent-id", nil)
+	router.ServeHTTP(w, req)
+
+	// Should return not found or success (if project manager is nil)
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK}, w.Code)
+}
+
+// ========================================
+// Worker Handler Additional Tests
+// ========================================
+
+func TestGetWorker_NotFound(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/workers/:id", server.getWorker)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/workers/nonexistent-id", nil)
+	router.ServeHTTP(w, req)
+
+	// Should return not found, ok (when manager is nil), or internal error
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+}
+
+// ========================================
+// Auth Handler Additional Tests
+// ========================================
+
+func TestGetCurrentUser_NoAuth(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/auth/me", server.getCurrentUser)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/auth/me", nil)
+	router.ServeHTTP(w, req)
+
+	// Should fail without auth token
+	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusInternalServerError}, w.Code)
+}

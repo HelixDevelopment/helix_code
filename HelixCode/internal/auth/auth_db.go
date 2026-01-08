@@ -24,14 +24,15 @@ func NewAuthDB(db database.DatabaseInterface) *AuthDB {
 // CreateUser creates a new user in the database
 func (a *AuthDB) CreateUser(ctx context.Context, user *User, passwordHash string) error {
 	query := `
-		INSERT INTO users (id, username, email, password_hash, is_active, is_verified, mfa_enabled, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+		INSERT INTO users (id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
 	_, err := a.db.Exec(ctx, query,
 		user.ID,
 		user.Username,
 		user.Email,
 		passwordHash,
+		sql.NullString{String: user.DisplayName, Valid: user.DisplayName != ""},
 		user.IsActive,
 		user.IsVerified,
 		user.MFAEnabled,
@@ -49,12 +50,13 @@ func (a *AuthDB) CreateUser(ctx context.Context, user *User, passwordHash string
 // GetUserByUsername retrieves a user by username
 func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User, string, error) {
 	query := `
-		SELECT id, username, email, password_hash, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
+		SELECT id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
 		FROM users
 		WHERE username = $1`
 
 	var user User
 	var passwordHash string
+	var displayName sql.NullString
 	var lastLogin sql.NullTime
 
 	err := a.db.QueryRow(ctx, query, username).Scan(
@@ -62,6 +64,7 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 		&user.Username,
 		&user.Email,
 		&passwordHash,
+		&displayName,
 		&user.IsActive,
 		&user.IsVerified,
 		&user.MFAEnabled,
@@ -69,7 +72,6 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
-	user.DisplayName = "" // Not stored in DB
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -78,6 +80,9 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 		return nil, "", fmt.Errorf("failed to get user by username: %v", err)
 	}
 
+	if displayName.Valid {
+		user.DisplayName = displayName.String
+	}
 	if lastLogin.Valid {
 		user.LastLogin = lastLogin.Time
 	}
@@ -88,12 +93,13 @@ func (a *AuthDB) GetUserByUsername(ctx context.Context, username string) (*User,
 // GetUserByEmail retrieves a user by email
 func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, string, error) {
 	query := `
-		SELECT id, username, email, password_hash, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
+		SELECT id, username, email, password_hash, display_name, is_active, is_verified, mfa_enabled, last_login, created_at, updated_at
 		FROM users
 		WHERE email = $1`
 
 	var user User
 	var passwordHash string
+	var displayName sql.NullString
 	var lastLogin sql.NullTime
 
 	err := a.db.QueryRow(ctx, query, email).Scan(
@@ -101,6 +107,7 @@ func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, strin
 		&user.Username,
 		&user.Email,
 		&passwordHash,
+		&displayName,
 		&user.IsActive,
 		&user.IsVerified,
 		&user.MFAEnabled,
@@ -108,7 +115,6 @@ func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, strin
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
-	user.DisplayName = "" // Not stored in DB
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -117,6 +123,9 @@ func (a *AuthDB) GetUserByEmail(ctx context.Context, email string) (*User, strin
 		return nil, "", fmt.Errorf("failed to get user by email: %v", err)
 	}
 
+	if displayName.Valid {
+		user.DisplayName = displayName.String
+	}
 	if lastLogin.Valid {
 		user.LastLogin = lastLogin.Time
 	}
@@ -132,13 +141,14 @@ func (a *AuthDB) GetUserByID(ctx context.Context, id uuid.UUID) (*User, error) {
 		WHERE id = $1`
 
 	var user User
+	var displayName sql.NullString
 	var lastLogin sql.NullTime
 
 	err := a.db.QueryRow(ctx, query, id).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
-		&user.DisplayName,
+		&displayName,
 		&user.IsActive,
 		&user.IsVerified,
 		&user.MFAEnabled,
@@ -154,6 +164,9 @@ func (a *AuthDB) GetUserByID(ctx context.Context, id uuid.UUID) (*User, error) {
 		return nil, fmt.Errorf("failed to get user by ID: %v", err)
 	}
 
+	if displayName.Valid {
+		user.DisplayName = displayName.String
+	}
 	if lastLogin.Valid {
 		user.LastLogin = lastLogin.Time
 	}

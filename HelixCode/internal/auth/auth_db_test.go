@@ -78,6 +78,7 @@ func TestAuthDB_GetUserByUsernameSuccess(t *testing.T) {
 	userID := uuid.New()
 	now := time.Now()
 	lastLogin := sql.NullTime{Time: now, Valid: true}
+	displayName := sql.NullString{String: "Test User", Valid: true}
 	passwordHash := "$2a$10$hashedpassword"
 
 	mockRow := database.NewMockRowWithValues(
@@ -85,6 +86,7 @@ func TestAuthDB_GetUserByUsernameSuccess(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
+		displayName,
 		true,  // is_active
 		false, // is_verified
 		false, // mfa_enabled
@@ -101,6 +103,7 @@ func TestAuthDB_GetUserByUsernameSuccess(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, userID, user.ID)
 	assert.Equal(t, "testuser", user.Username)
+	assert.Equal(t, "Test User", user.DisplayName)
 	assert.Equal(t, passwordHash, hash)
 	assert.Equal(t, now.Unix(), user.LastLogin.Unix())
 	mockDB.AssertExpectations(t)
@@ -129,6 +132,7 @@ func TestAuthDB_GetUserByUsernameNoLastLogin(t *testing.T) {
 	userID := uuid.New()
 	now := time.Now()
 	noLastLogin := sql.NullTime{Valid: false}
+	noDisplayName := sql.NullString{Valid: false}
 	passwordHash := "$2a$10$hashedpassword"
 
 	mockRow := database.NewMockRowWithValues(
@@ -136,6 +140,7 @@ func TestAuthDB_GetUserByUsernameNoLastLogin(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
+		noDisplayName,
 		true,
 		false,
 		false,
@@ -152,6 +157,7 @@ func TestAuthDB_GetUserByUsernameNoLastLogin(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, passwordHash, hash)
 	assert.True(t, user.LastLogin.IsZero())
+	assert.Empty(t, user.DisplayName)
 	mockDB.AssertExpectations(t)
 }
 
@@ -162,6 +168,7 @@ func TestAuthDB_GetUserByEmailSuccess(t *testing.T) {
 	userID := uuid.New()
 	now := time.Now()
 	lastLogin := sql.NullTime{Time: now, Valid: true}
+	displayName := sql.NullString{String: "Test User", Valid: true}
 	passwordHash := "$2a$10$hashedpassword"
 
 	mockRow := database.NewMockRowWithValues(
@@ -169,6 +176,7 @@ func TestAuthDB_GetUserByEmailSuccess(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		passwordHash,
+		displayName,
 		true,
 		true,
 		false,
@@ -185,6 +193,7 @@ func TestAuthDB_GetUserByEmailSuccess(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, userID, user.ID)
 	assert.Equal(t, "test@example.com", user.Email)
+	assert.Equal(t, "Test User", user.DisplayName)
 	assert.Equal(t, passwordHash, hash)
 	mockDB.AssertExpectations(t)
 }
@@ -212,12 +221,13 @@ func TestAuthDB_GetUserByIDSuccess(t *testing.T) {
 	userID := uuid.New()
 	now := time.Now()
 	lastLogin := sql.NullTime{Time: now, Valid: true}
+	displayName := sql.NullString{String: "Test User", Valid: true}
 
 	mockRow := database.NewMockRowWithValues(
 		userID,
 		"testuser",
 		"test@example.com",
-		"Test User",
+		displayName,
 		true,
 		true,
 		true, // mfa_enabled
@@ -234,6 +244,7 @@ func TestAuthDB_GetUserByIDSuccess(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, userID, user.ID)
 	assert.Equal(t, "testuser", user.Username)
+	assert.Equal(t, "Test User", user.DisplayName)
 	assert.True(t, user.MFAEnabled)
 	assert.Equal(t, now.Unix(), user.LastLogin.Unix())
 	mockDB.AssertExpectations(t)

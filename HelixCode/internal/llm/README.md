@@ -10,7 +10,7 @@ This package handles:
 - Cloud APIs (OpenAI, Anthropic, Gemini, etc.)
 - Provider selection strategies
 - Streaming responses
-- Token counting and cost tracking
+- Token counting and usage tracking
 
 ## Supported Providers
 
@@ -46,24 +46,62 @@ This package handles:
 
 ```go
 type Provider interface {
-    Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error)
-    GenerateStream(ctx context.Context, req *GenerateRequest) (<-chan StreamChunk, error)
-    GetCapabilities() *Capabilities
+    GetType() ProviderType
+    GetName() string
+    GetModels() []ModelInfo
+    GetCapabilities() []ModelCapability
+    Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error)
+    GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error
+    IsAvailable(ctx context.Context) bool
+    GetHealth(ctx context.Context) (*ProviderHealth, error)
+    Close() error
 }
 ```
 
-### GenerateRequest
+### LLMRequest
 
 ```go
-type GenerateRequest struct {
-    Model       string
-    Prompt      string
-    Messages    []Message
-    MaxTokens   int
-    Temperature float64
-    TopP        float64
-    Stop        []string
-    Stream      bool
+type LLMRequest struct {
+    ID               uuid.UUID              `json:"id"`
+    Model            string                 `json:"model"`
+    Messages         []Message              `json:"messages"`
+    MaxTokens        int                    `json:"max_tokens"`
+    Temperature      float64                `json:"temperature"`
+    TopP             float64                `json:"top_p"`
+    Stream           bool                   `json:"stream"`
+    Tools            []Tool                 `json:"tools"`
+    ToolChoice       interface{}            `json:"tool_choice"`
+    Stop             []string               `json:"stop"`
+    ThinkingBudget   int                    `json:"thinking_budget"`
+    CacheConfig      *CacheConfig           `json:"cache_config"`
+    Reasoning        *ReasoningConfig       `json:"reasoning"`
+    ProviderMetadata map[string]interface{} `json:"provider_metadata"`
+}
+```
+
+### LLMResponse
+
+```go
+type LLMResponse struct {
+    ID               uuid.UUID              `json:"id"`
+    RequestID        uuid.UUID              `json:"request_id"`
+    Content          string                 `json:"content"`
+    ToolCalls        []ToolCall             `json:"tool_calls"`
+    Usage            Usage                  `json:"usage"`
+    FinishReason     string                 `json:"finish_reason"`
+    ProcessingTime   time.Duration          `json:"processing_time"`
+    CreatedAt        time.Time              `json:"created_at"`
+    ProviderMetadata map[string]interface{} `json:"provider_metadata"`
+}
+```
+
+### Usage
+
+```go
+type Usage struct {
+    PromptTokens     int `json:"prompt_tokens"`
+    CompletionTokens int `json:"completion_tokens"`
+    TotalTokens      int `json:"total_tokens"`
 }
 ```
 
@@ -73,6 +111,7 @@ type GenerateRequest struct {
 type Message struct {
     Role    string // "system", "user", "assistant"
     Content string
+    Name    string // optional
 }
 ```
 
@@ -95,8 +134,9 @@ provider, err := llm.NewProvider(config)
 ### Generating Text
 
 ```go
-req := &llm.GenerateRequest{
-    Prompt:      "Write a function that sorts an array",
+req := &llm.LLMRequest{
+    Model:       "gpt-4",
+    Messages:    []llm.Message{{Role: "user", Content: "Write a function that sorts an array"}},
     MaxTokens:   500,
     Temperature: 0.7,
 }
@@ -106,43 +146,71 @@ if err != nil {
     return err
 }
 
-fmt.Println(resp.Text)
+fmt.Println(resp.Content)
 fmt.Printf("Tokens used: %d\n", resp.Usage.TotalTokens)
 ```
 
 ### Streaming Responses
 
 ```go
-req := &llm.GenerateRequest{
-    Prompt: "Explain machine learning",
-    Stream: true,
+req := &llm.LLMRequest{
+    Model:    "gpt-4",
+    Messages: []llm.Message{{Role: "user", Content: "Explain machine learning"}},
+    Stream:   true,
 }
 
-chunks, err := provider.GenerateStream(ctx, req)
-if err != nil {
-    return err
-}
+responseChan := make(chan llm.LLMResponse, 100)
+go func() {
+    err := provider.GenerateStream(ctx, req, responseChan)
+    if err != nil {
+        log.Printf("Stream error: %v", err)
+    }
+}()
 
-for chunk := range chunks {
-    fmt.Print(chunk.Text)
+for chunk := range responseChan {
+    fmt.Print(chunk.Content)
 }
 ```
 
-### Using Multiple Providers
+### Using ModelManager
 
 ```go
-manager := llm.NewProviderManager(config)
+// Create and configure ModelManager
+manager := llm.NewModelManager()
 
-// Add providers
-manager.AddProvider("openai", openaiProvider)
-manager.AddProvider("anthropic", anthropicProvider)
-manager.AddProvider("ollama", ollamaProvider)
+// Register providers
+manager.RegisterProvider(openaiProvider)
+manager.RegisterProvider(anthropicProvider)
+manager.RegisterProvider(ollamaProvider)
 
-// Use default provider
-resp, err := manager.Generate(ctx, req)
+// Select optimal model based on criteria
+criteria := llm.ModelSelectionCriteria{
+    TaskType:        "code_generation",
+    RequiredCaps:    []llm.ModelCapability{llm.CapabilityCodeGeneration},
+    MaxContextSize:  8192,
+    QualityPref:     "balanced",
+}
+model, err := manager.SelectOptimalModel(criteria)
 
-// Use specific provider
-resp, err := manager.GenerateWithProvider(ctx, "anthropic", req)
+// Get available models
+models := manager.GetAvailableModels()
+
+// Get models by capability
+codeModels := manager.GetModelsByCapability([]llm.ModelCapability{llm.CapabilityCodeGeneration})
+
+// Health check all providers
+healthMap := manager.HealthCheck(ctx)
+```
+
+### Using InitializeModelManager
+
+```go
+// Initialize from configuration
+configs := []llm.ProviderConfigEntry{
+    {Type: llm.ProviderTypeOpenAI, APIKey: apiKey, Enabled: true},
+    {Type: llm.ProviderTypeOllama, Endpoint: "http://localhost:11434", Enabled: true},
+}
+manager, err := llm.InitializeModelManager(configs)
 ```
 
 ## Provider Selection Strategies
@@ -185,15 +253,14 @@ llm:
       model: "llama2"
 ```
 
-## Cost Tracking
+## Token Usage Tracking
 
 ```go
-// Get cost information
-cost := resp.Usage.Cost
-currency := resp.Usage.Currency
-
-// Get provider cost rates
-rates := provider.GetCostRates()
+// Get token usage from response
+resp, _ := provider.Generate(ctx, req)
+fmt.Printf("Prompt tokens: %d\n", resp.Usage.PromptTokens)
+fmt.Printf("Completion tokens: %d\n", resp.Usage.CompletionTokens)
+fmt.Printf("Total tokens: %d\n", resp.Usage.TotalTokens)
 ```
 
 ## Testing

@@ -11,17 +11,17 @@ server:
 database:
   host: ""  # Empty for testing without database
   port: 5432
-  user: "helix"
-  password: "helixpass"
-  dbname: "helixcode_prod"
+  user: "helix_test"
+  password: "helix_test_password"  # TEST ONLY - safe for testing environments
+  dbname: "helixcode_test"  # TEST database - never use production database names
   sslmode: "disable"
 
 redis:
-  host: "redis"
+  host: "localhost"
   port: 6379
-  password: "redispass"
-  db: 0
-  enabled: true
+  password: "redis_test_password"  # TEST ONLY - safe for testing environments
+  db: 15  # Use high DB number for test isolation
+  enabled: false  # Disabled by default for unit tests
 
 auth:
   jwt_secret: "test-secret-do-not-use-in-production-minimum-32-bytes"  # TEST ONLY - use env var in production
