@@ -502,3 +502,121 @@ func TestHelperFunctions(t *testing.T) {
 		assert.Equal(t, 100, opts.BufferSize)
 	})
 }
+
+// TestConsoleMonitorCounts tests console monitor count and has methods
+func TestConsoleMonitorCounts(t *testing.T) {
+	t.Run("initial counts are zero", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		assert.Equal(t, 0, monitor.GetErrorCount())
+		assert.Equal(t, 0, monitor.GetMessageCount())
+		assert.False(t, monitor.HasErrors())
+	})
+
+	t.Run("get message log returns copy", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		log := monitor.GetMessageLog()
+		assert.NotNil(t, log)
+		assert.Empty(t, log)
+	})
+
+	t.Run("get error log returns copy", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		log := monitor.GetErrorLog()
+		assert.NotNil(t, log)
+		assert.Empty(t, log)
+	})
+
+	t.Run("custom console monitor options", func(t *testing.T) {
+		opts := &ConsoleMonitorOptions{
+			MaxLogSize:   500,
+			FilterErrors: false,
+			BufferSize:   50,
+		}
+		monitor := NewConsoleMonitor(opts)
+		assert.NotNil(t, monitor)
+		assert.Equal(t, 500, monitor.maxLogSize)
+		assert.False(t, monitor.filterErrors)
+	})
+}
+
+// TestControllerWithoutBrowser tests controller functions that don't require a browser
+func TestControllerWithoutBrowser(t *testing.T) {
+	discovery := NewDefaultChromeDiscovery()
+	controller := NewDefaultController(discovery)
+
+	t.Run("list browsers returns empty initially", func(t *testing.T) {
+		browsers := controller.ListBrowsers()
+		assert.Empty(t, browsers)
+	})
+
+	t.Run("get non-existent browser returns error", func(t *testing.T) {
+		_, err := controller.GetBrowser("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("close non-existent browser returns error", func(t *testing.T) {
+		err := controller.Close("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("get context for non-existent browser returns error", func(t *testing.T) {
+		_, _, err := controller.GetContext("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("close all browsers when none exist", func(t *testing.T) {
+		// Should not panic or error when no browsers exist
+		controller.CloseAll()
+		browsers := controller.ListBrowsers()
+		assert.Empty(t, browsers)
+	})
+}
+
+// TestScreenshotCapture tests screenshot capture without browser
+func TestScreenshotCapture(t *testing.T) {
+	t.Run("create screenshot capture", func(t *testing.T) {
+		discovery := NewDefaultChromeDiscovery()
+		controller := NewDefaultController(discovery)
+		executor := NewDefaultActionExecutor(controller)
+		capture := NewDefaultScreenshotCapture(controller, executor)
+		assert.NotNil(t, capture)
+	})
+}
+
+// TestActionExecutor tests action executor without browser
+func TestActionExecutor(t *testing.T) {
+	t.Run("create action executor", func(t *testing.T) {
+		discovery := NewDefaultChromeDiscovery()
+		controller := NewDefaultController(discovery)
+		executor := NewDefaultActionExecutor(controller)
+		assert.NotNil(t, executor)
+	})
+}
+
+// TestSelectorTypes tests selector type values
+func TestSelectorTypes(t *testing.T) {
+	t.Run("selector type values", func(t *testing.T) {
+		// SelectorType is an int enum
+		assert.Equal(t, SelectorType(0), SelectorCSS)
+		assert.Equal(t, SelectorType(1), SelectorXPath)
+		assert.Equal(t, SelectorType(2), SelectorText)
+	})
+}
+
+// TestConsoleLogger tests console logger creation
+func TestConsoleLogger(t *testing.T) {
+	t.Run("create console logger", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		logger := NewConsoleLogger(monitor, "test")
+		assert.NotNil(t, logger)
+	})
+
+	t.Run("create console logger without prefix", func(t *testing.T) {
+		monitor := NewConsoleMonitor(nil)
+		logger := NewConsoleLogger(monitor, "")
+		assert.NotNil(t, logger)
+	})
+}
