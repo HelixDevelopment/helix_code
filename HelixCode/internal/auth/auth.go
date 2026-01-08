@@ -13,6 +13,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -327,16 +328,75 @@ func (s *AuthService) verifyPassword(password, hash string) bool {
 }
 
 func (s *AuthService) verifyArgon2Password(password, hash string) bool {
-	// This is a simplified implementation
-	// In production, you'd want to properly parse the argon2 hash
+	// Parse Argon2 hash format: $argon2id$v=19$m=65536,t=1,p=4$salt$hash
 	parts := strings.Split(hash, "$")
 	if len(parts) != 6 {
 		return false
 	}
 
-	// For now, just use a simple comparison
-	// In a real implementation, you'd decode the parameters and verify
-	return subtle.ConstantTimeCompare([]byte(hash), []byte(hash)) == 1
+	// Validate algorithm type (support argon2id, argon2i, argon2d)
+	algorithm := parts[1]
+	if algorithm != "argon2id" && algorithm != "argon2i" && algorithm != "argon2d" {
+		return false
+	}
+
+	// Parse version (v=19 for Argon2 v1.3)
+	if !strings.HasPrefix(parts[2], "v=") {
+		return false
+	}
+
+	// Parse parameters: m=memory,t=time,p=parallelism
+	params := strings.Split(parts[3], ",")
+	if len(params) != 3 {
+		return false
+	}
+
+	var memory, time uint32
+	var parallelism uint8
+	for _, param := range params {
+		kv := strings.SplitN(param, "=", 2)
+		if len(kv) != 2 {
+			return false
+		}
+		var val uint64
+		_, err := fmt.Sscanf(kv[1], "%d", &val)
+		if err != nil {
+			return false
+		}
+		switch kv[0] {
+		case "m":
+			memory = uint32(val)
+		case "t":
+			time = uint32(val)
+		case "p":
+			parallelism = uint8(val)
+		}
+	}
+
+	// Decode salt and hash
+	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+	if err != nil {
+		return false
+	}
+	expectedHash, err := base64.RawStdEncoding.DecodeString(parts[5])
+	if err != nil {
+		return false
+	}
+
+	// Compute hash with the same parameters
+	var computedHash []byte
+	keyLen := uint32(len(expectedHash))
+	switch algorithm {
+	case "argon2id":
+		computedHash = argon2.IDKey([]byte(password), salt, time, memory, parallelism, keyLen)
+	case "argon2i":
+		computedHash = argon2.Key([]byte(password), salt, time, memory, parallelism, keyLen)
+	default:
+		return false
+	}
+
+	// Constant-time comparison to prevent timing attacks
+	return subtle.ConstantTimeCompare(computedHash, expectedHash) == 1
 }
 
 func (s *AuthService) generateSessionToken() (string, error) {

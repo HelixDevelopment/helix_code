@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/base64"
 	"testing"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/argon2"
 )
 
 // MockAuthRepository is a mock implementation of AuthRepository
@@ -158,6 +160,88 @@ func TestAuthService_hashPassword(t *testing.T) {
 	// Test wrong password
 	valid = service.verifyPassword("wrongpassword", hash)
 	assert.False(t, valid)
+}
+
+func TestAuthService_verifyArgon2Password(t *testing.T) {
+	service := &AuthService{config: DefaultConfig()}
+
+	// Generate a valid Argon2 hash for testing
+	// Using parameters: m=65536, t=1, p=4, keyLen=32
+	salt := []byte("randomsalt12")
+	password := "testpassword"
+	hash := argon2.IDKey([]byte(password), salt, 1, 65536, 4, 32)
+	saltB64 := base64.RawStdEncoding.EncodeToString(salt)
+	hashB64 := base64.RawStdEncoding.EncodeToString(hash)
+	validArgon2Hash := "$argon2id$v=19$m=65536,t=1,p=4$" + saltB64 + "$" + hashB64
+
+	tests := []struct {
+		name     string
+		password string
+		hash     string
+		expected bool
+	}{
+		{
+			name:     "valid argon2id hash",
+			password: password,
+			hash:     validArgon2Hash,
+			expected: true,
+		},
+		{
+			name:     "wrong password argon2id",
+			password: "wrongpassword",
+			hash:     validArgon2Hash,
+			expected: false,
+		},
+		{
+			name:     "invalid hash format - too few parts",
+			password: "testpassword",
+			hash:     "$argon2id$v=19$m=65536",
+			expected: false,
+		},
+		{
+			name:     "invalid algorithm",
+			password: "testpassword",
+			hash:     "$invalid$v=19$m=65536,t=1,p=4$cmFuZG9tc2FsdDEy$hash",
+			expected: false,
+		},
+		{
+			name:     "invalid version format",
+			password: "testpassword",
+			hash:     "$argon2id$19$m=65536,t=1,p=4$cmFuZG9tc2FsdDEy$hash",
+			expected: false,
+		},
+		{
+			name:     "invalid parameters format",
+			password: "testpassword",
+			hash:     "$argon2id$v=19$m=65536$cmFuZG9tc2FsdDEy$hash",
+			expected: false,
+		},
+		{
+			name:     "invalid base64 salt",
+			password: "testpassword",
+			hash:     "$argon2id$v=19$m=65536,t=1,p=4$!!!invalid!!!$hash",
+			expected: false,
+		},
+		{
+			name:     "invalid base64 hash",
+			password: "testpassword",
+			hash:     "$argon2id$v=19$m=65536,t=1,p=4$cmFuZG9tc2FsdDEy$!!!invalid!!!",
+			expected: false,
+		},
+		{
+			name:     "bcrypt hash should fail in argon2 verification",
+			password: "testpassword",
+			hash:     "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := service.verifyArgon2Password(tt.password, tt.hash)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }
 
 func TestAuthService_GenerateJWT(t *testing.T) {
