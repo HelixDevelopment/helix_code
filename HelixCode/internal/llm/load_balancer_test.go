@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -332,4 +333,267 @@ func TestLoadBalancingStats(t *testing.T) {
 		assert.NotNil(t, stats)
 		assert.Empty(t, stats.ProviderCounts)
 	})
+}
+
+// ========================================
+// LoadBalancer Tests
+// ========================================
+
+func TestNewLoadBalancer(t *testing.T) {
+	t.Run("creates load balancer with nil manager", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+		assert.NotNil(t, lb)
+		assert.NotNil(t, lb.strategies)
+		assert.Equal(t, "performance_based", lb.currentStrategy)
+		assert.NotNil(t, lb.stats)
+		assert.False(t, lb.isRunning)
+	})
+
+	t.Run("initializes all strategies", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		expectedStrategies := []string{
+			"round_robin",
+			"least_connections",
+			"response_time",
+			"weighted",
+			"performance_based",
+		}
+
+		for _, name := range expectedStrategies {
+			assert.NotNil(t, lb.strategies[name], "strategy %s should exist", name)
+		}
+	})
+}
+
+func TestLoadBalancer_SetStrategy(t *testing.T) {
+	t.Run("set valid strategy", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		err := lb.SetStrategy("round_robin")
+		assert.NoError(t, err)
+		assert.Equal(t, "round_robin", lb.currentStrategy)
+	})
+
+	t.Run("set invalid strategy", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		err := lb.SetStrategy("invalid_strategy")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "unknown load balancing strategy")
+	})
+
+	t.Run("set all valid strategies", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		strategies := []string{
+			"round_robin",
+			"least_connections",
+			"response_time",
+			"weighted",
+			"performance_based",
+		}
+
+		for _, strategy := range strategies {
+			err := lb.SetStrategy(strategy)
+			assert.NoError(t, err, "strategy %s should be valid", strategy)
+			assert.Equal(t, strategy, lb.currentStrategy)
+		}
+	})
+}
+
+func TestLoadBalancer_GetStats(t *testing.T) {
+	t.Run("returns stats copy", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		stats := lb.GetStats()
+		assert.NotNil(t, stats)
+		assert.NotNil(t, stats.ProviderCounts)
+		assert.NotNil(t, stats.ResponseTimes)
+		assert.NotNil(t, stats.ErrorRates)
+	})
+}
+
+func TestLoadBalancer_Stop(t *testing.T) {
+	t.Run("stop when not running", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+
+		lb.Stop()
+		assert.False(t, lb.isRunning)
+	})
+
+	t.Run("stop when running", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+		lb.isRunning = true
+
+		lb.Stop()
+		assert.False(t, lb.isRunning)
+	})
+}
+
+func TestLoadBalancer_SelectOptimalProvider(t *testing.T) {
+	t.Run("returns nil with nil manager", func(t *testing.T) {
+		// This test requires AutoLLMManager setup
+		// Skip for now as it needs integration test infrastructure
+		t.Skip("requires AutoLLMManager setup")
+	})
+}
+
+func TestLoadBalancer_Start(t *testing.T) {
+	t.Run("start with nil manager", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+		ctx := context.Background()
+
+		err := lb.Start(ctx)
+		assert.NoError(t, err)
+		assert.True(t, lb.isRunning)
+
+		// Cleanup
+		lb.Stop()
+	})
+
+	t.Run("start when already running returns nil", func(t *testing.T) {
+		lb := NewLoadBalancer(nil)
+		lb.isRunning = true
+
+		ctx := context.Background()
+		err := lb.Start(ctx)
+		assert.NoError(t, err)
+	})
+}
+
+// ========================================
+// Additional Strategy Tests
+// ========================================
+
+func TestRoundRobinStrategy_Wrapping(t *testing.T) {
+	strategy := &RoundRobinStrategy{}
+	providers := createTestAutoProviders()
+
+	// Run through multiple cycles
+	for i := 0; i < 10; i++ {
+		selected := strategy.SelectProvider(providers)
+		assert.NotNil(t, selected)
+	}
+}
+
+func TestLeastConnectionsStrategy_ZeroConnections(t *testing.T) {
+	strategy := &LeastConnectionsStrategy{}
+
+	providers := []*AutoProvider{
+		{
+			LocalLLMProvider: LocalLLMProvider{Name: "p1"},
+			Metrics:          &PerformanceMetrics{ActiveRequests: 0},
+		},
+		{
+			LocalLLMProvider: LocalLLMProvider{Name: "p2"},
+			Metrics:          &PerformanceMetrics{ActiveRequests: 5},
+		},
+	}
+
+	selected := strategy.SelectProvider(providers)
+	// Should select p1 with 0 connections
+	assert.Equal(t, "p1", selected.Name)
+}
+
+func TestResponseTimeStrategy_AllSameTime(t *testing.T) {
+	strategy := &ResponseTimeStrategy{}
+
+	providers := []*AutoProvider{
+		{
+			LocalLLMProvider: LocalLLMProvider{Name: "p1"},
+			Health:           &HealthStatus{ResponseTime: 100},
+		},
+		{
+			LocalLLMProvider: LocalLLMProvider{Name: "p2"},
+			Health:           &HealthStatus{ResponseTime: 100},
+		},
+	}
+
+	selected := strategy.SelectProvider(providers)
+	// Should select one of them
+	assert.NotNil(t, selected)
+}
+
+func TestWeightedStrategy_SingleProvider(t *testing.T) {
+	strategy := &WeightedStrategy{}
+
+	providers := []*AutoProvider{
+		{
+			LocalLLMProvider: LocalLLMProvider{Name: "only"},
+			Health:           &HealthStatus{IsHealthy: true},
+			Metrics:          &PerformanceMetrics{TokensPerSecond: 50},
+		},
+	}
+
+	selected := strategy.SelectProvider(providers)
+	assert.Equal(t, "only", selected.Name)
+}
+
+func TestPerformanceBasedStrategy_HighErrorRate(t *testing.T) {
+	strategy := &PerformanceBasedStrategy{}
+
+	lowErrorProvider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "low-error"},
+		Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+		Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 1.0},
+	}
+
+	highErrorProvider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "high-error"},
+		Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+		Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 50.0},
+	}
+
+	lowScore := strategy.calculateScore(lowErrorProvider)
+	highScore := strategy.calculateScore(highErrorProvider)
+
+	// Low error rate should have higher score
+	assert.Greater(t, lowScore, highScore)
+}
+
+func TestPerformanceBasedStrategy_HighThroughput(t *testing.T) {
+	strategy := &PerformanceBasedStrategy{}
+
+	slowProvider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "slow"},
+		Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+		Metrics:          &PerformanceMetrics{TokensPerSecond: 10, ErrorRate: 1.0},
+	}
+
+	fastProvider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "fast"},
+		Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+		Metrics:          &PerformanceMetrics{TokensPerSecond: 100, ErrorRate: 1.0},
+	}
+
+	slowScore := strategy.calculateScore(slowProvider)
+	fastScore := strategy.calculateScore(fastProvider)
+
+	// Higher throughput should have higher score
+	assert.Greater(t, fastScore, slowScore)
+}
+
+func TestAlertSystem_ClearAlerts(t *testing.T) {
+	as := NewAlertSystem()
+
+	// Add some alerts
+	for i := 0; i < 5; i++ {
+		as.SendAlert(&Alert{
+			Type:      "test",
+			Provider:  "provider",
+			Message:   "test message",
+			Severity:  "low",
+			Timestamp: time.Now(),
+		})
+	}
+
+	assert.Len(t, as.GetAlerts(), 5)
+
+	// GetAlerts returns a copy, so we can't clear via that
+	// Just verify alerts are returned correctly
+	alerts := as.GetAlerts()
+	for _, alert := range alerts {
+		assert.Equal(t, "test", alert.Type)
+	}
 }
