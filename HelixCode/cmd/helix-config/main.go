@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -678,136 +680,622 @@ func createSearchCommand() *cobra.Command {
 // Command implementations
 
 func runShowCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for show command
+	cfg, err := getConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	format, _ := cmd.Flags().GetString("format")
+	switch format {
+	case "json":
+		return printJSON(cfg)
+	case "yaml":
+		data, err := yaml.Marshal(cfg)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(data))
+	default:
+		fmt.Printf("Configuration loaded from: %s\n", viper.ConfigFileUsed())
+		fmt.Printf("Server Port: %d\n", cfg.Server.Port)
+		fmt.Printf("Database Host: %s\n", cfg.Database.Host)
+		fmt.Printf("Redis Enabled: %t\n", cfg.Redis.Enabled)
+	}
 	return nil
 }
 
 func runGetCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for get command
+	if len(args) == 0 {
+		return fmt.Errorf("key argument required")
+	}
+	key := args[0]
+
+	value := viper.Get(key)
+	if value == nil {
+		return fmt.Errorf("key not found: %s", key)
+	}
+
+	format, _ := cmd.Flags().GetString("format")
+	if format == "json" {
+		return printJSON(map[string]interface{}{key: value})
+	}
+	fmt.Printf("%s = %v\n", key, value)
 	return nil
 }
 
 func runSetCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for set command
+	if len(args) < 2 {
+		return fmt.Errorf("key and value arguments required")
+	}
+	key := args[0]
+	value := args[1]
+
+	viper.Set(key, value)
+	if err := viper.WriteConfig(); err != nil {
+		// If config doesn't exist, create it
+		if err := viper.SafeWriteConfig(); err != nil {
+			return fmt.Errorf("failed to write config: %w", err)
+		}
+	}
+	fmt.Printf("Set %s = %s\n", key, value)
 	return nil
 }
 
 func runDeleteCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for delete command
+	if len(args) == 0 {
+		return fmt.Errorf("key argument required")
+	}
+	key := args[0]
+
+	// Set to nil effectively removes the key
+	viper.Set(key, nil)
+	if err := viper.WriteConfig(); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	fmt.Printf("Deleted key: %s\n", key)
 	return nil
 }
 
 func runValidateCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for validate command
+	cfg, err := getConfig()
+	if err != nil {
+		fmt.Printf("Validation FAILED: %v\n", err)
+		return err
+	}
+
+	// Basic validation checks
+	errors := []string{}
+	if cfg.Server.Port <= 0 || cfg.Server.Port > 65535 {
+		errors = append(errors, "server.port must be between 1 and 65535")
+	}
+	if cfg.Auth.JWTSecret != "" && len(cfg.Auth.JWTSecret) < 32 {
+		errors = append(errors, "auth.jwt_secret should be at least 32 characters")
+	}
+
+	if len(errors) > 0 {
+		fmt.Println("Validation FAILED:")
+		for _, e := range errors {
+			fmt.Printf("  - %s\n", e)
+		}
+		return fmt.Errorf("validation failed with %d errors", len(errors))
+	}
+
+	fmt.Println("Configuration is valid")
 	return nil
 }
 
 func runExportCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for export command
+	cfg, err := getConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	output, _ := cmd.Flags().GetString("output")
+	format, _ := cmd.Flags().GetString("format")
+
+	var data []byte
+	switch format {
+	case "json":
+		data, err = json.MarshalIndent(cfg, "", "  ")
+	default:
+		data, err = yaml.Marshal(cfg)
+	}
+	if err != nil {
+		return err
+	}
+
+	if output == "" || output == "-" {
+		fmt.Println(string(data))
+	} else {
+		if err := os.WriteFile(output, data, 0644); err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
+		}
+		fmt.Printf("Configuration exported to: %s\n", output)
+	}
 	return nil
 }
 
 func runImportCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for import command
+	if len(args) == 0 {
+		return fmt.Errorf("file argument required")
+	}
+	file := args[0]
+
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Parse and merge config
+	var imported map[string]interface{}
+	if strings.HasSuffix(file, ".json") {
+		if err := json.Unmarshal(data, &imported); err != nil {
+			return fmt.Errorf("failed to parse JSON: %w", err)
+		}
+	} else {
+		if err := yaml.Unmarshal(data, &imported); err != nil {
+			return fmt.Errorf("failed to parse YAML: %w", err)
+		}
+	}
+
+	merge, _ := cmd.Flags().GetBool("merge")
+	if merge {
+		for k, v := range imported {
+			viper.Set(k, v)
+		}
+	} else {
+		for k, v := range imported {
+			viper.Set(k, v)
+		}
+	}
+
+	if err := viper.WriteConfig(); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	fmt.Printf("Configuration imported from: %s\n", file)
 	return nil
 }
 
 func runBackupCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for backup command
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		return fmt.Errorf("no config file in use")
+	}
+
+	backupPath := configPath + ".backup." + time.Now().Format("20060102-150405")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config: %w", err)
+	}
+
+	if err := os.WriteFile(backupPath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write backup: %w", err)
+	}
+	fmt.Printf("Configuration backed up to: %s\n", backupPath)
 	return nil
 }
 
 func runRestoreCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for restore command
+	if len(args) == 0 {
+		return fmt.Errorf("backup file argument required")
+	}
+	backupPath := args[0]
+
+	data, err := os.ReadFile(backupPath)
+	if err != nil {
+		return fmt.Errorf("failed to read backup: %w", err)
+	}
+
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		configPath = "config.yaml"
+	}
+
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
+		return fmt.Errorf("failed to restore config: %w", err)
+	}
+	fmt.Printf("Configuration restored from: %s\n", backupPath)
 	return nil
 }
 
 func runResetCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for reset command
+	force, _ := cmd.Flags().GetBool("force")
+	if !force {
+		fmt.Println("This will reset configuration to defaults. Use --force to confirm.")
+		return nil
+	}
+
+	// Create default config
+	defaultCfg := &config.HelixConfig{}
+	if err := config.SaveHelixConfig(defaultCfg); err != nil {
+		return fmt.Errorf("failed to save default config: %w", err)
+	}
+	fmt.Println("Configuration reset to defaults")
 	return nil
 }
 
 func runReloadCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for reload command
+	if err := viper.ReadInConfig(); err != nil {
+		return fmt.Errorf("failed to reload config: %w", err)
+	}
+	fmt.Println("Configuration reloaded")
 	return nil
 }
 
 func runWatchCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for watch command
-	return nil
+	fmt.Println("Watching for configuration changes... (Press Ctrl+C to stop)")
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Printf("Config changed: %s\n", e.Name)
+	})
+	// Block until interrupted
+	select {}
 }
 
 func runMigrateCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for migrate command
+	from, _ := cmd.Flags().GetString("from")
+	to, _ := cmd.Flags().GetString("to")
+
+	if from == "" {
+		from = viper.ConfigFileUsed()
+	}
+
+	data, err := os.ReadFile(from)
+	if err != nil {
+		return fmt.Errorf("failed to read source: %w", err)
+	}
+
+	// Simple migration - just copy for now
+	// In production, this would handle version upgrades
+	if err := os.WriteFile(to, data, 0644); err != nil {
+		return fmt.Errorf("failed to write target: %w", err)
+	}
+	fmt.Printf("Configuration migrated from %s to %s\n", from, to)
 	return nil
 }
 
 func runBenchmarkCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for benchmark command
+	iterations, _ := cmd.Flags().GetInt("iterations")
+	if iterations <= 0 {
+		iterations = 1000
+	}
+
+	start := time.Now()
+	for i := 0; i < iterations; i++ {
+		viper.Get("server.port")
+	}
+	readDuration := time.Since(start)
+
+	start = time.Now()
+	for i := 0; i < iterations; i++ {
+		viper.Set("benchmark.test", i)
+	}
+	writeDuration := time.Since(start)
+
+	fmt.Printf("Benchmark Results (%d iterations):\n", iterations)
+	fmt.Printf("  Read operations:  %v (%.2f ops/sec)\n", readDuration, float64(iterations)/readDuration.Seconds())
+	fmt.Printf("  Write operations: %v (%.2f ops/sec)\n", writeDuration, float64(iterations)/writeDuration.Seconds())
 	return nil
 }
 
 // Template command implementations
 
 func runTemplateListCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for template list command
+	templates := []string{
+		"minimal    - Minimal configuration for testing",
+		"production - Production-ready configuration",
+		"development - Development configuration with debug enabled",
+		"enterprise - Enterprise configuration with all features",
+	}
+	fmt.Println("Available templates:")
+	for _, t := range templates {
+		fmt.Printf("  %s\n", t)
+	}
 	return nil
 }
 
 func runTemplateApplyCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for template apply command
+	if len(args) == 0 {
+		return fmt.Errorf("template name argument required")
+	}
+	templateName := args[0]
+
+	// Apply template based on name
+	switch templateName {
+	case "minimal":
+		viper.Set("server.port", 8080)
+		viper.Set("database.enabled", false)
+		viper.Set("redis.enabled", false)
+	case "production":
+		viper.Set("server.port", 8080)
+		viper.Set("database.enabled", true)
+		viper.Set("redis.enabled", true)
+		viper.Set("logging.level", "info")
+	case "development":
+		viper.Set("server.port", 8080)
+		viper.Set("database.enabled", false)
+		viper.Set("logging.level", "debug")
+	case "enterprise":
+		viper.Set("server.port", 8080)
+		viper.Set("database.enabled", true)
+		viper.Set("redis.enabled", true)
+		viper.Set("logging.level", "info")
+		viper.Set("monitoring.enabled", true)
+	default:
+		return fmt.Errorf("unknown template: %s", templateName)
+	}
+
+	if err := viper.WriteConfig(); err != nil {
+		if err := viper.SafeWriteConfig(); err != nil {
+			return fmt.Errorf("failed to save config: %w", err)
+		}
+	}
+	fmt.Printf("Template '%s' applied successfully\n", templateName)
 	return nil
 }
 
 // History command implementations
 
 func runHistoryListCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for history list command
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		return fmt.Errorf("no config file in use")
+	}
+
+	// Look for backup files
+	dir := filepath.Dir(configPath)
+	base := filepath.Base(configPath)
+	pattern := base + ".backup.*"
+
+	matches, err := filepath.Glob(filepath.Join(dir, pattern))
+	if err != nil {
+		return fmt.Errorf("failed to list backups: %w", err)
+	}
+
+	if len(matches) == 0 {
+		fmt.Println("No backup history found")
+		return nil
+	}
+
+	fmt.Println("Configuration history:")
+	for _, m := range matches {
+		info, _ := os.Stat(m)
+		if info != nil {
+			fmt.Printf("  %s  %s\n", info.ModTime().Format("2006-01-02 15:04:05"), filepath.Base(m))
+		}
+	}
 	return nil
 }
 
 // Schema command implementations
 
 func runSchemaShowCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for schema show command
-	return nil
+	schema := map[string]interface{}{
+		"server": map[string]string{
+			"port":         "int - Server port (default: 8080)",
+			"host":         "string - Server host (default: localhost)",
+			"read_timeout": "duration - Read timeout (default: 30s)",
+		},
+		"database": map[string]string{
+			"enabled":  "bool - Enable database (default: false)",
+			"host":     "string - Database host",
+			"port":     "int - Database port (default: 5432)",
+			"user":     "string - Database user",
+			"password": "string - Database password",
+			"dbname":   "string - Database name",
+		},
+		"redis": map[string]string{
+			"enabled":  "bool - Enable Redis (default: false)",
+			"host":     "string - Redis host",
+			"port":     "int - Redis port (default: 6379)",
+			"password": "string - Redis password",
+		},
+		"auth": map[string]string{
+			"jwt_secret":   "string - JWT signing secret (min 32 chars)",
+			"token_expiry": "duration - Token expiry time",
+		},
+	}
+	return printJSON(schema)
 }
 
 // Utility command implementations
 
 func runCompletionCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for completion command
-	return nil
+	shell := "bash"
+	if len(args) > 0 {
+		shell = args[0]
+	}
+
+	switch shell {
+	case "bash":
+		return cmd.Root().GenBashCompletion(os.Stdout)
+	case "zsh":
+		return cmd.Root().GenZshCompletion(os.Stdout)
+	case "fish":
+		return cmd.Root().GenFishCompletion(os.Stdout, true)
+	case "powershell":
+		return cmd.Root().GenPowerShellCompletion(os.Stdout)
+	default:
+		return fmt.Errorf("unsupported shell: %s", shell)
+	}
 }
 
 func runVersionCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for version command
+	fmt.Printf("helix-config version %s\n", version)
+	fmt.Printf("Build time: %s\n", buildTime)
+	fmt.Printf("Git commit: %s\n", gitCommit)
 	return nil
 }
 
 func runInfoCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for info command
-	return nil
+	info := map[string]interface{}{
+		"config_file":   viper.ConfigFileUsed(),
+		"config_type":   viper.GetString("config_type"),
+		"keys_count":    len(viper.AllKeys()),
+		"env_prefix":    "HELIX",
+		"search_paths":  []string{".", "$HOME/.helixcode", "/etc/helixcode"},
+	}
+	return printJSON(info)
 }
 
 func runStatusCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for status command
-	return nil
+	cfg, err := getConfig()
+	status := "healthy"
+	issues := []string{}
+
+	if err != nil {
+		status = "error"
+		issues = append(issues, err.Error())
+	} else {
+		// Check database configuration - Host being empty means database is not configured
+		// but if other DB settings are present without Host, that's a misconfiguration
+		if cfg.Database.Host == "" && (cfg.Database.User != "" || cfg.Database.DBName != "") {
+			issues = append(issues, "database user/name set but host not configured")
+		}
+		// Check Redis configuration - has explicit Enabled flag
+		if cfg.Redis.Enabled && cfg.Redis.Host == "" {
+			issues = append(issues, "redis enabled but host not configured")
+		}
+		if len(issues) > 0 {
+			status = "warning"
+		}
+	}
+
+	result := map[string]interface{}{
+		"status":      status,
+		"issues":      issues,
+		"config_file": viper.ConfigFileUsed(),
+	}
+	return printJSON(result)
 }
 
 func runDiffCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for diff command
+	if len(args) < 2 {
+		return fmt.Errorf("two config files required for diff")
+	}
+
+	data1, err := os.ReadFile(args[0])
+	if err != nil {
+		return fmt.Errorf("failed to read first file: %w", err)
+	}
+	data2, err := os.ReadFile(args[1])
+	if err != nil {
+		return fmt.Errorf("failed to read second file: %w", err)
+	}
+
+	var cfg1, cfg2 map[string]interface{}
+	yaml.Unmarshal(data1, &cfg1)
+	yaml.Unmarshal(data2, &cfg2)
+
+	// Simple diff - just compare keys
+	fmt.Printf("--- %s\n", args[0])
+	fmt.Printf("+++ %s\n", args[1])
+
+	allKeys := make(map[string]bool)
+	for k := range cfg1 {
+		allKeys[k] = true
+	}
+	for k := range cfg2 {
+		allKeys[k] = true
+	}
+
+	for k := range allKeys {
+		v1, ok1 := cfg1[k]
+		v2, ok2 := cfg2[k]
+		if !ok1 {
+			fmt.Printf("+ %s: %v\n", k, v2)
+		} else if !ok2 {
+			fmt.Printf("- %s: %v\n", k, v1)
+		} else if fmt.Sprintf("%v", v1) != fmt.Sprintf("%v", v2) {
+			fmt.Printf("- %s: %v\n", k, v1)
+			fmt.Printf("+ %s: %v\n", k, v2)
+		}
+	}
 	return nil
 }
 
 func runMergeCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for merge command
+	if len(args) < 2 {
+		return fmt.Errorf("at least two config files required for merge")
+	}
+
+	merged := make(map[string]interface{})
+
+	for _, file := range args {
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", file, err)
+		}
+
+		var cfg map[string]interface{}
+		if err := yaml.Unmarshal(data, &cfg); err != nil {
+			return fmt.Errorf("failed to parse %s: %w", file, err)
+		}
+
+		// Merge configs (later files override earlier)
+		for k, v := range cfg {
+			merged[k] = v
+		}
+	}
+
+	output, _ := cmd.Flags().GetString("output")
+	data, _ := yaml.Marshal(merged)
+
+	if output == "" || output == "-" {
+		fmt.Println(string(data))
+	} else {
+		if err := os.WriteFile(output, data, 0644); err != nil {
+			return fmt.Errorf("failed to write merged config: %w", err)
+		}
+		fmt.Printf("Merged configuration written to: %s\n", output)
+	}
 	return nil
 }
 
 func runSearchCommand(cmd *cobra.Command, args []string) error {
-	// Implementation for search command
-	return nil
+	if len(args) == 0 {
+		return fmt.Errorf("search query required")
+	}
+	query := strings.ToLower(args[0])
+
+	keys, _ := cmd.Flags().GetBool("keys")
+	values, _ := cmd.Flags().GetBool("values")
+	limit, _ := cmd.Flags().GetInt("limit")
+
+	results := []map[string]interface{}{}
+	count := 0
+
+	for _, key := range viper.AllKeys() {
+		if count >= limit {
+			break
+		}
+
+		value := viper.Get(key)
+		valueStr := fmt.Sprintf("%v", value)
+
+		match := false
+		if keys && strings.Contains(strings.ToLower(key), query) {
+			match = true
+		}
+		if values && strings.Contains(strings.ToLower(valueStr), query) {
+			match = true
+		}
+
+		if match {
+			results = append(results, map[string]interface{}{
+				"key":   key,
+				"value": value,
+			})
+			count++
+		}
+	}
+
+	if len(results) == 0 {
+		fmt.Println("No results found")
+		return nil
+	}
+
+	return printJSON(results)
 }
 
 // Utility functions

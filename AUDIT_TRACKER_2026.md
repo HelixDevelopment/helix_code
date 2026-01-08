@@ -42,7 +42,10 @@ NewAnimaAIProvider()
 - `GenerateEmbedding()` → [0.1, 0.1, ..., 0.1] (1536 values)
 
 **Remediation Checklist:**
-- [ ] Replace with real implementations or error returns
+- [x] Replace with real implementations or error returns (COMPLETED 2026-01-09)
+  - Replaced MockAIProvider with NotImplementedProvider
+  - NotImplementedProvider returns proper errors instead of fake data
+  - Tests updated to verify error behavior
 - [ ] Add HELIX_ALLOW_MOCK_PROVIDERS env check
 - [ ] Add integration test for mock detection
 - [ ] Add CI check to prevent mock in production

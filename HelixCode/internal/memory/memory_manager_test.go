@@ -529,3 +529,454 @@ func BenchmarkInMemoryProviderRetrieve(b *testing.B) {
 		provider.Retrieve(ctx, key)
 	}
 }
+
+// =============================================================================
+// Redis Memory Provider Tests (In-Memory Mode)
+// =============================================================================
+
+func TestRedisMemoryProvider_Creation(t *testing.T) {
+	provider, err := NewRedisMemoryProvider(map[string]interface{}{
+		"host": "localhost",
+		"port": 6379,
+	})
+
+	if err != nil {
+		t.Fatalf("Failed to create Redis provider: %v", err)
+	}
+
+	if provider.Name() != "redis" {
+		t.Errorf("Expected name 'redis', got '%s'", provider.Name())
+	}
+
+	if provider.Type() != "redis" {
+		t.Errorf("Expected type 'redis', got '%s'", provider.Type())
+	}
+}
+
+func TestRedisMemoryProvider_StoreRetrieve(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{
+		"host":   "localhost",
+		"port":   6379,
+		"prefix": "test",
+	})
+	ctx := context.Background()
+
+	testData := map[string]interface{}{
+		"name":  "test-redis",
+		"value": 123,
+	}
+
+	// Store
+	err := provider.Store(ctx, "redis-key", testData)
+	if err != nil {
+		t.Fatalf("Failed to store data: %v", err)
+	}
+
+	// Retrieve
+	retrieved, err := provider.Retrieve(ctx, "redis-key")
+	if err != nil {
+		t.Fatalf("Failed to retrieve data: %v", err)
+	}
+
+	retrievedMap, ok := retrieved.(map[string]interface{})
+	if !ok {
+		t.Fatal("Retrieved data is not a map")
+	}
+
+	if retrievedMap["name"] != "test-redis" {
+		t.Errorf("Expected name 'test-redis', got %v", retrievedMap["name"])
+	}
+}
+
+func TestRedisMemoryProvider_Delete(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	// Store
+	provider.Store(ctx, "delete-key", "delete-value")
+
+	// Delete
+	err := provider.Delete(ctx, "delete-key")
+	if err != nil {
+		t.Fatalf("Failed to delete: %v", err)
+	}
+
+	// Verify deleted
+	_, err = provider.Retrieve(ctx, "delete-key")
+	if err == nil {
+		t.Error("Expected error for deleted key")
+	}
+}
+
+func TestRedisMemoryProvider_Clear(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	// Store multiple
+	provider.Store(ctx, "key1", "value1")
+	provider.Store(ctx, "key2", "value2")
+
+	// Clear
+	err := provider.Clear(ctx)
+	if err != nil {
+		t.Fatalf("Failed to clear: %v", err)
+	}
+
+	// Verify cleared
+	_, err1 := provider.Retrieve(ctx, "key1")
+	_, err2 := provider.Retrieve(ctx, "key2")
+
+	if err1 == nil || err2 == nil {
+		t.Error("Expected errors for cleared keys")
+	}
+}
+
+func TestRedisMemoryProvider_Search(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	provider.Store(ctx, "alice", "John")
+	provider.Store(ctx, "bob", "John")
+	provider.Store(ctx, "charlie", "Jane")
+
+	// Search for value "John" - should find 2 results
+	results, err := provider.Search(ctx, "John", 10)
+	if err != nil {
+		t.Fatalf("Search failed: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results for value 'John', got %d", len(results))
+	}
+}
+
+func TestRedisMemoryProvider_Health(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	err := provider.Health(ctx)
+	if err != nil {
+		t.Errorf("In-memory mode Redis should be healthy: %v", err)
+	}
+}
+
+// =============================================================================
+// Memcached Memory Provider Tests (In-Memory Mode)
+// =============================================================================
+
+func TestMemcachedMemoryProvider_Creation(t *testing.T) {
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{
+		"host": "localhost",
+		"port": 11211,
+	})
+
+	if err != nil {
+		t.Fatalf("Failed to create Memcached provider: %v", err)
+	}
+
+	if provider.Name() != "memcached" {
+		t.Errorf("Expected name 'memcached', got '%s'", provider.Name())
+	}
+
+	if provider.Type() != "memcached" {
+		t.Errorf("Expected type 'memcached', got '%s'", provider.Type())
+	}
+}
+
+func TestMemcachedMemoryProvider_StoreRetrieve(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	testData := map[string]interface{}{
+		"name":  "test-memcached",
+		"value": 456,
+	}
+
+	// Store
+	err := provider.Store(ctx, "mc-key", testData)
+	if err != nil {
+		t.Fatalf("Failed to store data: %v", err)
+	}
+
+	// Retrieve
+	retrieved, err := provider.Retrieve(ctx, "mc-key")
+	if err != nil {
+		t.Fatalf("Failed to retrieve data: %v", err)
+	}
+
+	retrievedMap, ok := retrieved.(map[string]interface{})
+	if !ok {
+		t.Fatal("Retrieved data is not a map")
+	}
+
+	if retrievedMap["name"] != "test-memcached" {
+		t.Errorf("Expected name 'test-memcached', got %v", retrievedMap["name"])
+	}
+}
+
+func TestMemcachedMemoryProvider_Delete(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	provider.Store(ctx, "delete-key", "value")
+
+	err := provider.Delete(ctx, "delete-key")
+	if err != nil {
+		t.Fatalf("Failed to delete: %v", err)
+	}
+
+	_, err = provider.Retrieve(ctx, "delete-key")
+	if err == nil {
+		t.Error("Expected error for deleted key")
+	}
+}
+
+func TestMemcachedMemoryProvider_Clear(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	provider.Store(ctx, "key1", "value1")
+	provider.Store(ctx, "key2", "value2")
+
+	err := provider.Clear(ctx)
+	if err != nil {
+		t.Fatalf("Failed to clear: %v", err)
+	}
+
+	_, err1 := provider.Retrieve(ctx, "key1")
+	_, err2 := provider.Retrieve(ctx, "key2")
+
+	if err1 == nil || err2 == nil {
+		t.Error("Expected errors for cleared keys")
+	}
+}
+
+func TestMemcachedMemoryProvider_Search(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	provider.Store(ctx, "alpha", "SearchValue")
+	provider.Store(ctx, "beta", "SearchValue")
+	provider.Store(ctx, "gamma", "OtherValue")
+
+	results, err := provider.Search(ctx, "SearchValue", 10)
+	if err != nil {
+		t.Fatalf("Search failed: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results for value 'SearchValue', got %d", len(results))
+	}
+}
+
+func TestMemcachedMemoryProvider_Health(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	err := provider.Health(ctx)
+	if err != nil {
+		t.Errorf("In-memory mode Memcached should be healthy: %v", err)
+	}
+}
+
+// =============================================================================
+// Filesystem Memory Provider Tests
+// =============================================================================
+
+func TestFilesystemMemoryProvider_Creation(t *testing.T) {
+	tempDir := t.TempDir()
+
+	provider, err := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+
+	if err != nil {
+		t.Fatalf("Failed to create Filesystem provider: %v", err)
+	}
+
+	if provider.Name() != "filesystem" {
+		t.Errorf("Expected name 'filesystem', got '%s'", provider.Name())
+	}
+
+	if provider.Type() != "filesystem" {
+		t.Errorf("Expected type 'filesystem', got '%s'", provider.Type())
+	}
+}
+
+func TestFilesystemMemoryProvider_StoreRetrieve(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	testData := map[string]interface{}{
+		"name":  "test-fs",
+		"value": 789,
+	}
+
+	// Store
+	err := provider.Store(ctx, "fs-key", testData)
+	if err != nil {
+		t.Fatalf("Failed to store data: %v", err)
+	}
+
+	// Retrieve
+	retrieved, err := provider.Retrieve(ctx, "fs-key")
+	if err != nil {
+		t.Fatalf("Failed to retrieve data: %v", err)
+	}
+
+	retrievedMap, ok := retrieved.(map[string]interface{})
+	if !ok {
+		t.Fatal("Retrieved data is not a map")
+	}
+
+	if retrievedMap["name"] != "test-fs" {
+		t.Errorf("Expected name 'test-fs', got %v", retrievedMap["name"])
+	}
+}
+
+func TestFilesystemMemoryProvider_Delete(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	provider.Store(ctx, "delete-key", "value")
+
+	err := provider.Delete(ctx, "delete-key")
+	if err != nil {
+		t.Fatalf("Failed to delete: %v", err)
+	}
+
+	_, err = provider.Retrieve(ctx, "delete-key")
+	if err == nil {
+		t.Error("Expected error for deleted key")
+	}
+}
+
+func TestFilesystemMemoryProvider_Clear(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	provider.Store(ctx, "key1", "value1")
+	provider.Store(ctx, "key2", "value2")
+
+	err := provider.Clear(ctx)
+	if err != nil {
+		t.Fatalf("Failed to clear: %v", err)
+	}
+
+	_, err1 := provider.Retrieve(ctx, "key1")
+	_, err2 := provider.Retrieve(ctx, "key2")
+
+	if err1 == nil || err2 == nil {
+		t.Error("Expected errors for cleared keys")
+	}
+}
+
+func TestFilesystemMemoryProvider_Search(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	provider.Store(ctx, "first", "SearchableContent")
+	provider.Store(ctx, "second", "SearchableContent")
+	provider.Store(ctx, "third", "DifferentContent")
+
+	results, err := provider.Search(ctx, "SearchableContent", 10)
+	if err != nil {
+		t.Fatalf("Search failed: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results for value 'SearchableContent', got %d", len(results))
+	}
+}
+
+func TestFilesystemMemoryProvider_Health(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	err := provider.Health(ctx)
+	if err != nil {
+		t.Errorf("Filesystem provider should be healthy with valid path: %v", err)
+	}
+}
+
+func TestFilesystemMemoryProvider_SpecialCharactersInKey(t *testing.T) {
+	tempDir := t.TempDir()
+	provider, _ := NewFilesystemMemoryProvider(map[string]interface{}{
+		"path": tempDir,
+	})
+	ctx := context.Background()
+
+	// Keys with special characters should be handled safely
+	specialKeys := []string{
+		"key/with/slashes",
+		"key..with..dots",
+		"key with spaces",
+		"key:with:colons",
+	}
+
+	for _, key := range specialKeys {
+		err := provider.Store(ctx, key, "value")
+		if err != nil {
+			t.Errorf("Failed to store key '%s': %v", key, err)
+			continue
+		}
+
+		retrieved, err := provider.Retrieve(ctx, key)
+		if err != nil {
+			t.Errorf("Failed to retrieve key '%s': %v", key, err)
+			continue
+		}
+
+		if retrieved != "value" {
+			t.Errorf("Value mismatch for key '%s': expected 'value', got %v", key, retrieved)
+		}
+	}
+}
+
+// =============================================================================
+// Factory Tests for New Providers
+// =============================================================================
+
+func TestMemoryProviderFactory_AllProviders(t *testing.T) {
+	factory := NewMemoryProviderFactory()
+	tempDir := t.TempDir()
+
+	testCases := []struct {
+		providerType string
+		config       map[string]interface{}
+		expectedType string
+	}{
+		{"inmemory", map[string]interface{}{}, "inmemory"},
+		{"redis", map[string]interface{}{"host": "localhost", "port": 6379}, "redis"},
+		{"memcached", map[string]interface{}{"host": "localhost", "port": 11211}, "memcached"},
+		{"filesystem", map[string]interface{}{"path": tempDir}, "filesystem"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.providerType, func(t *testing.T) {
+			provider, err := factory.CreateProvider(tc.providerType, tc.config)
+			if err != nil {
+				t.Fatalf("Failed to create %s provider: %v", tc.providerType, err)
+			}
+
+			if provider.Type() != tc.expectedType {
+				t.Errorf("Expected type '%s', got '%s'", tc.expectedType, provider.Type())
+			}
+		})
+	}
+}

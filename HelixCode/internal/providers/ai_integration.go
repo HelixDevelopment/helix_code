@@ -1275,95 +1275,90 @@ type MemoryStats struct {
 	LastUpdate          time.Time `json:"last_update"`
 }
 
-// Placeholder provider implementations
-func NewOpenAIProvider(config *AIProviderConfig) AIProvider      { return &MockAIProvider{} }
-func NewAnthropicProvider(config *AIProviderConfig) AIProvider   { return &MockAIProvider{} }
-func NewCohereProvider(config *AIProviderConfig) AIProvider      { return &MockAIProvider{} }
-func NewHuggingFaceProvider(config *AIProviderConfig) AIProvider { return &MockAIProvider{} }
-func NewMistralProvider(config *AIProviderConfig) AIProvider     { return &MockAIProvider{} }
-func NewGeminiProvider(config *AIProviderConfig) AIProvider      { return &MockAIProvider{} }
-func NewGemmaProvider(config *AIProviderConfig) AIProvider       { return &MockAIProvider{} }
-func NewLlamaIndexProvider(config *AIProviderConfig) AIProvider  { return &MockAIProvider{} }
-func NewMemGPTAIProvider(config *AIProviderConfig) AIProvider    { return &MockAIProvider{} }
-func NewCrewAIProvider(config *AIProviderConfig) AIProvider      { return &MockAIProvider{} }
-func NewCharacterAIProvider(config *AIProviderConfig) AIProvider { return &MockAIProvider{} }
-func NewReplikaAIProvider(config *AIProviderConfig) AIProvider   { return &MockAIProvider{} }
-func NewAnimaAIProvider(config *AIProviderConfig) AIProvider     { return &MockAIProvider{} }
-
-// MockAIProvider provides mock implementation
-type MockAIProvider struct{}
-
-func (m *MockAIProvider) GenerateText(ctx context.Context, prompt string, options *GenerationOptions) (*GenerationResult, error) {
-	return &GenerationResult{
-		Text:         "Mock generated text",
-		Tokens:       20,
-		FinishReason: "stop",
-		Metadata:     map[string]interface{}{"mock": true},
-		Cost:         0.001,
-		Duration:     time.Millisecond * 100,
-	}, nil
+// NotImplementedProvider returns errors for providers not yet integrated with AIIntegration.
+// Use the internal/llm package providers directly for full functionality.
+type NotImplementedProvider struct {
+	providerName string
 }
 
-func (m *MockAIProvider) GenerateEmbedding(ctx context.Context, text string) ([]float64, error) {
-	embedding := make([]float64, 1536)
-	for i := range embedding {
-		embedding[i] = 0.1
-	}
-	return embedding, nil
+// newNotImplementedProvider creates a provider that returns clear errors
+func newNotImplementedProvider(name string) *NotImplementedProvider {
+	return &NotImplementedProvider{providerName: name}
 }
 
-func (m *MockAIProvider) GenerateChat(ctx context.Context, messages []*ChatMessage, options *ChatOptions) (*ChatResult, error) {
-	return &ChatResult{
-		Message: &ChatMessage{
-			Role:    "assistant",
-			Content: "Mock chat response",
-			Tokens:  15,
-		},
-		Tokens:       25,
-		FinishReason: "stop",
-		Metadata:     map[string]interface{}{"mock": true},
-		Cost:         0.002,
-		Duration:     time.Millisecond * 150,
-	}, nil
+func (p *NotImplementedProvider) GenerateText(ctx context.Context, prompt string, options *GenerationOptions) (*GenerationResult, error) {
+	return nil, fmt.Errorf("provider %s is not yet integrated with AIIntegration - use internal/llm package directly", p.providerName)
 }
 
-func (m *MockAIProvider) ClassifyText(ctx context.Context, text string, categories []string) (*ClassificationResult, error) {
-	return &ClassificationResult{
-		Category:   categories[0],
-		Confidence: 0.8,
-		AllCategories: []*CategoryScore{
-			{Category: categories[0], Confidence: 0.8},
-			{Category: categories[1], Confidence: 0.2},
-		},
-		Tokens:   10,
-		Cost:     0.001,
-		Duration: time.Millisecond * 50,
-	}, nil
+func (p *NotImplementedProvider) GenerateEmbedding(ctx context.Context, text string) ([]float64, error) {
+	return nil, fmt.Errorf("provider %s is not yet integrated with AIIntegration - use internal/llm package directly", p.providerName)
 }
 
-func (m *MockAIProvider) ExtractEntities(ctx context.Context, text string) ([]*Entity, error) {
-	return []*Entity{
-		{
-			Type:       "PERSON",
-			Text:       "John Doe",
-			Confidence: 0.9,
-			Start:      0,
-			End:        8,
-			Metadata:   map[string]interface{}{"mock": true},
-		},
-	}, nil
+func (p *NotImplementedProvider) GenerateChat(ctx context.Context, messages []*ChatMessage, options *ChatOptions) (*ChatResult, error) {
+	return nil, fmt.Errorf("provider %s is not yet integrated with AIIntegration - use internal/llm package directly", p.providerName)
 }
 
-func (m *MockAIProvider) GetCapabilities() []string {
-	return []string{"text_generation", "chat", "embedding", "classification", "entity_extraction"}
+func (p *NotImplementedProvider) ClassifyText(ctx context.Context, text string, categories []string) (*ClassificationResult, error) {
+	return nil, fmt.Errorf("provider %s is not yet integrated with AIIntegration - use internal/llm package directly", p.providerName)
 }
 
-func (m *MockAIProvider) GetCostInfo() *CostInfo {
+func (p *NotImplementedProvider) ExtractEntities(ctx context.Context, text string) ([]*Entity, error) {
+	return nil, fmt.Errorf("provider %s is not yet integrated with AIIntegration - use internal/llm package directly", p.providerName)
+}
+
+func (p *NotImplementedProvider) GetCapabilities() []string {
+	return []string{} // No capabilities - provider not implemented
+}
+
+func (p *NotImplementedProvider) GetCostInfo() *CostInfo {
 	return &CostInfo{
-		InputTokens:  10,
-		OutputTokens: 20,
-		TotalTokens:  30,
-		Cost:         0.001,
+		InputTokens:  0,
+		OutputTokens: 0,
+		TotalTokens:  0,
+		Cost:         0,
 		Currency:     "USD",
 	}
+}
+
+// Provider factory functions - return NotImplementedProvider with clear error messages.
+// These providers need to be integrated with the internal/llm package implementations.
+// TODO: Implement proper wrappers for internal/llm providers
+func NewOpenAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("OpenAI")
+}
+func NewAnthropicProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Anthropic")
+}
+func NewCohereProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Cohere")
+}
+func NewHuggingFaceProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("HuggingFace")
+}
+func NewMistralProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Mistral")
+}
+func NewGeminiProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Gemini")
+}
+func NewGemmaProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Gemma")
+}
+func NewLlamaIndexProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("LlamaIndex")
+}
+func NewMemGPTAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("MemGPT")
+}
+func NewCrewAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("CrewAI")
+}
+func NewCharacterAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("CharacterAI")
+}
+func NewReplikaAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Replika")
+}
+func NewAnimaAIProvider(config *AIProviderConfig) AIProvider {
+	return newNotImplementedProvider("Anima")
 }

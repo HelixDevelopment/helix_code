@@ -865,9 +865,29 @@ func (auroraApp *AuroraApp) refreshSystemInfo() {
 	if auroraApp.systemMonitor.cpuUsage > 100 {
 		auroraApp.systemMonitor.cpuUsage = 100
 	}
-	// Disk usage would require OS-specific calls, using placeholder
-	auroraApp.systemMonitor.diskUsage = 25.0 // Placeholder
+	// Get actual disk usage for root filesystem
+	auroraApp.systemMonitor.diskUsage = auroraApp.getDiskUsage("/")
 	auroraApp.systemMonitor.mu.Unlock()
+}
+
+// getDiskUsage returns the disk usage percentage for the given path
+func (auroraApp *AuroraApp) getDiskUsage(path string) float64 {
+	var stat syscall.Statfs_t
+	if err := syscall.Statfs(path, &stat); err != nil {
+		log.Printf("Failed to get disk stats for %s: %v", path, err)
+		return 0.0
+	}
+
+	// Calculate usage percentage
+	total := stat.Blocks * uint64(stat.Bsize)
+	free := stat.Bfree * uint64(stat.Bsize)
+	used := total - free
+
+	if total == 0 {
+		return 0.0
+	}
+
+	return float64(used) / float64(total) * 100.0
 }
 
 func (auroraApp *AuroraApp) optimizePerformance() {

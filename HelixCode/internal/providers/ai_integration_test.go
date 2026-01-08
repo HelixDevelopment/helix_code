@@ -738,83 +738,84 @@ func TestPersonalityManager_Stop(t *testing.T) {
 }
 
 // =============================================================================
-// MockAIProvider Tests
+// NotImplementedProvider Tests
 // =============================================================================
+// These tests verify that NotImplementedProvider returns proper errors
+// instead of fake mock data, preventing mock responses from reaching production.
 
-func TestMockAIProvider_GenerateText(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_GenerateText(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 	ctx := context.Background()
 
 	result, err := provider.GenerateText(ctx, "test prompt", nil)
 
-	require.NoError(t, err)
-	assert.NotEmpty(t, result.Text)
-	assert.Greater(t, result.Tokens, 0)
-	assert.Equal(t, "stop", result.FinishReason)
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "TestProvider")
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
-func TestMockAIProvider_GenerateEmbedding(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_GenerateEmbedding(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 	ctx := context.Background()
 
 	embedding, err := provider.GenerateEmbedding(ctx, "test text")
 
-	require.NoError(t, err)
-	assert.Len(t, embedding, 1536)
+	require.Error(t, err)
+	assert.Nil(t, embedding)
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
-func TestMockAIProvider_GenerateChat(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_GenerateChat(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 	ctx := context.Background()
 
 	messages := []*ChatMessage{{Role: "user", Content: "Hello"}}
 	result, err := provider.GenerateChat(ctx, messages, nil)
 
-	require.NoError(t, err)
-	assert.NotNil(t, result.Message)
-	assert.Equal(t, "assistant", result.Message.Role)
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
-func TestMockAIProvider_ClassifyText(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_ClassifyText(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 	ctx := context.Background()
 
 	result, err := provider.ClassifyText(ctx, "test text", []string{"cat1", "cat2"})
 
-	require.NoError(t, err)
-	assert.Equal(t, "cat1", result.Category)
-	assert.Greater(t, result.Confidence, 0.0)
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
-func TestMockAIProvider_ExtractEntities(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_ExtractEntities(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 	ctx := context.Background()
 
 	entities, err := provider.ExtractEntities(ctx, "John Doe works at Company")
 
-	require.NoError(t, err)
-	assert.NotEmpty(t, entities)
-	assert.Equal(t, "PERSON", entities[0].Type)
+	require.Error(t, err)
+	assert.Nil(t, entities)
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
-func TestMockAIProvider_GetCapabilities(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_GetCapabilities(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 
 	capabilities := provider.GetCapabilities()
 
-	assert.NotEmpty(t, capabilities)
-	assert.Contains(t, capabilities, "text_generation")
-	assert.Contains(t, capabilities, "chat")
+	assert.Empty(t, capabilities)
 }
 
-func TestMockAIProvider_GetCostInfo(t *testing.T) {
-	provider := &MockAIProvider{}
+func TestNotImplementedProvider_GetCostInfo(t *testing.T) {
+	provider := newNotImplementedProvider("TestProvider")
 
 	cost := provider.GetCostInfo()
 
 	assert.NotNil(t, cost)
-	assert.Greater(t, cost.TotalTokens, 0)
-	assert.Equal(t, "USD", cost.Currency)
+	assert.Equal(t, 0, cost.TotalTokens)
+	assert.Equal(t, 0.0, cost.Cost)
 }
 
 // =============================================================================
@@ -869,14 +870,18 @@ func TestAIStats_Fields(t *testing.T) {
 // =============================================================================
 
 func TestLLMProviderWrapper_Generate(t *testing.T) {
-	mockProvider := &MockAIProvider{}
-	wrapper := &LLMProviderWrapper{provider: mockProvider}
+	// Using NotImplementedProvider to test wrapper behavior
+	// The wrapper should propagate the error from the underlying provider
+	notImplProvider := newNotImplementedProvider("TestProvider")
+	wrapper := &LLMProviderWrapper{provider: notImplProvider}
 	ctx := context.Background()
 
 	result, err := wrapper.Generate(ctx, "test prompt")
 
-	require.NoError(t, err)
-	assert.NotEmpty(t, result)
+	// NotImplementedProvider returns an error, wrapper should propagate it
+	require.Error(t, err)
+	assert.Empty(t, result)
+	assert.Contains(t, err.Error(), "not yet integrated")
 }
 
 // =============================================================================
