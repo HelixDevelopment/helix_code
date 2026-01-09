@@ -6,9 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/llm/compressioniface"
 	"dev.helix.code/internal/logging"
 	"dev.helix.code/internal/memory/providers"
+	"github.com/google/uuid"
 )
 
 // AIIntegration provides unified interface for AI systems integration
@@ -1320,45 +1322,498 @@ func (p *NotImplementedProvider) GetCostInfo() *CostInfo {
 	}
 }
 
-// Provider factory functions - return NotImplementedProvider with clear error messages.
-// These providers need to be integrated with the internal/llm package implementations.
-// TODO: Implement proper wrappers for internal/llm providers
+// LLMProviderAdapter wraps an internal/llm.Provider to implement the AIProvider interface.
+// This adapter enables using the low-level LLM providers through the higher-level AIIntegration API.
+type LLMProviderAdapter struct {
+	provider     llm.Provider
+	providerName string
+	lastCostInfo *CostInfo
+}
+
+// NewLLMProviderAdapter creates a new adapter wrapping an llm.Provider
+func NewLLMProviderAdapter(provider llm.Provider, name string) *LLMProviderAdapter {
+	return &LLMProviderAdapter{
+		provider:     provider,
+		providerName: name,
+		lastCostInfo: &CostInfo{Currency: "USD"},
+	}
+}
+
+func (a *LLMProviderAdapter) GenerateText(ctx context.Context, prompt string, options *GenerationOptions) (*GenerationResult, error) {
+	if a.provider == nil {
+		return nil, fmt.Errorf("provider not initialized")
+	}
+
+	// Build LLM request
+	request := &llm.LLMRequest{
+		ID:       uuid.New(),
+		Messages: []llm.Message{{Role: "user", Content: prompt}},
+	}
+
+	if options != nil {
+		request.MaxTokens = options.MaxTokens
+		request.Temperature = options.Temperature
+		request.TopP = options.TopP
+		request.Stop = options.Stop
+		request.Stream = options.Stream
+	}
+
+	// Generate response
+	startTime := time.Now()
+	resp, err := a.provider.Generate(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("generation failed: %w", err)
+	}
+
+	// Update cost tracking
+	a.lastCostInfo.InputTokens = resp.Usage.PromptTokens
+	a.lastCostInfo.OutputTokens = resp.Usage.CompletionTokens
+	a.lastCostInfo.TotalTokens = resp.Usage.TotalTokens
+
+	return &GenerationResult{
+		Text:         resp.Content,
+		Tokens:       resp.Usage.TotalTokens,
+		FinishReason: resp.FinishReason,
+		Duration:     time.Since(startTime),
+		Metadata:     resp.ProviderMetadata,
+	}, nil
+}
+
+func (a *LLMProviderAdapter) GenerateEmbedding(ctx context.Context, text string) ([]float64, error) {
+	// Embeddings require a specialized endpoint that most providers don't expose through the standard Generate method
+	// Return error indicating this needs a dedicated embedding model
+	return nil, fmt.Errorf("embedding generation requires dedicated embedding model; use a specialized embedding provider")
+}
+
+func (a *LLMProviderAdapter) GenerateChat(ctx context.Context, messages []*ChatMessage, options *ChatOptions) (*ChatResult, error) {
+	if a.provider == nil {
+		return nil, fmt.Errorf("provider not initialized")
+	}
+
+	// Convert ChatMessages to LLM Messages
+	llmMessages := make([]llm.Message, 0, len(messages)+1)
+
+	// Add system prompt if provided
+	if options != nil && options.SystemPrompt != "" {
+		llmMessages = append(llmMessages, llm.Message{
+			Role:    "system",
+			Content: options.SystemPrompt,
+		})
+	}
+
+	// Convert user messages
+	for _, msg := range messages {
+		llmMessages = append(llmMessages, llm.Message{
+			Role:    msg.Role,
+			Content: msg.Content,
+			Name:    msg.Name,
+		})
+	}
+
+	// Build request
+	request := &llm.LLMRequest{
+		ID:       uuid.New(),
+		Messages: llmMessages,
+	}
+
+	if options != nil {
+		if options.Model != "" {
+			request.Model = options.Model
+		}
+		request.MaxTokens = options.MaxTokens
+		request.Temperature = options.Temperature
+		request.TopP = options.TopP
+		request.Stop = options.Stop
+		request.Stream = options.Stream
+	}
+
+	// Generate response
+	startTime := time.Now()
+	resp, err := a.provider.Generate(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("chat generation failed: %w", err)
+	}
+
+	// Update cost tracking
+	a.lastCostInfo.InputTokens = resp.Usage.PromptTokens
+	a.lastCostInfo.OutputTokens = resp.Usage.CompletionTokens
+	a.lastCostInfo.TotalTokens = resp.Usage.TotalTokens
+
+	// Build response message
+	responseMessage := &ChatMessage{
+		Role:    "assistant",
+		Content: resp.Content,
+		Tokens:  resp.Usage.CompletionTokens,
+	}
+
+	return &ChatResult{
+		Message:      responseMessage,
+		Tokens:       resp.Usage.TotalTokens,
+		FinishReason: resp.FinishReason,
+		Duration:     time.Since(startTime),
+		Metadata:     resp.ProviderMetadata,
+	}, nil
+}
+
+func (a *LLMProviderAdapter) ClassifyText(ctx context.Context, text string, categories []string) (*ClassificationResult, error) {
+	if a.provider == nil {
+		return nil, fmt.Errorf("provider not initialized")
+	}
+
+	// Build a classification prompt
+	prompt := fmt.Sprintf(
+		"Classify the following text into exactly one of these categories: %v\n\nText: %s\n\nRespond with only the category name.",
+		categories, text,
+	)
+
+	result, err := a.GenerateText(ctx, prompt, &GenerationOptions{
+		MaxTokens:   50,
+		Temperature: 0.0, // Deterministic for classification
+	})
+	if err != nil {
+		return nil, fmt.Errorf("classification failed: %w", err)
+	}
+
+	// Parse the response to find the matching category
+	responseText := result.Text
+	selectedCategory := ""
+	maxConfidence := 0.0
+
+	// Check which category the response matches
+	for _, cat := range categories {
+		if responseText == cat || containsIgnoreCase(responseText, cat) {
+			selectedCategory = cat
+			maxConfidence = 0.9 // High confidence if exact match
+			break
+		}
+	}
+
+	if selectedCategory == "" && len(categories) > 0 {
+		selectedCategory = categories[0]
+		maxConfidence = 0.1 // Low confidence fallback
+	}
+
+	// Build category scores
+	allCategories := make([]*CategoryScore, len(categories))
+	for i, cat := range categories {
+		score := 0.1
+		if cat == selectedCategory {
+			score = maxConfidence
+		}
+		allCategories[i] = &CategoryScore{
+			Category:   cat,
+			Confidence: score,
+		}
+	}
+
+	return &ClassificationResult{
+		Category:      selectedCategory,
+		Confidence:    maxConfidence,
+		AllCategories: allCategories,
+		Tokens:        result.Tokens,
+		Duration:      result.Duration,
+	}, nil
+}
+
+func (a *LLMProviderAdapter) ExtractEntities(ctx context.Context, text string) ([]*Entity, error) {
+	if a.provider == nil {
+		return nil, fmt.Errorf("provider not initialized")
+	}
+
+	// Build entity extraction prompt
+	prompt := fmt.Sprintf(
+		`Extract named entities from the following text. For each entity, identify:
+- Type (PERSON, ORGANIZATION, LOCATION, DATE, NUMBER, etc.)
+- The exact text of the entity
+
+Format each entity as: TYPE: "text"
+
+Text: %s
+
+Entities:`, text,
+	)
+
+	result, err := a.GenerateText(ctx, prompt, &GenerationOptions{
+		MaxTokens:   500,
+		Temperature: 0.0,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("entity extraction failed: %w", err)
+	}
+
+	// Parse entities from response (simplified parsing)
+	entities := parseEntities(result.Text, text)
+
+	return entities, nil
+}
+
+func (a *LLMProviderAdapter) GetCapabilities() []string {
+	if a.provider == nil {
+		return []string{}
+	}
+
+	llmCaps := a.provider.GetCapabilities()
+	caps := make([]string, len(llmCaps))
+	for i, c := range llmCaps {
+		caps[i] = string(c)
+	}
+	return caps
+}
+
+func (a *LLMProviderAdapter) GetCostInfo() *CostInfo {
+	return a.lastCostInfo
+}
+
+// Helper functions for LLMProviderAdapter
+
+func containsIgnoreCase(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || contains(toLower(s), toLower(substr)))
+}
+
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || findSubstring(s, substr))
+}
+
+func findSubstring(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
+}
+
+func toLower(s string) string {
+	result := make([]byte, len(s))
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 'A' && c <= 'Z' {
+			result[i] = c + 32
+		} else {
+			result[i] = c
+		}
+	}
+	return string(result)
+}
+
+func parseEntities(response, originalText string) []*Entity {
+	// Simplified entity parsing - in production, use more robust NER
+	entities := []*Entity{}
+
+	// Look for patterns like "TYPE: \"text\""
+	lines := splitLines(response)
+	for _, line := range lines {
+		line = trimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// Try to parse TYPE: "text" format
+		colonIdx := findChar(line, ':')
+		if colonIdx > 0 && colonIdx < len(line)-1 {
+			entityType := trimSpace(line[:colonIdx])
+			entityText := trimSpace(line[colonIdx+1:])
+
+			// Remove quotes if present
+			if len(entityText) >= 2 && entityText[0] == '"' && entityText[len(entityText)-1] == '"' {
+				entityText = entityText[1 : len(entityText)-1]
+			}
+
+			if entityType != "" && entityText != "" {
+				// Find position in original text
+				start := findSubstringIndex(originalText, entityText)
+				end := start + len(entityText)
+				if start < 0 {
+					start = 0
+					end = 0
+				}
+
+				entities = append(entities, &Entity{
+					Type:       entityType,
+					Text:       entityText,
+					Confidence: 0.8,
+					Start:      start,
+					End:        end,
+				})
+			}
+		}
+	}
+
+	return entities
+}
+
+func splitLines(s string) []string {
+	var lines []string
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\n' {
+			lines = append(lines, s[start:i])
+			start = i + 1
+		}
+	}
+	if start < len(s) {
+		lines = append(lines, s[start:])
+	}
+	return lines
+}
+
+func trimSpace(s string) string {
+	start := 0
+	end := len(s)
+	for start < end && (s[start] == ' ' || s[start] == '\t' || s[start] == '\r' || s[start] == '\n') {
+		start++
+	}
+	for end > start && (s[end-1] == ' ' || s[end-1] == '\t' || s[end-1] == '\r' || s[end-1] == '\n') {
+		end--
+	}
+	return s[start:end]
+}
+
+func findChar(s string, c byte) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] == c {
+			return i
+		}
+	}
+	return -1
+}
+
+func findSubstringIndex(s, substr string) int {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return i
+		}
+	}
+	return -1
+}
+
+// Provider factory functions - create adapters wrapping internal/llm providers.
 func NewOpenAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("OpenAI")
+	if config == nil || config.Config == nil {
+		return newNotImplementedProvider("OpenAI (missing config)")
+	}
+
+	// Build llm.ProviderConfigEntry from AIProviderConfig
+	llmConfig := llm.ProviderConfigEntry{
+		Type:       llm.ProviderTypeOpenAI,
+		Enabled:    config.Enabled,
+		Parameters: config.Config,
+	}
+
+	// Extract API key from config
+	if apiKey, ok := config.Config["api_key"].(string); ok {
+		llmConfig.APIKey = apiKey
+	}
+	if endpoint, ok := config.Config["endpoint"].(string); ok {
+		llmConfig.Endpoint = endpoint
+	}
+	if model := config.Model; model != "" {
+		llmConfig.Models = []string{model}
+	}
+
+	provider, err := llm.NewOpenAIProvider(llmConfig)
+	if err != nil {
+		return newNotImplementedProvider(fmt.Sprintf("OpenAI (init failed: %v)", err))
+	}
+
+	return NewLLMProviderAdapter(provider, "OpenAI")
 }
 func NewAnthropicProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Anthropic")
+	if config == nil || config.Config == nil {
+		return newNotImplementedProvider("Anthropic (missing config)")
+	}
+
+	// Build llm.ProviderConfigEntry from AIProviderConfig
+	llmConfig := llm.ProviderConfigEntry{
+		Type:       llm.ProviderTypeAnthropic,
+		Enabled:    config.Enabled,
+		Parameters: config.Config,
+	}
+
+	// Extract API key from config
+	if apiKey, ok := config.Config["api_key"].(string); ok {
+		llmConfig.APIKey = apiKey
+	}
+	if endpoint, ok := config.Config["endpoint"].(string); ok {
+		llmConfig.Endpoint = endpoint
+	}
+	if model := config.Model; model != "" {
+		llmConfig.Models = []string{model}
+	}
+
+	provider, err := llm.NewAnthropicProvider(llmConfig)
+	if err != nil {
+		return newNotImplementedProvider(fmt.Sprintf("Anthropic (init failed: %v)", err))
+	}
+
+	return NewLLMProviderAdapter(provider, "Anthropic")
 }
+// The following providers are not yet implemented in internal/llm.
+// They return clear errors indicating the functionality is not available.
+// To add support: implement the provider in internal/llm package, then update the factory here.
+
 func NewCohereProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Cohere")
+	return newNotImplementedProvider("Cohere (not implemented in internal/llm)")
 }
 func NewHuggingFaceProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("HuggingFace")
+	return newNotImplementedProvider("HuggingFace (not implemented in internal/llm)")
 }
 func NewMistralProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Mistral")
+	// Note: MistralRS is available via NewMistralRSProvider in internal/llm for local Mistral models
+	return newNotImplementedProvider("Mistral (cloud API not implemented - use MistralRS for local)")
 }
 func NewGeminiProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Gemini")
+	if config == nil || config.Config == nil {
+		return newNotImplementedProvider("Gemini (missing config)")
+	}
+
+	// Build llm.ProviderConfigEntry from AIProviderConfig
+	llmConfig := llm.ProviderConfigEntry{
+		Type:       llm.ProviderTypeGemini,
+		Enabled:    config.Enabled,
+		Parameters: config.Config,
+	}
+
+	// Extract API key from config
+	if apiKey, ok := config.Config["api_key"].(string); ok {
+		llmConfig.APIKey = apiKey
+	}
+	if endpoint, ok := config.Config["endpoint"].(string); ok {
+		llmConfig.Endpoint = endpoint
+	}
+	if model := config.Model; model != "" {
+		llmConfig.Models = []string{model}
+	}
+
+	provider, err := llm.NewGeminiProvider(llmConfig)
+	if err != nil {
+		return newNotImplementedProvider(fmt.Sprintf("Gemini (init failed: %v)", err))
+	}
+
+	return NewLLMProviderAdapter(provider, "Gemini")
 }
 func NewGemmaProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Gemma")
+	// Note: Gemma models can be run via Ollama or other local providers
+	return newNotImplementedProvider("Gemma (use Ollama or local providers for Gemma models)")
 }
 func NewLlamaIndexProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("LlamaIndex")
+	// LlamaIndex is a framework, not an LLM provider
+	return newNotImplementedProvider("LlamaIndex (framework - use underlying LLM provider directly)")
 }
 func NewMemGPTAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("MemGPT")
+	// MemGPT uses other LLM providers; see internal/memory for memory integration
+	return newNotImplementedProvider("MemGPT (use memory integration with underlying LLM provider)")
 }
 func NewCrewAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("CrewAI")
+	// CrewAI is an orchestration framework, not an LLM provider
+	return newNotImplementedProvider("CrewAI (framework - use underlying LLM provider directly)")
 }
 func NewCharacterAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("CharacterAI")
+	return newNotImplementedProvider("CharacterAI (third-party API not implemented)")
 }
 func NewReplikaAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Replika")
+	return newNotImplementedProvider("Replika (third-party API not implemented)")
 }
 func NewAnimaAIProvider(config *AIProviderConfig) AIProvider {
-	return newNotImplementedProvider("Anima")
+	return newNotImplementedProvider("Anima (third-party API not implemented)")
 }

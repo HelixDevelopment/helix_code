@@ -203,25 +203,271 @@ func (p *ZepProvider) Search(ctx context.Context, query *VectorQuery) (*VectorSe
 	}, nil
 }
 
-// Retrieve retrieves vectors by IDs from Zep
+// Retrieve retrieves vectors by IDs from Zep.
+// IDs can be either edge UUIDs (for graph edges/facts) or node UUIDs (for graph nodes).
+// Each retrieved item is converted to VectorData with metadata containing the entity details.
 func (p *ZepProvider) Retrieve(ctx context.Context, ids []string) ([]*VectorData, error) {
-	// Zep doesn't have direct retrieve by ID, this is a stub
-	p.logger.Warn("Retrieve operation not fully supported in Zep")
-	return []*VectorData{}, nil
+	if len(ids) == 0 {
+		return []*VectorData{}, nil
+	}
+
+	results := make([]*VectorData, 0, len(ids))
+
+	for _, id := range ids {
+		if id == "" {
+			continue
+		}
+
+		// Try to retrieve as an edge (fact) first
+		edge, err := p.client.Graph.Edge.Get(ctx, id)
+		if err == nil && edge != nil {
+			metadata := map[string]interface{}{
+				"type":             "edge",
+				"fact":             edge.GetFact(),
+				"name":             edge.GetName(),
+				"source_node_uuid": edge.GetSourceNodeUUID(),
+				"target_node_uuid": edge.GetTargetNodeUUID(),
+			}
+			if edge.GetValidAt() != nil {
+				metadata["valid_at"] = *edge.GetValidAt()
+			}
+			if edge.GetInvalidAt() != nil {
+				metadata["invalid_at"] = *edge.GetInvalidAt()
+			}
+			if createdAt := edge.GetCreatedAt(); createdAt != "" {
+				metadata["created_at"] = createdAt
+			}
+			if edge.GetAttributes() != nil {
+				for k, v := range edge.GetAttributes() {
+					metadata[k] = v
+				}
+			}
+
+			// Use the fact content as the text representation
+			content := edge.GetFact()
+			if content == "" {
+				content = edge.GetName()
+			}
+			metadata["content"] = content
+
+			results = append(results, &VectorData{
+				ID:       id,
+				Metadata: metadata,
+			})
+			continue
+		}
+
+		// Try to retrieve as a node
+		node, err := p.client.Graph.Node.Get(ctx, id)
+		if err == nil && node != nil {
+			metadata := map[string]interface{}{
+				"type":    "node",
+				"name":    node.GetName(),
+				"summary": node.GetSummary(),
+				"labels":  node.GetLabels(),
+			}
+			if createdAt := node.GetCreatedAt(); createdAt != "" {
+				metadata["created_at"] = createdAt
+			}
+			if node.GetAttributes() != nil {
+				for k, v := range node.GetAttributes() {
+					metadata[k] = v
+				}
+			}
+
+			// Use the node summary or name as content
+			content := node.GetSummary()
+			if content == "" {
+				content = node.GetName()
+			}
+			metadata["content"] = content
+
+			results = append(results, &VectorData{
+				ID:       id,
+				Metadata: metadata,
+			})
+			continue
+		}
+
+		// ID not found as edge or node - log but don't fail
+		p.logger.Debug("Entity with ID '%s' not found in Zep graph", id)
+	}
+
+	return results, nil
 }
 
-// Update updates a vector in Zep
+// Update updates an entity in Zep.
+// For user IDs, updates user metadata. For edge UUIDs, Zep doesn't support direct edge updates,
+// so the edge is deleted and re-created with new data if a "fact" is provided in metadata.
+// For node UUIDs, nodes cannot be directly updated in Zep.
 func (p *ZepProvider) Update(ctx context.Context, id string, vector *VectorData) error {
-	// Zep doesn't have direct update by ID, this is a stub
-	p.logger.Warn("Update operation not fully supported in Zep")
+	if id == "" {
+		return fmt.Errorf("id cannot be empty")
+	}
+	if vector == nil {
+		return fmt.Errorf("vector data cannot be nil")
+	}
+
+	// Check if it's a user ID (collection)
+	isUserID := !strings.Contains(id, "-") || p.isKnownUser(id)
+	if isUserID {
+		// Update user metadata
+		return p.addUserMetadata(ctx, id, vector.Metadata)
+	}
+
+	// For edge UUIDs, Zep doesn't support partial updates
+	// We need to delete and recreate if we want to "update" a fact
+	if fact, ok := vector.Metadata["fact"].(string); ok && fact != "" {
+		// First, get the existing edge to preserve source/target info
+		existingEdge, err := p.client.Graph.Edge.Get(ctx, id)
+		if err != nil {
+			return fmt.Errorf("failed to get existing edge for update: %w", err)
+		}
+
+		// Delete the old edge
+		_, err = p.client.Graph.Edge.Delete(ctx, id)
+		if err != nil {
+			p.logger.Warn("Failed to delete old edge during update: %v", err)
+		}
+
+		// Determine user ID for the new edge
+		userID := p.userID
+		if uid, ok := vector.Metadata["user_id"].(string); ok && uid != "" {
+			userID = uid
+		}
+
+		// Extract edge properties
+		sourceName := "Entity"
+		targetName := "Entity"
+		factName := "RELATES_TO"
+
+		if sn, ok := vector.Metadata["source_node"].(string); ok {
+			sourceName = sn
+		} else if existingEdge != nil && existingEdge.GetSourceNodeUUID() != "" {
+			// Try to get the source node name from existing edge
+			sourceNode, err := p.client.Graph.Node.Get(ctx, existingEdge.GetSourceNodeUUID())
+			if err == nil && sourceNode != nil {
+				sourceName = sourceNode.GetName()
+			}
+		}
+
+		if tn, ok := vector.Metadata["target_node"].(string); ok {
+			targetName = tn
+		} else if existingEdge != nil && existingEdge.GetTargetNodeUUID() != "" {
+			// Try to get the target node name from existing edge
+			targetNode, err := p.client.Graph.Node.Get(ctx, existingEdge.GetTargetNodeUUID())
+			if err == nil && targetNode != nil {
+				targetName = targetNode.GetName()
+			}
+		}
+
+		if fn, ok := vector.Metadata["fact_name"].(string); ok {
+			factName = fn
+		} else if existingEdge != nil && existingEdge.GetName() != "" {
+			factName = existingEdge.GetName()
+		}
+
+		// Create new fact triple with updated content
+		req := &zep.AddTripleRequest{
+			UserID:         zep.String(userID),
+			Fact:           fact,
+			FactName:       factName,
+			SourceNodeName: zep.String(sourceName),
+			TargetNodeName: targetName,
+		}
+
+		_, err = p.client.Graph.AddFactTriple(ctx, req)
+		if err != nil {
+			return fmt.Errorf("failed to create updated fact: %w", err)
+		}
+
+		p.logger.Debug("Updated edge '%s' by replacing with new fact", id)
+		return nil
+	}
+
+	// For node UUIDs without a fact - nodes cannot be directly modified in Zep
+	// Log a warning and update local metadata cache
+	p.logger.Warn("Direct node updates not supported in Zep - storing metadata locally")
+	p.metadataCacheMu.Lock()
+	if p.metadataCache[id] == nil {
+		p.metadataCache[id] = make(map[string]interface{})
+	}
+	for k, v := range vector.Metadata {
+		p.metadataCache[id][k] = v
+	}
+	p.metadataCacheMu.Unlock()
+
 	return nil
 }
 
-// Delete deletes memory from Zep
+// Delete deletes entities from Zep by their IDs.
+// For user IDs, this deletes the entire user and their knowledge graph (use with caution).
+// For edge UUIDs, deletes the specific edge/fact.
+// For node UUIDs, Zep doesn't support direct node deletion - nodes are garbage collected
+// when no edges reference them.
 func (p *ZepProvider) Delete(ctx context.Context, ids []string) error {
-	// Zep doesn't have direct delete by ID, this is a stub
-	p.logger.Warn("Delete operation not fully supported in Zep")
-	return nil
+	if len(ids) == 0 {
+		return nil
+	}
+
+	var lastErr error
+	deletedCount := 0
+
+	for _, id := range ids {
+		if id == "" {
+			continue
+		}
+
+		// Check if it's a user ID (collection)
+		isUserID := !strings.Contains(id, "-") || p.isKnownUser(id)
+		if isUserID {
+			// Delete the user - this removes the entire knowledge graph
+			// This is a destructive operation
+			_, err := p.client.User.Delete(ctx, id)
+			if err != nil {
+				if strings.Contains(err.Error(), "not found") {
+					p.logger.Debug("User '%s' not found, may already be deleted", id)
+				} else {
+					p.logger.Warn("Failed to delete user '%s': %v", id, err)
+					lastErr = err
+				}
+			} else {
+				// Remove from local tracking
+				p.collectionsMu.Lock()
+				delete(p.collections, id)
+				p.collectionsMu.Unlock()
+				deletedCount++
+				p.logger.Info("Deleted user/collection '%s'", id)
+			}
+			continue
+		}
+
+		// Try to delete as an edge (fact)
+		_, err := p.client.Graph.Edge.Delete(ctx, id)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				p.logger.Debug("Edge '%s' not found, may already be deleted", id)
+			} else {
+				// Might be a node UUID - nodes can't be directly deleted in Zep
+				// They are garbage collected when no edges reference them
+				p.logger.Debug("Could not delete '%s' as edge: %v - if this is a node, it will be garbage collected when orphaned", id, err)
+			}
+		} else {
+			deletedCount++
+			p.logger.Debug("Deleted edge '%s'", id)
+		}
+
+		// Clean up local metadata cache
+		p.metadataCacheMu.Lock()
+		delete(p.metadataCache, id)
+		p.metadataCacheMu.Unlock()
+	}
+
+	if deletedCount > 0 {
+		p.logger.Info("Deleted %d entities from Zep", deletedCount)
+	}
+
+	return lastErr
 }
 
 // FindSimilar finds similar vectors in Zep
