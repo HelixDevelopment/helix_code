@@ -423,6 +423,10 @@ func (p *ChromaDBProvider) Update(ctx context.Context, id string, vector *Vector
 		return fmt.Errorf("provider not started")
 	}
 
+	if vector == nil {
+		return fmt.Errorf("vector cannot be nil")
+	}
+
 	p.logger.Info("Updating vector %s in ChromaDB", id)
 
 	collection := vector.Collection
@@ -525,6 +529,10 @@ func (p *ChromaDBProvider) Search(ctx context.Context, query *VectorQuery) (*Vec
 
 	if !p.started {
 		return nil, fmt.Errorf("provider not started")
+	}
+
+	if query == nil {
+		return nil, fmt.Errorf("query cannot be nil")
 	}
 
 	p.logger.Info("Searching vectors in ChromaDB with top_k=%d", query.TopK)
@@ -797,6 +805,10 @@ func (p *ChromaDBProvider) BatchFindSimilar(ctx context.Context, queries [][]flo
 func (p *ChromaDBProvider) CreateCollection(ctx context.Context, name string, config *CollectionConfig) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	if !p.started {
+		return fmt.Errorf("provider not started")
+	}
 
 	p.logger.Info("Creating collection %s in ChromaDB", name)
 
