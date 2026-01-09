@@ -308,16 +308,47 @@ func (wim *WorkerIsolationManager) cleanupSandbox(sandbox *WorkerSandbox) error 
 	return nil
 }
 
+// cleanupSandboxSafe is a thread-safe version of cleanupSandbox that acquires the lock for map deletion
+func (wim *WorkerIsolationManager) cleanupSandboxSafe(sandbox *WorkerSandbox) error {
+	// Perform filesystem cleanup (doesn't need lock)
+	if err := os.RemoveAll(sandbox.Directory); err != nil {
+		log.Printf("Warning: Failed to remove sandbox directory %s: %v", sandbox.Directory, err)
+	}
+
+	// Clean up cgroup (doesn't need lock)
+	cgroupPath := filepath.Join("/sys/fs/cgroup", "helixcode", sandbox.ID.String())
+	if err := os.RemoveAll(cgroupPath); err != nil {
+		log.Printf("Warning: Failed to remove cgroup %s: %v", cgroupPath, err)
+	}
+
+	// Acquire lock for map deletion
+	wim.mutex.Lock()
+	delete(wim.sandboxes, sandbox.ID)
+	wim.mutex.Unlock()
+
+	log.Printf("Cleaned up sandbox %s for user %s", sandbox.ID.String(), sandbox.User)
+	return nil
+}
+
 // CleanupExpiredSandboxes removes sandboxes that haven't been used recently
 func (wim *WorkerIsolationManager) CleanupExpiredSandboxes(ctx context.Context, maxAge time.Duration) {
 	wim.mutex.Lock()
-	defer wim.mutex.Unlock()
 
+	// Collect expired sandboxes first to avoid map modification during iteration
+	var expiredSandboxes []*WorkerSandbox
 	now := time.Now()
 	for _, sandbox := range wim.sandboxes {
 		if now.Sub(sandbox.LastUsed) > maxAge {
-			go wim.cleanupSandbox(sandbox)
+			expiredSandboxes = append(expiredSandboxes, sandbox)
 		}
+	}
+
+	// Release lock before cleanup to avoid holding it during I/O operations
+	wim.mutex.Unlock()
+
+	// Cleanup expired sandboxes (cleanupSandbox handles its own locking for map deletion)
+	for _, sandbox := range expiredSandboxes {
+		wim.cleanupSandboxSafe(sandbox)
 	}
 }
 
