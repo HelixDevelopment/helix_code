@@ -73,7 +73,7 @@ docs/
 - **GitHub** → External GitHub repository
 
 #### Hero Section Buttons
-- **Download Now** → `https://github.com/your-org/helixcode/releases/latest`
+- **Download Now** → `https://github.com/HelixDevelopment/Helix-CLI/releases/latest`
 - **Get Started** → `manual/#2-installation--setup`
 - **View Full Manual** → `manual/`
 

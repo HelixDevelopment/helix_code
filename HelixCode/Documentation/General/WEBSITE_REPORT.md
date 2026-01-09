@@ -78,7 +78,7 @@ docs/
 #### 2. Hero Section (3 buttons)
 | Button | Before | After | Action |
 |--------|--------|-------|--------|
-| Download Now | `href="#"` | `href="https://github.com/your-org/helixcode/releases/latest"` | Downloads latest release |
+| Download Now | `href="#"` | `href="https://github.com/HelixDevelopment/Helix-CLI/releases/latest"` | Downloads latest release |
 | Get Started | `href="#"` | `href="manual/#2-installation--setup"` | Opens installation guide |
 | View Full Manual | N/A (new) | `href="manual/"` | Opens manual homepage |
 

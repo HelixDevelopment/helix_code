@@ -214,7 +214,7 @@ Potential improvements:
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/your-org/helixcode/issues
+- GitHub Issues: https://github.com/HelixDevelopment/Helix-CLI/issues
 - Documentation: https://docs.helixcode.dev
 
 ---

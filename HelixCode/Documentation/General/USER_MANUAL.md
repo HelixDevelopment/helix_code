@@ -71,7 +71,7 @@ HelixCode is an enterprise-grade distributed AI development platform that enable
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/helixcode.git
+git clone https://github.com/HelixDevelopment/Helix-CLI.git
 cd helixcode/HelixCode
 
 # Install dependencies
@@ -1148,9 +1148,9 @@ tools:
 
 **For more information**:
 - Documentation: https://docs.helixcode.dev
-- GitHub: https://github.com/your-org/helixcode
+- GitHub: https://github.com/HelixDevelopment/Helix-CLI
 - Community: https://community.helixcode.dev
-- Issues: https://github.com/your-org/helixcode/issues
+- Issues: https://github.com/HelixDevelopment/Helix-CLI/issues
 
 **Version**: 2.0
 **Last Updated**: 2025-11-05

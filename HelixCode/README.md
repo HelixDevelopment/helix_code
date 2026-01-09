@@ -22,7 +22,7 @@ A distributed, AI-powered software development platform with multi-platform supp
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/helixcode.git
+git clone https://github.com/HelixDevelopment/Helix-CLI.git
 cd helixcode
 
 # Install dependencies
@@ -45,7 +45,7 @@ make dev
 
 1. **Clone and setup:**
    ```bash
-   git clone https://github.com/your-org/helixcode.git
+   git clone https://github.com/HelixDevelopment/Helix-CLI.git
    cd helixcode
    cp .env.example .env
    ```
@@ -395,6 +395,6 @@ This project is licensed under the terms specified in the LICENSE file.
 ## Support
 
 For support and questions:
-- GitHub Issues: https://github.com/your-org/helixcode/issues
+- GitHub Issues: https://github.com/HelixDevelopment/Helix-CLI/issues
 - Documentation: https://docs.helixcode.dev
 - Community: https://community.helixcode.dev
