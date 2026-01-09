@@ -3,6 +3,7 @@ package llm
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -337,7 +338,7 @@ func (r *CrossProviderRegistry) loadRegistry() {
 		if os.IsNotExist(err) {
 			return // Registry doesn't exist yet
 		}
-		fmt.Printf("Warning: failed to load registry: %v\n", err)
+		log.Printf("Warning: failed to load registry: %v", err)
 		return
 	}
 
@@ -348,7 +349,7 @@ func (r *CrossProviderRegistry) loadRegistry() {
 	}
 
 	if err := json.Unmarshal(data, &registry); err != nil {
-		fmt.Printf("Warning: failed to parse registry: %v\n", err)
+		log.Printf("Warning: failed to parse registry: %v", err)
 		return
 	}
 

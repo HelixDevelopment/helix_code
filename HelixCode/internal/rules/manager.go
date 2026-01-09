@@ -2,6 +2,7 @@ package rules
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -78,7 +79,7 @@ func (m *Manager) LoadFromDirectory(dir string) error {
 				ruleSet, err := parser.Parse()
 				if err != nil {
 					// Log error but continue
-					fmt.Printf("Warning: failed to load rules from %s: %v\n", path, err)
+					log.Printf("Warning: failed to load rules from %s: %v", path, err)
 					return nil
 				}
 

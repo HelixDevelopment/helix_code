@@ -2,6 +2,7 @@ package llm
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -117,7 +118,7 @@ func LoadAliasManagerFromConfig(configPath string) (*AliasManager, error) {
 	for _, alias := range config.Aliases {
 		if err := manager.AddAlias(alias); err != nil {
 			// Log error but continue loading other aliases
-			fmt.Printf("Warning: failed to add alias '%s': %v\n", alias.Alias, err)
+			log.Printf("Warning: failed to add alias '%s': %v", alias.Alias, err)
 		}
 	}
 
@@ -196,7 +197,7 @@ func LoadAliasManagerFromStandardPaths() (*AliasManager, error) {
 		if _, err := os.Stat(path); err == nil {
 			config, err := LoadAliasConfig(path)
 			if err != nil {
-				fmt.Printf("Warning: failed to load config from %s: %v\n", path, err)
+				log.Printf("Warning: failed to load config from %s: %v", path, err)
 				continue
 			}
 			configs = append(configs, config)
@@ -215,7 +216,7 @@ func LoadAliasManagerFromStandardPaths() (*AliasManager, error) {
 	manager := NewAliasManager(merged.FuzzyThreshold)
 	for _, alias := range merged.Aliases {
 		if err := manager.AddAlias(alias); err != nil {
-			fmt.Printf("Warning: failed to add alias '%s': %v\n", alias.Alias, err)
+			log.Printf("Warning: failed to add alias '%s': %v", alias.Alias, err)
 		}
 	}
 

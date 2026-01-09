@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -393,7 +394,7 @@ func (bm *BackupManager) CreateBackup(path string) (string, error) {
 	// Clean old backups
 	if err := bm.cleanOldBackups(filepath.Base(path)); err != nil {
 		// Log error but don't fail
-		fmt.Printf("warning: failed to clean old backups: %v\n", err)
+		log.Printf("warning: failed to clean old backups: %v", err)
 	}
 
 	return backupPath, nil

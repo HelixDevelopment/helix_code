@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -1022,11 +1023,11 @@ func (a *BaseAgent) processTask(ctx context.Context, task *Task) {
 	case a.resultChan <- result:
 	default:
 		// Channel is full, log error
-		fmt.Printf("Agent %s: result channel full, dropping result for task %s\n", a.id, task.ID)
+		log.Printf("Agent %s: result channel full, dropping result for task %s", a.id, task.ID)
 	}
 
 	if err != nil {
-		fmt.Printf("Agent %s: error processing task %s: %v\n", a.id, task.ID, err)
+		log.Printf("Agent %s: error processing task %s: %v", a.id, task.ID, err)
 	}
 }
 

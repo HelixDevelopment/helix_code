@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -50,7 +51,7 @@ func NewRepoCache(cacheDir string, ttl time.Duration) (*RepoCache, error) {
 	// Load existing cache entries
 	if err := cache.loadFromDisk(); err != nil {
 		// Non-fatal error, just log and continue
-		fmt.Printf("Warning: failed to load cache: %v\n", err)
+		log.Printf("Warning: failed to load cache: %v", err)
 	}
 
 	return cache, nil
@@ -92,7 +93,7 @@ func (rc *RepoCache) Set(key string, value interface{}) {
 	// Persist to disk asynchronously
 	go func() {
 		if err := rc.saveToDisk(key, entry); err != nil {
-			fmt.Printf("Warning: failed to save cache entry: %v\n", err)
+			log.Printf("Warning: failed to save cache entry: %v", err)
 		}
 	}()
 }
@@ -321,7 +322,7 @@ func (rc *RepoCache) StartCleanupRoutine(interval time.Duration) chan struct{} {
 			case <-ticker.C:
 				removed := rc.Cleanup()
 				if removed > 0 {
-					fmt.Printf("Cache cleanup: removed %d expired entries\n", removed)
+					log.Printf("Cache cleanup: removed %d expired entries", removed)
 				}
 			case <-stop:
 				return
