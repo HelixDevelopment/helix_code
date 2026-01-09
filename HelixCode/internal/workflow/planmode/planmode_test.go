@@ -797,3 +797,182 @@ func BenchmarkOptionRanking(b *testing.B) {
 		presenter.RankOptions(options, criteria)
 	}
 }
+
+// ========================================
+// Additional Executor Tests
+// ========================================
+
+func TestExecutorWithLLM(t *testing.T) {
+	testDir := "/tmp/test-llm"
+	os.MkdirAll(testDir, 0755)
+	defer os.RemoveAll(testDir)
+
+	t.Run("NewDefaultExecutorWithLLM", func(t *testing.T) {
+		mockLLM := NewMockLLMProvider()
+		executor := NewDefaultExecutorWithLLM(testDir, mockLLM)
+		assert.NotNil(t, executor)
+		assert.NotNil(t, executor.llmProvider)
+	})
+
+	t.Run("SetLLMProvider", func(t *testing.T) {
+		executor := NewDefaultExecutor(testDir)
+		assert.Nil(t, executor.llmProvider)
+
+		mockLLM := NewMockLLMProvider()
+		executor.SetLLMProvider(mockLLM)
+		assert.NotNil(t, executor.llmProvider)
+	})
+}
+
+func TestExecutorPauseResumeCancel(t *testing.T) {
+	testDir := "/tmp/test-pause"
+	os.MkdirAll(testDir, 0755)
+	defer os.RemoveAll(testDir)
+
+	executor := NewDefaultExecutor(testDir)
+
+	t.Run("Pause_NotFound", func(t *testing.T) {
+		err := executor.Pause("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("Resume_NotFound", func(t *testing.T) {
+		err := executor.Resume("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("Cancel_NotFound", func(t *testing.T) {
+		err := executor.Cancel("non-existent-id")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("GetProgress_NotFound", func(t *testing.T) {
+		progress, err := executor.GetProgress("non-existent-id")
+		assert.Error(t, err)
+		assert.Nil(t, progress)
+		assert.Contains(t, err.Error(), "not found")
+	})
+}
+
+func TestExecuteStepTypes(t *testing.T) {
+	testDir := "/tmp/test-step-types"
+	os.MkdirAll(testDir, 0755)
+	defer os.RemoveAll(testDir)
+
+	executor := NewDefaultExecutor(testDir)
+
+	t.Run("ShellCommand", func(t *testing.T) {
+		step := &PlanStep{
+			ID:          "step-shell",
+			Title:       "Shell Command",
+			Description: "Run echo",
+			Type:        StepTypeShellCommand,
+			Action:      "echo 'test'",
+		}
+
+		result, err := executor.ExecuteStep(context.Background(), step)
+		require.NoError(t, err)
+		assert.True(t, result.Success)
+	})
+
+	t.Run("FileOperation_Create", func(t *testing.T) {
+		step := &PlanStep{
+			ID:          "step-file-create",
+			Title:       "Create File",
+			Description: "Create a test file",
+			Type:        StepTypeFileOperation,
+			Action:      "create:" + testDir + "/test.txt",
+		}
+
+		result, err := executor.ExecuteStep(context.Background(), step)
+		require.NoError(t, err)
+		assert.True(t, result.Success)
+	})
+
+	t.Run("FileOperation_Delete", func(t *testing.T) {
+		// First create the file to delete
+		os.WriteFile(testDir+"/delete-test.txt", []byte("test content"), 0644)
+
+		step := &PlanStep{
+			ID:          "step-file-delete",
+			Title:       "Delete File",
+			Description: "Delete a test file",
+			Type:        StepTypeFileOperation,
+			Action:      "delete:" + testDir + "/delete-test.txt",
+		}
+
+		result, err := executor.ExecuteStep(context.Background(), step)
+		require.NoError(t, err)
+		assert.True(t, result.Success)
+	})
+}
+
+func TestExecutePlanWithDependencies(t *testing.T) {
+	testDir := "/tmp/test-deps"
+	os.MkdirAll(testDir, 0755)
+	defer os.RemoveAll(testDir)
+
+	executor := NewDefaultExecutor(testDir)
+
+	plan := &Plan{
+		ID:    "plan-deps",
+		Title: "Plan with Dependencies",
+		Steps: []*PlanStep{
+			{
+				ID:           "step-1",
+				Title:        "First Step",
+				Type:         StepTypeShellCommand,
+				Action:       "echo 'step 1'",
+				Dependencies: []string{},
+			},
+			{
+				ID:           "step-2",
+				Title:        "Second Step",
+				Type:         StepTypeShellCommand,
+				Action:       "echo 'step 2'",
+				Dependencies: []string{"step-1"},
+			},
+			{
+				ID:           "step-3",
+				Title:        "Third Step",
+				Type:         StepTypeShellCommand,
+				Action:       "echo 'step 3'",
+				Dependencies: []string{"step-1", "step-2"},
+			},
+		},
+	}
+
+	result, err := executor.Execute(context.Background(), plan)
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Len(t, result.Steps, 3)
+	assert.True(t, result.Success)
+}
+
+func TestExecutePlanWithFailingStep(t *testing.T) {
+	testDir := "/tmp/test-fail"
+	os.MkdirAll(testDir, 0755)
+	defer os.RemoveAll(testDir)
+
+	executor := NewDefaultExecutor(testDir)
+
+	plan := &Plan{
+		ID:    "plan-fail",
+		Title: "Plan with Failing Step",
+		Steps: []*PlanStep{
+			{
+				ID:     "step-1",
+				Title:  "Failing Step",
+				Type:   StepTypeShellCommand,
+				Action: "exit 1",
+			},
+		},
+	}
+
+	result, err := executor.Execute(context.Background(), plan)
+	require.NoError(t, err) // Executor doesn't return error, just marks step as failed
+	assert.NotNil(t, result)
+}
