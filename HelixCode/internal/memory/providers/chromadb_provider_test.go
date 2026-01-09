@@ -502,6 +502,10 @@ func TestChromaDBProvider_FindSimilar_NotStarted(t *testing.T) {
 func TestChromaDBProvider_FindSimilar_EmptyEmbedding(t *testing.T) {
 	server := createMockChromaServer(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"ids":       [][]string{{}},
+			"distances": [][]float64{{}},
+		})
 	})
 	defer server.Close()
 
@@ -598,10 +602,8 @@ func TestChromaDBProvider_DeleteCollection(t *testing.T) {
 func TestChromaDBProvider_ListCollections(t *testing.T) {
 	server := createMockChromaServer(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode([]map[string]interface{}{
-			{"name": "collection-1"},
-			{"name": "collection-2"},
-		})
+		// ChromaDB returns a list of collection names
+		json.NewEncoder(w).Encode([]string{"collection-1", "collection-2"})
 	})
 	defer server.Close()
 
@@ -614,6 +616,7 @@ func TestChromaDBProvider_ListCollections(t *testing.T) {
 	collections, err := provider.ListCollections(ctx)
 	require.NoError(t, err)
 	assert.NotNil(t, collections)
+	assert.Len(t, collections, 2)
 }
 
 func TestChromaDBProvider_GetCollection(t *testing.T) {
@@ -657,8 +660,10 @@ func TestChromaDBProvider_CreateIndex(t *testing.T) {
 		Type: "hnsw",
 	}
 
+	// ChromaDB doesn't support manual index creation
 	err := provider.CreateIndex(ctx, "test-collection", config)
-	require.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not support")
 }
 
 func TestChromaDBProvider_DeleteIndex(t *testing.T) {
@@ -673,8 +678,10 @@ func TestChromaDBProvider_DeleteIndex(t *testing.T) {
 	_ = provider.Initialize(ctx, nil)
 	_ = provider.Start(ctx)
 
+	// ChromaDB doesn't support manual index deletion
 	err := provider.DeleteIndex(ctx, "test-collection", "test-index")
-	require.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not support")
 }
 
 func TestChromaDBProvider_ListIndexes(t *testing.T) {
@@ -690,6 +697,7 @@ func TestChromaDBProvider_ListIndexes(t *testing.T) {
 	_ = provider.Initialize(ctx, nil)
 	_ = provider.Start(ctx)
 
+	// ChromaDB returns a default HNSW index even though manual indexing isn't supported
 	indexes, err := provider.ListIndexes(ctx, "test-collection")
 	require.NoError(t, err)
 	assert.NotNil(t, indexes)
@@ -702,6 +710,14 @@ func TestChromaDBProvider_ListIndexes(t *testing.T) {
 func TestChromaDBProvider_AddMetadata(t *testing.T) {
 	server := createMockChromaServer(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		// AddMetadata first calls GetMetadata, then Update
+		// Return metadata response for GET, success for POST
+		if r.Method == "POST" && r.URL.Path == "/api/v1/collections/default/get" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"ids":       []string{"vec-1"},
+				"metadatas": []map[string]interface{}{{"existing": "data"}},
+			})
+		}
 	})
 	defer server.Close()
 
@@ -754,6 +770,13 @@ func TestChromaDBProvider_GetMetadata(t *testing.T) {
 func TestChromaDBProvider_DeleteMetadata(t *testing.T) {
 	server := createMockChromaServer(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		// DeleteMetadata first calls GetMetadata, then Update
+		if r.Method == "POST" && r.URL.Path == "/api/v1/collections/default/get" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"ids":       []string{"vec-1"},
+				"metadatas": []map[string]interface{}{{"key": "value", "other": "data"}},
+			})
+		}
 	})
 	defer server.Close()
 
@@ -816,8 +839,10 @@ func TestChromaDBProvider_Backup(t *testing.T) {
 	_ = provider.Initialize(ctx, nil)
 	_ = provider.Start(ctx)
 
+	// ChromaDB doesn't support backup operations
 	err := provider.Backup(ctx, "/tmp/backup")
-	require.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not support")
 }
 
 func TestChromaDBProvider_Restore(t *testing.T) {
@@ -832,8 +857,10 @@ func TestChromaDBProvider_Restore(t *testing.T) {
 	_ = provider.Initialize(ctx, nil)
 	_ = provider.Start(ctx)
 
+	// ChromaDB doesn't support restore operations
 	err := provider.Restore(ctx, "/tmp/backup")
-	require.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not support")
 }
 
 func TestChromaDBProvider_Health(t *testing.T) {

@@ -1020,16 +1020,16 @@ func (p *ChromaDBProvider) ListIndexes(ctx context.Context, collection string) (
 
 // AddMetadata adds metadata to a vector
 func (p *ChromaDBProvider) AddMetadata(ctx context.Context, id string, metadata map[string]interface{}) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	p.logger.Info("Adding metadata to vector %s in ChromaDB", id)
 
-	// First get current metadata
+	// First get current metadata (outside lock to avoid deadlock)
 	current, err := p.GetMetadata(ctx, []string{id})
 	if err != nil {
 		return err
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if len(current) == 0 {
 		return fmt.Errorf("vector %s not found", id)
@@ -1191,20 +1191,20 @@ func (p *ChromaDBProvider) GetMetadata(ctx context.Context, ids []string) (map[s
 
 // DeleteMetadata deletes metadata
 func (p *ChromaDBProvider) DeleteMetadata(ctx context.Context, ids []string, keys []string) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	p.logger.Info("Deleting metadata for %d vectors in ChromaDB", len(ids))
 
 	if len(ids) == 0 {
 		return nil
 	}
 
-	// Get current metadata
+	// Get current metadata (outside lock to avoid deadlock)
 	current, err := p.GetMetadata(ctx, ids)
 	if err != nil {
 		return err
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	// Remove specified keys
 	for _, id := range ids {
