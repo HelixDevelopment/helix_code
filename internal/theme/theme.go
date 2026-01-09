@@ -2,9 +2,9 @@ package theme
 
 // Color constants extracted from HelixCode logo
 const (
-	PrimaryColor = "#BAE532"
-	SecondaryColor = "#BCE63C"
-	AccentColor = "#BBE536"
+	PrimaryColor = "#B5E9D4"
+	SecondaryColor = "#B5E218"
+	AccentColor = "#BCE63C"
 	TextColor = "#2D3047"
 	BackgroundColor = "#F5F5F5"
 )
