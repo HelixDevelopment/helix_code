@@ -967,9 +967,10 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 			modelName := modelNameEntry.Text
 
 			if da.llmManager != nil {
-				// Get provider from manager
-				provider := da.llmManager.GetProvider(providerName)
-				if provider != nil {
+				// Get provider from manager using provider type
+				providerType := llm.ProviderType(providerName)
+				provider, err := da.llmManager.GetProviderForModel(modelName, providerType)
+				if err == nil && provider != nil {
 					// Create LLM request
 					ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 					defer cancel()
@@ -990,7 +991,7 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
 					}
 				} else {
-					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available. Please configure it in Settings.\n",
+					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available or model not configured. Please configure it in Settings.\n",
 						providerName, modelName, providerName)
 				}
 			} else {
