@@ -532,8 +532,8 @@ func (app *HarmonyApp) Initialize() error {
 
 	// Initialize API client with default URL (can be changed in settings)
 	serverURL := "http://localhost:8080"
-	if cfg.Server.Host != "" && cfg.Server.Port > 0 {
-		serverURL = fmt.Sprintf("http://%s:%d", cfg.Server.Host, cfg.Server.Port)
+	if cfg.Server.Address != "" && cfg.Server.Port > 0 {
+		serverURL = fmt.Sprintf("http://%s:%d", cfg.Server.Address, cfg.Server.Port)
 	}
 	app.apiClient = NewAPIClient(serverURL)
 

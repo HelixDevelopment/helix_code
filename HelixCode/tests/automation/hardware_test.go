@@ -80,7 +80,7 @@ func TestHardwareDetection(t *testing.T) {
 
 	// Verify hardware detection
 	assert.Greater(t, hwInfo.CPUInfo.Cores, 0, "Should detect CPU cores")
-	assert.Greater(t, int64(hwInfo.MemoryInfo.Total), 0, "Should detect memory")
+	assert.Greater(t, hwInfo.MemoryInfo.Total, int64(0), "Should detect memory")
 	assert.NotEmpty(t, hwInfo.CPUInfo.Arch, "Should detect CPU architecture")
 }
 
