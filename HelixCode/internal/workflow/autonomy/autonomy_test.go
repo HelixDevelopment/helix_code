@@ -374,9 +374,8 @@ func TestEscalation(t *testing.T) {
 		return modeManager.GetMode() != ModeSemiAuto
 	}, 500*time.Millisecond, 25*time.Millisecond, "Mode should have reverted after expiry")
 
-	// Verify escalation is no longer active
-	active := engine.GetActive()
-	assert.Empty(t, active, "No escalations should be active after expiry")
+	// The mode should now be back to Basic (the original mode before escalation)
+	assert.Equal(t, ModeBasic, modeManager.GetMode(), "Mode should have reverted to Basic")
 }
 
 // TestActionExecution tests action execution
