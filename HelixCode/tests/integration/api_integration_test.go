@@ -88,8 +88,9 @@ func TestTaskProjectIntegration(t *testing.T) {
 	projectManager := project.NewManager()
 	taskManager := task.NewDatabaseManager(mockDB)
 
-	// Step 1: Create project
-	proj, err := projectManager.CreateProject(ctx, "Go Project", "Test project", "/tmp/test", "go")
+	// Step 1: Create project with a real temp directory
+	tempDir := t.TempDir()
+	proj, err := projectManager.CreateProject(ctx, "Go Project", "Test project", tempDir, "go")
 	require.NoError(t, err)
 	require.NotNil(t, proj)
 
@@ -129,8 +130,9 @@ func TestMultiStepWorkflowIntegration(t *testing.T) {
 	projectManager := project.NewManager()
 	taskManager := task.NewDatabaseManager(mockDB)
 
-	// Step 1: Create project
-	proj, err := projectManager.CreateProject(ctx, "Multi-Step Project", "Complete workflow test", "/tmp/multistep", "go")
+	// Step 1: Create project with a real temp directory
+	tempDir := t.TempDir()
+	proj, err := projectManager.CreateProject(ctx, "Multi-Step Project", "Complete workflow test", tempDir, "go")
 	require.NoError(t, err)
 
 	// Step 2: Create planning task
@@ -233,12 +235,13 @@ func TestProjectLifecycleIntegration(t *testing.T) {
 
 	projectManager := project.NewDatabaseManager(mockDB)
 	ownerID := uuid.New()
+	tempDir := t.TempDir()
 
-	// Step 1: Create project
+	// Step 1: Create project with valid UUID owner
 	mockRow1 := database.NewMockRowWithValues(time.Now(), time.Now())
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow1).Once()
 
-	proj, err := projectManager.CreateProject(ctx, "Lifecycle Project", "Test lifecycle", "/tmp/lifecycle", "go")
+	proj, err := projectManager.CreateProjectWithUser(ctx, "Lifecycle Project", "Test lifecycle", tempDir, "go", ownerID.String())
 	require.NoError(t, err)
 	require.NotNil(t, proj)
 	projectID := proj.ID
@@ -252,7 +255,7 @@ func TestProjectLifecycleIntegration(t *testing.T) {
 	}
 	mockRow2 := database.NewMockRowWithValues(
 		uuid.MustParse(projectID), "Lifecycle Project", "Test lifecycle",
-		ownerID, "/tmp/lifecycle", config, "active", time.Now(), time.Now(),
+		ownerID, tempDir, config, "active", time.Now(), time.Now(),
 	)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow2).Once()
 
@@ -278,7 +281,7 @@ func TestProjectLifecycleIntegration(t *testing.T) {
 	// Step 4: List projects
 	mockRows := database.NewMockRows([][]interface{}{
 		{uuid.MustParse(projectID), "Lifecycle Project", "Test lifecycle",
-			ownerID, "/tmp/lifecycle", config, "active", time.Now(), time.Now()},
+			ownerID, tempDir, config, "active", time.Now(), time.Now()},
 	})
 	mockDB.On("Query", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRows, nil).Once()
 
@@ -319,6 +322,8 @@ func TestTaskDependencyIntegration(t *testing.T) {
 	task1ID := task1.ID
 
 	// Create task 2 (depends on task 1)
+	// Note: CreateTask doesn't validate dependencies internally - it just stores them
+	// Dependencies are validated separately via depManager.ValidateDependencies
 	mockRow2 := database.NewMockRowWithValues(time.Now(), time.Now())
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow2).Once()
 
@@ -327,8 +332,8 @@ func TestTaskDependencyIntegration(t *testing.T) {
 	require.NoError(t, err)
 	task2ID := task2.ID
 
-	// Validate dependencies
-	mockRowValidate := database.NewMockRowWithValues(task1ID)
+	// Validate dependencies - the EXISTS query should return true
+	mockRowValidate := database.NewMockRowWithValues(true)
 	mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRowValidate).Once()
 
 	err = depManager.ValidateDependencies([]uuid.UUID{task1ID})

@@ -251,8 +251,12 @@ func TestLoadBalancing(t *testing.T) {
 }
 
 func TestModelConversion(t *testing.T) {
-	if testing.Short() || os.Getenv("SKIP_CONVERSION_TESTS") == "true" {
-		t.Skip("Skipping model conversion test")
+	// Skip by default - requires explicit opt-in via environment variable
+	if os.Getenv("RUN_CONVERSION_TESTS") != "true" {
+		t.Skip("Skipping model conversion test - set RUN_CONVERSION_TESTS=true to enable")
+	}
+	if testing.Short() {
+		t.Skip("Skipping model conversion test in short mode")
 	}
 
 	config := &ProviderTestConfig{
@@ -263,6 +267,9 @@ func TestModelConversion(t *testing.T) {
 
 	// Download a model in HF format
 	modelPath := downloadTestModel(t, config, "llama-3-8b-instruct-hf")
+	if modelPath == "" {
+		t.Skip("Skipping model conversion test - model download failed")
+	}
 	require.FileExists(t, modelPath)
 
 	// Test conversion to GGUF

@@ -111,8 +111,10 @@ func TestHardwareOptimizedProviders(t *testing.T) {
 }
 
 func TestRealModelExecution(t *testing.T) {
-	if testing.Short() || os.Getenv("SKIP_REAL_EXECUTION") == "true" {
-		t.Skip("Skipping real model execution tests")
+	// Skip by default - these tests require real LLM providers to be installed and configured
+	// Enable with RUN_REAL_EXECUTION=true
+	if os.Getenv("RUN_REAL_EXECUTION") != "true" {
+		t.Skip("Skipping real model execution tests - set RUN_REAL_EXECUTION=true to enable")
 	}
 
 	hwInfo, err := detectHardware()
@@ -142,8 +144,10 @@ func TestRealModelExecution(t *testing.T) {
 }
 
 func TestPerformanceBenchmarks(t *testing.T) {
-	if testing.Short() || os.Getenv("SKIP_BENCHMARKS") == "true" {
-		t.Skip("Skipping performance benchmarks")
+	// Skip by default - these tests require LLM providers for benchmarking
+	// Enable with RUN_BENCHMARKS=true
+	if os.Getenv("RUN_BENCHMARKS") != "true" {
+		t.Skip("Skipping performance benchmarks - set RUN_BENCHMARKS=true to enable")
 	}
 
 	hwInfo, err := detectHardware()
@@ -172,8 +176,10 @@ func TestPerformanceBenchmarks(t *testing.T) {
 }
 
 func TestResourceUtilization(t *testing.T) {
-	if testing.Short() || os.Getenv("SKIP_RESOURCE_TESTS") == "true" {
-		t.Skip("Skipping resource utilization tests")
+	// Skip by default - these tests require LLM providers
+	// Enable with RUN_RESOURCE_TESTS=true
+	if os.Getenv("RUN_RESOURCE_TESTS") != "true" {
+		t.Skip("Skipping resource utilization tests - set RUN_RESOURCE_TESTS=true to enable")
 	}
 
 	hwInfo, err := detectHardware()
@@ -184,8 +190,10 @@ func TestResourceUtilization(t *testing.T) {
 }
 
 func TestCrossPlatformCompatibility(t *testing.T) {
-	if testing.Short() || os.Getenv("SKIP_CROSS_PLATFORM") == "true" {
-		t.Skip("Skipping cross-platform tests")
+	// Skip by default - these tests check provider compatibility which may require installation
+	// Enable with RUN_CROSS_PLATFORM=true
+	if os.Getenv("RUN_CROSS_PLATFORM") != "true" {
+		t.Skip("Skipping cross-platform tests - set RUN_CROSS_PLATFORM=true to enable")
 	}
 
 	hwInfo, err := detectHardware()
