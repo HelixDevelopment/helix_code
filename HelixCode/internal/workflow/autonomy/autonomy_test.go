@@ -5,6 +5,9 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestModeCapabilities tests mode capability definitions
@@ -343,52 +346,37 @@ func TestGuardrails(t *testing.T) {
 
 // TestEscalation tests mode escalation
 func TestEscalation(t *testing.T) {
-	t.Skip("Skipping due to timing sensitivity - auto-revert race condition")
 	config := NewDefaultModeConfig()
 	config.PersistPath = ""
 
 	modeManager, err := NewModeManager(config)
-	if err != nil {
-		t.Fatalf("NewModeManager() error = %v", err)
-	}
+	require.NoError(t, err, "NewModeManager() should not error")
 
 	// Set to basic mode
 	ctx := context.Background()
 	err = modeManager.SetMode(ctx, ModeBasic, "test")
-	if err != nil {
-		t.Fatalf("SetMode() error = %v", err)
-	}
+	require.NoError(t, err, "SetMode() should not error")
 
 	escalationConfig := NewDefaultEscalationConfig()
 	engine := NewEscalationEngine(modeManager, escalationConfig)
 
-	// Request escalation with short duration
-	escalation, err := engine.Request(ctx, ModeSemiAuto, "testing", 50*time.Millisecond)
-	if err != nil {
-		t.Fatalf("Request() error = %v", err)
-	}
+	// Request escalation with reasonable duration
+	escalation, err := engine.Request(ctx, ModeSemiAuto, "testing", 100*time.Millisecond)
+	require.NoError(t, err, "Request() should not error")
+	require.True(t, escalation.Active, "Escalation should be active")
+	require.Equal(t, ModeSemiAuto, modeManager.GetMode(), "Mode should be escalated")
 
-	if !escalation.Active {
-		t.Error("Escalation should be active")
-	}
+	// Use Eventually to poll for mode reversion, avoiding race conditions
+	// This is more robust than fixed sleep + single check
+	require.Eventually(t, func() bool {
+		// Trigger expiry check - may be called multiple times until condition is met
+		_ = engine.CheckExpired(ctx)
+		return modeManager.GetMode() != ModeSemiAuto
+	}, 500*time.Millisecond, 25*time.Millisecond, "Mode should have reverted after expiry")
 
-	if modeManager.GetMode() != ModeSemiAuto {
-		t.Errorf("Mode = %v, want %v", modeManager.GetMode(), ModeSemiAuto)
-	}
-
-	// Wait for expiry
-	time.Sleep(100 * time.Millisecond)
-
-	// Check expired
-	err = engine.CheckExpired(ctx)
-	if err != nil {
-		t.Fatalf("CheckExpired() error = %v", err)
-	}
-
-	// Should have reverted
-	if modeManager.GetMode() == ModeSemiAuto {
-		t.Error("Mode should have reverted after expiry")
-	}
+	// Verify escalation is no longer active
+	active := engine.GetActive()
+	assert.Empty(t, active, "No escalations should be active after expiry")
 }
 
 // TestActionExecution tests action execution

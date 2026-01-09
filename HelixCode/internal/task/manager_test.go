@@ -440,9 +440,7 @@ func TestTaskManager_AssignTask(t *testing.T) {
 	}
 }
 
-func TestTaskManager_SplitTask(t *testing.T) {
-	t.Skip("SplitTask requires SplitStrategy implementation - skipping for coverage")
-}
+// NOTE: SplitTask tests are in manager_methods_test.go with MockSplitStrategy
 
 // ========================================
 // Task Queue Additional Tests

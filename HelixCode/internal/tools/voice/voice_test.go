@@ -682,3 +682,306 @@ func TestAudioFormat_String(t *testing.T) {
 		}
 	}
 }
+
+// TestParseSampleRate tests sample rate parsing from PulseAudio spec
+func TestParseSampleRate(t *testing.T) {
+	tests := []struct {
+		name       string
+		sampleSpec string
+		wantRate   int
+		wantErr    bool
+	}{
+		{"standard 44100Hz", "s16le 2ch 44100Hz", 44100, false},
+		{"48000Hz", "s16le 2ch 48000Hz", 48000, false},
+		{"16000Hz", "s16le 1ch 16000Hz", 16000, false},
+		{"96000Hz", "float32le 2ch 96000Hz", 96000, false},
+		{"no Hz suffix", "s16le 2ch 44100", 0, true},
+		{"empty string", "", 0, true},
+		{"malformed", "invalid", 0, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rate, err := parseSampleRate(tt.sampleSpec)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseSampleRate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && rate != tt.wantRate {
+				t.Errorf("parseSampleRate() = %v, want %v", rate, tt.wantRate)
+			}
+		})
+	}
+}
+
+// TestParseChannels tests channel count parsing from PulseAudio spec
+func TestParseChannels(t *testing.T) {
+	tests := []struct {
+		name       string
+		sampleSpec string
+		wantCh     int
+		wantErr    bool
+	}{
+		{"2 channels", "s16le 2ch 44100Hz", 2, false},
+		{"1 channel", "s16le 1ch 16000Hz", 1, false},
+		{"8 channels", "float32le 8ch 48000Hz", 8, false},
+		{"no ch suffix", "s16le 2 44100Hz", 0, true},
+		{"empty string", "", 0, true},
+		{"malformed", "invalid", 0, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ch, err := parseChannels(tt.sampleSpec)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseChannels() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && ch != tt.wantCh {
+				t.Errorf("parseChannels() = %v, want %v", ch, tt.wantCh)
+			}
+		})
+	}
+}
+
+// TestFormatPulseAudioDeviceName tests PulseAudio device name formatting
+func TestFormatPulseAudioDeviceName(t *testing.T) {
+	dm := &DeviceManager{}
+
+	tests := []struct {
+		name     string
+		deviceID string
+		want     string
+	}{
+		{
+			"alsa input device",
+			"alsa_input.pci-0000_00_1f.3.analog-stereo",
+			"Pci-0000 00 1f 3 Analog-stereo", // Hyphens preserved, underscores/dots become spaces
+		},
+		{
+			"alsa output device",
+			"alsa_output.usb-audio-device",
+			"Usb-audio-device", // Hyphens preserved
+		},
+		{
+			"simple device",
+			"default",
+			"Default",
+		},
+		{
+			"underscores only",
+			"device_name_test",
+			"Device Name Test",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := dm.formatPulseAudioDeviceName(tt.deviceID)
+			if got != tt.want {
+				t.Errorf("formatPulseAudioDeviceName() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestParseMacOSAudioDevices tests macOS audio device parsing
+func TestParseMacOSAudioDevices(t *testing.T) {
+	dm := &DeviceManager{}
+
+	t.Run("empty output", func(t *testing.T) {
+		devices := dm.parseMacOSAudioDevices("")
+		if len(devices) != 0 {
+			t.Errorf("expected 0 devices, got %d", len(devices))
+		}
+	})
+
+	t.Run("output only devices", func(t *testing.T) {
+		output := `
+Audio:
+    Output:
+        Built-in Output:
+            Default: Yes
+`
+		devices := dm.parseMacOSAudioDevices(output)
+		// Output devices should be filtered out
+		if len(devices) != 0 {
+			t.Errorf("expected 0 input devices, got %d", len(devices))
+		}
+	})
+
+	t.Run("input devices", func(t *testing.T) {
+		output := `
+Audio:
+    Input:
+        Built-in Microphone:
+            Default: Yes
+        External Mic:
+            Default: No
+`
+		devices := dm.parseMacOSAudioDevices(output)
+		if len(devices) < 1 {
+			t.Errorf("expected at least 1 input device, got %d", len(devices))
+		}
+	})
+}
+
+// TestParseWindowsAudioDevices tests Windows audio device parsing
+func TestParseWindowsAudioDevices(t *testing.T) {
+	dm := &DeviceManager{}
+
+	t.Run("empty output", func(t *testing.T) {
+		devices := dm.parseWindowsAudioDevices("")
+		if len(devices) != 0 {
+			t.Errorf("expected 0 devices, got %d", len(devices))
+		}
+	})
+
+	t.Run("single device", func(t *testing.T) {
+		output := `{
+    "Name": "Realtek High Definition Audio",
+    "DeviceID": "HDAUDIO\\FUNC_01"
+}`
+		devices := dm.parseWindowsAudioDevices(output)
+		if len(devices) != 1 {
+			t.Errorf("expected 1 device, got %d", len(devices))
+		}
+		if len(devices) > 0 {
+			if devices[0].Name != "Realtek High Definition Audio" {
+				t.Errorf("unexpected device name: %s", devices[0].Name)
+			}
+			if devices[0].Driver != "WASAPI" {
+				t.Errorf("unexpected driver: %s", devices[0].Driver)
+			}
+		}
+	})
+
+	t.Run("multiple devices", func(t *testing.T) {
+		output := `[
+    {
+        "Name": "Device 1",
+        "DeviceID": "ID1"
+    },
+    {
+        "Name": "Device 2",
+        "DeviceID": "ID2"
+    }
+]`
+		devices := dm.parseWindowsAudioDevices(output)
+		if len(devices) != 2 {
+			t.Errorf("expected 2 devices, got %d", len(devices))
+		}
+	})
+}
+
+// TestEnumerateMockDevices tests mock device enumeration
+func TestEnumerateMockDevices(t *testing.T) {
+	dm := &DeviceManager{}
+
+	devices, err := dm.enumerateMockDevices()
+	if err != nil {
+		t.Fatalf("enumerateMockDevices() error = %v", err)
+	}
+
+	if len(devices) != 2 {
+		t.Errorf("expected 2 mock devices, got %d", len(devices))
+	}
+
+	// Check first device (default)
+	if !devices[0].IsDefault {
+		t.Error("expected first device to be default")
+	}
+	if devices[0].Driver != "Mock" {
+		t.Error("expected Mock driver")
+	}
+	if devices[0].Name != "Mock Default Microphone" {
+		t.Errorf("unexpected name: %s", devices[0].Name)
+	}
+
+	// Check second device (USB)
+	if devices[1].IsDefault {
+		t.Error("expected second device to NOT be default")
+	}
+	if devices[1].Name != "Mock USB Microphone" {
+		t.Errorf("unexpected name: %s", devices[1].Name)
+	}
+}
+
+// TestDeviceManager_GetActiveDevice_NotSet tests getting active device when none is set
+func TestDeviceManager_GetActiveDevice_NotSet(t *testing.T) {
+	dm := &DeviceManager{
+		devices:      []AudioDevice{},
+		activeDevice: nil,
+	}
+
+	device := dm.GetActiveDevice()
+	if device != nil {
+		t.Error("expected nil device when none is active")
+	}
+}
+
+// TestDeviceManager_SelectDevice_Unavailable tests selecting unavailable device
+func TestDeviceManager_SelectDevice_Unavailable(t *testing.T) {
+	dm := &DeviceManager{
+		devices: []AudioDevice{
+			{
+				ID:          "unavailable-device",
+				Name:        "Unavailable Device",
+				IsAvailable: false,
+			},
+		},
+	}
+
+	err := dm.SelectDevice("unavailable-device")
+	if err != ErrDeviceUnavailable {
+		t.Errorf("expected ErrDeviceUnavailable, got %v", err)
+	}
+}
+
+// TestDeviceManager_ListDevices_Empty tests listing when no devices available
+func TestDeviceManager_ListDevices_Empty(t *testing.T) {
+	dm := &DeviceManager{
+		devices: []AudioDevice{},
+	}
+
+	_, err := dm.ListDevices(context.Background())
+	if err != ErrNoDevicesFound {
+		t.Errorf("expected ErrNoDevicesFound, got %v", err)
+	}
+}
+
+// TestDeviceManager_ValidateDevice_NoChannels tests validation with zero channels
+func TestDeviceManager_ValidateDevice_NoChannels(t *testing.T) {
+	dm := &DeviceManager{}
+
+	device := &AudioDevice{
+		ID:          "test",
+		Name:        "Test",
+		IsAvailable: true,
+		Channels:    0,
+		SampleRates: []int{44100},
+	}
+
+	err := dm.ValidateDevice(device)
+	if err == nil {
+		t.Error("expected error for device with no channels")
+	}
+}
+
+// TestDeviceManager_ValidateDevice_NoSampleRates tests validation with no sample rates
+func TestDeviceManager_ValidateDevice_NoSampleRates(t *testing.T) {
+	dm := &DeviceManager{}
+
+	device := &AudioDevice{
+		ID:          "test",
+		Name:        "Test",
+		IsAvailable: true,
+		Channels:    1,
+		SampleRates: []int{},
+	}
+
+	err := dm.ValidateDevice(device)
+	if err == nil {
+		t.Error("expected error for device with no sample rates")
+	}
+}
