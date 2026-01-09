@@ -413,7 +413,6 @@ func (m *IntegratedModelManager) acquireModelOperation(ctx context.Context, req 
 
 	// Check if model is already available
 	downloadedModels := m.registry.GetDownloadedModels()
-	_ = fmt.Sprintf("%s:%s", req.ModelID, req.TargetProvider) // Suppress unused variable warning
 
 	var existingModel *DownloadedModel
 	for _, model := range downloadedModels {
