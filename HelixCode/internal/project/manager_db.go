@@ -262,6 +262,39 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 	return projects, nil
 }
 
+// UpdateProject updates project name and description in the database
+func (m *DatabaseManager) UpdateProject(ctx context.Context, projectID, name, description string) (*Project, error) {
+	query := `
+		UPDATE projects
+		SET name = COALESCE(NULLIF($1, ''), name),
+		    description = COALESCE(NULLIF($2, ''), description),
+		    updated_at = $3
+		WHERE id = $4
+		RETURNING id, name, description, path, type, owner_id, created_at, updated_at, status, config
+	`
+
+	var project Project
+	var ownerID, status string
+	err := m.db.QueryRow(ctx, query, name, description, time.Now(), projectID).Scan(
+		&project.ID,
+		&project.Name,
+		&project.Description,
+		&project.Path,
+		&project.Type,
+		&ownerID,
+		&project.CreatedAt,
+		&project.UpdatedAt,
+		&status,
+		&project.Metadata,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update project: %v", err)
+	}
+
+	project.Active = status == "active"
+	return &project, nil
+}
+
 // UpdateProjectMetadata updates project metadata in the database
 func (m *DatabaseManager) UpdateProjectMetadata(ctx context.Context, projectID string, metadata Metadata) error {
 	query := `

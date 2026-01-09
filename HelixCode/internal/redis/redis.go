@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/config"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // Client wraps the Redis client
@@ -212,7 +212,7 @@ func (c *Client) SRem(ctx context.Context, key string, members ...interface{}) e
 }
 
 // ZAdd adds members to a sorted set
-func (c *Client) ZAdd(ctx context.Context, key string, members ...*redis.Z) error {
+func (c *Client) ZAdd(ctx context.Context, key string, members ...redis.Z) error {
 	if !c.IsEnabled() {
 		return nil // No-op if Redis is disabled
 	}

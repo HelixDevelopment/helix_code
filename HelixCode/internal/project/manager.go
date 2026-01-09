@@ -210,6 +210,27 @@ func (m *Manager) detectProjectType(project *Project) error {
 	return nil
 }
 
+// UpdateProject updates project name and description in memory
+func (m *Manager) UpdateProject(ctx context.Context, projectID, name, description string) (*Project, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	project, exists := m.projects[projectID]
+	if !exists {
+		return nil, fmt.Errorf("project not found: %s", projectID)
+	}
+
+	if name != "" {
+		project.Name = name
+	}
+	if description != "" {
+		project.Description = description
+	}
+	project.UpdatedAt = time.Now()
+
+	return project, nil
+}
+
 // UpdateProjectMetadata updates project metadata in memory
 func (m *Manager) UpdateProjectMetadata(ctx context.Context, projectID string, metadata Metadata) error {
 	m.mu.Lock()

@@ -229,11 +229,9 @@ func (p *PermissionManager) checkCapabilities(action *Action) *Permission {
 }
 
 // RequestConfirmation asks user to confirm an action
+// This blocks until user responds, times out (5 minutes), or context is cancelled
+// Callers must provide a confirmation response via ProvideConfirmation method
 func (p *PermissionManager) RequestConfirmation(ctx context.Context, action *Action) (bool, error) {
-	// This would integrate with the UI/CLI to get user confirmation
-	// For now, we'll return a mock response
-	// In production, this would block until user responds
-
 	// Create pending confirmation
 	pc := &pendingConfirm{
 		Action:    action,

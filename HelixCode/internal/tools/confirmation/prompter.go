@@ -177,12 +177,9 @@ func (ip *InteractivePrompter) Prompt(ctx context.Context, prompt *FormattedProm
 	// Use provided input or stdin
 	input := ip.input
 	if input == nil {
-		// In a real implementation, this would use os.Stdin
-		// For testing, we return a default response
-		return &PromptResponse{
-			Choice:    ChoiceAllow,
-			Timestamp: time.Now(),
-		}, nil
+		// No input source available - require explicit input for security
+		// Never auto-allow without user confirmation
+		return nil, fmt.Errorf("no input source available for confirmation prompt - user confirmation required")
 	}
 
 	// Read response

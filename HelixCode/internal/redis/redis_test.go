@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/config"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -328,7 +328,7 @@ func TestClient_ZAdd_DisabledWithMembers(t *testing.T) {
 	ctx := context.Background()
 
 	// ZAdd with members should be no-op
-	members := []*redis.Z{
+	members := []redis.Z{
 		{Score: 1.0, Member: "one"},
 		{Score: 2.0, Member: "two"},
 	}
@@ -604,7 +604,7 @@ func TestClient_ConcurrentSortedSetOperations_Disabled(t *testing.T) {
 
 		go func(i int) {
 			defer wg.Done()
-			member := &redis.Z{Score: float64(i), Member: i}
+			member := redis.Z{Score: float64(i), Member: i}
 			err := client.ZAdd(ctx, "zset", member)
 			assert.NoError(t, err)
 		}(i)
@@ -816,7 +816,7 @@ func TestClient_SortedSetWorkflow_Disabled(t *testing.T) {
 
 	// Simulate a sorted set (leaderboard) workflow
 	// 1. Add members with scores
-	members := []*redis.Z{
+	members := []redis.Z{
 		{Score: 100, Member: "player1"},
 		{Score: 200, Member: "player2"},
 		{Score: 150, Member: "player3"},

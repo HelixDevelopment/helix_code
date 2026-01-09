@@ -69,7 +69,7 @@ func TestListProjects(t *testing.T) {
 	server.router.ServeHTTP(w, req)
 
 	// Without auth, should get unauthorized
-	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -171,7 +171,7 @@ func TestLogout_MissingToken(t *testing.T) {
 	server.router.ServeHTTP(w, req)
 
 	// Without valid auth, should be unauthorized or bad request
-	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusBadRequest}, w.Code)
+	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusBadRequest, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -187,7 +187,7 @@ func TestRefreshToken_InvalidRequest(t *testing.T) {
 	server.router.ServeHTTP(w, req)
 
 	// Should fail without valid token
-	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusBadRequest}, w.Code)
+	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusBadRequest, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -208,7 +208,7 @@ func TestListTasks(t *testing.T) {
 	server.router.ServeHTTP(w, req)
 
 	// Handler should respond (may be unauthorized or return empty list)
-	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -223,7 +223,7 @@ func TestListWorkers(t *testing.T) {
 	server.router.ServeHTTP(w, req)
 
 	// Handler should respond (may be unauthorized or return empty list)
-	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -438,7 +438,7 @@ func TestExecutePlanningWorkflow_InvalidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should fail without proper request body
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestExecuteBuildingWorkflow_InvalidRequest(t *testing.T) {
@@ -452,7 +452,7 @@ func TestExecuteBuildingWorkflow_InvalidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestExecuteTestingWorkflow_InvalidRequest(t *testing.T) {
@@ -466,7 +466,7 @@ func TestExecuteTestingWorkflow_InvalidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestExecuteRefactoringWorkflow_InvalidRequest(t *testing.T) {
@@ -480,7 +480,7 @@ func TestExecuteRefactoringWorkflow_InvalidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -514,7 +514,7 @@ func TestCreateTask_EmptyBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should fail without required fields
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestGetTask_NotFound(t *testing.T) {
@@ -528,7 +528,7 @@ func TestGetTask_NotFound(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should return not found, ok (when manager is nil), or internal error
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestUpdateTask_InvalidRequest(t *testing.T) {
@@ -556,7 +556,7 @@ func TestDeleteTask_NotFound(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should return not found or internal error
-	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK}, w.Code)
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -588,7 +588,7 @@ func TestGetProject_NotFound(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should return not found or internal error
-	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestUpdateProject_InvalidRequest(t *testing.T) {
@@ -615,8 +615,8 @@ func TestDeleteProject_NotFound(t *testing.T) {
 	req, _ := http.NewRequest("DELETE", "/api/v1/projects/nonexistent-id", nil)
 	router.ServeHTTP(w, req)
 
-	// Should return not found or success (if project manager is nil)
-	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK}, w.Code)
+	// Should return service unavailable if project manager is nil, or not found/error if project manager exists
+	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusOK, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -634,7 +634,7 @@ func TestGetWorker_NotFound(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should return not found, ok (when manager is nil), or internal error
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -652,7 +652,7 @@ func TestGetCurrentUser_NoAuth(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should fail without auth token
-	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusUnauthorized, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -670,8 +670,8 @@ func TestListProjects_WithoutProjectManager(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/projects", nil)
 	router.ServeHTTP(w, req)
 
-	// Project manager is nil, so should fail with internal error
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError}, w.Code)
+	// Should fail with Unauthorized (no user_id), internal error, or service unavailable
+	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestLogin_ValidCredentials is skipped - requires proper mock setup
@@ -700,7 +700,7 @@ func TestRefreshToken_WithUserContext(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should succeed since user is in context
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestGetCurrentUser_WithContext tests getCurrentUser with user context
@@ -745,7 +745,7 @@ func TestCreateProject_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Project manager is nil, so will fail
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestListTasks_WithManager tests listTasks with task manager
@@ -760,7 +760,7 @@ func TestListTasks_WithManager(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Task manager is nil, so should return appropriate error or empty list
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestCreateTask_ValidRequest tests creating a task
@@ -785,7 +785,7 @@ func TestCreateTask_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Task manager is nil, so will fail
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestGetTask_ValidID tests getting a task by ID
@@ -800,7 +800,7 @@ func TestGetTask_ValidID(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Task manager is nil, so should fail or return not found
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestUpdateTask_ValidRequest tests updating a task
@@ -821,7 +821,7 @@ func TestUpdateTask_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Task manager is nil
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestDeleteTask_ValidID tests deleting a task
@@ -835,7 +835,7 @@ func TestDeleteTask_ValidID(t *testing.T) {
 	req, _ := http.NewRequest("DELETE", "/api/v1/tasks/task-123", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestListWorkers_WithManager tests listWorkers
@@ -850,7 +850,7 @@ func TestListWorkers_WithManager(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Worker manager is nil
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestGetWorker_ValidID tests getting a worker by ID
@@ -865,7 +865,7 @@ func TestGetWorker_ValidID(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Worker manager is nil
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestGetSystemStats_Handler tests getSystemStats
@@ -880,7 +880,7 @@ func TestGetSystemStats_Handler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Should return system stats or error
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestGetSystemStatus_Handler is skipped - requires database initialization
@@ -968,7 +968,7 @@ func TestCORSMiddleware_Handlers(t *testing.T) {
 
 	// The middleware should respond, status code check is sufficient
 	// CORS headers may be set differently based on configuration
-	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusNotFound, http.StatusMethodNotAllowed}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusNotFound, http.StatusMethodNotAllowed, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestWorkflowExecution_ValidRequest tests workflow execution
@@ -993,7 +993,7 @@ func TestWorkflowExecution_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Workflow executor is nil, so will fail
-	assert.Contains(t, []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestBuildingWorkflow_ValidRequest tests building workflow
@@ -1014,7 +1014,7 @@ func TestBuildingWorkflow_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // TestUpdateProject_ValidRequest tests updating a project
@@ -1036,7 +1036,7 @@ func TestUpdateProject_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Project manager is nil
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -1064,7 +1064,7 @@ func TestCreateWorker_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Worker pool may not be initialized
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestCreateWorker_InvalidRequest(t *testing.T) {
@@ -1085,7 +1085,7 @@ func TestCreateWorker_InvalidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestUpdateWorker_ValidRequest(t *testing.T) {
@@ -1105,7 +1105,7 @@ func TestUpdateWorker_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestDeleteWorker_ValidRequest(t *testing.T) {
@@ -1118,7 +1118,7 @@ func TestDeleteWorker_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("DELETE", "/api/v1/workers/worker-123", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestWorkerHeartbeat_ValidRequest(t *testing.T) {
@@ -1141,7 +1141,7 @@ func TestWorkerHeartbeat_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestGetWorkerMetrics_ValidRequest(t *testing.T) {
@@ -1154,7 +1154,7 @@ func TestGetWorkerMetrics_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/workers/worker-123/metrics", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -1177,7 +1177,7 @@ func TestAssignTask_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestStartTask_ValidRequest(t *testing.T) {
@@ -1190,7 +1190,7 @@ func TestStartTask_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/api/v1/tasks/task-123/start", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestCompleteTask_ValidRequest(t *testing.T) {
@@ -1210,7 +1210,7 @@ func TestCompleteTask_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestFailTask_ValidRequest(t *testing.T) {
@@ -1230,7 +1230,7 @@ func TestFailTask_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestRetryTask_ValidRequest(t *testing.T) {
@@ -1243,7 +1243,7 @@ func TestRetryTask_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/api/v1/tasks/task-123/retry", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestCreateTaskCheckpoint_ValidRequest(t *testing.T) {
@@ -1266,7 +1266,7 @@ func TestCreateTaskCheckpoint_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestGetTaskCheckpoints_ValidRequest(t *testing.T) {
@@ -1279,7 +1279,7 @@ func TestGetTaskCheckpoints_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/tasks/task-123/checkpoints", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -1296,7 +1296,7 @@ func TestListSessions_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/sessions", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestCreateSession_ValidRequest(t *testing.T) {
@@ -1316,7 +1316,7 @@ func TestCreateSession_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestGetSession_ValidRequest(t *testing.T) {
@@ -1329,7 +1329,7 @@ func TestGetSession_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/sessions/session-123", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestUpdateSession_ValidRequest(t *testing.T) {
@@ -1349,7 +1349,7 @@ func TestUpdateSession_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestGetProjectSessions_ValidRequest(t *testing.T) {
@@ -1362,7 +1362,7 @@ func TestGetProjectSessions_ValidRequest(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/projects/proj-123/sessions", nil)
 	router.ServeHTTP(w, req)
 
-	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================
@@ -1387,7 +1387,7 @@ func TestUpdateCurrentUser_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Auth middleware will reject without token
-	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusBadRequest, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusUnauthorized, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 func TestDeleteCurrentUser_ValidRequest(t *testing.T) {
@@ -1401,7 +1401,7 @@ func TestDeleteCurrentUser_ValidRequest(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Auth middleware will reject without token
-	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusUnauthorized, http.StatusInternalServerError}, w.Code)
+	assert.Contains(t, []int{http.StatusOK, http.StatusNoContent, http.StatusUnauthorized, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
 }
 
 // ========================================

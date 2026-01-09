@@ -187,11 +187,37 @@ func (s *Sandbox) applyFilesystemRestrictions(cmd *exec.Cmd) error {
 
 // applyNetworkRestrictions applies network restrictions
 func (s *Sandbox) applyNetworkRestrictions(cmd *exec.Cmd) error {
-	// Network isolation requires:
-	// - Network namespaces (Linux)
-	// - Firewall rules
-	// - Container networking
-	// This is a placeholder for future implementation
+	// Network isolation only supported on Linux
+	if runtime.GOOS != "linux" {
+		// On non-Linux platforms, network isolation is not available
+		// Log warning and continue without network isolation
+		if s.config.Network.Mode == NetworkNone {
+			return fmt.Errorf("network isolation (NetworkNone) is only supported on Linux; current OS: %s", runtime.GOOS)
+		}
+		return nil
+	}
+
+	// Apply network namespace isolation based on mode
+	switch s.config.Network.Mode {
+	case NetworkNone:
+		// Create a new network namespace with no access
+		// This completely isolates the process from all network interfaces
+		if cmd.SysProcAttr == nil {
+			cmd.SysProcAttr = &syscall.SysProcAttr{}
+		}
+		// CLONE_NEWNET creates a new network namespace
+		// The new namespace has only a loopback interface (lo) which is DOWN by default
+		cmd.SysProcAttr.Cloneflags |= syscall.CLONE_NEWNET
+
+	case NetworkHost:
+		// Host network only - use unshare for user namespace but share network
+		// This allows localhost connections but isolates other resources
+		// No additional flags needed - process shares host network namespace
+
+	case NetworkFull:
+		// Full network access - no restrictions
+		// Process inherits parent's network namespace
+	}
 
 	return nil
 }

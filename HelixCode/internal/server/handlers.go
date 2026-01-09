@@ -15,10 +15,15 @@ import (
 // Project Handlers
 
 func (s *Server) listProjects(c *gin.Context) {
-	// Get user ID from context
+	// Get user ID from context - authentication required
 	userID := c.GetString("user_id")
 	if userID == "" {
-		userID = "default-user" // For testing without full auth
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": "Authentication required",
+			"error":   "user_id not found in context - please authenticate first",
+		})
+		return
 	}
 
 	projects, err := s.projectManager.ListProjects(c.Request.Context(), userID)
@@ -284,16 +289,24 @@ func (s *Server) updateProject(c *gin.Context) {
 		return
 	}
 
-	// For now, return placeholder until we have user authentication
-	// In production, this would use: projectManager := project.NewDatabaseManager(s.db)
-	proj := gin.H{
-		"id":          id,
-		"name":        req.Name,
-		"description": req.Description,
-		"path":        "/path/to/project",
-		"type":        "go",
-		"created_at":  time.Now(),
-		"updated_at":  time.Now(),
+	if s.projectManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Project manager not available",
+			"error":   "database connection required for project management",
+		})
+		return
+	}
+
+	// Update the project using the project manager
+	proj, err := s.projectManager.UpdateProject(c.Request.Context(), id, req.Name, req.Description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update project",
+			"error":   err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -303,8 +316,27 @@ func (s *Server) updateProject(c *gin.Context) {
 }
 
 func (s *Server) deleteProject(c *gin.Context) {
-	// For now, return success until we have user authentication
-	// In production, this would use: projectManager := project.NewDatabaseManager(s.db)
+	id := c.Param("id")
+
+	if s.projectManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Project manager not available",
+			"error":   "database connection required for project management",
+		})
+		return
+	}
+
+	err := s.projectManager.DeleteProject(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to delete project",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Project deleted",
@@ -389,19 +421,11 @@ func (s *Server) createTask(c *gin.Context) {
 		return
 	}
 
-	// Fallback to placeholder if no database
-	task := gin.H{
-		"id":          "task_placeholder",
-		"name":        req.Name,
-		"description": req.Description,
-		"type":        req.Type,
-		"status":      "pending",
-		"created_at":  time.Now(),
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"status": "success",
-		"task":   task,
+	// Task manager not available - return service unavailable error
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":  "error",
+		"message": "Task manager not available",
+		"error":   "database connection required for task management",
 	})
 }
 
@@ -426,19 +450,11 @@ func (s *Server) getTask(c *gin.Context) {
 		return
 	}
 
-	// Fallback to placeholder if no database
-	task := gin.H{
-		"id":          id,
-		"name":        "Sample Task",
-		"description": "This is a sample task",
-		"type":        "generic",
-		"status":      "pending",
-		"created_at":  time.Now(),
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"task":   task,
+	// Task manager not available - return service unavailable error
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":  "error",
+		"message": "Task manager not available",
+		"error":   "database connection required for task management",
 	})
 }
 
@@ -504,36 +520,34 @@ func (s *Server) updateTask(c *gin.Context) {
 		return
 	}
 
-	// Fallback to placeholder if no database
-	task := gin.H{
-		"id":          id,
-		"name":        "Sample Task",
-		"description": "This is a sample task",
-		"type":        "generic",
-		"status":      req.Status,
-		"created_at":  time.Now(),
-		"updated_at":  time.Now(),
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"task":   task,
+	// Task manager not available - return service unavailable error
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":  "error",
+		"message": "Task manager not available",
+		"error":   "database connection required for task management",
 	})
 }
 
 func (s *Server) deleteTask(c *gin.Context) {
 	id := c.Param("id")
 
-	if s.taskManager != nil {
-		err := s.taskManager.DeleteTask(c.Request.Context(), id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"status":  "error",
-				"message": "Failed to delete task",
-				"error":   err.Error(),
-			})
-			return
-		}
+	if s.taskManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": "Task manager not available",
+			"error":   "database connection required for task management",
+		})
+		return
+	}
+
+	err := s.taskManager.DeleteTask(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to delete task",
+			"error":   err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -590,18 +604,11 @@ func (s *Server) getWorker(c *gin.Context) {
 		return
 	}
 
-	// Fallback to placeholder if no database
-	worker := gin.H{
-		"id":           id,
-		"hostname":     "localhost",
-		"status":       "active",
-		"capabilities": []string{"build", "test"},
-		"created_at":   time.Now(),
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"worker": worker,
+	// Worker manager not available - return service unavailable error
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":  "error",
+		"message": "Worker manager not available",
+		"error":   "database connection required for worker management",
 	})
 }
 
