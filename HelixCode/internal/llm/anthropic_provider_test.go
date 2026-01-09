@@ -607,3 +607,491 @@ func TestAnthropicProvider_Close(t *testing.T) {
 	err = provider.Close()
 	assert.NoError(t, err)
 }
+
+func TestAnthropicProvider_GenerateStream(t *testing.T) {
+	t.Run("successful streaming response", func(t *testing.T) {
+		// Create mock streaming server
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Verify streaming headers
+			assert.Equal(t, "text/event-stream", r.Header.Get("Accept"))
+
+			// Verify request body has stream enabled
+			var req anthropicRequest
+			err := json.NewDecoder(r.Body).Decode(&req)
+			assert.NoError(t, err)
+			assert.True(t, req.Stream)
+
+			// Set SSE headers
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusOK)
+
+			// Send streaming events as JSON objects
+			flusher, _ := w.(http.Flusher)
+
+			// content_block_delta event
+			deltaEvent := anthropicStreamEvent{
+				Type: "content_block_delta",
+				Delta: &anthropicDelta{
+					Type: "text_delta",
+					Text: "Hello ",
+				},
+			}
+			json.NewEncoder(w).Encode(deltaEvent)
+			flusher.Flush()
+
+			// Another delta
+			deltaEvent2 := anthropicStreamEvent{
+				Type: "content_block_delta",
+				Delta: &anthropicDelta{
+					Type: "text_delta",
+					Text: "World!",
+				},
+			}
+			json.NewEncoder(w).Encode(deltaEvent2)
+			flusher.Flush()
+
+			// message_stop event
+			stopEvent := anthropicStreamEvent{
+				Type: "message_stop",
+				Usage: &anthropicUsage{
+					InputTokens:  10,
+					OutputTokens: 20,
+				},
+			}
+			json.NewEncoder(w).Encode(stopEvent)
+			flusher.Flush()
+		}))
+		defer server.Close()
+
+		config := ProviderConfigEntry{
+			Type:     "anthropic",
+			Endpoint: server.URL,
+			APIKey:   "test-key",
+		}
+		provider, err := NewAnthropicProvider(config)
+		require.NoError(t, err)
+
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Hello"},
+			},
+			MaxTokens: 1000,
+			Stream:    true,
+		}
+
+		ch := make(chan LLMResponse, 10)
+		err = provider.GenerateStream(context.Background(), request, ch)
+		require.NoError(t, err)
+
+		// Collect all responses
+		var responses []LLMResponse
+		for resp := range ch {
+			responses = append(responses, resp)
+		}
+
+		// Should have multiple streaming responses
+		assert.NotEmpty(t, responses)
+	})
+
+	t.Run("streaming with tool use", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.WriteHeader(http.StatusOK)
+
+			flusher, _ := w.(http.Flusher)
+
+			// content_block_start with tool_use
+			startEvent := anthropicStreamEvent{
+				Type:  "content_block_start",
+				Index: 0,
+				ContentBlock: &anthropicContentBlock{
+					Type: "tool_use",
+					ID:   "toolu_stream_123",
+					Name: "get_weather",
+				},
+			}
+			json.NewEncoder(w).Encode(startEvent)
+			flusher.Flush()
+
+			// message_stop
+			stopEvent := anthropicStreamEvent{
+				Type: "message_stop",
+				Usage: &anthropicUsage{
+					InputTokens:  15,
+					OutputTokens: 25,
+				},
+			}
+			json.NewEncoder(w).Encode(stopEvent)
+			flusher.Flush()
+		}))
+		defer server.Close()
+
+		config := ProviderConfigEntry{
+			Type:     "anthropic",
+			Endpoint: server.URL,
+			APIKey:   "test-key",
+		}
+		provider, err := NewAnthropicProvider(config)
+		require.NoError(t, err)
+
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "What's the weather?"},
+			},
+			MaxTokens: 1000,
+			Tools: []Tool{
+				{
+					Type: "function",
+					Function: ToolFunction{
+						Name:        "get_weather",
+						Description: "Get weather",
+						Parameters:  map[string]interface{}{"type": "object"},
+					},
+				},
+			},
+		}
+
+		ch := make(chan LLMResponse, 10)
+		err = provider.GenerateStream(context.Background(), request, ch)
+		require.NoError(t, err)
+
+		// Collect responses
+		var responses []LLMResponse
+		for resp := range ch {
+			responses = append(responses, resp)
+		}
+
+		// Should have tool calls in final response
+		assert.NotEmpty(t, responses)
+		lastResp := responses[len(responses)-1]
+		assert.NotEmpty(t, lastResp.ToolCalls)
+		assert.Equal(t, "toolu_stream_123", lastResp.ToolCalls[0].ID)
+	})
+
+	t.Run("streaming error response", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"type": "error", "message": "Internal error"}`))
+		}))
+		defer server.Close()
+
+		config := ProviderConfigEntry{
+			Type:     "anthropic",
+			Endpoint: server.URL,
+			APIKey:   "test-key",
+		}
+		provider, err := NewAnthropicProvider(config)
+		require.NoError(t, err)
+
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Hello"},
+			},
+			MaxTokens: 1000,
+		}
+
+		ch := make(chan LLMResponse, 10)
+		err = provider.GenerateStream(context.Background(), request, ch)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "500")
+	})
+
+	t.Run("context cancellation", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Slow server - wait for context cancellation
+			time.Sleep(5 * time.Second)
+		}))
+		defer server.Close()
+
+		config := ProviderConfigEntry{
+			Type:     "anthropic",
+			Endpoint: server.URL,
+			APIKey:   "test-key",
+		}
+		provider, err := NewAnthropicProvider(config)
+		require.NoError(t, err)
+
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Hello"},
+			},
+			MaxTokens: 1000,
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+		defer cancel()
+
+		ch := make(chan LLMResponse, 10)
+		err = provider.GenerateStream(ctx, request, ch)
+		assert.Error(t, err)
+	})
+}
+
+func TestAnthropicProvider_BuildRequest(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:   "anthropic",
+		APIKey: "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	t.Run("default max tokens", func(t *testing.T) {
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Hello"},
+			},
+		}
+
+		req, err := provider.buildRequest(request)
+		require.NoError(t, err)
+		assert.Equal(t, 4096, req.MaxTokens)
+	})
+
+	t.Run("custom max tokens", func(t *testing.T) {
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Hello"},
+			},
+			MaxTokens: 2000,
+		}
+
+		req, err := provider.buildRequest(request)
+		require.NoError(t, err)
+		assert.Equal(t, 2000, req.MaxTokens)
+	})
+
+	t.Run("with system message and caching", func(t *testing.T) {
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "system", Content: "You are helpful."},
+				{Role: "user", Content: "Hello"},
+			},
+			MaxTokens: 1000,
+			CacheConfig: &CacheConfig{
+				Enabled:  true,
+				Strategy: CacheStrategyContext,
+			},
+		}
+
+		req, err := provider.buildRequest(request)
+		require.NoError(t, err)
+
+		// System should be cached
+		systemBlocks, ok := req.System.([]anthropicSystemBlock)
+		assert.True(t, ok)
+		assert.NotEmpty(t, systemBlocks)
+		assert.NotNil(t, systemBlocks[0].CacheControl)
+	})
+
+	t.Run("with reasoning config", func(t *testing.T) {
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Analyze this"},
+			},
+			MaxTokens: 2000,
+			Reasoning: &ReasoningConfig{
+				Enabled:        true,
+				ThinkingBudget: 1000,
+			},
+		}
+
+		req, err := provider.buildRequest(request)
+		require.NoError(t, err)
+		assert.NotNil(t, req.Thinking)
+		assert.Equal(t, "enabled", req.Thinking.Type)
+		assert.Equal(t, 1000, req.Thinking.Budget)
+	})
+
+	t.Run("with thinking budget override", func(t *testing.T) {
+		request := &LLMRequest{
+			ID:    uuid.New(),
+			Model: "claude-3-5-sonnet-latest",
+			Messages: []Message{
+				{Role: "user", Content: "Think about this"},
+			},
+			MaxTokens:      2000,
+			ThinkingBudget: 500,
+			Reasoning: &ReasoningConfig{
+				Enabled:        true,
+				ThinkingBudget: 1000,
+			},
+		}
+
+		req, err := provider.buildRequest(request)
+		require.NoError(t, err)
+		assert.NotNil(t, req.Thinking)
+		assert.Equal(t, 500, req.Thinking.Budget) // Override should take precedence
+	})
+}
+
+func TestAnthropicProvider_ShouldEnableThinking(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:   "anthropic",
+		APIKey: "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name     string
+		content  string
+		expected bool
+	}{
+		{"think keyword", "Please think about this", true},
+		{"reason keyword", "Can you reason through this?", true},
+		{"analyze keyword", "Analyze this code", true},
+		{"consider keyword", "Consider the implications", true},
+		{"explain why keyword", "Explain why this works", true},
+		{"step by step keyword", "Walk me through step by step", true},
+		{"no keywords", "Hello, how are you?", false},
+		{"case insensitive", "THINK about this", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			request := &LLMRequest{
+				Messages: []Message{
+					{Role: "user", Content: tt.content},
+				},
+			}
+
+			result := provider.shouldEnableThinking(request)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestAnthropicProvider_ConvertMessages(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:   "anthropic",
+		APIKey: "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	t.Run("system message extracted", func(t *testing.T) {
+		messages := []Message{
+			{Role: "system", Content: "You are a helpful assistant"},
+			{Role: "user", Content: "Hello"},
+			{Role: "assistant", Content: "Hi there!"},
+		}
+
+		systemMsg, anthropicMsgs := provider.convertMessages(messages)
+		assert.Equal(t, "You are a helpful assistant", systemMsg)
+		assert.Len(t, anthropicMsgs, 2)
+		assert.Equal(t, "user", anthropicMsgs[0].Role)
+		assert.Equal(t, "assistant", anthropicMsgs[1].Role)
+	})
+
+	t.Run("no system message", func(t *testing.T) {
+		messages := []Message{
+			{Role: "user", Content: "Hello"},
+		}
+
+		systemMsg, anthropicMsgs := provider.convertMessages(messages)
+		assert.Empty(t, systemMsg)
+		assert.Len(t, anthropicMsgs, 1)
+	})
+}
+
+func TestAnthropicProvider_ConvertTools(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:   "anthropic",
+		APIKey: "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	tools := []Tool{
+		{
+			Type: "function",
+			Function: ToolFunction{
+				Name:        "get_weather",
+				Description: "Get weather information",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"location": map[string]interface{}{"type": "string"},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: ToolFunction{
+				Name:        "get_time",
+				Description: "Get current time",
+				Parameters:  map[string]interface{}{"type": "object"},
+			},
+		},
+	}
+
+	result := provider.convertTools(tools)
+	assert.Len(t, result, 2)
+	assert.Equal(t, "get_weather", result[0].Name)
+	assert.Equal(t, "Get weather information", result[0].Description)
+	assert.Equal(t, "get_time", result[1].Name)
+}
+
+func TestAnthropicProvider_MakeRequest_NetworkError(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:     "anthropic",
+		Endpoint: "http://localhost:1", // Invalid endpoint
+		APIKey:   "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	request := &anthropicRequest{
+		Model:     "claude-3-5-sonnet-latest",
+		MaxTokens: 1000,
+		Messages:  []anthropicMessage{{Role: "user", Content: "Hello"}},
+	}
+
+	_, err = provider.makeRequest(context.Background(), request)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "request failed")
+}
+
+func TestAnthropicProvider_MakeRequest_InvalidJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("invalid json"))
+	}))
+	defer server.Close()
+
+	config := ProviderConfigEntry{
+		Type:     "anthropic",
+		Endpoint: server.URL,
+		APIKey:   "test-key",
+	}
+	provider, err := NewAnthropicProvider(config)
+	require.NoError(t, err)
+
+	request := &anthropicRequest{
+		Model:     "claude-3-5-sonnet-latest",
+		MaxTokens: 1000,
+		Messages:  []anthropicMessage{{Role: "user", Content: "Hello"}},
+	}
+
+	_, err = provider.makeRequest(context.Background(), request)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to parse response")
+}

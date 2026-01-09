@@ -727,7 +727,11 @@ func (m *AutoLLMManager) performHealthCheck(provider *AutoProvider) (bool, int, 
 	}
 	defer resp.Body.Close()
 
-	return resp.StatusCode == 200, responseTime, nil
+	if resp.StatusCode != 200 {
+		return false, responseTime, fmt.Errorf("health check failed with status %d", resp.StatusCode)
+	}
+
+	return true, responseTime, nil
 }
 
 // autoRecoverProvider automatically recovers a failed provider

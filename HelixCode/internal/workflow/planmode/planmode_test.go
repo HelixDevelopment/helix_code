@@ -976,3 +976,347 @@ func TestExecutePlanWithFailingStep(t *testing.T) {
 	require.NoError(t, err) // Executor doesn't return error, just marks step as failed
 	assert.NotNil(t, result)
 }
+
+// Test extractCodeFromMarkdown
+func TestExtractCodeFromMarkdown(t *testing.T) {
+	t.Run("NoCodeBlocks", func(t *testing.T) {
+		content := "This is plain text without code blocks"
+		result := extractCodeFromMarkdown(content)
+		assert.Equal(t, content, result)
+	})
+
+	t.Run("SingleCodeBlock", func(t *testing.T) {
+		content := "```\nfunc main() {\n    fmt.Println(\"Hello\")\n}\n```"
+		result := extractCodeFromMarkdown(content)
+		assert.Contains(t, result, "func main()")
+		assert.Contains(t, result, "fmt.Println")
+	})
+
+	t.Run("CodeBlockWithLanguage", func(t *testing.T) {
+		content := "```go\npackage main\n```"
+		result := extractCodeFromMarkdown(content)
+		assert.Equal(t, "package main", result)
+	})
+
+	t.Run("MultipleCodeBlocks", func(t *testing.T) {
+		content := "```\nblock1\n```\nsome text\n```\nblock2\n```"
+		result := extractCodeFromMarkdown(content)
+		assert.Contains(t, result, "block1")
+		assert.Contains(t, result, "block2")
+	})
+
+	t.Run("EmptyCodeBlock", func(t *testing.T) {
+		content := "```\n```"
+		result := extractCodeFromMarkdown(content)
+		assert.Equal(t, "", result)
+	})
+}
+
+// Test isSourceFile
+func TestIsSourceFile(t *testing.T) {
+	tests := []struct {
+		ext      string
+		expected bool
+	}{
+		{".go", true},
+		{".py", true},
+		{".js", true},
+		{".ts", true},
+		{".tsx", true},
+		{".jsx", true},
+		{".java", true},
+		{".rs", true},
+		{".c", true},
+		{".cpp", true},
+		{".rb", true},
+		{".php", true},
+		{".swift", true},
+		{".vue", true},
+		{".yaml", true},
+		{".json", true},
+		{".sql", true},
+		{".graphql", true},
+		{".proto", true},
+		{".txt", false},
+		{".exe", false},
+		{".bin", false},
+		{"", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.ext, func(t *testing.T) {
+			result := isSourceFile(tt.ext)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// Test detectProjectType
+func TestDetectProjectType(t *testing.T) {
+	t.Run("GoProject", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		os.WriteFile(tmpDir+"/go.mod", []byte("module test"), 0644)
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "go", result)
+	})
+
+	t.Run("NodeProject", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		os.WriteFile(tmpDir+"/package.json", []byte("{}"), 0644)
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "node", result)
+	})
+
+	t.Run("PythonProject_Requirements", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		os.WriteFile(tmpDir+"/requirements.txt", []byte("requests==2.0"), 0644)
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "python", result)
+	})
+
+	t.Run("RustProject", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		os.WriteFile(tmpDir+"/Cargo.toml", []byte("[package]"), 0644)
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "rust", result)
+	})
+
+	t.Run("JavaProject_Maven", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		os.WriteFile(tmpDir+"/pom.xml", []byte("<project/>"), 0644)
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "java", result)
+	})
+
+	t.Run("UnknownProject", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		result := detectProjectType(tmpDir)
+		assert.Equal(t, "unknown", result)
+	})
+}
+
+// Test ProgressTracker
+func TestProgressTracker(t *testing.T) {
+	t.Run("NewProgressTracker", func(t *testing.T) {
+		tracker := NewProgressTracker()
+		assert.NotNil(t, tracker)
+		assert.NotNil(t, tracker.callbacks)
+	})
+
+	t.Run("RegisterCallback", func(t *testing.T) {
+		tracker := NewProgressTracker()
+		callCount := 0
+
+		tracker.RegisterCallback("exec-1", func(p *ExecutionProgress) {
+			callCount++
+		})
+
+		// Register another callback for same execution
+		tracker.RegisterCallback("exec-1", func(p *ExecutionProgress) {
+			callCount++
+		})
+
+		// Notify
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "exec-1"})
+		assert.Equal(t, 2, callCount)
+	})
+
+	t.Run("NotifyProgress_NoCallbacks", func(t *testing.T) {
+		tracker := NewProgressTracker()
+		// Should not panic when no callbacks exist
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "non-existent"})
+	})
+
+	t.Run("ClearCallbacks", func(t *testing.T) {
+		tracker := NewProgressTracker()
+		callCount := 0
+
+		tracker.RegisterCallback("exec-1", func(p *ExecutionProgress) {
+			callCount++
+		})
+
+		tracker.ClearCallbacks("exec-1")
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "exec-1"})
+		assert.Equal(t, 0, callCount)
+	})
+
+	t.Run("MultipleExecutions", func(t *testing.T) {
+		tracker := NewProgressTracker()
+		exec1Count := 0
+		exec2Count := 0
+
+		tracker.RegisterCallback("exec-1", func(p *ExecutionProgress) {
+			exec1Count++
+		})
+		tracker.RegisterCallback("exec-2", func(p *ExecutionProgress) {
+			exec2Count++
+		})
+
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "exec-1"})
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "exec-2"})
+		tracker.NotifyProgress(&ExecutionProgress{ExecutionID: "exec-1"})
+
+		assert.Equal(t, 2, exec1Count)
+		assert.Equal(t, 1, exec2Count)
+	})
+}
+
+// Test StateManager additional methods
+func TestStateManager_Execution(t *testing.T) {
+	sm := NewStateManager()
+
+	t.Run("StoreExecution", func(t *testing.T) {
+		execution := &ExecutionResult{
+			ID:        "exec-1",
+			PlanID:    "plan-1",
+			StartTime: time.Now(),
+			Success:   true,
+		}
+
+		err := sm.StoreExecution(execution)
+		require.NoError(t, err)
+
+		retrieved, err := sm.GetExecution("exec-1")
+		require.NoError(t, err)
+		assert.Equal(t, "exec-1", retrieved.ID)
+		assert.Equal(t, "plan-1", retrieved.PlanID)
+		assert.True(t, retrieved.Success)
+	})
+
+	t.Run("GetExecution_NotFound", func(t *testing.T) {
+		_, err := sm.GetExecution("non-existent")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("StorePlan_EmptyID", func(t *testing.T) {
+		plan := &Plan{ID: "", Title: "Test"}
+		err := sm.StorePlan(plan)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "ID is required")
+	})
+
+	t.Run("StoreOptions_Empty", func(t *testing.T) {
+		err := sm.StoreOptions("plan-1", []*PlanOption{})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "at least one option")
+	})
+
+	t.Run("GetPlan_NotFound", func(t *testing.T) {
+		_, err := sm.GetPlan("non-existent")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("GetOptions_NotFound", func(t *testing.T) {
+		_, err := sm.GetOptions("non-existent")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("GetSelection_NotFound", func(t *testing.T) {
+		_, err := sm.GetSelection("non-existent")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+}
+
+// Test Workflow error paths
+func TestWorkflow_ErrorPaths(t *testing.T) {
+	t.Run("ExecuteWorkflow_SelectedOptionNotFound", func(t *testing.T) {
+		mockLLM := NewMockLLMProvider()
+		planner := NewLLMPlanner(mockLLM)
+		executor := NewDefaultExecutor("/tmp/test")
+		stateManager := NewStateManager()
+		controller := NewModeController()
+
+		// Create a presenter that returns a non-existent option ID
+		badPresenter := &MockPresenterBadSelection{}
+
+		workflow := NewPlanModeWorkflow(planner, badPresenter, executor, stateManager, controller)
+
+		task := &Task{ID: "task-1", Description: "Test"}
+		_, err := workflow.ExecuteWorkflow(context.Background(), task)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+}
+
+// MockPresenterBadSelection always returns a non-existent option ID
+type MockPresenterBadSelection struct{}
+
+func (m *MockPresenterBadSelection) Present(ctx context.Context, options []*PlanOption) (*Selection, error) {
+	return &Selection{
+		OptionID:  "non-existent-id",
+		Timestamp: time.Now(),
+	}, nil
+}
+
+func (m *MockPresenterBadSelection) CompareOptions(options []*PlanOption) (*Comparison, error) {
+	return &Comparison{}, nil
+}
+
+func (m *MockPresenterBadSelection) RankOptions(options []*PlanOption, criteria []RankCriterion) ([]*RankedOption, error) {
+	return nil, nil
+}
+
+// Test Config
+func TestConfig(t *testing.T) {
+	t.Run("DefaultConfig_Values", func(t *testing.T) {
+		config := DefaultConfig()
+		assert.Equal(t, 3, config.DefaultOptionCount)
+		assert.Equal(t, 5, config.MaxOptionCount)
+		assert.False(t, config.AutoSelectBest)
+		assert.True(t, config.ShowComparison)
+		assert.True(t, config.EnableProgressBar)
+		assert.Equal(t, 0.7, config.ConfidenceThreshold)
+		assert.Equal(t, ComplexityHigh, config.MaxPlanComplexity)
+	})
+
+	t.Run("NewPlanMode_NilConfig", func(t *testing.T) {
+		mockLLM := NewMockLLMProvider()
+		planner := NewLLMPlanner(mockLLM)
+		presenter := &MockPresenter{}
+		executor := NewDefaultExecutor("/tmp/test")
+		stateManager := NewStateManager()
+		controller := NewModeController()
+		workflow := NewPlanModeWorkflow(planner, presenter, executor, stateManager, controller)
+
+		pm := NewPlanMode(workflow, nil)
+		assert.NotNil(t, pm)
+		assert.NotNil(t, pm.config)
+		assert.Equal(t, 3, pm.config.DefaultOptionCount)
+	})
+}
+
+// Test PlanMode control methods
+func TestPlanMode_Control(t *testing.T) {
+	mockLLM := NewMockLLMProvider()
+	planner := NewLLMPlanner(mockLLM)
+	presenter := &MockPresenter{}
+	executor := NewDefaultExecutor("/tmp/test")
+	stateManager := NewStateManager()
+	controller := NewModeController()
+	workflow := NewPlanModeWorkflow(planner, presenter, executor, stateManager, controller)
+	pm := NewPlanMode(workflow, nil)
+
+	t.Run("Pause_NotFound", func(t *testing.T) {
+		err := pm.Pause("non-existent")
+		assert.Error(t, err)
+	})
+
+	t.Run("Resume_NotFound", func(t *testing.T) {
+		err := pm.Resume("non-existent")
+		assert.Error(t, err)
+	})
+
+	t.Run("Cancel_NotFound", func(t *testing.T) {
+		err := pm.Cancel("non-existent")
+		assert.Error(t, err)
+	})
+
+	t.Run("GetProgress_NotFound", func(t *testing.T) {
+		_, err := pm.GetProgress("non-existent")
+		assert.Error(t, err)
+	})
+}
