@@ -129,16 +129,23 @@ func (p *AnimaProvider) Health(ctx context.Context) (*HealthStatus, error) {
 		message = "Provider has not been started"
 	}
 
+	// Build metrics safely
+	metrics := map[string]interface{}{
+		"data_count":        len(p.data),
+		"collections_count": len(p.collections),
+	}
+	if p.stats != nil {
+		metrics["uptime_seconds"] = p.stats.Uptime.Seconds()
+	} else {
+		metrics["uptime_seconds"] = 0.0
+	}
+
 	return &HealthStatus{
 		Status:       status,
 		Message:      message,
 		Timestamp:    time.Now(),
 		ResponseTime: responseTime,
-		Metrics: map[string]interface{}{
-			"data_count":        len(p.data),
-			"collections_count": len(p.collections),
-			"uptime_seconds":    p.stats.Uptime.Seconds(),
-		},
+		Metrics:      metrics,
 		Details: map[string]interface{}{
 			"provider": "Anima AI Memory Provider",
 			"version":  "1.0.0",
@@ -529,6 +536,15 @@ func (p *AnimaProvider) CreateCollection(ctx context.Context, name string, confi
 
 	if _, exists := p.collections[name]; exists {
 		return fmt.Errorf("collection %s already exists", name)
+	}
+
+	// Handle nil config with defaults
+	if config == nil {
+		config = &CollectionConfig{
+			Name:      name,
+			Dimension: 768, // default dimension
+			Metric:    "cosine",
+		}
 	}
 
 	// Create collection info

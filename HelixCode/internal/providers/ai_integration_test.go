@@ -1028,3 +1028,421 @@ func TestAIIntegration_ListProviders_WithConfigs(t *testing.T) {
 	// Config is stored but providers aren't created until Initialize
 	_ = providers
 }
+
+// =============================================================================
+// LLMProviderAdapter Tests
+// =============================================================================
+
+func TestNewLLMProviderAdapter(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "TestProvider")
+
+	require.NotNil(t, adapter)
+	assert.Equal(t, "TestProvider", adapter.providerName)
+	assert.NotNil(t, adapter.lastCostInfo)
+	assert.Equal(t, "USD", adapter.lastCostInfo.Currency)
+}
+
+func TestLLMProviderAdapter_GetCapabilities_NilProvider(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	caps := adapter.GetCapabilities()
+	assert.Empty(t, caps)
+}
+
+func TestLLMProviderAdapter_GetCostInfo(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	costInfo := adapter.GetCostInfo()
+	require.NotNil(t, costInfo)
+	assert.Equal(t, "USD", costInfo.Currency)
+	assert.Equal(t, 0, costInfo.InputTokens)
+	assert.Equal(t, 0, costInfo.OutputTokens)
+}
+
+func TestLLMProviderAdapter_GenerateText_NilProvider(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	ctx := context.Background()
+	result, err := adapter.GenerateText(ctx, "test prompt", nil)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "provider not initialized")
+}
+
+func TestLLMProviderAdapter_GenerateChat_NilProvider(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	ctx := context.Background()
+	messages := []*ChatMessage{{Role: "user", Content: "Hello"}}
+	result, err := adapter.GenerateChat(ctx, messages, nil)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "provider not initialized")
+}
+
+func TestLLMProviderAdapter_GenerateEmbedding(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	ctx := context.Background()
+	result, err := adapter.GenerateEmbedding(ctx, "test text")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "embedding generation requires dedicated embedding model")
+}
+
+func TestLLMProviderAdapter_ClassifyText_NilProvider(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	ctx := context.Background()
+	result, err := adapter.ClassifyText(ctx, "test text", []string{"cat1", "cat2"})
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "provider not initialized")
+}
+
+func TestLLMProviderAdapter_ExtractEntities_NilProvider(t *testing.T) {
+	adapter := NewLLMProviderAdapter(nil, "Test")
+
+	ctx := context.Background()
+	result, err := adapter.ExtractEntities(ctx, "John works at Acme Corp")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "provider not initialized")
+}
+
+// =============================================================================
+// Helper Function Tests
+// =============================================================================
+
+func TestContainsIgnoreCase(t *testing.T) {
+	tests := []struct {
+		s      string
+		substr string
+		want   bool
+	}{
+		{"Hello World", "hello", true},
+		{"Hello World", "WORLD", true},
+		{"Hello World", "xyz", false},
+		{"Test", "test", true},
+		{"", "", true},
+		{"abc", "abcd", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.s+"_"+tt.substr, func(t *testing.T) {
+			got := containsIgnoreCase(tt.s, tt.substr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestToLower(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"Hello", "hello"},
+		{"WORLD", "world"},
+		{"MixedCase", "mixedcase"},
+		{"", ""},
+		{"123", "123"},
+		{"abc", "abc"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got := toLower(tt.input)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFindSubstring(t *testing.T) {
+	tests := []struct {
+		s      string
+		substr string
+		want   bool
+	}{
+		{"hello world", "world", true},
+		{"hello world", "hello", true},
+		{"hello world", "xyz", false},
+		{"test", "test", true},
+		{"test", "testing", false},
+		{"", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.s+"_"+tt.substr, func(t *testing.T) {
+			got := findSubstring(tt.s, tt.substr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestContains(t *testing.T) {
+	tests := []struct {
+		s      string
+		substr string
+		want   bool
+	}{
+		{"hello world", "world", true},
+		{"hello world", "hello", true},
+		{"hello world", "xyz", false},
+		{"test", "test", true},
+		{"", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.s+"_"+tt.substr, func(t *testing.T) {
+			got := contains(tt.s, tt.substr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSplitLines(t *testing.T) {
+	tests := []struct {
+		input string
+		want  []string
+	}{
+		{"a\nb\nc", []string{"a", "b", "c"}},
+		{"single", []string{"single"}},
+		{"a\n", []string{"a"}},    // trailing newline does not add empty element
+		{"", nil},                  // empty string returns nil
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got := splitLines(tt.input)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestTrimSpace(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"  hello  ", "hello"},
+		{"\t\ttab\t\t", "tab"},
+		{"\n\nnewline\n\n", "newline"},
+		{"notrim", "notrim"},
+		{"", ""},
+		{"   ", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got := trimSpace(tt.input)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFindChar(t *testing.T) {
+	tests := []struct {
+		s    string
+		c    byte
+		want int
+	}{
+		{"hello", 'e', 1},
+		{"hello", 'o', 4},
+		{"hello", 'x', -1},
+		{"", 'a', -1},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.c), func(t *testing.T) {
+			got := findChar(tt.s, tt.c)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFindSubstringIndex(t *testing.T) {
+	tests := []struct {
+		s      string
+		substr string
+		want   int
+	}{
+		{"hello world", "world", 6},
+		{"hello world", "hello", 0},
+		{"hello world", "xyz", -1},
+		{"test", "test", 0},
+		{"", "", 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.s+"_"+tt.substr, func(t *testing.T) {
+			got := findSubstringIndex(tt.s, tt.substr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestParseEntities(t *testing.T) {
+	input := `PERSON: "John Doe"
+ORGANIZATION: "Acme Corp"
+LOCATION: "New York"`
+	originalText := "John Doe works at Acme Corp in New York"
+
+	entities := parseEntities(input, originalText)
+
+	require.Len(t, entities, 3)
+
+	assert.Equal(t, "PERSON", entities[0].Type)
+	assert.Equal(t, "John Doe", entities[0].Text)
+
+	assert.Equal(t, "ORGANIZATION", entities[1].Type)
+	assert.Equal(t, "Acme Corp", entities[1].Text)
+
+	assert.Equal(t, "LOCATION", entities[2].Type)
+	assert.Equal(t, "New York", entities[2].Text)
+}
+
+// =============================================================================
+// Provider Factory Tests
+// =============================================================================
+
+func TestNewOpenAIProvider_NilConfig(t *testing.T) {
+	provider := NewOpenAIProvider(nil)
+
+	// Should return NotImplementedProvider with error message
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "missing config")
+}
+
+func TestNewAnthropicProvider_NilConfig(t *testing.T) {
+	provider := NewAnthropicProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "missing config")
+}
+
+func TestNewGeminiProvider_NilConfig(t *testing.T) {
+	provider := NewGeminiProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "missing config")
+}
+
+func TestNewCohereProvider(t *testing.T) {
+	provider := NewCohereProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+}
+
+func TestNewHuggingFaceProvider(t *testing.T) {
+	provider := NewHuggingFaceProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+}
+
+func TestNewMistralProvider(t *testing.T) {
+	provider := NewMistralProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+}
+
+func TestNewGemmaProvider(t *testing.T) {
+	provider := NewGemmaProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewLlamaIndexProvider(t *testing.T) {
+	provider := NewLlamaIndexProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewMemGPTAIProvider(t *testing.T) {
+	provider := NewMemGPTAIProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewCrewAIProvider(t *testing.T) {
+	provider := NewCrewAIProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewCharacterAIProvider_FromProviders(t *testing.T) {
+	provider := NewCharacterAIProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewReplikaAIProvider(t *testing.T) {
+	provider := NewReplikaAIProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}
+
+func TestNewAnimaAIProvider(t *testing.T) {
+	provider := NewAnimaAIProvider(nil)
+
+	require.NotNil(t, provider)
+
+	ctx := context.Background()
+	_, err := provider.GenerateText(ctx, "test", nil)
+	assert.Error(t, err)
+}

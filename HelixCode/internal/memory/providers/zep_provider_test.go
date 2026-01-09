@@ -723,8 +723,9 @@ func TestZepProvider_Delete_LogsWarning(t *testing.T) {
 	ctx := context.Background()
 	err = provider.Delete(ctx, []string{"id1", "id2"})
 
-	// Delete is a stub that returns nil
-	assert.NoError(t, err)
+	// Delete calls the real API - expect 401 error without credentials
+	// The method logs warnings but continues, so the last error is returned
+	assert.Error(t, err)
 }
 
 // ========================================
