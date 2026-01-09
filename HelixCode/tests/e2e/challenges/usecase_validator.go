@@ -624,13 +624,275 @@ func (v *UseCaseValidator) validateURLShortenerCommonFeatures(resultDir string) 
 
 // validateCLITaskManagerCommonFeatures checks common features for CLI task manager
 func (v *UseCaseValidator) validateCLITaskManagerCommonFeatures(resultDir string) []ValidationResult {
-	// TODO: Implement CLI task manager common features validation
-	return []ValidationResult{
-		{
-			CheckName: "common_sense_features",
-			Passed:    false,
-			Message:   "CLI task manager common features validation not yet implemented",
+	results := []ValidationResult{}
+
+	// Expected CLI commands/operations
+	foundOperations := map[string]bool{
+		"add":      false,
+		"list":     false,
+		"show":     false,
+		"complete": false,
+		"delete":   false,
+		"update":   false,
+	}
+
+	// Expected task attributes
+	foundAttributes := map[string]bool{
+		"id":          false,
+		"description": false,
+		"priority":    false,
+		"status":      false,
+		"due":         false,
+		"created":     false,
+	}
+
+	// Walk through all Go files recursively
+	filepath.Walk(resultDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+
+		// Skip test files
+		if !strings.HasSuffix(path, ".go") || strings.Contains(path, "_test.go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+
+		fileContent := strings.ToLower(string(content))
+
+		// Check for CLI commands (common patterns with Cobra)
+		if strings.Contains(fileContent, "addcmd") || strings.Contains(fileContent, "\"add\"") ||
+			strings.Contains(fileContent, "add command") || strings.Contains(fileContent, "cmd/add") {
+			foundOperations["add"] = true
+		}
+		if strings.Contains(fileContent, "listcmd") || strings.Contains(fileContent, "\"list\"") ||
+			strings.Contains(fileContent, "list command") || strings.Contains(fileContent, "cmd/list") {
+			foundOperations["list"] = true
+		}
+		if strings.Contains(fileContent, "showcmd") || strings.Contains(fileContent, "\"show\"") ||
+			strings.Contains(fileContent, "show command") || strings.Contains(fileContent, "cmd/show") ||
+			strings.Contains(fileContent, "gettask") {
+			foundOperations["show"] = true
+		}
+		if strings.Contains(fileContent, "completecmd") || strings.Contains(fileContent, "\"complete\"") ||
+			strings.Contains(fileContent, "complete command") || strings.Contains(fileContent, "cmd/complete") ||
+			strings.Contains(fileContent, "\"done\"") || strings.Contains(fileContent, "markcomplete") {
+			foundOperations["complete"] = true
+		}
+		if strings.Contains(fileContent, "deletecmd") || strings.Contains(fileContent, "\"delete\"") ||
+			strings.Contains(fileContent, "delete command") || strings.Contains(fileContent, "cmd/delete") ||
+			strings.Contains(fileContent, "\"remove\"") || strings.Contains(fileContent, "removetask") {
+			foundOperations["delete"] = true
+		}
+		if strings.Contains(fileContent, "updatecmd") || strings.Contains(fileContent, "\"update\"") ||
+			strings.Contains(fileContent, "update command") || strings.Contains(fileContent, "cmd/update") ||
+			strings.Contains(fileContent, "\"edit\"") || strings.Contains(fileContent, "edittask") {
+			foundOperations["update"] = true
+		}
+
+		// Check for task attributes (struct fields or JSON tags)
+		if strings.Contains(fileContent, "id") || strings.Contains(fileContent, "taskid") {
+			foundAttributes["id"] = true
+		}
+		if strings.Contains(fileContent, "description") || strings.Contains(fileContent, "title") ||
+			strings.Contains(fileContent, "content") || strings.Contains(fileContent, "text") {
+			foundAttributes["description"] = true
+		}
+		if strings.Contains(fileContent, "priority") {
+			foundAttributes["priority"] = true
+		}
+		if strings.Contains(fileContent, "status") || strings.Contains(fileContent, "completed") ||
+			strings.Contains(fileContent, "done") || strings.Contains(fileContent, "pending") {
+			foundAttributes["status"] = true
+		}
+		if strings.Contains(fileContent, "due") || strings.Contains(fileContent, "deadline") ||
+			strings.Contains(fileContent, "duedate") {
+			foundAttributes["due"] = true
+		}
+		if strings.Contains(fileContent, "created") || strings.Contains(fileContent, "createdat") ||
+			strings.Contains(fileContent, "timestamp") {
+			foundAttributes["created"] = true
+		}
+
+		return nil
+	})
+
+	// Validate commands - require at least 4 of 6 core commands
+	missingOperations := []string{}
+	foundOpsCount := 0
+	for op, found := range foundOperations {
+		if found {
+			foundOpsCount++
+		} else {
+			missingOperations = append(missingOperations, op)
+		}
+	}
+
+	if foundOpsCount >= 4 {
+		results = append(results, ValidationResult{
+			CheckName: "common_sense_cli_commands",
+			Passed:    true,
+			Message:   fmt.Sprintf("CLI has %d/6 expected commands", foundOpsCount),
 			Timestamp: time.Now(),
-		},
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "common_sense_cli_commands",
+			Passed:    false,
+			Error:     "Missing required CLI commands",
+			Details:   fmt.Sprintf("Found %d/6 commands. Missing: %s", foundOpsCount, strings.Join(missingOperations, ", ")),
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Validate task attributes - require at least 4 of 6 core attributes
+	missingAttributes := []string{}
+	foundAttrCount := 0
+	for attr, found := range foundAttributes {
+		if found {
+			foundAttrCount++
+		} else {
+			missingAttributes = append(missingAttributes, attr)
+		}
+	}
+
+	if foundAttrCount >= 4 {
+		results = append(results, ValidationResult{
+			CheckName: "common_sense_task_model",
+			Passed:    true,
+			Message:   fmt.Sprintf("Task model has %d/6 expected attributes", foundAttrCount),
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "common_sense_task_model",
+			Passed:    false,
+			Error:     "Task model missing expected attributes",
+			Details:   fmt.Sprintf("Found %d/6 attributes. Missing: %s", foundAttrCount, strings.Join(missingAttributes, ", ")),
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Check for Cobra framework usage
+	results = append(results, v.validateCobraUsage(resultDir))
+
+	// Check for persistence (JSON or SQLite)
+	results = append(results, v.validateCLIPersistence(resultDir))
+
+	return results
+}
+
+// validateCobraUsage checks if the project uses Cobra framework
+func (v *UseCaseValidator) validateCobraUsage(resultDir string) ValidationResult {
+	goModPath := filepath.Join(resultDir, "go.mod")
+	content, err := os.ReadFile(goModPath)
+	if err != nil {
+		return ValidationResult{
+			CheckName: "cobra_framework",
+			Passed:    false,
+			Error:     "Could not read go.mod",
+			Timestamp: time.Now(),
+		}
+	}
+
+	if strings.Contains(string(content), "github.com/spf13/cobra") {
+		return ValidationResult{
+			CheckName: "cobra_framework",
+			Passed:    true,
+			Message:   "Uses Cobra framework as required",
+			Timestamp: time.Now(),
+		}
+	}
+
+	// Also check for other CLI frameworks as acceptable alternatives
+	contentStr := string(content)
+	if strings.Contains(contentStr, "github.com/urfave/cli") ||
+		strings.Contains(contentStr, "github.com/alecthomas/kong") {
+		return ValidationResult{
+			CheckName: "cobra_framework",
+			Passed:    true,
+			Message:   "Uses alternative CLI framework (acceptable)",
+			Timestamp: time.Now(),
+		}
+	}
+
+	return ValidationResult{
+		CheckName: "cobra_framework",
+		Passed:    false,
+		Error:     "No CLI framework found in go.mod",
+		Details:   "Expected github.com/spf13/cobra or similar CLI framework",
+		Timestamp: time.Now(),
+	}
+}
+
+// validateCLIPersistence checks for data persistence implementation
+func (v *UseCaseValidator) validateCLIPersistence(resultDir string) ValidationResult {
+	hasJSONPersistence := false
+	hasSQLitePersistence := false
+
+	// Check go.mod for sqlite
+	goModPath := filepath.Join(resultDir, "go.mod")
+	if content, err := os.ReadFile(goModPath); err == nil {
+		contentStr := strings.ToLower(string(content))
+		if strings.Contains(contentStr, "sqlite") || strings.Contains(contentStr, "go-sqlite") ||
+			strings.Contains(contentStr, "modernc.org/sqlite") {
+			hasSQLitePersistence = true
+		}
+	}
+
+	// Walk through Go files for persistence patterns
+	filepath.Walk(resultDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+
+		contentStr := strings.ToLower(string(content))
+
+		// JSON persistence patterns
+		if strings.Contains(contentStr, "json.marshal") || strings.Contains(contentStr, "json.unmarshal") ||
+			strings.Contains(contentStr, "encoding/json") || strings.Contains(contentStr, ".json\"") {
+			if strings.Contains(contentStr, "os.writefile") || strings.Contains(contentStr, "os.readfile") ||
+				strings.Contains(contentStr, "ioutil.writefile") || strings.Contains(contentStr, "ioutil.readfile") {
+				hasJSONPersistence = true
+			}
+		}
+
+		// SQLite patterns
+		if strings.Contains(contentStr, "sql.open") || strings.Contains(contentStr, "sqlite") ||
+			strings.Contains(contentStr, "database/sql") {
+			hasSQLitePersistence = true
+		}
+
+		return nil
+	})
+
+	if hasJSONPersistence || hasSQLitePersistence {
+		method := "JSON file"
+		if hasSQLitePersistence {
+			method = "SQLite database"
+		}
+		return ValidationResult{
+			CheckName: "data_persistence",
+			Passed:    true,
+			Message:   fmt.Sprintf("Data persistence implemented using %s", method),
+			Timestamp: time.Now(),
+		}
+	}
+
+	return ValidationResult{
+		CheckName: "data_persistence",
+		Passed:    false,
+		Error:     "No data persistence found",
+		Details:   "Expected JSON file or SQLite database for task storage",
+		Timestamp: time.Now(),
 	}
 }

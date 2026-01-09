@@ -688,13 +688,197 @@ func (v *FunctionalValidator) validateURLShortener(ctx context.Context, resultDi
 
 // validateCLITaskManager performs functional testing for CLI task manager
 func (v *FunctionalValidator) validateCLITaskManager(ctx context.Context, resultDir string) []ValidationResult {
-	// TODO: Implement CLI task manager functional tests
-	return []ValidationResult{
-		{
-			CheckName: "functional_tests",
+	results := []ValidationResult{}
+
+	// Build the CLI task manager
+	if err := v.buildCLIProject(ctx, resultDir, "task"); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "build",
 			Passed:    false,
-			Message:   "CLI task manager functional tests not yet implemented",
+			Message:   fmt.Sprintf("Failed to build CLI task manager: %v", err),
 			Timestamp: time.Now(),
-		},
+		})
+		return results
 	}
+
+	results = append(results, ValidationResult{
+		CheckName: "build",
+		Passed:    true,
+		Message:   "CLI task manager builds successfully",
+		Timestamp: time.Now(),
+	})
+
+	// Get binary path
+	binPath := filepath.Join(resultDir, "task")
+	if runtime.GOOS == "windows" {
+		binPath += ".exe"
+	}
+
+	// Check if binary exists
+	if _, err := os.Stat(binPath); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "binary_exists",
+			Passed:    false,
+			Message:   "CLI task manager binary not found after build",
+			Timestamp: time.Now(),
+		})
+		return results
+	}
+
+	results = append(results, ValidationResult{
+		CheckName: "binary_exists",
+		Passed:    true,
+		Message:   "CLI task manager binary created successfully",
+		Timestamp: time.Now(),
+	})
+
+	// Test help command
+	helpResult := v.testCLICommand(ctx, binPath, []string{"--help"})
+	if !helpResult.Passed {
+		helpResult.CheckName = "help_command"
+		results = append(results, helpResult)
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "help_command",
+			Passed:    true,
+			Message:   "Help command works correctly",
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Test add command
+	addResult := v.testCLICommand(ctx, binPath, []string{"add", "Test task", "--priority", "high"})
+	if addResult.Passed {
+		results = append(results, ValidationResult{
+			CheckName: "add_command",
+			Passed:    true,
+			Message:   "Add command works correctly",
+			Timestamp: time.Now(),
+		})
+	} else {
+		// Try without priority flag
+		addResult2 := v.testCLICommand(ctx, binPath, []string{"add", "Test task"})
+		if addResult2.Passed {
+			results = append(results, ValidationResult{
+				CheckName: "add_command",
+				Passed:    true,
+				Message:   "Add command works correctly (basic form)",
+				Timestamp: time.Now(),
+			})
+		} else {
+			results = append(results, ValidationResult{
+				CheckName: "add_command",
+				Passed:    false,
+				Message:   "Add command failed",
+				Details:   addResult.Message,
+				Timestamp: time.Now(),
+			})
+		}
+	}
+
+	// Test list command
+	listResult := v.testCLICommand(ctx, binPath, []string{"list"})
+	if listResult.Passed {
+		results = append(results, ValidationResult{
+			CheckName: "list_command",
+			Passed:    true,
+			Message:   "List command works correctly",
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "list_command",
+			Passed:    false,
+			Message:   "List command failed",
+			Details:   listResult.Message,
+			Timestamp: time.Now(),
+		})
+	}
+
+	// Test that help includes expected commands
+	helpOutput := v.getCLIOutput(ctx, binPath, []string{"--help"})
+	expectedCommands := []string{"add", "list", "complete", "delete"}
+	foundCommands := 0
+	for _, cmd := range expectedCommands {
+		if strings.Contains(strings.ToLower(helpOutput), cmd) {
+			foundCommands++
+		}
+	}
+
+	if foundCommands >= 3 {
+		results = append(results, ValidationResult{
+			CheckName: "command_completeness",
+			Passed:    true,
+			Message:   fmt.Sprintf("CLI has %d/%d expected commands documented", foundCommands, len(expectedCommands)),
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "command_completeness",
+			Passed:    false,
+			Message:   fmt.Sprintf("CLI missing commands: only %d/%d found in help", foundCommands, len(expectedCommands)),
+			Details:   "Expected commands: add, list, complete, delete",
+			Timestamp: time.Now(),
+		})
+	}
+
+	return results
+}
+
+// buildCLIProject builds a CLI project with a specific output name
+func (v *FunctionalValidator) buildCLIProject(ctx context.Context, resultDir, outputName string) error {
+	// Check if there's a go.mod file
+	goMod := filepath.Join(resultDir, "go.mod")
+	if _, err := os.Stat(goMod); err != nil {
+		return fmt.Errorf("no go.mod file found")
+	}
+
+	// Try to build the project
+	cmd := exec.CommandContext(ctx, "go", "build", "-o", outputName, ".")
+	cmd.Dir = resultDir
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build failed: %v, stderr: %s", err, stderr.String())
+	}
+
+	return nil
+}
+
+// testCLICommand tests a CLI command and returns the result
+func (v *FunctionalValidator) testCLICommand(ctx context.Context, binPath string, args []string) ValidationResult {
+	cmd := exec.CommandContext(ctx, binPath, args...)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return ValidationResult{
+			Passed:    false,
+			Message:   fmt.Sprintf("Command failed: %v, stderr: %s", err, stderr.String()),
+			Timestamp: time.Now(),
+		}
+	}
+
+	return ValidationResult{
+		Passed:    true,
+		Message:   stdout.String(),
+		Timestamp: time.Now(),
+	}
+}
+
+// getCLIOutput runs a CLI command and returns its stdout output
+func (v *FunctionalValidator) getCLIOutput(ctx context.Context, binPath string, args []string) string {
+	cmd := exec.CommandContext(ctx, binPath, args...)
+
+	var stdout bytes.Buffer
+	cmd.Stdout = &stdout
+
+	_ = cmd.Run()
+	return stdout.String()
 }

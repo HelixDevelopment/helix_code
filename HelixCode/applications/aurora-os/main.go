@@ -1505,20 +1505,59 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 
 		// Add user message to history
 		currentHistory := auroraApp.chatHistory.Text
-		userMsg := fmt.Sprintf("\n[User]: %s\n", auroraApp.chatInput.Text)
+		userMessage := auroraApp.chatInput.Text
+		userMsg := fmt.Sprintf("\n[User]: %s\n", userMessage)
 		auroraApp.chatHistory.SetText(currentHistory + userMsg)
 
 		// Log the interaction
 		auroraApp.securityManager.AddAuditEntry("llm_chat", "user",
 			fmt.Sprintf("Sent message to %s/%s", auroraApp.llmProviderSel.Selected, modelNameEntry.Text), "info")
 
-		// Placeholder for actual LLM call
-		responseMsg := fmt.Sprintf("[AI (%s/%s)]: LLM integration requires a running provider. Configure your LLM provider in the settings.\n",
-			auroraApp.llmProviderSel.Selected, modelNameEntry.Text)
-		auroraApp.chatHistory.SetText(auroraApp.chatHistory.Text + responseMsg)
-
-		// Clear input
+		// Clear input immediately
 		auroraApp.chatInput.SetText("")
+
+		// Make LLM call in goroutine to not block UI
+		go func(msg string) {
+			var responseMsg string
+			providerName := auroraApp.llmProviderSel.Selected
+			modelName := modelNameEntry.Text
+
+			if auroraApp.llmManager != nil {
+				// Get provider from manager
+				provider := auroraApp.llmManager.GetProvider(providerName)
+				if provider != nil {
+					// Create LLM request
+					ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+					defer cancel()
+
+					request := &llm.LLMRequest{
+						Messages: []llm.Message{
+							{Role: "user", Content: msg},
+						},
+						Model:       modelName,
+						MaxTokens:   1024,
+						Temperature: 0.7,
+					}
+
+					response, err := provider.Generate(ctx, request)
+					if err != nil {
+						responseMsg = fmt.Sprintf("[AI (%s/%s)]: Error: %v\n", providerName, modelName, err)
+					} else {
+						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
+					}
+				} else {
+					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available. Please configure it in Settings.\n",
+						providerName, modelName, providerName)
+				}
+			} else {
+				// No LLM manager configured - show informative message
+				responseMsg = fmt.Sprintf("[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n",
+					providerName, modelName)
+			}
+
+			// Update UI on main thread
+			auroraApp.chatHistory.SetText(auroraApp.chatHistory.Text + responseMsg)
+		}(userMessage)
 	})
 
 	clearButton := widget.NewButton("Clear Chat", func() {

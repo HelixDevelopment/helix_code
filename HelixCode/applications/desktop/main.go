@@ -953,17 +953,55 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 
 		// Add user message to history
 		currentHistory := da.chatHistory.Text
-		userMsg := fmt.Sprintf("\n[User]: %s\n", da.chatInput.Text)
+		userMessage := da.chatInput.Text
+		userMsg := fmt.Sprintf("\n[User]: %s\n", userMessage)
 		da.chatHistory.SetText(currentHistory + userMsg)
 
-		// Placeholder for actual LLM call
-		// In a real implementation, this would call the LLM provider
-		responseMsg := fmt.Sprintf("[AI (%s/%s)]: LLM integration requires a running provider. Configure your LLM provider in the settings.\n",
-			da.llmProviderSel.Selected, modelNameEntry.Text)
-		da.chatHistory.SetText(da.chatHistory.Text + responseMsg)
-
-		// Clear input
+		// Clear input immediately
 		da.chatInput.SetText("")
+
+		// Make LLM call in goroutine to not block UI
+		go func(msg string) {
+			var responseMsg string
+			providerName := da.llmProviderSel.Selected
+			modelName := modelNameEntry.Text
+
+			if da.llmManager != nil {
+				// Get provider from manager
+				provider := da.llmManager.GetProvider(providerName)
+				if provider != nil {
+					// Create LLM request
+					ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+					defer cancel()
+
+					request := &llm.LLMRequest{
+						Messages: []llm.Message{
+							{Role: "user", Content: msg},
+						},
+						Model:       modelName,
+						MaxTokens:   1024,
+						Temperature: 0.7,
+					}
+
+					response, err := provider.Generate(ctx, request)
+					if err != nil {
+						responseMsg = fmt.Sprintf("[AI (%s/%s)]: Error: %v\n", providerName, modelName, err)
+					} else {
+						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
+					}
+				} else {
+					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available. Please configure it in Settings.\n",
+						providerName, modelName, providerName)
+				}
+			} else {
+				// No LLM manager configured - show informative message
+				responseMsg = fmt.Sprintf("[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n",
+					providerName, modelName)
+			}
+
+			// Update UI on main thread
+			da.chatHistory.SetText(da.chatHistory.Text + responseMsg)
+		}(userMessage)
 	})
 
 	clearButton := widget.NewButton("Clear Chat", func() {
