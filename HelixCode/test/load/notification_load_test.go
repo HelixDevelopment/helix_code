@@ -3,6 +3,7 @@ package load
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -15,8 +16,10 @@ import (
 // Load test for notification system under realistic production scenarios
 
 func TestLoad_1000NotificationsPerSecond(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+	// Skip by default - this is a performance test that requires sufficient hardware
+	// Enable with RUN_LOAD_TESTS=true
+	if os.Getenv("RUN_LOAD_TESTS") != "true" {
+		t.Skip("Skipping load test - set RUN_LOAD_TESTS=true to enable")
 	}
 
 	engine := notification.NewNotificationEngine()
