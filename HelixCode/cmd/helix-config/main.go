@@ -1129,11 +1129,11 @@ func runVersionCommand(cmd *cobra.Command, args []string) error {
 
 func runInfoCommand(cmd *cobra.Command, args []string) error {
 	info := map[string]interface{}{
-		"config_file":   viper.ConfigFileUsed(),
-		"config_type":   viper.GetString("config_type"),
-		"keys_count":    len(viper.AllKeys()),
-		"env_prefix":    "HELIX",
-		"search_paths":  []string{".", "$HOME/.helixcode", "/etc/helixcode"},
+		"config_file":  viper.ConfigFileUsed(),
+		"config_type":  viper.GetString("config_type"),
+		"keys_count":   len(viper.AllKeys()),
+		"env_prefix":   "HELIX",
+		"search_paths": []string{".", "$HOME/.helixcode", "/etc/helixcode"},
 	}
 	return printJSON(info)
 }

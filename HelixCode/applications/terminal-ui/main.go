@@ -52,9 +52,9 @@ type TerminalUI struct {
 	statusBar *tview.TextView
 
 	// LLM Chat state
-	chatHistory    []llm.Message
-	chatInput      *tview.InputField
-	chatOutput     *tview.TextView
+	chatHistory []llm.Message
+	chatInput   *tview.InputField
+	chatOutput  *tview.TextView
 
 	// Current state
 	currentUser    string

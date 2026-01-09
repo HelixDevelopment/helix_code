@@ -1050,10 +1050,10 @@ func TestCreateWorker_ValidRequest(t *testing.T) {
 	router.POST("/api/v1/workers", server.createWorker)
 
 	reqBody := map[string]interface{}{
-		"name":        "test-worker",
-		"host":        "192.168.1.100",
-		"port":        22,
-		"username":    "worker",
+		"name":         "test-worker",
+		"host":         "192.168.1.100",
+		"port":         22,
+		"username":     "worker",
 		"capabilities": []string{"build", "test"},
 	}
 	jsonBody, _ := json.Marshal(reqBody)

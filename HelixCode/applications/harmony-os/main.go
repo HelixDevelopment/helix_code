@@ -200,13 +200,13 @@ type HarmonyDistributedEngine struct {
 
 // HarmonyDevice represents a connected Harmony OS device
 type HarmonyDevice struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Type         string            `json:"type"`
-	Status       string            `json:"status"`
-	Capabilities []string          `json:"capabilities"`
-	Resources    HarmonyResources  `json:"resources"`
-	LastSeen     time.Time         `json:"last_seen"`
+	ID           string           `json:"id"`
+	Name         string           `json:"name"`
+	Type         string           `json:"type"`
+	Status       string           `json:"status"`
+	Capabilities []string         `json:"capabilities"`
+	Resources    HarmonyResources `json:"resources"`
+	LastSeen     time.Time        `json:"last_seen"`
 }
 
 // HarmonyResources represents device resources

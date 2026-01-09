@@ -53,7 +53,7 @@ func (c *CLI) Run() error {
 		nonInteractive = flag.Bool("non-interactive", false, "Run in non-interactive mode")
 	)
 	flag.Parse()
-	
+
 	// Debug: print flag values
 	fmt.Fprintf(os.Stderr, "Flags parsed: listWorkers=%v, nonInteractive=%v\n", *listWorkers, *nonInteractive)
 

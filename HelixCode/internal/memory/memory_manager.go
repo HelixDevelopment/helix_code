@@ -617,10 +617,10 @@ func (p *MemcachedMemoryProvider) Type() string {
 
 // FilesystemMemoryProvider is a filesystem-based implementation
 type FilesystemMemoryProvider struct {
-	config  map[string]interface{}
+	config   map[string]interface{}
 	basePath string
-	index   map[string]string // Maps keys to file paths
-	mu      sync.RWMutex
+	index    map[string]string // Maps keys to file paths
+	mu       sync.RWMutex
 }
 
 // NewFilesystemMemoryProvider creates a new filesystem provider
