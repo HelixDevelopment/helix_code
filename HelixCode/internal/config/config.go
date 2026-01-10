@@ -563,9 +563,49 @@ func (m *ConfigManager) UpdateConfig(updateFunc func(*Config)) error {
 // UpdateConfigFromMap updates the configuration with a map of values
 func (m *ConfigManager) UpdateConfigFromMap(updates map[string]interface{}) error {
 	return m.UpdateConfig(func(cfg *Config) {
-		// Apply updates from map - for now this is a placeholder
-		// In a real implementation, this would walk the map and update nested fields
+		// Apply updates from map by converting to JSON and back
+		// This allows nested field updates while maintaining type safety
+
+		// First, convert current config to a map
+		currentBytes, err := json.Marshal(cfg)
+		if err != nil {
+			return
+		}
+
+		var currentMap map[string]interface{}
+		if err := json.Unmarshal(currentBytes, &currentMap); err != nil {
+			return
+		}
+
+		// Merge updates into current map
+		mergeConfigMaps(currentMap, updates)
+
+		// Convert back to config
+		mergedBytes, err := json.Marshal(currentMap)
+		if err != nil {
+			return
+		}
+
+		// Unmarshal into the config pointer
+		json.Unmarshal(mergedBytes, cfg)
 	})
+}
+
+// mergeConfigMaps recursively merges src into dst
+func mergeConfigMaps(dst, src map[string]interface{}) {
+	for key, srcValue := range src {
+		if dstValue, exists := dst[key]; exists {
+			// If both are maps, merge recursively
+			if dstMap, ok := dstValue.(map[string]interface{}); ok {
+				if srcMap, ok := srcValue.(map[string]interface{}); ok {
+					mergeConfigMaps(dstMap, srcMap)
+					continue
+				}
+			}
+		}
+		// Otherwise, replace the value
+		dst[key] = srcValue
+	}
 }
 
 // IsConfigPresent checks if the configuration file exists
@@ -1461,7 +1501,24 @@ func (tm *ConfigurationTemplateManager) CreateTemplateFromConfig(config *Config,
 func (tm *ConfigurationTemplateManager) SaveTemplate(template *ConfigurationTemplate, path string) error {
 	// Store in manager
 	tm.templates[template.ID] = template
-	// Placeholder implementation - would save to path
+
+	// Ensure directory exists
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create template directory: %w", err)
+	}
+
+	// Serialize template to JSON
+	data, err := json.MarshalIndent(template, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal template: %w", err)
+	}
+
+	// Write to file
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to write template file: %w", err)
+	}
+
 	return nil
 }
 
@@ -1479,8 +1536,26 @@ func (tm *ConfigurationTemplateManager) ApplyTemplate(templateID string, variabl
 
 // LoadTemplate loads a configuration template
 func (tm *ConfigurationTemplateManager) LoadTemplate(path string) (*Config, error) {
-	// Placeholder implementation
-	return getDefaultConfig(), nil
+	// Read file
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read template file: %w", err)
+	}
+
+	// Deserialize template from JSON
+	var template ConfigurationTemplate
+	if err := json.Unmarshal(data, &template); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal template: %w", err)
+	}
+
+	// Store in manager
+	tm.templates[template.ID] = &template
+
+	// Return the config from the template
+	if template.Config == nil {
+		return getDefaultConfig(), nil
+	}
+	return template.Config, nil
 }
 
 // SearchTemplates searches templates by query

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 )
 
@@ -562,8 +563,36 @@ func (a *UsageAnalytics) calculateUsageSummary() *UsageSummary {
 		summary.AverageSatisfaction = totalSatisfaction / float64(count)
 	}
 
-	// Most used providers would be calculated from performance history
-	summary.MostUsedProviders = []string{"vllm", "llamacpp", "ollama"} // Placeholder
+	// Calculate most used providers from performance history
+	providerUsage := make(map[string]int)
+	for _, history := range a.PerformanceHistory {
+		if history != nil && history.Provider != "" {
+			providerUsage[history.Provider]++
+		}
+	}
+
+	// Sort providers by usage count
+	type providerCount struct {
+		provider string
+		count    int
+	}
+	var sortedProviders []providerCount
+	for provider, count := range providerUsage {
+		sortedProviders = append(sortedProviders, providerCount{provider, count})
+	}
+	sort.Slice(sortedProviders, func(i, j int) bool {
+		return sortedProviders[i].count > sortedProviders[j].count
+	})
+
+	// Take top 3 most used providers
+	for i := 0; i < len(sortedProviders) && i < 3; i++ {
+		summary.MostUsedProviders = append(summary.MostUsedProviders, sortedProviders[i].provider)
+	}
+
+	// If no usage data, provide empty list (not hardcoded)
+	if len(summary.MostUsedProviders) == 0 {
+		summary.MostUsedProviders = []string{}
+	}
 
 	return summary
 }
@@ -572,19 +601,69 @@ func (a *UsageAnalytics) analyzeTasks() map[string]*TaskAnalysis {
 	analysis := make(map[string]*TaskAnalysis)
 
 	for taskType, pattern := range a.TaskPatterns {
+		// Calculate success rate from actual usage stats if available
+		successRate := 0.0
+		successCount := 0
+		totalCount := 0
+		for _, stats := range a.ModelUsageStats {
+			if stats != nil {
+				totalCount += int(stats.TotalRequests)
+				if stats.UserSatisfaction > 3.5 {
+					successCount += int(stats.TotalRequests)
+				}
+			}
+		}
+		if totalCount > 0 {
+			successRate = float64(successCount) / float64(totalCount)
+		}
+
+		// Analyze trends based on usage patterns
+		trends := a.analyzeTaskTrends(taskType)
+
 		analysis[taskType] = &TaskAnalysis{
 			TaskType:          taskType,
-			Frequency:         int64(len(pattern.CommonModels)), // Simplified
+			Frequency:         int64(len(pattern.CommonModels)),
 			AverageComplexity: pattern.AverageComplexity,
 			PreferredModels:   pattern.CommonModels,
 			AverageLatency:    pattern.PerformanceRequirements["latency"],
-			SuccessRate:       0.9, // Placeholder
+			SuccessRate:       successRate,
 			PeakHours:         pattern.PeakHours,
-			Trends:            []string{"stable"}, // Placeholder
+			Trends:            trends,
 		}
 	}
 
 	return analysis
+}
+
+// analyzeTaskTrends analyzes usage trends for a task type
+func (a *UsageAnalytics) analyzeTaskTrends(taskType string) []string {
+	trends := []string{}
+
+	// Count usage for different time periods
+	var recentUsage, olderUsage int
+
+	for _, stats := range a.ModelUsageStats {
+		if stats == nil {
+			continue
+		}
+		// Approximate time-based analysis using LastUsed
+		if time.Since(stats.LastUsed) < 24*time.Hour {
+			recentUsage++
+		} else if time.Since(stats.LastUsed) < 7*24*time.Hour {
+			olderUsage++
+		}
+	}
+
+	// Determine trend direction
+	if recentUsage > olderUsage*2 {
+		trends = append(trends, "increasing")
+	} else if recentUsage*2 < olderUsage {
+		trends = append(trends, "decreasing")
+	} else {
+		trends = append(trends, "stable")
+	}
+
+	return trends
 }
 
 func (a *UsageAnalytics) analyzePerformance() *PerformanceAnalysis {

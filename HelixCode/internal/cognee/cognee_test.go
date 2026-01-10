@@ -646,11 +646,22 @@ func TestCompressionAlgorithms(t *testing.T) {
 		assert.Equal(t, "neural_symbolic", alg.GetName())
 		assert.Equal(t, 0.75, alg.GetCompressionRatio())
 
-		_, err := alg.Compress("test")
+		// Test compression round-trip
+		testData := "test data for compression"
+		compressed, err := alg.Compress(testData)
 		assert.NoError(t, err)
+		assert.NotNil(t, compressed)
+		assert.Greater(t, len(compressed), 0)
 
-		err = alg.Decompress([]byte("test"), nil)
+		// Decompress and verify
+		var decompressed string
+		err = alg.Decompress(compressed, &decompressed)
 		assert.NoError(t, err)
+		assert.Equal(t, testData, decompressed)
+
+		// Test compression ratio is updated
+		ratio := alg.GetCompressionRatio()
+		assert.Greater(t, ratio, 0.0)
 	})
 
 	t.Run("AdaptiveHuffmanCompression", func(t *testing.T) {
@@ -658,11 +669,16 @@ func TestCompressionAlgorithms(t *testing.T) {
 		assert.Equal(t, "adaptive_huffman", alg.GetName())
 		assert.Equal(t, 0.65, alg.GetCompressionRatio())
 
-		_, err := alg.Compress("test")
+		// Test compression round-trip
+		testData := "test data for adaptive huffman"
+		compressed, err := alg.Compress(testData)
 		assert.NoError(t, err)
+		assert.NotNil(t, compressed)
 
-		err = alg.Decompress([]byte("test"), nil)
+		var decompressed string
+		err = alg.Decompress(compressed, &decompressed)
 		assert.NoError(t, err)
+		assert.Equal(t, testData, decompressed)
 	})
 
 	t.Run("NeuralEmbeddingCompression", func(t *testing.T) {
@@ -670,11 +686,16 @@ func TestCompressionAlgorithms(t *testing.T) {
 		assert.Equal(t, "neural_embedding", alg.GetName())
 		assert.Equal(t, 0.80, alg.GetCompressionRatio())
 
-		_, err := alg.Compress("test")
+		// Test compression round-trip
+		testData := "test data for neural embedding"
+		compressed, err := alg.Compress(testData)
 		assert.NoError(t, err)
+		assert.NotNil(t, compressed)
 
-		err = alg.Decompress([]byte("test"), nil)
+		var decompressed string
+		err = alg.Decompress(compressed, &decompressed)
 		assert.NoError(t, err)
+		assert.Equal(t, testData, decompressed)
 	})
 }
 

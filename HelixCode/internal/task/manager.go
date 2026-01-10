@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/redis"
+	goredis "github.com/redis/go-redis/v9"
 	"github.com/google/uuid"
 )
 
@@ -254,18 +256,25 @@ func (tm *TaskManager) cacheTask(ctx context.Context, task *Task) error {
 // getCachedTask retrieves a task from Redis cache
 func (tm *TaskManager) getCachedTask(ctx context.Context, taskID uuid.UUID) (*Task, error) {
 	if tm.redis == nil || !tm.redis.IsEnabled() {
-		return nil, nil // Redis not available
+		return nil, nil // Redis not available, graceful degradation
 	}
 
 	key := fmt.Sprintf("task:%s", taskID)
 	data, err := tm.redis.Get(ctx, key)
 	if err != nil {
-		return nil, nil // Cache miss
+		// Check if it's a cache miss (key not found) - this is expected
+		if errors.Is(err, goredis.Nil) {
+			return nil, nil // Cache miss, no error
+		}
+		// Log unexpected errors but still allow fallback
+		log.Printf("Warning: Redis cache error for task %s: %v", taskID, err)
+		return nil, nil // Allow graceful degradation
 	}
 
 	var task Task
 	if err := json.Unmarshal([]byte(data), &task); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cached task: %v", err)
+		log.Printf("Warning: failed to unmarshal cached task %s: %v", taskID, err)
+		return nil, nil // Allow graceful degradation on unmarshal error
 	}
 
 	return &task, nil
@@ -299,17 +308,24 @@ func (tm *TaskManager) cacheTaskStats(ctx context.Context, stats map[string]inte
 // getCachedTaskStats retrieves cached task statistics
 func (tm *TaskManager) getCachedTaskStats(ctx context.Context) (map[string]interface{}, error) {
 	if tm.redis == nil || !tm.redis.IsEnabled() {
-		return nil, nil // Redis not available
+		return nil, nil // Redis not available, graceful degradation
 	}
 
 	data, err := tm.redis.Get(ctx, "task:stats")
 	if err != nil {
-		return nil, nil // Cache miss
+		// Check if it's a cache miss (key not found) - this is expected
+		if errors.Is(err, goredis.Nil) {
+			return nil, nil // Cache miss, no error
+		}
+		// Log unexpected errors but still allow fallback
+		log.Printf("Warning: Redis cache error for task stats: %v", err)
+		return nil, nil // Allow graceful degradation
 	}
 
 	var stats map[string]interface{}
 	if err := json.Unmarshal([]byte(data), &stats); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cached stats: %v", err)
+		log.Printf("Warning: failed to unmarshal cached stats: %v", err)
+		return nil, nil // Allow graceful degradation on unmarshal error
 	}
 
 	return stats, nil
@@ -334,18 +350,25 @@ func (tm *TaskManager) cacheWorkerTasks(ctx context.Context, workerID uuid.UUID,
 // getCachedWorkerTasks retrieves cached worker tasks
 func (tm *TaskManager) getCachedWorkerTasks(ctx context.Context, workerID uuid.UUID) ([]uuid.UUID, error) {
 	if tm.redis == nil || !tm.redis.IsEnabled() {
-		return nil, nil // Redis not available
+		return nil, nil // Redis not available, graceful degradation
 	}
 
 	key := fmt.Sprintf("worker:%s:tasks", workerID)
 	data, err := tm.redis.Get(ctx, key)
 	if err != nil {
-		return nil, nil // Cache miss
+		// Check if it's a cache miss (key not found) - this is expected
+		if errors.Is(err, goredis.Nil) {
+			return nil, nil // Cache miss, no error
+		}
+		// Log unexpected errors but still allow fallback
+		log.Printf("Warning: Redis cache error for worker tasks %s: %v", workerID, err)
+		return nil, nil // Allow graceful degradation
 	}
 
 	var taskIDs []uuid.UUID
 	if err := json.Unmarshal([]byte(data), &taskIDs); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cached task IDs: %v", err)
+		log.Printf("Warning: failed to unmarshal cached task IDs for worker %s: %v", workerID, err)
+		return nil, nil // Allow graceful degradation on unmarshal error
 	}
 
 	return taskIDs, nil

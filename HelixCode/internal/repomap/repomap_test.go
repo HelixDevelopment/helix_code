@@ -1233,6 +1233,7 @@ export default Person;
 	testFile := filepath.Join(tempDir, "test.js")
 
 	config := DefaultConfig()
+	config.CacheEnabled = false // Disable cache for testing to avoid temp dir cleanup issues
 	rm, _ := NewRepoMap(tempDir, config)
 
 	symbols, err := rm.extractFileSymbols(testFile)
@@ -1270,6 +1271,7 @@ CONSTANT = 42
 	testFile := filepath.Join(tempDir, "test.py")
 
 	config := DefaultConfig()
+	config.CacheEnabled = false // Disable cache for testing to avoid temp dir cleanup issues
 	rm, _ := NewRepoMap(tempDir, config)
 
 	symbols, err := rm.extractFileSymbols(testFile)

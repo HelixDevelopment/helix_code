@@ -1132,17 +1132,38 @@ func (e *ModelDiscoveryEngine) findAlternativeModels(model *ModelInfo, req *Reco
 	// Find models with similar capabilities but different sizes/formats
 	alternatives := []*ModelRecommendation{}
 
-	// This would typically query external APIs
-	// For now, return some hardcoded alternatives
-	alternativeMap := map[string][]string{
-		"llama-3-8b-instruct":   {"mistral-7b-instruct", "codellama-7b-instruct"},
-		"mistral-7b-instruct":   {"llama-3-8b-instruct", "zephyr-7b-beta"},
-		"codellama-7b-instruct": {"starcoder-7b", "deepseek-coder-6.7b"},
+	// First, try to find alternatives from the registry based on capabilities
+	if e.registry != nil {
+		downloadedModels := e.registry.GetDownloadedModels()
+		for _, downloaded := range downloadedModels {
+			// Skip the same model
+			if downloaded.ModelID == model.ID {
+				continue
+			}
+
+			// Convert downloaded model to ModelInfo for comparison
+			regModel := &ModelInfo{
+				ID:           downloaded.ModelID,
+				Name:         downloaded.ModelID,
+				Format:       downloaded.Format,
+				Capabilities: e.inferCapabilities(downloaded.ModelID),
+			}
+
+			// Check if model has similar capabilities
+			similarityScore := e.calculateCapabilitySimilarity(model, regModel)
+			if similarityScore > 0.5 {
+				altRecommendation := e.scoreModel(regModel, req)
+				altRecommendation.Reasons = append(altRecommendation.Reasons,
+					fmt.Sprintf("Similar capabilities to %s (%.0f%% match)", model.Name, similarityScore*100))
+				alternatives = append(alternatives, altRecommendation)
+			}
+		}
 	}
 
-	if altModels, exists := alternativeMap[model.ID]; exists {
-		for _, altModelID := range altModels {
-			// Create mock alternative model
+	// If no alternatives found from registry, use capability-based fallback mapping
+	if len(alternatives) == 0 {
+		fallbackAlternatives := e.getFallbackAlternatives(model)
+		for _, altModelID := range fallbackAlternatives {
 			altModel := &ModelInfo{
 				ID:           altModelID,
 				Name:         strings.Title(strings.ReplaceAll(altModelID, "-", " ")),
@@ -1151,11 +1172,58 @@ func (e *ModelDiscoveryEngine) findAlternativeModels(model *ModelInfo, req *Reco
 			}
 
 			altRecommendation := e.scoreModel(altModel, req)
+			altRecommendation.Reasons = append(altRecommendation.Reasons, "Fallback alternative based on model type")
 			alternatives = append(alternatives, altRecommendation)
 		}
 	}
 
 	return alternatives
+}
+
+// calculateCapabilitySimilarity computes similarity score between two models
+func (e *ModelDiscoveryEngine) calculateCapabilitySimilarity(m1, m2 *ModelInfo) float64 {
+	if m1 == nil || m2 == nil {
+		return 0.0
+	}
+
+	// Compare capabilities
+	sharedCaps := 0
+	totalCaps := len(m1.Capabilities)
+
+	for _, cap1 := range m1.Capabilities {
+		for _, cap2 := range m2.Capabilities {
+			if cap1 == cap2 {
+				sharedCaps++
+				break
+			}
+		}
+	}
+
+	if totalCaps == 0 {
+		return 0.0
+	}
+
+	return float64(sharedCaps) / float64(totalCaps)
+}
+
+// getFallbackAlternatives returns fallback alternatives based on model category
+func (e *ModelDiscoveryEngine) getFallbackAlternatives(model *ModelInfo) []string {
+	modelID := strings.ToLower(model.ID)
+
+	// Categorize model and return similar models
+	switch {
+	case strings.Contains(modelID, "code") || strings.Contains(modelID, "coder"):
+		return []string{"codellama-7b-instruct", "deepseek-coder-6.7b", "starcoder-7b"}
+	case strings.Contains(modelID, "llama"):
+		return []string{"mistral-7b-instruct", "zephyr-7b-beta", "vicuna-7b"}
+	case strings.Contains(modelID, "mistral"):
+		return []string{"llama-3-8b-instruct", "zephyr-7b-beta", "openchat-3.5"}
+	case strings.Contains(modelID, "phi"):
+		return []string{"gemma-2b-instruct", "tinyllama-1.1b", "stablelm-2-1.6b"}
+	default:
+		// General-purpose alternatives
+		return []string{"llama-3-8b-instruct", "mistral-7b-instruct", "gemma-7b-instruct"}
+	}
 }
 
 func (e *ModelDiscoveryEngine) generateInsights(recommendations []*ModelRecommendation, alternatives []*ModelRecommendation, req *RecommendationRequest) *RecommendationInsights {

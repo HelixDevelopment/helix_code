@@ -1,9 +1,12 @@
 package hardware
 
 import (
+	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -67,20 +70,8 @@ func (d *Detector) Detect() (*HardwareInfo, error) {
 // GetOptimalModelSize calculates the optimal model size for the hardware
 func (d *Detector) GetOptimalModelSize() string {
 	// Calculate based on available VRAM and RAM
-	var vramGB, ramGB int
-
-	// Parse VRAM
-	if strings.Contains(d.info.GPU.VRAM, "GB") {
-		vramGB, _ = strconv.Atoi(strings.TrimSuffix(d.info.GPU.VRAM, "GB"))
-	} else if strings.Contains(d.info.GPU.VRAM, "MB") {
-		vramMB, _ := strconv.Atoi(strings.TrimSuffix(d.info.GPU.VRAM, "MB"))
-		vramGB = vramMB / 1024
-	}
-
-	// Parse RAM
-	if strings.Contains(d.info.Memory.TotalRAM, "GB") {
-		ramGB, _ = strconv.Atoi(strings.TrimSuffix(d.info.Memory.TotalRAM, "GB"))
-	}
+	vramGB := d.parseMemorySize(d.info.GPU.VRAM)
+	ramGB := d.parseMemorySize(d.info.Memory.TotalRAM)
 
 	// Determine optimal model size based on available memory
 	totalMemory := vramGB + (ramGB / 2) // Use half of RAM for model loading
@@ -96,6 +87,44 @@ func (d *Detector) GetOptimalModelSize() string {
 		return "7B" // 7B parameter models
 	default:
 		return "3B" // 3B parameter models
+	}
+}
+
+// parseMemorySize parses a memory size string like "16GB" or "8192MB" and returns GB
+func (d *Detector) parseMemorySize(sizeStr string) int {
+	if sizeStr == "" {
+		return 0
+	}
+
+	// Use regex to extract number and unit
+	re := regexp.MustCompile(`(\d+(?:\.\d+)?)\s*(GB|MB|TB|G|M|T)?`)
+	matches := re.FindStringSubmatch(strings.ToUpper(sizeStr))
+	if len(matches) < 2 {
+		log.Printf("Warning: failed to parse memory size: %s", sizeStr)
+		return 0
+	}
+
+	value, err := strconv.ParseFloat(matches[1], 64)
+	if err != nil {
+		log.Printf("Warning: failed to parse memory value: %s, error: %v", matches[1], err)
+		return 0
+	}
+
+	// Determine unit and convert to GB
+	unit := "GB" // Default to GB if no unit specified
+	if len(matches) >= 3 && matches[2] != "" {
+		unit = matches[2]
+	}
+
+	switch unit {
+	case "TB", "T":
+		return int(value * 1024)
+	case "GB", "G":
+		return int(value)
+	case "MB", "M":
+		return int(value / 1024)
+	default:
+		return int(value) // Assume GB
 	}
 }
 
@@ -275,9 +304,88 @@ func (d *Detector) detectNVIDIA() error {
 }
 
 func (d *Detector) detectMemory() error {
-	// Simplified memory detection
-	// In a real implementation, this would use platform-specific methods
-	d.info.Memory.TotalRAM = "16GB" // Default fallback
+	switch runtime.GOOS {
+	case "linux":
+		return d.detectMemoryLinux()
+	case "darwin":
+		return d.detectMemoryMacOS()
+	default:
+		return d.detectMemoryGeneric()
+	}
+}
+
+func (d *Detector) detectMemoryLinux() error {
+	file, err := os.Open("/proc/meminfo")
+	if err != nil {
+		log.Printf("Warning: failed to open /proc/meminfo: %v", err)
+		return d.detectMemoryGeneric()
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "MemTotal:") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				memKB, err := strconv.ParseInt(fields[1], 10, 64)
+				if err != nil {
+					log.Printf("Warning: failed to parse MemTotal value: %v", err)
+					return d.detectMemoryGeneric()
+				}
+				// Convert KB to GB
+				memGB := memKB / (1024 * 1024)
+				d.info.Memory.TotalRAM = fmt.Sprintf("%dGB", memGB)
+				return nil
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Printf("Warning: error reading /proc/meminfo: %v", err)
+	}
+
+	return d.detectMemoryGeneric()
+}
+
+func (d *Detector) detectMemoryMacOS() error {
+	cmd := exec.Command("sysctl", "-n", "hw.memsize")
+	output, err := cmd.Output()
+	if err != nil {
+		log.Printf("Warning: failed to run sysctl for memory: %v", err)
+		return d.detectMemoryGeneric()
+	}
+
+	memBytes, err := strconv.ParseInt(strings.TrimSpace(string(output)), 10, 64)
+	if err != nil {
+		log.Printf("Warning: failed to parse memory size from sysctl: %v", err)
+		return d.detectMemoryGeneric()
+	}
+
+	// Convert bytes to GB
+	memGB := memBytes / (1024 * 1024 * 1024)
+	d.info.Memory.TotalRAM = fmt.Sprintf("%dGB", memGB)
+	return nil
+}
+
+func (d *Detector) detectMemoryGeneric() error {
+	// Use Go runtime to estimate available memory
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	// Estimate total system memory based on Sys (rough approximation)
+	// Sys is the total bytes of memory obtained from the OS
+	// Multiply by 4 as a heuristic since Go typically uses a fraction
+	estimatedTotal := m.Sys * 4
+	memGB := estimatedTotal / (1024 * 1024 * 1024)
+
+	// Set a reasonable minimum
+	if memGB < 4 {
+		memGB = 4
+	}
+
+	d.info.Memory.TotalRAM = fmt.Sprintf("%dGB", memGB)
+	log.Printf("Warning: memory detection fell back to estimate: %s", d.info.Memory.TotalRAM)
 	return nil
 }
 
