@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -815,5 +816,321 @@ func TestLoadAliasManagerFromStandardPaths(t *testing.T) {
 	// Should have default aliases loaded
 	if manager.Count() == 0 {
 		t.Error("LoadAliasManagerFromStandardPaths() returned empty manager")
+	}
+}
+
+// TestLoadAliasConfig_InvalidYAML tests loading invalid YAML config
+func TestLoadAliasConfig_InvalidYAML(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "invalid.yaml")
+
+	// Write invalid YAML
+	invalidYAML := "{{invalid yaml content::"
+	if err := writeTestFile(configPath, invalidYAML); err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	_, err := LoadAliasConfig(configPath)
+	if err == nil {
+		t.Error("LoadAliasConfig() should error on invalid YAML")
+	}
+}
+
+// TestLoadAliasConfig_DefaultsForMissingFields tests defaults for missing fields
+func TestLoadAliasConfig_DefaultsForMissingFields(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "minimal.yaml")
+
+	// Write YAML with missing fields
+	minimalYAML := `aliases:
+  - alias: test
+    target_model: test-model
+`
+	if err := writeTestFile(configPath, minimalYAML); err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	config, err := LoadAliasConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadAliasConfig() error = %v", err)
+	}
+
+	// Should set default version
+	if config.Version != "1.0" {
+		t.Errorf("Version = %v, want 1.0 (default)", config.Version)
+	}
+
+	// Should set default threshold
+	if config.FuzzyThreshold != 0.7 {
+		t.Errorf("FuzzyThreshold = %v, want 0.7 (default)", config.FuzzyThreshold)
+	}
+}
+
+// TestMergeAliasConfigs_Empty tests merging with empty input
+func TestMergeAliasConfigs_Empty(t *testing.T) {
+	merged := MergeAliasConfigs()
+
+	// Should return default config
+	if merged == nil {
+		t.Fatal("MergeAliasConfigs() returned nil")
+	}
+
+	// Should have default aliases
+	if len(merged.Aliases) == 0 {
+		t.Error("MergeAliasConfigs() with no args should return default aliases")
+	}
+}
+
+// TestMergeAliasConfigs_WithNil tests merging with nil configs
+func TestMergeAliasConfigs_WithNil(t *testing.T) {
+	config1 := &AliasConfig{
+		FuzzyThreshold: 0.8,
+		Aliases: []*ModelAlias{
+			{Alias: "test", TargetModel: "test-model"},
+		},
+	}
+
+	merged := MergeAliasConfigs(nil, config1, nil)
+
+	if merged == nil {
+		t.Fatal("MergeAliasConfigs() returned nil")
+	}
+
+	if len(merged.Aliases) != 1 {
+		t.Errorf("Merged aliases = %d, want 1", len(merged.Aliases))
+	}
+}
+
+// TestNormalizeKey tests the normalizeKey method via case-insensitive alias resolution
+func TestNormalizeKey(t *testing.T) {
+	manager := NewAliasManager(0.7)
+	manager.AddAlias(&ModelAlias{
+		Alias:       "test-alias",
+		TargetModel: "test-model",
+		Provider:    "test-provider",
+	})
+
+	// These should all resolve to the same alias (case-insensitive)
+	tests := []struct {
+		input string
+	}{
+		{"test-alias"},
+		{"TEST-ALIAS"},
+		{"Test-Alias"},
+		{"  test-alias  "},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			model, _, resolved := manager.Resolve(tt.input)
+			if !resolved {
+				t.Errorf("Resolve(%q) should resolve", tt.input)
+			}
+			if model != "test-model" {
+				t.Errorf("Resolve(%q) = %v, want test-model", tt.input, model)
+			}
+		})
+	}
+}
+
+// TestNewAliasManager_Threshold tests NewAliasManager with different thresholds
+func TestNewAliasManager_Threshold(t *testing.T) {
+	tests := []struct {
+		threshold float64
+		expected  float64
+	}{
+		{0.5, 0.5},
+		{0.7, 0.7},
+		{0.9, 0.9},
+		{0.0, 0.7}, // Default
+		{-0.1, 0.7}, // Invalid, should use default
+		{1.5, 0.7},  // Invalid, should use default
+	}
+
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			manager := NewAliasManager(tt.threshold)
+			got := manager.GetFuzzyThreshold()
+			if got != tt.expected {
+				t.Errorf("NewAliasManager(%v).GetFuzzyThreshold() = %v, want %v", tt.threshold, got, tt.expected)
+			}
+		})
+	}
+}
+
+// TestImportAliases_Override tests importing with override option
+func TestImportAliases_Override(t *testing.T) {
+	manager := NewAliasManager(0.7)
+
+	// Add initial alias
+	manager.AddAlias(&ModelAlias{
+		Alias:       "test",
+		TargetModel: "original-model",
+		Provider:    "provider1",
+	})
+
+	// Import with override = true
+	aliases := []*ModelAlias{
+		{Alias: "test", TargetModel: "new-model", Provider: "provider2"},
+	}
+
+	err := manager.ImportAliases(aliases, true)
+	if err != nil {
+		t.Fatalf("ImportAliases() error = %v", err)
+	}
+
+	// Should be overridden
+	model, _, _ := manager.Resolve("test")
+	if model != "new-model" {
+		t.Errorf("After override, model = %v, want new-model", model)
+	}
+}
+
+// TestImportAliases_NoOverride tests importing without override option
+func TestImportAliases_NoOverride(t *testing.T) {
+	manager := NewAliasManager(0.7)
+
+	// Add initial alias
+	manager.AddAlias(&ModelAlias{
+		Alias:       "test",
+		TargetModel: "original-model",
+		Provider:    "provider1",
+	})
+
+	// Import with override = false (should skip existing)
+	aliases := []*ModelAlias{
+		{Alias: "test", TargetModel: "new-model", Provider: "provider2"},
+		{Alias: "new", TargetModel: "another-model", Provider: "provider3"},
+	}
+
+	err := manager.ImportAliases(aliases, false)
+	if err != nil {
+		t.Fatalf("ImportAliases() error = %v", err)
+	}
+
+	// Original should remain
+	model, _, _ := manager.Resolve("test")
+	if model != "original-model" {
+		t.Errorf("Without override, model = %v, want original-model", model)
+	}
+
+	// New alias should be added
+	model2, _, resolved := manager.Resolve("new")
+	if !resolved || model2 != "another-model" {
+		t.Errorf("New alias not added correctly: model = %v, resolved = %v", model2, resolved)
+	}
+}
+
+// TestFuzzyMatching tests the fuzzy matching capability
+func TestFuzzyMatching(t *testing.T) {
+	manager := NewAliasManager(0.6) // Set low threshold for fuzzy matching
+
+	// Add some aliases
+	manager.AddAlias(&ModelAlias{
+		Alias:       "gpt4-turbo",
+		TargetModel: "gpt-4-turbo-preview",
+		Provider:    "openai",
+	})
+	manager.AddAlias(&ModelAlias{
+		Alias:       "claude-opus",
+		TargetModel: "claude-3-opus",
+		Provider:    "anthropic",
+	})
+
+	// Test fuzzy search
+	results := manager.SearchAliases("gpt4")
+	if len(results) == 0 {
+		t.Error("SearchAliases('gpt4') should find similar aliases")
+	}
+
+	results2 := manager.SearchAliases("claude")
+	if len(results2) == 0 {
+		t.Error("SearchAliases('claude') should find similar aliases")
+	}
+
+	// Autocomplete test
+	completions := manager.Autocomplete("gpt")
+	if len(completions) == 0 {
+		t.Error("Autocomplete('gpt') should find completions")
+	}
+}
+
+// TestResolveWithProvider tests resolving alias with provider
+func TestResolveWithProvider(t *testing.T) {
+	manager := NewAliasManager(0.7)
+
+	// Add aliases for same name but different providers
+	manager.AddAlias(&ModelAlias{
+		Alias:       "gpt4-openai",
+		TargetModel: "gpt-4",
+		Provider:    "openai",
+	})
+	manager.AddAlias(&ModelAlias{
+		Alias:       "gpt4-azure",
+		TargetModel: "gpt-4",
+		Provider:    "azure",
+	})
+
+	// Test resolve with specific provider
+	model, provider, resolved := manager.ResolveWithProvider("gpt4-azure", "azure")
+	if !resolved {
+		t.Error("ResolveWithProvider() should resolve")
+	}
+	if model != "gpt-4" {
+		t.Errorf("model = %v, want gpt-4", model)
+	}
+	if provider != "azure" {
+		t.Errorf("provider = %v, want azure", provider)
+	}
+
+	// Test with non-matching provider (should still resolve via alias)
+	model2, provider2, resolved2 := manager.ResolveWithProvider("gpt4-openai", "openai")
+	if !resolved2 {
+		t.Error("ResolveWithProvider() should resolve with matching provider")
+	}
+	if provider2 != "openai" {
+		t.Errorf("provider = %v, want openai", provider2)
+	}
+	_ = model2
+}
+
+// Helper function to write test files
+func writeTestFile(path, content string) error {
+	return os.WriteFile(path, []byte(content), 0644)
+}
+
+// TestDefaultAliasConfig tests the default configuration
+func TestDefaultAliasConfig(t *testing.T) {
+	config := DefaultAliasConfig()
+
+	if config.Version != "1.0" {
+		t.Errorf("Version = %v, want 1.0", config.Version)
+	}
+
+	if config.FuzzyThreshold != 0.7 {
+		t.Errorf("FuzzyThreshold = %v, want 0.7", config.FuzzyThreshold)
+	}
+
+	if len(config.Aliases) == 0 {
+		t.Error("Default config should have aliases")
+	}
+
+	// Check for some expected default aliases
+	hasGPT4 := false
+	hasClaude := false
+	for _, alias := range config.Aliases {
+		if alias.Alias == "gpt4" {
+			hasGPT4 = true
+		}
+		if alias.Alias == "claude" {
+			hasClaude = true
+		}
+	}
+
+	if !hasGPT4 {
+		t.Error("Default config should have gpt4 alias")
+	}
+	if !hasClaude {
+		t.Error("Default config should have claude alias")
 	}
 }
