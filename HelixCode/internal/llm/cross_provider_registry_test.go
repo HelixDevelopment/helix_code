@@ -462,3 +462,97 @@ func TestModelCompatibilityQuery(t *testing.T) {
 		assert.NotNil(t, query.Constraints)
 	})
 }
+
+func TestCrossProviderRegistry_findAlternativeProviders(t *testing.T) {
+	t.Run("FindsProvidersWithMatchingFormat", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Add providers with GGUF support
+		registry.compatibility["ollama"] = &ProviderCompatibility{
+			Provider:         "ollama",
+			SupportedFormats: []ModelFormat{FormatGGUF},
+		}
+		registry.compatibility["llamacpp"] = &ProviderCompatibility{
+			Provider:         "llamacpp",
+			SupportedFormats: []ModelFormat{FormatGGUF},
+		}
+
+		alternatives := registry.findAlternativeProviders("test-model", FormatGGUF)
+		assert.Contains(t, alternatives, "ollama")
+		assert.Contains(t, alternatives, "llamacpp")
+	})
+
+	t.Run("ReturnsEmptyForNoMatches", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Clear default providers
+		registry.compatibility = make(map[string]*ProviderCompatibility)
+
+		alternatives := registry.findAlternativeProviders("test-model", FormatGGUF)
+		assert.Empty(t, alternatives)
+	})
+}
+
+func TestCrossProviderRegistry_findCompatibleProvidersForModel(t *testing.T) {
+	t.Run("FindsProvidersWithMatchingFormat", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Add providers with specific format support
+		registry.compatibility["vllm"] = &ProviderCompatibility{
+			Provider:         "vllm",
+			SupportedFormats: []ModelFormat{FormatGPTQ, FormatAWQ},
+		}
+		registry.compatibility["ollama"] = &ProviderCompatibility{
+			Provider:         "ollama",
+			SupportedFormats: []ModelFormat{FormatGGUF},
+		}
+
+		compatible := registry.findCompatibleProvidersForModel("test-model", FormatGPTQ)
+		assert.Contains(t, compatible, "vllm")
+		assert.NotContains(t, compatible, "ollama")
+	})
+}
+
+func TestCrossProviderRegistry_estimateConversionTime(t *testing.T) {
+	t.Run("ReturnsEstimateForKnownFormats", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Estimate conversion from HF to GGUF
+		estimate := registry.estimateConversionTime(FormatHF, FormatGGUF)
+		assert.Greater(t, estimate, int64(0))
+	})
+}
+
+func TestCrossProviderRegistry_GetProviderInfo(t *testing.T) {
+	t.Run("ReturnsInfoForKnownProvider", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Add a provider
+		registry.providers["test-provider"] = &ProviderInfo{
+			Name:        "Test Provider",
+			Type:        "openai-compatible",
+			DefaultPort: 8080,
+		}
+
+		info, err := registry.GetProviderInfo("test-provider")
+		require.NoError(t, err)
+		assert.Equal(t, "Test Provider", info.Name)
+		assert.Equal(t, 8080, info.DefaultPort)
+	})
+
+	t.Run("ErrorsForUnknownProvider", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+		registry.providers = make(map[string]*ProviderInfo)
+
+		info, err := registry.GetProviderInfo("unknown")
+		assert.Error(t, err)
+		assert.Nil(t, info)
+	})
+}
+
