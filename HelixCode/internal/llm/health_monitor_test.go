@@ -255,3 +255,182 @@ func TestHealthMonitor_HandleUnhealthyProvider(t *testing.T) {
 		monitor.handleUnhealthyProvider("test", provider, assert.AnError)
 	})
 }
+
+func TestHealthMonitor_PerformHealthChecks_WithRunningProvider(t *testing.T) {
+	// Create a test server for health checks
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+
+	// Add a running provider with health URL
+	manager.providers["running"] = &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:      "RunningProvider",
+			HealthURL: server.URL,
+		},
+		Status:  "running",
+		Health:  &HealthStatus{},
+		Metrics: &PerformanceMetrics{},
+	}
+
+	monitor := NewHealthMonitor(manager)
+
+	// Perform health checks
+	monitor.performHealthChecks()
+
+	// Verify health was updated
+	provider := manager.providers["running"]
+	assert.True(t, provider.Health.IsHealthy)
+	assert.Equal(t, "healthy", provider.Health.Status)
+}
+
+func TestHealthMonitor_PerformHealthChecks_WithUnhealthyProvider(t *testing.T) {
+	// Create a test server that returns 500
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	manager.config.Health.MaxRetries = 3
+
+	// Add a running provider with unhealthy status
+	manager.providers["unhealthy"] = &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:      "UnhealthyProvider",
+			HealthURL: server.URL,
+		},
+		Status:     "running",
+		Health:     &HealthStatus{},
+		Metrics:    &PerformanceMetrics{},
+		RetryCount: 0,
+	}
+
+	monitor := NewHealthMonitor(manager)
+
+	// Perform health checks
+	monitor.performHealthChecks()
+
+	// Verify health was updated to unhealthy
+	provider := manager.providers["unhealthy"]
+	assert.False(t, provider.Health.IsHealthy)
+	assert.Equal(t, "unhealthy", provider.Health.Status)
+}
+
+func TestHealthMonitor_TriggerAutoRecovery(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	manager.config.Health.RetryDelay = 0 // No delay for testing
+
+	monitor := NewHealthMonitor(manager)
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:     "TestProvider",
+			DataPath: tmpDir,
+		},
+		Health:     &HealthStatus{},
+		RetryCount: 1,
+	}
+
+	// Should not panic - triggerAutoRecovery runs in goroutine
+	done := make(chan bool)
+	go func() {
+		monitor.triggerAutoRecovery("test", provider)
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		// Success
+	case <-time.After(2 * time.Second):
+		t.Log("triggerAutoRecovery completed or timed out")
+	}
+}
+
+func TestHealthMonitor_Start_WithStopChannel(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	monitor := NewHealthMonitor(manager)
+	monitor.checkInterval = 100 * time.Millisecond
+
+	// Start in goroutine
+	done := make(chan error)
+	go func() {
+		done <- monitor.Start(context.Background())
+	}()
+
+	// Wait a bit then stop via channel
+	time.Sleep(50 * time.Millisecond)
+	monitor.Stop()
+
+	// Wait for completion
+	select {
+	case err := <-done:
+		assert.NoError(t, err)
+	case <-time.After(2 * time.Second):
+		t.Fatal("Health monitor did not stop")
+	}
+}
+
+func TestHealthMonitor_AlertSystemIntegration(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	manager.config.Health.MaxRetries = 1
+
+	monitor := NewHealthMonitor(manager)
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:     "TestProvider",
+			DataPath: tmpDir,
+		},
+		Health:     &HealthStatus{},
+		RetryCount: 0,
+	}
+
+	// Handle unhealthy within retry limits
+	monitor.handleUnhealthyProvider("test", provider, assert.AnError)
+
+	// Verify alert was sent
+	alerts := monitor.alertSystem.GetAlerts()
+	assert.NotEmpty(t, alerts)
+	assert.Equal(t, "health_failure", alerts[0].Type)
+}
+
+func TestHealthMonitor_AlertSystemMaxRetries(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := NewAutoLLMManager(tmpDir)
+	manager.config.Health.MaxRetries = 1
+
+	monitor := NewHealthMonitor(manager)
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{
+			Name:     "TestProvider",
+			DataPath: tmpDir,
+		},
+		Health:     &HealthStatus{},
+		RetryCount: 5, // Exceeds max retries
+	}
+
+	// Handle unhealthy exceeding retry limits
+	monitor.handleUnhealthyProvider("test", provider, assert.AnError)
+
+	// Verify critical alert was sent
+	alerts := monitor.alertSystem.GetAlerts()
+	assert.GreaterOrEqual(t, len(alerts), 2)
+
+	hasCriticalAlert := false
+	for _, alert := range alerts {
+		if alert.Severity == "critical" {
+			hasCriticalAlert = true
+		}
+	}
+	assert.True(t, hasCriticalAlert)
+}
