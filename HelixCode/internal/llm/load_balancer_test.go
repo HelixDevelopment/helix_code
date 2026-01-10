@@ -597,3 +597,337 @@ func TestAlertSystem_ClearAlerts(t *testing.T) {
 		assert.Equal(t, "test", alert.Type)
 	}
 }
+
+// ========================================
+// LoadBalancer Integration Tests with AutoLLMManager
+// ========================================
+
+func createMockAutoLLMManager() *AutoLLMManager {
+	return &AutoLLMManager{
+		providers: map[string]*AutoProvider{
+			"healthy1": {
+				LocalLLMProvider: LocalLLMProvider{Name: "healthy1"},
+				Status:           "running",
+				Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+				Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 1.0},
+			},
+			"healthy2": {
+				LocalLLMProvider: LocalLLMProvider{Name: "healthy2"},
+				Status:           "running",
+				Health:           &HealthStatus{IsHealthy: true, ResponseTime: 50},
+				Metrics:          &PerformanceMetrics{TokensPerSecond: 100, ErrorRate: 0.5},
+			},
+			"unhealthy": {
+				LocalLLMProvider: LocalLLMProvider{Name: "unhealthy"},
+				Status:           "running",
+				Health:           &HealthStatus{IsHealthy: false, ResponseTime: 500},
+				Metrics:          &PerformanceMetrics{TokensPerSecond: 10, ErrorRate: 20.0},
+			},
+			"stopped": {
+				LocalLLMProvider: LocalLLMProvider{Name: "stopped"},
+				Status:           "stopped",
+				Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+				Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 0},
+			},
+		},
+	}
+}
+
+func TestLoadBalancer_SelectOptimalProvider_WithManager(t *testing.T) {
+	t.Run("selects from healthy providers", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		ctx := context.Background()
+		selected := lb.SelectOptimalProvider(ctx)
+
+		assert.NotNil(t, selected)
+		// Should select one of the healthy running providers
+		assert.Contains(t, []string{"healthy1", "healthy2"}, selected.Name)
+	})
+
+	t.Run("returns nil with no healthy providers", func(t *testing.T) {
+		manager := &AutoLLMManager{
+			providers: map[string]*AutoProvider{
+				"unhealthy": {
+					LocalLLMProvider: LocalLLMProvider{Name: "unhealthy"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: false},
+				},
+			},
+		}
+		lb := NewLoadBalancer(manager)
+
+		ctx := context.Background()
+		selected := lb.SelectOptimalProvider(ctx)
+
+		assert.Nil(t, selected)
+	})
+
+	t.Run("falls back to performance_based with invalid strategy", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+		lb.currentStrategy = "invalid_strategy"
+
+		ctx := context.Background()
+		selected := lb.SelectOptimalProvider(ctx)
+
+		assert.NotNil(t, selected)
+	})
+}
+
+func TestLoadBalancer_getHealthyProviders_Full(t *testing.T) {
+	t.Run("returns only healthy running providers", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		healthy := lb.getHealthyProviders()
+
+		assert.Len(t, healthy, 2)
+		for _, p := range healthy {
+			assert.True(t, p.Health.IsHealthy)
+			assert.Equal(t, "running", p.Status)
+		}
+	})
+
+	t.Run("returns empty with no healthy providers", func(t *testing.T) {
+		manager := &AutoLLMManager{
+			providers: map[string]*AutoProvider{
+				"unhealthy": {
+					LocalLLMProvider: LocalLLMProvider{Name: "unhealthy"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: false},
+				},
+			},
+		}
+		lb := NewLoadBalancer(manager)
+
+		healthy := lb.getHealthyProviders()
+
+		assert.Empty(t, healthy)
+	})
+}
+
+func TestLoadBalancer_updateStats_Full(t *testing.T) {
+	t.Run("increments request counts", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		provider := manager.providers["healthy1"]
+
+		lb.updateStats(provider)
+		assert.Equal(t, int64(1), lb.stats.TotalRequests)
+		assert.Equal(t, int64(1), lb.stats.ProviderCounts["healthy1"])
+
+		lb.updateStats(provider)
+		assert.Equal(t, int64(2), lb.stats.TotalRequests)
+		assert.Equal(t, int64(2), lb.stats.ProviderCounts["healthy1"])
+	})
+
+	t.Run("updates last updated time", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		before := lb.stats.LastUpdated
+		time.Sleep(1 * time.Millisecond)
+
+		provider := manager.providers["healthy1"]
+		lb.updateStats(provider)
+
+		assert.True(t, lb.stats.LastUpdated.After(before))
+	})
+}
+
+func TestLoadBalancer_collectPerformanceStats_Full(t *testing.T) {
+	t.Run("collects response times and error rates", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		lb.collectPerformanceStats()
+
+		// Should have stats for healthy providers
+		assert.NotEmpty(t, lb.stats.ResponseTimes)
+		assert.NotEmpty(t, lb.stats.ErrorRates)
+	})
+
+	t.Run("uses weighted average for response times", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		// Pre-set some values
+		lb.stats.ResponseTimes["healthy1"] = 200.0
+		lb.stats.ErrorRates["healthy1"] = 5.0
+
+		lb.collectPerformanceStats()
+
+		// Values should be weighted average (10% new, 90% old)
+		// New value: 100, Old: 200, Result: 0.1*100 + 0.9*200 = 10 + 180 = 190
+		expectedRT := 0.1*100 + 0.9*200
+		assert.InDelta(t, expectedRT, lb.stats.ResponseTimes["healthy1"], 0.01)
+	})
+}
+
+func TestLoadBalancer_determineOptimalProvider_Full(t *testing.T) {
+	t.Run("determines best performing provider", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		lb.determineOptimalProvider()
+
+		// healthy2 has better metrics (faster, lower error rate)
+		assert.Equal(t, "healthy2", lb.stats.OptimalProvider)
+	})
+
+	t.Run("ignores unhealthy providers", func(t *testing.T) {
+		manager := &AutoLLMManager{
+			providers: map[string]*AutoProvider{
+				"unhealthy": {
+					LocalLLMProvider: LocalLLMProvider{Name: "unhealthy"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: false, ResponseTime: 10},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 1000, ErrorRate: 0},
+				},
+				"healthy": {
+					LocalLLMProvider: LocalLLMProvider{Name: "healthy"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 1.0},
+				},
+			},
+		}
+		lb := NewLoadBalancer(manager)
+
+		lb.determineOptimalProvider()
+
+		assert.Equal(t, "healthy", lb.stats.OptimalProvider)
+	})
+}
+
+func TestLoadBalancer_calculatePerformanceScore_Full(t *testing.T) {
+	t.Run("calculates score with all factors", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		lb.stats.ResponseTimes["healthy1"] = 100.0
+		lb.stats.ErrorRates["healthy1"] = 2.0
+
+		provider := manager.providers["healthy1"]
+		score := lb.calculatePerformanceScore("healthy1", provider)
+
+		assert.Greater(t, score, 0.0)
+	})
+
+	t.Run("higher throughput yields higher score", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		lb.stats.ResponseTimes["healthy1"] = 100.0
+		lb.stats.ResponseTimes["healthy2"] = 100.0
+		lb.stats.ErrorRates["healthy1"] = 0.0
+		lb.stats.ErrorRates["healthy2"] = 0.0
+
+		score1 := lb.calculatePerformanceScore("healthy1", manager.providers["healthy1"])
+		score2 := lb.calculatePerformanceScore("healthy2", manager.providers["healthy2"])
+
+		// healthy2 has higher TokensPerSecond (100 vs 50)
+		assert.Greater(t, score2, score1)
+	})
+
+	t.Run("lower error rate yields higher score", func(t *testing.T) {
+		manager := &AutoLLMManager{
+			providers: map[string]*AutoProvider{
+				"low_error": {
+					LocalLLMProvider: LocalLLMProvider{Name: "low_error"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 0},
+				},
+				"high_error": {
+					LocalLLMProvider: LocalLLMProvider{Name: "high_error"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: true, ResponseTime: 100},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 50.0},
+				},
+			},
+		}
+		lb := NewLoadBalancer(manager)
+
+		lb.stats.ResponseTimes["low_error"] = 100.0
+		lb.stats.ResponseTimes["high_error"] = 100.0
+		lb.stats.ErrorRates["low_error"] = 0.0
+		lb.stats.ErrorRates["high_error"] = 50.0
+
+		scoreLow := lb.calculatePerformanceScore("low_error", manager.providers["low_error"])
+		scoreHigh := lb.calculatePerformanceScore("high_error", manager.providers["high_error"])
+
+		assert.Greater(t, scoreLow, scoreHigh)
+	})
+
+	t.Run("faster response time yields higher score", func(t *testing.T) {
+		manager := &AutoLLMManager{
+			providers: map[string]*AutoProvider{
+				"fast": {
+					LocalLLMProvider: LocalLLMProvider{Name: "fast"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: true, ResponseTime: 50},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 0},
+				},
+				"slow": {
+					LocalLLMProvider: LocalLLMProvider{Name: "slow"},
+					Status:           "running",
+					Health:           &HealthStatus{IsHealthy: true, ResponseTime: 500},
+					Metrics:          &PerformanceMetrics{TokensPerSecond: 50, ErrorRate: 0},
+				},
+			},
+		}
+		lb := NewLoadBalancer(manager)
+
+		lb.stats.ResponseTimes["fast"] = 50.0
+		lb.stats.ResponseTimes["slow"] = 500.0
+		lb.stats.ErrorRates["fast"] = 0.0
+		lb.stats.ErrorRates["slow"] = 0.0
+
+		scoreFast := lb.calculatePerformanceScore("fast", manager.providers["fast"])
+		scoreSlow := lb.calculatePerformanceScore("slow", manager.providers["slow"])
+
+		assert.Greater(t, scoreFast, scoreSlow)
+	})
+
+	t.Run("handles missing response time stats", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		// Don't add any stats
+		provider := manager.providers["healthy1"]
+		score := lb.calculatePerformanceScore("healthy1", provider)
+
+		// Should still return a valid score
+		assert.Greater(t, score, 0.0)
+	})
+}
+
+func TestLoadBalancer_collectStats_Context(t *testing.T) {
+	t.Run("stops on context cancellation", func(t *testing.T) {
+		manager := createMockAutoLLMManager()
+		lb := NewLoadBalancer(manager)
+
+		ctx, cancel := context.WithCancel(context.Background())
+
+		done := make(chan struct{})
+		go func() {
+			lb.collectStats(ctx)
+			close(done)
+		}()
+
+		// Cancel the context
+		cancel()
+
+		// Wait for collectStats to return
+		select {
+		case <-done:
+			// Success
+		case <-time.After(2 * time.Second):
+			t.Fatal("collectStats did not stop after context cancellation")
+		}
+	})
+}
