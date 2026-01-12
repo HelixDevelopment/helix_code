@@ -58,3 +58,6 @@
 [submodule "Example_Projects/Stark-Kitty-Kiro-Cli"]
 	path = Example_Projects/Stark-Kitty-Kiro-Cli
 	url = git@github.com:stark1tty/kiro-cli.git
+[submodule "Example_Projects/Kilo-Code"]
+	path = Example_Projects/Kilo-Code
+	url = git@github.com:Kilo-Org/kilocode.git
