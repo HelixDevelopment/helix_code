@@ -61,3 +61,6 @@
 [submodule "Example_Projects/Kilo-Code"]
 	path = Example_Projects/Kilo-Code
 	url = git@github.com:Kilo-Org/kilocode.git
+[submodule "Example_Projects/Amazon-Q-Developer-CLI"]
+	path = Example_Projects/Amazon-Q-Developer-CLI
+	url = git@github.com:aws/amazon-q-developer-cli.git
