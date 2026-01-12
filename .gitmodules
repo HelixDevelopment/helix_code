@@ -55,3 +55,6 @@
 [submodule "awesome-ai-memory"]
 	path = awesome-ai-memory
 	url = git@github.com:topoteretes/awesome-ai-memory.git
+[submodule "Example_Projects/Stark-Kitty-Kiro-Cli"]
+	path = Example_Projects/Stark-Kitty-Kiro-Cli
+	url = git@github.com:stark1tty/kiro-cli.git
