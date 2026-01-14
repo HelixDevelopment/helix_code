@@ -208,3 +208,18 @@
 [submodule "Example_Resources/Awesome-AI-Agents"]
 	path = Example_Resources/Awesome-AI-Agents
 	url = git@github.com:e2b-dev/awesome-ai-agents.git
+[submodule "Example_Projects/Postgres-MCP"]
+	path = Example_Projects/Postgres-MCP
+	url = git@github.com:timescale/pg-aiguide.git
+[submodule "Example_Projects/Noi"]
+	path = Example_Projects/Noi
+	url = git@github.com:lencx/Noi.git
+[submodule "Example_Projects/Claude-Squad"]
+	path = Example_Projects/Claude-Squad
+	url = git@github.com:smtg-ai/claude-squad.git
+[submodule "Example_Projects/Emdash"]
+	path = Example_Projects/Emdash
+	url = git@github.com:generalaction/emdash.git
+[submodule "Example_Projects/Codex-Skills"]
+	path = Example_Projects/Codex-Skills
+	url = org-14957082@github.com:openai/skills.git
