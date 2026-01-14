@@ -91,3 +91,18 @@
 [submodule "Example_Projects/OpenHands/agent-analysis"]
 	path = Example_Projects/OpenHands/agent-analysis
 	url = git@github.com:OpenHands/agent-analysis.git
+[submodule "Example_Resources/GitHub-Awesome-Copilot"]
+	path = Example_Resources/GitHub-Awesome-Copilot
+	url = git@github.com:github/awesome-copilot.git
+[submodule "Example_Projects/Superset"]
+	path = Example_Projects/Superset
+	url = git@github.com:superset-sh/superset.git
+[submodule "Example_Projects/ui-ux-pro-max-skill"]
+	path = Example_Projects/ui-ux-pro-max-skill
+	url = git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git
+[submodule "Example_Projects/Warp"]
+	path = Example_Projects/Warp
+	url = git@github.com:warpdotdev/Warp.git
+[submodule "Example_Projects/GitHub-Copilot-CLI"]
+	path = Example_Projects/GitHub-Copilot-CLI
+	url = git@github.com:github/copilot-cli.git
