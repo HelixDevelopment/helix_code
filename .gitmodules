@@ -148,3 +148,48 @@
 [submodule "Example_Projects/Codai"]
 	path = Example_Projects/Codai
 	url = git@github.com:meysamhadeli/codai.git
+[submodule "Example_Projects/FauxPilot"]
+	path = Example_Projects/FauxPilot
+	url = git@github.com:fauxpilot/fauxpilot.git
+[submodule "Example_Projects/vtcode"]
+	path = Example_Projects/vtcode
+	url = git@github.com:vinhnx/vtcode.git
+[submodule "Example_Projects/MobileAgent"]
+	path = Example_Projects/MobileAgent
+	url = git@github.com:X-PLUG/MobileAgent.git
+[submodule "Example_Projects/gptme/gptme"]
+	path = Example_Projects/gptme/gptme
+	url = git@github.com:gptme/gptme.git
+[submodule "Example_Projects/gptme/gptme-contrib"]
+	path = Example_Projects/gptme/gptme-contrib
+	url = git@github.com:gptme/gptme-contrib.git
+[submodule "Example_Projects/gptme/gptme-agent-template"]
+	path = Example_Projects/gptme/gptme-agent-template
+	url = git@github.com:gptme/gptme-agent-template.git
+[submodule "Example_Projects/gptme/gptme-pitch-deck"]
+	path = Example_Projects/gptme/gptme-pitch-deck
+	url = git@github.com:gptme/gptme-pitch-deck.git
+[submodule "Example_Projects/gptme/gptme-rag"]
+	path = Example_Projects/gptme/gptme-rag
+	url = git@github.com:gptme/gptme-rag.git
+[submodule "Example_Projects/gptme/gptme-webui"]
+	path = Example_Projects/gptme/gptme-webui
+	url = git@github.com:gptme/gptme-webui.git
+[submodule "Example_Projects/gptme/gptme-lessons"]
+	path = Example_Projects/gptme/gptme-lessons
+	url = git@github.com:gptme/gptme-lessons.git
+[submodule "Example_Projects/gptme/gptme-tauri"]
+	path = Example_Projects/gptme/gptme-tauri
+	url = git@github.com:gptme/gptme-tauri.git
+[submodule "Example_Projects/Conduit"]
+	path = Example_Projects/Conduit
+	url = git@github.com:lostintangent/conduit-release.git
+[submodule "Example_Projects/Shai"]
+	path = Example_Projects/Shai
+	url = git@github.com:ovh/shai.git
+[submodule "Example_Projects/SnowCLI"]
+	path = Example_Projects/SnowCLI
+	url = git@github.com:MayDay-wpf/snow-cli.git
+[submodule "Example_Projects/GitMCP"]
+	path = Example_Projects/GitMCP
+	url = https://github.com/idosal/git-mcp
