@@ -64,3 +64,30 @@
 [submodule "Example_Projects/Amazon-Q-Developer-CLI"]
 	path = Example_Projects/Amazon-Q-Developer-CLI
 	url = git@github.com:aws/amazon-q-developer-cli.git
+[submodule "Example_Projects/OpenHands/software-agent-sdk"]
+	path = Example_Projects/OpenHands/software-agent-sdk
+	url = git@github.com:OpenHands/software-agent-sdk.git
+[submodule "Example_Projects/OpenHands/OpenHands"]
+	path = Example_Projects/OpenHands/OpenHands
+	url = git@github.com:OpenHands/OpenHands.git
+[submodule "Example_Projects/OpenHands/agentic-code-search-oss"]
+	path = Example_Projects/OpenHands/agentic-code-search-oss
+	url = git@github.com:OpenHands/agentic-code-search-oss.git
+[submodule "Example_Projects/OpenHands/skills"]
+	path = Example_Projects/OpenHands/skills
+	url = git@github.com:OpenHands/skills.git
+[submodule "Example_Projects/OpenHands/litellm"]
+	path = Example_Projects/OpenHands/litellm
+	url = git@github.com:OpenHands/litellm.git
+[submodule "Example_Projects/OpenHands/OpenHands-Server"]
+	path = Example_Projects/OpenHands/OpenHands-Server
+	url = git@github.com:OpenHands/OpenHands-Server.git
+[submodule "Example_Projects/OpenHands/open-operator"]
+	path = Example_Projects/OpenHands/open-operator
+	url = git@github.com:OpenHands/open-operator.git
+[submodule "Example_Projects/OpenHands/OpenHands-Docs"]
+	path = Example_Projects/OpenHands/OpenHands-Docs
+	url = git@github.com:OpenHands/docs.git
+[submodule "Example_Projects/OpenHands/agent-analysis"]
+	path = Example_Projects/OpenHands/agent-analysis
+	url = git@github.com:OpenHands/agent-analysis.git
