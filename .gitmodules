@@ -106,3 +106,45 @@
 [submodule "Example_Projects/GitHub-Copilot-CLI"]
 	path = Example_Projects/GitHub-Copilot-CLI
 	url = git@github.com:github/copilot-cli.git
+[submodule "Example_Projects/Codex"]
+	path = Example_Projects/Codex
+	url = org-14957082@github.com:openai/codex.git
+[submodule "Example_Projects/Octogen"]
+	path = Example_Projects/Octogen
+	url = git@github.com:dbpunk-labs/octogen.git
+[submodule "Example_Projects/TaskWeaver"]
+	path = Example_Projects/TaskWeaver
+	url = git@github.com:microsoft/TaskWeaver.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AI-Core"]
+	path = Example_Projects/Cheshire-Cat-Ai/CC-AI-Core
+	url = git@github.com:cheshire-cat-ai/core.git
+[submodule "Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs"]
+	path = Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs
+	url = git@github.com:cheshire-cat-ai/docs.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs"]
+	path = Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs
+	url = git@github.com:cheshire-cat-ai/llms.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins"]
+	path = Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins
+	url = git@github.com:cheshire-cat-ai/plugins.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/plugin-template"]
+	path = Example_Projects/Cheshire-Cat-Ai/plugin-template
+	url = git@github.com:cheshire-cat-ai/plugin_template.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/model-plugins"]
+	path = Example_Projects/Cheshire-Cat-Ai/model-plugins
+	url = git@github.com:cheshire-cat-ai/models-plugin.git
+[submodule "Example_Projects/Cheshire-Cat-Ai/plugins-backend"]
+	path = Example_Projects/Cheshire-Cat-Ai/plugins-backend
+	url = git@github.com:cheshire-cat-ai/plugins-backend.git
+[submodule "Example_Resources/Awesome-AI-GPTs"]
+	path = Example_Resources/Awesome-AI-GPTs
+	url = git@github.com:EmbraceAGI/Awesome-AI-GPTs.git
+[submodule "Example_Projects/Multiagent-Coding-System"]
+	path = Example_Projects/Multiagent-Coding-System
+	url = git@github.com:Danau5tin/multi-agent-coding-system.git
+[submodule "Example_Resources/OpenAI-Cookbook"]
+	path = Example_Resources/OpenAI-Cookbook
+	url = org-14957082@github.com:openai/openai-cookbook.git
+[submodule "Example_Projects/Codai"]
+	path = Example_Projects/Codai
+	url = git@github.com:meysamhadeli/codai.git
