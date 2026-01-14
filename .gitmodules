@@ -193,3 +193,18 @@
 [submodule "Example_Projects/GitMCP"]
 	path = Example_Projects/GitMCP
 	url = https://github.com/idosal/git-mcp
+[submodule "Example_Projects/Claude-Code-Plugins-And-Skills"]
+	path = Example_Projects/Claude-Code-Plugins-And-Skills
+	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+[submodule "Example_Projects/Bridle"]
+	path = Example_Projects/Bridle
+	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+[submodule "Example_Projects/Agent-Deck"]
+	path = Example_Projects/Agent-Deck
+	url = git@github.com:asheshgoplani/agent-deck.git
+[submodule "Example_Projects/Nanocoder"]
+	path = Example_Projects/Nanocoder
+	url = git@github.com:Nano-Collective/nanocoder.git
+[submodule "Example_Resources/Awesome-AI-Agents"]
+	path = Example_Resources/Awesome-AI-Agents
+	url = git@github.com:e2b-dev/awesome-ai-agents.git
