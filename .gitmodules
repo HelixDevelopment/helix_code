@@ -229,3 +229,6 @@
 [submodule "Example_Projects/GitHub-Spec-Kit"]
 	path = Example_Projects/GitHub-Spec-Kit
 	url = git@github.com:github/spec-kit.git
+[submodule "Example_Resources/Taches-CC-Resources"]
+	path = Example_Resources/Taches-CC-Resources
+	url = git@github.com:glittercowboy/taches-cc-resources.git
