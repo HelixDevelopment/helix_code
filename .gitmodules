@@ -223,3 +223,9 @@
 [submodule "Example_Projects/Codex-Skills"]
 	path = Example_Projects/Codex-Skills
 	url = org-14957082@github.com:openai/skills.git
+[submodule "Example_Projects/Get-Shit-Done"]
+	path = Example_Projects/Get-Shit-Done
+	url = git@github.com:glittercowboy/get-shit-done.git
+[submodule "Example_Projects/GitHub-Spec-Kit"]
+	path = Example_Projects/GitHub-Spec-Kit
+	url = git@github.com:github/spec-kit.git
