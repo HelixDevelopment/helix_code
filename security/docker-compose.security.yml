@@ -4,6 +4,10 @@ services:
   sonarqube:
     image: sonarqube:community
     container_name: helixcode-sonarqube
+    mem_limit: 8g
+    memswap_limit: 8g
+    pids_limit: 2048
+    oom_score_adj: 500
     ports:
       - "9000:9000"
     environment:
@@ -31,6 +35,10 @@ services:
   sonarqube-db:
     image: postgres:15-alpine
     container_name: helixcode-sonarqube-db
+    mem_limit: 8g
+    memswap_limit: 8g
+    pids_limit: 2048
+    oom_score_adj: 500
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
@@ -44,6 +52,10 @@ services:
   snyk:
     image: snyk/snyk-cli:latest
     container_name: helixcode-snyk
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     volumes:
       - ../:/project
       - snyk_data:/root/.snyk
@@ -58,6 +70,10 @@ services:
       context: .
       dockerfile: security-scan.Dockerfile
     container_name: helixcode-security-scanner
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     volumes:
       - ../:/project
       - scan_results:/scan-results
