@@ -192,7 +192,7 @@
 	url = git@github.com:MayDay-wpf/snow-cli.git
 [submodule "Example_Projects/GitMCP"]
 	path = Example_Projects/GitMCP
-	url = https://github.com/idosal/git-mcp
+	url = git@github.com:idosal/git-mcp
 [submodule "Example_Projects/Claude-Code-Plugins-And-Skills"]
 	path = Example_Projects/Claude-Code-Plugins-And-Skills
 	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
