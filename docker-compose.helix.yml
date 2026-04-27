@@ -5,6 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: helixcode
+    mem_limit: 3g
+    memswap_limit: 3g
+    pids_limit: 2048
+    oom_score_adj: 500
     ports:
       - "${HELIX_API_PORT:-8080}:8080"
       - "${HELIX_SSH_PORT:-2222}:2222"
@@ -52,6 +56,10 @@ services:
   postgres:
     image: postgres:15
     container_name: helixcode-postgres
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       - POSTGRES_DB=helixcode_prod
       - POSTGRES_USER=helix
@@ -73,6 +81,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: helixcode-redis
+    mem_limit: 1g
+    memswap_limit: 1g
+    pids_limit: 1024
+    oom_score_adj: 500
     command: redis-server --requirepass ${HELIX_REDIS_PASSWORD}
     volumes:
       - redis_data:/data
@@ -91,6 +103,10 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     container_name: helixcode-worker-1
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     hostname: worker-1
     environment:
       - WORKER_ID=worker-1
@@ -120,6 +136,10 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     container_name: helixcode-worker-2
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     hostname: worker-2
     environment:
       - WORKER_ID=worker-2

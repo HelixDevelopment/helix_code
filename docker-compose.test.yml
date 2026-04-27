@@ -3,6 +3,10 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       POSTGRES_DB: helixcode_test
       POSTGRES_USER: helixcode
@@ -22,6 +26,10 @@ services:
 
   redis:
     image: redis:7-alpine
+    mem_limit: 1g
+    memswap_limit: 1g
+    pids_limit: 1024
+    oom_score_adj: 500
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
@@ -37,6 +45,10 @@ services:
 
   cognee:
     image: topoteretes/cognee:latest
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     ports:
       - "8000:8000"
     environment:
@@ -62,6 +74,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       WORKER_ID: worker1
       POSTGRES_HOST: postgres
@@ -90,6 +106,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       WORKER_ID: worker2
       POSTGRES_HOST: postgres
@@ -118,6 +138,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       WORKER_ID: worker3
       POSTGRES_HOST: postgres
@@ -146,6 +170,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
     environment:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
@@ -157,10 +185,6 @@ services:
       cognee:
         condition: service_healthy
       worker1:
-        condition: service_started
-      worker2:
-        condition: service_started
-      worker3:
         condition: service_started
       worker2:
         condition: service_started
