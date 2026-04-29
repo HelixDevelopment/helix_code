@@ -1412,7 +1412,7 @@ func TestExecutionResultCancelAndSkip(t *testing.T) {
 		hook := NewHook("test", HookTypeBeforeTask, func(ctx context.Context, e *Event) error { return nil })
 		result := NewExecutionResult(hook)
 
-		result.Skip()
+		result.Skip()  // SKIP-OK: #legacy-untriaged
 
 		if result.Status != StatusSkipped {
 			t.Errorf("expected status %s, got %s", StatusSkipped, result.Status)

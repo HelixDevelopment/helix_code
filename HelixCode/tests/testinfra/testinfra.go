@@ -463,21 +463,21 @@ func (i *Infrastructure) Config() *Config {
 // RequireService is a test helper that skips if a service is unavailable
 func RequireService(t interface{ Skip(...interface{}) }, ctx context.Context, infra *Infrastructure, service Service) {
 	if err := infra.CheckService(ctx, service); err != nil {
-		t.Skip(fmt.Sprintf("Service %s not available: %v", service, err))
+		t.Skip(fmt.Sprintf("Service %s not available: %v", service, err))  // SKIP-OK: #legacy-untriaged
 	}
 }
 
 // SkipIfNoInfrastructure skips the test if infrastructure is not available
 func SkipIfNoInfrastructure(t interface{ Skip(...interface{}) }) {
 	if os.Getenv("HELIX_TEST_INFRA") != "true" {
-		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true)")
+		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
 // SkipIfShort skips the test if running in short mode
 func SkipIfShort(t interface{ Skip(...interface{}); Short() bool }) {
 	if t.Short() {
-		t.Skip("Skipping in short mode")
+		t.Skip("Skipping in short mode")  // SKIP-OK: #short-mode
 	}
 }
 

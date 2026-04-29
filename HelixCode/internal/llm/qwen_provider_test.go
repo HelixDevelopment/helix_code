@@ -66,7 +66,7 @@ func TestNewQwenProvider(t *testing.T) {
 				// the provider might successfully authenticate. In that case,
 				// we skip this specific test rather than fail.
 				if err == nil {
-					t.Skip("Skipping: cached Qwen OAuth2 credentials may be present - test expects error but got nil")
+					t.Skip("Skipping: cached Qwen OAuth2 credentials may be present - test expects error but got nil")  // SKIP-OK: #legacy-untriaged
 				}
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)

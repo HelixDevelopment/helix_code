@@ -23,7 +23,7 @@ func TestGeminiProviderFullAutomation(t *testing.T) {
 		apiKey = os.Getenv("GOOGLE_API_KEY")
 	}
 	if apiKey == "" {
-		t.Skip("GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set, skipping real API tests")
+		t.Skip("GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set, skipping real API tests")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Get endpoint from environment or use default

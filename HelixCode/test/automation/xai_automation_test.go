@@ -21,7 +21,7 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 	// Get API key from environment
 	apiKey := os.Getenv("XAI_API_KEY")
 	if apiKey == "" {
-		t.Skip("XAI_API_KEY environment variable not set, skipping real API tests")
+		t.Skip("XAI_API_KEY environment variable not set, skipping real API tests")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Get endpoint from environment or use default
@@ -311,7 +311,7 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 func TestXAIProviderLoadTest(t *testing.T) {
 	apiKey := os.Getenv("XAI_API_KEY")
 	if apiKey == "" {
-		t.Skip("XAI_API_KEY environment variable not set, skipping load test")
+		t.Skip("XAI_API_KEY environment variable not set, skipping load test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{
@@ -418,7 +418,7 @@ func TestXAIProviderLoadTest(t *testing.T) {
 func TestXAIProviderModelCompatibility(t *testing.T) {
 	apiKey := os.Getenv("XAI_API_KEY")
 	if apiKey == "" {
-		t.Skip("XAI_API_KEY environment variable not set, skipping model compatibility test")
+		t.Skip("XAI_API_KEY environment variable not set, skipping model compatibility test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{
@@ -478,7 +478,7 @@ func TestXAIProviderModelCompatibility(t *testing.T) {
 func TestXAIProviderRateLimits(t *testing.T) {
 	apiKey := os.Getenv("XAI_API_KEY")
 	if apiKey == "" {
-		t.Skip("XAI_API_KEY environment variable not set, skipping rate limit test")
+		t.Skip("XAI_API_KEY environment variable not set, skipping rate limit test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{

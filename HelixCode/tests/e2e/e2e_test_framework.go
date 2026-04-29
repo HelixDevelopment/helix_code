@@ -285,13 +285,13 @@ func CleanupTestData(t *testing.T, data interface{}) {
 // SkipIfCI skips test if running in CI environment
 func SkipIfCI(t *testing.T) {
 	if os.Getenv("CI") != "" {
-		t.Skip("Skipping test in CI environment")
+		t.Skip("Skipping test in CI environment")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
 // SkipIfShort skips test if running with -short flag
 func SkipIfShort(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping test in short mode")
+		t.Skip("Skipping test in short mode")  // SKIP-OK: #short-mode
 	}
 }

@@ -23,7 +23,7 @@ import (
 // TestAuthProjectIntegration tests the integration between auth and project management
 func TestAuthProjectIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Setup
@@ -78,7 +78,7 @@ func TestAuthProjectIntegration(t *testing.T) {
 // TestTaskProjectIntegration tests task and project integration
 func TestTaskProjectIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	mockDB := database.NewMockDatabase()
@@ -120,7 +120,7 @@ func TestTaskProjectIntegration(t *testing.T) {
 // TestMultiStepWorkflowIntegration tests a complete workflow
 func TestMultiStepWorkflowIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	mockDB := database.NewMockDatabase()
@@ -168,7 +168,7 @@ func TestMultiStepWorkflowIntegration(t *testing.T) {
 // TestAuthLifecycleIntegration tests complete auth lifecycle
 func TestAuthLifecycleIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	mockDB := database.NewMockDatabase()
@@ -227,7 +227,7 @@ func TestAuthLifecycleIntegration(t *testing.T) {
 // TestProjectLifecycleIntegration tests complete project lifecycle
 func TestProjectLifecycleIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	mockDB := database.NewMockDatabase()
@@ -303,7 +303,7 @@ func TestProjectLifecycleIntegration(t *testing.T) {
 // TestTaskDependencyIntegration tests task dependency resolution
 func TestTaskDependencyIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	mockDB := database.NewMockDatabase()

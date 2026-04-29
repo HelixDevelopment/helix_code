@@ -62,7 +62,7 @@ func VectorDBAvailable() bool {
 func SkipIfNoInfrastructure(t *testing.T) {
 	t.Helper()
 	if !TestInfrastructureAvailable() {
-		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true and run docker-compose.full-test.yml)")
+		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true and run docker-compose.full-test.yml)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -70,7 +70,7 @@ func SkipIfNoInfrastructure(t *testing.T) {
 func SkipIfNoDatabase(t *testing.T) {
 	t.Helper()
 	if !DatabaseAvailable() {
-		t.Skip("Database not available for testing (set HELIX_DATABASE_HOST or run test infrastructure)")
+		t.Skip("Database not available for testing (set HELIX_DATABASE_HOST or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -78,7 +78,7 @@ func SkipIfNoDatabase(t *testing.T) {
 func SkipIfNoRedis(t *testing.T) {
 	t.Helper()
 	if !RedisAvailable() {
-		t.Skip("Redis not available for testing (set HELIX_REDIS_HOST or run test infrastructure)")
+		t.Skip("Redis not available for testing (set HELIX_REDIS_HOST or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -86,7 +86,7 @@ func SkipIfNoRedis(t *testing.T) {
 func SkipIfNoOllama(t *testing.T) {
 	t.Helper()
 	if !OllamaAvailable() {
-		t.Skip("Ollama not available for testing (set OLLAMA_HOST or run test infrastructure)")
+		t.Skip("Ollama not available for testing (set OLLAMA_HOST or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -94,7 +94,7 @@ func SkipIfNoOllama(t *testing.T) {
 func SkipIfNoMockLLM(t *testing.T) {
 	t.Helper()
 	if !MockLLMAvailable() {
-		t.Skip("Mock LLM server not available (set HELIX_TEST_MOCK_LLM_URL or run test infrastructure)")
+		t.Skip("Mock LLM server not available (set HELIX_TEST_MOCK_LLM_URL or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -102,7 +102,7 @@ func SkipIfNoMockLLM(t *testing.T) {
 func SkipIfNoSSH(t *testing.T) {
 	t.Helper()
 	if !SSHServerAvailable() {
-		t.Skip("SSH server not available for testing (set HELIX_TEST_SSH_HOST or run test infrastructure)")
+		t.Skip("SSH server not available for testing (set HELIX_TEST_SSH_HOST or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -110,7 +110,7 @@ func SkipIfNoSSH(t *testing.T) {
 func SkipIfNoBrowser(t *testing.T) {
 	t.Helper()
 	if !BrowserAvailable() {
-		t.Skip("Browser automation not available (set HELIX_TEST_SELENIUM_URL or run test infrastructure)")
+		t.Skip("Browser automation not available (set HELIX_TEST_SELENIUM_URL or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -118,7 +118,7 @@ func SkipIfNoBrowser(t *testing.T) {
 func SkipIfNoCognee(t *testing.T) {
 	t.Helper()
 	if !CogneeAvailable() {
-		t.Skip("Cognee not available for testing (set HELIX_TEST_COGNEE_URL or run test infrastructure)")
+		t.Skip("Cognee not available for testing (set HELIX_TEST_COGNEE_URL or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -126,7 +126,7 @@ func SkipIfNoCognee(t *testing.T) {
 func SkipIfNoVectorDB(t *testing.T) {
 	t.Helper()
 	if !VectorDBAvailable() {
-		t.Skip("Vector database not available (set HELIX_TEST_*_URL or run test infrastructure)")
+		t.Skip("Vector database not available (set HELIX_TEST_*_URL or run test infrastructure)")  // SKIP-OK: #legacy-untriaged
 	}
 }
 

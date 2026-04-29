@@ -20,7 +20,7 @@ func TestAnthropicProviderFullAutomation(t *testing.T) {
 	// Get API key from environment
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
-		t.Skip("ANTHROPIC_API_KEY environment variable not set, skipping real API tests")
+		t.Skip("ANTHROPIC_API_KEY environment variable not set, skipping real API tests")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Get endpoint from environment or use default

@@ -160,7 +160,7 @@ func TestCompletionResponse_Structure(t *testing.T) {
 // Integration test - only runs if API key is available
 func TestLLMClient_OllamaIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// This test requires Ollama to be running locally
@@ -184,7 +184,7 @@ func TestLLMClient_OllamaIntegration(t *testing.T) {
 	// If Ollama isn't running, we expect a connection error
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			t.Skip("Ollama not available (timeout)")
+			t.Skip("Ollama not available (timeout)")  // SKIP-OK: #legacy-untriaged
 		}
 		// Connection refused is also acceptable
 		t.Logf("Ollama not available: %v", err)

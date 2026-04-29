@@ -34,7 +34,7 @@ func TestCloudProvider_OpenAI_Generate(t *testing.T) {
 
 	// Skip if it's a mock key
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping OpenAI test - mock API key detected")
+		t.Skip("Skipping OpenAI test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -78,7 +78,7 @@ func TestCloudProvider_OpenAI_Health(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "OPENAI_API_KEY", "OPENAI_API_KEY not set, skipping OpenAI health test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping OpenAI test - mock API key detected")
+		t.Skip("Skipping OpenAI test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -113,7 +113,7 @@ func TestCloudProvider_Anthropic_Generate(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY not set, skipping Anthropic integration test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Anthropic test - mock API key detected")
+		t.Skip("Skipping Anthropic test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -156,7 +156,7 @@ func TestCloudProvider_Anthropic_Health(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY not set, skipping Anthropic health test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Anthropic test - mock API key detected")
+		t.Skip("Skipping Anthropic test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -190,7 +190,7 @@ func TestCloudProvider_Gemini_Generate(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "GEMINI_API_KEY", "GEMINI_API_KEY not set, skipping Gemini integration test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Gemini test - mock API key detected")
+		t.Skip("Skipping Gemini test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -233,7 +233,7 @@ func TestCloudProvider_Gemini_Health(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "GEMINI_API_KEY", "GEMINI_API_KEY not set, skipping Gemini health test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Gemini test - mock API key detected")
+		t.Skip("Skipping Gemini test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -267,7 +267,7 @@ func TestCloudProvider_Groq_Generate(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "GROQ_API_KEY", "GROQ_API_KEY not set, skipping Groq integration test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Groq test - mock API key detected")
+		t.Skip("Skipping Groq test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -310,7 +310,7 @@ func TestCloudProvider_Groq_Health(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "GROQ_API_KEY", "GROQ_API_KEY not set, skipping Groq health test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Groq test - mock API key detected")
+		t.Skip("Skipping Groq test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -340,7 +340,7 @@ func TestCloudProvider_Groq_Streaming(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "GROQ_API_KEY", "GROQ_API_KEY not set, skipping Groq streaming test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping Groq test - mock API key detected")
+		t.Skip("Skipping Groq test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -405,7 +405,7 @@ func TestCloudProvider_XAI_Generate(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "XAI_API_KEY", "XAI_API_KEY not set, skipping XAI integration test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping XAI test - mock API key detected")
+		t.Skip("Skipping XAI test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -449,7 +449,7 @@ func TestCloudProvider_OpenRouter_Generate(t *testing.T) {
 	apiKey := getEnvOrSkip(t, "OPENROUTER_API_KEY", "OPENROUTER_API_KEY not set, skipping OpenRouter integration test")
 
 	if strings.Contains(apiKey, "mock") {
-		t.Skip("Skipping OpenRouter test - mock API key detected")
+		t.Skip("Skipping OpenRouter test - mock API key detected")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := ProviderConfigEntry{
@@ -589,7 +589,7 @@ func TestCloudProvider_MultiProvider_Comparison(t *testing.T) {
 	}
 
 	if testedProviders == 0 {
-		t.Skip("No cloud providers configured for multi-provider comparison test")
+		t.Skip("No cloud providers configured for multi-provider comparison test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Logf("✅ Multi-provider comparison complete: %d providers tested", testedProviders)

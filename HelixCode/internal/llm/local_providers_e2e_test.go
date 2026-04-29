@@ -73,7 +73,7 @@ func testE2EGeneration(t *testing.T, provider Provider, providerName string) {
 	ctx := context.Background()
 	models := provider.GetModels()
 	if len(models) == 0 {
-		t.Skip("No models available for generation test")
+		t.Skip("No models available for generation test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	request := &LLMRequest{
@@ -103,7 +103,7 @@ func testE2EStreaming(t *testing.T, provider Provider, providerName string) {
 	ctx := context.Background()
 	models := provider.GetModels()
 	if len(models) == 0 {
-		t.Skip("No models available for streaming test")
+		t.Skip("No models available for streaming test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	request := &LLMRequest{

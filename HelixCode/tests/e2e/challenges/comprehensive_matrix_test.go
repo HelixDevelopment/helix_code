@@ -19,7 +19,7 @@ type ComprehensiveTestMatrix struct {
 // TestComprehensiveMatrix runs ALL combinations: models × distributions × challenges
 func TestComprehensiveMatrix(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping comprehensive matrix test in short mode")
+		t.Skip("Skipping comprehensive matrix test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -264,7 +264,7 @@ func testProvider(t *testing.T, executor *ChallengeExecutor, tm ComprehensiveTes
 // TestPhase1_Quick runs a quick subset to verify the framework works
 func TestPhase1_Quick(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping in short mode")
+		t.Skip("Skipping in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()

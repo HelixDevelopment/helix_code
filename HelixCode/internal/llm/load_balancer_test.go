@@ -435,7 +435,7 @@ func TestLoadBalancer_SelectOptimalProvider(t *testing.T) {
 	t.Run("returns nil with nil manager", func(t *testing.T) {
 		// This test requires AutoLLMManager setup
 		// Skip for now as it needs integration test infrastructure
-		t.Skip("requires AutoLLMManager setup")
+		t.Skip("requires AutoLLMManager setup")  // SKIP-OK: #legacy-untriaged
 	})
 }
 

@@ -48,7 +48,7 @@ func (e *Executor) Execute(ctx context.Context, hook *Hook, event *Event) *Execu
 
 	// Check if hook should execute
 	if !hook.ShouldExecute(event) {
-		result.Skip()
+		result.Skip()  // SKIP-OK: #legacy-untriaged
 		e.addResult(result)
 		return result
 	}
@@ -105,7 +105,7 @@ func (e *Executor) ExecuteSync(ctx context.Context, hooks []*Hook, event *Event)
 		result := NewExecutionResult(hook)
 
 		if !hook.ShouldExecute(event) {
-			result.Skip()
+			result.Skip()  // SKIP-OK: #legacy-untriaged
 			e.addResult(result)
 			results = append(results, result)
 			continue

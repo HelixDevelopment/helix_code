@@ -86,7 +86,7 @@ func TestHardwareDetection(t *testing.T) {
 
 func TestHardwareOptimizedProviders(t *testing.T) {
 	if testing.Short() || os.Getenv("SKIP_HARDWARE_TESTS") == "true" {
-		t.Skip("Skipping hardware tests in short mode")
+		t.Skip("Skipping hardware tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	hwInfo, err := detectHardware()
@@ -114,7 +114,7 @@ func TestRealModelExecution(t *testing.T) {
 	// Skip by default - these tests require real LLM providers to be installed and configured
 	// Enable with RUN_REAL_EXECUTION=true
 	if os.Getenv("RUN_REAL_EXECUTION") != "true" {
-		t.Skip("Skipping real model execution tests - set RUN_REAL_EXECUTION=true to enable")
+		t.Skip("Skipping real model execution tests - set RUN_REAL_EXECUTION=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 
 	hwInfo, err := detectHardware()
@@ -124,7 +124,7 @@ func TestRealModelExecution(t *testing.T) {
 	models := selectModelsForHardware(hwInfo)
 
 	if len(models) == 0 {
-		t.Skip("No suitable models for available hardware")
+		t.Skip("No suitable models for available hardware")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -147,7 +147,7 @@ func TestPerformanceBenchmarks(t *testing.T) {
 	// Skip by default - these tests require LLM providers for benchmarking
 	// Enable with RUN_BENCHMARKS=true
 	if os.Getenv("RUN_BENCHMARKS") != "true" {
-		t.Skip("Skipping performance benchmarks - set RUN_BENCHMARKS=true to enable")
+		t.Skip("Skipping performance benchmarks - set RUN_BENCHMARKS=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 
 	hwInfo, err := detectHardware()
@@ -156,7 +156,7 @@ func TestPerformanceBenchmarks(t *testing.T) {
 	// Select best provider for benchmarking
 	provider := selectBestProviderForBenchmarks(hwInfo)
 	if provider == "" {
-		t.Skip("No suitable provider for benchmarking")
+		t.Skip("No suitable provider for benchmarking")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -179,7 +179,7 @@ func TestResourceUtilization(t *testing.T) {
 	// Skip by default - these tests require LLM providers
 	// Enable with RUN_RESOURCE_TESTS=true
 	if os.Getenv("RUN_RESOURCE_TESTS") != "true" {
-		t.Skip("Skipping resource utilization tests - set RUN_RESOURCE_TESTS=true to enable")
+		t.Skip("Skipping resource utilization tests - set RUN_RESOURCE_TESTS=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 
 	hwInfo, err := detectHardware()
@@ -193,7 +193,7 @@ func TestCrossPlatformCompatibility(t *testing.T) {
 	// Skip by default - these tests check provider compatibility which may require installation
 	// Enable with RUN_CROSS_PLATFORM=true
 	if os.Getenv("RUN_CROSS_PLATFORM") != "true" {
-		t.Skip("Skipping cross-platform tests - set RUN_CROSS_PLATFORM=true to enable")
+		t.Skip("Skipping cross-platform tests - set RUN_CROSS_PLATFORM=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 
 	hwInfo, err := detectHardware()
@@ -627,7 +627,7 @@ func testRealModelExecution(t *testing.T, hwInfo *HardwareInfo, model TestModel)
 	// Select best provider for this model
 	provider := selectBestProviderForModel(model, hwInfo)
 	if provider == "" {
-		t.Skip("No suitable provider for model")
+		t.Skip("No suitable provider for model")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -672,13 +672,13 @@ func testResourceUtilization(t *testing.T, hwInfo *HardwareInfo) {
 	// Select provider and model for testing
 	provider := selectBestProviderForBenchmarks(hwInfo)
 	if provider == "" {
-		t.Skip("No suitable provider for resource testing")
+		t.Skip("No suitable provider for resource testing")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
 	models := selectModelsForHardware(hwInfo)
 	if len(models) == 0 {
-		t.Skip("No suitable models for resource testing")
+		t.Skip("No suitable models for resource testing")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 	model := models[0]

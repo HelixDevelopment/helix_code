@@ -330,7 +330,7 @@ func TestLanguageRegistry(t *testing.T) {
 		_, err := registry.GetByExtension(".go")
 		// Should error since no parser registered
 		if err == nil {
-			t.Skip("Parser already registered")
+			t.Skip("Parser already registered")  // SKIP-OK: #legacy-untriaged
 		}
 	})
 }
@@ -551,7 +551,7 @@ func TestMapCodebase(t *testing.T) {
 
 		// If no files were mapped, skip (no parsers available)
 		if cmap.TotalFiles == 0 {
-			t.Skip("No files mapped - tree-sitter parsers not available")
+			t.Skip("No files mapped - tree-sitter parsers not available")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -591,7 +591,7 @@ func TestMapCodebase(t *testing.T) {
 
 		// If no files were mapped, skip (no parsers available)
 		if cmap.TotalFiles == 0 {
-			t.Skip("No files mapped - tree-sitter parsers not available")
+			t.Skip("No files mapped - tree-sitter parsers not available")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 

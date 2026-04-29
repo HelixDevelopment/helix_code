@@ -209,7 +209,7 @@ func TestGitMentionHandler(t *testing.T) {
 	ctx := context.Background()
 	testCmd := exec.CommandContext(ctx, "git", "status")
 	if err := testCmd.Run(); err != nil {
-		t.Skip("Not in a git repository or git not available")
+		t.Skip("Not in a git repository or git not available")  // SKIP-OK: #legacy-untriaged
 	}
 
 	handler := NewGitMentionHandler(".")
@@ -238,7 +238,7 @@ func TestGitMentionHandler(t *testing.T) {
 		result, err := handler.Resolve(ctx, "HEAD", nil)
 
 		if err != nil {
-			t.Skip("Could not resolve HEAD commit (repo might be empty)")
+			t.Skip("Could not resolve HEAD commit (repo might be empty)")  // SKIP-OK: #legacy-untriaged
 		}
 
 		assert.Equal(t, MentionTypeCommit, result.Type)

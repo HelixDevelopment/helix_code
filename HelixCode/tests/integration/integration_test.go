@@ -98,13 +98,13 @@ func skipIfAuthNotConfigured(t *testing.T, config *TestConfig) {
 
 	// If we get 404, the endpoint doesn't exist
 	if resp.StatusCode == http.StatusNotFound {
-		t.Skip("Skipping test: auth endpoint not implemented on server")
+		t.Skip("Skipping test: auth endpoint not implemented on server")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
 	// If we get 401, the test user isn't configured (this is expected in CI)
 	if resp.StatusCode == http.StatusUnauthorized {
-		t.Skip("Skipping test: test admin user not configured on server")
+		t.Skip("Skipping test: test admin user not configured on server")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -183,7 +183,7 @@ func (c *TestClient) do(method, path string, body interface{}) (*http.Response, 
 // Test Suite: Basic Health Checks
 func TestHealthEndpoint(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -211,7 +211,7 @@ func TestHealthEndpoint(t *testing.T) {
 // Test Suite: Authentication Flow
 func TestAuthenticationFlow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -232,7 +232,7 @@ func TestAuthenticationFlow(t *testing.T) {
 	}
 	resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
-		t.Skip("Skipping test: auth endpoint not implemented on server")
+		t.Skip("Skipping test: auth endpoint not implemented on server")  // SKIP-OK: #legacy-untriaged
 	}
 
 	testClient := NewTestClient(config)
@@ -283,7 +283,7 @@ func TestAuthenticationFlow(t *testing.T) {
 // Test Suite: Task Management
 func TestTaskCreationAndRetrieval(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -305,7 +305,7 @@ func TestTaskCreationAndRetrieval(t *testing.T) {
 
 	// Skip if we get 401 (auth required but not properly configured)
 	if resp.StatusCode == http.StatusUnauthorized {
-		t.Skip("Skipping test: authentication required but not configured")
+		t.Skip("Skipping test: authentication required but not configured")  // SKIP-OK: #legacy-untriaged
 	}
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
@@ -341,7 +341,7 @@ func TestTaskCreationAndRetrieval(t *testing.T) {
 // Test Suite: Worker Management
 func TestWorkerRegistrationAndHeartbeat(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -365,7 +365,7 @@ func TestWorkerRegistrationAndHeartbeat(t *testing.T) {
 
 	// Skip if we get 401 (auth required but not properly configured)
 	if resp.StatusCode == http.StatusUnauthorized {
-		t.Skip("Skipping test: authentication required but not configured")
+		t.Skip("Skipping test: authentication required but not configured")  // SKIP-OK: #legacy-untriaged
 	}
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -393,7 +393,7 @@ func TestWorkerRegistrationAndHeartbeat(t *testing.T) {
 // Test Suite: End-to-End Workflow
 func TestCompleteWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -417,7 +417,7 @@ func TestCompleteWorkflow(t *testing.T) {
 
 	projectIDValue, ok := projectResp["id"]
 	if !ok || projectIDValue == nil {
-		t.Skip("Server did not return project ID - server may not be fully configured")
+		t.Skip("Server did not return project ID - server may not be fully configured")  // SKIP-OK: #legacy-untriaged
 	}
 	projectID, ok := projectIDValue.(string)
 	if !ok {
@@ -479,7 +479,7 @@ func TestCompleteWorkflow(t *testing.T) {
 // Test Suite: Concurrent Operations
 func TestConcurrentTaskCreation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := LoadTestConfig()
@@ -499,10 +499,10 @@ func TestConcurrentTaskCreation(t *testing.T) {
 	}
 	preCheck.Body.Close()
 	if preCheck.StatusCode == http.StatusUnauthorized {
-		t.Skip("Skipping test: authentication required but not configured")
+		t.Skip("Skipping test: authentication required but not configured")  // SKIP-OK: #legacy-untriaged
 	}
 	if preCheck.StatusCode == http.StatusNotFound {
-		t.Skip("Skipping test: tasks endpoint not implemented")
+		t.Skip("Skipping test: tasks endpoint not implemented")  // SKIP-OK: #legacy-untriaged
 	}
 
 	numTasks := 10

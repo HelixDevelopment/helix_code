@@ -100,7 +100,7 @@ func TestMemory_LeakDetection_RepeatedRequests(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping memory leak test")
+		t.Skip("Server not available, skipping memory leak test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -151,7 +151,7 @@ func TestMemory_LeakDetection_ConcurrentRequests(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping memory leak test")
+		t.Skip("Server not available, skipping memory leak test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -205,7 +205,7 @@ func TestMemory_LeakDetection_JSONParsing(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping memory leak test")
+		t.Skip("Server not available, skipping memory leak test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -272,7 +272,7 @@ func TestMemory_Allocation_LargePayloads(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping allocation test")
+		t.Skip("Server not available, skipping allocation test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -348,7 +348,7 @@ func TestMemory_Allocation_ConnectionPooling(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping connection pool test")
+		t.Skip("Server not available, skipping connection pool test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -395,7 +395,7 @@ func TestMemory_GCPressure_HighAllocationRate(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping GC pressure test")
+		t.Skip("Server not available, skipping GC pressure test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -468,7 +468,7 @@ func TestMemory_GCPressure_BurstTraffic(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping burst traffic test")
+		t.Skip("Server not available, skipping burst traffic test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -528,7 +528,7 @@ func TestMemory_ResourceCleanup_Goroutines(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping goroutine leak test")
+		t.Skip("Server not available, skipping goroutine leak test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -577,7 +577,7 @@ func TestMemory_ResourceCleanup_FileDescriptors(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping file descriptor test")
+		t.Skip("Server not available, skipping file descriptor test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -605,7 +605,7 @@ func TestMemory_ResourceCleanup_Contexts(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping context cleanup test")
+		t.Skip("Server not available, skipping context cleanup test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -675,7 +675,7 @@ func TestMemory_Profiling_IdleServerMemory(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping idle memory test")
+		t.Skip("Server not available, skipping idle memory test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -703,7 +703,7 @@ func TestMemory_Profiling_IdleServerMemory(t *testing.T) {
 // TestMemory_Stress_SustainedLoad tests memory stability under sustained load
 func TestMemory_Stress_SustainedLoad(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping sustained load test in short mode")
+		t.Skip("Skipping sustained load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultTestConfig()
@@ -712,7 +712,7 @@ func TestMemory_Stress_SustainedLoad(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping sustained load test")
+		t.Skip("Server not available, skipping sustained load test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 

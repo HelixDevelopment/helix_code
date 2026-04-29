@@ -25,7 +25,7 @@ const (
 // Test scenarios for complete user workflows
 func TestCompleteUserWorkflows(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping E2E tests in short mode")
+		t.Skip("Skipping E2E tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Build CLI
@@ -59,7 +59,7 @@ func TestCompleteUserWorkflows(t *testing.T) {
 
 func TestCLICommands(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping CLI tests in short mode")
+		t.Skip("Skipping CLI tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Build CLI
@@ -109,7 +109,7 @@ func TestCLICommands(t *testing.T) {
 
 func TestRealModelWorkflow(t *testing.T) {
 	if testing.Short() || os.Getenv("SKIP_REAL_MODEL_TESTS") == "true" {
-		t.Skip("Skipping real model tests")
+		t.Skip("Skipping real model tests")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Build CLI
@@ -561,7 +561,7 @@ func testRealModelWorkflow(t *testing.T) {
 	}
 
 	if len(workingModels) == 0 {
-		t.Skip("No working models available in test environment")
+		t.Skip("No working models available in test environment")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 

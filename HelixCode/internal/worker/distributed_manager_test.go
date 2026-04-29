@@ -11,7 +11,7 @@ import (
 // TestDistributedWorkerManager tests the distributed worker manager
 func TestDistributedWorkerManager(t *testing.T) {
 	// Skip this test for now as it requires SSH setup
-	t.Skip("Skipping distributed worker manager test - requires SSH setup")
+	t.Skip("Skipping distributed worker manager test - requires SSH setup")  // SKIP-OK: #requires-ssh
 
 	config := WorkerConfig{
 		Enabled: true,
@@ -122,7 +122,7 @@ func TestWorkerConfigValidation(t *testing.T) {
 // TestTaskPriority tests task priority handling
 func TestTaskPriority(t *testing.T) {
 	// Skip this test as it requires SSH setup
-	t.Skip("Skipping task priority test - requires SSH setup")
+	t.Skip("Skipping task priority test - requires SSH setup")  // SKIP-OK: #requires-ssh
 
 	// Test task creation without SSH
 	tasks := []struct {
@@ -267,7 +267,7 @@ func TestWorkerHealthMonitoring(t *testing.T) {
 	// Get worker and simulate health updates
 	workers := manager.GetAvailableWorkers()
 	if len(workers) == 0 {
-		t.Skip("No workers available for health monitoring test")
+		t.Skip("No workers available for health monitoring test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	worker := workers[0]

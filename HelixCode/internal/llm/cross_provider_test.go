@@ -111,7 +111,7 @@ func TestCrossProviderRegistry(t *testing.T) {
 func TestLocalLLMManagerCrossProvider(t *testing.T) {
 	// Skip test when external dependencies (git repo context, pip) are not available
 	// This test tries to clone repositories and build providers which requires proper tooling
-	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")
+	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")  // SKIP-OK: #integration-mode-only
 
 	baseDir := t.TempDir()
 	manager := NewLocalLLMManager(baseDir)
@@ -181,7 +181,7 @@ func TestLocalLLMManagerCrossProvider(t *testing.T) {
 func TestModelSharing(t *testing.T) {
 	// Skip test when external dependencies (git repo context, pip) are not available
 	// This test tries to clone repositories and build providers which requires proper tooling
-	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")
+	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")  // SKIP-OK: #integration-mode-only
 
 	baseDir := t.TempDir()
 	manager := NewLocalLLMManager(baseDir)
@@ -269,7 +269,7 @@ func TestModelConversion(t *testing.T) {
 func TestHardwareCompatibility(t *testing.T) {
 	// Skip test when external dependencies (git repo context, pip) are not available
 	// This test tries to clone repositories and build providers which requires proper tooling
-	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")
+	t.Skip("Skipping integration test that requires external dependencies (git, pip, provider installations)")  // SKIP-OK: #integration-mode-only
 
 	baseDir := t.TempDir()
 	manager := NewLocalLLMManager(baseDir)
@@ -352,7 +352,7 @@ func BenchmarkModelSharing(b *testing.B) {
 // TestIntegrationWorkflow tests complete integration workflow
 func TestIntegrationWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	baseDir := t.TempDir()

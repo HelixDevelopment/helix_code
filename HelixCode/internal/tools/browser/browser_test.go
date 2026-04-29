@@ -17,7 +17,7 @@ func TestChromeDiscovery(t *testing.T) {
 	t.Run("find chrome", func(t *testing.T) {
 		path, err := discovery.FindChrome()
 		if err != nil {
-			t.Skip("Chrome not installed, skipping test")
+			t.Skip("Chrome not installed, skipping test")  // SKIP-OK: #legacy-untriaged
 		}
 		assert.NotEmpty(t, path)
 
@@ -34,7 +34,7 @@ func TestChromeDiscovery(t *testing.T) {
 	t.Run("find chrome version", func(t *testing.T) {
 		path, err := discovery.FindChrome()
 		if err != nil {
-			t.Skip("Chrome not installed, skipping test")
+			t.Skip("Chrome not installed, skipping test")  // SKIP-OK: #legacy-untriaged
 		}
 
 		version, err := discovery.FindChromeVersion(path)
@@ -49,7 +49,7 @@ func TestChromeDiscovery(t *testing.T) {
 	t.Run("find all chrome installations", func(t *testing.T) {
 		chromes, err := discovery.FindAll()
 		if err != nil {
-			t.Skip("No Chrome installations found, skipping test")
+			t.Skip("No Chrome installations found, skipping test")  // SKIP-OK: #legacy-untriaged
 		}
 
 		assert.NotEmpty(t, chromes, "Should find at least one Chrome installation")
@@ -61,7 +61,7 @@ func TestChromeDiscovery(t *testing.T) {
 	t.Run("get preferred chrome", func(t *testing.T) {
 		path, err := GetPreferredChrome()
 		if err != nil {
-			t.Skip("No Chrome installation found, skipping test")
+			t.Skip("No Chrome installation found, skipping test")  // SKIP-OK: #legacy-untriaged
 		}
 		assert.NotEmpty(t, path)
 		t.Logf("Preferred Chrome: %s", path)

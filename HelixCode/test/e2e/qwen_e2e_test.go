@@ -20,7 +20,7 @@ func TestQwenProviderEndToEnd(t *testing.T) {
 	// Skip if no API key
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY environment variable not set, skipping e2e test")
+		t.Skip("QWEN_API_KEY environment variable not set, skipping e2e test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Setup test environment
@@ -193,7 +193,7 @@ The cache should have a maximum capacity and evict the least recently used items
 		qwenModels := filterModelsByProvider(models, llm.ProviderTypeQwen)
 
 		if len(qwenModels) < 2 {
-			t.Skip("Need at least 2 Qwen models for comparison test")
+			t.Skip("Need at least 2 Qwen models for comparison test")  // SKIP-OK: #legacy-untriaged
 		}
 
 		testPrompt := "Explain quantum computing in simple terms."
@@ -260,12 +260,12 @@ func TestQwenProviderDistributedWorkflow(t *testing.T) {
 	// This test would require setting up distributed workers
 	// For now, skip if not in full distributed environment
 	if os.Getenv("DISTRIBUTED_TEST") != "true" {
-		t.Skip("Skipping distributed workflow test - set DISTRIBUTED_TEST=true to run")
+		t.Skip("Skipping distributed workflow test - set DISTRIBUTED_TEST=true to run")  // SKIP-OK: #legacy-untriaged
 	}
 
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY not set")
+		t.Skip("QWEN_API_KEY not set")  // SKIP-OK: #requires-upstream-key
 	}
 
 	env := SetupTestEnvironment(t)

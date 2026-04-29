@@ -16,7 +16,7 @@ import (
 // TestRealAIReasoning tests reasoning with real AI models
 func TestRealAIReasoning(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping real AI test in short mode")
+		t.Skip("Skipping real AI test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
@@ -34,7 +34,7 @@ func TestRealAIReasoning(t *testing.T) {
 	// Test with available providers
 	availableProviders := providerManager.GetAvailableProviders()
 	if len(availableProviders) == 0 {
-		t.Skip("No LLM providers available for automation testing")
+		t.Skip("No LLM providers available for automation testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Test reasoning with each available provider
@@ -71,7 +71,7 @@ func TestRealAIReasoning(t *testing.T) {
 // TestDistributedTaskExecution tests distributed task execution
 func TestDistributedTaskExecution(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping distributed task test in short mode")
+		t.Skip("Skipping distributed task test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -114,7 +114,7 @@ func TestDistributedTaskExecution(t *testing.T) {
 // TestPerformanceBenchmarks tests performance benchmarks
 func TestPerformanceBenchmarks(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance benchmarks in short mode")
+		t.Skip("Skipping performance benchmarks in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -154,7 +154,7 @@ func TestPerformanceBenchmarks(t *testing.T) {
 // TestConcurrentOperations tests concurrent operations
 func TestConcurrentOperations(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping concurrent operations test in short mode")
+		t.Skip("Skipping concurrent operations test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -190,7 +190,7 @@ func TestConcurrentOperations(t *testing.T) {
 // TestResourceUsage tests resource usage patterns
 func TestResourceUsage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping resource usage test in short mode")
+		t.Skip("Skipping resource usage test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -228,7 +228,7 @@ func TestResourceUsage(t *testing.T) {
 // TestErrorRecovery tests automatic error recovery
 func TestErrorRecovery(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping error recovery test in short mode")
+		t.Skip("Skipping error recovery test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -256,7 +256,7 @@ func TestErrorRecovery(t *testing.T) {
 // TestLongRunningOperations tests long-running operations
 func TestLongRunningOperations(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping long-running operations test in short mode")
+		t.Skip("Skipping long-running operations test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)

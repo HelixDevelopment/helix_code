@@ -183,7 +183,7 @@ func BenchmarkAuthLogin(b *testing.B) {
 
 func TestPerformance_HealthEndpointThroughput(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()
@@ -263,7 +263,7 @@ func TestPerformance_HealthEndpointThroughput(t *testing.T) {
 
 func TestPerformance_ConcurrentProjectCreation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()
@@ -330,7 +330,7 @@ func TestPerformance_ConcurrentProjectCreation(t *testing.T) {
 
 func TestPerformance_SustainedLoad(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()
@@ -403,7 +403,7 @@ results:
 
 func TestPerformance_ConnectionPooling(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()
@@ -450,7 +450,7 @@ func TestPerformance_ConnectionPooling(t *testing.T) {
 
 func TestPerformance_MemoryUnderLoad(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()
@@ -516,7 +516,7 @@ func TestPerformance_ResponseSize(t *testing.T) {
 
 func TestPerformance_ErrorRecovery(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getTestConfig()

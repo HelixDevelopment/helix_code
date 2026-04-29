@@ -246,7 +246,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 	t.Logf("   Failed: %d", testedProviders-successfulProviders)
 
 	if testedProviders == 0 {
-		t.Skip("No free provider API keys available for testing")
+		t.Skip("No free provider API keys available for testing")  // SKIP-OK: #requires-upstream-key
 	}
 
 	assert.Greater(t, successfulProviders, 0, "At least one free provider should work")

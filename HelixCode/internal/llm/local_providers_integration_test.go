@@ -281,7 +281,7 @@ func TestAllLocalProvidersIntegration(t *testing.T) {
 	}
 
 	if availableProviders == 0 {
-		t.Skip("No local providers available for integration testing")
+		t.Skip("No local providers available for integration testing")  // SKIP-OK: #integration-mode-only
 	}
 
 	t.Logf("✅ %d out of %d local providers are available", availableProviders, len(providers))
@@ -309,7 +309,7 @@ func TestLocalProviderStreaming(t *testing.T) {
 
 	ctx := context.Background()
 	if !provider.IsAvailable(ctx) {
-		t.Skip("Provider not available for streaming test")
+		t.Skip("Provider not available for streaming test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Test streaming

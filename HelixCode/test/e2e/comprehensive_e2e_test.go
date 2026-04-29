@@ -19,7 +19,7 @@ import (
 // TestCompleteDistributedWorkflow tests a complete distributed AI workflow
 func TestCompleteDistributedWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping complete workflow test in short mode")
+		t.Skip("Skipping complete workflow test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -160,7 +160,7 @@ func TestCompleteDistributedWorkflow(t *testing.T) {
 // TestRealAIEndToEnd tests real AI integration end-to-end
 func TestRealAIEndToEnd(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping real AI end-to-end test in short mode")
+		t.Skip("Skipping real AI end-to-end test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
@@ -180,7 +180,7 @@ func TestRealAIEndToEnd(t *testing.T) {
 	// Get available providers
 	availableProviders := providerManager.GetAvailableProviders()
 	if len(availableProviders) == 0 {
-		t.Skip("No LLM providers available for end-to-end testing")
+		t.Skip("No LLM providers available for end-to-end testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Logf("Found %d available LLM providers", len(availableProviders))
@@ -241,7 +241,7 @@ Please provide a step-by-step architecture design.`,
 // TestScalabilityEndToEnd tests system scalability
 func TestScalabilityEndToEnd(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping scalability test in short mode")
+		t.Skip("Skipping scalability test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -299,7 +299,7 @@ func TestScalabilityEndToEnd(t *testing.T) {
 // TestFaultToleranceEndToEnd tests system fault tolerance
 func TestFaultToleranceEndToEnd(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping fault tolerance test in short mode")
+		t.Skip("Skipping fault tolerance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	ctx := context.Background()
@@ -357,7 +357,7 @@ func TestFaultToleranceEndToEnd(t *testing.T) {
 // TestCrossPlatformEndToEnd tests cross-platform compatibility
 func TestCrossPlatformEndToEnd(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping cross-platform test in short mode")
+		t.Skip("Skipping cross-platform test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	t.Log("🌐 Starting cross-platform end-to-end test")

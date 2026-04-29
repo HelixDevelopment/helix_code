@@ -12,7 +12,7 @@ func TestCLIHelp(t *testing.T) {
 
 	// CLI might not exist in test environment
 	if err != nil {
-		t.Skip("CLI not available for testing")
+		t.Skip("CLI not available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	if len(output) == 0 {
@@ -27,7 +27,7 @@ func TestCLICommands(t *testing.T) {
 
 	// CLI might not exist in test environment
 	if err != nil {
-		t.Skip("CLI not available for testing")
+		t.Skip("CLI not available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	if len(output) == 0 {

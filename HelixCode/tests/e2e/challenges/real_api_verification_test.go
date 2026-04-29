@@ -206,7 +206,7 @@ func TestNoMockGeneratorInProduction(t *testing.T) {
 // This test addresses the critical bug where all 21 ASCII art tests had
 // identical MD5 hash: cdde8a3be5b39ca5e58a644e01052132
 func TestVerifyCodeDiversityAcrossProviders(t *testing.T) {
-	t.Skip("Skipping until LLM APIs are configured - requires real API keys and running services")
+	t.Skip("Skipping until LLM APIs are configured - requires real API keys and running services")  // SKIP-OK: #requires-upstream-key
 
 	// This test would:
 	// 1. Execute same challenge with 2+ different providers

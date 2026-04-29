@@ -12,7 +12,7 @@ import (
 // TestAllChallenges runs all challenges with Ollama (local provider)
 func TestAllChallenges(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -29,7 +29,7 @@ func TestAllChallenges(t *testing.T) {
 	}
 
 	if len(challengeFiles) == 0 {
-		t.Skip("No challenge definitions found")
+		t.Skip("No challenge definitions found")  // SKIP-OK: #legacy-untriaged
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -99,7 +99,7 @@ func TestAllChallenges(t *testing.T) {
 // TestASCIIArtGenerator specifically tests the ASCII art generator challenge
 func TestASCIIArtGenerator(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -143,7 +143,7 @@ func TestASCIIArtGenerator(t *testing.T) {
 // TestTicTacToeGame specifically tests the tic-tac-toe challenge
 func TestTicTacToeGame(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -185,7 +185,7 @@ func TestTicTacToeGame(t *testing.T) {
 // TestNotesAPI specifically tests the notes API challenge
 func TestNotesAPI(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()

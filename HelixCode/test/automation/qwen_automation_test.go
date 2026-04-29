@@ -21,7 +21,7 @@ func TestQwenProviderFullAutomation(t *testing.T) {
 	// Get API key from environment
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY environment variable not set, skipping real API tests")
+		t.Skip("QWEN_API_KEY environment variable not set, skipping real API tests")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Get endpoint from environment or use default
@@ -313,7 +313,7 @@ func TestQwenProviderFullAutomation(t *testing.T) {
 func TestQwenProviderLoadTest(t *testing.T) {
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY environment variable not set, skipping load test")
+		t.Skip("QWEN_API_KEY environment variable not set, skipping load test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{
@@ -420,7 +420,7 @@ func TestQwenProviderLoadTest(t *testing.T) {
 func TestQwenProviderModelCompatibility(t *testing.T) {
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY environment variable not set, skipping model compatibility test")
+		t.Skip("QWEN_API_KEY environment variable not set, skipping model compatibility test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{
@@ -480,7 +480,7 @@ func TestQwenProviderModelCompatibility(t *testing.T) {
 func TestQwenProviderRateLimits(t *testing.T) {
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("QWEN_API_KEY environment variable not set, skipping rate limit test")
+		t.Skip("QWEN_API_KEY environment variable not set, skipping rate limit test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := llm.ProviderConfigEntry{

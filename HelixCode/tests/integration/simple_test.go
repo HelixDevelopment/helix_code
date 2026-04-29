@@ -11,7 +11,7 @@ import (
 // Simple integration tests
 func TestSystemCommands(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test basic system commands
@@ -42,7 +42,7 @@ func TestSystemCommands(t *testing.T) {
 
 func TestNetworkConnectivity(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping network test in short mode")
+		t.Skip("Skipping network test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test basic network connectivity

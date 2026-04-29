@@ -44,7 +44,7 @@ type ProviderTest struct {
 
 func TestRealProviderIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration tests in short mode")
+		t.Skip("Skipping integration tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := &ProviderTestConfig{
@@ -69,7 +69,7 @@ func TestRealProviderIntegration(t *testing.T) {
 
 func TestModelSharingAcrossProviders(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration tests in short mode")
+		t.Skip("Skipping integration tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := &ProviderTestConfig{
@@ -81,7 +81,7 @@ func TestModelSharingAcrossProviders(t *testing.T) {
 	// Get available providers
 	providers := getAvailableProviders(t, config)
 	if len(providers) < 2 {
-		t.Skip("Need at least 2 providers for model sharing test")
+		t.Skip("Need at least 2 providers for model sharing test")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -109,7 +109,7 @@ func TestModelSharingAcrossProviders(t *testing.T) {
 
 func TestProviderFailover(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration tests in short mode")
+		t.Skip("Skipping integration tests in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := &ProviderTestConfig{
@@ -121,7 +121,7 @@ func TestProviderFailover(t *testing.T) {
 	// Get multiple providers for failover test
 	providers := getAvailableProviders(t, config)
 	if len(providers) < 2 {
-		t.Skip("Need at least 2 providers for failover test")
+		t.Skip("Need at least 2 providers for failover test")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -170,7 +170,7 @@ func TestProviderFailover(t *testing.T) {
 
 func TestPerformanceBenchmarks(t *testing.T) {
 	if testing.Short() || os.Getenv("SKIP_BENCHMARKS") == "true" {
-		t.Skip("Skipping benchmark tests")
+		t.Skip("Skipping benchmark tests")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := &ProviderTestConfig{
@@ -182,7 +182,7 @@ func TestPerformanceBenchmarks(t *testing.T) {
 	// Get best performing provider
 	providers := getAvailableProviders(t, config)
 	if len(providers) == 0 {
-		t.Skip("No providers available for benchmarking")
+		t.Skip("No providers available for benchmarking")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -207,7 +207,7 @@ func TestPerformanceBenchmarks(t *testing.T) {
 
 func TestLoadBalancing(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load balancing test")
+		t.Skip("Skipping load balancing test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := &ProviderTestConfig{
@@ -219,7 +219,7 @@ func TestLoadBalancing(t *testing.T) {
 	// Get multiple providers
 	providers := getAvailableProviders(t, config)
 	if len(providers) < 2 {
-		t.Skip("Need at least 2 providers for load balancing test")
+		t.Skip("Need at least 2 providers for load balancing test")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -253,10 +253,10 @@ func TestLoadBalancing(t *testing.T) {
 func TestModelConversion(t *testing.T) {
 	// Skip by default - requires explicit opt-in via environment variable
 	if os.Getenv("RUN_CONVERSION_TESTS") != "true" {
-		t.Skip("Skipping model conversion test - set RUN_CONVERSION_TESTS=true to enable")
+		t.Skip("Skipping model conversion test - set RUN_CONVERSION_TESTS=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 	if testing.Short() {
-		t.Skip("Skipping model conversion test in short mode")
+		t.Skip("Skipping model conversion test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := &ProviderTestConfig{
@@ -268,7 +268,7 @@ func TestModelConversion(t *testing.T) {
 	// Download a model in HF format
 	modelPath := downloadTestModel(t, config, "llama-3-8b-instruct-hf")
 	if modelPath == "" {
-		t.Skip("Skipping model conversion test - model download failed")
+		t.Skip("Skipping model conversion test - model download failed")  // SKIP-OK: #legacy-untriaged
 	}
 	require.FileExists(t, modelPath)
 
@@ -634,7 +634,7 @@ func testConvertedModel(t *testing.T, modelPath string) {
 
 func TestProviderEdgeCases(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping edge case tests")
+		t.Skip("Skipping edge case tests")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Test provider with invalid configuration
@@ -674,7 +674,7 @@ func testInsufficientResources(t *testing.T) {
 
 func TestProviderStress(t *testing.T) {
 	if testing.Short() || os.Getenv("SKIP_STRESS_TESTS") == "true" {
-		t.Skip("Skipping stress tests")
+		t.Skip("Skipping stress tests")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Logf("Running stress tests")

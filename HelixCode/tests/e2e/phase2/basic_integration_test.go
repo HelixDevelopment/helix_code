@@ -68,7 +68,7 @@ func TestBasicIntegration(t *testing.T) {
 	// Test 3: Test User Validation
 	t.Run("Test User Validation", func(t *testing.T) {
 		if len(framework.TestUsers) == 0 {
-			t.Skip("No test users available")
+			t.Skip("No test users available")  // SKIP-OK: #legacy-untriaged
 		}
 		
 		user := framework.TestUsers[0]
@@ -98,7 +98,7 @@ func TestBasicIntegration(t *testing.T) {
 	// Test 4: Test Project Validation  
 	t.Run("Test Project Validation", func(t *testing.T) {
 		if len(framework.TestProjects) == 0 {
-			t.Skip("No test projects available")
+			t.Skip("No test projects available")  // SKIP-OK: #legacy-untriaged
 		}
 		
 		project := framework.TestProjects[0]

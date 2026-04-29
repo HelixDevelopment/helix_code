@@ -243,7 +243,7 @@ func TestEndToEndWorkflow(t *testing.T) {
 
 	workers := env.WorkerManager.GetAvailableWorkers()
 	if len(workers) == 0 {
-		t.Skip("No workers available for end-to-end test")
+		t.Skip("No workers available for end-to-end test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Submit multiple test tasks

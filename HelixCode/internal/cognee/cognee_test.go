@@ -2084,7 +2084,7 @@ func TestNewHandler(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		service, err := NewCogneeService(cfg, nil)
 		if err != nil {
-			t.Skip("Could not create service")
+			t.Skip("Could not create service")  // SKIP-OK: #legacy-untriaged
 		}
 
 		handler := NewHandler(service)
@@ -2114,7 +2114,7 @@ func TestNewHandler(t *testing.T) {
 		}
 		manager, err := NewCogneeManager(cfg, nil)
 		if err != nil {
-			t.Skip("Could not create manager")
+			t.Skip("Could not create manager")  // SKIP-OK: #legacy-untriaged
 		}
 
 		handler := NewHandlerWithManager(manager)
@@ -2175,7 +2175,7 @@ func TestHandlerGetHealth(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		service, err := NewCogneeService(cfg, nil)
 		if err != nil {
-			t.Skip("Could not create service")
+			t.Skip("Could not create service")  // SKIP-OK: #legacy-untriaged
 		}
 		handler := NewHandler(service)
 
@@ -2233,7 +2233,7 @@ func TestHandlerAddMemory(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		service, err := NewCogneeService(cfg, nil)
 		if err != nil {
-			t.Skip("Could not create service")
+			t.Skip("Could not create service")  // SKIP-OK: #legacy-untriaged
 		}
 		handler := NewHandler(service)
 
@@ -2272,7 +2272,7 @@ func TestHandlerAddBatchMemory(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		service, err := NewCogneeService(cfg, nil)
 		if err != nil {
-			t.Skip("Could not create service")
+			t.Skip("Could not create service")  // SKIP-OK: #legacy-untriaged
 		}
 		handler := NewHandler(service)
 

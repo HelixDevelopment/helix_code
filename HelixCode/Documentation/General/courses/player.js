@@ -123,11 +123,11 @@ class VideoPlayer {
                     break;
                 case 'arrowright':
                     e.preventDefault();
-                    this.skip(10);
+                    this.skip(10);  // SKIP-OK: #legacy-untriaged
                     break;
                 case 'arrowleft':
                     e.preventDefault();
-                    this.skip(-10);
+                    this.skip(-10);  // SKIP-OK: #legacy-untriaged
                     break;
                 case 'arrowup':
                     e.preventDefault();

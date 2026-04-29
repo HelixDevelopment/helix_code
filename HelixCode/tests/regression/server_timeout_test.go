@@ -38,7 +38,7 @@ func TestServerTimeoutConfiguration(t *testing.T) {
 
 		// Skip if config file wasn't loaded (we're testing config file values, not defaults)
 		if cfg.Server.IdleTimeout == 60 {
-			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")
+			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Verify idle timeout is 300 seconds (5 minutes), not 60 seconds
@@ -66,7 +66,7 @@ func TestServerTimeoutConfiguration(t *testing.T) {
 
 		// Skip if config file wasn't loaded (we're testing config file values, not defaults)
 		if cfg.Server.IdleTimeout == 60 {
-			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")
+			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Convert to time.Duration and verify they're reasonable
@@ -105,7 +105,7 @@ func TestServerTimeoutConfiguration(t *testing.T) {
 
 		// Skip if config file wasn't loaded (we're testing config file values, not defaults)
 		if cfg.Server.IdleTimeout == 60 {
-			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")
+			t.Skip("Skipping: Config file not loaded (using defaults). Run from HelixCode directory with config/config.yaml present.")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// The configuration should match our expected values regardless of environment
@@ -118,7 +118,7 @@ func TestServerTimeoutConfiguration(t *testing.T) {
 func TestServerStability(t *testing.T) {
 	// This is a long-running test that verifies the server doesn't
 	// shut down prematurely due to timeout issues
-	t.Skip("Long-running stability test - run manually for verification")
+	t.Skip("Long-running stability test - run manually for verification")  // SKIP-OK: #legacy-untriaged
 
 	setupTestEnvironment(t)
 	cfg, err := config.Load()

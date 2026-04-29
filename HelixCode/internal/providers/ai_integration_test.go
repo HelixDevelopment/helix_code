@@ -892,7 +892,7 @@ func TestAIIntegration_Initialize_Skipped(t *testing.T) {
 	// Note: Initialize requires valid vector/memory configurations
 	// which are not available in unit tests without external services.
 	// This test is skipped to prevent nil pointer panics.
-	t.Skip("Initialize requires external services (vector DB)")
+	t.Skip("Initialize requires external services (vector DB)")  // SKIP-OK: #legacy-untriaged
 }
 
 func TestAIIntegration_GenerateText(t *testing.T) {

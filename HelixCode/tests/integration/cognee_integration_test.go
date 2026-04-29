@@ -195,11 +195,11 @@ func (c *CogneeClient) DeleteDataset(name string) error {
 // RequireCognee checks if Cognee is available
 func RequireCognee(t *testing.T) *CogneeClient {
 	if testing.Short() {
-		t.Skip("Skipping Cognee integration test in short mode")
+		t.Skip("Skipping Cognee integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if os.Getenv("HELIX_TEST_INFRA") != "true" {
-		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true)")
+		t.Skip("Test infrastructure not available (set HELIX_TEST_INFRA=true)")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := LoadCogneeConfig()

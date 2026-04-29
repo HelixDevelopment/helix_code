@@ -19,7 +19,7 @@ import (
 // TestWorkflowStepDefinition tests workflow step creation and validation
 func TestWorkflowStepDefinition(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Create a workflow with steps
@@ -84,7 +84,7 @@ func TestWorkflowStepDefinition(t *testing.T) {
 // TestWorkflowStepStatusTransitions tests step status transitions
 func TestWorkflowStepStatusTransitions(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	step := workflow.Step{
@@ -120,7 +120,7 @@ func TestWorkflowStepStatusTransitions(t *testing.T) {
 // TestTaskQueuePriorityIntegration tests task queue priority handling
 func TestTaskQueuePriorityIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Create task queue
@@ -160,7 +160,7 @@ func TestTaskQueuePriorityIntegration(t *testing.T) {
 // TestTaskTypesAndPriorities tests task type and priority combinations
 func TestTaskTypesAndPriorities(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test all task types
@@ -213,7 +213,7 @@ func TestTaskTypesAndPriorities(t *testing.T) {
 // TestTaskStatusTransitions tests task status transitions
 func TestTaskStatusTransitions(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Define valid status transitions using correct constants
@@ -251,7 +251,7 @@ func TestTaskStatusTransitions(t *testing.T) {
 // TestWorkflowWithTasks tests workflow and task type compatibility
 func TestWorkflowWithTasks(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Map workflow step types to task types
@@ -295,7 +295,7 @@ func TestWorkflowWithTasks(t *testing.T) {
 // TestWorkflowStatusCorrelation tests workflow status correlation with step statuses
 func TestWorkflowStatusCorrelation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	tests := []struct {
@@ -385,7 +385,7 @@ func calculateWorkflowStatus(steps []workflow.Step) workflow.WorkflowStatus {
 // TestTaskQueueClearAndRemove tests queue clear and remove operations
 func TestTaskQueueClearAndRemove(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	queue := task.NewTaskQueue()
@@ -419,7 +419,7 @@ func TestTaskQueueClearAndRemove(t *testing.T) {
 // TestWorkflowDAGValidation tests DAG structure validation in workflows
 func TestWorkflowDAGValidation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Valid DAG - linear dependency chain
@@ -491,7 +491,7 @@ func TestWorkflowDAGValidation(t *testing.T) {
 // TestTaskCriticalityAndPriorityCombinations tests task criticality handling
 func TestTaskCriticalityAndPriorityCombinations(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	queue := task.NewTaskQueue()

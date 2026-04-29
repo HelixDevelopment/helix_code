@@ -221,7 +221,7 @@ func TestSymlinkAttack_Resolution(t *testing.T) {
 	symlinkPath := filepath.Join(tempDir, "evil-symlink")
 	err = os.Symlink("/etc/passwd", symlinkPath)
 	if err != nil {
-		t.Skip("Cannot create symlinks - test requires elevated permissions")
+		t.Skip("Cannot create symlinks - test requires elevated permissions")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Resolve the symlink to check if it escapes

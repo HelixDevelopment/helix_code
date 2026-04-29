@@ -104,7 +104,7 @@ func TestNewBedrockProvider(t *testing.T) {
 			// Note: This will fail without valid AWS credentials
 			// For unit tests, we'll skip actual AWS calls
 			if testing.Short() {
-				t.Skip("Skipping AWS SDK test in short mode")
+				t.Skip("Skipping AWS SDK test in short mode")  // SKIP-OK: #short-mode
 			}
 
 			provider, err := NewBedrockProvider(tt.config)
@@ -830,7 +830,7 @@ func TestBedrockProvider_GenerateStream(t *testing.T) {
 	// Streaming tests are complex with the AWS SDK EventStream
 	// These would require more sophisticated mocking or integration tests
 	// For now, we'll skip this test and rely on integration testing
-	t.Skip("Skipping stream test - requires AWS SDK EventStream mocking which is complex")
+	t.Skip("Skipping stream test - requires AWS SDK EventStream mocking which is complex")  // SKIP-OK: #legacy-untriaged
 }
 
 func TestBedrockProvider_HandleBedrockError(t *testing.T) {
@@ -889,7 +889,7 @@ func TestBedrockProvider_HandleBedrockError(t *testing.T) {
 // Integration test - requires actual AWS credentials
 func TestBedrockProvider_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test")
+		t.Skip("Skipping integration test")  // SKIP-OK: #integration-mode-only
 	}
 
 	// This test requires valid AWS credentials

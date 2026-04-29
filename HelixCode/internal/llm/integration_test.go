@@ -32,7 +32,7 @@ func TestLlamaCPPProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Llama.cpp provider not available for integration test")
+		t.Skip("Llama.cpp provider not available for integration test")  // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -82,7 +82,7 @@ func TestOllamaProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Ollama provider not available for integration test")
+		t.Skip("Ollama provider not available for integration test")  // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -194,7 +194,7 @@ func TestQwenProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Qwen provider not available for integration test")
+		t.Skip("Qwen provider not available for integration test")  // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -365,7 +365,7 @@ func (m *MockProvider) Close() error {
 func getEnvOrSkip(t *testing.T, key, skipMsg string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		t.Skip(skipMsg)
+		t.Skip(skipMsg)  // SKIP-OK: #legacy-untriaged
 	}
 	return value
 }

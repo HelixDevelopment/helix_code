@@ -448,7 +448,7 @@ func TestQA_APIContract_HealthEndpoint(t *testing.T) {
 
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API contract test")
+		t.Skip("Server not available, skipping API contract test")  // SKIP-OK: #legacy-untriaged
 	}
 	defer resp.Body.Close()
 
@@ -477,7 +477,7 @@ func TestQA_APIContract_ErrorResponses(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API contract test")
+		t.Skip("Server not available, skipping API contract test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -510,7 +510,7 @@ func TestQA_APIContract_AuthenticationRequired(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API contract test")
+		t.Skip("Server not available, skipping API contract test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -525,7 +525,7 @@ func TestQA_APIContract_AuthenticationRequired(t *testing.T) {
 		t.Run(endpoint, func(t *testing.T) {
 			resp, err := client.Get(config.BaseURL + endpoint)
 			if err != nil {
-				t.Skip("Endpoint not available")
+				t.Skip("Endpoint not available")  // SKIP-OK: #legacy-untriaged
 				return
 			}
 			defer resp.Body.Close()
@@ -546,7 +546,7 @@ func TestQA_APIContract_JSONContentType(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API contract test")
+		t.Skip("Server not available, skipping API contract test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -559,7 +559,7 @@ func TestQA_APIContract_JSONContentType(t *testing.T) {
 		t.Run(endpoint, func(t *testing.T) {
 			resp, err := client.Get(config.BaseURL + endpoint)
 			if err != nil {
-				t.Skip("Endpoint not available")
+				t.Skip("Endpoint not available")  // SKIP-OK: #legacy-untriaged
 				return
 			}
 			defer resp.Body.Close()
@@ -581,7 +581,7 @@ func TestQA_APIContract_RequestValidation(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API contract test")
+		t.Skip("Server not available, skipping API contract test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -593,7 +593,7 @@ func TestQA_APIContract_RequestValidation(t *testing.T) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		t.Skip("Server not accepting requests")
+		t.Skip("Server not accepting requests")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 	defer resp.Body.Close()
@@ -663,7 +663,7 @@ func TestQA_Compatibility_APIVersioning(t *testing.T) {
 	// Skip if server is not available
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping API versioning test")
+		t.Skip("Server not available, skipping API versioning test")  // SKIP-OK: #legacy-untriaged
 	}
 	resp.Body.Close()
 
@@ -866,7 +866,7 @@ func TestQA_Performance_ResponseSize(t *testing.T) {
 
 	resp, err := client.Get(config.BaseURL + "/health")
 	if err != nil {
-		t.Skip("Server not available, skipping response size test")
+		t.Skip("Server not available, skipping response size test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	body, _ := io.ReadAll(resp.Body)

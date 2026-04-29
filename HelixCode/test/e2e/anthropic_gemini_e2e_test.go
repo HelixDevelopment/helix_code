@@ -21,7 +21,7 @@ func TestAnthropicProviderEndToEnd(t *testing.T) {
 	// Skip if no API key
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
-		t.Skip("ANTHROPIC_API_KEY environment variable not set, skipping e2e test")
+		t.Skip("ANTHROPIC_API_KEY environment variable not set, skipping e2e test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Setup test environment
@@ -318,7 +318,7 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 		apiKey = os.Getenv("GOOGLE_API_KEY")
 	}
 	if apiKey == "" {
-		t.Skip("GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set, skipping e2e test")
+		t.Skip("GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set, skipping e2e test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Setup test environment

@@ -99,7 +99,7 @@ func TestSSHSecurity_HostKeyVerification(t *testing.T) {
 func TestSSHSecurity_SandboxIsolation(t *testing.T) {
 	// Skip test if not running as root (required for user creation)
 	if os.Getuid() != 0 {
-		t.Skip("Skipping sandbox isolation test - requires root privileges")
+		t.Skip("Skipping sandbox isolation test - requires root privileges")  // SKIP-OK: #legacy-untriaged
 	}
 	ctx := context.Background()
 	wim := NewWorkerIsolationManager()
@@ -150,7 +150,7 @@ func TestSSHSecurity_KnownHostsFileManagement(t *testing.T) {
 // TestSSHSecurity_Integration tests full integration
 func TestSSHSecurity_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	pool := NewSSHWorkerPool(true)

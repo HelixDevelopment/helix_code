@@ -518,7 +518,7 @@ func TestDatabaseIntegration(t *testing.T) {
 	// The actual database tests are in internal/database package
 	t.Run("ConnectionParams", func(t *testing.T) {
 		if host == "" || port == "" || user == "" || password == "" {
-			t.Skip("Database environment variables not set")
+			t.Skip("Database environment variables not set")  // SKIP-OK: #legacy-untriaged
 		}
 		t.Logf("Database connection string format validated: %s", connStr[:50]+"...")
 	})

@@ -19,7 +19,7 @@ func TestLoad_1000NotificationsPerSecond(t *testing.T) {
 	// Skip by default - this is a performance test that requires sufficient hardware
 	// Enable with RUN_LOAD_TESTS=true
 	if os.Getenv("RUN_LOAD_TESTS") != "true" {
-		t.Skip("Skipping load test - set RUN_LOAD_TESTS=true to enable")
+		t.Skip("Skipping load test - set RUN_LOAD_TESTS=true to enable")  // SKIP-OK: #legacy-untriaged
 	}
 
 	engine := notification.NewNotificationEngine()
@@ -102,7 +102,7 @@ done:
 
 func TestLoad_ConcurrentChannels(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	engine := notification.NewNotificationEngine()
@@ -171,7 +171,7 @@ func TestLoad_ConcurrentChannels(t *testing.T) {
 
 func TestLoad_QueueSaturation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	engine := notification.NewNotificationEngine()
@@ -224,7 +224,7 @@ func TestLoad_QueueSaturation(t *testing.T) {
 
 func TestLoad_RetryStorm(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Create channel that fails 50% of the time
@@ -306,7 +306,7 @@ func TestLoad_RetryStorm(t *testing.T) {
 
 func TestLoad_RateLimiterStress(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	baseCh := &mockChannel{name: "mock"}
@@ -352,7 +352,7 @@ func TestLoad_RateLimiterStress(t *testing.T) {
 
 func TestLoad_EventBusHighVolume(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	bus := event.NewEventBus(true) // Async mode
@@ -409,7 +409,7 @@ func TestLoad_EventBusHighVolume(t *testing.T) {
 
 func TestLoad_MetricsUnderLoad(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping load test in short mode")
+		t.Skip("Skipping load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	metrics := notification.NewMetrics()

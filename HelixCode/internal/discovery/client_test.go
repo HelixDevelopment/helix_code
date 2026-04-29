@@ -361,7 +361,7 @@ func TestDiscoverByDNS(t *testing.T) {
 		assert.Equal(t, StrategyDNS, result.Strategy)
 	} else {
 		// DNS might not work in all test environments
-		t.Skip("DNS resolution not available in test environment")
+		t.Skip("DNS resolution not available in test environment")  // SKIP-OK: #legacy-untriaged
 	}
 }
 

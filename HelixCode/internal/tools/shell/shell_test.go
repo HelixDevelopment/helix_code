@@ -262,7 +262,7 @@ func TestOutputTruncation(t *testing.T) {
 // TestSignalHandling tests signal handling
 func TestSignalHandling(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping signal test on Windows")
+		t.Skip("Skipping signal test on Windows")  // SKIP-OK: #legacy-untriaged
 	}
 
 	executor := NewShellExecutor(DefaultConfig())

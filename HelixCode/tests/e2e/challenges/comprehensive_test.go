@@ -20,7 +20,7 @@ type TestMatrix struct {
 // TestAllProvidersAllChallenges runs all challenges with all available providers
 func TestAllProvidersAllChallenges(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping comprehensive test in short mode")
+		t.Skip("Skipping comprehensive test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -242,7 +242,7 @@ func TestAllProvidersAllChallenges(t *testing.T) {
 // TestXAIProvider specifically tests xAI provider with API key
 func TestXAIProvider(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping xAI test in short mode")
+		t.Skip("Skipping xAI test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -251,7 +251,7 @@ func TestXAIProvider(t *testing.T) {
 	// Check if xAI API key is configured
 	apiKey, err := executor.apiKeys.GetAPIKey(ProviderXAI)
 	if err != nil {
-		t.Skip("xAI API key not configured - skipping test")
+		t.Skip("xAI API key not configured - skipping test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	t.Logf("Testing xAI provider with API key: %s", MaskAPIKey(apiKey))
@@ -304,7 +304,7 @@ func TestXAIProvider(t *testing.T) {
 // TestOllamaProvider specifically tests local Ollama provider
 func TestOllamaProvider(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping Ollama test in short mode")
+		t.Skip("Skipping Ollama test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := DefaultChallengeConfig()
@@ -366,7 +366,7 @@ func findSubstring(s, substr string) bool {
 // TestGenerateComprehensiveReport generates a detailed test report
 func TestGenerateComprehensiveReport(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping report generation in short mode")
+		t.Skip("Skipping report generation in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Run comprehensive tests first

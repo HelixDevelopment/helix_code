@@ -69,7 +69,7 @@ func TestDeviceManager_SelectDevice(t *testing.T) {
 
 	devices, err := dm.ListDevices(context.Background())
 	if err != nil || len(devices) == 0 {
-		t.Skip("no devices available for testing")
+		t.Skip("no devices available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Select first device
@@ -481,7 +481,7 @@ func TestDeviceManager_ValidateDevice(t *testing.T) {
 	t.Run("validate valid device", func(t *testing.T) {
 		devices, err := dm.ListDevices(context.Background())
 		if err != nil || len(devices) == 0 {
-			t.Skip("no devices available for testing")
+			t.Skip("no devices available for testing")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// ValidateDevice takes *AudioDevice
@@ -534,7 +534,7 @@ func TestDeviceManager_GetDevice(t *testing.T) {
 
 	devices, err := dm.ListDevices(context.Background())
 	if err != nil || len(devices) == 0 {
-		t.Skip("no devices available for testing")
+		t.Skip("no devices available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Run("get existing device", func(t *testing.T) {
@@ -583,7 +583,7 @@ func TestVoiceInputManager_SelectDevice(t *testing.T) {
 	ctx := context.Background()
 	devices, err := manager.ListDevices(ctx)
 	if err != nil || len(devices) == 0 {
-		t.Skip("no devices available for testing")
+		t.Skip("no devices available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Run("select valid device", func(t *testing.T) {
