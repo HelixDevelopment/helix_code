@@ -25,8 +25,15 @@ type CLI struct {
 
 // NewCLI creates a new CLI instance
 func NewCLI() *CLI {
+	// Initialize LLM provider from config
+	llmProvider, _ := llm.NewLlamaCPPProvider(llm.LlamaConfig{
+		Model:      "llama-3-8b",
+		ServerHost: "http://localhost:8081", // Llama.cpp server default port
+	})
+
 	return &CLI{
 		workerPool:         worker.NewSSHWorkerPool(true),
+		llmProvider:        llmProvider,
 		notificationEngine: notification.NewNotificationEngine(),
 	}
 }

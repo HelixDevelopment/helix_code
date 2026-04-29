@@ -140,6 +140,9 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 		baseURL = fmt.Sprintf("%s:%d", baseURL, p.config.ServerPort)
 	}
 
+	// Llama.cpp uses /v1/completions endpoint (OpenAI compatible)
+	apiURL := baseURL + "/v1/completions"
+
 	// Build request payload - use Messages if available, otherwise use Model
 	var payload map[string]interface{}
 	if len(request.Messages) > 0 {
@@ -171,7 +174,7 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	}
 
 	// Make REAL HTTP call to Llama.cpp server
-	req, err := http.NewRequestWithContext(ctx, "POST", baseURL+"/completion", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", apiURL, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
