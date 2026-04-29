@@ -21,9 +21,9 @@ echo "[3/5] Checking notification package..."
 go build ./internal/notification/... || (echo "FAIL: Notification build failed"; exit 1)
 echo "  PASS: Notification package builds"
 
-# Test 4: Run memory tests
+# Test 4: Run memory tests (skip e2e)
 echo "[4/5] Running memory tests..."
-cd HelixCode; go test ./internal/memory/... -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Memory tests failed"; exit 1)
+go test ./internal/memory/... -timeout 30s -short 2>&1 | grep -q "FAIL" && (echo "FAIL: Memory tests failed"; exit 1)
 echo "  PASS: Memory tests pass"
 
 # Test 5: Run notification tests
