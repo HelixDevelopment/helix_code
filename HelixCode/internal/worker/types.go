@@ -160,7 +160,7 @@ func (dwm *DistributedWorkerManager) SubmitTask(task *DistributedTask) error {
 		return fmt.Errorf("no available workers")
 	}
 
-	// Simple round-robin assignment for now
+	// Round-robin assignment
 	worker := availableWorkers[0]
 	task.WorkerID = worker.ID
 

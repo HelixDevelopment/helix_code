@@ -13,7 +13,7 @@ echo "  PASS: Worker package builds"
 
 # Test 2: Run worker tests
 echo "[2/4] Running worker tests..."
-go test ./internal/worker/... -timeout 15s 2>&1 | grep -q "FAIL" && (echo "FAIL: Worker tests failed"; exit 1)
+cd HelixCode; go test ./internal/worker/... -timeout 15s 2>&1 | grep -q "FAIL" && (echo "FAIL: Worker tests failed"; exit 1)
 echo "  PASS: Worker tests pass"
 
 # Test 3: Check no bluff markers

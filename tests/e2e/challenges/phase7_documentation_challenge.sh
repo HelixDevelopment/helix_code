@@ -20,7 +20,7 @@ echo "  PASS: Docker config exists"
 
 # Test 3: Verify deployment package builds
 echo "[3/6] Checking deployment package..."
-cd HelixCode && go build ./internal/deployment/... || (echo "FAIL: Deployment build failed"; exit 1)
+cd HelixCode; go build ./internal/deployment/... || (echo "FAIL: Deployment build failed"; exit 1)
 echo "  PASS: Deployment package builds"
 
 # Test 4: Run deployment tests

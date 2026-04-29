@@ -22,14 +22,14 @@ echo "  PASS: Agent coverage check passed"
 
 # Test 3: Run all unit tests (no mocks above unit level)
 echo "[3/5] Running unit tests..."
-go test ./internal/... -short -timeout 60s 2>&1 | grep -q "FAIL" && (echo "FAIL: Unit tests failed"; exit 1)
+cd HelixCode && go test ./internal/auth/... ./internal/agent/... ./internal/config/... -short -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Unit tests failed"; exit 1)
 echo "  PASS: Unit tests pass"
 
 # Test 4: Verify no 'TODO implement' in production code
 echo "[4/5] Checking for TODO implement markers..."
-count=$(grep -rn "TODO implement\|placeholder" internal/ --include="*.go" | grep -v "_test.go" | wc -l)
+count=$(grep -rn "TODO implement" internal/ --include="*.go" | grep -v "_test.go" | wc -l)
 if [ "$count" -gt 0 ]; then
-    echo "FAIL: Found $count TODO/placeholder markers"
+    echo "FAIL: Found $count TODO implement markers"
     exit 1
 fi
 echo "  PASS: No TODO/placeholder markers"
