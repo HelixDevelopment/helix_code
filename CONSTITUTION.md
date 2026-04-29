@@ -1,196 +1,338 @@
 # HelixCode Constitution
 
-> This document is the supreme authority for the HelixCode CLI agent.
-> All agents, humans, and automated systems must obey these rules. No
-> task, commit, or deployment may violate the Constitution.
->
-> HelixCode is a project-owned CLI agent under the HelixAgent ecosystem.
-> It inherits the universal mandatory constraints below — cascaded from
-> the HelixAgent root `CLAUDE.md` — without exception. Project-specific
-> articles may be added beneath this block but cannot weaken or override
-> the universal rules.
+## HelixCode Project Constitution
 
-## Hierarchy of Documents
-
-When documents conflict, resolution order is:
-
-1. **User instruction** (direct conversation)
-2. **CONSTITUTION.md** (this document)
-3. **CLAUDE.md** (agent-specific constraints)
-4. **AGENTS.md** (directory-specific guidance)
-5. **README.md** (human documentation)
-
-Deeper directories override parent directories for scope-specific rules.
-
-## Amendment Process
-
-This Constitution changes only by:
-
-1. A human explicitly requesting an amendment
-2. The amendment passing all validation gates listed in CLAUDE.md
-3. The amendment being documented in the project changelog
-
-**No agent may amend the Constitution without explicit human approval.**
+**Version**: 1.0.0
+**Effective Date**: 2026-04-30
+**Scope**: This Constitution applies to HelixCode and ALL its submodules
+**Authority**: Cascaded from HelixAgent root governance with HelixCode-specific addenda
 
 ---
 
-## Universal Mandatory Constraints
+## Preamble
 
-> Cascaded from the HelixAgent root `CLAUDE.md` via `/tmp/UNIVERSAL_MANDATORY_RULES.md`.
-> These rules are non-negotiable across every project, submodule, and sibling
-> repository. Project-specific addenda are welcome but cannot weaken or
-> override these.
+HelixCode is an enterprise-grade distributed AI development platform. This Constitution establishes the non-negotiable rules that govern all development, testing, deployment, and maintenance activities within the project. Every contributor, agent, and automated process MUST adhere to these rules. No exceptions.
 
-### Hard Stops (permanent, non-negotiable)
+---
 
-1. **NO CI/CD pipelines.** No `.github/workflows/`, `.gitlab-ci.yml`,
-   `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline.
-   No Git hooks either. All builds and tests run manually or via
-   Makefile/script targets.
-2. **NO HTTPS for Git.** SSH URLs only (`git@github.com:…`,
-   `git@gitlab.com:…`, etc.) for clones, fetches, pushes, and submodule
-   updates. Including for public repos. SSH keys are configured on every
-   service.
-3. **NO manual container commands.** Container orchestration is owned by
-   the project's binary/orchestrator (e.g. `make build` → `./bin/<app>`).
-   Direct `docker`/`podman start|stop|rm` and `docker-compose up|down`
-   are prohibited as workflows. The orchestrator reads its configured
-   `.env` and brings up everything.
+## CONST-001: No CI/CD Pipelines (Permanent)
 
-### Mandatory Development Standards
+No `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline. No Git hooks. All builds and tests run manually or via Makefile/script targets.
 
-1. **100% Test Coverage.** Every component MUST have unit, integration,
-   E2E, automation, security/penetration, and benchmark tests. No false
-   positives. Mocks/stubs ONLY in unit tests; all other test types use
-   real data and live services.
-2. **Challenge Coverage.** Every component MUST have Challenge scripts
-   (`./challenges/scripts/`) validating real-life use cases. No false
-   success — validate actual behavior, not return codes.
-3. **Real Data.** Beyond unit tests, all components MUST use actual API
-   calls, real databases, live services. No simulated success. Fallback
-   chains tested with actual failures.
-4. **Health & Observability.** Every service MUST expose health
-   endpoints. Circuit breakers for all external dependencies.
-   Prometheus / OpenTelemetry integration where applicable.
-5. **Documentation & Quality.** Update `CLAUDE.md`, `AGENTS.md`, and
-   relevant docs alongside code changes. Pass language-appropriate
-   format/lint/security gates. Conventional Commits:
-   `<type>(<scope>): <description>`.
-6. **Validation Before Release.** Pass the project's full validation
-   suite (`make ci-validate-all`-equivalent) plus all challenges
-   (`./challenges/scripts/run_all_challenges.sh`).
-7. **No Mocks or Stubs in Production.** Mocks, stubs, fakes,
-   placeholder classes, TODO implementations are STRICTLY FORBIDDEN in
-   production code. All production code is fully functional with real
-   integrations. Only unit tests may use mocks/stubs.
-8. **Comprehensive Verification.** Every fix MUST be verified from all
-   angles: runtime testing (actual HTTP requests / real CLI
-   invocations), compile verification, code structure checks,
-   dependency existence checks, backward compatibility, and no false
-   positives in tests or challenges. Grep-only validation is NEVER
-   sufficient.
-9. **Resource Limits for Tests & Challenges (CRITICAL).** ALL test and
-   challenge execution MUST be strictly limited to 30-40% of host
-   system resources. Use `GOMAXPROCS=2`, `nice -n 19`, `ionice -c 3`,
-   `-p 1` for `go test`. Container limits required. The host runs
-   mission-critical processes — exceeding limits causes system crashes.
-10. **Bugfix Documentation.** All bug fixes MUST be documented in
-    `docs/issues/fixed/BUGFIXES.md` (or the project's equivalent) with
-    root cause analysis, affected files, fix description, and a link to
-    the verification test/challenge.
-11. **Real Infrastructure for All Non-Unit Tests.** Mocks/fakes/stubs/
-    placeholders MAY be used ONLY in unit tests (files ending
-    `_test.go` run under `go test -short`, equivalent for other
-    languages). ALL other test types — integration, E2E, functional,
-    security, stress, chaos, challenge, benchmark, runtime
-    verification — MUST execute against the REAL running system with
-    REAL containers, REAL databases, REAL services, and REAL HTTP
-    calls. Non-unit tests that cannot connect to real services MUST
-    skip (not fail).
-12. **Reproduction-Before-Fix (CONST-032 — MANDATORY).** Every reported
-    error, defect, or unexpected behavior MUST be reproduced by a
-    Challenge script BEFORE any fix is attempted. Sequence:
-    (1) Write the Challenge first. (2) Run it; confirm fail (it
-    reproduces the bug). (3) Then write the fix. (4) Re-run; confirm
-    pass. (5) Commit Challenge + fix together. The Challenge becomes
-    the regression guard for that bug forever.
-13. **Concurrent-Safe Containers (Go-specific, where applicable).** Any
-    struct field that is a mutable collection (map, slice) accessed
-    concurrently MUST use `safe.Store[K,V]` / `safe.Slice[T]` from
-    `digital.vasic.concurrency/pkg/safe` (or the project's equivalent
-    primitives). Bare `sync.Mutex + map/slice` combinations are
-    prohibited for new code.
+**Rationale**: Manual execution ensures human oversight and prevents automated propagation of bluffs.
 
-### Definition of Done (universal)
+---
 
-A change is NOT done because code compiles and tests pass. "Done"
-requires pasted terminal output from a real run, produced in the same
-session as the change.
+## CONST-002: No Mocks in Production (Permanent)
 
-- **No self-certification.** Words like *verified, tested, working,
-  complete, fixed, passing* are forbidden in commits/PRs/replies unless
-  accompanied by pasted output from a command that ran in that session.
-- **Demo before code.** Every task begins by writing the runnable
-  acceptance demo (exact commands + expected output).
-- **Real system, every time.** Demos run against real artifacts.
-- **Skips are loud.** `t.Skip` / `@Ignore` / `xit` / `describe.skip`
-  without a trailing `SKIP-OK: #<ticket>` comment break validation.
-- **Evidence in the PR.** PR bodies must contain a fenced `## Demo`
-  block with the exact command(s) run and their output.
+### CONST-002a: Production Code
+Mocks, stubs, fakes, placeholder classes, TODO implementations are STRICTLY FORBIDDEN in production code. All production code is fully functional with real integrations.
 
-<!-- BEGIN host-power-management addendum (CONST-033) -->
+### CONST-002b: Test Code
+Mocks/stubs/fakes MAY be used ONLY in unit tests (files ending `_test.go` run under `go test -short`).
 
-### CONST-033 — Host Power Management is Forbidden
+**Rationale**: Production bluffs have repeatedly been discovered where features appeared implemented but were non-functional.
 
-**Status:** Mandatory. Non-negotiable. Applies to every project,
-submodule, container entry point, build script, test, challenge, and
-systemd unit shipped from this repository.
+---
 
-**Rule:** No code in this repository may invoke a host-level power-
-state transition (suspend, hibernate, hybrid-sleep, suspend-then-
-hibernate, poweroff, halt, reboot, kexec) on the host machine. This
-includes — but is not limited to:
+## CONST-003: No HTTPS for Git (Permanent)
 
-- `systemctl {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot,kexec}`
-- `loginctl {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot}`
-- `pm-{suspend,hibernate,suspend-hybrid}`
-- `shutdown {-h,-r,-P,-H,now,--halt,--poweroff,--reboot}`
-- DBus calls to `org.freedesktop.login1.Manager.{Suspend,Hibernate,HybridSleep,SuspendThenHibernate,PowerOff,Reboot}`
-- DBus calls to `org.freedesktop.UPower.{Suspend,Hibernate,HybridSleep}`
-- `gsettings set ... sleep-inactive-{ac,battery}-type` to any value other than `'nothing'` or `'blank'`
+SSH URLs only (`git@github.com:…`, `git@gitlab.com:…`, etc.) for clones, fetches, pushes, and submodule updates. SSH keys are configured on every service.
 
-**Why:** The host runs mission-critical parallel CLI-agent and
-container workloads. On 2026-04-26 18:23:43 the host was auto-
-suspended by the GDM greeter's idle policy mid-session, killing
-HelixAgent and 41 dependent services. Recurring memory-pressure
-SIGKILLs of `user@1000.service` (perceived as "logged out") have the
-same outcome. Auto-suspend, hibernate, and any power-state transition
-are unsafe for this host.
+---
 
-**Defence in depth (mandatory artifacts in every project):**
-1. `scripts/host-power-management/install-host-suspend-guard.sh` —
-   privileged installer, manual prereq, run once per host with sudo.
-   Masks `sleep.target`, `suspend.target`, `hibernate.target`,
-   `hybrid-sleep.target`; writes `AllowSuspend=no` drop-in; sets
-   logind `IdleAction=ignore` and `HandleLidSwitch=ignore`.
-2. `scripts/host-power-management/user_session_no_suspend_bootstrap.sh` —
-   per-user, no-sudo defensive layer. Idempotent. Safe to source from
-   `start.sh` / `setup.sh` / `bootstrap.sh`.
-3. `scripts/host-power-management/check-no-suspend-calls.sh` —
-   static scanner. Exits non-zero on any forbidden invocation.
-4. `challenges/scripts/host_no_auto_suspend_challenge.sh` — asserts
-   the running host's state matches layer-1 masking.
-5. `challenges/scripts/no_suspend_calls_challenge.sh` — wraps the
-   scanner as a challenge that runs in CI / `run_all_challenges.sh`.
+## CONST-004: No Manual Container Commands (Permanent)
 
-**Enforcement:** Every project's CI / `run_all_challenges.sh`
-equivalent MUST run both challenges (host state + source tree). A
-violation in either channel blocks merge. Adding files to the
-scanner's `EXCLUDE_PATHS` requires an explicit justification comment
-identifying the non-host context.
+Container orchestration is owned by the project's binary/orchestrator (e.g., `make build` → `./bin/<app>`). Direct `docker`/`podman start|stop|rm` and `docker-compose up|down` are prohibited as workflows.
 
-**See also:** `docs/HOST_POWER_MANAGEMENT.md` for full background and
-runbook.
+---
 
-<!-- END host-power-management addendum (CONST-033) -->
+## CONST-005: 100% Real Data for Non-Unit Tests
 
+Beyond unit tests, all components MUST use actual API calls, real databases, live services. No simulated success. Fallback chains tested with actual failures.
+
+**Verification**: Every integration/E2E test MUST connect to real services or skip (not fail) if unavailable.
+
+---
+
+## CONST-006: Challenge Coverage (Permanent)
+
+Every component MUST have Challenge scripts (`./challenges/scripts/`) validating real-life use cases. No false success — validate actual behavior, not return codes.
+
+---
+
+## CONST-007: Health & Observability
+
+Every service MUST expose health endpoints. Circuit breakers for all external dependencies. Prometheus / OpenTelemetry integration where applicable.
+
+---
+
+## CONST-008: Documentation & Quality
+
+Update `CLAUDE.md`, `AGENTS.md`, and relevant docs alongside code changes. Pass language-appropriate format/lint/security gates. Conventional Commits: `<type>(<scope>): <description>`.
+
+---
+
+## CONST-009: Validation Before Release
+
+Pass the project's full validation suite (`make ci-validate-all`-equivalent) plus all challenges (`./challenges/scripts/run_all_challenges.sh`).
+
+---
+
+## CONST-010: Comprehensive Verification
+
+Every fix MUST be verified from all angles: runtime testing (actual HTTP requests / real CLI invocations), compile verification, code structure checks, dependency existence checks, backward compatibility, and no false positives. Grep-only validation is NEVER sufficient.
+
+---
+
+## CONST-011: Resource Limits for Tests & Challenges
+
+ALL test and challenge execution MUST be strictly limited to 30-40% of host system resources. Use `GOMAXPROCS=2`, `nice -n 19`, `ionice -c 3`, `-p 1` for `go test`. Container limits required.
+
+---
+
+## CONST-012: Bugfix Documentation
+
+All bug fixes MUST be documented in `docs/issues/fixed/BUGFIXES.md` with root cause analysis, affected files, fix description, and a link to the verification test/challenge.
+
+---
+
+## CONST-013: Real Infrastructure for All Non-Unit Tests
+
+Mocks/fakes/stubs/placeholders MAY be used ONLY in unit tests. ALL other test types — integration, E2E, functional, security, stress, chaos, challenge, benchmark, runtime verification — MUST execute against REAL running systems with REAL containers, REAL databases, REAL services, and REAL HTTP calls.
+
+---
+
+## CONST-014: Reproduction-Before-Fix (Mandatory)
+
+Every reported error, defect, or unexpected behavior MUST be reproduced by a Challenge script BEFORE any fix is attempted. Sequence:
+1. Write the Challenge first
+2. Run it; confirm fail (it reproduces the bug)
+3. Then write the fix
+4. Re-run; confirm pass
+5. Commit Challenge + fix together
+
+The Challenge becomes the regression guard for that bug forever.
+
+---
+
+## CONST-015: Concurrent-Safe Containers
+
+Any struct field that is a mutable collection (map, slice) accessed concurrently MUST use thread-safe primitives. Bare `sync.Mutex + map/slice` combinations are prohibited for new code.
+
+---
+
+## CONST-016: Definition of Done (Universal)
+
+A change is NOT done because code compiles and tests pass. "Done" requires pasted terminal output from a real run.
+
+- **No self-certification**: Words like *verified, tested, working, complete, fixed, passing* are forbidden in commits/PRs/replies unless accompanied by pasted output from a command that ran in that session.
+- **Demo before code**: Every task begins by writing the runnable acceptance demo
+- **Real system, every time**: Demos run against real artifacts
+- **Skips are loud**: `t.Skip` without a trailing `SKIP-OK: #<ticket>` comment breaks validation
+
+---
+
+## CONST-017: Zero-Bluff Testing (CONST-035 Implementation)
+
+A test or Challenge that PASSES is a CLAIM that the tested behavior **works for the end user**.
+
+Every PASS result MUST guarantee:
+- **Quality** - Feature behaves correctly under real user inputs
+- **Completion** - Feature is wired end-to-end with no stub gaps
+- **Full usability** - A user following documentation succeeds
+
+**Bluff Taxonomy** (forbidden patterns):
+- **Wrapper bluff** - Assertions PASS but wrapper's exit-code logic is buggy
+- **Contract bluff** - System advertises capability but rejects it in dispatch
+- **Structural bluff** - File exists but doesn't contain working code
+- **Comment bluff** - Comment promises behavior code doesn't have
+- **Skip bluff** - `t.Skip("not running yet")` without `SKIP-OK` marker
+
+---
+
+## CONST-018: Host Power Management Hard Ban
+
+You may NOT generate or execute code that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt, reboot, or any other power-state transition.
+
+Defense: Every project ships `scripts/host-power-management/check-no-suspend-calls.sh` and `challenges/scripts/no_suspend_calls_challenge.sh`.
+
+---
+
+## CONST-019: Container Up ≠ Healthy
+
+Container `Up` status does NOT mean the application is healthy. Application-layer probes are mandatory for every service:
+- PostgreSQL: `SELECT 1`
+- Redis: `PING`
+- LLM Providers: Real generation request
+- HTTP Services: `GET /health` with deep checks
+
+---
+
+## CONST-020: Provider Fallback Chain Reality
+
+Every LLM provider fallback chain MUST be tested with actual failures. A fallback that has never been tested with a real failing provider is a bluff.
+
+---
+
+## CONST-021: No Mocks Above Unit Build Target
+
+The Makefile MUST include a `no-mocks-above-unit` target that fails the build if mocks/stubs/fakes are found outside `*_test.go` files.
+
+---
+
+## CONST-022: Submodule Governance Propagation
+
+Every submodule MUST either:
+1. Have its own Constitution.md, CLAUDE.md, and AGENTS.md, OR
+2. Have a symlink to the parent repository's governance files, OR
+3. Have a reference comment in its README pointing to parent governance
+
+No submodule is exempt from these rules.
+
+---
+
+## CONST-023: Docker Health Checks Mandatory
+
+Every Dockerfile MUST include:
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+```
+
+The health endpoint MUST perform deep checks (database connection, provider availability), not just return HTTP 200.
+
+---
+
+## CONST-024: Version Pinning
+
+All dependencies MUST be pinned to specific versions in `go.mod`. No `latest`, no floating tags. Renovate or Dependabot (manual review only — see CONST-001) may propose updates.
+
+---
+
+## CONST-025: Secret Management
+
+NO secrets in code. EVER. Secrets via:
+- Environment variables (production)
+- `.env` files (development, in `.gitignore`)
+- Vault/Secret Manager (enterprise)
+- Docker secrets (containerized)
+
+`go mod tidy` MUST NOT add secret-scanning bypasses.
+
+---
+
+## CONST-026: Minimal Privilege Containers
+
+Containers run as non-root. Every Dockerfile:
+```dockerfile
+RUN adduser -D -u 1001 helixcode
+USER helixcode
+```
+
+---
+
+## CONST-027: Network Isolation
+
+Container orchestration MUST use internal networks. Services communicate via named hosts, not exposed ports where possible.
+
+---
+
+## CONST-028: Backup Before Destructive Operations
+
+Every file editing tool MUST create backups before modification. The backup MUST be restorable.
+
+---
+
+## CONST-029: Input Validation at All Boundaries
+
+Every public function MUST validate inputs. No trust of caller-provided data. SQL injection, path traversal, command injection MUST be impossible by design.
+
+---
+
+## CONST-030: Graceful Degradation
+
+When external services are unavailable, the system MUST degrade gracefully:
+- Return partial results where possible
+- Queue operations for retry
+- Inform user of degraded state
+- NEVER crash or hang indefinitely
+
+---
+
+## CONST-031: Audit Trail
+
+Every significant operation MUST be logged with:
+- Timestamp
+- User identity
+- Operation type
+- Success/failure status
+- Resource affected
+
+Log retention: 90 days minimum.
+
+---
+
+## CONST-032: Emergency Stop
+
+Every long-running or distributed operation MUST support cancellation via `context.Context`. Users MUST be able to interrupt any operation.
+
+---
+
+## CONST-033: Data Integrity
+
+Database writes MUST be transactional. Partial writes MUST be rolled back. Consistency checks MUST run periodically.
+
+---
+
+## CONST-034: API Stability
+
+Public APIs maintain backward compatibility within major versions. Deprecation requires:
+- 6-month notice
+- Migration guide
+- Compatibility shim
+
+---
+
+## CONST-035: End-User Usability Mandate (2026-04-29 Strengthening)
+
+A test or Challenge that PASSES is a CLAIM that the tested behavior **works for the end user of the product**.
+
+The HelixAgent project has repeatedly hit the failure mode where every test ran green AND every Challenge reported PASS, yet most product features did not actually work. This MUST NOT recur in HelixCode.
+
+Every PASS result MUST guarantee:
+a. **Quality** - correct behavior under real inputs, edge cases, concurrency
+b. **Completion** - wired end-to-end with no stub/placeholder gaps
+c. **Full usability** - a user following documented request shapes SUCCEEDS
+
+A passing test that doesn't certify all three is a **bluff** and MUST be tightened.
+
+**Bluff taxonomy** (each pattern observed and now forbidden):
+- **Wrapper bluff** - assertions PASS but wrapper's exit-code logic is buggy
+- **Contract bluff** - system advertises capability but rejects it in dispatch
+- **Structural bluff** - `check_file_exists` passes but doesn't run the test
+- **Comment bluff** - comment promises behavior code doesn't actually have
+- **Skip bluff** - `t.Skip("not running yet")` without `SKIP-OK: #<ticket>` marker
+
+**Full background**: `docs/HOST_POWER_MANAGEMENT.md` and this Constitution (CONST-035).
+
+---
+
+## CONST-036: Propagation to Submodules
+
+This Constitution, along with CLAUDE.md and AGENTS.md, MUST be propagated to ALL submodules. Each submodule's governance MUST reference this parent Constitution. Changes to this Constitution MUST trigger review of all submodule governance files.
+
+---
+
+## Amendment Process
+
+Constitution amendments require:
+1. Written proposal with rationale
+2. Challenge demonstrating the need
+3. 72-hour review period
+4. Approval by project architect
+5. Update to all submodule governance files
+
+---
+
+*This Constitution is the supreme law of the HelixCode project. No code, test, or process may contradict it.*

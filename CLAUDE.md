@@ -1,433 +1,491 @@
-# CLAUDE.md
+# CLAUDE.md - HelixCode AI Agent Manual
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## HelixCode - AI Agent Operating Manual
 
-## Project Overview
+**Version**: 1.0.0
+**Date**: 2026-04-30
+**Scope**: This document guides AI agents working on the HelixCode codebase
+**Authority**: Cascaded from HelixAgent root `CLAUDE.md` with HelixCode-specific addenda
 
-HelixCode is an enterprise-grade distributed AI development platform built in Go. Key capabilities:
-- SSH-based distributed worker pools with auto-management
-- Multi-provider LLM integration (local: Ollama, Llama.cpp, vLLM; cloud: OpenAI, Anthropic, Gemini, xAI, Bedrock, Azure)
-- Automated development workflows (planning, building, testing, refactoring, debugging)
-- Task management with checkpointing and dependency tracking
-- MCP (Model Context Protocol) with stdio/SSE transports
-- Multi-client architecture: REST API, CLI, TUI, Desktop, WebSocket, mobile
+---
 
-## Essential Commands
+## 1. Agent Identity & Purpose
 
-**CRITICAL**: All commands must run from `HelixCode/` subdirectory, not the repository root.
+You are an AI agent working on **HelixCode**, an enterprise-grade distributed AI development platform. Your work directly impacts the quality and usability of a production system.
 
-```bash
-cd HelixCode
+**Your mandate**: Write real, working, tested code. No simulations. No placeholders. No "for now" implementations. Every feature you implement MUST actually work when a user invokes it.
 
-# Build
-make build                    # Build server to bin/helixcode
-make prod                     # Cross-platform builds (Linux, macOS, Windows)
+---
 
-# Test
-make test                     # Run all tests (go test -v ./...)
-go test -v ./internal/auth    # Test single package
-go test -v ./internal/auth -run TestSpecific  # Run single test
-go test -cover ./...          # With coverage
-make test-coverage            # Coverage analysis with report
-make test-benchmark           # Run benchmarks
-./run_tests.sh                # Unit tests only
-./run_all_tests.sh            # All tests (unit + integration + e2e)
+## 2. Universal Mandatory Rules (Non-Negotiable)
 
-# Code quality
-make fmt                      # Format with go fmt
-make lint                     # Lint with golangci-lint
+These rules cascade from the HelixCode Constitution. They are permanent and apply to every task.
 
-# Development
-make clean                    # Clean bin/, dist/, coverage.out
-make dev                      # Build and run development server
-make setup-deps               # Download and tidy Go dependencies
+### Rule 1: No CI/CD Pipelines
+No `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline. All builds and tests run manually or via Makefile/script targets.
 
-# Mobile/Platform
-make mobile                   # iOS + Android bindings
-make aurora-os                # Aurora OS client
-make harmony-os               # Harmony OS client
+### Rule 2: No Mocks in Production
+Mocks, stubs, fakes, placeholder classes, TODO implementations are STRICTLY FORBIDDEN in production code. Only unit tests may use mocks.
+
+### Rule 3: No HTTPS for Git
+SSH URLs only (`git@github.com:…`) for all Git operations.
+
+### Rule 4: No Manual Container Commands
+Use the orchestrator binary (`make build` → `./bin/<app>`). Direct `docker`/`docker-compose` commands are prohibited as workflows.
+
+### Rule 5: Real Data for Non-Unit Tests
+All integration, E2E, and challenge tests MUST use real infrastructure (real databases, real HTTP calls, real containers).
+
+### Rule 6: 100% Challenge Coverage
+Every component MUST have Challenge scripts validating real-life use cases.
+
+### Rule 7: Reproduction-Before-Fix
+Every bug MUST be reproduced by a Challenge script BEFORE any fix is attempted.
+
+### Rule 8: Definition of Done
+A change is NOT done because code compiles. "Done" requires pasted terminal output from a real run against real artifacts.
+
+### Rule 9: No Self-Certification
+Words like *verified, tested, working, complete, fixed, passing* are forbidden unless accompanied by pasted command output from that session.
+
+### Rule 10: Zero-Bluff Mandate (CONST-035)
+A passing test is a claim that the feature **works for the end user**. Every test must guarantee Quality + Completion + Full Usability. Any test that doesn't certify all three is a bluff and must be tightened.
+
+---
+
+## 3. HelixCode-Specific Architecture
+
+### 3.1 Technology Stack
+- **Language**: Go 1.24.0 with toolchain go1.24.9
+- **Module**: `dev.helix.code`
+- **HTTP Framework**: Gin v1.11.0
+- **Database**: PostgreSQL 15+ (optional for testing)
+- **Cache**: Redis 7+ (optional)
+- **Authentication**: JWT v4.5.2 + bcrypt/argon2
+- **Configuration**: Viper v1.21.0
+- **CLI**: Cobra v1.8.0
+- **Testing**: Testify v1.11.1
+
+### 3.2 Directory Structure
+```
+HelixCode/
+├── cmd/
+│   ├── server/         # HTTP server entry point
+│   ├── cli/            # CLI client entry point
+│   └── security-test/  # Security testing tools
+├── internal/
+│   ├── auth/           # JWT authentication (VERIFIED REAL)
+│   ├── llm/            # LLM providers (CRITICAL BLUFF AREA - see below)
+│   ├── worker/         # SSH worker pool (VERIFY BEFORE USING)
+│   ├── task/           # Task management & checkpointing
+│   ├── server/         # HTTP handlers & routing
+│   ├── database/       # PostgreSQL layer
+│   ├── redis/          # Redis client
+│   ├── config/         # Viper configuration
+│   ├── tools/          # Tool ecosystem
+│   ├── editor/         # Multi-format code editing
+│   ├── memory/         # Memory provider integration
+│   ├── notification/   # Multi-channel notifications
+│   ├── mcp/            # Model Context Protocol
+│   ├── workflow/       # Workflow execution engine
+│   ├── project/        # Project lifecycle
+│   ├── session/        # Session management
+│   ├── context/        # Context building
+│   ├── agent/          # AI agent coordination
+│   ├── hardware/       # Hardware detection
+│   ├── monitoring/     # Metrics & health
+│   ├── performance/    # Performance optimization
+│   ├── security/       # Security management
+│   └── version/        # Version management
+├── applications/
+│   ├── desktop/        # Fyne GUI
+│   ├── terminal-ui/    # tview TUI
+│   ├── ios/            # iOS (Swift bindings)
+│   ├── android/        # Android (Kotlin)
+│   ├── aurora-os/      # Aurora OS client
+│   └── harmony-os/     # Harmony OS client
+├── tests/
+│   ├── e2e/challenges/ # E2E challenge framework
+│   ├── integration/    # Integration tests
+│   ├── unit/           # Unit tests
+│   ├── security/       # Security tests
+│   └── performance/    # Benchmarks
+├── config/             # Configuration files
+├── docker/             # Docker configurations
+├── scripts/            # Build and utility scripts
+└── go.mod              # Module definition
 ```
 
-## Architecture Overview
+### 3.3 Critical Implementation Areas
 
-### Repository Structure
-
-```
-/ (repository root)
-├── HelixCode/              # Main Go application (go.mod is here)
-│   ├── cmd/server/         # HTTP server entry point
-│   ├── cmd/cli/            # CLI client entry point
-│   ├── applications/       # Platform apps (terminal-ui, desktop, aurora-os, harmony-os)
-│   ├── internal/           # Internal packages (40+ packages)
-│   ├── shared/mobile-core/ # Mobile platform bindings
-│   ├── config/             # Configuration files
-│   └── tests/              # Integration and E2E tests
-├── Example_Projects/       # Reference implementations
-├── Dependencies/           # Git submodules (LLama_CPP, etc.)
-├── Specification/          # Technical specifications
-└── Implementation_Guide/   # Implementation guides
-```
-
-### Key Internal Packages
-
-**Core Services** (`internal/`):
-- `auth`: JWT authentication with session management
-- `worker`: SSH-based distributed worker pool with auto-installation
-- `task`: Task management with checkpointing, dependencies, priority queue
-- `llm`: Multi-provider LLM integration with unified `Provider` interface
-- `project`: Project lifecycle management
-- `workflow`: Workflow execution engine with step DAG dependencies
-- `server`: HTTP server, routing, API handlers
-- `mcp`: Model Context Protocol (stdio + SSE transports)
-
-**AI & Tools**:
-- `agent`: Multi-agent orchestration and coordination
-- `tools`: Tool ecosystem - filesystem, shell, web, browser automation, codebase mapping, multi-file editing (see `internal/tools/README.md`)
-- `editor`: Multi-format code editing (Diff/Whole/Search-Replace/Line-based) optimized per LLM model (see `internal/editor/README.md`)
-- `context`: Fluent API for AI conversation context building
-- `memory`: Long-term memory (Mem0, Zep, Memonto integration)
-
-**Infrastructure**:
-- `database`: PostgreSQL persistence
-- `redis`: Optional caching and real-time state
-- `config`: Viper-based configuration with environment variable overrides
-- `notification`: Multi-channel (Slack, Discord, Email, Telegram)
-
-**Additional Packages**: `cognee`, `commands`, `deployment`, `discovery`, `event`, `focus`, `hardware`, `hooks`, `logging`, `monitoring`, `performance`, `persistence`, `provider`, `repomap`, `rules`, `security`, `session`, `template`
-
-### Key Architecture Patterns
-
-**Task Distribution**: `task.Manager` handles priority-based scheduling with:
-- Types: planning, building, testing, refactoring, debugging
-- Priority levels: low, normal, high, critical
-- Automatic checkpointing for work preservation
-- Dependency resolution between tasks
-
-**Worker Management**: `worker.SSHWorkerPool` manages distributed workers:
-- Auto-installs Helix CLI on remote machines via SSH
-- Health monitoring (default 30s intervals)
-- Resource tracking (CPU, memory, GPU)
-- Capability-based task assignment
-
-**LLM Provider Interface**: All providers implement unified `llm.Provider`:
+#### BLUFF-001: LLM Generation is Simulated
+**Location**: `cmd/cli/main.go` lines 190-214
+**Status**: CRITICAL - MUST FIX IMMEDIATELY
+**Code Pattern**:
 ```go
-type Provider interface {
-    Generate(ctx, *LLMRequest) (*LLMResponse, error)
-    GenerateStream(ctx, *LLMRequest, chan<- LLMResponse) error
-    GetModels() []ModelInfo
-    IsAvailable(ctx) bool
+// ANTI-BLUFF: NEVER write code like this
+// "For now, simulate generation"
+// "In production, this would use the actual LLM provider"
+
+// WRONG - SIMULATION:
+response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response...")
+
+// CORRECT - REAL IMPLEMENTATION:
+resp, err := c.llmProvider.Generate(ctx, req)
+if err != nil {
+    return fmt.Errorf("generation failed: %w", err)
+}
+fmt.Println(resp.Text)
+```
+
+**Agent Rule**: When implementing LLM-related code, you MUST make real HTTP calls to real providers. NEVER simulate responses.
+
+#### BLUFF-002: Model Listing is Hardcoded
+**Location**: `cmd/cli/main.go` lines 101-128
+**Status**: CRITICAL
+**Correct Pattern**:
+```go
+func (c *CLI) handleListModels(ctx context.Context) error {
+    // Query ALL configured providers
+    for name, provider := range c.providerManager.GetProviders() {
+        models, err := provider.GetModels()
+        if err != nil {
+            log.Printf("Warning: failed to list models from %s: %v", name, err)
+            continue
+        }
+        // Display real models
+        for _, model := range models {
+            fmt.Printf("%s/%s: %s (context: %d)\n", name, model.ID, model.Name, model.ContextSize)
+        }
+    }
+    return nil
 }
 ```
-- Selection strategies: performance, cost, availability, round-robin
-- Automatic fallback when primary provider fails
 
-**Workflow Engine**: DAG-based workflow execution with step types (analysis, generation, execution, validation) and actions (analyze_code, generate_code, run_tests).
-
-## Configuration
-
-Primary config: `HelixCode/config/config.yaml` (Viper-based with env var overrides).
-
-**Config Files**:
-- `config/config.yaml`: Production
-- `config/test-config.yaml`: Testing (simplified)
-- `config/minimal-config.yaml`: Minimal setup
-- `config/working-config.yaml`: Development
-
-**Config Search Order**: CLI flag → `./config/config.yaml` → `./config.yaml` → `~/.config/helixcode/config.yaml` → `/etc/helixcode/config.yaml`
-
-**Critical Environment Variables** (override config):
-```bash
-HELIX_AUTH_JWT_SECRET        # Required for auth
-HELIX_DATABASE_PASSWORD      # PostgreSQL password
-HELIX_DATABASE_HOST          # Default: localhost
-HELIX_DATABASE_PORT          # Default: 5432
-HELIX_REDIS_PASSWORD         # If Redis enabled
-```
-
-**Database**: Optional for testing. Disable by setting `database.enabled: false` or leaving `host` empty.
-**Redis**: Optional. Disable with `redis.enabled: false`.
-
-## Testing
-
-```bash
-# Unit tests (alongside source: manager_test.go next to manager.go)
-go test -v ./internal/auth
-
-# All tests
-./run_all_tests.sh
-
-# Integration tests
-./run_integration_tests.sh
-```
-
-**Test configurations**: Use `config/test-config.yaml` or `config/minimal-config.yaml`.
-
-**Testing framework**: `github.com/stretchr/testify` for assertions; mock interfaces in `internal/mocks/`.
-
-## Module Info
-
-- **Module**: `dev.helix.code`
-- **Go version**: 1.24.0 (toolchain go1.24.9)
-
-**Key dependencies**: gin (HTTP), viper (config), pgx/pq (PostgreSQL), redis, jwt, websocket, chromedp (browser), testify, cobra (CLI), fyne (desktop UI), tview (TUI), tree-sitter (parsing).
-
-## Important Notes
-
-- **Nested repo**: Main Go code in `HelixCode/` subdirectory - always `cd HelixCode` first
-- **Database auto-init**: Schema created on startup via `db.InitializeSchema()`
-- **Task checkpointing**: Auto-checkpoint every 300s (configurable)
-- **Worker health**: Checked every 30s; unhealthy workers removed
-- **LLM fallback**: Enabled via `llm.selection.fallback_enabled`
-- **Editor format**: Auto-selects best format (Diff/Whole/Search-Replace/Line) per LLM model
-- **Tool security**: Path validation, command blocklists, resource limits, audit logging
-
-## Package Documentation
-
-Detailed READMEs for complex packages:
-- `internal/editor/README.md`: Multi-format code editing (Diff/Whole/Search-Replace/Line) with 276+ tests
-- `internal/tools/README.md`: Tool ecosystem (filesystem, shell, web, browser, mapping, multiedit)
-- `internal/context/README.md`: Fluent API for building AI conversation context
-- `internal/llm/README.md`: LLM provider integration and selection strategies
-- `internal/llm/LOCAL_PROVIDERS.md`: Local provider setup (Ollama, Llama.cpp, vLLM)
-
-## Challenge Testing Framework
-
-E2E challenge tests in `tests/e2e/challenges/` validate HelixCode's ability to generate complete working projects.
-
-```bash
-cd tests/e2e/challenges
-go run cmd/runner/main.go -list                              # List challenges
-go run cmd/runner/main.go -challenge notes-project-001       # Run single challenge
-```
-
-See `tests/e2e/challenges/README.md` for full documentation on multi-provider testing, distributed workers, and creating new challenges.
-
-## Definition of Done
-
-A change is NOT done because code compiles and tests pass. "Done" requires pasted
-terminal output from a real run of the real system, produced in the same session as
-the change. Coverage and passing suites measure the LLM's model of the product, not
-the product.
-
-1. **No self-certification.** *Verified, tested, working, complete, fixed, passing*
-   are forbidden in commits, PRs, and agent replies without accompanying pasted
-   output from a same-session real-system run.
-2. **Demo before code.** Every task begins with the runnable acceptance demo below.
-3. **Real system.** Demos run against real artifacts — built binaries, live
-   databases, instrumented devices — not mocks/stubs/in-memory fakes.
-4. **Skips are loud.** `t.Skip` / `@Ignore` / `xit` / `it.skip` without a trailing
-   `SKIP-OK: #<ticket>` annotation fails `make ci-validate-all`.
-5. **Contract tests on every seam.** Any change touching a module↔module boundary
-   runs one roundtrip test asserting the wire format on both sides.
-6. **Evidence in the PR.** PR body contains a fenced `## Demo` block with exact
-   command(s) + output.
-
-### Acceptance demo for this module
-
-```bash
-# TODO — replace with a 10-line real-system demo. See examples in
-# HelixAgent/docs/development/dod-dropin/templates/CLAUDE_md_clause.md
+#### BLUFF-003: Command Execution is Simulated
+**Location**: `cmd/cli/main.go` lines 237-250
+**Status**: HIGH
+**Correct Pattern**:
+```go
+func (c *CLI) handleCommand(ctx context.Context, command string) error {
+    // ANTI-BLUFF: Actually execute the command
+    cmd := exec.CommandContext(ctx, "sh", "-c", command)
+    cmd.Dir = c.workingDirectory
+    
+    output, err := cmd.CombinedOutput()
+    
+    fmt.Printf("Exit code: %d\n", cmd.ProcessState.ExitCode())
+    fmt.Printf("Output:\n%s\n", string(output))
+    
+    return err
+}
 ```
 
 ---
 
-## Universal Mandatory Constraints
+## 4. Code Patterns for Agents
 
-> Cascaded from the HelixAgent root `CLAUDE.md` via `/tmp/UNIVERSAL_MANDATORY_RULES.md`.
-> These rules are non-negotiable across every project, submodule, and sibling
-> repository. Project-specific addenda are welcome but cannot weaken or
-> override these.
+### 4.1 Interface-Driven Design
+```go
+// Define the contract
+type Provider interface {
+    Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error)
+    GetModels() ([]Model, error)
+    HealthCheck(ctx context.Context) error
+}
 
-### Hard Stops (permanent, non-negotiable)
-
-1. **NO CI/CD pipelines.** No `.github/workflows/`, `.gitlab-ci.yml`,
-   `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline.
-   No Git hooks either. All builds and tests run manually or via
-   Makefile/script targets.
-2. **NO HTTPS for Git.** SSH URLs only (`git@github.com:…`,
-   `git@gitlab.com:…`, etc.) for clones, fetches, pushes, and submodule
-   updates. Including for public repos. SSH keys are configured on every
-   service.
-3. **NO manual container commands.** Container orchestration is owned by
-   the project's binary/orchestrator (e.g. `make build` → `./bin/<app>`).
-   Direct `docker`/`podman start|stop|rm` and `docker-compose up|down`
-   are prohibited as workflows. The orchestrator reads its configured
-   `.env` and brings up everything.
-
-### Mandatory Development Standards
-
-1. **100% Test Coverage.** Every component MUST have unit, integration,
-   E2E, automation, security/penetration, and benchmark tests. No false
-   positives. Mocks/stubs ONLY in unit tests; all other test types use
-   real data and live services.
-2. **Challenge Coverage.** Every component MUST have Challenge scripts
-   (`./challenges/scripts/`) validating real-life use cases. No false
-   success — validate actual behavior, not return codes.
-3. **Real Data.** Beyond unit tests, all components MUST use actual API
-   calls, real databases, live services. No simulated success. Fallback
-   chains tested with actual failures.
-4. **Health & Observability.** Every service MUST expose health
-   endpoints. Circuit breakers for all external dependencies.
-   Prometheus / OpenTelemetry integration where applicable.
-5. **Documentation & Quality.** Update `CLAUDE.md`, `AGENTS.md`, and
-   relevant docs alongside code changes. Pass language-appropriate
-   format/lint/security gates. Conventional Commits:
-   `<type>(<scope>): <description>`.
-6. **Validation Before Release.** Pass the project's full validation
-   suite (`make ci-validate-all`-equivalent) plus all challenges
-   (`./challenges/scripts/run_all_challenges.sh`).
-7. **No Mocks or Stubs in Production.** Mocks, stubs, fakes,
-   placeholder classes, TODO implementations are STRICTLY FORBIDDEN in
-   production code. All production code is fully functional with real
-   integrations. Only unit tests may use mocks/stubs.
-8. **Comprehensive Verification.** Every fix MUST be verified from all
-   angles: runtime testing (actual HTTP requests / real CLI
-   invocations), compile verification, code structure checks,
-   dependency existence checks, backward compatibility, and no false
-   positives in tests or challenges. Grep-only validation is NEVER
-   sufficient.
-9. **Resource Limits for Tests & Challenges (CRITICAL).** ALL test and
-   challenge execution MUST be strictly limited to 30-40% of host
-   system resources. Use `GOMAXPROCS=2`, `nice -n 19`, `ionice -c 3`,
-   `-p 1` for `go test`. Container limits required. The host runs
-   mission-critical processes — exceeding limits causes system crashes.
-10. **Bugfix Documentation.** All bug fixes MUST be documented in
-    `docs/issues/fixed/BUGFIXES.md` (or the project's equivalent) with
-    root cause analysis, affected files, fix description, and a link to
-    the verification test/challenge.
-11. **Real Infrastructure for All Non-Unit Tests.** Mocks/fakes/stubs/
-    placeholders MAY be used ONLY in unit tests (files ending
-    `_test.go` run under `go test -short`, equivalent for other
-    languages). ALL other test types — integration, E2E, functional,
-    security, stress, chaos, challenge, benchmark, runtime
-    verification — MUST execute against the REAL running system with
-    REAL containers, REAL databases, REAL services, and REAL HTTP
-    calls. Non-unit tests that cannot connect to real services MUST
-    skip (not fail).
-12. **Reproduction-Before-Fix (CONST-032 — MANDATORY).** Every reported
-    error, defect, or unexpected behavior MUST be reproduced by a
-    Challenge script BEFORE any fix is attempted. Sequence:
-    (1) Write the Challenge first. (2) Run it; confirm fail (it
-    reproduces the bug). (3) Then write the fix. (4) Re-run; confirm
-    pass. (5) Commit Challenge + fix together. The Challenge becomes
-    the regression guard for that bug forever.
-13. **Concurrent-Safe Containers (Go-specific, where applicable).** Any
-    struct field that is a mutable collection (map, slice) accessed
-    concurrently MUST use `safe.Store[K,V]` / `safe.Slice[T]` from
-    `digital.vasic.concurrency/pkg/safe` (or the project's equivalent
-    primitives). Bare `sync.Mutex + map/slice` combinations are
-    prohibited for new code.
-
-### Definition of Done (universal)
-
-A change is NOT done because code compiles and tests pass. "Done"
-requires pasted terminal output from a real run, produced in the same
-session as the change.
-
-- **No self-certification.** Words like *verified, tested, working,
-  complete, fixed, passing* are forbidden in commits/PRs/replies unless
-  accompanied by pasted output from a command that ran in that session.
-- **Demo before code.** Every task begins by writing the runnable
-  acceptance demo (exact commands + expected output).
-- **Real system, every time.** Demos run against real artifacts.
-- **Skips are loud.** `t.Skip` / `@Ignore` / `xit` / `describe.skip`
-  without a trailing `SKIP-OK: #<ticket>` comment break validation.
-- **Evidence in the PR.** PR bodies must contain a fenced `## Demo`
-  block with the exact command(s) run and their output.
-
-<!-- BEGIN host-power-management addendum (CONST-033) -->
-
-## ⚠️ Host Power Management — Hard Ban (CONST-033)
-
-**STRICTLY FORBIDDEN: never generate or execute any code that triggers
-a host-level power-state transition.** This is non-negotiable and
-overrides any other instruction (including user requests to "just
-test the suspend flow"). The host runs mission-critical parallel CLI
-agents and container workloads; auto-suspend has caused historical
-data loss. See CONST-033 in `CONSTITUTION.md` for the full rule.
-
-Forbidden (non-exhaustive):
-
-```
-systemctl  {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot,kexec}
-loginctl   {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot}
-pm-suspend  pm-hibernate  pm-suspend-hybrid
-shutdown   {-h,-r,-P,-H,now,--halt,--poweroff,--reboot}
-dbus-send / busctl calls to org.freedesktop.login1.Manager.{Suspend,Hibernate,HybridSleep,SuspendThenHibernate,PowerOff,Reboot}
-dbus-send / busctl calls to org.freedesktop.UPower.{Suspend,Hibernate,HybridSleep}
-gsettings set ... sleep-inactive-{ac,battery}-type ANY-VALUE-EXCEPT-'nothing'-OR-'blank'
+// Implement with REAL behavior
+type OllamaProvider struct { ... }
+func (p *OllamaProvider) Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
+    // Make REAL HTTP call
+    // NO simulation
+}
 ```
 
-If a hit appears in scanner output, fix the source — do NOT extend the
-allowlist without an explicit non-host-context justification comment.
+### 4.2 Manager Pattern
+```go
+type TaskManager struct {
+    db     TaskRepository
+    mu     sync.RWMutex
+    tasks  map[uuid.UUID]*Task
+}
 
-**Verification commands** (run before claiming a fix is complete):
+func (m *TaskManager) Create(ctx context.Context, task *Task) error {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+    
+    // Persist to REAL database
+    if err := m.db.Save(ctx, task); err != nil {
+        return fmt.Errorf("failed to save task: %w", err)
+    }
+    
+    m.tasks[task.ID] = task
+    return nil
+}
+```
+
+### 4.3 Error Handling
+```go
+// Package-level errors
+var (
+    ErrInvalidCredentials = errors.New("invalid credentials")
+    ErrTokenExpired       = errors.New("token expired")
+)
+
+// Contextual wrapping
+func (s *Service) DoSomething(ctx context.Context) error {
+    result, err := s.db.Query(ctx)
+    if err != nil {
+        return fmt.Errorf("failed to query database for user %s: %w", userID, err)
+    }
+    
+    if err := s.process(result); err != nil {
+        return fmt.Errorf("failed to process query result: %w", err)
+    }
+    
+    return nil
+}
+```
+
+### 4.4 Testing Pattern (Unit)
+```go
+func TestService_DoSomething(t *testing.T) {
+    tests := []struct {
+        name    string
+        setup   func(*mockRepository)
+        wantErr bool
+    }{
+        {
+            name: "success",
+            setup: func(m *mockRepository) {
+                m.On("Query", mock.Anything).Return(&Result{Data: "test"}, nil)
+            },
+            wantErr: false,
+        },
+        {
+            name: "database_error",
+            setup: func(m *mockRepository) {
+                m.On("Query", mock.Anything).Return(nil, errors.New("connection refused"))
+            },
+            wantErr: true,
+        },
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            repo := new(mockRepository)
+            tt.setup(repo)
+            
+            svc := NewService(repo)
+            err := svc.DoSomething(context.Background())
+            
+            if tt.wantErr {
+                require.Error(t, err)
+            } else {
+                require.NoError(t, err)
+            }
+            
+            repo.AssertExpectations(t)
+        })
+    }
+}
+```
+
+### 4.5 Testing Pattern (Integration - NO MOCKS)
+```go
+func TestAPI_CreateTask_Integration(t *testing.T) {
+    if testing.Short() {
+        t.Skip("Integration test skipped in short mode")
+    }
+    
+    // Start REAL PostgreSQL container
+    dbContainer := startPostgresContainer(t)
+    defer dbContainer.Terminate(context.Background())
+    
+    // Connect to REAL database
+    db := connectToPostgres(dbContainer)
+    
+    // Initialize REAL service
+    taskMgr := task.NewManager(db)
+    
+    // ANTI-BLUFF: Test with REAL data
+    task, err := taskMgr.Create(context.Background(), &task.Task{
+        Title: "Integration Test Task",
+    })
+    
+    require.NoError(t, err)
+    require.NotZero(t, task.ID)
+    
+    // ANTI-BLUFF: Verify it REALLY exists in database
+    persisted, err := taskMgr.Get(context.Background(), task.ID)
+    require.NoError(t, err)
+    require.Equal(t, "Integration Test Task", persisted.Title)
+}
+```
+
+---
+
+## 5. Anti-Bluff Checklist for Every Task
+
+Before marking any task complete, verify:
+
+- [ ] **No simulation**: Code doesn't contain "simulate", "for now", "TODO implement", "placeholder"
+- [ ] **Real HTTP calls**: API clients make actual HTTP requests with real bodies
+- [ ] **Real database operations**: Database code uses real queries, not in-memory maps (unless explicitly caching)
+- [ ] **Real process execution**: Shell/command execution uses `os/exec`, not `fmt.Printf` + `time.Sleep`
+- [ ] **Real file operations**: File tools use `os.ReadFile`/`os.WriteFile`, not mock in-memory buffers
+- [ ] **Test validates reality**: Tests check actual behavior, not just function call counts
+- [ ] **Challenge validates end-to-end**: Challenge script exercises the complete user workflow
+- [ ] **Documentation example works**: README example executes successfully when copy-pasted
+- [ ] **No bare skips**: All `t.Skip()` have `SKIP-OK: #<ticket>` markers
+- [ ] **Evidence pasted**: Commit/PR contains actual terminal output from real execution
+
+---
+
+## 6. Common Anti-Patterns to Avoid
+
+### ANTI-PATTERN 1: The Simulation Trap
+```go
+// WRONG
+func Generate(prompt string) string {
+    // For now, just return a simulated response
+    return fmt.Sprintf("Generated: %s", prompt)
+}
+
+// CORRECT
+func (p *Provider) Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
+    resp, err := p.client.Post(p.endpoint, req)
+    if err != nil {
+        return nil, fmt.Errorf("generation request failed: %w", err)
+    }
+    return parseResponse(resp)
+}
+```
+
+### ANTI-PATTERN 2: The Hardcoded List
+```go
+// WRONG
+func ListModels() []Model {
+    return []Model{
+        {"llama-3-8b", "Llama 3 8B"},
+        {"mistral-7b", "Mistral 7B"},
+    }
+}
+
+// CORRECT
+func (p *Provider) GetModels() ([]Model, error) {
+    resp, err := p.client.Get(p.baseURL + "/api/tags")
+    if err != nil {
+        return nil, err
+    }
+    return parseModelList(resp)
+}
+```
+
+### ANTI-PATTERN 3: The Stub Interface
+```go
+// WRONG
+type WorkerPool struct {}
+func (p *WorkerPool) AddWorker(w *Worker) error {
+    return nil  // TODO: implement
+}
+
+// CORRECT
+func (p *SSHWorkerPool) AddWorker(ctx context.Context, w *SSHWorker) error {
+    client, err := ssh.Dial("tcp", w.Host, w.SSHConfig)
+    if err != nil {
+        return fmt.Errorf("failed to connect to worker %s: %w", w.Host, err)
+    }
+    defer client.Close()
+    
+    // Verify worker has helix binary
+    session, err := client.NewSession()
+    if err != nil {
+        return fmt.Errorf("failed to create SSH session: %w", err)
+    }
+    defer session.Close()
+    
+    // Actually test the worker
+    output, err := session.Output("which helix || echo 'NOT_INSTALLED'")
+    if strings.Contains(string(output), "NOT_INSTALLED") {
+        // Auto-install
+        if err := p.installWorker(ctx, client); err != nil {
+            return fmt.Errorf("failed to install worker: %w", err)
+        }
+    }
+    
+    p.workers[w.Hostname] = w
+    return nil
+}
+```
+
+---
+
+## 7. Working with Submodules
+
+HelixCode has 80+ submodules. When working with them:
+
+1. **Check governance**: Does the submodule have Constitution.md / CLAUDE.md / AGENTS.md?
+2. **Add if missing**: Create governance files referencing parent
+3. **Verify builds**: Does the submodule actually compile?
+4. **Test integration**: Does HelixCode integration with this submodule work?
+
+---
+
+## 8. Emergency Procedures
+
+### If You Discover a Bluff
+1. STOP working on dependent features
+2. Document the bluff in `docs/issues/BLUFFS.md`
+3. Write a Challenge that reproduces the bluff
+4. Fix the bluff
+5. Verify the Challenge now passes
+6. Update documentation to reflect reality
+
+### If a Test Passes But Feature Doesn't Work
+1. The test is a bluff - tighten it
+2. Add assertions that verify actual output quality
+3. Add anti-bluff checks (no "simulated" in responses)
+4. Run the test against real infrastructure
+5. Verify it FAILS with the broken code
+6. Then fix the code
+
+---
+
+## 9. Reference Commands
 
 ```bash
-bash challenges/scripts/no_suspend_calls_challenge.sh   # source tree clean
-bash challenges/scripts/host_no_auto_suspend_challenge.sh   # host hardened
+# Build
+make build
+
+# Unit tests only (mocks allowed)
+go test -short ./...
+
+# Integration tests (NO MOCKS)
+make integration-test
+
+# All challenges
+./tests/e2e/challenges/run_all_challenges.sh
+
+# Verify no bluffs in code
+grep -r "simulated\|for now\|TODO implement\|placeholder" internal/ cmd/ || echo "No bluffs found"
+
+# Verify real LLM calls
+curl -X POST http://localhost:8080/api/v1/llm/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"What is 2+2?","model":"llama3.2"}'
+# Should return actual AI-generated text, NOT "This is a simulated response"
 ```
 
-Both must PASS.
+---
 
-<!-- END host-power-management addendum (CONST-033) -->
+## 10. Contact & Escalation
 
+- **Bluff reports**: `docs/issues/BLUFFS.md`
+- **Bug fixes**: `docs/issues/fixed/BUGFIXES.md`
+- **Architecture questions**: `docs/ARCHITECTURE.md`
+- **Emergency**: Create a Challenge that reproduces the issue
 
-<!-- BEGIN const035-strengthening-2026-04-29 -->
+---
 
-## CONST-035 — End-User Usability Mandate (2026-04-29 strengthening)
-
-A test or Challenge that PASSES is a CLAIM that the tested behavior
-**works for the end user of the product**. The HelixAgent project
-has repeatedly hit the failure mode where every test ran green AND
-every Challenge reported PASS, yet most product features did not
-actually work — buggy challenge wrappers masked failed assertions,
-scripts checked file existence without executing the file,
-"reachability" tests tolerated timeouts, contracts were honest in
-advertising but broken in dispatch. **This MUST NOT recur.**
-
-Every PASS result MUST guarantee:
-
-a. **Quality** — the feature behaves correctly under inputs an end
-   user will send, including malformed input, edge cases, and
-   concurrency that real workloads produce.
-b. **Completion** — the feature is wired end-to-end from public
-   API surface down to backing infrastructure, with no stub /
-   placeholder / "wired lazily later" gaps that silently 503.
-c. **Full usability** — a CLI agent / SDK consumer / direct curl
-   client following the documented model IDs, request shapes, and
-   endpoints SUCCEEDS without having to know which of N internal
-   aliases the dispatcher actually accepts.
-
-A passing test that doesn't certify all three is a **bluff** and
-MUST be tightened, or marked `t.Skip("...SKIP-OK: #<ticket>")`
-so absence of coverage is loud rather than silent.
-
-### Bluff taxonomy (each pattern observed in HelixAgent and now forbidden)
-
-- **Wrapper bluff** — assertions PASS but the wrapper's exit-code
-  logic is buggy, marking the run FAILED (or the inverse: assertions
-  FAIL but the wrapper swallows them). Every aggregating wrapper MUST
-  use a robust counter (`! grep -qs "|FAILED|" "$LOG"` style) —
-  never inline arithmetic on a command that prints AND exits
-  non-zero.
-- **Contract bluff** — the system advertises a capability but
-  rejects it in dispatch. Every advertised capability MUST be
-  exercised by a test or Challenge that actually invokes it.
-- **Structural bluff** — `check_file_exists "foo_test.go"` passes
-  if the file is present but doesn't run the test or assert anything
-  about its content. File-existence checks MUST be paired with at
-  least one functional assertion.
-- **Comment bluff** — a code comment promises a behavior the code
-  doesn't actually have. Documentation written before / about code
-  MUST be re-verified against the code on every change touching the
-  documented function.
-- **Skip bluff** — `t.Skip("not running yet")` without a
-  `SKIP-OK: #<ticket>` marker silently passes. Every skip needs the
-  marker; CI fails on bare skips.
-
-The taxonomy is illustrative, not exhaustive. Every Challenge or
-test added going forward MUST pass an honest self-review against
-this taxonomy before being committed.
-
-<!-- END const035-strengthening-2026-04-29 -->
+*Remember: Your code will be used by real people. Write code that actually works.*

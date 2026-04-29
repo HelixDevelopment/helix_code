@@ -187,26 +187,52 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 	return nil
 }
 
-// handleGenerate performs LLM generation
+	// handleGenerate performs LLM generation
 func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
 	fmt.Printf("\n=== Generating with %s ===\n", model)
 	fmt.Printf("Prompt: %s\n\n", prompt)
 
-	// For now, simulate generation
-	// In production, this would use the actual LLM provider
+	// ANTI-BLUFF: MUST use real LLM provider, not simulation
+	if c.llmProvider == nil {
+		return fmt.Errorf("LLM provider not initialized - please check configuration")
+	}
+
+	// Parse model from string (format: provider:model or just model)
+	modelName := model
+	if strings.Contains(model, ":") {
+		parts := strings.SplitN(model, ":", 2)
+		modelName = parts[1]
+	}
+
+	// Get provider
+	provider := c.llmProvider
+
+	// Create generation request
+	req := &llm.LLMRequest{
+		Model:       modelName,
+		MaxTokens:   maxTokens,
+		Temperature: temperature,
+		Stream:      stream,
+	}
 
 	if stream {
-		// Simulate streaming response
-		words := strings.Split(prompt+" This is a simulated streaming response from the model.", " ")
-		for _, word := range words {
-			fmt.Printf("%s ", word)
-			time.Sleep(100 * time.Millisecond)
+		// Real streaming from provider
+		chunkChan := make(chan llm.LLMResponse, 100)
+		err := provider.GenerateStream(ctx, req, chunkChan)
+		if err != nil {
+			return fmt.Errorf("streaming generation failed: %w", err)
+		}
+		for chunk := range chunkChan {
+			fmt.Printf("%s ", chunk.Content)
 		}
 		fmt.Println()
 	} else {
-		// Simulate non-streaming response
-		response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response from the %s model. The prompt was processed successfully and the model generated appropriate output based on the input provided.", prompt, model)
-		fmt.Println(response)
+		// Real non-streaming from provider
+		resp, err := provider.Generate(ctx, req)
+		if err != nil {
+			return fmt.Errorf("generation failed: %w", err)
+		}
+		fmt.Println(resp.Content)
 	}
 
 	fmt.Printf("\n✅ Generation completed\n")

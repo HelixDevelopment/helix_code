@@ -1,12 +1,20 @@
 package llm
 
 import (
+	"bufio"
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// Remove unused imports - io is not used
 
 // LlamaCPPProvider implements the LLM provider interface for Llama.cpp
 type LlamaCPPProvider struct {
@@ -16,7 +24,7 @@ type LlamaCPPProvider struct {
 
 // LlamaConfig holds configuration for Llama.cpp
 type LlamaConfig struct {
-	ModelPath     string        `json:"model_path"`
+	Model         string        `json:"model"`
 	ContextSize   int           `json:"context_size"`
 	GPUEnabled    bool          `json:"gpu_enabled"`
 	GPULayers     int           `json:"gpu_layers"`
@@ -33,7 +41,7 @@ func NewLlamaCPPProvider(config LlamaConfig) (*LlamaCPPProvider, error) {
 		isRunning: true,
 	}
 
-	log.Printf("✅ Llama.cpp provider initialized with model: %s", config.ModelPath)
+	log.Printf("✅ Llama.cpp provider initialized with model: %s", config.Model)
 	return provider, nil
 }
 
@@ -48,10 +56,49 @@ func (p *LlamaCPPProvider) GetName() string {
 }
 
 // GetModels returns available models
+// ANTI-BLUFF: Query REAL Llama.cpp server for available models
 func (p *LlamaCPPProvider) GetModels() []ModelInfo {
-	return []ModelInfo{
-		{
-			Name:           p.config.ModelPath,
+	baseURL := p.config.ServerHost
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+
+	// REAL HTTP call to Llama.cpp server
+	resp, err := http.Get(baseURL + "/models")
+	if err != nil {
+		log.Printf("Failed to list Llama.cpp models: %v", err)
+		// Return configured model as fallback
+		return []ModelInfo{
+			{
+				Name:           p.config.Model,
+				Provider:       ProviderTypeLocal,
+				ContextSize:    p.config.ContextSize,
+				Capabilities:   []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration, CapabilityCodeAnalysis},
+				MaxTokens:      p.config.ContextSize,
+				SupportsTools:  false,
+				SupportsVision: false,
+				Description:    "Local Llama.cpp model",
+			},
+		}
+	}
+	defer resp.Body.Close()
+
+	// Parse response
+	var result struct {
+		Models []struct {
+			Name string `json:"name"`
+		} `json:"models"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		log.Printf("Failed to decode Llama.cpp models: %v", err)
+		return []ModelInfo{}
+	}
+
+	models := make([]ModelInfo, len(result.Models))
+	for i, m := range result.Models {
+		models[i] = ModelInfo{
+			Name:           m.Name,
 			Provider:       ProviderTypeLocal,
 			ContextSize:    p.config.ContextSize,
 			Capabilities:   []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration, CapabilityCodeAnalysis},
@@ -59,8 +106,9 @@ func (p *LlamaCPPProvider) GetModels() []ModelInfo {
 			SupportsTools:  false,
 			SupportsVision: false,
 			Description:    "Local Llama.cpp model",
-		},
+		}
 	}
+	return models
 }
 
 // GetCapabilities returns model capabilities
@@ -77,51 +125,176 @@ func (p *LlamaCPPProvider) GetCapabilities() []ModelCapability {
 }
 
 // Generate generates a response using Llama.cpp
+// ANTI-BLUFF: This MUST make REAL HTTP call to Llama.cpp server
 func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
 	if !p.isRunning {
 		return nil, ErrProviderUnavailable
 	}
 
-	// Simulate processing time
-	time.Sleep(100 * time.Millisecond)
+	// REAL implementation - connect to Llama.cpp server
+	baseURL := p.config.ServerHost
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+	if p.config.ServerPort != 0 {
+		baseURL = fmt.Sprintf("%s:%d", baseURL, p.config.ServerPort)
+	}
+
+	// Build request payload - use Messages if available, otherwise use Model
+	var payload map[string]interface{}
+	if len(request.Messages) > 0 {
+		payload = map[string]interface{}{
+			"model":       p.config.Model,
+			"messages":    request.Messages,
+			"max_tokens":  request.MaxTokens,
+			"temperature": request.Temperature,
+			"stream":      false,
+		}
+	} else {
+		// Convert Messages to prompt string
+		prompt := ""
+		for _, msg := range request.Messages {
+			prompt += msg.Role + ": " + msg.Content + "\n"
+		}
+		payload = map[string]interface{}{
+			"model":       p.config.Model,
+			"prompt":      prompt,
+			"max_tokens":  request.MaxTokens,
+			"temperature": request.Temperature,
+			"stream":      false,
+		}
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Make REAL HTTP call to Llama.cpp server
+	req, err := http.NewRequestWithContext(ctx, "POST", baseURL+"/completion", bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: p.config.ServerTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("llama.cpp request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("llama.cpp returned status %d", resp.StatusCode)
+	}
+
+	// Parse REAL response
+	var result struct {
+		Content string `json:"content"`
+		Usage   struct {
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
+		} `json:"usage"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
 
 	return &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: request.ID,
-		Content:   "This is a simulated response from Llama.cpp provider",
+		Content:   result.Content,
 		Usage: Usage{
-			PromptTokens:     100,
-			CompletionTokens: 50,
-			TotalTokens:      150,
+			PromptTokens:     result.Usage.PromptTokens,
+			CompletionTokens: result.Usage.CompletionTokens,
+			TotalTokens:      result.Usage.TotalTokens,
 		},
-		ProcessingTime: 100 * time.Millisecond,
+		ProcessingTime: time.Since(time.Now()),
 		CreatedAt:      time.Now(),
 	}, nil
 }
 
 // GenerateStream generates a streaming response
+// ANTI-BLUFF: This MUST stream REAL response from Llama.cpp server
 func (p *LlamaCPPProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
 	if !p.isRunning {
 		return ErrProviderUnavailable
 	}
 
-	// Simulate streaming response
-	chunks := []string{"This", " is", " a", " streaming", " response"}
-	for _, chunk := range chunks {
+	// REAL streaming implementation
+	baseURL := p.config.ServerHost
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+	if p.config.ServerPort != 0 {
+		baseURL = fmt.Sprintf("%s:%d", baseURL, p.config.ServerPort)
+	}
+
+	// Build prompt from messages or use Model field
+	prompt := ""
+	if len(request.Messages) > 0 {
+		for _, msg := range request.Messages {
+			prompt += msg.Role + ": " + msg.Content + "\n"
+		}
+	} else {
+		prompt = request.Model
+	}
+
+	payload := map[string]interface{}{
+		"model":      p.config.Model,
+		"prompt":     prompt,
+		"max_tokens": request.MaxTokens,
+		"temperature": request.Temperature,
+		"stream":      true,
+	}
+
+	body, _ := json.Marshal(payload)
+	req, _ := http.NewRequestWithContext(ctx, "POST", baseURL+"/completion", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "text/event-stream")
+
+	client := &http.Client{Timeout: 0} // No timeout for streaming
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("llama.cpp stream request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read SSE stream from REAL server
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		data := strings.TrimPrefix(line, "data: ")
+		if data == "[DONE]" {
+			break
+		}
+
+		var chunk struct {
+			Content string `json:"content"`
+		}
+		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
+			continue
+		}
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case ch <- LLMResponse{
 			ID:        uuid.New(),
 			RequestID: request.ID,
-			Content:   chunk,
+			Content:   chunk.Content,
 			CreatedAt: time.Now(),
 		}:
-			time.Sleep(50 * time.Millisecond)
 		}
 	}
 
-	return nil
+	return scanner.Err()
 }
 
 // IsAvailable checks if the provider is available

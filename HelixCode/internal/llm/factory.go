@@ -31,12 +31,12 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 		return NewOllamaProvider(ollamaConfig)
 	case ProviderTypeLlamaCpp:
 		llamaConfig := LlamaConfig{
-			ModelPath:     "", // Needs to be set from config
+			Model:         "", // Needs to be set from config
 			ContextSize:   4096,
 			ServerTimeout: 120 * time.Second,
 		}
 		if len(config.Models) > 0 {
-			llamaConfig.ModelPath = config.Models[0]
+			llamaConfig.Model = config.Models[0]
 		}
 		// Map parameters
 		if val, ok := config.Parameters["context_size"].(float64); ok {

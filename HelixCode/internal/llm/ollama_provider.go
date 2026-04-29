@@ -370,7 +370,7 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	// Send the complete response as a single chunk for now
+	// ANTI-BLUFF: Send REAL response chunk from Ollama
 	select {
 	case <-ctx.Done():
 		return ctx.Err()

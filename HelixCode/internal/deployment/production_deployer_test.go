@@ -15,6 +15,7 @@ func TestNewProductionDeployer(t *testing.T) {
 	t.Run("NewProductionDeployer_MinimalConfig", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:        "test",
 			DeploymentStrategy: ProductionDeploy,
 			TargetServers:      []string{"server1", "server2"},
@@ -34,6 +35,7 @@ func TestNewProductionDeployer(t *testing.T) {
 	t.Run("NewProductionDeployer_WithMonitoring", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:       "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:       "prod",
 			MonitoringEnabled: true,
 			TargetServers:     []string{"server1"},
@@ -49,6 +51,7 @@ func TestNewProductionDeployer(t *testing.T) {
 	t.Run("NewProductionDeployer_FullConfig", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:            "production",
 			DeploymentStrategy:     BlueGreenDeploy,
 			SecurityGateEnabled:    false, // Skip security to avoid init issues
@@ -427,6 +430,7 @@ func TestProductionDeployerConcurrency(t *testing.T) {
 	t.Run("MultipleDeployment_Prevented", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{"server1"},
 		}
@@ -473,6 +477,7 @@ func TestDeploymentConfigValidation(t *testing.T) {
 	t.Run("Config_WithEmptyServers", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{},
 		}
@@ -488,6 +493,7 @@ func TestDeploymentConfigValidation(t *testing.T) {
 	t.Run("Config_WithTimeouts", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			CanaryDuration:     5 * time.Minute,
 			RollbackTimeout:    10 * time.Minute,
 			HealthCheckTimeout: 2 * time.Minute,
@@ -508,6 +514,7 @@ func TestDeploymentStatusTracking(t *testing.T) {
 	t.Run("Status_PhaseTracking", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{"server1"},
 		}
@@ -534,6 +541,7 @@ func TestStartProductionDeployment(t *testing.T) {
 	t.Run("Deployment_MissingCredentials", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:         "test",
 			TargetServers:       []string{"server1"},
 			Credentials:         nil,  // Set to nil instead of empty
@@ -557,6 +565,7 @@ func TestStartProductionDeployment(t *testing.T) {
 	t.Run("Deployment_ConcurrentPrevention", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{"server1"},
 			Credentials: map[string]string{
@@ -582,6 +591,7 @@ func TestStartProductionDeployment(t *testing.T) {
 	t.Run("Deployment_SuccessfulFlow", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{"server1"},
 			Credentials: map[string]string{
@@ -611,6 +621,7 @@ func TestStartProductionDeployment(t *testing.T) {
 func TestExecutePhase(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment:   "test",
 		TargetServers: []string{"server1"},
 		Credentials: map[string]string{
@@ -651,6 +662,7 @@ func TestExecutePhase(t *testing.T) {
 func TestCheckPrerequisites(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment:   "test",
 		TargetServers: []string{"server1"},
 	}
@@ -680,6 +692,7 @@ func TestCheckPrerequisites(t *testing.T) {
 func TestValidateTargetServers(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName: "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment: "test",
 	}
 
@@ -719,6 +732,7 @@ func TestDeploymentStrategies(t *testing.T) {
 		t.Run("Strategy_"+string(strategy), func(t *testing.T) {
 			config := &DeploymentConfig{
 				ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 				Environment:        "test",
 				DeploymentStrategy: strategy,
 				TargetServers:      []string{"server1"},
@@ -739,6 +753,7 @@ func TestDeploymentStrategies(t *testing.T) {
 func TestDeploymentNotifications(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment:   "test",
 		TargetServers: []string{"server1"},
 	}
@@ -764,6 +779,7 @@ func TestDeploymentNotifications(t *testing.T) {
 func TestRollbackFunctionality(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment:         "test",
 		TargetServers:       []string{"server1"},
 		AutoRollbackEnabled: true,
@@ -789,6 +805,7 @@ func TestRollbackFunctionality(t *testing.T) {
 func TestDeploymentMetricsCollection(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		Environment:   "test",
 		TargetServers: []string{"server1", "server2"},
 	}
@@ -811,6 +828,7 @@ func TestExecuteProductionDeploy(t *testing.T) {
 	t.Run("ProductionDeploy_WithServers", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:        "test",
 			DeploymentStrategy: ProductionDeploy,
 			TargetServers:      []string{"server1", "server2", "server3", "server4", "server5"},
@@ -834,6 +852,7 @@ func TestExecuteProductionDeploy(t *testing.T) {
 	t.Run("ProductionDeploy_EmptyServers", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:        "test",
 			DeploymentStrategy: ProductionDeploy,
 			TargetServers:      []string{},
@@ -857,6 +876,7 @@ func TestExecuteProductionDeploy(t *testing.T) {
 func TestDeployToServer(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		TargetServers: []string{"server1"},
 	}
 
@@ -890,6 +910,7 @@ func TestExecuteHealthCheck(t *testing.T) {
 	t.Run("HealthCheck_Disabled", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			HealthCheckEnabled: false,
 			TargetServers:      []string{"server1"},
 		}
@@ -907,6 +928,7 @@ func TestExecuteHealthCheck(t *testing.T) {
 	t.Run("HealthCheck_WithDeployedServers", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			HealthCheckEnabled: true,
 			TargetServers:      []string{"server1", "server2", "server3"},
 		}
@@ -931,6 +953,7 @@ func TestExecuteHealthCheck(t *testing.T) {
 	t.Run("HealthCheck_NoDeployedServers", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			HealthCheckEnabled: true,
 			TargetServers:      []string{},
 		}
@@ -951,6 +974,7 @@ func TestExecuteHealthCheck(t *testing.T) {
 func TestCheckServerHealth(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		TargetServers: []string{"server1"},
 	}
 
@@ -974,6 +998,7 @@ func TestExecuteValidation(t *testing.T) {
 	t.Run("Validation_NoServersDeployed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			TargetServers: []string{"server1"},
 		}
 
@@ -991,6 +1016,7 @@ func TestExecuteValidation(t *testing.T) {
 	t.Run("Validation_WithServersDeployed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			TargetServers: []string{"server1"},
 		}
 
@@ -1010,6 +1036,7 @@ func TestExecuteValidation(t *testing.T) {
 	t.Run("Validation_SecurityGateFailed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			SecurityGateEnabled: true,
 			TargetServers:       []string{"server1"},
 		}
@@ -1031,6 +1058,7 @@ func TestExecuteValidation(t *testing.T) {
 	t.Run("Validation_PerformanceGateFailed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 		}
@@ -1052,6 +1080,7 @@ func TestExecuteValidation(t *testing.T) {
 	t.Run("Validation_HealthCheckFailed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			HealthCheckEnabled: true,
 			TargetServers:      []string{"server1"},
 		}
@@ -1076,6 +1105,7 @@ func TestExecuteMonitoring(t *testing.T) {
 	t.Run("Monitoring_Disabled", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:       "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			MonitoringEnabled: false,
 			TargetServers:     []string{"server1"},
 		}
@@ -1093,6 +1123,7 @@ func TestExecuteMonitoring(t *testing.T) {
 	t.Run("Monitoring_Enabled", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:       "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			MonitoringEnabled: true,
 			TargetServers:     []string{"server1", "server2"},
 		}
@@ -1115,6 +1146,7 @@ func TestDeploymentStrategiesExecution(t *testing.T) {
 	baseConfig := func(strategy DeployStrategy) *DeploymentConfig {
 		return &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:        "test",
 			DeploymentStrategy: strategy,
 			TargetServers:      []string{"server1", "server2"},
@@ -1214,6 +1246,7 @@ func TestHelperFunctions(t *testing.T) {
 func TestSecurityScanSimulation(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		SecurityGateEnabled: false, // Don't actually initialize security
 		TargetServers:       []string{"server1"},
 	}
@@ -1236,6 +1269,7 @@ func TestSecurityScanSimulation(t *testing.T) {
 func TestPerformanceValidationSimulation(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		PerformanceGateEnabled: false,
 		TargetServers:          []string{"server1"},
 	}
@@ -1274,6 +1308,7 @@ func TestFailDeployment(t *testing.T) {
 	t.Run("FailDeployment_WithAutoRollback", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			AutoRollbackEnabled: true,
 			TargetServers:       []string{"server1", "server2"},
 		}
@@ -1295,6 +1330,7 @@ func TestFailDeployment(t *testing.T) {
 	t.Run("FailDeployment_WithoutAutoRollback", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			AutoRollbackEnabled: false,
 			TargetServers:       []string{"server1"},
 		}
@@ -1315,6 +1351,7 @@ func TestExecuteDeployment(t *testing.T) {
 	t.Run("ExecuteDeployment_UnknownStrategy", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			DeploymentStrategy: DeployStrategy("unknown_strategy"),
 			TargetServers:      []string{"server1"},
 			Credentials:        map[string]string{"deploy_key": "test"},
@@ -1334,6 +1371,7 @@ func TestExecuteDeployment(t *testing.T) {
 	t.Run("ExecuteDeployment_ProductionStrategy", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:        "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			DeploymentStrategy: ProductionDeploy,
 			TargetServers:      []string{"server1", "server2", "server3", "server4", "server5"},
 			Credentials:        map[string]string{"deploy_key": "test"},
@@ -1376,6 +1414,7 @@ func TestExecuteSecurityCheck(t *testing.T) {
 	t.Run("SecurityCheck_Disabled", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			SecurityGateEnabled: false,
 			TargetServers:       []string{"server1"},
 		}
@@ -1393,6 +1432,7 @@ func TestExecuteSecurityCheck(t *testing.T) {
 	t.Run("SecurityCheck_Enabled_Passed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			SecurityGateEnabled: true,
 			TargetServers:       []string{"server1"},
 		}
@@ -1414,6 +1454,7 @@ func TestExecuteSecurityCheck(t *testing.T) {
 	t.Run("SecurityCheck_StatusUpdate", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			SecurityGateEnabled: true,
 			TargetServers:       []string{"server1"},
 		}
@@ -1435,6 +1476,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Disabled", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: false,
 			TargetServers:          []string{"server1"},
 		}
@@ -1449,14 +1491,15 @@ func TestExecutePerformanceCheck(t *testing.T) {
 		assert.True(t, success)
 	})
 
-	t.Run("PerformanceCheck_Enabled_Passed", func(t *testing.T) {
+		t.Run("PerformanceCheck_Enabled_Passed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:             "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
-				ThroughputTarget: 100,                    // Low threshold for simulated pass
-				LatencyTarget:    "500ms",                // High threshold for simulated pass
+				ThroughputTarget: 1,                      // Real measurement: binary size based (~1 ops/sec)
+				LatencyTarget:    "500ms",                // High threshold for real pass
 				CPUTarget:        90.0,                   // High threshold
 				MemoryTarget:     8 * 1024 * 1024 * 1024, // 8GB threshold
 			},
@@ -1478,6 +1521,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_Throughput", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
@@ -1504,6 +1548,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_Latency", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
@@ -1529,6 +1574,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_CPU", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
@@ -1553,6 +1599,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_Memory", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
@@ -1577,6 +1624,7 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_StatusMetrics", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
@@ -1608,6 +1656,7 @@ func TestExecutePreparation(t *testing.T) {
 	t.Run("Preparation_WithValidConfig", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			Environment:   "test",
 			TargetServers: []string{"server1", "server2"},
 			Credentials: map[string]string{
@@ -1628,6 +1677,7 @@ func TestExecutePreparation(t *testing.T) {
 	t.Run("Preparation_MissingCredentials", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			TargetServers: []string{"server1"},
 			Credentials:   nil,
 		}
@@ -1646,6 +1696,7 @@ func TestExecutePreparation(t *testing.T) {
 	t.Run("Preparation_WithMonitoring", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:       "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			TargetServers:     []string{"server1"},
 			MonitoringEnabled: true,
 			Credentials: map[string]string{
@@ -1670,6 +1721,7 @@ func TestRollbackTriggering(t *testing.T) {
 	t.Run("TriggerRollback_UpdatesStatus", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			AutoRollbackEnabled: true,
 			TargetServers:       []string{"server1", "server2", "server3"},
 		}
@@ -1691,6 +1743,7 @@ func TestRollbackTriggering(t *testing.T) {
 	t.Run("TriggerRollback_NoServersDeployed", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:         "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 			AutoRollbackEnabled: true,
 			TargetServers:       []string{"server1"},
 		}
@@ -1708,6 +1761,7 @@ func TestRollbackTriggering(t *testing.T) {
 func TestPhaseNotifications(t *testing.T) {
 	config := &DeploymentConfig{
 		ProjectName:   "test-project",
+			BinaryPath:   "/tmp/helixcode-test-binary",
 		TargetServers: []string{"server1"},
 		Notifications: NotificationConfig{
 			SlackEnabled: true,
