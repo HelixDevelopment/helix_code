@@ -903,7 +903,7 @@ func TestBedrockProvider_Integration(t *testing.T) {
 
 	provider, err := NewBedrockProvider(config)
 	if err != nil {
-		t.Skipf("Skipping integration test: %v", err)
+		t.Skipf("Skipping integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	// Test availability
@@ -925,7 +925,7 @@ func TestBedrockProvider_Integration(t *testing.T) {
 
 	response, err := provider.Generate(ctx, request)
 	if err != nil {
-		t.Skipf("Integration test failed (may be due to AWS access): %v", err)
+		t.Skipf("Integration test failed (may be due to AWS access): %v (SKIP-OK: #integration-only)", err)
 	}
 
 	assert.NotNil(t, response)

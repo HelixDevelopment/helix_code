@@ -92,7 +92,7 @@ func TestBrowserLaunch(t *testing.T) {
 
 		browser, err := controller.Launch(ctx, opts)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer controller.Close(browser.ID)
@@ -108,7 +108,7 @@ func TestBrowserLaunch(t *testing.T) {
 
 		browser, err := controller.Launch(ctx, nil)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer controller.Close(browser.ID)
@@ -122,7 +122,7 @@ func TestBrowserLaunch(t *testing.T) {
 
 		browser, err := controller.Launch(ctx, DefaultLaunchOptions())
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer controller.Close(browser.ID)
@@ -146,7 +146,7 @@ func TestBrowserLaunch(t *testing.T) {
 
 		browser, err := controller.Launch(ctx, DefaultLaunchOptions())
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer controller.Close(browser.ID)
@@ -162,7 +162,7 @@ func TestBrowserLaunch(t *testing.T) {
 
 		browser, err := controller.Launch(ctx, DefaultLaunchOptions())
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 
@@ -185,7 +185,7 @@ func TestBrowserActions(t *testing.T) {
 
 	browser, err := controller.Launch(ctx, DefaultLaunchOptions())
 	if err != nil {
-		t.Skipf("Failed to launch browser: %v", err)
+		t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 	defer controller.Close(browser.ID)
@@ -286,7 +286,7 @@ func TestScreenshot(t *testing.T) {
 
 	browser, err := controller.Launch(ctx, DefaultLaunchOptions())
 	if err != nil {
-		t.Skipf("Failed to launch browser: %v", err)
+		t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 	defer controller.Close(browser.ID)
@@ -359,7 +359,7 @@ func TestBrowserTools(t *testing.T) {
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer tools.CloseBrowser(browser.ID)
@@ -373,7 +373,7 @@ func TestBrowserTools(t *testing.T) {
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer tools.CloseBrowser(browser.ID)
@@ -394,7 +394,7 @@ func TestBrowserTools(t *testing.T) {
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer tools.CloseBrowser(browser.ID)
@@ -416,7 +416,7 @@ func TestBrowserTools(t *testing.T) {
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
 		if err != nil {
-			t.Skipf("Failed to launch browser: %v", err)
+			t.Skipf("Failed to launch browser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 		defer tools.CloseBrowser(browser.ID)
@@ -434,7 +434,7 @@ func TestBrowserSession(t *testing.T) {
 
 	session, err := NewBrowserSession(ctx, tools, nil)
 	if err != nil {
-		t.Skipf("Failed to create browser session: %v", err)
+		t.Skipf("Failed to create browser session: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 	defer session.Close()

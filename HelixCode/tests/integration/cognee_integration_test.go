@@ -216,7 +216,7 @@ func RequireCognee(t *testing.T) *CogneeClient {
 		time.Sleep(2 * time.Second)
 	}
 
-	t.Skipf("Cognee not available: %v", lastErr)
+	t.Skipf("Cognee not available: %v (SKIP-OK: #infra-unavailable)", lastErr)
 	return nil
 }
 

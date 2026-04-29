@@ -88,7 +88,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 		t.Run(fmt.Sprintf("Provider_%s", provider.name), func(t *testing.T) {
 			config, available := provider.configFunc()
 			if !available {
-				t.Skipf("%s API key not available, skipping tests", provider.name)
+				t.Skipf("%s API key not available, skipping tests (SKIP-OK: #infra-unavailable)", provider.name)
 				return
 			}
 
@@ -293,7 +293,7 @@ func TestFreeProvidersLoadTest(t *testing.T) {
 		t.Run(fmt.Sprintf("LoadTest_%s", provider.name), func(t *testing.T) {
 			config, available := provider.configFunc()
 			if !available {
-				t.Skipf("%s API key not available, skipping load test", provider.name)
+				t.Skipf("%s API key not available, skipping load test (SKIP-OK: #infra-unavailable)", provider.name)
 				return
 			}
 
@@ -442,7 +442,7 @@ func TestFreeProvidersFeatureComparison(t *testing.T) {
 		t.Run(fmt.Sprintf("Features_%s", provider.name), func(t *testing.T) {
 			config, available := provider.configFunc()
 			if !available {
-				t.Skipf("%s not available", provider.name)
+				t.Skipf("%s not available (SKIP-OK: #infra-unavailable)", provider.name)
 				return
 			}
 

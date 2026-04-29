@@ -27,7 +27,7 @@ func TestVLLMProviderIntegration(t *testing.T) {
 
 	provider, err := NewVLLMProvider(config)
 	if err != nil {
-		t.Skipf("Skipping VLLM integration test: %v", err)
+		t.Skipf("Skipping VLLM integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "VLLM")
@@ -49,7 +49,7 @@ func TestLocalAIProviderIntegration(t *testing.T) {
 
 	provider, err := NewLocalAIProvider(config)
 	if err != nil {
-		t.Skipf("Skipping LocalAI integration test: %v", err)
+		t.Skipf("Skipping LocalAI integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "LocalAI")
@@ -71,7 +71,7 @@ func TestFastChatProviderIntegration(t *testing.T) {
 
 	provider, err := NewFastChatProvider(config)
 	if err != nil {
-		t.Skipf("Skipping FastChat integration test: %v", err)
+		t.Skipf("Skipping FastChat integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "FastChat")
@@ -93,7 +93,7 @@ func TestTextGenProviderIntegration(t *testing.T) {
 
 	provider, err := NewTextGenProvider(config)
 	if err != nil {
-		t.Skipf("Skipping TextGen integration test: %v", err)
+		t.Skipf("Skipping TextGen integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "TextGen")
@@ -115,7 +115,7 @@ func TestLMStudioProviderIntegration(t *testing.T) {
 
 	provider, err := NewLMStudioProvider(config)
 	if err != nil {
-		t.Skipf("Skipping LM Studio integration test: %v", err)
+		t.Skipf("Skipping LM Studio integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "LM Studio")
@@ -137,7 +137,7 @@ func TestJanProviderIntegration(t *testing.T) {
 
 	provider, err := NewJanProvider(config)
 	if err != nil {
-		t.Skipf("Skipping Jan AI integration test: %v", err)
+		t.Skipf("Skipping Jan AI integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "Jan AI")
@@ -156,7 +156,7 @@ func TestKoboldAIProviderIntegration(t *testing.T) {
 
 	provider, err := NewKoboldAIProvider(config)
 	if err != nil {
-		t.Skipf("Skipping KoboldAI integration test: %v", err)
+		t.Skipf("Skipping KoboldAI integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "KoboldAI")
@@ -178,7 +178,7 @@ func TestGPT4AllProviderIntegration(t *testing.T) {
 
 	provider, err := NewGPT4AllProvider(config)
 	if err != nil {
-		t.Skipf("Skipping GPT4All integration test: %v", err)
+		t.Skipf("Skipping GPT4All integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "GPT4All")
@@ -200,7 +200,7 @@ func TestTabbyAPIProviderIntegration(t *testing.T) {
 
 	provider, err := NewTabbyAPIProvider(config)
 	if err != nil {
-		t.Skipf("Skipping TabbyAPI integration test: %v", err)
+		t.Skipf("Skipping TabbyAPI integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "TabbyAPI")
@@ -222,7 +222,7 @@ func TestMLXProviderIntegration(t *testing.T) {
 
 	provider, err := NewMLXProvider(config)
 	if err != nil {
-		t.Skipf("Skipping MLX integration test: %v", err)
+		t.Skipf("Skipping MLX integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "MLX")
@@ -244,7 +244,7 @@ func TestMistralRSProviderIntegration(t *testing.T) {
 
 	provider, err := NewMistralRSProvider(config)
 	if err != nil {
-		t.Skipf("Skipping MistralRS integration test: %v", err)
+		t.Skipf("Skipping MistralRS integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	testLocalProvider(t, provider, "MistralRS")
@@ -304,7 +304,7 @@ func TestLocalProviderStreaming(t *testing.T) {
 
 	provider, err := NewVLLMProvider(config)
 	if err != nil {
-		t.Skipf("Skipping streaming test: %v", err)
+		t.Skipf("Skipping streaming test: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 	}
 
 	ctx := context.Background()
@@ -423,7 +423,7 @@ func testLocalProvider(t *testing.T, provider Provider, providerName string) {
 	// Test provider availability
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skipf("%s provider not available for integration test", providerName)
+		t.Skipf("%s provider not available for integration test (SKIP-OK: #integration-only)", providerName)
 	}
 
 	// Test model listing

@@ -502,7 +502,7 @@ func TestMapFile(t *testing.T) {
 
 			// May error without actual tree-sitter parsers, which is expected
 			if err != nil {
-				t.Skipf("Skipping test without tree-sitter parser: %v", err)
+				t.Skipf("Skipping test without tree-sitter parser: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 				return
 			}
 
@@ -545,7 +545,7 @@ func TestMapCodebase(t *testing.T) {
 
 		// May have errors without actual tree-sitter parsers
 		if err != nil && cmap == nil {
-			t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+			t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 
@@ -585,7 +585,7 @@ func TestMapCodebase(t *testing.T) {
 
 		// May have errors without actual tree-sitter parsers
 		if err != nil && cmap == nil {
-			t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+			t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 
@@ -607,14 +607,14 @@ func TestMapCodebase(t *testing.T) {
 		// First map
 		cmap1, err := mapper.MapCodebase(ctx, tmpDir, opts)
 		if err != nil && cmap1 == nil {
-			t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+			t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 
 		// Second map (should use cache)
 		cmap2, err := mapper.MapCodebase(ctx, tmpDir, opts)
 		if err != nil && cmap2 == nil {
-			t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+			t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 			return
 		}
 
@@ -1162,7 +1162,7 @@ func TestMapper_MapFiles(t *testing.T) {
 
 	// May fail without tree-sitter parsers
 	if err != nil {
-		t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+		t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 
@@ -1184,7 +1184,7 @@ func TestMapper_UpdateMap(t *testing.T) {
 
 	cmap, err := mapper.MapCodebase(ctx, tmpDir, nil)
 	if err != nil && cmap == nil {
-		t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+		t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 
@@ -1215,7 +1215,7 @@ func TestMapper_GetDefinitions(t *testing.T) {
 	// Get definitions
 	defs, err := mapper.GetDefinitions(ctx, testFile)
 	if err != nil {
-		t.Skipf("Skipping test without tree-sitter parsers: %v", err)
+		t.Skipf("Skipping test without tree-sitter parsers: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 

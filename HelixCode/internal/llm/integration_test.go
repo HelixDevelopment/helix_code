@@ -25,7 +25,7 @@ func TestLlamaCPPProviderIntegration(t *testing.T) {
 
 	provider, err := NewLlamaCPPProvider(config)
 	if err != nil {
-		t.Skipf("Skipping Llama.cpp integration test: %v", err)
+		t.Skipf("Skipping Llama.cpp integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	// Test provider availability
@@ -75,7 +75,7 @@ func TestOllamaProviderIntegration(t *testing.T) {
 
 	provider, err := NewOllamaProvider(config)
 	if err != nil {
-		t.Skipf("Skipping Ollama integration test: %v", err)
+		t.Skipf("Skipping Ollama integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	// Test provider availability
@@ -187,7 +187,7 @@ func TestQwenProviderIntegration(t *testing.T) {
 
 	provider, err := NewQwenProvider(config)
 	if err != nil {
-		t.Skipf("Skipping Qwen integration test: %v", err)
+		t.Skipf("Skipping Qwen integration test: %v (SKIP-OK: #integration-only)", err)
 	}
 
 	// Test provider availability

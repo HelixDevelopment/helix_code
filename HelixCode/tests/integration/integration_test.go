@@ -51,14 +51,14 @@ func skipIfServerUnavailable(t *testing.T, config *TestConfig) {
 
 	req, err := http.NewRequestWithContext(ctx, "GET", config.BaseURL+"/health", nil)
 	if err != nil {
-		t.Skipf("Skipping test: cannot create request: %v", err)
+		t.Skipf("Skipping test: cannot create request: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 
 	client := &http.Client{Timeout: 2 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		t.Skipf("Skipping test: server not available at %s: %v", config.BaseURL, err)
+		t.Skipf("Skipping test: server not available at %s: %v (SKIP-OK: #infra-unavailable)", config.BaseURL, err)
 		return
 	}
 	resp.Body.Close()
@@ -84,14 +84,14 @@ func skipIfAuthNotConfigured(t *testing.T, config *TestConfig) {
 	jsonData, _ := json.Marshal(creds)
 	req, err := http.NewRequestWithContext(ctx, "POST", config.BaseURL+"/api/v1/auth/login", bytes.NewBuffer(jsonData))
 	if err != nil {
-		t.Skipf("Skipping test: cannot create auth request: %v", err)
+		t.Skipf("Skipping test: cannot create auth request: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		t.Skipf("Skipping test: auth endpoint not reachable: %v", err)
+		t.Skipf("Skipping test: auth endpoint not reachable: %v (SKIP-OK: #infra-unavailable)", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -228,7 +228,7 @@ func TestAuthenticationFlow(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		t.Skipf("Skipping test: auth endpoint not reachable: %v", err)
+		t.Skipf("Skipping test: auth endpoint not reachable: %v (SKIP-OK: #infra-unavailable)", err)
 	}
 	resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
@@ -421,7 +421,7 @@ func TestCompleteWorkflow(t *testing.T) {
 	}
 	projectID, ok := projectIDValue.(string)
 	if !ok {
-		t.Skipf("Project ID is not a string: %T", projectIDValue)
+		t.Skipf("Project ID is not a string: %T (SKIP-OK: #unmarked-skip-needs-ticket)", projectIDValue)
 	}
 
 	// 2. Create a task within the project
@@ -495,7 +495,7 @@ func TestConcurrentTaskCreation(t *testing.T) {
 	}
 	preCheck, err := client.Post("/api/v1/tasks", testData)
 	if err != nil {
-		t.Skipf("Skipping test: cannot reach tasks endpoint: %v", err)
+		t.Skipf("Skipping test: cannot reach tasks endpoint: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 	}
 	preCheck.Body.Close()
 	if preCheck.StatusCode == http.StatusUnauthorized {

@@ -552,7 +552,7 @@ func TestCloudProvider_MultiProvider_Comparison(t *testing.T) {
 		t.Run(p.name, func(t *testing.T) {
 			apiKey := os.Getenv(p.envKey)
 			if apiKey == "" || strings.Contains(apiKey, "mock") {
-				t.Skipf("%s not configured for testing", p.name)
+				t.Skipf("%s not configured for testing (SKIP-OK: #unmarked-skip-needs-ticket)", p.name)
 				return
 			}
 

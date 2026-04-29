@@ -53,7 +53,7 @@ func TestRedisIntegration(t *testing.T) {
 	t.Run("Health", func(t *testing.T) {
 		err := provider.Health(ctx)
 		if err != nil {
-			t.Skipf("Redis not available at %s:%s - skipping integration tests: %v", host, port, err)
+			t.Skipf("Redis not available at %s:%s - skipping integration tests: %v (SKIP-OK: #infra-redis-unavailable)", host, port, err)
 		}
 	})
 
@@ -197,7 +197,7 @@ func TestMemcachedIntegration(t *testing.T) {
 	t.Run("Health", func(t *testing.T) {
 		err := provider.Health(ctx)
 		if err != nil {
-			t.Skipf("Memcached not available at %s:%s - skipping integration tests: %v", host, port, err)
+			t.Skipf("Memcached not available at %s:%s - skipping integration tests: %v (SKIP-OK: #integration-only)", host, port, err)
 		}
 	})
 
