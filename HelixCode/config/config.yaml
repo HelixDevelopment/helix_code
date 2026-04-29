@@ -9,7 +9,7 @@ server:
   shutdown_timeout: 30
 
 database:
-  host: ""
+  host: "localhost"
   port: 5432
   user: "${HELIX_DATABASE_USER:helix}"
   password: "${HELIX_DATABASE_PASSWORD}"  # REQUIRED: Set via environment variable
