@@ -297,6 +297,79 @@ OPENROUTER_API_KEY=sk-or-your-key
 GITHUB_TOKEN=ghp_your-github-token
 ```
 
+## LLMsVerifier Configuration
+
+The LLMsVerifier subsystem is the **single source of truth** for all model and provider metadata (CONST-036). When enabled, HelixCode fetches live model data from the verifier service instead of using hardcoded lists.
+
+```yaml
+verifier:
+  enabled: false              # Master enable/disable
+  mode: remote                # "remote" (REST API) or "embedded"
+  endpoint: http://localhost:8081  # Verifier REST API URL
+  api_key: ""                 # Optional authentication key
+  timeout: 30s                # Request timeout
+  cache_ttl: 5m               # In-memory cache TTL
+  polling_interval: 60s       # Background poll interval
+
+  scoring:
+    weights:
+      code_capability: 0.40   # Weight for code generation performance
+      responsiveness: 0.20    # Weight for latency
+      reliability: 0.20       # Weight for uptime/consistency
+      feature_richness: 0.15  # Weight for feature breadth
+      value_proposition: 0.05 # Weight for price/performance
+    min_acceptable_score: 6.0 # Minimum score to include model
+
+  health:
+    failure_threshold: 5      # Failures before opening circuit
+    recovery_threshold: 3     # Successes before closing circuit
+    circuit_breaker:
+      enabled: true
+      half_open_timeout: 60s  # Time in Open state before retry
+
+  events:
+    enabled: true             # Enable change event publishing
+    websocket: false          # WebSocket real-time events
+    websocket_path: /ws/verifier/events
+```
+
+**Environment Variables:**
+```bash
+HELIX_VERIFIER_ENABLED=true
+HELIX_VERIFIER_ENDPOINT=http://localhost:8081
+HELIX_VERIFIER_API_KEY=
+HELIX_VERIFIER_TIMEOUT=30s
+HELIX_VERIFIER_CACHE_TTL=5m
+HELIX_VERIFIER_POLLING_INTERVAL=60s
+HELIX_VERIFIER_MIN_SCORE=6.0
+```
+
+**Provider API Keys** (used by verifier for live discovery):
+```bash
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=...
+DEEPSEEK_API_KEY=...
+GROQ_API_KEY=...
+MISTRAL_API_KEY=...
+XAI_API_KEY=...
+OPENROUTER_API_KEY=...
+```
+
+### Verifier Fallback Models
+
+When the verifier is unavailable, HelixCode uses a constitutional fallback list of 7 verified models:
+
+| Model | Provider | Context | Score | Tier |
+|-------|----------|---------|-------|------|
+| Llama 3.2 3B | Ollama | 128K | 6.0 | 3 |
+| GPT-4o | OpenAI | 128K | 9.1 | 1 |
+| Claude 3.5 Sonnet | Anthropic | 200K | 8.9 | 1 |
+| Mistral Large | Mistral | 128K | 7.8 | 2 |
+| Gemini 2.5 Pro | Gemini | 1M | 8.7 | 1 |
+| DeepSeek Chat | DeepSeek | 64K | 8.3 | 2 |
+| Grok-3 Fast Beta | xAI | 128K | 8.0 | 1 |
+
 ## Memory Provider Configurations
 
 ### Cognee Configuration
