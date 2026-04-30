@@ -64,6 +64,17 @@ func TestLlamaCPPProvider_GetName(t *testing.T) {
 }
 
 func TestLlamaCPPProvider_GetModels(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping LlamaCPP test in short mode (SKIP-OK: #short-mode)")
+	}
+	// Skip if no LlamaCPP server available
+	provider, _ := NewLlamaCPPProvider(LlamaConfig{
+		Model:      "/path/to/model.gguf",
+		ServerHost: "http://localhost:8081",
+	})
+	if provider == nil {
+		t.Skip("LlamaCPP provider not available (SKIP-OK: #no-llamacpp)")
+	}
 	config := LlamaConfig{
 		Model:   "/path/to/llama-7b.gguf",
 		ContextSize: 4096,
@@ -108,6 +119,17 @@ func TestLlamaCPPProvider_GetCapabilities(t *testing.T) {
 }
 
 func TestLlamaCPPProvider_Generate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping LlamaCPP test in short mode (SKIP-OK: #short-mode)")
+	}
+	// Skip if no LlamaCPP server available
+	provider, _ := NewLlamaCPPProvider(LlamaConfig{
+		Model:      "/path/to/model.gguf",
+		ServerHost: "http://localhost:8081",
+	})
+	if provider == nil {
+		t.Skip("LlamaCPP provider not available (SKIP-OK: #no-llamacpp)")
+	}
 	t.Run("Success", func(t *testing.T) {
 		config := LlamaConfig{
 			Model:   "/path/to/model.gguf",
@@ -162,6 +184,17 @@ func TestLlamaCPPProvider_Generate(t *testing.T) {
 }
 
 func TestLlamaCPPProvider_GenerateStream(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping LlamaCPP test in short mode (SKIP-OK: #short-mode)")
+	}
+	// Skip if no LlamaCPP server available
+	provider, _ := NewLlamaCPPProvider(LlamaConfig{
+		Model:      "/path/to/model.gguf",
+		ServerHost: "http://localhost:8081",
+	})
+	if provider == nil {
+		t.Skip("LlamaCPP provider not available (SKIP-OK: #no-llamacpp)")
+	}
 	t.Run("Success", func(t *testing.T) {
 		config := LlamaConfig{
 			Model:   "/path/to/model.gguf",

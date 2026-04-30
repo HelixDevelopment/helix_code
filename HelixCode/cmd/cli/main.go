@@ -25,10 +25,10 @@ type CLI struct {
 
 // NewCLI creates a new CLI instance
 func NewCLI() *CLI {
-	// Initialize LLM provider from config
-	llmProvider, _ := llm.NewLlamaCPPProvider(llm.LlamaConfig{
-		Model:      "llama-3-8b",
-		ServerHost: "http://localhost:8081", // Llama.cpp server default port
+	// Initialize LLM provider from config - use Ollama on port 11434
+	llmProvider, _ := llm.NewOllamaProvider(llm.OllamaConfig{
+		DefaultModel:  "llama3.2", // Use Ollama's model name
+		BaseURL: "http://localhost:11434", // Ollama default port
 	})
 
 	return &CLI{

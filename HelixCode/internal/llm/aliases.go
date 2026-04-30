@@ -178,7 +178,7 @@ func (am *AliasManager) ListAliasesByProvider(provider string) []*ModelAlias {
 	return aliases
 }
 
-// SearchAliases searches aliases by tags or description
+// SearchAliases searches aliases by tags, description, alias name, or target model
 func (am *AliasManager) SearchAliases(query string) []*ModelAlias {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
@@ -187,6 +187,18 @@ func (am *AliasManager) SearchAliases(query string) []*ModelAlias {
 	matches := make([]*ModelAlias, 0)
 
 	for _, alias := range am.aliases {
+		// Check alias name
+		if strings.Contains(strings.ToLower(alias.Alias), query) {
+			matches = append(matches, alias)
+			continue
+		}
+
+		// Check target model
+		if strings.Contains(strings.ToLower(alias.TargetModel), query) {
+			matches = append(matches, alias)
+			continue
+		}
+
 		// Check description
 		if strings.Contains(strings.ToLower(alias.Description), query) {
 			matches = append(matches, alias)

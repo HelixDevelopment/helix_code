@@ -429,7 +429,10 @@ func TestRateLimit_Cleanup(t *testing.T) {
 	err := tracker.CheckBudget(ctx, sessionID, 1000, 0.05)
 	assert.Error(t, err)
 
-	// Wait for rate limit window to expire
+	// Wait for rate limit window to expire (skip in short mode)
+	if testing.Short() {
+		t.Skip("Skipping rate limit wait in short mode (SKIP-OK: #short-mode)")
+	}
 	time.Sleep(61 * time.Second)
 
 	// Should now be able to make requests again

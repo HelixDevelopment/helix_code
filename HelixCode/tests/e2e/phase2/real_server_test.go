@@ -11,6 +11,18 @@ import (
 
 // TestRealServerIntegration performs comprehensive testing against the real HelixCode server
 func TestRealServerIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping e2e test in short mode (SKIP-OK: #short-mode)")
+	}
+	// Skip if server not available
+	config := LoadTestConfig()
+	resp, err := http.Get(config.BaseURL + "/health")
+	if err != nil || resp == nil || resp.StatusCode != 200 {
+		t.Skip("Server not available - skipping e2e test (SKIP-OK: #server-not-available)")
+	}
+	if resp != nil {
+		resp.Body.Close()
+	}
 	t.Log("🎯 PHASE 2: Real Server Integration Test")
 	t.Log("Testing comprehensive functionality against real HelixCode server...")
 	

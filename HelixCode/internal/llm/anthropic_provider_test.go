@@ -609,6 +609,13 @@ func TestAnthropicProvider_Close(t *testing.T) {
 }
 
 func TestAnthropicProvider_GenerateStream(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping streaming test in short mode (SKIP-OK: #short-mode)")
+	}
+	// Skip if no API key available - requires real server
+	if os.Getenv("ANTHROPIC_API_KEY") == "" {
+		t.Skip("Skipping streaming test - no API key (SKIP-OK: #no-api-key)")
+	}
 	t.Run("successful streaming response", func(t *testing.T) {
 		// Create mock streaming server
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

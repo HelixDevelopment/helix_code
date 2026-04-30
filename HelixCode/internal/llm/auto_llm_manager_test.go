@@ -638,6 +638,9 @@ func TestAutoLLMManager_AutoHealthCheck_WithUnhealthyProvider(t *testing.T) {
 }
 
 func TestAutoLLMManager_AutoRecoverProvider(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 
@@ -709,6 +712,9 @@ func TestAutoLLMManager_CheckForUpdates_NotGitRepo(t *testing.T) {
 }
 
 func TestAutoLLMManager_AutoStartProvider_NoStartupCmd(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 
@@ -762,6 +768,9 @@ func TestAutoLLMManager_AutoConfigureProvider_CreateConfig(t *testing.T) {
 }
 
 func TestAutoLLMManager_Initialize_Full(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping full initialization test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 
@@ -996,6 +1005,9 @@ func TestAutoLLMManager_AutoStartAllProviders_AlreadyRunning(t *testing.T) {
 }
 
 func TestAutoLLMManager_AutoCloneProvider_ExistingDirectory(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 
@@ -1018,6 +1030,9 @@ func TestAutoLLMManager_AutoCloneProvider_ExistingDirectory(t *testing.T) {
 }
 
 func TestAutoLLMManager_AutoBuildProvider(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 
@@ -1078,6 +1093,9 @@ func TestAutoLLMManager_AutoBuildProvider_Failure(t *testing.T) {
 }
 
 func TestAutoLLMManager_AutoUpdateProvider(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 

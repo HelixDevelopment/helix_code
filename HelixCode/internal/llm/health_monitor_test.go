@@ -354,6 +354,9 @@ func TestHealthMonitor_TriggerAutoRecovery(t *testing.T) {
 }
 
 func TestHealthMonitor_Start_WithStopChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test in short mode (SKIP-OK: #short-mode)")
+	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
 	monitor := NewHealthMonitor(manager)
