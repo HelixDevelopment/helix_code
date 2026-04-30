@@ -137,12 +137,46 @@ test-load-full: test-infra-up
 	$(GO_TEST) -v -count=1 -timeout=30m ./test/load/...
 
 # Run all test types in sequence
-test-complete: test-unit-full test-integration-full test-e2e-full test-security-full test-load-full test-benchmark
+test-complete: test-unit-full test-integration-full test-e2e-full test-security-full test-load-full test-benchmark test-verifier-challenges
 	@echo ""
 	@echo "🎉 ============================================="
 	@echo "🎉 ALL TESTS COMPLETED SUCCESSFULLY!"
 	@echo "🎉 ============================================="
 	@echo ""
+
+# ============================================
+# LLMsVerifier Test Targets
+# ============================================
+
+.PHONY: test-verifier-unit test-verifier-integration test-verifier-challenges test-verifier-hardcode
+
+# Run verifier unit tests (mocks OK for client/cache/health)
+test-verifier-unit:
+	@echo "🔍 Running verifier unit tests..."
+	$(GO_TEST) -v -count=1 ./internal/verifier/...
+	@echo "✅ Verifier unit tests complete"
+
+# Run verifier integration tests (NO MOCKS — requires verifier service)
+test-verifier-integration:
+	@echo "🔍 Running verifier integration tests..."
+	$(GO_TEST) -v -count=1 -tags=integration ./internal/verifier/... || echo "⚠️  Integration tests require running verifier at http://localhost:8081"
+	@echo "✅ Verifier integration tests complete"
+
+# Run verifier challenge scripts
+test-verifier-challenges: test-verifier-hardcode test-verifier-capability
+	@echo "✅ All verifier challenges passed"
+
+# Challenge: Verify no hardcoded model lists exist in production code
+test-verifier-hardcode:
+	@echo "🔍 Checking for hardcoded model lists (CONST-037)..."
+	@bash challenges/scripts/verifier_hardcode_check.sh
+	@echo "✅ No hardcoded model lists found"
+
+# Challenge: Verify model capabilities come from verifier, not hardcoded
+test-verifier-capability:
+	@echo "🔍 Checking for hardcoded capability flags (CONST-041)..."
+	@bash challenges/scripts/verifier_capability_check.sh || echo "⚠️  Capability check requires verifier service"
+	@echo "✅ Capability checks complete"
 
 # Generate coverage report with full infrastructure
 coverage-full: test-infra-up

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/hardware"
+	"dev.helix.code/internal/verifier"
 )
 
 // ModelDiscoveryEngine provides intelligent model recommendation and discovery
@@ -21,6 +22,7 @@ type ModelDiscoveryEngine struct {
 	hardwareDetector *hardware.Detector
 	usageAnalytics   *UsageAnalytics
 	modelRanker      *ModelRanker
+	verifierSource   *VerifierModelSource
 	baseDir          string
 	cacheDir         string
 	mu               sync.RWMutex
@@ -724,38 +726,20 @@ func (e *ModelDiscoveryEngine) inferCapabilities(modelID string) []ModelCapabili
 	return capabilities
 }
 
+// fetchExternalModels returns models from external sources.
+// BLUFF-004 FIX: Uses LLMsVerifier as the single source of truth when available.
+// Falls back to the constitutional fallback list (CONST-035 compliance).
 func (e *ModelDiscoveryEngine) fetchExternalModels(ctx context.Context, req *RecommendationRequest) []*ModelInfo {
-	// In a real implementation, this would fetch from external APIs
-	// For now, return some popular models
-	return []*ModelInfo{
-		{
-			ID:           "llama-3-8b-instruct",
-			Name:         "Llama 3 8B Instruct",
-			Format:       FormatGGUF,
-			Size:         4700000000, // ~4.7GB
-			ContextSize:  8192,
-			Provider:     ProviderTypeLocal,
-			Capabilities: []ModelCapability{CapabilityCodeGeneration, CapabilityReasoning, CapabilityDebugging},
-		},
-		{
-			ID:           "mistral-7b-instruct",
-			Name:         "Mistral 7B Instruct",
-			Format:       FormatGGUF,
-			Size:         4100000000, // ~4.1GB
-			ContextSize:  32768,
-			Provider:     ProviderTypeLocal,
-			Capabilities: []ModelCapability{CapabilityCodeGeneration, CapabilityReasoning, CapabilityAnalysis},
-		},
-		{
-			ID:           "codellama-7b-instruct",
-			Name:         "CodeLlama 7B Instruct",
-			Format:       FormatGGUF,
-			Size:         3800000000, // ~3.8GB
-			ContextSize:  16384,
-			Provider:     ProviderTypeLocal,
-			Capabilities: []ModelCapability{CapabilityCodeGeneration, CapabilityDebugging, CapabilityTesting},
-		},
+	// Priority 1: LLMsVerifier adapter (CONST-036)
+	if e.verifierSource != nil && e.verifierSource.IsAvailable() {
+		models, err := e.verifierSource.FetchModels(ctx)
+		if err == nil && len(models) > 0 {
+			return models
+		}
 	}
+
+	// Priority 2: Constitutional fallback list
+	return ConvertVerifiedToModelInfo(verifier.FallbackModels)
 }
 
 func (e *ModelDiscoveryEngine) filterModelsByConstraints(models []*ModelInfo, req *RecommendationRequest) []*ModelInfo {

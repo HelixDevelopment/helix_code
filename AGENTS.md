@@ -13,7 +13,9 @@
 
 HelixCode is an enterprise-grade distributed AI development platform built in Go. It enables intelligent task division, work preservation, cross-platform development workflows, and multi-provider LLM integration through a unified REST API, CLI, Terminal UI, Desktop, and Mobile client architecture.
 
-**Current Status**: The `internal/` foundation is largely solid (auth, database, server, worker, task, workflow, tools, editor, notification, MCP are real implementations). Critical bluff and stub areas remain in select entry points and peripheral packages. All agents MUST prioritize zero-bluff implementation.
+**Current Status**: The `internal/` foundation is largely solid (auth, database, server, worker, task, workflow, tools, editor, notification, MCP, **verifier** are real implementations). Critical bluff and stub areas remain in select entry points and peripheral packages. All agents MUST prioritize zero-bluff implementation.
+
+**LLMsVerifier Integration Status**: `internal/verifier/` package is now implemented with REST API client, two-tier cache, circuit breaker health monitor, background poller, score adapter, and event publisher. BLUFF-002 (hardcoded CLI models) and BLUFF-004 (hardcoded external models) are FIXED. BLUFF-005 (scoring ignores verifier data) is FIXED in `ModelManager.SelectOptimalModel()`.
 
 **Key Features**:
 - **Distributed Computing**: SSH-based worker pools with health monitoring, auto-installation, and consensus
@@ -338,10 +340,12 @@ response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated respo
 **Impact**: Users following README's documented legacy CLI usage receive fake responses.
 **Fix Priority**: P0
 
-### BLUFF-002: Model Listing is Hardcoded in Legacy CLI (CRITICAL)
+### BLUFF-002: Model Listing is Hardcoded in Legacy CLI (CRITICAL) — FIXED
 **File**: `cmd/cli/main.go` lines ~101-128
-**Evidence**: Only 3 hardcoded models. No dynamic discovery.
-**Fix Priority**: P0
+**Evidence**: Previously only 3 hardcoded models. No dynamic discovery.
+**Fix**: Replaced with verifier-aware `handleListModels()` that queries LLMsVerifier adapter first, falls back to provider discovery, then to constitutional `FallbackModels` (7 models with scores and verification status).
+**Verification**: `go test -v ./internal/verifier/...` passes; `go build ./cmd/cli/...` compiles.
+**Fix Priority**: P0 — RESOLVED
 
 ### BLUFF-003: Command Execution is Simulated in Legacy CLI (HIGH)
 **File**: `cmd/cli/main.go` lines ~237-250
@@ -378,6 +382,37 @@ fmt.Printf("Command completed successfully\n")
 **File**: `cmd/helix-config/main.go`
 **Evidence**: Many template/history/schema subcommands print placeholder messages.
 **Fix Priority**: P3
+
+### BLUFF-004: LLMsVerifier Integration is Stubbed or Bypassed (CRITICAL)
+**File Pattern**: `internal/verifier/*.go` containing empty structs, `// TODO`, or methods that return hardcoded data instead of calling the verifier.
+**Evidence**:
+- `VerificationService` methods return hardcoded `VerificationResult{OverallScore: 8.5}` instead of querying the verifier database
+- `ModelDiscoveryService` returns an empty slice instead of calling provider APIs
+- The verifier client returns fallback models without attempting a real HTTP call
+**Fix Priority**: P0 - Immediate
+**Verification Command**:
+```bash
+make test-verifier-integration
+# This MUST pass with real verifier data, not mocked scores
+```
+
+### BLUFF-005: Provider Discovery Uses Hardcoded Env Var Names (HIGH)
+**File Pattern**: `internal/verifier/startup.go` or provider adapter files containing hardcoded strings like `"OPENAI_API_KEY"` without checking `SupportedProviders[provider].EnvVars`.
+**Fix Priority**: P1 - High
+
+### BLUFF-006: Model Capabilities Are Hardcoded (HIGH)
+**File Pattern**: `internal/llm/*.go` containing `SupportsToolUse: true` as a struct literal for specific models, or `Provider.GetCapabilities()` returning a static slice.
+**Fix Priority**: P1 - High
+**Constitutional Impact**: Violates CONST-041 (MCP/LSP/ACP/Embedding/RAG/Skills/Plugins Integration Mandate).
+
+### BLUFF-007: Test Claims Integration But Uses Mocked Verifier (CRITICAL)
+**File Pattern**: `*_test.go` files with `testify/mock` or `testMode: true` in non-unit test files.
+**Fix Priority**: P0 - Immediate
+**Constitutional Impact**: Violates CONST-038 (Model Provider Anti-Bluff Guarantee) and CONST-017 (Zero-Bluff Testing).
+
+### BLUFF-008: Scoring Weights Do Not Sum to 1.0 (MEDIUM)
+**File Pattern**: `configs/verifier.yaml` or `internal/verifier/config.go` where scoring weights are misconfigured.
+**Fix Priority**: P2 - Medium
 
 ---
 
@@ -683,6 +718,71 @@ A passing test that doesn't certify all three is a **bluff** and MUST be tighten
 - **Skip bluff** — `t.Skip("not running yet")` without `SKIP-OK: #<ticket>` marker
 
 The taxonomy is illustrative, not exhaustive. Every Challenge or test added going forward MUST pass an honest self-review against this taxonomy before being committed.
+
+---
+
+## CONST-036: LLMsVerifier Single Source of Truth Mandate
+
+**Rule**: LLMsVerifier SHALL BE the sole authoritative source for:
+1. All model metadata (names, IDs, context windows, capabilities)
+2. All provider metadata (endpoints, auth types, supported models)
+3. All verification status (verified, partial, failed, pending)
+4. All scoring data (overall scores, capability scores, tier rankings)
+
+**Prohibition**: NO hardcoded model lists, NO hardcoded provider lists, NO simulated model discovery. Any code path that presents a model or provider listing to a user MUST fetch that listing from the LLMsVerifier subsystem or its cached replica.
+
+**Anti-Bluff Verification**:
+- Challenge script `challenges/scripts/verifier_hardcode_check.sh` scans all Go source files for hardcoded model arrays.
+- The only permitted hardcoded data is the 7-entry fallback list in `internal/verifier/fallback_models.go`.
+
+---
+
+## CONST-037: Model Provider Anti-Bluff Guarantee
+
+**Rule**: Every model displayed to an end user MUST have been verified by LLMsVerifier within the last 24h. Models older than this MUST display a "stale" indicator and be deprioritized.
+
+**Anti-Bluff Testing**:
+- Unit tests MAY mock the verifier client.
+- Integration tests MUST start the verifier server and perform real provider discovery.
+- The Makefile target `make test-verifier-integration` MUST exist and run without mocks.
+
+---
+
+## CONST-038: Real-Time Model Status Accuracy
+
+**Rule**: Model status (available, rate-limited, cooldown, offline, deprecated) displayed to users MUST reflect the actual state as known by LLMsVerifier within 60 seconds.
+
+**Polling vs. Push**:
+- If WebSocket/SSE push is unavailable, the system MUST poll LLMsVerifier at most every 60s.
+- The TUI MUST display a "last updated" timestamp with every model listing.
+- Models in "cooldown" or "rate-limited" state MUST show the estimated recovery time if known.
+
+---
+
+## CONST-039: All Providers and Models Integration Mandate
+
+**Rule**: HelixCode MUST integrate with ALL providers that LLMsVerifier supports, subject only to:
+1. The provider being explicitly disabled in configuration (`enabled: false`)
+2. The API key being absent and the provider requiring one
+3. The provider being marked `deprecated` in the verifier database
+
+**Minimum Provider Set** (SHALL NOT be reduced without constitutional amendment):
+OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp.
+
+---
+
+## CONST-040: MCP / LSP / ACP / Embedding / RAG / Skills / Plugins Integration Mandate
+
+**Rule**: LLMsVerifier integration SHALL extend beyond basic model listing to cover ALL capability dimensions:
+
+1. **MCP**: The verifier MUST report which models support MCP tool calling.
+2. **LSP**: The verifier MUST report code-analysis capabilities.
+3. **ACP**: The verifier MUST report multi-agent coordination support.
+4. **Embedding**: The verifier MUST report `supports_embeddings` for each model.
+5. **RAG**: The verifier MUST report context-window sizes for chunking strategies.
+6. **Skills / Plugins**: The verifier MUST track plugin compatibility.
+
+**Prohibition**: Capability flags MUST NOT be hardcoded. The `Provider.GetCapabilities()` method MUST return data sourced from the verifier's `VerificationResult` fields.
 
 ---
 

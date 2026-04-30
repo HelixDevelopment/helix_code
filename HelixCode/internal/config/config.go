@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -80,6 +81,7 @@ type Config struct {
 	Providers   ProvidersConfig   `mapstructure:"providers"`
 	Logging     LoggingConfig     `mapstructure:"logging"`
 	Cognee      *CogneeConfig     `mapstructure:"cognee"`
+	Verifier    *VerifierConfig   `mapstructure:"verifier"`
 }
 
 // HelixConfig is an alias for Config
@@ -224,6 +226,26 @@ func Load() (*Config, error) {
 	viper.BindEnv("redis.host", "HELIX_REDIS_HOST")
 	viper.BindEnv("redis.port", "HELIX_REDIS_PORT")
 
+	// LLMsVerifier env var bindings
+	viper.BindEnv("verifier.enabled", "HELIX_VERIFIER_ENABLED")
+	viper.BindEnv("verifier.endpoint", "HELIX_VERIFIER_ENDPOINT")
+	viper.BindEnv("verifier.api_key", "HELIX_VERIFIER_API_KEY")
+	viper.BindEnv("verifier.timeout", "HELIX_VERIFIER_TIMEOUT")
+	viper.BindEnv("verifier.cache_ttl", "HELIX_VERIFIER_CACHE_TTL")
+	viper.BindEnv("verifier.polling_interval", "HELIX_VERIFIER_POLLING_INTERVAL")
+	viper.BindEnv("verifier.scoring.min_acceptable_score", "HELIX_VERIFIER_MIN_SCORE")
+	viper.BindEnv("verifier.scoring.models_dev_endpoint", "HELIX_MODELS_DEV_ENDPOINT")
+
+	// Per-provider API key bindings
+	viper.BindEnv("verifier.providers.openai.api_key", "OPENAI_API_KEY")
+	viper.BindEnv("verifier.providers.anthropic.api_key", "ANTHROPIC_API_KEY")
+	viper.BindEnv("verifier.providers.gemini.api_key", "GEMINI_API_KEY")
+	viper.BindEnv("verifier.providers.deepseek.api_key", "DEEPSEEK_API_KEY")
+	viper.BindEnv("verifier.providers.groq.api_key", "GROQ_API_KEY")
+	viper.BindEnv("verifier.providers.mistral.api_key", "MISTRAL_API_KEY")
+	viper.BindEnv("verifier.providers.xai.api_key", "XAI_API_KEY")
+	viper.BindEnv("verifier.providers.openrouter.api_key", "OPENROUTER_API_KEY")
+
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -312,6 +334,37 @@ func setDefaults() {
 	viper.SetDefault("logging.level", "info")
 	viper.SetDefault("logging.format", "text")
 	viper.SetDefault("logging.output", "stdout")
+
+	// LLMsVerifier defaults
+	viper.SetDefault("verifier.enabled", false)
+	viper.SetDefault("verifier.mode", "remote")
+	viper.SetDefault("verifier.endpoint", "http://localhost:8081")
+	viper.SetDefault("verifier.timeout", "30s")
+	viper.SetDefault("verifier.cache_ttl", "5m")
+	viper.SetDefault("verifier.polling_interval", "60s")
+
+	// Scoring defaults (match LLMsVerifier weights)
+	viper.SetDefault("verifier.scoring.weights.code_capability", 0.40)
+	viper.SetDefault("verifier.scoring.weights.responsiveness", 0.20)
+	viper.SetDefault("verifier.scoring.weights.reliability", 0.20)
+	viper.SetDefault("verifier.scoring.weights.feature_richness", 0.15)
+	viper.SetDefault("verifier.scoring.weights.value_proposition", 0.05)
+	viper.SetDefault("verifier.scoring.min_acceptable_score", 6.0)
+	viper.SetDefault("verifier.scoring.models_dev_enabled", true)
+	viper.SetDefault("verifier.scoring.models_dev_endpoint", "https://api.models.dev")
+
+	// Health defaults
+	viper.SetDefault("verifier.health.check_interval", "30s")
+	viper.SetDefault("verifier.health.timeout", "10s")
+	viper.SetDefault("verifier.health.failure_threshold", 5)
+	viper.SetDefault("verifier.health.recovery_threshold", 3)
+	viper.SetDefault("verifier.health.circuit_breaker.enabled", true)
+	viper.SetDefault("verifier.health.circuit_breaker.half_open_timeout", "60s")
+
+	// Event defaults
+	viper.SetDefault("verifier.events.enabled", true)
+	viper.SetDefault("verifier.events.websocket", false)
+	viper.SetDefault("verifier.events.websocket_path", "/ws/verifier/events")
 }
 
 // findConfigFile searches for config file in various locations
@@ -405,6 +458,32 @@ func validateConfig(cfg *Config) error {
 	}
 	if cfg.LLM.Temperature < 0 || cfg.LLM.Temperature > 2 {
 		return fmt.Errorf("temperature must be between 0 and 2")
+	}
+
+	// Verifier validation
+	if cfg.Verifier != nil && cfg.Verifier.Enabled {
+		if cfg.Verifier.Mode != "remote" && cfg.Verifier.Mode != "embedded" {
+			return fmt.Errorf("verifier.mode must be 'remote' or 'embedded', got: %s", cfg.Verifier.Mode)
+		}
+		if cfg.Verifier.Endpoint == "" && cfg.Verifier.Mode == "remote" {
+			return fmt.Errorf("verifier.endpoint is required when mode is 'remote'")
+		}
+		if cfg.Verifier.PollingInterval < 10*time.Second {
+			return fmt.Errorf("verifier.polling_interval must be >= 10s")
+		}
+		if cfg.Verifier.CacheTTL < 1*time.Second {
+			return fmt.Errorf("verifier.cache_ttl must be >= 1s")
+		}
+
+		// Validate scoring weights sum to 1.0
+		totalWeight := cfg.Verifier.Scoring.Weights.CodeCapability +
+			cfg.Verifier.Scoring.Weights.Responsiveness +
+			cfg.Verifier.Scoring.Weights.Reliability +
+			cfg.Verifier.Scoring.Weights.FeatureRichness +
+			cfg.Verifier.Scoring.Weights.ValueProposition
+		if math.Abs(totalWeight-1.0) > 0.001 {
+			return fmt.Errorf("verifier scoring weights must sum to 1.0, got: %.3f", totalWeight)
+		}
 	}
 
 	return nil

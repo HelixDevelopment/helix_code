@@ -13,6 +13,7 @@ import (
 
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 )
 
@@ -21,6 +22,7 @@ type CLI struct {
 	workerPool         *worker.SSHWorkerPool
 	llmProvider        llm.Provider
 	notificationEngine *notification.NotificationEngine
+	verifierAdapter    *verifier.Adapter
 }
 
 // NewCLI creates a new CLI instance
@@ -105,33 +107,57 @@ func (c *CLI) handleListWorkers(ctx context.Context) error {
 	return nil
 }
 
-// handleListModels lists available models
+// handleListModels lists available models.
+// BLUFF-002 FIX: Uses LLMsVerifier as the single source of truth when enabled.
+// Falls back to provider discovery and then to the constitutional fallback list.
 func (c *CLI) handleListModels(ctx context.Context) error {
-	// For now, return static list
-	// In production, this would query the model manager
-
-	models := []struct {
-		ID          string
-		Name        string
-		Provider    string
-		ContextSize int
-		Status      string
-	}{
-		{"llama-3-8b", "Llama 3 8B", "llama.cpp", 8192, "available"},
-		{"mistral-7b", "Mistral 7B", "ollama", 4096, "available"},
-		{"phi-3-mini", "Phi-3 Mini", "openai", 128000, "available"},
-	}
-
 	fmt.Println("\n=== Available Models ===")
-	for _, model := range models {
-		fmt.Printf("ID: %s\n", model.ID)
-		fmt.Printf("  Name: %s\n", model.Name)
-		fmt.Printf("  Provider: %s\n", model.Provider)
-		fmt.Printf("  Context Size: %d\n", model.ContextSize)
-		fmt.Printf("  Status: %s\n\n", model.Status)
+
+	// Priority 1: LLMsVerifier adapter (CONST-036 single source of truth)
+	if c.verifierAdapter != nil && c.verifierAdapter.IsEnabled() {
+		models, err := c.verifierAdapter.GetVerifiedModels(ctx)
+		if err == nil && len(models) > 0 {
+			c.printVerifiedModels(models)
+			return nil
+		}
+		// Log warning but continue to fallback
+		fmt.Fprintf(os.Stderr, "⚠️  Verifier unavailable (%v), using fallback...\n", err)
 	}
 
+	// Priority 2: Provider's own model list (e.g., Ollama /api/tags)
+	if c.llmProvider != nil {
+		providerModels := c.llmProvider.GetModels()
+		if len(providerModels) > 0 {
+			for _, m := range providerModels {
+				fmt.Printf("ID: %s\n  Name: %s\n  Provider: %s\n  Context Size: %d\n  Status: available\n\n",
+					m.ID, m.Name, m.Provider, m.ContextSize)
+			}
+			return nil
+		}
+	}
+
+	// Priority 3: Constitutional fallback list (CONST-035 compliance)
+	c.printVerifiedModels(verifier.FallbackModels)
+	fmt.Println("ℹ️  Using fallback model list. Start LLMsVerifier for live data.")
 	return nil
+}
+
+func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
+	for _, m := range models {
+		status := "✓ verified"
+		if !m.Verified {
+			status = "○ pending"
+		}
+		if m.VerificationStatus == "failed" {
+			status = "✗ failed"
+		}
+		if m.VerificationStatus == "rate_limited" {
+			status = "⏳ rate-limited"
+		}
+		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
+		fmt.Printf("ID: %s\n  Name: %s\n  Provider: %s\n  Score: %s\n  Context Size: %d\n  Status: %s\n\n",
+			m.ID, m.DisplayName, m.Provider, scoreStr, m.ContextSize, status)
+	}
 }
 
 // handleHealthCheck performs system health check

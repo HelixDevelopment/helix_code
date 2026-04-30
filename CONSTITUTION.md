@@ -324,6 +324,129 @@ This Constitution, along with CLAUDE.md and AGENTS.md, MUST be propagated to ALL
 
 ---
 
+## CONST-037: LLMsVerifier Single Source of Truth Mandate
+
+**Rule**: LLMsVerifier SHALL BE the sole authoritative source for:
+1. All model metadata (names, IDs, context windows, capabilities)
+2. All provider metadata (endpoints, auth types, supported models)
+3. All verification status (verified, partial, failed, pending)
+4. All scoring data (overall scores, capability scores, tier rankings)
+5. All rate-limit and cooldown state
+
+**Prohibition**: NO hardcoded model lists, NO hardcoded provider lists, NO simulated model discovery. Any code path that presents a model or provider listing to a user MUST fetch that listing from the LLMsVerifier subsystem or its cached replica.
+
+**Anti-Bluff Verification**:
+- The challenge script `challenges/scripts/verifier_hardcode_check.sh` MUST scan all Go source files for hardcoded model arrays.
+- Any `[]string{"gpt-4", "claude-3"}` or equivalent literal in production code is a constitutional violation.
+- The only permitted hardcoded data is the LLMsVerifier service endpoint URL and the list of verification test types.
+
+**Enforcement**: `make test-complete` MUST include a test that asserts `ModelManager.GetAvailableModels()` returns at least as many models as the verifier's database contains for configured providers. A test that passes while the CLI shows a hardcoded list is a TEST BLUFF and violates CONST-017.
+
+---
+
+## CONST-038: Model Provider Anti-Bluff Guarantee
+
+**Rule**: Every model displayed to an end user MUST have been verified by LLMsVerifier within the last `verification_timeout` period (default: 24h). Models older than this MUST display a "stale" indicator and be deprioritized.
+
+**Prohibition Against Test Bluffing**:
+- A unit test that mocks the verifier client and asserts `GetAvailableModels()` returns 3 models DOES NOT satisfy this rule.
+- An integration test that starts the verifier server, performs real provider discovery, and confirms the model count matches the actual provider API response DOES satisfy this rule.
+- The Makefile target `make test-verifier-integration` MUST exist and MUST run without mocks.
+
+**The "Tests Pass But Features Don't Work" Guarantee**:
+```
+NO TEST MAY PASS UNLESS THE FEATURE IT TESTS IS DEMONSTRABLY USABLE
+BY AN END USER IN THE SAME BUILD.
+```
+- If `TestModelList` passes but `helixcode --list-models` shows hardcoded data, the test is a BLUFF.
+- If `TestProviderHealth` passes but the health endpoint returns `200 OK` for a provider that is actually down, the test is a BLUFF.
+- If `TestLLMGeneration` passes but `--prompt "hello"` returns a simulated string, the test is a BLUFF.
+- Bluff tests MUST be rewritten or deleted. There is no "grandfather" exception.
+
+**Evidence Standard**: Every test that claims to verify model/provider functionality MUST:
+1. Call a real API endpoint or a real verifier database
+2. Assert on response content that could only come from that real source
+3. Include a test that runs the CLI binary with `--list-models` and checks output against verifier data
+
+---
+
+## CONST-039: Real-Time Model Status Accuracy
+
+**Rule**: Model status (available, rate-limited, cooldown, offline, deprecated) displayed to users MUST reflect the actual state as known by LLMsVerifier within `max_staleness` seconds (default: 60s).
+
+**Polling vs. Push**:
+- If WebSocket/SSE push is unavailable, the system MUST poll LLMsVerifier at most every `status_poll_interval` (default: 30s).
+- The TUI MUST display a "last updated" timestamp with every model listing.
+- Models in "cooldown" or "rate-limited" state MUST show the estimated recovery time if known.
+
+**Accuracy Verification**:
+- Challenge script `challenges/scripts/model_status_accuracy_challenge.sh` MUST:
+  1. Artificially rate-limit a provider by exhausting its quota
+  2. Wait for the status to propagate to the verifier
+  3. Check that `helixcode --list-models` shows the rate-limited status within 60s
+  4. Check that `SelectOptimalModel()` no longer selects the rate-limited model
+
+**Prohibition**: Status indicators that are "always green" or that lag >60s behind reality violate this rule.
+
+---
+
+## CONST-040: All Providers and Models Integration Mandate
+
+**Rule**: HelixCode MUST integrate with ALL providers and models that LLMsVerifier supports, subject only to:
+1. The provider being explicitly disabled in configuration (`enabled: false`)
+2. The API key being absent and the provider requiring one
+3. The provider being marked `deprecated` in the verifier database
+
+**Minimum Provider Set** (SHALL NOT be reduced without constitutional amendment):
+| Provider | Auth Type | Required Env Var |
+|----------|-----------|-----------------|
+| OpenAI | API Key | `OPENAI_API_KEY` |
+| Anthropic | API Key / OAuth | `ANTHROPIC_API_KEY` |
+| Gemini | API Key | `GEMINI_API_KEY` |
+| DeepSeek | API Key | `DEEPSEEK_API_KEY` |
+| Groq | API Key | `GROQ_API_KEY` |
+| Mistral | API Key | `MISTRAL_API_KEY` |
+| xAI | API Key | `XAI_API_KEY` |
+| OpenRouter | API Key | `OPENROUTER_API_KEY` |
+| Ollama | Local | None (auto-detect) |
+| Llama.cpp | Local | None (auto-detect) |
+
+**Integration Requirement**: For every provider in the minimum set:
+- There MUST be a provider adapter file in `internal/llm/` or `internal/verifier/adapters/`
+- There MUST be a `*_test.go` file with real API tests (skipped only if `HELIX_SKIP_LIVE_PROVIDER_TESTS` is set)
+- There MUST be a challenge script in `challenges/scripts/`
+- The model listing MUST include models from this provider when the provider is enabled
+
+---
+
+## CONST-041: MCP / LSP / ACP / Embedding / RAG / Skills / Plugins Integration Mandate
+
+**Rule**: LLMsVerifier integration SHALL extend beyond basic model listing to cover ALL capability dimensions:
+
+1. **MCP (Model Context Protocol)**: The verifier MUST report which models support MCP tool calling. HelixCode's MCP subsystem MUST consult verifier capability flags before selecting a model for tool-use tasks.
+
+2. **LSP (Language Server Protocol)**: The verifier MUST report code-analysis capabilities. Models without `code_analysis` capability MUST NOT be selected for refactoring or debugging tasks.
+
+3. **ACP (Agent Capability Protocol)**: The verifier MUST report multi-agent coordination support. Models with `supports_parallel_tool_use` MUST be preferred for ACP workflows.
+
+4. **Embedding**: The verifier MUST report `supports_embeddings` for each model. The `CogneeConfig` embedding model selection MUST be verifier-aware.
+
+5. **RAG (Retrieval-Augmented Generation)**: The verifier MUST report context-window sizes. RAG chunking strategies MUST adapt to the selected model's `context_window_tokens` as reported by the verifier.
+
+6. **Skills / Plugins**: The verifier MUST track plugin compatibility. Models flagged `plugin_compatible` MUST be used when skill/plugin execution is required.
+
+**Capability Checklist** (MUST be verified by challenge):
+- [ ] MCP tool calling verified for at least 3 providers
+- [ ] LSP code-analysis verified for at least 3 providers
+- [ ] ACP parallel tool use verified for at least 2 providers
+- [ ] Embedding generation verified for at least 2 providers
+- [ ] RAG context-window adaptation verified
+- [ ] Skills/plugin execution verified for at least 2 providers
+
+**Prohibition**: Capability flags MUST NOT be hardcoded. The `Provider.GetCapabilities()` method MUST return data sourced from the verifier's `VerificationResult` fields.
+
+---
+
 ## Amendment Process
 
 Constitution amendments require:

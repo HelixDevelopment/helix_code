@@ -1,0 +1,288 @@
+# ============================================================================
+# LLMsVerifier Integration Configuration
+# Version: 2.0.0
+# Authority: CONST-036 — LLMsVerifier Single Source of Truth Mandate
+# ============================================================================
+
+verifier:
+  # Master enable/disable for the entire verifier subsystem
+  enabled: false
+
+  # Operation mode: "remote" (REST API) or "embedded" (future)
+  mode: remote
+
+  # LLMsVerifier REST API endpoint
+  # In production, this points to the deployed verifier service.
+  # In development, this typically points to localhost:8081.
+  endpoint: http://localhost:8081
+
+  # Optional API key for authenticated verifier access.
+  # If empty, the client will still attempt unauthenticated requests.
+  api_key: ""
+
+  # Request timeout for individual verifier API calls.
+  # Must be between 5s and 5m.
+  timeout: 30s
+
+  # ==========================================================================
+  # Cache Configuration
+  # ==========================================================================
+  cache:
+    # How long to cache verifier responses in memory.
+    # Must be between 1s and 24h.
+    ttl: 5m
+
+    # Maximum number of entries in the cache.
+    max_entries: 1000
+
+  # ==========================================================================
+  # Background Polling Configuration
+  # ==========================================================================
+  polling:
+    # How often to poll the verifier for model/pricing updates.
+    # Must be between 10s and 1h.
+    interval: 60s
+
+    # Whether to enable the background polling goroutine at startup.
+    enabled: true
+
+  # ==========================================================================
+  # Scoring Weights
+  # ==========================================================================
+  # These weights control how verifier scores are combined with local
+  # heuristics in ModelManager.SelectOptimalModel().
+  #
+  # When verifier is available, the final score is a weighted blend:
+  #   - 60% from the verifier (normalized 0-10 scale)
+  #   - 40% from local heuristics (capability, context, task, hardware)
+  #
+  # Within the verifier's contribution, these weights determine how the
+  # composite score is built from the 5 verification dimensions.
+  # All weights must sum to exactly 1.0.
+  # ==========================================================================
+  scoring:
+    # Model's performance on code generation, editing, and refactoring tasks.
+    code_capability: 0.40
+
+    # Latency / time-to-first-token performance.
+    responsiveness: 0.20
+
+    # Uptime and consistency of results.
+    reliability: 0.20
+
+    # Breadth of features (multimodal, tool calling, function calling, etc.).
+    feature_richness: 0.15
+
+    # Price-to-performance ratio.
+    value_proposition: 0.05
+
+  # ==========================================================================
+  # Health Monitoring & Circuit Breaker
+  # ==========================================================================
+  health:
+    # How many consecutive failures before opening the circuit.
+    failure_threshold: 5
+
+    # How many consecutive successes in Half-Open state before closing.
+    recovery_threshold: 3
+
+    # How long to wait in Open state before trying Half-Open.
+    half_open_timeout: 60s
+
+  # ==========================================================================
+  # Event System Configuration
+  # ==========================================================================
+  events:
+    # Whether to enable the event publisher for model/pricing changes.
+    enabled: true
+
+    # WebSocket endpoint for real-time events (optional; if empty,
+    # the publisher will broadcast only in-process).
+    websocket_url: ""
+
+    # Maximum number of events to queue before dropping.
+    buffer_size: 100
+
+# ============================================================================
+# Provider Configuration
+# ============================================================================
+# Each provider block controls whether it is enabled and what settings
+# are used when talking to its API.
+#
+# API keys are NOT stored here. They are read from environment variables
+# and bound by internal/config/config.go during Load().
+# ============================================================================
+
+providers:
+  # --------------------------------------------------------------------------
+  # OpenAI
+  # --------------------------------------------------------------------------
+  openai:
+    enabled: true
+    endpoint: https://api.openai.com/v1
+    timeout: 30s
+    models:
+      - gpt-4o
+      - gpt-4o-mini
+      - gpt-4-turbo
+      - gpt-4.1
+      - o1
+      - o3-mini
+
+  # --------------------------------------------------------------------------
+  # Anthropic
+  # --------------------------------------------------------------------------
+  anthropic:
+    enabled: true
+    endpoint: https://api.anthropic.com/v1
+    timeout: 30s
+    models:
+      - claude-3-5-sonnet
+      - claude-3-5-haiku
+      - claude-3-opus
+
+  # --------------------------------------------------------------------------
+  # Google Gemini
+  # --------------------------------------------------------------------------
+  gemini:
+    enabled: true
+    endpoint: https://generativelanguage.googleapis.com/v1beta
+    timeout: 30s
+    models:
+      - gemini-2.5-pro
+      - gemini-2.5-flash
+      - gemini-1.5-pro
+
+  # --------------------------------------------------------------------------
+  # DeepSeek
+  # --------------------------------------------------------------------------
+  deepseek:
+    enabled: true
+    endpoint: https://api.deepseek.com/v1
+    timeout: 30s
+    models:
+      - deepseek-chat
+      - deepseek-coder
+      - deepseek-r1
+
+  # --------------------------------------------------------------------------
+  # Groq (Ultra-Fast Inference)
+  # --------------------------------------------------------------------------
+  groq:
+    enabled: true
+    endpoint: https://api.groq.com/openai/v1
+    timeout: 30s
+    models:
+      - llama-3.3-70b-versatile
+      - mixtral-8x7b-32768
+      - gemma2-9b-it
+
+  # --------------------------------------------------------------------------
+  # Mistral AI
+  # --------------------------------------------------------------------------
+  mistral:
+    enabled: true
+    endpoint: https://api.mistral.ai/v1
+    timeout: 30s
+    models:
+      - mistral-large
+      - mistral-medium
+      - mistral-small
+
+  # --------------------------------------------------------------------------
+  # XAI (Grok)
+  # --------------------------------------------------------------------------
+  xai:
+    enabled: true
+    endpoint: https://api.xai.com/v1
+    timeout: 30s
+    models:
+      - grok-3-fast-beta
+      - grok-3-mini-fast-beta
+
+  # --------------------------------------------------------------------------
+  # OpenRouter (Multi-Provider Router)
+  # --------------------------------------------------------------------------
+  openrouter:
+    enabled: true
+    endpoint: https://openrouter.ai/api/v1
+    timeout: 30s
+    models:
+      - openrouter/auto
+
+  # --------------------------------------------------------------------------
+  # GitHub Models (via GitHub Copilot / GitHub Models API)
+  # --------------------------------------------------------------------------
+  github:
+    enabled: true
+    endpoint: https://models.inference.ai.azure.com
+    timeout: 30s
+    models:
+      - github/gpt-4o
+      - github/claude-3-5-sonnet
+
+  # --------------------------------------------------------------------------
+  # Ollama (Local)
+  # --------------------------------------------------------------------------
+  ollama:
+    enabled: true
+    endpoint: http://localhost:11434
+    timeout: 60s
+    models:
+      - llama-3.2-3b
+      - llama-3.3-70b
+      - qwen-2.5-72b
+
+  # --------------------------------------------------------------------------
+  # llama.cpp (Local)
+  # --------------------------------------------------------------------------
+  llamacpp:
+    enabled: true
+    endpoint: http://localhost:8080
+    timeout: 60s
+    models:
+      - local-llama-3.2-3b
+
+  # --------------------------------------------------------------------------
+  # Cohere
+  # --------------------------------------------------------------------------
+  cohere:
+    enabled: true
+    endpoint: https://api.cohere.com/v1
+    timeout: 30s
+    models:
+      - command-r
+      - command-r-plus
+
+  # --------------------------------------------------------------------------
+  # AI21 Labs (Jamba / Jurassic)
+  # --------------------------------------------------------------------------
+  ai21:
+    enabled: true
+    endpoint: https://api.ai21.com/studio/v1
+    timeout: 30s
+    models:
+      - jamba-1.5-large
+      - jamba-1.5-mini
+
+  # --------------------------------------------------------------------------
+  # Perplexity
+  # --------------------------------------------------------------------------
+  perplexity:
+    enabled: true
+    endpoint: https://api.perplexity.ai
+    timeout: 30s
+    models:
+      - sonar-pro
+      - sonar-reasoning
+
+  # --------------------------------------------------------------------------
+  # Together AI
+  # --------------------------------------------------------------------------
+  together:
+    enabled: true
+    endpoint: https://api.together.xyz/v1
+    timeout: 30s
+    models:
+      - together/llama-3-70b
+      - together/mixtral-8x22b

@@ -479,7 +479,26 @@ curl -X POST http://localhost:8080/api/v1/llm/generate \
 
 ---
 
-## 10. Contact & Escalation
+## 10. LLMsVerifier Constitutional Mandates (CONST-036 through CONST-040)
+
+### CONST-036: LLMsVerifier Single Source of Truth
+LLMsVerifier is the sole authoritative source for model metadata, provider metadata, verification status, and scoring data. NO hardcoded model lists. NO simulated discovery.
+
+### CONST-037: Model Provider Anti-Bluff Guarantee
+Every model displayed to users MUST be verified by LLMsVerifier within 24h. Integration tests MUST use real verifier data, not mocks.
+
+### CONST-038: Real-Time Model Status Accuracy
+Model status MUST reflect verifier state within 60s. Poll interval ≤ 60s if push unavailable.
+
+### CONST-039: All Providers Integration Mandate
+HelixCode MUST integrate with all verifier-supported providers: OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp.
+
+### CONST-040: Capability Integration Mandate
+MCP, LSP, ACP, Embedding, RAG, Skills, and Plugins capability flags MUST be sourced from verifier `VerificationResult`. NO hardcoded capability flags.
+
+---
+
+## 11. Contact & Escalation
 
 - **Bluff reports**: `docs/issues/BLUFFS.md`
 - **Bug fixes**: `docs/issues/fixed/BUGFIXES.md`

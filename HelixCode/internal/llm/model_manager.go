@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/hardware"
+	"dev.helix.code/internal/verifier"
 )
 
 // ModelManager manages LLM models and their selection
@@ -17,6 +18,7 @@ type ModelManager struct {
 	hardwareDetector *hardware.Detector
 	providers        map[ProviderType]Provider
 	modelRegistry    map[string]*ModelInfo
+	verifierAdapter  *verifier.Adapter
 	mu               sync.RWMutex
 }
 
@@ -98,6 +100,13 @@ func (m *ModelManager) SelectOptimalModel(criteria ModelSelectionCriteria) (*Mod
 		bestModel.Model.Name, bestModel.Score, bestModel.Reason)
 
 	return bestModel.Model, nil
+}
+
+// SetVerifierAdapter injects the verifier adapter for score-augmented selection.
+func (m *ModelManager) SetVerifierAdapter(adapter *verifier.Adapter) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.verifierAdapter = adapter
 }
 
 // GetAvailableModels returns all available models
@@ -224,6 +233,28 @@ func (m *ModelManager) calculateModelScore(model *ModelInfo, criteria ModelSelec
 	provider, exists := m.providers[model.Provider]
 	if !exists || !provider.IsAvailable(context.Background()) {
 		return ModelScore{Model: model, Score: 0, Reason: "provider unavailable"}
+	}
+
+	// BLUFF-005 FIX: Incorporate LLMsVerifier scores into ranking
+	if m.verifierAdapter != nil && m.verifierAdapter.IsEnabled() {
+		verifierScore, found := m.verifierAdapter.GetModelScore(model.ID)
+		if found {
+			// Weighted blend: 60% verifier, 40% local heuristic
+			normalizedVerifier := verifierScore / 10.0
+			blendedScore := (normalizedVerifier * 0.6) + (baseScore * 0.4)
+
+			// Task-specific boost from verifier dimensions
+			switch criteria.TaskType {
+			case "code_generation", "debugging", "refactoring":
+				codeScore, _ := m.verifierAdapter.GetModelCodeCapabilityScore(model.ID)
+				blendedScore += (codeScore / 10.0) * 0.15
+			case "planning", "analysis":
+				relScore, _ := m.verifierAdapter.GetModelReliabilityScore(model.ID)
+				blendedScore += (relScore / 10.0) * 0.10
+			}
+
+			baseScore = blendedScore
+		}
 	}
 
 	score = baseScore
