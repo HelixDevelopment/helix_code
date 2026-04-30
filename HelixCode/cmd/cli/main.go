@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
@@ -305,18 +305,21 @@ func (c *CLI) handleNotification(ctx context.Context, message, notifyType, prior
 	return nil
 }
 
-// handleCommand executes a command
+// handleCommand executes a command locally via os/exec.
+// ANTI-BLUFF (BLUFF-003 FIX): This executes REAL commands, not simulations.
 func (c *CLI) handleCommand(ctx context.Context, command string) error {
 	fmt.Printf("\n=== Executing Command ===\n")
 	fmt.Printf("Command: %s\n\n", command)
 
-	// For now, simulate command execution
-	// In production, this would execute on a worker
+	cmd := exec.CommandContext(ctx, "sh", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	fmt.Printf("Executing: %s\n", command)
-	time.Sleep(1 * time.Second)
-	fmt.Printf("Command completed successfully\n")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("command failed: %w", err)
+	}
 
+	fmt.Printf("\n✅ Command completed (exit code: %d)\n", cmd.ProcessState.ExitCode())
 	return nil
 }
 

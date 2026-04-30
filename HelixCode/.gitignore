@@ -121,3 +121,4 @@ coverage/
 # vendor/
 
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
+cli
