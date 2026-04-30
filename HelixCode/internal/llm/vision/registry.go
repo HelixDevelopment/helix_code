@@ -95,14 +95,16 @@ type ModelUpdate struct {
 	Deprecated   *bool
 }
 
-// NewModelRegistry creates a new model registry with default vision models
+// NewModelRegistry creates a new model registry.
+// It pre-populates with FallbackVisionModels (CONST-035 compliant).
+// Call SyncWithVerifier() after initialization to upgrade to live data.
 func NewModelRegistry() *ModelRegistry {
 	registry := &ModelRegistry{
 		models: make(map[string]*Model),
 	}
 
-	// Register default vision-capable models
-	for _, model := range DefaultVisionModels {
+	// Register fallback vision-capable models (used when verifier unavailable)
+	for _, model := range FallbackVisionModels {
 		registry.Register(model)
 	}
 
@@ -307,7 +309,9 @@ func (c *CapabilityChecker) FindBestVisionModel(ctx context.Context, preferences
 }
 
 // Default vision-capable models
-var DefaultVisionModels = []*Model{
+// FallbackVisionModels is the constitutional fallback list for vision models.
+// It is used when LLMsVerifier is unavailable. Updates require constitutional review.
+var FallbackVisionModels = []*Model{
 	{
 		ID:       "claude-3-5-sonnet-20241022",
 		Name:     "Claude 3.5 Sonnet",

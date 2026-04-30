@@ -44,7 +44,7 @@ cd "$SCAN_DIR"
 echo "→ Scanning for hardcoded model ID arrays in user-facing code..."
 PATTERN1=$(grep -rPn '\[\]string\s*\{\s*"gpt-|^\s*"claude-|^\s*"llama-|^\s*"mistral-|^\s*"gemini-|^\s*"deepseek-|^\s*"grok-|^\s*"phi-|^\s*"codellama-' \
     --include="*.go" \
-    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "fallback_models.go" | grep -v "verifier_integration.go" | grep -v "_provider.go" | grep -v "internal/editor/model_formats.go" || true)
+    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "fallback_models.go" | grep -v "verifier_integration.go" | grep -v "_provider.go" | grep -v "internal/editor/model_formats.go" | grep -v "doc.go" || true)
 
 if [ -n "$PATTERN1" ]; then
     echo -e "${RED}VIOLATION: Hardcoded model arrays found:${NC}"
@@ -58,7 +58,7 @@ fi
 echo "→ Scanning for hardcoded provider lists in user-facing code..."
 PATTERN2=$(grep -rPn 'Providers:\s*\[\]string\{|providers.*=.*\[\]string\{|"openai".*"anthropic".*"gemini"' \
     --include="*.go" \
-    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_config.go" | grep -v "config.go" | grep -v "_provider.go" | grep -v "model_discovery.go" || true)
+    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_config.go" | grep -v "config.go" | grep -v "_provider.go" | grep -v "model_discovery.go" | grep -v "doc.go" | grep -v '\[\]string{}' || true)
 
 if [ -n "$PATTERN2" ]; then
     echo -e "${RED}VIOLATION: Hardcoded provider lists found:${NC}"

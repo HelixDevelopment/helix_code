@@ -91,11 +91,9 @@ func DefaultConfig() *Config {
 		FallbackModel:        "claude-3-5-sonnet-20241022",
 		AllowDowngrade:       false,
 		PreferredVisionModel: "claude-3-5-sonnet-20241022",
-		ModelPriority: []string{
-			"claude-3-5-sonnet-20241022",
-			"gpt-4o",
-			"gemini-2.0-flash",
-		},
+		// ModelPriority is populated at runtime from the verifier (CONST-036).
+		// These legacy defaults are only used when verifier is unavailable.
+		ModelPriority: []string{}, // populated at runtime from verifier
 		ProviderPreference: []string{
 			"anthropic",
 			"openai",

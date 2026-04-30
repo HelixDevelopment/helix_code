@@ -316,16 +316,17 @@ func (p *KoboldAIProvider) discoverModels() error {
 	// Create a single model info with the loaded model
 	if modelResponse.Result != "" {
 		modelInfo := ModelInfo{
-			Name:           modelResponse.Result,
-			Provider:       ProviderTypeKoboldAI,
-			ContextSize:    2048, // Default for KoboldAI models
-			MaxTokens:      1024,
-			Capabilities:   p.GetCapabilities(),
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    fmt.Sprintf("KoboldAI model: %s", modelResponse.Result),
+			Name:        modelResponse.Result,
+			Provider:    ProviderTypeKoboldAI,
+			ContextSize: 2048, // Default for KoboldAI models
+			MaxTokens:   1024,
+			Description: fmt.Sprintf("KoboldAI model: %s", modelResponse.Result),
 		}
 		p.models = append(p.models, modelInfo)
+	}
+
+	for i := range p.models {
+		EnrichModelInfo(&p.models[i])
 	}
 
 	return nil

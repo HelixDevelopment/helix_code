@@ -185,66 +185,44 @@ func (orp *OpenRouterProvider) initializeModels() {
 	// Focus on free/low-cost models
 	orp.models = []ModelInfo{
 		{
-			Name:           "deepseek-r1-free",
-			Provider:       ProviderTypeOpenRouter,
-			ContextSize:    163840,
-			Capabilities:   orp.GetCapabilities(),
-			MaxTokens:      10000,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "DeepSeek R1 Free - Free reasoning model via OpenRouter",
+			Name:        "deepseek-r1-free",
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: 163840,
+			MaxTokens:   10000,
+			Description: "DeepSeek R1 Free - Free reasoning model via OpenRouter",
 		},
 		{
 			Name:        "meta-llama/llama-3.2-3b-instruct:free",
 			Provider:    ProviderTypeOpenRouter,
 			ContextSize: 131072,
-			Capabilities: []ModelCapability{
-				CapabilityTextGeneration,
-				CapabilityCodeGeneration,
-				CapabilityCodeAnalysis,
-			},
-			MaxTokens:      4096,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Llama 3.2 3B Instruct Free - Free lightweight model",
+			MaxTokens:   4096,
+			Description: "Llama 3.2 3B Instruct Free - Free lightweight model",
 		},
 		{
-			Name:           "microsoft/wizardlm-2-8x22b:free",
-			Provider:       ProviderTypeOpenRouter,
-			ContextSize:    65536,
-			Capabilities:   orp.GetCapabilities(),
-			MaxTokens:      4096,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "WizardLM-2 8x22B Free - Free instruction-tuned model",
+			Name:        "microsoft/wizardlm-2-8x22b:free",
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: 65536,
+			MaxTokens:   4096,
+			Description: "WizardLM-2 8x22B Free - Free instruction-tuned model",
 		},
 		{
 			Name:        "mistralai/mistral-7b-instruct:free",
 			Provider:    ProviderTypeOpenRouter,
 			ContextSize: 32768,
-			Capabilities: []ModelCapability{
-				CapabilityTextGeneration,
-				CapabilityCodeGeneration,
-				CapabilityCodeAnalysis,
-			},
-			MaxTokens:      4096,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Mistral 7B Instruct Free - Free Mistral model",
+			MaxTokens:   4096,
+			Description: "Mistral 7B Instruct Free - Free Mistral model",
 		},
 		{
 			Name:        "huggingface/zephyr-7b-beta:free",
 			Provider:    ProviderTypeOpenRouter,
 			ContextSize: 32768,
-			Capabilities: []ModelCapability{
-				CapabilityTextGeneration,
-				CapabilityCodeGeneration,
-			},
-			MaxTokens:      4096,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Zephyr 7B Beta Free - Free fine-tuned model",
+			MaxTokens:   4096,
+			Description: "Zephyr 7B Beta Free - Free fine-tuned model",
 		},
+	}
+
+	for i := range orp.models {
+		EnrichModelInfo(&orp.models[i])
 	}
 
 	log.Printf("✅ OpenRouter provider initialized with %d models", len(orp.models))

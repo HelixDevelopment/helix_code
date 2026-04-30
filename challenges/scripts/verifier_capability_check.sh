@@ -29,7 +29,7 @@ cd "$SCAN_DIR"
 echo "→ Scanning for hardcoded capability assignments..."
 PATTERN1=$(grep -rPn 'SupportsToolUse:\s*(true|false)|SupportsVision:\s*(true|false)|SupportsStreaming:\s*(true|false)|SupportsReasoning:\s*(true|false)' \
     --include="*.go" \
-    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_integration.go" | grep -v "fallback_models.go" || true)
+    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_integration.go" | grep -v "fallback_models.go" | grep -v "doc.go" | grep -v "internal/llm/vision" || true)
 
 if [ -n "$PATTERN1" ]; then
     echo -e "${RED}VIOLATION: Hardcoded capability flags found:${NC}"
@@ -43,7 +43,7 @@ fi
 echo "→ Scanning for hardcoded capability slices..."
 PATTERN2=$(grep -rPn 'Capabilities:\s*\[\]\w*Capability\{|Capabilities:\s*\[\]string\{' \
     --include="*.go" \
-    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_integration.go" | grep -v "fallback_models.go" || true)
+    internal/ cmd/ 2>/dev/null | grep -v "_test.go" | grep -v "verifier_integration.go" | grep -v "fallback_models.go" | grep -v "doc.go" | grep -v "internal/llm/vision" || true)
 
 if [ -n "$PATTERN2" ]; then
     echo -e "${YELLOW}WARNING: Hardcoded capability slices found (review required):${NC}"

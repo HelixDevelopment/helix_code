@@ -277,9 +277,11 @@ func (a *UsageAnalytics) GetUserPreferences(ctx context.Context, userID string) 
 	}
 
 	// Return default preferences
+	// PreferredProviders is intentionally empty; it is populated at runtime
+	// from the verifier's provider list (CONST-036 / CONST-039).
 	return &UserPreferences{
 		UserID:              userID,
-		PreferredProviders:  []string{"vllm", "llamacpp"},
+		PreferredProviders:  []string{}, // populated at runtime from verifier
 		QualityPreference:   "balanced",
 		BudgetConstraints:   make(map[string]float64),
 		TaskFrequencies:     make(map[string]int),

@@ -304,84 +304,56 @@ func (gp *GroqProvider) Close() error {
 // Helper methods
 
 func getGroqModels() []ModelInfo {
-	allCapabilities := []ModelCapability{
-		CapabilityTextGeneration,
-		CapabilityCodeGeneration,
-		CapabilityCodeAnalysis,
-		CapabilityPlanning,
-		CapabilityDebugging,
-		CapabilityRefactoring,
-		CapabilityTesting,
+	models := []ModelInfo{
+		{
+			Name:        "llama-3.3-70b-versatile",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 131072,
+			MaxTokens:   32768,
+			Description: "Llama 3.3 70B - Most capable model on Groq with ultra-fast inference",
+		},
+		{
+			Name:        "llama-3.1-70b-versatile",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Llama 3.1 70B - Previous generation with excellent speed",
+		},
+		{
+			Name:        "llama-3.1-8b-instant",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Llama 3.1 8B - Extremely fast, ideal for high-volume use",
+		},
+		{
+			Name:        "mixtral-8x7b-32768",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 32768,
+			MaxTokens:   32768,
+			Description: "Mixtral 8x7B - Mixture of experts with fast inference",
+		},
+		{
+			Name:        "gemma2-9b-it",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 8192,
+			MaxTokens:   8192,
+			Description: "Gemma 2 9B - Google's efficient open model on Groq",
+		},
+		{
+			Name:        "gemma-7b-it",
+			Provider:    ProviderTypeGroq,
+			ContextSize: 8192,
+			MaxTokens:   8192,
+			Description: "Gemma 7B - Compact and fast",
+		},
 	}
 
-	textCapabilities := []ModelCapability{
-		CapabilityTextGeneration,
-		CapabilityCodeGeneration,
-		CapabilityCodeAnalysis,
+	for i := range models {
+		EnrichModelInfo(&models[i])
 	}
 
-	return []ModelInfo{
-		{
-			Name:           "llama-3.3-70b-versatile",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    131072,
-			MaxTokens:      32768,
-			Capabilities:   allCapabilities,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Llama 3.3 70B - Most capable model on Groq with ultra-fast inference",
-		},
-		{
-			Name:           "llama-3.1-70b-versatile",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    131072,
-			MaxTokens:      8192,
-			Capabilities:   allCapabilities,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Llama 3.1 70B - Previous generation with excellent speed",
-		},
-		{
-			Name:           "llama-3.1-8b-instant",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    131072,
-			MaxTokens:      8192,
-			Capabilities:   allCapabilities,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Llama 3.1 8B - Extremely fast, ideal for high-volume use",
-		},
-		{
-			Name:           "mixtral-8x7b-32768",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    32768,
-			MaxTokens:      32768,
-			Capabilities:   allCapabilities,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Mixtral 8x7B - Mixture of experts with fast inference",
-		},
-		{
-			Name:           "gemma2-9b-it",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    8192,
-			MaxTokens:      8192,
-			Capabilities:   textCapabilities,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Gemma 2 9B - Google's efficient open model on Groq",
-		},
-		{
-			Name:           "gemma-7b-it",
-			Provider:       ProviderTypeGroq,
-			ContextSize:    8192,
-			MaxTokens:      8192,
-			Capabilities:   textCapabilities,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Gemma 7B - Compact and fast",
-		},
-	}
+	return models
 }
 
 func (gp *GroqProvider) buildGroqRequest(request *LLMRequest) (*GroqRequest, error) {

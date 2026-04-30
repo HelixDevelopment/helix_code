@@ -106,15 +106,16 @@ func (p *OllamaProvider) GetModels() []ModelInfo {
 
 	for _, model := range p.models {
 		modelInfos = append(modelInfos, ModelInfo{
-			Name:           model.Name,
-			Provider:       ProviderTypeLocal,
-			ContextSize:    4096, // Default context size
-			Capabilities:   []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration, CapabilityCodeAnalysis},
-			MaxTokens:      4096,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    fmt.Sprintf("Ollama model: %s", model.Name),
+			Name:        model.Name,
+			Provider:    ProviderTypeLocal,
+			ContextSize: 4096, // Default context size
+			MaxTokens:   4096,
+			Description: fmt.Sprintf("Ollama model: %s", model.Name),
 		})
+	}
+
+	for i := range modelInfos {
+		EnrichModelInfo(&modelInfos[i])
 	}
 
 	return modelInfos

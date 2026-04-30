@@ -359,16 +359,17 @@ func (p *OpenAICompatibleProvider) discoverModels() error {
 	// Convert to ModelInfo
 	for _, model := range response.Data {
 		modelInfo := ModelInfo{
-			Name:           model.ID,
-			Provider:       p.GetType(),
-			ContextSize:    p.inferContextSize(model.ID),
-			MaxTokens:      p.inferMaxTokens(model.ID),
-			Capabilities:   p.GetCapabilities(),
-			SupportsTools:  p.supportsTools(model.ID),
-			SupportsVision: p.supportsVisionModel(model.ID),
-			Description:    fmt.Sprintf("%s model: %s", p.name, model.ID),
+			Name:        model.ID,
+			Provider:    p.GetType(),
+			ContextSize: p.inferContextSize(model.ID),
+			MaxTokens:   p.inferMaxTokens(model.ID),
+			Description: fmt.Sprintf("%s model: %s", p.name, model.ID),
 		}
 		p.models = append(p.models, modelInfo)
+	}
+
+	for i := range p.models {
+		EnrichModelInfo(&p.models[i])
 	}
 
 	return nil

@@ -183,49 +183,37 @@ func (xp *XAIProvider) initializeModels() {
 	// Predefined XAI/Grok models with their capabilities
 	xp.models = []ModelInfo{
 		{
-			Name:           "grok-3-fast-beta",
-			Provider:       ProviderTypeXAI,
-			ContextSize:    131072,
-			Capabilities:   xp.GetCapabilities(),
-			MaxTokens:      20000,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Grok 3 Fast Beta - Fast and efficient Grok model for coding and general tasks",
+			Name:        "grok-3-fast-beta",
+			Provider:    ProviderTypeXAI,
+			ContextSize: 131072,
+			MaxTokens:   20000,
+			Description: "Grok 3 Fast Beta - Fast and efficient Grok model for coding and general tasks",
 		},
 		{
-			Name:           "grok-3-mini-fast-beta",
-			Provider:       ProviderTypeXAI,
-			ContextSize:    131072,
-			Capabilities:   xp.GetCapabilities(),
-			MaxTokens:      20000,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Grok 3 Mini Fast Beta - Lightweight and fast Grok model",
+			Name:        "grok-3-mini-fast-beta",
+			Provider:    ProviderTypeXAI,
+			ContextSize: 131072,
+			MaxTokens:   20000,
+			Description: "Grok 3 Mini Fast Beta - Lightweight and fast Grok model",
 		},
 		{
-			Name:           "grok-3-beta",
-			Provider:       ProviderTypeXAI,
-			ContextSize:    131072,
-			Capabilities:   xp.GetCapabilities(),
-			MaxTokens:      20000,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Grok 3 Beta - Full-featured Grok model with advanced capabilities",
+			Name:        "grok-3-beta",
+			Provider:    ProviderTypeXAI,
+			ContextSize: 131072,
+			MaxTokens:   20000,
+			Description: "Grok 3 Beta - Full-featured Grok model with advanced capabilities",
 		},
 		{
 			Name:        "grok-3-mini-beta",
 			Provider:    ProviderTypeXAI,
 			ContextSize: 131072,
-			Capabilities: []ModelCapability{
-				CapabilityTextGeneration,
-				CapabilityCodeGeneration,
-				CapabilityCodeAnalysis,
-			},
-			MaxTokens:      20000,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Grok 3 Mini Beta - Efficient Grok model for basic tasks",
+			MaxTokens:   20000,
+			Description: "Grok 3 Mini Beta - Efficient Grok model for basic tasks",
 		},
+	}
+
+	for i := range xp.models {
+		EnrichModelInfo(&xp.models[i])
 	}
 
 	log.Printf("✅ XAI provider initialized with %d models", len(xp.models))

@@ -208,16 +208,17 @@ func (lp *LocalProvider) initializeModels() error {
 	// Convert to ModelInfo
 	for _, model := range tagsResponse.Models {
 		modelInfo := ModelInfo{
-			Name:           model.Name,
-			Provider:       ProviderTypeLocal,
-			ContextSize:    4096, // Default for most models
-			MaxTokens:      2048,
-			Capabilities:   lp.GetCapabilities(),
-			SupportsTools:  false, // Ollama doesn't support tools yet
-			SupportsVision: strings.Contains(strings.ToLower(model.Name), "vision"),
-			Description:    fmt.Sprintf("Local model: %s", model.Name),
+			Name:        model.Name,
+			Provider:    ProviderTypeLocal,
+			ContextSize: 4096, // Default for most models
+			MaxTokens:   2048,
+			Description: fmt.Sprintf("Local model: %s", model.Name),
 		}
 		lp.models = append(lp.models, modelInfo)
+	}
+
+	for i := range lp.models {
+		EnrichModelInfo(&lp.models[i])
 	}
 
 	log.Printf("✅ Local provider initialized with %d models", len(lp.models))

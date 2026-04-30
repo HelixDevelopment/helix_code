@@ -63,25 +63,25 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 	case ProviderTypeGroq:
 		return NewGroqProvider(config)
 	case ProviderTypeVLLM:
-		return NewVLLMProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeLocalAI:
-		return NewLocalAIProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeFastChat:
-		return NewFastChatProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeTextGen:
-		return NewTextGenProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeLMStudio:
-		return NewLMStudioProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeJan:
-		return NewJanProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeGPT4All:
-		return NewGPT4AllProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeTabbyAPI:
-		return NewTabbyAPIProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeMLX:
-		return NewMLXProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeMistralRS:
-		return NewMistralRSProvider(config)
+		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
 	case ProviderTypeKoboldAI:
 		koboldConfig := KoboldAIConfig{
 			BaseURL: config.Endpoint,

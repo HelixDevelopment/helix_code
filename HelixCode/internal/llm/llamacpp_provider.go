@@ -68,18 +68,19 @@ func (p *LlamaCPPProvider) GetModels() []ModelInfo {
 	if err != nil {
 		log.Printf("Failed to list Llama.cpp models: %v", err)
 		// Return configured model as fallback
-		return []ModelInfo{
+		models := []ModelInfo{
 			{
-				Name:           p.config.Model,
-				Provider:       ProviderTypeLocal,
-				ContextSize:    p.config.ContextSize,
-				Capabilities:   []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration, CapabilityCodeAnalysis},
-				MaxTokens:      p.config.ContextSize,
-				SupportsTools:  false,
-				SupportsVision: false,
-				Description:    "Local Llama.cpp model",
+				Name:        p.config.Model,
+				Provider:    ProviderTypeLocal,
+				ContextSize: p.config.ContextSize,
+				MaxTokens:   p.config.ContextSize,
+				Description: "Local Llama.cpp model",
 			},
 		}
+		for i := range models {
+			EnrichModelInfo(&models[i])
+		}
+		return models
 	}
 	defer resp.Body.Close()
 
@@ -98,15 +99,15 @@ func (p *LlamaCPPProvider) GetModels() []ModelInfo {
 	models := make([]ModelInfo, len(result.Models))
 	for i, m := range result.Models {
 		models[i] = ModelInfo{
-			Name:           m.Name,
-			Provider:       ProviderTypeLocal,
-			ContextSize:    p.config.ContextSize,
-			Capabilities:   []ModelCapability{CapabilityTextGeneration, CapabilityCodeGeneration, CapabilityCodeAnalysis},
-			MaxTokens:      p.config.ContextSize,
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Local Llama.cpp model",
+			Name:        m.Name,
+			Provider:    ProviderTypeLocal,
+			ContextSize: p.config.ContextSize,
+			MaxTokens:   p.config.ContextSize,
+			Description: "Local Llama.cpp model",
 		}
+	}
+	for i := range models {
+		EnrichModelInfo(&models[i])
 	}
 	return models
 }

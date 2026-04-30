@@ -1283,7 +1283,7 @@ func runSyncModels(cmd *cobra.Command, args []string) error {
 		fmt.Printf("🔗 Processing: %s (%s)\n", model.ModelID, model.Format)
 
 		// Check if model needs optimization for any provider
-		providers := []string{"vllm", "llamacpp", "ollama", "localai", "fastchat", "textgen", "lmstudio", "jan", "koboldai", "gpt4all", "tabbyapi", "mlx", "mistralrs"}
+		providers := llm.GetLocalInferenceProviders()
 
 		for _, provider := range providers {
 			// Check compatibility

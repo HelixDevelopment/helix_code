@@ -184,45 +184,37 @@ func (op *OpenAIProvider) initializeModels() {
 	// Predefined OpenAI models with their capabilities
 	op.models = []ModelInfo{
 		{
-			Name:           "gpt-4o",
-			Provider:       ProviderTypeOpenAI,
-			ContextSize:    128000,
-			Capabilities:   op.GetCapabilities(),
-			MaxTokens:      4096,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "OpenAI's most advanced multimodal model",
+			Name:        "gpt-4o",
+			Provider:    ProviderTypeOpenAI,
+			ContextSize: 128000,
+			MaxTokens:   4096,
+			Description: "OpenAI's most advanced multimodal model",
 		},
 		{
-			Name:           "gpt-4-turbo",
-			Provider:       ProviderTypeOpenAI,
-			ContextSize:    128000,
-			Capabilities:   op.GetCapabilities(),
-			MaxTokens:      4096,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "OpenAI's advanced multimodal model",
+			Name:        "gpt-4-turbo",
+			Provider:    ProviderTypeOpenAI,
+			ContextSize: 128000,
+			MaxTokens:   4096,
+			Description: "OpenAI's advanced multimodal model",
 		},
 		{
-			Name:           "gpt-4",
-			Provider:       ProviderTypeOpenAI,
-			ContextSize:    8192,
-			Capabilities:   op.GetCapabilities(),
-			MaxTokens:      4096,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "OpenAI's powerful text model",
+			Name:        "gpt-4",
+			Provider:    ProviderTypeOpenAI,
+			ContextSize: 8192,
+			MaxTokens:   4096,
+			Description: "OpenAI's powerful text model",
 		},
 		{
-			Name:           "gpt-3.5-turbo",
-			Provider:       ProviderTypeOpenAI,
-			ContextSize:    16385,
-			Capabilities:   op.GetCapabilities(),
-			MaxTokens:      4096,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "OpenAI's fast and efficient model",
+			Name:        "gpt-3.5-turbo",
+			Provider:    ProviderTypeOpenAI,
+			ContextSize: 16385,
+			MaxTokens:   4096,
+			Description: "OpenAI's fast and efficient model",
 		},
+	}
+
+	for i := range op.models {
+		EnrichModelInfo(&op.models[i])
 	}
 
 	log.Printf("✅ OpenAI provider initialized with %d models", len(op.models))

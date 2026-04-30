@@ -3,11 +3,21 @@ package vision
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// defaultRegistry is the package-level vision model registry.
+// It is initialized lazily and can be replaced for testing.
+var defaultRegistry = NewModelRegistry()
+
+// SetModelRegistry sets the global vision model registry.
+func SetModelRegistry(r *ModelRegistry) {
+	defaultRegistry = r
+}
 
 // VisionSwitchManager manages automatic vision model switching
 type VisionSwitchManager struct {
@@ -222,14 +232,17 @@ func (v *VisionSwitchManager) GetCurrentModel() *Model {
 
 // SetCurrentModel sets the current model
 func (v *VisionSwitchManager) SetCurrentModel(modelID string) error {
-	// In a real implementation, this would look up the model from registry
-	// For now, we create a simple model
-	model := &Model{
-		ID:   modelID,
-		Name: modelID,
-		Capabilities: &Capabilities{
-			SupportsVision: false,
-		},
+	// Look up the model from the global registry (verifier-aware)
+	model, err := defaultRegistry.Get(modelID)
+	if err != nil {
+		// Model not in registry — create a minimal entry with inferred capabilities
+		model = &Model{
+			ID:   modelID,
+			Name: modelID,
+			Capabilities: &Capabilities{
+				SupportsVision: inferVisionSupport(modelID),
+			},
+		}
 	}
 
 	v.mu.Lock()
@@ -237,6 +250,17 @@ func (v *VisionSwitchManager) SetCurrentModel(modelID string) error {
 	v.mu.Unlock()
 
 	return nil
+}
+
+// inferVisionSupport guesses vision support from model ID heuristics.
+// This is a fallback when the model is not in the verifier registry.
+func inferVisionSupport(modelID string) bool {
+	lower := strings.ToLower(modelID)
+	return strings.Contains(lower, "vision") ||
+		strings.Contains(lower, "4o") ||
+		strings.Contains(lower, "claude-3") ||
+		strings.Contains(lower, "gemini-pro") ||
+		strings.Contains(lower, "qwen-vl")
 }
 
 // IsSwitchActive returns true if a switch is currently active

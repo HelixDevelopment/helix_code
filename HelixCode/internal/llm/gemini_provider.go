@@ -177,135 +177,97 @@ func NewGeminiProvider(config ProviderConfigEntry) (*GeminiProvider, error) {
 // getGeminiModels returns all available Gemini models
 // Based on OpenCode and Qwen Code implementations
 func getGeminiModels() []ModelInfo {
-	allCapabilities := []ModelCapability{
-		CapabilityTextGeneration,
-		CapabilityCodeGeneration,
-		CapabilityCodeAnalysis,
-		CapabilityPlanning,
-		CapabilityDebugging,
-		CapabilityRefactoring,
-		CapabilityTesting,
-	}
 
-	visionCapabilities := append(allCapabilities, CapabilityVision)
-
-	return []ModelInfo{
+	models := []ModelInfo{
 		// Gemini 2.5 family (latest)
 		{
-			Name:           "gemini-2.5-pro",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    2097152, // 2M tokens
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.5 Pro - Most capable model with 2M context window",
+			Name:        "gemini-2.5-pro",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 2097152, // 2M tokens
+			MaxTokens:   8192,
+			Description: "Gemini 2.5 Pro - Most capable model with 2M context window",
 		},
 		{
-			Name:           "gemini-2.5-flash",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576, // 1M tokens
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.5 Flash - Fast and efficient with 1M context",
+			Name:        "gemini-2.5-flash",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576, // 1M tokens
+			MaxTokens:   8192,
+			Description: "Gemini 2.5 Flash - Fast and efficient with 1M context",
 		},
 		{
-			Name:           "gemini-2.5-flash-lite",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.5 Flash Lite - Cost-effective with full capabilities",
+			Name:        "gemini-2.5-flash-lite",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576,
+			MaxTokens:   8192,
+			Description: "Gemini 2.5 Flash Lite - Cost-effective with full capabilities",
 		},
 		// Gemini 2.0 family
 		{
-			Name:           "gemini-2.0-flash-001",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.0 Flash - Fast multimodal model",
+			Name:        "gemini-2.0-flash-001",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576,
+			MaxTokens:   8192,
+			Description: "Gemini 2.0 Flash - Fast multimodal model",
 		},
 		{
-			Name:           "gemini-2.0-flash",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.0 Flash (Latest) - Always latest 2.0 Flash version",
+			Name:        "gemini-2.0-flash",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576,
+			MaxTokens:   8192,
+			Description: "Gemini 2.0 Flash (Latest) - Always latest 2.0 Flash version",
 		},
 		{
-			Name:           "gemini-2.0-flash-lite",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    32000,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 2.0 Flash Lite - Fast image understanding with smaller context",
+			Name:        "gemini-2.0-flash-lite",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 32000,
+			MaxTokens:   8192,
+			Description: "Gemini 2.0 Flash Lite - Fast image understanding with smaller context",
 		},
 		// Gemini 1.5 family
 		{
-			Name:           "gemini-1.5-pro",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    2097152, // 2M tokens
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 1.5 Pro - Powerful with 2M context window",
+			Name:        "gemini-1.5-pro",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 2097152, // 2M tokens
+			MaxTokens:   8192,
+			Description: "Gemini 1.5 Pro - Powerful with 2M context window",
 		},
 		{
-			Name:           "gemini-1.5-flash",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 1.5 Flash - Fast and efficient",
+			Name:        "gemini-1.5-flash",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576,
+			MaxTokens:   8192,
+			Description: "Gemini 1.5 Flash - Fast and efficient",
 		},
 		{
-			Name:           "gemini-1.5-flash-8b",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    1048576,
-			MaxTokens:      8192,
-			Capabilities:   visionCapabilities,
-			SupportsTools:  true,
-			SupportsVision: true,
-			Description:    "Gemini 1.5 Flash 8B - Smaller, faster variant",
+			Name:        "gemini-1.5-flash-8b",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 1048576,
+			MaxTokens:   8192,
+			Description: "Gemini 1.5 Flash 8B - Smaller, faster variant",
 		},
 		// Gemini 1.0 family
 		{
-			Name:           "gemini-1.0-pro",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    32000,
-			MaxTokens:      8192,
-			Capabilities:   allCapabilities,
-			SupportsTools:  true,
-			SupportsVision: false,
-			Description:    "Gemini 1.0 Pro - Reliable text-only model",
+			Name:        "gemini-1.0-pro",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 32000,
+			MaxTokens:   8192,
+			Description: "Gemini 1.0 Pro - Reliable text-only model",
 		},
 		// Embedding models
 		{
-			Name:           "gemini-embedding-001",
-			Provider:       ProviderTypeGemini,
-			ContextSize:    2048,
-			MaxTokens:      0,
-			Capabilities:   []ModelCapability{CapabilityTextGeneration},
-			SupportsTools:  false,
-			SupportsVision: false,
-			Description:    "Gemini Embedding - Text embeddings for semantic search",
+			Name:        "gemini-embedding-001",
+			Provider:    ProviderTypeGemini,
+			ContextSize: 2048,
+			MaxTokens:   0,
+			Description: "Gemini Embedding - Text embeddings for semantic search",
 		},
 	}
+
+	for i := range models {
+		EnrichModelInfo(&models[i])
+	}
+
+	return models
 }
 
 // GetType returns the provider type
