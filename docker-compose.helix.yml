@@ -164,6 +164,46 @@ services:
           cpus: '2.0'
           memory: 2G
 
+  # HelixQA runner for autonomous QA sessions
+  helixqa-runner:
+    build:
+      context: ./HelixQA
+      dockerfile: ../docker/Dockerfile.helixqa
+    container_name: helixqa-runner
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
+    depends_on:
+      helixcode:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      HELIX_AUTONOMOUS_ENABLED: "true"
+      HELIX_AUTONOMOUS_PLATFORMS: "api,web"
+      HELIX_AUTONOMOUS_TIMEOUT: "2h"
+      HELIX_WEB_URL: "http://helixcode:8080"
+      HELIX_OUTPUT_DIR: "/qa-results"
+      HELIX_REPORT_FORMATS: "markdown,html,json"
+      HELIX_TICKETS_ENABLED: "true"
+      HELIX_VERIFIER_URL: "http://llmsverifier:9090"
+    volumes:
+      - ./qa-results:/qa-results
+      - ./HelixQA/banks:/qa-banks:ro
+    networks:
+      - helixcode-network
+    profiles:
+      - qa
+    healthcheck:
+      test: ["CMD", "helixqa", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
 volumes:
   postgres_data:
   redis_data:

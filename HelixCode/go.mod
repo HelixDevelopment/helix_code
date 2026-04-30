@@ -143,3 +143,15 @@ require (
 )
 
 replace digital.vasic.containers => ../Containers
+
+replace digital.vasic.helixqa => ../../HelixQA
+
+replace digital.vasic.docprocessor => ../../Dependencies/HelixDevelopment/DocProcessor
+
+replace digital.vasic.llmorchestrator => ../../Dependencies/HelixDevelopment/LLMOrchestrator
+
+replace digital.vasic.visionengine => ../../Dependencies/HelixDevelopment/VisionEngine
+
+replace digital.vasic.challenges => ../../Challenges
+
+replace digital.vasic.security => ../../Security

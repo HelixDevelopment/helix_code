@@ -3,6 +3,21 @@
 
 cd "$(dirname "$0")/../../.." # Change to repo root
 
+# --- Governance cascade gate (CONST-035 / Article XI §11.9) ---
+echo "[PRE-CHECK] Running governance cascade verification..."
+if [[ -x "scripts/verify-governance-cascade.sh" ]]; then
+  ./scripts/verify-governance-cascade.sh
+  if [[ $? -ne 0 ]]; then
+    echo "[BLOCKED] Governance cascade verification failed. Merge prohibited."
+    exit 42
+  fi
+else
+  echo "[BLOCKED] Governance verification script not found or not executable."
+  exit 43
+fi
+echo "[PRE-CHECK] Governance cascade verification passed."
+# --- End governance cascade gate ---
+
 echo "=========================================="
 echo "  HelixCode Anti-Bluff Challenge Runner"
 echo "=========================================="

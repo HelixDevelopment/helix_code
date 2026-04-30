@@ -416,7 +416,7 @@ make test-verifier-integration
 ### BLUFF-007: Test Claims Integration But Uses Mocked Verifier (CRITICAL)
 **File Pattern**: `*_test.go` files with `testify/mock` or `testMode: true` in non-unit test files.
 **Fix Priority**: P0 - Immediate
-**Constitutional Impact**: Violates CONST-038 (Model Provider Anti-Bluff Guarantee) and CONST-017 (Zero-Bluff Testing).
+**Constitutional Impact**: Violates CONST-038 (Model Provider Anti-Bluff Guarantee) and CONST-035 (Zero-Bluff Testing).
 
 ### BLUFF-008: Scoring Weights Do Not Sum to 1.0 (MEDIUM)
 **File Pattern**: `configs/verifier.yaml` or `internal/verifier/config.go` where scoring weights are misconfigured.
@@ -738,6 +738,24 @@ A passing test that doesn't certify all three is a **bluff** and MUST be tighten
 - **Skip bluff** — `t.Skip("not running yet")` without `SKIP-OK: #<ticket>` marker
 
 The taxonomy is illustrative, not exhaustive. Every Challenge or test added going forward MUST pass an honest self-review against this taxonomy before being committed.
+
+⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)
+
+This Article exists because of an explicit user mandate, verbatim:
+
+"We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!"
+
+The operative rule: the bar for shipping is not "tests pass" but "users can use the feature."
+
+Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. No metadata-only PASS, no configuration-only PASS, no "absence-of-error" PASS, no grep-based PASS — all are critical defects regardless of how green the summary line looks.
+
+Tests and Challenges (HelixQA) are bound equally.
+
+No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one.
+
+**Cascade requirement:** this anchor MUST appear in every submodule's governance files. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.
+
+Full text: CONSTITUTION.md Article XI §11.9.
 
 ---
 

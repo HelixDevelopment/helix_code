@@ -497,3 +497,58 @@ dev-setup: setup-deps logo-deps
 	@echo "  5. Run 'make mobile-android' to build Android AAR"
 	@echo "  6. Run 'make aurora-os' to build Aurora OS client"
 	@echo "  7. Run 'make harmony-os' to build Harmony OS client"
+# ---------------------------------------------------------------------------
+# HelixQA integration targets
+# ---------------------------------------------------------------------------
+
+.PHONY: helixqa-build helixqa-test helixqa-challenge helixqa-bump-submodules
+
+HELIXQA_DIR := ../../HelixQA
+HELIXQA_DEPS := ../../Dependencies/HelixDevelopment
+
+helixqa-build: ## Build HelixQA and all dependency modules
+	@echo "Building HelixQA..."
+	cd $(HELIXQA_DIR) && go build ./...
+	@echo "Building DocProcessor..."
+	cd $(HELIXQA_DEPS)/DocProcessor && go build ./...
+	@echo "Building LLMOrchestrator..."
+	cd $(HELIXQA_DEPS)/LLMOrchestrator && go build ./...
+	@echo "Building LLMProvider..."
+	cd $(HELIXQA_DEPS)/LLMProvider && go build ./...
+	@echo "Building VisionEngine..."
+	cd $(HELIXQA_DEPS)/VisionEngine && go build ./...
+	@echo "HelixQA build complete."
+
+helixqa-test: ## Run HelixQA test suite with race detector
+	cd $(HELIXQA_DIR) && go test ./... -race -count=1 -p 2
+
+helixqa-challenge: ## Run HelixQA challenge banks against local HelixCode stack
+	cd $(HELIXQA_DIR) && go run ./cmd/helixqa run \
+		--banks ./banks/full-qa-api,./banks/full-qa-web \
+		--platform api,web \
+		--browser-url http://localhost:8080 \
+		--output ./qa-results/helixcode-$(shell date +%Y%m%d-%H%M%S) \
+		--report markdown,html,json \
+		--validate \
+		--tickets
+
+helixqa-bump-submodules: ## Bump all HelixQA dependency submodules with verification
+	@echo "Fetching updates for HelixQA dependencies..."
+	@for dep in DocProcessor LLMOrchestrator LLMProvider VisionEngine; do \
+		path="$(HELIXQA_DEPS)/$$dep"; \
+		echo "  Checking $$dep ($$path)..."; \
+		git -C $$path fetch origin; \
+		current=$$(git -C $$path rev-parse HEAD); \
+		candidate=$$(git -C $$path rev-parse origin/main); \
+		if [ "$$current" != "$$candidate" ]; then \
+			echo "    Advance $$dep: $$(git -C $$path rev-parse --short $$current) -> $$(git -C $$path rev-parse --short $$candidate)"; \
+			git -C $$path checkout $$candidate; \
+		else \
+			echo "    $$dep is already at latest."; \
+		fi; \
+	done
+	@echo "Building with candidate commits..."
+	$(MAKE) helixqa-build
+	@echo "Testing with candidate commits..."
+	$(MAKE) helixqa-test
+	@echo "Bump verification complete. Stage changes with: git add $(HELIXQA_DEPS)"
