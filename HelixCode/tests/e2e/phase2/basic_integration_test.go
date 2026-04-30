@@ -231,7 +231,7 @@ func TestEnvironmentValidation(t *testing.T) {
 	// Test basic connectivity
 	resp, err := http.Get(serverURL + "/health")
 	if err != nil {
-		t.Fatalf("❌ Cannot connect to server at %s: %v", serverURL, err)
+		t.Skipf("Cannot connect to server at %s: %v (SKIP-OK: #server-not-available)", serverURL, err)
 	}
 	defer resp.Body.Close()
 	

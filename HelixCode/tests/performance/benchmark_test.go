@@ -2,6 +2,7 @@ package performance
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,6 +40,22 @@ func getTestConfig() *TestConfig {
 		TargetRPS:        100,
 		TargetLatencyP95: 500 * time.Millisecond,
 		TargetLatencyP99: 1 * time.Second,
+	}
+}
+
+func skipIfServerUnavailable(t *testing.T) {
+	t.Helper()
+	config := getTestConfig()
+	client := newHTTPClient()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, config.BaseURL+"/health", nil)
+	resp, err := client.Do(req)
+	if err != nil || resp == nil || resp.StatusCode != 200 {
+		t.Skip("Server not available (SKIP-OK: #server-not-available)")
+	}
+	if resp != nil {
+		resp.Body.Close()
 	}
 }
 
@@ -185,6 +202,7 @@ func TestPerformance_HealthEndpointThroughput(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()
@@ -265,6 +283,7 @@ func TestPerformance_ConcurrentProjectCreation(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()
@@ -332,6 +351,7 @@ func TestPerformance_SustainedLoad(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()
@@ -405,6 +425,7 @@ func TestPerformance_ConnectionPooling(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()
@@ -452,6 +473,7 @@ func TestPerformance_MemoryUnderLoad(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()
@@ -483,6 +505,7 @@ func TestPerformance_MemoryUnderLoad(t *testing.T) {
 }
 
 func TestPerformance_ResponseSize(t *testing.T) {
+	skipIfServerUnavailable(t)
 	config := getTestConfig()
 	client := newHTTPClient()
 
@@ -518,6 +541,7 @@ func TestPerformance_ErrorRecovery(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
+	skipIfServerUnavailable(t)
 
 	config := getTestConfig()
 	client := newHTTPClient()

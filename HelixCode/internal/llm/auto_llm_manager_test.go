@@ -489,6 +489,7 @@ func TestAutoLLMManager_Start_AlreadyRunning(t *testing.T) {
 
 func TestAutoLLMManager_StartBackgroundTasks_Disabled(t *testing.T) {
 	manager := NewAutoLLMManager("")
+	defer manager.Stop()
 	manager.config.AutoMonitor = false
 	manager.config.Performance.AutoOptimize = false
 	manager.config.Updates.AutoCheck = false
@@ -773,9 +774,13 @@ func TestAutoLLMManager_Initialize_Full(t *testing.T) {
 	}
 	tmpDir := t.TempDir()
 	manager := NewAutoLLMManager(tmpDir)
+	defer manager.Stop()
 
-	// Disable auto-install to prevent long-running operations
+	// Disable auto-install and background tasks to prevent goroutine leaks
 	manager.config.AutoInstall = false
+	manager.config.AutoMonitor = false
+	manager.config.Performance.AutoOptimize = false
+	manager.config.Updates.AutoCheck = false
 
 	ctx := context.Background()
 	err := manager.Initialize(ctx)
@@ -872,6 +877,7 @@ func TestAutoLLMManager_RunBackgroundTask_FunctionError(t *testing.T) {
 
 func TestAutoLLMManager_StartBackgroundTasks_AllEnabled(t *testing.T) {
 	manager := NewAutoLLMManager("")
+	defer manager.Stop()
 	manager.config.AutoMonitor = true
 	manager.config.Performance.AutoOptimize = true
 	manager.config.Updates.AutoCheck = true
@@ -884,9 +890,6 @@ func TestAutoLLMManager_StartBackgroundTasks_AllEnabled(t *testing.T) {
 	assert.NotNil(t, manager.backgroundTasks["health"])
 	assert.NotNil(t, manager.backgroundTasks["performance"])
 	assert.NotNil(t, manager.backgroundTasks["updates"])
-
-	// Clean up
-	manager.Stop()
 }
 
 func TestAutoLLMManager_Stop_WithProviders(t *testing.T) {

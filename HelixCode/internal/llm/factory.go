@@ -63,25 +63,25 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 	case ProviderTypeGroq:
 		return NewGroqProvider(config)
 	case ProviderTypeVLLM:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("vllm", config)
 	case ProviderTypeLocalAI:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("localai", config)
 	case ProviderTypeFastChat:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("fastchat", config)
 	case ProviderTypeTextGen:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("textgen", config)
 	case ProviderTypeLMStudio:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("lmstudio", config)
 	case ProviderTypeJan:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("jan", config)
 	case ProviderTypeGPT4All:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("gpt4all", config)
 	case ProviderTypeTabbyAPI:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("tabbyapi", config)
 	case ProviderTypeMLX:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("mlx", config)
 	case ProviderTypeMistralRS:
-		return nil, fmt.Errorf("provider %s not yet implemented", config.Type)
+		return newOpenAICompatibleFromConfig("mistralrs", config)
 	case ProviderTypeKoboldAI:
 		koboldConfig := KoboldAIConfig{
 			BaseURL: config.Endpoint,
@@ -98,6 +98,37 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", config.Type)
 	}
+}
+
+// newOpenAICompatibleFromConfig creates an OpenAI-compatible provider from a generic config entry.
+// This is used for local providers (VLLM, LocalAI, LMStudio, etc.) that implement the OpenAI API spec.
+func newOpenAICompatibleFromConfig(name string, config ProviderConfigEntry) (Provider, error) {
+	cfg := OpenAICompatibleConfig{
+		BaseURL:          config.Endpoint,
+		APIKey:           config.APIKey,
+		DefaultModel:     "",
+		Timeout:          120 * time.Second,
+		MaxRetries:       3,
+		StreamingSupport: true,
+		ModelEndpoint:    "/v1/models",
+		ChatEndpoint:     "/v1/chat/completions",
+	}
+	if len(config.Models) > 0 {
+		cfg.DefaultModel = config.Models[0]
+	}
+	if val, ok := config.Parameters["timeout"].(float64); ok {
+		cfg.Timeout = time.Duration(val) * time.Second
+	}
+	if val, ok := config.Parameters["streaming_support"].(bool); ok {
+		cfg.StreamingSupport = val
+	}
+	if val, ok := config.Parameters["model_endpoint"].(string); ok {
+		cfg.ModelEndpoint = val
+	}
+	if val, ok := config.Parameters["chat_endpoint"].(string); ok {
+		cfg.ChatEndpoint = val
+	}
+	return NewOpenAICompatibleProvider(name, cfg)
 }
 
 // InitializeModelManager initializes a ModelManager with providers from configuration

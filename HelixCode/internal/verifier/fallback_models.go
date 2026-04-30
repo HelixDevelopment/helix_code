@@ -26,3 +26,17 @@ var FallbackModels = []*VerifiedModel{
 	{ID: "deepseek-chat", Name: "DeepSeek Chat", DisplayName: "DeepSeek Chat", Provider: "deepseek", ContextSize: 64000, Source: "fallback", OverallScore: 8.3, Tier: 2, OpenSource: true},
 	{ID: "grok-3-fast-beta", Name: "Grok-3 Fast Beta", DisplayName: "Grok-3 Fast Beta", Provider: "xai", ContextSize: 131072, Source: "fallback", OverallScore: 8.0, Tier: 1},
 }
+
+// makeDefaultProviderScores returns the default provider score map used by
+// the embedded verifier server and test fixtures.
+func makeDefaultProviderScores() map[string]float64 {
+	return map[string]float64{
+		"openai":    9.1,
+		"anthropic": 8.9,
+		"ollama":    6.0,
+		"mistral":   7.8,
+		"gemini":    8.7,
+		"deepseek":  8.3,
+		"xai":       8.0,
+	}
+}

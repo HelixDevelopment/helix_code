@@ -339,7 +339,7 @@ func TestHealthMonitor_TriggerAutoRecovery(t *testing.T) {
 	}
 
 	// Should not panic - triggerAutoRecovery runs in goroutine
-	done := make(chan bool)
+	done := make(chan bool, 1)
 	go func() {
 		monitor.triggerAutoRecovery("test", provider)
 		done <- true
@@ -348,7 +348,7 @@ func TestHealthMonitor_TriggerAutoRecovery(t *testing.T) {
 	select {
 	case <-done:
 		// Success
-	case <-time.After(2 * time.Second):
+	case <-time.After(5 * time.Second):
 		t.Log("triggerAutoRecovery completed or timed out")
 	}
 }

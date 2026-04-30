@@ -299,6 +299,12 @@ func (v *CodeValidator) validateCompilation(ctx context.Context, resultDir, lang
 		return result
 	}
 
+	// Enforce a 30-second timeout for compilation
+	compileCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	cmd = exec.CommandContext(compileCtx, cmd.Path, cmd.Args[1:]...)
+	cmd.Dir = resultDir
+
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -338,6 +344,12 @@ func (v *CodeValidator) validateTests(ctx context.Context, resultDir, language s
 		result.Message = "Tests not found or not applicable"
 		return result
 	}
+
+	// Enforce a 30-second timeout for tests
+	testCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	cmd = exec.CommandContext(testCtx, cmd.Path, cmd.Args[1:]...)
+	cmd.Dir = resultDir
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -403,7 +415,15 @@ func (v *CodeValidator) validateRuns(ctx context.Context, resultDir, language st
 	if cmdWithCtx.Process != nil {
 		// Kill the process
 		cmdWithCtx.Process.Kill()
-		cmdWithCtx.Wait()
+		// Wait with a timeout to avoid hanging on child processes
+		done := make(chan error, 1)
+		go func() { done <- cmdWithCtx.Wait() }()
+		select {
+		case <-done:
+			// Process exited
+		case <-time.After(5 * time.Second):
+			// Timed out waiting for process cleanup
+		}
 
 		result.Passed = true
 		result.Message = "Application started successfully"
@@ -524,23 +544,7 @@ func getCompileCommand(resultDir, language string) (*exec.Cmd, error) {
 	case "go":
 		// Check if go.mod exists
 		if _, err := os.Stat(filepath.Join(resultDir, "go.mod")); err == nil {
-			// Run go mod tidy to ensure all dependencies are in go.mod and go.sum
-			tidyCmd := exec.Command("go", "mod", "tidy")
-			tidyCmd.Dir = resultDir
-			if err := tidyCmd.Run(); err != nil {
-				// If tidy fails, try to continue - compilation will catch the error
-				fmt.Printf("Warning: go mod tidy failed: %v\n", err)
-			}
-
-			// Download dependencies
-			downloadCmd := exec.Command("go", "mod", "download")
-			downloadCmd.Dir = resultDir
-			if err := downloadCmd.Run(); err != nil {
-				// If download fails, try to continue - compilation will catch the error
-				fmt.Printf("Warning: go mod download failed: %v\n", err)
-			}
-
-			cmd := exec.Command("go", "build", "./...")
+			cmd := exec.Command("go", "build", "-tags", "nogui", "./...")
 			cmd.Dir = resultDir
 			return cmd, nil
 		}

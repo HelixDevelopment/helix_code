@@ -1,0 +1,101 @@
+# HelixCode Builder & Development Environment
+# ============================================================
+# This compose file provides a FULLY CONTAINERIZED development
+# and build environment. No host dependencies required.
+#
+# Services:
+#   builder   — Go toolchain + all build tools (golangci-lint, gcc, etc.)
+#   postgres  — PostgreSQL 15 for database-dependent tests
+#   redis     — Redis 7 for cache-dependent tests
+#
+# Usage:
+#   docker compose -f docker-compose.builder.yml run --rm builder make build
+#   docker compose -f docker-compose.builder.yml run --rm builder make test
+#   docker compose -f docker-compose.builder.yml run --rm builder make lint
+#
+# Authority: CONST-035 — All builds MUST be containerized.
+# ============================================================
+
+services:
+  builder:
+    build:
+      context: ..
+      dockerfile: HelixCode/docker/build/Dockerfile.builder
+    image: helixcode-builder:latest
+    container_name: helixcode-builder
+    volumes:
+      # Mount the project source for live development
+      - ../:/workspace
+      # Mount Docker socket for docker-in-docker capabilities
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Cache Go modules between runs
+      - helixcode-go-mod:/go/pkg/mod
+      # Cache Go build cache between runs
+      - helixcode-go-build:/root/.cache/go-build
+    working_dir: /workspace/HelixCode
+    environment:
+      - HELIX_DATABASE_HOST=postgres
+      - HELIX_DATABASE_PORT=5432
+      - HELIX_DATABASE_USER=helix
+      - HELIX_DATABASE_PASSWORD=helixpass
+      - HELIX_DATABASE_NAME=helixcode_test
+      - HELIX_REDIS_HOST=redis
+      - HELIX_REDIS_PORT=6379
+      - HELIX_REDIS_PASSWORD=
+      - CGO_ENABLED=1
+      - GOFLAGS=-mod=mod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - helixcode-build
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: helixcode-builder-postgres
+    environment:
+      POSTGRES_USER: helix
+      POSTGRES_PASSWORD: helixpass
+      POSTGRES_DB: helixcode_test
+    volumes:
+      - helixcode-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helix -d helixcode_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - helixcode-build
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: helixcode-builder-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - helixcode-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - helixcode-build
+    ports:
+      - "127.0.0.1:6379:6379"
+
+volumes:
+  helixcode-go-mod:
+  helixcode-go-build:
+  helixcode-postgres:
+  helixcode-redis:
+
+networks:
+  helixcode-build:
+    driver: bridge

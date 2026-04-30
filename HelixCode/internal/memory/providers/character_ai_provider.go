@@ -1073,6 +1073,8 @@ func (p *CharacterAIProvider) IsCloud() bool {
 
 // Close closes the provider
 func (p *CharacterAIProvider) Close(ctx context.Context) error {
+	// Stop background workers before closing
+	_ = p.Stop(ctx)
 	// Cleanup resources if needed
 	return nil
 }

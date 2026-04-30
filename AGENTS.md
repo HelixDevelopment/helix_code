@@ -55,6 +55,7 @@ HelixCode is an enterprise-grade distributed AI development platform built in Go
 - **Tree-sitter**: go-tree-sitter
 - **Identity**: Azure SDK, AWS SDK v2
 - **Vector/Memory**: Cognee, ChromaDB, Qdrant, Weaviate clients
+- **Container Orchestration**: digital.vasic.containers (vasic-digital/Containers submodule)
 
 ---
 
@@ -98,6 +99,21 @@ cd HelixCode
 | `make test-load-full` | Load tests |
 | `make test-complete` | Sequential run of all full test types |
 | `make coverage-full` | Coverage with full infrastructure |
+
+### Containerized Builds (NO Host Dependencies)
+| Command | Purpose |
+|---------|---------|
+| `make container-builder-image` | Build the builder container image |
+| `make container-build` | Build application inside container |
+| `make container-test` | Run tests inside container |
+| `make container-lint` | Run linter inside container |
+| `make container-shell` | Interactive shell in builder container |
+| `make container-dev-up` | Start containerized dev environment |
+| `make container-dev-down` | Stop containerized dev environment |
+| `make container-release` | Full release build in container |
+| `./scripts/containers/build-in-container.sh` | Convenience wrapper script |
+
+The builder container includes: Go 1.24, gcc, postgresql-client, redis, docker-cli, golangci-lint, and all build tools. The only host requirement is Docker/Podman.
 
 ### Standalone Test Scripts
 | Script | Purpose |
@@ -329,16 +345,12 @@ HelixCode/
 
 ## Verified Bluff & Stub Areas (MUST FIX)
 
-### BLUFF-001: LLM Generation is Simulated in Legacy CLI (CRITICAL)
-**File**: `cmd/cli/main.go` lines ~190-214
-**Evidence**:
-```go
-// For now, simulate generation
-// In production, this would use the actual LLM provider
-response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response...", prompt)
-```
-**Impact**: Users following README's documented legacy CLI usage receive fake responses.
-**Fix Priority**: P0
+### BLUFF-001: LLM Generation is Simulated in Legacy CLI (CRITICAL) — FIXED
+**File**: `cmd/cli/main.go` lines ~236-284
+**Evidence**: Previously returned `fmt.Sprintf("Generated response for: %s...", prompt)` without calling any provider.
+**Fix**: `handleGenerate()` now constructs a real `llm.LLMRequest` with user messages and calls `provider.Generate()` / `provider.GenerateStream()`. Errors are propagated to the user if the provider is unavailable.
+**Verification**: `go build -tags nogui ./cmd/cli/` compiles; provider call is real (returns error if Ollama/etc. is not running).
+**Fix Priority**: P0 — RESOLVED
 
 ### BLUFF-002: Model Listing is Hardcoded in Legacy CLI (CRITICAL) — FIXED
 **File**: `cmd/cli/main.go` lines ~101-128
@@ -347,16 +359,12 @@ response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated respo
 **Verification**: `go test -v ./internal/verifier/...` passes; `go build ./cmd/cli/...` compiles.
 **Fix Priority**: P0 — RESOLVED
 
-### BLUFF-003: Command Execution is Simulated in Legacy CLI (HIGH)
-**File**: `cmd/cli/main.go` lines ~237-250
-**Evidence**:
-```go
-// For now, simulate command execution
-fmt.Printf("Executing: %s\n", command)
-time.Sleep(1 * time.Second)
-fmt.Printf("Command completed successfully\n")
-```
-**Fix Priority**: P0
+### BLUFF-003: Command Execution is Simulated in Legacy CLI (HIGH) — FIXED
+**File**: `cmd/cli/main.go` lines ~310-324
+**Evidence**: Previously printed the command and slept for 1 second without executing anything.
+**Fix**: `handleCommand()` uses `exec.CommandContext(ctx, "sh", "-c", command)` with real `os.Stdout`/`os.Stderr` redirection. Exit codes are reported.
+**Verification**: `go build -tags nogui ./cmd/cli/` compiles.
+**Fix Priority**: P0 — RESOLVED
 
 ### STUB-001: Security Scanning is Simulated
 **File**: `internal/security/security.go` (~132 lines)
@@ -413,6 +421,18 @@ make test-verifier-integration
 ### BLUFF-008: Scoring Weights Do Not Sum to 1.0 (MEDIUM)
 **File Pattern**: `configs/verifier.yaml` or `internal/verifier/config.go` where scoring weights are misconfigured.
 **Fix Priority**: P2 - Medium
+
+### BLUFF-009: `/metrics` Endpoint Returns Hardcoded Zeros (CRITICAL) — FIXED
+**File**: `internal/server/handlers.go` lines ~834-855
+**Evidence**: All dynamic metrics (goroutines, memory, database connections) were hardcoded to `0`.
+**Fix**: `getMetrics()` now calls `runtime.ReadMemStats()`, `runtime.NumGoroutine()`, and `s.db.Pool.Stat()` to return real values.
+**Fix Priority**: P0 — RESOLVED
+
+### BLUFF-010: Multi-Edit Conflict Detection is a No-Op (HIGH) — FIXED
+**File**: `internal/tools/multiedit/transaction.go` lines ~352-369
+**Evidence**: `detectFileConflict()` always returned `nil, nil` with comment "For now, we'll assume no conflicts."
+**Fix**: Implemented real conflict detection — reads the file from disk, computes SHA-256, and compares against the `Checksum` field. Returns `ConflictModified` or `ConflictDeleted` when appropriate.
+**Fix Priority**: P1 — RESOLVED
 
 ---
 

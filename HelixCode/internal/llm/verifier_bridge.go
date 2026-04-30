@@ -87,6 +87,14 @@ func inferCapabilitiesFromModelID(mi *ModelInfo) {
 		mi.Capabilities = ensureCapability(mi.Capabilities, CapabilityReasoning)
 	}
 
+	// Tool support inference from known tool-capable model families
+	if strings.Contains(lower, "gpt-4") || strings.Contains(lower, "claude-3") ||
+		strings.Contains(lower, "gemini-1.5") || strings.Contains(lower, "gemini-2") ||
+		strings.Contains(lower, "mistral-large") || strings.Contains(lower, "command-r-plus") ||
+		strings.Contains(lower, "llama-3.3") || strings.Contains(lower, "qwen2.5") {
+		mi.SupportsTools = true
+	}
+
 	// All models support text generation at minimum
 	mi.Capabilities = ensureCapability(mi.Capabilities, CapabilityTextGeneration)
 }

@@ -252,12 +252,15 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 	// Get provider
 	provider := c.llmProvider
 
-	// Create generation request
+	// Create generation request with the prompt as a user message
 	req := &llm.LLMRequest{
 		Model:       modelName,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 		Stream:      stream,
+		Messages: []llm.Message{
+			{Role: "user", Content: prompt},
+		},
 	}
 
 	if stream {

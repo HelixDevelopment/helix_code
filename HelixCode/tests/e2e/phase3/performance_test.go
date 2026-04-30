@@ -41,8 +41,9 @@ type PerformanceMetrics struct {
 
 // TestHighLoadAuthentication tests authentication under high load
 func TestHighLoadAuthentication(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("🚀 Testing authentication under high load...")
-	
+
 	framework := &PerformanceTestFramework{
 		E2ETestFramework: e2e.NewE2ETestFramework(t),
 		ConcurrentUsers:  100,
@@ -50,7 +51,7 @@ func TestHighLoadAuthentication(t *testing.T) {
 		Metrics:          &PerformanceMetrics{},
 	}
 	defer framework.Cleanup(t)
-	
+
 	// Configure for real server
 	framework.BaseURL = getProductionServerURL()
 	

@@ -14,24 +14,42 @@ type BootstrapResult struct {
 	Adapter  *Adapter
 	Poller   *Poller
 	Config   *AdapterConfig
+	embedded *EmbeddedServer // non-nil when running in embedded mode
 }
 
 // Bootstrap creates the full verifier subsystem from application config.
 // If verifier is disabled in config, returns nil, nil.
+// When cfg.Endpoint is empty or "embedded", an in-process embedded verifier
+// server is started so the subsystem is fully functional without external deps.
 func Bootstrap(cfg *config.VerifierConfig) (*BootstrapResult, error) {
 	if cfg == nil || !cfg.Enabled {
 		log.Println("ℹ️  LLMsVerifier disabled in configuration")
 		return nil, nil
 	}
 
-	if cfg.Mode != "remote" {
+	var embedded *EmbeddedServer
+	endpoint := cfg.Endpoint
+
+	// Start embedded server when no external endpoint is configured
+	if endpoint == "" || endpoint == "embedded" {
+		log.Println("🚀 Starting embedded LLMsVerifier server...")
+		var err error
+		embedded, err = NewEmbeddedServer()
+		if err != nil {
+			return nil, fmt.Errorf("failed to start embedded verifier: %w", err)
+		}
+		endpoint = embedded.URL()
+		log.Printf("✅ Embedded LLMsVerifier running at %s", endpoint)
+	}
+
+	if cfg.Mode != "remote" && cfg.Mode != "" {
 		return nil, fmt.Errorf("verifier mode %q not yet supported (only 'remote' is implemented)", cfg.Mode)
 	}
 
 	// Build adapter config from application config
 	adapterCfg := &AdapterConfig{
 		Enabled:         cfg.Enabled,
-		Endpoint:        cfg.Endpoint,
+		Endpoint:        endpoint,
 		APIKey:          cfg.APIKey,
 		Timeout:         cfg.Timeout,
 		CacheTTL:        cfg.CacheTTL,
@@ -66,7 +84,7 @@ func Bootstrap(cfg *config.VerifierConfig) (*BootstrapResult, error) {
 	}
 
 	// Create REST client
-	client := NewClient(cfg.Endpoint, cfg.APIKey, cfg.Timeout)
+	client := NewClient(endpoint, cfg.APIKey, cfg.Timeout)
 
 	// Create cache (no Redis backing yet)
 	cache := NewCache(cfg.CacheTTL, nil)
@@ -96,15 +114,16 @@ func Bootstrap(cfg *config.VerifierConfig) (*BootstrapResult, error) {
 		log.Printf("⚠️  Verifier health check failed: %v (will use fallback models)", err)
 		health.RecordFailure()
 	} else {
-		log.Printf("✅ LLMsVerifier connected: %s", cfg.Endpoint)
+		log.Printf("✅ LLMsVerifier connected: %s", endpoint)
 		health.RecordSuccess()
 	}
 
 	return &BootstrapResult{
-		Client:  client,
-		Adapter: adapter,
-		Poller:  poller,
-		Config:  adapterCfg,
+		Client:   client,
+		Adapter:  adapter,
+		Poller:   poller,
+		Config:   adapterCfg,
+		embedded: embedded,
 	}, nil
 }
 
@@ -116,5 +135,9 @@ func (r *BootstrapResult) Shutdown() {
 	if r.Poller != nil {
 		r.Poller.Stop()
 		log.Println("🛑 Verifier poller stopped")
+	}
+	if r.embedded != nil {
+		r.embedded.Shutdown()
+		log.Println("🛑 Embedded verifier server stopped")
 	}
 }

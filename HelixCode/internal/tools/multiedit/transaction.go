@@ -3,8 +3,10 @@ package multiedit
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -349,22 +351,47 @@ func (cr *ConflictResolver) DetectConflicts(ctx context.Context, tx *EditTransac
 	return conflicts, nil
 }
 
-// detectFileConflict detects conflicts for a single file
+// detectFileConflict detects conflicts for a single file by comparing
+// the provided checksum against the current file content on disk.
 func (cr *ConflictResolver) detectFileConflict(ctx context.Context, edit *FileEdit) (*Conflict, error) {
 	// Skip for create operations
 	if edit.Operation == OpCreate {
 		return nil, nil
 	}
 
-	// Read current file content
-	// This would use the filesystem tools in a real implementation
-	// For now, we'll just check if checksum is provided and valid
+	// No checksum provided — cannot detect conflicts
 	if edit.Checksum == "" {
-		return nil, nil // No checksum to verify
+		return nil, nil
 	}
 
-	// In a real implementation, we'd read the file and compare checksums
-	// For now, we'll assume no conflicts
+	// Read current file content
+	content, err := os.ReadFile(edit.FilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// File was deleted since the edit was prepared
+			return &Conflict{
+				Type:        ConflictDeleted,
+				FilePath:    edit.FilePath,
+				Description: "File was deleted after the edit was prepared",
+			}, nil
+		}
+		return nil, fmt.Errorf("failed to read file %q: %w", edit.FilePath, err)
+	}
+
+	// Compute SHA-256 of current content
+	hash := sha256.Sum256(content)
+	currentChecksum := hex.EncodeToString(hash[:])
+
+	// Compare checksums
+	if currentChecksum != edit.Checksum {
+		return &Conflict{
+			Type:        ConflictModified,
+			FilePath:    edit.FilePath,
+			Expected:    edit.Checksum,
+			Actual:      currentChecksum,
+			Description: fmt.Sprintf("File changed on disk (expected checksum %s, got %s)", edit.Checksum, currentChecksum),
+		}, nil
+	}
 
 	return nil, nil
 }

@@ -10,13 +10,14 @@ import (
 
 // TestSimpleProduction validates basic production functionality
 func TestSimpleProduction(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("🚀 PRODUCTION VALIDATION: Simple Test")
 	t.Log("Testing basic production functionality...")
-	
+
 	// Get production server URL
 	serverURL := getProductionServerURL()
 	t.Logf("🌐 Testing production server: %s", serverURL)
-	
+
 	// Test 1: Server Health
 	t.Log("1️⃣ Testing server health...")
 	resp, err := http.Get(serverURL + "/health")
@@ -81,12 +82,13 @@ func TestSimpleProduction(t *testing.T) {
 
 // TestProductionConnectivity tests production connectivity
 func TestProductionConnectivity(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("🔗 PRODUCTION CONNECTIVITY TEST")
 	t.Log("Testing connectivity to production HelixCode server...")
-	
+
 	serverURL := getProductionServerURL()
 	t.Logf("🔗 Testing server: %s", serverURL)
-	
+
 	// Basic connectivity test
 	resp, err := http.Get(serverURL + "/health")
 	if err != nil {

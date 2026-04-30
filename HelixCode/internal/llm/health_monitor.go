@@ -34,28 +34,33 @@ func NewHealthMonitor(manager *AutoLLMManager) *HealthMonitor {
 // Start begins automated health monitoring
 func (hm *HealthMonitor) Start(ctx context.Context) error {
 	hm.mutex.Lock()
-	defer hm.mutex.Unlock()
-
 	if hm.isRunning {
+		hm.mutex.Unlock()
 		return nil
 	}
+	hm.isRunning = true
+	// Recreate stop channel in case it was closed previously
+	hm.stopChan = make(chan bool)
+	hm.mutex.Unlock()
 
 	log.Println("🏥 Starting automated health monitoring...")
 
 	ticker := time.NewTicker(hm.checkInterval)
 	defer ticker.Stop()
 
-	hm.isRunning = true
-
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("🏥 Health monitor stopped")
+			hm.mutex.Lock()
 			hm.isRunning = false
+			hm.mutex.Unlock()
+			log.Println("🏥 Health monitor stopped")
 			return nil
 		case <-hm.stopChan:
-			log.Println("🏥 Health monitor stopped")
+			hm.mutex.Lock()
 			hm.isRunning = false
+			hm.mutex.Unlock()
+			log.Println("🏥 Health monitor stopped")
 			return nil
 		case <-ticker.C:
 			hm.performHealthChecks()
@@ -180,9 +185,13 @@ func (hm *HealthMonitor) triggerAutoRecovery(name string, provider *AutoProvider
 // Stop stops the health monitor
 func (hm *HealthMonitor) Stop() {
 	hm.mutex.Lock()
-	defer hm.mutex.Unlock()
+	running := hm.isRunning
+	if running {
+		hm.isRunning = false
+	}
+	hm.mutex.Unlock()
 
-	if hm.isRunning {
+	if running {
 		close(hm.stopChan)
 	}
 }

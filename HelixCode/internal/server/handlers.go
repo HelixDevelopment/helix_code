@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"dev.helix.code/internal/auth"
@@ -832,20 +833,34 @@ func (s *Server) getServerInfo(c *gin.Context) {
 
 // getMetrics returns server metrics
 func (s *Server) getMetrics(c *gin.Context) {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
 	metrics := gin.H{
 		"uptime_seconds": time.Since(s.startTime).Seconds(),
 		"requests": gin.H{
-			"total":  0,
+			"total":  0, // TODO: add request counter middleware
 			"active": 0,
 		},
 		"resources": gin.H{
-			"goroutines": 0,
-			"memory_mb":  0,
+			"goroutines":      runtime.NumGoroutine(),
+			"memory_mb":       float64(m.Alloc) / (1024 * 1024),
+			"memory_total_mb": float64(m.TotalAlloc) / (1024 * 1024),
+			"gc_count":        m.NumGC,
 		},
 		"database": gin.H{
 			"connections_active": 0,
 			"connections_idle":   0,
 		},
+	}
+
+	// Database stats if available
+	if s.db != nil && s.db.Pool != nil {
+		stats := s.db.Pool.Stat()
+		dbMetrics := metrics["database"].(gin.H)
+		dbMetrics["connections_active"] = stats.TotalConns()
+		dbMetrics["connections_idle"] = stats.IdleConns()
+		dbMetrics["max_connections"] = stats.MaxConns()
 	}
 
 	c.JSON(http.StatusOK, gin.H{

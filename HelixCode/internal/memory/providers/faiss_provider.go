@@ -256,8 +256,8 @@ func (p *FAISSProvider) Store(ctx context.Context, vectors []*VectorData) error 
 		p.updateStats(time.Since(start))
 	}()
 
-	p.mu.RLock()
-	defer p.mu.RUnlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if !p.started {
 		return fmt.Errorf("provider not started")
@@ -977,6 +977,7 @@ func (p *FAISSProvider) loadExistingIndicesFromPath(ctx context.Context, storage
 }
 
 func (p *FAISSProvider) getOrCreateIndex(ctx context.Context, collection string) (*FAISSIndex, error) {
+	// Caller must hold p.mu (read or write lock)
 	if index, exists := p.indices[collection]; exists {
 		return index, nil
 	}

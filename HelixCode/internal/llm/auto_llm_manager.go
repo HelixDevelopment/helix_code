@@ -899,7 +899,7 @@ func (m *AutoLLMManager) Stop() error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	if !m.isRunning {
+	if !m.isRunning && len(m.backgroundTasks) == 0 {
 		return nil
 	}
 
@@ -909,6 +909,7 @@ func (m *AutoLLMManager) Stop() error {
 	for _, task := range m.backgroundTasks {
 		close(task.StopChan)
 	}
+	m.backgroundTasks = make(map[string]*BackgroundTask)
 
 	// Stop all providers
 	for _, provider := range m.providers {

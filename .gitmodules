@@ -232,3 +232,6 @@
 [submodule "Example_Resources/Taches-CC-Resources"]
 	path = Example_Resources/Taches-CC-Resources
 	url = git@github.com:glittercowboy/taches-cc-resources.git
+[submodule "Containers"]
+	path = Containers
+	url = git@github.com:vasic-digital/Containers.git

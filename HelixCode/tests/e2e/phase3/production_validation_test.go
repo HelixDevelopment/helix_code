@@ -15,6 +15,7 @@ import (
 
 // TestProductionDeployment validates the complete production deployment
 func TestProductionDeployment(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("🚀 PRODUCTION DEPLOYMENT VALIDATION")
 	t.Log("Validating complete enterprise production deployment...")
 	
@@ -197,6 +198,7 @@ func TestProductionDeployment(t *testing.T) {
 
 // TestProductionScaling tests production scaling capabilities
 func TestProductionScaling(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("📈 Testing production scaling capabilities...")
 	
 	serverURL := getProductionServerURL()
@@ -230,6 +232,7 @@ func TestProductionScaling(t *testing.T) {
 
 // TestEnterpriseFeatures tests enterprise-specific features
 func TestEnterpriseFeatures(t *testing.T) {
+	skipIfServerUnavailable(t)
 	t.Log("🏢 Testing enterprise-specific features...")
 	
 	serverURL := getProductionServerURL()

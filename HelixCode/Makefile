@@ -305,6 +305,16 @@ help:
 	@echo "  make prod            - Build for production"
 	@echo "  make assets          - Generate all assets"
 	@echo ""
+	@echo "Containerized Builds (NO host deps required):"
+	@echo "  make container-builder-image  - Build the builder container"
+	@echo "  make container-build          - Build inside container"
+	@echo "  make container-test           - Run tests inside container"
+	@echo "  make container-lint           - Run lint inside container"
+	@echo "  make container-shell          - Interactive builder shell"
+	@echo "  make container-dev-up         - Start containerized dev env"
+	@echo "  make container-dev-down       - Stop containerized dev env"
+	@echo "  make container-release        - Full release in container"
+	@echo ""
 	@echo "Documentation:"
 	@echo "  make sync-manual     - Sync user manual to website"
 	@echo "  make manual-html     - Convert manual Markdown to HTML"
@@ -404,6 +414,77 @@ harmony-os:
 aurora-harmony: aurora-os harmony-os
 	@echo "🌟🔶 Aurora OS and Harmony OS clients built"
 
+# ============================================================
+# CONTAINERIZED BUILDS — No host dependencies required
+# Authority: CONST-035 — All builds MUST be containerized.
+# ============================================================
+
+COMPOSE_BUILDER := docker compose -f docker-compose.builder.yml
+BUILDER_SERVICE := builder
+
+.PHONY: container-builder-image container-build container-test container-lint container-shell container-dev-up container-dev-down container-clean
+
+# Build the builder container image
+container-builder-image:
+	@echo "🐳 Building HelixCode builder image..."
+	$(COMPOSE_BUILDER) build $(BUILDER_SERVICE)
+	@echo "✅ Builder image ready: helixcode-builder:latest"
+
+# Build the application inside the builder container
+container-build: container-builder-image
+	@echo "🔨 Building HelixCode inside container..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "make build"
+	@echo "✅ Container build complete"
+
+# Run tests inside the builder container
+container-test: container-builder-image
+	@echo "🧪 Running tests inside container..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "make test"
+	@echo "✅ Container tests complete"
+
+# Run lint inside the builder container
+container-lint: container-builder-image
+	@echo "🔍 Running lint inside container..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "make lint"
+	@echo "✅ Container lint complete"
+
+# Run full test suite inside the builder container
+container-test-full: container-builder-image
+	@echo "🧪 Running full test suite inside container..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "go test -v -short -timeout=120s ./..."
+	@echo "✅ Container full tests complete"
+
+# Drop into an interactive shell inside the builder container
+container-shell: container-builder-image
+	@echo "🐚 Starting interactive builder shell..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE)
+
+# Start builder + dependencies (postgres, redis) for dev
+container-dev-up:
+	@echo "🚀 Starting containerized dev environment..."
+	$(COMPOSE_BUILDER) up -d postgres redis
+	@echo "✅ Dev environment ready (postgres + redis)"
+	@echo "   Run 'make container-shell' to enter builder"
+
+# Stop builder dev environment
+container-dev-down:
+	@echo "🛑 Stopping containerized dev environment..."
+	$(COMPOSE_BUILDER) down
+	@echo "✅ Dev environment stopped"
+
+# Clean builder containers and volumes
+container-clean:
+	@echo "🧹 Cleaning builder containers and volumes..."
+	$(COMPOSE_BUILDER) down -v --remove-orphans
+	@echo "✅ Builder environment cleaned"
+
+# One-shot containerized build with all dependencies
+container-release: container-clean container-builder-image
+	@echo "🚀 Running containerized release build..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "make clean && make build && make test"
+	@echo "✅ Container release build complete"
+
+# ============================================================
 # Development tools setup
 dev-setup: setup-deps logo-deps
 	@echo "🔧 Development environment setup complete"
