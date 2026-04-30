@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"dev.helix.code/internal/auth"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/session"
+	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/workflow"
 	"github.com/gin-gonic/gin"
 )
@@ -856,123 +858,197 @@ func (s *Server) getMetrics(c *gin.Context) {
 
 // listLLMProviders returns available LLM providers
 func (s *Server) listLLMProviders(c *gin.Context) {
-	providers := []gin.H{
-		{
-			"id":          "ollama",
-			"name":        "Ollama",
-			"type":        "local",
-			"description": "Local LLM inference using Ollama",
-			"status":      "available",
-			"models":      []string{"llama2", "llama2:7b", "mistral", "codellama"},
-		},
-		{
-			"id":          "openai",
-			"name":        "OpenAI",
-			"type":        "cloud",
-			"description": "OpenAI GPT models",
-			"status":      "available",
-			"models":      []string{"gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"},
-		},
-		{
-			"id":          "anthropic",
-			"name":        "Anthropic",
-			"type":        "cloud",
-			"description": "Anthropic Claude models",
-			"status":      "available",
-			"models":      []string{"claude-3-opus", "claude-3-sonnet", "claude-3-haiku"},
-		},
-		{
-			"id":          "gemini",
-			"name":        "Google Gemini",
-			"type":        "cloud",
-			"description": "Google Gemini models",
-			"status":      "available",
-			"models":      []string{"gemini-pro", "gemini-pro-vision"},
-		},
-		{
-			"id":          "azure",
-			"name":        "Azure OpenAI",
-			"type":        "cloud",
-			"description": "Azure-hosted OpenAI models",
-			"status":      "available",
-			"models":      []string{"gpt-4", "gpt-35-turbo"},
-		},
-		{
-			"id":          "bedrock",
-			"name":        "AWS Bedrock",
-			"type":        "cloud",
-			"description": "AWS Bedrock foundation models",
-			"status":      "available",
-			"models":      []string{"anthropic.claude-v2", "amazon.titan-text"},
-		},
-		{
-			"id":          "groq",
-			"name":        "Groq",
-			"type":        "cloud",
-			"description": "Groq LPU inference",
-			"status":      "available",
-			"models":      []string{"llama2-70b", "mixtral-8x7b"},
-		},
-		{
-			"id":          "llamacpp",
-			"name":        "Llama.cpp",
-			"type":        "local",
-			"description": "Local inference with llama.cpp",
-			"status":      "available",
-			"models":      []string{"custom-gguf"},
-		},
-		{
-			"id":          "vllm",
-			"name":        "vLLM",
-			"type":        "local",
-			"description": "High-throughput local inference",
-			"status":      "available",
-			"models":      []string{"custom"},
-		},
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	// Priority 1: LLMsVerifier (CONST-036)
+	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
+		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
+		if err == nil && len(models) > 0 {
+			providers := buildProvidersFromVerifiedModels(models)
+			c.JSON(http.StatusOK, gin.H{
+				"status":      "success",
+				"providers":   providers,
+				"count":       len(providers),
+				"source":      "verifier",
+				"last_updated": time.Now().UTC(),
+			})
+			return
+		}
 	}
 
+	// Priority 2: Constitutional fallback (CONST-035)
+	models := verifier.FallbackModels
+	providers := buildProvidersFromVerifiedModels(models)
 	c.JSON(http.StatusOK, gin.H{
-		"status":    "success",
-		"providers": providers,
-		"count":     len(providers),
+		"status":      "success",
+		"providers":   providers,
+		"count":       len(providers),
+		"source":      "fallback",
+		"last_updated": time.Now().UTC(),
 	})
+}
+
+// buildProvidersFromVerifiedModels groups models by provider.
+func buildProvidersFromVerifiedModels(models []*verifier.VerifiedModel) []gin.H {
+	providerMap := make(map[string][]string)
+	providerInfo := make(map[string]gin.H)
+
+	for _, m := range models {
+		providerMap[m.Provider] = append(providerMap[m.Provider], m.ID)
+		if _, ok := providerInfo[m.Provider]; !ok {
+			providerType := "cloud"
+			if m.OpenSource || m.Provider == "ollama" || m.Provider == "llamacpp" {
+				providerType = "local"
+			}
+			providerInfo[m.Provider] = gin.H{
+				"id":     m.Provider,
+				"name":   capitalize(m.Provider),
+				"type":   providerType,
+				"status": "available",
+			}
+		}
+	}
+
+	var providers []gin.H
+	for id, info := range providerInfo {
+		providers = append(providers, gin.H{
+			"id":          id,
+			"name":        info["name"],
+			"type":        info["type"],
+			"status":      info["status"],
+			"models":      providerMap[id],
+			"model_count": len(providerMap[id]),
+		})
+	}
+	return providers
+}
+
+func capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	if s == "openai" {
+		return "OpenAI"
+	}
+	if s == "llamacpp" {
+		return "Llama.cpp"
+	}
+	return string(s[0]-32) + s[1:]
 }
 
 // getLLMProvider returns details for a specific LLM provider
 func (s *Server) getLLMProvider(c *gin.Context) {
 	providerID := c.Param("id")
 
-	provider := gin.H{
-		"id":          providerID,
-		"name":        providerID,
-		"status":      "available",
-		"configured":  true,
-		"description": "LLM Provider",
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	// Try verifier first
+	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
+		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
+		if err == nil {
+			var providerModels []gin.H
+			for _, m := range models {
+				if m.Provider == providerID {
+					providerModels = append(providerModels, verifiedModelToJSON(m))
+				}
+			}
+			if len(providerModels) > 0 {
+				c.JSON(http.StatusOK, gin.H{
+					"status":   "success",
+					"provider": gin.H{
+						"id":          providerID,
+						"name":        capitalize(providerID),
+						"status":      "available",
+						"models":      providerModels,
+						"model_count": len(providerModels),
+						"source":      "verifier",
+					},
+				})
+				return
+			}
+		}
 	}
 
+	// Fallback
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
-		"provider": provider,
+		"provider": gin.H{
+			"id":          providerID,
+			"name":        capitalize(providerID),
+			"status":      "available",
+			"configured":  true,
+			"description": "LLM Provider",
+			"source":      "fallback",
+		},
 	})
 }
 
 // listLLMModels returns available LLM models
 func (s *Server) listLLMModels(c *gin.Context) {
-	models := []gin.H{
-		{"id": "gpt-4", "provider": "openai", "context_length": 8192},
-		{"id": "gpt-4-turbo", "provider": "openai", "context_length": 128000},
-		{"id": "gpt-3.5-turbo", "provider": "openai", "context_length": 16385},
-		{"id": "claude-3-opus", "provider": "anthropic", "context_length": 200000},
-		{"id": "claude-3-sonnet", "provider": "anthropic", "context_length": 200000},
-		{"id": "llama2:7b", "provider": "ollama", "context_length": 4096},
-		{"id": "gemini-pro", "provider": "gemini", "context_length": 32768},
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	// Priority 1: LLMsVerifier (CONST-036)
+	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
+		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
+		if err == nil && len(models) > 0 {
+			var result []gin.H
+			for _, m := range models {
+				result = append(result, verifiedModelToJSON(m))
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status":       "success",
+				"models":       result,
+				"count":        len(result),
+				"source":       "verifier",
+				"last_updated": time.Now().UTC(),
+			})
+			return
+		}
 	}
 
+	// Priority 2: Constitutional fallback (CONST-035)
+	var result []gin.H
+	for _, m := range verifier.FallbackModels {
+		result = append(result, verifiedModelToJSON(m))
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"models": models,
-		"count":  len(models),
+		"status":       "success",
+		"models":       result,
+		"count":        len(result),
+		"source":       "fallback",
+		"last_updated": time.Now().UTC(),
 	})
+}
+
+// verifiedModelToJSON converts a VerifiedModel to a JSON-friendly map.
+func verifiedModelToJSON(m *verifier.VerifiedModel) gin.H {
+	status := "available"
+	if m.VerificationStatus == "failed" {
+		status = "failed"
+	} else if m.VerificationStatus == "rate_limited" {
+		status = "rate_limited"
+	} else if m.Deprecated {
+		status = "deprecated"
+	}
+
+	return gin.H{
+		"id":              m.ID,
+		"name":            m.DisplayName,
+		"provider":        m.Provider,
+		"context_length":  m.ContextSize,
+		"max_tokens":      m.MaxOutputTokens,
+		"score":           m.OverallScore,
+		"tier":            m.Tier,
+		"verified":        m.Verified,
+		"status":          status,
+		"supports_vision": m.SupportsVision,
+		"supports_tools":  m.SupportsTools,
+		"open_source":     m.OpenSource,
+		"source":          m.Source,
+	}
 }
 
 // Memory System Handlers

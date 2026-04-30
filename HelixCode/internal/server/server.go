@@ -17,6 +17,7 @@ import (
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
+	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 	"github.com/gin-gonic/gin"
 )
@@ -34,9 +35,10 @@ type Server struct {
 	workerManager  *worker.DatabaseManager
 	projectManager *project.DatabaseManager
 	sessionManager *session.Manager
-	server         *http.Server
-	router         *gin.Engine
-	startTime      time.Time
+	server          *http.Server
+	router          *gin.Engine
+	startTime       time.Time
+	verifierResult  *verifier.BootstrapResult
 }
 
 // New creates a new HTTP server
@@ -91,6 +93,16 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 	// Initialize session manager
 	sessionMgr := session.NewManager()
 
+	// Initialize LLMsVerifier subsystem if enabled
+	var verifierResult *verifier.BootstrapResult
+	if cfg.Verifier != nil && cfg.Verifier.Enabled {
+		var err error
+		verifierResult, err = verifier.Bootstrap(cfg.Verifier)
+		if err != nil {
+			log.Printf("⚠️  Failed to bootstrap verifier: %v (continuing without)", err)
+		}
+	}
+
 	server := &Server{
 		config:         cfg,
 		db:             db,
@@ -104,6 +116,7 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		sessionManager: sessionMgr,
 		router:         router,
 		startTime:      time.Now(),
+		verifierResult: verifierResult,
 	}
 
 	// Setup routes
@@ -129,6 +142,9 @@ func (s *Server) Start() error {
 
 // Shutdown gracefully shuts down the server
 func (s *Server) Shutdown(ctx context.Context) error {
+	if s.verifierResult != nil {
+		s.verifierResult.Shutdown()
+	}
 	return s.server.Shutdown(ctx)
 }
 

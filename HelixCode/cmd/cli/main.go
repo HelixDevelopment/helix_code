@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/verifier"
@@ -29,14 +30,25 @@ type CLI struct {
 func NewCLI() *CLI {
 	// Initialize LLM provider from config - use Ollama on port 11434
 	llmProvider, _ := llm.NewOllamaProvider(llm.OllamaConfig{
-		DefaultModel:  "llama3.2", // Use Ollama's model name
-		BaseURL: "http://localhost:11434", // Ollama default port
+		DefaultModel: "llama3.2",         // Use Ollama's model name
+		BaseURL:      "http://localhost:11434", // Ollama default port
 	})
+
+	// Initialize LLMsVerifier subsystem if config is available
+	var verifierAdapter *verifier.Adapter
+	cfg, err := config.Load()
+	if err == nil && cfg.Verifier != nil && cfg.Verifier.Enabled {
+		vResult, vErr := verifier.Bootstrap(cfg.Verifier)
+		if vErr == nil && vResult != nil {
+			verifierAdapter = vResult.Adapter
+		}
+	}
 
 	return &CLI{
 		workerPool:         worker.NewSSHWorkerPool(true),
 		llmProvider:        llmProvider,
 		notificationEngine: notification.NewNotificationEngine(),
+		verifierAdapter:    verifierAdapter,
 	}
 }
 
