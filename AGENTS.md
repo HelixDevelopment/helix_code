@@ -1,8 +1,8 @@
-# AGENTS.md - HelixCode Authoritative Agent Guide
+# AGENTS.md — HelixCode Authoritative Agent Guide
 
 ## HelixCode Agent Guidelines
 
-**Version**: 2.0.0 (Updated with CONST-035 Anti-Bluff Mandate)
+**Version**: 3.0.0 (Updated with full architecture audit)
 **Date**: 2026-04-30
 **Scope**: All AI agents, human contributors, and automated processes working on HelixCode
 **Authority**: Derived from HelixAgent AGENTS.md with HelixCode-specific enhancements
@@ -11,75 +11,21 @@
 
 ## Project Overview
 
-HelixCode is an enterprise-grade distributed AI development platform built in Go that enables intelligent task division, work preservation, and cross-platform development workflows.
+HelixCode is an enterprise-grade distributed AI development platform built in Go. It enables intelligent task division, work preservation, cross-platform development workflows, and multi-provider LLM integration through a unified REST API, CLI, Terminal UI, Desktop, and Mobile client architecture.
 
-**Current Status**: Foundation is solid (auth system verified real), but CRITICAL bluff areas exist in core user-facing features. All agents MUST prioritize zero-bluff implementation.
+**Current Status**: The `internal/` foundation is largely solid (auth, database, server, worker, task, workflow, tools, editor, notification, MCP are real implementations). Critical bluff and stub areas remain in select entry points and peripheral packages. All agents MUST prioritize zero-bluff implementation.
 
-**Key Features (Target State)**:
-- **Distributed Computing**: SSH-based worker pools with auto-installation and health monitoring
-- **Multi-Provider LLM Integration**: Support for 15+ providers
-- **Development Workflows**: Automated planning, building, testing, refactoring
-- **Task Management**: Intelligent task division with checkpointing
-- **MCP Protocol**: Full Model Context Protocol implementation
-- **Multi-Client Architecture**: REST API, CLI, Terminal UI, WebSocket, Desktop, Mobile
-- **Memory Systems**: Integration with external memory providers
-- **Advanced Editor**: Multi-format code editing
-- **Tools Ecosystem**: 40+ comprehensive tools
-- **Notifications**: Multi-channel support
-
----
-
-## Verified Real Implementations
-
-### AUTH-001: Authentication System (VERIFIED REAL)
-**File**: `internal/auth/auth.go`
-**Lines**: 470
-**Assessment**: Production-ready
-
-Verified capabilities:
-- User registration with validation
-- Password hashing with bcrypt + argon2
-- JWT token generation and verification
-- Session management with crypto-random tokens
-- Password verification with fallback chain
-- Constant-time comparison for timing attack prevention
-
-**Agent Note**: This is the gold standard. All other packages should match this quality.
-
----
-
-## Verified Bluff Areas (MUST FIX)
-
-### BLUFF-001: LLM Generation is Simulated (CRITICAL)
-**File**: `cmd/cli/main.go` lines 190-214
-**Evidence**:
-```go
-// For now, simulate generation
-// In production, this would use the actual LLM provider
-response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response...", prompt)
-```
-
-**Impact**: Users following README's documented CLI usage receive fake responses.
-
-**Fix Priority**: P0 - Immediate
-
-### BLUFF-002: Model Listing is Hardcoded (CRITICAL)
-**File**: `cmd/cli/main.go` lines 101-128
-**Evidence**: Only 3 hardcoded models. No dynamic discovery.
-
-**Fix Priority**: P0 - Immediate
-
-### BLUFF-003: Command Execution is Simulated (HIGH)
-**File**: `cmd/cli/main.go` lines 237-250
-**Evidence**:
-```go
-// For now, simulate command execution
-fmt.Printf("Executing: %s\n", command)
-time.Sleep(1 * time.Second)
-fmt.Printf("Command completed successfully\n")
-```
-
-**Fix Priority**: P0 - Immediate
+**Key Features**:
+- **Distributed Computing**: SSH-based worker pools with health monitoring, auto-installation, and consensus
+- **Multi-Provider LLM Integration**: 15+ providers (OpenAI, Anthropic, Gemini, Ollama, Azure, Bedrock, Groq, Mistral, Cohere, xAI, DeepSeek, Qwen, OpenRouter, HuggingFace, Llama.cpp)
+- **Development Workflows**: Automated planning, building, testing, refactoring with real shell execution
+- **Task Management**: Intelligent task division with priorities, dependencies, checkpointing, and Redis caching
+- **MCP Protocol**: Full Model Context Protocol server over WebSocket with tool dispatch
+- **Multi-Client Architecture**: REST API (Gin), Cobra CLI, Terminal UI (tview), Desktop (Fyne), Mobile (gomobile), WebSocket
+- **Memory Systems**: In-memory, filesystem, Redis, Memcached, Cognee, ChromaDB, Qdrant, Weaviate integrations
+- **Advanced Editor**: Multi-format code editing (diff, whole-file, search/replace, line-based) with backups
+- **Tools Ecosystem**: 40+ tools across filesystem, shell, web, browser, mapping, multiedit, confirmation, notebook, git
+- **Notifications**: Multi-channel support (Slack, Email, Telegram, Discord, Yandex Messenger, Max)
 
 ---
 
@@ -89,9 +35,9 @@ fmt.Printf("Command completed successfully\n")
 - **Language**: Go 1.24.0 with toolchain go1.24.9
 - **Module**: `dev.helix.code`
 - **HTTP Framework**: Gin v1.11.0
-- **Authentication**: JWT v4.5.2
-- **Database**: PostgreSQL 15+ (optional)
-- **Cache**: Redis 7+ (optional)
+- **Authentication**: JWT v4.5.2, bcrypt + argon2
+- **Database**: PostgreSQL 15+ via pgx/v5 (optional)
+- **Cache**: Redis 7+ via go-redis/v9 (optional)
 - **Configuration**: Viper v1.21.0
 - **CLI Framework**: Cobra v1.8.0
 - **Testing**: Testify v1.11.1
@@ -105,69 +51,333 @@ fmt.Printf("Command completed successfully\n")
 - **Browser Automation**: chromedp v0.14.2
 - **Web Scraping**: goquery v1.10.3
 - **Tree-sitter**: go-tree-sitter
+- **Identity**: Azure SDK, AWS SDK v2
+- **Vector/Memory**: Cognee, ChromaDB, Qdrant, Weaviate clients
 
 ---
 
-## Essential Build Commands
+## Working Directory & Build System
 
-**CRITICAL**: All commands must be run from the `HelixCode/` subdirectory.
+**CRITICAL**: All build and test commands must be run from the `HelixCode/` subdirectory, not the repository root.
 
-### Core Commands
-- **Build**: `make build` (generates logo assets and builds to bin/helixcode)
-- **Test all**: `make test` or `go test -v ./...`
-- **Test single**: `go test -v -run TestName ./path/to/package`
-- **Lint**: `make lint` or `golangci-lint run ./...`
-- **Format**: `make fmt` or `go fmt ./...`
-- **Clean**: `make clean`
+```bash
+cd HelixCode
+```
 
-### Development Workflow
-- **Dev server**: `make dev`
-- **Logo assets**: `make logo-assets` (required before first build)
-- **Setup deps**: `make setup-deps` or `go mod tidy`
+### Build Commands
+| Command | Purpose |
+|---------|---------|
+| `make build` | Build server binary to `bin/helixcode` |
+| `make test` | Run `go test -v ./...` |
+| `make test-all` | Run tests + coverage + benchmarks + docs |
+| `make test-coverage` | Generate coverage report |
+| `make test-benchmark` | Run Go benchmarks |
+| `make logo-assets` | Generate logo assets (required before first build) |
+| `make setup-deps` | Run `go mod tidy` |
+| `make fmt` | Run `go fmt ./...` |
+| `make lint` | Run `golangci-lint run ./...` |
+| `make clean` | Clean build artifacts |
+| `make dev` | Start development server |
+| `make prod` | Cross-platform production build |
+| `make mobile` | Build iOS + Android targets |
+| `make aurora-os` | Build Aurora OS target |
+| `make harmony-os` | Build Harmony OS target |
 
-### Specialized Builds
-- **Production**: `make prod` (cross-platform)
-- **Mobile**: `make mobile` (iOS + Android)
-- **Aurora OS**: `make aurora-os`
-- **Harmony OS**: `make harmony-os`
+### Full Infrastructure Test Commands
+| Command | Purpose |
+|---------|---------|
+| `make test-infra-up` | Start full Docker test infrastructure |
+| `make test-infra-down` | Stop full Docker test infrastructure |
+| `make test-full` | ALL tests with real infrastructure (zero skips) |
+| `make test-unit-full` | Unit tests with real services |
+| `make test-integration-full` | Integration tests with `-tags=integration` |
+| `make test-e2e-full` | E2E challenge tests via runner |
+| `make test-security-full` | Security test suite |
+| `make test-load-full` | Load tests |
+| `make test-complete` | Sequential run of all full test types |
+| `make coverage-full` | Coverage with full infrastructure |
 
-### Testing Variations
-- **Unit**: `./run_tests.sh --unit`
-- **Integration**: `./run_tests.sh --integration`
-- **E2E**: `./run_tests.sh --e2e`
-- **Coverage**: `./run_tests.sh --coverage`
-- **Security**: `./run_tests.sh --security`
-- **Challenges**: `cd tests/e2e/challenges && ./run_all_challenges.sh`
+### Standalone Test Scripts
+| Script | Purpose |
+|--------|---------|
+| `./run_tests.sh --unit` | Unit tests |
+| `./run_tests.sh --integration` | Integration tests |
+| `./run_tests.sh --e2e` | E2E tests |
+| `./run_tests.sh --coverage` | Coverage analysis |
+| `./run_tests.sh --security` | Security tests |
+| `./run_all_tests.sh` | Orchestrates ALL suites sequentially |
+| `./run_integration_tests.sh` | DB integration tests with Docker |
+
+### Single Test Execution
+```bash
+go test -v -run TestName ./path/to/package
+go test -v -tags=integration ./internal/database
+cd tests/e2e/challenges && go run cmd/runner/main.go -challenge ascii-art-generator-001 -providers ollama
+```
 
 ---
 
 ## Architecture & Code Organization
 
-### Core Structure
 ```
 HelixCode/
-├── cmd/                    # Application entry points
-│   ├── server/            # Main HTTP server
-│   ├── cli/               # CLI client
-│   └── security-test/     # Security testing tools
-├── internal/              # Internal packages
-│   ├── auth/              # JWT authentication (VERIFIED REAL)
-│   ├── llm/               # LLM providers (BLUFF AREA)
-│   ├── worker/            # SSH-based worker pool
-│   ├── task/              # Task management
-│   ├── server/            # HTTP server & API
-│   ├── database/          # PostgreSQL layer
-│   ├── tools/             # Tool ecosystem
-│   ├── editor/            # Code editing
-│   ├── memory/            # Memory integration
-│   ├── notification/      # Notifications
-│   ├── mcp/               # MCP protocol
-│   ├── workflow/          # Workflow engine
-│   └── ...
-├── applications/          # Platform-specific apps
-├── tests/                 # Test suites
-└── config/               # Configuration files
+├── cmd/                          # Application entry points
+│   ├── server/main.go            # HTTP server entry point
+│   ├── cli/main.go               # Legacy flag-based CLI client
+│   ├── root.go                   # Cobra root command (`helix`)
+│   ├── main_commands.go          # `helix start`, `helix auto`
+│   ├── other_commands.go         # `helix server`, `helix version`, etc.
+│   ├── local-llm.go              # `helix local-llm` command tree
+│   ├── local-llm-advanced.go     # Advanced local-llm commands
+│   ├── helix-config/main.go      # Dedicated config management CLI
+│   ├── security-test/main.go     # Simulated security test runner
+│   ├── security-fix/main.go      # Security fix wrapper
+│   ├── security-fix-standalone/main.go  # Standalone security scanner
+│   ├── performance-optimization/main.go # Performance optimizer
+│   ├── performance-optimization-standalone/main.go # Standalone perf simulator
+│   └── config-test/main.go       # Config hot-reload test utility
+│
+├── internal/                     # Internal packages (~40 packages)
+│   ├── auth/                     # JWT authentication, bcrypt/argon2, sessions
+│   ├── llm/                      # LLM provider implementations (15+ providers)
+│   │   ├── providers/            # Per-provider HTTP clients
+│   │   ├── compression/          # Context compression
+│   │   └── vision/               # Vision/multimodal support
+│   ├── provider/                 # Provider abstractions
+│   ├── providers/                # Provider management
+│   ├── worker/                   # SSH-based worker pool, health checks
+│   ├── task/                     # Task queues, dependencies, checkpoints
+│   ├── server/                   # Gin HTTP server, routes, middleware
+│   ├── database/                 # PostgreSQL pgx pool, schema initialization
+│   ├── redis/                    # go-redis wrapper with graceful degradation
+│   ├── tools/                    # 40+ tool ecosystem registry
+│   │   ├── filesystem/           # fs_read, fs_write, fs_edit, glob, grep
+│   │   ├── shell/                # shell, shell_background with sandbox
+│   │   ├── web/                  # web_fetch, web_search
+│   │   ├── browser/              # browser_launch, browser_navigate, browser_screenshot
+│   │   ├── multiedit/            # Transactional multi-file editing
+│   │   └── git/                  # Git automation
+│   ├── editor/                   # Multi-format code editing with backups
+│   ├── memory/                   # Memory providers (in-mem, filesystem, Redis, etc.)
+│   ├── cognee/                   # Cognee.ai memory integration
+│   ├── context/                  # Hierarchical context management with TTL
+│   ├── notification/             # Multi-channel notification engine
+│   ├── mcp/                      # Model Context Protocol WebSocket server
+│   ├── workflow/                 # Development workflow execution
+│   ├── config/                   # Viper-based configuration management
+│   ├── event/                    # Pub/sub event bus
+│   ├── logging/                  # Structured logging wrapper
+│   ├── monitoring/               # Metric collection framework
+│   ├── security/                 # Security scanning (stubbed)
+│   ├── session/                  # Development session management
+│   ├── agent/                    # Agent orchestration
+│   ├── project/                  # Project management
+│   ├── rules/                    # Rules engine
+│   ├── hooks/                    # Hook system
+│   ├── focus/                    # Focus chain management
+│   ├── template/                 # Template system
+│   ├── persistence/              # State persistence
+│   ├── deployment/               # Deployment management
+│   ├── discovery/                # Service/model discovery
+│   ├── hardware/                 # Hardware abstraction
+│   ├── repomap/                  # Repository mapping
+│   ├── version/                  # Version management
+│   ├── fix/                      # Security fix engine
+│   ├── performance/              # Performance optimization
+│   ├── testutil/                 # Test utilities
+│   └── mocks/                    # Shared mocks
+│
+├── applications/                 # Platform-specific applications
+│   ├── desktop/                  # Fyne desktop app
+│   ├── terminal-ui/              # tview terminal UI
+│   ├── android/                  # Android app
+│   ├── ios/                      # iOS app
+│   ├── aurora-os/                # Aurora OS client
+│   └── harmony-os/               # Harmony OS client
+│
+├── api/                          # OpenAPI specification
+│   └── openapi.yaml              # Full REST API spec (OpenAPI 3.0.3)
+│
+├── config/                       # Configuration files
+│   ├── config.yaml               # Primary application config
+│   ├── production-config.yaml    # Enterprise production config
+│   ├── minimal-config.yaml       # Minimal test config (DB/Redis disabled)
+│   ├── test-config.yaml          # Test-specific config
+│   ├── working-config.yaml       # Working variant
+│   ├── azure_example.yaml        # Azure-specific example
+│   └── model-aliases.example.yaml# Model alias examples
+│
+├── tests/                        # New test framework
+│   ├── e2e/challenges/           # Challenge-based E2E tests
+│   └── automation/               # Hardware automation tests
+│
+├── test/                         # Legacy/parallel test suites
+│   ├── integration/              # Integration tests
+│   ├── e2e/                      # Legacy E2E tests
+│   ├── automation/               # Provider automation tests
+│   └── load/                     # Load tests
+│
+├── benchmarks/                   # Performance benchmarks
+├── security/                     # Security tests
+├── standalone_tests/             # Standalone CLI tests
+├── docker/                       # Docker assets and extended compose
+├── scripts/                      # Build and deployment scripts
+└── assets/                       # Logo and image assets
 ```
+
+---
+
+## Verified Real Implementations
+
+### AUTH-001: Authentication System (VERIFIED REAL)
+**File**: `internal/auth/auth.go` (~470 lines)
+**Assessment**: Production-ready
+- User registration with validation
+- Password hashing with bcrypt + argon2 fallback
+- JWT token generation and verification (JWT v4)
+- Session management with crypto-random tokens
+- Constant-time comparison for timing attack prevention
+- Full test coverage in `internal/auth/auth_test.go` (~777 lines)
+
+### DB-001: Database Layer (VERIFIED REAL)
+**File**: `internal/database/database.go`
+**Assessment**: Production-ready
+- PostgreSQL connection pool via pgx/v5
+- Full schema initialization (users, workers, tasks, projects, sessions, LLM providers, MCP servers, notifications, audit logs)
+- `DatabaseInterface` for testability
+- Graceful degradation when host is empty
+
+### SRV-001: HTTP Server (VERIFIED REAL)
+**File**: `internal/server/server.go`
+**Assessment**: Production-ready
+- Gin-based server with 50+ routes across `/api/v1/`
+- JWT auth middleware, CORS, security headers
+- WebSocket endpoint for MCP
+- Health check with DB + Redis validation
+- Graceful shutdown (30s timeout)
+
+### LLM-001: LLM Providers (VERIFIED REAL)
+**File**: `internal/llm/` (~5000+ lines across providers)
+**Assessment**: Real HTTP clients
+- `AnthropicProvider` (~752 lines): Full SSE streaming, prompt caching, extended thinking, tool calls
+- `OpenAIProvider` (~431+ lines): Full HTTP API client
+- `ModelManager`: Multi-provider orchestration, selection strategy, fallback chain
+- 16 provider subdirectories with real HTTP implementations
+- **Note**: The `internal/llm/` package is genuine. Bluff areas are at `cmd/cli/main.go` only.
+
+### WRK-001: Worker Pool (VERIFIED REAL)
+**File**: `internal/worker/` (~800+ lines)
+**Assessment**: Real distributed worker management
+- `WorkerManager`: Register, heartbeat, assign tasks, complete tasks
+- SSH config parsing, capability matching, resource tracking
+- Health checks with TTL
+
+### TSK-001: Task Management (VERIFIED REAL)
+**File**: `internal/task/` (~1000+ lines)
+**Assessment**: Real task lifecycle
+- Priority queues, dependency validation, checkpointing
+- Redis caching with graceful degradation
+- Retry logic and cleanup
+
+### WFL-001: Workflow Engine (VERIFIED REAL)
+**File**: `internal/workflow/` (~1100+ lines)
+**Assessment**: Real shell execution
+- `Executor` dispatches to real `exec.CommandContext()` calls
+- Security filtering via `isDangerousCommand()` (rm, dd, mkfs, fork bombs, etc.)
+- LLM integration with real `LLMRequest`
+- Supports Go, Node, Python, Rust project types
+
+### TOO-001: Tools Ecosystem (VERIFIED REAL)
+**File**: `internal/tools/` (~2000+ lines)
+**Assessment**: Real tool registry
+- 8 categories: filesystem, shell, web, browser, mapping, multiedit, confirmation, notebook
+- Real chromedp browser automation
+- Transactional multi-file editing
+
+### EDT-001: Code Editor (VERIFIED REAL)
+**File**: `internal/editor/` (~600+ lines)
+**Assessment**: Real file I/O
+- Diff, whole-file, search/replace, line-based editors
+- Automatic file backup with `io.Copy`
+- `EditApplier` / `EditValidator` interfaces
+
+### NOT-001: Notification Engine (VERIFIED REAL)
+**File**: `internal/notification/` (~800+ lines)
+**Assessment**: Real HTTP/SMTP calls
+- Slack (webhook HTTP POST), Email (SMTP via `net/smtp`), Telegram (Bot API), Discord (webhook)
+- Yandex Messenger (OAuth API), Max (enterprise API)
+- Rate limiting, retry, queue, metrics
+
+### MCP-001: MCP Protocol Server (VERIFIED REAL)
+**File**: `internal/mcp/` (~400+ lines)
+**Assessment**: Real WebSocket server
+- gorilla/websocket concurrent session handling
+- JSON-RPC-like message format
+- Tool execution dispatch
+
+### CFG-001: Configuration Management (VERIFIED REAL)
+**File**: `internal/config/` (~1700+ lines)
+**Assessment**: Full Viper integration
+- Environment variable binding (`HELIX_*`)
+- Config file search (`.`, `$HOME/.helixcode`, `/etc/helixcode`)
+- Validation rules, default config creation
+- `ConfigManager` for load/save/merge
+
+---
+
+## Verified Bluff & Stub Areas (MUST FIX)
+
+### BLUFF-001: LLM Generation is Simulated in Legacy CLI (CRITICAL)
+**File**: `cmd/cli/main.go` lines ~190-214
+**Evidence**:
+```go
+// For now, simulate generation
+// In production, this would use the actual LLM provider
+response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response...", prompt)
+```
+**Impact**: Users following README's documented legacy CLI usage receive fake responses.
+**Fix Priority**: P0
+
+### BLUFF-002: Model Listing is Hardcoded in Legacy CLI (CRITICAL)
+**File**: `cmd/cli/main.go` lines ~101-128
+**Evidence**: Only 3 hardcoded models. No dynamic discovery.
+**Fix Priority**: P0
+
+### BLUFF-003: Command Execution is Simulated in Legacy CLI (HIGH)
+**File**: `cmd/cli/main.go` lines ~237-250
+**Evidence**:
+```go
+// For now, simulate command execution
+fmt.Printf("Executing: %s\n", command)
+time.Sleep(1 * time.Second)
+fmt.Printf("Command completed successfully\n")
+```
+**Fix Priority**: P0
+
+### STUB-001: Security Scanning is Simulated
+**File**: `internal/security/security.go` (~132 lines)
+**Evidence**: `ScanFeature()` contains explicit "Simulate security scanning logic" comment. Always returns `Success=true, Score=95` with empty issues.
+**Fix Priority**: P1
+
+### STUB-002: Memory Redis/Memcached Providers Store Locally
+**File**: `internal/memory/` (~1800+ lines)
+**Evidence**: `RedisMemoryProvider` and `MemcachedMemoryProvider` store data in local maps with comments like "Redis client would be used in production." Connection config is parsed but not used.
+**Fix Priority**: P2
+
+### STUB-003: Security-Test Entry Point is Entirely Simulated
+**File**: `cmd/security-test/main.go`
+**Evidence**: Hardcoded list of 12 simulated security tests. `simulateSecurityScan()` returns pre-canned issue lists per category.
+**Fix Priority**: P2
+
+### STUB-004: Several `helix` Subcommands are Print-Only
+**File**: `cmd/other_commands.go`
+**Evidence**: `server`, `generate`, `test`, `worker`, `notify` commands are stubbed (print placeholder messages).
+**Fix Priority**: P2
+
+### STUB-005: Several `helix-config` Subcommands are Placeholders
+**File**: `cmd/helix-config/main.go`
+**Evidence**: Many template/history/schema subcommands print placeholder messages.
+**Fix Priority**: P3
 
 ---
 
@@ -180,36 +390,81 @@ Main config at `config/config.yaml`:
 server:
   address: "0.0.0.0"
   port: 8080
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 300
+  shutdown_timeout: 30
 
 database:
-  host: ""  # Empty to disable for testing
+  host: ""          # Empty string disables PostgreSQL
   port: 5432
   user: "helix"
+  password: "${HELIX_DATABASE_PASSWORD}"
   dbname: "helixcode_prod"
   sslmode: "disable"
 
 redis:
   host: "redis"
   port: 6379
+  password: "${HELIX_REDIS_PASSWORD}"
+  db: 0
   enabled: true
 
 auth:
-  jwt_secret: "change-in-production"
+  jwt_secret: "${HELIX_AUTH_JWT_SECRET}"
   token_expiry: 86400
   session_expiry: 604800
-  
+  bcrypt_cost: 12
+
 workers:
   health_check_interval: 30
+  health_ttl: 120
   max_concurrent_tasks: 10
-  
+
 tasks:
   max_retries: 3
   checkpoint_interval: 300
-  
+  cleanup_interval: 3600
+
 llm:
   default_provider: "local"
   max_tokens: 4096
   temperature: 0.7
+  timeout: 30
+  max_retries: 3
+  providers:
+    <name>:
+      type: <provider-type>
+      endpoint: <url>
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: ""
+  selection:
+    strategy: "performance"
+    fallback_enabled: true
+    health_check_interval: 30
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"
+
+notifications:
+  enabled: true
+  rules:
+    - name: "..."
+      condition: "type==error"
+      channels: ["slack", "email"]
+      priority: urgent
+      enabled: true
+  channels:
+    slack: { enabled, webhook_url, channel, username, timeout }
+    telegram: { enabled, bot_token, chat_id, timeout }
+    email: { enabled, smtp: { server, port, username, password, tls }, recipients, timeout }
+    discord: { enabled, webhook_url, timeout }
 ```
 
 ### Environment Variables
@@ -218,122 +473,167 @@ llm:
 - `HELIX_AUTH_JWT_SECRET`
 - `HELIX_REDIS_PASSWORD`
 
-**LLM Provider Keys**:
-- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, etc.
+**LLM Provider Keys** (as needed):
+- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `COHERE_API_KEY`, `AZURE_OPENAI_API_KEY`, `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+
+**Notification Integrations**:
+- `HELIX_SLACK_WEBHOOK_URL`
+- `HELIX_TELEGRAM_BOT_TOKEN`, `HELIX_TELEGRAM_CHAT_ID`
+- `HELIX_EMAIL_SMTP_SERVER`, `HELIX_EMAIL_USERNAME`, `HELIX_EMAIL_PASSWORD`
+- `HELIX_DISCORD_WEBHOOK_URL`
 
 ---
 
-## Testing Approach
+## Testing Strategy
 
 ### Test Categories
 1. **Unit tests**: Mocks allowed, `*_test.go`, `-short` flag
 2. **Contract tests**: Real API schemas, no mocks
 3. **Component tests**: Real subsystems wired together
-4. **Integration tests**: Full app with real dependencies
-5. **E2E challenges**: Complete user workflows
+4. **Integration tests**: Full app with real dependencies (`-tags=integration`)
+5. **E2E challenges**: Complete user workflows against real LLM APIs
 6. **Security tests**: OWASP compliance
 7. **Performance tests**: Benchmarks
+8. **Automation tests**: Provider/hardware automation (`-tags=automation`)
+9. **Load tests**: Stress testing
 
 ### Anti-Bluff Testing Rules
 - Unit tests: Mocks OK
-- ALL other tests: Real infrastructure ONLY
-- Every PASS guarantees Quality + Completion + Usability
+- **ALL other tests: Real infrastructure ONLY**
+- Every PASS guarantees **Quality + Completion + Usability**
 - Challenges fail on simulated/stubbed behavior
-- No bare `t.Skip()` without `SKIP-OK: #<ticket>`
+- No bare `t.Skip()` without `SKIP-OK: #<ticket>` marker
 
----
+### Docker Test Infrastructure
+- `docker-compose.test.yml`: PostgreSQL 16, Redis 7, Memcached, Cognee, ChromaDB, Qdrant, Ollama, Prometheus, Grafana
+- `docker-compose.full-test.yml`: Complete stack with mock-LLM server, Selenium, ChromeDP, SSH server + 3 workers, Cognee, Weaviate, mock-Slack, multicast router
 
-## Key Subsystems
+### Challenge Framework (`tests/e2e/challenges/`)
+The most rigorous test system validates HelixCode by having it **generate real projects** and testing them:
+- **Challenge Definitions**: JSON specs (ASCII art generator, CLI task manager, JSON validator, notes API, tic-tac-toe TUI, URL shortener)
+- **Execution Flow**: Load spec → Call real LLM API → Parse generated code → Compile → Test → Runtime validation
+- **Validation Layers**: Directory structure, code quality, compilation, testing, functionality, runtime validation with diverse data
+- **Test Matrix**: Supports CLI, TUI, REST, WebSocket interfaces across 15+ providers and worker pool distributions
 
-### LLM Package (`internal/llm/`)
-**Status**: CRITICAL BLUFF AREA
+### Test Scripts Summary
+```bash
+# Basic
+cd HelixCode && make test
 
-Target state:
-- 15+ providers with real implementations
-- Provider manager with fallback chain
-- Circuit breakers per provider
-- Health checks
-- Model discovery
+# Full infrastructure (recommended for validation)
+make test-infra-up
+make test-complete
+make test-infra-down
 
-### Tools Package (`internal/tools/`)
-**Status**: To be verified
+# Individual categories
+make test-unit-full
+make test-integration-full
+make test-e2e-full
+make test-security-full
+make test-load-full
 
-Target tools:
-- Filesystem: fs_read, fs_write, fs_edit, glob, grep
-- Shell: shell, shell_background with sandbox
-- Web: web_fetch, web_search
-- Browser: browser_launch, browser_navigate, browser_screenshot
-- Git: git automation
-- MultiEdit: Transactional multi-file editing
-
-### Editor Package (`internal/editor/`)
-**Status**: To be verified
-
-Target formats:
-- Diff Format (unified diff)
-- Whole File replacement
-- Search/Replace with regex
-- Line-Based edits
-
----
-
-## Free AI Providers
-
-- **XAI (Grok)**: grok-3-fast-beta, grok-3-mini-fast-beta
-- **OpenRouter**: Free models from various providers
-- **GitHub Copilot**: gpt-4o, claude-3.5-sonnet (with subscription)
-- **Qwen**: 2,000 requests/day free tier
+# Legacy scripts
+./run_tests.sh --all
+./run_all_tests.sh
+./run_integration_tests.sh
+```
 
 ---
 
 ## Docker Deployment
+
+### Production (`docker-compose.yml`)
+Services: helixcode-server (8080, 2222), postgres:15, redis:7, nginx (80, 443), prometheus (9090), grafana (3000)
 
 ### Quick Start
 ```bash
 cd HelixCode
 cp .env.example .env
 # Edit .env with secure passwords
-docker-compose up -d
-docker-compose ps
+docker compose up -d
+docker compose ps
 curl http://localhost/health
 ```
 
-### Services
-- helixcode-server (ports 8080, 2222)
-- postgres (port 5432)
-- redis (port 6379)
-- nginx (ports 80, 443)
+### Other Compose Files
+| File | Purpose |
+|------|---------|
+| `docker-compose-simple.yml` | Minimal dev (postgres + redis only) |
+| `docker-compose.test.yml` | Integration/E2E testing stack |
+| `docker-compose.full-test.yml` | Zero-skip full test infrastructure |
+| `docker-compose.aurora-os.yml` | Security-focused Aurora OS platform |
+| `docker-compose.harmony-os.yml` | Distributed Harmony OS platform |
+| `docker-compose.specialized-platforms.yml` | Combined Aurora + Harmony |
+| `docker/docker-compose.yml` | Extended full-stack with Milvus, Elasticsearch, MLflow, Jaeger, Jupyter, Portainer |
+
+### Deployment Patterns
+- Healthchecks on every service
+- Docker profiles: `monitoring`, `distributed`, `with-redis`, `production`, `dev`, `server`
+- Isolated bridge networks per deployment
+- Named persistent volumes for all stateful services
+- `.env` file for secrets
 
 ---
 
-## Important Gotchas
+## Code Style & Development Conventions
 
-### Critical Requirements
-- **Always work from HelixCode/ subdirectory**
+### Go Conventions
+- Standard Go formatting: `go fmt ./...`
+- Linting: `golangci-lint run ./...` (timeout 10m in CI)
+- Vet: `go vet ./...`
+- Table-driven tests with `t.Run()` subtests
+- Build tags for integration/automation tests: `//go:build integration`
+
+### Project Conventions
+- **Always work from `HelixCode/` subdirectory**
 - **Generate logo assets before first build**: `make logo-assets`
 - **Database/Redis optional**: Disable by setting `database.host: ""`
 - **Environment variables override config file**
+- Use `internal/` for all core packages; no `pkg/` directory in active use
+- Error handling: explicit, no silent failures
+- Concurrent access: use `sync.RWMutex` or channel patterns
 
-### Anti-Bluff Mandate (CONST-035)
-Every agent working on HelixCode MUST:
-1. Verify code actually works before marking complete
-2. Write tests that validate REAL behavior
-3. Write challenges that exercise complete workflows
-4. Never commit simulated/placeholder code to production paths
-5. Include pasted terminal output as evidence of working code
+### API Conventions
+- REST API documented in `api/openapi.yaml` (OpenAPI 3.0.3)
+- Base path: `/api/v1`
+- Authentication: Bearer JWT via `Authorization` header
+- Health endpoint: `GET /health` (no auth required)
 
-### Common Issues
-1. **Build fails**: Run `make logo-assets` then `make build`
-2. **Database errors**: Check `HELIX_DATABASE_PASSWORD`
-3. **Worker SSH failures**: Verify SSH key authentication
-4. **LLM timeouts**: Check provider status and config
+---
+
+## Security Considerations
+
+### Verified Security Features
+- Password hashing: bcrypt (cost 12) with argon2 fallback
+- JWT with constant-time comparison
+- CORS middleware, security headers (X-Frame-Options, CSP, HSTS)
+- Rate limiting support in production config
+- Session timeout, concurrent session limits, IP binding options
+- Workflow `isDangerousCommand()` filter blocks rm, dd, mkfs, fork bombs, etc.
+- Input validation in auth and server packages
+
+### Security Testing
+- `security/security_test.go`: OWASP Top 10, SAST, DAST, credential scanning, TLS enforcement, input validation (path traversal, XSS, SQL injection, command injection, SSRF)
+- File permission checks (0600 for configs)
+
+### Known Security Stubs
+- `internal/security/security.go`: Simulated scanning (always returns clean)
+- `cmd/security-test/main.go`: Entirely simulated security tests
+
+### Production Hardening
+- Use `HELIX_AUTH_JWT_SECRET` with high entropy
+- Enable PostgreSQL SSL in production
+- Enable Redis authentication
+- Configure CORS `allowed_origins` explicitly
+- Enable audit logging
+- Set `bcrypt_cost: 14` in production
 
 ---
 
 ## Universal Mandatory Constraints
 
 ### Hard Stops (permanent, non-negotiable)
-1. **NO CI/CD pipelines**
+1. **NO CI/CD pipelines** (Note: existing workflow files in `.github/workflows/` are legacy and must not be expanded)
 2. **NO HTTPS for Git** (SSH only)
 3. **NO manual container commands** (orchestrator-owned)
 
@@ -368,31 +668,53 @@ A test or Challenge that PASSES is a CLAIM that the tested behavior **works for 
 The HelixAgent project has repeatedly hit the failure mode where every test ran green AND every Challenge reported PASS, yet most product features did not actually work — buggy challenge wrappers masked failed assertions, scripts checked file existence without executing the file, "reachability" tests tolerated timeouts, contracts were honest in advertising but broken in dispatch. **This MUST NOT recur in HelixCode.**
 
 Every PASS result MUST guarantee:
-a. **Quality** - correct behavior under real inputs, edge cases, concurrency
-b. **Completion** - wired end-to-end with no stub/placeholder gaps
-c. **Full usability** - a user following documentation succeeds
+a. **Quality** — correct behavior under real inputs, edge cases, concurrency
+b. **Completion** — wired end-to-end with no stub/placeholder gaps
+c. **Full usability** — a user following documentation succeeds
 
 A passing test that doesn't certify all three is a **bluff** and MUST be tightened.
 
 ### Bluff Taxonomy (each pattern observed and now forbidden)
 
-- **Wrapper bluff** - assertions PASS but wrapper's exit-code logic is buggy
-- **Contract bluff** - system advertises capability but rejects it in dispatch
-- **Structural bluff** - file exists but doesn't contain working code
-- **Comment bluff** - comment promises behavior code doesn't have
-- **Skip bluff** - `t.Skip("not running yet")` without `SKIP-OK: #<ticket>` marker
+- **Wrapper bluff** — assertions PASS but wrapper's exit-code logic is buggy
+- **Contract bluff** — system advertises capability but rejects it in dispatch
+- **Structural bluff** — file exists but doesn't contain working code
+- **Comment bluff** — comment promises behavior code doesn't have
+- **Skip bluff** — `t.Skip("not running yet")` without `SKIP-OK: #<ticket>` marker
 
 The taxonomy is illustrative, not exhaustive. Every Challenge or test added going forward MUST pass an honest self-review against this taxonomy before being committed.
 
 ---
 
-## Contact & Resources
+## Free AI Providers
+
+- **XAI (Grok)**: `grok-3-fast-beta`, `grok-3-mini-fast-beta`
+- **OpenRouter**: Free models from various providers
+- **GitHub Copilot**: `gpt-4o`, `claude-3.5-sonnet` (with subscription)
+- **Qwen**: 2,000 requests/day free tier
+
+---
+
+## Common Issues
+
+1. **Build fails**: Run `make logo-assets` then `make build`
+2. **Database errors**: Check `HELIX_DATABASE_PASSWORD`
+3. **Worker SSH failures**: Verify SSH key authentication
+4. **LLM timeouts**: Check provider status and config
+5. **Redis connection failures**: Check `HELIX_REDIS_PASSWORD` and `redis.enabled`
+6. **Test skips**: Ensure `SKIP-OK: #<ticket>` marker is present for any intentional skips
+
+---
+
+## Resources & References
 
 - **Constitution**: `CONSTITUTION.md`
 - **CLAUDE.md**: `CLAUDE.md`
 - **Gap Analysis**: `HELIXCODE_GAP_ANALYSIS.md`
 - **Zero-Bluff Plan**: `HELIXCODE_ZERO_BLUFF_PLAN.md`
 - **Testing Strategy**: `ANTI_BLUFF_TESTING_STRATEGY.md`
+- **OpenAPI Spec**: `HelixCode/api/openapi.yaml`
+- **Docker Guide**: `HelixCode/DOCKER_DEPLOYMENT.md`
 
 ---
 
