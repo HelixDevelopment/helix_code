@@ -10,6 +10,7 @@ import (
 	"dev.helix.code/internal/auth"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/helixqa"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
@@ -39,6 +40,7 @@ type Server struct {
 	router          *gin.Engine
 	startTime       time.Time
 	verifierResult  *verifier.BootstrapResult
+	qaEngine        *helixqa.Engine
 }
 
 // New creates a new HTTP server
@@ -103,6 +105,18 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		}
 	}
 
+	// Initialize HelixQA engine if enabled
+	var qaEngine *helixqa.Engine
+	if cfg.QA.Enabled {
+		var err error
+		qaEngine, err = helixqa.NewEngine(cfg)
+		if err != nil {
+			log.Printf("⚠️  Failed to initialize HelixQA engine: %v (continuing without)", err)
+		} else {
+			log.Printf("✅ HelixQA engine initialized (output: %s)", cfg.QA.OutputDir)
+		}
+	}
+
 	server := &Server{
 		config:         cfg,
 		db:             db,
@@ -117,6 +131,7 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		router:         router,
 		startTime:      time.Now(),
 		verifierResult: verifierResult,
+		qaEngine:       qaEngine,
 	}
 
 	// Setup routes
@@ -262,6 +277,18 @@ func (s *Server) setupRoutes() {
 		{
 			memory.GET("/systems", s.listMemorySystems)
 			memory.GET("/stats", s.getMemoryStats)
+		}
+
+		// QA routes
+		qa := api.Group("/qa")
+		qa.Use(s.authMiddleware())
+		{
+			qa.POST("/session", s.startQASession)
+			qa.GET("/sessions", s.listQASessions)
+			qa.GET("/session/:id/status", s.getQASessionStatus)
+			qa.GET("/session/:id/report", s.getQASessionReport)
+			qa.GET("/session/:id/screenshot/:name", s.getQASessionScreenshot)
+			qa.DELETE("/session/:id", s.cancelQASession)
 		}
 	}
 

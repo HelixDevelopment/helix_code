@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 )
@@ -72,6 +73,18 @@ func (c *CLI) Run() error {
 		notifyType     = flag.String("notify-type", "info", "Notification type")
 		notifyPriority = flag.String("notify-priority", "medium", "Notification priority")
 		nonInteractive = flag.Bool("non-interactive", false, "Run in non-interactive mode")
+
+		// QA flags
+		qaRun        = flag.Bool("qa-run", false, "Start a QA session")
+		qaList       = flag.Bool("qa-list", false, "List QA sessions")
+		qaReport     = flag.String("qa-report", "", "Get QA report for session ID")
+		qaScreenshot = flag.String("qa-screenshot", "", "Capture screenshot for session ID")
+		qaCancel     = flag.String("qa-cancel", "", "Cancel QA session by ID")
+		qaPlatforms  = flag.String("qa-platforms", "web", "Comma-separated platforms for QA")
+		qaBanks      = flag.String("qa-banks", "", "Comma-separated bank paths for QA")
+		qaFormat     = flag.String("qa-format", "markdown", "Report format: markdown|html|json")
+		qaWait       = flag.Bool("qa-wait", false, "Wait for QA session to complete")
+		qaServerURL  = flag.String("qa-server", "http://localhost:8080", "HelixCode server URL for QA")
 	)
 	flag.Parse()
 
@@ -94,6 +107,16 @@ func (c *CLI) Run() error {
 		return c.handleGenerate(ctx, *prompt, *model, *maxTokens, *temperature, *stream)
 	case *notify != "":
 		return c.handleNotification(ctx, *notify, *notifyType, *notifyPriority)
+	case *qaRun:
+		return c.handleQARun(ctx, *qaServerURL, *qaPlatforms, *qaBanks, *qaWait)
+	case *qaList:
+		return c.handleQAList(ctx, *qaServerURL)
+	case *qaReport != "":
+		return c.handleQAReport(ctx, *qaServerURL, *qaReport, *qaFormat)
+	case *qaScreenshot != "":
+		return c.handleQAScreenshot(ctx, *qaServerURL, *qaScreenshot)
+	case *qaCancel != "":
+		return c.handleQACancel(ctx, *qaServerURL, *qaCancel)
 	case *command != "":
 		return c.handleCommand(ctx, *command)
 	case *nonInteractive:
@@ -414,4 +437,90 @@ func main() {
 	if err := cli.Run(); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
+}
+
+
+// QA command handlers
+
+func (c *CLI) handleQARun(ctx context.Context, serverURL, platforms, banks string, wait bool) error {
+	if banks == "" {
+		return fmt.Errorf("--qa-banks is required for --qa-run")
+	}
+	client := server.NewClient(serverURL)
+	req := server.StartSessionRequest{
+		Platforms: strings.Split(platforms, ","),
+		Banks:     strings.Split(banks, ","),
+	}
+	state, err := client.StartQASession(req)
+	if err != nil {
+		return fmt.Errorf("failed to start QA session: %w", err)
+	}
+	fmt.Printf("QA Session started: %s\n", state.ID)
+	fmt.Printf("Platforms: %s\n", strings.Join(state.Platforms, ", "))
+	fmt.Printf("Status: %s\n", state.Status)
+
+	if wait {
+		fmt.Println("Waiting for session to complete...")
+		if err := client.WaitForSession(state.ID, os.Stdout); err != nil {
+			return err
+		}
+		fmt.Println("Session completed!")
+	}
+	return nil
+}
+
+func (c *CLI) handleQAList(ctx context.Context, serverURL string) error {
+	client := server.NewClient(serverURL)
+	sessions, err := client.ListQASessions()
+	if err != nil {
+		return fmt.Errorf("failed to list sessions: %w", err)
+	}
+	if len(sessions) == 0 {
+		fmt.Println("No QA sessions found.")
+		return nil
+	}
+	fmt.Println("\n=== QA Sessions ===")
+	fmt.Printf("%-12s %-12s %-20s %-30s %-20s\n", "ID", "Status", "Phase", "Platforms", "Started")
+	for _, s := range sessions {
+		id := s.ID
+		if len(id) > 10 {
+			id = id[:10]
+		}
+		fmt.Printf("%-12s %-12s %-20s %-30s %-20s\n",
+			id, s.Status, s.Phase, strings.Join(s.Platforms, ","), s.StartTime.Format("2006-01-02 15:04:05"))
+	}
+	return nil
+}
+
+func (c *CLI) handleQAReport(ctx context.Context, serverURL, sessionID, format string) error {
+	client := server.NewClient(serverURL)
+	data, err := client.GetReport(sessionID, format)
+	if err != nil {
+		return fmt.Errorf("failed to get report: %w", err)
+	}
+	fmt.Println(string(data))
+	return nil
+}
+
+func (c *CLI) handleQAScreenshot(ctx context.Context, serverURL, sessionID string) error {
+	client := server.NewClient(serverURL)
+	data, meta, err := client.CaptureScreenshot(sessionID, "", false)
+	if err != nil {
+		return fmt.Errorf("failed to capture screenshot: %w", err)
+	}
+	filename := fmt.Sprintf("screenshot-%s.png", sessionID)
+	if err := os.WriteFile(filename, data, 0644); err != nil {
+		return err
+	}
+	fmt.Printf("Screenshot saved: %s (%d bytes, platform=%s)\n", filename, len(data), meta["platform"])
+	return nil
+}
+
+func (c *CLI) handleQACancel(ctx context.Context, serverURL, sessionID string) error {
+	client := server.NewClient(serverURL)
+	if err := client.CancelQASession(sessionID); err != nil {
+		return fmt.Errorf("failed to cancel session: %w", err)
+	}
+	fmt.Printf("Session %s cancelled.\n", sessionID)
+	return nil
 }

@@ -66,6 +66,24 @@ type LLMConfig struct {
 	Temperature     float64 `mapstructure:"temperature"`
 }
 
+// QAConfig holds HelixQA-specific configuration injected into HelixCode.
+type QAConfig struct {
+	Enabled           bool     `mapstructure:"enabled"`
+	BanksDir          string   `mapstructure:"banks_dir"`
+	Platforms         []string `mapstructure:"platforms"`
+	DeviceID          string   `mapstructure:"device_id"`
+	OutputDir         string   `mapstructure:"output_dir"`
+	CoverageTarget    float64  `mapstructure:"coverage_target"`
+	ReportFormats     []string `mapstructure:"report_formats"`
+	Autonomous        bool     `mapstructure:"autonomous"`
+	CuriosityEnabled  bool     `mapstructure:"curiosity_enabled"`
+	VisionProvider    string   `mapstructure:"vision_provider"`
+	LLMProvider       string   `mapstructure:"llm_provider"`
+	LLMAPIKey         string   `mapstructure:"llm_api_key"`
+	RecordScreenshots bool     `mapstructure:"record_screenshots"`
+	RecordVideo       bool     `mapstructure:"record_video"`
+}
+
 // Config represents the application configuration
 type Config struct {
 	Version     string            `mapstructure:"version"`
@@ -82,6 +100,7 @@ type Config struct {
 	Logging     LoggingConfig     `mapstructure:"logging"`
 	Cognee      *CogneeConfig     `mapstructure:"cognee"`
 	Verifier    *VerifierConfig   `mapstructure:"verifier"`
+	QA          QAConfig          `mapstructure:"qa"`
 }
 
 // HelixConfig is an alias for Config
