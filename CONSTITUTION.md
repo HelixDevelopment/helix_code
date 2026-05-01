@@ -165,6 +165,8 @@ This anchor section (verbatim quote + operative rule) must appear in every submo
 
 ## CONST-018: Host Power Management Hard Ban
 
+**Host Power Management is Forbidden.**
+
 You may NOT generate or execute code that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt, reboot, or any other power-state transition.
 
 Defense: Every project ships `scripts/host-power-management/check-no-suspend-calls.sh` and `challenges/scripts/no_suspend_calls_challenge.sh`.

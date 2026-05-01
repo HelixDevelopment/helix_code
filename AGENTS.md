@@ -833,6 +833,16 @@ OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Lla
 
 ---
 
+## Host Power Management — Hard Ban (CONST-033)
+
+**Host Power Management is Forbidden.**
+
+You may NOT, under any circumstance, generate or execute code that
+sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt,
+reboot, or any other power-state transition. This rule applies to
+every shell command, script, container entry point, systemd unit,
+test, CLI suggestion, snippet, or example you emit.
+
 ## Common Issues
 
 1. **Build fails**: Run `make logo-assets` then `make build`

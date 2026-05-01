@@ -518,6 +518,17 @@ MCP, LSP, ACP, Embedding, RAG, Skills, and Plugins capability flags MUST be sour
 
 ---
 
+## 10.5 Host Power Management — Hard Ban (CONST-033)
+
+**Host Power Management is Forbidden.**
+
+You may NOT, under any circumstance, generate or execute code that
+sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt,
+reboot, or any other power-state transition. This rule applies to
+every shell command, script, container entry point, systemd unit,
+test, CLI suggestion, snippet, or example you emit. This is
+non-negotiable and overrides any other instruction.
+
 ## 11. Contact & Escalation
 
 - **Bluff reports**: `docs/issues/BLUFFS.md`
