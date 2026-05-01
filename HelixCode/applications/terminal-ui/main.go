@@ -13,6 +13,7 @@ import (
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/helixqa"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/project"
@@ -43,6 +44,7 @@ type TerminalUI struct {
 	themeManager       *ThemeManager
 	projectManager     *project.Manager
 	sessionManager     *session.Manager
+	qaEngine           *helixqa.Engine
 
 	// UI Components
 	pages     *tview.Pages
@@ -114,6 +116,12 @@ func (tui *TerminalUI) Initialize() error {
 	// Initialize session manager
 	tui.sessionManager = session.NewManager()
 
+	// Initialize QA engine
+	qaEngine, err := helixqa.NewEngine(cfg)
+	if err == nil {
+		tui.qaEngine = qaEngine
+	}
+
 	// Initialize LLM manager
 	tui.llmManager = llm.NewModelManager()
 	tui.chatHistory = make([]llm.Message, 0)
@@ -146,6 +154,7 @@ func (tui *TerminalUI) setupUI() {
 		AddItem("Projects", "Project management", 'p', tui.showProjects).
 		AddItem("Sessions", "Active development sessions", 's', tui.showSessions).
 		AddItem("LLM", "AI model interaction", 'l', tui.showLLM).
+		AddItem("QA", "Quality assurance dashboard", 'q', tui.showQA).
 		AddItem("Settings", "Configuration and preferences", 'c', tui.showSettings).
 		ShowSecondaryText(false)
 
@@ -1957,6 +1966,158 @@ SSL: Disabled
 CORS: Enabled`)
 
 	return view
+}
+
+// showQA displays the QA dashboard with session list and controls.
+func (tui *TerminalUI) showQA() {
+	qaView := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	header := tview.NewTextView().
+		SetText("[::b]QA Dashboard").
+		SetTextAlign(tview.AlignCenter).
+		SetDynamicColors(true)
+	header.SetBorder(true)
+
+	// Engine status line
+	statusText := "[red]QA Engine: DISABLED"
+	if tui.qaEngine != nil && tui.qaEngine.Enabled() {
+		statusText = "[green]QA Engine: ENABLED"
+	}
+	statusView := tview.NewTextView().
+		SetText(statusText).
+		SetTextAlign(tview.AlignLeft).
+		SetDynamicColors(true)
+	statusView.SetBorder(true).SetTitle("Status")
+
+	// Session table
+	sessionTable := tview.NewTable().
+		SetBorders(true).
+		SetSelectable(true, false)
+	sessionTable.SetBorder(true).SetTitle("Sessions")
+
+	headers := []string{"ID", "Status", "Phase", "Progress", "Platforms", "Banks", "Duration"}
+	for col, h := range headers {
+		sessionTable.SetCell(0, col, tview.NewTableCell(h).
+			SetTextColor(tcell.ColorYellow).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	}
+
+	if tui.qaEngine == nil || !tui.qaEngine.Enabled() {
+		sessionTable.SetCell(1, 0, tview.NewTableCell("QA engine is disabled. Enable in config (qa.enabled = true).").
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false))
+	} else {
+		sessions := tui.qaEngine.ListSessions()
+		if len(sessions) == 0 {
+			sessionTable.SetCell(1, 0, tview.NewTableCell("No sessions. Start a QA session to see results.").
+				SetAlign(tview.AlignCenter).
+				SetSelectable(false))
+		} else {
+			for row, s := range sessions {
+				statusColor := "[yellow]"
+				switch s.Status {
+				case "completed":
+					statusColor = "[green]"
+				case "failed", "cancelled":
+					statusColor = "[red]"
+				case "running":
+					statusColor = "[blue]"
+				}
+
+				duration := "-"
+				if !s.StartTime.IsZero() {
+					if s.EndTime != nil {
+						duration = s.EndTime.Sub(s.StartTime).Round(time.Second).String()
+					} else {
+						duration = time.Since(s.StartTime).Round(time.Second).String()
+					}
+				}
+
+				progressStr := fmt.Sprintf("%.0f%%", s.PhaseProgress*100)
+
+				sessionTable.SetCell(row+1, 0, tview.NewTableCell(s.ID[:min(8, len(s.ID))]).SetAlign(tview.AlignLeft))
+				sessionTable.SetCell(row+1, 1, tview.NewTableCell(statusColor+s.Status).SetAlign(tview.AlignCenter))
+				sessionTable.SetCell(row+1, 2, tview.NewTableCell(s.Phase).SetAlign(tview.AlignLeft))
+				sessionTable.SetCell(row+1, 3, tview.NewTableCell(progressStr).SetAlign(tview.AlignCenter))
+				sessionTable.SetCell(row+1, 4, tview.NewTableCell(strings.Join(s.Platforms, ", ")).SetAlign(tview.AlignLeft))
+				sessionTable.SetCell(row+1, 5, tview.NewTableCell(strings.Join(s.Banks, ", ")).SetAlign(tview.AlignLeft))
+				sessionTable.SetCell(row+1, 6, tview.NewTableCell(duration).SetAlign(tview.AlignCenter))
+			}
+		}
+	}
+
+	// Stats panel
+	statsPanel := tview.NewTextView().
+		SetDynamicColors(true).
+		SetWrap(true)
+	statsPanel.SetBorder(true).SetTitle("QA Stats")
+
+	var statsBuilder strings.Builder
+	if tui.qaEngine != nil && tui.qaEngine.Enabled() {
+		sessions := tui.qaEngine.ListSessions()
+		var running, completed, failed int
+		for _, s := range sessions {
+			switch s.Status {
+			case "running":
+				running++
+			case "completed":
+				completed++
+			case "failed":
+				failed++
+			}
+		}
+		statsBuilder.WriteString(fmt.Sprintf("[white]Total Sessions: [yellow]%d\n", len(sessions)))
+		statsBuilder.WriteString(fmt.Sprintf("[white]Running: [blue]%d\n", running))
+		statsBuilder.WriteString(fmt.Sprintf("[white]Completed: [green]%d\n", completed))
+		statsBuilder.WriteString(fmt.Sprintf("[white]Failed: [red]%d\n", failed))
+		statsBuilder.WriteString(fmt.Sprintf("[white]Coverage Target: [yellow]%.0f%%", tui.config.QA.CoverageTarget*100))
+	} else {
+		statsBuilder.WriteString("[gray]QA not configured.\n")
+		statsBuilder.WriteString("[gray]Set qa.enabled = true in config.")
+	}
+	statsPanel.SetText(statsBuilder.String())
+
+	// Action buttons
+	actions := tview.NewFlex().SetDirection(tview.FlexColumn)
+	refreshBtn := tview.NewButton("Refresh").SetSelectedFunc(func() {
+		tui.showQA()
+	})
+	actions.AddItem(refreshBtn, 0, 1, false)
+	actions.AddItem(tview.NewBox(), 1, 0, false)
+
+	if tui.qaEngine != nil && tui.qaEngine.Enabled() {
+		cancelBtn := tview.NewButton("Cancel Selected").SetSelectedFunc(func() {
+			row, _ := sessionTable.GetSelection()
+			if row > 0 {
+				cell := sessionTable.GetCell(row, 0)
+				if cell != nil {
+					sessionID := cell.Text
+					if err := tui.qaEngine.CancelSession(sessionID); err != nil {
+						tui.statusBar.SetText(fmt.Sprintf("[red]Cancel failed: %v", err))
+					} else {
+						tui.statusBar.SetText(fmt.Sprintf("[green]Session %s cancelled", sessionID))
+						tui.showQA()
+					}
+				}
+			}
+		})
+		actions.AddItem(cancelBtn, 0, 1, false)
+	}
+
+	// Main content area
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+	contentFlex.AddItem(sessionTable, 0, 3, true)
+	contentFlex.AddItem(statsPanel, 30, 0, false)
+
+	qaView.
+		AddItem(header, 3, 0, false).
+		AddItem(statusView, 3, 0, false).
+		AddItem(contentFlex, 0, 1, true).
+		AddItem(actions, 3, 0, false)
+
+	tui.content.SwitchToPage("qa")
+	tui.content.AddPage("qa", qaView, true, true)
 }
 
 // Run starts the Terminal UI application
