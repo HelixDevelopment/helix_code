@@ -341,6 +341,17 @@ HelixCode/
 - Validation rules, default config creation
 - `ConfigManager` for load/save/merge
 
+### QA-001: HelixQA Integration (VERIFIED REAL)
+**Files**: `internal/helixqa/`, `internal/server/qa_handlers.go`, `applications/terminal-ui/main.go`
+**Assessment**: Full embedded QA engine with real session lifecycle
+- `Engine` struct manages QA sessions with map + sync.RWMutex
+- `StartSession()`, `CancelSession()`, `GetSession()`, `ListSessions()` with real state tracking
+- REST API: `POST /api/v1/qa/session`, `GET /api/v1/qa/session/:id/status`, `GET /api/v1/qa/session/:id/report`, `GET /api/v1/qa/session/:id/screenshot/:name`, `DELETE /api/v1/qa/session/:id`
+- CLI flags: `--qa-run`, `--qa-list`, `--qa-report`, `--qa-screenshot`, `--qa-cancel`
+- TUI dashboard with session table, stats panel, refresh/cancel actions
+- Screenshot pipeline: 8 platform engines (Linux, Web, iOS, Android, CLI, TUI, macOS, Windows)
+- Tests: `internal/helixqa/wrapper_test.go`, `internal/server/qa_handlers_test.go`, `pkg/screenshot/*_test.go`
+
 ---
 
 ## Verified Bluff & Stub Areas (MUST FIX)
