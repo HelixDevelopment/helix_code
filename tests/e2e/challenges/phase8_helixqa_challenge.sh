@@ -61,15 +61,22 @@ go test ./internal/server/... -timeout 30s -count=1 || (echo "FAIL: server tests
 echo "  PASS: QA handler tests pass"
 
 # Test 9: Verify CLI QA flags exist
-echo "[9/10] Checking CLI QA flags..."
+echo "[9/11] Checking CLI QA flags..."
 grep -q 'qa-run' cmd/cli/main.go || (echo "FAIL: --qa-run flag missing"; exit 1)
 grep -q 'qa-list' cmd/cli/main.go || (echo "FAIL: --qa-list flag missing"; exit 1)
 grep -q 'qa-report' cmd/cli/main.go || (echo "FAIL: --qa-report flag missing"; exit 1)
 grep -q 'qa-cancel' cmd/cli/main.go || (echo "FAIL: --qa-cancel flag missing"; exit 1)
 echo "  PASS: CLI QA flags present"
 
-# Test 10: Verify screenshot engines compile in HelixQA
-echo "[10/10] Checking HelixQA screenshot engines..."
+# Test 10: Verify TUI QA dashboard exists
+echo "[10/11] Checking TUI QA dashboard..."
+grep -q 'showQA' applications/terminal-ui/main.go || (echo "FAIL: showQA function missing"; exit 1)
+grep -q 'QA.*Quality assurance' applications/terminal-ui/main.go || (echo "FAIL: QA sidebar item missing"; exit 1)
+go build ./applications/terminal-ui/... || (echo "FAIL: TUI build failed"; exit 1)
+echo "  PASS: TUI QA dashboard present and compiles"
+
+# Test 11: Verify screenshot engines compile in HelixQA
+echo "[11/11] Checking HelixQA screenshot engines..."
 cd ../HelixQA
 go build ./pkg/screenshot/... || (echo "FAIL: screenshot package build failed"; exit 1)
 go test ./pkg/screenshot/... -timeout 30s -count=1 || (echo "FAIL: screenshot tests failed"; exit 1)
@@ -89,4 +96,5 @@ echo "  - Wrapper package (internal/helixqa) builds and tests pass"
 echo "  - REST API handlers (internal/server/qa_handlers) build and test pass"
 echo "  - QA configuration (QAConfig) in config system"
 echo "  - CLI QA flags (--qa-run, --qa-list, --qa-report, --qa-cancel)"
+echo "  - TUI QA dashboard (showQA) present and compiles"
 echo "  - Screenshot pipeline with 8 platform engines builds and tests pass"
