@@ -503,8 +503,8 @@ dev-setup: setup-deps logo-deps
 
 .PHONY: helixqa-build helixqa-test helixqa-challenge helixqa-bump-submodules
 
-HELIXQA_DIR := ../../HelixQA
-HELIXQA_DEPS := ../../Dependencies/HelixDevelopment
+HELIXQA_DIR := ../HelixQA
+HELIXQA_DEPS := ../Dependencies/HelixDevelopment
 
 helixqa-build: ## Build HelixQA and all dependency modules
 	@echo "Building HelixQA..."
