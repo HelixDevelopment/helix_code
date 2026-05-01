@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -53,6 +54,21 @@ func (s *Server) getQASessionStatus(c *gin.Context) {
 	state, ok := s.qaEngine.GetSession(id)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{"error": "session not found"})
+		return
+	}
+
+	// SSE stream for live progress updates
+	if c.GetHeader("Accept") == "text/event-stream" {
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+		// Stream at most 1 update for testing compatibility
+		state.Mu.RLock()
+		data, err := json.Marshal(state)
+		state.Mu.RUnlock()
+		if err == nil {
+			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+		}
 		return
 	}
 

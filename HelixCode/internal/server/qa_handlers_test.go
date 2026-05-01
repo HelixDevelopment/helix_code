@@ -163,6 +163,7 @@ func TestGetQASessionStatus_AfterCreation(t *testing.T) {
 
 	w2 := httptest.NewRecorder()
 	c2, _ := gin.CreateTestContext(w2)
+	c2.Request, _ = http.NewRequest("GET", "/api/v1/qa/session/"+created.ID+"/status", nil)
 	c2.Params = gin.Params{{Key: "id", Value: created.ID}}
 	server.getQASessionStatus(c2)
 
@@ -250,4 +251,32 @@ func TestGetQASessionScreenshot_NotFound(t *testing.T) {
 
 	server.getQASessionScreenshot(c)
 	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestGetQASessionStatus_SSEStream(t *testing.T) {
+	server, w, c, bankFile := setupQATestServer(t)
+	req := StartSessionRequest{
+		Platforms: []string{"web"},
+		Banks:     []string{bankFile},
+	}
+	body, _ := json.Marshal(req)
+	c.Request, _ = http.NewRequest("POST", "/api/v1/qa/session", bytes.NewBuffer(body))
+	c.Request.Header.Set("Content-Type", "application/json")
+	server.startQASession(c)
+
+	var created helixqa.SessionState
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &created))
+
+	w2 := httptest.NewRecorder()
+	c2, _ := gin.CreateTestContext(w2)
+	c2.Request, _ = http.NewRequest("GET", "/api/v1/qa/session/"+created.ID+"/status", nil)
+	c2.Request.Header.Set("Accept", "text/event-stream")
+	c2.Params = gin.Params{{Key: "id", Value: created.ID}}
+
+	server.getQASessionStatus(c2)
+
+	// Verify SSE headers and body format
+	assert.Contains(t, w2.Header().Get("Content-Type"), "text/event-stream")
+	assert.Contains(t, w2.Body.String(), "data: ")
+	assert.Contains(t, w2.Body.String(), created.ID)
 }
