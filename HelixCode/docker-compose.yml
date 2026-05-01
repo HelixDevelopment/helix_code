@@ -123,12 +123,34 @@ services:
       - helixcode-prod
     restart: unless-stopped
 
+  # HelixQA runner (optional, requires --profile qa)
+  helixqa-runner:
+    build:
+      context: ../HelixQA
+      dockerfile: Dockerfile
+    profiles:
+      - qa
+    environment:
+      - HELIXQA_SERVER_URL=http://helixcode-server:8080
+      - HELIXQA_API_KEY=${HELIX_AUTH_JWT_SECRET}
+      - HELIXQA_OUTPUT_DIR=/qa-results
+    volumes:
+      - ../HelixQA/banks:/qa-banks:ro
+      - qa_results:/qa-results
+    depends_on:
+      helixcode-server:
+        condition: service_healthy
+    networks:
+      - helixcode-prod
+    command: ["run", "--banks", "/qa-banks", "--platform", "api,web", "--output", "/qa-results"]
+
 volumes:
   postgres_prod_data:
   redis_prod_data:
   prometheus_data:
   grafana_data:
   ssh-keys:
+  qa_results:
 
 networks:
   helixcode-prod:
