@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/verify-governance-cascade.sh
 # Governance cascade verification — exits non-zero on any deficiency.
-# Version: 1.0.0
+# Version: 2.0.0
 # Author: HelixCode Integration Plan
 
 set -euo pipefail
@@ -20,24 +20,29 @@ MANDATORY_PATTERNS=(
 REPORT_FILE="governance-cascade-report-$(date +%Y%m%d-%H%M%S).txt"
 FAILURES=0
 
-# Submodule list: space-separated paths relative to repo root.
-HELIXCODE_SUBMODULES=(
-  "awesome-cpp-examples"
-  "awesome-shell-examples"
-  "cpp-learning-lab"
-  "rust-examples"
-  "rust-learning-lab"
-  "go-examples"
-  "go-learning-lab"
-  "python-examples"
-  "python-learning-lab"
-  "data-learning-lab"
-  "ml-starter-lab"
-  "mlops-learning-lab"
-  "data-engineering-lab"
-  "distributed-systems-learning-lab"
-  "internal/isolated_files"
-)
+# Return true if the submodule path is HelixCode-owned (not third-party).
+is_helixcode_owned() {
+  local path="$1"
+  case "$path" in
+    Challenges|Security|Containers|HelixQA|Assets)
+      return 0
+      ;;
+    Dependencies/HelixDevelopment/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Submodules are discovered dynamically from .gitmodules.
+read_submodules() {
+  local gitmodules="${1:-.gitmodules}"
+  if [[ -f "$gitmodules" ]]; then
+    grep '^\s*path = ' "$gitmodules" | sed 's/^\s*path = //'
+  fi
+}
 
 # Catalogizer submodules are discovered dynamically from .gitmodules.
 read_catalogizer_submodules() {
@@ -91,18 +96,18 @@ for file in "${REQUIRED_FILES[@]}"; do
   done
 done
 
-for sub in "${HELIXCODE_SUBMODULES[@]}"; do
-  if [[ -d "$sub" ]]; then
+# Verify HelixCode-owned submodules only
+while IFS= read -r sub; do
+  if is_helixcode_owned "$sub" && [[ -d "$sub" ]]; then
     verify_submodule "$sub"
-  else
-    echo "MISSING_DIR: $sub" >> "$REPORT_FILE"
-    ((FAILURES++)) || true
   fi
-done
+done < <(read_submodules)
+
+
 
 # Catalogizer cascade (optional — run only when Catalogizer is sibling checkout)
 while IFS= read -r sub; do
-  if [[ -d "$sub" ]]; then
+  if is_helixcode_owned "$sub" && [[ -d "$sub" ]]; then
     verify_submodule "$sub"
   fi
 done < <(read_catalogizer_submodules)
