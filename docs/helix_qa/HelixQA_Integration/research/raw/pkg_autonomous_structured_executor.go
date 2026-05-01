@@ -1,0 +1,1253 @@
+// SPDX-FileCopyrightText: 2026 Milos Vasic
+// SPDX-License-Identifier: Apache-2.0
+
+package autonomous
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"image"
+	// Register JPEG decoder for Screenshot() that returns
+	// JPEG on some ADB versions.
+	_ "image/jpeg"
+	_ "image/png"
+	"os"
+	osexec "os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"digital.vasic.helixqa/pkg/analysis"
+	"digital.vasic.helixqa/pkg/config"
+	"digital.vasic.helixqa/pkg/llm"
+	"digital.vasic.helixqa/pkg/navigator"
+	"digital.vasic.helixqa/pkg/testbank"
+)
+
+// ActionExecutor interface for platform actions
+type ActionExecutor interface {
+	Screenshot(ctx context.Context) ([]byte, error)
+}
+
+// StructuredTestExecutor runs test cases from test banks in a
+// systematic manner before curiosity-driven exploration.
+type StructuredTestExecutor struct {
+	config       PipelineConfig
+	execFactory  ExecutorFactory
+	vision       llm.Provider
+	onFinding    func(analysis.AnalysisFinding)
+	onScreenshot func(platform string, data []byte)
+	// http is the executor for ActionTypeHTTP steps. Lazy-built
+	// the first time an HTTP step appears, using
+	// PipelineConfig.HTTPBaseURL (or env HELIXQA_HTTP_BASE_URL as
+	// a fallback). Nil until needed.
+	http *HTTPExecutor
+
+	// playwright is the executor for ActionTypePlaywright steps.
+	// Lazy-built the first time a Playwright step appears, using
+	// PipelineConfig.PlaywrightCDPURL (or env
+	// HELIXQA_PLAYWRIGHT_CDP_URL). Nil until configured AND
+	// needed; absent config means Playwright steps SKIP rather
+	// than execute.
+	playwright *PlaywrightExecutor
+}
+
+// NewStructuredTestExecutor creates a new structured test executor.
+func NewStructuredTestExecutor(
+	config PipelineConfig,
+	execFactory ExecutorFactory,
+	vision llm.Provider,
+	onFinding func(analysis.AnalysisFinding),
+	onScreenshot func(platform string, data []byte),
+) *StructuredTestExecutor {
+	return &StructuredTestExecutor{
+		config:       config,
+		execFactory:  execFactory,
+		vision:       vision,
+		onFinding:    onFinding,
+		onScreenshot: onScreenshot,
+	}
+}
+
+// Execute runs all structured test cases from the test bank directory.
+// It loads test banks and executes each test case's steps systematically.
+func (ste *StructuredTestExecutor) Execute(
+	ctx context.Context,
+) (*StructuredExecutionResult, error) {
+	result := &StructuredExecutionResult{
+		TestCasesRun:    0,
+		TestCasesPassed: 0,
+		TestCasesFailed: 0,
+		StepsExecuted:   0,
+		Findings:        []analysis.AnalysisFinding{},
+	}
+
+	// Load test banks from BanksDir
+	if ste.config.BanksDir == "" {
+		fmt.Println("  [structured] No BanksDir configured, skipping structured tests")
+		return result, nil
+	}
+
+	banksDir := ste.config.BanksDir
+	banks, err := testbank.LoadDir(banksDir)
+	if err != nil {
+		// Try alternative path relative to project root
+		altDir := filepath.Join(
+			ste.config.ProjectRoot,
+			"challenges", "helixqa-banks",
+		)
+		banks, err = testbank.LoadDir(altDir)
+		if err != nil {
+			fmt.Printf(
+				"  [structured] Failed to load test banks: %v\n",
+				err,
+			)
+			return result, err
+		}
+		banksDir = altDir
+	}
+
+	fmt.Printf(
+		"  [structured] Loaded %d test banks from %s\n",
+		len(banks), banksDir,
+	)
+
+	// FIX-QA-2026-04-21-019 preflight: on Android TV launchers the
+	// home screen stacks channel rows from every app that published
+	// TV channels. If any of those non-target apps is running when
+	// structured tests start pressing DPAD, the first ENTER can hand
+	// control to the foreign app. Proactively force-stop the apps
+	// most commonly observed stealing focus before the first step.
+	// The target app itself is never in this list.
+	ste.preflightStopCompetingApps(ctx)
+
+	// Execute each bank's test cases
+	for _, bank := range banks {
+		if err := ste.executeBank(ctx, bank, result); err != nil {
+			fmt.Printf(
+				"  [structured] Bank '%s' error: %v\n",
+				bank.Name, err,
+			)
+		}
+	}
+
+	return result, nil
+}
+
+// executeBank runs all test cases from a single test bank.
+func (ste *StructuredTestExecutor) executeBank(
+	ctx context.Context,
+	bank *testbank.BankFile,
+	result *StructuredExecutionResult,
+) error {
+	fmt.Printf(
+		"  [structured] Executing bank: %s (%d test cases)\n",
+		bank.Name, len(bank.TestCases),
+	)
+
+	for _, tc := range bank.TestCases {
+		// Check if test applies to any of our platforms
+		applies := ste.testAppliesToPlatforms(tc)
+		if !applies {
+			continue
+		}
+
+		if err := ste.executeTestCase(ctx, tc, result); err != nil {
+			fmt.Printf(
+				"  [structured] Test case '%s' failed: %v\n",
+				tc.ID, err,
+			)
+		}
+	}
+
+	return nil
+}
+
+// executeTestCase runs a single test case with all its steps.
+func (ste *StructuredTestExecutor) executeTestCase(
+	ctx context.Context,
+	tc testbank.TestCase,
+	result *StructuredExecutionResult,
+) error {
+	result.TestCasesRun++
+
+	fmt.Printf(
+		"  [structured] [%s] %s (priority: %s, steps: %d)\n",
+		tc.ID, tc.Name, tc.Priority, len(tc.Steps),
+	)
+
+	// Article XI §11.5: env-dependent tests SKIP-OK when their
+	// declared `requires_env` variables aren't set. Better to
+	// honestly skip than fail-or-bluff-pass on unsupported hardware.
+	for _, envVar := range tc.RequiresEnv {
+		if os.Getenv(envVar) == "" {
+			fmt.Printf(
+				"  [structured] [%s] ⊘ SKIPPED — SKIP-OK: #%s — env %q not set (lab hardware unavailable)\n",
+				tc.ID, envVar, envVar,
+			)
+			result.TestCasesSkipped++
+			result.StepsExecuted += len(tc.Steps)
+			return nil
+		}
+	}
+
+	testPassed := true
+	executedSteps := 0
+	skippedSteps := 0
+	var stepResults []TestStepResult
+
+	for i, step := range tc.Steps {
+		stepResult := ste.executeStep(ctx, tc, step, i+1)
+		stepResults = append(stepResults, stepResult)
+		result.StepsExecuted++
+
+		if stepResult.Skipped {
+			skippedSteps++
+			continue
+		}
+		executedSteps++
+
+		if !stepResult.Passed {
+			testPassed = false
+			// Create finding for failed step
+			finding := analysis.AnalysisFinding{
+				Category: analysis.CategoryFunctional,
+				Severity: ste.priorityToSeverity(tc.Priority),
+				Title: fmt.Sprintf(
+					"Test Case Failed: %s - Step %d",
+					tc.Name, i+1,
+				),
+				Description: fmt.Sprintf(
+					"Step: %s\nAction: %s\nExpected: %s\nActual: %s",
+					step.Name, step.Action,
+					step.Expected, stepResult.Actual,
+				),
+				Platform:           ste.getPlatformForStep(step),
+				AcceptanceCriteria: fmt.Sprintf("Step '%s' executes successfully and produces the expected outcome: %s", step.Name, step.Expected),
+			}
+			result.Findings = append(result.Findings, finding)
+			if ste.onFinding != nil {
+				ste.onFinding(finding)
+			}
+
+			// Stop executing further steps on failure
+			break
+		}
+	}
+
+	switch {
+	case executedSteps == 0 && skippedSteps > 0:
+		// Every step was a bank placeholder — nothing actually ran
+		// against the app, so do not count as pass or fail.
+		result.TestCasesSkipped++
+		fmt.Printf(
+			"  [structured] [%s] ⊘ SKIPPED (%d placeholder steps)\n",
+			tc.ID, skippedSteps,
+		)
+	case testPassed:
+		result.TestCasesPassed++
+		if skippedSteps > 0 {
+			fmt.Printf(
+				"  [structured] [%s] ✓ PASSED (%d steps, %d placeholders skipped)\n",
+				tc.ID, executedSteps, skippedSteps,
+			)
+		} else {
+			fmt.Printf(
+				"  [structured] [%s] ✓ PASSED (%d steps)\n",
+				tc.ID, len(stepResults),
+			)
+		}
+	default:
+		result.TestCasesFailed++
+		fmt.Printf(
+			"  [structured] [%s] ✗ FAILED (%d/%d steps passed, %d skipped)\n",
+			tc.ID, executedSteps-1, executedSteps, skippedSteps,
+		)
+	}
+
+	return nil
+}
+
+// executeStep runs a single test step.
+func (ste *StructuredTestExecutor) executeStep(
+	ctx context.Context,
+	tc testbank.TestCase,
+	step testbank.TestStep,
+	stepNum int,
+) TestStepResult {
+	result := TestStepResult{
+		StepName: step.Name,
+		Passed:   false,
+	}
+
+	fmt.Printf(
+		"    [step %d] %s\n", stepNum, step.Name,
+	)
+
+	// Determine platform for this step
+	platform := ste.getPlatformForStep(step)
+
+	// Get executor for platform
+	executor, err := ste.execFactory.Create(platform)
+	if err != nil {
+		result.Actual = fmt.Sprintf(
+			"Failed to create executor: %v", err,
+		)
+		return result
+	}
+
+	// Wait for UI to render before screenshot.
+	// 500ms is sufficient for most UI transitions on Android TV.
+	// Cold start handled separately by the test step's own sleep action.
+	time.Sleep(500 * time.Millisecond)
+
+	// FIX-QA-2026-04-21-019: Foreground guard. Before every step,
+	// verify the app under test is still in the foreground. If the
+	// previous step navigated to an Android TV home-screen channel
+	// tile that belongs to a different app (RuTube, IPTV, YouTube,
+	// mitv-videoplayer), a raw DPAD_ENTER can launch that foreign
+	// app — all subsequent keypresses then land in the wrong app
+	// and the LLM dutifully reports "home screen visible" because
+	// it truly is, just the wrong app's home. Emit a CRITICAL
+	// finding, force-launch the target app, and continue.
+	ste.ensureAppForeground(ctx, platform, tc, stepNum)
+
+	// Take screenshot before action
+	beforeSS, _ := executor.Screenshot(ctx)
+	if len(beforeSS) > 0 && !IsBlankScreenshot(beforeSS) && ste.onScreenshot != nil {
+		ste.onScreenshot(platform, beforeSS)
+	}
+
+	// Execute the action based on type
+	// CRITICAL: Now actually executes ADB commands, sleep, keypress, etc!
+	actionResult := ste.performAction(ctx, executor, step)
+
+	// Placeholder/skipped actions short-circuit — no verification,
+	// no failure, just propagate the Skipped flag so the test case
+	// loop can account for them separately.
+	if actionResult.Skipped {
+		result.Skipped = true
+		result.Actual = actionResult.Message
+		return result
+	}
+
+	// FIX-QA-2026-04-21-019 part 2: post-action drift check. The
+	// previous step may have been a DPAD_ENTER on a launcher tile
+	// that handed control to a foreign app (RuTube, IPTV, YouTube,
+	// …). Re-check foreground immediately; if drift to a foreign
+	// app is detected, force-stop + relaunch before screenshotting
+	// so the after-action screenshot reflects Catalogizer's UI (or
+	// the launcher), not the foreign app's.
+	ste.ensureAppForeground(ctx, platform, tc, stepNum)
+
+	// Take screenshot after action.
+	// 500ms is enough for UI to settle after a keypress/tap.
+	time.Sleep(500 * time.Millisecond)
+	afterSS, _ := executor.Screenshot(ctx)
+	if len(afterSS) > 0 && !IsBlankScreenshot(afterSS) && ste.onScreenshot != nil {
+		ste.onScreenshot(platform, afterSS)
+	}
+
+	// Verify expected outcome using vision if available
+	if ste.vision != nil && len(afterSS) > 0 {
+		verified, actual, providerErr := ste.verifyOutcome(
+			ctx, afterSS, step.Expected,
+		)
+		// CRITICAL FIX: Action must succeed BEFORE vision verification matters
+		// If action failed, test fails regardless of what vision says
+		if providerErr != nil {
+			// All vision providers failed (rate limits, auth errors, etc).
+			// Fall back to action success so tests aren't falsely marked as
+			// failing due to broken infrastructure rather than app bugs.
+			result.Passed = actionResult.Success
+			if actionResult.Success {
+				result.Actual = actual + " (vision provider error - falling back to action success)"
+			} else {
+				result.Actual = actionResult.Message + " | Vision error: " + actual
+			}
+		} else {
+			result.Passed = actionResult.Success && verified
+			if actionResult.Success {
+				result.Actual = actual
+			} else {
+				result.Actual = actionResult.Message + " | Vision: " + actual
+			}
+		}
+	} else {
+		// Without vision, rely solely on action success
+		result.Passed = actionResult.Success
+		result.Actual = actionResult.Message
+	}
+
+	return result
+}
+
+// performAction executes the action using the executor.
+// CRITICAL: This now actually executes actions instead of just returning success!
+func (ste *StructuredTestExecutor) performAction(
+	ctx context.Context,
+	executor navigator.ActionExecutor,
+	step testbank.TestStep,
+) ActionResult {
+	actionType, actionValue := step.ParseAction()
+
+	switch actionType {
+	case testbank.ActionTypeADBShell:
+		// Execute ADB shell command. Previous implementation only
+		// ran a connection check (Screenshot) and reported success
+		// without actually invoking the command, so every test that
+		// relied on adb_shell: silently no-oped. Fix: route through
+		// ADBExecutor.Shell so the device actually runs the command.
+		fmt.Printf("      [action] adb shell: %s\n", actionValue)
+		adbExec, ok := executor.(*navigator.ADBExecutor)
+		if !ok {
+			return ActionResult{Success: false, Message: "adb_shell requires an Android executor"}
+		}
+		out, err := adbExec.Shell(ctx, actionValue)
+		if err != nil {
+			return ActionResult{Success: false, Message: fmt.Sprintf("adb shell error: %v (out: %s)", err, truncateOutput(out, 200))}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("Executed: %s", actionValue)}
+
+	case testbank.ActionTypeSleep:
+		// Sleep for specified milliseconds
+		ms := 0
+		fmt.Sscanf(actionValue, "%d", &ms)
+		if ms <= 0 {
+			ms = 2000 // Default 2 seconds
+		}
+		fmt.Printf("      [action] sleep: %dms\n", ms)
+		time.Sleep(time.Duration(ms) * time.Millisecond)
+		return ActionResult{Success: true, Message: fmt.Sprintf("Slept %dms", ms)}
+
+	case testbank.ActionTypeScreenshot:
+		// Screenshot will be taken after this
+		fmt.Printf("      [action] screenshot\n")
+		return ActionResult{Success: true, Message: "Screenshot requested"}
+
+	case testbank.ActionTypeKeyPress:
+		// Simulate key press
+		fmt.Printf("      [action] keypress: %s\n", actionValue)
+		if keyExecutor, ok := executor.(interface {
+			KeyPress(context.Context, string) error
+		}); ok {
+			err := keyExecutor.KeyPress(ctx, actionValue)
+			if err != nil {
+				return ActionResult{Success: false, Message: fmt.Sprintf("Keypress failed: %v", err)}
+			}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("Key pressed: %s", actionValue)}
+
+	case testbank.ActionTypeText:
+		// Enter text
+		fmt.Printf("      [action] text: %s\n", actionValue)
+		if typeExecutor, ok := executor.(interface {
+			Type(context.Context, string) error
+		}); ok {
+			err := typeExecutor.Type(ctx, actionValue)
+			if err != nil {
+				return ActionResult{Success: false, Message: fmt.Sprintf("Type failed: %v", err)}
+			}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("Typed: %s", actionValue)}
+
+	case testbank.ActionTypeTap:
+		// Tap at coordinates
+		fmt.Printf("      [action] tap: %s\n", actionValue)
+		var x, y int
+		fmt.Sscanf(actionValue, "%d,%d", &x, &y)
+		if tapExecutor, ok := executor.(interface {
+			Click(context.Context, int, int) error
+		}); ok {
+			err := tapExecutor.Click(ctx, x, y)
+			if err != nil {
+				return ActionResult{Success: false, Message: fmt.Sprintf("Tap failed: %v", err)}
+			}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("Tapped: %d,%d", x, y)}
+
+	case testbank.ActionTypePlaybackCheck:
+		// Query adb shell dumpsys media_session and assert that at
+		// least one active session is in PlaybackState PLAYING. The
+		// value format is "<package>" or "<package>:<minState>";
+		// the default package is "*" (any app) and the default
+		// minState is 3 (PLAYING).
+		fmt.Printf("      [action] playback_check: %s\n", actionValue)
+		adbExec, ok := executor.(*navigator.ADBExecutor)
+		if !ok {
+			return ActionResult{Success: false, Message: "playback_check requires an Android executor"}
+		}
+		pkg, minState := parsePlaybackCheckArgs(actionValue)
+		out, err := adbExec.Shell(ctx, "dumpsys media_session 2>/dev/null")
+		if err != nil {
+			return ActionResult{Success: false, Message: fmt.Sprintf("dumpsys failed: %v", err)}
+		}
+		ok2, reason := verifyPlaybackState(string(out), pkg, minState)
+		if !ok2 {
+			return ActionResult{Success: false, Message: fmt.Sprintf("playback not active: %s", reason)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("playback verified: %s", reason)}
+
+	case testbank.ActionTypeFrameDiff:
+		// Capture two screenshots separated by waitMs milliseconds
+		// (default 2000 ms) and assert that they differ. Used to
+		// confirm that video playback is actually rendering frames
+		// rather than sitting on a frozen first frame.
+		fmt.Printf("      [action] frame_diff: %s\n", actionValue)
+		waitMs := 2000
+		if actionValue != "" {
+			if n, err := parseIntField(actionValue); err == nil && n > 0 {
+				waitMs = n
+			}
+		}
+		first, err := executor.Screenshot(ctx)
+		if err != nil || len(first) == 0 {
+			return ActionResult{Success: false, Message: fmt.Sprintf("first screenshot failed: %v", err)}
+		}
+		time.Sleep(time.Duration(waitMs) * time.Millisecond)
+		second, err := executor.Screenshot(ctx)
+		if err != nil || len(second) == 0 {
+			return ActionResult{Success: false, Message: fmt.Sprintf("second screenshot failed: %v", err)}
+		}
+		changed, diffPct := framesDiffer(first, second)
+		if !changed {
+			return ActionResult{Success: false, Message: fmt.Sprintf("frames identical (diff %.1f%%) — playback appears frozen", diffPct)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("frames differ by %.1f%% — motion detected", diffPct)}
+
+	case testbank.ActionTypeHTTP:
+		// HTTP request against the backend API. Action value is
+		// "<METHOD> <PATH>"; the request body, headers, expected
+		// status, and JSON-path / body-contains assertions are
+		// declared on the TestStep itself. Lazy-builds the
+		// per-session HTTPExecutor on first use.
+		method, urlPath := parseHTTPAction(actionValue)
+		fmt.Printf("      [action] http: %s %s\n", method, urlPath)
+		if ste.http == nil {
+			baseURL := ste.config.HTTPBaseURL
+			if baseURL == "" {
+				baseURL = os.Getenv("HELIXQA_HTTP_BASE_URL")
+			}
+			if baseURL == "" {
+				return ActionResult{Success: false, Message: "http: HELIXQA_HTTP_BASE_URL not set and PipelineConfig.HTTPBaseURL empty"}
+			}
+			ste.http = NewHTTPExecutor(baseURL)
+		}
+		return ste.http.Execute(ctx, method, urlPath, step)
+
+	case testbank.ActionTypeAssert:
+		// Structured assertion against the most recent HTTP
+		// response captured by ActionTypeHTTP. Format:
+		// "<kind>: <expr>" where kind is one of status_eq,
+		// json_path_eq, body_contains, header_eq.
+		if ste.http == nil {
+			return ActionResult{Success: false, Message: "assert: no prior http step in this test case"}
+		}
+		fmt.Printf("      [action] assert: %s\n", actionValue)
+		return runAssertion(ste.http, actionValue)
+
+	case testbank.ActionTypePlaywright:
+		// Web browser action via the Playwright CLI adapter
+		// (Challenges/pkg/userflow.PlaywrightCLIAdapter). Lazy-
+		// builds the per-session executor on first use. When no
+		// CDP URL is configured (PipelineConfig.PlaywrightCDPURL
+		// nor HELIXQA_PLAYWRIGHT_CDP_URL env), the step SKIPs
+		// with PLAYWRIGHT-RUNTIME-PENDING — Article XI §11.2.2
+		// (no silent PASS when the real system is unreachable).
+		fmt.Printf("      [action] playwright: %s\n", actionValue)
+		if ste.playwright == nil {
+			cdpURL := ste.config.PlaywrightCDPURL
+			if cdpURL == "" {
+				cdpURL = os.Getenv("HELIXQA_PLAYWRIGHT_CDP_URL")
+			}
+			if cdpURL == "" {
+				return ActionResult{
+					Skipped: true,
+					Message: fmt.Sprintf("SKIP-OK: #PLAYWRIGHT-RUNTIME-PENDING — set PipelineConfig.PlaywrightCDPURL or HELIXQA_PLAYWRIGHT_CDP_URL to ws://host:port to run %q", actionValue),
+				}
+			}
+			ste.playwright = NewPlaywrightExecutor(cdpURL)
+		}
+		return ste.playwright.Execute(ctx, actionValue)
+
+	case testbank.ActionTypeDescription:
+		// Legacy text-only action. If the author marked it as an
+		// unfinished placeholder ("# TODO: Convert to executable ..."),
+		// treat the step as SKIPPED rather than FAILED — the bank
+		// entry is incomplete, not the app under test. This keeps
+		// real failures visible and prevents 1000+ false-negative
+		// findings from drowning out genuine issues.
+		if strings.HasPrefix(strings.TrimSpace(actionValue), "# TODO: Convert to executable") {
+			fmt.Printf("      [SKIP] Placeholder action (bank incomplete): %s\n", actionValue)
+			return ActionResult{Skipped: true, Message: "Bank placeholder — convert to adb_shell:/sleep:/key:/text:/tap: action"}
+		}
+		fmt.Printf("      [WARNING] Text-only action (not executable): %s\n", actionValue)
+		return ActionResult{Success: false, Message: "Text-only action - not executable! Use adb_shell:, sleep:, http:, etc."}
+
+	default:
+		return ActionResult{Success: false, Message: fmt.Sprintf("Unknown action type: %s", actionType)}
+	}
+}
+
+// runAssertion evaluates a structured ActionTypeAssert expression
+// against the HTTPExecutor's most recent response. Format:
+// "status_eq: 200", "json_path_eq: $.foo = bar",
+// "body_contains: hello", "header_eq: Content-Type = application/json".
+func runAssertion(h *HTTPExecutor, value string) ActionResult {
+	idx := strings.Index(value, ":")
+	if idx <= 0 {
+		return ActionResult{Success: false, Message: "assert: format is '<kind>: <expr>'"}
+	}
+	kind := strings.TrimSpace(value[:idx])
+	expr := strings.TrimSpace(value[idx+1:])
+	status, headers, body := h.LastResponse()
+
+	switch kind {
+	case "status_eq":
+		var want int
+		if _, err := fmt.Sscanf(expr, "%d", &want); err != nil {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert status_eq: bad value %q", expr)}
+		}
+		if status != want {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert status_eq: got %d, want %d", status, want)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("status_eq: %d", status)}
+	case "body_contains":
+		if !strings.Contains(string(body), expr) {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert body_contains: %q not in body", expr)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("body_contains: %q", expr)}
+	case "json_path_eq":
+		// "$.path = expected"
+		eq := strings.Index(expr, "=")
+		if eq <= 0 {
+			return ActionResult{Success: false, Message: "assert json_path_eq: format is '$.path = expected'"}
+		}
+		path := strings.TrimSpace(expr[:eq])
+		want := strings.TrimSpace(expr[eq+1:])
+		ok, val, err := jsonPathExists(body, path)
+		if err != nil {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert json_path_eq: %v", err)}
+		}
+		if !ok {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert json_path_eq: path %q not found", path)}
+		}
+		got := fmt.Sprintf("%v", val)
+		if got != want {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert json_path_eq: %s = %q, want %q", path, got, want)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("json_path_eq: %s = %q", path, got)}
+	case "header_eq":
+		// "Header-Name = expected"
+		eq := strings.Index(expr, "=")
+		if eq <= 0 {
+			return ActionResult{Success: false, Message: "assert header_eq: format is 'Name = value'"}
+		}
+		name := strings.TrimSpace(expr[:eq])
+		want := strings.TrimSpace(expr[eq+1:])
+		got := headers.Get(name)
+		if got != want {
+			return ActionResult{Success: false, Message: fmt.Sprintf("assert header_eq: %s = %q, want %q", name, got, want)}
+		}
+		return ActionResult{Success: true, Message: fmt.Sprintf("header_eq: %s = %q", name, got)}
+	default:
+		return ActionResult{Success: false, Message: fmt.Sprintf("assert: unknown kind %q", kind)}
+	}
+}
+
+
+// preflightStopCompetingApps force-stops known channel-publishing
+// apps on Android TV so that a rogue DPAD_ENTER on a foreign
+// channel tile does not silently hand control over and void the
+// structured phase. The list is a generic set of Android TV apps
+// observed in the wild to publish home channels; it is NOT the
+// app under test. The target app (ste.config.AndroidPackage) is
+// excluded from the stop list as a defensive measure even though
+// it would never appear here, to keep this library
+// project-agnostic (HelixQA Constitution §1).
+//
+// Failures to stop an app (not installed, already stopped, adb
+// unavailable) are ignored — this is best-effort hygiene, not a
+// test-fatal operation.
+func (ste *StructuredTestExecutor) preflightStopCompetingApps(
+	ctx context.Context,
+) {
+	device := ste.config.AndroidDevice
+	if device == "" && len(ste.config.AndroidDevices) > 0 {
+		device = ste.config.AndroidDevices[0]
+	}
+	if device == "" {
+		return
+	}
+
+	// Consumer-owned list via config.CompetingAppPackages (HelixQA
+	// Constitution §1 — no project-specific names baked into the
+	// library). Callers populate this from their own env var; see
+	// cmd/helixqa/main.go which reads HELIX_COMPETING_APP_PACKAGES
+	// and passes it through. If empty, the preflight is a no-op
+	// and the per-step foreground guard still catches drift.
+	competitors := ste.config.CompetingAppPackages
+	if len(competitors) == 0 {
+		fmt.Printf(
+			"  [structured] preflight: no competing-app packages configured " +
+				"(HELIX_COMPETING_APP_PACKAGES) — per-step foreground guard " +
+				"will still catch drift to foreign apps\n",
+		)
+		return
+	}
+
+	target := ste.config.AndroidPackage
+	for _, pkg := range competitors {
+		if pkg == "" || pkg == target {
+			continue
+		}
+		_, _ = osexec.CommandContext(
+			ctx,
+			"adb", "-s", device,
+			"shell", "am", "force-stop", pkg,
+		).CombinedOutput()
+	}
+	fmt.Printf(
+		"  [structured] preflight: force-stopped %d competing apps on %s\n",
+		len(competitors), device,
+	)
+}
+
+// isLauncherPackage returns true when the package string identifies
+// one of the known Android TV launcher packages. Focus on a launcher
+// is a legitimate intermediate state for tv-channel-* / tv-watch-next-*
+// tests, which intentionally navigate to home to click a channel tile.
+// Focus on any other foreign app is drift.
+func isLauncherPackage(pkg string) bool {
+	if pkg == "" {
+		return false
+	}
+	switch pkg {
+	case
+		"com.mitv.tvhome.atv",
+		"com.mitv.tvhome.michannel",
+		"com.google.android.tvlauncher",
+		"com.google.android.leanbacklauncher",
+		"com.amazon.tv.launcher",
+		"com.android.tv.launcher":
+		return true
+	}
+	return false
+}
+
+// currentForegroundPackage extracts the foreground package name from
+// `adb shell dumpsys window windows` output. Returns empty string on
+// parse failure.
+func currentForegroundPackage(dumpsysOut string) string {
+	line := extractLine(dumpsysOut, "mCurrentFocus=")
+	if line == "" {
+		return ""
+	}
+	// Format: "mCurrentFocus=Window{... u0 <package>/<component>}"
+	// Find the last '{...}' and split by space.
+	i := strings.LastIndex(line, "{")
+	if i < 0 {
+		return ""
+	}
+	j := strings.LastIndex(line, "}")
+	if j < 0 || j <= i {
+		return ""
+	}
+	inner := line[i+1 : j]
+	parts := strings.Fields(inner)
+	if len(parts) == 0 {
+		return ""
+	}
+	// Last field is "<package>/<component>".
+	compStr := parts[len(parts)-1]
+	slash := strings.Index(compStr, "/")
+	if slash < 0 {
+		return compStr
+	}
+	return compStr[:slash]
+}
+
+// ensureAppForeground guards against silent app-swap drift where
+// a DPAD_ENTER on an Android TV launcher channel tile has handed
+// control to a different app. The guard only applies to android /
+// androidtv platforms where a target package is configured.
+//
+// On drift to a foreign app (non-launcher, non-target): emits a
+// CRITICAL finding and force-relaunches the target app. Drift to a
+// launcher is tolerated silently — tv-channel-* tests legitimately
+// visit the launcher to click channel tiles.
+//
+// Test cases that INTENTIONALLY exercise system overlays (voice
+// search → Google Katniss / `ihq` input method, launcher channel
+// deep-links → RuTube / IPTV Pro by design) can opt out via
+// `allow_foreground_leave: true` in the bank YAML — the guard then
+// treats their drift events as expected behaviour rather than
+// infrastructure failures.
+//
+// A foreground drift during a structured bank step that does NOT
+// opt out is a Constitution-class failure — the affected test's
+// remaining steps cannot be trusted, but the session continues so
+// that subsequent test cases (which relaunch the app via their
+// own adb_shell: am start seed steps) still run.
+func (ste *StructuredTestExecutor) ensureAppForeground(
+	ctx context.Context,
+	platform string,
+	tc testbank.TestCase,
+	stepNum int,
+) {
+	if platform != "android" && platform != "androidtv" {
+		return
+	}
+	// Per-test opt-out for tests that intentionally leave the app.
+	if tc.AllowForegroundLeave {
+		return
+	}
+	expectedPkg := ste.config.AndroidPackage
+	if expectedPkg == "" {
+		return
+	}
+	device := ste.config.AndroidDevice
+	if device == "" && len(ste.config.AndroidDevices) > 0 {
+		device = ste.config.AndroidDevices[0]
+	}
+	if device == "" {
+		return
+	}
+
+	fgOut, _ := osexec.CommandContext(
+		ctx,
+		"adb", "-s", device,
+		"shell", "dumpsys", "window", "windows",
+	).CombinedOutput()
+	fgStr := string(fgOut)
+	if len(fgStr) == 0 {
+		return
+	}
+	currentPkg := currentForegroundPackage(fgStr)
+	if currentPkg == "" {
+		return
+	}
+	if currentPkg == expectedPkg {
+		return
+	}
+	// Launcher foreground is a legitimate intermediate state for
+	// tv-channel-* / tv-watch-next-* tests that navigate to home to
+	// select a channel tile. Only relaunch on true foreign-app drift.
+	if isLauncherPackage(currentPkg) {
+		return
+	}
+
+	// Foreground drift detected — extract current focus for finding.
+	currentFocus := extractLine(fgStr, "mCurrentFocus=")
+	if currentFocus == "" {
+		currentFocus = "(unknown - dumpsys window windows did not report mCurrentFocus)"
+	}
+
+	fmt.Printf(
+		"  [structured] [%s] ⚠ FOREGROUND DRIFT at step %d: "+
+			"expected %s, found %q (package=%s) — force-stopping and relaunching\n",
+		tc.ID, stepNum, expectedPkg, currentFocus, currentPkg,
+	)
+
+	// Force-stop the hijacker so subsequent DPAD events cannot land
+	// back in it.
+	_, _ = osexec.CommandContext(
+		ctx,
+		"adb", "-s", device,
+		"shell", "am", "force-stop", currentPkg,
+	).CombinedOutput()
+
+	if ste.onFinding != nil {
+		ste.onFinding(analysis.AnalysisFinding{
+			Category: analysis.CategoryFunctional,
+			Severity: analysis.SeverityCritical,
+			Title: fmt.Sprintf(
+				"Foreground Drift During Structured Test: %s (step %d)",
+				tc.Name, stepNum,
+			),
+			Description: fmt.Sprintf(
+				"Test case %q step %d detected that the target app "+
+					"(%s) is no longer in the foreground. Current focus: %s. "+
+					"This typically happens when a previous step's "+
+					"DPAD_ENTER landed on a non-Catalogizer Android TV "+
+					"home channel tile (RuTube, IPTV Pro, YouTube TV, "+
+					"mitv-videoplayer) and launched that app. All "+
+					"subsequent keypresses in the test landed in the "+
+					"wrong app, producing false-positive PASS results. "+
+					"The guard force-relaunched the target app; this "+
+					"test's remaining steps were not trusted.",
+				tc.ID, stepNum, expectedPkg, currentFocus,
+			),
+			Platform: platform,
+			AcceptanceCriteria: fmt.Sprintf(
+				"Every structured test step must execute against package %s. "+
+					"Foreground drift into any other package is a CRITICAL "+
+					"test-infrastructure failure and voids the step's result.",
+				expectedPkg,
+			),
+		})
+	}
+
+	// IMPORTANT: do NOT append `--es qa_username/qa_password`
+	// extras to the launch intent.
+	//
+	// HelixQA's "Fully Autonomous LLM-Driven QA" constitution
+	// (HelixQA/CLAUDE.md) forbids scripted navigation flows /
+	// hardcoded keystroke sequences that bypass the LLM. The
+	// consuming-project side (Catalogizer's "Universal Solution
+	// Principle" in CLAUDE.md) forbids QA-only receivers /
+	// test-only Activity extras / app-side bypasses — the rule
+	// is: fix detection in HelixQA, never in the app under test.
+	//
+	// Together those rules mean any `qa_username` extra HelixQA
+	// emits is dead instrumentation: no app on the supported
+	// platforms will read it, and emitting it lets a reviewer
+	// believe a working bypass exists when it does not. That is
+	// the exact bluff Article XI bans. The ADBExecutor.Type()
+	// path now opens Compose-TV's IME via DPAD_CENTER before
+	// typing (see pkg/navigator/executor.go), which is the real
+	// fix for the form-fill failure mode that motivated the
+	// extras in the first place.
+	launchArgs := []string{
+		"-s", device, "shell", "am", "start",
+		"-n", expectedPkg + "/.ui.MainActivity",
+	}
+	_, _ = osexec.CommandContext(ctx, "adb", launchArgs...).CombinedOutput()
+	time.Sleep(3 * time.Second)
+}
+
+// verifyOutcome uses LLM vision to verify if the screenshot matches expected state.
+// Returns (verified, actualDescription, providerError).
+func (ste *StructuredTestExecutor) verifyOutcome(
+	ctx context.Context,
+	screenshot []byte,
+	expected string,
+) (bool, string, error) {
+	if ste.vision == nil || !ste.vision.SupportsVision() {
+		return false, "No vision provider available - cannot verify outcome", errors.New("no vision provider")
+	}
+
+	prompt := fmt.Sprintf(
+		"Analyze this screenshot and determine if the expected state is met.\n\n"+
+			"Expected: %s\n\n"+
+			"Respond with ONLY:\n"+
+			"VERIFIED: yes/no\n"+
+			"ACTUAL: brief description of what's visible",
+		expected,
+	)
+
+	resp, err := ste.vision.Vision(ctx, screenshot, prompt)
+	if err != nil {
+		return false, fmt.Sprintf("Vision analysis failed: %v", err), err
+	}
+
+	// Parse response
+	response := ""
+	if resp != nil {
+		response = resp.Content
+	}
+
+	// FIX-QA-2026-04-21-013: the original implementation required
+	// the exact literal "VERIFIED: yes" in the response. That's fine
+	// for navigation-tuned providers that follow structured-output
+	// prompts, but astica (first-ranked for the structured phase on
+	// this project) returns rich natural-language descriptions and
+	// never emits "VERIFIED: yes" literally. The old code then
+	// treated every structured test as failing on vision verification
+	// even when the action succeeded. Fix is tri-state:
+	//
+	//   1. Exact "VERIFIED: yes" / "VERIFIED: no" → honour it.
+	//   2. Response is non-empty natural language → AMBIGUOUS;
+	//      return providerErr so the caller falls back to action
+	//      success (which for structured-bank tests is usually a
+	//      binary "action ran without adb error").
+	//   3. Response empty → providerErr (same fallback).
+	actual := extractLine(response, "ACTUAL:")
+	switch {
+	case containsIgnoreCase(response, "VERIFIED: yes"):
+		return true, actual, nil
+	case containsIgnoreCase(response, "VERIFIED: no"):
+		return false, actual, nil
+	case strings.TrimSpace(response) == "":
+		return false, "Vision response empty — cannot verify",
+			errors.New("vision response empty")
+	default:
+		// Non-empty but not in the exact format. Treat as ambiguous
+		// so the executor defers to actionResult.Success. Preserve
+		// the raw response so the test log still shows what the
+		// vision provider saw.
+		snippet := response
+		if len(snippet) > 200 {
+			snippet = snippet[:200] + "…"
+		}
+		return false,
+			"Vision response not in VERIFIED format: " + snippet,
+			errors.New("vision response ambiguous")
+	}
+}
+
+// testAppliesToPlatforms checks if a test case applies to configured platforms.
+func (ste *StructuredTestExecutor) testAppliesToPlatforms(
+	tc testbank.TestCase,
+) bool {
+	if len(tc.Platforms) == 0 {
+		return true // Applies to all platforms
+	}
+
+	for _, tp := range tc.Platforms {
+		for _, cp := range ste.config.Platforms {
+			if string(tp) == cp ||
+				tp == config.PlatformAll {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// getPlatformForStep returns the platform for a step.
+func (ste *StructuredTestExecutor) getPlatformForStep(
+	step testbank.TestStep,
+) string {
+	if step.Platform != "" {
+		return string(step.Platform)
+	}
+	// Default to first configured platform
+	if len(ste.config.Platforms) > 0 {
+		return ste.config.Platforms[0]
+	}
+	return "android"
+}
+
+// priorityToSeverity converts test priority to analysis severity.
+func (ste *StructuredTestExecutor) priorityToSeverity(
+	p testbank.Priority,
+) analysis.FindingSeverity {
+	switch p {
+	case testbank.PriorityCritical:
+		return analysis.SeverityCritical
+	case testbank.PriorityHigh:
+		return analysis.SeverityHigh
+	case testbank.PriorityMedium:
+		return analysis.SeverityMedium
+	default:
+		return analysis.SeverityLow
+	}
+}
+
+// StructuredExecutionResult holds the results of structured test execution.
+type StructuredExecutionResult struct {
+	TestCasesRun     int
+	TestCasesPassed  int
+	TestCasesFailed  int
+	TestCasesSkipped int
+	StepsExecuted    int
+	Findings         []analysis.AnalysisFinding
+}
+
+// TestStepResult represents the outcome of a single test step.
+type TestStepResult struct {
+	StepName string
+	Passed   bool
+	Skipped  bool
+	Actual   string
+}
+
+// ActionResult represents the outcome of performing an action.
+type ActionResult struct {
+	Success bool
+	Skipped bool
+	Message string
+}
+
+// Helper functions
+func containsIgnoreCase(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+
+// extractLine scans text line-by-line and returns the first line whose
+// trimmed form contains (or starts with) prefix. Returns the trimmed
+// line. Returns "" if no match. Used to pluck mCurrentFocus= out of a
+// multi-kilobyte dumpsys dump without confusing the foreground-drift
+// guard (FIX-QA-2026-04-21-019 part 3 — previously a stub that returned
+// the entire text, which made currentForegroundPackage see the whole
+// dumpsys as one giant line and classify InputMethod windows as drift).
+func extractLine(text, prefix string) string {
+	for _, raw := range strings.Split(text, "\n") {
+		line := strings.TrimSpace(raw)
+		if line == "" {
+			continue
+		}
+		if strings.HasPrefix(line, prefix) || strings.Contains(line, prefix) {
+			return line
+		}
+	}
+	return ""
+}
+
+// truncateOutput clips command output to n runes so error messages
+// stay readable when a failing adb shell call produces a wall of
+// logcat or dumpsys text.
+func truncateOutput(b []byte, n int) string {
+	s := string(b)
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "..."
+}
+
+// parseIntField parses a trimmed decimal integer. Returns error on
+// an empty or malformed input so callers can fall back to defaults.
+func parseIntField(s string) (int, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0, fmt.Errorf("empty")
+	}
+	var n int
+	if _, err := fmt.Sscanf(s, "%d", &n); err != nil {
+		return 0, err
+	}
+	return n, nil
+}
+
+// parsePlaybackCheckArgs splits a playback_check value into a
+// package filter and a minimum PlaybackState integer. Accepts:
+//   - ""                  -> ("*", 3)
+//   - "com.example"       -> ("com.example", 3)
+//   - "com.example:2"     -> ("com.example", 2)
+//   - "*"                 -> ("*", 3)
+func parsePlaybackCheckArgs(s string) (string, int) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "*", 3
+	}
+	pkg := s
+	minState := 3
+	if idx := strings.Index(s, ":"); idx > 0 {
+		pkg = strings.TrimSpace(s[:idx])
+		if n, err := parseIntField(s[idx+1:]); err == nil && n >= 0 {
+			minState = n
+		}
+	}
+	if pkg == "" {
+		pkg = "*"
+	}
+	return pkg, minState
+}
+
+// verifyPlaybackState scans the full output of
+// `dumpsys media_session` looking for a session record whose
+// package matches (or any package if pkg == "*") AND whose
+// PlaybackState integer is >= minState. Returns (true, reason)
+// when a matching session is found and (false, reason) otherwise.
+//
+// The relevant dumpsys lines look like:
+//
+//	package=<app package under test>
+//	state=PlaybackState {state=3, position=12345, ...
+//
+// PlaybackState integers: 0=NONE, 1=STOPPED, 2=PAUSED, 3=PLAYING,
+// 4=FAST_FORWARDING, 5=REWINDING, 6=BUFFERING, 7=ERROR, 8=CONNECTING,
+// 9=SKIPPING_TO_PREVIOUS, 10=SKIPPING_TO_NEXT, 11=SKIPPING_TO_QUEUE_ITEM.
+// We treat state >= minState (default 3) as "playing or better",
+// which matches the intent of "is the app actually playing something".
+func verifyPlaybackState(dump, pkg string, minState int) (bool, string) {
+	lines := strings.Split(dump, "\n")
+	var currentPkg string
+	var bestState = -1
+	var bestPkg string
+	for _, raw := range lines {
+		line := strings.TrimSpace(raw)
+		if strings.HasPrefix(line, "package=") {
+			currentPkg = strings.TrimPrefix(line, "package=")
+			continue
+		}
+		if !strings.Contains(line, "PlaybackState {state=") {
+			continue
+		}
+		// Extract the integer after "state="
+		idx := strings.Index(line, "state=")
+		if idx < 0 {
+			continue
+		}
+		rest := line[idx+len("state="):]
+		n := 0
+		for _, r := range rest {
+			if r < '0' || r > '9' {
+				break
+			}
+			n = n*10 + int(r-'0')
+		}
+		if pkg != "*" && currentPkg != pkg {
+			continue
+		}
+		if n > bestState {
+			bestState = n
+			bestPkg = currentPkg
+		}
+	}
+	if bestState < 0 {
+		if pkg == "*" {
+			return false, "no media session found in dumpsys media_session"
+		}
+		return false, fmt.Sprintf("no media session found for package %q", pkg)
+	}
+	if bestState < minState {
+		return false, fmt.Sprintf("%s state=%d (want >=%d)", bestPkg, bestState, minState)
+	}
+	return true, fmt.Sprintf("%s state=%d", bestPkg, bestState)
+}
+
+// framesDiffer compares two PNG screenshots and returns whether
+// they visually differ by more than ~1 % of sampled pixels. Uses
+// the same 9x9 grid as IsBlankScreenshot but aggregates across
+// 17x17 = 289 points for a tighter signal. Suitable for confirming
+// that a video player is actually rendering new frames.
+func framesDiffer(aBytes, bBytes []byte) (bool, float64) {
+	a, _, errA := image.Decode(bytes.NewReader(aBytes))
+	b, _, errB := image.Decode(bytes.NewReader(bBytes))
+	if errA != nil || errB != nil {
+		// If we can't decode, be conservative and say they differ
+		// so we do not block a test on a decoding bug.
+		return true, 100.0
+	}
+	ba := a.Bounds()
+	bb := b.Bounds()
+	w := ba.Dx()
+	h := ba.Dy()
+	if w != bb.Dx() || h != bb.Dy() {
+		return true, 100.0
+	}
+	const gridN = 17
+	var diffCount, total int
+	for iy := 1; iy <= gridN; iy++ {
+		for ix := 1; ix <= gridN; ix++ {
+			x := ba.Min.X + w*ix/(gridN+1)
+			y := ba.Min.Y + h*iy/(gridN+1)
+			ar, ag, ab, _ := a.At(x, y).RGBA()
+			br, bg, bb2, _ := b.At(x+(bb.Min.X-ba.Min.X), y+(bb.Min.Y-ba.Min.Y)).RGBA()
+			ar, ag, ab = ar>>8, ag>>8, ab>>8
+			br, bg, bb2 = br>>8, bg>>8, bb2>>8
+			d := absU32(ar, br) + absU32(ag, bg) + absU32(ab, bb2)
+			if d > 30 {
+				diffCount++
+			}
+			total++
+		}
+	}
+	if total == 0 {
+		return false, 0
+	}
+	pct := float64(diffCount) * 100.0 / float64(total)
+	// >=1 % of sample points differ by >30 per-channel = real motion
+	return pct >= 1.0, pct
+}
+
+func absU32(a, b uint32) uint32 {
+	if a > b {
+		return a - b
+	}
+	return b - a
+}
