@@ -2087,6 +2087,11 @@ func (tui *TerminalUI) showQA() {
 	actions.AddItem(tview.NewBox(), 1, 0, false)
 
 	if tui.qaEngine != nil && tui.qaEngine.Enabled() {
+		startBtn := tview.NewButton("Start Session").SetSelectedFunc(func() {
+			tui.showStartQAForm()
+		})
+		actions.AddItem(startBtn, 0, 1, false)
+
 		cancelBtn := tview.NewButton("Cancel Selected").SetSelectedFunc(func() {
 			row, _ := sessionTable.GetSelection()
 			if row > 0 {
@@ -2118,6 +2123,62 @@ func (tui *TerminalUI) showQA() {
 
 	tui.content.SwitchToPage("qa")
 	tui.content.AddPage("qa", qaView, true, true)
+}
+
+// showStartQAForm displays a form for starting a new QA session.
+func (tui *TerminalUI) showStartQAForm() {
+	form := tview.NewForm()
+	form.SetBorder(true).SetTitle("Start QA Session").SetTitleAlign(tview.AlignLeft)
+
+	var platformsStr, banksStr string
+	var autonomous bool
+
+	form.AddInputField("Platforms", "web", 30, nil, func(text string) {
+		platformsStr = text
+	})
+	form.AddInputField("Banks", "default", 30, nil, func(text string) {
+		banksStr = text
+	})
+	form.AddCheckbox("Autonomous", false, func(checked bool) {
+		autonomous = checked
+	})
+
+	form.AddButton("Start", func() {
+		if platformsStr == "" || banksStr == "" {
+			tui.statusBar.SetText("[red]Platforms and banks are required")
+			tui.pages.RemovePage("startQAForm")
+			return
+		}
+		platforms := strings.Split(platformsStr, ",")
+		for i := range platforms {
+			platforms[i] = strings.TrimSpace(platforms[i])
+		}
+		banks := strings.Split(banksStr, ",")
+		for i := range banks {
+			banks[i] = strings.TrimSpace(banks[i])
+		}
+
+		sessionID := uuid.New().String()
+		_, err := tui.qaEngine.StartSession(context.Background(), sessionID, platforms, banks, autonomous)
+		if err != nil {
+			tui.statusBar.SetText(fmt.Sprintf("[red]Start session failed: %v", err))
+		} else {
+			tui.statusBar.SetText(fmt.Sprintf("[green]Session %s started", sessionID[:8]))
+		}
+		tui.pages.RemovePage("startQAForm")
+		tui.showQA()
+	})
+
+	form.AddButton("Cancel", func() {
+		tui.pages.RemovePage("startQAForm")
+	})
+
+	modal := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(tview.NewBox(), 0, 1, false).
+		AddItem(form, 15, 0, true).
+		AddItem(tview.NewBox(), 0, 1, false)
+
+	tui.pages.AddPage("startQAForm", modal, true, true)
 }
 
 // Run starts the Terminal UI application
