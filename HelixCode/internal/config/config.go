@@ -505,6 +505,22 @@ func validateConfig(cfg *Config) error {
 		}
 	}
 
+	// QA validation
+	if cfg.QA.Enabled {
+		if cfg.QA.CoverageTarget < 0 || cfg.QA.CoverageTarget > 1 {
+			return fmt.Errorf("qa.coverage_target must be between 0 and 1, got: %.2f", cfg.QA.CoverageTarget)
+		}
+		for _, format := range cfg.QA.ReportFormats {
+			lower := strings.ToLower(format)
+			if lower != "markdown" && lower != "html" && lower != "json" {
+				return fmt.Errorf("qa.report_formats contains invalid format: %s", format)
+			}
+		}
+		if cfg.QA.OutputDir == "" {
+			cfg.QA.OutputDir = "qa-results"
+		}
+	}
+
 	return nil
 }
 
