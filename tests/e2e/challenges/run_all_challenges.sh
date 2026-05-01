@@ -26,7 +26,7 @@ echo ""
 PASSED=0
 FAILED=0
 
-for phase in 1 2 3 4 5 6 7; do
+for phase in 1 2 3 4 5 6 7 8; do
     echo "=== Running Phase $phase Challenge ==="
     SCRIPT=$(ls tests/e2e/challenges/phase${phase}_*challenge.sh 2>/dev/null | head -1)
     if [ -z "$SCRIPT" ]; then
