@@ -51,6 +51,8 @@ tags:
     description: AI memory system management
   - name: System
     description: System status and metrics
+  - name: QA
+    description: Quality Assurance session management and reporting
 
 security:
   - BearerAuth: []
@@ -1312,6 +1314,241 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MetricsResponse'
+
+  /qa/session:
+    post:
+      tags:
+        - QA
+      summary: Start a QA session
+      description: Start a new quality assurance test session with specified platforms and test banks
+      operationId: startQASession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartSessionRequest'
+      responses:
+        '201':
+          description: QA session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QASession'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /qa/sessions:
+    get:
+      tags:
+        - QA
+      summary: List all QA sessions
+      description: Retrieve a list of all QA sessions and their current states
+      operationId: listQASessions
+      responses:
+        '200':
+          description: List of QA sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QASessionList'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /qa/session/{id}/status:
+    get:
+      tags:
+        - QA
+      summary: Get QA session status
+      description: Retrieve the current status and progress of a QA session
+      operationId: getQASessionStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID
+      responses:
+        '200':
+          description: Session status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QASession'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /qa/session/{id}/report:
+    get:
+      tags:
+        - QA
+      summary: Get QA session report
+      description: Retrieve the generated report for a completed QA session
+      operationId: getQASessionReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [markdown, html, json]
+            default: markdown
+          description: Report format
+      responses:
+        '200':
+          description: Report retrieved
+          content:
+            text/markdown:
+              schema:
+                type: string
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Session not completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /qa/session/{id}/screenshot/{name}:
+    get:
+      tags:
+        - QA
+      summary: Capture a screenshot
+      description: Capture a screenshot for the specified platform during a QA session
+      operationId: getQASessionScreenshot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Screenshot name
+        - name: platform
+          in: query
+          schema:
+            type: string
+          description: Target platform override
+        - name: encode
+          in: query
+          schema:
+            type: string
+            enum: [base64]
+          description: Encoding format
+      responses:
+        '200':
+          description: Screenshot captured
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /qa/session/{id}:
+    delete:
+      tags:
+        - QA
+      summary: Cancel a QA session
+      description: Cancel a running QA session
+      operationId: cancelQASession
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID
+      responses:
+        '200':
+          description: Session cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cancelled:
+                    type: boolean
+                  session_id:
+                    type: string
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: QA engine disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -2629,3 +2866,95 @@ components:
                   type: integer
                 connections_idle:
                   type: integer
+
+    StartSessionRequest:
+      type: object
+      required:
+        - platforms
+        - banks
+      properties:
+        platforms:
+          type: array
+          items:
+            type: string
+          example: ["web", "android"]
+          description: Target platforms to test
+        banks:
+          type: array
+          items:
+            type: string
+          example: ["./banks/api", "./banks/web"]
+          description: Test bank paths
+        autonomous:
+          type: boolean
+          default: false
+          description: Enable autonomous QA mode
+        coverage_target:
+          type: number
+          format: float
+          default: 0.9
+          description: Desired feature coverage (0-1)
+        curiosity_enabled:
+          type: boolean
+          default: true
+          description: Enable curiosity-driven exploration
+
+    QASession:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+          example: running
+        phase:
+          type: string
+          example: "execution"
+        phase_progress:
+          type: number
+          format: float
+          example: 0.75
+          description: Phase completion (0-1)
+        platforms:
+          type: array
+          items:
+            type: string
+          example: ["web", "android"]
+        banks:
+          type: array
+          items:
+            type: string
+          example: ["./banks/api"]
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        report_path:
+          type: string
+          example: "./qa-results/report.md"
+
+    QASessionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/QASession'
+
+    ScreenshotResponse:
+      type: object
+      properties:
+        data:
+          type: string
+          description: Base64-encoded image data
+        path:
+          type: string
+        platform:
+          type: string
+        size:
+          type: integer
+          description: Image size in bytes
