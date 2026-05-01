@@ -14,6 +14,7 @@ import (
 	hqaConfig "digital.vasic.helixqa/pkg/config"
 	hqaEvidence "digital.vasic.helixqa/pkg/evidence"
 	hqaOrchestrator "digital.vasic.helixqa/pkg/orchestrator"
+	hqaScreenshot "digital.vasic.helixqa/pkg/screenshot"
 	"digital.vasic.helixqa/pkg/reporter"
 )
 
@@ -218,6 +219,39 @@ func (e *Engine) GenerateReport(state *SessionState, format string) ([]byte, str
 	}
 	data, err := os.ReadFile(path)
 	return data, path, err
+}
+
+// CaptureScreenshot captures a standalone screenshot for the given platform.
+func (e *Engine) CaptureScreenshot(ctx context.Context, platform string, opts hqaScreenshot.CaptureOptions) (*hqaScreenshot.Result, error) {
+	if !e.enabled {
+		return nil, fmt.Errorf("QA is disabled")
+	}
+	mgr := hqaScreenshot.NewManager(nil)
+	// Register all available engines
+	mgr.RegisterEngine(hqaConfig.PlatformWeb, hqaScreenshot.NewWebEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformLinux, hqaScreenshot.NewLinuxEngine())
+	mgr.RegisterEngine(hqaConfig.PlatformIOS, hqaScreenshot.NewIOSEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformAndroid, hqaScreenshot.NewAndroidEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformDesktop, hqaScreenshot.NewLinuxEngine())
+	return mgr.Capture(ctx, hqaConfig.Platform(platform), opts)
+}
+
+// ListScreenshotEngines returns the names of supported screenshot engines.
+func (e *Engine) ListScreenshotEngines(ctx context.Context) []string {
+	if !e.enabled {
+		return nil
+	}
+	mgr := hqaScreenshot.NewManager(nil)
+	mgr.RegisterEngine(hqaConfig.PlatformWeb, hqaScreenshot.NewWebEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformLinux, hqaScreenshot.NewLinuxEngine())
+	mgr.RegisterEngine(hqaConfig.PlatformIOS, hqaScreenshot.NewIOSEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformAndroid, hqaScreenshot.NewAndroidEngine(""))
+	mgr.RegisterEngine(hqaConfig.PlatformDesktop, hqaScreenshot.NewLinuxEngine())
+	var names []string
+	for _, plat := range mgr.SupportedPlatforms(ctx) {
+		names = append(names, string(plat))
+	}
+	return names
 }
 
 func buildQAConfig(cfg *config.Config) (*hqaConfig.Config, error) {

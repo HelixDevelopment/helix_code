@@ -290,6 +290,14 @@ func (s *Server) setupRoutes() {
 			qa.GET("/session/:id/screenshot/:name", s.getQASessionScreenshot)
 			qa.DELETE("/session/:id", s.cancelQASession)
 		}
+
+		// Screenshot routes (standalone)
+		screenshot := api.Group("/screenshot")
+		screenshot.Use(s.authMiddleware())
+		{
+			screenshot.GET("/engines", s.listScreenshotEngines)
+			screenshot.GET("/:platform", s.captureScreenshot)
+		}
 	}
 
 	// WebSocket routes
