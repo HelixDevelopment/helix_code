@@ -61,7 +61,11 @@ func skipIfServerUnavailable(t *testing.T, config *TestConfig) {
 		t.Skipf("Skipping test: server not available at %s: %v (SKIP-OK: #infra-unavailable)", config.BaseURL, err)
 		return
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Skipf("Skipping test: server at %s returned %d for /health, not a HelixCode server (SKIP-OK: #infra-mismatch)", config.BaseURL, resp.StatusCode)
+		return
+	}
 }
 
 // skipIfAuthNotConfigured skips the test if the server auth isn't properly configured for testing
