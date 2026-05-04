@@ -330,3 +330,19 @@ func (p *LlamaCPPProvider) Close() error {
 	log.Println("✅ Llama.cpp provider closed")
 	return nil
 }
+
+// GetContextWindow returns the model's context window size in tokens.
+// Uses the ContextSize from the LlamaConfig when set; falls back to 200_000.
+func (p *LlamaCPPProvider) GetContextWindow() int {
+	if p.config.ContextSize > 0 {
+		return p.config.ContextSize
+	}
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the llama.cpp /tokenize endpoint.
+func (p *LlamaCPPProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}

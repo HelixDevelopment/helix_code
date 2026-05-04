@@ -254,6 +254,20 @@ func (p *OllamaProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — local Ollama models vary; 200k is a safe upper bound
+// pending a Phase 3 upgrade to query /api/show for the actual context length.
+func (p *OllamaProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to query the Ollama tokenize endpoint when available.
+func (p *OllamaProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // Private helper methods
 
 func (p *OllamaProvider) discoverModels() error {

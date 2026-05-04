@@ -714,3 +714,27 @@ func (ap *AnthropicProvider) Close() error {
 	log.Printf("Anthropic provider closed")
 	return nil
 }
+
+// GetContextWindow returns the context window size in tokens for the configured model.
+// All current Claude models (3.x, 4.x) support 200k tokens; claude-2 variants support 100k.
+func (ap *AnthropicProvider) GetContextWindow() int {
+	// Use the first configured model name as the active model.
+	model := ""
+	if len(ap.config.Models) > 0 {
+		model = ap.config.Models[0]
+	}
+	switch {
+	case strings.Contains(model, "claude-2"):
+		return 100_000
+	default:
+		// claude-3, claude-3.5, claude-3.7, claude-4 — all 200k
+		return 200_000
+	}
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — providers SHOULD
+// override with their native tokenizer (Phase 3 sub-spec).
+func (ap *AnthropicProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}

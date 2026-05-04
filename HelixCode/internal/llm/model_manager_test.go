@@ -54,6 +54,14 @@ func (m *MockTestProvider) Close() error {
 	return nil
 }
 
+func (m *MockTestProvider) GetContextWindow() int {
+	return 200_000
+}
+
+func (m *MockTestProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // ========================================
 // NewModelManager Tests
 // ========================================

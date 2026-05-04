@@ -421,3 +421,11 @@ func (m *MockRegTestProvider) GetHealth(ctx context.Context) (*ProviderHealth, e
 func (m *MockRegTestProvider) Close() error {
 	return nil
 }
+
+func (m *MockRegTestProvider) GetContextWindow() int {
+	return 200_000
+}
+
+func (m *MockRegTestProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}

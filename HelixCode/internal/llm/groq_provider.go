@@ -301,6 +301,20 @@ func (gp *GroqProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — Groq models (Llama, Mixtral, Gemma) range from 8k–128k;
+// 200k is a safe upper bound pending a Phase 3 model-aware upgrade.
+func (gp *GroqProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the Groq tokenize endpoint.
+func (gp *GroqProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // Helper methods
 
 func getGroqModels() []ModelInfo {

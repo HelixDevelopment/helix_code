@@ -300,6 +300,16 @@ func (p *ToolCallingProvider) Close() error {
 	return p.baseProvider.Close()
 }
 
+// GetContextWindow delegates to the underlying base provider.
+func (p *ToolCallingProvider) GetContextWindow() int {
+	return p.baseProvider.GetContextWindow()
+}
+
+// CountTokens delegates to the underlying base provider.
+func (p *ToolCallingProvider) CountTokens(text string) (int, error) {
+	return p.baseProvider.CountTokens(text)
+}
+
 // Helper methods
 
 func (p *ToolCallingProvider) buildToolEnhancedPrompt(prompt string, tools []Tool) string {

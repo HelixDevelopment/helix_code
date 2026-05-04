@@ -284,6 +284,19 @@ func (cp *CopilotProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — GitHub Copilot routes to GPT-4o/Claude variants; 200k is safe.
+func (cp *CopilotProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the GitHub Copilot tokenize endpoint.
+func (cp *CopilotProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // Helper methods
 
 func (cp *CopilotProvider) initializeModels() {

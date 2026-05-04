@@ -1007,3 +1007,16 @@ func (vp *VertexAIProvider) Close() error {
 	log.Printf("Vertex AI provider closed")
 	return nil
 }
+
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — Vertex AI Gemini models support 1M+; 200k is a safe conservative value.
+func (vp *VertexAIProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the Vertex AI countTokens endpoint.
+func (vp *VertexAIProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}

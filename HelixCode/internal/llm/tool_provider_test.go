@@ -44,6 +44,8 @@ func (m *MockProvider) GenerateStream(ctx context.Context, req *LLMRequest, ch c
 func (m *MockProvider) IsAvailable(ctx context.Context) bool                      { return true }
 func (m *MockProvider) GetHealth(ctx context.Context) (*ProviderHealth, error)    { return &ProviderHealth{Status: "healthy"}, nil }
 func (m *MockProvider) Close() error                                              { return nil }
+func (m *MockProvider) GetContextWindow() int                                     { return 200_000 }
+func (m *MockProvider) CountTokens(text string) (int, error)                      { return CharBasedTokenCount(text) }
 
 // MockToolExecutor implements ToolExecutor for testing
 type MockToolExecutor struct {

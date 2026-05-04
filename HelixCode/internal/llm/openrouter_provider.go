@@ -178,6 +178,19 @@ func (orp *OpenRouterProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — OpenRouter routes to many models; 200k is a safe upper bound.
+func (orp *OpenRouterProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the OpenRouter tokenize endpoint.
+func (orp *OpenRouterProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // Helper methods
 
 func (orp *OpenRouterProvider) initializeModels() {

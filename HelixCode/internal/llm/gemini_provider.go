@@ -674,3 +674,16 @@ func (gp *GeminiProvider) Close() error {
 	log.Printf("Gemini provider closed")
 	return nil
 }
+
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 (Gemini 1.5 Pro/Flash support 1M+; 200k is a safe conservative value).
+func (gp *GeminiProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the Gemini countTokens API endpoint.
+func (gp *GeminiProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}

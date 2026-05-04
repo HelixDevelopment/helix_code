@@ -10,8 +10,8 @@
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
 - **Active feature:** F01 — Auto-Compaction System
-- **Active task:** P1-F01-T03 — implement Provider methods across all *_provider.go
-- **Last completed:** P0-16 — Phase 0 close-out (diagrams, DEPRECATED.md, evidence, push)
+- **Active task:** P1-F01-T04 — ThrashingGuard with TDD
+- **Last completed:** P1-F01-T03 — implement Provider methods across all *_provider.go
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -51,7 +51,7 @@
 ## Active feature task list (P1-F01: Auto-Compaction)
 - [x] P1-F01-T01 — bootstrap Phase 1 evidence + advance PROGRESS
 - [x] P1-F01-T02 — add GetContextWindow + CountTokens to Provider interface  ← commit (T02)
-- [ ] P1-F01-T03 — implement Provider methods across all *_provider.go
+- [x] P1-F01-T03 — implement Provider methods across all *_provider.go  ← commit (T03)
 - [ ] P1-F01-T04 — ThrashingGuard with TDD
 - [ ] P1-F01-T05 — CompactionMetadata with TDD
 - [ ] P1-F01-T06 — AutoCompactor with TDD

@@ -370,6 +370,20 @@ func (op *OpenAIProvider) updateHealth(status string, latency time.Duration, err
 	op.lastHealth.LastCheck = time.Now()
 }
 
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — individual deployments SHOULD configure this to match
+// the actual model (e.g. gpt-4o supports 128k, gpt-4-turbo supports 128k).
+func (op *OpenAIProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to tiktoken for accurate OpenAI tokenization.
+func (op *OpenAIProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
 // OpenAI API types
 
 type OpenAIRequest struct {

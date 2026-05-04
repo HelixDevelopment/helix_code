@@ -83,6 +83,14 @@ func (m *MockLLMProvider) Close() error {
 	return nil
 }
 
+func (m *MockLLMProvider) GetContextWindow() int {
+	return 200_000
+}
+
+func (m *MockLLMProvider) CountTokens(text string) (int, error) {
+	return llm.CharBasedTokenCount(text)
+}
+
 // Test helper functions
 
 func createTestMessage(id string, role MessageRole, content string) *Message {

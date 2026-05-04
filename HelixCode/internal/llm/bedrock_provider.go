@@ -1071,3 +1071,16 @@ func (bp *BedrockProvider) Close() error {
 	log.Printf("AWS Bedrock provider closed")
 	return nil
 }
+
+// GetContextWindow returns the model's context window size in tokens.
+// Default: 200_000 — AWS Bedrock Claude models support 200k; Titan models vary.
+func (bp *BedrockProvider) GetContextWindow() int {
+	return 200_000
+}
+
+// CountTokens returns an estimated token count for text.
+// Uses char-based fallback (1 token ≈ 3.5 chars) — Phase 3 will upgrade
+// to the Bedrock tokenize endpoint.
+func (bp *BedrockProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
