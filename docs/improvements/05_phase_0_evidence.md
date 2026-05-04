@@ -996,7 +996,7 @@ make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
 
 **Tasks completed:** 16 plan tasks + 2 added during execution (T08.5, T08.7) + 1 deferred (T02 cosmetic) = 17 closed + 1 deferred + 1 polish-fix-it.
 
-**Final SHA on all 4 remotes:** (filled in after final commit — see commit log)
+**Final SHA on all 4 remotes:** `3676f411073f1fa9ac4841eb184d3a6734231fd3` — all 4 remotes (github, gitlab, origin, upstream) converge at this SHA.
 
 **Open carry-forward items (Phase 1+):**
 1. **LLMsVerifier dual-pin divergence** — `Dependencies/HelixDevelopment/LLMsVerifier` ahead of `HelixAgent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
