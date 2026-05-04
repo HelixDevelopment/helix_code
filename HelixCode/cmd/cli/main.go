@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -15,6 +16,8 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/server"
+	"dev.helix.code/internal/tools/confirmation"
+	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 )
@@ -25,6 +28,8 @@ type CLI struct {
 	llmProvider        llm.Provider
 	notificationEngine *notification.NotificationEngine
 	verifierAdapter    *verifier.Adapter
+	permissionMode     string
+	permissionsEngine  *permissions.Engine
 }
 
 // NewCLI creates a new CLI instance
@@ -53,6 +58,40 @@ func NewCLI() *CLI {
 	}
 }
 
+// initPermissions bootstraps the permissions.Engine with rules loaded from
+// ~/.helixcode/permissions.yaml (user scope) and <cwd>/.helixcode/permissions.yaml
+// (project scope), then registers a default confirmation.Policy with pe.
+//
+// CONCERN (T10 / Phase 3): pe is a locally constructed PolicyEngine that is not
+// yet wired into the tool execution path. The --permission-mode flag is parsed
+// and validated here, and the Engine is ready, but actual tool calls are not yet
+// gated by it. T10 will introduce the `permissions` subcommand; Phase 3 will
+// thread pe through the session/tool dispatcher so denies block execution.
+func (c *CLI) initPermissions(ctx context.Context, pe *confirmation.PolicyEngine) error {
+	if c.permissionMode != "" && !permissions.IsValidMode(c.permissionMode) {
+		return fmt.Errorf("invalid --permission-mode %q (valid: %v)", c.permissionMode, permissions.ValidModes)
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("resolving user home dir: %w", err)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolving cwd: %w", err)
+	}
+	loader := &permissions.FileLoader{
+		UserPath:    filepath.Join(home, ".helixcode", "permissions.yaml"),
+		ProjectPath: filepath.Join(cwd, ".helixcode", "permissions.yaml"),
+		Mode:        c.permissionMode,
+	}
+	eng, err := permissions.NewEngine(ctx, loader, pe)
+	if err != nil {
+		return fmt.Errorf("initialising permissions engine: %w", err)
+	}
+	c.permissionsEngine = eng
+	return nil
+}
+
 // Run executes the CLI
 func (c *CLI) Run() error {
 	// Parse command-line flags
@@ -73,6 +112,7 @@ func (c *CLI) Run() error {
 		notifyType     = flag.String("notify-type", "info", "Notification type")
 		notifyPriority = flag.String("notify-priority", "medium", "Notification priority")
 		nonInteractive = flag.Bool("non-interactive", false, "Run in non-interactive mode")
+		permissionMode = flag.String("permission-mode", "", "permission preset: default|auto|acceptEdits|dontAsk|bypassPermissions")
 
 		// QA flags
 		qaRun        = flag.Bool("qa-run", false, "Start a QA session")
@@ -92,6 +132,16 @@ func (c *CLI) Run() error {
 	fmt.Fprintf(os.Stderr, "Flags parsed: listWorkers=%v, nonInteractive=%v\n", *listWorkers, *nonInteractive)
 
 	ctx := context.Background()
+
+	// Bootstrap permissions engine. A locally constructed PolicyEngine is used
+	// here; T10/Phase 3 will thread it into the tool dispatcher so deny rules
+	// actually block execution. For now the flag is parsed, validated, and the
+	// engine is initialised — ready for wiring.
+	c.permissionMode = *permissionMode
+	policyEngine := confirmation.NewPolicyEngine()
+	if err := c.initPermissions(ctx, policyEngine); err != nil {
+		return fmt.Errorf("permissions bootstrap: %w", err)
+	}
 
 	// Handle different commands
 	switch {
