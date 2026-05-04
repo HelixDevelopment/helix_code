@@ -102,6 +102,9 @@ type MessageMetadata struct {
 	FilePaths  []string
 	CodeBlocks int
 	HasError   bool
+	// Extra holds arbitrary key-value pairs for extensions such as
+	// CompactionMetadata (stored under MetadataKey = "context_management").
+	Extra map[string]interface{}
 }
 
 // MessageType categorizes messages
