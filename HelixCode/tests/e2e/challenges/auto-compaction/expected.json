@@ -1,0 +1,19 @@
+{
+  "must_appear_in_stdout": [
+    "AUTO_COMPACTION_TRIGGERED",
+    "tokens_before=[0-9]+",
+    "tokens_after=[0-9]+",
+    "compaction_metadata_attached"
+  ],
+  "must_not_appear": [
+    "simulated",
+    "placeholder",
+    "TODO_implement",
+    "for now"
+  ],
+  "min_duration_ms": 1000,
+  "max_duration_ms": 90000,
+  "asserts_external_state": [
+    {"type": "file_exists", "path": "tests/e2e/challenges/auto-compaction/.last-run-evidence.json"}
+  ]
+}
