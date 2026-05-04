@@ -179,6 +179,20 @@ func (pe *PolicyEngine) SetPolicy(toolName string, policy *Policy) error {
 	return nil
 }
 
+// SetDefaultPolicy replaces the fallback policy used when no tool-specific
+// policy is registered. It validates the policy before applying it.
+func (pe *PolicyEngine) SetDefaultPolicy(policy *Policy) error {
+	if err := ValidatePolicy(policy); err != nil {
+		return fmt.Errorf("invalid default policy: %w", err)
+	}
+
+	pe.mu.Lock()
+	defer pe.mu.Unlock()
+
+	pe.defaults = policy
+	return nil
+}
+
 // GetPolicy retrieves a policy for a tool
 func (pe *PolicyEngine) GetPolicy(toolName string) (*Policy, bool) {
 	pe.mu.RLock()
