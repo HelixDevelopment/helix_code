@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F02 — Permission Rule System (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active feature:** F02 — Permission Rule System
+- **Active task:** P1-F02-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F01-T11 — Feature 1 (Auto-Compaction) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -60,6 +60,21 @@
 - [x] P1-F01-T09 — integration test against real Anthropic provider  ← commit `4734f35`
 - [x] P1-F01-T10 — Challenge with expected.json + runtime evidence  ← commit `9284392`
 - [x] P1-F01-T11 — Feature 1 close-out + push  ← (this commit)
+
+## Active feature task list (P1-F02: Permission Rule System)
+- [ ] P1-F02-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F02-T02 — add Wildcard field to confirmation.Condition (TDD)
+- [ ] P1-F02-T03 — internal/tools/permissions package skeleton
+- [ ] P1-F02-T04 — shell_splitter.go + mvdan.cc/sh/v3 dep (TDD)
+- [ ] P1-F02-T05 — rule_engine.go pattern parse + match + priority (TDD)
+- [ ] P1-F02-T06 — mode_presets.go five presets + command lists (TDD)
+- [ ] P1-F02-T07 — rule_loader.go YAML + file precedence (TDD)
+- [ ] P1-F02-T08 — permissions.go facade + PolicyEngine registration
+- [ ] P1-F02-T09 — wire --permission-mode flag + integration test (no mocks)
+- [ ] P1-F02-T10 — helixcode permissions {list,add,remove,check} subcommands
+- [ ] P1-F02-T11 — /permissions slash command via internal/commands
+- [ ] P1-F02-T12 — Challenge with three runtime-evidence scenarios
+- [ ] P1-F02-T13 — Feature 2 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

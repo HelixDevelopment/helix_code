@@ -55,3 +55,16 @@ Extended the existing `internal/llm/compression/` infrastructure (CompressionCoo
 ### Open carry-forward (F01 → Phase 3)
 
 - **Per-provider native tokenizers.** Currently every provider falls back to `CharBasedTokenCount` (1 token ≈ 3.5 chars). Phase 3 sub-spec adds: tiktoken for OpenAI/Azure/Bedrock, anthropic-tokenizer for Anthropic, native counters for Gemini/Qwen/etc. The 80%-threshold trigger is correct under the fallback (conservative under-estimation), so this is a precision improvement, not a correctness fix.
+
+---
+
+## P1-F02 — Permission Rule System
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f02-permission-rules-design.md` (commit `f9e97ff`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f02-permission-rules.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)
