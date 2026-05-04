@@ -9,7 +9,7 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule)
+- **Active task:** P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + verify cascade
 - **Last completed:** P0-12 — cascade CONST-042/043 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -42,8 +42,8 @@
 - [x] P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet) ← (this commit)
 - [x] P0-11 — add Article XII (CONST-042, CONST-043) to root CONSTITUTION.md  ← (this commit)
 - [x] P0-12 — cascade CONST-042/043 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN) ← (this commit)
-- [ ] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule)
-- [ ] P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + verify cascade
+- [x] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule) ← (this commit)
+- [-] P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + verify cascade
 - [ ] P0-15 — Makefile verify-foundation target + extend ci-validate-all
 - [ ] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out
 

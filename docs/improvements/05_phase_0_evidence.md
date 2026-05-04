@@ -815,3 +815,14 @@ all-exit=0
 | AGENTS.md CONST-041 (MCP) cross-ref preserved | ✓ line 425 |
 | Secret scan clean (4 files) | ✓ all exit=0 |
 | No third-party submodule modifications | ✓ |
+
+## P0-13 — root CLAUDE.md §3.2 bluff fix
+
+**Timestamp:** 2026-05-04T23:20:29+03:00
+
+**Corrected line (CLAUDE.md:112):**
+```
+├── HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
+```
+
+**No remaining mislabel:** `grep -nE "HelixCode.*SUBMODULE" CLAUDE.md` returns only this corrected line (with "NOT a submodule" qualifier present).

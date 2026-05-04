@@ -109,7 +109,7 @@ HelixCode/                                # ← repo root (governance + submodul
 ├── docs/                                 # ARCHITECTURE.md, COMPLETE_*.md guides,
 │                                         #   bluff-proofing/, llms_verifier/, helix_qa/
 │
-├── HelixCode/      ← SUBMODULE: the actual Go application (see §3.2.1)
+├── HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
 ├── HelixQA/        ← SUBMODULE: QA / challenge-orchestration platform
 ├── Challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
 ├── Containers/     ← SUBMODULE: Docker/container artefacts
