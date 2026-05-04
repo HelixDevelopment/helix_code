@@ -8,19 +8,20 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** P1 — claude-code porting (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active phase:** P1 — claude-code feature porting
+- **Active feature:** F01 — Auto-Compaction System
+- **Active task:** P1-F01-T01 — bootstrap Phase 1 evidence + advance PROGRESS
 - **Last completed:** P0-16 — Phase 0 close-out (diagrams, DEPRECATED.md, evidence, push)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-05 (P0-16)
+- **Last touched:** 2026-05-05
 - **Blocked-on:** none
 
 ## Phase status
 | Phase | State | Started | Completed | Evidence |
 |---|---|---|---|---|
 | P0 — Foundation | done | 2026-05-04 | 2026-05-05 | docs/improvements/05_phase_0_evidence.md |
-| P1 — claude-code | pending | — | — | — |
+| P1 — claude-code | active | 2026-05-05 | — | docs/improvements/06_phase_1_evidence.md |
 | P2 — Other CLI agents | pending | — | — | — |
 | P3 — Test infra | pending | — | — | — |
 | P4 — Anti-bluff audit | pending | — | — | — |
@@ -47,11 +48,25 @@
 - [x] P0-15 — Makefile verify-foundation target + extend ci-validate-all ← (this commit)
 - [x] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out  ← (this commit)
 
+## Active feature task list (P1-F01: Auto-Compaction)
+- [-] P1-F01-T01 — bootstrap Phase 1 evidence + advance PROGRESS
+- [ ] P1-F01-T02 — add GetContextWindow + CountTokens to Provider interface
+- [ ] P1-F01-T03 — implement Provider methods across all *_provider.go
+- [ ] P1-F01-T04 — ThrashingGuard with TDD
+- [ ] P1-F01-T05 — CompactionMetadata with TDD
+- [ ] P1-F01-T06 — AutoCompactor with TDD
+- [ ] P1-F01-T07 — wire AutoCompactor into internal/agent/agent.go
+- [ ] P1-F01-T08 — wire ThrashingGuard reset into internal/session/manager.go
+- [ ] P1-F01-T09 — integration test against real Anthropic provider
+- [ ] P1-F01-T10 — Challenge with expected.json + runtime evidence
+- [ ] P1-F01-T11 — Feature 1 close-out + push
+
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
 - 2026-05-04 — Non-force pushes pre-authorised for the duration of this programme — user statement during brainstorming — see synthesis spec §7.3
 - 2026-05-04 — claude-code-source is Phase 1 priority #1 — user statement — see synthesis spec §4.1
 - 2026-05-05 — Phase 0 closed; 17 plan tasks done + 2 added during execution (T08.5, T08.7); foundation verified; carry-forward items documented in evidence file P0-16
+- 2026-05-05 — Phase 1 entered; Feature 1 (Auto-Compaction) starts. Approach: extend existing internal/llm/compression infrastructure rather than build the parallel system the porting doc proposed (gap discovered during plan-writing).
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
