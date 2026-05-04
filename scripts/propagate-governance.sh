@@ -12,12 +12,28 @@ FAILED=0
 SKIPPED=0
 TIMEOUT=10
 
+# Only propagate into HelixCode-owned submodules; skip third-party repos.
+is_owned() {
+    local p="$1"
+    case "$p" in
+        Challenges|Security|Containers|HelixQA) return 0 ;;
+        HelixAgent|HelixAgent/HelixLLM|HelixAgent/HelixMemory|HelixAgent/HelixSpecifier) return 0 ;;
+        Dependencies/HelixDevelopment/*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 echo "=== Governance Propagation ==="
 echo "Repo: $REPO_ROOT"
 echo ""
 
 while IFS= read -r line; do
     path=$(echo "$line" | awk '{print $2}')
+
+    if ! is_owned "$path"; then
+        SKIPPED=$((SKIPPED + 1))
+        continue
+    fi
 
     if [ ! -e "$path/.git" ]; then
         SKIPPED=$((SKIPPED + 1))
@@ -54,8 +70,15 @@ while IFS= read -r line; do
         continue
     fi
 
-    if timeout "$TIMEOUT" git push > /dev/null 2>&1; then
-        echo "✅ PUSHED: $path"
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+    if [ "$branch" = "HEAD" ] || [ -z "$branch" ]; then
+        echo "⚠ DETACHED_HEAD: $path — skipping push (checkout main first)"
+        FAILED=$((FAILED + 1))
+        cd "$REPO_ROOT"
+        continue
+    fi
+    if timeout "$TIMEOUT" git push origin "$branch" > /dev/null 2>&1; then
+        echo "✅ PUSHED: $path ($branch)"
         PUSHED=$((PUSHED + 1))
     else
         echo "❌ PUSH_FAIL: $path (no write access or timeout)"

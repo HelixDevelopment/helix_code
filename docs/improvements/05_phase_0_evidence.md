@@ -826,3 +826,41 @@ all-exit=0
 ```
 
 **No remaining mislabel:** `grep -nE "HelixCode.*SUBMODULE" CLAUDE.md` returns only this corrected line (with "NOT a submodule" qualifier present).
+
+## P0-14 — governance cascade across owned-by-us submodules
+
+**Timestamp:** 2026-05-04T23:50:00+03:00
+
+**Verifier extended patterns:** CONST-042, CONST-043 added to MANDATORY_PATTERNS in `scripts/verify-governance-cascade.sh`.
+
+**Root files fixed:** Added "The bar for shipping is not..." to root CLAUDE.md and AGENTS.md (§11.9 operative rule), which then cascaded to all submodules.
+
+**Cascade verifier output (final):**
+```
+GOVERNANCE_CASCADE: PASSED
+exit=0
+```
+
+**Owned-by-us submodule SHAs after cascade:**
+
+| Submodule | SHA | Branch |
+|---|---|---|
+| HelixQA | ecebe9a | main |
+| Challenges | 53d47c8 | main |
+| Containers | 6736040 | main |
+| Security | e7c09c1 | main |
+| Dependencies/HelixDevelopment/LLMsVerifier | d473231d | main |
+| Dependencies/HelixDevelopment/DocProcessor | 764a9a9 | master |
+| Dependencies/HelixDevelopment/LLMOrchestrator | c2b04ad | master |
+| Dependencies/HelixDevelopment/LLMProvider | afe0ac5 | master |
+| Dependencies/HelixDevelopment/VisionEngine | 9a35a9f | master |
+| HelixAgent | 9a19ac12 | main |
+| HelixAgent/HelixLLM | 4a412c7 | main |
+| HelixAgent/HelixMemory | e464257 | main |
+| HelixAgent/HelixSpecifier | f1f9927 | main |
+
+**Excluded from cascade (third-party):** `HelixAgent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `Github-Pages-Website`, `Assets`.
+
+**Scripts modified:**
+- `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded Assets/Github-Pages-Website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
+- `scripts/propagate-governance.sh`: Added `is_owned()` guard to prevent cascading into third-party submodules; added explicit branch-aware push with detached-HEAD protection.

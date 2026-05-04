@@ -86,6 +86,7 @@ HelixCode/tests/e2e/challenges/.DS_Store
 
 
 reports/demos/
+governance-cascade-report-*.txt
 
 # === Secret hygiene (CONST-041) — added P0-06 ===
 .env

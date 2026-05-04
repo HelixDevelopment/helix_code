@@ -15,6 +15,8 @@ MANDATORY_PATTERNS=(
   "CONST-035"
   "Reproduction-Before-Fix"
   "Host Power Management is Forbidden"
+  "CONST-042"
+  "CONST-043"
 )
 
 REPORT_FILE="governance-cascade-report-$(date +%Y%m%d-%H%M%S).txt"
@@ -24,11 +26,18 @@ FAILURES=0
 is_helixcode_owned() {
   local path="$1"
   case "$path" in
-    Challenges|Security|Containers|HelixQA|Assets)
+    Challenges|Security|Containers|HelixQA)
+      return 0
+      ;;
+    HelixAgent|HelixAgent/HelixLLM|HelixAgent/HelixMemory|HelixAgent/HelixSpecifier)
       return 0
       ;;
     Dependencies/HelixDevelopment/*)
       return 0
+      ;;
+    # Assets and Github-Pages-Website are ours but excluded (no code/governance mandate):
+    Assets|Github-Pages-Website)
+      return 1
       ;;
     *)
       return 1

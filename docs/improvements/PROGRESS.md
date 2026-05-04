@@ -9,11 +9,11 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + verify cascade
-- **Last completed:** P0-12 — cascade CONST-042/043 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN)
+- **Active task:** P0-15 — Makefile verify-foundation target + extend ci-validate-all
+- **Last completed:** P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + cascade CONST-042/043 across owned-by-us submodules
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-04 (P0-08)
+- **Last touched:** 2026-05-04 (P0-14)
 - **Blocked-on:** none
 
 ## Phase status
@@ -43,7 +43,7 @@
 - [x] P0-11 — add Article XII (CONST-042, CONST-043) to root CONSTITUTION.md  ← (this commit)
 - [x] P0-12 — cascade CONST-042/043 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN) ← (this commit)
 - [x] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule) ← (this commit)
-- [-] P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + verify cascade
+- [x] P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + cascade CONST-042/043 across owned-by-us submodules ← (this commit)
 - [ ] P0-15 — Makefile verify-foundation target + extend ci-validate-all
 - [ ] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out
 
