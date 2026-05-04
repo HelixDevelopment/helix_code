@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"dev.helix.code/internal/llm/compression"
 )
 
 func TestManager(t *testing.T) {
@@ -823,4 +825,79 @@ func TestStatistics_String(t *testing.T) {
 	// The String() method should return information about statistics
 	assert.NotEmpty(t, result)
 	assert.Contains(t, result, "10", "Should contain total count")
+}
+
+// ========================================
+// ThrashingGuard wiring tests (P1-F01-T08)
+// ========================================
+
+func TestManager_SetThrashingGuard(t *testing.T) {
+	t.Run("nil_guard_is_no_op", func(t *testing.T) {
+		mgr := NewManager()
+		// Setting nil must not panic and NoteUserMessage must succeed.
+		mgr.SetThrashingGuard(nil)
+
+		s, err := mgr.Create("proj-1", "Session 1", "", ModePlanning)
+		require.NoError(t, err)
+
+		err = mgr.NoteUserMessage(s.ID)
+		assert.NoError(t, err, "NoteUserMessage with nil guard must be a no-op")
+	})
+
+	t.Run("guard_reset_on_user_message", func(t *testing.T) {
+		mgr := NewManager()
+		guard := compression.NewThrashingGuard(3)
+		mgr.SetThrashingGuard(guard)
+
+		s, err := mgr.Create("proj-1", "Session 1", "", ModePlanning)
+		require.NoError(t, err)
+
+		// Record 2 compactions — still below threshold.
+		require.NoError(t, guard.RecordCompaction())
+		require.NoError(t, guard.RecordCompaction())
+
+		// User message should reset the counter.
+		err = mgr.NoteUserMessage(s.ID)
+		require.NoError(t, err)
+
+		// After reset, 3 more compactions should all succeed (threshold = 3).
+		require.NoError(t, guard.RecordCompaction())
+		require.NoError(t, guard.RecordCompaction())
+		require.NoError(t, guard.RecordCompaction())
+	})
+
+	t.Run("note_user_message_unknown_session_returns_error", func(t *testing.T) {
+		mgr := NewManager()
+		guard := compression.NewThrashingGuard(3)
+		mgr.SetThrashingGuard(guard)
+
+		err := mgr.NoteUserMessage("no-such-session")
+		assert.Error(t, err, "NoteUserMessage for unknown session must return an error")
+	})
+
+	t.Run("replace_guard_takes_effect", func(t *testing.T) {
+		mgr := NewManager()
+
+		s, err := mgr.Create("proj-1", "Session 1", "", ModePlanning)
+		require.NoError(t, err)
+
+		// Wire first guard, exhaust it.
+		g1 := compression.NewThrashingGuard(1)
+		mgr.SetThrashingGuard(g1)
+		require.NoError(t, g1.RecordCompaction()) // count=1, at threshold
+		require.Error(t, g1.RecordCompaction())   // count=2, thrashing
+
+		// Replace with a fresh guard.
+		g2 := compression.NewThrashingGuard(3)
+		mgr.SetThrashingGuard(g2)
+
+		// NoteUserMessage must reset g2 (not g1).
+		err = mgr.NoteUserMessage(s.ID)
+		require.NoError(t, err)
+
+		// g2 counter was 0 and is still 0; 3 compactions must succeed.
+		require.NoError(t, g2.RecordCompaction())
+		require.NoError(t, g2.RecordCompaction())
+		require.NoError(t, g2.RecordCompaction())
+	})
 }

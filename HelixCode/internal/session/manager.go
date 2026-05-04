@@ -8,23 +8,25 @@ import (
 
 	"dev.helix.code/internal/focus"
 	"dev.helix.code/internal/hooks"
+	"dev.helix.code/internal/llm/compression"
 )
 
 // Manager manages development sessions
 type Manager struct {
-	sessions      map[string]*Session // All sessions by ID
-	activeSession *Session            // Currently active session
-	focusManager  *focus.Manager      // Focus chain manager
-	hooksManager  *hooks.Manager      // Hooks manager
-	mu            sync.RWMutex        // Thread-safety
-	onCreate      []SessionCallback   // Callbacks on session creation
-	onStart       []SessionCallback   // Callbacks on session start
-	onPause       []SessionCallback   // Callbacks on session pause
-	onResume      []SessionCallback   // Callbacks on session resume
-	onComplete    []SessionCallback   // Callbacks on session completion
-	onDelete      []SessionCallback   // Callbacks on session deletion
-	onSwitch      []SwitchCallback    // Callbacks on session switch
-	maxHistory    int                 // Maximum sessions to keep
+	sessions       map[string]*Session         // All sessions by ID
+	activeSession  *Session                    // Currently active session
+	focusManager   *focus.Manager              // Focus chain manager
+	hooksManager   *hooks.Manager              // Hooks manager
+	mu             sync.RWMutex                // Thread-safety
+	onCreate       []SessionCallback           // Callbacks on session creation
+	onStart        []SessionCallback           // Callbacks on session start
+	onPause        []SessionCallback           // Callbacks on session pause
+	onResume       []SessionCallback           // Callbacks on session resume
+	onComplete     []SessionCallback           // Callbacks on session completion
+	onDelete       []SessionCallback           // Callbacks on session deletion
+	onSwitch       []SwitchCallback            // Callbacks on session switch
+	maxHistory     int                         // Maximum sessions to keep
+	thrashingGuard *compression.ThrashingGuard // Optional auto-compaction thrashing tracker; nil = no-op
 }
 
 // SessionCallback is called for session lifecycle events
@@ -609,6 +611,37 @@ func (m *Manager) SetMaxHistory(max int) {
 	defer m.mu.Unlock()
 
 	m.maxHistory = max
+}
+
+// SetThrashingGuard wires the auto-compaction thrashing guard into the session
+// manager. Pass nil to disable. When set, every call to NoteUserMessage will
+// reset the guard's consecutive-compaction counter.
+func (m *Manager) SetThrashingGuard(g *compression.ThrashingGuard) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.thrashingGuard = g
+}
+
+// NoteUserMessage notifies the session manager that a user message has been
+// appended to the given session. If a ThrashingGuard is wired, its consecutive-
+// compaction counter is reset to zero so that the auto-compactor does not
+// incorrectly detect thrashing after normal user interaction.
+//
+// Returns an error only if the session does not exist. A nil ThrashingGuard is
+// treated as a no-op so callers do not need to guard against the unset case.
+func (m *Manager) NoteUserMessage(sessionID string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, exists := m.sessions[sessionID]; !exists {
+		return fmt.Errorf("session not found: %s", sessionID)
+	}
+
+	if m.thrashingGuard != nil {
+		m.thrashingGuard.NoteUserMessage()
+	}
+
+	return nil
 }
 
 // TrimHistory removes old completed sessions beyond maxHistory
