@@ -259,3 +259,6 @@
 [submodule "Dependencies/HelixDevelopment/LLMsVerifier"]
 	path = Dependencies/HelixDevelopment/LLMsVerifier
 	url = git@github.com:vasic-digital/LLMsVerifier.git
+[submodule "HelixAgent"]
+	path = HelixAgent
+	url = git@github.com:HelixDevelopment/HelixAgent.git
