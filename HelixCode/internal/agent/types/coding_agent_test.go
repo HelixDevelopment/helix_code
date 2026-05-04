@@ -67,6 +67,33 @@ func (m *MockLLMProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns a fixed context-window size for tests.
+// Satisfies the llm.Provider interface (added in P1-F01-T02).
+func (m *MockLLMProvider) GetContextWindow() int {
+	return 4096
+}
+
+// CountTokens estimates token count using a simple whitespace-split heuristic.
+// Satisfies the llm.Provider interface (added in P1-F01-T02).
+func (m *MockLLMProvider) CountTokens(text string) (int, error) {
+	if text == "" {
+		return 0, nil
+	}
+	count := 0
+	inToken := false
+	for _, r := range text {
+		if r == ' ' || r == '\t' || r == '\n' || r == '\r' {
+			inToken = false
+		} else {
+			if !inToken {
+				count++
+				inToken = true
+			}
+		}
+	}
+	return count, nil
+}
+
 // TestNewCodingAgent tests coding agent creation
 func TestNewCodingAgent(t *testing.T) {
 	t.Run("Valid creation", func(t *testing.T) {

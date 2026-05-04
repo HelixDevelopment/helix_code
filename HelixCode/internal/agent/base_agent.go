@@ -11,6 +11,8 @@ import (
 	"dev.helix.code/internal/agent/task"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/llm/compression"
+	"dev.helix.code/internal/llm/compressioniface"
 	"dev.helix.code/internal/tools"
 )
 
@@ -57,6 +59,11 @@ type BaseAgent struct {
 	// LLM and Tools integration (optional - can be nil for simple agents)
 	llmProvider  llm.Provider
 	toolRegistry *tools.ToolRegistry
+
+	// autoCompactor handles claude-code-style 80%-window auto-compaction.
+	// Optional: nil = compaction is disabled (graceful degradation).
+	// Per Feature 1 (claude-code auto-compaction port), P1-F01-T07.
+	autoCompactor *compression.AutoCompactor
 }
 
 // NewBaseAgent creates a new base agent
@@ -361,6 +368,15 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{
 		},
 		MaxTokens:   4000,
 		Temperature: 0.3, // Low temperature for consistent results
+	}
+
+	// Run auto-compaction on the request messages if an AutoCompactor is wired.
+	// Nil autoCompactor = graceful no-op (backwards-compatible). Per P1-F01-T07.
+	if a.autoCompactor != nil {
+		conv := buildConversationForCompaction(request.Messages)
+		if _, err := a.autoCompactor.MaybeCompact(ctx, conv); err != nil {
+			return nil, fmt.Errorf("auto-compaction: %w", err)
+		}
 	}
 
 	// Execute LLM request
@@ -700,6 +716,37 @@ func (a *BaseAgent) GetToolRegistry() *tools.ToolRegistry {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return a.toolRegistry
+}
+
+// SetAutoCompactor enables auto-compaction on this agent. Pass nil to disable.
+// When non-nil, MaybeCompact() runs before each LLM Generate call.
+// Per Feature 1 (claude-code auto-compaction port), P1-F01-T07.
+func (a *BaseAgent) SetAutoCompactor(ac *compression.AutoCompactor) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.autoCompactor = ac
+}
+
+// GetAutoCompactor returns the current AutoCompactor (may be nil).
+func (a *BaseAgent) GetAutoCompactor() *compression.AutoCompactor {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.autoCompactor
+}
+
+// buildConversationForCompaction converts []llm.Message (the agent's per-request
+// message slice) into a *compressioniface.Conversation that AutoCompactor can
+// operate on. Only Role and Content are projected; token counting and metadata
+// are handled inside the compression layer. Per P1-F01-T07.
+func buildConversationForCompaction(msgs []llm.Message) *compressioniface.Conversation {
+	ciMsgs := make([]*compressioniface.Message, 0, len(msgs))
+	for _, m := range msgs {
+		ciMsgs = append(ciMsgs, &compressioniface.Message{
+			Role:    compressioniface.MessageRole(m.Role),
+			Content: m.Content,
+		})
+	}
+	return &compressioniface.Conversation{Messages: ciMsgs}
 }
 
 // Execute implements the Agent interface Execute method
