@@ -1,5 +1,6 @@
 .PHONY: no-silent-skips no-silent-skips-warn demo-all demo-all-warn demo-one ci-validate-all \
-        scan-sonarqube scan-snyk scan-all scan-gosec scan-trivy scan-secrets
+        scan-sonarqube scan-snyk scan-all scan-gosec scan-trivy scan-secrets scan-secrets-root \
+        verify-llmsverifier-pin-parity verify-governance-cascade bluff-detector verify-foundation
 
 no-silent-skips:
 	@bash scripts/no-silent-skips.sh
@@ -16,7 +17,7 @@ demo-all-warn:
 demo-one:
 	@DEMO_MODULES="$(MOD)" bash scripts/demo-all.sh
 
-ci-validate-all: no-silent-skips-warn demo-all-warn
+ci-validate-all: no-silent-skips-warn demo-all-warn verify-foundation
 	@echo "ci-validate-all: all gates executed"
 
 # ---------------------------------------------------------------------------
@@ -42,3 +43,38 @@ scan-trivy: ## Run trivy on HelixCode
 
 scan-secrets: ## Run scan-secrets.sh credential scanner
 	$(MAKE) -C HelixCode secrets-scan
+
+# ---------------------------------------------------------------------------
+# Phase-0 Foundation Gates (P0-15)
+# Individual verification gates wired from scripts/
+# Usage: make verify-foundation
+# ---------------------------------------------------------------------------
+
+verify-llmsverifier-pin-parity: ## Verify LLMsVerifier submodule pins are in parity
+	@bash scripts/verify-llmsverifier-pin-parity.sh
+
+verify-governance-cascade: ## Verify governance cascade (CONST-042/043) across owned submodules
+	@bash scripts/verify-governance-cascade.sh
+
+bluff-detector: ## Run bluff-detector (Phase 4 deliverable; stub-tolerant)
+	@if [ -x scripts/bluff-detector.sh ]; then \
+	  bash scripts/bluff-detector.sh; \
+	else \
+	  echo "bluff-detector.sh not yet implemented (Phase 4 deliverable); skipping"; \
+	fi
+
+# scan-secrets-root: run the root-level credential scanner (scripts/scan-secrets.sh).
+# Used by verify-foundation. Distinct from scan-secrets which runs the inner
+# HelixCode/scripts/scan-secrets.sh targeting only the Go app subdirectory.
+scan-secrets-root: ## Run root scripts/scan-secrets.sh (whole-repo credential scan)
+	@bash scripts/scan-secrets.sh
+
+# Composite Phase-0 foundation gate.
+# Depends on: no-silent-skips-warn, scan-secrets-root, verify-llmsverifier-pin-parity,
+#             verify-governance-cascade, bluff-detector.
+#
+# NOTE: As of P0-15, this gate exits 1 because verify-llmsverifier-pin-parity
+# reports the known LLMsVerifier dual-pin divergence (documented parking-lot item
+# in docs/improvements/PROGRESS.md). Resolution is a P0-16 close-out dependency.
+verify-foundation: no-silent-skips-warn scan-secrets-root verify-llmsverifier-pin-parity verify-governance-cascade bluff-detector
+	@echo "verify-foundation: all gates passed"

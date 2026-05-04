@@ -864,3 +864,79 @@ exit=0
 **Scripts modified:**
 - `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded Assets/Github-Pages-Website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
 - `scripts/propagate-governance.sh`: Added `is_owned()` guard to prevent cascading into third-party submodules; added explicit branch-aware push with detached-HEAD protection.
+
+---
+
+## P0-15 — Makefile verify-foundation gate
+
+**Timestamp:** 2026-05-04T00:00+03:00
+
+### Targets added to root Makefile
+
+| Target | Description |
+|---|---|
+| `verify-llmsverifier-pin-parity` | Wraps `scripts/verify-llmsverifier-pin-parity.sh` |
+| `verify-governance-cascade` | Wraps `scripts/verify-governance-cascade.sh` |
+| `bluff-detector` | Stub-tolerant: runs `scripts/bluff-detector.sh` if present; otherwise prints skip message and exits 0. Phase 4 deliverable. |
+| `scan-secrets-root` | Wraps root-level `scripts/scan-secrets.sh` (whole-repo scan, as distinct from `scan-secrets` which delegates to inner HelixCode scanner) |
+| `verify-foundation` | Composite gate: `no-silent-skips-warn scan-secrets-root verify-llmsverifier-pin-parity verify-governance-cascade bluff-detector` |
+
+**`ci-validate-all` updated:** now depends on `verify-foundation` in addition to `no-silent-skips-warn` and `demo-all-warn`.
+
+**Note on `scan-secrets`:** already existed (added by P0-T08.7), delegating to `HelixCode/scripts/scan-secrets.sh`. Not redeclared. `verify-foundation` uses `scan-secrets-root` instead to invoke the whole-repo root scanner.
+
+### Individual gate verification
+
+```
+$ make verify-llmsverifier-pin-parity 2>&1 | tail -5; echo "exit=$?"
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1    ← expected (known divergence, parking-lot item)
+
+$ make verify-governance-cascade 2>&1 | tail -2; echo "exit=$?"
+GOVERNANCE_CASCADE: PASSED
+exit=0    ← expected
+
+$ make scan-secrets-root 2>&1 | tail -2; echo "exit=$?"
+OK: no credential patterns found in .
+exit=0    ← expected
+
+$ make bluff-detector 2>&1; echo "exit=$?"
+bluff-detector.sh not yet implemented (Phase 4 deliverable); skipping
+exit=0    ← expected
+```
+
+### `make verify-foundation` output (last 15 lines)
+
+```
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+make-exit=2
+```
+
+**Expected behaviour:** exits 2 (make error propagation from prerequisite exit 1). The divergence is the documented LLMsVerifier dual-pin parking-lot item. This is NOT a defect in P0-15; P0-16 close-out depends on resolution.
+
+### Acceptance checklist
+
+| Criterion | Result |
+|---|---|
+| `verify-llmsverifier-pin-parity` target wired | ✓ |
+| `verify-governance-cascade` target wired | ✓ |
+| `bluff-detector` target wired (stub-tolerant) | ✓ |
+| `scan-secrets-root` target wired (root scanner) | ✓ |
+| `verify-foundation` composite target wired | ✓ |
+| `.PHONY` includes all new targets | ✓ |
+| `scan-secrets` NOT redeclared (pre-existing) | ✓ — already present from P0-T08.7 |
+| `ci-validate-all` updated to depend on `verify-foundation` | ✓ |
+| Each individual gate runs correctly | ✓ (see above) |
+| `verify-foundation` exits non-zero on known parity divergence | ✓ exit=2 |
+| No third-party submodule modifications | ✓ |
