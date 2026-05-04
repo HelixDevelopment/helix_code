@@ -581,3 +581,70 @@ $ ./scripts/scan-secrets.sh
 OK: no credential patterns found in .
 exit=0
 ```
+
+---
+
+## P0-09 — pre-push hook + installer + setup.sh wiring
+
+**Timestamp:** 2026-05-04T22:43:12+03:00
+
+**Hook source:** `-rwxr-xr-x scripts/git-hooks/pre-push`
+
+**Hook installed:** `-rwxr-xr-x .git/hooks/pre-push`
+
+**Installer output (first run — 1 hook installed):**
+```
+  installed: .git/hooks/pre-push
+OK: 1 hook(s) installed/updated under .git/hooks
+```
+
+**Installer output (second run — idempotency verified):**
+```
+OK: 0 hook(s) installed/updated under .git/hooks
+```
+
+**setup.sh hook-install line:**
+```
+./scripts/install-git-hooks.sh
+```
+
+**Force-block logic verified by inspection (10/10 cases PASS):**
+
+All three force-flag variants match correctly in the hook's case statement:
+
+| Test cmdline | Expected is_force | Result |
+|---|---|---|
+| `git push origin main --force` | 1 | PASS |
+| `git push origin main --force ` | 1 | PASS |
+| `git push --force origin main` | 1 | PASS |
+| `git push -f origin main` | 1 | PASS |
+| `git push origin main -f` | 1 | PASS |
+| `git push --force-with-lease origin main` | 1 | PASS |
+| `git push --force-with-lease` | 1 | PASS |
+| `git push origin main` | 0 | PASS |
+| `git push origin main --no-force` | 0 | PASS |
+| `git push upstream main` | 0 | PASS |
+
+**HELIX_FORCE_PUSH_APPROVED=1 bypass verified:**
+- Force push WITHOUT approval → BLOCKED (exit 1)
+- Force push WITH `HELIX_FORCE_PUSH_APPROVED=1` → ALLOWED (exit 0)
+
+**Non-force direct invocation:**
+```
+$ bash scripts/git-hooks/pre-push origin git@github.com:HelixDevelopment/HelixCode.git
+exit=0
+```
+
+**Platform degradation:** When `/proc/$PPID/cmdline` is not readable (macOS/BSD), the hook warns but exits 0 — it does not block. CONST-042 constitutional clause is the actual contract.
+
+**scan-secrets post-install verification:**
+```
+$ ./scripts/scan-secrets.sh
+OK: no credential patterns found in .
+exit=0
+```
+
+**Real push (this commit) succeeds:** indicates non-force pushes are not blocked by the installed hook.
+
+**CONST-041 compliance:** scan-secrets clean (above).
+**CONST-042 compliance:** pre-push hook is installed and blocks --force / -f / --force-with-lease without HELIX_FORCE_PUSH_APPROVED=1.

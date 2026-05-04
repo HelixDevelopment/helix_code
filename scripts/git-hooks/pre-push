@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# scripts/git-hooks/pre-push
+# Phase 0 P0-09 — force-push protection per CONST-042.
+#
+# Reject --force / -f / --force-with-lease pushes unless
+# HELIX_FORCE_PUSH_APPROVED=1 is set in the calling environment.
+#
+# This is a COURTESY GATE; the constitutional clause (CONST-042) is the
+# actual contract.  On platforms where /proc/PPID/cmdline is unavailable
+# (e.g. macOS, BSDs) the hook degrades gracefully: it warns and exits 0
+# rather than blocking every push.
+#
+# Additionally, runs scripts/scan-secrets.sh as a final pre-push gate.
+# If the scanner is missing (early P0 bootstrap), the check is skipped
+# with a warning rather than blocking the push.
+
+set -uo pipefail
+
+remote_name="${1:-}"
+remote_url="${2:-}"
+
+# ---------------------------------------------------------------------------
+# 1.  Force-push detection via /proc/<PPID>/cmdline
+# ---------------------------------------------------------------------------
+ppid_cmdline=""
+if [ -r "/proc/$PPID/cmdline" ]; then
+  ppid_cmdline=$(tr '\0' ' ' < "/proc/$PPID/cmdline")
+fi
+
+is_force=0
+if [ -n "$ppid_cmdline" ]; then
+  case "$ppid_cmdline" in
+    *" --force "*|*" --force"|*" -f "*|*" -f"|*" --force-with-lease"*)
+      is_force=1
+      ;;
+  esac
+else
+  # /proc not available (macOS / BSD).  Warn but do not block.
+  echo "WARN: pre-push hook: /proc/$PPID/cmdline not readable." >&2
+  echo "      Force-push detection is unavailable on this platform." >&2
+  echo "      CONST-042 constitutional clause is still the contract." >&2
+fi
+
+if [ "$is_force" -eq 1 ] && [ "${HELIX_FORCE_PUSH_APPROVED:-0}" != "1" ]; then
+  echo "" >&2
+  echo "============================================================" >&2
+  echo "BLOCKED by pre-push hook (CONST-042 No-Force-Push)" >&2
+  echo "============================================================" >&2
+  echo "Force push detected. Per CONST-042 (synthesis spec §2.4)," >&2
+  echo "force pushes require explicit user approval per operation." >&2
+  echo "" >&2
+  echo "If approved by the user IN THIS CONVERSATION, run:" >&2
+  echo "  HELIX_FORCE_PUSH_APPROVED=1 git push <args>" >&2
+  echo "" >&2
+  echo "Remote:          $remote_name $remote_url" >&2
+  echo "Parent cmdline:  $ppid_cmdline" >&2
+  echo "============================================================" >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# 2.  Secret scan gate (best-effort; missing scanner does NOT block push
+#     during early P0 bootstrap).
+# ---------------------------------------------------------------------------
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+SCANNER="$REPO_ROOT/scripts/scan-secrets.sh"
+
+if [ -x "$SCANNER" ]; then
+  if ! "$SCANNER" >/dev/null 2>&1; then
+    echo "" >&2
+    echo "============================================================" >&2
+    echo "BLOCKED by pre-push hook: scan-secrets.sh found credential" >&2
+    echo "patterns in the working tree." >&2
+    echo "Run scripts/scan-secrets.sh and remediate before pushing." >&2
+    echo "============================================================" >&2
+    exit 1
+  fi
+else
+  echo "WARN: pre-push hook: $SCANNER not found or not executable." >&2
+  echo "      Secret scan skipped (best-effort during bootstrap)." >&2
+fi
+
+exit 0

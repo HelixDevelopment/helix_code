@@ -20,6 +20,10 @@ echo "📦 Initializing git submodules..."
 ./scripts/init-submodules.sh
 
 echo ""
+echo "🔗 Installing local git hooks (CONST-042 enforcement)..."
+./scripts/install-git-hooks.sh
+
+echo ""
 echo "🔧 Installing system dependencies..."
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     ./install_missing_libs.sh
