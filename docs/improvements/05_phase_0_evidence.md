@@ -737,3 +737,28 @@ CONST-042 compliance: ✓ clean
 | Each file references synthesis spec | ✓ |
 | No secrets present (scan-secrets clean) | ✓ |
 | No third-party submodule modifications | ✓ |
+
+## P0-11 — Article XII added to root CONSTITUTION.md
+
+**Timestamp:** 2026-05-04T21:30:00+03:00
+
+**Anchors added:**
+- Article XII §12.1 (CONST-042) — No-Secret-Leak
+- Article XII §12.2 (CONST-043) — No-Force-Push
+
+**Verification:**
+```
+464:## Article XII — Repository Safety
+466:### §12.1 (CONST-042) — No-Secret-Leak
+477:### §12.2 (CONST-043) — No-Force-Push
+486:**Cascade requirement:** Same as §12.1 — verbatim, every owned-by-us repo's three governance files.
+```
+
+**Existing CONST-041 (MCP) intact:**
+```
+436:## CONST-041: MCP / LSP / ACP / Embedding / RAG / Skills / Plugins Integration Mandate
+```
+
+**Total CONST-NNN entries (CONST-001 through CONST-041):** 41 (unchanged)
+
+**Insertion point:** Between line 462 (`---` separator after CONST-041) and `## Amendment Process` section, at line 464.
