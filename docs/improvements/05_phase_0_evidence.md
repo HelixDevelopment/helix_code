@@ -939,4 +939,70 @@ make-exit=2
 | `ci-validate-all` updated to depend on `verify-foundation` | ✓ |
 | Each individual gate runs correctly | ✓ (see above) |
 | `verify-foundation` exits non-zero on known parity divergence | ✓ exit=2 |
+
+## P0-16 — Phase 0 close-out
+
+**Timestamp:** 2026-05-05T00:05+03:00
+
+**Diagrams regenerated to `docs/improvements/06_diagrams_real/`:**
+```
+total 348
+-rw-r--r-- 1 milosvasic milosvasic 105650 May  4 23:59 dependency_graph.png
+-rw-r--r-- 1 milosvasic milosvasic 129320 May  4 23:59 feature_gap_matrix.png
+-rw-r--r-- 1 milosvasic milosvasic  45270 May  4 23:59 integration_phases.png
+-rw-r--r-- 1 milosvasic milosvasic  67426 May  4 23:59 overall_architecture.png
+```
+
+**Canonical topology source:** `docs/improvements/canonical/topology.yaml`
+
+**Regenerator script:** `scripts/regenerate-diagrams.py` (executable; uses Agg backend for headless operation)
+
+**DEPRECATED.md pointers placed:**
+- `docs/improvements/01_analysis_step_01/DEPRECATED.md`
+- `docs/improvements/02_analysis_step_02/DEPRECATED.md`
+
+**Final `make verify-foundation` output (last 25 lines):**
+```
+./Dependencies/HuggingFace_Hub/tests/test_hf_api.py:4187:    @pytest.mark.skip("Creating duplicated collections work on staging")
+./Dependencies/HuggingFace_Hub/tests/test_hf_file_system.py:439:    @unittest.skip("Not implemented yet")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:64:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:73:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:91:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:105:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:112:@pytest.mark.skip("skipping this test, as InferenceAPI seems to not throw an error when sending unsupported params")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:132:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:147:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:165:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:191:@pytest.mark.skip("Temporary skipping this test")
+./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:217:@pytest.mark.skip("Temporary skipping this test")
+... (3800 more — re-run 'scripts/no-silent-skips.sh' without head)
+
+Annotate each with a trailing '// SKIP-OK: #<ticket>' (or '# SKIP-OK: #<ticket>')
+comment so the skip is tracked, or remove the skip if it is no longer needed.
+
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+```
+
+**verify-foundation exit code:** 2 — LLMsVerifier dual-pin divergence (out-of-scope per spec §1.3 N2; documented as the carry-forward open item to Phase 1).
+
+## Phase 0 — CLOSED
+
+**Tasks completed:** 16 plan tasks + 2 added during execution (T08.5, T08.7) + 1 deferred (T02 cosmetic) = 17 closed + 1 deferred + 1 polish-fix-it.
+
+**Final SHA on all 4 remotes:** (filled in after final commit — see commit log)
+
+**Open carry-forward items (Phase 1+):**
+1. **LLMsVerifier dual-pin divergence** — `Dependencies/HelixDevelopment/LLMsVerifier` ahead of `HelixAgent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
+2. **3 historical credential leaks** — already remediated in P0-T08.5 (files removed from index, replaced with .example templates, ephemeral generation script for SSH keys). Required operator action (separate from this programme): rotate the SonarQube + Snyk tokens; reject the leaked SSH public key wherever trusted.
+3. **13 cli_agents with stale HelixAgent pins** — `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset` will need their HelixAgent pin bumped before Phase 2 sub-specs touch them.
+4. **Submodule recursion cosmetic error** — `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` cause `git submodule foreach --recursive` to fatal-out; modifying third-party submodules is forbidden. Scripts wrap with `|| true`.
+
+**Phase 1 unblocked:** claude-code-source porting can proceed. The HelixAgent/cli_agents/claude-code/ source is fully populated; the inner Go app (HelixCode/) has its governance triplet; secret hygiene is in place; pre-push hook is installed; scan-secrets gates pre-push; SonarQube + Snyk infrastructure is wired (live scans pending operator credential rotation).
 | No third-party submodule modifications | ✓ |

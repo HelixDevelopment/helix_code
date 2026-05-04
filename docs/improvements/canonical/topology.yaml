@@ -1,0 +1,104 @@
+# docs/improvements/canonical/topology.yaml
+# Canonical real module set used by scripts/regenerate-diagrams.py.
+# Updated when submodule topology changes; commit in same change as the diagrams.
+
+modules:
+  core:
+    - name: HelixCode
+      role: integration core (meta-repo)
+      type: monorepo
+    - name: HelixCode/HelixCode  # path here is "from repo root"
+      role: Go application (tracked subdirectory)
+      type: go-module
+
+  substrate:
+    - name: HelixAgent
+      role: integration substrate
+      url: git@github.com:HelixDevelopment/HelixAgent.git
+
+  helix_libs:
+    - name: HelixLLM
+      url: git@github.com:HelixDevelopment/HelixLLM.git
+      pin: HelixAgent/HelixLLM
+    - name: HelixMemory
+      url: git@github.com:HelixDevelopment/HelixMemory.git
+      pin: HelixAgent/HelixMemory
+    - name: HelixSpecifier
+      url: git@github.com:HelixDevelopment/HelixSpecifier.git
+      pin: HelixAgent/HelixSpecifier
+    - name: LLMsVerifier
+      url: git@github.com:vasic-digital/LLMsVerifier.git
+      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + HelixAgent/LLMsVerifier (transitive)
+
+  helix_apps:
+    - name: HelixQA
+      url: git@github.com:HelixDevelopment/HelixQA.git
+
+  cross_cutting:
+    - name: Challenges
+      url: git@github.com:vasic-digital/Challenges.git
+    - name: Containers
+      url: git@github.com:vasic-digital/Containers.git
+    - name: Security
+      url: git@github.com:HelixDevelopment/Security.git
+
+  dependencies:
+    - name: DocProcessor
+    - name: LLMOrchestrator
+    - name: LLMProvider
+    - name: VisionEngine
+    - name: HuggingFace_Hub
+    - name: LLama_CPP
+    - name: Ollama
+
+  cli_agents_canonical_root: HelixAgent/cli_agents/
+  cli_agent_count: 60   # 47 populated, 13 deferred to Phase 2 sub-specs (see PROGRESS.md parking lot)
+
+phases:
+  - id: P0
+    name: Foundation Cleanup
+    weeks: 0-2
+    state: done
+  - id: P1
+    name: claude-code porting
+    weeks: 2-12
+    state: pending
+  - id: P2
+    name: Other CLI agents porting
+    weeks: 12-24
+    state: pending
+  - id: P3
+    name: Test infrastructure expansion
+    weeks: 12-22
+    state: pending (parallelisable)
+  - id: P4
+    name: Anti-bluff verification pass
+    weeks: 24-28
+    state: pending
+  - id: P5
+    name: End-user materials uplift
+    weeks: 28-32
+    state: pending
+
+features:
+  - Multi-LLM Support
+  - Tool Calling
+  - RAG Pipeline
+  - Streaming Output
+  - Auth/RBAC
+  - CLI Interface
+  - API Gateway
+  - Observability
+  - Hot-Reload
+  - Plugin System
+  - Batch Mode
+  - Cost Tracking
+  - Auto-Compaction (claude-code)
+  - Plan Mode (claude-code)
+  - Skill System (claude-code)
+  - MCP Lifecycle (claude-code)
+  - Hooks (claude-code)
+  - Architect/Editor (Aider)
+  - Repo-Map (Aider)
+  - Browser Automation (Cline)
+  - Sandbox Runtimes (OpenHands)

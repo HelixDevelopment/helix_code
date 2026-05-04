@@ -8,18 +8,18 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out
-- **Last completed:** P0-15 — Makefile verify-foundation target + extend ci-validate-all
+- **Active phase:** P1 — claude-code porting (awaits its own writing-plans cycle)
+- **Active task:** pending
+- **Last completed:** P0-16 — Phase 0 close-out (diagrams, DEPRECATED.md, evidence, push)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-04 (P0-14)
+- **Last touched:** 2026-05-05 (P0-16)
 - **Blocked-on:** none
 
 ## Phase status
 | Phase | State | Started | Completed | Evidence |
 |---|---|---|---|---|
-| P0 — Foundation | active | 2026-05-04 | — | docs/improvements/05_phase_0_evidence.md |
+| P0 — Foundation | done | 2026-05-04 | 2026-05-05 | docs/improvements/05_phase_0_evidence.md |
 | P1 — claude-code | pending | — | — | — |
 | P2 — Other CLI agents | pending | — | — | — |
 | P3 — Test infra | pending | — | — | — |
@@ -45,12 +45,13 @@
 - [x] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule) ← (this commit)
 - [x] P0-14 — extend verify-governance-cascade.sh + run propagate-governance.sh + cascade CONST-042/043 across owned-by-us submodules ← (this commit)
 - [x] P0-15 — Makefile verify-foundation target + extend ci-validate-all ← (this commit)
-- [ ] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out
+- [x] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
 - 2026-05-04 — Non-force pushes pre-authorised for the duration of this programme — user statement during brainstorming — see synthesis spec §7.3
 - 2026-05-04 — claude-code-source is Phase 1 priority #1 — user statement — see synthesis spec §4.1
+- 2026-05-05 — Phase 0 closed; 17 plan tasks done + 2 added during execution (T08.5, T08.7); foundation verified; carry-forward items documented in evidence file P0-16
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
