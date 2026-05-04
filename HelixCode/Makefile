@@ -552,3 +552,66 @@ helixqa-bump-submodules: ## Bump all HelixQA dependency submodules with verifica
 	@echo "Testing with candidate commits..."
 	$(MAKE) helixqa-test
 	@echo "Bump verification complete. Stage changes with: git add $(HELIXQA_DEPS)"
+
+# ---------------------------------------------------------------------------
+# Security scanning targets (P0-T08.7)
+# Delegates to scripts/security-scan.sh which loads credentials from .env.
+# To run a live scan: set SONAR_TOKEN / SNYK_TOKEN in HelixCode/.env first.
+# ---------------------------------------------------------------------------
+
+.PHONY: security-scan security-scan-snyk security-scan-sonarqube security-scan-trivy \
+        security-scan-gosec security-scan-grype security-scan-kics security-scan-semgrep \
+        security-scan-all deps-scan secrets-scan scan-start-sonar scan-stop
+
+security-scan: ## Run all open-source security scanners (gosec, trivy, grype, go-analysis)
+	@./scripts/security-scan.sh all
+
+security-scan-snyk: ## Run Snyk vulnerability scanner (requires SNYK_TOKEN in .env)
+	@./scripts/security-scan.sh snyk
+
+security-scan-sonarqube: ## Run SonarQube code analysis (requires SONAR_TOKEN in .env)
+	@./scripts/security-scan.sh sonarqube
+
+security-scan-trivy: ## Run Trivy vulnerability and secret scanner
+	@./scripts/security-scan.sh trivy
+
+security-scan-gosec: ## Run Gosec Go security checker
+	@./scripts/security-scan.sh gosec
+
+security-scan-grype: ## Run Grype container vulnerability scanner
+	@./scripts/security-scan.sh grype
+
+security-scan-kics: ## Run KICS IaC security scanner
+	@./scripts/security-scan.sh kics
+
+security-scan-semgrep: ## Run Semgrep SAST scanner
+	@./scripts/security-scan.sh semgrep
+
+security-scan-all: ## Run ALL scanners including SonarQube and Snyk (requires tokens in .env)
+	@./scripts/security-scan.sh gosec
+	@./scripts/security-scan.sh trivy
+	@./scripts/security-scan.sh grype
+	@./scripts/security-scan.sh semgrep
+	@./scripts/security-scan.sh snyk
+	@./scripts/security-scan.sh sonarqube
+
+deps-scan: ## Scan Go module dependencies for known vulnerabilities (govulncheck / snyk)
+	@if command -v govulncheck >/dev/null 2>&1; then \
+		echo "Running govulncheck..."; \
+		govulncheck ./...; \
+	else \
+		$(MAKE) security-scan-snyk; \
+	fi
+
+secrets-scan: ## Run scan-secrets.sh to verify no credentials are committed
+	@if [ -f scripts/scan-secrets.sh ]; then \
+		./scripts/scan-secrets.sh; \
+	else \
+		echo "Error: scripts/scan-secrets.sh not found"; exit 1; \
+	fi
+
+scan-start-sonar: ## Start SonarQube server (uses Containers BootManager once wired, T08.7/4)
+	@./scripts/security-scan.sh start-sonar
+
+scan-stop: ## Stop SonarQube services
+	@./scripts/security-scan.sh stop
