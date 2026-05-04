@@ -32,6 +32,7 @@ type Condition struct {
 	OperationType []OperationType
 	RiskLevel     []RiskLevel
 	PathPattern   string
+	Wildcard      string // glob pattern matched against the request's primary string parameter
 	Custom        func(ConfirmationRequest) bool
 }
 
@@ -73,6 +74,14 @@ func (c Condition) Matches(req ConfirmationRequest) bool {
 	// Match path pattern
 	if c.PathPattern != "" {
 		if matched, _ := filepath.Match(c.PathPattern, req.Operation.Target); !matched {
+			return false
+		}
+	}
+
+	// Match wildcard against primary string parameter
+	if c.Wildcard != "" {
+		primary := primaryStringParam(req)
+		if !wildcardMatch(c.Wildcard, primary) {
 			return false
 		}
 	}
@@ -258,6 +267,91 @@ func ValidatePolicy(policy *Policy) error {
 	}
 
 	return nil
+}
+
+// primaryStringParam returns the most-relevant string parameter for wildcard matching.
+// For Bash: req.Parameters["command"]. For file tools: req.Parameters["path"] or req.Operation.Target.
+func primaryStringParam(req ConfirmationRequest) string {
+	if cmd, ok := req.Parameters["command"].(string); ok {
+		return cmd
+	}
+	if p, ok := req.Parameters["path"].(string); ok {
+		return p
+	}
+	if p, ok := req.Parameters["file_path"].(string); ok {
+		return p
+	}
+	return req.Operation.Target
+}
+
+// wildcardMatch implements glob-style matching with *, ?, and [abc] character classes.
+// Returns true if pattern is empty (matches all).
+func wildcardMatch(pattern, s string) bool {
+	if pattern == "" {
+		return true
+	}
+	return globMatch(pattern, s)
+}
+
+// globMatch is a non-regex glob matcher that handles *, ?, and [abc].
+func globMatch(pattern, s string) bool {
+	// Iterative glob matcher: walk pattern and string in lock-step.
+	pi, si := 0, 0
+	starPi, starSi := -1, 0
+	for si < len(s) {
+		if pi < len(pattern) && pattern[pi] == '\\' && pi+1 < len(pattern) {
+			if pattern[pi+1] == s[si] {
+				pi += 2
+				si++
+				continue
+			}
+		} else if pi < len(pattern) && pattern[pi] == '?' {
+			pi++
+			si++
+			continue
+		} else if pi < len(pattern) && pattern[pi] == '[' {
+			closeIdx := pi + 1
+			for closeIdx < len(pattern) && pattern[closeIdx] != ']' {
+				closeIdx++
+			}
+			if closeIdx >= len(pattern) {
+				return false
+			}
+			class := pattern[pi+1 : closeIdx]
+			matched := false
+			for _, c := range []byte(class) {
+				if c == s[si] {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				pi = closeIdx + 1
+				si++
+				continue
+			}
+		} else if pi < len(pattern) && pattern[pi] == '*' {
+			starPi = pi
+			starSi = si
+			pi++
+			continue
+		} else if pi < len(pattern) && pattern[pi] == s[si] {
+			pi++
+			si++
+			continue
+		}
+		if starPi != -1 {
+			pi = starPi + 1
+			starSi++
+			si = starSi
+			continue
+		}
+		return false
+	}
+	for pi < len(pattern) && pattern[pi] == '*' {
+		pi++
+	}
+	return pi == len(pattern)
 }
 
 // sortRulesByPriority sorts rules by priority (highest first)
