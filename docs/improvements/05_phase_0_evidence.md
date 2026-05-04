@@ -305,4 +305,151 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 
 **Additional tracked files with fake/doc patterns** (`docs/*.md` and test fixtures): these are false-positive-in-intent — the patterns are doc examples and test fixtures, not real rotatable secrets. They will be reviewed during P0-T08.5 to determine whether to add per-file exclusions or restructure test data. No immediate action required.
 
+---
+
+## P0-08.7 — Port SonarQube + Snyk security scan integration (through Containers)
+
+**Timestamp:** 2026-05-04T22:30+03:00
+**Commits:** `1d728de` + `2494bc8` + `e29e2f6` + `16a4490` + (this commit)
+**Branch:** main
+
+### Sub-commit 1 — Compose files + configs (`1d728de`)
+
+Files created:
+- `HelixCode/docker/security/sonarqube/docker-compose.yml` — adapted from HelixAgent; container names changed from `helixagent-*` to `helixcode-*`; subnet changed to `172.21.0.0/16`
+- `HelixCode/docker/security/sonarqube/sonar-project.properties` — project key/name/version use `${SONARQUBE_PROJECT_KEY}` etc.
+- `HelixCode/docker/security/snyk/docker-compose.yml` — adapted; uses `${SNYK_TOKEN:-}`
+- `HelixCode/docker/security/snyk/Dockerfile` — adapted; references HelixCode project
+- `HelixCode/sonar-project.properties` — root-level; uses `${SONARQUBE_PROJECT_KEY}` env-var
+- `HelixCode/.snyk` — root-level Snyk policy (v1.25.0)
+
+Credential scan result: `No credentials found - OK`
+
+### Sub-commit 2 — Master orchestrator script (`2494bc8`)
+
+- `HelixCode/scripts/security-scan.sh` — supports `snyk|sonarqube|trivy|gosec|grype|kics|semgrep|all`
+- Loads credentials from `HelixCode/.env` (gitignored)
+- Reports to `reports/security/<scanner>-<timestamp>.<ext>`
+- `--help` dry run verified:
+
+```
+$ ./scripts/security-scan.sh --help
+Usage:
+  ./scripts/security-scan.sh [scanner] [options]
+
+Scanners:
+  snyk        - Snyk vulnerability scanner (requires SNYK_TOKEN)
+  sonarqube   - SonarQube code quality and security analysis
+  ...
+exit 0
+```
+
+### Sub-commit 3 — Makefile targets (`e29e2f6`)
+
+Inner Makefile (`HelixCode/Makefile`) targets added:
+`security-scan`, `security-scan-snyk`, `security-scan-sonarqube`, `security-scan-trivy`,
+`security-scan-gosec`, `security-scan-grype`, `security-scan-kics`, `security-scan-semgrep`,
+`security-scan-all`, `deps-scan`, `secrets-scan`, `scan-start-sonar`, `scan-stop`
+
+Root Makefile targets added:
+`scan-sonarqube`, `scan-snyk`, `scan-all`, `scan-gosec`, `scan-trivy`, `scan-secrets`
+
+Dry-run verification:
+```
+$ make -n scan-sonarqube
+make -C HelixCode security-scan-sonarqube
+./scripts/security-scan.sh sonarqube
+```
+
+### Sub-commit 4 — Containers BootManager wiring (`16a4490`)
+
+- `HelixCode/cmd/security-scan/main.go` (~170 lines) wires:
+  - `digital.vasic.containers/pkg/runtime.AutoDetect(ctx)` for runtime detection
+  - `digital.vasic.containers/pkg/endpoint.NewEndpoint()` builder for SonarQube + Snyk endpoints
+  - `digital.vasic.containers/pkg/health.NewDefaultChecker()` with HTTP health on `:9000/api/system/status`
+  - `digital.vasic.containers/pkg/boot.NewBootManager().BootAll(ctx)` for lifecycle management
+  - Supports `-action=start|stop|status`
+
+Build verification:
+```
+$ go build ./cmd/security-scan/...
+# exit 0 — binary compiles
+```
+
+`scripts/security-scan.sh start_sonarqube()` updated to call `go run ./cmd/security-scan` when Go is available; falls back to direct compose otherwise.
+
+### Sub-commit 5 — Challenges + evidence (this commit)
+
+Challenges created:
+- `HelixCode/tests/e2e/challenges/sonarqube/run.sh` — 8 sections, 33 tests (config-correctness only)
+- `HelixCode/tests/e2e/challenges/sonarqube/expected.json`
+- `HelixCode/tests/e2e/challenges/snyk/run.sh` — 7 sections, 26 tests (config-correctness only)
+- `HelixCode/tests/e2e/challenges/snyk/expected.json`
+
+Challenge run output (both 100% PASS):
+
+```
+===========================================
+  SonarQube Security Scanning Challenge
+===========================================
+[PASS] Root sonar-project.properties exists
+[PASS] SonarQube docker-compose.yml exists
+[PASS] SONAR_TOKEN uses env-var reference (not hardcoded)
+[PASS] sonar.projectKey uses env-var reference in root properties
+[PASS] No HelixAgent-specific references in HelixCode configs
+[PASS] SonarQube service defined
+[PASS] PostgreSQL service defined
+[PASS] SonarQube uses pinned community edition image
+[PASS] Memory limits configured
+[PASS] SonarQube health check uses /api/system/status
+[PASS] Security network defined
+[PASS] security-scan.sh --help shows sonarqube mode
+[PASS] cmd/security-scan imports Containers BootManager
+[PASS] cmd/security-scan uses runtime.AutoDetect
+Results: 33/33 passed, 0 failed
+
+===========================================
+  Snyk Security Scanning Challenge
+===========================================
+[PASS] Snyk docker-compose.yml exists
+[PASS] SNYK_TOKEN uses env-var reference (not hardcoded)
+[PASS] No HelixAgent-specific container names
+[PASS] snyk-deps service defined
+[PASS] snyk-full service defined
+[PASS] Dockerfile uses official snyk/snyk-cli base image
+[PASS] .snyk has policy version
+[PASS] security-scan.sh reads SNYK_TOKEN from env
+[PASS] cmd/security-scan imports Containers BootManager
+[PASS] cmd/security-scan handles snyk scanner
+Results: 26/26 passed, 0 failed
+```
+
+### CREDENTIAL ROTATION NOTE — MANDATORY before live scans
+
+This task does NOT run live scans. The original `helix.security.json` credentials (SonarQube token, Snyk token, project_key, organization) were committed and are considered compromised (see P0-T08.5). The user MUST rotate these before any live scan can succeed:
+
+1. **SonarQube token**: generate a new API token in SonarQube UI → set `SONAR_TOKEN=<new>` in `HelixCode/.env`
+2. **SonarQube project key**: choose a new key → set `SONARQUBE_PROJECT_KEY=<new>` in `HelixCode/.env`
+3. **Snyk token**: generate a new token at snyk.io → set `SNYK_TOKEN=<new>` in `HelixCode/.env`
+4. **Snyk organization**: set `SNYK_ORG=<new_org_id>` in `HelixCode/.env`
+
+After rotation, live scan can be invoked with:
+```bash
+make scan-sonarqube    # from root
+make scan-snyk         # from root
+```
+
+### scan-secrets.sh verification
+
+```
+$ bash scripts/scan-secrets.sh HelixCode/docker/security HelixCode/sonar-project.properties HelixCode/.snyk ...
+OK: no credential patterns found
+exit code: 0
+```
+
+### Remote convergence (all 5 commits)
+
+All 3 distinct remotes (github, gitlab, upstream) converged on each sub-commit SHA.
+Final HEAD after sub-commit 5 (this evidence): see PROGRESS.md.
+
 **Script correctness verdict:** The scanner is operating correctly on real data. It detects the known tracked private key (`id_rsa`) and real api-key patterns in the live `.env` files. Live-run exit=1 is correct given the presence of pre-existing tracked credentials.

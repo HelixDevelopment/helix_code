@@ -1,0 +1,34 @@
+{
+  "challenge": "sonarqube-scanning-config",
+  "description": "Validates SonarQube security scanning infrastructure configuration for HelixCode",
+  "note": "This challenge validates configuration correctness only — live scans require real credentials. Rotate SONAR_TOKEN before running live scans.",
+  "must_appear": [
+    "PASS.*Root sonar-project\\.properties exists",
+    "PASS.*SonarQube docker-compose\\.yml exists",
+    "PASS.*SONAR_TOKEN uses env-var reference",
+    "PASS.*sonar\\.projectKey uses env-var reference in root properties",
+    "PASS.*No HelixAgent-specific references",
+    "PASS.*SonarQube service defined",
+    "PASS.*PostgreSQL service defined",
+    "PASS.*Sonar scanner service defined",
+    "PASS.*SonarQube uses pinned community edition image",
+    "PASS.*Memory limits configured",
+    "PASS.*Health checks configured",
+    "PASS.*SonarQube health check uses /api/system/status",
+    "PASS.*Security network defined",
+    "PASS.*security-scan\\.sh --help shows sonarqube mode",
+    "PASS.*cmd/security-scan imports Containers BootManager",
+    "PASS.*cmd/security-scan uses runtime\\.AutoDetect"
+  ],
+  "must_not_appear": [
+    "FAIL.*sonar\\.projectKey uses env-var",
+    "FAIL.*No HelixAgent-specific references",
+    "FAIL.*SONAR_TOKEN uses env-var",
+    "FAIL.*SonarQube service defined",
+    "FAIL.*Memory limits configured",
+    "FAIL.*cmd/security-scan imports Containers BootManager",
+    "helixagent",
+    "hardcoded",
+    "TODO.*implement"
+  ]
+}
