@@ -34,7 +34,7 @@
 - [x] P0-06 — update .gitignore (root + inner)  ← (this commit)
 - [x] P0-07 — refresh HelixCode/HelixCode/.env.example  ← (this commit)
 - [x] P0-08 — scan-secrets.sh + planted-secret test  ← (this commit)
-- [ ] P0-08.5 — remediate 3 pre-existing tracked credentials (deferred from P0-08)
+- [~] P0-08.5 — remediate 3 pre-existing tracked credentials (in progress — P0-T08.5)
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
 - [ ] P0-10 — create HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md
 - [ ] P0-11 — add Article XII (CONST-041, CONST-042) to root CONSTITUTION.md
@@ -50,6 +50,8 @@
 - 2026-05-04 — claude-code-source is Phase 1 priority #1 — user statement — see synthesis spec §4.1
 
 ## Open risks / parking lot
+- **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
+- **Historical helix.security.json credential leak (remediated in P0-T08.5):** `helix.security.json` at repo root was committed with real SonarQube and Snyk credentials (token, project_key, organization, url). Material lives in git history and is considered compromised. Mitigation: removed from index via `git rm --cached`; replaced with `helix.security.json.example` containing `<REDACTED>` placeholders. Rotate: SonarQube token, Snyk token, organization, and project_key immediately.
 - HelixAgent submodule clone size — may need `--depth=1` shallow if >500 MB; measured at P0-03
 - Codex agent disambiguation (closed vs. open variant) — deferred to Phase 2 sub-spec
 - Example_Projects/ deletion — deferred to post-Phase-4 decision
