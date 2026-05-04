@@ -9,7 +9,7 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-01 — bootstrap PROGRESS.md
+- **Active task:** P0-03 — add HelixAgent submodule (P0-02 deferred — see parking lot)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04
@@ -26,9 +26,9 @@
 | P5 — End-user materials | pending | — | — | — |
 
 ## Active phase task list (Phase 0)
-- [-] P0-01 — bootstrap PROGRESS.md
-- [ ] P0-02 — resolve Agent-Deck nested-worktree recursion error
-- [ ] P0-03 — add HelixAgent submodule
+- [x] P0-01 — bootstrap PROGRESS.md  ← commit `2c07f57`
+- [~] P0-02 — Agent-Deck nested-worktree recursion error: **DEFERRED** (cosmetic; safe-fix requires modifying third-party submodules which is out of scope per spec §2.1; original `.git/info/exclude` approach was based on incorrect understanding of git submodule recursion semantics; see parking lot). Reverts: commits `904c925` + `a82f1a9`.
+- [-] P0-03 — add HelixAgent submodule
 - [ ] P0-04 — verify-llmsverifier-pin-parity.sh
 - [ ] P0-05 — migrate API keys from ../HelixAgent/.env
 - [ ] P0-06 — update .gitignore (root + inner)
@@ -52,3 +52,4 @@
 - HelixAgent submodule clone size — may need `--depth=1` shallow if >500 MB; measured at P0-03
 - Codex agent disambiguation (closed vs. open variant) — deferred to Phase 2 sub-spec
 - Example_Projects/ deletion — deferred to post-Phase-4 decision
+- **Submodule recursion cosmetic error (deferred from P0-02):** `git submodule foreach --recursive` errors out on `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` because each of those third-party repos has registered nested gitlinks (mode 160000) without corresponding `.gitmodules` entries. The original Task 2 plan proposed `.git/info/exclude` — that does NOT fix recursion (which walks the index, not the working tree). The only safe in-scope fix is to wrap script calls with `|| true` and tolerate the error. Modifying the affected third-party submodules' contents is forbidden by spec §2.1 (third-party not modified). Decision: scripts that use `git submodule foreach --recursive` (none yet in our codebase) must wrap with `|| true`; documentation updates that erroneously claimed Task 2 would resolve this are corrected.

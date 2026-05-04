@@ -172,41 +172,36 @@ Expected: all four `ls-remote` lines show the same SHA. Working tree clean.
 
 ---
 
-## Task 2: Resolve Agent-Deck nested-worktree recursion error (P0-02 in spec — was P0-01)
+## Task 2: Resolve Agent-Deck nested-worktree recursion error — **DEFERRED**
 
-**Note:** Spec calls this P0-01 but it's gated by needing local-only changes that don't go to git, so doing this second after PROGRESS bootstrap is cleaner.
+**Status:** This task was attempted, found unfixable in scope, reverted, and deferred to the parking lot. See `docs/improvements/PROGRESS.md` parking-lot section.
 
-**Files:**
-- Modify (LOCAL ONLY): `.git/info/exclude`
-- Modify: `docs/improvements/PROGRESS.md` (mark P0-02 ✓)
+**Why deferred:**
+- The original step 2.2 approach (`.git/info/exclude`) does NOT fix `git submodule foreach --recursive`. That command walks the **git index**, not the working tree, so `info/exclude` only suppresses `git status` noise — not the recursion error.
+- The actual fix would require `git rm --cached` of the orphaned gitlinks IN three third-party submodules (`Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}`) AND committing+pushing those changes upstream. Per spec §2.1, third-party repos must NOT be modified.
+- **An attempted in-scope-by-mistake fix** (commits `a47d2fa` + `636de8d`) was reverted (commits `904c925` + `a82f1a9`) once it was identified that the change made the meta-repo reference third-party SHAs that exist only in our local clones (broken state for fresh clones).
 
-- [ ] **Step 2.1: Verify the issue still reproduces**
+**Resolution accepted:** the recursion error is cosmetic and breaks no real workflow. Any script that uses `git submodule foreach --recursive` must wrap with `|| true` and manually verify success via OK-line count. No script in our current codebase uses unwrapped `--recursive`, so no immediate breakage.
 
-```bash
-git submodule foreach --recursive 'echo OK' 2>&1 | tail -10
-```
+**Permanent record of the original — incorrect — Task 2 plan is preserved below for traceability. DO NOT execute these steps.**
 
-Expected: error lines `fatal: No url found for submodule path 'Example_Projects/Agent-Deck/.claude/worktrees/agent-a3b98724'`. If absent, skip to Step 2.4.
-
-- [ ] **Step 2.2: Add the path to local exclude (NOT committed)**
+~~- [ ] **Step 2.1 (ORIGINAL — DEFERRED):** Verify the issue still reproduces~~
 
 ```bash
-echo "" >> .git/info/exclude
-echo "# P0-02: Agent-Deck has nested git worktrees that aren't submodules" >> .git/info/exclude
-echo "Example_Projects/Agent-Deck/.claude/worktrees/" >> .git/info/exclude
-cat .git/info/exclude | tail -5
+# git submodule foreach --recursive 'echo OK' 2>&1 | tail -10
 ```
 
-Expected: last 3-5 lines show the exclusion comment + path.
+~~Expected: error lines. (This expectation will continue to hold; the error is now accepted as cosmetic.)~~
 
-- [ ] **Step 2.3: Verify recursion no longer errors**
+~~- [ ] **Step 2.2 (ORIGINAL — INVALID):** Add the path to local exclude (NOT committed)~~
 
 ```bash
-git submodule foreach --recursive 'echo OK' 2>&1 | grep -c "^OK$"
-git submodule foreach --recursive 'echo OK' 2>&1 | grep -c "^fatal:"
+# (Approach was based on incorrect assumption about git submodule recursion semantics.)
 ```
 
-Expected: first count ≥87, second count = 0.
+~~- [ ] **Step 2.3 (ORIGINAL — INVALID):** Verify recursion no longer errors~~
+
+(Acceptance check changed: there is no longer a recursion-error gate for Phase 0. The 89-OK-lines + 3-fatal-lines state is the new accepted baseline until a non-invasive future fix exists.)
 
 - [ ] **Step 2.4: Capture evidence**
 
