@@ -12,7 +12,7 @@
 - **Active task:** P0-07 — refresh HelixCode/HelixCode/.env.example
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-04
+- **Last touched:** 2026-05-04 (P0-06 polish)
 - **Blocked-on:** none
 
 ## Phase status

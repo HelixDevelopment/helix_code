@@ -179,4 +179,14 @@ helix.security.json
 Verifications:
 - HelixCode/.env is ignored: YES
 - HelixCode/.env.example is NOT ignored: YES (good)
-- Tracked credential files (pre-existing test fixtures): 2 — `HelixCode/test/workers/ssh-keys/id_rsa` and `id_rsa.pub` are labelled `helixcode-test` and were committed before this task; `.gitignore` now prevents any NEW untracked `id_rsa` files from being accidentally added. These test fixtures will be reviewed for removal or `git rm --cached` treatment under a future task (P0-08 scan-secrets).
+- Tracked credential files (pre-existing CONST-041 violations, all committed before this task): **three files** are in the git index:
+  - `HelixCode/test/workers/ssh-keys/id_rsa` — SSH private key labelled `helixcode-test`
+  - `HelixCode/test/workers/ssh-keys/id_rsa.pub` — corresponding public key
+  - `helix.security.json` — root-level security credential file (5929 bytes, executable)
+
+  All three were committed before this programme began. The CONST-041 `.gitignore` blocks prevent any NEW untracked instances of these patterns from being accidentally added. Proper remediation — key/credential rotation, `git rm --cached` to remove from index, regeneration of any derived secrets, and historical-leak documentation — is deferred to **T08** (`scripts/scan-secrets.sh`). The planted-secret test in T08 will fail on the live tree due to these three files, triggering tracked remediation through the standard scan-secrets workflow.
+
+- **Asymmetric coverage between root and inner `.gitignore` CONST-041 blocks** is intentional and correct:
+  - The **root block** adds 10 patterns: omits `.env.local` (pre-existing at root `.gitignore` line 5) and omits `.env` at block level (pre-existing at line 4; P0-06 polish adds it back into the block to make the block self-contained).
+  - The **inner block** adds 8 patterns: omits `*.pem`, `*.key`, `*.crt` (pre-existing at inner `.gitignore` lines 85–87); omits `.env.local` (pre-existing at inner `.gitignore` line 44).
+  - **Effective combined coverage**: all 12 canonical secret-file patterns are protected at both the root and inner levels — the asymmetry reflects de-duplication of already-existing lines, not a coverage gap.
