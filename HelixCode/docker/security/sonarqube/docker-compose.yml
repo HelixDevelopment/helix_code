@@ -17,8 +17,8 @@ services:
       - postgres
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonar
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonar
+      SONAR_JDBC_USERNAME: ${SONARQUBE_DB_USER:-sonar}
+      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
       SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
     volumes:
       - sonarqube_data:/opt/sonarqube/data
@@ -52,15 +52,15 @@ services:
     pids_limit: 1024
     oom_score_adj: 500
     environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonar
+      POSTGRES_USER: ${SONARQUBE_DB_USER:-sonar}
+      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
       POSTGRES_DB: sonar
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - security-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sonar -d sonar"]
+      test: ["CMD-SHELL", "pg_isready -U ${SONARQUBE_DB_USER:-sonar} -d sonar"]
       interval: 10s
       timeout: 5s
       retries: 5

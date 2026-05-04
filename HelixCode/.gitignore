@@ -123,6 +123,11 @@ coverage/
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
 cli
 
+# === Security reports (never commit scanner output) ===
+reports/security/
+reports/security-cache/
+# === END Security reports ===
+
 # === Secret hygiene (CONST-041) — added P0-06 ===
 .env
 .env.*

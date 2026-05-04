@@ -2,6 +2,9 @@
 # scripts/security-scan.sh — Security Scanning Script for HelixCode
 # Ported from HelixAgent's scripts/security-scan.sh with HelixCode-specific paths.
 #
+# TODO(P3-refactor): this file handles 7+ scanners in ~580 lines; split into
+# per-scanner sourced modules under scripts/scanners/ in a future Phase 3 task.
+#
 # Usage:
 #   ./scripts/security-scan.sh [scanner] [options]
 #
@@ -27,13 +30,10 @@
 #     SONAR_TOKEN, SONARQUBE_PROJECT_KEY, SONARQUBE_PROJECT_NAME, SONARQUBE_PROJECT_VERSION
 #     SNYK_TOKEN
 #
-# Container orchestration:
-#   TODO(P0-T08.7/4): replace docker-compose invocations below with Containers BootManager call:
-#     go run ./cmd/security-scan -scanner=sonarqube
-#   For now, direct compose calls are used as an MVP; the Containers BootManager wiring
-#   is deferred to Sub-commit 4 / Phase 3.
+# Scanner orchestration uses cmd/security-scan/main.go (Containers BootManager) when go
+# is on PATH; falls back to direct compose otherwise.
 
-set -eo pipefail
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
@@ -144,7 +144,7 @@ run_gosec() {
         $RUNTIME run --rm \
             -v "${PROJECT_DIR}:/app:ro" \
             -w /app \
-            securego/gosec:latest \
+            securego/gosec:2.21.4 \
             -fmt json -out /app/reports/security/gosec-"${TIMESTAMP}".json ./... 2>/dev/null || true
     fi
 
@@ -179,7 +179,7 @@ run_trivy() {
         $RUNTIME run --rm \
             -v "${PROJECT_DIR}:/app:ro" \
             -v "${REPORTS_DIR}:/reports" \
-            aquasec/trivy:latest fs \
+            aquasec/trivy:0.55.2 fs \
             --format json \
             --output /reports/trivy-"${TIMESTAMP}".json \
             --scanners vuln,secret,misconfig \
@@ -211,7 +211,7 @@ run_grype() {
         echo -e "${YELLOW}Grype not installed locally, using container${NC}"
         $RUNTIME run --rm \
             -v "${PROJECT_DIR}:/app:ro" \
-            anchore/grype:latest \
+            anchore/grype:v0.86.0 \
             dir:/app -o json > "$report_file" 2>/dev/null || true
     fi
 
@@ -239,7 +239,7 @@ run_kics() {
         echo -e "${YELLOW}KICS not installed locally, using container${NC}"
         $RUNTIME run --rm \
             -v "${PROJECT_DIR}:/app:ro" \
-            checkmarx/kics:latest \
+            checkmarx/kics:v2.1.4 \
             scan -p /app/docker -o /app/reports/security --output-name "kics-${TIMESTAMP}" --report-formats json 2>/dev/null || true
     fi
 
@@ -263,7 +263,7 @@ run_semgrep() {
         echo -e "${YELLOW}Semgrep not installed locally, using container${NC}"
         $RUNTIME run --rm \
             -v "${PROJECT_DIR}:/app:ro" \
-            returntocorp/semgrep:latest \
+            returntocorp/semgrep:1.93.0 \
             semgrep scan --config auto --json --output /app/reports/security/semgrep-"${TIMESTAMP}".json /app 2>/dev/null || true
     fi
 

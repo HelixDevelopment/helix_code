@@ -38,7 +38,7 @@ const (
 
 func main() {
 	scanner := flag.String("scanner", "", "Scanner to boot: sonarqube|snyk")
-	action := flag.String("action", "start", "Action: start|stop|status")
+	action := flag.String("action", "start", "Action: start|status (stop is not yet implemented)")
 	flag.Parse()
 
 	if *scanner == "" {
@@ -148,8 +148,7 @@ func handleSonarQube(ctx context.Context, projectDir string, rt runtime.Containe
 			os.Exit(1)
 		}
 	case "stop":
-		log.Println("security-scan: SonarQube stop requested — use 'make scan-stop' (compose down)")
-		// TODO: wire ComposeOrchestrator.Down() here once the orchestrator interface is exposed.
+		return fmt.Errorf("stop action not yet implemented; use 'make scan-stop' or 'docker-compose -f <file> down' (TODO: wire ComposeOrchestrator.Down())")
 	default:
 		return fmt.Errorf("unknown action %q", action)
 	}
@@ -193,7 +192,7 @@ func handleSnyk(ctx context.Context, projectDir string, rt runtime.ContainerRunt
 	case "status":
 		fmt.Println("Snyk: container-based (no persistent health endpoint — check docker ps)")
 	case "stop":
-		log.Println("security-scan: Snyk stop — use 'make scan-stop' (compose down)")
+		return fmt.Errorf("stop action not yet implemented; use 'make scan-stop' or 'docker-compose -f <file> down' (TODO: wire ComposeOrchestrator.Down())")
 	default:
 		return fmt.Errorf("unknown action %q", action)
 	}

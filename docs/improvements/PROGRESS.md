@@ -37,6 +37,7 @@
 - [x] P0-08 — scan-secrets.sh + planted-secret test  ← (this commit)
 - [x] P0-08.5 — remediate 3 pre-existing tracked credentials  ← commits `8d30add` + `15cca9b` + `45bd4d4`
 - [x] P0-08.7 — Port SonarQube + Snyk security scan integration through Containers ← commits `1d728de` + `2494bc8` + `e29e2f6` + `16a4490` + sub5; Challenges: 33/33 + 26/26 PASS; Go BootManager wiring landed (go build exits 0); live scans deferred pending credential rotation (see evidence §P0-08.7)
+- [x] P0-08.7-fix — T08.7 code-quality review findings (Critical 1+2, Important 3-7) ← (this commit); evidence: §P0-T08.7 (fix-it) in 05_phase_0_evidence.md
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
 - [ ] P0-10 — create HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md
 - [ ] P0-11 — add Article XII (CONST-041, CONST-042) to root CONSTITUTION.md
