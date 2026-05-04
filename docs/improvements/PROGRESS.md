@@ -10,8 +10,8 @@
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
 - **Active feature:** F01 — Auto-Compaction System
-- **Active task:** P1-F01-T09 — integration test against real Anthropic provider
-- **Last completed:** P1-F01-T08 — Wire ThrashingGuard reset into internal/session/manager.go
+- **Active task:** P1-F01-T10 — Challenge with expected.json + runtime evidence
+- **Last completed:** P1-F01-T09 — integration test against real Anthropic provider (SKIP-OK when key unset)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04
@@ -57,7 +57,7 @@
 - [x] P1-F01-T06 — AutoCompactor with TDD  ← 3/3 tests PASS
 - [x] P1-F01-T07 — wire AutoCompactor into internal/agent/agent.go  ← commit (T07)
 - [x] P1-F01-T08 — wire ThrashingGuard reset into internal/session/manager.go  ← commit (T08)
-- [ ] P1-F01-T09 — integration test against real Anthropic provider
+- [x] P1-F01-T09 — integration test against real Anthropic provider  ← commit (T09); SKIP-OK: #P1-F01-INT when key unset; build exit=0; skip verified
 - [ ] P1-F01-T10 — Challenge with expected.json + runtime evidence
 - [ ] P1-F01-T11 — Feature 1 close-out + push
 
