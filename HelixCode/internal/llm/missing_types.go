@@ -198,4 +198,16 @@ type Provider interface {
 	IsAvailable(ctx context.Context) bool
 	GetHealth(ctx context.Context) (*ProviderHealth, error)
 	Close() error
+
+	// GetContextWindow returns the maximum number of tokens the active model
+	// can hold in a single context window. Used by the auto-compaction system
+	// to compute the 80%-trigger threshold.
+	GetContextWindow() int
+
+	// CountTokens returns an estimated token count for the given text.
+	// Implementations SHOULD use the provider's native tokenizer when available
+	// (e.g., tiktoken for OpenAI, anthropic-tokenizer for Anthropic) and MUST
+	// fall back to a conservative char-based estimate (1 token ≈ 4 chars) when
+	// no native tokenizer is reachable. Returns 0 + nil for empty text.
+	CountTokens(text string) (int, error)
 }
