@@ -9,12 +9,12 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F01 — Auto-Compaction System
-- **Active task:** P1-F01-T11 — Feature 1 close-out + push
-- **Last completed:** P1-F01-T10 — Challenge with expected.json + runtime evidence (SKIP-OK when key unset; driver compiles; evidence file written)
+- **Active feature:** F02 — Permission Rule System (awaits its own writing-plans cycle)
+- **Active task:** pending
+- **Last completed:** P1-F01-T11 — Feature 1 (Auto-Compaction) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-04
+- **Last touched:** 2026-05-05
 - **Blocked-on:** none
 
 ## Phase status
@@ -49,17 +49,17 @@
 - [x] P0-16 — regenerate diagrams + DEPRECATED.md pointers + Phase 0 evidence + push close-out  ← (this commit)
 
 ## Active feature task list (P1-F01: Auto-Compaction)
-- [x] P1-F01-T01 — bootstrap Phase 1 evidence + advance PROGRESS
-- [x] P1-F01-T02 — add GetContextWindow + CountTokens to Provider interface  ← commit (T02)
-- [x] P1-F01-T03 — implement Provider methods across all *_provider.go  ← commit (T03)
-- [x] P1-F01-T04 — ThrashingGuard with TDD  ← commit (T04) — 4/4 tests PASS
-- [x] P1-F01-T05 — CompactionMetadata with TDD
-- [x] P1-F01-T06 — AutoCompactor with TDD  ← 3/3 tests PASS
-- [x] P1-F01-T07 — wire AutoCompactor into internal/agent/agent.go  ← commit (T07)
-- [x] P1-F01-T08 — wire ThrashingGuard reset into internal/session/manager.go  ← commit (T08)
-- [x] P1-F01-T09 — integration test against real Anthropic provider  ← commit (T09); SKIP-OK: #P1-F01-INT when key unset; build exit=0; skip verified
-- [x] P1-F01-T10 — Challenge with expected.json + runtime evidence  ← commit (T10); SKIP-OK: #P1-F01-CHAL when key unset; driver compiles (build_exit=0); SKIP path verified
-- [ ] P1-F01-T11 — Feature 1 close-out + push
+- [x] P1-F01-T01 — bootstrap Phase 1 evidence + advance PROGRESS  ← commit `f0b9b15`
+- [x] P1-F01-T02 — add GetContextWindow + CountTokens to Provider interface  ← commit `5b153e6`
+- [x] P1-F01-T03 — implement Provider methods across all *_provider.go  ← commit `827971f`
+- [x] P1-F01-T04 — ThrashingGuard with TDD  ← commit `59f7daa`
+- [x] P1-F01-T05 — CompactionMetadata with TDD  ← commit `b9eae7f`
+- [x] P1-F01-T06 — AutoCompactor with TDD  ← commit `4330341`
+- [x] P1-F01-T07 — wire AutoCompactor into internal/agent  ← commit `cace643`
+- [x] P1-F01-T08 — wire ThrashingGuard reset into internal/session/manager.go  ← commit `b913ce2`
+- [x] P1-F01-T09 — integration test against real Anthropic provider  ← commit `4734f35`
+- [x] P1-F01-T10 — Challenge with expected.json + runtime evidence  ← commit `9284392`
+- [x] P1-F01-T11 — Feature 1 close-out + push  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -67,6 +67,7 @@
 - 2026-05-04 — claude-code-source is Phase 1 priority #1 — user statement — see synthesis spec §4.1
 - 2026-05-05 — Phase 0 closed; 17 plan tasks done + 2 added during execution (T08.5, T08.7); foundation verified; carry-forward items documented in evidence file P0-16
 - 2026-05-05 — Phase 1 entered; Feature 1 (Auto-Compaction) starts. Approach: extend existing internal/llm/compression infrastructure rather than build the parallel system the porting doc proposed (gap discovered during plan-writing).
+- 2026-05-05 — Feature 1 (Auto-Compaction) closed. Eleven sub-commits; extended existing internal/llm/compression rather than building parallel infrastructure as the porting doc proposed. Per-provider native tokenizers deferred to Phase 3.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
