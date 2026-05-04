@@ -289,8 +289,7 @@ run_snyk() {
         echo -e "${YELLOW}Set SNYK_TOKEN in HelixCode/.env for full features.${NC}"
     fi
 
-    # TODO(P0-T08.7/4): replace with Containers BootManager call:
-    #   go run ./cmd/security-scan -scanner=snyk
+    # Containers BootManager call (P0-T08.7/4): use Go binary if go is available.
     if command -v snyk &>/dev/null; then
         echo -e "${GREEN}Using local snyk installation${NC}"
         cd "$PROJECT_DIR"
@@ -319,9 +318,13 @@ run_snyk() {
 # -------------------------------------------------------------------
 start_sonarqube() {
     echo -e "${BLUE}Starting SonarQube server via compose...${NC}"
-    # TODO(P0-T08.7/4): replace with Containers BootManager call:
-    #   go run ./cmd/security-scan -scanner=sonarqube -action=start
-    $COMPOSE_CMD -f "$SONARQUBE_COMPOSE" up -d sonarqube postgres
+    # Containers BootManager call (P0-T08.7/4): use Go binary if go is available.
+    # Falls back to direct compose when go is not on PATH.
+    if command -v go &>/dev/null && [ -f "${PROJECT_DIR}/cmd/security-scan/main.go" ]; then
+        (cd "$PROJECT_DIR" && go run ./cmd/security-scan -scanner=sonarqube -action=start)
+    else
+        $COMPOSE_CMD -f "$SONARQUBE_COMPOSE" up -d sonarqube postgres
+    fi
 
     echo -e "${YELLOW}Waiting for SonarQube to be ready (this may take 2-3 minutes)...${NC}"
     local max_attempts=60
