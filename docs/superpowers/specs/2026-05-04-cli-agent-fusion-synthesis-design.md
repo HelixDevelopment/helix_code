@@ -38,7 +38,7 @@ A staged programme — *not* a single feature — that produces, in order:
 - **S1.** `git submodule foreach --recursive 'echo OK'` succeeds across the entire HelixCode tree.
 - **S2.** `make ci-validate-all` (root) and `make test-full` (inner) both pass with **zero `t.Skip()`** that lacks a `SKIP-OK: #<ticket>` marker.
 - **S3.** Every CLI-agent feature listed in `docs/improvements/04/.../porting_*.md` has: (a) source code merged at the documented HelixCode path, (b) a Challenge script that exercises the feature end-to-end against real infrastructure, (c) the Challenge's PASS evidence pasted in its commit message.
-- **S4.** Every governance triplet (Constitution.md / CLAUDE.md / AGENTS.md) at every owned-by-us repo carries the three constitutional anchors: anti-bluff (Article XI §11.9), no-force-push (CONST-042), no-secret-leak (CONST-041).
+- **S4.** Every governance triplet (Constitution.md / CLAUDE.md / AGENTS.md) at every owned-by-us repo carries the three constitutional anchors: anti-bluff (Article XI §11.9), no-force-push (CONST-043), no-secret-leak (CONST-042).
 - **S5.** SonarQube and Snyk both run locally via `make scan-sonarqube` / `make scan-snyk`, produce real reports, and have at least one finding triaged or waived with a documented exception.
 - **S6.** Refreshed PNG diagrams in `docs/improvements/06_diagrams_real/` reflect the real submodule topology (not the aspirational HelixML/HelixSDK fiction).
 
@@ -88,7 +88,7 @@ HelixCode/                              # meta-repo (this repo)
 
 ### 2.3 Secret handling
 
-**CONST-041 (NEW):**
+**CONST-042 (NEW):**
 > No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital, transitively or otherwise. All secrets live in `.env` files (mode 0600) listed in `.gitignore`. Any leak — to git, logs, build artefacts, screenshots, or external services — is a release blocker until rotated and post-mortemed.
 
 **Implementation:**
@@ -106,7 +106,7 @@ HelixCode/                              # meta-repo (this repo)
 
 ### 2.4 Push protections
 
-**CONST-042 (NEW):**
+**CONST-043 (NEW):**
 > No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval given for that specific operation. Authorization for one push does not extend to subsequent pushes. Bypassing hooks (`--no-verify`), signature verification (`--no-gpg-sign`), or protected-branch rules also requires explicit approval. This applies to every repository in the HelixDevelopment / vasic-digital stack.
 
 **Implementation:**
@@ -134,9 +134,9 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 | **P0-06** | Refresh `HelixCode/HelixCode/.env.example`: every key from `../HelixAgent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env\|sort) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example\|sort)` empty | P0-07 |
 | **P0-07** | `scripts/scan-secrets.sh` — gitleaks or fallback grep for `sk-`, `gho_`, `glpat-`, `xoxb-`, `AKIA`, `eyJ`; wired into `make ci-validate-all` | Exits 0 on clean tree; intentionally fails on planted test secret | P0-08 |
 | **P0-08** | `scripts/git-hooks/pre-push` rejecting `--force` unless `HELIX_FORCE_PUSH_APPROVED=1`; idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh` | Hook blocks `git push --force github main` (verify by reading hook output text only — do not actually run a force push) | P0-09 |
-| **P0-09** | Create governance triplet for `HelixCode/HelixCode/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-041, CONST-042) | P0-13 |
-| **P0-10** | Add CONST-041 + CONST-042 to root `CONSTITUTION.md` Article XII (NEW) | `grep -E "CONST-041\|CONST-042" CONSTITUTION.md` returns both | P0-11 |
-| **P0-11** | Cascade CONST-041 + CONST-042 to root `CLAUDE.md`, `AGENTS.md`, `CRUSH.md`, `QWEN.md`. Backfill anti-bluff anchor to `CRUSH.md` and `QWEN.md` (currently missing) | `for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE "11.9\|CONST-041\|CONST-042" $f; done` returns all four | P0-12 |
+| **P0-09** | Create governance triplet for `HelixCode/HelixCode/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
+| **P0-10** | Add CONST-042 + CONST-043 to root `CONSTITUTION.md` Article XII (NEW) | `grep -E "CONST-042\|CONST-043" CONSTITUTION.md` returns both | P0-11 |
+| **P0-11** | Cascade CONST-042 + CONST-043 to root `CLAUDE.md`, `AGENTS.md`, `CRUSH.md`, `QWEN.md`. Backfill anti-bluff anchor to `CRUSH.md` and `QWEN.md` (currently missing) | `for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE "11.9\|CONST-042\|CONST-043" $f; done` returns all four | P0-12 |
 | **P0-12** | Cascade all three anchors to every owned submodule: HelixQA, Challenges, Containers, Security, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, plus new HelixAgent and its nested HelixLLM/HelixMemory/HelixSpecifier. Backfill missing anti-bluff anchor in LLMsVerifier (all 3) and CONSTITUTION.md anchor in the four Dependencies repos | `scripts/verify-governance-cascade.sh` (extended) exits 0 | P0-13 |
 | **P0-13** | Fix root `CLAUDE.md` §3.2 bluff: change `HelixCode/ ← SUBMODULE` to `HelixCode/ ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted)` | `grep -A1 '^├── HelixCode/' CLAUDE.md` shows corrected label | P0-14 |
 | **P0-14** | Wire P0 gates into Makefile: `make verify-foundation` runs P0-01, 03, 05, 07, 12 checks plus `no-silent-skips` and `verify-governance-cascade.sh` | Exits 0 with no warnings; output committed to evidence log | P0-15 |
@@ -294,7 +294,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 
 ### 4.6 Cross-phase rules
 - **No phase declares done** without a single rolled-up evidence file (`docs/improvements/0N_phase_N_evidence.md`) committed and pushed (no force) to all four remotes.
-- **Every phase respects CONST-035, CONST-041, CONST-042.**
+- **Every phase respects CONST-035, CONST-042, CONST-043.**
 - **Submodule pointer updates** require running through secret-scan + verify-pin-parity gate.
 - **Force-push prohibition is absolute.**
 
@@ -377,8 +377,8 @@ Every owned-by-us repo's governance triplet (`CONSTITUTION.md`, `CLAUDE.md`, `AG
 > Operative rule: every PASS carries positive runtime evidence captured during execution. Metadata-only / configuration-only / absence-of-error / grep-based PASS without runtime evidence are critical defects.
 
 **Article XII (NEW) — Repository Safety:**
-- **§12.1 (CONST-041) — No-Secret-Leak.** No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital. All secrets in `.env` (mode 0600) listed in `.gitignore`. Any leak is a release blocker until rotated and post-mortemed.
-- **§12.2 (CONST-042) — No-Force-Push.** No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation without explicit per-operation user approval. Authorization for one push does not extend further.
+- **§12.1 (CONST-042) — No-Secret-Leak.** No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital. All secrets in `.env` (mode 0600) listed in `.gitignore`. Any leak is a release blocker until rotated and post-mortemed.
+- **§12.2 (CONST-043) — No-Force-Push.** No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation without explicit per-operation user approval. Authorization for one push does not extend further.
 
 ### 6.2 CLAUDE.md / AGENTS.md structure
 
@@ -413,7 +413,7 @@ Run via `make propagate-governance`. Verifier `scripts/verify-governance-cascade
 - `docs/USER_MANUAL.md` — end-to-end user guide (Phase 5); HTML via `make manual-html`.
 - `docs/COMPLETE_API_REFERENCE.md`, `docs/COMPLETE_CLI_REFERENCE.md`, `docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md`, `docs/COMPLETE_DEPLOYMENT_GUIDE.md`, `docs/COMPLETE_TROUBLESHOOTING_GUIDE.md` — refreshed per port.
 - `docs/adr/` — ADRs added per non-trivial port.
-- `docs/HOST_POWER_MANAGEMENT.md` — already documents CONST-033; cross-link to CONST-041/042.
+- `docs/HOST_POWER_MANAGEMENT.md` — already documents CONST-033; cross-link to CONST-042/042.
 
 **Inside meta-repo root:**
 - `Github-Pages-Website/` — feature pages, comparison matrix, install guide, asciinema demos.
@@ -537,7 +537,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
    5. `git push <each-remote> main` for `github`, `gitlab`, `origin`, `upstream`
 3. Verify: `for r in github gitlab origin upstream; do git ls-remote --heads $r main; done` — all four return same SHA.
 
-**Authorisation rule (CONST-042 reaffirmed):**
+**Authorisation rule (CONST-043 reaffirmed):**
 - **Regular `git push` (no force) for advancing `main` on existing remotes during this programme** — pre-authorised in conversation; no per-push approval needed.
 - **Force pushes / history rewrites / hook bypasses / new branches / new remotes** — still per-operation approval.
 
@@ -593,7 +593,7 @@ Pass executed 2026-05-04 by the authoring agent immediately before handing the s
 
 ## 9. References
 
-- **Constitution:** `CONSTITUTION.md` (Article XI §11.9 = anti-bluff anchor; Article XII §12.1 = CONST-041; §12.2 = CONST-042 — both NEW in P0-10)
+- **Constitution:** `CONSTITUTION.md` (Article XI §11.9 = anti-bluff anchor; Article XII §12.1 = CONST-042; §12.2 = CONST-043 — both NEW in P0-10)
 - **Existing planning material:** `docs/improvements/03_main_plan_step_01/Deep Dive Submodule Integration/` and `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/`
 - **Per-CLI-agent porting docs:** `docs/improvements/04/.../porting_*.md` (16 documents)
 - **Anti-bluff framework reference:** `docs/improvements/04/.../anti_bluff_test_framework.md`

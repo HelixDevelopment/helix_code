@@ -138,7 +138,7 @@ HelixCode/tests/e2e/challenges/.DS_Store
 
 reports/demos/
 
-# === Secret hygiene (CONST-041) — added P0-06 ===
+# === Secret hygiene (CONST-042) — added P0-06 ===
 .env.*
 !.env.example
 *.pem
@@ -164,7 +164,7 @@ Inner .gitignore tail:
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
 cli
 
-# === Secret hygiene (CONST-041) — added P0-06 ===
+# === Secret hygiene (CONST-042) — added P0-06 ===
 .env
 .env.*
 !.env.example
@@ -179,14 +179,14 @@ helix.security.json
 Verifications:
 - HelixCode/.env is ignored: YES
 - HelixCode/.env.example is NOT ignored: YES (good)
-- Tracked credential files (pre-existing CONST-041 violations, all committed before this task): **three files** are in the git index:
+- Tracked credential files (pre-existing CONST-042 violations, all committed before this task): **three files** are in the git index:
   - `HelixCode/test/workers/ssh-keys/id_rsa` — SSH private key labelled `helixcode-test`
   - `HelixCode/test/workers/ssh-keys/id_rsa.pub` — corresponding public key
   - `helix.security.json` — root-level security credential file (5929 bytes, executable)
 
-  All three were committed before this programme began. The CONST-041 `.gitignore` blocks prevent any NEW untracked instances of these patterns from being accidentally added. Proper remediation — key/credential rotation, `git rm --cached` to remove from index, regeneration of any derived secrets, and historical-leak documentation — is deferred to **T08** (`scripts/scan-secrets.sh`). The planted-secret test in T08 will fail on the live tree due to these three files, triggering tracked remediation through the standard scan-secrets workflow.
+  All three were committed before this programme began. The CONST-042 `.gitignore` blocks prevent any NEW untracked instances of these patterns from being accidentally added. Proper remediation — key/credential rotation, `git rm --cached` to remove from index, regeneration of any derived secrets, and historical-leak documentation — is deferred to **T08** (`scripts/scan-secrets.sh`). The planted-secret test in T08 will fail on the live tree due to these three files, triggering tracked remediation through the standard scan-secrets workflow.
 
-- **Asymmetric coverage between root and inner `.gitignore` CONST-041 blocks** is intentional and correct:
+- **Asymmetric coverage between root and inner `.gitignore` CONST-042 blocks** is intentional and correct:
   - The **root block** adds 10 patterns: omits `.env.local` (pre-existing at root `.gitignore` line 5) and omits `.env` at block level (pre-existing at line 4; P0-06 polish adds it back into the block to make the block self-contained).
   - The **inner block** adds 8 patterns: omits `*.pem`, `*.key`, `*.crt` (pre-existing at inner `.gitignore` lines 85–87); omits `.env.local` (pre-existing at inner `.gitignore` line 44).
   - **Effective combined coverage**: all 12 canonical secret-file patterns are protected at both the root and inner levels — the asymmetry reflects de-duplication of already-existing lines, not a coverage gap.
@@ -218,7 +218,7 @@ VERIFIED: zero real values present in .env.example
 real-value-count=0
 ```
 
-**CONST-041 status:** COMPLIANT — every entry in `.env.example` is either a comment, blank line, or `KEY=<REDACTED>`.
+**CONST-042 status:** COMPLIANT — every entry in `.env.example` is either a comment, blank line, or `KEY=<REDACTED>`.
 
 **File format:** 7-line header block + 1 blank line + 109 `KEY=<REDACTED>` lines = 117 lines total.
 
@@ -242,7 +242,7 @@ exit=0
 
 Live exit code: **1** (expected — known credential files in tracked tree per T06 polish evidence; NOT a script defect)
 
-Filenames flagged by the scanner (file:line only — values redacted per CONST-041):
+Filenames flagged by the scanner (file:line only — values redacted per CONST-042):
 
 ```
 ./Challenges/Panoptic/docs/SECURITY.md:462:
@@ -635,7 +635,7 @@ $ bash scripts/git-hooks/pre-push origin git@github.com:HelixDevelopment/HelixCo
 exit=0
 ```
 
-**Platform degradation:** When `/proc/$PPID/cmdline` is not readable (macOS/BSD), the hook warns but exits 0 — it does not block. CONST-042 constitutional clause is the actual contract.
+**Platform degradation:** When `/proc/$PPID/cmdline` is not readable (macOS/BSD), the hook warns but exits 0 — it does not block. CONST-043 constitutional clause is the actual contract.
 
 **scan-secrets post-install verification:**
 ```
@@ -646,8 +646,8 @@ exit=0
 
 **Real push (this commit) succeeds:** indicates non-force pushes are not blocked by the installed hook.
 
-**CONST-041 compliance:** scan-secrets clean (above).
-**CONST-042 compliance:** pre-push hook is installed and blocks --force / -f / --force-with-lease without HELIX_FORCE_PUSH_APPROVED=1.
+**CONST-042 compliance:** scan-secrets clean (above).
+**CONST-043 compliance:** pre-push hook is installed and blocks --force / -f / --force-with-lease without HELIX_FORCE_PUSH_APPROVED=1.
 
 ---
 
@@ -674,7 +674,7 @@ HelixCode/CONSTITUTION.md:3
 HelixCode/CLAUDE.md:2
 HelixCode/AGENTS.md:2
 
-$ grep -c "CONST-041\|CONST-042" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
+$ grep -c "CONST-042\|CONST-043" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
 HelixCode/CONSTITUTION.md:2
 HelixCode/CLAUDE.md:3
 HelixCode/AGENTS.md:4
@@ -682,8 +682,8 @@ HelixCode/AGENTS.md:4
 
 All files contain:
 - Article XI §11.9 anti-bluff anchor (verbatim user mandate + operative rule) ✓
-- CONST-041 (No-Secret-Leak) ✓
-- CONST-042 (No-Force-Push) ✓
+- CONST-042 (No-Secret-Leak) ✓
+- CONST-043 (No-Force-Push) ✓
 
 ### ADDENDA markers verified
 
@@ -723,7 +723,7 @@ OK: no credential patterns found in HelixCode/CONSTITUTION.md
 [HelixCode/CONSTITUTION.md] exit=0
 ```
 
-CONST-041 compliance: ✓ clean
+CONST-042 compliance: ✓ clean
 
 ### Acceptance checklist
 
@@ -731,8 +731,8 @@ CONST-041 compliance: ✓ clean
 |---|---|
 | All three files exist at `HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md` | ✓ |
 | Each file contains Article XI §11.9 verbatim | ✓ |
-| Each file contains CONST-041 (No-Secret-Leak) | ✓ |
-| Each file contains CONST-042 (No-Force-Push) | ✓ |
+| Each file contains CONST-042 (No-Secret-Leak) | ✓ |
+| Each file contains CONST-043 (No-Force-Push) | ✓ |
 | Each file has REPO-SPECIFIC ADDENDA delimiters | ✓ |
 | Each file references synthesis spec | ✓ |
 | No secrets present (scan-secrets clean) | ✓ |

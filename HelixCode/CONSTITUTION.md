@@ -37,11 +37,11 @@ Full text: root `CONSTITUTION.md` Article XI §11.9.
 
 ## Article XII — Security Mandates
 
-### §12.1 (CONST-041) — No-Secret-Leak
+### §12.1 (CONST-042) — No-Secret-Leak
 
 > No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital, transitively or otherwise. All secrets live in `.env` files (mode 0600) listed in `.gitignore`. Any leak — to git, logs, build artefacts, screenshots, or external services — is a release blocker until rotated and post-mortemed.
 
-### §12.2 (CONST-042) — No-Force-Push
+### §12.2 (CONST-043) — No-Force-Push
 
 > No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval given for that specific operation. Authorization for one push does not extend to subsequent pushes. Bypassing hooks (`--no-verify`), signature verification (`--no-gpg-sign`), or protected-branch rules also requires explicit approval.
 
