@@ -15,6 +15,13 @@ You are an AI agent working on **HelixCode**, an enterprise-grade distributed AI
 
 **Your mandate**: Write real, working, tested code. No simulations. No placeholders. No "for now" implementations. Every feature you implement MUST actually work when a user invokes it.
 
+### 1.1 Peer Governance Documents (keep in sync)
+This `CLAUDE.md` sits alongside several other agent/governance manuals at the repo root. They overlap and must remain consistent:
+- `CONSTITUTION.md` — source of truth for all mandates (CONST-033, CONST-035, CONST-036–040, Article XI §11.9). When this file conflicts with the Constitution, the Constitution wins.
+- `AGENTS.md` — generic agent manual (40 KB; mirror anti-bluff rules here).
+- `CRUSH.md`, `QWEN.md` — sibling agent manuals for other CLI tools. Cascade rule changes to all of them.
+- `HelixCode/CLAUDE.md`, `HelixQA/CLAUDE.md`, `Challenges/CLAUDE.md` — submodule-scoped manuals; this root file inherits from them and they inherit from this one.
+
 ---
 
 ## 2. Universal Mandatory Rules (Non-Negotiable)
@@ -76,71 +83,94 @@ Full text: CONSTITUTION.md Article XI §11.9.
 ## 3. HelixCode-Specific Architecture
 
 ### 3.1 Technology Stack
-- **Language**: Go 1.24.0 with toolchain go1.24.9
-- **Module**: `dev.helix.code`
-- **HTTP Framework**: Gin v1.11.0
-- **Database**: PostgreSQL 15+ (optional for testing)
-- **Cache**: Redis 7+ (optional)
-- **Authentication**: JWT v4.5.2 + bcrypt/argon2
-- **Configuration**: Viper v1.21.0
-- **CLI**: Cobra v1.8.0
-- **Testing**: Testify v1.11.1
+- **Language**: Go — root meta-repo on `go 1.25.2`, inner Go application (`HelixCode/`) on `go 1.26`. Keep both modules current; do not downgrade.
+- **Module IDs**: root `dev.helix.code` (thin), inner `dev.helix.code` (full app + transitive deps).
+- **HTTP / API**: Gin v1.11.0, gorilla/websocket v1.5.3, gRPC v1.80.0.
+- **Persistence**: PostgreSQL 15+ via pgx/v5 + lib/pq; Redis 7+ via go-redis/v9.
+- **AuthN/Z**: golang-jwt/v4 v4.5.2, bcrypt/argon2 (`golang.org/x/crypto`), oauth2.
+- **Config / CLI**: Viper v1.21.0, Cobra v1.8.0, pflag v1.0.10, fsnotify v1.9.0.
+- **LLM / Cloud**: AWS Bedrock runtime (aws-sdk-go-v2), Azure azcore/azidentity, getzep/zep-go/v3, smacker/go-tree-sitter.
+- **UI**: Fyne v2.7.0 (desktop GUI), tview / tcell/v2 (terminal UI), chromedp (headless browser).
+- **Testing**: stretchr/testify v1.11.1.
 
-### 3.2 Directory Structure
+### 3.2 Repository Layout — Meta-Repo + Submodules
+
+**This repo is a governance/meta-repo, not the Go application.** The actual Go binary lives in the `HelixCode/` subdirectory (a submodule). When an agent says "edit `internal/auth`," they almost always mean `HelixCode/internal/auth`, not the root `internal/`.
+
 ```
-HelixCode/
+HelixCode/                                # ← repo root (governance + submodules)
+├── CLAUDE.md / AGENTS.md / CONSTITUTION.md / CRUSH.md / QWEN.md   # agent manuals
+├── Makefile                              # governance gates only (see §3.4)
+├── go.mod                                # thin root module (dev.helix.code, go 1.25.2)
+├── helix                                 # Docker facade script (run platform standalone)
+├── setup.sh                              # one-shot: submodule init + deps + build
+├── .gitmodules                           # source of truth for submodule wiring
+├── docker-compose.helix.yml              # standalone deployment
+├── internal/{fix,security,testing,theme} # root-level helpers ONLY (NOT the app)
+├── cmd/security-test/                    # root-level security-test tool ONLY
+├── scripts/                              # init-submodules, propagate-governance,
+│                                         #   verify-governance-cascade, no-silent-skips,
+│                                         #   demo-all, run-all-tests, …
+├── docs/                                 # ARCHITECTURE.md, COMPLETE_*.md guides,
+│                                         #   bluff-proofing/, llms_verifier/, helix_qa/
+│
+├── HelixCode/      ← SUBMODULE: the actual Go application (see §3.2.1)
+├── HelixQA/        ← SUBMODULE: QA / challenge-orchestration platform
+├── Challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
+├── Containers/     ← SUBMODULE: Docker/container artefacts
+├── Dependencies/   ← SUBMODULES: LLama_CPP, Ollama, HuggingFace_Hub, …
+├── Security/       ← SUBMODULE: security tooling
+├── Assets/         ← SUBMODULE: logos, themes, brand
+├── Github-Pages-Website/ ← SUBMODULE: marketing site
+└── Example_Projects/     ← reference projects (Aider, Cline, Plandex, OpenHands, …)
+```
+
+#### 3.2.1 Inner Go application — `HelixCode/` submodule
+
+```
+HelixCode/HelixCode/                      # module dev.helix.code, go 1.26
+├── Makefile                              # real build/test targets (see §3.4)
 ├── cmd/
-│   ├── server/         # HTTP server entry point
-│   ├── cli/            # CLI client entry point
-│   └── security-test/  # Security testing tools
-├── internal/
-│   ├── auth/           # JWT authentication (VERIFIED REAL)
-│   ├── llm/            # LLM providers (CRITICAL BLUFF AREA - see below)
-│   ├── worker/         # SSH worker pool (VERIFY BEFORE USING)
-│   ├── task/           # Task management & checkpointing
-│   ├── server/         # HTTP handlers & routing
-│   ├── database/       # PostgreSQL layer
-│   ├── redis/          # Redis client
-│   ├── config/         # Viper configuration
-│   ├── tools/          # Tool ecosystem
-│   ├── editor/         # Multi-format code editing
-│   ├── memory/         # Memory provider integration
-│   ├── notification/   # Multi-channel notifications
-│   ├── mcp/            # Model Context Protocol
-│   ├── workflow/       # Workflow execution engine
-│   ├── project/        # Project lifecycle
-│   ├── session/        # Session management
-│   ├── context/        # Context building
-│   ├── agent/          # AI agent coordination
-│   ├── hardware/       # Hardware detection
-│   ├── monitoring/     # Metrics & health
-│   ├── performance/    # Performance optimization
-│   ├── security/       # Security management
-│   └── version/        # Version management
+│   ├── server/                           # HTTP server entry → bin/helixcode
+│   ├── cli/                              # CLI client entry → bin/cli
+│   ├── helix-config/                     # config tool
+│   ├── config-test/                      # config validator
+│   ├── security-test/, security-fix*/    # security tools
+│   └── performance-optimization*/        # perf tools
+├── internal/                             # ~45 packages — the real domain code
+│   ├── auth/        agent/      cognee/      commands/   config/
+│   ├── context/     database/   deployment/  discovery/  editor/
+│   ├── event/       focus/      hardware/    helixqa/    hooks/
+│   ├── llm/         logging/    logo/        mcp/        memory/
+│   ├── monitoring/  notification/ performance/ persistence/ project/
+│   ├── provider/    providers/  redis/       repomap/    rules/
+│   ├── security/    server/     session/     task/       template/
+│   ├── tools/       verifier/   version/     worker/     workflow/
+│   ├── adapters/    fix/        testutil/    mocks/      # mocks/ is unit-test-only
 ├── applications/
-│   ├── desktop/        # Fyne GUI
-│   ├── terminal-ui/    # tview TUI
-│   ├── ios/            # iOS (Swift bindings)
-│   ├── android/        # Android (Kotlin)
-│   ├── aurora-os/      # Aurora OS client
-│   └── harmony-os/     # Harmony OS client
+│   ├── desktop/      (Fyne GUI)
+│   ├── terminal-ui/  (tview TUI)
+│   ├── ios/  android/  aurora-os/  harmony-os/
 ├── tests/
-│   ├── e2e/challenges/ # E2E challenge framework
-│   ├── integration/    # Integration tests
-│   ├── unit/           # Unit tests
-│   ├── security/       # Security tests
-│   └── performance/    # Benchmarks
-├── config/             # Configuration files
-├── docker/             # Docker configurations
-├── scripts/            # Build and utility scripts
-└── go.mod              # Module definition
+│   ├── e2e/challenges/   # E2E challenge runner (cmd/runner/main.go)
+│   ├── integration/      # gated by `-tags=integration`
+│   ├── unit/             # mocks ALLOWED here only
+│   ├── security/         # security suite
+│   └── performance/      # benchmarks
+├── config/                # YAML configs (dev/, prod/, test/)
+├── docker/  scripts/  shared/  qa-integration/
+└── docker-compose.full-test.yml + .env.full-test    # zero-skip integration stack
 ```
 
-### 3.3 Critical Implementation Areas
+**Cardinal rule:** if a path in instructions doesn't start with `HelixCode/`, `HelixQA/`, etc., assume it is relative to the inner Go module and prefix with `HelixCode/`.
+
+### 3.3 Historical Bluffs — Resolved, Guard Against Regression
+
+The three patterns below were live bluffs in earlier revisions of `HelixCode/cmd/cli/main.go`. They have been fixed (verify with `grep -rn "simulate\|For now\|TODO implement\|placeholder" HelixCode/cmd/cli/main.go` — must return empty). Treat these as canonical anti-pattern examples; if a future change reintroduces any of them, the change is broken regardless of whether tests pass.
 
 #### BLUFF-001: LLM Generation is Simulated
-**Location**: `cmd/cli/main.go` lines 190-214
-**Status**: CRITICAL - MUST FIX IMMEDIATELY
+**Location**: `HelixCode/cmd/cli/main.go` → function `handleGenerate`
+**Status**: RESOLVED — now calls `provider.Generate` / `GenerateStream` directly. Do not regress.
 **Code Pattern**:
 ```go
 // ANTI-BLUFF: NEVER write code like this
@@ -160,9 +190,86 @@ fmt.Println(resp.Text)
 
 **Agent Rule**: When implementing LLM-related code, you MUST make real HTTP calls to real providers. NEVER simulate responses.
 
+### 3.4 Build & Test Commands
+
+Two Makefiles. The **root** Makefile only runs governance gates; the **inner** `HelixCode/Makefile` does real builds and tests. Always know which directory you are in.
+
+**Root governance gates** (run from repo root):
+```bash
+make no-silent-skips         # fail on bare t.Skip() without SKIP-OK marker
+make demo-all                # run every submodule's demo (proves they actually run)
+make demo-one MOD=<name>     # run one submodule's demo
+make ci-validate-all         # all governance gates in warn-mode
+./setup.sh                   # first-time: submodules + system deps + build
+./scripts/init-submodules.sh                 # init all submodules
+./scripts/propagate-governance.sh            # cascade Constitution/CLAUDE/AGENTS
+./scripts/verify-governance-cascade.sh       # confirm anchors present in submodules
+./helix start | stop | logs | shell          # Docker facade for the platform
+```
+
+**Inner application** (run from `HelixCode/`):
+```bash
+make build                   # → bin/helixcode (server)
+make verify-compile          # quick compile-only sanity check
+make test                    # all unit tests
+make test-coverage           # coverage with -race
+make fmt                     # gofmt
+make lint                    # golangci-lint run
+make dev                     # build + run with config/dev/config.yaml
+make prod                    # cross-compile linux/macos/windows
+```
+
+**Full integration / E2E** (real PostgreSQL + Redis + Ollama via docker-compose):
+```bash
+make test-infra-up                           # start docker-compose.full-test.yml
+make test-infra-status                       # check stack health
+make test-full                               # ALL tests, ZERO skips
+make test-unit-full / test-integration-full / test-e2e-full / test-security-full
+make test-verifier-unit / test-verifier-integration / test-verifier-challenges
+make test-infra-down                         # tear down stack + volumes
+```
+
+**Containerized builds** (no host Go required):
+```bash
+make container-builder-image    # build the builder image once
+make container-build            # build inside container
+make container-test             # test inside container
+make container-shell            # interactive shell in builder
+make container-release          # full release in container
+```
+
+**Single-test invocation** (inner module):
+```bash
+cd HelixCode
+go test -v -run TestJWTGenerate ./internal/auth                          # single unit test
+go test -v -tags=integration -run TestAPI_CreateTask ./tests/integration/...
+go test -v -count=1 ./internal/verifier/...                              # disable test cache
+go test -v -race -coverprofile=cover.out ./internal/llm                  # one pkg with race+cover
+```
+
+**E2E challenges** (real, end-to-end, runtime evidence required):
+```bash
+cd HelixCode/tests/e2e/challenges && go run cmd/runner/main.go -all
+# Or root-level cross-cutting Challenges:
+cd Challenges && make <target>
+```
+
+**Anti-bluff smoke check** (must always pass):
+```bash
+grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
+```
+
+**Platform / mobile builds** (inner module):
+```bash
+make desktop / desktop-nogui / desktop-linux / desktop-macos / desktop-windows
+make mobile-init && make mobile-ios && make mobile-android
+make aurora-os && make harmony-os
+```
+
 #### BLUFF-002: Model Listing is Hardcoded
-**Location**: `cmd/cli/main.go` lines 101-128
-**Status**: CRITICAL
+**Location**: `HelixCode/cmd/cli/main.go` → function `handleListModels`
+**Status**: RESOLVED — must continue to query `c.providerManager.GetProviders()` per CONST-036/037 (LLMsVerifier is the single source of truth).
 **Correct Pattern**:
 ```go
 func (c *CLI) handleListModels(ctx context.Context) error {
@@ -183,8 +290,8 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 ```
 
 #### BLUFF-003: Command Execution is Simulated
-**Location**: `cmd/cli/main.go` lines 237-250
-**Status**: HIGH
+**Location**: `HelixCode/cmd/cli/main.go` → function `handleCommand`
+**Status**: RESOLVED — must continue to use `os/exec` via `exec.CommandContext` and surface real exit codes. Never replace with print-and-sleep.
 **Correct Pattern**:
 ```go
 func (c *CLI) handleCommand(ctx context.Context, command string) error {
@@ -474,27 +581,27 @@ HelixCode has 80+ submodules. When working with them:
 
 ## 9. Reference Commands
 
+The full command catalog lives in **§3.4 Build & Test Commands**. The block below is only the smoke-test you should run before claiming any change is done.
+
 ```bash
-# Build
-make build
+# 1. Compiles?
+cd HelixCode && make verify-compile
 
-# Unit tests only (mocks allowed)
-go test -short ./...
+# 2. Unit tests (mocks allowed only here)
+cd HelixCode && go test -count=1 ./...
 
-# Integration tests (NO MOCKS)
-make integration-test
+# 3. Anti-bluff scan
+grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
 
-# All challenges
-./tests/e2e/challenges/run_all_challenges.sh
-
-# Verify no bluffs in code
-grep -r "simulated\|for now\|TODO implement\|placeholder" internal/ cmd/ || echo "No bluffs found"
-
-# Verify real LLM calls
-curl -X POST http://localhost:8080/api/v1/llm/generate \
+# 4. Real LLM end-to-end (requires `make test-infra-up` first)
+curl -sS -X POST http://localhost:8080/api/v1/llm/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"What is 2+2?","model":"llama3.2"}'
-# Should return actual AI-generated text, NOT "This is a simulated response"
+# Must return real AI output, not "simulated response".
+
+# 5. Governance still cascading?
+./scripts/verify-governance-cascade.sh
 ```
 
 ---
