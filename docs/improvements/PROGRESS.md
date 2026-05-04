@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet)
-- **Last completed:** P0-09 — pre-push hook + installer + setup.sh wiring
+- **Active task:** P0-11 — add Article XII (CONST-041 + CONST-042) to root CONSTITUTION.md
+- **Last completed:** P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04 (P0-08)
@@ -39,7 +39,7 @@
 - [x] P0-08.7 — Port SonarQube + Snyk security scan integration through Containers ← commits `1d728de` + `2494bc8` + `e29e2f6` + `16a4490` + sub5; Challenges: 33/33 + 26/26 PASS; Go BootManager wiring landed (go build exits 0); live scans deferred pending credential rotation (see evidence §P0-08.7)
 - [x] P0-08.7-fix — T08.7 code-quality review findings (Critical 1+2, Important 3-7) ← commits `b21b051`; evidence: §P0-T08.7 (fix-it) in 05_phase_0_evidence.md
 - [x] P0-09 — pre-push hook + installer + setup.sh wiring ← (this commit)
-- [ ] P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet)
+- [x] P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet) ← (this commit)
 - [ ] P0-11 — add Article XII (CONST-041, CONST-042) to root CONSTITUTION.md
 - [ ] P0-12 — cascade CONST-041/042 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN)
 - [ ] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule)

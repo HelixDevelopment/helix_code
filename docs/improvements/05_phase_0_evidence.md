@@ -648,3 +648,92 @@ exit=0
 
 **CONST-041 compliance:** scan-secrets clean (above).
 **CONST-042 compliance:** pre-push hook is installed and blocks --force / -f / --force-with-lease without HELIX_FORCE_PUSH_APPROVED=1.
+
+---
+
+## P0-10 — HelixCode/ inner Go-app governance triplet
+
+**Timestamp:** 2026-05-04T22:55+03:00
+**Branch:** main
+
+### Files created
+
+| File | Size | Path |
+|---|---|---|
+| `CONSTITUTION.md` | 5622 bytes | `HelixCode/HelixCode/CONSTITUTION.md` |
+| `CLAUDE.md` | 6204 bytes | `HelixCode/HelixCode/CLAUDE.md` |
+| `AGENTS.md` | 4787 bytes | `HelixCode/HelixCode/AGENTS.md` |
+
+### Anchor verification
+
+Each file was verified to contain all three constitutional anchors:
+
+```
+$ grep -c "11\.9\|tests do execute" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
+HelixCode/CONSTITUTION.md:3
+HelixCode/CLAUDE.md:2
+HelixCode/AGENTS.md:2
+
+$ grep -c "CONST-041\|CONST-042" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
+HelixCode/CONSTITUTION.md:2
+HelixCode/CLAUDE.md:3
+HelixCode/AGENTS.md:4
+```
+
+All files contain:
+- Article XI §11.9 anti-bluff anchor (verbatim user mandate + operative rule) ✓
+- CONST-041 (No-Secret-Leak) ✓
+- CONST-042 (No-Force-Push) ✓
+
+### ADDENDA markers verified
+
+```
+$ grep -c "BEGIN: REPO-SPECIFIC ADDENDA\|END: REPO-SPECIFIC ADDENDA" \
+    HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
+HelixCode/CONSTITUTION.md:2
+HelixCode/CLAUDE.md:2
+HelixCode/AGENTS.md:2
+```
+
+All three files have `<!-- BEGIN: REPO-SPECIFIC ADDENDA -->` / `<!-- END: REPO-SPECIFIC ADDENDA -->` delimiters. ✓
+
+### Synthesis spec references verified
+
+```
+$ grep -c "2026-05-04-cli-agent-fusion-synthesis-design" \
+    HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
+HelixCode/CONSTITUTION.md:1
+HelixCode/CLAUDE.md:2
+HelixCode/AGENTS.md:2
+```
+
+All three reference `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`. ✓
+
+### Secret scan
+
+```
+$ for f in HelixCode/CLAUDE.md HelixCode/AGENTS.md HelixCode/CONSTITUTION.md; do
+    bash scripts/scan-secrets.sh "$f"; echo "[$f] exit=$?"
+  done
+OK: no credential patterns found in HelixCode/CLAUDE.md
+[HelixCode/CLAUDE.md] exit=0
+OK: no credential patterns found in HelixCode/AGENTS.md
+[HelixCode/AGENTS.md] exit=0
+OK: no credential patterns found in HelixCode/CONSTITUTION.md
+[HelixCode/CONSTITUTION.md] exit=0
+```
+
+CONST-041 compliance: ✓ clean
+
+### Acceptance checklist
+
+| Criterion | Result |
+|---|---|
+| All three files exist at `HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md` | ✓ |
+| Each file contains Article XI §11.9 verbatim | ✓ |
+| Each file contains CONST-041 (No-Secret-Leak) | ✓ |
+| Each file contains CONST-042 (No-Force-Push) | ✓ |
+| Each file has REPO-SPECIFIC ADDENDA delimiters | ✓ |
+| Each file references synthesis spec | ✓ |
+| No secrets present (scan-secrets clean) | ✓ |
+| No third-party submodule modifications | ✓ |
