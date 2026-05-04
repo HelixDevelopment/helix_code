@@ -762,3 +762,56 @@ CONST-042 compliance: ✓ clean
 **Total CONST-NNN entries (CONST-001 through CONST-041):** 41 (unchanged)
 
 **Insertion point:** Between line 462 (`---` separator after CONST-041) and `## Amendment Process` section, at line 464.
+
+---
+
+## P0-12 — root sister-file cascade (CLAUDE/AGENTS/CRUSH/QWEN)
+
+**Timestamp:** 2026-05-04T23:15:00+03:00
+
+**Anchor presence after cascade:**
+```
+  CLAUDE.md    anti-bluff=3  CONST-042=1  CONST-043=1
+  AGENTS.md    anti-bluff=2  CONST-042=1  CONST-043=1
+  CRUSH.md     anti-bluff=2  CONST-042=1  CONST-043=1
+  QWEN.md      anti-bluff=2  CONST-042=1  CONST-043=1
+```
+
+**Legitimate CONST-041 cross-reference preserved in AGENTS.md:**
+```
+425:**Constitutional Impact**: Violates CONST-041 (MCP/LSP/ACP/Embedding/RAG/Skills/Plugins Integration Mandate).
+```
+
+**Secret scan (four files):**
+```
+OK: no credential patterns found in CLAUDE.md
+OK: no credential patterns found in AGENTS.md
+OK: no credential patterns found in CRUSH.md
+OK: no credential patterns found in QWEN.md
+all-exit=0
+```
+
+**Submodule audit:** No third-party submodule modifications — HelixAgent, Containers, Challenges, HelixQA, Security, LLMsVerifier all had zero commits in last 30 minutes.
+
+**Edit strategy:**
+- `CLAUDE.md` + `AGENTS.md`: existing anti-bluff section replaced with canonical `## Constitutional anchors` block (which includes §11.9 + CONST-042 + CONST-043). Non-canonical ⚠️ inline format superseded by structured heading block.
+- `CRUSH.md` + `QWEN.md`: full canonical anchor block inserted after title/intro paragraph (previously missing all anchors).
+
+**Acceptance checklist:**
+| Criterion | Result |
+|---|---|
+| CLAUDE.md has anti-bluff §11.9 (count ≥1) | ✓ count=3 |
+| CLAUDE.md has CONST-042 (count ≥1) | ✓ count=1 |
+| CLAUDE.md has CONST-043 (count ≥1) | ✓ count=1 |
+| AGENTS.md has anti-bluff §11.9 (count ≥1) | ✓ count=2 |
+| AGENTS.md has CONST-042 (count ≥1) | ✓ count=1 |
+| AGENTS.md has CONST-043 (count ≥1) | ✓ count=1 |
+| CRUSH.md has anti-bluff §11.9 (count ≥1) | ✓ count=2 |
+| CRUSH.md has CONST-042 (count ≥1) | ✓ count=1 |
+| CRUSH.md has CONST-043 (count ≥1) | ✓ count=1 |
+| QWEN.md has anti-bluff §11.9 (count ≥1) | ✓ count=2 |
+| QWEN.md has CONST-042 (count ≥1) | ✓ count=1 |
+| QWEN.md has CONST-043 (count ≥1) | ✓ count=1 |
+| AGENTS.md CONST-041 (MCP) cross-ref preserved | ✓ line 425 |
+| Secret scan clean (4 files) | ✓ all exit=0 |
+| No third-party submodule modifications | ✓ |
