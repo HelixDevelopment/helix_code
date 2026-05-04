@@ -9,10 +9,10 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-07 — refresh HelixCode/HelixCode/.env.example
+- **Active task:** P0-08 — scan-secrets.sh + planted-secret test
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-04 (P0-06 polish)
+- **Last touched:** 2026-05-04 (P0-07)
 - **Blocked-on:** none
 
 ## Phase status
@@ -32,7 +32,7 @@
 - [x] P0-04 — verify-llmsverifier-pin-parity.sh  ← (this commit)
 - [x] P0-05 — migrate API keys from ../HelixAgent/.env  ← (this commit)
 - [x] P0-06 — update .gitignore (root + inner)  ← (this commit)
-- [ ] P0-07 — refresh HelixCode/HelixCode/.env.example
+- [x] P0-07 — refresh HelixCode/HelixCode/.env.example  ← (this commit)
 - [ ] P0-08 — scan-secrets.sh + planted-secret test
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
 - [ ] P0-10 — create HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md

@@ -190,3 +190,34 @@ Verifications:
   - The **root block** adds 10 patterns: omits `.env.local` (pre-existing at root `.gitignore` line 5) and omits `.env` at block level (pre-existing at line 4; P0-06 polish adds it back into the block to make the block self-contained).
   - The **inner block** adds 8 patterns: omits `*.pem`, `*.key`, `*.crt` (pre-existing at inner `.gitignore` lines 85–87); omits `.env.local` (pre-existing at inner `.gitignore` line 44).
   - **Effective combined coverage**: all 12 canonical secret-file patterns are protected at both the root and inner levels — the asymmetry reflects de-duplication of already-existing lines, not a coverage gap.
+
+## P0-07 — .env.example refresh
+
+**Timestamp:** 2026-05-04T21:36:23+03:00
+
+**Key parity vs ../HelixAgent/.env:** OK (identical)
+
+**Real values present:** 0 (must be 0)
+
+**Total keys:** 109
+
+**Verification commands and output:**
+
+```
+$ grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u > /tmp/p0-07-canonical-keys.txt
+$ wc -l /tmp/p0-07-canonical-keys.txt
+109 /tmp/p0-07-canonical-keys.txt
+
+$ diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) \
+       <(grep -oE '^[A-Z_]+=' HelixCode/.env.example | sort -u)
+key-diff-exit=0
+
+$ result=$(grep -E '^[A-Z_]+=[^<]' HelixCode/.env.example | grep -vE '=$')
+$ [ -z "$result" ] && echo "VERIFIED: zero real values present in .env.example"
+VERIFIED: zero real values present in .env.example
+real-value-count=0
+```
+
+**CONST-041 status:** COMPLIANT — every entry in `.env.example` is either a comment, blank line, or `KEY=<REDACTED>`.
+
+**File format:** 7-line header block + 1 blank line + 109 `KEY=<REDACTED>` lines = 117 lines total.
