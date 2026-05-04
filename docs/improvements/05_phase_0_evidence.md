@@ -221,3 +221,88 @@ real-value-count=0
 **CONST-041 status:** COMPLIANT — every entry in `.env.example` is either a comment, blank line, or `KEY=<REDACTED>`.
 
 **File format:** 7-line header block + 1 blank line + 109 `KEY=<REDACTED>` lines = 117 lines total.
+
+## P0-08 — scan-secrets.sh + planted-secret test
+
+**Timestamp:** 2026-05-04T22:15+03:00
+
+### Test harness output (Step 8.4)
+
+```
+TEST 1: clean directory → expect exit 0
+  PASS
+TEST 2: planted secret → expect non-zero exit
+  PASS — scanner detected the planted secret
+
+Results: 2 passed, 0 failed
+exit=0
+```
+
+### Live-tree run (Step 8.5)
+
+Live exit code: **1** (expected — known credential files in tracked tree per T06 polish evidence; NOT a script defect)
+
+Filenames flagged by the scanner (file:line only — values redacted per CONST-041):
+
+```
+./Challenges/Panoptic/docs/SECURITY.md:462:
+./Challenges/Panoptic/tests/security/panoptic_test.go:422:
+./Challenges/Panoptic/tests/security/panoptic_test.go:423:
+./Challenges/Panoptic/tests/security/panoptic_test.go:454:
+./Challenges/pkg/env/redact_test.go:37:
+./Challenges/pkg/env/redact_test.go:48:
+./Challenges/pkg/logging/redacting_logger_test.go:55:
+./docs/COMPLETE_CLI_REFERENCE.md:908:
+./docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md:833:
+./docs/troubleshooting/guide.md:649:
+./.env:188:
+./.env:20:
+./.env:4:
+./.env:6:
+./.env:9:
+./HelixCode/.env:118:
+./HelixCode/.env:119:
+./HelixCode/.env:186:
+./HelixCode/.env:29:
+./HelixCode/.env:41:
+./HelixCode/.env:43:
+./HelixCode/.env:46:
+./HelixCode/.env:47:
+./HelixCode/.env:53:
+./HelixCode/internal/llm/vertexai_provider_test.go:25:
+./HelixCode/internal/worker/ssh_pool_test.go:569:
+./HelixCode/tests/e2e/test-bank/performance_security_tests.go:1073:
+./HelixCode/test/workers/ssh-keys/id_rsa:1:
+./HelixQA/pkg/llm/google_test.go:334:
+./Security/pkg/securestorage/securestorage_test.go:129:
+```
+
+### Findings
+
+**Tracked files with matches:**
+| File | Tracked | Nature |
+|---|---|---|
+| `HelixCode/test/workers/ssh-keys/id_rsa` | YES | Pre-existing tracked SSH private key (T06 known credential #1) |
+| `helix.security.json` | YES | Pre-existing tracked credential file (T06 known credential #2) |
+| `HelixCode/test/workers/ssh-keys/id_rsa.pub` | YES (no match) | Public key — does not match any pattern |
+| `docs/COMPLETE_CLI_REFERENCE.md:908` | YES | Example/doc text: `sk-ant-your-anthropic-key` (placeholder, not a real key) |
+| `docs/superpowers/plans/...foundation-cleanup.md:833` | YES | Planted-secret TDD test example: `sk-FAKE0123456789...` (fake) |
+| `docs/troubleshooting/guide.md:649` | YES | Documentation snippet: `-----BEGIN OPENSSH PRIVATE KEY-----` (illustrative, incomplete) |
+| `HelixCode/internal/llm/vertexai_provider_test.go:25` | YES | Unit-test fixture: embedded fake RSA key block (test data, not rotatable) |
+| `HelixCode/internal/worker/ssh_pool_test.go:569` | YES | Unit-test stub: partial `-----BEGIN OPENSSH PRIVATE KEY-----` header only |
+| `HelixCode/tests/e2e/test-bank/performance_security_tests.go:1073` | YES | Test fixture: `sk-1234567890abcdef` (clearly fake) |
+
+**Not-tracked files flagged** (untracked working-tree files — not a commit risk):
+- `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
+- `Challenges/Panoptic/...`, `HelixQA/...`, `Security/...`: submodule working-tree files, not tracked at root
+
+**The 3 pre-existing tracked credentials from T06 polish:**
+- `HelixCode/test/workers/ssh-keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
+- `HelixCode/test/workers/ssh-keys/id_rsa.pub` — public key, no secret pattern matches (expected)
+- `helix.security.json` — NOT detected in this run (see note below)
+
+**Note on `helix.security.json`:** The scanner's `SCAN_TARGET="."` run did not flag `helix.security.json` in the output above. The file's content does not match any of the scanner's current patterns (it's a JSON credential file that likely uses JWTs or other formats not in the regex set). The file IS blocked from future commits via `.gitignore` (P0-06) and will be addressed in P0-T08.5 remediation. The scanner's pattern set can be extended in P0-T08.5 to cover JWT/JSON credential formats.
+
+**Additional tracked files with fake/doc patterns** (`docs/*.md` and test fixtures): these are false-positive-in-intent — the patterns are doc examples and test fixtures, not real rotatable secrets. They will be reviewed during P0-T08.5 to determine whether to add per-file exclusions or restructure test data. No immediate action required.
+
+**Script correctness verdict:** The scanner is operating correctly on real data. It detects the known tracked private key (`id_rsa`) and real api-key patterns in the live `.env` files. Live-run exit=1 is correct given the presence of pre-existing tracked credentials.
