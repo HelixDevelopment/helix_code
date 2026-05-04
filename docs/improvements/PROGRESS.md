@@ -9,7 +9,7 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-04 — verify-llmsverifier-pin-parity.sh
+- **Active task:** P0-05 — migrate API keys from ../HelixAgent/.env
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04
@@ -29,8 +29,7 @@
 - [x] P0-01 — bootstrap PROGRESS.md  ← commit `2c07f57`
 - [~] P0-02 — Agent-Deck nested-worktree recursion error: **DEFERRED** (cosmetic; safe-fix requires modifying third-party submodules which is out of scope per spec §2.1; original `.git/info/exclude` approach was based on incorrect understanding of git submodule recursion semantics; see parking lot). Reverts: commits `904c925` + `a82f1a9`.
 - [x] P0-03 — add HelixAgent submodule  ← (this commit) — 47/60 cli_agents populated; 13 deferred to Phase 2 sub-specs (see parking lot)
-- [-] P0-04 — verify-llmsverifier-pin-parity.sh
-- [ ] P0-04 — verify-llmsverifier-pin-parity.sh
+- [x] P0-04 — verify-llmsverifier-pin-parity.sh  ← (this commit)
 - [ ] P0-05 — migrate API keys from ../HelixAgent/.env
 - [ ] P0-06 — update .gitignore (root + inner)
 - [ ] P0-07 — refresh HelixCode/HelixCode/.env.example
@@ -55,3 +54,4 @@
 - Example_Projects/ deletion — deferred to post-Phase-4 decision
 - **Submodule recursion cosmetic error (deferred from P0-02):** `git submodule foreach --recursive` errors out on `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` because each of those third-party repos has registered nested gitlinks (mode 160000) without corresponding `.gitmodules` entries. The original Task 2 plan proposed `.git/info/exclude` — that does NOT fix recursion (which walks the index, not the working tree). The only safe in-scope fix is to wrap script calls with `|| true` and tolerate the error. Modifying the affected third-party submodules' contents is forbidden by spec §2.1 (third-party not modified). Decision: scripts that use `git submodule foreach --recursive` (none yet in our codebase) must wrap with `|| true`; documentation updates that erroneously claimed Task 2 would resolve this are corrected.
 - **HelixAgent stale cli_agents pins (discovered during P0-03):** 13 of 60 cli_agents under `HelixAgent/cli_agents/` cannot be initialized because HelixAgent's recorded submodule SHAs no longer exist on the corresponding upstream remotes. Affected: `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset`. Each Phase 2 sub-spec for the affected agent must first bump HelixAgent's pointer (commit IN HelixAgent itself, then bump HelixAgent's pointer in this meta-repo) to a SHA that exists upstream. Phase 1 priority `claude-code` is NOT affected — fully populated. Per spec §1.3 N2, HelixAgent rewrite is out of scope for this programme; the per-agent pin bumps go through HelixAgent's own governance.
+- **LLMsVerifier dual-pin divergence (discovered during P0-04):** `Dependencies/HelixDevelopment/LLMsVerifier` at `629c5bd5d141351270e72b6fb7359fa4b7881d7c`; `HelixAgent/LLMsVerifier` at `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`. Per spec §2.2 the canonical pin is the one in `Dependencies/HelixDevelopment/LLMsVerifier` (direct Go import path). The canonical is exactly one commit ahead of the transitive (HelixAgent) view. Resolving the divergence requires either (a) bumping HelixAgent's recorded LLMsVerifier pointer to the canonical SHA — out of scope per spec §1.3 N2 (HelixAgent rewrite forbidden), or (b) updating `Dependencies/HelixDevelopment/LLMsVerifier` to match HelixAgent's view if HelixAgent's view is more current. Decision deferred; the parity verifier (`scripts/verify-llmsverifier-pin-parity.sh`) will continue to gate any future change that introduces NEW divergence beyond this baseline.

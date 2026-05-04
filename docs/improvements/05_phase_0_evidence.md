@@ -59,3 +59,49 @@ SSH URL per Constitution Rule 3.
 | HelixAgent total size measured | ✓ 777 MB |
 
 **Outcome:** Phase 1 (claude-code porting) is unblocked. The 13 unpopulated cli_agents are documented as deferred to Phase 2 sub-spec time when each affected agent's pin can be bumped in HelixAgent.
+
+## P0-04 — verify-llmsverifier-pin-parity.sh
+
+**Timestamp:** 2026-05-04T21:30+03:00
+
+### Live pass-path output (Step 4.2)
+
+```
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1
+```
+
+### Synthetic-divergence test (Step 4.4)
+
+Because the live state was already divergent (exit=1), we used the canonical submodule's `HEAD^` (`1d53ae3b...` — which equals the transitive SHA) to temporarily bring the two into parity, proving the script correctly reports exit=0 on parity:
+
+After checking out `PARENT_PARENT_SHA` (canonical→`1d53ae3b`, transitive→`1d53ae3b`):
+```
+OK: LLMsVerifier pin parity — both at 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+exit=0 (expected — script correctly detects parity)
+```
+
+After restoring canonical to `PARENT_SHA` (`629c5bd5`):
+```
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1  (matches Step 4.2 — back to original live state)
+```
+
+Restore verified: `git -C Dependencies/HelixDevelopment/LLMsVerifier rev-parse HEAD` returns `629c5bd5d141351270e72b6fb7359fa4b7881d7c` — correct.
+
+### Live divergence status
+
+Pins diverge — see PROGRESS.md parking lot for resolution.
+
+- `Dependencies/HelixDevelopment/LLMsVerifier` → `629c5bd5d141351270e72b6fb7359fa4b7881d7c`
+- `HelixAgent/LLMsVerifier` → `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`
+
+The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolution deferred per spec §1.3 N2.
