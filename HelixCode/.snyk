@@ -1,0 +1,14 @@
+# Snyk Policy File for HelixCode
+# https://snyk.io/docs/using-snyk-policy-files/
+version: v1.25.0
+language-settings:
+  go:
+    countDeps: true
+
+ignore:
+  SNYK-GOLANG-GITHUBCOMGOLOGLOG-7261795:
+    - "* > github.com/go-logr/logr":
+        reason: "Logr is used transitively and does not affect security"
+        expires: "2026-12-01T00:00:00Z"
+
+patch: {}

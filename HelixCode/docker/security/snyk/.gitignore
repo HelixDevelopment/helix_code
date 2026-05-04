@@ -1,0 +1,4 @@
+# Un-ignore the Snyk scanner Dockerfile in this directory.
+# The parent .gitignore has Dockerfile* excluded (for the main app),
+# but this subdirectory needs its scanner Dockerfile tracked.
+!Dockerfile

@@ -1,0 +1,100 @@
+version: '3.8'
+
+# Snyk Security Scanning Infrastructure for HelixCode
+# All credentials loaded from environment variables — never hardcoded.
+# Boot this infrastructure through the Containers BootManager, not bare docker commands.
+# TODO(P0-T08.7/4): Full lifecycle managed by cmd/security-scan via Containers BootManager.
+
+services:
+  snyk-deps:
+    build:
+      context: ../../..
+      dockerfile: docker/security/snyk/Dockerfile
+    container_name: helixcode-snyk-deps
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
+    environment:
+      SNYK_TOKEN: ${SNYK_TOKEN:-}
+    volumes:
+      - ../../..:/app:ro
+      - snyk-reports:/reports
+    command: /scripts/scan-dependencies.sh
+    networks:
+      - security-network
+    profiles:
+      - dependencies
+      - all
+
+  snyk-code:
+    build:
+      context: ../../..
+      dockerfile: docker/security/snyk/Dockerfile
+    container_name: helixcode-snyk-code
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
+    environment:
+      SNYK_TOKEN: ${SNYK_TOKEN:-}
+    volumes:
+      - ../../..:/app:ro
+      - snyk-reports:/reports
+    command: /scripts/scan-code.sh
+    networks:
+      - security-network
+    profiles:
+      - code
+      - all
+
+  snyk-iac:
+    build:
+      context: ../../..
+      dockerfile: docker/security/snyk/Dockerfile
+    container_name: helixcode-snyk-iac
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
+    environment:
+      SNYK_TOKEN: ${SNYK_TOKEN:-}
+    volumes:
+      - ../../..:/app:ro
+      - snyk-reports:/reports
+    command: /scripts/scan-iac.sh
+    networks:
+      - security-network
+    profiles:
+      - iac
+      - all
+
+  snyk-full:
+    build:
+      context: ../../..
+      dockerfile: docker/security/snyk/Dockerfile
+    container_name: helixcode-snyk-full
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 1024
+    oom_score_adj: 500
+    environment:
+      SNYK_TOKEN: ${SNYK_TOKEN:-}
+    volumes:
+      - ../../..:/app:ro
+      - snyk-reports:/reports
+    command: /scripts/scan-all.sh
+    networks:
+      - security-network
+    profiles:
+      - full
+      - all
+
+networks:
+  security-network:
+    external: true
+    name: helixcode-sonarqube_security-network
+
+volumes:
+  snyk-reports:
+    driver: local
