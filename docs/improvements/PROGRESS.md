@@ -10,6 +10,7 @@
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
 - **Active task:** P0-09 — pre-push hook + installer + setup.sh wiring
+- **Last completed:** P0-08.5 — remediate 3 pre-existing tracked credentials (commits `8d30add` + `15cca9b` + `45bd4d4`)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04 (P0-08)
@@ -34,7 +35,7 @@
 - [x] P0-06 — update .gitignore (root + inner)  ← (this commit)
 - [x] P0-07 — refresh HelixCode/HelixCode/.env.example  ← (this commit)
 - [x] P0-08 — scan-secrets.sh + planted-secret test  ← (this commit)
-- [~] P0-08.5 — remediate 3 pre-existing tracked credentials (in progress — P0-T08.5)
+- [x] P0-08.5 — remediate 3 pre-existing tracked credentials  ← commits `8d30add` + `15cca9b` + `45bd4d4`
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
 - [ ] P0-10 — create HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md
 - [ ] P0-11 — add Article XII (CONST-041, CONST-042) to root CONSTITUTION.md
