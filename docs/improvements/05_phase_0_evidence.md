@@ -105,3 +105,78 @@ Pins diverge — see PROGRESS.md parking lot for resolution.
 - `HelixAgent/LLMsVerifier` → `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`
 
 The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolution deferred per spec §1.3 N2.
+
+## P0-05 — API-key migration from ../HelixAgent/.env
+
+**Timestamp:** 2026-05-04T21:15:12+03:00
+
+**Source:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/HelixAgent/.env`
+
+**Destination:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/.env`
+
+**Key count:** 109
+
+**Key set diff (source vs destination):**
+
+```
+```
+
+(empty diff = identical key set)
+
+**In git index — precise exact-match check:** `HelixCode/HelixCode/.env` is **NOT** tracked by git (`git ls-files --error-unmatch HelixCode/HelixCode/.env` exits 1). The earlier substring-grep count of 2 reflected unrelated tracked files (`HelixCode/HelixCode/.env.example` and `HelixCode/HelixCode/.env.full-test`), not the secret-bearing file.
+
+## P0-06 — .gitignore hardening
+Timestamp: 2026-05-04T21:22:51+03:00
+
+Root .gitignore tail:
+```
+# Allow the e2e challenge testing framework but ignore test results
+!HelixCode/tests/e2e/challenges/
+HelixCode/tests/e2e/challenges/test-results/
+HelixCode/tests/e2e/challenges/.DS_Store
+
+
+reports/demos/
+
+# === Secret hygiene (CONST-041) — added P0-06 ===
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+helix.security.json
+# === END Secret hygiene ===
+```
+
+Inner .gitignore tail:
+```
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories (if using Go modules, comment out vendor/ above)
+# vendor/
+
+# End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
+cli
+
+# === Secret hygiene (CONST-041) — added P0-06 ===
+.env
+.env.*
+!.env.example
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+helix.security.json
+# === END Secret hygiene ===
+```
+
+Verifications:
+- HelixCode/.env is ignored: YES
+- HelixCode/.env.example is NOT ignored: YES (good)
+- Tracked credential files (pre-existing test fixtures): 2 — `HelixCode/test/workers/ssh-keys/id_rsa` and `id_rsa.pub` are labelled `helixcode-test` and were committed before this task; `.gitignore` now prevents any NEW untracked `id_rsa` files from being accidentally added. These test fixtures will be reviewed for removal or `git rm --cached` treatment under a future task (P0-08 scan-secrets).

@@ -9,7 +9,7 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-05 — migrate API keys from ../HelixAgent/.env
+- **Active task:** P0-07 — refresh HelixCode/HelixCode/.env.example
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04
@@ -30,8 +30,8 @@
 - [~] P0-02 — Agent-Deck nested-worktree recursion error: **DEFERRED** (cosmetic; safe-fix requires modifying third-party submodules which is out of scope per spec §2.1; original `.git/info/exclude` approach was based on incorrect understanding of git submodule recursion semantics; see parking lot). Reverts: commits `904c925` + `a82f1a9`.
 - [x] P0-03 — add HelixAgent submodule  ← (this commit) — 47/60 cli_agents populated; 13 deferred to Phase 2 sub-specs (see parking lot)
 - [x] P0-04 — verify-llmsverifier-pin-parity.sh  ← (this commit)
-- [ ] P0-05 — migrate API keys from ../HelixAgent/.env
-- [ ] P0-06 — update .gitignore (root + inner)
+- [x] P0-05 — migrate API keys from ../HelixAgent/.env  ← (this commit)
+- [x] P0-06 — update .gitignore (root + inner)  ← (this commit)
 - [ ] P0-07 — refresh HelixCode/HelixCode/.env.example
 - [ ] P0-08 — scan-secrets.sh + planted-secret test
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
