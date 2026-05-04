@@ -9,7 +9,7 @@
 
 ## Current focus
 - **Active phase:** P0 — Foundation Cleanup
-- **Active task:** P0-01 — bootstrap PROGRESS.md
+- **Active task:** P0-03 — add HelixAgent submodule
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-04
@@ -26,8 +26,8 @@
 | P5 — End-user materials | pending | — | — | — |
 
 ## Active phase task list (Phase 0)
-- [-] P0-01 — bootstrap PROGRESS.md
-- [ ] P0-02 — resolve Agent-Deck nested-worktree recursion error
+- [x] P0-01 — bootstrap PROGRESS.md  ← commit 2c07f57
+- [x] P0-02 — resolve Agent-Deck nested-worktree recursion error  ← commit (this commit)
 - [ ] P0-03 — add HelixAgent submodule
 - [ ] P0-04 — verify-llmsverifier-pin-parity.sh
 - [ ] P0-05 — migrate API keys from ../HelixAgent/.env
