@@ -1,3 +1,18 @@
+// helix.security.json.example
+// ============================================================
+// TEMPLATE ONLY — DO NOT fill in real credentials.
+//
+// Historical leak notice (CONST-041 / P0-T08.5 — 2026-05-04):
+// The original helix.security.json was committed with real SonarQube
+// and Snyk credentials (token, project_key, organization, url).
+// Those credentials are permanently in git history and are considered
+// COMPROMISED. They have been removed from the index via git rm --cached.
+// Rotate: SonarQube token, Snyk token, and any associated org credentials
+// immediately if they could authenticate against any live service.
+//
+// To use: copy this file to helix.security.json (gitignored),
+// fill in real values. NEVER commit helix.security.json.
+// ============================================================
 {
   "version": "1.0.0",
   "project": {
@@ -23,10 +38,10 @@
     },
     "sonarqube": {
       "enabled": true,
-      "url": "${SONAR_HOST_URL:http://localhost:9000}",
-      "project_key": "${SONAR_PROJECT_KEY:helixcode}",
-      "organization": "${SONAR_ORGANIZATION}",
-      "token": "${SONAR_TOKEN}",
+      "url": "<REDACTED_SONARQUBE_URL>",
+      "project_key": "<REDACTED>",
+      "organization": "<REDACTED>",
+      "token": "<REDACTED>",
       "quality_gate": "production-ready",
       "coverage_minimum": 80,
       "duplications_maximum": 3,
@@ -36,8 +51,8 @@
     },
     "snyk": {
       "enabled": true,
-      "token": "${SNYK_TOKEN}",
-      "organization": "${SNYK_ORGANIZATION}",
+      "token": "<REDACTED>",
+      "organization": "<REDACTED>",
       "project": "${SNYK_PROJECT:helixcode}",
       "monitoring": true,
       "severity_threshold": "medium",
