@@ -64,8 +64,8 @@ func (m *Manager) SetConfig(c *Config) {
 	m.mu.Unlock()
 }
 
-// GetConfig returns the active configuration (may be nil).
-func (m *Manager) GetConfig() *Config {
+// Config returns the active configuration (may be nil).
+func (m *Manager) Config() *Config {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.cfg
