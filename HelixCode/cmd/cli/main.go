@@ -30,6 +30,7 @@ import (
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
+	"dev.helix.code/internal/tools/task"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
@@ -685,6 +686,64 @@ func (c *CLI) Run() error {
 		} else if cloud != nil {
 			c.llmProvider = cloud
 			fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
+		}
+	}
+
+	// P1-F15-T10: Subagent system wiring.
+	//
+	// Helper-mode dispatch (T08) already sits as the very first statement in
+	// main(); that path never reaches here. This block wires the host-side
+	// SubagentManager: spawners, task tool, /subagents slash command.
+	//
+	// Order:
+	//   1. Construct in-process + subprocess spawners.
+	//   2. Construct SubagentManager (requires non-nil LLMProvider).
+	//      If c.llmProvider is nil (F12 default Ollama also failed), skip
+	//      the entire block with a warning — the rest of the CLI keeps
+	//      working for non-subagent paths.
+	//   3. Register the `task` agent tool against the manager.
+	//   4. Register the /subagents slash command.
+	//   5. Defer Shutdown so running subagents are cancelled on CLI exit.
+	//
+	// Anti-bluff anchor: the manager rejects nil LLMProvider at construction
+	// (subagent.NewSubagentManager). We mirror that gate here so a misconfigured
+	// CLI never silently produces dispatchable-but-broken subagents — the
+	// `task` tool is only registered when the manager truly works.
+	{
+		subagentLogger := zap.NewNop()
+		subagentWorkDir, swdErr := os.Getwd()
+		if swdErr != nil {
+			log.Printf("subagent: resolving cwd failed (skipping wire-in): %v", swdErr)
+		} else if c.llmProvider == nil {
+			log.Printf("subagent: no LLM provider available (F12 default failed); skipping wire-in")
+		} else {
+			inProcessSpawner := subagent.NewInProcessSpawner()
+			subprocessSpawner, spErr := subagent.NewSubprocessSpawner(subagentWorkDir)
+			if spErr != nil {
+				log.Printf("subagent: subprocess spawner unavailable (continuing in-process only): %v", spErr)
+			}
+			subagentMgr, smErr := subagent.NewSubagentManager(subagent.SubagentManagerOptions{
+				InProcessSpawner:  inProcessSpawner,
+				SubprocessSpawner: subprocessSpawner,
+				LLMProvider:       c.llmProvider,
+				Logger:            subagentLogger,
+				WorkDir:           subagentWorkDir,
+			})
+			if smErr != nil {
+				log.Printf("subagent: manager construction failed (skipping wire-in): %v", smErr)
+			} else {
+				defer func() {
+					shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer shutCancel()
+					_ = subagentMgr.Shutdown(shutCtx)
+				}()
+				toolReg.Register(task.NewTaskTool(subagentMgr))
+				if regErr := cmdRegistry.Register(commands.NewSubagentsCommand(subagentMgr)); regErr != nil {
+					log.Printf("subagent: register slash command failed: %v", regErr)
+				}
+				log.Printf("subagent: manager initialised (max_concurrency=%d)",
+					subagent.DefaultMaxConcurrency)
+			}
 		}
 	}
 
