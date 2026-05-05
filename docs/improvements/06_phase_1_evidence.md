@@ -225,4 +225,64 @@ F03 closed 2026-05-05. F04 (Git Worktree Agent Isolation) unblocked.
 
 ### Task evidence trail
 
-(filled in commit-by-commit as tasks land)
+- T01 — `d5ae14a` — bootstrap evidence + advance PROGRESS + .gitignore
+- T02 — `97075a2` + `ccaaf33` — package skeleton (types + doc) + anti-bluff smoke fix
+- T03 — `3e8b942` — git binary wrappers (7 unit tests against ephemeral repos)
+- T04 — `94decd8` — Manager + ValidateName + GetCurrentDirectory + IsIsolated (7 tests)
+- T05 — `bddf79d` — Manager.EnterWorktree (7 tests)
+- T06 — `1fa0617` — Manager.ExitWorktree + ListWorktrees + RemoveWorktree (7 tests)
+- T07 — `f522805` — 4 tools.Tool implementations (8 tests)
+- T08 — `73b040a` — session.Manager.currentWorktree field + getter/setter (3 tests)
+- T09 — `0a1fb53` — helixcode worktree {list,enter,exit,remove} subcommands (5 tests)
+- T10 — `64e8a45` — /worktree slash command + builtin registration (6+1 tests)
+- T11 — `4325459` — cmd/cli/main.go startup wiring + integration tests (3 tests, no mocks)
+- T12 — `9a23db1` — Challenge with runtime evidence (3 scenarios)
+
+### Challenge runtime evidence (from T12, re-verified at T13 close-out)
+
+```
+=== S1: isolation preserves main ===
+main_head_unchanged=true
+new_file_not_in_main=true
+
+=== S2: clean re-entry idempotent ===
+first_path_equals_second_path=true
+
+=== S3: invalid names rejected ===
+all_rejected=true
+
+PASS: all three scenarios produced expected outcomes
+```
+
+### Anti-bluff scan
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  internal/tools/worktree/ tests/e2e/challenges/worktree/ \
+  tests/integration/worktree/ \
+  internal/commands/worktree_command.go internal/commands/worktree_command_test.go \
+  internal/commands/builtin/worktree_register_test.go \
+  cmd/cli/worktree_cmd.go cmd/cli/worktree_cmd_test.go \
+  internal/session/manager_worktree_test.go && echo "BLUFF FOUND" || echo "clean"
+clean
+```
+
+### Verify-foundation gate
+
+```
+⚠️  3832 silent-skip violation(s) detected.
+(violations are all in Dependencies/HuggingFace_Hub — third-party submodule, out of scope)
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+EXIT_CODE: 1 (non-zero — same Phase 0 LLMsVerifier-pin baseline as F01/F02/F03 close-outs; carry-forward from Phase 0 parking lot)
+```
+
+### Closure
+
+F04 closed 2026-05-05. F05 (Hook-Based Extensibility) unblocked.
