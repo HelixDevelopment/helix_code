@@ -18,6 +18,7 @@ import (
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
+	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 )
@@ -30,6 +31,7 @@ type CLI struct {
 	verifierAdapter    *verifier.Adapter
 	permissionMode     string
 	permissionsEngine  *permissions.Engine
+	persistenceManager *persistence.Manager
 }
 
 // NewCLI creates a new CLI instance
@@ -92,6 +94,24 @@ func (c *CLI) initPermissions(ctx context.Context, pe *confirmation.PolicyEngine
 	return nil
 }
 
+// initPersistence bootstraps the persistence.Manager rooted at the current
+// working directory. Large tool outputs (>50 KB) will be written under
+// <cwd>/.helix/tool-results/ so the context window is not flooded.
+// A background goroutine prunes files older than DefaultMaxAge (7 days).
+func (c *CLI) initPersistence() error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolving cwd for persistence: %w", err)
+	}
+	c.persistenceManager = persistence.NewManager(cwd)
+	go func() {
+		if err := c.persistenceManager.CleanupOld(persistence.DefaultMaxAge); err != nil {
+			log.Printf("WARN persistence cleanup: %v", err)
+		}
+	}()
+	return nil
+}
+
 // Run executes the CLI
 func (c *CLI) Run() error {
 	// Parse command-line flags
@@ -141,6 +161,9 @@ func (c *CLI) Run() error {
 	policyEngine := confirmation.NewPolicyEngine()
 	if err := c.initPermissions(ctx, policyEngine); err != nil {
 		return fmt.Errorf("permissions bootstrap: %w", err)
+	}
+	if err := c.initPersistence(); err != nil {
+		return fmt.Errorf("persistence init: %w", err)
 	}
 
 	// Handle different commands
