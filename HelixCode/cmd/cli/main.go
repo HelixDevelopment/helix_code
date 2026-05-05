@@ -29,6 +29,7 @@ import (
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 	"dev.helix.code/internal/workflow"
+	"dev.helix.code/internal/workflow/planmode"
 	"go.uber.org/zap"
 )
 
@@ -310,6 +311,24 @@ func (c *CLI) Run() error {
 	// re-register the base commands already wired above by RegisterBuiltinCommandsWithMCP).
 	if regErr := cmdRegistry.Register(commands.NewTasksCommand(bgMgr)); regErr != nil {
 		log.Printf("tasks: register slash command failed: %v", regErr)
+	}
+
+	// F08: plan-mode gate — intercepts destructive tool calls when the agent is
+	// operating in plan mode and enforces approval before execution.
+	modeCtrl := planmode.NewModeController()
+	planner := planmode.NewDefaultPlanner()
+	gate := planmode.NewToolGate(modeCtrl, planner)
+	toolReg.SetPlanModeGate(gate)
+
+	// F08: register Enter/Exit plan-mode agent tools.
+	toolReg.Register(tools.NewEnterPlanModeTool(modeCtrl))
+	toolReg.Register(tools.NewExitPlanModeTool(modeCtrl))
+
+	// F08: register /plan slash command directly (avoid double-registering base
+	// commands through RegisterBuiltinCommandsWithPlanMode, which would conflict
+	// with the F06 RegisterBuiltinCommandsWithMCP call already in this function).
+	if regErr := cmdRegistry.Register(commands.NewPlanCommand(planner, modeCtrl)); regErr != nil {
+		log.Printf("plan: register slash command failed: %v", regErr)
 	}
 
 	// Handle different commands
