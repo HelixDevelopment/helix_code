@@ -88,6 +88,32 @@ func TestHTTPTransport_4xxNoOAuth(t *testing.T) {
 	assert.True(t, strings.Contains(err.Error(), "400") || isErrProtocol(err))
 }
 
+func TestHTTPTransport_CloseUnblocksRecv(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// never respond; let the test close the transport
+		time.Sleep(5 * time.Second)
+	}))
+	defer srv.Close()
+	tr := NewHTTPTransport(HTTPConfig{URL: srv.URL})
+	ctx := context.Background()
+	require.NoError(t, tr.Open(ctx))
+
+	done := make(chan error, 1)
+	go func() {
+		_, err := tr.Recv(ctx)
+		done <- err
+	}()
+
+	// Close should unblock Recv with ErrTransportClosed
+	require.NoError(t, tr.Close())
+	select {
+	case err := <-done:
+		require.ErrorIs(t, err, ErrTransportClosed)
+	case <-time.After(2 * time.Second):
+		t.Fatal("Recv did not unblock after Close")
+	}
+}
+
 func isErrProtocol(err error) bool {
 	for ; err != nil; err = unwrapErr(err) {
 		if err == ErrProtocol {

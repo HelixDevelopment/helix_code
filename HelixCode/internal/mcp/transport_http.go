@@ -22,11 +22,12 @@ type HTTPConfig struct {
 }
 
 type httpTransport struct {
-	cfg    HTTPConfig
-	client *http.Client
-	recvCh chan *recvItem
-	mu     sync.Mutex
-	closed bool
+	cfg     HTTPConfig
+	client  *http.Client
+	recvCh  chan *recvItem
+	closeCh chan struct{}
+	mu      sync.Mutex
+	closed  bool
 }
 
 type recvItem struct {
@@ -40,9 +41,10 @@ func NewHTTPTransport(cfg HTTPConfig) *httpTransport {
 		to = 60 * time.Second
 	}
 	return &httpTransport{
-		cfg:    cfg,
-		client: &http.Client{Timeout: to},
-		recvCh: make(chan *recvItem, 16),
+		cfg:     cfg,
+		client:  &http.Client{Timeout: to},
+		recvCh:  make(chan *recvItem, 16),
+		closeCh: make(chan struct{}),
 	}
 }
 
@@ -70,10 +72,17 @@ func (t *httpTransport) Send(ctx context.Context, msg *MCPMessage) error {
 	return nil
 }
 
+func (t *httpTransport) pushRecv(item *recvItem) {
+	select {
+	case t.recvCh <- item:
+	case <-t.closeCh:
+	}
+}
+
 func (t *httpTransport) sendOne(ctx context.Context, body []byte) {
 	req, err := http.NewRequestWithContext(ctx, "POST", t.cfg.URL, bytes.NewReader(body))
 	if err != nil {
-		t.recvCh <- &recvItem{err: fmt.Errorf("mcp http: build request: %w", err)}
+		t.pushRecv(&recvItem{err: fmt.Errorf("mcp http: build request: %w", err)})
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -83,42 +92,44 @@ func (t *httpTransport) sendOne(ctx context.Context, body []byte) {
 	if t.cfg.TokenSource != nil {
 		tok, err := t.cfg.TokenSource.Token()
 		if err != nil {
-			t.recvCh <- &recvItem{err: fmt.Errorf("%w: %v", ErrOAuthRequired, err)}
+			t.pushRecv(&recvItem{err: fmt.Errorf("%w: %v", ErrOAuthRequired, err)})
 			return
 		}
-		req.Header.Set("Authorization", "Bearer "+tok.AccessToken)
+		tok.SetAuthHeader(req)
 	}
 	resp, err := t.client.Do(req)
 	if err != nil {
-		t.recvCh <- &recvItem{err: fmt.Errorf("mcp http: do: %w", err)}
+		t.pushRecv(&recvItem{err: fmt.Errorf("mcp http: do: %w", err)})
 		return
 	}
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 32*1024*1024))
 	if resp.StatusCode == 401 {
 		if t.cfg.OAuthEnabled {
-			t.recvCh <- &recvItem{err: ErrOAuthRequired}
+			t.pushRecv(&recvItem{err: ErrOAuthRequired})
 		} else {
-			t.recvCh <- &recvItem{err: fmt.Errorf("%w: 401 %s", ErrProtocol, string(respBody))}
+			t.pushRecv(&recvItem{err: fmt.Errorf("%w: 401 %s", ErrProtocol, string(respBody))})
 		}
 		return
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		t.recvCh <- &recvItem{err: fmt.Errorf("%w: status %d: %s", ErrProtocol, resp.StatusCode, string(respBody))}
+		t.pushRecv(&recvItem{err: fmt.Errorf("%w: status %d: %s", ErrProtocol, resp.StatusCode, string(respBody))})
 		return
 	}
 	var m MCPMessage
 	if err := json.Unmarshal(respBody, &m); err != nil {
-		t.recvCh <- &recvItem{err: fmt.Errorf("%w: parse response: %v", ErrProtocol, err)}
+		t.pushRecv(&recvItem{err: fmt.Errorf("%w: parse response: %v", ErrProtocol, err)})
 		return
 	}
-	t.recvCh <- &recvItem{msg: &m}
+	t.pushRecv(&recvItem{msg: &m})
 }
 
 func (t *httpTransport) Recv(ctx context.Context) (*MCPMessage, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
+	case <-t.closeCh:
+		return nil, ErrTransportClosed
 	case item := <-t.recvCh:
 		if item.err != nil {
 			return nil, item.err
@@ -129,7 +140,12 @@ func (t *httpTransport) Recv(ctx context.Context) (*MCPMessage, error) {
 
 func (t *httpTransport) Close() error {
 	t.mu.Lock()
+	if t.closed {
+		t.mu.Unlock()
+		return nil
+	}
 	t.closed = true
+	close(t.closeCh)
 	t.mu.Unlock()
 	return nil
 }
