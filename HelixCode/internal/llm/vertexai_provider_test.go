@@ -75,7 +75,11 @@ func TestNewVertexAIProvider(t *testing.T) {
 			},
 			credFile:    false,
 			expectError: true,
-			errorMsg:    "failed to find credentials",
+			// P1-F12-T05: missing ambient credentials are NOT fatal at
+			// construction (deferred to first API call). The remaining
+			// failure mode is the project_id requirement, which fires
+			// after the deferred-credential warning is logged.
+			errorMsg: "project_id is required",
 		},
 		{
 			name: "default location",

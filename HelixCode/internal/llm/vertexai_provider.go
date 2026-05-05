@@ -207,19 +207,34 @@ func (tp *TokenProvider) GetToken(ctx context.Context) (string, error) {
 func NewVertexAIProvider(config ProviderConfigEntry) (*VertexAIProvider, error) {
 	ctx := context.Background()
 
-	// Get project ID from config or credentials
+	// Get project ID from config or credentials.
+	// Precedence: explicit Parameters["project_id"] >
+	//             VERTEXAI_PROJECT (existing convention) >
+	//             GOOGLE_CLOUD_PROJECT (canonical GCP-standard) >
+	//             GCP_PROJECT (legacy gcloud-cli fallback) >
+	//             credentials.ProjectID (resolved later if creds load).
 	projectID, ok := config.Parameters["project_id"].(string)
 	if !ok || projectID == "" {
 		projectID = os.Getenv("VERTEXAI_PROJECT")
+		if projectID == "" {
+			projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+		}
 		if projectID == "" {
 			projectID = os.Getenv("GCP_PROJECT")
 		}
 	}
 
-	// Get location/region
+	// Get location/region.
+	// Precedence: explicit Parameters["location"] >
+	//             VERTEXAI_LOCATION (existing convention) >
+	//             GOOGLE_CLOUD_LOCATION (canonical GCP-standard) >
+	//             "us-central1" (documented default).
 	location, ok := config.Parameters["location"].(string)
 	if !ok || location == "" {
 		location = os.Getenv("VERTEXAI_LOCATION")
+		if location == "" {
+			location = os.Getenv("GOOGLE_CLOUD_LOCATION")
+		}
 		if location == "" {
 			location = "us-central1" // Default location
 		}
@@ -261,23 +276,27 @@ func NewVertexAIProvider(config ProviderConfigEntry) (*VertexAIProvider, error) 
 			}
 		}
 	} else {
-		// Try Application Default Credentials
+		// Try Application Default Credentials. ADC is allowed to fail at
+		// construction time — credential resolution is deferred to the
+		// first API call (see TokenProvider.GetToken). This makes the
+		// provider constructible on hosts with no GCP creds at all so the
+		// wizard / model-selector / verifier-routed GetModels can still
+		// run, surfacing real errors only when a request is dispatched.
 		credentials, err = google.FindDefaultCredentials(
 			ctx,
 			"https://www.googleapis.com/auth/cloud-platform",
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to find credentials: %w (set GOOGLE_APPLICATION_CREDENTIALS or configure gcloud)", err)
-		}
-
-		// Use credentials project ID if available
-		if projectID == "" && credentials.ProjectID != "" {
+			log.Printf("Vertex AI: no ambient credentials found at construction (%v); deferring to first API call", err)
+			credentials = nil
+		} else if projectID == "" && credentials.ProjectID != "" {
+			// Use credentials project ID if available
 			projectID = credentials.ProjectID
 		}
 	}
 
 	if projectID == "" {
-		return nil, fmt.Errorf("project_id is required for Vertex AI (set project_id parameter or VERTEXAI_PROJECT env var)")
+		return nil, fmt.Errorf("project_id is required for Vertex AI (set project_id parameter, VERTEXAI_PROJECT, GOOGLE_CLOUD_PROJECT, or GCP_PROJECT env var)")
 	}
 
 	// Build endpoint URL
