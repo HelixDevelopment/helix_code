@@ -370,3 +370,111 @@ F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
 ### Task evidence trail
 
 (filled in commit-by-commit as tasks land)
+
+#### T13 — Challenge run
+
+```bash
+$ ./Challenges/p1-f06-mcp-full-lifecycle/run.sh
+==> build bin/helixcode (server)
+🎨 Generating logo assets...
+cd scripts/logo && go run generate_assets.go
+🔍 Extracting colors from logo...
+🎨 Generating ASCII art...
+✅ ASCII art saved to: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/images/logo-ascii.txt
+
+
+                :=+**##**+-:            
+             :+##%#######%%#+-          
+           :*############**+*#*-        
+         .+#############*++***##*.      
+        :#############*++****#####:     
+       =#############+++****#######:    
+      =#*##########*+++****#########.   
+     =#**#########*++*****#########%*   
+    -#****#######*+++**#############%-  
+   .#*******#####++******#############  
+   +#**********#*+*+:.    :+#########%= 
+  :#**********#**+:         :*%#######* 
+  **************+             *%######%:
+ :#************+    :=++=-.    #######%=
+ +*************.  :***####*-   :%#####%+
+ ************#-  -#***+--+##-   *######*
+:#************  -#***.    :**   -%######
+=***********#=  ****.  :-. -#-  :%######
++#**********#: -#*#-  +##*. #=  .#######
+=++++++++++++. +**#. :#**#- *+  .######*
+               +***. -#*##. #-  :%####%+
+               +**#. .#**. =#   =%####%-
+               +#*#-  =##-+#:   #######.
+               =#*#*   -+*=.   =%####%* 
+               :#**#=         -######%: 
+                *####=       =######%+  
+                -#*####=---+**+****#*   
+                 +###########**+++**.   
+                  *##############%*.    
+                   +###########%#=      
+                    -*#%%##%%%#+.       
+                      :-++*+=:          
+
+📱 Generating platform icons...
+✅ Icons generated in: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/icons
+🎨 Saving color scheme...
+✅ Color scheme saved to: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/colors/color-scheme.json
+🎨 Generating theme files...
+✅ Theme files generated
+
+✨ Logo asset generation complete!
+
+🎨 Color Scheme:
+   Primary:   #C0E852
+   Secondary: #B6E31D
+   Accent:    #C6EC73
+   Text:      #2D3047
+   Background: #F5F5F5
+✅ Logo assets generated
+🚀 Building helixcode...
+go build -ldflags="-X main.version=1.0.0 -X main.buildTime=2026-05-05_13:27:32 -X main.gitCommit=5c8437c" -o bin/helixcode ./cmd/server
+✅ Build complete: bin/helixcode
+==> build bin/cli (CLI with mcp subcommand)
+==> build echo MCP server
+==> write mcp.yml
+==> helixcode mcp list
+NAME  TRANSPORT  ALWAYS-LOAD  TARGET
+echo  stdio      true         /tmp/.private/milosvasic/tmp.8J0OB6qdwJ/echo-mcp
+==> helixcode mcp test echo
+ready
+==> anti-bluff smoke on internal/mcp/
+clean
+==> cross-compile (linux native)
+==> P1-F06 challenge PASS
+```
+
+#### T13 — All commits in the F06 branch
+
+```bash
+$ git log --oneline | grep "P1-F06"
+5c8437c fix(P1-F06-T12): robust integration test path; echo server returns real tool; warn on registry overwrite
+3c7fbf6 feat(P1-F06-T12): wire MCP Manager into cmd/cli startup + tools/registry + add integration test
+d96487f fix(P1-F06-T11): export PKCE/state helpers, fix OAuth callback race + error ordering, add mcp register test
+265c09e feat(P1-F06-T11): add helixcode mcp CLI subcommands + /mcp slash command
+627deff fix(P1-F06-T10): warn on missing env vars; explicit slice allocation in LoadMerged
+7c3cf86 feat(P1-F06-T10): add MCP YAML config loader/saver with project-overrides-user merging
+d5c948e fix(P1-F06-T09): specEqual must check all fields; Reload removes before close
+504b5c2 fix(P1-F06-T09): rename GetConfig back to Config (Go allows method/type name overlap)
+bece64a feat(P1-F06-T09): add MCP Manager registry + tool merging + reload
+4203d0c fix(P1-F06-T08): idempotent Close, recvLoop cancellation on handshake failure, race-free onEvent
+e5e4fd0 feat(P1-F06-T08): add MCP Client lifecycle + state machine + handshake
+b02a293 fix(P1-F06-T07): TokenCache.Save enforces 0600 on overwrite; check body-read errors; harden mode test
+1e194f6 feat(P1-F06-T07): add MCP OAuth 2.0 helpers (RFC 8414 discovery, PKCE, token cache)
+813ce55 fix(P1-F06-T06): serialize WS close-frame write with Send/ping (gorilla forbids concurrent writes)
+16eea5e feat(P1-F06-T06): add WebSocket MCP transport with closeCh-based shutdown
+fa16e31 fix(P1-F06-T05): reset backoff only on clean EOF; use t.client for SSE POST
+aa52901 feat(P1-F06-T05): add SSE MCP transport with auto-reconnect and closeCh-based shutdown
+6942929 fix(P1-F06-T04): closeCh-based shutdown for HTTP transport (race-free Close+Recv)
+c633c62 feat(P1-F06-T04): add HTTP MCP transport with OAuth bearer header
+7d82c46 fix(P1-F06-T03): single read goroutine for stdio transport (race-free Recv)
+c396a96 feat(P1-F06-T03): add stdio MCP transport with cross-platform process group control
+f42011b fix(P1-F06-T02): unexport state helpers, migrate to math/rand/v2, expand state-string tests
+c138401 feat(P1-F06-T02): add MCP client types + Transport interface + BackoffSchedule
+168f8d7 docs(P1-F06-T01): bootstrap Phase 1 / Feature 6 evidence + advance PROGRESS
+```
