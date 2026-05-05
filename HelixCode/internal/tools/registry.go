@@ -17,6 +17,7 @@ import (
 	"dev.helix.code/internal/tools/shell"
 	"dev.helix.code/internal/tools/web"
 	"dev.helix.code/internal/workflow"
+	"dev.helix.code/internal/workflow/planmode"
 )
 
 // Tool represents a unified interface for all tools
@@ -75,6 +76,10 @@ type ToolRegistry struct {
 	// bgManager routes run_in_background:true calls (F07). Optional; nil
 	// disables background dispatch (Execute returns ErrNoBackgroundMgr).
 	bgManager *workflow.BackgroundManager
+
+	// planGate is the optional plan-mode gate (F08). When set, Execute
+	// consults it before running any tool; blocked calls return ErrPlanModeGated.
+	planGate *planmode.ToolGate
 
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
@@ -281,6 +286,44 @@ func (r *ToolRegistry) SetBackgroundManager(m *workflow.BackgroundManager) {
 	r.bgManager = m
 }
 
+// SetPlanModeGate wires a plan-mode gate. When set, Execute consults it before
+// running any tool; blocked calls return ErrPlanModeGated.
+func (r *ToolRegistry) SetPlanModeGate(g *planmode.ToolGate) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.planGate = g
+}
+
+// checkPlanModeGate consults the plan-mode gate (if wired). Returns
+// ErrPlanModeGated wrapped with tool name + reason when blocked.
+func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interface{}) error {
+	r.mu.RLock()
+	g := r.planGate
+	r.mu.RUnlock()
+	if g == nil {
+		return nil
+	}
+	blocked, reason := g.IsBlocked(name, params)
+	if !blocked {
+		return nil
+	}
+	return fmt.Errorf("%w: %s (%s)", ErrPlanModeGated, name, reason)
+}
+
+// markPlanActionExecuted consumes the matched plan action after a successful
+// Execute. No-op when no gate is wired or no action matches.
+func (r *ToolRegistry) markPlanActionExecuted(name string, params map[string]interface{}) {
+	r.mu.RLock()
+	g := r.planGate
+	r.mu.RUnlock()
+	if g == nil {
+		return
+	}
+	if planID, action, ok := g.MatchApprovedAction(name, params); ok && action != nil {
+		g.MarkExecuted(planID, action.ID)
+	}
+}
+
 // Execute executes a tool by name with given parameters.
 // Fires hook lifecycle events around the inner tool.Execute when a hooks
 // manager is configured via SetHooksManager. A blocking before-hook prevents
@@ -292,6 +335,12 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 	// F07: dispatch to BackgroundManager when run_in_background:true.
 	if bg, ok := params["run_in_background"].(bool); ok && bg {
 		return r.executeInBackground(ctx, name, params)
+	}
+
+	// F08: plan-mode gate — block destructive tools when in plan mode without
+	// an approved plan action authorising the call.
+	if err := r.checkPlanModeGate(name, params); err != nil {
+		return nil, err
 	}
 
 	tool, err := r.Get(name)
@@ -314,6 +363,11 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 	// AfterToolCall + specialised after-events (block logged, not propagated).
 	if r.hooksManager != nil {
 		r.fireAfter(ctx, name, params, result, execErr)
+	}
+
+	// F08: on success, consume the matched plan action so it cannot be re-used.
+	if execErr == nil {
+		r.markPlanActionExecuted(name, params)
 	}
 
 	return result, execErr
@@ -567,6 +621,12 @@ func (r *ToolRegistry) executeInBackground(ctx context.Context, name string, par
 
 	if bm == nil {
 		return nil, ErrNoBackgroundMgr
+	}
+
+	// F08: plan-mode gate — background dispatch is also subject to plan-mode
+	// policy. Blocked calls are rejected synchronously before any task is queued.
+	if err := r.checkPlanModeGate(name, params); err != nil {
+		return nil, err
 	}
 
 	// Fire before-hooks synchronously at dispatch time. A blocking hook can
