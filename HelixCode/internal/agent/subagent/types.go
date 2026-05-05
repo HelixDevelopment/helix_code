@@ -169,7 +169,8 @@ type FakeLLMProvider struct {
 	mu         sync.Mutex
 	canned     map[string]string
 	callCount  atomic.Int64
-	lastPrompt atomic.Value // string
+	lastPrompt atomic.Value  // string
+	delay      atomic.Int64  // time.Duration as int64; 0 = no delay
 }
 
 // Compile-time assertion that FakeLLMProvider implements llm.Provider in
@@ -198,6 +199,18 @@ func (p *FakeLLMProvider) SetCanned(prompt, response string) {
 		p.canned = make(map[string]string)
 	}
 	p.canned[prompt] = response
+}
+
+// WithDelay configures Generate / GenerateStream to block for `d` before
+// returning. The block IS context-aware: if the caller's ctx is canceled or
+// times out before `d` elapses, Generate returns ctx.Err() immediately. This
+// lets unit tests exercise the spawner's timeout / cancellation paths against
+// a real time-based blocking provider rather than mocking ctx itself.
+//
+// Setting d <= 0 disables the delay (default behaviour). Safe for concurrent
+// use; the most recent call wins.
+func (p *FakeLLMProvider) WithDelay(d time.Duration) {
+	p.delay.Store(int64(d))
 }
 
 // GenerateCallCount returns the total number of Generate invocations.
@@ -259,6 +272,14 @@ func (p *FakeLLMProvider) Generate(ctx context.Context, request *llm.LLMRequest)
 	p.callCount.Add(1)
 	prompt := extractPrompt(request)
 	p.lastPrompt.Store(prompt)
+
+	if d := time.Duration(p.delay.Load()); d > 0 {
+		select {
+		case <-time.After(d):
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 
 	p.mu.Lock()
 	canned, ok := p.canned[prompt]
