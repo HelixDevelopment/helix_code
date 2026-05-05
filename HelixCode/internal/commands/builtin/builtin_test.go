@@ -553,15 +553,25 @@ func TestDeepPlanningCommand(t *testing.T) {
 	}
 }
 
-// TestRegisterBuiltinCommands tests command registration
+// TestRegisterBuiltinCommands tests command registration.
+// Note: "worktree" and its alias "wt" are only registered by
+// RegisterBuiltinCommandsWithWorktree (tested in worktree_register_test.go).
 func TestRegisterBuiltinCommands(t *testing.T) {
 	registry := commands.NewRegistry()
 
 	RegisterBuiltinCommands(registry)
 
+	// worktree requires a worktree.Manager and is registered separately via
+	// RegisterBuiltinCommandsWithWorktree; skip it in the base registration check.
+	worktreeOnly := map[string]bool{"worktree": true}
+	worktreeAliasOnly := map[string]bool{"wt": true}
+
 	// Test that all commands are registered
 	expectedCommands := GetBuiltinCommandNames()
 	for _, name := range expectedCommands {
+		if worktreeOnly[name] {
+			continue
+		}
 		_, exists := registry.Get(name)
 		if !exists {
 			t.Errorf("Command %q should be registered", name)
@@ -571,6 +581,9 @@ func TestRegisterBuiltinCommands(t *testing.T) {
 	// Test that all aliases work
 	aliases := GetBuiltinCommandAliases()
 	for alias := range aliases {
+		if worktreeAliasOnly[alias] {
+			continue
+		}
 		_, exists := registry.Get(alias)
 		if !exists {
 			t.Errorf("Alias %q should be registered", alias)
