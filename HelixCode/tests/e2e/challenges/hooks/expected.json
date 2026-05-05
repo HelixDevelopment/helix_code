@@ -1,0 +1,19 @@
+{
+  "name": "hooks/lifecycle-end-to-end",
+  "feature": "P1-F05 — Hook-Based Extensibility",
+  "scenarios": [
+    {
+      "id": "S1-block-bash-rm",
+      "expected_blocker_count": 1,
+      "expected_marker_present_after": true
+    },
+    {
+      "id": "S2-audit-after-tool",
+      "expected_log_lines": 3
+    },
+    {
+      "id": "S3-yaml-validate-malformed",
+      "expected_validate_exit_code_nonzero": true
+    }
+  ]
+}
