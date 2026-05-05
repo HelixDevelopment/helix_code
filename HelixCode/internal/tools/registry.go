@@ -82,6 +82,12 @@ type ToolRegistry struct {
 	// consults it before running any tool; blocked calls return ErrPlanModeGated.
 	planGate *planmode.ToolGate
 
+	// lspManager is the optional LSP manager (F13). When set, Execute fires
+	// a post-success NotifyChange for Edit-class tools (fs_edit / fs_write /
+	// multiedit_commit) so subsequent calls to LSPManager.GetDiagnostics see
+	// fresh state. nil disables the auto-trigger.
+	lspManager *LSPManager
+
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
 	shell        *shell.ShellExecutor
@@ -295,6 +301,23 @@ func (r *ToolRegistry) SetPlanModeGate(g *planmode.ToolGate) {
 	r.planGate = g
 }
 
+// SetLSPManager wires an LSPManager onto the registry. Once set, every
+// successful Execute call for an Edit-class tool (fs_edit, fs_write,
+// multiedit_commit) triggers a NotifyChange on the manager so subsequent
+// calls to LSPManager.GetDiagnostics see fresh state for the edited files.
+//
+// Pass nil to disable the auto-trigger.
+//
+// The trigger is best-effort and synchronous, capped at autoTriggerTimeout
+// (2s). It never propagates LSP-side errors back to the Execute caller —
+// diagnostics are a side-channel surfaced via separate tooling
+// (lsp_get_diagnostics).
+func (r *ToolRegistry) SetLSPManager(m *LSPManager) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lspManager = m
+}
+
 // checkPlanModeGate consults the plan-mode gate (if wired). Returns
 // ErrPlanModeGated wrapped with tool name + reason when blocked.
 func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interface{}) error {
@@ -369,6 +392,13 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 	// F08: on success, consume the matched plan action so it cannot be re-used.
 	if execErr == nil {
 		r.markPlanActionExecuted(name, params)
+	}
+
+	// F13: on success, fire the LSP auto-trigger for Edit-class tools so
+	// subsequent GetDiagnostics calls see fresh state. Best-effort: errors
+	// are swallowed inside triggerLSPAfterEdit.
+	if execErr == nil {
+		r.triggerLSPAfterEdit(ctx, name, params)
 	}
 
 	return result, execErr
