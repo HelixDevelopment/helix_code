@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -33,6 +34,43 @@ import (
 	"dev.helix.code/internal/workflow/planmode"
 	"go.uber.org/zap"
 )
+
+// defaultConfigPathFromEnv resolves the on-disk wizard config path using the
+// supplied env-lookup. Mirrors internal/llm.defaultWizardConfigPath but lives
+// here so cmd/cli does not need to import an unexported helper. Honours
+// XDG_CONFIG_HOME, falls back to $HOME/.config/helixcode/llm.yaml.
+func defaultConfigPathFromEnv(env func(string) string) string {
+	if xdg := strings.TrimSpace(env("XDG_CONFIG_HOME")); xdg != "" {
+		return filepath.Join(xdg, "helixcode", "llm.yaml")
+	}
+	home := strings.TrimSpace(env("HOME"))
+	if home == "" {
+		return filepath.Join(".", ".config", "helixcode", "llm.yaml")
+	}
+	return filepath.Join(home, ".config", "helixcode", "llm.yaml")
+}
+
+// loadProviderConfigFromDisk reads the wizard-written YAML at
+// $XDG_CONFIG_HOME/helixcode/llm.yaml (or $HOME/.config fallback) and returns
+// the persisted ProviderType + ProviderConfigEntry. Missing-file is reported
+// as an os.ErrNotExist-wrapped error so callers can fall through to other
+// selection sources (env / wizard prompt). Unmarshal failures are surfaced as
+// non-sentinel errors.
+//
+// Anti-bluff anchor: this is a real-disk reader. There is no stubbed config
+// path or fake "no config means everything is fine" mode — callers handle
+// the missing file with errors.Is(err, os.ErrNotExist).
+func loadProviderConfigFromDisk(envLookup func(string) string) (string, llm.ProviderConfigEntry, error) {
+	path := defaultConfigPathFromEnv(envLookup)
+	res, err := llm.LoadWizardConfig(path)
+	if err != nil {
+		return "", llm.ProviderConfigEntry{}, err
+	}
+	if res == nil {
+		return "", llm.ProviderConfigEntry{}, fmt.Errorf("loadProviderConfigFromDisk: nil result from %s", path)
+	}
+	return string(res.ProviderType), res.ConfigEntry, nil
+}
 
 // CLI represents the command-line interface
 type CLI struct {
@@ -255,6 +293,14 @@ func (c *CLI) Run() error {
 		resumeFlag        = flag.Bool("resume", false, "Resume most recent session for current project (F11)")
 		continueFlag      = flag.Bool("continue", false, "Resume most recent session globally across projects (F11)")
 		resumeSessionFlag = flag.String("resume-session", "", "Resume a specific session by ID (F11)")
+
+		// F12: cloud LLM provider override.
+		// Precedence (handled by llm.Select): --provider > HELIX_LLM_PROVIDER > config-file > wizard.
+		// On ErrNoProviderConfigured we print a friendly message and continue with
+		// the existing default Ollama provider — we never auto-launch the TUI here
+		// because that would hang non-TTY runs. Users start the wizard explicitly
+		// via `helixcode wizard`.
+		providerFlag = flag.String("provider", "", "F12 cloud LLM provider override (anthropic|bedrock|vertexai|azure)")
 	)
 	flag.Parse()
 
@@ -463,6 +509,50 @@ func (c *CLI) Run() error {
 	// list/show/resume/delete operate on the live on-disk state.
 	if regErr := cmdRegistry.Register(commands.NewSessionsCommand(transcriptStore, currentProject)); regErr != nil {
 		log.Printf("sessions: register slash failed: %v", regErr)
+	}
+
+	// F12: resolve cloud LLM provider via flag > env > config-file precedence.
+	// Failure modes are friendly: if no source is configured we keep the
+	// existing default (Ollama) and tell the user how to configure cloud.
+	// If construction fails (missing creds for the chosen type), we warn and
+	// keep the default so the rest of the CLI still works for non-LLM paths.
+	configProviderName, configEntry, configErr := loadProviderConfigFromDisk(os.Getenv)
+	if configErr != nil && !errors.Is(configErr, os.ErrNotExist) {
+		log.Printf("F12 provider: config load failed (continuing without): %v", configErr)
+	}
+	selectorInput := llm.SelectorInput{
+		Flag:   *providerFlag,
+		Env:    os.Getenv("HELIX_LLM_PROVIDER"),
+		Config: configProviderName,
+	}
+	ptype, selErr := llm.Select(selectorInput)
+	switch {
+	case errors.Is(selErr, llm.ErrNoProviderConfigured):
+		// Friendly hint, then keep the default provider.
+		fmt.Fprintln(os.Stderr,
+			"F12 provider: no cloud provider configured. "+
+				"Run `helixcode wizard` or set HELIX_LLM_PROVIDER. "+
+				"Continuing with the default local provider.")
+	case selErr != nil:
+		// User typed an unknown value -> fail loudly. This is non-zero exit
+		// because it's an explicit, fixable user error.
+		return fmt.Errorf("F12 provider: %w", selErr)
+	default:
+		// We have a resolved cloud type. If --provider/--env supplied a value
+		// that's different from the on-disk config, configEntry won't have
+		// matching credentials — try construction anyway and surface failures
+		// as warnings (don't crash).
+		entry := configEntry
+		entry.Type = ptype
+		cloud, cErr := llm.NewCloudProvider(ptype, entry)
+		if cErr != nil {
+			fmt.Fprintf(os.Stderr,
+				"F12 provider: failed to construct %q (%v); "+
+					"falling back to default local provider.\n", ptype, cErr)
+		} else if cloud != nil {
+			c.llmProvider = cloud
+			fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
+		}
 	}
 
 	// Handle different commands
@@ -882,6 +972,19 @@ func main() {
 		store := session.NewTranscriptStore(sessionStoreBaseDir())
 		currentProject, _ := session.ComputeProjectIdentity()
 		cmd := newSessionsCmd(sessionsCmdDeps{Store: store, CurrentProject: currentProject})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "wizard" subcommand group before flag.Parse()
+	// so Cobra handles its own flag parsing (same pattern as "sessions").
+	// The wizard runs RunWizard (interactive tview) or, when --provider is
+	// supplied, builds a NonInteractiveResult and writes the YAML directly.
+	if len(os.Args) >= 2 && os.Args[1] == "wizard" {
+		cmd := newWizardCmd(wizardCmdDeps{})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)

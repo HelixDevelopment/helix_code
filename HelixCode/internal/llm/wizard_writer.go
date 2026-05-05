@@ -166,6 +166,33 @@ func OverwriteWizardConfig(path string, result *WizardResult) error {
 	return nil
 }
 
+// LoadWizardConfig reads a previously-written wizard config from disk and
+// unmarshals it back into a WizardResult. This is the read-side counterpart
+// to WriteWizardConfig / OverwriteWizardConfig. Used by `helixcode`
+// startup to discover a persisted provider selection (T09 wiring).
+//
+// Returns os.ErrNotExist (wrapped) if path is missing — callers can use
+// errors.Is(err, os.ErrNotExist) to fall back to other selection sources.
+//
+// No simulation: this opens a real file and yaml-unmarshals real bytes.
+func LoadWizardConfig(path string) (*WizardResult, error) {
+	if path == "" {
+		return nil, errors.New("LoadWizardConfig: empty path")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("LoadWizardConfig: read %s: %w", path, err)
+	}
+	var out WizardResult
+	if err := yaml.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("LoadWizardConfig: unmarshal %s: %w", path, err)
+	}
+	if out.ConfigPath == "" {
+		out.ConfigPath = path
+	}
+	return &out, nil
+}
+
 // ensureSecretSafeParent guarantees that the parent directory of path
 // exists with mode 0700. If the directory already exists we leave its
 // permissions alone — overriding user-set perms on an existing dir

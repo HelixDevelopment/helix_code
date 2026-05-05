@@ -132,3 +132,11 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 func supportedCloudProviderList() string {
 	return "anthropic, bedrock, vertexai, azure"
 }
+
+// ParseCloudProviderType is the exported counterpart of parseCloudProviderType.
+// Callers outside this package (e.g., the wizard cobra subcommand) use it to
+// normalise user-supplied --provider strings without re-implementing the
+// alias table here. Returns the same non-sentinel error on unknown input.
+func ParseCloudProviderType(raw string) (ProviderType, error) {
+	return parseCloudProviderType(raw)
+}
