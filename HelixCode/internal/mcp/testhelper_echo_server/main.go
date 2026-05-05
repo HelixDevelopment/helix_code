@@ -35,7 +35,14 @@ func main() {
 			fmt.Fprintf(os.Stderr, "notif: %s\n", req.Method)
 			continue
 		}
-		resp := rpc{JSONRPC: "2.0", ID: req.ID, Result: json.RawMessage(`{}`)}
+		var resultPayload json.RawMessage
+		switch req.Method {
+		case "tools/list":
+			resultPayload = json.RawMessage(`{"tools":[{"name":"echo","description":"Echoes input back","inputSchema":{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}}]}`)
+		default:
+			resultPayload = json.RawMessage(`{}`)
+		}
+		resp := rpc{JSONRPC: "2.0", ID: req.ID, Result: resultPayload}
 		b, _ := json.Marshal(&resp)
 		out.Write(b)
 		out.WriteByte('\n')

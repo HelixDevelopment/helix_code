@@ -458,9 +458,18 @@ func (r *ToolRegistry) ExportSchemas() ([]byte, error) {
 // Tool names are prefixed "<server>:<tool>" so they are unambiguous.
 // Only tools from servers currently in StateReady are registered; call
 // this after Manager.Start has had time to connect alwaysLoad servers.
+//
+// LIMITATION: This is called once at startup. After mcp.Manager.Reload, the
+// tool registry is NOT automatically reconciled — new tools are invisible
+// and removed tools error on call. To pick up Reload changes, the caller
+// must invoke RegisterMCPManager again. (Reconciliation will be addressed
+// in a follow-up.)
 func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
 	for _, t := range m.Tools() {
 		name := t.Server + ":" + t.Name
+		if _, err := r.Get(name); err == nil {
+			log.Printf("WARN tools: MCP tool %q replaces existing registration", name)
+		}
 		// Capture loop variables so the closure references the correct values.
 		server, toolName := t.Server, t.Name
 		desc := t.Desc
@@ -488,8 +497,8 @@ type mcpTool struct {
 	desc     string
 }
 
-func (t *mcpTool) Name() string        { return t.name }
-func (t *mcpTool) Description() string { return t.desc }
+func (t *mcpTool) Name() string           { return t.name }
+func (t *mcpTool) Description() string    { return t.desc }
 func (t *mcpTool) Category() ToolCategory { return ToolCategory("mcp") }
 
 func (t *mcpTool) Schema() ToolSchema {
