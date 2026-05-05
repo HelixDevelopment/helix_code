@@ -97,8 +97,10 @@ func (t *sseTransport) runSSELoop(ctx context.Context) {
 		if ctx.Err() != nil {
 			return
 		}
-		_ = err // always retry on any error
-		bs.Reset()
+		if err == nil {
+			bs.Reset() // clean EOF: server closed cleanly, reset for next time
+		}
+		// on error: keep bs advancing through the schedule
 	}
 }
 
@@ -213,7 +215,7 @@ func (t *sseTransport) Send(ctx context.Context, msg *MCPMessage) error {
 		}
 		tok.SetAuthHeader(req)
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := t.client.Do(req)
 	if err != nil {
 		return err
 	}
