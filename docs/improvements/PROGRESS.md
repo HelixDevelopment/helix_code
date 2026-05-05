@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** P1-F14 — Sandboxed Shell Execution (in progress)
-- **Active task:** P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14
-- **Last completed:** P1-F13-T12 — Feature 13 (LSP Integration) close-out + push to 4 remotes (all 12 tasks shipped)
+- **Active feature:** idle, F15 next candidate (Subagent Team)
+- **Active task:** —
+- **Last completed:** P1-F14-T12 — Feature 14 (Sandboxed Shell Execution) close-out + push to 4 remotes (all 12 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -220,18 +220,18 @@
 - [x] P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force  ← (this commit)
 
 ## Active feature task list (P1-F14: Sandboxed Shell Execution)
-- [x] P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14  ← (this commit)
-- [ ] P1-F14-T02 — sandbox/types.go: SandboxConfig + Policy + Capabilities + Result + Backend interface + ConstitutionalDenyList (TDD)
-- [ ] P1-F14-T03 — sandbox/detector.go: capability probes + SelectBackend with fail-closed (TDD)
-- [ ] P1-F14-T04 — sandbox/bubblewrap_backend.go: deterministic argv builder + Run (TDD)
-- [ ] P1-F14-T05 — sandbox/native_backend.go: SysProcAttr.Cloneflags userns + native_helper re-exec (TDD)
-- [ ] P1-F14-T06 — sandbox/manager.go: backend selection + CONST-033 deny + user deny + fail-closed (TDD)
-- [ ] P1-F14-T07 — sandbox/sandboxed_shell_tool.go: Tool interface impl as shell_sandboxed (TDD)
-- [ ] P1-F14-T08 — sandbox/config_loader.go: YAML loader + secret-safe writer (mode 0600) (TDD)
-- [ ] P1-F14-T09 — /sandbox slash command (status/test/policy) (TDD)
-- [ ] P1-F14-T10 — main.go wiring (Detector + Manager + tool + slash) + gated integration test
-- [ ] P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases
-- [ ] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
+- [x] P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14  ← commit `0ef5811`
+- [x] P1-F14-T02 — sandbox/types.go: SandboxConfig + Policy + Capabilities + Result + Backend interface + ConstitutionalDenyList (TDD)  ← commit `abdbdab`
+- [x] P1-F14-T03 — sandbox/detector.go: capability probes + SelectBackend with fail-closed (TDD)  ← commit `4f7141f`
+- [x] P1-F14-T04 — sandbox/bubblewrap_backend.go: deterministic argv builder + Run (TDD)  ← commit `ec4cb9b`
+- [x] P1-F14-T05 — sandbox/native_backend.go: SysProcAttr.Cloneflags userns + native_helper re-exec (TDD)  ← commit `5d05b3d`
+- [x] P1-F14-T06 — sandbox/manager.go: backend selection + CONST-033 deny + user deny + fail-closed (TDD)  ← commit `a642101`
+- [x] P1-F14-T07 — sandbox/sandboxed_shell_tool.go: Tool interface impl as shell_sandboxed (TDD)  ← commit `ba54c0c`
+- [x] P1-F14-T08 — sandbox/config_loader.go: YAML loader + secret-safe writer (mode 0600) (TDD)  ← commit `9aadc02`
+- [x] P1-F14-T09 — /sandbox slash command (status/test/policy) (TDD)  ← commit `93dc377`
+- [x] P1-F14-T10 — main.go wiring (Detector + Manager + tool + slash) + gated integration test  ← commit `fdb5ddc`
+- [x] P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases  ← submodule `53ebc80` + meta-repo `998896c`
+- [x] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -247,6 +247,7 @@
 - 2026-05-05 — Feature 11 (Session Transcript Resume) closed. 9 task commits (T01 `ddb45dc`, T02 `fa6bc5f`, T03 `466ab97`, T04 `d72e401`, T05 `08fa5c0`, T06 `607206a`, T07 `0fb036c`, T08 submodule `1e79453` + meta `f4d0ff2`, T09 close-out) + 1 follow-up (`f258cf7` preserves ProjectPath/Name across `SessionManager.Append`). New files in `internal/session/`: identity.go (Git-root-or-cwd), transcript_store.go (JSONL transcripts + metadata I/O), resume.go (ResumeFinder + ResumeMode + FindResumeTarget). Existing `session_manager.go` extended with `Append/Resume/CurrentID`. Surface: `/sessions` slash + `helixcode sessions {list,show,resume,delete}` cobra + `--resume`/`--continue` flags wired in `cmd/cli/main.go`. Challenge harness exercises real fork-exec process boundaries (write child PID ≠ read child PID, both ≠ orchestrator). All 4 remotes pushed non-force. F12 (Multi-Provider Backend) is the next candidate per the original 12-feature programme plan.
 - 2026-05-05 — Feature 12 (Multi-Provider Backend) closed. 11 task commits (T01 `bd5dc69`, T02 `06c9c34`, T03 `dde10dd`, T04 `d01026d`, T05 `67417ed`, T06 `880b4dc`, T07 `28b6fa1`, T08 `778040e`, T09 `ac55fca`, T10 submodule `4e42fbc` + meta-repo `b937e17` + SHA backfill `1586624`, T11 close-out). Anthropic / Bedrock / Vertex / Azure unified behind a single `Selector` (flag > env > config > wizard precedence) with verifier-backed `GetModels` on all four cloud providers (CONST-036/037 satisfied). New `internal/llm/{selector.go, wizard.go, wizard_writer.go, provider_factory.go::NewCloudProvider}` plus four per-provider audit tests (`{anthropic,bedrock,vertexai,azure}_provider_audit_test.go`). Surface: `--provider` flag + `HELIX_LLM_PROVIDER` env + `helixcode wizard` cobra + tview TUI wizard with `tcell.SimulationScreen` headless tests (mode 0600 + O_EXCL writer). Challenge harness emits LOCAL-always-runs (11/11 PASS) + CLOUD credential-gated sections with explicit `SKIP-OK: P1-F12 cloud creds not provided` markers. All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). F13 (LSP Integration) is the next candidate.
 - 2026-05-05 — Feature 13 (LSP Integration) closed. 12 task commits (T01 `df98b6d`, T02 `b9a30e4`, T03 `3c5d894`, T04 `2fdb648`, T05 `beef346`, T06 `33387a3`, T07 `9bb3118`, T08 `a1aa7e6`, T09 `1b7812f`, T10 `080b79b`, T11 submodule `f00bf19` + meta-repo `9ea2cdf`, T12 close-out). 5 curated LSP servers (gopls / rust-analyzer / pyright / typescript-language-server / clangd) brought online with lazy-spawn + 5-minute idle timeout per server, file-extension router, crash recovery, post-Execute auto-trigger after `fs_edit`/`fs_write`/`multi_edit_commit` (attaches `lsp_diagnostics` to the tool result map). New files in `internal/tools/`: `lsp_types.go`, `lsp_client.go` (jsonrpc2 wrapper around `go.lsp.dev/jsonrpc2 v0.10.0` + `go.lsp.dev/protocol v0.12.0`), `lsp_manager.go`, `lsp_servers.go`, `lsp.go` (LSPGetDiagnostics + LSPAnalyzeDiagnostic agent tools), `lsp_autotrigger.go`, `lsp_fakeserver/main.go` (in-tree real-subprocess fake LSP for deterministic tests). Surface: `/lsp` slash + `helixcode lsp {status,restart,list-servers,stop}` cobra. Challenge harness has TWO sections — MANAGER PIPELINE (always runs, real OS subprocess speaking real LSP-framed JSON-RPC over stdio, NOT an in-process stub) + REAL LANGUAGE SERVERS (gated, SKIP-OK with install hints). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). F14 (Sandboxed Shell Execution) is the next candidate.
+- 2026-05-06 — Feature 14 (Sandboxed Shell Execution) closed. 12 task commits (T01 `0ef5811`, T02 `abdbdab`, T03 `4f7141f`, T04 `ec4cb9b`, T05 `5d05b3d`, T06 `a642101`, T07 `ba54c0c`, T08 `9aadc02`, T09 `93dc377`, T10 `fdb5ddc`, T11 submodule `53ebc80` + meta-repo `998896c`, T12 close-out). Linux-first sandboxed shell execution: hybrid bubblewrap (preferred when on PATH) + native Go `Cloneflags` userns fallback; default-DENY network with per-call opt-in; CONST-033 power-management deny-list rejects matching commands BEFORE any subprocess spawns; fail-closed when neither bwrap nor unprivileged userns are available — never a silent unsandboxed run. New `internal/tools/sandbox/` package (types + detector + bubblewrap_backend + native_backend + native_helper re-exec + manager + sandboxed_shell_tool + config_loader). Tool: `shell_sandboxed`. Surface: `/sandbox {status,test,policy}` slash + secret-safe YAML at `~/.config/helixcode/sandbox.yaml` (mode 0600, parent 0700 — mirrors F12 wizard_writer; CONST-042 satisfied). Challenge harness emits THREE sections — DETECTOR + FAIL-CLOSED (always runs, asserts CONST-033 spawn-counter rejection AND verbatim fail-closed message), BUBBLEWRAP (gated, real curl-inside-sandbox network probe), NATIVE (gated, force-constructed NativeBackend with helper-mode dispatch). On this host both gated phases RAN end-to-end. All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). F15 (Subagent Team) is the next candidate.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.

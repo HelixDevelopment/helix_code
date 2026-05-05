@@ -27,18 +27,18 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14
-- [ ] P1-F14-T02 — `internal/tools/sandbox/types.go`: SandboxConfig + SandboxPolicy + SandboxCapabilities + SandboxRequest + SandboxResult + SandboxBackend interface + ConstitutionalDenyList constants (TDD)
-- [ ] P1-F14-T03 — `internal/tools/sandbox/detector.go`: Detect() probes bwrap + userns + cgroups v2 + GOOS via injected Probe interface (TDD)
-- [ ] P1-F14-T04 — `internal/tools/sandbox/bubblewrap_backend.go`: argv builder + Run via os/exec.CommandContext (TDD with synthetic argv assertions on a fake SubprocessRunner)
-- [ ] P1-F14-T05 — `internal/tools/sandbox/native_backend.go` (+ `native_backend_other.go`): SysProcAttr.Cloneflags setup + small re-exec helper (TDD; gated tests when userns enabled)
-- [ ] P1-F14-T06 — `internal/tools/sandbox/manager.go`: backend selection + CONST-033 deny-list + user deny-list + network gating + timeout (TDD with fake backend + spawn-counter)
-- [ ] P1-F14-T07 — `internal/tools/sandbox/sandboxed_shell_tool.go`: Tool interface impl, registered name `shell_sandboxed` (TDD)
-- [ ] P1-F14-T08 — `internal/tools/sandbox/config_loader.go`: YAML loader for `~/.config/helixcode/sandbox.yaml` + secret-safe writer (mode 0600, parent 0700; mirrors F12 wizard_writer) (TDD)
-- [ ] P1-F14-T09 — `/sandbox` slash command at `internal/commands/sandbox_command.go` (status/test/policy) (TDD)
-- [ ] P1-F14-T10 — main.go wiring (Detector + Manager + tool registration + slash registration) + integration tests (gated, SKIP-OK on missing bwrap/userns)
-- [ ] P1-F14-T11 — Challenge harness (Phase A always-runs detector + fail-closed; Phase B bwrap-gated; Phase C native-gated)
-- [ ] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
+- [x] P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14
+- [x] P1-F14-T02 — `internal/tools/sandbox/types.go`: SandboxConfig + SandboxPolicy + SandboxCapabilities + SandboxRequest + SandboxResult + SandboxBackend interface + ConstitutionalDenyList constants (TDD)
+- [x] P1-F14-T03 — `internal/tools/sandbox/detector.go`: Detect() probes bwrap + userns + cgroups v2 + GOOS via injected Probe interface (TDD)
+- [x] P1-F14-T04 — `internal/tools/sandbox/bubblewrap_backend.go`: argv builder + Run via os/exec.CommandContext (TDD with synthetic argv assertions on a fake SubprocessRunner)
+- [x] P1-F14-T05 — `internal/tools/sandbox/native_backend.go` (+ `native_backend_other.go`): SysProcAttr.Cloneflags setup + small re-exec helper (TDD; gated tests when userns enabled)
+- [x] P1-F14-T06 — `internal/tools/sandbox/manager.go`: backend selection + CONST-033 deny-list + user deny-list + network gating + timeout (TDD with fake backend + spawn-counter)
+- [x] P1-F14-T07 — `internal/tools/sandbox/sandboxed_shell_tool.go`: Tool interface impl, registered name `shell_sandboxed` (TDD)
+- [x] P1-F14-T08 — `internal/tools/sandbox/config_loader.go`: YAML loader for `~/.config/helixcode/sandbox.yaml` + secret-safe writer (mode 0600, parent 0700; mirrors F12 wizard_writer) (TDD)
+- [x] P1-F14-T09 — `/sandbox` slash command at `internal/commands/sandbox_command.go` (status/test/policy) (TDD)
+- [x] P1-F14-T10 — main.go wiring (Detector + Manager + tool registration + slash registration) + integration tests (gated, SKIP-OK on missing bwrap/userns)
+- [x] P1-F14-T11 — Challenge harness (Phase A always-runs detector + fail-closed; Phase B bwrap-gated; Phase C native-gated)
+- [x] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
 
 ---
 

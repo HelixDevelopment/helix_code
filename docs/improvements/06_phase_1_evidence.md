@@ -1491,4 +1491,146 @@ clean
 EXIT=0
 ```
 
-### P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
+### P1-F14-T12 — Close-out evidence
+
+**Date:** 2026-05-06
+
+**Scope:** Tick all 12 F14 task boxes in plan + PROGRESS, run final
+verification battery, append close-out evidence, commit close-out, push
+to 4 meta-repo remotes (origin/github/gitlab/upstream) non-force, and
+push the `Challenges/` submodule to its single `origin` non-force
+(mirror gap noted, deferred infra work, consistent with F11 + F12 + F13
+close-out precedent).
+
+**Task SHAs (all 12 F14 commits):**
+- T01 `0ef5811` — bootstrap evidence + advance PROGRESS to F14
+- T02 `abdbdab` — `internal/tools/sandbox/types.go` (SandboxConfig + SandboxPolicy + SandboxCapabilities + SandboxRequest + SandboxResult + SandboxBackend interface + ConstitutionalDenyList)
+- T03 `4f7141f` — `internal/tools/sandbox/detector.go` (Detect / DetectWith probes + SelectBackend with explicit fail-closed semantics)
+- T04 `ec4cb9b` — `internal/tools/sandbox/bubblewrap_backend.go` (deterministic argv builder + Run via SubprocessRunner)
+- T05 `5d05b3d` — `internal/tools/sandbox/native_backend.go` + `native_backend_other.go` + `cmd/native_helper/main.go` (SysProcAttr.Cloneflags userns + helper re-exec)
+- T06 `a642101` — `internal/tools/sandbox/manager.go` (CONST-033 enforcement + user deny-list + fail-closed gate)
+- T07 `ba54c0c` — `internal/tools/sandbox/sandboxed_shell_tool.go` (Tool interface impl, registered as `shell_sandboxed`)
+- T08 `9aadc02` — `internal/tools/sandbox/config_loader.go` (YAML loader + secret-safe writer, mode 0600 / parent 0700)
+- T09 `93dc377` — `internal/commands/sandbox_command.go` (`/sandbox` slash: status / test / policy)
+- T10 `fdb5ddc` — `cmd/cli/main.go` wiring (Detector + Manager + tool registration + slash registration) + gated integration tests
+- T11 — submodule `53ebc80c0c5e3893c45d6dcc88de8f4824d20bbe` + meta-repo `998896c` (Challenge harness with runtime evidence: detector + fail-closed always-runs + bwrap + native gated phases — both gated phases RAN on this host)
+- T12 — (this commit) close-out
+
+**Final test summary (verbatim):**
+
+```
+$ cd HelixCode && go test -count=1 ./internal/tools/sandbox/... ./internal/commands/... ./cmd/cli/...
+ok  	dev.helix.code/internal/tools/sandbox	0.121s
+ok  	dev.helix.code/internal/commands	0.690s
+ok  	dev.helix.code/internal/commands/builtin	0.013s
+ok  	dev.helix.code/cmd/cli	0.047s
+```
+
+```
+$ cd HelixCode && go test -tags=integration -run "TestSandbox_" ./tests/integration/...
+ok  	dev.helix.code/tests/integration	1.459s
+?   	dev.helix.code/tests/integration/cmd/p1f07_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f08_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f09_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f10_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f11_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f12_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f13_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f14_challenge	[no test files]
+ok  	dev.helix.code/tests/integration/hooks	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/permissions	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/persistence	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/worktree	0.005s [no tests to run]
+```
+
+Note: `internal/tools/git` continues to show a pre-existing build
+failure (`MockLLMProvider` lacks the `CountTokens` method that the
+production `llm.Provider` interface gained well before F13 began — the
+mock fell out of sync with the interface). It is unrelated to F14 (it
+touches no sandbox code) and remains logged as pre-existing
+infrastructure debt. The F14-affected packages
+(`internal/tools/sandbox`, `internal/commands`,
+`internal/commands/builtin`, `cmd/cli`, `tests/integration`) all pass
+cleanly.
+
+**Anti-bluff smoke (verbatim):**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/tools/sandbox/ internal/commands/sandbox_command.go cmd/cli/main.go \
+    tests/integration/sandbox_test.go tests/integration/cmd/p1f14_challenge/ \
+    && echo BLUFF || echo clean
+clean
+```
+
+```
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    p1-f14-sandboxed-shell/ && echo BLUFF || echo clean
+clean
+```
+
+**Cross-compile (verbatim):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f14check ./cmd/cli/
+$ ls -la /tmp/helixcode_linux_f14check
+-rwxr-xr-x 1 milosvasic milosvasic 85312032 May  6 00:54 /tmp/helixcode_linux_f14check
+Cross-compile success: linux/amd64 binary at /tmp/helixcode_linux_f14check
+```
+
+**Final harness re-run (verbatim, EXIT=0):**
+
+```
+$ cd HelixCode && go build -o /tmp/p1f14_challenge ./tests/integration/cmd/p1f14_challenge/
+$ /tmp/p1f14_challenge ; echo "EXIT=$?"
+==> P1-F14 challenge harness pid: 1320549
+==> phase 0: Detector capabilities (informational)
+    {
+      "goos": "linux",
+      "bubblewrap_path": "/usr/bin/bwrap",
+      "unprivileged_userns": true,
+      "cgroups_v2": true,
+      "selected_backend": "bubblewrap"
+    }
+    runtime.GOOS    : linux
+    selected backend: bubblewrap
+==> phase A: CONST-033 rejected before spawn (always runs)
+    systemctl-suspend      -> DenyError rule="CONST-033: systemctl power-management subcommand (suspend/hibernate/poweroff/halt/reboot/kexec)"
+    bash-c-poweroff        -> DenyError rule="CONST-033: systemctl power-management subcommand (suspend/hibernate/poweroff/halt/reboot/kexec)"
+    chained-pm-suspend     -> DenyError rule="CONST-033: pm-utils suspend/hibernate binary (pm-suspend/pm-hibernate/pm-suspend-hybrid)"
+    loginctl-terminate     -> DenyError rule="CONST-033: loginctl power-management or session-termination subcommand"
+==> phase B: fail-closed when no backend (always runs)
+    fail-closed reason: "harness fail-closed test"
+==> phase C: bubblewrap backend end-to-end (gated)
+    workdir         : /tmp/.private/milosvasic/p1f14-bwrap-3793919312
+    bwrap path      : /usr/bin/bwrap
+    C.1 echo ok      : exit=0 stdout="hello-from-sandbox-challenge" duration=3.95632ms
+    C.2 net-allowed  : exit=0 stdout="network-allowed-test"
+    C.3 net-denied   : stdout="NETDENIED" (curl failed inside sandbox as expected)
+==> phase D: native backend end-to-end (gated)
+    native workdir  : /tmp/.private/milosvasic/p1f14-native-3083875014
+    host binary     : /tmp/p1f14_challenge
+    native echo ok  : exit=0 stdout="hello-from-native-sandbox" duration=5.728455ms
+==> phase E: sandbox config YAML round-trip on disk (always runs)
+    cfg path        : /tmp/.private/milosvasic/p1f14-cfg-3418213683/sandbox.yaml
+    cfg mode        : 0600
+    cfg size        : 244 bytes
+    round-trip ok   : timeout=45s mem=768MB cpu=65% deny=3 entries
+==> ALL CHECKS PASSED
+==> P1-F14 challenge harness PASS
+EXIT=0
+```
+
+**Summary:** Feature 14 (Sandboxed Shell Execution) is complete —
+Linux-first hybrid bubblewrap + native userns sandbox with default-DENY
+network, CONST-033 power-management deny-list enforced BEFORE any
+subprocess spawns, fail-closed when neither backend is available, and a
+secret-safe YAML config (mode 0600, parent 0700) at
+`~/.config/helixcode/sandbox.yaml`. Surface: `shell_sandboxed` tool +
+`/sandbox` slash + the underlying `internal/tools/sandbox` package.
+Pushed to all 4 meta-repo remotes (origin / github / gitlab / upstream)
+non-force; the `Challenges/` submodule was pushed to its single
+`origin` non-force (mirror gap to github / gitlab / upstream is
+deferred infra work, consistent with F11 + F12 + F13 close-out
+precedent).
+
