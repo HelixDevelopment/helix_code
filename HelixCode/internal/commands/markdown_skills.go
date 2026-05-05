@@ -309,3 +309,11 @@ func (l *SkillLoader) Loaded() map[string]string {
 	}
 	return out
 }
+
+// ParseSkillForTest exposes parseSkillFile to other packages' tests.
+// Production code uses SkillLoader; this helper is for unit tests in
+// packages such as internal/agent that need to construct Skills without
+// a real filesystem or a running SkillLoader.
+func ParseSkillForTest(name, raw, sourcePath string) (*Skill, error) {
+	return parseSkillFile(name, raw, sourcePath)
+}
