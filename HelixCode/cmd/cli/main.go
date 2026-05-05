@@ -180,6 +180,24 @@ func (c *CLI) initHooks(ctx context.Context, sessionMgr *session.Manager) error 
 	return nil
 }
 
+// sessionStoreBaseDir resolves the on-disk root for F11 session transcripts.
+// Resolution order (XDG Base Directory Specification):
+//  1. $XDG_DATA_HOME/helixcode/sessions/   (when $XDG_DATA_HOME is set and absolute)
+//  2. $HOME/.local/share/helixcode/sessions/  (XDG default)
+//  3. ./.helixcode-sessions/  (last-resort fallback when $HOME is also unset)
+//
+// The directory is not created here; TranscriptStore creates per-session
+// subdirectories on first append.
+func sessionStoreBaseDir() string {
+	if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" && filepath.IsAbs(xdg) {
+		return filepath.Join(xdg, "helixcode", "sessions")
+	}
+	if home, err := os.UserHomeDir(); err == nil && home != "" {
+		return filepath.Join(home, ".local", "share", "helixcode", "sessions")
+	}
+	return filepath.Join(".", ".helixcode-sessions")
+}
+
 // worktreeRevParseToplevel is a tiny shim to avoid leaking the worktree
 // package's internal helpers; it shells out to git directly.
 func worktreeRevParseToplevel(ctx context.Context, cwd string) (string, error) {
@@ -225,6 +243,18 @@ func (c *CLI) Run() error {
 		qaFormat     = flag.String("qa-format", "markdown", "Report format: markdown|html|json")
 		qaWait       = flag.Bool("qa-wait", false, "Wait for QA session to complete")
 		qaServerURL  = flag.String("qa-server", "http://localhost:8080", "HelixCode server URL for QA")
+
+		// F11: session transcript resume.
+		// `--resume` resumes the most recently active session for the current project.
+		// `--continue` resumes the most recently active session globally (any project).
+		// `--resume-session <id>` resumes a specific session by ID (overrides the bool flags).
+		// We use three separate flags rather than a NoOptDefVal sentinel because this
+		// command-line surface is built on stdlib `flag`, which does not support
+		// optional-value flags. Three flags also disambiguate "no id supplied" from
+		// "id is the empty string".
+		resumeFlag        = flag.Bool("resume", false, "Resume most recent session for current project (F11)")
+		continueFlag      = flag.Bool("continue", false, "Resume most recent session globally across projects (F11)")
+		resumeSessionFlag = flag.String("resume-session", "", "Resume a specific session by ID (F11)")
 	)
 	flag.Parse()
 
@@ -379,6 +409,60 @@ func (c *CLI) Run() error {
 	_ = agent.NewSkillDispatcher(skillReg, nil) // wired into baseAgent in a follow-up
 	if regErr := cmdRegistry.Register(commands.NewSkillsCommand(skillLoader, skillReg)); regErr != nil {
 		log.Printf("skills: register slash failed: %v", regErr)
+	}
+
+	// F11: session transcript persistence + resume.
+	// Construct a TranscriptStore rooted at $XDG_DATA_HOME/helixcode/sessions/
+	// (falling back to ~/.local/share/helixcode/sessions/), the ResumeFinder
+	// that wraps it, and a SessionManager wired to the same store. Both the
+	// /sessions slash command and the `helixcode sessions` cobra subcommand
+	// share this TranscriptStore so they observe the same on-disk state.
+	transcriptStore := session.NewTranscriptStore(sessionStoreBaseDir())
+	resumeFinder := session.NewResumeFinder(transcriptStore)
+	resumeMgr := session.NewSessionManager()
+	resumeMgr.SetStore(transcriptStore)
+
+	currentProject, projErr := session.ComputeProjectIdentity()
+	if projErr != nil {
+		log.Printf("session: project identity unresolved: %v (continuing with empty scope)", projErr)
+		currentProject = ""
+	}
+
+	// Process F11 resume flags BEFORE the main dispatcher. A successful resume
+	// rehydrates the in-memory transcript and sets the session manager's
+	// CurrentID; a "no sessions found" error is downgraded to a friendly
+	// message so the CLI continues with a fresh session.
+	if *resumeSessionFlag != "" {
+		if err := resumeMgr.Resume(ctx, *resumeSessionFlag); err != nil {
+			return fmt.Errorf("resume session %s: %w", *resumeSessionFlag, err)
+		}
+		fmt.Fprintf(os.Stderr, "Resumed session %s (%d messages).\n",
+			resumeMgr.CurrentID(), resumeMgr.LoadedMessageCountForTestF11())
+	} else if *resumeFlag || *continueFlag {
+		mode := session.ResumeProject
+		scope := currentProject
+		if *continueFlag {
+			mode = session.ResumeGlobal
+			scope = ""
+		}
+		target, ferr := resumeFinder.FindResumeTarget(ctx, mode, scope)
+		if ferr != nil {
+			fmt.Fprintf(os.Stderr, "No resumable session found (%v); starting fresh.\n", ferr)
+		} else {
+			if err := resumeMgr.Resume(ctx, target.SessionID); err != nil {
+				return fmt.Errorf("resume session %s: %w", target.SessionID, err)
+			}
+			fmt.Fprintf(os.Stderr, "Resumed session %s (%d messages, last active %s).\n",
+				resumeMgr.CurrentID(),
+				resumeMgr.LoadedMessageCountForTestF11(),
+				target.LastActivity.Format("2006-01-02 15:04:05"))
+		}
+	}
+
+	// Register /sessions slash command. It uses the same TranscriptStore so
+	// list/show/resume/delete operate on the live on-disk state.
+	if regErr := cmdRegistry.Register(commands.NewSessionsCommand(transcriptStore, currentProject)); regErr != nil {
+		log.Printf("sessions: register slash failed: %v", regErr)
 	}
 
 	// Handle different commands
@@ -783,6 +867,21 @@ func main() {
 			log.Printf("commands dispatcher: load failed: %v", err)
 		}
 		cmd := newCommandsCmd(commandsCmdDeps{Loader: mdLdr, Registry: cmdReg})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "sessions" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "commands").
+	// The TranscriptStore is constructed here directly off the F11 base dir so
+	// `helixcode sessions list` works without a full CLI bootstrap.
+	if len(os.Args) >= 2 && os.Args[1] == "sessions" {
+		store := session.NewTranscriptStore(sessionStoreBaseDir())
+		currentProject, _ := session.ComputeProjectIdentity()
+		cmd := newSessionsCmd(sessionsCmdDeps{Store: store, CurrentProject: currentProject})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)
