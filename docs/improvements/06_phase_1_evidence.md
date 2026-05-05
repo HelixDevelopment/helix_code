@@ -421,6 +421,40 @@ c8143af feat(P1-F08-T05): ToolRegistry.SetPlanModeGate + Execute gating + MarkEx
 ### Task evidence trail
 (filled in commit-by-commit as tasks land)
 
+#### T07 — Challenge run
+
+```bash
+$ ./Challenges/p1-f09-slash-commands/run.sh
+==> build F09 challenge harness
+==> run harness
+==> step 1: write echo.md with body 'Got: {{ARG1}}'
+==> step 2: load registry from /tmp/.private/milosvasic/p1f09-challenge-1449595194/.helix/commands
+    loaded: map[echo:/tmp/.private/milosvasic/p1f09-challenge-1449595194/.helix/commands/echo.md]
+==> step 3: execute echo command with arg 'hello world'
+    output = Got: hello world
+==> step 4: mutate file body to 'New: {{ARG1}}'; reload; re-run
+    output = New: second-run
+==> step 5: delete file; reload; verify command unregistered
+    echo command unregistered: ok
+==> P1-F09 challenge harness PASS
+==> anti-bluff smoke on F09-affected code
+clean
+==> cross-compile linux
+==> P1-F09 challenge PASS
+```
+
+#### T07 — All commits in the F09 branch
+
+```bash
+$ git log --oneline | grep "P1-F09"
+096ee6e feat(P1-F09-T06): wire markdown loader + watcher into main.go + integration test
+60e9052 feat(P1-F09-T05): /commands slash command + helixcode commands cobra (list/show/reload/run)
+fbbbf98 feat(P1-F09-T04): markdown_watcher.go fsnotify + debounced reload
+c3eb33a feat(P1-F09-T03): MarkdownLoader scans project + user dirs, registers/unregisters Markdown commands
+50e0a6a feat(P1-F09-T02): MarkdownCommand + frontmatter parser + regex variable substitution
+73ca3e0 docs(P1-F09-T01): bootstrap Phase 1 / Feature 9 evidence + advance PROGRESS
+```
+
 ---
 
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
