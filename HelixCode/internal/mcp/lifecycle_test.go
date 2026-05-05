@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -91,4 +92,76 @@ func TestClient_StateTransitions(t *testing.T) {
 	assert.Equal(t, StateConnecting, c.State())
 	c.setState(StateReady)
 	assert.Equal(t, StateReady, c.State())
+}
+
+// contextWithSeededHandshake seeds the fake transport with replies and
+// returns a short-lived context for Connect. Helper to dedupe boilerplate.
+func contextWithSeededHandshake(t *testing.T, ft *fakeTransport) context.Context {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	t.Cleanup(cancel)
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		for _, m := range ft.sentMessages() {
+			if m.Method == "initialize" {
+				ft.pushReply(&MCPMessage{JSONRPC: "2.0", ID: m.ID, Result: map[string]any{}})
+			}
+		}
+		time.Sleep(20 * time.Millisecond)
+		for _, m := range ft.sentMessages() {
+			if m.Method == "tools/list" {
+				ft.pushReply(&MCPMessage{JSONRPC: "2.0", ID: m.ID, Result: map[string]any{"tools": []map[string]any{}}})
+			}
+		}
+	}()
+	return ctx
+}
+
+func TestClient_CloseIdempotentUnderRace(t *testing.T) {
+	ft := newFakeTransport()
+	c := NewClient("srv-a", ft)
+	require.NoError(t, c.Connect(contextWithSeededHandshake(t, ft)))
+
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_ = c.Close()
+		}()
+	}
+	wg.Wait()
+}
+
+func TestClient_HandshakeFailureStopsRecvLoop(t *testing.T) {
+	ft := newFakeTransport()
+	c := NewClient("srv-a", ft)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	// Don't push any reply — handshake will time out.
+	err := c.Connect(ctx)
+	require.Error(t, err)
+	assert.Equal(t, StateDisconnected, c.State())
+	// Give recvLoop time to exit after its context is cancelled.
+	time.Sleep(50 * time.Millisecond)
+	// A retry must work cleanly (no zombie recvLoop racing on the same transport).
+	ctx2, cancel2 := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel2()
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		for _, m := range ft.sentMessages() {
+			if m.Method == "initialize" {
+				ft.pushReply(&MCPMessage{JSONRPC: "2.0", ID: m.ID, Result: map[string]any{}})
+			}
+		}
+		time.Sleep(20 * time.Millisecond)
+		for _, m := range ft.sentMessages() {
+			if m.Method == "tools/list" {
+				ft.pushReply(&MCPMessage{JSONRPC: "2.0", ID: m.ID, Result: map[string]any{"tools": []map[string]any{}}})
+			}
+		}
+	}()
+	require.NoError(t, c.Connect(ctx2))
+	assert.Equal(t, StateReady, c.State())
+	require.NoError(t, c.Close())
 }

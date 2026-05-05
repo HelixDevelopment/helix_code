@@ -29,16 +29,18 @@ type CallResult struct {
 
 // Client is one connected MCP server.
 type Client struct {
-	name      string
-	transport Transport
-	state     atomic.Int32
-	mu        sync.Mutex
-	tools     []ExternalTool
-	pending   map[string]chan *MCPMessage
-	nextID    atomic.Int64
-	done      chan struct{}
-	onEvent   func(Event)
-	pendCap   int
+	name       string
+	transport  Transport
+	state      atomic.Int32
+	mu         sync.Mutex
+	tools      []ExternalTool
+	pending    map[string]chan *MCPMessage
+	nextID     atomic.Int64
+	done       chan struct{}
+	onEvent    func(Event)
+	pendCap    int
+	closed     bool               // guarded by mu
+	recvCancel context.CancelFunc // guarded by mu; cancels the active recvLoop goroutine
 }
 
 // NewClient builds a Client around a Transport. transport.Open is called on Connect.
@@ -71,13 +73,20 @@ func (c *Client) State() ClientState { return ClientState(c.state.Load()) }
 
 func (c *Client) setState(s ClientState) {
 	c.state.Store(int32(s))
-	if c.onEvent != nil {
-		c.onEvent(Event{Server: c.name, State: s})
+	c.mu.Lock()
+	fn := c.onEvent
+	c.mu.Unlock()
+	if fn != nil {
+		fn(Event{Server: c.name, State: s})
 	}
 }
 
 // SetOnEvent installs an event callback.
-func (c *Client) SetOnEvent(fn func(Event)) { c.onEvent = fn }
+func (c *Client) SetOnEvent(fn func(Event)) {
+	c.mu.Lock()
+	c.onEvent = fn
+	c.mu.Unlock()
+}
 
 func (c *Client) nextRPCID() string {
 	return "rpc-" + strconv.FormatInt(c.nextID.Add(1), 10)
@@ -90,9 +99,19 @@ func (c *Client) Connect(ctx context.Context) error {
 		c.setState(StateDisconnected)
 		return fmt.Errorf("mcp client %s: open: %w", c.name, err)
 	}
-	go c.recvLoop(ctx)
+	rctx, cancel := context.WithCancel(context.Background())
+	c.mu.Lock()
+	c.recvCancel = cancel
+	c.mu.Unlock()
+	go c.recvLoop(rctx)
 	c.setState(StateInitializing)
 	if err := c.handshake(ctx); err != nil {
+		c.mu.Lock()
+		if c.recvCancel != nil {
+			c.recvCancel()
+			c.recvCancel = nil
+		}
+		c.mu.Unlock()
 		c.setState(StateDisconnected)
 		return err
 	}
@@ -300,13 +319,19 @@ func messageIDString(id interface{}) string {
 	}
 }
 
-// Close shuts the client down.
+// Close shuts the client down. It is safe to call concurrently and more than once.
 func (c *Client) Close() error {
-	c.setState(StateClosed)
-	select {
-	case <-c.done:
-	default:
-		close(c.done)
+	c.mu.Lock()
+	if c.closed {
+		c.mu.Unlock()
+		return nil
 	}
+	c.closed = true
+	close(c.done)
+	if c.recvCancel != nil {
+		c.recvCancel()
+	}
+	c.mu.Unlock()
+	c.setState(StateClosed)
 	return c.transport.Close()
 }
