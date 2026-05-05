@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/workflow"
 )
 
@@ -136,4 +137,81 @@ func TestRegistry_BackgroundFlagFalseTakesForegroundPath(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "fg", res)
+}
+
+// fakeValidatingTool fails validation when params contain "bad_key".
+// Used to verify that Validate is called synchronously at dispatch time,
+// not deferred to inside the background goroutine.
+type fakeValidatingTool struct {
+	name string
+}
+
+func (f *fakeValidatingTool) Name() string        { return f.name }
+func (f *fakeValidatingTool) Description() string { return "" }
+func (f *fakeValidatingTool) Schema() ToolSchema  { return ToolSchema{Type: "object"} }
+func (f *fakeValidatingTool) Category() ToolCategory {
+	return CategoryFileSystem
+}
+func (f *fakeValidatingTool) Validate(params map[string]interface{}) error {
+	if _, has := params["bad_key"]; has {
+		return errors.New("bad_key is not allowed")
+	}
+	return nil
+}
+func (f *fakeValidatingTool) Execute(ctx context.Context, params map[string]interface{}) (interface{}, error) {
+	return "ok", nil
+}
+
+// TestRegistry_RunInBackgroundCallsValidateSynchronously confirms that a tool
+// with invalid params is rejected at dispatch time (not inside the goroutine).
+// Before the fix, Validate was not called on the background path, so bad params
+// would reach the goroutine and fail with an opaque error (or succeed silently
+// if the tool itself was lenient). After the fix, Execute returns a wrapped
+// "parameter validation failed" error immediately and no task is queued.
+func TestRegistry_RunInBackgroundCallsValidateSynchronously(t *testing.T) {
+	r, _ := newRegistryWithBgMgr(t)
+	tool := &fakeValidatingTool{name: "ValidatingTool"}
+	r.Register(tool)
+
+	_, err := r.Execute(context.Background(), "ValidatingTool", map[string]interface{}{
+		"run_in_background": true,
+		"bad_key":           "x",
+	})
+	require.Error(t, err, "should fail synchronously due to validation error")
+	assert.Contains(t, err.Error(), "validation", "error should mention validation")
+	assert.Contains(t, err.Error(), "bad_key", "error should surface the rejected key")
+
+	// Confirm no task was created — the dispatch was aborted before StartTask.
+	list := r.bgManager.ListTasks()
+	assert.Empty(t, list, "no task must be queued when validation fails at dispatch")
+}
+
+// TestRegistry_RunInBackgroundHookBlocksPreventsDispatch confirms that a
+// blocking before-hook prevents background task dispatch (spec §4.7). Before
+// the fix, fireBefore was skipped on the background path, so a hook configured
+// to block (e.g. user-confirmation on Bash) was silently bypassed when the
+// caller added run_in_background:true. After the fix, the hook fires
+// synchronously and Execute returns the blocker error immediately.
+func TestRegistry_RunInBackgroundHookBlocksPreventsDispatch(t *testing.T) {
+	r, _ := newRegistryWithBgMgr(t)
+	tool := &fakePlainTool{name: "BlockedTool", finalResult: "never"}
+	r.Register(tool)
+
+	hm := hooks.NewManager()
+	blockHook := hooks.NewHook("blocker", hooks.HookTypeBeforeToolCall,
+		func(ctx context.Context, e *hooks.Event) error {
+			return errors.New("hook rejected the call")
+		})
+	require.NoError(t, hm.Register(blockHook))
+	r.SetHooksManager(hm)
+
+	_, err := r.Execute(context.Background(), "BlockedTool", map[string]interface{}{
+		"run_in_background": true,
+	})
+	require.Error(t, err, "blocking hook must prevent background dispatch")
+	assert.Contains(t, err.Error(), "blocked", "error should mention the hook block")
+
+	// Confirm no task was queued.
+	list := r.bgManager.ListTasks()
+	assert.Empty(t, list, "no task must be queued when a before-hook blocks at dispatch")
 }

@@ -549,18 +549,46 @@ func (t *mcpTool) Execute(ctx context.Context, params map[string]interface{}) (i
 
 // executeInBackground routes to BackgroundManager.StartTask. Returns immediately
 // with task_id, state, and a message. Foreground logic is unchanged.
+//
+// Both hooksManager and bgManager are captured under a single RLock to avoid
+// a second lock acquisition after the first release.
+//
+// Before dispatching the task, this function:
+//  1. Fires fireBefore synchronously (spec §4.7 — hooks fire on the dispatch
+//     event for run_in_background:true). A blocking hook rejects the dispatch,
+//     preserving F05 policy enforcement (e.g. user-confirmation for Bash).
+//  2. Calls tool.Validate on the cleaned params so bad parameters fail fast at
+//     dispatch time instead of inside the background goroutine with an opaque error.
 func (r *ToolRegistry) executeInBackground(ctx context.Context, name string, params map[string]interface{}) (interface{}, error) {
 	r.mu.RLock()
 	bm := r.bgManager
+	hm := r.hooksManager
 	r.mu.RUnlock()
+
 	if bm == nil {
 		return nil, ErrNoBackgroundMgr
 	}
+
+	// Fire before-hooks synchronously at dispatch time. A blocking hook can
+	// reject the dispatch, preventing the task from ever being queued.
+	if hm != nil {
+		if err := r.fireBefore(ctx, name, params); err != nil {
+			return nil, err
+		}
+	}
+
 	tool, err := r.Get(name)
 	if err != nil {
 		return nil, err
 	}
 	cleanArgs := stripBackgroundFlag(params)
+
+	// Validate synchronously so bad params fail at dispatch time rather than
+	// inside the background goroutine.
+	if err := tool.Validate(cleanArgs); err != nil {
+		return nil, fmt.Errorf("parameter validation failed: %w", err)
+	}
+
 	bgExec := r.adaptToolForBackground(tool)
 	task, err := bm.StartTask(name, cleanArgs, bgExec)
 	if err != nil {
