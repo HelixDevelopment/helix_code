@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"syscall"
 	"time"
 )
 
@@ -35,6 +34,10 @@ type shellRunnerModify struct {
 //   - Stdout JSON matching {"data":{...}} → merged into event.Data for
 //     downstream handlers; malformed stdout JSON is logged and ignored.
 //   - Caller's context cancellation aborts the script (including child processes).
+//
+// Platform note: setProcessGroup / killProcessGroup are implemented in
+// shell_runner_unix.go (//go:build unix) and shell_runner_windows.go
+// (//go:build windows) respectively.
 func NewShellRunner(scriptPath string, timeout time.Duration) HookFunc {
 	return func(ctx context.Context, event *Event) error {
 		runCtx := ctx
@@ -66,9 +69,11 @@ func NewShellRunner(scriptPath string, timeout time.Duration) HookFunc {
 		var stdout, stderr bytes.Buffer
 		cmd.Stdout = &stdout
 		cmd.Stderr = &stderr
-		// Place the script in its own process group so we can kill the whole
-		// group (script + all its children) when the context expires.
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		// Place the script in its own process group (Unix) so we can kill the
+		// whole group (script + all its children) when the context expires.
+		// On Windows this is a no-op; process tree cleanup relies on
+		// cmd.Process.Kill() in killProcessGroup.
+		setProcessGroup(cmd)
 
 		if startErr := cmd.Start(); startErr != nil {
 			return fmt.Errorf("hook script %s: %w", scriptPath, startErr)
@@ -89,8 +94,7 @@ func NewShellRunner(scriptPath string, timeout time.Duration) HookFunc {
 		case <-runCtx.Done():
 			// Context cancelled or timed out — kill the entire process group.
 			if cmd.Process != nil {
-				// Negative PID targets the whole process group.
-				_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+				killProcessGroup(cmd)
 			}
 			// Drain the wait goroutine.
 			<-done
