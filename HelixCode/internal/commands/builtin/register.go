@@ -3,6 +3,7 @@ package builtin
 import (
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/hooks"
+	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/tools/worktree"
 )
 
@@ -48,6 +49,15 @@ func RegisterBuiltinCommandsWithHooks(registry *commands.Registry, mgr *hooks.Ma
 	return registry.Register(commands.NewHooksCommand(mgr))
 }
 
+// RegisterBuiltinCommandsWithMCP extends RegisterBuiltinCommands with the
+// /mcp command, which requires an mcp.Manager dependency. Callers that have
+// a Manager (cmd/cli/main.go startup) use this; callers without one (legacy
+// paths) use the original RegisterBuiltinCommands.
+func RegisterBuiltinCommandsWithMCP(registry *commands.Registry, mgr *mcp.Manager) error {
+	RegisterBuiltinCommands(registry)
+	return registry.Register(commands.NewMCPCommand(mgr))
+}
+
 // GetBuiltinCommandNames returns names of all built-in commands
 func GetBuiltinCommandNames() []string {
 	return []string{
@@ -60,6 +70,7 @@ func GetBuiltinCommandNames() []string {
 		"permissions",
 		"worktree",
 		"hooks",
+		"mcp",
 	}
 }
 
