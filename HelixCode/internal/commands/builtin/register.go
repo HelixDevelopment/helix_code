@@ -5,6 +5,7 @@ import (
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/tools/worktree"
+	"dev.helix.code/internal/workflow"
 )
 
 // RegisterBuiltinCommands registers all built-in commands with the registry
@@ -58,6 +59,15 @@ func RegisterBuiltinCommandsWithMCP(registry *commands.Registry, mgr *mcp.Manage
 	return registry.Register(commands.NewMCPCommand(mgr))
 }
 
+// RegisterBuiltinCommandsWithTasks extends RegisterBuiltinCommands with the
+// /tasks command, which requires a workflow.BackgroundManager dependency. Callers
+// that have a BackgroundManager (cmd/cli/main.go startup) use this; callers
+// without one (legacy paths) use the original RegisterBuiltinCommands.
+func RegisterBuiltinCommandsWithTasks(registry *commands.Registry, mgr *workflow.BackgroundManager) error {
+	RegisterBuiltinCommands(registry)
+	return registry.Register(commands.NewTasksCommand(mgr))
+}
+
 // GetBuiltinCommandNames returns names of all built-in commands
 func GetBuiltinCommandNames() []string {
 	return []string{
@@ -71,6 +81,7 @@ func GetBuiltinCommandNames() []string {
 		"worktree",
 		"hooks",
 		"mcp",
+		"tasks",
 	}
 }
 

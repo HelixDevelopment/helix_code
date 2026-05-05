@@ -567,7 +567,9 @@ func TestRegisterBuiltinCommands(t *testing.T) {
 	// RegisterBuiltinCommandsWithHooks; skip it in the base registration check.
 	// mcp requires an mcp.Manager and is registered separately via
 	// RegisterBuiltinCommandsWithMCP; skip it in the base registration check.
-	worktreeOnly := map[string]bool{"worktree": true, "hooks": true, "mcp": true}
+	// tasks requires a workflow.BackgroundManager and is registered separately via
+	// RegisterBuiltinCommandsWithTasks; skip it in the base registration check.
+	worktreeOnly := map[string]bool{"worktree": true, "hooks": true, "mcp": true, "tasks": true}
 	worktreeAliasOnly := map[string]bool{"wt": true, "hk": true}
 
 	// Test that all commands are registered
