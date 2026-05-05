@@ -694,3 +694,62 @@ ff81607 fix(P1-F07-T05): ShellTool implements BackgroundAware (interface satisfa
 
 ### Task evidence trail
 (filled in commit-by-commit as tasks land)
+
+### P1-F11-T08 — Challenge harness runtime evidence
+
+**Date:** 2026-05-05
+**Artifacts:**
+- `HelixCode/tests/integration/cmd/p1f11_challenge/main.go` — 3-phase fork-exec orchestrator
+- `Challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
+
+**Approach:** real fork-exec subprocess, NOT a fresh-struct fallback. The
+orchestrator forks itself twice with `phase=write` and `phase=read`. The two
+children have distinct PIDs and zero shared in-memory Go state with each
+other or with the orchestrator. The transcript bytes are stat-verified on
+disk between the two phases.
+
+**Verbatim harness stdout (`/tmp/p1f11_challenge` direct invocation):**
+
+```
+==> orchestrator pid: 598484
+    baseDir       : /tmp/.private/milosvasic/p1f11-3836489688
+    sessionID     : b68efb6c-c7ec-4917-99ec-1cf28e3e3747
+    harness binary: /tmp/p1f11_challenge
+==> phase A: fork-exec child to write 3 messages
+    [child pid=598491 phase=write] wrote 3 messages, sessionID=b68efb6c-c7ec-4917-99ec-1cf28e3e3747
+    [child pid=598491 phase=write] meta.MessageCount=3 OK
+    on-disk transcript.jsonl size=264 bytes (path=/tmp/.private/milosvasic/p1f11-3836489688/b68efb6c-c7ec-4917-99ec-1cf28e3e3747/transcript.jsonl)
+    on-disk metadata.json   size=275 bytes (path=/tmp/.private/milosvasic/p1f11-3836489688/b68efb6c-c7ec-4917-99ec-1cf28e3e3747/metadata.json)
+==> phase B: fork-exec NEW child to resume + assert byte-exact recovery
+    [child pid=598497 phase=read]  resumed 3 messages, byte-exact OK
+    [child pid=598497 phase=read]    msg[0] role="user" content="hello cross-process world"
+    [child pid=598497 phase=read]    msg[1] role="assistant" content="transcript resumed across PIDs"
+    [child pid=598497 phase=read]    msg[2] role="user" content="what is 2+2?"
+==> phase C: in-orchestrator ResumeGlobal across two project paths
+    global-resume target  : sessionID=8b1c6e3a-2fd8-4d80-a8e3-731227b54d73 project=/tmp/projB-f11
+    project-scope (projA) : sessionID=b68efb6c-c7ec-4917-99ec-1cf28e3e3747 project=/tmp/projA-f11
+==> ALL CHECKS PASSED
+==> P1-F11 challenge harness PASS
+EXIT=0
+```
+
+**Cross-compile (linux/amd64):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f11_challenge_linux ./tests/integration/cmd/p1f11_challenge/
+$ file /tmp/p1f11_challenge_linux
+/tmp/p1f11_challenge_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, ..., Go BuildID=...
+```
+
+**Anti-bluff smoke:**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f11_challenge/ && echo BLUFF || echo clean
+clean
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" p1-f11-session-resume/ && echo BLUFF || echo clean
+clean
+```
+
+**`Challenges/p1-f11-session-resume/run.sh` end-to-end (build + run +
+in-script anti-bluff + cross-compile):** exits 0 with `==> P1-F11 challenge
+PASS`.
