@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F08 — Plan Mode
-- **Active task:** P1-F08-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F07-T11 — Feature 7 (Background Task System) close-out + push
+- **Active feature:** (idle, awaiting next feature pick — F09 candidate)
+- **Active task:** —
+- **Last completed:** P1-F08-T09 — Feature 8 (Plan Mode) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -149,15 +149,15 @@
 - [x] P1-F07-T11 — Feature 7 close-out + push
 
 ## Active feature task list (P1-F08: Plan Mode)
-- [ ] P1-F08-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F08-T02 — Planner extensions + hook types (TDD)
-- [ ] P1-F08-T03 — planmode/gating.go: ToolGate (TDD)
-- [ ] P1-F08-T04 — tools/types_planmode.go + plan_tools.go (TDD)
-- [ ] P1-F08-T05 — tools/registry.go: SetPlanModeGate + Execute gating (TDD)
-- [ ] P1-F08-T06 — commands/plan_command.go: /plan slash + builtin reg (TDD)
-- [ ] P1-F08-T07 — cmd/cli/main.go startup wiring + integration test
-- [ ] P1-F08-T08 — Challenge with runtime evidence + cross-compile check
-- [ ] P1-F08-T09 — Feature 8 close-out + push
+- [x] P1-F08-T01 — bootstrap evidence + advance PROGRESS
+- [x] P1-F08-T02 — Planner extensions + hook types (TDD)
+- [x] P1-F08-T03 — planmode/gating.go: ToolGate (TDD)
+- [x] P1-F08-T04 — tools/types_planmode.go + plan_tools.go (TDD)
+- [x] P1-F08-T05 — tools/registry.go: SetPlanModeGate + Execute gating (TDD)
+- [x] P1-F08-T06 — commands/plan_command.go: /plan slash + builtin reg (TDD)
+- [x] P1-F08-T07 — cmd/cli/main.go startup wiring + integration test
+- [x] P1-F08-T08 — Challenge with runtime evidence + cross-compile check
+- [x] P1-F08-T09 — Feature 8 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
