@@ -125,6 +125,101 @@ func (m *Manager) EnterWorktree(ctx context.Context, name, baseBranch string) (s
 	return path, nil
 }
 
+// CreateWorktreeForSubagent creates a new git worktree for a subagent without
+// mutating the manager's currentWorktree state. Returns the absolute path to
+// the new worktree and a cleanup closure that removes the worktree directory
+// (and unregisters its git metadata). Used by the F15 subagent system, where
+// the parent agent's location must NOT change when a subagent is dispatched.
+//
+// Behaviour mirrors EnterWorktree's worktree-creation path minus the state
+// assignment:
+//   - Validates name via ValidateName.
+//   - If <repoRoot>/.helix-worktrees/<name>/ already exists and is clean,
+//     returns it (the caller's cleanup will still remove it).
+//   - Otherwise creates the parent dir, tries `git worktree add <path>
+//     <branch>`, falling back to `git worktree add -b <branch> <path>` on
+//     failure.
+//   - baseBranch == "" defaults the branch to name (matches EnterWorktree).
+//
+// The returned cleanup func is idempotent and safe to call from a deferred
+// statement: it runs `git worktree remove -f <path>` (force) so dirty changes
+// inside the worktree do not block teardown.
+//
+// Cross-references: P1-F15-T06.
+func (m *Manager) CreateWorktreeForSubagent(ctx context.Context, name, baseBranch string) (string, func() error, error) {
+	if err := m.ValidateName(name); err != nil {
+		return "", nil, err
+	}
+
+	branch := baseBranch
+	if branch == "" {
+		branch = name
+	}
+
+	path := filepath.Join(m.repoRoot, WorktreeDir, name)
+
+	// We do NOT touch m.currentWorktree here, so we only need the lock to
+	// serialize concurrent creates against the same path. Use the same lock
+	// as EnterWorktree for parity.
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Reuse existing clean worktree if present.
+	if info, err := os.Stat(path); err == nil && info.IsDir() {
+		out, sErr := gitStatusPorcelain(ctx, path)
+		if sErr != nil {
+			return "", nil, fmt.Errorf("checking worktree status: %w", sErr)
+		}
+		if strings.TrimSpace(string(out)) != "" {
+			return "", nil, fmt.Errorf("worktree %q has uncommitted changes — clean or remove first", name)
+		}
+		return path, m.subagentCleanupFunc(path), nil
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return "", nil, fmt.Errorf("creating worktree parent dir: %w", err)
+	}
+
+	// Try existing branch first.
+	if out, err := gitWorktreeAdd(ctx, m.repoRoot, branch, path); err != nil {
+		// Fall back to creating a new branch.
+		if out2, err2 := gitWorktreeAddNewBranch(ctx, m.repoRoot, branch, path); err2 != nil {
+			return "", nil, fmt.Errorf(
+				"creating subagent worktree (existing-branch attempt: %s) (new-branch attempt: %s): %w",
+				strings.TrimSpace(string(out)), strings.TrimSpace(string(out2)), err2,
+			)
+		}
+	}
+
+	return path, m.subagentCleanupFunc(path), nil
+}
+
+// subagentCleanupFunc returns an idempotent closure that removes the worktree
+// at path via `git worktree remove -f`. The closure does NOT touch
+// m.currentWorktree (subagent worktrees were never registered there).
+func (m *Manager) subagentCleanupFunc(path string) func() error {
+	var done bool
+	return func() error {
+		if done {
+			return nil
+		}
+		done = true
+		// Use a background ctx because cleanup may run after the original
+		// dispatch ctx has been canceled (e.g. timeout / kill); we still
+		// want the directory gone.
+		ctx := context.Background()
+		if _, err := gitWorktreeRemove(ctx, m.repoRoot, path, true); err != nil {
+			// Force-remove failed; fall back to raw rmdir so we don't leak
+			// the directory. Git metadata may linger until the next
+			// `git worktree prune`, which is acceptable.
+			if rmErr := os.RemoveAll(path); rmErr != nil {
+				return fmt.Errorf("subagent worktree cleanup: git remove failed (%v) and rmdir failed: %w", err, rmErr)
+			}
+		}
+		return nil
+	}
+}
+
 // ExitWorktree clears the active-worktree state and returns the agent to
 // the main worktree. Idempotent: calling on a non-isolated Manager is a
 // no-op.
