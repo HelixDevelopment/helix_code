@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"dev.helix.code/internal/tools/persistence"
 )
 
 // MockProvider implements Provider for testing
@@ -436,9 +438,9 @@ func TestToolCallingProvider_buildFinalPrompt(t *testing.T) {
 	mockBase := &MockProvider{}
 	provider := NewToolCallingProvider(mockBase)
 
-	results := map[string]interface{}{
-		"calculator": "4",
-		"search":     "Found information",
+	results := map[string]*persistence.PersistedResult{
+		"calculator": {Output: "4", ToolName: "calculator"},
+		"search":     {Output: "Found information", ToolName: "search"},
 	}
 
 	prompt := provider.buildFinalPrompt("What is 2+2?", "Let me calculate", results)

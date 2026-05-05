@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"dev.helix.code/internal/tools/persistence"
 )
 
 // Enhanced LLM Provider Interface with Tool Calling
@@ -60,9 +62,10 @@ type ToolExecutor interface {
 
 // ToolCallingProvider implements EnhancedLLMProvider with tool calling support
 type ToolCallingProvider struct {
-	baseProvider Provider
-	tools        map[string]Tool
-	toolExecutor ToolExecutor
+	baseProvider       Provider
+	tools              map[string]Tool
+	toolExecutor       ToolExecutor
+	persistenceManager *persistence.Manager
 }
 
 // NewToolCallingProvider creates a new tool calling provider
@@ -76,6 +79,34 @@ func NewToolCallingProvider(baseProvider Provider) *ToolCallingProvider {
 // SetToolExecutor sets the tool executor (typically a tools.ToolRegistry)
 func (p *ToolCallingProvider) SetToolExecutor(executor ToolExecutor) {
 	p.toolExecutor = executor
+}
+
+// SetPersistenceManager wires a persistence.Manager so that tool-result
+// outputs above the threshold are written to disk and substituted with
+// a path-reference in the final prompt. A nil manager disables persistence.
+func (p *ToolCallingProvider) SetPersistenceManager(m *persistence.Manager) {
+	p.persistenceManager = m
+}
+
+// persistResults wraps each tool result through MaybePersist. Non-string
+// results are stringified via fmt.Sprintf("%v", v) before the size check.
+func (p *ToolCallingProvider) persistResults(raw map[string]interface{}) map[string]*persistence.PersistedResult {
+	out := make(map[string]*persistence.PersistedResult, len(raw))
+	for toolName, val := range raw {
+		var s string
+		switch v := val.(type) {
+		case string:
+			s = v
+		default:
+			s = fmt.Sprintf("%v", v)
+		}
+		res, err := p.persistenceManager.MaybePersist(toolName, "", s)
+		if err != nil {
+			res = &persistence.PersistedResult{Output: s, ToolName: toolName}
+		}
+		out[toolName] = res
+	}
+	return out
 }
 
 // GenerateWithTools performs generation with tool calling support
@@ -110,7 +141,7 @@ func (p *ToolCallingProvider) GenerateWithTools(ctx context.Context, req ToolGen
 		}
 
 		// Generate final response with tool results
-		finalPrompt := p.buildFinalPrompt(req.Prompt, resp.Content, results)
+		finalPrompt := p.buildFinalPrompt(req.Prompt, resp.Content, p.persistResults(results))
 		genReq.Messages = []Message{{Role: "user", Content: finalPrompt}}
 
 		finalResp, err := p.baseProvider.Generate(ctx, genReq)
@@ -193,7 +224,7 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 			}
 
 			// Generate final response with tool results
-			finalPrompt := p.buildFinalPrompt(req.Prompt, fullResponse, results)
+			finalPrompt := p.buildFinalPrompt(req.Prompt, fullResponse, p.persistResults(results))
 
 			// Stream final response
 			finalStreamReq := &LLMRequest{
@@ -410,10 +441,15 @@ func (p *ToolCallingProvider) executeToolHandler(ctx context.Context, toolName s
 	}, nil
 }
 
-func (p *ToolCallingProvider) buildFinalPrompt(originalPrompt, initialResponse string, toolResults map[string]interface{}) string {
+func (p *ToolCallingProvider) buildFinalPrompt(originalPrompt, initialResponse string, toolResults map[string]*persistence.PersistedResult) string {
 	resultsStr := ""
 	for toolName, result := range toolResults {
-		resultsStr += fmt.Sprintf("- %s: %v\n", toolName, result)
+		if result.WasPersisted {
+			resultsStr += fmt.Sprintf("- %s: [persisted to %s — %d chars. Use Read with that path to fetch full content.]\n",
+				toolName, result.PersistedOutputPath, result.PersistedOutputSize)
+		} else {
+			resultsStr += fmt.Sprintf("- %s: %v\n", toolName, result.Output)
+		}
 	}
 
 	return fmt.Sprintf(`Original request: %s
