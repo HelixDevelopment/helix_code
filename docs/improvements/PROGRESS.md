@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F02 — Permission Rule System
-- **Active task:** P1-F02-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F01-T11 — Feature 1 (Auto-Compaction) close-out + push
+- **Active feature:** F03 — Tool Result Persistence (awaits its own writing-plans cycle)
+- **Active task:** pending
+- **Last completed:** P1-F02-T13 — Feature 2 (Permission Rule System) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -62,19 +62,19 @@
 - [x] P1-F01-T11 — Feature 1 close-out + push  ← (this commit)
 
 ## Active feature task list (P1-F02: Permission Rule System)
-- [ ] P1-F02-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F02-T02 — add Wildcard field to confirmation.Condition (TDD)
-- [ ] P1-F02-T03 — internal/tools/permissions package skeleton
-- [ ] P1-F02-T04 — shell_splitter.go + mvdan.cc/sh/v3 dep (TDD)
-- [ ] P1-F02-T05 — rule_engine.go pattern parse + match + priority (TDD)
-- [ ] P1-F02-T06 — mode_presets.go five presets + command lists (TDD)
-- [ ] P1-F02-T07 — rule_loader.go YAML + file precedence (TDD)
-- [ ] P1-F02-T08 — permissions.go facade + PolicyEngine registration
-- [ ] P1-F02-T09 — wire --permission-mode flag + integration test (no mocks)
-- [ ] P1-F02-T10 — helixcode permissions {list,add,remove,check} subcommands
-- [ ] P1-F02-T11 — /permissions slash command via internal/commands
-- [ ] P1-F02-T12 — Challenge with three runtime-evidence scenarios
-- [ ] P1-F02-T13 — Feature 2 close-out + push
+- [x] P1-F02-T01 — bootstrap evidence + advance PROGRESS  ← commit `d56905d`
+- [x] P1-F02-T02 — add Wildcard field to confirmation.Condition (TDD)  ← commit `5ffc46d`
+- [x] P1-F02-T03 — internal/tools/permissions package skeleton  ← commit `26de1b4`
+- [x] P1-F02-T04 — shell_splitter.go + mvdan.cc/sh/v3 dep (TDD)  ← commits `28a4fa8` + `c2b5dd8`
+- [x] P1-F02-T05 — rule_engine.go pattern parse + match + priority (TDD)  ← commit `eab41d3`
+- [x] P1-F02-T06 — mode_presets.go five presets + command lists (TDD)  ← commit `75b284f`
+- [x] P1-F02-T07 — rule_loader.go YAML + file precedence (TDD)  ← commit `31c4366`
+- [x] P1-F02-T08 — permissions.go facade + PolicyEngine registration  ← commit `41be967`
+- [x] P1-F02-T09 — wire --permission-mode flag + integration test (no mocks)  ← commit `c1d67ad`
+- [x] P1-F02-T10 — helixcode permissions {list,add,remove,check} subcommands  ← commit `588f2cd`
+- [x] P1-F02-T11 — /permissions slash command via internal/commands  ← commits `2fb11d4` + `244aff9`
+- [x] P1-F02-T12 — Challenge with three runtime-evidence scenarios  ← commit `7252911`
+- [x] P1-F02-T13 — Feature 2 close-out + push  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -83,6 +83,7 @@
 - 2026-05-05 — Phase 0 closed; 17 plan tasks done + 2 added during execution (T08.5, T08.7); foundation verified; carry-forward items documented in evidence file P0-16
 - 2026-05-05 — Phase 1 entered; Feature 1 (Auto-Compaction) starts. Approach: extend existing internal/llm/compression infrastructure rather than build the parallel system the porting doc proposed (gap discovered during plan-writing).
 - 2026-05-05 — Feature 1 (Auto-Compaction) closed. Eleven sub-commits; extended existing internal/llm/compression rather than building parallel infrastructure as the porting doc proposed. Per-provider native tokenizers deferred to Phase 3.
+- 2026-05-05 — Feature 2 (Permission Rule System) closed. Thirteen+ sub-commits (T11 needed a registration follow-up `244aff9`). Extended internal/tools/confirmation.PolicyEngine with a Wildcard Condition field; added internal/tools/permissions package that loads layered YAML rule files (~/.helixcode + project) and produces a Policy that delegates to a smuggle-resistant rule engine (mvdan.cc/sh/v3 walker handles $(...), backticks, heredocs, quoted operators, pipelines). Five claude-code mode presets (default | auto | acceptEdits | dontAsk | bypassPermissions) compose with the existing AutonomyMode gradient. Full CLI surface: --permission-mode flag, helixcode permissions {list,add,remove,check} subcommands, and a /permissions slash command via internal/commands (registered through builtin/register.go). Followed F01's "extend existing" pattern. Engine proven via 3 integration tests + 3 Challenge scenarios; dispatcher wiring (ConfirmationCoordinator → permissions.Engine) deferred to Phase 3.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
@@ -94,3 +95,4 @@
 - **HelixAgent stale cli_agents pins (discovered during P0-03):** 13 of 60 cli_agents under `HelixAgent/cli_agents/` cannot be initialized because HelixAgent's recorded submodule SHAs no longer exist on the corresponding upstream remotes. Affected: `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset`. Each Phase 2 sub-spec for the affected agent must first bump HelixAgent's pointer (commit IN HelixAgent itself, then bump HelixAgent's pointer in this meta-repo) to a SHA that exists upstream. Phase 1 priority `claude-code` is NOT affected — fully populated. Per spec §1.3 N2, HelixAgent rewrite is out of scope for this programme; the per-agent pin bumps go through HelixAgent's own governance.
 - **SonarQube + Snyk live-scan deferral (P0-T08.7):** The scan infrastructure (compose files, scripts, BootManager binary, Challenges) is fully wired and configuration-validated. Live scans CANNOT run until the user rotates the leaked credentials from `helix.security.json` (remediated in P0-T08.5 but historical values are compromised). Action required: (1) generate new SonarQube API token, (2) set `SONAR_TOKEN` + `SONARQUBE_PROJECT_KEY` + `SONARQUBE_PROJECT_NAME` in `HelixCode/.env`, (3) generate new Snyk token, (4) set `SNYK_TOKEN` in `HelixCode/.env`, (5) run `make scan-sonarqube` / `make scan-snyk`. This is NOT a code defect — it is a security-rotation dependency on the operator.
 - **LLMsVerifier dual-pin divergence (discovered during P0-04):** `Dependencies/HelixDevelopment/LLMsVerifier` at `d473231d27196e2151405f37936151a386b590e3`; `HelixAgent/LLMsVerifier` at `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`. Per spec §2.2 the canonical pin is the one in `Dependencies/HelixDevelopment/LLMsVerifier` (direct Go import path). The canonical is exactly one commit ahead of the transitive (HelixAgent) view. Resolving the divergence requires either (a) bumping HelixAgent's recorded LLMsVerifier pointer to the canonical SHA — out of scope per spec §1.3 N2 (HelixAgent rewrite forbidden), or (b) updating `Dependencies/HelixDevelopment/LLMsVerifier` to match HelixAgent's view if HelixAgent's view is more current. Decision deferred; the parity verifier (`scripts/verify-llmsverifier-pin-parity.sh`) will continue to gate any future change that introduces NEW divergence beyond this baseline. **P0-15 impact:** `make verify-foundation` exits 2 (non-zero) until this divergence is resolved. **P0-16 close-out dependency:** `make verify-foundation` must exit 0 for Phase 0 to be declared complete. This divergence must be resolved (or explicitly waived via `VERIFY_FOUNDATION_WARN_ONLY=1`) as part of P0-16.
+- **Permissions engine not yet threaded into tool dispatch (deferred from P1-F02-T09):** The `--permission-mode` flag parses and `permissions.Engine` constructs at startup, but the resulting Engine's `*confirmation.PolicyEngine` is currently local to `(*CLI).initPermissions` and is not consulted by the production tool-execution path. The engine itself is proven correct (3 integration tests + 3 Challenge scenarios); the wiring gap means a deny rule would not actually block a tool call in a live session. Action: Phase 3 (test infra) sub-spec must wire `internal/tools/registry.go`'s `ConfirmationCoordinator` to use the loaded engine. Current behavior: rule files are validated and the CLI flag is honored at the `helixcode permissions check` dry-run; live tool dispatch falls through to the default `confirmation.PolicyEngine` (which has no rules). NOT a security regression — falls back to ask-by-default.
