@@ -107,6 +107,58 @@ func sanitiseToolName(name string) string {
 // resolves outside the manager's base directory.
 var ErrPathTraversal = errors.New("path outside persistence directory")
 
+// filenamePattern matches the canonical persistence filename format:
+//
+//	<sanitised-tool>_<16-hex-hash>_<UTC-yyyymmdd_hhmmss>.txt
+var filenamePattern = regexp.MustCompile(`^[A-Za-z0-9._-]+_[a-f0-9]{16}_\d{8}_\d{6}\.txt$`)
+
+// CleanupOld removes persisted files older than maxAge from the base dir.
+// Skips non-matching filenames (e.g., .gitkeep, README.md) and directories.
+// Per-file errors are logged and the walk continues; the first error is
+// returned for caller awareness but the sweep always completes.
+func (m *Manager) CleanupOld(maxAge time.Duration) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	entries, err := os.ReadDir(m.baseDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("reading %s: %w", m.baseDir, err)
+	}
+
+	cutoff := time.Now().Add(-maxAge)
+	var firstErr error
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if !filenamePattern.MatchString(entry.Name()) {
+			continue
+		}
+		info, statErr := entry.Info()
+		if statErr != nil {
+			log.Printf("WARN persistence: stat %s: %v", entry.Name(), statErr)
+			if firstErr == nil {
+				firstErr = statErr
+			}
+			continue
+		}
+		if info.ModTime().After(cutoff) {
+			continue
+		}
+		path := filepath.Join(m.baseDir, entry.Name())
+		if rmErr := os.Remove(path); rmErr != nil {
+			log.Printf("WARN persistence: remove %s: %v", path, rmErr)
+			if firstErr == nil {
+				firstErr = rmErr
+			}
+		}
+	}
+	return firstErr
+}
+
 // LoadPersisted reads a previously-persisted output by absolute path.
 // Returns ErrPathTraversal if path resolves outside the manager's base
 // directory; wraps os.ErrNotExist for missing files.
