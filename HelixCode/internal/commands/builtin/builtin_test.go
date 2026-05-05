@@ -563,8 +563,10 @@ func TestRegisterBuiltinCommands(t *testing.T) {
 
 	// worktree requires a worktree.Manager and is registered separately via
 	// RegisterBuiltinCommandsWithWorktree; skip it in the base registration check.
-	worktreeOnly := map[string]bool{"worktree": true}
-	worktreeAliasOnly := map[string]bool{"wt": true}
+	// hooks requires a hooks.Manager and is registered separately via
+	// RegisterBuiltinCommandsWithHooks; skip it in the base registration check.
+	worktreeOnly := map[string]bool{"worktree": true, "hooks": true}
+	worktreeAliasOnly := map[string]bool{"wt": true, "hk": true}
 
 	// Test that all commands are registered
 	expectedCommands := GetBuiltinCommandNames()

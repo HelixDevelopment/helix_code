@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"dev.helix.code/internal/commands"
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/tools/worktree"
 )
 
@@ -38,6 +39,15 @@ func RegisterBuiltinCommandsWithWorktree(registry *commands.Registry, m *worktre
 	return registry.Register(commands.NewWorktreeCommand(m))
 }
 
+// RegisterBuiltinCommandsWithHooks extends RegisterBuiltinCommands with the
+// /hooks command, which requires a hooks.Manager dependency. Callers that
+// have a Manager (cmd/cli/main.go startup) use this; callers without one
+// (legacy paths) use the original RegisterBuiltinCommands.
+func RegisterBuiltinCommandsWithHooks(registry *commands.Registry, mgr *hooks.Manager) error {
+	RegisterBuiltinCommands(registry)
+	return registry.Register(commands.NewHooksCommand(mgr))
+}
+
 // GetBuiltinCommandNames returns names of all built-in commands
 func GetBuiltinCommandNames() []string {
 	return []string{
@@ -49,6 +59,7 @@ func GetBuiltinCommandNames() []string {
 		"deepplanning",
 		"permissions",
 		"worktree",
+		"hooks",
 	}
 }
 
@@ -86,5 +97,8 @@ func GetBuiltinCommandAliases() map[string]string {
 
 		// worktree aliases
 		"wt": "worktree",
+
+		// hooks aliases
+		"hk": "hooks",
 	}
 }
