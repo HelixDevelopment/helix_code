@@ -887,8 +887,8 @@ submodule and meta-repo.
 ### P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)
 
 **Date:** 2026-05-05
-**Submodule commit:** `<filled-by-T10-commit-step>` (Challenges)
-**Meta-repo commit:** `<filled-by-T10-commit-step>`
+**Submodule commit:** `4e42fbc` (Challenges)
+**Meta-repo commit:** `b937e17`
 
 **Files added:**
 
