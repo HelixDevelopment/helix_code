@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/agent"
+	"dev.helix.code/internal/agent/subagent"
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
@@ -72,6 +73,65 @@ func loadProviderConfigFromDisk(envLookup func(string) string) (string, llm.Prov
 		return "", llm.ProviderConfigEntry{}, fmt.Errorf("loadProviderConfigFromDisk: nil result from %s", path)
 	}
 	return string(res.ProviderType), res.ConfigEntry, nil
+}
+
+// buildSubagentLLMProvider constructs the LLM provider used by a subagent
+// helper child (P1-F15-T08). Wired into main() via subagent.RunAsSubagent.
+//
+// The child does NOT replay the parent's full F12 bootstrap (no flag parsing,
+// no friendly Stderr hints): it reads the same config-file + HELIX_LLM_PROVIDER
+// env that the parent uses, resolves the type via llm.Select, and constructs
+// the cloud provider. On any failure (no config, env-only with missing creds,
+// construction error) it falls back to the local Ollama default — matching the
+// parent's "keep working for non-LLM paths" stance.
+//
+// Pragmatic v1: we read env+config-file only; the child does not see the
+// parent's --provider flag because the spawner re-exec's the helper without
+// argv. This is documented in the spec § 4.2; if a future task plumbs
+// --provider through the env protocol, this function should consult it.
+//
+// Anti-bluff: this function MUST construct a real provider — never a stub or
+// the FakeLLMProvider (which lives in the subagent package as a test-only
+// type with the "fake-test-only" sentinel ProviderType).
+func buildSubagentLLMProvider(ctx context.Context) (llm.Provider, error) {
+	configProviderName, configEntry, configErr := loadProviderConfigFromDisk(os.Getenv)
+	if configErr != nil && !errors.Is(configErr, os.ErrNotExist) {
+		// Config read failed for a real reason; surface it but keep going so
+		// we still try env / default.
+		log.Printf("subagent: config load failed (continuing): %v", configErr)
+	}
+	selectorInput := llm.SelectorInput{
+		Flag:   "",
+		Env:    os.Getenv("HELIX_LLM_PROVIDER"),
+		Config: configProviderName,
+	}
+	ptype, selErr := llm.Select(selectorInput)
+	switch {
+	case errors.Is(selErr, llm.ErrNoProviderConfigured):
+		// Fall through to default Ollama.
+	case selErr != nil:
+		// Unknown provider name — surface and fall back to default rather
+		// than aborting the subagent run.
+		log.Printf("subagent: provider selector error: %v (falling back to default)", selErr)
+	default:
+		entry := configEntry
+		entry.Type = ptype
+		cloud, cErr := llm.NewCloudProvider(ptype, entry)
+		if cErr == nil && cloud != nil {
+			return cloud, nil
+		}
+		log.Printf("subagent: failed to construct cloud provider %q (%v); falling back to local default", ptype, cErr)
+	}
+
+	// Default: local Ollama on the standard port. Mirrors NewCLI()'s default.
+	provider, err := llm.NewOllamaProvider(llm.OllamaConfig{
+		DefaultModel: "llama3.2",
+		BaseURL:      "http://localhost:11434",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("subagent: default Ollama provider construction failed: %w", err)
+	}
+	return provider, nil
 }
 
 // CLI represents the command-line interface
@@ -967,6 +1027,22 @@ func (c *CLI) showHelp() {
 }
 
 func main() {
+	// P1-F15-T08: subagent helper-mode dispatch — MUST run BEFORE the F14
+	// sandbox helper-mode dispatch (per spec §3 anchor). A subagent helper
+	// child does NOT initialise the sandbox; the parent re-exec'd us with
+	// HELIXCODE_SUBAGENT_HELPER=1 and a JSON-encoded SubagentTask in
+	// HELIXCODE_SUBAGENT_HELPER_PAYLOAD. We must decode, run an
+	// InProcessSpawner with the child's own LLM provider, write a
+	// SubagentResult JSON to stdout, and exit — without touching the sandbox
+	// or the rest of the CLI bootstrap.
+	//
+	// Anti-bluff anchor: this MUST be the very first statement in main().
+	// Reordering it after the sandbox dispatch (or any flag parsing) would
+	// break the protocol round-trip the parent depends on.
+	if subagent.IsSubagentInvocation() {
+		os.Exit(subagent.RunAsSubagent(buildSubagentLLMProvider))
+	}
+
 	// F14: native sandbox helper re-exec dispatch.
 	//
 	// The native backend launches the host binary with HELIX_SANDBOX_NATIVE_HELPER
@@ -975,10 +1051,11 @@ func main() {
 	// normal CLI logic — the helper child is inside fresh PID/MNT/USER/UTS/IPC
 	// namespaces and re-entering the CLI bootstrap would hang or crash.
 	//
-	// Anti-bluff anchor: this dispatch MUST be the very first statement in
-	// main() so no flag parsing, cobra subcommand interception, or env-driven
-	// init runs before the helper takes over. On non-Linux this is a no-op
-	// (IsHelperInvocation returns false there — see native_backend_other.go).
+	// Anti-bluff anchor: this dispatch MUST be the SECOND statement in
+	// main() (the first is subagent.IsSubagentInvocation above) so no flag
+	// parsing, cobra subcommand interception, or env-driven init runs before
+	// the helper takes over. On non-Linux this is a no-op (IsHelperInvocation
+	// returns false there — see native_backend_other.go).
 	if sandbox.IsHelperInvocation() {
 		os.Exit(sandbox.RunAsHelper())
 	}
