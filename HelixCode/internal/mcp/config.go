@@ -3,8 +3,10 @@ package mcp
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
+	"sort"
 
 	"gopkg.in/yaml.v3"
 )
@@ -39,14 +41,20 @@ type OAuthSpec struct {
 
 var envRe = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}`)
 
-func expandEnv(s string) string {
-	return envRe.ReplaceAllStringFunc(s, func(m string) string {
+// expandEnv returns the expanded string and a list of any env var names that
+// were referenced but not set. Missing vars expand to "" (compatible with the
+// historical behaviour) and the list lets the caller emit a single warning.
+func expandEnv(s string) (string, []string) {
+	var missing []string
+	out := envRe.ReplaceAllStringFunc(s, func(m string) string {
 		key := m[2 : len(m)-1]
 		if v, ok := os.LookupEnv(key); ok {
 			return v
 		}
+		missing = append(missing, key)
 		return ""
 	})
+	return out, missing
 }
 
 // LoadConfig reads and validates a single YAML file.
@@ -59,17 +67,33 @@ func LoadConfig(path string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("mcp config: parse %s: %w", path, err)
 	}
+	missing := map[string]bool{}
+	expand := func(s string) string {
+		out, miss := expandEnv(s)
+		for _, k := range miss {
+			missing[k] = true
+		}
+		return out
+	}
 	for i := range cfg.Servers {
 		s := &cfg.Servers[i]
-		s.URL = expandEnv(s.URL)
-		s.SSEURL = expandEnv(s.SSEURL)
-		s.Cwd = expandEnv(s.Cwd)
+		s.URL = expand(s.URL)
+		s.SSEURL = expand(s.SSEURL)
+		s.Cwd = expand(s.Cwd)
 		for j, c := range s.Command {
-			s.Command[j] = expandEnv(c)
+			s.Command[j] = expand(c)
 		}
 		for k, v := range s.Env {
-			s.Env[k] = expandEnv(v)
+			s.Env[k] = expand(v)
 		}
+	}
+	if len(missing) > 0 {
+		keys := make([]string, 0, len(missing))
+		for k := range missing {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		log.Printf("mcp config %s: env var(s) not set, expanded to empty: %v", path, keys)
 	}
 	if err := cfg.Validate(); err != nil {
 		return nil, err
@@ -107,7 +131,7 @@ func LoadMerged(userPath, projectPath string) (*Config, error) {
 			for _, s := range c.Servers {
 				byName[s.Name] = true
 			}
-			filtered := merged.Servers[:0]
+			filtered := make([]ServerSpec, 0, len(merged.Servers))
 			for _, s := range merged.Servers {
 				if !byName[s.Name] {
 					filtered = append(filtered, s)

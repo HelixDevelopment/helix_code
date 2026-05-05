@@ -100,3 +100,21 @@ func TestConfig_SaveRoundTrip(t *testing.T) {
 	assert.Equal(t, "a", got.Servers[0].Name)
 	assert.True(t, got.Servers[0].AlwaysLoad)
 }
+
+func TestConfig_MissingEnvVarExpandsToEmpty(t *testing.T) {
+	yaml := []byte(`
+servers:
+  - name: a
+    transport: stdio
+    command: ["echo"]
+    env:
+      MY_KEY: "before-${P1F06_T10_NOT_SET}-after"
+`)
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "mcp.yml"), yaml, 0644))
+	os.Unsetenv("P1F06_T10_NOT_SET")
+	cfg, err := LoadConfig(filepath.Join(dir, "mcp.yml"))
+	require.NoError(t, err)
+	require.Len(t, cfg.Servers, 1)
+	assert.Equal(t, "before--after", cfg.Servers[0].Env["MY_KEY"])
+}
