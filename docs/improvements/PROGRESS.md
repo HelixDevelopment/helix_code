@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F11 — Session Transcript Resume
-- **Active task:** P1-F11-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F10-T09 — Feature 10 (Skill System) close-out + push
+- **Active feature:** idle (F11 closed; F12 — Multi-Provider Backend — is the next candidate per the original 12-feature programme plan)
+- **Active task:** none (awaiting F12 kickoff)
+- **Last completed:** P1-F11-T09 — Feature 11 (Session Transcript Resume) close-out + push to 4 remotes (all 9 tasks shipped + F11-fix `f258cf7`)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -181,15 +181,16 @@
 - [x] P1-F10-T09 — Feature 10 close-out + push
 
 ## Active feature task list (P1-F11: Session Transcript Resume)
-- [ ] P1-F11-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F11-T02 — identity.go: ComputeProjectIdentity (TDD)
-- [ ] P1-F11-T03 — transcript_store.go: JSONL append/read + metadata I/O (TDD)
-- [ ] P1-F11-T04 — resume.go: ResumeFinder + ResumeMode + FindResumeTarget (TDD)
-- [ ] P1-F11-T05 — SessionManager extensions: Append/Resume/CurrentID (TDD)
-- [ ] P1-F11-T06 — /sessions slash + helixcode sessions cobra (TDD)
-- [ ] P1-F11-T07 — main.go --resume/--continue flag parsing + integration test
-- [ ] P1-F11-T08 — Challenge with runtime evidence + cross-compile check
-- [ ] P1-F11-T09 — Feature 11 close-out + push
+- [x] P1-F11-T01 — bootstrap evidence + advance PROGRESS  ← commit `ddb45dc`
+- [x] P1-F11-T02 — identity.go: ComputeProjectIdentity (TDD)  ← commit `fa6bc5f`
+- [x] P1-F11-T03 — transcript_store.go: JSONL append/read + metadata I/O (TDD)  ← commit `466ab97`
+- [x] P1-F11-T04 — resume.go: ResumeFinder + ResumeMode + FindResumeTarget (TDD)  ← commit `d72e401`
+- [x] P1-F11-T05 — SessionManager extensions: Append/Resume/CurrentID (TDD)  ← commit `08fa5c0`
+- [x] P1-F11-T06 — /sessions slash + helixcode sessions cobra (TDD)  ← commit `607206a`
+- [x] P1-F11-T07 — main.go --resume/--continue flag parsing + integration test  ← commit `0fb036c`
+- [x] P1-F11-T08 — Challenge with runtime evidence + cross-compile check  ← submodule `1e79453` + meta-repo `f4d0ff2`
+- [x] P1-F11-T09 — Feature 11 close-out + push  ← (this commit)
+- [x] P1-F11-fix — preserve ProjectPath/Name across SessionManager.Append  ← commit `f258cf7`
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -202,6 +203,7 @@
 - 2026-05-05 — Feature 3 (Tool Result Persistence) closed. Eleven sub-commits. New thin sub-package `internal/tools/persistence` mirrors F02's pattern. Threshold check fires at the LLM provider boundary (tool_provider.go). T07 audit confirmed 0 of 16 LLM providers bypass `tool_provider.go` — single choke point. LLM reads back via the existing Read tool — no new tool added. Lazy 7-day CleanupOld at startup. Engine proven via 3 integration tests + 3 Challenge scenarios (above/below threshold + hash idempotence).
 - 2026-05-05 — Feature 4 (Git Worktree Agent Isolation) closed. Thirteen sub-commits (T02 needed a fix-up `ccaaf33` for an anti-bluff smoke regression — the docstring contained "placeholders" which trips the coarse `grep "placeholder"` check). New thin sub-package `internal/tools/worktree` mirrors F02/F03's pattern. Shells out to the git binary consistent with `internal/tools/git/`. Worktrees stored at `<repoRoot>/.helix-worktrees/<name>/` (in-repo; .gitignore'd). Meta-only — no submodule auto-init; agents that need submodule code run `git submodule update --init --recursive` from inside the worktree. Full surface: 4 agent tools + 4 Cobra subcommands (enter/exit print help when called from CLI) + 1 /worktree slash command. Per-session state via single field on session.Manager rather than a parallel worktree_state.go file.
 - 2026-05-05 — Feature 5 (Hook-Based Extensibility) closed. 14 sub-commits (12 feat + 2 fix-ups: T04's cross-platform shell-runner split, T03's yaml-loader priority default). Extended existing internal/hooks package with 6 new HookType constants + 3 new files (yaml_loader, shell_runner, blockers). Config-driven shell hooks via ~/.helixcode/hooks.yaml. 5 wiring points: tools/registry.Execute (6 events), llm/compression/AutoCompactor (OnCompaction), agent (OnError + RequestPlanApproval stub for F08). Full surface: 5 Cobra subcommands + /hooks slash command (aliased /hk).
+- 2026-05-05 — Feature 11 (Session Transcript Resume) closed. 9 task commits (T01 `ddb45dc`, T02 `fa6bc5f`, T03 `466ab97`, T04 `d72e401`, T05 `08fa5c0`, T06 `607206a`, T07 `0fb036c`, T08 submodule `1e79453` + meta `f4d0ff2`, T09 close-out) + 1 follow-up (`f258cf7` preserves ProjectPath/Name across `SessionManager.Append`). New files in `internal/session/`: identity.go (Git-root-or-cwd), transcript_store.go (JSONL transcripts + metadata I/O), resume.go (ResumeFinder + ResumeMode + FindResumeTarget). Existing `session_manager.go` extended with `Append/Resume/CurrentID`. Surface: `/sessions` slash + `helixcode sessions {list,show,resume,delete}` cobra + `--resume`/`--continue` flags wired in `cmd/cli/main.go`. Challenge harness exercises real fork-exec process boundaries (write child PID ≠ read child PID, both ≠ orchestrator). All 4 remotes pushed non-force. F12 (Multi-Provider Backend) is the next candidate per the original 12-feature programme plan.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.

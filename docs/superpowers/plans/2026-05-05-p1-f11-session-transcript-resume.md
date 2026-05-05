@@ -23,15 +23,15 @@ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
 
 ## Task list
 
-- [ ] P1-F11-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F11-T02 — identity.go: computeProjectIdentity (Git root, cwd fallback) (TDD)
-- [ ] P1-F11-T03 — transcript_store.go: JSONL append/read + metadata I/O (TDD)
-- [ ] P1-F11-T04 — resume.go: ResumeFinder + ResumeMode + FindResumeTarget (TDD)
-- [ ] P1-F11-T05 — session_manager extensions: Append + Resume + CurrentID (TDD)
-- [ ] P1-F11-T06 — /sessions slash + helixcode sessions cobra (TDD)
-- [ ] P1-F11-T07 — main.go: --resume/--continue flag parsing + integration test
-- [ ] P1-F11-T08 — Challenge with runtime evidence (process restart preserves transcript)
-- [ ] P1-F11-T09 — Feature 11 close-out + push to 4 remotes
+- [x] P1-F11-T01 — bootstrap evidence + advance PROGRESS
+- [x] P1-F11-T02 — identity.go: computeProjectIdentity (Git root, cwd fallback) (TDD)
+- [x] P1-F11-T03 — transcript_store.go: JSONL append/read + metadata I/O (TDD)
+- [x] P1-F11-T04 — resume.go: ResumeFinder + ResumeMode + FindResumeTarget (TDD)
+- [x] P1-F11-T05 — session_manager extensions: Append + Resume + CurrentID (TDD)
+- [x] P1-F11-T06 — /sessions slash + helixcode sessions cobra (TDD)
+- [x] P1-F11-T07 — main.go: --resume/--continue flag parsing + integration test
+- [x] P1-F11-T08 — Challenge with runtime evidence (process restart preserves transcript)
+- [x] P1-F11-T09 — Feature 11 close-out + push to 4 remotes
 
 ---
 

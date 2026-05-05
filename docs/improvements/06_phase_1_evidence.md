@@ -753,3 +753,99 @@ clean
 **`Challenges/p1-f11-session-resume/run.sh` end-to-end (build + run +
 in-script anti-bluff + cross-compile):** exits 0 with `==> P1-F11 challenge
 PASS`.
+
+### P1-F11-T09 — Close-out evidence
+
+**Date:** 2026-05-05
+**Status:** F11 COMPLETE (all 9 tasks shipped + 1 follow-up bug-fix).
+**Next candidate:** P1-F12 — Multi-Provider Backend (per the original 12-feature programme plan).
+
+**Task SHAs (verbatim from task brief):**
+
+| Task | SHA | Subject |
+|---|---|---|
+| T01 | `ddb45dc` | bootstrap evidence + advance PROGRESS |
+| T02 | `fa6bc5f` | identity.go (ComputeProjectIdentity) |
+| T03 | `466ab97` | transcript_store.go (JSONL + metadata) |
+| T04 | `d72e401` | resume.go (ResumeFinder) |
+| T05 | `08fa5c0` | SessionManager.Append/Resume/CurrentID |
+| T06 | `607206a` | /sessions slash + helixcode sessions cobra |
+| T07 | `0fb036c` | main.go wiring + integration tests |
+| T08 | submodule `1e79453`, meta-repo `f4d0ff2` | challenge harness + runtime evidence |
+| F11-fix | `f258cf7` | preserve ProjectPath/Name across SessionManager.Append |
+| T09 | (this commit) | close-out + push to 4 remotes |
+
+**Final unit-test battery (verbatim, `cd HelixCode && go test ./internal/session/... ./internal/commands/... ./cmd/cli/...`):**
+
+```
+ok  	dev.helix.code/internal/session	0.127s
+ok  	dev.helix.code/internal/commands	0.648s
+ok  	dev.helix.code/internal/commands/builtin	0.011s
+ok  	dev.helix.code/cmd/cli	0.045s
+```
+
+**Final integration battery (verbatim, `cd HelixCode && go test -v -tags=integration -run TestSessions_ ./tests/integration/...`):**
+
+```
+=== RUN   TestSessions_ResumePersistsAcrossRestart
+--- PASS: TestSessions_ResumePersistsAcrossRestart (0.00s)
+=== RUN   TestSessions_GlobalFindsMostRecentAcrossProjects
+--- PASS: TestSessions_GlobalFindsMostRecentAcrossProjects (0.00s)
+PASS
+ok  	dev.helix.code/tests/integration	0.006s
+```
+
+**Final challenge-harness rerun (verbatim stdout, EXIT=0):**
+
+```
+==> orchestrator pid: 604776
+    baseDir       : /tmp/.private/milosvasic/p1f11-2217964319
+    sessionID     : 599d0a83-d345-428a-a982-cf0de81e1f57
+    harness binary: /tmp/p1f11_challenge
+==> phase A: fork-exec child to write 3 messages
+    [child pid=604782 phase=write] wrote 3 messages, sessionID=599d0a83-d345-428a-a982-cf0de81e1f57
+    [child pid=604782 phase=write] meta.MessageCount=3 OK
+    [child pid=604782 phase=write] meta.ProjectPath="/tmp/projA-f11" ProjectName="projA-f11" preserved across Append
+    on-disk transcript.jsonl size=264 bytes (path=/tmp/.private/milosvasic/p1f11-2217964319/599d0a83-d345-428a-a982-cf0de81e1f57/transcript.jsonl)
+    on-disk metadata.json   size=276 bytes (path=/tmp/.private/milosvasic/p1f11-2217964319/599d0a83-d345-428a-a982-cf0de81e1f57/metadata.json)
+==> phase B: fork-exec NEW child to resume + assert byte-exact recovery
+    [child pid=604789 phase=read]  resumed 3 messages, byte-exact OK
+    [child pid=604789 phase=read]    msg[0] role="user" content="hello cross-process world"
+    [child pid=604789 phase=read]    msg[1] role="assistant" content="transcript resumed across PIDs"
+    [child pid=604789 phase=read]    msg[2] role="user" content="what is 2+2?"
+==> phase C: in-orchestrator ResumeGlobal across two project paths
+    global-resume target  : sessionID=7d0992ba-ca6b-404e-9e30-e8f2b2d1b9b7 project=/tmp/projB-f11
+    project-scope (projA) : sessionID=599d0a83-d345-428a-a982-cf0de81e1f57 project=/tmp/projA-f11
+==> ALL CHECKS PASSED
+==> P1-F11 challenge harness PASS
+EXIT=0
+```
+
+**Final anti-bluff smoke (verbatim, both repos):**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/session/ internal/commands/ cmd/cli/main.go cmd/cli/sessions_cmd.go \
+    tests/integration/cmd/p1f11_challenge/ \
+    && echo BLUFF || echo clean
+clean
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    p1-f11-session-resume/ \
+    && echo BLUFF || echo clean
+clean
+```
+
+**Final cross-compile (linux/amd64):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f11check ./cmd/cli/
+$ ls -la /tmp/helixcode_linux_f11check
+-rwxr-xr-x 1 milosvasic milosvasic 75909384 May  5 19:12 /tmp/helixcode_linux_f11check
+```
+
+**Summary:** Feature 11 (Session Transcript Resume) is complete; transcripts now
+persist as JSONL on disk, resume via `--resume`/`--continue` flags +
+`/sessions` slash + `helixcode sessions` cobra; cross-process restart proven
+via real fork-exec harness with distinct PIDs. Pushed to all 4 remotes
+(origin, github, gitlab, upstream) on `main` non-force, both Challenges
+submodule and meta-repo.
