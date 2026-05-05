@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** (idle, awaiting next feature pick — F10 candidate)
-- **Active task:** —
+- **Active feature:** F10 — Skill System
+- **Active task:** P1-F10-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F09-T08 — Feature 9 (Slash Command System) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -168,6 +168,17 @@
 - [x] P1-F09-T06 — main.go wiring + integration test
 - [x] P1-F09-T07 — Challenge with runtime evidence + cross-compile check
 - [x] P1-F09-T08 — Feature 9 close-out + push
+
+## Active feature task list (P1-F10: Skill System)
+- [ ] P1-F10-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F10-T02 — markdown_skills.go: Skill + SkillRegistry + parser + Render (TDD)
+- [ ] P1-F10-T03 — SkillLoader: scan dirs + register/unregister (TDD)
+- [ ] P1-F10-T04 — skills_watcher.go: fsnotify + debounce (TDD)
+- [ ] P1-F10-T05 — agent/skill_dispatcher.go: Match + capture extraction (TDD)
+- [ ] P1-F10-T06 — /skills slash + helixcode skills cobra (TDD)
+- [ ] P1-F10-T07 — main.go wiring + integration test
+- [ ] P1-F10-T08 — Challenge with runtime evidence + cross-compile check
+- [ ] P1-F10-T09 — Feature 10 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

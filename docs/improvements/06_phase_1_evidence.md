@@ -457,6 +457,18 @@ c3eb33a feat(P1-F09-T03): MarkdownLoader scans project + user dirs, registers/un
 
 ---
 
+## P1-F10 — Skill System
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f10-skill-system-design.md` (commit `5b80058`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f10-skill-system.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+---
+
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f06-mcp-full-lifecycle-design.md` (commit `386a4af`)
