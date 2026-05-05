@@ -478,3 +478,16 @@ f42011b fix(P1-F06-T02): unexport state helpers, migrate to math/rand/v2, expand
 c138401 feat(P1-F06-T02): add MCP client types + Transport interface + BackoffSchedule
 168f8d7 docs(P1-F06-T01): bootstrap Phase 1 / Feature 6 evidence + advance PROGRESS
 ```
+
+---
+
+## P1-F07 — Background Task System (Ctrl+B)
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f07-background-task-system-design.md` (commit `d11885e`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f07-background-task-system.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)

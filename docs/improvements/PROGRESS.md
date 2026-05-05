@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** (idle, awaiting next feature pick — F07 candidate)
-- **Active task:** —
+- **Active feature:** F07 — Background Task System (Ctrl+B)
+- **Active task:** P1-F07-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F06-T14 — Feature 6 (MCP Full Lifecycle) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -134,6 +134,19 @@
 - [x] P1-F06-T12 — cmd/cli/main.go startup wiring + tools/registry.go integration + integration tests
 - [x] P1-F06-T13 — Challenge with runtime evidence + cross-compile check
 - [x] P1-F06-T14 — Feature 6 close-out + push
+
+## Active feature task list (P1-F07: Background Task System)
+- [ ] P1-F07-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F07-T02 — workflow/background.go: BackgroundTask + TaskState (TDD)
+- [ ] P1-F07-T03 — workflow/background.go: BackgroundManager + sweeper (TDD)
+- [ ] P1-F07-T04 — tools/types_background.go: BackgroundAware interface + LineSink + error sentinel
+- [ ] P1-F07-T05 — tools/shell/background.go: shell BackgroundAware adapter (TDD)
+- [ ] P1-F07-T06 — tools/registry.go: SetBackgroundManager + Execute dispatch + adaptToolForBackground (TDD)
+- [ ] P1-F07-T07 — tools/task_tools.go: TaskOutputTool + TaskStopTool + RegisterTaskTools (TDD)
+- [ ] P1-F07-T08 — commands/tasks_command.go: /tasks slash command + builtin registration (TDD)
+- [ ] P1-F07-T09 — cmd/cli/main.go startup wiring + integration test (real subprocess)
+- [ ] P1-F07-T10 — Challenge with runtime evidence + cross-compile check
+- [ ] P1-F07-T11 — Feature 7 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
