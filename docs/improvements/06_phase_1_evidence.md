@@ -467,6 +467,41 @@ c3eb33a feat(P1-F09-T03): MarkdownLoader scans project + user dirs, registers/un
 ### Task evidence trail
 (filled in commit-by-commit as tasks land)
 
+#### T08 — Challenge run
+
+```bash
+$ ./Challenges/p1-f10-skills/run.sh
+==> build F10 challenge harness
+==> run harness
+==> step 1: write refactor.md with named-capture trigger
+    loaded: map[refactor:/tmp/.private/milosvasic/p1f10-2344530819/.helix/skills/refactor.md]
+==> step 2: dispatcher.Match on 'refactor LoginButton component'
+    rendered = Refactoring LoginButton
+    captures = map[comp:LoginButton]
+==> step 3: mutate refactor.md to 'Now: {{ARG.comp}}', reload, re-match
+    rendered = Now: MainNav
+==> step 4: remove file, reload, registry no longer matches
+    skill unregistered after removal: OK
+==> P1-F10 challenge harness PASS
+==> anti-bluff smoke on F10-affected code
+clean
+==> cross-compile linux
+==> P1-F10 challenge PASS
+```
+
+#### T08 — All commits in the F10 branch
+
+```bash
+$ git log --oneline | grep "P1-F10"
+2e8c057 feat(P1-F10-T07): wire skills loader + watcher + dispatcher into main.go + integration test
+b3a585a feat(P1-F10-T06): /skills slash command + helixcode skills cobra (list/show/invoke/reload)
+99af82c feat(P1-F10-T05): agent/skill_dispatcher.go Match + capture extraction
+b82ae4c feat(P1-F10-T04): skills_watcher.go fsnotify + debounced reload
+1b63153 feat(P1-F10-T03): SkillLoader scans .helix/skills dirs and registers/unregisters
+2b0cf98 feat(P1-F10-T02): Skill + SkillRegistry + parser + Render
+a6c40d7 docs(P1-F10-T01): bootstrap Phase 1 / Feature 10 evidence + advance PROGRESS
+```
+
 ---
 
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
