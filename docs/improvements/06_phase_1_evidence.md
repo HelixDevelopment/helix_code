@@ -1675,5 +1675,106 @@ disabled in v1.
 
 ### P1-F15-T11 — Challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)
 
+Files created:
+- `HelixCode/tests/integration/cmd/p1f15_challenge/main.go` — runtime-evidence harness
+- `Challenges/p1-f15-subagent-team/CHALLENGE.md` — challenge description (six phases)
+- `Challenges/p1-f15-subagent-team/run.sh` — orchestration script (build + run + smoke + cross-compile)
+
+Compile-check:
+```
+$ cd HelixCode && go build ./tests/integration/cmd/p1f15_challenge/
+(no output = clean)
+```
+
+Harness execution (full stdout, exit 0):
+```
+$ cd HelixCode && go build -o /tmp/p1f15_challenge ./tests/integration/cmd/p1f15_challenge/ && /tmp/p1f15_challenge ; echo "EXIT=$?"
+==> P1-F15 challenge harness pid: 1411580
+==> phase A: in-process spawner + real FakeLLMProvider (always runs)
+    in-process       : id=802490ba-08f2-4f56-8c93-b705066ca258 state=succeeded output="phase-a-output" duration=54.591µs call_count=1
+==> phase B: subprocess spawner re-execs THIS binary (always runs)
+    host binary      : /tmp/p1f15_challenge
+    parent pid       : 1411580
+    subprocess_used  : true
+    output           : "FAKE-LLM-ECHO: phase-b-prompt"
+    duration         : 4.694295ms
+    parent_call_count: 0 (must be 0)
+==> phase C: real F04 worktree creation (gated)
+    repo             : /tmp/.private/milosvasic/p1f15-repo-1033792440
+    worktree         : /tmp/.private/milosvasic/p1f15-repo-1033792440/.helix-worktrees/helixcode-subagent-p1f15-phasec-task
+    diff_len         : 164 bytes
+    parent_isolated  : false (must be false)
+==> phase D: real Anthropic LLM round-trip (gated)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> phase E: max-concurrency cap (always runs)
+    cap=2 enforced   : true (3rd Dispatch returned ErrMaxConcurrency)
+    results drained  : 2
+==> phase F: kill cancels a running subagent (always runs)
+    kill_id          : df8f043c-5c2c-4262-bd3a-31a9247017df
+    state            : canceled (cancelled)
+    duration         : 50.234201ms
+==> ALL CHECKS PASSED
+==> P1-F15 challenge harness PASS
+EXIT=0
+```
+
+Cross-compile linux/amd64:
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f15_challenge_linux ./tests/integration/cmd/p1f15_challenge/ && echo "cross-compile OK $(ls -la /tmp/p1f15_challenge_linux | awk '{print $5}') bytes"
+cross-compile OK 56688776 bytes
+```
+
+run.sh execution (full pipeline including embedded smoke + cross-compile):
+```
+$ bash Challenges/p1-f15-subagent-team/run.sh ; echo "EXIT=$?"
+==> build F15 challenge harness
+==> run harness
+==> P1-F15 challenge harness pid: 1413570
+==> phase A: in-process spawner + real FakeLLMProvider (always runs)
+    in-process       : id=2da3493a-01fa-4294-94a8-08284bbe6e42 state=succeeded output="phase-a-output" duration=10.377µs call_count=1
+==> phase B: subprocess spawner re-execs THIS binary (always runs)
+    host binary      : /tmp/.private/milosvasic/tmp.Cf0Eohcrjm/p1f15_challenge
+    parent pid       : 1413570
+    subprocess_used  : true
+    output           : "FAKE-LLM-ECHO: phase-b-prompt"
+    duration         : 3.933879ms
+    parent_call_count: 0 (must be 0)
+==> phase C: real F04 worktree creation (gated)
+    repo             : /tmp/.private/milosvasic/p1f15-repo-318599428
+    worktree         : /tmp/.private/milosvasic/p1f15-repo-318599428/.helix-worktrees/helixcode-subagent-p1f15-phasec-task
+    diff_len         : 164 bytes
+    parent_isolated  : false (must be false)
+==> phase D: real Anthropic LLM round-trip (gated)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> phase E: max-concurrency cap (always runs)
+    cap=2 enforced   : true (3rd Dispatch returned ErrMaxConcurrency)
+    results drained  : 2
+==> phase F: kill cancels a running subagent (always runs)
+    kill_id          : 61518a77-7499-4f1b-84cc-656d6b57d718
+    state            : canceled (cancelled)
+    duration         : 50.225854ms
+==> ALL CHECKS PASSED
+==> P1-F15 challenge harness PASS
+==> anti-bluff smoke on F15-affected code
+clean
+==> cross-compile linux
+==> P1-F15 challenge PASS
+EXIT=0
+```
+
+Anti-bluff smoke (both directories):
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f15_challenge/ ../Challenges/p1-f15-subagent-team/ && echo BLUFF || echo clean
+clean
+```
+
+Phase outcomes:
+- Phase A (in-process)        : RAN, PASS — `GenerateCallCount==1` proves real provider invocation
+- Phase B (subprocess)        : RAN, PASS — fork-exec of harness binary, parent provider call count == 0
+- Phase C (worktree, gated)   : RAN, PASS — git on PATH; real `git init` repo + real F04 worktree; staged diff captured
+- Phase D (real LLM, gated)   : SKIPPED — ANTHROPIC_API_KEY not set
+- Phase E (concurrency cap)   : RAN, PASS — third Dispatch returned ErrMaxConcurrency
+- Phase F (kill cancel)       : RAN, PASS — Kill propagated; State=StateCanceled
+
 ### P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
 
