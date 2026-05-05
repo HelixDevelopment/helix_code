@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F03 — Tool Result Persistence
-- **Active task:** P1-F03-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F02-T13 — Feature 2 (Permission Rule System) close-out + push
+- **Active feature:** F04 — Git Worktree Agent Isolation (awaits its own writing-plans cycle)
+- **Active task:** pending
+- **Last completed:** P1-F03-T11 — Feature 3 (Tool Result Persistence) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -77,17 +77,17 @@
 - [x] P1-F02-T13 — Feature 2 close-out + push  ← (this commit)
 
 ## Active feature task list (P1-F03: Tool Result Persistence)
-- [ ] P1-F03-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F03-T02 — internal/tools/persistence package skeleton (types + doc)
-- [ ] P1-F03-T03 — Manager.MaybePersist with hash idempotence (TDD)
-- [ ] P1-F03-T04 — LoadPersisted with path-traversal guard (TDD)
-- [ ] P1-F03-T05 — CleanupOld with filename-pattern matching (TDD)
-- [ ] P1-F03-T06 — wire into internal/llm/tool_provider.go orchestration loop
-- [ ] P1-F03-T07 — audit + wire individual LLM providers
-- [ ] P1-F03-T08 — system prompt note about persistedOutputPath
-- [ ] P1-F03-T09 — cmd/cli/main.go startup + integration test (no mocks)
-- [ ] P1-F03-T10 — Challenge with three runtime-evidence scenarios
-- [ ] P1-F03-T11 — Feature 3 close-out + push
+- [x] P1-F03-T01 — bootstrap evidence + advance PROGRESS — `ee35017`
+- [x] P1-F03-T02 — internal/tools/persistence package skeleton (types + doc) — `c806f72`
+- [x] P1-F03-T03 — Manager.MaybePersist with hash idempotence (TDD) — `38a17d4`
+- [x] P1-F03-T04 — LoadPersisted with path-traversal guard (TDD) — `a9a41f2`
+- [x] P1-F03-T05 — CleanupOld with filename-pattern matching (TDD) — `7afe24f`
+- [x] P1-F03-T06 — wire into internal/llm/tool_provider.go orchestration loop — `6199e96`
+- [x] P1-F03-T07 — audit + wire individual LLM providers — `88856c4`
+- [x] P1-F03-T08 — system prompt note about persistedOutputPath — `c80b438`
+- [x] P1-F03-T09 — cmd/cli/main.go startup + integration test (no mocks) — `9141297`
+- [x] P1-F03-T10 — Challenge with three runtime-evidence scenarios — `84874be`
+- [x] P1-F03-T11 — Feature 3 close-out + push — `(this commit)`
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -97,6 +97,7 @@
 - 2026-05-05 — Phase 1 entered; Feature 1 (Auto-Compaction) starts. Approach: extend existing internal/llm/compression infrastructure rather than build the parallel system the porting doc proposed (gap discovered during plan-writing).
 - 2026-05-05 — Feature 1 (Auto-Compaction) closed. Eleven sub-commits; extended existing internal/llm/compression rather than building parallel infrastructure as the porting doc proposed. Per-provider native tokenizers deferred to Phase 3.
 - 2026-05-05 — Feature 2 (Permission Rule System) closed. Thirteen+ sub-commits (T11 needed a registration follow-up `244aff9`). Extended internal/tools/confirmation.PolicyEngine with a Wildcard Condition field; added internal/tools/permissions package that loads layered YAML rule files (~/.helixcode + project) and produces a Policy that delegates to a smuggle-resistant rule engine (mvdan.cc/sh/v3 walker handles $(...), backticks, heredocs, quoted operators, pipelines). Five claude-code mode presets (default | auto | acceptEdits | dontAsk | bypassPermissions) compose with the existing AutonomyMode gradient. Full CLI surface: --permission-mode flag, helixcode permissions {list,add,remove,check} subcommands, and a /permissions slash command via internal/commands (registered through builtin/register.go). Followed F01's "extend existing" pattern. Engine proven via 3 integration tests + 3 Challenge scenarios; dispatcher wiring (ConfirmationCoordinator → permissions.Engine) deferred to Phase 3.
+- 2026-05-05 — Feature 3 (Tool Result Persistence) closed. Eleven sub-commits. New thin sub-package `internal/tools/persistence` mirrors F02's pattern. Threshold check fires at the LLM provider boundary (tool_provider.go). T07 audit confirmed 0 of 16 LLM providers bypass `tool_provider.go` — single choke point. LLM reads back via the existing Read tool — no new tool added. Lazy 7-day CleanupOld at startup. Engine proven via 3 integration tests + 3 Challenge scenarios (above/below threshold + hash idempotence).
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.

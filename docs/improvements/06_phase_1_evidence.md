@@ -144,8 +144,72 @@ F02 closed 2026-05-05. F03 (Tool Result Persistence) unblocked.
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f03-tool-result-persistence-design.md` (commit `f813fc9`)
 **Plan:** `docs/superpowers/plans/2026-05-05-p1-f03-tool-result-persistence.md`
 **Started:** 2026-05-05
-**Status:** active
+**Status:** CLOSED
 
 ### Task evidence trail
 
-(filled in commit-by-commit as tasks land)
+- T01 — `ee35017` — bootstrap evidence + advance PROGRESS
+- T02 — `c806f72` — persistence package skeleton
+- T03 — `38a17d4` — Manager.MaybePersist (8 unit tests)
+- T04 — `a9a41f2` — LoadPersisted with path-traversal guard (4 unit tests)
+- T05 — `7afe24f` — CleanupOld with filename-pattern matching (4 unit tests)
+- T06 — `6199e96` — wire into tool_provider orchestration (5 unit tests)
+- T07 — `88856c4` — audit + contract test for LLM providers (audit: 0/16 bypass tool_provider)
+- T08 — `c80b438` — system prompt note about persistedOutputPath (2 unit tests)
+- T09 — `9141297` — cmd/cli/main.go startup + integration tests (3 tests, no mocks)
+- T10 — `84874be` — Challenge with runtime evidence (3 scenarios)
+
+### Challenge runtime evidence (from T10, re-verified at T11 close-out)
+
+```
+=== S1: below-threshold inline ===
+was_persisted=false
+path=
+size=0
+dir_exists=false
+
+=== S2: above-threshold persisted ===
+was_persisted=true
+path=/tmp/.private/milosvasic/tmp.BqN6n3Jxsq/s2/.helix/tool-results/Bash_663cf1fa30006e28_20260505_040435.txt
+size=50001
+dir_exists=true
+
+=== S3: hash idempotence ===
+first_path=/tmp/.private/milosvasic/tmp.BqN6n3Jxsq/s3/.helix/tool-results/Bash_bab66c78f72b74df_20260505_040435.txt
+second_path=/tmp/.private/milosvasic/tmp.BqN6n3Jxsq/s3/.helix/tool-results/Bash_bab66c78f72b74df_20260505_040435.txt
+hashes_match=true
+
+PASS: all three scenarios produced expected outcomes
+```
+
+### Anti-bluff scan
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  internal/tools/persistence/ tests/e2e/challenges/persistence/ \
+  tests/integration/persistence/ internal/llm/tool_provider.go \
+  internal/llm/tool_provider_persistence_test.go \
+  internal/llm/provider_persistence_audit_test.go \
+  internal/agent/system_prompt_persistence_test.go
+clean
+```
+
+### Verify-foundation gate
+
+```
+⚠️  3832 silent-skip violation(s) detected.
+(violations are all in Dependencies/HuggingFace_Hub — third-party submodule, out of scope)
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+EXIT_CODE: 0 (same Phase 0 LLMsVerifier-pin baseline as F01 + F02 close-outs; carry-forward from Phase 0 parking lot)
+```
+
+### Closure
+
+F03 closed 2026-05-05. F04 (Git Worktree Agent Isolation) unblocked.
