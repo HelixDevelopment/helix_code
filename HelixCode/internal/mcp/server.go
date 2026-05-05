@@ -58,12 +58,13 @@ type ToolHandler func(ctx context.Context, session *MCPSession, args map[string]
 
 // MCPMessage represents an MCP protocol message
 type MCPMessage struct {
-	ID     string          `json:"id"`
-	Type   string          `json:"type"`
-	Method string          `json:"method"`
-	Params json.RawMessage `json:"params"`
-	Result interface{}     `json:"result,omitempty"`
-	Error  *MCPError       `json:"error,omitempty"`
+	JSONRPC string          `json:"jsonrpc,omitempty"`
+	ID      string          `json:"id"`
+	Type    string          `json:"type"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params"`
+	Result  interface{}     `json:"result,omitempty"`
+	Error   *MCPError       `json:"error,omitempty"`
 }
 
 // MCPError represents an MCP protocol error
