@@ -7,35 +7,6 @@ import (
 	"sync"
 )
 
-// Config is the top-level YAML schema for .helixcode/mcp.yml.
-// (T10 moves this to config.go and adds YAML tags + LoadConfig.)
-type Config struct {
-	Servers []ServerSpec
-}
-
-// ServerSpec defines one MCP server. (T10 adds YAML tags.)
-type ServerSpec struct {
-	Name       string
-	Transport  TransportType
-	Command    []string
-	Env        map[string]string
-	Cwd        string
-	URL        string
-	SSEURL     string
-	OAuth      OAuthSpec
-	AlwaysLoad bool
-}
-
-// OAuthSpec describes the OAuth configuration for a server.
-type OAuthSpec struct {
-	Enabled       bool
-	ClientID      string
-	Scope         string
-	IssuerURL     string
-	AuthEndpoint  string
-	TokenEndpoint string
-}
-
 // ClientStatus is a snapshot for /mcp listing.
 type ClientStatus struct {
 	Name      string
