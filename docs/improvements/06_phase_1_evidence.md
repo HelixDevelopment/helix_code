@@ -298,4 +298,62 @@ F04 closed 2026-05-05. F05 (Hook-Based Extensibility) unblocked.
 
 ### Task evidence trail
 
-(filled in commit-by-commit as tasks land)
+- T01 — `b7e7185` — bootstrap evidence + advance PROGRESS
+- T02 — `857ef64` — 6 new HookType constants (3 unit tests)
+- T03 — `bf50e8d` + `df72487` (priority default fix) — yaml_loader.go FileLoader (10 unit tests)
+- T04 — `af5641f` + `b304c3e` (cross-platform fix) — shell_runner.go NewShellRunner (8 unit tests)
+- T05 — `b820bee` — blockers.go Blockers helper (5 unit tests)
+- T06 — `61ce79e` — wire registry.Execute with 6 events (6 unit tests)
+- T07 — `302aabd` — wire OnCompaction in AutoCompactor (4 unit tests)
+- T08 — `76a0823` — wire OnError + RequestPlanApproval stub (5 unit tests)
+- T09 — `d0f85d9` — helixcode hooks Cobra subcommands (7 unit tests)
+- T10 — `910488b` — /hooks slash command + builtin registration (5+1 unit tests)
+- T11 — `6925038` — cmd/cli/main.go startup wiring + 3 integration tests (no mocks)
+- T12 — `d5da040` — Challenge with 3 runtime-evidence scenarios
+
+### Challenge runtime evidence (from T12, re-verified at T13 close-out)
+
+```
+=== S1: block-bash-rm ===
+blocker_count=1
+marker_present_after=true
+
+=== S2: audit-after-tool ===
+log_lines=3
+
+=== S3: yaml-validate-malformed ===
+validate_error_present=true
+
+PASS: all three scenarios produced expected outcomes
+```
+
+### Anti-bluff scan
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  internal/hooks/ tests/e2e/challenges/hooks/ tests/integration/hooks/ \
+  cmd/cli/hooks_cmd.go cmd/cli/hooks_cmd_test.go \
+  internal/commands/hooks_command.go internal/commands/hooks_command_test.go \
+  internal/commands/builtin/hooks_register_test.go
+clean
+```
+
+### Verify-foundation gate
+
+```
+⚠️  3832 silent-skip violation(s) detected.
+(violations are all in Dependencies/HuggingFace_Hub — third-party submodule, out of scope)
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+EXIT_CODE: 1 (non-zero — same Phase 0 LLMsVerifier-pin baseline as F01/F02/F03/F04 close-outs; carry-forward from Phase 0 parking lot)
+```
+
+### Closure
+
+F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.

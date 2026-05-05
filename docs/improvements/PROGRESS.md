@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F05 — Hook-Based Extensibility
-- **Active task:** P1-F05-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F04-T13 — Feature 4 (Git Worktree Agent Isolation) close-out + push
+- **Active feature:** F06 — MCP Full Lifecycle (awaits its own writing-plans cycle)
+- **Active task:** pending
+- **Last completed:** P1-F05-T13 — Feature 5 (Hook-Based Extensibility) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -105,19 +105,19 @@
 - [x] P1-F04-T13 — Feature 4 close-out + push  ← (this commit)
 
 ## Active feature task list (P1-F05: Hook-Based Extensibility)
-- [ ] P1-F05-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F05-T02 — add 6 new HookType constants (TDD)
-- [ ] P1-F05-T03 — yaml_loader.go: FileLoader + apiVersion validation (TDD)
-- [ ] P1-F05-T04 — shell_runner.go: NewShellRunner HookFunc (TDD)
-- [ ] P1-F05-T05 — blockers.go: Blockers helper (TDD)
-- [ ] P1-F05-T06 — wire registry.Execute with 6 events (TDD)
-- [ ] P1-F05-T07 — wire OnCompaction in AutoCompactor (TDD)
-- [ ] P1-F05-T08 — wire OnError + RequestPlanApproval stub in agent.go (TDD)
-- [ ] P1-F05-T09 — helixcode hooks {list,test,enable,disable,validate} subcommands
-- [ ] P1-F05-T10 — /hooks slash command + builtin registration
-- [ ] P1-F05-T11 — cmd/cli/main.go startup wiring + integration tests (no mocks)
-- [ ] P1-F05-T12 — Challenge with three runtime-evidence scenarios
-- [ ] P1-F05-T13 — Feature 5 close-out + push
+- [x] P1-F05-T01 — bootstrap evidence + advance PROGRESS  ← commit `b7e7185`
+- [x] P1-F05-T02 — add 6 new HookType constants (TDD)  ← commit `857ef64`
+- [x] P1-F05-T03 — yaml_loader.go: FileLoader + apiVersion validation (TDD)  ← commits `bf50e8d` + `df72487`
+- [x] P1-F05-T04 — shell_runner.go: NewShellRunner HookFunc (TDD)  ← commits `af5641f` + `b304c3e`
+- [x] P1-F05-T05 — blockers.go: Blockers helper (TDD)  ← commit `b820bee`
+- [x] P1-F05-T06 — wire registry.Execute with 6 events (TDD)  ← commit `61ce79e`
+- [x] P1-F05-T07 — wire OnCompaction in AutoCompactor (TDD)  ← commit `302aabd`
+- [x] P1-F05-T08 — wire OnError + RequestPlanApproval stub in agent.go (TDD)  ← commit `76a0823`
+- [x] P1-F05-T09 — helixcode hooks {list,test,enable,disable,validate} subcommands  ← commit `d0f85d9`
+- [x] P1-F05-T10 — /hooks slash command + builtin registration  ← commit `910488b`
+- [x] P1-F05-T11 — cmd/cli/main.go startup wiring + integration tests (no mocks)  ← commit `6925038`
+- [x] P1-F05-T12 — Challenge with three runtime-evidence scenarios  ← commit `d5da040`
+- [x] P1-F05-T13 — Feature 5 close-out + push  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -129,6 +129,7 @@
 - 2026-05-05 — Feature 2 (Permission Rule System) closed. Thirteen+ sub-commits (T11 needed a registration follow-up `244aff9`). Extended internal/tools/confirmation.PolicyEngine with a Wildcard Condition field; added internal/tools/permissions package that loads layered YAML rule files (~/.helixcode + project) and produces a Policy that delegates to a smuggle-resistant rule engine (mvdan.cc/sh/v3 walker handles $(...), backticks, heredocs, quoted operators, pipelines). Five claude-code mode presets (default | auto | acceptEdits | dontAsk | bypassPermissions) compose with the existing AutonomyMode gradient. Full CLI surface: --permission-mode flag, helixcode permissions {list,add,remove,check} subcommands, and a /permissions slash command via internal/commands (registered through builtin/register.go). Followed F01's "extend existing" pattern. Engine proven via 3 integration tests + 3 Challenge scenarios; dispatcher wiring (ConfirmationCoordinator → permissions.Engine) deferred to Phase 3.
 - 2026-05-05 — Feature 3 (Tool Result Persistence) closed. Eleven sub-commits. New thin sub-package `internal/tools/persistence` mirrors F02's pattern. Threshold check fires at the LLM provider boundary (tool_provider.go). T07 audit confirmed 0 of 16 LLM providers bypass `tool_provider.go` — single choke point. LLM reads back via the existing Read tool — no new tool added. Lazy 7-day CleanupOld at startup. Engine proven via 3 integration tests + 3 Challenge scenarios (above/below threshold + hash idempotence).
 - 2026-05-05 — Feature 4 (Git Worktree Agent Isolation) closed. Thirteen sub-commits (T02 needed a fix-up `ccaaf33` for an anti-bluff smoke regression — the docstring contained "placeholders" which trips the coarse `grep "placeholder"` check). New thin sub-package `internal/tools/worktree` mirrors F02/F03's pattern. Shells out to the git binary consistent with `internal/tools/git/`. Worktrees stored at `<repoRoot>/.helix-worktrees/<name>/` (in-repo; .gitignore'd). Meta-only — no submodule auto-init; agents that need submodule code run `git submodule update --init --recursive` from inside the worktree. Full surface: 4 agent tools + 4 Cobra subcommands (enter/exit print help when called from CLI) + 1 /worktree slash command. Per-session state via single field on session.Manager rather than a parallel worktree_state.go file.
+- 2026-05-05 — Feature 5 (Hook-Based Extensibility) closed. 14 sub-commits (12 feat + 2 fix-ups: T04's cross-platform shell-runner split, T03's yaml-loader priority default). Extended existing internal/hooks package with 6 new HookType constants + 3 new files (yaml_loader, shell_runner, blockers). Config-driven shell hooks via ~/.helixcode/hooks.yaml. 5 wiring points: tools/registry.Execute (6 events), llm/compression/AutoCompactor (OnCompaction), agent (OnError + RequestPlanApproval stub for F08). Full surface: 5 Cobra subcommands + /hooks slash command (aliased /hk).
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
