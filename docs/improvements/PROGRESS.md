@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F14 next candidate (Sandboxed Shell Execution)
-- **Active task:** —
+- **Active feature:** P1-F14 — Sandboxed Shell Execution (in progress)
+- **Active task:** P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14
 - **Last completed:** P1-F13-T12 — Feature 13 (LSP Integration) close-out + push to 4 remotes (all 12 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -218,6 +218,20 @@
 - [x] P1-F13-T10 — helixcode lsp cobra + main.go wiring + gated integration test  ← commit `080b79b`
 - [x] P1-F13-T11 — Challenge: in-tree fake LSP pipeline + gated real-server phase  ← submodule `f00bf19` + meta-repo `9ea2cdf`
 - [x] P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F14: Sandboxed Shell Execution)
+- [x] P1-F14-T01 — bootstrap evidence + advance PROGRESS to F14  ← (this commit)
+- [ ] P1-F14-T02 — sandbox/types.go: SandboxConfig + Policy + Capabilities + Result + Backend interface + ConstitutionalDenyList (TDD)
+- [ ] P1-F14-T03 — sandbox/detector.go: capability probes + SelectBackend with fail-closed (TDD)
+- [ ] P1-F14-T04 — sandbox/bubblewrap_backend.go: deterministic argv builder + Run (TDD)
+- [ ] P1-F14-T05 — sandbox/native_backend.go: SysProcAttr.Cloneflags userns + native_helper re-exec (TDD)
+- [ ] P1-F14-T06 — sandbox/manager.go: backend selection + CONST-033 deny + user deny + fail-closed (TDD)
+- [ ] P1-F14-T07 — sandbox/sandboxed_shell_tool.go: Tool interface impl as shell_sandboxed (TDD)
+- [ ] P1-F14-T08 — sandbox/config_loader.go: YAML loader + secret-safe writer (mode 0600) (TDD)
+- [ ] P1-F14-T09 — /sandbox slash command (status/test/policy) (TDD)
+- [ ] P1-F14-T10 — main.go wiring (Detector + Manager + tool + slash) + gated integration test
+- [ ] P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases
+- [ ] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

@@ -1365,3 +1365,47 @@ cobra. Pushed to all 4 meta-repo remotes (origin / github / gitlab /
 upstream) non-force; the `Challenges/` submodule was pushed to its
 single `origin` non-force (mirror gap to github / gitlab / upstream is
 deferred infra work, consistent with F11 + F12 close-out precedent).
+
+## P1-F14 — Sandboxed Shell Execution
+
+**Date:** 2026-05-05
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f14-sandboxed-shell-execution-design.md` (commit `067e5d9`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f14-sandboxed-shell-execution.md` (commit `daff9cd`)
+**Started:** 2026-05-05
+**Status:** active
+
+**Goal:** Linux-first sandboxed shell execution: hybrid bubblewrap
+(preferred) + native userns fallback; default-DENY network with
+per-call opt-in; CONST-033 deny-list rejects power-management
+commands BEFORE spawn; new `shell_sandboxed` tool + `/sandbox`
+slash; config at `~/.config/helixcode/sandbox.yaml`; macOS Seatbelt
++ Windows Job Object deferred to F14.5.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F14-T01 — Bootstrap
+
+(this commit) — append F14 section header to evidence; advance PROGRESS current focus to F14; insert 12-task list.
+
+### P1-F14-T02 — sandbox/types.go: SandboxConfig + Policy + Capabilities + Result + Backend interface + ConstitutionalDenyList (TDD)
+
+### P1-F14-T03 — sandbox/detector.go: capability probes + SelectBackend with fail-closed (TDD)
+
+### P1-F14-T04 — sandbox/bubblewrap_backend.go: deterministic argv builder + Run (TDD)
+
+### P1-F14-T05 — sandbox/native_backend.go: SysProcAttr.Cloneflags userns + native_helper re-exec (TDD)
+
+### P1-F14-T06 — sandbox/manager.go: backend selection + CONST-033 deny + user deny + fail-closed (TDD)
+
+### P1-F14-T07 — sandbox/sandboxed_shell_tool.go: Tool interface impl as shell_sandboxed (TDD)
+
+### P1-F14-T08 — sandbox/config_loader.go: YAML loader + secret-safe writer (mode 0600) (TDD)
+
+### P1-F14-T09 — /sandbox slash command (status/test/policy) (TDD)
+
+### P1-F14-T10 — main.go wiring (Detector + Manager + tool + slash) + gated integration test
+
+### P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases
+
+### P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
