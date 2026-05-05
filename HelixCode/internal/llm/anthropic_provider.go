@@ -141,9 +141,20 @@ func NewAnthropicProvider(config ProviderConfigEntry) (*AnthropicProvider, error
 		return nil, fmt.Errorf("anthropic API key not provided")
 	}
 
+	// Endpoint precedence (P1-F12-T03):
+	//   1. Explicit Config.Endpoint (highest — user wired a specific URL).
+	//   2. ANTHROPIC_BASE_URL env var (mid — runtime override without
+	//      rewriting config; mirrors official Anthropic SDKs).
+	//   3. Canonical Anthropic API endpoint (default).
+	// An empty ANTHROPIC_BASE_URL is treated as "unset" — sending requests
+	// to "" would fail in non-obvious ways at the HTTP layer.
 	endpoint := config.Endpoint
 	if endpoint == "" {
-		endpoint = "https://api.anthropic.com/v1/messages"
+		if envBase := os.Getenv("ANTHROPIC_BASE_URL"); envBase != "" {
+			endpoint = envBase
+		} else {
+			endpoint = "https://api.anthropic.com/v1/messages"
+		}
 	}
 
 	provider := &AnthropicProvider{
