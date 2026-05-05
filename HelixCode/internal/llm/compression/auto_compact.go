@@ -3,7 +3,9 @@ package compression
 import (
 	"context"
 	"fmt"
+	"sync"
 
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm/compressioniface"
 )
 
@@ -33,6 +35,8 @@ type AutoCompactor struct {
 	coord          compressioniface.CompressionCoordinator
 	guard          *ThrashingGuard
 	thresholdRatio float64
+	mu             sync.Mutex
+	hooksManager   *hooks.Manager
 }
 
 // NewAutoCompactor returns an AutoCompactor configured with the given
@@ -50,6 +54,16 @@ func NewAutoCompactor(
 		guard:          guard,
 		thresholdRatio: thresholdRatio,
 	}
+}
+
+// SetHooksManager wires a hooks.Manager so MaybeCompact can fire
+// HookTypeOnCompaction after a successful compaction. A nil manager disables
+// hook firing. Blocking hooks surface as MaybeCompact's return error so the
+// caller can react.
+func (a *AutoCompactor) SetHooksManager(m *hooks.Manager) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.hooksManager = m
 }
 
 // MaybeCompact checks whether the conversation has crossed the configured
@@ -99,5 +113,22 @@ func (a *AutoCompactor) MaybeCompact(ctx context.Context, conv *compressioniface
 		// CompressionResult.TokensSaved is the delta; derive TokensAfter from it.
 		result.TokensAfter = total - cr.TokensSaved
 	}
+
+	// Fire OnCompaction; a blocking hook surfaces as the function's error.
+	a.mu.Lock()
+	mgr := a.hooksManager
+	a.mu.Unlock()
+	if mgr != nil {
+		event := hooks.NewEventWithContext(ctx, hooks.HookTypeOnCompaction)
+		event.Source = "auto_compactor"
+		event.SetData("before_size", result.TokensBefore)
+		event.SetData("after_size", result.TokensAfter)
+		event.SetData("messages_compacted", len(conv.Messages))
+		results := mgr.TriggerEventAndWait(event)
+		if blockers := hooks.Blockers(results); len(blockers) > 0 {
+			return result, fmt.Errorf("compaction blocked by hook(s): %v", blockers[0])
+		}
+	}
+
 	return result, nil
 }
