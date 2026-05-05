@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F06 — MCP Full Lifecycle (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active feature:** F06 — MCP Full Lifecycle (4 Transports + OAuth)
+- **Active task:** P1-F06-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F05-T13 — Feature 5 (Hook-Based Extensibility) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -118,6 +118,22 @@
 - [x] P1-F05-T11 — cmd/cli/main.go startup wiring + integration tests (no mocks)  ← commit `6925038`
 - [x] P1-F05-T12 — Challenge with three runtime-evidence scenarios  ← commit `d5da040`
 - [x] P1-F05-T13 — Feature 5 close-out + push  ← (this commit)
+
+## Active feature task list (P1-F06: MCP Full Lifecycle)
+- [ ] P1-F06-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F06-T02 — types.go + transport.go interface + BackoffSchedule (TDD)
+- [ ] P1-F06-T03 — transport_stdio.go + cross-platform unix/windows files (TDD)
+- [ ] P1-F06-T04 — transport_http.go with OAuth bearer header (TDD)
+- [ ] P1-F06-T05 — transport_sse.go with reconnect loop (TDD)
+- [ ] P1-F06-T06 — transport_ws.go via gorilla/websocket (TDD)
+- [ ] P1-F06-T07 — oauth.go: RFC 8414 discovery + PKCE + token cache (TDD)
+- [ ] P1-F06-T08 — lifecycle.go: Client state machine + handshake (TDD)
+- [ ] P1-F06-T09 — registry.go: Manager + tool merging (TDD)
+- [ ] P1-F06-T10 — config.go: YAML loader/saver, project + user precedence (TDD)
+- [ ] P1-F06-T11 — cmd/cli/mcp_cmd.go + /mcp slash command (TDD)
+- [ ] P1-F06-T12 — cmd/cli/main.go startup wiring + tools/registry.go integration + integration tests
+- [ ] P1-F06-T13 — Challenge with runtime evidence + cross-compile check
+- [ ] P1-F06-T14 — Feature 6 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

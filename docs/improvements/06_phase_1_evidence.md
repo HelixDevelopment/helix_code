@@ -357,3 +357,16 @@ EXIT_CODE: 1 (non-zero — same Phase 0 LLMsVerifier-pin baseline as F01/F02/F03
 ### Closure
 
 F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
+
+---
+
+## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f06-mcp-full-lifecycle-design.md` (commit `386a4af`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f06-mcp-full-lifecycle.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)
