@@ -132,7 +132,10 @@ func ExchangeCode(ctx context.Context, tokenEndpoint, code, verifier, clientID, 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return nil, fmt.Errorf("mcp oauth: read token response: %w", err)
+	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("mcp oauth: token exchange status %d: %s", resp.StatusCode, string(body))
 	}
@@ -175,10 +178,15 @@ func (c *TokenCache) Save(server string, tok *SavedToken) error {
 		return err
 	}
 	path := c.path(server)
-	if err := os.WriteFile(path, data, 0600); err != nil {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0600); err != nil {
 		return err
 	}
-	return nil
+	if err := os.Chmod(tmp, 0600); err != nil {
+		_ = os.Remove(tmp)
+		return err
+	}
+	return os.Rename(tmp, path)
 }
 
 // Load reads the token from <Dir>/<server>.json. Refuses to read if mode is not 0600.

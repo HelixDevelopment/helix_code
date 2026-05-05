@@ -81,9 +81,25 @@ func TestTokenCache_RefuseLooseMode(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "server-b.json")
 	require.NoError(t, os.WriteFile(path, []byte(`{"access_token":"x"}`), 0644))
+	require.NoError(t, os.Chmod(path, 0644))
 	tc := &TokenCache{Dir: dir}
 	_, err := tc.Load("server-b")
 	require.Error(t, err)
+}
+
+func TestTokenCache_OverwriteEnforcesMode(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "server-c.json")
+	require.NoError(t, os.WriteFile(path, []byte(`{}`), 0644))
+	require.NoError(t, os.Chmod(path, 0644))
+	tc := &TokenCache{Dir: dir}
+	require.NoError(t, tc.Save("server-c", &SavedToken{AccessToken: "t-1"}))
+	st, err := os.Stat(path)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0600), st.Mode().Perm())
+	got, err := tc.Load("server-c")
+	require.NoError(t, err)
+	assert.Equal(t, "t-1", got.AccessToken)
 }
 
 func TestAuthorizationURL_BuildsExpected(t *testing.T) {
