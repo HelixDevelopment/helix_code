@@ -10,6 +10,7 @@ import (
 
 	"dev.helix.code/internal/agent/task"
 	"dev.helix.code/internal/config"
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/llm/compression"
 	"dev.helix.code/internal/llm/compressioniface"
@@ -64,6 +65,11 @@ type BaseAgent struct {
 	// Optional: nil = compaction is disabled (graceful degradation).
 	// Per Feature 1 (claude-code auto-compaction port), P1-F01-T07.
 	autoCompactor *compression.AutoCompactor
+
+	// hooksManager fires lifecycle hook events (OnError, OnPlanApproval, etc.).
+	// Optional: nil = hook firing is disabled (graceful degradation).
+	// Per Feature 5 (hook-based extensibility), P1-F05-T08.
+	hooksManager *hooks.Manager
 }
 
 // NewBaseAgent creates a new base agent
@@ -382,13 +388,17 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{
 	// Execute LLM request
 	response, err := a.llmProvider.Generate(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("LLM generation failed: %w", err)
+		llmErr := fmt.Errorf("LLM generation failed: %w", err)
+		a.dispatchOnError(ctx, llmErr, "llm")
+		return nil, llmErr
 	}
 
 	// Parse and process the response based on task type
 	result, err := a.processLLMResponse(ctx, t, response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to process LLM response: %w", err)
+		llmRespErr := fmt.Errorf("failed to process LLM response: %w", err)
+		a.dispatchOnError(ctx, llmRespErr, "llm")
+		return nil, llmRespErr
 	}
 
 	return result, nil
@@ -736,6 +746,51 @@ func (a *BaseAgent) GetAutoCompactor() *compression.AutoCompactor {
 	return a.autoCompactor
 }
 
+// SetHooksManager wires a hooks.Manager so the agent's lifecycle code can
+// fire OnError (on tool/LLM errors in the message loop) and OnPlanApproval
+// (when the plan-mode approval gate calls RequestPlanApproval). A nil
+// manager disables hook firing.
+// Per Feature 5 (hook-based extensibility), P1-F05-T08.
+func (a *BaseAgent) SetHooksManager(m *hooks.Manager) {
+	a.hooksManager = m
+}
+
+// dispatchOnError fires HookTypeOnError synchronously with a payload of
+// {error_message, error_type}. Sync (TriggerEventAndWait) is used so test
+// observation is deterministic; the returned blockers are deliberately
+// IGNORED — the error has already happened and the agent loop's job is
+// to report it, not retry.
+// Per Feature 5 (hook-based extensibility), P1-F05-T08.
+func (a *BaseAgent) dispatchOnError(ctx context.Context, err error, errorType string) {
+	if a.hooksManager == nil || err == nil {
+		return
+	}
+	event := hooks.NewEventWithContext(ctx, hooks.HookTypeOnError)
+	event.Source = "agent"
+	event.SetData("error_message", err.Error())
+	event.SetData("error_type", errorType)
+	_ = a.hooksManager.TriggerEventAndWait(event)
+}
+
+// RequestPlanApproval fires HookTypeOnPlanApproval synchronously. A
+// blocking hook surfaces as a returned error; nil error means all hooks
+// allow the plan. F05 ships this method but does NOT call it in the agent
+// message loop — F08 (Plan Mode) wires it into the actual approval gate.
+// Per Feature 5 (hook-based extensibility), P1-F05-T08.
+func (a *BaseAgent) RequestPlanApproval(ctx context.Context, plan string) error {
+	if a.hooksManager == nil {
+		return nil
+	}
+	event := hooks.NewEventWithContext(ctx, hooks.HookTypeOnPlanApproval)
+	event.Source = "agent"
+	event.SetData("plan_text", plan)
+	results := a.hooksManager.TriggerEventAndWait(event)
+	if blockers := hooks.Blockers(results); len(blockers) > 0 {
+		return fmt.Errorf("plan approval blocked: %v", blockers[0])
+	}
+	return nil
+}
+
 // buildConversationForCompaction converts []llm.Message (the agent's per-request
 // message slice) into a *compressioniface.Conversation that AutoCompactor can
 // operate on. Only Role and Content are projected; token counting and metadata
@@ -765,6 +820,10 @@ func (a *BaseAgent) Execute(ctx context.Context, t *task.Task) (*task.Result, er
 	result.Duration = time.Since(startTime)
 
 	if err != nil {
+		// Dispatch OnError hook synchronously so subscribers can react to the
+		// task-level error. Blockers are ignored — the error has already occurred.
+		// Per Feature 5 (hook-based extensibility), P1-F05-T08.
+		a.dispatchOnError(ctx, err, "tool")
 		result.SetFailure(err)
 		a.mu.Lock()
 		a.tasksFailed++
