@@ -63,6 +63,7 @@ const (
 	CategoryNotebook     ToolCategory = "notebook"
 	CategoryInteractive  ToolCategory = "interactive"
 	CategoryLSP          ToolCategory = "lsp"
+	CategorySandbox      ToolCategory = "sandbox"
 )
 
 // ToolRegistry manages all available tools
