@@ -56,15 +56,16 @@ type Tool struct {
 // ToolHandler is the function signature for tool execution
 type ToolHandler func(ctx context.Context, session *MCPSession, args map[string]interface{}) (interface{}, error)
 
-// MCPMessage represents an MCP protocol message
+// MCPMessage represents an MCP protocol message.
+// ID is interface{} to accept both string and numeric JSON-RPC identifiers.
 type MCPMessage struct {
-	JSONRPC string          `json:"jsonrpc,omitempty"`
-	ID      string          `json:"id"`
-	Type    string          `json:"type"`
-	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params"`
-	Result  interface{}     `json:"result,omitempty"`
-	Error   *MCPError       `json:"error,omitempty"`
+	JSONRPC string      `json:"jsonrpc,omitempty"`
+	ID      interface{} `json:"id,omitempty"`
+	Type    string      `json:"type,omitempty"`
+	Method  string      `json:"method,omitempty"`
+	Params  interface{} `json:"params,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
+	Error   *MCPError   `json:"error,omitempty"`
 }
 
 // MCPError represents an MCP protocol error
@@ -72,6 +73,28 @@ type MCPError struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
+}
+
+// unmarshalParams decodes the Params field (which may be json.RawMessage,
+// map[string]any, or nil) into dst.
+func unmarshalParams(params interface{}, dst interface{}) error {
+	if params == nil {
+		return nil
+	}
+	var raw []byte
+	switch v := params.(type) {
+	case json.RawMessage:
+		raw = v
+	case []byte:
+		raw = v
+	default:
+		var err error
+		raw, err = json.Marshal(v)
+		if err != nil {
+			return err
+		}
+	}
+	return json.Unmarshal(raw, dst)
 }
 
 // NewMCPServer creates a new MCP server
@@ -186,7 +209,7 @@ func (s *MCPServer) handleInitialize(session *MCPSession, message *MCPMessage) {
 		} `json:"clientInfo"`
 	}
 
-	if err := json.Unmarshal(message.Params, &params); err != nil {
+	if err := unmarshalParams(message.Params, &params); err != nil {
 		s.sendError(session, message.ID, -32700, "Parse error", nil)
 		return
 	}
@@ -246,7 +269,7 @@ func (s *MCPServer) handleCallTool(ctx context.Context, session *MCPSession, mes
 		Arguments map[string]interface{} `json:"arguments"`
 	}
 
-	if err := json.Unmarshal(message.Params, &params); err != nil {
+	if err := unmarshalParams(message.Params, &params); err != nil {
 		s.sendError(session, message.ID, -32700, "Parse error", nil)
 		return
 	}
@@ -319,7 +342,7 @@ func (s *MCPServer) sendMessage(session *MCPSession, message *MCPMessage) error 
 }
 
 // sendError sends an error response
-func (s *MCPServer) sendError(session *MCPSession, id string, code int, message string, data interface{}) {
+func (s *MCPServer) sendError(session *MCPSession, id interface{}, code int, message string, data interface{}) {
 	errorResponse := MCPMessage{
 		ID:   id,
 		Type: "response",
@@ -338,18 +361,11 @@ func (s *MCPServer) BroadcastNotification(method string, params interface{}) {
 	s.sessionMux.RLock()
 	defer s.sessionMux.RUnlock()
 
-	// Convert params to JSON
-	paramsJSON, err := json.Marshal(params)
-	if err != nil {
-		log.Printf("❌ Failed to marshal notification params: %v", err)
-		return
-	}
-
 	notification := MCPMessage{
 		ID:     uuid.New().String(),
 		Type:   "notification",
 		Method: method,
-		Params: json.RawMessage(paramsJSON),
+		Params: params,
 	}
 
 	for _, session := range s.sessions {
