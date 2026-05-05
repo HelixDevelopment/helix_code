@@ -1408,4 +1408,87 @@ slash; config at `~/.config/helixcode/sandbox.yaml`; macOS Seatbelt
 
 ### P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases
 
+**Date:** 2026-05-06
+**Submodule SHA:** Challenges@(this commit)
+**Meta-repo SHA:** (this commit)
+
+**Files created**
+
+- `HelixCode/tests/integration/cmd/p1f14_challenge/main.go` — runtime-evidence harness with helper-mode dispatch as the first line of `main()`, six phases (0/A/B/C/D/E), CONST-033 deny variants, default-DENY network probe via real curl inside bwrap, real native re-exec, and real on-disk YAML round-trip with mode/size assertion.
+- `Challenges/p1-f14-sandboxed-shell/CHALLENGE.md` — phase narrative, pass criteria, gated-skip semantics.
+- `Challenges/p1-f14-sandboxed-shell/run.sh` — orchestrator: builds harness, runs it, runs anti-bluff smoke (string-fragment regex), cross-compiles linux/amd64. `chmod +x` set.
+
+**Verbatim harness stdout (real run, host has bwrap 0.11.1 + userns):**
+
+```
+==> P1-F14 challenge harness pid: 1311699
+==> phase 0: Detector capabilities (informational)
+    {
+      "goos": "linux",
+      "bubblewrap_path": "/usr/bin/bwrap",
+      "unprivileged_userns": true,
+      "cgroups_v2": true,
+      "selected_backend": "bubblewrap"
+    }
+    runtime.GOOS    : linux
+    selected backend: bubblewrap
+==> phase A: CONST-033 rejected before spawn (always runs)
+    systemctl-suspend      -> DenyError rule="CONST-033: systemctl power-management subcommand (suspend/hibernate/poweroff/halt/reboot/kexec)"
+    bash-c-poweroff        -> DenyError rule="CONST-033: systemctl power-management subcommand (suspend/hibernate/poweroff/halt/reboot/kexec)"
+    chained-pm-suspend     -> DenyError rule="CONST-033: pm-utils suspend/hibernate binary (pm-suspend/pm-hibernate/pm-suspend-hybrid)"
+    loginctl-terminate     -> DenyError rule="CONST-033: loginctl power-management or session-termination subcommand"
+==> phase B: fail-closed when no backend (always runs)
+    fail-closed reason: "harness fail-closed test"
+==> phase C: bubblewrap backend end-to-end (gated)
+    workdir         : /tmp/.private/milosvasic/p1f14-bwrap-2041273237
+    bwrap path      : /usr/bin/bwrap
+    C.1 echo ok      : exit=0 stdout="hello-from-sandbox-challenge" duration=3.877907ms
+    C.2 net-allowed  : exit=0 stdout="network-allowed-test"
+    C.3 net-denied   : stdout="NETDENIED" (curl failed inside sandbox as expected)
+==> phase D: native backend end-to-end (gated)
+    native workdir  : /tmp/.private/milosvasic/p1f14-native-4293028747
+    host binary     : /tmp/p1f14_challenge
+    native echo ok  : exit=0 stdout="hello-from-native-sandbox" duration=5.380989ms
+==> phase E: sandbox config YAML round-trip on disk (always runs)
+    cfg path        : /tmp/.private/milosvasic/p1f14-cfg-1935452706/sandbox.yaml
+    cfg mode        : 0600
+    cfg size        : 244 bytes
+    round-trip ok   : timeout=45s mem=768MB cpu=65% deny=3 entries
+==> ALL CHECKS PASSED
+==> P1-F14 challenge harness PASS
+EXIT=0
+```
+
+**Phase D outcome on this host:** RAN (not skipped). Despite the detector preferring bubblewrap, Phase D force-constructs a `NativeBackend` and a manager wired only to it (`caps.SelectedBackend = BackendNative`), so the userns re-exec path is exercised end-to-end. The harness binary itself receives the `HELIX_SANDBOX_NATIVE_HELPER` env-var inside the new namespaces and short-circuits to `RunAsHelper()` thanks to the helper-mode dispatch as the first statement of `main()`.
+
+**Cross-compile evidence (linux/amd64):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f14_challenge_linux ./tests/integration/cmd/p1f14_challenge/
+$ ls -la /tmp/p1f14_challenge_linux
+-rwxr-xr-x 1 milosvasic milosvasic 56153144 May  6 00:50 /tmp/p1f14_challenge_linux
+```
+
+**Anti-bluff smoke:**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f14_challenge/ ../Challenges/p1-f14-sandboxed-shell/ && echo BLUFF || echo clean
+clean
+```
+
+**End-to-end via run.sh (idempotent re-run):**
+
+```
+==> build F14 challenge harness
+==> run harness
+... [phases identical to above; PIDs differ] ...
+==> ALL CHECKS PASSED
+==> P1-F14 challenge harness PASS
+==> anti-bluff smoke on F14-affected code
+clean
+==> cross-compile linux
+==> P1-F14 challenge PASS
+EXIT=0
+```
+
 ### P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force
