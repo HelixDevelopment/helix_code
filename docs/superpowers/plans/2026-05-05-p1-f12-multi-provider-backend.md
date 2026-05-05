@@ -25,17 +25,17 @@ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
 
 ## Task list
 
-- [ ] P1-F12-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F12-T02 — provider.go: confirm unified Provider + LLMsVerifier integration (TDD audit, no rewrite)
-- [ ] P1-F12-T03 — provider_anthropic.go: confirm conformance to unified interface (TDD audit + gap fixes)
-- [ ] P1-F12-T04 — provider_bedrock.go: confirm conformance + verifier-backed GetModels (TDD)
-- [ ] P1-F12-T05 — provider_vertex.go: confirm conformance + verifier-backed GetModels (TDD)
-- [ ] P1-F12-T06 — provider_azure.go: confirm conformance + verifier-backed GetModels (TDD)
-- [ ] P1-F12-T07 — provider_factory.go: NewCloudProvider + selector precedence (TDD)
-- [ ] P1-F12-T08 — wizard.go + wizard_writer.go: tview TUI wizard (TDD with tcell.SimulationScreen)
-- [ ] P1-F12-T09 — main.go wiring + `helixcode wizard` cobra + integration test (gated, SKIP-OK on missing creds)
-- [ ] P1-F12-T10 — Challenge with runtime evidence (LOCAL always-runs, CLOUD credential-gated)
-- [ ] P1-F12-T11 — Feature 12 close-out + push 4 remotes
+- [x] P1-F12-T01 — bootstrap evidence + advance PROGRESS
+- [x] P1-F12-T02 — provider.go: confirm unified Provider + LLMsVerifier integration (TDD audit, no rewrite)
+- [x] P1-F12-T03 — provider_anthropic.go: confirm conformance to unified interface (TDD audit + gap fixes)
+- [x] P1-F12-T04 — provider_bedrock.go: confirm conformance + verifier-backed GetModels (TDD)
+- [x] P1-F12-T05 — provider_vertex.go: confirm conformance + verifier-backed GetModels (TDD)
+- [x] P1-F12-T06 — provider_azure.go: confirm conformance + verifier-backed GetModels (TDD)
+- [x] P1-F12-T07 — provider_factory.go: NewCloudProvider + selector precedence (TDD)
+- [x] P1-F12-T08 — wizard.go + wizard_writer.go: tview TUI wizard (TDD with tcell.SimulationScreen)
+- [x] P1-F12-T09 — main.go wiring + `helixcode wizard` cobra + integration test (gated, SKIP-OK on missing creds)
+- [x] P1-F12-T10 — Challenge with runtime evidence (LOCAL always-runs, CLOUD credential-gated)
+- [x] P1-F12-T11 — Feature 12 close-out + push 4 remotes
 
 ---
 

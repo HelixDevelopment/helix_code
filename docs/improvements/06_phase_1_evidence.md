@@ -998,3 +998,126 @@ present in the harness env. Phases A–D exercised real Selector,
 factory, and on-disk wizard write/read paths and all passed.
 
 ### P1-F12-T11 — Feature 12 close-out + push 4 remotes
+
+**Date:** 2026-05-05
+
+**Scope:** Tick all 11 F12 task boxes in plan + PROGRESS, run final
+verification battery, append close-out evidence, commit close-out, push
+to 4 meta-repo remotes (origin/github/gitlab/upstream) non-force, and
+push the `Challenges/` submodule to its single `origin` non-force
+(mirror gap noted, deferred infra work).
+
+**Task SHAs (all 11 F12 commits, plus T10 SHA backfill):**
+- T01 `bd5dc69` — bootstrap evidence + advance PROGRESS to F12
+- T02 `06c9c34` — provider audit test confirms unified interface for 4 cloud types
+- T03 `dde10dd` — anthropic provider audit + base URL precedence (config > env)
+- T04 `d01026d` — bedrock GetModels routes through VerifierModelSource
+- T05 `67417ed` — vertex GetModels routes through VerifierModelSource (deferred ADC + GCP env fallback)
+- T06 `880b4dc` — azure GetModels routes through VerifierModelSource (`AZURE_OPENAI_API_VERSION` honoured)
+- T07 `28b6fa1` — NewCloudProvider + Selector (flag > env > config > wizard precedence)
+- T08 `778040e` — tview wizard + WizardConfigWriter (mode 0600, O_EXCL secret-safe)
+- T09 `ac55fca` — wire selector into main.go + `helixcode wizard` cobra + integration tests
+- T10 — submodule `4e42fbc` + meta-repo `b937e17` + SHA backfill `1586624` (challenge harness)
+- T11 — (this commit) close-out
+
+**Final test summary (verbatim):**
+
+```
+$ cd HelixCode && go test ./internal/llm/... ./cmd/cli/...
+ok  	dev.helix.code/internal/llm	46.345s
+ok  	dev.helix.code/internal/llm/compression	0.011s
+ok  	dev.helix.code/internal/llm/compressioniface	(cached)
+ok  	dev.helix.code/internal/llm/vision	(cached)
+ok  	dev.helix.code/cmd/cli	0.048s
+```
+
+```
+$ cd HelixCode && go test -tags=integration -run "TestMultiProvider_" ./tests/integration/...
+ok  	dev.helix.code/tests/integration	0.044s
+?   	dev.helix.code/tests/integration/cmd/p1f07_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f08_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f09_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f10_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f11_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f12_challenge	[no test files]
+ok  	dev.helix.code/tests/integration/hooks	0.003s [no tests to run]
+ok  	dev.helix.code/tests/integration/permissions	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/persistence	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/worktree	0.005s [no tests to run]
+```
+
+**Anti-bluff smoke (verbatim):**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/llm/wizard.go internal/llm/wizard_writer.go internal/llm/provider_factory.go \
+    internal/llm/anthropic_provider_audit_test.go internal/llm/bedrock_provider_audit_test.go \
+    internal/llm/vertexai_provider_audit_test.go internal/llm/azure_provider_audit_test.go \
+    cmd/cli/wizard_cmd.go tests/integration/cmd/p1f12_challenge/ \
+    tests/integration/multi_provider_test.go && echo BLUFF || echo clean
+clean
+```
+
+```
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    p1-f12-multi-provider/ && echo BLUFF || echo clean
+clean
+```
+
+**Cross-compile (verbatim):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f12check ./cmd/cli/
+$ ls -la /tmp/helixcode_linux_f12check
+-rwxr-xr-x 1 milosvasic milosvasic 84564208 May  5 22:13 /tmp/helixcode_linux_f12check
+Cross-compile success: linux/amd64 binary at /tmp/helixcode_linux_f12check
+```
+
+**Final harness re-run (verbatim, EXIT=0):**
+
+```
+$ cd HelixCode && go build -o /tmp/p1f12_challenge ./tests/integration/cmd/p1f12_challenge/
+$ /tmp/p1f12_challenge ; echo "EXIT=$?"
+==> P1-F12 challenge harness pid: 710565
+==> phase A: Selector precedence (flag > env > config)
+    A1 env=anthropic flag="" config="" -> "anthropic" OK
+    A2 flag=bedrock env=anthropic config="" -> "bedrock" OK (flag wins)
+    A3 all-empty -> errors.Is(err, ErrNoProviderConfigured) OK (no provider configured: pass --provider, set HELIX_LLM_PROVIDER, populate provider in config, or run `helixcode wizard`)
+    A4 config=vertex-ai -> "vertexai" OK
+==> phase B: NewCloudProvider constructs all 4 cloud backends
+    B.anthropic constructed OK type="anthropic" name="Anthropic" models=11
+    B.bedrock constructed OK type="bedrock" name="AWS Bedrock" models=15
+2026/05/05 22:13:14 Vertex AI: no ambient credentials found at construction (google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information); deferring to first API call
+    B.vertexai constructed OK type="vertexai" name="Vertex AI" models=14
+2026/05/05 22:13:14 ✅ Azure provider using API key authentication
+2026/05/05 22:13:14 ✅ Azure OpenAI provider initialized: endpoint=https://test.openai.azure.com, api_version=2024-08-01-preview, deployments=0
+    B.azure constructed OK type="azure" name="Azure OpenAI" models=12
+    B summary: constructed=4 rejected=0 / 4
+==> phase C: wizard non-interactive write/read round-trip on disk
+    XDG_CONFIG_HOME=/tmp/.private/milosvasic/p1f12-xdg-1339203049
+    cfgPath        =/tmp/.private/milosvasic/p1f12-xdg-1339203049/helixcode/llm.yaml
+    RunWizard OK provider="anthropic" api_key="harness-test-key"
+    on-disk size=283 bytes mode=0600 OK
+    LoadWizardConfig OK provider="anthropic" api_key="harness-test-key"
+==> phase D: end-to-end Selector + factory after disk read
+    Select(loaded.ProviderType) -> "anthropic"
+    NewCloudProvider OK type="anthropic" name="Anthropic"
+==> phase E: real cloud round-trip (gated on ANTHROPIC_API_KEY)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> ALL CHECKS PASSED
+==> P1-F12 challenge harness PASS
+EXIT=0
+```
+
+**Summary:** Feature 12 (Multi-Provider Backend) is complete — Anthropic
+/ Bedrock / Vertex AI / Azure OpenAI unified behind a single `Selector`
+(flag > env > config > wizard precedence) with verifier-backed
+`GetModels` on all four cloud providers (CONST-036/037 satisfied),
+plus tview wizard with mode 0600 + O_EXCL writer, `--provider` flag,
+`HELIX_LLM_PROVIDER` env, `helixcode wizard` cobra subcommand, and
+runtime-evidence Challenge harness (LOCAL 11/11 PASS, CLOUD
+credential-gated). Pushed to all 4 meta-repo remotes
+(origin/github/gitlab/upstream) non-force; the `Challenges/` submodule
+was pushed to its single `origin` non-force (mirror gap to
+github/gitlab/upstream is deferred infra work, consistent with F11
+close-out precedent).

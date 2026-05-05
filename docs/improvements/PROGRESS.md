@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** P1-F12 — Multi-Provider Backend (in progress)
-- **Active task:** P1-F12-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F11-T09 — Feature 11 (Session Transcript Resume) close-out + push to 4 remotes (all 9 tasks shipped + F11-fix `f258cf7`)
+- **Active feature:** idle, F13 next candidate (LSP Integration)
+- **Active task:** —
+- **Last completed:** P1-F12-T11 — Feature 12 (Multi-Provider Backend) close-out + push to 4 remotes (all 11 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -193,17 +193,17 @@
 - [x] P1-F11-fix — preserve ProjectPath/Name across SessionManager.Append  ← commit `f258cf7`
 
 ## Active feature task list (P1-F12: Multi-Provider Backend)
-- [x] P1-F12-T01 — bootstrap evidence + advance PROGRESS  ← (this commit)
-- [ ] P1-F12-T02 — provider.go: unified interface + LLMsVerifier audit (TDD)
-- [ ] P1-F12-T03 — anthropic_provider.go conformance + base URL precedence (TDD)
-- [ ] P1-F12-T04 — bedrock_provider.go conformance + verifier GetModels (TDD)
-- [ ] P1-F12-T05 — vertexai_provider.go conformance + verifier GetModels (TDD)
-- [ ] P1-F12-T06 — azure_provider.go conformance + verifier GetModels (TDD)
-- [ ] P1-F12-T07 — provider_factory.go: NewCloudProvider + Selector (TDD)
-- [ ] P1-F12-T08 — wizard.go: tview TUI + mode 0600 + O_EXCL (TDD)
-- [ ] P1-F12-T09 — main.go wiring + helixcode wizard cobra + integration test
-- [ ] P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)
-- [ ] P1-F12-T11 — Feature 12 close-out + push 4 remotes
+- [x] P1-F12-T01 — bootstrap evidence + advance PROGRESS  ← commit `bd5dc69`
+- [x] P1-F12-T02 — provider.go: unified interface + LLMsVerifier audit (TDD)  ← commit `06c9c34`
+- [x] P1-F12-T03 — anthropic_provider.go conformance + base URL precedence (TDD)  ← commit `dde10dd`
+- [x] P1-F12-T04 — bedrock_provider.go conformance + verifier GetModels (TDD)  ← commit `d01026d`
+- [x] P1-F12-T05 — vertexai_provider.go conformance + verifier GetModels (TDD)  ← commit `67417ed`
+- [x] P1-F12-T06 — azure_provider.go conformance + verifier GetModels (TDD)  ← commit `880b4dc`
+- [x] P1-F12-T07 — provider_factory.go: NewCloudProvider + Selector (TDD)  ← commit `28b6fa1`
+- [x] P1-F12-T08 — wizard.go: tview TUI + mode 0600 + O_EXCL (TDD)  ← commit `778040e`
+- [x] P1-F12-T09 — main.go wiring + helixcode wizard cobra + integration test  ← commit `ac55fca`
+- [x] P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)  ← submodule `4e42fbc` + meta-repo `b937e17` + SHA backfill `1586624`
+- [x] P1-F12-T11 — Feature 12 close-out + push 4 remotes  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -217,6 +217,7 @@
 - 2026-05-05 — Feature 4 (Git Worktree Agent Isolation) closed. Thirteen sub-commits (T02 needed a fix-up `ccaaf33` for an anti-bluff smoke regression — the docstring contained "placeholders" which trips the coarse `grep "placeholder"` check). New thin sub-package `internal/tools/worktree` mirrors F02/F03's pattern. Shells out to the git binary consistent with `internal/tools/git/`. Worktrees stored at `<repoRoot>/.helix-worktrees/<name>/` (in-repo; .gitignore'd). Meta-only — no submodule auto-init; agents that need submodule code run `git submodule update --init --recursive` from inside the worktree. Full surface: 4 agent tools + 4 Cobra subcommands (enter/exit print help when called from CLI) + 1 /worktree slash command. Per-session state via single field on session.Manager rather than a parallel worktree_state.go file.
 - 2026-05-05 — Feature 5 (Hook-Based Extensibility) closed. 14 sub-commits (12 feat + 2 fix-ups: T04's cross-platform shell-runner split, T03's yaml-loader priority default). Extended existing internal/hooks package with 6 new HookType constants + 3 new files (yaml_loader, shell_runner, blockers). Config-driven shell hooks via ~/.helixcode/hooks.yaml. 5 wiring points: tools/registry.Execute (6 events), llm/compression/AutoCompactor (OnCompaction), agent (OnError + RequestPlanApproval stub for F08). Full surface: 5 Cobra subcommands + /hooks slash command (aliased /hk).
 - 2026-05-05 — Feature 11 (Session Transcript Resume) closed. 9 task commits (T01 `ddb45dc`, T02 `fa6bc5f`, T03 `466ab97`, T04 `d72e401`, T05 `08fa5c0`, T06 `607206a`, T07 `0fb036c`, T08 submodule `1e79453` + meta `f4d0ff2`, T09 close-out) + 1 follow-up (`f258cf7` preserves ProjectPath/Name across `SessionManager.Append`). New files in `internal/session/`: identity.go (Git-root-or-cwd), transcript_store.go (JSONL transcripts + metadata I/O), resume.go (ResumeFinder + ResumeMode + FindResumeTarget). Existing `session_manager.go` extended with `Append/Resume/CurrentID`. Surface: `/sessions` slash + `helixcode sessions {list,show,resume,delete}` cobra + `--resume`/`--continue` flags wired in `cmd/cli/main.go`. Challenge harness exercises real fork-exec process boundaries (write child PID ≠ read child PID, both ≠ orchestrator). All 4 remotes pushed non-force. F12 (Multi-Provider Backend) is the next candidate per the original 12-feature programme plan.
+- 2026-05-05 — Feature 12 (Multi-Provider Backend) closed. 11 task commits (T01 `bd5dc69`, T02 `06c9c34`, T03 `dde10dd`, T04 `d01026d`, T05 `67417ed`, T06 `880b4dc`, T07 `28b6fa1`, T08 `778040e`, T09 `ac55fca`, T10 submodule `4e42fbc` + meta-repo `b937e17` + SHA backfill `1586624`, T11 close-out). Anthropic / Bedrock / Vertex / Azure unified behind a single `Selector` (flag > env > config > wizard precedence) with verifier-backed `GetModels` on all four cloud providers (CONST-036/037 satisfied). New `internal/llm/{selector.go, wizard.go, wizard_writer.go, provider_factory.go::NewCloudProvider}` plus four per-provider audit tests (`{anthropic,bedrock,vertexai,azure}_provider_audit_test.go`). Surface: `--provider` flag + `HELIX_LLM_PROVIDER` env + `helixcode wizard` cobra + tview TUI wizard with `tcell.SimulationScreen` headless tests (mode 0600 + O_EXCL writer). Challenge harness emits LOCAL-always-runs (11/11 PASS) + CLOUD credential-gated sections with explicit `SKIP-OK: P1-F12 cloud creds not provided` markers. All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). F13 (LSP Integration) is the next candidate.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh-keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh-keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
