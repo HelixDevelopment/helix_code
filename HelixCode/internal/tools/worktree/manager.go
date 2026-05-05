@@ -124,3 +124,106 @@ func (m *Manager) EnterWorktree(ctx context.Context, name, baseBranch string) (s
 	m.currentWorktree = path
 	return path, nil
 }
+
+// ExitWorktree clears the active-worktree state and returns the agent to
+// the main worktree. Idempotent: calling on a non-isolated Manager is a
+// no-op.
+func (m *Manager) ExitWorktree() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.currentWorktree = ""
+}
+
+// ListWorktrees returns all helix-managed worktrees (the directory entries
+// under <repoRoot>/.helix-worktrees/). Files in the WorktreeDir are
+// ignored — only subdirectories count.
+//
+// The Branch field is best-effort: it parses `git worktree list --porcelain`
+// output to associate paths with branches. If parsing fails for any entry,
+// Branch is left empty for that entry.
+func (m *Manager) ListWorktrees(ctx context.Context) ([]Worktree, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	dir := filepath.Join(m.repoRoot, WorktreeDir)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("reading %s: %w", dir, err)
+	}
+
+	branchByPath := parseWorktreeBranches(ctx, m.repoRoot)
+
+	var out []Worktree
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		full := filepath.Join(dir, entry.Name())
+		out = append(out, Worktree{
+			Name:   entry.Name(),
+			Path:   full,
+			Branch: branchByPath[full],
+		})
+	}
+	return out, nil
+}
+
+// parseWorktreeBranches returns a map from worktree absolute path to its
+// current branch name, derived from `git worktree list --porcelain`. On
+// any parse error, returns whatever was successfully parsed (best-effort).
+func parseWorktreeBranches(ctx context.Context, repoRoot string) map[string]string {
+	out, err := gitWorktreeList(ctx, repoRoot)
+	if err != nil {
+		return nil
+	}
+	branches := map[string]string{}
+	var curPath, curBranch string
+	for _, line := range strings.Split(string(out), "\n") {
+		switch {
+		case strings.HasPrefix(line, "worktree "):
+			if curPath != "" {
+				branches[curPath] = curBranch
+			}
+			curPath = strings.TrimPrefix(line, "worktree ")
+			curBranch = ""
+		case strings.HasPrefix(line, "branch "):
+			curBranch = strings.TrimPrefix(strings.TrimPrefix(line, "branch "), "refs/heads/")
+		}
+	}
+	if curPath != "" {
+		branches[curPath] = curBranch
+	}
+	return branches
+}
+
+// RemoveWorktree deletes the worktree directory and unregisters its git
+// metadata. Refuses to remove the currently-active worktree (call
+// ExitWorktree first). On `git worktree remove` failure, retries with -f
+// before returning a composite error.
+func (m *Manager) RemoveWorktree(ctx context.Context, name string) error {
+	if err := m.ValidateName(name); err != nil {
+		return err
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	path := filepath.Join(m.repoRoot, WorktreeDir, name)
+	if path == m.currentWorktree {
+		return fmt.Errorf("cannot remove the current worktree; ExitWorktree first")
+	}
+
+	if out, err := gitWorktreeRemove(ctx, m.repoRoot, path, false); err != nil {
+		// Retry with -f.
+		if out2, err2 := gitWorktreeRemove(ctx, m.repoRoot, path, true); err2 != nil {
+			return fmt.Errorf(
+				"removing worktree (without -f: %s) (with -f: %s): %w",
+				strings.TrimSpace(string(out)), strings.TrimSpace(string(out2)), err2,
+			)
+		}
+	}
+	return nil
+}
