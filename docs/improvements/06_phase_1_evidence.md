@@ -1167,7 +1167,7 @@ lsp` cobra.
 
 Date: 2026-05-05.
 
-Submodule SHA: `68e02885e36ff9c5c37056bb2874ae93ae7d7377` (Challenges)
+Submodule SHA: `f00bf190b50404aed7f923b17f3b60d89dea916b` (Challenges, rebased onto origin/main during T12 close-out)
 Meta-repo SHA: (this commit)
 
 Files added:
@@ -1258,7 +1258,7 @@ close-out precedent).
 - T08 `a1aa7e6` — `internal/tools/registry.go` SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit
 - T09 `1b7812f` — `/lsp` slash command (status / restart / list-servers / stop)
 - T10 `080b79b` — `helixcode lsp` cobra + `cmd/cli/main.go` wiring + gated integration test
-- T11 — submodule `68e0288d` + meta-repo `9ea2cdf` (Challenge harness with runtime evidence: in-tree fake LSP pipeline + gated real-server phase)
+- T11 — submodule `f00bf19` + meta-repo `9ea2cdf` (Challenge harness with runtime evidence: in-tree fake LSP pipeline + gated real-server phase; submodule SHA reflects rebase onto Challenges' origin/main during T12)
 - T12 — (this commit) close-out
 
 **Final test summary (verbatim):**
