@@ -41,6 +41,9 @@ func (c *MarkdownCommand) Usage() string { return "/" + c.name + " [args]" }
 // SourcePath returns the .md file path this command was loaded from.
 func (c *MarkdownCommand) SourcePath() string { return c.sourcePath }
 
+// Body returns the raw (unrendered) body string of the command.
+func (c *MarkdownCommand) Body() string { return c.body }
+
 // Execute renders the command body with token substitution and returns it as Output.
 func (c *MarkdownCommand) Execute(ctx context.Context, cc *CommandContext) (*CommandResult, error) {
 	if cc == nil {
