@@ -1,0 +1,20 @@
+{
+  "name": "worktree/agent-isolation-end-to-end",
+  "feature": "P1-F04 — Git Worktree Agent Isolation",
+  "scenarios": [
+    {
+      "id": "S1-isolation-preserves-main",
+      "expected_main_head_unchanged": true,
+      "expected_new_file_not_in_main": true
+    },
+    {
+      "id": "S2-clean-reentry-idempotent",
+      "expected_first_path_equals_second_path": true
+    },
+    {
+      "id": "S3-invalid-names-rejected",
+      "names": ["../etc", "", "name with spaces", "65-chars-long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+      "expected_all_rejected": true
+    }
+  ]
+}
