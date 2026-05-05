@@ -28,6 +28,8 @@ import (
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
+	"dev.helix.code/internal/workflow"
+	"go.uber.org/zap"
 )
 
 // CLI represents the command-line interface
@@ -297,6 +299,18 @@ func (c *CLI) Run() error {
 		log.Printf("mcp: register slash command failed: %v", regErr)
 	}
 	c.commandRegistry = cmdRegistry
+
+	// F07: background task manager — runs tools asynchronously when invoked
+	// with run_in_background:true and powers the /tasks slash command.
+	bgMgr := workflow.NewBackgroundManager(zap.NewNop(), workflow.ManagerConfig{})
+	defer bgMgr.Close()
+	toolReg.SetBackgroundManager(bgMgr)
+	toolReg.RegisterTaskTools(bgMgr)
+	// Register /tasks directly (not via RegisterBuiltinCommandsWithTasks which would
+	// re-register the base commands already wired above by RegisterBuiltinCommandsWithMCP).
+	if regErr := cmdRegistry.Register(commands.NewTasksCommand(bgMgr)); regErr != nil {
+		log.Printf("tasks: register slash command failed: %v", regErr)
+	}
 
 	// Handle different commands
 	switch {
