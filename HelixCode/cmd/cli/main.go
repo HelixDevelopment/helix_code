@@ -331,6 +331,28 @@ func (c *CLI) Run() error {
 		log.Printf("plan: register slash command failed: %v", regErr)
 	}
 
+	// F09: user-defined Markdown slash commands.
+	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
+	projectCmds := filepath.Join(".", ".helix", "commands")
+	var userCmds string
+	if userCfg, err := os.UserConfigDir(); err == nil {
+		userCmds = filepath.Join(userCfg, "helixcode", "commands")
+	}
+	mdLoader := commands.NewMarkdownLoader(cmdRegistry, projectCmds, userCmds)
+	if loadErr := mdLoader.Load(); loadErr != nil {
+		log.Printf("markdown commands: load failed: %v", loadErr)
+	}
+	mdWatcher, mdwErr := commands.NewMarkdownWatcher(mdLoader, []string{projectCmds, userCmds})
+	if mdwErr != nil {
+		log.Printf("markdown commands: watcher init failed: %v", mdwErr)
+	} else {
+		go mdWatcher.Run(ctx)
+		defer mdWatcher.Close() //nolint:errcheck
+	}
+	if regErr := cmdRegistry.Register(commands.NewCommandsCommand(mdLoader, cmdRegistry)); regErr != nil {
+		log.Printf("commands: register slash failed: %v", regErr)
+	}
+
 	// Handle different commands
 	switch {
 	case *listWorkers:
@@ -709,6 +731,30 @@ func main() {
 	// so that Cobra handles its own flag parsing (same pattern as "hooks").
 	if len(os.Args) >= 2 && os.Args[1] == "mcp" {
 		cmd := newMCPCommand(MCPCommandDeps{ConfigPath: ".helixcode/mcp.yml"})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "commands" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "mcp").
+	// The loader and registry are constructed here with zero startup cost
+	// (Load() is a no-op when dirs are absent); the full wiring runs later
+	// inside cli.Run() for other code paths.
+	if len(os.Args) >= 2 && os.Args[1] == "commands" {
+		projectCmds := filepath.Join(".", ".helix", "commands")
+		var userCmds string
+		if userCfg, err := os.UserConfigDir(); err == nil {
+			userCmds = filepath.Join(userCfg, "helixcode", "commands")
+		}
+		cmdReg := commands.NewRegistry()
+		mdLdr := commands.NewMarkdownLoader(cmdReg, projectCmds, userCmds)
+		if err := mdLdr.Load(); err != nil {
+			log.Printf("commands dispatcher: load failed: %v", err)
+		}
+		cmd := newCommandsCmd(commandsCmdDeps{Loader: mdLdr, Registry: cmdReg})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)
