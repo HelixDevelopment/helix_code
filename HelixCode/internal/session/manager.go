@@ -13,20 +13,21 @@ import (
 
 // Manager manages development sessions
 type Manager struct {
-	sessions       map[string]*Session         // All sessions by ID
-	activeSession  *Session                    // Currently active session
-	focusManager   *focus.Manager              // Focus chain manager
-	hooksManager   *hooks.Manager              // Hooks manager
-	mu             sync.RWMutex                // Thread-safety
-	onCreate       []SessionCallback           // Callbacks on session creation
-	onStart        []SessionCallback           // Callbacks on session start
-	onPause        []SessionCallback           // Callbacks on session pause
-	onResume       []SessionCallback           // Callbacks on session resume
-	onComplete     []SessionCallback           // Callbacks on session completion
-	onDelete       []SessionCallback           // Callbacks on session deletion
-	onSwitch       []SwitchCallback            // Callbacks on session switch
-	maxHistory     int                         // Maximum sessions to keep
-	thrashingGuard *compression.ThrashingGuard // Optional auto-compaction thrashing tracker; nil = no-op
+	sessions        map[string]*Session         // All sessions by ID
+	activeSession   *Session                    // Currently active session
+	focusManager    *focus.Manager              // Focus chain manager
+	hooksManager    *hooks.Manager              // Hooks manager
+	mu              sync.RWMutex                // Thread-safety
+	onCreate        []SessionCallback           // Callbacks on session creation
+	onStart         []SessionCallback           // Callbacks on session start
+	onPause         []SessionCallback           // Callbacks on session pause
+	onResume        []SessionCallback           // Callbacks on session resume
+	onComplete      []SessionCallback           // Callbacks on session completion
+	onDelete        []SessionCallback           // Callbacks on session deletion
+	onSwitch        []SwitchCallback            // Callbacks on session switch
+	maxHistory      int                         // Maximum sessions to keep
+	thrashingGuard  *compression.ThrashingGuard // Optional auto-compaction thrashing tracker; nil = no-op
+	currentWorktree string                      // P1-F04 — active worktree path; "" = main worktree
 }
 
 // SessionCallback is called for session lifecycle events
@@ -682,6 +683,22 @@ func (m *Manager) TrimHistory() int {
 	}
 
 	return removed
+}
+
+// GetCurrentWorktree returns the absolute path of the active worktree, or
+// "" if the session is in the main worktree.
+func (m *Manager) GetCurrentWorktree() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.currentWorktree
+}
+
+// SetCurrentWorktree records the active worktree path. Pass "" to indicate
+// the session has exited a worktree (returned to main).
+func (m *Manager) SetCurrentWorktree(path string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.currentWorktree = path
 }
 
 // emitHook emits a hook event
