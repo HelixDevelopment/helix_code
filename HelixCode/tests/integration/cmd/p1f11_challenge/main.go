@@ -203,20 +203,25 @@ func runPhaseWrite() error {
 		return fmt.Errorf("metadata.MessageCount = %d; want %d", meta.MessageCount, len(msgs))
 	}
 
-	// SessionManager.Append writes a metadata sidecar that does not carry
-	// ProjectPath/ProjectName (those fields are not part of the in-memory
-	// SessionManager state in F11). Re-attach them so phase C can locate
-	// this session by ProjectPath.
-	meta.ProjectPath = "/tmp/projA-f11"
-	meta.ProjectName = "projA-f11"
-	if err := store.UpdateSessionMetadata(ctx, *meta); err != nil {
-		return fmt.Errorf("re-attach ProjectPath: %w", err)
+	// SessionManager.Append must preserve the seeded ProjectPath/ProjectName
+	// across writes (regression bar for the F11-T08 metadata-preservation
+	// fix). Assert it here directly so the harness fails loudly if the bug
+	// regresses, instead of silently re-attaching the fields.
+	if meta.ProjectPath != "/tmp/projA-f11" {
+		return fmt.Errorf("metadata.ProjectPath after Append = %q; want %q (Append must preserve seeded ProjectPath)",
+			meta.ProjectPath, "/tmp/projA-f11")
+	}
+	if meta.ProjectName != "projA-f11" {
+		return fmt.Errorf("metadata.ProjectName after Append = %q; want %q (Append must preserve seeded ProjectName)",
+			meta.ProjectName, "projA-f11")
 	}
 
 	fmt.Printf("    [child pid=%d phase=write] wrote %d messages, sessionID=%s\n",
 		os.Getpid(), len(msgs), sessionID)
 	fmt.Printf("    [child pid=%d phase=write] meta.MessageCount=%d OK\n",
 		os.Getpid(), meta.MessageCount)
+	fmt.Printf("    [child pid=%d phase=write] meta.ProjectPath=%q ProjectName=%q preserved across Append\n",
+		os.Getpid(), meta.ProjectPath, meta.ProjectName)
 	return nil
 }
 

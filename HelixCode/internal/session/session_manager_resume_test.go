@@ -71,3 +71,62 @@ func TestSessionManager_AppendNoStore_NoError(t *testing.T) {
 	err := mgr.Append(context.Background(), Message{Role: "user", Content: "x", Timestamp: time.Now()})
 	assert.NoError(t, err)
 }
+
+// TestSessionManager_Append_PreservesProjectMetadata is the regression test for
+// the F11-T08 bug: SessionManager.Append used to overwrite the on-disk metadata
+// sidecar with a freshly-constructed SessionMetadata that did not carry
+// ProjectPath / ProjectName / BranchName / original StartedAt. That made
+// project-scoped lookup (ListSessionMetadata(ctx, projectPath)) silently miss
+// any session that had been appended to.
+//
+// After the fix, Append must read the existing metadata, mutate only
+// LastActivity + MessageCount (keeping IsActive true while the session is
+// active), and preserve every other persisted field byte-exact.
+func TestSessionManager_Append_PreservesProjectMetadata(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	store := NewTranscriptStore(dir)
+
+	sid := "f11-preserve-meta"
+	startedAt := time.Date(2026, 5, 5, 12, 0, 0, 0, time.UTC)
+
+	// Seed metadata with the full identity payload that production code wires.
+	seed := SessionMetadata{
+		SessionID:    sid,
+		ProjectPath:  "/foo/bar",
+		ProjectName:  "bar",
+		StartedAt:    startedAt,
+		LastActivity: startedAt,
+		MessageCount: 0,
+		IsActive:     true,
+		BranchName:   "main",
+	}
+	require.NoError(t, store.UpdateSessionMetadata(ctx, seed))
+
+	// Construct manager and bind to the seeded session via Resume so the
+	// in-memory startedAt/currentID are aligned with the on-disk record.
+	mgr := NewSessionManagerForTestF11()
+	mgr.SetStore(store)
+	require.NoError(t, mgr.Resume(ctx, sid))
+
+	require.NoError(t, mgr.Append(ctx, Message{Role: "user", Content: "one", Timestamp: time.Now()}))
+	require.NoError(t, mgr.Append(ctx, Message{Role: "assistant", Content: "two", Timestamp: time.Now()}))
+
+	got, err := store.GetSessionMetadata(ctx, sid)
+	require.NoError(t, err)
+
+	assert.Equal(t, "/foo/bar", got.ProjectPath, "Append must preserve ProjectPath")
+	assert.Equal(t, "bar", got.ProjectName, "Append must preserve ProjectName")
+	assert.Equal(t, "main", got.BranchName, "Append must preserve BranchName")
+	assert.True(t, startedAt.Equal(got.StartedAt), "Append must preserve StartedAt: got %v want %v", got.StartedAt, startedAt)
+	assert.True(t, got.IsActive, "Append must keep IsActive=true while the session is active")
+	assert.Equal(t, 2, got.MessageCount, "Append must update MessageCount")
+	assert.True(t, got.LastActivity.After(startedAt), "Append must advance LastActivity past StartedAt")
+
+	// Project-scoped listing must still find the session — this is the
+	// downstream consequence the harness was tripping over.
+	matches, err := store.ListSessionMetadata(ctx, "/foo/bar")
+	require.NoError(t, err)
+	require.Len(t, matches, 1, "ListSessionMetadata(/foo/bar) must return the session after Append")
+	assert.Equal(t, sid, matches[0].SessionID)
+}

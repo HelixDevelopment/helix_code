@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -72,6 +73,19 @@ func (m *SessionManager) CurrentID() string {
 //
 // If no store is wired, or if the current session ID is empty, Append is a
 // silent no-op (returns nil).
+//
+// Metadata-preservation contract: Append reads the existing metadata sidecar
+// (if any) and mutates ONLY LastActivity, MessageCount, and IsActive (the
+// session is by definition active while Append is being called). All other
+// persisted fields — ProjectPath, ProjectName, BranchName, StartedAt — are
+// preserved byte-exact so that project-scoped lookup via
+// ListSessionMetadata(ctx, projectPath) continues to return the session after
+// it has been written to. Regression test:
+// TestSessionManager_Append_PreservesProjectMetadata.
+//
+// On first append (no existing metadata), Append synthesises a fresh record
+// using ComputeProjectIdentity() for ProjectPath/ProjectName so that the
+// session is locatable by project from the start.
 func (m *SessionManager) Append(ctx context.Context, msg Message) error {
 	m.mu.Lock()
 	store := m.store
@@ -89,14 +103,49 @@ func (m *SessionManager) Append(ctx context.Context, msg Message) error {
 		return err
 	}
 
-	meta := SessionMetadata{
-		SessionID:    id,
-		StartedAt:    startedAt,
-		LastActivity: time.Now(),
-		MessageCount: count,
-		IsActive:     true,
+	// Read existing metadata so we can preserve ProjectPath, ProjectName,
+	// BranchName, and the original StartedAt across writes. GetSessionMetadata
+	// will resynthesise a record from the JSONL transcript if the sidecar is
+	// missing (e.g. on first append where TranscriptStore.Append already wrote
+	// a defaults-only sidecar) — that's fine; we still mutate it in place
+	// rather than replacing it wholesale.
+	existing, err := store.GetSessionMetadata(ctx, id)
+	if err != nil || existing == nil {
+		// No existing metadata and no transcript-derived synthesis was
+		// possible. Build a fresh record with project identity attached so
+		// the session is locatable by project path on later lookups.
+		meta := SessionMetadata{
+			SessionID:    id,
+			StartedAt:    startedAt,
+			LastActivity: time.Now(),
+			MessageCount: count,
+			IsActive:     true,
+		}
+		if meta.StartedAt.IsZero() {
+			meta.StartedAt = time.Now()
+		}
+		if projPath, identityErr := ComputeProjectIdentity(); identityErr == nil && projPath != "" {
+			meta.ProjectPath = projPath
+			meta.ProjectName = filepath.Base(projPath)
+		}
+		return store.UpdateSessionMetadata(ctx, meta)
 	}
-	return store.UpdateSessionMetadata(ctx, meta)
+
+	// Mutate only the activity-tracking fields; preserve everything else.
+	existing.LastActivity = time.Now()
+	existing.MessageCount = count
+	existing.IsActive = true
+	if existing.SessionID == "" {
+		existing.SessionID = id
+	}
+	if existing.StartedAt.IsZero() {
+		if !startedAt.IsZero() {
+			existing.StartedAt = startedAt
+		} else {
+			existing.StartedAt = time.Now()
+		}
+	}
+	return store.UpdateSessionMetadata(ctx, *existing)
 }
 
 // Resume loads the stored metadata and transcript for sessionID into the
