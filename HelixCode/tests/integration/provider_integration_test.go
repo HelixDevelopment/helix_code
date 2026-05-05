@@ -704,13 +704,21 @@ func testResourceLeakDetection(t *testing.T) {
 	// Monitor for memory/file handle leaks
 }
 
-// Cleanup function
+// Cleanup function — also performs F13 fake LSP server build (see lsp_test.go)
 func TestMain(m *testing.M) {
-	// Run tests
-	code := m.Run()
+	// F13: build the in-tree fake LSP server before any test runs. The binary
+	// path is exposed to the rest of the package via fakeServerBin
+	// (declared in lsp_test.go). Build failure aborts the whole test binary
+	// so tests never silently skip the LSP pipeline.
+	tmpDir, cleanup, err := buildFakeLSPServerForIntegration()
+	if err != nil {
+		// Print to stderr; m.Run() not invoked.
+		_, _ = os.Stderr.WriteString("TestMain: " + err.Error() + "\n")
+		os.Exit(2)
+	}
+	defer cleanup()
+	_ = tmpDir // anchor usage; cleanup() owns the dir
 
-	// Cleanup
-	// Stop any running providers
-	// Clean up temporary files
+	code := m.Run()
 	os.Exit(code)
 }

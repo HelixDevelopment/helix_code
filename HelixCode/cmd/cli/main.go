@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 
 	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/commands"
@@ -344,6 +345,25 @@ func (c *CLI) Run() error {
 	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
 	c.toolRegistry = toolReg
 
+	// F13: LSP manager — curated 5-server allowlist filtered by exec.LookPath
+	// at startup. The manager is wired into the tool registry so successful
+	// Edit-class tool calls (fs_edit / fs_write / multiedit_commit) auto-trigger
+	// a NotifyChange and refresh diagnostics. The /lsp slash command and the
+	// `helixcode lsp` cobra subcommand both consume this same manager.
+	curatedLSPSpecs := tools.CuratedServerSpecs()
+	detectedLSPSpecs := tools.DetectAvailableServers(curatedLSPSpecs)
+	lspWorkingDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("lsp manager: resolving cwd: %w", err)
+	}
+	lspManager := tools.NewLSPManager(lspWorkingDir, detectedLSPSpecs, zap.NewNop())
+	defer func() {
+		shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutCancel()
+		_ = lspManager.Shutdown(shutCtx)
+	}()
+	toolReg.SetLSPManager(lspManager)
+
 	// Construct the MCP Manager, load merged config from user + project YAML,
 	// and start alwaysLoad servers. Errors are soft (logged) so a missing or
 	// malformed mcp.yml never prevents the CLI from running.
@@ -406,6 +426,13 @@ func (c *CLI) Run() error {
 	// with the F06 RegisterBuiltinCommandsWithMCP call already in this function).
 	if regErr := cmdRegistry.Register(commands.NewPlanCommand(planner, modeCtrl)); regErr != nil {
 		log.Printf("plan: register slash command failed: %v", regErr)
+	}
+
+	// F13: register /lsp slash command. Shares the same LSPManager + curated
+	// allowlist constructed earlier in this function so the slash command and
+	// the `helixcode lsp` cobra subcommand observe identical state.
+	if regErr := cmdRegistry.Register(commands.NewLSPCommand(lspManager, curatedLSPSpecs)); regErr != nil {
+		log.Printf("lsp: register slash command failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.
@@ -985,6 +1012,31 @@ func main() {
 	// supplied, builds a NonInteractiveResult and writes the YAML directly.
 	if len(os.Args) >= 2 && os.Args[1] == "wizard" {
 		cmd := newWizardCmd(wizardCmdDeps{})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "lsp" subcommand group before flag.Parse() so
+	// Cobra handles its own flag parsing (same pattern as "sessions"/"wizard").
+	// The LSPManager is constructed here directly off the curated allowlist
+	// filtered by exec.LookPath, so `helixcode lsp list-servers` works without
+	// the full CLI bootstrap. status/restart/stop also work but only over the
+	// servers visible to this short-lived manager — for a long-running session
+	// the in-process /lsp slash command is the right surface.
+	if len(os.Args) >= 2 && os.Args[1] == "lsp" {
+		curated := tools.CuratedServerSpecs()
+		detected := tools.DetectAvailableServers(curated)
+		cwd, _ := os.Getwd()
+		mgr := tools.NewLSPManager(cwd, detected, zap.NewNop())
+		defer func() {
+			shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer shutCancel()
+			_ = mgr.Shutdown(shutCtx)
+		}()
+		cmd := newLSPCmd(lspCmdDeps{Manager: mgr, CuratedSpecs: curated})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)
