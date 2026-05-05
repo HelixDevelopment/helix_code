@@ -28,6 +28,7 @@ import (
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
+	"dev.helix.code/internal/tools/sandbox"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
@@ -433,6 +434,51 @@ func (c *CLI) Run() error {
 	// the `helixcode lsp` cobra subcommand observe identical state.
 	if regErr := cmdRegistry.Register(commands.NewLSPCommand(lspManager, curatedLSPSpecs)); regErr != nil {
 		log.Printf("lsp: register slash command failed: %v", regErr)
+	}
+
+	// F14: sandbox manager + shell_sandboxed tool + /sandbox slash command.
+	//
+	// Wire order: load on-disk config (missing-file → defaults; ignore
+	// not-exist), construct a SandboxManager via NewSandboxManagerFromDetector
+	// using the inner Go module's working directory as the project root, then
+	// register the agent-callable tool and the slash command. The detector
+	// runs once at startup; /sandbox status surfaces the resolved capabilities
+	// without re-detecting.
+	//
+	// Anti-bluff anchor: this is the SOLE wire-in for sandbox in the CLI. The
+	// helper-mode dispatch at the top of main() handles the re-exec child;
+	// every host-side command path goes through the manager constructed here.
+	sandboxConfigPath := sandbox.DefaultConfigPath(os.Getenv)
+	sandboxConfig, sandboxCfgErr := sandbox.LoadSandboxConfig(sandboxConfigPath)
+	if sandboxCfgErr != nil {
+		// LoadSandboxConfig already returns DefaultSandboxConfig() for missing
+		// file; a non-nil error here means a bad YAML / negative limit. Log
+		// and continue with safe defaults so a malformed user file does not
+		// block the rest of the CLI.
+		log.Printf("sandbox: config load failed (using defaults): %v", sandboxCfgErr)
+		sandboxConfig = sandbox.DefaultSandboxConfig()
+	}
+	sandboxWorkDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("sandbox manager: resolving cwd: %w", err)
+	}
+	sandboxMgr, sandboxCaps, sbErr := sandbox.NewSandboxManagerFromDetector(sandboxWorkDir, sandboxConfig, zap.NewNop())
+	if sbErr != nil {
+		log.Printf("sandbox: manager init failed: %v", sbErr)
+	} else {
+		log.Printf("sandbox: backend=%s reason=%q",
+			sandboxCaps.SelectedBackend.String(), sandboxCaps.UnavailableReason)
+	}
+
+	// Register the agent-callable tool. Even when SelectedBackend == None the
+	// tool is registered so its Execute path surfaces a friendly fail-closed
+	// error (with install hints) to the agent — better than the agent being
+	// unable to see the tool at all.
+	if sandboxMgr != nil {
+		toolReg.Register(sandbox.NewSandboxedShellTool(sandboxMgr))
+		if regErr := cmdRegistry.Register(commands.NewSandboxCommand(sandboxMgr)); regErr != nil {
+			log.Printf("sandbox: register slash command failed: %v", regErr)
+		}
 	}
 
 	// F09: user-defined Markdown slash commands.
@@ -921,6 +967,22 @@ func (c *CLI) showHelp() {
 }
 
 func main() {
+	// F14: native sandbox helper re-exec dispatch.
+	//
+	// The native backend launches the host binary with HELIX_SANDBOX_NATIVE_HELPER
+	// set; that invocation must run the helper (mount /proc, apply rlimits,
+	// chdir, exec /bin/sh -c <command>) and exit. It must NOT continue into
+	// normal CLI logic — the helper child is inside fresh PID/MNT/USER/UTS/IPC
+	// namespaces and re-entering the CLI bootstrap would hang or crash.
+	//
+	// Anti-bluff anchor: this dispatch MUST be the very first statement in
+	// main() so no flag parsing, cobra subcommand interception, or env-driven
+	// init runs before the helper takes over. On non-Linux this is a no-op
+	// (IsHelperInvocation returns false there — see native_backend_other.go).
+	if sandbox.IsHelperInvocation() {
+		os.Exit(sandbox.RunAsHelper())
+	}
+
 	// Minimal dispatcher: intercept the "permissions" subcommand group before
 	// flag.Parse() so that Cobra handles its own flag parsing.
 	if len(os.Args) > 1 && os.Args[1] == "permissions" {
