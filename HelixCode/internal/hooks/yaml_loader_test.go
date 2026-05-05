@@ -176,3 +176,23 @@ hooks:
 	require.Len(t, hooks, 1)
 	assert.Equal(t, 5*time.Second, hooks[0].Timeout)
 }
+
+func TestFileLoader_DefaultsZeroPriorityToPriorityNormal(t *testing.T) {
+	tmp := t.TempDir()
+	scriptPath := filepath.Join(tmp, "x.sh")
+	require.NoError(t, os.WriteFile(scriptPath, []byte("#!/bin/sh\nexit 0\n"), 0o755))
+	userPath := filepath.Join(tmp, "user.yaml")
+	// No `priority:` key in YAML — defaults to 0 in Go's zero value.
+	require.NoError(t, os.WriteFile(userPath, []byte(`apiVersion: helixcode.hooks/v1
+hooks:
+  - id: noprio
+    event: before_tool_call
+    script: `+scriptPath+`
+`), 0o600))
+	loader := &FileLoader{UserPath: userPath, ProjectPath: filepath.Join(tmp, "missing.yaml")}
+	hs, _, err := loader.Load(context.Background())
+	require.NoError(t, err)
+	require.Len(t, hs, 1)
+	assert.Equal(t, PriorityNormal, hs[0].Priority,
+		"omitted priority must default to PriorityNormal, not 0")
+}

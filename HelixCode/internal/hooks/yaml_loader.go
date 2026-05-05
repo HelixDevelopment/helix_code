@@ -146,12 +146,16 @@ func filterEnabledAndConvert(schemas []hookSchema) []*Hook {
 				timeout = d
 			}
 		}
+		priority := HookPriority(s.Priority)
+		if priority == 0 {
+			priority = PriorityNormal
+		}
 		hook := &Hook{
 			ID:          s.ID,
 			Name:        s.ID, // use id as display name; users can override later
 			Type:        evt,
 			Description: s.Description,
-			Priority:    HookPriority(s.Priority),
+			Priority:    priority,
 			Async:       s.Async,
 			Timeout:     timeout,
 			Enabled:     true,
