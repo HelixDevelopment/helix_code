@@ -1,0 +1,24 @@
+{
+  "name": "persistence/tool-result-end-to-end",
+  "feature": "P1-F03 — Tool Result Persistence",
+  "scenarios": [
+    {
+      "id": "S1-below-threshold-inline",
+      "input_size": 49999,
+      "expected_was_persisted": false,
+      "expected_dir_exists_after": false
+    },
+    {
+      "id": "S2-above-threshold-persisted",
+      "input_size": 50001,
+      "expected_was_persisted": true,
+      "expected_file_byte_count": 50001
+    },
+    {
+      "id": "S3-hash-idempotence-same-filename",
+      "input_size": 60000,
+      "expected_first_filename_equals_second_filename": true,
+      "note": "two persists of identical content must produce the same file (hash-collision filename)"
+    }
+  ]
+}
