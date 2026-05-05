@@ -34,6 +34,9 @@ type CommandContext struct {
 	ChatHistory []ChatMessage          `json:"chat_history"`
 	WorkingDir  string                 `json:"working_dir"`
 	Metadata    map[string]interface{} `json:"metadata"`
+	// F09: Markdown command substitution fields (zero-value safe)
+	Selection   string `json:"selection,omitempty"`    // current text selection
+	CurrentFile string `json:"current_file,omitempty"` // current file path
 }
 
 // ChatMessage represents a message in chat history
