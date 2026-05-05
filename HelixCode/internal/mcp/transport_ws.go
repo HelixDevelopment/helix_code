@@ -201,11 +201,13 @@ func (t *wsTransport) Close() error {
 		t.cancel()
 	}
 	if conn != nil {
+		t.mu.Lock()
 		_ = conn.WriteControl(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 			time.Now().Add(time.Second),
 		)
+		t.mu.Unlock()
 		_ = conn.Close()
 	}
 	return nil
