@@ -491,3 +491,50 @@ c138401 feat(P1-F06-T02): add MCP client types + Transport interface + BackoffSc
 ### Task evidence trail
 
 (filled in commit-by-commit as tasks land)
+
+#### T10 — Challenge run
+
+```bash
+$ ./Challenges/p1-f07-background-tasks/run.sh
+==> build F07 challenge harness
+==> run harness
+==> start background streaming task
+task_id = a4d4cf19-35ec-48f0-8557-36692a7879d0
+[poll t=0ms] state=pending lines=0 -> 
+[poll t=200ms] state=running lines=1 -> line 1
+[poll t=401ms] state=running lines=2 -> line 1 | line 2
+[poll t=801ms] state=running lines=3 -> line 1 | line 2 | line 3
+==> streaming verified: agent saw growing line count mid-execution
+==> start sleep 30 task and cancel
+==> sleep task cancelled, state= failed
+==> pgrep -x sleep returned: 4121527
+4122233
+4122322
+4122972
+4122986
+4122989
+==> P1-F07 challenge harness PASS
+==> anti-bluff smoke on F07-affected code
+clean
+==> cross-compile linux
+==> P1-F07 challenge PASS
+```
+
+#### T10 — All commits in the F07 branch
+
+```bash
+$ git log --oneline | grep "P1-F07"
+6782e7c feat(P1-F07-T09): wire BackgroundManager into cmd/cli startup + integration test (real subprocess)
+6546e06 feat(P1-F07-T08): add /tasks slash command + builtin registration helper
+ed09126 feat(P1-F07-T07): add TaskOutput + TaskStop agent tools and registration
+2e9d8cc fix(P1-F07-T06): fire pre-execution hooks + validate params on background dispatch
+2bfbc0d feat(P1-F07-T06): ToolRegistry dispatches run_in_background flag to BackgroundManager
+ff81607 fix(P1-F07-T05): ShellTool implements BackgroundAware (interface satisfaction at compile time)
+7ff28c2 feat(P1-F07-T05): shell tool implements BackgroundAware (streaming stdout/stderr)
+46cd996 feat(P1-F07-T04): add BackgroundAware interface + LineSink + error sentinel
+02f0563 fix(P1-F07-T03): StopTask re-checks state after cancel; go mod tidy on zap
+0f038a1 feat(P1-F07-T03): add BackgroundManager with sweeper, panic recovery, MaxConcurrent
+290513f fix(P1-F07-T02): EndedAt accessor (race-free), SetState panics on unknown state
+57b0a72 feat(P1-F07-T02): add BackgroundTask + TaskState with bounded output ring
+76d8331 docs(P1-F07-T01): bootstrap Phase 1 / Feature 7 evidence + advance PROGRESS
+```
