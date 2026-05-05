@@ -13,9 +13,12 @@ import (
 	"syscall"
 
 	"dev.helix.code/internal/config"
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/server"
+	"dev.helix.code/internal/session"
+	"dev.helix.code/internal/tools"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
@@ -34,6 +37,9 @@ type CLI struct {
 	permissionsEngine  *permissions.Engine
 	persistenceManager *persistence.Manager
 	worktreeManager    *worktree.Manager
+	sessionMgr         *session.Manager
+	toolRegistry       *tools.ToolRegistry
+	hooksLoaded        int // count of hooks loaded at startup (for diagnostics)
 }
 
 // NewCLI creates a new CLI instance
@@ -130,6 +136,41 @@ func (c *CLI) initWorktree(ctx context.Context) error {
 	return nil
 }
 
+// initHooks loads ~/.helixcode/hooks.yaml + <cwd>/.helixcode/hooks.yaml,
+// wraps each enabled entry in a shell-runner HookFunc, and registers it
+// with the session.Manager.hooksManager. Errors fail-fast.
+func (c *CLI) initHooks(ctx context.Context, sessionMgr *session.Manager) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("resolving home dir for hooks: %w", err)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolving cwd for hooks: %w", err)
+	}
+	loader := &hooks.FileLoader{
+		UserPath:    filepath.Join(home, ".helixcode", "hooks.yaml"),
+		ProjectPath: filepath.Join(cwd, ".helixcode", "hooks.yaml"),
+	}
+	hs, sources, err := loader.Load(ctx)
+	if err != nil {
+		return fmt.Errorf("loading hooks: %w", err)
+	}
+	hm := sessionMgr.GetHooksManager()
+	for _, h := range hs {
+		scriptPath := h.Metadata["script"]
+		h.Handler = hooks.NewShellRunner(scriptPath, h.Timeout)
+		if err := hm.Register(h); err != nil {
+			return fmt.Errorf("registering hook %q: %w", h.ID, err)
+		}
+	}
+	c.hooksLoaded = len(hs)
+	if len(sources) > 0 {
+		log.Printf("hooks: loaded %d hook(s) from %v", len(hs), sources)
+	}
+	return nil
+}
+
 // worktreeRevParseToplevel is a tiny shim to avoid leaking the worktree
 // package's internal helpers; it shells out to git directly.
 func worktreeRevParseToplevel(ctx context.Context, cwd string) (string, error) {
@@ -198,6 +239,25 @@ func (c *CLI) Run() error {
 	if err := c.initWorktree(ctx); err != nil {
 		return fmt.Errorf("worktree init: %w", err)
 	}
+
+	// Construct the session manager (carries the hooks.Manager inside it).
+	sessionMgr := session.NewManager()
+	c.sessionMgr = sessionMgr
+
+	// Load hooks from ~/.helixcode/hooks.yaml + <cwd>/.helixcode/hooks.yaml
+	// and register them with the session's hooks manager.
+	if err := c.initHooks(ctx, sessionMgr); err != nil {
+		return fmt.Errorf("hooks init: %w", err)
+	}
+
+	// Construct the tool registry and wire the hooks manager so that
+	// BeforeToolCall / AfterToolCall / BeforeBash / AfterBash actually fire.
+	toolReg, err := tools.NewToolRegistry(tools.DefaultRegistryConfig())
+	if err != nil {
+		return fmt.Errorf("tool registry init: %w", err)
+	}
+	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
+	c.toolRegistry = toolReg
 
 	// Handle different commands
 	switch {
