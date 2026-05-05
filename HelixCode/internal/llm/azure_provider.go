@@ -198,9 +198,14 @@ func NewAzureProvider(config ProviderConfigEntry) (*AzureProvider, error) {
 		return nil, fmt.Errorf("azure endpoint is required (set in config or AZURE_OPENAI_ENDPOINT env var)")
 	}
 
-	// Get API version (with default)
+	// Get API version (precedence: explicit Parameters > AZURE_OPENAI_API_VERSION
+	// env (canonical Azure SDK name) > AZURE_API_VERSION env (legacy
+	// Helix-specific name, kept for backward compatibility) > documented default).
 	apiVersion, ok := config.Parameters["api_version"].(string)
 	if !ok || apiVersion == "" {
+		apiVersion = os.Getenv("AZURE_OPENAI_API_VERSION")
+	}
+	if apiVersion == "" {
 		apiVersion = os.Getenv("AZURE_API_VERSION")
 	}
 	if apiVersion == "" {
