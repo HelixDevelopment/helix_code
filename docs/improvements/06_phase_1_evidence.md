@@ -1165,4 +1165,75 @@ lsp` cobra.
 
 ### P1-F13-T11 — Challenge: in-tree fake LSP pipeline + gated real-server phase
 
+Date: 2026-05-05.
+
+Submodule SHA: `68e02885e36ff9c5c37056bb2874ae93ae7d7377` (Challenges)
+Meta-repo SHA: (this commit)
+
+Files added:
+- `HelixCode/tests/integration/cmd/p1f13_challenge/main.go` — runtime-evidence harness with phases 0/A/B/C/D/E/F.
+- `Challenges/p1-f13-lsp-integration/CHALLENGE.md` — pass criteria + procedure.
+- `Challenges/p1-f13-lsp-integration/run.sh` — drives the harness, anti-bluff smoke (string-fragment regex), cross-compile.
+
+Verbatim harness stdout (`/tmp/p1f13_challenge`):
+
+```
+==> P1-F13 challenge harness pid: 895669
+==> phase 0: build in-tree fake LSP server
+    fake LSP binary: /tmp/.private/milosvasic/p1f13-fakebin-2806220759/helix-lsp-fakeserver
+    binary size    : 7034173 bytes
+    workspace      : /tmp/.private/milosvasic/p1f13-ws-583521644
+==> phase A: lazy spawn + diagnostics round-trip
+    spawned server : name="fake" pid=896205 status="ready"
+    diagnostic     : severity=error message="phase-A-bad"
+==> phase B: didChange round-trip
+    didChange diag : severity=error message="phase-B-different"
+==> phase C: Restart cycles the OS process
+    pre-restart pid : 896205
+    post-restart pid: 896236 (different — process cycled)
+==> phase D: Stop tears the server down
+    Servers()[0]   : name="fake" status="stopped" (stopped)
+==> phase E: auto-trigger after registry.Execute(fs_write)
+    auto-trigger   : severity=error message="phase-E-via-registry" file=phaseE.fake
+    auto-trigger pid: 896242
+==> phase F: real gopls round-trip (gated on PATH)
+    [skipped: gopls not on PATH]
+==> ALL CHECKS PASSED
+==> P1-F13 challenge harness PASS
+EXIT=0
+```
+
+Cross-compile linux/amd64:
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f13_challenge_linux ./tests/integration/cmd/p1f13_challenge/
+$ ls -la /tmp/p1f13_challenge_linux
+-rwxr-xr-x 1 milosvasic milosvasic 61126920 May  5 23:28 /tmp/p1f13_challenge_linux
+```
+
+Anti-bluff smoke (programme convention; both directories):
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f13_challenge/ ../Challenges/p1-f13-lsp-integration/ && echo BLUFF || echo clean
+clean
+```
+
+`run.sh` end-to-end (drives harness + anti-bluff + cross-compile):
+
+```
+==> build F13 challenge harness
+==> run harness
+==> P1-F13 challenge harness pid: 898100
+... (same phase output as above)
+==> P1-F13 challenge harness PASS
+==> anti-bluff smoke on F13-affected code
+clean
+==> cross-compile linux
+==> P1-F13 challenge PASS
+RC=0
+```
+
+Phase F was SKIPPED on this host: `exec.LookPath("gopls")` returned an error (gopls not on PATH).
+Honest skip per F11/F12 precedent — counted as success.
+
 ### P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force
