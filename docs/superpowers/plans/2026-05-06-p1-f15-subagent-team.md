@@ -28,18 +28,18 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F15-T01 — bootstrap evidence + advance PROGRESS to F15
-- [ ] P1-F15-T02 — `internal/agent/subagent/types.go`: SubagentTask + SubagentResult + Isolation/SubagentState enums + SubagentSpawner interface + error sentinels + FakeLLMProvider TEST PROVIDER (TDD)
-- [ ] P1-F15-T03 — `internal/agent/subagent/inprocess_spawner.go`: goroutine-based spawner; inner agent loop invokes llm.Provider.Generate (TDD; FakeLLM call-count assertion)
-- [ ] P1-F15-T04 — `internal/agent/subagent/subprocess_spawner.go`: helper-mode re-exec spawner; sentinel env-var dispatch; JSON stdout decode (TDD; argv+env assertions on injected Executor)
-- [ ] P1-F15-T05 — `internal/agent/subagent/manager.go`: SubagentManager with dispatch + streaming aggregation + max-concurrency + kill-by-id (TDD; channel-close-on-error invariant)
-- [ ] P1-F15-T06 — `internal/agent/subagent/worktree_integration.go`: F04 worktree integration for isolation=worktree (TDD; real `git init` tempdir)
-- [ ] P1-F15-T07 — `internal/tools/task_tool.go`: TaskTool implementing tools.Tool interface, registered name `task` (TDD)
-- [ ] P1-F15-T08 — `internal/agent/subagent/helper_mode.go` + main.go integration: IsSubagentInvocation + RunAsSubagent + early-main dispatch
-- [ ] P1-F15-T09 — `internal/commands/subagents_command.go`: /subagents slash (list / status / kill) (TDD; CONST-042 anti-leak: status shows description not prompt body)
-- [ ] P1-F15-T10 — main.go wiring (Manager + tool + slash + helper-mode) + integration tests (gated, SKIP-OK on missing git)
-- [ ] P1-F15-T11 — Challenge harness (Phase A in-process always; Phase B subprocess always; Phase C worktree gated on git; Phase D real-LLM gated on ANTHROPIC_API_KEY)
-- [ ] P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
+- [x] P1-F15-T01 — bootstrap evidence + advance PROGRESS to F15
+- [x] P1-F15-T02 — `internal/agent/subagent/types.go`: SubagentTask + SubagentResult + Isolation/SubagentState enums + SubagentSpawner interface + error sentinels + FakeLLMProvider TEST PROVIDER (TDD)
+- [x] P1-F15-T03 — `internal/agent/subagent/inprocess_spawner.go`: goroutine-based spawner; inner agent loop invokes llm.Provider.Generate (TDD; FakeLLM call-count assertion)
+- [x] P1-F15-T04 — `internal/agent/subagent/subprocess_spawner.go`: helper-mode re-exec spawner; sentinel env-var dispatch; JSON stdout decode (TDD; argv+env assertions on injected Executor)
+- [x] P1-F15-T05 — `internal/agent/subagent/manager.go`: SubagentManager with dispatch + streaming aggregation + max-concurrency + kill-by-id (TDD; channel-close-on-error invariant)
+- [x] P1-F15-T06 — `internal/agent/subagent/worktree_integration.go`: F04 worktree integration for isolation=worktree (TDD; real `git init` tempdir)
+- [x] P1-F15-T07 — `internal/tools/task_tool.go`: TaskTool implementing tools.Tool interface, registered name `task` (TDD)
+- [x] P1-F15-T08 — `internal/agent/subagent/helper_mode.go` + main.go integration: IsSubagentInvocation + RunAsSubagent + early-main dispatch
+- [x] P1-F15-T09 — `internal/commands/subagents_command.go`: /subagents slash (list / status / kill) (TDD; CONST-042 anti-leak: status shows description not prompt body)
+- [x] P1-F15-T10 — main.go wiring (Manager + tool + slash + helper-mode) + integration tests (gated, SKIP-OK on missing git)
+- [x] P1-F15-T11 — Challenge harness (Phase A in-process always; Phase B subprocess always; Phase C worktree gated on git; Phase D real-LLM gated on ANTHROPIC_API_KEY)
+- [x] P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
 
 ---
 

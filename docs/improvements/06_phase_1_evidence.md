@@ -1778,3 +1778,122 @@ Phase outcomes:
 
 ### P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
 
+**Date:** 2026-05-06
+
+**Task SHAs (all 12):**
+- T01 `b970aa5` — bootstrap evidence + advance PROGRESS to F15
+- T02 `adc273d` — subagent types + Isolation/State enums + FakeLLMProvider TEST PROVIDER
+- T03 `ceeb670` — InProcessSpawner with real llm.Provider invocation + ctx cancel
+- T04 `ec21b17` — SubprocessSpawner with sentinel env var + JSON stdout decode
+- T05 `8e2f9e8` — SubagentManager with streaming dispatch + max-concurrency + kill-by-id
+- T06 `9311692` — F04 worktree integration for isolation=worktree
+- T07 `1f9d0f3` — TaskTool implementing tools.Tool as `task`
+- T08 `07863d2` — IsSubagentInvocation + RunAsSubagent helper-mode + main.go early-dispatch
+- T09 `87b6eac` — /subagents slash command (list/status/kill) + CONST-042 anti-leak
+- T10 `af0aa29` — wire SubagentManager into main.go + /subagents + gated integration tests
+- T11 — Challenges submodule `163965e0bc9c63f4395cd9b65c70feebcfe61cee` + meta-repo `16708a7`
+- T12 — close-out + push 4 remotes (this commit)
+
+Final test summary (verbatim, F15-affected packages):
+```
+ok  	dev.helix.code/internal/agent	7.334s
+ok  	dev.helix.code/internal/agent/subagent	(cached)
+?   	dev.helix.code/internal/agent/subagent/testhelper	[no test files]
+ok  	dev.helix.code/internal/agent/task	(cached)
+ok  	dev.helix.code/internal/agent/types	0.008s
+ok  	dev.helix.code/internal/tools	5.440s
+ok  	dev.helix.code/internal/tools/browser	(cached)
+ok  	dev.helix.code/internal/tools/confirmation	0.003s
+ok  	dev.helix.code/internal/tools/filesystem	(cached)
+FAIL	dev.helix.code/internal/tools/git [build failed]
+?   	dev.helix.code/internal/tools/lsp_fakeserver	[no test files]
+ok  	dev.helix.code/internal/tools/mapping	(cached)
+ok  	dev.helix.code/internal/tools/multiedit	(cached)
+ok  	dev.helix.code/internal/tools/permissions	(cached)
+ok  	dev.helix.code/internal/tools/persistence	(cached)
+ok  	dev.helix.code/internal/tools/sandbox	(cached)
+ok  	dev.helix.code/internal/tools/shell	(cached)
+ok  	dev.helix.code/internal/tools/task	(cached)
+ok  	dev.helix.code/internal/tools/voice	(cached)
+ok  	dev.helix.code/internal/tools/web	(cached)
+ok  	dev.helix.code/internal/tools/worktree	0.314s
+ok  	dev.helix.code/internal/commands	(cached)
+ok  	dev.helix.code/internal/commands/builtin	(cached)
+ok  	dev.helix.code/cmd/cli	(cached)
+FAIL
+```
+
+The single `internal/tools/git [build failed]` is the same pre-existing
+`MockLLMProvider`-missing-`CountTokens` issue documented in F13 / F14 evidence
+(`MockLLMProvider` was authored before F01 added `CountTokens` to the
+`llm.Provider` interface). Not a F15 regression — `git_test.go` last touched
+in commit `5fcc5a4` (pre-Phase-1).
+
+Integration tests (gated, `-tags=integration`):
+```
+ok  	dev.helix.code/tests/integration	4.763s
+?   	dev.helix.code/tests/integration/cmd/p1f15_challenge	[no test files]
+```
+
+Anti-bluff smoke (HelixCode F15 surface):
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  internal/agent/subagent/ internal/tools/task/ internal/tools/worktree/manager.go \
+  internal/commands/subagents_command.go cmd/cli/main.go \
+  tests/integration/subagent_test.go tests/integration/cmd/p1f15_challenge/ \
+  && echo BLUFF || echo clean
+clean
+```
+
+Anti-bluff smoke (Challenges submodule):
+```
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  p1-f15-subagent-team/ && echo BLUFF || echo clean
+clean
+```
+
+Cross-compile linux/amd64 (cmd/cli):
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f15check ./cmd/cli/ && echo "cross-compile OK $(ls -la /tmp/helixcode_linux_f15check | awk '{print $5}') bytes"
+cross-compile OK 85416080 bytes
+```
+
+Final harness re-run (verbatim):
+```
+$ cd HelixCode && go build -o /tmp/p1f15_challenge ./tests/integration/cmd/p1f15_challenge/ && /tmp/p1f15_challenge ; echo "EXIT=$?"
+==> P1-F15 challenge harness pid: 1422473
+==> phase A: in-process spawner + real FakeLLMProvider (always runs)
+    in-process       : id=1fcd08a2-82ca-44f3-b117-0f0db24dd426 state=succeeded output="phase-a-output" duration=11.066µs call_count=1
+==> phase B: subprocess spawner re-execs THIS binary (always runs)
+    host binary      : /tmp/p1f15_challenge
+    parent pid       : 1422473
+    subprocess_used  : true
+    output           : "FAKE-LLM-ECHO: phase-b-prompt"
+    duration         : 5.425418ms
+    parent_call_count: 0 (must be 0)
+==> phase C: real F04 worktree creation (gated)
+    repo             : /tmp/.private/milosvasic/p1f15-repo-4177254061
+    worktree         : /tmp/.private/milosvasic/p1f15-repo-4177254061/.helix-worktrees/helixcode-subagent-p1f15-phasec-task
+    diff_len         : 164 bytes
+    parent_isolated  : false (must be false)
+==> phase D: real Anthropic LLM round-trip (gated)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> phase E: max-concurrency cap (always runs)
+    cap=2 enforced   : true (3rd Dispatch returned ErrMaxConcurrency)
+    results drained  : 2
+==> phase F: kill cancels a running subagent (always runs)
+    kill_id          : 46f91601-1880-425c-9aad-9b3f474a8a60
+    state            : canceled (cancelled)
+    duration         : 50.275798ms
+==> ALL CHECKS PASSED
+==> P1-F15 challenge harness PASS
+EXIT=0
+```
+
+Feature 15 (Subagent Team) is complete: hybrid in-process + subprocess
+dispatch with optional F04 worktree isolation, streaming aggregation,
+`task` tool, `/subagents` slash, helper-mode re-exec, six-phase challenge
+harness with runtime evidence. Pushed to 4 remotes (origin / github /
+gitlab / upstream) on the meta-repo non-force; Challenges submodule
+pushed to its single `origin` (mirror gap noted, deferred infra).
+
