@@ -682,3 +682,15 @@ ff81607 fix(P1-F07-T05): ShellTool implements BackgroundAware (interface satisfa
 57b0a72 feat(P1-F07-T02): add BackgroundTask + TaskState with bounded output ring
 76d8331 docs(P1-F07-T01): bootstrap Phase 1 / Feature 7 evidence + advance PROGRESS
 ```
+
+---
+
+## P1-F11 — Session Transcript Resume
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f11-session-transcript-resume-design.md` (commit `9128a9d`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f11-session-transcript-resume.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)

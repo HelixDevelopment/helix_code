@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** (idle, awaiting next feature pick — F11 candidate)
-- **Active task:** —
+- **Active feature:** F11 — Session Transcript Resume
+- **Active task:** P1-F11-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F10-T09 — Feature 10 (Skill System) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -179,6 +179,17 @@
 - [x] P1-F10-T07 — main.go wiring + integration test
 - [x] P1-F10-T08 — Challenge with runtime evidence + cross-compile check
 - [x] P1-F10-T09 — Feature 10 close-out + push
+
+## Active feature task list (P1-F11: Session Transcript Resume)
+- [ ] P1-F11-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F11-T02 — identity.go: ComputeProjectIdentity (TDD)
+- [ ] P1-F11-T03 — transcript_store.go: JSONL append/read + metadata I/O (TDD)
+- [ ] P1-F11-T04 — resume.go: ResumeFinder + ResumeMode + FindResumeTarget (TDD)
+- [ ] P1-F11-T05 — SessionManager extensions: Append/Resume/CurrentID (TDD)
+- [ ] P1-F11-T06 — /sessions slash + helixcode sessions cobra (TDD)
+- [ ] P1-F11-T07 — main.go --resume/--continue flag parsing + integration test
+- [ ] P1-F11-T08 — Challenge with runtime evidence + cross-compile check
+- [ ] P1-F11-T09 — Feature 11 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
