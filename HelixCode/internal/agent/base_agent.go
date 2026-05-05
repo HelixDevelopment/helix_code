@@ -601,6 +601,8 @@ You are part of a multi-agent system for software development. Your responses sh
 2. Formatted as JSON as requested
 3. Focused on your area of expertise
 
+Tool output handling: when a tool produces output exceeding 50,000 characters, the runtime persists the raw content to disk. The tool result you receive will contain a "persistedOutputPath" pointing to a file under .helix/tool-results/. To read the full content, invoke the Read tool with that path. Treat the path as a regular workspace file.
+
 Always respond with valid JSON only, no additional text.`, a.agentType, a.name, a.capabilities)
 }
 
