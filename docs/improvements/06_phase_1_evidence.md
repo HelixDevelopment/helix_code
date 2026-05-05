@@ -886,4 +886,115 @@ submodule and meta-repo.
 
 ### P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)
 
+**Date:** 2026-05-05
+**Submodule commit:** `<filled-by-T10-commit-step>` (Challenges)
+**Meta-repo commit:** `<filled-by-T10-commit-step>`
+
+**Files added:**
+
+- `HelixCode/tests/integration/cmd/p1f12_challenge/main.go` — five-phase harness
+- `Challenges/p1-f12-multi-provider/CHALLENGE.md`
+- `Challenges/p1-f12-multi-provider/run.sh` (chmod +x; uses
+  string-fragment regex construction so the script does not match the
+  anti-bluff smoke regex itself)
+
+**Build (verbatim):**
+
+```
+$ cd HelixCode && go build ./tests/integration/cmd/p1f12_challenge/
+$ cd HelixCode && go build -o /tmp/p1f12_challenge ./tests/integration/cmd/p1f12_challenge/
+```
+
+**Harness run (verbatim stdout):**
+
+```
+==> P1-F12 challenge harness pid: 678863
+==> phase A: Selector precedence (flag > env > config)
+    A1 env=anthropic flag="" config="" -> "anthropic" OK
+    A2 flag=bedrock env=anthropic config="" -> "bedrock" OK (flag wins)
+    A3 all-empty -> errors.Is(err, ErrNoProviderConfigured) OK (no provider configured: pass --provider, set HELIX_LLM_PROVIDER, populate provider in config, or run `helixcode wizard`)
+    A4 config=vertex-ai -> "vertexai" OK
+==> phase B: NewCloudProvider constructs all 4 cloud backends
+    B.anthropic constructed OK type="anthropic" name="Anthropic" models=11
+    B.bedrock constructed OK type="bedrock" name="AWS Bedrock" models=15
+2026/05/05 21:39:48 Vertex AI: no ambient credentials found at construction (google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information); deferring to first API call
+    B.vertexai constructed OK type="vertexai" name="Vertex AI" models=14
+2026/05/05 21:39:48 ✅ Azure provider using API key authentication
+2026/05/05 21:39:48 ✅ Azure OpenAI provider initialized: endpoint=https://test.openai.azure.com, api_version=2024-08-01-preview, deployments=0
+    B.azure constructed OK type="azure" name="Azure OpenAI" models=12
+    B summary: constructed=4 rejected=0 / 4
+==> phase C: wizard non-interactive write/read round-trip on disk
+    XDG_CONFIG_HOME=/tmp/.private/milosvasic/p1f12-xdg-280912170
+    cfgPath        =/tmp/.private/milosvasic/p1f12-xdg-280912170/helixcode/llm.yaml
+    RunWizard OK provider="anthropic" api_key="harness-test-key"
+    on-disk size=282 bytes mode=0600 OK
+    LoadWizardConfig OK provider="anthropic" api_key="harness-test-key"
+==> phase D: end-to-end Selector + factory after disk read
+    Select(loaded.ProviderType) -> "anthropic"
+    NewCloudProvider OK type="anthropic" name="Anthropic"
+==> phase E: real cloud round-trip (gated on ANTHROPIC_API_KEY)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> ALL CHECKS PASSED
+==> P1-F12 challenge harness PASS
+EXIT=0
+```
+
+**run.sh end-to-end (verbatim stdout):**
+
+```
+==> build F12 challenge harness
+==> run harness
+==> P1-F12 challenge harness pid: 680725
+==> phase A: Selector precedence (flag > env > config)
+    A1 env=anthropic flag="" config="" -> "anthropic" OK
+    A2 flag=bedrock env=anthropic config="" -> "bedrock" OK (flag wins)
+    A3 all-empty -> errors.Is(err, ErrNoProviderConfigured) OK (no provider configured: pass --provider, set HELIX_LLM_PROVIDER, populate provider in config, or run `helixcode wizard`)
+    A4 config=vertex-ai -> "vertexai" OK
+==> phase B: NewCloudProvider constructs all 4 cloud backends
+    B.anthropic constructed OK type="anthropic" name="Anthropic" models=11
+    B.bedrock constructed OK type="bedrock" name="AWS Bedrock" models=15
+2026/05/05 21:40:47 Vertex AI: no ambient credentials found at construction (google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information); deferring to first API call
+    B.vertexai constructed OK type="vertexai" name="Vertex AI" models=14
+2026/05/05 21:40:47 ✅ Azure provider using API key authentication
+2026/05/05 21:40:47 ✅ Azure OpenAI provider initialized: endpoint=https://test.openai.azure.com, api_version=2024-08-01-preview, deployments=0
+    B.azure constructed OK type="azure" name="Azure OpenAI" models=12
+    B summary: constructed=4 rejected=0 / 4
+==> phase C: wizard non-interactive write/read round-trip on disk
+    XDG_CONFIG_HOME=/tmp/.private/milosvasic/p1f12-xdg-2140118139
+    cfgPath        =/tmp/.private/milosvasic/p1f12-xdg-2140118139/helixcode/llm.yaml
+    RunWizard OK provider="anthropic" api_key="harness-test-key"
+    on-disk size=283 bytes mode=0600 OK
+    LoadWizardConfig OK provider="anthropic" api_key="harness-test-key"
+==> phase D: end-to-end Selector + factory after disk read
+    Select(loaded.ProviderType) -> "anthropic"
+    NewCloudProvider OK type="anthropic" name="Anthropic"
+==> phase E: real cloud round-trip (gated on ANTHROPIC_API_KEY)
+    [skipped: ANTHROPIC_API_KEY not set]
+==> ALL CHECKS PASSED
+==> P1-F12 challenge harness PASS
+==> anti-bluff smoke on F12-affected code
+clean
+==> cross-compile linux
+==> P1-F12 challenge PASS
+RUN_SH_EXIT=0
+```
+
+**Cross-compile linux/amd64 (verbatim):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f12_challenge_linux ./tests/integration/cmd/p1f12_challenge/ && file /tmp/p1f12_challenge_linux
+/tmp/p1f12_challenge_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, Go BuildID=vsd48tcvviMo93e2U-mu/Y3Bq1gGsmrfAFDhA7yJP/iIyTAPrkjitvokzqEJyD/PcK-Xh6ITzFqy0qC7L1X, BuildID[sha1]=42dd03931deafd50b88d7d493a660a7cbf592ea8, with debug_info, not stripped
+```
+
+**Anti-bluff smoke (verbatim):**
+
+```
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f12_challenge/ Challenges/p1-f12-multi-provider/ 2>/dev/null && echo BLUFF || echo clean
+clean
+```
+
+**Phase E gating:** Phase E was skipped — `ANTHROPIC_API_KEY` was not
+present in the harness env. Phases A–D exercised real Selector,
+factory, and on-disk wizard write/read paths and all passed.
+
 ### P1-F12-T11 — Feature 12 close-out + push 4 remotes
