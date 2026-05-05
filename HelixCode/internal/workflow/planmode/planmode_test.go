@@ -170,6 +170,14 @@ func (m *MockLLMProvider) Close() error {
 	return nil
 }
 
+func (m *MockLLMProvider) GetContextWindow() int {
+	return 128000
+}
+
+func (m *MockLLMProvider) CountTokens(text string) (int, error) {
+	return len(text) / 4, nil
+}
+
 // MockPresenter is a mock option presenter for testing
 type MockPresenter struct {
 	selectedIndex int

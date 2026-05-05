@@ -31,6 +31,7 @@ const (
 	HookTypeAfterBash      HookType = "after_bash"       // After bash execution
 	HookTypeOnCompaction   HookType = "on_compaction"    // On message compaction
 	HookTypeOnPlanApproval HookType = "on_plan_approval" // On plan approval
+	HookTypeOnPlanReject   HookType = "on_plan_reject"   // On plan rejection (F08)
 )
 
 // HookPriority determines execution order (higher = earlier)

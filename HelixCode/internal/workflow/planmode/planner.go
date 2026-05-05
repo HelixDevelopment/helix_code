@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
 	"github.com/google/uuid"
 )
@@ -31,6 +33,16 @@ type TaskContext struct {
 	Environment   map[string]string
 }
 
+// PlanAction represents a discrete tool-call action within a plan (F08).
+type PlanAction struct {
+	ID          string         // Unique action identifier
+	ToolName    string         // Name of the tool to invoke
+	Args        map[string]any // Tool arguments
+	Description string         // Human-readable description
+	Approved    *bool          // nil = undecided, true = approved, false = rejected
+	Executed    bool           // Whether the action has been executed
+}
+
 // Plan represents an implementation plan
 type Plan struct {
 	ID          string
@@ -38,11 +50,13 @@ type Plan struct {
 	Title       string
 	Description string
 	Steps       []*PlanStep
+	Actions     []PlanAction // Discrete tool-call actions subject to approval (F08)
 	Resources   []string
 	Risks       []Risk
 	Estimates   Estimates
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	ApprovedAt  *time.Time // Set when plan transitions to PlanApproved (F08)
 	Version     int
 	Status      PlanStatus
 }
@@ -173,11 +187,14 @@ const (
 	PlanCompleted
 	PlanFailed
 	PlanCancelled
+	PlanPending  // Submitted and awaiting approval (F08)
+	PlanApproved // All actions approved; ready to execute (F08)
+	PlanRejected // Plan was rejected by the user (F08)
 )
 
 // String returns string representation of plan status
 func (ps PlanStatus) String() string {
-	return [...]string{"Draft", "Ready", "InProgress", "Completed", "Failed", "Cancelled"}[ps]
+	return [...]string{"Draft", "Ready", "InProgress", "Completed", "Failed", "Cancelled", "Pending", "Approved", "Rejected"}[ps]
 }
 
 // Priority defines task priority
@@ -215,6 +232,177 @@ type Planner interface {
 
 	// ValidatePlan validates a plan
 	ValidatePlan(ctx context.Context, plan *Plan) (*ValidationResult, error)
+}
+
+// ApprovalPlanner extends Planner with plan-management and approval-flow operations (F08).
+// DefaultPlanner implements this interface.
+type ApprovalPlanner interface {
+	// SubmitPlan stores a plan and sets its status to PlanPending.
+	SubmitPlan(plan *Plan) error
+
+	// GetPlan retrieves a previously submitted plan by ID.
+	GetPlan(id string) (*Plan, error)
+
+	// ListPlans returns all stored plans.
+	ListPlans() []*Plan
+
+	// ApprovePlan approves every action in the plan and transitions status to PlanApproved.
+	ApprovePlan(planID string) error
+
+	// ApproveAction approves a single action within a plan without changing the overall plan status.
+	ApproveAction(planID, actionID string) error
+
+	// RejectPlan rejects the plan and transitions status to PlanRejected.
+	RejectPlan(planID string) error
+
+	// ActivePlan returns the most recently submitted plan whose status is PlanPending
+	// or PlanApproved. Returns nil when no such plan exists.
+	ActivePlan() *Plan
+}
+
+// DefaultPlanner is a lightweight in-process ApprovalPlanner (F08).
+// It stores plans in memory and can optionally fire hooks through a Manager.
+type DefaultPlanner struct {
+	mu    sync.RWMutex
+	plans map[string]*Plan
+	hooks *hooks.Manager
+}
+
+// NewDefaultPlanner creates a new DefaultPlanner with empty storage.
+func NewDefaultPlanner() *DefaultPlanner {
+	return &DefaultPlanner{
+		plans: make(map[string]*Plan),
+	}
+}
+
+// SetHooksManager wires hook-firing for plan approve/reject events. Optional.
+func (p *DefaultPlanner) SetHooksManager(m *hooks.Manager) {
+	p.mu.Lock()
+	p.hooks = m
+	p.mu.Unlock()
+}
+
+// SubmitPlan stores the plan, setting its status to PlanPending.
+func (p *DefaultPlanner) SubmitPlan(plan *Plan) error {
+	if plan == nil {
+		return fmt.Errorf("plan must not be nil")
+	}
+	if plan.ID == "" {
+		return fmt.Errorf("plan ID is required")
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	plan.Status = PlanPending
+	if plan.CreatedAt.IsZero() {
+		plan.CreatedAt = time.Now()
+	}
+	p.plans[plan.ID] = plan
+	return nil
+}
+
+// GetPlan retrieves a plan by ID.
+func (p *DefaultPlanner) GetPlan(id string) (*Plan, error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	plan, ok := p.plans[id]
+	if !ok {
+		return nil, fmt.Errorf("plan %s not found", id)
+	}
+	return plan, nil
+}
+
+// ListPlans returns all stored plans.
+func (p *DefaultPlanner) ListPlans() []*Plan {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	out := make([]*Plan, 0, len(p.plans))
+	for _, pl := range p.plans {
+		out = append(out, pl)
+	}
+	return out
+}
+
+// ApprovePlan approves all actions in the plan and transitions it to PlanApproved.
+func (p *DefaultPlanner) ApprovePlan(planID string) error {
+	p.mu.Lock()
+	plan, ok := p.plans[planID]
+	if !ok {
+		p.mu.Unlock()
+		return fmt.Errorf("plan %s not found", planID)
+	}
+	plan.Status = PlanApproved
+	now := time.Now()
+	plan.ApprovedAt = &now
+	for i := range plan.Actions {
+		t := true
+		plan.Actions[i].Approved = &t
+	}
+	hookMgr := p.hooks
+	actionCount := len(plan.Actions)
+	p.mu.Unlock()
+
+	if hookMgr != nil {
+		ev := hooks.NewEvent(hooks.HookTypeOnPlanApproval)
+		ev.SetData("plan_id", planID)
+		ev.SetData("action_count", actionCount)
+		hookMgr.TriggerEvent(ev)
+	}
+	return nil
+}
+
+// ApproveAction approves a single action within the plan.
+func (p *DefaultPlanner) ApproveAction(planID, actionID string) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	plan, ok := p.plans[planID]
+	if !ok {
+		return fmt.Errorf("plan %s not found", planID)
+	}
+	for i := range plan.Actions {
+		if plan.Actions[i].ID == actionID {
+			t := true
+			plan.Actions[i].Approved = &t
+			return nil
+		}
+	}
+	return fmt.Errorf("action %s not found in plan %s", actionID, planID)
+}
+
+// RejectPlan transitions the plan to PlanRejected.
+func (p *DefaultPlanner) RejectPlan(planID string) error {
+	p.mu.Lock()
+	plan, ok := p.plans[planID]
+	if !ok {
+		p.mu.Unlock()
+		return fmt.Errorf("plan %s not found", planID)
+	}
+	plan.Status = PlanRejected
+	hookMgr := p.hooks
+	p.mu.Unlock()
+
+	if hookMgr != nil {
+		ev := hooks.NewEvent(hooks.HookTypeOnPlanReject)
+		ev.SetData("plan_id", planID)
+		hookMgr.TriggerEvent(ev)
+	}
+	return nil
+}
+
+// ActivePlan returns the most recently submitted plan whose status is PlanPending
+// or PlanApproved, or nil if none exists.
+func (p *DefaultPlanner) ActivePlan() *Plan {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	var active *Plan
+	for _, plan := range p.plans {
+		if plan.Status != PlanPending && plan.Status != PlanApproved {
+			continue
+		}
+		if active == nil || plan.CreatedAt.After(active.CreatedAt) {
+			active = plan
+		}
+	}
+	return active
 }
 
 // LLMPlanner implements Planner using an LLM
