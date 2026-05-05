@@ -16,6 +16,7 @@ import (
 	"dev.helix.code/internal/tools/multiedit"
 	"dev.helix.code/internal/tools/shell"
 	"dev.helix.code/internal/tools/web"
+	"dev.helix.code/internal/workflow"
 )
 
 // Tool represents a unified interface for all tools
@@ -70,6 +71,10 @@ type ToolRegistry struct {
 
 	// Hook lifecycle manager (optional; nil = passthrough).
 	hooksManager *hooks.Manager
+
+	// bgManager routes run_in_background:true calls (F07). Optional; nil
+	// disables background dispatch (Execute returns ErrNoBackgroundMgr).
+	bgManager *workflow.BackgroundManager
 
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
@@ -267,6 +272,15 @@ func (r *ToolRegistry) SetHooksManager(m *hooks.Manager) {
 	r.hooksManager = m
 }
 
+// SetBackgroundManager wires a BackgroundManager. Calls to Execute with
+// run_in_background:true require this to be set. Optional; nil disables
+// background dispatch (Execute returns ErrNoBackgroundMgr in that case).
+func (r *ToolRegistry) SetBackgroundManager(m *workflow.BackgroundManager) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.bgManager = m
+}
+
 // Execute executes a tool by name with given parameters.
 // Fires hook lifecycle events around the inner tool.Execute when a hooks
 // manager is configured via SetHooksManager. A blocking before-hook prevents
@@ -275,6 +289,11 @@ func (r *ToolRegistry) SetHooksManager(m *hooks.Manager) {
 // hooks see the full picture; a blocking after-hook is logged at WARN but
 // does not retroactively undo the operation.
 func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[string]interface{}) (interface{}, error) {
+	// F07: dispatch to BackgroundManager when run_in_background:true.
+	if bg, ok := params["run_in_background"].(bool); ok && bg {
+		return r.executeInBackground(ctx, name, params)
+	}
+
 	tool, err := r.Get(name)
 	if err != nil {
 		return nil, err
@@ -526,6 +545,63 @@ func (t *mcpTool) Execute(ctx context.Context, params map[string]interface{}) (i
 		return nil, err
 	}
 	return res, nil
+}
+
+// executeInBackground routes to BackgroundManager.StartTask. Returns immediately
+// with task_id, state, and a message. Foreground logic is unchanged.
+func (r *ToolRegistry) executeInBackground(ctx context.Context, name string, params map[string]interface{}) (interface{}, error) {
+	r.mu.RLock()
+	bm := r.bgManager
+	r.mu.RUnlock()
+	if bm == nil {
+		return nil, ErrNoBackgroundMgr
+	}
+	tool, err := r.Get(name)
+	if err != nil {
+		return nil, err
+	}
+	cleanArgs := stripBackgroundFlag(params)
+	bgExec := r.adaptToolForBackground(tool)
+	task, err := bm.StartTask(name, cleanArgs, bgExec)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"task_id": task.ID,
+		"state":   string(task.State()),
+		"message": fmt.Sprintf("Task started in background. ID: %s — use TaskOutput to check progress.", task.ID),
+	}, nil
+}
+
+// adaptToolForBackground returns a workflow.BackgroundExecutor that bridges
+// the tool's Execute / ExecuteWithProgress methods. Streaming-aware tools
+// get the sink directly; plain tools get a final-result-only fallback that
+// writes the formatted result as a single sink line at completion.
+func (r *ToolRegistry) adaptToolForBackground(tool Tool) workflow.BackgroundExecutor {
+	if ba, ok := tool.(BackgroundAware); ok {
+		return func(ctx context.Context, args map[string]interface{}, sink workflow.LineSink) (interface{}, error) {
+			return ba.ExecuteWithProgress(ctx, args, LineSink(sink))
+		}
+	}
+	return func(ctx context.Context, args map[string]interface{}, sink workflow.LineSink) (interface{}, error) {
+		res, err := tool.Execute(ctx, args)
+		if err == nil && res != nil {
+			sink(fmt.Sprintf("%v", res))
+		}
+		return res, err
+	}
+}
+
+// stripBackgroundFlag returns a copy of params without the "run_in_background" key.
+func stripBackgroundFlag(params map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(params))
+	for k, v := range params {
+		if k == "run_in_background" {
+			continue
+		}
+		out[k] = v
+	}
+	return out
 }
 
 // Close closes the registry and releases all resources
