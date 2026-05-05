@@ -1513,7 +1513,7 @@ close-out precedent).
 - T08 `9aadc02` — `internal/tools/sandbox/config_loader.go` (YAML loader + secret-safe writer, mode 0600 / parent 0700)
 - T09 `93dc377` — `internal/commands/sandbox_command.go` (`/sandbox` slash: status / test / policy)
 - T10 `fdb5ddc` — `cmd/cli/main.go` wiring (Detector + Manager + tool registration + slash registration) + gated integration tests
-- T11 — submodule `53ebc80c0c5e3893c45d6dcc88de8f4824d20bbe` + meta-repo `998896c` (Challenge harness with runtime evidence: detector + fail-closed always-runs + bwrap + native gated phases — both gated phases RAN on this host)
+- T11 — submodule `7d336ad2e47c15f8e864ccabc7466146ea0744b0` + meta-repo `998896c` (Challenge harness with runtime evidence: detector + fail-closed always-runs + bwrap + native gated phases — both gated phases RAN on this host)
 - T12 — (this commit) close-out
 
 **Final test summary (verbatim):**
