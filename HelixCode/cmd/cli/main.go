@@ -12,9 +12,12 @@ import (
 	"strings"
 	"syscall"
 
+	"dev.helix.code/internal/commands"
+	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
@@ -39,6 +42,8 @@ type CLI struct {
 	worktreeManager    *worktree.Manager
 	sessionMgr         *session.Manager
 	toolRegistry       *tools.ToolRegistry
+	commandRegistry    *commands.Registry
+	mcpManager         *mcp.Manager
 	hooksLoaded        int // count of hooks loaded at startup (for diagnostics)
 }
 
@@ -258,6 +263,40 @@ func (c *CLI) Run() error {
 	}
 	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
 	c.toolRegistry = toolReg
+
+	// Construct the MCP Manager, load merged config from user + project YAML,
+	// and start alwaysLoad servers. Errors are soft (logged) so a missing or
+	// malformed mcp.yml never prevents the CLI from running.
+	mcpMgr := mcp.NewManager()
+	{
+		var userMCPPath string
+		if configHome, err := os.UserConfigDir(); err == nil {
+			userMCPPath = filepath.Join(configHome, "helixcode", "mcp.yml")
+		}
+		projMCPPath := ".helixcode/mcp.yml"
+		cfg, cfgErr := mcp.LoadMerged(userMCPPath, projMCPPath)
+		if cfgErr != nil {
+			log.Printf("mcp: config load failed: %v (continuing without MCP)", cfgErr)
+		} else {
+			mcpMgr.SetConfig(cfg)
+			if startErr := mcpMgr.Start(ctx); startErr != nil {
+				log.Printf("mcp: start failed: %v", startErr)
+			}
+		}
+	}
+	c.mcpManager = mcpMgr
+	defer mcpMgr.Close() //nolint:errcheck
+
+	// Wire MCP-discovered tools into the tool registry as "<server>:<tool>".
+	toolReg.RegisterMCPManager(mcpMgr)
+
+	// Build the commands registry and register all builtin slash commands,
+	// including the /mcp command that requires an mcp.Manager.
+	cmdRegistry := commands.NewRegistry()
+	if regErr := builtin.RegisterBuiltinCommandsWithMCP(cmdRegistry, mcpMgr); regErr != nil {
+		log.Printf("mcp: register slash command failed: %v", regErr)
+	}
+	c.commandRegistry = cmdRegistry
 
 	// Handle different commands
 	switch {
@@ -626,6 +665,17 @@ func main() {
 	// so that Cobra handles its own flag parsing (same pattern as "permissions" / "worktree").
 	if len(os.Args) >= 2 && os.Args[1] == "hooks" {
 		cmd := newHooksCommand()
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "mcp" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "hooks").
+	if len(os.Args) >= 2 && os.Args[1] == "mcp" {
+		cmd := newMCPCommand(MCPCommandDeps{ConfigPath: ".helixcode/mcp.yml"})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)

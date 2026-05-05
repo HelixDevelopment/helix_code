@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"dev.helix.code/internal/hooks"
+	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/filesystem"
@@ -451,6 +452,71 @@ func (r *ToolRegistry) GetAllSchemas() map[string]ToolSchema {
 func (r *ToolRegistry) ExportSchemas() ([]byte, error) {
 	schemas := r.GetAllSchemas()
 	return json.MarshalIndent(schemas, "", "  ")
+}
+
+// RegisterMCPManager exposes external MCP server tools to the agent.
+// Tool names are prefixed "<server>:<tool>" so they are unambiguous.
+// Only tools from servers currently in StateReady are registered; call
+// this after Manager.Start has had time to connect alwaysLoad servers.
+func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
+	for _, t := range m.Tools() {
+		name := t.Server + ":" + t.Name
+		// Capture loop variables so the closure references the correct values.
+		server, toolName := t.Server, t.Name
+		desc := t.Desc
+		if desc == "" {
+			desc = t.Title
+		}
+		r.Register(&mcpTool{
+			registry: r,
+			mcpMgr:   m,
+			server:   server,
+			toolName: toolName,
+			name:     name,
+			desc:     desc,
+		})
+	}
+}
+
+// mcpTool is an internal Tool adapter that routes Execute to an mcp.Manager.
+type mcpTool struct {
+	registry *ToolRegistry
+	mcpMgr   *mcp.Manager
+	server   string
+	toolName string
+	name     string
+	desc     string
+}
+
+func (t *mcpTool) Name() string        { return t.name }
+func (t *mcpTool) Description() string { return t.desc }
+func (t *mcpTool) Category() ToolCategory { return ToolCategory("mcp") }
+
+func (t *mcpTool) Schema() ToolSchema {
+	return ToolSchema{
+		Type:        "object",
+		Properties:  map[string]interface{}{"args": map[string]interface{}{"type": "object"}},
+		Required:    []string{},
+		Description: t.desc,
+	}
+}
+
+func (t *mcpTool) Validate(params map[string]interface{}) error { return nil }
+
+func (t *mcpTool) Execute(ctx context.Context, params map[string]interface{}) (interface{}, error) {
+	args, _ := params["args"].(map[string]any)
+	if args == nil {
+		// Treat the whole params map as the tool arguments when no "args" key.
+		args = make(map[string]any, len(params))
+		for k, v := range params {
+			args[k] = v
+		}
+	}
+	res, err := t.mcpMgr.CallTool(ctx, t.server, t.toolName, args)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // Close closes the registry and releases all resources
