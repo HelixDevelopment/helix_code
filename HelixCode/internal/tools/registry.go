@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/filesystem"
@@ -64,6 +66,9 @@ type ToolRegistry struct {
 	tools   map[string]Tool
 	aliases map[string]string // alias -> tool name
 	mu      sync.RWMutex
+
+	// Hook lifecycle manager (optional; nil = passthrough).
+	hooksManager *hooks.Manager
 
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
@@ -251,20 +256,143 @@ func (r *ToolRegistry) Get(name string) (Tool, error) {
 	return tool, nil
 }
 
-// Execute executes a tool by name with given parameters
+// SetHooksManager wires a hooks.Manager so Execute can fire lifecycle events
+// (BeforeToolCall / AfterToolCall plus specialised BeforeBash/AfterBash for
+// Bash and BeforeEdit/AfterEdit for Edit/Write/MultiEdit). A nil manager
+// disables hook firing (Execute behaves as before).
+func (r *ToolRegistry) SetHooksManager(m *hooks.Manager) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.hooksManager = m
+}
+
+// Execute executes a tool by name with given parameters.
+// Fires hook lifecycle events around the inner tool.Execute when a hooks
+// manager is configured via SetHooksManager. A blocking before-hook prevents
+// the tool from running and returns an error wrapping the blockers.
+// After-hooks fire even when the tool returned an error so observability
+// hooks see the full picture; a blocking after-hook is logged at WARN but
+// does not retroactively undo the operation.
 func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[string]interface{}) (interface{}, error) {
 	tool, err := r.Get(name)
 	if err != nil {
 		return nil, err
 	}
-
-	// Validate parameters
 	if err := tool.Validate(params); err != nil {
 		return nil, fmt.Errorf("parameter validation failed: %w", err)
 	}
 
-	// Execute tool
-	return tool.Execute(ctx, params)
+	// BeforeToolCall + specialised before-events (block aborts).
+	if r.hooksManager != nil {
+		if err := r.fireBefore(ctx, name, params); err != nil {
+			return nil, err
+		}
+	}
+
+	result, execErr := tool.Execute(ctx, params)
+
+	// AfterToolCall + specialised after-events (block logged, not propagated).
+	if r.hooksManager != nil {
+		r.fireAfter(ctx, name, params, result, execErr)
+	}
+
+	return result, execErr
+}
+
+// fireBefore dispatches BeforeToolCall + the specialised event for the tool.
+// Returns the first non-nil blocker as a wrapped error; nil if everything OK.
+func (r *ToolRegistry) fireBefore(ctx context.Context, name string, params map[string]interface{}) error {
+	if err := r.dispatchAndCheck(ctx, hooks.HookTypeBeforeToolCall, "tool_registry", map[string]interface{}{
+		"toolName": name,
+		"params":   params,
+	}); err != nil {
+		return err
+	}
+	if specialised, ok := specialisedBeforeEvent(name); ok {
+		if err := r.dispatchAndCheck(ctx, specialised, "tool_registry", map[string]interface{}{
+			"toolName": name,
+			"params":   params,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// fireAfter dispatches AfterToolCall + the specialised event for the tool.
+// Blockers from after-events are logged at WARN; this function never returns
+// them as errors (the operation already happened).
+func (r *ToolRegistry) fireAfter(ctx context.Context, name string, params map[string]interface{}, result interface{}, execErr error) {
+	data := map[string]interface{}{
+		"toolName": name,
+		"params":   params,
+		"result":   result,
+		"error":    errString(execErr),
+	}
+	r.dispatchAndLog(ctx, hooks.HookTypeAfterToolCall, "tool_registry", data)
+	if specialised, ok := specialisedAfterEvent(name); ok {
+		r.dispatchAndLog(ctx, specialised, "tool_registry", data)
+	}
+}
+
+// dispatchAndCheck fires an event synchronously and returns the first blocker
+// as a wrapped error.
+func (r *ToolRegistry) dispatchAndCheck(ctx context.Context, evtType hooks.HookType, source string, data map[string]interface{}) error {
+	event := hooks.NewEventWithContext(ctx, evtType)
+	event.Source = source
+	for k, v := range data {
+		event.SetData(k, v)
+	}
+	results := r.hooksManager.TriggerEventAndWait(event)
+	if blockers := hooks.Blockers(results); len(blockers) > 0 {
+		return fmt.Errorf("operation blocked by hook(s) on %s: %v", evtType, blockers[0])
+	}
+	return nil
+}
+
+// dispatchAndLog fires an event synchronously, logging any blockers at WARN.
+func (r *ToolRegistry) dispatchAndLog(ctx context.Context, evtType hooks.HookType, source string, data map[string]interface{}) {
+	event := hooks.NewEventWithContext(ctx, evtType)
+	event.Source = source
+	for k, v := range data {
+		event.SetData(k, v)
+	}
+	results := r.hooksManager.TriggerEventAndWait(event)
+	if blockers := hooks.Blockers(results); len(blockers) > 0 {
+		log.Printf("WARN registry: %d hook blocker(s) on %s ignored: %v", len(blockers), evtType, blockers[0])
+	}
+}
+
+// specialisedBeforeEvent maps tool names to the specialised before-event
+// (BeforeBash for Bash; BeforeEdit for Edit/Write/MultiEdit). Returns false
+// for tools without a specialisation.
+func specialisedBeforeEvent(toolName string) (hooks.HookType, bool) {
+	switch toolName {
+	case "Bash":
+		return hooks.HookTypeBeforeBash, true
+	case "Edit", "Write", "MultiEdit":
+		return hooks.HookTypeBeforeEdit, true
+	}
+	return "", false
+}
+
+// specialisedAfterEvent mirrors specialisedBeforeEvent for the after side.
+func specialisedAfterEvent(toolName string) (hooks.HookType, bool) {
+	switch toolName {
+	case "Bash":
+		return hooks.HookTypeAfterBash, true
+	case "Edit", "Write", "MultiEdit":
+		return hooks.HookTypeAfterEdit, true
+	}
+	return "", false
+}
+
+// errString safely renders an error for inclusion in event payloads.
+func errString(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
 }
 
 // List returns all registered tools
