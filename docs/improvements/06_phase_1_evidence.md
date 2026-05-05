@@ -371,6 +371,44 @@ F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
 
 (filled in commit-by-commit as tasks land)
 
+#### T08 — Challenge run
+
+```bash
+$ ./Challenges/p1-f08-plan-mode/run.sh
+==> build F08 challenge harness
+==> run harness
+==> step 1: transition to plan mode
+    mode = Plan
+==> step 2: try shell echo hi without approved plan -> expect blocked
+    blocked correctly: tools: blocked by plan mode: shell (no active plan)
+==> step 3: submit + approve plan with shell echo hi action
+    plan approved.
+==> step 4: run shell echo hi -> expect success with 'hi' in output
+    output = hi
+==> step 5: try shell echo bye -> expect blocked (key-arg mismatch)
+    blocked correctly (key-arg mismatch): tools: blocked by plan mode: shell (no approved plan action authorises this tool)
+==> step 6: ExitPlanMode -> shell echo bye now succeeds
+    output = bye
+==> P1-F08 challenge harness PASS
+==> anti-bluff smoke on F08-affected code
+clean
+==> cross-compile linux
+==> P1-F08 challenge PASS
+```
+
+#### T08 — All commits in the F08 branch
+
+```bash
+$ git log --oneline | grep "P1-F08"
+a6985cb feat(P1-F08-T07): wire plan-mode gate into cmd/cli + integration test (real shell gating)
+598af0d feat(P1-F08-T06): add /plan slash command + builtin registration
+c8143af feat(P1-F08-T05): ToolRegistry.SetPlanModeGate + Execute gating + MarkExecuted on success
+4df8da3 feat(P1-F08-T04): add EnterPlanMode + ExitPlanMode agent tools + ErrPlanModeGated sentinel
+55369c2 feat(P1-F08-T03): add ToolGate with allow-list + key-arg matching for plan-mode gating
+80a99a3 feat(P1-F08-T02): Planner ApprovePlan/ApproveAction/RejectPlan/ActivePlan + OnPlanApproval/OnPlanReject hooks
+5057de9 docs(P1-F08-T01): bootstrap Phase 1 / Feature 8 evidence + advance PROGRESS
+```
+
 ---
 
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
