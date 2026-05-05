@@ -7,10 +7,14 @@ package workflow
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 // TaskState is the lifecycle state of a background task.
@@ -188,5 +192,252 @@ func ordinalToTaskState(o int32) TaskState {
 		return TaskCancelled
 	default:
 		return TaskState(fmt.Sprintf("unknown(%d)", o))
+	}
+}
+
+// LineSink is invoked by an executor for each line of progress output.
+type LineSink func(line string)
+
+// BackgroundExecutor is the closure StartTask runs in a goroutine.
+type BackgroundExecutor func(ctx context.Context, args map[string]any, sink LineSink) (any, error)
+
+// ManagerConfig configures a BackgroundManager.
+type ManagerConfig struct {
+	OutputCap     int           // per-task ring; default 256
+	LineBytesMax  int           // per-line cap; default 4096
+	SweepInterval time.Duration // sweeper tick; default 5min
+	MaxAge        time.Duration // post-completion retention; default 1h
+	MaxConcurrent int           // concurrent in-flight limit; default 64
+}
+
+// BackgroundManager manages concurrent background tasks.
+type BackgroundManager struct {
+	tasks   map[string]*BackgroundTask
+	mu      sync.RWMutex
+	cfg     ManagerConfig
+	log     *zap.Logger
+	closeCh chan struct{}
+	closed  bool
+	wg      sync.WaitGroup
+}
+
+// Error sentinels.
+var (
+	ErrTaskNotFound   = errors.New("workflow: background task not found")
+	ErrTaskNotRunning = errors.New("workflow: task is not running")
+	ErrManagerClosed  = errors.New("workflow: background manager closed")
+	ErrTooManyTasks   = errors.New("workflow: too many concurrent background tasks")
+)
+
+// NewBackgroundManager constructs a manager and starts the sweeper goroutine.
+func NewBackgroundManager(log *zap.Logger, cfg ManagerConfig) *BackgroundManager {
+	if log == nil {
+		log = zap.NewNop()
+	}
+	if cfg.OutputCap <= 0 {
+		cfg.OutputCap = 256
+	}
+	if cfg.LineBytesMax <= 0 {
+		cfg.LineBytesMax = 4096
+	}
+	if cfg.SweepInterval <= 0 {
+		cfg.SweepInterval = 5 * time.Minute
+	}
+	if cfg.MaxAge <= 0 {
+		cfg.MaxAge = 1 * time.Hour
+	}
+	if cfg.MaxConcurrent <= 0 {
+		cfg.MaxConcurrent = 64
+	}
+	bm := &BackgroundManager{
+		tasks:   make(map[string]*BackgroundTask),
+		cfg:     cfg,
+		log:     log,
+		closeCh: make(chan struct{}),
+	}
+	bm.wg.Add(1)
+	go bm.sweepLoop()
+	return bm
+}
+
+// StartTask spawns a goroutine to run the executor. Returns immediately
+// with the task; the goroutine writes terminal state on exit.
+func (bm *BackgroundManager) StartTask(toolName string, args map[string]any, exec BackgroundExecutor) (*BackgroundTask, error) {
+	bm.mu.Lock()
+	if bm.closed {
+		bm.mu.Unlock()
+		return nil, ErrManagerClosed
+	}
+	if bm.countInFlightLocked() >= bm.cfg.MaxConcurrent {
+		bm.mu.Unlock()
+		return nil, ErrTooManyTasks
+	}
+	id := uuid.New().String()
+	ctx, cancel := context.WithCancel(context.Background())
+	task := newBackgroundTask(id, toolName, args, bm.cfg.OutputCap, bm.cfg.LineBytesMax, ctx, cancel)
+	bm.tasks[id] = task
+	bm.mu.Unlock()
+
+	bm.log.Info("background task started",
+		zap.String("id", id), zap.String("tool", toolName))
+
+	bm.wg.Add(1)
+	go bm.run(task, exec)
+	return task, nil
+}
+
+// run executes the task in a goroutine with panic recovery.
+func (bm *BackgroundManager) run(task *BackgroundTask, exec BackgroundExecutor) {
+	defer bm.wg.Done()
+	task.SetState(TaskRunning)
+	defer func() {
+		if r := recover(); r != nil {
+			err := fmt.Errorf("panic: %v", r)
+			task.AppendOutput(err.Error())
+			task.setResult(nil, err)
+			task.SetState(TaskFailed)
+			bm.log.Warn("background task panicked",
+				zap.String("id", task.ID), zap.Any("panic", r))
+		}
+	}()
+	res, err := exec(task.ctx, task.Args, task.AppendOutput)
+	task.setResult(res, err)
+	switch {
+	case err != nil && errors.Is(err, context.Canceled):
+		task.SetState(TaskCancelled)
+		bm.log.Info("background task cancelled", zap.String("id", task.ID))
+	case err != nil:
+		task.AppendOutput(fmt.Sprintf("Error: %v", err))
+		task.SetState(TaskFailed)
+		bm.log.Warn("background task failed",
+			zap.String("id", task.ID), zap.Error(err))
+	default:
+		task.SetState(TaskCompleted)
+		bm.log.Info("background task completed", zap.String("id", task.ID))
+	}
+}
+
+// GetTask returns a task by ID.
+func (bm *BackgroundManager) GetTask(id string) (*BackgroundTask, error) {
+	bm.mu.RLock()
+	defer bm.mu.RUnlock()
+	task, ok := bm.tasks[id]
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrTaskNotFound, id)
+	}
+	return task, nil
+}
+
+// StopTask cancels a running task. Returns ErrTaskNotRunning if the task
+// is already in a terminal state.
+func (bm *BackgroundManager) StopTask(id string) error {
+	bm.mu.RLock()
+	task, ok := bm.tasks[id]
+	bm.mu.RUnlock()
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrTaskNotFound, id)
+	}
+	st := task.State()
+	if st != TaskRunning && st != TaskPending {
+		return fmt.Errorf("%w: state=%s", ErrTaskNotRunning, st)
+	}
+	task.cancel()
+	return nil
+}
+
+// ListTasks returns a snapshot of all current tasks.
+func (bm *BackgroundManager) ListTasks() []*BackgroundTask {
+	bm.mu.RLock()
+	defer bm.mu.RUnlock()
+	out := make([]*BackgroundTask, 0, len(bm.tasks))
+	for _, t := range bm.tasks {
+		out = append(out, t)
+	}
+	return out
+}
+
+// Status returns the current state and last output snapshot.
+func (bm *BackgroundManager) Status(id string) (TaskState, []string, error) {
+	task, err := bm.GetTask(id)
+	if err != nil {
+		return TaskState(""), nil, err
+	}
+	return task.State(), task.LastLines(0), nil
+}
+
+// Close stops the sweeper, cancels all in-flight tasks, and waits briefly
+// for goroutines to exit. Idempotent.
+func (bm *BackgroundManager) Close() error {
+	bm.mu.Lock()
+	if bm.closed {
+		bm.mu.Unlock()
+		return nil
+	}
+	bm.closed = true
+	close(bm.closeCh)
+	snap := make([]*BackgroundTask, 0, len(bm.tasks))
+	for _, t := range bm.tasks {
+		snap = append(snap, t)
+	}
+	bm.mu.Unlock()
+	for _, t := range snap {
+		if t.cancel != nil {
+			t.cancel()
+		}
+	}
+	done := make(chan struct{})
+	go func() { bm.wg.Wait(); close(done) }()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		bm.log.Warn("background manager close: drain timeout (5s)")
+	}
+	return nil
+}
+
+// countInFlightLocked counts non-terminal tasks. Caller must hold bm.mu.
+func (bm *BackgroundManager) countInFlightLocked() int {
+	n := 0
+	for _, t := range bm.tasks {
+		if !t.State().IsTerminal() {
+			n++
+		}
+	}
+	return n
+}
+
+// sweepLoop runs in a goroutine and periodically prunes terminal tasks
+// older than cfg.MaxAge.
+func (bm *BackgroundManager) sweepLoop() {
+	defer bm.wg.Done()
+	ticker := time.NewTicker(bm.cfg.SweepInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-bm.closeCh:
+			return
+		case <-ticker.C:
+			bm.sweep()
+		}
+	}
+}
+
+func (bm *BackgroundManager) sweep() {
+	cutoff := time.Now().Add(-bm.cfg.MaxAge)
+	bm.mu.Lock()
+	defer bm.mu.Unlock()
+	for id, t := range bm.tasks {
+		if !t.State().IsTerminal() {
+			continue
+		}
+		// endedAt is unexported; same-package access is permitted but must
+		// take t.mu.RLock() to avoid the data race documented in T02 fix-up.
+		t.mu.RLock()
+		ended := t.endedAt
+		t.mu.RUnlock()
+		if ended != nil && ended.Before(cutoff) {
+			delete(bm.tasks, id)
+			bm.log.Debug("background task swept", zap.String("id", id))
+		}
 	}
 }
