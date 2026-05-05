@@ -231,10 +231,14 @@ func (m *Manager) Reload(ctx context.Context, newCfg *Config) error {
 		}
 		if exists {
 			m.mu.Lock()
-			if c, ok := m.clients[name]; ok {
-				_ = c.Close()
+			c, ok := m.clients[name]
+			if ok {
+				delete(m.clients, name)
 			}
 			m.mu.Unlock()
+			if ok {
+				_ = c.Close()
+			}
 		}
 		c, err := m.buildClient(spec)
 		if err != nil {
@@ -250,8 +254,19 @@ func (m *Manager) Reload(ctx context.Context, newCfg *Config) error {
 
 // specEqual is a shallow equality check for ServerSpec.
 func specEqual(a, b ServerSpec) bool {
-	if a.Name != b.Name || a.Transport != b.Transport || a.URL != b.URL || a.AlwaysLoad != b.AlwaysLoad {
+	if a.Name != b.Name || a.Transport != b.Transport ||
+		a.URL != b.URL || a.SSEURL != b.SSEURL ||
+		a.Cwd != b.Cwd || a.AlwaysLoad != b.AlwaysLoad ||
+		a.OAuth != b.OAuth {
 		return false
+	}
+	if len(a.Env) != len(b.Env) {
+		return false
+	}
+	for k, v := range a.Env {
+		if b.Env[k] != v {
+			return false
+		}
 	}
 	if len(a.Command) != len(b.Command) {
 		return false

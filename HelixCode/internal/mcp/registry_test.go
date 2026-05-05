@@ -68,3 +68,25 @@ func TestManager_StatusReportsAllClients(t *testing.T) {
 	st := m.Status()
 	require.Len(t, st, 2)
 }
+
+func TestManager_ReloadDetectsEnvChange(t *testing.T) {
+	cfgOld := &Config{Servers: []ServerSpec{
+		{Name: "a", Transport: TransportStdio, Command: []string{"x"}, Env: map[string]string{"K": "v1"}},
+	}}
+	cfgNew := &Config{Servers: []ServerSpec{
+		{Name: "a", Transport: TransportStdio, Command: []string{"x"}, Env: map[string]string{"K": "v2"}},
+	}}
+	m := NewManager()
+	m.SetConfig(cfgOld)
+	// Manually register a client matching old spec (sidestep transport spawn)
+	c := NewClient("a", newFakeTransport())
+	m.addClient(c)
+	// Reload with new env value — old client must be replaced
+	require.NoError(t, m.Reload(context.Background(), cfgNew))
+	// The map should now contain a new client (different pointer from the old one).
+	m.mu.RLock()
+	got, ok := m.clients["a"]
+	m.mu.RUnlock()
+	require.True(t, ok)
+	require.NotSame(t, c, got, "Reload must replace the client when Env changes")
+}
