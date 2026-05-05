@@ -9,12 +9,12 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F15 next candidate (Subagent Team)
-- **Active task:** —
+- **Active feature:** P1-F15 — Subagent Team (in progress)
+- **Active task:** P1-F15-T01 — bootstrap evidence + advance PROGRESS to F15
 - **Last completed:** P1-F14-T12 — Feature 14 (Sandboxed Shell Execution) close-out + push to 4 remotes (all 12 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-05
+- **Last touched:** 2026-05-06
 - **Blocked-on:** none
 
 ## Phase status
@@ -232,6 +232,20 @@
 - [x] P1-F14-T10 — main.go wiring (Detector + Manager + tool + slash) + gated integration test  ← commit `fdb5ddc`
 - [x] P1-F14-T11 — Challenge harness: detector + fail-closed always-runs + bwrap/native gated phases  ← submodule `7d336ad` + meta-repo `998896c`
 - [x] P1-F14-T12 — Feature 14 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F15: Subagent Team)
+- [x] P1-F15-T01 — bootstrap evidence + advance PROGRESS to F15  ← (this commit)
+- [ ] P1-F15-T02 — subagent types + Isolation/State enums + FakeLLMProvider TEST PROVIDER (TDD)
+- [ ] P1-F15-T03 — InProcessSpawner with real llm.Provider invocation + ctx cancel (TDD)
+- [ ] P1-F15-T04 — SubprocessSpawner with sentinel env var + JSON stdout decode (TDD)
+- [ ] P1-F15-T05 — SubagentManager with streaming dispatch + max-concurrency + kill-by-id (TDD)
+- [ ] P1-F15-T06 — F04 worktree integration for isolation=worktree (real git tempdir test)
+- [ ] P1-F15-T07 — TaskTool implementing tools.Tool as `task` (claude-code-compatible name)
+- [ ] P1-F15-T08 — IsSubagentInvocation + RunAsSubagent helper-mode + main.go early-dispatch
+- [ ] P1-F15-T09 — /subagents slash command (list/status/kill) + CONST-042 anti-leak (TDD)
+- [ ] P1-F15-T10 — wire SubagentManager into main.go + /subagents + gated integration tests
+- [ ] P1-F15-T11 — Challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)
+- [ ] P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

@@ -1634,3 +1634,46 @@ non-force; the `Challenges/` submodule was pushed to its single
 deferred infra work, consistent with F11 + F12 + F13 close-out
 precedent).
 
+## P1-F15 — Subagent Team
+
+**Date:** 2026-05-06
+**Spec:** `docs/superpowers/specs/2026-05-06-p1-f15-subagent-team-design.md` (commit `cb078c6`)
+**Plan:** `docs/superpowers/plans/2026-05-06-p1-f15-subagent-team.md` (commit `fbd6e91`)
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** Hybrid in-process + subprocess subagent execution with
+optional F04 worktree isolation; streaming result aggregation; `task`
+tool (claude-code-compatible) + /subagents slash; FakeLLMProvider
+TEST PROVIDER for in-tree pipeline evidence; subagent recursion
+disabled in v1.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F15-T01 — Bootstrap
+
+(this commit) — append F15 section header to evidence; advance PROGRESS current focus to F15; insert 12-task list.
+
+### P1-F15-T02 — subagent types + Isolation/State enums + FakeLLMProvider TEST PROVIDER (TDD)
+
+### P1-F15-T03 — InProcessSpawner with real llm.Provider invocation + ctx cancel (TDD)
+
+### P1-F15-T04 — SubprocessSpawner with sentinel env var + JSON stdout decode (TDD)
+
+### P1-F15-T05 — SubagentManager with streaming dispatch + max-concurrency + kill-by-id (TDD)
+
+### P1-F15-T06 — F04 worktree integration for isolation=worktree (real git tempdir test)
+
+### P1-F15-T07 — TaskTool implementing tools.Tool as `task` (claude-code-compatible name)
+
+### P1-F15-T08 — IsSubagentInvocation + RunAsSubagent helper-mode + main.go early-dispatch
+
+### P1-F15-T09 — /subagents slash command (list/status/kill) + CONST-042 anti-leak (TDD)
+
+### P1-F15-T10 — wire SubagentManager into main.go + /subagents + gated integration tests
+
+### P1-F15-T11 — Challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)
+
+### P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force
+
