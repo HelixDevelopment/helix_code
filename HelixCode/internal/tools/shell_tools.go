@@ -78,6 +78,18 @@ func (t *ShellTool) Execute(ctx context.Context, params map[string]interface{}) 
 	return t.registry.shell.Execute(ctx, cmd)
 }
 
+// ExecuteWithProgress streams shell command output line-by-line through sink.
+// Implements BackgroundAware so the ToolRegistry's run_in_background dispatcher
+// can route this tool through BackgroundManager with mid-execution progress.
+func (t *ShellTool) ExecuteWithProgress(ctx context.Context, params map[string]interface{}, sink LineSink) (interface{}, error) {
+	return t.registry.shell.ExecuteWithProgress(ctx, params, func(line string) {
+		sink(line)
+	})
+}
+
+// Compile-time assertion that *ShellTool satisfies BackgroundAware.
+var _ BackgroundAware = (*ShellTool)(nil)
+
 // ShellBackgroundTool implements asynchronous shell execution
 type ShellBackgroundTool struct {
 	registry *ToolRegistry
