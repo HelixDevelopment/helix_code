@@ -849,3 +849,41 @@ persist as JSONL on disk, resume via `--resume`/`--continue` flags +
 via real fork-exec harness with distinct PIDs. Pushed to all 4 remotes
 (origin, github, gitlab, upstream) on `main` non-force, both Challenges
 submodule and meta-repo.
+
+---
+
+## P1-F12 — Multi-Provider Backend
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f12-multi-provider-backend-design.md` (commit `fd32a82`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f12-multi-provider-backend.md` (commit `f72d0d7`)
+**Started:** 2026-05-05
+**Status:** active
+
+**Goal:** Ship 4-provider backend (Anthropic + AWS Bedrock + Google Vertex AI + Azure OpenAI) with tview wizard, factory selection (flag>env>config>wizard), LLMsVerifier-routed model lists.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F12-T01 — Bootstrap
+
+(this commit) — append F12 section header to evidence; advance PROGRESS current focus to F12; insert 11-task list.
+
+### P1-F12-T02 — provider.go: unified interface + LLMsVerifier audit (TDD)
+
+### P1-F12-T03 — anthropic_provider.go conformance + base URL precedence (TDD)
+
+### P1-F12-T04 — bedrock_provider.go conformance + verifier GetModels (TDD)
+
+### P1-F12-T05 — vertexai_provider.go conformance + verifier GetModels (TDD)
+
+### P1-F12-T06 — azure_provider.go conformance + verifier GetModels (TDD)
+
+### P1-F12-T07 — provider_factory.go: NewCloudProvider + Selector (TDD)
+
+### P1-F12-T08 — wizard.go: tview TUI + mode 0600 + O_EXCL (TDD)
+
+### P1-F12-T09 — main.go wiring + helixcode wizard cobra + integration test
+
+### P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)
+
+### P1-F12-T11 — Feature 12 close-out + push 4 remotes

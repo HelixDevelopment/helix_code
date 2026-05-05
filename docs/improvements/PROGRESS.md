@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle (F11 closed; F12 — Multi-Provider Backend — is the next candidate per the original 12-feature programme plan)
-- **Active task:** none (awaiting F12 kickoff)
+- **Active feature:** P1-F12 — Multi-Provider Backend (in progress)
+- **Active task:** P1-F12-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F11-T09 — Feature 11 (Session Transcript Resume) close-out + push to 4 remotes (all 9 tasks shipped + F11-fix `f258cf7`)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -191,6 +191,19 @@
 - [x] P1-F11-T08 — Challenge with runtime evidence + cross-compile check  ← submodule `1e79453` + meta-repo `f4d0ff2`
 - [x] P1-F11-T09 — Feature 11 close-out + push  ← (this commit)
 - [x] P1-F11-fix — preserve ProjectPath/Name across SessionManager.Append  ← commit `f258cf7`
+
+## Active feature task list (P1-F12: Multi-Provider Backend)
+- [x] P1-F12-T01 — bootstrap evidence + advance PROGRESS  ← (this commit)
+- [ ] P1-F12-T02 — provider.go: unified interface + LLMsVerifier audit (TDD)
+- [ ] P1-F12-T03 — anthropic_provider.go conformance + base URL precedence (TDD)
+- [ ] P1-F12-T04 — bedrock_provider.go conformance + verifier GetModels (TDD)
+- [ ] P1-F12-T05 — vertexai_provider.go conformance + verifier GetModels (TDD)
+- [ ] P1-F12-T06 — azure_provider.go conformance + verifier GetModels (TDD)
+- [ ] P1-F12-T07 — provider_factory.go: NewCloudProvider + Selector (TDD)
+- [ ] P1-F12-T08 — wizard.go: tview TUI + mode 0600 + O_EXCL (TDD)
+- [ ] P1-F12-T09 — main.go wiring + helixcode wizard cobra + integration test
+- [ ] P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)
+- [ ] P1-F12-T11 — Feature 12 close-out + push 4 remotes
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
