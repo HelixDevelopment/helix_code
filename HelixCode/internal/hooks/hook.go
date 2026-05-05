@@ -23,6 +23,14 @@ const (
 	HookTypeOnError     HookType = "on_error"     // On error occurrence
 	HookTypeOnSuccess   HookType = "on_success"   // On success
 	HookTypeCustom      HookType = "custom"       // Custom hook
+
+	// P1-F05 additions: claude-code-style lifecycle events.
+	HookTypeBeforeToolCall HookType = "before_tool_call" // Before tool call
+	HookTypeAfterToolCall  HookType = "after_tool_call"  // After tool call
+	HookTypeBeforeBash     HookType = "before_bash"      // Before bash execution
+	HookTypeAfterBash      HookType = "after_bash"       // After bash execution
+	HookTypeOnCompaction   HookType = "on_compaction"    // On message compaction
+	HookTypeOnPlanApproval HookType = "on_plan_approval" // On plan approval
 )
 
 // HookPriority determines execution order (higher = earlier)
