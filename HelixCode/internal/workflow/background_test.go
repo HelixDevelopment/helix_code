@@ -46,13 +46,13 @@ func TestBackgroundTask_StateAtomicGetSet(t *testing.T) {
 	assert.Equal(t, TaskRunning, bt.State())
 	bt.SetState(TaskCompleted)
 	assert.Equal(t, TaskCompleted, bt.State())
-	assert.NotNil(t, bt.EndedAt)
+	assert.NotNil(t, bt.EndedAt())
 }
 
 func TestBackgroundTask_SetStateRunningDoesNotSetEndedAt(t *testing.T) {
 	bt := newBackgroundTaskForTest("id-5", "Bash", nil, 256, 4096)
 	bt.SetState(TaskRunning)
-	assert.Nil(t, bt.EndedAt)
+	assert.Nil(t, bt.EndedAt())
 }
 
 func TestBackgroundTask_ResultRoundTrip(t *testing.T) {
@@ -61,6 +61,13 @@ func TestBackgroundTask_ResultRoundTrip(t *testing.T) {
 	res, err := bt.Result()
 	assert.Equal(t, "ok", res)
 	assert.NoError(t, err)
+}
+
+func TestBackgroundTask_SetStateUnknownPanics(t *testing.T) {
+	bt := newBackgroundTaskForTest("id-x", "Bash", nil, 256, 4096)
+	assert.Panics(t, func() {
+		bt.SetState(TaskState("bogus"))
+	})
 }
 
 // newBackgroundTaskForTest is a package-internal constructor that bypasses

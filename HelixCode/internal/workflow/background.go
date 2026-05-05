@@ -35,10 +35,10 @@ type BackgroundTask struct {
 	ToolName  string
 	Args      map[string]any
 	StartedAt time.Time
-	EndedAt   *time.Time
 
 	state        atomic.Int32
 	mu           sync.RWMutex
+	endedAt      *time.Time
 	output       []string
 	outputCap    int
 	lineBytesMax int
@@ -77,13 +77,25 @@ func (bt *BackgroundTask) State() TaskState {
 	return ordinalToTaskState(bt.state.Load())
 }
 
-// SetState updates the state. On terminal transitions, EndedAt is set.
+// EndedAt returns the task's end time (or nil if still running). Lock-guarded.
+func (bt *BackgroundTask) EndedAt() *time.Time {
+	bt.mu.RLock()
+	defer bt.mu.RUnlock()
+	return bt.endedAt
+}
+
+// SetState updates the state. On terminal transitions, endedAt is set.
+// Panics if s is an unknown TaskState.
 func (bt *BackgroundTask) SetState(s TaskState) {
-	bt.state.Store(int32(taskStateOrdinal(s)))
+	ord := taskStateOrdinal(s)
+	if ord < 0 {
+		panic(fmt.Sprintf("workflow: SetState called with unknown TaskState %q", s))
+	}
+	bt.state.Store(int32(ord))
 	if s.IsTerminal() {
 		bt.mu.Lock()
 		now := time.Now()
-		bt.EndedAt = &now
+		bt.endedAt = &now
 		bt.mu.Unlock()
 	}
 }
