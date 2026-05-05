@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -174,4 +177,113 @@ func (c *MarkdownCommand) buildResolver(cc *CommandContext) func(string) string 
 			return "{{" + token + "}}"
 		}
 	}
+}
+
+// MarkdownLoader scans project + user command directories and registers each
+// .md file as a MarkdownCommand in the supplied Registry. Project files
+// override user files of the same name on collision.
+type MarkdownLoader struct {
+	registry   *Registry
+	projectDir string
+	userDir    string
+	mu         sync.Mutex
+	loaded     map[string]string // command name → source path
+	log        *zap.Logger
+}
+
+// NewMarkdownLoader constructs a loader. Either dir may be empty or
+// nonexistent; the loader gracefully skips missing dirs.
+func NewMarkdownLoader(registry *Registry, projectDir, userDir string) *MarkdownLoader {
+	return &MarkdownLoader{
+		registry:   registry,
+		projectDir: projectDir,
+		userDir:    userDir,
+		loaded:     map[string]string{},
+		log:        zap.NewNop(),
+	}
+}
+
+// SetLogger installs a non-noop logger.
+func (l *MarkdownLoader) SetLogger(log *zap.Logger) { l.log = log }
+
+// Load is a synonym for Reload. Provided for clarity at startup.
+func (l *MarkdownLoader) Load() error { return l.Reload() }
+
+// Reload re-scans both directories and reconciles the registry. Added files
+// are registered, removed files are unregistered, changed files are replaced.
+// Per-file errors (parse, read) are logged at WARN and the file is skipped;
+// they do NOT cause Reload to fail.
+func (l *MarkdownLoader) Reload() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	want := map[string]*MarkdownCommand{}
+	// Order: user first, then project (project overrides user on collision).
+	for _, dir := range []string{l.userDir, l.projectDir} {
+		if dir == "" {
+			continue
+		}
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			l.log.Warn("markdown loader: read dir", zap.String("dir", dir), zap.Error(err))
+			continue
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			name := strings.TrimSuffix(entry.Name(), ".md")
+			path := filepath.Join(dir, entry.Name())
+			data, err := os.ReadFile(path)
+			if err != nil {
+				l.log.Warn("markdown loader: read file", zap.String("path", path), zap.Error(err))
+				continue
+			}
+			cmd, err := parseMarkdownCommand(name, string(data), path)
+			if err != nil {
+				l.log.Warn("markdown loader: parse error", zap.String("path", path), zap.Error(err))
+				continue
+			}
+			want[name] = cmd
+		}
+	}
+
+	// Remove names that disappeared (only those previously loaded by us).
+	for name := range l.loaded {
+		if _, ok := want[name]; !ok {
+			l.registry.Unregister(name)
+			delete(l.loaded, name)
+		}
+	}
+	// Add or replace.
+	for name, cmd := range want {
+		if existing, ok := l.registry.Get(name); ok {
+			if _, isMd := existing.(*MarkdownCommand); !isMd {
+				l.log.Warn("markdown loader: name conflicts with built-in",
+					zap.String("name", name), zap.String("source", cmd.sourcePath))
+				continue
+			}
+			l.registry.Unregister(name)
+		}
+		if err := l.registry.Register(cmd); err != nil {
+			l.log.Warn("markdown loader: register", zap.String("name", name), zap.Error(err))
+			continue
+		}
+		l.loaded[name] = cmd.sourcePath
+	}
+	return nil
+}
+
+// Loaded returns a snapshot of name → source path.
+func (l *MarkdownLoader) Loaded() map[string]string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make(map[string]string, len(l.loaded))
+	for k, v := range l.loaded {
+		out[k] = v
+	}
+	return out
 }

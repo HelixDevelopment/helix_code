@@ -136,3 +136,92 @@ func TestMarkdownCommand_Execute(t *testing.T) {
 	assert.True(t, res.Success)
 	assert.Equal(t, "Hi there", strings.TrimSpace(res.Output))
 }
+
+func TestMarkdownLoader_LoadProjectAndUser(t *testing.T) {
+	projectDir := t.TempDir()
+	userDir := t.TempDir()
+	projCmds := filepath.Join(projectDir, ".helix", "commands")
+	userCmds := filepath.Join(userDir, ".config", "helixcode", "commands")
+	require.NoError(t, os.MkdirAll(projCmds, 0755))
+	require.NoError(t, os.MkdirAll(userCmds, 0755))
+
+	require.NoError(t, os.WriteFile(filepath.Join(userCmds, "shared.md"),
+		[]byte("---\ndescription: from user\n---\n\nuser body"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(projCmds, "shared.md"),
+		[]byte("---\ndescription: from project\n---\n\nproject body"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(userCmds, "user-only.md"),
+		[]byte("only user"), 0644))
+
+	reg := NewRegistry()
+	loader := NewMarkdownLoader(reg, projCmds, userCmds)
+	require.NoError(t, loader.Load())
+
+	cmd, ok := reg.Get("shared")
+	require.True(t, ok)
+	mc := cmd.(*MarkdownCommand)
+	assert.Equal(t, "from project", mc.Description())
+
+	_, ok = reg.Get("user-only")
+	assert.True(t, ok)
+}
+
+func TestMarkdownLoader_ReloadDiff_AddsRemovesUpdates(t *testing.T) {
+	projectDir := t.TempDir()
+	cmds := filepath.Join(projectDir, ".helix", "commands")
+	require.NoError(t, os.MkdirAll(cmds, 0755))
+
+	reg := NewRegistry()
+	loader := NewMarkdownLoader(reg, cmds, "")
+	require.NoError(t, loader.Load())
+	_, ok := reg.Get("a")
+	assert.False(t, ok)
+
+	require.NoError(t, os.WriteFile(filepath.Join(cmds, "a.md"), []byte("body a"), 0644))
+	require.NoError(t, loader.Reload())
+	_, ok = reg.Get("a")
+	assert.True(t, ok)
+
+	require.NoError(t, os.Remove(filepath.Join(cmds, "a.md")))
+	require.NoError(t, loader.Reload())
+	_, ok = reg.Get("a")
+	assert.False(t, ok)
+}
+
+func TestMarkdownLoader_BadFrontmatterIsLoggedNotFatal(t *testing.T) {
+	projectDir := t.TempDir()
+	cmds := filepath.Join(projectDir, ".helix", "commands")
+	require.NoError(t, os.MkdirAll(cmds, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(cmds, "good.md"), []byte("good body"), 0644))
+	// Use unterminated frontmatter that parseMarkdownCommand explicitly rejects.
+	require.NoError(t, os.WriteFile(filepath.Join(cmds, "bad.md"),
+		[]byte("---\ntitle: oops\n(no closing fence)"), 0644))
+
+	reg := NewRegistry()
+	loader := NewMarkdownLoader(reg, cmds, "")
+	require.NoError(t, loader.Load())
+	_, ok := reg.Get("good")
+	assert.True(t, ok)
+	_, ok = reg.Get("bad")
+	assert.False(t, ok, "bad.md must be skipped")
+}
+
+func TestMarkdownLoader_NonExistentDirsAreSkipped(t *testing.T) {
+	reg := NewRegistry()
+	loader := NewMarkdownLoader(reg, "/tmp/does/not/exist", "/tmp/also/does/not/exist")
+	require.NoError(t, loader.Load())
+}
+
+func TestMarkdownLoader_LoadedReturnsSnapshot(t *testing.T) {
+	projectDir := t.TempDir()
+	cmds := filepath.Join(projectDir, ".helix", "commands")
+	require.NoError(t, os.MkdirAll(cmds, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(cmds, "a.md"), []byte("a"), 0644))
+
+	reg := NewRegistry()
+	loader := NewMarkdownLoader(reg, cmds, "")
+	require.NoError(t, loader.Load())
+
+	loaded := loader.Loaded()
+	require.Len(t, loaded, 1)
+	assert.Contains(t, loaded["a"], "a.md")
+}
