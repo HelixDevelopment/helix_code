@@ -21,6 +21,9 @@ func RegisterBuiltinCommands(registry *commands.Registry) {
 
 	// Planning and architecture
 	registry.Register(NewDeepPlanningCommand())
+
+	// Permission management
+	registry.Register(commands.NewPermissionsCommand())
 }
 
 // GetBuiltinCommandNames returns names of all built-in commands
@@ -32,6 +35,7 @@ func GetBuiltinCommandNames() []string {
 		"reportbug",
 		"workflows",
 		"deepplanning",
+		"permissions",
 	}
 }
 
@@ -63,5 +67,8 @@ func GetBuiltinCommandAliases() map[string]string {
 		"deepplan":  "deepplanning",
 		"dp":        "deepplanning",
 		"architect": "deepplanning",
+
+		// permissions aliases
+		"perms": "permissions",
 	}
 }
