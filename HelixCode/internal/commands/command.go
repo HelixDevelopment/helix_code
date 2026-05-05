@@ -47,6 +47,7 @@ type ChatMessage struct {
 type CommandResult struct {
 	Success     bool                   `json:"success"`
 	Message     string                 `json:"message"`
+	Output      string                 `json:"output,omitempty"`
 	Data        interface{}            `json:"data,omitempty"`
 	Actions     []Action               `json:"actions,omitempty"`
 	ShouldReply bool                   `json:"should_reply"`
