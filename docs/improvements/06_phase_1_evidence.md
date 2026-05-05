@@ -365,7 +365,7 @@ F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f08-plan-mode-design.md` (commit `c7c4843`)
 **Plan:** `docs/superpowers/plans/2026-05-05-p1-f08-plan-mode.md`
 **Started:** 2026-05-05
-**Status:** active
+**Status:** CLOSED
 
 ### Task evidence trail
 
@@ -411,12 +411,24 @@ c8143af feat(P1-F08-T05): ToolRegistry.SetPlanModeGate + Execute gating + MarkEx
 
 ---
 
+## P1-F09 — Slash Command System
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f09-slash-command-system-design.md` (commit `79e8bd1`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f09-slash-command-system.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+---
+
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f06-mcp-full-lifecycle-design.md` (commit `386a4af`)
 **Plan:** `docs/superpowers/plans/2026-05-05-p1-f06-mcp-full-lifecycle.md`
 **Started:** 2026-05-05
-**Status:** active
+**Status:** CLOSED
 
 ### Task evidence trail
 
