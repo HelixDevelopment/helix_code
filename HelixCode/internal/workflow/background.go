@@ -329,7 +329,9 @@ func (bm *BackgroundManager) GetTask(id string) (*BackgroundTask, error) {
 }
 
 // StopTask cancels a running task. Returns ErrTaskNotRunning if the task
-// is already in a terminal state.
+// is already in a terminal state. Re-checks state after cancel in case
+// the task reached a terminal state (e.g. completed) between the initial
+// state check and the cancel() call.
 func (bm *BackgroundManager) StopTask(id string) error {
 	bm.mu.RLock()
 	task, ok := bm.tasks[id]
@@ -342,6 +344,12 @@ func (bm *BackgroundManager) StopTask(id string) error {
 		return fmt.Errorf("%w: state=%s", ErrTaskNotRunning, st)
 	}
 	task.cancel()
+	// Re-check: if the goroutine reached a non-Cancelled terminal state
+	// before the cancel propagated, surface that to the caller so they
+	// don't wait for a TaskCancelled state that won't happen.
+	if st2 := task.State(); st2.IsTerminal() && st2 != TaskCancelled {
+		return fmt.Errorf("%w: state=%s", ErrTaskNotRunning, st2)
+	}
 	return nil
 }
 
