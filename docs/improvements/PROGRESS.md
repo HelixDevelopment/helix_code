@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F05 — Hook-Based Extensibility (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active feature:** F05 — Hook-Based Extensibility
+- **Active task:** P1-F05-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F04-T13 — Feature 4 (Git Worktree Agent Isolation) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -103,6 +103,21 @@
 - [x] P1-F04-T11 — cmd/cli/main.go startup wiring + integration test (no mocks)  ← commit `4325459`
 - [x] P1-F04-T12 — Challenge with three runtime-evidence scenarios  ← commit `9a23db1`
 - [x] P1-F04-T13 — Feature 4 close-out + push  ← (this commit)
+
+## Active feature task list (P1-F05: Hook-Based Extensibility)
+- [ ] P1-F05-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F05-T02 — add 6 new HookType constants (TDD)
+- [ ] P1-F05-T03 — yaml_loader.go: FileLoader + apiVersion validation (TDD)
+- [ ] P1-F05-T04 — shell_runner.go: NewShellRunner HookFunc (TDD)
+- [ ] P1-F05-T05 — blockers.go: Blockers helper (TDD)
+- [ ] P1-F05-T06 — wire registry.Execute with 6 events (TDD)
+- [ ] P1-F05-T07 — wire OnCompaction in AutoCompactor (TDD)
+- [ ] P1-F05-T08 — wire OnError + RequestPlanApproval stub in agent.go (TDD)
+- [ ] P1-F05-T09 — helixcode hooks {list,test,enable,disable,validate} subcommands
+- [ ] P1-F05-T10 — /hooks slash command + builtin registration
+- [ ] P1-F05-T11 — cmd/cli/main.go startup wiring + integration tests (no mocks)
+- [ ] P1-F05-T12 — Challenge with three runtime-evidence scenarios
+- [ ] P1-F05-T13 — Feature 5 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

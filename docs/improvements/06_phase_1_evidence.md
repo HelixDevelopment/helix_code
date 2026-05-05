@@ -286,3 +286,16 @@ EXIT_CODE: 1 (non-zero — same Phase 0 LLMsVerifier-pin baseline as F01/F02/F03
 ### Closure
 
 F04 closed 2026-05-05. F05 (Hook-Based Extensibility) unblocked.
+
+---
+
+## P1-F05 — Hook-Based Extensibility
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f05-hook-based-extensibility-design.md` (commit `118df80`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f05-hook-based-extensibility.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)
