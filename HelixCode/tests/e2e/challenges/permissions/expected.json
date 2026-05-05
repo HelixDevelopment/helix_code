@@ -1,0 +1,40 @@
+{
+  "name": "permissions/rule-engine-end-to-end",
+  "feature": "P1-F02 — Permission Rule System",
+  "scenarios": [
+    {
+      "id": "S1-read-auto-allowed-under-dontAsk",
+      "input": {
+        "permission_mode": "dontAsk",
+        "tool": "Bash",
+        "command": "ls -la /tmp"
+      },
+      "expected_decision": "allow",
+      "expected_match_pattern_substring": "ls"
+    },
+    {
+      "id": "S2-destructive-denied-under-default",
+      "input": {
+        "permission_mode": "default",
+        "rules_yaml": "apiVersion: helixcode.permissions/v1\nrules:\n  - pattern: \"Bash(rm*)\"\n    action: deny\n    priority: 1000\n",
+        "tool": "Bash",
+        "command": "rm -rf /tmp/helixcode-challenge-marker"
+      },
+      "expected_decision": "deny",
+      "expected_marker_path": "/tmp/helixcode-challenge-marker",
+      "expected_marker_present_after": true
+    },
+    {
+      "id": "S3-smuggle-via-cmd-substitution-denied",
+      "input": {
+        "permission_mode": "auto",
+        "rules_yaml": "apiVersion: helixcode.permissions/v1\nrules:\n  - pattern: \"Bash(rm*)\"\n    action: deny\n    priority: 1000\n",
+        "tool": "Bash",
+        "command": "echo hi $(rm -rf /tmp/helixcode-smuggle-marker)"
+      },
+      "expected_decision": "deny",
+      "expected_marker_path": "/tmp/helixcode-smuggle-marker",
+      "expected_marker_present_after": true
+    }
+  ]
+}
