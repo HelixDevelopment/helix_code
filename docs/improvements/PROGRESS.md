@@ -87,7 +87,7 @@
 - [x] P1-F03-T08 — system prompt note about persistedOutputPath — `c80b438`
 - [x] P1-F03-T09 — cmd/cli/main.go startup + integration test (no mocks) — `9141297`
 - [x] P1-F03-T10 — Challenge with three runtime-evidence scenarios — `84874be`
-- [x] P1-F03-T11 — Feature 3 close-out + push — `(this commit)`
+- [x] P1-F03-T11 — Feature 3 close-out + push — `8b13e93`
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
