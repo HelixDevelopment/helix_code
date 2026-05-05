@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 
+	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
@@ -351,6 +352,33 @@ func (c *CLI) Run() error {
 	}
 	if regErr := cmdRegistry.Register(commands.NewCommandsCommand(mdLoader, cmdRegistry)); regErr != nil {
 		log.Printf("commands: register slash failed: %v", regErr)
+	}
+
+	// F10: agent-invoked Skills.
+	// Project dir: ./.helix/skills; user dir: ~/.config/helixcode/skills (XDG).
+	skillProjectDir := filepath.Join(".", ".helix", "skills")
+	var skillUserDir string
+	if userCfg, err := os.UserConfigDir(); err == nil {
+		skillUserDir = filepath.Join(userCfg, "helixcode", "skills")
+	}
+	skillReg := commands.NewSkillRegistry()
+	skillLoader := commands.NewSkillLoader(skillReg, skillProjectDir, skillUserDir)
+	if loadErr := skillLoader.Load(); loadErr != nil {
+		log.Printf("skills: load failed: %v", loadErr)
+	}
+	skillWatcher, swErr := commands.NewSkillsWatcher(skillLoader, []string{skillProjectDir, skillUserDir})
+	if swErr != nil {
+		log.Printf("skills: watcher init failed: %v", swErr)
+	} else {
+		go skillWatcher.Run(ctx)
+		defer skillWatcher.Close() //nolint:errcheck
+	}
+	// SkillDispatcher: caller can pass nil for wtMgr; isolation routing is
+	// the caller's responsibility. Constructed here so the agent loop can
+	// call .Match before each LLM turn.
+	_ = agent.NewSkillDispatcher(skillReg, nil) // wired into baseAgent in a follow-up
+	if regErr := cmdRegistry.Register(commands.NewSkillsCommand(skillLoader, skillReg)); regErr != nil {
+		log.Printf("skills: register slash failed: %v", regErr)
 	}
 
 	// Handle different commands
@@ -755,6 +783,27 @@ func main() {
 			log.Printf("commands dispatcher: load failed: %v", err)
 		}
 		cmd := newCommandsCmd(commandsCmdDeps{Loader: mdLdr, Registry: cmdReg})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "skills" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "commands").
+	if len(os.Args) >= 2 && os.Args[1] == "skills" {
+		projDir := filepath.Join(".", ".helix", "skills")
+		var userDir string
+		if userCfg, err := os.UserConfigDir(); err == nil {
+			userDir = filepath.Join(userCfg, "helixcode", "skills")
+		}
+		skillReg := commands.NewSkillRegistry()
+		loader := commands.NewSkillLoader(skillReg, projDir, userDir)
+		if err := loader.Load(); err != nil {
+			log.Printf("skills dispatcher: load failed: %v", err)
+		}
+		cmd := newSkillsCmd(skillsCmdDeps{Loader: loader, Registry: skillReg})
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			os.Exit(1)
