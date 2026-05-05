@@ -2,11 +2,14 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 	"sync"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -204,4 +207,105 @@ func (r *SkillRegistry) FindMatching(input string) (*Skill, map[string]string, b
 		}
 	}
 	return nil, nil, false
+}
+
+// SkillLoader scans project + user skill directories and registers each
+// .md file as a Skill in the supplied SkillRegistry. Project files override
+// user files of the same name on collision. Non-existent directories are
+// silently skipped; per-file parse errors are logged at WARN and do not
+// cause Load/Reload to fail.
+type SkillLoader struct {
+	registry   *SkillRegistry
+	projectDir string
+	userDir    string
+	mu         sync.Mutex
+	loaded     map[string]string // skill name → source path
+	log        *zap.Logger
+}
+
+// NewSkillLoader constructs a loader. Either dir may be empty or
+// nonexistent; the loader gracefully skips missing dirs.
+func NewSkillLoader(reg *SkillRegistry, projectDir, userDir string) *SkillLoader {
+	return &SkillLoader{
+		registry:   reg,
+		projectDir: projectDir,
+		userDir:    userDir,
+		loaded:     map[string]string{},
+		log:        zap.NewNop(),
+	}
+}
+
+// SetLogger installs a non-noop logger.
+func (l *SkillLoader) SetLogger(log *zap.Logger) { l.log = log }
+
+// Load is a synonym for Reload. Provided for clarity at startup.
+func (l *SkillLoader) Load() error { return l.Reload() }
+
+// Reload re-scans both directories and reconciles the registry. Added files
+// are registered, removed files are unregistered, changed files are replaced.
+// Per-file errors (parse, read) are logged at WARN and the file is skipped;
+// they do NOT cause Reload to fail.
+func (l *SkillLoader) Reload() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	want := map[string]*Skill{}
+	// Order: user first, then project (project overrides user on collision).
+	for _, dir := range []string{l.userDir, l.projectDir} {
+		if dir == "" {
+			continue
+		}
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			l.log.Warn("skill loader: read dir", zap.String("dir", dir), zap.Error(err))
+			continue
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			name := strings.TrimSuffix(entry.Name(), ".md")
+			path := filepath.Join(dir, entry.Name())
+			data, err := os.ReadFile(path)
+			if err != nil {
+				l.log.Warn("skill loader: read file", zap.String("path", path), zap.Error(err))
+				continue
+			}
+			s, err := parseSkillFile(name, string(data), path)
+			if err != nil {
+				l.log.Warn("skill loader: parse error", zap.String("path", path), zap.Error(err))
+				continue
+			}
+			want[name] = s
+		}
+	}
+
+	// Remove names that disappeared (only those previously loaded by us).
+	for name := range l.loaded {
+		if _, ok := want[name]; !ok {
+			l.registry.Remove(name)
+			delete(l.loaded, name)
+		}
+	}
+	// Add or replace.
+	for name, s := range want {
+		l.registry.Add(s)
+		l.loaded[name] = s.SourcePath()
+	}
+	return nil
+}
+
+// Loaded returns a snapshot of skill name → source path for all skills
+// currently managed by this loader.
+func (l *SkillLoader) Loaded() map[string]string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make(map[string]string, len(l.loaded))
+	for k, v := range l.loaded {
+		out[k] = v
+	}
+	return out
 }

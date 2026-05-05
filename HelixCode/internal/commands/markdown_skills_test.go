@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -107,4 +109,96 @@ func TestSkillRegistry_AddRemove(t *testing.T) {
 	reg.Remove("x")
 	_, ok = reg.Get("x")
 	assert.False(t, ok)
+}
+
+func TestSkillLoader_LoadProjectAndUser(t *testing.T) {
+	projectDir := t.TempDir()
+	userDir := t.TempDir()
+	projDir := filepath.Join(projectDir, ".helix", "skills")
+	usrDir := filepath.Join(userDir, ".config", "helixcode", "skills")
+	require.NoError(t, os.MkdirAll(projDir, 0755))
+	require.NoError(t, os.MkdirAll(usrDir, 0755))
+
+	require.NoError(t, os.WriteFile(filepath.Join(usrDir, "shared.md"),
+		[]byte("---\ndescription: from user\ntriggers: [\"^x\"]\n---\nuser body"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(projDir, "shared.md"),
+		[]byte("---\ndescription: from project\ntriggers: [\"^x\"]\n---\nproject body"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(usrDir, "user-only.md"),
+		[]byte("---\ndescription: u\ntriggers: [\"^u\"]\n---\nuser only body"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, projDir, usrDir)
+	require.NoError(t, loader.Load())
+
+	// "shared" should reflect project version (project overrides user)
+	s, ok := reg.Get("shared")
+	require.True(t, ok)
+	assert.Equal(t, "from project", s.Description())
+
+	// "user-only" still loaded
+	_, ok = reg.Get("user-only")
+	assert.True(t, ok)
+}
+
+func TestSkillLoader_ReloadDiff_AddsRemovesUpdates(t *testing.T) {
+	projectDir := t.TempDir()
+	skills := filepath.Join(projectDir, ".helix", "skills")
+	require.NoError(t, os.MkdirAll(skills, 0755))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, skills, "")
+	require.NoError(t, loader.Load())
+	_, ok := reg.Get("a")
+	assert.False(t, ok)
+
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "a.md"),
+		[]byte("---\ndescription: a\ntriggers: [\"^a\"]\n---\nbody a"), 0644))
+	require.NoError(t, loader.Reload())
+	_, ok = reg.Get("a")
+	assert.True(t, ok)
+
+	require.NoError(t, os.Remove(filepath.Join(skills, "a.md")))
+	require.NoError(t, loader.Reload())
+	_, ok = reg.Get("a")
+	assert.False(t, ok)
+}
+
+func TestSkillLoader_BadFrontmatterIsLoggedNotFatal(t *testing.T) {
+	projectDir := t.TempDir()
+	skills := filepath.Join(projectDir, ".helix", "skills")
+	require.NoError(t, os.MkdirAll(skills, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "good.md"),
+		[]byte("---\ndescription: g\ntriggers: [\"^g\"]\n---\ngood body"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "bad.md"),
+		[]byte("---\ntitle: oops\n(no closing fence)"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, skills, "")
+	require.NoError(t, loader.Load())
+	_, ok := reg.Get("good")
+	assert.True(t, ok)
+	_, ok = reg.Get("bad")
+	assert.False(t, ok, "bad.md must be skipped")
+}
+
+func TestSkillLoader_NonExistentDirsAreSkipped(t *testing.T) {
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, "/tmp/p1f10-skills-does-not-exist", "/tmp/p1f10-skills-also-not-exist")
+	require.NoError(t, loader.Load())
+}
+
+func TestSkillLoader_LoadedReturnsSnapshot(t *testing.T) {
+	projectDir := t.TempDir()
+	skills := filepath.Join(projectDir, ".helix", "skills")
+	require.NoError(t, os.MkdirAll(skills, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "x.md"),
+		[]byte("---\ndescription: x\ntriggers: [\"^x\"]\n---\nbody"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, skills, "")
+	require.NoError(t, loader.Load())
+
+	loaded := loader.Loaded()
+	require.Len(t, loaded, 1)
+	assert.Contains(t, loaded["x"], "x.md")
 }
