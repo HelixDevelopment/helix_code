@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F13 next candidate (LSP Integration)
-- **Active task:** —
+- **Active feature:** P1-F13 — LSP Integration (in progress)
+- **Active task:** P1-F13-T01 — bootstrap evidence + advance PROGRESS to F13
 - **Last completed:** P1-F12-T11 — Feature 12 (Multi-Provider Backend) close-out + push to 4 remotes (all 11 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -204,6 +204,20 @@
 - [x] P1-F12-T09 — main.go wiring + helixcode wizard cobra + integration test  ← commit `ac55fca`
 - [x] P1-F12-T10 — Challenge with runtime evidence (local + cloud-gated)  ← submodule `4e42fbc` + meta-repo `b937e17` + SHA backfill `1586624`
 - [x] P1-F12-T11 — Feature 12 close-out + push 4 remotes  ← (this commit)
+
+## Active feature task list (P1-F13: LSP Integration)
+- [x] P1-F13-T01 — bootstrap evidence + advance PROGRESS to F13  ← (this commit)
+- [ ] P1-F13-T02 — go.mod: add go.lsp.dev/jsonrpc2 v0.10.0 + protocol v0.12.0 (TDD)
+- [ ] P1-F13-T03 — internal/tools/lsp_types.go: Diagnostic + DiagnosticSummary + LSPServerSpec (TDD)
+- [ ] P1-F13-T04 — internal/tools/lsp_client.go: jsonrpc2 wrapper + handshake (TDD with paired pipes)
+- [ ] P1-F13-T05 — internal/tools/lsp_manager.go: lazy-spawn + idle-timeout + ext-router + fake LSP (TDD)
+- [ ] P1-F13-T06 — internal/tools/lsp_servers.go: curated 5-server allowlist + Detect (TDD)
+- [ ] P1-F13-T07 — internal/tools/lsp.go: LSPGetDiagnostics + LSPAnalyzeDiagnostic tools (TDD)
+- [ ] P1-F13-T08 — registry.SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit (TDD)
+- [ ] P1-F13-T09 — /lsp slash command (status/restart/list-servers/stop) (TDD)
+- [ ] P1-F13-T10 — helixcode lsp cobra + main.go wiring + gated integration test
+- [ ] P1-F13-T11 — Challenge: in-tree fake LSP pipeline + gated real-server phase
+- [ ] P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

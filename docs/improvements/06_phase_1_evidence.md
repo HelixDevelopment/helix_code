@@ -1121,3 +1121,48 @@ credential-gated). Pushed to all 4 meta-repo remotes
 was pushed to its single `origin` non-force (mirror gap to
 github/gitlab/upstream is deferred infra work, consistent with F11
 close-out precedent).
+
+---
+
+## P1-F13 — LSP Integration
+
+**Date:** 2026-05-05
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f13-lsp-integration-design.md` (commit `ed36237`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f13-lsp-integration.md` (commit `2e4916d`)
+**Started:** 2026-05-05
+**Status:** active
+
+**Goal:** Integrate Language Server Protocol via go.lsp.dev libs:
+lazy-spawn manager + 5-server curated allowlist (gopls /
+rust-analyzer / pyright / typescript-language-server / clangd) +
+auto-trigger diagnostics after Edit/Write + `/lsp` slash + `helixcode
+lsp` cobra.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F13-T01 — Bootstrap
+
+(this commit) — append F13 section header to evidence; advance PROGRESS current focus to F13; insert 12-task list.
+
+### P1-F13-T02 — go.mod: add go.lsp.dev/jsonrpc2 v0.10.0 + protocol v0.12.0 (TDD)
+
+### P1-F13-T03 — internal/tools/lsp_types.go: Diagnostic + DiagnosticSummary + LSPServerSpec (TDD)
+
+### P1-F13-T04 — internal/tools/lsp_client.go: jsonrpc2 wrapper + handshake (TDD with paired pipes)
+
+### P1-F13-T05 — internal/tools/lsp_manager.go: lazy-spawn + idle-timeout + ext-router + fake LSP (TDD)
+
+### P1-F13-T06 — internal/tools/lsp_servers.go: curated 5-server allowlist + Detect (TDD)
+
+### P1-F13-T07 — internal/tools/lsp.go: LSPGetDiagnostics + LSPAnalyzeDiagnostic tools (TDD)
+
+### P1-F13-T08 — registry.SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit (TDD)
+
+### P1-F13-T09 — /lsp slash command (status/restart/list-servers/stop) (TDD)
+
+### P1-F13-T10 — helixcode lsp cobra + main.go wiring + gated integration test
+
+### P1-F13-T11 — Challenge: in-tree fake LSP pipeline + gated real-server phase
+
+### P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force
