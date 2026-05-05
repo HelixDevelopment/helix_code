@@ -360,6 +360,19 @@ F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
 
 ---
 
+## P1-F08 — Plan Mode
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f08-plan-mode-design.md` (commit `c7c4843`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f08-plan-mode.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)
+
+---
+
 ## P1-F06 — MCP Full Lifecycle (4 Transports + OAuth)
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f06-mcp-full-lifecycle-design.md` (commit `386a4af`)
