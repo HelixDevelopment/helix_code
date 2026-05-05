@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -48,12 +47,19 @@ func (r *stderrRing) Snapshot() []byte {
 	return out
 }
 
+// readResult carries a parsed frame or an error from the read loop.
+type readResult struct {
+	msg *MCPMessage
+	err error
+}
+
 type stdioTransport struct {
 	cfg     StdioConfig
 	cmd     *exec.Cmd
 	stdin   io.WriteCloser
-	stdout  *bufio.Reader
+	stdout  *bufio.Reader // owned exclusively by readLoop; no other caller may read it
 	ring    *stderrRing
+	readCh  chan readResult
 	mu      sync.Mutex
 	closed  bool
 	closeCh chan struct{}
@@ -65,6 +71,7 @@ func NewStdioTransport(cfg StdioConfig) *stdioTransport {
 	return &stdioTransport{
 		cfg:     cfg,
 		ring:    &stderrRing{cap: 64 * 1024},
+		readCh:  make(chan readResult, 4),
 		closeCh: make(chan struct{}),
 	}
 }
@@ -111,7 +118,41 @@ func (t *stdioTransport) Open(ctx context.Context) error {
 			}
 		}
 	}()
+	go t.readLoop()
 	return nil
+}
+
+// readLoop is the single goroutine that owns t.stdout. It runs for the lifetime
+// of the transport, pushing parsed frames and errors onto t.readCh.
+func (t *stdioTransport) readLoop() {
+	for {
+		line, err := t.stdout.ReadBytes('\n')
+		if len(line) > 0 {
+			var m MCPMessage
+			if uerr := json.Unmarshal(bytes.TrimSpace(line), &m); uerr != nil {
+				t.sendRead(readResult{err: fmt.Errorf("%w: %v", ErrProtocol, uerr)})
+				if err != nil {
+					return
+				}
+				continue
+			}
+			t.sendRead(readResult{msg: &m})
+		}
+		if err != nil {
+			// Surface EOF or transport error to the next Recv caller, then stop.
+			t.sendRead(readResult{err: err})
+			return
+		}
+	}
+}
+
+// sendRead delivers a result onto readCh, or aborts silently if the transport
+// is closing so the goroutine is never blocked forever.
+func (t *stdioTransport) sendRead(r readResult) {
+	select {
+	case t.readCh <- r:
+	case <-t.closeCh:
+	}
 }
 
 func (t *stdioTransport) Send(ctx context.Context, msg *MCPMessage) error {
@@ -132,42 +173,16 @@ func (t *stdioTransport) Send(ctx context.Context, msg *MCPMessage) error {
 }
 
 func (t *stdioTransport) Recv(ctx context.Context) (*MCPMessage, error) {
-	if t.closed || t.stdout == nil {
-		return nil, ErrTransportClosed
-	}
-	type result struct {
-		msg *MCPMessage
-		err error
-	}
-	ch := make(chan result, 1)
-	go func() {
-		line, err := t.stdout.ReadBytes('\n')
-		if err != nil {
-			if errors.Is(err, io.EOF) && len(line) == 0 {
-				ch <- result{nil, io.EOF}
-				return
-			}
-		}
-		var m MCPMessage
-		if uerr := json.Unmarshal(bytes.TrimSpace(line), &m); uerr != nil {
-			ch <- result{nil, fmt.Errorf("%w: %v", ErrProtocol, uerr)}
-			return
-		}
-		ch <- result{&m, err}
-	}()
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case r := <-ch:
-		if r.err == io.EOF {
-			return nil, io.EOF
-		}
-		if r.err != nil && r.msg == nil {
-			return nil, r.err
-		}
-		return r.msg, nil
 	case <-t.closeCh:
 		return nil, ErrTransportClosed
+	case r, ok := <-t.readCh:
+		if !ok {
+			return nil, ErrTransportClosed
+		}
+		return r.msg, r.err
 	}
 }
 

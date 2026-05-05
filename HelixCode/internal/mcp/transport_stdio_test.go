@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -53,9 +54,9 @@ func TestStdioTransport_StderrCapture(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	require.NoError(t, tr.Open(ctx))
-	time.Sleep(200 * time.Millisecond)
-	stderr := tr.Stderr()
-	assert.Contains(t, string(stderr), "echo-mcp-server: ready")
+	require.Eventually(t, func() bool {
+		return strings.Contains(string(tr.Stderr()), "echo-mcp-server: ready")
+	}, 5*time.Second, 20*time.Millisecond)
 	require.NoError(t, tr.Close())
 }
 

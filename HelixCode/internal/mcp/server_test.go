@@ -3,11 +3,13 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewMCPServer(t *testing.T) {
@@ -546,20 +548,22 @@ func TestBroadcastNotification(t *testing.T) {
 		"message": "test notification",
 	})
 
-	// Give goroutines time to execute
-	time.Sleep(10 * time.Millisecond)
+	// Wait for the broadcast goroutines to deliver to both sessions.
+	require.Eventually(t, func() bool {
+		return mockConn1.WriteCalled() && mockConn2.WriteCalled()
+	}, 5*time.Second, 5*time.Millisecond, "broadcast goroutines did not complete in time")
 
-	// Both connections should have received the notification
-	assert.True(t, mockConn1.writeCalled)
-	assert.True(t, mockConn2.writeCalled)
+	// Both connections should have received the notification.
+	assert.True(t, mockConn1.WriteCalled())
+	assert.True(t, mockConn2.WriteCalled())
 
-	// Verify the notification content (simplified check)
-	assert.NotEmpty(t, mockConn1.lastMessage)
-	assert.NotEmpty(t, mockConn2.lastMessage)
+	// Verify the notification content (simplified check).
+	assert.NotEmpty(t, mockConn1.LastMessage())
+	assert.NotEmpty(t, mockConn2.LastMessage())
 
-	// Check that both messages contain the expected method
-	assert.Contains(t, string(mockConn1.lastMessage), "test.event")
-	assert.Contains(t, string(mockConn2.lastMessage), "test.event")
+	// Check that both messages contain the expected method.
+	assert.True(t, strings.Contains(string(mockConn1.LastMessage()), "test.event"))
+	assert.True(t, strings.Contains(string(mockConn2.LastMessage()), "test.event"))
 }
 
 func TestCloseSession(t *testing.T) {
@@ -584,5 +588,5 @@ func TestCloseSession(t *testing.T) {
 	server.CloseSession(sessionID)
 
 	assert.Equal(t, 0, server.GetSessionCount())
-	assert.True(t, mockConn.closeCalled)
+	assert.True(t, mockConn.CloseCalled())
 }
