@@ -482,6 +482,17 @@ func (c *CLI) showHelp() {
 }
 
 func main() {
+	// Minimal dispatcher: intercept the "permissions" subcommand group before
+	// flag.Parse() so that Cobra handles its own flag parsing.
+	if len(os.Args) > 1 && os.Args[1] == "permissions" {
+		cmd := newPermissionsCommand()
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+		return
+	}
+
 	cli := NewCLI()
 
 	if err := cli.Run(); err != nil {
