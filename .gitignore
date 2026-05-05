@@ -101,3 +101,6 @@ id_ed25519
 id_ed25519.pub
 helix.security.json
 # === END Secret hygiene ===
+
+# Worktrees created by HelixCode P1-F04 EnterWorktree (do NOT commit)
+.helix-worktrees/

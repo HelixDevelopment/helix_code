@@ -213,3 +213,16 @@ EXIT_CODE: 0 (same Phase 0 LLMsVerifier-pin baseline as F01 + F02 close-outs; ca
 ### Closure
 
 F03 closed 2026-05-05. F04 (Git Worktree Agent Isolation) unblocked.
+
+---
+
+## P1-F04 — Git Worktree Agent Isolation
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md` (commit `7ba8907`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f04-git-worktree-agent-isolation.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)

@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F04 — Git Worktree Agent Isolation (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active feature:** F04 — Git Worktree Agent Isolation
+- **Active task:** P1-F04-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F03-T11 — Feature 3 (Tool Result Persistence) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -88,6 +88,21 @@
 - [x] P1-F03-T09 — cmd/cli/main.go startup + integration test (no mocks) — `9141297`
 - [x] P1-F03-T10 — Challenge with three runtime-evidence scenarios — `84874be`
 - [x] P1-F03-T11 — Feature 3 close-out + push — `8b13e93`
+
+## Active feature task list (P1-F04: Git Worktree Agent Isolation)
+- [ ] P1-F04-T01 — bootstrap evidence + advance PROGRESS + .gitignore
+- [ ] P1-F04-T02 — internal/tools/worktree package skeleton (types + doc)
+- [ ] P1-F04-T03 — git.go thin git-binary wrappers (TDD against ephemeral repo)
+- [ ] P1-F04-T04 — Manager + ValidateName + GetCurrentDirectory + IsIsolated (TDD)
+- [ ] P1-F04-T05 — Manager.EnterWorktree (TDD; existing/new branch + dirty rejection)
+- [ ] P1-F04-T06 — Manager.ExitWorktree + ListWorktrees + RemoveWorktree (TDD)
+- [ ] P1-F04-T07 — 4 tools.Tool interface implementations (TDD)
+- [ ] P1-F04-T08 — session.Manager currentWorktree field + getter/setter (TDD)
+- [ ] P1-F04-T09 — helixcode worktree {list,enter,exit,remove} Cobra subcommands
+- [ ] P1-F04-T10 — /worktree slash command + register in builtin/register.go
+- [ ] P1-F04-T11 — cmd/cli/main.go startup wiring + integration test (no mocks)
+- [ ] P1-F04-T12 — Challenge with three runtime-evidence scenarios
+- [ ] P1-F04-T13 — Feature 4 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
