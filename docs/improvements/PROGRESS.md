@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F03 — Tool Result Persistence (awaits its own writing-plans cycle)
-- **Active task:** pending
+- **Active feature:** F03 — Tool Result Persistence
+- **Active task:** P1-F03-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P1-F02-T13 — Feature 2 (Permission Rule System) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -75,6 +75,19 @@
 - [x] P1-F02-T11 — /permissions slash command via internal/commands  ← commits `2fb11d4` + `244aff9`
 - [x] P1-F02-T12 — Challenge with three runtime-evidence scenarios  ← commit `7252911`
 - [x] P1-F02-T13 — Feature 2 close-out + push  ← (this commit)
+
+## Active feature task list (P1-F03: Tool Result Persistence)
+- [ ] P1-F03-T01 — bootstrap evidence + advance PROGRESS
+- [ ] P1-F03-T02 — internal/tools/persistence package skeleton (types + doc)
+- [ ] P1-F03-T03 — Manager.MaybePersist with hash idempotence (TDD)
+- [ ] P1-F03-T04 — LoadPersisted with path-traversal guard (TDD)
+- [ ] P1-F03-T05 — CleanupOld with filename-pattern matching (TDD)
+- [ ] P1-F03-T06 — wire into internal/llm/tool_provider.go orchestration loop
+- [ ] P1-F03-T07 — audit + wire individual LLM providers
+- [ ] P1-F03-T08 — system prompt note about persistedOutputPath
+- [ ] P1-F03-T09 — cmd/cli/main.go startup + integration test (no mocks)
+- [ ] P1-F03-T10 — Challenge with three runtime-evidence scenarios
+- [ ] P1-F03-T11 — Feature 3 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

@@ -136,3 +136,16 @@ EXIT_CODE: 2 (non-zero — same baseline as F01 close-out; carry-forward from Ph
 ### Closure
 
 F02 closed 2026-05-05. F03 (Tool Result Persistence) unblocked.
+
+---
+
+## P1-F03 — Tool Result Persistence
+
+**Spec:** `docs/superpowers/specs/2026-05-05-p1-f03-tool-result-persistence-design.md` (commit `f813fc9`)
+**Plan:** `docs/superpowers/plans/2026-05-05-p1-f03-tool-result-persistence.md`
+**Started:** 2026-05-05
+**Status:** active
+
+### Task evidence trail
+
+(filled in commit-by-commit as tasks land)
