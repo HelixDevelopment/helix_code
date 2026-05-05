@@ -9,9 +9,9 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** F09 — Slash Command System
-- **Active task:** P1-F09-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P1-F08-T09 — Feature 8 (Plan Mode) close-out + push
+- **Active feature:** (idle, awaiting next feature pick — F10 candidate)
+- **Active task:** —
+- **Last completed:** P1-F09-T08 — Feature 9 (Slash Command System) close-out + push
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-05
@@ -160,14 +160,14 @@
 - [x] P1-F08-T09 — Feature 8 close-out + push
 
 ## Active feature task list (P1-F09: Slash Command System)
-- [ ] P1-F09-T01 — bootstrap evidence + advance PROGRESS
-- [ ] P1-F09-T02 — markdown_commands.go: MarkdownCommand + parser + substitution (TDD)
-- [ ] P1-F09-T03 — MarkdownLoader: scan dirs + register/unregister (TDD)
-- [ ] P1-F09-T04 — markdown_watcher.go: fsnotify + debounce (TDD)
-- [ ] P1-F09-T05 — /commands slash + helixcode commands cobra (TDD)
-- [ ] P1-F09-T06 — main.go wiring + integration test
-- [ ] P1-F09-T07 — Challenge with runtime evidence + cross-compile check
-- [ ] P1-F09-T08 — Feature 9 close-out + push
+- [x] P1-F09-T01 — bootstrap evidence + advance PROGRESS
+- [x] P1-F09-T02 — markdown_commands.go: MarkdownCommand + parser + substitution (TDD)
+- [x] P1-F09-T03 — MarkdownLoader: scan dirs + register/unregister (TDD)
+- [x] P1-F09-T04 — markdown_watcher.go: fsnotify + debounce (TDD)
+- [x] P1-F09-T05 — /commands slash + helixcode commands cobra (TDD)
+- [x] P1-F09-T06 — main.go wiring + integration test
+- [x] P1-F09-T07 — Challenge with runtime evidence + cross-compile check
+- [x] P1-F09-T08 — Feature 9 close-out + push
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
