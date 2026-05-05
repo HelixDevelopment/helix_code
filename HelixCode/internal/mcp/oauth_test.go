@@ -17,7 +17,7 @@ import (
 )
 
 func TestPKCE_VerifierAndChallenge(t *testing.T) {
-	v, c, err := generatePKCE()
+	v, c, err := GeneratePKCE()
 	require.NoError(t, err)
 	assert.GreaterOrEqual(t, len(v), 43)
 	assert.LessOrEqual(t, len(v), 128)

@@ -44,10 +44,10 @@ type AuthRequest struct {
 	CodeChallenge         string
 }
 
-// generatePKCE returns (verifier, challenge) per RFC 7636.
+// GeneratePKCE returns (verifier, challenge) per RFC 7636.
 // Verifier is 64 base64url characters (48 bytes of entropy → 64 chars).
 // Challenge is SHA-256(verifier), base64url-no-padding.
-func generatePKCE() (string, string, error) {
+func GeneratePKCE() (string, string, error) {
 	raw := make([]byte, 48)
 	if _, err := rand.Read(raw); err != nil {
 		return "", "", err
@@ -58,8 +58,8 @@ func generatePKCE() (string, string, error) {
 	return verifier, challenge, nil
 }
 
-// randState returns a 32-byte base64url state parameter.
-func randState() (string, error) {
+// RandState returns a 32-byte base64url state parameter.
+func RandState() (string, error) {
 	raw := make([]byte, 24)
 	if _, err := rand.Read(raw); err != nil {
 		return "", err

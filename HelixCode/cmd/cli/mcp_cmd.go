@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net"
@@ -248,11 +245,11 @@ func runOAuthInteractive(ctx context.Context, configPath, name string, out inter
 			tokEP = md.TokenEndpoint
 		}
 	}
-	verifier, challenge, err := mcpGeneratePKCE()
+	verifier, challenge, err := mcp.GeneratePKCE()
 	if err != nil {
 		return err
 	}
-	state, err := mcpGenerateState()
+	state, err := mcp.RandState()
 	if err != nil {
 		return err
 	}
@@ -293,24 +290,6 @@ func runOAuthInteractive(ctx context.Context, configPath, name string, out inter
 	return nil
 }
 
-func mcpGeneratePKCE() (string, string, error) {
-	raw := make([]byte, 48)
-	if _, err := rand.Read(raw); err != nil {
-		return "", "", err
-	}
-	v := base64.RawURLEncoding.EncodeToString(raw)
-	sum := sha256.Sum256([]byte(v))
-	return v, base64.RawURLEncoding.EncodeToString(sum[:]), nil
-}
-
-func mcpGenerateState() (string, error) {
-	raw := make([]byte, 24)
-	if _, err := rand.Read(raw); err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(raw), nil
-}
-
 func allocLoopbackListener() (int, net.Listener, error) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -331,19 +310,24 @@ func waitForCallback(ctx context.Context, ln net.Listener, wantState string) (st
 	srv := &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
-			if q.Get("state") != wantState {
-				http.Error(w, "state mismatch", 400)
-				resCh <- result{err: fmt.Errorf("oauth callback: state mismatch")}
-				return
-			}
+			var res result
 			if eqe := q.Get("error"); eqe != "" {
+				// Auth server reported error — surface it before state check
 				http.Error(w, eqe, 400)
-				resCh <- result{err: fmt.Errorf("oauth callback error: %s", eqe)}
-				return
+				res = result{err: fmt.Errorf("oauth callback error: %s", eqe)}
+			} else if q.Get("state") != wantState {
+				http.Error(w, "state mismatch", 400)
+				res = result{err: fmt.Errorf("oauth callback: state mismatch")}
+			} else {
+				code := q.Get("code")
+				fmt.Fprintln(w, "authorization received; you can close this tab")
+				res = result{code: code}
 			}
-			code := q.Get("code")
-			fmt.Fprintln(w, "authorization received; you can close this tab")
-			resCh <- result{code: code}
+			// Non-blocking send: ignore if a previous request already filled the channel.
+			select {
+			case resCh <- res:
+			default:
+			}
 		}),
 	}
 	go srv.Serve(ln) //nolint:errcheck
