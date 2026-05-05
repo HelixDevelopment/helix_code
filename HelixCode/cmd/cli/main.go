@@ -562,6 +562,17 @@ func main() {
 		return
 	}
 
+	// Dispatcher: intercept the "hooks" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "permissions" / "worktree").
+	if len(os.Args) >= 2 && os.Args[1] == "hooks" {
+		cmd := newHooksCommand()
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
 	cli := NewCLI()
 
 	if err := cli.Run(); err != nil {
