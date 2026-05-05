@@ -33,6 +33,7 @@ type CLI struct {
 	permissionMode     string
 	permissionsEngine  *permissions.Engine
 	persistenceManager *persistence.Manager
+	worktreeManager    *worktree.Manager
 }
 
 // NewCLI creates a new CLI instance
@@ -113,6 +114,34 @@ func (c *CLI) initPersistence() error {
 	return nil
 }
 
+// initWorktree bootstraps the worktree.Manager with repoRoot resolved via
+// `git rev-parse --show-toplevel`, falling back to os.Getwd() if the cwd
+// is not a git repo.
+func (c *CLI) initWorktree(ctx context.Context) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolving cwd for worktree: %w", err)
+	}
+	repoRoot := cwd
+	if root, err := worktreeRevParseToplevel(ctx, cwd); err == nil {
+		repoRoot = root
+	}
+	c.worktreeManager = worktree.NewManager(repoRoot)
+	return nil
+}
+
+// worktreeRevParseToplevel is a tiny shim to avoid leaking the worktree
+// package's internal helpers; it shells out to git directly.
+func worktreeRevParseToplevel(ctx context.Context, cwd string) (string, error) {
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--show-toplevel")
+	cmd.Dir = cwd
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
 // Run executes the CLI
 func (c *CLI) Run() error {
 	// Parse command-line flags
@@ -165,6 +194,9 @@ func (c *CLI) Run() error {
 	}
 	if err := c.initPersistence(); err != nil {
 		return fmt.Errorf("persistence init: %w", err)
+	}
+	if err := c.initWorktree(ctx); err != nil {
+		return fmt.Errorf("worktree init: %w", err)
 	}
 
 	// Handle different commands
