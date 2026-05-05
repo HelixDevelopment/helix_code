@@ -1,0 +1,134 @@
+package llm
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
+// provider_factory.go (P1-F12-T07): unified construction + selection for the
+// four cloud backends covered by Feature 12 — Anthropic, Bedrock, Vertex AI,
+// Azure OpenAI. The pre-existing NewProvider() in factory.go is the
+// catch-all factory across every Provider type (cloud + local + OpenAI-
+// compatible). NewCloudProvider() narrows scope to the cloud quartet so
+// the wizard / selector path can refuse to construct anything outside that
+// universe — and so a misconfigured "ollama" string in --provider does not
+// silently fall through to a local backend.
+
+// ErrNoProviderConfigured is returned by Select when none of the four sources
+// (flag / env / config / wizard-default) yielded a value. Callers running in
+// interactive mode should launch the wizard on this error; non-interactive
+// callers should surface it to the user with a remediation hint.
+var ErrNoProviderConfigured = errors.New(
+	"no provider configured: pass --provider, set HELIX_LLM_PROVIDER, " +
+		"populate provider in config, or run `helixcode wizard`")
+
+// SelectorInput captures the four sources of provider-type selection in the
+// precedence order the Selector applies (flag > env > config > wizard).
+// Each field is the raw, untrimmed string the caller obtained from that
+// source. Empty strings are treated as "source did not provide a value" and
+// the next source is consulted.
+type SelectorInput struct {
+	// Flag is the CLI flag value (e.g., --provider=bedrock). Highest
+	// precedence — explicit user instruction for this invocation.
+	Flag string
+
+	// Env is the value of HELIX_LLM_PROVIDER (or whatever the caller has
+	// chosen as its env var). Mid precedence — runtime override without
+	// rewriting config.
+	Env string
+
+	// Config is the value loaded from a persisted config file
+	// (e.g., $XDG_CONFIG_HOME/helixcode/config.yaml's provider field).
+	// Lowest precedence among "user-provided" sources.
+	Config string
+}
+
+// Select resolves the cloud ProviderType to use using flag > env > config
+// precedence. It returns ErrNoProviderConfigured (sentinel, errors.Is-able)
+// when every source is empty — at which point the caller should launch the
+// interactive wizard if running interactively. Unknown/unsupported provider
+// strings return a non-sentinel error so the caller can distinguish the
+// "needs wizard" case from "user typed garbage".
+//
+// The Selector is pure: no env reads, no file IO, no construction. It is
+// intentionally trivial so it can be exercised exhaustively by unit tests.
+func Select(input SelectorInput) (ProviderType, error) {
+	raw := firstNonEmpty(input.Flag, input.Env, input.Config)
+	if raw == "" {
+		return "", ErrNoProviderConfigured
+	}
+	return parseCloudProviderType(raw)
+}
+
+// NewCloudProvider constructs the concrete cloud Provider for the given
+// resolved ProviderType using cfg. It only handles the four Feature-12
+// cloud backends. Local / OpenAI-compatible / hosted-OpenAI providers are
+// rejected — callers needing those should use NewProvider() in factory.go.
+//
+// Returned Provider already implements the full Provider interface; any
+// credential / endpoint resolution failures bubble up from the underlying
+// New<X>Provider constructor. Per the audits in T03–T06, all four
+// constructors defer credential validation where the SDK permits it, so
+// this function can succeed in offline / no-creds environments and let
+// runtime calls surface real auth errors (anti-bluff: no fake-success
+// "available" status when nothing actually works).
+func NewCloudProvider(t ProviderType, cfg ProviderConfigEntry) (Provider, error) {
+	// Normalise cfg.Type to match t so downstream provider code that reads
+	// cfg.Type sees a coherent value even if the caller passed a config
+	// loaded from a different source.
+	cfg.Type = t
+
+	switch t {
+	case ProviderTypeAnthropic:
+		return NewAnthropicProvider(cfg)
+	case ProviderTypeBedrock:
+		return NewBedrockProvider(cfg)
+	case ProviderTypeVertexAI:
+		return NewVertexAIProvider(cfg)
+	case ProviderTypeAzure:
+		return NewAzureProvider(cfg)
+	default:
+		return nil, fmt.Errorf(
+			"NewCloudProvider: %q is not a cloud provider type (supported: %s)",
+			t, supportedCloudProviderList())
+	}
+}
+
+// firstNonEmpty returns the first non-empty (after trim) string in args.
+func firstNonEmpty(args ...string) string {
+	for _, a := range args {
+		if strings.TrimSpace(a) != "" {
+			return a
+		}
+	}
+	return ""
+}
+
+// parseCloudProviderType normalises the raw user-provided string into a
+// canonical cloud ProviderType. Returns a non-sentinel error for unknown
+// values so callers can distinguish "no source" (ErrNoProviderConfigured)
+// from "user typed garbage".
+func parseCloudProviderType(raw string) (ProviderType, error) {
+	norm := strings.ToLower(strings.TrimSpace(raw))
+	switch norm {
+	case "anthropic":
+		return ProviderTypeAnthropic, nil
+	case "bedrock", "aws", "aws-bedrock":
+		return ProviderTypeBedrock, nil
+	case "vertexai", "vertex", "vertex-ai", "gcp", "gcp-vertex":
+		return ProviderTypeVertexAI, nil
+	case "azure", "azure-openai", "azureopenai":
+		return ProviderTypeAzure, nil
+	default:
+		return "", fmt.Errorf(
+			"unknown cloud provider %q (supported: %s)",
+			raw, supportedCloudProviderList())
+	}
+}
+
+// supportedCloudProviderList returns a stable, human-readable list of the
+// four canonical cloud provider names for error messages.
+func supportedCloudProviderList() string {
+	return "anthropic, bedrock, vertexai, azure"
+}
