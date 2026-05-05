@@ -51,6 +51,7 @@ const (
 	StatusPending   HookStatus = "pending"   // Not yet executed
 	StatusRunning   HookStatus = "running"   // Currently executing
 	StatusCompleted HookStatus = "completed" // Successfully completed
+	StatusSucceeded HookStatus = "succeeded" // Successfully completed (alias for Completed)
 	StatusFailed    HookStatus = "failed"    // Failed with error
 	StatusCanceled  HookStatus = "canceled"  // Canceled before completion
 	StatusSkipped   HookStatus = "skipped"   // Skipped due to conditions
