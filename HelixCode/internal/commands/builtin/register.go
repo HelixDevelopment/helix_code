@@ -6,6 +6,7 @@ import (
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/workflow"
+	"dev.helix.code/internal/workflow/planmode"
 )
 
 // RegisterBuiltinCommands registers all built-in commands with the registry
@@ -68,6 +69,16 @@ func RegisterBuiltinCommandsWithTasks(registry *commands.Registry, mgr *workflow
 	return registry.Register(commands.NewTasksCommand(mgr))
 }
 
+// RegisterBuiltinCommandsWithPlanMode extends RegisterBuiltinCommands with the
+// /plan command, which requires a planmode.ApprovalPlanner and
+// planmode.ModeController dependency. Callers that have both
+// (cmd/cli/main.go startup) use this; callers without them (legacy paths) use
+// the original RegisterBuiltinCommands.
+func RegisterBuiltinCommandsWithPlanMode(registry *commands.Registry, planner planmode.ApprovalPlanner, mc planmode.ModeController) error {
+	RegisterBuiltinCommands(registry)
+	return registry.Register(commands.NewPlanCommand(planner, mc))
+}
+
 // GetBuiltinCommandNames returns names of all built-in commands
 func GetBuiltinCommandNames() []string {
 	return []string{
@@ -82,6 +93,7 @@ func GetBuiltinCommandNames() []string {
 		"hooks",
 		"mcp",
 		"tasks",
+		"plan",
 	}
 }
 
