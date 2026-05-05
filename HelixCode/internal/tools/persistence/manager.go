@@ -106,3 +106,30 @@ func sanitiseToolName(name string) string {
 // ErrPathTraversal is returned by LoadPersisted when the requested path
 // resolves outside the manager's base directory.
 var ErrPathTraversal = errors.New("path outside persistence directory")
+
+// LoadPersisted reads a previously-persisted output by absolute path.
+// Returns ErrPathTraversal if path resolves outside the manager's base
+// directory; wraps os.ErrNotExist for missing files.
+func (m *Manager) LoadPersisted(path string) (string, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return "", fmt.Errorf("resolving %s: %w", path, err)
+	}
+	absBase, err := filepath.Abs(m.baseDir)
+	if err != nil {
+		return "", fmt.Errorf("resolving base %s: %w", m.baseDir, err)
+	}
+	rel, err := filepath.Rel(absBase, absPath)
+	if err != nil || strings.HasPrefix(rel, "..") || rel == ".." {
+		return "", fmt.Errorf("%w: %s", ErrPathTraversal, path)
+	}
+
+	body, err := os.ReadFile(absPath)
+	if err != nil {
+		return "", fmt.Errorf("reading %s: %w", absPath, err)
+	}
+	return string(body), nil
+}
