@@ -29,18 +29,18 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F13-T01 — bootstrap evidence + advance PROGRESS to F13
-- [ ] P1-F13-T02 — go.mod: add `go.lsp.dev/jsonrpc2 v0.10.0` + `go.lsp.dev/protocol v0.12.0` (TDD: failing import test → run; add deps; run again)
-- [ ] P1-F13-T03 — `internal/tools/lsp_types.go`: Diagnostic + DiagnosticSummary + DiagnosticSeverity + LSPServerSpec + ServerStatus (TDD)
-- [ ] P1-F13-T04 — `internal/tools/lsp_client.go`: jsonrpc2 client wrapper, initialize/shutdown handshake, didOpen/didChange/publishDiagnostics (TDD with paired in-memory pipes)
-- [ ] P1-F13-T05 — `internal/tools/lsp_manager.go`: lazy-spawn + idle-timeout + file-extension router + crash-recovery (TDD with in-tree fake server subprocess)
-- [ ] P1-F13-T06 — `internal/tools/lsp_servers.go`: curated allowlist + `Detect` via exec.LookPath (TDD)
-- [ ] P1-F13-T07 — `internal/tools/lsp.go`: LSPGetDiagnosticsTool + LSPAnalyzeDiagnosticTool (TDD)
-- [ ] P1-F13-T08 — `internal/tools/registry.go`: SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit (TDD)
-- [ ] P1-F13-T09 — `/lsp` slash command + `internal/commands/lsp_command.go` (TDD)
-- [ ] P1-F13-T10 — `helixcode lsp` cobra: `cmd/cli/lsp_cmd.go` + main.go wiring + integration test (gated, SKIP-OK on missing servers)
-- [ ] P1-F13-T11 — Challenge with runtime evidence (in-tree fake server harness + real-server gated phase)
-- [ ] P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force
+- [x] P1-F13-T01 — bootstrap evidence + advance PROGRESS to F13
+- [x] P1-F13-T02 — go.mod: add `go.lsp.dev/jsonrpc2 v0.10.0` + `go.lsp.dev/protocol v0.12.0` (TDD: failing import test → run; add deps; run again)
+- [x] P1-F13-T03 — `internal/tools/lsp_types.go`: Diagnostic + DiagnosticSummary + DiagnosticSeverity + LSPServerSpec + ServerStatus (TDD)
+- [x] P1-F13-T04 — `internal/tools/lsp_client.go`: jsonrpc2 client wrapper, initialize/shutdown handshake, didOpen/didChange/publishDiagnostics (TDD with paired in-memory pipes)
+- [x] P1-F13-T05 — `internal/tools/lsp_manager.go`: lazy-spawn + idle-timeout + file-extension router + crash-recovery (TDD with in-tree fake server subprocess)
+- [x] P1-F13-T06 — `internal/tools/lsp_servers.go`: curated allowlist + `Detect` via exec.LookPath (TDD)
+- [x] P1-F13-T07 — `internal/tools/lsp.go`: LSPGetDiagnosticsTool + LSPAnalyzeDiagnosticTool (TDD)
+- [x] P1-F13-T08 — `internal/tools/registry.go`: SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit (TDD)
+- [x] P1-F13-T09 — `/lsp` slash command + `internal/commands/lsp_command.go` (TDD)
+- [x] P1-F13-T10 — `helixcode lsp` cobra: `cmd/cli/lsp_cmd.go` + main.go wiring + integration test (gated, SKIP-OK on missing servers)
+- [x] P1-F13-T11 — Challenge with runtime evidence (in-tree fake server harness + real-server gated phase)
+- [x] P1-F13-T12 — Feature 13 close-out + push 4 remotes non-force
 
 ---
 
