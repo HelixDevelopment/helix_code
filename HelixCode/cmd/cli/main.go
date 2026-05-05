@@ -19,6 +19,7 @@ import (
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
+	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/worker"
 )
@@ -512,6 +513,19 @@ func main() {
 		cmd.SetArgs(os.Args[2:])
 		if err := cmd.Execute(); err != nil {
 			log.Fatalf("Error: %v", err)
+		}
+		return
+	}
+
+	// Dispatcher: intercept the "worktree" subcommand group before flag.Parse()
+	// so that Cobra handles its own flag parsing (same pattern as "permissions").
+	if len(os.Args) >= 2 && os.Args[1] == "worktree" {
+		cwd, _ := os.Getwd()
+		m := worktree.NewManager(cwd)
+		cmd := newWorktreeCommand(m)
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
 		}
 		return
 	}
