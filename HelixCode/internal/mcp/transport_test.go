@@ -51,7 +51,11 @@ func TestTransportType_Validate(t *testing.T) {
 
 func TestClientState_String(t *testing.T) {
 	assert.Equal(t, "disconnected", StateDisconnected.String())
+	assert.Equal(t, "connecting", StateConnecting.String())
+	assert.Equal(t, "initializing", StateInitializing.String())
 	assert.Equal(t, "ready", StateReady.String())
 	assert.Equal(t, "reconnecting", StateReconnecting.String())
 	assert.Equal(t, "closed", StateClosed.String())
+	// out-of-range falls into the default case
+	assert.Equal(t, "unknown(99)", ClientState(99).String())
 }

@@ -56,13 +56,13 @@ func (s ClientState) String() string {
 	}
 }
 
-// LoadState atomically reads the state from a *atomic.Int32 backing store.
-func LoadState(p *atomic.Int32) ClientState {
+// loadState atomically reads the state from a *atomic.Int32 backing store.
+func loadState(p *atomic.Int32) ClientState {
 	return ClientState(p.Load())
 }
 
-// StoreState atomically stores the state.
-func StoreState(p *atomic.Int32, s ClientState) {
+// storeState atomically stores the state.
+func storeState(p *atomic.Int32, s ClientState) {
 	p.Store(int32(s))
 }
 
