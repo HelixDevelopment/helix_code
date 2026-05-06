@@ -3257,3 +3257,53 @@ Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependenc
 1. LLMsVerifier's `.gitignore` line 223 (`**/*api_key*`) is intentionally broad to prevent credential file commits per CONST-042. The loader script's *name* matches the pattern but the script contains zero secrets — it only sources them at runtime. Resolved by adding two precise negations directly after the broad-ban block (with explanatory comment) so the security rule keeps working for everything else.
 2. HelixAgent's working tree shows nested-submodule pointer drift (`Mm` in `git status`) from prior WP work. Treated as out-of-scope for WP4; only `scripts/` and `Makefile` were staged per submodule.
 
+### P1.5-WP5 — .env API key dedup
+
+**Goal:** strip the 41 keys exposed by `$HOME/api_keys.sh` (loaded centrally per WP4) from the 5 `.env` files in the tree, leaving only non-API content (DB URLs, ports, log levels, `ApiKey_*` style aliases the loader doesn't yet manage, etc.). Backups stay local + gitignored; restorable via `mv .env.backup_p1-5 .env`.
+
+#### Per-file dedup results
+
+| .env file | Before | After | Removed |
+|---|---:|---:|---:|
+| `./.env`                       |  93 |  57 | 36 |
+| `./HelixCode/.env`             | 186 | 148 | 38 |
+| `./HelixQA/.env`               |  80 |  44 | 36 |
+| `./HelixAgent/.env`            |  80 |  44 | 36 |
+| `./HelixAgent/HelixLLM/.env`   |  80 |  44 | 36 |
+| **Total**                       | **519** | **337** | **182** |
+
+Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 names emitted by `$HOME/api_keys.sh`. The `HelixCode/.env` removed-count of 38 includes 2 extra lines that were duplicates inside that single file; the underlying *unique* key-name set deleted per file is the same 36-name subset (5 files share the same loader source).
+
+#### Sample of removed key NAMES (values redacted, never logged)
+
+`HUGGINGFACE_API_KEY`, `NVIDIA_API_KEY`, `CHUTES_API_KEY`, `SILICONFLOW_API_KEY`, `KIMI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `MISTRAL_API_KEY`, `CODESTRAL_API_KEY`, `GROQ_API_KEY`, `COHERE_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `FIREWORKS_API_KEY`, `HYPERBOLIC_API_KEY`, `NOVITA_API_KEY`, `ZAI_API_KEY`, `ZHIPU_API_KEY`, `VERTEX_API_KEY`, `REPLICATE_API_KEY`, `MODAL_API_KEY`, `MODAL_API_KEY_ID`, `KILO_API_KEY`, `JUNIE_API_KEY`, `INFERENCE_API_KEY`, `NIA_API_KEY`, `PUBLICAI_API_KEY`, `SARVAM_API_KEY`, `VENICE_API_KEY`, `VULAVULA_API_KEY`, `TENCENT_CLOUD_API_KEY`, `UPSTAGE_API_KEY`, `CLOUDFLARE_API_KEY`, `NLP_API_KEY`, `GITLAB_TOKEN`, `GITFLIC_TOKEN`, `GITVERSE_TOKEN`, `GITHUB_MODELS_API_KEY`, `FIRBASE_CLI_TOKEN`, `DEEPSEEK_USE_LOCAL`.
+
+#### Non-API content preserved (spot-check)
+
+- `./.env` retains `HELIXAGENT_API_KEY=…`, `CLAUDE_CODE_USE_OAUTH_CREDENTIALS=true`, `QWEN_CODE_USE_OAUTH_CREDENTIALS=true`, plus all `ApiKey_*` aliases (Tavily, Astica, etc.) the central loader does not yet emit.
+- `./HelixCode/.env` retains `USE_HELIX_LLM=true`, `PORT=8100`, `HELIXAGENT_PORT_*`, `LOG_LEVEL=info`, `LOG_FORMAT=json`, `REDIS_PASSWORD=`, `HELIXAGENT_API_KEY=…`.
+- `./HelixQA/.env`, `./HelixAgent/.env`, `./HelixAgent/HelixLLM/.env` retain `ApiKey_*` aliases (`ApiKey_Tavily`, `ApiKey_Astica_Vision`, `ApiKey_Tencent_Cloud`, etc.) and the `ASTICA_API_KEY=…` / `TAVILY_API_KEY=$ApiKey_Tavily` indirect bindings — none of these names are in the 41-key SAFE_KEYS list, so they were correctly preserved.
+
+#### Backups + diff files (local only, gitignored)
+
+- `./.env.backup_p1-5` + `./.env.diff_p1-5`
+- `./HelixCode/.env.backup_p1-5` + `./HelixCode/.env.diff_p1-5`
+- `./HelixQA/.env.backup_p1-5` + `./HelixQA/.env.diff_p1-5`
+- `./HelixAgent/.env.backup_p1-5` + `./HelixAgent/.env.diff_p1-5`
+- `./HelixAgent/HelixLLM/.env.backup_p1-5` + `./HelixAgent/HelixLLM/.env.diff_p1-5`
+
+Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` was extended with `**/*.env.backup_p1-5` and `**/*.env.diff_p1-5` so they cannot be tracked from any subdirectory.
+
+#### Commit chain
+
+| SHA | Scope |
+|---|---|
+| _see git log_ | meta-repo: `.gitignore` patterns for backup/diff + WP5 close-out |
+
+(Submodule `.env` files are themselves gitignored at every level — the dedup is purely a local-filesystem operation; there are no `.env`-content commits to make in the submodules. The only tracked artefact changing is the root `.gitignore` and this evidence file.)
+
+#### Defects / deviations
+
+1. The dedup spec in the task body assumed each `.env` would get its own commit. In reality every `.env` is already covered by `.gitignore` (root + each submodule's own), so `git add .env` is a no-op and would silently produce empty commits. Confirmed via `git check-ignore -v` for each path. Outcome: collapsed to a single commit on the root `.gitignore` + this evidence file only — no submodule commits, no submodule-pointer bumps. Backups + diffs are likewise gitignored, so the working tree stays clean apart from `.gitignore` itself.
+2. `./HelixCode/.env` removed 38 lines vs the 36-line baseline because that file historically had two duplicate `KEY=$ApiKey_Foo` lines for the same key (likely an editing accident). Both were removed correctly because both matched a SAFE_KEY name. Net result is identical to removing the canonical 36 keys, just with the dup tax taken.
+

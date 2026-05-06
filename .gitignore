@@ -111,3 +111,9 @@ HelixCode/security-scan
 HelixCode/testhelper
 HelixCode/.helixcode/
 .claude/
+
+# P1.5-WP5: .env API-key dedup backups
+.env.backup_p1-5
+.env.diff_p1-5
+**/*.env.backup_p1-5
+**/*.env.diff_p1-5
