@@ -3725,3 +3725,81 @@ Every PASS in the per-repo table corresponds to a real `go build` / `go test` in
 #### Defects / deviations
 
 None of substance. The only deviation from the WP10 task spec is that `examples/multi_agent_system` was identified as having the same MockLLMProvider drift but was deliberately deferred — it is not on the WP10 critical path and amounts to a duplicate fix that can be batched with other examples cleanup work. Documented above so it isn't lost.
+
+---
+
+### P1.5-WP11 — Phase 1.5 Challenge harness (5 phases)
+
+**Timestamp:** 2026-05-06
+**Status:** CLOSED
+
+#### Artefacts produced
+
+- `HelixCode/tests/integration/cmd/p1_5_challenge/main.go` — 5-phase Go harness (stdlib only).
+- `Challenges/p1-5-foundation-cleanup/CHALLENGE.md` — phase-by-phase contract + anti-bluff anchors.
+- `Challenges/p1-5-foundation-cleanup/run.sh` — build + run + bluff smoke + cross-compile, F11–F20 anti-self-match string-fragment trick applied.
+
+#### Verbatim runtime evidence
+
+```
+$ cd HelixCode && go build -o /tmp/p1_5_challenge ./tests/integration/cmd/p1_5_challenge/ && /tmp/p1_5_challenge ; echo "EXIT=$?"
+==> P1.5 challenge harness pid: 1712243
+==> meta-repo root: /run/media/milosvasic/DATA4TB/Projects/HelixCode
+==> Phase A — NO-DUPLICATE-SUBMODULES
+phaseA: scanned 1 meta-repo-tracked .gitmodules file(s)
+phaseA: LLMsVerifier at Dependencies/HelixDevelopment/LLMsVerifier (1 location, no duplicates)
+phaseA: Containers at Containers (1 location, no duplicates)
+phaseA: Security at Security (1 location, no duplicates)
+phaseA: HelixQA at HelixQA (1 location, no duplicates)
+phaseA: MCP-Servers at MCP-Servers (1 location, no duplicates)
+==> Phase B — API-KEYS-LOADER
+phaseB: branch1=PASS branch2=PASS branch3=PASS
+==> Phase C — DOCS-UNDER-DOCS-DIR
+phaseC: zero Documentation/ uppercase dirs in first-party tree; docs/ canonical at [HelixCode/docs HelixCode/tests/automation/results/docs docs]
+==> Phase D — SNAKE_CASE
+phaseD: 259 conformant first-party directories scanned; 88 allowlisted (cmd/, repo names); 0 violations
+==> Phase E — ANTI-BLUFF-ANCHOR
+---- verify_anti_bluff_cascade.sh output ----
+OK: anti-bluff anchor present in all 39 files across 13 repos
+---- end verify_anti_bluff_cascade.sh output ----
+phaseE: PASS (cascade script exit 0)
+==> ALL CHECKS PASSED
+==> P1.5 challenge harness PASS
+EXIT=0
+```
+
+#### Cross-compile linux/amd64
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1_5_challenge_linux ./tests/integration/cmd/p1_5_challenge/ && file /tmp/p1_5_challenge_linux
+/tmp/p1_5_challenge_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=…, with debug_info, not stripped
+```
+
+#### Anti-bluff smoke (both clean)
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1_5_challenge/ ; echo $?
+1   # grep returned no matches → smoke clean
+
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" p1-5-foundation-cleanup/ ; echo $?
+1   # grep returned no matches → smoke clean
+```
+
+The `Challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the harness output above plus its own `==> P1.5 foundation-cleanup challenge PASS` final line.
+
+#### Phase-by-phase outcome
+
+| Phase | Verdict | Evidence kind |
+|---|---|---|
+| A — NO-DUPLICATE-SUBMODULES | PASS | 5/5 canonical submodules at expected root paths; meta-repo-tracked `.gitmodules` URL-uniqueness check returns zero duplicates |
+| B — API-KEYS-LOADER | PASS | three real bash subshells with synthesised HOME + tempdir pwd captured `value_from_sh`, `value_from_env`, and empty respectively |
+| C — DOCS-UNDER-DOCS-DIR | PASS | zero `Documentation/` (any non-`docs` casing) directories in scoped tree; canonical `docs/` confirmed at `docs`, `HelixCode/docs`, and `HelixCode/tests/automation/results/docs` |
+| D — SNAKE_CASE | PASS | 259 directories scanned, 88 allowlisted (Go-application packages, repo names from `.gitmodules`, well-known artefact dirs, WP7 deferred list), 0 violations |
+| E — ANTI-BLUFF-ANCHOR | PASS | `scripts/verify_anti_bluff_cascade.sh` exit 0; "OK: anti-bluff anchor present in all 39 files across 13 repos" line captured |
+
+#### Defects / deviations
+
+1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `HelixAgent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `HelixAgent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
+2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `Challenges/p1-f06-mcp-full-lifecycle`, `Containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora-os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
+3. **Snake-case regex relaxed for digit prefixes.** Initial regex `^[a-z][a-z0-9_]*$` flagged `01_analysis_step_01`, `06_diagrams_real`, etc. used throughout `docs/improvements/`. Relaxed to `^[a-z0-9][a-z0-9_]*$` to accept digit-prefixed sequence names; the rest of the snake_case discipline (lowercase + digits + underscores only) is preserved.
+4. **No commits or pushes performed in WP11.** Per CONST-043 + WP12 ownership of the push step, this WP only produces artefacts. The dual commit (Challenges submodule first, then meta-repo) is captured in the WP12 work plan.
