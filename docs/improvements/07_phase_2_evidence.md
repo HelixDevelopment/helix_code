@@ -452,3 +452,55 @@ positive runtime evidence against real chromium subprocess; anti-bluff
 smoke clean; cross-compile clean; third Phase 2 feature shipped.
 
 ---
+
+## P2-F24 — Codex Project Memory
+
+Spec: `docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md` (commit `c31b9ac`).
+Plan: `docs/superpowers/plans/2026-05-07-p2-f24-codex-project-memory.md` (commit `19094b8`).
+
+### One-line goal
+
+Ship a real, end-to-end **project memory** subsystem for the HelixCode CLI
+agent, modelled on codex's `AGENTS.md` pattern. NEW
+`internal/projectmemory/` package: `Memory` (immutable value), `MemoryLoader`
+(parent-walk discovery for `helixcode.md` / `codex.md` / `AGENTS.md`,
+case-insensitive, stops at git root) + `MemoryRegistry` (atomic-pointer
+`Snapshot` / `Set` / `Reload` + `MemorySnapshotter` interface) +
+`MemoryWatcher` (fsnotify + 200 ms debounce + graceful degrade). NEW
+`/memory` slash (`status` / `show` / `edit` / `reload`).
+`BaseAgent.getSystemPrompt` prepends `Memory.Render()` per-call (nil-safe;
+backward-compat). User overlay at `$XDG_CONFIG_HOME/helixcode/memory.md`
+loaded AFTER project memory. 64 KB cap with positive `TruncatedProject` /
+`TruncatedUser` flags.
+
+### Commits in order
+
+| Task | Commit | Subject |
+|------|--------|---------|
+| P2-F24-T01 | (this commit) | bootstrap F24 evidence + advance PROGRESS to F24 |
+| P2-F24-T02 |        | projectmemory types - Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD) |
+| P2-F24-T03 |        | projectmemory loader - parent-walk + git-root-stop + user overlay + truncation (TDD) |
+| P2-F24-T04 |        | projectmemory registry - atomic-pointer Snapshot/Set/Reload + MemorySnapshotter (TDD -race) |
+| P2-F24-T05 |        | projectmemory watcher - fsnotify + 200ms debounce + graceful degrade (TDD real-fsnotify) |
+| P2-F24-T06 |        | /memory slash command - status/show/edit/reload + editor seam (TDD) |
+| P2-F24-T07 |        | BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD) |
+| P2-F24-T08 |        | close out feature 24 — Codex Project Memory |
+
+### Acceptance
+
+Every task TDD-driven (failing test → minimal impl → green); anti-bluff
+smoke `clean` on every commit; zero new external deps (`fsnotify v1.9.0`
+already direct in `HelixCode/go.mod`); 5-phase Challenge (project-only
++ missing-file-graceful + hot-reload + project-plus-user + truncation)
+with positive runtime evidence per Article XI §11.9.
+
+### P2-F24-T01 — bootstrap F24 evidence section + advance PROGRESS
+
+F24 section appended to this file. PROGRESS.md current focus advanced from
+"F23 closed; F24 next candidate (brainstorm)" to "F24 (Codex Project
+Memory) in flight". CONTINUATION.md F24 mid-flight section ticks T01 next.
+Zero new external deps verified — `fsnotify v1.9.0` already direct in
+`HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
+Per-task commit subjects + SHAs filled in by T02-T08.
+
+---

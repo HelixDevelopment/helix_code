@@ -8,9 +8,9 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F23 COMPLETE; F24 next candidate
-- **Active feature:** —
-- **Active task:** —
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F24 (Codex Project Memory) in flight
+- **Active feature:** P2-F24 — Codex Project Memory
+- **Active task:** P2-F24-T01 — bootstrap F24 evidence + advance PROGRESS to F24
 - **Last completed:** P2-F23-T10 — Feature 23 (Cline Browser Tool) close-out + push 4 remotes non-force
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -365,6 +365,16 @@
 - [x] P2-F23-T08 — browser_close_v2.go: idempotent CloseSession + post-close RequireSession fails (TDD)  ← commit `ad0c0df`
 - [x] P2-F23-T09 — /browser slash + main.go wiring + RegisterBrowserToolsV2 + integration test (7/7 PASS against real chromium)  ← commit `f39f686`
 - [x] P2-F23-T10 — Challenge harness 7 phases A-G (chromium-gated) + close-out + push 4 remotes non-force  ← (this commit)
+
+## P2-F24 task list (Codex Project Memory) — IN FLIGHT
+- [ ] P2-F24-T01 — bootstrap F24 evidence section + advance PROGRESS to F24
+- [ ] P2-F24-T02 — projectmemory/types.go: Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD)
+- [ ] P2-F24-T03 — projectmemory/loader.go: parent-walk + git-root-stop + user overlay + truncation (TDD with real tempdirs)
+- [ ] P2-F24-T04 — projectmemory/registry.go: atomic-pointer Snapshot/Set/Reload + MemorySnapshotter (TDD -race)
+- [ ] P2-F24-T05 — projectmemory/watcher.go: fsnotify + 200ms debounce + graceful degrade (TDD with real fsnotify)
+- [ ] P2-F24-T06 — /memory slash command (status/show/edit/reload) + editor seam (TDD)
+- [ ] P2-F24-T07 — BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD)
+- [ ] P2-F24-T08 — Challenge harness 5 phases A-E + close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
