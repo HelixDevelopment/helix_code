@@ -2138,3 +2138,38 @@ EXIT=0
 
 **Summary:** F16 (OpenTelemetry Integration) — all 12 tasks shipped; OTel v1.30.0 tracer + meter wired into LLM/tool/agent hot paths with three exporters + no-op fast path; default-deny secret-attribute blocklist enforced; /telemetry slash live; 5-phase challenge harness PASS (4 always-on + 1 gated). Pushed to all 4 meta-repo remotes non-force; Challenges submodule pushed to its single `origin` (mirror gap).
 
+## P1-F17 — Smart File Editing
+
+**Date:** 2026-05-06
+**Spec:** `docs/superpowers/specs/2026-05-06-p1-f17-smart-file-editing-design.md` (commit `fa77f09`)
+**Plan:** `docs/superpowers/plans/2026-05-06-p1-f17-smart-file-editing.md` (commit `880d1e7`)
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** SEARCH/REPLACE block-based smart edit tool building on F08 multiedit (transactional); re-read + diff verification; lenient re-search conflict policy; whole-prompt atomicity gate; /edit slash with status/diff/dry-run/commit; binary file refusal; ambiguity rejection; reuses F08 DiffManager (no duplicate LCS impl).
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F17-T01 — Bootstrap
+
+(this commit) — append F17 section header to evidence; advance PROGRESS current focus to F17; insert 10-task list.
+
+### P1-F17-T02 — smartedit/types.go: EditBlock + markers + sentinels + size limits (TDD)
+
+### P1-F17-T03 — smartedit/parser.go: SEARCH/REPLACE block parser + path-stickiness + line tracking (TDD)
+
+### P1-F17-T04 — smartedit/applier.go + binary_detect.go: lenient re-search + ambiguity + binary refusal (TDD)
+
+### P1-F17-T05 — smartedit/diff.go: unified-diff wrapper re-using F08 multiedit DiffManager (TDD)
+
+### P1-F17-T06 — smartedit/smart_edit_tool.go: Tool impl + multiedit transaction + post-write re-read + diff (TDD)
+
+### P1-F17-T07 — /edit slash (status/diff/dry-run/commit) + SmartEditInspector (TDD)
+
+### P1-F17-T08 — main.go wiring + registry registration + always-run integration tests
+
+### P1-F17-T09 — Challenge harness: 7-phase (SINGLE/NOT-FOUND/MULTI/ROLLBACK/DIFF/AMBIG/BINARY) with sha-256 positive evidence
+
+### P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
+

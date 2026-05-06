@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F17 next candidate (Smart File Editing)
-- **Active task:** —
+- **Active feature:** P1-F17 — Smart File Editing (in progress)
+- **Active task:** P1-F17-T01 — bootstrap evidence + advance PROGRESS to F17
 - **Last completed:** P1-F16-T12 — Feature 16 (OpenTelemetry Integration) close-out + push to 4 remotes (all 12 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -260,6 +260,18 @@
 - [x] P1-F16-T10 — main.go wiring + gated integration tests (stdout always; OTLP gRPC+HTTP gated)  ← commit `a5eb1c9`
 - [x] P1-F16-T11 — Challenge harness: in-tree fake OTLP/HTTP receiver + 5 phases (STDOUT/FAKE-OTLP/FILTER/NOOP/REAL)  ← submodule `af34a2c` + meta-repo `c4972dc`
 - [x] P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F17: Smart File Editing)
+- [x] P1-F17-T01 — bootstrap evidence + advance PROGRESS to F17  ← (this commit)
+- [ ] P1-F17-T02 — smartedit/types.go: EditBlock + markers + sentinels + size limits (TDD)
+- [ ] P1-F17-T03 — smartedit/parser.go: SEARCH/REPLACE block parser + path-stickiness + line tracking (TDD)
+- [ ] P1-F17-T04 — smartedit/applier.go + binary_detect.go: lenient re-search + ambiguity + binary refusal (TDD)
+- [ ] P1-F17-T05 — smartedit/diff.go: unified-diff wrapper re-using F08 multiedit DiffManager (TDD)
+- [ ] P1-F17-T06 — smartedit/smart_edit_tool.go: Tool impl + multiedit transaction + post-write re-read + diff (TDD)
+- [ ] P1-F17-T07 — /edit slash (status/diff/dry-run/commit) + SmartEditInspector (TDD)
+- [ ] P1-F17-T08 — main.go wiring + registry registration + always-run integration tests
+- [ ] P1-F17-T09 — Challenge harness: 7-phase (SINGLE/NOT-FOUND/MULTI/ROLLBACK/DIFF/AMBIG/BINARY) with sha-256 positive evidence
+- [ ] P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
