@@ -101,14 +101,19 @@ func MergeNode(tree *PlanTree, childID string) (*PlanNode, error) {
 }
 
 func findNode(node *PlanNode, id string) *PlanNode {
-	if node == nil {
+	return findNodeVisited(node, id, make(map[string]bool))
+}
+
+func findNodeVisited(node *PlanNode, id string, visited map[string]bool) *PlanNode {
+	if node == nil || visited[node.ID] {
 		return nil
 	}
+	visited[node.ID] = true
 	if node.ID == id {
 		return node
 	}
 	for _, child := range node.Children {
-		if found := findNode(child, id); found != nil {
+		if found := findNodeVisited(child, id, visited); found != nil {
 			return found
 		}
 	}
@@ -116,14 +121,19 @@ func findNode(node *PlanNode, id string) *PlanNode {
 }
 
 func nodeDepth(node *PlanNode, id string, depth int) int {
-	if node == nil {
+	return nodeDepthVisited(node, id, depth, make(map[string]bool))
+}
+
+func nodeDepthVisited(node *PlanNode, id string, depth int, visited map[string]bool) int {
+	if node == nil || visited[node.ID] {
 		return 0
 	}
+	visited[node.ID] = true
 	if node.ID == id {
 		return depth
 	}
 	for _, child := range node.Children {
-		if d := nodeDepth(child, id, depth+1); d > 0 {
+		if d := nodeDepthVisited(child, id, depth+1, visited); d > 0 {
 			return d
 		}
 	}

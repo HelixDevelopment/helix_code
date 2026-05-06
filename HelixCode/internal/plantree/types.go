@@ -144,9 +144,14 @@ const (
 )
 
 func RenderTree(node *PlanNode, depth int) string {
-	if node == nil {
+	return renderTreeVisited(node, depth, make(map[string]bool))
+}
+
+func renderTreeVisited(node *PlanNode, depth int, visited map[string]bool) string {
+	if node == nil || visited[node.ID] {
 		return ""
 	}
+	visited[node.ID] = true
 	indent := strings.Repeat("  ", depth)
 	compactTag := ""
 	if node.Metadata != nil && node.Metadata["compacted"] == "true" {
@@ -154,29 +159,39 @@ func RenderTree(node *PlanNode, depth int) string {
 	}
 	result := fmt.Sprintf("%s%s %s (%s)%s\n", indent, node.Status.Marker(), node.Title, node.ID, compactTag)
 	for _, child := range node.Children {
-		result += RenderTree(child, depth+1)
+		result += renderTreeVisited(child, depth+1, visited)
 	}
 	return result
 }
 
 func CountNodes(node *PlanNode) int {
-	if node == nil {
+	return countNodesVisited(node, make(map[string]bool))
+}
+
+func countNodesVisited(node *PlanNode, visited map[string]bool) int {
+	if node == nil || visited[node.ID] {
 		return 0
 	}
+	visited[node.ID] = true
 	count := 1
 	for _, child := range node.Children {
-		count += CountNodes(child)
+		count += countNodesVisited(child, visited)
 	}
 	return count
 }
 
 func MaxDepth(node *PlanNode) int {
-	if node == nil {
+	return maxDepthVisited(node, make(map[string]bool))
+}
+
+func maxDepthVisited(node *PlanNode, visited map[string]bool) int {
+	if node == nil || visited[node.ID] {
 		return 0
 	}
+	visited[node.ID] = true
 	maxChild := 0
 	for _, child := range node.Children {
-		d := MaxDepth(child)
+		d := maxDepthVisited(child, visited)
 		if d > maxChild {
 			maxChild = d
 		}
