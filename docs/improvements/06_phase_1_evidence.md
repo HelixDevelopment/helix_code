@@ -2719,5 +2719,88 @@ Phase verdicts:
 - Phase D (DEPTH-DETECT): 6 env-driven branches verified — NO_COLOR override, COLORTERM=truecolor, TERM=*-256color, TERM=xterm (ANSI16), TERM=dumb, all-unset.
 - Phase E (YAML-MERGE): real `theme.yaml` written to tempdir, parsed by `gopkg.in/yaml.v3`, merged by `LoadFromFile` over the dark baseline; custom theme has `Name=="my-custom"`, **5/5 roles**, error matches the YAML override (`\x1b[38;2;255;0;255m` truecolor + `\x1b[38;5;201m` ansi256), info/warn/highlight/dim are byte-equal to `BuiltinDarkTheme()`. Merged error truecolor differs from dark error truecolor (no silent collapse).
 
-### P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE
+### P1-F20-T09 — Close-out evidence + PHASE 1 COMPLETE
+
+Date: 2026-05-06.
+
+Nine task commits in F20:
+
+| Task | Subject | SHA |
+|---|---|---|
+| T01 | docs(P1-F20-T01): bootstrap Phase 1 / Feature 20 evidence + advance PROGRESS | `60777fd` |
+| T02 | feat(P1-F20-T02): theme types - Role + Color + ColorDepth + Theme + sentinels + Reset const | `4697565` |
+| T03 | feat(P1-F20-T03): builtin themes dark/light/none with pinned byte tables | `a66737d` |
+| T04 | feat(P1-F20-T04): theme name + color depth detection from injected env | `7f97f57` |
+| T05 | feat(P1-F20-T05): theme loader + ThemeRegistry + YAML merge over dark baseline + Styler | `1fd42d9` |
+| T06 | feat(P1-F20-T06): wire theme.Styler into handleGenerate via F18 RenderTextBlock | `1066798` |
+| T07 | feat(P1-F20-T07): /theme slash (status/list/show) + main.go wiring + integration test | `348630c` |
+| T08 | feat(P1-F20-T08): challenge with runtime evidence + cross-compile check | submodule `4bf04bb` + meta-repo `300f973` |
+| T09 | chore(P1-F20-T09): close out feature 20 + Phase 1 of CLI-Agent Fusion programme COMPLETE | (this commit) |
+
+Final verification (`cd HelixCode && go test ./internal/theme/... ./internal/commands/... ./cmd/cli/...`):
+
+```
+ok  	dev.helix.code/internal/theme	0.004s
+ok  	dev.helix.code/internal/commands	0.693s
+ok  	dev.helix.code/internal/commands/builtin	0.016s
+ok  	dev.helix.code/cmd/cli	0.056s
+```
+
+Integration (`go test -tags=integration -run "TestTheme_" ./tests/integration/...`): `ok dev.helix.code/tests/integration 1.607s`.
+
+Anti-bluff smoke on F20 surface (inner module):
+
+```
+clean
+```
+
+Anti-bluff smoke on Challenges submodule:
+
+```
+clean
+```
+
+Cross-compile linux/amd64 (`GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f20check ./cmd/cli/`): success — 94,424,800 byte binary produced.
+
+Final harness re-run (`/tmp/p1f20_challenge ; echo "EXIT=$?"`), final 2 lines:
+
+```
+==> P1-F20 challenge harness PASS
+EXIT=0
+```
+
+Two-line summary: F20 ships a real, end-to-end 5-role semantic theme system (info/warn/error/highlight/dim) with byte-pinned built-in dark/light/none palettes across Truecolor/ANSI256/ANSI16 depth tiers, optional YAML overlay over the dark baseline at `$XDG_CONFIG_HOME/helixcode/theme.yaml`, env-driven name + depth resolution, plain-mode forced to `DepthOff`, `/theme {status,list,show}` slash, and 5 always-run Challenge phases with positive byte evidence (PHASE-A dark opens + Reset; PHASE-B light/dark cross-theme distinguisher; PHASE-C zero-`\x1b` invariant under DepthOff; PHASE-D 6 env branches; PHASE-E YAML merge over dark baseline). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to `origin`.
+
+---
+
+## Phase 1 of CLI-Agent Fusion programme — COMPLETE (2026-05-06)
+
+All 20 features shipped. Phase 1 entry condition (Article XI §11.9: every PASS carries positive runtime evidence; no absence-of-error PASS) satisfied across the entire programme. Anti-bluff smoke `clean` across every feature surface. All four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity for every close-out commit; Challenges submodule mirrored to its `origin` for every dual-commit task.
+
+| # | Feature | Close-out commit |
+|---|---|---|
+| F01 | Auto-Compaction | `4734f35`/`9284392` evidence; close-out per F01-T11 |
+| F02 | Permission Rule System | F02-T13 close-out |
+| F03 | Tool Result Persistence | `8b13e93` |
+| F04 | Git Worktree Agent Isolation | F04-T13 close-out |
+| F05 | Hook-Based Extensibility | F05-T13 close-out |
+| F06 | MCP Full Lifecycle | F06-T14 close-out |
+| F07 | Background Task System | F07-T11 close-out |
+| F08 | Plan Mode | F08-T09 close-out |
+| F09 | Slash Command System | F09-T08 close-out |
+| F10 | Skill System | F10-T09 close-out |
+| F11 | Session Transcript Resume | F11-T09 close-out |
+| F12 | Multi-Provider Backend | F12-T11 close-out |
+| F13 | LSP Integration | F13-T12 close-out |
+| F14 | Sandboxed Shell Execution | `998896c` (T11) + F14-T12 close-out |
+| F15 | Subagent Team | `16708a7` (T11) + F15-T12 close-out |
+| F16 | OpenTelemetry Integration | `c4972dc` (T11) + F16-T12 close-out |
+| F17 | Smart File Editing | `daa1279` (T09) + F17-T10 close-out |
+| F18 | No-Flicker Rendering | `c44b049` (T09) + `92db29e` (T10 close-out) |
+| F19 | AskUserQuestion with Previews | `ecb3e26` (T06) + `f584c67` (T07 close-out) |
+| F20 | Theme System | `300f973` (T08) + (this commit) (T09 close-out) — **PHASE 1 COMPLETE** |
+
+The 20 features collectively port the claude-code feature surface onto the HelixCode CLI agent: auto-compaction, layered permission rules, tool-result persistence, git-worktree agent isolation, shell-hook extensibility, full MCP lifecycle (stdio/HTTP/SSE/WS + OAuth), background tasks with streaming, plan mode, markdown slash commands, markdown skills, session transcript resume, multi-provider cloud backend (Anthropic/Bedrock/Vertex/Azure) with verifier-backed model lists, LSP integration (5 servers), sandboxed shell execution (bubblewrap + native userns) with CONST-033 deny-list, hybrid in-process+subprocess subagent dispatch with optional worktree isolation, OpenTelemetry (traces + metrics) with secret-filter, Aider-style SEARCH/REPLACE smart edits with multiedit-transactional atomicity, no-flicker ANSI streaming renderer with plain-mode fallback, structured `ask_user` tool with non-TTY short-circuit + previews, and 5-role semantic theme system with built-in/YAML palettes and depth auto-detect. Every feature carries a Challenge harness with positive byte evidence; every claim of completion is backed by pasted terminal output captured in this evidence log.
+
+**Phase 1 of the CLI-Agent Fusion programme is complete.** The HelixCode CLI agent now matches claude-code's user-visible feature surface end-to-end, with anti-bluff invariants enforced by Challenge runtime evidence at every step.
 

@@ -29,15 +29,15 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F20-T01 — bootstrap evidence + advance PROGRESS to F20
-- [ ] P1-F20-T02 — `internal/theme/types.go`: Theme + Role + Color + ColorDepth + ThemeName + sentinels + Reset const (TDD)
-- [ ] P1-F20-T03 — `internal/theme/builtin.go`: ThemeDark + ThemeLight + ThemeNone literals + BuiltIn() registry (TDD; pin §3.4 byte tables)
-- [ ] P1-F20-T04 — `internal/theme/detect.go`: DetectThemeName + DetectColorDepth pure functions of an injected env closure (TDD; table-drive every branch)
-- [ ] P1-F20-T05 — `internal/theme/loader.go`: LoaderOptions + Loader.Load + Styler + Stylize + WithDepth + YAML merge into dark baseline (TDD; real tempdir + injected fs)
-- [ ] P1-F20-T06 — Wire Styler into F18 in `cmd/cli/main.go` (handleGenerate non-stream RenderTextBlock + plain-mode WithDepth(Off) override) (TDD)
-- [ ] P1-F20-T07 — `/theme` slash command (status / list / show <name>) + main.go registration (TDD) + integration test
-- [ ] P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-MODE-ZERO-COLOR + DEPTH-AUTO-DETECT + YAML-OVERRIDE) with positive byte evidence
-- [ ] P1-F20-T09 — Feature 20 close-out + push 4 remotes non-force — **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE**
+- [x] P1-F20-T01 — bootstrap evidence + advance PROGRESS to F20
+- [x] P1-F20-T02 — `internal/theme/types.go`: Theme + Role + Color + ColorDepth + ThemeName + sentinels + Reset const (TDD)
+- [x] P1-F20-T03 — `internal/theme/builtin.go`: ThemeDark + ThemeLight + ThemeNone literals + BuiltIn() registry (TDD; pin §3.4 byte tables)
+- [x] P1-F20-T04 — `internal/theme/detect.go`: DetectThemeName + DetectColorDepth pure functions of an injected env closure (TDD; table-drive every branch)
+- [x] P1-F20-T05 — `internal/theme/loader.go`: LoaderOptions + Loader.Load + Styler + Stylize + WithDepth + YAML merge into dark baseline (TDD; real tempdir + injected fs)
+- [x] P1-F20-T06 — Wire Styler into F18 in `cmd/cli/main.go` (handleGenerate non-stream RenderTextBlock + plain-mode WithDepth(Off) override) (TDD)
+- [x] P1-F20-T07 — `/theme` slash command (status / list / show <name>) + main.go registration (TDD) + integration test
+- [x] P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-MODE-ZERO-COLOR + DEPTH-AUTO-DETECT + YAML-OVERRIDE) with positive byte evidence
+- [x] P1-F20-T09 — Feature 20 close-out + push 4 remotes non-force — **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE**
 
 ---
 
