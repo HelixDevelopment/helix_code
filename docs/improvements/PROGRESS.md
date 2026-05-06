@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F18 next candidate (No-Flicker Rendering)
-- **Active task:** —
+- **Active feature:** P1-F18 — No-Flicker Rendering (in progress)
+- **Active task:** P1-F18-T01 — bootstrap evidence + advance PROGRESS to F18
 - **Last completed:** P1-F17-T10 — Feature 17 (Smart File Editing) close-out + push to 4 remotes (all 10 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -272,6 +272,18 @@
 - [x] P1-F17-T08 — main.go wiring + registry registration + always-run integration tests  ← commit `5bf4c92`
 - [x] P1-F17-T09 — Challenge harness: 7-phase (SINGLE/NOT-FOUND/MULTI/ROLLBACK/DIFF/AMBIG/BINARY) with sha-256 positive evidence  ← submodule `e2e9e94` + meta-repo `daa1279`
 - [x] P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F18: No-Flicker Rendering)
+- [x] P1-F18-T01 — bootstrap evidence + advance PROGRESS to F18  ← (this commit)
+- [ ] P1-F18-T02 — render/types.go: Renderer interface + RenderMode + Frame + sentinels + env-var consts (TDD)
+- [ ] P1-F18-T03 — render/ansi_renderer.go: in-place line update + multi-line frame + dirty-region diff (TDD)
+- [ ] P1-F18-T04 — render/plain_renderer.go: line-by-line fallback with zero-ANSI/zero-CR invariant (TDD)
+- [ ] P1-F18-T05 — render/viewport.go: Frame buffer + dirty-line tracking + pure-Go Diff (TDD)
+- [ ] P1-F18-T06 — render/factory.go: HELIXCODE_RENDER env var + TTY detection via x/term (TDD)
+- [ ] P1-F18-T07 — Wire LLM streaming hook in cmd/cli/main.go::handleGenerate (TDD)
+- [ ] P1-F18-T08 — render/tool_helpers.go + wire tool-result frame rendering (TDD)
+- [ ] P1-F18-T09 — Challenge harness: 5 phases (STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY gated)
+- [ ] P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

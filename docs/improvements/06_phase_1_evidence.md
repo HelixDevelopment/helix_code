@@ -2317,3 +2317,38 @@ EXIT=0
 
 **Two-line summary.** Feature 17 (Smart File Editing) is closed: 10 task SHAs in tree, all unit + integration tests green, anti-bluff smoke clean across both HelixCode and Challenges trees, harness PASS with byte-exact sha-256 positive evidence in all 7 phases (SINGLE / NOT-FOUND / MULTI / ROLLBACK / DIFF / AMBIG / BINARY). The PARTIAL-FAILURE-ROLLBACK phase is the discriminating gate — d1.txt's in-memory block applied cleanly, d2.txt's block failed `not-found`, the whole-prompt atomic transaction aborted, and `sha256(after) == sha256(before)` re-read from disk for **both** files; this is the mechanical proof that smart-edit can never silently leave files half-written, which is the worst-class bug the feature was designed to eliminate.
 
+## P1-F18 — No-Flicker Rendering
+
+**Date:** 2026-05-06
+**Spec:** `docs/superpowers/specs/2026-05-06-p1-f18-no-flicker-rendering-design.md` (commit `7f52a9c`)
+**Plan:** `docs/superpowers/plans/2026-05-06-p1-f18-no-flicker-rendering.md` (commit `6b6bbff`)
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** Custom ANSI/CR renderer for streaming LLM tokens + tool result blocks; HELIXCODE_RENDER env var (auto/fancy/plain); TTY auto-detect via x/term; dirty-region diff; plain mode strips \r for log-grep safety; zero new external deps.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F18-T01 — Bootstrap
+
+(this commit) — append F18 section header to evidence; advance PROGRESS current focus to F18; insert 10-task list.
+
+### P1-F18-T02 — render/types.go: Renderer interface + RenderMode + Frame + sentinels + env-var consts (TDD)
+
+### P1-F18-T03 — render/ansi_renderer.go: in-place line update + multi-line frame + dirty-region diff (TDD)
+
+### P1-F18-T04 — render/plain_renderer.go: line-by-line fallback with zero-ANSI/zero-CR invariant (TDD)
+
+### P1-F18-T05 — render/viewport.go: Frame buffer + dirty-line tracking + pure-Go Diff (TDD)
+
+### P1-F18-T06 — render/factory.go: HELIXCODE_RENDER env var + TTY detection via x/term (TDD)
+
+### P1-F18-T07 — Wire LLM streaming hook in cmd/cli/main.go::handleGenerate (TDD)
+
+### P1-F18-T08 — render/tool_helpers.go + wire tool-result frame rendering (TDD)
+
+### P1-F18-T09 — Challenge harness: 5 phases (STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY gated)
+
+### P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
+
