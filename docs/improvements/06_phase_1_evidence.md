@@ -3525,3 +3525,140 @@ EXIT=0
 #### Defects / deviations
 
 None. The propagation was almost a no-op — only one of 39 file slots needed the verbatim quote appended. The verification script is the load-bearing artefact going forward: it locks in the cascade so a future paraphrase or accidental section deletion is caught immediately.
+
+---
+
+### P1.5-WP9 — Comprehensive reference updates sweep
+
+After WP2-WP7's mass moves/renames, swept all source code, tests, scripts, Dockerfiles, configs, and docs for stale references to old paths and updated them in-place.
+
+#### Per-old-path before/after counts
+
+| Old reference | Files matched (before) | Files matched (after) | Resolution |
+|---|---|---|---|
+| `Example_Projects/` | 19 | 11 | Active code/scripts/docs updated; 11 residual = audit-trail (specs/plans/reports + intentional "(formerly …)" markers in CLAUDE.md cascade) |
+| `Example_Resources/` | 2 | 9 | After CLAUDE.md cascade update; 9 residual = "(formerly Example_Resources/)" annotations + spec/plan audit trail |
+| `HelixAgent/cli_agents/` | 6 | 4 | Active script + Go code fixed; 4 residual = specs/plans + frozen `.gosec-baseline.json` |
+| `HelixAgent/cli_agents_configs/` | 0 | 0 | None to fix |
+| `HelixAgent/LLMsVerifier` | 7 | 7 | `verify-llmsverifier-pin-parity.sh` rewritten as single-canonical guard; rest = specs/plans + frozen security reports |
+| `HelixAgent/Containers` | 3 | 2 | `internal/config/config.go` fallback path fixed; 2 residual = historical apply-report + plan |
+| `Challenges/Containers` | 3 | 3 | All historical (session log, BUGFIXES, audit report) |
+| `HelixAgent/HelixQA` | 1 | 1 | spec/plan audit trail |
+| Other (`HelixAgent/HelixLLM/submodules/Containers`, `HelixAgent/HelixLLM/submodules/Security`, `HelixAgent/Security`, `HelixAgent/MCP-Servers`, `HelixAgent/external/mcp-servers/servers`) | 0 | 0 | Nothing to do |
+
+#### Total file count modified (in scope; excluding third-party + audit trail)
+
+**18 files changed across 5 repos** (1 root + 4 submodules: HelixAgent, HelixQA, Security, HelixLLM, HelixMemory, HelixSpecifier — last three are HelixAgent inner-submodules):
+
+Root meta-repo (12 files):
+1. `CLAUDE.md` — repo-layout block
+2. `ANALYSIS_SOURCES.md` — research artifact (60+ refs)
+3. `EXAMPLE_PROJECTS_INDEX.md` — research artifact (~30 refs)
+4. `EXAMPLE_PROJECTS_QUICK_REFERENCE.md` — research artifact (3 refs)
+5. `docs/bluff_proofing/STEP_BY_STEP_GUIDE.md` — live setup guide
+6. `docs/bluff_proofing/full_plan/STEP_BY_STEP_GUIDE.md` — live setup guide
+7. `docs/helix_qa/HelixQA_Integration/research/helixcode_architecture.md`
+8. `scripts/regenerate-diagrams.py` — diagram label
+9. `scripts/verify-llmsverifier-pin-parity.sh` — rewritten as single-canonical guard
+10. `HelixAgent` (gitlink bump)
+11. `HelixQA` (gitlink bump)
+12. `Security` (gitlink bump)
+
+HelixAgent submodule (6 files):
+1. `CLAUDE.md`
+2. `internal/clis/agents/claude_code/claude_code.go` — sourceDir fallback (HelixAgent → HelixCode + cli_agents)
+3. `internal/config/config.go` — Containers/.env fallback (HelixAgent → HelixCode)
+4. `tests/integration/cli_agents_test.go` — OpenCode/Cline test paths (Example_Projects → cli_agents)
+5. `docs/CLI_AGENTS_TEST_DOCUMENTATION.md`
+6. `docs/CLI_AGENT_PLUGINS_PLAN.md` — 50 path entries
+
+HelixQA, Security, HelixLLM, HelixMemory, HelixSpecifier submodules: each `CLAUDE.md` repo-layout block.
+
+#### Sample of representative changes
+
+```
+HelixAgent/internal/clis/agents/claude_code/claude_code.go:144
+- sourceDir = "/run/media/.../HelixAgent/cli_agents/claude-code-source"
++ sourceDir = "/run/media/.../HelixCode/cli_agents/claude-code-source"
+
+HelixAgent/internal/config/config.go:782
+- "/run/media/.../HelixAgent/Containers/.env",
++ "/run/media/.../HelixCode/Containers/.env",
+
+HelixAgent/tests/integration/cli_agents_test.go:26-29
+- openCodePath = "/run/media/.../HelixCode/Example_Projects/OpenCode/OpenCode"
++ openCodePath = "/run/media/.../HelixCode/cli_agents/opencode"
+- clinePath    = "/run/media/.../HelixCode/Example_Projects/Cline"
++ clinePath    = "/run/media/.../HelixCode/cli_agents/cline"
+
+scripts/regenerate-diagrams.py:84
+- f"HelixAgent/cli_agents/  ({...} agents — canonical source; ...)",
++ f"cli_agents/  ({...} agents — canonical source; ...)",
+
+scripts/verify-llmsverifier-pin-parity.sh
+  Pin-parity check is degenerate post-WP2 (single canonical pin).
+  Converted to a re-introduction tripwire that fails if HelixAgent/LLMsVerifier
+  ever reappears, otherwise prints the canonical SHA and exits 0.
+
+CLAUDE.md (root + 7 cascaded copies)
+  Replaced "└── Example_Projects/  ← reference projects" with two entries
+  (cli_agents/, cli_agents_resources/) plus "formerly …" annotations.
+
+docs/helix_qa/HelixQA_Integration/research/helixcode_architecture.md:141-142
+- Example_Projects/   # Example integrations (submodule)
+- Example_Resources/  # Resource templates (submodule)
++ cli_agents/         # Reference CLI agent submodules (formerly Example_Projects/)
++ cli_agents_resources/ # Reference resource submodules (formerly Example_Resources/)
+
+ANALYSIS_SOURCES.md / EXAMPLE_PROJECTS_INDEX.md / EXAMPLE_PROJECTS_QUICK_REFERENCE.md
+  Mass sed: Example_Projects/Qwen_Code/   → cli_agents/qwen-code/
+            Example_Projects/Gemini_CLI/  → cli_agents/gemini-cli/
+            Example_Projects/DeepSeek_CLI/ → cli_agents/deepseek-cli/
+            Example_Projects/             → cli_agents/   (catch-all)
+
+HelixAgent/docs/CLI_AGENT_PLUGINS_PLAN.md
+  Mass sed: Example_Projects/ → cli_agents/  (50 occurrences)
+
+HelixAgent/docs/CLI_AGENTS_TEST_DOCUMENTATION.md
+  OpenCode test path:  /HelixCode/Example_Projects/OpenCode/OpenCode/  → /HelixCode/cli_agents/opencode/
+  Cline test path:     /HelixCode/Example_Projects/Cline/             → /HelixCode/cli_agents/cline/
+
+docs/bluff_proofing/{,full_plan/}STEP_BY_STEP_GUIDE.md
+- ls Example_Projects/   # Should show: Aider, Cline, Codex, OpenHands, etc.
++ ls cli_agents/          # Should show: aider, cline, codex, openhands, etc.
+```
+
+#### Residue (intentional)
+
+| File / class | Reason |
+|---|---|
+| `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` | Historical design spec authored under pre-WP2 layout — preserved as audit trail of the migration design |
+| `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md` | Historical Phase 0 plan |
+| `docs/superpowers/plans/2026-05-06-p1-5-foundation-cleanup.md` | The Phase 1.5 plan itself — describes the migration in flight |
+| `HelixAgent/.gosec-baseline.json` | Frozen baseline of a historical security scan run; absolute paths reflect scan-time layout |
+| `HelixAgent/reports/security/gosec-report.json`, `gosec-report-final.json` | Frozen scan output |
+| `HelixAgent/docs/reports/COMPREHENSIVE_UNFINISHED_WORK_REPORT.md` | Historical report |
+| `HelixAgent/docs/superpowers/plans/2026-03-26-phase1-phase2-dead-code-memory-safety.md` | Historical plan |
+| `HelixAgent/docs/development/SESSION_2026-04-24.md` | Historical session log |
+| `HelixAgent/docs/issues/fixed/BUGFIXES.md` | Historical bugfix audit log |
+| `HelixAgent/reports/audit/full-report.md` | Historical audit report |
+| `Containers/scripts/resource-policy/apply-report.md` | Historical policy-application report |
+| "formerly Example_Projects/" / "formerly Example_Resources/" annotations in CLAUDE.md (8 files) + helixcode_architecture.md | Deliberately retained migration-context markers for future readers |
+| `scripts/verify-llmsverifier-pin-parity.sh` deprecation comment | Documents WP2's elimination of the duplicate transitive submodule |
+
+#### Commit chain
+
+| SHA | Repo | Scope |
+|---|---|---|
+| `19b9eeb` | HelixLLM (HelixAgent inner) | CLAUDE.md repo-layout |
+| `c309f92` | HelixMemory (HelixAgent inner) | CLAUDE.md repo-layout |
+| `53b8c98` | HelixSpecifier (HelixAgent inner) | CLAUDE.md repo-layout |
+| `9a314ab7` | HelixAgent | CLAUDE.md + 5 source/test/doc files + bump 3 inner gitlinks |
+| `7f1c75a` | HelixQA | CLAUDE.md repo-layout |
+| `a4c381b` | Security | CLAUDE.md repo-layout |
+| `79f8a2b` | meta-repo root | CLAUDE.md + 4 docs + scripts/regenerate-diagrams.py + scripts/verify-llmsverifier-pin-parity.sh + 3 root research artifacts + bump 3 root-level gitlinks |
+| (this commit) | meta-repo root | close-out evidence |
+
+#### Defects / deviations
+
+None. All updates are mechanical sed-driven substitutions on real-world paths. Re-running the sweep confirmed all remaining matches are intentional historical artifacts. The `verify-llmsverifier-pin-parity.sh` deviation is a deliberate improvement: instead of just substituting paths, the script was rewritten so that the WP2 deduplication is now mechanically guarded — the script will FAIL if the legacy duplicate ever reappears.
