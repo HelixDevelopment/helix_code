@@ -3171,3 +3171,89 @@ No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere u
 2. `git config --file .gitmodules --remove-section submodule.X` returns exit 1 with `fatal: no such section` when the section was already removed by a successful `git rm` — expected, suppressed via `|| true`.
 3. After `git rm` of a submodule path, the gitlink is auto-staged; passing the same path to a follow-up `git add` errors with `pathspec did not match any files` — solved by skipping the redundant add.
 
+### P1.5-WP4 — API key loader (bash + Go)
+
+Goal: every Helix* repo loads API keys with `$HOME/api_keys.sh` first, `.env` fallback. Both formats must work; loader source-able from any subdirectory.
+
+#### Artifacts shipped
+
+| File | Purpose |
+|---|---|
+| `scripts/load_api_keys.sh` | Canonical bash loader. Walks up from cwd to find `.gitmodules`-rooted `.env`. Honours `HELIXCODE_LOAD_API_KEYS=0`. |
+| `scripts/test_load_api_keys.sh` | 4-branch self-test (shell-present, env-fallback, neither-present-silent, opt-out). |
+| `HelixCode/internal/secrets/loader.go` | Go counterpart. Same precedence; `os.Setenv`-based; CONST-042-clean (values never logged). |
+| `HelixCode/internal/secrets/loader_test.go` | 8 unit tests covering shell-format, env-fallback, precedence, quoting, comments, blanks, missing-export skip, neither-found-error. |
+
+#### Verbatim test output
+
+```
+$ bash scripts/test_load_api_keys.sh
+PASS: branch1_prefers_api_keys_sh
+PASS: branch2_falls_back_to_env
+PASS: branch3_neither_present_is_silent
+PASS: branch4_opt_out_respected
+
+Results: PASS=4 FAIL=0
+```
+
+```
+$ cd HelixCode && go test -v -count=1 ./internal/secrets/...
+=== RUN   TestLoadAPIKeys_FromShellFormat
+--- PASS: TestLoadAPIKeys_FromShellFormat (0.00s)
+=== RUN   TestLoadAPIKeys_FromEnvFile
+--- PASS: TestLoadAPIKeys_FromEnvFile (0.00s)
+=== RUN   TestLoadAPIKeys_PrefersShellOverEnv
+--- PASS: TestLoadAPIKeys_PrefersShellOverEnv (0.00s)
+=== RUN   TestLoadAPIKeys_StripsQuotes
+--- PASS: TestLoadAPIKeys_StripsQuotes (0.00s)
+=== RUN   TestLoadAPIKeys_IgnoresComments
+--- PASS: TestLoadAPIKeys_IgnoresComments (0.00s)
+=== RUN   TestLoadAPIKeys_IgnoresBlank
+--- PASS: TestLoadAPIKeys_IgnoresBlank (0.00s)
+=== RUN   TestLoadAPIKeys_HandlesMissingExport
+--- PASS: TestLoadAPIKeys_HandlesMissingExport (0.00s)
+=== RUN   TestLoadAPIKeys_NeitherFound_ReturnsError
+--- PASS: TestLoadAPIKeys_NeitherFound_ReturnsError (0.00s)
+PASS
+ok  	dev.helix.code/internal/secrets	0.002s
+```
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/secrets/loader.go internal/secrets/loader_test.go && echo BLUFF || echo clean
+clean
+```
+
+#### Submodule propagation (active 4 of ~12)
+
+| Submodule | Loader copy | Makefile sourced | Commit |
+|---|---|---|---|
+| HelixAgent                                | yes | `test:` | `d5ab478` |
+| HelixQA                                   | yes | `build:` + `test:` | `d6e7a3e` |
+| Containers                                | yes | `build:` + `test:` | `9c2bb3e` |
+| Dependencies/HelixDevelopment/LLMsVerifier | yes | `build:` + `test:` | `b4db2f9` |
+
+Decision: copy (not symlink) across submodule repo boundaries — symlinks across separate git repos break standalone checkouts.
+
+LLMsVerifier required a precise `.gitignore` allow-exception (`!scripts/load_api_keys.sh`, `!**/scripts/load_api_keys.sh`) so the broad `**/*api_key*` security rule (CONST-042 defense-in-depth) still blocks credential files but lets the secret-free loader script be tracked.
+
+#### Submodules NOT propagated to (deferred per "pragmatic v1" plan)
+
+Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependencies/HelixDevelopment/Ollama, Dependencies/HelixDevelopment/HuggingFace_Hub, Github-Pages-Website, MCP-Servers, plus any other submodule under HelixAgent/HelixLLM/. These can adopt the loader later when their build flows need it.
+
+#### Commit chain
+
+| SHA | Scope |
+|---|---|
+| `c4f56d6` | meta-repo: bash loader + self-test + Go loader + 8 unit tests |
+| `d5ab478` | HelixAgent: loader + Makefile wire-in |
+| `d6e7a3e` | HelixQA: loader + Makefile wire-in |
+| `9c2bb3e` | Containers: loader + Makefile wire-in |
+| `b4db2f9` | LLMsVerifier: loader + .gitignore exception + Makefile wire-in |
+| `0822606` | meta-repo: bump 4 submodule gitlinks |
+
+#### Defects observed during execution
+
+1. LLMsVerifier's `.gitignore` line 223 (`**/*api_key*`) is intentionally broad to prevent credential file commits per CONST-042. The loader script's *name* matches the pattern but the script contains zero secrets — it only sources them at runtime. Resolved by adding two precise negations directly after the broad-ban block (with explanatory comment) so the security rule keeps working for everything else.
+2. HelixAgent's working tree shows nested-submodule pointer drift (`Mm` in `git status`) from prior WP work. Treated as out-of-scope for WP4; only `scripts/` and `Makefile` were staged per submodule.
+
