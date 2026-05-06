@@ -187,6 +187,12 @@ const (
 
 	// SourceDefault: hard-coded built-in default (lowest priority).
 	SourceDefault
+
+	// SourceRuntime: mode was changed at runtime (e.g. via /approval set or
+	// ApprovalManager.SetMode). Sits outside the precedence chain — it is
+	// only assigned after Select has already picked an initial source and
+	// the user later asks the manager to swap modes mid-session.
+	SourceRuntime
 )
 
 // String returns the canonical source name.
@@ -200,6 +206,8 @@ func (s ResolvedSource) String() string {
 		return "config"
 	case SourceDefault:
 		return "default"
+	case SourceRuntime:
+		return "runtime"
 	default:
 		return fmt.Sprintf("unknown-source(%d)", int(s))
 	}

@@ -108,6 +108,7 @@ func TestResolvedSource_String(t *testing.T) {
 		SourceEnv:     "env",
 		SourceConfig:  "config",
 		SourceDefault: "default",
+		SourceRuntime: "runtime",
 	}
 	for s, want := range cases {
 		if got := s.String(); got != want {
