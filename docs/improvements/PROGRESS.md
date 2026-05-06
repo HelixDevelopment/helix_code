@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F20 next candidate (Theme System)
-- **Active task:** —
+- **Active feature:** P1-F20 — Theme System (in progress) — FINAL Phase 1 feature
+- **Active task:** P1-F20-T01 — bootstrap evidence + advance PROGRESS to F20
 - **Last completed:** P1-F19-T07 — Feature 19 (AskUserQuestion with Previews) close-out + push to 4 remotes (all 7 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -293,6 +293,17 @@
 - [x] P1-F19-T05 — wire ask_user into registry + integration test (always-runs both branches)  ← commit `98bd424`
 - [x] P1-F19-T06 — Challenge harness: 5 always-run phases + reader-position + byte-offset positive evidence  ← submodule `e3454a4` + meta-repo `ecb3e26`
 - [x] P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F20: Theme System) — FINAL Phase 1 feature
+- [x] P1-F20-T01 — bootstrap evidence + advance PROGRESS to F20  ← (this commit)
+- [ ] P1-F20-T02 — theme/types.go: Role + Color + ColorDepth + Theme + sentinels + Reset const (TDD)
+- [ ] P1-F20-T03 — theme/builtin.go: dark/light/none themes with pinned byte tables (TDD)
+- [ ] P1-F20-T04 — theme/detect.go: ThemeName + ColorDepth detection from injected env (TDD)
+- [ ] P1-F20-T05 — theme/loader.go: ThemeRegistry + YAML merge into dark baseline + Styler (TDD)
+- [ ] P1-F20-T06 — wire theme.Styler into handleGenerate via F18 RenderTextBlock (TDD)
+- [ ] P1-F20-T07 — /theme slash (status/list/show) + main.go wiring + integration test (TDD)
+- [ ] P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)
+- [ ] P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

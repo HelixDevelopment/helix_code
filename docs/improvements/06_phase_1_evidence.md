@@ -2620,3 +2620,36 @@ EXIT=0
 
 Two-line summary: F19 ships a real `ask_user` tool with non-TTY short-circuit (zero-read invariant proven by reader-position byte counts), retry loop, F18-renderer-driven inline previews (preview-before-label proven by writer byte offsets 37 + 87), and 5 always-run Challenge phases. All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to `origin`.
 
+## P1-F20 — Theme System
+
+**Date:** 2026-05-06
+**Spec:** `0e97afa`
+**Plan:** `6bc5d0c`
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** 5-role semantic theme (info/warn/error/highlight/dim) with built-in light/dark/none + optional YAML override at $XDG_CONFIG_HOME/helixcode/theme.yaml; depth auto-detect via $COLORTERM/$TERM (truecolor → ANSI256 → ANSI16 → off); plain mode forces zero color emission; /theme slash + HELIXCODE_THEME env; decorator Styler over F18 renderer; zero new external deps. **Final Phase 1 feature.**
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F20-T01 — Bootstrap
+
+(this commit) — append F20 section header to evidence; advance PROGRESS current focus to F20; insert 9-task list.
+
+### P1-F20-T02 — theme/types.go: Role + Color + ColorDepth + Theme + sentinels + Reset const (TDD)
+
+### P1-F20-T03 — theme/builtin.go: dark/light/none themes with pinned byte tables (TDD)
+
+### P1-F20-T04 — theme/detect.go: ThemeName + ColorDepth detection from injected env (TDD)
+
+### P1-F20-T05 — theme/loader.go: ThemeRegistry + YAML merge into dark baseline + Styler (TDD)
+
+### P1-F20-T06 — wire theme.Styler into handleGenerate via F18 RenderTextBlock (TDD)
+
+### P1-F20-T07 — /theme slash (status/list/show) + main.go wiring + integration test (TDD)
+
+### P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)
+
+### P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE
+
