@@ -33,6 +33,7 @@ import (
 	"dev.helix.code/internal/theme"
 	"dev.helix.code/internal/tools"
 	"dev.helix.code/internal/tools/askuser"
+	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
@@ -157,7 +158,8 @@ type CLI struct {
 	toolRegistry       *tools.ToolRegistry
 	commandRegistry    *commands.Registry
 	mcpManager         *mcp.Manager
-	hooksLoaded        int // count of hooks loaded at startup (for diagnostics)
+	browserManager     *browser.BrowserManager // F23: cline-style single-session browser façade
+	hooksLoaded        int                     // count of hooks loaded at startup (for diagnostics)
 }
 
 // NewCLI creates a new CLI instance
@@ -689,6 +691,24 @@ func (c *CLI) Run() error {
 	if regErr := cmdRegistry.Register(commands.NewGitAutoCommitCommand(autoCommitter)); regErr != nil {
 		log.Printf("git_auto_commit: register slash command failed: %v", regErr)
 	}
+
+	// F23: cline-style browser tool suite (browser_navigate, browser_snapshot,
+	// browser_click, browser_type, browser_screenshot, browser_close) plus
+	// the /browser slash command (status / navigate <url> / close).
+	// Headless default; HELIXCODE_BROWSER_HEADED=true opt-in. Lazy-create on
+	// first navigate; idempotent close. Defensive close-on-exit at the end
+	// of main() via defer.
+	browserMgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), zap.NewNop())
+	if err := tools.RegisterBrowserToolsV2(toolReg, browserMgr); err != nil {
+		log.Printf("browser: register tools failed: %v", err)
+	}
+	c.browserManager = browserMgr
+	if regErr := cmdRegistry.Register(commands.NewBrowserCommand(browserMgr)); regErr != nil {
+		log.Printf("browser: register slash command failed: %v", regErr)
+	}
+	// Defensive close-on-exit: tear down chromium subprocess if a session
+	// was lazily created during the run. Idempotent (sync.Once-guarded).
+	defer browserMgr.CloseSession() //nolint:errcheck
 
 	// F09: user-defined Markdown slash commands.
 	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
