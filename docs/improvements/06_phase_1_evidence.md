@@ -3307,3 +3307,66 @@ Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` wa
 1. The dedup spec in the task body assumed each `.env` would get its own commit. In reality every `.env` is already covered by `.gitignore` (root + each submodule's own), so `git add .env` is a no-op and would silently produce empty commits. Confirmed via `git check-ignore -v` for each path. Outcome: collapsed to a single commit on the root `.gitignore` + this evidence file only — no submodule commits, no submodule-pointer bumps. Backups + diffs are likewise gitignored, so the working tree stays clean apart from `.gitignore` itself.
 2. `./HelixCode/.env` removed 38 lines vs the 36-line baseline because that file historically had two duplicate `KEY=$ApiKey_Foo` lines for the same key (likely an editing accident). Both were removed correctly because both matched a SAFE_KEY name. Net result is identical to removing the canonical 36 keys, just with the dup tax taken.
 
+
+### P1.5-WP6 — Docs consolidation (Documentation/ → docs/)
+
+**Goal**: Eliminate every `Documentation/` directory in the tree by merging into the canonical `docs/`. Update all live internal links. Three directories tracked by inventory (`./Documentation`, `./HelixCode/Documentation`, `HelixAgent/skills/development/documentation`).
+
+#### Per-directory summary
+
+| Source | Target | Items moved | Collisions | Commit |
+|---|---|---:|---:|---|
+| `./Documentation/` | `./docs/` | 3 dirs (`General/`, `Materials/`, `User_Manual/`) — recursively contains 5 + 2 + (4 examples + 8 tutorials + 4 top md) = 23 files in 6 subtrees | 0 (no name overlap with existing `docs/` content) | `0d832b3` |
+| `HelixCode/Documentation/` | `HelixCode/docs/` | 6 entries (`Architecture/`, `General/`, `Testing/`, `User_Manual/`, plus `AUDIT_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_AUDIT_REPORT.md`) — over 60 markdown + html + yaml files | 0 (HelixCode/docs/ did not exist) | `4530efc` |
+| `HelixAgent/skills/development/documentation/` | `HelixAgent/docs/skills/development/` | 1 file (`SKILL.md`) | 0 | HelixAgent: `2a6e11c4`; meta-repo gitlink: `1470b2e` |
+
+All moves used `git mv` (rename detection preserved 100% for every file).
+
+#### Internal link updates
+
+Updated **12 files** that contained live references to the old `Documentation/...` paths:
+
+Root scope (T06.01) — 7 files:
+- `IMPLEMENTATION_COMPLETION_PLAN.md`, `COMPREHENSIVE_COMPLETION_REPORT.md`, `COMPREHENSIVE_PROJECT_REPORT_AND_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_UNFINISHED_WORK_AND_IMPLEMENTATION_PLAN.md`, `PHASED_IMPLEMENTATION_PLAN.md` (root reports — `Documentation/General|Materials|User_Manual` → `docs/...`)
+- `docs/User_Manual/INDEX.md`, `docs/User_Manual/SUMMARY.md` (self-refs in tree-diagrams updated)
+
+HelixCode scope (T06.02) — 5 files (live operational paths, not historical):
+- `HelixCode/scripts/generate-manual.sh`, `HelixCode/scripts/sync-manual.sh` (PROJECT_ROOT path constants)
+- `HelixCode/scripts/generate-test-catalog/generate-test-catalog.go` (hard-coded `os.MkdirAll`/`os.Create` paths)
+- `HelixCode/TEST_RESULTS.md`, `HelixCode/COMPLETION_REPORT.md`, `HelixCode/QUICK_REFERENCE_MANUAL_SYSTEM.md`, `HelixCode/DOCUMENTATION_SYSTEM_SUMMARY.md`, `HelixCode/tests/e2e/FINAL_SUMMARY.md`, `HelixCode/docs/Architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md`, `HelixCode/docs/User_Manual/README.md`
+
+#### Deliberately untouched
+
+- `docs/superpowers/plans/2026-05-06-p1-5-foundation-cleanup.md` — the plan that orchestrates this very migration; preserved as a historical record (rewriting it would corrupt the audit trail of this WP).
+- `docs/improvements/03_main_plan_step_01/.../stage1_helixcode_mapping.md` and `04_main_plan_step_02/.../stage1_helixcode_mapping.md` — research artefacts documenting the OLD layout for posterity.
+- `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` — synthesis design doc referencing the previous structure.
+- `HelixQA/`, `cli_agents_resources/`, `Example_Projects/` — third-party submodules / vendored content (out of scope per WP6 charter).
+
+#### Verification
+
+```bash
+$ find . -maxdepth 6 -name "Documentation" -type d 2>/dev/null | grep -v '.git/'
+$ # (empty — zero remaining)
+$ find . -maxdepth 6 -name "documentation" -type d 2>/dev/null | grep -v '.git/'
+./cli_agents/codename-goose/documentation
+./cli_agents/fauxpilot/documentation
+./cli_agents/bridle/plugins/packages/creator-studio-pack/documentation
+./cli_agents/claude-plugins/plugins/packages/creator-studio-pack/documentation
+```
+
+The four lowercase `documentation/` directories belong to **third-party `cli_agents/` upstreams** (`codename-goose`, `fauxpilot`, `bridle`, `claude-plugins`). Restructuring vendored upstream layouts is out of scope for WP6 — those are governed by their own projects.
+
+#### Commit chain
+
+| SHA | Scope |
+|---|---|
+| `0d832b3` | T06.01 — root `Documentation/` → `docs/` (3 subtrees + 7 link-update files) |
+| `4530efc` | T06.02 — `HelixCode/Documentation/` → `HelixCode/docs/` (6 entries + 5 link-update files; scripts incl. Go) |
+| `2a6e11c4` (HelixAgent) | T06.03 — `HelixAgent/skills/development/documentation/SKILL.md` → `HelixAgent/docs/skills/development/SKILL.md` |
+| `1470b2e` | T06.03 — meta-repo gitlink bump for HelixAgent |
+
+#### Defects / deviations
+
+1. **Plan-file untouched**: the `p1-5-foundation-cleanup.md` plan in `docs/superpowers/plans/` references `Documentation/` ~10 times. Not rewritten because the plan describes the migration itself; rewriting would erase the audit trail. Same reasoning for `improvements/03_*` and `improvements/04_*` research docs.
+2. **`HelixQA/` references not rewritten** — those `Documentation/` references live inside vendored upstream content (`HelixQA/tools/opensource/perfetto`, `scrcpy`, `signoz`) and are external project paths, not HelixCode-owned.
+3. **Lowercase `documentation/` not consolidated**: limited to 4 third-party upstream packages under `cli_agents/`. Out of scope per WP6 charter ("merge `Documentation/`", uppercase).
