@@ -306,6 +306,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-06     | T08 update    | T08 (Challenge harness 5 phases, meta `2781c1a` + sub `f2ea964`) closed; 8 of 9 F21 tasks done; T09 (close-out + push 4 remotes) is next. |
 | 2026-05-06     | T09 close-out | F21 (Codex Approval Modes) CLOSED — first Phase 2 feature shipped. All 9 tasks ticked in plan + PROGRESS. F22 next candidate (brainstorming required). Decision log entry added in PROGRESS.md. Test summary, anti-bluff `clean`, cross-compile linux/amd64 (94 MB), and harness final-2-lines (`ALL CHECKS PASSED` / `P2-F21 challenge harness PASS`) recorded in `07_phase_2_evidence.md` §P2-F21-T09. |
 | 2026-05-06     | F22 docs      | F22 (Aider Git Auto-Commit Per Change) spec + plan landed on `main`. Spec `8be7fba` (`docs/superpowers/specs/2026-05-06-p2-f22-aider-git-auto-commit-design.md`), plan `b4f217d` (`docs/superpowers/plans/2026-05-06-p2-f22-aider-git-auto-commit.md`). 9 tasks (T01 bootstrap → T09 Challenge + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps. F22 in flight; T01 next. |
+| 2026-05-07     | F23 docs      | F23 (Cline Browser Tool) spec + plan landed on `main`. Spec `83d401d` (`docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md`), plan `bc5fd3e` (`docs/superpowers/plans/2026-05-07-p2-f23-cline-browser-tool.md`). 10 tasks (T01 bootstrap → T10 Challenge 7 phases + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps (chromedp v0.15.1 + cdproto already direct from earlier work). F23 in flight; T01 next. |
 
 ---
 
@@ -340,4 +341,40 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (commit-success-but-tree-dirty / message-doesn't-reflect-diff / fires-on-non-edit-tools / runtime-toggle-not-honoured / secret-leak); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 
-**Picking up F22 specifically:** F22 is CLOSED. Brainstorm next Phase 2 feature (F23) per synthesis design §4.2 (cline / plandex / openhands).
+**Picking up F22 specifically:** F22 is CLOSED. F23 (Cline Browser Tool) docs landed; T01 next.
+
+---
+
+## F23 mid-flight section (active feature)
+
+**Active feature:** P2-F23 — Cline Browser Tool (third Phase 2 feature).
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md` (commit `83d401d`).
+
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f23-cline-browser-tool.md` (commit `bc5fd3e`).
+
+**User-confirmed design (Q1-Q5 = A,A,A,A,A):**
+- Q1=A: Browser engine `chromedp` (already direct in `HelixCode/go.mod` v0.15.1 + cdproto v0.0.0-20260405000525-47a8ff65b46a). Chromium subprocess managed by chromedp via `NewExecAllocator` + `NewContext`.
+- Q2=A: Six tools — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_type`, `browser_screenshot`, `browser_close`. Per-tool `RequiresApproval` per spec §3.6: `navigate`/`click`/`type`/`close` → `LevelEdit`; `snapshot`/`screenshot` → `LevelReadOnly`. NO `LevelRun`/`LevelAll`.
+- Q3=A: Headless default; `HELIXCODE_BROWSER_HEADED=true` (case-insensitive literal `true`) opt-in for headed mode. Read once at session-create via `OptionsFromEnv()`.
+- Q4=A: Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns absolute file path (NOT base64).
+- Q5=A: `/browser` slash (`status` / `navigate <url>` / `close`) PLUS the six tools. NO cobra subcommand.
+
+**Task progress:** 0 of 10 complete (docs only landed).
+
+| Task | Status | Subject                                                                                                                                          |
+|------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| T01  | TODO   | bootstrap F23 evidence section + advance PROGRESS to F23                                                                                         |
+| T02  | TODO   | browser/types.go + options.go: Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD) |
+| T03  | TODO   | browser/manager.go + session.go: BrowserManager atomic-pointer lifecycle + BrowserSession with chromedp Context + per-session tempdir + sync.Once close + sessionFactory seam (TDD) |
+| T04  | TODO   | browser/navigate_tool.go: browser_navigate Tool impl with WaitReady + lazy session-create + 30 s timeout (TDD)                                  |
+| T05  | TODO   | browser/snapshot_tool.go: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)                                     |
+| T06  | TODO   | browser/click_type_tools.go: browser_click + browser_type Tool impls with NodeVisible + 5 s selector timeout + ClickWaitDuration settle (TDD)   |
+| T07  | TODO   | browser/screenshot_tool.go: browser_screenshot Tool impl with PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD)                         |
+| T08  | TODO   | browser/close_tool.go: browser_close Tool impl with idempotent CloseSession + post-close RequireSession fails (TDD)                             |
+| T09  | TODO   | /browser slash + main.go wiring + browser.RegisterAll + integration test (real-chromium gated)                                                  |
+| T10  | TODO   | Challenge harness 7 phases A-G (navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) + close-out + push 4 remotes |
+
+**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (navigate-but-not-loaded / snapshot-empty-HTML / click-but-DOM-unchanged / screenshot-0-bytes-or-non-PNG / close-but-chromium-still-running); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch. Skip permitted ONLY if chromium absent (must emit `SKIP-OK: #P2-F23 chromium not available`).
+
+**Picking up F23 specifically:** Start with T01 (bootstrap F23 evidence + advance PROGRESS); proceed sequentially through T02..T10. T03 introduces the `sessionFactory` test seam to keep unit tests off real chromium; integration test (T09) and Challenge (T10) gate on real chromium availability.
