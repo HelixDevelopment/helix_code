@@ -1,21 +1,3 @@
-[submodule "Example_Projects/OpenCode/OpenCode"]
-	path = Example_Projects/OpenCode/OpenCode
-	url = git@github.com:opencode-ai/opencode.git
-[submodule "Example_Projects/OpenCode/Homebrew-Tap"]
-	path = Example_Projects/OpenCode/Homebrew-Tap
-	url = git@github.com:opencode-ai/homebrew-tap.git
-[submodule "Example_Projects/Ollama_Code"]
-	path = Example_Projects/Ollama_Code
-	url = git@github.com:tcsenpai/ollama-code.git
-[submodule "Example_Projects/Qwen_Code"]
-	path = Example_Projects/Qwen_Code
-	url = git@github.com:QwenLM/qwen-code.git
-[submodule "Example_Projects/Codename_Goose"]
-	path = Example_Projects/Codename_Goose
-	url = git@github.com:jgenerali/codename-goose.git
-[submodule "Example_Projects/Claude_Code"]
-	path = Example_Projects/Claude_Code
-	url = git@github.com:anthropics/claude-code.git
 [submodule "Dependencies/LLama_CPP"]
 	path = Dependencies/LLama_CPP
 	url = git@github.com:ggml-org/llama.cpp.git
@@ -25,210 +7,27 @@
 [submodule "Dependencies/HuggingFace_Hub"]
 	path = Dependencies/HuggingFace_Hub
 	url = git@github.com:huggingface/huggingface_hub.git
-[submodule "Example_Projects/DeepSeek_CLI"]
-	path = Example_Projects/DeepSeek_CLI
-	url = git@github.com:holasoymalva/deepseek-cli.git
-[submodule "Example_Projects/Mistral_Code"]
-	path = Example_Projects/Mistral_Code
-	url = git@github.com:Wylgrif/Mistral-code.git
 [submodule "Github-Pages-Website"]
 	path = Github-Pages-Website
 	url = git@github.com:HelixDevelopment-Code/Welcome.git
-[submodule "Example_Projects/Gemini_CLI"]
-	path = Example_Projects/Gemini_CLI
-	url = git@github.com:google-gemini/gemini-cli.git
-[submodule "Example_Projects/Forge"]
-	path = Example_Projects/Forge
-	url = git@github.com:antinomyhq/forge.git
-[submodule "Example_Projects/Plandex"]
-	path = Example_Projects/Plandex
-	url = git@github.com:plandex-ai/plandex.git
-[submodule "Example_Projects/GPT_Engineer"]
-	path = Example_Projects/GPT_Engineer
-	url = git@github.com:AntonOsika/gpt-engineer.git
-[submodule "Example_Projects/Aider"]
-	path = Example_Projects/Aider
-	url = git@github.com:Aider-AI/aider.git
-[submodule "Example_Projects/Cline"]
-	path = Example_Projects/Cline
-	url = git@github.com:cline/cline.git
 [submodule "awesome-ai-memory"]
 	path = awesome-ai-memory
 	url = git@github.com:topoteretes/awesome-ai-memory.git
-[submodule "Example_Projects/Stark-Kitty-Kiro-Cli"]
-	path = Example_Projects/Stark-Kitty-Kiro-Cli
-	url = git@github.com:stark1tty/kiro-cli.git
-[submodule "Example_Projects/Kilo-Code"]
-	path = Example_Projects/Kilo-Code
-	url = git@github.com:Kilo-Org/kilocode.git
-[submodule "Example_Projects/Amazon-Q-Developer-CLI"]
-	path = Example_Projects/Amazon-Q-Developer-CLI
-	url = git@github.com:aws/amazon-q-developer-cli.git
-[submodule "Example_Projects/OpenHands/software-agent-sdk"]
-	path = Example_Projects/OpenHands/software-agent-sdk
-	url = git@github.com:OpenHands/software-agent-sdk.git
-[submodule "Example_Projects/OpenHands/OpenHands"]
-	path = Example_Projects/OpenHands/OpenHands
-	url = git@github.com:OpenHands/OpenHands.git
-[submodule "Example_Projects/OpenHands/agentic-code-search-oss"]
-	path = Example_Projects/OpenHands/agentic-code-search-oss
-	url = git@github.com:OpenHands/agentic-code-search-oss.git
-[submodule "Example_Projects/OpenHands/skills"]
-	path = Example_Projects/OpenHands/skills
-	url = git@github.com:OpenHands/skills.git
-[submodule "Example_Projects/OpenHands/litellm"]
-	path = Example_Projects/OpenHands/litellm
-	url = git@github.com:OpenHands/litellm.git
-[submodule "Example_Projects/OpenHands/OpenHands-Server"]
-	path = Example_Projects/OpenHands/OpenHands-Server
-	url = git@github.com:OpenHands/OpenHands-Server.git
-[submodule "Example_Projects/OpenHands/open-operator"]
-	path = Example_Projects/OpenHands/open-operator
-	url = git@github.com:OpenHands/open-operator.git
-[submodule "Example_Projects/OpenHands/OpenHands-Docs"]
-	path = Example_Projects/OpenHands/OpenHands-Docs
-	url = git@github.com:OpenHands/docs.git
-[submodule "Example_Projects/OpenHands/agent-analysis"]
-	path = Example_Projects/OpenHands/agent-analysis
-	url = git@github.com:OpenHands/agent-analysis.git
 [submodule "Example_Resources/GitHub-Awesome-Copilot"]
 	path = Example_Resources/GitHub-Awesome-Copilot
 	url = git@github.com:github/awesome-copilot.git
-[submodule "Example_Projects/Superset"]
-	path = Example_Projects/Superset
-	url = git@github.com:superset-sh/superset.git
-[submodule "Example_Projects/ui-ux-pro-max-skill"]
-	path = Example_Projects/ui-ux-pro-max-skill
-	url = git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git
-[submodule "Example_Projects/Warp"]
-	path = Example_Projects/Warp
-	url = git@github.com:warpdotdev/Warp.git
-[submodule "Example_Projects/GitHub-Copilot-CLI"]
-	path = Example_Projects/GitHub-Copilot-CLI
-	url = git@github.com:github/copilot-cli.git
-[submodule "Example_Projects/Codex"]
-	path = Example_Projects/Codex
-	url = org-14957082@github.com:openai/codex.git
-[submodule "Example_Projects/Octogen"]
-	path = Example_Projects/Octogen
-	url = git@github.com:dbpunk-labs/octogen.git
-[submodule "Example_Projects/TaskWeaver"]
-	path = Example_Projects/TaskWeaver
-	url = git@github.com:microsoft/TaskWeaver.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AI-Core"]
-	path = Example_Projects/Cheshire-Cat-Ai/CC-AI-Core
-	url = git@github.com:cheshire-cat-ai/core.git
 [submodule "Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs"]
 	path = Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs
 	url = git@github.com:cheshire-cat-ai/docs.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs"]
-	path = Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs
-	url = git@github.com:cheshire-cat-ai/llms.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins"]
-	path = Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins
-	url = git@github.com:cheshire-cat-ai/plugins.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/plugin-template"]
-	path = Example_Projects/Cheshire-Cat-Ai/plugin-template
-	url = git@github.com:cheshire-cat-ai/plugin_template.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/model-plugins"]
-	path = Example_Projects/Cheshire-Cat-Ai/model-plugins
-	url = git@github.com:cheshire-cat-ai/models-plugin.git
-[submodule "Example_Projects/Cheshire-Cat-Ai/plugins-backend"]
-	path = Example_Projects/Cheshire-Cat-Ai/plugins-backend
-	url = git@github.com:cheshire-cat-ai/plugins-backend.git
 [submodule "Example_Resources/Awesome-AI-GPTs"]
 	path = Example_Resources/Awesome-AI-GPTs
 	url = git@github.com:EmbraceAGI/Awesome-AI-GPTs.git
-[submodule "Example_Projects/Multiagent-Coding-System"]
-	path = Example_Projects/Multiagent-Coding-System
-	url = git@github.com:Danau5tin/multi-agent-coding-system.git
 [submodule "Example_Resources/OpenAI-Cookbook"]
 	path = Example_Resources/OpenAI-Cookbook
 	url = org-14957082@github.com:openai/openai-cookbook.git
-[submodule "Example_Projects/Codai"]
-	path = Example_Projects/Codai
-	url = git@github.com:meysamhadeli/codai.git
-[submodule "Example_Projects/FauxPilot"]
-	path = Example_Projects/FauxPilot
-	url = git@github.com:fauxpilot/fauxpilot.git
-[submodule "Example_Projects/vtcode"]
-	path = Example_Projects/vtcode
-	url = git@github.com:vinhnx/vtcode.git
-[submodule "Example_Projects/MobileAgent"]
-	path = Example_Projects/MobileAgent
-	url = git@github.com:X-PLUG/MobileAgent.git
-[submodule "Example_Projects/gptme/gptme"]
-	path = Example_Projects/gptme/gptme
-	url = git@github.com:gptme/gptme.git
-[submodule "Example_Projects/gptme/gptme-contrib"]
-	path = Example_Projects/gptme/gptme-contrib
-	url = git@github.com:gptme/gptme-contrib.git
-[submodule "Example_Projects/gptme/gptme-agent-template"]
-	path = Example_Projects/gptme/gptme-agent-template
-	url = git@github.com:gptme/gptme-agent-template.git
-[submodule "Example_Projects/gptme/gptme-pitch-deck"]
-	path = Example_Projects/gptme/gptme-pitch-deck
-	url = git@github.com:gptme/gptme-pitch-deck.git
-[submodule "Example_Projects/gptme/gptme-rag"]
-	path = Example_Projects/gptme/gptme-rag
-	url = git@github.com:gptme/gptme-rag.git
-[submodule "Example_Projects/gptme/gptme-webui"]
-	path = Example_Projects/gptme/gptme-webui
-	url = git@github.com:gptme/gptme-webui.git
-[submodule "Example_Projects/gptme/gptme-lessons"]
-	path = Example_Projects/gptme/gptme-lessons
-	url = git@github.com:gptme/gptme-lessons.git
-[submodule "Example_Projects/gptme/gptme-tauri"]
-	path = Example_Projects/gptme/gptme-tauri
-	url = git@github.com:gptme/gptme-tauri.git
-[submodule "Example_Projects/Conduit"]
-	path = Example_Projects/Conduit
-	url = git@github.com:lostintangent/conduit-release.git
-[submodule "Example_Projects/Shai"]
-	path = Example_Projects/Shai
-	url = git@github.com:ovh/shai.git
-[submodule "Example_Projects/SnowCLI"]
-	path = Example_Projects/SnowCLI
-	url = git@github.com:MayDay-wpf/snow-cli.git
-[submodule "Example_Projects/GitMCP"]
-	path = Example_Projects/GitMCP
-	url = git@github.com:idosal/git-mcp
-[submodule "Example_Projects/Claude-Code-Plugins-And-Skills"]
-	path = Example_Projects/Claude-Code-Plugins-And-Skills
-	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
-[submodule "Example_Projects/Bridle"]
-	path = Example_Projects/Bridle
-	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
-[submodule "Example_Projects/Agent-Deck"]
-	path = Example_Projects/Agent-Deck
-	url = git@github.com:asheshgoplani/agent-deck.git
-[submodule "Example_Projects/Nanocoder"]
-	path = Example_Projects/Nanocoder
-	url = git@github.com:Nano-Collective/nanocoder.git
 [submodule "Example_Resources/Awesome-AI-Agents"]
 	path = Example_Resources/Awesome-AI-Agents
 	url = git@github.com:e2b-dev/awesome-ai-agents.git
-[submodule "Example_Projects/Postgres-MCP"]
-	path = Example_Projects/Postgres-MCP
-	url = git@github.com:timescale/pg-aiguide.git
-[submodule "Example_Projects/Noi"]
-	path = Example_Projects/Noi
-	url = git@github.com:lencx/Noi.git
-[submodule "Example_Projects/Claude-Squad"]
-	path = Example_Projects/Claude-Squad
-	url = git@github.com:smtg-ai/claude-squad.git
-[submodule "Example_Projects/Emdash"]
-	path = Example_Projects/Emdash
-	url = git@github.com:generalaction/emdash.git
-[submodule "Example_Projects/Codex-Skills"]
-	path = Example_Projects/Codex-Skills
-	url = org-14957082@github.com:openai/skills.git
-[submodule "Example_Projects/Get-Shit-Done"]
-	path = Example_Projects/Get-Shit-Done
-	url = git@github.com:glittercowboy/get-shit-done.git
-[submodule "Example_Projects/GitHub-Spec-Kit"]
-	path = Example_Projects/GitHub-Spec-Kit
-	url = git@github.com:github/spec-kit.git
 [submodule "Example_Resources/Taches-CC-Resources"]
 	path = Example_Resources/Taches-CC-Resources
 	url = git@github.com:glittercowboy/taches-cc-resources.git
