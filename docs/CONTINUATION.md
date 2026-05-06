@@ -324,7 +324,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
 - Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
 
-**Task progress:** 6 of 9 complete (T06 done at `db55e72`; T07 next).
+**Task progress:** 7 of 9 complete (T07 done at `a999b3a`; T08 next).
 
 | Task | Status         | Subject                                                                                                                                  |
 |------|----------------|------------------------------------------------------------------------------------------------------------------------------------------|
@@ -334,7 +334,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T04  | DONE `4b2ab67` | autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)                        |
 | T05  | DONE `3a28ca6` | autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)                  |
 | T06  | DONE `db55e72` | registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)                            |
-| T07  | not started | /git_auto_commit slash command (status/on/off/show) (TDD)                                                                                |
+| T07  | DONE `a999b3a` | /git_auto_commit slash command (status/on/off/show) (TDD)                                                                             |
 | T08  | not started | main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test                                        |
 | T09  | not started | Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes |
 
