@@ -1107,12 +1107,18 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 			return fmt.Errorf("streaming generation failed: %w", perr)
 		}
 	} else {
-		// Real non-streaming from provider
+		// Real non-streaming from provider, wired through the P1-F18
+		// Renderer (T08) so the full LLM response respects HELIXCODE_RENDER
+		// + TTY detection. Plain mode -> zero-ANSI/zero-CR transcript;
+		// fancy mode -> hide-cursor + per-line emit. The blockID is empty
+		// (one-shot) because a non-stream completion is not re-rendered.
 		resp, err := provider.Generate(ctx, req)
 		if err != nil {
 			return fmt.Errorf("generation failed: %w", err)
 		}
-		fmt.Println(resp.Content)
+		if rerr := printResponseThroughRenderer(resp.Content); rerr != nil {
+			return fmt.Errorf("renderer print failed: %w", rerr)
+		}
 	}
 
 	fmt.Printf("\n✅ Generation completed\n")
@@ -1158,6 +1164,27 @@ func streamToRenderer(ctx context.Context, ch <-chan llm.LLMResponse, r render.R
 			}
 		}
 	}
+}
+
+// printResponseThroughRenderer prints a single non-stream LLM response
+// through the P1-F18 Renderer (T08) so the bytes flow through plain/fancy
+// resolution + zero-ANSI/zero-CR enforcement instead of bare fmt.Println.
+//
+// Construction is local: the non-stream branch in handleGenerate doesn't
+// need a longer-lived renderer (the response is one-shot, never re-rendered),
+// so we build, render, and Close on each call. blockID is empty so
+// RenderTextBlock generates a synthetic one-shot ID under the hood.
+//
+// Empty content is a no-op (mirrors RenderTextBlock contract); since
+// fmt.Println("") would have emitted a stray newline we keep the empty case
+// silent here to preserve transcript hygiene.
+func printResponseThroughRenderer(content string) error {
+	r, err := render.NewRenderer(render.FactoryOptions{})
+	if err != nil {
+		return fmt.Errorf("renderer init failed: %w", err)
+	}
+	defer func() { _ = r.Close() }()
+	return render.RenderTextBlock(r, "", content)
 }
 
 // handleNotification sends a notification

@@ -122,6 +122,24 @@ func TestStreamingThroughRenderer_FancyMode_HasANSIControl(t *testing.T) {
 	}
 }
 
+func TestPrintResponseThroughRenderer_NonEmptyContent_NoError(t *testing.T) {
+	// Smoke: non-stream LLM response printing must succeed end-to-end with
+	// the default renderer construction (HELIXCODE_RENDER unset, no Writer
+	// override -> os.Stdout, plain mode resolved by the factory's TTY probe
+	// when running under `go test`).
+	if err := printResponseThroughRenderer("hello from non-stream branch\n"); err != nil {
+		t.Fatalf("printResponseThroughRenderer non-empty: %v", err)
+	}
+}
+
+func TestPrintResponseThroughRenderer_EmptyContent_NoOp(t *testing.T) {
+	// Empty content must not error and must not panic. The internal
+	// RenderTextBlock("") -> no-op contract is exercised here.
+	if err := printResponseThroughRenderer(""); err != nil {
+		t.Fatalf("printResponseThroughRenderer empty: %v", err)
+	}
+}
+
 func TestStreamingThroughRenderer_BeginCommit_BalancedAcrossErrors(t *testing.T) {
 	// Producer ships two chunks then closes the channel WITH an error
 	// returned to its own caller. From streamToRenderer's perspective,
