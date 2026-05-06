@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/llm/compression"
 	"dev.helix.code/internal/llm/compressioniface"
+	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
 )
@@ -76,6 +77,23 @@ type BaseAgent struct {
 	// loop's per-iteration boundary. nil = no telemetry (graceful degradation).
 	// Per Feature 16 (telemetry), P1-F16-T08.
 	telemetry *telemetry.AgentInstrumentation
+
+	// memoryRegistry is the optional project memory snapshotter. nil = no
+	// project memory injection (graceful degradation; preserves existing
+	// BaseAgent behaviour for tests that don't wire memory). When set,
+	// getSystemPrompt prepends Memory.Render() per call (lock-free atomic
+	// load — no caching).
+	// Per Feature 24 (codex project memory port), P2-F24-T07.
+	memoryRegistry projectmemory.MemorySnapshotter
+}
+
+// SetMemoryRegistry installs an optional MemorySnapshotter so getSystemPrompt
+// prepends the current project memory + user overlay on every call. nil-safe:
+// passing nil disables the prepend (the prompt reverts to the existing body).
+func (a *BaseAgent) SetMemoryRegistry(r projectmemory.MemorySnapshotter) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.memoryRegistry = r
 }
 
 // NewBaseAgent creates a new base agent
@@ -623,9 +641,14 @@ Format response as JSON:
 	}
 }
 
-// getSystemPrompt returns the system prompt for the agent
+// getSystemPrompt returns the system prompt for the agent. When a project
+// memory registry is wired (via SetMemoryRegistry), the current memory
+// snapshot is prepended to the base prompt. The snapshot is read per-call
+// via the registry's lock-free atomic load — never cached at construct time
+// — so mid-session edits via /memory edit + fsnotify-driven reload are
+// observed immediately. Spec §3.5 (F24).
 func (a *BaseAgent) getSystemPrompt() string {
-	return fmt.Sprintf(`You are a %s agent named %s. Your capabilities include: %v.
+	base := fmt.Sprintf(`You are a %s agent named %s. Your capabilities include: %v.
 
 You are part of a multi-agent system for software development. Your responses should be:
 1. Precise and actionable
@@ -635,6 +658,18 @@ You are part of a multi-agent system for software development. Your responses sh
 Tool output handling: when a tool produces output exceeding 50,000 characters, the runtime persists the raw content to disk. The tool result you receive will contain a "persistedOutputPath" pointing to a file under .helix/tool-results/. To read the full content, invoke the Read tool with that path. Treat the path as a regular workspace file.
 
 Always respond with valid JSON only, no additional text.`, a.agentType, a.name, a.capabilities)
+
+	a.mu.RLock()
+	reg := a.memoryRegistry
+	a.mu.RUnlock()
+	if reg == nil {
+		return base
+	}
+	rendered := reg.Snapshot().Render()
+	if rendered == "" {
+		return base
+	}
+	return rendered + "\n\n---\n\n" + base
 }
 
 // processLLMResponse processes the LLM response based on task type

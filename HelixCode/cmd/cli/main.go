@@ -26,6 +26,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
@@ -158,8 +159,9 @@ type CLI struct {
 	toolRegistry       *tools.ToolRegistry
 	commandRegistry    *commands.Registry
 	mcpManager         *mcp.Manager
-	browserManager     *browser.BrowserManager // F23: cline-style single-session browser façade
-	hooksLoaded        int                     // count of hooks loaded at startup (for diagnostics)
+	browserManager     *browser.BrowserManager        // F23: cline-style single-session browser façade
+	memoryRegistry     *projectmemory.MemoryRegistry  // F24: codex-style project memory + hot-reload
+	hooksLoaded        int                            // count of hooks loaded at startup (for diagnostics)
 }
 
 // NewCLI creates a new CLI instance
@@ -709,6 +711,30 @@ func (c *CLI) Run() error {
 	// Defensive close-on-exit: tear down chromium subprocess if a session
 	// was lazily created during the run. Idempotent (sync.Once-guarded).
 	defer browserMgr.CloseSession() //nolint:errcheck
+
+	// F24: codex-style project memory subsystem.
+	// Discovers helixcode.md / codex.md / AGENTS.md by parent-walking from
+	// cwd up to a git root or filesystem root. Loads $XDG_CONFIG_HOME/
+	// helixcode/memory.md as a per-user overlay (rendered AFTER project
+	// memory). Hot-reloaded mid-session via fsnotify (200 ms debounce).
+	// /memory slash exposes status/show/edit/reload. BaseAgent prepends
+	// Memory.Render() to the system prompt on every LLM call (lock-free
+	// atomic load — no caching).
+	memCwd, _ := os.Getwd()
+	memLoader := projectmemory.NewMemoryLoader(zap.NewNop())
+	memRegistry := projectmemory.NewMemoryRegistry(memLoader, memCwd)
+	if _, err := memRegistry.Reload(ctx); err != nil {
+		log.Printf("projectmemory: initial reload failed: %v", err)
+	}
+	memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop())
+	if err := memWatcher.Start(ctx); err != nil {
+		log.Printf("projectmemory: watcher start failed (degrading to slash-only reload): %v", err)
+	}
+	defer memWatcher.Close() //nolint:errcheck
+	if regErr := cmdRegistry.Register(commands.NewMemoryCommand(memRegistry)); regErr != nil {
+		log.Printf("projectmemory: register slash command failed: %v", regErr)
+	}
+	c.memoryRegistry = memRegistry
 
 	// F09: user-defined Markdown slash commands.
 	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
