@@ -426,13 +426,14 @@ func TestBrowserTools(t *testing.T) {
 	})
 }
 
-// TestBrowserSession tests browser session management
-func TestBrowserSession(t *testing.T) {
+// TestLegacyBrowserSession tests legacy browser session management.
+// (Renamed from TestBrowserSession in P2-F23 T03 alongside the type rename.)
+func TestLegacyBrowserSession(t *testing.T) {
 	tools := NewBrowserTools(nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	session, err := NewBrowserSession(ctx, tools, nil)
+	session, err := NewLegacyBrowserSession(ctx, tools, nil)
 	if err != nil {
 		t.Skipf("Failed to create browser session: %v (SKIP-OK: #unmarked-skip-needs-ticket)", err)
 		return

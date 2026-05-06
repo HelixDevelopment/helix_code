@@ -275,8 +275,8 @@ func (bt *BrowserTools) stopConsoleMonitor(browserID string) {
 	}
 }
 
-// BrowserSession represents a browser automation session
-type BrowserSession struct {
+// LegacyBrowserSession represents a browser automation session
+type LegacyBrowserSession struct {
 	Browser     *Browser
 	Tools       *BrowserTools
 	Context     context.Context
@@ -288,8 +288,12 @@ type BrowserSession struct {
 	mu          sync.RWMutex
 }
 
-// NewBrowserSession creates a new browser session
-func NewBrowserSession(ctx context.Context, tools *BrowserTools, opts *LaunchOptions) (*BrowserSession, error) {
+// NewLegacyBrowserSession creates a new legacy browser session.
+// Renamed from NewBrowserSession in P2-F23 (T03) to avoid type-name
+// collision with the new cline-style BrowserSession (single-session,
+// atomic-pointer managed). Multi-browser callers continue to work
+// against this legacy API; F23 callers use BrowserManager.
+func NewLegacyBrowserSession(ctx context.Context, tools *BrowserTools, opts *LaunchOptions) (*LegacyBrowserSession, error) {
 	sessionCtx, cancel := context.WithCancel(ctx)
 
 	browser, err := tools.LaunchBrowser(sessionCtx, opts)
@@ -298,7 +302,7 @@ func NewBrowserSession(ctx context.Context, tools *BrowserTools, opts *LaunchOpt
 		return nil, err
 	}
 
-	return &BrowserSession{
+	return &LegacyBrowserSession{
 		Browser:     browser,
 		Tools:       tools,
 		Context:     sessionCtx,
@@ -309,7 +313,7 @@ func NewBrowserSession(ctx context.Context, tools *BrowserTools, opts *LaunchOpt
 }
 
 // Navigate navigates to a URL in the session
-func (bs *BrowserSession) Navigate(url string) error {
+func (bs *LegacyBrowserSession) Navigate(url string) error {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 
@@ -328,7 +332,7 @@ func (bs *BrowserSession) Navigate(url string) error {
 }
 
 // TakeScreenshot takes a screenshot in the session
-func (bs *BrowserSession) TakeScreenshot(opts *ScreenshotOptions) (*Screenshot, error) {
+func (bs *LegacyBrowserSession) TakeScreenshot(opts *ScreenshotOptions) (*Screenshot, error) {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 
@@ -343,7 +347,7 @@ func (bs *BrowserSession) TakeScreenshot(opts *ScreenshotOptions) (*Screenshot, 
 }
 
 // Close closes the browser session
-func (bs *BrowserSession) Close() error {
+func (bs *LegacyBrowserSession) Close() error {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
 
@@ -353,7 +357,7 @@ func (bs *BrowserSession) Close() error {
 }
 
 // GetErrors returns all errors that occurred in the session
-func (bs *BrowserSession) GetErrors() []error {
+func (bs *LegacyBrowserSession) GetErrors() []error {
 	bs.mu.RLock()
 	defer bs.mu.RUnlock()
 
@@ -363,7 +367,7 @@ func (bs *BrowserSession) GetErrors() []error {
 }
 
 // GetScreenshots returns all screenshots taken in the session
-func (bs *BrowserSession) GetScreenshots() []*Screenshot {
+func (bs *LegacyBrowserSession) GetScreenshots() []*Screenshot {
 	bs.mu.RLock()
 	defer bs.mu.RUnlock()
 
