@@ -18,6 +18,7 @@ import (
 	"dev.helix.code/internal/agent/subagent"
 	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/approvalwire"
+	"dev.helix.code/internal/autocommit"
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
@@ -668,6 +669,25 @@ func (c *CLI) Run() error {
 		approvalMgr.Mode(), approvalMgr.Source(), sandboxAvailable)
 	if regErr := cmdRegistry.Register(commands.NewApprovalCommand(approvalMgr)); regErr != nil {
 		log.Printf("approval: register slash command failed: %v", regErr)
+	}
+
+	// F22: per-edit git auto-commit (Aider-style).
+	// Default-on; opt-out via HELIXCODE_GIT_AUTO_COMMIT=off or
+	// /git_auto_commit off. WorkingDir is the process cwd at startup;
+	// in subagent worktrees that's the worktree path (F04 invariant).
+	acEnabled := os.Getenv(autocommit.EnvVarName) != "off"
+	cwd, _ := os.Getwd()
+	autoCommitter := autocommit.NewAutoCommitter(autocommit.Options{
+		Enabled:    acEnabled,
+		Provider:   c.llmProvider,
+		WorkingDir: cwd,
+		Logger:     zap.NewNop(),
+	})
+	toolReg.SetAutoCommitter(autoCommitter)
+	log.Printf("git_auto_commit: enabled=%t cwd=%s git_repo=%t",
+		autoCommitter.Enabled(), cwd, autoCommitter.IsGitRepo())
+	if regErr := cmdRegistry.Register(commands.NewGitAutoCommitCommand(autoCommitter)); regErr != nil {
+		log.Printf("git_auto_commit: register slash command failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.
