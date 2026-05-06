@@ -45,7 +45,7 @@ runtime mode swap.
 | P2-F21-T05 | `19bffce` (+ CONTINUATION update `1195ef9`) | Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD) |
 | P2-F21-T06 | `ad8843b` (+ CONTINUATION update `9b72c26`) | /approval slash command (status/set/show) (TDD) |
 | P2-F21-T07 | `c022968` (+ CONTINUATION update `bd67324`) | main.go wiring + --approval pflag + registry hook + integration test (TDD) |
-| P2-F21-T08 | sub `aff2a6f` + meta `2781c1a` (+ CONTINUATION update `ee413c3`) | Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny) |
+| P2-F21-T08 | sub `f2ea964` + meta `2781c1a` (+ CONTINUATION update `ee413c3`) | Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny) |
 | P2-F21-T09 | (this commit) | Feature 21 close-out + push 4 remotes non-force |
 
 ### Acceptance
@@ -187,7 +187,7 @@ before `Tool.Execute`).
 | T05 | `19bffce` (Tool interface ext + ~38 impls) + CONTINUATION update `1195ef9` |
 | T06 | `ad8843b` (/approval slash) + CONTINUATION update `9b72c26` |
 | T07 | `c022968` (main.go wiring + 8 integration tests) + CONTINUATION update `bd67324` |
-| T08 | Challenges submodule `aff2a6f` + meta-repo gitlink `2781c1a` + CONTINUATION update `ee413c3` |
+| T08 | Challenges submodule `f2ea964` + meta-repo gitlink `2781c1a` + CONTINUATION update `ee413c3` |
 | T09 | (this commit — close-out + push 4 remotes) |
 
 **Verbatim test summary (`go test ./internal/approval/... ./internal/commands/... ./cmd/cli/...`):**

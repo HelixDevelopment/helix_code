@@ -107,7 +107,7 @@ Meta-repo remotes (4):
 | T05  | `19bffce` (+ `1195ef9`) | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
 | T06  | `ad8843b` (+ `9b72c26`) | `/approval` slash command (status/set/show) — ApprovalInspector seam + ParseMode + ModeDescriptors render |
 | T07  | `c022968` (+ `bd67324`) | main.go wiring + `--approval` flag + registry hook + 8 integration tests (approvalwire.AskUserYesNoPrompter + ToolRegistry.SetApprovalManager + applyApprovalGate; sandbox markers injected for full-auto Run/All) |
-| T08  | meta `2781c1a` / sub `aff2a6f` (+ `ee413c3`) | Challenge harness 5 phases (suggest-deny, auto-edit-prompt, full-auto-sandbox, runtime-change, F02-final-deny); harness PASS, cross-compile linux/amd64 PASS, anti-bluff smoke clean; F02 contract pinned via in-stub deny-rule (registry-level F02 seam not yet wired — see CHALLENGE.md §11) |
+| T08  | meta `2781c1a` / sub `f2ea964` (+ `ee413c3`) | Challenge harness 5 phases (suggest-deny, auto-edit-prompt, full-auto-sandbox, runtime-change, F02-final-deny); harness PASS, cross-compile linux/amd64 PASS, anti-bluff smoke clean; F02 contract pinned via in-stub deny-rule (registry-level F02 seam not yet wired — see CHALLENGE.md §11) |
 | T09  | (this commit) | Feature 21 close-out + push 4 remotes non-force (PROGRESS + plan ticks + evidence T09 section + this CONTINUATION update) |
 
 ---
@@ -240,8 +240,8 @@ If F21 is the active feature when you resume:
    to end.
 3. Continue at **T09** (Feature 21 close-out + push to all 4 meta-repo
    remotes non-force; also push the Challenges submodule's own 4 remotes
-   for the T08 commit `aff2a6f` that was deferred). T08 completed at
-   meta `2781c1a` / submodule `aff2a6f` — challenge harness PASS,
+   for the T08 commit `f2ea964` that was deferred). T08 completed at
+   meta `2781c1a` / submodule `f2ea964` — challenge harness PASS,
    cross-compile linux/amd64 PASS, anti-bluff smoke clean.
 
 ### Picking up new feature after F21
@@ -303,5 +303,5 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-06     | Initial create| Captures state through P2-F21-T04 (`5ef13b8`); Phase 2 in flight.  |
 | 2026-05-06     | T06 update    | T06 (`/approval` slash command) closed; 6 of 9 F21 tasks done.     |
 | 2026-05-06     | T07 update    | T07 (main.go wiring + registry hook + integration test, `c022968`) closed; 7 of 9 F21 tasks done. |
-| 2026-05-06     | T08 update    | T08 (Challenge harness 5 phases, meta `2781c1a` + sub `aff2a6f`) closed; 8 of 9 F21 tasks done; T09 (close-out + push 4 remotes) is next. |
+| 2026-05-06     | T08 update    | T08 (Challenge harness 5 phases, meta `2781c1a` + sub `f2ea964`) closed; 8 of 9 F21 tasks done; T09 (close-out + push 4 remotes) is next. |
 | 2026-05-06     | T09 close-out | F21 (Codex Approval Modes) CLOSED — first Phase 2 feature shipped. All 9 tasks ticked in plan + PROGRESS. F22 next candidate (brainstorming required). Decision log entry added in PROGRESS.md. Test summary, anti-bluff `clean`, cross-compile linux/amd64 (94 MB), and harness final-2-lines (`ALL CHECKS PASSED` / `P2-F21 challenge harness PASS`) recorded in `07_phase_2_evidence.md` §P2-F21-T09. |
