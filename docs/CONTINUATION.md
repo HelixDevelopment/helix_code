@@ -360,12 +360,12 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns absolute file path (NOT base64).
 - Q5=A: `/browser` slash (`status` / `navigate <url>` / `close`) PLUS the six tools. NO cobra subcommand.
 
-**Task progress:** 1 of 10 complete.
+**Task progress:** 2 of 10 complete.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| T01  | DONE (this commit) | bootstrap F23 evidence section + advance PROGRESS to F23                                                                                         |
-| T02  | TODO   | browser/types.go + options.go: Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD) |
+| T01  | DONE `64e499b` | bootstrap F23 evidence section + advance PROGRESS to F23                                                                                         |
+| T02  | DONE `cdb323e` | browser/types.go + options.go: Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD) |
 | T03  | TODO   | browser/manager.go + session.go: BrowserManager atomic-pointer lifecycle + BrowserSession with chromedp Context + per-session tempdir + sync.Once close + sessionFactory seam (TDD) |
 | T04  | TODO   | browser/navigate_tool.go: browser_navigate Tool impl with WaitReady + lazy session-create + 30 s timeout (TDD)                                  |
 | T05  | TODO   | browser/snapshot_tool.go: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)                                     |
