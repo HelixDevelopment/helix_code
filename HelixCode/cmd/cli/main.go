@@ -803,6 +803,42 @@ func (c *CLI) Run() error {
 		log.Printf("telemetry: register slash command failed: %v", regErr)
 	}
 
+	// P1-F20-T07: Register the /theme slash command.
+	//
+	// The slash command is observation-only: it inspects the active theme
+	// name, depth, and source so the operator can verify F20 detection at
+	// runtime without grepping logs. Registry construction here is parallel
+	// to (not shared with) the per-handleGenerate registry built later — both
+	// pre-load the same built-ins + same optional theme.yaml so /theme list
+	// and the styling code path observe identical state.
+	//
+	// Failure mode: every fallible step degrades gracefully. YAML missing /
+	// malformed -> log + continue with built-ins. Get failure -> log +
+	// fall back to dark. The slash command always registers; worst case is
+	// /theme show <user-theme> errors and /theme list shows the three
+	// built-ins only.
+	{
+		slashThemeRegistry := theme.NewThemeRegistry()
+		if path := theme.DefaultThemePath(os.Getenv); path != "" {
+			if err := slashThemeRegistry.LoadFromFile(path); err != nil {
+				log.Printf("theme(slash): yaml load failed (continuing with built-ins): %v", err)
+			}
+		}
+		slashThemeName := theme.DetectThemeName(os.Getenv)
+		slashSelectedTheme, slashErr := slashThemeRegistry.Get(slashThemeName)
+		if slashErr != nil {
+			log.Printf("theme(slash): get %q failed (%v), falling back to dark", slashThemeName, slashErr)
+			slashSelectedTheme, _ = slashThemeRegistry.Get(theme.ThemeDark)
+			slashThemeName = theme.ThemeDark
+		}
+		slashColorDepth := theme.DetectColorDepth(os.Getenv)
+		slashSource := commands.ResolveThemeSource(os.Getenv)
+		slashStyler := theme.NewStyler(slashSelectedTheme, slashColorDepth)
+		if regErr := cmdRegistry.Register(commands.NewThemeCommand(slashThemeRegistry, slashThemeName, slashColorDepth, slashSource, slashStyler)); regErr != nil {
+			log.Printf("theme: register slash command failed: %v", regErr)
+		}
+	}
+
 	// Note: BaseAgent (telemetry.AgentInstrumentation consumer) is NOT
 	// constructed in this CLI entry point; agent-loop instrumentation is wired
 	// at the call site in callers that own a BaseAgent (e.g. subagent helper
