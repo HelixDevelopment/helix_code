@@ -238,3 +238,40 @@ EXIT=0
 **Two-line summary:** F21 ships codex-compatible 4-mode approval with CLI/env/config selector, atomic-pointer runtime swap, F14 sandbox coupling under full-auto, and F02 final-deny composition; all 9 tasks committed with TDD discipline. Challenge harness PASS across all 5 phases with positive runtime evidence; anti-bluff smoke clean; cross-compile clean; first Phase 2 feature shipped.
 
 ---
+
+## P2-F22 — Aider Git Auto-Commit Per Change
+
+**Date opened:** 2026-05-06
+**Date closed:** —
+**Spec:** `8be7fba`
+**Plan:** `b4f217d`
+**Status:** in flight
+
+### One-line goal
+
+Aider-style per-edit git auto-commit for HelixCode CLI: one commit per accepted
+edit (LevelEdit/LevelAll tools), LLM-summarised commit message with
+deterministic fallback, `Co-Authored-By: HelixCode <noreply@helixcode.dev>`
+trailer on every auto-commit. Default-on; opt-out via env / slash / per-edit
+param. Composes with F21 approval and F04 worktree.
+
+### Commits in order
+
+| Task | Commit | Subject |
+|---|---|---|
+| P2-F22-T01 | (this commit) | bootstrap F22 evidence + advance PROGRESS to F22 |
+| P2-F22-T02 | tbd | autocommit/types.go (TDD) |
+| P2-F22-T03 | tbd | autocommit/git.go thin wrapper (real-git TDD) |
+| P2-F22-T04 | tbd | autocommit/summariser.go + secret_filter.go (TDD) |
+| P2-F22-T05 | tbd | autocommit/committer.go pipeline (real-git TDD) |
+| P2-F22-T06 | tbd | registry.go SetAutoCommitter + fireAutoCommit hook (TDD) |
+| P2-F22-T07 | tbd | /git_auto_commit slash command (TDD) |
+| P2-F22-T08 | tbd | main.go wiring + integration test |
+| P2-F22-T09 | tbd | Challenge harness 6+1 phases + close-out + push 4 remotes |
+
+### Acceptance
+
+_to be filled in as tasks land — every claim of "PASS" must include
+pasted runtime evidence per Article XI §11.9._
+
+---

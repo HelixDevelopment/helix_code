@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F21 COMPLETE; F22 next candidate
-- **Active feature:** —
-- **Active task:** —
-- **Last completed:** P2-F21-T09 — Feature 21 (Codex Approval Modes) close-out + push 4 remotes non-force
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F22 (Aider Git Auto-Commit Per Change) in flight
+- **Active feature:** P2-F22 — Aider Git Auto-Commit Per Change
+- **Active task:** P2-F22-T02 — autocommit/types.go (next)
+- **Last completed:** P2-F22-T01 — bootstrap F22 evidence + advance PROGRESS to F22
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-06
@@ -342,6 +342,17 @@
 - [x] P2-F21-T07 — main.go wiring + --approval pflag + registry hook + integration test (TDD)  ← commit `c022968` + CONTINUATION update `bd67324`
 - [x] P2-F21-T08 — Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny)  ← Challenges submodule `f2ea964` + meta-repo `2781c1a` + CONTINUATION update `ee413c3`
 - [x] P2-F21-T09 — Feature 21 close-out + push 4 remotes non-force  ← (this commit)
+
+## P2-F22 task list (Aider Git Auto-Commit Per Change) — in flight
+- [x] P2-F22-T01 — bootstrap F22 evidence section + advance PROGRESS to F22  ← (this commit)
+- [ ] P2-F22-T02 — autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)
+- [ ] P2-F22-T03 — autocommit/git.go: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (real-git TDD)
+- [ ] P2-F22-T04 — autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)
+- [ ] P2-F22-T05 — autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)
+- [ ] P2-F22-T06 — registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)
+- [ ] P2-F22-T07 — /git_auto_commit slash command (status/on/off/show) (TDD)
+- [ ] P2-F22-T08 — main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test
+- [ ] P2-F22-T09 — Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
