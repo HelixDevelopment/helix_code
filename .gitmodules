@@ -214,3 +214,6 @@
 [submodule "cli_agents/superset"]
 	path = cli_agents/superset
 	url = git@github.com:superset-sh/superset.git
+[submodule "MCP-Servers"]
+	path = MCP-Servers
+	url = git@github.com:modelcontextprotocol/servers.git
