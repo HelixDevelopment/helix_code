@@ -2963,3 +2963,106 @@ a WP1 concern — it's a checkout/init issue tracked under WP2 restructuring
 and WP10 validation; root sees them as `-dirty` SHAs but no gitlink advance
 exists to commit.
 
+## P1.5-WP2 — Submodule restructuring
+
+**Timestamp:** 2026-05-06
+**Status:** CLOSED (49 of 57 cli_agents moved + cli_agents_configs + cli_agents_resources rename)
+
+### Summary
+
+Mechanical move of `HelixAgent/cli_agents/*` submodules to meta-repo root,
+plus the related plain-content directory `cli_agents_configs/` and rename
+of `Example_Resources/` -> `cli_agents_resources/`. Submodule moves use
+`deinit -f` + `git rm` in HelixAgent followed by `git submodule add --force`
+at root with the same upstream URL.
+
+### cli_agents — moved successfully (49 of 57)
+
+Across 7 batched commits (P1.5-T02.02-pre … P1.5-T02.08):
+
+- batch 1 (T02.02-pre): agent-deck, aiagent, aichat, aichat-llm-functions, aider
+- batch 2 (T02.03):     amazon-q, bridle, claude-code, claude-code-source,
+                        claude-plugins, claude-squad, cli-agent, codai, codename-goose
+- batch 3 (T02.04):     codex-skills, conduit, copilot-cli, crush, deepseek-cli,
+                        deepseek-cli-youkpan, fauxpilot, forge
+- batch 4 (T02.05):     gemini-cli, get-shit-done, git-mcp, gpt-engineer, gptme,
+                        junie, mistral-code, multiagent-coding
+- batch 5 (T02.06):     nanocoder, noi, octogen, open-interpreter, plandex,
+                        postgres-mcp, qwen-code
+- batch 6 (T02.07):     shai, snow-cli, swe-agent, taskweaver, ui-ux-pro-max,
+                        vtcode, warp, x-cmd, xela-cli, zeroshot
+- batch 7 (T02.08):     cline, codex (recovered via retry with 300s timeout)
+
+### cli_agents — FAILED (8 of 57)
+
+Network/clone instability from large or rate-limited repos. All entries
+remain in `HelixAgent/.gitmodules` and HEAD gitlinks. Commits T02.10 +
+T02.11 restored `opencode-cli` and `openhands` after side effects of
+the killed retry job (script left them mid-state).
+
+| name         | reason                                              |
+|--------------|-----------------------------------------------------|
+| continue     | submodule_add_exit=124 (fetch-pack disconnect)      |
+| kilo-code    | submodule_add_exit=124 (fetch-pack disconnect)      |
+| mobile-agent | submodule_add_exit=124 (fetch-pack disconnect)     |
+| opencode-cli | submodule_add_exit=128 (invalid index-pack output)  |
+| openhands    | submodule_add_exit=124 (fetch-pack disconnect)      |
+| roo-code     | submodule_add_exit=124 (fetch-pack disconnect)      |
+| spec-kit     | submodule_add_exit=128 (clone failed)               |
+| superset     | submodule_add_exit=124 (fetch-pack disconnect)      |
+
+The 8 remain pending and can be moved in a follow-up session with
+longer timeouts and/or shallow clones.
+
+### cli_agents_configs — moved (T02.62)
+
+109 plain-content config files (json + yaml).
+- HelixAgent removal commit: `d0d41d0e`
+- Root add commit:           `0c27100`
+- Final path: `cli_agents_configs/` at meta-repo root.
+
+### cli_agents_resources — renamed from Example_Resources (T02.63)
+
+6 submodules renamed in-place at root:
+- Awesome-AI-Agents
+- Awesome-AI-GPTs
+- Cheshire-Cat-Ai (with nested submodule CC-AI-Docs)
+- GitHub-Awesome-Copilot
+- OpenAI-Cookbook
+- Taches-CC-Resources
+
+Updates: `.gitmodules` paths rewritten; `.git/config` submodule sections
+renamed; `.git/modules/Example_Resources/*` directory tree moved to
+`.git/modules/cli_agents_resources/*`; per-submodule `.git` pointer files
+updated to reflect new gitdir.
+
+### Final state
+
+| metric                                             | value                                |
+|----------------------------------------------------|--------------------------------------|
+| `ls cli_agents/ \| wc -l` at root                  | 49                                   |
+| `ls HelixAgent/cli_agents/` (excl `.md`)           | 7                                    |
+| HelixAgent `.gitmodules` cli_agents entries        | 8                                    |
+| Root `.gitmodules` cli_agents entries              | 49                                   |
+| Root `.gitmodules` cli_agents_resources entries    | 6                                    |
+| `cli_agents_configs/` files                        | 109                                  |
+| HelixAgent gitlink (root sees)                     | `9f12253a290bc51312076f57cb883ce57f7b2730` |
+
+### Defects observed during execution
+
+1. `git rm` on a `submodule deinit -f` + `rm -rf .git/modules/X`-cleared
+   submodule does NOT remove the entry from `.gitmodules` — only the
+   gitlink. This caused 25 stale `.gitmodules` entries at HelixAgent
+   to remain across batches 2-6 until T02.09 cleanup commit that used
+   `git config --remove-section` to clean them up.
+2. The retry script for FAILED clones cloned partial repos before the
+   `git submodule add` final stage, leaving dangling `.git/modules/X/`
+   directories at root that had to be `rm -rf`'d before subsequent
+   retries could succeed.
+3. Killing the retry job mid-batch staged HelixAgent deletions for
+   targets in flight (kilo-code, mobile-agent, openhands, opencode-cli,
+   roo-code) that had to be selectively reverted via `git checkout
+   HEAD -- cli_agents/X` and `git config --file .gitmodules` restoration.
+   openhands required gitlink restoration via
+   `git update-index --add --cacheinfo 160000,SHA,path`.
+
