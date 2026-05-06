@@ -29,15 +29,15 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P2-F22-T01 — bootstrap F22 evidence section + advance PROGRESS to F22
-- [ ] P2-F22-T02 — `internal/autocommit/types.go`: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)
-- [ ] P2-F22-T03 — `internal/autocommit/git.go`: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (TDD with real tempdir + git init)
-- [ ] P2-F22-T04 — `internal/autocommit/summariser.go` + `secret_filter.go`: LLM-driven summariser + deterministic fallback + secret-pattern strip (TDD)
-- [ ] P2-F22-T05 — `internal/autocommit/committer.go`: AutoCommitter.MaybeCommit + atomic.Bool enabled state (TDD)
-- [ ] P2-F22-T06 — registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD; coverage table-test)
-- [ ] P2-F22-T07 — `/git_auto_commit` slash command (status/on/off/show) (TDD)
-- [ ] P2-F22-T08 — main.go wiring + integration test
-- [ ] P2-F22-T09 — Challenge harness (5+1 phases: default-on + LLM-summary-accurate + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ optional PHASE-G secret filter]) + close-out + push 4 remotes non-force
+- [x] P2-F22-T01 — bootstrap F22 evidence section + advance PROGRESS to F22
+- [x] P2-F22-T02 — `internal/autocommit/types.go`: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)
+- [x] P2-F22-T03 — `internal/autocommit/git.go`: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (TDD with real tempdir + git init)
+- [x] P2-F22-T04 — `internal/autocommit/summariser.go` + `secret_filter.go`: LLM-driven summariser + deterministic fallback + secret-pattern strip (TDD)
+- [x] P2-F22-T05 — `internal/autocommit/committer.go`: AutoCommitter.MaybeCommit + atomic.Bool enabled state (TDD)
+- [x] P2-F22-T06 — registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD; coverage table-test)
+- [x] P2-F22-T07 — `/git_auto_commit` slash command (status/on/off/show) (TDD)
+- [x] P2-F22-T08 — main.go wiring + integration test
+- [x] P2-F22-T09 — Challenge harness (5+1 phases: default-on + LLM-summary-accurate + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ optional PHASE-G secret filter]) + close-out + push 4 remotes non-force
 
 ---
 

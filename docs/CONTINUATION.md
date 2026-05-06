@@ -324,7 +324,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
 - Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
 
-**Task progress:** 8 of 9 complete (T08 done at `bab7ebc`; T09 next).
+**Task progress:** 9 of 9 complete — feature CLOSED.
 
 | Task | Status         | Subject                                                                                                                                  |
 |------|----------------|------------------------------------------------------------------------------------------------------------------------------------------|
@@ -336,8 +336,8 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T06  | DONE `db55e72` | registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)                            |
 | T07  | DONE `a999b3a` | /git_auto_commit slash command (status/on/off/show) (TDD)                                                                             |
 | T08  | DONE `bab7ebc` | main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test                                     |
-| T09  | not started | Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes |
+| T09  | DONE (this commit) | Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip + secret) + close-out + push 4 remotes |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (commit-success-but-tree-dirty / message-doesn't-reflect-diff / fires-on-non-edit-tools / runtime-toggle-not-honoured / secret-leak); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 
-**Picking up F22 specifically:** Read the plan end-to-end. Continue at **T02** (autocommit/types.go: CommitContext + CommitResult + Options + sentinels + constants).
+**Picking up F22 specifically:** F22 is CLOSED. Brainstorm next Phase 2 feature (F23) per synthesis design §4.2 (cline / plandex / openhands).

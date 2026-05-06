@@ -259,19 +259,64 @@ param. Composes with F21 approval and F04 worktree.
 
 | Task | Commit | Subject |
 |---|---|---|
-| P2-F22-T01 | (this commit) | bootstrap F22 evidence + advance PROGRESS to F22 |
-| P2-F22-T02 | tbd | autocommit/types.go (TDD) |
-| P2-F22-T03 | tbd | autocommit/git.go thin wrapper (real-git TDD) |
-| P2-F22-T04 | tbd | autocommit/summariser.go + secret_filter.go (TDD) |
-| P2-F22-T05 | tbd | autocommit/committer.go pipeline (real-git TDD) |
-| P2-F22-T06 | tbd | registry.go SetAutoCommitter + fireAutoCommit hook (TDD) |
-| P2-F22-T07 | tbd | /git_auto_commit slash command (TDD) |
-| P2-F22-T08 | tbd | main.go wiring + integration test |
-| P2-F22-T09 | tbd | Challenge harness 6+1 phases + close-out + push 4 remotes |
+| P2-F22-T01 | `550be34` | bootstrap F22 evidence + advance PROGRESS to F22 |
+| P2-F22-T02 | `0468beb` | autocommit/types.go (TDD) |
+| P2-F22-T03 | `cb4fc30` | autocommit/git.go thin wrapper (real-git TDD) |
+| P2-F22-T04 | `4b2ab67` | autocommit/summariser.go + secret_filter.go (TDD) |
+| P2-F22-T05 | `3a28ca6` | autocommit/committer.go pipeline (real-git TDD) |
+| P2-F22-T06 | `db55e72` | registry.go SetAutoCommitter + fireAutoCommit hook (TDD) |
+| P2-F22-T07 | `a999b3a` | /git_auto_commit slash command (TDD) |
+| P2-F22-T08 | `bab7ebc` | main.go wiring + integration test |
+| P2-F22-T09 | (this commit) | Challenge harness 6+1 phases + close-out + push 4 remotes |
 
-### Acceptance
+### P2-F22-T09 — Close-out evidence
 
-_to be filled in as tasks land — every claim of "PASS" must include
-pasted runtime evidence per Article XI §11.9._
+**Verification battery output (verbatim):**
+
+Unit tests (autocommit + commands + tools):
+```
+ok  	dev.helix.code/internal/autocommit	0.200s
+ok  	dev.helix.code/internal/commands	0.006s
+ok  	dev.helix.code/internal/tools	5.178s
+```
+
+Integration tests (`-tags=integration`, `-run TestAutoCommit_Integration`):
+```
+ok  	dev.helix.code/tests/integration	1.297s
+```
+
+Anti-bluff smoke (F22 surface):
+```
+clean
+```
+
+Cross-compile linux/amd64:
+```
+-rwxr-xr-x 1 milosvasic milosvasic 46987907 May  7 00:12 /tmp/helixcode-linux-amd64
+```
+
+`go mod tidy` diff (zero new deps):
+```
+(empty — no changes to go.mod or go.sum)
+```
+
+Challenge harness final block (verbatim):
+```
+SUMMARY: PHASE-A=7/7 PASS; PHASE-B=3/3 PASS; PHASE-C=2/2 PASS; PHASE-D=3/3 PASS; PHASE-E=4/4 PASS; PHASE-F=3/3 PASS; PHASE-G=3/3 PASS
+==> ALL CHECKS PASSED
+==> P2-F22 challenge harness PASS
+==> anti-bluff smoke on F22-affected code
+clean
+==> cross-compile linux
+==> P2-F22 challenge PASS
+```
+
+**Two-line summary:** F22 ships aider-style per-edit git auto-commit with
+LLM-summarised subjects, deterministic fallback, mandatory co-author trailer,
+default-on with three opt-out paths (env / slash / per-edit param), F21 +
+F04 composition, and CONST-042 secret filtering; all 9 tasks committed with
+TDD discipline. Challenge harness PASS across all 7 phases (25/25 checks)
+with positive runtime evidence; anti-bluff smoke clean; cross-compile clean;
+second Phase 2 feature shipped.
 
 ---

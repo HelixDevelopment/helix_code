@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F22 (Aider Git Auto-Commit Per Change) in flight
-- **Active feature:** P2-F22 — Aider Git Auto-Commit Per Change
-- **Active task:** P2-F22-T02 — autocommit/types.go (next)
-- **Last completed:** P2-F22-T01 — bootstrap F22 evidence + advance PROGRESS to F22
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F22 COMPLETE; F23 next candidate
+- **Active feature:** —
+- **Active task:** —
+- **Last completed:** P2-F22-T09 — Feature 22 (Aider Git Auto-Commit Per Change) close-out + push 4 remotes non-force
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-06
@@ -343,16 +343,16 @@
 - [x] P2-F21-T08 — Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny)  ← Challenges submodule `f2ea964` + meta-repo `2781c1a` + CONTINUATION update `ee413c3`
 - [x] P2-F21-T09 — Feature 21 close-out + push 4 remotes non-force  ← (this commit)
 
-## P2-F22 task list (Aider Git Auto-Commit Per Change) — in flight
-- [x] P2-F22-T01 — bootstrap F22 evidence section + advance PROGRESS to F22  ← (this commit)
-- [ ] P2-F22-T02 — autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)
-- [ ] P2-F22-T03 — autocommit/git.go: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (real-git TDD)
-- [ ] P2-F22-T04 — autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)
-- [ ] P2-F22-T05 — autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)
-- [ ] P2-F22-T06 — registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)
-- [ ] P2-F22-T07 — /git_auto_commit slash command (status/on/off/show) (TDD)
-- [ ] P2-F22-T08 — main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test
-- [ ] P2-F22-T09 — Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes
+## P2-F22 task list (Aider Git Auto-Commit Per Change) — ALL CLOSED
+- [x] P2-F22-T01 — bootstrap F22 evidence section + advance PROGRESS to F22  ← commit `550be34`
+- [x] P2-F22-T02 — autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)  ← commit `0468beb`
+- [x] P2-F22-T03 — autocommit/git.go: thin git wrapper (real-git TDD)  ← commit `cb4fc30`
+- [x] P2-F22-T04 — autocommit/summariser.go + secret_filter.go (TDD)  ← commit `4b2ab67`
+- [x] P2-F22-T05 — autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)  ← commit `3a28ca6`
+- [x] P2-F22-T06 — registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)  ← commit `db55e72`
+- [x] P2-F22-T07 — /git_auto_commit slash command (status/on/off/show) (TDD)  ← commit `a999b3a`
+- [x] P2-F22-T08 — main.go wiring + integration test  ← commit `bab7ebc`
+- [x] P2-F22-T09 — Challenge harness 6+1 phases + close-out + push 4 remotes  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -379,6 +379,7 @@
 - 2026-05-06 — **PHASE 1.5 (FOUNDATION CLEANUP) COMPLETE.** All 12 work packages shipped: WP1 Inventory + foundation safety (`421495a`); WP2 Submodule restructuring ~67 mechanical moves (`90dec95`); WP3 Submodule deduplication 5 sets (`154c06c`); WP4 API key loader bash + Go (`e57894e`); WP5 .env API key dedup with USER GATE (`92d5463`); WP6 Docs consolidation 3 dirs (`f09f57d`); WP7 Snake_case directory normalization (`3c3cd8d`); WP8 Anti-bluff Constitution propagation (`0eead08`); WP9 Reference updates comprehensive grep sweep (`42166fd`); WP10 Rebuild + validation + fix `internal/tools/git` MockLLMProvider drift (`0a77c93` + fix `45be827`); WP11 Phase 1.5 Challenge harness 5 phases (meta `306d3d9` + Challenges submodule `7e94f28`); WP12 close-out + push deepest-first (this commit). Acceptance criteria: Phase 1.5 Challenge harness EXIT=0 with all 5 phases (NO-DUPLICATE-SUBMODULES + API-KEYS-LOADER + DOCS-UNDER-DOCS-DIR + SNAKE_CASE + ANTI-BLUFF-ANCHOR) printing positive runtime evidence per Article XI §11.9; `scripts/verify_anti_bluff_cascade.sh` exit 0 ("OK: anti-bluff anchor present in all 39 files across 13 repos"); inner-module `go test -count=1 -short ./internal/... ./cmd/...` all green; anti-bluff smoke clean across all P1.5-touched files. All four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity; HelixAgent submodule pushed to its `origin`; Challenges submodule pushed to its `origin`. **Next phase: Phase 2 (other CLI agents) ready to start once user authorises.**
 - 2026-05-06 — Phase 2 started; F21 (Codex Approval Modes) is first port; layers on F02 + F14; uses F19 prompter; CLI/env/config selector mirrors F12 pattern.
 - 2026-05-06 — Feature 21 (Codex Approval Modes) closed. 9 task commits (T01 `a7a349f`, T02 `9c2664d`, T03 `0d655d8`, T04 `5ef13b8`, T05 `19bffce` + CONTINUATION `1195ef9`, T06 `ad8843b` + CONTINUATION `9b72c26`, T07 `c022968` + CONTINUATION `bd67324`, T08 Challenges submodule `f2ea964` + meta-repo `2781c1a` + CONTINUATION `ee413c3`, T09 close-out — this commit). Real, end-to-end 4-mode codex-compatible approval system: suggest (read-only) / auto-edit (edit OK, run prompts) / full-auto (edit + run with sandbox forced + network DENY) / dangerously-bypass (no checks; 2-second pause + warning). Selector: --approval flag > HELIXCODE_APPROVAL env > ~/.config/helixcode/approval.yaml > default suggest. Per-tool Tool.RequiresApproval() ApprovalLevel (read-only/edit/run/all); ~38 existing tools migrated with explicit levels; safe-default LevelEdit for forgotten overrides. /approval slash (status/set/show); runtime mode swap via atomic.Pointer takes effect on next CheckApproval. F02 retains final-deny authority (composition truth table pinned via in-stub deny-rule in PHASE-E pending registry-level seam). Zero new external deps. Five-phase Challenge harness PASS (PHASE-A SUGGEST-DENY + PHASE-B AUTO-EDIT-PROMPT + PHASE-C FULL-AUTO-SANDBOX + PHASE-D RUNTIME-CHANGE + PHASE-E F02-FINAL-DENY) with positive runtime evidence per Article XI §11.9; cross-compile linux/amd64 PASS (94 MB binary); anti-bluff smoke clean across all F21 surface (HelixCode + Challenges). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). **First Phase 2 feature shipped.** F22 next candidate per synthesis design §4.2 (Codex follow-on / aider / cline / plandex — choice via brainstorming).
+- 2026-05-07 — Feature 22 (Aider Git Auto-Commit Per Change) closed. 9 task commits (T01 `550be34`, T02 `0468beb`, T03 `cb4fc30`, T04 `4b2ab67`, T05 `3a28ca6`, T06 `db55e72`, T07 `a999b3a`, T08 `bab7ebc`, T09 close-out — this commit). Real, end-to-end per-edit git auto-commit modelled on aider: one commit per accepted edit (LevelEdit/LevelAll tools); LLM-summarised subject (50-72 chars, imperative voice) with deterministic fallback on LLM unavailability; `Co-Authored-By: HelixCode <noreply@helixcode.dev>` trailer appended to EVERY auto-commit. Default-on; opt-out via `HELIXCODE_GIT_AUTO_COMMIT=off` env, runtime `/git_auto_commit off` slash, or per-edit `_helix_skip_git_commit:true` param. Composes with F21 approval (only commits AFTER approval granted) and F04 worktree (auto-commits work in subagent worktrees). Best-effort secret filter (CONST-042). Zero new external deps. Seven-phase Challenge harness PASS (PHASE-A DEFAULT-ON 7/7 + PHASE-B LLM-SENTINEL 3/3 + PHASE-C NON-EDIT-NO-OP 2/2 + PHASE-D ENV-OFF 3/3 + PHASE-E RUNTIME-TOGGLE 4/4 + PHASE-F PER-EDIT-SKIP 3/3 + PHASE-G SECRET-FILTER 3/3) with positive runtime evidence per Article XI §11.9; cross-compile linux/amd64 PASS (44 MB binary); anti-bluff smoke clean across all F22 surface (HelixCode + Challenges). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). **Second Phase 2 feature shipped.** F23 next candidate per synthesis design §4.2 (cline / plandex / openhands — choice via brainstorming).
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh_keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh_keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
