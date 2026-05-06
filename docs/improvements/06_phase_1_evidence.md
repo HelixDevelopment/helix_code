@@ -1897,3 +1897,42 @@ harness with runtime evidence. Pushed to 4 remotes (origin / github /
 gitlab / upstream) on the meta-repo non-force; Challenges submodule
 pushed to its single `origin` (mirror gap noted, deferred infra).
 
+## P1-F16 — OpenTelemetry Integration
+
+**Date:** 2026-05-06
+**Spec:** `docs/superpowers/specs/2026-05-06-p1-f16-opentelemetry-integration-design.md` (commit `bc07a96`)
+**Plan:** `docs/superpowers/plans/2026-05-06-p1-f16-opentelemetry-integration.md` (commit `750659c`)
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** OTel v1.30.0 tracing + metrics with three exporters (OTLP/gRPC, OTLP/HTTP, stdout); env-var configured (OTEL_*); LLM Generate/GenerateStream + ToolRegistry.Execute + agent loop iterations instrumented; /telemetry slash; secret-attribute blocklist (api_key/token/auth/prompt) is default-deny; sandbox/subagent/LSP instrumentation deferred to F16.5.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F16-T01 — Bootstrap
+
+(this commit) — append F16 section header to evidence; advance PROGRESS current focus to F16; insert 12-task list.
+
+### P1-F16-T02 — go.mod: add OTel v1.30.0 dep set (TDD failing import test)
+
+### P1-F16-T03 — types.go: TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys + sentinels (TDD)
+
+### P1-F16-T04 — config.go + attribute_filter.go: env-var parsing + exporter selection + secret filter (TDD)
+
+### P1-F16-T05 — provider.go: TelemetryProvider construction (TracerProvider + MeterProvider) (TDD)
+
+### P1-F16-T06 — llm_instrumentation.go: TracedLLMProvider decorator with token counter + latency histogram (TDD)
+
+### P1-F16-T07 — tool_instrumentation.go + ToolRegistry.Execute in-place wrap + SetTelemetryProvider (TDD)
+
+### P1-F16-T08 — agent_instrumentation.go + BaseAgent.executeTaskWithLLM in-place wrap (TDD)
+
+### P1-F16-T09 — /telemetry slash command (status/show/flush) (TDD)
+
+### P1-F16-T10 — main.go wiring + gated integration tests (stdout always; OTLP gRPC+HTTP gated)
+
+### P1-F16-T11 — Challenge harness: in-tree fake OTLP/HTTP receiver + 5 phases (STDOUT/FAKE-OTLP/FILTER/NOOP/REAL)
+
+### P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
+

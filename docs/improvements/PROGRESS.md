@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F16 next candidate (OpenTelemetry Integration)
-- **Active task:** —
+- **Active feature:** P1-F16 — OpenTelemetry Integration (in progress)
+- **Active task:** P1-F16-T01 — bootstrap evidence + advance PROGRESS to F16
 - **Last completed:** P1-F15-T12 — Feature 15 (Subagent Team) close-out + push to 4 remotes (all 12 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -246,6 +246,20 @@
 - [x] P1-F15-T10 — wire SubagentManager into main.go + /subagents + gated integration tests  ← commit `af0aa29`
 - [x] P1-F15-T11 — Challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)  ← submodule `163965e` + meta-repo `16708a7`
 - [x] P1-F15-T12 — Feature 15 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F16: OpenTelemetry Integration)
+- [x] P1-F16-T01 — bootstrap evidence + advance PROGRESS to F16  ← (this commit)
+- [ ] P1-F16-T02 — go.mod: add OTel v1.30.0 dep set (TDD failing import test)
+- [ ] P1-F16-T03 — types.go: TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys + sentinels (TDD)
+- [ ] P1-F16-T04 — config.go + attribute_filter.go: env-var parsing + exporter selection + secret filter (TDD)
+- [ ] P1-F16-T05 — provider.go: TelemetryProvider construction (TracerProvider + MeterProvider) (TDD)
+- [ ] P1-F16-T06 — llm_instrumentation.go: TracedLLMProvider decorator with token counter + latency histogram (TDD)
+- [ ] P1-F16-T07 — tool_instrumentation.go + ToolRegistry.Execute in-place wrap + SetTelemetryProvider (TDD)
+- [ ] P1-F16-T08 — agent_instrumentation.go + BaseAgent.executeTaskWithLLM in-place wrap (TDD)
+- [ ] P1-F16-T09 — /telemetry slash command (status/show/flush) (TDD)
+- [ ] P1-F16-T10 — main.go wiring + gated integration tests (stdout always; OTLP gRPC+HTTP gated)
+- [ ] P1-F16-T11 — Challenge harness: in-tree fake OTLP/HTTP receiver + 5 phases (STDOUT/FAKE-OTLP/FILTER/NOOP/REAL)
+- [ ] P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
