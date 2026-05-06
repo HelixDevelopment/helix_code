@@ -16,6 +16,8 @@ import (
 
 	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/agent/subagent"
+	"dev.helix.code/internal/approval"
+	"dev.helix.code/internal/approvalwire"
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
@@ -369,6 +371,13 @@ func (c *CLI) Run() error {
 		// because that would hang non-TTY runs. Users start the wizard explicitly
 		// via `helixcode wizard`.
 		providerFlag = flag.String("provider", "", "F12 cloud LLM provider override (anthropic|bedrock|vertexai|azure)")
+
+		// F21: approval mode override.
+		// Precedence (handled by approval.Select): --approval > HELIXCODE_APPROVAL >
+		// $XDG_CONFIG_HOME/helixcode/approval.yaml > built-in default (suggest).
+		// Garbage values fall through to the next source; the selector aggregates
+		// parse errors so we can warn the user without losing the runtime mode.
+		approvalFlag = flag.String("approval", "", "F21 approval mode override (suggest|auto-edit|full-auto|dangerously-bypass)")
 	)
 	flag.Parse()
 
@@ -610,6 +619,55 @@ func (c *CLI) Run() error {
 		if regErr := cmdRegistry.Register(commands.NewSandboxCommand(sandboxMgr)); regErr != nil {
 			log.Printf("sandbox: register slash command failed: %v", regErr)
 		}
+	}
+
+	// F21: approval gate. Resolution order is flag > env > config > default
+	// (handled by approval.Select). When the resolved mode is ModeFullAuto,
+	// the manager refuses to construct without an active sandbox — we surface
+	// the error and fall through to the safe-default ModeSuggest so the rest
+	// of the CLI keeps working. The /approval slash command is registered so
+	// users can flip the mode at runtime via SetMode.
+	//
+	// Sandbox availability: SandboxManager.SelectedBackend() != BackendNone is
+	// the canonical "sandbox usable" predicate (the manager surfaces a
+	// FailClosedError on Execute when None). nil sandboxMgr (init failure) is
+	// treated as unavailable.
+	sandboxAvailable := sandboxMgr != nil && sandboxMgr.SelectedBackend() != sandbox.BackendNone
+	approvalSelectorInput := approval.SelectorInput{
+		Flag:       *approvalFlag,
+		Env:        os.Getenv(approval.EnvVarName),
+		ConfigPath: approval.DefaultConfigPath(os.Getenv),
+	}
+	approvalMode, approvalSource, approvalSelErr := approval.Select(approvalSelectorInput)
+	if approvalSelErr != nil {
+		log.Printf("approval: selector reported parse errors (using mode=%s source=%s): %v",
+			approvalMode, approvalSource, approvalSelErr)
+	}
+	approvalMgrOpts := approval.ApprovalManagerOptions{
+		InitialMode:      approvalMode,
+		Source:           approvalSource,
+		SandboxAvailable: sandboxAvailable,
+		PauseDangerous:   2 * time.Second,
+	}
+	if askUserPrompter != nil {
+		approvalMgrOpts.Responder = &approvalwire.AskUserYesNoPrompter{Inner: askUserPrompter}
+	}
+	approvalMgr, approvalMgrErr := approval.NewApprovalManager(approvalMgrOpts)
+	if approvalMgrErr != nil {
+		log.Printf("approval: manager init failed for mode=%s (falling back to suggest): %v",
+			approvalMode, approvalMgrErr)
+		approvalMgrOpts.InitialMode = approval.ModeSuggest
+		approvalMgrOpts.Source = approval.SourceDefault
+		approvalMgr, approvalMgrErr = approval.NewApprovalManager(approvalMgrOpts)
+		if approvalMgrErr != nil {
+			return fmt.Errorf("approval manager init (fallback): %w", approvalMgrErr)
+		}
+	}
+	toolReg.SetApprovalManager(approvalMgr)
+	log.Printf("approval: mode=%s source=%s sandbox_available=%t",
+		approvalMgr.Mode(), approvalMgr.Source(), sandboxAvailable)
+	if regErr := cmdRegistry.Register(commands.NewApprovalCommand(approvalMgr)); regErr != nil {
+		log.Printf("approval: register slash command failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.

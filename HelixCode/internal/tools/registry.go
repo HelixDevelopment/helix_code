@@ -121,6 +121,16 @@ type ToolRegistry struct {
 	// before).
 	toolTelemetry *telemetry.ToolInstrumentation
 
+	// approvalMgr is the optional F21 approval gate. When set, Execute
+	// consults it BEFORE invoking the inner tool: read-only tools bypass the
+	// gate, edit/run/all-level tools are routed through CheckApproval and
+	// (when matrix dictates) PromptForApproval. ModeFullAuto + Run/All also
+	// causes Execute to inject the sandbox markers
+	// "_helix_sandbox_required"=true and "_helix_sandbox_network_allowed"=
+	// false into the args map so downstream sandbox-aware tools wrap the
+	// invocation. nil disables the gate (Execute behaves exactly as before).
+	approvalMgr *approval.ApprovalManager
+
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
 	shell        *shell.ShellExecutor
@@ -372,6 +382,26 @@ func (r *ToolRegistry) SetTelemetryInstrumentation(t *telemetry.ToolInstrumentat
 	r.toolTelemetry = t
 }
 
+// SetApprovalManager wires the F21 approval gate. Once set, Execute consults
+// the manager BEFORE invoking the inner tool. ApprovalLevel.LevelReadOnly
+// short-circuits the gate (matrix permits it in every mode); other levels
+// route through CheckApproval/PromptForApproval.
+//
+// Sandbox markers: when the active mode is ModeFullAuto AND the tool's
+// RequiresApproval level is LevelRun or LevelAll, Execute injects the
+// sentinels "_helix_sandbox_required"=true and "_helix_sandbox_network_allowed"=
+// false into the args map so downstream sandbox-aware tools (F14
+// shell_sandboxed) wrap the invocation. Tools that ignore the markers are
+// unaffected; nil-args inputs are upgraded to a fresh map. The markers are
+// documented in spec 7128289 §11 (Non-obvious calls).
+//
+// Pass nil to disable the gate (Execute behaves exactly as before).
+func (r *ToolRegistry) SetApprovalManager(a *approval.ApprovalManager) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.approvalMgr = a
+}
+
 // checkPlanModeGate consults the plan-mode gate (if wired). Returns
 // ErrPlanModeGated wrapped with tool name + reason when blocked.
 func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interface{}) error {
@@ -386,6 +416,85 @@ func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interfac
 		return nil
 	}
 	return fmt.Errorf("%w: %s (%s)", ErrPlanModeGated, name, reason)
+}
+
+// applyApprovalGate consults the F21 approval manager (when wired) for the
+// given tool. Read-only tools bypass the gate. Edit/Run/All-level tools are
+// routed through CheckApproval; ActionDenyWithReason returns the wrapped
+// ErrApprovalDenied error verbatim, ActionPromptUser invokes
+// PromptForApproval to obtain a yes/no answer.
+//
+// When the active mode is ModeFullAuto AND the tool's level is LevelRun or
+// LevelAll, the gate also injects sandbox markers into a copy of params so
+// the original caller's map is not mutated. The returned params (cloned or
+// not) replace the original map for the rest of Execute. Returns the
+// (possibly rewritten) params + nil on allow, original params + error on
+// deny.
+//
+// nil approval manager → no-op (returns input params unchanged).
+func (r *ToolRegistry) applyApprovalGate(ctx context.Context, tool Tool, name string, params map[string]interface{}) (map[string]interface{}, error) {
+	r.mu.RLock()
+	a := r.approvalMgr
+	r.mu.RUnlock()
+	if a == nil {
+		return params, nil
+	}
+
+	level := tool.RequiresApproval()
+	// Read-only short-circuit — every mode allows pure reads, and the
+	// matrix never asks the user. Skipping the gate avoids the cost of a
+	// CheckApproval call on the hottest path (file reads, greps).
+	if level == approval.LevelReadOnly {
+		return params, nil
+	}
+
+	req := approval.ApprovalRequest{
+		ToolName: name,
+		Level:    level,
+		Args:     params,
+	}
+	action, err := a.CheckApproval(req)
+	if err != nil {
+		// CheckApproval returns the wrapped ErrApprovalDenied or
+		// ErrInvalidLevel for matrix denials and bad inputs respectively.
+		// Surface the error verbatim so callers can errors.Is() classify.
+		return params, err
+	}
+	switch action {
+	case approval.ActionAllow:
+		// proceed (sandbox marker injection below)
+	case approval.ActionPromptUser:
+		allowed, perr := a.PromptForApproval(ctx, req)
+		if perr != nil {
+			return params, perr
+		}
+		if !allowed {
+			return params, fmt.Errorf("%w: user denied tool %q (level=%s)",
+				approval.ErrApprovalDenied, name, level)
+		}
+	case approval.ActionDenyWithReason:
+		// Defensive: CheckApproval returns an error alongside the deny;
+		// the err branch above already handled it. If a future
+		// implementation returns Action without an error, surface a
+		// generic deny so the gate cannot be silently bypassed.
+		return params, fmt.Errorf("%w: tool %q (level=%s) denied by mode %s",
+			approval.ErrApprovalDenied, name, level, a.Mode())
+	}
+
+	// F14/F21 integration: when ModeFullAuto + (LevelRun|LevelAll), inject
+	// sandbox markers so downstream sandbox-aware tools wrap the
+	// invocation. Markers are documented in spec 7128289 §11.
+	if a.SandboxRequired(level) {
+		// Clone the map so the caller's original is untouched.
+		cloned := make(map[string]interface{}, len(params)+2)
+		for k, v := range params {
+			cloned[k] = v
+		}
+		cloned["_helix_sandbox_required"] = true
+		cloned["_helix_sandbox_network_allowed"] = a.NetworkAllowed()
+		params = cloned
+	}
+	return params, nil
 }
 
 // markPlanActionExecuted consumes the matched plan action after a successful
@@ -427,6 +536,16 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 	}
 	if err := tool.Validate(params); err != nil {
 		return nil, fmt.Errorf("parameter validation failed: %w", err)
+	}
+
+	// F21: approval gate. Runs AFTER plan-mode + Validate so policy errors
+	// surface in their canonical form, but BEFORE before-hooks fire so a
+	// denied call never reaches BeforeToolCall observers (matches spec §4
+	// data-flow: gate sits between Validate and Execute). May rewrite params
+	// to inject sandbox markers when the active mode is ModeFullAuto.
+	params, err = r.applyApprovalGate(ctx, tool, name, params)
+	if err != nil {
+		return nil, err
 	}
 
 	// BeforeToolCall + specialised before-events (block aborts).
@@ -750,6 +869,14 @@ func (r *ToolRegistry) executeInBackground(ctx context.Context, name string, par
 	// inside the background goroutine.
 	if err := tool.Validate(cleanArgs); err != nil {
 		return nil, fmt.Errorf("parameter validation failed: %w", err)
+	}
+
+	// F21: approval gate also applies to background dispatch. Denied calls
+	// are rejected synchronously so the user sees the deny immediately
+	// instead of having a phantom task ID returned.
+	cleanArgs, err = r.applyApprovalGate(ctx, tool, name, cleanArgs)
+	if err != nil {
+		return nil, err
 	}
 
 	bgExec := r.adaptToolForBackground(tool)
