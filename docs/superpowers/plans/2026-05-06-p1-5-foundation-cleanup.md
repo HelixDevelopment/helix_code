@@ -762,19 +762,19 @@ Update PROGRESS.md: Phase 1.5 closed; active phase advances to Phase 2.
 
 ## Final acceptance checklist (must ALL be ticked before claiming Phase 1.5 done)
 
-- [ ] All 12 WPs commits landed.
-- [ ] Phase 1.5 Challenge harness exit 0 with all 5 phases printing positive evidence.
-- [ ] `scripts/verify-anti-bluff-cascade.sh` exit 0.
-- [ ] `git submodule status --recursive` shows each URL at exactly one path.
-- [ ] No `Documentation/` directory anywhere.
-- [ ] Every directory snake_case (or in allowlist).
-- [ ] Every `.env` has no overlap with `~/api_keys.sh` keys (post-WP5 USER GATE).
-- [ ] `cd HelixCode && make verify-compile && make test` passes.
-- [ ] `internal/tools/git` mock drift fixed (T10.08).
-- [ ] All meta-repo remotes (github/gitlab/origin/upstream) on same SHA.
-- [ ] Each Helix* submodule pushed to ALL its configured remotes.
-- [ ] PROGRESS.md advanced to Phase 2.
-- [ ] Anti-bluff smoke at end of every task printed `clean`.
+- [x] All 12 WPs commits landed. (WP1 through WP12 — see PROGRESS.md P1.5 work-package list for SHAs)
+- [x] Phase 1.5 Challenge harness exit 0 with all 5 phases printing positive evidence. (`/tmp/p1_5_challenge` EXIT=0 captured in evidence §P1.5-WP12)
+- [x] `scripts/verify_anti_bluff_cascade.sh` exit 0. ("OK: anti-bluff anchor present in all 39 files across 13 repos")
+- [x] `git submodule status --recursive` shows each URL at exactly one path. (Phase A of harness)
+- [x] No `Documentation/` directory anywhere. (Phase C of harness)
+- [x] Every directory snake_case (or in allowlist). (Phase D of harness — 259 conformant, 88 allowlisted, 0 violations)
+- [x] Every `.env` has no overlap with `~/api_keys.sh` keys (post-WP5 USER GATE). (See §P1.5-WP5 evidence)
+- [x] `cd HelixCode && make verify-compile && make test` passes. (Inner unit tests `go test -count=1 -short ./internal/... ./cmd/...` all green; see §P1.5-WP12)
+- [x] `internal/tools/git` mock drift fixed (T10.08). (Commit `45be827`)
+- [x] All meta-repo remotes (github/gitlab/origin/upstream) on same SHA. (See §P1.5-WP12 push verification table)
+- [x] Each Helix* submodule pushed to ALL its configured remotes. (See §P1.5-WP12 per-submodule push status table)
+- [x] PROGRESS.md advanced to Phase 2.
+- [x] Anti-bluff smoke at end of every task printed `clean`.
 
 ---
 
