@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/llm/compression"
 	"dev.helix.code/internal/llm/compressioniface"
+	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
 )
 
@@ -70,6 +71,11 @@ type BaseAgent struct {
 	// Optional: nil = hook firing is disabled (graceful degradation).
 	// Per Feature 5 (hook-based extensibility), P1-F05-T08.
 	hooksManager *hooks.Manager
+
+	// telemetry is the optional OTel-based span+metric helper for the agent
+	// loop's per-iteration boundary. nil = no telemetry (graceful degradation).
+	// Per Feature 16 (telemetry), P1-F16-T08.
+	telemetry *telemetry.AgentInstrumentation
 }
 
 // NewBaseAgent creates a new base agent
@@ -352,17 +358,29 @@ func (a *BaseAgent) basicTesting(ctx context.Context, t *Task) (interface{}, err
 }
 
 // executeTaskWithLLM executes a task using the LLM provider
-func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{}, error) {
+func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (result interface{}, iterErr error) {
+	// Wrap iteration body in a telemetry span when wired. The LLM-driven
+	// path here represents one agent loop iteration (build prompt → call
+	// LLM → process response). nil telemetry = graceful no-op.
+	// Per Feature 16 (telemetry), P1-F16-T08.
+	if a.telemetry != nil {
+		var finish func(error)
+		ctx, finish = a.telemetry.BeginIteration(ctx, 0, t.ID)
+		defer func() { finish(iterErr) }()
+	}
+
 	// Build the prompt based on task type
 	prompt, err := a.buildPromptForTask(t)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build prompt: %w", err)
+		iterErr = fmt.Errorf("failed to build prompt: %w", err)
+		return nil, iterErr
 	}
 
 	// Get available models
 	models := a.llmProvider.GetModels()
 	if len(models) == 0 {
-		return nil, fmt.Errorf("no models available from provider")
+		iterErr = fmt.Errorf("no models available from provider")
+		return nil, iterErr
 	}
 
 	// Create LLM request
@@ -381,7 +399,8 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{
 	if a.autoCompactor != nil {
 		conv := buildConversationForCompaction(request.Messages)
 		if _, err := a.autoCompactor.MaybeCompact(ctx, conv); err != nil {
-			return nil, fmt.Errorf("auto-compaction: %w", err)
+			iterErr = fmt.Errorf("auto-compaction: %w", err)
+			return nil, iterErr
 		}
 	}
 
@@ -390,18 +409,20 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (interface{
 	if err != nil {
 		llmErr := fmt.Errorf("LLM generation failed: %w", err)
 		a.dispatchOnError(ctx, llmErr, "llm")
-		return nil, llmErr
+		iterErr = llmErr
+		return nil, iterErr
 	}
 
 	// Parse and process the response based on task type
-	result, err := a.processLLMResponse(ctx, t, response)
+	processed, err := a.processLLMResponse(ctx, t, response)
 	if err != nil {
 		llmRespErr := fmt.Errorf("failed to process LLM response: %w", err)
 		a.dispatchOnError(ctx, llmRespErr, "llm")
-		return nil, llmRespErr
+		iterErr = llmRespErr
+		return nil, iterErr
 	}
 
-	return result, nil
+	return processed, nil
 }
 
 // buildPromptForTask builds an appropriate prompt for the task type
@@ -744,6 +765,24 @@ func (a *BaseAgent) GetAutoCompactor() *compression.AutoCompactor {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return a.autoCompactor
+}
+
+// SetTelemetryInstrumentation wires an *telemetry.AgentInstrumentation so the
+// agent loop can emit a span + iteration counter + latency histogram per
+// LLM-driven iteration. Pass nil to disable. When non-nil, executeTaskWithLLM
+// brackets its body with BeginIteration / finish closure.
+// Per Feature 16 (telemetry), P1-F16-T08.
+func (a *BaseAgent) SetTelemetryInstrumentation(ti *telemetry.AgentInstrumentation) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.telemetry = ti
+}
+
+// GetTelemetryInstrumentation returns the current AgentInstrumentation (may be nil).
+func (a *BaseAgent) GetTelemetryInstrumentation() *telemetry.AgentInstrumentation {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.telemetry
 }
 
 // SetHooksManager wires a hooks.Manager so the agent's lifecycle code can
