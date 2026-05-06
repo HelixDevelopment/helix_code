@@ -29,16 +29,16 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P2-F23-T01 — bootstrap F23 evidence section + advance PROGRESS to F23
-- [ ] P2-F23-T02 — `internal/tools/browser/types.go` + `options.go`: BrowserOptions + Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD)
-- [ ] P2-F23-T03 — `internal/tools/browser/manager.go` + `session.go`: BrowserManager with atomic-pointer lifecycle + BrowserSession with chromedp Context + per-session tempdir + sync.Once close + headed/headless option (TDD with stub chromedp seam)
-- [ ] P2-F23-T04 — `internal/tools/browser/navigate_tool.go`: browser_navigate Tool impl with WaitReady + lazy session-create (TDD)
-- [ ] P2-F23-T05 — `internal/tools/browser/snapshot_tool.go`: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)
-- [ ] P2-F23-T06 — `internal/tools/browser/click_type_tools.go`: browser_click + browser_type Tool impls with NodeVisible + click-settle wait + selector-not-found mapping (TDD)
-- [ ] P2-F23-T07 — `internal/tools/browser/screenshot_tool.go`: browser_screenshot Tool impl with PNG-magic verification + size > 1024 + image/png.DecodeConfig (TDD)
-- [ ] P2-F23-T08 — `internal/tools/browser/close_tool.go`: browser_close Tool impl with idempotent-close semantics (TDD)
-- [ ] P2-F23-T09 — `internal/commands/browser_command.go`: /browser slash (status/navigate/close) + main.go wiring + browser.RegisterAll + integration test (gated on real chromium)
-- [ ] P2-F23-T10 — Challenge harness (7 phases A-G: navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) gated on chromium + close-out + push 4 remotes non-force
+- [x] P2-F23-T01 — bootstrap F23 evidence section + advance PROGRESS to F23
+- [x] P2-F23-T02 — `internal/tools/browser/types.go` + `options.go`: BrowserOptions + Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD)
+- [x] P2-F23-T03 — `internal/tools/browser/manager.go` + `session.go`: BrowserManager with atomic-pointer lifecycle + BrowserSession with chromedp Context + per-session tempdir + sync.Once close + headed/headless option (TDD with stub chromedp seam)
+- [x] P2-F23-T04 — `internal/tools/browser/navigate_tool.go`: browser_navigate Tool impl with WaitReady + lazy session-create (TDD)
+- [x] P2-F23-T05 — `internal/tools/browser/snapshot_tool.go`: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)
+- [x] P2-F23-T06 — `internal/tools/browser/click_type_tools.go`: browser_click + browser_type Tool impls with NodeVisible + click-settle wait + selector-not-found mapping (TDD)
+- [x] P2-F23-T07 — `internal/tools/browser/screenshot_tool.go`: browser_screenshot Tool impl with PNG-magic verification + size > 1024 + image/png.DecodeConfig (TDD)
+- [x] P2-F23-T08 — `internal/tools/browser/close_tool.go`: browser_close Tool impl with idempotent-close semantics (TDD)
+- [x] P2-F23-T09 — `internal/commands/browser_command.go`: /browser slash (status/navigate/close) + main.go wiring + browser.RegisterAll + integration test (gated on real chromium)
+- [x] P2-F23-T10 — Challenge harness (7 phases A-G: navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) gated on chromium + close-out + push 4 remotes non-force
 
 ---
 

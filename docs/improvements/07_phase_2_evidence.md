@@ -373,4 +373,82 @@ Zero new external deps verified — `chromedp v0.15.1` + `cdproto` already
 direct in `HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
 Per-task commit subjects + SHAs filled in by T02-T10.
 
+### P2-F23-T10 — Close-out evidence
+
+Commits in order: T01 `64e499b`, T02 `cdb323e`, T03 `e0ff1bf`, T04
+`2bcb281`, T05 `ec0b3cc`, T06 `659307d`, T07 `3ca50a3`, T08 `ad0c0df`,
+T09 `f39f686`, T10 close-out (this commit).
+
+F23 surface compile (the meta `make verify-compile` exits non-zero on
+pre-existing X11/glfw + multi_agent_system MockLLMProvider drift —
+unrelated to F23, same gating noted during F22 close-out):
+
+```
+$ go build ./internal/tools/... ./internal/commands/... ./cmd/cli/... ./tests/integration/cmd/...
+(no output)
+```
+
+F23 unit tests (verbatim):
+```
+$ go test -count=1 ./internal/tools/browser/... ./internal/commands/ ...
+ok  	dev.helix.code/internal/tools/browser	0.009s
+ok  	dev.helix.code/internal/commands	0.054s
+```
+
+F23 integration tests (real chromium subprocess, verbatim):
+```
+$ go test -count=1 -tags=integration -run "TestBrowser_Integration" ./tests/integration/ -timeout 240s
+ok  	dev.helix.code/tests/integration	5.697s
+```
+
+Anti-bluff smoke (verbatim):
+```
+$ grep -rn "simulated|for now|TODO implement|placeholder" \
+    internal/tools/browser/ \
+    internal/tools/browser_navigate_v2.go \
+    internal/tools/browser_snapshot_v2.go \
+    internal/tools/browser_click_type_v2.go \
+    internal/tools/browser_screenshot_v2.go \
+    internal/tools/browser_close_v2.go \
+    internal/tools/browser_register_v2.go \
+    internal/commands/browser_command.go \
+    tests/integration/cmd/p2f23_challenge/
+clean
+```
+
+Cross-compile linux/amd64 (verbatim):
+```
+$ GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode-linux-amd64 ./cmd/server
+-rwxr-xr-x 1 milosvasic milosvasic 46987907 May  7 01:08 /tmp/helixcode-linux-amd64
+```
+
+Zero new external deps (verbatim):
+```
+$ go mod tidy
+$ git diff --exit-code go.mod
+$ git diff --exit-code go.sum
+(empty — no changes to go.mod or go.sum)
+```
+
+Challenge harness final block (verbatim):
+```
+SUMMARY: PHASE-A=4/4 PASS; PHASE-B=2/2 PASS; PHASE-C=3/3 PASS; PHASE-D=2/2 PASS; PHASE-E=4/4 PASS; PHASE-F=2/2 PASS; PHASE-G=2/2 PASS
+==> ALL CHECKS PASSED
+==> P2-F23 challenge harness PASS
+==> anti-bluff smoke on F23-affected code
+clean
+==> cross-compile linux
+==> P2-F23 challenge PASS
+```
+
+**Two-line summary:** F23 ships a real, end-to-end 6-tool cline-style
+browser-automation suite (browser_navigate / browser_snapshot /
+browser_click / browser_type / browser_screenshot / browser_close)
+with atomic-pointer single-session BrowserManager, sync.Once close,
+PNG-magic + DecodeConfig + size>1024 screenshot verification, /browser
+slash command, F21 RequiresApproval per-tool, and zero new external
+deps. Challenge harness PASS across all 7 phases (19/19 checks) with
+positive runtime evidence against real chromium subprocess; anti-bluff
+smoke clean; cross-compile clean; third Phase 2 feature shipped.
+
 ---

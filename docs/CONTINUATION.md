@@ -48,7 +48,7 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P0 — Foundation                | DONE         | per `05_phase_0_evidence`  | governance cascade + secret-leak remediation                  |
 | P1 — claude-code (F01..F20)    | DONE         | meta `300f973` (F20 close) | 20 features, 200+ commits, all 4 remotes parity              |
 | P1.5 — Foundation Cleanup      | DONE         | meta `4131bf0`             | 12 WPs, ~48 commits, deepest-first push complete             |
-| P2 — CLI agent porting         | IN PROGRESS  | F21 DONE @ this commit     | F21 closed (9/9 tasks); F22 next candidate (brainstorm)       |
+| P2 — CLI agent porting         | IN PROGRESS  | F23 DONE @ this commit     | F23 closed (10/10 tasks); F24 next candidate (brainstorm)     |
 | P3 — Test infra                | NOT STARTED  | —                          | depends on Phase 2 close                                      |
 | P4 — Anti-bluff audit          | NOT STARTED  | —                          | depends on Phase 3 close                                      |
 | P5 — End-user materials uplift | NOT STARTED  | —                          | final phase                                                   |
@@ -360,7 +360,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns absolute file path (NOT base64).
 - Q5=A: `/browser` slash (`status` / `navigate <url>` / `close`) PLUS the six tools. NO cobra subcommand.
 
-**Task progress:** 9 of 10 complete.
+**Task progress:** 10 of 10 complete — F23 CLOSED.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -373,7 +373,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T07  | DONE `3ca50a3` | browser_screenshot_v2.go: browser_screenshot Tool impl with PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD)                         |
 | T08  | DONE `ad0c0df` | browser_close_v2.go: browser_close Tool impl with idempotent CloseSession + post-close RequireSession fails (TDD)                             |
 | T09  | DONE `f39f686` | /browser slash + main.go wiring + RegisterBrowserToolsV2 + integration test (7/7 PASS against real chromium) |
-| T10  | TODO   | Challenge harness 7 phases A-G (navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) + close-out + push 4 remotes |
+| T10  | DONE (this commit) | Challenge harness 7 phases A-G + close-out + push 4 remotes — all 7 phases PASS against real chromium |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (navigate-but-not-loaded / snapshot-empty-HTML / click-but-DOM-unchanged / screenshot-0-bytes-or-non-PNG / close-but-chromium-still-running); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch. Skip permitted ONLY if chromium absent (must emit `SKIP-OK: #P2-F23 chromium not available`).
 
