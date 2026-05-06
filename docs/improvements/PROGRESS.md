@@ -8,9 +8,9 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F24 COMPLETE; F25 next candidate
-- **Active feature:** —
-- **Active task:** —
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F25 in flight
+- **Active feature:** P2-F25 — Plandex Plan Trees + Context Compaction
+- **Active task:** P2-F25-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P2-F24-T08 — Feature 24 (Codex Project Memory) close-out + push 4 remotes non-force
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -375,6 +375,18 @@
 - [x] P2-F24-T06 — /memory slash command (status/show/edit/reload) + editor seam (TDD)
 - [x] P2-F24-T07 — BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD)
 - [x] P2-F24-T08 — Challenge harness 5 phases A-E + close-out + push 4 remotes non-force
+
+## P2-F25 task list (Plandex Plan Trees) — IN FLIGHT
+- [ ] P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS to F25
+- [ ] P2-F25-T02 — plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)
+- [ ] P2-F25-T03 — plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs)
+- [ ] P2-F25-T04 — plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)
+- [ ] P2-F25-T05 — plantree/verify.go: VerifyTree 6 checks (orphans, cycles, depth, uniqueness, self-parent, count) (TDD)
+- [ ] P2-F25-T06 — plantree/compact.go: CompactTree + Summariser adapter + F01 delegation + threshold guard (TDD)
+- [ ] P2-F25-T07 — plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)
+- [ ] P2-F25-T08 — /plan slash command (list/show/compact/verify) (TDD)
+- [ ] P2-F25-T09 — main.go wiring + CategoryPlan + RegisterPlanTools + builtin registration + integration test
+- [ ] P2-F25-T10 — Challenge harness 7 phases A-G + close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

@@ -593,3 +593,16 @@ real tempdirs + real fsnotify; anti-bluff smoke clean; cross-compile
 clean; zero new external deps; fourth Phase 2 feature shipped.
 
 ---
+
+---
+
+## P2-F25 — Plandex Plan Trees + Context Compaction
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f25-plandex-plan-trees-design.md`
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f25-plandex-plan-trees.md`
+**Q1-Q5 = A,A,A,A,A** (full plandex port; .helixcode/plans/ storage; 6 tools + /plan slash; F01 AutoCompactor reuse)
+**Tasks:** 10 (T01 bootstrap → T10 Challenge 7 phases + close-out)
+**Zero new external deps** (google/uuid already direct in HelixCode/go.mod)
+
+### P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS
+(evidence recorded below)

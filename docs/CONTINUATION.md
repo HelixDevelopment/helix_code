@@ -82,9 +82,9 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**None.** F21 closed; Phase 2 ready for F22 brainstorming.
+**P2-F25 — Plandex Plan Trees + Context Compaction.** Fifth Phase 2 feature; spec + plan landed. T01 in progress.
 
-### Most recent feature (closed): P2-F21 — Codex Approval Modes
+### Most recent feature (closed): P2-F24 — Codex Project Memory
 
 - Spec: `7128289` (`docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md`)
 - Plan: `bbb61de` (`docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md`)
@@ -307,8 +307,8 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-06     | T09 close-out | F21 (Codex Approval Modes) CLOSED — first Phase 2 feature shipped. All 9 tasks ticked in plan + PROGRESS. F22 next candidate (brainstorming required). Decision log entry added in PROGRESS.md. Test summary, anti-bluff `clean`, cross-compile linux/amd64 (94 MB), and harness final-2-lines (`ALL CHECKS PASSED` / `P2-F21 challenge harness PASS`) recorded in `07_phase_2_evidence.md` §P2-F21-T09. |
 | 2026-05-06     | F22 docs      | F22 (Aider Git Auto-Commit Per Change) spec + plan landed on `main`. Spec `8be7fba` (`docs/superpowers/specs/2026-05-06-p2-f22-aider-git-auto-commit-design.md`), plan `b4f217d` (`docs/superpowers/plans/2026-05-06-p2-f22-aider-git-auto-commit.md`). 9 tasks (T01 bootstrap → T09 Challenge + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps. F22 in flight; T01 next. |
 | 2026-05-07     | F23 docs      | F23 (Cline Browser Tool) spec + plan landed on `main`. Spec `83d401d` (`docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md`), plan `bc5fd3e` (`docs/superpowers/plans/2026-05-07-p2-f23-cline-browser-tool.md`). 10 tasks (T01 bootstrap → T10 Challenge 7 phases + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps (chromedp v0.15.1 + cdproto already direct from earlier work). F23 in flight; T01 next. |
-
----
+| 2026-05-07     | F24 docs      | F24 (Codex Project Memory) spec + plan landed on `main`. Spec `c31b9ac` (`docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md`), plan `19094b8` (`docs/superpowers/plans/2026-05-07-p2-f24-codex-project-memory.md`). 8 tasks (T01 bootstrap → T08 Challenge 5 phases + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps. F24 in flight; T01 next. |
+| 2026-05-07     | F25 docs      | F25 (Plandex Plan Trees + Context Compaction) spec + plan landed on `main`. Spec `docs/superpowers/specs/2026-05-07-p2-f25-plandex-plan-trees-design.md`, plan `docs/superpowers/plans/2026-05-07-p2-f25-plandex-plan-trees.md`. 10 tasks (T01 bootstrap → T10 Challenge 7 phases + close-out). Q1-Q5=A,A,A,A,A (full plandex port; .helixcode/plans/ storage; 6 tools + /plan slash; F01 AutoCompactor reuse). Zero new external deps (google/uuid already direct). F25 in flight; T01 next. |
 
 ## F22 mid-flight section (active feature)
 
@@ -411,4 +411,40 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (case-sensitive filename mismatch / hot-reload event-but-no-update / agent-cached-old-blob / silent-truncation-no-flag / missing-file-error-instead-of-empty); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 
-**Picking up F24 specifically:** Start with T01 (bootstrap F24 evidence + advance PROGRESS); proceed sequentially through T02..T08. T03/T05 use real `t.TempDir()` and real fsnotify (no mock fs). T07 introduces `MemorySnapshotter` interface so BaseAgent depends on read-only contract.
+**Picking up F24 specifically:** F24 is CLOSED. F25 (Plandex Plan Trees) docs landed; T01 next.
+
+---
+
+## F25 mid-flight section (active feature)
+
+**Active feature:** P2-F25 — Plandex Plan Trees + Context Compaction (fifth Phase 2 feature).
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f25-plandex-plan-trees-design.md` (commit `a978371`).
+
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f25-plandex-plan-trees.md` (commit `a978371`).
+
+**User-confirmed design (Q1-Q5 = A,A,A,A,A):**
+- Q1=A: Plandex — branching plan trees + context compaction (full plandex port).
+- Q2=A: Full scope — plan tree data structure, 6 tools, /plan slash, context compaction, plan verification.
+- Q3=A: `.helixcode/plans/<name>.json` (project dir, per-project storage, git-trackable).
+- Q4=A: 6 tools (plan_create/branch/merge/list/show/delete) + /plan slash (list/show/compact/verify). NO cobra subcommands.
+- Q5=A: Context compaction via F01 AutoCompactor reuse. Threshold at 128 KB serialized JSON.
+
+**Task progress:** 1 of 10 complete — T01 in flight.
+
+| Task | Status | Subject                                                                                                                                          |
+|------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| T01  | IN FLIGHT | bootstrap F25 evidence section + advance PROGRESS to F25                                                                                  |
+| T02  | —        | plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)                                            |
+| T03  | —        | plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs)                                  |
+| T04  | —        | plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)                                                     |
+| T05  | —        | plantree/verify.go: VerifyTree 6 checks (orphans, cycles, depth, uniqueness, self-parent, count) (TDD)                                    |
+| T06  | —        | plantree/compact.go: CompactTree + Summariser adapter + F01 delegation + threshold guard (TDD)                                              |
+| T07  | —        | plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)                                   |
+| T08  | —        | /plan slash command (list/show/compact/verify) (TDD)                                                                                        |
+| T09  | —        | main.go wiring + CategoryPlan + RegisterPlanTools + builtin registration + integration test                                                |
+| T10  | —        | Challenge harness 7 phases A-G + close-out + push 4 remotes non-force                                                                       |
+
+**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (plan_create writes invalid JSON / plan_branch adds orphan / plan_merge leaves Metadata unchanged / compact claims success but no byte reduction / verify reports clean on corrupted tree) + two bonus (plan_show output mismatch / shallow compact no-op). Each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
+
+**Picking up F25 specifically:** F25 specs + plan landed; T01 (bootstrap) is in progress. Proceed with T02 (types.go) after T01 commits.
