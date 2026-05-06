@@ -7,7 +7,7 @@ Successfully created a comprehensive HTML documentation system with automatic sy
 ## Created Files
 
 ### 1. HTML Manual
-**Location**: `/HelixCode/Documentation/User_Manual/manual.html`
+**Location**: `/HelixCode/docs/User_Manual/manual.html`
 **Size**: 45KB
 **Features**:
 - Professional responsive design matching GitHub Pages website theme
@@ -36,7 +36,7 @@ Successfully created a comprehensive HTML documentation system with automatic sy
 
 **Features**:
 - Copies `manual.html` to `Github-Pages-Website/docs/manual/index.html`
-- Copies all images from `Documentation/User_Manual/images/` to destination
+- Copies all images from `docs/User_Manual/images/` to destination
 - Generates PDF version using wkhtmltopdf (if available)
 - Creates versioned PDFs: `HelixCode_User_Manual_YYYYMMDD_HHMMSS.pdf`
 - Symlinks latest PDF: `HelixCode_User_Manual_Latest.pdf`
@@ -101,7 +101,7 @@ cd HelixCode
 ```
 
 ### 5. Documentation README
-**Location**: `/HelixCode/Documentation/User_Manual/README.md`
+**Location**: `/HelixCode/docs/User_Manual/README.md`
 **Size**: 5.6KB
 **Purpose**: Comprehensive guide to the documentation system
 
@@ -119,7 +119,7 @@ cd HelixCode
 
 ```
 HelixCode/
-├── Documentation/
+├── docs/
 │   └── User_Manual/
 │       ├── manual.html              # Styled HTML manual (45KB)
 │       ├── images/                  # Supporting images
@@ -265,7 +265,7 @@ Edit CSS variables in `manual.html`:
 Update the `<main class="content">` section in `manual.html` with new sections following the existing structure.
 
 ### Adding Images
-1. Place images in `Documentation/User_Manual/images/`
+1. Place images in `docs/User_Manual/images/`
 2. Reference with relative paths: `../../Assets/Logo.png`
 3. Run sync script to copy to GitHub Pages
 
@@ -348,7 +348,7 @@ Potential improvements:
 ## Success Criteria
 
 ✅ **All requirements met:**
-1. ✅ Created HTML manual at `Documentation/User_Manual/manual.html`
+1. ✅ Created HTML manual at `docs/User_Manual/manual.html`
 2. ✅ Beautifully styled with professional CSS
 3. ✅ Navigation sidebar with jump links
 4. ✅ Syntax highlighting for code blocks

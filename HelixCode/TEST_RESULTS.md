@@ -237,7 +237,7 @@ The E2E testing framework has been fully integrated into the GitHub Pages websit
 
 ## Test Coverage Improvement Plan
 
-### ✅ Plan Document Created: `Documentation/Testing/COVERAGE_IMPROVEMENT_PLAN.md`
+### ✅ Plan Document Created: `docs/Testing/COVERAGE_IMPROVEMENT_PLAN.md`
 
 A comprehensive plan has been created to improve test coverage from 77% to 80%+. The plan includes:
 
@@ -374,7 +374,7 @@ go run cmd/main.go run --all
 
 ## Test Catalog
 
-### ✅ Automated Test Catalog: `Documentation/Testing/Tests_Catalog.md`
+### ✅ Automated Test Catalog: `docs/Testing/Tests_Catalog.md`
 
 **Status**: COMPLETE
 **Total Tests Documented**: 1,192 test cases
@@ -422,7 +422,7 @@ go run cmd/main.go run --all
    - Per-file coverage details
 
 4. **Test Catalog**
-   - File: `Documentation/Testing/Tests_Catalog.md`
+   - File: `docs/Testing/Tests_Catalog.md`
    - Total: 1,192 test cases documented
    - Format: Human-readable markdown with categorization
 

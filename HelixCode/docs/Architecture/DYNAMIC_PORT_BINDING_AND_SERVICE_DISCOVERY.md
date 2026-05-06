@@ -732,9 +732,9 @@ func TestDynamicPortAllocation_Integration(t *testing.T) {
 - [ ] Migration guide for existing deployments
 
 **Files**:
-- `Documentation/Architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md` (this file)
-- `Documentation/UserGuides/SERVICE_DISCOVERY_GUIDE.md`
-- `Documentation/Troubleshooting/SERVICE_DISCOVERY.md`
+- `docs/Architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md` (this file)
+- `docs/UserGuides/SERVICE_DISCOVERY_GUIDE.md`
+- `docs/Troubleshooting/SERVICE_DISCOVERY.md`
 
 ---
 

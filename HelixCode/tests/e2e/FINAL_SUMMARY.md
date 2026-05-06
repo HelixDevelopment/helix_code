@@ -140,7 +140,7 @@ tests/e2e/
 │   ├── mock-llm-provider            → Port 8090
 │   └── mock-slack                   → Port 8091
 │
-└── Documentation/                   [Comprehensive Guides]
+└── docs/                   [Comprehensive Guides]
     ├── README.md (535 lines)        → User guide
     ├── IMPLEMENTATION_STATUS.md     → Status report
     ├── DEPLOYMENT_GUIDE.md          → Deployment guide

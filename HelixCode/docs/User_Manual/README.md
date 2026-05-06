@@ -14,7 +14,7 @@ The HelixCode documentation system provides:
 ## Files and Directories
 
 ```
-Documentation/User_Manual/
+docs/User_Manual/
 ├── manual.html              # Main HTML manual (styled and interactive)
 ├── images/                  # Supporting images and assets
 └── README.md               # This file
@@ -60,7 +60,7 @@ Go program that converts Markdown to styled HTML.
 
 ```bash
 cd HelixCode/scripts
-./md-to-html -input=../README.md -output=../Documentation/User_Manual/manual.html
+./md-to-html -input=../README.md -output=../docs/User_Manual/manual.html
 ```
 
 **Options:**
@@ -97,7 +97,7 @@ The generated HTML manual includes:
 
 ### Complete Documentation Update Workflow
 
-1. **Update Content**: Edit `README.md` or create content in `Documentation/User_Manual/`
+1. **Update Content**: Edit `README.md` or create content in `docs/User_Manual/`
 
 2. **Generate Manual** (optional if using pre-built `manual.html`):
    ```bash
@@ -148,7 +148,7 @@ The HTML manual includes embedded CSS. To update styles:
 
 ### Adding Images
 
-1. Place images in `Documentation/User_Manual/images/`
+1. Place images in `docs/User_Manual/images/`
 2. Reference them in the manual with relative paths
 3. The sync script will automatically copy them to GitHub Pages
 

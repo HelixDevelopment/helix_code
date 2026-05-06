@@ -237,12 +237,12 @@ func extractSteps(body *ast.BlockStmt) []string {
 
 func generateCatalog(testCases []TestCase) error {
 	// Create output directory
-	err := os.MkdirAll("Documentation/Testing", 0755)
+	err := os.MkdirAll("docs/Testing", 0755)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create("Documentation/Testing/Tests_Catalog.md")
+	file, err := os.Create("docs/Testing/Tests_Catalog.md")
 	if err != nil {
 		return err
 	}
