@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"dev.helix.code/internal/approval"
+	"dev.helix.code/internal/autocommit"
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/telemetry"
@@ -130,6 +131,13 @@ type ToolRegistry struct {
 	// false into the args map so downstream sandbox-aware tools wrap the
 	// invocation. nil disables the gate (Execute behaves exactly as before).
 	approvalMgr *approval.ApprovalManager
+
+	// autoCommitter is the optional F22 git auto-commit committer. When
+	// set, Execute fires a post-success MaybeCommit call adjacent to the
+	// F13 LSP auto-trigger for Edit-class (LevelEdit / LevelAll) tools.
+	// Failures from the committer are logged at WARN and never propagate
+	// to the calling tool. nil disables auto-commit.
+	autoCommitter *autocommit.AutoCommitter
 
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
@@ -402,6 +410,110 @@ func (r *ToolRegistry) SetApprovalManager(a *approval.ApprovalManager) {
 	r.approvalMgr = a
 }
 
+// SetAutoCommitter wires the F22 per-edit git auto-commit. Once set,
+// Execute fires a post-success MaybeCommit hook for Edit-class tools
+// (LevelEdit / LevelAll). The hook is a no-op when:
+//   - the committer's enabled flag is false (env or /git_auto_commit off);
+//   - the working dir is not a git repo;
+//   - the working tree is clean;
+//   - params[autocommit.SkipParamKey] is true.
+//
+// Failures inside MaybeCommit are logged at WARN and NEVER propagated to
+// the calling tool — auto-commit is best-effort.
+//
+// Pass nil to disable the auto-commit hook.
+func (r *ToolRegistry) SetAutoCommitter(c *autocommit.AutoCommitter) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.autoCommitter = c
+}
+
+// fireAutoCommit fires the F22 auto-commit pipeline after a successful
+// edit-class tool execution. Best-effort: any error from MaybeCommit is
+// logged at WARN and discarded.
+//
+// Filters:
+//   - nil committer → no-op
+//   - tool.RequiresApproval() not in {LevelEdit, LevelAll} → no-op
+//   - params[autocommit.SkipParamKey] == true → no-op
+//
+// MutatedPaths is derived via derivePaths() — see that function for the
+// per-tool table.
+func (r *ToolRegistry) fireAutoCommit(ctx context.Context, name string,
+	params map[string]interface{}, tool Tool, _ interface{}) {
+	r.mu.RLock()
+	c := r.autoCommitter
+	r.mu.RUnlock()
+	if c == nil {
+		return
+	}
+	level := tool.RequiresApproval()
+	if level != approval.LevelEdit && level != approval.LevelAll {
+		return
+	}
+	skip := false
+	if v, ok := params[autocommit.SkipParamKey].(bool); ok && v {
+		skip = true
+	}
+	if skip {
+		return
+	}
+	paths := derivePaths(name, params)
+	cctx := autocommit.CommitContext{
+		ToolName:      name,
+		Args:          params,
+		MutatedPaths:  paths,
+		SkipRequested: false,
+	}
+	if _, err := c.MaybeCommit(ctx, cctx); err != nil {
+		log.Printf("auto-commit: %v", err)
+	}
+}
+
+// derivePaths is the per-tool mutated-paths table. It is intentionally
+// explicit rather than generic introspection: a generic "find every
+// `path`-shaped string" would over-trigger on unrelated args (e.g. the
+// `path` field of a `glob` query). Future tools that mutate files with
+// novel param shapes need an explicit entry here; the fallthrough
+// returns nil and the committer's porcelain-based discovery handles it
+// safely.
+//
+// Per spec §3.5 of the F22 design.
+func derivePaths(toolName string, params map[string]interface{}) []string {
+	switch toolName {
+	case "fs_write", "fs_edit", "smart_edit", "notebook_edit", "write_file":
+		if p, ok := params["path"].(string); ok && p != "" {
+			return []string{p}
+		}
+	case "multiedit_commit":
+		if edits, ok := params["edits"].([]interface{}); ok {
+			seen := map[string]struct{}{}
+			var out []string
+			for _, e := range edits {
+				m, ok := e.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				p, ok := m["path"].(string)
+				if !ok || p == "" {
+					continue
+				}
+				if _, dup := seen[p]; dup {
+					continue
+				}
+				seen[p] = struct{}{}
+				out = append(out, p)
+			}
+			return out
+		}
+	case "mapping_edit":
+		if p, ok := params["target_file"].(string); ok && p != "" {
+			return []string{p}
+		}
+	}
+	return nil
+}
+
 // checkPlanModeGate consults the plan-mode gate (if wired). Returns
 // ErrPlanModeGated wrapped with tool name + reason when blocked.
 func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interface{}) error {
@@ -588,6 +700,14 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 	// are swallowed inside triggerLSPAfterEdit.
 	if execErr == nil {
 		r.triggerLSPAfterEdit(ctx, name, params)
+	}
+
+	// F22: on success, fire the auto-commit hook for Edit-class tools.
+	// Runs AFTER F13 LSP auto-trigger so diagnostics settle before the
+	// working tree gets committed (per spec §11 #1). Best-effort:
+	// errors from MaybeCommit are logged + discarded.
+	if execErr == nil {
+		r.fireAutoCommit(ctx, name, params, tool, result)
 	}
 
 	return result, execErr
