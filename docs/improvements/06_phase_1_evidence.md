@@ -3462,3 +3462,66 @@ These should be addressed in a future WP that combines (a) the rename, (b) Makef
 1. **Top-level umbrella dirs deferred** — `HelixCode/`, `Assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
 2. **Go-package-affecting renames deferred** — see deferred list above.
 3. **Submodule pointer drift** — committing inside HelixAgent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
+
+---
+
+### P1.5-WP8 — Anti-bluff Constitution propagation
+
+**Timestamp:** 2026-05-06
+**Status:** CLOSED
+**Pre-condition:** WP7 closed at `3c3cd8d`.
+
+#### Goal
+
+Confirm CONST-035 / Article XI §11.9 verbatim user mandate is present in every Helix* repo's `CONSTITUTION.md` / `CLAUDE.md` / `AGENTS.md` (13 targets × 3 files = 39 checks).
+
+#### Audit results (before)
+
+13 targets surveyed (`.`, HelixAgent, HelixQA, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, Containers, Security, HelixAgent/{HelixLLM,HelixSpecifier,HelixMemory}). Results:
+
+| Target | CONSTITUTION.md | CLAUDE.md | AGENTS.md |
+|---|---|---|---|
+| . (root meta-repo) | PRESENT | PRESENT | PRESENT |
+| HelixAgent | PRESENT | PRESENT | PRESENT |
+| HelixQA | PRESENT | PRESENT | PRESENT |
+| Dependencies/HelixDevelopment/LLMsVerifier | PRESENT | PRESENT | PRESENT |
+| Dependencies/HelixDevelopment/DocProcessor | PRESENT | PRESENT | PRESENT |
+| Dependencies/HelixDevelopment/LLMOrchestrator | PRESENT | PRESENT | PRESENT |
+| Dependencies/HelixDevelopment/LLMProvider | PRESENT | PRESENT | PRESENT |
+| Dependencies/HelixDevelopment/VisionEngine | PRESENT | PRESENT | PRESENT |
+| **Containers** | **MISSING** | PRESENT | PRESENT |
+| Security | PRESENT | PRESENT | PRESENT |
+| HelixAgent/HelixLLM | PRESENT | PRESENT | PRESENT |
+| HelixAgent/HelixSpecifier | PRESENT | PRESENT | PRESENT |
+| HelixAgent/HelixMemory | PRESENT | PRESENT | PRESENT |
+
+Inner Go application `HelixCode/HelixCode/` (same repo as root) carries all three files PRESENT — same set of files as root via the shared submodule structure.
+
+#### Gaps closed (1)
+
+1. `Containers/CONSTITUTION.md` — file existed with substantial anti-bluff content (Sixth/Seventh Law inheritance, parent ATMOSphere covenant, clauses 6.L/6.O/6.P/6.Q) but lacked the **verbatim** user mandate quote. Appended a new "Article XI §11.9 — Anti-Bluff Forensic Anchor (CONST-035) — cascaded from HelixCode root" section containing the verbatim quote + operative rule + repository-scope statement. No legitimate per-repo paraphrase was overwritten — the addition is purely additive.
+
+#### New files created (0)
+
+No new CONSTITUTION.md / CLAUDE.md / AGENTS.md files needed — all 39 file slots already existed.
+
+#### Verification script
+
+Created `scripts/verify_anti_bluff_cascade.sh` (mode 755). It iterates all 13 targets × 3 files and exits non-zero on any gap. Run after the gap close:
+
+```
+$ ./scripts/verify_anti_bluff_cascade.sh
+OK: anti-bluff anchor present in all 39 files across 13 repos
+EXIT=0
+```
+
+#### Commit chain
+
+| SHA | Repo | Scope |
+|---|---|---|
+| `7bed5c5` | Containers (submodule) | append verbatim CONST-035 anchor to CONSTITUTION.md |
+| (this commit) | meta-repo root | bump Containers gitlink + add verify_anti_bluff_cascade.sh + close-out doc |
+
+#### Defects / deviations
+
+None. The propagation was almost a no-op — only one of 39 file slots needed the verbatim quote appended. The verification script is the load-bearing artefact going forward: it locks in the cascade so a future paraphrase or accidental section deletion is caught immediately.
