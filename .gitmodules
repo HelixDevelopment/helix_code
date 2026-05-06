@@ -61,3 +61,18 @@
 [submodule "HelixAgent"]
 	path = HelixAgent
 	url = git@github.com:HelixDevelopment/HelixAgent.git
+[submodule "cli_agents/agent-deck"]
+	path = cli_agents/agent-deck
+	url = git@github.com:asheshgoplani/agent-deck.git
+[submodule "cli_agents/aiagent"]
+	path = cli_agents/aiagent
+	url = git@github.com:Xiaoccer/AIAgent.git
+[submodule "cli_agents/aichat"]
+	path = cli_agents/aichat
+	url = git@github.com:sigoden/aichat.git
+[submodule "cli_agents/aichat-llm-functions"]
+	path = cli_agents/aichat-llm-functions
+	url = git@github.com:sigoden/llm-functions.git
+[submodule "cli_agents/aider"]
+	path = cli_agents/aider
+	url = git@github.com:Aider-AI/aider.git
