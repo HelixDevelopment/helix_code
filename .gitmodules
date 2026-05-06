@@ -127,3 +127,27 @@
 [submodule "cli_agents/forge"]
 	path = cli_agents/forge
 	url = git@github.com:antinomyhq/forge.git
+[submodule "cli_agents/gemini-cli"]
+	path = cli_agents/gemini-cli
+	url = git@github.com:google-gemini/gemini-cli.git
+[submodule "cli_agents/get-shit-done"]
+	path = cli_agents/get-shit-done
+	url = git@github.com:glittercowboy/get-shit-done.git
+[submodule "cli_agents/git-mcp"]
+	path = cli_agents/git-mcp
+	url = git@github.com:idosal/git-mcp.git
+[submodule "cli_agents/gpt-engineer"]
+	path = cli_agents/gpt-engineer
+	url = git@github.com:AntonOsika/gpt-engineer.git
+[submodule "cli_agents/gptme"]
+	path = cli_agents/gptme
+	url = git@github.com:ErikBjare/gptme.git
+[submodule "cli_agents/junie"]
+	path = cli_agents/junie
+	url = git@github.com:JetBrains/junie.git
+[submodule "cli_agents/mistral-code"]
+	path = cli_agents/mistral-code
+	url = git@github.com:Wylgrif/Mistral-code.git
+[submodule "cli_agents/multiagent-coding"]
+	path = cli_agents/multiagent-coding
+	url = git@github.com:Danau5tin/multi-agent-coding-system.git
