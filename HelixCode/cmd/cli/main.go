@@ -25,6 +25,7 @@ import (
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
+	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
@@ -372,6 +373,51 @@ func (c *CLI) Run() error {
 
 	ctx := context.Background()
 
+	// P1-F16-T10: Telemetry bootstrap.
+	//
+	// Order matters: telemetry MUST be constructed BEFORE the F12 LLM provider
+	// is wrapped, BEFORE the tool registry is instrumented, and BEFORE the
+	// /telemetry slash command is registered. Failure to construct (bad env
+	// vars, exporter init failure) is non-fatal — NewTelemetryProvider returns
+	// a noop provider in that case so the rest of the CLI keeps working. The
+	// returned error is informational; we surface it via log so operators can
+	// debug misconfiguration without losing the binary.
+	//
+	// Anti-bluff anchor: when HELIXCODE_OTEL_EXPORTER=stdout (or any other
+	// real exporter), the wrapped LLM provider below ACTUALLY emits spans/
+	// metrics through the OTel SDK pipeline. The gated integration tests in
+	// tests/integration/telemetry_test.go prove this end-to-end with the real
+	// stdouttrace + stdoutmetric exporters.
+	telemetryCfg, telemetryCfgErr := telemetry.LoadConfigFromEnv(os.Getenv)
+	if telemetryCfgErr != nil {
+		log.Printf("telemetry: config invalid (continuing with noop): %v", telemetryCfgErr)
+		telemetryCfg = telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop}
+	}
+	telemetryProv, telemetryProvErr := telemetry.NewTelemetryProvider(telemetryCfg, zap.NewNop())
+	if telemetryProvErr != nil {
+		log.Printf("telemetry: provider construction failed (continuing with noop): %v", telemetryProvErr)
+	}
+	if telemetryProv == nil {
+		// Defence in depth — NewTelemetryProvider should never return nil, but
+		// if it ever did we'd nil-panic in the decorators below. Be paranoid.
+		telemetryProv, _ = telemetry.NewTelemetryProvider(
+			telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop},
+			zap.NewNop(),
+		)
+	}
+	defer func() {
+		shutdownTimeout := telemetryCfg.ShutdownTimeout
+		if shutdownTimeout <= 0 {
+			shutdownTimeout = telemetry.DefaultShutdownTimeout
+		}
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		if err := telemetryProv.Shutdown(shutdownCtx); err != nil {
+			log.Printf("telemetry: shutdown error: %v", err)
+		}
+	}()
+	log.Printf("telemetry: initialised (exporter=%s)", string(telemetryProv.Exporter()))
+
 	// Bootstrap permissions engine. A locally constructed PolicyEngine is used
 	// here; T10/Phase 3 will thread it into the tool dispatcher so deny rules
 	// actually block execution. For now the flag is parsed, validated, and the
@@ -688,6 +734,57 @@ func (c *CLI) Run() error {
 			fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
 		}
 	}
+
+	// P1-F16-T10: Wrap the resolved LLM provider with the telemetry decorator.
+	//
+	// Order anchor: this MUST run AFTER F12 has settled c.llmProvider AND
+	// BEFORE the F15 SubagentManager is constructed below. Wrapping later (e.g.
+	// after F15) would dispatch raw, untraced calls through the SubagentManager
+	// — the manager captures the provider reference at construction time, so
+	// any subsequent reassignment of c.llmProvider would not propagate.
+	//
+	// REPLACE-NOT-DUPLICATE invariant: c.llmProvider IS reassigned to the
+	// traced wrapper. There is no shadow "raw" provider kept on the struct;
+	// every downstream Generate / GenerateStream call now flows through
+	// telemetry.TracedLLMProvider.Generate, which records a span + metrics.
+	// When telemetry is in noop mode (the default when no OTEL_* env vars are
+	// set), the decorator is effectively pass-through — the OTel noop tracer
+	// and noop meter make every span/record operation a stub.
+	//
+	// Failure mode: if the decorator constructor fails (extremely rare; OTel
+	// metric instrument names are static and known-good), we log and keep the
+	// undecorated provider so the CLI still works.
+	if c.llmProvider != nil {
+		tracedLLM, traceErr := telemetry.NewTracedLLMProvider(c.llmProvider, telemetryProv)
+		if traceErr != nil {
+			log.Printf("telemetry: LLM decorator construction failed (using undecorated provider): %v", traceErr)
+		} else {
+			c.llmProvider = tracedLLM
+		}
+	}
+
+	// P1-F16-T10: Wire telemetry into the tool registry. Each successful
+	// ToolRegistry.Execute will now emit a "tool.<name>" span + tool-call
+	// metrics labelled with outcome={success|failure}.
+	if toolInstr, tiErr := telemetry.NewToolInstrumentation(telemetryProv); tiErr != nil {
+		log.Printf("telemetry: tool instrumentation construction failed: %v", tiErr)
+	} else {
+		toolReg.SetTelemetryInstrumentation(toolInstr)
+	}
+
+	// P1-F16-T10: Register the /telemetry slash command. The command queries
+	// the same telemetryProv constructed above so /telemetry status / show /
+	// flush observe identical state.
+	if regErr := cmdRegistry.Register(commands.NewTelemetryCommand(telemetryProv)); regErr != nil {
+		log.Printf("telemetry: register slash command failed: %v", regErr)
+	}
+
+	// Note: BaseAgent (telemetry.AgentInstrumentation consumer) is NOT
+	// constructed in this CLI entry point; agent-loop instrumentation is wired
+	// at the call site in callers that own a BaseAgent (e.g. subagent helper
+	// flows have their own dispatch). The AgentInstrumentation factory is
+	// available via telemetry.NewAgentInstrumentation(telemetryProv) for those
+	// callers and is exercised end-to-end by the gated integration tests.
 
 	// P1-F15-T10: Subagent system wiring.
 	//
