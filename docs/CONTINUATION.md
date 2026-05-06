@@ -396,18 +396,18 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: `/memory` slash with subcommands `status` (default) / `show` / `edit` (open in `$EDITOR`, default `vi`) / `reload`.
 - Q5=A: Hot reload via existing `fsnotify` dep. 200 ms debounce. fsnotify failure degrades to slash-only reload; registry continues to work.
 
-**Task progress:** 0 of 8 complete — F24 in flight.
+**Task progress:** 8 of 8 complete — F24 CLOSED.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| T01  | TODO   | bootstrap F24 evidence section + advance PROGRESS to F24                                                                                         |
-| T02  | TODO   | projectmemory/types.go: Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD)                                                  |
-| T03  | TODO   | projectmemory/loader.go: parent-walk + git-root-stop + user overlay + truncation (TDD with real tempdirs)                                        |
-| T04  | TODO   | projectmemory/registry.go: atomic-pointer Snapshot/Set/Reload + MemorySnapshotter interface (TDD -race)                                          |
-| T05  | TODO   | projectmemory/watcher.go: fsnotify + 200 ms debounce + graceful degrade (TDD with real fsnotify)                                                 |
-| T06  | TODO   | /memory slash command (status/show/edit/reload) with editor seam (TDD)                                                                            |
-| T07  | TODO   | BaseAgent SetMemoryRegistry + getSystemPrompt prepend + main.go wiring + integration test (TDD)                                                  |
-| T08  | TODO   | Challenge harness 5 phases A-E + close-out + push 4 remotes non-force                                                                             |
+| T01  | DONE `f55b3e3` | bootstrap F24 evidence section + advance PROGRESS to F24                                                                                  |
+| T02  | DONE `fd90eed` | projectmemory/types.go: Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD)                                          |
+| T03  | DONE `99d3971` | projectmemory/loader.go: parent-walk + git-root-stop + user overlay + truncation (TDD with real tempdirs)                                |
+| T04  | DONE `0760562` | projectmemory/registry.go: atomic-pointer Snapshot/Set/Reload + MemorySnapshotter interface (TDD -race)                                  |
+| T05  | DONE `d740964` | projectmemory/watcher.go: fsnotify + 200 ms debounce + graceful degrade (TDD with real fsnotify)                                         |
+| T06  | DONE `7af2859` | /memory slash command (status/show/edit/reload) with editor seam (TDD)                                                                    |
+| T07  | DONE `40927fc` | BaseAgent SetMemoryRegistry + getSystemPrompt prepend + main.go wiring + integration test (TDD)                                          |
+| T08  | DONE (this commit) | Challenge harness 5 phases A-E + close-out + push 4 remotes non-force — all 17/17 checks PASS against real tempdirs + real fsnotify |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (case-sensitive filename mismatch / hot-reload event-but-no-update / agent-cached-old-blob / silent-truncation-no-flag / missing-file-error-instead-of-empty); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 

@@ -503,4 +503,93 @@ Zero new external deps verified — `fsnotify v1.9.0` already direct in
 `HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
 Per-task commit subjects + SHAs filled in by T02-T08.
 
+### P2-F24-T08 — Close-out evidence
+
+Commits in order: T01 `f55b3e3`, T02 `fd90eed`, T03 `99d3971`, T04
+`0760562`, T05 `d740964`, T06 `7af2859`, T07 `40927fc`, T08 close-out
+(this commit).
+
+F24 surface compile (verbatim):
+
+```
+$ go build ./internal/projectmemory/... ./internal/commands/... ./internal/agent/... ./cmd/cli/... ./tests/integration/cmd/...
+(no output)
+```
+
+F24 unit tests under -race (verbatim):
+```
+$ go test -count=1 -race ./internal/projectmemory/ ./internal/commands/ ./internal/agent/
+ok  	dev.helix.code/internal/projectmemory	1.745s
+ok  	dev.helix.code/internal/commands	1.784s
+ok  	dev.helix.code/internal/agent	8.372s
+```
+
+F24 integration tests (real tempdirs + real fsnotify, verbatim):
+```
+$ go test -count=1 -tags=integration -run TestMemory_Integration ./tests/integration/
+ok  	dev.helix.code/tests/integration	2.358s
+```
+
+Anti-bluff smoke (verbatim):
+```
+$ grep -rn "simulated|for now|TODO implement|placeholder" \
+    internal/projectmemory \
+    internal/commands/memory_command.go \
+    tests/integration/cmd/p2f24_challenge
+clean
+```
+
+Cross-compile linux/amd64 (verbatim):
+```
+$ GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode-linux-amd64-f24 ./cmd/server
+-rwxr-xr-x 1 milosvasic milosvasic 46987907 May  7 01:53 /tmp/helixcode-linux-amd64-f24
+```
+
+Zero new external deps (verbatim):
+```
+$ go mod tidy
+$ git diff --exit-code HelixCode/go.mod
+$ git diff --exit-code HelixCode/go.sum
+(empty — no changes to go.mod or go.sum)
+```
+
+Challenge harness final block (verbatim):
+```
+PHASE-A: project content contains fixture sentinel
+PHASE-A: User field empty (no overlay loaded)
+PHASE-A: ProjectPath resolves to helixcode.md
+PHASE-A: LoadedAt set
+PHASE-B: missing-file Reload returned nil error
+PHASE-B: ProjectPath is empty
+PHASE-B: Project content is empty
+PHASE-B: Render() returns empty string
+PHASE-C: registry Snapshot contains updated sentinel after fsnotify event
+PHASE-C: registry Snapshot no longer contains initial sentinel (positive byte differential)
+PHASE-C: LoadedAt updated within last 5 seconds
+PHASE-D: rendered output contains both project and user sentinels
+PHASE-D: project sentinel precedes user sentinel (project-before-user order)
+PHASE-D: render delimiter present
+PHASE-E: Project truncated to exactly MaxMemoryBytes (65536)
+PHASE-E: TruncatedProject flag set
+PHASE-E: first MaxMemoryBytes bytes match original input byte-for-byte
+SUMMARY: PHASE-A=4/4 PASS; PHASE-B=4/4 PASS; PHASE-C=3/3 PASS; PHASE-D=3/3 PASS; PHASE-E=3/3 PASS
+==> ALL CHECKS PASSED
+==> anti-bluff smoke on F24-affected code
+clean
+==> cross-compile linux
+==> P2-F24 challenge PASS
+```
+
+**Two-line summary:** F24 ships a real, end-to-end codex-style project
+memory subsystem (parent-walk discovery for `helixcode.md` / `codex.md`
+/ `AGENTS.md` with case-insensitive matching + git-root stop, atomic-
+pointer registry with lock-free Snapshot + mu-serialised Reload, real
+fsnotify watcher with 200 ms debounce + parent-dir watch surviving
+atomic-write renames, `/memory` slash with status/show/edit/reload, and
+nil-safe BaseAgent integration that prepends `Memory.Render()` per-call
+without caching). Five-phase Challenge harness PASS across all 17/17
+checks with positive runtime evidence per Article XI §11.9 against
+real tempdirs + real fsnotify; anti-bluff smoke clean; cross-compile
+clean; zero new external deps; fourth Phase 2 feature shipped.
+
 ---
