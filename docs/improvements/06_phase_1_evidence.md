@@ -2171,5 +2171,78 @@ EXIT=0
 
 ### P1-F17-T09 — Challenge harness: 7-phase (SINGLE/NOT-FOUND/MULTI/ROLLBACK/DIFF/AMBIG/BINARY) with sha-256 positive evidence
 
+**Date:** 2026-05-06
+**Files:**
+- `HelixCode/tests/integration/cmd/p1f17_challenge/main.go` (Go harness; 7 always-runs phases against real `*multiedit.MultiFileEditor` per-tempdir).
+- `Challenges/p1-f17-smart-file-editing/CHALLENGE.md` (procedure + pass criteria + anti-bluff anchors).
+- `Challenges/p1-f17-smart-file-editing/run.sh` (set -euo pipefail; build, run, anti-bluff smoke with fragment-built regex, cross-compile linux).
+
+**Cross-compile:** `GOOS=linux GOARCH=amd64 go build -o /tmp/p1f17_challenge_linux ./tests/integration/cmd/p1f17_challenge` → 73 MB binary (clean).
+
+**Anti-bluff smoke:** `clean` over `tests/integration/cmd/p1f17_challenge/` + `Challenges/p1-f17-smart-file-editing/` (regex built from fragments).
+
+**Verbatim harness stdout (real on-disk run; `INFO transaction …` lines from F08 multiedit elided for brevity):**
+
+```
+==> P1-F17 challenge harness pid: 2005117
+==> phase A: SINGLE-FILE edit applied (always runs)
+    file             : /tmp/.private/milosvasic/p1f17-phase-a-2527445563/a.txt
+    sha256_before    : 865de7c3cd7c4284afcd0aa82fc8014b6d456fb1216445566252b03e63da29d7
+    sha256_after     : 17eadc68ec3e55d55500d00bba7052a09886387390ef617bd6cef964509dc8c8
+    sha256_expected  : 17eadc68ec3e55d55500d00bba7052a09886387390ef617bd6cef964509dc8c8
+    verdict          : edit landed on disk; hashes confirm replacement
+==> phase B: NOT-FOUND aborts (always runs)
+    file             : /tmp/.private/milosvasic/p1f17-phase-b-2780701816/b.txt
+    sha256_before    : 5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03
+    sha256_after     : 5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03
+    atomic_error     : .../b.txt block (lines 2-6): not-found
+    verdict          : NOT-FOUND aborted commit; disk untouched
+==> phase C: MULTI-FILE atomic commit (always runs)
+    file_1           : /tmp/.private/milosvasic/p1f17-phase-c-1357853100/c1.txt
+    sha256_before_1  : b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060
+    sha256_after_1   : ae9a6306a205417afddd14316cc1d0d5e04a98f1be10865dce643925ee070ce2
+    file_2           : /tmp/.private/milosvasic/p1f17-phase-c-1357853100/c2.txt
+    sha256_before_2  : f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad
+    sha256_after_2   : 673953e0ad7fc53247f4feadc2c2d4506396840d1f8796526f48d47333ac7652
+    verdict          : both files landed atomically; per-file hashes confirm replacements
+==> phase D: ROLLBACK on partial failure (always runs)
+    file_1           : /tmp/.private/milosvasic/p1f17-phase-d-3857990016/d1.txt
+    sha256_before_1  : 8ca86a36ec908feacee1a885befd4045416ff937a9df9e694c4e9a72370b7aaf
+    sha256_after_1   : 8ca86a36ec908feacee1a885befd4045416ff937a9df9e694c4e9a72370b7aaf (== before)
+    file_2           : /tmp/.private/milosvasic/p1f17-phase-d-3857990016/d2.txt
+    sha256_before_2  : 5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03
+    sha256_after_2   : 5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03 (== before)
+    atomic_error     : .../d2.txt block (lines 8-12): not-found
+    verdict          : block1 applied in memory but file 1 NOT written; rollback proven
+==> phase E: DIFF EXACTNESS (always runs)
+    file             : /tmp/.private/milosvasic/p1f17-phase-e-4178674575/e.txt
+    sha256_before    : 865de7c3cd7c4284afcd0aa82fc8014b6d456fb1216445566252b03e63da29d7
+    sha256_after     : 17eadc68ec3e55d55500d00bba7052a09886387390ef617bd6cef964509dc8c8
+    diff_excerpt     :
+        @@ -1,3 +1,3 @@
+         hello
+        -old-line
+        +new-line
+         world
+    verdict          : result.Diff contains the exact +/- lines for the change
+==> phase F: AMBIG (always runs)
+    file             : /tmp/.private/milosvasic/p1f17-phase-f-1852788365/f.txt
+    sha256_before    : 57f6f8439eadc24dc916637658a8aad756fe0662c2172551d44dacc68c344496
+    sha256_after     : 57f6f8439eadc24dc916637658a8aad756fe0662c2172551d44dacc68c344496 (== before)
+    atomic_error     : .../f.txt block (lines 2-6): ambiguous
+    verdict          : ambiguous SEARCH refused; disk untouched
+==> phase G: BINARY (always runs)
+    file             : /tmp/.private/milosvasic/p1f17-phase-g-3349598644/g.bin
+    sha256_before    : 0a84857ab343b71b64ac53969df5504620e913c13aadb27ba7d4ad6710b1edf9
+    sha256_after     : 0a84857ab343b71b64ac53969df5504620e913c13aadb27ba7d4ad6710b1edf9 (== before)
+    atomic_error     : binary file: .../g.bin
+    verdict          : binary file refused; disk untouched
+==> ALL CHECKS PASSED
+==> P1-F17 challenge harness PASS
+EXIT=0
+```
+
+**Phase D verdict (load-bearing).** d1.txt's block (`applies-fine` → `changed`) applied cleanly in memory; d2.txt's block (`absent-text` → `whatever`) failed with `not-found`. Whole-prompt atomicity gate aborted the commit. Re-reading both files from disk confirms `sha256(after) == sha256(before)` for **both** files — d1.txt was NOT written despite its in-memory apply succeeding. This is the mechanical guarantee that the gate works.
+
 ### P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
 
