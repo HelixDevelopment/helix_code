@@ -1,0 +1,548 @@
+Entering 'Challenges'
+=== Challenges ===
+Already up to date.
+Entering 'Challenges/Containers'
+=== Containers ===
+ * [new branch]      lava-pin/2026-05-06-group-b -> origin/lava-pin/2026-05-06-group-b
+ * [new branch]      lava-pin/2026-05-07-pkg-vm -> origin/lava-pin/2026-05-07-pkg-vm
+   ba751ae..2ba3e56  main       -> origin/main
+Your branch is behind 'origin/main' by 34 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+ create mode 100644 pkg/vm/screenshot_test.go
+ create mode 100644 pkg/vm/teardown.go
+ create mode 100644 pkg/vm/types.go
+Entering 'Challenges/Panoptic'
+=== Panoptic ===
+Your branch is up to date with 'origin/main'.
+Already up to date.
+Entering 'Containers'
+=== Containers ===
+ * [new branch]      lava-pin/2026-05-05-clause-6n-prime -> origin/lava-pin/2026-05-05-clause-6n-prime
+ * [new branch]      lava-pin/2026-05-06-group-b -> origin/lava-pin/2026-05-06-group-b
+ * [new branch]      lava-pin/2026-05-07-pkg-vm -> origin/lava-pin/2026-05-07-pkg-vm
+ create mode 100644 pkg/vm/screenshot_test.go
+ create mode 100644 pkg/vm/teardown.go
+ create mode 100644 pkg/vm/types.go
+Entering 'Dependencies/HelixDevelopment/DocProcessor'
+=== Dependencies/HelixDevelopment/DocProcessor ===
+From github.com:HelixDevelopment/DocProcessor
+   764a9a9..3a571e0  master     -> origin/master
+ AGENTS.md | 137 +++++++++++++++++++++++++++++++++++++++++++
+ CLAUDE.md | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 333 insertions(+)
+Entering 'Dependencies/HelixDevelopment/LLMOrchestrator'
+=== Dependencies/HelixDevelopment/LLMOrchestrator ===
+From github.com:HelixDevelopment/LLMOrchestrator
+   c2b04ad..17378f9  master     -> origin/master
+ AGENTS.md | 137 +++++++++++++++++++++++++++++++++++++++++++
+ CLAUDE.md | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 333 insertions(+)
+Entering 'Dependencies/HelixDevelopment/LLMProvider'
+=== Dependencies/HelixDevelopment/LLMProvider ===
+From github.com:HelixDevelopment/LLMProvider
+   afe0ac5..262e20f  master     -> origin/master
+ AGENTS.md | 259 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ CLAUDE.md | 196 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 455 insertions(+)
+Entering 'Dependencies/HelixDevelopment/LLMsVerifier'
+=== Dependencies/HelixDevelopment/LLMsVerifier ===
+Already up to date.
+Entering 'Dependencies/HelixDevelopment/VisionEngine'
+=== Dependencies/HelixDevelopment/VisionEngine ===
+From github.com:HelixDevelopment/VisionEngine
+   9a35a9f..4f42ac5  master     -> origin/master
+ AGENTS.md | 137 +++++++++++++++++++++++++++++++++++++++++++++
+ CLAUDE.md | 188 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 325 insertions(+)
+Entering 'Dependencies/HuggingFace_Hub'
+=== Dependencies/HuggingFace_Hub ===
+ * [new branch]        no-traceback-on-local-entry-not-found -> origin/no-traceback-on-local-entry-not-found
+ + f968ffd4...cf812fa7 update-inference-types-automated-pr -> origin/update-inference-types-automated-pr  (forced update)
+ * [new branch]        use-parse-hf-uri        -> origin/use-parse-hf-uri
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Dependencies/LLama_CPP'
+=== Dependencies/LLama_CPP ===
+ * [new tag]             b9038        -> b9038
+ * [new tag]             b9041        -> b9041
+ * [new tag]             gguf-v0.19.0 -> gguf-v0.19.0
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Dependencies/Ollama'
+=== Dependencies/Ollama ===
+   e478be4c..13a60e98  parth-mlx-decode-checkpoints -> origin/parth-mlx-decode-checkpoints
+ * [new tag]           v0.23.1                -> v0.23.1
+ * [new tag]           v0.23.1-rc0            -> v0.23.1-rc0
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Example_Resources/Awesome-AI-Agents'
+=== Example_Resources/Awesome-AI-Agents ===
+Already up to date.
+Entering 'Example_Resources/Awesome-AI-GPTs'
+=== Example_Resources/Awesome-AI-GPTs ===
+Already up to date.
+Entering 'Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs'
+=== Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs ===
+From github.com:cheshire-cat-ai/docs
+ + 8bca820...5fce6ac gh-pages   -> origin/gh-pages  (forced update)
+Already up to date.
+Entering 'Example_Resources/GitHub-Awesome-Copilot'
+=== Example_Resources/GitHub-Awesome-Copilot ===
+ * [new branch]          sync/cli-for-beginners-v1.0.35-v1.0.36-24ec4c065234a914 -> origin/sync/cli-for-beginners-v1.0.35-v1.0.36-24ec4c065234a914
+ * [new branch]          update/http-hooks-learning-hub-67d6c1651b1af661 -> origin/update/http-hooks-learning-hub-67d6c1651b1af661
+ * [new branch]          update/learning-hub-v1.0.40-7017a06ec6fbd6f6 -> origin/update/learning-hub-v1.0.40-7017a06ec6fbd6f6
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Example_Resources/OpenAI-Cookbook'
+=== Example_Resources/OpenAI-Cookbook ===
+ * [new branch]      msingh-new              -> origin/msingh-new
+ * [new branch]      qdrant-notebook-changes -> origin/qdrant-notebook-changes
+ * [new branch]      rtaylor/code-review-evals -> origin/rtaylor/code-review-evals
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Example_Resources/Taches-CC-Resources'
+=== Example_Resources/Taches-CC-Resources ===
+From github.com:glittercowboy/taches-cc-resources
+   056d0bc..1757615  main       -> origin/main
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+Entering 'Github-Pages-Website'
+=== Github-Pages-Website ===
+Already up to date.
+Entering 'HelixAgent'
+=== HelixAgent ===
+Already up to date.
+Entering 'HelixAgent/Agentic'
+=== Agentic ===
+Already up to date.
+Entering 'HelixAgent/Auth'
+=== Auth ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 306f5e3..21efc87
+Entering 'HelixAgent/AutoTemp'
+=== AutoTemp ===
+Already up to date.
+Entering 'HelixAgent/BackgroundTasks'
+=== BackgroundTasks ===
+Already up to date.
+Entering 'HelixAgent/Benchmark'
+=== Benchmark ===
+Already up to date.
+Entering 'HelixAgent/BuildCheck'
+=== BuildCheck ===
+Already up to date.
+Entering 'HelixAgent/Cache'
+=== Cache ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 4c7adaa..c2998e1
+Entering 'HelixAgent/Challenges'
+=== Challenges ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 7af6592..4bf04bb
+Entering 'HelixAgent/Claritas'
+=== Claritas ===
+Already up to date.
+Entering 'HelixAgent/Concurrency'
+=== Concurrency ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 938d8ba..2ef5b14
+Entering 'HelixAgent/Containers'
+=== Containers ===
+ * [new branch]      lava-pin/2026-05-05-clause-6n-prime -> origin/lava-pin/2026-05-05-clause-6n-prime
+ * [new branch]      lava-pin/2026-05-06-group-b -> origin/lava-pin/2026-05-06-group-b
+ * [new branch]      lava-pin/2026-05-07-pkg-vm -> origin/lava-pin/2026-05-07-pkg-vm
+Please commit your changes or stash them before you merge.
+Aborting
+Updating ba751ae..2ba3e56
+Entering 'HelixAgent/ConversationContext'
+=== ConversationContext ===
+Already up to date.
+Entering 'HelixAgent/Database'
+=== Database ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating aca9155..62d71f5
+Entering 'HelixAgent/DocProcessor'
+=== DocProcessor ===
+Already up to date.
+Entering 'HelixAgent/Embeddings'
+=== Embeddings ===
+Already up to date.
+Entering 'HelixAgent/EventBus'
+=== EventBus ===
+Already up to date.
+Entering 'HelixAgent/Formatters'
+=== Formatters ===
+Already up to date.
+Entering 'HelixAgent/GandalfSolutions'
+=== GandalfSolutions ===
+Already up to date.
+Entering 'HelixAgent/HelixLLM'
+=== HelixLLM ===
+Already up to date.
+Entering 'HelixAgent/HelixMemory'
+=== HelixMemory ===
+Already up to date.
+Entering 'HelixAgent/HelixQA'
+=== HelixQA ===
+From github.com:HelixDevelopment/HelixQA
+   bf9756f..f129a34  main       -> origin/main
+Please commit your changes or stash them before you merge.
+Aborting
+Updating bf9756f..f129a34
+Entering 'HelixAgent/HelixSpecifier'
+=== HelixSpecifier ===
+Already up to date.
+Entering 'HelixAgent/HyperTune'
+=== HyperTune ===
+Already up to date.
+Entering 'HelixAgent/I-LLM'
+=== I-LLM ===
+Already up to date.
+Entering 'HelixAgent/LLMOps'
+=== LLMOps ===
+Already up to date.
+Entering 'HelixAgent/LLMOrchestrator'
+=== LLMOrchestrator ===
+Already up to date.
+Entering 'HelixAgent/LLMProvider'
+=== LLMProvider ===
+Already up to date.
+Entering 'HelixAgent/LLMsVerifier'
+=== LLMsVerifier ===
+From github.com:vasic-digital/LLMsVerifier
+   fca4a4f9..d473231d  main       -> origin/main
+Your branch is behind 'origin/main' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+ CLAUDE.md       | 1179 ++++++++++++++++++++++-------------------------
+ CONSTITUTION.md |  757 +++++++++++++++++++-----------
+ 3 files changed, 1859 insertions(+), 1449 deletions(-)
+Entering 'HelixAgent/LeakHub'
+=== LeakHub ===
+Already up to date.
+Entering 'HelixAgent/MCP-Servers'
+=== MCP-Servers ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/airtable-mcp'
+=== MCP/submodules/airtable-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/all-in-one-mcp'
+=== MCP/submodules/all-in-one-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/appcypher-awesome-mcp'
+=== MCP/submodules/appcypher-awesome-mcp ===
+From github.com:appcypher/awesome-mcp-servers
+   187929a..280218b  main       -> origin/main
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 187929a..280218b
+Entering 'HelixAgent/MCP/submodules/atlassian-mcp'
+=== MCP/submodules/atlassian-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/awesome-devops-mcp'
+=== MCP/submodules/awesome-devops-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/awesome-mcp-servers'
+=== MCP/submodules/awesome-mcp-servers ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/aws-mcp'
+=== MCP/submodules/aws-mcp ===
+ * [new branch]        feature/dsql-lint-tool  -> origin/feature/dsql-lint-tool
+ * [new branch]        upgrade/aws-api-mcp-awscli-v1.45.4 -> origin/upgrade/aws-api-mcp-awscli-v1.45.4
+ * [new tag]           2026.05.20260505222206  -> 2026.05.20260505222206
+Please commit your changes or stash them before you merge.
+Aborting
+Updating d3a14083..458b2c4d
+Entering 'HelixAgent/MCP/submodules/brave-search'
+=== MCP/submodules/brave-search ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/browserbase-mcp'
+=== MCP/submodules/browserbase-mcp ===
+From github.com:browserbase/mcp-server-browserbase
+   f6bd321..1e196b3  main       -> origin/main
+   adfe604..741b02d  ce-955/rename-advanced-stealth-to-verified -> origin/ce-955/rename-advanced-stealth-to-verified
+Please commit your changes or stash them before you merge.
+Aborting
+Updating f6bd321..1e196b3
+Entering 'HelixAgent/MCP/submodules/cloudflare-mcp'
+=== MCP/submodules/cloudflare-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/context7-mcp'
+=== MCP/submodules/context7-mcp ===
+From github.com:upstash/context7
+   85c3a0c..78b9826  master     -> origin/master
+ * [new branch]      changeset-release/master -> origin/changeset-release/master
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 85c3a0c..78b9826
+Entering 'HelixAgent/MCP/submodules/create-python-server'
+=== MCP/submodules/create-python-server ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/create-typescript-server'
+=== MCP/submodules/create-typescript-server ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/docs-mcp'
+=== MCP/submodules/docs-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/elasticsearch-mcp'
+=== MCP/submodules/elasticsearch-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/ever-works-awesome-mcp'
+=== MCP/submodules/ever-works-awesome-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/firecrawl-mcp'
+=== MCP/submodules/firecrawl-mcp ===
+From github.com:mendableai/firecrawl-mcp-server
+   57d2d0f..71aa555  main       -> origin/main
+ * [new branch]      update     -> origin/update
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 57d2d0f..71aa555
+Entering 'HelixAgent/MCP/submodules/github-mcp-server'
+=== MCP/submodules/github-mcp-server ===
+From github.com:github/github-mcp-server
+   926d049..2dab994  main       -> origin/main
+ + 1e74312...cbd22dd rosstarrant/add-discussion-comment-write-ops -> origin/rosstarrant/add-discussion-comment-write-ops  (forced update)
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 926d049..2dab994
+Entering 'HelixAgent/MCP/submodules/habito-awesome-mcp'
+=== MCP/submodules/habito-awesome-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/heroku-mcp'
+=== MCP/submodules/heroku-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/inspector'
+=== MCP/submodules/inspector ===
+From github.com:modelcontextprotocol/inspector
+ * [new branch]        v2/issue-1263-apps-screen -> origin/v2/issue-1263-apps-screen
+   1ffcdc38..323f42d1  v2/main    -> origin/v2/main
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/k8s-mcp-server'
+=== MCP/submodules/k8s-mcp-server ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/kubernetes-mcp'
+=== MCP/submodules/kubernetes-mcp ===
+   5f1e5a3..c1ed3b3  main       -> origin/main
+ + 9d3bb82...c9f52d1 dependabot/go_modules/kubernetes-f344e94896 -> origin/dependabot/go_modules/kubernetes-f344e94896  (forced update)
+ * [new tag]         v0.0.62    -> v0.0.62
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 5f1e5a3..c1ed3b3
+Entering 'HelixAgent/MCP/submodules/langchain-mcp'
+=== MCP/submodules/langchain-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/llamaindex-mcp'
+=== MCP/submodules/llamaindex-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/mcp-playwright-ea'
+=== MCP/submodules/mcp-playwright-ea ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/microsoft-mcp'
+=== MCP/submodules/microsoft-mcp ===
+ * [new tag]           Azure.Mcp.Server-3.0.0-beta.9 -> Azure.Mcp.Server-3.0.0-beta.9
+ * [new tag]           Template.Mcp.Server-0.0.12-alpha.6247644 -> Template.Mcp.Server-0.0.12-alpha.6247644
+ * [new tag]           Template.Mcp.Server-0.0.12-alpha.6251995 -> Template.Mcp.Server-0.0.12-alpha.6251995
+	tools/Azure.Mcp.Tools.App
+Aborting
+Updating 26692b36..9f923302
+Entering 'HelixAgent/MCP/submodules/mongodb-mcp'
+=== MCP/submodules/mongodb-mcp ===
+ * [new branch]      mcp-transports-package -> origin/mcp-transports-package
+   ea77d28..c2d50c7  v2                     -> origin/v2
+ * [new tag]         v1.11.0-prerelease.2   -> v1.11.0-prerelease.2
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 83cc145..db996ee
+Entering 'HelixAgent/MCP/submodules/notion-mcp-server'
+=== MCP/submodules/notion-mcp-server ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/obsidian-mcp'
+=== MCP/submodules/obsidian-mcp ===
+From github.com:cyanheads/obsidian-mcp-server
+   70b6203..d23ca98  main       -> origin/main
+ * [new tag]         v3.1.4     -> v3.1.4
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 70b6203..d23ca98
+Entering 'HelixAgent/MCP/submodules/omnisearch-mcp'
+=== MCP/submodules/omnisearch-mcp ===
+ * [new branch]      renovate/pnpm-10.x -> origin/renovate/pnpm-10.x
+ * [new branch]      renovate/valibot-1.x-lockfile -> origin/renovate/valibot-1.x-lockfile
+ * [new tag]         v0.0.25            -> v0.0.25
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 8d20e46..f374c1a
+Entering 'HelixAgent/MCP/submodules/perplexity-mcp'
+=== MCP/submodules/perplexity-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/playwright-mcp'
+=== MCP/submodules/playwright-mcp ===
+From github.com:microsoft/playwright-mcp
+   4c76659..9a015fc  main       -> origin/main
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 4c76659..9a015fc
+Entering 'HelixAgent/MCP/submodules/python-sdk'
+=== MCP/submodules/python-sdk ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/qdrant-mcp'
+=== MCP/submodules/qdrant-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/redis-mcp'
+=== MCP/submodules/redis-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/registry'
+=== MCP/submodules/registry ===
+   1b9f69e..2b90d93  main       -> origin/main
+ * [new branch]      dependabot/go_modules/deploy/github.com/pulumi/pulumi/sdk/v3-3.235.0 -> origin/dependabot/go_modules/deploy/github.com/pulumi/pulumi/sdk/v3-3.235.0
+ * [new tag]         v1.7.8     -> v1.7.8
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 1b9f69e..2b90d93
+Entering 'HelixAgent/MCP/submodules/sentry-mcp'
+=== MCP/submodules/sentry-mcp ===
+From github.com:getsentry/sentry-mcp
+   eb19278..7f1f31d  main       -> origin/main
+ * [new branch]      feat/adopt-sentry-api-sdk -> origin/feat/adopt-sentry-api-sdk
+Please commit your changes or stash them before you merge.
+Aborting
+Updating eb19278..7f1f31d
+Entering 'HelixAgent/MCP/submodules/slack-mcp'
+=== MCP/submodules/slack-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/supabase-mcp'
+=== MCP/submodules/supabase-mcp ===
+   65474b4..87c6584  main       -> origin/main
+ * [new branch]      fix/prompt-injection-test-output-shape -> origin/fix/prompt-injection-test-output-shape
+ * [new branch]      mattrossman/ai-702-createsupabaseapiplatform-add-fetch-option-to-support-in -> origin/mattrossman/ai-702-createsupabaseapiplatform-add-fetch-option-to-support-in
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 65474b4..87c6584
+Entering 'HelixAgent/MCP/submodules/telegram-mcp'
+=== MCP/submodules/telegram-mcp ===
+From github.com:chigwell/telegram-mcp
+   bee2085..0f35835  main       -> origin/main
+ * [new tag]         v3.1.0     -> v3.1.0
+Please commit your changes or stash them before you merge.
+Aborting
+Updating bee2085..0f35835
+Entering 'HelixAgent/MCP/submodules/trello-mcp'
+=== MCP/submodules/trello-mcp ===
+From github.com:delorenj/mcp-server-trello
+   02dafec..12bf0f2  main       -> origin/main
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 02dafec..12bf0f2
+Entering 'HelixAgent/MCP/submodules/typescript-sdk'
+=== MCP/submodules/typescript-sdk ===
+ * [new branch]        dependabot/github_actions/pnpm/action-setup-6.0.5 -> origin/dependabot/github_actions/pnpm/action-setup-6.0.5
+   6ef09713..3d43f781  feature/v2-codemode-draft -> origin/feature/v2-codemode-draft
+ * [new branch]        fix/readme-npm-badges-blockquote -> origin/fix/readme-npm-badges-blockquote
+Already up to date.
+Entering 'HelixAgent/MCP/submodules/workers-mcp'
+=== MCP/submodules/workers-mcp ===
+Already up to date.
+Entering 'HelixAgent/MCP_Module'
+=== MCP_Module ===
+Already up to date.
+Entering 'HelixAgent/Memory'
+=== Memory ===
+Already up to date.
+Entering 'HelixAgent/Messaging'
+=== Messaging ===
+Already up to date.
+Entering 'HelixAgent/Models'
+=== Models ===
+Already up to date.
+Entering 'HelixAgent/Normalize'
+=== Normalize ===
+Already up to date.
+Entering 'HelixAgent/Observability'
+=== Observability ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 46e3f8f..1fa872f
+Entering 'HelixAgent/Optimization'
+=== Optimization ===
+Already up to date.
+Entering 'HelixAgent/Ouroborous'
+=== Ouroborous ===
+Already up to date.
+Entering 'HelixAgent/Planning'
+=== Planning ===
+Already up to date.
+Entering 'HelixAgent/PliniusCommon'
+=== PliniusCommon ===
+Already up to date.
+Entering 'HelixAgent/Plugins'
+=== Plugins ===
+Already up to date.
+Entering 'HelixAgent/RAG'
+=== RAG ===
+Already up to date.
+Entering 'HelixAgent/RedTeam'
+=== RedTeam ===
+Already up to date.
+Entering 'HelixAgent/Security'
+=== Security ===
+ * [new branch]      lava-pin/2026-05-05-10th-invocation-propagation -> origin/lava-pin/2026-05-05-10th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-9th-invocation-propagation -> origin/lava-pin/2026-05-05-9th-invocation-propagation
+ * [new branch]      lava-pin/2026-05-05-clause-6n -> origin/lava-pin/2026-05-05-clause-6n
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 14cbd56..7fc1e26
+Entering 'HelixAgent/SelfImprove'
+=== SelfImprove ===
+Already up to date.
+Entering 'HelixAgent/SkillRegistry'
+=== SkillRegistry ===
+Already up to date.
+Entering 'HelixAgent/Storage'
+=== Storage ===
+Already up to date.
+Entering 'HelixAgent/Streaming'
+=== Streaming ===
+Already up to date.
+Entering 'HelixAgent/ToolSchema'
+=== ToolSchema ===
+Already up to date.
+Entering 'HelixAgent/VectorDB'
+=== VectorDB ===
+Already up to date.
+Entering 'HelixAgent/Veritas'
+=== Veritas ===
+Already up to date.
+Entering 'HelixAgent/VisionEngine'
+=== VisionEngine ===
+Already up to date.
+Entering 'HelixAgent/cli_agents/HelixCode'
+=== cli_agents/HelixCode ===

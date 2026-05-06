@@ -2804,3 +2804,108 @@ The 20 features collectively port the claude-code feature surface onto the Helix
 
 **Phase 1 of the CLI-Agent Fusion programme is complete.** The HelixCode CLI agent now matches claude-code's user-visible feature surface end-to-end, with anti-bluff invariants enforced by Challenge runtime evidence at every step.
 
+
+
+---
+
+## P1.5 — Foundation Cleanup (in progress)
+
+**Plan:** `docs/superpowers/plans/2026-05-06-p1-5-foundation-cleanup.md`
+**Snapshot:** `docs/improvements/p1-5-snapshot-pre.md`
+**Dedup map:** `docs/improvements/p1-5-dedup-canonical.md`
+**Init log:** `docs/improvements/p1-5-fetch.log` (also `/tmp/p1-5-init.log`)
+**Pull log:** `/tmp/p1-5-pull.log` (paths-only; will be folded in if WP1 resumes cleanly)
+**Reachability log:** `/tmp/p1-5-remotes.log` → captured into `docs/improvements/p1-5-remote-reachability.md`
+
+### P1.5-pre — Cleanup commits
+
+| Step | Commit | Subject |
+|---|---|---|
+| 1a | `aad6a67d` (HelixAgent) | preserve in-flight nested gitlink updates |
+| 1b | `47dc905a` (Challenges) | preserve nested gitlink updates |
+| 1c | `d0ad6fd3` (root) | preserve in-flight tracked changes + submodule gitlink advances |
+| 2  | `ad5e108c` (root) | remove `Example_Projects/` entirely (67 submodules deinit + .gitmodules rewrite + tree delete) |
+| 3  | `cff2d90f` (root) | gitignore phase-1 development artefacts |
+
+**Evidence (pasted from this session, 2026-05-06T16:25 +03:00):**
+
+```
+$ git log --oneline -5
+cff2d90 chore(P1.5-pre): gitignore phase-1 development artefacts
+ad5e108 feat(P1.5-pre): remove Example_Projects/ entirely (replaced by cli_agents/* in WP2)
+d0ad6fd chore(P1.5): preserve in-flight tracked changes + submodule gitlink advances pre-foundation-cleanup
+191f824 docs(P1.5): foundation cleanup plan
+046d802 chore(P1-F20-T09): close out feature 20 + Phase 1 of CLI-Agent Fusion programme COMPLETE
+
+$ wc -l .gitmodules        # was 264 lines pre-removal; now Example_Projects/ gone
+63 .gitmodules
+
+$ grep -c 'Example_Projects' .gitmodules
+0
+
+$ git submodule status --recursive 2>&1 | head -1
+ 47dc905a230e28054df1c7be091d5a68792f81ea Challenges (1.0.2-dev-0.0.2-118-g47dc905)
+# (no longer aborts — Agent-Deck recursion blocker resolved by Example_Projects removal)
+```
+
+### P1.5-WP1-T01.01 — Recursive fetch + pull (HALTED)
+
+`git submodule update --init --recursive` ran for ~25 minutes; cloned ~28 new
+HelixQA opensource submodules totalling >1.5 GB on disk.
+
+**Three failures aborted final init:**
+
+```
+ERROR: Repository not found.
+fatal: clone of 'git@github.com:vasic-digital/DebateOrchestrator.git' into submodule path '...HelixAgent/DebateOrchestrator' failed
+fatal: clone of 'git@github.com:stark1tty/kiro-cli.git' into submodule path '...HelixAgent/cli_agents/kiro-cli' failed
+fatal: clone of 'git@github.com:tcsenpai/ollama-code.git' into submodule path '...HelixAgent/cli_agents/ollama-code' failed
+Failed to clone 'DebateOrchestrator' a second time, aborting
+fatal: Failed to recurse into submodule path 'HelixAgent'
+```
+
+Per user STOP-protocol mandate ("If a fetch fails with auth error or
+unreachable remote, STOP — push step depends on this"), WP1 halts here and
+defers user decision: create the missing remotes, promote them to Phase 2
+parking lot, or amend `.gitmodules` to drop them.
+
+`kiro-cli` and `ollama-code` are upstream-deleted third-party forks; Phase 0
+§3.3 already recorded "13 deferred to Phase 2 sub-specs" — these are 2 of
+those. `DebateOrchestrator` is a vasic-digital-owned repo that needs creating
+or renaming first.
+
+The fetch+pull-loop (`git submodule foreach --recursive`) was started against
+the partially-initialised tree; partial output in `/tmp/p1-5-pull.log`. It
+will be re-run cleanly after WP1 resumes.
+
+### P1.5-WP1-T01.02 — Pre-state snapshot (PARTIAL)
+
+`docs/improvements/p1-5-snapshot-pre.md` captures: pre-WP1 commit set,
+submodule counts (~196 total, ~36 uninitialised), reachability table,
+.gitmodules content summary, dirty-state cascade, decided canonical paths
+pointer, rollback recipe. Marked partial because §Reachability lists three
+unreachable URLs that block T01.01 close-out.
+
+### P1.5-WP1-T01.03 — Remote reachability sweep (IN PROGRESS)
+
+181 unique remote URLs (21 root + 165 HelixAgent, deduplicated). Each
+`git ls-remote $url HEAD` with 15s timeout. At capture time, ~44/181 URLs
+verified OK. Loop running in background; final table goes into
+`docs/improvements/p1-5-remote-reachability.md`. Three known UNREACHABLE
+already (DebateOrchestrator, kiro-cli, ollama-code).
+
+### P1.5-WP1-T01.04 — Dedup canonical list (DONE)
+
+`docs/improvements/p1-5-dedup-canonical.md` — 5 canonical paths recorded:
+
+1. LLMsVerifier → `Dependencies/HelixDevelopment/LLMsVerifier/`
+2. Containers   → `Containers/`
+3. Security     → `Security/`
+4. HelixQA      → `HelixQA/`
+5. MCP-Servers  → TBD at WP3.T03.05 (MCP-Servers/ vs MCP/submodules/* — needs audit)
+
+### P1.5-WP1-T01.05 — Bootstrap evidence + advance PROGRESS (THIS COMMIT)
+
+PROGRESS.md updated: active phase → P1.5; active task → P1.5-WP1-T01.01
+(HALTED); WP1..WP12 task list inserted; P1.5-pre commits recorded.
+

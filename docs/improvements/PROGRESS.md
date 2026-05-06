@@ -8,24 +8,51 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 1 of CLI-Agent Fusion programme COMPLETE — all 20 features (F01–F20) shipped
+- **Active phase:** Phase 1.5 — Foundation Cleanup (in progress, WP1)
 - **Active feature:** —
-- **Active task:** —
-- **Last completed:** P1-F20-T09 — Feature 20 (Theme System) close-out + push 4 remotes — **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE**
+- **Active task:** P1.5-WP1-T01.01 (HALTED — three unreachable remotes; user STOP-protocol triggered)
+- **Last completed:** P1.5-pre cleanup (HelixAgent gitlinks, Challenges gitlinks, root tracked changes, Example_Projects/ removal, .gitignore update)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-06
-- **Blocked-on:** none
+- **Blocked-on:** user decision on three unreachable remotes (DebateOrchestrator / kiro-cli / ollama-code) — see `docs/improvements/p1-5-snapshot-pre.md` §Reachability
 
 ## Phase status
 | Phase | State | Started | Completed | Evidence |
 |---|---|---|---|---|
 | P0 — Foundation | done | 2026-05-04 | 2026-05-05 | docs/improvements/05_phase_0_evidence.md |
 | P1 — claude-code | done | 2026-05-05 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md |
+| P1.5 — Foundation Cleanup | in_progress | 2026-05-06 | — | docs/improvements/06_phase_1_evidence.md §P1.5 |
 | P2 — Other CLI agents | pending | — | — | — |
 | P3 — Test infra | pending | — | — | — |
 | P4 — Anti-bluff audit | pending | — | — | — |
 | P5 — End-user materials | pending | — | — | — |
+
+## P1.5 Work-package list (12 WPs)
+- [~] P1.5-WP1 — Inventory + foundation safety (5 tasks) **HALTED — unreachable remotes**
+- [ ] P1.5-WP2 — Submodule restructuring (~67 mechanical moves)
+- [ ] P1.5-WP3 — Submodule deduplication (5 sets)
+- [ ] P1.5-WP4 — API key loader (bash + Go)
+- [ ] P1.5-WP5 — `.env` API key dedup (USER GATE)
+- [ ] P1.5-WP6 — Docs consolidation (3 dirs)
+- [ ] P1.5-WP7 — Snake_case directory normalization
+- [ ] P1.5-WP8 — Anti-bluff Constitution propagation
+- [ ] P1.5-WP9 — Reference updates (comprehensive grep sweep)
+- [ ] P1.5-WP10 — Rebuild + validation + fix `internal/tools/git` pre-existing failure
+- [ ] P1.5-WP11 — Phase 1.5 Challenge harness (5 phases)
+- [ ] P1.5-WP12 — Commit + push everything (deepest-first)
+
+## P1.5 task list (in flight)
+- [x] P1.5-pre — HelixAgent gitlink commit  ← `aad6a67d`
+- [x] P1.5-pre — Challenges gitlink commit  ← `47dc905a`
+- [x] P1.5-pre — root tracked + gitlink commit  ← `d0ad6fd3`
+- [x] P1.5-pre — remove Example_Projects/ entirely (67 submodules)  ← `ad5e108c`
+- [x] P1.5-pre — gitignore phase-1 development artefacts  ← `cff2d90f`
+- [~] P1.5-WP1-T01.01 — recursive fetch + pull every submodule **HALTED** (init aborted at HelixAgent/DebateOrchestrator unreachable; full log in `docs/improvements/p1-5-fetch.log`)
+- [~] P1.5-WP1-T01.02 — pre-state snapshot **PARTIAL** — `docs/improvements/p1-5-snapshot-pre.md` (commit pending bootstrap)
+- [~] P1.5-WP1-T01.03 — remote reachability sweep **IN PROGRESS** (181 unique URLs, see `docs/improvements/p1-5-remote-reachability.md`)
+- [x] P1.5-WP1-T01.04 — dedup canonical list  ← `docs/improvements/p1-5-dedup-canonical.md`
+- [ ] P1.5-WP1-T01.05 — bootstrap evidence + advance PROGRESS (commit pending — this commit)
 
 ## Active phase task list (Phase 0)
 - [x] P0-01 — bootstrap PROGRESS.md  ← commit `2c07f57`
