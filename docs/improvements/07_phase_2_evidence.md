@@ -21,9 +21,10 @@ Phase status pointer: `docs/improvements/PROGRESS.md`
 ## P2-F21 — Codex Approval Modes
 
 **Date opened:** 2026-05-06
+**Date closed:** 2026-05-06
 **Spec:** `7128289`
 **Plan:** `bbb61de`
-**Status:** in progress
+**Status:** DONE
 
 ### One-line goal
 
@@ -37,15 +38,15 @@ runtime mode swap.
 
 | Task | Commit | Subject |
 |---|---|---|
-| P2-F21-T01 |  | bootstrap Phase 2 evidence + advance PROGRESS to F21 |
-| P2-F21-T02 |  | approval/types.go: ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors (TDD) |
-| P2-F21-T03 |  | approval/selector.go: flag > env > config > default precedence (TDD) |
-| P2-F21-T04 |  | approval/manager.go: ApprovalManager with 4×4 matrix gate + F02/F14/F19 integration (TDD) |
-| P2-F21-T05 |  | Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD) |
-| P2-F21-T06 |  | /approval slash command (status/set/show) (TDD) |
-| P2-F21-T07 |  | main.go wiring + --approval pflag + registry hook + integration test (TDD) |
-| P2-F21-T08 |  | Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny) |
-| P2-F21-T09 |  | Feature 21 close-out + push 4 remotes non-force |
+| P2-F21-T01 | `a7a349f` | bootstrap Phase 2 evidence + advance PROGRESS to F21 |
+| P2-F21-T02 | `9c2664d` | approval/types.go: ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors (TDD) |
+| P2-F21-T03 | `0d655d8` | approval/selector.go: flag > env > config > default precedence (TDD) |
+| P2-F21-T04 | `5ef13b8` | approval/manager.go: ApprovalManager with 4×4 matrix gate + F02/F14/F19 integration (TDD) |
+| P2-F21-T05 | `19bffce` (+ CONTINUATION update `1195ef9`) | Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD) |
+| P2-F21-T06 | `ad8843b` (+ CONTINUATION update `9b72c26`) | /approval slash command (status/set/show) (TDD) |
+| P2-F21-T07 | `c022968` (+ CONTINUATION update `bd67324`) | main.go wiring + --approval pflag + registry hook + integration test (TDD) |
+| P2-F21-T08 | sub `aff2a6f` + meta `2781c1a` (+ CONTINUATION update `ee413c3`) | Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny) |
+| P2-F21-T09 | (this commit) | Feature 21 close-out + push 4 remotes non-force |
 
 ### Acceptance
 
@@ -171,8 +172,69 @@ CHALLENGE.md §11 for the agent-handoff note describing where any
 future F02 registry-level seam must sit (after `applyApprovalGate`,
 before `Tool.Execute`).
 
-### P2-F21-T09 — Feature 21 close-out + push 4 remotes
+### P2-F21-T09 — Close-out evidence
 
-_pending._
+**Date:** 2026-05-06
+
+**All task SHAs (T01–T09):**
+
+| Task | SHA(s) |
+|---|---|
+| T01 | `a7a349f` — bootstrap Phase 2 evidence + advance PROGRESS to F21 |
+| T02 | `9c2664d` — approval types |
+| T03 | `0d655d8` — Selector |
+| T04 | `5ef13b8` — ApprovalManager |
+| T05 | `19bffce` (Tool interface ext + ~38 impls) + CONTINUATION update `1195ef9` |
+| T06 | `ad8843b` (/approval slash) + CONTINUATION update `9b72c26` |
+| T07 | `c022968` (main.go wiring + 8 integration tests) + CONTINUATION update `bd67324` |
+| T08 | Challenges submodule `aff2a6f` + meta-repo gitlink `2781c1a` + CONTINUATION update `ee413c3` |
+| T09 | (this commit — close-out + push 4 remotes) |
+
+**Verbatim test summary (`go test ./internal/approval/... ./internal/commands/... ./cmd/cli/...`):**
+
+```
+ok  	dev.helix.code/internal/approval	0.004s
+ok  	dev.helix.code/internal/commands	0.695s
+ok  	dev.helix.code/internal/commands/builtin	0.018s
+ok  	dev.helix.code/cmd/cli	0.051s
+```
+
+**Verbatim integration test summary (`go test -tags=integration -run "TestApproval_" ./tests/integration/...`):**
+
+```
+ok  	dev.helix.code/tests/integration	1.498s
+```
+
+**Anti-bluff smoke (verbatim — both clean):**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/approval/ internal/approvalwire/ internal/commands/approval_command.go \
+    cmd/cli/main.go tests/integration/approval_test.go tests/integration/cmd/p2f21_challenge/ \
+    && echo BLUFF || echo clean
+clean
+
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    p2-f21-codex-approval-modes/ && echo BLUFF || echo clean
+clean
+```
+
+**Cross-compile (linux/amd64):**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f21check ./cmd/cli/
+$ ls -la /tmp/helixcode_linux_f21check
+-rwxr-xr-x 1 milosvasic milosvasic 94522992 May  6 23:09 /tmp/helixcode_linux_f21check
+```
+
+**Final harness re-run — final 2 lines:**
+
+```
+==> ALL CHECKS PASSED
+==> P2-F21 challenge harness PASS
+EXIT=0
+```
+
+**Two-line summary:** F21 ships codex-compatible 4-mode approval with CLI/env/config selector, atomic-pointer runtime swap, F14 sandbox coupling under full-auto, and F02 final-deny composition; all 9 tasks committed with TDD discipline. Challenge harness PASS across all 5 phases with positive runtime evidence; anti-bluff smoke clean; cross-compile clean; first Phase 2 feature shipped.
 
 ---

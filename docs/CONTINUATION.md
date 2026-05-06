@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated:** 2026-05-06T23:10:00Z by meta-repo HEAD `2781c1a` (will roll forward on this commit)
+**Last updated:** 2026-05-06T23:30:00Z by meta-repo HEAD (this commit — F21 close-out)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -48,7 +48,7 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P0 — Foundation                | DONE         | per `05_phase_0_evidence`  | governance cascade + secret-leak remediation                  |
 | P1 — claude-code (F01..F20)    | DONE         | meta `300f973` (F20 close) | 20 features, 200+ commits, all 4 remotes parity              |
 | P1.5 — Foundation Cleanup      | DONE         | meta `4131bf0`             | 12 WPs, ~48 commits, deepest-first push complete             |
-| P2 — CLI agent porting         | IN PROGRESS  | —                          | F21 mid-flight (8 of 9 tasks done; T09 close-out next)        |
+| P2 — CLI agent porting         | IN PROGRESS  | F21 DONE @ this commit     | F21 closed (9/9 tasks); F22 next candidate (brainstorm)       |
 | P3 — Test infra                | NOT STARTED  | —                          | depends on Phase 2 close                                      |
 | P4 — Anti-bluff audit          | NOT STARTED  | —                          | depends on Phase 3 close                                      |
 | P5 — End-user materials uplift | NOT STARTED  | —                          | final phase                                                   |
@@ -82,17 +82,21 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**P2-F21 — Codex Approval Modes**
+**None.** F21 closed; Phase 2 ready for F22 brainstorming.
+
+### Most recent feature (closed): P2-F21 — Codex Approval Modes
 
 - Spec: `7128289` (`docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md`)
 - Plan: `bbb61de` (`docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md`)
+- Closed: 2026-05-06 (T09 close-out commit)
+- Status: **DONE** — first Phase 2 feature shipped
 - Goal: Codex-compatible 4-mode approval system (suggest / auto-edit /
   full-auto / dangerously-bypass) with CLI flag > env > config > default
   precedence; per-tool `RequiresApproval()` gate; F14 sandbox coupling for
   full-auto; F02 final-deny authority retained; `/approval` slash + atomic-
   pointer runtime mode swap.
 
-**Tasks completed (8 of 9):**
+**Tasks completed (9 of 9):**
 
 | Task | Commit       | Subject                                                                        |
 |------|--------------|--------------------------------------------------------------------------------|
@@ -100,14 +104,11 @@ Meta-repo remotes (4):
 | T02  | `9c2664d`    | approval/types.go (ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors) |
 | T03  | `0d655d8`    | approval/selector.go (flag > env > config > default precedence)                |
 | T04  | `5ef13b8`    | approval/manager.go (4×4 matrix gate + F02/F14/F19 integration)                |
-| T05  | `19bffce`    | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
-| T06  | `ad8843b`    | `/approval` slash command (status/set/show) — ApprovalInspector seam + ParseMode + ModeDescriptors render |
-| T07  | `c022968`    | main.go wiring + `--approval` flag + registry hook + 8 integration tests (approvalwire.AskUserYesNoPrompter + ToolRegistry.SetApprovalManager + applyApprovalGate; sandbox markers injected for full-auto Run/All) |
-| T08  | meta `2781c1a` / sub `aff2a6f` | Challenge harness 5 phases (suggest-deny, auto-edit-prompt, full-auto-sandbox, runtime-change, F02-final-deny); harness PASS, cross-compile linux/amd64 PASS, anti-bluff smoke clean; F02 contract pinned via in-stub deny-rule (registry-level F02 seam not yet wired — see CHALLENGE.md §11) |
-
-**Tasks remaining (1 of 9):**
-
-- **T09** — Feature 21 close-out + push to all 4 meta-repo remotes (non-force). Includes pushing the Challenges submodule (T08 deferred its push) to its own 4 remotes per the programme convention.
+| T05  | `19bffce` (+ `1195ef9`) | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
+| T06  | `ad8843b` (+ `9b72c26`) | `/approval` slash command (status/set/show) — ApprovalInspector seam + ParseMode + ModeDescriptors render |
+| T07  | `c022968` (+ `bd67324`) | main.go wiring + `--approval` flag + registry hook + 8 integration tests (approvalwire.AskUserYesNoPrompter + ToolRegistry.SetApprovalManager + applyApprovalGate; sandbox markers injected for full-auto Run/All) |
+| T08  | meta `2781c1a` / sub `aff2a6f` (+ `ee413c3`) | Challenge harness 5 phases (suggest-deny, auto-edit-prompt, full-auto-sandbox, runtime-change, F02-final-deny); harness PASS, cross-compile linux/amd64 PASS, anti-bluff smoke clean; F02 contract pinned via in-stub deny-rule (registry-level F02 seam not yet wired — see CHALLENGE.md §11) |
+| T09  | (this commit) | Feature 21 close-out + push 4 remotes non-force (PROGRESS + plan ticks + evidence T09 section + this CONTINUATION update) |
 
 ---
 
@@ -303,3 +304,4 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-06     | T06 update    | T06 (`/approval` slash command) closed; 6 of 9 F21 tasks done.     |
 | 2026-05-06     | T07 update    | T07 (main.go wiring + registry hook + integration test, `c022968`) closed; 7 of 9 F21 tasks done. |
 | 2026-05-06     | T08 update    | T08 (Challenge harness 5 phases, meta `2781c1a` + sub `aff2a6f`) closed; 8 of 9 F21 tasks done; T09 (close-out + push 4 remotes) is next. |
+| 2026-05-06     | T09 close-out | F21 (Codex Approval Modes) CLOSED — first Phase 2 feature shipped. All 9 tasks ticked in plan + PROGRESS. F22 next candidate (brainstorming required). Decision log entry added in PROGRESS.md. Test summary, anti-bluff `clean`, cross-compile linux/amd64 (94 MB), and harness final-2-lines (`ALL CHECKS PASSED` / `P2-F21 challenge harness PASS`) recorded in `07_phase_2_evidence.md` §P2-F21-T09. |

@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress)
-- **Active feature:** P2-F21 — Codex Approval Modes (in progress)
-- **Active task:** P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21
-- **Last completed:** P1.5-WP12 — Foundation Cleanup close-out + push (deepest-first: HelixAgent → Challenges → meta-repo to 4 remotes)
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F21 COMPLETE; F22 next candidate
+- **Active feature:** —
+- **Active task:** —
+- **Last completed:** P2-F21-T09 — Feature 21 (Codex Approval Modes) close-out + push 4 remotes non-force
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-06
@@ -332,16 +332,16 @@
 - [x] P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)  ← submodule `4bf04bb` + meta-repo `300f973`
 - [x] P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE  ← (this commit)
 
-## Active feature task list (P2-F21: Codex Approval Modes)
-- [x] P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21  ← (this commit)
-- [ ] P2-F21-T02 — approval/types.go: ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors (TDD)
-- [ ] P2-F21-T03 — approval/selector.go: flag > env > config > default precedence (TDD)
-- [ ] P2-F21-T04 — approval/manager.go: ApprovalManager with 4×4 matrix gate + F02/F14/F19 integration (TDD)
-- [ ] P2-F21-T05 — Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD)
-- [ ] P2-F21-T06 — /approval slash command (status/set/show) (TDD)
-- [ ] P2-F21-T07 — main.go wiring + --approval pflag + registry hook + integration test (TDD)
-- [ ] P2-F21-T08 — Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny)
-- [ ] P2-F21-T09 — Feature 21 close-out + push 4 remotes non-force
+## P2-F21 task list (Codex Approval Modes) — ALL CLOSED
+- [x] P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21  ← commit `a7a349f`
+- [x] P2-F21-T02 — approval/types.go: ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors (TDD)  ← commit `9c2664d`
+- [x] P2-F21-T03 — approval/selector.go: flag > env > config > default precedence (TDD)  ← commit `0d655d8`
+- [x] P2-F21-T04 — approval/manager.go: ApprovalManager with 4×4 matrix gate + F02/F14/F19 integration (TDD)  ← commit `5ef13b8`
+- [x] P2-F21-T05 — Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD)  ← commit `19bffce` + CONTINUATION update `1195ef9`
+- [x] P2-F21-T06 — /approval slash command (status/set/show) (TDD)  ← commit `ad8843b` + CONTINUATION update `9b72c26`
+- [x] P2-F21-T07 — main.go wiring + --approval pflag + registry hook + integration test (TDD)  ← commit `c022968` + CONTINUATION update `bd67324`
+- [x] P2-F21-T08 — Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny)  ← Challenges submodule `aff2a6f` + meta-repo `2781c1a` + CONTINUATION update `ee413c3`
+- [x] P2-F21-T09 — Feature 21 close-out + push 4 remotes non-force  ← (this commit)
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
@@ -367,6 +367,7 @@
 - 2026-05-06 — **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE.** All 20 features shipped: F01 Auto-Compaction (`4734f35`+`9284392` evidence; close-out `f0b9b15`..); F02 Permission Rules (`d56905d`..close-out); F03 Tool Result Persistence (`ee35017`..close-out); F04 Git Worktree Agent Isolation (`d5ae14a`..close-out); F05 Hook-Based Extensibility (`b7e7185`..close-out); F06 MCP Full Lifecycle (T14 close-out); F07 Background Tasks (T11 close-out); F08 Plan Mode (T09 close-out); F09 Slash Commands (T08 close-out); F10 Skills (T09 close-out); F11 Session Resume (`ddb45dc`..T09 close-out); F12 Multi-Provider Backend (`bd5dc69`..T11 close-out); F13 LSP Integration (`df98b6d`..T12 close-out); F14 Sandboxed Shell Execution (`0ef5811`..T12 close-out); F15 Subagent Team (`b970aa5`..T12 close-out); F16 OpenTelemetry (`5fc7dc1`..T12 close-out); F17 Smart File Editing (`37b1471`..T10 close-out); F18 No-Flicker Rendering (`a8aa8f3`..`92db29e` close-out); F19 AskUserQuestion (`b7fc6bb`..`f584c67` close-out); F20 Theme System (`60777fd`..T09 close-out — this commit). Phase 1 entry condition met: every Phase 1 feature ships with positive runtime evidence per Article XI §11.9 (no absence-of-error PASS), all anti-bluff smoke `clean`, all four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity, all Challenges submodule changes mirrored to its `origin`. Next phase: Phase 2 (other CLI agents) once user authorises.
 - 2026-05-06 — **PHASE 1.5 (FOUNDATION CLEANUP) COMPLETE.** All 12 work packages shipped: WP1 Inventory + foundation safety (`421495a`); WP2 Submodule restructuring ~67 mechanical moves (`90dec95`); WP3 Submodule deduplication 5 sets (`154c06c`); WP4 API key loader bash + Go (`e57894e`); WP5 .env API key dedup with USER GATE (`92d5463`); WP6 Docs consolidation 3 dirs (`f09f57d`); WP7 Snake_case directory normalization (`3c3cd8d`); WP8 Anti-bluff Constitution propagation (`0eead08`); WP9 Reference updates comprehensive grep sweep (`42166fd`); WP10 Rebuild + validation + fix `internal/tools/git` MockLLMProvider drift (`0a77c93` + fix `45be827`); WP11 Phase 1.5 Challenge harness 5 phases (meta `306d3d9` + Challenges submodule `7e94f28`); WP12 close-out + push deepest-first (this commit). Acceptance criteria: Phase 1.5 Challenge harness EXIT=0 with all 5 phases (NO-DUPLICATE-SUBMODULES + API-KEYS-LOADER + DOCS-UNDER-DOCS-DIR + SNAKE_CASE + ANTI-BLUFF-ANCHOR) printing positive runtime evidence per Article XI §11.9; `scripts/verify_anti_bluff_cascade.sh` exit 0 ("OK: anti-bluff anchor present in all 39 files across 13 repos"); inner-module `go test -count=1 -short ./internal/... ./cmd/...` all green; anti-bluff smoke clean across all P1.5-touched files. All four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity; HelixAgent submodule pushed to its `origin`; Challenges submodule pushed to its `origin`. **Next phase: Phase 2 (other CLI agents) ready to start once user authorises.**
 - 2026-05-06 — Phase 2 started; F21 (Codex Approval Modes) is first port; layers on F02 + F14; uses F19 prompter; CLI/env/config selector mirrors F12 pattern.
+- 2026-05-06 — Feature 21 (Codex Approval Modes) closed. 9 task commits (T01 `a7a349f`, T02 `9c2664d`, T03 `0d655d8`, T04 `5ef13b8`, T05 `19bffce` + CONTINUATION `1195ef9`, T06 `ad8843b` + CONTINUATION `9b72c26`, T07 `c022968` + CONTINUATION `bd67324`, T08 Challenges submodule `aff2a6f` + meta-repo `2781c1a` + CONTINUATION `ee413c3`, T09 close-out — this commit). Real, end-to-end 4-mode codex-compatible approval system: suggest (read-only) / auto-edit (edit OK, run prompts) / full-auto (edit + run with sandbox forced + network DENY) / dangerously-bypass (no checks; 2-second pause + warning). Selector: --approval flag > HELIXCODE_APPROVAL env > ~/.config/helixcode/approval.yaml > default suggest. Per-tool Tool.RequiresApproval() ApprovalLevel (read-only/edit/run/all); ~38 existing tools migrated with explicit levels; safe-default LevelEdit for forgotten overrides. /approval slash (status/set/show); runtime mode swap via atomic.Pointer takes effect on next CheckApproval. F02 retains final-deny authority (composition truth table pinned via in-stub deny-rule in PHASE-E pending registry-level seam). Zero new external deps. Five-phase Challenge harness PASS (PHASE-A SUGGEST-DENY + PHASE-B AUTO-EDIT-PROMPT + PHASE-C FULL-AUTO-SANDBOX + PHASE-D RUNTIME-CHANGE + PHASE-E F02-FINAL-DENY) with positive runtime evidence per Article XI §11.9; cross-compile linux/amd64 PASS (94 MB binary); anti-bluff smoke clean across all F21 surface (HelixCode + Challenges). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin` (mirror gap noted, deferred infra). **First Phase 2 feature shipped.** F22 next candidate per synthesis design §4.2 (Codex follow-on / aider / cline / plandex — choice via brainstorming).
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh_keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh_keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.

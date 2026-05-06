@@ -29,15 +29,15 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21 (first Phase 2 feature)
-- [ ] P2-F21-T02 — `internal/approval/types.go`: ApprovalMode + ApprovalLevel + Action + Decision + ResolvedSource + sentinels + ModeDescriptors table (TDD)
-- [ ] P2-F21-T03 — `internal/approval/selector.go`: flag/env/config precedence + ParseMode (TDD; mirror F12 Selector)
-- [ ] P2-F21-T04 — `internal/approval/manager.go`: ApprovalManager with atomic-pointer mode + 4×4 matrix gate + F02/F14/F19 integration + DefaultLevelEdit + YAML loader (TDD)
-- [ ] P2-F21-T05 — Extend `tools.Tool` interface with `RequiresApproval() approval.ApprovalLevel` + apply to all ~30 existing tools (TDD; coverage table-test)
-- [ ] P2-F21-T06 — `internal/commands/approval_command.go`: /approval slash (status/set/show) (TDD)
-- [ ] P2-F21-T07 — main.go wiring: ApprovalManager construction + `--approval` pflag + registry hook + /approval registration (TDD with integration test)
-- [ ] P2-F21-T08 — Challenge harness: 5 phases (one per mode + runtime change + F02 composition) with positive byte evidence
-- [ ] P2-F21-T09 — F21 close-out + push 4 remotes non-force
+- [x] P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21 (first Phase 2 feature)
+- [x] P2-F21-T02 — `internal/approval/types.go`: ApprovalMode + ApprovalLevel + Action + Decision + ResolvedSource + sentinels + ModeDescriptors table (TDD)
+- [x] P2-F21-T03 — `internal/approval/selector.go`: flag/env/config precedence + ParseMode (TDD; mirror F12 Selector)
+- [x] P2-F21-T04 — `internal/approval/manager.go`: ApprovalManager with atomic-pointer mode + 4×4 matrix gate + F02/F14/F19 integration + DefaultLevelEdit + YAML loader (TDD)
+- [x] P2-F21-T05 — Extend `tools.Tool` interface with `RequiresApproval() approval.ApprovalLevel` + apply to all ~30 existing tools (TDD; coverage table-test)
+- [x] P2-F21-T06 — `internal/commands/approval_command.go`: /approval slash (status/set/show) (TDD)
+- [x] P2-F21-T07 — main.go wiring: ApprovalManager construction + `--approval` pflag + registry hook + /approval registration (TDD with integration test)
+- [x] P2-F21-T08 — Challenge harness: 5 phases (one per mode + runtime change + F02 composition) with positive byte evidence
+- [x] P2-F21-T09 — F21 close-out + push 4 remotes non-force
 
 ---
 
