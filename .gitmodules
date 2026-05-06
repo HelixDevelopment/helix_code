@@ -172,3 +172,33 @@
 [submodule "cli_agents/qwen-code"]
 	path = cli_agents/qwen-code
 	url = git@github.com:QwenLM/qwen-code.git
+[submodule "cli_agents/shai"]
+	path = cli_agents/shai
+	url = git@github.com:ovh/shai.git
+[submodule "cli_agents/snow-cli"]
+	path = cli_agents/snow-cli
+	url = git@github.com:MayDay-wpf/snow-cli.git
+[submodule "cli_agents/swe-agent"]
+	path = cli_agents/swe-agent
+	url = git@github.com:princeton-nlp/SWE-agent.git
+[submodule "cli_agents/taskweaver"]
+	path = cli_agents/taskweaver
+	url = git@github.com:microsoft/TaskWeaver.git
+[submodule "cli_agents/ui-ux-pro-max"]
+	path = cli_agents/ui-ux-pro-max
+	url = git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git
+[submodule "cli_agents/vtcode"]
+	path = cli_agents/vtcode
+	url = git@github.com:vinhnx/vtcode.git
+[submodule "cli_agents/warp"]
+	path = cli_agents/warp
+	url = git@github.com:warpdotdev/Warp.git
+[submodule "cli_agents/x-cmd"]
+	path = cli_agents/x-cmd
+	url = git@github.com:x-cmd/x-cmd.git
+[submodule "cli_agents/xela-cli"]
+	path = cli_agents/xela-cli
+	url = git@github.com:xelauvas/codeclau.git
+[submodule "cli_agents/zeroshot"]
+	path = cli_agents/zeroshot
+	url = git@github.com:covibes/zeroshot.git
