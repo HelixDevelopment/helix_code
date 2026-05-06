@@ -100,7 +100,7 @@ Meta-repo remotes (4):
 | T02  | `9c2664d`    | approval/types.go (ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors) |
 | T03  | `0d655d8`    | approval/selector.go (flag > env > config > default precedence)                |
 | T04  | `5ef13b8`    | approval/manager.go (4×4 matrix gate + F02/F14/F19 integration)                |
-| T05  | `<pending>`  | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
+| T05  | `19bffce`    | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
 
 **Tasks remaining (4 of 9):**
 
