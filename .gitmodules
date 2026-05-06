@@ -76,3 +76,30 @@
 [submodule "cli_agents/aider"]
 	path = cli_agents/aider
 	url = git@github.com:Aider-AI/aider.git
+[submodule "cli_agents/amazon-q"]
+	path = cli_agents/amazon-q
+	url = git@github.com:aws/amazon-q-developer-cli.git
+[submodule "cli_agents/bridle"]
+	path = cli_agents/bridle
+	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+[submodule "cli_agents/claude-code"]
+	path = cli_agents/claude-code
+	url = git@github.com:anthropics/claude-code.git
+[submodule "cli_agents/claude-code-source"]
+	path = cli_agents/claude-code-source
+	url = git@gitlab.com:milos85vasic/ccode-private.git
+[submodule "cli_agents/claude-plugins"]
+	path = cli_agents/claude-plugins
+	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+[submodule "cli_agents/claude-squad"]
+	path = cli_agents/claude-squad
+	url = git@github.com:smtg-ai/claude-squad.git
+[submodule "cli_agents/cli-agent"]
+	path = cli_agents/cli-agent
+	url = git@github.com:NathanGr33n/CLI_Tool.git
+[submodule "cli_agents/codai"]
+	path = cli_agents/codai
+	url = git@github.com:meysamhadeli/codai.git
+[submodule "cli_agents/codename-goose"]
+	path = cli_agents/codename-goose
+	url = git@github.com:jgenerali/codename-goose.git
