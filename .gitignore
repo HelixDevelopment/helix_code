@@ -104,3 +104,10 @@ helix.security.json
 
 # Worktrees created by HelixCode P1-F04 EnterWorktree (do NOT commit)
 .helix-worktrees/
+
+# P1.5 cleanup: leftover phase-1 development artefacts
+HelixCode/p1f*_challenge
+HelixCode/security-scan
+HelixCode/testhelper
+HelixCode/.helixcode/
+.claude/
