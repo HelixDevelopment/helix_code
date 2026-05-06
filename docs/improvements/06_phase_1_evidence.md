@@ -2966,7 +2966,7 @@ exists to commit.
 ## P1.5-WP2 — Submodule restructuring
 
 **Timestamp:** 2026-05-06
-**Status:** CLOSED (49 of 57 cli_agents moved + cli_agents_configs + cli_agents_resources rename)
+**Status:** CLOSED (51 of 57 cli_agents moved + cli_agents_configs + cli_agents_resources rename)
 
 ### Summary
 
@@ -2976,9 +2976,9 @@ of `Example_Resources/` -> `cli_agents_resources/`. Submodule moves use
 `deinit -f` + `git rm` in HelixAgent followed by `git submodule add --force`
 at root with the same upstream URL.
 
-### cli_agents — moved successfully (49 of 57)
+### cli_agents — moved successfully (51 of 57)
 
-Across 7 batched commits (P1.5-T02.02-pre … P1.5-T02.08):
+Across 8 batched commits (P1.5-T02.02-pre … P1.5-T02.12):
 
 - batch 1 (T02.02-pre): agent-deck, aiagent, aichat, aichat-llm-functions, aider
 - batch 2 (T02.03):     amazon-q, bridle, claude-code, claude-code-source,
@@ -2992,8 +2992,10 @@ Across 7 batched commits (P1.5-T02.02-pre … P1.5-T02.08):
 - batch 6 (T02.07):     shai, snow-cli, swe-agent, taskweaver, ui-ux-pro-max,
                         vtcode, warp, x-cmd, xela-cli, zeroshot
 - batch 7 (T02.08):     cline, codex (recovered via retry with 300s timeout)
+- batch 7+ (T02.12):    spec-kit, superset (recovered after retry job's
+                        background completion was detected post-kill-attempt)
 
-### cli_agents — FAILED (8 of 57)
+### cli_agents — FAILED (6 of 57)
 
 Network/clone instability from large or rate-limited repos. All entries
 remain in `HelixAgent/.gitmodules` and HEAD gitlinks. Commits T02.10 +
@@ -3008,10 +3010,8 @@ the killed retry job (script left them mid-state).
 | opencode-cli | submodule_add_exit=128 (invalid index-pack output)  |
 | openhands    | submodule_add_exit=124 (fetch-pack disconnect)      |
 | roo-code     | submodule_add_exit=124 (fetch-pack disconnect)      |
-| spec-kit     | submodule_add_exit=128 (clone failed)               |
-| superset     | submodule_add_exit=124 (fetch-pack disconnect)      |
 
-The 8 remain pending and can be moved in a follow-up session with
+The 6 remain pending and can be moved in a follow-up session with
 longer timeouts and/or shallow clones.
 
 ### cli_agents_configs — moved (T02.62)
@@ -3040,13 +3040,13 @@ updated to reflect new gitdir.
 
 | metric                                             | value                                |
 |----------------------------------------------------|--------------------------------------|
-| `ls cli_agents/ \| wc -l` at root                  | 49                                   |
-| `ls HelixAgent/cli_agents/` (excl `.md`)           | 7                                    |
-| HelixAgent `.gitmodules` cli_agents entries        | 8                                    |
-| Root `.gitmodules` cli_agents entries              | 49                                   |
+| `ls cli_agents/ \| wc -l` at root                  | 51                                   |
+| `ls HelixAgent/cli_agents/` (excl `.md`)           | 5                                    |
+| HelixAgent `.gitmodules` cli_agents entries        | 6                                    |
+| Root `.gitmodules` cli_agents entries              | 51                                   |
 | Root `.gitmodules` cli_agents_resources entries    | 6                                    |
 | `cli_agents_configs/` files                        | 109                                  |
-| HelixAgent gitlink (root sees)                     | `9f12253a290bc51312076f57cb883ce57f7b2730` |
+| HelixAgent gitlink (root sees, post-T02.12)        | (see `git ls-tree HEAD HelixAgent`)  |
 
 ### Defects observed during execution
 
