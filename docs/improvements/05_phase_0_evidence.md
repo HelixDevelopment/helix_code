@@ -180,8 +180,8 @@ Verifications:
 - HelixCode/.env is ignored: YES
 - HelixCode/.env.example is NOT ignored: YES (good)
 - Tracked credential files (pre-existing CONST-042 violations, all committed before this task): **three files** are in the git index:
-  - `HelixCode/test/workers/ssh-keys/id_rsa` — SSH private key labelled `helixcode-test`
-  - `HelixCode/test/workers/ssh-keys/id_rsa.pub` — corresponding public key
+  - `HelixCode/test/workers/ssh_keys/id_rsa` — SSH private key labelled `helixcode-test`
+  - `HelixCode/test/workers/ssh_keys/id_rsa.pub` — corresponding public key
   - `helix.security.json` — root-level security credential file (5929 bytes, executable)
 
   All three were committed before this programme began. The CONST-042 `.gitignore` blocks prevent any NEW untracked instances of these patterns from being accidentally added. Proper remediation — key/credential rotation, `git rm --cached` to remove from index, regeneration of any derived secrets, and historical-leak documentation — is deferred to **T08** (`scripts/scan-secrets.sh`). The planted-secret test in T08 will fail on the live tree due to these three files, triggering tracked remediation through the standard scan-secrets workflow.
@@ -271,8 +271,8 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 ./HelixCode/.env:53:
 ./HelixCode/internal/llm/vertexai_provider_test.go:25:
 ./HelixCode/internal/worker/ssh_pool_test.go:569:
-./HelixCode/tests/e2e/test-bank/performance_security_tests.go:1073:
-./HelixCode/test/workers/ssh-keys/id_rsa:1:
+./HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073:
+./HelixCode/test/workers/ssh_keys/id_rsa:1:
 ./HelixQA/pkg/llm/google_test.go:334:
 ./Security/pkg/securestorage/securestorage_test.go:129:
 ```
@@ -282,23 +282,23 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 **Tracked files with matches:**
 | File | Tracked | Nature |
 |---|---|---|
-| `HelixCode/test/workers/ssh-keys/id_rsa` | YES | Pre-existing tracked SSH private key (T06 known credential #1) |
+| `HelixCode/test/workers/ssh_keys/id_rsa` | YES | Pre-existing tracked SSH private key (T06 known credential #1) |
 | `helix.security.json` | YES | Pre-existing tracked credential file (T06 known credential #2) |
-| `HelixCode/test/workers/ssh-keys/id_rsa.pub` | YES (no match) | Public key — does not match any pattern |
+| `HelixCode/test/workers/ssh_keys/id_rsa.pub` | YES (no match) | Public key — does not match any pattern |
 | `docs/COMPLETE_CLI_REFERENCE.md:908` | YES | Example/doc text: `sk-ant-your-anthropic-key` (placeholder, not a real key) |
 | `docs/superpowers/plans/...foundation-cleanup.md:833` | YES | Planted-secret TDD test example: `sk-FAKE0123456789...` (fake) |
 | `docs/troubleshooting/guide.md:649` | YES | Documentation snippet: `-----BEGIN OPENSSH PRIVATE KEY-----` (illustrative, incomplete) |
 | `HelixCode/internal/llm/vertexai_provider_test.go:25` | YES | Unit-test fixture: embedded fake RSA key block (test data, not rotatable) |
 | `HelixCode/internal/worker/ssh_pool_test.go:569` | YES | Unit-test stub: partial `-----BEGIN OPENSSH PRIVATE KEY-----` header only |
-| `HelixCode/tests/e2e/test-bank/performance_security_tests.go:1073` | YES | Test fixture: `sk-1234567890abcdef` (clearly fake) |
+| `HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073` | YES | Test fixture: `sk-1234567890abcdef` (clearly fake) |
 
 **Not-tracked files flagged** (untracked working-tree files — not a commit risk):
 - `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
 - `Challenges/Panoptic/...`, `HelixQA/...`, `Security/...`: submodule working-tree files, not tracked at root
 
 **The 3 pre-existing tracked credentials from T06 polish:**
-- `HelixCode/test/workers/ssh-keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
-- `HelixCode/test/workers/ssh-keys/id_rsa.pub` — public key, no secret pattern matches (expected)
+- `HelixCode/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
+- `HelixCode/test/workers/ssh_keys/id_rsa.pub` — public key, no secret pattern matches (expected)
 - `helix.security.json` — NOT detected in this run (see note below)
 
 **Note on `helix.security.json`:** The scanner's `SCAN_TARGET="."` run did not flag `helix.security.json` in the output above. The file's content does not match any of the scanner's current patterns (it's a JSON credential file that likely uses JWTs or other formats not in the regex set). The file IS blocked from future commits via `.gitignore` (P0-06) and will be addressed in P0-T08.5 remediation. The scanner's pattern set can be extended in P0-T08.5 to cover JWT/JSON credential formats.
@@ -588,7 +588,7 @@ exit=0
 
 **Timestamp:** 2026-05-04T22:43:12+03:00
 
-**Hook source:** `-rwxr-xr-x scripts/git-hooks/pre-push`
+**Hook source:** `-rwxr-xr-x scripts/git_hooks/pre-push`
 
 **Hook installed:** `-rwxr-xr-x .git/hooks/pre-push`
 
@@ -631,7 +631,7 @@ All three force-flag variants match correctly in the hook's case statement:
 
 **Non-force direct invocation:**
 ```
-$ bash scripts/git-hooks/pre-push origin git@github.com:HelixDevelopment/HelixCode.git
+$ bash scripts/git_hooks/pre-push origin git@github.com:HelixDevelopment/HelixCode.git
 exit=0
 ```
 

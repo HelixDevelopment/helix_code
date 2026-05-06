@@ -3328,12 +3328,12 @@ Updated **12 files** that contained live references to the old `Documentation/..
 
 Root scope (T06.01) — 7 files:
 - `IMPLEMENTATION_COMPLETION_PLAN.md`, `COMPREHENSIVE_COMPLETION_REPORT.md`, `COMPREHENSIVE_PROJECT_REPORT_AND_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_UNFINISHED_WORK_AND_IMPLEMENTATION_PLAN.md`, `PHASED_IMPLEMENTATION_PLAN.md` (root reports — `Documentation/General|Materials|User_Manual` → `docs/...`)
-- `docs/User_Manual/INDEX.md`, `docs/User_Manual/SUMMARY.md` (self-refs in tree-diagrams updated)
+- `docs/user_manual/INDEX.md`, `docs/user_manual/SUMMARY.md` (self-refs in tree-diagrams updated)
 
 HelixCode scope (T06.02) — 5 files (live operational paths, not historical):
 - `HelixCode/scripts/generate-manual.sh`, `HelixCode/scripts/sync-manual.sh` (PROJECT_ROOT path constants)
-- `HelixCode/scripts/generate-test-catalog/generate-test-catalog.go` (hard-coded `os.MkdirAll`/`os.Create` paths)
-- `HelixCode/TEST_RESULTS.md`, `HelixCode/COMPLETION_REPORT.md`, `HelixCode/QUICK_REFERENCE_MANUAL_SYSTEM.md`, `HelixCode/DOCUMENTATION_SYSTEM_SUMMARY.md`, `HelixCode/tests/e2e/FINAL_SUMMARY.md`, `HelixCode/docs/Architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md`, `HelixCode/docs/User_Manual/README.md`
+- `HelixCode/scripts/generate_test_catalog/generate-test-catalog.go` (hard-coded `os.MkdirAll`/`os.Create` paths)
+- `HelixCode/TEST_RESULTS.md`, `HelixCode/COMPLETION_REPORT.md`, `HelixCode/QUICK_REFERENCE_MANUAL_SYSTEM.md`, `HelixCode/DOCUMENTATION_SYSTEM_SUMMARY.md`, `HelixCode/tests/e2e/FINAL_SUMMARY.md`, `HelixCode/docs/architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md`, `HelixCode/docs/user_manual/README.md`
 
 #### Deliberately untouched
 
@@ -3370,3 +3370,95 @@ The four lowercase `documentation/` directories belong to **third-party `cli_age
 1. **Plan-file untouched**: the `p1-5-foundation-cleanup.md` plan in `docs/superpowers/plans/` references `Documentation/` ~10 times. Not rewritten because the plan describes the migration itself; rewriting would erase the audit trail. Same reasoning for `improvements/03_*` and `improvements/04_*` research docs.
 2. **`HelixQA/` references not rewritten** — those `Documentation/` references live inside vendored upstream content (`HelixQA/tools/opensource/perfetto`, `scrcpy`, `signoz`) and are external project paths, not HelixCode-owned.
 3. **Lowercase `documentation/` not consolidated**: limited to 4 third-party upstream packages under `cli_agents/`. Out of scope per WP6 charter ("merge `Documentation/`", uppercase).
+
+---
+
+### P1.5-WP7 — Snake_case directory normalization
+
+**Timestamp:** 2026-05-06
+**Status:** CLOSED
+
+#### Inventory
+
+After exclusion of `.git/`, `.helix*/`, `.claude/`, `.github/`, `cli_agents/`, `cli_agents_resources/`, `Dependencies/`, `Example_Projects/`, `vendor/`, `node_modules/`, `__pycache__/`, `bin/`, `dist/`, `build/`, `target/`, `testdata/`, and submodule path entries from `.gitmodules` (208 paths), the depth-≤4 scan found:
+
+- **52 non-conforming directory names** in our control surface.
+- After narrowing to safe targets (docs, scripts, examples, data dirs only) → **29 renames performed**.
+- **23 deferred** (umbrella dirs + Go cmd/application packages — see below).
+
+#### Renames performed (29)
+
+Sample of 10 (full list logged in commit diff):
+
+| OLD | NEW |
+|---|---|
+| `docs/bluff-proofing` | `docs/bluff_proofing` |
+| `docs/bluff-proofing/Architecture_And_Diagrams` | `docs/bluff_proofing/architecture_and_diagrams` |
+| `docs/bluff-proofing/Full_Plan` | `docs/bluff_proofing/full_plan` |
+| `docs/General` | `docs/general` |
+| `docs/Materials` | `docs/materials` |
+| `docs/User_Manual` | `docs/user_manual` |
+| `docs/llms_verifier/LLMsVerifier_Integration` | `docs/llms_verifier/llms_verifier_integration` |
+| `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint` | `…/kimi_agent_helix_cli_integration_blueprint` |
+| `docs/improvements/03_main_plan_step_01/Deep Dive Submodule Integration` | `…/deep_dive_submodule_integration` |
+| `HelixCode/docs/Architecture` | `HelixCode/docs/architecture` |
+| `HelixCode/docs/General` | `HelixCode/docs/general` |
+| `HelixCode/docs/General/video-courses` | `HelixCode/docs/general/video_courses` |
+| `HelixCode/docs/Testing` | `HelixCode/docs/testing` |
+| `HelixCode/docs/User_Manual` | `HelixCode/docs/user_manual` |
+| `HelixCode/benchmark-reports` | `HelixCode/benchmark_reports` |
+| `HelixCode/doc-reports` | `HelixCode/doc_reports` |
+| `HelixCode/test-reports` | `HelixCode/test_reports` |
+| `HelixCode/test-programs` | `HelixCode/test_programs` |
+| `HelixCode/examples/multi-agent-system` | `HelixCode/examples/multi_agent_system` |
+| `HelixCode/examples/qa-integration` | `HelixCode/examples/qa_integration` |
+| `HelixCode/examples/phase3/code-review` | `HelixCode/examples/phase3/code_review` |
+| `HelixCode/examples/phase3/feature-dev` | `HelixCode/examples/phase3/feature_dev` |
+| `HelixCode/examples/phase3/multi-session` | `HelixCode/examples/phase3/multi_session` |
+| `HelixCode/scripts/generate-test-catalog` | `HelixCode/scripts/generate_test_catalog` |
+| `HelixCode/shared/mobile-core` | `HelixCode/shared/mobile_core` |
+| `HelixCode/test/workers/ssh-keys` | `HelixCode/test/workers/ssh_keys` |
+| `HelixCode/tests/e2e/test-bank` | `HelixCode/tests/e2e/test_bank` |
+| `scripts/git-hooks` | `scripts/git_hooks` |
+| `scripts/host-power-management` | `scripts/host_power_management` |
+
+359 individual file rename entries staged in the meta-repo (children of renamed dirs); zero collisions.
+
+#### Reference updates
+
+- **35 files** rewritten in the meta-repo to point at new paths (sed-applied substitution from old→new).
+- **3 files** updated inside `HelixQA/` (CONSTITUTION + host_power_management refs).
+- **7 files** updated inside `HelixAgent/` (CONSTITUTION, .gosec-baseline.json, host_power_management refs, BUGFIXES history).
+
+#### Collisions / failures
+
+None — all 29 renames applied cleanly.
+
+#### Deferred renames (23)
+
+Reason categories:
+
+**Umbrella / submodule-root-like dirs (10)** — heavily referenced top-level project dirs whose rename would cascade through dozens of docs, scripts, and `.env.*` examples; left as-is to avoid risk:
+- `Assets/`, `Dependencies/`, `HelixCode/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
+
+**Go `cmd/<binary>` packages (9)** — renaming changes `go build` import paths, Makefile target args, and produced `bin/<name>` artifact names:
+- `cmd/security-test`, `HelixCode/cmd/config-test`, `HelixCode/cmd/helix-config`, `HelixCode/cmd/performance-optimization`, `HelixCode/cmd/performance-optimization-standalone`, `HelixCode/cmd/security-fix`, `HelixCode/cmd/security-fix-standalone`, `HelixCode/cmd/security-scan`, `HelixCode/cmd/security-test`
+
+**Go application packages (4)** — referenced as Go import paths in `HelixCode/Makefile` (`./applications/aurora-os`, etc.):
+- `HelixCode/applications/aurora-os`, `HelixCode/applications/harmony-os`, `HelixCode/applications/terminal-ui`, `HelixCode/applications/ios/HelixCode`
+
+These should be addressed in a future WP that combines (a) the rename, (b) Makefile import-path updates, (c) Go package name updates inside each `main.go`, and (d) re-running `make verify-compile` to prove correctness.
+
+#### Commit chain
+
+| SHA | Repo | Scope |
+|---|---|---|
+| `e54dbea` | HelixQA | host_power_management ref updates inside CONSTITUTION + challenges + docs |
+| `5b131a76` | HelixAgent | host_power_management + test_bank ref updates (CONSTITUTION, .gosec-baseline.json, BUGFIXES, etc.) |
+| (pending) | meta-repo | 29 dir renames + 35 file ref updates + HelixAgent/HelixQA gitlink bumps |
+
+#### Defects / deviations
+
+1. **Top-level umbrella dirs deferred** — `HelixCode/`, `Assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
+2. **Go-package-affecting renames deferred** — see deferred list above.
+3. **Submodule pointer drift** — committing inside HelixAgent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.

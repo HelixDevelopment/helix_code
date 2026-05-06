@@ -351,7 +351,7 @@ Estimated 13 sub-commits. F03 (Tool Result Persistence) is unblocked when T13 la
 ## 11. References
 
 - Synthesis spec: `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` §4.1 (Phase 1 charter)
-- Porting doc: `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/porting_claude_code.md` §Feature 2
+- Porting doc: `docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md` §Feature 2
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f01-auto-compaction.md`
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`
 - Existing infrastructure being extended:

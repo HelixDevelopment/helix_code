@@ -161,7 +161,7 @@ This report provides a comprehensive verification that all features defined in S
   - Native system integration
 
 #### Mobile Framework ✅
-- Location: `/HelixCode/shared/mobile-core/`
+- Location: `/HelixCode/shared/mobile_core/`
 - Features:
   - iOS framework ready
   - Android framework ready

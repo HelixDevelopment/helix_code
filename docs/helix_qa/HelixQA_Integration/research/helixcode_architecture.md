@@ -659,7 +659,7 @@ HELIX_NOTIFICATIONS_ENABLED=true
 
 **Challenge Suite**: `challenges/scripts/`
 
-**Standalone Tests**: `HelixCode/standalone_tests/`, `HelixCode/test-programs/`
+**Standalone Tests**: `HelixCode/standalone_tests/`, `HelixCode/test_programs/`
 
 ### 6.2 Test Types
 
@@ -873,9 +873,9 @@ HelixQA/
 
 **Existing Screenshot/Visual Evidence**:
 - `HelixCode/assets/` - Static assets (logos, icons)
-- `HelixCode/benchmark-reports/` - Performance benchmarks (text/csv)
-- `HelixCode/doc-reports/` - Documentation generation reports
-- `HelixCode/test-reports/` - Test execution reports
+- `HelixCode/benchmark_reports/` - Performance benchmarks (text/csv)
+- `HelixCode/doc_reports/` - Documentation generation reports
+- `HelixCode/test_reports/` - Test execution reports
 - ChromeDP integration (`chromedp/chromedp`) - Browser automation for web content
 
 **Code Evidence**:

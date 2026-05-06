@@ -110,7 +110,7 @@ Only 3 of 40+ internal packages have README files:
 
 #### 1.2.4 Video Courses - Not Produced
 
-**Location**: `docs/General/video-courses/`
+**Location**: `docs/general/video-courses/`
 
 | Item | Status |
 |------|--------|
@@ -127,7 +127,7 @@ Only 3 of 40+ internal packages have README files:
 
 #### 1.2.5 Website Content - Needs Updates
 
-**Location**: `docs/General/`
+**Location**: `docs/general/`
 
 | File | Status | Issues |
 |------|--------|--------|
@@ -411,14 +411,14 @@ Week 8 - Remaining packages:
 #### 4.2 API Documentation
 
 Update and complete:
-- [ ] `docs/General/API_DOCUMENTATION.md`
-- [ ] `docs/General/API_REFERENCE.md`
+- [ ] `docs/general/API_DOCUMENTATION.md`
+- [ ] `docs/general/API_REFERENCE.md`
 - [ ] Swagger/OpenAPI specification
 - [ ] API examples for all endpoints
 
 #### 4.3 User Manual
 
-**Location**: `docs/User_Manual/`
+**Location**: `docs/user_manual/`
 
 - [ ] Verify and update `manual.html`
 - [ ] Add missing sections
@@ -468,7 +468,7 @@ For each lesson (16 total):
 
 #### 6.1 Content Consolidation
 
-**Location**: `docs/General/`
+**Location**: `docs/general/`
 
 - [ ] Consolidate `index.html`, `index-enhanced.html`, `index-updated.html`
 - [ ] Choose single authoritative version

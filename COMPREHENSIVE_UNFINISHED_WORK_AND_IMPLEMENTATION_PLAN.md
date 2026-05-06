@@ -823,7 +823,7 @@ Github-Pages-Website/docs/
 - Rate limiting documentation
 - Error codes
 
-**Update `docs/General/API_REFERENCE.md`**:
+**Update `docs/general/API_REFERENCE.md`**:
 - Complete endpoint documentation
 - Code examples
 - SDK usage
@@ -866,7 +866,7 @@ Github-Pages-Website/docs/
 
 #### Step 5.1: Main User Manual Updates
 
-**File**: `docs/User_Manual/README.md`
+**File**: `docs/user_manual/README.md`
 
 **Sections to Add/Update**:
 
@@ -932,7 +932,7 @@ Github-Pages-Website/docs/
 
 #### Step 5.2: Tutorial Series
 
-**Create `docs/User_Manual/tutorials/`**:
+**Create `docs/user_manual/tutorials/`**:
 1. Tutorial: Your First HelixCode Project
 2. Tutorial: Setting Up Distributed Workers
 3. Tutorial: Integrating Multiple LLM Providers
@@ -947,7 +947,7 @@ Github-Pages-Website/docs/
 
 #### Step 5.3: Quick Reference Cards
 
-**Create `docs/User_Manual/quick-reference/`**:
+**Create `docs/user_manual/quick-reference/`**:
 1. CLI command cheat sheet
 2. Keyboard shortcuts reference
 3. Configuration quick reference
@@ -1271,7 +1271,7 @@ internal/providers/ai_integration.go - Remove mocks
 cmd/helix-config/main.go - Implement 24 commands
 All GUI applications - Implement pending features
 12 README files to expand
-docs/User_Manual/README.md - Add sections
+docs/user_manual/README.md - Add sections
 Github-Pages-Website/docs/index.html - Update content
 Github-Pages-Website/docs/courses/course-data.js - Add courses
 ```

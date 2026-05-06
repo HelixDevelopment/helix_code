@@ -339,7 +339,7 @@ Listed in §1.3 (N1–N7). Summarised: modify-payload propagation back to operat
 ## 11. References
 
 - Synthesis spec: `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` §4.1 (Phase 1 charter)
-- Porting doc: `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/porting_claude_code.md` §Feature 5
+- Porting doc: `docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md` §Feature 5
 - Predecessor spec: `docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md` (commit `7ba8907`)
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f04-git-worktree-agent-isolation.md` (commit `7abf0c7`)
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`

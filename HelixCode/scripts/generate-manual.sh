@@ -18,7 +18,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 README_FILE="$PROJECT_ROOT/README.md"
-OUTPUT_DIR="$PROJECT_ROOT/docs/User_Manual"
+OUTPUT_DIR="$PROJECT_ROOT/docs/user_manual"
 OUTPUT_FILE="$OUTPUT_DIR/manual.html"
 MD_TO_HTML="$SCRIPT_DIR/md-to-html"
 

@@ -296,7 +296,7 @@ Temporarily set `PersistThreshold = 0` so every output persists. Re-run the Chal
 ## 11. References
 
 - Synthesis spec: `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` §4.1 (Phase 1 charter)
-- Porting doc: `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/porting_claude_code.md` §Feature 3
+- Porting doc: `docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md` §Feature 3
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f02-permission-rules.md`
 - Predecessor spec: `docs/superpowers/specs/2026-05-05-p1-f02-permission-rules-design.md`
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`

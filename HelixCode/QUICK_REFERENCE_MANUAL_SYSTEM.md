@@ -12,7 +12,7 @@ cd HelixCode
 
 | File | Purpose | Size |
 |------|---------|------|
-| `docs/User_Manual/manual.html` | Main HTML manual | 45KB |
+| `docs/user_manual/manual.html` | Main HTML manual | 45KB |
 | `scripts/sync-manual.sh` | Sync to GitHub Pages | 12KB |
 | `scripts/generate-manual.sh` | Generate from README | 1.6KB |
 | `scripts/md-to-html` | Go converter binary | 3.0MB |
@@ -76,8 +76,8 @@ cat scripts/sync-manual.log
 ## File Locations
 
 ### Source
-- Manual: `HelixCode/docs/User_Manual/manual.html`
-- Images: `HelixCode/docs/User_Manual/images/`
+- Manual: `HelixCode/docs/user_manual/manual.html`
+- Images: `HelixCode/docs/user_manual/images/`
 
 ### Destination (after sync)
 - Manual: `Github-Pages-Website/docs/manual/index.html`
@@ -89,7 +89,7 @@ cat scripts/sync-manual.log
 | Issue | Solution |
 |-------|----------|
 | Permission denied | `chmod +x scripts/*.sh` |
-| Manual not found | File exists at `docs/User_Manual/manual.html` |
+| Manual not found | File exists at `docs/user_manual/manual.html` |
 | No GitHub Pages dir | Clone at `../Github-Pages-Website` |
 | PDF generation fails | Install `wkhtmltopdf` or skip PDF |
 
@@ -119,12 +119,12 @@ Edit CSS variables in `manual.html`:
 Edit the `<main>` section in `manual.html`.
 
 ### Add Images
-1. Place in `docs/User_Manual/images/`
+1. Place in `docs/user_manual/images/`
 2. Run `./scripts/sync-manual.sh`
 
 ## Support
 
-- Full Guide: `docs/User_Manual/README.md`
+- Full Guide: `docs/user_manual/README.md`
 - Summary: `DOCUMENTATION_SYSTEM_SUMMARY.md`
 - Website: https://docs.helixcode.dev
 

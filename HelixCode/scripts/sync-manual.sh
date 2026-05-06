@@ -2,7 +2,7 @@
 #
 # sync-manual.sh - Sync user manual to GitHub Pages Website
 #
-# This script synchronizes the user manual from docs/User_Manual to
+# This script synchronizes the user manual from docs/user_manual to
 # the GitHub Pages Website, generates PDF versions, and logs all operations.
 #
 # Usage: ./scripts/sync-manual.sh
@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 # Directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-MANUAL_SOURCE_DIR="$PROJECT_ROOT/docs/User_Manual"
+MANUAL_SOURCE_DIR="$PROJECT_ROOT/docs/user_manual"
 GITHUB_PAGES_DIR="$(dirname "$PROJECT_ROOT")/Github-Pages-Website"
 MANUAL_DEST_DIR="$GITHUB_PAGES_DIR/docs/manual"
 LOG_FILE="$SCRIPT_DIR/sync-manual.log"

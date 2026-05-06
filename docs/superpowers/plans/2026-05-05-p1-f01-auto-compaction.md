@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, testify v1.11, the existing `digital.vasic.containers` Go library for docker-compose orchestration, the existing `internal/llm/compression/` package, the existing `internal/llm/compressioniface/` interface boundary.
 
-**Source spec:** `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` §4.1 + `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/porting_claude_code.md` §"Feature 1: Auto-Compaction System".
+**Source spec:** `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` §4.1 + `docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md` §"Feature 1: Auto-Compaction System".
 
 **Critical pre-flight finding:** the porting doc was authored without awareness of `internal/llm/compression/` (full coordinator + 3 strategies + config + stats already in place). This plan extends rather than duplicates. The porting doc's `internal/context/compaction.go` + `internal/context/token_counter.go` are NOT created — those would be parallel infrastructure.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# HelixCode/test/workers/ssh-keys/generate-test-keys.sh
+# HelixCode/test/workers/ssh_keys/generate-test-keys.sh
 # Generates fresh ephemeral SSH keys for test workers. The previous tracked
 # keys (id_rsa, id_rsa.pub) were a CONST-041 violation discovered in P0-08
 # and remediated in P0-T08.5 (2026-05-04); their material lives forever in
@@ -10,7 +10,7 @@
 # MUST reject it and replace it with the output of this script.
 #
 # Run before any test that needs SSH keys; idempotent (skips if keys exist).
-# Usage: bash HelixCode/test/workers/ssh-keys/generate-test-keys.sh
+# Usage: bash HelixCode/test/workers/ssh_keys/generate-test-keys.sh
 
 set -euo pipefail
 cd "$(dirname "$0")"

@@ -30,7 +30,7 @@ echo "  PASS: Deployment tests pass"
 
 # Test 5: Verify master action plan exists
 echo "[5/6] Checking master action plan..."
-test -f ../docs/bluff-proofing/MASTER_ACTION_PLAN.md || (echo "FAIL: MASTER_ACTION_PLAN.md missing"; exit 1)
+test -f ../docs/bluff_proofing/MASTER_ACTION_PLAN.md || (echo "FAIL: MASTER_ACTION_PLAN.md missing"; exit 1)
 echo "  PASS: Master action plan exists"
 
 # Test 6: Verify all challenge scripts

@@ -110,7 +110,7 @@ HelixCode/                              # meta-repo (this repo)
 > No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval given for that specific operation. Authorization for one push does not extend to subsequent pushes. Bypassing hooks (`--no-verify`), signature verification (`--no-gpg-sign`), or protected-branch rules also requires explicit approval. This applies to every repository in the HelixDevelopment / vasic-digital stack.
 
 **Implementation:**
-- Pre-push hook at `scripts/git-hooks/pre-push` rejects `--force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` is set. Idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh`.
+- Pre-push hook at `scripts/git_hooks/pre-push` rejects `--force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` is set. Idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh`.
 - Hook is local courtesy gate; the constitutional clause is the actual contract.
 
 ### 2.5 Authorisation scope for non-force pushes during this programme
@@ -133,7 +133,7 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 | **P0-05** | Update `.gitignore` (root + `HelixCode/HelixCode/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
 | **P0-06** | Refresh `HelixCode/HelixCode/.env.example`: every key from `../HelixAgent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env\|sort) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example\|sort)` empty | P0-07 |
 | **P0-07** | `scripts/scan-secrets.sh` — gitleaks or fallback grep for `sk-`, `gho_`, `glpat-`, `xoxb-`, `AKIA`, `eyJ`; wired into `make ci-validate-all` | Exits 0 on clean tree; intentionally fails on planted test secret | P0-08 |
-| **P0-08** | `scripts/git-hooks/pre-push` rejecting `--force` unless `HELIX_FORCE_PUSH_APPROVED=1`; idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh` | Hook blocks `git push --force github main` (verify by reading hook output text only — do not actually run a force push) | P0-09 |
+| **P0-08** | `scripts/git_hooks/pre-push` rejecting `--force` unless `HELIX_FORCE_PUSH_APPROVED=1`; idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh` | Hook blocks `git push --force github main` (verify by reading hook output text only — do not actually run a force push) | P0-09 |
 | **P0-09** | Create governance triplet for `HelixCode/HelixCode/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
 | **P0-10** | Add CONST-042 + CONST-043 to root `CONSTITUTION.md` Article XII (NEW) | `grep -E "CONST-042\|CONST-043" CONSTITUTION.md` returns both | P0-11 |
 | **P0-11** | Cascade CONST-042 + CONST-043 to root `CLAUDE.md`, `AGENTS.md`, `CRUSH.md`, `QWEN.md`. Backfill anti-bluff anchor to `CRUSH.md` and `QWEN.md` (currently missing) | `for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE "11.9\|CONST-042\|CONST-043" $f; done` returns all four | P0-12 |
@@ -594,7 +594,7 @@ Pass executed 2026-05-04 by the authoring agent immediately before handing the s
 ## 9. References
 
 - **Constitution:** `CONSTITUTION.md` (Article XI §11.9 = anti-bluff anchor; Article XII §12.1 = CONST-042; §12.2 = CONST-043 — both NEW in P0-10)
-- **Existing planning material:** `docs/improvements/03_main_plan_step_01/Deep Dive Submodule Integration/` and `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint/`
+- **Existing planning material:** `docs/improvements/03_main_plan_step_01/deep_dive_submodule_integration/` and `docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/`
 - **Per-CLI-agent porting docs:** `docs/improvements/04/.../porting_*.md` (16 documents)
 - **Anti-bluff framework reference:** `docs/improvements/04/.../anti_bluff_test_framework.md`
 - **Real module map (gh org):** `HelixDevelopment/{HelixAgent,HelixCode,HelixLLM,HelixMemory,HelixSpecifier,HelixQA,HelixBuilder,HelixGitpx,HelixPlay,HelixTranslate}` and `vasic-digital/{LLMsVerifier,Challenges,Containers,...}`

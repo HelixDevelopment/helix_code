@@ -227,7 +227,7 @@
 ## 📖 Documentation Structure
 
 ```
-docs/User_Manual/
+docs/user_manual/
 ├── README.md                     # 3,027 lines - Comprehensive manual
 ├── SUMMARY.md                    # 632 lines - Creation summary
 ├── INDEX.md                      # This file - Quick navigation

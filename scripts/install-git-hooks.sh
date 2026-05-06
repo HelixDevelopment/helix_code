@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-HOOKS_SRC="scripts/git-hooks"
+HOOKS_SRC="scripts/git_hooks"
 HOOKS_DST=".git/hooks"
 
 mkdir -p "$HOOKS_DST"

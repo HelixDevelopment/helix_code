@@ -20,7 +20,7 @@
 | `scripts/scan-secrets.sh` | Scan working tree + diff for credentials; gitleaks if installed, else regex fallback (sk-, gho_, glpat-, xoxb-, AKIA, eyJ) |
 | `scripts/verify-llmsverifier-pin-parity.sh` | Compare `Dependencies/HelixDevelopment/LLMsVerifier` SHA vs. `HelixAgent/LLMsVerifier` SHA; fail on divergence |
 | `scripts/bluff-detector.sh` | Composite bluff scanner: skip-audit + assertion-density + challenge-evidence + integration-purity + simulation-string + print-and-sleep |
-| `scripts/git-hooks/pre-push` | Reject `git push --force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` |
+| `scripts/git_hooks/pre-push` | Reject `git push --force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` |
 | `scripts/install-git-hooks.sh` | Idempotent hook installer; called by `setup.sh` |
 | `scripts/regenerate-diagrams.py` | Python script reading `docs/improvements/canonical/topology.yaml`, emits four PNGs to `docs/improvements/06_diagrams_real/` |
 | `docs/improvements/canonical/topology.yaml` | Canonical real module set + edges, used by diagram regenerator |
@@ -997,15 +997,15 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 9: Pre-push hook + installer + setup.sh wiring (P0-09 / spec P0-08)
 
 **Files:**
-- Create: `scripts/git-hooks/pre-push`
+- Create: `scripts/git_hooks/pre-push`
 - Create: `scripts/install-git-hooks.sh`
 - Modify: `setup.sh` (add hook install invocation)
 
 - [ ] **Step 9.1: Write the pre-push hook**
 
 ```bash
-mkdir -p scripts/git-hooks
-cat > scripts/git-hooks/pre-push <<'BASH'
+mkdir -p scripts/git_hooks
+cat > scripts/git_hooks/pre-push <<'BASH'
 #!/usr/bin/env bash
 # pre-push hook — Phase 0 P0-09
 # Reject force pushes unless HELIX_FORCE_PUSH_APPROVED=1 is set.
@@ -1058,7 +1058,7 @@ fi
 
 exit 0
 BASH
-chmod +x scripts/git-hooks/pre-push
+chmod +x scripts/git_hooks/pre-push
 ```
 
 - [ ] **Step 9.2: Write the installer**
@@ -1073,7 +1073,7 @@ cat > scripts/install-git-hooks.sh <<'BASH'
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-HOOKS_SRC="scripts/git-hooks"
+HOOKS_SRC="scripts/git_hooks"
 HOOKS_DST=".git/hooks"
 
 mkdir -p "$HOOKS_DST"
@@ -1116,7 +1116,7 @@ We test by invoking the hook directly with a contrived parent command line — w
 # Direct hook test — simulates being called with a force-push parent
 HELIX_FORCE_PUSH_APPROVED=0 bash -c '
   # Set up a fake /proc-style cmdline by spoofing PPID to current shell using strings
-  echo "" | scripts/git-hooks/pre-push test-remote git@example.com:test.git 2>&1
+  echo "" | scripts/git_hooks/pre-push test-remote git@example.com:test.git 2>&1
   echo "exit=$?"
 ' || echo "(expected non-zero on force-flag detection in real ppid)"
 
@@ -1124,7 +1124,7 @@ HELIX_FORCE_PUSH_APPROVED=0 bash -c '
 cat > /tmp/p0-09-fake-parent.sh <<EOF
 #!/usr/bin/env bash
 # pretend we're "git push --force"
-exec scripts/git-hooks/pre-push test-remote git@example.com:test.git
+exec scripts/git_hooks/pre-push test-remote git@example.com:test.git
 EOF
 chmod +x /tmp/p0-09-fake-parent.sh
 
@@ -1172,7 +1172,7 @@ Timestamp: $(date -Iseconds)
 
 Hook source:
 \`\`\`
-$(ls -la scripts/git-hooks/pre-push)
+$(ls -la scripts/git_hooks/pre-push)
 \`\`\`
 
 Hook installed:
@@ -1191,7 +1191,7 @@ $(grep -A1 "install-git-hooks" setup.sh | head -3)
 \`\`\`
 EOF
 
-git add scripts/git-hooks/pre-push scripts/install-git-hooks.sh setup.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add scripts/git_hooks/pre-push scripts/install-git-hooks.sh setup.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
 feat(P0-09): add pre-push hook for force-push protection (CONST-043)
 
@@ -1512,7 +1512,7 @@ No API key, token, password, certificate, or other credential may be committed t
 No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval given for that specific operation. Authorization for one push does not extend to subsequent pushes. Bypassing hooks (`--no-verify`), signature verification (`--no-gpg-sign`), or protected-branch rules also requires explicit approval. This applies to every repository in the HelixDevelopment / vasic-digital stack.
 
 **Operational requirements:**
-- Local pre-push hook at `scripts/git-hooks/pre-push` (installed by `scripts/install-git-hooks.sh`) must reject `--force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` is set.
+- Local pre-push hook at `scripts/git_hooks/pre-push` (installed by `scripts/install-git-hooks.sh`) must reject `--force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` is set.
 - The hook is a courtesy gate; this constitutional clause is the actual contract.
 - Regular non-force pushes of new commits to existing branches on already-configured remotes are PERMITTED without per-push approval, scoped to a programme/conversation in which the user has authorised the cadence.
 
@@ -2465,7 +2465,7 @@ Expected: all four remotes converge. Working tree clean.
 **3. Type/identifier consistency:**
 - `scripts/scan-secrets.sh` referenced consistently in Tasks 8, 9, 15.
 - `scripts/verify-llmsverifier-pin-parity.sh` consistent in Tasks 4, 15.
-- `scripts/git-hooks/pre-push` and `scripts/install-git-hooks.sh` consistent in Task 9.
+- `scripts/git_hooks/pre-push` and `scripts/install-git-hooks.sh` consistent in Task 9.
 - CONST-042 / CONST-043 numbering consistent across Tasks 10, 11, 12, 14.
 - Article numbering: §11.9 (existing) and §12.1/§12.2 (new) consistent.
 - Submodule path `HelixCode/HelixAgent/` consistent across Tasks 3, 4, 14.

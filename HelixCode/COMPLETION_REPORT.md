@@ -167,7 +167,7 @@ verify-compile         # Verify compilation
 - Assets, styles, JavaScript
 
 ### Documentation:
-- 45 markdown files in `docs/General/` (33,937 lines)
+- 45 markdown files in `docs/general/` (33,937 lines)
 - 9 comprehensive guides in `docs/` (9,099 lines)
 - 41 of 42 internal packages have README.md files
 

@@ -393,7 +393,7 @@ filesystem.Client.ListDirectory()
 - `scripts/android/` — Android-specific build scripts
 - `scripts/audit/` — Audit automation
 - `scripts/hooks/` — Git hooks + LLM-as-Judge pre-push gate
-- `scripts/host-power-management/` — CONST-033 suspend guard
+- `scripts/host_power_management/` — CONST-033 suspend guard
 - `scripts/lib/` — Shared shell libraries
 - `scripts/tests/` — Test runners
 

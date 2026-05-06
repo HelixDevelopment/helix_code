@@ -108,7 +108,7 @@ Line 303: helixConfig.APIKeys undefined
 
 #### E2E Test Bank - Test Case Generation Needed
 
-**Location**: `HelixCode/tests/e2e/test-bank/`
+**Location**: `HelixCode/tests/e2e/test_bank/`
 **Status**: Framework complete, test cases missing
 **Required Test Cases**:
 
