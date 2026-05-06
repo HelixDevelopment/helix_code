@@ -9,8 +9,8 @@
 
 ## Current focus
 - **Active phase:** P1 — claude-code feature porting
-- **Active feature:** idle, F19 next candidate (AskUserQuestion with Previews)
-- **Active task:** —
+- **Active feature:** P1-F19 — AskUserQuestion with Previews (in progress)
+- **Active task:** P1-F19-T01 — bootstrap evidence + advance PROGRESS to F19
 - **Last completed:** P1-F18-T10 — Feature 18 (No-Flicker Rendering) close-out + push to 4 remotes (all 10 tasks shipped)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -284,6 +284,15 @@
 - [x] P1-F18-T08 — render/tool_helpers.go + wire tool-result frame rendering (TDD)  ← commit `05434c4`
 - [x] P1-F18-T09 — Challenge harness: 5 phases (STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY gated)  ← submodule `c409ed3` + meta-repo `c44b049`
 - [x] P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force  ← (this commit)
+
+## Active feature task list (P1-F19: AskUserQuestion with Previews)
+- [x] P1-F19-T01 — bootstrap evidence + advance PROGRESS to F19  ← (this commit)
+- [ ] P1-F19-T02 — askuser/types.go: Choice + Question + Result + Prompter interface + sentinels (TDD)
+- [ ] P1-F19-T03 — askuser/stdin_prompter.go: non-TTY short-circuit + retry loop + timeout + F18 menu render (TDD)
+- [ ] P1-F19-T04 — askuser/ask_user_tool.go: AskUserTool wrapping Prompter + CategoryAskUser (TDD)
+- [ ] P1-F19-T05 — wire ask_user into registry + integration test (always-runs both branches)
+- [ ] P1-F19-T06 — Challenge harness: 5 always-run phases + reader-position + byte-offset positive evidence
+- [ ] P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

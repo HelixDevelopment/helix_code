@@ -2485,3 +2485,32 @@ EXIT=0
 
 **Two-line summary:** Feature 18 ships a custom-built no-flicker renderer (ANSI in-place updates for TTY + plain line-buffered fallback for non-TTY) wired into the CLI streaming hot path with positive byte-level evidence on five phases (4 always-run + 1 TTY-gated). Zero new external dependencies, env-var-only surface (`HELIXCODE_RENDER=plain|fancy|auto`), CONST-042 satisfied (no token/frame text logged at any level), all 10 task commits shipped + pushed non-force to 4 remotes.
 
+## P1-F19 — AskUserQuestion with Previews
+
+**Date:** 2026-05-06
+**Spec:** `cedd81e`
+**Plan:** `c8c9059`
+**Started:** 2026-05-06
+**Status:** active
+
+**Goal:** ask_user tool: stdin readline + numbered choices + inline previews via F18 renderer; non-TTY auto-pick default OR error; ErrUserCancelled on EOF; 3-retry budget per question; 5min timeout; tool-only surface (no slash, no cobra); zero new external deps.
+
+### Task evidence trail
+(filled in commit-by-commit as tasks land)
+
+### P1-F19-T01 — Bootstrap
+
+(this commit) — append F19 section header to evidence; advance PROGRESS current focus to F19; insert 7-task list.
+
+### P1-F19-T02 — askuser/types.go: Choice + Question + Result + Prompter interface + sentinels (TDD)
+
+### P1-F19-T03 — askuser/stdin_prompter.go: non-TTY short-circuit + retry loop + timeout + F18 menu render (TDD)
+
+### P1-F19-T04 — askuser/ask_user_tool.go: AskUserTool wrapping Prompter + CategoryAskUser (TDD)
+
+### P1-F19-T05 — wire ask_user into registry + integration test (always-runs both branches)
+
+### P1-F19-T06 — Challenge harness: 5 always-run phases + reader-position + byte-offset positive evidence
+
+### P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
+
