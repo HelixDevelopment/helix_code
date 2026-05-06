@@ -378,3 +378,37 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (navigate-but-not-loaded / snapshot-empty-HTML / click-but-DOM-unchanged / screenshot-0-bytes-or-non-PNG / close-but-chromium-still-running); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch. Skip permitted ONLY if chromium absent (must emit `SKIP-OK: #P2-F23 chromium not available`).
 
 **Picking up F23 specifically:** Start with T01 (bootstrap F23 evidence + advance PROGRESS); proceed sequentially through T02..T10. T03 introduces the `sessionFactory` test seam to keep unit tests off real chromium; integration test (T09) and Challenge (T10) gate on real chromium availability.
+
+---
+
+## F24 mid-flight section (active feature)
+
+**Active feature:** P2-F24 — Codex Project Memory (fourth Phase 2 feature).
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md` (commit `c31b9ac`).
+
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f24-codex-project-memory.md` (commit `19094b8`).
+
+**User-confirmed design (Q1-Q5 = A,A,A,A,A):**
+- Q1=A: Memory file discovery walks parent dirs from cwd; matches first of `helixcode.md` / `codex.md` / `AGENTS.md` (case-insensitive); stops at git root or filesystem root. PROJECT scope.
+- Q2=A: Format is plain Markdown. Prepended to system prompt at every LLM call.
+- Q3=A: Per-user overlay at `$XDG_CONFIG_HOME/helixcode/memory.md` (or `$HOME/.config/helixcode/memory.md` fallback) loaded AFTER project memory in the system prompt with delimiter.
+- Q4=A: `/memory` slash with subcommands `status` (default) / `show` / `edit` (open in `$EDITOR`, default `vi`) / `reload`.
+- Q5=A: Hot reload via existing `fsnotify` dep. 200 ms debounce. fsnotify failure degrades to slash-only reload; registry continues to work.
+
+**Task progress:** 0 of 8 complete — F24 in flight.
+
+| Task | Status | Subject                                                                                                                                          |
+|------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| T01  | TODO   | bootstrap F24 evidence section + advance PROGRESS to F24                                                                                         |
+| T02  | TODO   | projectmemory/types.go: Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD)                                                  |
+| T03  | TODO   | projectmemory/loader.go: parent-walk + git-root-stop + user overlay + truncation (TDD with real tempdirs)                                        |
+| T04  | TODO   | projectmemory/registry.go: atomic-pointer Snapshot/Set/Reload + MemorySnapshotter interface (TDD -race)                                          |
+| T05  | TODO   | projectmemory/watcher.go: fsnotify + 200 ms debounce + graceful degrade (TDD with real fsnotify)                                                 |
+| T06  | TODO   | /memory slash command (status/show/edit/reload) with editor seam (TDD)                                                                            |
+| T07  | TODO   | BaseAgent SetMemoryRegistry + getSystemPrompt prepend + main.go wiring + integration test (TDD)                                                  |
+| T08  | TODO   | Challenge harness 5 phases A-E + close-out + push 4 remotes non-force                                                                             |
+
+**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (case-sensitive filename mismatch / hot-reload event-but-no-update / agent-cached-old-blob / silent-truncation-no-flag / missing-file-error-instead-of-empty); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
+
+**Picking up F24 specifically:** Start with T01 (bootstrap F24 evidence + advance PROGRESS); proceed sequentially through T02..T08. T03/T05 use real `t.TempDir()` and real fsnotify (no mock fs). T07 introduces `MemorySnapshotter` interface so BaseAgent depends on read-only contract.
