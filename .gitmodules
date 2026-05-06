@@ -211,3 +211,6 @@
 [submodule "cli_agents/spec-kit"]
 	path = cli_agents/spec-kit
 	url = git@github.com:github/spec-kit.git
+[submodule "cli_agents/superset"]
+	path = cli_agents/superset
+	url = git@github.com:superset-sh/superset.git
