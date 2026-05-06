@@ -8,13 +8,13 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F22 COMPLETE; F23 next candidate
-- **Active feature:** —
-- **Active task:** —
-- **Last completed:** P2-F22-T09 — Feature 22 (Aider Git Auto-Commit Per Change) close-out + push 4 remotes non-force
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F22 COMPLETE; F23 (Cline Browser Tool) in flight
+- **Active feature:** P2-F23 — Cline Browser Tool
+- **Active task:** P2-F23-T02 (T01 DONE — bootstrap)
+- **Last completed:** P2-F23-T01 — bootstrap F23 evidence + advance PROGRESS to F23
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-06
+- **Last touched:** 2026-05-07
 - **Blocked-on:** —
 
 ## Phase status
@@ -353,6 +353,18 @@
 - [x] P2-F22-T07 — /git_auto_commit slash command (status/on/off/show) (TDD)  ← commit `a999b3a`
 - [x] P2-F22-T08 — main.go wiring + integration test  ← commit `bab7ebc`
 - [x] P2-F22-T09 — Challenge harness 6+1 phases + close-out + push 4 remotes  ← (this commit)
+
+## P2-F23 task list (Cline Browser Tool) — IN PROGRESS
+- [x] P2-F23-T01 — bootstrap F23 evidence section + advance PROGRESS to F23  ← (this commit)
+- [ ] P2-F23-T02 — `internal/tools/browser/types.go` + `options.go`: BrowserOptions + Snapshot + ScreenshotResult + ManagerStatus + sentinels + EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes (TDD)
+- [ ] P2-F23-T03 — `internal/tools/browser/manager.go` + `session.go`: BrowserManager with atomic-pointer lifecycle + BrowserSession with chromedp Context + per-session tempdir + sync.Once close + headed/headless option (TDD with stub chromedp seam)
+- [ ] P2-F23-T04 — `internal/tools/browser/navigate_tool.go`: browser_navigate Tool impl with WaitReady + lazy session-create (TDD)
+- [ ] P2-F23-T05 — `internal/tools/browser/snapshot_tool.go`: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)
+- [ ] P2-F23-T06 — `internal/tools/browser/click_type_tools.go`: browser_click + browser_type Tool impls with NodeVisible + click-settle wait + selector-not-found mapping (TDD)
+- [ ] P2-F23-T07 — `internal/tools/browser/screenshot_tool.go`: browser_screenshot Tool impl with PNG-magic verification + size > 1024 + image/png.DecodeConfig (TDD)
+- [ ] P2-F23-T08 — `internal/tools/browser/close_tool.go`: browser_close Tool impl with idempotent-close semantics (TDD)
+- [ ] P2-F23-T09 — `internal/commands/browser_command.go`: /browser slash (status/navigate/close) + main.go wiring + browser.RegisterAll + integration test (gated on real chromium)
+- [ ] P2-F23-T10 — Challenge harness (7 phases A-G) gated on chromium + close-out + push 4 remotes non-force
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

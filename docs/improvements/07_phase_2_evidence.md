@@ -320,3 +320,57 @@ with positive runtime evidence; anti-bluff smoke clean; cross-compile clean;
 second Phase 2 feature shipped.
 
 ---
+
+## P2-F23 — Cline Browser Tool
+
+Spec: `docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md` (commit `83d401d`).
+Plan: `docs/superpowers/plans/2026-05-07-p2-f23-cline-browser-tool.md` (commit `bc5fd3e`).
+
+### One-line goal
+
+Ship a real, end-to-end **6-tool browser-automation suite** (`browser_navigate`
+/ `browser_snapshot` / `browser_click` / `browser_type` / `browser_screenshot`
+/ `browser_close`) for the HelixCode CLI agent, modelled on cline's Puppeteer
+surface, using the existing `internal/tools/browser/` chromedp infrastructure
+(`Controller`, `ChromeDiscovery`, ...) with a thinner cline-style session
+façade (atomic-pointer `BrowserManager`, `BrowserSession` with `sync.Once`
+close, `BrowserOptions` from env, `Snapshot` + `ScreenshotResult` value types,
+sentinel errors). `/browser` slash (status / navigate / close); NO cobra
+subcommand. Headless by default; `HELIXCODE_BROWSER_HEADED=true` opt-in.
+Screenshots written to per-session tempdir (`$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png`)
+with PNG-magic + DecodeConfig + size>1024 verification.
+
+### Commits in order
+
+| Task | Commit | Subject |
+|------|--------|---------|
+| P2-F23-T01 | (this commit) | bootstrap F23 evidence + advance PROGRESS to F23 |
+| P2-F23-T02 |        | browser types + options - Snapshot/ScreenshotResult/ManagerStatus + sentinels (TDD) |
+| P2-F23-T03 |        | browser manager + session - atomic-pointer + sync.Once + sessionFactory seam (TDD) |
+| P2-F23-T04 |        | browser_navigate tool - lazy session-create + WaitReady + 30s timeout (TDD) |
+| P2-F23-T05 |        | browser_snapshot tool - html/text mode + 64KB cap + Truncated flag (TDD) |
+| P2-F23-T06 |        | browser_click + browser_type tools - NodeVisible + 5s + ClickWait settle (TDD) |
+| P2-F23-T07 |        | browser_screenshot tool - PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD) |
+| P2-F23-T08 |        | browser_close tool - idempotent CloseSession + post-close RequireSession fails (TDD) |
+| P2-F23-T09 |        | /browser slash + main.go wiring + browser.RegisterAll + integration test |
+| P2-F23-T10 |        | close out feature 23 — Cline Browser Tool |
+
+### Acceptance
+
+Every task TDD-driven (failing test → minimal impl → green); anti-bluff
+smoke `clean` on every commit; zero new external deps (`chromedp v0.15.1`
++ `cdproto` already direct in `HelixCode/go.mod`); 7-phase Challenge
+(navigate-and-snapshot / snapshot-text / click-mutates-DOM / type-into-input
+/ screenshot-PNG-magic / close-tears-down / concurrent-session-sharing)
+gated on chromium availability with `SKIP-OK` only on chromium absence.
+
+### P2-F23-T01 — bootstrap F23 evidence section + advance PROGRESS
+
+F23 section appended to this file. PROGRESS.md current focus advanced from
+"F22 closed; F23 next candidate (brainstorm)" to "F23 (Cline Browser Tool)
+in flight". CONTINUATION.md F23 mid-flight section ticks T01 DONE.
+Zero new external deps verified — `chromedp v0.15.1` + `cdproto` already
+direct in `HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
+Per-task commit subjects + SHAs filled in by T02-T10.
+
+---
