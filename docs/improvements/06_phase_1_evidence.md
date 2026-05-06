@@ -2512,5 +2512,46 @@ EXIT=0
 
 ### P1-F19-T06 — Challenge harness: 5 always-run phases + reader-position + byte-offset positive evidence
 
+Files:
+- `HelixCode/tests/integration/cmd/p1f19_challenge/main.go` — 5-phase harness against real `bytes.Buffer` reader/writer.
+- `Challenges/p1-f19-ask-user-question/CHALLENGE.md` — challenge spec.
+- `Challenges/p1-f19-ask-user-question/run.sh` — driver (anti-self-match string-fragment regex; chmod +x).
+
+Verbatim runtime evidence (`./Challenges/p1-f19-ask-user-question/run.sh`):
+
+```
+==> build F19 challenge harness
+==> run harness
+==> P1-F19 challenge harness pid: 67243
+==> phase A: TTY-WITH-INPUT-RETURNS-CHOICE (always runs)
+    phaseA: input="2\n" -> value="b" index=1; writer-bytes=59; reader-remaining=0
+    verdict: ask_user consumed input, returned correct choice, rendered prompt
+==> phase B: NON-TTY-WITH-DEFAULT-RETURNS-DEFAULT (always runs)
+    phaseB: non-TTY+default="b" -> value="b" used_default=true; reader-remaining=2 (untouched=true); writer-bytes=0 (empty=true)
+    verdict: non-TTY short-circuit honoured Default without reading reader or writing to writer
+==> phase C: NON-TTY-NO-DEFAULT-ERRORS (always runs)
+    phaseC: non-TTY+no-default -> ask_user: askuser: ask_user requires interactive terminal; errors.Is(ErrInteractiveTerminalRequired)=true; writer-bytes=0
+    verdict: error sentinel propagated through tool wrapper; writer untouched
+==> phase D: PREVIEW-VISIBLE-IN-OUTPUT (always runs)
+    phaseD: preview "applies the change to disk" appears at byte offset 37; preview "discards the staged change" appears at byte offset 87; writer-bytes=146
+    verdict: choice previews rendered to writer (positive byte-offset evidence, not metadata)
+==> phase E: INVALID-INPUT-RETRY (always runs)
+    phaseE: invalid-then-valid retry succeeded; question rendered 2 time(s); 1-3 hint present; writer-bytes=145; reader-remaining=0
+    verdict: prompter rejected out-of-range input, redrew prompt, accepted valid follow-up
+==> ALL CHECKS PASSED
+==> P1-F19 challenge harness PASS
+==> anti-bluff smoke on F19-affected code
+clean
+==> cross-compile linux
+==> P1-F19 challenge PASS
+```
+
+Exit code: 0. Cross-compile linux/amd64 binary: `/tmp/p1f19_challenge_linux` (73,227,880 bytes).
+
+Anti-bluff verdict:
+- Phase B reader-untouched verdict: `untouched=true` (initial Len=2, post-call Len=2 — non-TTY short-circuit confirmed to NEVER read the buffer).
+- Phase D preview byte offsets (positive runtime evidence, not metadata): `"applies the change to disk"` at offset 37; `"discards the staged change"` at offset 87.
+- Anti-bluff smoke (string-fragment regex over harness + CHALLENGE.md + run.sh): `clean`.
+
 ### P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
 
