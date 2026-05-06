@@ -360,7 +360,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns absolute file path (NOT base64).
 - Q5=A: `/browser` slash (`status` / `navigate <url>` / `close`) PLUS the six tools. NO cobra subcommand.
 
-**Task progress:** 6 of 10 complete.
+**Task progress:** 7 of 10 complete.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -370,7 +370,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T04  | DONE `2bcb281` | browser_navigate_v2.go: browser_navigate Tool impl with WaitReady + lazy session-create + 30 s timeout (TDD); legacy tools renamed to browser_legacy_* |
 | T05  | DONE `ec0b3cc` | browser_snapshot_v2.go: browser_snapshot Tool impl with html/text mode + 64 KB cap + Truncated flag (TDD)                                     |
 | T06  | DONE `659307d` | browser_click_type_v2.go: browser_click + browser_type Tool impls with NodeVisible + 5 s selector timeout + ClickWaitDuration settle (TDD)   |
-| T07  | TODO   | browser/screenshot_tool.go: browser_screenshot Tool impl with PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD)                         |
+| T07  | DONE `3ca50a3` | browser_screenshot_v2.go: browser_screenshot Tool impl with PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD)                         |
 | T08  | TODO   | browser/close_tool.go: browser_close Tool impl with idempotent CloseSession + post-close RequireSession fails (TDD)                             |
 | T09  | TODO   | /browser slash + main.go wiring + browser.RegisterAll + integration test (real-chromium gated)                                                  |
 | T10  | TODO   | Challenge harness 7 phases A-G (navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) + close-out + push 4 remotes |
