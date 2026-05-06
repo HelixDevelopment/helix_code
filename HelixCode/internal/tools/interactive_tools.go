@@ -7,89 +7,13 @@ import (
 	"time"
 )
 
-// AskUserTool implements interactive user questions
-type AskUserTool struct {
-	registry *ToolRegistry
-}
-
-func (t *AskUserTool) Name() string { return "ask_user" }
-
-func (t *AskUserTool) Description() string {
-	return "Ask the user a question and wait for their response"
-}
-
-func (t *AskUserTool) Category() ToolCategory {
-	return CategoryInteractive
-}
-
-func (t *AskUserTool) Schema() ToolSchema {
-	return ToolSchema{
-		Type: "object",
-		Properties: map[string]interface{}{
-			"question": map[string]interface{}{
-				"type":        "string",
-				"description": "Question to ask the user",
-			},
-			"options": map[string]interface{}{
-				"type":        "array",
-				"description": "Optional list of predefined options",
-				"items": map[string]interface{}{
-					"type": "string",
-				},
-			},
-			"default": map[string]interface{}{
-				"type":        "string",
-				"description": "Default answer if user doesn't respond",
-			},
-			"timeout": map[string]interface{}{
-				"type":        "integer",
-				"description": "Timeout in seconds (default: no timeout)",
-			},
-		},
-		Required:    []string{"question"},
-		Description: "Ask the user a question and wait for their response",
-	}
-}
-
-func (t *AskUserTool) Validate(params map[string]interface{}) error {
-	if _, ok := params["question"]; !ok {
-		return fmt.Errorf("question is required")
-	}
-	return nil
-}
-
-func (t *AskUserTool) Execute(ctx context.Context, params map[string]interface{}) (interface{}, error) {
-	question := params["question"].(string)
-
-	response := &UserResponse{
-		Question:  question,
-		Timestamp: time.Now(),
-	}
-
-	if options, ok := params["options"].([]interface{}); ok {
-		response.Options = make([]string, len(options))
-		for i, opt := range options {
-			response.Options[i] = opt.(string)
-		}
-	}
-
-	if defaultVal, ok := params["default"].(string); ok {
-		response.Default = defaultVal
-	}
-
-	// In a real implementation, this would interact with the user
-	// For now, return the structure that should be filled by the user interface
-	return response, nil
-}
-
-// UserResponse represents a user's response to a question
-type UserResponse struct {
-	Question  string    `json:"question"`
-	Options   []string  `json:"options,omitempty"`
-	Default   string    `json:"default,omitempty"`
-	Answer    string    `json:"answer"`
-	Timestamp time.Time `json:"timestamp"`
-}
+// NOTE (P1-F19-T05): the previous in-tree AskUserTool stub that returned a
+// UserResponse struct without ever prompting the user was deleted. The real
+// ask_user tool now lives at internal/tools/askuser/ and is wired into the
+// registry by cmd/cli/main.go (so it has access to os.Stdin/os.Stdout). See
+// CONST-035 §11.9 — a non-prompting stub registered as "ask_user" was a
+// bluff because every call appeared to succeed without ever blocking on the
+// human operator.
 
 // TaskTrackerTool implements task tracking
 type TaskTrackerTool struct {

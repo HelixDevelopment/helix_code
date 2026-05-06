@@ -28,6 +28,7 @@ import (
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
+	"dev.helix.code/internal/tools/askuser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
@@ -454,6 +455,26 @@ func (c *CLI) Run() error {
 	}
 	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
 	c.toolRegistry = toolReg
+
+	// P1-F19-T05: ask_user tool registration. The askuser package's
+	// stdinPrompter reads os.Stdin / writes os.Stdout, auto-detects whether
+	// the destination is a TTY, and renders the question through the F18
+	// renderer. Defaults: 3 retries, 5 minute per-line timeout. When the
+	// destination is not a TTY, the prompter returns the question's Default
+	// (if set) with UsedDefault=true, otherwise ErrInteractiveTerminalRequired.
+	//
+	// We use Register (not RegisterTool — no such method) and there is no
+	// error path to handle. The previous in-tree bluff stub was removed in
+	// internal/tools/registry.go::registerAllTools so this registration is
+	// the SOLE wire-in for the "ask_user" name in the CLI.
+	askUserPrompter, askUserErr := askuser.NewStdinPrompter(askuser.StdinPrompterOptions{})
+	if askUserErr != nil {
+		log.Printf("ask_user: stdinPrompter construction failed; tool unavailable: %v", askUserErr)
+	} else {
+		toolReg.Register(askuser.NewAskUserTool(askUserPrompter))
+		log.Printf("ask_user: wired (interactive=auto-detect, max-retries=%d, timeout=%s)",
+			askuser.DefaultMaxRetries, askuser.DefaultTimeout)
+	}
 
 	// F13: LSP manager — curated 5-server allowlist filtered by exec.LookPath
 	// at startup. The manager is wired into the tool registry so successful

@@ -237,7 +237,11 @@ func (r *ToolRegistry) registerAllTools() error {
 	r.Register(&MultiEditCommitTool{registry: r})
 
 	// Interactive Tools
-	r.Register(&AskUserTool{registry: r})
+	// NOTE: ask_user is intentionally NOT auto-registered here. The real
+	// askuser.AskUserTool is wired in cmd/cli/main.go via NewAskUserTool +
+	// NewStdinPrompter so it has access to the process stdin/stdout. The
+	// previous in-tree bluff stub (which returned the question struct
+	// without prompting) has been removed (P1-F19-T05).
 	r.Register(&TaskTrackerTool{registry: r})
 
 	// Notebook Tools
