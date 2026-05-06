@@ -65,6 +65,21 @@ func (m *MockLLMProvider) Close() error {
 	return nil
 }
 
+// GetContextWindow returns a mock context window size for testing.
+// Returns 8192 tokens, a typical small-model context size.
+func (m *MockLLMProvider) GetContextWindow() int {
+	return 8192
+}
+
+// CountTokens returns a conservative char-based estimate (1 token ≈ 4 chars)
+// per the Provider interface fallback contract. Returns 0 for empty text.
+func (m *MockLLMProvider) CountTokens(text string) (int, error) {
+	if text == "" {
+		return 0, nil
+	}
+	return (len(text) + 3) / 4, nil
+}
+
 // setupTestRepo creates a temporary git repository for testing
 func setupTestRepo(t *testing.T) (string, func()) {
 	tmpDir, err := os.MkdirTemp("", "git-test-*")
