@@ -2909,3 +2909,57 @@ already (DebateOrchestrator, kiro-cli, ollama-code).
 PROGRESS.md updated: active phase → P1.5; active task → P1.5-WP1-T01.01
 (HALTED); WP1..WP12 task list inserted; P1.5-pre commits recorded.
 
+### P1.5-WP1 — Foundation safety completed (2026-05-06)
+
+WP1 closed out: all 3 user-approved decisions executed; post-pull gitlink
+advances locked in across HelixAgent, Challenges, and the root meta-repo.
+
+**Commits in WP1 (deepest-first):**
+
+Pre-WP1 (foundation):
+- `aad6a67d` — HelixAgent pre-WP1 in-flight tracked changes preserved
+- `47dc905a` — Challenges pre-WP1 in-flight tracked changes preserved
+- `d0ad6fd3` — root meta-repo: preserve in-flight tracked + gitlink advances
+- `ad5e108c` — root: remove `Example_Projects/` (replaced by `cli_agents/*` in WP2)
+- `cff2d90f` — root: gitignore Phase-1 development artefacts
+
+WP1 bootstrap:
+- `421495a0` — root: snapshot + dedup canonical list (`p1-5-snapshot-2026-05-06.md` + `p1-5-dedup-canonical.md`)
+
+WP1 close-out (this batch):
+- `a7d543dc` — HelixAgent: drop 3 unreachable submodule entries (DebateOrchestrator, kiro-cli, ollama-code)
+- `d16469c0` — HelixAgent: post-pull nested gitlink advances (LLMsVerifier, external/cognee, external/mcp-servers/servers, tools/snow-cli)
+- `fb274b73` — Challenges: post-pull gitlink advance (Containers)
+- `8688ece` — root: post-pull gitlink advances (HelixAgent, Challenges, Containers, 4× Dependencies/HelixDevelopment/*)
+
+**Decisions executed:**
+
+1. Dropped 3 unreachable submodule entries from `HelixAgent/.gitmodules`
+   per Phase 0 §3.3 parking lot. Result: `.gitmodules` block count went
+   170 → 167; gitlinks pointing to those paths removed from index;
+   `.git/modules/<path>` cleaned (never had real clones — they 404'd).
+2. Locked in post-pull tip SHAs as gitlink advances at every parent
+   (HelixAgent, Challenges, root) before WP2 starts moving submodules.
+
+**Scale of work:**
+
+- ~1.5 GB submodule content cloned during WP1 fetch+pull foreach.
+- ~155 submodules pulled to upstream tip cleanly.
+- 28 new submodules cloned (previously only registered).
+- 3 unreachable entries dropped (this commit).
+- Agent-Deck recursion blocker resolved earlier by `Example_Projects/` removal.
+
+**Snapshot pointer:**
+
+`docs/improvements/p1-5-snapshot-2026-05-06.md` — captures pre-WP1 state of
+all submodule SHAs for rollback reference.
+
+**Open issues reduced:**
+
+Post-pull advances now committed at all three parent levels. WP2..WP12
+remain. Pre-existing nested-submodule worktree dirty state (empty
+checkouts inside HelixAgent/HelixLLM/submodules/* and similar) is *not*
+a WP1 concern — it's a checkout/init issue tracked under WP2 restructuring
+and WP10 validation; root sees them as `-dirty` SHAs but no gitlink advance
+exists to commit.
+
