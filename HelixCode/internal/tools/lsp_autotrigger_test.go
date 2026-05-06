@@ -24,6 +24,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
@@ -34,6 +35,7 @@ import (
 // The tool name is configurable so we can register the same impl as fs_edit,
 // fs_write, or multiedit_commit interchangeably across the tests.
 type stubEditTool struct {
+	approval.DefaultLevelEdit
 	name string
 
 	// executeCalled bumps each Execute so a test can assert

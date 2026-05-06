@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/workflow/planmode"
 )
 
 // EnterPlanModeTool is the agent-callable tool that switches the agent into
 // plan mode. Side-effect: ModeController.TransitionTo(ModePlan).
 type EnterPlanModeTool struct {
-	mc planmode.ModeController
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates plan-mode state.
+	mc                        planmode.ModeController
 }
 
 // NewEnterPlanModeTool returns the agent-callable EnterPlanMode tool.
@@ -44,7 +46,8 @@ func (t *EnterPlanModeTool) Execute(ctx context.Context, params map[string]inter
 
 // ExitPlanModeTool returns the agent to normal execution.
 type ExitPlanModeTool struct {
-	mc planmode.ModeController
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates plan-mode state.
+	mc                        planmode.ModeController
 }
 
 // NewExitPlanModeTool returns the agent-callable ExitPlanMode tool.

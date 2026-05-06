@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"dev.helix.code/internal/approval"
 )
 
 // NOTE (P1-F19-T05): the previous in-tree AskUserTool stub that returned a
@@ -23,6 +25,11 @@ type TaskTrackerTool struct {
 }
 
 func (t *TaskTrackerTool) Name() string { return "task_tracker" }
+
+// RequiresApproval — in-memory todo scratch pad with no disk/shell side
+// effects. Per spec §3.6, task-tracking is a transparent agent affordance,
+// not a user-environment mutation. (spec §3.6).
+func (t *TaskTrackerTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *TaskTrackerTool) Description() string {
 	return "Track and manage tasks during execution"

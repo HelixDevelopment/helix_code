@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
@@ -57,6 +58,13 @@ func NewSandboxedShellTool(m SandboxedShellExecutor) *SandboxedShellTool {
 
 // Name returns the stable tool name for registry registration.
 func (t *SandboxedShellTool) Name() string { return "shell_sandboxed" }
+
+// RequiresApproval — even sandboxed, this is still a process exec. Per spec
+// §3.6, the "sandboxing is optional in auto-edit, required in full-auto"
+// composition is enforced by the policy layer, not by downgrading the level.
+func (t *SandboxedShellTool) RequiresApproval() approval.ApprovalLevel {
+	return approval.LevelRun
+}
 
 // Description is shown to the agent so it knows when to call this tool.
 func (t *SandboxedShellTool) Description() string {

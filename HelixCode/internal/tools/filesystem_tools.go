@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools/filesystem"
 )
 
@@ -13,6 +14,9 @@ type FSReadTool struct {
 }
 
 func (t *FSReadTool) Name() string { return "fs_read" }
+
+// RequiresApproval — pure read of file contents (spec §3.6).
+func (t *FSReadTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *FSReadTool) Description() string {
 	return "Read file contents from the filesystem"
@@ -64,7 +68,8 @@ func (t *FSReadTool) Execute(ctx context.Context, params map[string]interface{})
 
 // FSWriteTool implements file writing
 type FSWriteTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates filesystem.
+	registry                  *ToolRegistry
 }
 
 func (t *FSWriteTool) Name() string { return "fs_write" }
@@ -118,7 +123,8 @@ func (t *FSWriteTool) Execute(ctx context.Context, params map[string]interface{}
 
 // FSEditTool implements file editing
 type FSEditTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates filesystem.
+	registry                  *ToolRegistry
 }
 
 func (t *FSEditTool) Name() string { return "fs_edit" }
@@ -190,6 +196,9 @@ type GlobTool struct {
 
 func (t *GlobTool) Name() string { return "glob" }
 
+// RequiresApproval — pure read of filesystem entries (spec §3.6).
+func (t *GlobTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
+
 func (t *GlobTool) Description() string {
 	return "Find files matching a glob pattern"
 }
@@ -234,6 +243,9 @@ type GrepTool struct {
 }
 
 func (t *GrepTool) Name() string { return "grep" }
+
+// RequiresApproval — pure read; matches text in files (spec §3.6).
+func (t *GrepTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *GrepTool) Description() string {
 	return "Search file contents for a pattern"

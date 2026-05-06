@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools/shell"
 )
 
@@ -15,6 +16,9 @@ type ShellTool struct {
 }
 
 func (t *ShellTool) Name() string { return "shell" }
+
+// RequiresApproval — arbitrary process exec (spec §3.6).
+func (t *ShellTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
 
 func (t *ShellTool) Description() string {
 	return "Execute a shell command synchronously"
@@ -97,6 +101,9 @@ type ShellBackgroundTool struct {
 
 func (t *ShellBackgroundTool) Name() string { return "shell_background" }
 
+// RequiresApproval — arbitrary background process exec (spec §3.6).
+func (t *ShellBackgroundTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
+
 func (t *ShellBackgroundTool) Description() string {
 	return "Execute a shell command asynchronously in the background"
 }
@@ -158,6 +165,9 @@ type ShellOutputTool struct {
 
 func (t *ShellOutputTool) Name() string { return "shell_output" }
 
+// RequiresApproval — interrogates a running shell process (spec §3.6).
+func (t *ShellOutputTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
+
 func (t *ShellOutputTool) Description() string {
 	return "Get output from a background shell execution"
 }
@@ -198,6 +208,9 @@ type ShellKillTool struct {
 }
 
 func (t *ShellKillTool) Name() string { return "shell_kill" }
+
+// RequiresApproval — kills a running shell process (spec §3.6).
+func (t *ShellKillTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
 
 func (t *ShellKillTool) Description() string {
 	return "Kill a running background shell execution"

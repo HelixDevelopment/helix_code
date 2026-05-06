@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"dev.helix.code/internal/approval"
 )
 
 // NotebookReadTool reads Jupyter notebook files
@@ -13,6 +15,9 @@ type NotebookReadTool struct {
 }
 
 func (t *NotebookReadTool) Name() string { return "notebook_read" }
+
+// RequiresApproval — pure read of an ipynb file (spec §3.6).
+func (t *NotebookReadTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *NotebookReadTool) Description() string {
 	return "Read and parse a Jupyter notebook (.ipynb) file"
@@ -79,7 +84,8 @@ func (t *NotebookReadTool) Execute(ctx context.Context, params map[string]interf
 
 // NotebookEditTool edits Jupyter notebook cells
 type NotebookEditTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates ipynb file.
+	registry                  *ToolRegistry
 }
 
 func (t *NotebookEditTool) Name() string { return "notebook_edit" }

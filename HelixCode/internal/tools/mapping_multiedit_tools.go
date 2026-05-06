@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools/mapping"
 	"dev.helix.code/internal/tools/multiedit"
 )
@@ -14,6 +15,9 @@ type CodebaseMapTool struct {
 }
 
 func (t *CodebaseMapTool) Name() string { return "codebase_map" }
+
+// RequiresApproval — pure read of in-memory codebase map (spec §3.6).
+func (t *CodebaseMapTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *CodebaseMapTool) Description() string {
 	return "Create a map of the codebase structure and definitions"
@@ -82,6 +86,9 @@ type FileDefinitionsTool struct {
 
 func (t *FileDefinitionsTool) Name() string { return "file_definitions" }
 
+// RequiresApproval — pure read of file symbol map (spec §3.6).
+func (t *FileDefinitionsTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
+
 func (t *FileDefinitionsTool) Description() string {
 	return "Get all definitions (functions, classes, etc.) from a file"
 }
@@ -118,7 +125,8 @@ func (t *FileDefinitionsTool) Execute(ctx context.Context, params map[string]int
 
 // MultiEditBeginTool starts a multi-file edit transaction
 type MultiEditBeginTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — opens an edit txn that mutates filesystem on commit.
+	registry                  *ToolRegistry
 }
 
 func (t *MultiEditBeginTool) Name() string { return "multiedit_begin" }
@@ -171,7 +179,8 @@ func (t *MultiEditBeginTool) Execute(ctx context.Context, params map[string]inte
 
 // MultiEditAddTool adds an edit to a transaction
 type MultiEditAddTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — stages a filesystem mutation.
+	registry                  *ToolRegistry
 }
 
 func (t *MultiEditAddTool) Name() string { return "multiedit_add" }
@@ -255,7 +264,8 @@ func (t *MultiEditAddTool) Execute(ctx context.Context, params map[string]interf
 
 // MultiEditPreviewTool previews changes in a transaction
 type MultiEditPreviewTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — preview belongs to the edit pipeline; gate alongside its txn.
+	registry                  *ToolRegistry
 }
 
 func (t *MultiEditPreviewTool) Name() string { return "multiedit_preview" }
@@ -301,7 +311,8 @@ func (t *MultiEditPreviewTool) Execute(ctx context.Context, params map[string]in
 
 // MultiEditCommitTool commits a transaction
 type MultiEditCommitTool struct {
-	registry *ToolRegistry
+	approval.DefaultLevelEdit // §3.6 LevelEdit — commits filesystem mutation.
+	registry                  *ToolRegistry
 }
 
 func (t *MultiEditCommitTool) Name() string { return "multiedit_commit" }

@@ -48,7 +48,7 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P0 — Foundation                | DONE         | per `05_phase_0_evidence`  | governance cascade + secret-leak remediation                  |
 | P1 — claude-code (F01..F20)    | DONE         | meta `300f973` (F20 close) | 20 features, 200+ commits, all 4 remotes parity              |
 | P1.5 — Foundation Cleanup      | DONE         | meta `4131bf0`             | 12 WPs, ~48 commits, deepest-first push complete             |
-| P2 — CLI agent porting         | IN PROGRESS  | —                          | F21 mid-flight (4 of 9 tasks done)                            |
+| P2 — CLI agent porting         | IN PROGRESS  | —                          | F21 mid-flight (5 of 9 tasks done)                            |
 | P3 — Test infra                | NOT STARTED  | —                          | depends on Phase 2 close                                      |
 | P4 — Anti-bluff audit          | NOT STARTED  | —                          | depends on Phase 3 close                                      |
 | P5 — End-user materials uplift | NOT STARTED  | —                          | final phase                                                   |
@@ -92,7 +92,7 @@ Meta-repo remotes (4):
   full-auto; F02 final-deny authority retained; `/approval` slash + atomic-
   pointer runtime mode swap.
 
-**Tasks completed (4 of 9):**
+**Tasks completed (5 of 9):**
 
 | Task | Commit       | Subject                                                                        |
 |------|--------------|--------------------------------------------------------------------------------|
@@ -100,10 +100,10 @@ Meta-repo remotes (4):
 | T02  | `9c2664d`    | approval/types.go (ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors) |
 | T03  | `0d655d8`    | approval/selector.go (flag > env > config > default precedence)                |
 | T04  | `5ef13b8`    | approval/manager.go (4×4 matrix gate + F02/F14/F19 integration)                |
+| T05  | `<pending>`  | tools.Tool gains `RequiresApproval()`; spec §3.6 explicit-override applied to all ~38 tool impls + DefaultLevelEdit safe-default |
 
-**Tasks remaining (5 of 9):**
+**Tasks remaining (4 of 9):**
 
-- **T05** — Extend `Tool` interface with `RequiresApproval()` + `DefaultLevelEdit` and apply to ~30 existing tools (TDD).
 - **T06** — `/approval` slash command (`status` / `set` / `show`) (TDD).
 - **T07** — `cmd/cli/main.go` wiring + `--approval` pflag + registry hook + integration test (TDD).
 - **T08** — Challenge harness 5 phases:
@@ -242,7 +242,7 @@ If F21 is the active feature when you resume:
    at HEAD.
 2. Read `docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md` end
    to end.
-3. Continue at **T05** (Tool-interface extension).
+3. Continue at **T06** (`/approval` slash command — status/set/show).
 
 ### Picking up new feature after F21
 

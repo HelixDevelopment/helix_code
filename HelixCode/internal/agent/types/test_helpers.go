@@ -6,11 +6,15 @@ import (
 	"sync"
 	"unsafe"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
-// MockTool implements the tools.Tool interface for testing
+// MockTool implements the tools.Tool interface for testing.
+// Embeds approval.DefaultLevelEdit for the safe-default RequiresApproval()
+// per P2-F21-T05.
 type MockTool struct {
+	approval.DefaultLevelEdit
 	name        string
 	description string
 	executeFunc func(ctx context.Context, params map[string]interface{}) (interface{}, error)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/workflow"
 )
 
@@ -19,6 +20,9 @@ func NewTaskOutputTool(m *workflow.BackgroundManager) *TaskOutputTool {
 }
 
 func (t *TaskOutputTool) Name() string { return "TaskOutput" }
+
+// RequiresApproval — pure read of background task tail (spec §3.6).
+func (t *TaskOutputTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 func (t *TaskOutputTool) Description() string {
 	return "Read the output of a background task. Returns the last N lines (default 5) plus the task's current state."
 }
@@ -94,7 +98,10 @@ func NewTaskStopTool(m *workflow.BackgroundManager) *TaskStopTool {
 	return &TaskStopTool{manager: m}
 }
 
-func (t *TaskStopTool) Name() string           { return "TaskStop" }
+func (t *TaskStopTool) Name() string { return "TaskStop" }
+
+// RequiresApproval — terminates a running background task / process (spec §3.6).
+func (t *TaskStopTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
 func (t *TaskStopTool) Description() string    { return "Cancel a running background task by ID." }
 func (t *TaskStopTool) Category() ToolCategory { return CategoryFileSystem }
 func (t *TaskStopTool) Schema() ToolSchema {

@@ -36,6 +36,7 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
@@ -58,6 +59,13 @@ func NewAskUserTool(p Prompter) *AskUserTool {
 // mention "use the ask_user tool to ask the operator a multiple-choice
 // question" work without per-CLI rewrites.
 func (t *AskUserTool) Name() string { return "ask_user" }
+
+// RequiresApproval — asks the human a question; not a state mutation
+// (spec §3.6: "ask_user → LevelReadOnly — Asks the human; not a state
+// mutation").
+func (t *AskUserTool) RequiresApproval() approval.ApprovalLevel {
+	return approval.LevelReadOnly
+}
 
 // Description is shown to the agent so it knows when to call this tool. It
 // must mention that the tool blocks until the user responds — otherwise the

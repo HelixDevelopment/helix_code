@@ -5,10 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"dev.helix.code/internal/approval"
 )
 
 // fakeBgTool implements BackgroundAware for testing.
 type fakeBgTool struct {
+	approval.DefaultLevelEdit
 	name string
 }
 

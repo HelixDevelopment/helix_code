@@ -27,6 +27,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"dev.helix.code/internal/approval"
 )
 
 // ---------- helpers ----------
@@ -99,6 +101,9 @@ func NewLSPGetDiagnosticsTool(manager *LSPManager) *LSPGetDiagnosticsTool {
 }
 
 func (t *LSPGetDiagnosticsTool) Name() string { return "lsp_get_diagnostics" }
+
+// RequiresApproval — pure read of LSP server state (spec §3.6).
+func (t *LSPGetDiagnosticsTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *LSPGetDiagnosticsTool) Description() string {
 	return "Return diagnostics published by the LSP servers, optionally filtered to a single file or minimum severity."
@@ -189,6 +194,9 @@ func NewLSPAnalyzeDiagnosticTool(manager *LSPManager) *LSPAnalyzeDiagnosticTool 
 }
 
 func (t *LSPAnalyzeDiagnosticTool) Name() string { return "lsp_analyze_diagnostic" }
+
+// RequiresApproval — pure read of a single diagnostic record (spec §3.6).
+func (t *LSPAnalyzeDiagnosticTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *LSPAnalyzeDiagnosticTool) Description() string {
 	return "Look up a single LSP diagnostic by its stable ID and return a structured analysis report."

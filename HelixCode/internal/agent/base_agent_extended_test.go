@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/agent/task"
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/tools"
 )
@@ -140,6 +141,7 @@ func (m *MockToolRegistry) Get(name string) (tools.Tool, error) {
 
 // MockTool implements tools.Tool for testing
 type MockTool struct {
+	approval.DefaultLevelEdit
 	name        string
 	executeFunc func(ctx context.Context, params map[string]interface{}) (interface{}, error)
 }

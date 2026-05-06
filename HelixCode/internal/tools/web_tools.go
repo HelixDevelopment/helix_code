@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools/web"
 )
 
@@ -13,6 +14,9 @@ type WebFetchTool struct {
 }
 
 func (t *WebFetchTool) Name() string { return "web_fetch" }
+
+// RequiresApproval — pure read; HTTP GET of remote content (spec §3.6).
+func (t *WebFetchTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *WebFetchTool) Description() string {
 	return "Fetch content from a URL"
@@ -81,6 +85,9 @@ type WebSearchTool struct {
 }
 
 func (t *WebSearchTool) Name() string { return "web_search" }
+
+// RequiresApproval — pure read; queries a search API (spec §3.6).
+func (t *WebSearchTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *WebSearchTool) Description() string {
 	return "Search the web for information"

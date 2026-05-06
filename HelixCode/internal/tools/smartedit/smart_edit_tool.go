@@ -41,6 +41,7 @@ import (
 	"sort"
 	"time"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 	"dev.helix.code/internal/tools/multiedit"
 )
@@ -64,9 +65,10 @@ type MultiEditCommitter interface {
 // than construction) so the registry can wire the tool before the manager
 // is fully built — same pattern as F14/F15 tools.
 type SmartEditTool struct {
-	differ    *Differ
-	committer MultiEditCommitter
-	workdir   string // base for relative paths; "" → os.Getwd at Execute time
+	approval.DefaultLevelEdit // §3.6 LevelEdit — atomic file mutation pipeline.
+	differ                    *Differ
+	committer                 MultiEditCommitter
+	workdir                   string // base for relative paths; "" → os.Getwd at Execute time
 }
 
 // NewSmartEditTool constructs a SmartEditTool. workdir may be empty (resolved

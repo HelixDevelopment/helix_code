@@ -40,6 +40,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/agent/subagent"
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
@@ -79,6 +80,12 @@ func NewTaskTool(executor TaskExecutor) *TaskTool {
 // stable across CLI agents lets CLAUDE.md / AGENTS.md prompts that mention
 // "use the task tool to dispatch a subagent" work without per-CLI rewrites.
 func (t *TaskTool) Name() string { return "task" }
+
+// RequiresApproval — recursive agent spawn. Per spec §3.6, subagent dispatch
+// is LevelAll because the inner agent can re-trigger any tool — gating it
+// behind ModeDangerous ensures only "dangerously-bypass" permits unattended
+// recursive use.
+func (t *TaskTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelAll }
 
 // Description is shown to the agent so it knows when to call this tool. The
 // word "subagent" appears verbatim — TestTaskTool_DescriptionMentionsSubagent

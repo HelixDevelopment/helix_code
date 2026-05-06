@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools/browser"
 )
 
@@ -13,6 +14,9 @@ type BrowserLaunchTool struct {
 }
 
 func (t *BrowserLaunchTool) Name() string { return "browser_launch" }
+
+// RequiresApproval — spawns a browser process; mutates host state (spec §3.6).
+func (t *BrowserLaunchTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
 
 func (t *BrowserLaunchTool) Description() string {
 	return "Launch a new browser instance"
@@ -77,6 +81,9 @@ type BrowserNavigateTool struct {
 
 func (t *BrowserNavigateTool) Name() string { return "browser_navigate" }
 
+// RequiresApproval — mutates browser state and may visit malicious URLs (spec §3.6).
+func (t *BrowserNavigateTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
+
 func (t *BrowserNavigateTool) Description() string {
 	return "Navigate browser to a URL"
 }
@@ -126,6 +133,9 @@ type BrowserScreenshotTool struct {
 }
 
 func (t *BrowserScreenshotTool) Name() string { return "browser_screenshot" }
+
+// RequiresApproval — pure read of in-memory browser state (spec §3.6).
+func (t *BrowserScreenshotTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *BrowserScreenshotTool) Description() string {
 	return "Take a screenshot of the browser window"
@@ -210,6 +220,9 @@ type BrowserCloseTool struct {
 }
 
 func (t *BrowserCloseTool) Name() string { return "browser_close" }
+
+// RequiresApproval — terminates the browser process (spec §3.6).
+func (t *BrowserCloseTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
 
 func (t *BrowserCloseTool) Description() string {
 	return "Close a browser instance"

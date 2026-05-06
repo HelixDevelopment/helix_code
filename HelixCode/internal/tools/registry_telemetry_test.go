@@ -29,6 +29,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
 )
@@ -36,6 +37,7 @@ import (
 // stubTelemetryTool is a tiny Tool registered into the registry for telemetry
 // tests. Returns a configurable response or error from Execute.
 type stubTelemetryTool struct {
+	approval.DefaultLevelEdit
 	name     string
 	category tools.ToolCategory
 	err      error

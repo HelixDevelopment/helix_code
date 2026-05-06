@@ -7,6 +7,7 @@ import (
 	"log"
 	"sync"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/telemetry"
@@ -40,6 +41,27 @@ type Tool interface {
 
 	// Validate validates the parameters before execution
 	Validate(params map[string]interface{}) error
+
+	// RequiresApproval returns the approval level the tool requires (P2-F21).
+	// LevelReadOnly bypasses the approval gate (pure reads); LevelEdit gates
+	// behind ModeAutoEdit or higher; LevelRun gates behind ModeFullAuto;
+	// LevelAll gates behind ModeDangerous (escape hatch only). Tools that do
+	// not explicitly classify themselves should embed approval.DefaultLevelEdit
+	// for the safe default (LevelEdit).
+	//
+	// Per spec 7128289 §3.6, the explicit-override table is:
+	//   LevelReadOnly: fs_read, glob, grep, codebase_map, file_definitions,
+	//                  lsp_*, web_fetch, web_search, notebook_read,
+	//                  browser_screenshot, task_tracker, TaskOutput,
+	//                  ListWorktrees, ask_user.
+	//   LevelEdit:     fs_write, fs_edit, multiedit_*, notebook_edit,
+	//                  smart_edit, EnterPlanMode, ExitPlanMode,
+	//                  EnterWorktree, ExitWorktree, RemoveWorktree, mcp_*.
+	//   LevelRun:      shell, shell_background, shell_output, shell_kill,
+	//                  shell_sandboxed, browser_launch, browser_navigate,
+	//                  browser_close, TaskStop.
+	//   LevelAll:      task (subagent dispatch — recursive agent spawn).
+	RequiresApproval() approval.ApprovalLevel
 }
 
 // ToolSchema defines the JSON schema for tool parameters
@@ -641,6 +663,8 @@ func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
 
 // mcpTool is an internal Tool adapter that routes Execute to an mcp.Manager.
 type mcpTool struct {
+	approval.DefaultLevelEdit // F21: conservative default — per-server
+	// MCP capability metadata may override in F21.5 (spec §3.6 footnote).
 	registry *ToolRegistry
 	mcpMgr   *mcp.Manager
 	server   string

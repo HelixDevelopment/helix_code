@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/hooks"
 )
 
 // fakeTool is a minimal Tool that records its invocation count and lets the
 // test seed a fixed result/error. Mocking is allowed at the unit-test layer.
 type fakeTool struct {
+	approval.DefaultLevelEdit
 	name          string
 	executeCalled int
 	resultValue   interface{}

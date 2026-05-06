@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/tools"
 )
 
 // ─── EnterWorktreeTool ────────────────────────────────────────────────
 
 // EnterWorktreeTool implements the EnterWorktree agent tool.
-type EnterWorktreeTool struct{ m *Manager }
+type EnterWorktreeTool struct {
+	approval.DefaultLevelEdit // §3.6 LevelEdit — creates a worktree directory + branch.
+	m                         *Manager
+}
 
 // NewEnterWorktreeTool wires a Manager into an EnterWorktree tool.
 func NewEnterWorktreeTool(m *Manager) *EnterWorktreeTool { return &EnterWorktreeTool{m: m} }
@@ -73,7 +77,10 @@ func (t *EnterWorktreeTool) Execute(ctx context.Context, params map[string]inter
 // ─── ExitWorktreeTool ─────────────────────────────────────────────────
 
 // ExitWorktreeTool implements the ExitWorktree agent tool.
-type ExitWorktreeTool struct{ m *Manager }
+type ExitWorktreeTool struct {
+	approval.DefaultLevelEdit // §3.6 LevelEdit — mutates working-tree state.
+	m                         *Manager
+}
 
 // NewExitWorktreeTool wires a Manager into an ExitWorktree tool.
 func NewExitWorktreeTool(m *Manager) *ExitWorktreeTool { return &ExitWorktreeTool{m: m} }
@@ -102,6 +109,11 @@ func (t *ExitWorktreeTool) Execute(ctx context.Context, params map[string]interf
 
 // ListWorktreesTool implements the ListWorktrees agent tool.
 type ListWorktreesTool struct{ m *Manager }
+
+// RequiresApproval — pure read of worktree registry (spec §3.6).
+func (t *ListWorktreesTool) RequiresApproval() approval.ApprovalLevel {
+	return approval.LevelReadOnly
+}
 
 // NewListWorktreesTool wires a Manager into a ListWorktrees tool.
 func NewListWorktreesTool(m *Manager) *ListWorktreesTool { return &ListWorktreesTool{m: m} }
@@ -134,7 +146,10 @@ func (t *ListWorktreesTool) Execute(ctx context.Context, params map[string]inter
 // ─── RemoveWorktreeTool ───────────────────────────────────────────────
 
 // RemoveWorktreeTool implements the RemoveWorktree agent tool.
-type RemoveWorktreeTool struct{ m *Manager }
+type RemoveWorktreeTool struct {
+	approval.DefaultLevelEdit // §3.6 LevelEdit — deletes a worktree directory + branch.
+	m                         *Manager
+}
 
 // NewRemoveWorktreeTool wires a Manager into a RemoveWorktree tool.
 func NewRemoveWorktreeTool(m *Manager) *RemoveWorktreeTool { return &RemoveWorktreeTool{m: m} }

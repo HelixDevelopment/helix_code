@@ -10,11 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/workflow"
 )
 
 type fakeStreamingTool struct {
+	approval.DefaultLevelEdit
 	name        string
 	streamLines []string
 	finalResult any
@@ -41,6 +43,7 @@ func (f *fakeStreamingTool) ExecuteWithProgress(ctx context.Context, params map[
 }
 
 type fakePlainTool struct {
+	approval.DefaultLevelEdit
 	name        string
 	finalResult any
 	gotParams   map[string]interface{}
@@ -143,6 +146,7 @@ func TestRegistry_BackgroundFlagFalseTakesForegroundPath(t *testing.T) {
 // Used to verify that Validate is called synchronously at dispatch time,
 // not deferred to inside the background goroutine.
 type fakeValidatingTool struct {
+	approval.DefaultLevelEdit
 	name string
 }
 
