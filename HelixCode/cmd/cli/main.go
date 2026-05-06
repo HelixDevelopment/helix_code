@@ -23,6 +23,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/render"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/telemetry"
@@ -1078,16 +1079,33 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 	}
 
 	if stream {
-		// Real streaming from provider
+		// Real streaming from provider, wired through the P1-F18 Renderer
+		// so that token output respects HELIXCODE_RENDER + TTY detection
+		// (fancy = in-place line update, plain = line-buffered transcript).
+		r, rerr := render.NewRenderer(render.FactoryOptions{})
+		if rerr != nil {
+			// Constructing a renderer should be infallible for default
+			// options; surface the error rather than silently dropping
+			// to fmt.Printf — callers need to know if config is broken.
+			return fmt.Errorf("renderer init failed: %w", rerr)
+		}
+		defer func() { _ = r.Close() }()
+
 		chunkChan := make(chan llm.LLMResponse, 100)
-		err := provider.GenerateStream(ctx, req, chunkChan)
-		if err != nil {
-			return fmt.Errorf("streaming generation failed: %w", err)
+		errCh := make(chan error, 1)
+		go func() {
+			errCh <- provider.GenerateStream(ctx, req, chunkChan)
+		}()
+
+		blockID := "llm-" + modelName
+		if rerr := streamToRenderer(ctx, chunkChan, r, blockID); rerr != nil {
+			// Drain provider error before returning to avoid goroutine leak.
+			<-errCh
+			return fmt.Errorf("renderer stream failed: %w", rerr)
 		}
-		for chunk := range chunkChan {
-			fmt.Printf("%s ", chunk.Content)
+		if perr := <-errCh; perr != nil {
+			return fmt.Errorf("streaming generation failed: %w", perr)
 		}
-		fmt.Println()
 	} else {
 		// Real non-streaming from provider
 		resp, err := provider.Generate(ctx, req)
@@ -1099,6 +1117,47 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 
 	fmt.Printf("\n✅ Generation completed\n")
 	return nil
+}
+
+// streamToRenderer pumps LLM streaming chunks from ch through the supplied
+// Renderer using the Begin -> WriteToken... -> Commit token-streaming flow
+// (P1-F18 spec §4.1, §11.6).
+//
+// Invariants enforced:
+//   - Begin is called exactly once with blockID before the first WriteToken.
+//   - Commit runs unconditionally on return so the trailing newline is always
+//     emitted, even if the producer goroutine returns an error mid-stream.
+//   - ctx cancellation aborts the loop without surfacing an error from the
+//     channel-drain phase; the caller is responsible for joining the producer
+//     goroutine separately.
+//
+// The function reads until ch is closed by the producer; it does NOT close the
+// channel itself. Empty content chunks are forwarded so the renderer's
+// auto-Begin / no-op fast paths get exercised in the same way the production
+// path will see them under real provider implementations.
+func streamToRenderer(ctx context.Context, ch <-chan llm.LLMResponse, r render.Renderer, blockID string) (retErr error) {
+	if err := r.Begin(blockID); err != nil {
+		return fmt.Errorf("renderer begin: %w", err)
+	}
+	defer func() {
+		if cerr := r.Commit(); cerr != nil && retErr == nil {
+			retErr = fmt.Errorf("renderer commit: %w", cerr)
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case chunk, ok := <-ch:
+			if !ok {
+				return nil
+			}
+			if err := r.WriteToken(chunk.Content); err != nil {
+				return fmt.Errorf("renderer write: %w", err)
+			}
+		}
+	}
 }
 
 // handleNotification sends a notification
