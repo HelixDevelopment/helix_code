@@ -3066,3 +3066,108 @@ updated to reflect new gitdir.
    openhands required gitlink restoration via
    `git update-index --add --cacheinfo 160000,SHA,path`.
 
+---
+
+## P1.5-WP3 — Submodule deduplication (5 sets)
+
+Anti-divergence canonicalisation per `docs/improvements/p1-5-dedup-canonical.md`. URL-equivalence verified with `git config --file .gitmodules` before each removal — no URL_MISMATCH was found in any of the 5 sets.
+
+### T03.01 — LLMsVerifier dedup
+
+Canonical: `Dependencies/HelixDevelopment/LLMsVerifier` (kept).
+Removed: `HelixAgent/LLMsVerifier` (1 copy).
+
+| commit  | scope                                                         |
+|---------|---------------------------------------------------------------|
+| `d919a5e` | HelixAgent: remove submodule + Makefile/.trivy.yaml refs    |
+| `cb6fd9c` | meta-repo: bump HelixAgent gitlink                          |
+
+Consumer updates (HelixAgent):
+- `HelixAgent/Makefile` `verifier-init` / `verifier-update` / `verifier-build` targets retargeted to `../Dependencies/HelixDevelopment/LLMsVerifier`.
+- `HelixAgent/.trivy.yaml` `skip-dirs` updated to canonical relative path.
+- `HelixAgent/go.mod` `replace digital.vasic.llmsverifier => ../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
+- `HelixAgent/challenges/scripts/challenge_framework.sh` `get_verifier_binary()` retargeted (committed in T03.03).
+
+### T03.02 — Containers dedup (3 nested copies)
+
+Canonical: root `Containers` (kept).
+Removed: `HelixAgent/Containers`, `Challenges/Containers`, `HelixAgent/HelixLLM/submodules/Containers` (3 copies).
+
+| commit    | scope                                                    |
+|-----------|----------------------------------------------------------|
+| `ec59dcc` | HelixAgent: remove + setup-script loop entries          |
+| `abe62cb` | Challenges: remove                                       |
+| `e9bc2b1` | HelixLLM: remove submodules/Containers                   |
+| `0a451d2` | HelixAgent: bump HelixLLM gitlink                        |
+| `0e685b6` | meta-repo: bump HelixAgent + Challenges gitlinks         |
+
+Consumer updates:
+- `HelixAgent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: `Containers` removed from per-module loops (replaced with comment marker).
+- `HelixAgent/go.mod` `replace digital.vasic.containers => ../Containers` (committed in T03.03).
+- `Challenges/pkg/container/verifier.go` already uses runtime path-discovery (`findContainersDir()` walks `tools/containers`, `../tools/containers`, …) — no edit needed.
+
+### T03.03 — Security dedup (2 nested copies)
+
+Canonical: root `Security` (kept).
+Removed: `HelixAgent/Security`, `HelixAgent/HelixLLM/submodules/Security` (2 copies).
+
+| commit    | scope                                                         |
+|-----------|--------------------------------------------------------------|
+| `98899f9` | HelixAgent: remove + go.mod replaces + scripts + challenges  |
+| `bb85100` | HelixLLM: remove submodules/Security                          |
+| `39d77ac` | HelixAgent: bump HelixLLM gitlink                             |
+| `3a50b79` | meta-repo: bump HelixAgent gitlink                            |
+
+Consumer updates (HelixAgent):
+- `HelixAgent/go.mod`: `replace` directives pointed to canonical paths for `digital.vasic.security` (`../Security`), `digital.vasic.containers` (`../Containers`), `digital.vasic.llmsverifier` (`../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`), `digital.vasic.helixqa` (`../HelixQA`).
+- `HelixAgent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: drop `Security` loop entry.
+- `HelixAgent/challenges/scripts/security_module_challenge.sh`: `$PROJECT_ROOT/Security` → `$PROJECT_ROOT/../Security`; replace-directive grep updated.
+- `HelixAgent/challenges/scripts/challenge_framework.sh`: `get_verifier_binary()` retargets canonical LLMsVerifier path.
+
+### T03.04 — HelixQA dedup
+
+Canonical: root `HelixQA` (kept).
+Removed: `HelixAgent/HelixQA` (1 copy).
+
+| commit    | scope                                                     |
+|-----------|----------------------------------------------------------|
+| `2728cf6` | HelixAgent: remove + scripts + tests + challenges        |
+| `01441bb` | meta-repo: bump HelixAgent gitlink                        |
+
+Consumer updates (HelixAgent):
+- `scripts/orchestrate_full_test.sh`: `HelixQA` paths → `../HelixQA`; `cd ..` directives reworked to return to HelixAgent.
+- `scripts/run_all_tests_and_challenges.sh`: `./HelixQA` → `../HelixQA` (all occurrences).
+- `challenges/scripts/helixllm_integration_challenge.sh`, `helixqa_validation_challenge.sh`: `$PROJECT_ROOT/HelixQA` → `$PROJECT_ROOT/../HelixQA`.
+- `tests/integration/submodule_sync_test.go`: `helixQAPath := "HelixQA"` → `"../HelixQA"`; benchmark `git submodule status` arg updated.
+- `HelixAgent/go.mod` already updated in T03.03.
+
+### T03.05 — MCP-Servers dedup
+
+Action: PROMOTE — root `MCP-Servers` did not exist; promoted from `HelixAgent/MCP-Servers` (URL `git@github.com:modelcontextprotocol/servers.git`, SHA `4503e2d`). Removed 2 HelixAgent duplicates: `HelixAgent/MCP-Servers` and `HelixAgent/external/mcp-servers/servers` (both pointing at same upstream URL + SHA — verified equivalent before promotion).
+
+| commit    | scope                                                   |
+|-----------|--------------------------------------------------------|
+| `6e245ff` | HelixAgent: remove both duplicate locations            |
+| `7f775af` | meta-repo: promote MCP-Servers + bump HelixAgent       |
+
+Consumer updates: none required — the remaining HelixAgent references in `Makefile` (`EXCLUDE_DIRS`) and `.golangci.yml` (`skip-dirs`) are exclusion lists, harmless when the target path no longer exists locally.
+
+### Final canonical tree state
+
+```
+$ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|HelixQA|MCP-Servers" | head -5
+ 2ba3e56c... Containers (1.0.2-dev-0.0.2-126-g2ba3e56)
+ d473231d... Dependencies/HelixDevelopment/LLMsVerifier (heads/main)
+ ecebe9a5... HelixQA (v4.0.0-210-gecebe9a)
+ 4503e2d1... MCP-Servers (typescript-servers-0.6.2-3796-g4503e2d)
+ e7c09c15... Security (heads/main)
+```
+
+No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere under `HelixAgent/`, `Challenges/`, or `HelixAgent/HelixLLM/`.
+
+### Defects observed during execution
+
+1. `git submodule deinit` for nested-three-level submodules (e.g. `HelixAgent/HelixLLM/submodules/Security`) prints a non-fatal warning `error: could not lock config file .git/modules/HelixAgent/modules/HelixLLM/modules/submodules/Security/config: No such file or directory` because the per-submodule git dir was already pruned by an earlier WP1/WP2 operation. The deinit and `git rm` still succeed; the warning is cosmetic.
+2. `git config --file .gitmodules --remove-section submodule.X` returns exit 1 with `fatal: no such section` when the section was already removed by a successful `git rm` — expected, suppressed via `|| true`.
+3. After `git rm` of a submodule path, the gitlink is auto-staged; passing the same path to a follow-up `git add` errors with `pathspec did not match any files` — solved by skipping the redundant add.
+
