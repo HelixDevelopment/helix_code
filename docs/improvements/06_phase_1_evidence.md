@@ -1934,5 +1934,81 @@ pushed to its single `origin` (mirror gap noted, deferred infra).
 
 ### P1-F16-T11 — Challenge harness: in-tree fake OTLP/HTTP receiver + 5 phases (STDOUT/FAKE-OTLP/FILTER/NOOP/REAL)
 
+**Files created:**
+- `HelixCode/tests/integration/cmd/p1f16_challenge/main.go` — 5-phase harness binary (build tag `testing_export`).
+- `Challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` — challenge spec.
+- `Challenges/p1-f16-opentelemetry-integration/run.sh` — driver (anti-self-match string-fragment regex).
+
+**Compile-check (with `-tags=testing_export`):**
+
+```
+$ cd HelixCode && go build -tags=testing_export ./tests/integration/cmd/p1f16_challenge/
+(no output → success)
+```
+
+**Cross-compile linux/amd64:**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -tags=testing_export -o /tmp/p1f16_challenge_linux ./tests/integration/cmd/p1f16_challenge/
+$ ls -la /tmp/p1f16_challenge_linux
+-rwxr-xr-x 1 milosvasic milosvasic 43085708 May  6 10:25 /tmp/p1f16_challenge_linux
+$ file /tmp/p1f16_challenge_linux
+/tmp/p1f16_challenge_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, ...
+```
+
+**Anti-bluff smoke (meta-repo root):**
+
+```
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f16_challenge/ Challenges/p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
+clean
+```
+
+**Harness runtime evidence (verbatim, exit code 0):**
+
+```
+==> P1-F16 challenge harness pid: 1829590
+==> phase A: STDOUT exporter end-to-end (always runs)
+    exporter         : stdout
+    captured_bytes   : 3866
+    span_evidence    : {"Name":"llm.Generate","SpanContext":{"TraceID":"5be232f843c63ea73723225949922967","SpanID":"2e9b72ff49243d08","TraceFlags":"01","TraceState":"","Remote":false},"Parent":{"TraceID":"00000000000000000000000000000000","SpanID":"00000000000000...(truncated)
+    metric_evidence  : present (helixcode_llm_calls_total)
+==> phase B: real OTLP/HTTP exporter into in-process fake receiver (always runs)
+    receiver_addr    : 127.0.0.1:41415
+    traces_posts     : 1 (first body bytes: 341)
+    metrics_posts    : 2 (first body bytes: 1139)
+==> phase C: secret-attribute filter (always runs)
+    captured_bytes   : 3871
+    span_present     : true (llm.Generate exported)
+    secret_present   : false (marker "API_KEY=sk-CHALLENGE-12345" absent)
+    secret-leak prevention verified
+==> phase D: noop zero-cost (always runs)
+    exporter         : noop
+    calls            : 100
+    captured_bytes   : 0
+    elapsed          : 413.391µs
+    noop fast path: 100 calls completed without telemetry overhead
+==> phase E: real OTLP/HTTP collector round-trip (gated)
+    [skipped: OTEL_EXPORTER_OTLP_ENDPOINT not set]
+==> ALL CHECKS PASSED
+==> P1-F16 challenge harness PASS
+```
+
+**`run.sh` end-to-end (build + run + smoke + cross-compile, exit 0):**
+
+```
+==> build F16 challenge harness (with -tags=testing_export)
+==> run harness
+[... harness output as above ...]
+==> ALL CHECKS PASSED
+==> P1-F16 challenge harness PASS
+==> anti-bluff smoke on F16-affected code
+clean
+==> cross-compile linux
+==> P1-F16 challenge PASS
+RUN_SH_EXIT=0
+```
+
+**Phase E outcome:** skipped (gated; `OTEL_EXPORTER_OTLP_ENDPOINT` not set on this host). Honest skip per F11/F12/F13/F14/F15 precedent.
+
 ### P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
 
