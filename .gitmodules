@@ -103,3 +103,27 @@
 [submodule "cli_agents/codename-goose"]
 	path = cli_agents/codename-goose
 	url = git@github.com:jgenerali/codename-goose.git
+[submodule "cli_agents/codex-skills"]
+	path = cli_agents/codex-skills
+	url = git@github.com:openai/skills.git
+[submodule "cli_agents/conduit"]
+	path = cli_agents/conduit
+	url = git@github.com:lostintangent/conduit-release.git
+[submodule "cli_agents/copilot-cli"]
+	path = cli_agents/copilot-cli
+	url = git@github.com:github/copilot-cli.git
+[submodule "cli_agents/crush"]
+	path = cli_agents/crush
+	url = git@github.com:charmbracelet/crush.git
+[submodule "cli_agents/deepseek-cli"]
+	path = cli_agents/deepseek-cli
+	url = git@github.com:holasoymalva/deepseek-cli.git
+[submodule "cli_agents/deepseek-cli-youkpan"]
+	path = cli_agents/deepseek-cli-youkpan
+	url = git@github.com:youkpan/deepseek-cli.git
+[submodule "cli_agents/fauxpilot"]
+	path = cli_agents/fauxpilot
+	url = git@github.com:fauxpilot/fauxpilot.git
+[submodule "cli_agents/forge"]
+	path = cli_agents/forge
+	url = git@github.com:antinomyhq/forge.git
