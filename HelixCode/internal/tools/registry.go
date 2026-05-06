@@ -67,6 +67,7 @@ const (
 	CategorySandbox      ToolCategory = "sandbox"
 	CategorySubagent     ToolCategory = "subagent"
 	CategorySmartEdit    ToolCategory = "smart-edit"
+	CategoryAskUser      ToolCategory = "ask-user"
 )
 
 // ToolRegistry manages all available tools
