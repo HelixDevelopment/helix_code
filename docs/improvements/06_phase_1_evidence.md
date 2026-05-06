@@ -2651,5 +2651,73 @@ Two-line summary: F19 ships a real `ask_user` tool with non-TTY short-circuit (z
 
 ### P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)
 
+Files:
+- `Challenges/p1-f20-theme-system/CHALLENGE.md`
+- `Challenges/p1-f20-theme-system/run.sh` (executable)
+- `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`
+
+Verbatim run.sh stdout (host):
+
+```
+==> build F20 challenge harness
+==> run harness
+==> P1-F20 challenge harness pid: 504185
+==> phase A: BUILT-IN-DARK (always runs)
+    phaseA: role=info      open-bytes=1b5b33383b323b3232303b3232303b3232306d total-bytes=24
+    phaseA: role=warn      open-bytes=1b5b33383b323b3235353b3137363b306d total-bytes=22
+    phaseA: role=error     open-bytes=1b5b33383b323b3235353b36343b36346d total-bytes=22
+    phaseA: role=highlight open-bytes=1b5b33383b323b303b3230303b3232306d total-bytes=22
+    phaseA: role=dim       open-bytes=1b5b33383b323b3132383b3132383b3132386d total-bytes=24
+    verdict: dark theme rendered all 5 roles with pinned truecolor opens + Reset
+==> phase B: BUILT-IN-LIGHT (always runs)
+    phaseB: role=info      open-bytes=1b5b33383b323b34303b34303b34306d total-bytes=21
+    phaseB: role=warn      open-bytes=1b5b33383b323b3137353b39353b306d total-bytes=21
+    phaseB: role=error     open-bytes=1b5b33383b323b3137353b303b306d total-bytes=20
+    phaseB: role=highlight open-bytes=1b5b33383b323b303b39353b3137356d total-bytes=21
+    phaseB: role=dim       open-bytes=1b5b33383b323b3133383b3133383b3133386d total-bytes=24
+    verdict: light theme rendered all 5 roles; light-error "\x1b[38;2;175;0;0m" != dark-error "\x1b[38;2;255;64;64m"
+==> phase C: PLAIN-ZERO-COLOR (always runs)
+    phaseC: all 5 roles returned plain text (zero ANSI bytes)
+    verdict: DepthOff invariant holds across every role; NO_COLOR / dumb path safe
+==> phase D: DEPTH-DETECT (always runs)
+    phaseD: 6 depth branches verified (truecolor, ansi256, ansi16, off x3)
+    verdict: all branches returned the spec-mandated depth
+==> phase E: YAML-MERGE (always runs)
+    phaseE: YAML override merged - error=custom, info/warn/highlight/dim=dark-baseline; 5/5 roles present
+    verdict: real YAML on disk parsed, real merge over dark baseline, custom theme retrievable
+==> ALL CHECKS PASSED
+==> P1-F20 challenge harness PASS
+==> anti-bluff smoke on F20-affected code
+clean
+==> cross-compile linux
+==> P1-F20 challenge PASS
+EXIT=0
+```
+
+Cross-compile evidence:
+
+```
+$ GOOS=linux GOARCH=amd64 go build -o /tmp/p1f20_challenge_linux ./tests/integration/cmd/p1f20_challenge
+# (no output -> success)
+```
+
+Anti-bluff smoke (both checks):
+
+```
+$ grep -rn "simulated|for now|TODO implement|placeholder" tests/integration/cmd/p1f20_challenge/main.go && echo "BLUFF FOUND" || echo "clean"
+clean
+
+# run.sh internal smoke (regex built from string fragments to avoid self-match):
+==> anti-bluff smoke on F20-affected code
+clean
+```
+
+Phase verdicts:
+- Phase A (BUILT-IN-DARK): 5/5 dark roles rendered with the pinned spec-3.4 truecolor opens + `\x1b[0m` Reset; per-role hex of the open sequence printed as positive runtime evidence.
+- Phase B (BUILT-IN-LIGHT): 5/5 light roles match spec-3.4 light row; cross-theme distinguisher passed (light error `\x1b[38;2;175;0;0m` != dark error `\x1b[38;2;255;64;64m`).
+- Phase C (PLAIN-ZERO-COLOR, load-bearing): all 5 roles returned input byte-equal under `DepthOff`; **zero `\x1b` bytes** in any output. NO_COLOR / dumb-terminal path safe.
+- Phase D (DEPTH-DETECT): 6 env-driven branches verified — NO_COLOR override, COLORTERM=truecolor, TERM=*-256color, TERM=xterm (ANSI16), TERM=dumb, all-unset.
+- Phase E (YAML-MERGE): real `theme.yaml` written to tempdir, parsed by `gopkg.in/yaml.v3`, merged by `LoadFromFile` over the dark baseline; custom theme has `Name=="my-custom"`, **5/5 roles**, error matches the YAML override (`\x1b[38;2;255;0;255m` truecolor + `\x1b[38;5;201m` ansi256), info/warn/highlight/dim are byte-equal to `BuiltinDarkTheme()`. Merged error truecolor differs from dark error truecolor (no silent collapse).
+
 ### P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE
 
