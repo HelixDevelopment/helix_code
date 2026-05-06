@@ -1,5 +1,14 @@
 package tools
 
+// Legacy multi-browser API tools (browser_legacy_launch / browser_legacy_navigate
+// / browser_legacy_screenshot / browser_legacy_close) — these RETAIN the
+// underlying multi-browser BrowserTools API and exist alongside the F23
+// cline-style single-session tools (browser_navigate, browser_snapshot,
+// browser_click, browser_type, browser_screenshot, browser_close). They
+// were renamed from their previous bare names in P2-F23-T04 to free those
+// names for F23. Callers that need explicit per-call browser_id continue
+// to use the legacy tools; F23 callers use the single-session API.
+
 import (
 	"context"
 	"fmt"
@@ -8,12 +17,12 @@ import (
 	"dev.helix.code/internal/tools/browser"
 )
 
-// BrowserLaunchTool launches a browser instance
+// BrowserLaunchTool launches a browser instance (legacy multi-browser API).
 type BrowserLaunchTool struct {
 	registry *ToolRegistry
 }
 
-func (t *BrowserLaunchTool) Name() string { return "browser_launch" }
+func (t *BrowserLaunchTool) Name() string { return "browser_legacy_launch" }
 
 // RequiresApproval — spawns a browser process; mutates host state (spec §3.6).
 func (t *BrowserLaunchTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
@@ -79,7 +88,7 @@ type BrowserNavigateTool struct {
 	registry *ToolRegistry
 }
 
-func (t *BrowserNavigateTool) Name() string { return "browser_navigate" }
+func (t *BrowserNavigateTool) Name() string { return "browser_legacy_navigate" }
 
 // RequiresApproval — mutates browser state and may visit malicious URLs (spec §3.6).
 func (t *BrowserNavigateTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
@@ -132,7 +141,7 @@ type BrowserScreenshotTool struct {
 	registry *ToolRegistry
 }
 
-func (t *BrowserScreenshotTool) Name() string { return "browser_screenshot" }
+func (t *BrowserScreenshotTool) Name() string { return "browser_legacy_screenshot" }
 
 // RequiresApproval — pure read of in-memory browser state (spec §3.6).
 func (t *BrowserScreenshotTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
@@ -219,7 +228,7 @@ type BrowserCloseTool struct {
 	registry *ToolRegistry
 }
 
-func (t *BrowserCloseTool) Name() string { return "browser_close" }
+func (t *BrowserCloseTool) Name() string { return "browser_legacy_close" }
 
 // RequiresApproval — terminates the browser process (spec §3.6).
 func (t *BrowserCloseTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
