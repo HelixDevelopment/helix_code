@@ -31,6 +31,7 @@ import (
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
+	"dev.helix.code/internal/tools/smartedit"
 	"dev.helix.code/internal/tools/task"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
@@ -840,6 +841,45 @@ func (c *CLI) Run() error {
 				}
 				log.Printf("subagent: manager initialised (max_concurrency=%d)",
 					subagent.DefaultMaxConcurrency)
+			}
+		}
+	}
+
+	// P1-F17-T08: Smart File Editing wiring.
+	//
+	// SmartEditTool wraps the existing F08 *multiedit.MultiFileEditor (already
+	// constructed inside the tool registry's NewToolRegistry path and exposed
+	// via toolReg.GetMultiEdit()) — there is NO parallel editor instance, the
+	// transactional rollback semantics are inherited verbatim from multiedit.
+	//
+	// Wire order:
+	//   1. Pull the existing multiedit MultiFileEditor out of the registry.
+	//   2. Build a smartedit.MultiEditCommitter adapter around it.
+	//   3. Resolve the smart-edit workdir to the same cwd everything else uses.
+	//   4. Construct the SmartEditTool and register it under the "smart_edit"
+	//      tool name so agents can call it.
+	//   5. Register the /edit slash command pointing at the same SmartEditTool
+	//      (it satisfies commands.SmartEditInspector via ParsePrompt/DryRun/Commit).
+	//
+	// Anti-bluff anchor: when toolReg.GetMultiEdit() returns nil (multiedit
+	// failed to construct during registry init), we skip the entire block with
+	// a warning rather than register a tool that would explode on first call.
+	{
+		mfe := toolReg.GetMultiEdit()
+		if mfe == nil {
+			log.Printf("smart-edit: multiedit unavailable; smart_edit tool + /edit slash skipped")
+		} else {
+			smartWorkDir, swdErr := os.Getwd()
+			if swdErr != nil {
+				log.Printf("smart-edit: resolving cwd failed (skipping wire-in): %v", swdErr)
+			} else {
+				committer := smartedit.NewMultieditCommitter(mfe)
+				smartTool := smartedit.NewSmartEditTool(committer, smartWorkDir)
+				toolReg.Register(smartTool)
+				if regErr := cmdRegistry.Register(commands.NewEditCommand(smartTool)); regErr != nil {
+					log.Printf("smart-edit: register slash command failed: %v", regErr)
+				}
+				log.Printf("smart-edit: wired (workdir=%s)", smartWorkDir)
 			}
 		}
 	}
