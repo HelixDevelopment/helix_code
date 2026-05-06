@@ -360,7 +360,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns absolute file path (NOT base64).
 - Q5=A: `/browser` slash (`status` / `navigate <url>` / `close`) PLUS the six tools. NO cobra subcommand.
 
-**Task progress:** 8 of 10 complete.
+**Task progress:** 9 of 10 complete.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -372,7 +372,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T06  | DONE `659307d` | browser_click_type_v2.go: browser_click + browser_type Tool impls with NodeVisible + 5 s selector timeout + ClickWaitDuration settle (TDD)   |
 | T07  | DONE `3ca50a3` | browser_screenshot_v2.go: browser_screenshot Tool impl with PNG-magic + DecodeConfig + size>1024 + tempdir 0600 (TDD)                         |
 | T08  | DONE `ad0c0df` | browser_close_v2.go: browser_close Tool impl with idempotent CloseSession + post-close RequireSession fails (TDD)                             |
-| T09  | TODO   | /browser slash + main.go wiring + browser.RegisterAll + integration test (real-chromium gated)                                                  |
+| T09  | DONE `f39f686` | /browser slash + main.go wiring + RegisterBrowserToolsV2 + integration test (7/7 PASS against real chromium) |
 | T10  | TODO   | Challenge harness 7 phases A-G (navigate-and-snapshot + snapshot-text + click-mutates-DOM + type-into-input + screenshot-PNG-magic + close-tears-down + concurrent-session-sharing) + close-out + push 4 remotes |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (navigate-but-not-loaded / snapshot-empty-HTML / click-but-DOM-unchanged / screenshot-0-bytes-or-non-PNG / close-but-chromium-still-running); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch. Skip permitted ONLY if chromium absent (must emit `SKIP-OK: #P2-F23 chromium not available`).
