@@ -28,16 +28,16 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F17-T01 — bootstrap evidence + advance PROGRESS to F17
-- [ ] P1-F17-T02 — `internal/tools/smartedit/types.go`: EditBlock + EditPlan + BlockResult + EditResult + SmartEditResult + marker constants + error sentinels + size limits (TDD)
-- [ ] P1-F17-T03 — `internal/tools/smartedit/parser.go`: parse SEARCH/REPLACE blocks from prompt string; path-line stickiness; line-number tracking (TDD)
-- [ ] P1-F17-T04 — `internal/tools/smartedit/applier.go` + `binary_detect.go`: in-order block apply with lenient re-search; ambiguity detection; binary refusal (TDD)
-- [ ] P1-F17-T05 — `internal/tools/smartedit/diff.go`: pure-Go unified-diff wrapper around `multiedit.DiffManager.GenerateDiff`; assert byte-exact match with system `diff -u` (TDD)
-- [ ] P1-F17-T06 — `internal/tools/smartedit/smart_edit_tool.go`: Tool impl wrapping parser + applier + multiedit transaction; post-write re-read; `DryRun` / `Commit` / `LastResult` / `LastBlocks` (TDD with real `MultiFileEditor` against tempdirs)
-- [ ] P1-F17-T07 — `internal/commands/edit_command.go`: `/edit` slash (status / diff / dry-run / commit); `SmartEditInspector` interface in commands package (TDD with fake)
-- [ ] P1-F17-T08 — `cmd/cli/main.go` wiring + `internal/tools/registry.go` registration + integration tests (`-tags=integration`; always-runs against real tempdir)
-- [ ] P1-F17-T09 — Challenge harness (7-phase: SINGLE-FILE-SUCCESS + SEARCH-NOT-FOUND-REJECTED + MULTI-FILE-ATOMIC + PARTIAL-FAILURE-ROLLBACK + DIFF-EXACTNESS + AMBIGUOUS-REJECTED + BINARY-REFUSED) with sha-256 positive evidence per phase
-- [ ] P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
+- [x] P1-F17-T01 — bootstrap evidence + advance PROGRESS to F17
+- [x] P1-F17-T02 — `internal/tools/smartedit/types.go`: EditBlock + EditPlan + BlockResult + EditResult + SmartEditResult + marker constants + error sentinels + size limits (TDD)
+- [x] P1-F17-T03 — `internal/tools/smartedit/parser.go`: parse SEARCH/REPLACE blocks from prompt string; path-line stickiness; line-number tracking (TDD)
+- [x] P1-F17-T04 — `internal/tools/smartedit/applier.go` + `binary_detect.go`: in-order block apply with lenient re-search; ambiguity detection; binary refusal (TDD)
+- [x] P1-F17-T05 — `internal/tools/smartedit/diff.go`: pure-Go unified-diff wrapper around `multiedit.DiffManager.GenerateDiff`; assert byte-exact match with system `diff -u` (TDD)
+- [x] P1-F17-T06 — `internal/tools/smartedit/smart_edit_tool.go`: Tool impl wrapping parser + applier + multiedit transaction; post-write re-read; `DryRun` / `Commit` / `LastResult` / `LastBlocks` (TDD with real `MultiFileEditor` against tempdirs)
+- [x] P1-F17-T07 — `internal/commands/edit_command.go`: `/edit` slash (status / diff / dry-run / commit); `SmartEditInspector` interface in commands package (TDD with fake)
+- [x] P1-F17-T08 — `cmd/cli/main.go` wiring + `internal/tools/registry.go` registration + integration tests (`-tags=integration`; always-runs against real tempdir)
+- [x] P1-F17-T09 — Challenge harness (7-phase: SINGLE-FILE-SUCCESS + SEARCH-NOT-FOUND-REJECTED + MULTI-FILE-ATOMIC + PARTIAL-FAILURE-ROLLBACK + DIFF-EXACTNESS + AMBIGUOUS-REJECTED + BINARY-REFUSED) with sha-256 positive evidence per phase
+- [x] P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
 
 ---
 

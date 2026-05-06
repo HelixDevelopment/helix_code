@@ -2246,3 +2246,74 @@ EXIT=0
 
 ### P1-F17-T10 — Feature 17 close-out + push 4 remotes non-force
 
+**Date:** 2026-05-06
+
+**Task SHAs (10/10):**
+- T01 `37b1471` — bootstrap evidence + advance PROGRESS to F17
+- T02 `adcd9f0` — smartedit/types.go: EditBlock + markers + sentinels + size limits
+- T03 `91d7550` — smartedit/parser.go: SEARCH/REPLACE block parser + path-stickiness + line tracking
+- T04 `37beb27` — smartedit/applier.go + binary_detect.go: lenient re-search + ambiguity + binary refusal
+- T05 `6c00471` — smartedit/diff.go: unified-diff wrapper re-using F08 multiedit DiffManager
+- T06 `721fed9` — smartedit/smart_edit_tool.go: Tool impl + multiedit transaction + post-write re-read + diff
+- T07 `a2dd7eb` — /edit slash (status/diff/dry-run/commit) + SmartEditInspector
+- T08 `5bf4c92` — main.go wiring + registry registration + always-run integration tests
+- T09 — Challenge harness 7-phase: submodule `e2e9e94` + meta-repo `daa1279`
+- T10 — close-out (this commit)
+
+**Final verification battery (verbatim):**
+
+`go build ./cmd/cli/... ./internal/tools/smartedit/... ./internal/commands/...` — succeeded with no output.
+
+`go test -count=1 ./internal/tools/smartedit/... ./internal/commands/... ./cmd/cli/...`:
+```
+ok  	dev.helix.code/internal/tools/smartedit	0.040s
+ok  	dev.helix.code/internal/commands	0.667s
+ok  	dev.helix.code/internal/commands/builtin	0.020s
+ok  	dev.helix.code/cmd/cli	0.049s
+```
+
+`go test -tags=integration -run "TestSmartEdit_" ./tests/integration/...`:
+```
+ok  	dev.helix.code/tests/integration	1.543s
+?   	dev.helix.code/tests/integration/cmd/p1f07_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f08_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f09_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f10_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f11_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f12_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f13_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f14_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f15_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f17_challenge	[no test files]
+ok  	dev.helix.code/tests/integration/hooks	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/permissions	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/persistence	0.002s [no tests to run]
+ok  	dev.helix.code/tests/integration/worktree	0.007s [no tests to run]
+```
+
+**Anti-bluff smoke (verbatim):**
+
+HelixCode F17 paths:
+```
+clean
+```
+
+Challenges F17 dir:
+```
+clean
+```
+
+**Cross-compile (linux/amd64):**
+```
+-rwxr-xr-x 1 milosvasic milosvasic 94270248 May  6 11:41 /tmp/helixcode_linux_f17check
+/tmp/helixcode_linux_f17check: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=87972e4fea2893c0b55f10432b81b518ac14fb8f, with debug_info, not stripped
+```
+
+**Final harness re-run — last 2 lines:**
+```
+==> P1-F17 challenge harness PASS
+EXIT=0
+```
+
+**Two-line summary.** Feature 17 (Smart File Editing) is closed: 10 task SHAs in tree, all unit + integration tests green, anti-bluff smoke clean across both HelixCode and Challenges trees, harness PASS with byte-exact sha-256 positive evidence in all 7 phases (SINGLE / NOT-FOUND / MULTI / ROLLBACK / DIFF / AMBIG / BINARY). The PARTIAL-FAILURE-ROLLBACK phase is the discriminating gate — d1.txt's in-memory block applied cleanly, d2.txt's block failed `not-found`, the whole-prompt atomic transaction aborted, and `sha256(after) == sha256(before)` re-read from disk for **both** files; this is the mechanical proof that smart-edit can never silently leave files half-written, which is the worst-class bug the feature was designed to eliminate.
+
