@@ -27,6 +27,7 @@ import (
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/telemetry"
+	"dev.helix.code/internal/theme"
 	"dev.helix.code/internal/tools"
 	"dev.helix.code/internal/tools/askuser"
 	"dev.helix.code/internal/tools/confirmation"
@@ -1099,6 +1100,38 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		},
 	}
 
+	// P1-F20-T06: Theme + Styler construction.
+	//
+	// Building the registry / theme / depth here (rather than once at process
+	// start) keeps the wire-in scoped to the only call site that consumes it
+	// in F20 (the non-stream LLM body print). The cost is one map allocation
+	// + an opportunistic YAML stat per generate; both are negligible relative
+	// to the LLM call itself, and centralising the construction would require
+	// threading a Styler through CLI's struct and Run() which are out of
+	// scope for this task.
+	//
+	// Failure mode: every fallible step degrades gracefully. YAML missing /
+	// malformed -> log + use built-ins. Unknown theme name -> log + dark
+	// fallback. The user always gets a working binary; the worst case is
+	// that styling falls back to the dark baseline.
+	themeRegistry := theme.NewThemeRegistry()
+	if path := theme.DefaultThemePath(os.Getenv); path != "" {
+		if err := themeRegistry.LoadFromFile(path); err != nil {
+			log.Printf("theme: yaml load failed (continuing with built-ins): %v", err)
+		}
+	}
+	themeName := theme.DetectThemeName(os.Getenv)
+	selectedTheme, themeErr := themeRegistry.Get(themeName)
+	if themeErr != nil {
+		// Should not happen for built-in names, but be defensive: fall back
+		// to dark explicitly so an exotic HELIXCODE_THEME value can never
+		// produce a zero-Theme that styles to no-op silently.
+		log.Printf("theme: get %q failed (%v), falling back to dark", themeName, themeErr)
+		selectedTheme, _ = themeRegistry.Get(theme.ThemeDark)
+		themeName = theme.ThemeDark
+	}
+	colorDepth := theme.DetectColorDepth(os.Getenv)
+
 	if stream {
 		// Real streaming from provider, wired through the P1-F18 Renderer
 		// so that token output respects HELIXCODE_RENDER + TTY detection
@@ -1111,6 +1144,12 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 			return fmt.Errorf("renderer init failed: %w", rerr)
 		}
 		defer func() { _ = r.Close() }()
+		// Plain-mode protection (F20 spec §11): even though we don't style
+		// the streaming path in v1, log the active theme depth AFTER the
+		// adjustment so operators see the same observable depth they'd see
+		// for the non-stream branch.
+		effectiveDepth := adjustDepthForRenderer(r, colorDepth)
+		log.Printf("theme: name=%s depth=%s", themeName, effectiveDepth)
 
 		chunkChan := make(chan llm.LLMResponse, 100)
 		errCh := make(chan error, 1)
@@ -1133,12 +1172,27 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		// + TTY detection. Plain mode -> zero-ANSI/zero-CR transcript;
 		// fancy mode -> hide-cursor + per-line emit. The blockID is empty
 		// (one-shot) because a non-stream completion is not re-rendered.
+		//
+		// P1-F20-T06: decorate the response body with theme.Styler before
+		// it reaches RenderTextBlock. The depth is forced to DepthOff when
+		// the renderer is in plain mode so the styler emits zero ANSI bytes
+		// that the plain renderer would otherwise pass through verbatim.
+		r, rerr := render.NewRenderer(render.FactoryOptions{})
+		if rerr != nil {
+			return fmt.Errorf("renderer init failed: %w", rerr)
+		}
+		defer func() { _ = r.Close() }()
+
+		effectiveDepth := adjustDepthForRenderer(r, colorDepth)
+		styler := theme.NewStyler(selectedTheme, effectiveDepth)
+		log.Printf("theme: name=%s depth=%s", themeName, effectiveDepth)
+
 		resp, err := provider.Generate(ctx, req)
 		if err != nil {
 			return fmt.Errorf("generation failed: %w", err)
 		}
-		if rerr := printResponseThroughRenderer(resp.Content); rerr != nil {
-			return fmt.Errorf("renderer print failed: %w", rerr)
+		if perr := printResponseThroughRendererStyled(r, styler, resp.Content); perr != nil {
+			return fmt.Errorf("renderer print failed: %w", perr)
 		}
 	}
 
@@ -1199,12 +1253,71 @@ func streamToRenderer(ctx context.Context, ch <-chan llm.LLMResponse, r render.R
 // Empty content is a no-op (mirrors RenderTextBlock contract); since
 // fmt.Println("") would have emitted a stray newline we keep the empty case
 // silent here to preserve transcript hygiene.
+//
+// Retained as a thin wrapper for the F18-T08 smoke tests; new call sites
+// should prefer printResponseThroughRendererStyled which composes the
+// theme.Styler decorator (P1-F20-T06) on top of the same RenderTextBlock
+// path.
 func printResponseThroughRenderer(content string) error {
 	r, err := render.NewRenderer(render.FactoryOptions{})
 	if err != nil {
 		return fmt.Errorf("renderer init failed: %w", err)
 	}
 	defer func() { _ = r.Close() }()
+	return printResponseThroughRendererStyled(r, nil, content)
+}
+
+// adjustDepthForRenderer collapses requested to theme.DepthOff when r is in
+// plain mode; otherwise returns requested unchanged.
+//
+// Load-bearing per F20 spec §11: "plain mode forces zero color emission
+// regardless of theme setting". The plain renderer's pass-through clause
+// (plain_renderer.go: tool-output passthrough lets caller-supplied ANSI
+// bytes reach the writer verbatim) means we MUST prevent the Styler from
+// emitting ANSI in the first place when targeting a plain renderer —
+// otherwise pre-styled bytes from Stylize() would leak straight through into
+// log files and pipes. Forcing the depth here rather than down-converting
+// the bytes keeps the chokepoint at a single, testable function.
+//
+// The fancy renderer applies its own escape sequences for cursor moves and
+// dirty-line redraws, but it does NOT strip caller-supplied ANSI either; for
+// fancy mode we WANT the styler to colour the text, so we pass the requested
+// depth through untouched.
+func adjustDepthForRenderer(r render.Renderer, requested theme.ColorDepth) theme.ColorDepth {
+	if r != nil && r.Mode() == render.ModePlain {
+		return theme.DepthOff
+	}
+	return requested
+}
+
+// printResponseThroughRendererStyled prints a single non-stream LLM response
+// through the supplied Renderer, optionally decorating the text with the
+// supplied Styler before passing it to RenderTextBlock.
+//
+// Why styling lives here and NOT in streamToRenderer: the streaming hot path
+// emits one token at a time and relies on a stable per-line dirty-diff in
+// fancy mode; injecting a per-token open/close sequence would either
+// fragment the role-styled region across ANSI clear-line boundaries or
+// require buffering the entire stream before colouring it. Both options
+// regress streaming UX. We therefore restrict styling to the non-stream
+// branch in v1, which is the plan's documented compromise (cf. plan T06).
+//
+// Role choice: theme.RoleHighlight. Justification: the LLM's final answer is
+// the most important content in the transcript and benefits from a visual
+// pop relative to the surrounding `=== Generating … ===` headers and the
+// trailing `✅ Generation completed`, both of which are emitted via bare
+// fmt.Printf and remain unstyled. RoleInfo would render the LLM body the
+// same colour as routine status messages and lose the contrast.
+//
+// nil styler short-circuits to RenderTextBlock with the raw content — used
+// by callers that opt out of theming (e.g., the F18 backward-compat shim
+// printResponseThroughRenderer above) and by tests.
+//
+// Empty content is a no-op (mirrors RenderTextBlock contract).
+func printResponseThroughRendererStyled(r render.Renderer, styler *theme.Styler, content string) error {
+	if styler != nil {
+		content = styler.Stylize(theme.RoleHighlight, content)
+	}
 	return render.RenderTextBlock(r, "", content)
 }
 

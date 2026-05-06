@@ -1,4 +1,5 @@
-// Tests for the LLM streaming -> Renderer wire-in (P1-F18-T07).
+// Tests for the LLM streaming -> Renderer wire-in (P1-F18-T07) AND for the
+// theme.Styler -> Renderer wire-in on the non-stream branch (P1-F20-T06).
 //
 // The streaming hot path in handleGenerate is hard to unit-test directly
 // because it depends on a real llm.Provider. We extract the inner loop into
@@ -12,6 +13,16 @@
 //     CR+clear-line (\r\x1b[K) sequence, and a final \n on Commit.
 //   - Begin/Commit are balanced even when the producer goroutine returns an
 //     error mid-stream: Commit MUST run, the final \n MUST be emitted.
+//
+// P1-F20-T06 invariants:
+//   - adjustDepthForRenderer collapses to DepthOff when r.Mode() == ModePlain
+//     regardless of the requested depth (load-bearing per F20 spec §11:
+//     "plain mode forces zero color emission regardless of theme setting").
+//   - printResponseThroughRendererStyled emits the styler's RoleHighlight
+//     ANSI sequence around the text under fancy mode + non-Off depth, but
+//     emits ZERO ANSI bytes under plain mode (because the depth was forced
+//     to DepthOff at the integration site).
+//   - A nil styler short-circuits to RenderTextBlock with the raw text.
 package main
 
 import (
@@ -23,6 +34,7 @@ import (
 
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/render"
+	"dev.helix.code/internal/theme"
 )
 
 // produceChunks ships the supplied content strings as LLMResponse values onto
@@ -182,5 +194,149 @@ func TestStreamingThroughRenderer_BeginCommit_BalancedAcrossErrors(t *testing.T)
 	}
 	if strings.ContainsRune(out, 0x1b) {
 		t.Errorf("plain mode emitted ANSI escape; got %q", out)
+	}
+}
+
+// --------------------------------------------------------------------------
+// P1-F20-T06 tests: theme.Styler wire-in on the non-stream branch.
+// --------------------------------------------------------------------------
+
+// TestAdjustDepthForRenderer_PlainModeForcesOff is the load-bearing F20 §11
+// invariant: regardless of the depth requested by the operator's environment,
+// when the renderer is in plain mode the depth MUST collapse to DepthOff so
+// the Styler emits no ANSI bytes that the plain renderer (which passes
+// pre-styled bytes through verbatim) would leak into a log file.
+func TestAdjustDepthForRenderer_PlainModeForcesOff(t *testing.T) {
+	var buf bytes.Buffer
+	r, err := render.NewRenderer(render.FactoryOptions{Writer: &buf, Mode: render.ModePlain})
+	if err != nil {
+		t.Fatalf("NewRenderer plain: %v", err)
+	}
+	defer r.Close()
+
+	for _, requested := range []theme.ColorDepth{
+		theme.DepthANSI16,
+		theme.DepthANSI256,
+		theme.DepthTruecolor,
+	} {
+		got := adjustDepthForRenderer(r, requested)
+		if got != theme.DepthOff {
+			t.Errorf("plain mode + requested %s: want DepthOff, got %s", requested, got)
+		}
+	}
+}
+
+// TestAdjustDepthForRenderer_FancyModePassesThrough — under fancy mode the
+// adjustDepth helper must NOT downgrade; the operator's chosen depth wins.
+func TestAdjustDepthForRenderer_FancyModePassesThrough(t *testing.T) {
+	var buf bytes.Buffer
+	r, err := render.NewRenderer(render.FactoryOptions{Writer: &buf, Mode: render.ModeFancy})
+	if err != nil {
+		t.Fatalf("NewRenderer fancy: %v", err)
+	}
+	defer r.Close()
+
+	for _, requested := range []theme.ColorDepth{
+		theme.DepthOff,
+		theme.DepthANSI16,
+		theme.DepthANSI256,
+		theme.DepthTruecolor,
+	} {
+		got := adjustDepthForRenderer(r, requested)
+		if got != requested {
+			t.Errorf("fancy mode + requested %s: want %s, got %s", requested, requested, got)
+		}
+	}
+}
+
+// TestPrintResponseThroughRendererStyled_PlainMode_NoColorEmitted — even when
+// the test builds the Styler with a non-Off depth (operator might mistakenly
+// have COLORTERM=truecolor while output is piped to a file), the integration
+// helper MUST collapse the depth to DepthOff for plain renderers, so ZERO 0x1b
+// bytes reach the writer.
+func TestPrintResponseThroughRendererStyled_PlainMode_NoColorEmitted(t *testing.T) {
+	var buf bytes.Buffer
+	r, err := render.NewRenderer(render.FactoryOptions{Writer: &buf, Mode: render.ModePlain})
+	if err != nil {
+		t.Fatalf("NewRenderer plain: %v", err)
+	}
+	defer r.Close()
+
+	// Build a styler at a non-Off depth — the integration helper is
+	// responsible for forcing it down.
+	dark := theme.BuiltinDarkTheme()
+	styler := theme.NewStyler(dark, adjustDepthForRenderer(r, theme.DepthANSI256))
+
+	if err := printResponseThroughRendererStyled(r, styler, "Hello\n"); err != nil {
+		t.Fatalf("printResponseThroughRendererStyled: %v", err)
+	}
+
+	out := buf.String()
+	if strings.ContainsRune(out, 0x1b) {
+		t.Errorf("plain mode emitted ANSI escape (0x1b); buf = %q", out)
+	}
+	if !strings.Contains(out, "Hello") {
+		t.Errorf("plain mode missing text; got %q", out)
+	}
+}
+
+// TestPrintResponseThroughRendererStyled_FancyMode_StylesText — under fancy
+// renderer + ANSI256 + dark theme + RoleHighlight, the buffer MUST contain
+// the role's ANSI256 open sequence (\x1b[38;5;51m), the literal text, and the
+// trailing reset (\x1b[0m).
+func TestPrintResponseThroughRendererStyled_FancyMode_StylesText(t *testing.T) {
+	var buf bytes.Buffer
+	r, err := render.NewRenderer(render.FactoryOptions{Writer: &buf, Mode: render.ModeFancy})
+	if err != nil {
+		t.Fatalf("NewRenderer fancy: %v", err)
+	}
+	defer r.Close()
+
+	dark := theme.BuiltinDarkTheme()
+	depth := adjustDepthForRenderer(r, theme.DepthANSI256)
+	if depth != theme.DepthANSI256 {
+		t.Fatalf("fancy mode must preserve ANSI256 depth, got %s", depth)
+	}
+	styler := theme.NewStyler(dark, depth)
+
+	if err := printResponseThroughRendererStyled(r, styler, "Hello"); err != nil {
+		t.Fatalf("printResponseThroughRendererStyled: %v", err)
+	}
+
+	out := buf.String()
+	// Dark theme RoleHighlight at ANSI256 = \x1b[38;5;51m (cf. builtin.go).
+	wantOpen := "\x1b[38;5;51m"
+	if !strings.Contains(out, wantOpen) {
+		t.Errorf("fancy mode missing role open seq %q; buf = %q", wantOpen, out)
+	}
+	if !strings.Contains(out, "Hello") {
+		t.Errorf("fancy mode missing literal text; buf = %q", out)
+	}
+	if !strings.Contains(out, theme.Reset) {
+		t.Errorf("fancy mode missing theme.Reset (%q); buf = %q", theme.Reset, out)
+	}
+}
+
+// TestPrintResponseThroughRendererStyled_NilStyler_PassesThrough — passing
+// nil for styler must not panic and must emit the raw text unchanged through
+// the renderer (no ANSI bytes emitted by our code; plain mode invariants
+// continue to hold).
+func TestPrintResponseThroughRendererStyled_NilStyler_PassesThrough(t *testing.T) {
+	var buf bytes.Buffer
+	r, err := render.NewRenderer(render.FactoryOptions{Writer: &buf, Mode: render.ModePlain})
+	if err != nil {
+		t.Fatalf("NewRenderer plain: %v", err)
+	}
+	defer r.Close()
+
+	if err := printResponseThroughRendererStyled(r, nil, "Hello nil\n"); err != nil {
+		t.Fatalf("printResponseThroughRendererStyled nil styler: %v", err)
+	}
+	out := buf.String()
+	if strings.ContainsRune(out, 0x1b) {
+		t.Errorf("plain mode + nil styler must not emit ANSI; got %q", out)
+	}
+	if !strings.Contains(out, "Hello nil") {
+		t.Errorf("plain mode + nil styler missing text; got %q", out)
 	}
 }
