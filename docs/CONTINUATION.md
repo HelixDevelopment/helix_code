@@ -149,6 +149,30 @@ Meta-repo remotes (4):
   (directory absent on disk; only declaration remains). Stale; would surface
   in a future submodule recurse.
 
+### Recursive submodule dedup pass (2026-05-06) — partial
+
+Audit: `docs/improvements/recursive-dedup-audit.md`. Of 27 URLs flagged as
+appearing at >1 path:
+
+- **Removed (3):** orphan `[submodule "Toolkit/SiliconFlow"]`,
+  `[submodule "Toolkit/Chutes"]`, `[submodule "Toolkit/Toolkit/Chutes"]`
+  entries in `HelixAgent/.gitmodules`. None corresponded to a tracked
+  gitlink (`HelixAgent/Toolkit/` is checked in as plain files), so removal
+  is pure config cleanup.
+- **Preserved by design (23):** the `HelixAgent/HelixLLM/submodules/*`
+  tree (22) and `HelixAgent/Challenges` (1) are wired into their parent
+  module's `go.mod` via `replace ./submodules/<Name>` and `replace
+  ./Challenges` directives. They are vendored dependency trees, NOT
+  duplicates. Removing them would break HelixLLM and HelixAgent
+  compilation. Promoting them to root canonicals (`replace
+  ../../../Containers` style parent-traversal) requires a Phase 2
+  architectural ticket and full `go mod tidy` + build verification per
+  module.
+- **Skipped (1):** `cli_agents/bridle` ↔ `cli_agents/claude-plugins`
+  (third-party, excluded from removal per task constraints).
+
+Net effect: governance hygiene only. No functional submodule was removed.
+
 ### Constitutional debt (open since P0)
 
 - **LLMsVerifier dual-pin divergence** (P0-04): canonical pin in
