@@ -48,9 +48,9 @@ type ansiRenderer struct {
 	streamingID   string // "" if no active streaming block
 	streamingLine string // accumulated text for the current line (no trailing \n)
 
-	// frame-block state: per-blockID previous frame + cursor position
+	// frame-block state: per-blockID Viewport (T05) + cursor position
 	// (lines below the frame's top edge after the most recent RenderFrame).
-	framePrev      map[string]Frame
+	viewports      map[string]*Viewport
 	frameCursorPos map[string]int
 }
 
@@ -58,7 +58,7 @@ type ansiRenderer struct {
 func NewANSIRenderer(w io.Writer) *ansiRenderer {
 	return &ansiRenderer{
 		w:              w,
-		framePrev:      make(map[string]Frame),
+		viewports:      make(map[string]*Viewport),
 		frameCursorPos: make(map[string]int),
 	}
 }
@@ -182,6 +182,12 @@ func (r *ansiRenderer) Commit() error {
 }
 
 // RenderFrame draws or updates a multi-line frame.
+//
+// Diff logic is delegated to the Viewport type (T05): we obtain the
+// per-blockID Viewport, call Apply (which returns a LineDiff), and emit
+// ANSI for the Changed and Appended slots. First-frame rendering is the
+// degenerate case where the prior viewport was empty -- LineDiff carries
+// every index in Appended, so the same code path emits every line.
 func (r *ansiRenderer) RenderFrame(frame Frame) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -195,41 +201,28 @@ func (r *ansiRenderer) RenderFrame(frame Frame) error {
 		return err
 	}
 
-	prev, hasPrev := r.framePrev[frame.BlockID]
-	if !hasPrev {
-		// First render: emit every line followed by \n.
-		var b strings.Builder
-		for _, line := range frame.Lines {
-			b.WriteString(line)
-			b.WriteString("\n")
-		}
-		if b.Len() > 0 {
-			if _, err := io.WriteString(r.w, b.String()); err != nil {
-				return err
-			}
-		}
-		// Cursor now sits len(frame.Lines) lines below the frame's top.
-		r.framePrev[frame.BlockID] = cloneFrame(frame)
-		r.frameCursorPos[frame.BlockID] = len(frame.Lines)
+	vp, ok := r.viewports[frame.BlockID]
+	if !ok {
+		vp = NewViewport(frame.BlockID)
+		r.viewports[frame.BlockID] = vp
+	}
+	prevLineCount := vp.LineCount()
+	cursorPos := r.frameCursorPos[frame.BlockID]
+
+	diff := vp.Apply(frame)
+	if diff.IsNoChange() {
 		return nil
 	}
 
-	// Subsequent render: dirty-line diff.
-	cursorPos := r.frameCursorPos[frame.BlockID]
-
-	// Walk overlapping line slots.
-	overlap := minInt(len(prev.Lines), len(frame.Lines))
-	for i := 0; i < overlap; i++ {
-		if prev.Lines[i] == frame.Lines[i] {
-			continue
-		}
-		// Cursor is `cursorPos` lines below the top edge of the
-		// frame; line i is `cursorPos - i` lines above the cursor.
-		// (cursorPos > i because i < overlap <= len(prev.Lines) ==
-		// initial cursorPos, and we don't decrement cursorPos in this
-		// path.)
+	// Changed slots: in-place rewrite via cursor-up + CR+clear + new line +
+	// cursor-down. Indices refer to positions in the new frame, identical
+	// to the old frame's positions (since they fall in the overlap region).
+	// Cursor position is `cursorPos` lines below the top of the frame;
+	// line i is `cursorPos - i` lines above the cursor.
+	for _, i := range diff.Changed {
 		up := cursorPos - i
-		// up >= 1 always, since i in [0, overlap) and cursorPos >= overlap.
+		// up >= 1 always: i < min(prev,new) <= prevLineCount == cursorPos,
+		// so cursorPos - i >= 1.
 		seq := fmt.Sprintf(ansiCursorUpFmt, up) + ansiCRClearLine + frame.Lines[i] +
 			fmt.Sprintf(ansiCursorDownFmt, up)
 		if _, err := io.WriteString(r.w, seq); err != nil {
@@ -237,22 +230,25 @@ func (r *ansiRenderer) RenderFrame(frame Frame) error {
 		}
 	}
 
-	// New frame longer than previous: append the extra lines at the bottom.
-	if len(frame.Lines) > len(prev.Lines) {
+	// Appended slots: emit the new trailing lines, each followed by \n.
+	if len(diff.Appended) > 0 {
 		var b strings.Builder
-		for i := len(prev.Lines); i < len(frame.Lines); i++ {
+		for _, i := range diff.Appended {
 			b.WriteString(frame.Lines[i])
 			b.WriteString("\n")
 		}
 		if _, err := io.WriteString(r.w, b.String()); err != nil {
 			return err
 		}
-		cursorPos += len(frame.Lines) - len(prev.Lines)
+		cursorPos += len(diff.Appended)
 	}
-	// Note: when new frame is shorter than prev, trailing old lines are NOT
-	// cleared (acceptable v1 per task scope).
+	// Truncated: when the new frame is shorter than the previous, trailing
+	// old lines are NOT cleared from the terminal (acceptable v1 per task
+	// scope; documented). We still need to update cursorPos to reflect the
+	// new logical line count, but since cursor is below the lines, no
+	// movement is needed for this v1.
+	_ = prevLineCount // retained for clarity; debug builds may inspect.
 
-	r.framePrev[frame.BlockID] = cloneFrame(frame)
 	r.frameCursorPos[frame.BlockID] = cursorPos
 	return nil
 }
@@ -281,20 +277,6 @@ func (r *ansiRenderer) Close() error {
 	return nil
 }
 
-// cloneFrame returns a deep copy of f so the renderer's recorded "previous
-// frame" cannot be mutated by callers retaining the original slice.
-func cloneFrame(f Frame) Frame {
-	cp := Frame{BlockID: f.BlockID}
-	if f.Lines != nil {
-		cp.Lines = make([]string, len(f.Lines))
-		copy(cp.Lines, f.Lines)
-	}
-	return cp
-}
-
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
+// Note: defensive copying of Frame.Lines now lives in Viewport.Apply (T05).
+// minInt was previously used by the inline diff loop; the diff is now
+// computed by Diff in viewport.go.
