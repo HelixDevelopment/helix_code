@@ -202,3 +202,9 @@
 [submodule "cli_agents/zeroshot"]
 	path = cli_agents/zeroshot
 	url = git@github.com:covibes/zeroshot.git
+[submodule "cli_agents/cline"]
+	path = cli_agents/cline
+	url = git@github.com:cline/cline.git
+[submodule "cli_agents/codex"]
+	path = cli_agents/codex
+	url = git@github.com:openai/codex.git
