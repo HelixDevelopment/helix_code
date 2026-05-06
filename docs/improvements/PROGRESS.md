@@ -8,9 +8,9 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 1.5 (Foundation Cleanup) COMPLETE — Phase 2 (CLI agent porting) ready to start
-- **Active feature:** —
-- **Active task:** —
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress)
+- **Active feature:** P2-F21 — Codex Approval Modes (in progress)
+- **Active task:** P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21
 - **Last completed:** P1.5-WP12 — Foundation Cleanup close-out + push (deepest-first: HelixAgent → Challenges → meta-repo to 4 remotes)
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -23,7 +23,7 @@
 | P0 — Foundation | done | 2026-05-04 | 2026-05-05 | docs/improvements/05_phase_0_evidence.md |
 | P1 — claude-code | done | 2026-05-05 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md |
 | P1.5 — Foundation Cleanup | done | 2026-05-06 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md §P1.5 |
-| P2 — Other CLI agents | pending | — | — | — |
+| P2 — Other CLI agents | in progress | 2026-05-06 | — | docs/improvements/07_phase_2_evidence.md |
 | P3 — Test infra | pending | — | — | — |
 | P4 — Anti-bluff audit | pending | — | — | — |
 | P5 — End-user materials | pending | — | — | — |
@@ -332,6 +332,17 @@
 - [x] P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)  ← submodule `4bf04bb` + meta-repo `300f973`
 - [x] P1-F20-T09 — Feature 20 close-out + push 4 remotes — PHASE 1 COMPLETE  ← (this commit)
 
+## Active feature task list (P2-F21: Codex Approval Modes)
+- [x] P2-F21-T01 — bootstrap Phase 2 evidence + advance PROGRESS to F21  ← (this commit)
+- [ ] P2-F21-T02 — approval/types.go: ApprovalMode + ApprovalLevel + Decision + sentinels + ModeDescriptors (TDD)
+- [ ] P2-F21-T03 — approval/selector.go: flag > env > config > default precedence (TDD)
+- [ ] P2-F21-T04 — approval/manager.go: ApprovalManager with 4×4 matrix gate + F02/F14/F19 integration (TDD)
+- [ ] P2-F21-T05 — Extend Tool interface with RequiresApproval() + DefaultLevelEdit + apply to ~30 existing tools (TDD)
+- [ ] P2-F21-T06 — /approval slash command (status/set/show) (TDD)
+- [ ] P2-F21-T07 — main.go wiring + --approval pflag + registry hook + integration test (TDD)
+- [ ] P2-F21-T08 — Challenge harness 5 phases (suggest-deny + auto-edit-prompt + full-auto-sandbox + runtime-change + F02-final-deny)
+- [ ] P2-F21-T09 — Feature 21 close-out + push 4 remotes non-force
+
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
 - 2026-05-04 — Non-force pushes pre-authorised for the duration of this programme — user statement during brainstorming — see synthesis spec §7.3
@@ -355,6 +366,7 @@
 - 2026-05-06 — Feature 20 (Theme System) closed. 9 task commits (T01 `60777fd`, T02 `4697565`, T03 `a66737d`, T04 `7f97f57`, T05 `1fd42d9`, T06 `1066798`, T07 `348630c`, T08 submodule `4bf04bb` + meta-repo `300f973`, T09 close-out). Real, end-to-end 5-role semantic theme system for the HelixCode CLI agent: built-in `dark` / `light` / `none` themes with byte-pinned palettes per spec §3.4 across three depth tiers (`Truecolor` / `ANSI256` / `ANSI16`); optional YAML override at `$XDG_CONFIG_HOME/helixcode/theme.yaml` slot-merged over the dark baseline; theme-name resolution ladder (`HELIXCODE_THEME` env > `$COLORFGBG` heuristic > `dark` default); color-depth auto-detect from `$COLORTERM` (truecolor/24bit) and `$TERM` (`*-256color` → ANSI256, `dumb`/empty → Off, otherwise ANSI16); `Styler` decorator wraps text with role-coded SGR sequences (decorator pattern over F18's `Renderer` — F18 interface unchanged); plain-mode forced to `DepthOff` via `WithDepth` at startup as belt-and-suspenders against renderer regressions; `/theme {status,list,show <name>}` slash command (read-only). Zero new external deps — `gopkg.in/yaml.v3` was already present in `go.sum` via viper/cobra. Five always-run Challenge phases — PHASE-A (BUILT-IN-DARK, 5/5 dark roles with pinned `\x1b[38;2;…m` truecolor opens + `\x1b[0m` Reset), PHASE-B (BUILT-IN-LIGHT, light error `\x1b[38;2;175;0;0m` ≠ dark error `\x1b[38;2;255;64;64m` cross-theme distinguisher), PHASE-C (PLAIN-ZERO-COLOR, `bytes.IndexByte == -1` invariant under `DepthOff`), PHASE-D (DEPTH-DETECT, 6 env-driven branches), PHASE-E (YAML-MERGE, real `theme.yaml` on tempdir parsed by `yaml.v3`, custom `error` slot overlays dark baseline while un-mentioned `info`/`warn`/`highlight`/`dim` inherit). All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to its single `origin`. **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE — 20 features (F01..F20) shipped.**
 - 2026-05-06 — **PHASE 1 OF CLI-AGENT FUSION PROGRAMME COMPLETE.** All 20 features shipped: F01 Auto-Compaction (`4734f35`+`9284392` evidence; close-out `f0b9b15`..); F02 Permission Rules (`d56905d`..close-out); F03 Tool Result Persistence (`ee35017`..close-out); F04 Git Worktree Agent Isolation (`d5ae14a`..close-out); F05 Hook-Based Extensibility (`b7e7185`..close-out); F06 MCP Full Lifecycle (T14 close-out); F07 Background Tasks (T11 close-out); F08 Plan Mode (T09 close-out); F09 Slash Commands (T08 close-out); F10 Skills (T09 close-out); F11 Session Resume (`ddb45dc`..T09 close-out); F12 Multi-Provider Backend (`bd5dc69`..T11 close-out); F13 LSP Integration (`df98b6d`..T12 close-out); F14 Sandboxed Shell Execution (`0ef5811`..T12 close-out); F15 Subagent Team (`b970aa5`..T12 close-out); F16 OpenTelemetry (`5fc7dc1`..T12 close-out); F17 Smart File Editing (`37b1471`..T10 close-out); F18 No-Flicker Rendering (`a8aa8f3`..`92db29e` close-out); F19 AskUserQuestion (`b7fc6bb`..`f584c67` close-out); F20 Theme System (`60777fd`..T09 close-out — this commit). Phase 1 entry condition met: every Phase 1 feature ships with positive runtime evidence per Article XI §11.9 (no absence-of-error PASS), all anti-bluff smoke `clean`, all four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity, all Challenges submodule changes mirrored to its `origin`. Next phase: Phase 2 (other CLI agents) once user authorises.
 - 2026-05-06 — **PHASE 1.5 (FOUNDATION CLEANUP) COMPLETE.** All 12 work packages shipped: WP1 Inventory + foundation safety (`421495a`); WP2 Submodule restructuring ~67 mechanical moves (`90dec95`); WP3 Submodule deduplication 5 sets (`154c06c`); WP4 API key loader bash + Go (`e57894e`); WP5 .env API key dedup with USER GATE (`92d5463`); WP6 Docs consolidation 3 dirs (`f09f57d`); WP7 Snake_case directory normalization (`3c3cd8d`); WP8 Anti-bluff Constitution propagation (`0eead08`); WP9 Reference updates comprehensive grep sweep (`42166fd`); WP10 Rebuild + validation + fix `internal/tools/git` MockLLMProvider drift (`0a77c93` + fix `45be827`); WP11 Phase 1.5 Challenge harness 5 phases (meta `306d3d9` + Challenges submodule `7e94f28`); WP12 close-out + push deepest-first (this commit). Acceptance criteria: Phase 1.5 Challenge harness EXIT=0 with all 5 phases (NO-DUPLICATE-SUBMODULES + API-KEYS-LOADER + DOCS-UNDER-DOCS-DIR + SNAKE_CASE + ANTI-BLUFF-ANCHOR) printing positive runtime evidence per Article XI §11.9; `scripts/verify_anti_bluff_cascade.sh` exit 0 ("OK: anti-bluff anchor present in all 39 files across 13 repos"); inner-module `go test -count=1 -short ./internal/... ./cmd/...` all green; anti-bluff smoke clean across all P1.5-touched files. All four meta-repo remotes (`origin` + `github` + `gitlab` + `upstream`) at parity; HelixAgent submodule pushed to its `origin`; Challenges submodule pushed to its `origin`. **Next phase: Phase 2 (other CLI agents) ready to start once user authorises.**
+- 2026-05-06 — Phase 2 started; F21 (Codex Approval Modes) is first port; layers on F02 + F14; uses F19 prompter; CLI/env/config selector mirrors F12 pattern.
 
 ## Open risks / parking lot
 - **Historical SSH key leak (remediated in P0-T08.5):** `id_rsa` + `id_rsa.pub` at `HelixCode/test/workers/ssh_keys/` were committed as test fixtures before this programme. Their material lives in git history forever and is considered compromised. Mitigation: keys were ephemerally test-only (no production trust), replaced with auto-generated ed25519 ephemeral keys via `HelixCode/test/workers/ssh_keys/generate-test-keys.sh`, removed from the index via `git rm --cached`. Any future production system that erroneously trusts the leaked public key must reject it.
