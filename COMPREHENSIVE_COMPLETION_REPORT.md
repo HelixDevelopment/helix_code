@@ -562,7 +562,7 @@ Expand README.md files from <1.5KB to 3KB+ with:
    - Generate interactive API docs
 
 2. **API Reference Updates**
-   - Complete Documentation/General/API_REFERENCE.md
+   - Complete docs/General/API_REFERENCE.md
    - Add endpoint grouping
    - Add versioning documentation
    - Add rate limiting documentation
@@ -619,7 +619,7 @@ Create migration guides:
 
 #### Step 5.1: Update Main User Manual
 
-**Current Status**: Documentation/User_Manual/README.md (80KB+)
+**Current Status**: docs/User_Manual/README.md (80KB+)
 
 **Sections to Add/Update**:
 
@@ -1034,7 +1034,7 @@ Generate weekly reports on:
 5. All memory providers - Complete stub methods
 6. All GUI applications - Implement pending features
 7. 12 README files to expand
-8. Documentation/User_Manual/README.md - Add sections
+8. docs/User_Manual/README.md - Add sections
 9. Github-Pages-Website/docs/index.html - Update content
 10. Github-Pages-Website/docs/courses/course-data.js - Add courses
 

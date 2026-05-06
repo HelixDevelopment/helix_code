@@ -15,7 +15,7 @@ A comprehensive user manual for HelixCode has been created with complete documen
 ## Directory Structure Created
 
 ```
-/Users/milosvasic/Projects/HelixCode/Documentation/User_Manual/
+/Users/milosvasic/Projects/HelixCode/docs/User_Manual/
 ├── README.md                          # Main comprehensive manual (3,027 lines)
 ├── SUMMARY.md                         # This file
 ├── chapters/                          # Reserved for future chapter-based docs

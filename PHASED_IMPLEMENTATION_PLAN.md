@@ -504,7 +504,7 @@ Validation Tasks:
 
 ```bash
 # Day 1-2: API Documentation
-Target: Documentation/General/COMPLETE_API_REFERENCE.md
+Target: docs/General/COMPLETE_API_REFERENCE.md
 
 API Documentation Structure:
 1. Introduction & Overview (200 words)
@@ -534,9 +534,9 @@ Implementation Tasks:
 ```bash
 # Day 3-4: Operations Documentation
 Target Files:
-- Documentation/General/DEPLOYMENT_GUIDE.md
-- Documentation/General/SECURITY_GUIDE.md
-- Documentation/General/PERFORMANCE_TUNING.md
+- docs/General/DEPLOYMENT_GUIDE.md
+- docs/General/SECURITY_GUIDE.md
+- docs/General/PERFORMANCE_TUNING.md
 
 DEPLOYMENT_GUIDE.md Structure (1500 words):
 1. Prerequisites & Requirements
@@ -575,11 +575,11 @@ PERFORMANCE_TUNING.md Structure (1000 words):
 ```bash
 # Day 5-7: User Documentation
 Target Files:
-- Documentation/General/TROUBLESHOOTING.md
-- Documentation/General/CONTRIBUTOR_GUIDE.md
-- Documentation/General/TESTING_GUIDE.md
-- Documentation/General/MONITORING_GUIDE.md
-- Documentation/General/BACKUP_RECOVERY.md
+- docs/General/TROUBLESHOOTING.md
+- docs/General/CONTRIBUTOR_GUIDE.md
+- docs/General/TESTING_GUIDE.md
+- docs/General/MONITORING_GUIDE.md
+- docs/General/BACKUP_RECOVERY.md
 
 TROUBLESHOOTING.md Structure (1200 words):
 1. Common Issues & Solutions
@@ -631,7 +631,7 @@ BACKUP_RECOVERY.md Structure (800 words):
 
 ```bash
 # Day 1-3: Complete User Manual
-Target: Documentation/User_Manual/USER_MANUAL.md
+Target: docs/User_Manual/USER_MANUAL.md
 
 User Manual Enhancements:
 1. Step-by-Step Installation Guides (2000 words)

@@ -197,10 +197,10 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 | Main README | Complete | `HelixCode/README.md` |
 | CLAUDE.md | Complete | `CLAUDE.md` |
 | Enterprise Guide | Complete | `ENTERPRISE_DEPLOYMENT_GUIDE.md` |
-| User Manual | Complete | `Documentation/User_Manual/` |
-| API Reference | Complete | `Documentation/General/API_REFERENCE.md` |
-| Configuration Guide | Complete | `Documentation/General/CONFIGURATION_GUIDE.md` |
-| Video Course Outline | Complete | `Documentation/General/VIDEO_COURSE.md` |
+| User Manual | Complete | `docs/User_Manual/` |
+| API Reference | Complete | `docs/General/API_REFERENCE.md` |
+| Configuration Guide | Complete | `docs/General/CONFIGURATION_GUIDE.md` |
+| Video Course Outline | Complete | `docs/General/VIDEO_COURSE.md` |
 
 ### 3.3 Missing/Incomplete Documentation
 
@@ -496,7 +496,7 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 
 ### 4.3 User Manual Updates
 
-1. [ ] Complete all 8 tutorials in `/Documentation/User_Manual/tutorials/`
+1. [ ] Complete all 8 tutorials in `/docs/User_Manual/tutorials/`
 2. [ ] Add new provider guides (Anthropic, Gemini, AWS, Azure)
 3. [ ] Add memory system guide
 4. [ ] Add tool usage guide
