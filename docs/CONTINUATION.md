@@ -305,3 +305,39 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-06     | T07 update    | T07 (main.go wiring + registry hook + integration test, `c022968`) closed; 7 of 9 F21 tasks done. |
 | 2026-05-06     | T08 update    | T08 (Challenge harness 5 phases, meta `2781c1a` + sub `f2ea964`) closed; 8 of 9 F21 tasks done; T09 (close-out + push 4 remotes) is next. |
 | 2026-05-06     | T09 close-out | F21 (Codex Approval Modes) CLOSED — first Phase 2 feature shipped. All 9 tasks ticked in plan + PROGRESS. F22 next candidate (brainstorming required). Decision log entry added in PROGRESS.md. Test summary, anti-bluff `clean`, cross-compile linux/amd64 (94 MB), and harness final-2-lines (`ALL CHECKS PASSED` / `P2-F21 challenge harness PASS`) recorded in `07_phase_2_evidence.md` §P2-F21-T09. |
+| 2026-05-06     | F22 docs      | F22 (Aider Git Auto-Commit Per Change) spec + plan landed on `main`. Spec `8be7fba` (`docs/superpowers/specs/2026-05-06-p2-f22-aider-git-auto-commit-design.md`), plan `b4f217d` (`docs/superpowers/plans/2026-05-06-p2-f22-aider-git-auto-commit.md`). 9 tasks (T01 bootstrap → T09 Challenge + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps. F22 in flight; T01 next. |
+
+---
+
+## F22 mid-flight section (active feature)
+
+**Active feature:** P2-F22 — Aider Git Auto-Commit Per Change (second Phase 2 feature).
+
+**Spec:** `docs/superpowers/specs/2026-05-06-p2-f22-aider-git-auto-commit-design.md` (commit `8be7fba`).
+
+**Plan:** `docs/superpowers/plans/2026-05-06-p2-f22-aider-git-auto-commit.md` (commit `b4f217d`).
+
+**User-confirmed design (Q1-Q5 = A,A,A,A,A):**
+- Q1=A: ONE commit per accepted edit (aider default).
+- Q2=A: LLM-summarised commit message; deterministic fallback on LLM error.
+- Q3=A: `Co-Authored-By: HelixCode <noreply@helixcode.dev>` trailer on every auto-commit.
+- Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
+- Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
+
+**Task progress:** 0 of 9 complete (spec + plan only; T01 bootstrap is next).
+
+| Task | Status      | Subject                                                                                                                                  |
+|------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| T01  | not started | bootstrap F22 evidence section + advance PROGRESS to F22                                                                                 |
+| T02  | not started | autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)        |
+| T03  | not started | autocommit/git.go: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (real-git TDD)                    |
+| T04  | not started | autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)                           |
+| T05  | not started | autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)                     |
+| T06  | not started | registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)                               |
+| T07  | not started | /git_auto_commit slash command (status/on/off/show) (TDD)                                                                                |
+| T08  | not started | main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test                                        |
+| T09  | not started | Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes |
+
+**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (commit-success-but-tree-dirty / message-doesn't-reflect-diff / fires-on-non-edit-tools / runtime-toggle-not-honoured / secret-leak); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
+
+**Picking up F22 specifically:** Read the plan end-to-end. Continue at **T01** (bootstrap F22 evidence section in `07_phase_2_evidence.md` + advance PROGRESS focus + add F22 task list).
