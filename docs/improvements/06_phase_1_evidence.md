@@ -2350,5 +2350,82 @@ EXIT=0
 
 ### P1-F18-T09 — Challenge harness: 5 phases (STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY gated)
 
+**Files added:**
+
+- `HelixCode/tests/integration/cmd/p1f18_challenge/main.go` — real Go program;
+  five phases A-E, each carrying byte-level positive-evidence assertions.
+- `Challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` — narrative spec.
+- `Challenges/p1-f18-no-flicker-rendering/run.sh` — bash driver (build → run →
+  anti-bluff smoke with string-fragment regex trick → cross-compile linux/amd64).
+
+**Verbatim runtime evidence (from `run.sh` end-to-end):**
+
+```
+==> build F18 challenge harness
+==> run harness
+==> P1-F18 challenge harness pid: 2118876
+==> phase A: STREAMING-FANCY (always runs)
+    phaseA: bytes=371; hide-cursor=1; CR-clear=10; show-cursor=1
+    verdict: ANSI control sequences emitted in expected quantities
+==> phase B: STREAMING-PLAIN (always runs)
+    phaseB: bytes=58; ANSI-count=0; CR-count=0
+    verdict: zero ANSI / zero CR; all 10 words present in transcript
+==> phase C: DIRTY-REGION-DIFF (always runs)
+    phaseC: firstLen=80 delta=34 (delta<firstLen=true); cursor-up-count=1
+    verdict: only the changed line was emitted; in-place rewrite confirmed
+==> phase D: TTY-FALLBACK (always runs)
+    phaseD: mode=plain; auto-detect-on-buffer-correctly-picked-plain
+    verdict: factory ladder resolved bytes.Buffer to ModePlain; no escapes leaked
+==> phase E: REAL-TTY (gated)
+    [skipped: stdout is not a TTY]
+    SKIP-OK: real-TTY assertions only meaningful when run under an interactive terminal
+==> ALL CHECKS PASSED
+==> P1-F18 challenge harness PASS
+==> anti-bluff smoke on F18-affected code
+clean
+==> cross-compile linux
+==> P1-F18 challenge PASS
+```
+
+Exit code: 0.
+
+**Cross-compile evidence:**
+
+```
+$ GOOS=linux GOARCH=amd64 go build -o /tmp/p1f18_challenge_linux ./tests/integration/cmd/p1f18_challenge/
+$ file /tmp/p1f18_challenge_linux
+/tmp/p1f18_challenge_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, ...
+```
+
+**Anti-bluff smoke (both clean):**
+
+```
+$ grep -rn "<bluff-regex>" HelixCode/internal/render/ HelixCode/tests/integration/cmd/p1f18_challenge/
+clean
+$ grep -rn "<bluff-regex>" Challenges/p1-f18-no-flicker-rendering/
+clean
+```
+
+**Phase-by-phase load-bearing assertions:**
+
+- **Phase A** captures `bytes.Buffer` output of an `ansiRenderer` over a
+  `Begin → 10×WriteToken → Commit → Close` sequence and counts
+  `\x1b[?25l` (hide), `\r\x1b[K` (CR+clear-line), `\x1b[?25h` (show).
+  Got 1/10/1 — matches the documented per-token in-place repaint.
+- **Phase B** captures `bytes.Buffer` output of a `plainRenderer` over the
+  same 10-token stream and asserts ZERO `\x1b` and ZERO `\x0d`. Got 0/0
+  for both — zero-ANSI/zero-CR invariant intact.
+- **Phase C — load-bearing.** First `RenderTextBlock` of a 3-line block
+  produced 80 bytes; second `RenderTextBlock` with one line changed
+  added only 34 bytes (`delta<firstLen=true`). Regex `\x1b\[\d+A`
+  matched exactly **once** in the delta — single in-place cursor-up
+  rewrite, not a full re-paint.
+- **Phase D** drives `render.NewRenderer(FactoryOptions{Writer: &buf,
+  EnvLookup: () -> ""})` and confirms `r.Mode() == ModePlain`
+  (bytes.Buffer is not a TTY → auto rung resolves to plain).
+- **Phase E** SKIP-OK: stdout is not a TTY in this sub-shell. The phase
+  only carries evidential weight against a real terminal; SKIP is
+  required, not optional, in non-interactive contexts.
+
 ### P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
 
