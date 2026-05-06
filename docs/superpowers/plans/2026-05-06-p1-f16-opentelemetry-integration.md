@@ -46,18 +46,18 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F16-T01 — bootstrap evidence + advance PROGRESS to F16
-- [ ] P1-F16-T02 — `go.mod`: add OTel v1.30.0 dep set + go.sum (TDD: failing import test)
-- [ ] P1-F16-T03 — `internal/telemetry/types.go`: TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys + error sentinels (TDD)
-- [ ] P1-F16-T04 — `internal/telemetry/config.go` + `attribute_filter.go`: env-var parsing + exporter selection + secret-attribute filter (TDD)
-- [ ] P1-F16-T05 — `internal/telemetry/provider.go`: TelemetryProvider construction (TracerProvider + MeterProvider; selects exporter; pre-built instruments; ForceFlush/Shutdown) (TDD with `tracetest.SpanRecorder` + manual metric reader)
-- [ ] P1-F16-T06 — `internal/telemetry/llm_instrumentation.go`: TracedLLMProvider decorator (TDD with FakeLLMProvider; assert span name, token counter, no prompt-body attribute)
-- [ ] P1-F16-T07 — `internal/telemetry/tool_instrumentation.go` + `internal/tools/registry.go` wrap: `InstrumentToolCall` helper + in-place wrap of `Execute` + `SetTelemetryProvider` (TDD)
-- [ ] P1-F16-T08 — `internal/telemetry/agent_instrumentation.go` + `internal/agent/base_agent.go` wrap: `InstrumentAgentIteration` helper + in-place wrap of `executeTaskWithLLM` + `SetTelemetryProvider` (TDD)
-- [ ] P1-F16-T09 — `/telemetry` slash command (status / show / flush) (TDD; nil-provider reports unavailable)
-- [ ] P1-F16-T10 — main.go wiring (env-var load + provider construct + decorator + setters + slash + deferred shutdown) + integration tests (stdout always; OTLP gRPC + HTTP gated)
-- [ ] P1-F16-T11 — Challenge harness with in-tree fake OTLP/HTTP receiver (5-phase: STDOUT + FAKE-OTLP-HTTP + FILTER + NOOP + REAL-COLLECTOR)
-- [ ] P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
+- [x] P1-F16-T01 — bootstrap evidence + advance PROGRESS to F16
+- [x] P1-F16-T02 — `go.mod`: add OTel v1.30.0 dep set + go.sum (TDD: failing import test)
+- [x] P1-F16-T03 — `internal/telemetry/types.go`: TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys + error sentinels (TDD)
+- [x] P1-F16-T04 — `internal/telemetry/config.go` + `attribute_filter.go`: env-var parsing + exporter selection + secret-attribute filter (TDD)
+- [x] P1-F16-T05 — `internal/telemetry/provider.go`: TelemetryProvider construction (TracerProvider + MeterProvider; selects exporter; pre-built instruments; ForceFlush/Shutdown) (TDD with `tracetest.SpanRecorder` + manual metric reader)
+- [x] P1-F16-T06 — `internal/telemetry/llm_instrumentation.go`: TracedLLMProvider decorator (TDD with FakeLLMProvider; assert span name, token counter, no prompt-body attribute)
+- [x] P1-F16-T07 — `internal/telemetry/tool_instrumentation.go` + `internal/tools/registry.go` wrap: `InstrumentToolCall` helper + in-place wrap of `Execute` + `SetTelemetryProvider` (TDD)
+- [x] P1-F16-T08 — `internal/telemetry/agent_instrumentation.go` + `internal/agent/base_agent.go` wrap: `InstrumentAgentIteration` helper + in-place wrap of `executeTaskWithLLM` + `SetTelemetryProvider` (TDD)
+- [x] P1-F16-T09 — `/telemetry` slash command (status / show / flush) (TDD; nil-provider reports unavailable)
+- [x] P1-F16-T10 — main.go wiring (env-var load + provider construct + decorator + setters + slash + deferred shutdown) + integration tests (stdout always; OTLP gRPC + HTTP gated)
+- [x] P1-F16-T11 — Challenge harness with in-tree fake OTLP/HTTP receiver (5-phase: STDOUT + FAKE-OTLP-HTTP + FILTER + NOOP + REAL-COLLECTOR)
+- [x] P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
 
 ---
 

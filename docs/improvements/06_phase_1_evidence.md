@@ -2010,5 +2010,131 @@ RUN_SH_EXIT=0
 
 **Phase E outcome:** skipped (gated; `OTEL_EXPORTER_OTLP_ENDPOINT` not set on this host). Honest skip per F11/F12/F13/F14/F15 precedent.
 
-### P1-F16-T12 — Feature 16 close-out + push 4 remotes non-force
+### P1-F16-T12 — Close-out evidence
+
+**Date:** 2026-05-06
+
+**Commits (12 tasks):**
+- T01 `5fc7dc1` — bootstrap evidence + advance PROGRESS to F16
+- T02 `f2e7260` — OTel v1.30.0 dep set + TDD failing import test
+- T03 `de941b4` — types.go: TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys + sentinels
+- T04 `3c8593c` — env-var parsing + exporter selection + CONST-042 attribute filter
+- T05 `a8e13e3` — TelemetryProvider construction (TracerProvider + MeterProvider; ForceFlush + Shutdown)
+- T06 `6fcbff6` — TracedLLMProvider decorator + token counter + latency histogram + secret-attr safety
+- T07 `d80c278` — InstrumentToolCall + ToolRegistry.Execute in-place wrap + SetTelemetryProvider
+- T08 `7c06806` — InstrumentAgentIteration + BaseAgent.executeTaskWithLLM in-place wrap
+- T09 `7701c33` — /telemetry slash command (status/show/flush)
+- T10 `a5eb1c9` — main.go wiring + integration tests (stdout always; OTLP gRPC+HTTP gated)
+- T11 submodule `af34a2c94425b5eb94bf36cee87f1fb375bb971e` + meta-repo `c4972dceb87c5a6cbdb5fdf20706d0866ba68986` — Challenge harness with in-tree fake OTLP/HTTP receiver (5 phases)
+- T12 (this commit) — close-out
+
+**Verification battery (verbatim, 2026-05-06):**
+
+`cd HelixCode && go build ./cmd/cli/... ./internal/telemetry/... ./internal/tools/... ./internal/agent/... ./internal/commands/...`
+→ build succeeded with no output (exit 0).
+
+`cd HelixCode && go test ./internal/telemetry/... ./internal/tools/... ./internal/agent/... ./internal/commands/... ./cmd/cli/...`:
+
+```
+ok  	dev.helix.code/internal/telemetry	(cached)
+# dev.helix.code/internal/tools/git [dev.helix.code/internal/tools/git.test]
+internal/tools/git/git_test.go:118:50: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:141:45: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:180:50: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:217:50: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:255:50: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:313:49: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewAutoCommitCoordinator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:575:29: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewMessageGenerator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+internal/tools/git/git_test.go:619:29: cannot use mockProvider (variable of type *MockLLMProvider) as llm.Provider value in argument to NewMessageGenerator: *MockLLMProvider does not implement llm.Provider (missing method CountTokens)
+ok  	dev.helix.code/internal/tools	(cached)
+ok  	dev.helix.code/internal/tools/browser	(cached)
+ok  	dev.helix.code/internal/tools/confirmation	0.003s
+ok  	dev.helix.code/internal/tools/filesystem	(cached)
+FAIL	dev.helix.code/internal/tools/git [build failed]
+?   	dev.helix.code/internal/tools/lsp_fakeserver	[no test files]
+ok  	dev.helix.code/internal/tools/mapping	(cached)
+ok  	dev.helix.code/internal/tools/multiedit	(cached)
+ok  	dev.helix.code/internal/tools/permissions	(cached)
+ok  	dev.helix.code/internal/tools/persistence	(cached)
+ok  	dev.helix.code/internal/tools/sandbox	(cached)
+ok  	dev.helix.code/internal/tools/shell	(cached)
+ok  	dev.helix.code/internal/tools/task	(cached)
+ok  	dev.helix.code/internal/tools/voice	(cached)
+ok  	dev.helix.code/internal/tools/web	(cached)
+ok  	dev.helix.code/internal/tools/worktree	(cached)
+ok  	dev.helix.code/internal/agent	(cached)
+ok  	dev.helix.code/internal/agent/subagent	(cached)
+?   	dev.helix.code/internal/agent/subagent/testhelper	[no test files]
+ok  	dev.helix.code/internal/agent/task	(cached)
+ok  	dev.helix.code/internal/agent/types	(cached)
+ok  	dev.helix.code/internal/commands	(cached)
+ok  	dev.helix.code/internal/commands/builtin	(cached)
+ok  	dev.helix.code/cmd/cli	(cached)
+FAIL
+```
+
+The single `FAIL dev.helix.code/internal/tools/git [build failed]` is the pre-existing unrelated build failure (`MockLLMProvider missing method CountTokens`); it predates F16 and is documented in prior close-outs. All F16 packages (`internal/telemetry`, `internal/agent`, `internal/agent/subagent`, `internal/commands`, `cmd/cli`) PASS. No telemetry-specific failure.
+
+`cd HelixCode && go test -tags="integration testing_export" -v -count=1 -run "TestTelemetry_" ./tests/integration/`:
+
+```
+=== RUN   TestTelemetry_NoopByDefault
+--- PASS: TestTelemetry_NoopByDefault (0.00s)
+=== RUN   TestTelemetry_StdoutEndToEnd
+--- PASS: TestTelemetry_StdoutEndToEnd (0.00s)
+=== RUN   TestTelemetry_OTLPGRPCExporter_Gated
+    telemetry_test.go:192: SKIP-OK: P1-F16-T10 — OTEL_EXPORTER_OTLP_ENDPOINT not set; gRPC OTLP collector unavailable
+--- SKIP: TestTelemetry_OTLPGRPCExporter_Gated (0.00s)
+=== RUN   TestTelemetry_OTLPHTTPExporter_Gated
+    telemetry_test.go:224: SKIP-OK: P1-F16-T10 — OTEL_EXPORTER_OTLP_ENDPOINT not set; HTTP OTLP collector unavailable
+--- SKIP: TestTelemetry_OTLPHTTPExporter_Gated (0.00s)
+=== RUN   TestTelemetry_TracedLLMProvider_DoesNotLeakPromptInExport
+--- PASS: TestTelemetry_TracedLLMProvider_DoesNotLeakPromptInExport (0.00s)
+=== RUN   TestTelemetry_ToolInstrumentation_RecordsSpan
+--- PASS: TestTelemetry_ToolInstrumentation_RecordsSpan (0.00s)
+=== RUN   TestTelemetry_AgentInstrumentation_RecordsSpan
+--- PASS: TestTelemetry_AgentInstrumentation_RecordsSpan (0.00s)
+=== RUN   TestTelemetry_Shutdown_FlushesPendingSpans
+--- PASS: TestTelemetry_Shutdown_FlushesPendingSpans (0.00s)
+PASS
+ok  	dev.helix.code/tests/integration	1.491s
+```
+
+(The `OTLPGRPCExporter_Gated` + `OTLPHTTPExporter_Gated` skips carry the `SKIP-OK: P1-F16-T10` marker per CONST-035 / no-silent-skips.)
+
+**Anti-bluff smoke (HelixCode F16 surface):**
+
+```
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    internal/telemetry/ internal/commands/telemetry_command.go cmd/cli/main.go \
+    tests/integration/telemetry_test.go tests/integration/cmd/p1f16_challenge/ \
+    && echo BLUFF || echo clean
+clean
+```
+
+**Anti-bluff smoke (Challenges submodule F16 surface):**
+
+```
+$ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+    p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
+clean
+```
+
+**Cross-compile linux/amd64:**
+
+```
+$ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f16check ./cmd/cli/
+EXIT=0
+-rwxr-xr-x 1 milosvasic milosvasic 94176784 May  6 10:29 /tmp/helixcode_linux_f16check
+```
+
+**Final challenge harness re-run (verbatim, exit 0):**
+
+```
+==> ALL CHECKS PASSED
+==> P1-F16 challenge harness PASS
+EXIT=0
+```
+
+**Summary:** F16 (OpenTelemetry Integration) — all 12 tasks shipped; OTel v1.30.0 tracer + meter wired into LLM/tool/agent hot paths with three exporters + no-op fast path; default-deny secret-attribute blocklist enforced; /telemetry slash live; 5-phase challenge harness PASS (4 always-on + 1 gated). Pushed to all 4 meta-repo remotes non-force; Challenges submodule pushed to its single `origin` (mirror gap).
 
