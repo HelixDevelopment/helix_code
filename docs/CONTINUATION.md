@@ -324,7 +324,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
 - Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
 
-**Task progress:** 7 of 9 complete (T07 done at `a999b3a`; T08 next).
+**Task progress:** 8 of 9 complete (T08 done at `bab7ebc`; T09 next).
 
 | Task | Status         | Subject                                                                                                                                  |
 |------|----------------|------------------------------------------------------------------------------------------------------------------------------------------|
@@ -335,7 +335,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T05  | DONE `3a28ca6` | autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)                  |
 | T06  | DONE `db55e72` | registry.go: SetAutoCommitter + post-Execute fireAutoCommit hook + per-tool mutated-paths derivation (TDD)                            |
 | T07  | DONE `a999b3a` | /git_auto_commit slash command (status/on/off/show) (TDD)                                                                             |
-| T08  | not started | main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test                                        |
+| T08  | DONE `bab7ebc` | main.go wiring (env + autocommit construct + registry hook + /git_auto_commit) + integration test                                     |
 | T09  | not started | Challenge harness 6+1 phases (default-on + LLM-summary + non-edit-no-op + env-off + runtime-toggle + per-edit-skip [+ secret]) + close-out + push 4 remotes |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (commit-success-but-tree-dirty / message-doesn't-reflect-diff / fires-on-non-edit-tools / runtime-toggle-not-honoured / secret-leak); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
