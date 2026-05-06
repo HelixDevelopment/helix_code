@@ -66,6 +66,7 @@ const (
 	CategoryLSP          ToolCategory = "lsp"
 	CategorySandbox      ToolCategory = "sandbox"
 	CategorySubagent     ToolCategory = "subagent"
+	CategorySmartEdit    ToolCategory = "smart-edit"
 )
 
 // ToolRegistry manages all available tools
