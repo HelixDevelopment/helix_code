@@ -5,18 +5,18 @@ This document lists all the source files examined during the creation of the com
 ## Qwen Code Sources
 
 ### Documentation
-- `Example_Projects/Qwen_Code/README.md` - Main project overview
-- `Example_Projects/Qwen_Code/CHANGELOG.md` - Version history
-- `Example_Projects/Qwen_Code/docs/cli/authentication.md` - Auth details
-- `Example_Projects/Qwen_Code/docs/cli/commands.md` - Command reference
-- `Example_Projects/Qwen_Code/docs/cli/index.md` - CLI guide
-- `Example_Projects/Qwen_Code/docs/tools/` - Tools documentation
+- `cli_agents/qwen-code/README.md` - Main project overview
+- `cli_agents/qwen-code/CHANGELOG.md` - Version history
+- `cli_agents/qwen-code/docs/cli/authentication.md` - Auth details
+- `cli_agents/qwen-code/docs/cli/commands.md` - Command reference
+- `cli_agents/qwen-code/docs/cli/index.md` - CLI guide
+- `cli_agents/qwen-code/docs/tools/` - Tools documentation
 
 ### Source Code
-- `Example_Projects/Qwen_Code/package.json` - Dependencies and scripts
-- `Example_Projects/Qwen_Code/packages/cli/src/ui/models/availableModels.ts` - Model definitions
-- `Example_Projects/Qwen_Code/packages/core/src/core/openaiContentGenerator/provider/dashscope.ts` - DashScope provider implementation
-- `Example_Projects/Qwen_Code/packages/core/src/core/openaiContentGenerator/provider/` - Other provider implementations
+- `cli_agents/qwen-code/package.json` - Dependencies and scripts
+- `cli_agents/qwen-code/packages/cli/src/ui/models/availableModels.ts` - Model definitions
+- `cli_agents/qwen-code/packages/core/src/core/openaiContentGenerator/provider/dashscope.ts` - DashScope provider implementation
+- `cli_agents/qwen-code/packages/core/src/core/openaiContentGenerator/provider/` - Other provider implementations
 
 ### Key Findings
 - Monorepo architecture with core and CLI packages
@@ -30,22 +30,22 @@ This document lists all the source files examined during the creation of the com
 ## Gemini CLI Sources
 
 ### Documentation
-- `Example_Projects/Gemini_CLI/README.md` - Main project overview
-- `Example_Projects/Gemini_CLI/GEMINI.md` - Development guidelines
-- `Example_Projects/Gemini_CLI/docs/get-started/authentication.md` - Auth setup
-- `Example_Projects/Gemini_CLI/docs/cli/checkpointing.md` - Session saving
-- `Example_Projects/Gemini_CLI/docs/cli/token-caching.md` - Token optimization
-- `Example_Projects/Gemini_CLI/docs/core/policy-engine.md` - Policy management
-- `Example_Projects/Gemini_CLI/docs/tools/mcp-server.md` - MCP integration
+- `cli_agents/gemini-cli/README.md` - Main project overview
+- `cli_agents/gemini-cli/GEMINI.md` - Development guidelines
+- `cli_agents/gemini-cli/docs/get-started/authentication.md` - Auth setup
+- `cli_agents/gemini-cli/docs/cli/checkpointing.md` - Session saving
+- `cli_agents/gemini-cli/docs/cli/token-caching.md` - Token optimization
+- `cli_agents/gemini-cli/docs/core/policy-engine.md` - Policy management
+- `cli_agents/gemini-cli/docs/tools/mcp-server.md` - MCP integration
 
 ### Source Code
-- `Example_Projects/Gemini_CLI/package.json` - Project structure and dependencies
-- `Example_Projects/Gemini_CLI/packages/core/src/config/models.ts` - Model definitions and fallback
-- `Example_Projects/Gemini_CLI/packages/core/src/core/client.ts` - GeminiClient implementation
-- `Example_Projects/Gemini_CLI/packages/core/src/core/geminiRequest.ts` - Request building
-- `Example_Projects/Gemini_CLI/packages/core/src/core/baseLlmClient.ts` - Base LLM client
-- `Example_Projects/Gemini_CLI/packages/core/src/code_assist/` - OAuth and credential handling
-- `Example_Projects/Gemini_CLI/packages/core/src/mcp/` - MCP provider implementations
+- `cli_agents/gemini-cli/package.json` - Project structure and dependencies
+- `cli_agents/gemini-cli/packages/core/src/config/models.ts` - Model definitions and fallback
+- `cli_agents/gemini-cli/packages/core/src/core/client.ts` - GeminiClient implementation
+- `cli_agents/gemini-cli/packages/core/src/core/geminiRequest.ts` - Request building
+- `cli_agents/gemini-cli/packages/core/src/core/baseLlmClient.ts` - Base LLM client
+- `cli_agents/gemini-cli/packages/core/src/code_assist/` - OAuth and credential handling
+- `cli_agents/gemini-cli/packages/core/src/mcp/` - MCP provider implementations
 
 ### Key Findings
 - Monorepo with core, CLI, and a2a-server packages
@@ -61,18 +61,18 @@ This document lists all the source files examined during the creation of the com
 ## DeepSeek CLI Sources
 
 ### Documentation
-- `Example_Projects/DeepSeek_CLI/README.md` - Main project overview
-- `Example_Projects/DeepSeek_CLI/LOCAL-SETUP.md` - Local setup guide
+- `cli_agents/deepseek-cli/README.md` - Main project overview
+- `cli_agents/deepseek-cli/LOCAL-SETUP.md` - Local setup guide
 
 ### Source Code
-- `Example_Projects/DeepSeek_CLI/package.json` - Minimal dependencies
-- `Example_Projects/DeepSeek_CLI/src/api.ts` - Dual-mode API client
-- `Example_Projects/DeepSeek_CLI/src/cli.ts` - CLI interface
-- `Example_Projects/DeepSeek_CLI/src/config.ts` - Configuration management
-- `Example_Projects/DeepSeek_CLI/src/commands/interactive.ts` - Interactive REPL
-- `Example_Projects/DeepSeek_CLI/src/commands/chat.ts` - Chat command
-- `Example_Projects/DeepSeek_CLI/src/commands/setup.ts` - Setup automation
-- `Example_Projects/DeepSeek_CLI/src/utils/exec.ts` - Execution utilities
+- `cli_agents/deepseek-cli/package.json` - Minimal dependencies
+- `cli_agents/deepseek-cli/src/api.ts` - Dual-mode API client
+- `cli_agents/deepseek-cli/src/cli.ts` - CLI interface
+- `cli_agents/deepseek-cli/src/config.ts` - Configuration management
+- `cli_agents/deepseek-cli/src/commands/interactive.ts` - Interactive REPL
+- `cli_agents/deepseek-cli/src/commands/chat.ts` - Chat command
+- `cli_agents/deepseek-cli/src/commands/setup.ts` - Setup automation
+- `cli_agents/deepseek-cli/src/utils/exec.ts` - Execution utilities
 
 ### Key Findings
 - Single-package simple architecture

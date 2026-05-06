@@ -310,8 +310,8 @@ OLLAMA_HOST=...
 
 ## Documentation Links
 
-- Qwen Code Docs: `Example_Projects/Qwen_Code/docs/`
-- Gemini CLI Docs: `Example_Projects/Gemini_CLI/docs/`
-- DeepSeek CLI Docs: `Example_Projects/DeepSeek_CLI/`
+- Qwen Code Docs: `cli_agents/qwen-code/docs/`
+- Gemini CLI Docs: `cli_agents/gemini-cli/docs/`
+- DeepSeek CLI Docs: `cli_agents/deepseek-cli/`
 
 Full analysis available in: `/Users/milosvasic/Projects/HelixCode/EXAMPLE_PROJECTS_ANALYSIS.md`

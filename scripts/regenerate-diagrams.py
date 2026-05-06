@@ -81,7 +81,7 @@ def emit_overall_architecture(t, out: Path):
                                           boxstyle="round,pad=0.01",
                                           facecolor="lavender"))
     ax.text(0.50, 0.09,
-            f"HelixAgent/cli_agents/  ({t['modules']['cli_agent_count']} agents — canonical source; 47 populated, 13 Phase-2-deferred)",
+            f"cli_agents/  ({t['modules']['cli_agent_count']} agents — canonical source; 47 populated, 13 Phase-2-deferred)",
             ha="center", va="center", fontsize=8, style="italic")
 
     plt.tight_layout()

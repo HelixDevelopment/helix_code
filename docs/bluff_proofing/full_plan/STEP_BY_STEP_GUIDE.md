@@ -105,8 +105,8 @@ cd HelixCode
 git submodule update --init --recursive
 
 # Verify submodules
-ls Example_Projects/
-# Should show: Aider, Cline, Codex, OpenHands, etc.
+ls cli_agents/
+# Should show: aider, cline, codex, openhands, etc.
 ```
 
 ### 2.2 Verify Project Structure

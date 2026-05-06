@@ -177,7 +177,7 @@ ANALYSIS_SOURCES.md
 1. Identify feature in QUICK_REFERENCE priority matrix
 2. Read detailed implementation in ANALYSIS.md
 3. Locate source code using ANALYSIS_SOURCES.md
-4. Review actual code in Example_Projects/
+4. Review actual code in cli_agents/
 
 ### For Integration Planning
 1. Follow roadmap in ANALYSIS.md (5 phases)
@@ -221,19 +221,19 @@ ANALYSIS_SOURCES.md
 ## Quick Links to Source Files
 
 ### Qwen Code Key Files
-- Models: `Example_Projects/Qwen_Code/packages/cli/src/ui/models/availableModels.ts`
-- DashScope: `Example_Projects/Qwen_Code/packages/core/src/core/openaiContentGenerator/provider/dashscope.ts`
-- Config: `Example_Projects/Qwen_Code/README.md` (session config section)
+- Models: `cli_agents/qwen-code/packages/cli/src/ui/models/availableModels.ts`
+- DashScope: `cli_agents/qwen-code/packages/core/src/core/openaiContentGenerator/provider/dashscope.ts`
+- Config: `cli_agents/qwen-code/README.md` (session config section)
 
 ### Gemini CLI Key Files
-- Models: `Example_Projects/Gemini_CLI/packages/core/src/config/models.ts`
-- Client: `Example_Projects/Gemini_CLI/packages/core/src/core/client.ts`
-- Auth: `Example_Projects/Gemini_CLI/packages/core/src/code_assist/`
+- Models: `cli_agents/gemini-cli/packages/core/src/config/models.ts`
+- Client: `cli_agents/gemini-cli/packages/core/src/core/client.ts`
+- Auth: `cli_agents/gemini-cli/packages/core/src/code_assist/`
 
 ### DeepSeek CLI Key Files
-- API: `Example_Projects/DeepSeek_CLI/src/api.ts`
-- CLI: `Example_Projects/DeepSeek_CLI/src/cli.ts`
-- Interactive: `Example_Projects/DeepSeek_CLI/src/commands/interactive.ts`
+- API: `cli_agents/deepseek-cli/src/api.ts`
+- CLI: `cli_agents/deepseek-cli/src/cli.ts`
+- Interactive: `cli_agents/deepseek-cli/src/commands/interactive.ts`
 
 ---
 
@@ -292,10 +292,10 @@ After reviewing these documents:
 
 ## Additional Resources
 
-- Source projects located in: `/Users/milosvasic/Projects/HelixCode/Example_Projects/`
-- Qwen Code: `Example_Projects/Qwen_Code/docs/`
-- Gemini CLI: `Example_Projects/Gemini_CLI/docs/`
-- DeepSeek CLI: `Example_Projects/DeepSeek_CLI/README.md`
+- Source projects located in: `/Users/milosvasic/Projects/HelixCode/cli_agents/`
+- Qwen Code: `cli_agents/qwen-code/docs/`
+- Gemini CLI: `cli_agents/gemini-cli/docs/`
+- DeepSeek CLI: `cli_agents/deepseek-cli/README.md`
 
 All three projects have comprehensive documentation in their respective directories.
 
