@@ -151,3 +151,24 @@
 [submodule "cli_agents/multiagent-coding"]
 	path = cli_agents/multiagent-coding
 	url = git@github.com:Danau5tin/multi-agent-coding-system.git
+[submodule "cli_agents/nanocoder"]
+	path = cli_agents/nanocoder
+	url = git@github.com:Nano-Collective/nanocoder.git
+[submodule "cli_agents/noi"]
+	path = cli_agents/noi
+	url = git@github.com:lencx/Noi.git
+[submodule "cli_agents/octogen"]
+	path = cli_agents/octogen
+	url = git@github.com:dbpunk-labs/octogen.git
+[submodule "cli_agents/open-interpreter"]
+	path = cli_agents/open-interpreter
+	url = git@github.com:KillianLucas/open-interpreter.git
+[submodule "cli_agents/plandex"]
+	path = cli_agents/plandex
+	url = git@github.com:plandex-ai/plandex.git
+[submodule "cli_agents/postgres-mcp"]
+	path = cli_agents/postgres-mcp
+	url = git@github.com:timescale/pg-aiguide.git
+[submodule "cli_agents/qwen-code"]
+	path = cli_agents/qwen-code
+	url = git@github.com:QwenLM/qwen-code.git
