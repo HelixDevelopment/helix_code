@@ -13,23 +13,23 @@
 [submodule "awesome-ai-memory"]
 	path = awesome-ai-memory
 	url = git@github.com:topoteretes/awesome-ai-memory.git
-[submodule "Example_Resources/GitHub-Awesome-Copilot"]
-	path = Example_Resources/GitHub-Awesome-Copilot
+[submodule "cli_agents_resources/GitHub-Awesome-Copilot"]
+	path = cli_agents_resources/GitHub-Awesome-Copilot
 	url = git@github.com:github/awesome-copilot.git
-[submodule "Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs"]
-	path = Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs
+[submodule "cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs"]
+	path = cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs
 	url = git@github.com:cheshire-cat-ai/docs.git
-[submodule "Example_Resources/Awesome-AI-GPTs"]
-	path = Example_Resources/Awesome-AI-GPTs
+[submodule "cli_agents_resources/Awesome-AI-GPTs"]
+	path = cli_agents_resources/Awesome-AI-GPTs
 	url = git@github.com:EmbraceAGI/Awesome-AI-GPTs.git
-[submodule "Example_Resources/OpenAI-Cookbook"]
-	path = Example_Resources/OpenAI-Cookbook
+[submodule "cli_agents_resources/OpenAI-Cookbook"]
+	path = cli_agents_resources/OpenAI-Cookbook
 	url = org-14957082@github.com:openai/openai-cookbook.git
-[submodule "Example_Resources/Awesome-AI-Agents"]
-	path = Example_Resources/Awesome-AI-Agents
+[submodule "cli_agents_resources/Awesome-AI-Agents"]
+	path = cli_agents_resources/Awesome-AI-Agents
 	url = git@github.com:e2b-dev/awesome-ai-agents.git
-[submodule "Example_Resources/Taches-CC-Resources"]
-	path = Example_Resources/Taches-CC-Resources
+[submodule "cli_agents_resources/Taches-CC-Resources"]
+	path = cli_agents_resources/Taches-CC-Resources
 	url = git@github.com:glittercowboy/taches-cc-resources.git
 [submodule "Containers"]
 	path = Containers
