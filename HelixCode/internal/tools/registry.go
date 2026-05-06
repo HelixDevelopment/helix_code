@@ -9,6 +9,7 @@ import (
 
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/mcp"
+	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/filesystem"
@@ -89,6 +90,12 @@ type ToolRegistry struct {
 	// multiedit_commit) so subsequent calls to LSPManager.GetDiagnostics see
 	// fresh state. nil disables the auto-trigger.
 	lspManager *LSPManager
+
+	// toolTelemetry is the optional F16 telemetry instrumentation. When set,
+	// Execute wraps each successful-Validate tool dispatch in a span + metric
+	// pair via toolTelemetry.Begin. nil disables the wrap (Execute behaves as
+	// before).
+	toolTelemetry *telemetry.ToolInstrumentation
 
 	// Component instances
 	filesystem   *filesystem.FileSystemTools
@@ -320,6 +327,23 @@ func (r *ToolRegistry) SetLSPManager(m *LSPManager) {
 	r.lspManager = m
 }
 
+// SetTelemetryInstrumentation wires F16 telemetry onto the registry. Once set,
+// Execute wraps each successful-Validate tool dispatch in an OTel span +
+// helixcode_tool_calls_total / helixcode_tool_latency_seconds metrics labelled
+// with outcome={success|failure}.
+//
+// Pass nil to disable instrumentation (Execute behaves exactly as before).
+//
+// Telemetry is a side-channel: errors are NEVER propagated back to the
+// Execute caller (the OTel SDK doesn't return errors from span.End/Record/Add
+// in normal use; the noop tracer/meter make every operation a no-op when the
+// provider is in noop mode).
+func (r *ToolRegistry) SetTelemetryInstrumentation(t *telemetry.ToolInstrumentation) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.toolTelemetry = t
+}
+
 // checkPlanModeGate consults the plan-mode gate (if wired). Returns
 // ErrPlanModeGated wrapped with tool name + reason when blocked.
 func (r *ToolRegistry) checkPlanModeGate(name string, params map[string]interface{}) error {
@@ -384,7 +408,23 @@ func (r *ToolRegistry) Execute(ctx context.Context, name string, params map[stri
 		}
 	}
 
+	// F16: wrap the inner tool.Execute call in a telemetry span + metric pair
+	// when instrumentation is wired. The wrap fires ONLY after Validate +
+	// before-hooks succeed so the metrics reflect actual execution latency,
+	// not validation/policy overhead.
+	r.mu.RLock()
+	toolTelemetry := r.toolTelemetry
+	r.mu.RUnlock()
+	var finishTelemetry func(error)
+	if toolTelemetry != nil {
+		ctx, finishTelemetry = toolTelemetry.Begin(ctx, name, string(tool.Category()))
+	}
+
 	result, execErr := tool.Execute(ctx, params)
+
+	if finishTelemetry != nil {
+		finishTelemetry(execErr)
+	}
 
 	// AfterToolCall + specialised after-events (block logged, not propagated).
 	if r.hooksManager != nil {
