@@ -324,12 +324,12 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
 - Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
 
-**Task progress:** 1 of 9 complete (T01 done at `550be34`; T02 next).
+**Task progress:** 2 of 9 complete (T02 done at `0468beb`; T03 next).
 
 | Task | Status         | Subject                                                                                                                                  |
 |------|----------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | T01  | DONE `550be34` | bootstrap F22 evidence section + advance PROGRESS to F22                                                                                 |
-| T02  | not started | autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)        |
+| T02  | DONE `0468beb` | autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)        |
 | T03  | not started | autocommit/git.go: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (real-git TDD)                    |
 | T04  | not started | autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)                           |
 | T05  | not started | autocommit/committer.go: AutoCommitter.MaybeCommit pipeline + atomic.Bool enabled + co-author trailer (real-git TDD)                     |
