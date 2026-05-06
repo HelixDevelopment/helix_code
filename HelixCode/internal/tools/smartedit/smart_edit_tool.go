@@ -366,6 +366,69 @@ func (t *SmartEditTool) Execute(ctx context.Context, params map[string]interface
 	return res, nil
 }
 
+// ParsePrompt is a thin pass-through to Parse(prompt). It exists so the
+// /edit slash command (commands.SmartEditInspector) can request a parse-only
+// inspection of a SEARCH/REPLACE prompt without exercising disk reads, the
+// applier, or the committer. It returns the EditPlan unchanged on success.
+func (t *SmartEditTool) ParsePrompt(prompt string) (*EditPlan, error) {
+	return Parse(prompt)
+}
+
+// DryRun runs the full smart-edit pipeline (parse + read + apply in memory +
+// diff) WITHOUT writing to disk. It is the inspection entry-point used by
+// `/edit dry-run`. Workdir overrides the tool's default workdir for this
+// call; an empty string falls back to the tool's configured workdir, which
+// itself falls back to the process cwd at Execute time.
+//
+// The returned *SmartEditResult is the same value Execute would return with
+// `dry_run=true`; the helper is a convenience wrapper that constructs the
+// args map and calls Execute, so behaviour stays in lockstep with the agent
+// path and there is no parallel pipeline to drift.
+func (t *SmartEditTool) DryRun(ctx context.Context, prompt, workdir string) (*SmartEditResult, error) {
+	args := map[string]interface{}{
+		"prompt":  prompt,
+		"dry_run": true,
+	}
+	if workdir != "" {
+		args["workdir"] = workdir
+	}
+	out, err := t.Execute(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+	res, ok := out.(*SmartEditResult)
+	if !ok || res == nil {
+		return nil, fmt.Errorf("smart_edit dry-run: unexpected result type %T", out)
+	}
+	return res, nil
+}
+
+// Commit runs the full smart-edit pipeline INCLUDING the disk write through
+// the configured MultiEditCommitter. It is the user-initiated entry-point
+// used by `/edit commit`. Workdir behaves identically to DryRun.
+//
+// As with DryRun this is a convenience wrapper around Execute so the
+// commit path stays a single code-path; agent calls and slash-command calls
+// land in the exact same Execute body.
+func (t *SmartEditTool) Commit(ctx context.Context, prompt, workdir string) (*SmartEditResult, error) {
+	args := map[string]interface{}{
+		"prompt":  prompt,
+		"dry_run": false,
+	}
+	if workdir != "" {
+		args["workdir"] = workdir
+	}
+	out, err := t.Execute(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+	res, ok := out.(*SmartEditResult)
+	if !ok || res == nil {
+		return nil, fmt.Errorf("smart_edit commit: unexpected result type %T", out)
+	}
+	return res, nil
+}
+
 // resolvePath joins workdir with rel when rel is not already absolute.
 // An empty workdir falls back to the process cwd at call time. Absolute
 // paths are honoured as-is.
