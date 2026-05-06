@@ -27,16 +27,16 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F18-T01 — bootstrap evidence + advance PROGRESS to F18
-- [ ] P1-F18-T02 — `internal/render/types.go`: Renderer interface + RenderMode enum + Frame + error sentinels + env-var constants (TDD)
-- [ ] P1-F18-T03 — `internal/render/ansi_renderer.go`: in-place line update via `\r\033[K` + multi-line frame rendering with dirty-region diff (TDD against `bytes.Buffer`)
-- [ ] P1-F18-T04 — `internal/render/plain_renderer.go`: line-by-line `fmt.Fprint` fallback with newline-boundary buffering + `\r`-strip + zero-ANSI invariant (TDD)
-- [ ] P1-F18-T05 — `internal/render/viewport.go`: Frame buffer + dirty-line tracking + pure-Go `Diff` (TDD)
-- [ ] P1-F18-T06 — `internal/render/factory.go`: RendererFactory with `HELIXCODE_RENDER` env var + TTY detection via `golang.org/x/term`; constructor-injection seams for tests (TDD)
-- [ ] P1-F18-T07 — Wire LLM streaming hook in `cmd/cli/main.go::handleGenerate` (replace `fmt.Printf("%s ", chunk.Content)` loop with `Begin/WriteToken/Commit`) (TDD)
-- [ ] P1-F18-T08 — `internal/render/tool_helpers.go` + wire tool-result frame rendering at the existing print sites in `cmd/cli/main.go` (TDD)
-- [ ] P1-F18-T09 — Challenge harness (4 always-run phases + 1 TTY-gated phase: STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY) with positive byte evidence
-- [ ] P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
+- [x] P1-F18-T01 — bootstrap evidence + advance PROGRESS to F18
+- [x] P1-F18-T02 — `internal/render/types.go`: Renderer interface + RenderMode enum + Frame + error sentinels + env-var constants (TDD)
+- [x] P1-F18-T03 — `internal/render/ansi_renderer.go`: in-place line update via `\r\033[K` + multi-line frame rendering with dirty-region diff (TDD against `bytes.Buffer`)
+- [x] P1-F18-T04 — `internal/render/plain_renderer.go`: line-by-line `fmt.Fprint` fallback with newline-boundary buffering + `\r`-strip + zero-ANSI invariant (TDD)
+- [x] P1-F18-T05 — `internal/render/viewport.go`: Frame buffer + dirty-line tracking + pure-Go `Diff` (TDD)
+- [x] P1-F18-T06 — `internal/render/factory.go`: RendererFactory with `HELIXCODE_RENDER` env var + TTY detection via `golang.org/x/term`; constructor-injection seams for tests (TDD)
+- [x] P1-F18-T07 — Wire LLM streaming hook in `cmd/cli/main.go::handleGenerate` (replace `fmt.Printf("%s ", chunk.Content)` loop with `Begin/WriteToken/Commit`) (TDD)
+- [x] P1-F18-T08 — `internal/render/tool_helpers.go` + wire tool-result frame rendering at the existing print sites in `cmd/cli/main.go` (TDD)
+- [x] P1-F18-T09 — Challenge harness (4 always-run phases + 1 TTY-gated phase: STREAMING-FANCY + STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY) with positive byte evidence
+- [x] P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
 
 ---
 

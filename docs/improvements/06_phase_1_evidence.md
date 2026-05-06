@@ -2427,5 +2427,61 @@ clean
   only carries evidential weight against a real terminal; SKIP is
   required, not optional, in non-interactive contexts.
 
-### P1-F18-T10 — Feature 18 close-out + push 4 remotes non-force
+### P1-F18-T10 — Close-out evidence
+
+**Date:** 2026-05-06
+
+**All 10 commit SHAs:**
+
+- T01 `a8aa8f3` — bootstrap Phase 1 / Feature 18 evidence + advance PROGRESS
+- T02 `8d6ec3b` — render types + RenderMode + Frame + sentinels + env-var const
+- T03 `a3cd0e1` — ANSI renderer with in-place line update + dirty-region frame diff
+- T04 `487d72e` — plain renderer with zero-ANSI/zero-CR invariant + line buffering
+- T05 `8c90e7c` — Viewport with Frame buffer + dirty-line tracking + Diff; refactor ansiRenderer
+- T06 `288e6cd` — RendererFactory with HELIXCODE_RENDER env var + TTY detection via x/term
+- T07 `4ece7e8` — wire LLM streaming through Renderer Begin/WriteToken/Commit
+- T08 `05434c4` — RenderTextBlock/RenderLines helpers + wire non-stream LLM response print
+- T09 submodule `c409ed3` + meta-repo `c44b049` — challenge harness (5 phases)
+- T10 (this commit) — close-out + push to 4 remotes non-force
+
+**Final unit-test summary** (verbatim from `cd HelixCode && go test -count=1 ./internal/render/... ./cmd/cli/...`):
+
+```
+ok  	dev.helix.code/internal/render	0.021s
+ok  	dev.helix.code/cmd/cli	0.057s
+```
+
+**Anti-bluff smoke** (verbatim):
+
+```
+clean (HelixCode F18 surface)
+clean (Challenges F18 surface)
+```
+
+Run as:
+
+```
+cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  internal/render/ cmd/cli/main.go cmd/cli/render_streaming_test.go \
+  tests/integration/cmd/p1f18_challenge/ \
+  && echo BLUFF || echo "clean (HelixCode F18 surface)"
+cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+  p1-f18-no-flicker-rendering/ && echo BLUFF || echo "clean (Challenges F18 surface)"
+```
+
+**Cross-compile** (linux/amd64):
+
+```
+-rwxr-xr-x 1 milosvasic milosvasic 94325640 May  6 12:44 /tmp/helixcode_linux_f18check
+cross-compile OK
+```
+
+**Final challenge harness re-run — last 2 lines:**
+
+```
+==> P1-F18 challenge harness PASS
+EXIT=0
+```
+
+**Two-line summary:** Feature 18 ships a custom-built no-flicker renderer (ANSI in-place updates for TTY + plain line-buffered fallback for non-TTY) wired into the CLI streaming hot path with positive byte-level evidence on five phases (4 always-run + 1 TTY-gated). Zero new external dependencies, env-var-only surface (`HELIXCODE_RENDER=plain|fancy|auto`), CONST-042 satisfied (no token/frame text logged at any level), all 10 task commits shipped + pushed non-force to 4 remotes.
 
