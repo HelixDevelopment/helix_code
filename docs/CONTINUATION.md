@@ -324,11 +324,11 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: Default ON; opt-out via env `HELIXCODE_GIT_AUTO_COMMIT=off`, runtime `/git_auto_commit off`, per-edit `_helix_skip_git_commit:true` param.
 - Q5=A: `/git_auto_commit` slash command (status/on/off/show); NO cobra subcommand.
 
-**Task progress:** 0 of 9 complete (spec + plan only; T01 bootstrap is next).
+**Task progress:** 1 of 9 complete (T01 done at `550be34`; T02 next).
 
-| Task | Status      | Subject                                                                                                                                  |
-|------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| T01  | not started | bootstrap F22 evidence section + advance PROGRESS to F22                                                                                 |
+| Task | Status         | Subject                                                                                                                                  |
+|------|----------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| T01  | DONE `550be34` | bootstrap F22 evidence section + advance PROGRESS to F22                                                                                 |
 | T02  | not started | autocommit/types.go: CommitContext + CommitResult + Options + sentinels + EnvVarName/CoAuthorTrailer/SkipParamKey constants (TDD)        |
 | T03  | not started | autocommit/git.go: thin git wrapper (IsRepo/StatusPorcelain/DiffStaged/DiffUnstaged/Add/Commit/HeadSHA) (real-git TDD)                    |
 | T04  | not started | autocommit/summariser.go + secret_filter.go: LLM summariser + deterministic fallback + 4 secret patterns (TDD)                           |
@@ -340,4 +340,4 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (commit-success-but-tree-dirty / message-doesn't-reflect-diff / fires-on-non-edit-tools / runtime-toggle-not-honoured / secret-leak); each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 
-**Picking up F22 specifically:** Read the plan end-to-end. Continue at **T01** (bootstrap F22 evidence section in `07_phase_2_evidence.md` + advance PROGRESS focus + add F22 task list).
+**Picking up F22 specifically:** Read the plan end-to-end. Continue at **T02** (autocommit/types.go: CommitContext + CommitResult + Options + sentinels + constants).
