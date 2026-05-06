@@ -27,13 +27,13 @@ Must always print `clean`.
 
 ## Task list
 
-- [ ] P1-F19-T01 — bootstrap evidence + advance PROGRESS to F19
-- [ ] P1-F19-T02 — `internal/tools/askuser/types.go`: Choice + Question + Result + Prompter interface + sentinels + constants (TDD)
-- [ ] P1-F19-T03 — `internal/tools/askuser/stdin_prompter.go`: stdinPrompter using F18 renderer + non-TTY short-circuit + retry loop + timeout (TDD against `bytes.Buffer`)
-- [ ] P1-F19-T04 — `internal/tools/askuser/ask_user_tool.go`: AskUserTool wrapping Prompter + add `CategoryAskUser` to registry (TDD)
-- [ ] P1-F19-T05 — `cmd/cli/main.go` wiring (register tool through registry config) + integration test (always-runs both branches via real `bytes.Buffer`)
-- [ ] P1-F19-T06 — Challenge harness (5 always-run phases: STDIN-INPUT + NON-TTY-WITH-DEFAULT + NON-TTY-WITHOUT-DEFAULT-ERR + PREVIEW-RENDERING + INVALID-INPUT-RETRY) with positive byte/reader-position evidence
-- [ ] P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
+- [x] P1-F19-T01 — bootstrap evidence + advance PROGRESS to F19
+- [x] P1-F19-T02 — `internal/tools/askuser/types.go`: Choice + Question + Result + Prompter interface + sentinels + constants (TDD)
+- [x] P1-F19-T03 — `internal/tools/askuser/stdin_prompter.go`: stdinPrompter using F18 renderer + non-TTY short-circuit + retry loop + timeout (TDD against `bytes.Buffer`)
+- [x] P1-F19-T04 — `internal/tools/askuser/ask_user_tool.go`: AskUserTool wrapping Prompter + add `CategoryAskUser` to registry (TDD)
+- [x] P1-F19-T05 — `cmd/cli/main.go` wiring (register tool through registry config) + integration test (always-runs both branches via real `bytes.Buffer`)
+- [x] P1-F19-T06 — Challenge harness (5 always-run phases: STDIN-INPUT + NON-TTY-WITH-DEFAULT + NON-TTY-WITHOUT-DEFAULT-ERR + PREVIEW-RENDERING + INVALID-INPUT-RETRY) with positive byte/reader-position evidence
+- [x] P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
 
 ---
 

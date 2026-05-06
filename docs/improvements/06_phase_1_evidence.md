@@ -2553,5 +2553,70 @@ Anti-bluff verdict:
 - Phase D preview byte offsets (positive runtime evidence, not metadata): `"applies the change to disk"` at offset 37; `"discards the staged change"` at offset 87.
 - Anti-bluff smoke (string-fragment regex over harness + CHALLENGE.md + run.sh): `clean`.
 
-### P1-F19-T07 — Feature 19 close-out + push 4 remotes non-force
+### P1-F19-T07 — Close-out evidence
+
+Date: 2026-05-06.
+
+Seven task commits in F19:
+
+| Task | Subject | SHA |
+|---|---|---|
+| T01 | docs(P1-F19-T01): bootstrap Phase 1 / Feature 19 evidence + advance PROGRESS | `b7fc6bb` |
+| T02 | feat(P1-F19-T02): askuser types - Choice + Question + Result + Prompter interface + sentinels | `3be8ca7` |
+| T03 | feat(P1-F19-T03): stdinPrompter with non-TTY short-circuit + retry loop + timeout + F18 menu render | `2ded9d2` |
+| T04 | feat(P1-F19-T04): AskUserTool wrapping Prompter + CategoryAskUser registry const | `bc84789` |
+| T05 | feat(P1-F19-T05): wire ask_user into registry + integration tests; replace bluff stub | `98bd424` |
+| T06 | feat(P1-F19-T06): challenge with runtime evidence + cross-compile check | submodule `e3454a4` + meta-repo `ecb3e26` |
+| T07 | chore(P1-F19-T07): close out feature 19 — ask user question with previews | (this commit) |
+
+Final verification (`cd HelixCode && go test ./internal/tools/askuser/... ./internal/tools/... ./cmd/cli/...`):
+
+```
+ok  	dev.helix.code/internal/tools/askuser	(cached)
+ok  	dev.helix.code/internal/tools	5.549s
+ok  	dev.helix.code/internal/tools/browser	(cached)
+ok  	dev.helix.code/internal/tools/confirmation	0.006s
+ok  	dev.helix.code/internal/tools/filesystem	(cached)
+FAIL	dev.helix.code/internal/tools/git [build failed]
+?   	dev.helix.code/internal/tools/lsp_fakeserver	[no test files]
+ok  	dev.helix.code/internal/tools/mapping	(cached)
+ok  	dev.helix.code/internal/tools/multiedit	(cached)
+ok  	dev.helix.code/internal/tools/permissions	(cached)
+ok  	dev.helix.code/internal/tools/persistence	(cached)
+ok  	dev.helix.code/internal/tools/sandbox	0.127s
+ok  	dev.helix.code/internal/tools/shell	(cached)
+ok  	dev.helix.code/internal/tools/smartedit	0.041s
+ok  	dev.helix.code/internal/tools/task	0.008s
+ok  	dev.helix.code/internal/tools/voice	(cached)
+ok  	dev.helix.code/internal/tools/web	(cached)
+ok  	dev.helix.code/internal/tools/worktree	0.372s
+ok  	dev.helix.code/cmd/cli	0.057s
+```
+
+(`internal/tools/git` test build failure is pre-existing — `MockLLMProvider` missing `CountTokens` method from F01 Provider contract; verified to reproduce on F18 close-out commit `92db29e`. Out of F19 scope; tracked for resolution under F12/F13 follow-up.)
+
+Integration (`go test -tags=integration -run "TestAskUser_" ./tests/integration/...`): `ok dev.helix.code/tests/integration 1.986s`.
+
+Anti-bluff smoke on F19 surface (inner module):
+
+```
+clean
+```
+
+Anti-bluff smoke on Challenges submodule:
+
+```
+clean
+```
+
+Cross-compile linux/amd64 (`GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode_linux_f19check ./cmd/cli/`): success — 94,364,896 byte binary produced.
+
+Final harness re-run (`/tmp/p1f19_challenge ; echo "EXIT=$?"`), final 2 lines:
+
+```
+==> P1-F19 challenge harness PASS
+EXIT=0
+```
+
+Two-line summary: F19 ships a real `ask_user` tool with non-TTY short-circuit (zero-read invariant proven by reader-position byte counts), retry loop, F18-renderer-driven inline previews (preview-before-label proven by writer byte offsets 37 + 87), and 5 always-run Challenge phases. All 4 meta-repo remotes pushed non-force; Challenges submodule pushed to `origin`.
 
