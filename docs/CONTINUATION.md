@@ -82,7 +82,7 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**None.** F25 closed; Phase 2 ready for F26 brainstorming.
+**P2-F26 — Openhands Workspace + Task Planner + Step Executor.** Sixth Phase 2 feature; spec + plan landed. T01 in progress.
 
 ### Most recent feature (closed): P2-F25 — Plandex Plan Trees
 
@@ -309,6 +309,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-07     | F23 docs      | F23 (Cline Browser Tool) spec + plan landed on `main`. Spec `83d401d` (`docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md`), plan `bc5fd3e` (`docs/superpowers/plans/2026-05-07-p2-f23-cline-browser-tool.md`). 10 tasks (T01 bootstrap → T10 Challenge 7 phases + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps (chromedp v0.15.1 + cdproto already direct from earlier work). F23 in flight; T01 next. |
 | 2026-05-07     | F24 docs      | F24 (Codex Project Memory) spec + plan landed on `main`. Spec `c31b9ac` (`docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md`), plan `19094b8` (`docs/superpowers/plans/2026-05-07-p2-f24-codex-project-memory.md`). 8 tasks (T01 bootstrap → T08 Challenge 5 phases + close-out). Q1-Q5=A,A,A,A,A. Zero new external deps. F24 in flight; T01 next. |
 | 2026-05-07     | F25 docs      | F25 (Plandex Plan Trees + Context Compaction) spec + plan landed on `main`. Spec `docs/superpowers/specs/2026-05-07-p2-f25-plandex-plan-trees-design.md`, plan `docs/superpowers/plans/2026-05-07-p2-f25-plandex-plan-trees.md`. 10 tasks (T01 bootstrap → T10 Challenge 7 phases + close-out). Q1-Q5=A,A,A,A,A (full plandex port; .helixcode/plans/ storage; 6 tools + /plan slash; F01 AutoCompactor reuse). Zero new external deps (google/uuid already direct). F25 in flight; T01 next. |
+| 2026-05-07     | F26 docs      | F26 (Openhands Workspace + Task Planner + Step Executor) spec + plan landed on `main`. Spec + plan committed at `fbfea77`. 8 tasks (T01 → T08). Q1-Q5=A,A,A,A,A (core: container workspaces + planner + executor; F25 plan tree integration; 5 tools + /openhands slash + Cobra). Zero new external deps. F26 in flight; T01 next. |
 
 ## F22 mid-flight section (active feature)
 
@@ -447,4 +448,36 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (plan_create writes invalid JSON / plan_branch adds orphan / plan_merge leaves Metadata unchanged / compact claims success but no byte reduction / verify reports clean on corrupted tree) + two bonus (plan_show output mismatch / shallow compact no-op). All 7 phases PASS with positive byte evidence.
 
-**Picking up F25 specifically:** F25 is CLOSED. F26 next candidate per synthesis §4.2 (Aider voice input / Openhands / Kiro / Kilo-code / Roo-code / Continue).
+**Picking up F25 specifically:** F25 is CLOSED. F26 docs landed; T01 next.
+
+---
+
+## F26 mid-flight section (active feature)
+
+**Active feature:** P2-F26 — Openhands Workspace + Task Planner + Step Executor (sixth Phase 2 feature).
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f26-openhands-workspace-design.md` (commit `fbfea77`).
+
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f26-openhands-workspace.md` (commit `fbfea77`).
+
+**User-confirmed design (Q1-Q5 = A,A,A,A,A):**
+- Q1=A: Openhands — workspace + task planner + step executor (core).
+- Q2=A: Core — container-based workspaces, sequential step executor, F25 plan tree integration.
+- Q3=A: Container-based workspaces via Containers submodule (Docker/Podman).
+- Q4=A: F25 plan trees for structure + Openhands-style sequential step executor.
+- Q5=A: 5 tools (workspace_create/list/cleanup + task_plan/task_step) + /openhands slash + Cobra.
+
+**Task progress:** 1 of 8 — T01 in flight.
+
+| Task | Status | Subject |
+|------|--------|---------|
+| T01  | IN FLIGHT | bootstrap F26 evidence + advance PROGRESS + CONTINUATION |
+| T02  | — | workspace/types.go + manager.go (TDD) |
+| T03  | — | workspace/workspace_tools.go (TDD) |
+| T04  | — | planner/types.go + executor.go (TDD) |
+| T05  | — | planner/planner_tools.go (TDD) |
+| T06  | — | /openhands slash + cobra (TDD) |
+| T07  | — | main.go wiring + integration tests |
+| T08  | — | Challenge harness 5 phases + close-out + push 4 remotes |
+
+**Picking up F26 specifically:** T01 bootstrap in progress; proceed with T02 (workspace types + manager) after T01 commits.

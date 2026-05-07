@@ -667,3 +667,13 @@ all PASS under -race. Anti-bluff clean. Cross-compile 45 MB. Zero new
 external deps. Fifth Phase 2 feature shipped.
 
 ---
+
+---
+
+## P2-F26 — Openhands Workspace + Task Planner + Step Executor
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f26-openhands-workspace-design.md`
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f26-openhands-workspace.md`
+**Q1-Q5 = A,A,A,A,A** (core workspace+planner+executor; container-based; F25 plan tree; 5 tools + /openhands + Cobra)
+**Tasks:** 8 (T01 bootstrap → T08 Challenge 5 phases + close-out)
+**Zero new external deps** (Containers submodule; google/uuid already direct)
