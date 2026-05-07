@@ -16,7 +16,7 @@ A comprehensive user manual for HelixCode has been created with complete documen
 
 ```
 /Users/milosvasic/Projects/HelixCode/docs/user_manual/
-├── README.md                          # Main comprehensive manual (3,027 lines)
+├── README.md                          # Main comprehensive manual (3,240 lines)
 ├── SUMMARY.md                         # This file
 ├── chapters/                          # Reserved for future chapter-based docs
 ├── images/                            # Reserved for diagrams and screenshots
@@ -46,9 +46,9 @@ A comprehensive user manual for HelixCode has been created with complete documen
 
 | File | Lines | Description |
 |------|-------|-------------|
-| **README.md** | **3,027** | Comprehensive user manual covering all features |
+| **README.md** | **3,240** | Comprehensive user manual covering all features |
 
-### Tutorials (8 files)
+### Tutorials (10 files)
 
 | Tutorial | Lines | Duration | Level |
 |----------|-------|----------|-------|
@@ -76,7 +76,7 @@ A comprehensive user manual for HelixCode has been created with complete documen
 
 ### Grand Total
 
-**6,281 lines** of comprehensive documentation
+**6,494 lines** of comprehensive documentation
 
 ---
 
@@ -489,8 +489,8 @@ Create a custom tool for HelixCode's MCP server:
 ## Documentation Quality Metrics
 
 ### Completeness
-- **Total Lines**: 6,281
-- **Main Manual**: 3,027 lines (exceeds 2,000 line requirement)
+- **Total Lines**: 6,494
+- **Main Manual**: 3,240 lines (exceeds 2,000 line requirement)
 - **Tutorials**: 10 comprehensive guides
 - **Examples**: 4 production-ready configurations
 - **Coverage**: All 14+ providers, all tools, all workflows
@@ -653,9 +653,10 @@ Create a custom tool for HelixCode's MCP server:
 ---
 
 **Documentation Created**: November 6, 2025
-**Total Lines**: 6,281 lines
+**Last Updated**: May 8, 2026
+**Total Lines**: 6,494 lines
 **Status**: Complete ✅
-**Version**: 2.0
+**Version**: 2.1
 
 ---
 

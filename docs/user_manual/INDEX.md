@@ -1,6 +1,6 @@
 # HelixCode User Manual - Quick Index
 
-**Version**: 2.0 | **Date**: November 6, 2025 | **Total**: 6,754 lines
+**Version**: 2.1 | **Date**: May 8, 2026 | **Total**: 7,549 lines
 
 ---
 
@@ -46,15 +46,22 @@
   - [Autonomy Modes](#20-autonomy-modes)
   - [Vision Auto-Switch](#21-vision-auto-switch)
 - [Distributed Computing](#part-vi-distributed-computing)
+- [Memory System](#35-memory-system)
+- [Sandbox Configuration](#95-sandbox-configuration)
+- [Search Provider](#114-search-provider-configuration)
 - [Security](#29-security-best-practices)
 - [Troubleshooting](#30-troubleshooting)
+  - [Common Issues](#301-common-issues)
+  - [SSH Worker Issues](#302-ssh-worker-connection-issues)
+  - [LLM Connection Issues](#303-llm-connection-issues)
+  - [Rate Limit Handling](#304-rate-limit-handling)
 - [CLI Reference](#31-cli-command-reference)
 - [API Reference](#32-api-reference)
 - [FAQ](#33-faq)
 
 ---
 
-## 🎓 Tutorials (8 Comprehensive Guides) - 2,355 lines
+## 🎓 Tutorials (10 Comprehensive Guides) - 2,514 lines
 
 ### Beginner Level
 
@@ -118,6 +125,22 @@
 - Option generation
 - Step-by-step execution
 - **Example**: Real-time chat app (15K LOC in 9 hours)
+
+### Advanced Level (continued)
+
+#### [Tutorial 9: Creating a Custom LLM Provider](tutorials/Tutorial_9_Custom_Provider.md) - 79 lines
+⏱️ **30 minutes**
+- Implement the `Provider` interface
+- Provider scaffold (Name, Generate, GenerateStream)
+- Configuration & registration
+- **Skill**: Extending HelixCode
+
+#### [Tutorial 10: Adding a New Tool via MCP SDK](tutorials/Tutorial_10_Adding_a_Tool.md) - 80 lines
+⏱️ **30 minutes**
+- Define tool schema with JSON-RPC
+- Implement Execute() business logic
+- Register in MCP registry
+- **Skill**: MCP server extension
 
 ---
 
@@ -232,7 +255,7 @@ docs/user_manual/
 ├── SUMMARY.md                    # 632 lines - Creation summary
 ├── INDEX.md                      # This file - Quick navigation
 │
-├── tutorials/                    # 2,355 lines - 8 step-by-step guides
+├── tutorials/                    # 2,514 lines - 10 step-by-step guides
 │   ├── Tutorial_1_Building_Web_App.md                (1,245 lines)
 │   ├── Tutorial_2_Refactoring_Large_Codebase.md     (133 lines)
 │   ├── Tutorial_3_Multiple_AI_Providers.md          (110 lines)
@@ -240,7 +263,9 @@ docs/user_manual/
 │   ├── Tutorial_5_Voice_to_Code.md                  (118 lines)
 │   ├── Tutorial_6_Multi_File_Atomic_Edits.md        (134 lines)
 │   ├── Tutorial_7_Distributed_Development.md        (165 lines)
-│   └── Tutorial_8_Using_Plan_Mode.md                (301 lines)
+│   ├── Tutorial_8_Using_Plan_Mode.md                (301 lines)
+│   ├── Tutorial_9_Custom_Provider.md                (79 lines)
+│   └── Tutorial_10_Adding_a_Tool.md                 (80 lines)
 │
 ├── examples/                     # 740 lines - 4 production configs
 │   ├── basic_config.yaml                            (57 lines)
@@ -251,7 +276,7 @@ docs/user_manual/
 ├── chapters/                     # Reserved for future expansion
 └── images/                       # Reserved for diagrams
 
-Total: 6,754 lines of comprehensive documentation
+Total: 7,549 lines of comprehensive documentation
 ```
 
 ---
@@ -345,6 +370,13 @@ Total: 6,754 lines of comprehensive documentation
 - ✅ 4 production-ready configurations
 - ✅ All features covered
 
+### Version 2.1 (May 8, 2026)
+- ✅ Expanded to 7,549 lines
+- ✅ 10 tutorials (added Custom Provider, MCP Tool)
+- ✅ Memory System documentation
+- ✅ Sandbox & Search Provider configuration
+- ✅ Enhanced troubleshooting coverage
+
 ### Planned Updates
 - Video tutorials
 - Architecture diagrams
@@ -387,7 +419,7 @@ helixcode worker list
 
 ---
 
-**Last Updated**: November 6, 2025
-**Documentation Version**: 2.0
-**Total Lines**: 6,754
+**Last Updated**: May 8, 2026
+**Documentation Version**: 2.1
+**Total Lines**: 7,549
 **Status**: Complete ✅
