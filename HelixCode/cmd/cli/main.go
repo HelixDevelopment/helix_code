@@ -27,6 +27,7 @@ import (
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/kilocode"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/roocode"
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
 	"dev.helix.code/internal/server"
@@ -808,6 +809,21 @@ func (c *CLI) Run() error {
 	toolReg.Register(kilocode.NewKiloMultiEditTool(kcRefactorer))
 	if regErr := cmdRegistry.Register(commands.NewKilocodeCommand(kcEngine, kcAnalyzer, kcRefactorer)); regErr != nil {
 		log.Printf("kilocode: register slash failed: %v", regErr)
+	}
+
+	// F29: Roo-code full port.
+	// Task delegation via F15 subagents, template-based code generation,
+	// diff-based code review, conversation-aware memory.
+	// Tools: roo_delegate, roo_generate, roo_bootstrap. Slash: /roocode.
+	rooDelegator := roocode.NewTaskDelegator()
+	toolReg.Register(roocode.NewRooDelegateTool(rooDelegator))
+	rooGen := roocode.NewCodeGenerator(cwd)
+	toolReg.Register(roocode.NewRooGenerateTool(rooGen))
+	toolReg.Register(roocode.NewRooBootstrapTool(rooGen))
+	rooReviewer := roocode.NewCodeReviewer()
+	rooConvStore := roocode.NewConversationStore()
+	if regErr := cmdRegistry.Register(commands.NewRooCodeCommand(rooDelegator, rooGen, rooReviewer, rooConvStore)); regErr != nil {
+		log.Printf("roocode: register slash failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.
