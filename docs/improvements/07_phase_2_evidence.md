@@ -687,3 +687,29 @@ external deps. Fifth Phase 2 feature shipped.
 **Q1-Q5 = A,A,A,A,A** (core voice+repomap; hybrid Whisper; tree-sitter AST; 4 tools + /aider slash)
 **Tasks:** 9 (T01 → T09)
 **Zero new external deps**
+
+---
+
+## Phase 3 — Anti-Bluff Verification Results
+
+**Date:** 2026-05-07
+**Method:** Real runtime evidence per Article XI §11.9 — every test executes real code.
+
+### Verification matrix (all PASS):
+
+| Layer | Packages | Result |
+|-------|----------|--------|
+| Unit tests (-race) | approval, autocommit, projectmemory, plantree, workspace, planner, voice, kilocode, roocode, continua | 10/10 PASS |
+| Browser tests | tools/browser (real chromium) | PASS (36.5s) |
+| Challenge F25 | 7 phases (35 checks) | PASS |
+| Challenge F26 | 5 phases (10 checks) | PASS |
+| Challenge F27 | 6 phases (12 checks) | PASS |
+| Challenge F28 | 5 phases (10 checks) | PASS |
+| Challenge F29 | 5 phases (10 checks) | PASS |
+| Challenge F30 | 4 phases (8 checks) | PASS |
+| Anti-bluff smoke | 11 packages | CLEAN (0 markers) |
+
+**Total: 10/10 unit packages + 6/6 challenges = 16/16 verification gates PASS.
+85 challenge checks across 6 harnesses, all with positive byte evidence.**
+
+No false-success results. Every PASS backed by real execution output.
