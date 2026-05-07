@@ -69,7 +69,8 @@
    - [Command Execution](#91-command-execution)
    - [Security Controls](#92-security-controls)
    - [Output Streaming](#93-output-streaming)
-   - [Timeout Management](#94-timeout-management)
+    - [Timeout Management](#94-timeout-management)
+    - [Sandbox Configuration](#95-sandbox-configuration)
 
 10. [Browser Automation](#10-browser-automation)
     - [Browser Launch](#101-browser-launch)
@@ -82,6 +83,7 @@
     - [Web Search](#111-web-search)
     - [HTML Fetching](#112-html-fetching)
     - [Parsing & Extraction](#113-parsing--extraction)
+    - [Search Provider Configuration](#114-search-provider-configuration)
 
 12. [Voice-to-Code](#12-voice-to-code)
     - [Voice Input Setup](#121-voice-input-setup)
@@ -138,6 +140,11 @@
     - [Automatic Model Switching](#211-automatic-model-switching)
     - [Switch Modes](#212-switch-modes)
     - [Supported Formats](#213-supported-formats)
+
+35. [Memory System](#35-memory-system)
+    - [Available Backends](#351-available-backends)
+    - [Configuration](#352-configuration)
+    - [Choosing the Right Backend](#353-choosing-the-right-backend)
 
 ### Part VI: Distributed Computing
 22. [Distributed Worker Setup](#22-distributed-worker-setup)
@@ -3133,9 +3140,9 @@ web:
 
 Supported providers: Tavily (recommended — AI-optimized), Google Custom Search, Bing Web Search, DuckDuckGo (no API key needed, rate-limited).
 
-### 16. Memory System
+### 35. Memory System
 
-#### 16.1 Available Backends
+#### 35.1 Available Backends
 | Backend | Persistence | Scaling | Use Case |
 |---------|-------------|---------|----------|
 | In-Memory | None (ephemeral) | Single process | Development, testing |
@@ -3147,7 +3154,7 @@ Supported providers: Tavily (recommended — AI-optimized), Google Custom Search
 | Weaviate | Disk (vector + hybrid) | Distributed | Enterprise RAG |
 | Cognee | Disk (graph + vector) | Distributed | AI-native memory |
 
-#### 16.2 Configuration
+#### 35.2 Configuration
 
 ```yaml
 memory:
@@ -3164,7 +3171,7 @@ memory:
     distance: "cosine"  # cosine, euclidean, dot
 ```
 
-#### 16.3 Choosing the Right Backend
+#### 35.3 Choosing the Right Backend
 - **Development**: Start with `filesystem` — zero dependencies, data survives restart
 - **Team**: Use `redis` — fast, shared across team members
 - **Semantic search**: Use `chromadb` or `qdrant` — vector similarity for context retrieval
