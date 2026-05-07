@@ -1546,73 +1546,6 @@ helixcode llm generate "Hello, Claude!"
 
 #### Advanced Features
 
-##### 1. Extended Thinking 🧠
-
-Automatically activated for complex reasoning tasks.
-
-```go
-request := &LLMRequest{
-    Model: "claude-4-sonnet",
-    Messages: []Message{{
-        Role: "user",
-        Content: "Think step by step: Design a distributed caching system with eventual consistency",
-    }},
-    MaxTokens: 10000,
-}
-
-// Claude automatically allocates 80% (8000 tokens) for thinking
-// Returns final answer in remaining 20% (2000 tokens)
-response, _ := provider.Generate(ctx, request)
-```
-
-**Triggers** (keywords in prompt):
-- "think", "reason", "analyze", "consider"
-- "step by step", "carefully", "thoroughly"
-- "explain your reasoning", "show your work"
-
-##### 2. Prompt Caching 💾
-
-Up to 90% cost reduction on repeated contexts.
-
-```go
-// First request - creates cache
-request1 := &LLMRequest{
-    Messages: []Message{
-        {
-            Role: "system",
-            Content: "You are an expert Go developer. [... large codebase context ...]",
-        },
-        {Role: "user", Content: "Explain interfaces"},
-    },
-    Tools: []Tool{/* tool definitions */},
-}
-response1, _ := provider.Generate(ctx, request1)
-
-// Second request - uses cache (90% cheaper on system message and last tool)
-request2 := &LLMRequest{
-    Messages: []Message{
-        {
-            Role: "system",
-            Content: "You are an expert Go developer. [... same large context ...]",
-        },
-        {Role: "user", Content: "Explain channels"},
-    },
-    Tools: []Tool{/* same tools */},
-}
-response2, _ := provider.Generate(ctx, request2)
-
-// Check cache usage
-fmt.Printf("Cache read: %d tokens\n",
-    response2.ProviderMetadata["cache_read_tokens"])
-```
-
-**What Gets Cached**:
-- System messages (if > 1024 tokens)
-- Last user message (if > 1024 tokens)
-- Last tool definition (always)
-
-**Cache Lifetime**: 5 minutes
-
 ##### 3. Vision Support 👁️
 
 All Claude models support image analysis.
@@ -1724,6 +1657,35 @@ helixcode analyze-image screenshot.png "What UI issues do you see?"
    - Keep system prompts > 1024 tokens for caching
    - Reuse tool definitions across requests
    - Use Haiku for simple tasks
+
+##### Extended Thinking
+
+Enable extended thinking in config.yaml:
+
+```yaml
+llm:
+  providers:
+    anthropic:
+      api_key: "${ANTHROPIC_API_KEY}"
+      extended_thinking: true
+      thinking_budget: 16000  # tokens allocated for reasoning
+```
+
+When enabled, Claude produces a `thinking` block before the response. HelixCode surfaces this in the UI as an expandable reasoning trace. Use for complex debugging, architectural decisions, and multi-step planning.
+
+##### Prompt Caching
+
+Cache frequently used context (system prompts, tool definitions, document excerpts):
+
+```yaml
+llm:
+  providers:
+    anthropic:
+      prompt_caching: true
+      cache_ttl: 300  # seconds
+```
+
+Cache hit reduces cost by ~90% and latency by ~50%. Breakpoints: system prompts (automatically cached), tool definitions (automatically cached), and document blocks (manual `cache_control` points).
 
 ### 6.2 Google Gemini
 
@@ -1958,6 +1920,33 @@ helixcode search "best practices for error handling in Go"
    - **2.5 Pro**: Full codebase analysis, complex reasoning
    - **2.5 Flash**: Daily coding, fast iterations
    - **2.0 Flash**: Multimodal tasks, vision + code
+
+##### Multimodal Inputs
+
+Gemini accepts images, video, and audio inline:
+
+```yaml
+llm:
+  providers:
+    gemini:
+      api_key: "${GEMINI_API_KEY}"
+      multimodal: true
+```
+
+Usage: attach image files with `@image.png` in prompts. Gemini 2.5 Pro handles up to 2M tokens — enough for full codebase analysis.
+
+##### Flash Models for Speed
+
+```yaml
+llm:
+  providers:
+    gemini:
+      model: "gemini-2.5-flash-preview-05-06"
+      parameters:
+        temperature: 0.7
+```
+
+Flash models offer 4x faster inference at lower cost, suitable for code generation and refactoring.
 
 ### 6.3 OpenAI
 
@@ -2226,6 +2215,24 @@ helixcode generate --model amazon.titan-text-premier-v1 "Summarize this"
    - Use CloudWatch for usage metrics
    - Monitor per-model costs
 
+##### AWS IAM Authentication
+
+```yaml
+llm:
+  providers:
+    bedrock:
+      region: "us-east-1"
+      credentials:
+        access_key_id: "${AWS_ACCESS_KEY_ID}"
+        secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+        session_token: "${AWS_SESSION_TOKEN}"  # optional, for temporary creds
+      models:
+        - "anthropic.claude-sonnet-4-20250505"
+        - "amazon.titan-text-premier-v1:0"
+```
+
+IAM policy must grant `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`. Cross-region inference requires `bedrock:ListFoundationModels`.
+
 ### 6.5 Azure OpenAI
 
 **Microsoft's enterprise OpenAI service with Entra ID authentication.**
@@ -2272,21 +2279,7 @@ llm:
       default_deployment: "gpt-4o-deployment"
 ```
 
-##### Entra ID Authentication
-
-```go
-provider, _ := azure.NewAzureProvider(ProviderConfigEntry{
-    Type:         ProviderTypeAzure,
-    Endpoint:     os.Getenv("AZURE_OPENAI_ENDPOINT"),
-    AuthType:     "entra_id",
-    TenantID:     os.Getenv("AZURE_TENANT_ID"),
-    ClientID:     os.Getenv("AZURE_CLIENT_ID"),
-    ClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
-})
-```
-
 ##### Content Filtering
-
 ```yaml
 llm:
   providers:
@@ -2339,6 +2332,24 @@ llm:
 2. **Private Endpoints**: For enhanced security
 3. **Deployment Strategy**: Separate deployments for dev/staging/prod
 4. **Monitoring**: Use Azure Monitor and Application Insights
+
+##### Azure Entra ID Authentication
+
+```yaml
+llm:
+  providers:
+    azure:
+      endpoint: "https://<resource>.openai.azure.com"
+      deployment_id: "gpt-4o"
+      api_version: "2025-05-01-preview"
+      auth:
+        type: "entra_id"
+        client_id: "${AZURE_CLIENT_ID}"
+        client_secret: "${AZURE_CLIENT_SECRET}"
+        tenant_id: "${AZURE_TENANT_ID}"
+```
+
+Requires Azure AI Service role assignment. Managed identity also supported via `auth.type: "managed_identity"`.
 
 ### 6.6 Google VertexAI
 
@@ -2605,6 +2616,20 @@ llm:
 - Get API key for production use
 - Great for current events queries
 
+#### Free Tier
+
+```yaml
+llm:
+  providers:
+    xai:
+      api_key: "${XAI_API_KEY}"
+      model: "grok-3-fast-beta"  # free tier
+      parameters:
+        temperature: 0.7
+```
+
+Free tier: 100 requests/hour, 16K context. Upgrade for 1M context and priority access.
+
 ### 7.2 OpenRouter
 
 **Unified API for 100+ models with free options.**
@@ -2660,6 +2685,18 @@ llm:
 - Upgrade to API key for access to premium models
 - Use fallback for reliability
 - Monitor model availability
+
+#### Free Tier
+
+```yaml
+llm:
+  providers:
+    openrouter:
+      api_key: "${OPENROUTER_API_KEY}"
+      free_tier: true  # automatically selects free models
+```
+
+Routes to models like `mistralai/mixtral-8x22b-instruct` (free), `google/gemma-2-27b-it` (free). Rate-limited to 20 req/min on free tier.
 
 ### 7.3 GitHub Copilot
 
@@ -2787,6 +2824,18 @@ llm:
 - 2,000 requests/day is generous for development
 - Excellent for bilingual (Chinese/English) projects
 - Strong performance on coding tasks
+
+#### Free Tier
+
+```yaml
+llm:
+  providers:
+    qwen:
+      api_key: "${QWEN_API_KEY}"
+      model: "qwen-max"
+```
+
+Free: 2,000 requests/day. Paid: 10,000 req/min. Supports tool calling and streaming.
 
 ### 7.5 Ollama
 
@@ -3004,6 +3053,8 @@ helixcode generate "Write a function to parse JSON"
    - CPU threads = physical cores
    - Keep model in RAM (mmap)
    - Use flash attention for long context
+
+
 
 ---
 

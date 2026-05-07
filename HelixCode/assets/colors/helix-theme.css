@@ -1,15 +1,15 @@
 /* HelixCode Theme - Generated from Logo */
 :root {
-  --primary-color: #B3E10B;
-  --secondary-color: #BEE745;
-  --accent-color: #BBE639;
+  --primary-color: #C2E95B;
+  --secondary-color: #B4E8D3;
+  --accent-color: #B6E31A;
   --text-color: #2D3047;
   --background-color: #F5F5F5;
-  --border-color: #B3E10B80;
-  --hover-color: #B3E10B1a;
+  --border-color: #C2E95B80;
+  --hover-color: #C2E95B1a;
 }
 
-.helix-primary { color: #B3E10B; }
-.helix-secondary { color: #BEE745; }
-.helix-accent { color: #BBE639; }
+.helix-primary { color: #C2E95B; }
+.helix-secondary { color: #B4E8D3; }
+.helix-accent { color: #B6E31A; }
 .helix-bg { background-color: #F5F5F5; }
