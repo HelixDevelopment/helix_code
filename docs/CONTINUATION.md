@@ -82,9 +82,9 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**P2-F26 — Openhands Workspace + Task Planner + Step Executor.** Sixth Phase 2 feature; spec + plan landed. T01 in progress.
+**None.** F26 closed; Phase 2 ready for F27 brainstorming.
 
-### Most recent feature (closed): P2-F25 — Plandex Plan Trees
+### Most recent feature (closed): P2-F26 — Openhands Workspace + Planner
 
 - Spec: `7128289` (`docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md`)
 - Plan: `bbb61de` (`docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md`)
@@ -480,4 +480,9 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T07  | — | main.go wiring + integration tests |
 | T08  | — | Challenge harness 5 phases + close-out + push 4 remotes |
 
-**Picking up F26 specifically:** T01 bootstrap in progress; proceed with T02 (workspace types + manager) after T01 commits.
+### CONST-045 — No Hardcoded Distribution Hosts
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env` (N=1..100; iteration stops at first absent `_NAME`; the Containers module `pkg/envconfig/parser.go` is the authoritative loader). The .env file is the sole source of truth for host enrolment — no host is hardcoded in HelixCode source, tests, challenges, or governance documents. Every non-unit test run and every production deployment MUST use whichever hosts are currently configured when `CONTAINERS_REMOTE_ENABLED=true`. Adding, removing, or modifying a host means editing `Containers/.env`; no code change is required. The CURRENT configured set can be audited with `grep '^CONTAINERS_REMOTE_HOST_' Containers/.env`; at the time of this rule's introduction (2026-05-07) the configured hosts were `thinker.local`, but the rule applies to whatever set is in `.env` at any future point (N>=1). Direct `docker`/`podman` commands, manual container start/stop, and ad-hoc remote hosts outside the `.env` mechanism are strictly prohibited.
+
+---
+
+**Picking up F26 specifically:** F26 is CLOSED. F27 next candidate per synthesis §4.2.
