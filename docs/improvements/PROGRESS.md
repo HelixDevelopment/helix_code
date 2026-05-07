@@ -8,7 +8,7 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F28 COMPLETE; F29 next candidate
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F29 in flight
 - **Active feature:** P2-F28 — Kilo-code AST-Aware Refactoring
 - **Active task:** P2-F28-T01 — bootstrap evidence
 - **Last completed:** P2-F27-T09 — Feature 27 (Aider Voice + Repo-Map) close-out + push 4 remotes
