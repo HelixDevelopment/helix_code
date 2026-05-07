@@ -20,7 +20,7 @@ A comprehensive user manual for HelixCode has been created with complete documen
 ├── SUMMARY.md                         # This file
 ├── chapters/                          # Reserved for future chapter-based docs
 ├── images/                            # Reserved for diagrams and screenshots
-├── tutorials/                         # Step-by-step tutorials (8 tutorials)
+├── tutorials/                         # Step-by-step tutorials (10 tutorials)
 │   ├── Tutorial_1_Building_Web_App.md                (1,245 lines)
 │   ├── Tutorial_2_Refactoring_Large_Codebase.md     (133 lines)
 │   ├── Tutorial_3_Multiple_AI_Providers.md          (110 lines)
@@ -28,7 +28,9 @@ A comprehensive user manual for HelixCode has been created with complete documen
 │   ├── Tutorial_5_Voice_to_Code.md                  (118 lines)
 │   ├── Tutorial_6_Multi_File_Atomic_Edits.md        (134 lines)
 │   ├── Tutorial_7_Distributed_Development.md        (165 lines)
-│   └── Tutorial_8_Using_Plan_Mode.md                (301 lines)
+│   ├── Tutorial_8_Using_Plan_Mode.md                (301 lines)
+│   ├── Tutorial_9_Custom_Provider.md                (79 lines)
+│   └── Tutorial_10_Adding_a_Tool.md                 (80 lines)
 └── examples/                          # Configuration examples (4 files)
     ├── basic_config.yaml                            (57 lines)
     ├── provider_configs.yaml                        (174 lines)
@@ -58,7 +60,9 @@ A comprehensive user manual for HelixCode has been created with complete documen
 | Tutorial 6: Multi-File Edits | 134 | 20 min | Intermediate |
 | Tutorial 7: Distributed Development | 165 | 30 min | Advanced |
 | Tutorial 8: Plan Mode | 301 | 45 min | Intermediate-Advanced |
-| **TOTAL** | **2,355** | | |
+| Tutorial 9: Custom LLM Provider | 79 | 30 min | Advanced |
+| Tutorial 10: Tool via MCP SDK | 80 | 30 min | Advanced |
+| **TOTAL** | **2,514** | | |
 
 ### Configuration Examples (4 files)
 
@@ -72,7 +76,7 @@ A comprehensive user manual for HelixCode has been created with complete documen
 
 ### Grand Total
 
-**6,122 lines** of comprehensive documentation
+**6,281 lines** of comprehensive documentation
 
 ---
 
@@ -325,6 +329,30 @@ Master Plan Mode for large projects:
 
 ---
 
+### Tutorial 9: Creating a Custom LLM Provider
+**Duration**: 30 minutes | **Lines**: 79
+
+Extend HelixCode with a custom LLM provider:
+- Implement the `Provider` interface
+- Provider scaffold with `Name()`, `Generate()`, `GenerateStream()`
+- Configuration in `config/config.yaml`
+- Registration in provider registry via `init()`
+- Unit testing with Go's testing package
+
+---
+
+### Tutorial 10: Adding a New Tool via MCP SDK
+**Duration**: 30 minutes | **Lines**: 80
+
+Create a custom tool for HelixCode's MCP server:
+- Define tool schema with JSON-RPC
+- Implement `Execute()` for business logic
+- Register tool in MCP registry
+- Test via WebSocket connection
+- Optional `Confirmable` interface for dangerous tools
+
+---
+
 ## Configuration Examples
 
 ### 1. basic_config.yaml (57 lines)
@@ -438,7 +466,7 @@ Master Plan Mode for large projects:
 ✅ Desktop Application
 ✅ Mobile (iOS/Android)
 
-### Tutorials: 8
+### Tutorials: 10
 ✅ Building Web Applications
 ✅ Refactoring Large Codebases
 ✅ Multiple AI Providers
@@ -447,6 +475,8 @@ Master Plan Mode for large projects:
 ✅ Multi-File Atomic Edits
 ✅ Distributed Development
 ✅ Plan Mode Mastery
+✅ Custom LLM Provider
+✅ Tool via MCP SDK
 
 ### Configuration Examples: 4
 ✅ Basic Development Setup
@@ -459,9 +489,9 @@ Master Plan Mode for large projects:
 ## Documentation Quality Metrics
 
 ### Completeness
-- **Total Lines**: 6,122
+- **Total Lines**: 6,281
 - **Main Manual**: 3,027 lines (exceeds 2,000 line requirement)
-- **Tutorials**: 8 comprehensive guides
+- **Tutorials**: 10 comprehensive guides
 - **Examples**: 4 production-ready configurations
 - **Coverage**: All 14+ providers, all tools, all workflows
 
@@ -623,7 +653,7 @@ Master Plan Mode for large projects:
 ---
 
 **Documentation Created**: November 6, 2025
-**Total Lines**: 6,122 lines
+**Total Lines**: 6,281 lines
 **Status**: Complete ✅
 **Version**: 2.0
 
