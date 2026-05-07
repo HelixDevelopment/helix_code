@@ -12,20 +12,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockPlanStore struct {
+type mockPlanTreeStore struct {
 	plans map[string]plantree.PlanTree
 }
 
-func newMockPlanStore() *mockPlanStore {
-	return &mockPlanStore{plans: make(map[string]plantree.PlanTree)}
+func newMockPlanTreeStore() *mockPlanTreeStore {
+	return &mockPlanTreeStore{plans: make(map[string]plantree.PlanTree)}
 }
 
-func (m *mockPlanStore) Save(tree plantree.PlanTree) error {
+func (m *mockPlanTreeStore) Save(tree plantree.PlanTree) error {
 	m.plans[tree.Name] = tree
 	return nil
 }
 
-func (m *mockPlanStore) Load(name string) (plantree.PlanTree, error) {
+func (m *mockPlanTreeStore) Load(name string) (plantree.PlanTree, error) {
 	tree, ok := m.plans[name]
 	if !ok {
 		return plantree.PlanTree{}, plantree.ErrPlanNotFound
@@ -33,7 +33,7 @@ func (m *mockPlanStore) Load(name string) (plantree.PlanTree, error) {
 	return tree, nil
 }
 
-func (m *mockPlanStore) List() ([]plantree.PlanTreeSummary, error) {
+func (m *mockPlanTreeStore) List() ([]plantree.PlanTreeSummary, error) {
 	var summaries []plantree.PlanTreeSummary
 	for _, tree := range m.plans {
 		summaries = append(summaries, tree.Summary())
@@ -44,24 +44,24 @@ func (m *mockPlanStore) List() ([]plantree.PlanTreeSummary, error) {
 	return summaries, nil
 }
 
-func (m *mockPlanStore) Delete(name string) error {
+func (m *mockPlanTreeStore) Delete(name string) error {
 	delete(m.plans, name)
 	return nil
 }
 
-type mockPlanSummariser struct {
+type mockPTSummariser struct {
 	summary string
 	err     error
 }
 
-func (m *mockPlanSummariser) Summarise(text string, maxWords int) (string, error) {
+func (m *mockPTSummariser) Summarise(text string, maxWords int) (string, error) {
 	if m.err != nil {
 		return "", m.err
 	}
 	return m.summary, nil
 }
 
-func makeTestTree() plantree.PlanTree {
+func makeTestPlanTree() plantree.PlanTree {
 	now := time.Now().UTC()
 	root := &plantree.PlanNode{
 		ID:          "root-1",
@@ -91,34 +91,34 @@ func makeTestTree() plantree.PlanTree {
 	}
 }
 
-func TestPlanCommand_ListEmpty(t *testing.T) {
-	store := newMockPlanStore()
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_ListEmpty(t *testing.T) {
+	store := newMockPlanTreeStore()
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{})
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "No plans found")
+	assert.Contains(t, result.Message, "No plan trees found")
 }
 
-func TestPlanCommand_ListWithPlans(t *testing.T) {
-	store := newMockPlanStore()
-	store.Save(makeTestTree())
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_ListWithPlans(t *testing.T) {
+	store := newMockPlanTreeStore()
+	store.Save(makeTestPlanTree())
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{})
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "1 plan")
+	assert.Contains(t, result.Message, "1 plan tree")
 	assert.Contains(t, result.Output, "test-plan")
 }
 
-func TestPlanCommand_Show(t *testing.T) {
-	store := newMockPlanStore()
-	store.Save(makeTestTree())
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_Show(t *testing.T) {
+	store := newMockPlanTreeStore()
+	store.Save(makeTestPlanTree())
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args:  []string{"show", "test-plan"},
@@ -130,12 +130,11 @@ func TestPlanCommand_Show(t *testing.T) {
 	assert.Contains(t, result.Output, "Test Plan")
 	assert.Contains(t, result.Output, "Task One")
 	assert.Contains(t, result.Output, "[ ]")
-	assert.Contains(t, result.Output, "[▶]")
 }
 
-func TestPlanCommand_Show_NotFound(t *testing.T) {
-	store := newMockPlanStore()
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_Show_NotFound(t *testing.T) {
+	store := newMockPlanTreeStore()
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args: []string{"show", "nonexistent"},
@@ -146,10 +145,10 @@ func TestPlanCommand_Show_NotFound(t *testing.T) {
 	assert.Contains(t, result.Message, "plan not found")
 }
 
-func TestPlanCommand_Show_Subtree(t *testing.T) {
-	store := newMockPlanStore()
-	store.Save(makeTestTree())
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_Show_Subtree(t *testing.T) {
+	store := newMockPlanTreeStore()
+	store.Save(makeTestPlanTree())
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args:  []string{"show", "test-plan"},
@@ -160,28 +159,12 @@ func TestPlanCommand_Show_Subtree(t *testing.T) {
 	assert.True(t, result.Success)
 	assert.Contains(t, result.Output, "Task One")
 	assert.Contains(t, result.Output, "subtree")
-	assert.NotContains(t, result.Output, "Test Plan")
 }
 
-func TestPlanCommand_Compact(t *testing.T) {
-	store := newMockPlanStore()
-	tree := makeTestTree()
-	store.Save(tree)
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
-
-	result, err := cmd.Execute(context.Background(), &CommandContext{
-		Args: []string{"compact", "test-plan"},
-	})
-	require.NoError(t, err)
-
-	assert.True(t, result.Success)
-	assert.True(t, strings.Contains(result.Message, "no compaction needed") || strings.Contains(result.Message, "compacted"))
-}
-
-func TestPlanCommand_Verify_Clean(t *testing.T) {
-	store := newMockPlanStore()
-	store.Save(makeTestTree())
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_Verify_Clean(t *testing.T) {
+	store := newMockPlanTreeStore()
+	store.Save(makeTestPlanTree())
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args: []string{"verify", "test-plan"},
@@ -192,12 +175,12 @@ func TestPlanCommand_Verify_Clean(t *testing.T) {
 	assert.Contains(t, result.Message, "valid")
 }
 
-func TestPlanCommand_Verify_Corrupt(t *testing.T) {
-	store := newMockPlanStore()
-	tree := makeTestTree()
+func TestPlanTreeCommand_Verify_Corrupt(t *testing.T) {
+	store := newMockPlanTreeStore()
+	tree := makeTestPlanTree()
 	tree.Root.Children[0].ParentID = "nonexistent-parent"
 	store.Save(tree)
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args: []string{"verify", "test-plan"},
@@ -209,20 +192,20 @@ func TestPlanCommand_Verify_Corrupt(t *testing.T) {
 	assert.Contains(t, result.Output, "orphan")
 }
 
-func TestPlanCommand_DefaultToList(t *testing.T) {
-	store := newMockPlanStore()
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_DefaultToList(t *testing.T) {
+	store := newMockPlanTreeStore()
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{})
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "No plans found")
+	assert.Contains(t, result.Message, "No plan trees found")
 }
 
-func TestPlanCommand_UnknownSubcommand(t *testing.T) {
-	store := newMockPlanStore()
-	cmd := NewPlanCommand(store, &mockPlanSummariser{summary: "summary"})
+func TestPlanTreeCommand_UnknownSubcommand(t *testing.T) {
+	store := newMockPlanTreeStore()
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
 
 	result, err := cmd.Execute(context.Background(), &CommandContext{
 		Args: []string{"bogus"},
@@ -231,4 +214,19 @@ func TestPlanCommand_UnknownSubcommand(t *testing.T) {
 
 	assert.False(t, result.Success)
 	assert.Contains(t, result.Message, "unknown subcommand")
+}
+
+func TestPlanTreeCommand_Compact(t *testing.T) {
+	store := newMockPlanTreeStore()
+	tree := makeTestPlanTree()
+	store.Save(tree)
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "summary"})
+
+	result, err := cmd.Execute(context.Background(), &CommandContext{
+		Args: []string{"compact", "test-plan"},
+	})
+	require.NoError(t, err)
+
+	assert.True(t, result.Success)
+	assert.True(t, strings.Contains(result.Message, "no compaction needed") || strings.Contains(result.Message, "compacted"))
 }

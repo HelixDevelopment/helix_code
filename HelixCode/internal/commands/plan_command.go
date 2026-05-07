@@ -4,185 +4,141 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"text/tabwriter"
 
-	"dev.helix.code/internal/plantree"
+	"dev.helix.code/internal/workflow/planmode"
 )
 
+// PlanCommand implements the /plan slash command.
+//
+// Subcommands:
+//
+//	/plan              — show (default)
+//	/plan show         — display the active plan and its actions
+//	/plan approve      — approve the entire active plan
+//	/plan approve <id> — approve a single action by ID
+//	/plan reject       — reject the active plan and return to normal mode
+//	/plan status       — report current mode and plan summary
 type PlanCommand struct {
-	store      plantree.Store
-	summariser plantree.Summariser
+	planner planmode.ApprovalPlanner
+	mc      planmode.ModeController
 }
 
-func NewPlanCommand(store plantree.Store, summariser plantree.Summariser) *PlanCommand {
-	return &PlanCommand{store: store, summariser: summariser}
+// NewPlanCommand returns a /plan command bound to a planner and mode controller.
+func NewPlanCommand(planner planmode.ApprovalPlanner, mc planmode.ModeController) *PlanCommand {
+	return &PlanCommand{planner: planner, mc: mc}
 }
 
 func (c *PlanCommand) Name() string        { return "plan" }
-func (c *PlanCommand) Aliases() []string   { return []string{"pl"} }
-func (c *PlanCommand) Description() string { return "Manage plan trees" }
-func (c *PlanCommand) Usage() string {
-	return "/plan [list|show <name>|compact <name>|verify <name>]"
-}
+func (c *PlanCommand) Aliases() []string   { return nil }
+func (c *PlanCommand) Description() string { return "Inspect, approve, or reject the active plan." }
+func (c *PlanCommand) Usage() string       { return "/plan [show|approve [<action-id>]|reject|status]" }
 
-func (c *PlanCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
-	args := cmdCtx.Args
-	subcmd := "list"
-	if len(args) > 0 {
-		subcmd = args[0]
+// Execute dispatches to the appropriate subcommand handler.
+func (c *PlanCommand) Execute(ctx context.Context, cc *CommandContext) (*CommandResult, error) {
+	sub := "show"
+	if len(cc.Args) > 0 {
+		sub = cc.Args[0]
 	}
-
-	switch subcmd {
-	case "list":
-		return c.handleList(ctx, cmdCtx)
+	switch sub {
 	case "show":
-		return c.handleShow(ctx, cmdCtx)
-	case "compact":
-		return c.handleCompact(ctx, cmdCtx)
-	case "verify":
-		return c.handleVerify(ctx, cmdCtx)
+		return c.show()
+	case "approve":
+		return c.approve(cc.Args[1:])
+	case "reject":
+		return c.reject()
+	case "status":
+		return c.status()
 	default:
-		return &CommandResult{
-			Success: false,
-			Message: fmt.Sprintf("unknown subcommand: %s. Available: list, show, compact, verify", subcmd),
-		}, nil
+		return nil, fmt.Errorf("/plan: unknown subcommand %q (want show|approve|reject|status)", sub)
 	}
 }
 
-func (c *PlanCommand) handleList(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
-	summaries, err := c.store.List()
-	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("list plans: %v", err)}, nil
-	}
-
-	if len(summaries) == 0 {
-		return &CommandResult{Success: true, Message: "No plans found.", Output: "No plans found."}, nil
+// show renders the active plan and its actions.
+func (c *PlanCommand) show() (*CommandResult, error) {
+	plan := c.planner.ActivePlan()
+	if plan == nil {
+		return &CommandResult{Success: true, Output: "No active plan."}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%-20s %6s %-20s %s\n", "NAME", "NODES", "ROOT TITLE", "UPDATED"))
-	sb.WriteString(strings.Repeat("-", 80) + "\n")
-	for _, s := range summaries {
-		sb.WriteString(fmt.Sprintf("%-20s %6d %-20s %s\n", s.Name, s.NodeCount, truncate(s.RootTitle, 20), s.UpdatedAt.Format("2006-01-02 15:04")))
+	fmt.Fprintf(&sb, "Plan: %s — %s\n", plan.ID, plan.Title)
+	if plan.Description != "" {
+		fmt.Fprintf(&sb, "Description: %s\n", plan.Description)
 	}
+	fmt.Fprintf(&sb, "Status: %s\n\n", plan.Status)
 
-	output := sb.String()
-	return &CommandResult{Success: true, Message: fmt.Sprintf("%d plan(s)", len(summaries)), Output: output}, nil
-}
-
-func (c *PlanCommand) handleShow(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
-	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plan show <name>"}, nil
-	}
-
-	name := cmdCtx.Args[1]
-	tree, err := c.store.Load(name)
-	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan '%s': %v", name, err)}, nil
-	}
-
-	nodeID := cmdCtx.Flags["id"]
-	var output string
-	if nodeID != "" {
-		node := findNodeInTree(tree.Root, nodeID)
-		if node == nil {
-			return &CommandResult{Success: false, Message: fmt.Sprintf("node %s not found in plan '%s'", nodeID, name)}, nil
+	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tw, "ID\tTOOL\tAPPROVED\tEXECUTED\tDESCRIPTION")
+	for _, a := range plan.Actions {
+		approved := "no"
+		if a.Approved != nil && *a.Approved {
+			approved = "yes"
 		}
-		output = fmt.Sprintf("Plan: %s (subtree at %s)\n\n%s", name, nodeID, plantree.RenderTree(node, 0))
-	} else {
-		output = fmt.Sprintf("Plan: %s\n\n%s", name, plantree.RenderTree(tree.Root, 0))
+		executed := "no"
+		if a.Executed {
+			executed = "yes"
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", a.ID, a.ToolName, approved, executed, a.Description)
 	}
+	tw.Flush()
 
-	return &CommandResult{Success: true, Message: output, Output: output}, nil
+	return &CommandResult{Success: true, Output: sb.String()}, nil
 }
 
-func (c *PlanCommand) handleCompact(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
-	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plan compact <name>"}, nil
+// approve approves the whole active plan (no args) or a single action (one arg).
+func (c *PlanCommand) approve(rest []string) (*CommandResult, error) {
+	plan := c.planner.ActivePlan()
+	if plan == nil {
+		return nil, fmt.Errorf("/plan approve: no active plan")
 	}
-
-	name := cmdCtx.Args[1]
-	tree, err := c.store.Load(name)
-	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan '%s': %v", name, err)}, nil
-	}
-
-	result, err := plantree.CompactTree(&tree, c.summariser)
-	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("compact: %v", err)}, nil
-	}
-
-	if result.NodesCompacted == 0 {
+	if len(rest) == 0 {
+		if err := c.planner.ApprovePlan(plan.ID); err != nil {
+			return nil, err
+		}
 		return &CommandResult{
 			Success: true,
-			Message: fmt.Sprintf("Plan '%s': %d nodes, no compaction needed (%d bytes under threshold).", name, plantree.CountNodes(tree.Root), result.OriginalBytes),
+			Output:  fmt.Sprintf("Plan %s approved (%d actions).", plan.ID, len(plan.Actions)),
 		}, nil
 	}
-
-	if err := c.store.Save(result.Tree); err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("save compacted plan: %v", err)}, nil
+	actionID := rest[0]
+	if err := c.planner.ApproveAction(plan.ID, actionID); err != nil {
+		return nil, err
 	}
-
-	reduction := result.OriginalBytes - result.NewBytes
 	return &CommandResult{
 		Success: true,
-		Message: fmt.Sprintf("Plan '%s' compacted: %d nodes (%d bytes → %d bytes, -%d bytes).",
-			name, result.NodesCompacted, result.OriginalBytes, result.NewBytes, reduction),
+		Output:  fmt.Sprintf("Approved action %s.", actionID),
 	}, nil
 }
 
-func (c *PlanCommand) handleVerify(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
-	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plan verify <name>"}, nil
+// reject rejects the active plan and transitions back to ModeNormal if in plan mode.
+func (c *PlanCommand) reject() (*CommandResult, error) {
+	plan := c.planner.ActivePlan()
+	if plan == nil {
+		return nil, fmt.Errorf("/plan reject: no active plan")
 	}
-
-	name := cmdCtx.Args[1]
-	tree, err := c.store.Load(name)
-	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan '%s': %v", name, err)}, nil
+	if err := c.planner.RejectPlan(plan.ID); err != nil {
+		return nil, err
 	}
-
-	result := plantree.VerifyTree(&tree)
-
-	if result.Valid {
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Plan '%s' is valid.", name)}, nil
+	if c.mc.GetMode() == planmode.ModePlan {
+		_ = c.mc.TransitionTo(planmode.ModeNormal)
 	}
-
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Plan '%s' has %d issue(s):\n", name, len(result.Issues)))
-	for _, issue := range result.Issues {
-		severity := "WARN"
-		if issue.Severity == plantree.SeverityError {
-			severity = "ERROR"
-		}
-		nodeInfo := ""
-		if issue.NodeID != "" {
-			nodeInfo = fmt.Sprintf(" [%s]", issue.NodeID)
-		}
-		sb.WriteString(fmt.Sprintf("  [%s]%s %s\n", severity, nodeInfo, issue.Message))
-	}
-
-	output := sb.String()
-	return &CommandResult{Success: true, Message: output, Output: output}, nil
+	return &CommandResult{
+		Success: true,
+		Output:  fmt.Sprintf("Plan %s rejected. Returning to normal mode.", plan.ID),
+	}, nil
 }
 
-func findNodeInTree(node *plantree.PlanNode, id string) *plantree.PlanNode {
-	if node == nil {
-		return nil
+// status reports the current mode and a brief plan summary.
+func (c *PlanCommand) status() (*CommandResult, error) {
+	mode := c.mc.GetMode()
+	plan := c.planner.ActivePlan()
+	planSummary := "no active plan"
+	if plan != nil {
+		planSummary = fmt.Sprintf("plan=%s status=%s actions=%d", plan.ID, plan.Status, len(plan.Actions))
 	}
-	if node.ID == id {
-		return node
-	}
-	for _, child := range node.Children {
-		if found := findNodeInTree(child, id); found != nil {
-			return found
-		}
-	}
-	return nil
-}
-
-func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
+	return &CommandResult{
+		Success: true,
+		Output:  fmt.Sprintf("Mode: %s | %s", mode, planSummary),
+	}, nil
 }

@@ -37,6 +37,7 @@ import (
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
+	"dev.helix.code/internal/plantree"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
 	"dev.helix.code/internal/tools/smartedit"
@@ -735,6 +736,21 @@ func (c *CLI) Run() error {
 		log.Printf("projectmemory: register slash command failed: %v", regErr)
 	}
 	c.memoryRegistry = memRegistry
+
+	// F25: plandex-style plan tree system.
+	// Six agent tools (plan_create, plan_branch, plan_merge, plan_list,
+	// plan_show, plan_delete) backed by FileStore at .helixcode/plans/.
+	// /plan slash (list/show/compact/verify) with context compaction via
+	// F01's compression.Summariser. Plan trees are agent-driven — the agent
+	// calls plan_create/plan_branch/plan_merge as part of its task loop.
+	planStore := plantree.NewFileStore(cwd)
+	planSummariser := plantree.DeterministicSummariser{}
+	if err := plantree.RegisterPlanTools(toolReg, planStore); err != nil {
+		log.Printf("plantree: register tools failed: %v", err)
+	}
+	if regErr := cmdRegistry.Register(commands.NewPlanTreeCommand(planStore, planSummariser)); regErr != nil {
+		log.Printf("plantree: register slash command failed: %v", regErr)
+	}
 
 	// F09: user-defined Markdown slash commands.
 	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
