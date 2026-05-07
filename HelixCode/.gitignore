@@ -121,7 +121,7 @@ coverage/
 # vendor/
 
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
-cli
+/cli
 
 # === Security reports (never commit scanner output) ===
 reports/security/

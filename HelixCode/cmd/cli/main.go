@@ -38,6 +38,7 @@ import (
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
 	"dev.helix.code/internal/plantree"
+	taskplanner "dev.helix.code/internal/planner"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
 	"dev.helix.code/internal/tools/smartedit"
@@ -47,6 +48,7 @@ import (
 	"dev.helix.code/internal/worker"
 	"dev.helix.code/internal/workflow"
 	"dev.helix.code/internal/workflow/planmode"
+	"dev.helix.code/internal/workspace"
 	"go.uber.org/zap"
 )
 
@@ -751,6 +753,27 @@ func (c *CLI) Run() error {
 	if regErr := cmdRegistry.Register(commands.NewPlanTreeCommand(planStore, planSummariser)); regErr != nil {
 		log.Printf("plantree: register slash command failed: %v", regErr)
 	}
+
+	// F26: Openhands-style workspace + planner system.
+	// Container-based per-task workspaces (Docker/Podman), sequential
+	// step executor with retry, plan-tree-aware task planner. Tools:
+	// workspace_create/list/cleanup + task_plan/task_step. Slash:
+	// /openhands (list/create/cleanup).
+	wsMgr, wsErr := workspace.NewWorkspaceManager()
+	if wsErr != nil {
+		log.Printf("workspace: manager init failed (container runtime not available): %v", wsErr)
+	} else {
+		toolReg.Register(workspace.NewWorkspaceCreateTool(wsMgr))
+		toolReg.Register(workspace.NewWorkspaceListTool(wsMgr))
+		toolReg.Register(workspace.NewWorkspaceCleanupTool(wsMgr))
+		if regErr := cmdRegistry.Register(commands.NewOpenhandsCommand(wsMgr)); regErr != nil {
+			log.Printf("openhands: register slash command failed: %v", regErr)
+		}
+	}
+
+	plannerExec := taskplanner.NewSequentialExecutor(nil)
+	toolReg.Register(taskplanner.NewTaskPlanTool(plannerExec))
+	toolReg.Register(taskplanner.NewTaskStepTool(plannerExec))
 
 	// F09: user-defined Markdown slash commands.
 	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
