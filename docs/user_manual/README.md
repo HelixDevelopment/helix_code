@@ -3052,8 +3052,123 @@ helixcode generate "Write a function to parse JSON"
 4. **Performance**:
    - CPU threads = physical cores
    - Keep model in RAM (mmap)
-   - Use flash attention for long context
+    - Use flash attention for long context
 
+### 9. Shell Execution
+
+#### 9.1 Command Execution
+
+HelixCode executes shell commands securely through a sandboxed environment with configurable permissions.
+
+#### 9.2 Security Controls
+
+The shell executor applies allowlist/blocklist filtering before any command runs. Commands must be on the allowlist; commands on the blocklist are rejected outright.
+
+#### 9.3 Output Streaming
+
+Long-running commands stream output in real-time to the client interface.
+
+#### 9.4 Timeout Management
+
+Each command has a configurable timeout. Default: 30 seconds.
+
+#### 9.5 Sandbox Configuration
+
+```yaml
+shell:
+  sandbox:
+    enabled: true
+    allowed_commands:
+      - "go"
+      - "python"
+      - "node"
+      - "npm"
+      - "git"
+      - "docker"
+      - "make"
+      - "curl"
+      - "ls"
+      - "cat"
+      - "grep"
+      - "find"
+    blocked_commands:
+      - "rm -rf /"
+      - "dd"
+      - "mkfs"
+      - ":(){ :|:& };:"  # fork bomb
+    timeout: 300  # seconds per command
+    max_output_size: 10485760  # 10MB
+```
+
+Commands not in `allowed_commands` require interactive confirmation. Commands matching `blocked_commands` are rejected outright. Set `sandbox.enabled: false` only in trusted, isolated environments.
+
+### 11. Web Tools
+
+#### 11.1 Web Search
+
+HelixCode supports web search through multiple providers for fetching real-time information.
+
+#### 11.2 HTML Fetching
+
+The fetch tool retrieves raw HTML from URLs for processing and analysis.
+
+#### 11.3 Parsing & Extraction
+
+Content can be parsed from HTML into structured formats (markdown, text, JSON).
+
+#### 11.4 Search Provider Configuration
+
+```yaml
+web:
+  search:
+    provider: "tavily"  # or google, bing, duckduckgo
+    api_key: "${TAVILY_API_KEY}"
+    max_results: 8
+    safe_search: true
+  fetch:
+    user_agent: "HelixCode/2.0"
+    timeout: 30
+    max_size: 5242880  # 5MB
+```
+
+Supported providers: Tavily (recommended — AI-optimized), Google Custom Search, Bing Web Search, DuckDuckGo (no API key needed, rate-limited).
+
+### 16. Memory System
+
+#### 16.1 Available Backends
+| Backend | Persistence | Scaling | Use Case |
+|---------|-------------|---------|----------|
+| In-Memory | None (ephemeral) | Single process | Development, testing |
+| Filesystem | Disk (JSON) | Single node | Small projects |
+| Redis | RAM + RDB/AOF | Distributed | High-speed caching |
+| Memcached | RAM (volatile) | Distributed | Session cache |
+| ChromaDB | Disk (vector) | Distributed | Semantic search |
+| Qdrant | Disk (vector) | Distributed | Production RAG |
+| Weaviate | Disk (vector + hybrid) | Distributed | Enterprise RAG |
+| Cognee | Disk (graph + vector) | Distributed | AI-native memory |
+
+#### 16.2 Configuration
+
+```yaml
+memory:
+  backend: "chromadb"  # or redis, filesystem, qdrant, weaviate, cognee
+  connection:
+    host: "localhost"
+    port: 8000
+    tls: false
+  persistence:
+    path: "/var/lib/helixcode/memory/"
+    sync_interval: 60  # seconds
+  vector:
+    dimensions: 1536  # match embedding model output
+    distance: "cosine"  # cosine, euclidean, dot
+```
+
+#### 16.3 Choosing the Right Backend
+- **Development**: Start with `filesystem` — zero dependencies, data survives restart
+- **Team**: Use `redis` — fast, shared across team members
+- **Semantic search**: Use `chromadb` or `qdrant` — vector similarity for context retrieval
+- **Enterprise**: Use `weaviate` or `cognee` — hybrid search, multi-tenancy, audit trails
 
 
 ---
