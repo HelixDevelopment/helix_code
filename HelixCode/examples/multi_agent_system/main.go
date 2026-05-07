@@ -191,6 +191,17 @@ func (m *MockLLMProvider) GetHealth(ctx context.Context) (*llm.ProviderHealth, e
 	return &llm.ProviderHealth{Status: "healthy"}, nil
 }
 
+func (m *MockLLMProvider) GetContextWindow() int {
+	return 8192
+}
+
+func (m *MockLLMProvider) CountTokens(text string) (int, error) {
+	if len(text) == 0 {
+		return 0, nil
+	}
+	return len(text) / 4, nil
+}
+
 func (m *MockLLMProvider) Close() error {
 	return nil
 }
