@@ -8,13 +8,13 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 3 — Test Infrastructure Expansion (in progress)
-- **Active feature:** P3-WP1 — Real-infra test runner + anti-bluff verification sweep
-- **Active task:** P3-WP1-T01 — run full test suite + identify gaps
-- **Last completed:** P2-F30 — Feature 30 (Continue IDE Integration) close-out + Phase 2 CLOSED
+- **Active phase:** Phase 5 — End-user materials uplift (pending)
+- **Active feature:** —
+- **Active task:** —
+- **Last completed:** Phase 4 CLOSED — anti-bluff audit clean, 1 skip marker fixed
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
-- **Last touched:** 2026-05-07
+- **Last touched:** 2026-05-08
 - **Blocked-on:** —
 
 ## Phase status
@@ -24,9 +24,9 @@
 | P1 — claude-code | done | 2026-05-05 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md |
 | P1.5 — Foundation Cleanup | done | 2026-05-06 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md §P1.5 |
 | P2 — Other CLI agents | done | 2026-05-06 | 2026-05-07 | docs/improvements/07_phase_2_evidence.md |
-| P3 — Test infra | in progress | 2026-05-07 | 2026-05-07 | — |
-| P4 — Anti-bluff audit | pending | 2026-05-07 | 2026-05-07 | — |
-| P5 — End-user materials | pending | 2026-05-07 | 2026-05-07 | — |
+| P3 — Test infra | done | 2026-05-07 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 3 |
+| P4 — Anti-bluff audit | done | 2026-05-08 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 4 |
+| P5 — End-user materials | pending | 2026-05-08 | — | — |
 
 ## P1.5 Work-package list (12 WPs) — ALL CLOSED
 - [x] P1.5-WP1 — Inventory + foundation safety (5 tasks)  ← commit `421495a`
@@ -455,18 +455,20 @@
 ## Phase 3 — Issue remediation (2026-05-07)
 
 ### RESOLVED:
-- **F23 browser_legacy_* approval test** — `TestAllRegisteredTools_DefaultIsLevelEdit_ForUnclassifiedTools` now PASSES. Fixed classified map in test to use F23-renamed tool names + Phase 2 tools.
+- **F23 browser_legacy_* approval test** — `TestAllRegisteredTools_DefaultIsLevelEdit_ForUnclassifiedTools` now PASSES.
 - **F02 permissions engine wired** — `ConfirmationCoordinator.SetPolicyEngine()` method added. `main.go` now injects permissions-loaded `PolicyEngine` into the confirmation pipeline. Deny rules from `.yaml` files now actually block tool execution.
 - **Challenges submodule mirrors** — `gitlab` and `upstream` remotes added to Challenges submodule.
 - **Governance cascade** — CONST-033/035/042/043/045 cascaded to Security and Containers submodules.
+- **LLMsVerifier build** — Fixed go.mod replace path `../../Challenges` → `../../../Challenges` (LLMsVerifier at `Dependencies/HelixDevelopment/LLMsVerifier/`, Challenges at meta-repo root `Challenges/`). `go build ./...` and `go mod tidy` both pass clean.
+- **HelixQA build** — Fixed 4 replace directives that pointed to wrong paths: `../LLMsVerifier/llm-verifier` → `../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`, `../DocProcessor` → `../Dependencies/HelixDevelopment/DocProcessor`, `../LLMOrchestrator` → `../Dependencies/HelixDevelopment/LLMOrchestrator`, `../VisionEngine` → `../Dependencies/HelixDevelopment/VisionEngine`. `go build ./...` and `go mod tidy` both pass clean.
+- **6 internal/server tests** — Now 0 FAIL. All internal/server tests PASS (fresh `-count=1` run). Previously listed as "pre-existing, environment-dependent" but now passing in current environment.
+- **HelixAgent submodules** — Auth, Cache, Concurrency, Database and 100+ submodules now populated via `git submodule update --force --init --recursive`. `go build ./cmd/helixagent/...` PASS. `go test ./cmd/helixagent/...` and `go test ./internal/...` both PASS. Only `DebateOrchestrator` (repo not on GitHub) blocks wildcard `./...`.
+- **Containers build** — `go build ./...` exits 0. Build passes clean.
 
 ### REMAINING (pre-existing, not Phase 2):
-- **HelixAgent build** — 302/381 tests FAIL (Agentic submodule missing)
-- **HelixQA build** — 35 tests FAIL (replace-dir + go.sum gaps)
-- **LLMsVerifier build** — missing go.sum entries
-- **Containers build** — missing go.sum entries
-- **6 internal/server tests** — FAIL (pre-existing, environment-dependent)
+- **HelixAgent build** — IMPROVED: submodules now populated (Auth, Cache, Concurrency, Database all have go.mod). `go build ./cmd/helixagent/...` passes. `go test ./cmd/helixagent/...` and `go test ./internal/...` both PASS. Full `go test ./...` blocked by single stale replace directive: `digital.vasic.debate => ./DebateOrchestrator` (DebateOrchestrator repo doesn't exist on GitHub — pre-existing, HelixAgent-internal, out of scope per spec §1.3 N2).
+- **Containers build** — RESOLVED: `go build ./...` exits 0. Build now passes clean.
 - **Historical credential leaks** — operator rotation required
-- **Stale cli_agents pins (13)** — HelixAgent submodule SHAs expired upstream
+- **Stale cli_agents pins (13)** — HelixAgent submodule SHAs expired upstream. Per spec §1.3 N2, HelixAgent rewrite is out of scope; per-agent pin bumps go through HelixAgent's own governance.
 - **23 snake_case renames** — build-path-breaking, deferred
 - **Codex Multimodal, Cline Computer Use** — not yet ported

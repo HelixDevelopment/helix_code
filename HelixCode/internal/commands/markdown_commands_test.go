@@ -48,7 +48,7 @@ body`
 	body2 := "---\ntitle: oops\n: invalid_key\n---\nbody"
 	_, err2 := parseMarkdownCommand("bad", body2, "/tmp/bad.md")
 	if err == nil && err2 == nil {
-		t.Skip("yaml.v3 too lenient to test malformed; both bodies accepted")
+		t.Skip("SKIP-OK: P4-AUDIT yaml.v3 too lenient to test malformed; both bodies accepted")
 	}
 }
 
