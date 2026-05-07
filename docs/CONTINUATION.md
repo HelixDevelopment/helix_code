@@ -82,7 +82,7 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**None.** F27 closed; Phase 2 ready for F28 brainstorming.
+**None.** F28 closed; Phase 2 ready for F29 brainstorming.
 
 ### Most recent feature (closed): P2-F27 — Aider Voice Input + Repo-Map
 

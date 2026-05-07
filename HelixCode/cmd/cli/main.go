@@ -25,6 +25,7 @@ import (
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
+	"dev.helix.code/internal/kilocode"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
@@ -790,6 +791,23 @@ func (c *CLI) Run() error {
 	toolReg.Register(voice.NewVoiceTranscribeTool(voiceRec, voiceTrans))
 	if regErr := cmdRegistry.Register(commands.NewAiderCommand(voiceRec, voiceTrans)); regErr != nil {
 		log.Printf("aider: register slash failed: %v", regErr)
+	}
+
+	// F28: kilo-code AST-aware refactoring.
+	// Cross-file rename via tree-sitter + atomic F17 edits, impact analysis
+	// with call graph + blast radius, refactoring suite (extract method,
+	// inline call). Tools: kilocode_rename, kilocode_impact, kilocode_multi_edit.
+	// Slash: /kilocode (rename/impact/edit subcommands).
+	kcEngine := kilocode.NewRenameEngine(cwd)
+	toolReg.Register(kilocode.NewKiloRenameTool(kcEngine))
+	kcAnalyzer, kcErr := kilocode.NewImpactAnalyzer(cwd)
+	if kcErr == nil {
+		toolReg.Register(kilocode.NewKiloImpactTool(kcAnalyzer))
+	}
+	kcRefactorer := kilocode.NewRefactorer(cwd)
+	toolReg.Register(kilocode.NewKiloMultiEditTool(kcRefactorer))
+	if regErr := cmdRegistry.Register(commands.NewKilocodeCommand(kcEngine, kcAnalyzer, kcRefactorer)); regErr != nil {
+		log.Printf("kilocode: register slash failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.
