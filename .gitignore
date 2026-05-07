@@ -6,7 +6,7 @@
 .env.production
 
 # Docker volumes and data
-workspace/
+/workspace/
 projects/
 shared/
 
