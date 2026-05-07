@@ -10,8 +10,8 @@
 ## Current focus
 - **Active phase:** Phase 2 — CLI Agent Porting (in progress); F25 in flight
 - **Active feature:** P2-F25 — Plandex Plan Trees + Context Compaction
-- **Active task:** P2-F25-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P2-F24-T08 — Feature 24 (Codex Project Memory) close-out + push 4 remotes non-force
+- **Active task:** P2-F25-T10 — Challenge harness 7 phases A-G + close-out
+- **Last completed:** P2-F25-T09 — main.go wiring + plantree.RegisterPlanTools + /plantree slash + build verify
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-07
@@ -376,16 +376,16 @@
 - [x] P2-F24-T07 — BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD)
 - [x] P2-F24-T08 — Challenge harness 5 phases A-E + close-out + push 4 remotes non-force
 
-## P2-F25 task list (Plandex Plan Trees) — IN FLIGHT
-- [ ] P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS to F25
-- [ ] P2-F25-T02 — plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)
-- [ ] P2-F25-T03 — plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs)
-- [ ] P2-F25-T04 — plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)
-- [ ] P2-F25-T05 — plantree/verify.go: VerifyTree 6 checks (orphans, cycles, depth, uniqueness, self-parent, count) (TDD)
-- [ ] P2-F25-T06 — plantree/compact.go: CompactTree + Summariser adapter + F01 delegation + threshold guard (TDD)
-- [ ] P2-F25-T07 — plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)
-- [ ] P2-F25-T08 — /plan slash command (list/show/compact/verify) (TDD)
-- [ ] P2-F25-T09 — main.go wiring + CategoryPlan + RegisterPlanTools + builtin registration + integration test
+## P2-F25 task list (Plandex Plan Trees) — IN FLIGHT (9 of 10 done)
+- [x] P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS to F25 — `c744a27`
+- [x] P2-F25-T02 — plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD) — `1edc117`
+- [x] P2-F25-T03 — plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs) — `889126d`
+- [x] P2-F25-T04 — plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD) — `32a4139`
+- [x] P2-F25-T05 — plantree/verify.go: VerifyTree 6 checks + cycle-safe traversal (TDD) — `44010e5`
+- [x] P2-F25-T06 — plantree/compact.go: CompactTree + Summariser adapter + threshold guard (TDD) — `684e702`
+- [x] P2-F25-T07 — plantree/plan_tools.go: Six tools.Tool implementations (TDD) — `ee054db`
+- [x] P2-F25-T08 — /plantree slash command (list/show/compact/verify) (TDD) — `b7de19d`
+- [x] P2-F25-T09 — main.go wiring + plantree.RegisterPlanTools + /plantree registration + build verify — `b716a07`
 - [ ] P2-F25-T10 — Challenge harness 7 phases A-G + close-out + push 4 remotes non-force
 
 ## Decision log

@@ -430,21 +430,21 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: 6 tools (plan_create/branch/merge/list/show/delete) + /plan slash (list/show/compact/verify). NO cobra subcommands.
 - Q5=A: Context compaction via F01 AutoCompactor reuse. Threshold at 128 KB serialized JSON.
 
-**Task progress:** 1 of 10 complete — T01 in flight.
+**Task progress:** 9 of 10 complete — T10 next.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| T01  | IN FLIGHT | bootstrap F25 evidence section + advance PROGRESS to F25                                                                                  |
-| T02  | —        | plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)                                            |
-| T03  | —        | plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs)                                  |
-| T04  | —        | plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)                                                     |
-| T05  | —        | plantree/verify.go: VerifyTree 6 checks (orphans, cycles, depth, uniqueness, self-parent, count) (TDD)                                    |
-| T06  | —        | plantree/compact.go: CompactTree + Summariser adapter + F01 delegation + threshold guard (TDD)                                              |
-| T07  | —        | plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)                                   |
-| T08  | —        | /plan slash command (list/show/compact/verify) (TDD)                                                                                        |
-| T09  | —        | main.go wiring + CategoryPlan + RegisterPlanTools + builtin registration + integration test                                                |
+| T01  | DONE `c744a27` | bootstrap F25 evidence section + advance PROGRESS to F25                                                                                  |
+| T02  | DONE `1edc117` | plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)                                            |
+| T03  | DONE `889126d` | plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs)                                  |
+| T04  | DONE `32a4139` | plantree/operations.go: CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)                                                     |
+| T05  | DONE `44010e5` | plantree/verify.go: VerifyTree 6 checks + cycle-safe traversal (TDD)                                                                    |
+| T06  | DONE `684e702` | plantree/compact.go: CompactTree + Summariser adapter + threshold guard (TDD)                                              |
+| T07  | DONE `ee054db` | plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)                                   |
+| T08  | DONE `b7de19d` | /plantree slash command (list/show/compact/verify) (TDD)                                                                                        |
+| T09  | DONE `b716a07` | main.go wiring + plantree.RegisterPlanTools + /plantree registration + build verify                                                |
 | T10  | —        | Challenge harness 7 phases A-G + close-out + push 4 remotes non-force                                                                       |
 
 **Anti-bluff hot zone:** §5.2 of spec — five critical patterns (plan_create writes invalid JSON / plan_branch adds orphan / plan_merge leaves Metadata unchanged / compact claims success but no byte reduction / verify reports clean on corrupted tree) + two bonus (plan_show output mismatch / shallow compact no-op). Each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
 
-**Picking up F25 specifically:** F25 specs + plan landed; T01 (bootstrap) is in progress. Proceed with T02 (types.go) after T01 commits.
+**Picking up F25 specifically:** T01-T09 (types, store, operations, verify, compact, plan tools, slash, main.go wiring) all DONE. T10 (challenge harness 7 phases + close-out + push) is next. Build clean, all tests pass, anti-bluff clean.
