@@ -451,3 +451,22 @@
 - [x] P2-F28-T06 — kilocode_tools.go: 3 tools + /kilocode slash (TDD)
 - [x] P2-F28-T07 — main.go wiring
 - [x] P2-F28-T08 — Challenge harness 5 phases + close-out + push 4 remotes
+
+## Phase 3 — Issue remediation (2026-05-07)
+
+### RESOLVED:
+- **F23 browser_legacy_* approval test** — `TestAllRegisteredTools_DefaultIsLevelEdit_ForUnclassifiedTools` now PASSES. Fixed classified map in test to use F23-renamed tool names + Phase 2 tools.
+- **F02 permissions engine wired** — `ConfirmationCoordinator.SetPolicyEngine()` method added. `main.go` now injects permissions-loaded `PolicyEngine` into the confirmation pipeline. Deny rules from `.yaml` files now actually block tool execution.
+- **Challenges submodule mirrors** — `gitlab` and `upstream` remotes added to Challenges submodule.
+- **Governance cascade** — CONST-033/035/042/043/045 cascaded to Security and Containers submodules.
+
+### REMAINING (pre-existing, not Phase 2):
+- **HelixAgent build** — 302/381 tests FAIL (Agentic submodule missing)
+- **HelixQA build** — 35 tests FAIL (replace-dir + go.sum gaps)
+- **LLMsVerifier build** — missing go.sum entries
+- **Containers build** — missing go.sum entries
+- **6 internal/server tests** — FAIL (pre-existing, environment-dependent)
+- **Historical credential leaks** — operator rotation required
+- **Stale cli_agents pins (13)** — HelixAgent submodule SHAs expired upstream
+- **23 snake_case renames** — build-path-breaking, deferred
+- **Codex Multimodal, Cline Computer Use** — not yet ported

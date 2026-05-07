@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated:** 2026-05-06T23:30:00Z by meta-repo HEAD (this commit — F21 close-out)
+**Last updated: 2026-05-07T22:00:00Z (Phase 3 — known-issue remediation)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -277,7 +277,7 @@ test result (CONST-035). See:
 - `AGENTS.md` — "Continuation Maintenance" anchor
 
 **Verification (TBD):** `scripts/verify_continuation_sync.sh` will compare:
-- `Last updated` SHA in this file vs `git rev-parse HEAD` on `main`.
+- `Last updated: 2026-05-07T22:00:00Z (Phase 3 — known-issue remediation)
 - `Active feature` here vs `Current focus` in `docs/improvements/PROGRESS.md`.
 - Tasks-done count here vs ticked-tasks count in `PROGRESS.md`.
 - Known-issue list here covers all documented failures in evidence files.
