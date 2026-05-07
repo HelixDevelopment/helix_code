@@ -476,6 +476,12 @@ func (c *CLI) Run() error {
 		return fmt.Errorf("tool registry init: %w", err)
 	}
 	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
+	// Wire F02 permissions engine into the confirmation pipeline.
+	// The policyEngine was populated by initPermissions with deny/allow
+	// rules from ~/.helixcode/permissions.yaml and <cwd>/.helixcode/
+	// permissions.yaml. Without this wiring, permission rules validate
+	// but do not block tool execution.
+	toolReg.GetConfirmation().SetPolicyEngine(policyEngine)
 	c.toolRegistry = toolReg
 
 	// P1-F19-T05: ask_user tool registration. The askuser package's

@@ -131,6 +131,15 @@ func TestAllRegisteredTools_DefaultIsLevelEdit_ForUnclassifiedTools(t *testing.T
 		"shell": {}, "shell_background": {}, "shell_output": {},
 		"shell_kill": {}, "browser_launch": {}, "browser_navigate": {},
 		"browser_close": {}, "TaskStop": {},
+		// F23 legacy browser tools (renamed, explicit levels)
+		"browser_legacy_launch": {}, "browser_legacy_navigate": {},
+		"browser_legacy_screenshot": {}, "browser_legacy_close": {},
+		// Phase 2 tools with explicit classification
+		"plan_create": {}, "plan_branch": {}, "plan_merge": {},
+		"plan_delete": {}, "workspace_create": {}, "workspace_cleanup": {},
+		"voice_transcribe": {}, "kilocode_rename": {}, "kilocode_multi_edit": {},
+		"roo_delegate": {}, "roo_generate": {}, "roo_bootstrap": {},
+		"continue_edit": {}, "continue_complete": {},
 	}
 
 	for _, tool := range r.List() {

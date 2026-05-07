@@ -264,6 +264,15 @@ func (cc *ConfirmationCoordinator) SetPolicy(toolName string, policy *Policy) er
 	return cc.policyEngine.SetPolicy(toolName, policy)
 }
 
+// SetPolicyEngine replaces the coordinator's policy engine. Used to wire
+// externally-loaded policy engines (e.g. F02 permissions rules) into the
+// confirmation pipeline. Thread-safe via mutex.
+func (cc *ConfirmationCoordinator) SetPolicyEngine(pe *PolicyEngine) {
+	cc.mu.Lock()
+	defer cc.mu.Unlock()
+	cc.policyEngine = pe
+}
+
 // ResetChoices clears all permanent user choices
 func (cc *ConfirmationCoordinator) ResetChoices() {
 	cc.mu.Lock()
