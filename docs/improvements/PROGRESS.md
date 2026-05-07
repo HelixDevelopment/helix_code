@@ -8,9 +8,9 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F27 COMPLETE; F28 next candidate
-- **Active feature:** —
-- **Active task:** —
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F28 in flight
+- **Active feature:** P2-F28 — Kilo-code AST-Aware Refactoring
+- **Active task:** P2-F28-T01 — bootstrap evidence
 - **Last completed:** P2-F27-T09 — Feature 27 (Aider Voice + Repo-Map) close-out + push 4 remotes
 - **Last completed:** P2-F26-T08 — Feature 26 (Openhands Workspace + Planner) close-out + push 4 remotes
 - **Owner:** agent (Claude Opus 4.7)
@@ -442,3 +442,13 @@
 - **SonarQube + Snyk live-scan deferral (P0-T08.7):** The scan infrastructure (compose files, scripts, BootManager binary, Challenges) is fully wired and configuration-validated. Live scans CANNOT run until the user rotates the leaked credentials from `helix.security.json` (remediated in P0-T08.5 but historical values are compromised). Action required: (1) generate new SonarQube API token, (2) set `SONAR_TOKEN` + `SONARQUBE_PROJECT_KEY` + `SONARQUBE_PROJECT_NAME` in `HelixCode/.env`, (3) generate new Snyk token, (4) set `SNYK_TOKEN` in `HelixCode/.env`, (5) run `make scan-sonarqube` / `make scan-snyk`. This is NOT a code defect — it is a security-rotation dependency on the operator.
 - **LLMsVerifier dual-pin divergence (discovered during P0-04):** `Dependencies/HelixDevelopment/LLMsVerifier` at `d473231d27196e2151405f37936151a386b590e3`; `HelixAgent/LLMsVerifier` at `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`. Per spec §2.2 the canonical pin is the one in `Dependencies/HelixDevelopment/LLMsVerifier` (direct Go import path). The canonical is exactly one commit ahead of the transitive (HelixAgent) view. Resolving the divergence requires either (a) bumping HelixAgent's recorded LLMsVerifier pointer to the canonical SHA — out of scope per spec §1.3 N2 (HelixAgent rewrite forbidden), or (b) updating `Dependencies/HelixDevelopment/LLMsVerifier` to match HelixAgent's view if HelixAgent's view is more current. Decision deferred; the parity verifier (`scripts/verify-llmsverifier-pin-parity.sh`) will continue to gate any future change that introduces NEW divergence beyond this baseline. **P0-15 impact:** `make verify-foundation` exits 2 (non-zero) until this divergence is resolved. **P0-16 close-out dependency:** `make verify-foundation` must exit 0 for Phase 0 to be declared complete. This divergence must be resolved (or explicitly waived via `VERIFY_FOUNDATION_WARN_ONLY=1`) as part of P0-16.
 - **Permissions engine not yet threaded into tool dispatch (deferred from P1-F02-T09):** The `--permission-mode` flag parses and `permissions.Engine` constructs at startup, but the resulting Engine's `*confirmation.PolicyEngine` is currently local to `(*CLI).initPermissions` and is not consulted by the production tool-execution path. The engine itself is proven correct (3 integration tests + 3 Challenge scenarios); the wiring gap means a deny rule would not actually block a tool call in a live session. Action: Phase 3 (test infra) sub-spec must wire `internal/tools/registry.go`'s `ConfirmationCoordinator` to use the loaded engine. Current behavior: rule files are validated and the CLI flag is honored at the `helixcode permissions check` dry-run; live tool dispatch falls through to the default `confirmation.PolicyEngine` (which has no rules). NOT a security regression — falls back to ask-by-default.
+
+## P2-F28 task list (Kilo-code Refactoring) — IN FLIGHT
+- [ ] P2-F28-T01 — bootstrap F28 evidence + advance PROGRESS
+- [ ] P2-F28-T02 — types.go + callgraph.go: CallGraph + BuildCallGraph (TDD)
+- [ ] P2-F28-T03 — rename.go: tree-sitter query + atomic F17 edits (TDD)
+- [ ] P2-F28-T04 — impact.go: ImpactAnalyzer + blast radius (TDD)
+- [ ] P2-F28-T05 — refactor.go: extract method, move, inline (TDD)
+- [ ] P2-F28-T06 — kilocode_tools.go: 3 tools + /kilocode slash (TDD)
+- [ ] P2-F28-T07 — main.go wiring
+- [ ] P2-F28-T08 — Challenge harness 5 phases + close-out + push 4 remotes
