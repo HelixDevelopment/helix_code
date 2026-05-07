@@ -142,3 +142,7 @@ make ci-validate-all
 - Root CONSTITUTION.md: `../CONSTITUTION.md`
 - Synthesis spec: `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`
 - Progress tracker: `../docs/improvements/PROGRESS.md`
+
+## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
+
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host hardcoded anywhere. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests read `.env` at runtime and skip with `SKIP-OK:` when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate.

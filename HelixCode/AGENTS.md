@@ -95,3 +95,7 @@ Co-Authored-By: <agent-name> <email>
 - Root CONSTITUTION.md: `../CONSTITUTION.md`
 - Synthesis spec: `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`
 - Progress tracker: `../docs/improvements/PROGRESS.md`
+
+## CONST-045 — No Hardcoded Distribution Hosts (cascaded from root CONSTITUTION.md)
+
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host hardcoded in ANY source, test, challenge, config, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate and cascade requirements.

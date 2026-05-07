@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F26 in flight
-- **Active feature:** P2-F26 — Openhands Workspace + Task Planner + Step Executor
-- **Active task:** P2-F26-T01 — bootstrap evidence + advance PROGRESS
-- **Last completed:** P2-F25-T10 — Feature 25 (Plandex Plan Trees) close-out + push 4 remotes non-force
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F26 COMPLETE; F27 next candidate
+- **Active feature:** —
+- **Active task:** —
+- **Last completed:** P2-F26-T08 — Feature 26 (Openhands Workspace + Planner) close-out + push 4 remotes
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-07
@@ -388,15 +388,13 @@
 - [x] P2-F25-T09 — main.go wiring + plantree.RegisterPlanTools + /plantree registration + build verify — `b716a07`
 - [x] P2-F25-T10 — Challenge harness 7 phases A-G + close-out + push 4 remotes non-force — `ff9097d`
 
-## P2-F26 task list (Openhands Workspace + Planner) — IN FLIGHT
-- [ ] P2-F26-T01 — bootstrap F26 evidence section + advance PROGRESS to F26
-- [ ] P2-F26-T02 — workspace/types.go + manager.go: Workspace + Manager (TDD)
-- [ ] P2-F26-T03 — workspace/workspace_tools.go: workspace_create/list/cleanup (TDD)
-- [ ] P2-F26-T04 — planner/types.go + executor.go: TaskStep + TaskPlan + StepExecutor (TDD)
-- [ ] P2-F26-T05 — planner/planner_tools.go: task_plan, task_step (TDD)
-- [ ] P2-F26-T06 — /openhands slash + cobra subcommands (TDD)
-- [ ] P2-F26-T07 — main.go wiring + integration tests
-- [ ] P2-F26-T08 — Challenge harness 5 phases + close-out + push 4 remotes
+## P2-F26 task list (Openhands Workspace + Planner) — ALL CLOSED
+- [x] P2-F26-T01 — bootstrap F26 evidence section + advance PROGRESS to F26 — `613b204`
+- [x] P2-F26-T02 — workspace/types.go + manager.go (TDD) — `975de95`
+- [x] P2-F26-T03 — workspace/workspace_tools.go (TDD) — `4eb174d`
+- [x] P2-F26-T04+T05 — planner types + executor + tools (TDD) — `9254a68`
+- [x] P2-F26-T06+T07 — /openhands slash + main.go wiring + build verify — `5cdc6e7`
+- [x] P2-F26-T08 — Challenge harness 5 phases A-E + close-out — `b7572c0`
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

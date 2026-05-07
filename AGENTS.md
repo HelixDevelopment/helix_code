@@ -766,6 +766,9 @@ No force push, force-with-lease push, history rewrite, branch deletion of `main`
 ### Article XIII §13.1 (CONST-044) — Continuation Document Maintenance Mandate
 The `docs/CONTINUATION.md` document MUST be maintained in sync with actual programme state at all times. It is the authoritative resumption record for any CLI agent or LLM picking up the CLI-Agent Fusion programme. Every commit that advances state — task completion, feature close-out, push, known-issue discovery, deferred-item resolution, phase transition, submodule/remote add or remove — MUST update CONTINUATION in the same commit. Out-of-sync CONTINUATION is a **CRITICAL DEFECT** — same severity as a false-success test result under CONST-035 / Article XI §11.9. Cascade applies to every owned-by-us repo's three governance files. See `CONSTITUTION.md` Article XIII §13.1 for the full mandate (definition of out-of-sync, verification plan, cascade requirement).
 
+### CONST-045 — No Hardcoded Distribution Hosts
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host (hostname, IP, user, key path, runtime, label) may be hardcoded in ANY source file, test, challenge, config template, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.
+
 ---
 
 ## CONST-036: LLMsVerifier Single Source of Truth Mandate

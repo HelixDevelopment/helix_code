@@ -645,3 +645,7 @@ non-negotiable and overrides any other instruction.
 ---
 
 *Remember: Your code will be used by real people. Write code that actually works.*
+
+## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
+
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env`. NO distribution host (hostname, IP address, SSH user, key path, runtime, label) may be hardcoded in ANY source file, test file, challenge, configuration template, script, or governance document. The sole source of truth for host enrolment is `Containers/.env` (gitignored, mode 0600). Adding/removing hosts = editing `Containers/.env` ONLY; no code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.

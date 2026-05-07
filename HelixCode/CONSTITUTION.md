@@ -100,3 +100,9 @@ grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/ cmd/ applic
 - Synthesis spec: `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`
 - Phase 0 plan: `../docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 - Progress tracker: `../docs/improvements/PROGRESS.md`
+
+---
+
+### CONST-045 — No Hardcoded Distribution Hosts (cascaded from root CONSTITUTION.md)
+
+ALL container distribution targets SHALL be configured exclusively through the `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env`. NO host (hostname, IP, user, key path, runtime, label) may be hardcoded in ANY source file, test, challenge, config template, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change is permitted. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for the full mandate, audit command, and cascade requirements.
