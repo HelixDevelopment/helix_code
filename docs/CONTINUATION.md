@@ -48,8 +48,8 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P0 — Foundation                | DONE         | per `05_phase_0_evidence`  | governance cascade + secret-leak remediation                  |
 | P1 — claude-code (F01..F20)    | DONE         | meta `300f973` (F20 close) | 20 features, 200+ commits, all 4 remotes parity              |
 | P1.5 — Foundation Cleanup      | DONE         | meta `4131bf0`             | 12 WPs, ~48 commits, deepest-first push complete             |
-| P2 — CLI agent porting         | IN PROGRESS  | F23 DONE @ this commit     | F23 closed (10/10 tasks); F24 next candidate (brainstorm)     |
-| P3 — Test infra                | NOT STARTED  | —                          | depends on Phase 2 close                                      |
+| P2 — CLI agent porting         | DONE         | meta-repo HEAD (F30 close) | 10 features (F21-F30), all tests + challenges PASS
+| P3 — Test infra                | IN PROGRESS  | Phase 3 entry              | test runner + anti-bluff verification sweep
 | P4 — Anti-bluff audit          | NOT STARTED  | —                          | depends on Phase 3 close                                      |
 | P5 — End-user materials uplift | NOT STARTED  | —                          | final phase                                                   |
 

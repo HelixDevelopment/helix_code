@@ -8,11 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F30 COMPLETE
-- **Active feature:** P2-F28 — Kilo-code AST-Aware Refactoring
-- **Active task:** P2-F28-T01 — bootstrap evidence
-- **Last completed:** P2-F27-T09 — Feature 27 (Aider Voice + Repo-Map) close-out + push 4 remotes
-- **Last completed:** P2-F26-T08 — Feature 26 (Openhands Workspace + Planner) close-out + push 4 remotes
+- **Active phase:** Phase 3 — Test Infrastructure Expansion (in progress)
+- **Active feature:** P3-WP1 — Real-infra test runner + anti-bluff verification sweep
+- **Active task:** P3-WP1-T01 — run full test suite + identify gaps
+- **Last completed:** P2-F30 — Feature 30 (Continue IDE Integration) close-out + Phase 2 CLOSED
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-07
@@ -24,10 +23,10 @@
 | P0 — Foundation | done | 2026-05-04 | 2026-05-05 | docs/improvements/05_phase_0_evidence.md |
 | P1 — claude-code | done | 2026-05-05 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md |
 | P1.5 — Foundation Cleanup | done | 2026-05-06 | 2026-05-06 | docs/improvements/06_phase_1_evidence.md §P1.5 |
-| P2 — Other CLI agents | in progress | 2026-05-06 | — | docs/improvements/07_phase_2_evidence.md |
-| P3 — Test infra | pending | — | — | — |
-| P4 — Anti-bluff audit | pending | — | — | — |
-| P5 — End-user materials | pending | — | — | — |
+| P2 — Other CLI agents | done | 2026-05-06 | 2026-05-07 | docs/improvements/07_phase_2_evidence.md |
+| P3 — Test infra | in progress | 2026-05-07 | 2026-05-07 | — |
+| P4 — Anti-bluff audit | pending | 2026-05-07 | 2026-05-07 | — |
+| P5 — End-user materials | pending | 2026-05-07 | 2026-05-07 | — |
 
 ## P1.5 Work-package list (12 WPs) — ALL CLOSED
 - [x] P1.5-WP1 — Inventory + foundation safety (5 tasks)  ← commit `421495a`

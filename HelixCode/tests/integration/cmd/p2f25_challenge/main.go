@@ -46,7 +46,9 @@ var (
 )
 
 func main() {
-	dir = os.Args[1]
+	if len(os.Args) > 1 {
+		dir = os.Args[1]
+	}
 	if dir == "" {
 		dir, _ = os.MkdirTemp("", "p2f25-challenge-")
 		defer os.RemoveAll(dir)
