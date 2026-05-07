@@ -8,9 +8,9 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F26 COMPLETE; F27 next candidate
-- **Active feature:** —
-- **Active task:** —
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F27 in flight
+- **Active feature:** P2-F27 — Aider Voice Input + Repo-Map
+- **Active task:** P2-F27-T01 — bootstrap evidence + advance PROGRESS
 - **Last completed:** P2-F26-T08 — Feature 26 (Openhands Workspace + Planner) close-out + push 4 remotes
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
@@ -395,6 +395,17 @@
 - [x] P2-F26-T04+T05 — planner types + executor + tools (TDD) — `9254a68`
 - [x] P2-F26-T06+T07 — /openhands slash + main.go wiring + build verify — `5cdc6e7`
 - [x] P2-F26-T08 — Challenge harness 5 phases A-E + close-out — `b7572c0`
+
+## P2-F27 task list (Aider Voice + Repo-Map) — IN FLIGHT
+- [ ] P2-F27-T01 — bootstrap F27 evidence + advance PROGRESS
+- [ ] P2-F27-T02 — voice/types.go + recorder.go: arecord/sox capture (TDD)
+- [ ] P2-F27-T03 — voice/transcriber.go: Whisper API + whisper.cpp (TDD)
+- [ ] P2-F27-T04 — voice/voice_tools.go: voice_start/stop/transcribe (TDD)
+- [ ] P2-F27-T05 — repomap/mapper.go + cache.go: tree-sitter AST map (TDD)
+- [ ] P2-F27-T06 — repomap/repomap_tool.go: repomap tool (TDD)
+- [ ] P2-F27-T07 — /aider slash command (TDD)
+- [ ] P2-F27-T08 — main.go wiring + integration tests
+- [ ] P2-F27-T09 — Challenge harness 6 phases + close-out + push 4 remotes
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1

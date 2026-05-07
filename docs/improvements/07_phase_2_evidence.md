@@ -677,3 +677,13 @@ external deps. Fifth Phase 2 feature shipped.
 **Q1-Q5 = A,A,A,A,A** (core workspace+planner+executor; container-based; F25 plan tree; 5 tools + /openhands + Cobra)
 **Tasks:** 8 (T01 bootstrap → T08 Challenge 5 phases + close-out)
 **Zero new external deps** (Containers submodule; google/uuid already direct)
+
+---
+
+## P2-F27 — Aider Voice Input + Repo-Map
+
+**Spec:** `docs/superpowers/specs/2026-05-07-p2-f27-aider-voice-repomap-design.md`
+**Plan:** `docs/superpowers/plans/2026-05-07-p2-f27-aider-voice-repomap.md`
+**Q1-Q5 = A,A,A,A,A** (core voice+repomap; hybrid Whisper; tree-sitter AST; 4 tools + /aider slash)
+**Tasks:** 9 (T01 → T09)
+**Zero new external deps**
