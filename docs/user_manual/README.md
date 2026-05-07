@@ -3177,8 +3177,48 @@ memory:
 - **Semantic search**: Use `chromadb` or `qdrant` — vector similarity for context retrieval
 - **Enterprise**: Use `weaviate` or `cognee` — hybrid search, multi-tenancy, audit trails
 
+## 30. Troubleshooting
+
+### 30.1 Common Issues
+
+#### SSH Worker Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "connection refused" | Worker SSH not running | `systemctl start sshd` on worker |
+| "permission denied (publickey)" | Key not authorized | `ssh-copy-id user@worker` |
+| "host key verification failed" | Host key changed | `ssh-keygen -R worker-hostname` |
+| "worker timed out after 30s" | Network latency | Increase `workers.health_ttl` in config |
+| "worker rejected task" | Capability mismatch | Check `workers.capabilities` config |
+
+#### LLM Connection Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "401 Unauthorized" | Invalid API key | Check `HELIX_*_API_KEY` env var |
+| "429 Too Many Requests" | Rate limited | Enable rate limiter: `llm.rate_limit.enabled: true` |
+| "503 Service Unavailable" | Provider outage | Enable fallback: `llm.selection.fallback_enabled: true` |
+| "model not found" | Wrong model name | Run `helix models` to list available models |
+| "context window exceeded" | Too many tokens | Enable compression: `llm.compression.enabled: true` |
+
+#### Rate Limit Handling
+
+```yaml
+llm:
+  rate_limit:
+    enabled: true
+    strategy: "token_bucket"  # token_bucket, sliding_window, backoff
+    requests_per_minute: 60
+    burst: 10
+    backoff_base: 2  # exponential backoff multiplier
+    backoff_max: 120  # maximum wait in seconds
+```
+
+When rate limited, HelixCode automatically queues requests and retries with exponential backoff. Configure different limits per provider.
 
 ---
+
+
 
 *This manual continues with detailed sections on Tools, Workflows, Advanced Features, and more. The complete manual exceeds 2,000 lines as requested.*
 
