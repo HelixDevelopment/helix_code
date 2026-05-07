@@ -24,6 +24,7 @@ import (
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/continua"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/kilocode"
 	"dev.helix.code/internal/notification"
@@ -824,6 +825,19 @@ func (c *CLI) Run() error {
 	rooConvStore := roocode.NewConversationStore()
 	if regErr := cmdRegistry.Register(commands.NewRooCodeCommand(rooDelegator, rooGen, rooReviewer, rooConvStore)); regErr != nil {
 		log.Printf("roocode: register slash failed: %v", regErr)
+	}
+
+	// F30: Continue.dev IDE integration.
+	// Inline completions, workspace editor, multi-turn chat (F11 reuse),
+	// diff viewer, model selector. Tools: continue_edit, continue_complete.
+	// Slash: /continue (edit/complete/chat/diff subcommands).
+	contEditor := continua.NewWorkspaceEditor()
+	toolReg.Register(continua.NewContinueEditTool(contEditor))
+	contCompletion := continua.NewCompletionEngine()
+	toolReg.Register(continua.NewContinueCompleteTool(contCompletion))
+	contChat := continua.NewChatManager()
+	if regErr := cmdRegistry.Register(commands.NewContinueCommand(contEditor, contCompletion, contChat)); regErr != nil {
+		log.Printf("continue: register slash failed: %v", regErr)
 	}
 
 	// F09: user-defined Markdown slash commands.
