@@ -82,9 +82,9 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**P2-F25 — Plandex Plan Trees + Context Compaction.** Fifth Phase 2 feature; spec + plan landed. T01 in progress.
+**None.** F25 closed; Phase 2 ready for F26 brainstorming.
 
-### Most recent feature (closed): P2-F24 — Codex Project Memory
+### Most recent feature (closed): P2-F25 — Plandex Plan Trees
 
 - Spec: `7128289` (`docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md`)
 - Plan: `bbb61de` (`docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md`)
@@ -430,7 +430,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 - Q4=A: 6 tools (plan_create/branch/merge/list/show/delete) + /plan slash (list/show/compact/verify). NO cobra subcommands.
 - Q5=A: Context compaction via F01 AutoCompactor reuse. Threshold at 128 KB serialized JSON.
 
-**Task progress:** 9 of 10 complete — T10 next.
+**Task progress:** 10 of 10 complete — F25 CLOSED.
 
 | Task | Status | Subject                                                                                                                                          |
 |------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -443,8 +443,8 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | T07  | DONE `ee054db` | plantree/plan_tools.go: Six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)                                   |
 | T08  | DONE `b7de19d` | /plantree slash command (list/show/compact/verify) (TDD)                                                                                        |
 | T09  | DONE `b716a07` | main.go wiring + plantree.RegisterPlanTools + /plantree registration + build verify                                                |
-| T10  | —        | Challenge harness 7 phases A-G + close-out + push 4 remotes non-force                                                                       |
+| T10  | DONE `ff9097d` | Challenge harness 7 phases A-G + close-out + push 4 remotes non-force — all 35/35 checks PASS                                    |
 
-**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (plan_create writes invalid JSON / plan_branch adds orphan / plan_merge leaves Metadata unchanged / compact claims success but no byte reduction / verify reports clean on corrupted tree) + two bonus (plan_show output mismatch / shallow compact no-op). Each pinned by unit + integration + Challenge phase. Challenge MUST exit non-zero on byte-evidence mismatch.
+**Anti-bluff hot zone:** §5.2 of spec — five critical patterns (plan_create writes invalid JSON / plan_branch adds orphan / plan_merge leaves Metadata unchanged / compact claims success but no byte reduction / verify reports clean on corrupted tree) + two bonus (plan_show output mismatch / shallow compact no-op). All 7 phases PASS with positive byte evidence.
 
-**Picking up F25 specifically:** T01-T09 (types, store, operations, verify, compact, plan tools, slash, main.go wiring) all DONE. T10 (challenge harness 7 phases + close-out + push) is next. Build clean, all tests pass, anti-bluff clean.
+**Picking up F25 specifically:** F25 is CLOSED. F26 next candidate per synthesis §4.2 (Aider voice input / Openhands / Kiro / Kilo-code / Roo-code / Continue).

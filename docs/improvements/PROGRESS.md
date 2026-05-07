@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F25 in flight
-- **Active feature:** P2-F25 — Plandex Plan Trees + Context Compaction
-- **Active task:** P2-F25-T10 — Challenge harness 7 phases A-G + close-out
-- **Last completed:** P2-F25-T09 — main.go wiring + plantree.RegisterPlanTools + /plantree slash + build verify
+- **Active phase:** Phase 2 — CLI Agent Porting (in progress); F25 COMPLETE; F26 next candidate
+- **Active feature:** —
+- **Active task:** —
+- **Last completed:** P2-F25-T10 — Feature 25 (Plandex Plan Trees) close-out + push 4 remotes non-force
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-07
@@ -376,7 +376,7 @@
 - [x] P2-F24-T07 — BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD)
 - [x] P2-F24-T08 — Challenge harness 5 phases A-E + close-out + push 4 remotes non-force
 
-## P2-F25 task list (Plandex Plan Trees) — IN FLIGHT (9 of 10 done)
+## P2-F25 task list (Plandex Plan Trees) — ALL CLOSED
 - [x] P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS to F25 — `c744a27`
 - [x] P2-F25-T02 — plantree/types.go: PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD) — `1edc117`
 - [x] P2-F25-T03 — plantree/store.go: FileStore Save/Load/List/Delete + atomic writes + Store interface (TDD real-tempdirs) — `889126d`
@@ -386,7 +386,7 @@
 - [x] P2-F25-T07 — plantree/plan_tools.go: Six tools.Tool implementations (TDD) — `ee054db`
 - [x] P2-F25-T08 — /plantree slash command (list/show/compact/verify) (TDD) — `b7de19d`
 - [x] P2-F25-T09 — main.go wiring + plantree.RegisterPlanTools + /plantree registration + build verify — `b716a07`
-- [ ] P2-F25-T10 — Challenge harness 7 phases A-G + close-out + push 4 remotes non-force
+- [x] P2-F25-T10 — Challenge harness 7 phases A-G + close-out + push 4 remotes non-force — `ff9097d`
 
 ## Decision log
 - 2026-05-04 — Approach A (HelixAgent as integration substrate) — user-approved during brainstorming — see synthesis spec §2.1
