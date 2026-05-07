@@ -82,9 +82,9 @@ Meta-repo remotes (4):
 
 ## Active feature in flight
 
-**None.** F26 closed; Phase 2 ready for F27 brainstorming.
+**None.** F27 closed; Phase 2 ready for F28 brainstorming.
 
-### Most recent feature (closed): P2-F26 — Openhands Workspace + Planner
+### Most recent feature (closed): P2-F27 — Aider Voice Input + Repo-Map
 
 - Spec: `7128289` (`docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md`)
 - Plan: `bbb61de` (`docs/superpowers/plans/2026-05-06-p2-f21-codex-approval-modes.md`)
