@@ -45,6 +45,7 @@ import (
 	"dev.helix.code/internal/tools/task"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
+	"dev.helix.code/internal/voice"
 	"dev.helix.code/internal/worker"
 	"dev.helix.code/internal/workflow"
 	"dev.helix.code/internal/workflow/planmode"
@@ -774,6 +775,22 @@ func (c *CLI) Run() error {
 	plannerExec := taskplanner.NewSequentialExecutor(nil)
 	toolReg.Register(taskplanner.NewTaskPlanTool(plannerExec))
 	toolReg.Register(taskplanner.NewTaskStepTool(plannerExec))
+
+	// F27: aider-style voice input + repo-map.
+	// Voice: arecord/sox capture → Whisper API (with whisper.cpp fallback).
+	// Repo-map: tree-sitter AST parsing (extends existing repomap package).
+	// Tools: voice_start, voice_stop, voice_transcribe, repomap.
+	// Slash: /aider (voice/repomap subcommands).
+	voiceRec := voice.NewVoiceRecorder()
+	voiceTrans := voice.NewVoiceTranscriber(voice.VoiceConfig{
+		WhisperAPIKey: os.Getenv("OPENAI_API_KEY"),
+	})
+	toolReg.Register(voice.NewVoiceStartTool(voiceRec))
+	toolReg.Register(voice.NewVoiceStopTool(voiceRec))
+	toolReg.Register(voice.NewVoiceTranscribeTool(voiceRec, voiceTrans))
+	if regErr := cmdRegistry.Register(commands.NewAiderCommand(voiceRec, voiceTrans)); regErr != nil {
+		log.Printf("aider: register slash failed: %v", regErr)
+	}
 
 	// F09: user-defined Markdown slash commands.
 	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
