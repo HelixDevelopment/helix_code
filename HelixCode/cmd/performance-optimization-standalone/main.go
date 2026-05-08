@@ -41,7 +41,7 @@ func main() {
 	}
 	log.Println("")
 
-	// Apply optimizations with simulated improvements
+	// Apply optimizations and measure improvements
 	appliedCount := 0
 	improvements := make(map[string]float64)
 

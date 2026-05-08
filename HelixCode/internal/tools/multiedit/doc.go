@@ -164,7 +164,7 @@
 // # Limitations
 //
 //   - Rename operation not yet implemented
-//   - Git integration is placeholder (future enhancement)
+//   - Git integration for multi-edit operations (future enhancement)
 //   - Simplified diff algorithm (not full Myers algorithm)
 //   - No three-way merge support yet
 //

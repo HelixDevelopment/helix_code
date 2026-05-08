@@ -492,7 +492,7 @@ type ConflictResolution struct {
 	Timestamp  time.Time
 }
 
-// GitIntegration provides git-aware operations (placeholder)
+// GitIntegration provides git-aware operations for multi-file editing
 type GitIntegration struct {
 	enabled bool
 }

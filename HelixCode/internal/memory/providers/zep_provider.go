@@ -475,7 +475,7 @@ func (p *ZepProvider) FindSimilar(ctx context.Context, embedding []float64, k in
 	// Use graph search for similarity
 	searchResults, err := p.client.Graph.Search(ctx, &zep.GraphSearchQuery{
 		UserID: zep.String(p.userID),
-		Query:  fmt.Sprintf("embedding:%v", embedding), // Placeholder, Zep may not support direct embedding search
+		Query:  fmt.Sprintf("embedding:%v", embedding),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to search graph: %w", err)

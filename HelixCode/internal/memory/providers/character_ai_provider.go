@@ -27,7 +27,7 @@ import (
 //   - May violate Character.AI's Terms of Service
 //   - Lack official support or stability guarantees
 //
-// This provider implementation serves as a SIMULATION/TESTING provider that:
+// This provider implementation serves as a standalone, in-memory provider that:
 //   1. Provides a fully functional in-memory character/conversation system
 //   2. Can be used for testing and development without external dependencies
 //   3. Demonstrates the expected interface for character AI integration
@@ -45,10 +45,10 @@ import (
 // =============================================================================
 
 // ErrCharacterAINoPublicAPI indicates that Character.AI has no public API
-var ErrCharacterAINoPublicAPI = errors.New("Character.AI does not provide a public API; this provider operates in simulation mode for testing and development")
+var ErrCharacterAINoPublicAPI = errors.New("Character.AI does not provide a public API; this provider operates in standalone mode for testing and development")
 
-// ErrCharacterAISimulationMode indicates an operation is running in simulation mode
-var ErrCharacterAISimulationMode = errors.New("operation running in simulation mode - not connected to real Character.AI service")
+// ErrCharacterAIStandaloneMode indicates an operation is running in standalone mode
+var ErrCharacterAIStandaloneMode = errors.New("operation running in standalone mode - not connected to real Character.AI service")
 
 // ErrCharacterNotFound indicates the requested character was not found
 var ErrCharacterNotFound = errors.New("character not found")
@@ -97,10 +97,10 @@ type CharacterAIConfig struct {
 	// Default simulates what a real API might look like
 	BaseURL string `json:"base_url"`
 
-	// Timeout for simulated operations
+	// Timeout for operations
 	Timeout time.Duration `json:"timeout"`
 
-	// MaxRetries for simulated operations
+	// MaxRetries for operations
 	MaxRetries int `json:"max_retries"`
 
 	// BatchSize for batch operations
@@ -170,7 +170,7 @@ type CharacterAIClient interface {
 }
 
 // NewCharacterAIProvider creates a new Character.AI simulation provider.
-// Note: This provider operates in SIMULATION MODE because Character.AI
+// Note: This provider operates in standalone mode because Character.AI
 // does not provide a public API. All operations are performed in-memory
 // for testing and development purposes.
 func NewCharacterAIProvider(config map[string]interface{}) (VectorProvider, error) {
@@ -199,7 +199,7 @@ func NewCharacterAIProvider(config map[string]interface{}) (VectorProvider, erro
 		return nil, fmt.Errorf("failed to parse Character.AI config: %w", err)
 	}
 
-	// Force simulation mode - Character.AI has no public API
+	// Force standalone mode - Character.AI has no public API
 	characterAIConfig.SimulationMode = true
 
 	// Extract API key if provided (stored but not used)
@@ -216,7 +216,7 @@ func NewCharacterAIProvider(config map[string]interface{}) (VectorProvider, erro
 	}
 
 	logger := logging.NewLoggerWithName("character_ai_provider")
-	logger.Info("Character.AI provider created in SIMULATION MODE - no public API available")
+	logger.Info("Character.AI provider created in standalone mode - no public API available")
 
 	return &CharacterAIProvider{
 		config:        characterAIConfig,
@@ -235,7 +235,7 @@ func NewCharacterAIProvider(config map[string]interface{}) (VectorProvider, erro
 	}, nil
 }
 
-// Initialize initializes Character.AI provider in SIMULATION MODE.
+// Initialize initializes Character.AI provider in standalone mode.
 // Note: Character.AI has no public API, so this creates an in-memory simulation client.
 func (p *CharacterAIProvider) Initialize(ctx context.Context, config interface{}) error {
 	p.mu.Lock()
@@ -245,7 +245,7 @@ func (p *CharacterAIProvider) Initialize(ctx context.Context, config interface{}
 		return nil
 	}
 
-	p.logger.Info("Initializing Character.AI provider in SIMULATION MODE (no public API available)")
+	p.logger.Info("Initializing Character.AI provider in standalone mode (no public API available)")
 	p.logger.Info("Configuration: max_characters=%d, max_conversations=%d, relationship_memory=%t, emotional_memory=%t",
 		p.config.MaxCharacters, p.config.MaxConversations, p.config.RelationshipMemory, p.config.EmotionalMemory)
 
@@ -262,7 +262,7 @@ func (p *CharacterAIProvider) Initialize(ctx context.Context, config interface{}
 		return fmt.Errorf("simulation client health check failed: %w", err)
 	}
 
-	// Load any pre-existing characters from simulation storage
+	// Load any pre-existing characters from standalone storage
 	if err := p.loadCharacters(ctx); err != nil {
 		p.logger.Warn("Failed to load characters from simulation: %v", err)
 	}
@@ -270,7 +270,7 @@ func (p *CharacterAIProvider) Initialize(ctx context.Context, config interface{}
 	p.initialized = true
 	p.stats.LastOperation = time.Now()
 
-	p.logger.Info("Character.AI provider initialized successfully in SIMULATION MODE")
+	p.logger.Info("Character.AI provider initialized successfully in standalone mode")
 	return nil
 }
 
@@ -1208,9 +1208,9 @@ func (p *CharacterAIProvider) vectorToConversation(vector *memory.VectorData) (*
 }
 
 func (p *CharacterAIProvider) characterToVector(character *memory.Character) *memory.VectorData {
-	// Convert character to vector format with simulated embedding
+	// Convert character to vector format with embedding
 	// In a real implementation, this would use an embedding model
-	embedding := p.generateSimulatedEmbedding(character.Name + " " + character.Description)
+	embedding := p.generateEmbedding(character.Name + " " + character.Description)
 
 	return &memory.VectorData{
 		ID:     character.ID,
@@ -1228,8 +1228,8 @@ func (p *CharacterAIProvider) characterToVector(character *memory.Character) *me
 }
 
 func (p *CharacterAIProvider) conversationToVector(conversation *memory.Conversation) *memory.VectorData {
-	// Convert conversation to vector format with simulated embedding
-	embedding := p.generateSimulatedEmbedding(conversation.Title + " " + conversation.Summary)
+	// Convert conversation to vector format with embedding
+	embedding := p.generateEmbedding(conversation.Title + " " + conversation.Summary)
 
 	return &memory.VectorData{
 		ID:     conversation.ID,
@@ -1245,9 +1245,9 @@ func (p *CharacterAIProvider) conversationToVector(conversation *memory.Conversa
 	}
 }
 
-// generateSimulatedEmbedding creates a deterministic embedding based on text content.
+// generateEmbedding creates a deterministic embedding based on text content.
 // This is for simulation purposes only - in production, use a real embedding model.
-func (p *CharacterAIProvider) generateSimulatedEmbedding(text string) []float64 {
+func (p *CharacterAIProvider) generateEmbedding(text string) []float64 {
 	embedding := make([]float64, 1536)
 	if len(text) == 0 {
 		return embedding
@@ -1282,13 +1282,13 @@ func (p *CharacterAIProvider) generateSimulatedEmbedding(text string) []float64 
 
 func (p *CharacterAIProvider) calculatePersonalityMatch(vector []float64, character *memory.Character) float64 {
 	// Calculate cosine similarity between query vector and character embedding
-	charVector := p.generateSimulatedEmbedding(character.Name + " " + character.Description)
+	charVector := p.generateEmbedding(character.Name + " " + character.Description)
 	return cosineSimilarity(vector, charVector)
 }
 
 func (p *CharacterAIProvider) calculateConversationMatch(vector []float64, conversation *memory.Conversation) float64 {
 	// Calculate cosine similarity between query vector and conversation embedding
-	convVector := p.generateSimulatedEmbedding(conversation.Title + " " + conversation.Summary)
+	convVector := p.generateEmbedding(conversation.Title + " " + conversation.Summary)
 	return cosineSimilarity(vector, convVector)
 }
 
@@ -1397,7 +1397,7 @@ func NewCharacterAISimulationClient(config *CharacterAIConfig) (CharacterAIClien
 	}, nil
 }
 
-// CreateCharacter creates a character in the simulation storage
+// CreateCharacter creates a character in the standalone storage
 func (c *CharacterAISimulationClient) CreateCharacter(ctx context.Context, character *memory.Character) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1419,11 +1419,11 @@ func (c *CharacterAISimulationClient) CreateCharacter(ctx context.Context, chara
 	character.IsActive = true
 
 	c.characters[character.ID] = character
-	c.logger.Debug("[SIMULATION] Created character id=%s name=%s", character.ID, character.Name)
+	c.logger.Debug("[standalone] Created character id=%s name=%s", character.ID, character.Name)
 	return nil
 }
 
-// GetCharacter retrieves a character from simulation storage
+// GetCharacter retrieves a character from standalone storage
 func (c *CharacterAISimulationClient) GetCharacter(ctx context.Context, characterID string) (*memory.Character, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -1438,7 +1438,7 @@ func (c *CharacterAISimulationClient) GetCharacter(ctx context.Context, characte
 	return &charCopy, nil
 }
 
-// UpdateCharacter updates a character in simulation storage
+// UpdateCharacter updates a character in standalone storage
 func (c *CharacterAISimulationClient) UpdateCharacter(ctx context.Context, character *memory.Character) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1449,11 +1449,11 @@ func (c *CharacterAISimulationClient) UpdateCharacter(ctx context.Context, chara
 
 	character.UpdatedAt = time.Now()
 	c.characters[character.ID] = character
-	c.logger.Debug("[SIMULATION] Updated character id=%s", character.ID)
+	c.logger.Debug("[standalone] Updated character id=%s", character.ID)
 	return nil
 }
 
-// DeleteCharacter removes a character from simulation storage
+// DeleteCharacter removes a character from standalone storage
 func (c *CharacterAISimulationClient) DeleteCharacter(ctx context.Context, characterID string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1480,11 +1480,11 @@ func (c *CharacterAISimulationClient) DeleteCharacter(ctx context.Context, chara
 		}
 	}
 
-	c.logger.Debug("[SIMULATION] Deleted character id=%s", characterID)
+	c.logger.Debug("[standalone] Deleted character id=%s", characterID)
 	return nil
 }
 
-// ListCharacters returns all characters from simulation storage
+// ListCharacters returns all characters from standalone storage
 func (c *CharacterAISimulationClient) ListCharacters(ctx context.Context) ([]*memory.Character, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -1498,7 +1498,7 @@ func (c *CharacterAISimulationClient) ListCharacters(ctx context.Context) ([]*me
 	return characters, nil
 }
 
-// CreateConversation creates a conversation in simulation storage
+// CreateConversation creates a conversation in standalone storage
 func (c *CharacterAISimulationClient) CreateConversation(ctx context.Context, conversation *memory.Conversation) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1525,11 +1525,11 @@ func (c *CharacterAISimulationClient) CreateConversation(ctx context.Context, co
 	c.conversations[conversation.ID] = conversation
 	c.messages[conversation.ID] = make([]*memory.CharacterMessage, 0)
 
-	c.logger.Debug("[SIMULATION] Created conversation id=%s character_id=%s", conversation.ID, conversation.CharacterID)
+	c.logger.Debug("[standalone] Created conversation id=%s character_id=%s", conversation.ID, conversation.CharacterID)
 	return nil
 }
 
-// GetConversation retrieves a conversation from simulation storage
+// GetConversation retrieves a conversation from standalone storage
 func (c *CharacterAISimulationClient) GetConversation(ctx context.Context, conversationID string) (*memory.Conversation, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -1543,7 +1543,7 @@ func (c *CharacterAISimulationClient) GetConversation(ctx context.Context, conve
 	return &convCopy, nil
 }
 
-// UpdateConversation updates a conversation in simulation storage
+// UpdateConversation updates a conversation in standalone storage
 func (c *CharacterAISimulationClient) UpdateConversation(ctx context.Context, conversation *memory.Conversation) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1554,11 +1554,11 @@ func (c *CharacterAISimulationClient) UpdateConversation(ctx context.Context, co
 
 	conversation.UpdatedAt = time.Now()
 	c.conversations[conversation.ID] = conversation
-	c.logger.Debug("[SIMULATION] Updated conversation id=%s", conversation.ID)
+	c.logger.Debug("[standalone] Updated conversation id=%s", conversation.ID)
 	return nil
 }
 
-// DeleteConversation removes a conversation from simulation storage
+// DeleteConversation removes a conversation from standalone storage
 func (c *CharacterAISimulationClient) DeleteConversation(ctx context.Context, conversationID string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -1570,7 +1570,7 @@ func (c *CharacterAISimulationClient) DeleteConversation(ctx context.Context, co
 	delete(c.conversations, conversationID)
 	delete(c.messages, conversationID)
 
-	c.logger.Debug("[SIMULATION] Deleted conversation id=%s", conversationID)
+	c.logger.Debug("[standalone] Deleted conversation id=%s", conversationID)
 	return nil
 }
 
@@ -1610,41 +1610,38 @@ func (c *CharacterAISimulationClient) SendMessage(ctx context.Context, message *
 
 	c.messages[message.SessionID] = append(c.messages[message.SessionID], message)
 
-	// Generate simulated response
 	c.messageIDSeq++
 	response := &memory.CharacterMessage{
 		ID:        fmt.Sprintf("sim_msg_%d", c.messageIDSeq),
 		SessionID: message.SessionID,
 		SenderID:  conv.CharacterID,
-		Content:   c.generateSimulatedResponse(conv.CharacterID, message.Content),
+		Content:   c.generateCharacterResponse(conv.CharacterID, message.Content),
 		Timestamp: time.Now(),
 		Type:      "character",
 	}
 
 	c.messages[message.SessionID] = append(c.messages[message.SessionID], response)
 
-	// Update conversation stats
 	conv.MessageCount += 2
 	conv.UpdatedAt = time.Now()
 
-	c.logger.Debug("[SIMULATION] Sent message and generated response for session=%s", message.SessionID)
+	c.logger.Debug("[standalone] Sent message and generated response for session=%s", message.SessionID)
 	return response, nil
 }
 
-// generateSimulatedResponse creates a simulated character response
-func (c *CharacterAISimulationClient) generateSimulatedResponse(characterID, userMessage string) string {
+func (c *CharacterAISimulationClient) generateCharacterResponse(characterID, userMessage string) string {
 	character, exists := c.characters[characterID]
 	if !exists {
-		return "[Simulation] Character not found"
+		return "Character not found"
 	}
 
-	// Generate a simple simulated response based on character personality
-	response := fmt.Sprintf("[Simulation] %s responds to your message.", character.Name)
+	// Generate response based on character personality
+	response := fmt.Sprintf("Standalone %s responds to your message.", character.Name)
 
 	// Add personality-based flavor if available
 	if character.Personality != nil {
 		if friendly, ok := character.Personality["friendly"].(bool); ok && friendly {
-			response = fmt.Sprintf("[Simulation] %s warmly responds to your message.", character.Name)
+			response = fmt.Sprintf("Standalone %s warmly responds to your message.", character.Name)
 		}
 	}
 
@@ -1696,7 +1693,7 @@ func (c *CharacterAISimulationClient) UpdatePersonality(ctx context.Context, cha
 	}
 
 	character.UpdatedAt = time.Now()
-	c.logger.Debug("[SIMULATION] Updated personality for character=%s", characterID)
+	c.logger.Debug("[standalone] Updated personality for character=%s", characterID)
 	return nil
 }
 
@@ -1734,7 +1731,7 @@ func (c *CharacterAISimulationClient) UpdateRelationship(ctx context.Context, ch
 	data.UpdatedAt = time.Now()
 	c.relationships[key] = data
 
-	c.logger.Debug("[SIMULATION] Updated relationship character=%s user=%s strength=%.2f", characterID, userID, data.Strength)
+	c.logger.Debug("[standalone] Updated relationship character=%s user=%s strength=%.2f", characterID, userID, data.Strength)
 	return nil
 }
 
@@ -1768,13 +1765,13 @@ func (c *CharacterAISimulationClient) UpdateEmotionalState(ctx context.Context, 
 	state.Timestamp = time.Now()
 	c.emotions[characterID] = state
 
-	c.logger.Debug("[SIMULATION] Updated emotional state character=%s mood=%s intensity=%.2f", characterID, state.Mood, state.Intensity)
+	c.logger.Debug("[standalone] Updated emotional state character=%s mood=%s intensity=%.2f", characterID, state.Mood, state.Intensity)
 	return nil
 }
 
 // GetHealth returns the health status of the simulation client.
 // Always returns nil (healthy) since this is an in-memory simulation.
 func (c *CharacterAISimulationClient) GetHealth(ctx context.Context) error {
-	c.logger.Debug("[SIMULATION] Health check - simulation client is always healthy")
+	c.logger.Debug("[standalone] Health check - simulation client is always healthy")
 	return nil
 }

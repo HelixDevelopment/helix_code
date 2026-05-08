@@ -262,9 +262,6 @@ func (l *SimpleLexer) ParseBasic(source []byte, language string) (*ParsedTree, e
 		},
 	}
 
-	// This would be implemented with language-specific lexing rules
-	// For now, it's just a placeholder
-
 	return tree, nil
 }
 

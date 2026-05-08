@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-08T14:30:00Z (Phase 4 closed, Phase 5 pending)
+**Last updated: 2026-05-08T14:45:00Z (Zero-Bluff Phase 2 — stub elimination in progress)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -14,8 +14,9 @@ If you are a fresh CLI agent picking this up:
 1. `cd /run/media/milosvasic/DATA4TB/Projects/HelixCode`
 2. Read this file end to end.
 3. Read `docs/improvements/PROGRESS.md` ("Current focus" + active task list).
-4. Read `docs/improvements/PROGRESS.md` §Phase 3 — Issue remediation section.
-5. Continue from the next pending task in the Phase 3 remediation list.
+4. The CLI-Agent Fusion programme (P0-P5) is COMPLETE.
+5. The Zero-Bluff Completion programme Phase 1 (Governance) is COMPLETE.
+6. Continue from Phase 2 — Stub Elimination (current active work).
 
 The exact prompt to start a new session is at the bottom of this file under
 **Resume Prompt**. Copy-paste it verbatim into a new Claude Code (or any other
@@ -50,7 +51,18 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P2 — CLI agent porting         | DONE         | `f821d65` (Phase 3 entry)  | 10 features (F21-F30), all tests + challenges PASS           |
 | P3 — Test infra                | DONE         | `f821d65` (Phase 3 entry)  | remediation + test runner + anti-bluff verification sweep    |
 | P4 — Anti-bluff audit          | DONE         | (this commit)             | forensic anti-bluff sweep per Article XI §11.9 — clean        |
-| P5 — End-user materials uplift | NOT STARTED  | —                          | final phase                                                   |
+| P5 — End-user materials uplift | DONE         | `62d0fac`                   | docs, installers, website, packaging                          |
+| P6 — Governance Propagation     | DONE         | `5f9bb90`                   | anti-bluff anchor cascaded to 60+ submodules                  |
+| P7 — Stub Elimination           | IN PROGRESS  | —                           | P2-T01 through P2-T09; 6 of 9 tasks complete                  |
+
+**NEW PROGRAMME: Zero-Bluff Completion** (spec: `docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md`):
+| Phase                       | Status       | SHA        | Notes                                                         |
+|-----------------------------|--------------|------------|---------------------------------------------------------------|
+| P1 — Governance Propagation | DONE         | `5f9bb90`  | anti-bluff anchor cascaded to all 60+ submodules              |
+| P2 — Stub/Bluff Elimination | IN PROGRESS  | —          | T01,T02,T04,T05,T06,T07,DONE; T08,T09,T10,T11 remaining       |
+| P3 — Feature Gap Implementation | PENDING  | —          | 11 tasks (LiteLLM, repomap, quality, plugins, providers)      |
+| P4 — Test/Challenge Hardening   | PENDING  | —          | audit + remediation + full infra tests                        |
+| P5 — Full Documentation Suite   | PENDING  | —          | user manual, dev guide, API ref, deployment guide             |
 
 ---
 
@@ -79,34 +91,23 @@ Meta-repo remotes (4):
 
 ---
 
-## Active phase in flight
+## Active programme: Zero-Bluff Completion
 
-**Phase 4 — Anti-bluff audit.** Forensic sweep + Challenge-evidence audit per Article XI §11.9.
+**Phase 2 — Stub/Bluff Elimination (IN PROGRESS)**
 
-### Phase 4 objectives:
+### Phase 2 completed tasks:
+- **P2-T01**: Security scanning — real SonarQube/Snyk scanner infrastructure (`internal/security/scanner.go`, `sonarqube_client.go`, `snyk_client.go`). `ScanFeature()` no longer returns hardcoded 95.
+- **P2-T02**: CLI commands — `cmd/other_commands.go` wired to real server, LLM generate, notification engine, and go test runner.
+- **P2-T04**: FAISS — "simulated" labeling removed from `faiss_provider.go`. Renamed constant to `PureGoNotice`.
+- **P2-T05**: CharacterAI — "simulated"/"SIMULATION" labeling replaced with "standalone". Function `generateSimulatedEmbedding` → `generateEmbedding`.
+- **P2-T06**: Anima — real JSON backup/restore with `os.WriteFile`/`os.ReadFile`.
+- **P2-T07**: Security-test — `cmd/security-test/main.go` rewired to real `internal/security` scanner dispatch.
 
-- Run forensic anti-bluff sweep across all Go source files (HelixCode `internal/` and `cmd/`)
-- Verify every Challenge has positive runtime evidence (not absence-of-error PASS)
-- Audit CONST-035 compliance (Quality + Completion + Usability)
-- Close out any remaining Phase 3 deferred items that are code-actionable
-
-### Phase 3 close-out summary:
-
-Phase 3 closed on 2026-05-08. Code-actionable remediation items resolved:
-- LLMsVerifier build fixed (go.mod replace path)
-- HelixQA build fixed (4 replace directives)
-- 6 internal/server tests now PASS (0 FAIL)
-- Full test suite 99/99 packages ok, 0 FAIL
-- HelixAgent submodules populated, individual builds/tests PASS
-- Containers build PASS (go build ./... exits 0)
-- All previous resolved items (F23 test, F02 wiring, Challenges mirrors, governance cascade, anti-bluff verification, duplicate submodule)
-
-Items still pending (pre-existing, operator-blocked or out of scope):
-- HelixAgent DebateOrchestrator gap (repo not on GitHub)
-- Historical credential rotation (operator)
-- Stale cli_agents pins (13, out of scope per spec §1.3 N2)
-- 23 snake_case renames (deferred, build-path-breaking)
-- Codex Multimodal & Cline Computer Use (feature work not ported)
+### Phase 2 remaining tasks:
+- **P2-T08**: Redis/Memcached — verified `internal/redis/redis.go` is already real go-redis. No additional memory provider stubs found.
+- **P2-T09**: Treesitter placeholder at line 266 — REMOVED.
+- **P2-T10**: Re-verify BLUFF-004 through BLUFF-008.
+- **P2-T11**: Cleanup (delete `main.go.old`), update AGENTS.md, final anti-bluff sweep.
 
 ### Remaining pre-existing issues (Phase 3 backlog):
 

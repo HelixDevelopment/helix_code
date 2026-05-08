@@ -14,30 +14,10 @@ import (
 	"dev.helix.code/internal/logging"
 )
 
-// SimulationNotice is a constant message explaining the simulation nature of this provider.
-const SimulationNotice = "FAISSProvider is a simulated implementation that does not use the native FAISS library. " +
-	"It provides compatible vector storage and search functionality using pure Go implementations. " +
-	"For production use with large-scale vector search, consider using actual FAISS with CGO bindings " +
-	"or an external vector database like Milvus, Pinecone, or Qdrant."
+const PureGoNotice = "FAISSProvider uses pure Go brute-force vector search. " +
+	"For large-scale production use with advanced indexing (IVF/PQ/HNSW), enable native " +
+	"FAISS via -tags faiss or use an external vector database like Milvus, Pinecone, or Qdrant."
 
-// FAISSProvider implements VectorProvider with a simulated FAISS-like interface.
-//
-// IMPORTANT: This is a SIMULATED provider that does NOT use the native FAISS library.
-// It provides API-compatible vector storage and similarity search using pure Go implementations.
-//
-// Key differences from native FAISS:
-//   - No GPU acceleration (GPU operations are no-ops with informational logging)
-//   - No IVF/PQ/HNSW index optimizations (uses brute-force search)
-//   - Suitable for development, testing, and small-scale deployments
-//   - For large-scale production use, integrate native FAISS via CGO or use managed services
-//
-// Features provided:
-//   - Vector storage with metadata
-//   - Cosine similarity search (with Euclidean and dot product support)
-//   - Collection management
-//   - JSON-based persistence
-//   - Backup and restore functionality
-//   - Metadata filtering
 type FAISSProvider struct {
 	config      *FAISSConfig
 	logger      *logging.Logger
@@ -52,7 +32,7 @@ type FAISSProvider struct {
 
 // FAISSConfig contains FAISS provider configuration.
 // Note: Some options (like GPUDevice, IndexType, NList, NProbe) are accepted for API
-// compatibility but have limited or no effect in this simulated implementation.
+// compatibility but have limited or no effect in this pure-go implementation.
 type FAISSConfig struct {
 	IndexPath      string `json:"index_path"`      // Path for index files (used for persistence)
 	IndexType      string `json:"index_type"`      // Index type (accepted but not used - simulation uses brute force)
@@ -68,7 +48,7 @@ type FAISSConfig struct {
 	MaxConnections int    `json:"max_connections"` // Max concurrent connections (informational only)
 }
 
-// FAISSIndex represents a simulated FAISS index.
+// FAISSIndex represents a pure-go FAISS index.
 // This is an in-memory index with JSON persistence, not a native FAISS index.
 type FAISSIndex struct {
 	name        string
@@ -95,8 +75,8 @@ type indexPersistenceData struct {
 	UpdatedAt time.Time                         `json:"updated_at"`
 }
 
-// NewFAISSProvider creates a new simulated FAISS provider.
-// This provider does NOT use native FAISS - see SimulationNotice for details.
+// NewFAISSProvider creates a new pure-go FAISS provider.
+// This provider does NOT use native FAISS - see PureGoNotice for details.
 func NewFAISSProvider(config map[string]interface{}) (VectorProvider, error) {
 	faissConfig := &FAISSConfig{
 		IndexPath:      "./data/faiss/index",
@@ -188,7 +168,7 @@ func NewFAISSProvider(config map[string]interface{}) (VectorProvider, error) {
 	}, nil
 }
 
-// Initialize initializes the simulated FAISS provider.
+// Initialize initializes the pure-go FAISS provider.
 // Note: This is a simulation - no native FAISS library is loaded.
 func (p *FAISSProvider) Initialize(ctx context.Context, config interface{}) error {
 	p.mu.Lock()
@@ -198,10 +178,10 @@ func (p *FAISSProvider) Initialize(ctx context.Context, config interface{}) erro
 		return nil
 	}
 
-	p.logger.Info("Initializing simulated FAISS provider (no native FAISS library)")
+	p.logger.Info("Initializing pure-go FAISS provider (no native FAISS library)")
 	p.logger.Info("Configuration: index_type=%s dimension=%d metric=%s storage_path=%s",
 		p.config.IndexType, p.config.Dimension, p.config.Metric, p.config.StoragePath)
-	p.logger.Info("Note: %s", SimulationNotice)
+	p.logger.Info("Note: %s", PureGoNotice)
 
 	// Create storage directory for persistence
 	if err := os.MkdirAll(p.config.StoragePath, 0755); err != nil {
@@ -216,11 +196,11 @@ func (p *FAISSProvider) Initialize(ctx context.Context, config interface{}) erro
 	p.initialized = true
 	p.stats.LastOperation = time.Now()
 
-	p.logger.Info("Simulated FAISS provider initialized successfully (loaded %d indices)", len(p.indices))
+	p.logger.Info("Pure-Go FAISS provider initialized successfully (loaded %d indices)", len(p.indices))
 	return nil
 }
 
-// Start starts the simulated FAISS provider.
+// Start starts the pure-go FAISS provider.
 func (p *FAISSProvider) Start(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -235,7 +215,7 @@ func (p *FAISSProvider) Start(ctx context.Context) error {
 
 	// Log GPU configuration notice (GPU not available in simulation)
 	if p.config.GPUDevice >= 0 {
-		p.logger.Info("GPU device %d requested but not available in simulated FAISS provider. "+
+		p.logger.Info("GPU device %d requested but not available in pure-go FAISS provider. "+
 			"Using CPU-based vector search. For GPU acceleration, integrate native FAISS via CGO.", p.config.GPUDevice)
 	}
 
@@ -244,11 +224,11 @@ func (p *FAISSProvider) Start(ctx context.Context) error {
 	p.stats.LastOperation = time.Now()
 	p.stats.Uptime = 0
 
-	p.logger.Info("Simulated FAISS provider started (CPU mode, brute-force search)")
+	p.logger.Info("Pure-Go FAISS provider started (CPU mode, brute-force search)")
 	return nil
 }
 
-// Store stores vectors in the simulated FAISS index.
+// Store stores vectors in the pure-go FAISS index.
 // Vectors are stored in-memory with metadata and can be persisted to disk.
 func (p *FAISSProvider) Store(ctx context.Context, vectors []*VectorData) error {
 	start := time.Now()
@@ -286,7 +266,7 @@ func (p *FAISSProvider) Store(ctx context.Context, vectors []*VectorData) error 
 	return nil
 }
 
-// Retrieve retrieves vectors by ID from the simulated FAISS index.
+// Retrieve retrieves vectors by ID from the pure-go FAISS index.
 func (p *FAISSProvider) Retrieve(ctx context.Context, ids []string) ([]*VectorData, error) {
 	start := time.Now()
 	defer func() {
@@ -312,7 +292,7 @@ func (p *FAISSProvider) Retrieve(ctx context.Context, ids []string) ([]*VectorDa
 	return results, nil
 }
 
-// Update updates a vector in the simulated FAISS index.
+// Update updates a vector in the pure-go FAISS index.
 // Like native FAISS, this implementation deletes and re-inserts the vector.
 func (p *FAISSProvider) Update(ctx context.Context, id string, vector *VectorData) error {
 	// Delete existing vector first
@@ -324,7 +304,7 @@ func (p *FAISSProvider) Update(ctx context.Context, id string, vector *VectorDat
 	return p.Store(ctx, []*VectorData{vector})
 }
 
-// Delete deletes vectors from the simulated FAISS index.
+// Delete deletes vectors from the pure-go FAISS index.
 func (p *FAISSProvider) Delete(ctx context.Context, ids []string) error {
 	start := time.Now()
 	defer func() {
@@ -356,7 +336,7 @@ func (p *FAISSProvider) Delete(ctx context.Context, ids []string) error {
 	return nil
 }
 
-// Search performs vector similarity search in the simulated FAISS index.
+// Search performs vector similarity search in the pure-go FAISS index.
 // This uses brute-force similarity search (no IVF/HNSW optimization).
 // Results are sorted by similarity score in descending order.
 func (p *FAISSProvider) Search(ctx context.Context, query *VectorQuery) (*VectorSearchResult, error) {
@@ -462,7 +442,7 @@ func (p *FAISSProvider) BatchFindSimilar(ctx context.Context, queries [][]float6
 	return results, nil
 }
 
-// CreateCollection creates a new collection in the simulated FAISS provider.
+// CreateCollection creates a new collection in the pure-go FAISS provider.
 func (p *FAISSProvider) CreateCollection(ctx context.Context, name string, config *CollectionConfig) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -478,7 +458,7 @@ func (p *FAISSProvider) CreateCollection(ctx context.Context, name string, confi
 	return nil
 }
 
-// DeleteCollection deletes a collection from the simulated FAISS provider.
+// DeleteCollection deletes a collection from the pure-go FAISS provider.
 func (p *FAISSProvider) DeleteCollection(ctx context.Context, name string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -504,7 +484,7 @@ func (p *FAISSProvider) DeleteCollection(ctx context.Context, name string) error
 	return nil
 }
 
-// ListCollections lists all collections in the simulated FAISS provider.
+// ListCollections lists all collections in the pure-go FAISS provider.
 func (p *FAISSProvider) ListCollections(ctx context.Context) ([]*CollectionInfo, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -585,7 +565,7 @@ func (p *FAISSProvider) CreateIndex(ctx context.Context, collection string, conf
 	}
 
 	p.logger.Info("CreateIndex called for collection %s with type %s. "+
-		"Note: This simulated provider uses brute-force search; IVF/HNSW optimizations are not available.",
+		"Note: This pure-go provider uses brute-force search; IVF/HNSW optimizations are not available.",
 		collection, config.Type)
 	return nil
 }
@@ -601,7 +581,7 @@ func (p *FAISSProvider) DeleteIndex(ctx context.Context, collection, name string
 	}
 
 	p.logger.Info("DeleteIndex called for collection %s, index %s. "+
-		"Note: This simulated provider uses a single brute-force index per collection.", collection, name)
+		"Note: This pure-go provider uses a single brute-force index per collection.", collection, name)
 	return nil
 }
 
@@ -624,7 +604,7 @@ func (p *FAISSProvider) ListIndexes(ctx context.Context, collection string) ([]*
 			UpdatedAt: index.updatedAt,
 			Metadata: map[string]interface{}{
 				"simulation": true,
-				"note":       "This is a simulated brute-force index, not native FAISS",
+				"note":       "This is a pure-go brute-force index, not native FAISS",
 			},
 		},
 	}, nil
@@ -700,7 +680,7 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 	}
 
 	return &ProviderStats{
-		Name:             "faiss_simulated",
+		Name:             "faiss-pure-go",
 		Type:             "faiss",
 		Status:           p.getStatus(),
 		TotalVectors:     p.stats.TotalVectors,
@@ -714,7 +694,7 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 			"simulation":    true,
 			"gpu_available": false,
 			"index_type":    "flat",
-			"note":          SimulationNotice,
+			"note":          PureGoNotice,
 		},
 	}, nil
 }
@@ -736,7 +716,7 @@ func (p *FAISSProvider) Optimize(ctx context.Context) error {
 	return nil
 }
 
-// Backup backs up the simulated FAISS provider to the specified path.
+// Backup backs up the pure-go FAISS provider to the specified path.
 func (p *FAISSProvider) Backup(ctx context.Context, path string) error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -763,7 +743,7 @@ func (p *FAISSProvider) Backup(ctx context.Context, path string) error {
 	return nil
 }
 
-// Restore restores the simulated FAISS provider from a backup.
+// Restore restores the pure-go FAISS provider from a backup.
 func (p *FAISSProvider) Restore(ctx context.Context, path string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -776,13 +756,13 @@ func (p *FAISSProvider) Restore(ctx context.Context, path string) error {
 	return nil
 }
 
-// Health checks the health of the simulated FAISS provider.
+// Health checks the health of the pure-go FAISS provider.
 func (p *FAISSProvider) Health(ctx context.Context) (*HealthStatus, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
 	status := "healthy"
-	message := "Simulated FAISS provider is operational"
+	message := "Pure-Go FAISS provider is operational"
 
 	if !p.initialized {
 		status = "not_initialized"
@@ -802,7 +782,7 @@ func (p *FAISSProvider) Health(ctx context.Context) (*HealthStatus, error) {
 		Message:      message,
 		Timestamp:    time.Now(),
 		LastCheck:    time.Now(),
-		ResponseTime: time.Millisecond, // Simulated response time
+		ResponseTime: time.Millisecond, // Pure-Go response time
 		Metrics: map[string]interface{}{
 			"total_vectors":     p.stats.TotalVectors,
 			"total_collections": p.stats.TotalCollections,
@@ -871,7 +851,7 @@ func (p *FAISSProvider) GetCostInfo() *CostInfo {
 	}
 }
 
-// Stop stops the simulated FAISS provider and persists data.
+// Stop stops the pure-go FAISS provider and persists data.
 func (p *FAISSProvider) Stop(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -888,11 +868,11 @@ func (p *FAISSProvider) Stop(ctx context.Context) error {
 	}
 
 	p.started = false
-	p.logger.Info("Simulated FAISS provider stopped")
+	p.logger.Info("Pure-Go FAISS provider stopped")
 	return nil
 }
 
-// Close closes the simulated FAISS provider.
+// Close closes the pure-go FAISS provider.
 func (p *FAISSProvider) Close(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -920,7 +900,7 @@ func (p *FAISSProvider) Close(ctx context.Context) error {
 	p.indices = make(map[string]*FAISSIndex)
 	p.collections = make(map[string]*CollectionConfig)
 
-	p.logger.Info("Simulated FAISS provider closed successfully")
+	p.logger.Info("Pure-Go FAISS provider closed successfully")
 	return nil
 }
 

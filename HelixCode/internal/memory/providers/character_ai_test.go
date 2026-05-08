@@ -1112,7 +1112,7 @@ func TestCharacterAISimulationClient_Health(t *testing.T) {
 
 func TestCharacterAI_ErrorVariables(t *testing.T) {
 	assert.NotNil(t, ErrCharacterAINoPublicAPI)
-	assert.NotNil(t, ErrCharacterAISimulationMode)
+	assert.NotNil(t, ErrCharacterAIStandaloneMode)
 	assert.NotNil(t, ErrCharacterNotFound)
 	assert.NotNil(t, ErrConversationNotFound)
 	assert.NotNil(t, ErrCharacterAINotStarted)
@@ -1180,12 +1180,12 @@ func TestCharacterAIProvider_GenerateSimulatedEmbedding(t *testing.T) {
 	provider := newTestCharacterAIProvider()
 
 	// Same text should produce same embedding
-	emb1 := provider.generateSimulatedEmbedding("test text")
-	emb2 := provider.generateSimulatedEmbedding("test text")
+	emb1 := provider.generateEmbedding("test text")
+	emb2 := provider.generateEmbedding("test text")
 	assert.Equal(t, emb1, emb2)
 
 	// Different text should produce different embedding
-	emb3 := provider.generateSimulatedEmbedding("different text")
+	emb3 := provider.generateEmbedding("different text")
 	assert.NotEqual(t, emb1, emb3)
 
 	// Embedding should be normalized (length ~1)
@@ -1196,7 +1196,7 @@ func TestCharacterAIProvider_GenerateSimulatedEmbedding(t *testing.T) {
 	assert.InDelta(t, 1.0, norm, 0.0001)
 
 	// Empty text should return zero vector
-	emb4 := provider.generateSimulatedEmbedding("")
+	emb4 := provider.generateEmbedding("")
 	for _, v := range emb4 {
 		assert.Equal(t, 0.0, v)
 	}
@@ -2853,7 +2853,7 @@ func TestCharacterAIProvider_EmptyTextEmbedding(t *testing.T) {
 	provider := newTestCharacterAIProvider()
 
 	// Empty text should return zero vector
-	embedding := provider.generateSimulatedEmbedding("")
+	embedding := provider.generateEmbedding("")
 	assert.Len(t, embedding, 1536)
 
 	// All values should be zero
@@ -2878,7 +2878,7 @@ func TestCharacterAIProvider_UnicodeTextEmbedding(t *testing.T) {
 
 	embeddings := make([][]float64, len(unicodeTexts))
 	for i, text := range unicodeTexts {
-		embeddings[i] = provider.generateSimulatedEmbedding(text)
+		embeddings[i] = provider.generateEmbedding(text)
 		assert.Len(t, embeddings[i], 1536)
 
 		// Verify normalized

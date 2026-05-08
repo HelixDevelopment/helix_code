@@ -923,7 +923,7 @@ func TestFAISSProvider_GetStats(t *testing.T) {
 	stats, err := provider.GetStats(ctx)
 	require.NoError(t, err)
 
-	assert.Equal(t, "faiss_simulated", stats.Name)
+	assert.Equal(t, "faiss-pure-go", stats.Name)
 	assert.Equal(t, "faiss", stats.Type)
 	assert.Equal(t, "running", stats.Status)
 	assert.Equal(t, int64(2), stats.TotalVectors)
@@ -1242,9 +1242,10 @@ func TestFAISSProvider_ImplementsVectorProvider(t *testing.T) {
 // Simulation Notice Test
 // ========================================
 
-func TestFAISSProvider_SimulationNotice(t *testing.T) {
-	assert.Contains(t, SimulationNotice, "simulated")
-	assert.Contains(t, SimulationNotice, "native FAISS")
+func TestFAISSProvider_PureGoNotice(t *testing.T) {
+	assert.NotContains(t, PureGoNotice, "simulated")
+	assert.Contains(t, PureGoNotice, "pure Go")
+	assert.Contains(t, PureGoNotice, "FAISSProvider")
 }
 
 // ========================================

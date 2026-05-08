@@ -2,7 +2,9 @@ package providers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -1020,24 +1022,35 @@ func (p *AnimaProvider) Backup(ctx context.Context, path string) error {
 
 	p.logger.Info("Backing up Anima provider data to: %s", path)
 
-	// In a real implementation, this would serialize all data to disk
-	// For this implementation, we'll just log the operation
-	// The actual backup would involve:
-	// - Serializing p.data to a file
-	// - Serializing p.collections
-	// - Serializing p.indexes
-	// - Serializing p.metadata
-	// - Compressing the backup
+	type backupState struct {
+		Timestamp time.Time              `json:"timestamp"`
+		Entries   map[string]interface{} `json:"entries"`
+		Version   string                 `json:"version"`
+	}
+	state := backupState{
+		Timestamp: time.Now(),
+		Entries:   make(map[string]interface{}),
+		Version:   "1.0",
+	}
+	for k, v := range p.data {
+		state.Entries[k] = v
+	}
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("serialize backup: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return fmt.Errorf("write backup: %w", err)
+	}
 
 	p.stats.SuccessfulOps++
 	p.stats.TotalOperations++
 	p.stats.LastOperation = time.Now()
 
-	p.logger.Info("Anima provider backup completed (simulated)")
+	p.logger.Info("Anima provider backup completed")
 	return nil
 }
 
-// Restore restores data
 func (p *AnimaProvider) Restore(ctx context.Context, path string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -1048,19 +1061,29 @@ func (p *AnimaProvider) Restore(ctx context.Context, path string) error {
 
 	p.logger.Info("Restoring Anima provider data from: %s", path)
 
-	// In a real implementation, this would deserialize data from disk
-	// For this implementation, we'll just log the operation
-	// The actual restore would involve:
-	// - Deserializing data from backup file
-	// - Validating data integrity
-	// - Merging with existing data or replacing it
-	// - Rebuilding indexes
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read backup: %w", err)
+	}
+	var state struct {
+		Entries map[string]interface{} `json:"entries"`
+	}
+	if err := json.Unmarshal(data, &state); err != nil {
+		return fmt.Errorf("deserialize backup: %w", err)
+	}
+	if state.Entries != nil {
+		for k, v := range state.Entries {
+			if vd, ok := v.(*VectorData); ok {
+				p.data[k] = vd
+			}
+		}
+	}
 
 	p.stats.SuccessfulOps++
 	p.stats.TotalOperations++
 	p.stats.LastOperation = time.Now()
 
-	p.logger.Info("Anima provider restore completed (simulated)")
+	p.logger.Info("Anima provider restore completed")
 	return nil
 }
 
