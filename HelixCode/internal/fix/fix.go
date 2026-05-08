@@ -129,8 +129,165 @@ func processSecurityIssues(projectPath string, issues []interface{}, criticalOnl
 
 // attemptFix attempts to fix a specific security issue
 func attemptFix(projectPath string, issue interface{}) bool {
-	// In a real implementation, this would contain specific fix logic
-	// For now, simulate a successful fix for demonstration
+	logger := logging.DefaultLogger()
+
+	issueStr := fmt.Sprintf("%v", issue)
+
+	switch {
+	case strings.Contains(issueStr, "hardcoded") && strings.Contains(issueStr, "secret"):
+		return fixHardcodedSecret(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "sql") && strings.Contains(issueStr, "injection"):
+		return fixSQLInjection(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "path") && strings.Contains(issueStr, "traversal"):
+		return fixPathTraversal(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "xss") || strings.Contains(issueStr, "cross-site"):
+		return fixXSS(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "csrf"):
+		return fixCSRF(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "insecure") && strings.Contains(issueStr, "dependency"):
+		return fixInsecureDependency(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "missing") && strings.Contains(issueStr, "auth"):
+		return fixMissingAuth(projectPath, issueStr, logger)
+	case strings.Contains(issueStr, "weak") && strings.Contains(issueStr, "crypto"):
+		return fixWeakCrypto(projectPath, issueStr, logger)
+	default:
+		logger.Warn("Unknown issue type, cannot auto-fix: %s", issueStr)
+		return false
+	}
+}
+
+func fixHardcodedSecret(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix hardcoded secret: %s", issue)
+	files, err := findGoFiles(projectPath)
+	if err != nil {
+		logger.Error("Failed to find Go files: %v", err)
+		return false
+	}
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			continue
+		}
+
+		contentStr := string(content)
+		if strings.Contains(contentStr, "password") || strings.Contains(contentStr, "secret") ||
+			strings.Contains(contentStr, "api_key") || strings.Contains(contentStr, "token") {
+			if strings.Contains(contentStr, "= \"") && !strings.Contains(contentStr, "os.Getenv") {
+				logger.Warn("Hardcoded credential found in %s - requires manual review", file)
+				return false
+			}
+		}
+	}
+
+	logger.Info("No hardcoded secrets found in code (may be in config)")
+	return true
+}
+
+func fixSQLInjection(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix SQL injection: %s", issue)
+	files, err := findGoFiles(projectPath)
+	if err != nil {
+		logger.Error("Failed to find Go files: %v", err)
+		return false
+	}
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			continue
+		}
+
+		contentStr := string(content)
+		if strings.Contains(contentStr, "fmt.Sprintf") && strings.Contains(contentStr, "SELECT") {
+			logger.Warn("Potential SQL injection via fmt.Sprintf in %s - requires manual review", file)
+			return false
+		}
+		if strings.Contains(contentStr, "+") && strings.Contains(contentStr, "SELECT") {
+			logger.Warn("Potential SQL injection via string concat in %s - requires manual review", file)
+			return false
+		}
+	}
+
+	logger.Info("No obvious SQL injection patterns found")
+	return true
+}
+
+func fixPathTraversal(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix path traversal: %s", issue)
+	files, err := findGoFiles(projectPath)
+	if err != nil {
+		logger.Error("Failed to find Go files: %v", err)
+		return false
+	}
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			continue
+		}
+
+		contentStr := string(content)
+		if strings.Contains(contentStr, "os.Open") || strings.Contains(contentStr, "ioutil.ReadFile") {
+			if strings.Contains(contentStr, "..") || !strings.Contains(contentStr, "filepath.Clean") {
+				logger.Warn("Potential path traversal in %s - requires manual review", file)
+				return false
+			}
+		}
+	}
+
+	logger.Info("No obvious path traversal patterns found")
+	return true
+}
+
+func fixXSS(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix XSS: %s", issue)
+	logger.Warn("XSS fix requires manual review of HTML templates and output encoding")
+	return false
+}
+
+func fixCSRF(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix CSRF: %s", issue)
+	logger.Warn("CSRF fix requires manual implementation of CSRF tokens")
+	return false
+}
+
+func fixInsecureDependency(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix insecure dependency: %s", issue)
+	logger.Info("Run 'go list -m all | nancy sleuth' to check dependencies")
+	return false
+}
+
+func fixMissingAuth(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix missing auth: %s", issue)
+	logger.Warn("Missing auth requires manual implementation of authentication middleware")
+	return false
+}
+
+func fixWeakCrypto(projectPath, issue string, logger *logging.Logger) bool {
+	logger.Info("Attempting to fix weak crypto: %s", issue)
+	files, err := findGoFiles(projectPath)
+	if err != nil {
+		logger.Error("Failed to find Go files: %v", err)
+		return false
+	}
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			continue
+		}
+
+		contentStr := string(content)
+		if strings.Contains(contentStr, "md5") || strings.Contains(contentStr, "sha1") {
+			if strings.Contains(contentStr, "password") || strings.Contains(contentStr, "secret") {
+				logger.Warn("Weak crypto (MD5/SHA1) for passwords in %s - requires manual fix", file)
+				return false
+			}
+		}
+	}
+
+	logger.Info("No obvious weak crypto patterns found")
 	return true
 }
 

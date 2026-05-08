@@ -552,25 +552,34 @@ func TestConfigurationManagerWithOptions(t *testing.T) {
 }
 
 func TestConfigWatcherAndInfo(t *testing.T) {
-	// Test NewConfigWatcher (returns nil for now)
-	watcher, err := NewConfigWatcher("/dummy/path")
-	assert.Nil(t, watcher)
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "test_config.yaml")
+
+	configContent := `server:
+  address: "localhost"
+  port: 8080
+`
+	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	watcher, err := NewConfigWatcher(configPath)
+	assert.NotNil(t, watcher)
 	assert.NoError(t, err)
 
-	// Test GetConfigInfo (returns empty struct for now)
 	info, err := GetConfigInfo()
 	assert.NotNil(t, info)
 	assert.NoError(t, err)
+	assert.NotEmpty(t, info.ConfigPath)
 }
 
 func TestConfigManagerWatcherSupport(t *testing.T) {
 	tempDir := t.TempDir()
-	configPath := filepath.Join(tempDir, "watcher_config.json")
+	configPath := filepath.Join(tempDir, "watcher_config.yaml")
 
 	manager, err := NewHelixConfigManager(configPath)
 	require.NoError(t, err)
 
-	// Test AddWatcher (no-op for now)
-	manager.AddWatcher(nil) // Should not panic
-	// No assertions needed since it's a no-op
+	manager.AddWatcher(nil)
+
+	assert.Len(t, manager.watchers, 1)
 }

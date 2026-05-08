@@ -34,11 +34,13 @@ func (v *RuntimeValidator) ValidateRuntime(ctx context.Context, spec *ChallengeS
 		results = append(results, v.validateTicTacToeTUI(ctx, resultDir)...)
 	case "notes-project-001":
 		results = append(results, v.validateNotesProject(ctx, resultDir)...)
+	case "json-validator-cli-001":
+		results = append(results, v.validateJSONValidatorCLI(ctx, resultDir)...)
 	default:
 		results = append(results, ValidationResult{
 			CheckName: "runtime_validation",
-			Passed:    true,
-			Message:   fmt.Sprintf("No runtime validation defined for challenge: %s", spec.ID),
+			Passed:    false,
+			Error:     fmt.Sprintf("No runtime validation defined for challenge: %s (add validation case to runtime_validator.go)", spec.ID),
 			Timestamp: time.Now(),
 		})
 	}
@@ -454,4 +456,106 @@ func (v *RuntimeValidator) runCommand(ctx context.Context, exePath string, args 
 	}
 
 	return result
+}
+
+// validateJSONValidatorCLI tests the JSON validator CLI executable
+func (v *RuntimeValidator) validateJSONValidatorCLI(ctx context.Context, resultDir string) []ValidationResult {
+	results := []ValidationResult{}
+
+	exePath, buildErr := v.buildExecutable(resultDir, "json-validator")
+	if buildErr != nil {
+		results = append(results, ValidationResult{
+			CheckName: "runtime_build",
+			Passed:    false,
+			Error:     fmt.Sprintf("Failed to build executable: %v", buildErr),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
+	defer os.Remove(exePath)
+
+	results = append(results, ValidationResult{
+		CheckName: "runtime_build",
+		Passed:    true,
+		Message:   "Executable built successfully",
+		Details:   fmt.Sprintf("Binary: %s", exePath),
+		Timestamp: time.Now(),
+	})
+
+	helpResult := v.runCommand(ctx, exePath, []string{"--help"}, "", 5*time.Second)
+	helpOutput := helpResult.Stdout + helpResult.Stderr
+	hasUsage := strings.Contains(helpOutput, "Usage") || strings.Contains(helpOutput, "usage") ||
+		strings.Contains(helpOutput, "Use:") || strings.Contains(helpOutput, "use:")
+
+	if !hasUsage {
+		results = append(results, ValidationResult{
+			CheckName: "runtime_help",
+			Passed:    false,
+			Error:     "Help output missing usage information",
+			Details:   fmt.Sprintf("Stdout:\n%s\nStderr:\n%s", helpResult.Stdout, helpResult.Stderr),
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "runtime_help",
+			Passed:    true,
+			Message:   "Help command works correctly",
+			Timestamp: time.Now(),
+		})
+	}
+
+	testCases := []struct {
+		name     string
+		args     []string
+		stdin    string
+		wantPass bool
+	}{
+		{"valid_json", []string{}, `{"name": "test", "value": 123}`, true},
+		{"valid_array", []string{}, `[1, 2, 3, "four"]`, true},
+		{"valid_nested", []string{}, `{"outer": {"inner": [1, 2]}}`, true},
+		{"invalid_json", []string{}, `{"name": missing_quotes}`, false},
+		{"invalid_array", []string{}, `[1, 2, 3,]`, false},
+		{"empty_string", []string{}, ``, false},
+		{"number_only", []string{}, `42`, true},
+		{"string_only", []string{}, `"hello"`, true},
+		{"bool_only", []string{}, `true`, true},
+		{"null_value", []string{}, `null`, true},
+	}
+
+	allPassed := true
+	var failureDetails []string
+	var passCount int
+
+	for _, tc := range testCases {
+		testResult := v.runCommand(ctx, exePath, tc.args, tc.stdin, 5*time.Second)
+		passed := (testResult.ExitCode == 0) == tc.wantPass
+
+		if !passed {
+			allPassed = false
+			failureDetails = append(failureDetails, fmt.Sprintf("%s: expected pass=%t, got exit_code=%d, stdout=%s",
+				tc.name, tc.wantPass, testResult.ExitCode, testResult.Stdout))
+		} else {
+			passCount++
+		}
+	}
+
+	if !allPassed {
+		results = append(results, ValidationResult{
+			CheckName: "runtime_validation_logic",
+			Passed:    false,
+			Error:     fmt.Sprintf("Some validation tests failed (%d/%d passed)", passCount, len(testCases)),
+			Details:   strings.Join(failureDetails, "\n"),
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "runtime_validation_logic",
+			Passed:    true,
+			Message:   fmt.Sprintf("All %d validation tests passed", len(testCases)),
+			Details:   "Tested: valid JSON (object/array/nested/primitives), invalid JSON, edge cases",
+			Timestamp: time.Now(),
+		})
+	}
+
+	return results
 }

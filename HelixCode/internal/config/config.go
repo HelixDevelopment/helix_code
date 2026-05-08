@@ -626,6 +626,7 @@ func getDefaultConfig() *Config {
 type ConfigManager struct {
 	configPath string
 	config     *Config
+	watchers   []ConfigWatcher
 }
 
 // Initialize initializes the configuration manager
@@ -755,7 +756,9 @@ func (m *ConfigManager) saveConfig() error {
 }
 
 // AddWatcher adds a configuration change watcher
-func (m *ConfigManager) AddWatcher(watcher ConfigWatcher) {}
+func (m *ConfigManager) AddWatcher(watcher ConfigWatcher) {
+	m.watchers = append(m.watchers, watcher)
+}
 
 // ExportConfig exports the configuration to a file
 func (m *ConfigManager) ExportConfig(path string) error {
@@ -874,16 +877,57 @@ func UpdateHelixConfig(updateFunc func(*Config)) error {
 
 // NewConfigWatcher creates a new configuration watcher
 func NewConfigWatcher(configPath string) (ConfigWatcher, error) {
-	return nil, nil
+	if configPath == "" {
+		return nil, fmt.Errorf("config path cannot be empty")
+	}
+
+	if _, err := os.Stat(configPath); err != nil {
+		return nil, fmt.Errorf("config file not found: %v", err)
+	}
+
+	return &fileConfigWatcher{
+		configPath: configPath,
+		lastMod:    time.Now(),
+	}, nil
+}
+
+type fileConfigWatcher struct {
+	configPath string
+	lastMod    time.Time
+}
+
+func (w *fileConfigWatcher) OnConfigChange(old, new *Config) error {
+	return nil
 }
 
 // GetConfigInfo returns configuration information
 func GetConfigInfo() (*ConfigInfo, error) {
-	return &ConfigInfo{}, nil
+	cfg, err := LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config: %v", err)
+	}
+
+	return &ConfigInfo{
+		ConfigPath:    GetConfigPath(),
+		ServerAddress: fmt.Sprintf("%s:%d", cfg.Server.Address, cfg.Server.Port),
+		DatabaseHost:  cfg.Database.Host,
+		RedisEnabled:  cfg.Redis.Enabled,
+		LLMProvider:   cfg.LLM.DefaultProvider,
+		LogLevel:      cfg.Logging.Level,
+		LastModified:  time.Now(),
+	}, nil
 }
 
 // ConfigInfo represents configuration information
-type ConfigInfo struct{}
+type ConfigInfo struct {
+	ConfigPath    string    `json:"config_path"`
+	ServerAddress string    `json:"server_address"`
+	DatabaseHost  string    `json:"database_host"`
+	RedisEnabled  bool      `json:"redis_enabled"`
+	LLMProvider   string    `json:"llm_provider"`
+	LogLevel      string    `json:"log_level"`
+	LastModified  time.Time `json:"last_modified"`
+}
 
 // ConfigWatcher represents a configuration watcher
 type ConfigWatcher interface {

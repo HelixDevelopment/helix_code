@@ -56,11 +56,13 @@ func (v *FunctionalValidator) ValidateFunctional(ctx context.Context, spec *Chal
 			Details:   "Compilation and unit tests verify game logic correctness",
 			Timestamp: time.Now(),
 		})
+	case "json-validator-cli-001":
+		results = append(results, v.validateJSONValidatorFunctional(ctx, resultDir)...)
 	default:
 		results = append(results, ValidationResult{
 			CheckName: "functional_tests",
 			Passed:    false,
-			Message:   fmt.Sprintf("No functional tests defined for challenge: %s", spec.ID),
+			Error:     fmt.Sprintf("No functional tests defined for challenge: %s (add validation case to functional_validator.go)", spec.ID),
 			Timestamp: time.Now(),
 		})
 	}
@@ -101,15 +103,15 @@ func (v *FunctionalValidator) validateNotesProject(ctx context.Context, resultDi
 
 	// Wait for server to be ready
 	if !v.waitForServer(serverURL, 10*time.Second) {
-		// Check if failure is due to database connection (expected in mock mode)
+		// Check if failure is due to database connection - this is a REAL failure, not acceptable
 		serverLog := filepath.Join(resultDir, "server.log")
 		logContent, _ := os.ReadFile(serverLog)
 		if strings.Contains(string(logContent), "database") || strings.Contains(string(logContent), "connection refused") {
 			results = append(results, ValidationResult{
 				CheckName: "server_ready_without_db",
-				Passed:    true,
-				Message:   "Server attempted to start (database connection expected to fail in test mode)",
-				Details:   "Functional tests skipped - database not available. This is expected for mock-generated code.",
+				Passed:    false,
+				Error:     "Server failed to start due to missing database connection",
+				Details:   fmt.Sprintf("Server requires database. Log: %s. FIX: Start test database or mock database layer.", string(logContent)),
 				Timestamp: time.Now(),
 			})
 		} else {
@@ -881,4 +883,76 @@ func (v *FunctionalValidator) getCLIOutput(ctx context.Context, binPath string, 
 
 	_ = cmd.Run()
 	return stdout.String()
+}
+
+// validateJSONValidatorFunctional performs functional testing for JSON validator CLI
+func (v *FunctionalValidator) validateJSONValidatorFunctional(ctx context.Context, resultDir string) []ValidationResult {
+	results := []ValidationResult{}
+
+	if err := v.buildCLIProject(ctx, resultDir, "json-validator"); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "build",
+			Passed:    false,
+			Message:   fmt.Sprintf("Failed to build JSON validator: %v", err),
+			Timestamp: time.Now(),
+		})
+		return results
+	}
+
+	results = append(results, ValidationResult{
+		CheckName: "build",
+		Passed:    true,
+		Message:   "JSON validator builds successfully",
+		Timestamp: time.Now(),
+	})
+
+	binPath := filepath.Join(resultDir, "json-validator")
+	if runtime.GOOS == "windows" {
+		binPath += ".exe"
+	}
+
+	if _, err := os.Stat(binPath); err != nil {
+		results = append(results, ValidationResult{
+			CheckName: "binary_exists",
+			Passed:    false,
+			Message:   "JSON validator binary not found after build",
+			Timestamp: time.Now(),
+		})
+		return results
+	}
+
+	results = append(results, ValidationResult{
+		CheckName: "binary_exists",
+		Passed:    true,
+		Message:   "JSON validator binary created successfully",
+		Timestamp: time.Now(),
+	})
+
+	helpOutput := v.getCLIOutput(ctx, binPath, []string{"--help"})
+	expectedTerms := []string{"json", "validate", "file"}
+	foundTerms := 0
+	for _, term := range expectedTerms {
+		if strings.Contains(strings.ToLower(helpOutput), term) {
+			foundTerms++
+		}
+	}
+
+	if foundTerms >= 2 {
+		results = append(results, ValidationResult{
+			CheckName: "help_documentation",
+			Passed:    true,
+			Message:   fmt.Sprintf("Help includes %d/%d expected terms", foundTerms, len(expectedTerms)),
+			Timestamp: time.Now(),
+		})
+	} else {
+		results = append(results, ValidationResult{
+			CheckName: "help_documentation",
+			Passed:    false,
+			Message:   fmt.Sprintf("Help missing expected terms: only %d/%d found", foundTerms, len(expectedTerms)),
+			Details:   "Expected terms: json, validate, file",
+			Timestamp: time.Now(),
+		})
+	}
+
+	return results
 }
