@@ -1,0 +1,17 @@
+[Unit]
+Description=HelixCode AI Development Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=helixcode
+Group=helixcode
+ExecStart=/usr/bin/helixcode server
+Restart=on-failure
+RestartSec=10
+EnvironmentFile=-/etc/helixcode/helixcode.env
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

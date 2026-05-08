@@ -2,7 +2,7 @@
 
 # Build variables
 BINARY_NAME=helixcode
-VERSION=1.0.0
+VERSION=3.0.0
 BUILD_TIME=$(shell date +%Y-%m-%d_%H:%M:%S)
 GIT_COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
@@ -289,6 +289,46 @@ docs: manual-html sync-manual
 release: clean logo-assets docs build test
 	@echo "🚀 Building release..."
 	@echo "✅ Release build complete"
+
+# Debian packaging target
+.PHONY: deb
+deb: build
+	@echo "📦 Building Debian package..."
+	mkdir -p packaging/debian/helixcode/DEBIAN
+	mkdir -p packaging/debian/helixcode/usr/bin
+	mkdir -p packaging/debian/helixcode/etc/helixcode
+	mkdir -p packaging/debian/helixcode/lib/systemd/system
+	mkdir -p packaging/debian/helixcode/usr/share/doc/helixcode
+	cp bin/helixcode packaging/debian/helixcode/usr/bin/
+	cp packaging/debian/control packaging/debian/helixcode/DEBIAN/
+	cp packaging/debian/postinst packaging/debian/helixcode/DEBIAN/
+	cp packaging/debian/prerm packaging/debian/helixcode/DEBIAN/
+	cp packaging/debian/helixcode.service packaging/debian/helixcode/lib/systemd/system/
+	cp config/config.yaml packaging/debian/helixcode/etc/helixcode/config.yaml.example
+	cp README.md packaging/debian/helixcode/usr/share/doc/helixcode/
+	chmod 755 packaging/debian/helixcode/DEBIAN/postinst
+	chmod 755 packaging/debian/helixcode/DEBIAN/prerm
+	dpkg-deb --build packaging/debian/helixcode
+	mv packaging/debian/helixcode.deb packaging/helixcode_$(VERSION)_amd64.deb
+	@echo "✅ Debian package: packaging/helixcode_$(VERSION)_amd64.deb"
+
+# RPM packaging target
+.PHONY: rpm
+rpm: build
+	@echo "📦 Building RPM package..."
+	mkdir -p packaging/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	cp packaging/rpm/helixcode.spec packaging/rpmbuild/SPECS/
+	tar czf packaging/rpmbuild/SOURCES/helixcode-$(VERSION).tar.gz \
+		--transform="s/^/helixcode-$(VERSION)\//" \
+		bin/helixcode config/config.yaml README.md
+	rpmbuild --define "_topdir $(PWD)/packaging/rpmbuild" \
+		-bb packaging/rpmbuild/SPECS/helixcode.spec
+	cp packaging/rpmbuild/RPMS/x86_64/helixcode-*.rpm packaging/
+	@echo "✅ RPM package: packaging/helixcode-$(VERSION)-1.x86_64.rpm"
+
+.PHONY: installers
+installers: deb rpm homebrew windows
+	@echo "📦 All installers built in packaging/"
 
 help:
 	@echo "HelixCode Build System"
