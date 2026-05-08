@@ -326,6 +326,28 @@ rpm: build
 	cp packaging/rpmbuild/RPMS/x86_64/helixcode-*.rpm packaging/
 	@echo "✅ RPM package: packaging/helixcode-$(VERSION)-1.x86_64.rpm"
 
+# Homebrew packaging target
+.PHONY: homebrew
+homebrew: build
+	@echo "📦 Building Homebrew package..."
+	mkdir -p packaging/homebrew
+	tar czf packaging/helixcode-$(VERSION).darwin.amd64.tar.gz \
+		-C bin helixcode \
+		-C ../config config.yaml
+	shasum -a 256 packaging/helixcode-$(VERSION).darwin.amd64.tar.gz \
+		> packaging/helixcode-$(VERSION).darwin.amd64.tar.gz.sha256
+	@echo "✅ Homebrew archive: packaging/helixcode-$(VERSION).darwin.amd64.tar.gz"
+	@echo "✅ Formula: packaging/homebrew/helixcode.rb"
+
+# Windows installer target
+.PHONY: windows
+windows: build
+	@echo "📦 Building Windows installer..."
+	mkdir -p packaging/windows
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags="-s -w" -o bin/helixcode.exe ./$(CMD_DIR)/server
+	zip -j packaging/helixcode-$(VERSION).windows.amd64.zip bin/helixcode.exe config/config.yaml
+	@echo "✅ Windows package: packaging/helixcode-$(VERSION).windows.amd64.zip"
+
 .PHONY: installers
 installers: deb rpm homebrew windows
 	@echo "📦 All installers built in packaging/"
