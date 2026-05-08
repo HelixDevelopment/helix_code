@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|purge)
+        systemctl stop helixcode.service || true
+        systemctl disable helixcode.service || true
+        ;;
+esac

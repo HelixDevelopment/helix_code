@@ -1,0 +1,16 @@
+Source: helixcode
+Section: devel
+Priority: optional
+Maintainer: Helix Development <dev@helix.code>
+Build-Depends: debhelper-compat (= 13), golang-go (>= 1.24)
+Standards-Version: 4.6.2
+Homepage: https://helixcode.dev
+
+Package: helixcode
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
+Description: Distributed AI Development Platform
+ HelixCode is an enterprise-grade distributed AI development platform
+ that enables intelligent task division, work preservation, and
+ multi-provider LLM integration through a unified CLI, REST API,
+ and Terminal UI.
