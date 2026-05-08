@@ -842,11 +842,13 @@ func TestExecuteProductionDeploy(t *testing.T) {
 		ctx := context.Background()
 		success, err := deployer.executeProductionDeploy(ctx)
 
-		assert.NoError(t, err)
-		// Success depends on the simulated deployment
-		// At least some servers should be deployed
-		if success {
-			assert.NotEmpty(t, deployer.status.ServersDeployed)
+		// Deployment should fail without SSH infrastructure
+		assert.False(t, success)
+		if err != nil {
+			assert.Contains(t, err.Error(), "no servers deployed")
+		} else {
+			// If no error, success should still be false
+			assert.False(t, success, "Deployment should fail without SSH infrastructure")
 		}
 	})
 
@@ -875,34 +877,43 @@ func TestExecuteProductionDeploy(t *testing.T) {
 
 // TestDeployToServer tests individual server deployment
 func TestDeployToServer(t *testing.T) {
-	config := &DeploymentConfig{
-		ProjectName:   "test-project",
-			BinaryPath:   "/tmp/helixcode-test-binary",
-		TargetServers: []string{"server1"},
-	}
+	t.Run("DeployToServer_NoCredentials_ReturnsFalse", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			BinaryPath:    "/tmp/helixcode-test-binary",
+			TargetServers: []string{"server1"},
+		}
 
-	deployer, err := NewProductionDeployer(config)
-	require.NoError(t, err)
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
 
-	t.Run("DeployToServer_Success", func(t *testing.T) {
 		ctx := context.Background()
-		// Server names with length not divisible by 10 should succeed (90% success rate simulation)
 		success := deployer.deployToServer(ctx, "server1")
-		// Most servers should deploy successfully
-		assert.NotNil(t, success)
+		
+		// Should return false - no credentials configured
+		assert.False(t, success)
 	})
 
-	t.Run("DeployToServer_MultipleServers", func(t *testing.T) {
+	t.Run("DeployToServer_MultipleServers_NoCredentials_AllFail", func(t *testing.T) {
+		config := &DeploymentConfig{
+			ProjectName:   "test-project",
+			BinaryPath:    "/tmp/helixcode-test-binary",
+			TargetServers: []string{"s1", "s2", "s3", "s4", "s5"},
+		}
+
+		deployer, err := NewProductionDeployer(config)
+		require.NoError(t, err)
+
 		ctx := context.Background()
-		servers := []string{"s1", "s2", "s3", "s4", "s5"}
 		successCount := 0
-		for _, server := range servers {
+		for _, server := range config.TargetServers {
 			if deployer.deployToServer(ctx, server) {
 				successCount++
 			}
 		}
-		// Should have high success rate
-		assert.GreaterOrEqual(t, successCount, 4)
+		
+		// All should fail - no credentials
+		assert.Equal(t, 0, successCount)
 	})
 }
 
@@ -1388,14 +1399,12 @@ func TestExecuteDeployment(t *testing.T) {
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		success, err := deployer.executeDeployment(ctx)
+		success, err := deployer.executeProductionDeploy(ctx)
 
-		assert.NoError(t, err)
-		// Success depends on simulated deployment results
-		if success {
-			assert.Greater(t, deployer.status.Metrics.DeploymentTime, time.Duration(0))
-			assert.Greater(t, deployer.status.Metrics.DeployedServers, 0)
-		}
+		// Should fail without SSH infrastructure
+		assert.Error(t, err)
+		assert.False(t, success)
+		assert.Contains(t, err.Error(), "no servers deployed")
 	})
 }
 
