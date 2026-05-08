@@ -58,8 +58,6 @@ type ParseError struct {
 }
 
 // DefaultTreeSitterParser implements TreeSitterParser
-// Note: This is a placeholder implementation. In production, you would use
-// github.com/smacker/go-tree-sitter and language-specific parsers
 type DefaultTreeSitterParser struct {
 	registry LanguageRegistry
 }

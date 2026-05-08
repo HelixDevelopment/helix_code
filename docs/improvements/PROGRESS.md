@@ -8,10 +8,10 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 5 — End-user materials uplift (pending)
+- **Active phase:** Phase 5 — End-user materials uplift (done)
 - **Active feature:** —
 - **Active task:** —
-- **Last completed:** Phase 4 CLOSED — anti-bluff audit clean, 1 skip marker fixed
+- **Last completed:** Phase 5 CLOSED — documentation, installers, website uplift complete
 - **Owner:** agent (Claude Opus 4.7)
 - **Started:** 2026-05-04
 - **Last touched:** 2026-05-08
@@ -26,7 +26,7 @@
 | P2 — Other CLI agents | done | 2026-05-06 | 2026-05-07 | docs/improvements/07_phase_2_evidence.md |
 | P3 — Test infra | done | 2026-05-07 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 3 |
 | P4 — Anti-bluff audit | done | 2026-05-08 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 4 |
-| P5 — End-user materials | pending | 2026-05-08 | — | — |
+| P5 — End-user materials | done | 2026-05-08 | 2026-05-08 | this section |
 
 ## P1.5 Work-package list (12 WPs) — ALL CLOSED
 - [x] P1.5-WP1 — Inventory + foundation safety (5 tasks)  ← commit `421495a`

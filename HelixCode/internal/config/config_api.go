@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,11 @@ func NewConfigAPI(manager *ConfigManager) *ConfigAPI {
 		manager: manager,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true // Allow all origins for now
+				origin := r.Header.Get("Origin")
+				if origin == "" || origin == "http://localhost:8080" || origin == "http://127.0.0.1:8080" {
+					return true
+				}
+				return strings.HasPrefix(origin, "http://localhost:") || strings.HasPrefix(origin, "http://127.0.0.1:")
 			},
 		},
 		clients: make(map[*websocket.Conn]bool),

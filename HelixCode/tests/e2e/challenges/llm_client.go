@@ -7,9 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -301,9 +298,98 @@ func (c *LLMClient) completeAnthropic(ctx context.Context, req *CompletionReques
 	}, nil
 }
 
-// Gemini API implementation (placeholder)
+// Gemini API implementation
 func (c *LLMClient) completeGemini(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
-	return nil, fmt.Errorf("Gemini provider not yet implemented")
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderGemini)
+	if err != nil {
+		return nil, err
+	}
+
+	// Gemini uses a unique API format with contents/parts structure
+	payload := map[string]interface{}{
+		"contents": []map[string]interface{}{
+			{
+				"role": "user",
+				"parts": []map[string]string{
+					{"text": req.Prompt},
+				},
+			},
+		},
+		"generationConfig": map[string]interface{}{
+			"temperature":     req.Temperature,
+			"maxOutputTokens": req.MaxTokens,
+		},
+	}
+
+	if req.SystemPrompt != "" {
+		payload["systemInstruction"] = map[string]interface{}{
+			"parts": []map[string]string{
+				{"text": req.SystemPrompt},
+			},
+		}
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Gemini API key is passed as a query parameter
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", c.model, apiKey)
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Gemini API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp struct {
+		Candidates []struct {
+			Content struct {
+				Parts []struct {
+					Text string `json:"text"`
+				} `json:"parts"`
+			} `json:"content"`
+			FinishReason string `json:"finishReason"`
+		} `json:"candidates"`
+		UsageMetadata struct {
+			PromptTokenCount     int `json:"promptTokenCount"`
+			CandidatesTokenCount int `json:"candidatesTokenCount"`
+		} `json:"usageMetadata"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(apiResp.Candidates) == 0 {
+		return nil, fmt.Errorf("no candidates in response")
+	}
+
+	if len(apiResp.Candidates[0].Content.Parts) == 0 {
+		return nil, fmt.Errorf("no content parts in response")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp.Candidates[0].Content.Parts[0].Text,
+		FinishReason: apiResp.Candidates[0].FinishReason,
+		TokensUsed:   apiResp.UsageMetadata.PromptTokenCount + apiResp.UsageMetadata.CandidatesTokenCount,
+	}, nil
 }
 
 // Groq API implementation
@@ -379,9 +465,77 @@ func (c *LLMClient) completeGroq(ctx context.Context, req *CompletionRequest) (*
 	}, nil
 }
 
-// Mistral API implementation (placeholder)
+// Mistral API implementation (OpenAI-compatible)
 func (c *LLMClient) completeMistral(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
-	return nil, fmt.Errorf("Mistral provider not yet implemented")
+	apiKey, err := c.apiKeys.GetAPIKey(ProviderMistral)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mistral uses OpenAI-compatible API
+	payload := map[string]interface{}{
+		"model": c.model,
+		"messages": []map[string]string{
+			{"role": "system", "content": req.SystemPrompt},
+			{"role": "user", "content": req.Prompt},
+		},
+		"max_tokens":  req.MaxTokens,
+		"temperature": req.Temperature,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "https://api.mistral.ai/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	resp, err := c.client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Mistral API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage struct {
+			TotalTokens int `json:"total_tokens"`
+		} `json:"usage"`
+	}
+
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, err
+	}
+
+	if len(apiResp.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in response")
+	}
+
+	return &CompletionResponse{
+		Content:      apiResp.Choices[0].Message.Content,
+		FinishReason: apiResp.Choices[0].FinishReason,
+		TokensUsed:   apiResp.Usage.TotalTokens,
+	}, nil
 }
 
 // DeepSeek API implementation
@@ -719,39 +873,17 @@ func (c *LLMClient) completeOllama(ctx context.Context, req *CompletionRequest) 
 
 	resp, err := c.client.Do(httpReq)
 	if err != nil {
-		// Ollama is not available, fall back to mock generator
-		return c.fallbackToMockGenerator(ctx, req)
+		return nil, fmt.Errorf("Ollama API unavailable: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// TEMPORARILY FORCE FALLBACK FOR TESTING - ALWAYS USE MOCK GENERATOR
-	fallbackResp, err := c.fallbackToMockGenerator(ctx, req)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Ollama API error (status %d)", resp.StatusCode)
 	}
-	
-	// DEBUG: Save the fallback response to a file for inspection
-	debugFile := "/tmp/fallback_response_debug.txt"
-	os.WriteFile(debugFile, []byte(fallbackResp.Content), 0644)
 
-	return fallbackResp, nil
-}
-
-// Note: The following code was previously unreachable and has been removed.
-// If additional response processing is needed in the future, it should be
-// added before the fallback return statement above.
-
-// processOllamaResponse handles the response from Ollama API (currently unused)
-// This function is kept for reference but is not currently called.
-func (c *LLMClient) processOllamaResponse(resp *http.Response, ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		// Ollama returned an error, fall back to mock generator
-		return c.fallbackToMockGenerator(ctx, req)
+		return nil, fmt.Errorf("failed to read Ollama response: %w", err)
 	}
 
 	var apiResp struct {
@@ -760,112 +892,12 @@ func (c *LLMClient) processOllamaResponse(resp *http.Response, ctx context.Conte
 	}
 
 	if err := json.Unmarshal(body, &apiResp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse Ollama response: %w", err)
 	}
 
 	return &CompletionResponse{
 		Content:      apiResp.Response,
 		FinishReason: "stop",
-		TokensUsed:   0, // Ollama doesn't return token count
-	}, nil
-}
-
-// fallbackToMockGenerator generates mock project code when Ollama is unavailable
-func (c *LLMClient) fallbackToMockGenerator(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
-	// Create a temporary directory for mock generation
-	tempDir, err := os.MkdirTemp("", "helix-challenge-mock-")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp dir: %w", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	// Create mock generator
-	generator := NewMockGenerator()
-
-	// Generate project based on prompt content
-	prompt := strings.ToLower(req.Prompt)
-
-	switch {
-	case strings.Contains(prompt, "notes") || strings.Contains(prompt, "note taking"):
-		err = generator.GenerateNotesProject(ctx, tempDir)
-	case strings.Contains(prompt, "tic tac toe") || strings.Contains(prompt, "tictactoe"):
-		err = generator.GenerateTicTacToeGame(ctx, tempDir)
-	case strings.Contains(prompt, "ascii") || strings.Contains(prompt, "art"):
-		err = generator.GenerateASCIIArtGenerator(ctx, tempDir)
-	case strings.Contains(prompt, "task manager") || strings.Contains(prompt, "task"):
-		err = generator.GenerateCLITaskManager(ctx, tempDir)
-	case strings.Contains(prompt, "json validator") || strings.Contains(prompt, "json validation"):
-		err = generator.GenerateJSONValidatorCLI(ctx, tempDir)
-	case strings.Contains(prompt, "url shortener") || strings.Contains(prompt, "short url"):
-		err = generator.GenerateURLShortener(ctx, tempDir)
-	default:
-		// Default to notes project for unknown prompts
-		err = generator.GenerateNotesProject(ctx, tempDir)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("mock generation failed: %w", err)
-	}
-
-	// Read generated files to create a realistic LLM response
-	var response strings.Builder
-	response.WriteString("I've generated a complete, production-ready project for you. Here are the main files:\n\n")
-
-	err = filepath.Walk(tempDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-
-		// Skip hidden files and binary files
-		// Skip hidden files and binary files
-		shouldSkip := strings.HasPrefix(filepath.Base(path), ".") || 
-			   strings.HasSuffix(path, ".sum") ||
-			   strings.HasSuffix(path, ".exe") ||
-			   strings.HasSuffix(path, "server") ||
-			   strings.HasSuffix(path, "tic-tac-toe")
-		
-		if shouldSkip {
-			return nil
-		}
-
-		// Get relative path
-		relPath, err := filepath.Rel(tempDir, path)
-		if err != nil {
-			return err
-		}
-
-
-		// Read file content
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		response.WriteString(fmt.Sprintf("### %s\n\n", relPath))
-		response.WriteString(fmt.Sprintf("```%s\n", relPath))
-		response.Write(content)
-		response.WriteString("\n```\n\n")
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to read generated files: %w", err)
-	}
-
-	response.WriteString("\nThis project includes:\n")
-	response.WriteString("- Complete source code with proper Go modules\n")
-	response.WriteString("- Comprehensive tests\n") 
-	response.WriteString("- Documentation (README.md)\n")
-	response.WriteString("- Docker configuration for containerization\n")
-	response.WriteString("- Proper error handling and best practices\n")
-
-	return &CompletionResponse{
-		Content:      response.String(),
-		FinishReason: "stop",
-		TokensUsed:   2580, // Mock token count
+		TokensUsed:   0,
 	}, nil
 }

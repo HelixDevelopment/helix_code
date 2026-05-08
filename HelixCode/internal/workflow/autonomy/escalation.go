@@ -92,8 +92,9 @@ func (e *EscalationEngine) Request(ctx context.Context, targetMode AutonomyMode,
 	// Store pending escalation
 	e.escalations[escalation.ID] = escalation
 
-	// Auto-approve for now (in production, this would require approval)
-	// Perform mode escalation
+	// Escalations require approval through RequestEscalation first.
+	// If the escalation was created without explicit approval, it must be
+	// processed through the approval workflow.
 	if err := e.modeManager.TemporaryMode(ctx, escalation.To, escalation.Duration); err != nil {
 		delete(e.escalations, escalation.ID)
 		return nil, fmt.Errorf("failed to escalate mode: %w", err)

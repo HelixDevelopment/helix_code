@@ -2,6 +2,7 @@ package challenges
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 )
@@ -66,6 +67,8 @@ func TestLLMClient_MissingAPIKey(t *testing.T) {
 		ProviderOpenAI,
 		ProviderAnthropic,
 		ProviderGroq,
+		ProviderGemini,
+		ProviderMistral,
 	}
 
 	for _, provider := range providers {
@@ -271,7 +274,9 @@ func TestLLMClient_MultipleProviders(t *testing.T) {
 		{ProviderXAI, "grok-beta"},
 		{ProviderOpenAI, "gpt-4"},
 		{ProviderAnthropic, "claude-3-opus-20240229"},
+		{ProviderGemini, "gemini-pro"},
 		{ProviderGroq, "llama-3.1-405b-reasoning"},
+		{ProviderMistral, "mistral-large-latest"},
 		{ProviderOllama, "llama2"},
 	}
 
@@ -339,6 +344,60 @@ func TestLLMClient_LargePrompt(t *testing.T) {
 	// Should handle large prompts without panic
 	_, err := client.Complete(ctx, req)
 	_ = err // Expected to fail if Ollama not running
+}
+
+// TestLLMClient_GeminiWithKey verifies Gemini with a configured key
+// attempts a REAL API call instead of returning "not yet implemented"
+func TestLLMClient_GeminiWithKey(t *testing.T) {
+	apiKeys := &APIKeys{
+		Gemini: &GeminiConfig{APIKey: "test-gemini-key"},
+	}
+	client := NewLLMClient(ProviderGemini, "gemini-pro", apiKeys)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req := &CompletionRequest{
+		Prompt:       "Say hello",
+		SystemPrompt: "You are a helpful assistant",
+		MaxTokens:    50,
+		Temperature:  0.7,
+	}
+
+	_, err := client.Complete(ctx, req)
+	if err == nil {
+		t.Error("Expected error (no real Gemini API available), got nil")
+	}
+	if strings.Contains(err.Error(), "not yet implemented") {
+		t.Error("Gemini provider still using placeholder implementation — must make real HTTP call attempt")
+	}
+}
+
+// TestLLMClient_MistralWithKey verifies Mistral with a configured key
+// attempts a REAL API call instead of returning "not yet implemented"
+func TestLLMClient_MistralWithKey(t *testing.T) {
+	apiKeys := &APIKeys{
+		Mistral: &MistralConfig{APIKey: "test-mistral-key"},
+	}
+	client := NewLLMClient(ProviderMistral, "mistral-large-latest", apiKeys)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req := &CompletionRequest{
+		Prompt:       "Say hello",
+		SystemPrompt: "You are a helpful assistant",
+		MaxTokens:    50,
+		Temperature:  0.7,
+	}
+
+	_, err := client.Complete(ctx, req)
+	if err == nil {
+		t.Error("Expected error (no real Mistral API available), got nil")
+	}
+	if strings.Contains(err.Error(), "not yet implemented") {
+		t.Error("Mistral provider still using placeholder implementation — must make real HTTP call attempt")
+	}
 }
 
 func TestLLMClient_SpecialCharactersInPrompt(t *testing.T) {

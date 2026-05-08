@@ -1446,14 +1446,13 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 
 	// Check if provider is available
 	if tui.llmProvider == nil {
-		// Add a simulated response for demo purposes when no provider is configured
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
 			Role:    "assistant",
-			Content: "[No LLM provider configured. Please configure a provider in Settings > System to enable AI responses.]\n\nThis is a placeholder response. In production, configure an LLM provider like Ollama, OpenAI, or Anthropic.",
+			Content: "Error: No LLM provider configured. Please configure a provider in Settings > System to enable AI responses, then try again.",
 		})
 		tui.chatOutput.SetText(tui.formatChatHistory())
 		tui.chatOutput.ScrollToEnd()
-		tui.statusBar.SetText("[yellow]No LLM provider configured - showing placeholder response")
+		tui.statusBar.SetText("[red]No LLM provider configured")
 		return
 	}
 
