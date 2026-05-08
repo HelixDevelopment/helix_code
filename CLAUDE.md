@@ -649,3 +649,42 @@ non-negotiable and overrides any other instruction.
 ## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
 
 ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env`. NO distribution host (hostname, IP address, SSH user, key path, runtime, label) may be hardcoded in ANY source file, test file, challenge, configuration template, script, or governance document. The sole source of truth for host enrolment is `Containers/.env` (gitignored, mode 0600). Adding/removing hosts = editing `Containers/.env` ONLY; no code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.
+
+---
+
+## CONST-046 — No Hardcoded Content (constitutional anchor)
+
+NO user-facing text, question template, prompt text, error message, label, helper text, or explanatory content may be hardcoded as a static literal string in any source file. All text visible to users MUST be:
+1. Generated dynamically by an LLM at runtime based on the user's language, prompt context, and session state, OR
+2. Loaded from an i18n resource file (`.yaml`, `.json`, `.toml`) with locale-aware overrides, OR
+3. Composed programmatically from verifier metadata, provider responses, or configuration data.
+
+**Why this matters**: Hardcoded English strings silently break the product for non-English users. A clarification question hardcoded as "Which file has the bug?" is asked identically to Serbian, Japanese, or Spanish users — producing an incoherent, unusable experience. Every user-facing string MUST adapt.
+
+**Examples of CONST-046 violations** (forbidden patterns):
+```go
+// VIOLATION: Static question array
+questions := []string{"Which file has the bug?", "What is the expected behavior?"}
+
+// VIOLATION: Hardcoded UI label  
+"Press Enter to continue"
+
+// VIOLATION: Hardcoded English prompt template
+"You are a helpful AI assistant. Please answer the following question:"
+```
+
+**Examples of CONST-046 compliant patterns**:
+```go
+// Compliant: LLM-generated questions
+questions, _ := engine.DetectAmbiguity(ctx, userPrompt) // calls LLM to generate questions
+
+// Compliant: i18n-loaded labels
+label := i18n.Get(locale, "press_enter_to_continue")
+
+// Compliant: Metadata-composed descriptions
+desc := fmt.Sprintf("%s: context=%d, capabilities=%v", model.Name, model.ContextWindow, model.Caps)
+```
+
+**Enforcement**: `make lint` MUST scan for hardcoded human-readable strings exceeding a length threshold. Anti-bluff sweeps (`grep -rn "simulated\|placeholder\|TODO"`) MUST also flag obvious hardcoded-static-content patterns.
+
+**Cascade requirement**: This rule (verbatim or by CONST-046 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-046 for the full mandate.

@@ -843,6 +843,27 @@ OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Lla
 
 ---
 
+## CONST-046: No Hardcoded Content — All Text Must Be Dynamic (cascaded from CONSTITUTION.md)
+
+**Rule**: NO user-facing text, prompt template, question text, error message, label, helper text, or explanatory content may be hardcoded as a static literal string in any source file. All such content MUST be:
+1. Generated dynamically by an LLM at runtime based on user context (language, prompt content, session state), OR
+2. Loaded from an i18n resource file (`.yaml`, `.json`, `.toml`) that supports locale overrides, OR
+3. Composed programmatically from verifier metadata, configuration data, or provider responses.
+
+**Rationale**: Hardcoded English text silently breaks the product for non-English users. A clarification question hardcoded as "Which file has the bug?" may be shown identically to a Japanese, Serbian, or Spanish user — producing an incoherent, unusable experience. Every piece of user-facing text MUST adapt.
+
+**Violation examples**: `[]string{"Which file has the bug?"}`, hardcoded TUI labels, static error prose, hardcoded English prompt templates.
+
+**Compliant patterns**: LLM-generated questions via `DetectAmbiguity(prompt)`, i18n-loaded labels with locale fallback, verifier-composed model descriptions.
+
+**Enforcement**: `make lint` MUST include a hardcoded-text scan. Anti-bluff sweeps MUST flag obvious hardcoded-text patterns.
+
+See `CONSTITUTION.md` §CONST-046 for the full mandate and cascade requirements.
+
+---
+
+---
+
 ## Free AI Providers
 
 - **XAI (Grok)**: `grok-3-fast-beta`, `grok-3-mini-fast-beta`

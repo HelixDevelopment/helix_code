@@ -99,3 +99,16 @@ Co-Authored-By: <agent-name> <email>
 ## CONST-045 — No Hardcoded Distribution Hosts (cascaded from root CONSTITUTION.md)
 
 ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host hardcoded in ANY source, test, challenge, config, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate and cascade requirements.
+
+---
+
+## CONST-046 — No Hardcoded Content (cascaded from root CONSTITUTION.md)
+
+NO user-facing text, question template, prompt text, error message, label, helper text, or explanatory content may be hardcoded as a static literal string. All user-facing text MUST be:
+1. Generated dynamically by an LLM at runtime based on context (user's language, prompt, session), OR
+2. Loaded from an i18n resource file (`.yaml`, `.json`, `.toml`) configurable per locale, OR
+3. Composed from verifier metadata, configuration data, or provider responses.
+
+**Prohibition**: Static literal arrays of question text, fixed English prompt templates, hardcoded UI labels. Hardcoded English text silently breaks the product for non-English users — it is a constitutional violation. Every string visible to the user MUST adapt to the user's language and context.
+
+See root `CONSTITUTION.md` §CONST-046 for the full mandate, examples, and cascade requirements.
