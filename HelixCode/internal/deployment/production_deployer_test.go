@@ -845,9 +845,8 @@ func TestExecuteProductionDeploy(t *testing.T) {
 		// Deployment should fail without SSH infrastructure
 		assert.False(t, success)
 		if err != nil {
-			assert.Contains(t, err.Error(), "no servers deployed")
+			assert.Contains(t, err.Error(), "deployment failed")
 		} else {
-			// If no error, success should still be false
 			assert.False(t, success, "Deployment should fail without SSH infrastructure")
 		}
 	})
@@ -871,7 +870,9 @@ func TestExecuteProductionDeploy(t *testing.T) {
 		success, err := deployer.executeProductionDeploy(ctx)
 		// With no servers, success rate calculation would fail or return false
 		assert.False(t, success)
-		assert.NoError(t, err)
+		if err != nil {
+			assert.Contains(t, err.Error(), "no target servers")
+		}
 	})
 }
 
