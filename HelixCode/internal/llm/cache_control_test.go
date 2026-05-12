@@ -1,7 +1,9 @@
 package llm
 
 import (
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1077,4 +1079,137 @@ func BenchmarkCacheMetricsUpdate(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		metrics.UpdateMetrics(stats, savings)
 	}
+}
+
+// ---------------------------------------------------------------------------
+// CacheAwareness — TTL-based cache coldness heuristic
+//
+// Ported from gptme commit e896ed4ff: "feat(hooks): add TTL-based cache
+// coldness heuristic to cache_awareness (#2378)". Anthropic prompt-cache
+// entries have a ~5-minute TTL. After 5 minutes of inactivity, a cache entry
+// is "cold" and sending it again pays the full uncached price. This heuristic
+// lets callers predict implicit cache expiry BEFORE the next request rather
+// than reacting to a confirmed cache miss after the fact.
+// ---------------------------------------------------------------------------
+
+// TestCacheAwareness_NewIsAlwaysCold verifies a fresh CacheAwareness has no
+// completion recorded and reports a cold cache.
+//
+// gptme returns False (assume warm) when no prior call exists; the Go port
+// inverts the polarity to return true ("cold") so callers can default to
+// "be safe and skip the cache marker" before any traffic flows. This matches
+// the user's task spec verbatim.
+func TestCacheAwareness_NewIsAlwaysCold(t *testing.T) {
+	ca := NewCacheAwareness()
+	require.NotNil(t, ca)
+
+	now := time.Now()
+
+	assert.True(t, ca.IsCacheLikelyCold(now),
+		"fresh CacheAwareness with no completion recorded must report cold")
+	assert.True(t, ca.LastCompletionAt().IsZero(),
+		"fresh CacheAwareness must have a zero LastCompletionAt")
+}
+
+// TestCacheAwareness_FreshCompletionIsHot verifies that immediately after
+// recording a completion, the cache is reported as warm/hot (not cold).
+func TestCacheAwareness_FreshCompletionIsHot(t *testing.T) {
+	ca := NewCacheAwareness()
+	now := time.Now()
+
+	ca.RecordCompletion(now)
+
+	// Querying 1 second later — well within the 5-minute default threshold.
+	assert.False(t, ca.IsCacheLikelyCold(now.Add(1*time.Second)),
+		"a completion recorded 1s ago must not be reported as cold under default 5m threshold")
+
+	stored := ca.LastCompletionAt()
+	assert.True(t, stored.Equal(now),
+		"LastCompletionAt must round-trip exactly the timestamp passed to RecordCompletion; got %v want %v",
+		stored, now)
+}
+
+// TestCacheAwareness_AgedCompletionIsCold verifies that after the default
+// 5-minute TTL has elapsed, the cache is reported as cold.
+func TestCacheAwareness_AgedCompletionIsCold(t *testing.T) {
+	ca := NewCacheAwareness()
+	now := time.Now()
+
+	// Record a completion 6 minutes ago — past the 5-minute default threshold.
+	ca.RecordCompletion(now.Add(-6 * time.Minute))
+
+	assert.True(t, ca.IsCacheLikelyCold(now),
+		"a completion recorded 6 minutes ago must be reported as cold under default 5m threshold")
+}
+
+// TestCacheAwareness_ThresholdConfigurable verifies the cold threshold can be
+// customised away from the 5-minute Anthropic default — e.g. for providers
+// with different TTLs or for testing.
+func TestCacheAwareness_ThresholdConfigurable(t *testing.T) {
+	ca := NewCacheAwareness()
+	ca.SetColdThreshold(30 * time.Second)
+	assert.Equal(t, 30*time.Second, ca.ColdThreshold(),
+		"ColdThreshold getter must return the value just set")
+
+	now := time.Now()
+
+	// Completion 10s ago — still warm at a 30s threshold.
+	ca.RecordCompletion(now.Add(-10 * time.Second))
+	assert.False(t, ca.IsCacheLikelyCold(now),
+		"completion 10s ago must be warm under 30s threshold")
+
+	// Completion 45s ago — cold at a 30s threshold.
+	ca.RecordCompletion(now.Add(-45 * time.Second))
+	assert.True(t, ca.IsCacheLikelyCold(now),
+		"completion 45s ago must be cold under 30s threshold")
+}
+
+// TestCacheAwareness_ConcurrentAccess verifies the atomic timestamp field is
+// safe under concurrent reads and writes (race detector will flag bugs).
+//
+// Required because RecordCompletion fires from the response handler goroutine
+// while IsCacheLikelyCold is consulted from the request-build path.
+func TestCacheAwareness_ConcurrentAccess(t *testing.T) {
+	ca := NewCacheAwareness()
+	now := time.Now()
+
+	const goroutines = 32
+	const iterations = 500
+
+	var wg sync.WaitGroup
+	wg.Add(goroutines * 2)
+
+	for i := 0; i < goroutines; i++ {
+		go func(i int) {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				ca.RecordCompletion(now.Add(time.Duration(j) * time.Millisecond))
+			}
+		}(i)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				_ = ca.IsCacheLikelyCold(now)
+				_ = ca.LastCompletionAt()
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	// After all writes complete the timestamp must be a valid value that one
+	// of the writers stored (i.e. non-zero and not in the future).
+	last := ca.LastCompletionAt()
+	assert.False(t, last.IsZero(),
+		"after concurrent writes, LastCompletionAt must be non-zero")
+	assert.False(t, last.After(now.Add(time.Duration(iterations)*time.Millisecond)),
+		"LastCompletionAt must not exceed the latest value written by any goroutine")
+}
+
+// TestCacheControlConfig_ColdThresholdDefault verifies that DefaultCacheConfig
+// exposes the Anthropic-aligned 5-minute cold threshold as the default.
+func TestCacheControlConfig_ColdThresholdDefault(t *testing.T) {
+	config := DefaultCacheConfig()
+	assert.Equal(t, 5*time.Minute, config.ColdThreshold,
+		"DefaultCacheConfig.ColdThreshold must default to Anthropic's 5-minute TTL")
 }

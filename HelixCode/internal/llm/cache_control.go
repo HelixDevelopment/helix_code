@@ -1,5 +1,112 @@
 package llm
 
+import (
+	"sync/atomic"
+	"time"
+)
+
+// DefaultColdThreshold is the default time-since-last-completion threshold
+// beyond which a prompt cache entry is considered "cold" (likely expired).
+//
+// Anthropic prompt-cache entries have a ~5-minute TTL. After this many
+// seconds of inactivity the entry is almost certainly evicted on the
+// provider side, so sending the same request pays the full uncached price.
+// Other providers may need a different threshold via SetColdThreshold.
+//
+// Ported from gptme commit e896ed4ff (ANTHROPIC_CACHE_TTL_SECONDS = 300).
+const DefaultColdThreshold = 5 * time.Minute
+
+// CacheAwareness tracks the wall-clock time of the most recent successful
+// LLM completion so callers can predict, BEFORE sending the next request,
+// whether the provider's prompt cache entry is likely cold.
+//
+// The Anthropic prompt cache has an implicit TTL (~5 min). Without this
+// signal, callers have no way to know whether the cache will hit until
+// after the round-trip — by which point the cache-creation token cost has
+// already been paid. CacheAwareness lets the request-build path decide
+// whether to skip the explicit cache_control marker (saving a token and
+// making block-priority decisions clearer) when the cache is predicted cold.
+//
+// Concurrency: the timestamp field is read/written via sync/atomic so
+// callers may RecordCompletion from the response-handler goroutine while
+// other goroutines call IsCacheLikelyCold or LastCompletionAt from the
+// request-build path without explicit locking.
+//
+// Ported from gptme commit e896ed4ff (CacheState.last_call_completed_at
+// + is_cache_likely_cold + get_elapsed_since_last_call).
+type CacheAwareness struct {
+	// lastCompletionUnixNano stores the timestamp of the most recent
+	// completion as UnixNano. Zero == no completion recorded yet.
+	// Read/written atomically.
+	lastCompletionUnixNano atomic.Int64
+
+	// coldThresholdNanos stores the cold-threshold duration in nanoseconds.
+	// Read/written atomically so SetColdThreshold is safe to call from any
+	// goroutine without blocking IsCacheLikelyCold.
+	coldThresholdNanos atomic.Int64
+}
+
+// NewCacheAwareness returns a CacheAwareness with no completion recorded and
+// the default 5-minute cold threshold (DefaultColdThreshold).
+func NewCacheAwareness() *CacheAwareness {
+	ca := &CacheAwareness{}
+	ca.coldThresholdNanos.Store(int64(DefaultColdThreshold))
+	return ca
+}
+
+// RecordCompletion stores t as the most recent completion time. Call this
+// from the LLM response-handler path after a successful provider call.
+// Subsequent invocations overwrite the prior value (most-recent-wins).
+func (c *CacheAwareness) RecordCompletion(t time.Time) {
+	c.lastCompletionUnixNano.Store(t.UnixNano())
+}
+
+// LastCompletionAt returns the wall-clock time of the most recent recorded
+// completion, or a zero time.Time if no completion has been recorded.
+func (c *CacheAwareness) LastCompletionAt() time.Time {
+	n := c.lastCompletionUnixNano.Load()
+	if n == 0 {
+		return time.Time{}
+	}
+	return time.Unix(0, n)
+}
+
+// IsCacheLikelyCold reports whether the prompt cache is likely cold relative
+// to the supplied "now" timestamp. It returns true when:
+//
+//   - no completion has been recorded yet (conservative: assume cold so the
+//     caller doesn't burn a cache_creation token marker speculatively), OR
+//   - the elapsed time since the last recorded completion is greater than
+//     the configured cold threshold.
+//
+// The caller supplies "now" explicitly to keep this function deterministic
+// and testable (no hidden time.Now() call).
+//
+// Note: the default threshold (DefaultColdThreshold = 5 min) is calibrated
+// for Anthropic. For non-Anthropic providers, call SetColdThreshold first
+// or treat the result as advisory if the provider has no prompt cache.
+func (c *CacheAwareness) IsCacheLikelyCold(now time.Time) bool {
+	last := c.LastCompletionAt()
+	if last.IsZero() {
+		return true
+	}
+	threshold := time.Duration(c.coldThresholdNanos.Load())
+	return now.Sub(last) > threshold
+}
+
+// SetColdThreshold replaces the cold-threshold duration. Safe to call from
+// any goroutine; subsequent IsCacheLikelyCold calls will use the new value.
+//
+// Pass DefaultColdThreshold to restore Anthropic's 5-minute default.
+func (c *CacheAwareness) SetColdThreshold(d time.Duration) {
+	c.coldThresholdNanos.Store(int64(d))
+}
+
+// ColdThreshold returns the current cold-threshold duration.
+func (c *CacheAwareness) ColdThreshold() time.Duration {
+	return time.Duration(c.coldThresholdNanos.Load())
+}
+
 // CacheControl represents cache control directives for LLM providers
 // Currently supported by Anthropic for prompt caching to reduce costs
 type CacheControl struct {
@@ -53,6 +160,13 @@ type CacheConfig struct {
 
 	// CacheTTL cache time-to-live in seconds (default: 300)
 	CacheTTL int `json:"cache_ttl"`
+
+	// ColdThreshold is the duration after which a prompt cache entry is
+	// considered "cold" (likely expired on the provider side). Used by
+	// CacheAwareness.IsCacheLikelyCold to predict implicit TTL-based expiry
+	// before the next request. Defaults to DefaultColdThreshold (5 minutes,
+	// Anthropic-aligned). Ported from gptme commit e896ed4ff.
+	ColdThreshold time.Duration `json:"cold_threshold"`
 }
 
 // DefaultCacheConfig returns default caching configuration
@@ -60,8 +174,9 @@ func DefaultCacheConfig() CacheConfig {
 	return CacheConfig{
 		Enabled:           true,
 		Strategy:          CacheStrategyTools,
-		MinTokensForCache: 1024, // Anthropic's minimum for efficient caching
-		CacheTTL:          300,  // 5 minutes
+		MinTokensForCache: 1024,                 // Anthropic's minimum for efficient caching
+		CacheTTL:          300,                  // 5 minutes
+		ColdThreshold:     DefaultColdThreshold, // 5 minutes — Anthropic prompt-cache TTL
 	}
 }
 

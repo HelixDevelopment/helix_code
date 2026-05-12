@@ -22,6 +22,12 @@ type AnthropicProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// cacheAwareness tracks the wall-clock time of the most recent successful
+	// completion so callers can predict whether Anthropic's prompt-cache TTL
+	// (~5 minutes) has elapsed before sending the next request.
+	// Ported from gptme commit e896ed4ff.
+	cacheAwareness *CacheAwareness
 }
 
 // Anthropic API structures
@@ -164,10 +170,21 @@ func NewAnthropicProvider(config ProviderConfigEntry) (*AnthropicProvider, error
 		httpClient: &http.Client{
 			Timeout: 120 * time.Second,
 		},
-		models: getAnthropicModels(),
+		models:         getAnthropicModels(),
+		cacheAwareness: NewCacheAwareness(),
 	}
 
 	return provider, nil
+}
+
+// CacheAwareness returns the provider's cache-coldness tracker. Callers may
+// consult IsCacheLikelyCold() to decide whether to skip explicit
+// cache_control markers on the next request (the entry is likely expired
+// anyway, so attaching the marker would burn a cache-creation token cycle).
+//
+// Ported from gptme commit e896ed4ff.
+func (ap *AnthropicProvider) CacheAwareness() *CacheAwareness {
+	return ap.cacheAwareness
 }
 
 // getAnthropicModels returns all available Claude models with correct specifications
@@ -347,6 +364,13 @@ func (ap *AnthropicProvider) Generate(ctx context.Context, request *LLMRequest) 
 			"cache_creation_tokens": resp.Usage.CacheCreationTokens,
 			"cache_read_tokens":     resp.Usage.CacheReadTokens,
 		}
+	}
+
+	// Record completion time so subsequent callers can consult
+	// CacheAwareness.IsCacheLikelyCold() before sending the next request.
+	// This mirrors the GENERATION_POST hook from gptme commit e896ed4ff.
+	if ap.cacheAwareness != nil {
+		ap.cacheAwareness.RecordCompletion(time.Now())
 	}
 
 	return response, nil
@@ -675,6 +699,14 @@ func (ap *AnthropicProvider) parseStreamingResponse(body io.Reader, ch chan<- LL
 			}
 
 			ch <- finalResponse
+
+			// Record completion time on stream end so the next caller can
+			// consult CacheAwareness.IsCacheLikelyCold() before sending the
+			// next request. Ported from gptme commit e896ed4ff
+			// (GENERATION_POST hook).
+			if ap.cacheAwareness != nil {
+				ap.cacheAwareness.RecordCompletion(time.Now())
+			}
 		}
 	}
 
