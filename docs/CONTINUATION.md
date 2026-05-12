@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-13T00:00:00Z (Final zero-bluff sweep: notification SendDirect/SendNotification race fixed via template-immutable copy; RetryableChannel.stats atomic; Models anti-bluff anchor cascaded + added to owned-list; WP4 loader propagated to 4 final owned submodules (Challenges, Security, Assets, Github-Pages-Website); one more build binary untracked. Full-mode `go test -race ./cmd/... ./internal/... ./test/... ./tests/...` exits 0 across 95 packages. Meta-repo at `860df7f`.)
+**Last updated: 2026-05-13T01:00:00Z (cli_agents fetch + gptme feature porting cycle: 50/50 cli_agents fetched; 5 upstream-advanced (codex-skills, git-mcp, gptme, spec-kit, x-cmd); 3 high-value gptme features ported into HelixCode — (1) `internal/agent/subagent/` Role-typed posture with verify-role defaults, (2) `internal/agent/profiles/` package with built-in verifier profile, (3) `internal/llm/cache_control.go` CacheAwareness TTL heuristic. Each port has TDD-first unit tests + a dedicated anti-bluff Challenge script. `bash tests/e2e/challenges/run_all_challenges.sh` reports `11 passed, 0 failed`. Also: Dockerfile.builder gitignore fix + Go 1.26 pin; api_keys.sh and .env dual-load both verified. Meta-repo at `a57baac`.)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -395,6 +395,101 @@ race not introduced by this phase).
   (LLama_CPP, Ollama, HuggingFace_Hub, MCP-Servers, nested
   HelixAgent/HelixLLM/*) are out-of-scope per the decoupling
   mandate — we cannot pollute upstream trees.
+
+### cli_agents fetch + upstream-port cycle (2026-05-13)
+
+Per operator mandate "fetch and pull every single CLI agent Submodule
+so the latest and greates changes are obtained! Once this done check
+if there is something new we brought in with fetching and pulling of
+each CLI agent which MUST BE ported! Add more tests and Challenges
+as well!" — completed end-to-end:
+
+- **Fetch coverage:** 50/50 cli_agents fetched via `git fetch origin`.
+  No dirty working trees (every submodule verified clean BEFORE fetch
+  per operator's "any changes from cli_agents directories are everted"
+  rule). Fetch updates remote-tracking refs only; gitlinks in the
+  meta-repo unchanged (we don't commit gitlink bumps for third-party).
+- **Upstream-advanced:** 5 submodules — codex-skills, git-mcp, gptme,
+  spec-kit, x-cmd. Others were already at latest. Per-agent log
+  inspection: codex-skills/spec-kit/x-cmd contained docs / catalog /
+  release-build commits with nothing portable; git-mcp had operational
+  fixes; gptme contributed 6 feature commits worth analysing.
+- **Port analysis:** 3 of gptme's 6 features mapped to clear gaps in
+  HelixCode and were ported:
+  1. **Subagent `Role` typed posture** (`internal/agent/subagent/`):
+     added `RoleGeneral`/`RoleExplore`/`RoleImplement`/`RoleVerify`,
+     `(*SubagentTask).ApplyRoleDefaults()` wired into Dispatch.
+     `RoleVerify` defaults `IsolationNone` and `ReadOnlyByDefault=true`.
+  2. **Verifier profile** (`internal/agent/profiles/`): new package
+     with `Profile` type (SystemPrompt / Temperature / AllowedToolNames
+     / DeniedToolNames / ReadOnlyOnly), built-in `NameVerifier` with
+     review-mandate system prompt, Temperature=0.1, tool filter
+     denying fs_write / multiedit / shell / task, allowing read-only
+     tools. `ForRole(RoleVerify)` returns the verifier profile.
+  3. **Cache-coldness TTL heuristic** (`internal/llm/cache_control.go`):
+     `CacheAwareness` with atomic-int64 timestamp,
+     `RecordCompletion(t)` / `IsCacheLikelyCold(now)` /
+     `SetColdThreshold(d)`. `DefaultColdThreshold = 5*time.Minute`
+     (matches Anthropic's cache TTL). Wired into the Anthropic
+     provider's response/stream-stop paths.
+  Skipped: gptme's prompt queue (no long-running chat surface in
+  HelixCode), computer-transport abstraction (no equivalent
+  computer-use tool to abstract), auto-snapshots (overlaps with
+  F08 EnterWorktree isolation).
+- **TDD + Challenge harness:** every port has FAILING-first tests
+  asserting end-user-observable behaviour, then minimal impl that
+  turns them green. `go test -race -count=1` exits 0 for all touched
+  packages. 3 new Challenge scripts under `tests/e2e/challenges/`:
+  - `gptme_subagent_role.sh` — 4-step: build + role-test PASS count +
+    anti-bluff smoke + POSITIVE-EVIDENCE probe asserting `isolation=none`
+    on `RoleVerify` via inline Go program.
+  - `gptme_verifier_profile.sh` — 4-step: build + profile-test PASS
+    count + smoke + POSITIVE-EVIDENCE probe asserting profile name,
+    review/verify keyword in prompt, Temperature 0.1, and write-tool
+    in denylist.
+  - `gptme_cache_coldness.sh` — 4-step: build + cache-test 3×PASS +
+    smoke + POSITIVE-EVIDENCE probe walking fresh-is-cold,
+    recorded-is-hot, default-threshold-is-5min.
+  `bash tests/e2e/challenges/run_all_challenges.sh` reports
+  `Results: 11 passed, 0 failed` (up from 8/8 — the 3 new scripts).
+
+### Containerized build path (2026-05-13)
+
+Per operator mandate "boot-up Containers containing proper dependencies
+for EVERYTHING using our Containers Submodule":
+
+- `HelixCode/docker/build/Dockerfile.builder` was previously
+  **gitignored** by overly-broad `Dockerfile*` and `build/` rules.
+  Fresh clones couldn't build the builder image. Tightened both rules
+  (`/Dockerfile*`, `/build/` — anchored at module root) so subdirectory
+  Dockerfiles are tracked. Also bumped `FROM golang:1.24-alpine` →
+  `golang:1.26-alpine` to match `go.mod go 1.26`.
+- Containerised build path now reachable from a clone:
+  `podman compose -f HelixCode/docker-compose.builder.yml build builder`
+  (uses Containers-submodule-aware compose semantics; substitute
+  `docker compose` if available). The builder image carries
+  Go 1.26 + golangci-lint + alpine apk deps + postgres-client; mounts
+  the workspace and reuses Go module/build caches between runs.
+- Five more Dockerfiles also became trackable and were checked in:
+  `tests/e2e/mocks/Dockerfile.{llm,slack}-mock`,
+  `tests/infrastructure/Dockerfile.ssh-{server,worker}`,
+  `docker/security/snyk/Dockerfile`.
+
+### Dual API-key loader (2026-05-13)
+
+Per operator mandate "We shall have API keys in .env file in the root
+of the project or all of them as the part of api_keys.sh in our host's
+home dir! Both of it MUST BE fully supported!" — VERIFIED end-to-end:
+
+- `scripts/load_api_keys.sh` prefers `$HOME/api_keys.sh` when present,
+  falls back to `.env` at meta-repo root.
+- Test 1 — `$HOME/api_keys.sh` path: loader sourced from project root,
+  HOME pointing at real home dir → 42 secret-like vars in env.
+- Test 2 — `.env` fallback path: loader sourced with HOME pointed at
+  empty fakehome → 46 secret-like vars in env from project `.env`.
+- Both paths individually load full secret set; neither silently
+  drops. The loader's "prefer $HOME/api_keys.sh, fallback to .env"
+  precedence matches the operator's stated semantics.
 - **HelixLLM/.gitmodules has stale `submodules/HelixQA` declaration**
   (directory absent on disk; only declaration remains).
 
