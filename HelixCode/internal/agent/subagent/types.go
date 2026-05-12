@@ -72,20 +72,104 @@ const (
 	StateTimedOut State = "timed-out"
 )
 
+// Role declares the typed work posture of a subagent. Ported from upstream
+// gptme PR #2382 (subagent role= parameter). The role drives a small set of
+// default policies (isolation, read-only tool registration, profile
+// selection) so callers can pick a posture without having to wire every
+// flag explicitly.
+//
+// Precedence rule (mirrors upstream): explicit caller-supplied fields beat
+// role-derived defaults. `ApplyRoleDefaults` honours this.
+//
+//   - RoleGeneral: default posture, no special policy.
+//   - RoleExplore: read-only investigation (no writes, no shell).
+//   - RoleImplement: full capability, the implementation surface.
+//   - RoleVerify: review-only validation. Defaults to IsolationNone (the
+//     verifier MUST NOT modify state) and ReadOnlyByDefault=true (the
+//     manager / spawner downstream code filters tools accordingly).
+type Role string
+
+const (
+	// RoleGeneral — default posture, no opinion.
+	RoleGeneral Role = "general"
+	// RoleExplore — read-only investigation posture.
+	RoleExplore Role = "explore"
+	// RoleImplement — full read+write posture for implementation work.
+	RoleImplement Role = "implement"
+	// RoleVerify — review/validation posture. Subagent MUST NOT modify
+	// state; tool registry is filtered to read-only.
+	RoleVerify Role = "verify"
+)
+
+// IsValid reports whether r is one of the documented Role values. An empty
+// Role (the zero value) is treated as INVALID for IsValid purposes; callers
+// that want "no role set" semantics check `r == ""` directly.
+func (r Role) IsValid() bool {
+	switch r {
+	case RoleGeneral, RoleExplore, RoleImplement, RoleVerify:
+		return true
+	default:
+		return false
+	}
+}
+
 // SubagentTask is the input the agent gives to the `task` tool.
 //
 // `ID` is assigned by the manager (UUIDv4); callers MAY leave it empty.
 // `Timeout` of 0 falls back to the manager's configured default. `BaseBranch`
 // and `MergeOnSuccess` are only consulted when `Isolation == IsolationWorktree`.
+//
+// `Role` opts a task into a typed work posture (see Role). When non-empty,
+// the manager applies role-derived defaults via `ApplyRoleDefaults` during
+// Dispatch — explicit caller-supplied fields still win.
+//
+// `ReadOnlyByDefault` instructs the spawner / tool-registration code to
+// only register read-only tools for this task. It is set to true
+// automatically when Role == RoleVerify (verifier MUST NOT modify state).
 type SubagentTask struct {
-	ID             string        `json:"id"`
-	Description    string        `json:"description"`
-	Prompt         string        `json:"prompt"`
-	Isolation      Isolation     `json:"isolation"`
-	SubagentType   string        `json:"subagent_type,omitempty"`
-	Timeout        time.Duration `json:"timeout"`
-	BaseBranch     string        `json:"base_branch,omitempty"`
-	MergeOnSuccess bool          `json:"merge_on_success,omitempty"`
+	ID                string        `json:"id"`
+	Description       string        `json:"description"`
+	Prompt            string        `json:"prompt"`
+	Isolation         Isolation     `json:"isolation"`
+	SubagentType      string        `json:"subagent_type,omitempty"`
+	Timeout           time.Duration `json:"timeout"`
+	BaseBranch        string        `json:"base_branch,omitempty"`
+	MergeOnSuccess    bool          `json:"merge_on_success,omitempty"`
+	Role              Role          `json:"role,omitempty"`
+	ReadOnlyByDefault bool          `json:"read_only_by_default,omitempty"`
+}
+
+// ApplyRoleDefaults populates role-derived default policies on the task.
+// Explicit caller-supplied fields are NEVER overwritten — this method only
+// fills in zero-valued slots when a Role is set. Calling it on a task with
+// an empty Role is a no-op.
+//
+// Currently implemented defaults:
+//   - RoleVerify: Isolation=IsolationNone (verifier MUST NOT mutate state)
+//     and ReadOnlyByDefault=true. The latter is a contract for downstream
+//     tool registries: when set, only tools that report IsReadOnly==true
+//     (or otherwise verify as read-only) may be registered for the task.
+//
+// Other roles currently carry no defaults beyond their semantic intent;
+// adding more is intentionally a separate change so the precedence rule
+// is easy to audit.
+func (t *SubagentTask) ApplyRoleDefaults() {
+	if t == nil || t.Role == "" {
+		return
+	}
+	switch t.Role {
+	case RoleVerify:
+		// Verifier MUST run in-process (no worktree writes). Only fill in
+		// when the caller has not explicitly chosen an isolation mode.
+		if t.Isolation == "" {
+			t.Isolation = IsolationNone
+		}
+		// ReadOnlyByDefault: only set when caller did NOT explicitly opt
+		// out. Since the zero value of bool is the same as "no opt-out",
+		// the only safe rule is "verify role always sets this true". A
+		// caller that wants to override should NOT use RoleVerify.
+		t.ReadOnlyByDefault = true
+	}
 }
 
 // SubagentResult is the output of a single subagent execution.

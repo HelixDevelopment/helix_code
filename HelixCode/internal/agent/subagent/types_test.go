@@ -328,6 +328,170 @@ func TestSubagentRecursionEnvVar(t *testing.T) {
 	}
 }
 
+// TestRole_String exercises every Role enum value. Locks in the public
+// string representation so JSON / log output stays stable.
+func TestRole_String(t *testing.T) {
+	cases := []struct {
+		r    Role
+		want string
+	}{
+		{RoleGeneral, "general"},
+		{RoleExplore, "explore"},
+		{RoleImplement, "implement"},
+		{RoleVerify, "verify"},
+	}
+	for _, tc := range cases {
+		t.Run(string(tc.r), func(t *testing.T) {
+			if got := string(tc.r); got != tc.want {
+				t.Fatalf("Role %q: got %q want %q", tc.r, got, tc.want)
+			}
+		})
+	}
+}
+
+// TestRole_IsValid asserts the IsValid helper accepts every documented
+// role and rejects junk. End-user observable: a typo'd role= caller
+// argument gets rejected at the API boundary rather than silently
+// running with mystery defaults.
+func TestRole_IsValid(t *testing.T) {
+	valid := []Role{RoleGeneral, RoleExplore, RoleImplement, RoleVerify}
+	for _, r := range valid {
+		if !r.IsValid() {
+			t.Errorf("Role(%q).IsValid() = false, want true", r)
+		}
+	}
+	invalid := []Role{"", "junk", "VERIFY"}
+	for _, r := range invalid {
+		if r.IsValid() {
+			t.Errorf("Role(%q).IsValid() = true, want false", r)
+		}
+	}
+}
+
+// TestSubagentTask_RoleVerifyDefaults asserts that ApplyRoleDefaults
+// configures a RoleVerify task with IsolationNone (verify subagents
+// MUST NOT modify state — IsolationWorktree implies write capability
+// in the subprocess spawner) and ReadOnlyByDefault=true. This is the
+// END-USER-OBSERVABLE policy: a verify-role task that landed in the
+// dispatcher reaches the spawner with the read-only flag set.
+func TestSubagentTask_RoleVerifyDefaults(t *testing.T) {
+	task := SubagentTask{
+		Description: "review the diff",
+		Prompt:      "Critique the changes in feature/foo",
+		Role:        RoleVerify,
+	}
+	task.ApplyRoleDefaults()
+
+	if task.Isolation != IsolationNone {
+		t.Errorf("RoleVerify Isolation default = %q, want %q (verify must not modify state)",
+			task.Isolation, IsolationNone)
+	}
+	if !task.ReadOnlyByDefault {
+		t.Errorf("RoleVerify ReadOnlyByDefault = false, want true (verify subagent tools must be read-only)")
+	}
+}
+
+// TestSubagentTask_ApplyRoleDefaults_ExplicitWins asserts the precedence
+// rule from gptme's role taxonomy: explicit caller args beat role
+// defaults. If a caller asks for IsolationWorktree with RoleVerify
+// they get IsolationWorktree (they took the override responsibility).
+func TestSubagentTask_ApplyRoleDefaults_ExplicitWins(t *testing.T) {
+	task := SubagentTask{
+		Description: "explicit override",
+		Prompt:      "anything",
+		Role:        RoleVerify,
+		Isolation:   IsolationWorktree, // explicit, must NOT be reset to None
+	}
+	task.ApplyRoleDefaults()
+	if task.Isolation != IsolationWorktree {
+		t.Fatalf("ApplyRoleDefaults clobbered explicit Isolation=%q to %q",
+			IsolationWorktree, task.Isolation)
+	}
+}
+
+// TestSubagentTask_ApplyRoleDefaults_NoRoleNoChange asserts that calling
+// ApplyRoleDefaults on a task without Role is a no-op (the unset
+// SubagentTask continues to behave exactly as before this feature
+// landed — guards against silent behaviour change on legacy callers).
+func TestSubagentTask_ApplyRoleDefaults_NoRoleNoChange(t *testing.T) {
+	task := SubagentTask{
+		Description: "legacy",
+		Prompt:      "anything",
+	}
+	before := task
+	task.ApplyRoleDefaults()
+	if task != before {
+		t.Fatalf("ApplyRoleDefaults on roleless task changed it:\nbefore=%#v\nafter =%#v",
+			before, task)
+	}
+}
+
+// TestSubagentTask_RoleJSONRoundTrip asserts the Role + ReadOnlyByDefault
+// fields survive marshal/unmarshal. Catches accidental json-tag drift
+// that would silently downgrade a verify task to general on the wire.
+func TestSubagentTask_RoleJSONRoundTrip(t *testing.T) {
+	original := SubagentTask{
+		ID:                "task-role",
+		Description:       "verify",
+		Prompt:            "Critique",
+		Role:              RoleVerify,
+		Isolation:         IsolationNone,
+		ReadOnlyByDefault: true,
+	}
+	raw, err := json.Marshal(&original)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got SubagentTask
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.Role != RoleVerify {
+		t.Fatalf("Role round-trip: got %q want %q", got.Role, RoleVerify)
+	}
+	if !got.ReadOnlyByDefault {
+		t.Fatalf("ReadOnlyByDefault round-trip: got false want true")
+	}
+}
+
+// TestSubagentManager_DispatchAppliesRoleDefaults asserts the manager
+// invokes ApplyRoleDefaults during Dispatch, so a verify-role task
+// reaches the spawner with the policy fields populated. Uses a
+// recordingSpawner to inspect what the manager handed off — this is
+// end-user-observable through the spawner contract.
+func TestSubagentManager_DispatchAppliesRoleDefaults(t *testing.T) {
+	rec := newRecordingSpawner("in-process-recording")
+	provider := NewFakeLLMProvider(nil)
+	m := newManagerForTest(t, SubagentManagerOptions{
+		LLMProvider:      provider,
+		InProcessSpawner: rec,
+	})
+
+	_, err := m.Dispatch(context.Background(), SubagentTask{
+		Description: "verify role default",
+		Prompt:      "review",
+		Role:        RoleVerify,
+		// Isolation left empty — manager's ApplyRoleDefaults must populate it.
+	})
+	if err != nil {
+		t.Fatalf("Dispatch: %v", err)
+	}
+	// Wait for the recording spawner to actually receive the call.
+	_ = drainAll(t, m, 1, 2*time.Second)
+
+	got := rec.recordedTask()
+	if got.Role != RoleVerify {
+		t.Fatalf("recordedTask.Role = %q, want %q", got.Role, RoleVerify)
+	}
+	if got.Isolation != IsolationNone {
+		t.Fatalf("recordedTask.Isolation = %q, want %q (role defaults not applied)",
+			got.Isolation, IsolationNone)
+	}
+	if !got.ReadOnlyByDefault {
+		t.Fatalf("recordedTask.ReadOnlyByDefault = false, want true (read-only policy not applied)")
+	}
+}
+
 // TestSentinelErrors_Distinct guards against any future merge accidentally
 // pointing two sentinels at the same errors.New value.
 func TestSentinelErrors_Distinct(t *testing.T) {

@@ -196,6 +196,11 @@ func (m *SubagentManager) Dispatch(ctx context.Context, task SubagentTask) (stri
 	if task.Description == "" {
 		return "", errors.New("subagent: Dispatch: task.Description is empty")
 	}
+	// Apply Role-derived defaults BEFORE the isolation defaulting below so
+	// RoleVerify (which forces IsolationNone) lands its policy correctly.
+	// ApplyRoleDefaults is a no-op when task.Role == "".
+	task.ApplyRoleDefaults()
+
 	if task.Isolation == "" {
 		task.Isolation = IsolationNone
 	}
