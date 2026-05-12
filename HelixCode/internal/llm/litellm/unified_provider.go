@@ -187,6 +187,16 @@ func (p *UnifiedProvider) GenerateStream(ctx context.Context, req *llm.LLMReques
 			}
 			var raw json.RawMessage
 			if err := decoder.Decode(&raw); err != nil {
+				// Stream finished (EOF) or transport error — emit a
+				// terminal Done chunk so downstream readers can see the
+				// stream completed cleanly. Earlier revisions had a
+				// trailing Done-emit outside the for-loop, but the loop
+				// only exits via `return` so that code was unreachable
+				// (caught by `go vet`).
+				select {
+				case ch <- &LLMStreamChunk{Done: true}:
+				case <-ctx.Done():
+				}
 				return
 			}
 			chunk, err := p.config.Adapter.ConvertStreamChunk(raw)
@@ -201,10 +211,6 @@ func (p *UnifiedProvider) GenerateStream(ctx context.Context, req *llm.LLMReques
 			case <-ctx.Done():
 				return
 			}
-		}
-		select {
-		case ch <- &LLMStreamChunk{Done: true}:
-		case <-ctx.Done():
 		}
 	}()
 	return ch, nil

@@ -77,8 +77,18 @@ fi
 # Any of the above counts as an explicit, documented skip. The earlier
 # regex accepted only `#<digits>` and silently misflagged ~5500 valid
 # skips across the codebase, defeating the gate's purpose entirely.
+#
+# Path-based post-filter: grep's --exclude-dir matches BASENAME only,
+# but vendored trees nested under our own dirs (e.g.
+# HelixAgent/MCP/submodules/python-sdk/, HelixQA/tools/opensource/...)
+# slip through because the basename of the leaf is unique-looking but
+# the PARENT path tags the file as not-ours-to-annotate. Strip those
+# paths after the grep.
+VENDORED_PATH_REGEX='HelixAgent/MCP/submodules/|HelixQA/tools/opensource/|/python-sdk/|/llama-index/|/llama_index/|/chroma[/_]|/unstructured/|/browser-use/|/atlassian-mcp/|/opensource/'
+
 violations=$(grep -rnE "$PATTERNS" "${INCLUDES[@]}" "${EXCLUDES[@]}" . 2>/dev/null \
-             | grep -v -E 'SKIP-OK: #?[A-Za-z0-9][A-Za-z0-9_-]*' || true)
+             | grep -v -E 'SKIP-OK: #?[A-Za-z0-9][A-Za-z0-9_-]*' \
+             | grep -v -E "$VENDORED_PATH_REGEX" || true)
 
 if [ -n "$violations" ]; then
   count=$(printf '%s\n' "$violations" | wc -l | tr -d ' ')
