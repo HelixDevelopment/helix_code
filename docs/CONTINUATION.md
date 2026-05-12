@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T23:30:00Z (Submodule test parity round 2: 3 more fixes — `go mod tidy` for VisionEngine + DocProcessor stale checksums, removed phantom `pkg/remote/deployer_test.go` in VisionEngine that referenced obsolete `Deployer`/`Config` types after Ollama→LlamaCpp rename. Every owned submodule's `go test ./...` exits 0 (Containers, HelixQA, LLMsVerifier, LLMOrchestrator, LLMProvider, Security, VisionEngine, DocProcessor, Models, Challenges). Meta-repo at `fabc9a1`.)
+**Last updated: 2026-05-13T00:00:00Z (Final zero-bluff sweep: notification SendDirect/SendNotification race fixed via template-immutable copy; RetryableChannel.stats atomic; Models anti-bluff anchor cascaded + added to owned-list; WP4 loader propagated to 4 final owned submodules (Challenges, Security, Assets, Github-Pages-Website); one more build binary untracked. Full-mode `go test -race ./cmd/... ./internal/... ./test/... ./tests/...` exits 0 across 95 packages. Meta-repo at `860df7f`.)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -385,10 +385,16 @@ race not introduced by this phase).
 - **WP7 deferred snake_case renames (23 dirs):** 10 umbrella/top-level dirs
   (e.g. `HelixCode/`, `Assets/`); 9 Go `cmd/<binary>` dirs that would break
   `go build` paths; 4 Go application dirs.
-- **WP4 api_keys.sh loader propagation deferred to:** Challenges, Security,
-  Assets, Dependencies/HelixDevelopment/{LLama_CPP, Ollama, HuggingFace_Hub,
-  …}, Github-Pages-Website, MCP-Servers, plus all submodules nested under
-  HelixAgent/HelixLLM/.
+- **WP4 api_keys.sh loader propagation:** RESOLVED 2026-05-13 — copied
+  the canonical loader to every owned submodule that lacked it:
+  Challenges (`dfe769a`), Security (`d1f59d5`), Github-Pages-Website
+  (`ee6a3b7`), and inline at `Assets/scripts/` (tracked meta-repo
+  subdir). Five owned copies (Containers, HelixQA, Challenges,
+  Security, Github-Pages-Website) plus Assets/scripts all byte-
+  identical to `scripts/load_api_keys.sh`. Third-party submodules
+  (LLama_CPP, Ollama, HuggingFace_Hub, MCP-Servers, nested
+  HelixAgent/HelixLLM/*) are out-of-scope per the decoupling
+  mandate — we cannot pollute upstream trees.
 - **HelixLLM/.gitmodules has stale `submodules/HelixQA` declaration**
   (directory absent on disk; only declaration remains).
 
