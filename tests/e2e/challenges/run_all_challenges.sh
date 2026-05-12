@@ -42,6 +42,29 @@ for phase in 1 2 3 4 5 6 7 8; do
     echo ""
 done
 
+# gptme port anti-bluff challenges (subagent Role, verifier profile, cache coldness).
+# Listed explicitly so the existing phase{N}_*.sh glob is undisturbed.
+GPTME_SCRIPTS=(
+    "tests/e2e/challenges/gptme_subagent_role.sh"
+    "tests/e2e/challenges/gptme_verifier_profile.sh"
+    "tests/e2e/challenges/gptme_cache_coldness.sh"
+)
+for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
+    NAME=$(basename "$SCRIPT" .sh)
+    echo "=== Running $NAME Challenge ==="
+    if [ ! -f "$SCRIPT" ]; then
+        echo "❌ $NAME: Script not found"
+        ((FAILED++))
+    elif bash "$SCRIPT" 2>&1; then
+        echo "✅ $NAME: PASSED"
+        ((PASSED++))
+    else
+        echo "❌ $NAME: FAILED"
+        ((FAILED++))
+    fi
+    echo ""
+done
+
 echo "=========================================="
 echo "  Results: $PASSED passed, $FAILED failed"
 echo "=========================================="
