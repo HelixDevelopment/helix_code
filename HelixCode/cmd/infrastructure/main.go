@@ -8,10 +8,8 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"digital.vasic.containers/pkg/boot"
-	"digital.vasic.containers/pkg/compose"
 	"digital.vasic.containers/pkg/endpoint"
 	"digital.vasic.containers/pkg/logging"
 	"digital.vasic.containers/pkg/runtime"
@@ -66,7 +64,7 @@ func NewInfrastructureManager(mode InfraMode) (*InfrastructureManager, error) {
 		return nil, fmt.Errorf("failed to detect container runtime: %w", err)
 	}
 	
-	logger := logging.NewSlogAdapter()
+	logger := logging.NewSlogAdapter(nil)
 	
 	return &InfrastructureManager{
 		mode:       mode,
@@ -100,7 +98,6 @@ func (im *InfrastructureManager) productionEndpoints() map[string]endpoint.Servi
 			WithRequired(true).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.yml")).
 			WithServiceName("postgres").
-			WithDescription("PostgreSQL 15 database").
 			Build(),
 		"redis": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -109,7 +106,6 @@ func (im *InfrastructureManager) productionEndpoints() map[string]endpoint.Servi
 			WithRequired(true).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.yml")).
 			WithServiceName("redis").
-			WithDescription("Redis 7 cache").
 			Build(),
 		"helixcode-server": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -119,7 +115,6 @@ func (im *InfrastructureManager) productionEndpoints() map[string]endpoint.Servi
 			WithRequired(true).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.yml")).
 			WithServiceName("helixcode-server").
-			WithDescription("HelixCode main server").
 			Build(),
 		"prometheus": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -129,7 +124,6 @@ func (im *InfrastructureManager) productionEndpoints() map[string]endpoint.Servi
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.yml")).
 			WithServiceName("prometheus").
-			WithDescription("Prometheus monitoring").
 			Build(),
 		"grafana": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -139,7 +133,6 @@ func (im *InfrastructureManager) productionEndpoints() map[string]endpoint.Servi
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.yml")).
 			WithServiceName("grafana").
-			WithDescription("Grafana dashboards").
 			Build(),
 	}
 }
@@ -153,7 +146,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(true).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("postgres").
-			WithDescription("PostgreSQL test database").
 			Build(),
 		"redis-test": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -162,7 +154,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(true).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("redis").
-			WithDescription("Redis test cache").
 			Build(),
 		"ollama": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -172,7 +163,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("ollama").
-			WithDescription("Ollama local LLM").
 			Build(),
 		"memcached": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -181,7 +171,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("memcached").
-			WithDescription("Memcached cache").
 			Build(),
 		"cognee": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -191,7 +180,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("cognee").
-			WithDescription("Cognee memory system").
 			Build(),
 		"chromadb": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -201,7 +189,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("chromadb").
-			WithDescription("ChromaDB vector store").
 			Build(),
 		"qdrant": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -211,7 +198,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("qdrant").
-			WithDescription("Qdrant vector store").
 			Build(),
 		"weaviate": endpoint.NewEndpoint().
 			WithHost("localhost").
@@ -221,7 +207,6 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 			WithRequired(false).
 			WithComposeFile(filepath.Join(im.composeDir, "docker-compose.test.yml")).
 			WithServiceName("weaviate").
-			WithDescription("Weaviate vector store").
 			Build(),
 	}
 }
@@ -246,7 +231,6 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 		WithRequired(false).
 		WithComposeFile(filepath.Join(im.composeDir, "docker-compose.full-test.yml")).
 		WithServiceName("mock-llm").
-		WithDescription("Mock LLM server").
 		Build()
 	
 	full["selenium"] = endpoint.NewEndpoint().
@@ -257,7 +241,6 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 		WithRequired(false).
 		WithComposeFile(filepath.Join(im.composeDir, "docker-compose.full-test.yml")).
 		WithServiceName("selenium").
-		WithDescription("Selenium browser automation").
 		Build()
 	
 	return full
@@ -270,13 +253,10 @@ func (im *InfrastructureManager) Start() error {
 	
 	endpoints := im.defineEndpoints()
 	
-	var opts []boot.Option
+	var opts []boot.BootManagerOption
 	opts = append(opts, boot.WithRuntime(im.runtime))
 	opts = append(opts, boot.WithLogger(im.logger))
-	opts = append(opts, boot.WithHealthCheckRetries(3))
-	opts = append(opts, boot.WithHealthCheckTimeout(30*time.Second))
-	opts = append(opts, boot.WithParallelStartup(true))
-	
+
 	im.manager = boot.NewBootManager(endpoints, opts...)
 	
 	summary, err := im.manager.BootAll(im.ctx)
@@ -291,7 +271,14 @@ func (im *InfrastructureManager) Start() error {
 	
 	if summary.Failed > 0 {
 		fmt.Printf("\n⚠️  Some services failed to start:\n")
-		for name, errStr := range summary.Errors {
+		for name, result := range summary.Results {
+			if result == nil || result.Status != "failed" {
+				continue
+			}
+			errStr := "unknown error"
+			if result.Error != nil {
+				errStr = result.Error.Error()
+			}
 			fmt.Printf("   - %s: %s\n", name, errStr)
 		}
 	}
@@ -302,7 +289,7 @@ func (im *InfrastructureManager) Start() error {
 		if !ep.Required {
 			status = "~"
 		}
-		fmt.Printf("   %s %-20s %s (port %s)\n", status, name, ep.Description, ep.Port)
+		fmt.Printf("   %s %-20s %s (port %s)\n", status, name, ep.ServiceName, ep.Port)
 	}
 	
 	return nil
@@ -333,13 +320,15 @@ func (im *InfrastructureManager) Status() error {
 		return nil
 	}
 	
-	health := im.manager.GetHealthStatus()
+	health := im.manager.HealthCheckAll(im.ctx)
 	fmt.Printf("   Status: RUNNING\n\n")
-	
-	for name, status := range health {
+
+	for name, healthErr := range health {
 		emoji := "✅"
-		if status != "healthy" {
+		status := "healthy"
+		if healthErr != nil {
 			emoji = "❌"
+			status = healthErr.Error()
 		}
 		fmt.Printf("   %s %-20s %s\n", emoji, name, status)
 	}
