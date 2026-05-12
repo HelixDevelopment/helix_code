@@ -949,18 +949,30 @@ func TestExecuteHealthCheck(t *testing.T) {
 		deployer, err := NewProductionDeployer(config)
 		require.NoError(t, err)
 
-		// Simulate deployed servers
+		// Mark servers as deployed so executeHealthCheck attempts real checks.
 		deployer.status.ServersDeployed = []string{"server1", "server2", "server3"}
 
 		ctx := context.Background()
 		success, err := deployer.executeHealthCheck(ctx)
 
-		// Result depends on simulated health check success rate
-		assert.NotNil(t, success)
-		if success {
-			assert.Equal(t, "passed", deployer.status.HealthStatus.Status)
-			assert.True(t, deployer.status.HealthStatus.Passed)
-		}
+		// Anti-bluff (CONST-035): checkServerHealth deliberately returns
+		// an error for non-real hostnames ("server1"/"server2"/"server3")
+		// because real SSH/HTTP infrastructure is not available in this
+		// unit-test environment. The contract is therefore:
+		//   success == false
+		//   err must surface the infra-required error so callers do not
+		//        silently treat fake hosts as healthy.
+		// (Previously this test asserted `assert.NotNil(t, success)` on a
+		//  bool — which is always true — and a conditional block that
+		//  could never fail. That was a bluff.)
+		assert.False(t, success,
+			"health check against fake hostnames must NOT report success")
+		assert.Error(t, err,
+			"health check against fake hostnames must surface an infra-required error")
+		assert.NotEqual(t, "passed", deployer.status.HealthStatus.Status,
+			"HealthStatus.Status must not be 'passed' when no real servers are reachable")
+		assert.False(t, deployer.status.HealthStatus.Passed,
+			"HealthStatus.Passed must be false when no real servers are reachable")
 	})
 
 	t.Run("HealthCheck_NoDeployedServers", func(t *testing.T) {
@@ -977,9 +989,16 @@ func TestExecuteHealthCheck(t *testing.T) {
 		ctx := context.Background()
 		success, err := deployer.executeHealthCheck(ctx)
 
-		// With no deployed servers, should still pass but with empty health status
-		assert.NoError(t, err)
-		assert.True(t, success) // 0 healthy out of 0 servers passes 90% threshold
+		// Anti-bluff (CONST-035): the production contract for
+		// executeHealthCheck with zero deployed servers is `(false, nil)`
+		// (see production_deployer.go:618-621). The previous assertion
+		// `assert.True(t, success)` was a false claim that "0/0 passes
+		// the 90% threshold" — actually the code short-circuits and
+		// declines to certify health when there is nothing to check.
+		assert.NoError(t, err, "no servers deployed is not an error condition")
+		assert.False(t, success,
+			"health check with zero deployed servers must not report success — "+
+				"there is nothing to validate")
 	})
 }
 
@@ -1167,49 +1186,64 @@ func TestDeploymentStrategiesExecution(t *testing.T) {
 		}
 	}
 
-	t.Run("BlueGreenDeploy_Execution", func(t *testing.T) {
+	// Anti-bluff (CONST-035): every deployment strategy now refuses to
+	// claim success without real SSH infrastructure. The contract is:
+	//   success == false
+	//   err     != nil  (surfaces the infra-required reason)
+	// The previous tests asserted `assert.NotNil(t, success)` on a bool —
+	// which is always true — and `assert.NoError(t, err)` which contradicted
+	// the honest contract added in commit 7f4effd. Both were bluffs.
+
+	t.Run("BlueGreenDeploy_Execution_NoInfra_FailsHonestly", func(t *testing.T) {
 		deployer, err := NewProductionDeployer(baseConfig(BlueGreenDeploy))
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		success, err := deployer.executeBlueGreenDeploy(ctx)
+		success, deployErr := deployer.executeBlueGreenDeploy(ctx)
 
-		assert.NoError(t, err)
-		// Success depends on deployment simulation
-		assert.NotNil(t, success)
+		assert.False(t, success,
+			"BlueGreenDeploy must not report success without real SSH infrastructure")
+		assert.Error(t, deployErr,
+			"BlueGreenDeploy must surface infra-required error")
 	})
 
-	t.Run("CanaryDeploy_Execution", func(t *testing.T) {
+	t.Run("CanaryDeploy_Execution_NoInfra_FailsHonestly", func(t *testing.T) {
 		deployer, err := NewProductionDeployer(baseConfig(CanaryDeploy))
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		success, err := deployer.executeCanaryDeploy(ctx)
+		success, deployErr := deployer.executeCanaryDeploy(ctx)
 
-		assert.NoError(t, err)
-		assert.NotNil(t, success)
+		assert.False(t, success,
+			"CanaryDeploy must not report success without real SSH infrastructure")
+		assert.Error(t, deployErr,
+			"CanaryDeploy must surface infra-required error")
 	})
 
-	t.Run("RollingDeploy_Execution", func(t *testing.T) {
+	t.Run("RollingDeploy_Execution_NoInfra_FailsHonestly", func(t *testing.T) {
 		deployer, err := NewProductionDeployer(baseConfig(RollingDeploy))
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		success, err := deployer.executeRollingDeploy(ctx)
+		success, deployErr := deployer.executeRollingDeploy(ctx)
 
-		assert.NoError(t, err)
-		assert.NotNil(t, success)
+		assert.False(t, success,
+			"RollingDeploy must not report success without real SSH infrastructure")
+		assert.Error(t, deployErr,
+			"RollingDeploy must surface infra-required error")
 	})
 
-	t.Run("RecreateDeploy_Execution", func(t *testing.T) {
+	t.Run("RecreateDeploy_Execution_NoInfra_FailsHonestly", func(t *testing.T) {
 		deployer, err := NewProductionDeployer(baseConfig(RecreateDeploy))
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		success, err := deployer.executeRecreateDeploy(ctx)
+		success, deployErr := deployer.executeRecreateDeploy(ctx)
 
-		assert.NoError(t, err)
-		assert.NotNil(t, success)
+		assert.False(t, success,
+			"RecreateDeploy must not report success without real SSH infrastructure")
+		assert.Error(t, deployErr,
+			"RecreateDeploy must surface infra-required error")
 	})
 }
 
@@ -1402,10 +1436,19 @@ func TestExecuteDeployment(t *testing.T) {
 		ctx := context.Background()
 		success, err := deployer.executeProductionDeploy(ctx)
 
-		// Should fail without SSH infrastructure
-		assert.Error(t, err)
-		assert.False(t, success)
-		assert.Contains(t, err.Error(), "no servers deployed")
+		// Anti-bluff (CONST-035): without real SSH infrastructure,
+		// deployToServer returns false for every server, so 0/5 servers
+		// succeed. The production code surfaces "only 0.0% servers
+		// deployed (need 80%)" — NOT "no servers deployed", which is a
+		// different code path (zero servers in the deployed list). The
+		// previous assertion was therefore a substring bluff: it could
+		// only pass if the test happened to hit a different fail path.
+		assert.Error(t, err, "production deploy without SSH must error")
+		assert.False(t, success, "production deploy without SSH must not report success")
+		assert.Contains(t, err.Error(), "% servers deployed",
+			"error must surface the percentage-deployed reason emitted by production code")
+		assert.Contains(t, err.Error(), "need 80%",
+			"error must surface the 80% threshold requirement")
 	})
 }
 
