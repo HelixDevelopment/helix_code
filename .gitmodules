@@ -214,3 +214,6 @@
 [submodule "MCP-Servers"]
 	path = MCP-Servers
 	url = git@github.com:modelcontextprotocol/servers.git
+[submodule "Dependencies/HelixDevelopment/Models"]
+	path = Dependencies/HelixDevelopment/Models
+	url = git@github.com:vasic-digital/Models.git
