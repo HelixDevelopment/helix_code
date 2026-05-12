@@ -12,25 +12,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 )
 
 // SonarQubeScanner implements SonarQube code quality and security scanning
 type SonarQubeScanner struct {
 	config SonarQubeConfig
-}
-
-type SonarQubeConfig struct {
-	URL                   string
-	ProjectKey            string
-	Organization          string
-	Token                 string
-	QualityGate           string
-	CoverageMinimum       int
-	DuplicationsMaximum   int
-	MaintainabilityRating string
-	ReliabilityRating     string
-	SecurityRating        string
 }
 
 // NewSonarQubeScanner creates a new SonarQube scanner
@@ -130,20 +116,6 @@ func (s *SonarQubeScanner) Scan(ctx context.Context, scanCtx *ScanContext) (*Sca
 // SnykScanner implements Snyk vulnerability scanning
 type SnykScanner struct {
 	config SnykConfig
-}
-
-type SnykConfig struct {
-	Token                  string
-	Organization           string
-	Project                string
-	Monitoring             bool
-	SeverityThreshold      string
-	FailOnSeverity         string
-	ScanDependencies       bool
-	ScanCode               bool
-	ScanContainers         bool
-	ScanLicenses           bool
-	ExcludeDevDependencies bool
 }
 
 // NewSnykScanner creates a new Snyk scanner
@@ -272,13 +244,6 @@ type TrivyScanner struct {
 	config TrivyConfig
 }
 
-type TrivyConfig struct {
-	Enabled           bool
-	ScanContainers    bool
-	ScanFilesystem    bool
-	SeverityThreshold string
-}
-
 // NewTrivyScanner creates a new Trivy scanner
 func NewTrivyScanner(config TrivyConfig) (*TrivyScanner, error) {
 	return &TrivyScanner{config: config}, nil
@@ -333,13 +298,12 @@ func (t *TrivyScanner) Scan(ctx context.Context, scanCtx *ScanContext) (*ScanRes
 	}
 
 	summary := ScanSummary{
-		TimeTaken:         time.Since(startTime),
-		TotalIssues:       len(issues),
-		CriticalIssues:    countIssuesBySeverity(issues, "critical"),
-		HighIssues:        countIssuesBySeverity(issues, "high"),
-		MediumIssues:      countIssuesBySeverity(issues, "medium"),
-		LowIssues:         countIssuesBySeverity(issues, "low"),
-		ContainersScanned: len(t.getDockerImages()),
+		TimeTaken:      time.Since(startTime),
+		TotalIssues:    len(issues),
+		CriticalIssues: countIssuesBySeverity(issues, "critical"),
+		HighIssues:     countIssuesBySeverity(issues, "high"),
+		MediumIssues:   countIssuesBySeverity(issues, "medium"),
+		LowIssues:      countIssuesBySeverity(issues, "low"),
 	}
 
 	return &ScanResult{
@@ -430,4 +394,220 @@ func getString(m map[string]interface{}, key string) string {
 		return fmt.Sprintf("%v", val)
 	}
 	return ""
+}
+
+// SemgrepScanner implements Semgrep static-analysis scanning by shelling out to `semgrep`.
+type SemgrepScanner struct {
+	config SemgrepConfig
+}
+
+// NewSemgrepScanner creates a Semgrep scanner; returns an error only on invalid config (none today).
+func NewSemgrepScanner(config SemgrepConfig) (*SemgrepScanner, error) {
+	return &SemgrepScanner{config: config}, nil
+}
+
+func (s *SemgrepScanner) Name() string         { return "semgrep" }
+func (s *SemgrepScanner) Enabled() bool        { return s.config.Enabled }
+func (s *SemgrepScanner) Config() interface{}  { return s.config }
+
+func (s *SemgrepScanner) Scan(ctx context.Context, scanCtx *ScanContext) (*ScanResult, error) {
+	start := time.Now()
+	args := []string{"--json"}
+	if s.config.ConfigFile != "" {
+		args = append(args, "--config", s.config.ConfigFile)
+	} else {
+		args = append(args, "--config", "auto")
+	}
+	args = append(args, scanCtx.ProjectPath)
+	cmd := exec.CommandContext(ctx, "semgrep", args...)
+	cmd.Dir = scanCtx.ProjectPath
+	output, err := cmd.CombinedOutput()
+	result := &ScanResult{
+		Scanner:   s.Name(),
+		Timestamp: start,
+		Success:   err == nil,
+		Summary:   ScanSummary{TimeTaken: time.Since(start)},
+		Issues:    []ScanIssue{},
+		Metrics:   ScanMetrics{FilesScanned: countGoFiles(scanCtx.ProjectPath)},
+	}
+	if err != nil && len(output) == 0 {
+		result.Success = false
+		result.Issues = append(result.Issues, ScanIssue{
+			ID:           "semgrep-failed",
+			Scanner:      s.Name(),
+			Severity:     "high",
+			Title:        "Semgrep invocation failed",
+			Description:  err.Error(),
+			SuggestedFix: "Install semgrep (`pipx install semgrep`) and ensure it is on PATH",
+		})
+		result.Summary.TotalIssues = 1
+		return result, nil
+	}
+	var parsed map[string]interface{}
+	if err := json.Unmarshal(output, &parsed); err == nil {
+		if results, ok := parsed["results"].([]interface{}); ok {
+			for _, r := range results {
+				m, _ := r.(map[string]interface{})
+				sev := strings.ToLower(getString(m, "severity"))
+				result.Issues = append(result.Issues, ScanIssue{
+					ID:       getString(m, "check_id"),
+					Scanner:  s.Name(),
+					Type:     "static_analysis",
+					Severity: sev,
+					Title:    getString(m, "check_id"),
+					File:     getString(m, "path"),
+					Message:  getString(m, "message"),
+				})
+			}
+		}
+	}
+	result.Summary.TotalIssues = len(result.Issues)
+	result.Summary.CriticalIssues = countIssuesBySeverity(result.Issues, "critical")
+	result.Summary.HighIssues = countIssuesBySeverity(result.Issues, "high")
+	result.Summary.MediumIssues = countIssuesBySeverity(result.Issues, "medium")
+	result.Summary.LowIssues = countIssuesBySeverity(result.Issues, "low")
+	return result, nil
+}
+
+// GosecScanner implements gosec Go-source security scanning.
+type GosecScanner struct {
+	config GosecConfig
+}
+
+func NewGosecScanner(config GosecConfig) (*GosecScanner, error) {
+	return &GosecScanner{config: config}, nil
+}
+
+func (g *GosecScanner) Name() string        { return "gosec" }
+func (g *GosecScanner) Enabled() bool       { return g.config.Enabled }
+func (g *GosecScanner) Config() interface{} { return g.config }
+
+func (g *GosecScanner) Scan(ctx context.Context, scanCtx *ScanContext) (*ScanResult, error) {
+	start := time.Now()
+	cmd := exec.CommandContext(ctx, "gosec", "-fmt=json", "./...")
+	cmd.Dir = scanCtx.ProjectPath
+	output, err := cmd.CombinedOutput()
+	result := &ScanResult{
+		Scanner:   g.Name(),
+		Timestamp: start,
+		Success:   err == nil,
+		Summary:   ScanSummary{TimeTaken: time.Since(start)},
+		Issues:    []ScanIssue{},
+		Metrics:   ScanMetrics{FilesScanned: countGoFiles(scanCtx.ProjectPath)},
+	}
+	if err != nil && len(output) == 0 {
+		result.Success = false
+		result.Issues = append(result.Issues, ScanIssue{
+			ID:           "gosec-failed",
+			Scanner:      g.Name(),
+			Severity:     "high",
+			Title:        "gosec invocation failed",
+			Description:  err.Error(),
+			SuggestedFix: "Install gosec (`go install github.com/securego/gosec/v2/cmd/gosec@latest`)",
+		})
+		result.Summary.TotalIssues = 1
+		return result, nil
+	}
+	var parsed map[string]interface{}
+	if err := json.Unmarshal(output, &parsed); err == nil {
+		if issues, ok := parsed["Issues"].([]interface{}); ok {
+			for _, i := range issues {
+				m, _ := i.(map[string]interface{})
+				sev := strings.ToLower(getString(m, "severity"))
+				result.Issues = append(result.Issues, ScanIssue{
+					ID:       getString(m, "rule_id"),
+					Scanner:  g.Name(),
+					Type:     "go_security",
+					Severity: sev,
+					Title:    getString(m, "details"),
+					File:     getString(m, "file"),
+					Rule:     getString(m, "rule_id"),
+				})
+			}
+		}
+	}
+	result.Summary.TotalIssues = len(result.Issues)
+	result.Summary.CriticalIssues = countIssuesBySeverity(result.Issues, "critical")
+	result.Summary.HighIssues = countIssuesBySeverity(result.Issues, "high")
+	result.Summary.MediumIssues = countIssuesBySeverity(result.Issues, "medium")
+	result.Summary.LowIssues = countIssuesBySeverity(result.Issues, "low")
+	return result, nil
+}
+
+// NancyScanner implements Nancy Go-dependency vulnerability scanning by piping `go list -m all`.
+type NancyScanner struct {
+	config NancyConfig
+}
+
+func NewNancyScanner(config NancyConfig) (*NancyScanner, error) {
+	return &NancyScanner{config: config}, nil
+}
+
+func (n *NancyScanner) Name() string        { return "nancy" }
+func (n *NancyScanner) Enabled() bool       { return n.config.Enabled }
+func (n *NancyScanner) Config() interface{} { return n.config }
+
+func (n *NancyScanner) Scan(ctx context.Context, scanCtx *ScanContext) (*ScanResult, error) {
+	start := time.Now()
+	// Step 1: `go list -m all`
+	listCmd := exec.CommandContext(ctx, "go", "list", "-m", "all")
+	listCmd.Dir = scanCtx.ProjectPath
+	modOutput, listErr := listCmd.Output()
+	result := &ScanResult{
+		Scanner:   n.Name(),
+		Timestamp: start,
+		Success:   listErr == nil,
+		Summary:   ScanSummary{TimeTaken: time.Since(start)},
+		Issues:    []ScanIssue{},
+		Metrics:   ScanMetrics{DependenciesScanned: countDependencies(scanCtx.ProjectPath)},
+	}
+	if listErr != nil {
+		result.Issues = append(result.Issues, ScanIssue{
+			ID:          "nancy-list-failed",
+			Scanner:     n.Name(),
+			Severity:    "high",
+			Title:       "go list -m all failed",
+			Description: listErr.Error(),
+		})
+		result.Summary.TotalIssues = 1
+		return result, nil
+	}
+	// Step 2: pipe into `nancy sleuth`
+	nancyArgs := []string{"sleuth"}
+	if n.config.Quiet {
+		nancyArgs = append(nancyArgs, "--quiet")
+	}
+	if n.config.SkipUpdateCheck {
+		nancyArgs = append(nancyArgs, "--skip-update-check")
+	}
+	nancyCmd := exec.CommandContext(ctx, "nancy", nancyArgs...)
+	nancyCmd.Dir = scanCtx.ProjectPath
+	nancyCmd.Stdin = strings.NewReader(string(modOutput))
+	nancyOut, nancyErr := nancyCmd.CombinedOutput()
+	if nancyErr != nil && len(nancyOut) == 0 {
+		result.Success = false
+		result.Issues = append(result.Issues, ScanIssue{
+			ID:           "nancy-failed",
+			Scanner:      n.Name(),
+			Severity:     "high",
+			Title:        "nancy invocation failed",
+			Description:  nancyErr.Error(),
+			SuggestedFix: "Install nancy (`go install github.com/sonatype-nexus-community/nancy@latest`)",
+		})
+		result.Summary.TotalIssues = 1
+		return result, nil
+	}
+	// Nancy exit code != 0 indicates vulns found; surface the raw output as one informational issue
+	if len(nancyOut) > 0 {
+		result.Issues = append(result.Issues, ScanIssue{
+			ID:          "nancy-report",
+			Scanner:     n.Name(),
+			Type:        "dependency_vulnerability_report",
+			Severity:    "info",
+			Title:       "Nancy dependency audit",
+			Description: string(nancyOut),
+		})
+	}
+	result.Summary.TotalIssues = len(result.Issues)
+	return result, nil
 }

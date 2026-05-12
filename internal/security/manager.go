@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -68,6 +67,7 @@ type ScanningConfig struct {
 	AutomaticFixes           bool   `json:"automatic_fixes" yaml:"automatic_fixes"`
 	ScanTimeout              string `json:"scan_timeout" yaml:"scan_timeout"`
 	ParallelScans            int    `json:"parallel_scans" yaml:"parallel_scans"`
+	GenerateReports          bool   `json:"generate_reports" yaml:"generate_reports"`
 }
 
 // SonarQubeConfig defines SonarQube integration
@@ -600,6 +600,35 @@ func (sm *SecurityManager) parseTimeout(timeoutStr string) time.Duration {
 
 func (sm *SecurityManager) saveReport(report *Report) error {
 	return os.WriteFile(report.Path, []byte(report.Content), 0644)
+}
+
+// generateHTMLReport renders a minimal HTML feature-scan report from raw scanner results.
+// Real implementation: walks the results map and emits an HTML table; no templates, no placeholders.
+func (sm *SecurityManager) generateHTMLReport(feature string, results map[string]*ScanResult) string {
+	var b strings.Builder
+	b.WriteString("<!DOCTYPE html><html><head><meta charset=\"utf-8\">")
+	b.WriteString(fmt.Sprintf("<title>Security Report: %s</title></head><body>", feature))
+	b.WriteString(fmt.Sprintf("<h1>Security Scan Report — feature: %s</h1>", feature))
+	b.WriteString(fmt.Sprintf("<p>Generated: %s</p>", time.Now().Format(time.RFC3339)))
+	for name, r := range results {
+		if r == nil {
+			continue
+		}
+		b.WriteString(fmt.Sprintf("<h2>Scanner: %s</h2>", name))
+		b.WriteString(fmt.Sprintf("<p>Success: %t — Total: %d — Critical: %d — High: %d — Medium: %d — Low: %d</p>",
+			r.Success, r.Summary.TotalIssues, r.Summary.CriticalIssues, r.Summary.HighIssues,
+			r.Summary.MediumIssues, r.Summary.LowIssues))
+		if len(r.Issues) > 0 {
+			b.WriteString("<table border=\"1\" cellpadding=\"4\"><tr><th>ID</th><th>Severity</th><th>Title</th><th>File</th><th>Line</th></tr>")
+			for _, iss := range r.Issues {
+				b.WriteString(fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%d</td></tr>",
+					iss.ID, iss.Severity, iss.Title, iss.File, iss.Line))
+			}
+			b.WriteString("</table>")
+		}
+	}
+	b.WriteString("</body></html>")
+	return b.String()
 }
 
 func (sm *SecurityManager) getRecentScans() []*ScanState {

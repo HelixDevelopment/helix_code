@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T12:00:00Z (Backlog: cmd/infrastructure compile errors against Containers v2 API RESOLVED — `go build ./cmd/infrastructure/...` exits 0)
+**Last updated: 2026-05-12T18:00:00Z (Backlog: meta-repo `internal/security/` stale-duplicate drift + research-dump compile poison RESOLVED — `go build ./cmd/... ./internal/...` exits 0)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -342,6 +342,27 @@ race not introduced by this phase).
   `GetHealthStatus()` → `HealthCheckAll(ctx)`; unused `time` + `compose`
   imports removed; `ep.Description` (no longer on `ServiceEndpoint`)
   → `ep.ServiceName`.
+- **Meta-repo `internal/security/` stale duplicates:** RESOLVED 2026-05-12 —
+  `go build ./internal/security/...` exits 0. Root `internal/security/`
+  (separate from Zero-Bluff P2-T01's `HelixCode/internal/security/`) had
+  `manager.go` + `scanners.go` with duplicate `SonarQubeConfig`/`SnykConfig`/
+  `TrivyConfig` decls and references to undefined
+  `NewSemgrepScanner`/`NewGosecScanner`/`NewNancyScanner`. Fixes: removed
+  scanners.go's mini-duplicates (manager.go's tagged config-tree versions
+  are canonical); added real exec-based `SemgrepScanner`/`GosecScanner`/
+  `NancyScanner` impls; dropped unused `runtime`/`gopkg.in/yaml.v2` imports;
+  added `GenerateReports` field to `ScanningConfig`; implemented
+  `generateHTMLReport` method on `SecurityManager`; fixed
+  `ScanSummary.ContainersScanned` mis-field (belongs to `ScanMetrics`).
+- **Meta-repo `go build ./...` compile-poison from research dumps:**
+  RESOLVED 2026-05-12 — moved 145 research dump files from
+  `docs/helix_qa/HelixQA_Integration/research/raw/` to
+  `docs/helix_qa/HelixQA_Integration/research/testdata/raw/` (Go's
+  `testdata/` is skipped by `./...`); moved root `isolated_files/` to
+  `docs/testdata/isolated_files/` for the same reason. `cli_agents/plandex/`
+  submodule still produces 9 errors under bare `./...` (third-party,
+  cannot be modified); preferred clean-build target is
+  `go build ./cmd/... ./internal/...` which exits 0.
 - **`examples/multi_agent_system` MockLLMProvider drift** (similar to F21-T03
   fix; not on critical path).
 - **`applications/desktop` link FAIL on host:** missing X11/Xcursor.h
