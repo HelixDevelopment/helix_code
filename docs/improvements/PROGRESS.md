@@ -472,3 +472,42 @@
 - **Stale cli_agents pins (13)** — HelixAgent submodule SHAs expired upstream. Per spec §1.3 N2, HelixAgent rewrite is out of scope; per-agent pin bumps go through HelixAgent's own governance.
 - **23 snake_case renames** — build-path-breaking, deferred
 - **Codex Multimodal, Cline Computer Use** — not yet ported
+
+## Zero-Bluff Completion Programme — 5 Phases ALL CLOSED (2026-05-12)
+
+Spec: `docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md`
+
+| Phase | Title | Status | SHA |
+|---|---|---|---|
+| ZB-P1 | Governance Propagation | DONE | `5f9bb90` |
+| ZB-P2 | Stub / Bluff Elimination (T01-T11) | DONE | `b24ca8f` |
+| ZB-P3 | Feature Gap Implementation (11 tasks) | DONE | `1f1d8f4` |
+| ZB-P4 | Test / Challenge Hardening (weak-assertion sweep) | DONE | `21e6686` |
+| ZB-P5 | Full Documentation Suite | DONE | (this commit) |
+
+### ZB-P5 deliverables
+
+| Document | Path | Purpose |
+|---|---|---|
+| User Manual | `docs/user_manual/ZERO_BLUFF_USER_MANUAL.md` | End-user installation, configuration, F01-F30 usage |
+| Developer Guide | `docs/developer_guide/README.md` | Architecture, Tool/Command/Skill interfaces, anti-bluff discipline |
+| API Reference | `docs/api_reference/README.md` | 20 key internal packages, content from `go doc` |
+| Deployment Guide | `docs/deployment_guide/README.md` | Containers submodule, observability, manual CI/CD, security |
+
+Anti-bluff smoke at close-out: `clean` (template `placeholder` matches in
+`internal/config/config.go`, `internal/template/template.go`,
+`internal/workflow/*executor.go` are legitimate domain usage referring to
+`{{name}}` template variable substitution — NOT TODO markers).
+
+CLI examples validated against the codebase:
+- `helixcode wizard` — confirmed at `HelixCode/cmd/cli/wizard_cmd.go:83`
+- `/approval`, `/memory`, `/lsp`, `/theme`, `/telemetry`, `/worktree` — all present under `HelixCode/internal/commands/`
+- `cli --list-models` and interactive `> models` — confirmed at `HelixCode/cmd/cli/main.go:347, 1681`
+- `cli sessions list` — confirmed at `HelixCode/cmd/cli/main.go:1822`
+- `cli lsp list-servers` — confirmed at `HelixCode/cmd/cli/main.go:1850`
+
+### Zero-Bluff Programme: COMPLETE
+
+No further programme work pending. Backlog / parking-lot items:
+- `cmd/infrastructure/` has pre-existing compile errors against the Containers submodule API (`endpoint.Builder.WithDescription` missing; `logging.NewSlogAdapter` signature drift). Out of scope for ZB-P5 — to be triaged separately.
+- Fyne desktop build requires `libxcursor-dev` system package; documented as a prerequisite in the user manual.

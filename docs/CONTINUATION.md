@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T08:25:00Z (Zero-Bluff Phase 4 CLOSED — weak-assertion sweep complete, anti-bluff compliance enforced)
+**Last updated: 2026-05-12T11:30:00Z (Zero-Bluff Phase 5 CLOSED — full documentation suite shipped; Zero-Bluff programme COMPLETE)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -19,7 +19,9 @@ If you are a fresh CLI agent picking this up:
 6. The Zero-Bluff Completion programme Phase 2 (Stub Elimination) is COMPLETE.
 7. The Zero-Bluff Completion programme Phase 3 (Feature Gaps) is COMPLETE.
 8. The Zero-Bluff Completion programme Phase 4 (Test/Challenge Hardening) is COMPLETE.
-9. Continue from Phase 5 — Full Documentation Suite.
+9. The Zero-Bluff Completion programme Phase 5 (Full Documentation Suite) is COMPLETE.
+10. **The Zero-Bluff Completion programme is COMPLETE (all 5 phases shipped).**
+11. No active programme. Backlog / parking-lot items listed under "Next" at the bottom of this file.
 
 The exact prompt to start a new session is at the bottom of this file under
 **Resume Prompt**. Copy-paste it verbatim into a new Claude Code (or any other
@@ -65,7 +67,9 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P2 — Stub/Bluff Elimination | DONE         | `b24ca8f`  | T01-T11 complete; scanner+CLI+FAISS+CharacterAI+Anima+security-test+treesitter+multiedit |
 | P3 — Feature Gap Implementation | DONE     | `1f1d8f4`  | 11 tasks: LiteLLM, repomap, quality, clarification, plugins, 4 providers, CONST-046 |
 | P4 — Test/Challenge Hardening   | DONE     | `a3f8871`  | weak-assertion sweep: fix + deployment tests tightened with mutation-tested content assertions |
-| P5 — Full Documentation Suite   | PENDING  | —          | user manual, dev guide, API ref, deployment guide             |
+| P5 — Full Documentation Suite   | DONE     | (this commit) | 4 docs: user manual (ZERO_BLUFF_USER_MANUAL.md), developer_guide/README.md, api_reference/README.md, deployment_guide/README.md |
+
+**Zero-Bluff Completion programme: COMPLETE (all 5 phases shipped).**
 
 ---
 
