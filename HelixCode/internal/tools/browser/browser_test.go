@@ -184,7 +184,12 @@ func TestBrowserActions(t *testing.T) {
 	controller := NewDefaultController(discovery)
 	executor := NewDefaultActionExecutor(controller)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// 180 s covers worst-case launch + 6 navigate-and-act subtests + real
+	// example.com latency under the chromium-flock serialization. The
+	// earlier 60 s budget produced scroll_page deadline timeouts when the
+	// cumulative subtest time crept over 60 s (~1 s extra per navigate
+	// from real network jitter is enough to tip it).
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
 	browser, err := controller.Launch(ctx, DefaultLaunchOptions())
@@ -287,7 +292,12 @@ func TestScreenshot(t *testing.T) {
 	executor := NewDefaultActionExecutor(controller)
 	capture := NewDefaultScreenshotCapture(controller, executor)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// 180 s covers worst-case launch + 6 navigate-and-act subtests + real
+	// example.com latency under the chromium-flock serialization. The
+	// earlier 60 s budget produced scroll_page deadline timeouts when the
+	// cumulative subtest time crept over 60 s (~1 s extra per navigate
+	// from real network jitter is enough to tip it).
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
 	browser, err := controller.Launch(ctx, DefaultLaunchOptions())
@@ -376,7 +386,12 @@ func TestBrowserTools(t *testing.T) {
 	})
 
 	t.Run("navigate and screenshot", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		// 180 s covers worst-case launch + 6 navigate-and-act subtests + real
+	// example.com latency under the chromium-flock serialization. The
+	// earlier 60 s budget produced scroll_page deadline timeouts when the
+	// cumulative subtest time crept over 60 s (~1 s extra per navigate
+	// from real network jitter is enough to tip it).
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 		defer cancel()
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
@@ -397,7 +412,12 @@ func TestBrowserTools(t *testing.T) {
 	})
 
 	t.Run("get interactive elements", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		// 180 s covers worst-case launch + 6 navigate-and-act subtests + real
+	// example.com latency under the chromium-flock serialization. The
+	// earlier 60 s budget produced scroll_page deadline timeouts when the
+	// cumulative subtest time crept over 60 s (~1 s extra per navigate
+	// from real network jitter is enough to tip it).
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 		defer cancel()
 
 		browser, err := tools.LaunchBrowser(ctx, nil)
@@ -440,7 +460,12 @@ func TestLegacyBrowserSession(t *testing.T) {
 	unlock := serializeChromiumLaunches(t)
 	defer unlock()
 	tools := NewBrowserTools(nil)
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// 180 s covers worst-case launch + 6 navigate-and-act subtests + real
+	// example.com latency under the chromium-flock serialization. The
+	// earlier 60 s budget produced scroll_page deadline timeouts when the
+	// cumulative subtest time crept over 60 s (~1 s extra per navigate
+	// from real network jitter is enough to tip it).
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
 	session, err := NewLegacyBrowserSession(ctx, tools, nil)
