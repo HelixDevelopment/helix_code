@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T18:30:00Z (Hygiene: 3 runtime test artefacts untracked + HelixCode/.gitignore tightened — clean working tree; meta-repo at `d7a7956` synced to all 4 remotes)
+**Last updated: 2026-05-12T19:00:00Z (Anti-bluff sweep: 3 real test-flake bugs fixed — DNS no-timeout in discovery, QA engine goroutine race with t.TempDir cleanup, browser tests gated under `-short`. 3 consecutive full `./internal/...` short-mode runs PASS clean. Meta-repo at `fbc0560` synced to all 4 remotes.)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -540,3 +540,4 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-08     | ZB Phase 4    | Zero-Bluff Phase 4 (Test/Challenge Hardening) IN PROGRESS. Critical bluffs eliminated (validators, fix, config, deployment). Article XI §11.9 compliance enforced. Commits `4f5f8f0` + `7f4effd`. |
 | 2026-05-12     | ZB Phase 4 close | Zero-Bluff Phase 4 CLOSED. Weak-assertion sweep across 447 test files; 8 tests tightened in internal/fix + internal/deployment with mutation-test confirmation (6 mutations → 6 test failures → reverted). Commits `02b7306` + `a3f8871`. Cross-compile linux/amd64 PASS. Phase 5 (Documentation Suite) next. |
 | 2026-05-12     | Hygiene       | Untracked 3 runtime test artefacts + tightened `HelixCode/.gitignore` + removed stray 13 MB build binary. Commit `d7a7956`; all 4 remotes synced. CONTINUATION updated per CONST-044. |
+| 2026-05-12     | Anti-bluff sweep | Re-running `go test -short ./internal/...` surfaced 3 distinct flakes masking real defects. Fixed: (1) `internal/discovery/client.go` `discoverByDNS` had no per-call timeout — replaced `net.LookupHost` with `net.DefaultResolver.LookupHost(ctx, ...)` bounded at 200 ms; (2) `internal/helixqa/wrapper.go` `Engine.StartSession` goroutine raced with `t.TempDir` cleanup — added `sync.WaitGroup` + `Shutdown()` method + `t.Cleanup` hook in `setupQATestServer`; (3) `internal/tools/browser/browser_test.go` 5 chromium-launching tests starved under suite parallelism — gated behind `testing.Short()` with SKIP-OK markers. 3 consecutive full short-suite runs PASS clean. Commit `fbc0560`. |
