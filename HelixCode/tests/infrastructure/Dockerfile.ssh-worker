@@ -1,0 +1,88 @@
+# SSH Worker for HelixCode Distributed Testing
+# This container simulates a worker node with Go development environment
+
+FROM golang:1.24-alpine
+
+# Install required packages
+RUN apk add --no-cache \
+    openssh-server \
+    openssh-client \
+    bash \
+    curl \
+    git \
+    jq \
+    make \
+    gcc \
+    musl-dev \
+    ncurses \
+    shadow
+
+# Create SSH directories and generate host keys
+RUN mkdir -p /var/run/sshd && \
+    ssh-keygen -A
+
+# Create test user
+RUN adduser -D -s /bin/bash -h /home/helixcode helixcode && \
+    echo "helixcode:test_password" | chpasswd && \
+    mkdir -p /home/helixcode/.ssh && \
+    mkdir -p /home/helixcode/workspace && \
+    mkdir -p /home/helixcode/go/bin && \
+    chown -R helixcode:helixcode /home/helixcode
+
+# Set up Go environment for helixcode user
+RUN echo 'export GOPATH=/home/helixcode/go' >> /home/helixcode/.bashrc && \
+    echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> /home/helixcode/.bashrc && \
+    echo 'export WORKER_ID=${WORKER_ID:-worker-unknown}' >> /home/helixcode/.bashrc
+
+# Install common Go tools
+RUN go install golang.org/x/tools/gopls@latest && \
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && \
+    go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Copy Go tools to user's bin
+RUN cp /go/bin/* /home/helixcode/go/bin/ && \
+    chown -R helixcode:helixcode /home/helixcode/go
+
+# Configure SSH server
+RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config && \
+    echo "UsePAM no" >> /etc/ssh/sshd_config && \
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
+    echo "PrintMotd no" >> /etc/ssh/sshd_config && \
+    echo "AcceptEnv LANG LC_* WORKER_ID" >> /etc/ssh/sshd_config && \
+    echo "Subsystem sftp /usr/lib/ssh/sftp-server" >> /etc/ssh/sshd_config && \
+    echo "AllowUsers helixcode" >> /etc/ssh/sshd_config
+
+# Set proper permissions
+RUN chmod 700 /home/helixcode/.ssh
+
+# Create worker info script
+RUN echo '#!/bin/bash' > /home/helixcode/worker-info.sh && \
+    echo 'echo "Worker ID: ${WORKER_ID:-unknown}"' >> /home/helixcode/worker-info.sh && \
+    echo 'echo "Go Version: $(go version)"' >> /home/helixcode/worker-info.sh && \
+    echo 'echo "Hostname: $(hostname)"' >> /home/helixcode/worker-info.sh && \
+    echo 'echo "CPU Cores: $(nproc)"' >> /home/helixcode/worker-info.sh && \
+    echo 'echo "Memory: $(free -h | grep Mem | awk '\''{print $2}'\'')"' >> /home/helixcode/worker-info.sh && \
+    chmod +x /home/helixcode/worker-info.sh && \
+    chown helixcode:helixcode /home/helixcode/worker-info.sh
+
+# Create entrypoint script
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'if [ -f /home/helixcode/.ssh/id_rsa.pub ]; then' >> /entrypoint.sh && \
+    echo '  cp /home/helixcode/.ssh/id_rsa.pub /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo '  chown helixcode:helixcode /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo '  chmod 600 /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo 'fi' >> /entrypoint.sh && \
+    echo 'echo "Starting SSH Worker: ${WORKER_ID:-unknown}"' >> /entrypoint.sh && \
+    echo 'exec /usr/sbin/sshd -D -e' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+EXPOSE 22
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD nc -z localhost 22 || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]

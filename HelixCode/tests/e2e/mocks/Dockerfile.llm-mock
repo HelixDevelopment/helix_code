@@ -1,0 +1,44 @@
+# Mock LLM Server Dockerfile
+# Provides mock endpoints for OpenAI, Anthropic, Gemini, Azure, Bedrock, and other providers
+
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /app
+
+# Copy go mod files if they exist, otherwise create a simple module
+RUN echo 'module mock-llm-server' > go.mod && \
+    echo 'go 1.24' >> go.mod
+
+# Copy source code
+COPY cmd/mock-server/main.go ./main.go
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mock-llm-server .
+
+# Final image
+FROM alpine:3.19
+
+RUN apk add --no-cache ca-certificates curl
+
+WORKDIR /app
+
+COPY --from=builder /app/mock-llm-server /app/mock-llm-server
+
+# Default environment variables
+ENV MOCK_PORT=8090
+ENV MOCK_OPENAI=true
+ENV MOCK_ANTHROPIC=true
+ENV MOCK_GEMINI=true
+ENV MOCK_AZURE=true
+ENV MOCK_BEDROCK=true
+ENV MOCK_GROQ=true
+ENV MOCK_MISTRAL=true
+ENV MOCK_COHERE=true
+ENV LOG_LEVEL=info
+
+EXPOSE 8090
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD curl -f http://localhost:8090/health || exit 1
+
+CMD ["/app/mock-llm-server"]

@@ -1,0 +1,247 @@
+# Mock Slack Server Dockerfile
+# Provides mock Slack API endpoints for notification testing
+
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /app
+
+# Create go module
+RUN echo 'module mock-slack-server' > go.mod && \
+    echo 'go 1.24' >> go.mod
+
+# Create main.go inline
+RUN cat > main.go << 'EOF'
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"sync"
+	"time"
+)
+
+type MockSlackServer struct {
+	messages []SlackMessage
+	mu       sync.RWMutex
+}
+
+type SlackMessage struct {
+	Channel   string    `json:"channel"`
+	Text      string    `json:"text"`
+	Username  string    `json:"username,omitempty"`
+	IconEmoji string    `json:"icon_emoji,omitempty"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+type SlackResponse struct {
+	OK    bool   `json:"ok"`
+	Error string `json:"error,omitempty"`
+	TS    string `json:"ts,omitempty"`
+}
+
+func main() {
+	server := &MockSlackServer{
+		messages: make([]SlackMessage, 0),
+	}
+
+	port := os.Getenv("MOCK_PORT")
+	if port == "" {
+		port = "8091"
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/health", server.healthHandler)
+	mux.HandleFunc("/api/chat.postMessage", server.postMessageHandler)
+	mux.HandleFunc("/api/conversations.list", server.conversationsListHandler)
+	mux.HandleFunc("/api/auth.test", server.authTestHandler)
+	mux.HandleFunc("/messages", server.getMessagesHandler)
+	mux.HandleFunc("/clear", server.clearMessagesHandler)
+
+	// Webhook endpoint
+	mux.HandleFunc("/services/", server.webhookHandler)
+
+	addr := fmt.Sprintf(":%s", port)
+	log.Printf("Mock Slack Server starting on %s", addr)
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
+}
+
+func (s *MockSlackServer) healthHandler(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	messageCount := len(s.messages)
+	s.mu.RUnlock()
+
+	response := map[string]interface{}{
+		"status":        "healthy",
+		"timestamp":     time.Now().UTC().Format(time.RFC3339),
+		"message_count": messageCount,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *MockSlackServer) postMessageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		s.sendSlackError(w, "invalid_request")
+		return
+	}
+
+	var msg SlackMessage
+	if err := json.Unmarshal(body, &msg); err != nil {
+		// Try form-encoded
+		r.Body = io.NopCloser(strings.NewReader(string(body)))
+		r.ParseForm()
+		msg.Channel = r.FormValue("channel")
+		msg.Text = r.FormValue("text")
+		msg.Username = r.FormValue("username")
+	}
+
+	msg.Timestamp = time.Now()
+
+	s.mu.Lock()
+	s.messages = append(s.messages, msg)
+	s.mu.Unlock()
+
+	log.Printf("Received Slack message: channel=%s, text=%s", msg.Channel, truncate(msg.Text, 50))
+
+	response := SlackResponse{
+		OK: true,
+		TS: fmt.Sprintf("%d.%d", time.Now().Unix(), time.Now().Nanosecond()),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *MockSlackServer) webhookHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	var msg SlackMessage
+	json.Unmarshal(body, &msg)
+	msg.Timestamp = time.Now()
+
+	s.mu.Lock()
+	s.messages = append(s.messages, msg)
+	s.mu.Unlock()
+
+	log.Printf("Received Slack webhook: text=%s", truncate(msg.Text, 50))
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+
+func (s *MockSlackServer) conversationsListHandler(w http.ResponseWriter, r *http.Request) {
+	response := map[string]interface{}{
+		"ok": true,
+		"channels": []map[string]interface{}{
+			{"id": "C123456", "name": "general", "is_channel": true},
+			{"id": "C234567", "name": "random", "is_channel": true},
+			{"id": "C345678", "name": "helixcode-alerts", "is_channel": true},
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *MockSlackServer) authTestHandler(w http.ResponseWriter, r *http.Request) {
+	response := map[string]interface{}{
+		"ok":      true,
+		"user_id": "U123456",
+		"user":    "mockbot",
+		"team_id": "T123456",
+		"team":    "Mock Team",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *MockSlackServer) getMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	messages := make([]SlackMessage, len(s.messages))
+	copy(messages, s.messages)
+	s.mu.RUnlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(messages)
+}
+
+func (s *MockSlackServer) clearMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost && r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	s.mu.Lock()
+	s.messages = make([]SlackMessage, 0)
+	s.mu.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"cleared": true})
+}
+
+func (s *MockSlackServer) sendSlackError(w http.ResponseWriter, errCode string) {
+	response := SlackResponse{
+		OK:    false,
+		Error: errCode,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(response)
+}
+
+func truncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
+}
+
+import "strings"
+EOF
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mock-slack-server .
+
+# Final image
+FROM alpine:3.19
+
+RUN apk add --no-cache ca-certificates curl
+
+WORKDIR /app
+
+COPY --from=builder /app/mock-slack-server /app/mock-slack-server
+
+ENV MOCK_PORT=8091
+
+EXPOSE 8091
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD curl -f http://localhost:8091/health || exit 1
+
+CMD ["/app/mock-slack-server"]

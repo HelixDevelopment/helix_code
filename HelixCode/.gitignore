@@ -2,7 +2,10 @@
 # Binaries and build artifacts
 bin/
 dist/
-build/
+# Anchor `build/` at the module root so it only ignores top-level Go build
+# output (./build/) and NOT subdirectory paths like docker/build/ which
+# contain version-controlled build infrastructure (Dockerfile.builder).
+/build/
 *.exe
 *.exe~
 *.dll
@@ -75,7 +78,15 @@ assets/images/logo-ascii.txt
 # Development tools
 .goreleaser.yml
 .dockerignore
-Dockerfile*
+# Dockerfile* was overly broad — it hid the build/Dockerfile.builder that
+# the containerized build path relies on. Only ignore Dockerfiles at the
+# very top of HelixCode/ (used historically for one-off prototypes);
+# Dockerfiles in subdirs (docker/, applications/, tests/) MUST be tracked
+# because they describe reproducible build/test environments.
+/Dockerfile
+/Dockerfile.*
+# (subdirectory Dockerfiles, e.g. docker/build/Dockerfile.builder,
+# applications/desktop/Dockerfile.* are intentionally NOT ignored.)
 
 # Backup files
 *.bak

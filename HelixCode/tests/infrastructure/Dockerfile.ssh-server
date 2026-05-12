@@ -1,0 +1,62 @@
+# SSH Server for HelixCode Worker Testing
+# This container provides an SSH server for testing distributed worker functionality
+
+FROM alpine:3.19
+
+# Install required packages
+RUN apk add --no-cache \
+    openssh-server \
+    openssh-client \
+    bash \
+    curl \
+    git \
+    jq \
+    ncurses \
+    shadow
+
+# Create SSH directories and generate host keys
+RUN mkdir -p /var/run/sshd && \
+    ssh-keygen -A
+
+# Create test user with home directory
+RUN adduser -D -s /bin/bash -h /home/helixcode helixcode && \
+    echo "helixcode:test_password" | chpasswd && \
+    mkdir -p /home/helixcode/.ssh && \
+    mkdir -p /home/helixcode/workspace && \
+    chown -R helixcode:helixcode /home/helixcode
+
+# Configure SSH server
+RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config && \
+    echo "UsePAM no" >> /etc/ssh/sshd_config && \
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
+    echo "PrintMotd no" >> /etc/ssh/sshd_config && \
+    echo "AcceptEnv LANG LC_*" >> /etc/ssh/sshd_config && \
+    echo "Subsystem sftp /usr/lib/ssh/sftp-server" >> /etc/ssh/sshd_config && \
+    echo "AllowUsers helixcode" >> /etc/ssh/sshd_config
+
+# Copy authorized keys if they exist (will be mounted as volume)
+# The authorized_keys file will be mounted from tests/infrastructure/ssh_keys/
+
+# Set proper permissions on SSH directory
+RUN chmod 700 /home/helixcode/.ssh
+
+# Create entrypoint script to handle key setup
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'if [ -f /home/helixcode/.ssh/id_rsa.pub ]; then' >> /entrypoint.sh && \
+    echo '  cp /home/helixcode/.ssh/id_rsa.pub /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo '  chown helixcode:helixcode /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo '  chmod 600 /home/helixcode/.ssh/authorized_keys' >> /entrypoint.sh && \
+    echo 'fi' >> /entrypoint.sh && \
+    echo 'exec /usr/sbin/sshd -D -e' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+EXPOSE 22
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD nc -z localhost 22 || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]
