@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-08T21:00:00Z (Zero-Bluff Phase 4 in progress — critical bluffs eliminated, anti-bluff compliance enforced)
+**Last updated: 2026-05-12T08:25:00Z (Zero-Bluff Phase 4 CLOSED — weak-assertion sweep complete, anti-bluff compliance enforced)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -18,7 +18,8 @@ If you are a fresh CLI agent picking this up:
 5. The Zero-Bluff Completion programme Phase 1 (Governance) is COMPLETE.
 6. The Zero-Bluff Completion programme Phase 2 (Stub Elimination) is COMPLETE.
 7. The Zero-Bluff Completion programme Phase 3 (Feature Gaps) is COMPLETE.
-8. Continue from Phase 4 — Test/Challenge Hardening.
+8. The Zero-Bluff Completion programme Phase 4 (Test/Challenge Hardening) is COMPLETE.
+9. Continue from Phase 5 — Full Documentation Suite.
 
 The exact prompt to start a new session is at the bottom of this file under
 **Resume Prompt**. Copy-paste it verbatim into a new Claude Code (or any other
@@ -63,7 +64,7 @@ The CLI-Agent Fusion programme has 5 phases per the synthesis design at
 | P1 — Governance Propagation | DONE         | `5f9bb90`  | anti-bluff anchor cascaded to all 60+ submodules              |
 | P2 — Stub/Bluff Elimination | DONE         | `b24ca8f`  | T01-T11 complete; scanner+CLI+FAISS+CharacterAI+Anima+security-test+treesitter+multiedit |
 | P3 — Feature Gap Implementation | DONE     | `1f1d8f4`  | 11 tasks: LiteLLM, repomap, quality, clarification, plugins, 4 providers, CONST-046 |
-| P4 — Test/Challenge Hardening   | IN PROGRESS | `7f4effd`  | critical bluffs eliminated (validators, fix, config, deployment) — anti-bluff clean |
+| P4 — Test/Challenge Hardening   | DONE     | `a3f8871`  | weak-assertion sweep: fix + deployment tests tightened with mutation-tested content assertions |
 | P5 — Full Documentation Suite   | PENDING  | —          | user manual, dev guide, API ref, deployment guide             |
 
 ---
@@ -128,7 +129,7 @@ All 11 tasks implemented with 31 tests passing, anti-bluff clean:
 
  Evidence: `go build -tags nogui ./internal/...` PASS | `grep -rn "simulated\|placeholder\|TODO"` clean | 31 tests PASS | pushed to github + gitlab
 
-### Phase 4 — Test/Challenge Hardening (IN PROGRESS — `7f4effd`)
+### Phase 4 — Test/Challenge Hardening (CLOSED — `a3f8871`)
 
 **Critical Bluffs Eliminated (P0 fixes committed `4f5f8f0`):**
 1. **Challenge Validators** — Default-case free pass eliminated (runtime_validator.go:37, functional_validator.go:59)
@@ -155,6 +156,68 @@ All 11 tasks implemented with 31 tests passing, anti-bluff clean:
 - Anti-bluff sweep clean: `grep -rn "simulated\|for now" internal/` returns only permitted fallback models
 
 **Per Article XI §11.9**: Every PASS now carries positive runtime evidence. No false-success results tolerable.
+
+**P2 Weak-Assertion Sweep (committed `02b7306` + `a3f8871`):**
+
+Inventory (447 real test files in internal/ + cmd/ + tests/, excluding LLM-generated
+test-results/): scanned for assert.True(true) tautologies, discarded subject return
+values, bare t.Skip without SKIP-OK markers, NotNil-on-bool patterns, and content-blind
+NoError-only assertions.
+
+Triage:
+- TIGHTEN: 2 packages (internal/fix, internal/deployment) — 8 tests rewritten
+- OK: ~437 files — assertions already verify content or are legitimate error-path tests
+- DEFER: bare grep candidates in subagent/cognee/auth_test (legitimate error-path tests
+  that discard the happy value because the test is exercising the error contract)
+
+Tests tightened (8 total, mutation-test confirmed all 6 critical paths):
+
+1. internal/fix/fix_test.go::TestAttemptFix — added clean-vs-dirty source pairs for
+   hardcoded-secret, SQL-injection, weak-crypto (real Go files planted on disk so
+   pattern detection is genuinely exercised). Added XSS/CSRF/missing-auth/insecure-
+   dependency manual-only assertions.
+2. internal/fix/fix_test.go::TestProcessSecurityIssues — added dirty-source case
+   that plants fmt.Sprintf SELECT and asserts it bucketed as 'failed' not 'fixed';
+   added bucket-sum invariants.
+3. internal/fix/fix_test.go::TestFixAllCriticalSecurityIssues_SuccessConditions —
+   eliminated `assert.True(t, true)` tautology, replaced with documented Success
+   contract + TotalIssues==0 ⇒ Success==false invariant.
+4. internal/fix/fix.go — removed misleading `// For now, simulate processing`
+   comment (the code actually runs real pattern dispatch).
+5. internal/deployment/production_deployer_test.go::TestDeploymentStrategiesExecution
+   (4 strategies: BlueGreen, Canary, Rolling, Recreate) — replaced
+   `NotNil(success)` on bool + `NoError(err)` (contradictory to honest contract)
+   with `False(success)` + `Error(err)`.
+6. internal/deployment/production_deployer_test.go::TestExecuteHealthCheck
+   /HealthCheck_WithDeployedServers — replaced unreachable `if success {}` block
+   with explicit failure-path assertions.
+7. internal/deployment/production_deployer_test.go::TestExecuteHealthCheck
+   /HealthCheck_NoDeployedServers — fixed wrong assertion (`True(success)`
+   contradicted production code that returns `(false, nil)` for empty servers).
+8. internal/deployment/production_deployer_test.go::TestExecuteDeployment
+   /ExecuteDeployment_ProductionStrategy — fixed wrong substring match
+   ("no servers deployed" → "% servers deployed" + "need 80%").
+
+Mutation tests confirmed (6 production-code mutations → tests fail; reverted):
+1. Disabling SQL detection → ProcessSecurityIssues_DirtySource fails
+2. Disabling hardcoded-secret detection → DirtyDirectory test fails
+3. Disabling weak-crypto detection → DirtyDirectory test fails
+4. Hardcoding result.Success=true → SuccessConditions test fails
+5. NoServers branch returning true → NoDeployedServers test fails
+6. Lowering 80% threshold to 0% → ProductionStrategy test fails
+
+Anti-bluff smoke (production code only, excluding _test.go):
+- `simulated` / `For now, simulate` patterns in internal/ + cmd/: 1 remaining
+  (internal/worker/consensus.go:197 — degenerate single-node case, not a true
+  simulation; documented as deferred to Phase 5+).
+- "for now" comments are mostly innocuous (deferred-feature notes, fallback
+  documentation); none correspond to fake success-paths.
+
+Cross-compile (linux/amd64) PASS: 95 MB binary at /tmp/helixcode-zb-p4.
+
+Full internal/ unit-test sweep: PASS with one flake in internal/repomap
+(TestCacheEnabled — passes solo, fails under parallel; pre-existing
+race not introduced by this phase).
 
 ### Remaining pre-existing issues (Phase 3 backlog):
 
@@ -431,3 +494,4 @@ Read /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/CONTINUATION.md and c
 | 2026-05-08     | Phase 3 close | Phase 3 CLOSED. All code-actionable remediation resolved. HelixAgent submodules populated, Containers build fixed. Phase 4 started (anti-bluff audit). |
 | 2026-05-08     | ZB Phase 2-3  | Zero-Bluff Phase 2 (Stub Elimination) and Phase 3 (Feature Gaps) CLOSED. 31 new files, 4 providers, CONST-046 added. Anti-bluff clean. Pushed to github+gitlab. |
 | 2026-05-08     | ZB Phase 4    | Zero-Bluff Phase 4 (Test/Challenge Hardening) IN PROGRESS. Critical bluffs eliminated (validators, fix, config, deployment). Article XI §11.9 compliance enforced. Commits `4f5f8f0` + `7f4effd`. |
+| 2026-05-12     | ZB Phase 4 close | Zero-Bluff Phase 4 CLOSED. Weak-assertion sweep across 447 test files; 8 tests tightened in internal/fix + internal/deployment with mutation-test confirmation (6 mutations → 6 test failures → reverted). Commits `02b7306` + `a3f8871`. Cross-compile linux/amd64 PASS. Phase 5 (Documentation Suite) next. |
