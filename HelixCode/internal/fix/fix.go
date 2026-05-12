@@ -107,8 +107,10 @@ func processSecurityIssues(projectPath string, issues []interface{}, criticalOnl
 	for i, issue := range issues {
 		logger.Info("Processing issue %d/%d", i+1, len(issues))
 
-		// In a real implementation, this would analyze each issue and attempt fixes
-		// For now, simulate processing
+		// Each issue is dispatched to attemptFix which runs real pattern-based
+		// detection across the project's Go files (see fixHardcodedSecret,
+		// fixSQLInjection, fixPathTraversal, fixXSS, fixCSRF,
+		// fixInsecureDependency, fixMissingAuth, fixWeakCrypto).
 		if strings.Contains(fmt.Sprintf("%v", issue), "critical") || !criticalOnly {
 			// Attempt to fix the issue
 			if attemptFix(projectPath, issue) {

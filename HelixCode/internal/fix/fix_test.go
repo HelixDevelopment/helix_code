@@ -187,33 +187,77 @@ func TestFindGoFiles(t *testing.T) {
 	})
 }
 
-// TestAttemptFix tests the attemptFix function
+// TestAttemptFix tests the attemptFix function.
+// Anti-bluff (CONST-035 / Article XI §11.9): each fixer must be exercised
+// against real Go-source files on disk so the test fails when the underlying
+// pattern-detection regresses, not merely when error-returning code paths
+// are wired together. "No patterns found" in an empty tmpdir is a free PASS
+// and is therefore explicitly NOT exercised here.
 func TestAttemptFix(t *testing.T) {
-	t.Run("AttemptFix_KnownIssue_HardcodedSecret", func(t *testing.T) {
+	t.Run("AttemptFix_HardcodedSecret_CleanDirectory_ReturnsTrue", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		issue := "hardcoded secret detected in config"
+		// Place a clearly-clean source file so the walker has real work to do.
+		cleanGo := filepath.Join(tmpDir, "clean.go")
+		require.NoError(t, os.WriteFile(cleanGo, []byte("package p\nfunc f() {}\n"), 0644))
 
-		result := attemptFix(tmpDir, issue)
+		result := attemptFix(tmpDir, "hardcoded secret detected in config")
 
-		assert.True(t, result)
+		assert.True(t, result, "clean source must yield true (no patterns found)")
 	})
 
-	t.Run("AttemptFix_KnownIssue_SQLInjection", func(t *testing.T) {
+	t.Run("AttemptFix_HardcodedSecret_DirtyDirectory_ReturnsFalse", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		issue := "sql injection vulnerability found"
+		dirty := filepath.Join(tmpDir, "secret.go")
+		require.NoError(t, os.WriteFile(dirty, []byte(
+			"package p\nvar password = \"hunter2\"\n"), 0644))
 
-		result := attemptFix(tmpDir, issue)
+		result := attemptFix(tmpDir, "hardcoded secret detected in config")
 
-		assert.True(t, result)
+		assert.False(t, result,
+			"file containing hardcoded password literal must be detected and flagged for manual review")
+	})
+
+	t.Run("AttemptFix_SQLInjection_CleanDirectory_ReturnsTrue", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		clean := filepath.Join(tmpDir, "clean.go")
+		require.NoError(t, os.WriteFile(clean, []byte(
+			"package p\nimport \"database/sql\"\nfunc f(db *sql.DB){db.QueryRow(\"SELECT 1\")}\n"), 0644))
+
+		result := attemptFix(tmpDir, "sql injection vulnerability found")
+
+		assert.True(t, result, "no fmt.Sprintf or string-concat SELECT => safe")
+	})
+
+	t.Run("AttemptFix_SQLInjection_DirtyDirectory_ReturnsFalse", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		dirty := filepath.Join(tmpDir, "bad.go")
+		require.NoError(t, os.WriteFile(dirty, []byte(
+			"package p\nimport \"fmt\"\nfunc f(id string) string { return fmt.Sprintf(\"SELECT * FROM x WHERE id=%s\", id) }\n"), 0644))
+
+		result := attemptFix(tmpDir, "sql injection vulnerability found")
+
+		assert.False(t, result,
+			"fmt.Sprintf around SELECT must be detected as potential SQL injection")
+	})
+
+	t.Run("AttemptFix_WeakCrypto_DirtyDirectory_ReturnsFalse", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		dirty := filepath.Join(tmpDir, "weak.go")
+		require.NoError(t, os.WriteFile(dirty, []byte(
+			"package p\nimport \"crypto/md5\"\nfunc h(password string) []byte { x := md5.Sum([]byte(password)); return x[:] }\n"), 0644))
+
+		result := attemptFix(tmpDir, "weak crypto detected for password")
+
+		assert.False(t, result,
+			"md5 of password literal must be detected as weak-crypto-for-secret")
 	})
 
 	t.Run("AttemptFix_UnknownIssue_ReturnsFalse", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		issue := "test issue"
 
-		result := attemptFix(tmpDir, issue)
+		result := attemptFix(tmpDir, "test issue")
 
-		assert.False(t, result)
+		assert.False(t, result, "unrecognised issue strings must not silently report 'fixed'")
 	})
 
 	t.Run("AttemptFix_WithNilIssue_ReturnsFalse", func(t *testing.T) {
@@ -221,7 +265,7 @@ func TestAttemptFix(t *testing.T) {
 
 		result := attemptFix(tmpDir, nil)
 
-		assert.False(t, result)
+		assert.False(t, result, "nil must not silently report 'fixed'")
 	})
 
 	t.Run("AttemptFix_ComplexIssue_UnknownType", func(t *testing.T) {
@@ -234,14 +278,56 @@ func TestAttemptFix(t *testing.T) {
 
 		result := attemptFix(tmpDir, issue)
 
-		assert.False(t, result)
+		assert.False(t, result, "structured-but-unrecognised issue must not report 'fixed'")
+	})
+
+	t.Run("AttemptFix_XSS_AlwaysRequiresManualReview", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		result := attemptFix(tmpDir, "xss vulnerability in template")
+
+		assert.False(t, result,
+			"XSS auto-fix is documented as manual-only; must return false")
+	})
+
+	t.Run("AttemptFix_CSRF_AlwaysRequiresManualReview", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		result := attemptFix(tmpDir, "csrf token missing")
+
+		assert.False(t, result,
+			"CSRF auto-fix is documented as manual-only; must return false")
+	})
+
+	t.Run("AttemptFix_MissingAuth_AlwaysRequiresManualReview", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		result := attemptFix(tmpDir, "missing auth on endpoint")
+
+		assert.False(t, result,
+			"missing-auth auto-fix is documented as manual-only; must return false")
+	})
+
+	t.Run("AttemptFix_InsecureDependency_AlwaysRequiresManualReview", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		result := attemptFix(tmpDir, "insecure dependency in go.mod")
+
+		assert.False(t, result,
+			"insecure-dependency auto-fix is documented as manual-only; must return false")
 	})
 }
 
-// TestProcessSecurityIssues tests the processSecurityIssues function
+// TestProcessSecurityIssues tests the processSecurityIssues function.
+// Anti-bluff (CONST-035 / Article XI §11.9): exercise both the clean-source
+// path (fixer returns true) and the dirty-source path (fixer detects pattern
+// and returns false) so the test fails when pattern detection regresses.
 func TestProcessSecurityIssues(t *testing.T) {
-	t.Run("ProcessSecurityIssues_AllCritical_KnownTypes", func(t *testing.T) {
+	t.Run("ProcessSecurityIssues_AllCritical_KnownTypes_CleanSource", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		// Provide a clean Go file so the walker runs but finds no patterns.
+		require.NoError(t, os.WriteFile(filepath.Join(tmpDir, "clean.go"),
+			[]byte("package p\nfunc f(){}\n"), 0644))
 		issues := []interface{}{
 			"critical: hardcoded secret found",
 			"critical: sql injection vulnerability",
@@ -250,14 +336,39 @@ func TestProcessSecurityIssues(t *testing.T) {
 
 		fixed, failed, manual, skipped := processSecurityIssues(tmpDir, issues, true)
 
-		assert.Equal(t, 3, fixed)
+		assert.Equal(t, 3, fixed,
+			"all three known critical types must run pattern check and report 'fixed' for clean source")
 		assert.Equal(t, 0, failed)
 		assert.Equal(t, 0, manual)
 		assert.Equal(t, 0, skipped)
+		// Invariant: sum of buckets must equal input length.
+		assert.Equal(t, len(issues), fixed+failed+manual+skipped,
+			"every issue must be accounted for in exactly one bucket")
+	})
+
+	t.Run("ProcessSecurityIssues_DirtySource_DetectsAndReportsFailed", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		// Plant a real SQL-injection pattern so fixSQLInjection returns false.
+		require.NoError(t, os.WriteFile(filepath.Join(tmpDir, "bad.go"), []byte(
+			"package p\nimport \"fmt\"\nfunc q(id string) string { return fmt.Sprintf(\"SELECT * FROM x WHERE id=%s\", id) }\n"),
+			0644))
+		issues := []interface{}{"critical: sql injection vulnerability"}
+
+		fixed, failed, manual, skipped := processSecurityIssues(tmpDir, issues, true)
+
+		assert.Equal(t, 0, fixed,
+			"fmt.Sprintf SQL pattern must NOT be reported as fixed")
+		assert.Equal(t, 1, failed,
+			"fmt.Sprintf SQL pattern must be reported as failed (manual review required)")
+		assert.Equal(t, 0, manual)
+		assert.Equal(t, 0, skipped)
+		assert.Equal(t, len(issues), fixed+failed+manual+skipped)
 	})
 
 	t.Run("ProcessSecurityIssues_MixedWithCriticalOnly", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		require.NoError(t, os.WriteFile(filepath.Join(tmpDir, "clean.go"),
+			[]byte("package p\nfunc f(){}\n"), 0644))
 		issues := []interface{}{
 			"critical: sql injection vulnerability",
 			"high: xss vulnerability",
@@ -266,14 +377,19 @@ func TestProcessSecurityIssues(t *testing.T) {
 
 		fixed, failed, manual, skipped := processSecurityIssues(tmpDir, issues, true)
 
-		assert.Equal(t, 1, fixed)
+		assert.Equal(t, 1, fixed,
+			"only the 'critical' SQL issue must be attempted; clean source => 'fixed'")
 		assert.Equal(t, 0, failed)
 		assert.Equal(t, 0, manual)
-		assert.Equal(t, 2, skipped)
+		assert.Equal(t, 2, skipped,
+			"high+medium must be skipped when criticalOnly=true")
+		assert.Equal(t, len(issues), fixed+failed+manual+skipped)
 	})
 
 	t.Run("ProcessSecurityIssues_AllIssues_KnownTypes", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		require.NoError(t, os.WriteFile(filepath.Join(tmpDir, "clean.go"),
+			[]byte("package p\nfunc f(){}\n"), 0644))
 		issues := []interface{}{
 			"critical: hardcoded secret",
 			"high: weak crypto detected",
@@ -282,10 +398,13 @@ func TestProcessSecurityIssues(t *testing.T) {
 
 		fixed, failed, manual, skipped := processSecurityIssues(tmpDir, issues, false)
 
-		assert.Equal(t, 2, fixed)
-		assert.Equal(t, 1, failed)
+		// Clean source: hardcoded-secret + weak-crypto report 'fixed' (no patterns found).
+		// missing-auth ALWAYS returns false → bucketed as failed.
+		assert.Equal(t, 2, fixed, "hardcoded-secret and weak-crypto on clean source must be 'fixed'")
+		assert.Equal(t, 1, failed, "missing-auth is documented manual-only and must be 'failed'")
 		assert.Equal(t, 0, manual)
 		assert.Equal(t, 0, skipped)
+		assert.Equal(t, len(issues), fixed+failed+manual+skipped)
 	})
 
 	t.Run("ProcessSecurityIssues_EmptyIssues", func(t *testing.T) {
@@ -415,17 +534,27 @@ func TestFixAllCriticalSecurityIssues(t *testing.T) {
 
 		result, err := FixAllCriticalSecurityIssues(tmpDir, true)
 
-		assert.NoError(t, err)
-		// Success should be true if no issues or all critical issues fixed
-		// With stub implementation returning no issues, success depends on validation
-		if result.TotalIssues == 0 {
-			// No issues case - may or may not be success
-			assert.True(t, true) // Always passes - just documenting behavior
-		} else if result.FixedIssues > 0 && result.Validation != nil {
-			// If fixed some issues and validation passed
-			if result.Validation.RemainingCriticalIssues == 0 {
-				assert.True(t, result.Success)
+		// CONST-035: assert the documented success contract instead of using
+		// assert.True(t, true). The contract (see fix.go) is:
+		//   Success == (FixedIssues > 0) && (Validation == nil || Validation.RemainingCriticalIssues == 0)
+		require.NoError(t, err)
+		require.NotNil(t, result)
+
+		var expectedSuccess bool
+		if result.FixedIssues > 0 {
+			if result.Validation == nil || result.Validation.RemainingCriticalIssues == 0 {
+				expectedSuccess = true
 			}
+		}
+		assert.Equal(t, expectedSuccess, result.Success,
+			"Success flag must follow the documented contract: "+
+				"FixedIssues>0 AND (Validation nil OR RemainingCriticalIssues==0)")
+
+		// And invariant: when TotalIssues==0, Success MUST be false
+		// (cannot have "fixed" anything we never saw).
+		if result.TotalIssues == 0 {
+			assert.False(t, result.Success,
+				"Success must be false when TotalIssues==0 (nothing was actually fixed)")
 		}
 	})
 
