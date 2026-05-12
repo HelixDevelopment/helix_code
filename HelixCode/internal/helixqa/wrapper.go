@@ -43,6 +43,13 @@ type Engine struct {
 	qaCfg       *hqaConfig.Config
 	evidenceDir string
 	enabled     bool
+	// activeWG tracks every session goroutine spawned by StartSession so that
+	// Shutdown can wait for them to drain. Without this, tests using a
+	// t.TempDir-backed OutputDir race with the orchestrator goroutine: the
+	// test returns, Go's testing framework removes the temp dir, and the
+	// still-running orchestrator writes a new file into a half-deleted dir,
+	// producing "unlinkat ... directory not empty" cleanup errors.
+	activeWG sync.WaitGroup
 }
 
 // NewEngine builds the embedded QA engine from HelixCode configuration.
@@ -98,7 +105,9 @@ func (e *Engine) StartSession(ctx context.Context, id string, platforms, banks [
 	e.sessions[id] = state
 	e.sessionMu.Unlock()
 
+	e.activeWG.Add(1)
 	go func() {
+		defer e.activeWG.Done()
 		defer cancel()
 		state.Mu.Lock()
 		state.Status = "running"
@@ -150,6 +159,24 @@ func (e *Engine) GetSession(id string) (*SessionState, bool) {
 	defer e.sessionMu.RUnlock()
 	s, ok := e.sessions[id]
 	return s, ok
+}
+
+// Shutdown cancels every active session and blocks until all background
+// goroutines spawned by StartSession have returned. Intended for graceful
+// server shutdown and for test cleanup (t.Cleanup) so that the temp-dir
+// teardown cannot race with the orchestrator goroutine still writing
+// evidence files into OutputDir.
+func (e *Engine) Shutdown() {
+	e.sessionMu.Lock()
+	for _, s := range e.sessions {
+		s.Mu.Lock()
+		if s.CancelFunc != nil {
+			s.CancelFunc()
+		}
+		s.Mu.Unlock()
+	}
+	e.sessionMu.Unlock()
+	e.activeWG.Wait()
 }
 
 // CancelSession signals cancellation for a running session.

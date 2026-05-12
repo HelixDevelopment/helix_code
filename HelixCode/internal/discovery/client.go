@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -304,8 +305,13 @@ func (c *DiscoveryClient) discoverByDNS(serviceName string) (*DiscoveryResult, e
 		return nil, errors.New("DNS discovery not enabled")
 	}
 
-	// Try DNS lookup
-	addresses, err := net.LookupHost(serviceName)
+	// Bound DNS lookup with a short context so a slow or unreachable resolver
+	// cannot block past the caller's discovery budget (e.g. WaitForService's
+	// maxWait). System DNS resolution can otherwise stall many seconds under
+	// load or with mDNS/Avahi misconfiguration before NXDOMAIN propagates.
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	addresses, err := net.DefaultResolver.LookupHost(ctx, serviceName)
 	if err != nil {
 		return nil, fmt.Errorf("DNS lookup failed: %w", err)
 	}

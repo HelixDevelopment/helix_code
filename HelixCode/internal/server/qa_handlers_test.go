@@ -51,6 +51,12 @@ func setupQATestServer(t *testing.T) (*Server, *httptest.ResponseRecorder, *gin.
 	require.NotNil(t, server.qaEngine)
 	require.True(t, server.qaEngine.Enabled())
 
+	// Block until every orchestrator goroutine spawned by this test's
+	// session has returned. Without this, t.TempDir cleanup races with
+	// the still-writing orchestrator and produces "directory not empty"
+	// flakes when many test packages run in parallel under load.
+	t.Cleanup(func() { server.qaEngine.Shutdown() })
+
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	return server, w, c, bankFile
