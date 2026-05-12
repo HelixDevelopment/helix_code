@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T22:00:00Z (Zero-bluff sweep cont'd: 101 SKIP-OK annotations across Containers (25) + HelixQA (75) + LLMsVerifier (1); unreachable-code vet fix in litellm; no-silent-skips.sh gate polished with submodule auto-exclude, slug-form markers, tightened JS regex, vendored-path post-filter. `go vet` clean. Meta-repo at `36cfafb`; Containers at `af51968`; HelixQA at `e16bfeb`; LLMsVerifier at `98758126`.)
+**Last updated: 2026-05-12T22:30:00Z (Zero-bluff sweep complete: 108 SKIP-OK annotations across all owned submodules — Containers (25) + HelixQA (75) + LLMsVerifier (1) + Challenges (7). All remaining 41 violations are in HelixAgent/ which is out-of-scope per spec §1.3 N2. Meta-repo at `df258b8`; Challenges at `0da3d92`.)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
