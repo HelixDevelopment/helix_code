@@ -127,14 +127,14 @@ HelixCode/.helixcode/
 # (CONST-035 / Article XI §11.9). Evidence files are inherently per-run, can
 # be very large, and may contain sensitive UI state — they MUST stay local
 # and never reach upstream.
-docs/qa_evidence/
-docs/qa_evidence/**
-HelixCode/qa_evidence/
-HelixCode/qa_evidence/**
-HelixCode/docs/qa_evidence/
-HelixCode/docs/qa_evidence/**
-HelixQA/qa_evidence/
-HelixQA/qa_evidence/**
+# Ignore everything under qa_evidence/ EXCEPT the README that documents
+# the directory layout. The README MUST stay tracked so a fresh clone
+# explains where evidence lands without needing prior context.
+docs/qa_evidence/*
+!docs/qa_evidence/README.md
+HelixCode/qa_evidence/*
+HelixCode/docs/qa_evidence/*
+HelixQA/qa_evidence/*
 **/qa_session_*/
 **/*.qa-screenshot.png
 **/*.qa-screenshot.jpg
