@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync/atomic"
 	"time"
 )
 
@@ -52,7 +53,13 @@ func NewRetryableChannel(channel NotificationChannel, config RetryConfig) *Retry
 	}
 }
 
-// Send sends a notification with retry logic
+// Send sends a notification with retry logic.
+//
+// Stats fields (TotalAttempts / SuccessfulSends / FailedSends / Retries)
+// are mutated under concurrent Send calls and were previously plain
+// `r.stats.X++` increments without synchronisation. TestLoad_RetryStorm
+// surfaces the race under `-race`. Switched to sync/atomic.AddInt64 on
+// every stat write so concurrent senders see consistent counters.
 func (r *RetryableChannel) Send(ctx context.Context, notification *Notification) error {
 	if !r.config.Enabled {
 		return r.channel.Send(ctx, notification)
@@ -62,12 +69,12 @@ func (r *RetryableChannel) Send(ctx context.Context, notification *Notification)
 	backoff := r.config.InitialBackoff
 
 	for attempt := 0; attempt <= r.config.MaxRetries; attempt++ {
-		r.stats.TotalAttempts++
+		atomic.AddInt64(&r.stats.TotalAttempts, 1)
 
 		// Try to send
 		err := r.channel.Send(ctx, notification)
 		if err == nil {
-			r.stats.SuccessfulSends++
+			atomic.AddInt64(&r.stats.SuccessfulSends, 1)
 			if attempt > 0 {
 				log.Printf("Notification sent successfully after %d retries (channel: %s)",
 					attempt, r.channel.GetName())
@@ -79,13 +86,13 @@ func (r *RetryableChannel) Send(ctx context.Context, notification *Notification)
 
 		// Check if we should retry
 		if attempt == r.config.MaxRetries {
-			r.stats.FailedSends++
+			atomic.AddInt64(&r.stats.FailedSends, 1)
 			log.Printf("Notification failed after %d attempts (channel: %s): %v",
 				attempt+1, r.channel.GetName(), err)
 			break
 		}
 
-		r.stats.Retries++
+		atomic.AddInt64(&r.stats.Retries, 1)
 
 		// Log retry attempt
 		log.Printf("Notification send failed (attempt %d/%d, channel: %s), retrying in %v: %v",
@@ -140,14 +147,24 @@ func (r *RetryableChannel) GetConfig() map[string]interface{} {
 	return config
 }
 
-// GetStats returns retry statistics
+// GetStats returns retry statistics. Reads each counter atomically so
+// concurrent Send calls cannot tear the result.
 func (r *RetryableChannel) GetStats() RetryStats {
-	return *r.stats
+	return RetryStats{
+		TotalAttempts:   atomic.LoadInt64(&r.stats.TotalAttempts),
+		SuccessfulSends: atomic.LoadInt64(&r.stats.SuccessfulSends),
+		FailedSends:     atomic.LoadInt64(&r.stats.FailedSends),
+		Retries:         atomic.LoadInt64(&r.stats.Retries),
+	}
 }
 
-// ResetStats resets retry statistics
+// ResetStats resets retry statistics. Stored atomically so concurrent
+// Sends observe the zeroing consistently.
 func (r *RetryableChannel) ResetStats() {
-	r.stats = &RetryStats{}
+	atomic.StoreInt64(&r.stats.TotalAttempts, 0)
+	atomic.StoreInt64(&r.stats.SuccessfulSends, 0)
+	atomic.StoreInt64(&r.stats.FailedSends, 0)
+	atomic.StoreInt64(&r.stats.Retries, 0)
 }
 
 // CalculateBackoff calculates backoff duration for a given attempt

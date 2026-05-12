@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -81,13 +82,38 @@ func TestSendDirect(t *testing.T) {
 }
 
 // Mock channel for testing
+//
+// `received` records every notification handed to Send (under `mu`) so
+// tests can assert on the delivered notification's stamped fields (ID,
+// CreatedAt, Channels) — the observable side effect of SendNotification
+// / SendDirect. Earlier the tests checked those fields on the caller's
+// template, which was a CONST-035 PASS-bluff (the template happened to
+// be mutated by the engine; nothing actually verified that the channel
+// received it). After the SendNotification/SendDirect API became
+// template-immutable (fixes a data race exposed by TestLoad_*), tests
+// must use the channel's recorded view instead.
 type mockChannel struct {
-	name    string
-	enabled bool
+	name     string
+	enabled  bool
+	mu       sync.Mutex
+	received []*Notification
 }
 
 func (m *mockChannel) Send(ctx context.Context, notification *Notification) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.received = append(m.received, notification)
 	return nil
+}
+
+// receivedNotifications returns a snapshot of every notification Send
+// has been given. Safe to call from the test goroutine.
+func (m *mockChannel) receivedNotifications() []*Notification {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := make([]*Notification, len(m.received))
+	copy(out, m.received)
+	return out
 }
 
 func (m *mockChannel) GetName() string {
@@ -422,6 +448,11 @@ func TestSendNotification(t *testing.T) {
 	engine.AddRule(rule)
 
 	t.Run("SendNotificationWithMatchingRule", func(t *testing.T) {
+		// Assertions check the DELIVERED notification on the matching
+		// channel (slack), not the caller's template — the engine now
+		// treats the template as immutable to support concurrent
+		// callers (TestLoad_*).
+		startCount := len(slackChannel.receivedNotifications())
 		notification := &Notification{
 			Title:   "Test Info",
 			Message: "This is an info notification",
@@ -431,13 +462,22 @@ func TestSendNotification(t *testing.T) {
 		err := engine.SendNotification(context.Background(), notification)
 		assert.NoError(t, err)
 
-		// Check that notification was sent to slack but not email
-		// (We can't easily check this with the current mock, but the method should succeed)
-		assert.NotEqual(t, uuid.Nil, notification.ID)
-		assert.True(t, notification.CreatedAt.After(time.Now().Add(-1*time.Second)))
+		delivered := slackChannel.receivedNotifications()
+		assert.Len(t, delivered, startCount+1, "slack must receive one notification")
+		sent := delivered[startCount]
+		assert.NotEqual(t, uuid.Nil, sent.ID)
+		assert.True(t, sent.CreatedAt.After(time.Now().Add(-1*time.Second)))
+		assert.Equal(t, "Test Info", sent.Title)
+		assert.Equal(t, NotificationTypeInfo, sent.Type)
+		// Template MUST NOT be mutated.
+		assert.Equal(t, uuid.Nil, notification.ID, "template ID must remain Nil")
 	})
 
 	t.Run("SendNotificationWithNoMatchingRule", func(t *testing.T) {
+		// Type==error has no matching rule; SendNotification still
+		// succeeds (no error). No channel should receive anything.
+		preSlack := len(slackChannel.receivedNotifications())
+		preEmail := len(emailChannel.receivedNotifications())
 		notification := &Notification{
 			Title:   "Test Error",
 			Message: "This is an error notification",
@@ -447,12 +487,13 @@ func TestSendNotification(t *testing.T) {
 		err := engine.SendNotification(context.Background(), notification)
 		assert.NoError(t, err)
 
-		// Should succeed even with no matching rules
-		assert.NotEqual(t, uuid.Nil, notification.ID)
+		// No channels routed to → no deliveries.
+		assert.Equal(t, preSlack, len(slackChannel.receivedNotifications()), "no rule matches → slack must not receive")
+		assert.Equal(t, preEmail, len(emailChannel.receivedNotifications()), "no rule matches → email must not receive")
 	})
 
 	t.Run("SendNotificationWithDisabledChannels", func(t *testing.T) {
-		// Add a rule that includes a disabled channel
+		// Add a rule that includes a disabled channel.
 		rule := NotificationRule{
 			Name:      "warning-to-all",
 			Condition: "type==warning",
@@ -461,6 +502,10 @@ func TestSendNotification(t *testing.T) {
 			Enabled:   true,
 		}
 		engine.AddRule(rule)
+
+		preSlack := len(slackChannel.receivedNotifications())
+		preEmail := len(emailChannel.receivedNotifications())
+		preDisabled := len(disabledChannel.receivedNotifications())
 
 		notification := &Notification{
 			Title:   "Test Warning",
@@ -471,8 +516,10 @@ func TestSendNotification(t *testing.T) {
 		err := engine.SendNotification(context.Background(), notification)
 		assert.NoError(t, err)
 
-		// Should succeed, disabled channels should be filtered out
-		assert.NotEqual(t, uuid.Nil, notification.ID)
+		// Slack + email enabled → must receive. Disabled channel → must not.
+		assert.Equal(t, preSlack+1, len(slackChannel.receivedNotifications()), "slack must receive")
+		assert.Equal(t, preEmail+1, len(emailChannel.receivedNotifications()), "email must receive")
+		assert.Equal(t, preDisabled, len(disabledChannel.receivedNotifications()), "disabled channel must NOT receive")
 	})
 }
 

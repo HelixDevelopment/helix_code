@@ -128,24 +128,38 @@ func (e *NotificationEngine) LoadTemplate(name string, templateStr string) error
 }
 
 // SendNotification sends a notification based on rules
+//
+// The caller's *Notification is treated as an immutable template. We copy
+// it locally before stamping ID / CreatedAt / Channels, so concurrent
+// callers can safely share a template — the previous behaviour mutated
+// the caller's struct and produced data races when multiple goroutines
+// reused one Notification (TestLoad_ConcurrentChannels +
+// TestLoad_QueueSaturation both caught it under `-race`).
 func (e *NotificationEngine) SendNotification(ctx context.Context, notification *Notification) error {
-	notification.ID = uuid.New()
-	notification.CreatedAt = time.Now()
+	sent := *notification
+	sent.ID = uuid.New()
+	sent.CreatedAt = time.Now()
 
 	// Apply rules to determine channels and priority
-	e.applyRules(notification)
+	e.applyRules(&sent)
 
 	// Send through specified channels
-	return e.sendToChannels(ctx, notification)
+	return e.sendToChannels(ctx, &sent)
 }
 
-// SendDirect sends a notification directly to specified channels
+// SendDirect sends a notification directly to specified channels.
+//
+// Same template-immutability contract as SendNotification: the caller's
+// *Notification is copied locally and the copy receives ID / CreatedAt /
+// Channels assignments, so the caller can safely reuse one template
+// across concurrent goroutines.
 func (e *NotificationEngine) SendDirect(ctx context.Context, notification *Notification, channels []string) error {
-	notification.ID = uuid.New()
-	notification.CreatedAt = time.Now()
-	notification.Channels = channels
+	sent := *notification
+	sent.ID = uuid.New()
+	sent.CreatedAt = time.Now()
+	sent.Channels = channels
 
-	return e.sendToChannels(ctx, notification)
+	return e.sendToChannels(ctx, &sent)
 }
 
 // applyRules applies notification rules to determine channels and priority

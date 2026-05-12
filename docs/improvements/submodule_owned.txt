@@ -4,6 +4,7 @@ Dependencies/HelixDevelopment/DocProcessor | git@github.com:HelixDevelopment/Doc
 Dependencies/HelixDevelopment/LLMOrchestrator | git@github.com:HelixDevelopment/LLMOrchestrator.git
 Dependencies/HelixDevelopment/LLMProvider | git@github.com:HelixDevelopment/LLMProvider.git
 Dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git
+Dependencies/HelixDevelopment/Models | git@github.com:vasic-digital/Models.git
 Dependencies/HelixDevelopment/VisionEngine | git@github.com:HelixDevelopment/VisionEngine.git
 Github-Pages-Website | git@github.com:HelixDevelopment-Code/Welcome.git
 HelixAgent | git@github.com:HelixDevelopment/HelixAgent.git
