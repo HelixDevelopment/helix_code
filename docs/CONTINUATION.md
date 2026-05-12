@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-12T11:30:00Z (Zero-Bluff Phase 5 CLOSED — full documentation suite shipped; Zero-Bluff programme COMPLETE)
+**Last updated: 2026-05-12T12:00:00Z (Backlog: cmd/infrastructure compile errors against Containers v2 API RESOLVED — `go build ./cmd/infrastructure/...` exits 0)
 **Maintenance mandate:** This file MUST be updated on every commit that changes
 programme state. Out-of-sync continuation is a CRITICAL DEFECT — see
 `CONSTITUTION.md` Article XIII §13.1 (CONST-044), `CLAUDE.md` §12, and
@@ -332,6 +332,16 @@ race not introduced by this phase).
   `go build ./...` pass clean.
 - **Containers `make build`:** RESOLVED — `go build ./...` exits 0. Build
   passes clean.
+- **`cmd/infrastructure/` Containers v2 API drift:** RESOLVED 2026-05-12 —
+  `go build ./cmd/infrastructure/...` exits 0. Fixes: `NewSlogAdapter()`
+  → `NewSlogAdapter(nil)`; 16 `.WithDescription(...)` calls removed
+  (method no longer on `endpoint.Builder`); `boot.Option`
+  → `boot.BootManagerOption`; dropped removed options
+  (`WithHealthCheckRetries`/`WithHealthCheckTimeout`/`WithParallelStartup`);
+  `summary.Errors` → walk `summary.Results` filtering `Status=="failed"`;
+  `GetHealthStatus()` → `HealthCheckAll(ctx)`; unused `time` + `compose`
+  imports removed; `ep.Description` (no longer on `ServiceEndpoint`)
+  → `ep.ServiceName`.
 - **`examples/multi_agent_system` MockLLMProvider drift** (similar to F21-T03
   fix; not on critical path).
 - **`applications/desktop` link FAIL on host:** missing X11/Xcursor.h

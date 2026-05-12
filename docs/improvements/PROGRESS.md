@@ -509,5 +509,5 @@ CLI examples validated against the codebase:
 ### Zero-Bluff Programme: COMPLETE
 
 No further programme work pending. Backlog / parking-lot items:
-- `cmd/infrastructure/` has pre-existing compile errors against the Containers submodule API (`endpoint.Builder.WithDescription` missing; `logging.NewSlogAdapter` signature drift). Out of scope for ZB-P5 — to be triaged separately.
+- `cmd/infrastructure/` pre-existing compile errors against the Containers submodule API — **RESOLVED 2026-05-12**: `go build ./cmd/infrastructure/...` exits 0. Fixes applied: `NewSlogAdapter()` → `NewSlogAdapter(nil)`; removed 16 `WithDescription(...)` calls (no longer on `endpoint.Builder`); migrated `boot.Option` → `boot.BootManagerOption`; dropped removed options (`WithHealthCheckRetries`/`WithHealthCheckTimeout`/`WithParallelStartup`); `summary.Errors` → walk `summary.Results` filtering by `Status == "failed"`; `GetHealthStatus()` → `HealthCheckAll(ctx)`; removed unused `time` + `compose` imports; replaced `ep.Description` with `ep.ServiceName` in status output.
 - Fyne desktop build requires `libxcursor-dev` system package; documented as a prerequisite in the user manual.
