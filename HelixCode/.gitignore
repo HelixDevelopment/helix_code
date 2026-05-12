@@ -151,6 +151,7 @@ helix.security.json
 /server
 /terminal-ui
 /desktop
+/multi_agent_system
 /config-test
 /security-test
 /security-fix
