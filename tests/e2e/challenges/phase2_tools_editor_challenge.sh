@@ -15,8 +15,17 @@ go build ./internal/editor/... || (echo "FAIL: Editor build failed"; exit 1)
 echo "  PASS: Editor package builds"
 
 # Test 3: Run tools tests
+# Timeout bumped from 30s to 180s: internal/tools/browser tests serialize
+# real chromium launches via an inter-process flock (see
+# chromium_serialize_test.go) so the chromium phase of the suite is
+# inherently sequential. Five chromium-launching tests at ~6 s each =
+# ~30 s in the lock, plus per-test fixed costs. Verified locally:
+# `go test ./internal/tools/browser/` exits 0 in ~43 s with the flock
+# in place. The earlier 30 s budget killed the test binary mid-chromium,
+# producing a false anti-bluff FAIL when in reality the run-time race
+# is environmental, not a defect.
 echo "[3/4] Running tools tests..."
-go test ./internal/tools/... -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Tools tests failed"; exit 1)
+go test ./internal/tools/... -timeout 180s 2>&1 | grep -q "FAIL" && (echo "FAIL: Tools tests failed"; exit 1)
 echo "  PASS: Tools tests pass"
 
 # Test 4: Run editor tests
