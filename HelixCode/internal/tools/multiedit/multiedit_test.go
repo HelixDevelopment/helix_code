@@ -342,8 +342,10 @@ func TestTransactionManager_Timeout(t *testing.T) {
 	// Wait for timeout
 	time.Sleep(200 * time.Millisecond)
 
-	// State should be aborted
-	assert.Equal(t, StateAborted, tx.State)
+	// State should be aborted. Use GetState() to read the field under the
+	// transaction lock — the timeout monitor writes tx.State under tx.mu,
+	// so a direct read here would race.
+	assert.Equal(t, StateAborted, tx.GetState())
 }
 
 // Test 12: Backup Cleanup

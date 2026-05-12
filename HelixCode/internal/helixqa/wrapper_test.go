@@ -63,10 +63,22 @@ func TestEngine_StartSession(t *testing.T) {
 	state, err := engine.StartSession(ctx, "test-session-1", []string{"web"}, []string{bankFile}, false)
 	require.NoError(t, err)
 	require.NotNil(t, state)
+	// state.ID / state.Platforms / state.Banks are assigned in the struct
+	// literal inside StartSession and never mutated, so they're safe to
+	// read without locking. state.Status is mutated by the orchestrator
+	// goroutine that StartSession launches BEFORE returning, so checking
+	// it for "pending" here is a true data race — the goroutine can
+	// advance it to "running" / "completed" before the test reads it.
+	// Read mutable fields through state.Mu (the type's own lock).
 	assert.Equal(t, "test-session-1", state.ID)
-	assert.Equal(t, "pending", state.Status)
 	assert.Equal(t, []string{"web"}, state.Platforms)
 	assert.Equal(t, []string{bankFile}, state.Banks)
+	state.Mu.RLock()
+	status := state.Status
+	state.Mu.RUnlock()
+	// Status MUST be one of the known states. We do not pin it to
+	// "pending" because the goroutine may have already advanced it.
+	require.Contains(t, []string{"pending", "running", "completed", "failed", "cancelled"}, status)
 
 	// Verify session is retrievable
 	s, ok := engine.GetSession("test-session-1")
@@ -78,7 +90,10 @@ func TestEngine_StartSession(t *testing.T) {
 	go func() {
 		for {
 			s, _ := engine.GetSession("test-session-1")
-			if s.Status == "completed" || s.Status == "failed" || s.Status == "cancelled" {
+			s.Mu.RLock()
+			st := s.Status
+			s.Mu.RUnlock()
+			if st == "completed" || st == "failed" || st == "cancelled" {
 				close(done)
 				return
 			}
@@ -136,9 +151,18 @@ func TestEngine_CancelSession(t *testing.T) {
 	err = engine.CancelSession("test-session-3")
 	require.NoError(t, err)
 
+	// Wait for the orchestrator goroutine to fully terminate so its final
+	// Status write has been committed; reading Status before the goroutine
+	// settles produced a race against CancelSession's own Status write.
+	// Shutdown blocks on the per-engine WaitGroup.
+	engine.Shutdown()
+
 	s, ok := engine.GetSession("test-session-3")
 	require.True(t, ok)
-	assert.Equal(t, "cancelled", s.Status)
+	s.Mu.RLock()
+	status := s.Status
+	s.Mu.RUnlock()
+	assert.Equal(t, "cancelled", status)
 }
 
 func TestEngine_CancelSession_NotFound(t *testing.T) {

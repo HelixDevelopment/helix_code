@@ -281,12 +281,38 @@ func (m *SubagentManager) Dispatch(ctx context.Context, task SubagentTask) (stri
 }
 
 // forward drains a per-task spawner channel and emits results on the
-// aggregator. Releases the semaphore slot and removes the subagent from the
-// running map after the per-task channel closes.
+// aggregator.
+//
+// Cleanup ordering matters: callers that drain the aggregator (notably
+// drainAll in tests) expect that by the time they observe the terminal
+// result, the manager's running-map entry is gone AND the semaphore slot
+// is released. Earlier revisions did cleanup in a deferred block AFTER
+// the for-range exited (i.e. AFTER the spawner closed the per-task
+// channel), so cleanup happened later than the test's observation of
+// the terminal result — producing flakes in
+// TestSubagentManager_SemaphoreReleasedAfterCompletion and
+// TestSubagentManager_StatusReflectsRunning under load.
+//
+// Resolution: when we observe a TERMINAL state (succeeded/failed/
+// canceled/timed-out), release the slot and remove the running-map
+// entry BEFORE forwarding the result onto the aggregator. The
+// happens-before from the channel send to the receiver's wake then
+// guarantees the cleanup is visible to the test. Intermediate
+// non-terminal results (e.g. "running" progress events) flow through
+// unchanged so live status updates still work.
+//
+// A final defer covers the panic path: if the goroutine never sees a
+// terminal result (panic, ch closed early), we still release the slot
+// and remove the running-map entry so the manager doesn't leak.
 func (m *SubagentManager) forward(id string, ch <-chan SubagentResult) {
 	defer m.inflight.Done()
-	defer func() {
-		// Always release the slot + remove from running, even on panic.
+
+	cleanedUp := false
+	cleanup := func() {
+		if cleanedUp {
+			return
+		}
+		cleanedUp = true
 		m.mu.Lock()
 		if rs, ok := m.running[id]; ok {
 			rs.cancel()
@@ -294,14 +320,20 @@ func (m *SubagentManager) forward(id string, ch <-chan SubagentResult) {
 		}
 		m.mu.Unlock()
 		<-m.semaphore
-	}()
+	}
+	defer cleanup()
 
 	for r := range ch {
-		// Stamp the TaskID if the spawner forgot to.
 		if r.TaskID == "" {
 			r.TaskID = id
 		}
-		// Forward to aggregator unless it's already closed.
+		// Terminal state? Release the slot + remove the running-map entry
+		// BEFORE handing the result to the aggregator so that any
+		// downstream observer (test, parent agent) sees consistent state
+		// once the result is delivered.
+		if isTerminalState(r.State) {
+			cleanup()
+		}
 		select {
 		case <-m.aggregatorClosed:
 			// Manager is shutting down; drop the result rather than panic
@@ -309,6 +341,17 @@ func (m *SubagentManager) forward(id string, ch <-chan SubagentResult) {
 			return
 		case m.aggregator <- r:
 		}
+	}
+}
+
+// isTerminalState reports whether s represents a state from which a
+// subagent will produce no further results.
+func isTerminalState(s State) bool {
+	switch s {
+	case StateSucceeded, StateFailed, StateCanceled, StateTimedOut:
+		return true
+	default:
+		return false
 	}
 }
 

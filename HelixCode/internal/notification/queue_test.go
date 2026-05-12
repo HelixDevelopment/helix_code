@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -113,11 +114,14 @@ func TestNotificationQueue_Clear(t *testing.T) {
 func TestNotificationQueue_Worker(t *testing.T) {
 	engine := NewNotificationEngine()
 
-	// Register mock channel
-	sent := false
+	// Register mock channel. The mock's Send runs on the queue worker
+	// goroutine; the test asserts from the main goroutine. Use atomic.Bool so
+	// the worker's write and the main-goroutine read are synchronised under
+	// -race without altering the queue's real concurrency behaviour.
+	var sent atomic.Bool
 	mockCh := &retryMockChannel{
 		sendFunc: func(ctx context.Context, notif *Notification) error {
-			sent = true
+			sent.Store(true)
 			return nil
 		},
 	}
@@ -138,7 +142,7 @@ func TestNotificationQueue_Worker(t *testing.T) {
 	// Wait for worker to process
 	time.Sleep(300 * time.Millisecond)
 
-	assert.True(t, sent)
+	assert.True(t, sent.Load())
 	assert.True(t, queue.IsEmpty())
 
 	stats := queue.GetStats()

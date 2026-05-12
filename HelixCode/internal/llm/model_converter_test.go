@@ -364,6 +364,7 @@ func TestModelConverter_ConvertModel(t *testing.T) {
 	t.Run("CreatesConversionJob", func(t *testing.T) {
 		tempDir := t.TempDir()
 		converter := NewModelConverter(tempDir)
+		t.Cleanup(converter.Shutdown)
 
 		// Create source file
 		sourceDir := filepath.Join(tempDir, "source")
@@ -402,6 +403,7 @@ func TestModelConverter_ConvertModel(t *testing.T) {
 	t.Run("GeneratesTargetPath", func(t *testing.T) {
 		tempDir := t.TempDir()
 		converter := NewModelConverter(tempDir)
+		t.Cleanup(converter.Shutdown)
 
 		sourceDir := filepath.Join(tempDir, "source")
 		os.MkdirAll(sourceDir, 0755)

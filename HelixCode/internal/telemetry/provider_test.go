@@ -10,24 +10,55 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"go.uber.org/zap"
 )
 
-// captureStdout swaps the package-level stdoutWriter test hook with a buffer,
-// runs fn, restores the original writer, and returns whatever fn wrote.
+// syncBuffer is a goroutine-safe wrapper around *bytes.Buffer. The OTel SDK's
+// PeriodicReader (metrics) and BatchSpanProcessor (traces) each run on their
+// own background goroutine and both invoke Write on the captured writer when
+// ForceFlush fires. bytes.Buffer is NOT goroutine-safe, so the unsynchronised
+// version trips -race. The real OS stdout used in production is implicitly
+// serialised by the kernel's write syscall; in tests we need an explicit lock.
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (s *syncBuffer) Write(p []byte) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.Write(p)
+}
+
+func (s *syncBuffer) Bytes() []byte {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	// Defensive copy — caller is free to mutate / hold the slice across
+	// further writes by the (still-running) exporter goroutines.
+	return append([]byte(nil), s.buf.Bytes()...)
+}
+
+// Compile-time assertion: syncBuffer satisfies io.Writer (the type stdoutWriter
+// expects).
+var _ io.Writer = (*syncBuffer)(nil)
+
+// captureStdout swaps the package-level stdoutWriter test hook with a
+// goroutine-safe buffer, runs fn, restores the original writer, and returns
+// whatever fn wrote.
 func captureStdout(t *testing.T, fn func()) []byte {
 	t.Helper()
-	var buf bytes.Buffer
+	buf := &syncBuffer{}
 	old := stdoutWriter
-	stdoutWriter = &buf
+	stdoutWriter = buf
 	defer func() { stdoutWriter = old }()
 	fn()
-	// Defensive copy — the buffer is reused after the swap reverts.
-	return append([]byte(nil), buf.Bytes()...)
+	return buf.Bytes()
 }
 
 func TestNewTelemetryProvider_DisabledReturnsNoop(t *testing.T) {

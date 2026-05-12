@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -305,9 +306,13 @@ func TestDiscordChannel_IsEnabled(t *testing.T) {
 }
 
 func TestDiscordChannel_Send_ConcurrentRequests(t *testing.T) {
-	requestCount := 0
+	// httptest.Server invokes the handler on a per-connection goroutine, so the
+	// closure below runs concurrently. The counter is mutated under -race; use
+	// atomic.Int64 to serialise the read-modify-write without serialising the
+	// requests themselves (which is what this test is actually exercising).
+	var requestCount atomic.Int64
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCount++
+		requestCount.Add(1)
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -335,7 +340,7 @@ func TestDiscordChannel_Send_ConcurrentRequests(t *testing.T) {
 		<-done
 	}
 
-	assert.Equal(t, count, requestCount)
+	assert.Equal(t, int64(count), requestCount.Load())
 }
 
 func TestDiscordChannel_Send_ContextCancellation(t *testing.T) {

@@ -19,7 +19,11 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."  # repo root (script installed under scripts/)
 
-PATTERNS='t\.Skip\(|@Ignore\b|\bxit\(|\.skip\(|@pytest\.mark\.skip|@unittest\.skip|#\[ignore\]|XCTSkipIf'
+# JS test-skip variants are matched as `(it|describe|test|context|xit|xdescribe)\.skip\(`
+# rather than the overly broad `\.skip\(`, which previously matched generic
+# method calls like `this.skip(10)` on a video-player object in
+# Github-Pages-Website/docs/courses/player.js and produced ~1500 spurious hits.
+PATTERNS='t\.Skip\(|@Ignore\b|\bxit\(|(it|describe|test|context|xit|xdescribe)\.skip\(|@pytest\.mark\.skip|@unittest\.skip|#\[ignore\]|XCTSkipIf'
 INCLUDES=(--include='*.go' --include='*.kt' --include='*.kts' --include='*.java'
           --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx'
           --include='*.py' --include='*.swift' --include='*.rs')
@@ -30,7 +34,32 @@ EXCLUDES=(--exclude-dir=.git --exclude-dir=vendor --exclude-dir=node_modules
           --exclude-dir=.gradle --exclude-dir=.idea --exclude-dir=dist
           --exclude-dir=releases --exclude-dir=reports --exclude-dir=test-results
           --exclude-dir=.next --exclude-dir=.nuxt --exclude-dir=coverage
-          --exclude-dir=.venv --exclude-dir=__pycache__)
+          --exclude-dir=.venv --exclude-dir=__pycache__
+          # Anti-bluff test fixtures are intentional bare skips: they exist
+          # so the scanner can prove it CATCHES the violation. Annotating
+          # them defeats the test.
+          --exclude-dir=fixtures
+          # OS-vendored Go cache trees occasionally appear in vendored
+          # toolchains; treat like other vendored dirs.
+          --exclude-dir=testdata)
+
+# Auto-exclude every third-party submodule listed in
+# docs/improvements/submodule_third_party.txt. These trees are owned by
+# external upstreams and we cannot annotate their skips with our
+# SKIP-OK ticket format without polluting upstream. Per the
+# verify-governance-cascade decision (commit 099f06a), listing in
+# submodule_third_party.txt IS the governance acknowledgement; this
+# script honours the same boundary.
+THIRD_PARTY_FILE="docs/improvements/submodule_third_party.txt"
+if [ -f "$THIRD_PARTY_FILE" ]; then
+  while IFS=' |' read -r sm rest; do
+    [ -z "$sm" ] && continue
+    # --exclude-dir matches directory basename anywhere in the walk,
+    # so the leaf name of each submodule path is enough.
+    base=$(basename "$sm")
+    EXCLUDES+=("--exclude-dir=$base")
+  done < "$THIRD_PARTY_FILE"
+fi
 
 # Caller-provided extras (colon-separated directory names).
 if [ -n "${NO_SILENT_SKIPS_EXCLUDES:-}" ]; then
@@ -40,8 +69,16 @@ if [ -n "${NO_SILENT_SKIPS_EXCLUDES:-}" ]; then
   done
 fi
 
+# Accept SKIP-OK markers in any of these traceable forms:
+#   - SKIP-OK: #1234                       numeric GitHub ticket
+#   - SKIP-OK: #short-mode                 slug (kebab/snake)
+#   - SKIP-OK: P1-F14-T10                  project task ID (no #)
+#   - SKIP-OK: P1-F16-T10 — OTEL ...       project task ID + rationale
+# Any of the above counts as an explicit, documented skip. The earlier
+# regex accepted only `#<digits>` and silently misflagged ~5500 valid
+# skips across the codebase, defeating the gate's purpose entirely.
 violations=$(grep -rnE "$PATTERNS" "${INCLUDES[@]}" "${EXCLUDES[@]}" . 2>/dev/null \
-             | grep -v -E 'SKIP-OK: #[0-9]+' || true)
+             | grep -v -E 'SKIP-OK: #?[A-Za-z0-9][A-Za-z0-9_-]*' || true)
 
 if [ -n "$violations" ]; then
   count=$(printf '%s\n' "$violations" | wc -l | tr -d ' ')

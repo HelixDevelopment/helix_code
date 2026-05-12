@@ -212,6 +212,15 @@ func (tm *TransactionManager) AddEdit(tx *EditTransaction, edit *FileEdit) error
 	return nil
 }
 
+// GetState returns the current transaction state in a thread-safe manner.
+// Callers MUST use this accessor rather than reading tx.State directly,
+// because the timeout monitor goroutine writes to State under tx.mu.
+func (tx *EditTransaction) GetState() TransactionState {
+	tx.mu.RLock()
+	defer tx.mu.RUnlock()
+	return tx.State
+}
+
 // UpdateState updates the transaction state
 func (tm *TransactionManager) UpdateState(tx *EditTransaction, newState TransactionState) error {
 	tx.mu.Lock()

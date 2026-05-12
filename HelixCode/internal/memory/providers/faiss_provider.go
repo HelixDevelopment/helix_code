@@ -26,8 +26,13 @@ type FAISSProvider struct {
 	started     bool
 	indices     map[string]*FAISSIndex
 	collections map[string]*CollectionConfig
-	stats       *ProviderStats
-	startTime   time.Time
+	// statsMu protects every field of *stats. It is a separate lock so that
+	// the deferred updateStats() in Store/Retrieve/Update/Delete/Search runs
+	// AFTER p.mu.Unlock() (defers fire in LIFO order) without racing with
+	// concurrent readers/writers of the stats struct.
+	statsMu   sync.Mutex
+	stats     *ProviderStats
+	startTime time.Time
 }
 
 // FAISSConfig contains FAISS provider configuration.
@@ -194,7 +199,9 @@ func (p *FAISSProvider) Initialize(ctx context.Context, config interface{}) erro
 	}
 
 	p.initialized = true
+	p.statsMu.Lock()
 	p.stats.LastOperation = time.Now()
+	p.statsMu.Unlock()
 
 	p.logger.Info("Pure-Go FAISS provider initialized successfully (loaded %d indices)", len(p.indices))
 	return nil
@@ -221,8 +228,10 @@ func (p *FAISSProvider) Start(ctx context.Context) error {
 
 	p.started = true
 	p.startTime = time.Now()
+	p.statsMu.Lock()
 	p.stats.LastOperation = time.Now()
 	p.stats.Uptime = 0
+	p.statsMu.Unlock()
 
 	p.logger.Info("Pure-Go FAISS provider started (CPU mode, brute-force search)")
 	return nil
@@ -258,11 +267,15 @@ func (p *FAISSProvider) Store(ctx context.Context, vectors []*VectorData) error 
 			return fmt.Errorf("failed to add vector %q: %w", vector.ID, err)
 		}
 
+		p.statsMu.Lock()
 		p.stats.TotalVectors++
 		p.stats.TotalSize += int64(len(vector.Vector) * 8) // 8 bytes per float64
+		p.statsMu.Unlock()
 	}
 
+	p.statsMu.Lock()
 	p.stats.LastOperation = time.Now()
+	p.statsMu.Unlock()
 	return nil
 }
 
@@ -288,7 +301,9 @@ func (p *FAISSProvider) Retrieve(ctx context.Context, ids []string) ([]*VectorDa
 		results = append(results, vectors...)
 	}
 
+	p.statsMu.Lock()
 	p.stats.LastOperation = time.Now()
+	p.statsMu.Unlock()
 	return results, nil
 }
 
@@ -323,7 +338,9 @@ func (p *FAISSProvider) Delete(ctx context.Context, ids []string) error {
 		// Find and remove from all indices
 		for name, index := range p.indices {
 			if index.removeVector(id) {
+				p.statsMu.Lock()
 				p.stats.TotalVectors--
+				p.statsMu.Unlock()
 				p.logger.Debug("Vector deleted: id=%s collection=%s", id, name)
 				deletedCount++
 				break
@@ -332,7 +349,9 @@ func (p *FAISSProvider) Delete(ctx context.Context, ids []string) error {
 	}
 
 	p.logger.Debug("Deleted %d vectors (requested %d)", deletedCount, len(ids))
+	p.statsMu.Lock()
 	p.stats.LastOperation = time.Now()
+	p.statsMu.Unlock()
 	return nil
 }
 
@@ -452,7 +471,9 @@ func (p *FAISSProvider) CreateCollection(ctx context.Context, name string, confi
 	}
 
 	p.collections[name] = config
+	p.statsMu.Lock()
 	p.stats.TotalCollections++
+	p.statsMu.Unlock()
 
 	p.logger.Info("Collection created: name=%s dimension=%d metric=%s", name, config.Dimension, config.Metric)
 	return nil
@@ -478,7 +499,9 @@ func (p *FAISSProvider) DeleteCollection(ctx context.Context, name string) error
 
 	delete(p.collections, name)
 	delete(p.indices, name)
+	p.statsMu.Lock()
 	p.stats.TotalCollections--
+	p.statsMu.Unlock()
 
 	p.logger.Info("Collection deleted: name=%s", name)
 	return nil
@@ -674,7 +697,16 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
+	p.statsMu.Lock()
 	uptime := p.stats.Uptime
+	totalVectors := p.stats.TotalVectors
+	totalCollections := p.stats.TotalCollections
+	totalSize := p.stats.TotalSize
+	averageLatency := p.stats.AverageLatency
+	lastOperation := p.stats.LastOperation
+	errorCount := p.stats.ErrorCount
+	p.statsMu.Unlock()
+
 	if p.started && !p.startTime.IsZero() {
 		uptime = time.Since(p.startTime)
 	}
@@ -683,12 +715,12 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 		Name:             "faiss-pure-go",
 		Type:             "faiss",
 		Status:           p.getStatus(),
-		TotalVectors:     p.stats.TotalVectors,
-		TotalCollections: p.stats.TotalCollections,
-		TotalSize:        p.stats.TotalSize,
-		AverageLatency:   p.stats.AverageLatency,
-		LastOperation:    p.stats.LastOperation,
-		ErrorCount:       p.stats.ErrorCount,
+		TotalVectors:     totalVectors,
+		TotalCollections: totalCollections,
+		TotalSize:        totalSize,
+		AverageLatency:   averageLatency,
+		LastOperation:    lastOperation,
+		ErrorCount:       errorCount,
 		Uptime:           uptime,
 		Metadata: map[string]interface{}{
 			"simulation":    true,
@@ -777,6 +809,12 @@ func (p *FAISSProvider) Health(ctx context.Context) (*HealthStatus, error) {
 		uptime = time.Since(p.startTime)
 	}
 
+	p.statsMu.Lock()
+	totalVectors := p.stats.TotalVectors
+	totalCollections := p.stats.TotalCollections
+	totalSize := p.stats.TotalSize
+	p.statsMu.Unlock()
+
 	return &HealthStatus{
 		Status:       status,
 		Message:      message,
@@ -784,9 +822,9 @@ func (p *FAISSProvider) Health(ctx context.Context) (*HealthStatus, error) {
 		LastCheck:    time.Now(),
 		ResponseTime: time.Millisecond, // Pure-Go response time
 		Metrics: map[string]interface{}{
-			"total_vectors":     p.stats.TotalVectors,
-			"total_collections": p.stats.TotalCollections,
-			"total_size_bytes":  p.stats.TotalSize,
+			"total_vectors":     totalVectors,
+			"total_collections": totalCollections,
+			"total_size_bytes":  totalSize,
 			"uptime_seconds":    uptime.Seconds(),
 		},
 		Dependencies: map[string]string{
@@ -985,6 +1023,9 @@ func (p *FAISSProvider) getOrCreateIndex(ctx context.Context, collection string)
 }
 
 func (p *FAISSProvider) updateStats(duration time.Duration) {
+	p.statsMu.Lock()
+	defer p.statsMu.Unlock()
+
 	p.stats.LastOperation = time.Now()
 
 	// Update average latency (exponential moving average)

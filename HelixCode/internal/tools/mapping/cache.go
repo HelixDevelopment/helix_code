@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -99,31 +100,31 @@ func (cm *DiskCacheManager) Load(root string) (*CodebaseMap, error) {
 
 	// Check if cache file exists
 	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("cache not found")
 	}
 
 	// Read cache file
 	data, err := os.ReadFile(cachePath)
 	if err != nil {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("failed to read cache: %w", err)
 	}
 
 	// Unmarshal
 	var cmap CodebaseMap
 	if err := json.Unmarshal(data, &cmap); err != nil {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("failed to unmarshal cache: %w", err)
 	}
 
 	// Verify version
 	if cmap.Version != CacheVersion {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("cache version mismatch: expected %s, got %s", CacheVersion, cmap.Version)
 	}
 
-	cm.hits++
+	atomic.AddInt64(&cm.hits, 1)
 	return &cmap, nil
 }
 
@@ -178,31 +179,31 @@ func (cm *DiskCacheManager) LoadFile(path string) (*FileMap, error) {
 
 	// Check if cache file exists
 	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("cache not found")
 	}
 
 	// Read cache file
 	data, err := os.ReadFile(cachePath)
 	if err != nil {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("failed to read cache: %w", err)
 	}
 
 	// Unmarshal
 	var fileMap FileMap
 	if err := json.Unmarshal(data, &fileMap); err != nil {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("failed to unmarshal cache: %w", err)
 	}
 
 	// Verify file hasn't changed
 	if !cm.isFileMapValid(&fileMap, path) {
-		cm.misses++
+		atomic.AddInt64(&cm.misses, 1)
 		return nil, fmt.Errorf("cached file map is stale")
 	}
 
-	cm.hits++
+	atomic.AddInt64(&cm.hits, 1)
 	return &fileMap, nil
 }
 
@@ -268,8 +269,8 @@ func (cm *DiskCacheManager) Clear() error {
 		return fmt.Errorf("failed to recreate cache directory: %w", err)
 	}
 
-	cm.hits = 0
-	cm.misses = 0
+	atomic.StoreInt64(&cm.hits, 0)
+	atomic.StoreInt64(&cm.misses, 0)
 
 	return nil
 }
@@ -307,10 +308,12 @@ func (cm *DiskCacheManager) GetCacheStats() (*CacheStats, error) {
 	}
 
 	// Calculate hit rate
-	total := cm.hits + cm.misses
+	hits := atomic.LoadInt64(&cm.hits)
+	misses := atomic.LoadInt64(&cm.misses)
+	total := hits + misses
 	hitRate := 0.0
 	if total > 0 {
-		hitRate = float64(cm.hits) / float64(total)
+		hitRate = float64(hits) / float64(total)
 	}
 
 	return &CacheStats{

@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,6 +19,17 @@ type ModelConverter struct {
 	conversionTools map[string]*ConversionTool
 	tempDir         string
 	httpClient      *HTTPClient
+	// activeWG tracks every conversion goroutine spawned by ConvertModel so
+	// that Shutdown can wait for them to drain. Without this, tests using a
+	// t.TempDir-backed baseDir race with the runConversion goroutine: the
+	// test returns, Go's testing framework removes the temp dir, and the
+	// still-running goroutine writes new files into a half-deleted dir,
+	// producing "unlinkat ... directory not empty" cleanup errors.
+	activeWG sync.WaitGroup
+	// cancels tracks per-job context cancels so Shutdown can signal in-flight
+	// conversions to abort before waiting on activeWG.
+	cancelsMu sync.Mutex
+	cancels   map[string]context.CancelFunc
 }
 
 // ConversionJob represents an ongoing conversion
@@ -89,7 +101,22 @@ func NewModelConverter(baseDir string) *ModelConverter {
 		conversionTools: initializeAllConversionTools(),
 		tempDir:         tempDir,
 		httpClient:      &HTTPClient{Timeout: 30 * time.Second},
+		cancels:         make(map[string]context.CancelFunc),
 	}
+}
+
+// Shutdown cancels every active conversion and blocks until all background
+// goroutines spawned by ConvertModel have returned. Intended for graceful
+// shutdown and for test cleanup (t.Cleanup) so that temp-dir teardown cannot
+// race with the runConversion goroutine still writing log/status files into
+// baseDir.
+func (c *ModelConverter) Shutdown() {
+	c.cancelsMu.Lock()
+	for _, cancel := range c.cancels {
+		cancel()
+	}
+	c.cancelsMu.Unlock()
+	c.activeWG.Wait()
 }
 
 // ConvertModel converts a model from one format to another
@@ -128,8 +155,28 @@ func (c *ModelConverter) ConvertModel(ctx context.Context, config ConversionConf
 	// Estimate conversion time
 	job.EstimatedTime = c.estimateConversionTime(config)
 
+	// Track this conversion so Shutdown can cancel + wait for it. We derive
+	// a child context so Shutdown can signal abort without depending on the
+	// caller's context lifetime (the test's per-call context may already be
+	// cancelled by the time Shutdown runs, but the goroutine still needs a
+	// definitive stop signal that drains activeWG).
+	runCtx, runCancel := context.WithCancel(ctx)
+	c.cancelsMu.Lock()
+	c.cancels[jobID] = runCancel
+	c.cancelsMu.Unlock()
+
+	c.activeWG.Add(1)
 	// Start conversion in background
-	go c.runConversion(ctx, job, config, tool)
+	go func() {
+		defer c.activeWG.Done()
+		defer func() {
+			c.cancelsMu.Lock()
+			delete(c.cancels, jobID)
+			c.cancelsMu.Unlock()
+			runCancel()
+		}()
+		c.runConversion(runCtx, job, config, tool)
+	}()
 
 	return job, nil
 }

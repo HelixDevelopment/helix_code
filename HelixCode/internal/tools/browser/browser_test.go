@@ -77,9 +77,8 @@ func TestChromeDiscovery(t *testing.T) {
 
 // TestBrowserLaunch tests browser launch functionality
 func TestBrowserLaunch(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test (real chromium); SKIP-OK: #integration-tier-only — full-suite parallelism starves chromium launches; run under `go test` or `make test-full` to verify")
-	}
+	unlock := serializeChromiumLaunches(t)
+	defer unlock()
 	discovery := NewDefaultChromeDiscovery()
 	controller := NewDefaultController(discovery)
 
@@ -179,9 +178,8 @@ func TestBrowserLaunch(t *testing.T) {
 
 // TestBrowserActions tests browser action execution
 func TestBrowserActions(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test (real chromium); SKIP-OK: #integration-tier-only — full-suite parallelism starves chromium launches; run under `go test` or `make test-full` to verify")
-	}
+	unlock := serializeChromiumLaunches(t)
+	defer unlock()
 	discovery := NewDefaultChromeDiscovery()
 	controller := NewDefaultController(discovery)
 	executor := NewDefaultActionExecutor(controller)
@@ -282,9 +280,8 @@ func TestBrowserActions(t *testing.T) {
 
 // TestScreenshot tests screenshot capture
 func TestScreenshot(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test (real chromium); SKIP-OK: #integration-tier-only — full-suite parallelism starves chromium launches; run under `go test` or `make test-full` to verify")
-	}
+	unlock := serializeChromiumLaunches(t)
+	defer unlock()
 	discovery := NewDefaultChromeDiscovery()
 	controller := NewDefaultController(discovery)
 	executor := NewDefaultActionExecutor(controller)
@@ -359,9 +356,8 @@ func TestConsoleMonitor(t *testing.T) {
 
 // TestBrowserTools tests the unified BrowserTools interface
 func TestBrowserTools(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test (real chromium); SKIP-OK: #integration-tier-only — full-suite parallelism starves chromium launches; run under `go test` or `make test-full` to verify")
-	}
+	unlock := serializeChromiumLaunches(t)
+	defer unlock()
 	tools := NewBrowserTools(nil)
 	assert.NotNil(t, tools)
 
@@ -441,9 +437,8 @@ func TestBrowserTools(t *testing.T) {
 // TestLegacyBrowserSession tests legacy browser session management.
 // (Renamed from TestBrowserSession in P2-F23 T03 alongside the type rename.)
 func TestLegacyBrowserSession(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test (real chromium); SKIP-OK: #integration-tier-only — full-suite parallelism starves chromium launches; run under `go test` or `make test-full` to verify")
-	}
+	unlock := serializeChromiumLaunches(t)
+	defer unlock()
 	tools := NewBrowserTools(nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()

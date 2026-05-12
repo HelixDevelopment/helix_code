@@ -637,22 +637,28 @@ func TestStreamingWithErrors(t *testing.T) {
 	var stdoutLines []string
 	var stderrLines []string
 
-	done := make(chan struct{})
+	stdoutDone := make(chan struct{})
+	stderrDone := make(chan struct{})
 	go func() {
 		for line := range exec.Stdout {
 			stdoutLines = append(stdoutLines, line)
 		}
-		close(done)
+		close(stdoutDone)
 	}()
 
 	go func() {
 		for line := range exec.Stderr {
 			stderrLines = append(stderrLines, line)
 		}
+		close(stderrDone)
 	}()
 
 	result := <-exec.Done
-	<-done
+	// Wait for BOTH stream collectors to finish before reading the
+	// slices they wrote to — otherwise a goroutine append races with
+	// the assertions below.
+	<-stdoutDone
+	<-stderrDone
 
 	assert.Equal(t, 1, result.ExitCode)
 	assert.True(t, len(stdoutLines) > 0 || strings.Contains(result.Stdout, "stdout"))

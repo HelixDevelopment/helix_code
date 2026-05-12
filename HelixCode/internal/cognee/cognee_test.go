@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1785,9 +1786,9 @@ func TestClientAPIKeyHeader(t *testing.T) {
 // TestClientConcurrency tests concurrent client operations
 func TestClientConcurrency(t *testing.T) {
 	t.Run("ConcurrentRequests", func(t *testing.T) {
-		requestCount := 0
+		var requestCount int64
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestCount++
+			atomic.AddInt64(&requestCount, 1)
 			time.Sleep(10 * time.Millisecond)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(DatasetsResponse{})
@@ -1810,7 +1811,7 @@ func TestClientConcurrency(t *testing.T) {
 		}
 
 		wg.Wait()
-		assert.Equal(t, 10, requestCount)
+		assert.Equal(t, int64(10), atomic.LoadInt64(&requestCount))
 	})
 }
 

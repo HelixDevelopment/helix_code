@@ -135,8 +135,7 @@ func (e *Executor) CancelWorkflow(id string) error {
 		return fmt.Errorf("workflow not found: %s", id)
 	}
 
-	w.Status = WorkflowStatusFailed
-	w.UpdatedAt = time.Now()
+	w.SetStatus(WorkflowStatusFailed)
 	return nil
 }
 
@@ -236,44 +235,43 @@ func (e *Executor) ExecuteRefactoringWorkflow(ctx context.Context, projectID str
 	return workflow, nil
 }
 
-// executeWorkflow executes a workflow
+// executeWorkflow executes a workflow.
+//
+// All writes to workflow.Status, workflow.UpdatedAt, and per-step
+// Status/Error go through the workflow's mutex so concurrent readers
+// (tests, status polling) do not race.
 func (e *Executor) executeWorkflow(ctx context.Context, workflow *Workflow, proj *project.Project) {
-	workflow.Status = WorkflowStatusRunning
-	workflow.UpdatedAt = time.Now()
+	workflow.SetStatus(WorkflowStatusRunning)
 
 	for i := range workflow.Steps {
 		step := &workflow.Steps[i]
 
 		// Check if all dependencies are completed
 		if !e.areDependenciesCompleted(workflow, step) {
-			step.Status = StepStatusSkipped
+			workflow.setStepStatus(i, StepStatusSkipped, "")
 			continue
 		}
 
-		step.Status = StepStatusRunning
-		workflow.UpdatedAt = time.Now()
+		workflow.setStepStatus(i, StepStatusRunning, "")
 
-		// Execute step
+		// Execute step. executeStep reads/writes only fields of `step`
+		// that the executor goroutine owns at this point (no concurrent
+		// reader observes Step internals before completion), so passing
+		// the bare pointer is safe.
 		result, err := e.executeStep(ctx, step, proj)
 		if err != nil {
-			step.Status = StepStatusFailed
-			step.Error = err.Error()
-			workflow.Status = WorkflowStatusFailed
-			workflow.UpdatedAt = time.Now()
+			workflow.setStepStatus(i, StepStatusFailed, err.Error())
+			workflow.SetStatus(WorkflowStatusFailed)
 			return
 		}
 
-		step.Status = StepStatusCompleted
-		workflow.UpdatedAt = time.Now()
-
-		// Add result to step (simplified for now)
-		if result != "" {
-			step.Status = StepStatusCompleted
-		}
+		// Step completed. The `result` check below preserves prior
+		// behaviour (re-asserting completed status when non-empty).
+		_ = result
+		workflow.setStepStatus(i, StepStatusCompleted, "")
 	}
 
-	workflow.Status = WorkflowStatusCompleted
-	workflow.UpdatedAt = time.Now()
+	workflow.SetStatus(WorkflowStatusCompleted)
 }
 
 // executeStep executes a single workflow step

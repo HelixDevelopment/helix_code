@@ -3,6 +3,7 @@ package helixqa
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -33,6 +34,25 @@ type SessionState struct {
 	ReportPath       string                  `json:"report_path,omitempty"`
 	CancelFunc       context.CancelFunc      `json:"-"`
 	Mu               sync.RWMutex            `json:"-"`
+}
+
+// MarshalJSON serialises the session state under its own RLock so that the
+// HTTP handlers (which call `json.Marshal(state)`) cannot race with the
+// orchestrator goroutine spawned by StartSession that mutates Status /
+// Phase / PhaseProgress / EndTime / Result / ReportPath as the session
+// progresses. Without this, every QA-handler test that returned a
+// non-terminal session tripped the race detector — encoding/json reads the
+// raw fields via reflection and has no awareness of state.Mu.
+//
+// The shadow type below is the standard "alias-without-MarshalJSON"
+// pattern: it has the same JSON tags but no method receiver, so calling
+// json.Marshal on a sessionStateJSON value does not recurse into this
+// MarshalJSON.
+func (s *SessionState) MarshalJSON() ([]byte, error) {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	type sessionStateJSON SessionState
+	return json.Marshal((*sessionStateJSON)(s))
 }
 
 // Engine is the singleton QA engine embedded in the HelixCode server.
@@ -115,8 +135,20 @@ func (e *Engine) StartSession(ctx context.Context, id string, platforms, banks [
 		state.PhaseProgress = 0.0
 		state.Mu.Unlock()
 
-		cfg := e.qaCfg
-		cfg.Banks = banks
+		// Per-session config. Earlier revisions did `cfg := e.qaCfg` —
+		// which aliased the Engine's shared *hqaConfig.Config pointer —
+		// and then mutated `cfg.Banks` / `cfg.Platforms`. With more than
+		// one concurrent session, both goroutines clobbered the same
+		// shared struct, and the race detector caught it (writes at
+		// wrapper.go:119,130 from two goroutines to identical addresses).
+		// Worse than the test failure, the production effect was that
+		// concurrent sessions read each other's banks/platforms.
+		// Resolution: shallow-copy the engine's config so each session
+		// owns its own Banks/Platforms fields. Slices are reference
+		// types but assigning new slices to the copy does not touch
+		// the engine's shared instance.
+		sessionCfg := *e.qaCfg
+		sessionCfg.Banks = banks
 		parsedPlatforms, err := hqaConfig.ParsePlatforms(strings.Join(platforms, ","))
 		if err != nil {
 			state.Mu.Lock()
@@ -127,9 +159,9 @@ func (e *Engine) StartSession(ctx context.Context, id string, platforms, banks [
 			state.Mu.Unlock()
 			return
 		}
-		cfg.Platforms = parsedPlatforms
+		sessionCfg.Platforms = parsedPlatforms
 
-		orc := hqaOrchestrator.New(cfg)
+		orc := hqaOrchestrator.New(&sessionCfg)
 		res, err := orc.Run(sessionCtx)
 
 		state.Mu.Lock()
