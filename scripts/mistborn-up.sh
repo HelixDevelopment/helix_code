@@ -47,6 +47,12 @@ sleep 1
 ssh -fN -o ServerAliveInterval=30 \
     -L 15432:127.0.0.1:5432 \
     -L 16379:127.0.0.1:6379 \
+    -L 16333:127.0.0.1:6333 \
+    -L 16334:127.0.0.1:6334 \
+    -L 18000:127.0.0.1:8000 \
+    -L 11434:127.0.0.1:11434 \
+    -L 19090:127.0.0.1:9090 \
+    -L 13000:127.0.0.1:3000 \
     "${REMOTE_USER}@${REMOTE_HOST}"
 
 # Verify tunnel sockets bound
@@ -59,6 +65,12 @@ echo
 echo "=== mistborn-up: ALL SERVICES UP AND TUNNELLED ==="
 echo "  Local 127.0.0.1:15432 -> mistborn-postgres"
 echo "  Local 127.0.0.1:16379 -> mistborn-redis"
+echo "  Local 127.0.0.1:16333 -> mistborn-qdrant (HTTP)"
+echo "  Local 127.0.0.1:16334 -> mistborn-qdrant (gRPC)"
+echo "  Local 127.0.0.1:18000 -> mistborn-chromadb"
+echo "  Local 127.0.0.1:11434 -> mistborn-ollama"
+echo "  Local 127.0.0.1:19090 -> mistborn-prometheus"
+echo "  Local 127.0.0.1:13000 -> mistborn-grafana"
 echo
 echo "Local HelixCode / HelixAgent connect to 127.0.0.1:<tunneled-port>"
 echo "as if these services were running locally."
