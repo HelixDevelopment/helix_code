@@ -77,19 +77,15 @@ if [ ! -d "$SESSION_DIR/evidence" ]; then
     echo "  FAIL: no evidence dir produced"; exit 1
 fi
 EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
-# 6 core endpoint checks + 7 deep-content / bluff-reproduction checks +
-# 5 auth-flow probes (HCQA-014..018) + 6 tasks-CRUD probes (HCQA-019..024) +
-# 5 system-list probes (HCQA-025..029) +
-# 2 project-create probes (HCQA-030..031) +
-# 1 worker-create probe (HCQA-032) +
-# 2 auth-refresh probes (HCQA-033..034) +
-# 1 sessions-create probe (HCQA-035) +
-# 3 task-lifecycle probes (HCQA-036 create, HCQA-037 checkpoints-array,
-#                          HCQA-038 retry-422) + 2 internal-step probes
-#                          (HCQA-038-PRE-START, HCQA-038-PRE-COMPLETE)
-# = 40 (35 + 3 + 2). Lower bound is 40; any fewer means coverage lost.
-if [ "$EV_COUNT" -lt 40 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 40)"; exit 1
+# Static-list checks: 6 core + 7 deep-content + 1 memory-bluff guard = 14.
+# Sequenced-flow checks: 5 auth (HCQA-014..018) + 6 tasks-CRUD
+# (HCQA-019..024) + 5 system-list (HCQA-025..029) + 2 project-create
+# (HCQA-030..031) + 1 worker-create (HCQA-032) + 2 auth-refresh
+# (HCQA-033..034) + 1 sessions-create (HCQA-035) + 3 task-lifecycle
+# (HCQA-036..038) + 2 internal-step (HCQA-038-PRE-*) = 27.
+# Total: 14 + 27 = 41 evidence files. Lower bound is 41.
+if [ "$EV_COUNT" -lt 41 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 41)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

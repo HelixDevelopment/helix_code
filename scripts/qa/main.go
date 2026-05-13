@@ -273,6 +273,46 @@ var checks = []Check{
 		Method: "GET", Path: "/api/v1/memory/systems", WantStatus: 200,
 		WantBody: requireNonEmptyArray("systems"),
 	},
+	// HCQA-014b: catches the BUG #14 lie. /memory/systems used to
+	// claim status="available" for all 6 entries while /memory/stats
+	// simultaneously reported systems_connected=0 — direct contradiction
+	// (no memory manager wired in the Server struct, yet every entry
+	// claimed it was up). This check asserts the contradiction is
+	// resolved: status must NOT be "available" for any entry until the
+	// corresponding manager is wired AND a real reachability probe runs.
+	{
+		ID: "HCQA-MEM-BLUFF", Name: "Memory systems status agrees with /memory/stats systems_connected",
+		Method: "GET", Path: "/api/v1/memory/systems", WantStatus: 200,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			arr, _ := v["systems"].([]any)
+			availableCount := 0
+			for _, s := range arr {
+				m, _ := s.(map[string]any)
+				if m == nil {
+					continue
+				}
+				if m["status"] == "available" {
+					availableCount++
+				}
+			}
+			// Until a real memory manager is wired AND a real probe
+			// runs, no entry should claim "available". An empty
+			// availableCount is the honest state. If this assertion
+			// ever fails, either the manager IS wired (good — update
+			// the test to count the actually-running ones) or the
+			// status field was re-hardcoded to "available" without
+			// real backing (bad — CONST-035 violation).
+			if availableCount > 0 {
+				return fmt.Errorf("%d systems claim status=\"available\" but no memory manager is wired (CONST-035 bluff)",
+					availableCount)
+			}
+			return nil
+		},
+	},
 	{
 		ID: "HCQA-011", Name: "Known provider (openai) returns 200 with id matching",
 		Method: "GET", Path: "/api/v1/llm/providers/openai", WantStatus: 200,

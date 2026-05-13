@@ -1170,15 +1170,42 @@ func verifiedModelToJSON(m *verifier.VerifiedModel) gin.H {
 
 // Memory System Handlers
 
-// listMemorySystems returns available memory systems
+// listMemorySystems returns the catalogue of known memory subsystems
+// with their real configuration status.
+//
+// Anti-bluff (CONST-035): the previous version hardcoded `status:
+// "available"` for all 6 entries regardless of whether any provider
+// was actually wired up. /memory/stats simultaneously reported
+// `systems_connected: 0` — a direct contradiction. Callers seeing
+// "6 systems available" but `systems_connected: 0` had no way to know
+// which fact to trust; in reality NONE of the providers had a manager
+// instance plumbed in this Server struct, so all 6 were stubs.
+//
+// New contract: the catalogue itself (id/name/type/description/features)
+// remains as the documented set of supported memory backends — that
+// data IS real (these are known software products HelixCode is
+// designed to integrate with). But `status` is derived from real
+// wiring state, not hardcoded. Until the corresponding manager is
+// instantiated and a reachability probe runs, status is
+// "not_configured" — which now agrees with `systems_connected: 0`.
 func (s *Server) listMemorySystems(c *gin.Context) {
+	// memoryStatus reports "available" only when the subsystem has a
+	// real manager instance bound to the Server. Today none are wired
+	// (the *cognee.Service field and memoryManager fields are nil in
+	// every code path that reaches this handler), so all entries
+	// return "not_configured". When real providers are wired they
+	// MUST replace this with a real reachability probe — NOT swap
+	// the literal back to "available".
+	memoryStatus := func(_id string) string {
+		return "not_configured"
+	}
 	systems := []gin.H{
 		{
 			"id":          "cognee",
 			"name":        "Cognee",
 			"type":        "knowledge_graph",
 			"description": "AI-powered knowledge graph for memory management",
-			"status":      "available",
+			"status":      memoryStatus("cognee"),
 			"features":    []string{"semantic_search", "context_retrieval", "optimization"},
 		},
 		{
@@ -1186,7 +1213,7 @@ func (s *Server) listMemorySystems(c *gin.Context) {
 			"name":        "Weaviate",
 			"type":        "vector_db",
 			"description": "Vector database for embeddings",
-			"status":      "available",
+			"status":      memoryStatus("weaviate"),
 			"features":    []string{"vector_search", "hybrid_search", "filtering"},
 		},
 		{
@@ -1194,7 +1221,7 @@ func (s *Server) listMemorySystems(c *gin.Context) {
 			"name":        "ChromaDB",
 			"type":        "vector_db",
 			"description": "Embedding database",
-			"status":      "available",
+			"status":      memoryStatus("chromadb"),
 			"features":    []string{"vector_search", "metadata_filtering"},
 		},
 		{
@@ -1202,7 +1229,7 @@ func (s *Server) listMemorySystems(c *gin.Context) {
 			"name":        "Qdrant",
 			"type":        "vector_db",
 			"description": "High-performance vector similarity search",
-			"status":      "available",
+			"status":      memoryStatus("qdrant"),
 			"features":    []string{"vector_search", "filtering", "payload_indexing"},
 		},
 		{
@@ -1210,7 +1237,7 @@ func (s *Server) listMemorySystems(c *gin.Context) {
 			"name":        "Mem0",
 			"type":        "memory_layer",
 			"description": "Memory layer for AI applications",
-			"status":      "available",
+			"status":      memoryStatus("mem0"),
 			"features":    []string{"user_memory", "session_memory", "agent_memory"},
 		},
 		{
@@ -1218,7 +1245,7 @@ func (s *Server) listMemorySystems(c *gin.Context) {
 			"name":        "Zep",
 			"type":        "memory_store",
 			"description": "Long-term memory for AI assistants",
-			"status":      "available",
+			"status":      memoryStatus("zep"),
 			"features":    []string{"conversation_history", "entity_extraction", "summarization"},
 		},
 	}
