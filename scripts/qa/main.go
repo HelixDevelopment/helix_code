@@ -1300,6 +1300,62 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-101..103: round-31 final-corner coverage.
+		// WebSocket /ws + screenshot + qa endpoints.
+
+		// HCQA-101: WebSocket /ws HTTP-probe must 400 (gorilla rejects
+		// non-upgrade GETs). Confirms the route is wired AND doesn't
+		// crash/serve content for a plain HTTP request.
+		ev, _, ok = authStep(client, dir, "HCQA-101",
+			"GET /ws without Upgrade header returns 400 (websocket route wired)",
+			"GET", base+"/ws", nil, nil, 400, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-102: /screenshot/engines returns 503 "QA engine is disabled"
+		// (intentional config gating — verifies the disabled-state is
+		// HONESTLY surfaced rather than a fake empty list).
+		ev, _, ok = authStep(client, dir, "HCQA-102",
+			"GET /screenshot/engines returns 503 (QA engine disabled — honest)",
+			"GET", base+"/api/v1/screenshot/engines", nil, auth, 503,
+			func(v map[string]any, raw []byte) error {
+				bodyStr := string(raw)
+				if !strings.Contains(strings.ToLower(bodyStr), "disabled") {
+					return fmt.Errorf("503 body does not mention disabled: %.200s", bodyStr)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-103: /qa/session POST returns 503 (QA engine disabled).
+		// Same anti-bluff principle: honestly disabled, not a fake stub.
+		ev, _, ok = authStep(client, dir, "HCQA-103",
+			"POST /qa/session returns 503 (QA engine disabled — honest)",
+			"POST", base+"/api/v1/qa/session",
+			map[string]any{"target": "localhost:8080"}, auth, 503,
+			func(v map[string]any, raw []byte) error {
+				bodyStr := string(raw)
+				if !strings.Contains(strings.ToLower(bodyStr), "disabled") {
+					return fmt.Errorf("503 body does not mention disabled: %.200s", bodyStr)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-098..100: round-30 — DELETE /users/me lifecycle + system/status.
 		// Catches any regression where account deactivation fails
 		// silently (DELETE returns 200 but login still works) — which
