@@ -83,10 +83,13 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 # 2 project-create probes (HCQA-030..031) +
 # 1 worker-create probe (HCQA-032) +
 # 2 auth-refresh probes (HCQA-033..034) +
-# 1 sessions-create probe (HCQA-035)
-# = 35. Lower bound is 35; any fewer means the qa harness lost coverage.
-if [ "$EV_COUNT" -lt 35 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 35)"; exit 1
+# 1 sessions-create probe (HCQA-035) +
+# 3 task-lifecycle probes (HCQA-036 create, HCQA-037 checkpoints-array,
+#                          HCQA-038 retry-422) + 2 internal-step probes
+#                          (HCQA-038-PRE-START, HCQA-038-PRE-COMPLETE)
+# = 40 (35 + 3 + 2). Lower bound is 40; any fewer means coverage lost.
+if [ "$EV_COUNT" -lt 40 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 40)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

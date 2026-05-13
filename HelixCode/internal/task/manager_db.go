@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -415,6 +416,18 @@ func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID strin
 	return nil
 }
 
+// ErrTaskNotRetryable is returned by RetryTask when the target task
+// doesn't exist, isn't in the failed state, or has exhausted its retry
+// budget. It is a CLIENT-side condition (the request asked for an
+// invalid state transition), NOT a server-side fault — handlers MUST
+// map it to a 4xx response, not a generic 500. Previously the function
+// returned an unstructured fmt.Errorf for the same condition, and the
+// handler couldn't distinguish "DB exec failed" from "wrong state",
+// returning 500 for both. CONST-035 territory: a 500 lies about the
+// nature of the problem (callers think the server is broken when
+// really their request was incompatible with task state).
+var ErrTaskNotRetryable = errors.New("task not found, not in failed state, or max retries exceeded")
+
 // RetryTask resets a failed task for retry
 func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {
 	taskID, err := uuid.Parse(id)
@@ -435,7 +448,7 @@ func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("task not found, not in failed state, or max retries exceeded: %s", id)
+		return fmt.Errorf("%w: %s", ErrTaskNotRetryable, id)
 	}
 
 	return nil

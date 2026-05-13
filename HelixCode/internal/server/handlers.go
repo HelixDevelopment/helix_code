@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -1764,6 +1765,13 @@ func (s *Server) getTaskCheckpoints(c *gin.Context) {
 		return
 	}
 
+	// JSON contract: list endpoint MUST return an array, not null.
+	// Same nil-slice→null serialization bluff as listTasks/Projects/Workers
+	// — 4th instance of this pattern. Default to empty slice.
+	if checkpoints == nil {
+		checkpoints = []map[string]interface{}{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "success",
 		"checkpoints": checkpoints,
@@ -1784,6 +1792,18 @@ func (s *Server) retryTask(c *gin.Context) {
 
 	err := s.taskManager.RetryTask(c.Request.Context(), id)
 	if err != nil {
+		// 422 Unprocessable Entity for client-state errors (task not
+		// found, not in failed state, or max-retries exceeded). 500
+		// for genuine server faults. The previous version returned
+		// 500 unconditionally — lying about the nature of the error.
+		if errors.Is(err, task.ErrTaskNotRetryable) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": "Task is not in a retryable state",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to retry task",

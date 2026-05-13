@@ -894,6 +894,98 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			failed++
 		}
 
+		// HCQA-036..038: task-lifecycle probes — exercise the start/
+		// complete/checkpoints endpoints on a fresh task. The checkpoints
+		// probe catches BUG #12 (4th instance of the nil-slice→null
+		// JSON contract bluff — checkpoints was null instead of []).
+		// The retry-on-wrong-state probe catches BUG #13 (retry on a
+		// completed task returned 500 — a server-error code lying about
+		// what was a client-side state error; now correctly 422).
+		lifecycleTaskBody := map[string]any{
+			"name":     "qa-lifecycle-probe",
+			"type":     "qa",
+			"priority": "high",
+		}
+		var createR map[string]any
+		ev, createR, ok = authStep(client, dir, "HCQA-036",
+			"Create task for lifecycle probe (201 + UUID)",
+			"POST", base+"/api/v1/tasks", lifecycleTaskBody, auth, 201,
+			func(v map[string]any, raw []byte) error {
+				t, _ := v["task"].(map[string]any)
+				if t == nil {
+					return fmt.Errorf("task field missing")
+				}
+				id, _ := t["id"].(string)
+				if len(id) < 32 {
+					return fmt.Errorf("task.id=%q too short to be a UUID", id)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		taskIDLC := ""
+		if t, _ := createR["task"].(map[string]any); t != nil {
+			taskIDLC, _ = t["id"].(string)
+		}
+
+		if taskIDLC != "" {
+			// HCQA-037: empty checkpoints returns [] (catches BUG #12).
+			ev, _, ok = authStep(client, dir, "HCQA-037",
+				"GET /tasks/:id/checkpoints returns array (not null)",
+				"GET", base+"/api/v1/tasks/"+taskIDLC+"/checkpoints",
+				nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					if !strings.Contains(string(raw), `"checkpoints":[`) {
+						return fmt.Errorf("checkpoints field is not a JSON array (raw=%.200s)",
+							string(raw))
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-038: start → complete → retry returns 422 (BUG #13).
+			// Both start + complete handlers strictly require a JSON
+			// body — pass an empty object explicitly so the gin
+			// ShouldBindJSON doesn't reject with 400 "EOF".
+			_, _, _ = authStep(client, dir, "HCQA-038-PRE-START",
+				"Start task for retry probe", "POST",
+				base+"/api/v1/tasks/"+taskIDLC+"/start",
+				map[string]any{}, auth, 200, nil)
+			_, _, _ = authStep(client, dir, "HCQA-038-PRE-COMPLETE",
+				"Complete task for retry probe", "POST",
+				base+"/api/v1/tasks/"+taskIDLC+"/complete",
+				map[string]any{}, auth, 200, nil)
+			ev, _, ok = authStep(client, dir, "HCQA-038",
+				"POST /tasks/:id/retry on a completed task returns 422 (not 500)",
+				"POST", base+"/api/v1/tasks/"+taskIDLC+"/retry", nil,
+				auth, 422,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "error" {
+						return fmt.Errorf("status=%v want \"error\"", v["status"])
+					}
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "retry") {
+						return fmt.Errorf("message %q does not mention retry", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-035: create session (requires a real project_id from
 		// the round-4 create-project probe + a valid Mode). Catches
 		// any regression where the sessions handler returns a session
