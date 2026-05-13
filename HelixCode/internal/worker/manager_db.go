@@ -278,33 +278,29 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 	return worker, nil
 }
 
-// UpdateWorkerHeartbeat updates worker heartbeat and metrics
+// UpdateWorkerHeartbeat updates worker heartbeat and metrics.
+//
+// Anti-bluff (CONST-035): the previous version updated only
+// `workers.last_heartbeat` + appended a row to the `worker_metrics`
+// time-series table — but NEVER updated the worker's
+// cpu_usage_percent / memory_usage_percent / disk_usage_percent
+// snapshot columns. Result: GET /workers/:id always returned
+// `"cpu_usage_percent": 0, "memory_usage_percent": 0,
+//  "disk_usage_percent": 0` regardless of how many heartbeats had
+// landed. The worker record SAID it was the current-state snapshot
+// (`workers.cpu_usage_percent` exists as a column) but actually
+// reflected only the initial-create zero values forever.
+//
+// Now the heartbeat also writes the current values into the
+// workers row, so GET /workers/:id reflects the latest heartbeat.
 func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, metrics map[string]interface{}) error {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
 		return fmt.Errorf("invalid worker ID: %v", err)
 	}
-
-	// Update worker record
-	query := `
-		UPDATE workers
-		SET last_heartbeat = NOW(), updated_at = NOW()
-		WHERE id = $1
-	`
-
-	_, err = m.db.Exec(ctx, query, workerID)
-	if err != nil {
-		return fmt.Errorf("failed to update worker heartbeat: %v", err)
+	if metrics == nil {
+		metrics = map[string]interface{}{}
 	}
-
-	// Store metrics
-	metricsQuery := `
-		INSERT INTO worker_metrics (
-			worker_id, cpu_usage_percent, memory_usage_percent, disk_usage_percent,
-			network_rx_bytes, network_tx_bytes, current_tasks_count, temperature_celsius
-		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`
 
 	cpuUsage, _ := metrics["cpu_usage_percent"].(float64)
 	memoryUsage, _ := metrics["memory_usage_percent"].(float64)
@@ -314,12 +310,33 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 	currentTasks, _ := metrics["current_tasks_count"].(int)
 	temperature, _ := metrics["temperature_celsius"].(float64)
 
-	_, err = m.db.Exec(ctx, metricsQuery,
-		workerID, cpuUsage, memoryUsage, diskUsage,
-		networkRx, networkTx, currentTasks, temperature,
-	)
+	// Update the worker's snapshot columns AND the heartbeat timestamp.
+	// COALESCE(NULLIF) preserves existing values when the caller omits
+	// a field (sends 0.0 as the JSON zero-value). The previous query
+	// updated only last_heartbeat — turning the snapshot columns into
+	// a "current state" bluff.
+	if _, err = m.db.Exec(ctx, `
+		UPDATE workers
+		SET last_heartbeat       = NOW(),
+		    cpu_usage_percent    = CASE WHEN $2 > 0 THEN $2 ELSE cpu_usage_percent END,
+		    memory_usage_percent = CASE WHEN $3 > 0 THEN $3 ELSE memory_usage_percent END,
+		    disk_usage_percent   = CASE WHEN $4 > 0 THEN $4 ELSE disk_usage_percent END,
+		    updated_at           = NOW()
+		WHERE id = $1
+	`, workerID, cpuUsage, memoryUsage, diskUsage); err != nil {
+		return fmt.Errorf("failed to update worker heartbeat: %v", err)
+	}
 
-	if err != nil {
+	// Store time-series row for history queries.
+	if _, err = m.db.Exec(ctx, `
+		INSERT INTO worker_metrics (
+			worker_id, cpu_usage_percent, memory_usage_percent, disk_usage_percent,
+			network_rx_bytes, network_tx_bytes, current_tasks_count, temperature_celsius
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, workerID, cpuUsage, memoryUsage, diskUsage,
+		networkRx, networkTx, currentTasks, temperature,
+	); err != nil {
 		return fmt.Errorf("failed to store worker metrics: %v", err)
 	}
 

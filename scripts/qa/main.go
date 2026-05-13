@@ -1201,6 +1201,60 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-HB-*: heartbeat metrics persistence to snapshot columns.
+		// Catches BUG #20: heartbeat updated workers.last_heartbeat +
+		// inserted into worker_metrics time-series table, but NEVER
+		// updated the worker's cpu_usage_percent / memory_usage_percent
+		// / disk_usage_percent snapshot columns. GET /workers/:id
+		// always returned 0 for those fields regardless of how many
+		// heartbeats had landed. Schema has the columns; handler
+		// claimed success without writing them.
+		hbWorker := fmt.Sprintf("qa-hb-w-%d", time.Now().UnixNano())
+		_, hbWResp, _ := authStep(client, dir, "HCQA-HB-PRE-W",
+			"Create worker for heartbeat-snapshot probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": hbWorker}, auth, 201, nil)
+		hbWID := ""
+		if w, _ := hbWResp["worker"].(map[string]any); w != nil {
+			hbWID, _ = w["id"].(string)
+		}
+		if hbWID != "" {
+			_, _, _ = authStep(client, dir, "HCQA-HB-PRE-BEAT",
+				"Send heartbeat with metrics",
+				"POST", base+"/api/v1/workers/"+hbWID+"/heartbeat",
+				map[string]any{"metrics": map[string]any{
+					"cpu_usage_percent":    75.0,
+					"memory_usage_percent": 60.0,
+					"disk_usage_percent":   40.0,
+				}}, auth, 200, nil)
+
+			// HCQA-057: GET /workers/:id reflects the heartbeat values
+			// in the snapshot columns (catches BUG #20).
+			ev, _, ok = authStep(client, dir, "HCQA-057",
+				"GET /workers/:id reflects heartbeat metrics in snapshot columns",
+				"GET", base+"/api/v1/workers/"+hbWID, nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					w, _ := v["worker"].(map[string]any)
+					if w == nil {
+						return fmt.Errorf("worker field missing")
+					}
+					cpu, _ := w["cpu_usage_percent"].(float64)
+					mem, _ := w["memory_usage_percent"].(float64)
+					disk, _ := w["disk_usage_percent"].(float64)
+					if cpu < 1 || mem < 1 || disk < 1 {
+						return fmt.Errorf("workers.cpu/mem/disk=%v/%v/%v — heartbeat metrics "+
+							"not reaching snapshot columns (BUG #20 regression)", cpu, mem, disk)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-CKPT-*: checkpoint persistence end-to-end.
 		// Catches BUG #19 — POST /tasks/:id/checkpoint used to return 201
 		// "success" with `_, _ = m.db.Exec(...)` silently discarding the
