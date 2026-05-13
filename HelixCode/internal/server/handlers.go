@@ -20,16 +20,30 @@ import (
 // Project Handlers
 
 func (s *Server) listProjects(c *gin.Context) {
-	// Get user ID from context - authentication required
-	userID := c.GetString("user_id")
-	if userID == "" {
+	// Pull user from context — authMiddleware stores the full *auth.User
+	// under key "user", not a string "user_id". The previous version
+	// looked up "user_id" via c.GetString, which is never set, so EVERY
+	// authenticated request to GET /api/v1/projects returned 401 even
+	// with a valid JWT. Real production bug: the canonical "list my
+	// projects" endpoint was unreachable for the entire deployment.
+	userValue, exists := c.Get("user")
+	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
 			"message": "Authentication required",
-			"error":   "user_id not found in context - please authenticate first",
+			"error":   "user not found in context - please authenticate first",
 		})
 		return
 	}
+	user, ok := userValue.(*auth.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Invalid user context",
+		})
+		return
+	}
+	userID := user.ID.String()
 
 	projects, err := s.projectManager.ListProjects(c.Request.Context(), userID)
 	if err != nil {
@@ -39,6 +53,12 @@ func (s *Server) listProjects(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	// JSON contract: list endpoint MUST return an array, not null.
+	// Same nil-slice→null serialization bluff as listTasks.
+	if projects == nil {
+		projects = []*project.Project{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

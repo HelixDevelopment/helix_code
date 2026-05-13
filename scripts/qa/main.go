@@ -799,8 +799,49 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
-		// HCQA-025: logout (renumbered from former HCQA-019).
+		// HCQA-025: list projects returns 200 with an array (not 401, not null).
+		// Anti-bluff: pre-fix, this endpoint returned 401 even with a
+		// valid JWT because listProjects looked up "user_id" via
+		// c.GetString while authMiddleware sets "user" as *auth.User.
+		// And even after the auth fix, an empty result serialized as
+		// null instead of []. Both fixed; this check now guards both.
 		ev, _, ok = authStep(client, dir, "HCQA-025",
+			"List projects returns array (not 401, not null)",
+			"GET", base+"/api/v1/projects", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				if !strings.Contains(string(raw), `"projects":[`) {
+					return fmt.Errorf("projects field is not a JSON array (raw head=%.200s)",
+						string(raw))
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-026: list sessions returns 200 with array.
+		ev, _, ok = authStep(client, dir, "HCQA-026",
+			"List sessions returns array",
+			"GET", base+"/api/v1/sessions", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				if !strings.Contains(string(raw), `"sessions":[`) {
+					return fmt.Errorf("sessions field is not a JSON array (raw head=%.200s)",
+						string(raw))
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-027: logout (renumbered from former HCQA-019/HCQA-025).
+		ev, _, ok = authStep(client, dir, "HCQA-027",
 			"Logout with valid token returns 200",
 			"POST", base+"/api/v1/auth/logout", nil, auth, 200,
 			func(v map[string]any, raw []byte) error {
