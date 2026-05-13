@@ -13,6 +13,7 @@ import (
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/verifier"
+	"dev.helix.code/internal/worker"
 	"dev.helix.code/internal/workflow"
 	"github.com/gin-gonic/gin"
 )
@@ -608,6 +609,12 @@ func (s *Server) listWorkers(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	// JSON contract: list endpoint MUST return an array, not null.
+	// Same nil-slice→null serialization bluff as listTasks / listProjects.
+	if workers == nil {
+		workers = []*worker.Worker{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -381,8 +381,21 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 
 		token := authHeader[len(bearerPrefix):]
 
-		// Verify JWT token
-		user, err := s.auth.VerifyJWT(token)
+		// Verify JWT token AND fetch the complete user from the database.
+		//
+		// VerifyJWT (the cheap variant) returns a stub User with ONLY
+		// {ID, Username, Email} populated from JWT claims — every other
+		// field (IsActive, IsVerified, MFAEnabled, DisplayName, LastLogin,
+		// timestamps) is zero-valued. That stub then propagates into
+		// /api/v1/users/me responses with `is_active:false` and
+		// `created_at:"0001-01-01T00:00:00Z"`, which is a CONST-035 bluff:
+		// callers think the user was "created in year 0001" or is "not
+		// active" while in reality the DB has the right state.
+		//
+		// VerifyJWTWithDB performs a single indexed UUID lookup AND
+		// rejects deactivated accounts (defense-in-depth — a JWT issued
+		// before account deactivation must not continue to authenticate).
+		user, err := s.auth.VerifyJWTWithDB(c.Request.Context(), token)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":  "error",

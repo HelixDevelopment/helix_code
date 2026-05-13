@@ -623,9 +623,18 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 	token, _ := loginResp["token"].(string)
 
 	// HCQA-017: /users/me with valid Bearer.
+	//
+	// Anti-bluff invariants (tightened 2026-05-13 after discovering the
+	// JWT-stub bug): the returned user must have REAL persisted state,
+	// not the minimal stub the previous middleware returned from JWT
+	// claims alone. Specifically:
+	//   - id/username match the registered user (caught the wrong-user
+	//     case already)
+	//   - is_active==true (not the zero-value `false` stub)
+	//   - created_at is non-zero (not "0001-01-01T00:00:00Z" stub)
 	if token != "" {
 		ev, _, ok := authStep(client, dir, "HCQA-017",
-			"Authenticated /users/me returns the same user",
+			"Authenticated /users/me returns the same user with real persisted state",
 			"GET", base+"/api/v1/users/me", nil,
 			map[string]string{"Authorization": "Bearer " + token}, 200,
 			func(v map[string]any, raw []byte) error {
@@ -639,6 +648,13 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 				}
 				if u["id"] != registeredID {
 					return fmt.Errorf("user.id=%v want %q", u["id"], registeredID)
+				}
+				if active, _ := u["is_active"].(bool); !active {
+					return fmt.Errorf("user.is_active=false — stub-from-JWT-claims bluff (real user IS active)")
+				}
+				ca, _ := u["created_at"].(string)
+				if ca == "" || strings.HasPrefix(ca, "0001-") {
+					return fmt.Errorf("user.created_at=%q — zero-value stub bluff", ca)
 				}
 				return nil
 			})
@@ -840,8 +856,51 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			failed++
 		}
 
-		// HCQA-027: logout (renumbered from former HCQA-019/HCQA-025).
+		// HCQA-027: list workers returns 200 with array (catches the
+		// same nil-slice→null JSON contract bluff in listWorkers as
+		// the listTasks/listProjects path).
 		ev, _, ok = authStep(client, dir, "HCQA-027",
+			"List workers returns array (not null)",
+			"GET", base+"/api/v1/workers", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				if !strings.Contains(string(raw), `"workers":[`) {
+					return fmt.Errorf("workers field is not a JSON array (raw head=%.200s)",
+						string(raw))
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-028: system stats endpoint returns expected sub-objects.
+		ev, _, ok = authStep(client, dir, "HCQA-028",
+			"System stats includes tasks + workers + system sub-objects",
+			"GET", base+"/api/v1/system/stats", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				s, _ := v["stats"].(map[string]any)
+				if s == nil {
+					return fmt.Errorf("stats field missing")
+				}
+				for _, k := range []string{"tasks", "workers", "system"} {
+					if _, ok := s[k]; !ok {
+						return fmt.Errorf("stats.%s missing", k)
+					}
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-029: logout (renumbered from former HCQA-019/HCQA-025/HCQA-027).
+		ev, _, ok = authStep(client, dir, "HCQA-029",
 			"Logout with valid token returns 200",
 			"POST", base+"/api/v1/auth/logout", nil, auth, 200,
 			func(v map[string]any, raw []byte) error {
