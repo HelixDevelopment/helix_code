@@ -48,6 +48,10 @@ GPTME_SCRIPTS=(
     "tests/e2e/challenges/gptme_subagent_role.sh"
     "tests/e2e/challenges/gptme_verifier_profile.sh"
     "tests/e2e/challenges/gptme_cache_coldness.sh"
+    # Live-server anti-bluff harness — exercises HelixCode HTTP endpoints
+    # against the mistborn-distributed stack with captured wire evidence.
+    # SKIPs gracefully when mistborn tunnels (:15432) aren't bound.
+    "tests/e2e/challenges/helix_qa_live_anti_bluff.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
