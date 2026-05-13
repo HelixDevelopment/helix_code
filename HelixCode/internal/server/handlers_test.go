@@ -705,27 +705,29 @@ func TestListProjects_WithoutProjectManager(t *testing.T) {
 // TestLogout_ValidToken is skipped - requires proper mock setup
 // See TestLogout_MissingToken for basic logout handler testing
 
-// TestRefreshToken_WithUserContext tests refresh with user in context
-func TestRefreshToken_WithUserContext(t *testing.T) {
+// TestRefreshToken_WithBearer tests refresh with an Authorization header.
+//
+// After the BUG #11 fix, refreshToken no longer reads from gin context
+// (the /auth group has no authMiddleware so c.Get("user") never had a
+// value to find). It now manually parses+verifies the Bearer token via
+// VerifyJWTWithDB, mirroring the logout handler's pattern.
+//
+// The previous test injected user-in-context via a stub middleware and
+// expected a 200 path; that codepath no longer exists. The test now
+// sends a (mockDB-unverifiable) Bearer and accepts 401 as the expected
+// response for that case — same pattern as TestCreateProject_ValidRequest
+// accepting 401 after BUG #8/#9.
+func TestRefreshToken_WithBearer(t *testing.T) {
 	server := setupTestServer(t)
-
-	router := gin.New()
-	router.POST("/api/v1/auth/refresh", func(c *gin.Context) {
-		// Set user in context
-		c.Set("user", &auth.User{
-			ID:       uuid.New(),
-			Username: "testuser",
-			Email:    "test@example.com",
-		})
-		server.refreshToken(c)
-	})
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/auth/refresh", nil)
-	router.ServeHTTP(w, req)
+	req.Header.Set("Authorization", "Bearer not-a-real-token")
+	server.router.ServeHTTP(w, req)
 
-	// Should succeed since user is in context
-	assert.Contains(t, []int{http.StatusOK, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
+	assert.Contains(t,
+		[]int{http.StatusOK, http.StatusUnauthorized, http.StatusInternalServerError, http.StatusServiceUnavailable},
+		w.Code)
 }
 
 // TestGetCurrentUser_WithContext tests getCurrentUser with user context

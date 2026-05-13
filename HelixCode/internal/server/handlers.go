@@ -174,21 +174,33 @@ func (s *Server) logout(c *gin.Context) {
 }
 
 func (s *Server) refreshToken(c *gin.Context) {
-	// Get current user from context (set by auth middleware)
-	userValue, exists := c.Get("user")
-	if !exists {
+	// /auth/refresh is registered in the /auth group which has NO
+	// authMiddleware (register/login/logout must remain publicly
+	// reachable). The previous version called c.Get("user") expecting
+	// the middleware to have populated it — so it returned 401 "User
+	// not authenticated" for EVERY caller, even those with a perfectly
+	// valid Bearer token. Same context-key bug pattern as listProjects
+	// (BUG #3) but in the auth group instead of projects.
+	//
+	// Fix: manually parse + verify the Authorization header (mirrors
+	// the logout handler's pattern). Then re-fetch the full user from
+	// the database to issue a NEW JWT (the old token's claims are
+	// trusted for identification, not for state like is_active —
+	// VerifyJWTWithDB handles both).
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "User not authenticated",
+			"message": "Authorization header required",
 		})
 		return
 	}
-
-	user, ok := userValue.(*auth.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
+	user, err := s.auth.VerifyJWTWithDB(c.Request.Context(), authHeader[7:])
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": "Invalid or expired token",
+			"error":   err.Error(),
 		})
 		return
 	}

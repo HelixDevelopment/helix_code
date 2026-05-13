@@ -932,6 +932,50 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			failed++
 		}
 
+		// HCQA-033: POST /auth/refresh with valid Bearer issues a new JWT.
+		// Pre-fix: refreshToken handler called c.Get("user") but the
+		// /auth group has NO authMiddleware (register/login must stay
+		// public) — every refresh attempt 401'd, even with a perfectly
+		// valid token. Same context-key bug pattern as listProjects
+		// (BUG #3). Now manually parses+verifies the Authorization
+		// header via VerifyJWTWithDB, mirroring logout's pattern.
+		// Note: JWT iat (issued-at) is in seconds-since-epoch. If login
+		// and refresh happen within the same second, the new JWT can
+		// be byte-identical to the old one — the timestamps + payload
+		// are the same. So we assert "valid JWT is returned" but do
+		// NOT assert "different from the input" (the pre-fix behavior
+		// was 401 regardless of input, so "valid 200 with eyJ token"
+		// is already sufficient evidence that the refresh path works).
+		ev, refreshResp, ok := authStep(client, dir, "HCQA-033",
+			"POST /auth/refresh with valid Bearer returns new JWT",
+			"POST", base+"/api/v1/auth/refresh", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				tok, _ := v["token"].(string)
+				if len(tok) < 32 || !strings.HasPrefix(tok, "eyJ") {
+					return fmt.Errorf("refresh token=%q is not a JWT", tok)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		_ = refreshResp
+
+		// HCQA-034: POST /auth/refresh with garbage Bearer must 401.
+		ev, _, ok = authStep(client, dir, "HCQA-034",
+			"POST /auth/refresh with garbage Bearer must return 401",
+			"POST", base+"/api/v1/auth/refresh", nil,
+			map[string]string{"Authorization": "Bearer garbage-token"}, 401, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-032: POST /workers with empty ssh_config + capabilities
 		// must succeed (catches the ssh_config/capabilities NOT NULL
 		// constraint violation — same pattern as the task_data NOT NULL

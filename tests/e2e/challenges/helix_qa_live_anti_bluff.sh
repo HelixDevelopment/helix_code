@@ -80,12 +80,13 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 # 6 core endpoint checks + 7 deep-content / bluff-reproduction checks +
 # 5 auth-flow probes (HCQA-014..018) + 6 tasks-CRUD probes (HCQA-019..024) +
 # 5 system-list probes (HCQA-025..029) +
-# 2 project-create probes (HCQA-030 unauth-rejection, HCQA-031 auth-create) +
-# 1 worker-create probe (HCQA-032 — catches ssh_config/capabilities
-#                       NOT NULL constraint violation)
-# = 32. Lower bound is 32; any fewer means the qa harness lost coverage.
-if [ "$EV_COUNT" -lt 32 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 32)"; exit 1
+# 2 project-create probes (HCQA-030..031) +
+# 1 worker-create probe (HCQA-032) +
+# 2 auth-refresh probes (HCQA-033 valid-bearer-issues-new-jwt,
+#                       HCQA-034 garbage-bearer-401)
+# = 34. Lower bound is 34; any fewer means the qa harness lost coverage.
+if [ "$EV_COUNT" -lt 34 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 34)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,
