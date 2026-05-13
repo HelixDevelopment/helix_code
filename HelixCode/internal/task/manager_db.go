@@ -99,7 +99,7 @@ func (m *DatabaseManager) CreateTask(ctx context.Context, name, description, tas
 func (m *DatabaseManager) GetTask(ctx context.Context, id string) (*Task, error) {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid task ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `
@@ -307,7 +307,7 @@ func (m *DatabaseManager) ListTasks(ctx context.Context) ([]*Task, error) {
 func (m *DatabaseManager) StartTask(ctx context.Context, id string) error {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `
@@ -333,7 +333,7 @@ func (m *DatabaseManager) StartTask(ctx context.Context, id string) error {
 func (m *DatabaseManager) CompleteTask(ctx context.Context, id string, result map[string]interface{}) error {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `
@@ -359,7 +359,7 @@ func (m *DatabaseManager) CompleteTask(ctx context.Context, id string, result ma
 func (m *DatabaseManager) FailTask(ctx context.Context, id, errorMessage string) error {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `
@@ -385,7 +385,7 @@ func (m *DatabaseManager) FailTask(ctx context.Context, id, errorMessage string)
 func (m *DatabaseManager) DeleteTask(ctx context.Context, id string) error {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `DELETE FROM distributed_tasks WHERE id = $1`
@@ -407,7 +407,7 @@ func (m *DatabaseManager) DeleteTask(ctx context.Context, id string) error {
 func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID string) error {
 	taskUUID, err := uuid.Parse(taskID)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	workerUUID, err := uuid.Parse(workerID)
@@ -462,11 +462,17 @@ var ErrTaskInvalidStateTransition = errors.New("task not in prerequisite state f
 // resource. CONST-035: a 500 lies about the nature of the problem.
 var ErrTaskNotFound = errors.New("task not found")
 
+// ErrInvalidTaskID is returned by every manager function whose first
+// step is `uuid.Parse(id)`. A malformed task id is CLIENT-side input
+// error → 400 Bad Request, NOT 500. Handlers MUST errors.Is-check
+// this sentinel before falling through to the generic 500 branch.
+var ErrInvalidTaskID = errors.New("invalid task ID")
+
 // RetryTask resets a failed task for retry
 func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {
 	taskID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `
@@ -516,7 +522,7 @@ var ErrCheckpointRequiresAssignment = errors.New("task must be assigned to a wor
 func (m *DatabaseManager) CreateCheckpoint(ctx context.Context, taskID string, checkpointName string, checkpointData map[string]interface{}) error {
 	taskUUID, err := uuid.Parse(taskID)
 	if err != nil {
-		return fmt.Errorf("invalid task ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 	if checkpointData == nil {
 		checkpointData = map[string]interface{}{}
@@ -576,7 +582,7 @@ func (m *DatabaseManager) CreateCheckpoint(ctx context.Context, taskID string, c
 func (m *DatabaseManager) GetCheckpoints(ctx context.Context, taskID string) ([]map[string]interface{}, error) {
 	taskUUID, err := uuid.Parse(taskID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid task ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `

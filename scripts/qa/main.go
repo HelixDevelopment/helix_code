@@ -1201,6 +1201,31 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-073: malformed UUID on DELETE /tasks returns 400 (BUG #27).
+		// Pre-fix: 500 with "invalid task ID: invalid UUID length: 10" —
+		// CONST-035 wrong-HTTP-code (5xx for client-input error).
+		// Introduced `task.ErrInvalidTaskID` sentinel + handler-level
+		// `respondInvalidID` helper that maps to 400 Bad Request.
+		ev, _, ok = authStep(client, dir, "HCQA-073",
+			"DELETE /tasks/<malformed-uuid> returns 400 (was 500)",
+			"DELETE", base+"/api/v1/tasks/not-a-uuid", nil, auth, 400,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "error" {
+					return fmt.Errorf("status=%v want \"error\"", v["status"])
+				}
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "invalid") {
+					return fmt.Errorf("message %q does not mention invalid input", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-071: duplicate hostname on worker create returns 409
 		// with NO postgres SQLSTATE / constraint-name leakage (catches
 		// BUG #25). Pre-fix: raw "duplicate key value violates unique

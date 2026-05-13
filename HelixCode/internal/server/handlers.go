@@ -19,6 +19,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// respondInvalidID returns true and writes a 400 Bad Request response
+// if err is a "malformed id" sentinel from any manager package. Used
+// at every handler that accepts :id parameters — pre-fix these all
+// returned 500 for what is plainly a 400 client-input error
+// (CONST-035 wrong-HTTP-code).
+func respondInvalidID(c *gin.Context, err error, what string) bool {
+	if errors.Is(err, task.ErrInvalidTaskID) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid task ID format",
+			"error":   err.Error(),
+		})
+		return true
+	}
+	_ = what
+	return false
+}
+
 // Project Handlers
 
 func (s *Server) listProjects(c *gin.Context) {
@@ -613,7 +631,11 @@ func (s *Server) deleteTask(c *gin.Context) {
 
 	err := s.taskManager.DeleteTask(c.Request.Context(), id)
 	if err != nil {
-		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		// 400 for malformed UUID; 404 for missing resource; 500 only
+		// for genuine DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
