@@ -262,7 +262,19 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 	return projects, nil
 }
 
-// UpdateProject updates project name and description in the database
+// UpdateProject updates project name and description in the database.
+//
+// Anti-bluff (CONST-035): the previous version's RETURNING clause
+// referenced `path` and `type` columns that DON'T EXIST in the
+// projects schema (`internal/database/database.go:333`). Real schema
+// columns are `workspace_path` (mapped to Project.Path in Go) and
+// `config` JSONB (which holds the project type under `config["type"]`,
+// matching how GetProject loads it). Every successful UPDATE hit 500
+// with "ERROR: column path does not exist (SQLSTATE 42703)" — the
+// canonical "rename a project" call was unreachable.
+//
+// Fixed to mirror GetProject's pattern: RETURNING workspace_path +
+// config, then extract type from config["type"] in Go.
 func (m *DatabaseManager) UpdateProject(ctx context.Context, projectID, name, description string) (*Project, error) {
 	query := `
 		UPDATE projects
@@ -270,29 +282,43 @@ func (m *DatabaseManager) UpdateProject(ctx context.Context, projectID, name, de
 		    description = COALESCE(NULLIF($2, ''), description),
 		    updated_at = $3
 		WHERE id = $4
-		RETURNING id, name, description, path, type, owner_id, created_at, updated_at, status, config
+		RETURNING id, name, description, workspace_path, owner_id, created_at, updated_at, status, config
 	`
 
-	var project Project
-	var ownerID, status string
+	var (
+		dbID          uuid.UUID
+		retName       string
+		retDesc       string
+		workspacePath string
+		ownerID       uuid.UUID
+		createdAt     time.Time
+		updatedAt     time.Time
+		status        string
+		config        map[string]interface{}
+	)
 	err := m.db.QueryRow(ctx, query, name, description, time.Now(), projectID).Scan(
-		&project.ID,
-		&project.Name,
-		&project.Description,
-		&project.Path,
-		&project.Type,
-		&ownerID,
-		&project.CreatedAt,
-		&project.UpdatedAt,
-		&status,
-		&project.Metadata,
+		&dbID, &retName, &retDesc, &workspacePath, &ownerID, &createdAt, &updatedAt, &status, &config,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update project: %v", err)
 	}
 
-	project.Active = status == "active"
-	return &project, nil
+	// Match GetProject's mapping: type lives inside config JSONB, not
+	// as its own column.
+	projectType, _ := config["type"].(string)
+	metadataMap, _ := config["metadata"].(map[string]interface{})
+
+	return &Project{
+		ID:          dbID.String(),
+		Name:        retName,
+		Description: retDesc,
+		Path:        workspacePath,
+		Type:        projectType,
+		Active:      status == "active",
+		Metadata:    m.convertToMetadata(metadataMap),
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+	}, nil
 }
 
 // UpdateProjectMetadata updates project metadata in the database

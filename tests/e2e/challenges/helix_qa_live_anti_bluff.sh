@@ -82,10 +82,12 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 # (HCQA-019..024) + 5 system-list (HCQA-025..029) + 2 project-create
 # (HCQA-030..031) + 1 worker-create (HCQA-032) + 2 auth-refresh
 # (HCQA-033..034) + 1 sessions-create (HCQA-035) + 3 task-lifecycle
-# (HCQA-036..038) + 2 internal-step (HCQA-038-PRE-*) = 27.
-# Total: 14 + 27 = 41 evidence files. Lower bound is 41.
-if [ "$EV_COUNT" -lt 41 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 41)"; exit 1
+# (HCQA-036..038) + 2 internal-step (HCQA-038-PRE-*) +
+# 4 project-update-lifecycle (HCQA-039 create, HCQA-040 update,
+#                             HCQA-041-DEL delete, HCQA-041 get-404) = 31.
+# Total: 14 + 31 = 45 evidence files. Lower bound is 45.
+if [ "$EV_COUNT" -lt 45 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 45)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

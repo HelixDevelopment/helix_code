@@ -1026,6 +1026,92 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-039..041: project lifecycle (update + delete + 404-after-delete).
+		// Catches BUG #15: PUT /projects/:id used a wrong column name
+		// (`path` instead of `workspace_path`, and a nonexistent `type`
+		// column) in the UPDATE ... RETURNING clause — every PUT
+		// returned 500 "column path does not exist (SQLSTATE 42703)".
+		// The renamed PR validates the column mapping by asserting that
+		// the response carries the new name + description.
+		projForLifecycleBody := map[string]any{
+			"name":        "qa-update-lifecycle",
+			"description": "original",
+			"path":        fmt.Sprintf("/tmp/qa-update-lifecycle-%d", time.Now().UnixNano()),
+			"type":        "go",
+		}
+		ev, projLcResp, ok := authStep(client, dir, "HCQA-039",
+			"Create project for update-lifecycle probe",
+			"POST", base+"/api/v1/projects", projForLifecycleBody, auth, 201,
+			func(v map[string]any, raw []byte) error {
+				p, _ := v["project"].(map[string]any)
+				if p == nil || p["id"] == nil {
+					return fmt.Errorf("project.id missing")
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		projLcID := ""
+		if p, _ := projLcResp["project"].(map[string]any); p != nil {
+			projLcID, _ = p["id"].(string)
+		}
+
+		if projLcID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-040",
+				"PUT /projects/:id renames and updates description (catches BUG #15)",
+				"PUT", base+"/api/v1/projects/"+projLcID,
+				map[string]any{"name": "qa-renamed", "description": "updated"},
+				auth, 200,
+				func(v map[string]any, raw []byte) error {
+					p, _ := v["project"].(map[string]any)
+					if p == nil {
+						return fmt.Errorf("project field missing")
+					}
+					if p["name"] != "qa-renamed" {
+						return fmt.Errorf("project.name=%v want \"qa-renamed\"", p["name"])
+					}
+					if p["description"] != "updated" {
+						return fmt.Errorf("project.description=%v want \"updated\"", p["description"])
+					}
+					// path must round-trip (proves workspace_path<->Path
+					// mapping in UpdateProject works as in GetProject)
+					if path, _ := p["path"].(string); path == "" {
+						return fmt.Errorf("project.path empty — UpdateProject column-mapping regression")
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-041: DELETE then GET → 404.
+			ev, _, ok = authStep(client, dir, "HCQA-041-DEL",
+				"DELETE /projects/:id returns 200",
+				"DELETE", base+"/api/v1/projects/"+projLcID, nil, auth, 200, nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+			ev, _, ok = authStep(client, dir, "HCQA-041",
+				"GET deleted project returns 404",
+				"GET", base+"/api/v1/projects/"+projLcID, nil, auth, 404, nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-035: create session (requires a real project_id from
 		// the round-4 create-project probe + a valid Mode). Catches
 		// any regression where the sessions handler returns a session
