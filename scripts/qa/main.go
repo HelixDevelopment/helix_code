@@ -1201,6 +1201,90 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-061..063: state-machine constraint enforcement (catches BUG #21).
+		// Pre-fix: complete-on-pending, start-on-running, complete-on-completed
+		// all returned 500 (server-error) for what are client-side state
+		// errors. Now they return 422 with a clear "prerequisite state"
+		// message via the ErrTaskInvalidStateTransition sentinel.
+		_, smTResp, _ := authStep(client, dir, "HCQA-061-PRE-CREATE",
+			"Create task for state-machine probe",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-state-machine", "type": "qa"}, auth, 201, nil)
+		smTID := ""
+		if t, _ := smTResp["task"].(map[string]any); t != nil {
+			smTID, _ = t["id"].(string)
+		}
+		if smTID != "" {
+			// HCQA-061: complete on pending task → 422 (catches BUG #21).
+			ev, _, ok = authStep(client, dir, "HCQA-061",
+				"POST /tasks/:id/complete on pending task returns 422 (not 500)",
+				"POST", base+"/api/v1/tasks/"+smTID+"/complete",
+				map[string]any{"result": map[string]any{}}, auth, 422,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "error" {
+						return fmt.Errorf("status=%v want \"error\"", v["status"])
+					}
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "running") {
+						return fmt.Errorf("message %q does not mention prerequisite state", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-062: start it (legitimate transition pending→running).
+			_, _, _ = authStep(client, dir, "HCQA-062-PRE-START",
+				"Start task for state-machine probe",
+				"POST", base+"/api/v1/tasks/"+smTID+"/start",
+				map[string]any{}, auth, 200, nil)
+			// HCQA-062: start AGAIN (already running) → 422.
+			ev, _, ok = authStep(client, dir, "HCQA-062",
+				"POST /tasks/:id/start on already-running task returns 422 (not 500)",
+				"POST", base+"/api/v1/tasks/"+smTID+"/start",
+				map[string]any{}, auth, 422,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "pending") {
+						return fmt.Errorf("message %q does not mention pending requirement", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-063: complete it then complete-again → 422.
+			_, _, _ = authStep(client, dir, "HCQA-063-PRE-COMPLETE",
+				"Complete task for state-machine probe",
+				"POST", base+"/api/v1/tasks/"+smTID+"/complete",
+				map[string]any{"result": map[string]any{}}, auth, 200, nil)
+			ev, _, ok = authStep(client, dir, "HCQA-063",
+				"POST /tasks/:id/complete on already-completed task returns 422 (not 500)",
+				"POST", base+"/api/v1/tasks/"+smTID+"/complete",
+				map[string]any{"result": map[string]any{}}, auth, 422,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "running") {
+						return fmt.Errorf("message %q does not mention running requirement", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-058..060: positive-coverage for state-accuracy invariants.
 		// These probe areas where bugs were FEARED but not found in
 		// round 17. Mechanically asserting the invariants now prevents

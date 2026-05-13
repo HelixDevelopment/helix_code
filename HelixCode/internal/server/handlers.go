@@ -1627,6 +1627,16 @@ func (s *Server) startTask(c *gin.Context) {
 
 	err := s.taskManager.StartTask(c.Request.Context(), id)
 	if err != nil {
+		// 422 for client-state errors (task not in pending state),
+		// 500 only for genuine DB faults.
+		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": "Task is not in the prerequisite state to start (must be pending)",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to start task",
@@ -1636,12 +1646,12 @@ func (s *Server) startTask(c *gin.Context) {
 	}
 
 	// Get the updated task
-	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+	t, _ := s.taskManager.GetTask(c.Request.Context(), id)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Task started successfully",
-		"task":    task,
+		"task":    t,
 	})
 }
 
@@ -1672,6 +1682,16 @@ func (s *Server) completeTask(c *gin.Context) {
 
 	err := s.taskManager.CompleteTask(c.Request.Context(), id, req.Result)
 	if err != nil {
+		// 422 for client-state errors (task not in running state),
+		// 500 only for genuine DB faults.
+		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": "Task is not in the prerequisite state to complete (must be running)",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to complete task",
@@ -1681,12 +1701,12 @@ func (s *Server) completeTask(c *gin.Context) {
 	}
 
 	// Get the updated task
-	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+	t, _ := s.taskManager.GetTask(c.Request.Context(), id)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Task completed successfully",
-		"task":    task,
+		"task":    t,
 	})
 }
 

@@ -322,7 +322,8 @@ func (m *DatabaseManager) StartTask(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("task not found or not in pending state: %s", id)
+		// Wrap the sentinel so handlers can map to 422 (not 500).
+		return fmt.Errorf("%w: task %s not in pending state", ErrTaskInvalidStateTransition, id)
 	}
 
 	return nil
@@ -336,7 +337,7 @@ func (m *DatabaseManager) CompleteTask(ctx context.Context, id string, result ma
 	}
 
 	query := `
-		UPDATE distributed_tasks 
+		UPDATE distributed_tasks
 		SET status = 'completed', result_data = $1, completed_at = NOW(), updated_at = NOW()
 		WHERE id = $2 AND status = 'running'
 	`
@@ -347,7 +348,8 @@ func (m *DatabaseManager) CompleteTask(ctx context.Context, id string, result ma
 	}
 
 	if execResult.RowsAffected() == 0 {
-		return fmt.Errorf("task not found or not in running state: %s", id)
+		// Wrap the sentinel so handlers can map to 422 (not 500).
+		return fmt.Errorf("%w: task %s not in running state", ErrTaskInvalidStateTransition, id)
 	}
 
 	return nil
@@ -440,6 +442,14 @@ func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID strin
 // nature of the problem (callers think the server is broken when
 // really their request was incompatible with task state).
 var ErrTaskNotRetryable = errors.New("task not found, not in failed state, or max retries exceeded")
+
+// ErrTaskInvalidStateTransition is returned by StartTask / CompleteTask
+// when the target task is not in the prerequisite state for the
+// requested transition (start requires pending; complete requires
+// running). Same CONST-035 reasoning as ErrTaskNotRetryable — client-
+// state errors must surface as 4xx, not 500. Handlers MUST errors.Is-
+// check this sentinel and return 422 Unprocessable Entity.
+var ErrTaskInvalidStateTransition = errors.New("task not in prerequisite state for the requested transition")
 
 // RetryTask resets a failed task for retry
 func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {

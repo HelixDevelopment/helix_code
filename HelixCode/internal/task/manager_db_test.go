@@ -319,8 +319,13 @@ func TestDatabaseManager_StartTaskNotFound(t *testing.T) {
 
 	err := dm.StartTask(ctx, taskID.String())
 
+	// The error now wraps ErrTaskInvalidStateTransition (round 18 fix).
+	// Assert via errors.Is for the disciplined check, then loosen the
+	// substring assertion to match the new message ("not in pending
+	// state" still appears).
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "task not found or not in pending state")
+	assert.ErrorIs(t, err, ErrTaskInvalidStateTransition)
+	assert.Contains(t, err.Error(), "not in pending state")
 	mockDB.AssertExpectations(t)
 }
 
@@ -385,8 +390,10 @@ func TestDatabaseManager_CompleteTaskNotRunning(t *testing.T) {
 
 	err := dm.CompleteTask(ctx, taskID.String(), result)
 
+	// Same round-18 sentinel wrapping as StartTask's not-in-state path.
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "task not found or not in running state")
+	assert.ErrorIs(t, err, ErrTaskInvalidStateTransition)
+	assert.Contains(t, err.Error(), "not in running state")
 	mockDB.AssertExpectations(t)
 }
 
