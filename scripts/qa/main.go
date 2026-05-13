@@ -27,9 +27,40 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
+
+// redactCredentials replaces JWT-shaped tokens and JSON `*_token` values
+// with REDACTED markers BEFORE the body is written to disk. The QA
+// harness only needs to prove a token was present and well-formed (e.g.,
+// starts with "eyJ"); it does NOT need to log the actual credential
+// value. Defense-in-depth per CONST-042 / §12.1 (No-Secret-Leak): even
+// gitignored on-disk artefacts must not contain real credentials.
+//
+// Patterns redacted (in order):
+//   - JWT tokens (eyJ-prefixed bearer headers + bodies)
+//   - JSON fields ending in `_token` / `token` with string values
+//   - JSON fields named `session_token`, `refresh_token`, `access_token`,
+//     `api_key`, `password`, `secret`
+var (
+	jwtRe        = regexp.MustCompile(`eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+`)
+	tokenFieldRe = regexp.MustCompile(`"(session_token|refresh_token|access_token|api_key|password|secret|token)"\s*:\s*"[^"]+"`)
+)
+
+func redactCredentials(s string) string {
+	s = jwtRe.ReplaceAllString(s, "eyJ.REDACTED.JWT")
+	s = tokenFieldRe.ReplaceAllStringFunc(s, func(m string) string {
+		i := strings.Index(m, ":")
+		if i < 0 {
+			return m
+		}
+		field := strings.TrimSpace(m[:i])
+		return field + ": \"[REDACTED]\""
+	})
+	return s
+}
 
 type Check struct {
 	ID         string
@@ -337,7 +368,7 @@ func main() {
 		resp.Body.Close()
 		ev.Status = resp.StatusCode
 		ev.BodyBytes = len(body)
-		ev.BodyHead = string(body)
+		ev.BodyHead = redactCredentials(string(body))
 		if len(ev.BodyHead) > 600 {
 			ev.BodyHead = ev.BodyHead[:600] + "...(truncated)"
 		}
@@ -453,7 +484,7 @@ func authStep(client *http.Client, dir, id, name, method, url string,
 	raw, _ := io.ReadAll(resp.Body)
 	ev.Status = resp.StatusCode
 	ev.BodyBytes = len(raw)
-	ev.BodyHead = string(raw)
+	ev.BodyHead = redactCredentials(string(raw))
 	if len(ev.BodyHead) > 600 {
 		ev.BodyHead = ev.BodyHead[:600] + "...(truncated)"
 	}
