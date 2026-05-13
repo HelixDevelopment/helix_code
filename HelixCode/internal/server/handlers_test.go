@@ -351,6 +351,31 @@ func TestGetLLMProvider(t *testing.T) {
 	assert.Contains(t, provider, "status")
 }
 
+// TestGetLLMProvider_UnknownIDReturns404 reproduces and guards against
+// the CONST-035 / BLUFF-002 bluff where /api/v1/llm/providers/:id
+// returned a fabricated "available" stub for any arbitrary id — even
+// "does-not-exist-xyz" — silently lying about platform state.
+// After the fix in handlers.go, unknown IDs MUST return 404.
+func TestGetLLMProvider_UnknownIDReturns404(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/llm/providers/:id", server.getLLMProvider)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/llm/providers/does-not-exist-xyz", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code,
+		"unknown provider must 404 — fabricated stub responses are a CONST-035 bluff")
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "error", response["status"])
+	assert.Contains(t, response["error"], "does-not-exist-xyz")
+}
+
 func TestListLLMModels(t *testing.T) {
 	server := setupTestServer(t)
 

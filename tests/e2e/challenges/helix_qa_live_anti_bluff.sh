@@ -77,8 +77,10 @@ if [ ! -d "$SESSION_DIR/evidence" ]; then
     echo "  FAIL: no evidence dir produced"; exit 1
 fi
 EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
-if [ "$EV_COUNT" -lt 6 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 6)"; exit 1
+# 6 core endpoint checks + 7 deep-content / bluff-reproduction checks = 13.
+# Lower bound is 13; any fewer means the qa harness lost coverage.
+if [ "$EV_COUNT" -lt 13 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 13)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

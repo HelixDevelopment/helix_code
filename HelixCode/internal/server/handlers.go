@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -952,14 +953,22 @@ func capitalize(s string) string {
 	return string(s[0]-32) + s[1:]
 }
 
-// getLLMProvider returns details for a specific LLM provider
+// getLLMProvider returns details for a specific LLM provider.
+//
+// Anti-bluff (CONST-035 / CONST-037 / BLUFF-002): unknown provider IDs
+// MUST return 404, not a fabricated "available" stub. Returning success
+// for `/api/v1/llm/providers/typo-xyz` is the same class of bug as
+// hardcoded model lists — it lies to the caller about platform state.
+// The legitimate provider set is sourced from the verifier (priority 1)
+// and the constitutional fallback set (priority 2). Anything outside
+// that set is genuinely unknown.
 func (s *Server) getLLMProvider(c *gin.Context) {
 	providerID := c.Param("id")
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	// Try verifier first
+	// Priority 1: verifier — return verified models for this provider.
 	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
 		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
 		if err == nil {
@@ -986,7 +995,25 @@ func (s *Server) getLLMProvider(c *gin.Context) {
 		}
 	}
 
-	// Fallback
+	// Priority 2: constitutional fallback set (CONST-035).
+	knownProviders := make(map[string]bool)
+	for _, m := range verifier.FallbackModels {
+		knownProviders[m.Provider] = true
+	}
+	if !knownProviders[providerID] {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status": "error",
+			"error":  fmt.Sprintf("unknown LLM provider: %s", providerID),
+		})
+		return
+	}
+
+	var fallbackModels []gin.H
+	for _, m := range verifier.FallbackModels {
+		if m.Provider == providerID {
+			fallbackModels = append(fallbackModels, verifiedModelToJSON(m))
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
 		"provider": gin.H{
@@ -996,6 +1023,8 @@ func (s *Server) getLLMProvider(c *gin.Context) {
 			"configured":  true,
 			"description": "LLM Provider",
 			"source":      "fallback",
+			"models":      fallbackModels,
+			"model_count": len(fallbackModels),
 		},
 	})
 }

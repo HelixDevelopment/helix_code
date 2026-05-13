@@ -89,6 +89,63 @@ func requireDeepJSONPath(path ...string) func([]byte) error {
 	}
 }
 
+// requireDeepJSONValue asserts the value at path equals want (any-typed eq).
+func requireDeepJSONValue(want any, path ...string) func([]byte) error {
+	return func(body []byte) error {
+		var v any
+		if err := json.Unmarshal(body, &v); err != nil {
+			return fmt.Errorf("body not JSON: %w", err)
+		}
+		cur := v
+		for _, p := range path {
+			m, ok := cur.(map[string]any)
+			if !ok {
+				return fmt.Errorf("not a map at segment %q", p)
+			}
+			next, ok := m[p]
+			if !ok {
+				return fmt.Errorf("missing field %q", p)
+			}
+			cur = next
+		}
+		if fmt.Sprintf("%v", cur) != fmt.Sprintf("%v", want) {
+			return fmt.Errorf("at %v: got %v (%T), want %v (%T)",
+				path, cur, cur, want, want)
+		}
+		return nil
+	}
+}
+
+// requireNonEmptyArray asserts the value at path is a non-empty []any.
+func requireNonEmptyArray(path ...string) func([]byte) error {
+	return func(body []byte) error {
+		var v any
+		if err := json.Unmarshal(body, &v); err != nil {
+			return fmt.Errorf("body not JSON: %w", err)
+		}
+		cur := v
+		for _, p := range path {
+			m, ok := cur.(map[string]any)
+			if !ok {
+				return fmt.Errorf("not a map at segment %q", p)
+			}
+			next, ok := m[p]
+			if !ok {
+				return fmt.Errorf("missing field %q", p)
+			}
+			cur = next
+		}
+		arr, ok := cur.([]any)
+		if !ok {
+			return fmt.Errorf("at %v: not an array (got %T)", path, cur)
+		}
+		if len(arr) == 0 {
+			return fmt.Errorf("at %v: array is empty (count=0 is a bluff for a populated platform)", path)
+		}
+		return nil
+	}
+}
+
 var checks = []Check{
 	{
 		ID: "HCQA-001", Name: "Health check returns healthy status",
@@ -155,6 +212,84 @@ var checks = []Check{
 			s := strings.TrimSpace(string(b))
 			if !strings.HasPrefix(s, "{") && !strings.HasPrefix(s, "[") {
 				return fmt.Errorf("body not JSON-shaped, head=%q", s[:min(80, len(s))])
+			}
+			return nil
+		},
+	},
+
+	// Deep-content checks — added 2026-05-13 after discovering that
+	// "JSON-shape only" assertions pass for a server that returns
+	// {"status":"ok","providers":[]}, which is a populated-platform
+	// bluff. CONST-035 requires real evidence of working data.
+	{
+		ID: "HCQA-007", Name: "Server info reports database.connected==true",
+		Method: "GET", Path: "/api/v1/server/info", WantStatus: 200,
+		WantBody: requireDeepJSONValue(true, "info", "database", "connected"),
+	},
+	{
+		ID: "HCQA-008", Name: "LLM providers list is non-empty",
+		Method: "GET", Path: "/api/v1/llm/providers", WantStatus: 200,
+		WantBody: requireNonEmptyArray("providers"),
+	},
+	{
+		ID: "HCQA-009", Name: "LLM models list is non-empty",
+		Method: "GET", Path: "/api/v1/llm/models", WantStatus: 200,
+		WantBody: requireNonEmptyArray("models"),
+	},
+	{
+		ID: "HCQA-010", Name: "Memory systems list is non-empty",
+		Method: "GET", Path: "/api/v1/memory/systems", WantStatus: 200,
+		WantBody: requireNonEmptyArray("systems"),
+	},
+	{
+		ID: "HCQA-011", Name: "Known provider (openai) returns 200 with id matching",
+		Method: "GET", Path: "/api/v1/llm/providers/openai", WantStatus: 200,
+		WantBody: requireDeepJSONValue("openai", "provider", "id"),
+	},
+
+	// Anti-bluff bug-reproduction check — added 2026-05-13.
+	// Verifies the BLUFF-002-class fix in handlers.go:getLLMProvider:
+	// unknown provider IDs MUST return 404, not a fabricated
+	// "status: available" stub. Pre-fix the server returned 200 for
+	// "does-not-exist-xyz" which silently lied about platform state.
+	{
+		ID: "HCQA-012", Name: "Unknown provider 404 (BLUFF-002 reproduction)",
+		Method: "GET", Path: "/api/v1/llm/providers/does-not-exist-xyz",
+		WantStatus: 404,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			if v["status"] != "error" {
+				return fmt.Errorf("status field=%v, want \"error\"", v["status"])
+			}
+			es, _ := v["error"].(string)
+			if !strings.Contains(es, "does-not-exist-xyz") {
+				return fmt.Errorf("error %q does not mention the bogus id", es)
+			}
+			return nil
+		},
+	},
+	{
+		ID: "HCQA-013", Name: "Metrics endpoint includes resources.goroutines>0",
+		Method: "GET", Path: "/api/v1/metrics", WantStatus: 200,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			m, _ := v["metrics"].(map[string]any)
+			if m == nil {
+				return fmt.Errorf("metrics field missing or wrong type")
+			}
+			r, _ := m["resources"].(map[string]any)
+			if r == nil {
+				return fmt.Errorf("metrics.resources missing")
+			}
+			g, _ := r["goroutines"].(float64)
+			if g < 1 {
+				return fmt.Errorf("goroutines=%v, must be >0 for a live process", g)
 			}
 			return nil
 		},
