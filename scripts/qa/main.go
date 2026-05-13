@@ -1201,6 +1201,59 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-065..069: 5 endpoints that previously returned HTTP 500
+		// for "resource not found" (a client-side missing-id error)
+		// now correctly return 404. Catches BUG #23.
+		bogusID := "00000000-0000-0000-0000-000000000000"
+		ev, _, ok = authStep(client, dir, "HCQA-065",
+			"DELETE /tasks/<bogus> returns 404 (was 500)",
+			"DELETE", base+"/api/v1/tasks/"+bogusID, nil, auth, 404,
+			nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-066",
+			"POST /tasks/<bogus>/fail returns 404 (was 500)",
+			"POST", base+"/api/v1/tasks/"+bogusID+"/fail",
+			map[string]any{"error_message": "qa-bogus"}, auth, 404, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-067",
+			"DELETE /workers/<bogus> returns 404 (was 500)",
+			"DELETE", base+"/api/v1/workers/"+bogusID, nil, auth, 404, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-068",
+			"PUT /workers/<bogus> returns 404 (was 500)",
+			"PUT", base+"/api/v1/workers/"+bogusID,
+			map[string]any{"display_name": "x"}, auth, 404, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-069",
+			"DELETE /sessions/<bogus> returns 404 (was 500)",
+			"DELETE", base+"/api/v1/sessions/session-bogus-id", nil, auth, 404, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-064: re-assign an already-assigned task returns 422 (catches BUG #23).
 		// Same state-machine sentinel family as BUG #21 (start/complete) and
 		// BUG #13 (retry). AssignTask now wraps ErrTaskInvalidStateTransition.

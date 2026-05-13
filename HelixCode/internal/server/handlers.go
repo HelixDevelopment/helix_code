@@ -613,6 +613,15 @@ func (s *Server) deleteTask(c *gin.Context) {
 
 	err := s.taskManager.DeleteTask(c.Request.Context(), id)
 	if err != nil {
+		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		if errors.Is(err, task.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Task not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to delete task",
@@ -1444,8 +1453,17 @@ func (s *Server) updateWorker(c *gin.Context) {
 		return
 	}
 
-	worker, err := s.workerManager.UpdateWorker(c.Request.Context(), id, req.Hostname, req.DisplayName, req.Capabilities, req.MaxConcurrentTasks)
+	w, err := s.workerManager.UpdateWorker(c.Request.Context(), id, req.Hostname, req.DisplayName, req.Capabilities, req.MaxConcurrentTasks)
 	if err != nil {
+		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		if errors.Is(err, worker.ErrWorkerNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Worker not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to update worker",
@@ -1456,7 +1474,7 @@ func (s *Server) updateWorker(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"worker": worker,
+		"worker": w,
 	})
 }
 
@@ -1474,6 +1492,15 @@ func (s *Server) deleteWorker(c *gin.Context) {
 
 	err := s.workerManager.DeleteWorker(c.Request.Context(), id)
 	if err != nil {
+		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		if errors.Is(err, worker.ErrWorkerNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Worker not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to delete worker",
@@ -1748,6 +1775,15 @@ func (s *Server) failTask(c *gin.Context) {
 
 	err := s.taskManager.FailTask(c.Request.Context(), id, req.ErrorMessage)
 	if err != nil {
+		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		if errors.Is(err, task.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Task not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to mark task as failed",
@@ -1757,12 +1793,12 @@ func (s *Server) failTask(c *gin.Context) {
 	}
 
 	// Get the updated task
-	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+	t, _ := s.taskManager.GetTask(c.Request.Context(), id)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Task marked as failed",
-		"task":    task,
+		"task":    t,
 	})
 }
 
@@ -2089,6 +2125,15 @@ func (s *Server) deleteSession(c *gin.Context) {
 
 	err := s.sessionManager.Delete(id)
 	if err != nil {
+		// 404 for missing-resource errors; 500 only for genuine faults.
+		if errors.Is(err, session.ErrSessionNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Session not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to delete session",

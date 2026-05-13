@@ -374,7 +374,8 @@ func (m *DatabaseManager) FailTask(ctx context.Context, id, errorMessage string)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("task not found: %s", id)
+		// Wrap sentinel so handler can map to 404 instead of 500.
+		return fmt.Errorf("%w: %s", ErrTaskNotFound, id)
 	}
 
 	return nil
@@ -395,7 +396,8 @@ func (m *DatabaseManager) DeleteTask(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("task not found: %s", id)
+		// Wrap sentinel so handler can map to 404 instead of 500.
+		return fmt.Errorf("%w: %s", ErrTaskNotFound, id)
 	}
 
 	return nil
@@ -453,6 +455,12 @@ var ErrTaskNotRetryable = errors.New("task not found, not in failed state, or ma
 // state errors must surface as 4xx, not 500. Handlers MUST errors.Is-
 // check this sentinel and return 422 Unprocessable Entity.
 var ErrTaskInvalidStateTransition = errors.New("task not in prerequisite state for the requested transition")
+
+// ErrTaskNotFound is returned by DeleteTask / FailTask when the
+// target task doesn't exist (RowsAffected==0 with no state filter).
+// 404 Not Found, NOT 500 — the client asked for a non-existent
+// resource. CONST-035: a 500 lies about the nature of the problem.
+var ErrTaskNotFound = errors.New("task not found")
 
 // RetryTask resets a failed task for retry
 func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {

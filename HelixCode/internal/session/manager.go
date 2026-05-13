@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -10,6 +11,12 @@ import (
 	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/llm/compression"
 )
+
+// ErrSessionNotFound is returned when a session lookup by id fails.
+// Handlers MUST errors.Is-check this sentinel and return 404, not 500
+// (CONST-035: 500 lies about the nature of a client-side missing-
+// resource error).
+var ErrSessionNotFound = errors.New("session not found")
 
 // Manager manages development sessions
 type Manager struct {
@@ -121,7 +128,7 @@ func (m *Manager) Start(sessionID string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status == StatusCompleted {
@@ -168,7 +175,7 @@ func (m *Manager) Pause(sessionID string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status != StatusActive {
@@ -206,7 +213,7 @@ func (m *Manager) Resume(sessionID string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status != StatusPaused {
@@ -249,7 +256,7 @@ func (m *Manager) Complete(sessionID string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status == StatusCompleted {
@@ -288,7 +295,7 @@ func (m *Manager) Fail(sessionID string, reason string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	session.Status = StatusFailed
@@ -318,7 +325,7 @@ func (m *Manager) Delete(sessionID string) error {
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	// Don't delete active session
@@ -635,7 +642,7 @@ func (m *Manager) NoteUserMessage(sessionID string) error {
 	defer m.mu.Unlock()
 
 	if _, exists := m.sessions[sessionID]; !exists {
-		return fmt.Errorf("session not found: %s", sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if m.thrashingGuard != nil {

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,6 +10,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
+
+// Note: ErrWorkerNotFound is declared in memory_repository.go; we
+// reuse it here for the DB-manager paths so handlers can errors.Is-
+// check a single sentinel regardless of which manager produced the
+// error. CONST-035: 500 lies about the nature of a missing-resource
+// problem; handlers MUST map this sentinel to 404 Not Found.
 
 // DatabaseManager handles worker lifecycle and operations with database persistence
 type DatabaseManager struct {
@@ -406,6 +413,12 @@ func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname,
 	)
 
 	if err != nil {
+		// pgx.ErrNoRows means the WHERE id = $5 matched nothing — the
+		// worker doesn't exist. Surface as ErrWorkerNotFound so the
+		// handler can return 404 instead of 500.
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %s", ErrWorkerNotFound, id)
+		}
 		return nil, fmt.Errorf("failed to update worker: %v", err)
 	}
 
@@ -467,7 +480,8 @@ func (m *DatabaseManager) DeleteWorker(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("worker not found: %s", id)
+		// Wrap sentinel so handler can map to 404 instead of 500.
+		return fmt.Errorf("%w: %s", ErrWorkerNotFound, id)
 	}
 
 	return nil

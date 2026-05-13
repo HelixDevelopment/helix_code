@@ -88,11 +88,11 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 #                                      HCQA-048 assign, HCQA-049 round-trip,
 #                                      HCQA-050 heartbeat) = 61 evidence files.
 # Lower bound is 61.
-# Plus 6 checkpoint-lifecycle + 3 heartbeat-snapshot + 9 state-accuracy
-# + 6 state-machine + 5 reassign-422 (HCQA-064-PRE-TASK, HCQA-064-PRE-W1,
-# HCQA-064-PRE-W2, HCQA-064-PRE-ASSIGN1, HCQA-064 reassign-422) = 95.
-if [ "$EV_COUNT" -lt 95 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 95)"; exit 1
+# Plus 5 not-found-→-404 (HCQA-065 delete-task, HCQA-066 fail-task,
+# HCQA-067 delete-worker, HCQA-068 put-worker, HCQA-069 delete-session)
+# = 100. Lower bound is 100; any fewer means coverage lost.
+if [ "$EV_COUNT" -lt 100 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 100)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,
