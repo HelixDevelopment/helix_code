@@ -215,6 +215,26 @@ func (m *DatabaseManager) ListWorkers(ctx context.Context) ([]*Worker, error) {
 
 // RegisterWorker registers a new worker in the system
 func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayName string, sshConfig map[string]interface{}, capabilities []string, resources map[string]interface{}) (*Worker, error) {
+	// ssh_config is JSONB NOT NULL in the workers schema. When the caller
+	// omits ssh_config (or sends an empty body), it arrives as a nil map,
+	// which pgx serializes to SQL NULL — triggering a "null value in
+	// column ssh_config violates not-null constraint" 500 at INSERT
+	// time. Same pattern as the task_data NOT NULL bug in
+	// internal/task/manager_db.go:CreateTask. Default to empty JSON
+	// object at the persistence constructor so the schema invariant
+	// always holds. capabilities is a text[] column that pgx handles
+	// nil-as-empty-array correctly, so no equivalent fix needed there.
+	if sshConfig == nil {
+		sshConfig = map[string]interface{}{}
+	}
+	// capabilities is TEXT[] NOT NULL DEFAULT '{}' — but the INSERT
+	// explicitly passes the value, so the column DEFAULT never applies.
+	// A nil []string in Go marshals to SQL NULL via pgx, violating the
+	// NOT NULL constraint. Default to empty slice.
+	if capabilities == nil {
+		capabilities = []string{}
+	}
+
 	worker := &Worker{
 		ID:                 uuid.New(),
 		Hostname:           hostname,

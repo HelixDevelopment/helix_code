@@ -932,6 +932,38 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			failed++
 		}
 
+		// HCQA-032: POST /workers with empty ssh_config + capabilities
+		// must succeed (catches the ssh_config/capabilities NOT NULL
+		// constraint violation — same pattern as the task_data NOT NULL
+		// bug). Pre-fix this was a 500 "null value violates not-null"
+		// from postgres; post-fix the manager defaults nil to empty.
+		workerHost := fmt.Sprintf("qa-worker-%d", time.Now().UnixNano())
+		ev, _, ok = authStep(client, dir, "HCQA-032",
+			"POST /workers with empty ssh_config + capabilities returns 201",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": workerHost, "display_name": "qa-worker"},
+			auth, 201,
+			func(v map[string]any, raw []byte) error {
+				w, _ := v["worker"].(map[string]any)
+				if w == nil {
+					return fmt.Errorf("worker field missing")
+				}
+				id, _ := w["id"].(string)
+				if len(id) < 32 {
+					return fmt.Errorf("worker.id=%q too short to be a UUID", id)
+				}
+				if w["hostname"] != workerHost {
+					return fmt.Errorf("worker.hostname=%v != %q", w["hostname"], workerHost)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-028: system stats endpoint returns expected sub-objects.
 		ev, _, ok = authStep(client, dir, "HCQA-028",
 			"System stats includes tasks + workers + system sub-objects",
