@@ -88,12 +88,10 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 #                                      HCQA-048 assign, HCQA-049 round-trip,
 #                                      HCQA-050 heartbeat) = 61 evidence files.
 # Lower bound is 61.
-# Plus HCQA-089 (worker-metrics-malformed-400) + HCQA-090 (register-
-# overlong-400 + anti-leak) + HCQA-091-PRE-CREATE + HCQA-091 (SQL
-# injection defense — workers list still returns array after the
-# attempted DROP TABLE) = 124 evidence files.
-if [ "$EV_COUNT" -lt 124 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 124)"; exit 1
+# Plus HCQA-092 (binding-validation-400) + HCQA-093 (1MB-payload-201)
+# + HCQA-094 (unauthorized-401) = 127 evidence files.
+if [ "$EV_COUNT" -lt 127 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 127)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,
