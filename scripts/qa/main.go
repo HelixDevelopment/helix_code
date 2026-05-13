@@ -1201,6 +1201,133 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-044..047: session action lifecycle + worker-metrics fixes.
+		// HCQA-044 catches BUG #17 (worker-metrics null vs []).
+		// HCQA-045..047 exercise the session action transitions
+		// (start→active, pause→paused, complete→completed, invalid→400)
+		// to lock the design in place.
+		actSessProjBody := map[string]any{
+			"name": "qa-act-session-proj",
+			"path": fmt.Sprintf("/tmp/qa-act-session-proj-%d", time.Now().UnixNano()),
+		}
+		_, actSessProjResp, _ := authStep(client, dir, "HCQA-044-PRE-PROJ",
+			"Create project for session-action lifecycle probe",
+			"POST", base+"/api/v1/projects", actSessProjBody, auth, 201, nil)
+		actSessProjID := ""
+		if p, _ := actSessProjResp["project"].(map[string]any); p != nil {
+			actSessProjID, _ = p["id"].(string)
+		}
+		actSessID := ""
+		if actSessProjID != "" {
+			_, actSessResp, _ := authStep(client, dir, "HCQA-044-PRE-SESS",
+				"Create session for action lifecycle probe",
+				"POST", base+"/api/v1/sessions",
+				map[string]any{"project_id": actSessProjID, "mode": "planning", "name": "qa-act"},
+				auth, 201, nil)
+			if s, _ := actSessResp["session"].(map[string]any); s != nil {
+				actSessID, _ = s["id"].(string)
+			}
+		}
+
+		// HCQA-044: worker-metrics returns array (catches BUG #17 — 5th
+		// instance of nil-slice→null JSON contract bluff). Create a
+		// dedicated worker inline so HCQA-044 doesn't depend on the
+		// source ordering of HCQA-032 (which runs LATER in the auth
+		// flow). Decoupling avoids "evidence file not found" when the
+		// probe ordering changes.
+		metricsWorkerHost := fmt.Sprintf("qa-metrics-w-%d", time.Now().UnixNano())
+		_, metricsWorkerResp, _ := authStep(client, dir, "HCQA-044-PRE-W",
+			"Create worker for metrics probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": metricsWorkerHost}, auth, 201, nil)
+		metricsWID := ""
+		if w, _ := metricsWorkerResp["worker"].(map[string]any); w != nil {
+			metricsWID, _ = w["id"].(string)
+		}
+		if metricsWID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-044",
+				"GET /workers/:id/metrics returns array (not null)",
+				"GET", base+"/api/v1/workers/"+metricsWID+"/metrics", nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					if !strings.Contains(string(raw), `"metrics":[`) {
+						return fmt.Errorf("metrics field is not a JSON array (raw=%.200s)",
+							string(raw))
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-045..047: session action transitions.
+		if actSessID != "" {
+			// HCQA-045: action=start transitions paused→active.
+			ev, _, ok = authStep(client, dir, "HCQA-045",
+				"PUT /sessions/:id action=start transitions to active",
+				"PUT", base+"/api/v1/sessions/"+actSessID,
+				map[string]any{"action": "start"}, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					s, _ := v["session"].(map[string]any)
+					if s == nil {
+						return fmt.Errorf("session field missing")
+					}
+					if s["status"] != "active" {
+						return fmt.Errorf("session.status=%v want \"active\"", s["status"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-046: action=complete transitions active→completed.
+			ev, _, ok = authStep(client, dir, "HCQA-046",
+				"PUT /sessions/:id action=complete transitions to completed",
+				"PUT", base+"/api/v1/sessions/"+actSessID,
+				map[string]any{"action": "complete"}, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					s, _ := v["session"].(map[string]any)
+					if s == nil {
+						return fmt.Errorf("session field missing")
+					}
+					if s["status"] != "completed" {
+						return fmt.Errorf("session.status=%v want \"completed\"", s["status"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-047: invalid action returns 400 with clear error.
+			ev, _, ok = authStep(client, dir, "HCQA-047",
+				"PUT /sessions/:id with invalid action returns 400",
+				"PUT", base+"/api/v1/sessions/"+actSessID,
+				map[string]any{"action": "invalid-xyz"}, auth, 400,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "error" {
+						return fmt.Errorf("status=%v want \"error\"", v["status"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-035: create session (requires a real project_id from
 		// the round-4 create-project probe + a valid Mode). Catches
 		// any regression where the sessions handler returns a session

@@ -1553,6 +1553,13 @@ func (s *Server) getWorkerMetrics(c *gin.Context) {
 		return
 	}
 
+	// JSON contract: list endpoint MUST return an array, not null.
+	// 5th instance of the nil-slice→null bluff (tasks, projects,
+	// workers, checkpoints, now worker-metrics).
+	if metrics == nil {
+		metrics = []*worker.WorkerMetrics{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"metrics": metrics,

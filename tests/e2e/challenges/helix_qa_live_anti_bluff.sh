@@ -77,15 +77,16 @@ if [ ! -d "$SESSION_DIR/evidence" ]; then
     echo "  FAIL: no evidence dir produced"; exit 1
 fi
 EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
-# Static-list checks: 6 core + 7 deep-content + 1 memory-bluff guard = 14.
-# Sequenced-flow checks: 5 auth + 6 tasks-CRUD + 5 system-list + 2
-# project-create + 1 worker-create + 2 auth-refresh + 1 sessions-create
-# + 3 task-lifecycle + 2 task-lifecycle-internal + 4 project-update-
-# lifecycle + 4 worker-update-lifecycle (HCQA-042-CREATE, HCQA-042 update,
-# HCQA-043-DEL delete, HCQA-043 get-404) = 35.
-# Total: 14 + 35 = 49 evidence files. Lower bound is 49.
-if [ "$EV_COUNT" -lt 49 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 49)"; exit 1
+# Static-list checks: 14. Sequenced-flow checks: 35 (auth + tasks CRUD +
+# system-list + project-create + worker-create + auth-refresh + sessions-
+# create + task-lifecycle + project-update-lifecycle + worker-update-
+# lifecycle) + 2 internal pre-steps (HCQA-044-PRE-PROJ, HCQA-044-PRE-SESS)
+# + 4 action-lifecycle (HCQA-044 worker-metrics-array,
+# HCQA-045..047 session-action transitions) = 41.
+# Total: 14 + 41 + 1 (HCQA-044-PRE-W inline worker) = 56 evidence files.
+# Lower bound is 56.
+if [ "$EV_COUNT" -lt 56 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 56)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,
