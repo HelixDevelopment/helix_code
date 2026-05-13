@@ -276,6 +276,14 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 // Fixed to mirror GetProject's pattern: RETURNING workspace_path +
 // config, then extract type from config["type"] in Go.
 func (m *DatabaseManager) UpdateProject(ctx context.Context, projectID, name, description string) (*Project, error) {
+	// Pre-validate UUID format. Postgres would otherwise reject with
+	// SQLSTATE 22P02 "invalid input syntax for type uuid: ..." which
+	// leaks the SQLSTATE code in the API response (CONST-042) and
+	// surfaces as HTTP 500 (CONST-035). Surface as ErrInvalidProjectID
+	// → 400 instead.
+	if _, err := uuid.Parse(projectID); err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidProjectID, err)
+	}
 	query := `
 		UPDATE projects
 		SET name = COALESCE(NULLIF($1, ''), name),
@@ -339,6 +347,12 @@ func (m *DatabaseManager) UpdateProjectMetadata(ctx context.Context, projectID s
 
 // DeleteProject marks a project as deleted in the database
 func (m *DatabaseManager) DeleteProject(ctx context.Context, projectID string) error {
+	// Pre-validate UUID format (same CONST-042/CONST-035 fix as
+	// UpdateProject — postgres would otherwise leak SQLSTATE 22P02
+	// in the API response).
+	if _, err := uuid.Parse(projectID); err != nil {
+		return fmt.Errorf("%w: %v", ErrInvalidProjectID, err)
+	}
 	query := `
 		UPDATE projects
 		SET status = 'deleted', updated_at = $1

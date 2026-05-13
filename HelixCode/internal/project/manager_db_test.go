@@ -480,14 +480,17 @@ func TestDatabaseManager_DeleteProjectInvalidID(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Mock database error for invalid UUID - database rejects invalid UUID format
-	mockDB.MockExecError(fmt.Errorf("invalid input syntax for type uuid"))
-
+	// After round-25 fix: DeleteProject pre-validates UUID format and
+	// returns ErrInvalidProjectID BEFORE issuing the DB call. The mock
+	// Exec is never reached, so no mock setup is required. Previously
+	// the test mocked a postgres SQLSTATE 22P02 error and expected the
+	// generic "failed to delete project" wrap — that path leaked the
+	// raw pg error in the API response (CONST-042 schema leakage).
 	err := dm.DeleteProject(ctx, "invalid-uuid")
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to delete project")
-	mockDB.AssertExpectations(t)
+	assert.ErrorIs(t, err, ErrInvalidProjectID)
+	assert.Contains(t, err.Error(), "invalid project ID")
 }
 
 func TestDatabaseManager_DeleteProjectNotFound(t *testing.T) {

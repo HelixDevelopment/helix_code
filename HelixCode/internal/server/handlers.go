@@ -404,6 +404,18 @@ func (s *Server) updateProject(c *gin.Context) {
 	// Update the project using the project manager
 	proj, err := s.projectManager.UpdateProject(c.Request.Context(), id, req.Name, req.Description)
 	if err != nil {
+		// 400 malformed UUID; 404 not-found; 500 only for DB faults.
+		if respondInvalidID(c, err, "project") {
+			return
+		}
+		if errors.Is(err, project.ErrProjectNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Project not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to update project",
@@ -432,6 +444,18 @@ func (s *Server) deleteProject(c *gin.Context) {
 
 	err := s.projectManager.DeleteProject(c.Request.Context(), id)
 	if err != nil {
+		// 400 malformed UUID; 404 not-found; 500 only for DB faults.
+		if respondInvalidID(c, err, "project") {
+			return
+		}
+		if errors.Is(err, project.ErrProjectNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Project not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to delete project",
@@ -1920,9 +1944,12 @@ func (s *Server) createTaskCheckpoint(c *gin.Context) {
 
 	err := s.taskManager.CreateCheckpoint(c.Request.Context(), id, req.CheckpointName, req.CheckpointData)
 	if err != nil {
-		// 422 for client-state errors (task not assigned to a worker —
-		// the schema requires worker_id on every checkpoint row).
-		// 500 only for genuine DB faults.
+		// 400 for malformed UUID; 422 for client-state errors
+		// (task not assigned to a worker — schema requires worker_id
+		// on every checkpoint row). 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrCheckpointRequiresAssignment) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
@@ -1959,6 +1986,10 @@ func (s *Server) getTaskCheckpoints(c *gin.Context) {
 
 	checkpoints, err := s.taskManager.GetCheckpoints(c.Request.Context(), id)
 	if err != nil {
+		// 400 for malformed UUID; 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to get checkpoints",
@@ -2185,6 +2216,15 @@ func (s *Server) updateSession(c *gin.Context) {
 	}
 
 	if err != nil {
+		// 404 for missing session; 500 only for genuine faults.
+		if errors.Is(err, session.ErrSessionNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Session not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to update session",

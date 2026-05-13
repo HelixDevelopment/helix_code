@@ -1201,6 +1201,66 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-081..085: round-25 — PUT/DELETE project malformed-UUID
+		// (catches BUG #28 — pg SQLSTATE 22P02 leaked through), task
+		// checkpoint handlers (createTaskCheckpoint + getTaskCheckpoints
+		// missing respondInvalidID branches), and session PUT 404.
+		bogusU := "not-a-uuid"
+		for _, probe := range []struct{ id, method, path, name string }{
+			{"HCQA-081", "PUT", "/api/v1/projects/" + bogusU, "project-update-400"},
+			{"HCQA-082", "DELETE", "/api/v1/projects/" + bogusU, "project-delete-400"},
+			{"HCQA-083", "POST", "/api/v1/tasks/" + bogusU + "/checkpoint", "checkpoint-create-400"},
+			{"HCQA-084", "GET", "/api/v1/tasks/" + bogusU + "/checkpoints", "checkpoint-list-400"},
+		} {
+			body := map[string]any{}
+			if probe.name == "project-update-400" {
+				body["description"] = "qa-probe"
+			} else if probe.name == "checkpoint-create-400" {
+				body["checkpoint_name"] = "qa-probe"
+			}
+			ev, _, ok = authStep(client, dir, probe.id,
+				probe.method+" /<malformed-uuid> returns 400 + no postgres leak ("+probe.name+")",
+				probe.method, base+probe.path, body, auth, 400,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "invalid") {
+						return fmt.Errorf("message %q does not mention invalid input", m)
+					}
+					bodyStr := string(raw)
+					for _, leak := range []string{"SQLSTATE", "22P02", "fkey"} {
+						if strings.Contains(bodyStr, leak) {
+							return fmt.Errorf("postgres detail leak %q in: %.200s", leak, bodyStr)
+						}
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+		// HCQA-085: PUT /sessions/<bogus> with action=start returns 404
+		// (was 500 — updateSession handler wasn't routing ErrSessionNotFound).
+		ev, _, ok = authStep(client, dir, "HCQA-085",
+			"PUT /sessions/<bogus> action=start returns 404 (was 500)",
+			"PUT", base+"/api/v1/sessions/session-bogus-xyz",
+			map[string]any{"action": "start"}, auth, 404,
+			func(v map[string]any, raw []byte) error {
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "session") {
+					return fmt.Errorf("message %q does not mention session", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-074..080: malformed-UUID coverage across the rest of the
 		// matrix (sentinel-wired in round 24). Every endpoint accepting
 		// :id must return 400 for invalid UUID — not 500 (CONST-035) and
