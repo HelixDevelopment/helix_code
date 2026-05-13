@@ -343,6 +343,105 @@ var checks = []Check{
 			return nil
 		},
 	},
+	// HCQA-095: /llm/providers schema fidelity — every provider has
+	// id/name/status/type/models[] and status="available". Catches any
+	// regression that drops a required field or returns a fabricated
+	// stub (the round-1 BLUFF-002 pattern).
+	{
+		ID: "HCQA-095", Name: "/llm/providers schema — id/name/status/type/models[]/status=available for all",
+		Method: "GET", Path: "/api/v1/llm/providers", WantStatus: 200,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			arr, _ := v["providers"].([]any)
+			if len(arr) == 0 {
+				return fmt.Errorf("providers list empty")
+			}
+			for _, p := range arr {
+				m, _ := p.(map[string]any)
+				if m == nil {
+					continue
+				}
+				for _, k := range []string{"id", "name", "status", "type"} {
+					if s, _ := m[k].(string); s == "" {
+						return fmt.Errorf("provider %v missing %s", m["id"], k)
+					}
+				}
+				if _, ok := m["models"].([]any); !ok {
+					return fmt.Errorf("provider %v models not array", m["id"])
+				}
+				if m["status"] != "available" {
+					return fmt.Errorf("provider %v status=%v want \"available\"", m["id"], m["status"])
+				}
+			}
+			return nil
+		},
+	},
+
+	// HCQA-096: /llm/models schema fidelity — every model has
+	// id/provider/context_length>0. Catches any regression that ships
+	// stub models with zero context-length (would mislead callers
+	// computing token budgets).
+	{
+		ID: "HCQA-096", Name: "/llm/models schema — id/provider/context_length>0 for all",
+		Method: "GET", Path: "/api/v1/llm/models", WantStatus: 200,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			arr, _ := v["models"].([]any)
+			if len(arr) == 0 {
+				return fmt.Errorf("models list empty")
+			}
+			for _, mm := range arr {
+				m, _ := mm.(map[string]any)
+				if m == nil {
+					continue
+				}
+				if s, _ := m["id"].(string); s == "" {
+					return fmt.Errorf("model missing id")
+				}
+				if s, _ := m["provider"].(string); s == "" {
+					return fmt.Errorf("model %v missing provider", m["id"])
+				}
+				cl, _ := m["context_length"].(float64)
+				if cl <= 0 {
+					return fmt.Errorf("model %v context_length=%v must be > 0", m["id"], cl)
+				}
+			}
+			return nil
+		},
+	},
+
+	// HCQA-097: /memory/systems availableCount agrees with
+	// /memory/stats.systems_connected (extends the round-9 HCQA-MEM-BLUFF
+	// guard with a stricter cross-endpoint consistency check).
+	{
+		ID: "HCQA-097", Name: "/memory/systems available count is 0 (matches stats.systems_connected)",
+		Method: "GET", Path: "/api/v1/memory/systems", WantStatus: 200,
+		WantBody: func(b []byte) error {
+			var v map[string]any
+			if err := json.Unmarshal(b, &v); err != nil {
+				return fmt.Errorf("body not JSON: %w", err)
+			}
+			arr, _ := v["systems"].([]any)
+			availCount := 0
+			for _, s := range arr {
+				m, _ := s.(map[string]any)
+				if m != nil && m["status"] == "available" {
+					availCount++
+				}
+			}
+			if availCount > 0 {
+				return fmt.Errorf("availCount=%d while /memory/stats.systems_connected is 0 — bluff regression", availCount)
+			}
+			return nil
+		},
+	},
+
 	{
 		ID: "HCQA-013", Name: "Metrics endpoint includes resources.goroutines>0",
 		Method: "GET", Path: "/api/v1/metrics", WantStatus: 200,
