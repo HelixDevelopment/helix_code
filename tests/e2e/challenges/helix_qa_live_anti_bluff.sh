@@ -88,8 +88,8 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 #                                      HCQA-048 assign, HCQA-049 round-trip,
 #                                      HCQA-050 heartbeat) = 61 evidence files.
 # Lower bound is 61.
-if [ "$EV_COUNT" -lt 61 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 61)"; exit 1
+if [ "$EV_COUNT" -lt 66 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 66)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

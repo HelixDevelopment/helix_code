@@ -1201,6 +1201,116 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-051..053: task fail → retry round-trip + project-sessions list.
+		// Locks in correct behavior of the canonical fail/retry workflow
+		// AND catches any regression in the round-1/2/3/8 fixes
+		// (sentinel-based retry semantics, task_data NOT NULL, etc).
+		_, failTResp, _ := authStep(client, dir, "HCQA-051-CREATE",
+			"Create task for fail/retry lifecycle",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-fail-retry-task", "type": "qa"}, auth, 201, nil)
+		failTID := ""
+		if t, _ := failTResp["task"].(map[string]any); t != nil {
+			failTID, _ = t["id"].(string)
+		}
+		if failTID != "" {
+			_, _, _ = authStep(client, dir, "HCQA-051-START",
+				"Start task for fail/retry lifecycle",
+				"POST", base+"/api/v1/tasks/"+failTID+"/start",
+				map[string]any{}, auth, 200, nil)
+
+			// HCQA-051: fail with error_message persists status + error_message.
+			ev, _, ok = authStep(client, dir, "HCQA-051",
+				"POST /tasks/:id/fail persists status + error_message",
+				"POST", base+"/api/v1/tasks/"+failTID+"/fail",
+				map[string]any{"error_message": "qa-anti-bluff-injected-failure"},
+				auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					if t["status"] != "failed" {
+						return fmt.Errorf("task.status=%v want \"failed\"", t["status"])
+					}
+					if t["error_message"] != "qa-anti-bluff-injected-failure" {
+						return fmt.Errorf("error_message=%q did not round-trip", t["error_message"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-052: retry a real failed task transitions failed→pending
+			// and increments retry_count (proves the round-8 sentinel
+			// distinguishes legitimate retries from state errors).
+			ev, _, ok = authStep(client, dir, "HCQA-052",
+				"POST /tasks/:id/retry on failed task transitions to pending + increments retry_count",
+				"POST", base+"/api/v1/tasks/"+failTID+"/retry", nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					if t["status"] != "pending" {
+						return fmt.Errorf("task.status=%v want \"pending\"", t["status"])
+					}
+					rc, _ := t["retry_count"].(float64)
+					if rc != 1 {
+						return fmt.Errorf("retry_count=%v want 1 (proves real increment, not stub)", rc)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-053: GET /projects/:projectId/sessions lists the sessions
+		// for the project (uses the sessions-create probe's project_id).
+		// Catches any regression where session<->project linkage breaks.
+		// The probe uses HCQA-031's project (which got HCQA-035's session
+		// attached to it).
+		var projForSessionsID string
+		for _, r := range results {
+			if r.CheckID == "HCQA-031" {
+				if idx := strings.Index(r.BodyHead, `"id":"`); idx >= 0 {
+					start := idx + len(`"id":"`)
+					end := strings.Index(r.BodyHead[start:], `"`)
+					if end > 0 {
+						projForSessionsID = r.BodyHead[start : start+end]
+					}
+				}
+				break
+			}
+		}
+		if projForSessionsID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-053",
+				"GET /projects/:id/sessions returns array of sessions for project",
+				"GET", base+"/api/v1/projects/"+projForSessionsID+"/sessions",
+				nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					if !strings.Contains(string(raw), `"sessions":[`) {
+						return fmt.Errorf("sessions field is not a JSON array (raw=%.200s)",
+							string(raw))
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-ASSIGN-*: task assignment + heartbeat lifecycle.
 		// Catches BUG #18: GetTask/ListTasks scanned assigned_worker_id
 		// from the DB but never set Task.AssignedWorker on the returned
