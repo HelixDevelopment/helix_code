@@ -326,16 +326,35 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 	return nil
 }
 
-// UpdateWorker updates an existing worker in the database
+// UpdateWorker updates an existing worker in the database.
+//
+// Anti-bluff (CONST-035): the previous version unconditionally
+// replaced every column with the request value — passing
+// capabilities=nil ([]string nil) marshaled to SQL NULL via pgx,
+// violating the TEXT[] NOT NULL constraint and returning a 500.
+// Same pattern as RegisterWorker (round 5). And: passing an empty
+// hostname would have overwritten the existing hostname with ""
+// (a partial update should preserve unmentioned fields, not blank
+// them). The fix mirrors UpdateProject: COALESCE+NULLIF preserves
+// the existing column when the input is the zero value, and
+// capabilities defaults to an empty slice when nil so the column
+// invariant always holds.
 func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname, displayName string, capabilities []string, maxConcurrentTasks int) (*Worker, error) {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid worker ID: %v", err)
 	}
+	if capabilities == nil {
+		capabilities = []string{}
+	}
 
 	query := `
 		UPDATE workers
-		SET hostname = $1, display_name = $2, capabilities = $3, max_concurrent_tasks = $4, updated_at = NOW()
+		SET hostname             = COALESCE(NULLIF($1, ''), hostname),
+		    display_name         = COALESCE(NULLIF($2, ''), display_name),
+		    capabilities         = $3,
+		    max_concurrent_tasks = CASE WHEN $4 > 0 THEN $4 ELSE max_concurrent_tasks END,
+		    updated_at           = NOW()
 		WHERE id = $5
 		RETURNING id, hostname, display_name, ssh_config, capabilities, resources,
 			status, health_status, last_heartbeat, cpu_usage_percent,

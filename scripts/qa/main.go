@@ -1112,6 +1112,95 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-042..043: worker update + delete lifecycle.
+		// Catches BUG #16: PUT /workers/:id triggered the SAME NULL-on-
+		// capabilities constraint violation as RegisterWorker (round 5),
+		// AND was overwriting non-omitted fields with empty strings.
+		// Fix added COALESCE(NULLIF(...)) for hostname/display_name +
+		// nil-defaults capabilities to empty slice.
+		workerLcBody := map[string]any{
+			"hostname":     fmt.Sprintf("qa-update-w-%d", time.Now().UnixNano()),
+			"display_name": "qa-worker-original",
+		}
+		ev, workerLcResp, ok := authStep(client, dir, "HCQA-042-CREATE",
+			"Create worker for update-lifecycle probe",
+			"POST", base+"/api/v1/workers", workerLcBody, auth, 201,
+			func(v map[string]any, raw []byte) error {
+				w, _ := v["worker"].(map[string]any)
+				if w == nil || w["id"] == nil {
+					return fmt.Errorf("worker.id missing")
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		workerLcID := ""
+		origHostname := ""
+		if w, _ := workerLcResp["worker"].(map[string]any); w != nil {
+			workerLcID, _ = w["id"].(string)
+			origHostname, _ = w["hostname"].(string)
+		}
+
+		if workerLcID != "" {
+			// HCQA-042: PUT with partial body — hostname must be preserved
+			// (proves COALESCE pattern works), display_name must change,
+			// nil capabilities must not 500 (proves the nil-default).
+			ev, _, ok = authStep(client, dir, "HCQA-042",
+				"PUT /workers/:id updates display_name without clobbering hostname",
+				"PUT", base+"/api/v1/workers/"+workerLcID,
+				map[string]any{"display_name": "qa-worker-renamed", "max_concurrent_tasks": 20},
+				auth, 200,
+				func(v map[string]any, raw []byte) error {
+					w, _ := v["worker"].(map[string]any)
+					if w == nil {
+						return fmt.Errorf("worker field missing")
+					}
+					if w["display_name"] != "qa-worker-renamed" {
+						return fmt.Errorf("worker.display_name=%v want \"qa-worker-renamed\"",
+							w["display_name"])
+					}
+					if w["hostname"] != origHostname {
+						return fmt.Errorf("worker.hostname=%v changed from %q (partial-update clobber bug)",
+							w["hostname"], origHostname)
+					}
+					mct, _ := w["max_concurrent_tasks"].(float64)
+					if mct != 20 {
+						return fmt.Errorf("worker.max_concurrent_tasks=%v want 20", mct)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-043: DELETE → 200 and GET → 404.
+			ev, _, ok = authStep(client, dir, "HCQA-043-DEL",
+				"DELETE /workers/:id returns 200",
+				"DELETE", base+"/api/v1/workers/"+workerLcID, nil, auth, 200, nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+			ev, _, ok = authStep(client, dir, "HCQA-043",
+				"GET deleted worker returns 404",
+				"GET", base+"/api/v1/workers/"+workerLcID, nil, auth, 404, nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-035: create session (requires a real project_id from
 		// the round-4 create-project probe + a valid Mode). Catches
 		// any regression where the sessions handler returns a session
