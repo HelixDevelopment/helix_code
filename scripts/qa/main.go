@@ -1201,6 +1201,105 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-ASSIGN-*: task assignment + heartbeat lifecycle.
+		// Catches BUG #18: GetTask/ListTasks scanned assigned_worker_id
+		// from the DB but never set Task.AssignedWorker on the returned
+		// struct — every response had `"assigned_worker": null` even
+		// after a successful assign. Real persisted state in
+		// distributed_tasks.assigned_worker_id was correct; only the
+		// JSON response was wrong.
+		assignWorkerHost := fmt.Sprintf("qa-assign-w-%d", time.Now().UnixNano())
+		_, assignWResp, _ := authStep(client, dir, "HCQA-ASSIGN-PRE-W",
+			"Create worker for assign-task lifecycle",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": assignWorkerHost}, auth, 201, nil)
+		assignWID := ""
+		if w, _ := assignWResp["worker"].(map[string]any); w != nil {
+			assignWID, _ = w["id"].(string)
+		}
+		_, assignTResp, _ := authStep(client, dir, "HCQA-ASSIGN-PRE-T",
+			"Create task for assign-task lifecycle",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-assign-task", "type": "qa"}, auth, 201, nil)
+		assignTID := ""
+		if t, _ := assignTResp["task"].(map[string]any); t != nil {
+			assignTID, _ = t["id"].(string)
+		}
+		if assignWID != "" && assignTID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-048",
+				"POST /tasks/:id/assign populates assigned_worker (not null)",
+				"POST", base+"/api/v1/tasks/"+assignTID+"/assign",
+				map[string]any{"worker_id": assignWID}, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					if t["status"] != "assigned" {
+						return fmt.Errorf("task.status=%v want \"assigned\"", t["status"])
+					}
+					aw, _ := t["assigned_worker"].(string)
+					if aw == "" {
+						return fmt.Errorf("assigned_worker is null/empty — BUG #18 regression " +
+							"(GetTask not populating AssignedWorker from DB scan)")
+					}
+					if aw != assignWID {
+						return fmt.Errorf("assigned_worker=%q != requested worker_id %q", aw, assignWID)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-049: GET /tasks/:id round-trips assigned_worker
+			// (proves the fix works for GetTask too, not just the inline
+			// re-fetch after assign).
+			ev, _, ok = authStep(client, dir, "HCQA-049",
+				"GET /tasks/:id after assign shows assigned_worker (BUG #18 round-trip)",
+				"GET", base+"/api/v1/tasks/"+assignTID, nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					aw, _ := t["assigned_worker"].(string)
+					if aw != assignWID {
+						return fmt.Errorf("GET assigned_worker=%q != %q (BUG #18 regression in GetTask)",
+							aw, assignWID)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-050: POST /workers/:id/heartbeat returns 200 with success.
+			ev, _, ok = authStep(client, dir, "HCQA-050",
+				"POST /workers/:id/heartbeat returns 200",
+				"POST", base+"/api/v1/workers/"+assignWID+"/heartbeat",
+				map[string]any{"metrics": map[string]any{"cpu_usage_percent": 50.0}},
+				auth, 200,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "success" {
+						return fmt.Errorf("status=%v want \"success\"", v["status"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-044..047: session action lifecycle + worker-metrics fixes.
 		// HCQA-044 catches BUG #17 (worker-metrics null vs []).
 		// HCQA-045..047 exercise the session action transitions

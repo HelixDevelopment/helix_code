@@ -172,6 +172,16 @@ func (m *DatabaseManager) GetTask(ctx context.Context, id string) (*Task, error)
 		Status:         TaskStatus(status),
 		Priority:       taskPriority,
 		Criticality:    TaskCriticality(criticality),
+		// Anti-bluff (CONST-035): previously these two fields were
+		// scanned from the DB row (lines 123-124) but never assigned
+		// to the returned Task struct. Every response that included
+		// a task showed `"assigned_worker": null` even after a
+		// successful POST /tasks/:id/assign — silently lying about
+		// the assignment state. Real persisted state in
+		// `assigned_worker_id` column was correct; only the JSON
+		// response was wrong.
+		AssignedWorker: assignedWorkerID,
+		OriginalWorker: originalWorkerID,
 		Dependencies:   dependencies,
 		RetryCount:     retryCount,
 		MaxRetries:     maxRetries,
@@ -268,6 +278,9 @@ func (m *DatabaseManager) ListTasks(ctx context.Context) ([]*Task, error) {
 			Status:         TaskStatus(status),
 			Priority:       taskPriority,
 			Criticality:    TaskCriticality(criticality),
+			// Same bug as GetTask above — pulled from DB, never assigned.
+			AssignedWorker: assignedWorkerID,
+			OriginalWorker: originalWorkerID,
 			Dependencies:   dependencies,
 			RetryCount:     retryCount,
 			MaxRetries:     maxRetries,

@@ -83,10 +83,13 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 # lifecycle) + 2 internal pre-steps (HCQA-044-PRE-PROJ, HCQA-044-PRE-SESS)
 # + 4 action-lifecycle (HCQA-044 worker-metrics-array,
 # HCQA-045..047 session-action transitions) = 41.
-# Total: 14 + 41 + 1 (HCQA-044-PRE-W inline worker) = 56 evidence files.
-# Lower bound is 56.
-if [ "$EV_COUNT" -lt 56 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 56)"; exit 1
+# Total: 14 + 41 + 1 (HCQA-044-PRE-W inline worker) +
+#        5 task-assignment+heartbeat (HCQA-ASSIGN-PRE-W, HCQA-ASSIGN-PRE-T,
+#                                      HCQA-048 assign, HCQA-049 round-trip,
+#                                      HCQA-050 heartbeat) = 61 evidence files.
+# Lower bound is 61.
+if [ "$EV_COUNT" -lt 61 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 61)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,
