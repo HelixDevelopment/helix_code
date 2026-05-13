@@ -794,6 +794,27 @@ func (s *Server) getSystemStatus(c *gin.Context) {
 
 // Workflow Handlers
 
+// workflowError maps a workflow-executor error to the right HTTP code.
+// Pre-fix the 4 workflow handlers all returned 500 even when the
+// underlying cause was "project doesn't exist" (404 territory) — same
+// CONST-035 misclassification family as the round-20 bugs. Centralized
+// helper avoids duplicating the errors.Is branch in 4 places.
+func workflowError(c *gin.Context, err error, action string) {
+	if errors.Is(err, project.ErrProjectNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  "error",
+			"message": "Project not found",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"status":  "error",
+		"message": "Failed to execute " + action + " workflow",
+		"error":   err.Error(),
+	})
+}
+
 func (s *Server) executePlanningWorkflow(c *gin.Context) {
 	projectID := c.Param("projectId")
 
@@ -801,11 +822,7 @@ func (s *Server) executePlanningWorkflow(c *gin.Context) {
 
 	wf, err := workflowExecutor.ExecutePlanningWorkflow(c.Request.Context(), projectID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  "error",
-			"message": "Failed to execute planning workflow",
-			"error":   err.Error(),
-		})
+		workflowError(c, err, "planning")
 		return
 	}
 
@@ -818,16 +835,11 @@ func (s *Server) executePlanningWorkflow(c *gin.Context) {
 func (s *Server) executeBuildingWorkflow(c *gin.Context) {
 	projectID := c.Param("projectId")
 
-	projectManager := project.NewManager()
-	workflowExecutor := workflow.NewExecutor(projectManager)
+	workflowExecutor := workflow.NewExecutor(s.projectManager)
 
 	wf, err := workflowExecutor.ExecuteBuildingWorkflow(c.Request.Context(), projectID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  "error",
-			"message": "Failed to execute building workflow",
-			"error":   err.Error(),
-		})
+		workflowError(c, err, "building")
 		return
 	}
 
@@ -840,16 +852,11 @@ func (s *Server) executeBuildingWorkflow(c *gin.Context) {
 func (s *Server) executeTestingWorkflow(c *gin.Context) {
 	projectID := c.Param("projectId")
 
-	projectManager := project.NewManager()
-	workflowExecutor := workflow.NewExecutor(projectManager)
+	workflowExecutor := workflow.NewExecutor(s.projectManager)
 
 	wf, err := workflowExecutor.ExecuteTestingWorkflow(c.Request.Context(), projectID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  "error",
-			"message": "Failed to execute testing workflow",
-			"error":   err.Error(),
-		})
+		workflowError(c, err, "testing")
 		return
 	}
 
@@ -862,16 +869,11 @@ func (s *Server) executeTestingWorkflow(c *gin.Context) {
 func (s *Server) executeRefactoringWorkflow(c *gin.Context) {
 	projectID := c.Param("projectId")
 
-	projectManager := project.NewManager()
-	workflowExecutor := workflow.NewExecutor(projectManager)
+	workflowExecutor := workflow.NewExecutor(s.projectManager)
 
 	wf, err := workflowExecutor.ExecuteRefactoringWorkflow(c.Request.Context(), projectID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  "error",
-			"message": "Failed to execute refactoring workflow",
-			"error":   err.Error(),
-		})
+		workflowError(c, err, "refactoring")
 		return
 	}
 
@@ -1409,8 +1411,18 @@ func (s *Server) createWorker(c *gin.Context) {
 		return
 	}
 
-	worker, err := s.workerManager.RegisterWorker(c.Request.Context(), req.Hostname, req.DisplayName, req.SSHConfig, req.Capabilities, req.Resources)
+	w, err := s.workerManager.RegisterWorker(c.Request.Context(), req.Hostname, req.DisplayName, req.SSHConfig, req.Capabilities, req.Resources)
 	if err != nil {
+		// 409 Conflict for duplicate-hostname; clean message — no
+		// postgres SQLSTATE or constraint-name leakage (CONST-042).
+		if errors.Is(err, worker.ErrWorkerHostnameTaken) {
+			c.JSON(http.StatusConflict, gin.H{
+				"status":  "error",
+				"message": "Worker hostname already in use",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to register worker",
@@ -1421,7 +1433,7 @@ func (s *Server) createWorker(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"status": "success",
-		"worker": worker,
+		"worker": w,
 	})
 }
 

@@ -9,6 +9,7 @@ import (
 	"dev.helix.code/internal/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // Note: ErrWorkerNotFound is declared in memory_repository.go; we
@@ -16,6 +17,24 @@ import (
 // check a single sentinel regardless of which manager produced the
 // error. CONST-035: 500 lies about the nature of a missing-resource
 // problem; handlers MUST map this sentinel to 404 Not Found.
+
+// ErrWorkerHostnameTaken is returned by RegisterWorker when the
+// requested hostname collides with the workers_hostname_unique
+// constraint. Handlers MUST errors.Is-check this and return 409
+// Conflict with a clean message — NOT 500 with the raw pg error
+// "duplicate key value violates unique constraint \"workers_hostname_unique\"
+// (SQLSTATE 23505)". That raw error leaks the postgres constraint
+// name + SQLSTATE (CONST-042 schema leakage) and misclassifies a 4xx
+// as a 5xx (CONST-035 wrong-HTTP-code).
+var ErrWorkerHostnameTaken = errors.New("worker hostname already in use")
+
+// isUniqueViolation reports whether err is a postgres unique-constraint
+// violation (SQLSTATE 23505). The pgx driver wraps these as
+// *pgconn.PgError with Code "23505".
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
 
 // DatabaseManager handles worker lifecycle and operations with database persistence
 type DatabaseManager struct {
@@ -276,6 +295,13 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 	).Scan(&createdAt, &updatedAt)
 
 	if err != nil {
+		// Translate the postgres unique-constraint violation into a
+		// clean sentinel BEFORE leaking the raw error message
+		// (CONST-042: response must not contain "workers_hostname_unique"
+		//  or "SQLSTATE 23505").
+		if isUniqueViolation(err) {
+			return nil, fmt.Errorf("%w: %s", ErrWorkerHostnameTaken, hostname)
+		}
 		return nil, fmt.Errorf("failed to register worker in database: %v", err)
 	}
 

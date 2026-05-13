@@ -2,12 +2,19 @@ package project
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 )
+
+// ErrProjectNotFound is returned by manager / DB-manager lookups when
+// the requested project doesn't exist. Handlers MUST errors.Is-check
+// this sentinel and return 404 Not Found — never 500 (CONST-035: 500
+// lies about a missing-resource client error being a server fault).
+var ErrProjectNotFound = errors.New("project not found")
 
 // Project represents a development project
 type Project struct {
@@ -96,7 +103,7 @@ func (m *Manager) GetProject(ctx context.Context, id string) (*Project, error) {
 	// Check if project exists in memory
 	project, exists := m.projects[id]
 	if !exists {
-		return nil, fmt.Errorf("project not found: %s", id)
+		return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, id)
 	}
 
 	return project, nil
@@ -124,7 +131,7 @@ func (m *Manager) SetActiveProject(ctx context.Context, id string) error {
 	// Look up project directly to avoid deadlock
 	project, exists := m.projects[id]
 	if !exists {
-		return fmt.Errorf("project not found: %s", id)
+		return fmt.Errorf("%w: %s", ErrProjectNotFound, id)
 	}
 
 	// Deactivate previous active project
@@ -217,7 +224,7 @@ func (m *Manager) UpdateProject(ctx context.Context, projectID, name, descriptio
 
 	project, exists := m.projects[projectID]
 	if !exists {
-		return nil, fmt.Errorf("project not found: %s", projectID)
+		return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, projectID)
 	}
 
 	if name != "" {
@@ -238,7 +245,7 @@ func (m *Manager) UpdateProjectMetadata(ctx context.Context, projectID string, m
 
 	project, exists := m.projects[projectID]
 	if !exists {
-		return fmt.Errorf("project not found: %s", projectID)
+		return fmt.Errorf("%w: %s", ErrProjectNotFound, projectID)
 	}
 
 	project.Metadata = metadata
@@ -253,7 +260,7 @@ func (m *Manager) DeleteProject(ctx context.Context, projectID string) error {
 	defer m.mu.Unlock()
 
 	if _, exists := m.projects[projectID]; !exists {
-		return fmt.Errorf("project not found: %s", projectID)
+		return fmt.Errorf("%w: %s", ErrProjectNotFound, projectID)
 	}
 
 	// Clear activeProject if we're deleting the active project

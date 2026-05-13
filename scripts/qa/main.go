@@ -1201,6 +1201,63 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-071: duplicate hostname on worker create returns 409
+		// with NO postgres SQLSTATE / constraint-name leakage (catches
+		// BUG #25). Pre-fix: raw "duplicate key value violates unique
+		// constraint \"workers_hostname_unique\" (SQLSTATE 23505)"
+		// returned as HTTP 500 — CONST-042 schema leakage + CONST-035
+		// wrong-HTTP-code.
+		dupHost := fmt.Sprintf("qa-dup-host-%d", time.Now().UnixNano())
+		_, _, _ = authStep(client, dir, "HCQA-071-PRE-W",
+			"Create first worker (will be duplicated)",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": dupHost}, auth, 201, nil)
+		ev, _, ok = authStep(client, dir, "HCQA-071",
+			"POST /workers with duplicate hostname returns 409 (no postgres SQLSTATE leak)",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": dupHost}, auth, 409,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "error" {
+					return fmt.Errorf("status=%v want \"error\"", v["status"])
+				}
+				bodyStr := string(raw)
+				// Anti-leak: response must NOT contain postgres internals.
+				for _, leak := range []string{"workers_hostname_unique", "SQLSTATE", "duplicate key value"} {
+					if strings.Contains(bodyStr, leak) {
+						return fmt.Errorf("response leaks postgres detail %q: %.200s", leak, bodyStr)
+					}
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-072: workflow planning on bogus project returns 404 (BUG #26).
+		ev, _, ok = authStep(client, dir, "HCQA-072",
+			"POST /projects/<bogus>/workflows/planning returns 404 (was 500)",
+			"POST", base+"/api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/planning",
+			map[string]any{}, auth, 404,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "error" {
+					return fmt.Errorf("status=%v want \"error\"", v["status"])
+				}
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "project") {
+					return fmt.Errorf("message %q does not mention project", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-070: heartbeat on bogus worker returns 404 (catches BUG #24).
 		// Pre-fix: leaked raw postgres FK constraint error as HTTP 500
 		// (CONST-042 schema leakage + CONST-035 wrong-HTTP-code bluff).

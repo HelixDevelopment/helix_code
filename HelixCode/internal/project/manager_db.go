@@ -105,7 +105,7 @@ func (m *DatabaseManager) GetProject(ctx context.Context, id string) (*Project, 
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, fmt.Errorf("project not found: %s", id)
+			return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, id)
 		}
 		return nil, fmt.Errorf("failed to get project from database: %v", err)
 	}
