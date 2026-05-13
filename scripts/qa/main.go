@@ -665,12 +665,144 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 		failed++
 	}
 
-	// HCQA-019: logout.
+	// HCQA-019..HCQA-024: tasks CRUD before logout. Real DB persistence.
+	// Anti-bluff invariants:
+	//   - empty list returns [] not null (JSON contract: list always array)
+	//   - POST returns 201 with task.id (UUID) + data field present (the
+	//     "task_data is NOT NULL" schema-violation bug that returned 500
+	//     pre-fix would surface here as != 201)
+	//   - subsequent GET-list contains the just-created task.id
+	//   - GET /tasks/:id returns the same task we created
+	//   - DELETE returns 200 and the task is gone (idempotent 404 next time)
 	if token != "" {
+		auth := map[string]string{"Authorization": "Bearer " + token}
+
+		// HCQA-019: list empty (pre-create).
 		ev, _, ok := authStep(client, dir, "HCQA-019",
+			"Tasks list endpoint returns array (not null)",
+			"GET", base+"/api/v1/tasks", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				// Must be present AND be an array. nil-slice serialization
+				// to `null` is a JSON contract bluff — this check enforces
+				// the array invariant.
+				if !strings.Contains(string(raw), `"tasks":[`) {
+					return fmt.Errorf("tasks field is not a JSON array (raw head=%.200s)", string(raw))
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-020: create.
+		taskBody := map[string]any{
+			"name":        "qa-anti-bluff-task-" + username,
+			"type":        "qa",
+			"priority":    "high",
+			"description": "helix-qa anti-bluff probe task",
+		}
+		ev, createResp, ok := authStep(client, dir, "HCQA-020",
+			"Create task returns 201 with UUID + data field",
+			"POST", base+"/api/v1/tasks", taskBody, auth, 201,
+			func(v map[string]any, raw []byte) error {
+				t, _ := v["task"].(map[string]any)
+				if t == nil {
+					return fmt.Errorf("task field missing")
+				}
+				id, _ := t["id"].(string)
+				if len(id) < 32 {
+					return fmt.Errorf("task.id=%q too short to be a UUID", id)
+				}
+				// data must be present (proves the task_data NOT NULL
+				// schema invariant held)
+				if _, hasData := t["data"]; !hasData {
+					return fmt.Errorf("task.data field missing — task_data schema invariant broken")
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		createdTaskID := ""
+		if t, _ := createResp["task"].(map[string]any); t != nil {
+			createdTaskID, _ = t["id"].(string)
+		}
+
+		// HCQA-021: list contains the just-created task.
+		if createdTaskID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-021",
+				"List tasks contains the just-created task",
+				"GET", base+"/api/v1/tasks", nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					if !strings.Contains(string(raw), createdTaskID) {
+						return fmt.Errorf("list response does not contain created task id %q",
+							createdTaskID)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-022: GET /tasks/:id round-trips the same task.
+			ev, _, ok = authStep(client, dir, "HCQA-022",
+				"GET task by ID returns the same task",
+				"GET", base+"/api/v1/tasks/"+createdTaskID, nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					if t["id"] != createdTaskID {
+						return fmt.Errorf("task.id=%v != requested id %q", t["id"], createdTaskID)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-023: DELETE.
+			ev, _, ok = authStep(client, dir, "HCQA-023",
+				"DELETE task returns 200",
+				"DELETE", base+"/api/v1/tasks/"+createdTaskID, nil, auth, 200,
+				nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-024: GET after DELETE → 404.
+			ev, _, ok = authStep(client, dir, "HCQA-024",
+				"GET deleted task returns 404",
+				"GET", base+"/api/v1/tasks/"+createdTaskID, nil, auth, 404,
+				nil)
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-025: logout (renumbered from former HCQA-019).
+		ev, _, ok = authStep(client, dir, "HCQA-025",
 			"Logout with valid token returns 200",
-			"POST", base+"/api/v1/auth/logout", nil,
-			map[string]string{"Authorization": "Bearer " + token}, 200,
+			"POST", base+"/api/v1/auth/logout", nil, auth, 200,
 			func(v map[string]any, raw []byte) error {
 				if v["status"] != "success" {
 					return fmt.Errorf("status=%v want \"success\"", v["status"])

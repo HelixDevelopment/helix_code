@@ -45,6 +45,16 @@ func (m *DatabaseManager) CreateTask(ctx context.Context, name, description, tas
 		}
 	}
 
+	// task_data is JSONB NOT NULL in the distributed_tasks schema. When
+	// the caller omits parameters (or passes an empty body), `parameters`
+	// arrives as a nil map, which pgx serializes to SQL NULL — triggering
+	// a "null value in column task_data violates not-null constraint"
+	// error at INSERT time. Default to an empty JSON object so the
+	// not-null invariant always holds.
+	if parameters == nil {
+		parameters = map[string]interface{}{}
+	}
+
 	task := &Task{
 		ID:           uuid.New(),
 		Type:         TaskType(taskType),

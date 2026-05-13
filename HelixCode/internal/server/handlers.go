@@ -11,6 +11,7 @@ import (
 	"dev.helix.code/internal/auth"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/session"
+	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/verifier"
 	"dev.helix.code/internal/workflow"
 	"github.com/gin-gonic/gin"
@@ -366,6 +367,14 @@ func (s *Server) listTasks(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	// JSON contract: a list endpoint MUST return an array, not null.
+	// `s.taskManager.ListTasks` returns a nil slice when the table is
+	// empty, which Go's json package serializes as `null`. Callers
+	// expecting `tasks: []` will crash on `null`. Normalize here.
+	if tasks == nil {
+		tasks = []*task.Task{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
