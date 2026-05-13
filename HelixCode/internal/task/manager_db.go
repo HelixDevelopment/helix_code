@@ -467,19 +467,55 @@ func (m *DatabaseManager) RetryTask(ctx context.Context, id string) error {
 	return nil
 }
 
-// CreateCheckpoint creates a checkpoint for a task
+// ErrCheckpointRequiresAssignment is returned by CreateCheckpoint when
+// the target task has no assigned_worker_id. task_checkpoints.worker_id
+// is NOT NULL in the schema, so a checkpoint cannot be inserted without
+// a worker context. Handlers MUST map this to a 4xx response.
+var ErrCheckpointRequiresAssignment = errors.New("task must be assigned to a worker before creating a checkpoint")
+
+// CreateCheckpoint creates a checkpoint for a task.
+//
+// Anti-bluff (CONST-035): the previous implementation
+//   1. UPDATEd distributed_tasks.checkpoint_data (overwriting any
+//      previous checkpoint — no history kept on that field)
+//   2. INSERTed into task_checkpoints with `_, _ = m.db.Exec(...)` —
+//      SILENTLY DISCARDING BOTH the result AND the error
+//   3. Returned nil to the caller regardless
+//
+// The INSERT always failed because task_checkpoints.worker_id is
+// NOT NULL REFERENCES workers(id) but the INSERT omitted that column.
+// Net effect: POST /tasks/:id/checkpoint returned 201 "success"
+// while task_checkpoints stayed permanently empty, and the subsequent
+// GET /tasks/:id/checkpoints saw nothing. Triple-bluff: discarded
+// error, fabricated success response, history table never populated.
+//
+// Fix: read the task's assigned_worker_id, refuse if not assigned
+// (real 4xx — checkpoints conceptually require a worker context),
+// supply it in the INSERT, and surface the error if it still fails.
 func (m *DatabaseManager) CreateCheckpoint(ctx context.Context, taskID string, checkpointName string, checkpointData map[string]interface{}) error {
 	taskUUID, err := uuid.Parse(taskID)
 	if err != nil {
 		return fmt.Errorf("invalid task ID: %v", err)
 	}
+	if checkpointData == nil {
+		checkpointData = map[string]interface{}{}
+	}
 
-	// First update the task's checkpoint_data field
-	query := `
-		UPDATE distributed_tasks
-		SET checkpoint_data = $1, updated_at = NOW()
-		WHERE id = $2
-	`
+	// Fetch the task's assigned worker (the schema requires worker_id
+	// on every checkpoint row).
+	var assignedWorker *uuid.UUID
+	if err := m.db.QueryRow(ctx,
+		`SELECT assigned_worker_id FROM distributed_tasks WHERE id = $1`,
+		taskUUID,
+	).Scan(&assignedWorker); err != nil {
+		if err == pgx.ErrNoRows {
+			return fmt.Errorf("task not found: %s", taskID)
+		}
+		return fmt.Errorf("failed to lookup task for checkpoint: %v", err)
+	}
+	if assignedWorker == nil {
+		return fmt.Errorf("%w: %s", ErrCheckpointRequiresAssignment, taskID)
+	}
 
 	checkpointWithName := map[string]interface{}{
 		"name":       checkpointName,
@@ -487,25 +523,30 @@ func (m *DatabaseManager) CreateCheckpoint(ctx context.Context, taskID string, c
 		"created_at": time.Now(),
 	}
 
-	result, err := m.db.Exec(ctx, query, checkpointWithName, taskUUID)
+	// Step 1: update the task's latest-checkpoint snapshot.
+	result, err := m.db.Exec(ctx,
+		`UPDATE distributed_tasks SET checkpoint_data = $1, updated_at = NOW() WHERE id = $2`,
+		checkpointWithName, taskUUID,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to create checkpoint: %v", err)
+		return fmt.Errorf("failed to update task checkpoint_data: %v", err)
 	}
-
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("task not found: %s", taskID)
 	}
 
-	// Also insert into task_checkpoints table if it exists
-	checkpointQuery := `
-		INSERT INTO task_checkpoints (id, task_id, checkpoint_name, checkpoint_data, created_at)
-		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT DO NOTHING
-	`
-
-	_, _ = m.db.Exec(ctx, checkpointQuery,
-		uuid.New(), taskUUID, checkpointName, checkpointData, time.Now(),
+	// Step 2: insert into the history table. The previous version
+	// discarded the error from this INSERT; we now surface it. The
+	// worker_id column is required by the schema, so we pass the
+	// task's currently-assigned worker.
+	_, err = m.db.Exec(ctx,
+		`INSERT INTO task_checkpoints (id, task_id, checkpoint_name, checkpoint_data, worker_id, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6)`,
+		uuid.New(), taskUUID, checkpointName, checkpointData, *assignedWorker, time.Now(),
 	)
+	if err != nil {
+		return fmt.Errorf("failed to insert into task_checkpoints history: %v", err)
+	}
 
 	return nil
 }

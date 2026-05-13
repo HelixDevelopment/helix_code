@@ -1763,6 +1763,17 @@ func (s *Server) createTaskCheckpoint(c *gin.Context) {
 
 	err := s.taskManager.CreateCheckpoint(c.Request.Context(), id, req.CheckpointName, req.CheckpointData)
 	if err != nil {
+		// 422 for client-state errors (task not assigned to a worker —
+		// the schema requires worker_id on every checkpoint row).
+		// 500 only for genuine DB faults.
+		if errors.Is(err, task.ErrCheckpointRequiresAssignment) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": "Task must be assigned to a worker before creating a checkpoint",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to create checkpoint",

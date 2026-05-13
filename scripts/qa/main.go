@@ -1201,6 +1201,115 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-CKPT-*: checkpoint persistence end-to-end.
+		// Catches BUG #19 — POST /tasks/:id/checkpoint used to return 201
+		// "success" with `_, _ = m.db.Exec(...)` silently discarding the
+		// task_checkpoints INSERT error (failing because the schema
+		// required worker_id but the INSERT omitted it). GET checkpoints
+		// stayed perpetually empty — triple bluff: discarded error,
+		// fabricated success response, history table never populated.
+		// Fix added ErrCheckpointRequiresAssignment sentinel + surfaces
+		// the INSERT error + maps to 422 vs 500.
+		ckptW := fmt.Sprintf("qa-ckpt-w-%d", time.Now().UnixNano())
+		_, ckptWResp, _ := authStep(client, dir, "HCQA-CKPT-PRE-W",
+			"Create worker for checkpoint lifecycle probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": ckptW}, auth, 201, nil)
+		ckptWID := ""
+		if w, _ := ckptWResp["worker"].(map[string]any); w != nil {
+			ckptWID, _ = w["id"].(string)
+		}
+		_, ckptTResp, _ := authStep(client, dir, "HCQA-CKPT-PRE-T",
+			"Create task for checkpoint lifecycle probe",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-ckpt-task", "type": "qa"}, auth, 201, nil)
+		ckptTID := ""
+		if t, _ := ckptTResp["task"].(map[string]any); t != nil {
+			ckptTID, _ = t["id"].(string)
+		}
+
+		if ckptTID != "" {
+			// HCQA-054: checkpoint on UNASSIGNED task returns 422 (catches
+			// BUG #19 — was 201 fake-success). Run BEFORE the assign step.
+			ev, _, ok = authStep(client, dir, "HCQA-054",
+				"POST /tasks/:id/checkpoint on unassigned task returns 422 (not fake-201)",
+				"POST", base+"/api/v1/tasks/"+ckptTID+"/checkpoint",
+				map[string]any{"checkpoint_name": "qa-ckpt", "checkpoint_data": map[string]any{"step": "before-assign"}},
+				auth, 422,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "error" {
+						return fmt.Errorf("status=%v want \"error\"", v["status"])
+					}
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "assigned") {
+						return fmt.Errorf("message %q does not mention assignment requirement", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// Assign then checkpoint → 201 → GET shows it.
+			if ckptWID != "" {
+				_, _, _ = authStep(client, dir, "HCQA-CKPT-PRE-ASSIGN",
+					"Assign task for checkpoint history probe",
+					"POST", base+"/api/v1/tasks/"+ckptTID+"/assign",
+					map[string]any{"worker_id": ckptWID}, auth, 200, nil)
+
+				// HCQA-055: checkpoint on assigned task returns 201.
+				ev, _, ok = authStep(client, dir, "HCQA-055",
+					"POST /tasks/:id/checkpoint on assigned task returns 201",
+					"POST", base+"/api/v1/tasks/"+ckptTID+"/checkpoint",
+					map[string]any{
+						"checkpoint_name": "qa-anti-bluff-cp",
+						"checkpoint_data": map[string]any{"step": "qa-probe"},
+					},
+					auth, 201,
+					func(v map[string]any, raw []byte) error {
+						if v["status"] != "success" {
+							return fmt.Errorf("status=%v want \"success\"", v["status"])
+						}
+						return nil
+					})
+				results = append(results, ev)
+				if ok {
+					passed++
+				} else {
+					failed++
+				}
+
+				// HCQA-056: GET /tasks/:id/checkpoints now contains the
+				// just-created checkpoint (proves history is actually
+				// persisted — catches the silently-discarded-INSERT bug).
+				ev, _, ok = authStep(client, dir, "HCQA-056",
+					"GET /tasks/:id/checkpoints returns the just-created checkpoint (history persistence)",
+					"GET", base+"/api/v1/tasks/"+ckptTID+"/checkpoints",
+					nil, auth, 200,
+					func(v map[string]any, raw []byte) error {
+						arr, _ := v["checkpoints"].([]any)
+						if len(arr) < 1 {
+							return fmt.Errorf("checkpoints list is empty — BUG #19 regression " +
+								"(INSERT into task_checkpoints silently failing again?)")
+						}
+						cp0, _ := arr[0].(map[string]any)
+						if cp0["name"] != "qa-anti-bluff-cp" {
+							return fmt.Errorf("checkpoint.name=%v want \"qa-anti-bluff-cp\"", cp0["name"])
+						}
+						return nil
+					})
+				results = append(results, ev)
+				if ok {
+					passed++
+				} else {
+					failed++
+				}
+			}
+		}
+
 		// HCQA-051..053: task fail → retry round-trip + project-sessions list.
 		// Locks in correct behavior of the canonical fail/retry workflow
 		// AND catches any regression in the round-1/2/3/8 fixes
