@@ -19,6 +19,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -377,15 +378,283 @@ func main() {
 	summaryJSON, _ := json.MarshalIndent(summary, "", "  ")
 	_ = os.WriteFile(filepath.Join(*dir, "summary.json"), summaryJSON, 0o644)
 
+	// Sequenced auth-flow probes — exercise register → login → protected
+	// → logout against the live server. Each step writes its own evidence
+	// file. Failure of any step does NOT abort the suite; subsequent
+	// steps still attempt and record evidence, since "step N failed and
+	// then we never ran N+1" is itself useful diagnostic data.
+	authResults, ap, af := runAuthFlow(client, *base, *dir)
+	results = append(results, authResults...)
+	passed += ap
+	failed += af
+
+	total := len(checks) + len(authResults)
+
 	mdReport := generateMarkdown(passed, failed, results, *base, *dir)
 	_ = os.WriteFile(filepath.Join(*dir, "qa-report.md"), []byte(mdReport), 0o644)
 
+	// Update summary now that auth-flow results are merged.
+	summary["total"] = total
+	summary["passed"] = passed
+	summary["failed"] = failed
+	summary["results"] = results
+	summary["const_035"] = passed > 0 && failed == 0 && passed == total
+	summaryJSON, _ = json.MarshalIndent(summary, "", "  ")
+	_ = os.WriteFile(filepath.Join(*dir, "summary.json"), summaryJSON, 0o644)
+
 	fmt.Println()
-	fmt.Printf("=== helix-qa: %d/%d passed, %d failed ===\n", passed, len(checks), failed)
+	fmt.Printf("=== helix-qa: %d/%d passed, %d failed ===\n", passed, total, failed)
 	fmt.Printf("Evidence: %s\n", *dir)
 	if failed > 0 {
 		os.Exit(1)
 	}
+}
+
+// authStep performs one HTTP request as part of the sequenced auth flow,
+// records evidence, and returns the parsed JSON body + the populated
+// Evidence record. The caller stitches outputs of step N into the input
+// of step N+1.
+func authStep(client *http.Client, dir, id, name, method, url string,
+	body any, headers map[string]string, wantStatus int,
+	check func(map[string]any, []byte) error,
+) (Evidence, map[string]any, bool) {
+	ev := Evidence{
+		CheckID: id, CheckName: name,
+		Method: method, URL: url,
+		WantStatus: wantStatus,
+		Timestamp:  time.Now().UTC().Format(time.RFC3339),
+	}
+	var reqBody io.Reader
+	if body != nil {
+		buf, _ := json.Marshal(body)
+		reqBody = bytes.NewReader(buf)
+	}
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		ev.Result, ev.Error = "FAIL", err.Error()
+		return ev, nil, false
+	}
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	start := time.Now()
+	resp, err := client.Do(req)
+	ev.DurationMs = time.Since(start).Milliseconds()
+	if err != nil {
+		ev.Result, ev.Error = "FAIL", err.Error()
+		fmt.Printf("  [%s] FAIL: %v\n", id, err)
+		writeEvidence(dir, ev)
+		return ev, nil, false
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(resp.Body)
+	ev.Status = resp.StatusCode
+	ev.BodyBytes = len(raw)
+	ev.BodyHead = string(raw)
+	if len(ev.BodyHead) > 600 {
+		ev.BodyHead = ev.BodyHead[:600] + "...(truncated)"
+	}
+
+	parsed := map[string]any{}
+	_ = json.Unmarshal(raw, &parsed)
+
+	if resp.StatusCode != wantStatus {
+		ev.Result = "FAIL"
+		ev.Error = fmt.Sprintf("status %d != want %d", resp.StatusCode, wantStatus)
+		fmt.Printf("  [%s] FAIL: %s\n", id, ev.Error)
+		writeEvidence(dir, ev)
+		return ev, parsed, false
+	}
+	if check != nil {
+		if err := check(parsed, raw); err != nil {
+			ev.Result = "FAIL"
+			ev.Error = err.Error()
+			fmt.Printf("  [%s] FAIL: %s\n", id, err)
+			writeEvidence(dir, ev)
+			return ev, parsed, false
+		}
+	}
+	ev.Result = "PASS"
+	fmt.Printf("  [%s] PASS: %d %s (%d bytes)\n", id, resp.StatusCode, name, len(raw))
+	writeEvidence(dir, ev)
+	return ev, parsed, true
+}
+
+func writeEvidence(dir string, ev Evidence) {
+	path := filepath.Join(dir, "evidence", ev.CheckID+".json")
+	b, _ := json.MarshalIndent(ev, "", "  ")
+	_ = os.WriteFile(path, b, 0o644)
+}
+
+// runAuthFlow exercises register → login → protected → logout end-to-end.
+// Returns the per-step evidence and pass/fail counts.
+//
+// Anti-bluff invariants enforced (CONST-035):
+//   - Register must return 201 with user.id non-empty (real persisted user)
+//   - Login must return 200 with token non-empty (real JWT, not "")
+//   - /users/me with Bearer token must return the SAME username we registered
+//     (proves the token actually authenticated the right user, not just
+//      that the endpoint returns some-user-shaped JSON)
+//   - /users/me with garbage token must 401 (proves auth middleware is real)
+//   - Logout must return 200
+func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
+	var results []Evidence
+	passed, failed := 0, 0
+
+	username := fmt.Sprintf("qa-flow-%d", time.Now().UnixNano())
+	password := "Qa-AntiBluff-Flow-2026!"
+	email := username + "@helix.local"
+
+	// HCQA-014: unauthenticated /users/me must 401.
+	ev, _, ok := authStep(client, dir, "HCQA-014",
+		"Unauthenticated /users/me returns 401",
+		"GET", base+"/api/v1/users/me", nil, nil, 401,
+		func(v map[string]any, raw []byte) error {
+			if v["status"] != "error" {
+				return fmt.Errorf("status=%v want \"error\"", v["status"])
+			}
+			return nil
+		})
+	results = append(results, ev)
+	if ok {
+		passed++
+	} else {
+		failed++
+	}
+
+	// HCQA-015: register a fresh user.
+	regBody := map[string]string{"username": username, "password": password, "email": email}
+	ev, regResp, ok := authStep(client, dir, "HCQA-015",
+		"Auth register creates user with UUID",
+		"POST", base+"/api/v1/auth/register", regBody, nil, 201,
+		func(v map[string]any, raw []byte) error {
+			u, _ := v["user"].(map[string]any)
+			if u == nil {
+				return fmt.Errorf("user field missing")
+			}
+			id, _ := u["id"].(string)
+			if len(id) < 32 {
+				return fmt.Errorf("user.id=%q too short to be a UUID", id)
+			}
+			if u["username"] != username {
+				return fmt.Errorf("user.username=%v want %q", u["username"], username)
+			}
+			return nil
+		})
+	results = append(results, ev)
+	if ok {
+		passed++
+	} else {
+		failed++
+	}
+
+	registeredID := ""
+	if u, _ := regResp["user"].(map[string]any); u != nil {
+		registeredID, _ = u["id"].(string)
+	}
+
+	// HCQA-016: login → JWT.
+	loginBody := map[string]string{"username": username, "password": password}
+	ev, loginResp, ok := authStep(client, dir, "HCQA-016",
+		"Auth login returns JWT + session",
+		"POST", base+"/api/v1/auth/login", loginBody, nil, 200,
+		func(v map[string]any, raw []byte) error {
+			tok, _ := v["token"].(string)
+			if len(tok) < 32 {
+				return fmt.Errorf("token=%q too short to be a JWT", tok)
+			}
+			if !strings.HasPrefix(tok, "eyJ") {
+				return fmt.Errorf("token doesn't start with JWT header marker")
+			}
+			sess, _ := v["session"].(map[string]any)
+			if sess == nil {
+				return fmt.Errorf("session field missing")
+			}
+			sid, _ := sess["id"].(string)
+			if len(sid) < 32 {
+				return fmt.Errorf("session.id=%q too short to be a UUID", sid)
+			}
+			if sess["user_id"] != registeredID {
+				return fmt.Errorf("session.user_id=%v != registered user.id=%q",
+					sess["user_id"], registeredID)
+			}
+			return nil
+		})
+	results = append(results, ev)
+	if ok {
+		passed++
+	} else {
+		failed++
+	}
+	token, _ := loginResp["token"].(string)
+
+	// HCQA-017: /users/me with valid Bearer.
+	if token != "" {
+		ev, _, ok := authStep(client, dir, "HCQA-017",
+			"Authenticated /users/me returns the same user",
+			"GET", base+"/api/v1/users/me", nil,
+			map[string]string{"Authorization": "Bearer " + token}, 200,
+			func(v map[string]any, raw []byte) error {
+				u, _ := v["user"].(map[string]any)
+				if u == nil {
+					return fmt.Errorf("user field missing")
+				}
+				if u["username"] != username {
+					return fmt.Errorf("user.username=%v want %q (auth returned wrong user!)",
+						u["username"], username)
+				}
+				if u["id"] != registeredID {
+					return fmt.Errorf("user.id=%v want %q", u["id"], registeredID)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+	} else {
+		fmt.Println("  [HCQA-017] SKIP-OK: previous login failed; cannot exercise authenticated path")
+	}
+
+	// HCQA-018: garbage token must 401 (proves middleware verifies, not just looks).
+	ev, _, ok = authStep(client, dir, "HCQA-018",
+		"Garbage Bearer token returns 401",
+		"GET", base+"/api/v1/users/me", nil,
+		map[string]string{"Authorization": "Bearer not-a-real-token-xyz"}, 401,
+		nil)
+	results = append(results, ev)
+	if ok {
+		passed++
+	} else {
+		failed++
+	}
+
+	// HCQA-019: logout.
+	if token != "" {
+		ev, _, ok := authStep(client, dir, "HCQA-019",
+			"Logout with valid token returns 200",
+			"POST", base+"/api/v1/auth/logout", nil,
+			map[string]string{"Authorization": "Bearer " + token}, 200,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "success" {
+					return fmt.Errorf("status=%v want \"success\"", v["status"])
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+	}
+
+	return results, passed, failed
 }
 
 func generateMarkdown(passed, failed int, results []Evidence, base, dir string) string {
