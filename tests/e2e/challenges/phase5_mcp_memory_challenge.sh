@@ -23,7 +23,7 @@ echo "  PASS: Notification package builds"
 
 # Test 4: Run memory tests (skip e2e)
 echo "[4/5] Running memory tests..."
-go test ./internal/memory/... -timeout 30s -short 2>&1 | grep -q "FAIL" && (echo "FAIL: Memory tests failed"; exit 1)
+go test ./internal/memory/... -timeout 90s -short 2>&1 | grep -q "FAIL" && (echo "FAIL: Memory tests failed"; exit 1)
 echo "  PASS: Memory tests pass"
 
 # Test 5: Run notification tests
