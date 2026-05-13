@@ -894,6 +894,57 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			failed++
 		}
 
+		// HCQA-035: create session (requires a real project_id from
+		// the round-4 create-project probe + a valid Mode). Catches
+		// any regression where the sessions handler returns a session
+		// stub without persisting the linked project_id, or rejects a
+		// valid mode. We snapshot the just-created project's id from
+		// the earlier list-projects step's body excerpt.
+		projectsBody := ""
+		for _, r := range results {
+			if r.CheckID == "HCQA-025" {
+				projectsBody = r.BodyHead
+				break
+			}
+		}
+		if idx := strings.Index(projectsBody, `"id":"`); idx >= 0 {
+			start := idx + len(`"id":"`)
+			end := strings.Index(projectsBody[start:], `"`)
+			if end > 0 {
+				projID := projectsBody[start : start+end]
+				ev, _, ok = authStep(client, dir, "HCQA-035",
+					"POST /sessions with valid project_id + mode returns 201",
+					"POST", base+"/api/v1/sessions",
+					map[string]any{
+						"project_id":  projID,
+						"mode":        "planning",
+						"name":        "qa-anti-bluff-session",
+						"description": "qa-anti-bluff probe",
+					},
+					auth, 201,
+					func(v map[string]any, raw []byte) error {
+						sess, _ := v["session"].(map[string]any)
+						if sess == nil {
+							return fmt.Errorf("session field missing")
+						}
+						if sess["project_id"] != projID {
+							return fmt.Errorf("session.project_id=%v != requested %q",
+								sess["project_id"], projID)
+						}
+						if sess["mode"] != "planning" {
+							return fmt.Errorf("session.mode=%v != \"planning\"", sess["mode"])
+						}
+						return nil
+					})
+				results = append(results, ev)
+				if ok {
+					passed++
+				} else {
+					failed++
+				}
+			}
+		}
+
 		// HCQA-026: list sessions returns 200 with array.
 		ev, _, ok = authStep(client, dir, "HCQA-026",
 			"List sessions returns array",
