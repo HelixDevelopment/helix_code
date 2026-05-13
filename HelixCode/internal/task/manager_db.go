@@ -166,12 +166,12 @@ func (m *DatabaseManager) GetTask(ctx context.Context, id string) (*Task, error)
 	}
 
 	task := &Task{
-		ID:             dbID,
-		Type:           TaskType(taskType),
-		Data:           taskData,
-		Status:         TaskStatus(status),
-		Priority:       taskPriority,
-		Criticality:    TaskCriticality(criticality),
+		ID:          dbID,
+		Type:        TaskType(taskType),
+		Data:        taskData,
+		Status:      TaskStatus(status),
+		Priority:    taskPriority,
+		Criticality: TaskCriticality(criticality),
 		// Anti-bluff (CONST-035): previously these two fields were
 		// scanned from the DB row (lines 123-124) but never assigned
 		// to the returned Task struct. Every response that included
@@ -272,12 +272,12 @@ func (m *DatabaseManager) ListTasks(ctx context.Context) ([]*Task, error) {
 		}
 
 		task := &Task{
-			ID:             dbID,
-			Type:           TaskType(taskType),
-			Data:           taskData,
-			Status:         TaskStatus(status),
-			Priority:       taskPriority,
-			Criticality:    TaskCriticality(criticality),
+			ID:          dbID,
+			Type:        TaskType(taskType),
+			Data:        taskData,
+			Status:      TaskStatus(status),
+			Priority:    taskPriority,
+			Criticality: TaskCriticality(criticality),
 			// Same bug as GetTask above — pulled from DB, never assigned.
 			AssignedWorker: assignedWorkerID,
 			OriginalWorker: originalWorkerID,
@@ -508,11 +508,11 @@ var ErrCheckpointRequiresAssignment = errors.New("task must be assigned to a wor
 // CreateCheckpoint creates a checkpoint for a task.
 //
 // Anti-bluff (CONST-035): the previous implementation
-//   1. UPDATEd distributed_tasks.checkpoint_data (overwriting any
-//      previous checkpoint — no history kept on that field)
-//   2. INSERTed into task_checkpoints with `_, _ = m.db.Exec(...)` —
-//      SILENTLY DISCARDING BOTH the result AND the error
-//   3. Returned nil to the caller regardless
+//  1. UPDATEd distributed_tasks.checkpoint_data (overwriting any
+//     previous checkpoint — no history kept on that field)
+//  2. INSERTed into task_checkpoints with `_, _ = m.db.Exec(...)` —
+//     SILENTLY DISCARDING BOTH the result AND the error
+//  3. Returned nil to the caller regardless
 //
 // The INSERT always failed because task_checkpoints.worker_id is
 // NOT NULL REFERENCES workers(id) but the INSERT omitted that column.

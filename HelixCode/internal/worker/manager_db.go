@@ -343,7 +343,9 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 // cpu_usage_percent / memory_usage_percent / disk_usage_percent
 // snapshot columns. Result: GET /workers/:id always returned
 // `"cpu_usage_percent": 0, "memory_usage_percent": 0,
-//  "disk_usage_percent": 0` regardless of how many heartbeats had
+//
+//	"disk_usage_percent": 0` regardless of how many heartbeats had
+//
 // landed. The worker record SAID it was the current-state snapshot
 // (`workers.cpu_usage_percent` exists as a column) but actually
 // reflected only the initial-create zero values forever.

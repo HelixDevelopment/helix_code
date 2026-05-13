@@ -1035,10 +1035,10 @@ func (s *Server) listLLMProviders(c *gin.Context) {
 		if err == nil && len(models) > 0 {
 			providers := buildProvidersFromVerifiedModels(models)
 			c.JSON(http.StatusOK, gin.H{
-				"status":      "success",
-				"providers":   providers,
-				"count":       len(providers),
-				"source":      "verifier",
+				"status":       "success",
+				"providers":    providers,
+				"count":        len(providers),
+				"source":       "verifier",
 				"last_updated": time.Now().UTC(),
 			})
 			return
@@ -1049,10 +1049,10 @@ func (s *Server) listLLMProviders(c *gin.Context) {
 	models := verifier.FallbackModels
 	providers := buildProvidersFromVerifiedModels(models)
 	c.JSON(http.StatusOK, gin.H{
-		"status":      "success",
-		"providers":   providers,
-		"count":       len(providers),
-		"source":      "fallback",
+		"status":       "success",
+		"providers":    providers,
+		"count":        len(providers),
+		"source":       "fallback",
 		"last_updated": time.Now().UTC(),
 	})
 }
@@ -1132,7 +1132,7 @@ func (s *Server) getLLMProvider(c *gin.Context) {
 			}
 			if len(providerModels) > 0 {
 				c.JSON(http.StatusOK, gin.H{
-					"status":   "success",
+					"status": "success",
 					"provider": gin.H{
 						"id":          providerID,
 						"name":        capitalize(providerID),
@@ -1167,7 +1167,7 @@ func (s *Server) getLLMProvider(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status":   "success",
+		"status": "success",
 		"provider": gin.H{
 			"id":          providerID,
 			"name":        capitalize(providerID),

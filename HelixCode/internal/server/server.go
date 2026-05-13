@@ -36,11 +36,11 @@ type Server struct {
 	workerManager  *worker.DatabaseManager
 	projectManager *project.DatabaseManager
 	sessionManager *session.Manager
-	server          *http.Server
-	router          *gin.Engine
-	startTime       time.Time
-	verifierResult  *verifier.BootstrapResult
-	qaEngine        *helixqa.Engine
+	server         *http.Server
+	router         *gin.Engine
+	startTime      time.Time
+	verifierResult *verifier.BootstrapResult
+	qaEngine       *helixqa.Engine
 }
 
 // New creates a new HTTP server

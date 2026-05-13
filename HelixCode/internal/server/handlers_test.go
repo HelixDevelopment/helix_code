@@ -1447,5 +1447,5 @@ func TestDeleteCurrentUser_ValidRequest(t *testing.T) {
 func TestGetSystemStatus_ValidRequest(t *testing.T) {
 	// Skip this test because getSystemStatus accesses db.HealthCheck() which requires
 	// a database connection. This is tested in integration tests.
-	t.Skip("System status handler requires database connection - use integration tests")  // SKIP-OK: #integration-mode-only
+	t.Skip("System status handler requires database connection - use integration tests") // SKIP-OK: #integration-mode-only
 }
