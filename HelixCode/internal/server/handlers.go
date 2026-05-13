@@ -1542,6 +1542,18 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 
 	err := s.workerManager.UpdateWorkerHeartbeat(c.Request.Context(), id, req.Metrics)
 	if err != nil {
+		// 404 for missing worker; 500 only for genuine DB faults.
+		// Pre-fix: a heartbeat on a bogus worker id leaked the raw
+		// postgres FK constraint error as HTTP 500 (CONST-042 schema
+		// leakage + CONST-035 misclassified 404 as 500).
+		if errors.Is(err, worker.ErrWorkerNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Worker not found",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to update heartbeat",

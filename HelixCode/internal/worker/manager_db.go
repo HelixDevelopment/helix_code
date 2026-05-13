@@ -322,7 +322,14 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 	// a field (sends 0.0 as the JSON zero-value). The previous query
 	// updated only last_heartbeat — turning the snapshot columns into
 	// a "current state" bluff.
-	if _, err = m.db.Exec(ctx, `
+	//
+	// Anti-bluff (BUG #24): the previous version proceeded straight to
+	// the worker_metrics INSERT even if the worker didn't exist,
+	// causing a raw postgres FK error to bubble up as HTTP 500 —
+	// leaking schema details (CONST-042) AND misclassifying a 404 as
+	// a 500 (CONST-035). Check RowsAffected on the UPDATE first; if 0,
+	// surface ErrWorkerNotFound so the handler returns 404.
+	hbResult, err := m.db.Exec(ctx, `
 		UPDATE workers
 		SET last_heartbeat       = NOW(),
 		    cpu_usage_percent    = CASE WHEN $2 > 0 THEN $2 ELSE cpu_usage_percent END,
@@ -330,8 +337,12 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 		    disk_usage_percent   = CASE WHEN $4 > 0 THEN $4 ELSE disk_usage_percent END,
 		    updated_at           = NOW()
 		WHERE id = $1
-	`, workerID, cpuUsage, memoryUsage, diskUsage); err != nil {
+	`, workerID, cpuUsage, memoryUsage, diskUsage)
+	if err != nil {
 		return fmt.Errorf("failed to update worker heartbeat: %v", err)
+	}
+	if hbResult.RowsAffected() == 0 {
+		return fmt.Errorf("%w: %s", ErrWorkerNotFound, id)
 	}
 
 	// Store time-series row for history queries.

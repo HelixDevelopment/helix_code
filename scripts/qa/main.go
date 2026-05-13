@@ -1201,6 +1201,39 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-070: heartbeat on bogus worker returns 404 (catches BUG #24).
+		// Pre-fix: leaked raw postgres FK constraint error as HTTP 500
+		// (CONST-042 schema leakage + CONST-035 wrong-HTTP-code bluff).
+		// UpdateWorkerHeartbeat now checks RowsAffected on the
+		// workers-table UPDATE BEFORE attempting the worker_metrics
+		// INSERT, surfacing ErrWorkerNotFound which the handler maps
+		// to 404 with a clean message.
+		ev, _, ok = authStep(client, dir, "HCQA-070",
+			"POST /workers/<bogus>/heartbeat returns 404 (no postgres FK leak)",
+			"POST", base+"/api/v1/workers/00000000-0000-0000-0000-000000000000/heartbeat",
+			map[string]any{"metrics": map[string]any{"cpu_usage_percent": 50.0}},
+			auth, 404,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "error" {
+					return fmt.Errorf("status=%v want \"error\"", v["status"])
+				}
+				// Anti-leak: response must NOT contain postgres-schema
+				// detail like "worker_metrics_worker_id_fkey" or
+				// "violates foreign key constraint" — those are
+				// CONST-042 leakage of internal schema.
+				bodyStr := string(raw)
+				if strings.Contains(bodyStr, "fkey") || strings.Contains(bodyStr, "SQLSTATE") {
+					return fmt.Errorf("response leaks postgres schema details: %.200s", bodyStr)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-065..069: 5 endpoints that previously returned HTTP 500
 		// for "resource not found" (a client-side missing-id error)
 		// now correctly return 404. Catches BUG #23.
