@@ -1201,6 +1201,83 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-086..088: round-26 sessions+workers input validation.
+		// (29) POST /sessions with bogus project_id → 404
+		// (30) POST /sessions with malformed project_id → 400
+		// (31) POST /workers with >255-char hostname → 400, no pg leak
+		ev, _, ok = authStep(client, dir, "HCQA-086",
+			"POST /sessions with bogus project_id returns 404 (was 201 silent)",
+			"POST", base+"/api/v1/sessions",
+			map[string]any{
+				"project_id": "00000000-0000-0000-0000-000000000000",
+				"mode":       "planning",
+				"name":       "qa-anti-bluff",
+			},
+			auth, 404,
+			func(v map[string]any, raw []byte) error {
+				if v["status"] != "error" {
+					return fmt.Errorf("status=%v want \"error\"", v["status"])
+				}
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "project") {
+					return fmt.Errorf("message %q does not mention project", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-087",
+			"POST /sessions with malformed project_id returns 400 (was 201 silent)",
+			"POST", base+"/api/v1/sessions",
+			map[string]any{
+				"project_id": "not-a-uuid",
+				"mode":       "planning",
+				"name":       "qa-anti-bluff",
+			},
+			auth, 400,
+			func(v map[string]any, raw []byte) error {
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "invalid") {
+					return fmt.Errorf("message %q does not mention invalid input", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+		// HCQA-088: 512-char hostname must 400 + NO postgres leak.
+		longHost := strings.Repeat("a", 512)
+		ev, _, ok = authStep(client, dir, "HCQA-088",
+			"POST /workers with 512-char hostname returns 400 + no pg SQLSTATE 22001 leak",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": longHost}, auth, 400,
+			func(v map[string]any, raw []byte) error {
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "hostname") {
+					return fmt.Errorf("message %q does not mention hostname limit", m)
+				}
+				bodyStr := string(raw)
+				for _, leak := range []string{"SQLSTATE", "22001", "character varying"} {
+					if strings.Contains(bodyStr, leak) {
+						return fmt.Errorf("response leaks postgres detail %q: %.200s", leak, bodyStr)
+					}
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-081..085: round-25 — PUT/DELETE project malformed-UUID
 		// (catches BUG #28 — pg SQLSTATE 22P02 leaked through), task
 		// checkpoint handlers (createTaskCheckpoint + getTaskCheckpoints

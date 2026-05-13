@@ -33,6 +33,18 @@ var ErrWorkerHostnameTaken = errors.New("worker hostname already in use")
 // not 500. Parallel to task.ErrInvalidTaskID.
 var ErrInvalidWorkerID = errors.New("invalid worker ID")
 
+// ErrWorkerHostnameTooLong is returned by RegisterWorker when the
+// hostname exceeds the workers.hostname VARCHAR(255) column limit.
+// Pre-fix: postgres would reject with SQLSTATE 22001 "value too long
+// for type character varying(255)" — leaked schema details
+// (CONST-042) and surfaced as HTTP 500 (CONST-035). Handler MUST
+// errors.Is-check this and return 400 Bad Request with clean message.
+var ErrWorkerHostnameTooLong = errors.New("worker hostname exceeds 255-char limit")
+
+// hostnameMaxLen mirrors the workers.hostname VARCHAR(255) schema
+// constraint. Centralized so a future schema change updates one place.
+const hostnameMaxLen = 255
+
 // isUniqueViolation reports whether err is a postgres unique-constraint
 // violation (SQLSTATE 23505). The pgx driver wraps these as
 // *pgconn.PgError with Code "23505".
@@ -264,6 +276,13 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 	// NOT NULL constraint. Default to empty slice.
 	if capabilities == nil {
 		capabilities = []string{}
+	}
+	// Pre-validate hostname length BEFORE pg rejects with SQLSTATE 22001
+	// "value too long for type character varying(255)" — that error
+	// leaks the schema column type (CONST-042) and surfaces as HTTP 500
+	// (CONST-035 wrong-HTTP-code).
+	if len(hostname) > hostnameMaxLen {
+		return nil, fmt.Errorf("%w: got %d chars", ErrWorkerHostnameTooLong, len(hostname))
 	}
 
 	worker := &Worker{

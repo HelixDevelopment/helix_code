@@ -88,11 +88,11 @@ EV_COUNT="$(ls "$SESSION_DIR/evidence/" | wc -l | tr -d ' ')"
 #                                      HCQA-048 assign, HCQA-049 round-trip,
 #                                      HCQA-050 heartbeat) = 61 evidence files.
 # Lower bound is 61.
-# Plus HCQA-081..084 (4 project/checkpoint malformed-UUID-400 with
-# anti-leak assertion) + HCQA-085 (session-update-on-bogus-404)
-# = 117 evidence files.
-if [ "$EV_COUNT" -lt 117 ]; then
-    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 117)"; exit 1
+# Plus HCQA-086 (sessions-bogus-project-404), HCQA-087 (sessions-
+# malformed-project_id-400), HCQA-088 (worker-overlong-hostname-400
+# with anti-leak assertion) = 120 evidence files.
+if [ "$EV_COUNT" -lt 120 ]; then
+    echo "  FAIL: only $EV_COUNT evidence files (expected ≥ 120)"; exit 1
 fi
 # Every file MUST have result==PASS AND body_bytes>0.
 # `grep -l` exits 1 when nothing matches AND we have `set -o pipefail`,

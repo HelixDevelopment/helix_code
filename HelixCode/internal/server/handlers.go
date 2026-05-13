@@ -1481,8 +1481,17 @@ func (s *Server) createWorker(c *gin.Context) {
 
 	w, err := s.workerManager.RegisterWorker(c.Request.Context(), req.Hostname, req.DisplayName, req.SSHConfig, req.Capabilities, req.Resources)
 	if err != nil {
-		// 409 Conflict for duplicate-hostname; clean message — no
-		// postgres SQLSTATE or constraint-name leakage (CONST-042).
+		// 400 Bad Request for hostname-length violations (no pg
+		// SQLSTATE 22001 leakage); 409 Conflict for duplicate-hostname
+		// (no pg 23505 leakage); 500 only for genuine DB faults.
+		if errors.Is(err, worker.ErrWorkerHostnameTooLong) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Worker hostname exceeds 255-character limit",
+				"error":   err.Error(),
+			})
+			return
+		}
 		if errors.Is(err, worker.ErrWorkerHostnameTaken) {
 			c.JSON(http.StatusConflict, gin.H{
 				"status":  "error",
@@ -2123,6 +2132,35 @@ func (s *Server) createSession(c *gin.Context) {
 			"message": "Session manager not available",
 		})
 		return
+	}
+
+	// Validate project_id BEFORE creating the session. The in-memory
+	// session manager doesn't check the project FK, so without this
+	// gate POST /sessions silently accepts bogus or malformed
+	// project_id (BUG #29/#30: the session would be created with a
+	// dangling reference). This pre-check catches both cases:
+	//   - malformed UUID → 400 via ErrInvalidProjectID
+	//   - well-formed UUID but no such project → 404 via ErrProjectNotFound
+	if s.projectManager != nil {
+		if _, err := s.projectManager.GetProject(c.Request.Context(), req.ProjectID); err != nil {
+			if respondInvalidID(c, err, "project") {
+				return
+			}
+			if errors.Is(err, project.ErrProjectNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{
+					"status":  "error",
+					"message": "Project not found — cannot create session without a real project",
+					"error":   err.Error(),
+				})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Failed to validate project for session create",
+				"error":   err.Error(),
+			})
+			return
+		}
 	}
 
 	sess, err := s.sessionManager.Create(req.ProjectID, req.Name, req.Description, session.Mode(req.Mode))
