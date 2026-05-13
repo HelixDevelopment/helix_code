@@ -187,10 +187,18 @@ coverage-full: test-infra-up
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "✅ Coverage report: coverage.html"
 
-# Quick check that code compiles
+# Quick check that code compiles.
+#
+# Uses -tags=nogui so applications/desktop/ picks up its main_nogui.go
+# instead of the Fyne-GUI main.go. Without that tag, `go build ./...`
+# fails in headless / non-X11 environments because of the transitive
+# go-gl/glfw → X11/Xcursor C dependency — even though the codebase
+# already has a no-GUI variant. CONST-035: the canonical compile-gate
+# must not silently depend on an optional system library when a
+# no-dep variant exists in the tree.
 verify-compile:
-	@echo "🔍 Verifying code compilation..."
-	@$(GO) build ./... && echo "✅ All packages compile successfully"
+	@echo "🔍 Verifying code compilation (nogui — no X11 system libs required)..."
+	@$(GO) build -tags=nogui ./... && echo "✅ All packages compile successfully"
 
 # Clean build artifacts
 clean:
