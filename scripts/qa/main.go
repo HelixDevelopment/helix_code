@@ -1201,6 +1201,152 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-058..060: positive-coverage for state-accuracy invariants.
+		// These probe areas where bugs were FEARED but not found in
+		// round 17. Mechanically asserting the invariants now prevents
+		// regression into the bluff patterns we already fixed elsewhere.
+
+		// HCQA-058: complete with result body round-trips into result_data.
+		// (Field-naming asymmetry: request key is "result", response key
+		// is "result_data" — both work, just inconsistent. Worth a probe
+		// so any future "silently-discarded result" regression surfaces.)
+		_, completeTResp, _ := authStep(client, dir, "HCQA-058-PRE-CREATE",
+			"Create task for complete-result-data round-trip",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-result-data-task", "type": "qa"}, auth, 201, nil)
+		completeTID := ""
+		if t, _ := completeTResp["task"].(map[string]any); t != nil {
+			completeTID, _ = t["id"].(string)
+		}
+		if completeTID != "" {
+			_, _, _ = authStep(client, dir, "HCQA-058-PRE-START",
+				"Start task for complete probe",
+				"POST", base+"/api/v1/tasks/"+completeTID+"/start",
+				map[string]any{}, auth, 200, nil)
+			ev, _, ok = authStep(client, dir, "HCQA-058",
+				"POST /tasks/:id/complete with result body round-trips into result_data",
+				"POST", base+"/api/v1/tasks/"+completeTID+"/complete",
+				map[string]any{"result": map[string]any{
+					"output":    "qa-anti-bluff-output",
+					"exit_code": 0,
+				}}, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					t, _ := v["task"].(map[string]any)
+					if t == nil {
+						return fmt.Errorf("task field missing")
+					}
+					if t["status"] != "completed" {
+						return fmt.Errorf("task.status=%v want \"completed\"", t["status"])
+					}
+					rd, _ := t["result_data"].(map[string]any)
+					if rd == nil {
+						return fmt.Errorf("result_data missing — request->response field bridge broken")
+					}
+					if rd["output"] != "qa-anti-bluff-output" {
+						return fmt.Errorf("result_data.output=%v did not round-trip", rd["output"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-059: /tasks list ordered DESC by created_at — first
+		// element is the most recently created task. Catches any
+		// regression that flips the ORDER BY direction or drops it.
+		listOrderHost := fmt.Sprintf("qa-list-order-%d", time.Now().UnixNano())
+		_, listOrderResp, _ := authStep(client, dir, "HCQA-059-PRE-CREATE",
+			"Create task for list-ordering probe (most-recent-must-be-first)",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": listOrderHost, "type": "qa"}, auth, 201, nil)
+		listOrderTID := ""
+		if t, _ := listOrderResp["task"].(map[string]any); t != nil {
+			listOrderTID, _ = t["id"].(string)
+		}
+		if listOrderTID != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-059",
+				"GET /tasks list ordered DESC by created_at (first = most recent)",
+				"GET", base+"/api/v1/tasks", nil, auth, 200,
+				func(v map[string]any, raw []byte) error {
+					arr, _ := v["tasks"].([]any)
+					if len(arr) == 0 {
+						return fmt.Errorf("tasks list is empty after just creating one (BUG #2 regression?)")
+					}
+					first, _ := arr[0].(map[string]any)
+					if first == nil {
+						return fmt.Errorf("first task is not a map")
+					}
+					if first["id"] != listOrderTID {
+						return fmt.Errorf("first task id=%v != just-created %q (ORDER BY desc broken)",
+							first["id"], listOrderTID)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-060: /system/stats correctly counts created tasks/workers.
+		// Captures the BEFORE counts, creates one of each, asserts AFTER
+		// counts rose by exactly 1. Catches any "stats hardcoded to 0"
+		// or "stats stale" regression.
+		_, beforeStatsResp, _ := authStep(client, dir, "HCQA-060-PRE-STATS",
+			"Capture /system/stats counters before adding new task+worker",
+			"GET", base+"/api/v1/system/stats", nil, auth, 200, nil)
+		beforeTasks, beforeWorkers := 0.0, 0.0
+		if s, _ := beforeStatsResp["stats"].(map[string]any); s != nil {
+			if t, _ := s["tasks"].(map[string]any); t != nil {
+				beforeTasks, _ = t["total"].(float64)
+			}
+			if w, _ := s["workers"].(map[string]any); w != nil {
+				beforeWorkers, _ = w["total"].(float64)
+			}
+		}
+		_, _, _ = authStep(client, dir, "HCQA-060-PRE-CREATE-T",
+			"Create new task for stats-counter probe",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-stats-task", "type": "qa"}, auth, 201, nil)
+		_, _, _ = authStep(client, dir, "HCQA-060-PRE-CREATE-W",
+			"Create new worker for stats-counter probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": fmt.Sprintf("qa-stats-w-%d", time.Now().UnixNano())}, auth, 201, nil)
+		ev, _, ok = authStep(client, dir, "HCQA-060",
+			"GET /system/stats counters rose by 1 after creating new task+worker",
+			"GET", base+"/api/v1/system/stats", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				s, _ := v["stats"].(map[string]any)
+				if s == nil {
+					return fmt.Errorf("stats field missing")
+				}
+				t, _ := s["tasks"].(map[string]any)
+				w, _ := s["workers"].(map[string]any)
+				afterTasks, _ := t["total"].(float64)
+				afterWorkers, _ := w["total"].(float64)
+				if afterTasks != beforeTasks+1 {
+					return fmt.Errorf("tasks.total went %v→%v, expected +1 (BUG: stats stale or hardcoded)",
+						beforeTasks, afterTasks)
+				}
+				if afterWorkers != beforeWorkers+1 {
+					return fmt.Errorf("workers.total went %v→%v, expected +1 (BUG: stats stale or hardcoded)",
+						beforeWorkers, afterWorkers)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-HB-*: heartbeat metrics persistence to snapshot columns.
 		// Catches BUG #20: heartbeat updated workers.last_heartbeat +
 		// inserted into worker_metrics time-series table, but NEVER
