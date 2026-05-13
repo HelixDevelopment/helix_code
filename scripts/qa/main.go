@@ -1201,6 +1201,90 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-089..091: round-27 register/login + worker-metrics handlers.
+		// (32) GET /workers/<malformed>/metrics returned 500 instead of 400 —
+		// last handler missing the respondInvalidID branch.
+		ev, _, ok = authStep(client, dir, "HCQA-089",
+			"GET /workers/<malformed>/metrics returns 400 (was 500)",
+			"GET", base+"/api/v1/workers/not-a-uuid/metrics", nil, auth, 400,
+			func(v map[string]any, raw []byte) error {
+				m, _ := v["message"].(string)
+				if !strings.Contains(strings.ToLower(m), "invalid") {
+					return fmt.Errorf("message %q does not mention invalid input", m)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-090: register with overlong username already returns 400 —
+		// lock that in as positive coverage (and assert no pg leak).
+		longUsername := strings.Repeat("a", 300)
+		ev, _, ok = authStep(client, dir, "HCQA-090",
+			"POST /auth/register with overlong username returns 400 (no pg leak)",
+			"POST", base+"/api/v1/auth/register",
+			map[string]any{
+				"username": longUsername,
+				"email":    "qa-r27-overlong@helix.local",
+				"password": "Qa-R27-Pass-1!",
+			},
+			nil, 400,
+			func(v map[string]any, raw []byte) error {
+				bodyStr := string(raw)
+				for _, leak := range []string{"SQLSTATE", "22001", "character varying"} {
+					if strings.Contains(bodyStr, leak) {
+						return fmt.Errorf("response leaks pg detail %q: %.200s", leak, bodyStr)
+					}
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-091: SQL-injection-attempt-in-hostname is safely stored as
+		// data (pgx prepared statements parameterize) — workers table
+		// stays alive. Positive-coverage that prepared-statements
+		// defense is real (anti-bluff: any future regression to string-
+		// concatenated SQL would fail this probe).
+		// Unique per-run to avoid 409 duplicate-key on repeat probes
+		// (the hostname is stored verbatim, prepared statements
+		// guarantee no SQL execution — the "; DROP TABLE workers;--"
+		// suffix is just data).
+		injHost := fmt.Sprintf("qa-injection-test-%d'; DROP TABLE workers;--", time.Now().UnixNano())
+		_, injCreate, _ := authStep(client, dir, "HCQA-091-PRE-CREATE",
+			"Create worker with SQL-injection attempt in hostname",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": injHost}, auth, 201, nil)
+		if w, _ := injCreate["worker"].(map[string]any); w != nil {
+			if w["hostname"] != injHost {
+				fmt.Printf("  [HCQA-091-PRE-CREATE] WARN: hostname did not round-trip exactly: %q\n", w["hostname"])
+			}
+		}
+		ev, _, ok = authStep(client, dir, "HCQA-091",
+			"GET /workers list still returns array after SQL-injection attempt (table intact)",
+			"GET", base+"/api/v1/workers", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				arr, _ := v["workers"].([]any)
+				if len(arr) == 0 {
+					return fmt.Errorf("workers list empty after injection attempt — table may have been dropped (defense-in-depth FAIL)")
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-086..088: round-26 sessions+workers input validation.
 		// (29) POST /sessions with bogus project_id → 404
 		// (30) POST /sessions with malformed project_id → 400

@@ -1685,6 +1685,10 @@ func (s *Server) getWorkerMetrics(c *gin.Context) {
 	since := time.Now().Add(-1 * time.Hour)
 	metrics, err := s.workerManager.GetWorkerMetrics(c.Request.Context(), id, since)
 	if err != nil {
+		// 400 for malformed UUID; 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "worker") {
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to get worker metrics",
