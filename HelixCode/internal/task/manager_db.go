@@ -425,7 +425,10 @@ func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID strin
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("task not found or not in pending state: %s", taskID)
+		// Wrap the sentinel so handlers can map to 422 (not 500) for
+		// the assign-on-already-assigned case (BUG #23, same family
+		// as #13 retry and #21 start/complete).
+		return fmt.Errorf("%w: task %s not in pending state for assign", ErrTaskInvalidStateTransition, taskID)
 	}
 
 	return nil

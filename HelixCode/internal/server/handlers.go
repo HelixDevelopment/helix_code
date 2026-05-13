@@ -1595,6 +1595,17 @@ func (s *Server) assignTask(c *gin.Context) {
 
 	err := s.taskManager.AssignTask(c.Request.Context(), id, req.WorkerID)
 	if err != nil {
+		// 422 for client-state errors (task not in pending state —
+		// e.g., already assigned, completed, failed). 500 only for
+		// genuine DB faults.
+		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": "Task is not in the prerequisite state to assign (must be pending)",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Failed to assign task",
@@ -1604,12 +1615,12 @@ func (s *Server) assignTask(c *gin.Context) {
 	}
 
 	// Get the updated task
-	task, _ := s.taskManager.GetTask(c.Request.Context(), id)
+	t, _ := s.taskManager.GetTask(c.Request.Context(), id)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "Task assigned successfully",
-		"task":    task,
+		"task":    t,
 	})
 }
 

@@ -1201,6 +1201,59 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-064: re-assign an already-assigned task returns 422 (catches BUG #23).
+		// Same state-machine sentinel family as BUG #21 (start/complete) and
+		// BUG #13 (retry). AssignTask now wraps ErrTaskInvalidStateTransition.
+		_, reAssignTResp, _ := authStep(client, dir, "HCQA-064-PRE-TASK",
+			"Create task for reassign-422 probe",
+			"POST", base+"/api/v1/tasks",
+			map[string]any{"name": "qa-reassign-422", "type": "qa"}, auth, 201, nil)
+		reAssignTID := ""
+		if t, _ := reAssignTResp["task"].(map[string]any); t != nil {
+			reAssignTID, _ = t["id"].(string)
+		}
+		_, reAssignW1Resp, _ := authStep(client, dir, "HCQA-064-PRE-W1",
+			"Create first worker for reassign-422 probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": fmt.Sprintf("qa-reassign-w1-%d", time.Now().UnixNano())},
+			auth, 201, nil)
+		reAssignW1ID := ""
+		if w, _ := reAssignW1Resp["worker"].(map[string]any); w != nil {
+			reAssignW1ID, _ = w["id"].(string)
+		}
+		_, reAssignW2Resp, _ := authStep(client, dir, "HCQA-064-PRE-W2",
+			"Create second worker for reassign-422 probe",
+			"POST", base+"/api/v1/workers",
+			map[string]any{"hostname": fmt.Sprintf("qa-reassign-w2-%d", time.Now().UnixNano())},
+			auth, 201, nil)
+		reAssignW2ID := ""
+		if w, _ := reAssignW2Resp["worker"].(map[string]any); w != nil {
+			reAssignW2ID, _ = w["id"].(string)
+		}
+		if reAssignTID != "" && reAssignW1ID != "" && reAssignW2ID != "" {
+			_, _, _ = authStep(client, dir, "HCQA-064-PRE-ASSIGN1",
+				"First assign (pending → assigned)",
+				"POST", base+"/api/v1/tasks/"+reAssignTID+"/assign",
+				map[string]any{"worker_id": reAssignW1ID}, auth, 200, nil)
+			ev, _, ok = authStep(client, dir, "HCQA-064",
+				"POST /tasks/:id/assign on already-assigned task returns 422 (not 500)",
+				"POST", base+"/api/v1/tasks/"+reAssignTID+"/assign",
+				map[string]any{"worker_id": reAssignW2ID}, auth, 422,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "pending") {
+						return fmt.Errorf("message %q does not mention pending requirement", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-061..063: state-machine constraint enforcement (catches BUG #21).
 		// Pre-fix: complete-on-pending, start-on-running, complete-on-completed
 		// all returned 500 (server-error) for what are client-side state
