@@ -1300,6 +1300,99 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-098..100: round-30 — DELETE /users/me lifecycle + system/status.
+		// Catches any regression where account deactivation fails
+		// silently (DELETE returns 200 but login still works) — which
+		// would be a critical CONST-035 bluff: "account deleted" while
+		// the user can still authenticate.
+		delUser := fmt.Sprintf("qa-delete-me-%d", time.Now().UnixNano())
+		delPass := "Qa-Delete-Me-Pass-1!"
+		_, _, _ = authStep(client, dir, "HCQA-098-PRE-REGISTER",
+			"Register sacrificial user for DELETE /users/me probe",
+			"POST", base+"/api/v1/auth/register",
+			map[string]any{
+				"username": delUser,
+				"email":    delUser + "@helix.local",
+				"password": delPass,
+			},
+			nil, 201, nil)
+		_, delLoginResp, _ := authStep(client, dir, "HCQA-098-PRE-LOGIN",
+			"Login as sacrificial user",
+			"POST", base+"/api/v1/auth/login",
+			map[string]any{"username": delUser, "password": delPass},
+			nil, 200, nil)
+		delToken, _ := delLoginResp["token"].(string)
+		if delToken != "" {
+			ev, _, ok = authStep(client, dir, "HCQA-098",
+				"DELETE /users/me returns 200",
+				"DELETE", base+"/api/v1/users/me", nil,
+				map[string]string{"Authorization": "Bearer " + delToken}, 200,
+				func(v map[string]any, raw []byte) error {
+					if v["status"] != "success" {
+						return fmt.Errorf("status=%v want \"success\"", v["status"])
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+
+			// HCQA-099: deleted user must NOT be able to log in
+			// (account-deactivation actually deactivates).
+			ev, _, ok = authStep(client, dir, "HCQA-099",
+				"Login as deleted user must return 401 (account deactivated)",
+				"POST", base+"/api/v1/auth/login",
+				map[string]any{"username": delUser, "password": delPass},
+				nil, 401,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["error"].(string)
+					if !strings.Contains(strings.ToLower(m), "deactivat") &&
+						!strings.Contains(strings.ToLower(m), "credential") &&
+						!strings.Contains(strings.ToLower(m), "invalid") {
+						return fmt.Errorf("error %q does not mention deactivation/invalid", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
+		// HCQA-100: /system/status returns api+database health.
+		ev, _, ok = authStep(client, dir, "HCQA-100",
+			"GET /system/status reports api+database health",
+			"GET", base+"/api/v1/system/status", nil, auth, 200,
+			func(v map[string]any, raw []byte) error {
+				sys, _ := v["system"].(map[string]any)
+				if sys == nil {
+					return fmt.Errorf("system field missing")
+				}
+				for _, k := range []string{"api", "database", "version"} {
+					if s, _ := sys[k].(string); s == "" {
+						return fmt.Errorf("system.%s missing or empty", k)
+					}
+				}
+				if sys["api"] != "healthy" {
+					return fmt.Errorf("system.api=%v want \"healthy\"", sys["api"])
+				}
+				if sys["database"] != "healthy" {
+					return fmt.Errorf("system.database=%v want \"healthy\"", sys["database"])
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-092..094: round-28 robustness probes — concurrent creates,
 		// large payload, invalid JSON. No new bug surfaced — positive
 		// coverage to lock in correct behavior. Catches any future
