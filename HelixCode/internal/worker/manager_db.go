@@ -28,6 +28,11 @@ import (
 // as a 5xx (CONST-035 wrong-HTTP-code).
 var ErrWorkerHostnameTaken = errors.New("worker hostname already in use")
 
+// ErrInvalidWorkerID is returned when uuid.Parse(id) fails on a
+// caller-supplied worker id. Client input error → 400 Bad Request,
+// not 500. Parallel to task.ErrInvalidTaskID.
+var ErrInvalidWorkerID = errors.New("invalid worker ID")
+
 // isUniqueViolation reports whether err is a postgres unique-constraint
 // violation (SQLSTATE 23505). The pgx driver wraps these as
 // *pgconn.PgError with Code "23505".
@@ -52,7 +57,7 @@ func NewDatabaseManager(db database.DatabaseInterface) *DatabaseManager {
 func (m *DatabaseManager) GetWorker(ctx context.Context, id string) (*Worker, error) {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid worker ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidWorkerID, err)
 	}
 
 	query := `
@@ -329,7 +334,7 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, metrics map[string]interface{}) error {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid worker ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidWorkerID, err)
 	}
 	if metrics == nil {
 		metrics = map[string]interface{}{}
@@ -403,7 +408,7 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname, displayName string, capabilities []string, maxConcurrentTasks int) (*Worker, error) {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid worker ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidWorkerID, err)
 	}
 	if capabilities == nil {
 		capabilities = []string{}
@@ -506,7 +511,7 @@ func (m *DatabaseManager) UpdateWorker(ctx context.Context, id string, hostname,
 func (m *DatabaseManager) DeleteWorker(ctx context.Context, id string) error {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
-		return fmt.Errorf("invalid worker ID: %v", err)
+		return fmt.Errorf("%w: %v", ErrInvalidWorkerID, err)
 	}
 
 	query := `DELETE FROM workers WHERE id = $1`
@@ -528,7 +533,7 @@ func (m *DatabaseManager) DeleteWorker(ctx context.Context, id string) error {
 func (m *DatabaseManager) GetWorkerMetrics(ctx context.Context, id string, since time.Time) ([]*WorkerMetrics, error) {
 	workerID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid worker ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidWorkerID, err)
 	}
 
 	query := `

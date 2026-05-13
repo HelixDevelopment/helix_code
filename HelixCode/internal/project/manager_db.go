@@ -26,7 +26,7 @@ func NewDatabaseManager(db database.DatabaseInterface) *DatabaseManager {
 func (m *DatabaseManager) CreateProjectWithUser(ctx context.Context, name, description, path, projectType, ownerID string) (*Project, error) {
 	ownerUUID, err := uuid.Parse(ownerID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid owner ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidOwnerID, err)
 	}
 
 	// Detect project type and metadata
@@ -78,7 +78,7 @@ func (m *DatabaseManager) CreateProjectWithUser(ctx context.Context, name, descr
 func (m *DatabaseManager) GetProject(ctx context.Context, id string) (*Project, error) {
 	projectID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid project ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidProjectID, err)
 	}
 
 	query := `
@@ -199,7 +199,7 @@ func (m *DatabaseManager) convertToMetadata(data map[string]interface{}) Metadat
 func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*Project, error) {
 	ownerUUID, err := uuid.Parse(ownerID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid owner ID: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidOwnerID, err)
 	}
 
 	query := `

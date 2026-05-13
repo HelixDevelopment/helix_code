@@ -16,6 +16,16 @@ import (
 // lies about a missing-resource client error being a server fault).
 var ErrProjectNotFound = errors.New("project not found")
 
+// ErrInvalidProjectID is returned by DB-manager paths when uuid.Parse
+// fails on a caller-supplied project id (project_id column is UUID
+// in the projects schema). Client input error → 400 Bad Request.
+var ErrInvalidProjectID = errors.New("invalid project ID")
+
+// ErrInvalidOwnerID is returned when uuid.Parse fails on the
+// authenticated user's owner-id during project CRUD (only happens
+// if context-user is corrupted; surface as 400 to the caller).
+var ErrInvalidOwnerID = errors.New("invalid owner ID")
+
 // Project represents a development project
 type Project struct {
 	ID          string    `json:"id"`

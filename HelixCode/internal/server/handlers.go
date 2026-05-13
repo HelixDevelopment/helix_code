@@ -25,10 +25,32 @@ import (
 // returned 500 for what is plainly a 400 client-input error
 // (CONST-035 wrong-HTTP-code).
 func respondInvalidID(c *gin.Context, err error, what string) bool {
-	if errors.Is(err, task.ErrInvalidTaskID) {
+	switch {
+	case errors.Is(err, task.ErrInvalidTaskID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": "Invalid task ID format",
+			"error":   err.Error(),
+		})
+		return true
+	case errors.Is(err, worker.ErrInvalidWorkerID):
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid worker ID format",
+			"error":   err.Error(),
+		})
+		return true
+	case errors.Is(err, project.ErrInvalidProjectID):
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid project ID format",
+			"error":   err.Error(),
+		})
+		return true
+	case errors.Is(err, project.ErrInvalidOwnerID):
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid owner ID format",
 			"error":   err.Error(),
 		})
 		return true
@@ -1489,7 +1511,11 @@ func (s *Server) updateWorker(c *gin.Context) {
 
 	w, err := s.workerManager.UpdateWorker(c.Request.Context(), id, req.Hostname, req.DisplayName, req.Capabilities, req.MaxConcurrentTasks)
 	if err != nil {
-		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		// 400 for malformed UUID; 404 for missing-resource;
+		// 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "worker") {
+			return
+		}
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
@@ -1526,7 +1552,11 @@ func (s *Server) deleteWorker(c *gin.Context) {
 
 	err := s.workerManager.DeleteWorker(c.Request.Context(), id)
 	if err != nil {
-		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		// 400 for malformed UUID; 404 for missing-resource;
+		// 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "worker") {
+			return
+		}
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
@@ -1576,10 +1606,14 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 
 	err := s.workerManager.UpdateWorkerHeartbeat(c.Request.Context(), id, req.Metrics)
 	if err != nil {
-		// 404 for missing worker; 500 only for genuine DB faults.
-		// Pre-fix: a heartbeat on a bogus worker id leaked the raw
-		// postgres FK constraint error as HTTP 500 (CONST-042 schema
-		// leakage + CONST-035 misclassified 404 as 500).
+		// 400 for malformed UUID; 404 for missing worker; 500 only
+		// for genuine DB faults. Pre-fix: a heartbeat on a bogus
+		// worker id leaked the raw postgres FK constraint error as
+		// HTTP 500 (CONST-042 schema leakage + CONST-035
+		// misclassified 404 as 500).
+		if respondInvalidID(c, err, "worker") {
+			return
+		}
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
@@ -1668,9 +1702,11 @@ func (s *Server) assignTask(c *gin.Context) {
 
 	err := s.taskManager.AssignTask(c.Request.Context(), id, req.WorkerID)
 	if err != nil {
-		// 422 for client-state errors (task not in pending state —
-		// e.g., already assigned, completed, failed). 500 only for
-		// genuine DB faults.
+		// 400 for malformed UUID (either task id OR worker_id body);
+		// 422 for client-state errors; 500 for DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
@@ -1711,8 +1747,10 @@ func (s *Server) startTask(c *gin.Context) {
 
 	err := s.taskManager.StartTask(c.Request.Context(), id)
 	if err != nil {
-		// 422 for client-state errors (task not in pending state),
-		// 500 only for genuine DB faults.
+		// 400 for malformed UUID; 422 for client-state; 500 for DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
@@ -1766,8 +1804,10 @@ func (s *Server) completeTask(c *gin.Context) {
 
 	err := s.taskManager.CompleteTask(c.Request.Context(), id, req.Result)
 	if err != nil {
-		// 422 for client-state errors (task not in running state),
-		// 500 only for genuine DB faults.
+		// 400 for malformed UUID; 422 for client-state; 500 for DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskInvalidStateTransition) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
@@ -1821,7 +1861,11 @@ func (s *Server) failTask(c *gin.Context) {
 
 	err := s.taskManager.FailTask(c.Request.Context(), id, req.ErrorMessage)
 	if err != nil {
-		// 404 for missing-resource errors; 500 only for genuine DB faults.
+		// 400 for malformed UUID; 404 for missing-resource;
+		// 500 only for genuine DB faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
@@ -1950,10 +1994,12 @@ func (s *Server) retryTask(c *gin.Context) {
 
 	err := s.taskManager.RetryTask(c.Request.Context(), id)
 	if err != nil {
-		// 422 Unprocessable Entity for client-state errors (task not
-		// found, not in failed state, or max-retries exceeded). 500
-		// for genuine server faults. The previous version returned
-		// 500 unconditionally — lying about the nature of the error.
+		// 400 for malformed UUID; 422 for client-state errors (task
+		// not found, not in failed state, or max-retries exceeded);
+		// 500 only for genuine server faults.
+		if respondInvalidID(c, err, "task") {
+			return
+		}
 		if errors.Is(err, task.ErrTaskNotRetryable) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",

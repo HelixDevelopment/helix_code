@@ -412,7 +412,12 @@ func (m *DatabaseManager) AssignTask(ctx context.Context, taskID, workerID strin
 
 	workerUUID, err := uuid.Parse(workerID)
 	if err != nil {
-		return fmt.Errorf("invalid worker ID: %v", err)
+		// Wrap ErrInvalidTaskID — for the AssignTask handler the
+		// "worker_id" parameter still maps to a client-input error;
+		// the existing task-package sentinel is the right vehicle
+		// (no separate worker-id sentinel needed at this site since
+		// the failure surfaces to the same task handlers).
+		return fmt.Errorf("%w: worker_id: %v", ErrInvalidTaskID, err)
 	}
 
 	query := `

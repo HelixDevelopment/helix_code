@@ -1201,6 +1201,44 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-074..080: malformed-UUID coverage across the rest of the
+		// matrix (sentinel-wired in round 24). Every endpoint accepting
+		// :id must return 400 for invalid UUID — not 500 (CONST-035) and
+		// not leaking pgx/uuid internals (CONST-042).
+		bogusPath := "not-a-uuid-xyz"
+		for _, probe := range []struct{ id, method, path, name string }{
+			{"HCQA-074", "POST", "/api/v1/tasks/" + bogusPath + "/start", "task-start"},
+			{"HCQA-075", "POST", "/api/v1/tasks/" + bogusPath + "/complete", "task-complete"},
+			{"HCQA-076", "POST", "/api/v1/tasks/" + bogusPath + "/retry", "task-retry"},
+			{"HCQA-077", "POST", "/api/v1/tasks/" + bogusPath + "/fail", "task-fail"},
+			{"HCQA-078", "DELETE", "/api/v1/workers/" + bogusPath, "worker-delete"},
+			{"HCQA-079", "PUT", "/api/v1/workers/" + bogusPath, "worker-update"},
+			{"HCQA-080", "POST", "/api/v1/workers/" + bogusPath + "/heartbeat", "worker-heartbeat"},
+		} {
+			body := map[string]any{}
+			if probe.name == "task-fail" {
+				body["error_message"] = "qa-probe"
+			} else if probe.name == "worker-update" {
+				body["display_name"] = "qa"
+			}
+			ev, _, ok = authStep(client, dir, probe.id,
+				probe.method+" /<malformed-uuid> returns 400 ("+probe.name+")",
+				probe.method, base+probe.path, body, auth, 400,
+				func(v map[string]any, raw []byte) error {
+					m, _ := v["message"].(string)
+					if !strings.Contains(strings.ToLower(m), "invalid") {
+						return fmt.Errorf("message %q does not mention invalid input", m)
+					}
+					return nil
+				})
+			results = append(results, ev)
+			if ok {
+				passed++
+			} else {
+				failed++
+			}
+		}
+
 		// HCQA-073: malformed UUID on DELETE /tasks returns 400 (BUG #27).
 		// Pre-fix: 500 with "invalid task ID: invalid UUID length: 10" —
 		// CONST-035 wrong-HTTP-code (5xx for client-input error).
