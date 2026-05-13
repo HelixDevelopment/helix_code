@@ -253,6 +253,29 @@ func (s *Server) createProject(c *gin.Context) {
 		return
 	}
 
+	// Pull authenticated user — projects are owned, not anonymous.
+	// The previous code called s.projectManager.CreateProject(...) which
+	// hardcoded "default-user" as ownerID (manager_db.go:135), failing
+	// every real request with "invalid UUID length: 12" at the database
+	// layer (the string "default-user" is 12 chars). CONST-035 / BLUFF-002
+	// territory: the convenience wrapper SHIPPED a fabricated default.
+	userValue, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": "Authentication required",
+		})
+		return
+	}
+	user, ok := userValue.(*auth.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Invalid user context",
+		})
+		return
+	}
+
 	// Create project directory if it doesn't exist
 	if err := os.MkdirAll(req.Path, 0755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -263,7 +286,8 @@ func (s *Server) createProject(c *gin.Context) {
 		return
 	}
 
-	proj, err := s.projectManager.CreateProject(c.Request.Context(), req.Name, req.Description, req.Path, req.Type)
+	proj, err := s.projectManager.CreateProjectWithUser(
+		c.Request.Context(), req.Name, req.Description, req.Path, req.Type, user.ID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",

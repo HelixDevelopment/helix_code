@@ -750,7 +750,14 @@ func TestGetCurrentUser_WithContext(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-// TestCreateProject_ValidRequest tests creating a project
+// TestCreateProject_ValidRequest tests creating a project.
+// After the BUG #8/#9 fix consolidating POST /projects under the
+// authenticated routes, the handler now requires a c.Get("user") to
+// succeed. When called without any user context (as in this unit
+// test) the handler correctly returns 401 — mirroring how TestListProjects
+// already accepts 401 as a valid no-auth response. 401 added to the
+// expected set; the projectManager-nil panic-on-success guard is now
+// expressed as "no expected code requires reaching the nil manager."
 func TestCreateProject_ValidRequest(t *testing.T) {
 	server := setupTestServer(t)
 
@@ -769,8 +776,10 @@ func TestCreateProject_ValidRequest(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	// Project manager is nil, so will fail
-	assert.Contains(t, []int{http.StatusOK, http.StatusCreated, http.StatusBadRequest, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
+	assert.Contains(t,
+		[]int{http.StatusOK, http.StatusCreated, http.StatusBadRequest,
+			http.StatusUnauthorized, http.StatusInternalServerError, http.StatusServiceUnavailable},
+		w.Code)
 }
 
 // TestListTasks_WithManager tests listTasks with task manager

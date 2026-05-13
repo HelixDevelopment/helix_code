@@ -220,25 +220,30 @@ func (s *Server) setupRoutes() {
 			tasks.POST("/:id/retry", s.retryTask)
 		}
 
-		// Project routes
+		// Project routes — fully authenticated.
+		//
+		// Previously POST / + the 4 workflow endpoints were registered
+		// under a `publicProjects` group with the comment
+		// "no auth for testing" — i.e., anyone could create projects
+		// or trigger workflow executions against any projectId without
+		// any credential. That was a real production security hole AND
+		// inconsistent with createProject's own requirements (the
+		// handler now pulls `*auth.User` from context to determine
+		// project owner, which only works through authMiddleware).
+		// Consolidated into a single authenticated group.
 		projects := api.Group("/projects")
 		projects.Use(s.authMiddleware())
 		{
 			projects.GET("", s.listProjects)
+			projects.POST("", s.createProject)
 			projects.GET("/:id", s.getProject)
 			projects.PUT("/:id", s.updateProject)
 			projects.DELETE("/:id", s.deleteProject)
 			projects.GET("/:id/sessions", s.getProjectSessions)
-		}
-
-		// Project creation and workflow routes (no auth for testing)
-		publicProjects := api.Group("/projects")
-		{
-			publicProjects.POST("", s.createProject)
-			publicProjects.POST("/:projectId/workflows/planning", s.executePlanningWorkflow)
-			publicProjects.POST("/:projectId/workflows/building", s.executeBuildingWorkflow)
-			publicProjects.POST("/:projectId/workflows/testing", s.executeTestingWorkflow)
-			publicProjects.POST("/:projectId/workflows/refactoring", s.executeRefactoringWorkflow)
+			projects.POST("/:projectId/workflows/planning", s.executePlanningWorkflow)
+			projects.POST("/:projectId/workflows/building", s.executeBuildingWorkflow)
+			projects.POST("/:projectId/workflows/testing", s.executeTestingWorkflow)
+			projects.POST("/:projectId/workflows/refactoring", s.executeRefactoringWorkflow)
 		}
 
 		// Session routes

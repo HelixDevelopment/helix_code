@@ -815,6 +815,62 @@ func runAuthFlow(client *http.Client, base, dir string) ([]Evidence, int, int) {
 			}
 		}
 
+		// HCQA-PRE-projects: Unauthenticated POST /projects must 401 — the
+		// previous routing had a `publicProjects` group with "no auth
+		// for testing" comment, exposing POST and 4 workflow endpoints
+		// without authentication. CONST-035 anti-bluff: route comments
+		// that ship "for testing" become real production attack surface.
+		ev, _, ok = authStep(client, dir, "HCQA-030",
+			"Unauthenticated POST /projects must return 401",
+			"POST", base+"/api/v1/projects",
+			map[string]any{"name": "unauth-probe", "path": "/tmp/unauth-probe-qa"},
+			nil, 401, nil)
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
+		// HCQA-CREATE-PROJ: Authenticated POST /projects must return 201
+		// with project.id (UUID). Previously broken by:
+		//   (a) routing through publicProjects (no middleware) → 401
+		//       even with valid Bearer
+		//   (b) projectManager.CreateProject hardcoding ownerID to
+		//       "default-user" (12 chars, not a UUID) → 500
+		// Both fixed in this round.
+		projPath := fmt.Sprintf("/tmp/qa-create-proj-%d", time.Now().UnixNano())
+		ev, _, ok = authStep(client, dir, "HCQA-031",
+			"Auth POST /projects creates project with UUID + path",
+			"POST", base+"/api/v1/projects",
+			map[string]any{
+				"name":        "qa-create-proj",
+				"description": "qa anti-bluff project create probe",
+				"path":        projPath,
+				"type":        "go",
+			},
+			auth, 201,
+			func(v map[string]any, raw []byte) error {
+				p, _ := v["project"].(map[string]any)
+				if p == nil {
+					return fmt.Errorf("project field missing")
+				}
+				id, _ := p["id"].(string)
+				if len(id) < 32 {
+					return fmt.Errorf("project.id=%q too short to be a UUID", id)
+				}
+				if p["path"] != projPath {
+					return fmt.Errorf("project.path=%v != requested %q", p["path"], projPath)
+				}
+				return nil
+			})
+		results = append(results, ev)
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+
 		// HCQA-025: list projects returns 200 with an array (not 401, not null).
 		// Anti-bluff: pre-fix, this endpoint returned 401 even with a
 		// valid JWT because listProjects looked up "user_id" via
