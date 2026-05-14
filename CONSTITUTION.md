@@ -555,6 +555,30 @@ The `docs/CONTINUATION.md` document MUST be maintained in sync with the actual s
 
 ---
 
+## CONST-047: Recursive Submodule Application Mandate
+
+> **Verbatim user mandate (2026-05-14):** *"Make sure all work we do is applied ALWAYS to all Submodules we control under our organizations (vasic-digital and HelixDevelopment) fully recursively everywhere with full bluff-proofing and comprehensive documentation, user manuals and guides and full tests and Challenges coverage!"*
+
+**Operative rule:** Every engineering deliverable produced for HelixCode MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` GitHub organizations. "Owned" means any submodule whose remote URL is `git@github.com:vasic-digital/*.git` or `git@github.com:HelixDevelopment/*.git` (including the `HelixDevelopment-s-Code/*` brand variant). Each such submodule MUST receive in lockstep:
+
+1. **Anti-bluff posture (CONST-035 / Article XI §11.9):** every test and Challenge in the submodule must guarantee real, end-user-usable functionality. Metadata-only / absence-of-error / fake-PASS results are critical defects in submodules just as in the meta-repo.
+
+2. **Comprehensive documentation:** README plus user manuals plus guides that match the submodule's actual current capabilities. Documentation that advertises features the code doesn't deliver is the same class of defect as a fake-PASS test.
+
+3. **Full tests AND Challenges coverage:** unit tests where applicable, Challenges that exercise real workflows with captured runtime evidence (per CONST-035). 100% of user-reachable surfaces must be covered.
+
+4. **Recursive propagation:** when an owned submodule itself depends on sub-submodules under `vasic-digital` or `HelixDevelopment`, the mandate cascades. A submodule that owns child submodules under our organizations is responsible for cascading the mandate to them.
+
+5. **Synchronized commits:** when a meta-repo commit advances state that touches a submodule's surface, the corresponding submodule commit MUST land in the same engineering session and be pushed to all configured remotes.
+
+**Owned submodule baseline** (direct children of the meta-repo as of 2026-05-14): `vasic-digital/Containers`, `vasic-digital/Security`, `vasic-digital/Challenges`, `vasic-digital/LLMsVerifier`, `vasic-digital/Models`, `HelixDevelopment/HelixQA`, `HelixDevelopment/DocProcessor`, `HelixDevelopment/LLMOrchestrator`, `HelixDevelopment/LLMProvider`, `HelixDevelopment/VisionEngine`, `HelixDevelopment/HelixAgent`, `HelixDevelopment-s-Code/Website`. Plus any nested submodule under these orgs (full recursion).
+
+**Cascade requirement:** This anchor (verbatim or by `CONST-047` ID reference) MUST appear in every owned submodule's `CONSTITUTION.md`, `CLAUDE.md`, and `AGENTS.md`. Non-compliance is a release blocker — same severity as a CONST-035 bluff or a CONST-044 out-of-sync CONTINUATION.
+
+**Verification:** `scripts/verify-governance-cascade.sh` MUST be extended to confirm CONST-047 anchor presence in every owned submodule (in addition to its existing CONST-035 checks). A submodule missing the anchor is treated identically to one missing the anti-bluff anchor: blocked from merge.
+
+---
+
 ## Amendment Process
 
 Constitution amendments require:

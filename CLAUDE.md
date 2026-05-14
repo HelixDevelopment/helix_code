@@ -688,3 +688,11 @@ desc := fmt.Sprintf("%s: context=%d, capabilities=%v", model.Name, model.Context
 **Enforcement**: `make lint` MUST scan for hardcoded human-readable strings exceeding a length threshold. Anti-bluff sweeps (`grep -rn "simulated\|placeholder\|TODO"`) MUST also flag obvious hardcoded-static-content patterns.
 
 **Cascade requirement**: This rule (verbatim or by CONST-046 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-046 for the full mandate.
+
+## CONST-047 — Recursive Submodule Application Mandate (constitutional anchor)
+
+> Verbatim user mandate (2026-05-14): *"Make sure all work we do is applied ALWAYS to all Submodules we control under our organizations (vasic-digital and HelixDevelopment) fully recursively everywhere with full bluff-proofing and comprehensive documentation, user manuals and guides and full tests and Challenges coverage!"*
+
+Every engineering deliverable produced for HelixCode MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` organizations. Each owned submodule MUST receive: (1) the same anti-bluff posture (CONST-035), (2) comprehensive documentation that matches actual capabilities, (3) full tests + Challenges coverage with captured runtime evidence, (4) recursive propagation through nested submodules under the same orgs, (5) synchronized commits when meta-repo state advances.
+
+**Cascade requirement**: This rule (verbatim or by CONST-047 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-047 for the full mandate.

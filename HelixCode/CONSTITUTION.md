@@ -106,3 +106,13 @@ grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/ cmd/ applic
 ### CONST-045 — No Hardcoded Distribution Hosts (cascaded from root CONSTITUTION.md)
 
 ALL container distribution targets SHALL be configured exclusively through the `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env`. NO host (hostname, IP, user, key path, runtime, label) may be hardcoded in ANY source file, test, challenge, config template, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change is permitted. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for the full mandate, audit command, and cascade requirements.
+
+---
+
+## CONST-047 — Recursive Submodule Application Mandate (cascaded from root CONSTITUTION.md)
+
+> Verbatim user mandate (2026-05-14): *"Make sure all work we do is applied ALWAYS to all Submodules we control under our organizations (vasic-digital and HelixDevelopment) fully recursively everywhere with full bluff-proofing and comprehensive documentation, user manuals and guides and full tests and Challenges coverage!"*
+
+Every engineering deliverable produced for the main project MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` GitHub organizations. Each owned submodule (including this one) MUST receive in lockstep: (1) anti-bluff posture (CONST-035 / Article XI §11.9), (2) comprehensive documentation matching actual capabilities, (3) full tests + Challenges coverage with captured runtime evidence, (4) recursive propagation through nested submodules under the same orgs, (5) synchronized commits when meta-repo state advances this surface.
+
+See the root `CONSTITUTION.md` §CONST-047 for the full mandate. This anchor MUST remain in this submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md.

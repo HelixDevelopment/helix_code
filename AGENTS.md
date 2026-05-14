@@ -862,6 +862,20 @@ See `CONSTITUTION.md` §CONST-046 for the full mandate and cascade requirements.
 
 ---
 
+## CONST-047: Recursive Submodule Application Mandate (cascaded from CONSTITUTION.md)
+
+> Verbatim user mandate (2026-05-14): *"Make sure all work we do is applied ALWAYS to all Submodules we control under our organizations (vasic-digital and HelixDevelopment) fully recursively everywhere with full bluff-proofing and comprehensive documentation, user manuals and guides and full tests and Challenges coverage!"*
+
+Every engineering deliverable produced for HelixCode MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` GitHub organizations. Each owned submodule MUST receive in lockstep: (1) the same anti-bluff posture (CONST-035 / Article XI §11.9), (2) comprehensive documentation (README + user manuals + guides matching actual capabilities), (3) full tests + Challenges coverage with captured runtime evidence, (4) recursive propagation through nested submodules under the same orgs, (5) synchronized commits when meta-repo state advances a submodule's surface.
+
+**Owned submodule baseline** (direct children as of 2026-05-14): vasic-digital/{Containers, Security, Challenges, LLMsVerifier, Models}, HelixDevelopment/{HelixQA, DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine, HelixAgent}, HelixDevelopment-s-Code/Website — plus any nested submodule under these orgs (full recursion).
+
+**Cascade requirement:** This rule (verbatim or by CONST-047 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md.
+
+See `CONSTITUTION.md` §CONST-047 for the full mandate and verification details.
+
+---
+
 ---
 
 ## Free AI Providers
