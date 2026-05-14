@@ -344,18 +344,13 @@ func TestDiscordChannel_Send_ConcurrentRequests(t *testing.T) {
 }
 
 func TestDiscordChannel_Send_ContextCancellation(t *testing.T) {
-	// Anti-bluff (CONST-035 / §11.9): the original form discarded the
-	// returned error with `_ = err` and a "may or may not occur" comment,
-	// passing regardless of Send's behaviour. The IMPLEMENTATION at
-	// internal/notification/engine.go:648 uses `http.Post(...)` which does
-	// NOT consult the context — so a cancelled ctx has no effect and the
-	// Send completes against a 204-returning mock server. Pin this
-	// CURRENT contract with explicit assertions; if a future commit
-	// promotes Send to http.NewRequestWithContext (the desired behaviour),
-	// THIS TEST WILL FAIL and force the contract-update decision to be
-	// explicit. That is the anti-bluff property: a green test under both
-	// behaviours is the original bluff; failing under the new behaviour
-	// is the honest signal.
+	// Anti-bluff (CONST-035 / §11.9): originally `_ = err`; round-40
+	// first tightening pinned the broken behaviour (http.Post ignored
+	// ctx); this second tightening pins the CORRECT behaviour after
+	// engine.go was promoted to http.NewRequestWithContext +
+	// DefaultClient.Do. A cancelled ctx MUST now surface a context
+	// cancellation error, so callers waiting on a long-running webhook
+	// can abort cleanly.
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -373,8 +368,9 @@ func TestDiscordChannel_Send_ContextCancellation(t *testing.T) {
 	}
 
 	err := channel.Send(ctx, notification)
-	assert.NoError(t, err,
-		"current contract: Send uses http.Post which ignores ctx, so cancelled-ctx must NOT surface an error against a healthy webhook")
+	require.Error(t, err, "Send with a pre-cancelled ctx must surface a context-cancellation error")
+	assert.ErrorIs(t, err, context.Canceled,
+		"the cancellation error must wrap context.Canceled (proves http.NewRequestWithContext path is wired)")
 }
 
 func TestDiscordChannel_Send_LargePayload(t *testing.T) {

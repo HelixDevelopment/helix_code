@@ -645,9 +645,21 @@ func (c *DiscordChannel) Send(ctx context.Context, notification *Notification) e
 		return fmt.Errorf("failed to marshal discord payload: %v", err)
 	}
 
-	resp, err := http.Post(c.webhook, "application/json", bytes.NewReader(jsonData))
+	// Honour the caller's context (CONST-035): previously this used
+	// http.Post which ignored ctx, so cancelled/deadlined callers had
+	// no way to abort an in-flight Discord webhook call. Switched to
+	// http.NewRequestWithContext + DefaultClient.Do so context.Canceled
+	// / DeadlineExceeded propagate. The unit test
+	// TestDiscordChannel_Send_ContextCancellation now pins the new
+	// honest behaviour.
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.webhook, bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to send to discord: %v", err)
+		return fmt.Errorf("failed to build discord request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send to discord: %w", err)
 	}
 	defer resp.Body.Close()
 
