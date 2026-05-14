@@ -141,3 +141,4 @@ HelixQA/qa_evidence/*
 **/*.qa-recording.mp4
 **/*.qa-recording.webm
 **/*.qa-trace.json
+/HelixCode/examples/multi_agent_system/multi_agent_system
