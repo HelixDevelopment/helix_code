@@ -449,11 +449,17 @@ func TestConversationManager_CreateConversation(t *testing.T) {
 }
 
 func TestConversationManager_AddMessage(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form discarded the
+	// CreateConversation result with `_, _ = ...` and the GetConversation
+	// error with `conv, _ := ...`. If CreateConversation silently failed,
+	// the test would still pass GetConversation's Messages-len check via
+	// a fresh nil-conv panic disguised as runtime crash. Pin both calls.
 	ai := NewAIIntegration(nil)
 	cm := NewConversationManager(ai, ai.config)
 	ctx := context.Background()
 
-	_, _ = cm.CreateConversation(ctx, "conv-1")
+	_, err := cm.CreateConversation(ctx, "conv-1")
+	require.NoError(t, err, "CreateConversation must succeed before AddMessage can be tested")
 
 	msg := &ChatMessage{
 		Role:    "user",
@@ -461,10 +467,12 @@ func TestConversationManager_AddMessage(t *testing.T) {
 		Tokens:  5,
 	}
 
-	err := cm.AddMessage(ctx, "conv-1", msg)
-	assert.NoError(t, err)
+	err = cm.AddMessage(ctx, "conv-1", msg)
+	require.NoError(t, err)
 
-	conv, _ := cm.GetConversation(ctx, "conv-1")
+	conv, err := cm.GetConversation(ctx, "conv-1")
+	require.NoError(t, err, "GetConversation must succeed for the just-created conversation")
+	require.NotNil(t, conv)
 	assert.Len(t, conv.Messages, 1)
 	assert.Equal(t, 5, conv.TotalTokens)
 }
@@ -482,14 +490,17 @@ func TestConversationManager_AddMessage_NotFound(t *testing.T) {
 }
 
 func TestConversationManager_GetConversation(t *testing.T) {
+	// Anti-bluff: pin CreateConversation succeeded before GetConversation.
 	ai := NewAIIntegration(nil)
 	cm := NewConversationManager(ai, ai.config)
 	ctx := context.Background()
 
-	_, _ = cm.CreateConversation(ctx, "conv-1")
+	_, err := cm.CreateConversation(ctx, "conv-1")
+	require.NoError(t, err, "CreateConversation must succeed before GetConversation can be tested")
 
 	conv, err := cm.GetConversation(ctx, "conv-1")
 	require.NoError(t, err)
+	require.NotNil(t, conv)
 	assert.Equal(t, "conv-1", conv.ID)
 }
 
