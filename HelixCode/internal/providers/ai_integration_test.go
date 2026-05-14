@@ -966,24 +966,28 @@ func TestAIIntegration_ExtractEntities(t *testing.T) {
 	assert.Nil(t, entities)
 }
 
-func TestAIIntegration_GetConversationManager(t *testing.T) {
+func TestAIIntegration_GetConversationManager_PreInitReturnsNil(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form of this test wrote
+	// `_ = convMgr` after the accessor call and asserted NOTHING, so it
+	// passed regardless of what GetConversation returned. Per the documented
+	// contract (ai_integration.go:259-260), conversationMgr is only assigned
+	// in Initialize(); pre-Initialize the accessor MUST return nil. Asserting
+	// nil here pins that contract — a future regression that returned a
+	// zero-value stub from GetConversation would now fail this test instead
+	// of silently passing.
 	ai := NewAIIntegration(nil)
-
-	// ConversationManager is created on-demand or via Initialize
-	// Without Initialize, it may be nil
 	convMgr := ai.GetConversation()
-	// May be nil without full initialization
-	_ = convMgr
+	assert.Nil(t, convMgr, "GetConversation must return nil before Initialize (contract: conversationMgr is assigned only in Initialize)")
 }
 
-func TestAIIntegration_GetPersonalityManager(t *testing.T) {
+func TestAIIntegration_GetPersonalityManager_PreInitReturnsNil(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): see the conversation-manager test
+	// above. PersonalityManager has the same Initialize-only assignment
+	// pattern (ai_integration.go:262-263); pre-Initialize the accessor
+	// MUST return nil.
 	ai := NewAIIntegration(nil)
-
-	// PersonalityManager is created on-demand or via Initialize
-	// Without Initialize, it may be nil
 	personalityMgr := ai.GetPersonality()
-	// May be nil without full initialization
-	_ = personalityMgr
+	assert.Nil(t, personalityMgr, "GetPersonality must return nil before Initialize (contract: personalityMgr is assigned only in Initialize)")
 }
 
 func TestAIIntegration_HealthCheck(t *testing.T) {

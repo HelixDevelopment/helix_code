@@ -85,6 +85,13 @@ func TestNewClient_WithPassword(t *testing.T) {
 }
 
 func TestNewClient_WithDatabase(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form of this test ended
+	// with `_, _ = NewClient(cfg)` and asserted NOTHING — it passed
+	// regardless of whether NewClient connected, returned an error, returned
+	// a usable client, or panicked. Per redis.go's contract, NewClient with
+	// Enabled=true returns either (client, nil) on successful ping or
+	// (nil, err) on connection failure. Either branch produces an observable
+	// state; the test must assert one or the other.
 	cfg := &config.RedisConfig{
 		Enabled:  true,
 		Host:     "localhost",
@@ -92,8 +99,26 @@ func TestNewClient_WithDatabase(t *testing.T) {
 		Database: 15, // Valid database number
 	}
 
-	// This will fail if Redis isn't running, which is expected in CI
-	_, _ = NewClient(cfg)
+	client, err := NewClient(cfg)
+	if err != nil {
+		// Redis isn't running locally — that's expected in unit-test mode.
+		// Assert the documented failure-mode contract: nil client + a
+		// descriptive error that mentions Redis (not some other backend).
+		assert.Nil(t, client, "NewClient must return nil client when connection fails")
+		assert.Contains(t, err.Error(), "Redis", "error must identify Redis as the failing backend")
+		return
+	}
+	// Redis was reachable: client must be usable and configured for db 15.
+	require.NotNil(t, client, "NewClient returned (nil, nil) — contract violation")
+	assert.True(t, client.IsEnabled(), "client built from Enabled=true config must report enabled")
+	require.NotNil(t, client.GetClient(), "underlying go-redis client must be non-nil when Enabled=true")
+	// Round-trip a CLIENT GETNAME ping to prove the connection is live —
+	// the prior test passed even when go-redis silently returned a half-
+	// initialized client (which would crash on first use).
+	pingCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	assert.NoError(t, client.GetClient().Ping(pingCtx).Err(),
+		"client.Ping must succeed for the connection NewClient claims succeeded")
 }
 
 // =============================================================================

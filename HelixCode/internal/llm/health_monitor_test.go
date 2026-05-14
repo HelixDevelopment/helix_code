@@ -210,20 +210,38 @@ func TestHealthMonitor_UpdateProviderHealth(t *testing.T) {
 }
 
 func TestHealthMonitor_PerformHealthChecks(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form of this test ran
+	// performHealthChecks() and asserted only "should not panic" — passing
+	// regardless of any mutations performHealthChecks might have applied to
+	// non-running providers. Per health_monitor.go:76-78, providers whose
+	// Status != "running" MUST be skipped (no HTTP call, no Health/Metrics
+	// update). We pin that contract by capturing the pre-call snapshot and
+	// asserting it is unchanged afterwards. A regression that probed
+	// stopped providers (e.g. dropping the `if provider.Status != "running"
+	// { continue }` guard) would now fail this test instead of silently
+	// passing.
 	manager := NewAutoLLMManager("")
 
-	// Add a test provider that's not running
-	manager.providers["stopped"] = &AutoProvider{
+	stopped := &AutoProvider{
 		LocalLLMProvider: LocalLLMProvider{Name: "StoppedProvider"},
 		Status:           "stopped",
 		Health:           &HealthStatus{},
 		Metrics:          &PerformanceMetrics{},
 	}
+	manager.providers["stopped"] = stopped
+
+	// Snapshot the fields performHealthChecks would mutate for a "running"
+	// provider, so we can verify they are NOT mutated for "stopped".
+	preStatus := stopped.Status
+	preHealth := *stopped.Health   // value-copy of zero HealthStatus
+	preMetrics := *stopped.Metrics // value-copy of zero PerformanceMetrics
 
 	monitor := NewHealthMonitor(manager)
-
-	// Should not panic with stopped providers
 	monitor.performHealthChecks()
+
+	assert.Equal(t, preStatus, stopped.Status, "performHealthChecks must not mutate provider.Status for non-running providers")
+	assert.Equal(t, preHealth, *stopped.Health, "performHealthChecks must not mutate provider.Health for non-running providers")
+	assert.Equal(t, preMetrics, *stopped.Metrics, "performHealthChecks must not mutate provider.Metrics for non-running providers")
 }
 
 func TestHealthMonitor_HandleUnhealthyProvider(t *testing.T) {
