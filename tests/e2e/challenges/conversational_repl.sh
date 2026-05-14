@@ -17,7 +17,7 @@ cd "$ROOT"
 echo "=== Conversational REPL anti-bluff Challenge ==="
 
 # Step 1: Build / verify CLI exists.
-echo "[1/4] Checking CLI binary..."
+echo "[1/6] Checking CLI binary..."
 if [ ! -x HelixCode/bin/cli ]; then
     echo "  Building CLI..."
     (cd HelixCode && go build -o bin/cli ./cmd/cli) || {
@@ -29,7 +29,7 @@ echo "  PASS: HelixCode/bin/cli present"
 # Step 2: Verify the source of the conversational REPL is in place. This
 # is a STRUCTURAL gate (CONST-035 §11.9 forbids structural-only PASS;
 # this gate is PAIRED with the runtime gate in step 4 below).
-echo "[2/4] Verifying conversational REPL source..."
+echo "[2/6] Verifying conversational REPL source..."
 if ! grep -q 'bufio.NewScanner(os.Stdin)' HelixCode/cmd/cli/main.go; then
     echo "  FAIL: REPL is not using bufio.Scanner (regression to fmt.Scanln word-only?)"
     exit 1
@@ -41,7 +41,7 @@ fi
 echo "  PASS: bufio.Scanner + provider.Generate wired in handleInteractive"
 
 # Step 3: Verify /exit slash command works (TTY-pipe-safe regression test).
-echo "[3/4] Verifying /exit clean shutdown..."
+echo "[3/6] Verifying /exit clean shutdown..."
 OUTPUT=$(printf '/exit\n' | timeout 15 ./HelixCode/bin/cli 2>&1 || true)
 if ! printf '%s' "$OUTPUT" | grep -q 'Helix CLI Interactive Mode'; then
     echo "  FAIL: REPL didn't print its banner"
@@ -59,7 +59,7 @@ echo "  PASS: REPL banner emitted + /exit → 'Goodbye!' confirmed"
 # Anti-bluff: this is the gate that proves the REPL ACTUALLY sends
 # prompts to an LLM and prints responses — not a documentation-only
 # claim. Honest SKIP-OK when no provider key is available.
-echo "[4/4] Live REPL round-trip..."
+echo "[4/6] Live REPL round-trip..."
 # Use the canonical loader which does ApiKey_<Provider> → <PROVIDER>_API_KEY
 # normalisation (round-41 readiness fix). The loader's auto-run block can
 # return non-zero when no api_keys.sh / .env exists; with `set -euo
@@ -120,5 +120,46 @@ if ! printf '%s' "$LIVE_OUT" | grep -q 'tokens: in='; then
     exit 1
 fi
 echo "  PASS: live LLM round-trip emitted banner + ≥2 helix prompts + token stats + Goodbye"
+
+# Step 5: Multi-turn conversation memory probe (CONST-035 anti-bluff: the
+# REPL claims multi-turn context preserved in handleInteractive's
+# `conversation` slice. Prove it: ask "what is 2+2?", then in the SAME
+# session ask "what number did I just ask about?" — the model should
+# reference 2 (or 2+2). A regression that lost context between turns
+# would make the model answer "I don't know" or change topic entirely.
+echo "[5/6] Multi-turn conversation memory..."
+MT_OUT=$(printf 'What is 2+2?\nNow what is that plus 3?\n/exit\n' | \
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+# Anti-bluff: second turn must mention BOTH the prior result (4) AND
+# the new operation (+3, equals 7). A regression that lost context
+# would produce a response that doesn't reference the prior turn.
+if ! printf '%s' "$MT_OUT" | grep -qE '7|seven|that plus 3'; then
+    echo "  FAIL: second turn response doesn't reference prior context (regression to single-turn REPL?)"
+    printf '%s\n' "$MT_OUT" | tail -10
+    exit 1
+fi
+echo "  PASS: multi-turn context preserved across turns"
+
+# Step 6: /clear context-reset probe — CONST-035 anti-bluff: /clear
+# should wipe conversation slice so a subsequent question doesn't
+# leak prior context.
+echo "[6/6] /clear context-reset..."
+CL_OUT=$(printf 'What is 2+2?\n/clear\nWhat number did I just ask about?\n/exit\n' | \
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+if ! printf '%s' "$CL_OUT" | grep -q '(conversation history cleared)'; then
+    echo "  FAIL: /clear command didn't emit confirmation"
+    printf '%s\n' "$CL_OUT" | tail -10
+    exit 1
+fi
+# The post-/clear response should NOT reference 2 (the cleared content).
+# Honest invariant: response either says no prior context OR asks for
+# clarification — never references "2" or "2+2".
+POST_CLEAR=$(printf '%s' "$CL_OUT" | awk '/conversation history cleared/{flag=1; next} flag')
+if printf '%s' "$POST_CLEAR" | grep -qE '\b2\+2\b|\babout 2\b'; then
+    echo "  FAIL: post-/clear response references prior '2+2' context — /clear didn't actually clear"
+    printf '%s\n' "$CL_OUT" | tail -10
+    exit 1
+fi
+echo "  PASS: /clear wiped conversation history (no leak of prior context)"
 echo
 echo "=== Conversational REPL Challenge: PASSED ==="
