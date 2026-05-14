@@ -1341,9 +1341,6 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 
 	// handleGenerate performs LLM generation
 func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
-	fmt.Printf("\n=== Generating with %s ===\n", model)
-	fmt.Printf("Prompt: %s\n\n", prompt)
-
 	// ANTI-BLUFF: MUST use real LLM provider, not simulation
 	if c.llmProvider == nil {
 		return fmt.Errorf("LLM provider not initialized - please check configuration")
@@ -1355,6 +1352,24 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		parts := strings.SplitN(model, ":", 2)
 		modelName = parts[1]
 	}
+
+	// Round-41 readiness fix (CONST-035): the CLI's default model
+	// is "llama-3-8b" which is a generic-Ollama name that does NOT
+	// exist on Groq, OpenAI, Anthropic, Gemini, OpenRouter, or
+	// most actual providers. Sending it as-is to any of those
+	// returns a confusing 404. If the user accepted the default
+	// (or supplied an empty value), pick the provider's first
+	// reported model so the just-plug-in-API-key-and-go workflow
+	// works without the user knowing the provider's exact model
+	// names.
+	if modelName == "" || modelName == "llama-3-8b" {
+		if models := c.llmProvider.GetModels(); len(models) > 0 {
+			modelName = models[0].Name
+		}
+	}
+
+	fmt.Printf("\n=== Generating with %s ===\n", modelName)
+	fmt.Printf("Prompt: %s\n\n", prompt)
 
 	// Get provider
 	provider := c.llmProvider
