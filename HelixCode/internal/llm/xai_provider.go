@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,7 +33,10 @@ func NewXAIProvider(config ProviderConfigEntry) (*XAIProvider, error) {
 
 	apiKey := config.APIKey
 	if apiKey == "" {
-		return nil, fmt.Errorf("XAI API key is required")
+		apiKey = os.Getenv("XAI_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("XAI API key is required (set config.APIKey or XAI_API_KEY env var)")
 	}
 
 	provider := &XAIProvider{

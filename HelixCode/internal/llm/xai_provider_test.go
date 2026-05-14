@@ -41,6 +41,7 @@ func TestNewXAIProvider(t *testing.T) {
 	})
 
 	t.Run("MissingAPIKey", func(t *testing.T) {
+		t.Setenv("XAI_API_KEY", "")
 		config := ProviderConfigEntry{
 			Type:    ProviderTypeXAI,
 			Enabled: true,

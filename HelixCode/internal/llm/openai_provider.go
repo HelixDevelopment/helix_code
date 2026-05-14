@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,7 +33,10 @@ func NewOpenAIProvider(config ProviderConfigEntry) (*OpenAIProvider, error) {
 
 	apiKey := config.APIKey
 	if apiKey == "" {
-		return nil, fmt.Errorf("OpenAI API key is required")
+		apiKey = os.Getenv("OPENAI_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("OpenAI API key is required (set config.APIKey or OPENAI_API_KEY env var)")
 	}
 
 	provider := &OpenAIProvider{

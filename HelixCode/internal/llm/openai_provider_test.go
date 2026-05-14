@@ -41,6 +41,7 @@ func TestNewOpenAIProvider(t *testing.T) {
 	})
 
 	t.Run("MissingAPIKey", func(t *testing.T) {
+		t.Setenv("OPENAI_API_KEY", "")
 		config := ProviderConfigEntry{
 			Type:    ProviderTypeOpenAI,
 			Enabled: true,

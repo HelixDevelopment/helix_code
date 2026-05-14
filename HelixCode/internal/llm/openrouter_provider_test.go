@@ -41,6 +41,10 @@ func TestNewOpenRouterProvider(t *testing.T) {
 	})
 
 	t.Run("MissingAPIKey", func(t *testing.T) {
+		// Round 41: NewOpenRouterProvider now falls back to OPENROUTER_API_KEY
+		// env var (consistent with Anthropic/Groq/Gemini). To assert the
+		// missing-key error path, clear the env var for this test only.
+		t.Setenv("OPENROUTER_API_KEY", "")
 		config := ProviderConfigEntry{
 			Type:    ProviderTypeOpenRouter,
 			Enabled: true,

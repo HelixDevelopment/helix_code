@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,7 +33,10 @@ func NewOpenRouterProvider(config ProviderConfigEntry) (*OpenRouterProvider, err
 
 	apiKey := config.APIKey
 	if apiKey == "" {
-		return nil, fmt.Errorf("OpenRouter API key is required")
+		apiKey = os.Getenv("OPENROUTER_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("OpenRouter API key is required (set config.APIKey or OPENROUTER_API_KEY env var)")
 	}
 
 	provider := &OpenRouterProvider{
