@@ -115,17 +115,42 @@ Project memory loads `.helixcode/memory.md` from the repo root and caches it acr
 15 providers ship in `internal/providers/`:
 Anthropic Claude, OpenAI, Google Gemini, AWS Bedrock, Azure OpenAI, Google VertexAI, Groq, Mistral, DeepSeek, xAI, OpenRouter, Ollama, llama.cpp, LiteLLM gateway, CharacterAI.
 
-Switch provider:
+**There are TWO provider-access paths** (anti-bluff: an earlier
+revision of this doc claimed `./bin/cli --provider ollama` worked
+directly; in reality only 4 providers route through the F12 CLI
+shortcut, and the others go through the server-mediated path):
+
+**Path A — F12 direct-cloud CLI shortcut** (4 providers only):
 
 ```bash
 ./bin/cli --provider anthropic --model claude-3-5-sonnet
-./bin/cli --provider ollama --model llama3.2
+./bin/cli --provider bedrock   --model anthropic.claude-3-5-sonnet
+./bin/cli --provider vertexai  --model gemini-1.5-pro
+./bin/cli --provider azure     --model gpt-4o
 ```
+
+These four read credentials from the user's `~/.config/helixcode/`
+or `HELIX_LLM_PROVIDER` env. They construct the provider directly
+in the CLI process.
+
+**Path B — server-mediated (the other 11+ providers)**:
+
+For Groq, OpenAI, Gemini, DeepSeek, xAI, OpenRouter, Mistral, Qwen,
+Copilot, Ollama, llama.cpp, vLLM, LocalAI, LM Studio: add an entry
+under `llm.providers:` in `HelixCode/config/config.yaml`, start the
+HelixCode server (`make build && ./bin/helixcode server`), and
+access the provider via the server's REST API or via the CLI's
+`-server-url` flag pointing at the server. The server hosts the
+provider manager (CONST-039) and exposes a unified API.
+
+A `./bin/cli --provider groq` invocation now returns a directed
+error (since round 41) that names this path explicitly — no more
+ambiguous "unknown cloud provider" message.
 
 List available models (queries every configured provider — no hardcoding per CONST-036):
 
 ```bash
-./bin/cli --list-models      # CLI flag
+./bin/cli --list-models      # CLI flag — shows F12 + verifier-known providers
 # Or, inside the interactive REPL:
 > models
 ```

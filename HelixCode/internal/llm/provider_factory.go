@@ -135,15 +135,15 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return "", fmt.Errorf(
 			"provider %q is supported by HelixCode but not via the F12 direct-cloud-provider CLI path "+
 				"(supported direct-cloud backends: %s). "+
-				"Configure %q in HelixCode/config/config.yaml under providers: and access it via the HelixCode server "+
-				"(see docs/COMPLETE_HOWTO.md §4 'Configure additional providers'). "+
+				"Configure %q in HelixCode/config/config.yaml under llm.providers: and access it via the HelixCode server "+
+				"(see docs/user_manual/ZERO_BLUFF_USER_MANUAL.md §2.4 'LLM Providers (F12)'). "+
 				"The full provider list per CONST-039 is in docs/llms_verifier/.",
 			raw, supportedCloudProviderList(), raw)
 	default:
 		return "", fmt.Errorf(
 			"unknown provider %q (F12 direct-cloud supports: %s; "+
 				"the full HelixCode provider catalogue per CONST-039 is accessed via the server-side provider manager — "+
-				"see docs/COMPLETE_HOWTO.md)",
+				"see docs/user_manual/ZERO_BLUFF_USER_MANUAL.md §2.4)",
 			raw, supportedCloudProviderList())
 	}
 }
