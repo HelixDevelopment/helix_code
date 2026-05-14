@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"flag"
@@ -1645,14 +1646,42 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 	return nil
 }
 
-// handleInteractive starts interactive mode
+// handleInteractive starts the conversational REPL.
+//
+// Round 41 readiness fix (CONST-035): the prior REPL only accepted 6
+// hardcoded commands (workers/models/health/help/exit/quit) and used
+// fmt.Scanln which reads a single whitespace-delimited token — so a
+// multi-word prompt like "What is 2+2?" was silently truncated to
+// "What" and dispatched as an unknown command. The REPL did NOT
+// accept LLM prompts at all, which is the core feature a user expects
+// from a modern CLI agent (Claude Code, Aider, Cline).
+//
+// Now: bufio.Scanner reads entire lines; lines that start with "/"
+// are treated as slash commands (/workers, /models, /health, /help,
+// /exit, /quit, /clear); plain text lines are sent to the resolved
+// LLM provider and the response is printed. Multi-turn context is
+// preserved across turns within a single REPL session.
 func (c *CLI) handleInteractive(ctx context.Context) error {
 	fmt.Println("=== Helix CLI Interactive Mode ===")
-	fmt.Println("Type 'help' for available commands, 'exit' to quit")
+	fmt.Println("Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit.")
+	if c.llmProvider != nil {
+		if models := c.llmProvider.GetModels(); len(models) > 0 {
+			fmt.Printf("Provider: %s   Default model: %s\n", c.llmProvider.GetName(), models[0].Name)
+		}
+	}
 
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigChan)
+
+	scanner := bufio.NewScanner(os.Stdin)
+	// Allow long prompts (default 64 KB is too small for big code snippets).
+	scanner.Buffer(make([]byte, 0, 1<<20), 16<<20)
+
+	// Multi-turn conversation state (in-session only — F11 session
+	// persistence is via the sessions subcommand).
+	var conversation []llm.Message
 
 	for {
 		select {
@@ -1660,45 +1689,83 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			fmt.Println("\n\nShutting down...")
 			return nil
 		default:
-			// Continue with interactive loop
 		}
 
 		fmt.Print("\nhelix> ")
-
-		var input string
-		_, err := fmt.Scanln(&input)
-		if err != nil {
-			if err.Error() == "unexpected newline" {
-				continue
+		if !scanner.Scan() {
+			if err := scanner.Err(); err != nil {
+				return fmt.Errorf("REPL read error: %w", err)
 			}
-			return err
-		}
-
-		input = strings.TrimSpace(input)
-		if input == "" {
-			continue
-		}
-
-		if input == "exit" || input == "quit" {
+			// EOF — clean exit
 			fmt.Println("Goodbye!")
 			return nil
 		}
 
-		if input == "help" {
-			c.showHelp()
+		input := strings.TrimSpace(scanner.Text())
+		if input == "" {
 			continue
 		}
 
-		// Handle interactive commands
-		switch input {
-		case "workers":
-			c.handleListWorkers(ctx)
-		case "models":
-			c.handleListModels(ctx)
-		case "health":
-			c.handleHealthCheck(ctx)
-		default:
-			fmt.Printf("Unknown command: %s. Type 'help' for available commands.\n", input)
+		// Slash commands (extended with /clear, /reset). Backward-
+		// compat: bare 'exit'/'quit'/'help'/'workers'/'models'/'health'
+		// still recognised since the old REPL used those.
+		lower := strings.ToLower(input)
+		switch lower {
+		case "/exit", "/quit", "exit", "quit":
+			fmt.Println("Goodbye!")
+			return nil
+		case "/help", "help":
+			c.showHelp()
+			continue
+		case "/workers", "workers":
+			_ = c.handleListWorkers(ctx)
+			continue
+		case "/models", "models":
+			_ = c.handleListModels(ctx)
+			continue
+		case "/health", "health":
+			_ = c.handleHealthCheck(ctx)
+			continue
+		case "/clear", "/reset":
+			conversation = conversation[:0]
+			fmt.Println("(conversation history cleared)")
+			continue
+		}
+		// Unknown slash command: surface clearly, don't send to LLM
+		if strings.HasPrefix(input, "/") {
+			fmt.Printf("Unknown slash command: %s. Type '/help' for available commands.\n", input)
+			continue
+		}
+
+		// Plain text: send as LLM prompt (the core REPL contract).
+		if c.llmProvider == nil {
+			fmt.Println("No LLM provider configured — set HELIX_LLM_PROVIDER or run `wizard`. " +
+				"Slash commands (/workers, /models, /health, /exit) still work.")
+			continue
+		}
+
+		conversation = append(conversation, llm.Message{Role: "user", Content: input})
+
+		modelName := ""
+		if models := c.llmProvider.GetModels(); len(models) > 0 {
+			modelName = models[0].Name
+		}
+		req := &llm.LLMRequest{
+			Model:       modelName,
+			MaxTokens:   1000,
+			Temperature: 0.7,
+			Messages:    conversation,
+		}
+		resp, err := c.llmProvider.Generate(ctx, req)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			// Pop the user turn so a retry doesn't accumulate bad state.
+			conversation = conversation[:len(conversation)-1]
+			continue
+		}
+		if resp != nil && resp.Content != "" {
+			fmt.Println(resp.Content)
+			conversation = append(conversation, llm.Message{Role: "assistant", Content: resp.Content})
 		}
 	}
 }
