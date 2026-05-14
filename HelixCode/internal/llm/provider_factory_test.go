@@ -113,11 +113,17 @@ func TestSelector_VertexAlias(t *testing.T) {
 	}
 }
 
-// Selector restricts to cloud providers (factory's mandate).
+// Selector restricts to F12 direct-cloud providers (factory's mandate).
+//
+// Anti-bluff (CONST-035): the original test asserted ollama was rejected.
+// As of round 41 final, F12 covers 13 providers including ollama, so
+// asserting ollama-rejection would be a false claim about the contract.
+// Use "deepseek" (still a Path-B provider that routes to the directed
+// error) as the rejection probe.
 func TestSelector_RejectsNonCloudType(t *testing.T) {
-	_, err := Select(SelectorInput{Flag: "ollama"})
+	_, err := Select(SelectorInput{Flag: "deepseek"})
 	if err == nil {
-		t.Fatalf("Select() expected error for non-cloud provider 'ollama', got nil")
+		t.Fatalf("Select() expected error for Path-B provider 'deepseek', got nil")
 	}
 }
 
@@ -222,14 +228,20 @@ func TestNewCloudProvider_Unknown(t *testing.T) {
 
 // Reject local/non-cloud types — NewCloudProvider's mandate is the
 // 4 cloud backends only (Anthropic, Bedrock, Vertex, Azure).
-func TestNewCloudProvider_RejectsLocalProvider(t *testing.T) {
+// As of round 41 final, ollama IS a recognised F12 provider (via the
+// newOllamaFromEntry adapter). Use a still-rejected provider type to
+// pin the unknown-type contract: vLLM has no F12 constructor.
+//
+// Anti-bluff (CONST-035): renamed from TestNewCloudProvider_RejectsLocalProvider
+// because that name no longer matches the contract — ollama+llamacpp
+// (local providers) are now F12-supported.
+func TestNewCloudProvider_RejectsUnknownProvider(t *testing.T) {
 	cfg := ProviderConfigEntry{
-		Type:     ProviderTypeOllama,
-		Endpoint: "http://localhost:11434",
-		Enabled:  true,
+		Type:    ProviderTypeVLLM,
+		Enabled: true,
 	}
-	_, err := NewCloudProvider(ProviderTypeOllama, cfg)
+	_, err := NewCloudProvider(ProviderTypeVLLM, cfg)
 	if err == nil {
-		t.Fatal("NewCloudProvider(ollama) expected error (non-cloud), got nil")
+		t.Fatal("NewCloudProvider(vllm) expected error (no F12 constructor), got nil")
 	}
 }

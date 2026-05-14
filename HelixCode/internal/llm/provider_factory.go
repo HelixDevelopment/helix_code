@@ -102,6 +102,10 @@ func NewCloudProvider(t ProviderType, cfg ProviderConfigEntry) (Provider, error)
 		return NewQwenProvider(cfg)
 	case ProviderTypeCopilot:
 		return NewCopilotProvider(cfg)
+	case ProviderTypeOllama:
+		return newOllamaFromEntry(cfg)
+	case ProviderTypeLlamaCpp:
+		return newLlamaCPPFromEntry(cfg)
 	default:
 		return nil, fmt.Errorf(
 			"NewCloudProvider: %q is not a cloud provider type (supported: %s)",
@@ -156,9 +160,11 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return ProviderTypeQwen, nil
 	case "copilot", "github-copilot":
 		return ProviderTypeCopilot, nil
-	case "deepseek", "mistral",
-		"ollama", "llamacpp", "llama-cpp", "llama.cpp", "vllm",
-		"localai", "lmstudio":
+	case "ollama":
+		return ProviderTypeOllama, nil
+	case "llamacpp", "llama-cpp", "llama.cpp":
+		return ProviderTypeLlamaCpp, nil
+	case "deepseek", "mistral", "vllm", "localai", "lmstudio":
 		return "", fmt.Errorf(
 			"provider %q is supported by HelixCode but not via the F12 direct-cloud-provider CLI path "+
 				"(supported direct-cloud backends: %s). "+
@@ -184,7 +190,41 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 // four. Other providers still require server-mediated config.yaml setup
 // — see ZERO_BLUFF_USER_MANUAL.md §2.4 Path A vs Path B.
 func supportedCloudProviderList() string {
-	return "anthropic, bedrock, vertexai, azure, groq, openai, gemini, openrouter, xai, qwen, copilot"
+	return "anthropic, bedrock, vertexai, azure, groq, openai, gemini, openrouter, xai, qwen, copilot, ollama, llamacpp"
+}
+
+// newOllamaFromEntry adapts the generic ProviderConfigEntry into the
+// OllamaConfig that NewOllamaProvider expects. Defaults match the
+// constructor's own defaults (BaseURL http://localhost:11434, 30s
+// timeout, stream enabled). Endpoint from the entry overrides
+// BaseURL. Per CONST-035: the adapter never silently swallows a
+// construction error; failures bubble up to the caller.
+func newOllamaFromEntry(cfg ProviderConfigEntry) (Provider, error) {
+	oc := OllamaConfig{
+		BaseURL:       cfg.Endpoint,
+		StreamEnabled: true,
+	}
+	if oc.BaseURL == "" {
+		oc.BaseURL = "http://localhost:11434"
+	}
+	if len(cfg.Models) > 0 {
+		oc.DefaultModel = cfg.Models[0]
+	}
+	return NewOllamaProvider(oc)
+}
+
+// newLlamaCPPFromEntry adapts ProviderConfigEntry into LlamaConfig.
+// ServerHost comes from cfg.Endpoint when present, otherwise the
+// constructor's default-localhost path applies. Model defaults to
+// cfg.Models[0] if supplied. Anti-bluff: failures bubble up.
+func newLlamaCPPFromEntry(cfg ProviderConfigEntry) (Provider, error) {
+	lc := LlamaConfig{
+		ServerHost: cfg.Endpoint,
+	}
+	if len(cfg.Models) > 0 {
+		lc.Model = cfg.Models[0]
+	}
+	return NewLlamaCPPProvider(lc)
 }
 
 // ParseCloudProviderType is the exported counterpart of parseCloudProviderType.
