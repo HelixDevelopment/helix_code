@@ -129,10 +129,29 @@ func TestTracedLLMProvider_PromotesGetModels(t *testing.T) {
 }
 
 func TestTracedLLMProvider_PromotesGetCapabilities(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form ran
+	// `_ = wrap.GetCapabilities()` with the comment "Must not panic" and
+	// asserted NOTHING beyond the absence of a panic. The test name says
+	// "Promotes" — meaning TracedLLMProvider MUST forward the call to the
+	// inner provider and return what the inner returned. Pin that real
+	// promotion contract: the wrapped result must EQUAL the inner's result
+	// (FakeLLMProvider.GetCapabilities returns an empty []ModelCapability;
+	// a regression that returned nil or a fabricated non-empty slice
+	// would now fail this test).
 	inner := subagent.NewFakeLLMProvider(nil)
 	tp, _ := NewTelemetryProvider(TelemetryConfig{Enabled: false, Exporter: ExporterNoop}, zap.NewNop())
 	wrap, _ := NewTracedLLMProvider(inner, tp)
-	_ = wrap.GetCapabilities() // Must not panic.
+
+	innerCaps := inner.GetCapabilities()
+	wrapCaps := wrap.GetCapabilities()
+	if len(wrapCaps) != len(innerCaps) {
+		t.Fatalf("wrap.GetCapabilities len=%d, want %d (must promote inner result)", len(wrapCaps), len(innerCaps))
+	}
+	for i := range innerCaps {
+		if wrapCaps[i] != innerCaps[i] {
+			t.Errorf("wrap.GetCapabilities[%d]=%v, want %v", i, wrapCaps[i], innerCaps[i])
+		}
+	}
 }
 
 func TestTracedLLMProvider_PromotesGetHealth(t *testing.T) {
