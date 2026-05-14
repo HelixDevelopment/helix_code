@@ -1480,10 +1480,45 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		if perr := printResponseThroughRendererStyled(r, styler, resp.Content); perr != nil {
 			return fmt.Errorf("renderer print failed: %w", perr)
 		}
+		// Round 41 readiness fix (CONST-035): modern CLI agents
+		// (Claude Code, Aider, Cline) report token usage + duration
+		// after each generation so users can track consumption.
+		// Previously the CLI swallowed this telemetry — the user
+		// got the response but no insight into cost/usage.
+		if resp != nil {
+			printGenerationStats(resp)
+		}
 	}
 
 	fmt.Printf("\n✅ Generation completed\n")
 	return nil
+}
+
+// printGenerationStats surfaces token usage + processing time per turn so
+// users can see consumption like they'd see in Claude Code / Aider / Cline.
+// Anti-bluff: only prints fields that the provider populated; absence-of-data
+// is honestly shown rather than fabricated zero counts.
+func printGenerationStats(resp *llm.LLMResponse) {
+	if resp == nil {
+		return
+	}
+	in, out := resp.Usage.PromptTokens, resp.Usage.CompletionTokens
+	if in == 0 && out == 0 && resp.ProcessingTime == 0 {
+		// Provider didn't populate any telemetry; don't fabricate it.
+		return
+	}
+	fmt.Printf("\n📊 tokens: in=%d out=%d total=%d", in, out, in+out)
+	if resp.ProcessingTime > 0 {
+		fmt.Printf("   time: %s", resp.ProcessingTime.Round(time.Millisecond))
+		if out > 0 && resp.ProcessingTime.Seconds() > 0 {
+			tps := float64(out) / resp.ProcessingTime.Seconds()
+			fmt.Printf("   tps: %.1f", tps)
+		}
+	}
+	if resp.FinishReason != "" {
+		fmt.Printf("   finish: %s", resp.FinishReason)
+	}
+	fmt.Println()
 }
 
 // streamToRenderer pumps LLM streaming chunks from ch through the supplied
@@ -1766,6 +1801,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 		if resp != nil && resp.Content != "" {
 			fmt.Println(resp.Content)
 			conversation = append(conversation, llm.Message{Role: "assistant", Content: resp.Content})
+			printGenerationStats(resp)
 		}
 	}
 }
