@@ -9,6 +9,29 @@
 
 ---
 
+## INHERITED FROM constitution/AGENTS.md (HelixConstitution submodule)
+
+> Base agent rules: `constitution/AGENTS.md` — READ IT FIRST.
+> The base file is authoritative for any topic not covered here.
+> Project-specific rules below extend them; they never weaken them.
+
+The HelixConstitution submodule (`./constitution/`, added 2026-05-14)
+provides the universal CLI-agent operating manual. Every CLI agent
+working on this project — Claude Code, Codex, Cursor, Aider,
+Continue, Gemini CLI, future LLMs — MUST read both
+`constitution/AGENTS.md` AND this project AGENTS.md, treating the
+project file as a tightening overlay (never a weakening).
+
+**Project-tightening note** — HelixCode forbids GitFlic + GitVerse
+Git remotes per `CLAUDE.md` §6.W; the universal AGENTS.md's broader
+"multi-upstream" guidance is narrowed here. Other tightenings (e.g.
+CONST-033 host power management hard-ban, CONST-035 anti-bluff
+covenant, CONST-042 secret-leak policy, CONST-045 distribution-host
+config policy, CONST-046 no-hardcoded-content, CONST-047 recursive
+submodule application mandate) all SURVIVE this inheritance.
+
+---
+
 ## Project Overview
 
 HelixCode is an enterprise-grade distributed AI development platform built in Go. It enables intelligent task division, work preservation, cross-platform development workflows, and multi-provider LLM integration through a unified REST API, CLI, Terminal UI, Desktop, and Mobile client architecture.

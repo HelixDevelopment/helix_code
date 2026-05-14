@@ -9,6 +9,30 @@
 
 ---
 
+## INHERITED FROM constitution/Constitution.md (HelixConstitution submodule)
+
+All universal rules in `constitution/Constitution.md` apply
+unconditionally to HelixCode. This project Constitution **extends**
+those universal rules with HelixCode-specific addenda below — it
+does NOT and MAY NOT weaken any universal clause. When this
+Constitution disagrees with the constitution submodule, the
+constitution submodule wins.
+
+The constitution submodule is at `./constitution/` (added 2026-05-14
+per user mandate, pinned at the upstream `HelixDevelopment/HelixConstitution`
+HEAD). To locate it from nested submodules at arbitrary depth, source
+`constitution/find_constitution.sh` from the parent project tree.
+
+**Project-specific scope** — HelixCode does NOT inherit those parts of
+the universal Constitution that describe other-project specifics (e.g.
+multi-upstream Git push to GitFlic/GitVerse providers). Per this
+project's existing `CLAUDE.md` §6.W: "Only GitHub (`vasic-digital/*`,
+`HelixDevelopment/*`) and GitLab (`vasic-digital/*`, `HelixDevelopment/*`)
+are permitted as Git remotes. GitFlic, GitVerse, and all other providers
+are forbidden." §6.W is a project-level tightening that survives.
+
+---
+
 ## Preamble
 
 HelixCode is an enterprise-grade distributed AI development platform. This Constitution establishes the non-negotiable rules that govern all development, testing, deployment, and maintenance activities within the project. Every contributor, agent, and automated process MUST adhere to these rules. No exceptions.

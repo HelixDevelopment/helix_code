@@ -9,6 +9,27 @@
 
 ---
 
+## INHERITED FROM constitution/CLAUDE.md (HelixConstitution submodule)
+
+All rules in `constitution/CLAUDE.md` (and the
+`constitution/Constitution.md` it references) apply unconditionally
+to HelixCode. Project-specific rules below **extend** them — they
+do NOT and MAY NOT weaken any universal clause. When this file
+disagrees with the constitution submodule, the constitution wins.
+
+**Project-tightening note (CONST-038 / §6.W):** HelixCode permits
+only GitHub + GitLab Git remotes (`vasic-digital/*` and
+`HelixDevelopment/*`); GitFlic, GitVerse, and all other providers
+are explicitly forbidden. This is a project-level tightening that
+SURVIVES the universal "multi-upstream" guidance in
+`constitution/Constitution.md` Appendix C — universal allowance
+is broader, project rule is narrower, and the narrower rule wins
+(per inheritance precedence: project may tighten, never weaken).
+
+`@constitution/CLAUDE.md`
+
+---
+
 ## 1. Agent Identity & Purpose
 
 You are an AI agent working on **HelixCode**, an enterprise-grade distributed AI development platform. Your work directly impacts the quality and usability of a production system.
