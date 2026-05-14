@@ -50,9 +50,15 @@ func (c *PagerDutyChannel) Send(ctx context.Context, notification *Notification)
 		return fmt.Errorf("failed to marshal pagerduty payload: %v", err)
 	}
 
-	resp, err := http.Post(c.apiURL, "application/json", bytes.NewReader(jsonData))
+	// Honour ctx (CONST-035).
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.apiURL, bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to send to pagerduty: %v", err)
+		return fmt.Errorf("failed to build pagerduty request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send to pagerduty: %w", err)
 	}
 	defer resp.Body.Close()
 

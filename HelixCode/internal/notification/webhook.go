@@ -125,9 +125,16 @@ func (c *TeamsChannel) Send(ctx context.Context, notification *Notification) err
 		return fmt.Errorf("failed to marshal teams payload: %v", err)
 	}
 
-	resp, err := http.Post(c.webhook, "application/json", bytes.NewReader(jsonData))
+	// Honour ctx (CONST-035): prior code used http.Post which ignored
+	// the caller's cancellation/deadline.
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.webhook, bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to send to teams: %v", err)
+		return fmt.Errorf("failed to build teams request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send to teams: %w", err)
 	}
 	defer resp.Body.Close()
 

@@ -363,9 +363,15 @@ func (c *SlackChannel) Send(ctx context.Context, notification *Notification) err
 		return fmt.Errorf("failed to marshal slack payload: %v", err)
 	}
 
-	resp, err := http.Post(c.webhook, "application/json", bytes.NewReader(jsonData))
+	// Honour ctx (CONST-035).
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.webhook, bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to send to slack: %v", err)
+		return fmt.Errorf("failed to build slack request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send to slack: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -579,9 +585,15 @@ func (c *TelegramChannel) Send(ctx context.Context, notification *Notification) 
 		return fmt.Errorf("failed to marshal telegram payload: %v", err)
 	}
 
-	resp, err := http.Post(apiURL, "application/json", bytes.NewReader(jsonData))
+	// Honour ctx (CONST-035).
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiURL, bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to send to telegram: %v", err)
+		return fmt.Errorf("failed to build telegram request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send to telegram: %w", err)
 	}
 	defer resp.Body.Close()
 
