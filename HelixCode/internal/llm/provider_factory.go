@@ -92,6 +92,16 @@ func NewCloudProvider(t ProviderType, cfg ProviderConfigEntry) (Provider, error)
 		return NewGroqProvider(cfg)
 	case ProviderTypeOpenAI:
 		return NewOpenAIProvider(cfg)
+	case ProviderTypeGemini:
+		return NewGeminiProvider(cfg)
+	case ProviderTypeOpenRouter:
+		return NewOpenRouterProvider(cfg)
+	case ProviderTypeXAI:
+		return NewXAIProvider(cfg)
+	case ProviderTypeQwen:
+		return NewQwenProvider(cfg)
+	case ProviderTypeCopilot:
+		return NewCopilotProvider(cfg)
 	default:
 		return nil, fmt.Errorf(
 			"NewCloudProvider: %q is not a cloud provider type (supported: %s)",
@@ -136,8 +146,17 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return ProviderTypeGroq, nil
 	case "openai", "open-ai":
 		return ProviderTypeOpenAI, nil
-	case "gemini", "google", "deepseek", "xai", "grok",
-		"openrouter", "mistral", "qwen", "copilot", "github-copilot",
+	case "gemini", "google":
+		return ProviderTypeGemini, nil
+	case "openrouter", "open-router":
+		return ProviderTypeOpenRouter, nil
+	case "xai", "grok":
+		return ProviderTypeXAI, nil
+	case "qwen":
+		return ProviderTypeQwen, nil
+	case "copilot", "github-copilot":
+		return ProviderTypeCopilot, nil
+	case "deepseek", "mistral",
 		"ollama", "llamacpp", "llama-cpp", "llama.cpp", "vllm",
 		"localai", "lmstudio":
 		return "", fmt.Errorf(
@@ -165,7 +184,7 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 // four. Other providers still require server-mediated config.yaml setup
 // — see ZERO_BLUFF_USER_MANUAL.md §2.4 Path A vs Path B.
 func supportedCloudProviderList() string {
-	return "anthropic, bedrock, vertexai, azure, groq, openai"
+	return "anthropic, bedrock, vertexai, azure, groq, openai, gemini, openrouter, xai, qwen, copilot"
 }
 
 // ParseCloudProviderType is the exported counterpart of parseCloudProviderType.
