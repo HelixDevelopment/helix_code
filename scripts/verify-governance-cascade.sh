@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ANCHOR="Article XI.*11.9"
+CONST047_ANCHOR="CONST-047"
 FAILURES=0
 OWNED_FILE="$ROOT/docs/improvements/submodule_owned.txt"
 THIRD_PARTY_FILE="$ROOT/docs/improvements/submodule_third_party.txt"
@@ -28,12 +29,17 @@ if [ -f "$OWNED_FILE" ]; then
     [ -z "$sm" ] && continue
     [ ! -d "$ROOT/$sm" ] && echo "SKIP: $sm (not initialized)" && continue
     for f in CONSTITUTION.md CLAUDE.md AGENTS.md; do
-      if [ -f "$ROOT/$sm/$f" ] && grep -q "$ANCHOR" "$ROOT/$sm/$f" 2>/dev/null; then
-        echo "PASS: $sm/$f"
-      elif [ -f "$ROOT/$sm/$f" ]; then
-        echo "FAIL: $sm/$f — no anchor"; FAILURES=$((FAILURES+1))
-      else
+      if [ ! -f "$ROOT/$sm/$f" ]; then
         echo "FAIL: $sm/$f — file missing"; FAILURES=$((FAILURES+1))
+        continue
+      fi
+      missing_anchors=""
+      grep -q "$ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" §11.9"
+      grep -q "$CONST047_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-047"
+      if [ -z "$missing_anchors" ]; then
+        echo "PASS: $sm/$f (§11.9 + CONST-047)"
+      else
+        echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
       fi
     done
   done < "$OWNED_FILE"
