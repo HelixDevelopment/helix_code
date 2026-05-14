@@ -1447,19 +1447,26 @@ func TestCharacterAIProvider_CreateCollectionWithEmptyName(t *testing.T) {
 }
 
 func TestCharacterAIProvider_CreateCollectionWithNilConfig(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form was a TRIPLE
+	// bluff — (a) `defer func() { recover() }` SWALLOWED any panic and
+	// only t.Logf'd it (a panic is a critical defect, not a log line);
+	// (b) `_ = err` discarded the result; (c) the comment "Either
+	// succeeds or fails gracefully" admitted nothing was being checked.
+	// "Graceful handling of nil config" means the provider must NOT
+	// panic — period. Pin that contract: call CreateCollection on the
+	// main goroutine (no recover) and assert on the returned value. If
+	// the provider panics in the future, the test fails outright (which
+	// is the honest signal). The contract for the err itself: either
+	// nil (nil-config is treated as default config) or a descriptive
+	// non-nil error; nothing else is tolerated.
 	provider := newInitializedCharacterAIProvider(t)
 	ctx := context.Background()
 
-	// Should handle nil config gracefully (may panic if not handled)
-	defer func() {
-		if r := recover(); r != nil {
-			t.Logf("Panic caught (expected for nil config): %v", r)
-		}
-	}()
-
 	err := provider.CreateCollection(ctx, "nil-config-test", nil)
-	// Either succeeds or fails gracefully
-	_ = err
+	if err != nil {
+		assert.NotEmpty(t, err.Error(),
+			"non-nil error from CreateCollection(nil-config) must carry a non-empty message — a bare empty-error is itself a bluff")
+	}
 }
 
 func TestCharacterAIProvider_GetCollectionNotFound(t *testing.T) {

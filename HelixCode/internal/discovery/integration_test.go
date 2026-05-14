@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -487,10 +488,21 @@ func TestMultiStrategyDiscoveryFallback(t *testing.T) {
 	// Service not in registry, should fall back to DNS
 	result, err := client.Discover("localhost")
 
-	// DNS may or may not work in test environment
+	// Anti-bluff (CONST-035 / §11.9): the original `if err == nil` branch
+	// asserted nothing on the failure path, so any error — including a
+	// codebase regression like "fallback strategy not invoked" — silently
+	// passed. Pin both branches: on success the strategy MUST be DNS and
+	// the result non-nil; on failure the error MUST mention "DNS" or
+	// "lookup" so a regression that returned a different-strategy error
+	// (e.g. "no registry entry") would now fail.
 	if err == nil {
-		assert.NotNil(t, result)
-		assert.Equal(t, StrategyDNS, result.Strategy)
+		require.NotNil(t, result, "successful Discover must return a non-nil result")
+		assert.Equal(t, StrategyDNS, result.Strategy, "fallback to DNS must report StrategyDNS")
+	} else {
+		msg := strings.ToLower(err.Error())
+		assert.True(t,
+			strings.Contains(msg, "dns") || strings.Contains(msg, "lookup") || strings.Contains(msg, "host"),
+			"DNS-fallback failure must surface a DNS/lookup/host-related error; got %q", err.Error())
 	}
 }
 

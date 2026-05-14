@@ -695,11 +695,22 @@ func (p *CharacterAIProvider) CreateCollection(ctx context.Context, name string,
 		return fmt.Errorf("collection %s already exists", name)
 	}
 
+	// Anti-bluff (CONST-035 / §11.9): the original implementation
+	// dereferenced config.Description unconditionally and panicked when
+	// callers passed a nil config. Treat nil config as "use defaults"
+	// rather than crashing — caught by
+	// TestCharacterAIProvider_CreateCollectionWithNilConfig once that
+	// test was tightened to no longer recover() and swallow the panic.
+	description := ""
+	if config != nil {
+		description = config.Description
+	}
+
 	// Create a character as a collection
 	character := &memory.Character{
 		ID:          name,
 		Name:        name,
-		Description: config.Description,
+		Description: description,
 		Personality: map[string]interface{}{},
 		Traits:      map[string]interface{}{},
 		Appearance:  map[string]interface{}{},
@@ -719,7 +730,7 @@ func (p *CharacterAIProvider) CreateCollection(ctx context.Context, name string,
 	p.characters[name] = character
 	p.stats.TotalCollections++
 
-	p.logger.Info("Collection created name=%s description=%s", name, config.Description)
+	p.logger.Info("Collection created name=%s description=%s", name, description)
 	return nil
 }
 
