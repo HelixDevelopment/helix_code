@@ -2659,16 +2659,32 @@ func TestCogneeEvent(t *testing.T) {
 // TestServiceHealthCheckLoop tests the health check functionality
 func TestServiceHealthCheckLoop(t *testing.T) {
 	t.Run("PerformHealthCheck", func(t *testing.T) {
+		// Anti-bluff (CONST-035 / §11.9): the original form only asserted
+		// NewCogneeService NoError + invoked performHealthCheck — passing
+		// regardless of whether the call did anything. The comment claimed
+		// "should update health status" but no assertion verified that.
+		// Pin the contract: capture the health snapshot before the call,
+		// invoke it, then assert the snapshot AT LEAST changed timestamp
+		// (proof the call ran), OR pin that the call returned without
+		// panic AND the service is still usable (GetStats returns
+		// non-nil) — whichever surfaces a regression that would
+		// otherwise be invisible to the original form.
 		cfg := config.DefaultCogneeConfig()
 		cfg.AutoStart = false
 		service, err := NewCogneeService(cfg, nil)
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		// Directly call performHealthCheck
 		service.performHealthCheck(ctx)
 
-		// Should not panic and should update health status
+		// Post-call invariants: service is still usable (the call must not
+		// leave state corrupted). A regression that wedged the service
+		// would now fail this test.
+		stats, err := service.GetStatistics(ctx)
+		require.NoError(t, err,
+			"performHealthCheck must not corrupt the service — GetStatistics must still succeed after the call")
+		assert.NotNil(t, stats,
+			"GetStatistics must return non-nil snapshot")
 	})
 }
 

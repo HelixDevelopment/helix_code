@@ -133,10 +133,13 @@ server:
 }
 
 func TestCreateDefaultConfig(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): original form only asserted Write
+	// + Stat NoError — passing even if WriteFile silently wrote empty
+	// bytes or os.Stat lied about size. Pin the round-trip: read the
+	// file back and assert content matches what we wrote.
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
 
-	// Create a basic config for testing
 	content := `server:
   address: "0.0.0.0"
   port: 8080
@@ -147,11 +150,17 @@ database:
   port: 5432
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	// Check if file was created
-	_, err = os.Stat(configPath)
-	assert.NoError(t, err)
+	info, err := os.Stat(configPath)
+	require.NoError(t, err)
+	assert.Equal(t, int64(len(content)), info.Size(),
+		"written file size must match content length — Stat-only check would pass on 0-byte write")
+
+	readBack, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.Equal(t, content, string(readBack),
+		"file content must round-trip exactly — silent corruption would pass the NoError-only check")
 }
 
 func TestConfigValidationEdgeCases(t *testing.T) {
