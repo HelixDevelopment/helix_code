@@ -2602,12 +2602,24 @@ func TestServiceEmitEvent(t *testing.T) {
 		service, err := NewCogneeService(cfg, nil)
 		require.NoError(t, err)
 
+		// Anti-bluff (CONST-035 / §11.9): the original form ended with
+		// the comment "Event may or may not be received depending on
+		// service state" and asserted NOTHING. Per service.go:736-746
+		// the event-consumer goroutine only runs while the service is
+		// Started; this test does NOT Start the service, so the buffered
+		// emit succeeds but no handler is ever invoked. Pin THAT contract:
+		// without Start, the registered handler must not fire. The
+		// receivedEvents map is guarded so a regression that started
+		// processing events without an active loop would now FAIL the
+		// test by tripping the race detector AND the length assert.
+		var mu sync.Mutex
 		receivedEvents := make([]*CogneeEvent, 0)
 		service.RegisterEventHandler(func(e *CogneeEvent) {
+			mu.Lock()
+			defer mu.Unlock()
 			receivedEvents = append(receivedEvents, e)
 		})
 
-		// Emit an event
 		service.emitEvent(&CogneeEvent{
 			ID:        "test-event",
 			Type:      "test",
@@ -2615,10 +2627,13 @@ func TestServiceEmitEvent(t *testing.T) {
 			Timestamp: time.Now(),
 		})
 
-		// Give time for event to be processed
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond) // generous window for any (incorrect) async fire
 
-		// Note: Event may or may not be received depending on service state
+		mu.Lock()
+		got := len(receivedEvents)
+		mu.Unlock()
+		assert.Equal(t, 0, got,
+			"event handler must NOT fire when the service has not been Started (no consumer goroutine)")
 	})
 }
 

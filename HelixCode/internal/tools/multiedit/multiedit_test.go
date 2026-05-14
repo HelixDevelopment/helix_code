@@ -298,9 +298,17 @@ func TestMultiFileEditor_RollbackOnError(t *testing.T) {
 	err = mfe.Commit(context.Background(), tx)
 	assert.Error(t, err)
 
-	// Verify file1 was rolled back (if it was modified before failure)
-	// Note: The file may or may not be modified depending on which edit runs first
-	// in the parallel execution. The key test is that commit failed.
+	// Anti-bluff (CONST-035 / §11.9): the original comment said "the file
+	// may or may not be modified depending on which edit runs first" but
+	// asserted NOTHING about the rollback. The whole point of a
+	// transaction is that on commit failure, ALL files MUST be left in
+	// their pre-transaction state. Whichever edit ran first, file1's
+	// content MUST be "content 1" (original) after rollback — anything
+	// else means rollback is broken. Pin that contract.
+	final1, readErr := os.ReadFile(file1)
+	require.NoError(t, readErr, "file1 must remain readable after rollback")
+	assert.Equal(t, "content 1", string(final1),
+		"transaction rollback must restore file1 to its pre-transaction content regardless of edit ordering")
 }
 
 // Test 10: Preview Generation
