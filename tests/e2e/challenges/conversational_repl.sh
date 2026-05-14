@@ -60,7 +60,20 @@ echo "  PASS: REPL banner emitted + /exit → 'Goodbye!' confirmed"
 # prompts to an LLM and prints responses — not a documentation-only
 # claim. Honest SKIP-OK when no provider key is available.
 echo "[4/4] Live REPL round-trip..."
-[ -f "$HOME/api_keys.sh" ] && source "$HOME/api_keys.sh" 2>/dev/null
+# Use the canonical loader which does ApiKey_<Provider> → <PROVIDER>_API_KEY
+# normalisation (round-41 readiness fix). The loader's auto-run block can
+# return non-zero when no api_keys.sh / .env exists; with `set -euo
+# pipefail` that would abort the script silently. Wrap in set +e / set -e
+# so a missing-keys env honestly hits the SKIP-OK below instead of dying.
+set +e
+if [ -f scripts/load_api_keys.sh ]; then
+    # shellcheck source=/dev/null
+    . scripts/load_api_keys.sh 2>/dev/null
+elif [ -f "$HOME/api_keys.sh" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/api_keys.sh" 2>/dev/null
+fi
+set -e
 if [ -z "${GROQ_API_KEY:-}" ] && [ -z "${OPENAI_API_KEY:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
     echo "  SKIP: no GROQ_API_KEY/OPENAI_API_KEY/ANTHROPIC_API_KEY in env — SKIP-OK: #env-no-llm-key"
     echo
