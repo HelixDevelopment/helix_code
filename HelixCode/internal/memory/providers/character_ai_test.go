@@ -2833,20 +2833,25 @@ func TestCharacterAIProvider_StatsConsistency(t *testing.T) {
 }
 
 func TestCharacterAIProvider_TimeoutContext(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form discarded the
+	// error with `_ = err` and a "May or may not error" comment, passing
+	// regardless of Health's behaviour under a cancelled context. Per
+	// the standalone Character.AI provider's Health implementation it
+	// returns the provider's HealthInfo synchronously from in-memory
+	// state — context cancellation does not abort it. Pin that documented
+	// contract: with a deadline-expired context, Health still returns a
+	// non-nil HealthInfo and no error (a future regression that started
+	// honouring the deadline would FAIL this test, forcing an explicit
+	// behaviour decision rather than silent passing).
 	provider := newInitializedCharacterAIProvider(t)
 
-	// Create context with very short timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
 	defer cancel()
+	time.Sleep(5 * time.Millisecond) // ensure deadline has elapsed
 
-	// Wait for timeout
-	time.Sleep(5 * time.Millisecond)
-
-	// Operations should still complete (simulation doesn't actually timeout)
-	// but context is cancelled
-	_, err := provider.Health(ctx)
-	// May or may not error depending on implementation
-	_ = err
+	info, err := provider.Health(ctx)
+	assert.NoError(t, err, "Health is in-memory and must not surface a deadline error")
+	assert.NotNil(t, info, "Health must return a non-nil HealthInfo even on a cancelled context")
 }
 
 func TestCharacterAIProvider_EmptyTextEmbedding(t *testing.T) {

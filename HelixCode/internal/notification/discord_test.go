@@ -344,16 +344,25 @@ func TestDiscordChannel_Send_ConcurrentRequests(t *testing.T) {
 }
 
 func TestDiscordChannel_Send_ContextCancellation(t *testing.T) {
-	// Create a server that delays
+	// Anti-bluff (CONST-035 / §11.9): the original form discarded the
+	// returned error with `_ = err` and a "may or may not occur" comment,
+	// passing regardless of Send's behaviour. The IMPLEMENTATION at
+	// internal/notification/engine.go:648 uses `http.Post(...)` which does
+	// NOT consult the context — so a cancelled ctx has no effect and the
+	// Send completes against a 204-returning mock server. Pin this
+	// CURRENT contract with explicit assertions; if a future commit
+	// promotes Send to http.NewRequestWithContext (the desired behaviour),
+	// THIS TEST WILL FAIL and force the contract-update decision to be
+	// explicit. That is the anti-bluff property: a green test under both
+	// behaviours is the original bluff; failing under the new behaviour
+	// is the honest signal.
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Just respond normally for this test
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
 
 	channel := NewDiscordChannel(server.URL)
 
-	// Create a cancelled context
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
@@ -363,12 +372,9 @@ func TestDiscordChannel_Send_ContextCancellation(t *testing.T) {
 		Type:    NotificationTypeInfo,
 	}
 
-	// Note: http.Post doesn't respect context cancellation directly
-	// This test demonstrates the pattern, even if the behavior varies
 	err := channel.Send(ctx, notification)
-	// The error may or may not occur depending on timing
-	// This test is more for coverage than behavior validation
-	_ = err
+	assert.NoError(t, err,
+		"current contract: Send uses http.Post which ignores ctx, so cancelled-ctx must NOT surface an error against a healthy webhook")
 }
 
 func TestDiscordChannel_Send_LargePayload(t *testing.T) {

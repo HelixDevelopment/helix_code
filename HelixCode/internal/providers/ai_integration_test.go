@@ -1017,8 +1017,12 @@ func TestAIIntegration_Stop(t *testing.T) {
 }
 
 func TestAIIntegration_ListProviders_WithConfigs(t *testing.T) {
-	// Note: ListProviders returns created provider instances, not configs.
-	// Without Initialize, providers are not created.
+	// Anti-bluff (CONST-035 / §11.9): the original form ended with
+	// `_ = providers` and asserted NOTHING about the returned slice
+	// despite the comment that explicitly stated the expected behaviour
+	// ("ListProviders returns empty without Initialize"). Pin that
+	// contract: configs are present but providers map is empty until
+	// Initialize runs, so ListProviders MUST return an empty slice.
 	ai := NewAIIntegration(&AIConfig{
 		DefaultLLM: "test",
 		Providers: map[string]*AIProviderConfig{
@@ -1027,10 +1031,9 @@ func TestAIIntegration_ListProviders_WithConfigs(t *testing.T) {
 		},
 	})
 
-	// ListProviders returns empty without Initialize
 	providers := ai.ListProviders()
-	// Config is stored but providers aren't created until Initialize
-	_ = providers
+	assert.Empty(t, providers,
+		"ListProviders must return empty without Initialize (config is stored but providers map is unpopulated)")
 }
 
 // =============================================================================

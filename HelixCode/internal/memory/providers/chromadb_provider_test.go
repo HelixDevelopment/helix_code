@@ -228,6 +228,15 @@ func TestChromaDBProvider_Store_Empty(t *testing.T) {
 }
 
 func TestChromaDBProvider_Store_DefaultCollection(t *testing.T) {
+	// Anti-bluff (CONST-035 / §11.9): the original form set
+	// usedDefaultCollection in the mock handler, discarded the Store
+	// result with `_ = provider.Store(ctx, data)`, and then discarded the
+	// flag with `_ = usedDefaultCollection // Used in test verification`
+	// — passing even if Store never hit the mock server. The test's
+	// stated invariant ("VectorData without an explicit Collection MUST
+	// route to /api/v1/collections/default/add") was checked only by
+	// human reader, not by assertion. Now: require Store to succeed AND
+	// assert the default-collection path was actually exercised.
 	usedDefaultCollection := false
 	server := createMockChromaServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/collections/default/add" {
@@ -241,8 +250,8 @@ func TestChromaDBProvider_Store_DefaultCollection(t *testing.T) {
 	provider := createTestChromaDBProviderWithURL(t, server.URL)
 	ctx := context.Background()
 
-	_ = provider.Initialize(ctx, nil)
-	_ = provider.Start(ctx)
+	require.NoError(t, provider.Initialize(ctx, nil), "Initialize must succeed against mock server")
+	require.NoError(t, provider.Start(ctx), "Start must succeed against mock server")
 
 	data := []*VectorData{
 		{
@@ -252,9 +261,9 @@ func TestChromaDBProvider_Store_DefaultCollection(t *testing.T) {
 		},
 	}
 
-	_ = provider.Store(ctx, data)
-	// The request should have been made to the default collection
-	_ = usedDefaultCollection // Used in test verification
+	require.NoError(t, provider.Store(ctx, data), "Store with default-collection data must succeed")
+	assert.True(t, usedDefaultCollection,
+		"Store with no explicit Collection must route to /api/v1/collections/default/add")
 }
 
 // ========================================
