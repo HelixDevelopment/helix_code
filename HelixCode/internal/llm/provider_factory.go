@@ -109,6 +109,14 @@ func firstNonEmpty(args ...string) string {
 // canonical cloud ProviderType. Returns a non-sentinel error for unknown
 // values so callers can distinguish "no source" (ErrNoProviderConfigured)
 // from "user typed garbage".
+//
+// Anti-bluff (CONST-035): if the user typed a name that IS a known
+// provider type but NOT one of F12's four direct-cloud backends (e.g.
+// "groq", "openai", "gemini", "deepseek", "xai", "openrouter",
+// "mistral", "ollama", "llamacpp"), surface a directed error that
+// names the right path (server-mediated provider manager) rather than
+// the generic "unknown cloud provider" message — which previously
+// implied those providers aren't supported at all.
 func parseCloudProviderType(raw string) (ProviderType, error) {
 	norm := strings.ToLower(strings.TrimSpace(raw))
 	switch norm {
@@ -120,9 +128,22 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return ProviderTypeVertexAI, nil
 	case "azure", "azure-openai", "azureopenai":
 		return ProviderTypeAzure, nil
+	case "groq", "openai", "gemini", "google", "deepseek", "xai", "grok",
+		"openrouter", "mistral", "qwen", "copilot", "github-copilot",
+		"ollama", "llamacpp", "llama-cpp", "llama.cpp", "vllm",
+		"localai", "lmstudio":
+		return "", fmt.Errorf(
+			"provider %q is supported by HelixCode but not via the F12 direct-cloud-provider CLI path "+
+				"(supported direct-cloud backends: %s). "+
+				"Configure %q in HelixCode/config/config.yaml under providers: and access it via the HelixCode server "+
+				"(see docs/COMPLETE_HOWTO.md §4 'Configure additional providers'). "+
+				"The full provider list per CONST-039 is in docs/llms_verifier/.",
+			raw, supportedCloudProviderList(), raw)
 	default:
 		return "", fmt.Errorf(
-			"unknown cloud provider %q (supported: %s)",
+			"unknown provider %q (F12 direct-cloud supports: %s; "+
+				"the full HelixCode provider catalogue per CONST-039 is accessed via the server-side provider manager — "+
+				"see docs/COMPLETE_HOWTO.md)",
 			raw, supportedCloudProviderList())
 	}
 }
