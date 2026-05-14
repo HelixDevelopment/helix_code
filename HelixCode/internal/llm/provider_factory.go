@@ -88,6 +88,10 @@ func NewCloudProvider(t ProviderType, cfg ProviderConfigEntry) (Provider, error)
 		return NewVertexAIProvider(cfg)
 	case ProviderTypeAzure:
 		return NewAzureProvider(cfg)
+	case ProviderTypeGroq:
+		return NewGroqProvider(cfg)
+	case ProviderTypeOpenAI:
+		return NewOpenAIProvider(cfg)
 	default:
 		return nil, fmt.Errorf(
 			"NewCloudProvider: %q is not a cloud provider type (supported: %s)",
@@ -128,7 +132,11 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return ProviderTypeVertexAI, nil
 	case "azure", "azure-openai", "azureopenai":
 		return ProviderTypeAzure, nil
-	case "groq", "openai", "gemini", "google", "deepseek", "xai", "grok",
+	case "groq":
+		return ProviderTypeGroq, nil
+	case "openai", "open-ai":
+		return ProviderTypeOpenAI, nil
+	case "gemini", "google", "deepseek", "xai", "grok",
 		"openrouter", "mistral", "qwen", "copilot", "github-copilot",
 		"ollama", "llamacpp", "llama-cpp", "llama.cpp", "vllm",
 		"localai", "lmstudio":
@@ -149,9 +157,15 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 }
 
 // supportedCloudProviderList returns a stable, human-readable list of the
-// four canonical cloud provider names for error messages.
+// canonical direct-cloud-provider names for error messages. Expanded from
+// the original 4 (anthropic/bedrock/vertexai/azure) to also cover Groq +
+// OpenAI in round-41-continued, closing the most-common readiness gap
+// for users who expect modern-CLI-agent parity (just plug in API key
+// and go) with the two most-used cloud providers beyond the original
+// four. Other providers still require server-mediated config.yaml setup
+// — see ZERO_BLUFF_USER_MANUAL.md §2.4 Path A vs Path B.
 func supportedCloudProviderList() string {
-	return "anthropic, bedrock, vertexai, azure"
+	return "anthropic, bedrock, vertexai, azure, groq, openai"
 }
 
 // ParseCloudProviderType is the exported counterpart of parseCloudProviderType.

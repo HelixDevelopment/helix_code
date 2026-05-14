@@ -120,32 +120,38 @@ revision of this doc claimed `./bin/cli --provider ollama` worked
 directly; in reality only 4 providers route through the F12 CLI
 shortcut, and the others go through the server-mediated path):
 
-**Path A — F12 direct-cloud CLI shortcut** (4 providers only):
+**Path A — F12 direct-cloud CLI shortcut** (6 providers as of round 41 final):
 
 ```bash
 ./bin/cli --provider anthropic --model claude-3-5-sonnet
 ./bin/cli --provider bedrock   --model anthropic.claude-3-5-sonnet
 ./bin/cli --provider vertexai  --model gemini-1.5-pro
 ./bin/cli --provider azure     --model gpt-4o
+./bin/cli --provider groq      --model llama-3.3-70b-versatile
+./bin/cli --provider openai    --model gpt-4o
 ```
 
-These four read credentials from the user's `~/.config/helixcode/`
-or `HELIX_LLM_PROVIDER` env. They construct the provider directly
-in the CLI process.
+These six read credentials from the user's `~/.config/helixcode/`
+or `HELIX_LLM_PROVIDER` env (e.g. `GROQ_API_KEY`, `OPENAI_API_KEY`).
+They construct the provider directly in the CLI process — no
+server required. This is the **just-plug-in-an-API-key-and-go** path
+for the most-used cloud providers, giving HelixCode CLI parity with
+modern single-binary CLI agents (Claude Code, Aider, Cline) for
+these six.
 
-**Path B — server-mediated (the other 11+ providers)**:
+**Path B — server-mediated (the other 9+ providers)**:
 
-For Groq, OpenAI, Gemini, DeepSeek, xAI, OpenRouter, Mistral, Qwen,
-Copilot, Ollama, llama.cpp, vLLM, LocalAI, LM Studio: add an entry
-under `llm.providers:` in `HelixCode/config/config.yaml`, start the
+For Gemini, DeepSeek, xAI, OpenRouter, Mistral, Qwen, Copilot,
+Ollama, llama.cpp, vLLM, LocalAI, LM Studio: add an entry under
+`llm.providers:` in `HelixCode/config/config.yaml`, start the
 HelixCode server (`make build && ./bin/helixcode server`), and
 access the provider via the server's REST API or via the CLI's
 `-server-url` flag pointing at the server. The server hosts the
 provider manager (CONST-039) and exposes a unified API.
 
-A `./bin/cli --provider groq` invocation now returns a directed
-error (since round 41) that names this path explicitly — no more
-ambiguous "unknown cloud provider" message.
+A `./bin/cli --provider <Path-B-provider>` invocation surfaces a
+directed error (since round 41) that names this path explicitly —
+no more ambiguous "unknown cloud provider" message.
 
 List available models (queries every configured provider — no hardcoding per CONST-036):
 
