@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -145,8 +146,16 @@ func TestMultiProvider_FactoryConstructsAllFour(t *testing.T) {
 				return
 			}
 			require.NotNil(t, provider, "non-nil error implies non-nil provider")
-			// Provider interface compliance: GetModels must not panic.
-			_ = provider.GetModels()
+			// Anti-bluff (CONST-035 / §11.9): the original form discarded
+			// the result with `_ = provider.GetModels()` so the test
+			// passed even if GetModels returned nil for a synthetic-cred
+			// provider (which would crash callers iterating the slice).
+			// Pin the documented contract: GetModels MUST return a
+			// non-nil slice (possibly empty for unauthenticated state)
+			// so callers can `range` it safely without a nil-deref. A
+			// regression that returned nil would now FAIL.
+			models := provider.GetModels()
+			assert.NotNil(t, models, "GetModels must return a non-nil slice (possibly empty) so callers can iterate it safely")
 		})
 	}
 }
