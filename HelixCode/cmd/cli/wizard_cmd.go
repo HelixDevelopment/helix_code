@@ -98,10 +98,14 @@ func newWizardCmd(deps wizardCmdDeps) *cobra.Command {
 			})
 		},
 	}
-	cmd.Flags().StringVar(&providerFlag, "provider", "", "non-interactive: provider type (anthropic|bedrock|vertexai|azure)")
-	cmd.Flags().StringVar(&apiKeyFlag, "api-key", "", "API key (anthropic, azure)")
+	cmd.Flags().StringVar(&providerFlag, "provider", "",
+		"non-interactive: provider type "+
+			"(anthropic|bedrock|vertexai|azure|groq|openai|gemini|openrouter|xai|qwen|copilot|ollama|llamacpp)")
+	cmd.Flags().StringVar(&apiKeyFlag, "api-key", "",
+		"API key (anthropic, azure, groq, openai, gemini, openrouter, xai, qwen)")
 	cmd.Flags().StringVar(&regionFlag, "region", "", "AWS region (bedrock)")
-	cmd.Flags().StringVar(&endpointFlag, "endpoint", "", "endpoint URL (azure)")
+	cmd.Flags().StringVar(&endpointFlag, "endpoint", "",
+		"endpoint URL (azure | ollama | llamacpp — defaults to provider-standard localhost)")
 	cmd.Flags().StringVar(&projectFlag, "project", "", "GCP project ID (vertexai)")
 	cmd.Flags().StringVar(&locationFlag, "location", "", "GCP location (vertexai)")
 	cmd.Flags().StringVar(&apiVersionFlag, "api-version", "", "API version (azure)")
@@ -259,6 +263,36 @@ func buildNonInteractiveResult(flags wizardCmdFlags, configPath string) (*llm.Wi
 			params["api_version"] = flags.APIVersion
 		} else {
 			params["api_version"] = "2024-08-01-preview"
+		}
+	case llm.ProviderTypeGroq, llm.ProviderTypeOpenAI, llm.ProviderTypeGemini,
+		llm.ProviderTypeOpenRouter, llm.ProviderTypeXAI, llm.ProviderTypeQwen:
+		// Round 41: these 6 providers extended F12 with just-API-key auth.
+		// Anti-bluff (CONST-035): the wizard accepts them in --provider but
+		// requires --api-key for the non-interactive path. The constructors
+		// also fall back to <PROVIDER>_API_KEY env var at construction time
+		// (round-41 env-var fallback fix), so a user with the env var set
+		// can skip --api-key here too if they prefer that path — but the
+		// wizard's job is to PERSIST to llm.yaml, so we require it.
+		if strings.TrimSpace(flags.APIKey) == "" {
+			return nil, fmt.Errorf("wizard: --api-key is required for %s", ptype)
+		}
+		entry.APIKey = flags.APIKey
+		params["api_key"] = flags.APIKey
+	case llm.ProviderTypeCopilot:
+		// Copilot uses GITHUB_TOKEN (or gh CLI auth) — not a typical API key.
+		// If --api-key supplied, use it as the GitHub token; otherwise the
+		// provider's constructor will resolve via gh CLI / GITHUB_TOKEN env.
+		if strings.TrimSpace(flags.APIKey) != "" {
+			entry.APIKey = flags.APIKey
+			params["github_token"] = flags.APIKey
+		}
+	case llm.ProviderTypeOllama, llm.ProviderTypeLlamaCpp:
+		// Local providers — no API key. Optional --endpoint overrides
+		// the localhost default (11434 for Ollama, configurable for
+		// llama.cpp). No required flags.
+		if strings.TrimSpace(flags.Endpoint) != "" {
+			entry.Endpoint = flags.Endpoint
+			params["endpoint"] = flags.Endpoint
 		}
 	}
 
