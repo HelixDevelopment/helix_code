@@ -52,6 +52,12 @@ GPTME_SCRIPTS=(
     # against the mistborn-distributed stack with captured wire evidence.
     # SKIPs gracefully when mistborn tunnels (:15432) aren't bound.
     "tests/e2e/challenges/helix_qa_live_anti_bluff.sh"
+    # Conversational REPL anti-bluff Challenge (round 41) — verifies the
+    # interactive REPL accepts multi-word LLM prompts (regression-guard
+    # against the round-pre-41 fmt.Scanln-one-word-truncation form) and
+    # exercises a live LLM round-trip with paired structural + runtime
+    # gates. Honest SKIP-OK when no provider key in env.
+    "tests/e2e/challenges/conversational_repl.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
