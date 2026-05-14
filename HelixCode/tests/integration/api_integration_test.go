@@ -197,11 +197,16 @@ func TestAuthLifecycleIntegration(t *testing.T) {
 		mockDB.On("QueryRow", ctx, mockDB.AnyString(), mockDB.AnyArgs()).Return(mockRow).Once()
 		mockDB.MockExecSuccess(1) // For session creation
 
-		// Note: Login will fail due to password hash mismatch, but tests integration
+		// Anti-bluff (CONST-035 / §11.9): the original form discarded
+		// loginErr with `_ = loginErr` and a "We expect this to fail in
+		// mock environment" comment, but didn't ASSERT the failure. A
+		// regression where Login spuriously succeeded against the mocked
+		// hash would have gone unnoticed. The mock returns a synthetic
+		// bcrypt hash that does NOT match "pass123" — Login MUST fail
+		// with a credential/password-related error. Pin that contract.
 		_, _, loginErr := authService.Login(ctx, "lifecycle_user", "pass123", "api", "127.0.0.1", "test-agent")
-
-		// We expect this to fail in mock environment
-		_ = loginErr
+		require.Error(t, loginErr,
+			"Login must fail against a mocked bcrypt hash that doesn't correspond to the supplied password")
 	}
 
 	// Step 3: Generate JWT (if we have user)
