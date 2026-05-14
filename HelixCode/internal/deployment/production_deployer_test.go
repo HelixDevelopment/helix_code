@@ -1864,11 +1864,24 @@ func TestPhaseNotifications(t *testing.T) {
 
 
 // TestMain creates the test binary file required by most tests in this package
+//
+// Anti-bluff (CONST-035 / §11.9): the prior form silently discarded the
+// os.WriteFile error with `_ = …` and the os.Remove error. If WriteFile
+// failed (disk full, /tmp not writable, permissions), the whole package's
+// tests then ran against a MISSING binary and any test that probed the
+// fixture would either skip silently or fail with a confusing "file not
+// found" error far from the actual setup failure. Honest TestMain must
+// fail loudly at setup time, before any test runs.
 func TestMain(m *testing.M) {
 	binaryPath := "/tmp/helixcode-test-binary"
 	// Write a 2MB file so throughput calculation returns > 0
-	_ = os.WriteFile(binaryPath, make([]byte, 2*1024*1024), 0755)
+	if err := os.WriteFile(binaryPath, make([]byte, 2*1024*1024), 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "TestMain setup failed: %v\n", err)
+		os.Exit(2)
+	}
 	code := m.Run()
-	_ = os.Remove(binaryPath)
+	if err := os.Remove(binaryPath); err != nil && !os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "TestMain teardown warning: %v\n", err)
+	}
 	os.Exit(code)
 }
