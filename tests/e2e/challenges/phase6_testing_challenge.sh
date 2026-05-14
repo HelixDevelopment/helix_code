@@ -20,9 +20,15 @@ echo "[2/5] Checking agent test coverage..."
 go test ./internal/agent/... -cover -timeout 15s 2>&1 | grep -q "coverage:" || (echo "FAIL: Agent coverage check failed"; exit 1)
 echo "  PASS: Agent coverage check passed"
 
-# Test 3: Run all unit tests (no mocks above unit level)
+# Test 3: Run all unit tests (no mocks above unit level) — exit-code based (CONST-035 anti-bluff)
+# Note: this script already cd'd to HelixCode at the top; do NOT cd again
+# (the prior form `cd HelixCode && go test ... | grep -q FAIL` silently
+# passed because the second `cd HelixCode` failed (already there) and
+# the && shortcut skipped the test entirely — the grep then saw no
+# input, returned non-zero, and the `&& exit 1` never fired. Double
+# bluff: failed cd masked by failed grep, all reported as PASS.)
 echo "[3/5] Running unit tests..."
-cd HelixCode && go test ./internal/auth/... ./internal/agent/... ./internal/config/... -short -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Unit tests failed"; exit 1)
+go test ./internal/auth/... ./internal/agent/... ./internal/config/... -short -timeout 30s || { echo "FAIL: Unit tests failed"; exit 1; }
 echo "  PASS: Unit tests pass"
 
 # Test 4: Verify no 'TODO implement' in production code

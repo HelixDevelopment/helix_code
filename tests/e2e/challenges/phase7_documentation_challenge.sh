@@ -23,9 +23,9 @@ echo "[3/6] Checking deployment package..."
 cd HelixCode; go build ./internal/deployment/... || (echo "FAIL: Deployment build failed"; exit 1)
 echo "  PASS: Deployment package builds"
 
-# Test 4: Run deployment tests
+# Test 4: Run deployment tests — exit-code based (CONST-035 anti-bluff)
 echo "[4/6] Running deployment tests..."
-go test ./internal/deployment/... -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Deployment tests failed"; exit 1)
+go test ./internal/deployment/... -timeout 30s || { echo "FAIL: Deployment tests failed"; exit 1; }
 echo "  PASS: Deployment tests pass"
 
 # Test 5: Verify master action plan exists

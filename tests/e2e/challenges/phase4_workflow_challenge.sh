@@ -16,14 +16,14 @@ echo "[2/4] Checking session package..."
 go build ./internal/session/... || (echo "FAIL: Session build failed"; exit 1)
 echo "  PASS: Session package builds"
 
-# Test 3: Run workflow tests
+# Test 3: Run workflow tests — exit-code based (CONST-035 anti-bluff: see phase2 for rationale)
 echo "[3/4] Running workflow tests..."
-go test ./internal/workflow/... -timeout 30s 2>&1 | grep -q "FAIL" && (echo "FAIL: Workflow tests failed"; exit 1)
+go test ./internal/workflow/... -timeout 30s || { echo "FAIL: Workflow tests failed"; exit 1; }
 echo "  PASS: Workflow tests pass"
 
 # Test 4: Run session tests
 echo "[4/4] Running session tests..."
-go test ./internal/session/... -timeout 15s 2>&1 | grep -q "FAIL" && (echo "FAIL: Session tests failed"; exit 1)
+go test ./internal/session/... -timeout 15s || { echo "FAIL: Session tests failed"; exit 1; }
 echo "  PASS: Session tests pass"
 
 echo ""
