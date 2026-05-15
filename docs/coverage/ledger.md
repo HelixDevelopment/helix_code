@@ -52,6 +52,13 @@ capturing evidence — the generator never auto-promotes.
 
 <!-- BEGIN preserved-rollup -->
 
+The per-feature row body is preserved from the prior hand-authored
+edition (close-out¹⁴) where present; new features get inserted as
+`UNCONFIRMED:` across all 6 invariants. Re-mark cells by hand after
+capturing evidence — the generator never auto-promotes.
+
+<!-- BEGIN preserved-rollup -->
+
 For brevity the per-platform breakout is collapsed into a single row per
 feature; the **Platforms** column lists which platforms ship the feature.
 The CLI surface (F01–F12 F14–F25 F26–F30) is platform-agnostic Go and
@@ -90,6 +97,8 @@ flagged per-platform.
 | F28 Kilocode Refactoring | `/refactor rename/extract`, `/impact` | UNCONFIRMED: | UNCONFIRMED: | VERIFIED | UNCONFIRMED: | VERIFIED | PARTIAL | all platforms | Tree-sitter wired; no captured-evidence E2E. |
 | F29 RooCode Full Port | `/roo agent <task>` | UNCONFIRMED: | UNCONFIRMED: | VERIFIED | UNCONFIRMED: | VERIFIED | PARTIAL | all platforms | End-to-end agent flow needs Challenge. |
 | F30 Continue IDE | IDE companion integration | UNCONFIRMED: | UNCONFIRMED: | VERIFIED | UNCONFIRMED: | VERIFIED | PARTIAL | linux/mac/win + IDE | IDE-side install unverified. |
+
+<!-- END preserved-rollup -->
 
 <!-- END preserved-rollup -->
 
@@ -154,7 +163,7 @@ to tag the regeneration with a specific round (default: `mechanical-regeneration
 
 ## Honest gap inventory (mechanical signals)
 
-- **UNCONFIRMED: cells preserved:** 34 (from prior edition).
+- **UNCONFIRMED: cells preserved:** 35 (from prior edition).
   Promotions require captured-evidence per §11.4.2; the generator never promotes.
 - **Owned submodules with nested own-org chains:** 46 total references across all submodules.
   Each non-zero `CONST-051(C) layout` cell above is a tracked remediation.
@@ -166,4 +175,5 @@ to tag the regeneration with a specific round (default: `mechanical-regeneration
 |---|---|---|---|
 | 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹³ | First publication. Honest about UNCONFIRMED: cells. Closes Task #257 surface; generator script pending. |
 | 2026-05-15 | Claude Opus 4.7 | close-out-18-regen | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
+| 2026-05-15 | Claude Opus 4.7 | mechanical-regeneration | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
 | 2026-05-15 | Claude Opus 4.7 | mechanical-regeneration | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
