@@ -324,6 +324,7 @@ func TestCacheEnabled(t *testing.T) {
 	config := DefaultConfig()
 	config.CacheEnabled = true
 	rm, _ := NewRepoMap(tempDir, config)
+	t.Cleanup(func() { _ = rm.cache.Close() })
 
 	// First call - not cached
 	symbols1, err := rm.extractFileSymbols(testFile)
@@ -351,12 +352,13 @@ func TestInvalidateFile(t *testing.T) {
 	config := DefaultConfig()
 	config.CacheEnabled = true
 	rm, _ := NewRepoMap(tempDir, config)
+	t.Cleanup(func() { _ = rm.cache.Close() })
 
 	// Cache the file
 	rm.extractFileSymbols(testFile)
 
-	// Wait for async save to complete
-	time.Sleep(100 * time.Millisecond)
+	// Drain async save to disk
+	rm.cache.Wait()
 
 	// Invalidate
 	err := rm.InvalidateFile(testFile)
@@ -364,8 +366,8 @@ func TestInvalidateFile(t *testing.T) {
 		t.Fatalf("Failed to invalidate file: %v", err)
 	}
 
-	// Wait for async removal to complete
-	time.Sleep(100 * time.Millisecond)
+	// Drain async removal from disk
+	rm.cache.Wait()
 }
 
 func TestRefreshCache(t *testing.T) {
@@ -376,14 +378,12 @@ func TestRefreshCache(t *testing.T) {
 	config := DefaultConfig()
 	config.CacheEnabled = true
 	rm, _ := NewRepoMap(tempDir, config)
+	t.Cleanup(func() { _ = rm.cache.Close() })
 
 	err := rm.RefreshCache()
 	if err != nil {
 		t.Fatalf("RefreshCache failed: %v", err)
 	}
-
-	// Wait for async save operations to complete
-	time.Sleep(100 * time.Millisecond)
 }
 
 func TestRefreshCacheDisabled(t *testing.T) {

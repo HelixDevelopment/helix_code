@@ -19,12 +19,18 @@ func init() {
 	gob.Register(Symbol{})
 }
 
-// RepoCache provides disk-based caching for parsed symbols
+// RepoCache provides disk-based caching for parsed symbols.
+//
+// Async disk persistence is tracked via writes — callers MUST invoke
+// Close (or Wait) before disposing the cache directory, otherwise
+// fire-and-forget save goroutines may still be writing into a doomed
+// directory at process/test exit.
 type RepoCache struct {
 	cacheDir string
 	ttl      time.Duration
 	mu       sync.RWMutex
 	entries  map[string]*cacheEntry
+	writes   sync.WaitGroup
 }
 
 // cacheEntry represents a cached item with metadata
@@ -90,8 +96,10 @@ func (rc *RepoCache) Set(key string, value interface{}) {
 
 	rc.entries[key] = entry
 
-	// Persist to disk asynchronously
+	// Persist to disk asynchronously; tracked so Close can drain.
+	rc.writes.Add(1)
 	go func() {
+		defer rc.writes.Done()
 		if err := rc.saveToDisk(key, entry); err != nil {
 			log.Printf("Warning: failed to save cache entry: %v", err)
 		}
@@ -105,8 +113,10 @@ func (rc *RepoCache) Invalidate(key string) {
 
 	delete(rc.entries, key)
 
-	// Remove from disk
+	// Remove from disk; tracked so Close can drain.
+	rc.writes.Add(1)
 	go func() {
+		defer rc.writes.Done()
 		filename := rc.getCacheFilename(key)
 		os.Remove(filename)
 	}()
@@ -121,6 +131,24 @@ func (rc *RepoCache) InvalidateAll() error {
 
 	// Remove all cache files
 	return os.RemoveAll(rc.cacheDir)
+}
+
+// Wait blocks until all in-flight async disk writes spawned by Set,
+// Invalidate, or Cleanup have completed. Safe to call concurrently
+// with further Set/Invalidate/Cleanup calls — those add to the
+// WaitGroup before returning, so a Wait that completes only reflects
+// writes already initiated when Wait began.
+func (rc *RepoCache) Wait() {
+	rc.writes.Wait()
+}
+
+// Close drains all pending async disk writes. Callers MUST invoke
+// Close before disposing the cache directory (e.g. at process
+// shutdown or in tests using t.TempDir) to avoid the leaked-goroutine
+// vs. directory-removal race that silently drops persistence.
+func (rc *RepoCache) Close() error {
+	rc.writes.Wait()
+	return nil
 }
 
 // Size returns the number of cached entries
@@ -144,8 +172,10 @@ func (rc *RepoCache) Cleanup() int {
 			delete(rc.entries, key)
 			removed++
 
-			// Remove from disk
+			// Remove from disk; tracked so Close can drain.
+			rc.writes.Add(1)
 			go func(k string) {
+				defer rc.writes.Done()
 				filename := rc.getCacheFilename(k)
 				os.Remove(filename)
 			}(key)
