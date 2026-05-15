@@ -230,7 +230,7 @@ ctxs, _ := rm.GetOptimalContext("implement user auth", changedFiles)
 
 Supported languages: Go, Python, JavaScript/TypeScript, Java, C/C++, Rust, Ruby. Symbols: functions, methods, classes, structs, interfaces, enums, traits, modules, constants.
 
-`FileRanker` scores by name match, doc content, recency, import relationships. `RepoCache` provides TTL-bounded caching.
+`FileRanker` scores by name match, doc content, recency, import relationships. `RepoCache` provides TTL-bounded caching with async disk persistence; callers MUST invoke `(*RepoCache).Close()` (or `Wait()`) before disposing the cache directory to drain in-flight writes — otherwise fire-and-forget save goroutines may still be writing into a doomed directory at process/test exit.
 
 ## 12. `internal/quality`
 
