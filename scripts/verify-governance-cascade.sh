@@ -9,6 +9,9 @@ CONST050_ANCHOR="CONST-050"
 CONST051_ANCHOR="CONST-051"
 CONST052_ANCHOR="CONST-052"
 CONST053_ANCHOR="CONST-053"
+CONST054_ANCHOR="CONST-054"
+CONST055_ANCHOR="CONST-055"
+CONST056_ANCHOR="CONST-056"
 FAILURES=0
 OWNED_FILE="$ROOT/docs/improvements/submodule_owned.txt"
 THIRD_PARTY_FILE="$ROOT/docs/improvements/submodule_third_party.txt"
@@ -48,8 +51,11 @@ if [ -f "$OWNED_FILE" ]; then
       grep -q "$CONST051_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-051"
       grep -q "$CONST052_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-052"
       grep -q "$CONST053_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-053"
+      grep -q "$CONST054_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-054"
+      grep -q "$CONST055_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-055"
+      grep -q "$CONST056_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-056"
       if [ -z "$missing_anchors" ]; then
-        echo "PASS: $sm/$f (§11.9 + CONST-047/048/049/050/051/052/053)"
+        echo "PASS: $sm/$f (§11.9 + CONST-047..056)"
       else
         echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
       fi
