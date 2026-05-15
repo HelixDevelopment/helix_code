@@ -1521,6 +1521,122 @@ func printGenerationStats(resp *llm.LLMResponse) {
 	fmt.Println()
 }
 
+// expandAtMentions scans `*prompt` for `@<path>` tokens and, for each
+// token that resolves to a readable file on disk, appends a context
+// block at the end of the prompt of the form:
+//
+//	<attached_files>
+//	<file path="path/to/file">
+//	... content ...
+//	</file>
+//	...
+//	</attached_files>
+//
+// Modern-CLI-agent parity feature (Claude Code, Cursor, Aider).
+// Returns the list of resolved paths so the REPL can surface them
+// to the user. Tokens that don't resolve to a file stay verbatim in
+// the prompt — the LLM sees them as-is. Per-file size cap is 256 KiB
+// to keep prompts within typical context budgets; oversized files
+// are listed with a `(skipped: too large)` note but not embedded.
+//
+// CONST-035 anti-bluff: this function never silently invents content
+// for a missing file. Every attached path corresponds to a real file
+// read at runtime.
+func expandAtMentions(prompt *string) []string {
+	if prompt == nil || *prompt == "" {
+		return nil
+	}
+	const maxFileBytes = 256 * 1024
+	tokens := atMentionTokens(*prompt)
+	if len(tokens) == 0 {
+		return nil
+	}
+	attached := make([]string, 0, len(tokens))
+	var blocks []string
+	seen := make(map[string]bool, len(tokens))
+	for _, tok := range tokens {
+		path := strings.TrimPrefix(tok, "@")
+		if seen[path] {
+			continue
+		}
+		seen[path] = true
+		info, err := os.Stat(path)
+		if err != nil || info.IsDir() {
+			continue
+		}
+		if info.Size() > maxFileBytes {
+			blocks = append(blocks, fmt.Sprintf(
+				`<file path=%q size_bytes=%d>%s</file>`,
+				path, info.Size(),
+				"... [skipped: file exceeds 256 KiB context cap; show a subset with `head` / `grep` first]",
+			))
+			attached = append(attached, path+" (skipped: too large)")
+			continue
+		}
+		body, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		blocks = append(blocks, fmt.Sprintf(
+			"<file path=%q>\n%s\n</file>",
+			path, string(body),
+		))
+		attached = append(attached, path)
+	}
+	if len(blocks) == 0 {
+		return nil
+	}
+	*prompt = *prompt + "\n\n<attached_files>\n" + strings.Join(blocks, "\n") + "\n</attached_files>"
+	return attached
+}
+
+// atMentionTokens extracts `@<token>` mentions from text. A token is
+// a maximal run of non-whitespace characters after `@`, stripped of
+// trailing punctuation (comma, period, semicolon, colon, close
+// paren/bracket/brace, quote) that's commonly attached to a path in
+// prose but isn't part of the path itself.
+//
+// Tokens like `@README.md` capture the trailing `.md`; tokens like
+// `@docs/file.go.` strip the trailing dot. Tokens shorter than 2
+// chars after `@` are ignored (avoids matching e.g. `@`-as-pronoun).
+func atMentionTokens(text string) []string {
+	var tokens []string
+	for i := 0; i < len(text); i++ {
+		if text[i] != '@' {
+			continue
+		}
+		// `@` must be at start-of-text or NOT preceded by an
+		// identifier-character (letter/digit/underscore/dot), so we
+		// don't pick up emails like `user@host` or struct-tag forms.
+		// Punctuation like `(` or `,` is fine — `(@path)` should match.
+		if i > 0 {
+			c := text[i-1]
+			isIdent := (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+				(c >= '0' && c <= '9') || c == '_' || c == '.'
+			if isIdent {
+				continue
+			}
+		}
+		end := i + 1
+		for end < len(text) {
+			c := text[end]
+			if c == ' ' || c == '\t' || c == '\n' || c == '\r' {
+				break
+			}
+			end++
+		}
+		tok := text[i:end]
+		// Strip trailing prose punctuation.
+		tok = strings.TrimRight(tok, ".,;:)]}\"'!?")
+		if len(tok) < 3 { // `@` + ≥2 chars
+			continue
+		}
+		tokens = append(tokens, tok)
+		i = end - 1
+	}
+	return tokens
+}
+
 // streamToRenderer pumps LLM streaming chunks from ch through the supplied
 // Renderer using the Begin -> WriteToken... -> Commit token-streaming flow
 // (P1-F18 spec §4.1, §11.6).
@@ -1779,7 +1895,20 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			continue
 		}
 
-		conversation = append(conversation, llm.Message{Role: "user", Content: input})
+		// @-file mentions (modern-CLI-agent parity with Claude Code,
+		// Cursor, Aider). The user types `@path/to/file` anywhere in
+		// the prompt; we resolve each token to a file on disk and
+		// attach its content as a context block at the end of the
+		// prompt. Tokens that don't resolve to a file stay verbatim
+		// (no scary error — the LLM sees them as-is).
+		promptToSend := input
+		if attached := expandAtMentions(&promptToSend); len(attached) > 0 {
+			for _, p := range attached {
+				fmt.Printf("  📎 attached: %s\n", p)
+			}
+		}
+
+		conversation = append(conversation, llm.Message{Role: "user", Content: promptToSend})
 
 		modelName := ""
 		if models := c.llmProvider.GetModels(); len(models) > 0 {

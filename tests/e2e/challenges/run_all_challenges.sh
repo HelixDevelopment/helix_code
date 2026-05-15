@@ -58,6 +58,13 @@ GPTME_SCRIPTS=(
     # exercises a live LLM round-trip with paired structural + runtime
     # gates. Honest SKIP-OK when no provider key in env.
     "tests/e2e/challenges/conversational_repl.sh"
+    # @-file-mention anti-bluff Challenge (round 41) — verifies the
+    # REPL recognises `@<path>` tokens, attaches the file content to
+    # the prompt sent to the LLM, surfaces the 📎-marker to the user,
+    # and the LLM actually receives + quotes back a unique sentinel
+    # from the file (proving the attachment isn't a bluff). Also
+    # proves non-existent @-mentions stay verbatim with no crash.
+    "tests/e2e/challenges/at_mention.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
