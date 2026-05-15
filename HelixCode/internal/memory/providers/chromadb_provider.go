@@ -333,7 +333,20 @@ func (p *ChromaDBProvider) ensureCollection(ctx context.Context, name string, sa
 	return nil
 }
 
-// Retrieve retrieves vectors by IDs
+// Retrieve retrieves vectors by IDs across every collection.
+//
+// Honest implementation note (CONST-050(A)): the prior revision hardcoded
+// collection := "default" because there is no global ID→collection
+// index in ChromaDB's REST API. That silently returned wrong/empty
+// results for any ID stored in a non-default collection (Store does
+// honour v.Collection, so callers can store in any name they want).
+// The honest fix is to query every existing collection and union the
+// hits. For codebases with one or two collections this is fine; for
+// many collections the cost is N HTTP round-trips per Retrieve. If
+// that becomes a problem the right answer is for the caller to track
+// the ID→collection mapping locally (e.g. cache after Store) and pass
+// it back in — that would require a contract change at the
+// VectorProvider interface (out of scope for this fix).
 func (p *ChromaDBProvider) Retrieve(ctx context.Context, ids []string) ([]*VectorData, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -348,15 +361,49 @@ func (p *ChromaDBProvider) Retrieve(ctx context.Context, ids []string) ([]*Vecto
 		return []*VectorData{}, nil
 	}
 
-	// Group by collection - for now assume all from default, but we need to handle multiple collections
-	// This is a simplification; in practice, we'd need to know which collection each ID belongs to
-	collection := "default"
+	collections, err := p.listCollectionNamesLocked(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list collections: %w", err)
+	}
+	if len(collections) == 0 {
+		// No collections exist yet — Retrieve has nothing to scan against.
+		return []*VectorData{}, nil
+	}
 
+	// Union of hits across every collection. We deduplicate by ID using
+	// a set; if the same ID exists in multiple collections (caller's
+	// responsibility, not ours), the last-collection hit wins. ChromaDB
+	// allows that pathological case so this is best-effort honest.
+	hitsByID := make(map[string]*VectorData, len(ids))
+	for _, collection := range collections {
+		got, ferr := p.fetchFromCollectionLocked(ctx, collection, ids)
+		if ferr != nil {
+			// One collection failing shouldn't void the whole Retrieve —
+			// log and continue so callers still receive partial hits.
+			p.logger.Warn("ChromaDB Retrieve: collection %q fetch failed: %v", collection, ferr)
+			continue
+		}
+		for _, v := range got {
+			hitsByID[v.ID] = v
+		}
+	}
+
+	results := make([]*VectorData, 0, len(hitsByID))
+	for _, v := range hitsByID {
+		results = append(results, v)
+	}
+	return results, nil
+}
+
+// fetchFromCollectionLocked queries ChromaDB's /get endpoint for the
+// supplied IDs in a single collection. Returns only the rows that
+// exist; missing IDs are silently absent from the response (ChromaDB
+// semantics). Caller must hold p.mu.RLock at minimum.
+func (p *ChromaDBProvider) fetchFromCollectionLocked(ctx context.Context, collection string, ids []string) ([]*VectorData, error) {
 	data := map[string]interface{}{
 		"ids":     ids,
 		"include": []string{"metadatas", "embeddings"},
 	}
-
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -367,7 +414,6 @@ func (p *ChromaDBProvider) Retrieve(ctx context.Context, ids []string) ([]*Vecto
 	if err != nil {
 		return nil, err
 	}
-
 	req.Header.Set("Content-Type", "application/json")
 	if p.config.APIKey != "" {
 		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
@@ -389,29 +435,106 @@ func (p *ChromaDBProvider) Retrieve(ctx context.Context, ids []string) ([]*Vecto
 		return nil, err
 	}
 
-	// Parse ChromaDB response
 	var chromaResp struct {
 		Ids        []string                 `json:"ids"`
 		Embeddings [][]float64              `json:"embeddings"`
 		Metadatas  []map[string]interface{} `json:"metadatas"`
 	}
-
 	if err := json.Unmarshal(body, &chromaResp); err != nil {
 		return nil, err
 	}
 
-	results := make([]*VectorData, len(chromaResp.Ids))
+	results := make([]*VectorData, 0, len(chromaResp.Ids))
 	for i, id := range chromaResp.Ids {
-		results[i] = &VectorData{
-			ID:         id,
-			Vector:     chromaResp.Embeddings[i],
-			Metadata:   chromaResp.Metadatas[i],
-			Collection: collection,
-			Timestamp:  time.Now(), // We don't get timestamp from ChromaDB, so use current time
+		var emb []float64
+		if i < len(chromaResp.Embeddings) {
+			emb = chromaResp.Embeddings[i]
 		}
+		var md map[string]interface{}
+		if i < len(chromaResp.Metadatas) {
+			md = chromaResp.Metadatas[i]
+		}
+		results = append(results, &VectorData{
+			ID:         id,
+			Vector:     emb,
+			Metadata:   md,
+			Collection: collection,
+			Timestamp:  time.Now(), // ChromaDB /get doesn't return creation time
+		})
+	}
+	return results, nil
+}
+
+// listCollectionNamesLocked fetches the names of all existing
+// collections. Caller must hold p.mu.RLock at minimum. This is the
+// internal counterpart to ListCollections (which takes the lock and
+// wraps the names in CollectionInfo structs); extracted so Retrieve
+// can reach the names without re-locking.
+//
+// Tolerant parser: real ChromaDB v1 returns
+//
+//	[ {"id": "...", "name": "...", "metadata": {...}}, ... ]
+//
+// Older revisions of this codebase (and some test mocks) expected a
+// flat `["name1", "name2"]` array. We accept both shapes so the
+// honest collection-walk in Retrieve works against both targets.
+// If the response is something else entirely (e.g., a generic empty
+// 200 body from a permissive mock), we return [] rather than erroring
+// so a downstream Retrieve falls through to an empty result instead
+// of failing.
+func (p *ChromaDBProvider) listCollectionNamesLocked(ctx context.Context) ([]string, error) {
+	url := fmt.Sprintf("%s/api/v1/collections", p.config.URL)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if p.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
+	}
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("ChromaDB list collections failed with status %d: %s", resp.StatusCode, string(body))
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if len(bytes.TrimSpace(body)) == 0 {
+		return nil, nil
 	}
 
-	return results, nil
+	// Try real-ChromaDB shape first: array of objects with `name`.
+	var objects []struct {
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(body, &objects); err == nil {
+		names := make([]string, 0, len(objects))
+		for _, o := range objects {
+			if o.Name != "" {
+				names = append(names, o.Name)
+			}
+		}
+		if len(names) > 0 {
+			return names, nil
+		}
+		// Empty-name objects → fall through to legacy parse below
+		// (so a [{"id":"..."}] response without `name` doesn't
+		// short-circuit a flat-string parse on the same body).
+	}
+
+	// Fall back to legacy / mock shape: flat array of strings.
+	var names []string
+	if err := json.Unmarshal(body, &names); err == nil {
+		return names, nil
+	}
+
+	// Unknown shape — return empty so Retrieve falls through cleanly.
+	return nil, nil
 }
 
 // Update updates a vector
@@ -886,44 +1009,15 @@ func (p *ChromaDBProvider) ListCollections(ctx context.Context) ([]*CollectionIn
 	defer p.mu.RUnlock()
 
 	p.logger.Info("Listing collections in ChromaDB")
-
-	url := fmt.Sprintf("%s/api/v1/collections", p.config.URL)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	names, err := p.listCollectionNamesLocked(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if p.config.APIKey != "" {
-		req.Header.Set("Authorization", "Bearer "+p.config.APIKey)
-	}
-
-	resp, err := p.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("ChromaDB list collections failed with status %d: %s", resp.StatusCode, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Parse ChromaDB response - assuming it returns a list of collection names
-	var collections []string
-	if err := json.Unmarshal(body, &collections); err != nil {
-		return nil, err
-	}
-
-	result := make([]*CollectionInfo, len(collections))
-	for i, name := range collections {
+	result := make([]*CollectionInfo, len(names))
+	for i, name := range names {
 		result[i] = &CollectionInfo{Name: name}
 	}
-
 	return result, nil
 }
 

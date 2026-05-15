@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -1105,24 +1106,177 @@ func sortResults(results []*VectorSearchResultItem) {
 	}
 }
 
-// matchesFilters checks if a vector matches the provided filters
+// matchesFilters checks if a vector matches the provided filters.
+//
+// Supported value shapes (CONST-050(A) honest replacement of the
+// prior "Simple equality check for now" bluff):
+//
+//   - Scalar value `filters["k"] = v`: strict equality (vector.Metadata[k] == v).
+//   - Operator map `filters["k"] = map[string]interface{}{"$gt": 5}`: each
+//     operator key in the map must hold against vector.Metadata[k].
+//     Supported operators: $eq, $ne, $gt, $gte, $lt, $lte, $in, $nin,
+//     $contains. Unknown operator keys cause the vector to fail the
+//     match (so callers learn from a missing result, not a silently
+//     wrong inclusion).
+//
+// A vector with no metadata under the queried key fails the match.
 func matchesFilters(vector *VectorData, filters map[string]interface{}) bool {
 	if len(filters) == 0 {
 		return true
 	}
-
 	for key, filterValue := range filters {
 		vectorValue, exists := vector.Metadata[key]
 		if !exists {
 			return false
 		}
-
-		// Simple equality check for now
-		// In a real implementation, this would support more complex filtering
+		if opMap, ok := filterValue.(map[string]interface{}); ok {
+			if !matchesOperatorMap(vectorValue, opMap) {
+				return false
+			}
+			continue
+		}
+		// Scalar value → strict equality.
 		if vectorValue != filterValue {
 			return false
 		}
 	}
-
 	return true
+}
+
+// matchesOperatorMap evaluates a `{"$op": value, ...}` map against the
+// vector's value. Every operator key in the map must hold (logical AND).
+// Unknown operators return false (fail closed) so callers don't get
+// silently-wrong matches from typos in their filter syntax.
+func matchesOperatorMap(vectorValue interface{}, ops map[string]interface{}) bool {
+	for op, want := range ops {
+		switch op {
+		case "$eq":
+			if vectorValue != want {
+				return false
+			}
+		case "$ne":
+			if vectorValue == want {
+				return false
+			}
+		case "$gt":
+			if !compareNumeric(vectorValue, want, func(a, b float64) bool { return a > b }) {
+				return false
+			}
+		case "$gte":
+			if !compareNumeric(vectorValue, want, func(a, b float64) bool { return a >= b }) {
+				return false
+			}
+		case "$lt":
+			if !compareNumeric(vectorValue, want, func(a, b float64) bool { return a < b }) {
+				return false
+			}
+		case "$lte":
+			if !compareNumeric(vectorValue, want, func(a, b float64) bool { return a <= b }) {
+				return false
+			}
+		case "$in":
+			if !inSlice(vectorValue, want) {
+				return false
+			}
+		case "$nin":
+			if inSlice(vectorValue, want) {
+				return false
+			}
+		case "$contains":
+			vs, vok := vectorValue.(string)
+			ws, wok := want.(string)
+			if !vok || !wok || !strings.Contains(vs, ws) {
+				return false
+			}
+		default:
+			// Unknown operator — fail closed.
+			return false
+		}
+	}
+	return true
+}
+
+// compareNumeric coerces both sides to float64 and runs `cmp`. Returns
+// false if either side isn't a recognised numeric type.
+func compareNumeric(a, b interface{}, cmp func(float64, float64) bool) bool {
+	af, aok := toFloat64(a)
+	bf, bok := toFloat64(b)
+	if !aok || !bok {
+		return false
+	}
+	return cmp(af, bf)
+}
+
+// toFloat64 coerces the common JSON / Go numeric types to float64. Returns
+// (0, false) if the value isn't numeric — callers treat that as no-match.
+func toFloat64(v interface{}) (float64, bool) {
+	switch n := v.(type) {
+	case float64:
+		return n, true
+	case float32:
+		return float64(n), true
+	case int:
+		return float64(n), true
+	case int32:
+		return float64(n), true
+	case int64:
+		return float64(n), true
+	case uint:
+		return float64(n), true
+	case uint32:
+		return float64(n), true
+	case uint64:
+		return float64(n), true
+	default:
+		return 0, false
+	}
+}
+
+// inSlice reports whether `v` equals any element of `want`. `want` may be
+// `[]interface{}` (the JSON-decoded shape) or a typed slice. Returns
+// false if `want` isn't a slice at all (so $in with a non-list value
+// fails closed rather than silently matching).
+func inSlice(v, want interface{}) bool {
+	if list, ok := want.([]interface{}); ok {
+		for _, item := range list {
+			if v == item {
+				return true
+			}
+		}
+		return false
+	}
+	// Try common typed slices.
+	switch list := want.(type) {
+	case []string:
+		s, ok := v.(string)
+		if !ok {
+			return false
+		}
+		for _, item := range list {
+			if s == item {
+				return true
+			}
+		}
+	case []int:
+		n, ok := v.(int)
+		if !ok {
+			return false
+		}
+		for _, item := range list {
+			if n == item {
+				return true
+			}
+		}
+	case []float64:
+		f, ok := toFloat64(v)
+		if !ok {
+			return false
+		}
+		for _, item := range list {
+			if f == item {
+				return true
+			}
+		}
+	}
+	return false
 }
