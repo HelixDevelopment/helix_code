@@ -358,3 +358,33 @@
 [submodule "Dependencies/vasic-digital/Ouroborous"]
 	path = Dependencies/vasic-digital/Ouroborous
 	url = git@github.com:vasic-digital/Ouroborous.git
+[submodule "Dependencies/vasic-digital/Config"]
+	path = Dependencies/vasic-digital/Config
+	url = git@github.com:vasic-digital/Config.git
+[submodule "Dependencies/vasic-digital/Lazy"]
+	path = Dependencies/vasic-digital/Lazy
+	url = git@github.com:vasic-digital/Lazy.git
+[submodule "Dependencies/vasic-digital/Watcher"]
+	path = Dependencies/vasic-digital/Watcher
+	url = git@github.com:vasic-digital/Watcher.git
+[submodule "Dependencies/vasic-digital/Middleware"]
+	path = Dependencies/vasic-digital/Middleware
+	url = git@github.com:vasic-digital/Middleware.git
+[submodule "Dependencies/vasic-digital/RateLimiter"]
+	path = Dependencies/vasic-digital/RateLimiter
+	url = git@github.com:vasic-digital/RateLimiter.git
+[submodule "Dependencies/vasic-digital/I18n"]
+	path = Dependencies/vasic-digital/I18n
+	url = git@github.com:vasic-digital/I18n.git
+[submodule "Dependencies/vasic-digital/Recovery"]
+	path = Dependencies/vasic-digital/Recovery
+	url = git@github.com:vasic-digital/Recovery.git
+[submodule "Dependencies/vasic-digital/Document"]
+	path = Dependencies/vasic-digital/Document
+	url = git@github.com:vasic-digital/Document.git
+[submodule "Dependencies/vasic-digital/Filesystem"]
+	path = Dependencies/vasic-digital/Filesystem
+	url = git@github.com:vasic-digital/Filesystem.git
+[submodule "Dependencies/vasic-digital/TOON"]
+	path = Dependencies/vasic-digital/TOON
+	url = git@github.com:vasic-digital/TOON.git
