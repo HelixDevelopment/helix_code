@@ -104,6 +104,14 @@ GPTME_SCRIPTS=(
     # verdicts). Catches "CLI exits 0 with empty/garbled output"
     # class. SKIP-OK if binary not built.
     "tests/e2e/challenges/ui_terminal_interaction.sh"
+    # UX End-to-End Flow anti-bluff Challenge (round 41) — FINAL
+    # 6th of the 6 missing test types per Task #266. Drives the
+    # complete user journey (help → health → list-models →
+    # bogus-recover → post-liveness) + asserts on coherence:
+    # no user-hostile output (panic/goroutine/runtime error
+    # surfacing to user), friendly recovery from bad input,
+    # system survives the journey. Closes Task #266.
+    "tests/e2e/challenges/ux_end_to_end_flow.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
