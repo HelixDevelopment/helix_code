@@ -65,6 +65,13 @@ GPTME_SCRIPTS=(
     # from the file (proving the attachment isn't a bluff). Also
     # proves non-existent @-mentions stay verbatim with no crash.
     "tests/e2e/challenges/at_mention.sh"
+    # DDoS Health-Flood anti-bluff Challenge (round 41) — first
+    # installment of the 6 missing test types from Task #256 per
+    # CONST-050(B)'s matrix. Floods /api/v1/health with concurrent
+    # requests + asserts pass-rate threshold + post-flood liveness.
+    # Captures p50/p95/p99 latencies as wire evidence. Honest
+    # SKIP-OK when server isn't reachable.
+    "tests/e2e/challenges/ddos_health_flood.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
