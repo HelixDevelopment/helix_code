@@ -88,6 +88,14 @@ GPTME_SCRIPTS=(
     # control group. Catches "chaos starves real users" + "fell-over-
     # after-chaos" zombie classes. Honest SKIP-OK pattern.
     "tests/e2e/challenges/chaos_failure_injection.sh"
+    # Horizontal-Scaling anti-bluff Challenge (round 41) — 4th of
+    # the 6 missing test types per Task #266. Topology-dispatch
+    # to SKIP-OK on single-node dev boxes (the common case); when
+    # SCALING_REPLICA_URLS resolves to ≥2 reachable replicas,
+    # exercises per-replica load + load-balance fairness sanity +
+    # body-identity sha256 across replicas (catches the "different
+    # replicas → different upstream config" misconfiguration class).
+    "tests/e2e/challenges/scaling_horizontal.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
