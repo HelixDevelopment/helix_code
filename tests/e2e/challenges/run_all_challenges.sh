@@ -96,6 +96,14 @@ GPTME_SCRIPTS=(
     # body-identity sha256 across replicas (catches the "different
     # replicas → different upstream config" misconfiguration class).
     "tests/e2e/challenges/scaling_horizontal.sh"
+    # UI Terminal-Interaction anti-bluff Challenge (round 41) —
+    # 5th of the 6 missing test types per Task #266. Drives the
+    # built `HelixCode/bin/cli` binary non-interactively across
+    # -help / -health / -list-models flags + asserts on the
+    # actual stdout (labels present, structured entries, status
+    # verdicts). Catches "CLI exits 0 with empty/garbled output"
+    # class. SKIP-OK if binary not built.
+    "tests/e2e/challenges/ui_terminal_interaction.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
