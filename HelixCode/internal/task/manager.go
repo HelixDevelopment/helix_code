@@ -381,7 +381,6 @@ func (tm *TaskManager) GetTaskWithCache(ctx context.Context, taskID uuid.UUID) (
 		return cachedTask, nil
 	}
 
-	// Fallback to in-memory map (for now)
 	tm.mu.RLock()
 	task, exists := tm.tasks[taskID]
 	tm.mu.RUnlock()
