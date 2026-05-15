@@ -223,3 +223,18 @@
 [submodule "Panoptic"]
 	path = Panoptic
 	url = git@github.com:vasic-digital/Panoptic.git
+[submodule "Dependencies/vasic-digital/EventBus"]
+	path = Dependencies/vasic-digital/EventBus
+	url = git@github.com:vasic-digital/EventBus.git
+[submodule "Dependencies/vasic-digital/Concurrency"]
+	path = Dependencies/vasic-digital/Concurrency
+	url = git@github.com:vasic-digital/Concurrency.git
+[submodule "Dependencies/vasic-digital/Observability"]
+	path = Dependencies/vasic-digital/Observability
+	url = git@github.com:vasic-digital/Observability.git
+[submodule "Dependencies/vasic-digital/Auth"]
+	path = Dependencies/vasic-digital/Auth
+	url = git@github.com:vasic-digital/Auth.git
+[submodule "Dependencies/vasic-digital/Storage"]
+	path = Dependencies/vasic-digital/Storage
+	url = git@github.com:vasic-digital/Storage.git
