@@ -3,6 +3,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ANCHOR="Article XI.*11.9"
 CONST047_ANCHOR="CONST-047"
+CONST048_ANCHOR="CONST-048"
+CONST049_ANCHOR="CONST-049"
+CONST050_ANCHOR="CONST-050"
 FAILURES=0
 OWNED_FILE="$ROOT/docs/improvements/submodule_owned.txt"
 THIRD_PARTY_FILE="$ROOT/docs/improvements/submodule_third_party.txt"
@@ -36,8 +39,11 @@ if [ -f "$OWNED_FILE" ]; then
       missing_anchors=""
       grep -q "$ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" §11.9"
       grep -q "$CONST047_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-047"
+      grep -q "$CONST048_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-048"
+      grep -q "$CONST049_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-049"
+      grep -q "$CONST050_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-050"
       if [ -z "$missing_anchors" ]; then
-        echo "PASS: $sm/$f (§11.9 + CONST-047)"
+        echo "PASS: $sm/$f (§11.9 + CONST-047 + CONST-048 + CONST-049 + CONST-050)"
       else
         echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
       fi
