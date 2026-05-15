@@ -220,3 +220,6 @@
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
+[submodule "Panoptic"]
+	path = Panoptic
+	url = git@github.com:vasic-digital/Panoptic.git
