@@ -717,3 +717,38 @@ desc := fmt.Sprintf("%s: context=%d, capabilities=%v", model.Name, model.Context
 Every engineering deliverable produced for HelixCode MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` organizations. Each owned submodule MUST receive: (1) the same anti-bluff posture (CONST-035), (2) comprehensive documentation that matches actual capabilities, (3) full tests + Challenges coverage with captured runtime evidence, (4) recursive propagation through nested submodules under the same orgs, (5) synchronized commits when meta-repo state advances.
 
 **Cascade requirement**: This rule (verbatim or by CONST-047 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-047 for the full mandate.
+
+---
+
+## CONST-048 — Full-Automation-Coverage Mandate (cascaded from constitution submodule §11.4.25)
+
+> Verbatim user mandate (2026-05-15): *"Make sure that every feature, every functionality, every flow, every use case, every edge case, every service or application, on every platform we support is covered with full automation tests which will confirm anti-bluff policy and provide the proof of fully working capabilities, working implementation as expected, no issues, no bugs, fully documented, tests covered! Nothing less than this does not give us a chance to deliver stable product! This is mandatory constraint which MUST BE respected without ignoring, skipping, slacking or forgetting it!"*
+
+No feature, functionality, flow, use case, edge case, service, or application on any supported platform of HelixCode is deliverable until covered by automation tests proving six invariants: (1) anti-bluff posture with captured runtime evidence; (2) proof of working capability end-to-end on target topology; (3) implementation matching the documented promise; (4) no open issues/bugs surfaced; (5) full documentation in sync; (6) four-layer test floor (pre-build + post-build + runtime + paired mutation). Coverage ledger (feature × platform × invariant × status) regenerated at release-gate sweep.
+
+**Cascade requirement**: This rule (verbatim or by CONST-048 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.25 for the full mandate.
+
+## CONST-049 — Constitution-Submodule Update Workflow Mandate (cascaded from constitution submodule §11.4.26)
+
+> Verbatim user mandate (2026-05-15): *"Every time we add something into our root (constitution Submodule) Constitution, CLAUDE.MD and AGENTS.MD we MUST FIRST fetch and pull all new changes / work from constitution Submodule first! All changes we apply MUST BE commited and pushed to all constitution Submodule upstreams! In case of conflict, IT MUST BE carefully resolved! Nothing can be broken, made faulty, corrupted or unusable! After merging full validation and verification MUST BE done!"*
+
+Before any modification to `constitution/{Constitution,CLAUDE,AGENTS}.md`, execute the 7-step pipeline in order: (1) fetch + pull first inside the constitution submodule worktree; (2) apply the change with §11.4.17 classification + verbatim mandate quote; (3) validate (meta-test + no merge-conflict markers + cross-file consistency); (4) commit + push to EVERY configured upstream remote (governance files only — never `git add -A`); (5) careful conflict resolution preserving union of governance content — force-push forbidden (§9.2); (6) post-merge: `git submodule update --remote --init` + re-run cascade verifier confirming the new clause reaches every owned submodule (CONST-047); (7) bump consuming project's `.gitmodules` pointer to new HEAD in the SAME commit as cascade work.
+
+**Cascade requirement**: This rule (verbatim or by CONST-049 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
+
+## CONST-050 — No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
+
+> Verbatim user mandate (2026-05-15): *"Mocks, stubs, placeholders, TODOs or FIXMEs are allowed to exist ONLY in Unit tests! All other test types MUST interract with real fully implemented System! No fakes, empty implementations or bluffing is allowed of any kind! All codebase of the project MUST BE 100% covered with every supported test type: unit tests, integration tests, e2e tests, full automation tests, security tests, ddos tests, scaling tests, chaos tests, stress tests, performance tests, benchmarking tests, ui tests, ux tests, Challenges (fully incorporating our Challenges Submodule — https://github.com/vasic-digital/Challenges). EVERYTHING MUST BE tested using HelixQA (fully incorporating HelixQA Submodule — https://github.com/HelixDevelopment/HelixQA). HelixQA MUST BE used with all possible written tests suites (test banks) for every applications, service, platform, etc and execution of the full HelixQA QA autonomous sessions! All required dependency Submodules MUST BE added into the project as well (fully recursive!!!)."*
+
+Two cooperating invariants:
+
+**(A) No-fakes-beyond-unit-tests.** Mocks, stubs, fakes, placeholders, `TODO`, `FIXME`, "for now", "in production this would", or empty-implementation patterns are PERMITTED only in unit-test sources (`*_test.go` files invoked without the integration build tag; `HelixCode/tests/unit/`; etc.). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, HelixQA — MUST exercise the real, fully implemented HelixCode system against real infrastructure. Production code (anything under `HelixCode/cmd/`, `HelixCode/applications/`, `HelixCode/internal/<pkg>/<file>.go` not ending `_test.go`) MUST NOT import from `HelixCode/internal/mocks/`.
+
+**(B) 100% test-type coverage.** HelixCode's codebase MUST be covered by every supported test type the domain warrants: unit, integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges (vasic-digital/Challenges submodule fully incorporated at `./Challenges/`), HelixQA (HelixDevelopment/HelixQA submodule fully incorporated at `./HelixQA/`, with full autonomous QA sessions executing every registered test bank with captured wire evidence per check).
+
+**Required dependency submodules** (recursive per CONST-047):
+- Challenges — `git@github.com:vasic-digital/Challenges.git` (already at `./Challenges/`)
+- HelixQA — `git@github.com:HelixDevelopment/HelixQA.git` (already at `./HelixQA/`)
+- Any additional functionality submodules under `vasic-digital/*` / `HelixDevelopment/*` orgs that HelixCode depends on — incorporate rather than duplicate work the orgs already maintain.
+
+**Cascade requirement**: This rule (verbatim or by CONST-050 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.27 for the full mandate.

@@ -897,6 +897,32 @@ Every engineering deliverable produced for HelixCode MUST be applied — fully a
 
 See `CONSTITUTION.md` §CONST-047 for the full mandate and verification details.
 
+## CONST-048: Full-Automation-Coverage Mandate (cascaded from constitution submodule §11.4.25)
+
+> Verbatim user mandate (2026-05-15): *"Make sure that every feature, every functionality, every flow, every use case, every edge case, every service or application, on every platform we support is covered with full automation tests which will confirm anti-bluff policy and provide the proof of fully working capabilities, working implementation as expected, no issues, no bugs, fully documented, tests covered! Nothing less than this does not give us a chance to deliver stable product! This is mandatory constraint which MUST BE respected without ignoring, skipping, slacking or forgetting it!"*
+
+No feature / functionality / flow / use case / edge case / service / application on any supported platform of HelixCode is deliverable until automation tests prove six invariants: (1) anti-bluff posture with captured runtime evidence (CONST-035); (2) proof of working capability end-to-end on target topology; (3) implementation matches documented promise; (4) no open issues/bugs surfaced; (5) full documentation in sync; (6) four-layer test floor (pre-build + post-build + runtime + paired mutation). Coverage ledger regenerated at release-gate sweep.
+
+**Cascade requirement:** This rule (verbatim or by CONST-048 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.25 for the full mandate.
+
+## CONST-049: Constitution-Submodule Update Workflow Mandate (cascaded from constitution submodule §11.4.26)
+
+> Verbatim user mandate (2026-05-15): *"Every time we add something into our root (constitution Submodule) Constitution, CLAUDE.MD and AGENTS.MD we MUST FIRST fetch and pull all new changes / work from constitution Submodule first! All changes we apply MUST BE commited and pushed to all constitution Submodule upstreams! In case of conflict, IT MUST BE carefully resolved! Nothing can be broken, made faulty, corrupted or unusable! After merging full validation and verification MUST BE done!"*
+
+7-step pipeline: (1) fetch + pull first inside constitution submodule; (2) apply with §11.4.17 classification + verbatim mandate; (3) validate (meta-test + no conflict markers + cross-file consistency); (4) commit + push to EVERY configured upstream (governance files only, no `git add -A`); (5) careful conflict resolution preserving union — force-push forbidden (CONST-043); (6) post-merge cascade verification (CONST-047); (7) bump consuming `.gitmodules` pointer in SAME commit.
+
+**Cascade requirement:** This rule (verbatim or by CONST-049 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
+
+## CONST-050: No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
+
+> Verbatim user mandate (2026-05-15): *"Mocks, stubs, placeholders, TODOs or FIXMEs are allowed to exist ONLY in Unit tests! All other test types MUST interract with real fully implemented System! No fakes, empty implementations or bluffing is allowed of any kind! All codebase of the project MUST BE 100% covered with every supported test type: unit tests, integration tests, e2e tests, full automation tests, security tests, ddos tests, scaling tests, chaos tests, stress tests, performance tests, benchmarking tests, ui tests, ux tests, Challenges (fully incorporating our Challenges Submodule). EVERYTHING MUST BE tested using HelixQA (fully incorporating HelixQA Submodule). HelixQA MUST BE used with all possible written tests suites (test banks) for every applications, service, platform, etc and execution of the full HelixQA QA autonomous sessions! All required dependency Submodules MUST BE added into the project as well (fully recursive!!!)."*
+
+Two invariants. **(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now"/empty-implementation patterns PERMITTED only in unit-test sources; non-unit tests (integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, HelixQA) MUST exercise the real, fully implemented HelixCode system. Production code MUST NOT import `HelixCode/internal/mocks/`. **(B)** Codebase MUST be covered by every supported test type the domain warrants: unit, integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges (vasic-digital/Challenges submodule at `./Challenges/` fully incorporated), HelixQA (HelixDevelopment/HelixQA submodule at `./HelixQA/` fully incorporated, with full autonomous QA sessions executing every registered test bank with captured wire evidence).
+
+Required dependency submodules (recursive per CONST-047): Challenges (`git@github.com:vasic-digital/Challenges.git` at `./Challenges/`) + HelixQA (`git@github.com:HelixDevelopment/HelixQA.git` at `./HelixQA/`) + any other functionality submodules under vasic-digital/HelixDevelopment orgs HelixCode depends on. Pointers bumped to upstream HEAD in same commit as cascade work (CONST-049 step 7).
+
+**Cascade requirement:** This rule (verbatim or by CONST-050 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
+
 ---
 
 ---

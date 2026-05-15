@@ -15,6 +15,15 @@ No API key, token, password, certificate, or other credential may be committed t
 ### Article XII §12.2 (CONST-043) — No-Force-Push
 No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval per operation. Authorization for one push does not extend further. Bypassing hooks / signing / protected-branch rules also requires explicit approval.
 
+### CONST-048 — Full-Automation-Coverage Mandate (cascaded from constitution submodule §11.4.25)
+No feature/functionality/flow/use-case/edge-case/service/application on any supported platform of HelixCode is deliverable until covered by automation tests proving six invariants: (1) anti-bluff posture with captured runtime evidence; (2) proof of working capability end-to-end on target topology; (3) implementation matches documented promise; (4) no open issues/bugs surfaced; (5) full documentation in sync; (6) four-layer test floor. Coverage ledger regenerated at release-gate. See constitution submodule `Constitution.md` §11.4.25 for the full mandate.
+
+### CONST-049 — Constitution-Submodule Update Workflow Mandate (cascaded from constitution submodule §11.4.26)
+Before any modification to `constitution/{Constitution,CLAUDE,AGENTS}.md`: (1) fetch + pull first; (2) apply with §11.4.17 classification + verbatim mandate; (3) validate; (4) commit + push to EVERY configured upstream; (5) resolve conflicts preserving union — force-push forbidden; (6) cascade verification (CONST-047); (7) bump `.gitmodules` pointer in SAME commit. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
+
+### CONST-050 — No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
+**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now"/empty-implementation patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise the real, fully implemented system. Production code MUST NOT import `HelixCode/internal/mocks/`. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (vasic-digital/Challenges submodule at `./Challenges/`) + HelixQA (HelixDevelopment/HelixQA submodule at `./HelixQA/`, with full autonomous QA sessions). See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
+
 ## Project Overview
 
 HelixCode is an enterprise-grade distributed AI development platform built in Go that enables intelligent task division, work preservation, and cross-platform development workflows. It features:
