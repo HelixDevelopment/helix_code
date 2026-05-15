@@ -229,32 +229,109 @@ fi
 # ---------------------------------------------------------------------------
 # G6 — CONST-052 case-conformance (soft, surfaces candidates only)
 # ---------------------------------------------------------------------------
+#
+# Operator safety mandate (2026-05-15): "double check that snake_case
+# renaming is not applied to codebase which is by convention non-snake-case
+# — we MUST NOT break the System and working building process".
+#
+# Per CONST-052's own "common-sense exceptions (technology-preserving)"
+# clause, every directory whose name is mandated by language / tool /
+# framework convention is exempt from the rename. G6 enforces those
+# exemptions: it ONLY enumerates dirs that aren't already exempt, and
+# it NEVER fails the build (soft surface — the actual rename is phased
+# per Task #252 with full test-execution before each batch).
+#
+# NEVER_RENAME_PATTERNS — directories that MUST NOT be renamed even if
+# their name violates snake_case, because renaming them would break the
+# tooling that depends on the exact filename:
+NEVER_RENAME_PATTERNS=(
+    # Language / framework dirs that mandate specific case
+    'gradlew*'              # Gradle wrapper (case-sensitive)
+    'gradle'                # Gradle config dir
+    'Cargo.toml' 'Cargo.lock'   # Rust
+    'Gemfile' 'Gemfile.lock'    # Ruby
+    'Makefile' 'GNUmakefile'    # GNU make
+    'Dockerfile' 'Containerfile'
+    'CMakeLists.txt'
+    'build.gradle' 'build.gradle.kts'
+    'pom.xml'
+    'package.json' 'package-lock.json' 'pnpm-lock.yaml'
+    'tsconfig.json' 'jsconfig.json'
+    'pyproject.toml' 'setup.py' 'setup.cfg' 'requirements.txt'
+    'go.mod' 'go.sum'
+    # Android AOSP-mandated names (renaming = build break)
+    'AndroidManifest.xml'
+    'Android.bp' 'Android.mk'
+    'AndroidTest.xml'
+    # Apple framework / Xcode-mandated names
+    'Info.plist'
+    'Podfile' 'Podfile.lock'
+    '*.xcodeproj' '*.xcworkspace'
+    # AOSP top-level directories (the Android build system depends on these)
+    'art' 'bionic' 'bootable' 'bootloader' 'build' 'cts' 'dalvik'
+    'developers' 'development' 'device' 'docs' 'external' 'frameworks'
+    'hardware' 'kernel' 'kernel-5.10' 'libcore' 'libnativehelper'
+    'ndk' 'out' 'packages' 'pdk' 'platform_testing' 'prebuilts'
+    'sdk' 'system' 'test' 'toolchain' 'tools' 'vendor'
+    # Build / cache / generated artefacts (kept by tooling convention)
+    'node_modules' '__pycache__' '.gradle' '.idea' '.vscode'
+    'target' 'dist' 'out' 'build'
+    # VCS + governance
+    '.git' '.github' '.gitlab' '.svn'
+    # Names that fail snake_case but ARE the canonical owned-project names
+    # — these will be renamed in a deliberate phased batch per Task #252,
+    # but the rename includes coordinated upstream-repo renames + every
+    # consumer's .gitmodules update, so the local-dir-only check should
+    # NOT flag them as "easy fixes". They're explicitly tracked.
+    'HelixCode' 'Challenges' 'Containers' 'Dependencies'
+    'Github-Pages-Website' 'HelixAgent' 'HelixQA' 'Security' 'Panoptic'
+    'Upstreams' 'Assets' 'MCP-Servers'
+)
+
+is_protected_name() {
+    local name="$1"
+    for pattern in "${NEVER_RENAME_PATTERNS[@]}"; do
+        # shellcheck disable=SC2053
+        [[ "$name" == $pattern ]] && return 0
+    done
+    return 1
+}
+
 if want_gate G6; then
     GATES_RUN=$((GATES_RUN + 1))
     gate_header "G6 — CONST-052 case-conformance (soft — phased per task #252)"
-    # Soft gate: list top-level dirs that aren't snake_case. The actual rename
-    # is a phased program (CONST-052 + Task #252); this gate just enumerates
-    # candidates for the next rename batch. It does NOT count as a failure
-    # because the rename window is still open.
-    pascal_dirs=$(
-        find . -maxdepth 1 -mindepth 1 -type d \
-            ! -path "./.git" ! -path "./.github" \
-            -printf "%f\n" 2>/dev/null | \
-        grep -E '[A-Z]|-' | \
-        grep -vE '^(HelixCode|Challenges|Containers|Dependencies|Github-Pages-Website|HelixAgent|HelixQA|Security|Panoptic|Upstreams|Assets|MCP-Servers)$' || true
+    # Soft gate: list top-level dirs that aren't snake_case AND aren't
+    # protected by the never-rename patterns above. Operator safety
+    # mandate honoured: AOSP / framework / build-system dirs are never
+    # flagged because renaming them would break the build.
+    candidates=""
+    while IFS= read -r name; do
+        [[ -z "$name" ]] && continue
+        # Already snake_case (lowercase + underscores + digits)?
+        if [[ "$name" =~ ^[a-z0-9_]+$ ]]; then continue; fi
+        if is_protected_name "$name"; then continue; fi
+        candidates="$candidates $name"
+    done < <(find . -maxdepth 1 -mindepth 1 -type d \
+                 ! -path "./.git" ! -path "./.github" \
+                 -printf "%f\n" 2>/dev/null)
+    candidate_count=$(printf '%s\n' "$candidates" | tr ' ' '\n' | grep -v '^$' | wc -l | tr -d ' ')
+    # Also enumerate protected (for forensic visibility — show what we
+    # deliberately did NOT flag, so the operator can confirm the
+    # exemption coverage matches their mental model).
+    protected_count=$(
+        while IFS= read -r name; do
+            [[ -z "$name" ]] && continue
+            if [[ "$name" =~ ^[a-z0-9_]+$ ]]; then continue; fi
+            if is_protected_name "$name"; then echo "$name"; fi
+        done < <(find . -maxdepth 1 -mindepth 1 -type d \
+                     ! -path "./.git" ! -path "./.github" \
+                     -printf "%f\n" 2>/dev/null) | wc -l | tr -d ' '
     )
-    candidates=$(
-        find . -maxdepth 1 -mindepth 1 -type d \
-            ! -path "./.git" ! -path "./.github" \
-            -printf "%f\n" 2>/dev/null | \
-        grep -E '[A-Z]|-' || true
-    )
-    candidate_count=$(printf '%s\n' "$candidates" | grep -v '^$' | wc -l | tr -d ' ')
     if [[ "$candidate_count" -eq 0 ]]; then
-        gate_pass G6 "all top-level directories already snake_case"
+        gate_pass G6 "all top-level directories snake_case OR protected ($protected_count protected)"
     else
         # NOT a failure — phased rename per CONST-052 + Task #252.
-        gate_pass G6 "$candidate_count top-level directories pending rename per CONST-052 (Task #252)"
+        gate_pass G6 "$candidate_count unprotected rename candidates ($protected_count protected from rename)"
     fi
 fi
 
