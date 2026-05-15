@@ -923,6 +923,16 @@ Required dependency submodules (recursive per CONST-047): Challenges (`git@githu
 
 **Cascade requirement:** This rule (verbatim or by CONST-050 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 
+## CONST-051: Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout Mandate (cascaded from constitution submodule §11.4.28)
+
+> Verbatim user mandate (2026-05-15): *"All existing Submodules in the project that we are controlling and belong to some our organizations (vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory) are equal parts of the project's codebase! We MUST work on that code as much as we do with main project's codebase! ... We MUST NEVER modify Submodules to bring into them any project specific context ... All Submodule dependencies that are used by Submodule MUST BE acessed from the root of the project! We MUST NOT have nested Submodule dependencies."*
+
+Three invariants. **(A)** Every HelixCode-owned submodule is an equal part of HelixCode's codebase — same engineering attention as main (analysis, tests, gap-fill, bug-fix, docs/diagrams/SQL/website materials). Coverage ledgers list each as in-scope. **(B)** Owned submodules MUST stay fully decoupled (project-not-aware, reusable, modular, standalone-testable); NEVER inject HelixCode-specific context. Use configuration injection when a submodule needs parent info. **(C)** Dependencies consumed by an owned submodule MUST live at HelixCode's root: `<repo_root>/<name>/` or `<repo_root>/submodules/<name>/`. Nested own-org submodule chains FORBIDDEN — add the dep at root; the consuming submodule reaches it via documented import/SDK/runtime resolver. Third-party submodules exempt.
+
+Org list (dynamically discoverable via gh/glab): vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory, plus any subsequently authorised org.
+
+**Cascade requirement:** This rule (verbatim or by CONST-051 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.28 for the full mandate.
+
 ---
 
 ---

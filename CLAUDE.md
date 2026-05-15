@@ -752,3 +752,21 @@ Two cooperating invariants:
 - Any additional functionality submodules under `vasic-digital/*` / `HelixDevelopment/*` orgs that HelixCode depends on — incorporate rather than duplicate work the orgs already maintain.
 
 **Cascade requirement**: This rule (verbatim or by CONST-050 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
+
+## CONST-051 — Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout Mandate (cascaded from constitution submodule §11.4.28)
+
+> Verbatim user mandate (2026-05-15): *"All existing Submodules in the project that we are controlling and belong to some our organizations (vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory - we can ALWAYS check dynamically using GitHub and GitLab CLIs) are equal parts of the project's codebase! We MUST work on that code as much as we do with main project's codebase! All on equal basis! Equally important! ... We MUST NEVER modify Submodules to bring into them any project specific context since they all MUST BE ALWAYS fully decoupled, project not-aware, fully reusable and modular (by any other project(s)), completely testable! All Submodule dependencies that are used by Submodule MUST BE acessed from the root of the project! We MUST NOT have nested Submodule dependencies but accessing each from proper location from the root of the project - directly from project's root project_name/submodule_name or some more proper structure project_name/submodules/submodule_name!"*
+
+Three cooperating invariants:
+
+**(A) Equal-codebase.** Every HelixCode-owned submodule (orgs: `vasic-digital`, `HelixDevelopment`, `red-elf`, `ATMOSphere1234321`, `Bear-Suite`, `BoatOS123456`, `Helix-Flow`, `Helix-Track`, `Server-Factory`, plus any subsequently authorised org — discoverable via `gh org list` / `glab`) is an **equal part** of HelixCode's codebase. Same engineering attention as main: analysis, extension, test creation, gap-filling, bug-fix, documentation (user manuals, guides, diagrams, SQL, websites, all materials). Coverage ledgers (CONST-048) list every owned submodule as in-scope. A round of work that improves HelixCode main while leaving an owned-submodule deficiency unaddressed is a CONST-051 violation.
+
+**(B) Decoupling / reusability.** Owned submodules MUST stay fully decoupled from HelixCode and any other consuming project. NEVER inject project-specific context (hardcoded paths, hostnames, asset names) INTO a submodule. When a submodule needs HelixCode info, use configuration injection (env var, config file, constructor parameter) — never a hardcoded reach into the parent's tree. Every owned submodule MUST be project-not-aware, reusable, modular, and standalone-testable.
+
+**(C) Dependency-layout.** Every dependency consumed by an owned submodule MUST be accessible from HelixCode's root at:
+- `<repo_root>/<submodule_name>/` (HelixCode's current flat layout for Challenges, HelixQA, Containers, Security, etc.) OR
+- `<repo_root>/submodules/<submodule_name>/` (alternate grouped layout)
+
+**Nested own-org submodule chains are FORBIDDEN.** Add the dependency at HelixCode's root; the consuming submodule reaches it via documented import/SDK/runtime resolver — never via its own nested `.gitmodules` entry. Third-party submodules exempt.
+
+**Cascade requirement**: This rule (verbatim or by CONST-051 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.28 for the full mandate (gates, mutations, workflow integration).
