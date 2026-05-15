@@ -121,6 +121,19 @@ func TestOpenRouterProvider_GetCapabilities(t *testing.T) {
 func TestOpenRouterProvider_Generate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Provider's initializeModels() does a GET /models at
+			// construction time to populate the live catalog. Serve a
+			// minimal valid response on that path so the constructor
+			// doesn't churn through fallback; otherwise the test
+			// asserts the chat-completion contract.
+			if r.Method == "GET" && r.URL.Path == "/models" {
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"data": []map[string]interface{}{
+						{"id": "anthropic/claude-3-opus", "name": "Test", "context_length": 200000},
+					},
+				})
+				return
+			}
 			assert.Equal(t, "POST", r.Method)
 			assert.Contains(t, r.URL.Path, "/chat/completions")
 			assert.Equal(t, "Bearer test-api-key", r.Header.Get("Authorization"))

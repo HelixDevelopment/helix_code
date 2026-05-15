@@ -120,7 +120,7 @@ revision of this doc claimed `./bin/cli --provider ollama` worked
 directly; in reality only 4 providers route through the F12 CLI
 shortcut, and the others go through the server-mediated path):
 
-**Path A — F12 direct-cloud CLI shortcut** (13 providers as of round 41 final):
+**Path A — F12 direct-cloud CLI shortcut** (15 providers as of round 41 final):
 
 ```bash
 ./bin/cli --provider anthropic  --model claude-3-5-sonnet
@@ -130,36 +130,40 @@ shortcut, and the others go through the server-mediated path):
 ./bin/cli --provider groq       --model llama-3.3-70b-versatile
 ./bin/cli --provider openai     --model gpt-4o
 ./bin/cli --provider gemini     --model gemini-1.5-pro
-./bin/cli --provider openrouter --model anthropic/claude-3.5-sonnet
+./bin/cli --provider openrouter --model openai/gpt-oss-20b:free   # auto-selects from live /models
 ./bin/cli --provider xai        --model grok-3-fast-beta
 ./bin/cli --provider qwen       --model qwen-max
 ./bin/cli --provider copilot    --model gpt-4o
+./bin/cli --provider mistral    --model mistral-small-latest
+./bin/cli --provider deepseek   --model deepseek-chat
 ./bin/cli --provider ollama     --model llama3.2          # local — needs ollama running
 ./bin/cli --provider llamacpp   --model <path-to-model>   # local — needs llama-server running
 ```
 
-These thirteen read credentials from the user's `~/.config/helixcode/`
+These fifteen read credentials from the user's `~/.config/helixcode/`
 or `HELIX_LLM_PROVIDER` env (e.g. `GROQ_API_KEY`, `OPENAI_API_KEY`,
 `GEMINI_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`, `QWEN_API_KEY`,
-`GITHUB_TOKEN` for Copilot; local providers ollama/llamacpp default
-to their standard ports `:11434` / `:8080` on localhost and need no
-API key). They construct the provider directly in the CLI process —
-no server required. This is the **just-plug-in-an-API-key-and-go**
-path for the most-used cloud providers AND the most-used local
+`MISTRAL_API_KEY`, `DEEPSEEK_API_KEY`, `GITHUB_TOKEN` for Copilot;
+local providers ollama/llamacpp default to their standard ports
+`:11434` / `:8080` on localhost and need no API key). They
+construct the provider directly in the CLI process — no server
+required. This is the **just-plug-in-an-API-key-and-go** path
+for the most-used cloud providers AND the most-used local
 providers, giving HelixCode CLI parity with modern single-binary
-CLI agents (Claude Code, Aider, Cline) for these thirteen.
+CLI agents (Claude Code, Aider, Cline) for these fifteen.
 
-**Path B — server-mediated (the remaining ~6 providers)**:
+**Path B — server-mediated (the remaining 3 providers)**:
 
-For DeepSeek, Mistral, vLLM, LocalAI, LM Studio (and any other
-OpenAI-compatible passthrough endpoint): add an entry under
-`llm.providers:` in `HelixCode/config/config.yaml`, start the
-HelixCode server (`make build && ./bin/helixcode server`), and
-access the provider via the server's REST API or via the CLI's
-`-server-url` flag pointing at the server. The server hosts the
-provider manager (CONST-039) and exposes a unified API. These
-providers are served via the OpenAI-compatible passthrough since
-they don't have dedicated standalone constructors.
+For vLLM, LocalAI, LM Studio (and any other OpenAI-compatible
+passthrough endpoint with no dedicated constructor): add an entry
+under `llm.providers:` in `HelixCode/config/config.yaml`, start
+the HelixCode server (`make build && ./bin/helixcode server`),
+and access the provider via the server's REST API or via the
+CLI's `-server-url` flag pointing at the server. The server
+hosts the provider manager (CONST-039) and exposes a unified
+API. These providers are served via the OpenAI-compatible
+passthrough since they don't have dedicated standalone
+constructors.
 
 A `./bin/cli --provider <Path-B-provider>` invocation surfaces a
 directed error (since round 41) that names this path explicitly —

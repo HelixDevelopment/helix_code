@@ -116,14 +116,14 @@ func TestSelector_VertexAlias(t *testing.T) {
 // Selector restricts to F12 direct-cloud providers (factory's mandate).
 //
 // Anti-bluff (CONST-035): the original test asserted ollama was rejected.
-// As of round 41 final, F12 covers 13 providers including ollama, so
-// asserting ollama-rejection would be a false claim about the contract.
-// Use "deepseek" (still a Path-B provider that routes to the directed
-// error) as the rejection probe.
+// As of round 41 final, F12 covers 15 providers including ollama, mistral,
+// and deepseek, so any of those names would NOT be a valid rejection
+// probe. Use "vllm" (still a Path-B-only provider that routes to the
+// directed error) as the rejection probe.
 func TestSelector_RejectsNonCloudType(t *testing.T) {
-	_, err := Select(SelectorInput{Flag: "deepseek"})
+	_, err := Select(SelectorInput{Flag: "vllm"})
 	if err == nil {
-		t.Fatalf("Select() expected error for Path-B provider 'deepseek', got nil")
+		t.Fatalf("Select() expected error for Path-B provider 'vllm', got nil")
 	}
 }
 

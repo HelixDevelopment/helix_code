@@ -1,0 +1,364 @@
+package llm
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+// MistralProvider implements the Provider interface for the Mistral
+// Cloud (api.mistral.ai) OpenAI-compatible endpoint. Round-41 F12
+// fast-path expansion: a user with MISTRAL_API_KEY can run
+// `HELIX_LLM_PROVIDER=mistral ./bin/cli` without first editing
+// config.yaml or starting the HelixCode server.
+type MistralProvider struct {
+	config     ProviderConfigEntry
+	endpoint   string
+	apiKey     string
+	httpClient *http.Client
+	models     []ModelInfo
+	lastHealth *ProviderHealth
+}
+
+// NewMistralProvider creates a new Mistral provider.
+func NewMistralProvider(config ProviderConfigEntry) (*MistralProvider, error) {
+	endpoint := config.Endpoint
+	if endpoint == "" {
+		endpoint = "https://api.mistral.ai/v1"
+	}
+
+	apiKey := config.APIKey
+	if apiKey == "" {
+		apiKey = os.Getenv("MISTRAL_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("Mistral API key is required (set config.APIKey or MISTRAL_API_KEY env var)")
+	}
+
+	p := &MistralProvider{
+		config:   config,
+		endpoint: endpoint,
+		apiKey:   apiKey,
+		httpClient: &http.Client{
+			Timeout: 60 * time.Second,
+		},
+		lastHealth: &ProviderHealth{
+			Status:    "unknown",
+			LastCheck: time.Now(),
+		},
+	}
+
+	p.initializeModels()
+
+	return p, nil
+}
+
+func (mp *MistralProvider) GetType() ProviderType { return ProviderTypeMistral }
+func (mp *MistralProvider) GetName() string       { return "Mistral" }
+func (mp *MistralProvider) GetModels() []ModelInfo { return mp.models }
+
+func (mp *MistralProvider) GetCapabilities() []ModelCapability {
+	return []ModelCapability{
+		CapabilityTextGeneration,
+		CapabilityCodeGeneration,
+		CapabilityCodeAnalysis,
+		CapabilityPlanning,
+		CapabilityDebugging,
+		CapabilityRefactoring,
+		CapabilityTesting,
+		CapabilityVision,
+	}
+}
+
+// Generate makes a chat-completions request against api.mistral.ai.
+func (mp *MistralProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	startTime := time.Now()
+
+	openaiRequest, err := mp.convertToOpenAIRequest(request)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert request: %v", err)
+	}
+
+	response, err := mp.makeOpenAIRequest(ctx, openaiRequest)
+	if err != nil {
+		return nil, fmt.Errorf("Mistral request failed: %v", err)
+	}
+
+	return mp.convertFromOpenAIResponse(response, request.ID, time.Since(startTime)), nil
+}
+
+func (mp *MistralProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	defer close(ch)
+
+	openaiRequest, err := mp.convertToOpenAIRequest(request)
+	if err != nil {
+		return fmt.Errorf("failed to convert request: %v", err)
+	}
+	openaiRequest.Stream = true
+
+	return mp.makeOpenAIStreamRequest(ctx, openaiRequest, ch, request.ID)
+}
+
+func (mp *MistralProvider) IsAvailable(ctx context.Context) bool {
+	health, err := mp.GetHealth(ctx)
+	return err == nil && health.Status == "healthy"
+}
+
+func (mp *MistralProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/models", mp.endpoint), nil)
+	if err != nil {
+		mp.updateHealth("unhealthy", 0, mp.lastHealth.ErrorCount+1)
+		return mp.lastHealth, fmt.Errorf("failed to create health check request: %v", err)
+	}
+	mp.setAuthHeaders(req)
+
+	start := time.Now()
+	resp, err := mp.httpClient.Do(req)
+	latency := time.Since(start)
+	if err != nil {
+		mp.updateHealth("unhealthy", latency, mp.lastHealth.ErrorCount+1)
+		return mp.lastHealth, fmt.Errorf("health check failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		mp.updateHealth("unhealthy", latency, mp.lastHealth.ErrorCount+1)
+		return mp.lastHealth, fmt.Errorf("health check returned status %d", resp.StatusCode)
+	}
+
+	var modelsResponse struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&modelsResponse); err != nil {
+		mp.updateHealth("degraded", latency, mp.lastHealth.ErrorCount)
+		return mp.lastHealth, nil
+	}
+
+	mp.updateHealth("healthy", latency, 0)
+	mp.lastHealth.ModelCount = len(modelsResponse.Data)
+	return mp.lastHealth, nil
+}
+
+func (mp *MistralProvider) Close() error {
+	mp.httpClient.CloseIdleConnections()
+	return nil
+}
+
+// GetContextWindow returns the largest known Mistral context window.
+// Codestral / Mistral-Large support 128k+; 128k is the published max.
+func (mp *MistralProvider) GetContextWindow() int { return 128_000 }
+
+func (mp *MistralProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
+}
+
+func (mp *MistralProvider) initializeModels() {
+	mp.models = []ModelInfo{
+		{
+			Name:        "mistral-small-latest",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Mistral Small (latest) - fast, efficient general-purpose model",
+		},
+		{
+			Name:        "mistral-medium-latest",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Mistral Medium (latest) - balanced cost/quality",
+		},
+		{
+			Name:        "mistral-large-latest",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Mistral Large (latest) - flagship reasoning model",
+		},
+		{
+			Name:        "codestral-latest",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 256000,
+			MaxTokens:   8192,
+			Description: "Codestral (latest) - code-specialised model with 256k context",
+		},
+		{
+			Name:        "pixtral-12b-2409",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 131072,
+			MaxTokens:   8192,
+			Description: "Pixtral 12B - multimodal (vision + text)",
+		},
+		{
+			Name:        "open-mixtral-8x22b",
+			Provider:    ProviderTypeMistral,
+			ContextSize: 65536,
+			MaxTokens:   8192,
+			Description: "Open Mixtral 8x22B - open-weights MoE",
+		},
+	}
+
+	for i := range mp.models {
+		EnrichModelInfo(&mp.models[i])
+	}
+
+	log.Printf("✅ Mistral provider initialized with %d models", len(mp.models))
+}
+
+func (mp *MistralProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
+	var messages []OpenAIMessage
+	for _, msg := range request.Messages {
+		openaiMsg := OpenAIMessage{
+			Role:    msg.Role,
+			Content: msg.Content,
+		}
+		if msg.Name != "" {
+			openaiMsg.Name = msg.Name
+		}
+		messages = append(messages, openaiMsg)
+	}
+
+	return &OpenAIRequest{
+		Model:       request.Model,
+		Messages:    messages,
+		MaxTokens:   request.MaxTokens,
+		Temperature: request.Temperature,
+		TopP:        request.TopP,
+		Stream:      request.Stream,
+	}, nil
+}
+
+func (mp *MistralProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
+	var content string
+	if len(openaiResp.Choices) > 0 {
+		content = openaiResp.Choices[0].Message.Content
+	}
+
+	finish := ""
+	if len(openaiResp.Choices) > 0 {
+		finish = openaiResp.Choices[0].FinishReason
+	}
+
+	return &LLMResponse{
+		ID:        uuid.New(),
+		RequestID: requestID,
+		Content:   content,
+		Usage: Usage{
+			PromptTokens:     openaiResp.Usage.PromptTokens,
+			CompletionTokens: openaiResp.Usage.CompletionTokens,
+			TotalTokens:      openaiResp.Usage.TotalTokens,
+		},
+		FinishReason:   finish,
+		ProcessingTime: processingTime,
+		CreatedAt:      time.Now(),
+	}
+}
+
+func (mp *MistralProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/chat/completions", mp.endpoint), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	mp.setAuthHeaders(req)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := mp.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("Mistral API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var response OpenAIResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+func (mp *MistralProvider) makeOpenAIStreamRequest(ctx context.Context, request *OpenAIRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/chat/completions", mp.endpoint), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+	mp.setAuthHeaders(req)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := mp.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("Mistral API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	for decoder.More() {
+		var streamResp OpenAIStreamResponse
+		if err := decoder.Decode(&streamResp); err != nil {
+			return err
+		}
+
+		if len(streamResp.Choices) > 0 {
+			choice := streamResp.Choices[0]
+			if choice.Delta.Content != "" {
+				response := LLMResponse{
+					ID:        uuid.New(),
+					RequestID: requestID,
+					Content:   choice.Delta.Content,
+					CreatedAt: time.Now(),
+				}
+
+				select {
+				case ch <- response:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+			}
+		}
+
+		if len(streamResp.Choices) > 0 && streamResp.Choices[0].FinishReason != "" {
+			break
+		}
+	}
+
+	return nil
+}
+
+func (mp *MistralProvider) setAuthHeaders(req *http.Request) {
+	req.Header.Set("Authorization", "Bearer "+mp.apiKey)
+}
+
+func (mp *MistralProvider) updateHealth(status string, latency time.Duration, errorCount int) {
+	mp.lastHealth.Status = status
+	mp.lastHealth.Latency = latency
+	mp.lastHealth.ErrorCount = errorCount
+	mp.lastHealth.LastCheck = time.Now()
+}

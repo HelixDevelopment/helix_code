@@ -197,44 +197,165 @@ func (orp *OpenRouterProvider) CountTokens(text string) (int, error) {
 
 // Helper methods
 
+// openRouterCatalogResponse is the shape of GET /models from OpenRouter.
+type openRouterCatalogResponse struct {
+	Data []struct {
+		ID            string `json:"id"`
+		Name          string `json:"name"`
+		ContextLength int    `json:"context_length"`
+		TopProvider   struct {
+			MaxCompletionTokens int `json:"max_completion_tokens"`
+		} `json:"top_provider"`
+	} `json:"data"`
+}
+
+// preferredOpenRouterDefaults lists free-tier model IDs that probe
+// PASS (HTTP 200, real completion) most reliably from our session
+// 2026-05-14 anti-bluff sweep. Order = preference for default model
+// when the CLI auto-selects the first entry. These are seeded ahead
+// of the rest of the live catalog so HELIX_LLM_PROVIDER=openrouter
+// works out of the box without the user having to discover a
+// currently-uncongested free model by trial and error.
+//
+// CONST-036 note: this *bias* is hand-curated runtime evidence,
+// not a hardcoded SOURCE of model metadata — the catalog itself
+// is fetched live below. The fallback list further down is only
+// used when /models is unreachable (no network / API key revoked).
+var preferredOpenRouterDefaults = []string{
+	"openai/gpt-oss-20b:free",
+	"deepseek/deepseek-v4-flash:free",
+	"z-ai/glm-4.5-air:free",
+	"meta-llama/llama-3.3-70b-instruct:free",
+	"meta-llama/llama-3.2-3b-instruct:free",
+	"qwen/qwen3-coder:free",
+}
+
+// fetchCatalog calls OpenRouter's GET /models and returns the list
+// of available models, or an error if the call fails.
+func (orp *OpenRouterProvider) fetchCatalog(ctx context.Context) ([]ModelInfo, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", orp.endpoint+"/models", nil)
+	if err != nil {
+		return nil, fmt.Errorf("build /models request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+orp.apiKey)
+	req.Header.Set("Accept", "application/json")
+	resp, err := orp.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GET /models: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("GET /models returned %d: %s", resp.StatusCode, string(body))
+	}
+	var cat openRouterCatalogResponse
+	if err := json.NewDecoder(resp.Body).Decode(&cat); err != nil {
+		return nil, fmt.Errorf("decode /models response: %w", err)
+	}
+	if len(cat.Data) == 0 {
+		return nil, fmt.Errorf("/models returned empty data array")
+	}
+	// Index by ID for re-ordering.
+	byID := make(map[string]ModelInfo, len(cat.Data))
+	all := make([]ModelInfo, 0, len(cat.Data))
+	for _, m := range cat.Data {
+		maxTok := m.TopProvider.MaxCompletionTokens
+		if maxTok == 0 {
+			maxTok = 4096
+		}
+		ctxLen := m.ContextLength
+		if ctxLen == 0 {
+			ctxLen = 32768
+		}
+		mi := ModelInfo{
+			Name:        m.ID,
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: ctxLen,
+			MaxTokens:   maxTok,
+			Description: m.Name,
+		}
+		byID[m.ID] = mi
+		all = append(all, mi)
+	}
+	// Re-order: preferred defaults first (if present in catalog), then the rest.
+	ordered := make([]ModelInfo, 0, len(all))
+	seen := make(map[string]bool, len(all))
+	for _, pref := range preferredOpenRouterDefaults {
+		if mi, ok := byID[pref]; ok {
+			ordered = append(ordered, mi)
+			seen[pref] = true
+		}
+	}
+	for _, mi := range all {
+		if !seen[mi.Name] {
+			ordered = append(ordered, mi)
+		}
+	}
+	return ordered, nil
+}
+
 func (orp *OpenRouterProvider) initializeModels() {
-	// Predefined OpenRouter models with their capabilities
-	// Focus on free/low-cost models
+	// CONST-036 fix (round 41+): fetch the model catalog live from
+	// OpenRouter at provider init so HelixCode reflects whatever
+	// the provider actually serves today, instead of carrying a
+	// stale hardcoded list. CONST-035 anti-bluff: the prior list
+	// led with `deepseek-r1-free`, which OpenRouter long since
+	// retired (returned HTTP 400 "is not a valid model ID"),
+	// meaning every fresh user typing `HELIX_LLM_PROVIDER=openrouter`
+	// got an immediate broken-default failure. With live fetch +
+	// preferred-default re-ordering, that failure mode is gone.
+	//
+	// Fallback (when /models is unreachable) is a *small* curated
+	// list of currently-verified free IDs — not a stale catalog
+	// mined from training data. We accept that this fallback can
+	// also drift; the next agent updating this file should re-probe.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if models, err := orp.fetchCatalog(ctx); err == nil {
+		orp.models = models
+		for i := range orp.models {
+			EnrichModelInfo(&orp.models[i])
+		}
+		log.Printf("✅ OpenRouter provider initialized with %d models (live /models catalog)", len(orp.models))
+		return
+	} else {
+		log.Printf("⚠️  OpenRouter /models fetch failed (%v); using verified seed list", err)
+	}
 	orp.models = []ModelInfo{
 		{
-			Name:        "deepseek-r1-free",
+			Name:        "openai/gpt-oss-20b:free",
 			Provider:    ProviderTypeOpenRouter,
-			ContextSize: 163840,
-			MaxTokens:   10000,
-			Description: "DeepSeek R1 Free - Free reasoning model via OpenRouter",
+			ContextSize: 131072,
+			MaxTokens:   4096,
+			Description: "GPT-OSS 20B Free (round-41-verified working)",
+		},
+		{
+			Name:        "deepseek/deepseek-v4-flash:free",
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: 131072,
+			MaxTokens:   4096,
+			Description: "DeepSeek v4 Flash Free (round-41-verified working)",
+		},
+		{
+			Name:        "z-ai/glm-4.5-air:free",
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: 131072,
+			MaxTokens:   4096,
+			Description: "GLM 4.5 Air Free (round-41-verified working)",
+		},
+		{
+			Name:        "meta-llama/llama-3.3-70b-instruct:free",
+			Provider:    ProviderTypeOpenRouter,
+			ContextSize: 131072,
+			MaxTokens:   4096,
+			Description: "Llama 3.3 70B Instruct Free (rate-limited but valid ID)",
 		},
 		{
 			Name:        "meta-llama/llama-3.2-3b-instruct:free",
 			Provider:    ProviderTypeOpenRouter,
 			ContextSize: 131072,
 			MaxTokens:   4096,
-			Description: "Llama 3.2 3B Instruct Free - Free lightweight model",
-		},
-		{
-			Name:        "microsoft/wizardlm-2-8x22b:free",
-			Provider:    ProviderTypeOpenRouter,
-			ContextSize: 65536,
-			MaxTokens:   4096,
-			Description: "WizardLM-2 8x22B Free - Free instruction-tuned model",
-		},
-		{
-			Name:        "mistralai/mistral-7b-instruct:free",
-			Provider:    ProviderTypeOpenRouter,
-			ContextSize: 32768,
-			MaxTokens:   4096,
-			Description: "Mistral 7B Instruct Free - Free Mistral model",
-		},
-		{
-			Name:        "huggingface/zephyr-7b-beta:free",
-			Provider:    ProviderTypeOpenRouter,
-			ContextSize: 32768,
-			MaxTokens:   4096,
-			Description: "Zephyr 7B Beta Free - Free fine-tuned model",
+			Description: "Llama 3.2 3B Instruct Free (rate-limited but valid ID)",
 		},
 	}
 
@@ -242,7 +363,7 @@ func (orp *OpenRouterProvider) initializeModels() {
 		EnrichModelInfo(&orp.models[i])
 	}
 
-	log.Printf("✅ OpenRouter provider initialized with %d models", len(orp.models))
+	log.Printf("✅ OpenRouter provider initialized with %d models (fallback seed list)", len(orp.models))
 }
 
 func (orp *OpenRouterProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {

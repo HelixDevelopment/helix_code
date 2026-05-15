@@ -102,6 +102,10 @@ func NewCloudProvider(t ProviderType, cfg ProviderConfigEntry) (Provider, error)
 		return NewQwenProvider(cfg)
 	case ProviderTypeCopilot:
 		return NewCopilotProvider(cfg)
+	case ProviderTypeMistral:
+		return NewMistralProvider(cfg)
+	case ProviderTypeDeepSeek:
+		return NewDeepSeekProvider(cfg)
 	case ProviderTypeOllama:
 		return newOllamaFromEntry(cfg)
 	case ProviderTypeLlamaCpp:
@@ -160,11 +164,15 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 		return ProviderTypeQwen, nil
 	case "copilot", "github-copilot":
 		return ProviderTypeCopilot, nil
+	case "mistral":
+		return ProviderTypeMistral, nil
+	case "deepseek":
+		return ProviderTypeDeepSeek, nil
 	case "ollama":
 		return ProviderTypeOllama, nil
 	case "llamacpp", "llama-cpp", "llama.cpp":
 		return ProviderTypeLlamaCpp, nil
-	case "deepseek", "mistral", "vllm", "localai", "lmstudio":
+	case "vllm", "localai", "lmstudio":
 		return "", fmt.Errorf(
 			"provider %q is supported by HelixCode but not via the F12 direct-cloud-provider CLI path "+
 				"(supported direct-cloud backends: %s). "+
@@ -190,7 +198,7 @@ func parseCloudProviderType(raw string) (ProviderType, error) {
 // four. Other providers still require server-mediated config.yaml setup
 // — see ZERO_BLUFF_USER_MANUAL.md §2.4 Path A vs Path B.
 func supportedCloudProviderList() string {
-	return "anthropic, bedrock, vertexai, azure, groq, openai, gemini, openrouter, xai, qwen, copilot, ollama, llamacpp"
+	return "anthropic, bedrock, vertexai, azure, groq, openai, gemini, openrouter, xai, qwen, copilot, mistral, deepseek, ollama, llamacpp"
 }
 
 // newOllamaFromEntry adapts the generic ProviderConfigEntry into the

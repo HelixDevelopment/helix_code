@@ -100,9 +100,9 @@ func newWizardCmd(deps wizardCmdDeps) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&providerFlag, "provider", "",
 		"non-interactive: provider type "+
-			"(anthropic|bedrock|vertexai|azure|groq|openai|gemini|openrouter|xai|qwen|copilot|ollama|llamacpp)")
+			"(anthropic|bedrock|vertexai|azure|groq|openai|gemini|openrouter|xai|qwen|copilot|mistral|deepseek|ollama|llamacpp)")
 	cmd.Flags().StringVar(&apiKeyFlag, "api-key", "",
-		"API key (anthropic, azure, groq, openai, gemini, openrouter, xai, qwen)")
+		"API key (anthropic, azure, groq, openai, gemini, openrouter, xai, qwen, mistral, deepseek)")
 	cmd.Flags().StringVar(&regionFlag, "region", "", "AWS region (bedrock)")
 	cmd.Flags().StringVar(&endpointFlag, "endpoint", "",
 		"endpoint URL (azure | ollama | llamacpp — defaults to provider-standard localhost)")
@@ -265,8 +265,9 @@ func buildNonInteractiveResult(flags wizardCmdFlags, configPath string) (*llm.Wi
 			params["api_version"] = "2024-08-01-preview"
 		}
 	case llm.ProviderTypeGroq, llm.ProviderTypeOpenAI, llm.ProviderTypeGemini,
-		llm.ProviderTypeOpenRouter, llm.ProviderTypeXAI, llm.ProviderTypeQwen:
-		// Round 41: these 6 providers extended F12 with just-API-key auth.
+		llm.ProviderTypeOpenRouter, llm.ProviderTypeXAI, llm.ProviderTypeQwen,
+		llm.ProviderTypeMistral, llm.ProviderTypeDeepSeek:
+		// Round 41: these providers extended F12 with just-API-key auth.
 		// Anti-bluff (CONST-035): the wizard accepts them in --provider but
 		// requires --api-key for the non-interactive path. The constructors
 		// also fall back to <PROVIDER>_API_KEY env var at construction time

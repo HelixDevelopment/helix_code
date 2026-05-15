@@ -69,6 +69,7 @@ const (
 	ProviderTypeCohere      ProviderType = "cohere"
 	ProviderTypeHuggingFace ProviderType = "huggingface"
 	ProviderTypeMistral     ProviderType = "mistral"
+	ProviderTypeDeepSeek    ProviderType = "deepseek"
 	ProviderTypeClickHouse  ProviderType = "clickhouse"
 	ProviderTypeSupabase    ProviderType = "supabase"
 	ProviderTypeDeepLake    ProviderType = "deeplake"
