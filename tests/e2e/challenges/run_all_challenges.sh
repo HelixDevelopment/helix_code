@@ -80,6 +80,14 @@ GPTME_SCRIPTS=(
     # class that pass-rate gate would miss). Honest SKIP-OK
     # pattern.
     "tests/e2e/challenges/stress_sustained_load.sh"
+    # Chaos Failure-Injection anti-bluff Challenge (round 41) — 3rd
+    # of the 6 missing test types per Task #266. Operator-safe
+    # client-side fault injection (no sudo / no iptables / no host
+    # mutation per CONST-033): malformed HTTP, oversized headers,
+    # slow-loris, abrupt connection close + concurrent legit-traffic
+    # control group. Catches "chaos starves real users" + "fell-over-
+    # after-chaos" zombie classes. Honest SKIP-OK pattern.
+    "tests/e2e/challenges/chaos_failure_injection.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
