@@ -59,6 +59,13 @@ capturing evidence — the generator never auto-promotes.
 
 <!-- BEGIN preserved-rollup -->
 
+The per-feature row body is preserved from the prior hand-authored
+edition (close-out¹⁴) where present; new features get inserted as
+`UNCONFIRMED:` across all 6 invariants. Re-mark cells by hand after
+capturing evidence — the generator never auto-promotes.
+
+<!-- BEGIN preserved-rollup -->
+
 For brevity the per-platform breakout is collapsed into a single row per
 feature; the **Platforms** column lists which platforms ship the feature.
 The CLI surface (F01–F12 F14–F25 F26–F30) is platform-agnostic Go and
@@ -104,6 +111,8 @@ flagged per-platform.
 
 <!-- END preserved-rollup -->
 
+<!-- END preserved-rollup -->
+
 ## Test-type matrix (CONST-050(B))
 
 | Test type     | Tests dir present | Make target present | Status |
@@ -130,14 +139,70 @@ flagged per-platform.
 | Challenges | VERIFIED | 0 |  |
 | Containers | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/DocProcessor | VERIFIED | 0 |  |
+| Dependencies/HelixDevelopment/HelixLLM | VERIFIED | 0 |  |
+| Dependencies/HelixDevelopment/HelixMemory | VERIFIED | 0 |  |
+| Dependencies/HelixDevelopment/HelixSpecifier | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/LLMOrchestrator | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/LLMProvider | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/LLMsVerifier | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/Models | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/VisionEngine | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Agentic | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Auth | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/AutoTemp | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/BackgroundTasks | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Benchmark | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Cache | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Claritas | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Concurrency | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Config | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/conversation | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Database | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/DocProcessor | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Document | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Embeddings | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/EventBus | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Filesystem | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Formatters | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/GandalfSolutions | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/HyperTune | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/I18n | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/I-LLM | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Lazy | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/LeakHub | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/LLMOps | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/LLMOrchestrator | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/LLMProvider | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/MCP_Module | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Memory | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Messaging | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Middleware | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Models | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Normalize | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Observability | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Optimization | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Ouroborous | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Planning | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/PliniusCommon | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Plugins | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/RAG | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/RateLimiter | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Recovery | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/RedTeam | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/SelfImprove | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/SkillRegistry | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Storage | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Streaming | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/ToolSchema | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/TOON | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/VectorDB | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Veritas | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/VisionEngine | VERIFIED | 0 |  |
+| Dependencies/vasic-digital/Watcher | VERIFIED | 0 |  |
 | Github-Pages-Website | VERIFIED | 0 |  |
-| HelixAgent | **VIOLATION (46)** | 46 | Refactor pending — tracked task. |
+| HelixAgent | VERIFIED | 0 |  |
 | HelixQA | VERIFIED | 0 |  |
+| Panoptic | VERIFIED | 0 |  |
 | Security | VERIFIED | 0 |  |
 
 ## Governance anchor cascade
@@ -163,9 +228,9 @@ to tag the regeneration with a specific round (default: `mechanical-regeneration
 
 ## Honest gap inventory (mechanical signals)
 
-- **UNCONFIRMED: cells preserved:** 35 (from prior edition).
+- **UNCONFIRMED: cells preserved:** 36 (from prior edition).
   Promotions require captured-evidence per §11.4.2; the generator never promotes.
-- **Owned submodules with nested own-org chains:** 46 total references across all submodules.
+- **Owned submodules with nested own-org chains:** 0 total references across all submodules.
   Each non-zero `CONST-051(C) layout` cell above is a tracked remediation.
 - **Test-type matrix:** see table above for present / partial / missing.
 
@@ -177,3 +242,4 @@ to tag the regeneration with a specific round (default: `mechanical-regeneration
 | 2026-05-15 | Claude Opus 4.7 | close-out-18-regen | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
 | 2026-05-15 | Claude Opus 4.7 | mechanical-regeneration | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
 | 2026-05-15 | Claude Opus 4.7 | mechanical-regeneration | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 46 nested-submodule signals. Verifier: PASS. |
+| 2026-05-15 | Claude Opus 4.7 | mechanical-regeneration | Mechanical regeneration. Preserved 30 VERIFIED cells; refreshed 9 platform entries + 11 test-type rows + 0 nested-submodule signals. Verifier: PASS. |
