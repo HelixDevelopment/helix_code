@@ -72,6 +72,14 @@ GPTME_SCRIPTS=(
     # Captures p50/p95/p99 latencies as wire evidence. Honest
     # SKIP-OK when server isn't reachable.
     "tests/e2e/challenges/ddos_health_flood.sh"
+    # Stress Sustained-Load anti-bluff Challenge (round 41) — 2nd
+    # of the 6 missing test types per Task #266. Differs from DDoS
+    # (burst): sustained load over N seconds at target rps,
+    # per-second pass-rate snapshot, latency-degradation check
+    # vs pre-stress baseline (catches "still-200-but-zombie-slow"
+    # class that pass-rate gate would miss). Honest SKIP-OK
+    # pattern.
+    "tests/e2e/challenges/stress_sustained_load.sh"
 )
 for SCRIPT in "${GPTME_SCRIPTS[@]}"; do
     NAME=$(basename "$SCRIPT" .sh)
