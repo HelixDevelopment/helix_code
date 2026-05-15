@@ -104,24 +104,37 @@ as `internal/llm/groq_provider.go` being named after Groq.
 
 ### Github-Pages-Website (12 files)
 
-12 files in `Github-Pages-Website/docs/` mentioning HelixCode in
-`package.json` + `start-website.sh` + `stop-website.sh` +
-`test-local.sh` + `test-performance.sh` + others.
+Sub-audit (Task #264) results:
 
-This submodule IS HelixCode's GitHub Pages website. Its content
-describes HelixCode. While the submodule itself is cloned per-project
-(every consuming project can have its own Pages site), the *content*
-of HelixCode's website naturally describes HelixCode.
+| File | Refs | Classification |
+|---|---|---|
+| `Github-Pages-Website/scripts/load_api_keys.sh` | 2 (header + docstring) | cosmetic-only → genericised in close-out¹⁷ (commit `c54fff7`). |
+| `Github-Pages-Website/docs/package.json` | 2 (description + author) | legitimate-cross-project — npm metadata describes the site, which IS HelixCode's GitHub Pages site. |
+| `Github-Pages-Website/docs/start-website.sh` | 4 (header + log messages) | legitimate-cross-project — bash script that builds + starts HelixCode's docker stack for the website preview. Naming the site in headers + status logs is correct. |
+| `Github-Pages-Website/docs/stop-website.sh` | 1 (header) | legitimate-cross-project — same reasoning. |
+| `Github-Pages-Website/docs/test-local.sh` | 1 (header) | legitimate-cross-project — performance test script for THIS site. |
+| `Github-Pages-Website/docs/test-performance.sh` | 1 (header) | legitimate-cross-project — same. |
+| `Github-Pages-Website/docs/test-website.sh` | 1 (header) | legitimate-cross-project — same. |
+| `Github-Pages-Website/docs/js/main.js` | 2 (header comment + init log) | legitimate-cross-project — site JS describes the site. |
+| `Github-Pages-Website/docs/courses/player.js` | refs in content | legitimate-cross-project — course content for HelixCode. |
+| `Github-Pages-Website/docs/courses/course-data.js` | refs in content | legitimate-cross-project — course data. |
+| `Github-Pages-Website/docs/manual/.sync-metadata.json` | refs in metadata | legitimate-cross-project — sync metadata referencing the parent project. |
+| `Github-Pages-Website/docs/mobile/js/mobile.js` | refs in content | legitimate-cross-project — mobile site JS. |
 
-**Classification:** legitimate-cross-project (content, not code).
-The website's TEMPLATE / TOOLING should be generic (no
-HelixCode-specific paths in build scripts); the CONTENT can name
-HelixCode because it IS HelixCode's website.
+**Classification:** content vs build tooling distinction:
+- **Build tooling that operates on THIS site** (start-website.sh
+  etc.) is legitimately HelixCode-specific. It's not generic-website
+  tooling; it's THIS site's tooling. Replacing "HelixCode Website
+  Startup Script" with "Site Startup Script" would lose meaning.
+- **JS/content** describes HelixCode (the subject of the site).
+  Legitimate.
+- **`load_api_keys.sh`** was a cascaded copy of the shared
+  utility — same cosmetic-only treatment as the 3 other copies
+  (Task #262 carried over here in #264).
 
-**Action:** review whether build scripts (`start-website.sh`,
-`test-local.sh`, etc.) hardcode HelixCode-specific paths or just
-name HelixCode in titles/descriptions. Tracked as Task #264 (small
-audit).
+**Action complete.** No genuine-violation refactors needed in
+Github-Pages-Website beyond the load_api_keys.sh fix already
+landed.
 
 ### HelixAgent (105 files)
 
@@ -166,3 +179,4 @@ violation (Containers/apply_caps.py) + 1 cosmetic batch (4 × load_api_keys.sh)
 | Date | Reviewer | Round | Notes |
 |---|---|---|---|
 | 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁶ | First pass. Per-file decisions documented. Inline edits deferred to Tasks #262/#263/#264. |
+| 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁷ | Task #262 cosmetic-only fix landed (root + HelixQA + Security + Containers). Task #264 sub-audit complete: 1 carry-over load_api_keys.sh cosmetic fix in Github-Pages-Website, 11 other files classified legitimate-cross-project (THIS site's content + tooling). |
