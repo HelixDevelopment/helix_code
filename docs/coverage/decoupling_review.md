@@ -74,11 +74,13 @@ hardcoded into a Containers-submodule resource-cap policy script.
 **Classification:** genuine-violation. The Containers submodule
 should not enumerate consuming-project-internal paths.
 
-**Action:** refactor the path list out of the script into a
-configuration file the consuming project supplies (`apply_caps.py`
-reads `--paths-file <path>` or `RESOURCE_POLICY_PATHS_FILE` env var).
-HelixCode ships its own path-list file under `Containers/` invocation.
-Tracked as Task #263 (medium-scope refactor).
+**Action complete (close-out¹⁹, Task #263):** refactored. New
+`SKIP_PATH_FRAGMENTS_DEFAULT` is universal-only; new
+`--skip-paths-file` flag (+ `RESOURCE_POLICY_SKIP_PATHS_FILE` env
+var) loads project-specific fragments from a one-per-line file
+supplied by the consuming project. Containers commit `400ccbb`.
+HelixCode-side concrete list at `scripts/containers/resource-
+policy-skip-paths.list`.
 
 ### Dependencies/HelixDevelopment/LLMsVerifier (6 files)
 
