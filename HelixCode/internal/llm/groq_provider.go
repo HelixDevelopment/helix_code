@@ -540,10 +540,19 @@ func (gp *GroqProvider) parseSSEStreamWithMetrics(reader io.Reader, ch chan<- LL
 			totalTime := time.Since(startTime)
 			tokensPerSecond := float64(tokenCount) / totalTime.Seconds()
 
+			// Anti-bluff visual-correctness fix (CONST-035): the prior
+			// code sent the full accumulated content here in addition
+			// to the per-delta chunks above, causing every streamed
+			// response to render as "<tokens><FULL>" — e.g. "1 2 31 2 3"
+			// when the model produced "1 2 3". Renderers (ansi + plain)
+			// just WriteToken every chunk's Content, so the final
+			// "full content" chunk was being re-painted. Leave Content
+			// empty here: the deltas above carry the visible content;
+			// this terminal chunk carries only the metadata.
 			finalResponse := LLMResponse{
 				ID:           uuid.New(),
 				RequestID:    requestID,
-				Content:      contentBuilder.String(),
+				Content:      "",
 				FinishReason: chunk.Choices[0].FinishReason,
 				CreatedAt:    time.Now(),
 				ProviderMetadata: map[string]interface{}{
