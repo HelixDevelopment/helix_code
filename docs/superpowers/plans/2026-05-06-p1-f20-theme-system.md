@@ -756,7 +756,7 @@ Subject: `feat(P1-F20-T07): /theme slash command (status/list/show) + main.go wi
 
 ## Task 8: Challenge harness (5 always-run phases, positive byte evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`, new `Challenges/p1-f20-theme-system/CHALLENGE.md`, new `Challenges/p1-f20-theme-system/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`, new `challenges/p1-f20-theme-system/CHALLENGE.md`, new `challenges/p1-f20-theme-system/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -780,7 +780,7 @@ SUMMARY: PHASE-A=6/6 PASS; PHASE-B=4/4 PASS; PHASE-C=4/4 PASS; PHASE-D=6/6 PASS;
 
 The Challenge MUST exit non-zero on any byte-evidence mismatch. Absence-of-error is NEVER acceptable. Anti-bluff smoke clean check appended to harness output. Verbatim output captured into `06_phase_1_evidence.md`. Dual commit (Challenges submodule + meta-repo bump).
 
-`Challenges/p1-f20-theme-system/run.sh` mirrors F18/F19 structure: `cd HelixCode && go run ./tests/integration/cmd/p1f20_challenge/main.go`.
+`challenges/p1-f20-theme-system/run.sh` mirrors F18/F19 structure: `cd HelixCode && go run ./tests/integration/cmd/p1f20_challenge/main.go`.
 
 Subject: `feat(P1-F20-T08): challenge with 5 always-run phases + byte-count + zero-byte + depth-resolution + YAML-merge positive evidence`.
 

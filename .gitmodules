@@ -49,11 +49,11 @@
 [submodule "Dependencies/HelixDevelopment/VisionEngine"]
 	path = Dependencies/HelixDevelopment/VisionEngine
 	url = git@github.com:HelixDevelopment/VisionEngine.git
-[submodule "Security"]
-	path = Security
+[submodule "security"]
+	path = security
 	url = git@github.com:vasic-digital/Security.git
-[submodule "Challenges"]
-	path = Challenges
+[submodule "challenges"]
+	path = challenges
 	url = git@github.com:vasic-digital/Challenges.git
 [submodule "Dependencies/HelixDevelopment/LLMsVerifier"]
 	path = Dependencies/HelixDevelopment/LLMsVerifier

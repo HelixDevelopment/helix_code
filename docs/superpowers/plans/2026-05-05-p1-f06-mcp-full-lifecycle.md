@@ -4461,14 +4461,14 @@ EOF
 ## Task 13: Challenge with runtime evidence + cross-compile check
 
 **Files:**
-- Create: `Challenges/p1-f06-mcp-full-lifecycle/CHALLENGE.md`
-- Create: `Challenges/p1-f06-mcp-full-lifecycle/run.sh`
-- Create: `Challenges/p1-f06-mcp-full-lifecycle/expected.txt`
+- Create: `challenges/p1-f06-mcp-full-lifecycle/CHALLENGE.md`
+- Create: `challenges/p1-f06-mcp-full-lifecycle/run.sh`
+- Create: `challenges/p1-f06-mcp-full-lifecycle/expected.txt`
 - Modify: `docs/improvements/06_phase_1_evidence.md` — append runtime evidence
 
 - [ ] **Step 1: Write CHALLENGE.md**
 
-Create `Challenges/p1-f06-mcp-full-lifecycle/CHALLENGE.md`:
+Create `challenges/p1-f06-mcp-full-lifecycle/CHALLENGE.md`:
 
 ```markdown
 # Challenge: P1-F06 — MCP Full Lifecycle
@@ -4505,7 +4505,7 @@ Per Article XI §11.9, every PASS must carry positive runtime evidence.
 
 - [ ] **Step 2: Write run.sh**
 
-Create `Challenges/p1-f06-mcp-full-lifecycle/run.sh`:
+Create `challenges/p1-f06-mcp-full-lifecycle/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -4557,8 +4557,8 @@ echo "==> P1-F06 challenge PASS"
 - [ ] **Step 3: chmod and run**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f06-mcp-full-lifecycle/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f06-mcp-full-lifecycle/run.sh 2>&1 | tee /tmp/p1f06-run.log
+chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f06-mcp-full-lifecycle/run.sh
+/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f06-mcp-full-lifecycle/run.sh 2>&1 | tee /tmp/p1f06-run.log
 ```
 
 Expected: terminates with `==> P1-F06 challenge PASS` and exit 0.
@@ -4572,7 +4572,7 @@ Under the F06 section header (already added in T01), append:
 #### T13 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f06-mcp-full-lifecycle/run.sh
+$ ./challenges/p1-f06-mcp-full-lifecycle/run.sh
 ==> build bin/helixcode
 go build -o bin/helixcode ./cmd/server
 ==> build echo MCP server
@@ -4594,7 +4594,7 @@ clean
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add Challenges/p1-f06-mcp-full-lifecycle/ docs/improvements/06_phase_1_evidence.md
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add challenges/p1-f06-mcp-full-lifecycle/ docs/improvements/06_phase_1_evidence.md
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T13): challenge with runtime evidence + cross-compile check
 

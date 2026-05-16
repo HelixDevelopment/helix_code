@@ -20,7 +20,7 @@ remediation decision per the operator's "per-file review needed" mandate.
 
 ### Challenges (21 files)
 
-The 21 files are all `Challenges/p1-fNN-*/run.sh` and `Challenges/p2-fNN-*/run.sh`
+The 21 files are all `challenges/p1-fNN-*/run.sh` and `challenges/p2-fNN-*/run.sh`
 phase-runner scripts. Each script names HelixCode-specific phase IDs
 (F01-F30) and exercises HelixCode-specific features.
 
@@ -159,7 +159,7 @@ underway.
 
 ### Security (1 file)
 
-**`Security/scripts/load_api_keys.sh`** — same shared utility.
+**`security/scripts/load_api_keys.sh`** — same shared utility.
 
 **Classification:** cosmetic-only. Tracked under Task #262.
 

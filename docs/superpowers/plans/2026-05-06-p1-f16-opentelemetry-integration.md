@@ -887,7 +887,7 @@ Subject: `feat(P1-F16-T10): wire TelemetryProvider into main.go + /telemetry + g
 
 ## Task 11: Challenge with in-tree fake OTLP/HTTP receiver
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f16_challenge/main.go`, new `Challenges/p1-f16-opentelemetry-integration/CHALLENGE.md`, new `Challenges/p1-f16-opentelemetry-integration/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f16_challenge/main.go`, new `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md`, new `challenges/p1-f16-opentelemetry-integration/run.sh`.
 
 Harness phases (per spec §6.3):
 1. **STDOUT (always runs)** — captures the stdout exporter's writer, runs LLM + tool + agent through the full instrumentation path with FakeLLMProvider, asserts `"Name":"llm.generate"`, `"Name":"tool.execute"`, `"Name":"agent.iteration"` and `helixcode_llm_tokens_total` in the captured bytes; asserts ForceFlush returns within 5 s.

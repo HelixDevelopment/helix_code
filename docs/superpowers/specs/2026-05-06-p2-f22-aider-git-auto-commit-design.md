@@ -124,7 +124,7 @@ Why slash + env + per-edit and NOT cobra (Q5=A):
 - `HelixCode/internal/commands/git_auto_commit_command_test.go`.
 - `HelixCode/tests/integration/autocommit_test.go` — `//go:build integration`; ALWAYS-runs; real registry + real F21 ApprovalManager + real `WriteFileTool` + real git repo in tempdir; per-mode behaviour assertions.
 - `HelixCode/tests/integration/cmd/p2f22_challenge/main.go` — runtime evidence harness.
-- `Challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md` + `run.sh`.
+- `challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -418,7 +418,7 @@ The Challenge MUST exit non-zero on any byte-evidence mismatch. Absence-of-error
 ## 9. Constitutional compliance
 
 - **CONST-035** (anti-bluff): every PASS in F22 carries positive runtime evidence — real git tempdir + real commits + real SHA equality assertions + real co-author trailer presence + real working-tree-clean post-condition. The Challenge harness MUST exit non-zero on byte mismatch. Tests use real `git init` + real `git commit`; mocks of git are forbidden in integration tests (per Rule 5).
-- **CONST-039** (Challenge required): F22 ships with `Challenges/p2-f22-aider-git-auto-commit/` (Challenge harness with 6 phases + optional PHASE-G).
+- **CONST-039** (Challenge required): F22 ships with `challenges/p2-f22-aider-git-auto-commit/` (Challenge harness with 6 phases + optional PHASE-G).
 - **CONST-042** (no secret leak): the secret filter strips common patterns (AKIA, sk-, xoxb, gh[pousr]_) from commit messages before they're committed. The committer's logger NEVER logs the diff body at INFO; only paths + SHA + length are logged. A unit test scans `internal/autocommit/*.go` for `logger\.Info\(.*\b(diff|body|content)\b` and FAILs on any hit.
 - **CONST-043** (no force push, no auto-push): F22 NEVER calls `git push`. The Git wrapper does not implement a `Push` method. The committer's domain ends at `git commit`; pushes are a separate user action requiring explicit approval per CONST-043.
 - **CONST-033** (host power management): F22 emits no shell commands beyond `git ...` invocations through `exec.CommandContext`. No suspend/reboot/halt commands.

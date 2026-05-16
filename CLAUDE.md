@@ -41,7 +41,7 @@ This `CLAUDE.md` sits alongside several other agent/governance manuals at the re
 - `CONSTITUTION.md` — source of truth for all mandates (CONST-033, CONST-035, CONST-036–040, Article XI §11.9). When this file conflicts with the Constitution, the Constitution wins.
 - `AGENTS.md` — generic agent manual (40 KB; mirror anti-bluff rules here).
 - `CRUSH.md`, `QWEN.md` — sibling agent manuals for other CLI tools. Cascade rule changes to all of them.
-- `HelixCode/CLAUDE.md`, `helix_qa/CLAUDE.md`, `Challenges/CLAUDE.md` — submodule-scoped manuals; this root file inherits from them and they inherit from this one.
+- `HelixCode/CLAUDE.md`, `helix_qa/CLAUDE.md`, `challenges/CLAUDE.md` — submodule-scoped manuals; this root file inherits from them and they inherit from this one.
 
 ---
 
@@ -135,10 +135,10 @@ HelixCode/                                # ← repo root (governance + submodul
 │
 ├── HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
 ├── helix_qa/        ← SUBMODULE: QA / challenge-orchestration platform
-├── Challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
+├── challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
 ├── containers/     ← SUBMODULE: Docker/container artefacts
 ├── Dependencies/   ← SUBMODULES: LLama_CPP, Ollama, HuggingFace_Hub, …
-├── Security/       ← SUBMODULE: security tooling
+├── security/       ← SUBMODULE: security tooling
 ├── assets/         ← SUBMODULE: logos, themes, brand
 ├── github_pages_website/ ← SUBMODULE: marketing site
 ├── cli_agents/          ← reference CLI agents (aider, cline, plandex, openhands, …) — formerly Example_Projects/
@@ -744,10 +744,10 @@ Two cooperating invariants:
 
 **(A) No-fakes-beyond-unit-tests.** Mocks, stubs, fakes, placeholders, `TODO`, `FIXME`, "for now", "in production this would", or empty-implementation patterns are PERMITTED only in unit-test sources (`*_test.go` files invoked without the integration build tag; `HelixCode/tests/unit/`; etc.). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, helix_qa — MUST exercise the real, fully implemented HelixCode system against real infrastructure. Production code (anything under `HelixCode/cmd/`, `HelixCode/applications/`, `HelixCode/internal/<pkg>/<file>.go` not ending `_test.go`) MUST NOT import from `HelixCode/internal/mocks/`.
 
-**(B) 100% test-type coverage.** HelixCode's codebase MUST be covered by every supported test type the domain warrants: unit, integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges (vasic-digital/Challenges submodule fully incorporated at `./Challenges/`), helix_qa (HelixDevelopment/HelixQA submodule fully incorporated at `./helix_qa/`, with full autonomous QA sessions executing every registered test bank with captured wire evidence per check).
+**(B) 100% test-type coverage.** HelixCode's codebase MUST be covered by every supported test type the domain warrants: unit, integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges (vasic-digital/Challenges submodule fully incorporated at `./challenges/`), helix_qa (HelixDevelopment/HelixQA submodule fully incorporated at `./helix_qa/`, with full autonomous QA sessions executing every registered test bank with captured wire evidence per check).
 
 **Required dependency submodules** (recursive per CONST-047):
-- Challenges — `git@github.com:vasic-digital/Challenges.git` (already at `./Challenges/`)
+- Challenges — `git@github.com:vasic-digital/Challenges.git` (already at `./challenges/`)
 - helix_qa — `git@github.com:HelixDevelopment/HelixQA.git` (already at `./helix_qa/`)
 - Any additional functionality submodules under `vasic-digital/*` / `HelixDevelopment/*` orgs that HelixCode depends on — incorporate rather than duplicate work the orgs already maintain.
 
@@ -776,7 +776,7 @@ Three cooperating invariants:
 
 > Verbatim user mandate (2026-05-15): *"naming convention for Submodules and directories (applied deep into hierarchy recursively) - all directories and Submodules MSUT HAVE lowercase names with space separator between the words of '_' character (snake-case)! All existing Submodules and directories which are not following this rule MUST BE renamed! However, since this will most likely break some of the functionalities renaming we do MUST BE applied to all references to particular Submodule or directory! ... There MUST BE reasonable exceptions for this rules - source code for programming languages or Submodules which apply different naming convention - Android, Java, Kotlin and others. ... Upstreams directory which all of our projects and Submodules have MUST BE renamed to the lowercase letters too, however root project containing the install_upstreams system command (it is exported in out paths in our .bashrc or .zshrc) MUST BE updated to fully work with both Upstreams and upstreams directory. ... NOTE: Rules lowercase / snake-case do apply to all project files as well and references to it and from them!"*
 
-Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `Challenges/`, `containers/`, `HelixAgent/`, `helix_qa/`, `Security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
+Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `challenges/`, `containers/`, `HelixAgent/`, `helix_qa/`, `security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
 
 **Common-sense exceptions (technology-preserving):** language-mandated case for Java/Kotlin/Android/Apple/C#/Swift INSIDE the language root (submodule root follows our convention; subtree follows language convention); vendor/upstream third-party submodules keep upstream names; build artefacts (`node_modules`, `__pycache__`, `.git`, `target`, `build`, `bin`) keep tool-mandated names. The test "does renaming break the technology?" trumps the rule.
 

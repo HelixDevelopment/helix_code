@@ -77,7 +77,7 @@ HelixCode/external/memory/baseai/
 
 # Generated test challenges and results (but not the framework)
 HelixCode/challenges/
-Challenges/
+challenges/
 
 # Allow the e2e challenge testing framework but ignore test results
 !HelixCode/tests/e2e/challenges/

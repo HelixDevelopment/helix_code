@@ -237,7 +237,7 @@ Harness `tests/integration/cmd/p1f11_challenge/main.go`:
 5. Test global resume finds the session across project boundaries
 6. Anti-bluff smoke clean
 
-run.sh + CHALLENGE.md in `Challenges/p1-f11-session-resume/`. Dual commit. Verbatim evidence in `06_phase_1_evidence.md`.
+run.sh + CHALLENGE.md in `challenges/p1-f11-session-resume/`. Dual commit. Verbatim evidence in `06_phase_1_evidence.md`.
 
 Subject: `feat(P1-F11-T08): challenge with runtime evidence + cross-compile check`.
 

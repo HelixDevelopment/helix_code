@@ -42,7 +42,7 @@ LLMsVerifier integration reuses `internal/llm/verifier_integration.go::VerifierM
 - `HelixCode/cmd/cli/wizard_cmd.go` — `helixcode wizard` cobra subcommand.
 - `HelixCode/cmd/cli/wizard_cmd_test.go`.
 - `HelixCode/tests/integration/multi_provider_test.go` — `//go:build integration`, gated per §5.
-- `Challenges/p1-f12-multi-provider/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f12-multi-provider/CHALLENGE.md` + `run.sh`.
 - `HelixCode/tests/integration/cmd/p1f12_challenge/main.go` — runtime evidence harness.
 
 ### 3.2 Modified files

@@ -109,7 +109,7 @@ Why env-var only (Q5=B) and not slash + cobra:
 - `HelixCode/internal/render/tool_helpers_test.go`.
 - `HelixCode/tests/integration/render_test.go` — `//go:build integration`. Real fake-TTY (a `bytes.Buffer` + `IsTTY=true` injected via constructor option) and real non-TTY (`bytes.Buffer` only). Exercises full pipeline.
 - `HelixCode/tests/integration/cmd/p1f18_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -568,7 +568,7 @@ v1 reads terminal width once at factory time. A resize during the process lifeti
 - `TestRender_FactoryTruthTable_AllNineRows`.
 - `TestRender_HandleGenerateStreamPath_GoesThroughRendererNotFmtPrint` — wires up a `CLI` instance with a fake LLM provider; runs the streaming code path; asserts the captured stdout matches the renderer's signature byte pattern (NOT the today's `"%s "` token-with-space pattern).
 
-### 6.3 Challenge (`Challenges/p1-f18-no-flicker-rendering/`)
+### 6.3 Challenge (`challenges/p1-f18-no-flicker-rendering/`)
 
 Four-phase output skeleton (three always-run + one TTY-gated):
 
@@ -645,7 +645,7 @@ The cross-compile `make prod` target (linux/macos/windows) is exercised in T08. 
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FOUR always-run phases + one TTY-gated phase. Every phase records positive byte evidence (specific byte sequences, byte counts, signature presence). Mismatch is a hard failure. The four "what counts as no-flicker" criteria (§5.2) each map to a unit + integration + Challenge assertion.
-- **CONST-039** — Challenge at `Challenges/p1-f18-no-flicker-rendering/` + evidence harness at `tests/integration/cmd/p1f18_challenge/main.go`. Every phase asserts byte content with positive evidence.
+- **CONST-039** — Challenge at `challenges/p1-f18-no-flicker-rendering/` + evidence harness at `tests/integration/cmd/p1f18_challenge/main.go`. Every phase asserts byte content with positive evidence.
 - **CONST-042 (No-Secret-Leak)** — The renderer NEVER logs token text or frame content at any level. A unit test scans the renderer's source files for any `logger.Info(.*token` / `logger.Info(.*frame` / `logger.Debug(.*token` and FAILS on any match. Rendered output to stdout is by design (the user invoked a streaming prompt; they see the tokens) and not a CONST-042 concern (terminal output is local-only). The Challenge's saved evidence file records byte lengths + signature presence, never the rendered text itself.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T10 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — the renderer's only test seam is `Options.Writer` (an `io.Writer` for capture) + `Options.IsTTY` (an injectable bool for TTY-detection bypass). Both are constructor-injection seams, not mocks. Production code uses `os.Stdout` and `term.IsTerminal`. No filesystem abstraction; no mocked terminal.

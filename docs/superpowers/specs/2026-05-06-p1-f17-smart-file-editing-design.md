@@ -125,7 +125,7 @@ Why a tool + slash + no cobra subcommand:
 - `HelixCode/internal/commands/edit_command_test.go`.
 - `HelixCode/tests/integration/smartedit_test.go` — `//go:build integration`. Real tempdir, real disk writes, full pipeline.
 - `HelixCode/tests/integration/cmd/p1f17_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f17-smart-file-editing/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f17-smart-file-editing/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -676,7 +676,7 @@ For *this spec file's* meta-references to the markers (which the spec inevitably
 - `TestSmartEdit_DryRun_NeverWrites` — invokes `inspector.DryRun`; asserts sha unchanged.
 - `TestSmartEdit_OrderedBlocks_LaterSeesEarlier` — two blocks, same file; the second's SEARCH is the first's REPLACE; tool succeeds; final content matches the second REPLACE.
 
-### 6.3 Challenge (`Challenges/p1-f17-smart-file-editing/`)
+### 6.3 Challenge (`challenges/p1-f17-smart-file-editing/`)
 
 Seven-phase output skeleton (every phase always runs; no gating):
 
@@ -752,7 +752,7 @@ The cross-compile `make prod` target (linux/macos/windows) is exercised in T08.
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has SEVEN phases, all always-run. Every phase records sha-before and sha-after with positive evidence. The five real-execution criteria in §5.2 each map to a unit + integration + Challenge assertion. Disk-state mismatch is a hard failure.
-- **CONST-039** — Challenge at `Challenges/p1-f17-smart-file-editing/` + evidence harness at `tests/integration/cmd/p1f17_challenge/main.go`. Every phase asserts disk content with sha-256.
+- **CONST-039** — Challenge at `challenges/p1-f17-smart-file-editing/` + evidence harness at `tests/integration/cmd/p1f17_challenge/main.go`. Every phase asserts disk content with sha-256.
 - **CONST-042 (No-Secret-Leak)** — full diff text is logged at DEBUG only; INFO-level logs carry only diff byte-count. The user-facing slash output is by user request and not logged. A unit test asserts `zaptest` at `InfoLevel` does NOT see the diff body. The `Challenge` harness records sha + line count, never diff text.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T10 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — every real disk operation goes through `os.ReadFile` / `os.WriteFile` and the existing F08 multiedit transactional layer. The only test seam is `SmartEditInspector` (interface used by the slash command for testability); `SmartEditTool` is the production impl. No filesystem abstraction; no mocked disk.

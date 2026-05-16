@@ -74,7 +74,7 @@ The manager and the slash command both consume `SandboxCapabilities` directly so
 - `HelixCode/internal/commands/sandbox_command_test.go`.
 - `HelixCode/tests/integration/sandbox_test.go` — `//go:build integration`, gated per §5.
 - `HelixCode/tests/integration/cmd/p1f14_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 - `HelixCode/internal/tools/registry.go` — register `SandboxedShellTool` in `registerAllTools()`. Add `SetSandboxManager(*sandbox.SandboxManager)` in the same shape as the existing F13 `SetLSPManager`. The tool is registered lazily from `SetSandboxManager` (so unit tests of the registry that don't supply a manager don't see `shell_sandboxed`). NO changes to `Execute` semantics — `shell_sandboxed` is just another tool, no auto-trigger needed.
@@ -458,7 +458,7 @@ Linux only for v1. Concretely:
 
 - **§11.9 / CONST-035** — Challenge has THREE sections (detector/fail-closed, bwrap, native), the first always runs against real subprocesses + the real fail-closed path, the latter two are explicitly gated and never claim PASS without a runtime call. `[skipped: …]` lines name the missing capability AND the install command. Detector accuracy is itself a tested invariant.
 - **CONST-033 (Host Power Management ban)** — `ConstitutionalDenyList` in `types.go` enumerates `systemctl suspend|hibernate|hybrid-sleep|suspend-then-hibernate|poweroff|halt|reboot|kexec`, bare `shutdown|halt|poweroff|reboot|kexec`, `pm-suspend|pm-hibernate|pm-suspend-hybrid`, and the `loginctl` equivalents. The check runs in `SandboxManager.Execute` BEFORE any subprocess is spawned (asserted by `TestSandboxManager_RejectsConstitutionalDenyList_BeforeSpawn` with a spawn-counter on the fake backend). Matching is tokenised + word-boundary regex — both pass to handle whitespace, chained commands, and nested `bash -c '…'`.
-- **CONST-039** — F14 ships with a Challenge in `Challenges/p1-f14-sandboxed-shell-execution/` and an evidence harness at `tests/integration/cmd/p1f14_challenge/main.go`.
+- **CONST-039** — F14 ships with a Challenge in `challenges/p1-f14-sandboxed-shell-execution/` and an evidence harness at `tests/integration/cmd/p1f14_challenge/main.go`.
 - **CONST-042 (No-Secret-Leak)** — `~/.config/helixcode/sandbox.yaml` is written via `os.OpenFile(path, O_CREATE|O_WRONLY|O_EXCL, 0o600)` with parent dir created at `0o700`. The Challenge verifies file mode (≤ 0600) and parent dir mode (≤ 0700). Loader rejects files with broader perms with `ErrInsecurePerms`.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force.
 - **No-Mocks-In-Production (Universal Rule 2)** — `SandboxManager`, both backends, and the agent tool are real, talking to real subprocesses. Mocks live only in `_test.go` files at the `SubprocessRunner` boundary. The fake `SandboxBackend` used in deny-list tests is a unit-test artifact only and is never compiled into the production binary.

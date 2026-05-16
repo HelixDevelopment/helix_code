@@ -843,7 +843,7 @@ Subject: `feat(P2-F21-T07): main.go wiring (--approval pflag + manager + registr
 
 ## Task 8: Challenge harness (5 phases, positive byte evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f21_challenge/main.go`, new `Challenges/p2-f21-codex-approval-modes/CHALLENGE.md`, new `Challenges/p2-f21-codex-approval-modes/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p2f21_challenge/main.go`, new `challenges/p2-f21-codex-approval-modes/CHALLENGE.md`, new `challenges/p2-f21-codex-approval-modes/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -862,7 +862,7 @@ SUMMARY: PHASE-A=5/5 PASS; PHASE-B=6/6 PASS; PHASE-C=8/8 PASS [or SKIP-OK: bwrap
 
 The Challenge MUST exit non-zero on any byte-evidence mismatch. Absence-of-error is NEVER acceptable. Anti-bluff smoke clean check appended to harness output. Verbatim output captured into `07_phase_2_evidence.md`. Dual commit (Challenges submodule + meta-repo bump).
 
-`Challenges/p2-f21-codex-approval-modes/run.sh` mirrors F19/F20 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f21_challenge/main.go`.
+`challenges/p2-f21-codex-approval-modes/run.sh` mirrors F19/F20 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f21_challenge/main.go`.
 
 Subject: `feat(P2-F21-T08): challenge with 5 phases (suggest deny + auto-edit prompt + full-auto sandbox + runtime change + F02 final-deny) — positive byte evidence`.
 

@@ -27,7 +27,7 @@ Add `internal/commands/markdown_commands.go` (in the same package as built-ins s
 - `HelixCode/cmd/cli/commands_cmd_test.go`
 - `HelixCode/internal/commands/builtin/commands_register_test.go`
 - `HelixCode/tests/integration/markdown_commands_test.go`
-- `Challenges/p1-f09-slash-commands/CHALLENGE.md` + `run.sh`
+- `challenges/p1-f09-slash-commands/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
 - `HelixCode/internal/commands/builtin/register.go` — `RegisterBuiltinCommandsWithMarkdown(registry, loader)`; add `"commands"` to `GetBuiltinCommandNames` + builtin_test.go skip set

@@ -83,7 +83,7 @@ main()
 - `HelixCode/internal/commands/subagents_command_test.go`.
 - `HelixCode/tests/integration/subagent_test.go` — `//go:build integration`, gated per §5.2.
 - `HelixCode/tests/integration/cmd/p1f15_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f15-subagent-team/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f15-subagent-team/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 - `HelixCode/internal/tools/registry.go` — add `CategorySubagent ToolCategory = "subagent"`. Add `SetSubagentManager(m *subagent.SubagentManager)` (mirrors F13's `SetLSPManager` and F14's `SetSandboxManager`); the method lazily registers `TaskTool` so unit tests of the registry that don't supply a manager don't see the `task` tool.
@@ -482,7 +482,7 @@ Pure Go + stdlib (`os/exec`, `syscall`, `os.Executable`). No platform-specific c
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FOUR phases (in-process, subprocess, worktree, real-LLM); the first two always run; the latter two are explicitly gated and never claim PASS without runtime evidence. Anti-bluff criteria 1-4 in §5.2 each have a dedicated unit/Challenge assertion. The FakeLLMProvider's anti-misuse comment is itself self-tested.
-- **CONST-039** — Challenge at `Challenges/p1-f15-subagent-team/` + evidence harness at `tests/integration/cmd/p1f15_challenge/main.go`.
+- **CONST-039** — Challenge at `challenges/p1-f15-subagent-team/` + evidence harness at `tests/integration/cmd/p1f15_challenge/main.go`.
 - **CONST-042 (No-Secret-Leak)** — `SubagentTask.Prompt` is logged at DEBUG level only; INFO-level logs use `task.Description` (which is human-supplied and safe). `/subagents status` prints description, never prompt body. Subprocess payload (env-var-encoded) is NEVER printed by the manager — only the description is logged when the subagent starts.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force.
 - **No-Mocks-In-Production (Universal Rule 2)** — `SubagentManager`, both spawners, the `task` tool, the `/subagents` slash are real. The FakeLLMProvider is a TEST-ONLY type with a self-tested anti-misuse comment, and it is the SOLE exception (documented and bluff-scanner-allowlisted). Production code (cmd/, applications/) MUST NOT import it; the bluff scanner enforces this.

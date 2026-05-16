@@ -711,7 +711,7 @@ Subject: `feat(P1-F19-T05): wire ask_user into registry + integration test (alwa
 
 ## Task 6: Challenge harness (5-phase, positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f19_challenge/main.go`, new `Challenges/p1-f19-ask-user-question/CHALLENGE.md`, new `Challenges/p1-f19-ask-user-question/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f19_challenge/main.go`, new `challenges/p1-f19-ask-user-question/CHALLENGE.md`, new `challenges/p1-f19-ask-user-question/run.sh`.
 
 Harness phases (per spec §6.3):
 

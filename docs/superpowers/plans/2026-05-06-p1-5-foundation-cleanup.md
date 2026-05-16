@@ -161,7 +161,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 |---|---|---|---|
 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `HelixAgent/LLMsVerifier` | HelixAgent/Makefile, HelixAgent/scripts/*, HelixAgent/internal references |
 | containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
-| Security | `Security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
+| Security | `security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
 | helix_qa | `helix_qa/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
 | mcp_servers | TBD at T03.05 | TBD | TBD |
 
@@ -345,7 +345,7 @@ Keep root `containers/`. Enumerate the 3 nested copies. Per nested copy: `rg`, r
 
 ## P1.5-WP3-T03.03 — Security dedup
 
-Keep root `Security/`. 2 nested copies. Same pattern.
+Keep root `security/`. 2 nested copies. Same pattern.
 
 ## P1.5-WP3-T03.04 — helix_qa dedup
 
@@ -459,7 +459,7 @@ Commit: `test(P1.5-WP4-T04.05): loader exercises all 4 branches with real tempdi
 
 ## P1.5-WP4-T04.06 — Cross-repo loader Challenge
 
-Build `Challenges/p1-5-foundation-cleanup/loader-probe/main.go`: tiny program that calls `secrets.Load`, prints `(source, vars-set-count)`. Run it under each branch via shell harness. Capture output verbatim into `07_phase_1_5_evidence.md` § WP4.
+Build `challenges/p1-5-foundation-cleanup/loader-probe/main.go`: tiny program that calls `secrets.Load`, prints `(source, vars-set-count)`. Run it under each branch via shell harness. Capture output verbatim into `07_phase_1_5_evidence.md` § WP4.
 
 Commit: `feat(P1.5-WP4-T04.06): cross-repo loader Challenge with verbatim evidence`.
 
@@ -687,12 +687,12 @@ Each phase: `t.Errorf` on failure with the exact mismatched data. No bare `t.Ski
 
 ## P1.5-WP11-T11.02 — Challenge dir + `run.sh`
 
-`Challenges/p1-5-foundation-cleanup/CHALLENGE.md` with stated invariants. `run.sh` invokes the harness; sets `HELIXCODE_ROOT`; pipes verbatim output into `docs/improvements/07_phase_1_5_evidence.md` § WP11.
+`challenges/p1-5-foundation-cleanup/CHALLENGE.md` with stated invariants. `run.sh` invokes the harness; sets `HELIXCODE_ROOT`; pipes verbatim output into `docs/improvements/07_phase_1_5_evidence.md` § WP11.
 
 ## P1.5-WP11-T11.03 — Run harness, capture verbatim evidence
 
 ```bash
-cd Challenges/p1-5-foundation-cleanup && ./run.sh 2>&1 \
+cd challenges/p1-5-foundation-cleanup && ./run.sh 2>&1 \
   | tee -a ../../docs/improvements/07_phase_1_5_evidence.md
 ```
 

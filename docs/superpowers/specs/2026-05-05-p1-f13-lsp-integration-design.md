@@ -77,7 +77,7 @@ The auto-trigger lives in `ToolRegistry.Execute` (the existing chokepoint where 
 - `HelixCode/cmd/cli/lsp_cmd_test.go`.
 - `HelixCode/tests/integration/lsp_test.go` — `//go:build integration`, gated per §5.
 - `HelixCode/tests/integration/cmd/p1f13_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f13-lsp-integration/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f13-lsp-integration/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 - `HelixCode/internal/tools/registry.go` — register `LSPGetDiagnosticsTool` + `LSPAnalyzeDiagnosticTool` in `registerAllTools()`; add `SetLSPManager(*LSPManager)` and a post-Execute hook that calls `lspManager.NotifyChange(ctx, path)` when the tool name is `fs_edit` / `fs_write` / `multi_edit_commit` and the inner Execute returned no error. Augment the tool result map with `"lsp_diagnostics"` when the summary is non-empty. Add a `CategoryLSP ToolCategory = "lsp"` constant.
@@ -376,7 +376,7 @@ No new platform-specific code required.
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has TWO sections (manager pipeline vs real servers), the first always runs against a real subprocess speaking real JSON-RPC, the second is explicitly gated and never claims PASS without a runtime call. `[skipped: …]` lines name the missing binary so a reader can audit.
-- **CONST-039** — F13 ships with a Challenge in `Challenges/p1-f13-lsp-integration/` and an evidence harness at `tests/integration/cmd/p1f13_challenge/main.go`.
+- **CONST-039** — F13 ships with a Challenge in `challenges/p1-f13-lsp-integration/` and an evidence harness at `tests/integration/cmd/p1f13_challenge/main.go`.
 - **CONST-042 (No-Secret-Leak)** — LSP traffic over stdio frequently contains absolute paths to user files; `Diagnostic.Message` may contain user code snippets. Default INFO logging in `LSPClient` MUST NOT print full diagnostic messages or absolute paths; instead it logs `len(message)` and the basename only. DEBUG-level logging may include full content but is opt-in via `HELIX_LSP_DEBUG=1`. The Challenge verifies `INFO` log lines do not contain substrings of test diagnostic messages.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force.
 - **No-Mocks-In-Production (Universal Rule 2)** — `LSPManager`, `LSPClient`, and the agent tools are real, talking to real subprocesses over real stdio. Mocks live only in `_test.go` files at the transport boundary and in the in-tree fake server (which is itself NOT a mock — it is a real subprocess used by both unit tests and the Challenge harness).

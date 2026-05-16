@@ -28,7 +28,7 @@ New `internal/session/resume.go` holds `ResumeFinder`, `ResumeMode` enum (`Resum
 - `HelixCode/cmd/cli/sessions_cmd.go` — cobra subcommand
 - `HelixCode/cmd/cli/sessions_cmd_test.go`
 - `HelixCode/tests/integration/sessions_resume_test.go` — `//go:build integration`
-- `Challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
+- `challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
 - `HelixCode/internal/session/session_manager.go` — `Append(msg Message) error` (calls store), `Resume(ctx, id) error`, expose `CurrentID()`.

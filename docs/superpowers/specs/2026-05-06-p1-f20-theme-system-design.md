@@ -116,7 +116,7 @@ Why slash + env (Q5=B) and not cobra:
 - `HelixCode/internal/commands/theme_command_test.go`.
 - `HelixCode/tests/integration/theme_test.go` — `//go:build integration`; ALWAYS-runs; real env vars via `LoaderOptions.Env` injection + real temp YAML; asserts byte-exact ANSI emission via the production Styler.
 - `HelixCode/tests/integration/cmd/p1f20_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f20-theme-system/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f20-theme-system/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -557,7 +557,7 @@ A theme with empty `Open` at depth `Truecolor` (e.g. user-supplied YAML that onl
 - `TestTheme_Integration_DepthAutoDetect_AllFourBranches` — runs through `Loader.Load()` four times with synthesised `Env` covering the four depth branches; asserts each `Styler.Depth()` matches expected.
 - `TestTheme_Integration_YAMLOverride_CustomNameLoads` — writes `theme.yaml` to a tempdir; sets `LoaderOptions.ConfigDir` + `Env={"HELIXCODE_THEME":"custom-solarized"}`; loads; asserts `Stylize(RoleError, "x")` returns the YAML-supplied open code + reset.
 
-### 6.3 Challenge (`Challenges/p1-f20-theme-system/`)
+### 6.3 Challenge (`challenges/p1-f20-theme-system/`)
 
 Five-phase output skeleton (all always-run):
 
@@ -627,7 +627,7 @@ The cross-compile `make prod` target (linux/macos/windows) is exercised in T08. 
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FIVE always-run phases. Every phase records positive runtime evidence: byte counts (Phase A: exactly 2 ANSI sequences per token), byte content (Phase B: open/literal/reset present in order), zero-byte invariants (Phase C: zero `0x1b` in plain-mode capture), depth-resolution byte-equality (Phase D: synthesised env → expected depth), YAML-merge byte-equality (Phase E: custom slot wraps with custom code; un-mentioned slot wraps with built-in code). Every byte-evidence mismatch is a hard failure.
-- **CONST-039** — Challenge at `Challenges/p1-f20-theme-system/` + evidence harness at `tests/integration/cmd/p1f20_challenge/main.go`. Every phase asserts positive byte evidence.
+- **CONST-039** — Challenge at `challenges/p1-f20-theme-system/` + evidence harness at `tests/integration/cmd/p1f20_challenge/main.go`. Every phase asserts positive byte evidence.
 - **CONST-042 (No-Secret-Leak)** — theme YAML carries NO secrets (color codes are non-sensitive). File mode **0644** is acceptable (no secrets means no `.env` analogue; the file lives in `$XDG_CONFIG_HOME/helixcode/theme.yaml` which is the user's own config dir). The loader does NOT log file contents; only the resolved theme name is logged at INFO level. A unit test scans `internal/theme/*.go` for any `logger.Info(.*\(palette\|color\|open\|reset\))` match and FAILs on any hit (defensive — there are no actual secrets, but log discipline is consistent with F19's anti-bluff posture).
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T09 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — the loader's only test seams are constructor-injected (`Env func(string) string`, `ConfigDir string`, `Filesystem fs.FS`); no filesystem abstraction in production paths. The Styler has zero mockable surface — it's a pure value type. Unit tests use real `bytes.Buffer` for I/O capture and real `os.MkdirTemp` + `os.WriteFile` for YAML files. Mock renderers do NOT appear; the integration test wires the real `ansiRenderer` and the real `plainRenderer` from F18.

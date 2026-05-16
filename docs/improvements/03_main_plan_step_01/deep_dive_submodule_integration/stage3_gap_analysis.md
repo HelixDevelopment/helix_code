@@ -142,7 +142,7 @@
 | Headless/CI Mode | ⚠️ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Fig-Style Terminal Intellisense | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
-### 1.5 Security/Sandboxing (15 Features)
+### 1.5 security/Sandboxing (15 Features)
 
 | Feature | HelixCode | Claude Code | Aider | Cline | Codex | Plandex | Forge | Kilo | OpenCode | Gemini | Amazon Q |
 |---------|:---------:|:-----------:|:-----:|:-----:|:-----:|:-------:|:-----:|:----:|:--------:|:------:|:--------:|
@@ -319,7 +319,7 @@
 
 ---
 
-### 2.5 Security/Sandboxing Gaps (15 Features, 11 Missing/Partial)
+### 2.5 security/Sandboxing Gaps (15 Features, 11 Missing/Partial)
 
 | # | Gap | HelixCode Status | Target State | Priority |
 |---|-----|-----------------|--------------|----------|

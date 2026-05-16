@@ -285,7 +285,7 @@ task := gin.H{
 
 ## 5. Dependency Issues
 
-### 5.1 CRITICAL - Security/Maintenance
+### 5.1 CRITICAL - security/Maintenance
 
 | Dependency | Issue | Action Required |
 |------------|-------|-----------------|

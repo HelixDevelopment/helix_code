@@ -314,7 +314,7 @@ All `-tags=integration`-gated. `make test-integration-full` runs them. No bare `
 
 ### 6.3 Challenge
 
-`Challenges/p1-f06-mcp-full-lifecycle/` (mirrors F02–F05):
+`challenges/p1-f06-mcp-full-lifecycle/` (mirrors F02–F05):
 
 1. Build `bin/helixcode`.
 2. Write `.helixcode/mcp.yml` with one stdio server (`@modelcontextprotocol/server-everything`).

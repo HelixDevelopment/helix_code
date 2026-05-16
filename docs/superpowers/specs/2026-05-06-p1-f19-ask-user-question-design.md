@@ -132,7 +132,7 @@ Why tool-only (Q5=A) and not slash + cobra:
 - `HelixCode/internal/tools/askuser/ask_user_tool_test.go`.
 - `HelixCode/tests/integration/askuser_test.go` — `//go:build integration`. Always-runs both branches (TTY-with-input + non-TTY-with-default + non-TTY-without-default error path) using real `bytes.Buffer` readers/writers + injected `IsTTY`. Asserts byte content on the captured prompt and the parsed result.
 - `HelixCode/tests/integration/cmd/p1f19_challenge/main.go` — runtime evidence harness.
-- `Challenges/p1-f19-ask-user-question/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f19-ask-user-question/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -536,7 +536,7 @@ A preview MAY contain `\n` characters. `FormatQuestion` splits on `\n` and emits
 - `TestAskUser_Integration_NonTTY_NoDefault_ErrPropagated` — `IsTTY=false`; no default; asserts `errors.Is(err, ErrNoTTYNoDefault)`.
 - `TestAskUser_Integration_TwoConsecutivePrompts_ReaderConsumesCorrectly` — feeds `"1\n2\n"` to ONE reader; calls `Execute` twice; asserts first returns Index=0, second returns Index=1, reader fully drained.
 
-### 6.3 Challenge (`Challenges/p1-f19-ask-user-question/`)
+### 6.3 Challenge (`challenges/p1-f19-ask-user-question/`)
 
 Five-phase output skeleton (all always-run):
 
@@ -610,7 +610,7 @@ The cross-compile `make prod` target (linux/macos/windows) is exercised in T07. 
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FIVE always-run phases. Every phase records positive runtime evidence (Result fields, captured byte content, byte offsets, reader-position invariants). Mismatch is a hard failure. The four anti-bluff criteria (§5.2) each map to a unit + integration + Challenge assertion.
-- **CONST-039** — Challenge at `Challenges/p1-f19-ask-user-question/` + evidence harness at `tests/integration/cmd/p1f19_challenge/main.go`. Every phase asserts byte content with positive evidence.
+- **CONST-039** — Challenge at `challenges/p1-f19-ask-user-question/` + evidence harness at `tests/integration/cmd/p1f19_challenge/main.go`. Every phase asserts byte content with positive evidence.
 - **CONST-042 (No-Secret-Leak)** — the prompter NEVER logs question text, preview text, label text, or user input at any level. A unit test scans the source files and FAILS on any matching `logger.Info`/`logger.Debug` call. F16 telemetry, when wired, records only `tool_name`, `result_source`, `result_index`, `duration_ms` — never user-supplied text. The Challenge's saved evidence file records `Result.Value` (stable identifier from the agent), byte counts, and byte-offset relationships — never the rendered prompt text or user's typed line.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T07 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — the prompter's only test seams are constructor-injection (`Reader`, `Writer`, `IsTTY`, `Renderer`, `Timeout`, `MaxRetries` on `StdinPrompterOptions`); no filesystem abstraction, no mocked stdin. Production code uses `os.Stdin`, `os.Stdout`, `term.IsTerminal`. Unit tests use real `bytes.Buffer` for I/O capture. Mock prompters (`fakePrompter`) appear only in the *tool* tests (`ask_user_tool_test.go`) where the prompter is the dependency-under-mock, NOT the system-under-test.

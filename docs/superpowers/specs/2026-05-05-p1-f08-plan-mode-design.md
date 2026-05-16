@@ -37,7 +37,7 @@ Extend `internal/workflow/planmode/` with a new `gating.go` file holding `ToolGa
 | `HelixCode/internal/commands/plan_command_test.go` | Unit tests for the slash command |
 | `HelixCode/internal/commands/builtin/plan_register_test.go` | Test for `RegisterBuiltinCommandsWithPlanMode` |
 | `HelixCode/tests/integration/planmode_gating_test.go` | `//go:build integration` end-to-end test |
-| `Challenges/p1-f08-plan-mode/CHALLENGE.md` + `run.sh` | Runtime-evidence Challenge |
+| `challenges/p1-f08-plan-mode/CHALLENGE.md` + `run.sh` | Runtime-evidence Challenge |
 
 ### 3.2 Modified files
 
@@ -326,7 +326,7 @@ Registry tests (extend existing test file):
 
 ### 6.3 Challenge
 
-`Challenges/p1-f08-plan-mode/`:
+`challenges/p1-f08-plan-mode/`:
 1. Build the harness.
 2. Run a small program that:
    a. Constructs registry + ModeController + Planner + ToolGate.

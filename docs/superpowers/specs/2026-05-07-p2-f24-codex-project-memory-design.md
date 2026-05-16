@@ -91,7 +91,7 @@ The package layout under `HelixCode/internal/projectmemory/` is NEW (no existing
 - `HelixCode/internal/commands/memory_command.go` — `/memory` slash.
 - `HelixCode/internal/commands/memory_command_test.go`.
 - `HelixCode/tests/integration/cmd/p2f24_challenge/main.go` — Challenge harness (5 phases A-E).
-- `Challenges/p2-f24-codex-project-memory/CHALLENGE.md` + `Challenges/p2-f24-codex-project-memory/run.sh`.
+- `challenges/p2-f24-codex-project-memory/CHALLENGE.md` + `challenges/p2-f24-codex-project-memory/run.sh`.
 
 ### 3.2 Modified files
 
@@ -377,7 +377,7 @@ Backward-compat: every existing `BaseAgent` test that constructs without a memor
 
 ### 6.3 Challenge harness — five phases
 
-`Challenges/p2-f24-codex-project-memory/run.sh` invokes `tests/integration/cmd/p2f24_challenge/main.go`:
+`challenges/p2-f24-codex-project-memory/run.sh` invokes `tests/integration/cmd/p2f24_challenge/main.go`:
 
 1. **PHASE-A: PROJECT-ONLY** — tempdir with `helixcode.md` containing sentinel `MEMORY_FIXTURE_24`; loader.Discover returns Memory with `Project` containing sentinel, `User` empty, `ProjectPath` ending in `helixcode.md`. Assert (i) `len(Project) > 0`, (ii) sentinel present, (iii) `User == ""`, (iv) `ProjectPath != ""`.
 2. **PHASE-B: PROJECT-PLUS-USER** — tempdir with `helixcode.md` (sentinel `MEM_PROJECT_24`) + user overlay file (sentinel `MEM_USER_24`); both loaded; `Memory.Render()` contains BOTH sentinels in correct order (project before user).
@@ -421,7 +421,7 @@ The Challenge MUST exit non-zero on any byte-evidence mismatch. Absence-of-error
 ## 9. Constitutional compliance
 
 - **CONST-035** (anti-bluff): every PASS in F24 carries positive runtime evidence — real tempdirs + real fsnotify + real file I/O + sentinel byte equality + truncation flag verification + atomic-pointer Snapshot semantics. The Challenge harness MUST exit non-zero on byte mismatch. Tests use real fsnotify (mocks are forbidden in integration tests per Rule 5).
-- **CONST-039** (Challenge required): F24 ships with `Challenges/p2-f24-codex-project-memory/` (Challenge harness with 5 phases A-E).
+- **CONST-039** (Challenge required): F24 ships with `challenges/p2-f24-codex-project-memory/` (Challenge harness with 5 phases A-E).
 - **CONST-042** (no secret leak): memory contents NEVER logged at INFO level. The loader's logger logs only the path + byte counts. A unit test scans `internal/projectmemory/*.go` (excluding `_test.go`) for `logger\.Info\(.*\b(content|body|memory|project|user)\b.*\b%[sv]` matches and FAILs on any hit. Memory files MAY contain secrets (project policy text); the no-INFO-log rule prevents inadvertent leak via stdout/stderr of the CLI.
 - **CONST-043** (no force push, no auto-push): F24 emits zero `git push` commands. T08's close-out push to four remotes (origin / helixdev / vasic-digital / gitlab) is performed by the human operator with explicit per-push approval per CONST-043.
 - **CONST-033** (host power management): F24 emits no shell commands beyond the `/memory edit` `$EDITOR` invocation (which is a runtime user-space process, not a power-state transition). No suspend/reboot/halt commands.

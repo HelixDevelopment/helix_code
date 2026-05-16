@@ -181,7 +181,7 @@ See root `CONSTITUTION.md` §CONST-049 and constitution submodule `Constitution.
 
 **(A) No-fakes-beyond-unit-tests.** Mocks/stubs/fakes/placeholders/TODO/FIXME/"for now"/empty-implementation patterns PERMITTED only in `*_test.go` files invoked without the integration build tag (or under `tests/unit/`). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, helix_qa — MUST exercise this Go application against real infrastructure (real PostgreSQL, real Redis, real LLM endpoints, real containers). Production code under `cmd/`, `applications/`, and non-`_test.go` files in `internal/<pkg>/` MUST NOT import from `internal/mocks/`.
 
-**(B) 100% test-type coverage** with every supported test type. Required submodules incorporated recursively per CONST-047: Challenges (`../Challenges/`) + helix_qa (`../helix_qa/`).
+**(B) 100% test-type coverage** with every supported test type. Required submodules incorporated recursively per CONST-047: Challenges (`../challenges/`) + helix_qa (`../helix_qa/`).
 
 See root `CONSTITUTION.md` §CONST-050 and constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 

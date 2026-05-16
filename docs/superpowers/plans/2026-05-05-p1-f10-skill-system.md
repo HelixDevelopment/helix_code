@@ -451,7 +451,7 @@ Harness `tests/integration/cmd/p1f10_challenge/main.go`:
 5. Anti-bluff smoke clean
 6. Cross-compile linux clean
 
-run.sh + CHALLENGE.md in `Challenges/p1-f10-skills/`. Dual commit (submodule + meta-repo). Append verbatim run log to `06_phase_1_evidence.md`.
+run.sh + CHALLENGE.md in `challenges/p1-f10-skills/`. Dual commit (submodule + meta-repo). Append verbatim run log to `06_phase_1_evidence.md`.
 
 Subject: `feat(P1-F10-T08): challenge with runtime evidence + cross-compile check`.
 

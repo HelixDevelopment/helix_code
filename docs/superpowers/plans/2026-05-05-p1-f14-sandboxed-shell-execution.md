@@ -530,7 +530,7 @@ Subject: `feat(P1-F14-T10): wire SandboxManager into main.go + /sandbox + gated 
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f14_challenge/main.go`, new `Challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md`, new `Challenges/p1-f14-sandboxed-shell-execution/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f14_challenge/main.go`, new `challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md`, new `challenges/p1-f14-sandboxed-shell-execution/run.sh`.
 
 Output skeleton:
 ```

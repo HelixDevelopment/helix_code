@@ -148,7 +148,7 @@ All 4 quality assurance submodules are **declared in `.gitmodules` but their dir
 ```bash
 # Current state (EMPTY — requires initialization)
 helix_qa/        # 235 tests, 4-phase QA, 47-agent test bank
-Challenges/     # 209 tests, 16 evaluators, 21 adapters
+challenges/     # 209 tests, 16 evaluators, 21 adapters
 containers/     # 6 runtime implementations, Docker/Podman/K8s
 Dependencies/HelixDevelopment/LLMsVerifier/  # 12 provider adapters, ACP protocol
 ```

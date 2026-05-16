@@ -88,7 +88,7 @@ _pending._
 **Artefacts:**
 
 - Harness source: `HelixCode/tests/integration/cmd/p2f21_challenge/main.go`
-- Challenge dir: `Challenges/p2-f21-codex-approval-modes/{CHALLENGE.md,run.sh}`
+- Challenge dir: `challenges/p2-f21-codex-approval-modes/{CHALLENGE.md,run.sh}`
 
 **Build:**
 
@@ -136,7 +136,7 @@ $ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
 (no matches; exit 1 = clean)
 
 $ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-    Challenges/p2-f21-codex-approval-modes/
+    challenges/p2-f21-codex-approval-modes/
 (no matches; exit 1 = clean)
 ```
 

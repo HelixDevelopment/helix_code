@@ -213,4 +213,4 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 2. **HIGH**: HelixLLM - Core LLM infrastructure with 43 submodules
 3. **HIGH**: HelixMemory - Memory systems for context persistence
 4. **HIGH**: HelixSpecifier - Specification and contract system
-5. **MEDIUM**: Challenges/containers/helix_qa/LLMsVerifier - Already present, need full initialization
+5. **MEDIUM**: challenges/containers/helix_qa/LLMsVerifier - Already present, need full initialization

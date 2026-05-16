@@ -820,7 +820,7 @@ Subject: `feat(P2-F23-T09): /browser slash + main.go wiring + browser.RegisterAl
 
 ## Task 10: Challenge harness 7 phases + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f23_challenge/main.go`, new `Challenges/p2-f23-cline-browser-tool/CHALLENGE.md`, new `Challenges/p2-f23-cline-browser-tool/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p2f23_challenge/main.go`, new `challenges/p2-f23-cline-browser-tool/CHALLENGE.md`, new `challenges/p2-f23-cline-browser-tool/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -841,7 +841,7 @@ SUMMARY: PHASE-A=4/4 PASS; PHASE-B=2/2 PASS; PHASE-C=3/3 PASS; PHASE-D=2/2 PASS;
 
 The Challenge MUST exit non-zero on any byte-evidence mismatch. Skip is permitted ONLY when chromium absent and MUST emit `SKIP-OK: #P2-F23 chromium not available`. Anti-bluff smoke clean check appended. Verbatim output captured into `07_phase_2_evidence.md`. Dual commit (Challenges submodule + meta-repo bump).
 
-`Challenges/p2-f23-cline-browser-tool/run.sh` mirrors F19/F20/F21/F22 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f23_challenge/main.go`.
+`challenges/p2-f23-cline-browser-tool/run.sh` mirrors F19/F20/F21/F22 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f23_challenge/main.go`.
 
 **Close-out** — tick all 10 items in PROGRESS, advance PROGRESS focus from F23 to "Phase 2 of CLI-Agent Fusion programme: F23 closed; F24 next candidate". Run final verification:
 

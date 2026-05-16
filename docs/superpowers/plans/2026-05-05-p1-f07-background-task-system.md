@@ -2450,8 +2450,8 @@ EOF
 ## Task 10: Challenge with runtime evidence + cross-compile check
 
 **Files:**
-- Create: `Challenges/p1-f07-background-tasks/CHALLENGE.md` (in the Challenges submodule)
-- Create: `Challenges/p1-f07-background-tasks/run.sh`
+- Create: `challenges/p1-f07-background-tasks/CHALLENGE.md` (in the Challenges submodule)
+- Create: `challenges/p1-f07-background-tasks/run.sh`
 - Create: `HelixCode/tests/integration/cmd/p1f07_challenge/main.go` — small harness that polls TaskOutput across a streaming task
 - Modify: `docs/improvements/06_phase_1_evidence.md` — append T10 section with pasted runtime output
 
@@ -2580,7 +2580,7 @@ func run() error {
 
 - [ ] **Step 2: Write CHALLENGE.md**
 
-Create `Challenges/p1-f07-background-tasks/CHALLENGE.md`:
+Create `challenges/p1-f07-background-tasks/CHALLENGE.md`:
 
 ```markdown
 # Challenge: P1-F07 — Background Task System
@@ -2614,7 +2614,7 @@ output and successfully cancels long-running shell processes. Per Article XI
 
 - [ ] **Step 3: Write run.sh**
 
-Create `Challenges/p1-f07-background-tasks/run.sh`:
+Create `challenges/p1-f07-background-tasks/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -2651,8 +2651,8 @@ echo "==> P1-F07 challenge PASS"
 - [ ] **Step 4: chmod and run**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f07-background-tasks/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f07-background-tasks/run.sh 2>&1 | tee /tmp/p1f07-run.log
+chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
+/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh 2>&1 | tee /tmp/p1f07-run.log
 ```
 
 Expected: exits 0 with final line `==> P1-F07 challenge PASS`.
@@ -2666,7 +2666,7 @@ In `docs/improvements/06_phase_1_evidence.md`, under the F07 section header (add
 #### T10 — Challenge run
 
 \`\`\`bash
-$ ./Challenges/p1-f07-background-tasks/run.sh
+$ ./challenges/p1-f07-background-tasks/run.sh
 [paste FULL contents of /tmp/p1f07-run.log here verbatim — every line]
 \`\`\`
 
@@ -2683,7 +2683,7 @@ Use the actual content from `/tmp/p1f07-run.log` and the actual `git log` output
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add Challenges/p1-f07-background-tasks/ HelixCode/tests/integration/cmd/p1f07_challenge docs/improvements/06_phase_1_evidence.md
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add challenges/p1-f07-background-tasks/ HelixCode/tests/integration/cmd/p1f07_challenge docs/improvements/06_phase_1_evidence.md
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T10): challenge with runtime evidence + cross-compile check
 
@@ -2692,7 +2692,7 @@ EOF
 )"
 ```
 
-If `Challenges/` is a submodule (it is, per the F06 close-out experience), the commit may need to be made inside the submodule first, then the meta-repo commits the updated submodule pointer + evidence.md. Match the F06-T13 dual-commit pattern: submodule commit for `Challenges/p1-f07-background-tasks/` files, meta-repo commit for the submodule pointer + `docs/improvements/06_phase_1_evidence.md`.
+If `challenges/` is a submodule (it is, per the F06 close-out experience), the commit may need to be made inside the submodule first, then the meta-repo commits the updated submodule pointer + evidence.md. Match the F06-T13 dual-commit pattern: submodule commit for `challenges/p1-f07-background-tasks/` files, meta-repo commit for the submodule pointer + `docs/improvements/06_phase_1_evidence.md`.
 
 ---
 
@@ -2745,8 +2745,8 @@ go build ./cmd/cli/... ./internal/workflow/... ./internal/tools/
 go vet ./internal/workflow/... ./internal/tools/ ./internal/tools/shell/ ./internal/commands/... ./cmd/cli/...
 
 # Final challenge re-run
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f07-background-tasks/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/Challenges/p1-f07-background-tasks/run.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
+/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
 ```
 
 If any step fails, STOP and report. Do NOT push.

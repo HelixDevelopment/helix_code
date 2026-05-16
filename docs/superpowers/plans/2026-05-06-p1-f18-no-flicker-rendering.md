@@ -766,7 +766,7 @@ Subject: `feat(P1-F18-T08): RenderToolResult helper + wire tool-result frame ren
 
 ## Task 9: Challenge harness (5-phase, byte-signature positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f18_challenge/main.go`, new `Challenges/p1-f18-no-flicker-rendering/CHALLENGE.md`, new `Challenges/p1-f18-no-flicker-rendering/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f18_challenge/main.go`, new `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md`, new `challenges/p1-f18-no-flicker-rendering/run.sh`.
 
 Harness phases (per spec §6.3):
 

@@ -190,6 +190,6 @@ replace digital.vasic.llmorchestrator => ../Dependencies/HelixDevelopment/LLMOrc
 
 replace digital.vasic.visionengine => ../Dependencies/HelixDevelopment/VisionEngine
 
-replace digital.vasic.challenges => ../Challenges
+replace digital.vasic.challenges => ../challenges
 
-replace digital.vasic.security => ../Security
+replace digital.vasic.security => ../security

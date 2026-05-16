@@ -389,7 +389,7 @@ Subject: `feat(P1-F13-T10): wire LSPManager into main.go + helixcode lsp cobra +
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f13_challenge/main.go`, new `Challenges/p1-f13-lsp-integration/CHALLENGE.md`, new `Challenges/p1-f13-lsp-integration/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f13_challenge/main.go`, new `challenges/p1-f13-lsp-integration/CHALLENGE.md`, new `challenges/p1-f13-lsp-integration/run.sh`.
 
 The harness builds the in-tree fake LSP server, then runs two phases. Output skeleton:
 ```

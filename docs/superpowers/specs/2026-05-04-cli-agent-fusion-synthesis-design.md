@@ -64,9 +64,9 @@ HelixCode/                              # meta-repo (this repo)
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
 ├── helix_qa/                            # existing submodule
-├── Challenges/                         # existing submodule (now with containers + panoptic init'd)
+├── challenges/                         # existing submodule (now with containers + panoptic init'd)
 ├── containers/                         # existing submodule
-├── Security/                           # existing submodule
+├── security/                           # existing submodule
 │
 ├── Dependencies/HelixDevelopment/      # keep as-is for direct Go imports
 │   ├── LLMsVerifier/                   # canonical pin (HelixAgent/LLMsVerifier defers to this)
@@ -248,7 +248,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 | Security | ✗ | `tests/security/` | SQL-injection, auth bypass, tenant isolation, JWT edge cases |
 | Scanning | n/a | `scripts/scan-{sonarqube,snyk,gitleaks,trivy,grype,osv}.sh` | All scanners run; SonarQube + Snyk mandatory |
 | DDoS | ✗ | `tests/security/ddos/` (NEW) | Rate-limit verification with vegeta or wrk; HTTP 429 verified |
-| Challenge banks | ✗ | `Challenges/banks/<bank-name>/` | Each bank carries runtime evidence |
+| Challenge banks | ✗ | `challenges/banks/<bank-name>/` | Each bank carries runtime evidence |
 | helix_qa banks | ✗ | `helix_qa/banks/<bank-name>/` | Heavy QA sessions with multi-platform verification |
 
 **Acceptance criteria for Phase 3:**

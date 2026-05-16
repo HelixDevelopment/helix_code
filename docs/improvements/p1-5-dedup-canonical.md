@@ -11,8 +11,8 @@
 | # | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|---|
 | 1 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier/` (root) | `HelixAgent/LLMsVerifier/` | `HelixAgent/Makefile`, `HelixAgent/scripts/*`, any `internal/...` refs to old path |
-| 2 | containers   | `containers/` (root) | `Challenges/containers/`, `HelixAgent/containers/`, `HelixAgent/HelixLLM/submodules/containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
-| 3 | Security     | `Security/` (root) | `HelixAgent/Security/`, `HelixAgent/HelixLLM/submodules/Security/` (if present) | HelixAgent/scripts/security-*.sh, root cmd/security_test wiring |
+| 2 | containers   | `containers/` (root) | `challenges/containers/`, `HelixAgent/containers/`, `HelixAgent/HelixLLM/submodules/containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
+| 3 | Security     | `security/` (root) | `HelixAgent/security/`, `HelixAgent/HelixLLM/submodules/security/` (if present) | HelixAgent/scripts/security-*.sh, root cmd/security_test wiring |
 | 4 | helix_qa      | `helix_qa/` (root) | `HelixAgent/helix_qa/` | `HelixAgent/Makefile` test wiring; root `scripts/run-all-tests.sh` |
 | 5 | mcp_servers  | TBD at WP3.T03.05 — current candidates: `mcp_servers/` (root, may not exist), `HelixAgent/mcp_servers/`, `HelixAgent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
 

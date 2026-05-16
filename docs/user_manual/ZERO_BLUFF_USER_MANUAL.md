@@ -319,7 +319,7 @@ See [`docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md`](../COMPLETE_CONFIGURATION_D
 Every visible feature is backed by:
 
 - A passing test (`HelixCode/<pkg>/*_test.go`).
-- A Challenge that exercises the end-to-end user workflow against real infrastructure (`Challenges/`).
+- A Challenge that exercises the end-to-end user workflow against real infrastructure (`challenges/`).
 - An evidence trail in `docs/improvements/PROGRESS.md`.
 
 If a feature does not behave as documented, file an issue with the failing command — per CONST-035 documentation mismatches are critical defects.

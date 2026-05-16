@@ -36,8 +36,8 @@ Extend `internal/workflow/` with a new `background.go` file holding `BackgroundM
 | `HelixCode/internal/commands/tasks_command.go` | `/tasks` slash command |
 | `HelixCode/internal/commands/tasks_command_test.go` | Unit tests for the slash command |
 | `HelixCode/tests/integration/background_shell_test.go` | Real-subprocess integration tests (`//go:build integration`) |
-| `Challenges/p1-f07-background-tasks/CHALLENGE.md` | Runtime-evidence Challenge spec |
-| `Challenges/p1-f07-background-tasks/run.sh` | Challenge runner |
+| `challenges/p1-f07-background-tasks/CHALLENGE.md` | Runtime-evidence Challenge spec |
+| `challenges/p1-f07-background-tasks/run.sh` | Challenge runner |
 
 ### 3.2 Modified files
 
@@ -315,7 +315,7 @@ All `-tags=integration`; no bare `t.Skip()` without `SKIP-OK: <ticket>`.
 
 ### 6.3 Challenge
 
-`Challenges/p1-f07-background-tasks/`:
+`challenges/p1-f07-background-tasks/`:
 
 1. Build `bin/cli`.
 2. Small Go harness fires `Bash` with `command: "for i in 1 2 3; do echo line $i; sleep 0.5; done"` and `run_in_background: true`.

@@ -690,7 +690,7 @@ Subject: `feat(P1-F17-T08): wire SmartEditTool + /edit slash into main + always-
 
 ## Task 9: Challenge harness (7-phase, sha-256 positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f17_challenge/main.go`, new `Challenges/p1-f17-smart-file-editing/CHALLENGE.md`, new `Challenges/p1-f17-smart-file-editing/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f17_challenge/main.go`, new `challenges/p1-f17-smart-file-editing/CHALLENGE.md`, new `challenges/p1-f17-smart-file-editing/run.sh`.
 
 Harness phases (per spec §6.3):
 

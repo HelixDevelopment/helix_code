@@ -704,7 +704,7 @@ Subject: `feat(P2-F24-T07): BaseAgent SetMemoryRegistry + main.go wiring + integ
 
 ## Task 8: Challenge harness 5 phases + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f24_challenge/main.go`, new `Challenges/p2-f24-codex-project-memory/CHALLENGE.md`, new `Challenges/p2-f24-codex-project-memory/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p2f24_challenge/main.go`, new `challenges/p2-f24-codex-project-memory/CHALLENGE.md`, new `challenges/p2-f24-codex-project-memory/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -723,7 +723,7 @@ SUMMARY: PHASE-A=4/4 PASS; PHASE-B=4/4 PASS; PHASE-C=3/3 PASS; PHASE-D=3/3 PASS;
 
 The Challenge MUST exit non-zero on any byte-evidence mismatch. Anti-bluff smoke clean check appended. Verbatim output captured into `07_phase_2_evidence.md`. Dual commit (Challenges submodule + meta-repo bump).
 
-`Challenges/p2-f24-codex-project-memory/run.sh` mirrors F22/F23 structure with anti-bluff smoke + cross-compile linux check.
+`challenges/p2-f24-codex-project-memory/run.sh` mirrors F22/F23 structure with anti-bluff smoke + cross-compile linux check.
 
 **Close-out** — tick all 8 items in PROGRESS, advance PROGRESS focus from F24 to "Phase 2 of CLI-Agent Fusion programme: F24 closed; F25 next candidate". Run final verification:
 

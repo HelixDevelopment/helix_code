@@ -374,7 +374,7 @@ F05 closed 2026-05-05. F06 (MCP Full Lifecycle) unblocked.
 #### T08 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f08-plan-mode/run.sh
+$ ./challenges/p1-f08-plan-mode/run.sh
 ==> build F08 challenge harness
 ==> run harness
 ==> step 1: transition to plan mode
@@ -424,7 +424,7 @@ c8143af feat(P1-F08-T05): ToolRegistry.SetPlanModeGate + Execute gating + MarkEx
 #### T07 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f09-slash-commands/run.sh
+$ ./challenges/p1-f09-slash-commands/run.sh
 ==> build F09 challenge harness
 ==> run harness
 ==> step 1: write echo.md with body 'Got: {{ARG1}}'
@@ -470,7 +470,7 @@ c3eb33a feat(P1-F09-T03): MarkdownLoader scans project + user dirs, registers/un
 #### T08 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f10-skills/run.sh
+$ ./challenges/p1-f10-skills/run.sh
 ==> build F10 challenge harness
 ==> run harness
 ==> step 1: write refactor.md with named-capture trigger
@@ -518,7 +518,7 @@ a6c40d7 docs(P1-F10-T01): bootstrap Phase 1 / Feature 10 evidence + advance PROG
 #### T13 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f06-mcp-full-lifecycle/run.sh
+$ ./challenges/p1-f06-mcp-full-lifecycle/run.sh
 ==> build bin/helixcode (server)
 🎨 Generating logo assets...
 cd scripts/logo && go run generate_assets.go
@@ -639,7 +639,7 @@ c138401 feat(P1-F06-T02): add MCP client types + Transport interface + BackoffSc
 #### T10 — Challenge run
 
 ```bash
-$ ./Challenges/p1-f07-background-tasks/run.sh
+$ ./challenges/p1-f07-background-tasks/run.sh
 ==> build F07 challenge harness
 ==> run harness
 ==> start background streaming task
@@ -700,7 +700,7 @@ ff81607 fix(P1-F07-T05): ShellTool implements BackgroundAware (interface satisfa
 **Date:** 2026-05-05
 **Artifacts:**
 - `HelixCode/tests/integration/cmd/p1f11_challenge/main.go` — 3-phase fork-exec orchestrator
-- `Challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
+- `challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
 
 **Approach:** real fork-exec subprocess, NOT a fresh-struct fallback. The
 orchestrator forks itself twice with `phase=write` and `phase=read`. The two
@@ -750,7 +750,7 @@ $ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" p1
 clean
 ```
 
-**`Challenges/p1-f11-session-resume/run.sh` end-to-end (build + run +
+**`challenges/p1-f11-session-resume/run.sh` end-to-end (build + run +
 in-script anti-bluff + cross-compile):** exits 0 with `==> P1-F11 challenge
 PASS`.
 
@@ -893,8 +893,8 @@ submodule and meta-repo.
 **Files added:**
 
 - `HelixCode/tests/integration/cmd/p1f12_challenge/main.go` — five-phase harness
-- `Challenges/p1-f12-multi-provider/CHALLENGE.md`
-- `Challenges/p1-f12-multi-provider/run.sh` (chmod +x; uses
+- `challenges/p1-f12-multi-provider/CHALLENGE.md`
+- `challenges/p1-f12-multi-provider/run.sh` (chmod +x; uses
   string-fragment regex construction so the script does not match the
   anti-bluff smoke regex itself)
 
@@ -989,7 +989,7 @@ $ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f12_challenge_linux
 **Anti-bluff smoke (verbatim):**
 
 ```
-$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f12_challenge/ Challenges/p1-f12-multi-provider/ 2>/dev/null && echo BLUFF || echo clean
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f12_challenge/ challenges/p1-f12-multi-provider/ 2>/dev/null && echo BLUFF || echo clean
 clean
 ```
 
@@ -1004,7 +1004,7 @@ factory, and on-disk wizard write/read paths and all passed.
 **Scope:** Tick all 11 F12 task boxes in plan + PROGRESS, run final
 verification battery, append close-out evidence, commit close-out, push
 to 4 meta-repo remotes (origin/github/gitlab/upstream) non-force, and
-push the `Challenges/` submodule to its single `origin` non-force
+push the `challenges/` submodule to its single `origin` non-force
 (mirror gap noted, deferred infra work).
 
 **Task SHAs (all 11 F12 commits, plus T10 SHA backfill):**
@@ -1117,7 +1117,7 @@ plus tview wizard with mode 0600 + O_EXCL writer, `--provider` flag,
 `HELIX_LLM_PROVIDER` env, `helixcode wizard` cobra subcommand, and
 runtime-evidence Challenge harness (LOCAL 11/11 PASS, CLOUD
 credential-gated). Pushed to all 4 meta-repo remotes
-(origin/github/gitlab/upstream) non-force; the `Challenges/` submodule
+(origin/github/gitlab/upstream) non-force; the `challenges/` submodule
 was pushed to its single `origin` non-force (mirror gap to
 github/gitlab/upstream is deferred infra work, consistent with F11
 close-out precedent).
@@ -1172,8 +1172,8 @@ Meta-repo SHA: (this commit)
 
 Files added:
 - `HelixCode/tests/integration/cmd/p1f13_challenge/main.go` — runtime-evidence harness with phases 0/A/B/C/D/E/F.
-- `Challenges/p1-f13-lsp-integration/CHALLENGE.md` — pass criteria + procedure.
-- `Challenges/p1-f13-lsp-integration/run.sh` — drives the harness, anti-bluff smoke (string-fragment regex), cross-compile.
+- `challenges/p1-f13-lsp-integration/CHALLENGE.md` — pass criteria + procedure.
+- `challenges/p1-f13-lsp-integration/run.sh` — drives the harness, anti-bluff smoke (string-fragment regex), cross-compile.
 
 Verbatim harness stdout (`/tmp/p1f13_challenge`):
 
@@ -1214,7 +1214,7 @@ $ ls -la /tmp/p1f13_challenge_linux
 Anti-bluff smoke (programme convention; both directories):
 
 ```
-$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f13_challenge/ ../Challenges/p1-f13-lsp-integration/ && echo BLUFF || echo clean
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f13_challenge/ ../challenges/p1-f13-lsp-integration/ && echo BLUFF || echo clean
 clean
 ```
 
@@ -1243,7 +1243,7 @@ Honest skip per F11/F12 precedent — counted as success.
 **Scope:** Tick all 12 F13 task boxes in plan + PROGRESS, run final
 verification battery, append close-out evidence, commit close-out, push
 to 4 meta-repo remotes (origin/github/gitlab/upstream) non-force, and
-push the `Challenges/` submodule to its single `origin` non-force
+push the `challenges/` submodule to its single `origin` non-force
 (mirror gap noted, deferred infra work, consistent with F11 + F12
 close-out precedent).
 
@@ -1362,7 +1362,7 @@ auto-trigger on `fs_edit` / `fs_write` / `multi_edit_commit` (attaches
 fake LSP server validates the entire pipeline deterministically. Full
 user surface: `/lsp` slash + `helixcode lsp {status,restart,list-servers,stop}`
 cobra. Pushed to all 4 meta-repo remotes (origin / github / gitlab /
-upstream) non-force; the `Challenges/` submodule was pushed to its
+upstream) non-force; the `challenges/` submodule was pushed to its
 single `origin` non-force (mirror gap to github / gitlab / upstream is
 deferred infra work, consistent with F11 + F12 close-out precedent).
 
@@ -1415,8 +1415,8 @@ slash; config at `~/.config/helixcode/sandbox.yaml`; macOS Seatbelt
 **Files created**
 
 - `HelixCode/tests/integration/cmd/p1f14_challenge/main.go` — runtime-evidence harness with helper-mode dispatch as the first line of `main()`, six phases (0/A/B/C/D/E), CONST-033 deny variants, default-DENY network probe via real curl inside bwrap, real native re-exec, and real on-disk YAML round-trip with mode/size assertion.
-- `Challenges/p1-f14-sandboxed-shell/CHALLENGE.md` — phase narrative, pass criteria, gated-skip semantics.
-- `Challenges/p1-f14-sandboxed-shell/run.sh` — orchestrator: builds harness, runs it, runs anti-bluff smoke (string-fragment regex), cross-compiles linux/amd64. `chmod +x` set.
+- `challenges/p1-f14-sandboxed-shell/CHALLENGE.md` — phase narrative, pass criteria, gated-skip semantics.
+- `challenges/p1-f14-sandboxed-shell/run.sh` — orchestrator: builds harness, runs it, runs anti-bluff smoke (string-fragment regex), cross-compiles linux/amd64. `chmod +x` set.
 
 **Verbatim harness stdout (real run, host has bwrap 0.11.1 + userns):**
 
@@ -1472,7 +1472,7 @@ $ ls -la /tmp/p1f14_challenge_linux
 **Anti-bluff smoke:**
 
 ```
-$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f14_challenge/ ../Challenges/p1-f14-sandboxed-shell/ && echo BLUFF || echo clean
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f14_challenge/ ../challenges/p1-f14-sandboxed-shell/ && echo BLUFF || echo clean
 clean
 ```
 
@@ -1498,7 +1498,7 @@ EXIT=0
 **Scope:** Tick all 12 F14 task boxes in plan + PROGRESS, run final
 verification battery, append close-out evidence, commit close-out, push
 to 4 meta-repo remotes (origin/github/gitlab/upstream) non-force, and
-push the `Challenges/` submodule to its single `origin` non-force
+push the `challenges/` submodule to its single `origin` non-force
 (mirror gap noted, deferred infra work, consistent with F11 + F12 + F13
 close-out precedent).
 
@@ -1629,7 +1629,7 @@ secret-safe YAML config (mode 0600, parent 0700) at
 `~/.config/helixcode/sandbox.yaml`. Surface: `shell_sandboxed` tool +
 `/sandbox` slash + the underlying `internal/tools/sandbox` package.
 Pushed to all 4 meta-repo remotes (origin / github / gitlab / upstream)
-non-force; the `Challenges/` submodule was pushed to its single
+non-force; the `challenges/` submodule was pushed to its single
 `origin` non-force (mirror gap to github / gitlab / upstream is
 deferred infra work, consistent with F11 + F12 + F13 close-out
 precedent).
@@ -1677,8 +1677,8 @@ disabled in v1.
 
 Files created:
 - `HelixCode/tests/integration/cmd/p1f15_challenge/main.go` — runtime-evidence harness
-- `Challenges/p1-f15-subagent-team/CHALLENGE.md` — challenge description (six phases)
-- `Challenges/p1-f15-subagent-team/run.sh` — orchestration script (build + run + smoke + cross-compile)
+- `challenges/p1-f15-subagent-team/CHALLENGE.md` — challenge description (six phases)
+- `challenges/p1-f15-subagent-team/run.sh` — orchestration script (build + run + smoke + cross-compile)
 
 Compile-check:
 ```
@@ -1726,7 +1726,7 @@ cross-compile OK 56688776 bytes
 
 run.sh execution (full pipeline including embedded smoke + cross-compile):
 ```
-$ bash Challenges/p1-f15-subagent-team/run.sh ; echo "EXIT=$?"
+$ bash challenges/p1-f15-subagent-team/run.sh ; echo "EXIT=$?"
 ==> build F15 challenge harness
 ==> run harness
 ==> P1-F15 challenge harness pid: 1413570
@@ -1764,7 +1764,7 @@ EXIT=0
 
 Anti-bluff smoke (both directories):
 ```
-$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f15_challenge/ ../Challenges/p1-f15-subagent-team/ && echo BLUFF || echo clean
+$ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/integration/cmd/p1f15_challenge/ ../challenges/p1-f15-subagent-team/ && echo BLUFF || echo clean
 clean
 ```
 
@@ -1936,8 +1936,8 @@ pushed to its single `origin` (mirror gap noted, deferred infra).
 
 **Files created:**
 - `HelixCode/tests/integration/cmd/p1f16_challenge/main.go` — 5-phase harness binary (build tag `testing_export`).
-- `Challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` — challenge spec.
-- `Challenges/p1-f16-opentelemetry-integration/run.sh` — driver (anti-self-match string-fragment regex).
+- `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` — challenge spec.
+- `challenges/p1-f16-opentelemetry-integration/run.sh` — driver (anti-self-match string-fragment regex).
 
 **Compile-check (with `-tags=testing_export`):**
 
@@ -1959,7 +1959,7 @@ $ file /tmp/p1f16_challenge_linux
 **Anti-bluff smoke (meta-repo root):**
 
 ```
-$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f16_challenge/ Challenges/p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f16_challenge/ challenges/p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
 clean
 ```
 
@@ -2174,12 +2174,12 @@ EXIT=0
 **Date:** 2026-05-06
 **Files:**
 - `HelixCode/tests/integration/cmd/p1f17_challenge/main.go` (Go harness; 7 always-runs phases against real `*multiedit.MultiFileEditor` per-tempdir).
-- `Challenges/p1-f17-smart-file-editing/CHALLENGE.md` (procedure + pass criteria + anti-bluff anchors).
-- `Challenges/p1-f17-smart-file-editing/run.sh` (set -euo pipefail; build, run, anti-bluff smoke with fragment-built regex, cross-compile linux).
+- `challenges/p1-f17-smart-file-editing/CHALLENGE.md` (procedure + pass criteria + anti-bluff anchors).
+- `challenges/p1-f17-smart-file-editing/run.sh` (set -euo pipefail; build, run, anti-bluff smoke with fragment-built regex, cross-compile linux).
 
 **Cross-compile:** `GOOS=linux GOARCH=amd64 go build -o /tmp/p1f17_challenge_linux ./tests/integration/cmd/p1f17_challenge` → 73 MB binary (clean).
 
-**Anti-bluff smoke:** `clean` over `tests/integration/cmd/p1f17_challenge/` + `Challenges/p1-f17-smart-file-editing/` (regex built from fragments).
+**Anti-bluff smoke:** `clean` over `tests/integration/cmd/p1f17_challenge/` + `challenges/p1-f17-smart-file-editing/` (regex built from fragments).
 
 **Verbatim harness stdout (real on-disk run; `INFO transaction …` lines from F08 multiedit elided for brevity):**
 
@@ -2354,8 +2354,8 @@ EXIT=0
 
 - `HelixCode/tests/integration/cmd/p1f18_challenge/main.go` — real Go program;
   five phases A-E, each carrying byte-level positive-evidence assertions.
-- `Challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` — narrative spec.
-- `Challenges/p1-f18-no-flicker-rendering/run.sh` — bash driver (build → run →
+- `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` — narrative spec.
+- `challenges/p1-f18-no-flicker-rendering/run.sh` — bash driver (build → run →
   anti-bluff smoke with string-fragment regex trick → cross-compile linux/amd64).
 
 **Verbatim runtime evidence (from `run.sh` end-to-end):**
@@ -2402,7 +2402,7 @@ $ file /tmp/p1f18_challenge_linux
 ```
 $ grep -rn "<bluff-regex>" HelixCode/internal/render/ HelixCode/tests/integration/cmd/p1f18_challenge/
 clean
-$ grep -rn "<bluff-regex>" Challenges/p1-f18-no-flicker-rendering/
+$ grep -rn "<bluff-regex>" challenges/p1-f18-no-flicker-rendering/
 clean
 ```
 
@@ -2514,10 +2514,10 @@ EXIT=0
 
 Files:
 - `HelixCode/tests/integration/cmd/p1f19_challenge/main.go` — 5-phase harness against real `bytes.Buffer` reader/writer.
-- `Challenges/p1-f19-ask-user-question/CHALLENGE.md` — challenge spec.
-- `Challenges/p1-f19-ask-user-question/run.sh` — driver (anti-self-match string-fragment regex; chmod +x).
+- `challenges/p1-f19-ask-user-question/CHALLENGE.md` — challenge spec.
+- `challenges/p1-f19-ask-user-question/run.sh` — driver (anti-self-match string-fragment regex; chmod +x).
 
-Verbatim runtime evidence (`./Challenges/p1-f19-ask-user-question/run.sh`):
+Verbatim runtime evidence (`./challenges/p1-f19-ask-user-question/run.sh`):
 
 ```
 ==> build F19 challenge harness
@@ -2652,8 +2652,8 @@ Two-line summary: F19 ships a real `ask_user` tool with non-TTY short-circuit (z
 ### P1-F20-T08 — Challenge harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-ZERO-COLOR + DEPTH-DETECT + YAML-MERGE)
 
 Files:
-- `Challenges/p1-f20-theme-system/CHALLENGE.md`
-- `Challenges/p1-f20-theme-system/run.sh` (executable)
+- `challenges/p1-f20-theme-system/CHALLENGE.md`
+- `challenges/p1-f20-theme-system/run.sh` (executable)
 - `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`
 
 Verbatim run.sh stdout (host):
@@ -2900,7 +2900,7 @@ already (DebateOrchestrator, kiro-cli, ollama-code).
 
 1. LLMsVerifier → `Dependencies/HelixDevelopment/LLMsVerifier/`
 2. containers   → `containers/`
-3. Security     → `Security/`
+3. Security     → `security/`
 4. helix_qa      → `helix_qa/`
 5. mcp_servers  → TBD at WP3.T03.05 (mcp_servers/ vs MCP/submodules/* — needs audit)
 
@@ -3091,7 +3091,7 @@ Consumer updates (HelixAgent):
 ### T03.02 — containers dedup (3 nested copies)
 
 Canonical: root `Containers` (kept).
-Removed: `HelixAgent/Containers`, `Challenges/Containers`, `HelixAgent/HelixLLM/submodules/Containers` (3 copies).
+Removed: `HelixAgent/Containers`, `challenges/Containers`, `HelixAgent/HelixLLM/submodules/Containers` (3 copies).
 
 | commit    | scope                                                    |
 |-----------|----------------------------------------------------------|
@@ -3104,7 +3104,7 @@ Removed: `HelixAgent/Containers`, `Challenges/Containers`, `HelixAgent/HelixLLM/
 Consumer updates:
 - `HelixAgent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: `Containers` removed from per-module loops (replaced with comment marker).
 - `HelixAgent/go.mod` `replace digital.vasic.containers => ../Containers` (committed in T03.03).
-- `Challenges/pkg/container/verifier.go` already uses runtime path-discovery (`findContainersDir()` walks `tools/containers`, `../tools/containers`, …) — no edit needed.
+- `challenges/pkg/container/verifier.go` already uses runtime path-discovery (`findContainersDir()` walks `tools/containers`, `../tools/containers`, …) — no edit needed.
 
 ### T03.03 — Security dedup (2 nested copies)
 
@@ -3163,11 +3163,11 @@ $ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|H
  e7c09c15... Security (heads/main)
 ```
 
-No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere under `HelixAgent/`, `Challenges/`, or `HelixAgent/HelixLLM/`.
+No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere under `HelixAgent/`, `challenges/`, or `HelixAgent/HelixLLM/`.
 
 ### Defects observed during execution
 
-1. `git submodule deinit` for nested-three-level submodules (e.g. `HelixAgent/HelixLLM/submodules/Security`) prints a non-fatal warning `error: could not lock config file .git/modules/HelixAgent/modules/HelixLLM/modules/submodules/Security/config: No such file or directory` because the per-submodule git dir was already pruned by an earlier WP1/WP2 operation. The deinit and `git rm` still succeed; the warning is cosmetic.
+1. `git submodule deinit` for nested-three-level submodules (e.g. `HelixAgent/HelixLLM/submodules/Security`) prints a non-fatal warning `error: could not lock config file .git/modules/HelixAgent/modules/HelixLLM/modules/submodules/security/config: No such file or directory` because the per-submodule git dir was already pruned by an earlier WP1/WP2 operation. The deinit and `git rm` still succeed; the warning is cosmetic.
 2. `git config --file .gitmodules --remove-section submodule.X` returns exit 1 with `fatal: no such section` when the section was already removed by a successful `git rm` — expected, suppressed via `|| true`.
 3. After `git rm` of a submodule path, the gitlink is auto-staged; passing the same path to a follow-up `git add` errors with `pathspec did not match any files` — solved by skipping the redundant add.
 
@@ -3542,7 +3542,7 @@ After WP2-WP7's mass moves/renames, swept all source code, tests, scripts, Docke
 | `HelixAgent/cli_agents_configs/` | 0 | 0 | None to fix |
 | `HelixAgent/LLMsVerifier` | 7 | 7 | `verify-llmsverifier-pin-parity.sh` rewritten as single-canonical guard; rest = specs/plans + frozen security reports |
 | `HelixAgent/Containers` | 3 | 2 | `internal/config/config.go` fallback path fixed; 2 residual = historical apply-report + plan |
-| `Challenges/Containers` | 3 | 3 | All historical (session log, BUGFIXES, audit report) |
+| `challenges/Containers` | 3 | 3 | All historical (session log, BUGFIXES, audit report) |
 | `HelixAgent/HelixQA` | 1 | 1 | spec/plan audit trail |
 | Other (`HelixAgent/HelixLLM/submodules/Containers`, `HelixAgent/HelixLLM/submodules/Security`, `HelixAgent/Security`, `HelixAgent/MCP-Servers`, `HelixAgent/external/mcp-servers/servers`) | 0 | 0 | Nothing to do |
 
@@ -3736,8 +3736,8 @@ None of substance. The only deviation from the WP10 task spec is that `examples/
 #### Artefacts produced
 
 - `HelixCode/tests/integration/cmd/p1_5_challenge/main.go` — 5-phase Go harness (stdlib only).
-- `Challenges/p1-5-foundation-cleanup/CHALLENGE.md` — phase-by-phase contract + anti-bluff anchors.
-- `Challenges/p1-5-foundation-cleanup/run.sh` — build + run + bluff smoke + cross-compile, F11–F20 anti-self-match string-fragment trick applied.
+- `challenges/p1-5-foundation-cleanup/CHALLENGE.md` — phase-by-phase contract + anti-bluff anchors.
+- `challenges/p1-5-foundation-cleanup/run.sh` — build + run + bluff smoke + cross-compile, F11–F20 anti-self-match string-fragment trick applied.
 
 #### Verbatim runtime evidence
 
@@ -3785,7 +3785,7 @@ $ cd Challenges && grep -rn "simulated\|for now\|TODO implement\|placeholder" p1
 1   # grep returned no matches → smoke clean
 ```
 
-The `Challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the harness output above plus its own `==> P1.5 foundation-cleanup challenge PASS` final line.
+The `challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the harness output above plus its own `==> P1.5 foundation-cleanup challenge PASS` final line.
 
 #### Phase-by-phase outcome
 
@@ -3800,7 +3800,7 @@ The `Challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the
 #### Defects / deviations
 
 1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `HelixAgent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `HelixAgent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
-2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `Challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
+2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
 3. **Snake-case regex relaxed for digit prefixes.** Initial regex `^[a-z][a-z0-9_]*$` flagged `01_analysis_step_01`, `06_diagrams_real`, etc. used throughout `docs/improvements/`. Relaxed to `^[a-z0-9][a-z0-9_]*$` to accept digit-prefixed sequence names; the rest of the snake_case discipline (lowercase + digits + underscores only) is preserved.
 4. **No commits or pushes performed in WP11.** Per CONST-043 + WP12 ownership of the push step, this WP only produces artefacts. The dual commit (Challenges submodule first, then meta-repo) is captured in the WP12 work plan.
 
@@ -3892,7 +3892,7 @@ All inner-module unit tests pass; pre-existing meta-repo build issues (out of P1
 | `HelixAgent/HelixMemory` | `c309f92` | N (FF, 1 ahead) | `c309f92` | `e464257..c309f92 main -> main` | `git@github.com:HelixDevelopment/HelixMemory.git` |
 | `HelixAgent/HelixSpecifier` | `53b8c98` | N (FF, 1 ahead) | `53b8c98` | `f1f9927..53b8c98 main -> main` | `git@github.com:HelixDevelopment/HelixSpecifier.git` |
 | `Containers` | `7bed5c5` | N (FF, 2 ahead) | `7bed5c5` | `2ba3e56..7bed5c5 main -> main` | `git@github.com:vasic-digital/Containers.git` |
-| `Security` | `a4c381b` | Y (NON-FF, 1 ahead 12 behind; `git rebase --skip` — WP9 1-line patch did not apply: target lines absent in upstream Security/CLAUDE.md, so the patch was correctly dropped) | `7fc1e26` (= upstream tip, no extra local commits) | already at remote tip after skip; no push needed | `git@github.com:HelixDevelopment/Security.git` |
+| `Security` | `a4c381b` | Y (NON-FF, 1 ahead 12 behind; `git rebase --skip` — WP9 1-line patch did not apply: target lines absent in upstream security/CLAUDE.md, so the patch was correctly dropped) | `7fc1e26` (= upstream tip, no extra local commits) | already at remote tip after skip; no push needed | `git@github.com:HelixDevelopment/Security.git` |
 | `HelixAgent` | `9a314ab7` | N (FF, 28 ahead — full P1.5-WP1 through P1.5-WP9 batch) | `9a314ab7` | `9a19ac12..9a314ab7 main -> main` | `git@github.com:HelixDevelopment/HelixAgent.git` |
 | `HelixQA` | `7f1c75a` | Y (NON-FF, 3 ahead 4 behind; clean rebase, 3 P1.5 commits replayed onto upstream's `f129a34`) | `33613a7` | `f129a34..33613a7 main -> main` | `git@github.com:HelixDevelopment/HelixQA.git` |
 | `Challenges` | `7e94f28` | N (FF, 4 ahead) | `7e94f28` | `4bf04bb..7e94f28 main -> main` | `git@github.com:vasic-digital/Challenges.git` |

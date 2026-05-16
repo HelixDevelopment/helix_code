@@ -108,7 +108,7 @@ The package layout under `HelixCode/internal/tools/browser/` keeps the existing 
 - `HelixCode/internal/commands/browser_command_test.go`.
 - `HelixCode/tests/integration/browser_test.go` — `//go:build integration`; gated on chromium availability via `chromedp` discovery; spawns a real `httptest.Server` serving fixture HTML; exercises navigate → snapshot → click → snapshot (assert mutation) → type → screenshot (PNG-magic) → close (assert subsequent require fails).
 - `HelixCode/tests/integration/cmd/p2f23_challenge/main.go` — Challenge harness.
-- `Challenges/p2-f23-cline-browser-tool/CHALLENGE.md` + `Challenges/p2-f23-cline-browser-tool/run.sh`.
+- `challenges/p2-f23-cline-browser-tool/CHALLENGE.md` + `challenges/p2-f23-cline-browser-tool/run.sh`.
 
 ### 3.2 Modified files
 
@@ -446,7 +446,7 @@ Tests:
 
 ### 6.3 Challenge harness — seven phases
 
-`Challenges/p2-f23-cline-browser-tool/run.sh` invokes `tests/integration/cmd/p2f23_challenge/main.go`:
+`challenges/p2-f23-cline-browser-tool/run.sh` invokes `tests/integration/cmd/p2f23_challenge/main.go`:
 
 1. **PHASE-A: NAVIGATE-AND-SNAPSHOT (always runs; gated on chromium)** — local `httptest.Server` with sentinel `FIXTURE_LOADED_42`; `browser_navigate(srv.URL)` then `browser_snapshot(mode=html)`; assert (i) content contains sentinel, (ii) `len(content) > 100`, (iii) Snapshot.URL ends with `/`, (iv) Title equals `F23-FIXTURE`.
 2. **PHASE-B: SNAPSHOT-MODE-TEXT (always runs)** — same fixture; `browser_snapshot(mode=text)`; assert content is a string (not HTML tags) AND contains `FIXTURE_LOADED_42`.
@@ -494,7 +494,7 @@ The Challenge MUST exit non-zero on any byte-evidence mismatch. Skip is permitte
 ## 9. Constitutional compliance
 
 - **CONST-035** (anti-bluff): every PASS in F23 carries positive runtime evidence — real chromium subprocess + real `httptest.Server` + real DOM-mutation byte differential + real PNG-magic verification + real close-then-fail-on-require evidence. The Challenge harness MUST exit non-zero on byte mismatch. Tests use real chromium discovery + real chromedp Run (mocks of chromedp are forbidden in integration tests per Rule 5).
-- **CONST-039** (Challenge required): F23 ships with `Challenges/p2-f23-cline-browser-tool/` (Challenge harness with 7 phases A-G).
+- **CONST-039** (Challenge required): F23 ships with `challenges/p2-f23-cline-browser-tool/` (Challenge harness with 7 phases A-G).
 - **CONST-042** (no secret leak): full page contents are NEVER logged at INFO level. The browser tools' loggers log only the URL (which is a CALLER input — the agent or user already knows it), the snapshot byte length, and the screenshot file path. A unit test scans `internal/tools/browser/*.go` for `logger\.Info\(.*\b(content|html|page|body|snapshot|outerHTML|innerText)\b` matches and FAILs on any hit (excluding test files). Per-tool descriptions and telemetry NEVER include the user-typed text from `browser_type`. Screenshot files live under user-only-readable `0600` mode in `$XDG_DATA_HOME/helixcode/browser/screenshots/`.
 - **CONST-043** (no force push, no auto-push): F23 emits zero `git push` commands. T10's close-out push to four remotes (origin / helixdev / vasic-digital / gitlab) is performed by the human operator with explicit per-push approval per CONST-043; the docs work itself doesn't push.
 - **CONST-033** (host power management): F23 emits no shell commands beyond chromedp's chromium-subprocess management (which is a runtime user-space process, not a power-state transition). No suspend/reboot/halt commands.

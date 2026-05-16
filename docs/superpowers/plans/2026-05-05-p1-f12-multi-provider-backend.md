@@ -297,7 +297,7 @@ Subject: `feat(P1-F12-T09): wire selector into main.go + helixcode wizard cobra 
 
 ## Task 10: Challenge with runtime evidence
 
-**Files:** `tests/integration/cmd/p1f12_challenge/main.go` (new), `Challenges/p1-f12-multi-provider/CHALLENGE.md` (new), `Challenges/p1-f12-multi-provider/run.sh` (new).
+**Files:** `tests/integration/cmd/p1f12_challenge/main.go` (new), `challenges/p1-f12-multi-provider/CHALLENGE.md` (new), `challenges/p1-f12-multi-provider/run.sh` (new).
 
 The harness MUST print two distinct sections:
 ```

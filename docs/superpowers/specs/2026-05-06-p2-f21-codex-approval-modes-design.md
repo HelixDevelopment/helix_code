@@ -130,7 +130,7 @@ Why slash + flag + env + config (Q5=A) and not cobra:
 - `HelixCode/internal/commands/approval_command_test.go`.
 - `HelixCode/tests/integration/approval_test.go` — `//go:build integration`; ALWAYS-runs; real registry + real F02 PE + real F14 SM + real Prompter (or fake-tty Prompter); per-mode behaviour assertions.
 - `HelixCode/tests/integration/cmd/p2f21_challenge/main.go` — runtime evidence harness.
-- `Challenges/p2-f21-codex-approval-modes/CHALLENGE.md` + `run.sh`.
+- `challenges/p2-f21-codex-approval-modes/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -653,7 +653,7 @@ The 2-second pause before `/approval set dangerously-bypass` swap is a deliberat
 - `TestApproval_Integration_RuntimeModeChange_NextCallSeesNewMode` — wire ModeSuggest; first Execute returns Deny; call `manager.Set(ModeAutoEdit)`; second Execute returns Allow + file created.
 - `TestApproval_Integration_FullAutoNoSandbox_FailsAtStartup` — construct manager with FullAuto but inject a SandboxMgr whose Capabilities().HasSandbox=false; assert ErrSandboxRequired returned at the construction-validation step.
 
-### 6.3 Challenge (`Challenges/p2-f21-codex-approval-modes/`)
+### 6.3 Challenge (`challenges/p2-f21-codex-approval-modes/`)
 
 Five-phase output skeleton (all always-run except sandbox phase which has skip-with-marker for bwrap-absent hosts):
 
@@ -729,7 +729,7 @@ The `full-auto` + `LevelRun` sandbox path delegates to F14, which is platform-co
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FIVE always-run phases (PHASE-C uses skip-with-marker for bwrap-absent hosts; the marker is honest). Every phase records positive runtime evidence: invocation counters (PHASE-A: counter == 0 proves gate fired before tool), filesystem-state assertions (PHASE-A: `os.IsNotExist`; PHASE-B/D: `os.ReadFile` content equality), Prompter-replay equality (PHASE-B: yes/no divergence), sandbox-spy invocation count (PHASE-C: count == 1), runtime mode-change observable in tool outcome (PHASE-D), F02 final-deny composition (PHASE-E). Every byte-evidence mismatch is a hard failure.
-- **CONST-039** — Challenge at `Challenges/p2-f21-codex-approval-modes/` + evidence harness at `tests/integration/cmd/p2f21_challenge/main.go`.
+- **CONST-039** — Challenge at `challenges/p2-f21-codex-approval-modes/` + evidence harness at `tests/integration/cmd/p2f21_challenge/main.go`.
 - **CONST-042 (No-Secret-Leak)** — approval YAML carries no secrets. The manager's logger NEVER logs the tool params at INFO level (the params may carry a path or shell command body); only mode-name + tool-name. A unit test scans `internal/approval/*.go` for `logger\.\bInfo\(.*\b(params|command|args|body)\b` matches and FAILs on any hit.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T09 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — `ApprovalManager` test seams are constructor-injected (`PolicyEngine`, `SandboxMgr`, `Prompter`, `SleepFunc`); no production code path uses a mock. Integration tests wire the **real** F02 PE, **real** F14 SM, real Prompter via F19; only the SleepFunc seam (for the dangerous-mode pause) and the test-only Spy on SandboxManager (a thin wrapper recording invocation counts) are test-injected.

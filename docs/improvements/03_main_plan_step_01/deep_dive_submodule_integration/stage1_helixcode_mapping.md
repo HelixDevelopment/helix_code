@@ -76,7 +76,7 @@ HelixCode/
 ├── CONSTITUTION.md
 ├── CONTINUE_HERE.md
 ├── CRUSH.md
-├── Challenges/                            ← SUBMODULE (vasic-digital/Challenges)
+├── challenges/                            ← SUBMODULE (vasic-digital/Challenges)
 ├── containers/                            ← SUBMODULE (vasic-digital/Containers)
 ├── DETAILED_IMPLEMENTATION_PLAN.md
 ├── DETAILED_IMPLEMENTATION_TRACKER.md
@@ -479,7 +479,7 @@ HelixCode/
 ├── SKIPPED_TESTS_ANALYSIS.md
 ├── SONARQUBE_SNYK_IMPLEMENTATION.md
 ├── START_HERE.md
-├── Security/                              ← DIRECTORY
+├── security/                              ← DIRECTORY
 ├── TEAM_DEVELOPMENT_BREAKDOWN.md
 ├── TESTING_PLAN.md
 ├── UNFINISHED_WORK_REPORT.md

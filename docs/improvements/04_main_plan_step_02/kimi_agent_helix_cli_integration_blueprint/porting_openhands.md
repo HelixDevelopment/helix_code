@@ -4276,7 +4276,7 @@ go run /tmp/test_capability.go
 - OpenHands Cloud — RBAC, audit trails, quotas, VPC deployment
 
 ### Target Location (HelixCode)
-- `pkg/enterprise/tenant.go` (NEW — fills `Security/` and partially `Auth/`)
+- `pkg/enterprise/tenant.go` (NEW — fills `security/` and partially `Auth/`)
 - `pkg/enterprise/rbac.go` (NEW)
 - `pkg/enterprise/audit.go` (NEW)
 - `pkg/enterprise/quota.go` (NEW)

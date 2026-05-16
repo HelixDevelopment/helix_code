@@ -28,7 +28,7 @@ Add `internal/commands/markdown_skills.go` (same package as F09 — reuses `pars
 - `HelixCode/internal/agent/skill_dispatcher.go` — auto-invocation hook called from the agent loop
 - `HelixCode/internal/agent/skill_dispatcher_test.go`
 - `HelixCode/tests/integration/skills_test.go` — `//go:build integration`
-- `Challenges/p1-f10-skills/CHALLENGE.md` + `run.sh`
+- `challenges/p1-f10-skills/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
 - `HelixCode/internal/agent/base_agent.go` (or wherever the LLM-call loop lives) — wire `skillDispatcher.Match(userInput)` before each LLM turn; on match, inject skill body as system message

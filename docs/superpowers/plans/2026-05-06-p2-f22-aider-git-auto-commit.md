@@ -889,7 +889,7 @@ Subject: `feat(P2-F22-T08): main.go wiring (env + autocommit construct + registr
 
 ## Task 9: Challenge harness + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f22_challenge/main.go`, new `Challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md`, new `Challenges/p2-f22-aider-git-auto-commit/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p2f22_challenge/main.go`, new `challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md`, new `challenges/p2-f22-aider-git-auto-commit/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -911,7 +911,7 @@ SUMMARY: PHASE-A=6/6 PASS; PHASE-B=3/3 PASS; PHASE-C=2/2 PASS; PHASE-D=3/3 PASS;
 
 The Challenge MUST exit non-zero on any byte-evidence mismatch. Anti-bluff smoke clean check appended. Verbatim output captured into `07_phase_2_evidence.md`. Dual commit (Challenges submodule + meta-repo bump).
 
-`Challenges/p2-f22-aider-git-auto-commit/run.sh` mirrors F19/F20/F21 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f22_challenge/main.go`.
+`challenges/p2-f22-aider-git-auto-commit/run.sh` mirrors F19/F20/F21 structure: `cd HelixCode && go run ./tests/integration/cmd/p2f22_challenge/main.go`.
 
 **Close-out** — tick all 9 items in PROGRESS, advance PROGRESS focus from F22 to "Phase 2 of CLI-Agent Fusion programme: F22 closed; F23 next candidate". Run final verification:
 

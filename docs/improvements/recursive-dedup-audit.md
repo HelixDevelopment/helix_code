@@ -8,7 +8,7 @@ Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-part
 - Total recursive submodules: **241**
 - `.gitmodules` files inspected: 6
   - `./.gitmodules` (meta-repo root)
-  - `./Challenges/.gitmodules`
+  - `./challenges/.gitmodules`
   - `./HelixAgent/.gitmodules`
   - `./HelixAgent/HelixLLM/.gitmodules`
   - `./helix_qa/.gitmodules`
@@ -76,7 +76,7 @@ replace digital.vasic.conversation  => ./submodules/conversation
 replace digital.vasic.challenges => ./Challenges
 ```
 
-It is duplicated by URL with the root `Challenges/` submodule, but removal would break HelixAgent's build. The two paths represent **different dependency-resolution roots**.
+It is duplicated by URL with the root `challenges/` submodule, but removal would break HelixAgent's build. The two paths represent **different dependency-resolution roots**.
 
 #### Architectural decision required (NOT performed)
 

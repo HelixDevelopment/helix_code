@@ -20,7 +20,7 @@ HelixCode/                            ← meta-repo (governance + submodule wiri
 │   ├── applications/                 ← desktop / mobile / TUI
 │   └── tests/                        ← unit, integration, e2e, security, perf
 ├── helix_qa/                          ← QA submodule
-├── Challenges/                       ← Challenge bank
+├── challenges/                       ← Challenge bank
 ├── containers/                       ← Docker/container artefacts
 └── docs/                             ← meta-level docs (this directory)
 ```
@@ -37,7 +37,7 @@ Every shipped feature followed this lifecycle. Use the same structure for new wo
 2. **Spec** — formalise scope, components, success criteria, and out-of-scope items.
 3. **Plan** — break into tasks at `docs/superpowers/plans/<date>-<id>-plan.md`. Each task has TDD-shaped acceptance criteria.
 4. **TDD** — `superpowers:test-driven-development`: red → green → refactor, mocks only in unit tests.
-5. **Challenge** — every feature ships a Challenge in `Challenges/banks/<feature>/` that exercises the real workflow.
+5. **Challenge** — every feature ships a Challenge in `challenges/banks/<feature>/` that exercises the real workflow.
 6. **Evidence** — append runtime evidence to `docs/improvements/PROGRESS.md`.
 7. **Commit + push** to all four remotes (origin / github / gitlab / upstream) per CONST-043.
 
@@ -167,7 +167,7 @@ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
   HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
 ```
 
-Phase 4 added mutation-tested content assertions; see `Challenges/banks/zero-bluff/` for templates.
+Phase 4 added mutation-tested content assertions; see `challenges/banks/zero-bluff/` for templates.
 
 ---
 

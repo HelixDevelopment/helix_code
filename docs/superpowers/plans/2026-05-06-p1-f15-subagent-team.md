@@ -577,7 +577,7 @@ Subject: `feat(P1-F15-T10): wire SubagentManager into main.go + /subagents + gat
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f15_challenge/main.go`, new `Challenges/p1-f15-subagent-team/CHALLENGE.md`, new `Challenges/p1-f15-subagent-team/run.sh`.
+**Files:** new `HelixCode/tests/integration/cmd/p1f15_challenge/main.go`, new `challenges/p1-f15-subagent-team/CHALLENGE.md`, new `challenges/p1-f15-subagent-team/run.sh`.
 
 Output skeleton:
 ```

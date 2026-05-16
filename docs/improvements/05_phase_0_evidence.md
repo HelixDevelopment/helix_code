@@ -245,13 +245,13 @@ Live exit code: **1** (expected — known credential files in tracked tree per T
 Filenames flagged by the scanner (file:line only — values redacted per CONST-042):
 
 ```
-./Challenges/panoptic/docs/SECURITY.md:462:
-./Challenges/panoptic/tests/security/panoptic_test.go:422:
-./Challenges/panoptic/tests/security/panoptic_test.go:423:
-./Challenges/panoptic/tests/security/panoptic_test.go:454:
-./Challenges/pkg/env/redact_test.go:37:
-./Challenges/pkg/env/redact_test.go:48:
-./Challenges/pkg/logging/redacting_logger_test.go:55:
+./challenges/panoptic/docs/SECURITY.md:462:
+./challenges/panoptic/tests/security/panoptic_test.go:422:
+./challenges/panoptic/tests/security/panoptic_test.go:423:
+./challenges/panoptic/tests/security/panoptic_test.go:454:
+./challenges/pkg/env/redact_test.go:37:
+./challenges/pkg/env/redact_test.go:48:
+./challenges/pkg/logging/redacting_logger_test.go:55:
 ./docs/COMPLETE_CLI_REFERENCE.md:908:
 ./docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md:833:
 ./docs/troubleshooting/guide.md:649:
@@ -274,7 +274,7 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 ./HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073:
 ./HelixCode/test/workers/ssh_keys/id_rsa:1:
 ./helix_qa/pkg/llm/google_test.go:334:
-./Security/pkg/securestorage/securestorage_test.go:129:
+./security/pkg/securestorage/securestorage_test.go:129:
 ```
 
 ### Findings
@@ -294,7 +294,7 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 
 **Not-tracked files flagged** (untracked working-tree files — not a commit risk):
 - `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
-- `Challenges/panoptic/...`, `helix_qa/...`, `Security/...`: submodule working-tree files, not tracked at root
+- `challenges/panoptic/...`, `helix_qa/...`, `security/...`: submodule working-tree files, not tracked at root
 
 **The 3 pre-existing tracked credentials from T06 polish:**
 - `HelixCode/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)

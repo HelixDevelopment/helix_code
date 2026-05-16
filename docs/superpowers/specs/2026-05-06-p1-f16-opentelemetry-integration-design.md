@@ -113,7 +113,7 @@ Shutdown: at process exit, `TelemetryProvider.Shutdown(ctx)` calls `tp.ForceFlus
 - `HelixCode/internal/commands/telemetry_command_test.go`.
 - `HelixCode/tests/integration/telemetry_test.go` — `//go:build integration` (gating per §5.2).
 - `HelixCode/tests/integration/cmd/p1f16_challenge/main.go` — runtime evidence harness with in-tree fake OTLP/HTTP receiver.
-- `Challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` + `run.sh`.
+- `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
@@ -579,7 +579,7 @@ The Challenge harness's fake-receiver exit-code logic uses positive evidence: `i
 - `TestTelemetry_AgentIteration_RealLLMCall_StdoutExport` — runs `BaseAgent.executeTaskWithLLM` with `FakeLLMProvider` + stdout exporter; asserts span name `agent.iteration` appears and counter increments.
 - `TestTelemetry_NoOp_FastPath_RealRegistry` — telemetry disabled; runs 1000 tool calls; asserts execution time stays within 5% of the un-instrumented baseline (a regression-detector for accidental work in the no-op path).
 
-### 6.3 Challenge (`Challenges/p1-f16-opentelemetry-integration/`)
+### 6.3 Challenge (`challenges/p1-f16-opentelemetry-integration/`)
 
 Five-phase output skeleton:
 
@@ -638,7 +638,7 @@ OTel Go SDK is pure Go (no CGO) and supports `linux/amd64`, `linux/arm64`, `darw
 ## 9. Constitutional compliance
 
 - **§11.9 / CONST-035** — Challenge has FIVE phases. STDOUT, FAKE-OTLP-HTTP, FILTER, and NOOP always run; REAL-COLLECTOR is gated and never claims PASS without runtime evidence. The five real-execution criteria in §5.2 each map to a unit + Challenge assertion. Span-count-zero is a hard Challenge failure.
-- **CONST-039** — Challenge at `Challenges/p1-f16-opentelemetry-integration/` + evidence harness at `tests/integration/cmd/p1f16_challenge/main.go`.
+- **CONST-039** — Challenge at `challenges/p1-f16-opentelemetry-integration/` + evidence harness at `tests/integration/cmd/p1f16_challenge/main.go`.
 - **CONST-042 (No-Secret-Leak)** — `attribute_filter.go` enforces the blocklist for any user-provided attributes. `DefaultBlockedAttributeKeys` covers credential-shaped keys + prompt-body keys. Prompt body is NEVER added as a span attribute. `TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute` asserts this. The Challenge's FILTER phase deliberately injects `api_key=sk-abc-123` and `prompt=<body>` and asserts they are dropped from captured exports.
 - **CONST-043 (No-Force-Push)** — close-out task pushes to all four remotes non-force; explicit user authorization is requested at T12 before pushing.
 - **No-Mocks-In-Production (Universal Rule 2)** — `TelemetryProvider`, all three exporters, the three instrumentation sites, and the `/telemetry` slash are real. `tracetest.SpanRecorder` and the OTel `metric/sdk/metricdata` reader are TEST-ONLY scoped under `_test.go` files; the in-tree fake OTLP/HTTP receiver is the Challenge harness ONLY (under `tests/integration/cmd/p1f16_challenge/`) and is not linked from production paths.

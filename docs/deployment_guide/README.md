@@ -302,9 +302,9 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 |---|---|---|
 | `HelixCode/` | Core Go application | yes |
 | `helix_qa/` | QA + challenge orchestration | recommended |
-| `Challenges/` | Challenge bank | recommended for verification |
+| `challenges/` | Challenge bank | recommended for verification |
 | `containers/` | Docker/container artefacts | yes |
-| `Security/` | Security tooling | yes |
+| `security/` | Security tooling | yes |
 | `assets/` | Logos, themes, brand | optional |
 | `github_pages_website/` | Marketing site | optional |
 | `Dependencies/` | LLama_CPP, Ollama, HuggingFace_Hub | as needed |
