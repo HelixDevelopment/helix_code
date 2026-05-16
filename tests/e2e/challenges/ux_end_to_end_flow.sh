@@ -31,7 +31,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT"
 
-CLI_BIN="${HELIX_CLI_BIN:-HelixCode/bin/cli}"
+CLI_BIN="${HELIX_CLI_BIN:-helix_code/bin/cli}"
 TIMEOUT_SEC="${UX_CLI_TIMEOUT_SEC:-30}"
 BOGUS_MODEL="${UX_BOGUS_MODEL:-bogus-model-that-does-not-exist-xyz}"
 
@@ -68,7 +68,7 @@ echo
 echo "[1/6] Binary-presence dispatch..."
 if [[ ! -x "$CLI_BIN" ]]; then
     echo "  SKIP: $CLI_BIN not found — SKIP-OK: #env-binary-missing"
-    echo "  (run \`cd HelixCode && make build\` to produce ./bin/cli)"
+    echo "  (run \`cd helix_code && make build\` to produce ./bin/cli)"
     echo
     echo "=== UX End-to-End Flow Challenge: PASSED (SKIP-OK) ==="
     exit 0

@@ -17,23 +17,23 @@ echo "=== @-file-mention REPL anti-bluff Challenge ==="
 
 # Step 1: structural — both helper functions present in source.
 echo "[1/5] Structural: helpers wired in cmd/cli/main.go..."
-if ! grep -q 'func expandAtMentions(prompt \*string)' HelixCode/cmd/cli/main.go; then
+if ! grep -q 'func expandAtMentions(prompt \*string)' helix_code/cmd/cli/main.go; then
     echo "  FAIL: expandAtMentions helper missing"; exit 1
 fi
-if ! grep -q 'func atMentionTokens(text string)' HelixCode/cmd/cli/main.go; then
+if ! grep -q 'func atMentionTokens(text string)' helix_code/cmd/cli/main.go; then
     echo "  FAIL: atMentionTokens helper missing"; exit 1
 fi
-if ! grep -q 'expandAtMentions(&promptToSend)' HelixCode/cmd/cli/main.go; then
+if ! grep -q 'expandAtMentions(&promptToSend)' helix_code/cmd/cli/main.go; then
     echo "  FAIL: handleInteractive doesn't call expandAtMentions"; exit 1
 fi
 echo "  PASS: source has expandAtMentions + atMentionTokens + REPL call-site"
 
 # Step 2: structural — unit tests present.
 echo "[2/5] Structural: unit tests present..."
-if [ ! -f HelixCode/cmd/cli/at_mentions_test.go ]; then
+if [ ! -f helix_code/cmd/cli/at_mentions_test.go ]; then
     echo "  FAIL: at_mentions_test.go missing"; exit 1
 fi
-test_count=$(grep -c '^func Test' HelixCode/cmd/cli/at_mentions_test.go)
+test_count=$(grep -c '^func Test' helix_code/cmd/cli/at_mentions_test.go)
 if [ "$test_count" -lt 5 ]; then
     echo "  FAIL: only $test_count test funcs (want ≥5 covering tokens + attach + miss + oversize + dir)"
     exit 1
@@ -42,7 +42,7 @@ echo "  PASS: $test_count unit-test functions present"
 
 # Step 3: runtime — unit tests pass.
 echo "[3/5] Runtime: unit tests pass..."
-( cd HelixCode && go test -count=1 -run "TestAtMentionTokens|TestExpandAtMentions" ./cmd/cli/ ) || {
+( cd helix_code && go test -count=1 -run "TestAtMentionTokens|TestExpandAtMentions" ./cmd/cli/ ) || {
     echo "  FAIL: unit tests do not pass"; exit 1
 }
 echo "  PASS: TestAtMentionTokens + TestExpandAtMentions* all green"
@@ -72,8 +72,8 @@ PROVIDER=groq
 echo "  Using provider: $PROVIDER"
 
 # Build CLI if missing.
-if [ ! -x HelixCode/bin/cli ]; then
-    ( cd HelixCode && go build -o bin/cli ./cmd/cli ) || { echo "  FAIL: CLI build failed"; exit 1; }
+if [ ! -x helix_code/bin/cli ]; then
+    ( cd helix_code && go build -o bin/cli ./cmd/cli ) || { echo "  FAIL: CLI build failed"; exit 1; }
 fi
 
 # Plant a known-content file. The LLM should be able to identify the
@@ -95,7 +95,7 @@ trap "rm -f $TMP_FILE" EXIT
 # literal `@<path>` token and answers with no knowledge of the
 # sentinel.
 LIVE_OUT=$(printf 'Read @%s and quote ONLY the sentinel string verbatim, nothing else.\n/exit\n' "$TMP_FILE" | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 
 # Invariant (a): the 📎 attachment marker was emitted.
 if ! printf '%s' "$LIVE_OUT" | grep -q "📎 attached: $TMP_FILE"; then
@@ -122,7 +122,7 @@ echo "  PASS: 📎-marker emitted + sentinel echoed back by LLM + clean shutdown
 # and MUST NOT crash. Anti-bluff: prove the failure mode is graceful.
 echo "[5/5] Miss-handling: non-existent file stays verbatim..."
 MISS_OUT=$(printf 'Say only the word "noted"\n/exit\n' | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 # Should reach Goodbye even with no @-mention.
 if ! printf '%s' "$MISS_OUT" | grep -q 'Goodbye!'; then
     echo "  FAIL: REPL didn't shutdown cleanly on plain-prompt turn"
@@ -132,7 +132,7 @@ fi
 # A separate run with a @-mention of a non-existent file should NOT emit
 # the 📎-marker (no attachment) and SHOULD still reach Goodbye.
 GHOST_OUT=$(printf 'Say only the word "ok": @/tmp/this/path/does/not/exist.zzz\n/exit\n' | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 if printf '%s' "$GHOST_OUT" | grep -q "📎 attached: /tmp/this/path/does/not/exist.zzz"; then
     echo "  FAIL: REPL emitted attachment marker for non-existent file (bluff!)"
     exit 1

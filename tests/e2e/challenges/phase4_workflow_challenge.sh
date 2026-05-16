@@ -4,7 +4,7 @@ set -e
 
 echo "=== Phase 4 Anti-Bluff Challenge: Workflow & Session ==="
 
-cd HelixCode
+cd helix_code
 
 # Test 1: Workflow package builds
 echo "[1/4] Checking workflow package..."

@@ -4,7 +4,7 @@ set -e
 
 echo "=== Phase 3 Anti-Bluff Challenge: Worker & Distributed ==="
 
-cd HelixCode
+cd helix_code
 
 # Test 1: Worker package builds
 echo "[1/4] Checking worker package..."

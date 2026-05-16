@@ -4,7 +4,7 @@
 # types from Task #266.
 #
 # What this Challenge proves:
-#   - The `HelixCode/bin/cli` binary exists and is executable. If
+#   - The `helix_code/bin/cli` binary exists and is executable. If
 #     not, SKIP-OK with `#env-binary-missing` (operator's local
 #     build hasn't been produced yet — honest skip beats fake pass).
 #   - `cli -help` shows the documented flags AND known labels. Empty
@@ -27,7 +27,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT"
 
-CLI_BIN="${HELIX_CLI_BIN:-HelixCode/bin/cli}"
+CLI_BIN="${HELIX_CLI_BIN:-helix_code/bin/cli}"
 TIMEOUT_SEC="${UI_CLI_TIMEOUT_SEC:-30}"
 MIN_MODELS="${UI_MIN_MODELS:-1}"
 
@@ -41,7 +41,7 @@ echo
 echo "[1/6] Binary-presence dispatch..."
 if [[ ! -x "$CLI_BIN" ]]; then
     echo "  SKIP: $CLI_BIN not found or not executable — SKIP-OK: #env-binary-missing"
-    echo "  (run \`cd HelixCode && make build\` to produce ./bin/cli)"
+    echo "  (run \`cd helix_code && make build\` to produce ./bin/cli)"
     echo
     echo "=== UI Terminal-Interaction Challenge: PASSED (SKIP-OK) ==="
     exit 0

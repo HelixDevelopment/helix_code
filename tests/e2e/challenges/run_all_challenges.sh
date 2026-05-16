@@ -98,7 +98,7 @@ GPTME_SCRIPTS=(
     "tests/e2e/challenges/scaling_horizontal.sh"
     # UI Terminal-Interaction anti-bluff Challenge (round 41) —
     # 5th of the 6 missing test types per Task #266. Drives the
-    # built `HelixCode/bin/cli` binary non-interactively across
+    # built `helix_code/bin/cli` binary non-interactively across
     # -help / -health / -list-models flags + asserts on the
     # actual stdout (labels present, structured entries, status
     # verdicts). Catches "CLI exits 0 with empty/garbled output"

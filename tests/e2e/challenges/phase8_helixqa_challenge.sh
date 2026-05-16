@@ -24,16 +24,16 @@ echo "  PASS: Dependency submodules checked"
 
 # Test 3: Verify HelixCode go.mod has replace directives
 echo "[3/10] Checking HelixCode go.mod replace directives..."
-grep -q 'digital.vasic.helixqa => ../HelixQA' HelixCode/go.mod || (echo "FAIL: helix_qa replace missing"; exit 1)
-grep -q 'digital.vasic.docprocessor => ../Dependencies/HelixDevelopment/DocProcessor' HelixCode/go.mod || (echo "FAIL: DocProcessor replace missing"; exit 1)
-grep -q 'digital.vasic.llmorchestrator => ../Dependencies/HelixDevelopment/LLMOrchestrator' HelixCode/go.mod || (echo "FAIL: LLMOrchestrator replace missing"; exit 1)
+grep -q 'digital.vasic.helixqa => ../helix_qa' helix_code/go.mod || (echo "FAIL: helix_qa replace missing"; exit 1)
+grep -q 'digital.vasic.docprocessor => ../Dependencies/HelixDevelopment/DocProcessor' helix_code/go.mod || (echo "FAIL: DocProcessor replace missing"; exit 1)
+grep -q 'digital.vasic.llmorchestrator => ../Dependencies/HelixDevelopment/LLMOrchestrator' helix_code/go.mod || (echo "FAIL: LLMOrchestrator replace missing"; exit 1)
 echo "  PASS: Replace directives present"
 
 # Test 4: Verify helix_qa wrapper package exists and compiles
 echo "[4/10] Checking helix_qa wrapper package..."
-test -f HelixCode/internal/helixqa/wrapper.go || (echo "FAIL: wrapper.go missing"; exit 1)
-test -f HelixCode/internal/helixqa/wrapper_test.go || (echo "FAIL: wrapper_test.go missing"; exit 1)
-cd HelixCode
+test -f helix_code/internal/helixqa/wrapper.go || (echo "FAIL: wrapper.go missing"; exit 1)
+test -f helix_code/internal/helixqa/wrapper_test.go || (echo "FAIL: wrapper_test.go missing"; exit 1)
+cd helix_code
 go build ./internal/helixqa/... || (echo "FAIL: helixqa package build failed"; exit 1)
 echo "  PASS: helix_qa wrapper package builds"
 
@@ -77,7 +77,7 @@ echo "  PASS: TUI QA dashboard present and compiles"
 
 # Test 11: Verify screenshot engines compile in HelixQA
 echo "[11/11] Checking helix_qa screenshot engines..."
-cd ../HelixQA
+cd ../helix_qa
 go build ./pkg/screenshot/... || (echo "FAIL: screenshot package build failed"; exit 1)
 go test ./pkg/screenshot/... -timeout 30s -count=1 || (echo "FAIL: screenshot tests failed"; exit 1)
 echo "  PASS: Screenshot engines compile and tests pass"

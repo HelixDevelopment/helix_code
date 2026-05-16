@@ -44,7 +44,7 @@ echo "[3/5] Checking HelixCode server on :8080..."
 if ! curl -fsS -m 3 http://localhost:8080/health >/dev/null 2>&1; then
     echo "  HelixCode not up; booting briefly for the Challenge..."
     HC_BIN="/tmp/helixcode-server-${USER}-$$"
-    (cd HelixCode && go build -o "$HC_BIN" ./cmd/server)
+    (cd helix_code && go build -o "$HC_BIN" ./cmd/server)
     HELIX_DATABASE_HOST=127.0.0.1 HELIX_DATABASE_PORT=15432 \
         HELIX_DATABASE_USER=helix HELIX_DATABASE_NAME=helixcode_prod \
         HELIX_DATABASE_PASSWORD=helixpass \

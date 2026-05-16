@@ -11,7 +11,7 @@ echo "Verifying Role-typed posture (ApplyRoleDefaults) with positive runtime evi
 
 # Step 1: package builds
 echo "[1/4] Building internal/agent/subagent/..."
-cd HelixCode
+cd helix_code
 go build ./internal/agent/subagent/... || (echo "FAIL: subagent package build failed"; exit 1)
 echo "  PASS: subagent package builds"
 

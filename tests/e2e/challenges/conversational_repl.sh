@@ -18,23 +18,23 @@ echo "=== Conversational REPL anti-bluff Challenge ==="
 
 # Step 1: Build / verify CLI exists.
 echo "[1/6] Checking CLI binary..."
-if [ ! -x HelixCode/bin/cli ]; then
+if [ ! -x helix_code/bin/cli ]; then
     echo "  Building CLI..."
-    (cd HelixCode && go build -o bin/cli ./cmd/cli) || {
+    (cd helix_code && go build -o bin/cli ./cmd/cli) || {
         echo "  FAIL: CLI build failed"; exit 1
     }
 fi
-echo "  PASS: HelixCode/bin/cli present"
+echo "  PASS: helix_code/bin/cli present"
 
 # Step 2: Verify the source of the conversational REPL is in place. This
 # is a STRUCTURAL gate (CONST-035 §11.9 forbids structural-only PASS;
 # this gate is PAIRED with the runtime gate in step 4 below).
 echo "[2/6] Verifying conversational REPL source..."
-if ! grep -q 'bufio.NewScanner(os.Stdin)' HelixCode/cmd/cli/main.go; then
+if ! grep -q 'bufio.NewScanner(os.Stdin)' helix_code/cmd/cli/main.go; then
     echo "  FAIL: REPL is not using bufio.Scanner (regression to fmt.Scanln word-only?)"
     exit 1
 fi
-if ! grep -q 'c.llmProvider.Generate(ctx, req)' HelixCode/cmd/cli/main.go; then
+if ! grep -q 'c.llmProvider.Generate(ctx, req)' helix_code/cmd/cli/main.go; then
     echo "  FAIL: REPL never calls provider.Generate (regression to slash-only commands?)"
     exit 1
 fi
@@ -42,7 +42,7 @@ echo "  PASS: bufio.Scanner + provider.Generate wired in handleInteractive"
 
 # Step 3: Verify /exit slash command works (TTY-pipe-safe regression test).
 echo "[3/6] Verifying /exit clean shutdown..."
-OUTPUT=$(printf '/exit\n' | timeout 15 ./HelixCode/bin/cli 2>&1 || true)
+OUTPUT=$(printf '/exit\n' | timeout 15 ./helix_code/bin/cli 2>&1 || true)
 if ! printf '%s' "$OUTPUT" | grep -q 'Helix CLI Interactive Mode'; then
     echo "  FAIL: REPL didn't print its banner"
     printf '%s\n' "$OUTPUT" | tail -10
@@ -87,7 +87,7 @@ PROVIDER=groq
 echo "  Using provider: $PROVIDER"
 
 LIVE_OUT=$(printf 'Reply with the single word: four\n/exit\n' | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 
 # Anti-bluff invariants on the captured output:
 #   (a) The REPL banner was emitted (proves we entered the conversational path)
@@ -129,7 +129,7 @@ echo "  PASS: live LLM round-trip emitted banner + ≥2 helix prompts + token st
 # would make the model answer "I don't know" or change topic entirely.
 echo "[5/6] Multi-turn conversation memory..."
 MT_OUT=$(printf 'What is 2+2?\nNow what is that plus 3?\n/exit\n' | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 # Anti-bluff: second turn must mention BOTH the prior result (4) AND
 # the new operation (+3, equals 7). A regression that lost context
 # would produce a response that doesn't reference the prior turn.
@@ -145,7 +145,7 @@ echo "  PASS: multi-turn context preserved across turns"
 # leak prior context.
 echo "[6/6] /clear context-reset..."
 CL_OUT=$(printf 'What is 2+2?\n/clear\nWhat number did I just ask about?\n/exit\n' | \
-    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./HelixCode/bin/cli 2>&1 || true)
+    HELIX_LLM_PROVIDER=$PROVIDER timeout 60 ./helix_code/bin/cli 2>&1 || true)
 if ! printf '%s' "$CL_OUT" | grep -q '(conversation history cleared)'; then
     echo "  FAIL: /clear command didn't emit confirmation"
     printf '%s\n' "$CL_OUT" | tail -10

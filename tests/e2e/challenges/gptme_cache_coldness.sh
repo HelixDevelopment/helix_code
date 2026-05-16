@@ -11,7 +11,7 @@ echo "Verifying CacheAwareness IsCacheLikelyCold with positive runtime evidence"
 
 # Step 1: package builds
 echo "[1/4] Building internal/llm/..."
-cd HelixCode
+cd helix_code
 go build ./internal/llm/... || (echo "FAIL: llm package build failed"; exit 1)
 echo "  PASS: llm package builds"
 

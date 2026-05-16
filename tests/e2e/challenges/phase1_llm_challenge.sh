@@ -9,12 +9,12 @@ echo "Verifying real LLM integration (no simulations)"
 
 # Test 1: Check CLI binary exists
 echo "[1/5] Checking CLI binary..."
-test -f HelixCode/bin/cli || (echo "FAIL: CLI binary not found"; exit 1)
+test -f helix_code/bin/cli || (echo "FAIL: CLI binary not found"; exit 1)
 echo "  PASS: CLI binary exists"
 
 # Test 2: Check LLM package builds
 echo "[2/5] Checking LLM package builds..."
-cd HelixCode; go build ./internal/llm/... || (echo "FAIL: LLM package build failed"; exit 1)
+cd helix_code; go build ./internal/llm/... || (echo "FAIL: LLM package build failed"; exit 1)
 echo "  PASS: LLM package builds"
 
 # Test 3: Run LLM unit tests (no mocks) — exit-code based (CONST-035 anti-bluff)

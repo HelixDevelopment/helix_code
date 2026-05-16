@@ -4,7 +4,7 @@ set -e
 
 echo "=== Phase 6 Anti-Bluff Challenge: Testing & Coverage ==="
 
-cd HelixCode
+cd helix_code
 
 # Test 1: Check test coverage for auth (should be high)
 echo "[1/5] Checking auth test coverage..."
@@ -22,8 +22,8 @@ echo "  PASS: Agent coverage check passed"
 
 # Test 3: Run all unit tests (no mocks above unit level) — exit-code based (CONST-035 anti-bluff)
 # Note: this script already cd'd to HelixCode at the top; do NOT cd again
-# (the prior form `cd HelixCode && go test ... | grep -q FAIL` silently
-# passed because the second `cd HelixCode` failed (already there) and
+# (the prior form `cd helix_code && go test ... | grep -q FAIL` silently
+# passed because the second `cd helix_code` failed (already there) and
 # the && shortcut skipped the test entirely — the grep then saw no
 # input, returned non-zero, and the `&& exit 1` never fired. Double
 # bluff: failed cd masked by failed grep, all reported as PASS.)

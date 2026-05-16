@@ -4,7 +4,7 @@ set -e
 
 echo "=== Phase 5 Anti-Bluff Challenge: MCP, Memory, Notifications ==="
 
-cd HelixCode
+cd helix_code
 
 # Test 1: MCP package builds
 echo "[1/5] Checking MCP package..."

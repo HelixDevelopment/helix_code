@@ -13,14 +13,14 @@ echo "  PASS: All governance files exist"
 
 # Test 2: Verify docker config exists
 echo "[2/6] Checking Docker configuration..."
-test -f HelixCode/docker-compose.yml || (echo "FAIL: docker-compose.yml missing"; exit 1)
-test -f HelixCode/Dockerfile || (echo "FAIL: Dockerfile missing"; exit 1)
+test -f helix_code/docker-compose.yml || (echo "FAIL: docker-compose.yml missing"; exit 1)
+test -f helix_code/Dockerfile || (echo "FAIL: Dockerfile missing"; exit 1)
 test -f docker/docker-entrypoint.sh || (echo "FAIL: docker-entrypoint.sh missing"; exit 1)
 echo "  PASS: Docker config exists"
 
 # Test 3: Verify deployment package builds
 echo "[3/6] Checking deployment package..."
-cd HelixCode; go build ./internal/deployment/... || (echo "FAIL: Deployment build failed"; exit 1)
+cd helix_code; go build ./internal/deployment/... || (echo "FAIL: Deployment build failed"; exit 1)
 echo "  PASS: Deployment package builds"
 
 # Test 4: Run deployment tests — exit-code based (CONST-035 anti-bluff)

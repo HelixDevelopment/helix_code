@@ -6,7 +6,7 @@ echo "=== Phase 2 Anti-Bluff Challenge: Tools & Editor ==="
 
 # Test 1: Tools package builds
 echo "[1/4] Checking tools package..."
-cd HelixCode; go build ./internal/tools/... || (echo "FAIL: Tools build failed"; exit 1)
+cd helix_code; go build ./internal/tools/... || (echo "FAIL: Tools build failed"; exit 1)
 echo "  PASS: Tools package builds"
 
 # Test 2: Editor package builds

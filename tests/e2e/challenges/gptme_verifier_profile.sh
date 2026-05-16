@@ -11,7 +11,7 @@ echo "Verifying verifier profile resolution with positive runtime evidence"
 
 # Step 1: package builds
 echo "[1/4] Building internal/agent/profiles/..."
-cd HelixCode
+cd helix_code
 go build ./internal/agent/profiles/... || (echo "FAIL: profiles package build failed"; exit 1)
 echo "  PASS: profiles package builds"
 
