@@ -257,9 +257,9 @@ Line 303: helixConfig.APIKeys undefined
 
 ## 🌐 WEBSITE CONTENT
 
-### 7. **Github-Pages-Website Status**
+### 7. **github_pages_website Status**
 
-**Location**: `/Users/milosvasic/Projects/HelixCode/Github-Pages-Website/docs/`
+**Location**: `/Users/milosvasic/Projects/HelixCode/github_pages_website/docs/`
 **Overall Status**: 85% complete
 
 #### ✅ Complete Pages:

@@ -226,7 +226,7 @@ ls -la bin/
 ### Build Pipeline Integration
 
 - [x] Docs build before release
-- [x] Assets include documentation
+- [x] assets include documentation
 - [x] Build script includes docs
 - [x] Can skip docs with flag
 - [x] Build info includes doc status

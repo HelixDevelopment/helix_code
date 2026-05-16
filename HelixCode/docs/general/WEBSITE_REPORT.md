@@ -35,7 +35,7 @@ docs/
 ├── manual/
 │   ├── index.html         (1,185 lines) - User manual
 │   └── manual.css         (463 lines)  - Manual-specific styles
-└── images/                - Assets directory (placeholder)
+└── images/                - assets directory (placeholder)
 ```
 
 ### File Statistics

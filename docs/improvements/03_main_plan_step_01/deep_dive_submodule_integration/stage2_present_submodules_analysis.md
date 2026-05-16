@@ -396,7 +396,7 @@ pkg/
   metrics/       Prometheus-compatible challenge metrics
   plugin/        Plugin system for custom challenge types and assertions
   infra/         Infrastructure bridge to digital.vasic.containers
-  panoptic/      8 Panoptic-specific evaluators + CLI adapter
+  panoptic/      8 panoptic-specific evaluators + CLI adapter
   userflow/      Multi-platform automation: 8 interfaces, 21 implementations, 19 templates
 cmd/
   userflow-runner/  CLI runner for user flow challenges
@@ -455,7 +455,7 @@ type Plugin interface {
 - `mobile_activity_visible`, `mobile_element_exists`, `build_success`
 - `test_pass_rate`, and more
 
-**8 Panoptic Evaluators:**
+**8 panoptic Evaluators:**
 - `screenshot_exists`, `video_exists`, `no_ui_errors`
 - `ai_confidence_above`, `all_apps_passed`
 - `max_duration`, `report_exists`, `app_count`
@@ -490,7 +490,7 @@ Registry.Register(challenges)
 
 ### 3.5 How It Verifies AI Capabilities
 
-**Panoptic System (`pkg/panoptic`):**
+**panoptic System (`pkg/panoptic`):**
 - Integrates with vision AI for UI analysis
 - Captures screenshots and videos as evidence
 - Evaluates AI confidence scores
@@ -515,7 +515,7 @@ Registry.Register(challenges)
 | `GRPCAdapter` | GRPCCLIAdapter | grpcurl |
 | `WebSocketFlowAdapter` | GorillaWebSocket | gorilla/websocket |
 | `BuildAdapter` | Gradle, Cargo, NPM, Robolectric | Build tools |
-| `RecorderAdapter` | PanopticRecorder, ADBRecorder | CDP screencast, ADB |
+| `RecorderAdapter` | panopticRecorder, ADBRecorder | CDP screencast, ADB |
 
 **Custom Adapter Development:**
 Docs in `docs/userflow/writing-adapters.md` guide adapter creation.
@@ -536,7 +536,7 @@ Docs in `docs/userflow/writing-adapters.md` guide adapter creation.
 | 16 built-in evaluators | MCP tool use challenge evaluator |
 | 21 adapter implementations | CLI agent adapter (e.g., `claude-code`, `aider`) |
 | Plugin system with `.so` loading | Dynamic challenge loading from HelixCode |
-| Panoptic AI vision integration | AI agent behavior verification |
+| panoptic AI vision integration | AI agent behavior verification |
 | Anti-bluff detection | Bluff detection for AI-generated tests |
 
 ### 3.9 Extension Requirements

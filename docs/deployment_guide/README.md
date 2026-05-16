@@ -305,8 +305,8 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 | `Challenges/` | Challenge bank | recommended for verification |
 | `Containers/` | Docker/container artefacts | yes |
 | `Security/` | Security tooling | yes |
-| `Assets/` | Logos, themes, brand | optional |
-| `Github-Pages-Website/` | Marketing site | optional |
+| `assets/` | Logos, themes, brand | optional |
+| `github_pages_website/` | Marketing site | optional |
 | `Dependencies/` | LLama_CPP, Ollama, HuggingFace_Hub | as needed |
 
 Update all submodules deepest-first when releasing; never force-push (CONST-043).

@@ -1,7 +1,7 @@
 # LLM Verifier
 
 <p align="center">
-  <img src="../Assets/Logo.jpeg" alt="LLMsVerifier Logo" width="180" height="180">
+  <img src="../assets/Logo.jpeg" alt="LLMsVerifier Logo" width="180" height="180">
 </p>
 
 <p align="center">

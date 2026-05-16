@@ -45,10 +45,10 @@
 
 | File | Action |
 |------|--------|
-| `Github-Pages-Website/docs/index.html` | Edit — stats, links, feature list |
-| `Github-Pages-Website/docs/manual/index.html` | Edit — sync manual |
-| `Github-Pages-Website/docs/courses/` | Edit — if stale |
-| `Github-Pages-Website/docs/mobile/` | Edit — if stale |
+| `github_pages_website/docs/index.html` | Edit — stats, links, feature list |
+| `github_pages_website/docs/manual/index.html` | Edit — sync manual |
+| `github_pages_website/docs/courses/` | Edit — if stale |
+| `github_pages_website/docs/mobile/` | Edit — if stale |
 
 ---
 
@@ -1232,7 +1232,7 @@ git commit -m "feat: add platform-agnostic installer script and production Docke
 ### Task WEB-1: Website Content Accuracy Audit
 
 **Files:**
-- Modify: `Github-Pages-Website/docs/index.html`
+- Modify: `github_pages_website/docs/index.html`
 
 - [ ] **Step 1: Audit actual provider count from code**
 
@@ -1282,7 +1282,7 @@ Verify each link resolves. Fix any that 404 (repo structure changed).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add Github-Pages-Website/docs/index.html
+git add github_pages_website/docs/index.html
 git commit -m "website: update stats, provider count, and fix links"
 ```
 
@@ -1291,7 +1291,7 @@ git commit -m "website: update stats, provider count, and fix links"
 ### Task WEB-2: Manual Sync
 
 **Files:**
-- Modify: `Github-Pages-Website/docs/manual/index.html`
+- Modify: `github_pages_website/docs/manual/index.html`
 
 - [ ] **Step 1: Compare manual HTML against README.md**
 
@@ -1299,7 +1299,7 @@ git commit -m "website: update stats, provider count, and fix links"
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
 # Extract section headings from both
 grep -n "^### " HelixCode/docs/user_manual/README.md | head -50
-grep -n "class=\"section\"\|<h[23]" Github-Pages-Website/docs/manual/index.html | head -50
+grep -n "class=\"section\"\|<h[23]" github_pages_website/docs/manual/index.html | head -50
 ```
 
 Identify missing/extra sections.
@@ -1311,8 +1311,8 @@ Add any provider deep-dives, memory system, troubleshooting sections that were a
 - [ ] **Step 3: Check courses and mobile sub-sites**
 
 ```bash
-ls -la Github-Pages-Website/docs/courses/
-cat Github-Pages-Website/docs/courses/README.md 2>/dev/null | head -20
+ls -la github_pages_website/docs/courses/
+cat github_pages_website/docs/courses/README.md 2>/dev/null | head -20
 ```
 
 If curricula/metadata is stale, update the relevant course data files.
@@ -1320,7 +1320,7 @@ If curricula/metadata is stale, update the relevant course data files.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add Github-Pages-Website/docs/manual/index.html Github-Pages-Website/docs/courses/
+git add github_pages_website/docs/manual/index.html github_pages_website/docs/courses/
 git commit -m "website: sync manual and courses with latest docs"
 ```
 
@@ -1357,7 +1357,7 @@ If tests fail, inspect the specific test's output, fix the underlying issue in t
 - [ ] **Step 5: Verify no 404s**
 
 ```bash
-grep -rn 'href="http' Github-Pages-Website/docs/ | grep -v 'https://helixcode.dev\|https://github.com/helixcode' | head -20
+grep -rn 'href="http' github_pages_website/docs/ | grep -v 'https://helixcode.dev\|https://github.com/helixcode' | head -20
 ```
 
 Check each external link manually or via curl.
@@ -1365,7 +1365,7 @@ Check each external link manually or via curl.
 - [ ] **Step 6: Commit any fixes**
 
 ```bash
-git add Github-Pages-Website/
+git add github_pages_website/
 git commit -m "website: fix test failures and broken links"
 ```
 

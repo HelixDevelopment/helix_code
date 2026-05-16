@@ -198,7 +198,7 @@ make release
 
 ### Website Testing
 ```bash
-cd Github-Pages-Website/docs
+cd github_pages_website/docs
 
 # Test locally
 ./test-local.sh
@@ -326,7 +326,7 @@ HelixCode/
     ├── videos/                             # 50 video files
     └── course-data.js                      # UPDATE WITH REAL URLs
 
-Github-Pages-Website/docs/                  # Days 36-38 - ADD PAGES
+github_pages_website/docs/                  # Days 36-38 - ADD PAGES
 ├── api.html                                # NEW
 ├── downloads.html                          # NEW
 ├── community.html                          # NEW

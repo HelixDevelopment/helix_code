@@ -38,7 +38,7 @@
                     ▼                       ▼
          ┌──────────────────────┐  ┌────────────────┐
          │  website/manual/     │  │  1. Clean      │
-         │  - index.html        │  │  2. Assets     │
+         │  - index.html        │  │  2. assets     │
          │  - USER_MANUAL.html  │  │  3. Docs       │
          │  - style.css         │  │  4. Build      │
          │  - .metadata.json    │  │  5. Test       │

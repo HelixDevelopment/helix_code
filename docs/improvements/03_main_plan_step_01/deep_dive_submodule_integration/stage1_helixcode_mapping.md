@@ -55,7 +55,7 @@ HelixCode/
 ├── APPLICATION_CHALLENGE_STATUS.md
 ├── AUDIT_IMPLEMENTATION_TRACKER.md
 ├── AUDIT_TRACKER_2026.md
-├── Assets/
+├── assets/
 │   ├── AGENTS.md
 │   ├── CLAUDE.md
 │   ├── CONSTITUTION.md
@@ -205,7 +205,7 @@ HelixCode/
 ├── FINAL_SESSION_SUMMARY.md
 ├── GAP_ANALYSIS.md
 ├── GAP_ANALYSIS_SUMMARY.md
-├── Github-Pages-Website/                  ← SUBMODULE (HelixDevelopment-Code/Welcome)
+├── github_pages_website/                  ← SUBMODULE (HelixDevelopment-Code/Welcome)
 ├── HELIXCODE_*.md                          (30+ architecture/audit docs)
 ├── HelixCode/                              ← NESTED PROJECT STRUCTURE
 │   ├── .env.example
@@ -541,7 +541,7 @@ HelixCode/
 | 9 | Dependencies/HuggingFace_Hub | Dependencies/HuggingFace_Hub | git@github.com:huggingface/huggingface_hub.git | SSH |
 | 10 | Example_Projects/DeepSeek_CLI | Example_Projects/DeepSeek_CLI | git@github.com:holasoymalva/deepseek-cli.git | SSH |
 | 11 | Example_Projects/Mistral_Code | Example_Projects/Mistral_Code | git@github.com:Wylgrif/Mistral-code.git | SSH |
-| 12 | Github-Pages-Website | Github-Pages-Website | git@github.com:HelixDevelopment-Code/Welcome.git | SSH |
+| 12 | github_pages_website | github_pages_website | git@github.com:HelixDevelopment-Code/Welcome.git | SSH |
 | 13 | Example_Projects/Gemini_CLI | Example_Projects/Gemini_CLI | git@github.com:google-gemini/gemini-cli.git | SSH |
 | 14 | Example_Projects/Forge | Example_Projects/Forge | git@github.com:antinomyhq/forge.git | SSH |
 | 15 | Example_Projects/Plandex | Example_Projects/Plandex | git@github.com:plandex-ai/plandex.git | SSH |
@@ -779,7 +779,7 @@ HelixCode (root)
 │   └── HelixSpecifier (MISSING)
 │
 ├── Website
-│   └── Github-Pages-Website (HelixDevelopment-Code/Welcome)
+│   └── github_pages_website (HelixDevelopment-Code/Welcome)
 │
 ├── External AI CLI Examples (30+ submodules)
 │   ├── Anthropic: Claude_Code, Codex, Codex-Skills
@@ -814,7 +814,7 @@ HelixCode (root)
 | Example Projects (AI CLI tools) | ~35 | `Example_Projects/` |
 | Example Resources | ~5 | `Example_Resources/` |
 | Core Dependencies | 8 | `Dependencies/` + root |
-| Website | 1 | `Github-Pages-Website/` |
+| Website | 1 | `github_pages_website/` |
 
 ---
 

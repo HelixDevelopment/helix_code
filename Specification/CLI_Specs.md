@@ -1,4 +1,4 @@
-![JIRA alternative for the free world!](../Assets/Wide_Black.png)
+![JIRA alternative for the free world!](../assets/Wide_Black.png)
 
 # Helix CLI Specs
 
@@ -138,7 +138,7 @@ All steps - building, testing, generating the documentation, diagrams, etc. will
 
 ## Launcher icon
 
-Whenever Helix CLI process in some of its forms is running to the user in its operating system proper icon in some form (launcher icon) will be presented. For that purpose generate the icon(s) from the Logo.png from the Assets folder.
+Whenever Helix CLI process in some of its forms is running to the user in its operating system proper icon in some form (launcher icon) will be presented. For that purpose generate the icon(s) from the Logo.png from the assets folder.
 
 ## Unsorted points
 

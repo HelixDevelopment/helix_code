@@ -64,7 +64,7 @@ HelixCode/                              # meta-repo (this repo)
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
 ├── HelixQA/                            # existing submodule
-├── Challenges/                         # existing submodule (now with Containers + Panoptic init'd)
+├── Challenges/                         # existing submodule (now with Containers + panoptic init'd)
 ├── Containers/                         # existing submodule
 ├── Security/                           # existing submodule
 │
@@ -75,7 +75,7 @@ HelixCode/                              # meta-repo (this repo)
 ├── Example_Projects/                   # DEPRECATE — replaced by HelixAgent/cli_agents/ as canonical
 │                                       # (preserved through Phase 4; Phase 5 cleanup once import paths migrated)
 │
-├── Assets/  Github-Pages-Website/  Dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
+├── assets/  github_pages_website/  Dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
 └── docs/  scripts/  Makefile  setup.sh  helix  CLAUDE.md ...
 ```
 
@@ -278,8 +278,8 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 ### 4.5 Phase 5 — End-user materials uplift
 
 **Deliverables:**
-- `HelixCode/HelixCode/docs/USER_MANUAL.md` — full rewrite covering every Phase-1+2 feature; rendered to HTML at `Github-Pages-Website/manual/`.
-- `Github-Pages-Website/` — feature pages, comparison-with-{claude-code,aider,cline} matrix, screenshots/asciinema demos.
+- `HelixCode/HelixCode/docs/USER_MANUAL.md` — full rewrite covering every Phase-1+2 feature; rendered to HTML at `github_pages_website/manual/`.
+- `github_pages_website/` — feature pages, comparison-with-{claude-code,aider,cline} matrix, screenshots/asciinema demos.
 - `docs/VIDEO_COURSE_CURRICULUM.md` — per-feature episode outlines with sample scripts (full filming out of scope).
 - `docs/adr/NNN-<topic>.md` — one ADR per non-trivial port.
 - `docs/improvements/06_diagrams_real/` — refreshed showing all ported features.
@@ -287,7 +287,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 
 **Acceptance criteria for Phase 5:**
 - A new user can follow `USER_MANUAL.md` from install to running a multi-agent task without external help.
-- `Github-Pages-Website/` builds and renders.
+- `github_pages_website/` builds and renders.
 - Every Phase-1/2 feature has at least one mention in user-facing docs.
 
 **Dependencies:** Phases 1+2+4 done.
@@ -416,7 +416,7 @@ Run via `make propagate-governance`. Verifier `scripts/verify-governance-cascade
 - `docs/HOST_POWER_MANAGEMENT.md` — already documents CONST-033; cross-link to CONST-042/042.
 
 **Inside meta-repo root:**
-- `Github-Pages-Website/` — feature pages, comparison matrix, install guide, asciinema demos.
+- `github_pages_website/` — feature pages, comparison matrix, install guide, asciinema demos.
 - `Documentation/` — mirrored canonical docs.
 - `Website/` — marketing site.
 - `docs/improvements/06_diagrams_real/` — refreshed PNGs (P0-15).

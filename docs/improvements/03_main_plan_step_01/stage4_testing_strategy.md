@@ -1745,7 +1745,7 @@ The 16 existing evaluators are expanded with 8 CLI-agent-specific evaluators:
 
 **Total: 24 evaluators (8 new + 16 existing)**
 
-### 3.5 Panoptic Vision Integration for UI Testing
+### 3.5 panoptic Vision Integration for UI Testing
 
 ```go
 // PanopticVisionEvaluator uses screenshot comparison for UI validation
@@ -4430,7 +4430,7 @@ func (m *FixtureManager) Cleanup() error {
 | ACP | Agent Communication Protocol |
 | TUI | Terminal User Interface |
 | LSP | Language Server Protocol |
-| Panoptic Vision | Screenshot-based UI evaluation |
+| panoptic Vision | Screenshot-based UI evaluation |
 | Anti-Bluff | Hallucination detection |
 | Worktree | Git worktree for agent isolation |
 | Seatbelt | macOS sandbox profile |

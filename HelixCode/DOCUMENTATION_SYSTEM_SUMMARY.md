@@ -35,7 +35,7 @@ Successfully created a comprehensive HTML documentation system with automatic sy
 **Purpose**: Syncs manual to GitHub Pages Website
 
 **Features**:
-- Copies `manual.html` to `Github-Pages-Website/docs/manual/index.html`
+- Copies `manual.html` to `github_pages_website/docs/manual/index.html`
 - Copies all images from `docs/user_manual/images/` to destination
 - Generates PDF version using wkhtmltopdf (if available)
 - Creates versioned PDFs: `HelixCode_User_Manual_YYYYMMDD_HHMMSS.pdf`
@@ -153,7 +153,7 @@ HelixCode/
 
 4. **Review Output**:
    - Check log: `scripts/sync-manual.log`
-   - Review files in `Github-Pages-Website/docs/manual/`
+   - Review files in `github_pages_website/docs/manual/`
 
 5. **Commit Changes**:
    ```bash
@@ -229,8 +229,8 @@ sudo apt-get install wkhtmltopdf
 The manual integrates seamlessly with the GitHub Pages website:
 
 ### Destination
-- Path: `Github-Pages-Website/docs/manual/`
-- URL: `https://your-username.github.io/Github-Pages-Website/docs/manual/`
+- Path: `github_pages_website/docs/manual/`
+- URL: `https://your-username.github.io/github_pages_website/docs/manual/`
 
 ### Files Synced
 - `index.html` (main manual)
@@ -266,7 +266,7 @@ Update the `<main class="content">` section in `manual.html` with new sections f
 
 ### Adding Images
 1. Place images in `docs/user_manual/images/`
-2. Reference with relative paths: `../../Assets/Logo.png`
+2. Reference with relative paths: `../../assets/Logo.png`
 3. Run sync script to copy to GitHub Pages
 
 ## Troubleshooting

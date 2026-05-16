@@ -22,7 +22,7 @@ cd "$(dirname "$0")/.."  # repo root (script installed under scripts/)
 # JS test-skip variants are matched as `(it|describe|test|context|xit|xdescribe)\.skip\(`
 # rather than the overly broad `\.skip\(`, which previously matched generic
 # method calls like `this.skip(10)` on a video-player object in
-# Github-Pages-Website/docs/courses/player.js and produced ~1500 spurious hits.
+# github_pages_website/docs/courses/player.js and produced ~1500 spurious hits.
 PATTERNS='t\.Skip\(|@Ignore\b|\bxit\(|(it|describe|test|context|xit|xdescribe)\.skip\(|@pytest\.mark\.skip|@unittest\.skip|#\[ignore\]|XCTSkipIf'
 INCLUDES=(--include='*.go' --include='*.kt' --include='*.kts' --include='*.java'
           --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx'

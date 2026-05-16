@@ -1191,7 +1191,7 @@ Integration Tasks:
    cd HelixCode/Website
    
    # Copy existing website content
-   cp -r /Users/milosvasic/Projects/HelixCode/Github-Pages-Website/docs/* .
+   cp -r /Users/milosvasic/Projects/HelixCode/github_pages_website/docs/* .
    
    # Update build system
    echo "website:" >> ../Makefile

@@ -111,7 +111,7 @@ The generated HTML manual includes:
 
 4. **Review Changes**:
    - Check the log file: `scripts/sync-manual.log`
-   - Review generated files in `Github-Pages-Website/docs/manual/`
+   - Review generated files in `github_pages_website/docs/manual/`
 
 5. **Commit and Push**:
    ```bash
@@ -187,7 +187,7 @@ chmod +x scripts/*.sh
 
 The manual is automatically integrated with the GitHub Pages website:
 
-- **URL**: `https://your-username.github.io/Github-Pages-Website/docs/manual/`
+- **URL**: `https://your-username.github.io/github_pages_website/docs/manual/`
 - **Location**: `docs/manual/index.html`
 - **Assets**: `docs/manual/images/`
 - **PDF**: `docs/manual/HelixCode_User_Manual_Latest.pdf`

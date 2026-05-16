@@ -85,7 +85,7 @@ HelixCode contains **87 declared submodules**, all using SSH (`git@github.com` f
 | Example Resources | ~5 | Awesome-AI-Agents, Awesome-AI-GPTs, OpenAI-Cookbook |
 | Core Dependencies | 8 | LLama_CPP, Ollama, HuggingFace_Hub, DocProcessor, LLMOrchestrator, LLMProvider, LLMsVerifier, VisionEngine |
 | Quality Assurance | 3 | HelixQA, Challenges, Containers |
-| Website | 1 | Github-Pages-Website |
+| Website | 1 | github_pages_website |
 
 ### 2.2 Missing Required Submodules
 

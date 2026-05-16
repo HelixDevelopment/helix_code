@@ -161,7 +161,7 @@ verify-compile         # Verify compilation
 - `VIDEOS_04_12_COMPLETE_SCRIPTS.md` (17KB)
 
 ### Website:
-- Complete website in `Github-Pages-Website/docs/`
+- Complete website in `github_pages_website/docs/`
 - 78KB index.html
 - Courses, manual, mobile sections
 - Assets, styles, JavaScript

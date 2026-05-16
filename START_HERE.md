@@ -254,7 +254,7 @@ HelixCode/
 - `HelixCode/internal/notification/engine.go`
 - `HelixCode/.env.example`
 - `HelixCode/config/config.yaml`
-- `Github-Pages-Website/docs/index.html`
+- `github_pages_website/docs/index.html`
 
 **Created:**
 - 3 test files (slack, telegram, email)

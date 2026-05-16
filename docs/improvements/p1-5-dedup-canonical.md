@@ -14,12 +14,12 @@
 | 2 | Containers   | `Containers/` (root) | `Challenges/Containers/`, `HelixAgent/Containers/`, `HelixAgent/HelixLLM/submodules/Containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
 | 3 | Security     | `Security/` (root) | `HelixAgent/Security/`, `HelixAgent/HelixLLM/submodules/Security/` (if present) | HelixAgent/scripts/security-*.sh, root cmd/security_test wiring |
 | 4 | HelixQA      | `HelixQA/` (root) | `HelixAgent/HelixQA/` | `HelixAgent/Makefile` test wiring; root `scripts/run-all-tests.sh` |
-| 5 | MCP-Servers  | TBD at WP3.T03.05 — current candidates: `MCP-Servers/` (root, may not exist), `HelixAgent/MCP-Servers/`, `HelixAgent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
+| 5 | mcp_servers  | TBD at WP3.T03.05 — current candidates: `mcp_servers/` (root, may not exist), `HelixAgent/mcp_servers/`, `HelixAgent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
 
 **Note on set #5 (MCP-Servers):** The HelixAgent submodule tree has both
-`MCP-Servers/` (potentially a single aggregator) and `MCP/submodules/<NAME>/`
+`mcp_servers/` (potentially a single aggregator) and `MCP/submodules/<NAME>/`
 (per-server child entries: airtable-mcp, all-in-one-mcp, atlassian-mcp, etc.).
-Whether these are duplicates or whether `MCP-Servers/` is *the* aggregator that
+Whether these are duplicates or whether `mcp_servers/` is *the* aggregator that
 links the per-server entries is not resolvable from `.gitmodules` alone — the
 plan defers the canonical decision to WP3.T03.05 with audit-at-execution.
 
@@ -31,7 +31,7 @@ plan defers the canonical decision to WP3.T03.05 with audit-at-execution.
   required (T03.0X completion gate).
 - HelixQA dedup affects HelixAgent's test wiring; integration test must still
   pass post-dedup.
-- MCP-Servers TBD blocks any consumer code that imports MCP servers (CONST-040
+- mcp_servers TBD blocks any consumer code that imports MCP servers (CONST-040
   capability flags) until canonical chosen.
 
 ## Rollback per dedup

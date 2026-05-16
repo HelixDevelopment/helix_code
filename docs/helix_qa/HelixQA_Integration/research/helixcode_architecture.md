@@ -141,7 +141,7 @@ awesome-ai-memory/                  # AI memory resources (submodule)
 cli_agents/                        # Reference CLI agent submodules (formerly Example_Projects/)
 cli_agents_resources/              # Reference resource submodules (formerly Example_Resources/)
 Upstreams/                         # Upstream sync scripts
-Assets/                            # Repository assets
+assets/                            # Repository assets
 Dependencies/                      # Dependency documentation
 ```
 

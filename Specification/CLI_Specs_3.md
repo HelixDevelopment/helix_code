@@ -1,4 +1,4 @@
-![JIRA alternative for the free world!](../Assets/Wide_Black.png)
+![JIRA alternative for the free world!](../assets/Wide_Black.png)
 
 # Helix CLI Specification v3.0 - Complete Technical Blueprint
 

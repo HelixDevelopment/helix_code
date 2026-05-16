@@ -1,4 +1,4 @@
-![HelixCode - Distributed AI Development Platform](Assets/Wide_Black.png)
+![HelixCode - Distributed AI Development Platform](assets/Wide_Black.png)
 
 # HelixCode - Distributed AI Development Platform
 
@@ -107,7 +107,7 @@ HelixCode/
 │   │   └── workflow/       # Workflow execution
 │   └── scripts/            # Build and utility scripts
 ├── Website/                # Marketing website
-├── Assets/                 # Project assets and logos
+├── assets/                 # Project assets and logos
 └── docs/                   # Documentation
 ```
 

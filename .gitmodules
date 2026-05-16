@@ -7,8 +7,8 @@
 [submodule "Dependencies/HuggingFace_Hub"]
 	path = Dependencies/HuggingFace_Hub
 	url = git@github.com:huggingface/huggingface_hub.git
-[submodule "Github-Pages-Website"]
-	path = Github-Pages-Website
+[submodule "github_pages_website"]
+	path = github_pages_website
 	url = git@github.com:HelixDevelopment-Code/Welcome.git
 [submodule "awesome-ai-memory"]
 	path = awesome-ai-memory
@@ -211,8 +211,8 @@
 [submodule "cli_agents/superset"]
 	path = cli_agents/superset
 	url = git@github.com:superset-sh/superset.git
-[submodule "MCP-Servers"]
-	path = MCP-Servers
+[submodule "mcp_servers"]
+	path = mcp_servers
 	url = git@github.com:modelcontextprotocol/servers.git
 [submodule "Dependencies/HelixDevelopment/Models"]
 	path = Dependencies/HelixDevelopment/Models
@@ -220,8 +220,8 @@
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
-[submodule "Panoptic"]
-	path = Panoptic
+[submodule "panoptic"]
+	path = panoptic
 	url = git@github.com:vasic-digital/Panoptic.git
 [submodule "Dependencies/vasic-digital/EventBus"]
 	path = Dependencies/vasic-digital/EventBus

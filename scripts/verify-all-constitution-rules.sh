@@ -210,7 +210,7 @@ if want_gate G5; then
         grep -E '(^|/)\.env$|(^|/)\.env\.[^/]+$|\.pem$|\.key$|id_rsa(\.|$)|id_ed25519(\.|$)' | \
         grep -vE '\.env\.example$|\.env\.sample$|\.env\.template$' | \
         grep -vE '\.env\.full-test$|\.env\.test$|\.env\.ci$' | \
-        grep -vE '^(HelixAgent|cli_agents|cli_agents_resources|Dependencies/LLama_CPP|Dependencies/Ollama|Dependencies/HuggingFace_Hub|HelixQA/tools|Panoptic/tests|Panoptic/docs)' || true
+        grep -vE '^(HelixAgent|cli_agents|cli_agents_resources|Dependencies/LLama_CPP|Dependencies/Ollama|Dependencies/HuggingFace_Hub|HelixQA/tools|panoptic/tests|panoptic/docs)' || true
     )
     if [[ -z "$missing_gitignore" && -z "$tracked_sensitive" ]]; then
         gate_pass G5 "every owned submodule has .gitignore + no sensitive files tracked at owned-paths"

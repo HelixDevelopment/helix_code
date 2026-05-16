@@ -18,7 +18,7 @@ type TerminalUI struct {
 #### Required Components Specifications:
 
 **HeaderComponent**:
-- **ASCII Art**: Dynamic project branding from Assets/Logo.png
+- **ASCII Art**: Dynamic project branding from assets/Logo.png
 - **Project Info**: Current project name, path, and status
 - **System Status**: CPU, memory, and model usage indicators
 - **Mode Indicator**: Current active mode (plan, build, test, etc.)

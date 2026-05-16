@@ -123,7 +123,7 @@ Successfully completed comprehensive implementation of **18 major features** for
   - FAQ (10+ questions)
 
 ### 2. **GitHub Pages Website** ✅
-- **Location**: `Github-Pages-Website/docs/`
+- **Location**: `github_pages_website/docs/`
 - **Size Change**: 431 → 882 lines (+104%)
 - **Updates**:
   - Expanded hero section (14+ providers)
@@ -372,7 +372,7 @@ HelixCode/internal/
 docs/
 └── USER_MANUAL.md                # 537 lines
 
-Github-Pages-Website/docs/
+github_pages_website/docs/
 ├── index.html                    # 882 lines (was 431)
 └── README.md                     # 240 lines
 
@@ -498,7 +498,7 @@ HelixCode v2.0 is now an **enterprise-grade, feature-complete AI development pla
 ## 📞 Support & Resources
 
 - **User Manual**: `HelixCode/docs/USER_MANUAL.md`
-- **Website**: `Github-Pages-Website/docs/index.html`
+- **Website**: `github_pages_website/docs/index.html`
 - **Technical Designs**: `Design/TechnicalDesigns/`
 - **GitHub**: https://github.com/your-org/helixcode
 - **Issues**: https://github.com/your-org/helixcode/issues

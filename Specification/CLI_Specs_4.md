@@ -1,4 +1,4 @@
-![JIRA alternative for the free world!](../Assets/Wide_Black.png)
+![JIRA alternative for the free world!](../assets/Wide_Black.png)
 
 # Helix CLI Specification v4.0 - Implementation-Ready Technical Blueprint
 
@@ -531,7 +531,7 @@ type TerminalUI struct {
 #### Required Components Specifications:
 
 **HeaderComponent**:
-- **ASCII Art**: Dynamic project branding from Assets/Logo.png
+- **ASCII Art**: Dynamic project branding from assets/Logo.png
 - **Project Info**: Current project name, path, and status
 - **System Status**: CPU, memory, and model usage indicators
 - **Mode Indicator**: Current active mode (plan, build, test, etc.)

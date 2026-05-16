@@ -1,4 +1,4 @@
-![HelixCode - Distributed AI Development Platform](../Assets/Wide_Black.png)
+![HelixCode - Distributed AI Development Platform](../assets/Wide_Black.png)
 
 # HelixCode
 

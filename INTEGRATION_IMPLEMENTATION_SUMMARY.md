@@ -180,7 +180,7 @@ Total: ALL TESTS PASSING ✅
 
 ### 6. Website Updates
 
-**File:** `Github-Pages-Website/docs/index.html`
+**File:** `github_pages_website/docs/index.html`
 
 **Changes:**
 - ✅ Added new "Integrations" section showcasing all 4 integrations
@@ -406,7 +406,7 @@ coverage: 95.2% of statements
 - [Comprehensive Integration Report](NOTIFICATION_INTEGRATION_REPORT.md)
 
 **Website:**
-- [HelixCode Website](Github-Pages-Website/docs/index.html) (see Integrations section)
+- [HelixCode Website](github_pages_website/docs/index.html) (see Integrations section)
 
 ---
 
@@ -471,7 +471,7 @@ See the [Implementation Plan](NOTIFICATION_INTEGRATION_REPORT.md#8-implementatio
 - Config: `config/config.yaml`
 
 **Website:**
-- Local: `Github-Pages-Website/docs/index.html`
+- Local: `github_pages_website/docs/index.html`
 - See "Integrations" section
 
 ---

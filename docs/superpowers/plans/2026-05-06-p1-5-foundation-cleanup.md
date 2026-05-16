@@ -80,7 +80,7 @@ Must always print `clean`.
 
 | Item | Why deferred | Resolution point |
 |---|---|---|
-| MCP-Servers canonical location | unclear whether root `MCP-Servers/` exists yet, or whether to promote from one of the two HelixAgent locations | T03.05 picks at execution time; record in evidence |
+| mcp_servers canonical location | unclear whether root `mcp_servers/` exists yet, or whether to promote from one of the two HelixAgent locations | T03.05 picks at execution time; record in evidence |
 | Example_Projects/ submodule count | not enumerated in inventory; deletion may be ~40 separate `git rm --cached` operations | T02.64 enumerates first, then deletes |
 | WP2 collision count | overlap between Example_Projects/ contents and root cli_agents/ unknown until snapshot | T02.65 reconciles per-collision |
 | WP7 directory count | non-conforming dirs not pre-counted across all submodules | T07.01 inventories first, T07.02..T07.NN per finding |
@@ -163,7 +163,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 | Containers | `Containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `Security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
 | HelixQA | `HelixQA/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
-| MCP-Servers | TBD at T03.05 | TBD | TBD |
+| mcp_servers | TBD at T03.05 | TBD | TBD |
 
 Commit: `docs(P1.5-WP1-T01.04): submodule deduplication decisions`.
 
@@ -351,10 +351,10 @@ Keep root `Security/`. 2 nested copies. Same pattern.
 
 Keep root `HelixQA/`. Remove `HelixAgent/HelixQA`. Same pattern.
 
-## P1.5-WP3-T03.05 — MCP-Servers dedup (canonical TBD)
+## P1.5-WP3-T03.05 — mcp_servers dedup (canonical TBD)
 
 At execution time:
-- Check whether root `MCP-Servers/` exists. If yes, keep it; remove the two HelixAgent copies.
+- Check whether root `mcp_servers/` exists. If yes, keep it; remove the two HelixAgent copies.
 - If no: pick the more-current of the two HelixAgent copies, promote it to root via `git submodule add` at root + remove both HelixAgent entries. Document the decision in evidence.
 
 ---
@@ -554,7 +554,7 @@ find . -type d \
   -not -path "./HelixAgent" -not -path "./HelixQA" \
   -not -path "./Challenges" -not -path "./Containers" \
   -not -path "./Security" -not -path "./Assets" \
-  -not -path "./Dependencies/*" -not -path "./MCP-Servers/*" \
+  -not -path "./Dependencies/*" -not -path "./mcp_servers/*" \
   -not -path "./Github-Pages-Website" \
   -not -path "./HelixCode/cmd" -not -path "./HelixCode/internal" \
   | grep -E "[A-Z]|-" \

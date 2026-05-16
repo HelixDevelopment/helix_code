@@ -2902,7 +2902,7 @@ already (DebateOrchestrator, kiro-cli, ollama-code).
 2. Containers   → `Containers/`
 3. Security     → `Security/`
 4. HelixQA      → `HelixQA/`
-5. MCP-Servers  → TBD at WP3.T03.05 (MCP-Servers/ vs MCP/submodules/* — needs audit)
+5. mcp_servers  → TBD at WP3.T03.05 (mcp_servers/ vs MCP/submodules/* — needs audit)
 
 ### P1.5-WP1-T01.05 — Bootstrap evidence + advance PROGRESS (THIS COMMIT)
 
@@ -3141,14 +3141,14 @@ Consumer updates (HelixAgent):
 - `tests/integration/submodule_sync_test.go`: `helixQAPath := "HelixQA"` → `"../HelixQA"`; benchmark `git submodule status` arg updated.
 - `HelixAgent/go.mod` already updated in T03.03.
 
-### T03.05 — MCP-Servers dedup
+### T03.05 — mcp_servers dedup
 
 Action: PROMOTE — root `MCP-Servers` did not exist; promoted from `HelixAgent/MCP-Servers` (URL `git@github.com:modelcontextprotocol/servers.git`, SHA `4503e2d`). Removed 2 HelixAgent duplicates: `HelixAgent/MCP-Servers` and `HelixAgent/external/mcp-servers/servers` (both pointing at same upstream URL + SHA — verified equivalent before promotion).
 
 | commit    | scope                                                   |
 |-----------|--------------------------------------------------------|
 | `6e245ff` | HelixAgent: remove both duplicate locations            |
-| `7f775af` | meta-repo: promote MCP-Servers + bump HelixAgent       |
+| `7f775af` | meta-repo: promote mcp_servers + bump HelixAgent       |
 
 Consumer updates: none required — the remaining HelixAgent references in `Makefile` (`EXCLUDE_DIRS`) and `.golangci.yml` (`skip-dirs`) are exclusion lists, harmless when the target path no longer exists locally.
 
@@ -3159,7 +3159,7 @@ $ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|H
  2ba3e56c... Containers (1.0.2-dev-0.0.2-126-g2ba3e56)
  d473231d... Dependencies/HelixDevelopment/LLMsVerifier (heads/main)
  ecebe9a5... HelixQA (v4.0.0-210-gecebe9a)
- 4503e2d1... MCP-Servers (typescript-servers-0.6.2-3796-g4503e2d)
+ 4503e2d1... mcp_servers (typescript-servers-0.6.2-3796-g4503e2d)
  e7c09c15... Security (heads/main)
 ```
 
@@ -3439,7 +3439,7 @@ None — all 29 renames applied cleanly.
 Reason categories:
 
 **Umbrella / submodule-root-like dirs (10)** — heavily referenced top-level project dirs whose rename would cascade through dozens of docs, scripts, and `.env.*` examples; left as-is to avoid risk:
-- `Assets/`, `Dependencies/`, `HelixCode/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
+- `assets/`, `Dependencies/`, `HelixCode/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
 
 **Go `cmd/<binary>` packages (9)** — renaming changes `go build` import paths, Makefile target args, and produced `bin/<name>` artifact names:
 - `cmd/security_test`, `HelixCode/cmd/config_test`, `HelixCode/cmd/helix_config`, `HelixCode/cmd/performance_optimization`, `HelixCode/cmd/performance_optimization_standalone`, `HelixCode/cmd/security_fix`, `HelixCode/cmd/security_fix_standalone`, `HelixCode/cmd/security_scan`, `HelixCode/cmd/security_test`
@@ -3459,7 +3459,7 @@ These should be addressed in a future WP that combines (a) the rename, (b) Makef
 
 #### Defects / deviations
 
-1. **Top-level umbrella dirs deferred** — `HelixCode/`, `Assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
+1. **Top-level umbrella dirs deferred** — `HelixCode/`, `assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
 2. **Go-package-affecting renames deferred** — see deferred list above.
 3. **Submodule pointer drift** — committing inside HelixAgent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
 
@@ -3751,7 +3751,7 @@ phaseA: LLMsVerifier at Dependencies/HelixDevelopment/LLMsVerifier (1 location, 
 phaseA: Containers at Containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: HelixQA at HelixQA (1 location, no duplicates)
-phaseA: MCP-Servers at MCP-Servers (1 location, no duplicates)
+phaseA: mcp_servers at mcp_servers (1 location, no duplicates)
 ==> Phase B — API-KEYS-LOADER
 phaseB: branch1=PASS branch2=PASS branch3=PASS
 ==> Phase C — DOCS-UNDER-DOCS-DIR
@@ -3838,7 +3838,7 @@ phaseA: LLMsVerifier at Dependencies/HelixDevelopment/LLMsVerifier (1 location, 
 phaseA: Containers at Containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: HelixQA at HelixQA (1 location, no duplicates)
-phaseA: MCP-Servers at MCP-Servers (1 location, no duplicates)
+phaseA: mcp_servers at mcp_servers (1 location, no duplicates)
 ==> Phase B — API-KEYS-LOADER
 phaseB: branch1=PASS branch2=PASS branch3=PASS
 ==> Phase C — DOCS-UNDER-DOCS-DIR

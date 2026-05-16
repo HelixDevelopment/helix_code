@@ -18,7 +18,7 @@
 | 1 | WebSocket-Client-TS | `WebSocket-Client-TS` | `git@github.com:vasic-digital/WebSocket-Client-TS.git` | — | vasic-digital | Generic WebSocket client with React hooks |
 | 2 | UI-Components-React | `UI-Components-React` | `git@github.com:vasic-digital/UI-Components-React.git` | — | vasic-digital | Reusable React UI component library |
 | 3 | Challenges | `Challenges` | `git@github.com:vasic-digital/Challenges.git` | `4390e48` | vasic-digital | Structured test scenario framework; challenge bank definitions |
-| 4 | Assets | `Assets` | `git@github.com:vasic-digital/Assets.git` | `0dc5079` | vasic-digital | Asset management (images, icons, branding) |
+| 4 | assets | `Assets` | `git@github.com:vasic-digital/Assets.git` | `0dc5079` | vasic-digital | Asset management (images, icons, branding) |
 | 5 | Concurrency | `Concurrency` | `git@github.com:vasic-digital/Concurrency.git` | `333795a` | vasic-digital | Retry with backoff, offline cache, safe concurrent collections |
 | 6 | Config | `Config` | `git@github.com:vasic-digital/Config.git` | `cb1417e` | vasic-digital | Configuration management (env, file, validation) |
 | 7 | Filesystem | `Filesystem` | `git@github.com:vasic-digital/Filesystem.git` | `9580858` | vasic-digital | Unified multi-protocol filesystem client (SMB, FTP, NFS, WebDAV, local) |

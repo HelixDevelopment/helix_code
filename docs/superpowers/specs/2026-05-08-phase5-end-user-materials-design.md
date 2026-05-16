@@ -220,10 +220,10 @@ WP-WEB (website — depends on docs content being finalized)
 
 | Path | Action | Scope |
 |------|--------|-------|
-| `Github-Pages-Website/docs/index.html` | Edit | Update stats, links, feature list |
-| `Github-Pages-Website/docs/manual/index.html` | Edit | Sync with user manual |
-| `Github-Pages-Website/docs/courses/` | Edit | Update if curriculum stale |
-| `Github-Pages-Website/docs/mobile/` | Edit | Update if mobile info stale |
+| `github_pages_website/docs/index.html` | Edit | Update stats, links, feature list |
+| `github_pages_website/docs/manual/index.html` | Edit | Sync with user manual |
+| `github_pages_website/docs/courses/` | Edit | Update if curriculum stale |
+| `github_pages_website/docs/mobile/` | Edit | Update if mobile info stale |
 
 ---
 

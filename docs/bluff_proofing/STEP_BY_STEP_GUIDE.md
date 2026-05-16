@@ -165,7 +165,7 @@ go list -m all
 
 ## 3. Building HelixCode
 
-### 3.1 Generate Logo Assets (Required First Time)
+### 3.1 Generate Logo assets (Required First Time)
 
 ```bash
 cd HelixCode

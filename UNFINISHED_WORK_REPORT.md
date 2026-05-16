@@ -174,7 +174,7 @@ Despite documentation claiming completion, the HelixCode project has **significa
 ### **Website Directory Issue**
 ```bash
 ❌ /Website/ directory does NOT exist in project structure
-✅ Found external location: /Users/milosvasic/Projects/HelixCode/Github-Pages-Website/docs/
+✅ Found external location: /Users/milosvasic/Projects/HelixCode/github_pages_website/docs/
 ⚠️ Website not integrated into main project repository
 ```
 

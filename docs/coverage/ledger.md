@@ -199,10 +199,10 @@ flagged per-platform.
 | Dependencies/vasic-digital/Veritas | VERIFIED | 0 |  |
 | Dependencies/vasic-digital/VisionEngine | VERIFIED | 0 |  |
 | Dependencies/vasic-digital/Watcher | VERIFIED | 0 |  |
-| Github-Pages-Website | VERIFIED | 0 |  |
+| github_pages_website | VERIFIED | 0 |  |
 | HelixAgent | VERIFIED | 0 |  |
 | HelixQA | VERIFIED | 0 |  |
-| Panoptic | VERIFIED | 0 |  |
+| panoptic | VERIFIED | 0 |  |
 | Security | VERIFIED | 0 |  |
 
 ## Governance anchor cascade

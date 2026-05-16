@@ -80,9 +80,9 @@ cat scripts/sync-manual.log
 - Images: `HelixCode/docs/user_manual/images/`
 
 ### Destination (after sync)
-- Manual: `Github-Pages-Website/docs/manual/index.html`
-- Images: `Github-Pages-Website/docs/manual/images/`
-- PDF: `Github-Pages-Website/docs/manual/HelixCode_User_Manual_Latest.pdf`
+- Manual: `github_pages_website/docs/manual/index.html`
+- Images: `github_pages_website/docs/manual/images/`
+- PDF: `github_pages_website/docs/manual/HelixCode_User_Manual_Latest.pdf`
 
 ## Troubleshooting
 

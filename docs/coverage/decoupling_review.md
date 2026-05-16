@@ -104,24 +104,24 @@ as `internal/llm/groq_provider.go` being named after Groq.
 
 **Action:** none.
 
-### Github-Pages-Website (12 files)
+### github_pages_website (12 files)
 
 Sub-audit (Task #264) results:
 
 | File | Refs | Classification |
 |---|---|---|
-| `Github-Pages-Website/scripts/load_api_keys.sh` | 2 (header + docstring) | cosmetic-only → genericised in close-out¹⁷ (commit `c54fff7`). |
-| `Github-Pages-Website/docs/package.json` | 2 (description + author) | legitimate-cross-project — npm metadata describes the site, which IS HelixCode's GitHub Pages site. |
-| `Github-Pages-Website/docs/start-website.sh` | 4 (header + log messages) | legitimate-cross-project — bash script that builds + starts HelixCode's docker stack for the website preview. Naming the site in headers + status logs is correct. |
-| `Github-Pages-Website/docs/stop-website.sh` | 1 (header) | legitimate-cross-project — same reasoning. |
-| `Github-Pages-Website/docs/test-local.sh` | 1 (header) | legitimate-cross-project — performance test script for THIS site. |
-| `Github-Pages-Website/docs/test-performance.sh` | 1 (header) | legitimate-cross-project — same. |
-| `Github-Pages-Website/docs/test-website.sh` | 1 (header) | legitimate-cross-project — same. |
-| `Github-Pages-Website/docs/js/main.js` | 2 (header comment + init log) | legitimate-cross-project — site JS describes the site. |
-| `Github-Pages-Website/docs/courses/player.js` | refs in content | legitimate-cross-project — course content for HelixCode. |
-| `Github-Pages-Website/docs/courses/course-data.js` | refs in content | legitimate-cross-project — course data. |
-| `Github-Pages-Website/docs/manual/.sync-metadata.json` | refs in metadata | legitimate-cross-project — sync metadata referencing the parent project. |
-| `Github-Pages-Website/docs/mobile/js/mobile.js` | refs in content | legitimate-cross-project — mobile site JS. |
+| `github_pages_website/scripts/load_api_keys.sh` | 2 (header + docstring) | cosmetic-only → genericised in close-out¹⁷ (commit `c54fff7`). |
+| `github_pages_website/docs/package.json` | 2 (description + author) | legitimate-cross-project — npm metadata describes the site, which IS HelixCode's GitHub Pages site. |
+| `github_pages_website/docs/start-website.sh` | 4 (header + log messages) | legitimate-cross-project — bash script that builds + starts HelixCode's docker stack for the website preview. Naming the site in headers + status logs is correct. |
+| `github_pages_website/docs/stop-website.sh` | 1 (header) | legitimate-cross-project — same reasoning. |
+| `github_pages_website/docs/test-local.sh` | 1 (header) | legitimate-cross-project — performance test script for THIS site. |
+| `github_pages_website/docs/test-performance.sh` | 1 (header) | legitimate-cross-project — same. |
+| `github_pages_website/docs/test-website.sh` | 1 (header) | legitimate-cross-project — same. |
+| `github_pages_website/docs/js/main.js` | 2 (header comment + init log) | legitimate-cross-project — site JS describes the site. |
+| `github_pages_website/docs/courses/player.js` | refs in content | legitimate-cross-project — course content for HelixCode. |
+| `github_pages_website/docs/courses/course-data.js` | refs in content | legitimate-cross-project — course data. |
+| `github_pages_website/docs/manual/.sync-metadata.json` | refs in metadata | legitimate-cross-project — sync metadata referencing the parent project. |
+| `github_pages_website/docs/mobile/js/mobile.js` | refs in content | legitimate-cross-project — mobile site JS. |
 
 **Classification:** content vs build tooling distinction:
 - **Build tooling that operates on THIS site** (start-website.sh
@@ -135,7 +135,7 @@ Sub-audit (Task #264) results:
   (Task #262 carried over here in #264).
 
 **Action complete.** No genuine-violation refactors needed in
-Github-Pages-Website beyond the load_api_keys.sh fix already
+github_pages_website beyond the load_api_keys.sh fix already
 landed.
 
 ### HelixAgent (105 files)
@@ -167,18 +167,18 @@ underway.
 
 | Class | Files | Submodules | Action |
 |---|---|---|---|
-| legitimate-cross-project | 21 (Challenges) + 5 (LLMsVerifier cliagents) + 12 (Github-Pages-Website content) = 38 | Challenges, LLMsVerifier, Github-Pages-Website | None. |
+| legitimate-cross-project | 21 (Challenges) + 5 (LLMsVerifier cliagents) + 12 (github_pages_website content) = 38 | Challenges, LLMsVerifier, github_pages_website | None. |
 | cosmetic-only | 4 × `load_api_keys.sh` (HelixQA, Security, Containers, LLMsVerifier) | 4 submodules | Task #262 — genericise comments. |
 | genuine-violation | 1 × `apply_caps.py` paths-list | Containers | Task #263 — refactor to config-file input. |
 | deferred-to-#254 | 105 (HelixAgent) | HelixAgent | Roll into Task #254 (the larger HelixAgent remediation). |
 
 **Total decoupling-violation count after this audit:** 1 genuine
 violation (Containers/apply_caps.py) + 1 cosmetic batch (4 × load_api_keys.sh)
-+ 1 audit-pending (Github-Pages-Website build scripts).
++ 1 audit-pending (github_pages_website build scripts).
 
 ## Audit trail
 
 | Date | Reviewer | Round | Notes |
 |---|---|---|---|
 | 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁶ | First pass. Per-file decisions documented. Inline edits deferred to Tasks #262/#263/#264. |
-| 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁷ | Task #262 cosmetic-only fix landed (root + HelixQA + Security + Containers). Task #264 sub-audit complete: 1 carry-over load_api_keys.sh cosmetic fix in Github-Pages-Website, 11 other files classified legitimate-cross-project (THIS site's content + tooling). |
+| 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁷ | Task #262 cosmetic-only fix landed (root + HelixQA + Security + Containers). Task #264 sub-audit complete: 1 carry-over load_api_keys.sh cosmetic fix in github_pages_website, 11 other files classified legitimate-cross-project (THIS site's content + tooling). |

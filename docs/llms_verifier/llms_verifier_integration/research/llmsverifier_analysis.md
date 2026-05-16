@@ -28,7 +28,7 @@
 | `monitoring/` | Monitoring and observability configs |
 | `website/` | Website source |
 | `mobile/flutter/` | Mobile application (Flutter) |
-| `Assets/` | Logo and visual assets |
+| `assets/` | Logo and visual assets |
 | `Upstreams/` | Upstream repository management |
 | `reports/` | Generated reports storage |
 | `scripts/` | Utility scripts |

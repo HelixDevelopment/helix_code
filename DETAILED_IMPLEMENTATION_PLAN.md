@@ -697,7 +697,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 ### Day 36: Core Pages
 
 #### Morning: API Documentation Page (3 hours)
-**File**: `Github-Pages-Website/docs/api.html`
+**File**: `github_pages_website/docs/api.html`
 
 **Structure**:
 ```html
@@ -717,7 +717,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 - Include authentication guide
 
 #### Afternoon: Downloads Page (2 hours)
-**File**: `Github-Pages-Website/docs/downloads.html`
+**File**: `github_pages_website/docs/downloads.html`
 
 **Contents**:
 - Binary downloads for all platforms
@@ -729,7 +729,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 - Release notes links
 
 #### Late Afternoon: Community Page (3 hours)
-**File**: `Github-Pages-Website/docs/community.html`
+**File**: `github_pages_website/docs/community.html`
 
 **Contents**:
 - GitHub repository link
@@ -744,7 +744,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 ### Day 37: Additional Pages
 
 #### Morning: Roadmap Page (3 hours)
-**File**: `Github-Pages-Website/docs/roadmap.html`
+**File**: `github_pages_website/docs/roadmap.html`
 
 **Contents**:
 - Timeline visualization
@@ -756,7 +756,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 - Version history
 
 #### Afternoon: Changelog Page (2 hours)
-**File**: `Github-Pages-Website/docs/changelog.html`
+**File**: `github_pages_website/docs/changelog.html`
 
 **Contents**:
 - Version history
@@ -768,7 +768,7 @@ func TestTC202_WorkerHealthMonitoring(t *testing.T) {
 - Download links per version
 
 #### Late Afternoon: Blog Setup (3 hours)
-**File**: `Github-Pages-Website/docs/blog/`
+**File**: `github_pages_website/docs/blog/`
 
 **Structure**:
 ```

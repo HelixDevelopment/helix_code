@@ -268,7 +268,7 @@ All 40 internal packages have README files.
 
 ## 1.6 Website Status
 
-### Main Website (`Github-Pages-Website/`): 95% COMPLETE
+### Main Website (`github_pages_website/`): 95% COMPLETE
 - Version: v1.1.0 (November 2025)
 - All sections implemented
 - Mobile responsive

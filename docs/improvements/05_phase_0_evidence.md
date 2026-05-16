@@ -245,10 +245,10 @@ Live exit code: **1** (expected — known credential files in tracked tree per T
 Filenames flagged by the scanner (file:line only — values redacted per CONST-042):
 
 ```
-./Challenges/Panoptic/docs/SECURITY.md:462:
-./Challenges/Panoptic/tests/security/panoptic_test.go:422:
-./Challenges/Panoptic/tests/security/panoptic_test.go:423:
-./Challenges/Panoptic/tests/security/panoptic_test.go:454:
+./Challenges/panoptic/docs/SECURITY.md:462:
+./Challenges/panoptic/tests/security/panoptic_test.go:422:
+./Challenges/panoptic/tests/security/panoptic_test.go:423:
+./Challenges/panoptic/tests/security/panoptic_test.go:454:
 ./Challenges/pkg/env/redact_test.go:37:
 ./Challenges/pkg/env/redact_test.go:48:
 ./Challenges/pkg/logging/redacting_logger_test.go:55:
@@ -294,7 +294,7 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 
 **Not-tracked files flagged** (untracked working-tree files — not a commit risk):
 - `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
-- `Challenges/Panoptic/...`, `HelixQA/...`, `Security/...`: submodule working-tree files, not tracked at root
+- `Challenges/panoptic/...`, `HelixQA/...`, `Security/...`: submodule working-tree files, not tracked at root
 
 **The 3 pre-existing tracked credentials from T06 polish:**
 - `HelixCode/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
@@ -859,10 +859,10 @@ exit=0
 | HelixAgent/HelixMemory | e464257 | main |
 | HelixAgent/HelixSpecifier | f1f9927 | main |
 
-**Excluded from cascade (third-party):** `HelixAgent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `Github-Pages-Website`, `Assets`.
+**Excluded from cascade (third-party):** `HelixAgent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `github_pages_website`, `Assets`.
 
 **Scripts modified:**
-- `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded Assets/Github-Pages-Website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
+- `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded assets/github_pages_website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
 - `scripts/propagate-governance.sh`: Added `is_owned()` guard to prevent cascading into third-party submodules; added explicit branch-aware push with detached-HEAD protection.
 
 ---

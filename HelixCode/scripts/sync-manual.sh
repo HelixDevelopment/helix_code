@@ -160,7 +160,7 @@ This directory contains the HelixCode user manual in HTML and PDF formats.
 ## Viewing
 
 ### Online
-Visit the manual at: https://your-username.github.io/Github-Pages-Website/docs/manual/
+Visit the manual at: https://your-username.github.io/github_pages_website/docs/manual/
 
 ### Local
 Open `index.html` in any modern web browser.

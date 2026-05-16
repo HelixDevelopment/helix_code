@@ -210,7 +210,7 @@ All top-level internal packages except testutil lack doc.go files:
 
 ### 1.5 Website & Content Status
 
-#### Website (Github-Pages-Website/docs/)
+#### Website (github_pages_website/docs/)
 
 **Status**: Production Ready (v1.1.0)
 
@@ -1035,8 +1035,8 @@ Generate weekly reports on:
 6. All GUI applications - Implement pending features
 7. 12 README files to expand
 8. docs/user_manual/README.md - Add sections
-9. Github-Pages-Website/docs/index.html - Update content
-10. Github-Pages-Website/docs/courses/course-data.js - Add courses
+9. github_pages_website/docs/index.html - Update content
+10. github_pages_website/docs/courses/course-data.js - Add courses
 
 ---
 

@@ -251,9 +251,9 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 | Directory | Status | Purpose |
 |-----------|--------|---------|
 | `/Website/` | Planning only | Draft plan (45 lines) |
-| `/Github-Pages-Website/` | 90% Complete | Production website |
+| `/github_pages_website/` | 90% Complete | Production website |
 
-### 5.2 Github-Pages-Website Content
+### 5.2 github_pages_website Content
 
 **Complete (90%):**
 - Main index.html (1,196 lines)
