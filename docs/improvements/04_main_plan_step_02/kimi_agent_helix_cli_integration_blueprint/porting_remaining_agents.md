@@ -1755,7 +1755,7 @@ helix spec create --template api "User Authentication API"
 | Feature | HelixCode Package | Integration Point |
 |---------|-------------------|-------------------|
 | Mistral provider | `internal/llm/` | Already exists - verify |
-| Vibe CLI UX | `applications/terminal-ui/` | Reference for UX patterns |
+| Vibe CLI UX | `applications/terminal_ui/` | Reference for UX patterns |
 | Agent modes | `internal/session/modes.go` | Already covered in Copilot CLI |
 | Todo list | `internal/tools/todo.go` | New - task tracking within session |
 
@@ -2913,7 +2913,7 @@ helix db query "Show me average sales by region"
 
 | Feature | HelixCode Package | Integration Point |
 |---------|-------------------|-------------------|
-| Terminal adaptation | `applications/terminal-ui/` | Enhance with capability detection |
+| Terminal adaptation | `applications/terminal_ui/` | Enhance with capability detection |
 | Context commands | `internal/context/` | Add /context slash commands |
 | External editor | `internal/editor/external.go` | New - editor launch |
 
@@ -3503,7 +3503,7 @@ helix agent run --type planner --task "Analyze sales data"
 
 | Feature | HelixCode Package | Integration Point |
 |---------|-------------------|-------------------|
-| Terminal agent UX | `applications/terminal-ui/` | Enhance with command-aware UI |
+| Terminal agent UX | `applications/terminal_ui/` | Enhance with command-aware UI |
 | Agent mode | `internal/session/modes.go` | Add terminal-native agent mode |
 | Team knowledge | `internal/memory/team/` | New - shared prompt/command library |
 
@@ -3552,7 +3552,7 @@ helix --mode agent
 |---------|-------------------|-------------------|
 | Command validation | `internal/tools/shell/security.go` | New - per-command validation |
 | Sandbox policies | `internal/sandbox/` | Extend with Landlock + Seatbelt |
-| Inline completion | `applications/terminal-ui/` | Rich inline suggestions |
+| Inline completion | `applications/terminal_ui/` | Rich inline suggestions |
 
 #### Exact Code Changes
 
@@ -3908,7 +3908,7 @@ Game changers are features that significantly improve HelixCode's capabilities:
 | Todo manager | `internal/tools/` | `todo.go` | NEW |
 | Checkpoint system | `internal/memory/` | `checkpoint.go` | NEW |
 | Custom commands | `internal/commands/` | `custom.go` | NEW |
-| Terminal adaptation | `applications/terminal-ui/` | `terminal.go` (extend) | MODIFY |
+| Terminal adaptation | `applications/terminal_ui/` | `terminal.go` (extend) | MODIFY |
 | Context commands | `internal/commands/` | `context.go` | NEW |
 | External editor | `internal/editor/` | `external.go` | NEW |
 | Python sandbox | `internal/tools/sandbox/` | `python.go` | NEW |
@@ -3942,7 +3942,7 @@ Game changers are features that significantly improve HelixCode's capabilities:
 | Spec management | `internal/specs/` | `spec.go`, `loader.go` | NEW |
 | FauxPilot local | `internal/llm/local/` | `fauxpilot.go` | NEW |
 | Yolo mode | `internal/session/` | `yolo_mode.go` (extend modes) | MODIFY |
-| Agent mode UX | `applications/terminal-ui/` | `agent_mode.go` (extend) | MODIFY |
+| Agent mode UX | `applications/terminal_ui/` | `agent_mode.go` (extend) | MODIFY |
 | Team knowledge sharing | `internal/memory/team/` | `drive.go` (extend) | MODIFY |
 
 ---
@@ -4243,7 +4243,7 @@ For each feature, verify:
 | 3 | `internal/context/builder.go` | Add full-project scanning |
 | 4 | `internal/llm/streaming/` | Enhance SSE streaming for all providers |
 | 5 | `internal/llm/vision/` | Extend with UI analysis |
-| 6 | `applications/terminal-ui/terminal.go` | Add agent mode, progress indicators, hyperlinks |
+| 6 | `applications/terminal_ui/terminal.go` | Add agent mode, progress indicators, hyperlinks |
 | 7 | `applications/desktop/` | Add workflow canvas, agent kanban |
 | 8 | `internal/workflow/` | Add recipe execution hooks |
 | 9 | `internal/tools/shell/` | Add multiline support, failure detection |

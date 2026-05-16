@@ -190,7 +190,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 - All 20 features land with full (a)-(f).
 - `make test-full` (with `make test-infra-up`) passes with zero new `t.Skip()` without `SKIP-OK` markers.
 - Each feature's Challenge has runtime evidence pasted in its commit message body.
-- Features are wired into `applications/desktop/`, `applications/terminal-ui/`, `cmd/cli/` where applicable.
+- Features are wired into `applications/desktop/`, `applications/terminal_ui/`, `cmd/cli/` where applicable.
 
 **Estimated cycle:** 6-10 working weeks.
 

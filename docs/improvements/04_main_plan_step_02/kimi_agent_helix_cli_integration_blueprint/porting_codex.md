@@ -2466,17 +2466,17 @@ echo '{"id":1,"method":"thread/create","params":{"name":"test"}}' | HELIX_STDIO_
 - `codex-rs/tui/src/token_usage.rs` - Token usage display
 
 ### Target Location (in HelixCode)
-- `applications/terminal-ui/main.go` (MODIFY) - Add Codex-style TUI mode
-- `applications/terminal-ui/app.go` (NEW) - Main tview app
-- `applications/terminal-ui/chat.go` (NEW) - Chat widget
-- `applications/terminal-ui/streaming.go` (NEW) - Streaming display
-- `applications/terminal-ui/diff.go` (NEW) - Diff viewer
-- `applications/terminal-ui/approval.go` (NEW) - Approval modal
-- `applications/terminal-ui/status.go` (NEW) - Status bar
+- `applications/terminal_ui/main.go` (MODIFY) - Add Codex-style TUI mode
+- `applications/terminal_ui/app.go` (NEW) - Main tview app
+- `applications/terminal_ui/chat.go` (NEW) - Chat widget
+- `applications/terminal_ui/streaming.go` (NEW) - Streaming display
+- `applications/terminal_ui/diff.go` (NEW) - Diff viewer
+- `applications/terminal_ui/approval.go` (NEW) - Approval modal
+- `applications/terminal_ui/status.go` (NEW) - Status bar
 
 ### Exact Code Changes
 
-#### NEW: `applications/terminal-ui/app.go`
+#### NEW: `applications/terminal_ui/app.go`
 
 ```go
 package main
@@ -2662,7 +2662,7 @@ func (t *TUIApp) Run() error {
 }
 ```
 
-#### NEW: `applications/terminal-ui/chat.go`
+#### NEW: `applications/terminal_ui/chat.go`
 
 ```go
 package main
@@ -2761,7 +2761,7 @@ func (c *ChatView) AddFileChange(text string) {
 }
 ```
 
-#### NEW: `applications/terminal-ui/streaming.go`
+#### NEW: `applications/terminal_ui/streaming.go`
 
 ```go
 package main
@@ -2832,7 +2832,7 @@ func (c *JSONRPCClient) SendApprovalResponse(resp protocol.ApprovalResponse) err
 }
 ```
 
-#### NEW: `applications/terminal-ui/approval.go`
+#### NEW: `applications/terminal_ui/approval.go`
 
 ```go
 package main
@@ -2879,7 +2879,7 @@ func NewApprovalModal(req protocol.ApprovalRequest, callback func(protocol.Appro
 }
 ```
 
-#### NEW: `applications/terminal-ui/status.go`
+#### NEW: `applications/terminal_ui/status.go`
 
 ```go
 package main
@@ -2940,7 +2940,7 @@ func (s *StatusBar) updateText(status, reasoning string, usage TokenUsage) {
 }
 ```
 
-#### NEW: `applications/terminal-ui/diff.go`
+#### NEW: `applications/terminal_ui/diff.go`
 
 ```go
 package main
@@ -2995,7 +2995,7 @@ func (d *DiffViewer) ShowDiff(oldContent, newContent string) {
 ### Anti-Bluff Test
 
 ```go
-// applications/terminal-ui/tui_test.go
+// applications/terminal_ui/tui_test.go
 package main
 
 import (
@@ -3061,8 +3061,8 @@ func TestStatusBar(t *testing.T) {
 ### Integration Verification
 
 ```bash
-go test ./applications/terminal-ui/... -v
-go build -o helix-tui ./applications/terminal-ui/main.go
+go test ./applications/terminal_ui/... -v
+go build -o helix-tui ./applications/terminal_ui/main.go
 # Run interactively: ./helix-tui
 ```
 
@@ -3082,7 +3082,7 @@ go build -o helix-tui ./applications/terminal-ui/main.go
 - `internal/approval/engine.go` (NEW) - Approval decision engine
 - `internal/approval/renderer.go` (NEW) - Approval rendering (text, diff, image, audio)
 - `internal/tools/confirmation/` (MODIFY) - Enhance with Codex-style approval
-- `applications/terminal-ui/approval.go` (MODIFY) - Terminal approval UI
+- `applications/terminal_ui/approval.go` (MODIFY) - Terminal approval UI
 - `applications/desktop/` (MODIFY) - Desktop approval dialogs
 
 ### Exact Code Changes
@@ -3760,7 +3760,7 @@ helix --approval-policy=full-auto --sandbox-mode=workspace-write
 - `internal/llm/budget.go` (NEW) - Budget management
 - `internal/llm/ratelimit.go` (NEW) - Rate limiting
 - `internal/llm/model_manager.go` (MODIFY) - Integrate budget checks
-- `applications/terminal-ui/status.go` (MODIFY) - Display token usage
+- `applications/terminal_ui/status.go` (MODIFY) - Display token usage
 
 ### Exact Code Changes
 
@@ -4501,8 +4501,8 @@ go test ./internal/llm/... -run TestFallbackChain
 ### Target Location (in HelixCode)
 - `internal/llm/streaming.go` (NEW) - Streaming response handler
 - `internal/llm/provider.go` (MODIFY) - Add streaming Generate method
-- `applications/terminal-ui/streaming.go` (MODIFY) - Real-time display
-- `applications/terminal-ui/chat.go` (MODIFY) - Append streaming tokens
+- `applications/terminal_ui/streaming.go` (MODIFY) - Real-time display
+- `applications/terminal_ui/chat.go` (MODIFY) - Append streaming tokens
 - `internal/protocol/types.go` (MODIFY) - Streaming item types
 
 ### Exact Code Changes
@@ -4639,7 +4639,7 @@ func (p *BaseProvider) GenerateStreamCancellable(
 }
 ```
 
-#### MODIFY: `applications/terminal-ui/chat.go`
+#### MODIFY: `applications/terminal_ui/chat.go`
 
 Add streaming support to ChatView:
 
@@ -4685,7 +4685,7 @@ func (c *ChatView) FinalizeStreamingMessage(id string) {
 }
 ```
 
-#### MODIFY: `applications/terminal-ui/app.go`
+#### MODIFY: `applications/terminal_ui/app.go`
 
 Integrate streaming:
 
@@ -4831,7 +4831,7 @@ func TestStreamCancellation(t *testing.T) {
 
 ```bash
 go test ./internal/llm/... -run TestStreamingHandler
-go test ./applications/terminal-ui/... -run TestStream*
+go test ./applications/terminal_ui/... -run TestStream*
 ```
 
 ---
@@ -4849,7 +4849,7 @@ go test ./applications/terminal-ui/... -run TestStream*
 - `internal/context/git_context.go` (NEW) - Git-aware context builder
 - `internal/editor/diff_editor.go` (MODIFY) - Git diff-based editing
 - `cmd/root.go` (MODIFY) - Git-aware startup
-- `applications/terminal-ui/` (MODIFY) - Show git status in TUI
+- `applications/terminal_ui/` (MODIFY) - Show git status in TUI
 
 ### Exact Code Changes
 
@@ -5261,7 +5261,7 @@ go run ./cmd/cli/main.go "explain the git history" # Should show git context
 - `internal/watch/watcher.go` (NEW) - File watcher engine
 - `cmd/root.go` (MODIFY) - Add `watch` subcommand
 - `internal/session/` (MODIFY) - Auto-trigger on file changes
-- `applications/terminal-ui/` (MODIFY) - Show watch status
+- `applications/terminal_ui/` (MODIFY) - Show watch status
 
 ### Exact Code Changes
 
@@ -5773,7 +5773,7 @@ internal/watch/
   watcher.go                    - File watcher engine
   agent_trigger.go              - Watch-to-agent trigger
 
-applications/terminal-ui/
+applications/terminal_ui/
   app.go                        - Main TUI app (tview)
   chat.go                       - Chat view widget
   streaming.go                  - Streaming display

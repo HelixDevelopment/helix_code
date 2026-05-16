@@ -294,7 +294,7 @@ Line 303: helixConfig.APIKeys undefined
 **Components with TODO/FIXME markers** (18 files):
 
 1. `internal/memory/providers/weaviate_provider.go` - Weaviate integration incomplete
-2. `applications/terminal-ui/main.go` - Terminal UI has TODOs
+2. `applications/terminal_ui/main.go` - Terminal UI has TODOs
 3. `internal/providers/ai_integration.go` - AI provider integration TODOs
 4. `internal/tools/filesystem/doc.go` - Filesystem tool documentation missing
 5. `internal/llm/model_download_manager.go` - Download management incomplete
@@ -305,7 +305,7 @@ Line 303: helixConfig.APIKeys undefined
 10. `internal/config/config_api.go` - API config management TODOs
 
 **Files with Disabled/Broken markers** (2 files):
-1. `applications/aurora-os/theme.go` - Theme system disabled
+1. `applications/aurora_os/theme.go` - Theme system disabled
 2. `applications/desktop/theme.go` - Theme system disabled
 
 ---
@@ -357,10 +357,10 @@ Line 303: helixConfig.APIKeys undefined
 | `internal/hooks` | ~65% | ⚠️ Medium | P3 |
 | `internal/rules` | ~70% | ⚠️ Medium | P3 |
 | `internal/template` | ~75% | ⚠️ Medium | P3 |
-| `applications/aurora-os` | ~40% | ⚠️ Low | P2 |
-| `applications/harmony-os` | ~40% | ⚠️ Low | P2 |
+| `applications/aurora_os` | ~40% | ⚠️ Low | P2 |
+| `applications/harmony_os` | ~40% | ⚠️ Low | P2 |
 | `applications/desktop` | ~50% | ⚠️ Medium | P2 |
-| `applications/terminal-ui` | ~55% | ⚠️ Medium | P2 |
+| `applications/terminal_ui` | ~55% | ⚠️ Medium | P2 |
 
 **Target**: 100% coverage for all packages
 **Current Project Average**: ~82% overall

@@ -67,7 +67,7 @@ echo "✅ CLI built: bin/cli"
 
 # Build Terminal UI
 echo "🖥️ Building Terminal UI..."
-go build -o bin/tui ./applications/terminal-ui
+go build -o bin/tui ./applications/terminal_ui
 
 echo "✅ Terminal UI built: bin/tui"
 
@@ -79,13 +79,13 @@ echo "✅ Desktop app built: bin/desktop"
 
 # Build Aurora OS client
 echo "🌟 Building Aurora OS client..."
-go build -o bin/aurora-os ./applications/aurora-os
+go build -o bin/aurora-os ./applications/aurora_os
 
 echo "✅ Aurora OS client built: bin/aurora-os"
 
 # Build Harmony OS client
 echo "🔶 Building Harmony OS client..."
-go build -o bin/harmony-os ./applications/harmony-os
+go build -o bin/harmony-os ./applications/harmony_os
 
 echo "✅ Harmony OS client built: bin/harmony-os"
 

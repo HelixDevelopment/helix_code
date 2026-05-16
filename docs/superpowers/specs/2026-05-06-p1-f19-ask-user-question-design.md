@@ -111,7 +111,7 @@ Two layers under `HelixCode/internal/tools/askuser/`, plus thin wiring at the re
 Why a stdin readline (Q1=A) and not bubbletea / promptui / charmbracelet/huh:
 - **Zero new external deps** is a hard programme rule for F18+ (matches F18's anti-drift discipline); we already have `bufio` + `os.Stdin` + `golang.org/x/term`.
 - The render surface is one numbered menu with optional preview blocks — far less than what a TUI library brings (state machines, focus, keystroke routing). bubbletea's Elm-Architecture is overkill for "read one line, validate, retry up to 3 times".
-- The full-screen TUI in `applications/terminal-ui/` already uses `tview`/`tcell`. Adding bubbletea here would be a third paradigm. The CLI is line-oriented; a tiny purpose-built prompter matches the surface.
+- The full-screen TUI in `applications/terminal_ui/` already uses `tview`/`tcell`. Adding bubbletea here would be a third paradigm. The CLI is line-oriented; a tiny purpose-built prompter matches the surface.
 - Simplest fallback story: a `bufio.Reader` over `bytes.Buffer` IS the unit-test seam. No fake-terminal harness, no test-only event-loop, no goroutine-leak hazard.
 
 Why tool-only (Q5=A) and not slash + cobra:

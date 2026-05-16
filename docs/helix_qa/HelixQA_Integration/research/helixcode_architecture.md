@@ -199,11 +199,11 @@ go build -o bin/helix ./cmd/cli
 
 ### 2.2 TUI (Terminal UI)
 
-**Location**: `HelixCode/applications/terminal-ui/`
+**Location**: `HelixCode/applications/terminal_ui/`
 
 **Framework**: rivo/tview + gdamore/tcell/v2
 
-**Entry Point**: `HelixCode/applications/terminal-ui/main.go` (59,087 chars)
+**Entry Point**: `HelixCode/applications/terminal_ui/main.go` (59,087 chars)
 
 **Key Files**:
 - `main.go` - Full TUI application with multiple screens
@@ -219,7 +219,7 @@ go build -o bin/helix ./cmd/cli
 ```bash
 make build-terminal-ui
 # or
-go build -o bin/helix-tui ./applications/terminal-ui
+go build -o bin/helix-tui ./applications/terminal_ui
 ```
 
 **Integration Implications for HelixQA**:
@@ -287,8 +287,8 @@ make build-ios      # gomobile bind -target ios
 ### 2.5 Aurora OS & Harmony OS Clients
 
 **Locations**:
-- `HelixCode/applications/aurora-os/`
-- `HelixCode/applications/harmony-os/`
+- `HelixCode/applications/aurora_os/`
+- `HelixCode/applications/harmony_os/`
 
 **Framework**: Fyne v2 (same as desktop, platform-specific tweaks)
 
@@ -772,7 +772,7 @@ The repository contains extensive completion tracking:
 
 2. **Client App Validation**
    - **CLI**: `HelixCode/cmd/cli/` - Command exit codes, output formatting, stdin handling
-   - **TUI**: `HelixCode/applications/terminal-ui/` - Screen rendering, navigation flows
+   - **TUI**: `HelixCode/applications/terminal_ui/` - Screen rendering, navigation flows
    - **Desktop**: `HelixCode/applications/desktop/` - GUI element validation
    - **Mobile**: `HelixCode/applications/android/`, `ios/` - API contract + UI testing
 
@@ -886,7 +886,7 @@ HelixQA/
 
 | Gap | Location | Impact | HelixQA Opportunity |
 |-----|----------|--------|---------------------|
-| **No TUI screenshot collection** | `applications/terminal-ui/` | Cannot visually validate terminal UI | Add `terminal_test.go` with `tcell` screenshot capture |
+| **No TUI screenshot collection** | `applications/terminal_ui/` | Cannot visually validate terminal UI | Add `terminal_test.go` with `tcell` screenshot capture |
 | **No Desktop GUI screenshot tests** | `applications/desktop/` | No visual regression for Fyne apps | Integrate Fyne's `test.NewApp()` for headless screenshots |
 | **No WebSocket message logging** | `internal/server/` | Difficult to debug real-time issues | Add structured WS message capture for replay |
 | **No API response examples** | `api/openapi.yaml` | Missing example responses | Generate golden files from actual API calls |
@@ -1059,7 +1059,7 @@ The project follows a "Constitution" (CONSTITUTION.md) with clauses like CONST-0
 - `HelixCode/cmd/root.go` - Cobra root command
 - `HelixCode/cmd/cli/main.go` - CLI main
 - `HelixCode/cmd/server/main.go` - Server main
-- `HelixCode/applications/terminal-ui/main.go` - TUI main
+- `HelixCode/applications/terminal_ui/main.go` - TUI main
 - `HelixCode/applications/desktop/main.go` - Desktop main
 
 ### Core Server

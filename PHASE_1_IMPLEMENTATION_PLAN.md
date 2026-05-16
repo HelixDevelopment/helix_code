@@ -436,7 +436,7 @@ sudo yum install -y \
 go build -v ./applications/desktop/
 
 # Test terminal UI
-go build -v ./applications/terminal-ui/
+go build -v ./applications/terminal_ui/
 
 # Test mobile applications
 go build -v ./applications/ios/

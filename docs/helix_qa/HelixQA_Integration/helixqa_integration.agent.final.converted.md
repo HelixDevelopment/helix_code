@@ -1731,9 +1731,9 @@ The `helix qa list` command (omitted for brevity, but implemented as `qaListCmd(
 
 ### 3.5.1 QA Session Dashboard
 
-HelixCode's Terminal UI (`applications/terminal-ui/`) uses `rivo/tview` with `gdamore/tcell/v2`. The TUI communicates with the server via the same REST client used by the CLI, but adds a WebSocket connection for real-time updates where supported. For QA, the TUI adds a new screen accessible from the main menu: the **QA Dashboard**.
+HelixCode's Terminal UI (`applications/terminal_ui/`) uses `rivo/tview` with `gdamore/tcell/v2`. The TUI communicates with the server via the same REST client used by the CLI, but adds a WebSocket connection for real-time updates where supported. For QA, the TUI adds a new screen accessible from the main menu: the **QA Dashboard**.
 
-The dashboard is implemented in a new file, `HelixCode/applications/terminal-ui/qa_dashboard.go`. It contains a `QADashboard` struct that holds `tview` primitives: a session list table, a status text view, a progress bar, and a detail pane.
+The dashboard is implemented in a new file, `HelixCode/applications/terminal_ui/qa_dashboard.go`. It contains a `QADashboard` struct that holds `tview` primitives: a session list table, a status text view, a progress bar, and a detail pane.
 
 ```go
 package main
@@ -1825,7 +1825,7 @@ For environments where ASCII art is insufficient (e.g., high-resolution desktop 
 
 ### 3.5.3 Key Bindings
 
-The TUI key bindings are registered in the main event loop of `applications/terminal-ui/main.go`. The QA dashboard adds the following global bindings when active:
+The TUI key bindings are registered in the main event loop of `applications/terminal_ui/main.go`. The QA dashboard adds the following global bindings when active:
 
 **Table 4: Integration Touchpoints — HelixCode File to HelixQA Package**
 
@@ -1837,8 +1837,8 @@ The TUI key bindings are registered in the main event loop of `applications/term
 | `internal/config/config.go` | `pkg/config` | `QAConfig` struct added; `Validate()` extended with bank/device/key checks | After `Verifier` field |
 | `cmd/cli/main.go` | `internal/server/client.go` | `rootCmd.AddCommand(qaCmd())` | After existing command registrations |
 | `cmd/cli/qa.go` | `internal/server/client.go` | `RunE` functions call REST client methods | New file, 180 lines |
-| `applications/terminal-ui/main.go` | `internal/server/client.go` | Key bindings `F5`, `F6`, `F7` dispatch to QA dashboard methods | Event loop switch |
-| `applications/terminal-ui/qa_dashboard.go` | `internal/server/client.go` | SSE streaming and periodic polling via `server.Client` | New file, 240 lines |
+| `applications/terminal_ui/main.go` | `internal/server/client.go` | Key bindings `F5`, `F6`, `F7` dispatch to QA dashboard methods | Event loop switch |
+| `applications/terminal_ui/qa_dashboard.go` | `internal/server/client.go` | SSE streaming and periodic polling via `server.Client` | New file, 240 lines |
 | `internal/helixqa/wrapper.go` | `pkg/orchestrator`, `pkg/autonomous`, `pkg/evidence`, `pkg/config` | `Engine` struct wraps HelixQA types; `buildQAConfig` translates configs | New file, 200 lines |
 | `go.mod` | `digital.vasic.helixqa` | `require digital.vasic.helixqa v0.2.0` | Replace directive to local submodule path |
 
@@ -2690,7 +2690,7 @@ HelixCode ships six client targets: Web, Desktop (Linux, macOS, Windows), Mobile
 
 | Test Type | Web (Browser) | Desktop (Fyne GUI) | Mobile (Android / iOS) | CLI (Cobra) | TUI (tview/tcell) |
 |-----------|---------------|-------------------|------------------------|-------------|-------------------|
-| **Unit** | `go test -short` on `web/src/capture/`; jsdom for frontend logic | `go test -short` on Fyne widgets; `fyne test` headless app | `go test -short` on gomobile bindings; Android: Robolectric; iOS: XCTest | `go test -short` on `cmd/cli/` and `cmd/root.go`; Cobra command tree validation | `go test -short` on `applications/terminal-ui/`; tcell simulation mode |
+| **Unit** | `go test -short` on `web/src/capture/`; jsdom for frontend logic | `go test -short` on Fyne widgets; `fyne test` headless app | `go test -short` on gomobile bindings; Android: Robolectric; iOS: XCTest | `go test -short` on `cmd/cli/` and `cmd/root.go`; Cobra command tree validation | `go test -short` on `applications/terminal_ui/`; tcell simulation mode |
 | **Integration** | Playwright + real backend API (`docker-compose.test.yml`); no mock HTTP client | X11/Playwright against running desktop binary; real API calls | ADB + real device/emulator; `adb shell am start` with real backend; iOS: `xcrun simctl` + real API | `os/exec` of compiled CLI binary against real server; stdout/stderr parsed with real string ops | `asciinema` record of TUI session against real server; terminal state replayed and parsed |
 | **E2E** | Playwright full journey: login → create agent → run → verify; screenshots at every step | X11 executor: launch → navigate menus → trigger action → verify window title; `pkg/navigator/x11_executor.go` ^1^| ADBExecutor: tap → type → screenshot → vision verify; `pkg/navigator/executor.go` ^1^; iOS: `simctl io` + WebDriverAgent | CLI chain: `helix login` → `helix agent create` → `helix agent run` → parse output for success token | TUI automation: tcell event injection → screen buffer capture → structural comparison |
 | **Functional** | Playwright per-feature: upload, chat, settings; responsive breakpoints (375×667, 768×1024, 1920×1080) ^2^| Fyne `test.NewApp()` headless widget validation; pixel-diff for OpenGL canvas visual regression | Feature isolation: camera permission, deep link, geo-restriction probe (`pkg/autonomous/geo_probe.go`) ^1^| Per-command: `helix config set` → verify config file; `helix status` → verify exit code 0 + "Status: OK" | Per-screen: chat renders messages; config shows all fields; keyboard navigation reaches every widget |
@@ -4636,7 +4636,7 @@ The CLI (`HelixCode/cmd/cli/`, built with Cobra) exposes translation commands. B
 
 ### 9.1.5 TUI UX
 
-The TUI (`HelixCode/applications/terminal-ui/`, built with `rivo/tview`) is the richest keyboard-driven interface. Provider selection uses a list widget populated from the verifier cache; real-time streaming display is implemented through a `TextView` with `SetDynamicColors(true)` receiving WebSocket messages from `/ws/v1/chat`. Keyboard shortcuts (`Ctrl+P` provider panel, `Ctrl+M` model selection, `Ctrl+R` report export) are verified by sending `tcell` key events through the headless test harness. Color-coded quality scores use a four-tier palette: green ≥ 0.85, yellow 0.60–0.84, red < 0.60, gray for unverified providers.
+The TUI (`HelixCode/applications/terminal_ui/`, built with `rivo/tview`) is the richest keyboard-driven interface. Provider selection uses a list widget populated from the verifier cache; real-time streaming display is implemented through a `TextView` with `SetDynamicColors(true)` receiving WebSocket messages from `/ws/v1/chat`. Keyboard shortcuts (`Ctrl+P` provider panel, `Ctrl+M` model selection, `Ctrl+R` report export) are verified by sending `tcell` key events through the headless test harness. Color-coded quality scores use a four-tier palette: green ≥ 0.85, yellow 0.60–0.84, red < 0.60, gray for unverified providers.
 
 **Table 1. Complete UX Matrix: Client Type × UX Element × Interaction Pattern × QA Verification Method**
 

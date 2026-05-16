@@ -208,10 +208,10 @@ Returns hardcoded project object instead of database query.
 - Line 1482: `LoadTemplate()` - placeholder
 
 #### 3.7 UI Application Placeholders
-- `applications/aurora-os/main.go:869` - Hardcoded disk usage
-- `applications/aurora-os/main.go:1495` - Placeholder LLM call
+- `applications/aurora_os/main.go:869` - Hardcoded disk usage
+- `applications/aurora_os/main.go:1495` - Placeholder LLM call
 - `applications/desktop/main.go:959` - Placeholder LLM call
-- `applications/harmony-os/main.go:1534` - Placeholder LLM call
+- `applications/harmony_os/main.go:1534` - Placeholder LLM call
 
 ---
 
@@ -222,9 +222,9 @@ Returns hardcoded project object instead of database query.
 **Error:** Missing OpenGL and X11 development headers
 
 **Affected Applications:**
-1. `applications/aurora-os` - FAIL
+1. `applications/aurora_os` - FAIL
 2. `applications/desktop` - FAIL
-3. `applications/harmony-os` - FAIL
+3. `applications/harmony_os` - FAIL
 
 **Required Dependencies (Linux):**
 ```bash

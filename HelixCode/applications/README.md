@@ -22,7 +22,7 @@ The terminal-ui application uses `tview` and `tcell` which are pure Go libraries
 ```bash
 make build-terminal-ui
 # or
-go build -o bin/helix-tui ./applications/terminal-ui
+go build -o bin/helix-tui ./applications/terminal_ui
 ```
 
 ### Desktop GUI Applications
@@ -129,7 +129,7 @@ make mobile-android
 
 ```bash
 # Terminal UI
-go build -o bin/helix-tui ./applications/terminal-ui
+go build -o bin/helix-tui ./applications/terminal_ui
 
 # Desktop GUI
 make desktop
@@ -141,11 +141,11 @@ make desktop-nogui
 
 # Aurora OS
 make aurora-os
-# or: go build -o bin/aurora-os ./applications/aurora-os
+# or: go build -o bin/aurora-os ./applications/aurora_os
 
 # Harmony OS
 make harmony-os
-# or: go build -o bin/harmony-os ./applications/harmony-os
+# or: go build -o bin/harmony-os ./applications/harmony_os
 ```
 
 ### Cross-Platform Builds
@@ -260,7 +260,7 @@ Applications include unit tests for non-GUI components:
 
 ```bash
 # Test terminal-ui
-go test -v ./applications/terminal-ui/...
+go test -v ./applications/terminal_ui/...
 
 # Test desktop (non-GUI components)
 go test -v -tags nogui ./applications/desktop/...

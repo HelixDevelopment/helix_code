@@ -191,9 +191,9 @@ Test Files by Category:
 ### 2.2 CRITICAL-002: GUI Applications Missing Build Dependencies
 
 **Affected Applications**:
-1. `applications/aurora-os` - FAILS without X11/OpenGL
+1. `applications/aurora_os` - FAILS without X11/OpenGL
 2. `applications/desktop` - FAILS without X11/OpenGL
-3. `applications/harmony-os` - FAILS without X11/OpenGL
+3. `applications/harmony_os` - FAILS without X11/OpenGL
 
 **Required Dependencies (Linux)**:
 ```bash
@@ -210,7 +210,7 @@ apk add mesa-gl xrandr xcursor-dev libxinerama-dev libxi-dev
 **Applications that DO compile successfully**:
 - `cmd/server` (44MB) - Main HTTP server
 - `cmd/cli` (22MB) - Command-line interface
-- `applications/terminal-ui` (46MB) - Terminal user interface
+- `applications/terminal_ui` (46MB) - Terminal user interface
 
 ---
 
@@ -631,7 +631,7 @@ Github-Pages-Website/docs/
 
 #### Step 2.5: Application UI Completion
 
-**Terminal UI** (`applications/terminal-ui/`):
+**Terminal UI** (`applications/terminal_ui/`):
 - Implement Projects section
 - Implement Sessions section
 - Implement LLM interaction
@@ -643,12 +643,12 @@ Github-Pages-Website/docs/
 - Implement LLM tab
 - Connect to backend API
 
-**Aurora OS** (`applications/aurora-os/`):
+**Aurora OS** (`applications/aurora_os/`):
 - Complete all stub functions
 - Implement Aurora-specific features
 - Security features implementation
 
-**Harmony OS** (`applications/harmony-os/`):
+**Harmony OS** (`applications/harmony_os/`):
 - Connect distributed engine
 - Implement real system metrics
 - Complete resource management

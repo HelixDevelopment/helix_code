@@ -79,13 +79,13 @@ fyne.io/fyne/v2/widget    - UI widgets
 cd HelixCode
 
 # Build for current platform
-go build -o bin/harmony-os/helixcode-harmony ./applications/harmony-os
+go build -o bin/harmony-os/helixcode-harmony ./applications/harmony_os
 
 # Build for Harmony OS (ARM64)
 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 \
   go build -ldflags="-s -w" \
   -o bin/harmony-os/helixcode-harmony \
-  ./applications/harmony-os
+  ./applications/harmony_os
 
 # Using Makefile
 make harmony-os
@@ -99,19 +99,19 @@ cd HelixCode
 # Build CLI-only version (no GUI dependencies)
 go build -tags nogui \
   -o bin/harmony-os/helixcode-harmony-cli \
-  ./applications/harmony-os
+  ./applications/harmony_os
 
 # Cross-compile for ARM64 (Harmony OS)
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 \
   go build -tags nogui -ldflags="-s -w" \
   -o bin/harmony-os/helixcode-harmony-cli \
-  ./applications/harmony-os
+  ./applications/harmony_os
 ```
 
 ### Package as HAP
 
 ```bash
-cd applications/harmony-os
+cd applications/harmony_os
 hdc build release
 ```
 

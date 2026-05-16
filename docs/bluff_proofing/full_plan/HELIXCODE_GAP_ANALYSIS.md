@@ -212,10 +212,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 **Bluff Type**: Structural
 
 ```dockerfile
-RUN CGO_ENABLED=0 GOOS=linux go build ... -o bin/terminal-ui ./applications/terminal-ui
+RUN CGO_ENABLED=0 GOOS=linux go build ... -o bin/terminal-ui ./applications/terminal_ui
 ```
 
-**Evidence**: The Dockerfile tries to build `applications/terminal-ui` but without reading the tree structure, we cannot confirm this directory exists or contains valid Go code.
+**Evidence**: The Dockerfile tries to build `applications/terminal_ui` but without reading the tree structure, we cannot confirm this directory exists or contains valid Go code.
 
 ---
 
@@ -272,7 +272,7 @@ Verified real implementations:
 - Port exposure
 - Environment variable defaults
 
-**Gaps**: References missing `docker-entrypoint.sh`, may reference missing `applications/terminal-ui`
+**Gaps**: References missing `docker-entrypoint.sh`, may reference missing `applications/terminal_ui`
 
 ---
 

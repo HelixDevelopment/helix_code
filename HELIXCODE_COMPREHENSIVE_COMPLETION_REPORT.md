@@ -1285,7 +1285,7 @@ Critical Files (18 files with markers):
    - Complete all 15 stub methods
    - Add integration tests
 
-2. applications/terminal-ui/main.go
+2. applications/terminal_ui/main.go
    - Implement new task form
    - Enable Cognee integration
    - Disable Cognee functionality

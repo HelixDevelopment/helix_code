@@ -199,7 +199,7 @@ jobs:
 
       - name: Test Aurora OS
         run: |
-          cd applications/aurora-os
+          cd applications/aurora_os
           go test -v ./...
 
       - name: Upload Aurora OS binary
@@ -232,7 +232,7 @@ jobs:
 
       - name: Test Harmony OS
         run: |
-          cd applications/harmony-os
+          cd applications/harmony_os
           go test -v ./...
 
       - name: Upload Harmony OS binary

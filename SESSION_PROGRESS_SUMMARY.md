@@ -165,7 +165,7 @@ router.HandleFunc("/api/v1/config/status", api.handleStatus).Methods("GET")
 ## 🚧 Remaining Work (Priority 3)
 
 ### 1. Terminal UI Enhancements (~4 hours)
-**Location**: `applications/terminal-ui/main.go`
+**Location**: `applications/terminal_ui/main.go`
 - Line 349: Implement new task form
 - Line 543: Enable Cognee functionality
 - Line 549: Disable Cognee functionality

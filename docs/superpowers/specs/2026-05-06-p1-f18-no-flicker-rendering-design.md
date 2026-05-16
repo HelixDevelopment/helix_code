@@ -20,7 +20,7 @@ The non-TTY graceful degrade (Q4=B) is structurally enforced: `plainRenderer` MU
 
 The dirty-region diff (Q3=B) is the explicit anti-bluff lever for "no flicker is real, not just claimed": the renderer tracks a `Viewport` of the previous frame's lines, computes the line-by-line LCS-trivial dirty set on each new frame, and emits ANSI sequences ONLY for the lines that changed. A frame with one changed line of a five-line block emits exactly one `\033[<n>A\r\033[K<line>\033[<n>B`-style sequence — not five rewrites disguised as a fancy update.
 
-Out of scope for v1: full screen-mode TUI (alternative-screen-buffer `\033[?1049h` is deferred to F18.5); `tcell`/`termbox` adoption in the CLI hot path (the `applications/terminal-ui/` Fyne+tview TUI is a separate code path and not changed by F18); SIGWINCH terminal-resize responsiveness (the renderer reads width once at startup; resize-during-render is documented as "next frame picks up new width on next factory init or process restart"); mouse input; bracketed paste; truecolor / 24-bit color negotiation (we emit only the standard 8/16-color SGR set when needed for emphasis); Windows-pre-10 ANSI shimming (we rely on Go 1.16+'s automatic VT-mode enablement on Windows 10+).
+Out of scope for v1: full screen-mode TUI (alternative-screen-buffer `\033[?1049h` is deferred to F18.5); `tcell`/`termbox` adoption in the CLI hot path (the `applications/terminal_ui/` Fyne+tview TUI is a separate code path and not changed by F18); SIGWINCH terminal-resize responsiveness (the renderer reads width once at startup; resize-during-render is documented as "next frame picks up new width on next factory init or process restart"); mouse input; bracketed paste; truecolor / 24-bit color negotiation (we emit only the standard 8/16-color SGR set when needed for emphasis); Windows-pre-10 ANSI shimming (we rely on Go 1.16+'s automatic VT-mode enablement on Windows 10+).
 
 Anti-bluff: a `render` package whose code exists but is never wired into the agent's streaming hot path (so the agent still goes through `fmt.Print`), OR a `plainRenderer` that claims fallback but still emits a `\r` that breaks `grep`-on-redirected-output, OR a `dirty-region diff` that returns the same byte sequence whether one line changed or all five — each is a critical defect (§5.2). The single largest bluff vector for F18 is "renderer initialised but never called from production", which compiles, passes naive unit tests, and silently degrades the user experience to today's flicker-prone output without anyone noticing.
 
@@ -83,7 +83,7 @@ Three layers, all under `HelixCode/internal/render/`, plus thin wiring into the 
 Why a custom ANSI renderer (Q1=A) and not `tcell` / `termbox` / `bubbletea`:
 - **Zero new external deps** is a hard programme rule for F18 (matches F17's anti-drift discipline).
 - The render surface is two narrow modes (in-place token streaming + small-block frame rendering) — far less than what a full TUI library brings. We don't need event loops, focus management, or alt-screen for F18.
-- The full-screen TUI in `applications/terminal-ui/` already uses `tview`/`tcell`. Adding `bubbletea` here would create a third terminal-rendering paradigm in the codebase. The CLI is a streaming line-oriented tool; a tiny purpose-built renderer matches the surface.
+- The full-screen TUI in `applications/terminal_ui/` already uses `tview`/`tcell`. Adding `bubbletea` here would create a third terminal-rendering paradigm in the codebase. The CLI is a streaming line-oriented tool; a tiny purpose-built renderer matches the surface.
 
 Why env-var only (Q5=B) and not slash + cobra:
 - Render mode is a *startup* property — the renderer is constructed once and the env value is snapshotted into the active mode. Switching mid-process would require renderer re-initialisation, viewport reset, and unwinding any in-flight in-place updates. v1 punts on this complexity.
@@ -302,7 +302,7 @@ The chosen mode is logged at INFO at startup (`render mode: fancy (auto-resolved
 - `cmd/cli/main.go` startup (around the existing logger / cobra setup) — F18 inserts `renderer, mode, err := render.NewRenderer(render.Options{})` before any tool/slash registration. `defer renderer.Close()` is registered immediately after.
 - `internal/agent/base_agent.go::executeTaskWithLLM` (lines 360–426) — currently calls `Generate` (non-streaming). F18 does NOT change this; agent-loop streaming is a separate, larger change (out of scope; the renderer is built so a future patch can wire it in via a single `WriteToken` call site without re-architecting).
 - `internal/tools/registry.go::Execute` (line 250+) — F18 does NOT modify the registry. Tool result printing is at the *call sites* of `Execute` in `cmd/cli/main.go`; `RenderToolResult` is invoked there.
-- `applications/terminal-ui/` (Fyne / tview) — F18 is the **CLI** renderer; the desktop GUI and the tview TUI are separate code paths that already use their own rendering. They are NOT touched by F18.
+- `applications/terminal_ui/` (Fyne / tview) — F18 is the **CLI** renderer; the desktop GUI and the tview TUI are separate code paths that already use their own rendering. They are NOT touched by F18.
 - `golang.org/x/term` is at v0.41.0 in `go.sum` (verified) — already transitively required by other `golang.org/x` deps; F18 promotes it to a direct require.
 
 ## 4. Data flow

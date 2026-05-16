@@ -29,7 +29,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:205`
+**File**: `applications/harmony_os/main_test.go:205`
 
 **Description**: No description provided
 
@@ -49,7 +49,7 @@
 
 **Package**: `main`
 
-**File**: `applications/aurora-os/main_test.go:9`
+**File**: `applications/aurora_os/main_test.go:9`
 
 **Description**: No description provided
 
@@ -65,7 +65,7 @@
 
 **Package**: `main`
 
-**File**: `applications/aurora-os/main_test.go:30`
+**File**: `applications/aurora_os/main_test.go:30`
 
 **Description**: No description provided
 
@@ -82,7 +82,7 @@
 
 **Package**: `main`
 
-**File**: `applications/aurora-os/main_test.go:21`
+**File**: `applications/aurora_os/main_test.go:21`
 
 **Description**: No description provided
 
@@ -98,7 +98,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:243`
+**File**: `applications/harmony_os/main_test.go:243`
 
 **Description**: No description provided
 
@@ -116,7 +116,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:140`
+**File**: `applications/harmony_os/main_test.go:140`
 
 **Description**: No description provided
 
@@ -197,7 +197,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:34`
+**File**: `applications/harmony_os/main_test.go:34`
 
 **Description**: No description provided
 
@@ -217,7 +217,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:19`
+**File**: `applications/harmony_os/main_test.go:19`
 
 **Description**: No description provided
 
@@ -237,7 +237,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:74`
+**File**: `applications/harmony_os/main_test.go:74`
 
 **Description**: No description provided
 
@@ -257,7 +257,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:90`
+**File**: `applications/harmony_os/main_test.go:90`
 
 **Description**: No description provided
 
@@ -277,7 +277,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:54`
+**File**: `applications/harmony_os/main_test.go:54`
 
 **Description**: No description provided
 
@@ -297,7 +297,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:130`
+**File**: `applications/harmony_os/main_test.go:130`
 
 **Description**: No description provided
 
@@ -349,7 +349,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:11`
+**File**: `applications/harmony_os/main_test.go:11`
 
 **Description**: No description provided
 
@@ -366,7 +366,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:9`
+**File**: `applications/terminal_ui/main_test.go:9`
 
 **Description**: No description provided
 
@@ -399,7 +399,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:15`
+**File**: `applications/terminal_ui/main_test.go:15`
 
 **Description**: No description provided
 
@@ -416,7 +416,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:53`
+**File**: `applications/terminal_ui/main_test.go:53`
 
 **Description**: No description provided
 
@@ -432,7 +432,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:148`
+**File**: `applications/harmony_os/main_test.go:148`
 
 **Description**: No description provided
 
@@ -492,7 +492,7 @@
 
 **Package**: `main`
 
-**File**: `applications/harmony-os/main_test.go:103`
+**File**: `applications/harmony_os/main_test.go:103`
 
 **Description**: No description provided
 
@@ -512,7 +512,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:22`
+**File**: `applications/terminal_ui/main_test.go:22`
 
 **Description**: No description provided
 
@@ -548,7 +548,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:41`
+**File**: `applications/terminal_ui/main_test.go:41`
 
 **Description**: No description provided
 
@@ -588,7 +588,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:30`
+**File**: `applications/terminal_ui/main_test.go:30`
 
 **Description**: No description provided
 
@@ -628,7 +628,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:60`
+**File**: `applications/terminal_ui/main_test.go:60`
 
 **Description**: No description provided
 
@@ -644,7 +644,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:72`
+**File**: `applications/terminal_ui/main_test.go:72`
 
 **Description**: No description provided
 
@@ -660,7 +660,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:128`
+**File**: `applications/terminal_ui/main_test.go:128`
 
 **Description**: No description provided
 
@@ -676,7 +676,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:107`
+**File**: `applications/terminal_ui/main_test.go:107`
 
 **Description**: No description provided
 
@@ -692,7 +692,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:99`
+**File**: `applications/terminal_ui/main_test.go:99`
 
 **Description**: No description provided
 
@@ -708,7 +708,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:120`
+**File**: `applications/terminal_ui/main_test.go:120`
 
 **Description**: No description provided
 
@@ -724,7 +724,7 @@
 
 **Package**: `main`
 
-**File**: `applications/terminal-ui/main_test.go:85`
+**File**: `applications/terminal_ui/main_test.go:85`
 
 **Description**: No description provided
 

@@ -89,9 +89,9 @@ run_unit_tests() {
     run_package_tests "shared/mobile-core" "mobile-core"
 
     # Run tests for applications
-    run_package_tests "applications/terminal-ui" "terminal-ui"
+    run_package_tests "applications/terminal_ui" "terminal-ui"
     run_package_tests "applications/desktop" "desktop"
-    run_package_tests "applications/aurora-os" "aurora-os"
+    run_package_tests "applications/aurora_os" "aurora-os"
     run_package_tests "applications/symphony-os" "symphony-os"
 }
 

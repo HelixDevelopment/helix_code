@@ -8250,15 +8250,15 @@ func TestGeneratePatch(t *testing.T) {
 
 ### HelixCode Integration Target
 - **New files to create**:
-  - `applications/terminal-ui/renderer.go` — Terminal renderer
-  - `applications/terminal-ui/ansi.go` — ANSI escape sequences
+  - `applications/terminal_ui/renderer.go` — Terminal renderer
+  - `applications/terminal_ui/ansi.go` — ANSI escape sequences
 - **Existing files to modify**:
-  - `applications/terminal-ui/app.go` — Use new renderer
-- **Submodule dependencies**: `applications/terminal-ui/`
+  - `applications/terminal_ui/app.go` — Use new renderer
+- **Submodule dependencies**: `applications/terminal_ui/`
 
 ### Exact Code Implementation
 
-#### File: `applications/terminal-ui/ansi.go` (NEW)
+#### File: `applications/terminal_ui/ansi.go` (NEW)
 
 ```go
 package terminalui
@@ -8317,7 +8317,7 @@ func MoveCursorBack(n int) string {
 }
 ```
 
-#### File: `applications/terminal-ui/renderer.go` (NEW)
+#### File: `applications/terminal_ui/renderer.go` (NEW)
 
 ```go
 package terminalui
@@ -8466,7 +8466,7 @@ import (
 	"strings"
 	"testing"
 
-	"dev.helix.code/applications/terminal-ui"
+	"dev.helix.code/applications/terminal_ui"
 )
 
 func TestTerminalRenderer_EnterExitAltScreen(t *testing.T) {
@@ -8537,8 +8537,8 @@ func TestMoveCursorTo(t *testing.T) {
 
 ### Integration Steps
 
-1. **Create ANSI constants** (`applications/terminal-ui/ansi.go`)
-2. **Create renderer** (`applications/terminal-ui/renderer.go`)
+1. **Create ANSI constants** (`applications/terminal_ui/ansi.go`)
+2. **Create renderer** (`applications/terminal_ui/renderer.go`)
 3. **Replace direct fmt.Print** in app with renderer calls
 4. **Enter alt-screen** on app start, exit on shutdown
 5. **Use differential rendering** for streaming content
@@ -8556,11 +8556,11 @@ func TestMoveCursorTo(t *testing.T) {
 ### HelixCode Integration Target
 - **New files to create**:
   - `internal/tools/ask_user.go` — AskUserQuestion tool
-  - `applications/terminal-ui/question_renderer.go` — UI rendering
+  - `applications/terminal_ui/question_renderer.go` — UI rendering
 - **Existing files to modify**:
   - `internal/tools/registry.go` — Register AskUserQuestion
   - `internal/agent/agent.go` — Handle question response
-- **Submodule dependencies**: `internal/tools/`, `applications/terminal-ui/`
+- **Submodule dependencies**: `internal/tools/`, `applications/terminal_ui/`
 
 ### Exact Code Implementation
 
@@ -8875,17 +8875,17 @@ func TestAskUserQuestionTool_Preview(t *testing.T) {
 
 ### HelixCode Integration Target
 - **New files to create**:
-  - `applications/terminal-ui/theme.go` — Theme engine
-  - `applications/terminal-ui/themes/default.json` — Default theme
-  - `applications/terminal-ui/themes/high-contrast.json` — High contrast theme
+  - `applications/terminal_ui/theme.go` — Theme engine
+  - `applications/terminal_ui/themes/default.json` — Default theme
+  - `applications/terminal_ui/themes/high-contrast.json` — High contrast theme
 - **Existing files to modify**:
-  - `applications/terminal-ui/app.go` — Apply theme to all rendered elements
+  - `applications/terminal_ui/app.go` — Apply theme to all rendered elements
   - `cmd/cli/main.go` — Add `--theme` flag
-- **Submodule dependencies**: `applications/terminal-ui/`
+- **Submodule dependencies**: `applications/terminal_ui/`
 
 ### Exact Code Implementation
 
-#### File: `applications/terminal-ui/theme.go` (NEW)
+#### File: `applications/terminal_ui/theme.go` (NEW)
 
 ```go
 package terminalui
@@ -9035,7 +9035,7 @@ func SaveThemeFile(path string, theme *Theme) error {
 }
 ```
 
-#### File: `applications/terminal-ui/themes/default.json` (NEW)
+#### File: `applications/terminal_ui/themes/default.json` (NEW)
 
 ```json
 {
@@ -9078,7 +9078,7 @@ import (
 	"strings"
 	"testing"
 
-	"dev.helix.code/applications/terminal-ui"
+	"dev.helix.code/applications/terminal_ui"
 )
 
 func TestThemeColor_ToANSI(t *testing.T) {
@@ -9200,7 +9200,7 @@ func TestTheme_Styling(t *testing.T) {
 
 ### Integration Steps
 
-1. **Create theme engine** (`applications/terminal-ui/theme.go`)
+1. **Create theme engine** (`applications/terminal_ui/theme.go`)
 2. **Create default themes** in `themes/` directory
 3. **Add `--theme` CLI flag**
 4. **Load theme at app startup**
@@ -9275,13 +9275,13 @@ func TestTheme_Styling(t *testing.T) {
 | 53 | `internal/telemetry/middleware.go` | OpenTelemetry |
 | 54 | `internal/editor/smart_edit.go` | Smart Editing |
 | 55 | `internal/editor/patch.go` | Smart Editing |
-| 56 | `applications/terminal-ui/ansi.go` | No-Flicker |
-| 57 | `applications/terminal-ui/renderer.go` | No-Flicker |
+| 56 | `applications/terminal_ui/ansi.go` | No-Flicker |
+| 57 | `applications/terminal_ui/renderer.go` | No-Flicker |
 | 58 | `internal/tools/ask_user.go` | AskUserQuestion |
-| 59 | `applications/terminal-ui/question_renderer.go` | AskUserQuestion |
-| 60 | `applications/terminal-ui/theme.go` | Themes |
-| 61 | `applications/terminal-ui/themes/default.json` | Themes |
-| 62 | `applications/terminal-ui/themes/high-contrast.json` | Themes |
+| 59 | `applications/terminal_ui/question_renderer.go` | AskUserQuestion |
+| 60 | `applications/terminal_ui/theme.go` | Themes |
+| 61 | `applications/terminal_ui/themes/default.json` | Themes |
+| 62 | `applications/terminal_ui/themes/high-contrast.json` | Themes |
 
 ### Modified Files Summary (12 files)
 
@@ -9298,7 +9298,7 @@ func TestTheme_Styling(t *testing.T) {
 | 9 | `cmd/server/main.go` | OpenTelemetry | Initialize telemetry |
 | 10 | `internal/session/store.go` | Session Resume | Add metadata schema |
 | 11 | `internal/tools/bash.go` | Sandboxed Shell | Wrap with sandbox |
-| 12 | `applications/terminal-ui/app.go` | No-Flicker, Themes, AskUserQuestion | Use new renderer and theme |
+| 12 | `applications/terminal_ui/app.go` | No-Flicker, Themes, AskUserQuestion | Use new renderer and theme |
 
 ### Dependencies to Add
 

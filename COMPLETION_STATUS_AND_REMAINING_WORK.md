@@ -122,7 +122,7 @@ HelixCode is a sophisticated distributed AI development platform that is **large
 
 ### 2. UI Components (~70% Complete)
 
-#### Terminal UI (`applications/terminal-ui/main.go`)
+#### Terminal UI (`applications/terminal_ui/main.go`)
 ```go
 // TODO: Implement new task form
 // TODO: Enable Cognee

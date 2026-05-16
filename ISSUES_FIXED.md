@@ -62,7 +62,7 @@ All major components build successfully:
 - ✅ Server: `go build ./cmd/server` - OK
 - ✅ CLI Client: `go build ./cmd/cli` - OK  
 - ✅ Desktop App: `go build ./applications/desktop` - OK (with minor linker warnings)
-- ✅ Terminal UI: `go build ./applications/terminal-ui` - OK
+- ✅ Terminal UI: `go build ./applications/terminal_ui` - OK
 
 ## 🔄 Remaining Minor Issues
 

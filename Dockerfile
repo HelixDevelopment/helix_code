@@ -18,7 +18,7 @@ COPY HelixCode/ .
 # Build all components
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=1.0.0 -X main.buildTime=$(date +%Y-%m-%d_%H:%M:%S) -X main.gitCommit=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" -o bin/server ./cmd/server
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=1.0.0 -X main.buildTime=$(date +%Y-%m-%d_%H:%M:%S) -X main.gitCommit=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" -o bin/cli ./cmd/cli
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=1.0.0 -X main.buildTime=$(date +%Y-%m-%d_%H:%M:%S) -X main.gitCommit=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" -o bin/terminal-ui ./applications/terminal-ui
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=1.0.0 -X main.buildTime=$(date +%Y-%m-%d_%H:%M:%S) -X main.gitCommit=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" -o bin/terminal-ui ./applications/terminal_ui
 
 FROM alpine:latest
 

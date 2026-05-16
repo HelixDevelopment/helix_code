@@ -94,7 +94,7 @@ GET    /api/v1/config/status
 
 ### 5. Terminal UI Enhancements ✅
 **Time**: ~2 hours → COMPLETE
-**File**: `applications/terminal-ui/main.go`
+**File**: `applications/terminal_ui/main.go`
 
 **Implemented**:
 - ✅ **New Task Form**: Modal dialog with dropdowns for task type, priority, criticality

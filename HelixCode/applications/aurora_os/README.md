@@ -60,10 +60,10 @@ cd HelixCode
 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 \
   go build -ldflags="-s -w" \
   -o bin/aurora-os/helixcode-aurora \
-  ./applications/aurora-os
+  ./applications/aurora_os
 
 # Build for current platform (development)
-go build -o bin/helixcode-aurora ./applications/aurora-os
+go build -o bin/helixcode-aurora ./applications/aurora_os
 
 # Build using Makefile
 make aurora-os
@@ -80,10 +80,10 @@ cd HelixCode
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 \
   go build -tags nogui -ldflags="-s -w" \
   -o bin/aurora-os/helixcode-aurora-cli \
-  ./applications/aurora-os
+  ./applications/aurora_os
 
 # Build CLI-only version for current platform
-go build -tags nogui -o bin/helixcode-aurora-cli ./applications/aurora-os
+go build -tags nogui -o bin/helixcode-aurora-cli ./applications/aurora_os
 ```
 
 The CLI mode is useful for:
@@ -116,13 +116,13 @@ cd HelixCode
 GOOS=linux GOARCH=arm64 CGO_ENABLED=1 \
   go build -ldflags="-s -w" \
   -o bin/aurora-os/helixcode-aurora \
-  ./applications/aurora-os
+  ./applications/aurora_os
 
 # Build for Aurora OS (ARM64) - CLI version (no GUI dependencies)
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 \
   go build -tags nogui -ldflags="-s -w" \
   -o bin/aurora-os/helixcode-aurora-cli \
-  ./applications/aurora-os
+  ./applications/aurora_os
 
 # Build using Makefile
 make aurora-os
@@ -132,7 +132,7 @@ make aurora-os
 
 ```bash
 # Create RPM package
-cd applications/aurora-os
+cd applications/aurora_os
 rpmbuild -ba helixcode.spec
 ```
 
@@ -347,7 +347,7 @@ Configuration is stored in:
 ### Project Structure
 
 ```
-applications/aurora-os/
+applications/aurora_os/
 ├── main.go           # GUI entry point (build tag: !nogui)
 ├── main_nogui.go     # CLI entry point (build tag: nogui)
 ├── theme.go          # Theme definitions (build tag: !nogui)
@@ -361,20 +361,20 @@ applications/aurora-os/
 
 ```bash
 # Build GUI version for local development
-go build -o bin/helixcode-aurora ./applications/aurora-os
+go build -o bin/helixcode-aurora ./applications/aurora_os
 
 # Build CLI version for local development
-go build -tags nogui -o bin/helixcode-aurora-cli ./applications/aurora-os
+go build -tags nogui -o bin/helixcode-aurora-cli ./applications/aurora_os
 
 # Build and deploy to emulator
-aurora-sb2 -t AuroraOS-4.0.2.x86_64 go build ./applications/aurora-os
+aurora-sb2 -t AuroraOS-4.0.2.x86_64 go build ./applications/aurora_os
 ```
 
 ### Running Tests
 
 ```bash
 cd HelixCode
-go test -v ./applications/aurora-os/...
+go test -v ./applications/aurora_os/...
 ```
 
 ### Debugging

@@ -314,10 +314,10 @@ This audit analyzed **4,013 markdown files**, **73 SQL definitions**, **203 test
 #### Applications (Very Low - Needs Major Work)
 | Application | Coverage |
 |-------------|----------|
-| applications/aurora-os | 4.9% |
-| applications/harmony-os | 8.5% |
+| applications/aurora_os | 4.9% |
+| applications/harmony_os | 8.5% |
 | applications/desktop | 9.1% |
-| applications/terminal-ui | 9.6% |
+| applications/terminal_ui | 9.6% |
 | cmd/cli | 11.9% |
 | tests/e2e/phase3 | 16.2% |
 

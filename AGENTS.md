@@ -365,7 +365,7 @@ HelixCode/
 - `ConfigManager` for load/save/merge
 
 ### QA-001: HelixQA Integration (VERIFIED REAL)
-**Files**: `internal/helixqa/`, `internal/server/qa_handlers.go`, `applications/terminal-ui/main.go`
+**Files**: `internal/helixqa/`, `internal/server/qa_handlers.go`, `applications/terminal_ui/main.go`
 **Assessment**: Full embedded QA engine with real session lifecycle
 - `Engine` struct manages QA sessions with map + sync.RWMutex
 - `StartSession()`, `CancelSession()`, `GetSession()`, `ListSessions()` with real state tracking

@@ -70,9 +70,9 @@ echo "  PASS: CLI QA flags present"
 
 # Test 10: Verify TUI QA dashboard exists
 echo "[10/11] Checking TUI QA dashboard..."
-grep -q 'showQA' applications/terminal-ui/main.go || (echo "FAIL: showQA function missing"; exit 1)
-grep -q 'QA.*Quality assurance' applications/terminal-ui/main.go || (echo "FAIL: QA sidebar item missing"; exit 1)
-go build ./applications/terminal-ui/... || (echo "FAIL: TUI build failed"; exit 1)
+grep -q 'showQA' applications/terminal_ui/main.go || (echo "FAIL: showQA function missing"; exit 1)
+grep -q 'QA.*Quality assurance' applications/terminal_ui/main.go || (echo "FAIL: QA sidebar item missing"; exit 1)
+go build ./applications/terminal_ui/... || (echo "FAIL: TUI build failed"; exit 1)
 echo "  PASS: TUI QA dashboard present and compiles"
 
 # Test 11: Verify screenshot engines compile in HelixQA

@@ -139,11 +139,11 @@ $ go build ./internal/mocks/...
 ```bash
 $ go build ./...
 ✅✅✅ CLEAN BUILD ACHIEVED! ✅✅✅
-# dev.helix.code/applications/harmony-os
+# dev.helix.code/applications/harmony_os
 ld: warning: ignoring duplicate libraries: '-lobjc'
 # dev.helix.code/applications/desktop
 ld: warning: ignoring duplicate libraries: '-lobjc'
-# dev.helix.code/applications/aurora-os
+# dev.helix.code/applications/aurora_os
 ld: warning: ignoring duplicate libraries: '-lobjc'
 ```
 

@@ -65,10 +65,10 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
   - Line 406: `executeTesting()` - Placeholder
 
 #### UI Applications (4 Empty Initializers)
-- `applications/terminal-ui/main.go` line 90: Empty WorkerManager
+- `applications/terminal_ui/main.go` line 90: Empty WorkerManager
 - `applications/desktop/main.go` line 77: Empty WorkerManager
-- `applications/harmony-os/main.go` line 153: Empty WorkerManager
-- `applications/aurora-os/main.go` line 119: Empty WorkerManager
+- `applications/harmony_os/main.go` line 153: Empty WorkerManager
+- `applications/aurora_os/main.go` line 119: Empty WorkerManager
 
 ### 1.3 Disabled Components
 

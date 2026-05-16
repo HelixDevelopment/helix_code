@@ -13,7 +13,7 @@
 
 ### 1. Harmony OS Implementation ✅
 
-**Source Code** (`applications/harmony-os/`):
+**Source Code** (`applications/harmony_os/`):
 - ✅ **main.go** (687 lines) - Full GUI application with distributed computing
 - ✅ **theme.go** (392 lines) - Custom warm Harmony theme
 - ✅ **main_test.go** (258 lines) - Comprehensive test coverage (12/12 passing)
@@ -238,10 +238,10 @@ $ make aurora-harmony
 
 **Code Quality**:
 ```bash
-$ go vet ./applications/harmony-os/...
+$ go vet ./applications/harmony_os/...
 # No issues found
 
-$ go vet ./applications/aurora-os/...
+$ go vet ./applications/aurora_os/...
 # No issues found
 ```
 

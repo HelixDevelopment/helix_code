@@ -16,7 +16,7 @@ The Terminal UI (TUI) offers:
 
 ```bash
 cd HelixCode
-go build -o bin/helix-tui ./applications/terminal-ui
+go build -o bin/helix-tui ./applications/terminal_ui
 ```
 
 ## Running

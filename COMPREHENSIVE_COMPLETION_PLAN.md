@@ -182,7 +182,7 @@ Tests skipped due to missing API keys:
 
 ## 1.3 Application Completion Status
 
-### Terminal UI (`applications/terminal-ui/`)
+### Terminal UI (`applications/terminal_ui/`)
 - **Status**: 70% complete
 - **Missing**:
   - Worker Management implementation
@@ -201,7 +201,7 @@ Tests skipped due to missing API keys:
   - Real worker data integration
 - **Tests**: Theme-focused only (125 lines)
 
-### Aurora OS (`applications/aurora-os/`)
+### Aurora OS (`applications/aurora_os/`)
 - **Status**: 75% complete
 - **Missing**:
   - Projects/Sessions/LLM tabs
@@ -209,7 +209,7 @@ Tests skipped due to missing API keys:
   - Actual system metrics (currently simulated)
 - **Tests**: Minimal (39 lines) - NEEDS SIGNIFICANT EXPANSION
 
-### Harmony OS (`applications/harmony-os/`)
+### Harmony OS (`applications/harmony_os/`)
 - **Status**: 85% complete (BEST)
 - **Missing**:
   - Worker registration

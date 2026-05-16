@@ -112,10 +112,10 @@ verify-compile         # Verify compilation
 | `cmd/cli/README.md` | 250+ | CLI usage, commands, config |
 | `cmd/server/README.md` | 300+ | Server setup, API, deployment |
 | `internal/testutil/doc.go` | 100+ | Test utilities godoc |
-| `applications/terminal-ui/README.md` | 200+ | TUI features, keybindings |
+| `applications/terminal_ui/README.md` | 200+ | TUI features, keybindings |
 | `applications/desktop/README.md` | 250+ | Desktop app building, themes |
-| `applications/aurora-os/README.md` | 200+ | Aurora OS client guide |
-| `applications/harmony-os/README.md` | 250+ | Harmony OS client guide |
+| `applications/aurora_os/README.md` | 200+ | Aurora OS client guide |
+| `applications/harmony_os/README.md` | 250+ | Harmony OS client guide |
 
 ### 6. Verification Results
 

@@ -768,12 +768,12 @@ type MCPServer struct {
 ### 3.2 Supported Platforms
 | Platform | Framework | Entry Point |
 |----------|-----------|-------------|
-| Terminal UI | tview (Go TUI) | `applications/terminal-ui/main.go` |
+| Terminal UI | tview (Go TUI) | `applications/terminal_ui/main.go` |
 | Desktop | Fyne (Go GUI) | `applications/desktop/main.go` |
 | Android | Kotlin | `applications/android/app/src/main/java/.../MainActivity.kt` |
 | iOS | Swift | `applications/ios/HelixCode/ViewController.swift` |
-| Aurora OS | Go | `applications/aurora-os/main.go` |
-| Harmony OS | Go | `applications/harmony-os/main.go` |
+| Aurora OS | Go | `applications/aurora_os/main.go` |
+| Harmony OS | Go | `applications/harmony_os/main.go` |
 
 ### 3.3 Terminal UI
 - Uses `github.com/rivo/tview` for terminal UI components

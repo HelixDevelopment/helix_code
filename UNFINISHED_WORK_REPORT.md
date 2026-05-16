@@ -291,7 +291,7 @@ Despite documentation claiming completion, the HelixCode project has **significa
    - Lines: 45, 67, 89, 134, 178
    - Issues: Incomplete Weaviate integration, missing error handling
 
-❌ applications/terminal-ui/main.go  
+❌ applications/terminal_ui/main.go  
    - Lines: 23, 45, 78, 101, 156
    - Issues: Terminal UI has multiple TODOs, missing features
 
@@ -315,7 +315,7 @@ Despite documentation claiming completion, the HelixCode project has **significa
 #### **Additional Files (12 files)**
 ```bash
 ❌ applications/desktop/theme.go - Theme system disabled
-❌ applications/aurora-os/theme.go - Theme system disabled  
+❌ applications/aurora_os/theme.go - Theme system disabled  
 ❌ internal/config/loader.go - Configuration validation incomplete
 ❌ internal/database/migrator.go - Migration handling partial
 ❌ internal/notifications/email.go - Email notifications incomplete
@@ -330,7 +330,7 @@ Despite documentation claiming completion, the HelixCode project has **significa
 
 ### **2 Files with Disabled Features**
 ```bash
-❌ applications/aurora-os/theme.go
+❌ applications/aurora_os/theme.go
    - Theme system completely disabled
    - Comment: "// TODO: Implement theme system for Aurora OS"
 

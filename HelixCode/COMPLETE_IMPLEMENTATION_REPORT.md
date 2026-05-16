@@ -19,9 +19,9 @@ This report documents the complete implementation of HelixCode specialized platf
 ### 1. Harmony OS Source Code ✅
 
 **Files Created**:
-- `applications/harmony-os/main.go` (687 lines)
-- `applications/harmony-os/theme.go` (392 lines)
-- `applications/harmony-os/main_test.go` (258 lines)
+- `applications/harmony_os/main.go` (687 lines)
+- `applications/harmony_os/theme.go` (392 lines)
+- `applications/harmony_os/main_test.go` (258 lines)
 
 **Key Features**:
 - Distributed computing engine with task scheduling

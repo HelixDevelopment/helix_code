@@ -54,10 +54,10 @@ This audit analyzed the HelixCode project against its documentation to identify:
 | internal/tools/browser | 20.5% | 10 | 79.5% |
 | internal/memory/providers | 28.2% | 23 | 71.8% |
 | internal/workflow/planmode | 31.0% | 4 | 69.0% |
-| applications/aurora-os | 5.0% | 3 | 95.0% |
-| applications/harmony-os | 8.6% | 3 | 91.4% |
+| applications/aurora_os | 5.0% | 3 | 95.0% |
+| applications/harmony_os | 8.6% | 3 | 91.4% |
 | applications/desktop | 9.4% | 3 | 90.6% |
-| applications/terminal-ui | 9.6% | 3 | 90.4% |
+| applications/terminal_ui | 9.6% | 3 | 90.4% |
 | cmd/cli | 11.9% | 1 | 88.1% |
 | shared/mobile-core | 42.6% | 1 | 57.4% |
 | internal/llm | 42.0% | 48 | 58.0% |
@@ -341,9 +341,9 @@ task := gin.H{
 | Package | Coverage | Tests | Status |
 |---------|----------|-------|--------|
 | applications/desktop | 9.4% | 1 | CRITICAL |
-| applications/terminal-ui | 9.6% | 1 | CRITICAL |
-| applications/aurora-os | 5.0% | 2 | CRITICAL |
-| applications/harmony-os | 8.6% | 1 | CRITICAL |
+| applications/terminal_ui | 9.6% | 1 | CRITICAL |
+| applications/aurora_os | 5.0% | 2 | CRITICAL |
+| applications/harmony_os | 8.6% | 1 | CRITICAL |
 | applications/android | 0% | 0 | CRITICAL |
 | applications/ios | 0% | 0 | CRITICAL |
 

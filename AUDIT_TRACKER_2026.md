@@ -179,9 +179,9 @@ Templates are fully implemented - they generate proper code scaffolding with:
 
 | Application | Status | Fix |
 |-------------|--------|-----|
-| `applications/aurora-os` | FAIL | Install mesa-libGL-devel |
+| `applications/aurora_os` | FAIL | Install mesa-libGL-devel |
 | `applications/desktop` | FAIL | Install libXrandr-devel |
-| `applications/harmony-os` | FAIL | Install libXi-devel |
+| `applications/harmony_os` | FAIL | Install libXi-devel |
 
 **Fix (Fedora/RHEL):**
 ```bash
@@ -319,7 +319,7 @@ cd tests/e2e/challenges && go run cmd/runner/main.go -list
 - `internal/memory/memory_manager.go` - Implemented providers
 - `internal/memory/memory_manager_test.go` - Added provider tests
 - `cmd/helix-config/main.go` - Implemented commands
-- `applications/aurora-os/main.go` - Real disk usage detection
+- `applications/aurora_os/main.go` - Real disk usage detection
 
 **Verification:**
 - All core builds successful (server, cli, helix-config)

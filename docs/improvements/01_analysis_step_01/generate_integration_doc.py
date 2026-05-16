@@ -517,7 +517,7 @@ story.append(Spacer(1, 6))
 data = [
     [TH('Task ID'), TH('Task'), TH('Source Agent'), TH('Deliverable')],
     [TC('3.1'), TC('Implement Agent Modes (Code/Architect/Ask/Debug)'), TC('Roo Code'), TC('internal/agents/modes/ with mode-specific behavior')],
-    [TC('3.2'), TC('Build TUI with ratatui-style interface'), TC('Codex'), TC('applications/terminal-ui/ with chat, file browser, commands')],
+    [TC('3.2'), TC('Build TUI with ratatui-style interface'), TC('Codex'), TC('applications/terminal_ui/ with chat, file browser, commands')],
     [TC('3.3'), TC('Implement ML-based YOLO classifier'), TC('Claude Code'), TC('Train model from execution history for auto-approval')],
     [TC('3.4'), TC('Port OpenHands event-driven architecture'), TC('OpenHands'), TC('Event bus with action/observation stream processing')],
     [TC('3.5'), TC('Implement Panoptic ML-based vision'), TC('Panoptic'), TC('Replace pixel heuristics with ML model for image analysis')],
@@ -717,7 +717,7 @@ story.append(P('<b>Step 1:</b> Port tree-sitter integration from Aider repomap.p
 story.append(Spacer(1, 10))
 
 story.extend(H2('11.3 Codex Porting Guide'))
-story.append(P('<b>Step 1:</b> Port Seatbelt sandbox: create internal/tools/sandbox/seatbelt.go that generates Seatbelt policy profiles and executes commands via /usr/bin/sandbox-exec. <b>Step 2:</b> Port multi-level approval system: implement ApprovalPolicy with full-autonomy, interactive, and approval-required modes. <b>Step 3:</b> Port TUI: create applications/terminal-ui/ with ratatui-style interface using tview, including chat panel, file browser, command palette, and diff viewer. <b>Step 4:</b> Port JSON-RPC Lite protocol: implement internal/protocol/jsonrpc.go with structured request/response, thread history, and conversation summaries. <b>Step 5:</b> Write Challenges for sandbox isolation verification and approval gate testing.'))
+story.append(P('<b>Step 1:</b> Port Seatbelt sandbox: create internal/tools/sandbox/seatbelt.go that generates Seatbelt policy profiles and executes commands via /usr/bin/sandbox-exec. <b>Step 2:</b> Port multi-level approval system: implement ApprovalPolicy with full-autonomy, interactive, and approval-required modes. <b>Step 3:</b> Port TUI: create applications/terminal_ui/ with ratatui-style interface using tview, including chat panel, file browser, command palette, and diff viewer. <b>Step 4:</b> Port JSON-RPC Lite protocol: implement internal/protocol/jsonrpc.go with structured request/response, thread history, and conversation summaries. <b>Step 5:</b> Write Challenges for sandbox isolation verification and approval gate testing.'))
 story.append(Spacer(1, 10))
 
 story.extend(H2('11.4 OpenHands Porting Guide'))

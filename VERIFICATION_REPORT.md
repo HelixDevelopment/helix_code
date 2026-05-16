@@ -146,7 +146,7 @@ This report provides a comprehensive verification that all features defined in S
   - Health checks
 
 #### Terminal UI ✅
-- Location: `/HelixCode/applications/terminal-ui/`
+- Location: `/HelixCode/applications/terminal_ui/`
 - Features:
   - Rich interactive interface
   - Theme management
@@ -208,7 +208,7 @@ This report provides a comprehensive verification that all features defined in S
 - ✅ Linux - Full support with native builds
 - ✅ macOS - Native integration (M1/M2/M3 optimized)
 - ✅ Windows - Complete Windows support
-- ✅ Aurora OS - Specialized integration (applications/aurora-os/)
+- ✅ Aurora OS - Specialized integration (applications/aurora_os/)
 - ✅ SymphonyOS - Platform-specific optimizations (applications/symphony-os/)
 
 **Mobile Platforms**:
@@ -353,9 +353,9 @@ This report provides a comprehensive verification that all features defined in S
 - ✅ `test/automation/free_providers_automation_test.go`
 
 ### Application Tests
-- ✅ `applications/terminal-ui` - 13 tests
+- ✅ `applications/terminal_ui` - 13 tests
 - ✅ `applications/desktop` - 12 tests
-- ✅ `applications/aurora-os` - 3 tests
+- ✅ `applications/aurora_os` - 3 tests
 - ✅ `applications/symphony-os` - 3 tests
 
 ### CLI Tests

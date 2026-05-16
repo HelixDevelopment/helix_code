@@ -473,12 +473,12 @@ mobile: mobile-ios mobile-android
 # Aurora OS and Harmony OS build targets
 aurora-os:
 	@echo "🌟 Building Aurora OS client..."
-	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/aurora-os ./applications/aurora-os
+	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/aurora-os ./applications/aurora_os
 	@echo "✅ Aurora OS client built: bin/aurora-os"
 
 harmony-os:
 	@echo "🔶 Building Harmony OS client..."
-	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/harmony-os ./applications/harmony-os
+	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/harmony-os ./applications/harmony_os
 	@echo "✅ Harmony OS client built: bin/harmony-os"
 
 aurora-harmony: aurora-os harmony-os

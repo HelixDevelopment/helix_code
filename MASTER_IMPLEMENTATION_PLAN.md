@@ -60,7 +60,7 @@
 *   **Task 3.2.2**: Implement `MultiFileEditTool` (Atomic transactions).
 
 ### 3.3. UI Enhancements
-*   **Task 3.3.1**: Update Terminal UI (`applications/terminal-ui`).
+*   **Task 3.3.1**: Update Terminal UI (`applications/terminal_ui`).
     *   Add "New Task" form.
     *   Add Cognee toggle.
 
