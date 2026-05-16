@@ -65,7 +65,7 @@ EXCLUDES=(
   --exclude-dir=dist
   --exclude-dir=build
   --exclude-dir=Example_Projects
-  --exclude-dir=HelixAgent
+  --exclude-dir=helix_agent
   --exclude-dir=Dependencies
   --exclude-dir=Documentation
 )
