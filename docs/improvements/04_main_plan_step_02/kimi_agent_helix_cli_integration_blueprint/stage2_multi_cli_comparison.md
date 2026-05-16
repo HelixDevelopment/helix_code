@@ -49,7 +49,7 @@ This report analyzes the top 10 open-source CLI AI coding agents to identify the
 - Language: Python (100%)
 - Size: 140MB
 - Monolithic Python package with `aider/` as main module
-- Website/docs in `aider/website/`
+- website/docs in `aider/website/`
 - CLI entry via `aider/main.py`
 
 **Core Features:**

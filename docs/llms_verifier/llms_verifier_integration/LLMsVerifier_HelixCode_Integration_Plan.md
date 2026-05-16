@@ -1072,7 +1072,7 @@ To integrate LLMsVerifier as the single source of truth for models, the followin
 | `website/` | Website source |
 | `mobile/flutter/` | Mobile application (Flutter) |
 | `assets/` | Logo and visual assets |
-| `Upstreams/` | Upstream repository management |
+| `upstreams/` | Upstream repository management |
 | `reports/` | Generated reports storage |
 | `scripts/` | Utility scripts |
 | `specs/` | Specifications (e.g., `001-extend-llm-providers`) |

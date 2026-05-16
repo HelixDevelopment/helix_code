@@ -418,7 +418,7 @@ Run via `make propagate-governance`. Verifier `scripts/verify-governance-cascade
 **Inside meta-repo root:**
 - `github_pages_website/` — feature pages, comparison matrix, install guide, asciinema demos.
 - `Documentation/` — mirrored canonical docs.
-- `Website/` — marketing site.
+- `website/` — marketing site.
 - `docs/improvements/06_diagrams_real/` — refreshed PNGs (P0-15).
 - `docs/improvements/05_phase_0_evidence.md` — P0 rolled-up evidence.
 - `docs/improvements/0N_phase_N_evidence.md` — one per phase.

@@ -425,7 +425,7 @@ All top-level internal packages need doc.go files:
 ### 5.2 Active Website Structure
 
 ```
-Github-Pages-Website/docs/
+Github-Pages-website/docs/
 ├── index.html (1,279 lines - main single-page website)
 ├── assets/ (5 image files: favicons, logo)
 ├── styles/ (5 CSS files: main, components, fractals)
@@ -1272,8 +1272,8 @@ cmd/helix_config/main.go - Implement 24 commands
 All GUI applications - Implement pending features
 12 README files to expand
 docs/user_manual/README.md - Add sections
-Github-Pages-Website/docs/index.html - Update content
-Github-Pages-Website/docs/courses/course-data.js - Add courses
+Github-Pages-website/docs/index.html - Update content
+Github-Pages-website/docs/courses/course-data.js - Add courses
 ```
 
 ---

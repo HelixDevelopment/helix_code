@@ -241,7 +241,7 @@ sudo apt-get install libgl1-mesa-dev libxrandr-dev libxcursor-dev libxinerama-de
 
 ### 5.1 Schema Alignment
 
-**Specification:** `Implementation_Guide/001_SQL_Database_Definition.md`
+**Specification:** `implementation_guide/001_SQL_Database_Definition.md`
 **Implementation:** `internal/database/database.go`
 
 **Status:** ALIGNED with minor difference

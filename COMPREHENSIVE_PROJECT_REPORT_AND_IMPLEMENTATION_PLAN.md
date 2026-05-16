@@ -250,7 +250,7 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 
 | Directory | Status | Purpose |
 |-----------|--------|---------|
-| `/Website/` | Planning only | Draft plan (45 lines) |
+| `/website/` | Planning only | Draft plan (45 lines) |
 | `/github_pages_website/` | 90% Complete | Production website |
 
 ### 5.2 github_pages_website Content

@@ -62,7 +62,7 @@ prescribed by:
    all consumers:
    - `helix_code/`, `challenges/`, `containers/`, `Dependencies/`,
      `github_pages_website/`, `helix_agent/`, `helix_qa/`, `security/`,
-     `panoptic/`, `Upstreams/`, `assets/`, `mcp_servers/`.
+     `panoptic/`, `upstreams/`, `assets/`, `mcp_servers/`.
 
 ## Soft target
 

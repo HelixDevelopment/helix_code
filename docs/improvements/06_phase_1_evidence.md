@@ -3439,7 +3439,7 @@ None — all 29 renames applied cleanly.
 Reason categories:
 
 **Umbrella / submodule-root-like dirs (10)** — heavily referenced top-level project dirs whose rename would cascade through dozens of docs, scripts, and `.env.*` examples; left as-is to avoid risk:
-- `assets/`, `Dependencies/`, `helix_code/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
+- `assets/`, `Dependencies/`, `helix_code/` (the inner application root), `upstreams/`, `website/`, `implementation_guide/`, `specification/`, `specification/CLI_Specs_4`, `specification/CLI_Specs_5`, `specification/TODO`
 
 **Go `cmd/<binary>` packages (9)** — renaming changes `go build` import paths, Makefile target args, and produced `bin/<name>` artifact names:
 - `cmd/security_test`, `helix_code/cmd/config_test`, `helix_code/cmd/helix_config`, `helix_code/cmd/performance_optimization`, `helix_code/cmd/performance_optimization_standalone`, `helix_code/cmd/security_fix`, `helix_code/cmd/security_fix_standalone`, `helix_code/cmd/security_scan`, `helix_code/cmd/security_test`
@@ -3459,7 +3459,7 @@ These should be addressed in a future WP that combines (a) the rename, (b) Makef
 
 #### Defects / deviations
 
-1. **Top-level umbrella dirs deferred** — `helix_code/`, `assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
+1. **Top-level umbrella dirs deferred** — `helix_code/`, `assets/`, `Dependencies/`, `upstreams/`, `website/`, `specification/`, `implementation_guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
 2. **Go-package-affecting renames deferred** — see deferred list above.
 3. **Submodule pointer drift** — committing inside helix_agent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
 
@@ -3675,7 +3675,7 @@ None. All updates are mechanical sed-driven substitutions on real-world paths. R
 
 | Repo | `go build ./...` | `go test -short ./...` | Notes |
 |---|---|---|---|
-| meta-repo (`dev.helix.code`, `go 1.25.2`) | FAIL (pre-existing, isolated_files/, docs/, Implementation_Guide/, internal/security redeclarations) | FAIL (same set + 1 PASS in `tests/e2e/core`) | All failures pre-existing; touched in `WIP/Auto-commit` commits long before P1.5. |
+| meta-repo (`dev.helix.code`, `go 1.25.2`) | FAIL (pre-existing, isolated_files/, docs/, implementation_guide/, internal/security redeclarations) | FAIL (same set + 1 PASS in `tests/e2e/core`) | All failures pre-existing; touched in `WIP/Auto-commit` commits long before P1.5. |
 | HelixCode inner (`dev.helix.code`, `go 1.26`) | PASS for `internal/...` and `cmd/...`. `examples/multi_agent_system` failed pre-fix on same MockLLMProvider drift; `applications/desktop` Fyne-GLFW fails because host lacks X11/Xcursor.h headers. | **78 packages PASS, 0 FAIL** (after T10.03 fix; was 1 FAIL in `internal/tools/git` before fix) | Real-deal coverage. Auth, llm, tools/*, server, verifier, workflow all green. |
 | HelixAgent (`dev.helix.agent`) | FAIL (replace `digital.vasic.agentic => ./Agentic` but `Agentic/go.mod` missing — empty submodule). Many `internal/adapters/...` and `cmd/...` fail on this. | 79 packages PASS, 302 FAIL (almost all `[setup failed]` cascading from the same missing-Agentic-go.mod). | Pre-existing submodule init issue. Out of P1.5 scope. |
 | helix_qa (`digital.vasic.helixqa`) | FAIL (replace `digital.vasic.{visionengine,llmorchestrator,llmsverifier}` point at sibling dirs `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` that don't exist; missing go.sum entries for `golang.org/x/{sys,text}`, `nats-io`). | 100 packages PASS, 35 FAIL (all `[setup failed]` from the same replace-dir-missing issue). | Pre-existing dependency-graph wiring issue. Out of P1.5 scope. |
@@ -3701,7 +3701,7 @@ Logs captured: `/tmp/wp10-meta-build.log`, `/tmp/wp10-meta-test.log`, `/tmp/wp10
 |---|---|---|
 | `isolated_files/` and `docs/helix_qa/HelixQA_Integration/research/raw/` reference unavailable packages | meta-repo | Research/scratch trees never built; should be `+build ignore`d or moved out of `go build ./...` reach. F10/F11 candidate. |
 | `internal/security/{manager,scanners}.go` redeclare `SonarQubeConfig`, `SnykConfig`, `TrivyConfig`; missing `NewSemgrepScanner`/`NewGosecScanner`/`NewNancyScanner`; etc. | meta-repo | Pre-WP1; root-level helper code drift. |
-| `Implementation_Guide/scripts/ascii_art_generator.go`: unused `os` import | meta-repo | Script-style file; not part of any module build target. |
+| `implementation_guide/scripts/ascii_art_generator.go`: unused `os` import | meta-repo | Script-style file; not part of any module build target. |
 | `Agentic/go.mod` missing | HelixAgent | `replace digital.vasic.agentic => ./Agentic` but submodule init never populated `Agentic/`. Fix is `git submodule update --init --recursive` plus probably committing the missing `Agentic` submodule pointer at HelixAgent root. |
 | `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` dirs missing | helix_qa | Replace-dir paths assume sibling layout that doesn't exist in current repo. Same class as HelixAgent issue. |
 | Missing go.sum entries (kafka-go, rabbitmq/amqp091-go, golang.org/x/{sys,text,crypto,term}) | LLMsVerifier, HelixQA, containers | `go mod tidy` not run after recent dep changes. Mechanical fix once submodule wiring above is resolved. |

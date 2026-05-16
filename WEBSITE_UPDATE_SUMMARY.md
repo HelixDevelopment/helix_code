@@ -81,7 +81,7 @@
 ## 📁 File Structure
 
 ```
-Github-Pages-Website/docs/
+Github-Pages-website/docs/
 ├── index.html                    # Updated main page
 ├── DOCKER_SETUP.html            # New comprehensive Docker guide
 ├── GETTING_STARTED.html         # New complete setup guide

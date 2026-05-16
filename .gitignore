@@ -60,7 +60,7 @@ Dependencies/Ollama/
 Dependencies/HuggingFace_Hub/
 Example_Projects/DeepSeek_CLI/
 Example_Projects/Mistral_Code/
-Github-Pages-Website/
+Github-Pages-website/
 Example_Projects/Gemini_CLI/
 Example_Projects/Forge/
 Example_Projects/Plandex/
@@ -142,3 +142,8 @@ helix_qa/qa_evidence/*
 **/*.qa-recording.webm
 **/*.qa-trace.json
 /helix_code/examples/multi_agent_system/multi_agent_system
+
+# CONST-053: untrack stray binaries from earlier accidental commits
+/core.test
+/security-test
+/security_test

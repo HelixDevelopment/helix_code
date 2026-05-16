@@ -258,7 +258,7 @@ cd tests/e2e/challenges && go run cmd/runner/main.go -list
 - `COMPREHENSIVE_AUDIT_REPORT.md` - Detailed audit findings
 - `IMPLEMENTATION_TRACKER.md` - Existing implementation tracker
 - `CLAUDE.md` - Project guidelines
-- `Implementation_Guide/` - Implementation specifications
+- `implementation_guide/` - Implementation specifications
 
 ---
 

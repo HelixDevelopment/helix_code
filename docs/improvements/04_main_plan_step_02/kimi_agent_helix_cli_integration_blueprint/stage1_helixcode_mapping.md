@@ -487,7 +487,7 @@ helix_code/
 ├── VERIFICATION_SUMMARY.md
 ├── VIDEO_COURSE_CURRICULUM.md
 ├── WEBSITE_UPDATE_SUMMARY.md
-├── Website/                               ← DIRECTORY
+├── website/                               ← DIRECTORY
 ├── awesome-ai-memory/                     ← SUBMODULE
 ├── challenges/                            ← DIRECTORY (lowercase)
 ├── cmd/

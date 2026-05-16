@@ -1084,7 +1084,7 @@ Launch Activities:
 
 ```bash
 # Critical Missing Pages (7 pages)
-Target: /Website/ directory (to be created and integrated)
+Target: /website/ directory (to be created and integrated)
 
 1. API_DOCUMENTATION.html
    Structure:

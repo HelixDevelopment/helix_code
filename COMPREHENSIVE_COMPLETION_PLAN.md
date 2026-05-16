@@ -280,7 +280,7 @@ All 40 internal packages have README files.
 - Real video content in courses section
 - PDF certificate download (jsPDF needed)
 
-### Secondary Website (`Website/`): INCOMPLETE
+### Secondary Website (`website/`): INCOMPLETE
 - Only planning document exists
 - Hugo/Docusaurus not implemented
 - May be deprecated in favor of Github-Pages-Website

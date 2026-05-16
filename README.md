@@ -83,8 +83,8 @@ HelixCode Architecture
 
 ```
 helix_code/
-├── Specification/          # Technical specifications and requirements
-├── Implementation_Guide/   # Implementation plans and guides
+├── specification/          # Technical specifications and requirements
+├── implementation_guide/   # Implementation plans and guides
 ├── Design/                 # Design assets and specifications
 ├── helix_code/              # Main Go implementation
 │   ├── cmd/
@@ -106,7 +106,7 @@ helix_code/
 │   │   ├── worker/         # Worker pool management
 │   │   └── workflow/       # Workflow execution
 │   └── scripts/            # Build and utility scripts
-├── Website/                # Marketing website
+├── website/                # Marketing website
 ├── assets/                 # Project assets and logos
 └── docs/                   # Documentation
 ```
