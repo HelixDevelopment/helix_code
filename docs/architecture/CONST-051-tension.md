@@ -2,9 +2,30 @@
 
 ## Status
 
-**Architectural — operator decision required.** Surfaced after Tasks
-#254 + #273 migrated HelixAgent's 46 and HelixLLM's 34 nested own-org
-submodules to canonical parent-root locations.
+**RESOLVED via Option E (fork consolidation)** — close-out⁴⁶, 2026-05-16.
+
+Operator chose **Option E**. HelixAgent's 4 colliding-module replace
+directives migrated from `vasic-digital/*` → `HelixDevelopment/*` (the
+more-active canonical fork). Verification: HelixAgent compile is green
+across `./internal/...`, `./cmd/helixagent/...`, and
+`./tests/integration/...` against the HelixDevelopment-side variants
+of DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine. The
+vasic-digital submodules remain on disk for the moment (deprecation
+sweep is a follow-up); HelixAgent no longer consumes them.
+
+Task #274 (DebateOrchestrator) — the long-blocked sibling of this
+tension — was resolved in the same close-out by reconstruction from
+import surface; the new repo at
+`github.com/HelixDevelopment/DebateOrchestrator` is added as a
+submodule at `Dependencies/HelixDevelopment/DebateOrchestrator`.
+
+**Historical analysis preserved below for posterity.** Original
+"operator decision required" section retained verbatim so the
+option-tradeoff reasoning remains discoverable.
+
+---
+
+## (Historical) Surface after Tasks #254/#273
 
 ## The tension
 
