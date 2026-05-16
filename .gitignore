@@ -147,3 +147,13 @@ helix_qa/qa_evidence/*
 /core.test
 /security-test
 /security_test
+
+# CONST-053: SQLite db files (helix_qa session memory etc.)
+*.db
+*.db-shm
+*.db-wal
+/HelixQA/
+/qa-results/
+
+# Replica configs generated for multi-instance testing
+helix_code/config/replica-*.yaml

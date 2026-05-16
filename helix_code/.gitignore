@@ -207,3 +207,4 @@ internal/performance/reports/
 /scripts/md-to-html
 /tests/e2e/local-llm
 /tests/e2e/local_llm
+/config/replica-*.yaml
