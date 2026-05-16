@@ -662,9 +662,9 @@
 digital.vasic.containers => ../Containers        // PRESENT but EMPTY
 digital.vasic.helixqa => ../HelixQA               // PRESENT but EMPTY
 digital.vasic.challenges => ../Challenges         // PRESENT but EMPTY
-digital.vasic.docprocessor => ../Dependencies/HelixDevelopment/DocProcessor
-digital.vasic.llmorchestrator => ../Dependencies/HelixDevelopment/LLMOrchestrator
-digital.vasic.llmprovider => ../Dependencies/HelixDevelopment/LLMProvider
+digital.vasic.docprocessor => ../dependencies/HelixDevelopment/DocProcessor
+digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/LLMOrchestrator
+digital.vasic.llmprovider => ../dependencies/HelixDevelopment/LLMProvider
 ```
 
 **Problem:** All paths are `../` relative. Build fails if submodules not present at exact relative locations.

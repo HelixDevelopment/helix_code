@@ -7,10 +7,10 @@
 ssh -T git@github.com
 
 # 2. Add 4 MISSING submodules via SSH (NOT HTTPS)
-git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git Dependencies/HelixDevelopment/HelixAgent
-git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git Dependencies/HelixDevelopment/HelixLLM
-git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git Dependencies/HelixDevelopment/HelixMemory
-git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git Dependencies/HelixDevelopment/HelixSpecifier
+git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git dependencies/HelixDevelopment/HelixAgent
+git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git dependencies/HelixDevelopment/HelixLLM
+git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git dependencies/HelixDevelopment/HelixMemory
+git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git dependencies/HelixDevelopment/HelixSpecifier
 
 # 3. Initialize ALL submodules recursively
 git submodule update --init --recursive
@@ -24,11 +24,11 @@ go 1.26
 use (
     .
     ./HelixCode
-    ./Dependencies/HelixDevelopment/LLMsVerifier
-    ./Dependencies/HelixDevelopment/HelixAgent
-    ./Dependencies/HelixDevelopment/HelixLLM
-    ./Dependencies/HelixDevelopment/HelixMemory
-    ./Dependencies/HelixDevelopment/HelixSpecifier
+    ./dependencies/HelixDevelopment/LLMsVerifier
+    ./dependencies/HelixDevelopment/HelixAgent
+    ./dependencies/HelixDevelopment/HelixLLM
+    ./dependencies/HelixDevelopment/HelixMemory
+    ./dependencies/HelixDevelopment/HelixSpecifier
     ./HelixQA
     ./Challenges
     ./Containers

@@ -55,7 +55,7 @@ cli_agents/warp | git@github.com:warpdotdev/Warp.git
 cli_agents/x-cmd | git@github.com:x-cmd/x-cmd.git
 cli_agents/xela-cli | git@github.com:xelauvas/codeclau.git
 cli_agents/zeroshot | git@github.com:covibes/zeroshot.git
-Dependencies/HuggingFace_Hub | git@github.com:huggingface/huggingface_hub.git
-Dependencies/LLama_CPP | git@github.com:ggml-org/llama.cpp.git
-Dependencies/Ollama | git@github.com:ollama/ollama.git
+dependencies/HuggingFace_Hub | git@github.com:huggingface/huggingface_hub.git
+dependencies/LLama_CPP | git@github.com:ggml-org/llama.cpp.git
+dependencies/Ollama | git@github.com:ollama/ollama.git
 MCP-Servers | git@github.com:modelcontextprotocol/servers.git

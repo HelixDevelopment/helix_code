@@ -55,9 +55,9 @@ Example_Projects/Ollama_Code/
 Example_Projects/Qwen_Code/
 Example_Projects/Codename_Goose/
 Example_Projects/Claude_Code/
-Dependencies/LLama_CPP/
-Dependencies/Ollama/
-Dependencies/HuggingFace_Hub/
+dependencies/LLama_CPP/
+dependencies/Ollama/
+dependencies/HuggingFace_Hub/
 Example_Projects/DeepSeek_CLI/
 Example_Projects/Mistral_Code/
 Github-Pages-website/

@@ -1,7 +1,7 @@
 # Recursive Submodule Deduplication Audit (post-Phase 1.5)
 
 Date: 2026-05-06  
-Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-party trees: `cli_agents/`, `cli_agents_resources/`, `Dependencies/HuggingFace_Hub`, `Dependencies/Ollama`, `Dependencies/LLama_CPP`).
+Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-party trees: `cli_agents/`, `cli_agents_resources/`, `dependencies/HuggingFace_Hub`, `dependencies/Ollama`, `dependencies/LLama_CPP`).
 
 ## Inventory
 

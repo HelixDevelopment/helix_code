@@ -78,10 +78,10 @@ log "=== PHASE 0A: Adding 4 Missing Submodules via SSH ==="
 # P0-T2: Add HelixAgent
 # NOTE: HelixCode is actually a child of HelixAgent, so we use a read-only reference
 log "Adding HelixAgent submodule..."
-if [ ! -d "Dependencies/HelixDevelopment/HelixAgent" ]; then
+if [ ! -d "dependencies/HelixDevelopment/HelixAgent" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixAgent.git \
-        Dependencies/HelixDevelopment/HelixAgent
+        dependencies/HelixDevelopment/HelixAgent
     success "HelixAgent submodule added"
 else
     warn "HelixAgent directory already exists"
@@ -89,10 +89,10 @@ fi
 
 # P0-T2: Add HelixLLM
 log "Adding HelixLLM submodule..."
-if [ ! -d "Dependencies/HelixDevelopment/HelixLLM" ]; then
+if [ ! -d "dependencies/HelixDevelopment/HelixLLM" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixLLM.git \
-        Dependencies/HelixDevelopment/HelixLLM
+        dependencies/HelixDevelopment/HelixLLM
     success "HelixLLM submodule added"
 else
     warn "HelixLLM directory already exists"
@@ -100,10 +100,10 @@ fi
 
 # P0-T2: Add HelixMemory
 log "Adding HelixMemory submodule..."
-if [ ! -d "Dependencies/HelixDevelopment/HelixMemory" ]; then
+if [ ! -d "dependencies/HelixDevelopment/HelixMemory" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixMemory.git \
-        Dependencies/HelixDevelopment/HelixMemory
+        dependencies/HelixDevelopment/HelixMemory
     success "HelixMemory submodule added"
 else
     warn "HelixMemory directory already exists"
@@ -111,10 +111,10 @@ fi
 
 # P0-T2: Add HelixSpecifier
 log "Adding HelixSpecifier submodule..."
-if [ ! -d "Dependencies/HelixDevelopment/HelixSpecifier" ]; then
+if [ ! -d "dependencies/HelixDevelopment/HelixSpecifier" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixSpecifier.git \
-        Dependencies/HelixDevelopment/HelixSpecifier
+        dependencies/HelixDevelopment/HelixSpecifier
     success "HelixSpecifier submodule added"
 else
     warn "HelixSpecifier directory already exists"
@@ -194,11 +194,11 @@ go 1.26
 use (
 	.
 	./HelixCode
-	./Dependencies/HelixDevelopment/LLMsVerifier
-	./Dependencies/HelixDevelopment/HelixAgent
-	./Dependencies/HelixDevelopment/HelixLLM
-	./Dependencies/HelixDevelopment/HelixMemory
-	./Dependencies/HelixDevelopment/HelixSpecifier
+	./dependencies/HelixDevelopment/LLMsVerifier
+	./dependencies/HelixDevelopment/HelixAgent
+	./dependencies/HelixDevelopment/HelixLLM
+	./dependencies/HelixDevelopment/HelixMemory
+	./dependencies/HelixDevelopment/HelixSpecifier
 	./HelixQA
 	./Challenges
 	./Containers

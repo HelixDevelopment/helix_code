@@ -159,7 +159,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 
 | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|
-| LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `helix_agent/LLMsVerifier` | helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal references |
+| LLMsVerifier | `dependencies/HelixDevelopment/LLMsVerifier` | `helix_agent/LLMsVerifier` | helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal references |
 | containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
 | helix_qa | `helix_qa/` | `helix_agent/HelixQA` | helix_agent/Makefile, HelixAgent test wiring |
@@ -322,9 +322,9 @@ Commit: `chore(P1.5-WP2-T02.67): push HelixAgent post-restructure to all remotes
 
 ## P1.5-WP3-T03.01 — LLMsVerifier dedup
 
-Keep `Dependencies/HelixDevelopment/LLMsVerifier`. Remove `helix_agent/LLMsVerifier`.
+Keep `dependencies/HelixDevelopment/LLMsVerifier`. Remove `helix_agent/LLMsVerifier`.
 
-Pre-flight: `rg "helix_agent/LLMsVerifier" -l helix_agent/` lists every consumer. Update each to `../../Dependencies/HelixDevelopment/LLMsVerifier` (relative from `helix_agent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
+Pre-flight: `rg "helix_agent/LLMsVerifier" -l helix_agent/` lists every consumer. Update each to `../../dependencies/HelixDevelopment/LLMsVerifier` (relative from `helix_agent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
 
 ```bash
 cd HelixAgent
@@ -333,7 +333,7 @@ git rm --cached LLMsVerifier
 git config -f .gitmodules --remove-section submodule.LLMsVerifier
 rm -rf .git/modules/LLMsVerifier
 git add .gitmodules <consumer-files>
-git commit -m "chore(P1.5-WP3-T03.01): dedup LLMsVerifier; reference Dependencies/HelixDevelopment/ canonical"
+git commit -m "chore(P1.5-WP3-T03.01): dedup LLMsVerifier; reference dependencies/HelixDevelopment/ canonical"
 cd ..
 git add HelixAgent
 git commit -m "chore(P1.5-WP3-T03.01): bump HelixAgent gitlink after LLMsVerifier dedup"
@@ -430,7 +430,7 @@ Commit: `feat(P1.5-WP4-T04.03): internal/secrets/loader.go — Go counterpart of
 
 ## P1.5-WP4-T04.04 — Propagate loader to every Helix* submodule
 
-For each Helix* repo (HelixAgent, HelixQA, HelixCode-meta, Dependencies/HelixDevelopment/{LLMsVerifier, DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine}, plus HelixAgent's nested {HelixMemory, HelixSpecifier, HelixLLM}): copy `scripts/load_api_keys.sh` + ensure each repo's Makefile sources it before tests/build.
+For each Helix* repo (HelixAgent, HelixQA, HelixCode-meta, dependencies/HelixDevelopment/{LLMsVerifier, DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine}, plus HelixAgent's nested {HelixMemory, HelixSpecifier, HelixLLM}): copy `scripts/load_api_keys.sh` + ensure each repo's Makefile sources it before tests/build.
 
 ```bash
 # Per-repo Makefile addition:
@@ -554,7 +554,7 @@ find . -type d \
   -not -path "./HelixAgent" -not -path "./HelixQA" \
   -not -path "./Challenges" -not -path "./Containers" \
   -not -path "./Security" -not -path "./Assets" \
-  -not -path "./Dependencies/*" -not -path "./mcp_servers/*" \
+  -not -path "./dependencies/*" -not -path "./mcp_servers/*" \
   -not -path "./Github-Pages-Website" \
   -not -path "./helix_code/cmd" -not -path "./helix_code/internal" \
   | grep -E "[A-Z]|-" \
@@ -603,7 +603,7 @@ set -e
 ANCHOR="Article XI §11.9"
 fails=0
 for repo in . HelixAgent helix_qa HelixCode \
-            Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine} \
+            dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine} \
             helix_agent/{HelixMemory,HelixSpecifier,HelixLLM}; do
   for f in CONSTITUTION.md CLAUDE.md AGENTS.md; do
     p="$repo/$f"
@@ -659,7 +659,7 @@ cd HelixCode && go test -tags=integration ./... 2>&1 | tee -a /tmp/p1-5-inner-te
 
 ## P1.5-WP10-T10.03 .. T10.07 — Per-Helix* submodule build + test
 
-One task per repo (HelixAgent, HelixQA, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}). Each runs the repo's own Makefile/scripts. Failure here is a Phase 1.5 blocker.
+One task per repo (HelixAgent, HelixQA, dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}). Each runs the repo's own Makefile/scripts. Failure here is a Phase 1.5 blocker.
 
 ## P1.5-WP10-T10.08 — Fix pre-existing `internal/tools/git` mock drift (out-of-scope since F09)
 
@@ -714,7 +714,7 @@ Order:
 3. `helix_agent/{HelixMemory,HelixSpecifier,HelixLLM}` (any pending governance commits from WP8).
 4. `HelixAgent` itself.
 5. `HelixQA` root.
-6. `Dependencies/HelixDevelopment/*` (each).
+6. `dependencies/HelixDevelopment/*` (each).
 7. Root `Containers`, `Security`, `Challenges`, `MCP-Servers`, `Assets`, `Github-Pages-Website` if any pending changes.
 8. Meta-repo (last, in T12.04).
 

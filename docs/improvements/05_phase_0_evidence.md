@@ -68,7 +68,7 @@ SSH URL per Constitution Rule 3.
 
 ```
 FAIL: LLMsVerifier pin divergence
-  Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -88,20 +88,20 @@ exit=0 (expected — script correctly detects parity)
 After restoring canonical to `PARENT_SHA` (`629c5bd5`):
 ```
 FAIL: LLMsVerifier pin divergence
-  Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 exit=1  (matches Step 4.2 — back to original live state)
 ```
 
-Restore verified: `git -C Dependencies/HelixDevelopment/LLMsVerifier rev-parse HEAD` returns `629c5bd5d141351270e72b6fb7359fa4b7881d7c` — correct.
+Restore verified: `git -C dependencies/HelixDevelopment/LLMsVerifier rev-parse HEAD` returns `629c5bd5d141351270e72b6fb7359fa4b7881d7c` — correct.
 
 ### Live divergence status
 
 Pins diverge — see PROGRESS.md parking lot for resolution.
 
-- `Dependencies/HelixDevelopment/LLMsVerifier` → `629c5bd5d141351270e72b6fb7359fa4b7881d7c`
+- `dependencies/HelixDevelopment/LLMsVerifier` → `629c5bd5d141351270e72b6fb7359fa4b7881d7c`
 - `helix_agent/LLMsVerifier` → `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`
 
 The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolution deferred per spec §1.3 N2.
@@ -849,17 +849,17 @@ exit=0
 | Challenges | 53d47c8 | main |
 | containers | 6736040 | main |
 | Security | e7c09c1 | main |
-| Dependencies/HelixDevelopment/LLMsVerifier | d473231d | main |
-| Dependencies/HelixDevelopment/DocProcessor | 764a9a9 | master |
-| Dependencies/HelixDevelopment/LLMOrchestrator | c2b04ad | master |
-| Dependencies/HelixDevelopment/LLMProvider | afe0ac5 | master |
-| Dependencies/HelixDevelopment/VisionEngine | 9a35a9f | master |
+| dependencies/HelixDevelopment/LLMsVerifier | d473231d | main |
+| dependencies/HelixDevelopment/DocProcessor | 764a9a9 | master |
+| dependencies/HelixDevelopment/LLMOrchestrator | c2b04ad | master |
+| dependencies/HelixDevelopment/LLMProvider | afe0ac5 | master |
+| dependencies/HelixDevelopment/VisionEngine | 9a35a9f | master |
 | HelixAgent | 9a19ac12 | main |
 | helix_agent/HelixLLM | 4a412c7 | main |
 | helix_agent/HelixMemory | e464257 | main |
 | helix_agent/HelixSpecifier | f1f9927 | main |
 
-**Excluded from cascade (third-party):** `helix_agent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `github_pages_website`, `Assets`.
+**Excluded from cascade (third-party):** `helix_agent/cli_agents/*`, `Example_Projects/*`, `dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `github_pages_website`, `Assets`.
 
 **Scripts modified:**
 - `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded assets/github_pages_website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
@@ -890,7 +890,7 @@ exit=0
 ```
 $ make verify-llmsverifier-pin-parity 2>&1 | tail -5; echo "exit=$?"
 FAIL: LLMsVerifier pin divergence
-  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -915,7 +915,7 @@ exit=0    ← expected
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -963,18 +963,18 @@ total 348
 
 **Final `make verify-foundation` output (last 25 lines):**
 ```
-./Dependencies/HuggingFace_Hub/tests/test_hf_api.py:4187:    @pytest.mark.skip("Creating duplicated collections work on staging")
-./Dependencies/HuggingFace_Hub/tests/test_hf_file_system.py:439:    @unittest.skip("Not implemented yet")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:64:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:73:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:91:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:105:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:112:@pytest.mark.skip("skipping this test, as InferenceAPI seems to not throw an error when sending unsupported params")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:132:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:147:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:165:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:191:@pytest.mark.skip("Temporary skipping this test")
-./Dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:217:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_hf_api.py:4187:    @pytest.mark.skip("Creating duplicated collections work on staging")
+./dependencies/HuggingFace_Hub/tests/test_hf_file_system.py:439:    @unittest.skip("Not implemented yet")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:64:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:73:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:91:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:105:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:112:@pytest.mark.skip("skipping this test, as InferenceAPI seems to not throw an error when sending unsupported params")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:132:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:147:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:165:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:191:@pytest.mark.skip("Temporary skipping this test")
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:217:@pytest.mark.skip("Temporary skipping this test")
 ... (3800 more — re-run 'scripts/no-silent-skips.sh' without head)
 
 Annotate each with a trailing '// SKIP-OK: #<ticket>' (or '# SKIP-OK: #<ticket>')
@@ -983,7 +983,7 @@ comment so the skip is tracked, or remove the skip if it is no longer needed.
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -999,8 +999,8 @@ make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
 **Final SHA on all 4 remotes:** `3676f411073f1fa9ac4841eb184d3a6734231fd3` — all 4 remotes (github, gitlab, origin, upstream) converge at this SHA.
 
 **Open carry-forward items (Phase 1+):**
-1. **LLMsVerifier dual-pin divergence** — `Dependencies/HelixDevelopment/LLMsVerifier` ahead of `helix_agent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
-   > **Resolution annotation (close-out⁴⁵, 2026-05-15):** RESOLVED in P1.5-WP2. Transitive duplicate eliminated; HelixAgent now consumes the canonical pin via `go.mod` replace at `../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`. `make verify-foundation` exits 0. Original divergence text preserved above as historical record per evidence-doc convention.
+1. **LLMsVerifier dual-pin divergence** — `dependencies/HelixDevelopment/LLMsVerifier` ahead of `helix_agent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
+   > **Resolution annotation (close-out⁴⁵, 2026-05-15):** RESOLVED in P1.5-WP2. Transitive duplicate eliminated; HelixAgent now consumes the canonical pin via `go.mod` replace at `../dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`. `make verify-foundation` exits 0. Original divergence text preserved above as historical record per evidence-doc convention.
 2. **3 historical credential leaks** — already remediated in P0-T08.5 (files removed from index, replaced with .example templates, ephemeral generation script for SSH keys). Required operator action (separate from this programme): rotate the SonarQube + Snyk tokens; reject the leaked SSH public key wherever trusted.
 3. **13 cli_agents with stale HelixAgent pins** — `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset` will need their HelixAgent pin bumped before Phase 2 sub-specs touch them.
 4. **Submodule recursion cosmetic error** — `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` cause `git submodule foreach --recursive` to fatal-out; modifying third-party submodules is forbidden. Scripts wrap with `|| true`.

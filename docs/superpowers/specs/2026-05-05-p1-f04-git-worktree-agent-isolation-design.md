@@ -26,7 +26,7 @@ The implementation shells out to the `git` binary for all worktree operations, c
 - **G1 — No bluff.** Per Constitution Article XI §11.9, every PASS in this feature carries positive runtime evidence. The Challenge proves a real `git worktree add` succeeded against an ephemeral repo and the agent's effective working directory actually changed.
 - **G2 — Extend, don't parallelise.** Same lesson as F01/F02/F03. New sub-package `internal/tools/worktree/` lives next to `permissions/`, `persistence/`, `confirmation/` — same logical layer, different concern. The existing `internal/tools/git/` package (focused on auto-commit + attribution + message generation) is left untouched: worktree management is a workflow concern, not a commit-metadata concern.
 - **G3 — Per-session state via single field on `session.Manager`.** The porting doc proposes a parallel `internal/session/worktree_state.go`; we instead add a single `currentWorktree string` field plus getter/setter to `internal/session/manager.go`. Less surface area, same outcome.
-- **G4 — Meta-only worktrees.** `EnterWorktree` does not init submodules. The new worktree contains the meta-repo files + the inner Go module at `helix_code/` (a tracked subdirectory, present in any checkout). Submodules under `helix_agent/`, `Dependencies/`, etc. are empty placeholder directories. Agents that need submodule code run `git submodule update --init --recursive` from inside the worktree.
+- **G4 — Meta-only worktrees.** `EnterWorktree` does not init submodules. The new worktree contains the meta-repo files + the inner Go module at `helix_code/` (a tracked subdirectory, present in any checkout). Submodules under `helix_agent/`, `dependencies/`, etc. are empty placeholder directories. Agents that need submodule code run `git submodule update --init --recursive` from inside the worktree.
 - **G5 — Full surface (tools + Cobra + slash).** Mirrors F02's polish level. Agent-facing tools, human-facing CLI, and in-session slash command share a single `*Manager` instance.
 
 ### 1.3 Non-goals (explicit out-of-scope for F04)
@@ -207,7 +207,7 @@ The two-step "try existing, fall back to new" pattern matches the porting doc.
 
 Per §1.2 G4: `EnterWorktree` does NOT initialise submodules. The `Description` returned by `EnterWorktreeTool.Description()` documents this:
 
-> "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
+> "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
 
 This becomes part of the LLM-visible tool documentation.
 

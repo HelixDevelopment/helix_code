@@ -167,7 +167,7 @@ Before code changes, verify anti-bluff anchor is present in:
 
 1. Root governance files: CONSTITUTION.md, CLAUDE.md, AGENTS.md — DONE (Phase 1)
 2. Inner HelixCode AGENTS.md — DONE (Phase 1)
-3. All owned-by-us submodules: HelixAgent, HelixQA, Challenges, Containers, Security, Dependencies/HelixDevelopment/* — VERIFY
+3. All owned-by-us submodules: HelixAgent, HelixQA, Challenges, Containers, Security, dependencies/HelixDevelopment/* — VERIFY
 4. All third-party submodules — MUST add `.helix-governance` marker if missing
 
 ```bash

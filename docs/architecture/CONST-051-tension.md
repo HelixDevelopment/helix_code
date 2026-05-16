@@ -17,7 +17,7 @@ Task #274 (DebateOrchestrator) — the long-blocked sibling of this
 tension — was resolved in the same close-out by reconstruction from
 import surface; the new repo at
 `github.com/HelixDevelopment/DebateOrchestrator` is added as a
-submodule at `Dependencies/HelixDevelopment/DebateOrchestrator`.
+submodule at `dependencies/HelixDevelopment/DebateOrchestrator`.
 
 **Historical analysis preserved below for posterity.** Original
 "operator decision required" section retained verbatim so the
@@ -50,7 +50,7 @@ chain).
 ### After Tasks #254 / #273 (CONST-051(B) violation)
 ```go
 // helix_agent/go.mod
-replace digital.vasic.eventbus => ../Dependencies/vasic-digital/EventBus
+replace digital.vasic.eventbus => ../dependencies/vasic-digital/EventBus
 // helix_agent/.gitmodules
 (no EventBus entry — moved to parent root)
 ```
@@ -65,13 +65,13 @@ go: module digital.vasic.eventbus@v0.0.0 not found
 
 ## Attempted fix: go.work workspace at HelixCode root
 
-A `go.work` file with `use ./HelixAgent + ./Dependencies/vasic-digital/...`
+A `go.work` file with `use ./HelixAgent + ./dependencies/vasic-digital/...`
 was attempted (this round). It surfaced a SECOND conflict:
 
 ```
 go: conflicting replacements for digital.vasic.docprocessor:
-    .../Dependencies/HelixDevelopment/DocProcessor
-    .../Dependencies/vasic-digital/DocProcessor
+    .../dependencies/HelixDevelopment/DocProcessor
+    .../dependencies/vasic-digital/DocProcessor
 ```
 
 Both repos declare `module digital.vasic.docprocessor` even though
@@ -89,7 +89,7 @@ Three findings reframe the option set:
 
 **Finding 1 — The 4 colliding modules are forks of a common ancestor,
 not independent codebases that happen to share a name.**
-All four `Dependencies/{HelixDevelopment,vasic-digital}/{DocProcessor,
+All four `dependencies/{HelixDevelopment,vasic-digital}/{DocProcessor,
 LLMOrchestrator, LLMProvider, VisionEngine}` pairs share their
 first-commit SHA (DocProcessor root: `27888613...`; LLMOrchestrator
 root: `91209efb...`; LLMProvider root: `94fcea1f...`; VisionEngine
@@ -103,9 +103,9 @@ parent-build coexistence is incidental.
 
 **Finding 3 — The two consumers split on which fork they consume.**
 - `helix_code/go.mod` → `replace digital.vasic.docprocessor =>
-  ../Dependencies/HelixDevelopment/DocProcessor`
+  ../dependencies/HelixDevelopment/DocProcessor`
 - `helix_agent/go.mod` → `replace digital.vasic.docprocessor =>
-  ../Dependencies/vasic-digital/DocProcessor`
+  ../dependencies/vasic-digital/DocProcessor`
 
 The previous `go.work` attempt failed because it tried to register
 **both** sides under one workspace. But neither consumer needs both;
@@ -117,7 +117,7 @@ each picks one fork.
 Distinguish the colliding modules by org-prefix in their module path:
 
 ```go
-// Dependencies/HelixDevelopment/DocProcessor/go.mod
+// dependencies/HelixDevelopment/DocProcessor/go.mod
 module dev.helix.docprocessor   // distinguish from digital.vasic.docprocessor
 ```
 
@@ -125,7 +125,7 @@ Requires upstream repo edits AND every consumer's go.mod update.
 Substantial coordinated work spanning two GitHub orgs.
 
 ### Option B: Proper Go-module versioning
-Publish each Dependencies/vasic-digital/* module as a real Go module
+Publish each dependencies/vasic-digital/* module as a real Go module
 with semantic version tags. Consumers reference by version:
 
 ```go
@@ -150,7 +150,7 @@ HelixCode parent are exempt from standalone-build expectation."
 
 ### Option D: Hybrid — ship a bootstrap script
 Add a `scripts/bootstrap-standalone-build.sh` to HelixAgent + HelixLLM
-that, on clone, clones the parent's Dependencies/* tree adjacent and
+that, on clone, clones the parent's dependencies/* tree adjacent and
 generates a temporary go.work pointing at them. Consumers can build
 standalone after running bootstrap once. CONST-054's `helix-deps.yaml`
 manifest is the natural metadata source for this script (avoids
@@ -175,7 +175,7 @@ that case A+B is the right answer.
 A previous draft of this doc considered scoping `go.work` per consumer
 (HelixCode root has its own; HelixAgent root has its own). This does
 NOT solve the standalone-build gap that CONST-051(B) demands —
-HelixAgent's `go.work` would still reference `../Dependencies/...`
+HelixAgent's `go.work` would still reference `../dependencies/...`
 paths that don't exist after a fresh standalone clone. Per-consumer
 workspace only papers over the parent-build path that already works.
 

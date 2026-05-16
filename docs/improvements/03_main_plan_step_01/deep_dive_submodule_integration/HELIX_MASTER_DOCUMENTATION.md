@@ -91,10 +91,10 @@ HelixCode contains **87 declared submodules**, all using SSH (`git@github.com` f
 
 | Submodule | Status | Recommended SSH URL | Path |
 |-----------|--------|---------------------|------|
-| HelixAgent | **MISSING** | `git@github.com:HelixDevelopment/HelixAgent.git` | `Dependencies/HelixDevelopment/HelixAgent` |
-| HelixLLM | **MISSING** | `git@github.com:HelixDevelopment/HelixLLM.git` | `Dependencies/HelixDevelopment/HelixLLM` |
-| HelixMemory | **MISSING** | `git@github.com:HelixDevelopment/HelixMemory.git` | `Dependencies/HelixDevelopment/HelixMemory` |
-| HelixSpecifier | **MISSING** | `git@github.com:HelixDevelopment/HelixSpecifier.git` | `Dependencies/HelixDevelopment/HelixSpecifier` |
+| HelixAgent | **MISSING** | `git@github.com:HelixDevelopment/HelixAgent.git` | `dependencies/HelixDevelopment/HelixAgent` |
+| HelixLLM | **MISSING** | `git@github.com:HelixDevelopment/HelixLLM.git` | `dependencies/HelixDevelopment/HelixLLM` |
+| HelixMemory | **MISSING** | `git@github.com:HelixDevelopment/HelixMemory.git` | `dependencies/HelixDevelopment/HelixMemory` |
+| HelixSpecifier | **MISSING** | `git@github.com:HelixDevelopment/HelixSpecifier.git` | `dependencies/HelixDevelopment/HelixSpecifier` |
 
 ### 2.3 Architecture Overview
 
@@ -150,17 +150,17 @@ All 4 quality assurance submodules are **declared in `.gitmodules` but their dir
 helix_qa/        # 235 tests, 4-phase QA, 47-agent test bank
 challenges/     # 209 tests, 16 evaluators, 21 adapters
 containers/     # 6 runtime implementations, Docker/Podman/K8s
-Dependencies/HelixDevelopment/LLMsVerifier/  # 12 provider adapters, ACP protocol
+dependencies/HelixDevelopment/LLMsVerifier/  # 12 provider adapters, ACP protocol
 ```
 
 ### 3.2 Missing Submodules (Must Be Added)
 
 ```bash
 # These MUST be added via SSH
-Dependencies/HelixDevelopment/HelixAgent      # Ancestor project
-Dependencies/HelixDevelopment/HelixLLM        # LLM gateway
-Dependencies/HelixDevelopment/HelixMemory     # Memory system
-Dependencies/HelixDevelopment/HelixSpecifier    # Spec engine
+dependencies/HelixDevelopment/HelixAgent      # Ancestor project
+dependencies/HelixDevelopment/HelixLLM        # LLM gateway
+dependencies/HelixDevelopment/HelixMemory     # Memory system
+dependencies/HelixDevelopment/HelixSpecifier    # Spec engine
 ```
 
 ### 3.3 SSH Integration Commands
@@ -174,10 +174,10 @@ ssh-add ~/.ssh/id_ed25519   # or id_rsa
 ssh -T git@github.com       # verify access
 
 # === STEP 2: Add Missing Submodules via SSH ===
-git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git Dependencies/HelixDevelopment/HelixAgent
-git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git Dependencies/HelixDevelopment/HelixLLM
-git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git Dependencies/HelixDevelopment/HelixMemory
-git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git Dependencies/HelixDevelopment/HelixSpecifier
+git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git dependencies/HelixDevelopment/HelixAgent
+git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git dependencies/HelixDevelopment/HelixLLM
+git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git dependencies/HelixDevelopment/HelixMemory
+git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git dependencies/HelixDevelopment/HelixSpecifier
 
 # === STEP 3: Initialize ALL Submodules Recursively ===
 git submodule update --init --recursive
@@ -192,11 +192,11 @@ go 1.26
 use (
     .
     ./HelixCode
-    ./Dependencies/HelixDevelopment/LLMsVerifier
-    ./Dependencies/HelixDevelopment/HelixAgent
-    ./Dependencies/HelixDevelopment/HelixLLM
-    ./Dependencies/HelixDevelopment/HelixMemory
-    ./Dependencies/HelixDevelopment/HelixSpecifier
+    ./dependencies/HelixDevelopment/LLMsVerifier
+    ./dependencies/HelixDevelopment/HelixAgent
+    ./dependencies/HelixDevelopment/HelixLLM
+    ./dependencies/HelixDevelopment/HelixMemory
+    ./dependencies/HelixDevelopment/HelixSpecifier
     ./HelixQA
     ./Challenges
     ./Containers
@@ -996,11 +996,11 @@ jobs:
 
 | Submodule | SSH URL | Local Path |
 |-----------|---------|------------|
-| HelixAgent | `git@github.com:HelixDevelopment/HelixAgent.git` | `Dependencies/HelixDevelopment/HelixAgent` |
-| HelixLLM | `git@github.com:HelixDevelopment/HelixLLM.git` | `Dependencies/HelixDevelopment/HelixLLM` |
-| HelixMemory | `git@github.com:HelixDevelopment/HelixMemory.git` | `Dependencies/HelixDevelopment/HelixMemory` |
-| HelixSpecifier | `git@github.com:HelixDevelopment/HelixSpecifier.git` | `Dependencies/HelixDevelopment/HelixSpecifier` |
-| LLMsVerifier | `git@github.com:vasic-digital/LLMsVerifier.git` | `Dependencies/HelixDevelopment/LLMsVerifier` |
+| HelixAgent | `git@github.com:HelixDevelopment/HelixAgent.git` | `dependencies/HelixDevelopment/HelixAgent` |
+| HelixLLM | `git@github.com:HelixDevelopment/HelixLLM.git` | `dependencies/HelixDevelopment/HelixLLM` |
+| HelixMemory | `git@github.com:HelixDevelopment/HelixMemory.git` | `dependencies/HelixDevelopment/HelixMemory` |
+| HelixSpecifier | `git@github.com:HelixDevelopment/HelixSpecifier.git` | `dependencies/HelixDevelopment/HelixSpecifier` |
+| LLMsVerifier | `git@github.com:vasic-digital/LLMsVerifier.git` | `dependencies/HelixDevelopment/LLMsVerifier` |
 | helix_qa | `git@github.com:HelixDevelopment/HelixQA.git` | `HelixQA` |
 | Challenges | `git@github.com:vasic-digital/Challenges.git` | `Challenges` |
 | containers | `git@github.com:vasic-digital/Containers.git` | `Containers` |

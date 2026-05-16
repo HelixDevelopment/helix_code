@@ -17,16 +17,16 @@ echo "  PASS: helix_qa submodule present and populated"
 
 # Test 2: Verify dependency submodules exist
 echo "[2/10] Checking helix_qa dependency submodules..."
-test -d Dependencies/HelixDevelopment/DocProcessor/.git || echo "  WARN: DocProcessor submodule not initialized"
-test -d Dependencies/HelixDevelopment/LLMOrchestrator/.git || echo "  WARN: LLMOrchestrator submodule not initialized"
-test -d Dependencies/HelixDevelopment/VisionEngine/.git || echo "  WARN: VisionEngine submodule not initialized"
+test -d dependencies/HelixDevelopment/DocProcessor/.git || echo "  WARN: DocProcessor submodule not initialized"
+test -d dependencies/HelixDevelopment/LLMOrchestrator/.git || echo "  WARN: LLMOrchestrator submodule not initialized"
+test -d dependencies/HelixDevelopment/VisionEngine/.git || echo "  WARN: VisionEngine submodule not initialized"
 echo "  PASS: Dependency submodules checked"
 
 # Test 3: Verify HelixCode go.mod has replace directives
 echo "[3/10] Checking HelixCode go.mod replace directives..."
 grep -q 'digital.vasic.helixqa => ../helix_qa' helix_code/go.mod || (echo "FAIL: helix_qa replace missing"; exit 1)
-grep -q 'digital.vasic.docprocessor => ../Dependencies/HelixDevelopment/DocProcessor' helix_code/go.mod || (echo "FAIL: DocProcessor replace missing"; exit 1)
-grep -q 'digital.vasic.llmorchestrator => ../Dependencies/HelixDevelopment/LLMOrchestrator' helix_code/go.mod || (echo "FAIL: LLMOrchestrator replace missing"; exit 1)
+grep -q 'digital.vasic.docprocessor => ../dependencies/HelixDevelopment/DocProcessor' helix_code/go.mod || (echo "FAIL: DocProcessor replace missing"; exit 1)
+grep -q 'digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/LLMOrchestrator' helix_code/go.mod || (echo "FAIL: LLMOrchestrator replace missing"; exit 1)
 echo "  PASS: Replace directives present"
 
 # Test 4: Verify helix_qa wrapper package exists and compiles

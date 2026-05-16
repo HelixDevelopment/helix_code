@@ -138,7 +138,7 @@ Create `helix_code/internal/tools/worktree/doc.go`:
 // All worktree operations shell out to the git binary, consistent with
 // internal/tools/git/. Submodules are NOT initialised — the meta-repo and
 // the inner Go module at helix_code/ are present, but submodule directories
-// under helix_agent/, Dependencies/, etc. are empty placeholders.
+// under helix_agent/, dependencies/, etc. are empty placeholders.
 //
 // See: docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md
 package worktree
@@ -1376,7 +1376,7 @@ func NewEnterWorktreeTool(m *Manager) *EnterWorktreeTool { return &EnterWorktree
 func (t *EnterWorktreeTool) Name() string { return "EnterWorktree" }
 
 func (t *EnterWorktreeTool) Description() string {
-	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
+	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
 }
 
 func (t *EnterWorktreeTool) Schema() tools.ToolSchema {

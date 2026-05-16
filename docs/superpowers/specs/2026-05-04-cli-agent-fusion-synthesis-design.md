@@ -59,7 +59,7 @@ helix_code/                              # meta-repo (this repo)
 │   ├── HelixLLM/                       # nested submodule (canonical)
 │   ├── HelixMemory/                    # nested submodule (canonical)
 │   ├── HelixSpecifier/                 # nested submodule (canonical)
-│   ├── LLMsVerifier/                   # nested submodule (overlaps Dependencies/HelixDevelopment/LLMsVerifier)
+│   ├── LLMsVerifier/                   # nested submodule (overlaps dependencies/HelixDevelopment/LLMsVerifier)
 │   └── cli_agents/                     # 39 CLI-agent submodules — canonical source
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
@@ -68,14 +68,14 @@ helix_code/                              # meta-repo (this repo)
 ├── containers/                         # existing submodule
 ├── security/                           # existing submodule
 │
-├── Dependencies/HelixDevelopment/      # keep as-is for direct Go imports
+├── dependencies/HelixDevelopment/      # keep as-is for direct Go imports
 │   ├── LLMsVerifier/                   # canonical pin (helix_agent/LLMsVerifier defers to this)
 │   ├── DocProcessor/  LLMOrchestrator/  LLMProvider/  VisionEngine/
 │
 ├── Example_Projects/                   # DEPRECATE — replaced by helix_agent/cli_agents/ as canonical
 │                                       # (preserved through Phase 4; Phase 5 cleanup once import paths migrated)
 │
-├── assets/  github_pages_website/  Dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
+├── assets/  github_pages_website/  dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
 └── docs/  scripts/  Makefile  setup.sh  helix  CLAUDE.md ...
 ```
 
@@ -83,7 +83,7 @@ helix_code/                              # meta-repo (this repo)
 - **Protocol: SSH only.** `git@github.com:…` or `git@gitlab.com:…`. Constitution Rule 3 already prohibits HTTPS — re-affirmed.
 - **Recursion: deep.** `git submodule update --init --recursive --jobs 8`. `setup.sh` wraps this; we add a verifier that fails if any submodule is uninitialised.
 - **`helix_code/helix_code/` stays a tracked subdirectory.** Promoting it to a submodule would create a circular reference (this repo *is* `HelixDevelopment/HelixCode`). Documented explicitly in `helix_code/helix_code/CLAUDE.md`.
-- **LLMsVerifier dual-pinning.** `Dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
+- **LLMsVerifier dual-pinning.** `dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
 - **Agent-Deck nested-worktree fix.** `Example_Projects/Agent-Deck/.claude/worktrees/agent-*` paths are git worktrees, not submodules. Add to `.git/info/exclude` (local) and document.
 
 ### 2.3 Secret handling
@@ -128,7 +128,7 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 |---|---|---|---|
 | **P0-01** | Resolve `Example_Projects/Agent-Deck/.claude/worktrees/` recursion error: add path to `.git/info/exclude` (local); document fix in `helix_agent/cli_agents/agent-deck/CLAUDE.md` (after P0-02) | `git submodule foreach --recursive 'echo OK' \| grep -c OK` returns ≥87 with no `fatal:` | P0-02 |
 | **P0-02** | Add HelixAgent submodule: `git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent && git submodule update --init --recursive HelixAgent` | `ls helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}` all exist | P0-03, P1+ |
-| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `Dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
+| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
 | **P0-04** | Migrate API keys: `cp -p ../helix_agent/.env helix_code/helix_code/.env && chmod 600 helix_code/helix_code/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
 | **P0-05** | Update `.gitignore` (root + `helix_code/helix_code/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
 | **P0-06** | Refresh `helix_code/helix_code/.env.example`: every key from `../helix_agent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env\|sort) <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env.example\|sort)` empty | P0-07 |
@@ -137,7 +137,7 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 | **P0-09** | Create governance triplet for `helix_code/helix_code/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
 | **P0-10** | Add CONST-042 + CONST-043 to root `CONSTITUTION.md` Article XII (NEW) | `grep -E "CONST-042\|CONST-043" CONSTITUTION.md` returns both | P0-11 |
 | **P0-11** | Cascade CONST-042 + CONST-043 to root `CLAUDE.md`, `AGENTS.md`, `CRUSH.md`, `QWEN.md`. Backfill anti-bluff anchor to `CRUSH.md` and `QWEN.md` (currently missing) | `for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE "11.9\|CONST-042\|CONST-043" $f; done` returns all four | P0-12 |
-| **P0-12** | Cascade all three anchors to every owned submodule: HelixQA, Challenges, Containers, Security, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, plus new HelixAgent and its nested HelixLLM/HelixMemory/HelixSpecifier. Backfill missing anti-bluff anchor in LLMsVerifier (all 3) and CONSTITUTION.md anchor in the four Dependencies repos | `scripts/verify-governance-cascade.sh` (extended) exits 0 | P0-13 |
+| **P0-12** | Cascade all three anchors to every owned submodule: HelixQA, Challenges, Containers, Security, dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, plus new HelixAgent and its nested HelixLLM/HelixMemory/HelixSpecifier. Backfill missing anti-bluff anchor in LLMsVerifier (all 3) and CONSTITUTION.md anchor in the four Dependencies repos | `scripts/verify-governance-cascade.sh` (extended) exits 0 | P0-13 |
 | **P0-13** | Fix root `CLAUDE.md` §3.2 bluff: change `helix_code/ ← SUBMODULE` to `helix_code/ ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted)` | `grep -A1 '^├── helix_code/' CLAUDE.md` shows corrected label | P0-14 |
 | **P0-14** | Wire P0 gates into Makefile: `make verify-foundation` runs P0-01, 03, 05, 07, 12 checks plus `no-silent-skips` and `verify-governance-cascade.sh` | Exits 0 with no warnings; output committed to evidence log | P0-15 |
 | **P0-15** | Refresh PNG diagrams: regenerate `overall_architecture.png`, `dependency_graph.png`, `feature_gap_matrix.png`, `integration_phases.png` against real module set. Output to `docs/improvements/06_diagrams_real/`; deprecate 01/02 with `DEPRECATED.md` pointers | New diagrams exist; `01/DEPRECATED.md` and `02/DEPRECATED.md` reference new location | P0-16 |
@@ -400,9 +400,9 @@ canonical/AGENTS_TEMPLATE.md
 owned-repos.txt                        # HelixCode (root), helix_code/HelixCode (subdir),
                                        # HelixAgent, helix_agent/HelixLLM, helix_agent/HelixMemory,
                                        # helix_agent/HelixSpecifier, HelixQA, Challenges,
-                                       # Containers, Security, Dependencies/HelixDevelopment/*
+                                       # Containers, Security, dependencies/HelixDevelopment/*
                                        # NOT included: cli_agents/* (third-party), Example_Projects/*,
-                                       #                Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}
+                                       #                dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}
 ```
 
 Run via `make propagate-governance`. Verifier `scripts/verify-governance-cascade.sh` (extended) checks all three anchors in every owned-by-us governance file; failing it blocks `make ci-validate-all`.

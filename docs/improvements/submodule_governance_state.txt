@@ -6,23 +6,23 @@
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Dependencies/HelixDevelopment/DocProcessor ===
+=== dependencies/HelixDevelopment/DocProcessor ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Dependencies/HelixDevelopment/LLMOrchestrator ===
+=== dependencies/HelixDevelopment/LLMOrchestrator ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Dependencies/HelixDevelopment/LLMProvider ===
+=== dependencies/HelixDevelopment/LLMProvider ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Dependencies/HelixDevelopment/LLMsVerifier ===
+=== dependencies/HelixDevelopment/LLMsVerifier ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Dependencies/HelixDevelopment/VisionEngine ===
+=== dependencies/HelixDevelopment/VisionEngine ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md

@@ -71,7 +71,7 @@ unreachable remotes. Reachability detail in
 Root `.gitmodules` is now 63 lines (was 264 lines pre-removal). All 67
 `Example_Projects/...` blocks removed; remaining entries:
 - Challenges, HelixAgent, HelixQA, Containers, Security, Assets,
-  Github-Pages-Website, Dependencies/{LLama_CPP, Ollama, HuggingFace_Hub}.
+  Github-Pages-Website, dependencies/{LLama_CPP, Ollama, HuggingFace_Hub}.
 
 HelixAgent `.gitmodules` unchanged: 170 submodules across cli_agents/, MCP/,
 HelixLLM/submodules/, Toolkit/, Veritas, VisionEngine, etc.

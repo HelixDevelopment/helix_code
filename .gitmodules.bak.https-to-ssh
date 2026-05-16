@@ -16,14 +16,14 @@
 [submodule "Example_Projects/Claude_Code"]
 	path = Example_Projects/Claude_Code
 	url = git@github.com:anthropics/claude-code.git
-[submodule "Dependencies/LLama_CPP"]
-	path = Dependencies/LLama_CPP
+[submodule "dependencies/LLama_CPP"]
+	path = dependencies/LLama_CPP
 	url = git@github.com:ggml-org/llama.cpp.git
-[submodule "Dependencies/Ollama"]
-	path = Dependencies/Ollama
+[submodule "dependencies/Ollama"]
+	path = dependencies/Ollama
 	url = git@github.com:ollama/ollama.git
-[submodule "Dependencies/HuggingFace_Hub"]
-	path = Dependencies/HuggingFace_Hub
+[submodule "dependencies/HuggingFace_Hub"]
+	path = dependencies/HuggingFace_Hub
 	url = git@github.com:huggingface/huggingface_hub.git
 [submodule "Example_Projects/DeepSeek_CLI"]
 	path = Example_Projects/DeepSeek_CLI

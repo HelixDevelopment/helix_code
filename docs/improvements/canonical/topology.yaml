@@ -28,7 +28,7 @@ modules:
       pin: helix_agent/HelixSpecifier
     - name: LLMsVerifier
       url: git@github.com:vasic-digital/LLMsVerifier.git
-      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + helix_agent/LLMsVerifier (transitive)
+      pin: dependencies/HelixDevelopment/LLMsVerifier (canonical) + helix_agent/LLMsVerifier (transitive)
 
   helix_apps:
     - name: HelixQA
