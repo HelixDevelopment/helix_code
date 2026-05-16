@@ -355,10 +355,15 @@ func TestInvalidateFile(t *testing.T) {
 	t.Cleanup(func() { _ = rm.cache.Close() })
 
 	// Cache the file
-	rm.extractFileSymbols(testFile)
+	_, _ = rm.extractFileSymbols(testFile)
 
 	// Drain async save to disk
 	rm.cache.Wait()
+
+	cacheKey := rm.getCacheKey(testFile)
+	if !rm.cache.Has(cacheKey) {
+		t.Fatalf("precondition: cache must contain entry for %q before invalidation; extractFileSymbols did not populate cache", testFile)
+	}
 
 	// Invalidate
 	err := rm.InvalidateFile(testFile)
@@ -368,6 +373,10 @@ func TestInvalidateFile(t *testing.T) {
 
 	// Drain async removal from disk
 	rm.cache.Wait()
+
+	if rm.cache.Has(cacheKey) {
+		t.Fatalf("postcondition: cache must NOT contain entry for %q after InvalidateFile; invalidation was a no-op (bluff)", testFile)
+	}
 }
 
 func TestRefreshCache(t *testing.T) {
