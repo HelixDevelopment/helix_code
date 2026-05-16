@@ -171,6 +171,12 @@ func (s *Server) setupRoutes() {
 	// API routes
 	api := s.router.Group("/api/v1")
 	{
+		// API health alias for /health — matches README §API surface and
+		// the anti-bluff challenge harness (ddos_health_flood etc.) which
+		// probe /api/v1/health as the API-namespaced endpoint per
+		// CONST-035 (documented surface must actually exist).
+		api.GET("/health", s.healthCheck)
+
 		// Authentication routes
 		auth := api.Group("/auth")
 		{
