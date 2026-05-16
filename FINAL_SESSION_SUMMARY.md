@@ -159,7 +159,7 @@ GET    /api/v1/config/status
 ---
 
 ### 9. Discovery Engine - Est. 3 hours
-**Location**: `cmd/local-llm-advanced.go`
+**Location**: `cmd/local_llm_advanced.go`
 **Status**: NOT STARTED
 
 **Needs**:

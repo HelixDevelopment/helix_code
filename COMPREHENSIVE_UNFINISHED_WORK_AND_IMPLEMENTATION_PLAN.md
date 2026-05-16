@@ -279,7 +279,7 @@ apk add mesa-gl xrandr xcursor-dev libxinerama-dev libxi-dev
 
 #### Helix-Config Commands - Not Implemented
 
-**Location**: `cmd/helix-config/main.go:680-811`
+**Location**: `cmd/helix_config/main.go:680-811`
 
 24 command handlers return nil without implementation:
 - `runShowCommand()`, `runGetCommand()`, `runSetCommand()`, `runDeleteCommand()`
@@ -596,7 +596,7 @@ Github-Pages-Website/docs/
 
 #### Step 2.3: Helix-Config Commands
 
-**File**: `cmd/helix-config/main.go`
+**File**: `cmd/helix_config/main.go`
 
 **24 Commands to Implement**:
 - Configuration: show, get, set, delete
@@ -1268,7 +1268,7 @@ internal/workflow/executor.go - Implement TODOs
 internal/workflow/planmode/executor.go - Replace placeholders
 internal/memory/memory_manager.go - Implement providers
 internal/providers/ai_integration.go - Remove mocks
-cmd/helix-config/main.go - Implement 24 commands
+cmd/helix_config/main.go - Implement 24 commands
 All GUI applications - Implement pending features
 12 README files to expand
 docs/user_manual/README.md - Add sections

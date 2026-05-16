@@ -165,7 +165,7 @@ This comprehensive audit analyzed the entire HelixCode codebase against its docu
 - All 6 methods return "Filesystem provider not fully implemented"
 
 #### 3.2 Helix-Config Commands Not Implemented
-**Location:** `cmd/helix-config/main.go:680-811`
+**Location:** `cmd/helix_config/main.go:680-811`
 
 24 command handlers return nil without implementation:
 - `runShowCommand()`, `runGetCommand()`, `runSetCommand()`, `runDeleteCommand()`
@@ -322,7 +322,7 @@ sudo apt-get install libgl1-mesa-dev libxrandr-dev libxcursor-dev libxinerama-de
 **Priority:** HIGH
 **Effort:** 3 days
 **Files:**
-- `cmd/helix-config/main.go`
+- `cmd/helix_config/main.go`
 
 **Actions:**
 1. Implement all 24 command handlers
@@ -422,7 +422,7 @@ Create issues for each task with labels:
 ```
 internal/providers/ai_integration.go     # MockAIProvider issue
 internal/memory/memory_manager.go        # Unimplemented providers
-cmd/helix-config/main.go                 # Unimplemented commands
+cmd/helix_config/main.go                 # Unimplemented commands
 internal/tools/voice/device.go           # Mock implementations
 internal/tools/voice/transcriber.go      # Mock implementations
 internal/server/handlers.go              # Placeholder handler

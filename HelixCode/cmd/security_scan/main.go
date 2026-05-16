@@ -1,4 +1,4 @@
-// cmd/security-scan — HelixCode security scanner bootstrap via Containers BootManager.
+// cmd/security_scan — HelixCode security scanner bootstrap via Containers BootManager.
 //
 // This binary wires the SonarQube and Snyk container lifecycle through the
 // digital.vasic.containers BootManager (pkg/boot, pkg/endpoint, pkg/health, pkg/runtime).
@@ -6,8 +6,8 @@
 //
 // Usage:
 //
-//	go run ./cmd/security-scan -scanner=sonarqube [-action=start|stop|status]
-//	go run ./cmd/security-scan -scanner=snyk [-action=start|stop|status]
+//	go run ./cmd/security_scan -scanner=sonarqube [-action=start|stop|status]
+//	go run ./cmd/security_scan -scanner=snyk [-action=start|stop|status]
 //
 // Credentials are read from the environment (loaded by the calling script from .env).
 // No credentials are baked into this binary.
@@ -200,7 +200,7 @@ func handleSnyk(ctx context.Context, projectDir string, rt runtime.ContainerRunt
 }
 
 // resolveProjectDir returns the HelixCode project directory.
-// When running via `go run ./cmd/security-scan` the working directory is the
+// When running via `go run ./cmd/security_scan` the working directory is the
 // module root; this function validates and returns it.
 func resolveProjectDir() (string, error) {
 	dir, err := os.Getwd()

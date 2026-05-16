@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 | Global config flag | ✅ | `--config` with viper |
 | Debug/logging flags | ✅ | `--debug`, `--log-level` |
 | Server mode | ✅ | `cmd/server/main.go` |
-| Security utilities | ✅ | `cmd/security-fix/` |
+| Security utilities | ✅ | `cmd/security_fix/` |
 
 ### 1.5 What's Missing vs State-of-the-Art
 - **Missing**: Interactive chat REPL loop (only basic command structure)
@@ -1064,8 +1064,8 @@ digital.vasic.security => ../Security
 | Network Isolation | Optional network isolation |
 
 ### 12.2 Security Tools
-- `cmd/security-fix/` - Automated security fix utility
-- `cmd/security-test/` - Security testing utility
+- `cmd/security_fix/` - Automated security fix utility
+- `cmd/security_test/` - Security testing utility
 - `internal/security/` - Core security package
 - `internal/tools/confirmation/` - Confirmation with audit logging
 

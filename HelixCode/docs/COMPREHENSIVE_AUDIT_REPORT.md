@@ -137,13 +137,13 @@ This audit analyzed the HelixCode project against its documentation to identify:
 
 ### Packages with 0% Coverage (No Tests)
 
-- cmd/config-test
-- cmd/helix-config
-- cmd/performance-optimization
-- cmd/performance-optimization-standalone
-- cmd/security-fix
-- cmd/security-fix-standalone
-- cmd/security-test
+- cmd/config_test
+- cmd/helix_config
+- cmd/performance_optimization
+- cmd/performance_optimization_standalone
+- cmd/security_fix
+- cmd/security_fix_standalone
+- cmd/security_test
 - internal/mocks
 - internal/testutil
 - examples/* (all example packages)

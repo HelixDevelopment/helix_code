@@ -3442,7 +3442,7 @@ Reason categories:
 - `Assets/`, `Dependencies/`, `HelixCode/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
 
 **Go `cmd/<binary>` packages (9)** — renaming changes `go build` import paths, Makefile target args, and produced `bin/<name>` artifact names:
-- `cmd/security-test`, `HelixCode/cmd/config-test`, `HelixCode/cmd/helix-config`, `HelixCode/cmd/performance-optimization`, `HelixCode/cmd/performance-optimization-standalone`, `HelixCode/cmd/security-fix`, `HelixCode/cmd/security-fix-standalone`, `HelixCode/cmd/security-scan`, `HelixCode/cmd/security-test`
+- `cmd/security_test`, `HelixCode/cmd/config_test`, `HelixCode/cmd/helix_config`, `HelixCode/cmd/performance_optimization`, `HelixCode/cmd/performance_optimization_standalone`, `HelixCode/cmd/security_fix`, `HelixCode/cmd/security_fix_standalone`, `HelixCode/cmd/security_scan`, `HelixCode/cmd/security_test`
 
 **Go application packages (4)** — referenced as Go import paths in `HelixCode/Makefile` (`./applications/aurora_os`, etc.):
 - `HelixCode/applications/aurora_os`, `HelixCode/applications/harmony_os`, `HelixCode/applications/terminal_ui`, `HelixCode/applications/ios/HelixCode`

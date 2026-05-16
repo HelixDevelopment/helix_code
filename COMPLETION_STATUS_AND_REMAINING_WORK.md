@@ -169,7 +169,7 @@ HelixCode is a sophisticated distributed AI development platform that is **large
 
 ### 5. Command Line Tools (~85% Complete)
 
-#### Discovery Command (`cmd/local-llm-advanced.go`)
+#### Discovery Command (`cmd/local_llm_advanced.go`)
 ```go
 _ = ctx // TODO: Use context for cancellation
 _ = discoveryEngine // TODO: Implement discovery logic

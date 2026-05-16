@@ -4,7 +4,7 @@ version: '3.8'
 # This compose file sets up SonarQube Community Edition for code quality and security scanning.
 # All credentials are loaded from environment variables — never hardcoded.
 # Boot this infrastructure through the Containers BootManager, not bare docker commands.
-# TODO(P0-T08.7/4): Full lifecycle managed by cmd/security-scan via Containers BootManager.
+# TODO(P0-T08.7/4): Full lifecycle managed by cmd/security_scan via Containers BootManager.
 
 services:
   sonarqube:

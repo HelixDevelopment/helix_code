@@ -23,13 +23,13 @@ HelixCode/internal/security/snyk_client.go           — create
 HelixCode/internal/security/security.go              — modify (real ScanFeature)
 HelixCode/internal/security/security_real_test.go    — create (TDD tests)
 HelixCode/cmd/other_commands.go                      — rewrite (wire to real)
-HelixCode/cmd/helix-config/main.go                   — modify (fix any stubs)
+HelixCode/cmd/helix_config/main.go                   — modify (fix any stubs)
 HelixCode/internal/memory/providers/faiss_native.go  — create (cgo wrapper)
 HelixCode/internal/memory/providers/faiss_fallback.go — create (pure-Go brute force)
 HelixCode/internal/memory/providers/faiss_provider.go — modify (use real backends)
 HelixCode/internal/memory/providers/character_ai_provider.go — modify (real API)
 HelixCode/internal/memory/providers/anima_provider.go — modify (real backup/restore)
-HelixCode/cmd/security-test/main.go                  — rewrite (real scanning)
+HelixCode/cmd/security_test/main.go                  — rewrite (real scanning)
 HelixCode/internal/memory/redis_provider.go          — modify (real go-redis)
 HelixCode/internal/memory/memcached_provider.go      — modify (real gomemcache)
 HelixCode/internal/tools/mapping/treesitter.go       — modify (fix line 266)
@@ -411,13 +411,13 @@ Phase: 2  Task: P2-T02"
 
 ### Task P2-T03: Fix helix-config placeholder subcommands
 
-**Files:** Modify `HelixCode/cmd/helix-config/main.go`
+**Files:** Modify `HelixCode/cmd/helix_config/main.go`
 
 - [ ] **Step 1: Audit for stubs**
 
 ```bash
 cd HelixCode
-grep -n "not yet implemented\|TODO.*implement\|fmt.Println.*Available\|fmt.Println.*Running\|fmt.Println.*Completed" cmd/helix-config/main.go | grep -v "//" | head -20
+grep -n "not yet implemented\|TODO.*implement\|fmt.Println.*Available\|fmt.Println.*Running\|fmt.Println.*Completed" cmd/helix_config/main.go | grep -v "//" | head -20
 ```
 
 Identify any print-only commands that should be wired to `internal/config/` functions.
@@ -449,7 +449,7 @@ Run: func(cmd *cobra.Command, args []string) {
 - [ ] **Step 3: Verify zero stubs**
 
 ```bash
-grep -n "not yet implemented" HelixCode/cmd/helix-config/main.go
+grep -n "not yet implemented" HelixCode/cmd/helix_config/main.go
 ```
 
 Expected: zero output
@@ -457,9 +457,9 @@ Expected: zero output
 - [ ] **Step 4: Build, test, commit**
 
 ```bash
-cd HelixCode && go build ./cmd/helix-config/...
+cd HelixCode && go build ./cmd/helix_config/...
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/helix-config/
+git add HelixCode/cmd/helix_config/
 git commit -m "fix(P2-T03): wire helix-config templ ates/history/schema to real implementations
 
 Phase: 2  Task: P2-T03"
@@ -725,12 +725,12 @@ Phase: 2  Task: P2-T06"
 
 ### Task P2-T07: Replace security-test entry point
 
-**Files:** Rewrite `HelixCode/cmd/security-test/main.go`
+**Files:** Rewrite `HelixCode/cmd/security_test/main.go`
 
 - [ ] **Step 1: Rewrite with real scanner dispatch**
 
 ```bash
-grep -c "simulated\|hardcoded" HelixCode/cmd/security-test/main.go
+grep -c "simulated\|hardcoded" HelixCode/cmd/security_test/main.go
 ```
 
 Rewrite the file to use `security.NewSecurityManager()` with `ScanFeature()` for each of the 12 security categories. Output real results. Exit code based on pass/fail.
@@ -738,10 +738,10 @@ Rewrite the file to use `security.NewSecurityManager()` with `ScanFeature()` for
 - [ ] **Step 2: Verify zero simulated results, build, commit**
 
 ```bash
-grep -rn "simulated\|hardcoded\|simulateSecurity" HelixCode/cmd/security-test/main.go && echo "BLUFF" || echo "clean"
-cd HelixCode && go build ./cmd/security-test/...
+grep -rn "simulated\|hardcoded\|simulateSecurity" HelixCode/cmd/security_test/main.go && echo "BLUFF" || echo "clean"
+cd HelixCode && go build ./cmd/security_test/...
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/security-test/main.go
+git add HelixCode/cmd/security_test/main.go
 git commit -m "fix(P2-T07): replace simulated security-test with real scanner dispatch
 
 Phase: 2  Task: P2-T07"

@@ -368,9 +368,9 @@ This document tracks the implementation of fixes identified in the Comprehensive
   - Update fallback documentation
 
 - [ ] **P2-2.2** Add missing READMEs
-  - cmd/config-test/README.md
-  - cmd/helix-config/README.md
-  - cmd/security-fix/README.md
+  - cmd/config_test/README.md
+  - cmd/helix_config/README.md
+  - cmd/security_fix/README.md
   - applications/android/README.md
   - applications/ios/README.md
 

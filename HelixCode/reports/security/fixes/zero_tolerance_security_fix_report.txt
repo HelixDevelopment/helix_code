@@ -22,7 +22,7 @@ FIX EXECUTION RESULTS:
 
 CRITICAL ISSUES ADDRESSED:
 1. Insecure SSH Host Key Verification
-   File: /Users/milosvasic/Projects/HelixCode/HelixCode/cmd/security-fix-standalone/main.go
+   File: /Users/milosvasic/Projects/HelixCode/HelixCode/cmd/security_fix_standalone/main.go
    Description: SSH connections bypass host key verification, enabling MITM attacks
    Suggested Fix: ssh.HostKeyCallback(ssh.FixedHostKey(hostKey))
 

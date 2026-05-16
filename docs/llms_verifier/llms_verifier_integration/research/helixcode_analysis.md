@@ -27,7 +27,7 @@
 | `Website` | Marketing website |
 | `awesome-ai-memory` | awesome-ai-memory submodule (@ 7f281fd) |
 | `challenges/scripts` | Challenge scripts (host power management, no-suspend) |
-| `cmd/security-test` | Security testing tools |
+| `cmd/security_test` | Security testing tools |
 | `docker` | Docker configurations |
 | `docs` | Additional documentation |
 | `internal` | Go internal packages (see below) |

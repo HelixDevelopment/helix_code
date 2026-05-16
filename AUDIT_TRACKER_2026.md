@@ -129,7 +129,7 @@ NewAnimaAIProvider()
 
 ### Helix-Config Commands (24 commands) - COMPLETED 2026-01-09
 
-**File:** `cmd/helix-config/main.go:680-811`
+**File:** `cmd/helix_config/main.go:680-811`
 
 - [x] runShowCommand
 - [x] runGetCommand
@@ -223,7 +223,7 @@ sudo apt-get install libgl1-mesa-dev libxrandr-dev libxcursor-dev libxinerama-de
 |------|-------|
 | `internal/providers/ai_integration.go` | MockAIProvider |
 | `internal/memory/memory_manager.go` | 18 unimplemented methods |
-| `cmd/helix-config/main.go` | 24 unimplemented commands |
+| `cmd/helix_config/main.go` | 24 unimplemented commands |
 | `internal/workflow/executor.go` | 4 template TODOs |
 | `internal/tools/voice/device.go` | Mock implementations |
 | `internal/tools/voice/transcriber.go` | Mock transcription |
@@ -318,7 +318,7 @@ cd tests/e2e/challenges && go run cmd/runner/main.go -list
 - `internal/providers/ai_integration_test.go` - Updated tests
 - `internal/memory/memory_manager.go` - Implemented providers
 - `internal/memory/memory_manager_test.go` - Added provider tests
-- `cmd/helix-config/main.go` - Implemented commands
+- `cmd/helix_config/main.go` - Implemented commands
 - `applications/aurora_os/main.go` - Real disk usage detection
 
 **Verification:**

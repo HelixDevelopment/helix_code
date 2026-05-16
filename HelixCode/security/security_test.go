@@ -19,8 +19,8 @@ import (
 func TestSecureByDesign(t *testing.T) {
 	// Test 1: No hardcoded credentials
 	testFiles := []string{
-		"cmd/local-llm.go",
-		"cmd/local-llm-advanced.go",
+		"cmd/local_llm.go",
+		"cmd/local_llm_advanced.go",
 		"internal/llm/",
 	}
 

@@ -15,15 +15,15 @@
     "PASS.*Dockerfile uses official snyk/snyk-cli base image",
     "PASS.*\\.snyk has policy version",
     "PASS.*security-scan\\.sh --help shows snyk mode",
-    "PASS.*cmd/security-scan imports Containers BootManager",
-    "PASS.*cmd/security-scan handles snyk scanner"
+    "PASS.*cmd/security_scan imports Containers BootManager",
+    "PASS.*cmd/security_scan handles snyk scanner"
   ],
   "must_not_appear": [
     "FAIL.*SNYK_TOKEN uses env-var",
     "FAIL.*No HelixAgent-specific",
     "FAIL.*snyk-deps service defined",
     "FAIL.*Dockerfile uses official snyk",
-    "FAIL.*cmd/security-scan imports Containers",
+    "FAIL.*cmd/security_scan imports Containers",
     "helixagent",
     "hardcoded",
     "TODO.*implement"

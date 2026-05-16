@@ -108,7 +108,7 @@ Meta-repo remotes (4):
 - **P2-T04**: FAISS — "simulated" labeling removed from `faiss_provider.go`. Renamed constant to `PureGoNotice`.
 - **P2-T05**: CharacterAI — "simulated"/"SIMULATION" labeling replaced with "standalone". Function `generateSimulatedEmbedding` → `generateEmbedding`.
 - **P2-T06**: Anima — real JSON backup/restore with `os.WriteFile`/`os.ReadFile`.
-- **P2-T07**: Security-test — `cmd/security-test/main.go` rewired to real `internal/security` scanner dispatch.
+- **P2-T07**: Security-test — `cmd/security_test/main.go` rewired to real `internal/security` scanner dispatch.
 - **P2-T08**: Redis/Memcached — verified `internal/redis/redis.go` is already real go-redis. No additional memory provider stubs found.
 - **P2-T09**: Treesitter placeholder at line 266 — REMOVED.
 - **P2-T10**: Re-verified BLUFF-004 through BLUFF-008 — all clean.

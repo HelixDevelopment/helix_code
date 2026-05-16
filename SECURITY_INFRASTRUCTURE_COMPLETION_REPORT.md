@@ -87,7 +87,7 @@ File System Security:    0/9    (0% - manual required)
 ### Automated Fix Details
 ```
 ✅ SSH001: Insecure SSH Host Key Verification
-   - Fixed in: cmd/security-fix-standalone/main.go
+   - Fixed in: cmd/security_fix_standalone/main.go
    - Fix Applied: ssh.HostKeyCallback(ssh.FixedHostKey(hostKey))
    - Status: SUCCESS
 ```

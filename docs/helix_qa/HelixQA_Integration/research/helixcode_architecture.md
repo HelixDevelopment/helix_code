@@ -173,8 +173,8 @@ This is the **actual application root**. The repository root contains meta-files
 - `HelixCode/cmd/root.go` (2,075 chars) - Root command definition with global flags
 - `HelixCode/cmd/main_commands.go` - Primary command implementations
 - `HelixCode/cmd/other_commands.go` - Auxiliary commands
-- `HelixCode/cmd/local-llm.go` - Standalone local LLM command
-- `HelixCode/cmd/local-llm-advanced.go` - Advanced local LLM options
+- `HelixCode/cmd/local_llm.go` - Standalone local LLM command
+- `HelixCode/cmd/local_llm_advanced.go` - Advanced local LLM options
 
 **Communication with APIs**:
 - Uses `internal/server/client.go` to communicate with the REST API
@@ -669,7 +669,7 @@ HELIX_NOTIFICATIONS_ENABLED=true
 | Integration | `*_integration_test.go` | `make test-integration` | Cross-package integration |
 | E2E | `tests/e2e/` | `make test-e2e` | Full system end-to-end |
 | Challenges | `challenges/scripts/` | `make test-challenges` | 7-phase challenge suite |
-| Security | `cmd/security-test/` | `make security-test` | Security/penetration tests |
+| Security | `cmd/security_test/` | `make security-test` | Security/penetration tests |
 | Cloud Provider | `cloud_providers_integration_test.go` | Manual | Live provider validation |
 
 ### 6.3 Challenge System
@@ -940,8 +940,8 @@ git submodule update --init --recursive
 
 **Locations**:
 - `HelixCode/internal/security/` - Security core
-- `HelixCode/cmd/security-test/` - Security test harness
-- `HelixCode/cmd/security-fix/` - Security fix tools
+- `HelixCode/cmd/security_test/` - Security test harness
+- `HelixCode/cmd/security_fix/` - Security fix tools
 - `HelixCode/security/` - Security documentation and tooling
 
 **Features**:

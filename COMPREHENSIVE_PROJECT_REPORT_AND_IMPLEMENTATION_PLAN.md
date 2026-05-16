@@ -79,8 +79,8 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 | PagerDuty integration | `internal/notification/integrations.go` | Disabled by default |
 | Jira integration | `internal/notification/integrations.go` | Disabled by default |
 | GitHub integration | `internal/notification/integrations.go` | Disabled by default |
-| Security testing | `cmd/security-test/main.go` | "TEMPORARILY DISABLED" |
-| Configuration watcher | `cmd/config-test/main.go` | Not implemented in current API |
+| Security testing | `cmd/security_test/main.go` | "TEMPORARILY DISABLED" |
+| Configuration watcher | `cmd/config_test/main.go` | Not implemented in current API |
 
 ### 1.4 TODO/FIXME Comments (47+ Files)
 

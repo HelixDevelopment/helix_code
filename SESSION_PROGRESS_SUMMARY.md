@@ -190,7 +190,7 @@ router.HandleFunc("/api/v1/config/status", api.handleStatus).Methods("GET")
 - Dashboard integration
 
 ### 5. Discovery Engine (~3 hours)
-**Location**: `cmd/local-llm-advanced.go`
+**Location**: `cmd/local_llm_advanced.go`
 - Complete discovery logic
 - Insights generation
 - Context integration

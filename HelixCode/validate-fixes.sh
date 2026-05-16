@@ -147,8 +147,8 @@ for test_file in "${test_files[@]}"; do
         print_warning "Test file $test_file found (consider removing)"
     fi
     
-    if [ -d "cmd/config-test" ]; then
-        print_warning "Test directory cmd/config-test found (consider removing)"
+    if [ -d "cmd/config_test" ]; then
+        print_warning "Test directory cmd/config_test found (consider removing)"
     fi
 done
 

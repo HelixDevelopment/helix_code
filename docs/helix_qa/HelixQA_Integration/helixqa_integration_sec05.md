@@ -43,7 +43,7 @@ Functional tests isolate a single feature and verify only that feature's surface
 
 #### 5.1.5 Security Tests
 
-Security tests validate authentication, authorization, and injection resistance. HelixCode provides `cmd/security-test/` and `make security-test` [^3^]. Tests must attempt concrete bypasses: CSRF token omission, XSS payload injection, SQL injection, and JWT header stripping. The anti-bluff check is two-sided: first confirm the system rejects the attack; then temporarily disable the security control and confirm the attack succeeds.
+Security tests validate authentication, authorization, and injection resistance. HelixCode provides `cmd/security_test/` and `make security-test` [^3^]. Tests must attempt concrete bypasses: CSRF token omission, XSS payload injection, SQL injection, and JWT header stripping. The anti-bluff check is two-sided: first confirm the system rejects the attack; then temporarily disable the security control and confirm the attack succeeds.
 
 #### 5.1.6 Stress Tests
 

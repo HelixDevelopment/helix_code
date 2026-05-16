@@ -126,7 +126,7 @@ HelixCode/                                # ← repo root (governance + submodul
 ├── .gitmodules                           # source of truth for submodule wiring
 ├── docker-compose.helix.yml              # standalone deployment
 ├── internal/{fix,security,testing,theme} # root-level helpers ONLY (NOT the app)
-├── cmd/security-test/                    # root-level security-test tool ONLY
+├── cmd/security_test/                    # root-level security-test tool ONLY
 ├── scripts/                              # init-submodules, propagate-governance,
 │                                         #   verify-governance-cascade, no-silent-skips,
 │                                         #   demo-all, run-all-tests, …

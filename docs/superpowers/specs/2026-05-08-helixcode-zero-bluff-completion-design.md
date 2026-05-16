@@ -114,7 +114,7 @@ Create `.helix-governance` marker file with:
 |------|---------|------|-----|
 | P2-T01 | `internal/security/security.go` | Replace `ScanFeature()` simulated result with real SonarQube/Snyk scanning via Containers orchestration | Challenge expecting real scan results |
 | P2-T02 | `cmd/other_commands.go` | Wire `server`, `generate`, `test`, `worker`, `notify` to real implementations | CLI integration tests |
-| P2-T03 | `cmd/helix-config/main.go` | Audit and fix any placeholder subcommands | Config subcommand tests |
+| P2-T03 | `cmd/helix_config/main.go` | Audit and fix any placeholder subcommands | Config subcommand tests |
 
 ### 4.2 Sub-phase 2B: Memory Provider Stubs (P2)
 
@@ -128,7 +128,7 @@ Create `.helix-governance` marker file with:
 
 | Task | File(s) | What | TDD |
 |------|---------|------|-----|
-| P2-T07 | `cmd/security-test/main.go` | Replace 12 simulated test results with real container-orchestrated scans | Challenge with real security tests |
+| P2-T07 | `cmd/security_test/main.go` | Replace 12 simulated test results with real container-orchestrated scans | Challenge with real security tests |
 | P2-T08 | `internal/memory/` (Redis/Memcached) | Wire to real go-redis and Memcached clients | Integration tests against docker-compose services |
 | P2-T09 | `internal/tools/mapping/treesitter.go:266` | Implement or remove placeholder | Treesitter integration test |
 

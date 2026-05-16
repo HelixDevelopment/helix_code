@@ -53,8 +53,8 @@ if apiKey == "" {
 
 ### Packages:
 1. `dev.helix.code/test/load` - Load testing (notification_load_test.go)
-2. `dev.helix.code/cmd/performance-optimization` - Performance optimization tools
-3. `dev.helix.code/cmd/performance-optimization-standalone` - Standalone optimization
+2. `dev.helix.code/cmd/performance_optimization` - Performance optimization tools
+3. `dev.helix.code/cmd/performance_optimization_standalone` - Standalone optimization
 4. `dev.helix.code/internal/performance` - Performance monitoring
 5. `dev.helix.code/internal/tools/mapping` - Tool mapping performance tests
 6. `dev.helix.code/internal/logging` - Logging performance tests
@@ -97,8 +97,8 @@ if testing.Short() {
 ### Packages:
 1. `dev.helix.code` - Root package (no tests expected)
 2. `dev.helix.code/cmd` - Command root (no tests)
-3. `dev.helix.code/cmd/helix-config` - Config command
-4. `dev.helix.code/cmd/security-test` - Security testing command
+3. `dev.helix.code/cmd/helix_config` - Config command
+4. `dev.helix.code/cmd/security_test` - Security testing command
 
 ---
 
@@ -107,8 +107,8 @@ if testing.Short() {
 **Status**: ✅ Legitimate
 
 ### Packages:
-1. `dev.helix.code/cmd/security-fix` - Security fix command
-2. `dev.helix.code/cmd/security-fix-standalone` - Standalone security fix
+1. `dev.helix.code/cmd/security_fix` - Security fix command
+2. `dev.helix.code/cmd/security_fix_standalone` - Standalone security fix
 
 ---
 

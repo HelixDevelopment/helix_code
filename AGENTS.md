@@ -414,7 +414,7 @@ HelixCode/
 **Fix Priority**: P2 — RESOLVED
 
 ### STUB-003: Security-Test Entry Point is Entirely Simulated — FIXED
-**File**: `cmd/security-test/main.go`
+**File**: `cmd/security_test/main.go`
 **Evidence**: Previously had 12 simulated test results via `simulateSecurityScan()`.
 **Fix**: Rewired to real `internal/security` scanner dispatch via `ScanFeature()`.
 **Fix Priority**: P2 — RESOLVED (commit `33ddf6a`)
@@ -426,7 +426,7 @@ HelixCode/
 **Fix Priority**: P2 — RESOLVED (commit `33ddf6a`)
 
 ### STUB-005: Several `helix-config` Subcommands are Placeholders — PENDING
-**File**: `cmd/helix-config/main.go`
+**File**: `cmd/helix_config/main.go`
 **Evidence**: Many template/history/schema subcommands print placeholder messages.
 **Fix Priority**: P3
 
@@ -714,7 +714,7 @@ curl http://localhost/health
 
 ### Known Security Stubs
 - `internal/security/security.go`: Simulated scanning (always returns clean)
-- `cmd/security-test/main.go`: Entirely simulated security tests
+- `cmd/security_test/main.go`: Entirely simulated security tests
 
 ### Production Hardening
 - Use `HELIX_AUTH_JWT_SECRET` with high entropy

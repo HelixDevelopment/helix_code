@@ -47,7 +47,7 @@ SNYK_COMPOSE="${HELIXCODE_ROOT}/docker/security/snyk/docker-compose.yml"
 SNYK_DOCKERFILE="${HELIXCODE_ROOT}/docker/security/snyk/Dockerfile"
 SNYK_POLICY="${HELIXCODE_ROOT}/.snyk"
 SECURITY_SCAN="${HELIXCODE_ROOT}/scripts/security-scan.sh"
-BOOT_BINARY="${HELIXCODE_ROOT}/cmd/security-scan/main.go"
+BOOT_BINARY="${HELIXCODE_ROOT}/cmd/security_scan/main.go"
 
 # ============================================================================
 # SECTION 1: FILE EXISTENCE
@@ -58,7 +58,7 @@ echo -e "${BLUE}--- Section 1: File Existence ---${NC}"
 [ -f "$SNYK_DOCKERFILE" ]  && record_result "Snyk Dockerfile exists"                  "PASS" || record_result "Snyk Dockerfile exists" "FAIL"
 [ -f "$SNYK_POLICY" ]      && record_result "Root .snyk policy file exists"           "PASS" || record_result "Root .snyk policy file exists" "FAIL"
 [ -f "$SECURITY_SCAN" ]    && record_result "scripts/security-scan.sh exists"         "PASS" || record_result "scripts/security-scan.sh exists" "FAIL"
-[ -f "$BOOT_BINARY" ]      && record_result "cmd/security-scan/main.go exists"        "PASS" || record_result "cmd/security-scan/main.go exists" "FAIL"
+[ -f "$BOOT_BINARY" ]      && record_result "cmd/security_scan/main.go exists"        "PASS" || record_result "cmd/security_scan/main.go exists" "FAIL"
 
 # ============================================================================
 # SECTION 2: NO HARDCODED CREDENTIALS
@@ -148,15 +148,15 @@ else
 fi
 
 if grep -q "digital.vasic.containers/pkg/boot" "$BOOT_BINARY"; then
-    record_result "cmd/security-scan imports Containers BootManager" "PASS"
+    record_result "cmd/security_scan imports Containers BootManager" "PASS"
 else
-    record_result "cmd/security-scan imports Containers BootManager" "FAIL"
+    record_result "cmd/security_scan imports Containers BootManager" "FAIL"
 fi
 
 if grep -q '"snyk"' "$BOOT_BINARY"; then
-    record_result "cmd/security-scan handles snyk scanner" "PASS"
+    record_result "cmd/security_scan handles snyk scanner" "PASS"
 else
-    record_result "cmd/security-scan handles snyk scanner" "FAIL"
+    record_result "cmd/security_scan handles snyk scanner" "FAIL"
 fi
 
 # ============================================================================

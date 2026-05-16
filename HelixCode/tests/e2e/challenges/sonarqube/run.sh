@@ -51,7 +51,7 @@ DOCKER_COMPOSE="${HELIXCODE_ROOT}/docker/security/sonarqube/docker-compose.yml"
 DOCKER_PROPS="${HELIXCODE_ROOT}/docker/security/sonarqube/sonar-project.properties"
 SNYK_POLICY="${HELIXCODE_ROOT}/.snyk"
 SECURITY_SCAN="${HELIXCODE_ROOT}/scripts/security-scan.sh"
-BOOT_BINARY="${HELIXCODE_ROOT}/cmd/security-scan/main.go"
+BOOT_BINARY="${HELIXCODE_ROOT}/cmd/security_scan/main.go"
 
 # ============================================================================
 # SECTION 1: FILE EXISTENCE
@@ -64,7 +64,7 @@ echo -e "${BLUE}--- Section 1: File Existence ---${NC}"
 [ -f "$SNYK_POLICY" ]      && record_result "Root .snyk policy exists"                 "PASS" || record_result "Root .snyk policy exists" "FAIL"
 [ -f "$SECURITY_SCAN" ]    && record_result "scripts/security-scan.sh exists"          "PASS" || record_result "scripts/security-scan.sh exists" "FAIL"
 [ -x "$SECURITY_SCAN" ]    && record_result "security-scan.sh is executable"           "PASS" || record_result "security-scan.sh is executable" "FAIL"
-[ -f "$BOOT_BINARY" ]      && record_result "cmd/security-scan/main.go exists"         "PASS" || record_result "cmd/security-scan/main.go exists" "FAIL"
+[ -f "$BOOT_BINARY" ]      && record_result "cmd/security_scan/main.go exists"         "PASS" || record_result "cmd/security_scan/main.go exists" "FAIL"
 
 # ============================================================================
 # SECTION 2: NO HARDCODED CREDENTIALS
@@ -174,16 +174,16 @@ fi
 
 # Boot binary references Containers BootManager imports
 if grep -q "digital.vasic.containers/pkg/boot" "$BOOT_BINARY"; then
-    record_result "cmd/security-scan imports Containers BootManager" "PASS"
+    record_result "cmd/security_scan imports Containers BootManager" "PASS"
 else
-    record_result "cmd/security-scan imports Containers BootManager" "FAIL"
+    record_result "cmd/security_scan imports Containers BootManager" "FAIL"
 fi
 
 # Boot binary references runtime.AutoDetect
 if grep -q "runtime.AutoDetect" "$BOOT_BINARY"; then
-    record_result "cmd/security-scan uses runtime.AutoDetect" "PASS"
+    record_result "cmd/security_scan uses runtime.AutoDetect" "PASS"
 else
-    record_result "cmd/security-scan uses runtime.AutoDetect" "FAIL"
+    record_result "cmd/security_scan uses runtime.AutoDetect" "FAIL"
 fi
 
 # ============================================================================

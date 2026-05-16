@@ -198,10 +198,10 @@ This audit analyzed **4,013 markdown files**, **73 SQL definitions**, **203 test
 
 | Package | Reason |
 |---------|--------|
-| cmd/config-test | Utility tool |
-| cmd/helix-config | Management tool |
-| cmd/performance-optimization | Optimization tool |
-| cmd/security-fix | Security tool |
+| cmd/config_test | Utility tool |
+| cmd/helix_config | Management tool |
+| cmd/performance_optimization | Optimization tool |
+| cmd/security_fix | Security tool |
 | examples/* | Example code |
 | scripts/* | Build scripts |
 | internal/mocks | Test infrastructure |

@@ -363,7 +363,7 @@ make -C HelixCode security-scan-sonarqube
 
 ### Sub-commit 4 — Containers BootManager wiring (`16a4490`)
 
-- `HelixCode/cmd/security-scan/main.go` (~170 lines) wires:
+- `HelixCode/cmd/security_scan/main.go` (~170 lines) wires:
   - `digital.vasic.containers/pkg/runtime.AutoDetect(ctx)` for runtime detection
   - `digital.vasic.containers/pkg/endpoint.NewEndpoint()` builder for SonarQube + Snyk endpoints
   - `digital.vasic.containers/pkg/health.NewDefaultChecker()` with HTTP health on `:9000/api/system/status`
@@ -372,11 +372,11 @@ make -C HelixCode security-scan-sonarqube
 
 Build verification:
 ```
-$ go build ./cmd/security-scan/...
+$ go build ./cmd/security_scan/...
 # exit 0 — binary compiles
 ```
 
-`scripts/security-scan.sh start_sonarqube()` updated to call `go run ./cmd/security-scan` when Go is available; falls back to direct compose otherwise.
+`scripts/security-scan.sh start_sonarqube()` updated to call `go run ./cmd/security_scan` when Go is available; falls back to direct compose otherwise.
 
 ### Sub-commit 5 — Challenges + evidence (this commit)
 
@@ -404,8 +404,8 @@ Challenge run output (both 100% PASS):
 [PASS] SonarQube health check uses /api/system/status
 [PASS] Security network defined
 [PASS] security-scan.sh --help shows sonarqube mode
-[PASS] cmd/security-scan imports Containers BootManager
-[PASS] cmd/security-scan uses runtime.AutoDetect
+[PASS] cmd/security_scan imports Containers BootManager
+[PASS] cmd/security_scan uses runtime.AutoDetect
 Results: 33/33 passed, 0 failed
 
 ===========================================
@@ -419,8 +419,8 @@ Results: 33/33 passed, 0 failed
 [PASS] Dockerfile uses official snyk/snyk-cli base image
 [PASS] .snyk has policy version
 [PASS] security-scan.sh reads SNYK_TOKEN from env
-[PASS] cmd/security-scan imports Containers BootManager
-[PASS] cmd/security-scan handles snyk scanner
+[PASS] cmd/security_scan imports Containers BootManager
+[PASS] cmd/security_scan handles snyk scanner
 Results: 26/26 passed, 0 failed
 ```
 
@@ -493,7 +493,7 @@ $ grep -nE "PASSWORD:.*sonar" HelixCode/docker/security/sonarqube/docker-compose
 `HelixCode/scripts/security-scan.sh` lines 31-34 removed. Original stale text:
 ```
 # TODO(P0-T08.7/4): replace docker-compose invocations below with Containers BootManager call:
-#   go run ./cmd/security-scan -scanner=sonarqube
+#   go run ./cmd/security_scan -scanner=sonarqube
 # For now, direct compose calls are used as an MVP; the Containers BootManager wiring
 # is deferred to Sub-commit 4 / Phase 3.
 ```
@@ -519,14 +519,14 @@ exit=0
 
 ### Important 4 — stop action returns explicit error
 
-`HelixCode/cmd/security-scan/main.go` — both `handleSonarQube` and `handleSnyk` stop cases now return `fmt.Errorf(...)`. Flag description updated to `"start|status (stop is not yet implemented)"`.
+`HelixCode/cmd/security_scan/main.go` — both `handleSonarQube` and `handleSnyk` stop cases now return `fmt.Errorf(...)`. Flag description updated to `"start|status (stop is not yet implemented)"`.
 
 Verification:
 ```
-$ go build ./cmd/security-scan/...
+$ go build ./cmd/security_scan/...
 # exit=0 — PASS
 
-$ go run ./cmd/security-scan/main.go -action=stop -scanner=sonarqube 2>&1 | head -3
+$ go run ./cmd/security_scan/main.go -action=stop -scanner=sonarqube 2>&1 | head -3
 2026/05/04 22:38:15 security-scan: detected runtime: podman
 2026/05/04 22:38:15 security-scan: sonarqube stop failed: stop action not yet implemented; use 'make scan-stop' or 'docker-compose -f <file> down' (TODO: wire ComposeOrchestrator.Down())
 exit status 1
