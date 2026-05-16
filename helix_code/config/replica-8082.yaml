@@ -1,0 +1,225 @@
+# HelixCode Server Configuration - FIXED
+
+server:
+  address: "0.0.0.0"
+  port: 8082
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 300
+  shutdown_timeout: 30
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "${HELIX_DATABASE_USER:helix}"
+  password: "${HELIX_DATABASE_PASSWORD}"  # REQUIRED: Set via environment variable
+  dbname: "${HELIX_DATABASE_NAME:helixcode_prod}"
+  sslmode: "disable"
+
+redis:
+  host: "${HELIX_REDIS_HOST:redis}"
+  port: 6379
+  password: "${HELIX_REDIS_PASSWORD}"  # REQUIRED: Set via environment variable
+  db: 0
+  enabled: true
+
+auth:
+  jwt_secret: "${HELIX_AUTH_JWT_SECRET}"  # REQUIRED: Set via environment variable - never commit real secrets
+  token_expiry: 86400
+  session_expiry: 604800
+  bcrypt_cost: 12
+
+workers:
+  health_check_interval: 30
+  health_ttl: 120
+  max_concurrent_tasks: 10
+
+tasks:
+  max_retries: 3
+  checkpoint_interval: 300
+  cleanup_interval: 3600
+
+llm:
+  default_provider: "local"
+  max_tokens: 4096
+  temperature: 0.7
+  timeout: 30
+  max_retries: 3
+  
+  providers:
+    # Local providers with proper structure
+    local:
+      type: local
+      endpoint: "http://localhost:11434"
+      enabled: true
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        
+    ollama:
+      type: ollama
+      endpoint: "http://localhost:11434"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        
+    llamacpp:
+      type: llamacpp
+      endpoint: "http://localhost:8080"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+    
+    # Cloud providers with proper structure
+    openai:
+      type: openai
+      endpoint: "https://api.openai.com/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via OPENAI_API_KEY
+        
+    anthropic:
+      type: anthropic
+      endpoint: "https://api.anthropic.com/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via ANTHROPIC_API_KEY
+        
+    gemini:
+      type: gemini
+      endpoint: "https://generativelanguage.googleapis.com/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via GEMINI_API_KEY
+        
+    xai:
+      type: xai
+      endpoint: "https://api.x.ai/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via XAI_API_KEY
+        
+    copilot:
+      type: copilot
+      endpoint: "https://api.githubcopilot.com/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via GITHUB_TOKEN
+        
+    openrouter:
+      type: openrouter
+      endpoint: "https://openrouter.ai/api/v1"
+      enabled: false
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via OPENROUTER_API_KEY
+    
+    # HelixAgent providers
+    helix-llm:
+      type: helix-llm
+      endpoint: "${HELIX_LLM_ENDPOINT:http://localhost:8081}"
+      enabled: true
+      parameters:
+        timeout: 60.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via HELIX_LLM_API_KEY
+      
+    helix-debate:
+      type: helix-debate
+      endpoint: "${HELIX_DEBATE_ENDPOINT:http://localhost:8082}"
+      enabled: true
+      parameters:
+        timeout: 120.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "" # Set via HELIX_DEBATE_API_KEY
+  
+  # Provider selection preferences
+  selection:
+    strategy: "performance"  # performance, cost, availability, round-robin
+    fallback_enabled: true
+    health_check_interval: 30
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"
+
+notifications:
+  enabled: true
+
+  # Notification rules - map events to channels
+  rules:
+    - name: "Critical Task Failures"
+      condition: "type==error"
+      channels: ["slack", "email", "telegram"]
+      priority: urgent
+      enabled: true
+
+    - name: "Worker Health Alerts"
+      condition: "type==alert"
+      channels: ["slack", "telegram"]
+      priority: high
+      enabled: true
+
+    - name: "Workflow Completions"
+      condition: "type==success"
+      channels: ["slack"]
+      priority: medium
+      enabled: true
+
+  # Channel configurations
+  channels:
+    slack:
+      enabled: false  # Set to true and configure webhook to enable
+      webhook_url: ""  # Set via HELIX_SLACK_WEBHOOK_URL environment variable
+      channel: "#helix-notifications"
+      username: "HelixCode Bot"
+      timeout: 10
+
+    telegram:
+      enabled: false  # Set to true and configure bot to enable
+      bot_token: ""  # Set via HELIX_TELEGRAM_BOT_TOKEN environment variable
+      chat_id: ""  # Set via HELIX_TELEGRAM_CHAT_ID environment variable
+      timeout: 10
+
+    email:
+      enabled: false  # Set to true and configure SMTP to enable
+      smtp:
+        server: ""  # Set via HELIX_EMAIL_SMTP_SERVER
+        port: 587  # Set via HELIX_EMAIL_SMTP_PORT
+        username: ""  # Set via HELIX_EMAIL_USERNAME
+        password: ""  # Set via HELIX_EMAIL_PASSWORD
+        from: ""  # Set via HELIX_EMAIL_FROM
+        tls: true
+      recipients:
+        default: []  # Set via HELIX_EMAIL_RECIPIENTS (comma-separated)
+      timeout: 30
+
+    discord:
+      enabled: false  # Set to true and configure webhook to enable
+      webhook_url: ""  # Set via HELIX_DISCORD_WEBHOOK_URL environment variable
+      timeout: 10
