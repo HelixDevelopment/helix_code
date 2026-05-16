@@ -812,7 +812,7 @@ ALL container distribution targets SHALL be configured exclusively through `CONT
 **Prohibition**: NO hardcoded model lists, NO hardcoded provider lists, NO simulated model discovery. Any code path that presents a model or provider listing to a user MUST fetch that listing from the LLMsVerifier subsystem or its cached replica.
 
 **Anti-Bluff Verification**:
-- Challenge script `challenges/scripts/verifier_hardcode_check.sh` scans all Go source files for hardcoded model arrays.
+- Challenge script `scripts/anti_bluff/verifier_hardcode_check.sh` scans all Go source files for hardcoded model arrays.
 - The only permitted hardcoded data is the 7-entry fallback list in `internal/verifier/fallback_models.go`.
 
 ---

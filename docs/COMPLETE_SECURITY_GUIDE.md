@@ -259,7 +259,7 @@ HelixCode includes comprehensive security scanning:
 
 ```bash
 # Run complete security scan
-docker-compose -f security/docker-compose.security.yml up
+docker-compose -f scripts/security_scan/docker-compose.security.yml up
 
 # Execute security scan
 docker exec helixcode-security-scanner /security-scripts/scan-all.sh

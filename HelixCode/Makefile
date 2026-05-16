@@ -169,13 +169,13 @@ test-verifier-challenges: test-verifier-hardcode test-verifier-capability
 # Challenge: Verify no hardcoded model lists exist in production code
 test-verifier-hardcode:
 	@echo "🔍 Checking for hardcoded model lists (CONST-037)..."
-	@bash challenges/scripts/verifier_hardcode_check.sh
+	@bash scripts/anti_bluff/verifier_hardcode_check.sh
 	@echo "✅ No hardcoded model lists found"
 
 # Challenge: Verify model capabilities come from verifier, not hardcoded
 test-verifier-capability:
 	@echo "🔍 Checking for hardcoded capability flags (CONST-041)..."
-	@bash challenges/scripts/verifier_capability_check.sh || echo "⚠️  Capability check requires verifier service"
+	@bash scripts/anti_bluff/verifier_capability_check.sh || echo "⚠️  Capability check requires verifier service"
 	@echo "✅ Capability checks complete"
 
 # Generate coverage report with full infrastructure

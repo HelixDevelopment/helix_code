@@ -144,8 +144,8 @@ Forbidden: `systemctl suspend/hibernate/poweroff/halt/reboot`, `loginctl suspend
 
 **Verification:**
 ```bash
-bash challenges/scripts/no_suspend_calls_challenge.sh
-bash challenges/scripts/host_no_auto_suspend_challenge.sh
+bash scripts/anti_bluff/no_suspend_calls_challenge.sh
+bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
 ```
 Both must PASS.
 
@@ -160,8 +160,8 @@ Forbidden: `loginctl terminate-user|terminate-session|kill-user|kill-session`, `
 **Verification:**
 ```bash
 bash challenges/scripts/no_session_termination_calls_challenge.sh
-bash challenges/scripts/no_suspend_calls_challenge.sh
-bash challenges/scripts/host_no_auto_suspend_challenge.sh
+bash scripts/anti_bluff/no_suspend_calls_challenge.sh
+bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
 ```
 All three must PASS.
 

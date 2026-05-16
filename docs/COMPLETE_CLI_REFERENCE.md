@@ -697,7 +697,7 @@ helix-config version
 docker-compose -f docker/docker-compose.yml up -d
 
 # Start with security scanning
-docker-compose -f security/docker-compose.security.yml up -d
+docker-compose -f scripts/security_scan/docker-compose.security.yml up -d
 
 # View service status
 docker-compose ps

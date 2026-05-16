@@ -324,13 +324,13 @@ go test -v ./internal/verifier/...
 go test -tags=integration -v ./internal/verifier/...
 
 # Hardcode check (CONST-037)
-bash challenges/scripts/verifier_hardcode_check.sh
+bash scripts/anti_bluff/verifier_hardcode_check.sh
 
 # Capability check (CONST-041)
-bash challenges/scripts/verifier_capability_check.sh
+bash scripts/anti_bluff/verifier_capability_check.sh
 
 # Full E2E challenge
-bash challenges/scripts/verifier_e2e_challenge.sh
+bash scripts/anti_bluff/verifier_e2e_challenge.sh
 
 # Makefile targets
 make test-verifier-unit

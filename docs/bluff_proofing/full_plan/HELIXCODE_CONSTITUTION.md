@@ -155,7 +155,7 @@ Every PASS result MUST guarantee:
 
 You may NOT generate or execute code that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt, reboot, or any other power-state transition.
 
-Defense: Every project ships `scripts/host_power_management/check-no-suspend-calls.sh` and `challenges/scripts/no_suspend_calls_challenge.sh`.
+Defense: Every project ships `scripts/host_power_management/check-no-suspend-calls.sh` and `scripts/anti_bluff/no_suspend_calls_challenge.sh`.
 
 ---
 

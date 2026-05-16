@@ -193,7 +193,7 @@ This anchor section (verbatim quote + operative rule) must appear in every submo
 
 You may NOT generate or execute code that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt, reboot, or any other power-state transition.
 
-Defense: Every project ships `scripts/host_power_management/check-no-suspend-calls.sh` and `challenges/scripts/no_suspend_calls_challenge.sh`.
+Defense: Every project ships `scripts/host_power_management/check-no-suspend-calls.sh` and `scripts/anti_bluff/no_suspend_calls_challenge.sh`.
 
 ---
 
@@ -374,7 +374,7 @@ This Constitution, along with CLAUDE.md and AGENTS.md, MUST be propagated to ALL
 **Prohibition**: NO hardcoded model lists, NO hardcoded provider lists, NO simulated model discovery. Any code path that presents a model or provider listing to a user MUST fetch that listing from the LLMsVerifier subsystem or its cached replica.
 
 **Anti-Bluff Verification**:
-- The challenge script `challenges/scripts/verifier_hardcode_check.sh` MUST scan all Go source files for hardcoded model arrays.
+- The challenge script `scripts/anti_bluff/verifier_hardcode_check.sh` MUST scan all Go source files for hardcoded model arrays.
 - Any `[]string{"gpt-4", "claude-3"}` or equivalent literal in production code is a constitutional violation.
 - The only permitted hardcoded data is the LLMsVerifier service endpoint URL and the list of verification test types.
 

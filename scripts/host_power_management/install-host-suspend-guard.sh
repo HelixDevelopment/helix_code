@@ -18,7 +18,7 @@
 # it's running mission-critical workloads.
 #
 # Verification (re-run the challenge after this script):
-#   bash challenges/scripts/host_no_auto_suspend_challenge.sh
+#   bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
 # All 4 assertions must PASS.
 
 set -euo pipefail
@@ -63,5 +63,5 @@ systemctl reload-or-restart systemd-logind || true
 
 echo
 echo "DONE. Verify with:"
-echo "  bash challenges/scripts/host_no_auto_suspend_challenge.sh"
+echo "  bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh"
 echo "All 4 assertions must PASS."

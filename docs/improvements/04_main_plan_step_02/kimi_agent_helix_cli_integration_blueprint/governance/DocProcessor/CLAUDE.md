@@ -145,8 +145,8 @@ When modifying integration seams:
 1. Immediately revert the offending code.
 2. Run the verification challenges:
    ```bash
-   bash challenges/scripts/no_suspend_calls_challenge.sh
-   bash challenges/scripts/host_no_auto_suspend_challenge.sh
+   bash scripts/anti_bluff/no_suspend_calls_challenge.sh
+   bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
    bash challenges/scripts/no_session_termination_calls_challenge.sh
    ```
 3. File `docs/issues/fixed/POWER_VIOLATION_<date>.md` with full forensic analysis.
@@ -175,8 +175,8 @@ The host runs mission-critical parallel CLI agents and container workloads; auto
 
 **Verification commands:**
 ```bash
-bash challenges/scripts/no_suspend_calls_challenge.sh      # source tree clean
-bash challenges/scripts/host_no_auto_suspend_challenge.sh    # host hardened
+bash scripts/anti_bluff/no_suspend_calls_challenge.sh      # source tree clean
+bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh    # host hardened
 ```
 Both must PASS.
 
@@ -200,8 +200,8 @@ Both must PASS.
 **Verification commands:**
 ```bash
 bash challenges/scripts/no_session_termination_calls_challenge.sh
-bash challenges/scripts/no_suspend_calls_challenge.sh
-bash challenges/scripts/host_no_auto_suspend_challenge.sh
+bash scripts/anti_bluff/no_suspend_calls_challenge.sh
+bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
 ```
 All three must PASS.
 

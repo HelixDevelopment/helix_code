@@ -58,20 +58,20 @@ Three layers, in order of strength:
 3. **Source-tree static gate:**
    `scripts/host_power_management/check-no-suspend-calls.sh` walks the
    tree and exits non-zero on any forbidden invocation.
-   `challenges/scripts/no_suspend_calls_challenge.sh` wraps it as a
+   `scripts/anti_bluff/no_suspend_calls_challenge.sh` wraps it as a
    challenge that runs in CI / `run_all_challenges.sh`.
-   `challenges/scripts/host_no_auto_suspend_challenge.sh` asserts the
+   `scripts/anti_bluff/host_no_auto_suspend_challenge.sh` asserts the
    running host's state matches the layer-1 masking.
 
 ## Verification
 
 ```bash
 # Layer 1: host state
-bash challenges/scripts/host_no_auto_suspend_challenge.sh
+bash scripts/anti_bluff/host_no_auto_suspend_challenge.sh
 # Expected: 4 PASS
 
 # Layer 3: source tree
-bash challenges/scripts/no_suspend_calls_challenge.sh
+bash scripts/anti_bluff/no_suspend_calls_challenge.sh
 # Expected: PASS, no forbidden calls
 ```
 
