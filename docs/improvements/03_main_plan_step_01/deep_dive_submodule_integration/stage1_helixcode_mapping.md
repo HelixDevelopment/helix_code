@@ -39,7 +39,7 @@
 ## 3. COMPLETE DIRECTORY TREE (Top 3 Levels)
 
 ```
-HelixCode/
+helix_code/
 ├── .env.example
 ├── .github/
 │   └── workflows/
@@ -207,7 +207,7 @@ HelixCode/
 ├── GAP_ANALYSIS_SUMMARY.md
 ├── github_pages_website/                  ← SUBMODULE (HelixDevelopment-Code/Welcome)
 ├── HELIXCODE_*.md                          (30+ architecture/audit docs)
-├── HelixCode/                              ← NESTED PROJECT STRUCTURE
+├── helix_code/                              ← NESTED PROJECT STRUCTURE
 │   ├── .env.example
 │   ├── .env.full-test
 │   ├── .github/workflows/
@@ -693,38 +693,38 @@ HelixCode/
 | `postgres-init.sql` | SQL | Unknown | PostgreSQL initialization |
 | `helix.security.json` | JSON Security | Unknown | Security configuration |
 
-### 6.2 Nested Configuration Files (HelixCode/ subdirectory)
+### 6.2 Nested Configuration Files (helix_code/ subdirectory)
 
 | File | Type | Purpose |
 |------|------|---------|
-| `HelixCode/go.mod` | Go Module | Nested Go module |
-| `HelixCode/go.sum` | Go Checksums | Nested dependency checksums |
-| `HelixCode/Makefile` | Build Automation | Nested build targets |
-| `HelixCode/config/config.yaml` | YAML | Main configuration |
-| `HelixCode/config/azure_example.yaml` | YAML | Azure example config |
-| `HelixCode/config/minimal-config.yaml` | YAML | Minimal config |
-| `HelixCode/config/production-config.yaml` | YAML | Production config |
-| `HelixCode/config/test-config.yaml` | YAML | Test config |
-| `HelixCode/config/model-aliases.example.yaml` | YAML | Model aliases example |
-| `HelixCode/docker/docker-compose.yml` | Docker Compose | Docker orchestration |
-| `HelixCode/api/openapi.yaml` | OpenAPI | API specification |
-| `HelixCode/.env.example` | Environment | Extended env template (2,998 bytes) |
-| `HelixCode/.env.full-test` | Environment | Full test env (4,607 bytes) |
+| `helix_code/go.mod` | Go Module | Nested Go module |
+| `helix_code/go.sum` | Go Checksums | Nested dependency checksums |
+| `helix_code/Makefile` | Build Automation | Nested build targets |
+| `helix_code/config/config.yaml` | YAML | Main configuration |
+| `helix_code/config/azure_example.yaml` | YAML | Azure example config |
+| `helix_code/config/minimal-config.yaml` | YAML | Minimal config |
+| `helix_code/config/production-config.yaml` | YAML | Production config |
+| `helix_code/config/test-config.yaml` | YAML | Test config |
+| `helix_code/config/model-aliases.example.yaml` | YAML | Model aliases example |
+| `helix_code/docker/docker-compose.yml` | Docker Compose | Docker orchestration |
+| `helix_code/api/openapi.yaml` | OpenAPI | API specification |
+| `helix_code/.env.example` | Environment | Extended env template (2,998 bytes) |
+| `helix_code/.env.full-test` | Environment | Full test env (4,607 bytes) |
 
 ### 6.3 GitHub Actions / CI
 
 | File | Purpose |
 |------|---------|
 | `.github/workflows/notification-tests.yml` | Notification test automation (3,249 bytes) |
-| `HelixCode/.github/workflows/` | Additional workflows in nested project |
+| `helix_code/.github/workflows/` | Additional workflows in nested project |
 
 ### 6.4 Configuration Summary by Technology
 
 | Technology | Files Found |
 |------------|-------------|
-| **Go** | `go.mod`, `go.sum` (root + HelixCode/) |
+| **Go** | `go.mod`, `go.sum` (root + helix_code/) |
 | **Docker** | `Dockerfile`, `Dockerfile.test`, `Dockerfile.worker`, `docker-compose.helix.yml`, `docker-compose.test.yml` |
-| **YAML** | `test-config.yaml`, `configs/verifier.yaml`, `HelixCode/config/*.yaml`, `HelixCode/api/openapi.yaml` |
+| **YAML** | `test-config.yaml`, `configs/verifier.yaml`, `helix_code/config/*.yaml`, `helix_code/api/openapi.yaml` |
 | **Shell** | `setup.sh`, `docker-entrypoint.sh`, `install_missing_libs.sh`, `penpot-integration.sh`, `test-docker-quick.sh`, `test-docker-setup.sh` |
 | **JSON** | `helix.security.json` |
 | **SQL** | `postgres-init.sql` |

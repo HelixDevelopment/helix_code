@@ -1293,7 +1293,7 @@ Add to `runAgent()` function after line 196:
 
 ```bash
 # 1. Build the event package
-cd /path/to/HelixCode/Toolkit
+cd /path/to/helix_code/Toolkit
 go build ./pkg/event/...
 
 # 2. Run unit tests

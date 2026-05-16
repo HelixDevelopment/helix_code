@@ -14,7 +14,7 @@ Ship a real, end-to-end **5-role semantic theme system** for the HelixCode CLI a
 
 Three concrete user surfaces ship together:
 
-1. **`theme` package** (`HelixCode/internal/theme/`) — five semantic roles (`Info` / `Warn` / `Error` / `Highlight` / `Dim`; Q1=A) backed by per-depth `Color` variants (`ANSI16` / `ANSI256` / `Truecolor`). Three built-in themes (`dark` / `light` / `none`; Q2=C) that always ship with the binary and never require disk I/O. An optional user YAML override at `$XDG_CONFIG_HOME/helixcode/theme.yaml` (Q2=C) that can replace any subset of the built-in palette without forcing the user to re-spell every role. A `Styler` that wraps text with role-coded ANSI escape codes for fancy mode and acts as a no-op pass-through for plain mode.
+1. **`theme` package** (`helix_code/internal/theme/`) — five semantic roles (`Info` / `Warn` / `Error` / `Highlight` / `Dim`; Q1=A) backed by per-depth `Color` variants (`ANSI16` / `ANSI256` / `Truecolor`). Three built-in themes (`dark` / `light` / `none`; Q2=C) that always ship with the binary and never require disk I/O. An optional user YAML override at `$XDG_CONFIG_HOME/helixcode/theme.yaml` (Q2=C) that can replace any subset of the built-in palette without forcing the user to re-spell every role. A `Styler` that wraps text with role-coded ANSI escape codes for fancy mode and acts as a no-op pass-through for plain mode.
 2. **Renderer integration** (Q1=A consequence) — F18's `Renderer` is extended through a thin `Stylize(role Role, text string) string` helper invoked at the call sites that already pass text into `WriteToken` / `RenderTextBlock` / `RenderLines`. The Styler is constructed once at process startup alongside the renderer (same factory pattern as F18 + F19) and threaded through the existing wire points (LLM streaming hook in `handleGenerate`, tool result frame helpers, slash-command output). Plain-mode renderers receive a Styler whose `Stylize` is the identity function — no ANSI escape codes leave the package.
 3. **Env var + `/theme` slash command** (Q5=B) — `HELIXCODE_THEME=dark|light|none|<custom-name>` (Q3=C precedence: env > `$COLORFGBG` parse > default `dark`). Color depth auto-detected (Q4=D) from `$COLORTERM` (`truecolor`/`24bit` → Truecolor), then `$TERM` (`*-256color` → ANSI256, otherwise → ANSI16; `dumb`/unset → `Off`). A read-only `/theme` slash command with three subcommands: `/theme status` (active name + depth + source), `/theme list` (all available names: built-in + YAML), `/theme show <name>` (preview the 5 roles in a numbered table with sample text). NO cobra subcommand. Switching the active theme at runtime is OUT OF SCOPE for v1 (deferred to F20.5; see §8).
 
@@ -30,7 +30,7 @@ Anti-bluff hot zone (loud): a theme "applied" but no ANSI bytes ever observable 
 
 ## 2. Architecture
 
-Four layers, all under `HelixCode/internal/theme/`, plus thin wiring at the F18 renderer boundary and one slash command:
+Four layers, all under `helix_code/internal/theme/`, plus thin wiring at the F18 renderer boundary and one slash command:
 
 - **`Theme` struct** (`types.go`) — the value type carrying the 5-role palette per `ColorDepth`. Concretely, a `Theme` holds three `[5]Color` arrays (one per depth tier) so a single `Theme` can be rendered at the depth the terminal actually supports, without a runtime cross-depth conversion (which would bias the palette).
 - **`ThemeRegistry`** (`builtin.go`) — exposes `BuiltIn() map[ThemeName]Theme` returning the three frozen built-ins (`ThemeDark`, `ThemeLight`, `ThemeNone`). Built-ins live in code (no disk read), so a binary with NO `theme.yaml` on disk still has all three available. The registry is read-only after `Build()` — concurrent reads are safe; writes happen only via the loader.
@@ -104,25 +104,25 @@ Why slash + env (Q5=B) and not cobra:
 
 ### 3.1 New files
 
-- `HelixCode/internal/theme/types.go` — `Theme`, `Role` enum, `Color`, `ColorDepth`, `ThemeName`, sentinel errors (`ErrUnknownTheme`, `ErrInvalidYAML`, `ErrInvalidRole`), constants.
-- `HelixCode/internal/theme/types_test.go`.
-- `HelixCode/internal/theme/builtin.go` — `BuiltIn() map[ThemeName]Theme`; concrete `ThemeDark` / `ThemeLight` / `ThemeNone` literals with full per-depth palettes.
-- `HelixCode/internal/theme/builtin_test.go`.
-- `HelixCode/internal/theme/detect.go` — `DetectThemeName(env func(string) string) (ThemeName, string)` (returns the resolved name + the *source* string for `/theme status`); `DetectColorDepth(env func(string) string) ColorDepth`. Pure functions of the env lookup; no `os.Getenv` inside the function body.
-- `HelixCode/internal/theme/detect_test.go` — table-driven over every (HELIXCODE_THEME, COLORFGBG, COLORTERM, TERM) combination called out in §3.6.
-- `HelixCode/internal/theme/loader.go` — `LoaderOptions` (Env / ConfigDir / Filesystem seams), `Loader.Load() (*Styler, error)`, `Styler{Stylize}`.
-- `HelixCode/internal/theme/loader_test.go` — real temp `theme.yaml` with custom palette; injected `Env` and `ConfigDir`; assert merged Theme matches expected per-depth bytes.
-- `HelixCode/internal/commands/theme_command.go` — `ThemeCommand` (`Command` impl); `/theme status`, `/theme list`, `/theme show <name>`.
-- `HelixCode/internal/commands/theme_command_test.go`.
-- `HelixCode/tests/integration/theme_test.go` — `//go:build integration`; ALWAYS-runs; real env vars via `LoaderOptions.Env` injection + real temp YAML; asserts byte-exact ANSI emission via the production Styler.
-- `HelixCode/tests/integration/cmd/p1f20_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/theme/types.go` — `Theme`, `Role` enum, `Color`, `ColorDepth`, `ThemeName`, sentinel errors (`ErrUnknownTheme`, `ErrInvalidYAML`, `ErrInvalidRole`), constants.
+- `helix_code/internal/theme/types_test.go`.
+- `helix_code/internal/theme/builtin.go` — `BuiltIn() map[ThemeName]Theme`; concrete `ThemeDark` / `ThemeLight` / `ThemeNone` literals with full per-depth palettes.
+- `helix_code/internal/theme/builtin_test.go`.
+- `helix_code/internal/theme/detect.go` — `DetectThemeName(env func(string) string) (ThemeName, string)` (returns the resolved name + the *source* string for `/theme status`); `DetectColorDepth(env func(string) string) ColorDepth`. Pure functions of the env lookup; no `os.Getenv` inside the function body.
+- `helix_code/internal/theme/detect_test.go` — table-driven over every (HELIXCODE_THEME, COLORFGBG, COLORTERM, TERM) combination called out in §3.6.
+- `helix_code/internal/theme/loader.go` — `LoaderOptions` (Env / ConfigDir / Filesystem seams), `Loader.Load() (*Styler, error)`, `Styler{Stylize}`.
+- `helix_code/internal/theme/loader_test.go` — real temp `theme.yaml` with custom palette; injected `Env` and `ConfigDir`; assert merged Theme matches expected per-depth bytes.
+- `helix_code/internal/commands/theme_command.go` — `ThemeCommand` (`Command` impl); `/theme status`, `/theme list`, `/theme show <name>`.
+- `helix_code/internal/commands/theme_command_test.go`.
+- `helix_code/tests/integration/theme_test.go` — `//go:build integration`; ALWAYS-runs; real env vars via `LoaderOptions.Env` injection + real temp YAML; asserts byte-exact ANSI emission via the production Styler.
+- `helix_code/tests/integration/cmd/p1f20_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f20-theme-system/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/cmd/cli/main.go` — three small additions: (1) construct the `theme.Loader` + `theme.Styler` at startup adjacent to the renderer; (2) wire the styler into the `handleGenerate` non-stream `RenderTextBlock` call (style response with `RoleInfo`, errors with `RoleError`); (3) register `/theme` via `commands.NewThemeCommand(c.styler, themeLoader)`.
-- `HelixCode/internal/commands/registry.go` — no schema change; one new registration via the existing `Register(cmd Command)` API.
-- `HelixCode/go.mod` — `gopkg.in/yaml.v3` is **already** an indirect dep (verify with `grep "yaml.v3" HelixCode/go.mod` before T05); F20 promotes it to a direct dep at the version already in `go.sum`. T05 verifies `go mod tidy` produces only the indirect→direct line move; no new transitive entries.
+- `helix_code/cmd/cli/main.go` — three small additions: (1) construct the `theme.Loader` + `theme.Styler` at startup adjacent to the renderer; (2) wire the styler into the `handleGenerate` non-stream `RenderTextBlock` call (style response with `RoleInfo`, errors with `RoleError`); (3) register `/theme` via `commands.NewThemeCommand(c.styler, themeLoader)`.
+- `helix_code/internal/commands/registry.go` — no schema change; one new registration via the existing `Register(cmd Command)` API.
+- `helix_code/go.mod` — `gopkg.in/yaml.v3` is **already** an indirect dep (verify with `grep "yaml.v3" helix_code/go.mod` before T05); F20 promotes it to a direct dep at the version already in `go.sum`. T05 verifies `go mod tidy` produces only the indirect→direct line move; no new transitive entries.
 
 **One existing-tree direct dep promoted** (yaml.v3); see §3.5.
 
@@ -658,6 +658,6 @@ The cross-compile `make prod` target (linux/macos/windows) is exercised in T08. 
 9. **`/theme show <name>` previews the named theme's palette, NOT the active styler's** — so `/theme show light` on a dark-themed session shows light's codes (not light's codes mapped through dark's depth). Rationale: the user is asking "what does light look like"; the answer must use light's data. Recorded in §4.3.
 10. **`bytes.Count(captured, []byte("\x1b[")) == 2 * num-tokens`** as the Phase A invariant — exactly one open + one reset per styled token. A count of zero proves bluff (a) (no styling); a count off by N proves bluff (c) (extra ANSI leaks). Recorded in §5.2.
 11. **The `theme.yaml` file is read once at startup** — no fsnotify watcher in v1. F20.5 may add hot-reload; v1 documents this in §8 and §11. Rationale: the theme is a startup-property like the renderer mode (F18 is also startup-only); both are configured before the agent loop opens.
-12. **`yaml.v3` indirect→direct promotion is the only `go.mod` change** — verified before T05 by `grep "yaml.v3" HelixCode/go.mod`. T08 verifies `go mod tidy` produces only the `require` block move; no new `go.sum` entries.
+12. **`yaml.v3` indirect→direct promotion is the only `go.mod` change** — verified before T05 by `grep "yaml.v3" helix_code/go.mod`. T08 verifies `go mod tidy` produces only the `require` block move; no new `go.sum` entries.
 13. **CSS / JSON assets in `assets/colors/` are unchanged** — those drive the Fyne desktop GUI; coupling them to the CLI theme would require a runtime CSS parser in Go (out of scope). Recorded in §3.8 + §8.
 14. **Phase 1 close-out** — F20 is the final Phase 1 feature. T09 records the programme milestone in PROGRESS.md alongside the F20 close-out summary.

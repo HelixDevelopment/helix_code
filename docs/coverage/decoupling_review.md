@@ -62,9 +62,9 @@ override or alias). Tracked as Task #262.
 Lines 67, 82, 85, 87, 89 reference HelixCode-internal paths:
 ```python
 # Third-party cli_agents (only HelixCode is ours)
-"/cli_agents/HelixCode/HelixCode/",
+"/cli_agents/helix_code/helix_code/",
 # Third-party MCP servers shipped beside HelixCode
-"/HelixCode/mcp-servers/",
+"/helix_code/mcp-servers/",
 "/HelixLLM/docs/",
 ```
 

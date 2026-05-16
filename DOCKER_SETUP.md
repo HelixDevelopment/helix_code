@@ -87,8 +87,8 @@ The Docker setup provides:
 - `./workspace`: Main working directory
 - `./projects`: Project storage
 - `./shared`: Shared configuration and discovery data
-- `./HelixCode/config`: Application configuration
-- `./HelixCode/assets`: Static assets
+- `./helix_code/config`: Application configuration
+- `./helix_code/assets`: Static assets
 
 ## Usage
 
@@ -212,7 +212,7 @@ worker-3:
     - WORKER_MAX_TASKS=2
     - HELIX_SERVER=helixcode:2222
   volumes:
-    - ./HelixCode/test/ssh-keys:/root/.ssh:ro
+    - ./helix_code/test/ssh-keys:/root/.ssh:ro
     - ./workspace:/workspace:ro
     - ./projects:/projects:ro
   depends_on:
@@ -280,7 +280,7 @@ HELIX_REDIS_URL=redis://user:pass@host:port/database
 3. **Worker connection issues**:
    ```bash
    # Check SSH keys
-   ls -la HelixCode/test/ssh-keys/
+   ls -la helix_code/test/ssh-keys/
    
    # Test worker connectivity
    docker exec helixcode ssh -o StrictHostKeyChecking=no worker-1 echo "test"

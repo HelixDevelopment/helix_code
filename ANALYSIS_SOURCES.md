@@ -195,5 +195,5 @@ This document lists all the source files examined during the creation of the com
 - **Documentation Generated**: 3 markdown files
 - **Total Lines of Analysis**: 1000+
 
-All analysis documents are stored in `/Users/milosvasic/Projects/HelixCode/`
+All analysis documents are stored in `/Users/milosvasic/Projects/helix_code/`
 

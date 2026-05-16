@@ -8,13 +8,13 @@ set -e
 echo "Initializing external memory provider repositories for HelixCode..."
 
 # Create the external memory directory if it doesn't exist
-mkdir -p HelixCode/external/memory
+mkdir -p helix_code/external/memory
 
 # Function to clone a repository if it doesn't exist
 clone_if_not_exists() {
     local repo_name=$1
     local repo_url=$2
-    local target_dir="HelixCode/external/memory/$repo_name"
+    local target_dir="helix_code/external/memory/$repo_name"
 
     if [ -d "$target_dir" ]; then
         echo "Repository $repo_name already exists, skipping..."

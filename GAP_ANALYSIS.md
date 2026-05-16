@@ -22,15 +22,15 @@ This comprehensive analysis compares HelixCode's current capabilities against le
 ### 1.1 Current HelixCode Providers
 
 **Implemented (7 providers):**
-- ✅ OpenAI (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/openai_provider.go`)
-- ✅ Ollama (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/ollama_provider.go`)
-- ✅ Llama.cpp (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/llamacpp_provider.go`)
-- ✅ Qwen (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/qwen_provider.go`)
-- ✅ xAI/Grok (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/xai_provider.go`)
-- ✅ OpenRouter (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/openrouter_provider.go`)
-- ✅ GitHub Copilot (`/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/copilot_provider.go`)
+- ✅ OpenAI (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/openai_provider.go`)
+- ✅ Ollama (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/ollama_provider.go`)
+- ✅ Llama.cpp (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/llamacpp_provider.go`)
+- ✅ Qwen (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/qwen_provider.go`)
+- ✅ xAI/Grok (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/xai_provider.go`)
+- ✅ OpenRouter (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/openrouter_provider.go`)
+- ✅ GitHub Copilot (`/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/copilot_provider.go`)
 
-**ProviderType enum location:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go` (lines 17-27)
+**ProviderType enum location:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go` (lines 17-27)
 
 ### 1.2 Providers in Other Agents (MISSING in HelixCode)
 
@@ -264,7 +264,7 @@ This comprehensive analysis compares HelixCode's current capabilities against le
 ### 4.1 Current HelixCode Tool Support
 
 **MCP Implementation** ✅ IMPLEMENTED
-- Location: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/mcp/server.go`
+- Location: `/Users/milosvasic/Projects/helix_code/helix_code/internal/mcp/server.go`
 - Features:
   - WebSocket-based MCP server
   - Tool registration and execution
@@ -404,19 +404,19 @@ This comprehensive analysis compares HelixCode's current capabilities against le
 
 **Provider Integration:**
 1. Add Anthropic Provider
-   - File: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider.go`
+   - File: `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go`
    - Models: claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-3.5-sonnet, claude-3.7-sonnet, claude-4-sonnet
    - Features: Extended thinking, prompt caching, vision support
    - Reference: OpenCode schema lines 378-379
 
 2. Add Gemini Provider
-   - File: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/gemini_provider.go`
+   - File: `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/gemini_provider.go`
    - Models: gemini-2.0-flash, gemini-2.5, gemini-2.5-flash
    - Features: 1M+ context, vision, multi-modal
    - Reference: OpenCode schema lines 380-381
 
 3. Update Provider Factory
-   - Location: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go` lines 339-356
+   - Location: `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go` lines 339-356
    - Add cases for ProviderTypeAnthropic, ProviderTypeGemini
 
 ### Phase 2: HIGH PRIORITY (Week 3-4)
@@ -439,12 +439,12 @@ This comprehensive analysis compares HelixCode's current capabilities against le
    - Settings integration
 
 4. AWS Bedrock Provider
-   - File: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/bedrock_provider.go`
+   - File: `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/bedrock_provider.go`
    - Support Claude via Bedrock
    - AWS authentication
 
 5. Azure OpenAI Provider
-   - File: `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/azure_provider.go`
+   - File: `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/azure_provider.go`
    - Microsoft Entra ID auth
    - Multiple deployment support
 
@@ -580,20 +580,20 @@ Impact: Quality of life
 
 ```bash
 # CRITICAL
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/gemini_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/gemini_provider.go
 
 # HIGH PRIORITY
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/bedrock_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/azure_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/vertexai_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/groq_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/mistral_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/bedrock_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/azure_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/vertexai_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/groq_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/mistral_provider.go
 ```
 
 ### Provider Enum Update:
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go`
 **Lines:** 17-27
 
 Add:
@@ -609,7 +609,7 @@ ProviderTypeMistral    ProviderType = "mistral"
 
 ### LLMRequest Enhancement:
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go`
 **Lines:** 43-57
 
 Add fields:
@@ -622,7 +622,7 @@ SessionTokenLimit  int               `json:"session_token_limit,omitempty"` // T
 
 ### ModelInfo Enhancement:
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go`
 **Lines:** 131-140
 
 Add fields:
@@ -694,7 +694,7 @@ ReasoningCapability      string `json:"reasoning_capability,omitempty"` // "basi
    - Streaming with tools
 
 ### Test Locations:
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/`
 - Follow existing pattern from `qwen_provider_test.go`, `integration_test.go`
 
 ---
@@ -703,7 +703,7 @@ ReasoningCapability      string `json:"reasoning_capability,omitempty"` // "basi
 
 ### Update Config Schema:
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/config/config.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/config/config.go`
 
 Add provider configurations:
 ```yaml

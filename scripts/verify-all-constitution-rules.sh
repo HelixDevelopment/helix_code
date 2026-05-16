@@ -11,7 +11,7 @@
 #   G1  Governance cascade        — scripts/verify-governance-cascade.sh
 #                                    (§11.9 + CONST-047..059, 14 anchors × 36 files)
 #   G2  CONST-035 anti-bluff smoke — grep for production bluff markers
-#                                    in HelixCode/internal + HelixCode/cmd
+#                                    in helix_code/internal + helix_code/cmd
 #   G3  CONST-050(A) mock-from-prod — grep for internal/mocks imports
 #                                    in non-test production code
 #   G4  CONST-051(C) nested-own-org — each owned submodule's .gitmodules
@@ -111,14 +111,14 @@ fi
 if want_gate G2; then
     GATES_RUN=$((GATES_RUN + 1))
     gate_header "G2 — CONST-035 anti-bluff smoke (production code)"
-    # Production = HelixCode/{internal,cmd}/**/*.go excluding *_test.go.
+    # Production = helix_code/{internal,cmd}/**/*.go excluding *_test.go.
     bluff_hits=$(
-        find HelixCode/internal HelixCode/cmd -type f -name "*.go" \
+        find helix_code/internal helix_code/cmd -type f -name "*.go" \
             ! -name "*_test.go" 2>/dev/null | \
         xargs grep -lE "(simulated|TODO implement|fake response|in production this would)" 2>/dev/null
     )
     if [[ -z "$bluff_hits" ]]; then
-        gate_pass G2 "zero production bluff markers in HelixCode/{internal,cmd}"
+        gate_pass G2 "zero production bluff markers in helix_code/{internal,cmd}"
     else
         gate_fail G2 "production code contains bluff markers" \
             "files: $bluff_hits — replace simulation with real implementation"
@@ -132,13 +132,13 @@ if want_gate G3; then
     GATES_RUN=$((GATES_RUN + 1))
     gate_header "G3 — CONST-050(A) mock-from-production audit"
     mock_hits=$(
-        find HelixCode/cmd HelixCode/applications -type f -name "*.go" \
+        find helix_code/cmd helix_code/applications -type f -name "*.go" \
             ! -name "*_test.go" 2>/dev/null | \
         xargs grep -lE 'dev\.helix\.code/internal/mocks' 2>/dev/null
     )
     # internal/* production code (non _test.go) must also not import internal/mocks
     internal_mock_hits=$(
-        find HelixCode/internal -type f -name "*.go" \
+        find helix_code/internal -type f -name "*.go" \
             ! -path "*/mocks/*" ! -name "*_test.go" 2>/dev/null | \
         xargs grep -lE 'dev\.helix\.code/internal/mocks' 2>/dev/null
     )

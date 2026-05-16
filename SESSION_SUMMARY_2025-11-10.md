@@ -174,15 +174,15 @@ cd HelixCode
 ## 🔧 Technical Details
 
 ### Files Modified:
-1. `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/mocks/memory_mocks.go` ✅
+1. `/Users/milosvasic/Projects/helix_code/helix_code/internal/mocks/memory_mocks.go` ✅
 
 ### Files Created:
-1. `/Users/milosvasic/Projects/HelixCode/PROJECT_COMPLETION_ANALYSIS.md`
-2. `/Users/milosvasic/Projects/HelixCode/DETAILED_IMPLEMENTATION_PLAN.md`
-3. `/Users/milosvasic/Projects/HelixCode/QUICK_START_IMPLEMENTATION.md`
-4. `/Users/milosvasic/Projects/HelixCode/PHASE_0_PROGRESS.md`
-5. `/Users/milosvasic/Projects/HelixCode/IMPLEMENTATION_LOG.txt`
-6. `/Users/milosvasic/Projects/HelixCode/SESSION_SUMMARY_2025-11-10.md`
+1. `/Users/milosvasic/Projects/helix_code/PROJECT_COMPLETION_ANALYSIS.md`
+2. `/Users/milosvasic/Projects/helix_code/DETAILED_IMPLEMENTATION_PLAN.md`
+3. `/Users/milosvasic/Projects/helix_code/QUICK_START_IMPLEMENTATION.md`
+4. `/Users/milosvasic/Projects/helix_code/PHASE_0_PROGRESS.md`
+5. `/Users/milosvasic/Projects/helix_code/IMPLEMENTATION_LOG.txt`
+6. `/Users/milosvasic/Projects/helix_code/SESSION_SUMMARY_2025-11-10.md`
 
 ### Commands Used:
 ```bash

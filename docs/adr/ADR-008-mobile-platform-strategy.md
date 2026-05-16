@@ -370,6 +370,6 @@ The mobile core handles connectivity gracefully:
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/shared/mobile_core/mobile.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/applications/aurora_os/`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/applications/harmony_os/`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/shared/mobile_core/mobile.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/applications/aurora_os/`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/applications/harmony_os/`

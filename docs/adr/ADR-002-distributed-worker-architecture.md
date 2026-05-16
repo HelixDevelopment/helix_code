@@ -245,8 +245,8 @@ For multi-master deployments, a consensus manager handles:
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/worker/ssh_pool.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/worker/manager.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/worker/types.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/worker/isolation.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/worker/consensus.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/ssh_pool.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/manager.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/types.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/isolation.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/consensus.go`

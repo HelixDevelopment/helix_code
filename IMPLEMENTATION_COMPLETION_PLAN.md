@@ -619,7 +619,7 @@ go tool cover -func=coverage.out | grep total
 ## Appendix A: File Locations Reference
 
 ```
-HelixCode/
+helix_code/
 ├── tests/
 │   ├── e2e/
 │   │   ├── test-bank/

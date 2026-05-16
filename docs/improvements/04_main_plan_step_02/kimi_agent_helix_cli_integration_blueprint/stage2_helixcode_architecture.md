@@ -771,7 +771,7 @@ type MCPServer struct {
 | Terminal UI | tview (Go TUI) | `applications/terminal_ui/main.go` |
 | Desktop | Fyne (Go GUI) | `applications/desktop/main.go` |
 | Android | Kotlin | `applications/android/app/src/main/java/.../MainActivity.kt` |
-| iOS | Swift | `applications/ios/HelixCode/ViewController.swift` |
+| iOS | Swift | `applications/ios/helix_code/ViewController.swift` |
 | Aurora OS | Go | `applications/aurora_os/main.go` |
 | Harmony OS | Go | `applications/harmony_os/main.go` |
 
@@ -1111,4 +1111,4 @@ digital.vasic.security => ../Security
 ---
 
 *Report generated from analysis of HelixCode repository at https://github.com/HelixDevelopment/HelixCode*
-*Focus Path: `HelixCode/` directory*
+*Focus Path: `helix_code/` directory*

@@ -397,7 +397,7 @@ This method is called during HelixCode server startup (in `cmd/server/main.go` a
 When adding a feature that needs model data, use the Go SDK client:
 
 ```go
-import "github.com/HelixDevelopment/HelixCode/pkg/sdk/go/verifier"
+import "github.com/HelixDevelopment/helix_code/pkg/sdk/go/verifier"
 
 client := verifier.New(verifier.ClientConfig{
     BaseURL: "http://localhost:8081",
@@ -414,7 +414,7 @@ scores, err := client.GetProviderScores(ctx)
 When the existing `ModelManager.SelectOptimalModel()` needs verifier scores, use the adapter:
 
 ```go
-import "github.com/HelixDevelopment/HelixCode/internal/services"
+import "github.com/HelixDevelopment/helix_code/internal/services"
 
 adapter := services.NewLLMsVerifierScoreAdapter(
     verifierScoringService,
@@ -2623,7 +2623,7 @@ This submodule is part of the Helix ecosystem. LLMsVerifier is the single source
 4. Skip provider capability verification
 
 ### Integration Points
-- For Go submodules: Import `github.com/HelixDevelopment/HelixCode/pkg/sdk/go/verifier`
+- For Go submodules: Import `github.com/HelixDevelopment/helix_code/pkg/sdk/go/verifier`
 - For non-Go submodules: Use the REST API at `http://localhost:8081/api/v1/verifier`
 - For test submodules: Use the test fixture database at `:memory:` or a test-specific SQLite file
 
@@ -2657,7 +2657,7 @@ This submodule is part of the Helix ecosystem. LLMsVerifier is the single source
 
 ### Technology Stack Note
 If this submodule uses models, it depends on:
-- `github.com/HelixDevelopment/HelixCode/pkg/sdk/go/verifier` (Go submodules)
+- `github.com/HelixDevelopment/helix_code/pkg/sdk/go/verifier` (Go submodules)
 - `http://localhost:8081/api/v1/verifier` (REST API for all languages)
 - `digital.vasic.llmsverifier` (direct import, Go only)
 

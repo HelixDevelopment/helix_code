@@ -81,7 +81,7 @@ HelixCode is a distributed AI development platform built in Go with a modular, p
 ```bash
 # Clone repository (SSH only)
 git clone git@github.com:HelixDevelopment/HelixCode.git
-cd HelixCode/HelixCode
+cd helix_code/HelixCode
 
 # Install dependencies
 make setup-deps
@@ -130,7 +130,7 @@ export GEMINI_API_KEY="..."
 ## Project Structure
 
 ```
-HelixCode/
+helix_code/
 ├── cmd/                    # Application entry points
 │   ├── server/main.go      # HTTP server
 │   ├── cli/main.go         # CLI client (flag-based)

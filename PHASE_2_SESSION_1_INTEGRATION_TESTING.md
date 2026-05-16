@@ -191,9 +191,9 @@ For Phase 2 Session 2, consider:
    - Fixed Zep provider name case
    - Skipped unimplemented providers
 
-3. `HelixCode/internal/config/advanced_config.go` (modified, per git status)
-4. `HelixCode/internal/config/advanced_config_part2.go` (modified, per git status)
-5. `HelixCode/internal/workflow/planmode/planmode_test.go` (modified, per git status)
+3. `helix_code/internal/config/advanced_config.go` (modified, per git status)
+4. `helix_code/internal/config/advanced_config_part2.go` (modified, per git status)
+5. `helix_code/internal/workflow/planmode/planmode_test.go` (modified, per git status)
 
 ## Conclusion
 

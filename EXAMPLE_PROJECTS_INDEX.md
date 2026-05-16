@@ -292,7 +292,7 @@ After reviewing these documents:
 
 ## Additional Resources
 
-- Source projects located in: `/Users/milosvasic/Projects/HelixCode/cli_agents/`
+- Source projects located in: `/Users/milosvasic/Projects/helix_code/cli_agents/`
 - Qwen Code: `cli_agents/qwen-code/docs/`
 - Gemini CLI: `cli_agents/gemini-cli/docs/`
 - DeepSeek CLI: `cli_agents/deepseek-cli/README.md`

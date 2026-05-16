@@ -108,7 +108,7 @@ type Agent interface {
 
 ## 🗂️ **File Locations**
 
-All challenge files are located in: `/Volumes/T7/Projects/HelixCode/HelixCode/challenges/`
+All challenge files are located in: `/Volumes/T7/Projects/helix_code/helix_code/challenges/`
 
 ```
 challenges/

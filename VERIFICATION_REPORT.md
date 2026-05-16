@@ -31,17 +31,17 @@ This report provides a comprehensive verification that all features defined in S
 | `audit_logs` | ✅ | Security audit trail |
 
 **Schema Location**:
-- `/HelixCode/internal/database/database.go` (lines 131-465)
-- `/HelixCode/test/init.sql` (test database)
+- `/helix_code/internal/database/database.go` (lines 131-465)
+- `/helix_code/test/init.sql` (test database)
 
 ## 2. Distributed Worker Network
 
 ### ✅ FULLY IMPLEMENTED - SSH-Based Worker Management
 
 **Implementation Files**:
-- `/HelixCode/internal/worker/manager.go`
-- `/HelixCode/internal/worker/ssh_pool.go`
-- `/HelixCode/internal/worker/types.go`
+- `/helix_code/internal/worker/manager.go`
+- `/helix_code/internal/worker/ssh_pool.go`
+- `/helix_code/internal/worker/types.go`
 
 **Features Verified**:
 - ✅ SSH-based worker pool management
@@ -62,16 +62,16 @@ This report provides a comprehensive verification that all features defined in S
 ### ✅ FULLY IMPLEMENTED - Multi-Provider Support
 
 **Implementation Files**:
-- `/HelixCode/internal/llm/provider.go` - Base provider interface
-- `/HelixCode/internal/llm/reasoning.go` - Advanced reasoning engine
-- `/HelixCode/internal/llm/tool_provider.go` - Tool calling support
-- `/HelixCode/internal/llm/llamacpp_provider.go` - Local Llama.cpp
-- `/HelixCode/internal/llm/ollama_provider.go` - Ollama support
-- `/HelixCode/internal/llm/openai_provider.go` - OpenAI support
-- `/HelixCode/internal/llm/qwen_provider.go` - Qwen support
-- `/HelixCode/internal/llm/xai_provider.go` - xAI support
-- `/HelixCode/internal/llm/openrouter_provider.go` - OpenRouter support
-- `/HelixCode/internal/llm/copilot_provider.go` - GitHub Copilot support
+- `/helix_code/internal/llm/provider.go` - Base provider interface
+- `/helix_code/internal/llm/reasoning.go` - Advanced reasoning engine
+- `/helix_code/internal/llm/tool_provider.go` - Tool calling support
+- `/helix_code/internal/llm/llamacpp_provider.go` - Local Llama.cpp
+- `/helix_code/internal/llm/ollama_provider.go` - Ollama support
+- `/helix_code/internal/llm/openai_provider.go` - OpenAI support
+- `/helix_code/internal/llm/qwen_provider.go` - Qwen support
+- `/helix_code/internal/llm/xai_provider.go` - xAI support
+- `/helix_code/internal/llm/openrouter_provider.go` - OpenRouter support
+- `/helix_code/internal/llm/copilot_provider.go` - GitHub Copilot support
 
 **Features Verified**:
 - ✅ Enhanced provider interface with tool calling
@@ -104,8 +104,8 @@ This report provides a comprehensive verification that all features defined in S
 ### ✅ FULLY IMPLEMENTED - Full Protocol Support
 
 **Implementation Files**:
-- `/HelixCode/internal/mcp/server.go`
-- `/HelixCode/internal/mcp/mock_conn.go` (for testing)
+- `/helix_code/internal/mcp/server.go`
+- `/helix_code/internal/mcp/mock_conn.go` (for testing)
 
 **Features Verified**:
 - ✅ WebSocket transport
@@ -128,7 +128,7 @@ This report provides a comprehensive verification that all features defined in S
 **Client Types**:
 
 #### REST API ✅
-- Location: `/HelixCode/internal/server/`
+- Location: `/helix_code/internal/server/`
 - Features:
   - Comprehensive RESTful API
   - WebSocket support
@@ -137,7 +137,7 @@ This report provides a comprehensive verification that all features defined in S
   - Rate limiting
 
 #### CLI ✅
-- Location: `/HelixCode/cmd/cli/`
+- Location: `/helix_code/cmd/cli/`
 - Features:
   - Interactive mode
   - Script automation
@@ -146,7 +146,7 @@ This report provides a comprehensive verification that all features defined in S
   - Health checks
 
 #### Terminal UI ✅
-- Location: `/HelixCode/applications/terminal_ui/`
+- Location: `/helix_code/applications/terminal_ui/`
 - Features:
   - Rich interactive interface
   - Theme management
@@ -154,14 +154,14 @@ This report provides a comprehensive verification that all features defined in S
   - Log viewing
 
 #### Desktop Application ✅
-- Location: `/HelixCode/applications/desktop/`
+- Location: `/helix_code/applications/desktop/`
 - Features:
   - Cross-platform (via Fyne)
   - Theme management
   - Native system integration
 
 #### Mobile Framework ✅
-- Location: `/HelixCode/shared/mobile_core/`
+- Location: `/helix_code/shared/mobile_core/`
 - Features:
   - iOS framework ready
   - Android framework ready
@@ -178,7 +178,7 @@ This report provides a comprehensive verification that all features defined in S
 
 ### ✅ FULLY IMPLEMENTED - All Required Channels
 
-**Implementation File**: `/HelixCode/internal/notification/engine.go`
+**Implementation File**: `/helix_code/internal/notification/engine.go`
 
 **Channels Implemented**:
 1. ✅ Slack - Webhook and bot integration (lines 316-395)
@@ -215,7 +215,7 @@ This report provides a comprehensive verification that all features defined in S
 - ✅ iOS - Framework ready (shared/mobile-core/)
 - ✅ Android - Framework ready (shared/mobile-core/)
 
-**Hardware Detection**: `/HelixCode/internal/hardware/detector.go`
+**Hardware Detection**: `/helix_code/internal/hardware/detector.go`
 - ✅ CPU detection
 - ✅ GPU detection (Metal, CUDA)
 - ✅ Memory detection
@@ -232,8 +232,8 @@ This report provides a comprehensive verification that all features defined in S
 ### ✅ FULLY IMPLEMENTED - Enterprise-Grade Security
 
 **Implementation Files**:
-- `/HelixCode/internal/auth/auth.go`
-- `/HelixCode/internal/auth/auth_db.go`
+- `/helix_code/internal/auth/auth.go`
+- `/helix_code/internal/auth/auth_db.go`
 
 **Security Features Verified**:
 - ✅ JWT-based authentication
@@ -254,11 +254,11 @@ This report provides a comprehensive verification that all features defined in S
 ### ✅ FULLY IMPLEMENTED - All Workflow Types
 
 **Implementation Files**:
-- `/HelixCode/internal/workflow/workflow.go`
-- `/HelixCode/internal/workflow/executor.go`
-- `/HelixCode/internal/session/session.go`
-- `/HelixCode/internal/project/manager.go`
-- `/HelixCode/internal/task/manager.go`
+- `/helix_code/internal/workflow/workflow.go`
+- `/helix_code/internal/workflow/executor.go`
+- `/helix_code/internal/session/session.go`
+- `/helix_code/internal/project/manager.go`
+- `/helix_code/internal/task/manager.go`
 
 **Workflow Types Supported**:
 - ✅ Planning Mode - Project analysis and architecture
@@ -286,9 +286,9 @@ This report provides a comprehensive verification that all features defined in S
 ### ✅ FULLY IMPLEMENTED - Robust Data Protection
 
 **Implementation Files**:
-- `/HelixCode/internal/task/checkpoint.go`
-- `/HelixCode/internal/task/dependency.go`
-- `/HelixCode/internal/task/queue.go`
+- `/helix_code/internal/task/checkpoint.go`
+- `/helix_code/internal/task/dependency.go`
+- `/helix_code/internal/task/queue.go`
 
 **Features Verified**:
 - ✅ Automatic checkpointing at configurable intervals
@@ -307,17 +307,17 @@ This report provides a comprehensive verification that all features defined in S
 ## 11. Additional Components
 
 ### Configuration Management ✅
-- Location: `/HelixCode/internal/config/`
+- Location: `/helix_code/internal/config/`
 - Features: YAML configuration, environment variables, validation
 - Test Coverage: 6 test cases ✅
 
 ### Redis Caching ✅
-- Location: `/HelixCode/internal/redis/`
+- Location: `/helix_code/internal/redis/`
 - Features: Optional caching layer, session storage
 - Test Coverage: 1 test case ✅
 
 ### Logo Processing ✅
-- Location: `/HelixCode/internal/logo/`
+- Location: `/helix_code/internal/logo/`
 - Features: Asset generation, color extraction
 - Test Coverage: 1 test case ✅
 

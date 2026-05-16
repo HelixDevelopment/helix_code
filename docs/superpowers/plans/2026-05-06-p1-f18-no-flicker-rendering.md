@@ -6,11 +6,11 @@
 
 **Architecture:** New `internal/render/` package with `types.go` (Renderer interface + Frame + RenderMode + error sentinels + env-var constants), `ansi_renderer.go` (TTY-mode impl; `\r\033[K` for in-place line update; `\033[<n>A`/`\033[<n>B` cursor-positioning for multi-line frame; `\033[?25l`/`\033[?25h` cursor hide/show; per-block `Viewport` for dirty-region diff), `plain_renderer.go` (line-by-line `fmt.Fprint` fallback; per-block buffer flushed at newline boundaries; strips `\r` from tokens silently for log-grep-safety; passes ANSI through verbatim per §5.4), `viewport.go` (`Viewport{lines, lastLines}` + `Diff(newFrame Frame) []int` returning indices of changed lines; pure Go), `factory.go` (`NewRenderer(opts Options) (Renderer, RenderMode, error)`; reads `HELIXCODE_RENDER` env var via injectable `Options.Env`; probes TTY via `term.IsTerminal` with `Options.IsTTY` test seam; returns `ErrInvalidEnvMode` for typo'd values which `cmd/cli/main.go` falls back to plain on), `tool_helpers.go` (`RenderToolResult(r, id, result)` glue: type-switch over LSP diagnostic / sandbox result / smart-edit result / subagent result; unknown types fall back to `fmt.Fprintln`). Two existing files get tiny additions: `cmd/cli/main.go` (renderer construction at startup + `defer renderer.Close()` + replace streaming-print loop in `handleGenerate` + wrap tool-result printing through `RenderToolResult`).
 
-**Tech Stack:** Go 1.26, testify v1.11, zap (already in `go.mod`) — already present. **NO new external deps.** `golang.org/x/term` is at v0.41.0 in `go.sum` (verified via `grep "golang.org/x/term" HelixCode/go.sum`); currently indirect. After T02 introduces a direct import (`import "golang.org/x/term"` in `factory.go`), `go mod tidy` promotes the `go.mod` line from `// indirect` to a direct require — that is the one expected `go.mod` change for F18, and `go.sum` is unchanged. Brief justification: (1) ANSI control is a small finite set of byte sequences → pure constants + `fmt.Sprintf` for the parameterised ones; (2) dirty-region diff is a `for i := range max(len(old), len(new))` loop; (3) TTY detection is a single `term.IsTerminal(int)` call from `golang.org/x/term`; (4) width probe (one-shot, factory time) is `term.GetSize(int)`. `go mod tidy` after T02 must produce **zero new entries in `go.sum`** (only the indirect→direct promotion in `go.mod`). T10's verification step asserts this loudly.
+**Tech Stack:** Go 1.26, testify v1.11, zap (already in `go.mod`) — already present. **NO new external deps.** `golang.org/x/term` is at v0.41.0 in `go.sum` (verified via `grep "golang.org/x/term" helix_code/go.sum`); currently indirect. After T02 introduces a direct import (`import "golang.org/x/term"` in `factory.go`), `go mod tidy` promotes the `go.mod` line from `// indirect` to a direct require — that is the one expected `go.mod` change for F18, and `go.sum` is unchanged. Brief justification: (1) ANSI control is a small finite set of byte sequences → pure constants + `fmt.Sprintf` for the parameterised ones; (2) dirty-region diff is a `for i := range max(len(old), len(new))` loop; (3) TTY detection is a single `term.IsTerminal(int)` call from `golang.org/x/term`; (4) width probe (one-shot, factory time) is `term.GetSize(int)`. `go mod tidy` after T02 must produce **zero new entries in `go.sum`** (only the indirect→direct promotion in `go.mod`). T10's verification step asserts this loudly.
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f18-no-flicker-rendering-design.md` (commit `7f52a9c`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F18 surface):**
 ```bash
@@ -42,7 +42,7 @@ Must always print `clean`.
 
 ## Task 1: Bootstrap
 
-Append F18 evidence section header (spec `7f52a9c`), update PROGRESS current focus to F18 (replacing the F17 close-out's "F18 next candidate" pointer), insert F18 task list (10 items) after F17's. Confirm `06_phase_1_evidence.md` has an F18 anchor. Verify `golang.org/x/term v0.41.0` is in `HelixCode/go.sum` (sanity check before T06 promotes it to direct).
+Append F18 evidence section header (spec `7f52a9c`), update PROGRESS current focus to F18 (replacing the F17 close-out's "F18 next candidate" pointer), insert F18 task list (10 items) after F17's. Confirm `06_phase_1_evidence.md` has an F18 anchor. Verify `golang.org/x/term v0.41.0` is in `helix_code/go.sum` (sanity check before T06 promotes it to direct).
 
 Commit: `docs(P1-F18-T01): bootstrap Phase 1 / Feature 18 evidence + advance PROGRESS`.
 
@@ -50,7 +50,7 @@ Commit: `docs(P1-F18-T01): bootstrap Phase 1 / Feature 18 evidence + advance PRO
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/render/types.go`, new `HelixCode/internal/render/types_test.go`.
+**Files:** new `helix_code/internal/render/types.go`, new `helix_code/internal/render/types_test.go`.
 
 Define:
 - `RenderMode` enum (`RenderModePlain = 0`, `RenderModeFancy = 1`) with `String() string` method (`"plain"` / `"fancy"`).
@@ -96,7 +96,7 @@ Subject: `feat(P1-F18-T02): Renderer interface + RenderMode enum + Frame + error
 
 ## Task 3: ansi_renderer.go (TDD)
 
-**Files:** new `HelixCode/internal/render/ansi_renderer.go`, new `HelixCode/internal/render/ansi_renderer_test.go`.
+**Files:** new `helix_code/internal/render/ansi_renderer.go`, new `helix_code/internal/render/ansi_renderer_test.go`.
 
 `ansi_renderer.go` exports nothing public (the factory returns the `Renderer` interface). Internals:
 
@@ -254,7 +254,7 @@ Subject: `feat(P1-F18-T03): ansiRenderer with in-place line updates + dirty-regi
 
 ## Task 4: plain_renderer.go (TDD)
 
-**Files:** new `HelixCode/internal/render/plain_renderer.go`, new `HelixCode/internal/render/plain_renderer_test.go`.
+**Files:** new `helix_code/internal/render/plain_renderer.go`, new `helix_code/internal/render/plain_renderer_test.go`.
 
 `plain_renderer.go`:
 
@@ -374,7 +374,7 @@ Subject: `feat(P1-F18-T04): plainRenderer with line-by-line fallback + zero-ANSI
 
 ## Task 5: viewport.go (TDD)
 
-**Files:** new `HelixCode/internal/render/viewport.go`, new `HelixCode/internal/render/viewport_test.go`.
+**Files:** new `helix_code/internal/render/viewport.go`, new `helix_code/internal/render/viewport_test.go`.
 
 `viewport.go`:
 
@@ -447,7 +447,7 @@ Subject: `feat(P1-F18-T05): Viewport with pure-Go dirty-line Diff + Apply`.
 
 ## Task 6: factory.go (TDD)
 
-**Files:** new `HelixCode/internal/render/factory.go`, new `HelixCode/internal/render/factory_test.go`.
+**Files:** new `helix_code/internal/render/factory.go`, new `helix_code/internal/render/factory_test.go`.
 
 `factory.go` introduces the direct `golang.org/x/term` import. After this commit, run `go mod tidy` once — `go.mod` line for `golang.org/x/term v0.41.0` drops the `// indirect` marker; `go.sum` is unchanged. T10 verifies this loudly.
 
@@ -568,7 +568,7 @@ Subject: `feat(P1-F18-T06): RendererFactory with HELIXCODE_RENDER env var + TTY 
 
 ## Task 7: Wire LLM streaming hook in cmd/cli/main.go (TDD)
 
-**Files:** modify `HelixCode/cmd/cli/main.go`, modify (or extend) `HelixCode/cmd/cli/main_test.go` if it exists, OR create a new integration test in `HelixCode/tests/integration/render_test.go`.
+**Files:** modify `helix_code/cmd/cli/main.go`, modify (or extend) `helix_code/cmd/cli/main_test.go` if it exists, OR create a new integration test in `helix_code/tests/integration/render_test.go`.
 
 `main.go` changes:
 
@@ -670,7 +670,7 @@ Subject: `feat(P1-F18-T07): wire renderer into handleGenerate streaming hot path
 
 ## Task 8: tool_helpers.go + wire tool result rendering (TDD)
 
-**Files:** new `HelixCode/internal/render/tool_helpers.go`, new `HelixCode/internal/render/tool_helpers_test.go`, modify `HelixCode/cmd/cli/main.go` (call `RenderToolResult` at existing tool-result print sites).
+**Files:** new `helix_code/internal/render/tool_helpers.go`, new `helix_code/internal/render/tool_helpers_test.go`, modify `helix_code/cmd/cli/main.go` (call `RenderToolResult` at existing tool-result print sites).
 
 `tool_helpers.go`:
 
@@ -766,7 +766,7 @@ Subject: `feat(P1-F18-T08): RenderToolResult helper + wire tool-result frame ren
 
 ## Task 9: Challenge harness (5-phase, byte-signature positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f18_challenge/main.go`, new `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md`, new `challenges/p1-f18-no-flicker-rendering/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f18_challenge/main.go`, new `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md`, new `challenges/p1-f18-no-flicker-rendering/run.sh`.
 
 Harness phases (per spec §6.3):
 

@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f15-subagent-team-design.md` (commit `cb078c6`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F15 surface):**
 ```bash
@@ -51,7 +51,7 @@ Append F15 evidence section header (spec `cb078c6`), update PROGRESS current foc
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/types.go`, new `HelixCode/internal/agent/subagent/types_test.go`.
+**Files:** new `helix_code/internal/agent/subagent/types.go`, new `helix_code/internal/agent/subagent/types_test.go`.
 
 Define `Isolation` enum (`IsolationNone`, `IsolationWorktree`), `SubagentState` enum (`StatePending`, `StateRunning`, `StateSucceeded`, `StateFailed`, `StateKilled`, `StateTimedOut`), `SubagentTask` struct, `SubagentResult` struct, `SubagentSpawner` interface, error sentinels (`ErrMaxConcurrency`, `ErrSubagentNotFound`, `ErrWorktreeUnavailable`, `ErrInvalidIsolation`, `ErrSubagentTimeout`, `ErrSubagentKilled`), and `FakeLLMProvider` (TEST PROVIDER per spec §5.2). Add `DefaultSubagentTask()` (sets `Isolation: IsolationNone`, `Timeout: 5*time.Minute`).
 
@@ -104,7 +104,7 @@ Subject: `feat(P1-F15-T02): subagent types + Isolation/State enums + FakeLLMProv
 
 ## Task 3: inprocess_spawner.go (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/inprocess_spawner.go`, new `HelixCode/internal/agent/subagent/inprocess_spawner_test.go`.
+**Files:** new `helix_code/internal/agent/subagent/inprocess_spawner.go`, new `helix_code/internal/agent/subagent/inprocess_spawner_test.go`.
 
 `InProcessSpawner` runs the subagent's inner agent loop in a goroutine. The inner loop is a thin wrapper that:
 1. Calls `provider.Generate(ctx, &llm.LLMRequest{Prompt: task.Prompt})`.
@@ -167,7 +167,7 @@ Subject: `feat(P1-F15-T03): InProcessSpawner with real llm.Provider invocation +
 
 ## Task 4: subprocess_spawner.go (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/subprocess_spawner.go`, new `HelixCode/internal/agent/subagent/subprocess_spawner_test.go`.
+**Files:** new `helix_code/internal/agent/subagent/subprocess_spawner.go`, new `helix_code/internal/agent/subagent/subprocess_spawner_test.go`.
 
 `SubprocessSpawner` fork-execs `os.Executable()` with `HELIX_SUBAGENT_INVOCATION=1` + `HELIX_SUBAGENT_PAYLOAD=<base64-json>`. The injected `Executor` seam lets unit tests assert argv + env without spawning a real subprocess.
 
@@ -238,7 +238,7 @@ Subject: `feat(P1-F15-T04): SubprocessSpawner with sentinel env var + JSON stdou
 
 ## Task 5: manager.go (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/manager.go`, new `HelixCode/internal/agent/subagent/manager_test.go`.
+**Files:** new `helix_code/internal/agent/subagent/manager.go`, new `helix_code/internal/agent/subagent/manager_test.go`.
 
 `SubagentManager.Dispatch` (per spec §4.2): acquire semaphore → assign UUID → set timeout-bound ctx → if isolation=worktree, call `wtMgr.EnterWorktree`, pick subprocess spawner, else pick in-process → register sub in `m.running` → spawn goroutine that calls `spawner.Spawn` and `defer close(ch)` + `defer release sem`.
 
@@ -300,7 +300,7 @@ Subject: `feat(P1-F15-T05): SubagentManager with streaming dispatch + max-concur
 
 ## Task 6: worktree_integration.go (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/worktree_integration.go`, new `HelixCode/internal/agent/subagent/worktree_integration_test.go`.
+**Files:** new `helix_code/internal/agent/subagent/worktree_integration.go`, new `helix_code/internal/agent/subagent/worktree_integration_test.go`.
 
 Wraps F04's `worktree.Manager.EnterWorktree`. The function `prepareWorktreeForSubagent(ctx, wtMgr, subID, baseBranch)` returns `(path string, err error)`. Errors are wrapped with `ErrWorktreeUnavailable` when `wtMgr` is nil.
 
@@ -338,7 +338,7 @@ Subject: `feat(P1-F15-T06): F04 worktree integration for isolation=worktree (rea
 
 ## Task 7: task_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/task_tool.go`, new `HelixCode/internal/tools/task_tool_test.go`.
+**Files:** new `helix_code/internal/tools/task_tool.go`, new `helix_code/internal/tools/task_tool_test.go`.
 
 Lives in package `tools` (NOT `subagent`) so it can directly implement the `Tool` interface without an adapter. Imports `dev.helix.code/internal/agent/subagent`. New `CategorySubagent ToolCategory = "subagent"` constant added to `registry.go`.
 
@@ -404,7 +404,7 @@ Subject: `feat(P1-F15-T07): TaskTool implementing tools.Tool as task (claude-cod
 
 ## Task 8: helper_mode.go + main.go integration (TDD)
 
-**Files:** new `HelixCode/internal/agent/subagent/helper_mode.go`, new `HelixCode/internal/agent/subagent/helper_mode_test.go`, modify `HelixCode/cmd/cli/main.go`.
+**Files:** new `helix_code/internal/agent/subagent/helper_mode.go`, new `helix_code/internal/agent/subagent/helper_mode_test.go`, modify `helix_code/cmd/cli/main.go`.
 
 ```go
 const subagentInvocationEnvVar = "HELIX_SUBAGENT_INVOCATION"
@@ -470,7 +470,7 @@ Subject: `feat(P1-F15-T08): IsSubagentInvocation + RunAsSubagent helper-mode + m
 
 ## Task 9: /subagents slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/subagents_command.go`, new `HelixCode/internal/commands/subagents_command_test.go`.
+**Files:** new `helix_code/internal/commands/subagents_command.go`, new `helix_code/internal/commands/subagents_command_test.go`.
 
 Mirrors F14 `/sandbox` command pattern: defines a small `SubagentManager` interface in the commands package so the slash is testable with a fake.
 
@@ -520,7 +520,7 @@ Subject: `feat(P1-F15-T09): /subagents slash command (list/status/kill) + CONST-
 
 ## Task 10: main.go wiring + integration test
 
-**Files:** modify `HelixCode/cmd/cli/main.go`, modify `HelixCode/internal/tools/registry.go`, new `HelixCode/tests/integration/subagent_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go`, modify `helix_code/internal/tools/registry.go`, new `helix_code/tests/integration/subagent_test.go` (`//go:build integration`).
 
 `registry.go` modifications:
 ```go
@@ -577,7 +577,7 @@ Subject: `feat(P1-F15-T10): wire SubagentManager into main.go + /subagents + gat
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f15_challenge/main.go`, new `challenges/p1-f15-subagent-team/CHALLENGE.md`, new `challenges/p1-f15-subagent-team/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f15_challenge/main.go`, new `challenges/p1-f15-subagent-team/CHALLENGE.md`, new `challenges/p1-f15-subagent-team/run.sh`.
 
 Output skeleton:
 ```

@@ -73,7 +73,7 @@ check "G5 baseline green" 0 "$baseline_g5_rc"
 # ---------------------------------------------------------------------------
 echo
 echo "=== G2 mutation (plant bluff marker in production code) ==="
-G2_TARGET="HelixCode/internal/llm/_mutation_test_bluff.go"
+G2_TARGET="helix_code/internal/llm/_mutation_test_bluff.go"
 cat > "$G2_TARGET" <<'EOF'
 package llm
 
@@ -97,7 +97,7 @@ check "G2 reverted (sweep exits 0)" 0 "$?"
 # ---------------------------------------------------------------------------
 echo
 echo "=== G3 mutation (plant mock-import in production code) ==="
-G3_TARGET="HelixCode/cmd/_mutation_test_mock_import.go"
+G3_TARGET="helix_code/cmd/_mutation_test_mock_import.go"
 cat > "$G3_TARGET" <<'EOF'
 package main
 

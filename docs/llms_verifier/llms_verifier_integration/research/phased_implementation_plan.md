@@ -43,7 +43,7 @@ This plan specifies **every single action** required to integrate LLMsVerifier a
 For each phase, the rollback procedure is:
 1. `git checkout -- <files-modified-in-this-phase>`
 2. `git rm --cached <files-created-in-this-phase>` (then `rm` them)
-3. Restore previous `go.mod` with `git checkout -- HelixCode/go.mod`
+3. Restore previous `go.mod` with `git checkout -- helix_code/go.mod`
 4. Run `make test-unit` to verify baseline passes
 5. Run `make build` to verify compilation succeeds
 
@@ -76,7 +76,7 @@ After completing each phase, run:
 **NOTE**: We do NOT import LLMsVerifier as a Go module (it depends on `digital.vasic.llmprovider` at `../../LLMProvider` which is incompatible with `dev.helix.code`). Instead, we use HTTP REST API calls. No new Go module dependency is needed — we only use `net/http` from stdlib.
 
 #### TASK 1.1.1: Verify No Module Import Required
-**File(s)**: `HelixCode/go.mod`
+**File(s)**: `helix_code/go.mod`
 **Line(s)**: EOF — verify no `replace digital.vasic.llmsverifier` or `digital.vasic.llmprovider` entries
 **Action**: VERIFY
 
@@ -87,7 +87,7 @@ After completing each phase, run:
 ```
 
 **Acceptance Criteria**:
-1. `grep -E "digital\.vasic|llmsverifier|llmprovider" HelixCode/go.mod` returns zero matches
+1. `grep -E "digital\.vasic|llmsverifier|llmprovider" helix_code/go.mod` returns zero matches
 2. `go mod tidy` completes without adding LLMsVerifier as a dependency
 
 **Dependencies**: None
@@ -98,7 +98,7 @@ After completing each phase, run:
 ### TASK 1.2: Add VerifierConfig Struct to internal/config/config.go
 
 #### TASK 1.2.1: Add VerifierConfig and Related Structs
-**File(s)**: `HelixCode/internal/config/config.go`
+**File(s)**: `helix_code/internal/config/config.go`
 **Line(s)**: After line 253 (after `Cognee *CogneeConfig` field)
 **Action**: MODIFY
 
@@ -206,7 +206,7 @@ type HelixAgentVerifierSync struct {
 ---
 
 #### TASK 1.2.2: Add Viper Defaults for All Verifier Config Options
-**File(s)**: `HelixCode/internal/config/config.go`
+**File(s)**: `helix_code/internal/config/config.go`
 **Line(s)**: Inside `setDefaults()` function, after existing defaults
 **Action**: MODIFY
 
@@ -268,7 +268,7 @@ func setDefaults() {
 ---
 
 #### TASK 1.2.3: Add Environment Variable Bindings
-**File(s)**: `HelixCode/internal/config/config.go`
+**File(s)**: `helix_code/internal/config/config.go`
 **Line(s)**: After existing explicit env var bindings (after `HELIX_REDIS_PORT` binding)
 **Action**: MODIFY
 
@@ -324,7 +324,7 @@ func setDefaults() {
 ---
 
 #### TASK 1.2.4: Add Config Validation Rules
-**File(s)**: `HelixCode/internal/config/config.go`
+**File(s)**: `helix_code/internal/config/config.go`
 **Line(s)**: Inside `validateConfig()` function, before `return nil`
 **Action**: MODIFY
 
@@ -389,7 +389,7 @@ func (c *Config) validateConfig() error {
 ### TASK 1.3: Create configs/verifier.yaml
 
 #### TASK 1.3.1: Create Full Verifier Config Schema
-**File(s)**: `HelixCode/configs/verifier.yaml`
+**File(s)**: `helix_code/configs/verifier.yaml`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -545,7 +545,7 @@ verifier:
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/configs/verifier.yaml`
+1. File exists at `helix_code/configs/verifier.yaml`
 2. `go test -short ./internal/config/...` can load this file via Viper
 3. All provider sections have `enabled`, `api_key` (or `host` for local), and `models` fields
 4. Scoring weights sum to 1.0 in the file
@@ -558,7 +558,7 @@ verifier:
 ### TASK 1.4: Update .env.example
 
 #### TASK 1.4.1: Add All Verifier and Provider Env Vars
-**File(s)**: `HelixCode/.env.example`
+**File(s)**: `helix_code/.env.example`
 **Line(s)**: After existing env vars, before any closing comments
 **Action**: MODIFY
 
@@ -615,7 +615,7 @@ HELIX_LLAMA_CPP_HOST=http://localhost:8080
 ### TASK 1.5: Create internal/verifier/types.go
 
 #### TASK 1.5.1: Define All Shared Verifier Types
-**File(s)**: `HelixCode/internal/verifier/types.go`
+**File(s)**: `helix_code/internal/verifier/types.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -797,7 +797,7 @@ var FallbackModels = []*VerifiedModel{
 ### TASK 1.6: Create internal/verifier/client.go
 
 #### TASK 1.6.1: Implement REST API Client
-**File(s)**: `HelixCode/internal/verifier/client.go`
+**File(s)**: `helix_code/internal/verifier/client.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1052,7 +1052,7 @@ func (c *Client) setAuthHeader(req *http.Request) {
 ### TASK 1.7: Create internal/verifier/config.go
 
 #### TASK 1.7.1: Create Verifier-Specific Config Types and Loader
-**File(s)**: `HelixCode/internal/verifier/config.go`
+**File(s)**: `helix_code/internal/verifier/config.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1196,7 +1196,7 @@ func (ac *AdapterConfig) Validate() error {
 ### TASK 1.8: Create internal/verifier/doc.go
 
 #### TASK 1.8.1: Package Documentation
-**File(s)**: `HelixCode/internal/verifier/doc.go`
+**File(s)**: `helix_code/internal/verifier/doc.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1250,7 +1250,7 @@ package verifier
 ### TASK 1.9: Add Enable/Disable Truth Table
 
 #### TASK 1.9.1: Document and Implement Verifier Enable/Disable Behavior
-**File(s)**: `HelixCode/internal/verifier/adapter.go` (will be created in Phase 2, but the truth table is defined here)
+**File(s)**: `helix_code/internal/verifier/adapter.go` (will be created in Phase 2, but the truth table is defined here)
 **Line(s)**: N/A — truth table is enforced by nil-check in initialization
 **Action**: DOCUMENT
 
@@ -1325,7 +1325,7 @@ make test-unit
 ### TASK 2.1: Create internal/verifier/adapter.go
 
 #### TASK 2.1.1: Implement ScoreAdapter Bridge
-**File(s)**: `HelixCode/internal/verifier/adapter.go`
+**File(s)**: `helix_code/internal/verifier/adapter.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1579,7 +1579,7 @@ func (a *Adapter) getFallbackModels() ([]*VerifiedModel, error) {
 ### TASK 2.2: Create internal/verifier/discovery.go
 
 #### TASK 2.2.1: Implement ModelDiscoveryService
-**File(s)**: `HelixCode/internal/verifier/discovery.go`
+**File(s)**: `helix_code/internal/verifier/discovery.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1794,7 +1794,7 @@ func hasAllCapabilities(m *VerifiedModel, required []string) bool {
 ### TASK 2.3: Create internal/verifier/poller.go
 
 #### TASK 2.3.1: Implement Background Polling for Real-Time Updates
-**File(s)**: `HelixCode/internal/verifier/poller.go`
+**File(s)**: `helix_code/internal/verifier/poller.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -1994,7 +1994,7 @@ func indexModels(models []*VerifiedModel) map[string]*VerifiedModel {
 ### TASK 2.4: Create internal/verifier/cache.go
 
 #### TASK 2.4.1: Implement Two-Tier Cache (LRU + Redis)
-**File(s)**: `HelixCode/internal/verifier/cache.go`
+**File(s)**: `helix_code/internal/verifier/cache.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -2183,7 +2183,7 @@ func (c *Cache) Invalidate(provider string) {
 ### TASK 2.5: Create internal/verifier/health.go
 
 #### TASK 2.5.1: Implement Circuit Breaker and Health Monitor
-**File(s)**: `HelixCode/internal/verifier/health.go`
+**File(s)**: `helix_code/internal/verifier/health.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -2328,7 +2328,7 @@ func (h *HealthMonitor) IsHealthy() bool {
 ### TASK 2.6: Create internal/verifier/events.go
 
 #### TASK 2.6.1: Implement Event Publishing to HelixCode Event Bus
-**File(s)**: `HelixCode/internal/verifier/events.go`
+**File(s)**: `helix_code/internal/verifier/events.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -2441,7 +2441,7 @@ func (ep *EventPublisher) SetEnabled(enabled bool) {
 ### TASK 2.7: Modify internal/llm/model_discovery.go
 
 #### TASK 2.7.1: Replace fetchExternalModels() Hardcoded List with Verifier Fetch
-**File(s)**: `HelixCode/internal/llm/model_discovery.go`
+**File(s)**: `helix_code/internal/llm/model_discovery.go`
 **Line(s)**: Search for `func (e *ModelDiscoveryEngine) fetchExternalModels()`
 **Action**: MODIFY
 
@@ -2539,7 +2539,7 @@ func (e *ModelDiscoveryEngine) mapCapabilities(v *verifier.VerifiedModel) []Mode
 ### TASK 2.8: Modify internal/llm/model_manager.go
 
 #### TASK 2.8.1: Augment SelectOptimalModel() with Verifier Scores
-**File(s)**: `HelixCode/internal/llm/model_manager.go`
+**File(s)**: `helix_code/internal/llm/model_manager.go`
 **Line(s)**: Inside `SelectOptimalModel()` method, after task type suitability filter
 **Action**: MODIFY
 
@@ -2645,7 +2645,7 @@ func (m *ModelManager) rankByVerifierScores(
 ### TASK 2.9: Modify cmd/cli/main.go
 
 #### TASK 2.9.1: Replace handleListModels() Hardcoded Models with Dynamic Fetch
-**File(s)**: `HelixCode/cmd/cli/main.go`
+**File(s)**: `helix_code/cmd/cli/main.go`
 **Line(s)**: Lines 101-128 (the `handleListModels` method)
 **Action**: MODIFY
 
@@ -2733,7 +2733,7 @@ func (c *CLI) printFallbackModels() error {
 ### TASK 2.10: Modify internal/llm/factory.go
 
 #### TASK 2.10.1: Add Verifier-Aware Provider Validation
-**File(s)**: `HelixCode/internal/llm/factory.go`
+**File(s)**: `helix_code/internal/llm/factory.go`
 **Line(s)**: After provider creation, before `return provider, nil`
 **Action**: MODIFY
 
@@ -2799,7 +2799,7 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 ### TASK 2.11: Create internal/llm/verifier_integration.go
 
 #### TASK 2.11.1: Create Bridge File Between llm and verifier Packages
-**File(s)**: `HelixCode/internal/llm/verifier_integration.go`
+**File(s)**: `helix_code/internal/llm/verifier_integration.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -2891,7 +2891,7 @@ func (s *VerifierModelSource) convert(verified []*verifier.VerifiedModel) []*Mod
 ### TASK 2.12: Add Provider-Specific Enable/Disable and Real-Time Updates
 
 #### TASK 2.12.1: Implement Provider Enable Truth Table
-**File(s)**: `HelixCode/internal/verifier/adapter.go`
+**File(s)**: `helix_code/internal/verifier/adapter.go`
 **Line(s)**: Already implemented in `filterByProviderConfig()` — add truth table documentation
 **Action**: DOCUMENT
 
@@ -2976,7 +2976,7 @@ make test-unit
 ### TASK 3.1: Create internal/cli/ux/symbols.go
 
 #### TASK 3.1.1: Implement Cross-Platform Symbol Resolution
-**File(s)**: `HelixCode/internal/cli/ux/symbols.go`
+**File(s)**: `helix_code/internal/cli/ux/symbols.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -3090,7 +3090,7 @@ func NewSymbolSet(isWindowsCMD bool) *SymbolSet {
 ### TASK 3.2: Create internal/cli/ux/badges.go
 
 #### TASK 3.2.1: Implement All Badge Types
-**File(s)**: `HelixCode/internal/cli/ux/badges.go`
+**File(s)**: `helix_code/internal/cli/ux/badges.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -3238,7 +3238,7 @@ func formatDuration(d time.Duration) string {
 ### TASK 3.3: Create internal/cli/ux/capabilities.go
 
 #### TASK 3.3.1: Implement Capability Strip Rendering
-**File(s)**: `HelixCode/internal/cli/ux/capabilities.go`
+**File(s)**: `helix_code/internal/cli/ux/capabilities.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -3357,7 +3357,7 @@ func CapabilityDetails(m *verifier.VerifiedModel, v *verifier.VerificationResult
 ### TASK 3.4: Create internal/cli/ux/render.go
 
 #### TASK 3.4.1: Implement Model List Rendering (Wide/Standard/Narrow)
-**File(s)**: `HelixCode/internal/cli/ux/render.go`
+**File(s)**: `helix_code/internal/cli/ux/render.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -3587,7 +3587,7 @@ func formatLatency(d time.Duration) string {
 ### TASK 3.5: Create internal/cli/ux/detail.go
 
 #### TASK 3.5.1: Implement Model Detail Rendering
-**File(s)**: `HelixCode/internal/cli/ux/detail.go`
+**File(s)**: `helix_code/internal/cli/ux/detail.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -3806,7 +3806,7 @@ func renderDetailYAML(m *verifier.VerifiedModel, p *verifier.ProviderStatus, v *
 ### TASK 3.6: Create internal/cli/tui/model_selector.go
 
 #### TASK 3.6.1: Implement tview-Based Interactive Model Selector
-**File(s)**: `HelixCode/internal/cli/tui/model_selector.go`
+**File(s)**: `helix_code/internal/cli/tui/model_selector.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -4041,7 +4041,7 @@ func countStatuses(rows []*ux.ModelListRow) statusCounts {
 ### TASK 3.7: Modify cmd/cli/main.go — Add Enhanced CLI Flags
 
 #### TASK 3.7.1: Add All New CLI Flags
-**File(s)**: `HelixCode/cmd/cli/main.go`
+**File(s)**: `helix_code/cmd/cli/main.go`
 **Line(s)**: After existing `flag.StringVar(&c.prompt, ...)` declarations
 **Action**: MODIFY
 
@@ -4229,7 +4229,7 @@ func (c *CLI) sortModels(models []*verifier.VerifiedModel, sortBy string) []*ver
 ### TASK 3.8: Implement Real-Time Status Bar and Notifications
 
 #### TASK 3.8.1: Create Status Bar Component
-**File(s)**: `HelixCode/internal/cli/ux/status_bar.go`
+**File(s)**: `helix_code/internal/cli/ux/status_bar.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -4280,7 +4280,7 @@ func (sb *StatusBar) Render() string {
 ```
 
 #### TASK 3.8.2: Create Alert/Notification System
-**File(s)**: `HelixCode/internal/cli/ux/alerts.go`
+**File(s)**: `helix_code/internal/cli/ux/alerts.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -4346,7 +4346,7 @@ func (a *Alert) Render(sym *SymbolSet, width int) string {
 ```
 
 #### TASK 3.8.3: Create Auto-Suggest Component
-**File(s)**: `HelixCode/internal/cli/ux/auto_suggest.go`
+**File(s)**: `helix_code/internal/cli/ux/auto_suggest.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -4471,7 +4471,7 @@ make test-unit
 ### TASK 4.1: MCP (Model Context Protocol) Integration
 
 #### TASK 4.1.1: Modify MCP Server to Use Verifier-Selected Models
-**File(s)**: `HelixCode/internal/mcp/server.go`
+**File(s)**: `helix_code/internal/mcp/server.go`
 **Line(s)**: Search for `func (s *Server) handleListTools()` or `func (s *Server) HandleRequest()`
 **Action**: MODIFY
 
@@ -4521,7 +4521,7 @@ func (s *Server) GetMCPCapableModels(ctx context.Context) ([]string, error) {
 ### TASK 4.2: LSP (Language Server Protocol) Integration
 
 #### TASK 4.2.1: Connect LSP Features to Model Capabilities
-**File(s)**: `HelixCode/internal/lsp/completion.go`
+**File(s)**: `helix_code/internal/lsp/completion.go`
 **Line(s)**: Before completion request dispatch
 **Action**: MODIFY
 
@@ -4557,7 +4557,7 @@ func (s *LSPService) selectLSPModel(ctx context.Context) (string, error) {
 ### TASK 4.3: ACP (Agent Communication Protocol) Integration
 
 #### TASK 4.3.1: Reference Verifier in Agent Discovery
-**File(s)**: `HelixCode/internal/acp/discovery.go`
+**File(s)**: `helix_code/internal/acp/discovery.go`
 **Line(s)**: Inside `DiscoverAgents()` function
 **Action**: MODIFY
 
@@ -4603,7 +4603,7 @@ func (d *DiscoveryService) DiscoverAgents(ctx context.Context) ([]*AgentInfo, er
 ### TASK 4.4: Embeddings Integration
 
 #### TASK 4.4.1: Use Verifier to Select Optimal Embedding Models
-**File(s)**: `HelixCode/internal/embeddings/selector.go` (or equivalent)
+**File(s)**: `helix_code/internal/embeddings/selector.go` (or equivalent)
 **Line(s)**: Inside embedding model selection function
 **Action**: MODIFY
 
@@ -4645,7 +4645,7 @@ func (s *EmbeddingService) SelectEmbeddingModel(ctx context.Context) (string, er
 ### TASK 4.5: RAG Integration
 
 #### TASK 4.5.1: Connect RAG Pipeline to Verified Models
-**File(s)**: `HelixCode/internal/rag/pipeline.go`
+**File(s)**: `helix_code/internal/rag/pipeline.go`
 **Line(s)**: Before LLM query dispatch in pipeline
 **Action**: MODIFY
 
@@ -4697,7 +4697,7 @@ func mapBoolFloat(b bool) float64 {
 ### TASK 4.6: Skills Integration
 
 #### TASK 4.6.1: Map Skills to Model Capability Requirements
-**File(s)**: `HelixCode/internal/skills/manager.go`
+**File(s)**: `helix_code/internal/skills/manager.go`
 **Line(s)**: Inside skill execution or validation function
 **Action**: MODIFY
 
@@ -4766,7 +4766,7 @@ func hasCapability(m *verifier.VerifiedModel, cap string) bool {
 ### TASK 4.7: Plugins Integration
 
 #### TASK 4.7.1: Verify Plugins Against Verifier Before Activation
-**File(s)**: `HelixCode/internal/plugins/manager.go`
+**File(s)**: `helix_code/internal/plugins/manager.go`
 **Line(s)**: Inside plugin activation or validation
 **Action**: MODIFY
 
@@ -4814,7 +4814,7 @@ func (m *PluginManager) validatePluginModelRequirements(ctx context.Context, plu
 ### TASK 4.8: Token Usage Tracking Integration
 
 #### TASK 4.8.1: Track Token Usage with Verifier Context
-**File(s)**: `HelixCode/internal/usage/tracker.go` (or equivalent)
+**File(s)**: `helix_code/internal/usage/tracker.go` (or equivalent)
 **Line(s)**: CREATE new file or modify existing
 **Action**: CREATE/MODIFY
 
@@ -4894,7 +4894,7 @@ func (t *TokenUsageTracker) GetUsageReport() []*UsageRecord {
 ### TASK 4.9: Pricing Update Integration
 
 #### TASK 4.9.1: Integrate Real-Time Pricing from Verifier
-**File(s)**: `HelixCode/internal/pricing/monitor.go` (or equivalent)
+**File(s)**: `helix_code/internal/pricing/monitor.go` (or equivalent)
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -4950,7 +4950,7 @@ type PricingUpdate struct {
 ### TASK 4.10: Rate Limiting Integration with Cooldown State
 
 #### TASK 4.10.1: Integrate Rate Limit and Cooldown Awareness
-**File(s)**: `HelixCode/internal/ratelimit/verifier_integration.go` (or equivalent)
+**File(s)**: `helix_code/internal/ratelimit/verifier_integration.go` (or equivalent)
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5178,7 +5178,7 @@ make test-unit
 ### TASK 5.1: Create Unit Test Files
 
 #### TASK 5.1.1: Create internal/verifier/client_test.go
-**File(s)**: `HelixCode/internal/verifier/client_test.go`
+**File(s)**: `helix_code/internal/verifier/client_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5312,7 +5312,7 @@ func TestClient_AuthHeader_NoKey(t *testing.T) {
 ---
 
 #### TASK 5.1.2: Create internal/verifier/cache_test.go
-**File(s)**: `HelixCode/internal/verifier/cache_test.go`
+**File(s)**: `helix_code/internal/verifier/cache_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5399,7 +5399,7 @@ func TestCache_ModelScore(t *testing.T) {
 ---
 
 #### TASK 5.1.3: Create internal/verifier/health_test.go
-**File(s)**: `HelixCode/internal/verifier/health_test.go`
+**File(s)**: `helix_code/internal/verifier/health_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5495,7 +5495,7 @@ func TestHealthMonitor_DisabledBreaker(t *testing.T) {
 ---
 
 #### TASK 5.1.4: Create internal/verifier/adapter_test.go
-**File(s)**: `HelixCode/internal/verifier/adapter_test.go`
+**File(s)**: `helix_code/internal/verifier/adapter_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5594,7 +5594,7 @@ func TestAdapter_GetFallbackModels(t *testing.T) {
 ---
 
 #### TASK 5.1.5: Create internal/verifier/polling_test.go
-**File(s)**: `HelixCode/internal/verifier/polling_test.go`
+**File(s)**: `helix_code/internal/verifier/polling_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5673,7 +5673,7 @@ func TestPoller_DetectChanges(t *testing.T) {
 ---
 
 #### TASK 5.1.6: Create internal/llm/verifier_integration_test.go
-**File(s)**: `HelixCode/internal/llm/verifier_integration_test.go`
+**File(s)**: `helix_code/internal/llm/verifier_integration_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5730,7 +5730,7 @@ func TestVerifierModelSource_FetchModels(t *testing.T) {
 ---
 
 #### TASK 5.1.7: Create internal/cli/ux/render_test.go
-**File(s)**: `HelixCode/internal/cli/ux/render_test.go`
+**File(s)**: `helix_code/internal/cli/ux/render_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5810,7 +5810,7 @@ func TestTruncate(t *testing.T) {
 ### TASK 5.2: Create Contract Test Files
 
 #### TASK 5.2.1: Create tests/contract/verifier_schema_contract_test.go
-**File(s)**: `HelixCode/tests/contract/verifier_schema_contract_test.go`
+**File(s)**: `helix_code/tests/contract/verifier_schema_contract_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5903,7 +5903,7 @@ func ContractTest_VerifierSchema(t *testing.T) {
 ---
 
 #### TASK 5.2.2: Create tests/contract/error_response_contract_test.go
-**File(s)**: `HelixCode/tests/contract/error_response_contract_test.go`
+**File(s)**: `helix_code/tests/contract/error_response_contract_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -5957,7 +5957,7 @@ func ContractTest_ErrorResponseFormat(t *testing.T) {
 ### TASK 5.3: Create Component Test Files
 
 #### TASK 5.3.1: Create tests/component/model_manager_verifier_component_test.go
-**File(s)**: `HelixCode/tests/component/model_manager_verifier_component_test.go`
+**File(s)**: `helix_code/tests/component/model_manager_verifier_component_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -6036,7 +6036,7 @@ func ComponentTest_ModelManagerSelectModel_UsesVerifierScores(t *testing.T) {
 ### TASK 5.4: Create Integration Test Files
 
 #### TASK 5.4.1: Create tests/integration/helixcode_full_stack_test.go
-**File(s)**: `HelixCode/tests/integration/helixcode_full_stack_test.go`
+**File(s)**: `helix_code/tests/integration/helixcode_full_stack_test.go`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -6112,7 +6112,7 @@ func IntegrationTest_FullStack_APIModels_ReturnsVerifierData(t *testing.T) {
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 OUTPUT_FILE="/tmp/verifier_model_list_output.txt"
 
 echo "[CHALLENGE] verifier_model_list_challenge: START"
@@ -6134,7 +6134,7 @@ echo "[CHALLENGE] verifier_model_list_challenge: PASS"
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 OUTPUT_FILE="/tmp/verifier_select_output.txt"
 
 echo "[CHALLENGE] verifier_model_select_challenge: START"
@@ -6157,7 +6157,7 @@ fi
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 OUTPUT_FILE="/tmp/verifier_disable_output.txt"
 
 echo "[CHALLENGE] verifier_disable_fallback_challenge: START"
@@ -6176,14 +6176,14 @@ echo "[CHALLENGE] verifier_disable_fallback_challenge: PASS"
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CONFIG_FILE="${PROJECT_ROOT}/HelixCode/configs/config.yaml"
+CONFIG_FILE="${PROJECT_ROOT}/helix_code/configs/config.yaml"
 
 echo "[CHALLENGE] verifier_api_key_provision_challenge: START"
 if grep -rP 'api_key:\s*sk-[a-zA-Z0-9]' "${CONFIG_FILE}" 2>/dev/null; then
     echo "[FAIL] Literal API key found in config (security violation)"
     exit 1
 fi
-ENV_FILE="${PROJECT_ROOT}/HelixCode/.env.example"
+ENV_FILE="${PROJECT_ROOT}/helix_code/.env.example"
 KEY_COUNT=$(grep -c "HELIX_.*API_KEY\|HELIX_.*API_TOKEN" "${ENV_FILE}" || true)
 if [[ "${KEY_COUNT}" -lt 10 ]]; then
     echo "[FAIL] Only ${KEY_COUNT} API keys documented in .env.example (expected >= 10)"
@@ -6269,7 +6269,7 @@ echo "[CHALLENGE] verifier_mcp_lsp_acp_challenge: PASS"
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 
 echo "[CHALLENGE] verifier_cross_platform_cli_challenge: START"
 PLATFORM=$(uname -s)
@@ -6310,7 +6310,7 @@ echo "[CHALLENGE] verifier_cross_platform_cli_challenge: PASS (${PLATFORM} ${ARC
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-SERVER_BIN="${PROJECT_ROOT}/HelixCode/bin/server"
+SERVER_BIN="${PROJECT_ROOT}/helix_code/bin/server"
 LOG_FILE="/tmp/verifier_startup_pipeline.log"
 
 echo "[CHALLENGE] verifier_startup_pipeline_challenge: START"
@@ -6388,7 +6388,7 @@ echo "[CHALLENGE] verifier_canned_detection_challenge: PASS"
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 CLI_LOG="/tmp/verifier_security_cli.log"
 
 echo "[CHALLENGE] verifier_security_redaction_challenge: START"
@@ -6401,7 +6401,7 @@ if grep -q "${FAKE_KEY}" "${CLI_LOG}"; then
     echo "[FAIL] API key found in CLI output"
     exit 1
 fi
-if grep -r "${FAKE_KEY}" "${PROJECT_ROOT}/HelixCode/" > /dev/null 2>&1; then
+if grep -r "${FAKE_KEY}" "${PROJECT_ROOT}/helix_code/" > /dev/null 2>&1; then
     echo "[FAIL] API key found in HelixCode directory"
     exit 1
 fi
@@ -6464,7 +6464,7 @@ echo "[CHALLENGE] verifier_scoring_accuracy_challenge: PASS"
 ### TASK 5.6: Create Coverage and Quality Scripts
 
 #### TASK 5.6.1: Create scripts/enforce_coverage.sh
-**File(s)**: `HelixCode/scripts/enforce_coverage.sh`
+**File(s)**: `helix_code/scripts/enforce_coverage.sh`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -6492,7 +6492,7 @@ echo "[PASS] Coverage check passed: Unit=${UNIT_COVER}%, Integration=${INTEGRATI
 ```
 
 #### TASK 5.6.2: Create scripts/no_mocks_above_unit.sh
-**File(s)**: `HelixCode/scripts/no_mocks_above_unit.sh`
+**File(s)**: `helix_code/scripts/no_mocks_above_unit.sh`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -6518,7 +6518,7 @@ echo "[PASS] No mocks above unit tests"
 ```
 
 #### TASK 5.6.3: Create docker-compose.test.yml
-**File(s)**: `HelixCode/docker-compose.test.yml`
+**File(s)**: `helix_code/docker-compose.test.yml`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -6587,7 +6587,7 @@ volumes:
 ### TASK 5.7: Modify Makefile
 
 #### TASK 5.7.1: Add All Test Targets
-**File(s)**: `HelixCode/Makefile`
+**File(s)**: `helix_code/Makefile`
 **Line(s)**: Before existing `.PHONY` line or at end of file
 **Action**: MODIFY
 
@@ -6751,7 +6751,7 @@ make test-unit
 ### TASK 6.1: Update CONSTITUTION.md
 
 #### TASK 6.1.1: Add CONST-036 through CONST-040
-**File(s)**: `HelixCode/CONSTITUTION.md`
+**File(s)**: `helix_code/CONSTITUTION.md`
 **Line(s)**: After CONST-035 (before ## MANIFESTO section)
 **Action**: MODIFY
 
@@ -6787,7 +6787,7 @@ make test-unit
 ### TASK 6.2: Update CLAUDE.md
 
 #### TASK 6.2.1: Add Verifier Architecture Section
-**File(s)**: `HelixCode/CLAUDE.md`
+**File(s)**: `helix_code/CLAUDE.md`
 **Line(s)**: After existing architecture section (or at end of document)
 **Action**: MODIFY
 
@@ -6855,7 +6855,7 @@ HelixCode integrates LLMsVerifier as its single source of truth for model metada
 ### TASK 6.3: Update AGENTS.md
 
 #### TASK 6.3.1: Add New Bluff Areas BLUFF-004 through BLUFF-008
-**File(s)**: `HelixCode/AGENTS.md`
+**File(s)**: `helix_code/AGENTS.md`
 **Line(s)**: After existing BLUFF-003 (or at end of Known Bluff Areas section)
 **Action**: MODIFY
 
@@ -6912,7 +6912,7 @@ HelixCode integrates LLMsVerifier as its single source of truth for model metada
 ### TASK 6.4: Create docs/verifier/INTEGRATION_GUIDE.md
 
 #### TASK 6.4.1: Write Comprehensive Integration Guide
-**File(s)**: `HelixCode/docs/verifier/INTEGRATION_GUIDE.md`
+**File(s)**: `helix_code/docs/verifier/INTEGRATION_GUIDE.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7018,7 +7018,7 @@ See Phase Rollback Plans in `phased_implementation_plan.md`.
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/INTEGRATION_GUIDE.md`
+1. File exists at `helix_code/docs/verifier/INTEGRATION_GUIDE.md`
 2. Contains configuration section with all env vars
 3. Contains troubleshooting section with 3+ entries
 4. References `CLAUDE.md` and `configs/verifier.yaml`
@@ -7031,7 +7031,7 @@ See Phase Rollback Plans in `phased_implementation_plan.md`.
 ### TASK 6.5: Create docs/verifier/USER_GUIDE.md
 
 #### TASK 6.5.1: Write User Guide
-**File(s)**: `HelixCode/docs/verifier/USER_GUIDE.md`
+**File(s)**: `helix_code/docs/verifier/USER_GUIDE.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7097,7 +7097,7 @@ The CLI automatically polls the verifier for updates. Use `--refresh-models` to 
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/USER_GUIDE.md`
+1. File exists at `helix_code/docs/verifier/USER_GUIDE.md`
 2. Contains examples for all CLI flags
 3. Contains at least 5 usage examples
 
@@ -7109,7 +7109,7 @@ The CLI automatically polls the verifier for updates. Use `--refresh-models` to 
 ### TASK 6.6: Create docs/verifier/API_REFERENCE.md
 
 #### TASK 6.6.1: Write API Reference
-**File(s)**: `HelixCode/docs/verifier/API_REFERENCE.md`
+**File(s)**: `helix_code/docs/verifier/API_REFERENCE.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7185,7 +7185,7 @@ models, err := client.GetModels(ctx)
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/API_REFERENCE.md`
+1. File exists at `helix_code/docs/verifier/API_REFERENCE.md`
 2. Documents all 7 API endpoints
 3. References `internal/verifier/types.go` for data types
 
@@ -7197,7 +7197,7 @@ models, err := client.GetModels(ctx)
 ### TASK 6.7: Create docs/verifier/CONFIGURATION.md
 
 #### TASK 6.7.1: Write Configuration Reference
-**File(s)**: `HelixCode/docs/verifier/CONFIGURATION.md`
+**File(s)**: `helix_code/docs/verifier/CONFIGURATION.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7253,7 +7253,7 @@ models, err := client.GetModels(ctx)
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/CONFIGURATION.md`
+1. File exists at `helix_code/docs/verifier/CONFIGURATION.md`
 2. Documents all 6 key settings
 3. Lists all 5 validation rules
 
@@ -7265,7 +7265,7 @@ models, err := client.GetModels(ctx)
 ### TASK 6.8: Create docs/verifier/TROUBLESHOOTING.md
 
 #### TASK 6.8.1: Write Troubleshooting Guide
-**File(s)**: `HelixCode/docs/verifier/TROUBLESHOOTING.md`
+**File(s)**: `helix_code/docs/verifier/TROUBLESHOOTING.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7335,7 +7335,7 @@ models, err := client.GetModels(ctx)
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/TROUBLESHOOTING.md`
+1. File exists at `helix_code/docs/verifier/TROUBLESHOOTING.md`
 2. Contains 4 troubleshooting entries with Symptoms, Diagnosis, Resolution
 3. Each entry has at least 2 diagnosis steps and 2 resolution steps
 
@@ -7347,7 +7347,7 @@ models, err := client.GetModels(ctx)
 ### TASK 6.9: Update README.md
 
 #### TASK 6.9.1: Add Verifier Features Section
-**File(s)**: `HelixCode/README.md`
+**File(s)**: `helix_code/README.md`
 **Line(s)**: After existing "Features" section or near the top
 **Action**: MODIFY
 
@@ -7395,7 +7395,7 @@ See `docs/verifier/INTEGRATION_GUIDE.md` for full documentation.
 ### TASK 6.10: Create configs/verifier.yaml.example
 
 #### TASK 6.10.1: Create Example Configuration File
-**File(s)**: `HelixCode/configs/verifier.yaml.example`
+**File(s)**: `helix_code/configs/verifier.yaml.example`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7449,7 +7449,7 @@ verifier:
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/configs/verifier.yaml.example`
+1. File exists at `helix_code/configs/verifier.yaml.example`
 2. All env vars use `${VAR}` syntax
 3. Contains example for OpenAI and Anthropic providers
 
@@ -7498,7 +7498,7 @@ verifier:
 ### TASK 6.12: Create Migration Guide
 
 #### TASK 6.12.1: Write Migration Guide from Hardcoded System
-**File(s)**: `HelixCode/docs/verifier/MIGRATION_GUIDE.md`
+**File(s)**: `helix_code/docs/verifier/MIGRATION_GUIDE.md`
 **Line(s)**: CREATE new file
 **Action**: CREATE
 
@@ -7540,7 +7540,7 @@ All code paths have `if adapter != nil && adapter.IsEnabled()` guards.
 ```
 
 **Acceptance Criteria**:
-1. File exists at `HelixCode/docs/verifier/MIGRATION_GUIDE.md`
+1. File exists at `helix_code/docs/verifier/MIGRATION_GUIDE.md`
 2. Contains before/after comparison
 3. Contains numbered migration steps
 4. States backward compatibility guarantee

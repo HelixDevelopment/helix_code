@@ -18,7 +18,7 @@ Three concrete user surfaces ship together:
 
 Scope is **Linux v1**. macOS Seatbelt and Windows Job Object are explicitly deferred to F14.5 (§8). On non-Linux hosts the manager fails closed with a clear message — no fallback "noop" sandbox is offered, ever.
 
-The existing `HelixCode/internal/tools/shell/` package (which ships its own `Command` / `ShellExecutor` / `Sandbox` types and has pre-existing build failures predating F09) is **left untouched**. F14 is a parallel, additive package at `HelixCode/internal/tools/sandbox/` with its own types and its own tool. There is intentionally no shared `SandboxConfig` symbol between the two packages — name reuse across packages is fine in Go and avoiding it would mean either fixing pre-existing breakage or contorting F14's API; both are out of scope.
+The existing `helix_code/internal/tools/shell/` package (which ships its own `Command` / `ShellExecutor` / `Sandbox` types and has pre-existing build failures predating F09) is **left untouched**. F14 is a parallel, additive package at `helix_code/internal/tools/sandbox/` with its own types and its own tool. There is intentionally no shared `SandboxConfig` symbol between the two packages — name reuse across packages is fine in Go and avoiding it would mean either fixing pre-existing breakage or contorting F14's API; both are out of scope.
 
 The scope of F14 is **kernel-enforced isolation of a single shell command per invocation**. Long-running daemons inside the sandbox, persistent named sandbox sessions, in-sandbox interactive TTYs, and seccomp-bpf custom filters are explicitly deferred (§8).
 
@@ -56,29 +56,29 @@ The manager and the slash command both consume `SandboxCapabilities` directly so
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/tools/sandbox/types.go` — `SandboxConfig`, `SandboxPolicy`, `SandboxCapabilities`, `SandboxRequest`, `SandboxResult`, `SandboxBackend` interface, `SandboxBackendKind` enum, deny-list constants. No external deps.
-- `HelixCode/internal/tools/sandbox/types_test.go`.
-- `HelixCode/internal/tools/sandbox/detector.go` — `Detect() SandboxCapabilities` (probes bwrap, userns, cgroups v2, GOOS).
-- `HelixCode/internal/tools/sandbox/detector_test.go` — uses an injected `Probe` interface so unit tests don't depend on the host kernel.
-- `HelixCode/internal/tools/sandbox/bubblewrap_backend.go` — argv builder + Run via `os/exec.CommandContext`.
-- `HelixCode/internal/tools/sandbox/bubblewrap_backend_test.go` — argv assertions against a fake `SubprocessRunner`.
-- `HelixCode/internal/tools/sandbox/native_backend.go` — `SysProcAttr.Cloneflags` setup + Run.
-- `HelixCode/internal/tools/sandbox/native_backend_test.go` — gated unit tests when `unprivileged_userns_clone == 1`.
-- `HelixCode/internal/tools/sandbox/manager.go` — backend selection + policy enforcement.
-- `HelixCode/internal/tools/sandbox/manager_test.go`.
-- `HelixCode/internal/tools/sandbox/sandboxed_shell_tool.go` — `Tool` interface implementation; tool name `shell_sandboxed`.
-- `HelixCode/internal/tools/sandbox/sandboxed_shell_tool_test.go`.
-- `HelixCode/internal/tools/sandbox/config_loader.go` — YAML loader + secret-safe writer (mirrors F12 `wizard_writer.go`).
-- `HelixCode/internal/tools/sandbox/config_loader_test.go`.
-- `HelixCode/internal/commands/sandbox_command.go` — `/sandbox` slash command (`status` / `test` / `policy`).
-- `HelixCode/internal/commands/sandbox_command_test.go`.
-- `HelixCode/tests/integration/sandbox_test.go` — `//go:build integration`, gated per §5.
-- `HelixCode/tests/integration/cmd/p1f14_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/tools/sandbox/types.go` — `SandboxConfig`, `SandboxPolicy`, `SandboxCapabilities`, `SandboxRequest`, `SandboxResult`, `SandboxBackend` interface, `SandboxBackendKind` enum, deny-list constants. No external deps.
+- `helix_code/internal/tools/sandbox/types_test.go`.
+- `helix_code/internal/tools/sandbox/detector.go` — `Detect() SandboxCapabilities` (probes bwrap, userns, cgroups v2, GOOS).
+- `helix_code/internal/tools/sandbox/detector_test.go` — uses an injected `Probe` interface so unit tests don't depend on the host kernel.
+- `helix_code/internal/tools/sandbox/bubblewrap_backend.go` — argv builder + Run via `os/exec.CommandContext`.
+- `helix_code/internal/tools/sandbox/bubblewrap_backend_test.go` — argv assertions against a fake `SubprocessRunner`.
+- `helix_code/internal/tools/sandbox/native_backend.go` — `SysProcAttr.Cloneflags` setup + Run.
+- `helix_code/internal/tools/sandbox/native_backend_test.go` — gated unit tests when `unprivileged_userns_clone == 1`.
+- `helix_code/internal/tools/sandbox/manager.go` — backend selection + policy enforcement.
+- `helix_code/internal/tools/sandbox/manager_test.go`.
+- `helix_code/internal/tools/sandbox/sandboxed_shell_tool.go` — `Tool` interface implementation; tool name `shell_sandboxed`.
+- `helix_code/internal/tools/sandbox/sandboxed_shell_tool_test.go`.
+- `helix_code/internal/tools/sandbox/config_loader.go` — YAML loader + secret-safe writer (mirrors F12 `wizard_writer.go`).
+- `helix_code/internal/tools/sandbox/config_loader_test.go`.
+- `helix_code/internal/commands/sandbox_command.go` — `/sandbox` slash command (`status` / `test` / `policy`).
+- `helix_code/internal/commands/sandbox_command_test.go`.
+- `helix_code/tests/integration/sandbox_test.go` — `//go:build integration`, gated per §5.
+- `helix_code/tests/integration/cmd/p1f14_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
-- `HelixCode/internal/tools/registry.go` — register `SandboxedShellTool` in `registerAllTools()`. Add `SetSandboxManager(*sandbox.SandboxManager)` in the same shape as the existing F13 `SetLSPManager`. The tool is registered lazily from `SetSandboxManager` (so unit tests of the registry that don't supply a manager don't see `shell_sandboxed`). NO changes to `Execute` semantics — `shell_sandboxed` is just another tool, no auto-trigger needed.
-- `HelixCode/cmd/cli/main.go` — call `sandbox.Detect()`, load `~/.config/helixcode/sandbox.yaml`, construct a `SandboxManager`, call `registry.SetSandboxManager(...)`, register `/sandbox` slash command. **No cobra subcommand** (Q5=C — keeps surface light).
+- `helix_code/internal/tools/registry.go` — register `SandboxedShellTool` in `registerAllTools()`. Add `SetSandboxManager(*sandbox.SandboxManager)` in the same shape as the existing F13 `SetLSPManager`. The tool is registered lazily from `SetSandboxManager` (so unit tests of the registry that don't supply a manager don't see `shell_sandboxed`). NO changes to `Execute` semantics — `shell_sandboxed` is just another tool, no auto-trigger needed.
+- `helix_code/cmd/cli/main.go` — call `sandbox.Detect()`, load `~/.config/helixcode/sandbox.yaml`, construct a `SandboxManager`, call `registry.SetSandboxManager(...)`, register `/sandbox` slash command. **No cobra subcommand** (Q5=C — keeps surface light).
 
 ### 3.3 Types
 
@@ -221,7 +221,7 @@ The agent tool result is a `map[string]interface{}` with keys `exit_code`, `stdo
 
 ### 3.5 Existing-code constraints
 
-`HelixCode/internal/tools/shell/` already defines `SandboxConfig`, `SandboxBackend`, `Sandbox`, `Command`, `ExecutionResult`, `NetworkMode`, etc. **F14 deliberately does NOT import or modify that package.** Names in the new `sandbox` package are independent (Go scopes types per package). The pre-existing build failures in `internal/tools/shell/` predate F09 and are out of scope; the `shell_sandboxed` tool is implemented directly via `os/exec.CommandContext` plus the new backend, without the broken `ShellExecutor`. The existing `bash` tool stays as-is — F14 does not modify it (Q4=B).
+`helix_code/internal/tools/shell/` already defines `SandboxConfig`, `SandboxBackend`, `Sandbox`, `Command`, `ExecutionResult`, `NetworkMode`, etc. **F14 deliberately does NOT import or modify that package.** Names in the new `sandbox` package are independent (Go scopes types per package). The pre-existing build failures in `internal/tools/shell/` predate F09 and are out of scope; the `shell_sandboxed` tool is implemented directly via `os/exec.CommandContext` plus the new backend, without the broken `ShellExecutor`. The existing `bash` tool stays as-is — F14 does not modify it (Q4=B).
 
 ## 4. Data flow
 

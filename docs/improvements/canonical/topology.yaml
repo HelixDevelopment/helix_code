@@ -7,7 +7,7 @@ modules:
     - name: HelixCode
       role: integration core (meta-repo)
       type: monorepo
-    - name: HelixCode/HelixCode  # path here is "from repo root"
+    - name: helix_code/HelixCode  # path here is "from repo root"
       role: Go application (tracked subdirectory)
       type: go-module
 

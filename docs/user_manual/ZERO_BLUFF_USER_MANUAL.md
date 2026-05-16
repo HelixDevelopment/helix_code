@@ -35,7 +35,7 @@ cd HelixCode
 ### 1.3 First-Run Wizard (F01 + F02)
 
 ```bash
-./HelixCode/bin/cli wizard
+./helix_code/bin/cli wizard
 ```
 
 The wizard walks through:
@@ -69,7 +69,7 @@ Resolution order (highest precedence first):
 | F17 — Smart File Editing | 4 formats (diff/whole/search-replace/line) auto-selected per LLM model | Used internally by the `edit` tool |
 | F26 — Workspace Manager | Tracks the active project root | `/workspace show`, `/workspace switch <path>` |
 
-Smart-edit format selection happens automatically based on the model's strengths; see `HelixCode/internal/editor/README.md`.
+Smart-edit format selection happens automatically based on the model's strengths; see `helix_code/internal/editor/README.md`.
 
 ### 2.2 Approval & Sandbox (F02, F14, F21)
 
@@ -82,10 +82,10 @@ Smart-edit format selection happens automatically based on the model's strengths
 Set the mode at startup:
 
 ```bash
-./HelixCode/bin/cli --approval suggest
-./HelixCode/bin/cli --approval auto-edit
-./HelixCode/bin/cli --approval full-auto      # requires sandbox
-HELIXCODE_APPROVAL=full-auto ./HelixCode/bin/cli
+./helix_code/bin/cli --approval suggest
+./helix_code/bin/cli --approval auto-edit
+./helix_code/bin/cli --approval full-auto      # requires sandbox
+HELIXCODE_APPROVAL=full-auto ./helix_code/bin/cli
 ```
 
 Inspect / change at runtime:
@@ -156,7 +156,7 @@ CLI agents (Claude Code, Aider, Cline) for these fifteen.
 
 For vLLM, LocalAI, LM Studio (and any other OpenAI-compatible
 passthrough endpoint with no dedicated constructor): add an entry
-under `llm.providers:` in `HelixCode/config/config.yaml`, start
+under `llm.providers:` in `helix_code/config/config.yaml`, start
 the HelixCode server (`make build && ./bin/helixcode server`),
 and access the provider via the server's REST API or via the
 CLI's `-server-url` flag pointing at the server. The server
@@ -318,7 +318,7 @@ See [`docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md`](../COMPLETE_CONFIGURATION_D
 
 Every visible feature is backed by:
 
-- A passing test (`HelixCode/<pkg>/*_test.go`).
+- A passing test (`helix_code/<pkg>/*_test.go`).
 - A Challenge that exercises the end-to-end user workflow against real infrastructure (`challenges/`).
 - An evidence trail in `docs/improvements/PROGRESS.md`.
 

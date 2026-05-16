@@ -7,13 +7,13 @@ RUN apk add --no-cache git ca-certificates tzdata docker-cli openssh-client
 WORKDIR /app
 
 # Copy go mod files
-COPY HelixCode/go.mod HelixCode/go.sum ./
+COPY helix_code/go.mod helix_code/go.sum ./
 
 # Download dependencies
 RUN go mod download
 
 # Copy source code
-COPY HelixCode/ .
+COPY helix_code/ .
 
 # Build all components
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=1.0.0 -X main.buildTime=$(date +%Y-%m-%d_%H:%M:%S) -X main.gitCommit=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" -o bin/server ./cmd/server

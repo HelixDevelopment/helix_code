@@ -18,8 +18,8 @@ Phase 1 implementation is **100% complete**, **fully tested**, **documented**, a
 ### 1. **Prompt Caching System** (90% Cost Reduction)
 
 **Files Created:**
-- `HelixCode/internal/llm/cache_control.go` (260 lines)
-- `HelixCode/internal/llm/cache_control_test.go` (1,080 lines, 60 tests)
+- `helix_code/internal/llm/cache_control.go` (260 lines)
+- `helix_code/internal/llm/cache_control_test.go` (1,080 lines, 60 tests)
 
 **Features:**
 - ✅ 5 caching strategies (None, System, Tools, Context, Aggressive)
@@ -47,9 +47,9 @@ Savings: $0.054 (90%)
 ### 2. **Reasoning Model Support** (o1, DeepSeek R1, Claude, QwQ)
 
 **Files Created:**
-- `HelixCode/internal/llm/reasoning.go` (509 lines)
-- `HelixCode/internal/llm/reasoning_test.go` (709 lines, 41 tests)
-- `HelixCode/docs/REASONING_MODELS.md` (695 lines documentation)
+- `helix_code/internal/llm/reasoning.go` (509 lines)
+- `helix_code/internal/llm/reasoning_test.go` (709 lines, 41 tests)
+- `helix_code/docs/REASONING_MODELS.md` (695 lines documentation)
 
 **Supported Models:**
 | Model | Budget | Input Cost | Output Cost | Best For |
@@ -82,8 +82,8 @@ Complex refactoring task:
 ### 3. **Token Budget Management** (Complete Cost Control)
 
 **Files Created:**
-- `HelixCode/internal/llm/token_budget.go` (363 lines)
-- `HelixCode/internal/llm/token_budget_test.go` (1,200+ lines, 77 tests)
+- `helix_code/internal/llm/token_budget.go` (363 lines)
+- `helix_code/internal/llm/token_budget_test.go` (1,200+ lines, 77 tests)
 
 **Features:**
 - ✅ Per-request token limits (default: 10,000)
@@ -124,7 +124,7 @@ Enterprise usage (1,000 requests/day):
 ### Provider Interface Enhancement
 
 **Updated:**
-- `HelixCode/internal/llm/provider.go` - Enhanced ProviderManager
+- `helix_code/internal/llm/provider.go` - Enhanced ProviderManager
 
 **New Features:**
 ```go
@@ -347,10 +347,10 @@ During Phase 1, agents also implemented significant portions of Phase 2-6:
 - `PROVIDER_FEATURES.md` - Provider capabilities
 
 **Code Locations:**
-- Cache Control: `HelixCode/internal/llm/cache_control.go`
-- Reasoning: `HelixCode/internal/llm/reasoning.go`
-- Token Budgets: `HelixCode/internal/llm/token_budget.go`
-- Provider Manager: `HelixCode/internal/llm/provider.go`
+- Cache Control: `helix_code/internal/llm/cache_control.go`
+- Reasoning: `helix_code/internal/llm/reasoning.go`
+- Token Budgets: `helix_code/internal/llm/token_budget.go`
+- Provider Manager: `helix_code/internal/llm/provider.go`
 
 **Tests:**
 - All tests: `cd HelixCode && go test ./internal/llm/...`

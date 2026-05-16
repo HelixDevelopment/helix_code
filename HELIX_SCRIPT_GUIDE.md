@@ -340,13 +340,13 @@ HELIX_DEBUG=1 ./helix start
 ## 📁 Directory Structure
 
 ```
-HelixCode/
+helix_code/
 ├── helix                    # Main facade script
 ├── .env                     # Environment configuration
 ├── workspace/               # Working directory (mounted)
 ├── projects/                # Project storage (mounted)
 ├── shared/                  # Shared configuration (mounted)
-└── HelixCode/              # Source code
+└── helix_code/              # Source code
     ├── config/             # Application configuration
     ├── assets/             # Static assets
     └── test/ssh-keys/      # SSH keys for workers

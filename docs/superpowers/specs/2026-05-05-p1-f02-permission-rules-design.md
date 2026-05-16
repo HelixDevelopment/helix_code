@@ -355,10 +355,10 @@ Estimated 13 sub-commits. F03 (Tool Result Persistence) is unblocked when T13 la
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f01-auto-compaction.md`
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`
 - Existing infrastructure being extended:
-  - `HelixCode/internal/tools/confirmation/policies.go` — `PolicyEngine`, `Policy`, `Rule`, `Condition`
-  - `HelixCode/internal/tools/confirmation/audit.go` — audit log
-  - `HelixCode/internal/workflow/autonomy/permission.go` — autonomy-level `PermissionManager` (unchanged)
-  - `HelixCode/internal/commands/command.go` — slash-command interface
+  - `helix_code/internal/tools/confirmation/policies.go` — `PolicyEngine`, `Policy`, `Rule`, `Condition`
+  - `helix_code/internal/tools/confirmation/audit.go` — audit log
+  - `helix_code/internal/workflow/autonomy/permission.go` — autonomy-level `PermissionManager` (unchanged)
+  - `helix_code/internal/commands/command.go` — slash-command interface
 - Constitutional anchors:
   - Article XI §11.9 — Anti-Bluff Forensic Anchor (every PASS carries runtime evidence)
   - CONST-035 — Zero-Bluff Mandate

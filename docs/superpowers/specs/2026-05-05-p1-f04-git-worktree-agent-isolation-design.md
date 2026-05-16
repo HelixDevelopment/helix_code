@@ -26,7 +26,7 @@ The implementation shells out to the `git` binary for all worktree operations, c
 - **G1 — No bluff.** Per Constitution Article XI §11.9, every PASS in this feature carries positive runtime evidence. The Challenge proves a real `git worktree add` succeeded against an ephemeral repo and the agent's effective working directory actually changed.
 - **G2 — Extend, don't parallelise.** Same lesson as F01/F02/F03. New sub-package `internal/tools/worktree/` lives next to `permissions/`, `persistence/`, `confirmation/` — same logical layer, different concern. The existing `internal/tools/git/` package (focused on auto-commit + attribution + message generation) is left untouched: worktree management is a workflow concern, not a commit-metadata concern.
 - **G3 — Per-session state via single field on `session.Manager`.** The porting doc proposes a parallel `internal/session/worktree_state.go`; we instead add a single `currentWorktree string` field plus getter/setter to `internal/session/manager.go`. Less surface area, same outcome.
-- **G4 — Meta-only worktrees.** `EnterWorktree` does not init submodules. The new worktree contains the meta-repo files + the inner Go module at `HelixCode/` (a tracked subdirectory, present in any checkout). Submodules under `helix_agent/`, `Dependencies/`, etc. are empty placeholder directories. Agents that need submodule code run `git submodule update --init --recursive` from inside the worktree.
+- **G4 — Meta-only worktrees.** `EnterWorktree` does not init submodules. The new worktree contains the meta-repo files + the inner Go module at `helix_code/` (a tracked subdirectory, present in any checkout). Submodules under `helix_agent/`, `Dependencies/`, etc. are empty placeholder directories. Agents that need submodule code run `git submodule update --init --recursive` from inside the worktree.
 - **G5 — Full surface (tools + Cobra + slash).** Mirrors F02's polish level. Agent-facing tools, human-facing CLI, and in-session slash command share a single `*Manager` instance.
 
 ### 1.3 Non-goals (explicit out-of-scope for F04)
@@ -105,7 +105,7 @@ A single `*worktree.Manager` instance is constructed at CLI startup with `repoRo
 | `internal/commands/builtin/register.go` (extended) | Add `registry.Register(commands.NewWorktreeCommand(manager))` alongside the existing `NewPermissionsCommand` registration. Update `GetBuiltinCommandNames` and `GetBuiltinCommandAliases`. |
 | `internal/session/manager.go` (extended) | Add `currentWorktree string` field + `GetCurrentWorktree() string` + `SetCurrentWorktree(s string)` methods. Use the session's existing mutex (or add `sync.RWMutex` if absent). |
 | `cmd/cli/main.go` (extended) | Construct `*worktree.Manager` at startup with `repoRoot` resolved via `gitRevParseToplevel` (fallback to `os.Getwd()`). Inject into tool registry, Cobra subcommand group, and `WorktreeCommand` constructor. |
-| `.gitignore` (root + `HelixCode/.gitignore`) | Add `.helix-worktrees/` entry to both. |
+| `.gitignore` (root + `helix_code/.gitignore`) | Add `.helix-worktrees/` entry to both. |
 
 ---
 
@@ -207,7 +207,7 @@ The two-step "try existing, fall back to new" pattern matches the porting doc.
 
 Per §1.2 G4: `EnterWorktree` does NOT initialise submodules. The `Description` returned by `EnterWorktreeTool.Description()` documents this:
 
-> "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied). Submodules are NOT initialised — the meta-repo and the inner Go module at HelixCode/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
+> "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
 
 This becomes part of the LLM-visible tool documentation.
 
@@ -349,7 +349,7 @@ Temporarily comment out the regex check in `ValidateName`. Re-run Challenge — 
 
 | # | Task | Outputs |
 |---|---|---|
-| T01 | Bootstrap `06_phase_1_evidence.md` §F04 + advance PROGRESS to F04-active + add `.helix-worktrees/` to root + `HelixCode/.gitignore` | docs + gitignore only |
+| T01 | Bootstrap `06_phase_1_evidence.md` §F04 + advance PROGRESS to F04-active + add `.helix-worktrees/` to root + `helix_code/.gitignore` | docs + gitignore only |
 | T02 | `internal/tools/worktree/types.go` + `doc.go` skeleton (constants + Worktree struct) | compile-only |
 | T03 | `git.go` thin git-binary wrappers + tests against real ephemeral repo (TDD) | unit tests pass |
 | T04 | `manager.go`: `Manager` struct + `ValidateName` + `GetCurrentDirectory` + `IsIsolated` (TDD) | unit tests pass |
@@ -382,7 +382,7 @@ Listed in §1.3 (N1–N7). Summarised here: subagent isolation (P1-F15), session
 | Concurrent `EnterWorktree` calls (race on same name) | `Manager.mu` serialises mutations; concurrent enters with the same name converge on the same path. |
 | `RemoveWorktree` on a worktree that was manually deleted | `git worktree remove` may fail; falls back to `-f`; documented. |
 | `.helix-worktrees/` name collides with user data | Unlikely (dot-prefix + specific name). Collision triggers a startup-time error or a documented `git worktree add` failure. |
-| HelixCode meta-repo's tracked-subdirectory-not-submodule layout for `HelixCode/` makes `git worktree` semantics unusual | The inner Go module IS present in the worktree (it's a tracked subdirectory). T11 integration test verifies. |
+| HelixCode meta-repo's tracked-subdirectory-not-submodule layout for `helix_code/` makes `git worktree` semantics unusual | The inner Go module IS present in the worktree (it's a tracked subdirectory). T11 integration test verifies. |
 | `cmd/cli/main.go` is large and tangled (per F02/F03 review notes) | T09 + T11 only ADD a few lines. No restructuring. |
 | F02's permissions wiring gap + F03's persistence wiring gap also touch `cmd/cli/main.go` | F04's wiring is independent (different fields, different methods). The three features coexist on the CLI struct. |
 
@@ -396,11 +396,11 @@ Listed in §1.3 (N1–N7). Summarised here: subagent isolation (P1-F15), session
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f03-tool-result-persistence.md` (commit `d33f674`)
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`
 - Existing infrastructure being audited (NOT modified except for wiring):
-  - `HelixCode/internal/tools/git/` — auto-commit + attribution + message generation; uses `os/exec` to shell out to git (8 callsites). Pattern reused; package itself not modified.
-  - `HelixCode/internal/tools/registry.go` — `Tool` interface (`Name()`, `Description()`, `Execute(ctx, params) (interface{}, error)`, `Schema() ToolSchema`, `Category() ToolCategory`, `Validate(params) error`); `CategoryShell` is the closest existing category. F04 introduces no new category — worktree tools use `CategoryShell` (closest semantic match).
-  - `HelixCode/internal/commands/command.go` — slash command `Command` interface
-  - `HelixCode/internal/commands/builtin/register.go` — slash-command registry entry point
-  - `HelixCode/internal/session/manager.go` — session state (extended with one field)
+  - `helix_code/internal/tools/git/` — auto-commit + attribution + message generation; uses `os/exec` to shell out to git (8 callsites). Pattern reused; package itself not modified.
+  - `helix_code/internal/tools/registry.go` — `Tool` interface (`Name()`, `Description()`, `Execute(ctx, params) (interface{}, error)`, `Schema() ToolSchema`, `Category() ToolCategory`, `Validate(params) error`); `CategoryShell` is the closest existing category. F04 introduces no new category — worktree tools use `CategoryShell` (closest semantic match).
+  - `helix_code/internal/commands/command.go` — slash command `Command` interface
+  - `helix_code/internal/commands/builtin/register.go` — slash-command registry entry point
+  - `helix_code/internal/session/manager.go` — session state (extended with one field)
 - Constitutional anchors:
   - Article XI §11.9 — Anti-Bluff Forensic Anchor
   - CONST-035 — Zero-Bluff Mandate

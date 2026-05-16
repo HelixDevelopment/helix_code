@@ -314,4 +314,4 @@ OLLAMA_HOST=...
 - Gemini CLI Docs: `cli_agents/gemini-cli/docs/`
 - DeepSeek CLI Docs: `cli_agents/deepseek-cli/`
 
-Full analysis available in: `/Users/milosvasic/Projects/HelixCode/EXAMPLE_PROJECTS_ANALYSIS.md`
+Full analysis available in: `/Users/milosvasic/Projects/helix_code/EXAMPLE_PROJECTS_ANALYSIS.md`

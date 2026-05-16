@@ -32,10 +32,10 @@ Five concrete user surfaces ship together:
 
 ## 2. Architecture
 
-The package layout under `HelixCode/internal/plantree/` is NEW (no existing collision). It is a self-contained subsystem owned by main.go's startup wiring:
+The package layout under `helix_code/internal/plantree/` is NEW (no existing collision). It is a self-contained subsystem owned by main.go's startup wiring:
 
 ```
-HelixCode/internal/plantree/
+helix_code/internal/plantree/
 ├── doc.go               package docstring
 ├── types.go             PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree()
 ├── store.go             PlanStore Save/Load/List/Delete — filesystem JSON I/O
@@ -476,7 +476,7 @@ Plan tool mutations (`plan_create`, `plan_branch`, `plan_merge`, `plan_delete`) 
 ## 10. File Layout Summary
 
 ```
-HelixCode/internal/plantree/
+helix_code/internal/plantree/
 ├── doc.go
 ├── doc_test.go
 ├── types.go               ← PlanNode, PlanTree, PlanStatus, PlanTreeSummary, PlanIssue, VerifyResult, sentinels, constants, RenderTree
@@ -492,11 +492,11 @@ HelixCode/internal/plantree/
 ├── plan_tools.go          ← plan_create, plan_branch, plan_merge, plan_list, plan_show, plan_delete (tools.Tool impls)
 └── plan_tools_test.go
 
-HelixCode/internal/commands/
+helix_code/internal/commands/
 └── plan_command.go        ← /plan slash (list/show/compact/verify)
 └── plan_command_test.go
 
-HelixCode/tests/integration/cmd/p2f25_challenge/
+helix_code/tests/integration/cmd/p2f25_challenge/
 ├── run.sh
 ├── CHALLENGE.md
 └── main.go
@@ -507,10 +507,10 @@ HelixCode/tests/integration/cmd/p2f25_challenge/
 ## 11. Tech Stack
 
 - **Go 1.24** (stdlib: `encoding/json`, `os`, `sync`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`)
-- **google/uuid** (ALREADY direct in `HelixCode/go.mod` for node ID generation)
+- **google/uuid** (ALREADY direct in `helix_code/go.mod` for node ID generation)
 - **testify v1.11** (assert + require for TDD)
 - **F01 compression.Summariser** (already shipped — reuse for compaction)
-- **Zero new external deps** — all deps above are pre-existing in `HelixCode/go.mod`
+- **Zero new external deps** — all deps above are pre-existing in `helix_code/go.mod`
 
 ---
 

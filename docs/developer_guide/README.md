@@ -1,7 +1,7 @@
 # HelixCode Developer Guide — Zero-Bluff Phase 5
 
 **Audience**: Contributors and integrators working on the HelixCode codebase.
-**Companion**: Architecture deep-dive at [`docs/improvements/`](../improvements/) and [`HelixCode/docs/architecture/`](../../HelixCode/docs/architecture/).
+**Companion**: Architecture deep-dive at [`docs/improvements/`](../improvements/) and [`helix_code/docs/architecture/`](../../helix_code/docs/architecture/).
 **Mandate**: Every contribution MUST comply with the Constitution (`CONSTITUTION.md`) and the Zero-Bluff anchors (Article XI §11.9, CONST-035, CONST-046).
 **Last updated**: 2026-05-12
 
@@ -9,12 +9,12 @@
 
 ## 1. Repository Layout
 
-HelixCode is a **meta-repository** of governance plus submodules, with the actual Go application in `HelixCode/HelixCode/`.
+HelixCode is a **meta-repository** of governance plus submodules, with the actual Go application in `helix_code/helix_code/`.
 
 ```
-HelixCode/                            ← meta-repo (governance + submodule wiring)
+helix_code/                            ← meta-repo (governance + submodule wiring)
 ├── CLAUDE.md / AGENTS.md / CONSTITUTION.md
-├── HelixCode/                        ← inner Go module (the application)
+├── helix_code/                        ← inner Go module (the application)
 │   ├── cmd/                          ← CLI + server entry points
 │   ├── internal/                     ← ~55 internal packages (the domain)
 │   ├── applications/                 ← desktop / mobile / TUI
@@ -25,7 +25,7 @@ HelixCode/                            ← meta-repo (governance + submodule wiri
 └── docs/                             ← meta-level docs (this directory)
 ```
 
-**Cardinal rule**: paths in instructions almost always refer to the inner module — `internal/auth` means `HelixCode/internal/auth`.
+**Cardinal rule**: paths in instructions almost always refer to the inner module — `internal/auth` means `helix_code/internal/auth`.
 
 ---
 
@@ -50,7 +50,7 @@ The 30-feature programme is documented in `docs/superpowers/specs/2026-05-04-cli
 Tools are pluggable units the agent can invoke. Every tool implements:
 
 ```go
-// HelixCode/internal/tools/types.go
+// helix_code/internal/tools/types.go
 type Tool interface {
     Name() string
     Description() string
@@ -66,7 +66,7 @@ type Tool interface {
 Register a tool:
 
 ```go
-// HelixCode/internal/tools/<your_tool>.go
+// helix_code/internal/tools/<your_tool>.go
 func init() {
     tools.MustRegister(&MyTool{...})
 }
@@ -164,7 +164,7 @@ Smoke check (must always pass):
 
 ```bash
 grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
+  helix_code/internal helix_code/cmd && echo "BLUFF FOUND" || echo "clean"
 ```
 
 Phase 4 added mutation-tested content assertions; see `challenges/banks/zero-bluff/` for templates.
@@ -194,7 +194,7 @@ Last verified at 39/39 governance files (Phase 4 close-out, commit `21e6686`).
 | Command | Purpose |
 |---|---|
 | `make build` | Inner module: produce `bin/helixcode` and `bin/cli` |
-| `make verify-compile` | Compile-only smoke (`HelixCode/Makefile`) |
+| `make verify-compile` | Compile-only smoke (`helix_code/Makefile`) |
 | `make test` | All unit tests |
 | `make test-coverage` | Coverage with `-race` |
 | `make lint` | golangci-lint + CONST-046 string lint |

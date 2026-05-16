@@ -463,5 +463,5 @@ For schema evolution:
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/database/database.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/database/interface.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/database/database.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/database/interface.go`

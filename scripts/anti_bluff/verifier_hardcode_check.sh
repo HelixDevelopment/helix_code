@@ -28,7 +28,7 @@ NC='\033[0m' # No Color
 
 VIOLATIONS=0
 
-# Directory to scan (HelixCode/ subdirectory)
+# Directory to scan (helix_code/ subdirectory)
 SCAN_DIR="${1:-HelixCode}"
 
 if [ ! -d "$SCAN_DIR" ]; then

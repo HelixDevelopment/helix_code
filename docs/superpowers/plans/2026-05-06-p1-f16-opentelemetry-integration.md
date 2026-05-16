@@ -28,7 +28,7 @@ Estimated transitive footprint: ~25 new modules in `go.sum` (notably `google.gol
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f16-opentelemetry-integration-design.md` (commit `bc07a96`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F16 surface):**
 ```bash
@@ -71,9 +71,9 @@ Commit: `docs(P1-F16-T01): bootstrap Phase 1 / Feature 16 evidence + advance PRO
 
 ## Task 2: go.mod (OTel v1.30.0 dep set, TDD)
 
-**Files:** modify `HelixCode/go.mod`, regenerate `HelixCode/go.sum`. New ephemeral file `HelixCode/internal/telemetry/_deps_smoke_test.go` (TDD).
+**Files:** modify `helix_code/go.mod`, regenerate `helix_code/go.sum`. New ephemeral file `helix_code/internal/telemetry/_deps_smoke_test.go` (TDD).
 
-Run from `HelixCode/`:
+Run from `helix_code/`:
 
 ```bash
 go get go.opentelemetry.io/otel@v1.30.0
@@ -132,7 +132,7 @@ Commit: `feat(P1-F16-T02): add OpenTelemetry v1.30.0 dep set + dep-link smoke te
 
 ## Task 3: types.go (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/types.go`, new `HelixCode/internal/telemetry/types_test.go`. Delete `_deps_smoke_test.go`.
+**Files:** new `helix_code/internal/telemetry/types.go`, new `helix_code/internal/telemetry/types_test.go`. Delete `_deps_smoke_test.go`.
 
 Define:
 - `ExporterKind` string enum (`ExporterNone`, `ExporterStdout`, `ExporterOTLPGRPC`, `ExporterOTLPHTTP`).
@@ -179,7 +179,7 @@ Subject: `feat(P1-F16-T03): TelemetryConfig + ExporterKind + DefaultBlockedAttri
 
 ## Task 4: config.go + attribute_filter.go (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/config.go`, new `HelixCode/internal/telemetry/config_test.go`, new `HelixCode/internal/telemetry/attribute_filter.go`, new `HelixCode/internal/telemetry/attribute_filter_test.go`.
+**Files:** new `helix_code/internal/telemetry/config.go`, new `helix_code/internal/telemetry/config_test.go`, new `helix_code/internal/telemetry/attribute_filter.go`, new `helix_code/internal/telemetry/attribute_filter_test.go`.
 
 `config.go` exports:
 - `LoadConfigFromEnv() (*TelemetryConfig, error)` — reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_EXPORTER_OTLP_INSECURE`, `OTEL_EXPORTER_OTLP_TIMEOUT`. When all are unset, returns `&TelemetryConfig{Enabled: false, Kind: ExporterNone}`. Returns `ErrUnknownExporterKind` on bogus protocol.
@@ -280,7 +280,7 @@ Subject: `feat(P1-F16-T04): env-var config parsing + exporter selection + CONST-
 
 ## Task 5: provider.go (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/provider.go`, new `HelixCode/internal/telemetry/provider_test.go`.
+**Files:** new `helix_code/internal/telemetry/provider.go`, new `helix_code/internal/telemetry/provider_test.go`.
 
 Implementation outline:
 
@@ -426,7 +426,7 @@ Subject: `feat(P1-F16-T05): TelemetryProvider with exporter selection + ForceFlu
 
 ## Task 6: llm_instrumentation.go (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/llm_instrumentation.go`, new `HelixCode/internal/telemetry/llm_instrumentation_test.go`.
+**Files:** new `helix_code/internal/telemetry/llm_instrumentation.go`, new `helix_code/internal/telemetry/llm_instrumentation_test.go`.
 
 `TracedLLMProvider` uses Go struct embedding so only `Generate` and `GenerateStream` are overridden; the other 9 methods of `llm.Provider` are promoted automatically.
 
@@ -566,7 +566,7 @@ Subject: `feat(P1-F16-T06): TracedLLMProvider decorator + token counter + latenc
 
 ## Task 7: tool_instrumentation.go + registry wrap (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/tool_instrumentation.go`, new `HelixCode/internal/telemetry/tool_instrumentation_test.go`, modify `HelixCode/internal/tools/registry.go`.
+**Files:** new `helix_code/internal/telemetry/tool_instrumentation.go`, new `helix_code/internal/telemetry/tool_instrumentation_test.go`, modify `helix_code/internal/tools/registry.go`.
 
 `tool_instrumentation.go`:
 
@@ -659,7 +659,7 @@ Subject: `feat(P1-F16-T07): InstrumentToolCall helper + ToolRegistry.Execute spa
 
 ## Task 8: agent_instrumentation.go + base_agent wrap (TDD)
 
-**Files:** new `HelixCode/internal/telemetry/agent_instrumentation.go`, new `HelixCode/internal/telemetry/agent_instrumentation_test.go`, modify `HelixCode/internal/agent/base_agent.go`.
+**Files:** new `helix_code/internal/telemetry/agent_instrumentation.go`, new `helix_code/internal/telemetry/agent_instrumentation_test.go`, modify `helix_code/internal/agent/base_agent.go`.
 
 `agent_instrumentation.go`:
 
@@ -739,7 +739,7 @@ Subject: `feat(P1-F16-T08): InstrumentAgentIteration helper + BaseAgent.executeT
 
 ## Task 9: /telemetry slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/telemetry_command.go`, new `HelixCode/internal/commands/telemetry_command_test.go`.
+**Files:** new `helix_code/internal/commands/telemetry_command.go`, new `helix_code/internal/commands/telemetry_command_test.go`.
 
 Mirrors F14 `/sandbox` and F15 `/subagents` shape: defines `TelemetryProviderInspector` interface in the commands package so the slash is testable with a fake.
 
@@ -786,7 +786,7 @@ Subject: `feat(P1-F16-T09): /telemetry slash command (status/show/flush) + nil-p
 
 ## Task 10: main.go wiring + integration tests
 
-**Files:** modify `HelixCode/cmd/cli/main.go`, new `HelixCode/tests/integration/telemetry_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go`, new `helix_code/tests/integration/telemetry_test.go` (`//go:build integration`).
 
 `main.go` additions (per spec §4.1) — three blocks alongside the existing logger construction:
 
@@ -887,7 +887,7 @@ Subject: `feat(P1-F16-T10): wire TelemetryProvider into main.go + /telemetry + g
 
 ## Task 11: Challenge with in-tree fake OTLP/HTTP receiver
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f16_challenge/main.go`, new `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md`, new `challenges/p1-f16-opentelemetry-integration/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f16_challenge/main.go`, new `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md`, new `challenges/p1-f16-opentelemetry-integration/run.sh`.
 
 Harness phases (per spec §6.3):
 1. **STDOUT (always runs)** — captures the stdout exporter's writer, runs LLM + tool + agent through the full instrumentation path with FakeLLMProvider, asserts `"Name":"llm.generate"`, `"Name":"tool.execute"`, `"Name":"agent.iteration"` and `helixcode_llm_tokens_total` in the captured bytes; asserts ForceFlush returns within 5 s.

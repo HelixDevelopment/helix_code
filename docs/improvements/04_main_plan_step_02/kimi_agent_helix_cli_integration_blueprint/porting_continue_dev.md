@@ -60,7 +60,7 @@ core/
 
 ### HelixCode Target Architecture
 ```
-HelixCode/
+helix_code/
   cmd/
     cli/                # CLI entry point
     server/             # HTTP server

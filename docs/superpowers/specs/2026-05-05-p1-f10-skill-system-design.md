@@ -17,22 +17,22 @@ Add `internal/commands/markdown_skills.go` (same package as F09 — reuses `pars
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/commands/markdown_skills.go` — `Skill`, `SkillRegistry`, `SkillLoader`, `parseSkillFile`, `compileTriggers`, `FindMatching`
-- `HelixCode/internal/commands/markdown_skills_test.go` — unit tests
-- `HelixCode/internal/commands/skills_watcher.go` — fsnotify wrapper (or extend the F09 watcher to monitor both dirs)
-- `HelixCode/internal/commands/skills_watcher_test.go`
-- `HelixCode/internal/commands/skills_command.go` — `/skills` slash command
-- `HelixCode/internal/commands/skills_command_test.go`
-- `HelixCode/cmd/cli/skills_cmd.go` — cobra subcommand
-- `HelixCode/cmd/cli/skills_cmd_test.go`
-- `HelixCode/internal/agent/skill_dispatcher.go` — auto-invocation hook called from the agent loop
-- `HelixCode/internal/agent/skill_dispatcher_test.go`
-- `HelixCode/tests/integration/skills_test.go` — `//go:build integration`
+- `helix_code/internal/commands/markdown_skills.go` — `Skill`, `SkillRegistry`, `SkillLoader`, `parseSkillFile`, `compileTriggers`, `FindMatching`
+- `helix_code/internal/commands/markdown_skills_test.go` — unit tests
+- `helix_code/internal/commands/skills_watcher.go` — fsnotify wrapper (or extend the F09 watcher to monitor both dirs)
+- `helix_code/internal/commands/skills_watcher_test.go`
+- `helix_code/internal/commands/skills_command.go` — `/skills` slash command
+- `helix_code/internal/commands/skills_command_test.go`
+- `helix_code/cmd/cli/skills_cmd.go` — cobra subcommand
+- `helix_code/cmd/cli/skills_cmd_test.go`
+- `helix_code/internal/agent/skill_dispatcher.go` — auto-invocation hook called from the agent loop
+- `helix_code/internal/agent/skill_dispatcher_test.go`
+- `helix_code/tests/integration/skills_test.go` — `//go:build integration`
 - `challenges/p1-f10-skills/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
-- `HelixCode/internal/agent/base_agent.go` (or wherever the LLM-call loop lives) — wire `skillDispatcher.Match(userInput)` before each LLM turn; on match, inject skill body as system message
-- `HelixCode/cmd/cli/main.go` — construct `SkillLoader` + `SkillRegistry` + dispatcher; register `/skills` slash; wire cobra dispatcher; pass loader to existing watcher (or start a second watcher)
+- `helix_code/internal/agent/base_agent.go` (or wherever the LLM-call loop lives) — wire `skillDispatcher.Match(userInput)` before each LLM turn; on match, inject skill body as system message
+- `helix_code/cmd/cli/main.go` — construct `SkillLoader` + `SkillRegistry` + dispatcher; register `/skills` slash; wire cobra dispatcher; pass loader to existing watcher (or start a second watcher)
 
 ### 3.3 Types
 

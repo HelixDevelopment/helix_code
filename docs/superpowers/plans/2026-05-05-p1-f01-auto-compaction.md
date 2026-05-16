@@ -19,28 +19,28 @@
 ### NEW files
 | Path | Responsibility |
 |---|---|
-| `HelixCode/internal/llm/compression/thrashing.go` | `ThrashingGuard` wrapper: tracks consecutive-compaction count, aborts on 3-without-user-message |
-| `HelixCode/internal/llm/compression/thrashing_test.go` | Unit tests for ThrashingGuard (mocks allowed per CONST-002) |
-| `HelixCode/internal/llm/compression/metadata.go` | `CompactionMetadata` + helpers to attach/read it from `*compressioniface.Message` |
-| `HelixCode/internal/llm/compression/metadata_test.go` | Unit tests for metadata |
-| `HelixCode/internal/llm/compression/auto_compact.go` | `AutoCompactor` — uses Provider's `GetContextWindow()`/`CountTokens()` to gate triggering at 80% threshold; calls `CompressionCoordinator.Compress()` via `ThrashingGuard`; attaches metadata |
-| `HelixCode/internal/llm/compression/auto_compact_test.go` | Unit tests with mocked Provider + mocked CompressionCoordinator |
-| `HelixCode/tests/integration/auto_compaction_integration_test.go` | `-tags=integration`, no mocks, real Anthropic provider, real PostgreSQL session store |
-| `HelixCode/tests/e2e/challenges/auto-compaction/run.sh` | End-to-end Challenge invoking the agent against a long-conversation fixture |
-| `HelixCode/tests/e2e/challenges/auto-compaction/expected.json` | Runtime-evidence assertions |
+| `helix_code/internal/llm/compression/thrashing.go` | `ThrashingGuard` wrapper: tracks consecutive-compaction count, aborts on 3-without-user-message |
+| `helix_code/internal/llm/compression/thrashing_test.go` | Unit tests for ThrashingGuard (mocks allowed per CONST-002) |
+| `helix_code/internal/llm/compression/metadata.go` | `CompactionMetadata` + helpers to attach/read it from `*compressioniface.Message` |
+| `helix_code/internal/llm/compression/metadata_test.go` | Unit tests for metadata |
+| `helix_code/internal/llm/compression/auto_compact.go` | `AutoCompactor` — uses Provider's `GetContextWindow()`/`CountTokens()` to gate triggering at 80% threshold; calls `CompressionCoordinator.Compress()` via `ThrashingGuard`; attaches metadata |
+| `helix_code/internal/llm/compression/auto_compact_test.go` | Unit tests with mocked Provider + mocked CompressionCoordinator |
+| `helix_code/tests/integration/auto_compaction_integration_test.go` | `-tags=integration`, no mocks, real Anthropic provider, real PostgreSQL session store |
+| `helix_code/tests/e2e/challenges/auto-compaction/run.sh` | End-to-end Challenge invoking the agent against a long-conversation fixture |
+| `helix_code/tests/e2e/challenges/auto-compaction/expected.json` | Runtime-evidence assertions |
 
 ### MODIFIED files
 | Path | What changes |
 |---|---|
-| `HelixCode/internal/llm/missing_types.go` | Add `GetContextWindow() int` and `CountTokens(text string) (int, error)` to `Provider` interface |
-| `HelixCode/internal/llm/anthropic_provider.go` | Implement both new methods (uses `tiktoken` if available; `claude-3-5-sonnet`'s 200k context) |
-| `HelixCode/internal/llm/azure_provider.go` | Implement both new methods (delegate to underlying OpenAI Azure tokenizer) |
-| `HelixCode/internal/llm/bedrock_provider.go` | Implement both new methods |
-| `HelixCode/internal/llm/copilot_provider.go` | Implement both new methods |
-| `HelixCode/internal/llm/<every other *_provider.go>` | Implement both new methods — minimal: char-based fallback (1 token ≈ 4 chars), 200k window default. Per-provider real tokenizers are deferred to a Phase 3 sub-spec. |
-| `HelixCode/internal/agent/agent.go` | Insert `AutoCompactor.MaybeCompact()` call before each LLM request in the message loop |
-| `HelixCode/internal/session/manager.go` | Reset `ThrashingGuard.consecutiveCount` when a user message is added to the session |
-| `HelixCode/docs/improvements/05_phase_0_evidence.md` | (NOT touched — that's Phase 0's evidence file. Phase 1 evidence goes elsewhere.) |
+| `helix_code/internal/llm/missing_types.go` | Add `GetContextWindow() int` and `CountTokens(text string) (int, error)` to `Provider` interface |
+| `helix_code/internal/llm/anthropic_provider.go` | Implement both new methods (uses `tiktoken` if available; `claude-3-5-sonnet`'s 200k context) |
+| `helix_code/internal/llm/azure_provider.go` | Implement both new methods (delegate to underlying OpenAI Azure tokenizer) |
+| `helix_code/internal/llm/bedrock_provider.go` | Implement both new methods |
+| `helix_code/internal/llm/copilot_provider.go` | Implement both new methods |
+| `helix_code/internal/llm/<every other *_provider.go>` | Implement both new methods — minimal: char-based fallback (1 token ≈ 4 chars), 200k window default. Per-provider real tokenizers are deferred to a Phase 3 sub-spec. |
+| `helix_code/internal/agent/agent.go` | Insert `AutoCompactor.MaybeCompact()` call before each LLM request in the message loop |
+| `helix_code/internal/session/manager.go` | Reset `ThrashingGuard.consecutiveCount` when a user message is added to the session |
+| `helix_code/docs/improvements/05_phase_0_evidence.md` | (NOT touched — that's Phase 0's evidence file. Phase 1 evidence goes elsewhere.) |
 | `docs/improvements/06_phase_1_evidence.md` | NEW — accumulated Phase 1 evidence; first section is Feature 1 |
 | `docs/improvements/PROGRESS.md` | Move Phase 1 status from `pending` → `active`; add Feature 1 task list |
 
@@ -130,12 +130,12 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 2: Add `GetContextWindow()` + `CountTokens()` to `Provider` interface
 
 **Files:**
-- Modify: `HelixCode/internal/llm/missing_types.go` (or wherever `type Provider interface` lives)
+- Modify: `helix_code/internal/llm/missing_types.go` (or wherever `type Provider interface` lives)
 
 - [ ] **Step 2.1: Locate and read the Provider interface**
 
 ```bash
-grep -nE "^type Provider interface" HelixCode/internal/llm/missing_types.go
+grep -nE "^type Provider interface" helix_code/internal/llm/missing_types.go
 ```
 
 Use Read tool to confirm the interface body and find the closing `}`.
@@ -169,7 +169,7 @@ Expected: file does NOT compile in isolation if other files in the package imple
 - [ ] **Step 2.4: Commit (interface change only — package will not build until T03)**
 
 ```bash
-git add HelixCode/internal/llm/missing_types.go
+git add helix_code/internal/llm/missing_types.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T02): add GetContextWindow + CountTokens to Provider interface
 
@@ -193,7 +193,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 3: Implement `GetContextWindow()` + `CountTokens()` on every existing Provider
 
 **Files:**
-- Modify: every `HelixCode/internal/llm/*_provider.go` (anthropic, azure, bedrock, copilot, openai, ollama, google, gemini, deepseek, groq, mistral, xai, openrouter, llama_cpp, ...)
+- Modify: every `helix_code/internal/llm/*_provider.go` (anthropic, azure, bedrock, copilot, openai, ollama, google, gemini, deepseek, groq, mistral, xai, openrouter, llama_cpp, ...)
 
 - [ ] **Step 3.1: Enumerate every existing Provider implementation**
 
@@ -205,7 +205,7 @@ Each file in the list needs the two new methods added.
 
 - [ ] **Step 3.2: Define a shared char-based fallback helper**
 
-Create `HelixCode/internal/llm/token_fallback.go`:
+Create `helix_code/internal/llm/token_fallback.go`:
 
 ```go
 package llm
@@ -285,7 +285,7 @@ If test doesn't exist, that's fine — Task 4+ adds tests. Just confirm the buil
 - [ ] **Step 3.6: Commit + push**
 
 ```bash
-git add HelixCode/internal/llm/token_fallback.go HelixCode/internal/llm/*_provider.go
+git add helix_code/internal/llm/token_fallback.go helix_code/internal/llm/*_provider.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T03): implement GetContextWindow + CountTokens on every Provider
 
@@ -312,13 +312,13 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 4: ThrashingGuard with TDD
 
 **Files:**
-- Create: `HelixCode/internal/llm/compression/thrashing.go`
-- Create: `HelixCode/internal/llm/compression/thrashing_test.go`
+- Create: `helix_code/internal/llm/compression/thrashing.go`
+- Create: `helix_code/internal/llm/compression/thrashing_test.go`
 
 - [ ] **Step 4.1: Write the failing test**
 
 ```go
-// HelixCode/internal/llm/compression/thrashing_test.go
+// helix_code/internal/llm/compression/thrashing_test.go
 package compression
 
 import (
@@ -375,7 +375,7 @@ Expected: FAIL with `undefined: NewThrashingGuard` etc.
 - [ ] **Step 4.3: Write the minimal implementation**
 
 ```go
-// HelixCode/internal/llm/compression/thrashing.go
+// helix_code/internal/llm/compression/thrashing.go
 package compression
 
 import (
@@ -438,7 +438,7 @@ Expected: 4/4 PASS.
 - [ ] **Step 4.5: Commit + push**
 
 ```bash
-git add HelixCode/internal/llm/compression/thrashing.go HelixCode/internal/llm/compression/thrashing_test.go
+git add helix_code/internal/llm/compression/thrashing.go helix_code/internal/llm/compression/thrashing_test.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T04): add ThrashingGuard with TDD
 
@@ -461,13 +461,13 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 5: CompactionMetadata with TDD
 
 **Files:**
-- Create: `HelixCode/internal/llm/compression/metadata.go`
-- Create: `HelixCode/internal/llm/compression/metadata_test.go`
+- Create: `helix_code/internal/llm/compression/metadata.go`
+- Create: `helix_code/internal/llm/compression/metadata_test.go`
 
 - [ ] **Step 5.1: Write the failing test**
 
 ```go
-// HelixCode/internal/llm/compression/metadata_test.go
+// helix_code/internal/llm/compression/metadata_test.go
 package compression
 
 import (
@@ -521,7 +521,7 @@ Expected: undefined identifiers.
 - [ ] **Step 5.3: Implement**
 
 ```go
-// HelixCode/internal/llm/compression/metadata.go
+// helix_code/internal/llm/compression/metadata.go
 package compression
 
 import (
@@ -602,7 +602,7 @@ func ReadCompactionMetadata(msg *compressioniface.Message) (*CompactionMetadata,
 - [ ] **Step 5.4: Verify the existing `compressioniface.Message` has a `Metadata` field**
 
 ```bash
-grep -n "Metadata" HelixCode/internal/llm/compressioniface/interface.go | head -10
+grep -n "Metadata" helix_code/internal/llm/compressioniface/interface.go | head -10
 ```
 
 Expected: line `Metadata           map[string]interface{}` present in the `Conversation` and/or `Message` struct. If the field is on `Conversation` rather than `Message`, ADJUST the metadata.go above to attach to `Conversation.Metadata` instead.
@@ -618,7 +618,7 @@ Expected: 3/3 PASS.
 - [ ] **Step 5.6: Commit + push**
 
 ```bash
-git add HelixCode/internal/llm/compression/metadata.go HelixCode/internal/llm/compression/metadata_test.go
+git add helix_code/internal/llm/compression/metadata.go helix_code/internal/llm/compression/metadata_test.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T05): add CompactionMetadata with TDD
 
@@ -642,13 +642,13 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 6: AutoCompactor — the 80%-trigger orchestrator
 
 **Files:**
-- Create: `HelixCode/internal/llm/compression/auto_compact.go`
-- Create: `HelixCode/internal/llm/compression/auto_compact_test.go`
+- Create: `helix_code/internal/llm/compression/auto_compact.go`
+- Create: `helix_code/internal/llm/compression/auto_compact_test.go`
 
 - [ ] **Step 6.1: Write the failing test**
 
 ```go
-// HelixCode/internal/llm/compression/auto_compact_test.go
+// helix_code/internal/llm/compression/auto_compact_test.go
 package compression
 
 import (
@@ -751,7 +751,7 @@ cd HelixCode && go test -v -run TestAutoCompactor ./internal/llm/compression/...
 - [ ] **Step 6.3: Implement**
 
 ```go
-// HelixCode/internal/llm/compression/auto_compact.go
+// helix_code/internal/llm/compression/auto_compact.go
 package compression
 
 import (
@@ -843,7 +843,7 @@ func (a *AutoCompactor) MaybeCompact(ctx context.Context, conv *compressioniface
 - [ ] **Step 6.4: Verify `compressioniface.CompressionResult` has `TokensAfter`**
 
 ```bash
-grep -n "TokensAfter" HelixCode/internal/llm/compressioniface/*.go
+grep -n "TokensAfter" helix_code/internal/llm/compressioniface/*.go
 ```
 
 If absent, adjust the assignment to whichever field the existing struct exposes (e.g., `cr.CompressedTokens`).
@@ -859,7 +859,7 @@ Expected: 3/3 PASS.
 - [ ] **Step 6.6: Commit + push**
 
 ```bash
-git add HelixCode/internal/llm/compression/auto_compact.go HelixCode/internal/llm/compression/auto_compact_test.go
+git add helix_code/internal/llm/compression/auto_compact.go helix_code/internal/llm/compression/auto_compact_test.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T06): add AutoCompactor 80%-trigger orchestrator
 
@@ -883,12 +883,12 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 7: Wire AutoCompactor into `internal/agent/agent.go`
 
 **Files:**
-- Modify: `HelixCode/internal/agent/agent.go`
+- Modify: `helix_code/internal/agent/agent.go`
 
 - [ ] **Step 7.1: Read agent.go to find the message-loop hot path**
 
 ```bash
-grep -nE "Generate|GenerateStream|sendToProvider|providerCall|llmRequest" HelixCode/internal/agent/agent.go | head -10
+grep -nE "Generate|GenerateStream|sendToProvider|providerCall|llmRequest" helix_code/internal/agent/agent.go | head -10
 ```
 
 Identify the exact line where the agent calls the provider's `Generate()` (or wherever the LLM round-trip happens). The auto-compactor must run BEFORE that call.
@@ -935,7 +935,7 @@ Expected: PASS rate identical to pre-task baseline. If tests now require an `aut
 - [ ] **Step 7.6: Commit + push**
 
 ```bash
-git add HelixCode/internal/agent/agent.go
+git add helix_code/internal/agent/agent.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T07): wire AutoCompactor into agent.go message loop
 
@@ -958,12 +958,12 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 8: Wire ThrashingGuard.NoteUserMessage() into session manager
 
 **Files:**
-- Modify: `HelixCode/internal/session/manager.go`
+- Modify: `helix_code/internal/session/manager.go`
 
 - [ ] **Step 8.1: Locate the user-message-append path**
 
 ```bash
-grep -nE "AppendMessage|AddUserMessage|UserMessage|user.*[Mm]essage" HelixCode/internal/session/manager.go | head -10
+grep -nE "AppendMessage|AddUserMessage|UserMessage|user.*[Mm]essage" helix_code/internal/session/manager.go | head -10
 ```
 
 Identify where a user-role message is added to the session's message list. This is where ThrashingGuard.NoteUserMessage() must be called.
@@ -1007,7 +1007,7 @@ cd HelixCode && go test -v ./internal/session/... 2>&1 | tail -10
 - [ ] **Step 8.5: Commit + push**
 
 ```bash
-git add HelixCode/internal/session/manager.go
+git add helix_code/internal/session/manager.go
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T08): wire ThrashingGuard.NoteUserMessage into session manager
 
@@ -1029,7 +1029,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 9: Integration test — real Anthropic provider, no mocks
 
 **Files:**
-- Create: `HelixCode/tests/integration/auto_compaction_integration_test.go`
+- Create: `helix_code/tests/integration/auto_compaction_integration_test.go`
 
 - [ ] **Step 9.1: Verify `make test-infra-up` brings up the docker-compose stack**
 
@@ -1045,7 +1045,7 @@ If this fails, document and skip the test (it cannot run without infra). This is
 //go:build integration
 // +build integration
 
-// HelixCode/tests/integration/auto_compaction_integration_test.go
+// helix_code/tests/integration/auto_compaction_integration_test.go
 package integration
 
 import (
@@ -1136,7 +1136,7 @@ Expected: PASS if `HELIX_LLM_ANTHROPIC_KEY` is set; SKIP-OK if not. Either way, 
 - [ ] **Step 9.4: Commit + push**
 
 ```bash
-git add HelixCode/tests/integration/auto_compaction_integration_test.go
+git add helix_code/tests/integration/auto_compaction_integration_test.go
 git commit -m "$(cat <<'EOF'
 test(P1-F01-T09): integration test for auto-compaction (no mocks)
 
@@ -1162,8 +1162,8 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 10: Challenge — runtime-evidence end-to-end
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/auto-compaction/run.sh`
-- Create: `HelixCode/tests/e2e/challenges/auto-compaction/expected.json`
+- Create: `helix_code/tests/e2e/challenges/auto-compaction/run.sh`
+- Create: `helix_code/tests/e2e/challenges/auto-compaction/expected.json`
 
 - [ ] **Step 10.1: Write `expected.json`**
 
@@ -1193,7 +1193,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 
 ```bash
 #!/usr/bin/env bash
-# HelixCode/tests/e2e/challenges/auto-compaction/run.sh
+# helix_code/tests/e2e/challenges/auto-compaction/run.sh
 # Challenge: claude-code-style auto-compaction triggers at 80% threshold,
 # attaches metadata, and respects thrashing detection.
 
@@ -1277,7 +1277,7 @@ cat tests/e2e/challenges/auto-compaction/.last-run-evidence.json
 - [ ] **Step 10.3: Make executable**
 
 ```bash
-chmod +x HelixCode/tests/e2e/challenges/auto-compaction/run.sh
+chmod +x helix_code/tests/e2e/challenges/auto-compaction/run.sh
 ```
 
 - [ ] **Step 10.4: Run (when credentials available)**
@@ -1291,7 +1291,7 @@ Expected: SKIP-OK if no credentials; full run with `AUTO_COMPACTION_TRIGGERED` +
 - [ ] **Step 10.5: Commit + push**
 
 ```bash
-git add HelixCode/tests/e2e/challenges/auto-compaction/run.sh HelixCode/tests/e2e/challenges/auto-compaction/expected.json
+git add helix_code/tests/e2e/challenges/auto-compaction/run.sh helix_code/tests/e2e/challenges/auto-compaction/expected.json
 git commit -m "$(cat <<'EOF'
 feat(P1-F01-T10): Challenge for auto-compaction with runtime evidence
 

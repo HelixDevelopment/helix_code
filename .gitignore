@@ -70,19 +70,19 @@ Example_Projects/Cline/
 awesome-ai-memory/
 
 # External memory provider repositories (cloned on demand)
-HelixCode/external/memory/mem0/
-HelixCode/external/memory/zep/
-HelixCode/external/memory/memonto/
-HelixCode/external/memory/baseai/
+helix_code/external/memory/mem0/
+helix_code/external/memory/zep/
+helix_code/external/memory/memonto/
+helix_code/external/memory/baseai/
 
 # Generated test challenges and results (but not the framework)
-HelixCode/challenges/
+helix_code/challenges/
 challenges/
 
 # Allow the e2e challenge testing framework but ignore test results
-!HelixCode/tests/e2e/challenges/
-HelixCode/tests/e2e/challenges/test-results/
-HelixCode/tests/e2e/challenges/.DS_Store
+!helix_code/tests/e2e/challenges/
+helix_code/tests/e2e/challenges/test-results/
+helix_code/tests/e2e/challenges/.DS_Store
 
 
 reports/demos/
@@ -106,10 +106,10 @@ helix.security.json
 .helix-worktrees/
 
 # P1.5 cleanup: leftover phase-1 development artefacts
-HelixCode/p1f*_challenge
-HelixCode/security-scan
-HelixCode/testhelper
-HelixCode/.helixcode/
+helix_code/p1f*_challenge
+helix_code/security-scan
+helix_code/testhelper
+helix_code/.helixcode/
 .claude/
 
 # P1.5-WP5: .env API-key dedup backups
@@ -132,8 +132,8 @@ HelixCode/.helixcode/
 # explains where evidence lands without needing prior context.
 docs/qa_evidence/*
 !docs/qa_evidence/README.md
-HelixCode/qa_evidence/*
-HelixCode/docs/qa_evidence/*
+helix_code/qa_evidence/*
+helix_code/docs/qa_evidence/*
 helix_qa/qa_evidence/*
 **/qa_session_*/
 **/*.qa-screenshot.png
@@ -141,4 +141,4 @@ helix_qa/qa_evidence/*
 **/*.qa-recording.mp4
 **/*.qa-recording.webm
 **/*.qa-trace.json
-/HelixCode/examples/multi_agent_system/multi_agent_system
+/helix_code/examples/multi_agent_system/multi_agent_system

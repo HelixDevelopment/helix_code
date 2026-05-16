@@ -311,7 +311,7 @@ Priority packages with low coverage:
 ## 🔧 Technical Details
 
 ### Files Modified:
-1. `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/mocks/memory_mocks.go`
+1. `/Users/milosvasic/Projects/helix_code/helix_code/internal/mocks/memory_mocks.go`
    - 14 fixes applied
    - Now compiles cleanly
 

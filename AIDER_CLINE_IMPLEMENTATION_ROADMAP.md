@@ -45,4 +45,4 @@
 
 **(This document continues with the full implementation plan as created above, but saved to a different filename)**
 
-[See full content at /Users/milosvasic/Projects/HelixCode/AIDER_CLINE_IMPLEMENTATION_ROADMAP.md]
+[See full content at /Users/milosvasic/Projects/helix_code/AIDER_CLINE_IMPLEMENTATION_ROADMAP.md]

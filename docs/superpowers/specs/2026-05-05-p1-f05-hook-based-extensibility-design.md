@@ -344,12 +344,12 @@ Listed in §1.3 (N1–N7). Summarised: modify-payload propagation back to operat
 - Predecessor plan: `docs/superpowers/plans/2026-05-05-p1-f04-git-worktree-agent-isolation.md` (commit `7abf0c7`)
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`
 - Existing infrastructure being extended (NOT replaced):
-  - `HelixCode/internal/hooks/` — existing Manager + Hook + Event + Executor; F05 adds 6 HookType consts + 3 new files (`yaml_loader.go`, `shell_runner.go`, `blockers.go`)
-  - `HelixCode/internal/session/manager.go` — already has `hooksManager *hooks.Manager` field; F05 reuses it
-  - `HelixCode/internal/tools/registry.go` — extended with 6 dispatch points in `Execute`
-  - `HelixCode/internal/llm/compression/auto_compactor.go` — extended with `OnCompaction` dispatch
-  - `HelixCode/internal/agent/agent.go` — extended with `OnError` dispatch + `RequestPlanApproval` stub
-  - `HelixCode/internal/commands/builtin/register.go` — extended with `RegisterBuiltinCommandsWithHooks`
+  - `helix_code/internal/hooks/` — existing Manager + Hook + Event + Executor; F05 adds 6 HookType consts + 3 new files (`yaml_loader.go`, `shell_runner.go`, `blockers.go`)
+  - `helix_code/internal/session/manager.go` — already has `hooksManager *hooks.Manager` field; F05 reuses it
+  - `helix_code/internal/tools/registry.go` — extended with 6 dispatch points in `Execute`
+  - `helix_code/internal/llm/compression/auto_compactor.go` — extended with `OnCompaction` dispatch
+  - `helix_code/internal/agent/agent.go` — extended with `OnError` dispatch + `RequestPlanApproval` stub
+  - `helix_code/internal/commands/builtin/register.go` — extended with `RegisterBuiltinCommandsWithHooks`
 - Constitutional anchors:
   - Article XI §11.9 — Anti-Bluff Forensic Anchor
   - CONST-035 — Zero-Bluff Mandate

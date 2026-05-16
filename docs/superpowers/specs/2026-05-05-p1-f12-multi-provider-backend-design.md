@@ -14,7 +14,7 @@ Ship a unified multi-provider front-end for the existing `internal/llm.Provider`
 2. Env var `HELIX_LLM_PROVIDER`.
 3. Interactive **tview** wizard launched on first run when no provider is configured, and explicitly via the `helixcode wizard` cobra subcommand.
 
-Model lists for every provider are sourced exclusively from `internal/verifier/` (LLMsVerifier) per CONST-036/037; no hardcoded `[]Model` literals. The four cloud-provider implementations (`anthropic_provider.go`, `bedrock_provider.go`, `azure_provider.go`, `vertexai_provider.go`) **already exist** under `HelixCode/internal/llm/` — F12 wires them into a coherent factory + UX layer without re-implementing the providers.
+Model lists for every provider are sourced exclusively from `internal/verifier/` (LLMsVerifier) per CONST-036/037; no hardcoded `[]Model` literals. The four cloud-provider implementations (`anthropic_provider.go`, `bedrock_provider.go`, `azure_provider.go`, `vertexai_provider.go`) **already exist** under `helix_code/internal/llm/` — F12 wires them into a coherent factory + UX layer without re-implementing the providers.
 
 The change is non-breaking: `cmd/cli/main.go` currently hardcodes Ollama via `llm.NewOllamaProvider`; after F12, Ollama remains the fallback when none of flag/env/wizard yields a configured cloud provider, preserving local-only workflows.
 
@@ -33,21 +33,21 @@ LLMsVerifier integration reuses `internal/llm/verifier_integration.go::VerifierM
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/llm/selector.go` — `Selector` struct, `Resolve(ctx, opts) (Provider, ProviderType, error)`, precedence rules, env var parsing.
-- `HelixCode/internal/llm/selector_test.go` — table-driven precedence + fallback tests.
-- `HelixCode/internal/llm/wizard.go` — tview application, form fields, validation, config write-out.
-- `HelixCode/internal/llm/wizard_test.go` — headless tview screen tests (`tcell.SimulationScreen`).
-- `HelixCode/internal/llm/wizard_writer.go` — file-only `WizardConfigWriter` so unit tests can assert without touching real `~/.config`.
-- `HelixCode/internal/llm/wizard_writer_test.go`.
-- `HelixCode/cmd/cli/wizard_cmd.go` — `helixcode wizard` cobra subcommand.
-- `HelixCode/cmd/cli/wizard_cmd_test.go`.
-- `HelixCode/tests/integration/multi_provider_test.go` — `//go:build integration`, gated per §5.
+- `helix_code/internal/llm/selector.go` — `Selector` struct, `Resolve(ctx, opts) (Provider, ProviderType, error)`, precedence rules, env var parsing.
+- `helix_code/internal/llm/selector_test.go` — table-driven precedence + fallback tests.
+- `helix_code/internal/llm/wizard.go` — tview application, form fields, validation, config write-out.
+- `helix_code/internal/llm/wizard_test.go` — headless tview screen tests (`tcell.SimulationScreen`).
+- `helix_code/internal/llm/wizard_writer.go` — file-only `WizardConfigWriter` so unit tests can assert without touching real `~/.config`.
+- `helix_code/internal/llm/wizard_writer_test.go`.
+- `helix_code/cmd/cli/wizard_cmd.go` — `helixcode wizard` cobra subcommand.
+- `helix_code/cmd/cli/wizard_cmd_test.go`.
+- `helix_code/tests/integration/multi_provider_test.go` — `//go:build integration`, gated per §5.
 - `challenges/p1-f12-multi-provider/CHALLENGE.md` + `run.sh`.
-- `HelixCode/tests/integration/cmd/p1f12_challenge/main.go` — runtime evidence harness.
+- `helix_code/tests/integration/cmd/p1f12_challenge/main.go` — runtime evidence harness.
 
 ### 3.2 Modified files
-- `HelixCode/internal/llm/factory.go` — add `NewCloudProvider(cfg ProviderConfigEntry)` cloud-only helper that validates `cfg.Type ∈ {anthropic, bedrock, vertexai, azure}`. The existing `NewProvider` switch is left intact for non-cloud types.
-- `HelixCode/cmd/cli/main.go` — replace the hardcoded Ollama bootstrap in `NewCLI()` with `llm.NewSelector(...).Resolve(ctx, opts)`. Add `--provider`, `--model`, `--llm-config` top-level flags. Register `helixcode wizard` cobra command. First-run guard: when no config file exists AND no flag/env set, auto-launch the wizard before constructing the agent.
+- `helix_code/internal/llm/factory.go` — add `NewCloudProvider(cfg ProviderConfigEntry)` cloud-only helper that validates `cfg.Type ∈ {anthropic, bedrock, vertexai, azure}`. The existing `NewProvider` switch is left intact for non-cloud types.
+- `helix_code/cmd/cli/main.go` — replace the hardcoded Ollama bootstrap in `NewCLI()` with `llm.NewSelector(...).Resolve(ctx, opts)`. Add `--provider`, `--model`, `--llm-config` top-level flags. Register `helixcode wizard` cobra command. First-run guard: when no config file exists AND no flag/env set, auto-launch the wizard before constructing the agent.
 
 ### 3.3 Types
 
@@ -240,7 +240,7 @@ Challenge:
 
 ## 7. Cross-platform
 
-All cloud SDKs are pure Go and already in `HelixCode/go.mod`:
+All cloud SDKs are pure Go and already in `helix_code/go.mod`:
 - `github.com/aws/aws-sdk-go-v2 v1.32.7` and `service/bedrockruntime v1.23.1`
 - `github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0`, `sdk/azidentity v1.8.0`
 - Vertex AI is implemented over **raw HTTPS + `golang.org/x/oauth2/google`** (already in deps; see `vertexai_provider.go`); we deliberately do NOT pull `cloud.google.com/go/aiplatform` because the existing impl already works and adding the SDK would be a 30+MB dep churn for zero gain.

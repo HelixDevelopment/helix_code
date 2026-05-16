@@ -242,7 +242,7 @@ response, err := pm.Generate(ctx, request)
 ### Run All Tests
 
 ```bash
-cd HelixCode/internal/llm
+cd helix_code/internal/llm
 
 # Run all provider feature tests
 go test -v -run TestReasoning

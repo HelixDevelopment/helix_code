@@ -87,7 +87,7 @@ _pending._
 
 **Artefacts:**
 
-- Harness source: `HelixCode/tests/integration/cmd/p2f21_challenge/main.go`
+- Harness source: `helix_code/tests/integration/cmd/p2f21_challenge/main.go`
 - Challenge dir: `challenges/p2-f21-codex-approval-modes/{CHALLENGE.md,run.sh}`
 
 **Build:**
@@ -132,7 +132,7 @@ linux-build-exit=0
 
 ```
 $ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-    HelixCode/tests/integration/cmd/p2f21_challenge/main.go
+    helix_code/tests/integration/cmd/p2f21_challenge/main.go
 (no matches; exit 1 = clean)
 
 $ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
@@ -359,7 +359,7 @@ with PNG-magic + DecodeConfig + size>1024 verification.
 
 Every task TDD-driven (failing test → minimal impl → green); anti-bluff
 smoke `clean` on every commit; zero new external deps (`chromedp v0.15.1`
-+ `cdproto` already direct in `HelixCode/go.mod`); 7-phase Challenge
++ `cdproto` already direct in `helix_code/go.mod`); 7-phase Challenge
 (navigate-and-snapshot / snapshot-text / click-mutates-DOM / type-into-input
 / screenshot-PNG-magic / close-tears-down / concurrent-session-sharing)
 gated on chromium availability with `SKIP-OK` only on chromium absence.
@@ -370,7 +370,7 @@ F23 section appended to this file. PROGRESS.md current focus advanced from
 "F22 closed; F23 next candidate (brainstorm)" to "F23 (Cline Browser Tool)
 in flight". CONTINUATION.md F23 mid-flight section ticks T01 DONE.
 Zero new external deps verified — `chromedp v0.15.1` + `cdproto` already
-direct in `HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
+direct in `helix_code/go.mod`; `git diff go.mod` shows no diff after T01.
 Per-task commit subjects + SHAs filled in by T02-T10.
 
 ### P2-F23-T10 — Close-out evidence
@@ -490,7 +490,7 @@ loaded AFTER project memory. 64 KB cap with positive `TruncatedProject` /
 
 Every task TDD-driven (failing test → minimal impl → green); anti-bluff
 smoke `clean` on every commit; zero new external deps (`fsnotify v1.9.0`
-already direct in `HelixCode/go.mod`); 5-phase Challenge (project-only
+already direct in `helix_code/go.mod`); 5-phase Challenge (project-only
 + missing-file-graceful + hot-reload + project-plus-user + truncation)
 with positive runtime evidence per Article XI §11.9.
 
@@ -500,7 +500,7 @@ F24 section appended to this file. PROGRESS.md current focus advanced from
 "F23 closed; F24 next candidate (brainstorm)" to "F24 (Codex Project
 Memory) in flight". CONTINUATION.md F24 mid-flight section ticks T01 next.
 Zero new external deps verified — `fsnotify v1.9.0` already direct in
-`HelixCode/go.mod`; `git diff go.mod` shows no diff after T01.
+`helix_code/go.mod`; `git diff go.mod` shows no diff after T01.
 Per-task commit subjects + SHAs filled in by T02-T08.
 
 ### P2-F24-T08 — Close-out evidence
@@ -548,8 +548,8 @@ $ GOOS=linux GOARCH=amd64 go build -o /tmp/helixcode-linux-amd64-f24 ./cmd/serve
 Zero new external deps (verbatim):
 ```
 $ go mod tidy
-$ git diff --exit-code HelixCode/go.mod
-$ git diff --exit-code HelixCode/go.sum
+$ git diff --exit-code helix_code/go.mod
+$ git diff --exit-code helix_code/go.sum
 (empty — no changes to go.mod or go.sum)
 ```
 
@@ -602,7 +602,7 @@ clean; zero new external deps; fourth Phase 2 feature shipped.
 **Plan:** `docs/superpowers/plans/2026-05-07-p2-f25-plandex-plan-trees.md`
 **Q1-Q5 = A,A,A,A,A** (full plandex port; .helixcode/plans/ storage; 6 tools + /plan slash; F01 AutoCompactor reuse)
 **Tasks:** 10 (T01 bootstrap → T10 Challenge 7 phases + close-out)
-**Zero new external deps** (google/uuid already direct in HelixCode/go.mod)
+**Zero new external deps** (google/uuid already direct in helix_code/go.mod)
 
 ### P2-F25-T01 — bootstrap F25 evidence section + advance PROGRESS
 (evidence recorded below)
@@ -654,7 +654,7 @@ SUMMARY: PHASE-A=4/4; PHASE-B=5/5; PHASE-C=4/4; PHASE-D=5/5; PHASE-E=8/8; PHASE-
 
 Zero new external deps (verbatim):
 ```
-$ go mod tidy && git diff --exit-code HelixCode/go.mod && git diff --exit-code HelixCode/go.sum
+$ go mod tidy && git diff --exit-code helix_code/go.mod && git diff --exit-code helix_code/go.sum
 (empty — no changes to go.mod or go.sum)
 ```
 

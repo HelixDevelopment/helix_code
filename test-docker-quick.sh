@@ -63,8 +63,8 @@ main() {
     
     # Directory structure
     run_test "HelixCode source directory exists" "[ -d HelixCode ]"
-    run_test "HelixCode config directory exists" "[ -d HelixCode/config ]"
-    run_test "HelixCode assets directory exists" "[ -d HelixCode/assets ]"
+    run_test "HelixCode config directory exists" "[ -d helix_code/config ]"
+    run_test "HelixCode assets directory exists" "[ -d helix_code/assets ]"
     
     # Docker compose syntax check
     run_test "docker-compose.helix.yml syntax valid" "docker-compose -f docker-compose.helix.yml config -q"

@@ -10,7 +10,7 @@ HelixCode is a **sophisticated, enterprise-grade distributed AI development plat
 
 ### Core Directory Layout
 ```
-HelixCode/
+helix_code/
 ├── cmd/                          # Application entry points
 │   ├── server/main.go           # REST API server (82 lines)
 │   └── cli/main.go              # CLI client (333 lines)

@@ -987,7 +987,7 @@ func TestRealWorldScenario(t *testing.T) {
 				Timeout:   5 * time.Second,
 				Endpoint:  "/health",
 				Method:    "GET",
-				Headers:   map[string]string{"User-Agent": "HelixCode/1.0"},
+				Headers:   map[string]string{"User-Agent": "helix_code/1.0"},
 				ExpectedStatusCodes: []int{200, 201, 202},
 			},
 		},

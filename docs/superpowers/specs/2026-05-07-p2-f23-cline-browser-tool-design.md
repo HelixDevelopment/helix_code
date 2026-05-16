@@ -26,7 +26,7 @@ Three concrete user surfaces ship together:
 
 ## 2. Architecture
 
-The package layout under `HelixCode/internal/tools/browser/` keeps the existing chromedp infrastructure (Controller, ActionExecutor, etc.) intact and ADDS a thin cline-style session façade on top:
+The package layout under `helix_code/internal/tools/browser/` keeps the existing chromedp infrastructure (Controller, ActionExecutor, etc.) intact and ADDS a thin cline-style session façade on top:
 
 - **`BrowserSession`** (`session.go`, NEW) — encapsulates one chromium subprocess. Fields: `ctx context.Context` (the chromedp Context returned by `chromedp.NewContext` + `chromedp.NewExecAllocator` chain), `cancel context.CancelFunc` (cancels `ctx` AND tears down the chromium subprocess), `screenshotDir string` (per-session tempdir under `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/`; created at session-create), `screenshotCount atomic.Uint64` (next screenshot number; written as `<n>.png` in the session dir), `chromiumPath string` (the discovered chromium binary path; recorded for `/browser status`), `headed bool` (recorded for `/browser status`; `true` when `HELIXCODE_BROWSER_HEADED=true` was set at session-create), `createdAt time.Time` (wall-clock when the session started), `log *zap.Logger`. Methods: `Run(ctx context.Context, actions ...chromedp.Action) error` (the single chromedp entry point — wraps `chromedp.Run(s.ctx, actions...)`; rejects with `ErrNoActiveSession` if `s.ctx == nil`), `NextScreenshotPath() string` (atomic-increment + format `<dir>/<n>.png`), `Close() error` (calls `s.cancel()` once via `sync.Once`, removes `screenshotDir`, returns).
 - **`BrowserManager`** (`manager.go`, NEW) — atomic pointer to the single current `*BrowserSession`. Fields: `current atomic.Pointer[BrowserSession]`, `screenshotRoot string` (parent of all per-session dirs; usually `$XDG_DATA_HOME/helixcode/browser/screenshots`), `discovery ChromeDiscovery` (the existing `internal/tools/browser/discovery.go` interface), `log *zap.Logger`, `mu sync.Mutex` (guards EnsureSession / CloseSession against races; the atomic pointer makes the read path lock-free). Methods: `EnsureSession(ctx context.Context) (*BrowserSession, error)` (loads `current`; if non-nil, returns it; otherwise acquires `mu`, double-checks, discovers chromium via `discovery.Discover`, creates the chromedp Allocator + Context, registers cancel + sub-cancel, creates the tempdir, stores in `current`, returns), `RequireSession() (*BrowserSession, error)` (loads `current`; if nil → `ErrNoActiveSession`; otherwise returns), `CloseSession() error` (acquires `mu`, swaps `current` to nil, calls `s.Close()` on the previous session, returns), `Status() ManagerStatus` (active yes/no + chromium path + tempdir + headed mode + createdAt). The atomic-pointer pattern ensures concurrent tool calls share one session without the lock-on-read tax; the mutex serialises lifecycle transitions only.
@@ -85,36 +85,36 @@ The package layout under `HelixCode/internal/tools/browser/` keeps the existing 
 
 ### 3.1 New files
 
-- `HelixCode/internal/tools/browser/types.go` — `Snapshot`, `ScreenshotResult`, `ManagerStatus` value types; sentinel errors; `EnvVarHeadedMode` constant.
-- `HelixCode/internal/tools/browser/types_test.go`.
-- `HelixCode/internal/tools/browser/options.go` — `BrowserOptions` + `OptionsFromEnv()`.
-- `HelixCode/internal/tools/browser/options_test.go`.
-- `HelixCode/internal/tools/browser/session.go` — `BrowserSession` struct + `Run` + `NextScreenshotPath` + `Close` (sync.Once-guarded).
-- `HelixCode/internal/tools/browser/session_test.go` — exercises `Run` + `NextScreenshotPath` against a stub session built via `chromedp.NewContext` over an in-process headless instance (skip-OK if chromium binary not on PATH).
-- `HelixCode/internal/tools/browser/manager.go` — `BrowserManager` struct + `EnsureSession` / `RequireSession` / `CloseSession` / `Status`.
-- `HelixCode/internal/tools/browser/manager_test.go` — atomic-pointer concurrency, double-create idempotency, close-then-require returns `ErrNoActiveSession`.
-- `HelixCode/internal/tools/browser/navigate_tool.go` — `BrowserNavigateToolV2` (V2 to disambiguate from existing `BrowserNavigateTool` in `internal/tools/browser_tools.go`); registers as Name `browser_navigate` if the existing one is replaced at registration time, OR as a new name `browser_navigate_v2` if coexistence is needed (T09 picks the resolution).
-- `HelixCode/internal/tools/browser/navigate_tool_test.go`.
-- `HelixCode/internal/tools/browser/snapshot_tool.go` — `BrowserSnapshotTool`.
-- `HelixCode/internal/tools/browser/snapshot_tool_test.go`.
-- `HelixCode/internal/tools/browser/click_type_tools.go` — `BrowserClickTool` + `BrowserTypeTool` together (small, related).
-- `HelixCode/internal/tools/browser/click_type_tools_test.go`.
-- `HelixCode/internal/tools/browser/screenshot_tool.go` — `BrowserScreenshotToolV2` (PNG-magic + size verification baked into Execute).
-- `HelixCode/internal/tools/browser/screenshot_tool_test.go`.
-- `HelixCode/internal/tools/browser/close_tool.go` — `BrowserCloseToolV2`.
-- `HelixCode/internal/tools/browser/close_tool_test.go`.
-- `HelixCode/internal/tools/browser/register.go` — `RegisterAll(reg *tools.ToolRegistry, mgr *BrowserManager) error` — single entry point that constructs all six tools and calls `reg.RegisterTool` for each.
-- `HelixCode/internal/commands/browser_command.go` — `BrowserCommand` slash struct; subcommands `status` / `navigate <url>` / `close`.
-- `HelixCode/internal/commands/browser_command_test.go`.
-- `HelixCode/tests/integration/browser_test.go` — `//go:build integration`; gated on chromium availability via `chromedp` discovery; spawns a real `httptest.Server` serving fixture HTML; exercises navigate → snapshot → click → snapshot (assert mutation) → type → screenshot (PNG-magic) → close (assert subsequent require fails).
-- `HelixCode/tests/integration/cmd/p2f23_challenge/main.go` — Challenge harness.
+- `helix_code/internal/tools/browser/types.go` — `Snapshot`, `ScreenshotResult`, `ManagerStatus` value types; sentinel errors; `EnvVarHeadedMode` constant.
+- `helix_code/internal/tools/browser/types_test.go`.
+- `helix_code/internal/tools/browser/options.go` — `BrowserOptions` + `OptionsFromEnv()`.
+- `helix_code/internal/tools/browser/options_test.go`.
+- `helix_code/internal/tools/browser/session.go` — `BrowserSession` struct + `Run` + `NextScreenshotPath` + `Close` (sync.Once-guarded).
+- `helix_code/internal/tools/browser/session_test.go` — exercises `Run` + `NextScreenshotPath` against a stub session built via `chromedp.NewContext` over an in-process headless instance (skip-OK if chromium binary not on PATH).
+- `helix_code/internal/tools/browser/manager.go` — `BrowserManager` struct + `EnsureSession` / `RequireSession` / `CloseSession` / `Status`.
+- `helix_code/internal/tools/browser/manager_test.go` — atomic-pointer concurrency, double-create idempotency, close-then-require returns `ErrNoActiveSession`.
+- `helix_code/internal/tools/browser/navigate_tool.go` — `BrowserNavigateToolV2` (V2 to disambiguate from existing `BrowserNavigateTool` in `internal/tools/browser_tools.go`); registers as Name `browser_navigate` if the existing one is replaced at registration time, OR as a new name `browser_navigate_v2` if coexistence is needed (T09 picks the resolution).
+- `helix_code/internal/tools/browser/navigate_tool_test.go`.
+- `helix_code/internal/tools/browser/snapshot_tool.go` — `BrowserSnapshotTool`.
+- `helix_code/internal/tools/browser/snapshot_tool_test.go`.
+- `helix_code/internal/tools/browser/click_type_tools.go` — `BrowserClickTool` + `BrowserTypeTool` together (small, related).
+- `helix_code/internal/tools/browser/click_type_tools_test.go`.
+- `helix_code/internal/tools/browser/screenshot_tool.go` — `BrowserScreenshotToolV2` (PNG-magic + size verification baked into Execute).
+- `helix_code/internal/tools/browser/screenshot_tool_test.go`.
+- `helix_code/internal/tools/browser/close_tool.go` — `BrowserCloseToolV2`.
+- `helix_code/internal/tools/browser/close_tool_test.go`.
+- `helix_code/internal/tools/browser/register.go` — `RegisterAll(reg *tools.ToolRegistry, mgr *BrowserManager) error` — single entry point that constructs all six tools and calls `reg.RegisterTool` for each.
+- `helix_code/internal/commands/browser_command.go` — `BrowserCommand` slash struct; subcommands `status` / `navigate <url>` / `close`.
+- `helix_code/internal/commands/browser_command_test.go`.
+- `helix_code/tests/integration/browser_test.go` — `//go:build integration`; gated on chromium availability via `chromedp` discovery; spawns a real `httptest.Server` serving fixture HTML; exercises navigate → snapshot → click → snapshot (assert mutation) → type → screenshot (PNG-magic) → close (assert subsequent require fails).
+- `helix_code/tests/integration/cmd/p2f23_challenge/main.go` — Challenge harness.
 - `challenges/p2-f23-cline-browser-tool/CHALLENGE.md` + `challenges/p2-f23-cline-browser-tool/run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/cmd/cli/main.go` — three additions adjacent to F22 wiring: (1) construct `mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)`; (2) call `browser.RegisterAll(c.toolRegistry, mgr)`; (3) register `commands.NewBrowserCommand(mgr)` slash. NO removal of existing `BrowserLaunchTool`/etc.
-- `HelixCode/internal/commands/registry.go` — no schema change; one new `Register(...)` call site for `/browser`.
-- `HelixCode/go.mod` — **zero new external deps** (chromedp v0.15.1 + cdproto v0.0.0-20260405000525-47a8ff65b46a are already direct deps from earlier browser work). T10's verification step asserts `git diff go.mod` and `git diff go.sum` are no-op.
+- `helix_code/cmd/cli/main.go` — three additions adjacent to F22 wiring: (1) construct `mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)`; (2) call `browser.RegisterAll(c.toolRegistry, mgr)`; (3) register `commands.NewBrowserCommand(mgr)` slash. NO removal of existing `BrowserLaunchTool`/etc.
+- `helix_code/internal/commands/registry.go` — no schema change; one new `Register(...)` call site for `/browser`.
+- `helix_code/go.mod` — **zero new external deps** (chromedp v0.15.1 + cdproto v0.0.0-20260405000525-47a8ff65b46a are already direct deps from earlier browser work). T10's verification step asserts `git diff go.mod` and `git diff go.sum` are no-op.
 
 ### 3.3 Types
 
@@ -300,7 +300,7 @@ func (c *BrowserCommand) Execute(ctx context.Context, cc *CommandContext) (*Comm
 
 ### 3.7 New external dependencies
 
-**Zero new dependencies.** chromedp v0.15.1 + cdproto v0.0.0-20260405000525-47a8ff65b46a are already direct deps in `HelixCode/go.mod` (introduced for the existing `internal/tools/browser/` package). `os/exec` is not used (chromedp manages the subprocess). `os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context` are stdlib. `zap` is already direct. T10's verification step asserts `git diff --exit-code go.mod go.sum` is no-op.
+**Zero new dependencies.** chromedp v0.15.1 + cdproto v0.0.0-20260405000525-47a8ff65b46a are already direct deps in `helix_code/go.mod` (introduced for the existing `internal/tools/browser/` package). `os/exec` is not used (chromedp manages the subprocess). `os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context` are stdlib. `zap` is already direct. T10's verification step asserts `git diff --exit-code go.mod go.sum` is no-op.
 
 ---
 
@@ -503,7 +503,7 @@ The Challenge MUST exit non-zero on any byte-evidence mismatch. Skip is permitte
 
 ## 10. Open questions resolved
 
-- **Q1 = A** — Browser engine: `chromedp` (already in `HelixCode/go.mod` as a direct dep at v0.15.1, with cdproto v0.0.0-20260405000525-47a8ff65b46a). Chromium subprocess managed by chromedp via `NewExecAllocator` + `NewContext`. No new external deps.
+- **Q1 = A** — Browser engine: `chromedp` (already in `helix_code/go.mod` as a direct dep at v0.15.1, with cdproto v0.0.0-20260405000525-47a8ff65b46a). Chromium subprocess managed by chromedp via `NewExecAllocator` + `NewContext`. No new external deps.
 - **Q2 = A** — Tool surface: six tools (`browser_navigate`, `browser_snapshot`, `browser_click`, `browser_type`, `browser_screenshot`, `browser_close`); each registered through the F21-extended Tool interface; per-tool RequiresApproval mapped per §3.6 (`navigate`/`click`/`type`/`close` → `LevelEdit`; `snapshot`/`screenshot` → `LevelReadOnly`).
 - **Q3 = A** — Headless default; `HELIXCODE_BROWSER_HEADED=true` env var (case-insensitive equal to literal `true`) enables headed mode for human debugging. Read once at session-create via `OptionsFromEnv()`; not re-read mid-session.
 - **Q4 = A** — Screenshots written to `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png`; tool result returns the absolute file path (NOT base64); files are mode `0600`; per-session tempdir is removed on `CloseSession()`. `n` is monotonic per session via `atomic.Uint64`.

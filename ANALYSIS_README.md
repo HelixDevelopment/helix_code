@@ -192,7 +192,7 @@ A: WebSocket connection → Session creation → Tool list → Tool execution �
 ## Contact & Updates
 
 This analysis was generated from the HelixCode repository at:
-`/Users/milosvasic/Projects/HelixCode/HelixCode`
+`/Users/milosvasic/Projects/helix_code/HelixCode`
 
 For the latest code, refer to the actual source files at the above location.
 

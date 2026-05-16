@@ -95,32 +95,32 @@ Shutdown: at process exit, `TelemetryProvider.Shutdown(ctx)` calls `tp.ForceFlus
 
 ### 3.1 New files
 
-- `HelixCode/internal/telemetry/types.go` — `TelemetryConfig`, `ExporterKind` enum, `TelemetryStats` (for /telemetry status), error sentinels. Exported `BlockedAttributeKeys` default list (CONST-042 secret-attribute blocklist; see §5.2).
-- `HelixCode/internal/telemetry/types_test.go`.
-- `HelixCode/internal/telemetry/config.go` — `LoadConfigFromEnv() *TelemetryConfig` + `SelectExporter() ExporterKind`. Pure; no OTel deps.
-- `HelixCode/internal/telemetry/config_test.go`.
-- `HelixCode/internal/telemetry/provider.go` — `TelemetryProvider` constructor (`NewTelemetryProvider(ctx, cfg, logger) (*TelemetryProvider, error)`), `Tracer()`, `Meter()`, `Shutdown(ctx)`, `ForceFlush(ctx)`, `Stats()`, `RingBuffer()` for /telemetry show.
-- `HelixCode/internal/telemetry/provider_test.go`.
-- `HelixCode/internal/telemetry/llm_instrumentation.go` — `TracedLLMProvider` decorator + factory.
-- `HelixCode/internal/telemetry/llm_instrumentation_test.go`.
-- `HelixCode/internal/telemetry/tool_instrumentation.go` — small `instrumentToolCall(ctx, tp, name) (context.Context, func(err error))` helper used in-place inside `ToolRegistry.Execute`. Lives in the telemetry package so the tool registry imports it cleanly.
-- `HelixCode/internal/telemetry/tool_instrumentation_test.go`.
-- `HelixCode/internal/telemetry/agent_instrumentation.go` — analogous helper for the agent loop iteration: `instrumentAgentIteration(ctx, tp) (context.Context, func(err error))`.
-- `HelixCode/internal/telemetry/agent_instrumentation_test.go`.
-- `HelixCode/internal/telemetry/attribute_filter.go` — `FilterAttributes([]attribute.KeyValue, blocked []string) []attribute.KeyValue`. CONST-042 secret-shaped-attribute filter (§5.2).
-- `HelixCode/internal/telemetry/attribute_filter_test.go`.
-- `HelixCode/internal/commands/telemetry_command.go` — `/telemetry` slash (`status`/`show`/`flush`).
-- `HelixCode/internal/commands/telemetry_command_test.go`.
-- `HelixCode/tests/integration/telemetry_test.go` — `//go:build integration` (gating per §5.2).
-- `HelixCode/tests/integration/cmd/p1f16_challenge/main.go` — runtime evidence harness with in-tree fake OTLP/HTTP receiver.
+- `helix_code/internal/telemetry/types.go` — `TelemetryConfig`, `ExporterKind` enum, `TelemetryStats` (for /telemetry status), error sentinels. Exported `BlockedAttributeKeys` default list (CONST-042 secret-attribute blocklist; see §5.2).
+- `helix_code/internal/telemetry/types_test.go`.
+- `helix_code/internal/telemetry/config.go` — `LoadConfigFromEnv() *TelemetryConfig` + `SelectExporter() ExporterKind`. Pure; no OTel deps.
+- `helix_code/internal/telemetry/config_test.go`.
+- `helix_code/internal/telemetry/provider.go` — `TelemetryProvider` constructor (`NewTelemetryProvider(ctx, cfg, logger) (*TelemetryProvider, error)`), `Tracer()`, `Meter()`, `Shutdown(ctx)`, `ForceFlush(ctx)`, `Stats()`, `RingBuffer()` for /telemetry show.
+- `helix_code/internal/telemetry/provider_test.go`.
+- `helix_code/internal/telemetry/llm_instrumentation.go` — `TracedLLMProvider` decorator + factory.
+- `helix_code/internal/telemetry/llm_instrumentation_test.go`.
+- `helix_code/internal/telemetry/tool_instrumentation.go` — small `instrumentToolCall(ctx, tp, name) (context.Context, func(err error))` helper used in-place inside `ToolRegistry.Execute`. Lives in the telemetry package so the tool registry imports it cleanly.
+- `helix_code/internal/telemetry/tool_instrumentation_test.go`.
+- `helix_code/internal/telemetry/agent_instrumentation.go` — analogous helper for the agent loop iteration: `instrumentAgentIteration(ctx, tp) (context.Context, func(err error))`.
+- `helix_code/internal/telemetry/agent_instrumentation_test.go`.
+- `helix_code/internal/telemetry/attribute_filter.go` — `FilterAttributes([]attribute.KeyValue, blocked []string) []attribute.KeyValue`. CONST-042 secret-shaped-attribute filter (§5.2).
+- `helix_code/internal/telemetry/attribute_filter_test.go`.
+- `helix_code/internal/commands/telemetry_command.go` — `/telemetry` slash (`status`/`show`/`flush`).
+- `helix_code/internal/commands/telemetry_command_test.go`.
+- `helix_code/tests/integration/telemetry_test.go` — `//go:build integration` (gating per §5.2).
+- `helix_code/tests/integration/cmd/p1f16_challenge/main.go` — runtime evidence harness with in-tree fake OTLP/HTTP receiver.
 - `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/go.mod` — add OTel deps (§3.5).
-- `HelixCode/internal/tools/registry.go` — add `telemetryProvider *telemetry.TelemetryProvider` field; add `SetTelemetryProvider(*telemetry.TelemetryProvider)` setter (mirrors `SetLSPManager` / `SetSandboxManager` / `SetSubagentManager`); wrap `Execute` body with `instrumentToolCall` (5 added lines).
-- `HelixCode/internal/agent/base_agent.go` — add `telemetryProvider *telemetry.TelemetryProvider` field; add `SetTelemetryProvider` setter; wrap `executeTaskWithLLM` LLM-call site with `instrumentAgentIteration` (5 added lines).
-- `HelixCode/cmd/cli/main.go` — three lines: load config from env, construct TelemetryProvider, register `/telemetry` slash + setters on registry/agent + `defer tp.Shutdown(ctx)`. The init goes alongside the existing logger construction (~line 400).
+- `helix_code/go.mod` — add OTel deps (§3.5).
+- `helix_code/internal/tools/registry.go` — add `telemetryProvider *telemetry.TelemetryProvider` field; add `SetTelemetryProvider(*telemetry.TelemetryProvider)` setter (mirrors `SetLSPManager` / `SetSandboxManager` / `SetSubagentManager`); wrap `Execute` body with `instrumentToolCall` (5 added lines).
+- `helix_code/internal/agent/base_agent.go` — add `telemetryProvider *telemetry.TelemetryProvider` field; add `SetTelemetryProvider` setter; wrap `executeTaskWithLLM` LLM-call site with `instrumentAgentIteration` (5 added lines).
+- `helix_code/cmd/cli/main.go` — three lines: load config from env, construct TelemetryProvider, register `/telemetry` slash + setters on registry/agent + `defer tp.Shutdown(ctx)`. The init goes alongside the existing logger construction (~line 400).
 
 ### 3.3 Types
 

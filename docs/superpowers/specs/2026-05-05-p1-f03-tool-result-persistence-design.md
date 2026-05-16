@@ -301,10 +301,10 @@ Temporarily set `PersistThreshold = 0` so every output persists. Re-run the Chal
 - Predecessor spec: `docs/superpowers/specs/2026-05-05-p1-f02-permission-rules-design.md`
 - Evidence file (live): `docs/improvements/06_phase_1_evidence.md`
 - Existing infrastructure being audited (NOT modified except for wiring):
-  - `HelixCode/internal/tools/registry.go` — `Execute` returns `(interface{}, error)`; unchanged
-  - `HelixCode/internal/llm/tool_provider.go` — orchestration loop where `MaybePersist` is called
-  - `HelixCode/internal/llm/anthropic_provider.go` — tool_result content serialisation
-  - `HelixCode/internal/persistence/Store` — heavyweight state-snapshot; NOT used as substrate (per N6)
+  - `helix_code/internal/tools/registry.go` — `Execute` returns `(interface{}, error)`; unchanged
+  - `helix_code/internal/llm/tool_provider.go` — orchestration loop where `MaybePersist` is called
+  - `helix_code/internal/llm/anthropic_provider.go` — tool_result content serialisation
+  - `helix_code/internal/persistence/Store` — heavyweight state-snapshot; NOT used as substrate (per N6)
 - Constitutional anchors:
   - Article XI §11.9 — Anti-Bluff Forensic Anchor (every PASS carries runtime evidence)
   - CONST-035 — Zero-Bluff Mandate

@@ -68,7 +68,7 @@ A passing test is a claim that the feature **works for the end user**. Every tes
 
 ### 3.2 Directory Structure
 ```
-HelixCode/
+helix_code/
 ├── cmd/
 │   ├── server/         # HTTP server entry point
 │   ├── cli/            # CLI client entry point

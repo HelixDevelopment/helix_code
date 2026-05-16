@@ -37,10 +37,10 @@
 | `test` | Test configurations |
 | `tests/e2e` | E2E test suites |
 
-### 1.2 HelixCode/ Subdirectory Structure (Main Code)
+### 1.2 helix_code/ Subdirectory Structure (Main Code)
 
 ```
-HelixCode/
+helix_code/
 ├── cmd/
 │   ├── cli/              # CLI client entry point
 │   ├── server/           # HTTP server entry point
@@ -217,7 +217,7 @@ make fmt            # Format code
 
 ## 5. Configuration System
 
-### 5.1 Main Config File: `HelixCode/internal/config/config.go` [^15^]
+### 5.1 Main Config File: `helix_code/internal/config/config.go` [^15^]
 
 **Configuration Loading Order** (Viper-based):
 1. Set defaults (`setDefaults()`)
@@ -293,7 +293,7 @@ HELIX_WEB_PORT=3000
 
 ### 5.3 ConfigManager
 
-File: `HelixCode/internal/config/config.go` lines 360+  
+File: `helix_code/internal/config/config.go` lines 360+  
 Provides `ConfigManager` with:
 - `NewHelixConfigManager(configPath)` - loads or creates default config
 - `GetConfig()`, `UpdateConfig()`, `UpdateConfigFromMap()`
@@ -363,7 +363,7 @@ nonInteractive = flag.Bool("non-interactive", false, "Run in non-interactive mod
 
 ### 7.1 Provider Interface [^38^]
 
-File: `HelixCode/internal/llm/missing_types.go`
+File: `helix_code/internal/llm/missing_types.go`
 
 ```go
 type Provider interface {
@@ -393,7 +393,7 @@ type Provider interface {
 
 ### 7.3 Provider Factory [^21^]
 
-File: `HelixCode/internal/llm/factory.go`
+File: `helix_code/internal/llm/factory.go`
 
 ```go
 func NewProvider(config ProviderConfigEntry) (Provider, error) {
@@ -438,7 +438,7 @@ func InitializeModelManager(configs []ProviderConfigEntry) (*ModelManager, error
 
 ### 7.4 Model Manager [^33^]
 
-File: `HelixCode/internal/llm/model_manager.go`
+File: `helix_code/internal/llm/model_manager.go`
 
 **Core Responsibilities**:
 - `RegisterProvider(provider Provider) error` - registers provider and its models
@@ -469,7 +469,7 @@ type ModelSelectionCriteria struct {
 
 ### 7.5 Model Discovery Engine [^29^]
 
-File: `HelixCode/internal/llm/model_discovery.go`
+File: `helix_code/internal/llm/model_discovery.go`
 
 **Key Features**:
 - `GetRecommendations(ctx, RecommendationRequest) (*RecommendationResponse, error)`
@@ -490,7 +490,7 @@ File: `HelixCode/internal/llm/model_discovery.go`
 
 ### 7.6 Cross-Provider Registry [^14^]
 
-File: `HelixCode/internal/llm/cross_provider_registry.go`
+File: `helix_code/internal/llm/cross_provider_registry.go`
 
 **Default Providers Registered**:
 | Provider | Type | Endpoint | Default Port | Supported Formats |
@@ -503,7 +503,7 @@ File: `HelixCode/internal/llm/cross_provider_registry.go`
 
 ### 7.7 Alias Management [^20^]
 
-File: `HelixCode/internal/llm/aliases.go`
+File: `helix_code/internal/llm/aliases.go`
 
 - `AliasManager` with fuzzy matching (Levenshtein distance)
 - Default threshold: 0.7 (70%)
@@ -512,7 +512,7 @@ File: `HelixCode/internal/llm/aliases.go`
 
 ### 7.8 Auto LLM Manager [^23^]
 
-File: `HelixCode/internal/llm/auto_llm_manager.go`
+File: `helix_code/internal/llm/auto_llm_manager.go`
 
 **Zero-Touch Mode**:
 - Auto-discover, auto-install, auto-configure, auto-start, auto-monitor, auto-update
@@ -523,7 +523,7 @@ File: `HelixCode/internal/llm/auto_llm_manager.go`
 
 ### 7.9 Ollama Provider Implementation [^31^]
 
-File: `HelixCode/internal/llm/ollama_provider.go`
+File: `helix_code/internal/llm/ollama_provider.go`
 
 **Real Implementation** (anti-bluff verified):
 - `discoverModels()` - calls `GET /api/tags` to fetch actual models
@@ -545,7 +545,7 @@ type OllamaConfig struct {
 
 ### 7.10 Current Model Listing (CRITICAL BLUFF)
 
-File: `HelixCode/cmd/cli/main.go` lines 101-128
+File: `helix_code/cmd/cli/main.go` lines 101-128
 
 ```go
 func (c *CLI) handleListModels(ctx context.Context) error {
@@ -679,7 +679,7 @@ make test-infra-status # Check status
 
 ### 10.2 LLM Package Test Files
 
-File: `HelixCode/internal/llm/` contains extensive test files:
+File: `helix_code/internal/llm/` contains extensive test files:
 - `aliases_test.go`
 - `anthropic_provider_test.go`
 - `auto_llm_manager_test.go`
@@ -777,8 +777,8 @@ Files:
 ### 12.1 LLM Provider Integration
 
 **Current Integration Model**:
-- Provider interface at `HelixCode/internal/llm/missing_types.go`
-- Factory pattern at `HelixCode/internal/llm/factory.go`
+- Provider interface at `helix_code/internal/llm/missing_types.go`
+- Factory pattern at `helix_code/internal/llm/factory.go`
 - Each provider is a separate Go file implementing the `Provider` interface
 - 35+ provider types supported
 
@@ -955,35 +955,35 @@ To integrate LLMsVerifier as the single source of truth for models, the followin
 | `internal/llm/model_discovery.go` | ~900+ | Replace `fetchExternalModels()` hardcoded list |
 | `internal/llm/model_manager.go` | ~280 | Add LLMsVerifier status to model scoring |
 | `internal/config/config.go` | ~100 | Add LLMsVerifier configuration section |
-| `HelixCode/go.mod` | - | Add LLMsVerifier client dependency |
+| `helix_code/go.mod` | - | Add LLMsVerifier client dependency |
 
 ---
 
 ## 17. Citations
 
 [^1^]: https://github.com/HelixDevelopment/HelixCode - Repository main page
-[^2^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/README.md - README
-[^3^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/go.mod - Go module definition
-[^4^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/.env.example - Environment template
-[^5^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/AGENTS.md - Agent guidelines
-[^10^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/cmd/cli/main.go - CLI entry point
-[^11^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/cmd/cli/main.go.old - Old CLI entry point
-[^13^]: https://github.com/HelixDevelopment/HelixCode/tree/main/HelixCode/internal/llm - LLM package directory
-[^14^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/cross_provider_registry.go - Cross-provider registry
-[^15^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/config/config.go - Configuration system
-[^20^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/aliases.go - Alias management
-[^21^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/factory.go - Provider factory
-[^22^]: https://github.com/HelixDevelopment/HelixCode/tree/main/challenges - Challenges directory
-[^23^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/auto_llm_manager.go - Auto LLM manager
-[^24^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/Makefile - Build system
-[^29^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/model_discovery.go - Model discovery
-[^30^]: https://github.com/HelixDevelopment/HelixCode/tree/main/challenges/scripts - Challenge scripts
-[^31^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/ollama_provider.go - Ollama provider
-[^33^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/model_manager.go - Model manager
-[^34^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/CONSTITUTION.md - Project constitution
-[^36^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/docker-compose.yml - Docker composition
-[^37^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/cmd/server/main.go - Server entry point
-[^38^]: https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/HelixCode/internal/llm/missing_types.go - Provider types and interface
+[^2^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/README.md - README
+[^3^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/go.mod - Go module definition
+[^4^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/.env.example - Environment template
+[^5^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/AGENTS.md - Agent guidelines
+[^10^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go - CLI entry point
+[^11^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go.old - Old CLI entry point
+[^13^]: https://github.com/HelixDevelopment/helix_code/tree/main/helix_code/internal/llm - LLM package directory
+[^14^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/cross_provider_registry.go - Cross-provider registry
+[^15^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/config/config.go - Configuration system
+[^20^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/aliases.go - Alias management
+[^21^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/factory.go - Provider factory
+[^22^]: https://github.com/HelixDevelopment/helix_code/tree/main/challenges - Challenges directory
+[^23^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/auto_llm_manager.go - Auto LLM manager
+[^24^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/Makefile - Build system
+[^29^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/model_discovery.go - Model discovery
+[^30^]: https://github.com/HelixDevelopment/helix_code/tree/main/challenges/scripts - Challenge scripts
+[^31^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/ollama_provider.go - Ollama provider
+[^33^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/model_manager.go - Model manager
+[^34^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/CONSTITUTION.md - Project constitution
+[^36^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/docker-compose.yml - Docker composition
+[^37^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/server/main.go - Server entry point
+[^38^]: https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/missing_types.go - Provider types and interface
 
 ---
 

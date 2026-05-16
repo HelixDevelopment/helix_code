@@ -6,13 +6,13 @@
 
 **Goal:** Ship a real, end-to-end **6-tool browser-automation suite** for the HelixCode CLI agent, modelled on cline's Puppeteer surface. F23 EXTENDS the existing `internal/tools/browser/` package (which already carries the chromedp infrastructure — `Controller`, `ActionExecutor`, `ScreenshotCapture`, `ConsoleMonitor`, `ChromeDiscovery`, `ScreenshotAnnotator` — at ~3 K LOC) by ADDING a thinner cline-style session façade (`BrowserSession`, `BrowserManager` with atomic-pointer lifecycle, `BrowserOptions` from env, `Snapshot`/`ScreenshotResult` value types, sentinel errors, `EnvVarHeadedMode` constant) and SIX new Tool-interface implementations (`browser_navigate`, `browser_snapshot`, `browser_click`, `browser_type`, `browser_screenshot`, `browser_close`) — each with the F21-mandated `RequiresApproval()` level mapped per spec §3.6 (`navigate`/`click`/`type`/`close` → `LevelEdit`; `snapshot`/`screenshot` → `LevelReadOnly`). Adds a `/browser` slash command (`status` / `navigate <url>` / `close`); NO cobra subcommand. Headless by default; `HELIXCODE_BROWSER_HEADED=true` (case-insensitive literal `true`) enables headed mode. Screenshots written to per-session tempdir under `$XDG_DATA_HOME/helixcode/browser/screenshots/<session-id>/<n>.png` (mode `0600`); tool result returns the absolute file path (NOT base64). Idempotent close via `sync.Once`. Lifecycle: lazy-create on first navigate; explicit close via tool or slash; defensive `defer mgr.CloseSession()` at process exit.
 
-**Architecture:** New files under `HelixCode/internal/tools/browser/` — `types.go` (`Snapshot`, `ScreenshotResult`, `ManagerStatus`, sentinels `ErrNoActiveSession`/`ErrChromiumNotFound`/`ErrNavigationTimeout`/`ErrSelectorNotFound`/`ErrScreenshotTooLarge`, `EnvVarHeadedMode`, `MaxSnapshotBytes`, `MaxScreenshotBytes`), `options.go` (`BrowserOptions` + `OptionsFromEnv()`), `session.go` (`BrowserSession` with chromedp Context + cancel + per-session screenshot tempdir + atomic counter + `sync.Once` close), `manager.go` (`BrowserManager` with `atomic.Pointer[BrowserSession] current`, `EnsureSession`/`RequireSession`/`CloseSession`/`Status`, mutex serialises only lifecycle transitions), `navigate_tool.go` / `snapshot_tool.go` / `click_type_tools.go` / `screenshot_tool.go` / `close_tool.go` (six Tool impls), `register.go` (single `RegisterAll(reg, mgr)` entry point). New `internal/commands/browser_command.go` for the `/browser` slash. Two existing files get small additions: `cmd/cli/main.go` (1) construct `mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)`, (2) call `browser.RegisterAll(c.toolRegistry, mgr)`, (3) register `commands.NewBrowserCommand(mgr)` slash; `internal/commands/registry.go` gets one new `Register(...)` call site. Coexists with the existing `BrowserLaunchTool`/`BrowserNavigateTool`/`BrowserScreenshotTool`/`BrowserCloseTool` in `internal/tools/browser_tools.go` (multi-browser API stays — back-compat). T09 picks the registration strategy: F23 tools register under `browser_navigate`/etc. names, with the existing ones renamed `_legacy` if any test needs to disambiguate.
+**Architecture:** New files under `helix_code/internal/tools/browser/` — `types.go` (`Snapshot`, `ScreenshotResult`, `ManagerStatus`, sentinels `ErrNoActiveSession`/`ErrChromiumNotFound`/`ErrNavigationTimeout`/`ErrSelectorNotFound`/`ErrScreenshotTooLarge`, `EnvVarHeadedMode`, `MaxSnapshotBytes`, `MaxScreenshotBytes`), `options.go` (`BrowserOptions` + `OptionsFromEnv()`), `session.go` (`BrowserSession` with chromedp Context + cancel + per-session screenshot tempdir + atomic counter + `sync.Once` close), `manager.go` (`BrowserManager` with `atomic.Pointer[BrowserSession] current`, `EnsureSession`/`RequireSession`/`CloseSession`/`Status`, mutex serialises only lifecycle transitions), `navigate_tool.go` / `snapshot_tool.go` / `click_type_tools.go` / `screenshot_tool.go` / `close_tool.go` (six Tool impls), `register.go` (single `RegisterAll(reg, mgr)` entry point). New `internal/commands/browser_command.go` for the `/browser` slash. Two existing files get small additions: `cmd/cli/main.go` (1) construct `mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)`, (2) call `browser.RegisterAll(c.toolRegistry, mgr)`, (3) register `commands.NewBrowserCommand(mgr)` slash; `internal/commands/registry.go` gets one new `Register(...)` call site. Coexists with the existing `BrowserLaunchTool`/`BrowserNavigateTool`/`BrowserScreenshotTool`/`BrowserCloseTool` in `internal/tools/browser_tools.go` (multi-browser API stays — back-compat). T09 picks the registration strategy: F23 tools register under `browser_navigate`/etc. names, with the existing ones renamed `_legacy` if any test needs to disambiguate.
 
-**Tech Stack:** Go 1.26, testify v1.11, zap (already direct), chromedp v0.15.1 (ALREADY direct in `HelixCode/go.mod`), cdproto v0.0.0-20260405000525-47a8ff65b46a (ALREADY direct). **Zero new external deps** (`os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `image/png`, `net/http/httptest` all stdlib). `go mod tidy` after T09 must produce no diff in either `go.mod` or `go.sum`. T10's verification step asserts this loudly.
+**Tech Stack:** Go 1.26, testify v1.11, zap (already direct), chromedp v0.15.1 (ALREADY direct in `helix_code/go.mod`), cdproto v0.0.0-20260405000525-47a8ff65b46a (ALREADY direct). **Zero new external deps** (`os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `image/png`, `net/http/httptest` all stdlib). `go mod tidy` after T09 must produce no diff in either `go.mod` or `go.sum`. T10's verification step asserts this loudly.
 
 **Spec:** `docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md` (commit `83d401d`).
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (full 4-term applied to F23 surface):**
 ```bash
@@ -60,7 +60,7 @@ Commit: `docs(P2-F23-T01): bootstrap F23 evidence + advance PROGRESS to F23 (Cli
 
 ## Task 2: types.go + options.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/types.go`, new `HelixCode/internal/tools/browser/types_test.go`, new `HelixCode/internal/tools/browser/options.go`, new `HelixCode/internal/tools/browser/options_test.go`.
+**Files:** new `helix_code/internal/tools/browser/types.go`, new `helix_code/internal/tools/browser/types_test.go`, new `helix_code/internal/tools/browser/options.go`, new `helix_code/internal/tools/browser/options_test.go`.
 
 Define in `types.go`:
 - `Snapshot struct { URL, Title, Mode, Content string; Truncated bool }`.
@@ -140,7 +140,7 @@ Subject: `feat(P2-F23-T02): browser types + options - Snapshot/ScreenshotResult/
 
 ## Task 3: manager.go + session.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/manager.go`, new `HelixCode/internal/tools/browser/manager_test.go`, new `HelixCode/internal/tools/browser/session.go`, new `HelixCode/internal/tools/browser/session_test.go`.
+**Files:** new `helix_code/internal/tools/browser/manager.go`, new `helix_code/internal/tools/browser/manager_test.go`, new `helix_code/internal/tools/browser/session.go`, new `helix_code/internal/tools/browser/session_test.go`.
 
 `session.go`:
 
@@ -352,7 +352,7 @@ Subject: `feat(P2-F23-T03): browser manager + session - atomic-pointer lifecycle
 
 ## Task 4: navigate_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/navigate_tool.go`, new `HelixCode/internal/tools/browser/navigate_tool_test.go`.
+**Files:** new `helix_code/internal/tools/browser/navigate_tool.go`, new `helix_code/internal/tools/browser/navigate_tool_test.go`.
 
 ```go
 type BrowserNavigateToolV2 struct { mgr *BrowserManager; opts BrowserOptions }
@@ -432,7 +432,7 @@ Subject: `feat(P2-F23-T04): browser_navigate tool - lazy session-create + WaitRe
 
 ## Task 5: snapshot_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/snapshot_tool.go`, new `HelixCode/internal/tools/browser/snapshot_tool_test.go`.
+**Files:** new `helix_code/internal/tools/browser/snapshot_tool.go`, new `helix_code/internal/tools/browser/snapshot_tool_test.go`.
 
 ```go
 type BrowserSnapshotTool struct { mgr *BrowserManager; opts BrowserOptions }
@@ -520,7 +520,7 @@ Subject: `feat(P2-F23-T05): browser_snapshot tool - html/text mode + 64 KB cap +
 
 ## Task 6: click_type_tools.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/click_type_tools.go`, new `HelixCode/internal/tools/browser/click_type_tools_test.go`.
+**Files:** new `helix_code/internal/tools/browser/click_type_tools.go`, new `helix_code/internal/tools/browser/click_type_tools_test.go`.
 
 `browser_click`:
 
@@ -588,7 +588,7 @@ Subject: `feat(P2-F23-T06): browser_click + browser_type tools - NodeVisible + 5
 
 ## Task 7: screenshot_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/screenshot_tool.go`, new `HelixCode/internal/tools/browser/screenshot_tool_test.go`.
+**Files:** new `helix_code/internal/tools/browser/screenshot_tool.go`, new `helix_code/internal/tools/browser/screenshot_tool_test.go`.
 
 ```go
 type BrowserScreenshotToolV2 struct { mgr *BrowserManager; opts BrowserOptions }
@@ -663,7 +663,7 @@ Subject: `feat(P2-F23-T07): browser_screenshot tool - PNG-magic + DecodeConfig +
 
 ## Task 8: close_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/browser/close_tool.go`, new `HelixCode/internal/tools/browser/close_tool_test.go`.
+**Files:** new `helix_code/internal/tools/browser/close_tool.go`, new `helix_code/internal/tools/browser/close_tool_test.go`.
 
 ```go
 type BrowserCloseToolV2 struct { mgr *BrowserManager }
@@ -710,7 +710,7 @@ Subject: `feat(P2-F23-T08): browser_close tool - idempotent CloseSession + post-
 
 ## Task 9: /browser slash + main.go wiring + integration test (TDD)
 
-**Files:** new `HelixCode/internal/commands/browser_command.go`, new `HelixCode/internal/commands/browser_command_test.go`, new `HelixCode/internal/tools/browser/register.go`, modify `HelixCode/cmd/cli/main.go`, new `HelixCode/tests/integration/browser_test.go` (`//go:build integration`).
+**Files:** new `helix_code/internal/commands/browser_command.go`, new `helix_code/internal/commands/browser_command_test.go`, new `helix_code/internal/tools/browser/register.go`, modify `helix_code/cmd/cli/main.go`, new `helix_code/tests/integration/browser_test.go` (`//go:build integration`).
 
 `register.go`:
 
@@ -820,7 +820,7 @@ Subject: `feat(P2-F23-T09): /browser slash + main.go wiring + browser.RegisterAl
 
 ## Task 10: Challenge harness 7 phases + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f23_challenge/main.go`, new `challenges/p2-f23-cline-browser-tool/CHALLENGE.md`, new `challenges/p2-f23-cline-browser-tool/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p2f23_challenge/main.go`, new `challenges/p2-f23-cline-browser-tool/CHALLENGE.md`, new `challenges/p2-f23-cline-browser-tool/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -897,7 +897,7 @@ Subject: `chore(P2-F23-T10): close out feature 23 — Cline Browser Tool`.
 1. **Spec coverage:** every spec section maps to a task — T02 types + options (§3.3 + §10), T03 manager + session (§3.3 + §3.6), T04 navigate (§3.4 row 1), T05 snapshot (§3.4 row 2), T06 click + type (§3.4 rows 3-4), T07 screenshot (§3.4 row 5 + §5.2 Bluff #4), T08 close (§3.4 row 6 + §5.2 Bluff #5), T09 /browser slash + main.go wiring + integration (§3.5 + §4 + §6.2), T10 Challenge 7 phases (§6.3 + §5.2) + close-out.
 2. **TDD:** every code task starts with failing tests. Types test pins constants byte-for-byte. Options test covers env-var case sensitivity. Manager test uses a stub `sessionFactory` to avoid spawning chromium in unit tests; integration tests use the production factory and gate on chromium availability. Six per-tool tests (T04-T08) assert Schema/Validate/RequiresApproval + no-session error paths; happy paths run under the integration test (T09) and Challenge (T10) against real chromium.
 3. **Type consistency:** `Snapshot`, `ScreenshotResult`, `ManagerStatus`, `BrowserOptions`, `BrowserSession`, `BrowserManager`, `BrowserNavigateToolV2`, `BrowserSnapshotTool`, `BrowserClickTool`, `BrowserTypeTool`, `BrowserScreenshotToolV2`, `BrowserCloseToolV2`, `BrowserCommand`, sentinel errors (`ErrNoActiveSession`, `ErrChromiumNotFound`, `ErrNavigationTimeout`, `ErrSelectorNotFound`, `ErrScreenshotTooLarge`), constants (`EnvVarHeadedMode`, `MaxSnapshotBytes`, `MaxScreenshotBytes`, `pngMagic`), command name `browser`, env var `HELIXCODE_BROWSER_HEADED` — all match across spec §3 and plan T02-T10.
-4. **Zero new external deps:** chromedp v0.15.1 + cdproto are already direct in `HelixCode/go.mod`. T10's verification step asserts `git diff --exit-code go.mod go.sum` is no-op. Stdlib only beyond that (image/png, net/http/httptest, sync/atomic, etc.).
+4. **Zero new external deps:** chromedp v0.15.1 + cdproto are already direct in `helix_code/go.mod`. T10's verification step asserts `git diff --exit-code go.mod go.sum` is no-op. Stdlib only beyond that (image/png, net/http/httptest, sync/atomic, etc.).
 5. **Anti-bluff (§5.2):** Challenge has SEVEN phases (A-G), all run on chromium availability; SKIP-OK only on chromium absence. Every phase records positive evidence: HTTP-fixture sentinel equality (PHASE-A/B), DOM-mutation byte differential (PHASE-C), input-value byte readback (PHASE-D), PNG-magic + DecodeConfig + size>1024 (PHASE-E), `errors.Is(ErrNoActiveSession)` post-close (PHASE-F), pointer equality across N=5 goroutines (PHASE-G). Byte-evidence mismatch is a hard Challenge failure. Absence-of-error is NEVER acceptable.
 6. **CONST-042:** browser tools NEVER log full page contents at INFO level. The committer's logger logs only the URL (caller input — already known to caller), the snapshot byte length, and the screenshot file path. A unit test scans `internal/tools/browser/*.go` for `logger\.Info\(.*\b(content|html|page|body|snapshot|outerHTML|innerText)\b` matches and FAILs on any hit (excluding test files). Per-tool descriptions and telemetry NEVER include user-typed text from `browser_type`. Screenshot files are mode `0600`.
 7. **CONST-043:** F23 emits zero `git push` commands and the `BrowserSession` does NOT call any git operations. T10's close-out push to 4 remotes requires explicit user authorisation per push.

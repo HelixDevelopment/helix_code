@@ -29,7 +29,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.24.0'
-        cache-dependency-path: HelixCode/go.sum
+        cache-dependency-path: helix_code/go.sum
 
     - name: Install dependencies
       working-directory: ./HelixCode
@@ -48,7 +48,7 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        files: ./HelixCode/coverage.out
+        files: ./helix_code/coverage.out
         flags: notifications
         name: notification-coverage
         fail_ci_if_error: false
@@ -66,7 +66,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.24.0'
-        cache-dependency-path: HelixCode/go.sum
+        cache-dependency-path: helix_code/go.sum
 
     - name: Install dependencies
       working-directory: ./HelixCode
@@ -90,7 +90,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.24.0'
-        cache-dependency-path: HelixCode/go.sum
+        cache-dependency-path: helix_code/go.sum
 
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v4

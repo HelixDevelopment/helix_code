@@ -397,10 +397,10 @@ coverage: 95.2% of statements
 ## 📚 Documentation Links
 
 **Setup Guides:**
-- [Slack Setup Guide](HelixCode/docs/integrations/SLACK_SETUP.md)
-- [Telegram Setup Guide](HelixCode/docs/integrations/TELEGRAM_SETUP.md)
-- [Email Setup Guide](HelixCode/docs/integrations/EMAIL_SETUP.md)
-- [Integrations Overview](HelixCode/docs/integrations/README.md)
+- [Slack Setup Guide](helix_code/docs/integrations/SLACK_SETUP.md)
+- [Telegram Setup Guide](helix_code/docs/integrations/TELEGRAM_SETUP.md)
+- [Email Setup Guide](helix_code/docs/integrations/EMAIL_SETUP.md)
+- [Integrations Overview](helix_code/docs/integrations/README.md)
 
 **Implementation Details:**
 - [Comprehensive Integration Report](NOTIFICATION_INTEGRATION_REPORT.md)
@@ -459,11 +459,11 @@ See the [Implementation Plan](NOTIFICATION_INTEGRATION_REPORT.md#8-implementatio
 ## 📞 Support & Resources
 
 **Documentation:**
-- Setup guides in `HelixCode/docs/integrations/`
+- Setup guides in `helix_code/docs/integrations/`
 - Implementation report: `NOTIFICATION_INTEGRATION_REPORT.md`
 
 **Testing:**
-- All tests in `HelixCode/internal/notification/*_test.go`
+- All tests in `helix_code/internal/notification/*_test.go`
 - Run with: `go test ./internal/notification/... -v`
 
 **Configuration:**

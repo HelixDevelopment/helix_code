@@ -12,7 +12,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f20-theme-system-design.md` (commit `0e97afa`).
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F20 surface):**
 ```bash
@@ -43,7 +43,7 @@ Must always print `clean`.
 
 ## Task 1: Bootstrap
 
-Append F20 evidence section header (spec `0e97afa`), update PROGRESS current focus to F20 (replacing F19 close-out's "F20 next candidate" pointer), insert F20 task list (9 items) after F19's, ensure `06_phase_1_evidence.md` has an F20 anchor. Verify `gopkg.in/yaml.v3` is currently in `HelixCode/go.mod` (likely indirect; sanity check before T05 imports it).
+Append F20 evidence section header (spec `0e97afa`), update PROGRESS current focus to F20 (replacing F19 close-out's "F20 next candidate" pointer), insert F20 task list (9 items) after F19's, ensure `06_phase_1_evidence.md` has an F20 anchor. Verify `gopkg.in/yaml.v3` is currently in `helix_code/go.mod` (likely indirect; sanity check before T05 imports it).
 
 ```bash
 cd HelixCode && grep "yaml.v3" go.mod  # confirm presence (indirect or direct)
@@ -55,7 +55,7 @@ Commit: `docs(P1-F20-T01): bootstrap Phase 1 / Feature 20 evidence + advance PRO
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/theme/types.go`, new `HelixCode/internal/theme/types_test.go`.
+**Files:** new `helix_code/internal/theme/types.go`, new `helix_code/internal/theme/types_test.go`.
 
 Define:
 - `Role int` enum + 5 values (`RoleInfo` / `RoleWarn` / `RoleError` / `RoleHighlight` / `RoleDim`) + private `numRoles` sentinel for array sizing.
@@ -128,7 +128,7 @@ Subject: `feat(P1-F20-T02): theme types - Role + Color + ColorDepth + Theme + se
 
 ## Task 3: builtin.go (TDD; pin §3.4 byte tables)
 
-**Files:** new `HelixCode/internal/theme/builtin.go`, new `HelixCode/internal/theme/builtin_test.go`.
+**Files:** new `helix_code/internal/theme/builtin.go`, new `helix_code/internal/theme/builtin_test.go`.
 
 `builtin.go`:
 
@@ -225,7 +225,7 @@ Subject: `feat(P1-F20-T03): builtin themes dark/light/none with pinned byte tabl
 
 ## Task 4: detect.go (TDD; table-drive every branch)
 
-**Files:** new `HelixCode/internal/theme/detect.go`, new `HelixCode/internal/theme/detect_test.go`.
+**Files:** new `helix_code/internal/theme/detect.go`, new `helix_code/internal/theme/detect_test.go`.
 
 `detect.go`:
 
@@ -362,7 +362,7 @@ Subject: `feat(P1-F20-T04): theme name + color depth detection from injected env
 
 ## Task 5: loader.go (TDD; YAML merge into dark baseline)
 
-**Files:** new `HelixCode/internal/theme/loader.go`, new `HelixCode/internal/theme/loader_test.go`. **Modify** `HelixCode/go.mod` to promote `gopkg.in/yaml.v3` from indirect to direct (verify with `go mod tidy` produces no new `go.sum` entries).
+**Files:** new `helix_code/internal/theme/loader.go`, new `helix_code/internal/theme/loader_test.go`. **Modify** `helix_code/go.mod` to promote `gopkg.in/yaml.v3` from indirect to direct (verify with `go mod tidy` produces no new `go.sum` entries).
 
 `loader.go`:
 
@@ -585,7 +585,7 @@ Subject: `feat(P1-F20-T05): theme loader + Styler with YAML merge into dark base
 
 ## Task 6: Wire Styler into F18 (TDD)
 
-**Files:** modify `HelixCode/cmd/cli/main.go`. Add new test `HelixCode/cmd/cli/main_theme_wire_test.go` if a focused unit harness fits, otherwise the integration test in T07 carries the byte assertions.
+**Files:** modify `helix_code/cmd/cli/main.go`. Add new test `helix_code/cmd/cli/main_theme_wire_test.go` if a focused unit harness fits, otherwise the integration test in T07 carries the byte assertions.
 
 Three small additions in `cmd/cli/main.go`:
 
@@ -634,7 +634,7 @@ Subject: `feat(P1-F20-T06): wire theme.Styler into handleGenerate via F18 Render
 
 ## Task 7: /theme slash command + integration test (TDD)
 
-**Files:** new `HelixCode/internal/commands/theme_command.go`, new `HelixCode/internal/commands/theme_command_test.go`, modify `HelixCode/cmd/cli/main.go` (one line: register the command), new `HelixCode/tests/integration/theme_test.go` (`//go:build integration`).
+**Files:** new `helix_code/internal/commands/theme_command.go`, new `helix_code/internal/commands/theme_command_test.go`, modify `helix_code/cmd/cli/main.go` (one line: register the command), new `helix_code/tests/integration/theme_test.go` (`//go:build integration`).
 
 `theme_command.go`:
 
@@ -756,7 +756,7 @@ Subject: `feat(P1-F20-T07): /theme slash command (status/list/show) + main.go wi
 
 ## Task 8: Challenge harness (5 always-run phases, positive byte evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`, new `challenges/p1-f20-theme-system/CHALLENGE.md`, new `challenges/p1-f20-theme-system/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f20_challenge/main.go`, new `challenges/p1-f20-theme-system/CHALLENGE.md`, new `challenges/p1-f20-theme-system/run.sh`.
 
 Harness phases (per spec §6.3):
 

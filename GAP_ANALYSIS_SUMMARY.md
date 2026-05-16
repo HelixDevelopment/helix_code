@@ -1,6 +1,6 @@
 # HelixCode Gap Analysis - Executive Summary
 
-**Document:** Full analysis at `/Users/milosvasic/Projects/HelixCode/GAP_ANALYSIS.md`
+**Document:** Full analysis at `/Users/milosvasic/Projects/helix_code/GAP_ANALYSIS.md`
 **Date:** 2025-11-04
 
 ---
@@ -121,29 +121,29 @@
 ### Where to Add Providers:
 ```bash
 # New provider files
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/gemini_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/bedrock_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/azure_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/gemini_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/bedrock_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/azure_provider.go
 
 # Update provider enum
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go:17-27
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go:17-27
 
 # Update factory
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go:339-356
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go:339-356
 ```
 
 ### Existing Provider Examples:
 ```bash
 # Best reference for new cloud providers
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/openai_provider.go
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/qwen_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/openai_provider.go
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/qwen_provider.go
 
 # OAuth2 example
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/qwen_provider.go:46-98
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/qwen_provider.go:46-98
 
 # Token exchange example
-/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/copilot_provider.go:65-162
+/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/copilot_provider.go:65-162
 ```
 
 ---
@@ -213,7 +213,7 @@
 
 ## Next Steps
 
-1. **Read Full Analysis**: `/Users/milosvasic/Projects/HelixCode/GAP_ANALYSIS.md`
+1. **Read Full Analysis**: `/Users/milosvasic/Projects/helix_code/GAP_ANALYSIS.md`
 2. **Start with Anthropic**: Week 1 implementation
 3. **Add Gemini**: Week 2 implementation
 4. **Test & Deploy**: Week 3-4

@@ -1219,7 +1219,7 @@ go run tests/e2e/challenges/cmd/runner/main.go -all
 # PART 5: MAKEFILE TARGETS
 
 ```makefile
-# Add to HelixCode/Makefile
+# Add to helix_code/Makefile
 
 # ============================================
 # FULL TEST INFRASTRUCTURE

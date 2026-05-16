@@ -172,7 +172,7 @@ cd HelixCode && go test -count=1 ./...
 
 # 3. Anti-bluff scan
 grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
+  helix_code/internal helix_code/cmd && echo "BLUFF FOUND" || echo "clean"
 
 # 4. Real LLM end-to-end (requires `make test-infra-up` first)
 make test-infra-up
@@ -244,7 +244,7 @@ PostgreSQL backup (per cluster pg conventions):
 pg_dump -Fc -d helixcode > helixcode-$(date +%Y%m%d).dump
 ```
 
-Restore: `pg_restore -d helixcode helixcode-<date>.dump`. Schemas live in `HelixCode/internal/database/migrations/`.
+Restore: `pg_restore -d helixcode helixcode-<date>.dump`. Schemas live in `helix_code/internal/database/migrations/`.
 
 ---
 
@@ -272,7 +272,7 @@ Every owned-by-us repo MUST carry `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md` wi
 
 ```bash
 grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  HelixCode/internal HelixCode/cmd && echo "BLUFF FOUND" || echo "clean"
+  helix_code/internal helix_code/cmd && echo "BLUFF FOUND" || echo "clean"
 ```
 
 A `BLUFF FOUND` is a release blocker per Article XI §11.9.
@@ -300,7 +300,7 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 
 | Submodule | Purpose | Required in prod? |
 |---|---|---|
-| `HelixCode/` | Core Go application | yes |
+| `helix_code/` | Core Go application | yes |
 | `helix_qa/` | QA + challenge orchestration | recommended |
 | `challenges/` | Challenge bank | recommended for verification |
 | `containers/` | Docker/container artefacts | yes |

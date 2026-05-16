@@ -6,11 +6,11 @@
 
 **Architecture:** New `internal/tools/askuser/` package with `types.go` (`Choice` + `Question` + `Result` + `Prompter` interface + sentinels `ErrInvalidQuestion`/`ErrNoTTYNoDefault`/`ErrUserCancelled`/`ErrPromptTimeout`/`ErrTooManyInvalidAttempts` + constants `DefaultTimeout=5min`/`DefaultMaxRetries=3`/`SourceStdin`/`SourceDefault`), `stdin_prompter.go` (production `stdinPrompter` with `Reader`/`Writer`/`IsTTY`/`Renderer`/`Timeout`/`MaxRetries` constructor seams; `FormatQuestion` exported pure helper; non-TTY branch short-circuits before read; TTY branch reads via `bufio.ReadString('\n')` in a goroutine with `select`-on-`ctx.Done` for cancellation; retries up to `MaxRetries` on empty/non-numeric/out-of-range; EOF → `ErrUserCancelled`; ctx-cancel/timeout → `ErrPromptTimeout`), `ask_user_tool.go` (`AskUserTool` implements `tools.Tool`; `Name()=="ask_user"`; `Category()==tools.CategoryAskUser`; parses `params["question"]`/`params["choices"]`/`params["default"]`; calls `prompter.Prompt`; returns `Result` as `map[string]interface{}`). Two existing files get tiny additions: `internal/tools/registry.go` (new `CategoryAskUser ToolCategory = "ask-user"` const + optional `AskUserPrompter askuser.Prompter` field on `RegistryConfig` + registration in `buildToolList`); `cmd/cli/main.go` (no changes required for correctness; optional polish to share `c.renderer` via `RegistryConfig.AskUserPrompter`).
 
-**Tech Stack:** Go 1.26, testify v1.11, zap (already in `go.mod`) — already present. **NO new external deps.** `golang.org/x/term` is a direct dep at v0.41.0 (promoted from indirect by F18-T06; verified via `grep "golang.org/x/term" HelixCode/go.mod`). `dev.helix.code/internal/render` is the F18-internal package; `internal/tools/askuser/` imports `render` for `RenderLines` only. `go mod tidy` after T02 must produce **zero new entries in `go.sum`** AND **zero changes to `go.mod`**. T07's verification step asserts this loudly.
+**Tech Stack:** Go 1.26, testify v1.11, zap (already in `go.mod`) — already present. **NO new external deps.** `golang.org/x/term` is a direct dep at v0.41.0 (promoted from indirect by F18-T06; verified via `grep "golang.org/x/term" helix_code/go.mod`). `dev.helix.code/internal/render` is the F18-internal package; `internal/tools/askuser/` imports `render` for `RenderLines` only. `go mod tidy` after T02 must produce **zero new entries in `go.sum`** AND **zero changes to `go.mod`**. T07's verification step asserts this loudly.
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f19-ask-user-question-design.md` (commit `cedd81e`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F19 surface):**
 ```bash
@@ -39,7 +39,7 @@ Must always print `clean`.
 
 ## Task 1: Bootstrap
 
-Append F19 evidence section header (spec `cedd81e`), update PROGRESS current focus to F19 (replacing the F18 close-out's "F19 next candidate" pointer), insert F19 task list (7 items) after F18's. Confirm `06_phase_1_evidence.md` has an F19 anchor. Verify `golang.org/x/term v0.41.0` is a direct dep in `HelixCode/go.mod` (sanity check before T03 imports it).
+Append F19 evidence section header (spec `cedd81e`), update PROGRESS current focus to F19 (replacing the F18 close-out's "F19 next candidate" pointer), insert F19 task list (7 items) after F18's. Confirm `06_phase_1_evidence.md` has an F19 anchor. Verify `golang.org/x/term v0.41.0` is a direct dep in `helix_code/go.mod` (sanity check before T03 imports it).
 
 Commit: `docs(P1-F19-T01): bootstrap Phase 1 / Feature 19 evidence + advance PROGRESS`.
 
@@ -47,7 +47,7 @@ Commit: `docs(P1-F19-T01): bootstrap Phase 1 / Feature 19 evidence + advance PRO
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/askuser/types.go`, new `HelixCode/internal/tools/askuser/types_test.go`.
+**Files:** new `helix_code/internal/tools/askuser/types.go`, new `helix_code/internal/tools/askuser/types_test.go`.
 
 Define:
 - `Choice{Label, Value, Preview string}`.
@@ -140,7 +140,7 @@ Subject: `feat(P1-F19-T02): askuser types - Choice + Question + Result + Prompte
 
 ## Task 3: stdin_prompter.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/askuser/stdin_prompter.go`, new `HelixCode/internal/tools/askuser/stdin_prompter_test.go`.
+**Files:** new `helix_code/internal/tools/askuser/stdin_prompter.go`, new `helix_code/internal/tools/askuser/stdin_prompter_test.go`.
 
 `stdin_prompter.go`:
 
@@ -420,7 +420,7 @@ Subject: `feat(P1-F19-T03): stdinPrompter with non-TTY short-circuit + retry loo
 
 ## Task 4: ask_user_tool.go (TDD) + registry category
 
-**Files:** new `HelixCode/internal/tools/askuser/ask_user_tool.go`, new `HelixCode/internal/tools/askuser/ask_user_tool_test.go`, modify `HelixCode/internal/tools/registry.go` (add `CategoryAskUser` const).
+**Files:** new `helix_code/internal/tools/askuser/ask_user_tool.go`, new `helix_code/internal/tools/askuser/ask_user_tool_test.go`, modify `helix_code/internal/tools/registry.go` (add `CategoryAskUser` const).
 
 `ask_user_tool.go`:
 
@@ -589,7 +589,7 @@ Subject: `feat(P1-F19-T04): AskUserTool wrapping Prompter + CategoryAskUser regi
 
 ## Task 5: registry wiring + integration test
 
-**Files:** modify `HelixCode/internal/tools/registry.go` (register `askuser.NewAskUserTool` in `buildToolList` or equivalent + add optional `AskUserPrompter askuser.Prompter` field on `RegistryConfig`), modify `HelixCode/cmd/cli/main.go` (optional: pass `c.renderer` via `RegistryConfig.AskUserPrompter`), new `HelixCode/tests/integration/askuser_test.go`.
+**Files:** modify `helix_code/internal/tools/registry.go` (register `askuser.NewAskUserTool` in `buildToolList` or equivalent + add optional `AskUserPrompter askuser.Prompter` field on `RegistryConfig`), modify `helix_code/cmd/cli/main.go` (optional: pass `c.renderer` via `RegistryConfig.AskUserPrompter`), new `helix_code/tests/integration/askuser_test.go`.
 
 `registry.go` changes:
 
@@ -711,7 +711,7 @@ Subject: `feat(P1-F19-T05): wire ask_user into registry + integration test (alwa
 
 ## Task 6: Challenge harness (5-phase, positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f19_challenge/main.go`, new `challenges/p1-f19-ask-user-question/CHALLENGE.md`, new `challenges/p1-f19-ask-user-question/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f19_challenge/main.go`, new `challenges/p1-f19-ask-user-question/CHALLENGE.md`, new `challenges/p1-f19-ask-user-question/run.sh`.
 
 Harness phases (per spec §6.3):
 

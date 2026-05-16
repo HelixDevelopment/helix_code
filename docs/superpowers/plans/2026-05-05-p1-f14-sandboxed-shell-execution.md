@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f14-sandboxed-shell-execution-design.md` (commit `067e5d9`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F14 surface):**
 ```bash
@@ -50,7 +50,7 @@ Append F14 evidence section header (spec `067e5d9`), update PROGRESS current foc
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/sandbox/types.go`, new `HelixCode/internal/tools/sandbox/types_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/types.go`, new `helix_code/internal/tools/sandbox/types_test.go`.
 
 Define `SandboxBackendKind` enum (None/Bubblewrap/Native) with `String()`, `SandboxCapabilities`, `SandboxPolicy`, `SandboxRequest`, `SandboxResult`, `SandboxBackend` interface, `SandboxConfig`, and the `ConstitutionalDenyList` slice from spec §3.3. Add `DefaultSandboxConfig()`, `DefaultSandboxPolicy()`, and `MergedDenyList(cfg SandboxConfig) []string` (CONST-033 + user, deduped, marker-prefixed for `[CONST-033]` rendering).
 
@@ -87,7 +87,7 @@ Subject: `feat(P1-F14-T02): sandbox types + ConstitutionalDenyList + default-DEN
 
 ## Task 3: detector.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/sandbox/detector.go`, new `HelixCode/internal/tools/sandbox/detector_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/detector.go`, new `helix_code/internal/tools/sandbox/detector_test.go`.
 
 `Detect() SandboxCapabilities` calls a small `Probe` interface so unit tests inject canned responses:
 ```go
@@ -159,7 +159,7 @@ Subject: `feat(P1-F14-T03): SandboxDetector + SelectBackend with explicit fail-c
 
 ## Task 4: bubblewrap_backend.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/sandbox/bubblewrap_backend.go`, new `HelixCode/internal/tools/sandbox/bubblewrap_backend_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/bubblewrap_backend.go`, new `helix_code/internal/tools/sandbox/bubblewrap_backend_test.go`.
 
 `BubblewrapBackend` builds argv from `SandboxRequest` and runs via injected `SubprocessRunner` (interface boundary so unit tests don't spawn real subprocesses).
 
@@ -223,7 +223,7 @@ Subject: `feat(P1-F14-T04): BubblewrapBackend with deterministic argv builder`.
 
 ## Task 5: native_backend.go (TDD; gated tests)
 
-**Files:** new `HelixCode/internal/tools/sandbox/native_backend.go` (`//go:build linux`), new `HelixCode/internal/tools/sandbox/native_backend_other.go` (`//go:build !linux`), new `HelixCode/internal/tools/sandbox/native_backend_test.go` (`//go:build linux`), new `HelixCode/internal/tools/sandbox/cmd/native_helper/main.go` (the re-exec helper).
+**Files:** new `helix_code/internal/tools/sandbox/native_backend.go` (`//go:build linux`), new `helix_code/internal/tools/sandbox/native_backend_other.go` (`//go:build !linux`), new `helix_code/internal/tools/sandbox/native_backend_test.go` (`//go:build linux`), new `helix_code/internal/tools/sandbox/cmd/native_helper/main.go` (the re-exec helper).
 
 `NativeBackend` sets `cmd.SysProcAttr.Cloneflags` to `CLONE_NEWPID|CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWUSER`, plus `CLONE_NEWNET` when network denied. UidMappings/GidMappings map container UID 0 to the host's current UID/GID. The re-exec helper at `internal/tools/sandbox/cmd/native_helper/main.go` runs with PID 1 in the new namespaces, remounts `/proc`, then `execve`s `/bin/sh -c <command>`. Helper path resolved at startup via sibling lookup near `os.Executable()`; if absent, native backend's `Run` returns `ErrNativeHelperMissing`.
 
@@ -282,7 +282,7 @@ Subject: `feat(P1-F14-T05): NativeBackend with Cloneflags userns + native_helper
 
 ## Task 6: manager.go (TDD with fake backend + spawn-counter)
 
-**Files:** new `HelixCode/internal/tools/sandbox/manager.go`, new `HelixCode/internal/tools/sandbox/manager_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/manager.go`, new `helix_code/internal/tools/sandbox/manager_test.go`.
 
 `SandboxManager.Execute` (per spec §4.2): backend-nil check → CONST-033 deny-list → user deny-list → ctx timeout → `Backend.Run`. Both deny-list checks use tokenised argv-head match AND word-boundary regex on the raw command (so `systemctl   suspend; ls` and `bash -c 'systemctl suspend'` are both caught).
 
@@ -330,7 +330,7 @@ Subject: `feat(P1-F14-T06): SandboxManager with CONST-033 deny-list + user deny-
 
 ## Task 7: sandboxed_shell_tool.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/sandbox/sandboxed_shell_tool.go`, new `HelixCode/internal/tools/sandbox/sandboxed_shell_tool_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/sandboxed_shell_tool.go`, new `helix_code/internal/tools/sandbox/sandboxed_shell_tool_test.go`.
 
 `SandboxedShellTool` implements the `Tool` interface from `internal/tools/registry.go`. Tool name: `shell_sandboxed`. Schema: `command` (string, required), `network` (bool, default false), `timeout_seconds` (int, default 30; max 600), `cwd` (string, optional). Execute builds `SandboxRequest` from params, calls `manager.Execute`, returns a result map.
 
@@ -379,7 +379,7 @@ Subject: `feat(P1-F14-T07): SandboxedShellTool implementing Tool interface as sh
 
 ## Task 8: config_loader.go (TDD; mirrors F12 wizard_writer)
 
-**Files:** new `HelixCode/internal/tools/sandbox/config_loader.go`, new `HelixCode/internal/tools/sandbox/config_loader_test.go`.
+**Files:** new `helix_code/internal/tools/sandbox/config_loader.go`, new `helix_code/internal/tools/sandbox/config_loader_test.go`.
 
 ```go
 func LoadConfig(path string) (SandboxConfig, error)        // "" → ~/.config/helixcode/sandbox.yaml; missing OK → defaults
@@ -430,7 +430,7 @@ Subject: `feat(P1-F14-T08): sandbox.yaml YAML loader + secret-safe writer (0600/
 
 ## Task 9: /sandbox slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/sandbox_command.go`, new `HelixCode/internal/commands/sandbox_command_test.go`.
+**Files:** new `helix_code/internal/commands/sandbox_command.go`, new `helix_code/internal/commands/sandbox_command_test.go`.
 
 Mirrors F13 `lsp_command.go` pattern: defines a small `SandboxManager` interface in the commands package so the slash command is testable with a fake while still letting `main.go` pass the real `*sandbox.SandboxManager`.
 
@@ -456,7 +456,7 @@ Subject: `feat(P1-F14-T09): /sandbox slash command (status / test / policy)`.
 
 ## Task 10: main.go wiring + integration test
 
-**Files:** modify `HelixCode/cmd/cli/main.go`, modify `HelixCode/internal/tools/registry.go`, new `HelixCode/tests/integration/sandbox_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go`, modify `helix_code/internal/tools/registry.go`, new `helix_code/tests/integration/sandbox_test.go` (`//go:build integration`).
 
 `registry.go` modifications:
 ```go
@@ -530,7 +530,7 @@ Subject: `feat(P1-F14-T10): wire SandboxManager into main.go + /sandbox + gated 
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f14_challenge/main.go`, new `challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md`, new `challenges/p1-f14-sandboxed-shell-execution/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f14_challenge/main.go`, new `challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md`, new `challenges/p1-f14-sandboxed-shell-execution/run.sh`.
 
 Output skeleton:
 ```
@@ -575,7 +575,7 @@ Tick all 12 items in PROGRESS, advance PROGRESS focus to F15 candidate, run fina
 1. **Spec coverage:** every spec section maps to a task — T02 types + CONST-033 (§3.3, §9), T03 detector + SelectBackend (§3.3, §5.2), T04 bubblewrap argv (§3.3, §4.3), T05 native cloneflags (§3.3, §4.4, §7), T06 manager policy enforcement (§4.2, §4.6, §5.1), T07 tool (§3.3, §3.4), T08 config loader (§3.3, §9 CONST-042), T09 slash (§3.4), T10 wiring + integration (§4.1, §5.2, §6.2), T11 Challenge three phases (§5.2, §6.3), T12 close-out (§9).
 2. **TDD:** every code task starts with a failing test that exercises real code paths (CONST-033 deny-list with spawn-counter; argv builder pure-function tests; fail-closed gate against forced-empty capabilities; YAML loader against real tempdir files).
 3. **Type consistency:** `SandboxConfig`, `SandboxPolicy`, `SandboxCapabilities`, `SandboxRequest`, `SandboxResult`, `SandboxBackend`, `SandboxManager`, `SandboxedShellTool`, `BubblewrapBackend`, `NativeBackend`, `ConstitutionalDenyList` — names match across spec §3.3 and plan T02–T08.
-4. **No new external deps:** bubblewrap is invoked as a subprocess via `os/exec` (stdlib); native namespace setup uses `syscall.SysProcAttr.Cloneflags` (stdlib); YAML loading reuses `gopkg.in/yaml.v3 v3.0.1` already in `go.mod`. Confirmed via `grep -E "yaml.v3|fsnotify" HelixCode/go.mod`. No `go get` needed.
+4. **No new external deps:** bubblewrap is invoked as a subprocess via `os/exec` (stdlib); native namespace setup uses `syscall.SysProcAttr.Cloneflags` (stdlib); YAML loading reuses `gopkg.in/yaml.v3 v3.0.1` already in `go.mod`. Confirmed via `grep -E "yaml.v3|fsnotify" helix_code/go.mod`. No `go get` needed.
 5. **Anti-bluff (§5.2):** Challenge has THREE sections; Phase A always runs and asserts the verbatim fail-closed message + CONST-033 spawn-counter rejection; Phases B and C are explicitly gated with `SKIP-OK: P1-F14 <missing capability> (install: <hint>)`. The fail-closed assertion is the single most consequential test in the feature.
 6. **CONST-033 deny-list:** rejected BEFORE backend.Run is invoked; verified by `countingBackend.runs == 0` in unit + Challenge tests. List covers `systemctl {suspend|hibernate|hybrid-sleep|suspend-then-hibernate|poweroff|halt|reboot|kexec}`, bare `shutdown|halt|poweroff|reboot|kexec`, `pm-suspend|pm-hibernate|pm-suspend-hybrid`, and `loginctl {suspend|hibernate|hybrid-sleep|poweroff|reboot}`. Tokenised + word-boundary regex match catches whitespace, chained, and nested-shell variants.
 7. **CONST-042:** sandbox.yaml written via `os.OpenFile(O_CREATE|O_WRONLY|O_EXCL, 0o600)`, parent dir at `0o700`. Loader rejects perms wider than 0600 with `ErrInsecurePerms`. Mirrors F12 wizard_writer pattern.

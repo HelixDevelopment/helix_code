@@ -320,8 +320,8 @@ cat > /tmp/marker.txt << 'MARKEREOF'
 #
 # This file extends HelixCode constitutional governance to this third-party
 # submodule. Full governance documents:
-#   https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md
-#   https://github.com/HelixDevelopment/HelixCode/blob/main/AGENTS.md
+#   https://github.com/HelixDevelopment/helix_code/blob/main/CONSTITUTION.md
+#   https://github.com/HelixDevelopment/helix_code/blob/main/AGENTS.md
 #
 # Key constraints:
 #   CONST-042 (No-Secret-Leak): No API keys, tokens, passwords, certs, or
@@ -388,7 +388,7 @@ done < docs/improvements/submodule_third_party.txt
 - [ ] **Step 1: Read the current script**
 
 ```bash
-cat /run/media/milosvasic/DATA4TB/Projects/HelixCode/scripts/verify-governance-cascade.sh
+cat /run/media/milosvasic/DATA4TB/Projects/helix_code/scripts/verify-governance-cascade.sh
 ```
 
 Note the existing structure, then replace/extend.
@@ -396,7 +396,7 @@ Note the existing structure, then replace/extend.
 - [ ] **Step 2: Write the extended verification script**
 
 ```bash
-cat > /run/media/milosvasic/DATA4TB/Projects/HelixCode/scripts/verify-governance-cascade.sh << 'SCRIPTEOF'
+cat > /run/media/milosvasic/DATA4TB/Projects/helix_code/scripts/verify-governance-cascade.sh << 'SCRIPTEOF'
 #!/bin/bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -444,7 +444,7 @@ echo "=== Result: $FAILURES failures ==="
 [ "$FAILURES" -eq 0 ] && echo "PASS" && exit 0
 echo "FAIL"; exit 1
 SCRIPTEOF
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/scripts/verify-governance-cascade.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/scripts/verify-governance-cascade.sh
 ```
 
 - [ ] **Step 3: Run and verify it passes**

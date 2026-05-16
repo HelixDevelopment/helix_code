@@ -103,8 +103,8 @@ main() {
     
     # Test 6: Check required directories
     run_test "HelixCode directory exists" "[ -d HelixCode ]"
-    run_test "HelixCode config directory exists" "[ -d HelixCode/config ]"
-    run_test "HelixCode assets directory exists" "[ -d HelixCode/assets ]"
+    run_test "HelixCode config directory exists" "[ -d helix_code/config ]"
+    run_test "HelixCode assets directory exists" "[ -d helix_code/assets ]"
     
     # Test 7: Check port availability
     run_test "Default API port (8080) available" "port_available 8080"

@@ -26,7 +26,7 @@ Three concrete user surfaces ship together:
 
 ## 2. Architecture
 
-The package layout under `HelixCode/internal/projectmemory/` is NEW (no existing collision). It is a self-contained subsystem owned by main.go's startup wiring:
+The package layout under `helix_code/internal/projectmemory/` is NEW (no existing collision). It is a self-contained subsystem owned by main.go's startup wiring:
 
 - **`Memory`** (`types.go`, NEW) — immutable value type returned by `MemoryLoader.Discover` and stored in `MemoryRegistry.current`. Fields: `Project string` (raw bytes of the resolved project memory file; capped at `MaxMemoryBytes`; empty when no file found), `User string` (raw bytes of the user overlay file; capped at `MaxMemoryBytes`; empty when no file found), `ProjectPath string` (absolute path of the discovered project memory file; empty when not found), `UserPath string` (absolute path of the user overlay file; empty when not found), `LoadedAt time.Time` (wall-clock when `Discover` completed), `TruncatedProject bool` (true when `Project` was capped from a larger source), `TruncatedUser bool` (true when `User` was capped from a larger source). Method: `Render() string` (returns Project + delimiter + User; empty when both are empty; never panics on partial data).
 - **`MemoryLoader`** (`loader.go`, NEW) — encapsulates discovery + read. Fields: `xdgConfigHome string` (resolved from `$XDG_CONFIG_HOME` or `$HOME/.config`), `log *zap.Logger`. Methods: `Discover(cwd string) (Memory, error)` (parent-walks from `cwd` up to a git root marker (`.git/` directory) or filesystem root, looking for first match against the case-INSENSITIVE filename list `["helixcode.md", "codex.md", "AGENTS.md"]`; reads the matched file (capped at 64 KB with `TruncatedProject` set on overflow); reads the user overlay at `$XDG_CONFIG_HOME/helixcode/memory.md` (capped + flagged similarly); returns the assembled `Memory`; missing files are NOT errors — they yield empty strings + empty paths). Helper: `findProjectMemory(start string) (string, error)` (returns the absolute path of the first found file or empty string + nil error).
@@ -63,7 +63,7 @@ The package layout under `HelixCode/internal/projectmemory/` is NEW (no existing
 
 **Why a single shared registry per CLI instance and NOT per-agent registries:** project memory IS the project's contract; every agent in the session should observe the same view. F15 subagents that need agent-specific context have their own per-task `Input` — not memory. F04 worktrees are isolated per-repo, but the project memory IS the repo's contract — sharing across worktrees is fine because a worktree IS the same logical project.
 
-**Why hot-reload via fsnotify (Q5=A) and NOT polling:** mid-session edits (the user opens `helixcode.md` in a separate editor while the CLI is running) are the canonical use case. Polling would either be too slow (>1s) or wasteful (every 100 ms with a stat call on every iteration). fsnotify is push-based, debounced, and already a direct dep (`github.com/fsnotify/fsnotify v1.9.0` in `HelixCode/go.mod`). Failure mode: fsnotify watch failure (e.g. macOS FSEvents temporarily unavailable) degrades to no-hot-reload but the slash-driven `/memory reload` always works.
+**Why hot-reload via fsnotify (Q5=A) and NOT polling:** mid-session edits (the user opens `helixcode.md` in a separate editor while the CLI is running) are the canonical use case. Polling would either be too slow (>1s) or wasteful (every 100 ms with a stat call on every iteration). fsnotify is push-based, debounced, and already a direct dep (`github.com/fsnotify/fsnotify v1.9.0` in `helix_code/go.mod`). Failure mode: fsnotify watch failure (e.g. macOS FSEvents temporarily unavailable) degrades to no-hot-reload but the slash-driven `/memory reload` always works.
 
 **Why per-user overlay AFTER project memory in the system prompt (Q3=A):** project memory establishes the "ground truth" for the project; the user overlay is the user's personal preferences/constraints (e.g. "I prefer terse responses"). Putting user AFTER project means the user's preferences get the LLM's most-recent attention bias without overriding project-level mandates. Inverting this order would let a user-level "disable approval gates" instruction silently override a project-level "always require approval" mandate — a genuine security risk.
 
@@ -79,25 +79,25 @@ The package layout under `HelixCode/internal/projectmemory/` is NEW (no existing
 
 ### 3.1 New files
 
-- `HelixCode/internal/projectmemory/types.go` — `Memory`, `MemorySource`, sentinel errors, constants.
-- `HelixCode/internal/projectmemory/types_test.go`.
-- `HelixCode/internal/projectmemory/loader.go` — `MemoryLoader` + `Discover` + helpers.
-- `HelixCode/internal/projectmemory/loader_test.go` — exercises parent-walk + user overlay + truncation + missing-file paths against real tempdirs.
-- `HelixCode/internal/projectmemory/registry.go` — `MemoryRegistry` with atomic-pointer Snapshot/Set/Reload + `MemorySnapshotter` interface.
-- `HelixCode/internal/projectmemory/registry_test.go` — concurrency (-race) + Reload-keeps-old-on-error.
-- `HelixCode/internal/projectmemory/watcher.go` — `MemoryWatcher` fsnotify wrapper with debounce.
-- `HelixCode/internal/projectmemory/watcher_test.go` — real fsnotify against real tempdir; assert Reload fires within 500 ms of file write.
-- `HelixCode/internal/projectmemory/doc.go` — package-level docstring.
-- `HelixCode/internal/commands/memory_command.go` — `/memory` slash.
-- `HelixCode/internal/commands/memory_command_test.go`.
-- `HelixCode/tests/integration/cmd/p2f24_challenge/main.go` — Challenge harness (5 phases A-E).
+- `helix_code/internal/projectmemory/types.go` — `Memory`, `MemorySource`, sentinel errors, constants.
+- `helix_code/internal/projectmemory/types_test.go`.
+- `helix_code/internal/projectmemory/loader.go` — `MemoryLoader` + `Discover` + helpers.
+- `helix_code/internal/projectmemory/loader_test.go` — exercises parent-walk + user overlay + truncation + missing-file paths against real tempdirs.
+- `helix_code/internal/projectmemory/registry.go` — `MemoryRegistry` with atomic-pointer Snapshot/Set/Reload + `MemorySnapshotter` interface.
+- `helix_code/internal/projectmemory/registry_test.go` — concurrency (-race) + Reload-keeps-old-on-error.
+- `helix_code/internal/projectmemory/watcher.go` — `MemoryWatcher` fsnotify wrapper with debounce.
+- `helix_code/internal/projectmemory/watcher_test.go` — real fsnotify against real tempdir; assert Reload fires within 500 ms of file write.
+- `helix_code/internal/projectmemory/doc.go` — package-level docstring.
+- `helix_code/internal/commands/memory_command.go` — `/memory` slash.
+- `helix_code/internal/commands/memory_command_test.go`.
+- `helix_code/tests/integration/cmd/p2f24_challenge/main.go` — Challenge harness (5 phases A-E).
 - `challenges/p2-f24-codex-project-memory/CHALLENGE.md` + `challenges/p2-f24-codex-project-memory/run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/cmd/cli/main.go` — three additions adjacent to the F23 wiring: (1) construct `memLoader := projectmemory.NewMemoryLoader(zap.NewNop())`; (2) construct `memRegistry := projectmemory.NewMemoryRegistry(memLoader, cwd)` and call `memRegistry.Reload(ctx)` once at startup; (3) construct `memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop()); memWatcher.Start(ctx); defer memWatcher.Close()`; (4) register `commands.NewMemoryCommand(memRegistry)` slash.
-- `HelixCode/internal/agent/base_agent.go` — `getSystemPrompt()` reads `a.memoryRegistry.Snapshot()` (if `a.memoryRegistry != nil`) and prepends the rendered Memory to the existing prompt body. Field added: `memoryRegistry projectmemory.MemorySnapshotter`. Setter added: `SetMemoryRegistry(r projectmemory.MemorySnapshotter)`. Backward-compat: when `memoryRegistry == nil`, the prompt is unchanged.
-- `HelixCode/go.mod` — **zero new external deps** (`github.com/fsnotify/fsnotify v1.9.0` is already a direct dep). T08's verification step asserts `git diff go.mod` and `git diff go.sum` are no-op.
+- `helix_code/cmd/cli/main.go` — three additions adjacent to the F23 wiring: (1) construct `memLoader := projectmemory.NewMemoryLoader(zap.NewNop())`; (2) construct `memRegistry := projectmemory.NewMemoryRegistry(memLoader, cwd)` and call `memRegistry.Reload(ctx)` once at startup; (3) construct `memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop()); memWatcher.Start(ctx); defer memWatcher.Close()`; (4) register `commands.NewMemoryCommand(memRegistry)` slash.
+- `helix_code/internal/agent/base_agent.go` — `getSystemPrompt()` reads `a.memoryRegistry.Snapshot()` (if `a.memoryRegistry != nil`) and prepends the rendered Memory to the existing prompt body. Field added: `memoryRegistry projectmemory.MemorySnapshotter`. Setter added: `SetMemoryRegistry(r projectmemory.MemorySnapshotter)`. Backward-compat: when `memoryRegistry == nil`, the prompt is unchanged.
+- `helix_code/go.mod` — **zero new external deps** (`github.com/fsnotify/fsnotify v1.9.0` is already a direct dep). T08's verification step asserts `git diff go.mod` and `git diff go.sum` are no-op.
 
 ### 3.3 Types
 
@@ -260,7 +260,7 @@ Backward-compat: every existing `BaseAgent` test that constructs without a memor
 
 ### 3.6 New external dependencies
 
-**Zero new dependencies.** `github.com/fsnotify/fsnotify v1.9.0` is already a direct dep in `HelixCode/go.mod`. `os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `os/exec` are stdlib. `zap` is already direct. T08's verification step asserts `git diff --exit-code go.mod go.sum` is no-op.
+**Zero new dependencies.** `github.com/fsnotify/fsnotify v1.9.0` is already a direct dep in `helix_code/go.mod`. `os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `os/exec` are stdlib. `zap` is already direct. T08's verification step asserts `git diff --exit-code go.mod go.sum` is no-op.
 
 ---
 

@@ -65,29 +65,29 @@ main()
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/agent/subagent/types.go` — `SubagentTask`, `SubagentResult`, `Isolation` enum, `SubagentState` enum, `SubagentSpawner` interface, error sentinels, `FakeLLMProvider` (TEST PROVIDER, see §5.2).
-- `HelixCode/internal/agent/subagent/types_test.go`.
-- `HelixCode/internal/agent/subagent/inprocess_spawner.go` — goroutine-based spawner; runs an inner agent loop with the parent's `llm.Provider` (or a freshly-constructed one when configured) and a fresh `tools.ToolRegistry` view.
-- `HelixCode/internal/agent/subagent/inprocess_spawner_test.go` — uses `FakeLLMProvider`.
-- `HelixCode/internal/agent/subagent/subprocess_spawner.go` — fork-exec via `os.Executable()` + `HELIX_SUBAGENT_INVOCATION=1`; reads JSON-encoded `SubagentResult` from child stdout.
-- `HelixCode/internal/agent/subagent/subprocess_spawner_test.go` — uses an injectable `Executor` seam to assert argv + env.
-- `HelixCode/internal/agent/subagent/manager.go` — `SubagentManager` with dispatch + streaming aggregation + max-concurrency + kill-by-id.
-- `HelixCode/internal/agent/subagent/manager_test.go`.
-- `HelixCode/internal/agent/subagent/worktree_integration.go` — wraps F04's `worktree.Manager.EnterWorktree`; on dispatch failure, no worktree is created.
-- `HelixCode/internal/agent/subagent/worktree_integration_test.go` — runs against a real `git init`-ed tempdir.
-- `HelixCode/internal/agent/subagent/helper_mode.go` — `IsSubagentInvocation()` + `RunAsSubagent() int`. Helper-mode does NOT depend on the rest of the CLI bootstrap; it constructs a minimal subagent runtime from env-var-encoded payload, runs the inner agent loop, prints JSON to stdout, exits.
-- `HelixCode/internal/agent/subagent/helper_mode_test.go`.
-- `HelixCode/internal/tools/task_tool.go` — `TaskTool` implementing `tools.Tool` interface; tool name `task`.
-- `HelixCode/internal/tools/task_tool_test.go`.
-- `HelixCode/internal/commands/subagents_command.go` — `/subagents` slash (list/status/kill).
-- `HelixCode/internal/commands/subagents_command_test.go`.
-- `HelixCode/tests/integration/subagent_test.go` — `//go:build integration`, gated per §5.2.
-- `HelixCode/tests/integration/cmd/p1f15_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/agent/subagent/types.go` — `SubagentTask`, `SubagentResult`, `Isolation` enum, `SubagentState` enum, `SubagentSpawner` interface, error sentinels, `FakeLLMProvider` (TEST PROVIDER, see §5.2).
+- `helix_code/internal/agent/subagent/types_test.go`.
+- `helix_code/internal/agent/subagent/inprocess_spawner.go` — goroutine-based spawner; runs an inner agent loop with the parent's `llm.Provider` (or a freshly-constructed one when configured) and a fresh `tools.ToolRegistry` view.
+- `helix_code/internal/agent/subagent/inprocess_spawner_test.go` — uses `FakeLLMProvider`.
+- `helix_code/internal/agent/subagent/subprocess_spawner.go` — fork-exec via `os.Executable()` + `HELIX_SUBAGENT_INVOCATION=1`; reads JSON-encoded `SubagentResult` from child stdout.
+- `helix_code/internal/agent/subagent/subprocess_spawner_test.go` — uses an injectable `Executor` seam to assert argv + env.
+- `helix_code/internal/agent/subagent/manager.go` — `SubagentManager` with dispatch + streaming aggregation + max-concurrency + kill-by-id.
+- `helix_code/internal/agent/subagent/manager_test.go`.
+- `helix_code/internal/agent/subagent/worktree_integration.go` — wraps F04's `worktree.Manager.EnterWorktree`; on dispatch failure, no worktree is created.
+- `helix_code/internal/agent/subagent/worktree_integration_test.go` — runs against a real `git init`-ed tempdir.
+- `helix_code/internal/agent/subagent/helper_mode.go` — `IsSubagentInvocation()` + `RunAsSubagent() int`. Helper-mode does NOT depend on the rest of the CLI bootstrap; it constructs a minimal subagent runtime from env-var-encoded payload, runs the inner agent loop, prints JSON to stdout, exits.
+- `helix_code/internal/agent/subagent/helper_mode_test.go`.
+- `helix_code/internal/tools/task_tool.go` — `TaskTool` implementing `tools.Tool` interface; tool name `task`.
+- `helix_code/internal/tools/task_tool_test.go`.
+- `helix_code/internal/commands/subagents_command.go` — `/subagents` slash (list/status/kill).
+- `helix_code/internal/commands/subagents_command_test.go`.
+- `helix_code/tests/integration/subagent_test.go` — `//go:build integration`, gated per §5.2.
+- `helix_code/tests/integration/cmd/p1f15_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f15-subagent-team/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
-- `HelixCode/internal/tools/registry.go` — add `CategorySubagent ToolCategory = "subagent"`. Add `SetSubagentManager(m *subagent.SubagentManager)` (mirrors F13's `SetLSPManager` and F14's `SetSandboxManager`); the method lazily registers `TaskTool` so unit tests of the registry that don't supply a manager don't see the `task` tool.
-- `HelixCode/cmd/cli/main.go` — three lines:
+- `helix_code/internal/tools/registry.go` — add `CategorySubagent ToolCategory = "subagent"`. Add `SetSubagentManager(m *subagent.SubagentManager)` (mirrors F13's `SetLSPManager` and F14's `SetSandboxManager`); the method lazily registers `TaskTool` so unit tests of the registry that don't supply a manager don't see the `task` tool.
+- `helix_code/cmd/cli/main.go` — three lines:
   1. **First statement of `main()`**: `if subagent.IsSubagentInvocation() { os.Exit(subagent.RunAsSubagent()) }`. MUST precede the existing `sandbox.IsHelperInvocation()` check.
   2. After the existing tool-registry construction: build a `SubagentManager`, call `registry.SetSubagentManager(mgr)`.
   3. Slash-command registration: `slashRegistry.Register(commands.NewSubagentsCommand(mgr))`.

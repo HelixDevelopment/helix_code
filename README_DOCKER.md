@@ -63,7 +63,7 @@ HELIX_AUTO_PORT=true           # Auto-adjust if ports occupied (recommended)
 ## 📁 Directory Structure
 
 ```
-HelixCode/
+helix_code/
 ├── helix                    # Main facade script
 ├── Dockerfile               # Main application image
 ├── docker-compose.helix.yml # Complete stack definition
@@ -216,7 +216,7 @@ docker system df
 **Worker Connection Issues**:
 ```bash
 # Check SSH setup
-ls -la HelixCode/test/ssh-keys/
+ls -la helix_code/test/ssh-keys/
 
 # Test worker connectivity
 docker exec helixcode ssh worker-1 echo "test"
@@ -282,8 +282,8 @@ curl http://localhost:8080/health
 ## 📚 Documentation
 
 - [DOCKER_SETUP.md](DOCKER_SETUP.md) - Detailed setup guide
-- [HelixCode README](../HelixCode/README.md) - Main project documentation
-- [API Documentation](../HelixCode/docs/api/) - REST API reference
+- [HelixCode README](../helix_code/README.md) - Main project documentation
+- [API Documentation](../helix_code/docs/api/) - REST API reference
 
 ## 🆘 Support
 

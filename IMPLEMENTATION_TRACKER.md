@@ -152,10 +152,10 @@ ssh.InsecureIgnoreHostKey()  // ALLOWS MAN-IN-THE-MIDDLE ATTACKS
 ---
 
 ## 🔗 RELATED FILES
-- **Main Code:** `/Users/milosvasic/Projects/HelixCode/HelixCode/`
-- **Tests:** `/Users/milosvasic/Projects/HelixCode/HelixCode/tests/`
-- **Analysis:** `/Users/milosvasic/Projects/HelixCode/COMPREHENSIVE_ANALYSIS_REPORT.md`
-- **Tracker:** `/Users/milosvasic/Projects/HelixCode/IMPLEMENTATION_TRACKER.md`
+- **Main Code:** `/Users/milosvasic/Projects/helix_code/helix_code/`
+- **Tests:** `/Users/milosvasic/Projects/helix_code/helix_code/tests/`
+- **Analysis:** `/Users/milosvasic/Projects/helix_code/COMPREHENSIVE_ANALYSIS_REPORT.md`
+- **Tracker:** `/Users/milosvasic/Projects/helix_code/IMPLEMENTATION_TRACKER.md`
 
 ---
 

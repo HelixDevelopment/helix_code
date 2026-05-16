@@ -16,55 +16,55 @@
 
 ```
 # LiteLLM
-HelixCode/internal/llm/litellm/types.go              — create
-HelixCode/internal/llm/litellm/unified_provider.go   — create
-HelixCode/internal/llm/litellm/adapter_openai.go     — create
-HelixCode/internal/llm/litellm/adapter_anthropic.go  — create
-HelixCode/internal/llm/litellm/adapter_google.go     — create
-HelixCode/internal/llm/litellm/registry.go           — create
-HelixCode/internal/llm/litellm/cost_tracker.go       — create
-HelixCode/internal/llm/litellm/unified_provider_test.go — create
+helix_code/internal/llm/litellm/types.go              — create
+helix_code/internal/llm/litellm/unified_provider.go   — create
+helix_code/internal/llm/litellm/adapter_openai.go     — create
+helix_code/internal/llm/litellm/adapter_anthropic.go  — create
+helix_code/internal/llm/litellm/adapter_google.go     — create
+helix_code/internal/llm/litellm/registry.go           — create
+helix_code/internal/llm/litellm/cost_tracker.go       — create
+helix_code/internal/llm/litellm/unified_provider_test.go — create
 
 # RepoMap
-HelixCode/internal/repomap/types.go           — create
-HelixCode/internal/repomap/scanner.go         — create
-HelixCode/internal/repomap/map_builder.go     — create
-HelixCode/internal/repomap/watcher.go         — create
-HelixCode/internal/repomap/repomap_tool.go    — create
-HelixCode/internal/repomap/repomap_test.go    — create
+helix_code/internal/repomap/types.go           — create
+helix_code/internal/repomap/scanner.go         — create
+helix_code/internal/repomap/map_builder.go     — create
+helix_code/internal/repomap/watcher.go         — create
+helix_code/internal/repomap/repomap_tool.go    — create
+helix_code/internal/repomap/repomap_test.go    — create
 
 # Quality Scoring
-HelixCode/internal/quality/types.go           — create
-HelixCode/internal/quality/scorer.go          — create
-HelixCode/internal/quality/gate.go            — create
-HelixCode/internal/quality/history.go         — create
-HelixCode/internal/quality/scorer_test.go     — create
+helix_code/internal/quality/types.go           — create
+helix_code/internal/quality/scorer.go          — create
+helix_code/internal/quality/gate.go            — create
+helix_code/internal/quality/history.go         — create
+helix_code/internal/quality/scorer_test.go     — create
 
 # Clarification System
-HelixCode/internal/clarification/types.go     — create
-HelixCode/internal/clarification/engine.go    — create
-HelixCode/internal/clarification/question.go  — create
-HelixCode/internal/clarification/engine_test.go — create
+helix_code/internal/clarification/types.go     — create
+helix_code/internal/clarification/engine.go    — create
+helix_code/internal/clarification/question.go  — create
+helix_code/internal/clarification/engine_test.go — create
 
 # Plugin System
-HelixCode/internal/plugins/types.go           — create
-HelixCode/internal/plugins/manifest.go        — create
-HelixCode/internal/plugins/loader.go          — create
-HelixCode/internal/plugins/registry.go        — create
-HelixCode/internal/plugins/exec.go            — create
-HelixCode/internal/plugins/loader_test.go     — create
+helix_code/internal/plugins/types.go           — create
+helix_code/internal/plugins/manifest.go        — create
+helix_code/internal/plugins/loader.go          — create
+helix_code/internal/plugins/registry.go        — create
+helix_code/internal/plugins/exec.go            — create
+helix_code/internal/plugins/loader_test.go     — create
 
 # New Providers
-HelixCode/internal/llm/providers/cohere/client.go     — create
-HelixCode/internal/llm/providers/replicate/client.go  — create
-HelixCode/internal/llm/providers/together/client.go   — create
+helix_code/internal/llm/providers/cohere/client.go     — create
+helix_code/internal/llm/providers/replicate/client.go  — create
+helix_code/internal/llm/providers/together/client.go   — create
 ```
 
 ---
 
 ### Task P3-T01: LiteLLM Abstraction Layer
 
-**Files:** Create `HelixCode/internal/llm/litellm/` package (8 files)
+**Files:** Create `helix_code/internal/llm/litellm/` package (8 files)
 
 - [ ] **Step 1: Create types** (`types.go`)
 
@@ -199,7 +199,7 @@ func TestUnifiedProvider_OpenAIAdapter_Roundtrip(t *testing.T) {
 ```bash
 cd HelixCode && go build ./internal/llm/litellm/... && go test ./internal/llm/litellm/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/llm/litellm/
+git add helix_code/internal/llm/litellm/
 git commit -m "feat(P3-T01): add LiteLLM unified provider abstraction layer
 
 Phase: 3  Task: P3-T01"
@@ -209,7 +209,7 @@ Phase: 3  Task: P3-T01"
 
 ### Task P3-T02: RepoMap — Semantic Codebase Mapping
 
-**Files:** Create `HelixCode/internal/repomap/` package (6 files)
+**Files:** Create `helix_code/internal/repomap/` package (6 files)
 
 - [ ] **Step 1: Create types** (`types.go`)
 
@@ -289,7 +289,7 @@ func TestRepoMap_ScanGoProject(t *testing.T) {
 ```bash
 cd HelixCode && go build ./internal/repomap/... && go test ./internal/repomap/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/repomap/
+git add helix_code/internal/repomap/
 git commit -m "feat(P3-T02): add RepoMap semantic codebase mapping with tree-sitter
 
 Phase: 3  Task: P3-T02"
@@ -299,7 +299,7 @@ Phase: 3  Task: P3-T02"
 
 ### Task P3-T03: Confidence-Based Quality Scoring
 
-**Files:** Create `HelixCode/internal/quality/` package (5 files)
+**Files:** Create `helix_code/internal/quality/` package (5 files)
 
 - [ ] **Step 1: Create types** (`types.go`)
 
@@ -363,7 +363,7 @@ func (h *History) Average() ScoreResult { ... }        // aggregate
 ```bash
 cd HelixCode && go test ./internal/quality/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/quality/
+git add helix_code/internal/quality/
 git commit -m "feat(P3-T03): add confidence-based quality scoring system
 
 Phase: 3  Task: P3-T03"
@@ -373,7 +373,7 @@ Phase: 3  Task: P3-T03"
 
 ### Task P3-T04: Interactive Clarification System
 
-**Files:** Create `HelixCode/internal/clarification/` package (4 files)
+**Files:** Create `helix_code/internal/clarification/` package (4 files)
 
 - [ ] **Step 1: Create types** (`types.go`)
 
@@ -439,7 +439,7 @@ Pattern matching for common ambiguity types:
 ```bash
 cd HelixCode && go test ./internal/clarification/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/clarification/
+git add helix_code/internal/clarification/
 git commit -m "feat(P3-T04): add interactive clarification engine
 
 Phase: 3  Task: P3-T04"
@@ -449,7 +449,7 @@ Phase: 3  Task: P3-T04"
 
 ### Task P3-T05: Plugin/Extension System
 
-**Files:** Create `HelixCode/internal/plugins/` package (6 files)
+**Files:** Create `helix_code/internal/plugins/` package (6 files)
 
 - [ ] **Step 1: Create types** (`types.go`)
 
@@ -527,7 +527,7 @@ Reuses F14 `sandbox.Manager` for plugin isolation. Each plugin runs in its own s
 ```bash
 cd HelixCode && go test ./internal/plugins/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/plugins/
+git add helix_code/internal/plugins/
 git commit -m "feat(P3-T05): add plugin/extension system with sandboxed execution
 
 Phase: 3  Task: P3-T05"
@@ -537,7 +537,7 @@ Phase: 3  Task: P3-T05"
 
 ### Task P3-T06: Cohere Provider
 
-**Files:** Create `HelixCode/internal/llm/providers/cohere/client.go`
+**Files:** Create `helix_code/internal/llm/providers/cohere/client.go`
 
 ```go
 package cohere
@@ -572,7 +572,7 @@ func (c *Client) Generate(ctx context.Context, req *llm.LLMRequest) (*llm.LLMRes
 ```bash
 cd HelixCode && go build ./internal/llm/providers/cohere/
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/llm/providers/cohere/
+git add helix_code/internal/llm/providers/cohere/
 git commit -m "feat(P3-T06): add Cohere LLM provider
 
 Phase: 3  Task: P3-T06"
@@ -582,7 +582,7 @@ Phase: 3  Task: P3-T06"
 
 ### Task P3-T07: Replicate Provider
 
-**Files:** Create `HelixCode/internal/llm/providers/replicate/client.go`
+**Files:** Create `helix_code/internal/llm/providers/replicate/client.go`
 
 Replicate uses a different API pattern (async predictions). Client calls `/v1/predictions` with model + input, polls for completion.
 
@@ -591,7 +591,7 @@ Replicate uses a different API pattern (async predictions). Client calls `/v1/pr
 ```bash
 cd HelixCode && go build ./internal/llm/providers/replicate/
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/llm/providers/replicate/
+git add helix_code/internal/llm/providers/replicate/
 git commit -m "feat(P3-T07): add Replicate LLM provider
 
 Phase: 3  Task: P3-T07"
@@ -601,7 +601,7 @@ Phase: 3  Task: P3-T07"
 
 ### Task P3-T08: Together.ai Provider
 
-**Files:** Create `HelixCode/internal/llm/providers/together/client.go`
+**Files:** Create `helix_code/internal/llm/providers/together/client.go`
 
 OpenAI-compatible endpoint at `https://api.together.xyz/v1/chat/completions`. Minimal adapter on top of existing OpenAI format.
 
@@ -610,7 +610,7 @@ OpenAI-compatible endpoint at `https://api.together.xyz/v1/chat/completions`. Mi
 ```bash
 cd HelixCode && go build ./internal/llm/providers/together/
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/llm/providers/together/
+git add helix_code/internal/llm/providers/together/
 git commit -m "feat(P3-T08): add Together.ai LLM provider
 
 Phase: 3  Task: P3-T08"
@@ -620,10 +620,10 @@ Phase: 3  Task: P3-T08"
 
 ### Task P3-T09: Verify HuggingFace Provider
 
-**Files:** Check `HelixCode/internal/llm/providers/huggingface/` (if exists)
+**Files:** Check `helix_code/internal/llm/providers/huggingface/` (if exists)
 
 ```bash
-grep -rn "simulated\|stub\|placeholder\|TODO" HelixCode/internal/llm/providers/huggingface/ 2>/dev/null && echo "ISSUE FOUND" || echo "clean"
+grep -rn "simulated\|stub\|placeholder\|TODO" helix_code/internal/llm/providers/huggingface/ 2>/dev/null && echo "ISSUE FOUND" || echo "clean"
 ```
 
 If stubbed: fix with real HuggingFace Inference API calls. If real: document as verified.
@@ -632,7 +632,7 @@ If stubbed: fix with real HuggingFace Inference API calls. If real: document as 
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/llm/providers/huggingface/
+git add helix_code/internal/llm/providers/huggingface/
 git commit -m "feat(P3-T09): verify HuggingFace provider is real, fix if stubbed
 
 Phase: 3  Task: P3-T09"

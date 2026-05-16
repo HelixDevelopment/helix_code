@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f11-session-transcript-resume-design.md` (commit `9128a9d`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term):**
 ```bash

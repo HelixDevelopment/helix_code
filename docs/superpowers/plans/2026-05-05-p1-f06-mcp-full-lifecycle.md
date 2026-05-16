@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f06-mcp-full-lifecycle-design.md` (commit `386a4af`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/HelixCode/` per the F01–F05 convention.
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/helix_code/` per the F01–F05 convention.
 
 **Anti-bluff smoke (run on every commit, FULL pattern):**
 ```bash
@@ -119,14 +119,14 @@ EOF
 ## Task 2: types.go + transport.go interface + BackoffSchedule (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/client_doc.go` (package overview comment for client surface)
-- Create: `HelixCode/internal/mcp/types.go` (TransportType, error vars, ClientState, Event)
-- Create: `HelixCode/internal/mcp/transport.go` (Transport interface, BackoffSchedule)
-- Create: `HelixCode/internal/mcp/transport_test.go`
+- Create: `helix_code/internal/mcp/client_doc.go` (package overview comment for client surface)
+- Create: `helix_code/internal/mcp/types.go` (TransportType, error vars, ClientState, Event)
+- Create: `helix_code/internal/mcp/transport.go` (Transport interface, BackoffSchedule)
+- Create: `helix_code/internal/mcp/transport_test.go`
 
 - [ ] **Step 1: Write failing test for BackoffSchedule**
 
-Create `HelixCode/internal/mcp/transport_test.go`:
+Create `helix_code/internal/mcp/transport_test.go`:
 
 ```go
 package mcp
@@ -198,7 +198,7 @@ Expected: FAIL with undefined: NewBackoffSchedule, TransportStdio, etc.
 
 - [ ] **Step 3: Write client_doc.go**
 
-Create `HelixCode/internal/mcp/client_doc.go`:
+Create `helix_code/internal/mcp/client_doc.go`:
 
 ```go
 // Package mcp also provides client-side support for the Model Context Protocol.
@@ -222,7 +222,7 @@ package mcp
 
 - [ ] **Step 4: Write types.go**
 
-Create `HelixCode/internal/mcp/types.go`:
+Create `helix_code/internal/mcp/types.go`:
 
 ```go
 package mcp
@@ -317,7 +317,7 @@ var (
 
 - [ ] **Step 5: Write transport.go**
 
-Create `HelixCode/internal/mcp/transport.go`:
+Create `helix_code/internal/mcp/transport.go`:
 
 ```go
 package mcp
@@ -401,7 +401,7 @@ Expected: `clean`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/client_doc.go HelixCode/internal/mcp/types.go HelixCode/internal/mcp/transport.go HelixCode/internal/mcp/transport_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/client_doc.go helix_code/internal/mcp/types.go helix_code/internal/mcp/transport.go helix_code/internal/mcp/transport_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T02): add MCP client types + Transport interface + BackoffSchedule
 
@@ -415,15 +415,15 @@ EOF
 ## Task 3: transport_stdio.go + cross-platform unix/windows files (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/transport_stdio.go`
-- Create: `HelixCode/internal/mcp/transport_stdio_unix.go` (`//go:build unix`)
-- Create: `HelixCode/internal/mcp/transport_stdio_windows.go` (`//go:build windows`)
-- Create: `HelixCode/internal/mcp/transport_stdio_test.go`
-- Create: `HelixCode/internal/mcp/testhelper_echo_server/main.go` (Go test helper that echoes JSON-RPC over stdin/stdout)
+- Create: `helix_code/internal/mcp/transport_stdio.go`
+- Create: `helix_code/internal/mcp/transport_stdio_unix.go` (`//go:build unix`)
+- Create: `helix_code/internal/mcp/transport_stdio_windows.go` (`//go:build windows`)
+- Create: `helix_code/internal/mcp/transport_stdio_test.go`
+- Create: `helix_code/internal/mcp/testhelper_echo_server/main.go` (Go test helper that echoes JSON-RPC over stdin/stdout)
 
 - [ ] **Step 1: Write the test helper subprocess**
 
-Create `HelixCode/internal/mcp/testhelper_echo_server/main.go`:
+Create `helix_code/internal/mcp/testhelper_echo_server/main.go`:
 
 ```go
 // echo MCP server: reads newline-delimited JSON-RPC from stdin, replies with
@@ -476,7 +476,7 @@ func main() {
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/mcp/transport_stdio_test.go`:
+Create `helix_code/internal/mcp/transport_stdio_test.go`:
 
 ```go
 package mcp
@@ -569,7 +569,7 @@ Expected: FAIL with undefined: NewStdioTransport, StdioConfig.
 
 - [ ] **Step 4: Write transport_stdio.go (cross-platform core)**
 
-Create `HelixCode/internal/mcp/transport_stdio.go`:
+Create `helix_code/internal/mcp/transport_stdio.go`:
 
 ```go
 package mcp
@@ -789,7 +789,7 @@ func mergeEnv(extra map[string]string) []string {
 
 - [ ] **Step 5: Write transport_stdio_unix.go**
 
-Create `HelixCode/internal/mcp/transport_stdio_unix.go`:
+Create `helix_code/internal/mcp/transport_stdio_unix.go`:
 
 ```go
 //go:build unix
@@ -825,7 +825,7 @@ func getEnv() []string {
 
 - [ ] **Step 6: Write transport_stdio_windows.go**
 
-Create `HelixCode/internal/mcp/transport_stdio_windows.go`:
+Create `helix_code/internal/mcp/transport_stdio_windows.go`:
 
 ```go
 //go:build windows
@@ -889,7 +889,7 @@ Expected: `clean`.
 - [ ] **Step 10: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/transport_stdio.go HelixCode/internal/mcp/transport_stdio_unix.go HelixCode/internal/mcp/transport_stdio_windows.go HelixCode/internal/mcp/transport_stdio_test.go HelixCode/internal/mcp/testhelper_echo_server/main.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/transport_stdio.go helix_code/internal/mcp/transport_stdio_unix.go helix_code/internal/mcp/transport_stdio_windows.go helix_code/internal/mcp/transport_stdio_test.go helix_code/internal/mcp/testhelper_echo_server/main.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T03): add stdio MCP transport with cross-platform process group control
 
@@ -903,12 +903,12 @@ EOF
 ## Task 4: transport_http.go with OAuth bearer header (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/transport_http.go`
-- Create: `HelixCode/internal/mcp/transport_http_test.go`
+- Create: `helix_code/internal/mcp/transport_http.go`
+- Create: `helix_code/internal/mcp/transport_http_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/transport_http_test.go`:
+Create `helix_code/internal/mcp/transport_http_test.go`:
 
 ```go
 package mcp
@@ -1029,7 +1029,7 @@ Expected: FAIL with undefined: NewHTTPTransport, HTTPConfig.
 
 - [ ] **Step 3: Write transport_http.go**
 
-Create `HelixCode/internal/mcp/transport_http.go`:
+Create `helix_code/internal/mcp/transport_http.go`:
 
 ```go
 package mcp
@@ -1192,7 +1192,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/transport_http.go HelixCode/internal/mcp/transport_http_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/transport_http.go helix_code/internal/mcp/transport_http_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T04): add HTTP MCP transport with OAuth bearer header
 
@@ -1206,12 +1206,12 @@ EOF
 ## Task 5: transport_sse.go with reconnect loop (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/transport_sse.go`
-- Create: `HelixCode/internal/mcp/transport_sse_test.go`
+- Create: `helix_code/internal/mcp/transport_sse.go`
+- Create: `helix_code/internal/mcp/transport_sse_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/transport_sse_test.go`:
+Create `helix_code/internal/mcp/transport_sse_test.go`:
 
 ```go
 package mcp
@@ -1343,7 +1343,7 @@ Expected: FAIL with undefined: NewSSETransport, SSEConfig.
 
 - [ ] **Step 3: Write transport_sse.go**
 
-Create `HelixCode/internal/mcp/transport_sse.go`:
+Create `helix_code/internal/mcp/transport_sse.go`:
 
 ```go
 package mcp
@@ -1591,7 +1591,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/transport_sse.go HelixCode/internal/mcp/transport_sse_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/transport_sse.go helix_code/internal/mcp/transport_sse_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T05): add SSE MCP transport with auto-reconnect
 
@@ -1605,12 +1605,12 @@ EOF
 ## Task 6: transport_ws.go via gorilla/websocket (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/transport_ws.go`
-- Create: `HelixCode/internal/mcp/transport_ws_test.go`
+- Create: `helix_code/internal/mcp/transport_ws.go`
+- Create: `helix_code/internal/mcp/transport_ws_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/transport_ws_test.go`:
+Create `helix_code/internal/mcp/transport_ws_test.go`:
 
 ```go
 package mcp
@@ -1697,7 +1697,7 @@ Expected: FAIL with undefined: NewWSTransport, WSConfig.
 
 - [ ] **Step 3: Write transport_ws.go**
 
-Create `HelixCode/internal/mcp/transport_ws.go`:
+Create `helix_code/internal/mcp/transport_ws.go`:
 
 ```go
 package mcp
@@ -1891,7 +1891,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/transport_ws.go HelixCode/internal/mcp/transport_ws_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/transport_ws.go helix_code/internal/mcp/transport_ws_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T06): add WebSocket MCP transport via gorilla/websocket
 
@@ -1905,12 +1905,12 @@ EOF
 ## Task 7: oauth.go — RFC 8414 discovery + PKCE + token cache (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/oauth.go`
-- Create: `HelixCode/internal/mcp/oauth_test.go`
+- Create: `helix_code/internal/mcp/oauth.go`
+- Create: `helix_code/internal/mcp/oauth_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/oauth_test.go`:
+Create `helix_code/internal/mcp/oauth_test.go`:
 
 ```go
 package mcp
@@ -2033,7 +2033,7 @@ Expected: FAIL with undefined: generatePKCE, DiscoverAS, ExchangeCode, TokenCach
 
 - [ ] **Step 3: Write oauth.go**
 
-Create `HelixCode/internal/mcp/oauth.go`:
+Create `helix_code/internal/mcp/oauth.go`:
 
 ```go
 package mcp
@@ -2263,7 +2263,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/oauth.go HelixCode/internal/mcp/oauth_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/oauth.go helix_code/internal/mcp/oauth_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T07): add OAuth 2.0 + RFC 8414 discovery + PKCE + token cache for MCP
 
@@ -2277,13 +2277,13 @@ EOF
 ## Task 8: lifecycle.go — Client state machine + handshake (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/lifecycle.go`
-- Create: `HelixCode/internal/mcp/lifecycle_test.go`
-- Create: `HelixCode/internal/mcp/fake_transport_test.go` (test-only fake transport)
+- Create: `helix_code/internal/mcp/lifecycle.go`
+- Create: `helix_code/internal/mcp/lifecycle_test.go`
+- Create: `helix_code/internal/mcp/fake_transport_test.go` (test-only fake transport)
 
 - [ ] **Step 1: Write fake_transport_test.go (test helper)**
 
-Create `HelixCode/internal/mcp/fake_transport_test.go`:
+Create `helix_code/internal/mcp/fake_transport_test.go`:
 
 ```go
 package mcp
@@ -2366,7 +2366,7 @@ func (f *fakeTransport) sentMessages() []*MCPMessage {
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/mcp/lifecycle_test.go`:
+Create `helix_code/internal/mcp/lifecycle_test.go`:
 
 ```go
 package mcp
@@ -2476,7 +2476,7 @@ Expected: FAIL with undefined: NewClient.
 
 - [ ] **Step 4: Write lifecycle.go**
 
-Create `HelixCode/internal/mcp/lifecycle.go`:
+Create `helix_code/internal/mcp/lifecycle.go`:
 
 ```go
 package mcp
@@ -2798,7 +2798,7 @@ Expected: `clean`.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/lifecycle.go HelixCode/internal/mcp/lifecycle_test.go HelixCode/internal/mcp/fake_transport_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/lifecycle.go helix_code/internal/mcp/lifecycle_test.go helix_code/internal/mcp/fake_transport_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T08): add MCP Client lifecycle + state machine + handshake
 
@@ -2812,12 +2812,12 @@ EOF
 ## Task 9: registry.go — Manager + tool merging (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/registry.go`
-- Create: `HelixCode/internal/mcp/registry_test.go`
+- Create: `helix_code/internal/mcp/registry.go`
+- Create: `helix_code/internal/mcp/registry_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/registry_test.go`:
+Create `helix_code/internal/mcp/registry_test.go`:
 
 ```go
 package mcp
@@ -2904,7 +2904,7 @@ Expected: FAIL with undefined: NewManager, addClient.
 
 - [ ] **Step 3: Write registry.go**
 
-Create `HelixCode/internal/mcp/registry.go`:
+Create `helix_code/internal/mcp/registry.go`:
 
 ```go
 package mcp
@@ -3215,7 +3215,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/registry.go HelixCode/internal/mcp/registry_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/registry.go helix_code/internal/mcp/registry_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T09): add MCP Manager registry + tool merging + reload
 
@@ -3229,12 +3229,12 @@ EOF
 ## Task 10: config.go — YAML loader/saver, project + user precedence (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/mcp/config.go`
-- Create: `HelixCode/internal/mcp/config_test.go`
+- Create: `helix_code/internal/mcp/config.go`
+- Create: `helix_code/internal/mcp/config_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/mcp/config_test.go`:
+Create `helix_code/internal/mcp/config_test.go`:
 
 ```go
 package mcp
@@ -3351,7 +3351,7 @@ Expected: FAIL with undefined: LoadConfig, LoadMerged, SaveConfig, Config, Serve
 
 - [ ] **Step 3: Write config.go**
 
-Create `HelixCode/internal/mcp/config.go`:
+Create `helix_code/internal/mcp/config.go`:
 
 ```go
 package mcp
@@ -3547,7 +3547,7 @@ Expected: `clean`.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/mcp/config.go HelixCode/internal/mcp/config_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/mcp/config.go helix_code/internal/mcp/config_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T10): add MCP YAML config loader/saver with project-overrides-user merging
 
@@ -3561,15 +3561,15 @@ EOF
 ## Task 11: cmd/cli/mcp_cmd.go + /mcp slash command (TDD)
 
 **Files:**
-- Create: `HelixCode/cmd/cli/mcp_cmd.go`
-- Create: `HelixCode/cmd/cli/mcp_cmd_test.go`
-- Create: `HelixCode/internal/commands/mcp_command.go`
-- Create: `HelixCode/internal/commands/mcp_command_test.go`
-- Modify: `HelixCode/internal/commands/builtin/register.go` — register `/mcp`
+- Create: `helix_code/cmd/cli/mcp_cmd.go`
+- Create: `helix_code/cmd/cli/mcp_cmd_test.go`
+- Create: `helix_code/internal/commands/mcp_command.go`
+- Create: `helix_code/internal/commands/mcp_command_test.go`
+- Modify: `helix_code/internal/commands/builtin/register.go` — register `/mcp`
 
 - [ ] **Step 1: Write failing test for cobra subcommands**
 
-Create `HelixCode/cmd/cli/mcp_cmd_test.go`:
+Create `helix_code/cmd/cli/mcp_cmd_test.go`:
 
 ```go
 package main
@@ -3669,7 +3669,7 @@ Expected: FAIL with undefined: newMCPCommand, MCPCommandDeps.
 
 - [ ] **Step 3: Write cmd/cli/mcp_cmd.go**
 
-Create `HelixCode/cmd/cli/mcp_cmd.go`:
+Create `helix_code/cmd/cli/mcp_cmd.go`:
 
 ```go
 package main
@@ -3879,7 +3879,7 @@ func newMCPLogs(deps MCPCommandDeps) *cobra.Command {
 
 - [ ] **Step 4: Add OAuth interactive helper**
 
-Append to `HelixCode/cmd/cli/mcp_cmd.go`:
+Append to `helix_code/cmd/cli/mcp_cmd.go`:
 
 ```go
 // runOAuthInteractive performs the PKCE flow against the named server.
@@ -3973,7 +3973,7 @@ func runOAuthInteractive(ctx context.Context, configPath, name string, out inter
 
 - [ ] **Step 5: Add OAuth helpers (loopback listener, browser opener)**
 
-Append to `HelixCode/cmd/cli/mcp_cmd.go`:
+Append to `helix_code/cmd/cli/mcp_cmd.go`:
 
 ```go
 import (
@@ -4098,7 +4098,7 @@ Expected: PASS (4/4).
 
 - [ ] **Step 7: Write internal/commands/mcp_command.go**
 
-Create `HelixCode/internal/commands/mcp_command.go`:
+Create `helix_code/internal/commands/mcp_command.go`:
 
 ```go
 package commands
@@ -4173,7 +4173,7 @@ func (c *MCPCommand) list() string {
 
 - [ ] **Step 8: Write internal/commands/mcp_command_test.go**
 
-Create `HelixCode/internal/commands/mcp_command_test.go`:
+Create `helix_code/internal/commands/mcp_command_test.go`:
 
 ```go
 package commands
@@ -4204,7 +4204,7 @@ func TestSlashMCP_UnknownSubcommand(t *testing.T) {
 
 - [ ] **Step 9: Register /mcp in builtin/register.go**
 
-Edit `HelixCode/internal/commands/builtin/register.go` to add (alongside existing `/permissions`, `/worktree`, `/hooks` registrations):
+Edit `helix_code/internal/commands/builtin/register.go` to add (alongside existing `/permissions`, `/worktree`, `/hooks` registrations):
 
 ```go
 // New parameter on RegisterAll: mcpManager *mcp.Manager
@@ -4233,7 +4233,7 @@ Expected: `clean`.
 - [ ] **Step 12: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/cmd/cli/mcp_cmd.go HelixCode/cmd/cli/mcp_cmd_test.go HelixCode/internal/commands/mcp_command.go HelixCode/internal/commands/mcp_command_test.go HelixCode/internal/commands/builtin/register.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/cmd/cli/mcp_cmd.go helix_code/cmd/cli/mcp_cmd_test.go helix_code/internal/commands/mcp_command.go helix_code/internal/commands/mcp_command_test.go helix_code/internal/commands/builtin/register.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T11): add helixcode mcp CLI subcommands + /mcp slash command
 
@@ -4247,14 +4247,14 @@ EOF
 ## Task 12: cmd/cli/main.go startup wiring + tools/registry.go integration + integration tests
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go` — wire `mcp.Manager.Start(ctx)` at startup; register `mcp` cobra command
-- Modify: `HelixCode/internal/tools/registry.go` — query `Manager.Tools()` and register external tools
-- Create: `HelixCode/tests/integration/mcp_stdio_test.go` (real subprocess via test helper echo server)
-- Create: `HelixCode/tests/integration/mcp_http_test.go` (real httptest.Server, no mocks for the protocol layer)
+- Modify: `helix_code/cmd/cli/main.go` — wire `mcp.Manager.Start(ctx)` at startup; register `mcp` cobra command
+- Modify: `helix_code/internal/tools/registry.go` — query `Manager.Tools()` and register external tools
+- Create: `helix_code/tests/integration/mcp_stdio_test.go` (real subprocess via test helper echo server)
+- Create: `helix_code/tests/integration/mcp_http_test.go` (real httptest.Server, no mocks for the protocol layer)
 
 - [ ] **Step 1: Write the integration test for stdio (TDD)**
 
-Create `HelixCode/tests/integration/mcp_stdio_test.go`:
+Create `helix_code/tests/integration/mcp_stdio_test.go`:
 
 ```go
 //go:build integration
@@ -4346,7 +4346,7 @@ Expected: PASS.
 
 - [ ] **Step 3: Wire mcp.Manager into cmd/cli/main.go**
 
-Edit `HelixCode/cmd/cli/main.go` (find the existing startup block where session/hooks/permissions are set up — match that pattern):
+Edit `helix_code/cmd/cli/main.go` (find the existing startup block where session/hooks/permissions are set up — match that pattern):
 
 1. Add import: `"dev.helix.code/internal/mcp"`
 2. After other managers are constructed, add:
@@ -4383,7 +4383,7 @@ rootCmd.AddCommand(newMCPCommand(MCPCommandDeps{
 
 - [ ] **Step 4: Wire mcp.Manager into internal/tools/registry.go**
 
-Edit `HelixCode/internal/tools/registry.go`. Add a method on the existing `Registry` type:
+Edit `helix_code/internal/tools/registry.go`. Add a method on the existing `Registry` type:
 
 ```go
 // RegisterMCPManager binds an mcp.Manager so its tools become agent-callable.
@@ -4447,7 +4447,7 @@ Expected: `clean`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/cmd/cli/main.go HelixCode/internal/tools/registry.go HelixCode/tests/integration/mcp_stdio_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/cmd/cli/main.go helix_code/internal/tools/registry.go helix_code/tests/integration/mcp_stdio_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F06-T12): wire MCP Manager into cmd/cli startup + tools/registry + add integration test
 
@@ -4492,7 +4492,7 @@ Per Article XI §11.9, every PASS must carry positive runtime evidence.
 5. Run `helixcode mcp list` — assert table includes "echo" with transport
    "stdio".
 6. Anti-bluff smoke: `grep -rn "simulated\|for now\|TODO implement\|placeholder"
-   HelixCode/internal/mcp/` returns empty.
+   helix_code/internal/mcp/` returns empty.
 7. Cross-compile to Windows: `GOOS=windows go build ./...` succeeds.
 
 ## Pass criteria
@@ -4557,8 +4557,8 @@ echo "==> P1-F06 challenge PASS"
 - [ ] **Step 3: chmod and run**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f06-mcp-full-lifecycle/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f06-mcp-full-lifecycle/run.sh 2>&1 | tee /tmp/p1f06-run.log
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f06-mcp-full-lifecycle/run.sh
+/run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f06-mcp-full-lifecycle/run.sh 2>&1 | tee /tmp/p1f06-run.log
 ```
 
 Expected: terminates with `==> P1-F06 challenge PASS` and exit 0.
@@ -4633,7 +4633,7 @@ In the existing P1-F06 task list block, change `- [ ]` to `- [x]` for every item
 - [ ] **Step 3: Final smoke + test sweep**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 go test -count=1 ./internal/mcp/... ./internal/commands/... ./cmd/cli/...
 go test -count=1 -tags=integration -run "TestMCP_" ./tests/integration/...
 grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/mcp/ cmd/cli/mcp_cmd.go internal/commands/mcp_command.go && echo "BLUFF FOUND" || echo "clean"

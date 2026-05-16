@@ -333,5 +333,5 @@ type AuthRepository interface {
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/auth/auth.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/auth/auth_db.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/auth/auth.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/auth/auth_db.go`

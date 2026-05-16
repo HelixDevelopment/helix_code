@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f05-hook-based-extensibility-design.md` (commit `118df80`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/HelixCode/` per the F01–F04 convention.
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/helix_code/` per the F01–F04 convention.
 
 **Anti-bluff smoke (run on every commit, FULL pattern):**
 ```bash
@@ -99,12 +99,12 @@ EOF
 ## Task 2: Add 6 new HookType constants (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/hooks/hook.go` (extend the existing const block at lines 12-25)
-- Create: `HelixCode/internal/hooks/hook_types_p1f05_test.go`
+- Modify: `helix_code/internal/hooks/hook.go` (extend the existing const block at lines 12-25)
+- Create: `helix_code/internal/hooks/hook_types_p1f05_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/hooks/hook_types_p1f05_test.go`:
+Create `helix_code/internal/hooks/hook_types_p1f05_test.go`:
 
 ```go
 package hooks
@@ -180,13 +180,13 @@ func TestF05HookTypes_DoNotCollideWithExisting(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestF05HookTypes' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestF05HookTypes' ./internal/hooks/
 ```
 Expected: FAIL — the new HookType constants are undefined.
 
 - [ ] **Step 3: Add the new constants to hook.go**
 
-In `HelixCode/internal/hooks/hook.go`, find the existing `const ( … HookType ... )` block (around lines 12-25). Add the 6 new constants at the end of the block, BEFORE the closing `)`:
+In `helix_code/internal/hooks/hook.go`, find the existing `const ( … HookType ... )` block (around lines 12-25). Add the 6 new constants at the end of the block, BEFORE the closing `)`:
 
 ```go
 const (
@@ -217,28 +217,28 @@ const (
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestF05HookTypes' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestF05HookTypes' ./internal/hooks/
 ```
 Expected: PASS — 3 tests.
 
 - [ ] **Step 5: Run full hooks package (regression check)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/hooks/...
 ```
 Expected: PASS — no regression in existing hook tests.
 
 - [ ] **Step 6: Anti-bluff smoke (FULL pattern)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/hook.go internal/hooks/hook_types_p1f05_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/hook.go internal/hooks/hook_types_p1f05_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. (Existing hook.go may have pre-existing hits — only flag NEW lines.)
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/hooks/hook.go HelixCode/internal/hooks/hook_types_p1f05_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/hooks/hook.go helix_code/internal/hooks/hook_types_p1f05_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T02): add 6 new HookType constants for claude-code lifecycle events
 
@@ -258,12 +258,12 @@ EOF
 ## Task 3: yaml_loader.go — FileLoader with apiVersion validation (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/hooks/yaml_loader.go`
-- Create: `HelixCode/internal/hooks/yaml_loader_test.go`
+- Create: `helix_code/internal/hooks/yaml_loader.go`
+- Create: `helix_code/internal/hooks/yaml_loader_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/hooks/yaml_loader_test.go`:
+Create `helix_code/internal/hooks/yaml_loader_test.go`:
 
 ```go
 package hooks
@@ -449,13 +449,13 @@ hooks:
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestFileLoader' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestFileLoader' ./internal/hooks/
 ```
 Expected: FAIL — `FileLoader` undefined.
 
 - [ ] **Step 3: Implement yaml_loader.go**
 
-Create `HelixCode/internal/hooks/yaml_loader.go`:
+Create `helix_code/internal/hooks/yaml_loader.go`:
 
 ```go
 package hooks
@@ -646,28 +646,28 @@ func parseEventType(s string) (HookType, bool) {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestFileLoader' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestFileLoader' ./internal/hooks/
 ```
 Expected: PASS — 9 tests.
 
 - [ ] **Step 5: Run full hooks package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/hooks/...
 ```
 Expected: PASS — no regression.
 
 - [ ] **Step 6: Anti-bluff smoke (FULL pattern)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/yaml_loader.go internal/hooks/yaml_loader_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/yaml_loader.go internal/hooks/yaml_loader_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/hooks/yaml_loader.go HelixCode/internal/hooks/yaml_loader_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/hooks/yaml_loader.go helix_code/internal/hooks/yaml_loader_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T03): yaml_loader.go — FileLoader with apiVersion validation (TDD)
 
@@ -690,12 +690,12 @@ EOF
 ## Task 4: shell_runner.go — NewShellRunner HookFunc (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/hooks/shell_runner.go`
-- Create: `HelixCode/internal/hooks/shell_runner_test.go`
+- Create: `helix_code/internal/hooks/shell_runner.go`
+- Create: `helix_code/internal/hooks/shell_runner_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/hooks/shell_runner_test.go`:
+Create `helix_code/internal/hooks/shell_runner_test.go`:
 
 ```go
 package hooks
@@ -815,13 +815,13 @@ func TestShellRunner_RespectsCallerContextCancel(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestShellRunner' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestShellRunner' ./internal/hooks/
 ```
 Expected: FAIL — `NewShellRunner` undefined.
 
 - [ ] **Step 3: Implement shell_runner.go**
 
-Create `HelixCode/internal/hooks/shell_runner.go`:
+Create `helix_code/internal/hooks/shell_runner.go`:
 
 ```go
 package hooks
@@ -918,28 +918,28 @@ func NewShellRunner(scriptPath string, timeout time.Duration) HookFunc {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestShellRunner' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestShellRunner' ./internal/hooks/
 ```
 Expected: PASS — 8 tests.
 
 - [ ] **Step 5: Run full hooks package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/hooks/...
 ```
 Expected: PASS — no regression.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/shell_runner.go internal/hooks/shell_runner_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/shell_runner.go internal/hooks/shell_runner_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/hooks/shell_runner.go HelixCode/internal/hooks/shell_runner_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/hooks/shell_runner.go helix_code/internal/hooks/shell_runner_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T04): shell_runner.go — NewShellRunner HookFunc (TDD)
 
@@ -961,12 +961,12 @@ EOF
 ## Task 5: blockers.go — Blockers helper (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/hooks/blockers.go`
-- Create: `HelixCode/internal/hooks/blockers_test.go`
+- Create: `helix_code/internal/hooks/blockers.go`
+- Create: `helix_code/internal/hooks/blockers_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/hooks/blockers_test.go`:
+Create `helix_code/internal/hooks/blockers_test.go`:
 
 ```go
 package hooks
@@ -1025,13 +1025,13 @@ func TestBlockers_NilResultEntryIsSkipped(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestBlockers' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestBlockers' ./internal/hooks/
 ```
 Expected: FAIL — `Blockers` undefined.
 
 - [ ] **Step 3: Implement blockers.go**
 
-Create `HelixCode/internal/hooks/blockers.go`:
+Create `helix_code/internal/hooks/blockers.go`:
 
 ```go
 package hooks
@@ -1061,28 +1061,28 @@ func Blockers(results []*ExecutionResult) []error {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestBlockers' ./internal/hooks/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestBlockers' ./internal/hooks/
 ```
 Expected: PASS — 5 tests.
 
 - [ ] **Step 5: Run full hooks package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/hooks/...
 ```
 Expected: PASS.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/blockers.go internal/hooks/blockers_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/hooks/blockers.go internal/hooks/blockers_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/hooks/blockers.go HelixCode/internal/hooks/blockers_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/hooks/blockers.go helix_code/internal/hooks/blockers_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T05): blockers.go — Blockers helper (TDD)
 
@@ -1102,12 +1102,12 @@ EOF
 ## Task 6: Wire registry.Execute with 6 events (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/registry.go` (Execute + new SetHooksManager method)
-- Create: `HelixCode/internal/tools/registry_hooks_test.go`
+- Modify: `helix_code/internal/tools/registry.go` (Execute + new SetHooksManager method)
+- Create: `helix_code/internal/tools/registry_hooks_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/registry_hooks_test.go`:
+Create `helix_code/internal/tools/registry_hooks_test.go`:
 
 ```go
 package tools
@@ -1243,13 +1243,13 @@ func TestRegistry_Execute_NilHooksManagerIsPassthrough(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestRegistry_(SetHooksManager|Execute_(BeforeToolCallBlock|AfterToolCall|BashFires|EditFires|NilHooksManager))' ./internal/tools/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestRegistry_(SetHooksManager|Execute_(BeforeToolCallBlock|AfterToolCall|BashFires|EditFires|NilHooksManager))' ./internal/tools/
 ```
 Expected: FAIL — `SetHooksManager` undefined.
 
 - [ ] **Step 3: Modify registry.go**
 
-In `HelixCode/internal/tools/registry.go`:
+In `helix_code/internal/tools/registry.go`:
 
 1. Add the import for `dev.helix.code/internal/hooks` (if not already present).
 
@@ -1407,28 +1407,28 @@ func errString(err error) string {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestRegistry_' ./internal/tools/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestRegistry_' ./internal/tools/
 ```
 Expected: PASS — 6 tests.
 
 - [ ] **Step 5: Run full tools package + hooks package (regression)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/... ./internal/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/... ./internal/hooks/...
 ```
 Expected: PASS.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/registry.go internal/tools/registry_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/registry.go internal/tools/registry_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. (Existing registry.go may have pre-existing hits; only flag new lines.)
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/registry.go HelixCode/internal/tools/registry_hooks_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/registry.go helix_code/internal/tools/registry_hooks_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T06): wire registry.Execute with 6 hook events (TDD)
 
@@ -1450,20 +1450,20 @@ EOF
 ## Task 7: Wire OnCompaction in AutoCompactor (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/llm/compression/auto_compactor.go` (add SetHooksManager + OnCompaction dispatch)
-- Create: `HelixCode/internal/llm/compression/auto_compactor_hooks_test.go`
+- Modify: `helix_code/internal/llm/compression/auto_compactor.go` (add SetHooksManager + OnCompaction dispatch)
+- Create: `helix_code/internal/llm/compression/auto_compactor_hooks_test.go`
 
 - [ ] **Step 1: Investigate auto_compactor.go**
 
 ```bash
-grep -n 'type AutoCompactor\|func.*AutoCompactor.*Compact\|return\b' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/compression/auto_compactor.go | head -20
+grep -n 'type AutoCompactor\|func.*AutoCompactor.*Compact\|return\b' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/compression/auto_compactor.go | head -20
 ```
 
 Find the public method that performs a compaction (likely `Compact` or similar). The dispatch fires on success at the end of that method.
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/llm/compression/auto_compactor_hooks_test.go`:
+Create `helix_code/internal/llm/compression/auto_compactor_hooks_test.go`:
 
 ```go
 package compression
@@ -1536,13 +1536,13 @@ func TestAutoCompactor_NilHooksManagerIsPassthrough(t *testing.T) {
 - [ ] **Step 3: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestAutoCompactor_(SetHooksManager|Fires|Blocker|NilHooksManager)' ./internal/llm/compression/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestAutoCompactor_(SetHooksManager|Fires|Blocker|NilHooksManager)' ./internal/llm/compression/
 ```
 Expected: FAIL — `SetHooksManager` undefined or test helpers undefined.
 
 - [ ] **Step 4: Modify auto_compactor.go**
 
-In `HelixCode/internal/llm/compression/auto_compactor.go`:
+In `helix_code/internal/llm/compression/auto_compactor.go`:
 
 1. Add the import `dev.helix.code/internal/hooks` if missing.
 2. Add a `hooksManager *hooks.Manager` field to the `AutoCompactor` struct.
@@ -1587,28 +1587,28 @@ If the existing test file uses inline fixtures rather than helpers, declare equi
 - [ ] **Step 6: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestAutoCompactor_(SetHooksManager|Fires|Blocker|NilHooksManager)' ./internal/llm/compression/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestAutoCompactor_(SetHooksManager|Fires|Blocker|NilHooksManager)' ./internal/llm/compression/
 ```
 Expected: PASS — 4 tests.
 
 - [ ] **Step 7: Run full compression package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/llm/compression/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/llm/compression/...
 ```
 Expected: PASS — F01's existing tests still green.
 
 - [ ] **Step 8: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/llm/compression/auto_compactor.go internal/llm/compression/auto_compactor_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/llm/compression/auto_compactor.go internal/llm/compression/auto_compactor_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. (Existing auto_compactor.go may have pre-existing hits — only flag new lines.)
 
 - [ ] **Step 9: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/llm/compression/auto_compactor.go HelixCode/internal/llm/compression/auto_compactor_hooks_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/llm/compression/auto_compactor.go helix_code/internal/llm/compression/auto_compactor_hooks_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T07): wire OnCompaction in AutoCompactor (TDD)
 
@@ -1628,20 +1628,20 @@ EOF
 ## Task 8: Wire OnError + RequestPlanApproval stub in agent.go (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/agent/agent.go` (or `base_agent.go` — investigate which holds the message loop)
-- Create: `HelixCode/internal/agent/agent_hooks_test.go`
+- Modify: `helix_code/internal/agent/agent.go` (or `base_agent.go` — investigate which holds the message loop)
+- Create: `helix_code/internal/agent/agent_hooks_test.go`
 
 - [ ] **Step 1: Investigate agent.go layout**
 
 ```bash
-grep -n 'type.*Agent\|messageLoop\|MessageLoop\|RunLoop\|HandleError\|on_error' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/agent/*.go | grep -v _test.go | head -20
+grep -n 'type.*Agent\|messageLoop\|MessageLoop\|RunLoop\|HandleError\|on_error' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/agent/*.go | grep -v _test.go | head -20
 ```
 
 Find the agent's primary message loop and the spot where tool/LLM errors surface. The `OnError` dispatch fires there.
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/agent/agent_hooks_test.go`:
+Create `helix_code/internal/agent/agent_hooks_test.go`:
 
 ```go
 package agent
@@ -1728,7 +1728,7 @@ func TestBaseAgent_NilHooksManagerIsSafe(t *testing.T) {
 - [ ] **Step 3: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestBaseAgent_(SetHooksManager|DispatchOnError|RequestPlanApproval|NilHooksManager)' ./internal/agent/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestBaseAgent_(SetHooksManager|DispatchOnError|RequestPlanApproval|NilHooksManager)' ./internal/agent/
 ```
 Expected: FAIL — `SetHooksManager` / `dispatchOnError` / `RequestPlanApproval` undefined.
 
@@ -1793,28 +1793,28 @@ If the existing message loop is in a different file (e.g., `cmd/cli/main.go` or 
 - [ ] **Step 5: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestBaseAgent_(SetHooksManager|DispatchOnError|RequestPlanApproval|NilHooksManager)' ./internal/agent/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestBaseAgent_(SetHooksManager|DispatchOnError|RequestPlanApproval|NilHooksManager)' ./internal/agent/
 ```
 Expected: PASS — 5 tests.
 
 - [ ] **Step 6: Run full agent package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/agent/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/agent/...
 ```
 Expected: PASS — F01/F03 tests (TestGetSystemPrompt etc.) still green.
 
 - [ ] **Step 7: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/agent/agent.go internal/agent/base_agent.go internal/agent/agent_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/agent/agent.go internal/agent/base_agent.go internal/agent/agent_hooks_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. (Existing agent files may have pre-existing hits — only flag new lines.)
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/agent/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/agent/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T08): wire OnError + RequestPlanApproval stub in agent (TDD)
 
@@ -1836,13 +1836,13 @@ EOF
 ## Task 9: helixcode hooks Cobra subcommands
 
 **Files:**
-- Create: `HelixCode/cmd/cli/hooks_cmd.go`
-- Create: `HelixCode/cmd/cli/hooks_cmd_test.go`
-- Modify: `HelixCode/cmd/cli/main.go` (add dispatcher entry for `os.Args[1] == "hooks"`)
+- Create: `helix_code/cmd/cli/hooks_cmd.go`
+- Create: `helix_code/cmd/cli/hooks_cmd_test.go`
+- Modify: `helix_code/cmd/cli/main.go` (add dispatcher entry for `os.Args[1] == "hooks"`)
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/cmd/cli/hooks_cmd_test.go`:
+Create `helix_code/cmd/cli/hooks_cmd_test.go`:
 
 ```go
 package main
@@ -1979,13 +1979,13 @@ hooks:
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestRunHooks' ./cmd/cli/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestRunHooks' ./cmd/cli/
 ```
 Expected: FAIL — runHooks* functions undefined.
 
 - [ ] **Step 3: Implement hooks_cmd.go**
 
-Create `HelixCode/cmd/cli/hooks_cmd.go`:
+Create `helix_code/cmd/cli/hooks_cmd.go`:
 
 ```go
 package main
@@ -2229,7 +2229,7 @@ func boolStr(b bool) string {
 
 - [ ] **Step 4: Wire dispatcher in main.go**
 
-In `HelixCode/cmd/cli/main.go`, find the existing dispatcher block (added by F02 for `os.Args[1] == "permissions"` and extended by F04 for `worktree`). Add an analogous block for `"hooks"` immediately after the existing ones:
+In `helix_code/cmd/cli/main.go`, find the existing dispatcher block (added by F02 for `os.Args[1] == "permissions"` and extended by F04 for `worktree`). Add an analogous block for `"hooks"` immediately after the existing ones:
 
 ```go
 if len(os.Args) >= 2 && os.Args[1] == "hooks" {
@@ -2245,35 +2245,35 @@ if len(os.Args) >= 2 && os.Args[1] == "hooks" {
 - [ ] **Step 5: Verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./cmd/cli/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./cmd/cli/...
 ```
 Expected: clean compile.
 
 - [ ] **Step 6: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestRunHooks' ./cmd/cli/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestRunHooks' ./cmd/cli/
 ```
 Expected: PASS — 7 tests.
 
 - [ ] **Step 7: Smoke-test the binary**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build -o bin/helixcode ./cmd/cli && ./bin/helixcode hooks --help
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build -o bin/helixcode ./cmd/cli && ./bin/helixcode hooks --help
 ```
 Expected: prints subcommand list `list / validate / test / enable / disable`.
 
 - [ ] **Step 8: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/hooks_cmd.go cmd/cli/hooks_cmd_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/hooks_cmd.go cmd/cli/hooks_cmd_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 9: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f HelixCode/cmd/cli/hooks_cmd.go HelixCode/cmd/cli/hooks_cmd_test.go HelixCode/cmd/cli/main.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f helix_code/cmd/cli/hooks_cmd.go helix_code/cmd/cli/hooks_cmd_test.go helix_code/cmd/cli/main.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T09): helixcode hooks {list,test,enable,disable,validate} subcommands
 
@@ -2294,14 +2294,14 @@ EOF
 ## Task 10: /hooks slash command + builtin registration
 
 **Files:**
-- Create: `HelixCode/internal/commands/hooks_command.go`
-- Create: `HelixCode/internal/commands/hooks_command_test.go`
-- Modify: `HelixCode/internal/commands/builtin/register.go` (add `RegisterBuiltinCommandsWithHooks`)
-- Create: `HelixCode/internal/commands/builtin/hooks_register_test.go`
+- Create: `helix_code/internal/commands/hooks_command.go`
+- Create: `helix_code/internal/commands/hooks_command_test.go`
+- Modify: `helix_code/internal/commands/builtin/register.go` (add `RegisterBuiltinCommandsWithHooks`)
+- Create: `helix_code/internal/commands/builtin/hooks_register_test.go`
 
 - [ ] **Step 1: Write failing test for the slash command**
 
-Create `HelixCode/internal/commands/hooks_command_test.go`:
+Create `helix_code/internal/commands/hooks_command_test.go`:
 
 ```go
 package commands
@@ -2380,13 +2380,13 @@ func TestHooksCommand_TestRequiresEvent(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestHooksCommand' ./internal/commands/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestHooksCommand' ./internal/commands/
 ```
 Expected: FAIL — `NewHooksCommand` undefined.
 
 - [ ] **Step 3: Implement hooks_command.go**
 
-Create `HelixCode/internal/commands/hooks_command.go`:
+Create `helix_code/internal/commands/hooks_command.go`:
 
 ```go
 package commands
@@ -2469,7 +2469,7 @@ func (c *HooksCommand) test(ctx context.Context, eventName string) (*CommandResu
 The `Manager.GetAll()` method may not exist on the existing hooks.Manager. If not, add it:
 
 ```bash
-grep -n 'func (m \*Manager) GetAll\|func (m \*Manager) List' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/hooks/manager.go
+grep -n 'func (m \*Manager) GetAll\|func (m \*Manager) List' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/hooks/manager.go
 ```
 
 If `GetAll()` doesn't exist, modify `internal/hooks/manager.go` to add:
@@ -2492,13 +2492,13 @@ func (m *Manager) GetAll() []*Hook {
 - [ ] **Step 4: Run slash command tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestHooksCommand' ./internal/commands/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestHooksCommand' ./internal/commands/
 ```
 Expected: PASS — 5 tests.
 
 - [ ] **Step 5: Write registration test**
 
-Create `HelixCode/internal/commands/builtin/hooks_register_test.go`:
+Create `helix_code/internal/commands/builtin/hooks_register_test.go`:
 
 ```go
 package builtin_test
@@ -2532,13 +2532,13 @@ func TestRegisterBuiltinCommands_IncludesHooks(t *testing.T) {
 - [ ] **Step 6: Run failing registration test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestRegisterBuiltinCommands_IncludesHooks' ./internal/commands/builtin/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestRegisterBuiltinCommands_IncludesHooks' ./internal/commands/builtin/
 ```
 Expected: FAIL — `RegisterBuiltinCommandsWithHooks` undefined.
 
 - [ ] **Step 7: Modify builtin/register.go**
 
-In `HelixCode/internal/commands/builtin/register.go`:
+In `helix_code/internal/commands/builtin/register.go`:
 
 1. Add the import for `dev.helix.code/internal/hooks` if missing.
 
@@ -2565,28 +2565,28 @@ func RegisterBuiltinCommandsWithHooks(registry *commands.Registry, mgr *hooks.Ma
 - [ ] **Step 8: Run registration test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestRegisterBuiltinCommands_IncludesHooks' ./internal/commands/builtin/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestRegisterBuiltinCommands_IncludesHooks' ./internal/commands/builtin/
 ```
 Expected: PASS.
 
 - [ ] **Step 9: Run full commands package + builtin package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/commands/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/commands/...
 ```
 Expected: PASS — F02 permissions tests + F04 worktree tests still green.
 
 - [ ] **Step 10: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/commands/hooks_command.go internal/commands/builtin/register.go internal/commands/builtin/hooks_register_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/commands/hooks_command.go internal/commands/builtin/register.go internal/commands/builtin/hooks_register_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 11: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/commands/hooks_command.go HelixCode/internal/commands/hooks_command_test.go HelixCode/internal/commands/builtin/register.go HelixCode/internal/commands/builtin/hooks_register_test.go HelixCode/internal/hooks/manager.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/commands/hooks_command.go helix_code/internal/commands/hooks_command_test.go helix_code/internal/commands/builtin/register.go helix_code/internal/commands/builtin/hooks_register_test.go helix_code/internal/hooks/manager.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T10): /hooks slash command + builtin registration
 
@@ -2609,12 +2609,12 @@ EOF
 ## Task 11: cmd/cli/main.go startup wiring + integration tests (no mocks)
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go`
-- Create: `HelixCode/tests/integration/hooks/hooks_integration_test.go`
+- Modify: `helix_code/cmd/cli/main.go`
+- Create: `helix_code/tests/integration/hooks/hooks_integration_test.go`
 
 - [ ] **Step 1: Add initHooks bootstrap to main.go**
 
-In `HelixCode/cmd/cli/main.go`, find the existing `Run()` startup sequence (where F02/F03/F04's `initPermissions`/`initPersistence`/`initWorktree` are called). Add a new field on the CLI struct:
+In `helix_code/cmd/cli/main.go`, find the existing `Run()` startup sequence (where F02/F03/F04's `initPermissions`/`initPersistence`/`initWorktree` are called). Add a new field on the CLI struct:
 
 ```go
 hooksLoaded int  // count of hooks loaded at startup (for diagnostics)
@@ -2683,17 +2683,17 @@ If `c.toolRegistry` doesn't exist as a CLI struct field, locate the registry-con
 - [ ] **Step 2: Verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./cmd/cli/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./cmd/cli/...
 ```
 Expected: clean compile.
 
 - [ ] **Step 3: Write integration tests**
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/integration/hooks
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/integration/hooks
 ```
 
-Create `HelixCode/tests/integration/hooks/hooks_integration_test.go`:
+Create `helix_code/tests/integration/hooks/hooks_integration_test.go`:
 
 ```go
 //go:build integration
@@ -2807,22 +2807,22 @@ hooks:
 - [ ] **Step 4: Run integration tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/hooks/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/hooks/...
 ```
 Expected: PASS — 3 tests.
 
 - [ ] **Step 5: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/hooks/ tests/integration/hooks/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/hooks/ tests/integration/hooks/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. (cmd/cli/main.go may have pre-existing hits — only flag new lines.)
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f HelixCode/cmd/cli/main.go
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/tests/integration/hooks/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f helix_code/cmd/cli/main.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/tests/integration/hooks/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T11): cmd/cli/main.go startup wiring + integration tests
 
@@ -2844,19 +2844,19 @@ EOF
 ## Task 12: Challenge with three runtime-evidence scenarios
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/hooks/expected.json`
-- Create: `HelixCode/tests/e2e/challenges/hooks/run.sh`
-- Create: `HelixCode/tests/e2e/challenges/hooks/README.md`
+- Create: `helix_code/tests/e2e/challenges/hooks/expected.json`
+- Create: `helix_code/tests/e2e/challenges/hooks/run.sh`
+- Create: `helix_code/tests/e2e/challenges/hooks/README.md`
 
 - [ ] **Step 1: Create the directory**
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/hooks
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/hooks
 ```
 
 - [ ] **Step 2: Write expected.json**
 
-Create `HelixCode/tests/e2e/challenges/hooks/expected.json`:
+Create `helix_code/tests/e2e/challenges/hooks/expected.json`:
 
 ```json
 {
@@ -2882,7 +2882,7 @@ Create `HelixCode/tests/e2e/challenges/hooks/expected.json`:
 
 - [ ] **Step 3: Write run.sh**
 
-Create `HelixCode/tests/e2e/challenges/hooks/run.sh`:
+Create `helix_code/tests/e2e/challenges/hooks/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -3017,12 +3017,12 @@ echo "PASS: all three scenarios produced expected outcomes"
 - [ ] **Step 4: Make it executable**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/hooks/run.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/hooks/run.sh
 ```
 
 - [ ] **Step 5: Write README.md**
 
-Create `HelixCode/tests/e2e/challenges/hooks/README.md`:
+Create `helix_code/tests/e2e/challenges/hooks/README.md`:
 
 ```markdown
 # Challenge — Hook-Based Extensibility (P1-F05)
@@ -3073,21 +3073,21 @@ Revert the mutation and confirm PASS.
 - [ ] **Step 6: Run the Challenge**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/hooks/run.sh 2>&1 | tee /tmp/p1-f05-t12-evidence.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/hooks/run.sh 2>&1 | tee /tmp/p1-f05-t12-evidence.txt
 ```
 Expected: PASS at the end. Exit 0.
 
 - [ ] **Step 7: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/hooks/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/hooks/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/tests/e2e/challenges/hooks/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/tests/e2e/challenges/hooks/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F05-T12): Challenge for hooks with runtime evidence
 
@@ -3120,14 +3120,14 @@ EOF
 - [ ] **Step 1: Re-run the Challenge to capture fresh evidence**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/hooks/run.sh 2>&1 | tee /tmp/p1-f05-t13-rerun.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/hooks/run.sh 2>&1 | tee /tmp/p1-f05-t13-rerun.txt
 ```
 Expected: PASS. If FAIL, STOP.
 
 - [ ] **Step 2: Run final regression test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && \
   go test -count=1 -race ./internal/hooks/... ./internal/tools/... ./internal/llm/compression/... ./internal/agent/... ./internal/commands/... ./cmd/cli/... 2>&1 | tee /tmp/p1-f05-t13-tests.txt && \
   go test -count=1 -race -tags=integration ./tests/integration/hooks/... ./tests/integration/worktree/... ./tests/integration/persistence/... ./tests/integration/permissions/... 2>&1 | tee -a /tmp/p1-f05-t13-tests.txt
 ```
@@ -3144,7 +3144,7 @@ Phase 0 LLMsVerifier-pin baseline (exit 1-2 warn-only) is acceptable — same as
 - [ ] **Step 4: Anti-bluff smoke (broad)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
   internal/hooks/ tests/e2e/challenges/hooks/ tests/integration/hooks/ \
   cmd/cli/hooks_cmd.go cmd/cli/hooks_cmd_test.go \
   internal/commands/hooks_command.go internal/commands/hooks_command_test.go \

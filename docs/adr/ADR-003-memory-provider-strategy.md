@@ -281,8 +281,8 @@ type CostInfo struct {
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/memory/providers/types.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/memory/providers/factory.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/memory/providers/mem0_provider.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/memory/providers/zep_provider.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/memory/providers/faiss_provider.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/types.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/factory.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/mem0_provider.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/zep_provider.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/faiss_provider.go`

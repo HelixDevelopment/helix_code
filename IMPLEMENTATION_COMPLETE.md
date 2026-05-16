@@ -107,7 +107,7 @@ Successfully completed comprehensive implementation of **18 major features** for
 ## 📚 Documentation Delivered
 
 ### 1. **Comprehensive User Manual** ✅
-- **Location**: `HelixCode/docs/USER_MANUAL.md`
+- **Location**: `helix_code/docs/USER_MANUAL.md`
 - **Size**: 537 lines
 - **Sections**: 12 major sections
 - **Contents**:
@@ -343,7 +343,7 @@ helixcode vision enable --mode session
 
 ### Implementation Files
 ```
-HelixCode/internal/
+helix_code/internal/
 ├── tools/
 │   ├── filesystem/      # File operations (3,639 lines)
 │   ├── shell/           # Shell execution (2,623 lines)
@@ -497,7 +497,7 @@ HelixCode v2.0 is now an **enterprise-grade, feature-complete AI development pla
 
 ## 📞 Support & Resources
 
-- **User Manual**: `HelixCode/docs/USER_MANUAL.md`
+- **User Manual**: `helix_code/docs/USER_MANUAL.md`
 - **Website**: `github_pages_website/docs/index.html`
 - **Technical Designs**: `Design/TechnicalDesigns/`
 - **GitHub**: https://github.com/your-org/helixcode

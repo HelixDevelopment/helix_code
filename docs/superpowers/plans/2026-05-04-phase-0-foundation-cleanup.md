@@ -4,7 +4,7 @@
 
 **Goal:** Land the unblocking foundation for the CLI-Agent Fusion programme — submodule topology, secret-handling, push protections, governance cascade, and verification gates — so that Phase 1 (claude-code porting) can begin on top of a verifiably-clean base.
 
-**Architecture:** Sixteen sequenced sub-tasks producing concrete artefacts: scripts (`scan-secrets.sh`, `verify-llmsverifier-pin-parity.sh`, `bluff-detector.sh`, `pre-push` hook + installer), governance files (new `HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md`, root `CONSTITUTION.md` Article XII, root `CRUSH.md` / `QWEN.md` anchor backfills), submodule integration (`HelixAgent` at `HelixCode/helix_agent/` with deep recursive init), `.env` migration from `../helix_agent/.env`, governance cascade across all owned-by-us submodules, refreshed PNG diagrams in `docs/improvements/06_diagrams_real/`, a single `make verify-foundation` Makefile target wiring the gates, and a rolled-up evidence log.
+**Architecture:** Sixteen sequenced sub-tasks producing concrete artefacts: scripts (`scan-secrets.sh`, `verify-llmsverifier-pin-parity.sh`, `bluff-detector.sh`, `pre-push` hook + installer), governance files (new `helix_code/helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md`, root `CONSTITUTION.md` Article XII, root `CRUSH.md` / `QWEN.md` anchor backfills), submodule integration (`HelixAgent` at `helix_code/helix_agent/` with deep recursive init), `.env` migration from `../helix_agent/.env`, governance cascade across all owned-by-us submodules, refreshed PNG diagrams in `docs/improvements/06_diagrams_real/`, a single `make verify-foundation` Makefile target wiring the gates, and a rolled-up evidence log.
 
 **Tech Stack:** bash scripts (POSIX-portable where possible), Go test patterns (testify), git submodules over SSH, Python 3 + matplotlib for diagram regeneration, gitleaks (with grep fallback) for secret scanning, GNU Make for orchestration, gh + glab CLIs for cross-platform verification.
 
@@ -29,19 +29,19 @@
 | `docs/improvements/02_analysis_step_02/DEPRECATED.md` | Same |
 | `docs/improvements/05_phase_0_evidence.md` | Pasted output of every P0 acceptance check with timestamps |
 | `docs/improvements/PROGRESS.md` | Live-progress single source of truth (per spec §7.1) |
-| `HelixCode/HelixCode/CLAUDE.md` | Inner Go-app agent manual (currently missing — only governance node where bluffs live) |
-| `HelixCode/HelixCode/AGENTS.md` | Sister to CLAUDE.md |
-| `HelixCode/HelixCode/CONSTITUTION.md` | Inner constitution mirroring root + Go-specific addenda |
+| `helix_code/helix_code/CLAUDE.md` | Inner Go-app agent manual (currently missing — only governance node where bluffs live) |
+| `helix_code/helix_code/AGENTS.md` | Sister to CLAUDE.md |
+| `helix_code/helix_code/CONSTITUTION.md` | Inner constitution mirroring root + Go-specific addenda |
 
 ### MODIFIED files
 | Path | What changes |
 |---|---|
 | `.gitmodules` | Add `[submodule "HelixAgent"]` block, SSH URL, deep recursive |
 | `.gitignore` (root) | Add `.env`, `.env.local`, `.env.*` (with `!.env.example`), `*.pem`, `*.key`, `*.crt`, `id_rsa*` |
-| `HelixCode/HelixCode/.gitignore` | Same patterns |
-| `HelixCode/HelixCode/.env.example` | Refresh: enumerate every key from `../helix_agent/.env` with `<REDACTED>` placeholders |
+| `helix_code/helix_code/.gitignore` | Same patterns |
+| `helix_code/helix_code/.env.example` | Refresh: enumerate every key from `../helix_agent/.env` with `<REDACTED>` placeholders |
 | `CONSTITUTION.md` (root) | Append Article XII §12.1 (CONST-042) + §12.2 (CONST-043) |
-| `CLAUDE.md` (root) | Add CONST-042/042 sections; fix §3.2 bluff (`HelixCode/ ← SUBMODULE` → `← TRACKED SUBDIRECTORY`) |
+| `CLAUDE.md` (root) | Add CONST-042/042 sections; fix §3.2 bluff (`helix_code/ ← SUBMODULE` → `← TRACKED SUBDIRECTORY`) |
 | `AGENTS.md` (root) | Add CONST-042/042 sections |
 | `CRUSH.md` (root) | Add anti-bluff Article XI §11.9 anchor + CONST-042/042 |
 | `QWEN.md` (root) | Same |
@@ -52,10 +52,10 @@
 | `.git/info/exclude` (LOCAL — not committed) | Add `Example_Projects/Agent-Deck/.claude/worktrees/` |
 | **Submodule governance** (after `propagate-governance.sh` runs) | All owned-by-us submodules' `CONSTITUTION.md`/`CLAUDE.md`/`AGENTS.md` get updated copies |
 
-### NEW files INSIDE HelixCode/HelixCode/ (not the meta-repo)
+### NEW files INSIDE helix_code/helix_code/ (not the meta-repo)
 | Path | Responsibility |
 |---|---|
-| `HelixCode/HelixCode/.env` | Copy of `../helix_agent/.env`, mode 0600, gitignored (NOT under git) |
+| `helix_code/helix_code/.env` | Copy of `../helix_agent/.env`, mode 0600, gitignored (NOT under git) |
 
 ---
 
@@ -124,10 +124,10 @@
 - [ ] P0-04 — verify-llmsverifier-pin-parity.sh
 - [ ] P0-05 — migrate API keys from ../helix_agent/.env
 - [ ] P0-06 — update .gitignore (root + inner)
-- [ ] P0-07 — refresh HelixCode/HelixCode/.env.example
+- [ ] P0-07 — refresh helix_code/helix_code/.env.example
 - [ ] P0-08 — scan-secrets.sh + planted-secret test
 - [ ] P0-09 — pre-push hook + installer + setup.sh wiring
-- [ ] P0-10 — create HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md
+- [ ] P0-10 — create helix_code/helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md
 - [ ] P0-11 — add Article XII (CONST-042, CONST-043) to root CONSTITUTION.md
 - [ ] P0-12 — cascade CONST-042/042 + anti-bluff anchor to root sister files (CLAUDE, AGENTS, CRUSH, QWEN)
 - [ ] P0-13 — fix root CLAUDE.md §3.2 bluff (HelixCode tracked-dir vs. submodule)
@@ -354,7 +354,7 @@ git add .gitmodules HelixAgent docs/improvements/05_phase_0_evidence.md docs/imp
 git commit -m "$(cat <<'EOF'
 feat(P0-03): integrate HelixAgent as submodule (Approach A substrate)
 
-Adds HelixAgent at HelixCode/helix_agent/ via SSH per Constitution Rule 3.
+Adds HelixAgent at helix_code/helix_agent/ via SSH per Constitution Rule 3.
 Brings HelixLLM, HelixMemory, HelixSpecifier, LLMsVerifier, and 39
 cli_agents/ submodules transitively. Recursive deep init verified.
 
@@ -506,7 +506,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 ## Task 5: Migrate API keys from `../helix_agent/.env` (P0-05 / spec P0-04)
 
 **Files:**
-- Create: `HelixCode/HelixCode/.env` (NOT under git — gitignored in next task)
+- Create: `helix_code/helix_code/.env` (NOT under git — gitignored in next task)
 
 - [ ] **Step 5.1: Verify source exists with proper permissions**
 
@@ -520,7 +520,7 @@ Expected: `-rw-------` mode and "readable". If not, STOP and fix permissions on 
 - [ ] **Step 5.2: Verify destination directory exists**
 
 ```bash
-ls -d HelixCode/HelixCode/ && echo "dir exists"
+ls -d helix_code/helix_code/ && echo "dir exists"
 ```
 
 Expected: directory listing + "dir exists".
@@ -528,9 +528,9 @@ Expected: directory listing + "dir exists".
 - [ ] **Step 5.3: Copy preserving mode**
 
 ```bash
-cp -p ../helix_agent/.env HelixCode/HelixCode/.env
-chmod 600 HelixCode/HelixCode/.env
-ls -la HelixCode/HelixCode/.env
+cp -p ../helix_agent/.env helix_code/helix_code/.env
+chmod 600 helix_code/helix_code/.env
+ls -la helix_code/helix_code/.env
 ```
 
 Expected: `-rw-------` mode on the destination, owner = current user.
@@ -539,7 +539,7 @@ Expected: `-rw-------` mode on the destination, owner = current user.
 
 ```bash
 diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
-     <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env | sort -u)
+     <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env | sort -u)
 echo "exit=$?"
 ```
 
@@ -548,13 +548,13 @@ Expected: empty diff and `exit=0`. If the diff is non-empty, the cp failed silen
 - [ ] **Step 5.5: Verify file is NOT staged (it must not enter git)**
 
 ```bash
-git status --porcelain HelixCode/HelixCode/.env 2>&1
+git status --porcelain helix_code/helix_code/.env 2>&1
 ```
 
 Expected: empty output (it's outside the gitignore yet, so git would otherwise flag it as untracked — but that's fine; we add to gitignore in P0-06). Confirm it's not in the index:
 
 ```bash
-git ls-files | grep -F "HelixCode/HelixCode/.env"
+git ls-files | grep -F "helix_code/helix_code/.env"
 echo "exit=$?"
 ```
 
@@ -569,18 +569,18 @@ cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 Timestamp: $(date -Iseconds)
 
 Source: $(ls -la ../helix_agent/.env | awk '{print $1, $3, $4, $5, $9}')
-Destination: $(ls -la HelixCode/HelixCode/.env | awk '{print $1, $3, $4, $5, $9}')
+Destination: $(ls -la helix_code/helix_code/.env | awk '{print $1, $3, $4, $5, $9}')
 
-Key count: $(grep -cE '^[A-Z_]+=' HelixCode/HelixCode/.env)
+Key count: $(grep -cE '^[A-Z_]+=' helix_code/helix_code/.env)
 
 Key set diff (source vs destination):
 \`\`\`
 $(diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
-       <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env | sort -u) 2>&1 | head -20)
+       <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env | sort -u) 2>&1 | head -20)
 \`\`\`
 (empty diff = identical key set)
 
-In git index: $(git ls-files | grep -cF "HelixCode/HelixCode/.env" || echo 0)
+In git index: $(git ls-files | grep -cF "helix_code/helix_code/.env" || echo 0)
 EOF
 ```
 
@@ -594,7 +594,7 @@ We deliberately do NOT commit anything in this task. The `.env` file must never 
 
 **Files:**
 - Modify: `.gitignore`
-- Modify: `HelixCode/HelixCode/.gitignore`
+- Modify: `helix_code/helix_code/.gitignore`
 
 - [ ] **Step 6.1: Inspect current state of both .gitignore files**
 
@@ -602,8 +602,8 @@ We deliberately do NOT commit anything in this task. The `.env` file must never 
 echo "=== root ==="
 grep -nE "^\.env|^\*\.pem|^\*\.key|^\*\.crt|^id_rsa" .gitignore || echo "no matches"
 echo "=== inner ==="
-grep -nE "^\.env|^\*\.pem|^\*\.key|^\*\.crt|^id_rsa" HelixCode/HelixCode/.gitignore 2>&1 || echo "file may not exist"
-test -f HelixCode/HelixCode/.gitignore && echo "inner exists" || echo "inner does NOT exist"
+grep -nE "^\.env|^\*\.pem|^\*\.key|^\*\.crt|^id_rsa" helix_code/helix_code/.gitignore 2>&1 || echo "file may not exist"
+test -f helix_code/helix_code/.gitignore && echo "inner exists" || echo "inner does NOT exist"
 ```
 
 Note any existing entries — we must not duplicate.
@@ -631,12 +631,12 @@ helix.security.json
 
 - [ ] **Step 6.3: Append secret patterns to inner `.gitignore`**
 
-Use the Edit tool. Same block. If `HelixCode/HelixCode/.gitignore` doesn't exist, create it with just this block + the existing build-artefact entries it should logically have (look at root `.gitignore` for clues).
+Use the Edit tool. Same block. If `helix_code/helix_code/.gitignore` doesn't exist, create it with just this block + the existing build-artefact entries it should logically have (look at root `.gitignore` for clues).
 
 - [ ] **Step 6.4: Verify .env is now ignored**
 
 ```bash
-git check-ignore HelixCode/HelixCode/.env
+git check-ignore helix_code/helix_code/.env
 echo "exit=$?"
 ```
 
@@ -645,7 +645,7 @@ Expected: prints the path (or pattern) and `exit=0` (meaning matched and ignored
 - [ ] **Step 6.5: Verify `.env.example` is NOT ignored (the !.env.example exception)**
 
 ```bash
-git check-ignore HelixCode/HelixCode/.env.example
+git check-ignore helix_code/helix_code/.env.example
 echo "exit=$?"
 ```
 
@@ -654,7 +654,7 @@ Expected: `exit=1` (not matched, not ignored). If it's ignored, the negation rul
 - [ ] **Step 6.6: Verify nothing in the working tree got swept into "ignored but tracked"**
 
 ```bash
-git ls-files --error-unmatch HelixCode/HelixCode/.env.example 2>&1
+git ls-files --error-unmatch helix_code/helix_code/.env.example 2>&1
 git ls-files | grep -E '\.env$|\.pem$|\.key$|\.crt$|id_rsa' | grep -v '\.example$' || echo "no leaks tracked"
 ```
 
@@ -675,20 +675,20 @@ $(tail -20 .gitignore)
 
 Inner .gitignore tail:
 \`\`\`
-$(tail -20 HelixCode/HelixCode/.gitignore)
+$(tail -20 helix_code/helix_code/.gitignore)
 \`\`\`
 
 Verifications:
-- HelixCode/HelixCode/.env is ignored: $(git check-ignore HelixCode/HelixCode/.env >/dev/null 2>&1 && echo "YES" || echo "NO")
-- HelixCode/HelixCode/.env.example is NOT ignored: $(git check-ignore HelixCode/HelixCode/.env.example >/dev/null 2>&1 && echo "NO (BAD)" || echo "YES (good)")
+- helix_code/helix_code/.env is ignored: $(git check-ignore helix_code/helix_code/.env >/dev/null 2>&1 && echo "YES" || echo "NO")
+- helix_code/helix_code/.env.example is NOT ignored: $(git check-ignore helix_code/helix_code/.env.example >/dev/null 2>&1 && echo "NO (BAD)" || echo "YES (good)")
 - Tracked credential files: $(git ls-files | grep -E '\.env$|\.pem$|\.key$|\.crt$|id_rsa' | grep -v '\.example$' | wc -l)
 EOF
 
-git add .gitignore HelixCode/HelixCode/.gitignore docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add .gitignore helix_code/helix_code/.gitignore docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
 chore(P0-05/P0-06): migrate API keys + harden .gitignore against secret leaks
 
-Copies ../helix_agent/.env to HelixCode/HelixCode/.env (mode 0600, NOT
+Copies ../helix_agent/.env to helix_code/helix_code/.env (mode 0600, NOT
 committed) and adds .env / .env.local / .env.* / *.pem / *.key / *.crt
 / id_rsa* / helix.security.json patterns to root and inner .gitignore.
 Per CONST-042, no credential artefact may be committed.
@@ -705,10 +705,10 @@ for r in github gitlab origin upstream; do git push $r main; done
 
 ---
 
-## Task 7: Refresh `HelixCode/HelixCode/.env.example` (P0-07 / spec P0-06)
+## Task 7: Refresh `helix_code/helix_code/.env.example` (P0-07 / spec P0-06)
 
 **Files:**
-- Modify: `HelixCode/HelixCode/.env.example`
+- Modify: `helix_code/helix_code/.env.example`
 
 - [ ] **Step 7.1: Generate the canonical key set from the real .env**
 
@@ -734,25 +734,25 @@ Expected: line count matches the count from Step 5.6.
   while IFS= read -r key; do
     echo "${key}<REDACTED>"
   done < /tmp/p0-07-canonical-keys.txt
-} > HelixCode/HelixCode/.env.example.new
+} > helix_code/helix_code/.env.example.new
 ```
 
 - [ ] **Step 7.3: Diff against existing .env.example and replace**
 
 ```bash
-diff -u HelixCode/HelixCode/.env.example HelixCode/HelixCode/.env.example.new | head -50
-mv HelixCode/HelixCode/.env.example.new HelixCode/HelixCode/.env.example
+diff -u helix_code/helix_code/.env.example helix_code/helix_code/.env.example.new | head -50
+mv helix_code/helix_code/.env.example.new helix_code/helix_code/.env.example
 ```
 
 - [ ] **Step 7.4: Verify keys parity with real .env, no real values present**
 
 ```bash
 diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
-     <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example | sort -u)
+     <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env.example | sort -u)
 echo "key-diff-exit=$?"
 
 # Confirm no real-value patterns
-grep -E '^[A-Z_]+=[^<]' HelixCode/HelixCode/.env.example | grep -vE '=$' | head -5
+grep -E '^[A-Z_]+=[^<]' helix_code/helix_code/.env.example | grep -vE '=$' | head -5
 echo "real-value-grep-exit=$?"
 ```
 
@@ -766,14 +766,14 @@ cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 ## P0-07 — .env.example refresh
 Timestamp: $(date -Iseconds)
 
-Key parity vs ../helix_agent/.env: $(diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example | sort -u) > /dev/null && echo "OK (identical)" || echo "DIVERGENT")
-Real values present: $(grep -E '^[A-Z_]+=[^<]' HelixCode/HelixCode/.env.example | grep -vE '=$' | wc -l)
-Total keys: $(grep -cE '^[A-Z_]+=' HelixCode/HelixCode/.env.example)
+Key parity vs ../helix_agent/.env: $(diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env.example | sort -u) > /dev/null && echo "OK (identical)" || echo "DIVERGENT")
+Real values present: $(grep -E '^[A-Z_]+=[^<]' helix_code/helix_code/.env.example | grep -vE '=$' | wc -l)
+Total keys: $(grep -cE '^[A-Z_]+=' helix_code/helix_code/.env.example)
 EOF
 
-git add HelixCode/HelixCode/.env.example docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add helix_code/helix_code/.env.example docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
-chore(P0-07): refresh HelixCode/.env.example from ../helix_agent/.env key set
+chore(P0-07): refresh helix_code/.env.example from ../helix_agent/.env key set
 
 All keys present, all values <REDACTED>. Verified zero real values.
 
@@ -1216,22 +1216,22 @@ Expected: push succeeds (the hook does not block non-force pushes); all four rem
 
 ---
 
-## Task 10: Create `HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md` (P0-10 / spec P0-09)
+## Task 10: Create `helix_code/helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md` (P0-10 / spec P0-09)
 
 **Files:**
-- Create: `HelixCode/HelixCode/CONSTITUTION.md`
-- Create: `HelixCode/HelixCode/CLAUDE.md`
-- Create: `HelixCode/HelixCode/AGENTS.md`
+- Create: `helix_code/helix_code/CONSTITUTION.md`
+- Create: `helix_code/helix_code/CLAUDE.md`
+- Create: `helix_code/helix_code/AGENTS.md`
 
 - [ ] **Step 10.1: Confirm none of the three exist**
 
 ```bash
-ls HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md 2>&1
+ls helix_code/helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md 2>&1
 ```
 
 Expected: three "No such file or directory" errors. If any exist, STOP and read them — do not overwrite without understanding what's there.
 
-- [ ] **Step 10.2: Create `HelixCode/HelixCode/CONSTITUTION.md`**
+- [ ] **Step 10.2: Create `helix_code/helix_code/CONSTITUTION.md`**
 
 Use the Write tool. Content:
 
@@ -1239,7 +1239,7 @@ Use the Write tool. Content:
 # HelixCode (Inner Go Application) — Constitution
 
 **Version:** 1.0.0 — created 2026-05-04 by P0-10
-**Scope:** This file governs the Go application code under `HelixCode/HelixCode/`. It inherits from the meta-repo root `CONSTITUTION.md` and adds Go-specific addenda.
+**Scope:** This file governs the Go application code under `helix_code/helix_code/`. It inherits from the meta-repo root `CONSTITUTION.md` and adds Go-specific addenda.
 **Authority:** Where this file conflicts with the root, the root wins. Where it conflicts with the synthesis spec, the spec wins.
 
 ## Inherited mandates (cascaded from root — wording must match)
@@ -1292,14 +1292,14 @@ grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/ cmd/ applic
 - Synthesis spec: `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`
 ```
 
-- [ ] **Step 10.3: Create `HelixCode/HelixCode/CLAUDE.md`**
+- [ ] **Step 10.3: Create `helix_code/helix_code/CLAUDE.md`**
 
 Content (similar structure, agent-manual flavour):
 
 ```markdown
 # HelixCode (Inner Go App) — Agent Manual (CLAUDE.md)
 
-**Scope:** This file guides AI agents working inside `HelixCode/HelixCode/` (the Go application).
+**Scope:** This file guides AI agents working inside `helix_code/helix_code/` (the Go application).
 **Inherits:** `../CLAUDE.md` (meta-repo root). Where they conflict, the root wins.
 
 ## Peer governance
@@ -1370,14 +1370,14 @@ go test -v -run <TestName> ./internal/<pkg>
 ```
 ```
 
-- [ ] **Step 10.4: Create `HelixCode/HelixCode/AGENTS.md`**
+- [ ] **Step 10.4: Create `helix_code/helix_code/AGENTS.md`**
 
 Content (third governance file — parallel structure):
 
 ```markdown
 # HelixCode (Inner Go App) — Generic Agent Manual (AGENTS.md)
 
-**Scope:** Guidance for non-Claude AI agents working inside `HelixCode/HelixCode/`.
+**Scope:** Guidance for non-Claude AI agents working inside `helix_code/helix_code/`.
 **Inherits:** `../AGENTS.md` (meta-repo root). Where they conflict, root wins.
 
 ## Peer governance
@@ -1418,7 +1418,7 @@ Content (third governance file — parallel structure):
 - [ ] **Step 10.5: Verify all three anchors are present in each file**
 
 ```bash
-for f in HelixCode/HelixCode/{CONSTITUTION,CLAUDE,AGENTS}.md; do
+for f in helix_code/helix_code/{CONSTITUTION,CLAUDE,AGENTS}.md; do
   echo "=== $f ==="
   grep -c "11.9\|tests do execute" "$f" 2>&1 | head -1
   grep -c "CONST-042\|No-Secret-Leak" "$f" 2>&1 | head -1
@@ -1433,14 +1433,14 @@ Expected: each grep returns ≥1.
 ```bash
 cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 
-## P0-10 — HelixCode/HelixCode/ governance triplet
+## P0-10 — helix_code/helix_code/ governance triplet
 Timestamp: $(date -Iseconds)
 
 Files created:
-$(ls -la HelixCode/HelixCode/{CONSTITUTION,CLAUDE,AGENTS}.md)
+$(ls -la helix_code/helix_code/{CONSTITUTION,CLAUDE,AGENTS}.md)
 
 Anchor counts (must all be ≥1):
-$(for f in HelixCode/HelixCode/{CONSTITUTION,CLAUDE,AGENTS}.md; do
+$(for f in helix_code/helix_code/{CONSTITUTION,CLAUDE,AGENTS}.md; do
   printf "  %s — anti-bluff:%d  CONST-042:%d  CONST-043:%d\n" \
     "$f" \
     "$(grep -c '11.9\|tests do execute' "$f")" \
@@ -1449,9 +1449,9 @@ $(for f in HelixCode/HelixCode/{CONSTITUTION,CLAUDE,AGENTS}.md; do
 done)
 EOF
 
-git add HelixCode/HelixCode/{CONSTITUTION,CLAUDE,AGENTS}.md docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add helix_code/helix_code/{CONSTITUTION,CLAUDE,AGENTS}.md docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
-docs(P0-10): create HelixCode/ inner Go app governance triplet
+docs(P0-10): create helix_code/ inner Go app governance triplet
 
 Adds CLAUDE.md / AGENTS.md / CONSTITUTION.md to the inner Go application
 directory — currently the most important governance node and the one
@@ -1673,17 +1673,17 @@ for r in github gitlab origin upstream; do git push $r main; done
 - [ ] **Step 13.1: Locate the exact line**
 
 ```bash
-grep -nE "HelixCode/.*←.*SUBMODULE|HelixCode/.*<-.*SUBMODULE" CLAUDE.md
+grep -nE "helix_code/.*←.*SUBMODULE|helix_code/.*<-.*SUBMODULE" CLAUDE.md
 ```
 
 Expected: one matching line (the §3.2 inner-app pointer with the bluff label).
 
 - [ ] **Step 13.2: Use Edit tool to replace the bluff label**
 
-Replace `HelixCode/      ← SUBMODULE: the actual Go application (see §3.2.1)` (or whatever the current text is) with:
+Replace `helix_code/      ← SUBMODULE: the actual Go application (see §3.2.1)` (or whatever the current text is) with:
 
 ```
-HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
+helix_code/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
 ```
 
 Use the exact `old_string` from the file as read; the Edit tool will refuse if the match isn't unique.
@@ -1691,8 +1691,8 @@ Use the exact `old_string` from the file as read; the Edit tool will refuse if t
 - [ ] **Step 13.3: Verify**
 
 ```bash
-grep -A1 "^├── HelixCode/" CLAUDE.md
-grep -nE "HelixCode/.*SUBMODULE" CLAUDE.md  # should be empty (no remaining "SUBMODULE" mislabel for the inner dir)
+grep -A1 "^├── helix_code/" CLAUDE.md
+grep -nE "helix_code/.*SUBMODULE" CLAUDE.md  # should be empty (no remaining "SUBMODULE" mislabel for the inner dir)
 ```
 
 - [ ] **Step 13.4: Commit + push**
@@ -1705,15 +1705,15 @@ Timestamp: $(date -Iseconds)
 
 Corrected line:
 \`\`\`
-$(grep -A1 "^├── HelixCode/" CLAUDE.md)
+$(grep -A1 "^├── helix_code/" CLAUDE.md)
 \`\`\`
 EOF
 
 git add CLAUDE.md docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
-docs(P0-13): fix CLAUDE.md §3.2 bluff — HelixCode/ is tracked subdir, not submodule
+docs(P0-13): fix CLAUDE.md §3.2 bluff — helix_code/ is tracked subdir, not submodule
 
-The previous edit labelled HelixCode/ as a submodule. It is not — it's
+The previous edit labelled helix_code/ as a submodule. It is not — it's
 a tracked subdirectory of this meta-repo. Promoting it to a submodule
 would create a circular reference (this repo IS HelixDevelopment/HelixCode).
 
@@ -2030,7 +2030,7 @@ modules:
     - name: HelixCode
       role: integration core (meta-repo)
       type: monorepo
-    - name: HelixCode/HelixCode
+    - name: helix_code/HelixCode
       role: Go application (tracked subdirectory)
       type: go-module
 
@@ -2446,7 +2446,7 @@ Expected: all four remotes converge. Working tree clean.
 | P0-06 (.env.example refresh) | Task 7 | ✓ |
 | P0-07 (scan-secrets.sh) | Task 8 | ✓ |
 | P0-08 (pre-push hook) | Task 9 | ✓ |
-| P0-09 (HelixCode/HelixCode/ governance) | Task 10 | ✓ |
+| P0-09 (helix_code/helix_code/ governance) | Task 10 | ✓ |
 | P0-10 (Article XII to root) | Task 11 | ✓ |
 | P0-11 (cascade root sisters) | Task 12 | ✓ |
 | P0-12 (cascade owned-by-us submodules) | Task 14 | ✓ |
@@ -2468,7 +2468,7 @@ Expected: all four remotes converge. Working tree clean.
 - `scripts/git_hooks/pre-push` and `scripts/install-git-hooks.sh` consistent in Task 9.
 - CONST-042 / CONST-043 numbering consistent across Tasks 10, 11, 12, 14.
 - Article numbering: §11.9 (existing) and §12.1/§12.2 (new) consistent.
-- Submodule path `HelixCode/helix_agent/` consistent across Tasks 3, 4, 14.
+- Submodule path `helix_code/helix_agent/` consistent across Tasks 3, 4, 14.
 - File-mode 0600 referenced consistently for `.env` (Tasks 5, 6, 10).
 
 **4. Identified open spec-level uncertainties (carried forward, not blockers):**

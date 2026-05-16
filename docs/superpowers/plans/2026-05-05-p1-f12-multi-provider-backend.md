@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f12-multi-provider-backend-design.md` (commit `fd32a82`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term):**
 ```bash
@@ -344,6 +344,6 @@ Tick 11 items in PROGRESS, advance PROGRESS focus to F13 candidate, run final ve
 3. **Type consistency:** `Selector`, `SelectorOptions`, `WizardForm`, `Wizard`, `WizardConfigWriter`, `FileWizardConfigWriter`, `NewCloudProvider` consistent across spec and plan.
 4. **Cross-platform:** pure Go + cloud SDKs already in `go.mod`; tview headless via `tcell.SimulationScreen` — no new deps.
 5. **Anti-bluff:** full 4-term smoke + Challenge with explicit LOCAL/CLOUD separation + `SKIP-OK: P1-F12 cloud creds not provided` markers per Universal Rule.
-6. **No new deps:** verified — `aws-sdk-go-v2/service/bedrockruntime`, `Azure/azure-sdk-for-go/sdk/{azcore,azidentity}`, `golang.org/x/oauth2/google`, `rivo/tview`, `gdamore/tcell/v2` all present in `HelixCode/go.mod`.
+6. **No new deps:** verified — `aws-sdk-go-v2/service/bedrockruntime`, `Azure/azure-sdk-for-go/sdk/{azcore,azidentity}`, `golang.org/x/oauth2/google`, `rivo/tview`, `gdamore/tcell/v2` all present in `helix_code/go.mod`.
 7. **Branch + push:** stays on main, non-force to all four remotes (per CONST-043).
 8. **Reality check:** 4 cloud `*_provider.go` files (anthropic/bedrock/azure/vertexai) ALREADY exist in `internal/llm/`. F12 is the selection/UX/wizard/factory layer plus per-provider verifier-routing audits — NOT a from-scratch implementation. The porting doc's brand-new `Chat`/`StreamChat` interface is intentionally NOT adopted; doing so would force a rewrite of every existing provider and contradict the non-breaking mandate (Q3=B).

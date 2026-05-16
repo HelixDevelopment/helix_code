@@ -52,7 +52,7 @@ contain sensitive UI state. Do not commit them. Do not push them.
 ## Programmatic access
 
 The Go helper `internal/helixqa.Engine.EvidenceCollector(platform)`
-(see `HelixCode/internal/helixqa/wrapper.go:186`) returns the
+(see `helix_code/internal/helixqa/wrapper.go:186`) returns the
 `hqaEvidence.Collector` that writes into the session directory layout
 described above. Test code that needs to capture extra evidence should
 go through that collector — never write directly to `qa_evidence/`.

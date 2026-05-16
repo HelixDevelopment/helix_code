@@ -30,7 +30,7 @@ Fatal: configuration loading failed
 ```
 
 **Step-by-Step Diagnosis:**
-1. Verify you are in the correct directory (`HelixCode/` subdirectory)
+1. Verify you are in the correct directory (`helix_code/` subdirectory)
 2. Check if config file exists: `ls -la config/config.yaml`
 3. Verify file permissions: `stat config/config.yaml`
 

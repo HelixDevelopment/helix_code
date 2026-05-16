@@ -51,7 +51,7 @@
 - Cache operations: 100%
 
 **Files Modified:**
-- `HelixCode/internal/cognee/cognee_test.go` (+154 lines, 10 functions, 27 subtests)
+- `helix_code/internal/cognee/cognee_test.go` (+154 lines, 10 functions, 27 subtests)
 
 **Impact:**
 - 657% increase in coverage (12.5% → 94.2%)
@@ -353,15 +353,15 @@ Continue with internal/editor (83.3%) for one more quick win, then reassess.
 ## 📁 Important Files Updated
 
 ### This Session:
-- ✅ `HelixCode/internal/cognee/cognee_test.go` - Added 154 lines
-- ✅ `HelixCode/internal/context/mentions/mentions_test.go` - Added 344 lines
-- ✅ `HelixCode/internal/session/session_test.go` - Added 171 lines
-- ✅ `HelixCode/internal/session/manager_test.go` - Added 74 lines
-- ✅ `HelixCode/internal/commands/builtin/builtin_test.go` - Added 148 lines
-- ✅ `HelixCode/internal/editor/search_replace_editor_test.go` - Added 122 lines
-- ✅ `HelixCode/internal/editor/model_formats_test.go` - Added 39 lines
-- ✅ `HelixCode/internal/editor/line_editor_test.go` - Added 59 lines
-- ✅ `HelixCode/internal/editor/editor_test.go` - Added 115 lines
+- ✅ `helix_code/internal/cognee/cognee_test.go` - Added 154 lines
+- ✅ `helix_code/internal/context/mentions/mentions_test.go` - Added 344 lines
+- ✅ `helix_code/internal/session/session_test.go` - Added 171 lines
+- ✅ `helix_code/internal/session/manager_test.go` - Added 74 lines
+- ✅ `helix_code/internal/commands/builtin/builtin_test.go` - Added 148 lines
+- ✅ `helix_code/internal/editor/search_replace_editor_test.go` - Added 122 lines
+- ✅ `helix_code/internal/editor/model_formats_test.go` - Added 39 lines
+- ✅ `helix_code/internal/editor/line_editor_test.go` - Added 59 lines
+- ✅ `helix_code/internal/editor/editor_test.go` - Added 115 lines
 - ✅ `CONTINUE_HERE.md` - This file (comprehensive update)
 
 ### Documentation:

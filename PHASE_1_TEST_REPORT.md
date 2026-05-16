@@ -41,8 +41,8 @@ Phase 1 implementation is **100% complete** with **all 162 tests passing** and *
 ## Module 1: Prompt Caching System
 
 ### Implementation Files
-- `HelixCode/internal/llm/cache_control.go` (260 lines)
-- `HelixCode/internal/llm/cache_control_test.go` (1,080 lines)
+- `helix_code/internal/llm/cache_control.go` (260 lines)
+- `helix_code/internal/llm/cache_control_test.go` (1,080 lines)
 
 ### Test Results
 
@@ -112,9 +112,9 @@ Savings:         $0.054 (90%)
 ## Module 2: Reasoning Model Support
 
 ### Implementation Files
-- `HelixCode/internal/llm/reasoning.go` (509 lines)
-- `HelixCode/internal/llm/reasoning_test.go` (709 lines)
-- `HelixCode/docs/REASONING_MODELS.md` (695 lines)
+- `helix_code/internal/llm/reasoning.go` (509 lines)
+- `helix_code/internal/llm/reasoning_test.go` (709 lines)
+- `helix_code/docs/REASONING_MODELS.md` (695 lines)
 
 ### Test Results
 
@@ -212,8 +212,8 @@ DeepSeek R1 is 28x cheaper than OpenAI o1!
 ## Module 3: Token Budget Management
 
 ### Implementation Files
-- `HelixCode/internal/llm/token_budget.go` (363 lines)
-- `HelixCode/internal/llm/token_budget_test.go` (1,200+ lines)
+- `helix_code/internal/llm/token_budget.go` (363 lines)
+- `helix_code/internal/llm/token_budget_test.go` (1,200+ lines)
 
 ### Test Results
 

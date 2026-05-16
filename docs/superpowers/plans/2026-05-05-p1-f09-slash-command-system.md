@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f09-slash-command-system-design.md` (commit `79e8bd1`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term):**
 ```bash
@@ -84,7 +84,7 @@ F09 task list block (8 items, all unchecked):
 
 ## Task 2: markdown_commands.go — MarkdownCommand + parser + substitution (TDD)
 
-**Files:** create `HelixCode/internal/commands/markdown_commands.go`, `HelixCode/internal/commands/markdown_commands_test.go`.
+**Files:** create `helix_code/internal/commands/markdown_commands.go`, `helix_code/internal/commands/markdown_commands_test.go`.
 
 Test file (write FAILING test first):
 ```go
@@ -580,7 +580,7 @@ Run TDD cycle. Subject: `feat(P1-F09-T03): MarkdownLoader scans project + user d
 
 ## Task 4: markdown_watcher.go — fsnotify + 200ms debounce (TDD)
 
-**Files:** create `HelixCode/internal/commands/markdown_watcher.go`, `HelixCode/internal/commands/markdown_watcher_test.go`.
+**Files:** create `helix_code/internal/commands/markdown_watcher.go`, `helix_code/internal/commands/markdown_watcher_test.go`.
 
 Test cases:
 ```go
@@ -737,7 +737,7 @@ Run TDD cycle. Subject: `feat(P1-F09-T04): markdown_watcher.go fsnotify + deboun
 
 ## Task 5: /commands slash + helixcode commands cobra (TDD)
 
-**Files:** create `HelixCode/internal/commands/commands_command.go`, `HelixCode/internal/commands/commands_command_test.go`, `HelixCode/cmd/cli/commands_cmd.go`, `HelixCode/cmd/cli/commands_cmd_test.go`.
+**Files:** create `helix_code/internal/commands/commands_command.go`, `helix_code/internal/commands/commands_command_test.go`, `helix_code/cmd/cli/commands_cmd.go`, `helix_code/cmd/cli/commands_cmd_test.go`.
 
 `/commands` slash:
 - `/commands` (default `list`) → table NAME / TITLE / SOURCE
@@ -795,7 +795,7 @@ Subject: `feat(P1-F09-T06): wire markdown loader + watcher into main.go + integr
 
 ## Task 7: Challenge with runtime evidence
 
-Harness `HelixCode/tests/integration/cmd/p1f09_challenge/main.go`:
+Harness `helix_code/tests/integration/cmd/p1f09_challenge/main.go`:
 1. Create temp `.helix/commands/echo.md` with `Got: {{ARG1}}`
 2. Build registry, load, run `echo` with arg `"hello world"`
 3. Assert output contains `Got: hello world`

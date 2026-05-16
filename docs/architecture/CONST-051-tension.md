@@ -97,12 +97,12 @@ root: `b2fcdcfb...`). HelixDevelopment fork has more activity
 (DocProcessor: 63 vs 35 commits) — it is the more-maintained side.
 
 **Finding 2 — HelixCode does NOT depend on HelixAgent.**
-`grep helixagent HelixCode/go.mod` returns nothing. No source imports
+`grep helixagent helix_code/go.mod` returns nothing. No source imports
 of HelixAgent module path. They are independent Go modules whose
 parent-build coexistence is incidental.
 
 **Finding 3 — The two consumers split on which fork they consume.**
-- `HelixCode/go.mod` → `replace digital.vasic.docprocessor =>
+- `helix_code/go.mod` → `replace digital.vasic.docprocessor =>
   ../Dependencies/HelixDevelopment/DocProcessor`
 - `helix_agent/go.mod` → `replace digital.vasic.docprocessor =>
   ../Dependencies/vasic-digital/DocProcessor`

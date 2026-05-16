@@ -61,28 +61,28 @@ The auto-trigger lives in `ToolRegistry.Execute` (the existing chokepoint where 
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/tools/lsp_types.go` — `Diagnostic`, `DiagnosticSummary`, `DiagnosticSeverity`, `LSPServerSpec`, `ServerStatus`. No deps.
-- `HelixCode/internal/tools/lsp_client.go` — `LSPClient` (jsonrpc2 wrapper, handshake, didOpen/didChange, publishDiagnostics handler).
-- `HelixCode/internal/tools/lsp_client_test.go` — unit tests against an in-process fake server (in-memory `io.ReadWriter` pair).
-- `HelixCode/internal/tools/lsp_manager.go` — `LSPManager` (lazy spawn, idle timeout, file-extension router, crash recovery).
-- `HelixCode/internal/tools/lsp_manager_test.go` — unit tests with the in-tree fake LSP subprocess (built once via `go test -c`).
-- `HelixCode/internal/tools/lsp_servers.go` — curated allowlist (`gopls`, `rust-analyzer`, `pyright`, `typescript-language-server`, `clangd`), `Detect()` via `exec.LookPath`.
-- `HelixCode/internal/tools/lsp_servers_test.go`.
-- `HelixCode/internal/tools/lsp.go` — `LSPGetDiagnosticsTool`, `LSPAnalyzeDiagnosticTool` (Tool interface adapters).
-- `HelixCode/internal/tools/lsp_test.go`.
-- `HelixCode/internal/tools/lsp_fakeserver/main.go` — small in-tree LSP server that implements `initialize`, `textDocument/didOpen`, `textDocument/didChange`, and emits a deterministic `publishDiagnostics` (used by manager tests + Challenge harness).
-- `HelixCode/internal/commands/lsp_command.go` — `/lsp` slash command with `status` / `restart` / `list-servers` / `stop` subcommands.
-- `HelixCode/internal/commands/lsp_command_test.go`.
-- `HelixCode/cmd/cli/lsp_cmd.go` — `helixcode lsp` cobra root + 4 subcommands.
-- `HelixCode/cmd/cli/lsp_cmd_test.go`.
-- `HelixCode/tests/integration/lsp_test.go` — `//go:build integration`, gated per §5.
-- `HelixCode/tests/integration/cmd/p1f13_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/tools/lsp_types.go` — `Diagnostic`, `DiagnosticSummary`, `DiagnosticSeverity`, `LSPServerSpec`, `ServerStatus`. No deps.
+- `helix_code/internal/tools/lsp_client.go` — `LSPClient` (jsonrpc2 wrapper, handshake, didOpen/didChange, publishDiagnostics handler).
+- `helix_code/internal/tools/lsp_client_test.go` — unit tests against an in-process fake server (in-memory `io.ReadWriter` pair).
+- `helix_code/internal/tools/lsp_manager.go` — `LSPManager` (lazy spawn, idle timeout, file-extension router, crash recovery).
+- `helix_code/internal/tools/lsp_manager_test.go` — unit tests with the in-tree fake LSP subprocess (built once via `go test -c`).
+- `helix_code/internal/tools/lsp_servers.go` — curated allowlist (`gopls`, `rust-analyzer`, `pyright`, `typescript-language-server`, `clangd`), `Detect()` via `exec.LookPath`.
+- `helix_code/internal/tools/lsp_servers_test.go`.
+- `helix_code/internal/tools/lsp.go` — `LSPGetDiagnosticsTool`, `LSPAnalyzeDiagnosticTool` (Tool interface adapters).
+- `helix_code/internal/tools/lsp_test.go`.
+- `helix_code/internal/tools/lsp_fakeserver/main.go` — small in-tree LSP server that implements `initialize`, `textDocument/didOpen`, `textDocument/didChange`, and emits a deterministic `publishDiagnostics` (used by manager tests + Challenge harness).
+- `helix_code/internal/commands/lsp_command.go` — `/lsp` slash command with `status` / `restart` / `list-servers` / `stop` subcommands.
+- `helix_code/internal/commands/lsp_command_test.go`.
+- `helix_code/cmd/cli/lsp_cmd.go` — `helixcode lsp` cobra root + 4 subcommands.
+- `helix_code/cmd/cli/lsp_cmd_test.go`.
+- `helix_code/tests/integration/lsp_test.go` — `//go:build integration`, gated per §5.
+- `helix_code/tests/integration/cmd/p1f13_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f13-lsp-integration/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
-- `HelixCode/internal/tools/registry.go` — register `LSPGetDiagnosticsTool` + `LSPAnalyzeDiagnosticTool` in `registerAllTools()`; add `SetLSPManager(*LSPManager)` and a post-Execute hook that calls `lspManager.NotifyChange(ctx, path)` when the tool name is `fs_edit` / `fs_write` / `multi_edit_commit` and the inner Execute returned no error. Augment the tool result map with `"lsp_diagnostics"` when the summary is non-empty. Add a `CategoryLSP ToolCategory = "lsp"` constant.
-- `HelixCode/cmd/cli/main.go` — construct an `LSPManager` during CLI startup, wire it into the registry via `SetLSPManager`, register `/lsp` slash command and `helixcode lsp` cobra subcommand, defer `lspMgr.Close()`.
-- `HelixCode/go.mod` / `HelixCode/go.sum` — add `go.lsp.dev/jsonrpc2 v0.10.0` and `go.lsp.dev/protocol v0.12.0`. (Both confirmed absent from go.mod at spec time; only `aws-sdk-go-v2/.../protocol/eventstream` is present, which is unrelated.)
+- `helix_code/internal/tools/registry.go` — register `LSPGetDiagnosticsTool` + `LSPAnalyzeDiagnosticTool` in `registerAllTools()`; add `SetLSPManager(*LSPManager)` and a post-Execute hook that calls `lspManager.NotifyChange(ctx, path)` when the tool name is `fs_edit` / `fs_write` / `multi_edit_commit` and the inner Execute returned no error. Augment the tool result map with `"lsp_diagnostics"` when the summary is non-empty. Add a `CategoryLSP ToolCategory = "lsp"` constant.
+- `helix_code/cmd/cli/main.go` — construct an `LSPManager` during CLI startup, wire it into the registry via `SetLSPManager`, register `/lsp` slash command and `helixcode lsp` cobra subcommand, defer `lspMgr.Close()`.
+- `helix_code/go.mod` / `helix_code/go.sum` — add `go.lsp.dev/jsonrpc2 v0.10.0` and `go.lsp.dev/protocol v0.12.0`. (Both confirmed absent from go.mod at spec time; only `aws-sdk-go-v2/.../protocol/eventstream` is present, which is unrelated.)
 
 ### 3.3 Types
 

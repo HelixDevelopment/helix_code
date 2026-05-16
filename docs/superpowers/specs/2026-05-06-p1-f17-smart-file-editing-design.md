@@ -39,7 +39,7 @@ Anti-bluff: a `smart_edit` tool that reports `applied=true` without the file con
 
 ## 2. Architecture
 
-Four layers, all under `HelixCode/internal/tools/smartedit/`, plus a slash command under `HelixCode/internal/commands/`:
+Four layers, all under `helix_code/internal/tools/smartedit/`, plus a slash command under `helix_code/internal/commands/`:
 
 - **`SmartEditParser`** (`parser.go`) — pure function `Parse(prompt string) ([]EditBlock, error)`. Tokenises a prompt string into `EditBlock` records by scanning for the delimiter triplet `<<<<<<< SEARCH` / `=======` / `>>>>>>> REPLACE`. Each block carries its file path (the line immediately preceding `<<<<<<< SEARCH`), the SEARCH literal, and the REPLACE literal. No filesystem access; no stateful side effects.
 - **`SmartEditApplier`** (`applier.go`) — pure function `Apply(content string, blocks []EditBlock) (string, []BlockResult, error)`. Takes a file's current content + the list of blocks targeting that file; for each block, locates the SEARCH literal in the current content, ensures it is present **exactly once** (lenient conflict detection per Q4=B; ambiguous → fail), and replaces it with REPLACE. Returns the new content, per-block success/failure, and an aggregate error (the first block failure aborts the file). No filesystem access.
@@ -109,28 +109,28 @@ Why a tool + slash + no cobra subcommand:
 
 ### 3.1 New files
 
-- `HelixCode/internal/tools/smartedit/types.go` — `EditBlock`, `EditPlan`, `BlockResult`, `EditResult`, `SmartEditResult`, marker constants (`searchMarker`, `dividerMarker`, `replaceMarker`), error sentinels.
-- `HelixCode/internal/tools/smartedit/types_test.go`.
-- `HelixCode/internal/tools/smartedit/parser.go` — `Parse(prompt string) ([]EditBlock, error)`, marker scanner.
-- `HelixCode/internal/tools/smartedit/parser_test.go`.
-- `HelixCode/internal/tools/smartedit/applier.go` — `Apply(content string, blocks []EditBlock) (string, []BlockResult, error)`; `findExactlyOnce(content, search string) (int, error)`.
-- `HelixCode/internal/tools/smartedit/applier_test.go`.
-- `HelixCode/internal/tools/smartedit/diff.go` — `UnifiedDiff(oldContent, newContent, path string) string`; thin wrapper around `multiedit.DiffManager.GenerateDiff` (re-uses existing F08 LCS implementation). Lives in this package so the smart-edit tool does not pull every multiedit symbol into its public API.
-- `HelixCode/internal/tools/smartedit/diff_test.go`.
-- `HelixCode/internal/tools/smartedit/smart_edit_tool.go` — `SmartEditTool` (Tool impl); embeds `*multiedit.MultiFileEditor`; tracks last attempt for `/edit status` / `/edit diff`.
-- `HelixCode/internal/tools/smartedit/smart_edit_tool_test.go`.
-- `HelixCode/internal/tools/smartedit/binary_detect.go` — `IsBinary(content []byte) bool` per the standard "first 8KiB contains a NUL byte" heuristic. Lives in this package (not in filesystem) so the binary-refusal contract is local to smart-edit; if filesystem grows its own binary-detect later they can de-duplicate.
-- `HelixCode/internal/tools/smartedit/binary_detect_test.go`.
-- `HelixCode/internal/commands/edit_command.go` — `/edit` slash (`status` / `diff` / `dry-run` / `commit`).
-- `HelixCode/internal/commands/edit_command_test.go`.
-- `HelixCode/tests/integration/smartedit_test.go` — `//go:build integration`. Real tempdir, real disk writes, full pipeline.
-- `HelixCode/tests/integration/cmd/p1f17_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/tools/smartedit/types.go` — `EditBlock`, `EditPlan`, `BlockResult`, `EditResult`, `SmartEditResult`, marker constants (`searchMarker`, `dividerMarker`, `replaceMarker`), error sentinels.
+- `helix_code/internal/tools/smartedit/types_test.go`.
+- `helix_code/internal/tools/smartedit/parser.go` — `Parse(prompt string) ([]EditBlock, error)`, marker scanner.
+- `helix_code/internal/tools/smartedit/parser_test.go`.
+- `helix_code/internal/tools/smartedit/applier.go` — `Apply(content string, blocks []EditBlock) (string, []BlockResult, error)`; `findExactlyOnce(content, search string) (int, error)`.
+- `helix_code/internal/tools/smartedit/applier_test.go`.
+- `helix_code/internal/tools/smartedit/diff.go` — `UnifiedDiff(oldContent, newContent, path string) string`; thin wrapper around `multiedit.DiffManager.GenerateDiff` (re-uses existing F08 LCS implementation). Lives in this package so the smart-edit tool does not pull every multiedit symbol into its public API.
+- `helix_code/internal/tools/smartedit/diff_test.go`.
+- `helix_code/internal/tools/smartedit/smart_edit_tool.go` — `SmartEditTool` (Tool impl); embeds `*multiedit.MultiFileEditor`; tracks last attempt for `/edit status` / `/edit diff`.
+- `helix_code/internal/tools/smartedit/smart_edit_tool_test.go`.
+- `helix_code/internal/tools/smartedit/binary_detect.go` — `IsBinary(content []byte) bool` per the standard "first 8KiB contains a NUL byte" heuristic. Lives in this package (not in filesystem) so the binary-refusal contract is local to smart-edit; if filesystem grows its own binary-detect later they can de-duplicate.
+- `helix_code/internal/tools/smartedit/binary_detect_test.go`.
+- `helix_code/internal/commands/edit_command.go` — `/edit` slash (`status` / `diff` / `dry-run` / `commit`).
+- `helix_code/internal/commands/edit_command_test.go`.
+- `helix_code/tests/integration/smartedit_test.go` — `//go:build integration`. Real tempdir, real disk writes, full pipeline.
+- `helix_code/tests/integration/cmd/p1f17_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f17-smart-file-editing/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/cmd/cli/main.go` — three lines: construct `SmartEditTool` (passes the existing `*multiedit.MultiFileEditor` already wired by F08), register into the tool registry, register `/edit` slash.
-- `HelixCode/internal/tools/registry.go` — register `smart_edit` in the `Tool` map alongside `fs_edit` / `multiedit_commit` (single line in the existing init block; no new fields, no new setters — `SmartEditTool` is opaque to the registry).
+- `helix_code/cmd/cli/main.go` — three lines: construct `SmartEditTool` (passes the existing `*multiedit.MultiFileEditor` already wired by F08), register into the tool registry, register `/edit` slash.
+- `helix_code/internal/tools/registry.go` — register `smart_edit` in the `Tool` map alongside `fs_edit` / `multiedit_commit` (single line in the existing init block; no new fields, no new setters — `SmartEditTool` is opaque to the registry).
 
 **No new external dependencies** (§3.5).
 

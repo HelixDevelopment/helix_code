@@ -28,7 +28,7 @@ Using the CONST-035 anti-bluff mandate from HelixAgent's governance framework, w
 ## 2. VERIFIED BLUFFS (Confirmed by Code Inspection)
 
 ### BLUFF-001: LLM Generation is Completely Simulated (CRITICAL)
-**Location**: `HelixCode/cmd/cli/main.go` lines 190-214
+**Location**: `helix_code/cmd/cli/main.go` lines 190-214
 **Severity**: CRITICAL
 **Bluff Type**: Contract + Comment
 
@@ -61,7 +61,7 @@ if stream {
 ---
 
 ### BLUFF-002: Model Listing is Hardcoded, Not Dynamic (CRITICAL)
-**Location**: `HelixCode/cmd/cli/main.go` lines 101-128
+**Location**: `helix_code/cmd/cli/main.go` lines 101-128
 **Severity**: CRITICAL
 **Bluff Type**: Contract + Comment
 
@@ -87,7 +87,7 @@ models := []struct{...}{
 ---
 
 ### BLUFF-003: Command Execution is Simulated (HIGH)
-**Location**: `HelixCode/cmd/cli/main.go` lines 237-250
+**Location**: `helix_code/cmd/cli/main.go` lines 237-250
 **Severity**: HIGH
 **Bluff Type**: Contract + Comment
 
@@ -112,7 +112,7 @@ fmt.Printf("Command completed successfully\n")
 ---
 
 ### BLUFF-004: Worker Pool Statistics May Be Simulated (HIGH)
-**Location**: `HelixCode/cmd/cli/main.go` lines 86-99
+**Location**: `helix_code/cmd/cli/main.go` lines 86-99
 **Severity**: HIGH
 **Bluff Type**: Contract (to be verified)
 
@@ -129,7 +129,7 @@ fmt.Printf("Command completed successfully\n")
 ---
 
 ### BLUFF-005: Minimal Go Dependencies vs Advertised Features (HIGH)
-**Location**: `HelixCode/go.mod`
+**Location**: `helix_code/go.mod`
 **Severity**: HIGH
 **Bluff Type**: Structural
 
@@ -162,7 +162,7 @@ require (
 ---
 
 ### BLUFF-006: Notification System - Unknown Real Implementation (MEDIUM)
-**Location**: `HelixCode/cmd/cli/main.go` lines 217-235
+**Location**: `helix_code/cmd/cli/main.go` lines 217-235
 **Severity**: MEDIUM
 **Bluff Type**: Contract (partial)
 
@@ -191,7 +191,7 @@ The README advertises 11 tables: users, workers, tasks, projects, sessions, llm_
 ---
 
 ### BLUFF-008: Docker Compose References Non-Existent Files (MEDIUM)
-**Location**: `HelixCode/Dockerfile` lines 40-42
+**Location**: `helix_code/Dockerfile` lines 40-42
 **Severity**: MEDIUM
 **Bluff Type**: Structural
 
@@ -207,7 +207,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ---
 
 ### BLUFF-009: Terminal UI Application Build Target (MEDIUM)
-**Location**: `HelixCode/Dockerfile` line 21
+**Location**: `helix_code/Dockerfile` line 21
 **Severity**: MEDIUM
 **Bluff Type**: Structural
 
@@ -421,8 +421,8 @@ HelixCode has a **solid architectural foundation** in authentication and CLI str
 | .gitmodules | root | 233 | 80+ submodules |
 | go.mod | root | 10 | CRITICAL: Only 3 dependencies |
 | Dockerfile | root | 55 | Multi-stage but references missing files |
-| cmd/cli/main.go | HelixCode/ | 341 | BLUFF-001, BLUFF-002, BLUFF-003 confirmed |
-| internal/auth/auth.go | HelixCode/ | 470 | REAL-001: Fully implemented |
+| cmd/cli/main.go | helix_code/ | 341 | BLUFF-001, BLUFF-002, BLUFF-003 confirmed |
+| internal/auth/auth.go | helix_code/ | 470 | REAL-001: Fully implemented |
 
 ## Appendix B: Verification Commands for Auditors
 
@@ -442,7 +442,7 @@ curl http://localhost:8080/api/v1/llm/models
 # Bluff indicator: Prints "Command completed successfully" without actual output
 
 # Verify go.mod dependencies
-cat HelixCode/go.mod | grep -E "gin|pgx|viper|cobra|chromedp|tview|fyne"
+cat helix_code/go.mod | grep -E "gin|pgx|viper|cobra|chromedp|tview|fyne"
 # Bluff indicator: Returns empty (no dependencies found)
 
 # Verify tests use real infrastructure

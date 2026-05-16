@@ -36,7 +36,7 @@ This report provides a comprehensive analysis of the HelixCode project, identify
 ### 1. **Build Errors - BLOCKING**
 
 #### `internal/mocks/memory_mocks.go` - 10+ compilation errors
-**Location**: `HelixCode/internal/mocks/memory_mocks.go`
+**Location**: `helix_code/internal/mocks/memory_mocks.go`
 **Impact**: Prevents building entire test suite
 **Errors**:
 ```
@@ -56,7 +56,7 @@ Line 1105: undefined: memory.ConversationMessage
 **Fix Priority**: P0 - CRITICAL
 
 #### `tests/unit/api_key_manager_test_fixed.go` - Missing API functions
-**Location**: `HelixCode/tests/unit/api_key_manager_test_fixed.go`
+**Location**: `helix_code/tests/unit/api_key_manager_test_fixed.go`
 **Impact**: API key rotation/management tests fail to compile
 **Errors**:
 ```
@@ -108,7 +108,7 @@ Line 303: helixConfig.APIKeys undefined
 
 #### E2E Test Bank - Test Case Generation Needed
 
-**Location**: `HelixCode/tests/e2e/test_bank/`
+**Location**: `helix_code/tests/e2e/test_bank/`
 **Status**: Framework complete, test cases missing
 **Required Test Cases**:
 
@@ -165,7 +165,7 @@ Line 303: helixConfig.APIKeys undefined
 
 ### 5. **User Manual Completeness**
 
-**Location**: `HelixCode/docs/USER_MANUAL.md`
+**Location**: `helix_code/docs/USER_MANUAL.md`
 **Status**: Basic structure exists, needs expansion
 **Missing Sections**:
 - ❌ Step-by-step installation for all platforms
@@ -185,7 +185,7 @@ Line 303: helixConfig.APIKeys undefined
 
 ### 6. **Video Course Content - 0% Complete**
 
-**Location**: `HelixCode/docs/courses/`
+**Location**: `helix_code/docs/courses/`
 **Status**: HTML/JS framework ready, NO ACTUAL VIDEO CONTENT
 **Current State**: Using placeholder videos (BigBuckBunny.mp4, etc.)
 
@@ -259,7 +259,7 @@ Line 303: helixConfig.APIKeys undefined
 
 ### 7. **github_pages_website Status**
 
-**Location**: `/Users/milosvasic/Projects/HelixCode/github_pages_website/docs/`
+**Location**: `/Users/milosvasic/Projects/helix_code/github_pages_website/docs/`
 **Overall Status**: 85% complete
 
 #### ✅ Complete Pages:

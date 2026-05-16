@@ -39,7 +39,7 @@ warning() {
 
 # Check if we're in the right directory
 check_environment() {
-    if [ ! -f "${PROJECT_ROOT}/HelixCode/go.mod" ]; then
+    if [ ! -f "${PROJECT_ROOT}/helix_code/go.mod" ]; then
         error "Not in HelixCode project root directory"
         exit 1
     fi

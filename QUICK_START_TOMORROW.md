@@ -39,7 +39,7 @@ Open and review:
 ### Task 1: Create Mock Server Directory
 
 ```bash
-cd /home/milosvasic/Projects/HelixDevelopment/HelixCode/HelixCode
+cd /home/milosvasic/Projects/HelixDevelopment/helix_code/HelixCode
 mkdir -p internal/notification/testutil
 cd internal/notification/testutil
 ```
@@ -187,7 +187,7 @@ func TestMockSlackServer_Reset(t *testing.T) {
 **Run the test:**
 
 ```bash
-cd /home/milosvasic/Projects/HelixDevelopment/HelixCode/HelixCode
+cd /home/milosvasic/Projects/HelixDevelopment/helix_code/HelixCode
 go test ./internal/notification/testutil/... -v
 ```
 
@@ -351,7 +351,7 @@ func (m *MockDiscordServer) Reset() {
 
 1. **Run all tests:**
 ```bash
-cd /home/milosvasic/Projects/HelixDevelopment/HelixCode/HelixCode
+cd /home/milosvasic/Projects/HelixDevelopment/helix_code/HelixCode
 
 # Test mock servers
 go test ./internal/notification/testutil/... -v
@@ -414,7 +414,7 @@ Next tasks:
 3. Test Telegram integration with mock server
 4. Test Discord integration with mock server
 
-**File to create:** `HelixCode/test/integration/slack_integration_test.go`
+**File to create:** `helix_code/test/integration/slack_integration_test.go`
 
 See `IMPLEMENTATION_ROADMAP.md` Phase 1, Day 3-4 for details.
 

@@ -112,7 +112,7 @@ The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolu
 
 **Source:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/helix_agent/.env`
 
-**Destination:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/.env`
+**Destination:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/.env`
 
 **Key count:** 109
 
@@ -123,7 +123,7 @@ The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolu
 
 (empty diff = identical key set)
 
-**In git index — precise exact-match check:** `HelixCode/HelixCode/.env` is **NOT** tracked by git (`git ls-files --error-unmatch HelixCode/HelixCode/.env` exits 1). The earlier substring-grep count of 2 reflected unrelated tracked files (`HelixCode/HelixCode/.env.example` and `HelixCode/HelixCode/.env.full-test`), not the secret-bearing file.
+**In git index — precise exact-match check:** `helix_code/helix_code/.env` is **NOT** tracked by git (`git ls-files --error-unmatch helix_code/helix_code/.env` exits 1). The earlier substring-grep count of 2 reflected unrelated tracked files (`helix_code/helix_code/.env.example` and `helix_code/helix_code/.env.full-test`), not the secret-bearing file.
 
 ## P0-06 — .gitignore hardening
 Timestamp: 2026-05-04T21:22:51+03:00
@@ -131,9 +131,9 @@ Timestamp: 2026-05-04T21:22:51+03:00
 Root .gitignore tail:
 ```
 # Allow the e2e challenge testing framework but ignore test results
-!HelixCode/tests/e2e/challenges/
-HelixCode/tests/e2e/challenges/test-results/
-HelixCode/tests/e2e/challenges/.DS_Store
+!helix_code/tests/e2e/challenges/
+helix_code/tests/e2e/challenges/test-results/
+helix_code/tests/e2e/challenges/.DS_Store
 
 
 reports/demos/
@@ -177,11 +177,11 @@ helix.security.json
 ```
 
 Verifications:
-- HelixCode/.env is ignored: YES
-- HelixCode/.env.example is NOT ignored: YES (good)
+- helix_code/.env is ignored: YES
+- helix_code/.env.example is NOT ignored: YES (good)
 - Tracked credential files (pre-existing CONST-042 violations, all committed before this task): **three files** are in the git index:
-  - `HelixCode/test/workers/ssh_keys/id_rsa` — SSH private key labelled `helixcode-test`
-  - `HelixCode/test/workers/ssh_keys/id_rsa.pub` — corresponding public key
+  - `helix_code/test/workers/ssh_keys/id_rsa` — SSH private key labelled `helixcode-test`
+  - `helix_code/test/workers/ssh_keys/id_rsa.pub` — corresponding public key
   - `helix.security.json` — root-level security credential file (5929 bytes, executable)
 
   All three were committed before this programme began. The CONST-042 `.gitignore` blocks prevent any NEW untracked instances of these patterns from being accidentally added. Proper remediation — key/credential rotation, `git rm --cached` to remove from index, regeneration of any derived secrets, and historical-leak documentation — is deferred to **T08** (`scripts/scan-secrets.sh`). The planted-secret test in T08 will fail on the live tree due to these three files, triggering tracked remediation through the standard scan-secrets workflow.
@@ -209,10 +209,10 @@ $ wc -l /tmp/p0-07-canonical-keys.txt
 109 /tmp/p0-07-canonical-keys.txt
 
 $ diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
-       <(grep -oE '^[A-Z_]+=' HelixCode/.env.example | sort -u)
+       <(grep -oE '^[A-Z_]+=' helix_code/.env.example | sort -u)
 key-diff-exit=0
 
-$ result=$(grep -E '^[A-Z_]+=[^<]' HelixCode/.env.example | grep -vE '=$')
+$ result=$(grep -E '^[A-Z_]+=[^<]' helix_code/.env.example | grep -vE '=$')
 $ [ -z "$result" ] && echo "VERIFIED: zero real values present in .env.example"
 VERIFIED: zero real values present in .env.example
 real-value-count=0
@@ -260,19 +260,19 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 ./.env:4:
 ./.env:6:
 ./.env:9:
-./HelixCode/.env:118:
-./HelixCode/.env:119:
-./HelixCode/.env:186:
-./HelixCode/.env:29:
-./HelixCode/.env:41:
-./HelixCode/.env:43:
-./HelixCode/.env:46:
-./HelixCode/.env:47:
-./HelixCode/.env:53:
-./HelixCode/internal/llm/vertexai_provider_test.go:25:
-./HelixCode/internal/worker/ssh_pool_test.go:569:
-./HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073:
-./HelixCode/test/workers/ssh_keys/id_rsa:1:
+./helix_code/.env:118:
+./helix_code/.env:119:
+./helix_code/.env:186:
+./helix_code/.env:29:
+./helix_code/.env:41:
+./helix_code/.env:43:
+./helix_code/.env:46:
+./helix_code/.env:47:
+./helix_code/.env:53:
+./helix_code/internal/llm/vertexai_provider_test.go:25:
+./helix_code/internal/worker/ssh_pool_test.go:569:
+./helix_code/tests/e2e/test_bank/performance_security_tests.go:1073:
+./helix_code/test/workers/ssh_keys/id_rsa:1:
 ./helix_qa/pkg/llm/google_test.go:334:
 ./security/pkg/securestorage/securestorage_test.go:129:
 ```
@@ -282,23 +282,23 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 **Tracked files with matches:**
 | File | Tracked | Nature |
 |---|---|---|
-| `HelixCode/test/workers/ssh_keys/id_rsa` | YES | Pre-existing tracked SSH private key (T06 known credential #1) |
+| `helix_code/test/workers/ssh_keys/id_rsa` | YES | Pre-existing tracked SSH private key (T06 known credential #1) |
 | `helix.security.json` | YES | Pre-existing tracked credential file (T06 known credential #2) |
-| `HelixCode/test/workers/ssh_keys/id_rsa.pub` | YES (no match) | Public key — does not match any pattern |
+| `helix_code/test/workers/ssh_keys/id_rsa.pub` | YES (no match) | Public key — does not match any pattern |
 | `docs/COMPLETE_CLI_REFERENCE.md:908` | YES | Example/doc text: `sk-ant-your-anthropic-key` (placeholder, not a real key) |
 | `docs/superpowers/plans/...foundation-cleanup.md:833` | YES | Planted-secret TDD test example: `sk-FAKE0123456789...` (fake) |
 | `docs/troubleshooting/guide.md:649` | YES | Documentation snippet: `-----BEGIN OPENSSH PRIVATE KEY-----` (illustrative, incomplete) |
-| `HelixCode/internal/llm/vertexai_provider_test.go:25` | YES | Unit-test fixture: embedded fake RSA key block (test data, not rotatable) |
-| `HelixCode/internal/worker/ssh_pool_test.go:569` | YES | Unit-test stub: partial `-----BEGIN OPENSSH PRIVATE KEY-----` header only |
-| `HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073` | YES | Test fixture: `sk-1234567890abcdef` (clearly fake) |
+| `helix_code/internal/llm/vertexai_provider_test.go:25` | YES | Unit-test fixture: embedded fake RSA key block (test data, not rotatable) |
+| `helix_code/internal/worker/ssh_pool_test.go:569` | YES | Unit-test stub: partial `-----BEGIN OPENSSH PRIVATE KEY-----` header only |
+| `helix_code/tests/e2e/test_bank/performance_security_tests.go:1073` | YES | Test fixture: `sk-1234567890abcdef` (clearly fake) |
 
 **Not-tracked files flagged** (untracked working-tree files — not a commit risk):
-- `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
+- `.env`, `helix_code/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
 - `challenges/panoptic/...`, `helix_qa/...`, `security/...`: submodule working-tree files, not tracked at root
 
 **The 3 pre-existing tracked credentials from T06 polish:**
-- `HelixCode/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
-- `HelixCode/test/workers/ssh_keys/id_rsa.pub` — public key, no secret pattern matches (expected)
+- `helix_code/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
+- `helix_code/test/workers/ssh_keys/id_rsa.pub` — public key, no secret pattern matches (expected)
 - `helix.security.json` — NOT detected in this run (see note below)
 
 **Note on `helix.security.json`:** The scanner's `SCAN_TARGET="."` run did not flag `helix.security.json` in the output above. The file's content does not match any of the scanner's current patterns (it's a JSON credential file that likely uses JWTs or other formats not in the regex set). The file IS blocked from future commits via `.gitignore` (P0-06) and will be addressed in P0-T08.5 remediation. The scanner's pattern set can be extended in P0-T08.5 to cover JWT/JSON credential formats.
@@ -316,19 +316,19 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 ### Sub-commit 1 — Compose files + configs (`1d728de`)
 
 Files created:
-- `HelixCode/docker/security/sonarqube/docker-compose.yml` — adapted from HelixAgent; container names changed from `helixagent-*` to `helixcode-*`; subnet changed to `172.21.0.0/16`
-- `HelixCode/docker/security/sonarqube/sonar-project.properties` — project key/name/version use `${SONARQUBE_PROJECT_KEY}` etc.
-- `HelixCode/docker/security/snyk/docker-compose.yml` — adapted; uses `${SNYK_TOKEN:-}`
-- `HelixCode/docker/security/snyk/Dockerfile` — adapted; references HelixCode project
-- `HelixCode/sonar-project.properties` — root-level; uses `${SONARQUBE_PROJECT_KEY}` env-var
-- `HelixCode/.snyk` — root-level Snyk policy (v1.25.0)
+- `helix_code/docker/security/sonarqube/docker-compose.yml` — adapted from HelixAgent; container names changed from `helixagent-*` to `helixcode-*`; subnet changed to `172.21.0.0/16`
+- `helix_code/docker/security/sonarqube/sonar-project.properties` — project key/name/version use `${SONARQUBE_PROJECT_KEY}` etc.
+- `helix_code/docker/security/snyk/docker-compose.yml` — adapted; uses `${SNYK_TOKEN:-}`
+- `helix_code/docker/security/snyk/Dockerfile` — adapted; references HelixCode project
+- `helix_code/sonar-project.properties` — root-level; uses `${SONARQUBE_PROJECT_KEY}` env-var
+- `helix_code/.snyk` — root-level Snyk policy (v1.25.0)
 
 Credential scan result: `No credentials found - OK`
 
 ### Sub-commit 2 — Master orchestrator script (`2494bc8`)
 
-- `HelixCode/scripts/security-scan.sh` — supports `snyk|sonarqube|trivy|gosec|grype|kics|semgrep|all`
-- Loads credentials from `HelixCode/.env` (gitignored)
+- `helix_code/scripts/security-scan.sh` — supports `snyk|sonarqube|trivy|gosec|grype|kics|semgrep|all`
+- Loads credentials from `helix_code/.env` (gitignored)
 - Reports to `reports/security/<scanner>-<timestamp>.<ext>`
 - `--help` dry run verified:
 
@@ -346,7 +346,7 @@ exit 0
 
 ### Sub-commit 3 — Makefile targets (`e29e2f6`)
 
-Inner Makefile (`HelixCode/Makefile`) targets added:
+Inner Makefile (`helix_code/Makefile`) targets added:
 `security-scan`, `security-scan-snyk`, `security-scan-sonarqube`, `security-scan-trivy`,
 `security-scan-gosec`, `security-scan-grype`, `security-scan-kics`, `security-scan-semgrep`,
 `security-scan-all`, `deps-scan`, `secrets-scan`, `scan-start-sonar`, `scan-stop`
@@ -363,7 +363,7 @@ make -C HelixCode security-scan-sonarqube
 
 ### Sub-commit 4 — containers BootManager wiring (`16a4490`)
 
-- `HelixCode/cmd/security_scan/main.go` (~170 lines) wires:
+- `helix_code/cmd/security_scan/main.go` (~170 lines) wires:
   - `digital.vasic.containers/pkg/runtime.AutoDetect(ctx)` for runtime detection
   - `digital.vasic.containers/pkg/endpoint.NewEndpoint()` builder for SonarQube + Snyk endpoints
   - `digital.vasic.containers/pkg/health.NewDefaultChecker()` with HTTP health on `:9000/api/system/status`
@@ -381,10 +381,10 @@ $ go build ./cmd/security_scan/...
 ### Sub-commit 5 — Challenges + evidence (this commit)
 
 Challenges created:
-- `HelixCode/tests/e2e/challenges/sonarqube/run.sh` — 8 sections, 33 tests (config-correctness only)
-- `HelixCode/tests/e2e/challenges/sonarqube/expected.json`
-- `HelixCode/tests/e2e/challenges/snyk/run.sh` — 7 sections, 26 tests (config-correctness only)
-- `HelixCode/tests/e2e/challenges/snyk/expected.json`
+- `helix_code/tests/e2e/challenges/sonarqube/run.sh` — 8 sections, 33 tests (config-correctness only)
+- `helix_code/tests/e2e/challenges/sonarqube/expected.json`
+- `helix_code/tests/e2e/challenges/snyk/run.sh` — 7 sections, 26 tests (config-correctness only)
+- `helix_code/tests/e2e/challenges/snyk/expected.json`
 
 Challenge run output (both 100% PASS):
 
@@ -428,10 +428,10 @@ Results: 26/26 passed, 0 failed
 
 This task does NOT run live scans. The original `helix.security.json` credentials (SonarQube token, Snyk token, project_key, organization) were committed and are considered compromised (see P0-T08.5). The user MUST rotate these before any live scan can succeed:
 
-1. **SonarQube token**: generate a new API token in SonarQube UI → set `SONAR_TOKEN=<new>` in `HelixCode/.env`
-2. **SonarQube project key**: choose a new key → set `SONARQUBE_PROJECT_KEY=<new>` in `HelixCode/.env`
-3. **Snyk token**: generate a new token at snyk.io → set `SNYK_TOKEN=<new>` in `HelixCode/.env`
-4. **Snyk organization**: set `SNYK_ORG=<new_org_id>` in `HelixCode/.env`
+1. **SonarQube token**: generate a new API token in SonarQube UI → set `SONAR_TOKEN=<new>` in `helix_code/.env`
+2. **SonarQube project key**: choose a new key → set `SONARQUBE_PROJECT_KEY=<new>` in `helix_code/.env`
+3. **Snyk token**: generate a new token at snyk.io → set `SNYK_TOKEN=<new>` in `helix_code/.env`
+4. **Snyk organization**: set `SNYK_ORG=<new_org_id>` in `helix_code/.env`
 
 After rotation, live scan can be invoked with:
 ```bash
@@ -442,7 +442,7 @@ make scan-snyk         # from root
 ### scan-secrets.sh verification
 
 ```
-$ bash scripts/scan-secrets.sh HelixCode/docker/security HelixCode/sonar-project.properties HelixCode/.snyk ...
+$ bash scripts/scan-secrets.sh helix_code/docker/security helix_code/sonar-project.properties helix_code/.snyk ...
 OK: no credential patterns found
 exit code: 0
 ```
@@ -461,7 +461,7 @@ Final HEAD after sub-commit 5 (this evidence): see PROGRESS.md.
 
 ### Critical 1 — Hardcoded DB credentials
 
-`HelixCode/docker/security/sonarqube/docker-compose.yml` — replaced hardcoded `sonar` values:
+`helix_code/docker/security/sonarqube/docker-compose.yml` — replaced hardcoded `sonar` values:
 
 ```
 # Before:
@@ -479,10 +479,10 @@ POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
 
 Verification:
 ```
-$ grep -nE "PASSWORD: sonar$|PASSWORD: \"sonar\"$" HelixCode/docker/security/sonarqube/docker-compose.yml
+$ grep -nE "PASSWORD: sonar$|PASSWORD: \"sonar\"$" helix_code/docker/security/sonarqube/docker-compose.yml
 # (empty — PASS)
 
-$ grep -nE "PASSWORD:.*sonar" HelixCode/docker/security/sonarqube/docker-compose.yml
+$ grep -nE "PASSWORD:.*sonar" helix_code/docker/security/sonarqube/docker-compose.yml
 21:      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
 56:      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
 # env-var form — PASS
@@ -490,7 +490,7 @@ $ grep -nE "PASSWORD:.*sonar" HelixCode/docker/security/sonarqube/docker-compose
 
 ### Critical 2 — Stale TODO removed
 
-`HelixCode/scripts/security-scan.sh` lines 31-34 removed. Original stale text:
+`helix_code/scripts/security-scan.sh` lines 31-34 removed. Original stale text:
 ```
 # TODO(P0-T08.7/4): replace docker-compose invocations below with containers BootManager call:
 #   go run ./cmd/security_scan -scanner=sonarqube
@@ -501,25 +501,25 @@ Replaced with single-line accurate status note. Sub-commit 4 (`16a4490`) had alr
 
 Verification:
 ```
-$ grep -nE "deferred to Sub-commit 4|For now, direct compose calls" HelixCode/scripts/security-scan.sh
+$ grep -nE "deferred to Sub-commit 4|For now, direct compose calls" helix_code/scripts/security-scan.sh
 # (empty — PASS)
 ```
 
 ### Important 3 — set -euo pipefail
 
 ```
-$ head -40 HelixCode/scripts/security-scan.sh | grep -nE "^set -"
+$ head -40 helix_code/scripts/security-scan.sh | grep -nE "^set -"
 36:set -euo pipefail
 # PASS
 
-$ HelixCode/scripts/security-scan.sh --help > /dev/null 2>&1; echo "exit=$?"
+$ helix_code/scripts/security-scan.sh --help > /dev/null 2>&1; echo "exit=$?"
 exit=0
 # PASS — no unbound variable errors on --help path
 ```
 
 ### Important 4 — stop action returns explicit error
 
-`HelixCode/cmd/security_scan/main.go` — both `handleSonarQube` and `handleSnyk` stop cases now return `fmt.Errorf(...)`. Flag description updated to `"start|status (stop is not yet implemented)"`.
+`helix_code/cmd/security_scan/main.go` — both `handleSonarQube` and `handleSnyk` stop cases now return `fmt.Errorf(...)`. Flag description updated to `"start|status (stop is not yet implemented)"`.
 
 Verification:
 ```
@@ -535,7 +535,7 @@ exit status 1
 
 ### Important 5 — :latest image tags pinned
 
-All 5 container-fallback image tags in `HelixCode/scripts/security-scan.sh` pinned:
+All 5 container-fallback image tags in `helix_code/scripts/security-scan.sh` pinned:
 - `securego/gosec:latest` → `securego/gosec:2.21.4`
 - `aquasec/trivy:latest` → `aquasec/trivy:0.55.2`
 - `anchore/grype:latest` → `anchore/grype:v0.86.0`
@@ -544,7 +544,7 @@ All 5 container-fallback image tags in `HelixCode/scripts/security-scan.sh` pinn
 
 Verification:
 ```
-$ grep -nE ":latest" HelixCode/scripts/security-scan.sh
+$ grep -nE ":latest" helix_code/scripts/security-scan.sh
 # (empty — PASS)
 ```
 
@@ -558,7 +558,7 @@ Added TODO comment at top of `security-scan.sh` (line 6):
 
 ### Important 7 — reports/security/ gitignored
 
-Added to `HelixCode/.gitignore`:
+Added to `helix_code/.gitignore`:
 ```
 # === Security reports (never commit scanner output) ===
 reports/security/
@@ -568,8 +568,8 @@ reports/security-cache/
 
 Verification:
 ```
-$ git check-ignore HelixCode/reports/security/test.json; echo "exit=$?"
-HelixCode/reports/security/test.json
+$ git check-ignore helix_code/reports/security/test.json; echo "exit=$?"
+helix_code/reports/security/test.json
 exit=0
 # PASS
 ```
@@ -651,7 +651,7 @@ exit=0
 
 ---
 
-## P0-10 — HelixCode/ inner Go-app governance triplet
+## P0-10 — helix_code/ inner Go-app governance triplet
 
 **Timestamp:** 2026-05-04T22:55+03:00
 **Branch:** main
@@ -660,24 +660,24 @@ exit=0
 
 | File | Size | Path |
 |---|---|---|
-| `CONSTITUTION.md` | 5622 bytes | `HelixCode/HelixCode/CONSTITUTION.md` |
-| `CLAUDE.md` | 6204 bytes | `HelixCode/HelixCode/CLAUDE.md` |
-| `AGENTS.md` | 4787 bytes | `HelixCode/HelixCode/AGENTS.md` |
+| `CONSTITUTION.md` | 5622 bytes | `helix_code/helix_code/CONSTITUTION.md` |
+| `CLAUDE.md` | 6204 bytes | `helix_code/helix_code/CLAUDE.md` |
+| `AGENTS.md` | 4787 bytes | `helix_code/helix_code/AGENTS.md` |
 
 ### Anchor verification
 
 Each file was verified to contain all three constitutional anchors:
 
 ```
-$ grep -c "11\.9\|tests do execute" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
-HelixCode/CONSTITUTION.md:3
-HelixCode/CLAUDE.md:2
-HelixCode/AGENTS.md:2
+$ grep -c "11\.9\|tests do execute" helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:3
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2
 
-$ grep -c "CONST-042\|CONST-043" HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
-HelixCode/CONSTITUTION.md:2
-HelixCode/CLAUDE.md:3
-HelixCode/AGENTS.md:4
+$ grep -c "CONST-042\|CONST-043" helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:2
+helix_code/CLAUDE.md:3
+helix_code/AGENTS.md:4
 ```
 
 All files contain:
@@ -689,10 +689,10 @@ All files contain:
 
 ```
 $ grep -c "BEGIN: REPO-SPECIFIC ADDENDA\|END: REPO-SPECIFIC ADDENDA" \
-    HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
-HelixCode/CONSTITUTION.md:2
-HelixCode/CLAUDE.md:2
-HelixCode/AGENTS.md:2
+    helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:2
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2
 ```
 
 All three files have `<!-- BEGIN: REPO-SPECIFIC ADDENDA -->` / `<!-- END: REPO-SPECIFIC ADDENDA -->` delimiters. ✓
@@ -701,10 +701,10 @@ All three files have `<!-- BEGIN: REPO-SPECIFIC ADDENDA -->` / `<!-- END: REPO-S
 
 ```
 $ grep -c "2026-05-04-cli-agent-fusion-synthesis-design" \
-    HelixCode/CONSTITUTION.md HelixCode/CLAUDE.md HelixCode/AGENTS.md
-HelixCode/CONSTITUTION.md:1
-HelixCode/CLAUDE.md:2
-HelixCode/AGENTS.md:2
+    helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:1
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2
 ```
 
 All three reference `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md`. ✓
@@ -712,15 +712,15 @@ All three reference `../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synth
 ### Secret scan
 
 ```
-$ for f in HelixCode/CLAUDE.md HelixCode/AGENTS.md HelixCode/CONSTITUTION.md; do
+$ for f in helix_code/CLAUDE.md helix_code/AGENTS.md helix_code/CONSTITUTION.md; do
     bash scripts/scan-secrets.sh "$f"; echo "[$f] exit=$?"
   done
-OK: no credential patterns found in HelixCode/CLAUDE.md
-[HelixCode/CLAUDE.md] exit=0
-OK: no credential patterns found in HelixCode/AGENTS.md
-[HelixCode/AGENTS.md] exit=0
-OK: no credential patterns found in HelixCode/CONSTITUTION.md
-[HelixCode/CONSTITUTION.md] exit=0
+OK: no credential patterns found in helix_code/CLAUDE.md
+[helix_code/CLAUDE.md] exit=0
+OK: no credential patterns found in helix_code/AGENTS.md
+[helix_code/AGENTS.md] exit=0
+OK: no credential patterns found in helix_code/CONSTITUTION.md
+[helix_code/CONSTITUTION.md] exit=0
 ```
 
 CONST-042 compliance: ✓ clean
@@ -729,7 +729,7 @@ CONST-042 compliance: ✓ clean
 
 | Criterion | Result |
 |---|---|
-| All three files exist at `HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md` | ✓ |
+| All three files exist at `helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md` | ✓ |
 | Each file contains Article XI §11.9 verbatim | ✓ |
 | Each file contains CONST-042 (No-Secret-Leak) | ✓ |
 | Each file contains CONST-043 (No-Force-Push) | ✓ |
@@ -822,7 +822,7 @@ all-exit=0
 
 **Corrected line (CLAUDE.md:112):**
 ```
-├── HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
+├── helix_code/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
 ```
 
 **No remaining mislabel:** `grep -nE "HelixCode.*SUBMODULE" CLAUDE.md` returns only this corrected line (with "NOT a submodule" qualifier present).
@@ -883,7 +883,7 @@ exit=0
 
 **`ci-validate-all` updated:** now depends on `verify-foundation` in addition to `no-silent-skips-warn` and `demo-all-warn`.
 
-**Note on `scan-secrets`:** already existed (added by P0-T08.7), delegating to `HelixCode/scripts/scan-secrets.sh`. Not redeclared. `verify-foundation` uses `scan-secrets-root` instead to invoke the whole-repo root scanner.
+**Note on `scan-secrets`:** already existed (added by P0-T08.7), delegating to `helix_code/scripts/scan-secrets.sh`. Not redeclared. `verify-foundation` uses `scan-secrets-root` instead to invoke the whole-repo root scanner.
 
 ### Individual gate verification
 
@@ -1005,5 +1005,5 @@ make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
 3. **13 cli_agents with stale HelixAgent pins** — `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset` will need their HelixAgent pin bumped before Phase 2 sub-specs touch them.
 4. **Submodule recursion cosmetic error** — `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` cause `git submodule foreach --recursive` to fatal-out; modifying third-party submodules is forbidden. Scripts wrap with `|| true`.
 
-**Phase 1 unblocked:** claude-code-source porting can proceed. The helix_agent/cli_agents/claude-code/ source is fully populated; the inner Go app (HelixCode/) has its governance triplet; secret hygiene is in place; pre-push hook is installed; scan-secrets gates pre-push; SonarQube + Snyk infrastructure is wired (live scans pending operator credential rotation).
+**Phase 1 unblocked:** claude-code-source porting can proceed. The helix_agent/cli_agents/claude-code/ source is fully populated; the inner Go app (helix_code/) has its governance triplet; secret hygiene is in place; pre-push hook is installed; scan-secrets gates pre-push; SonarQube + Snyk infrastructure is wired (live scans pending operator credential rotation).
 | No third-party submodule modifications | ✓ |

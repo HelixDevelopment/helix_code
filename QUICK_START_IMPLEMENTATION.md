@@ -28,7 +28,7 @@
 
 #### 1. Fix Memory Mocks (2-3 hours)
 ```bash
-cd /Users/milosvasic/Projects/HelixCode/HelixCode
+cd /Users/milosvasic/Projects/helix_code/HelixCode
 
 # Edit this file:
 vi internal/mocks/memory_mocks.go
@@ -303,7 +303,7 @@ ls docs/courses/videos/*.mp4 2>/dev/null | wc -l
 
 ### Critical Files to Edit
 ```
-HelixCode/
+helix_code/
 ├── internal/mocks/memory_mocks.go          # Day 1 - FIX THIS FIRST
 ├── tests/unit/api_key_manager_test_fixed.go # Day 1 - FIX THIS SECOND
 ├── tests/e2e/test-bank/                    # Days 11-17 - ADD TEST CASES
@@ -349,7 +349,7 @@ If you encounter permission issues:
 # Already done during initial setup
 
 # File permissions
-chmod -R u+w HelixCode/  # Make files writable
+chmod -R u+w helix_code/  # Make files writable
 
 # Go modules
 export GOPATH=$HOME/go  # Use user directory
@@ -426,7 +426,7 @@ export GOPATH=$HOME/go  # Use user directory
 
 ### First Command to Run:
 ```bash
-cd /Users/milosvasic/Projects/HelixCode/HelixCode
+cd /Users/milosvasic/Projects/helix_code/HelixCode
 git status  # Check current state
 git pull    # Get latest changes
 go build ./...  # See current errors

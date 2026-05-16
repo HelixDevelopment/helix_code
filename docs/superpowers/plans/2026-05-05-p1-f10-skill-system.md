@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f10-skill-system-design.md` (commit `5b80058`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term):**
 ```bash
@@ -44,7 +44,7 @@ Append F10 evidence section header (spec `5b80058`, plan `<this commit>`, starte
 
 ## Task 2: markdown_skills.go — Skill + SkillRegistry + parser + Render (TDD)
 
-**Files:** create `HelixCode/internal/commands/markdown_skills.go`, `HelixCode/internal/commands/markdown_skills_test.go`.
+**Files:** create `helix_code/internal/commands/markdown_skills.go`, `helix_code/internal/commands/markdown_skills_test.go`.
 
 Test cases (write FAILING first):
 
@@ -341,7 +341,7 @@ Mirror F09's `MarkdownWatcher` pattern. Implementation in `internal/commands/ski
 
 ## Task 5: agent/skill_dispatcher.go — Match + injection + isolation routing (TDD)
 
-**Files:** create `HelixCode/internal/agent/skill_dispatcher.go`, `HelixCode/internal/agent/skill_dispatcher_test.go`.
+**Files:** create `helix_code/internal/agent/skill_dispatcher.go`, `helix_code/internal/agent/skill_dispatcher_test.go`.
 
 ```go
 package agent

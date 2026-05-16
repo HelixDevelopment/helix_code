@@ -524,7 +524,7 @@ $ ./challenges/p1-f06-mcp-full-lifecycle/run.sh
 cd scripts/logo && go run generate_assets.go
 🔍 Extracting colors from logo...
 🎨 Generating ASCII art...
-✅ ASCII art saved to: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/images/logo-ascii.txt
+✅ ASCII art saved to: /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/assets/images/logo-ascii.txt
 
 
                 :=+**##**+-:            
@@ -561,9 +561,9 @@ cd scripts/logo && go run generate_assets.go
                       :-++*+=:          
 
 📱 Generating platform icons...
-✅ Icons generated in: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/icons
+✅ Icons generated in: /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/assets/icons
 🎨 Saving color scheme...
-✅ Color scheme saved to: /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/assets/colors/color-scheme.json
+✅ Color scheme saved to: /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/assets/colors/color-scheme.json
 🎨 Generating theme files...
 ✅ Theme files generated
 
@@ -699,7 +699,7 @@ ff81607 fix(P1-F07-T05): ShellTool implements BackgroundAware (interface satisfa
 
 **Date:** 2026-05-05
 **Artifacts:**
-- `HelixCode/tests/integration/cmd/p1f11_challenge/main.go` — 3-phase fork-exec orchestrator
+- `helix_code/tests/integration/cmd/p1f11_challenge/main.go` — 3-phase fork-exec orchestrator
 - `challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
 
 **Approach:** real fork-exec subprocess, NOT a fresh-struct fallback. The
@@ -892,7 +892,7 @@ submodule and meta-repo.
 
 **Files added:**
 
-- `HelixCode/tests/integration/cmd/p1f12_challenge/main.go` — five-phase harness
+- `helix_code/tests/integration/cmd/p1f12_challenge/main.go` — five-phase harness
 - `challenges/p1-f12-multi-provider/CHALLENGE.md`
 - `challenges/p1-f12-multi-provider/run.sh` (chmod +x; uses
   string-fragment regex construction so the script does not match the
@@ -989,7 +989,7 @@ $ cd HelixCode && GOOS=linux GOARCH=amd64 go build -o /tmp/p1f12_challenge_linux
 **Anti-bluff smoke (verbatim):**
 
 ```
-$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f12_challenge/ challenges/p1-f12-multi-provider/ 2>/dev/null && echo BLUFF || echo clean
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/tests/integration/cmd/p1f12_challenge/ challenges/p1-f12-multi-provider/ 2>/dev/null && echo BLUFF || echo clean
 clean
 ```
 
@@ -1171,7 +1171,7 @@ Submodule SHA: `f00bf190b50404aed7f923b17f3b60d89dea916b` (Challenges, rebased o
 Meta-repo SHA: (this commit)
 
 Files added:
-- `HelixCode/tests/integration/cmd/p1f13_challenge/main.go` — runtime-evidence harness with phases 0/A/B/C/D/E/F.
+- `helix_code/tests/integration/cmd/p1f13_challenge/main.go` — runtime-evidence harness with phases 0/A/B/C/D/E/F.
 - `challenges/p1-f13-lsp-integration/CHALLENGE.md` — pass criteria + procedure.
 - `challenges/p1-f13-lsp-integration/run.sh` — drives the harness, anti-bluff smoke (string-fragment regex), cross-compile.
 
@@ -1414,7 +1414,7 @@ slash; config at `~/.config/helixcode/sandbox.yaml`; macOS Seatbelt
 
 **Files created**
 
-- `HelixCode/tests/integration/cmd/p1f14_challenge/main.go` — runtime-evidence harness with helper-mode dispatch as the first line of `main()`, six phases (0/A/B/C/D/E), CONST-033 deny variants, default-DENY network probe via real curl inside bwrap, real native re-exec, and real on-disk YAML round-trip with mode/size assertion.
+- `helix_code/tests/integration/cmd/p1f14_challenge/main.go` — runtime-evidence harness with helper-mode dispatch as the first line of `main()`, six phases (0/A/B/C/D/E), CONST-033 deny variants, default-DENY network probe via real curl inside bwrap, real native re-exec, and real on-disk YAML round-trip with mode/size assertion.
 - `challenges/p1-f14-sandboxed-shell/CHALLENGE.md` — phase narrative, pass criteria, gated-skip semantics.
 - `challenges/p1-f14-sandboxed-shell/run.sh` — orchestrator: builds harness, runs it, runs anti-bluff smoke (string-fragment regex), cross-compiles linux/amd64. `chmod +x` set.
 
@@ -1676,7 +1676,7 @@ disabled in v1.
 ### P1-F15-T11 — Challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)
 
 Files created:
-- `HelixCode/tests/integration/cmd/p1f15_challenge/main.go` — runtime-evidence harness
+- `helix_code/tests/integration/cmd/p1f15_challenge/main.go` — runtime-evidence harness
 - `challenges/p1-f15-subagent-team/CHALLENGE.md` — challenge description (six phases)
 - `challenges/p1-f15-subagent-team/run.sh` — orchestration script (build + run + smoke + cross-compile)
 
@@ -1935,7 +1935,7 @@ pushed to its single `origin` (mirror gap noted, deferred infra).
 ### P1-F16-T11 — Challenge harness: in-tree fake OTLP/HTTP receiver + 5 phases (STDOUT/FAKE-OTLP/FILTER/NOOP/REAL)
 
 **Files created:**
-- `HelixCode/tests/integration/cmd/p1f16_challenge/main.go` — 5-phase harness binary (build tag `testing_export`).
+- `helix_code/tests/integration/cmd/p1f16_challenge/main.go` — 5-phase harness binary (build tag `testing_export`).
 - `challenges/p1-f16-opentelemetry-integration/CHALLENGE.md` — challenge spec.
 - `challenges/p1-f16-opentelemetry-integration/run.sh` — driver (anti-self-match string-fragment regex).
 
@@ -1959,7 +1959,7 @@ $ file /tmp/p1f16_challenge_linux
 **Anti-bluff smoke (meta-repo root):**
 
 ```
-$ grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/tests/integration/cmd/p1f16_challenge/ challenges/p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
+$ grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/tests/integration/cmd/p1f16_challenge/ challenges/p1-f16-opentelemetry-integration/ && echo BLUFF || echo clean
 clean
 ```
 
@@ -2173,7 +2173,7 @@ EXIT=0
 
 **Date:** 2026-05-06
 **Files:**
-- `HelixCode/tests/integration/cmd/p1f17_challenge/main.go` (Go harness; 7 always-runs phases against real `*multiedit.MultiFileEditor` per-tempdir).
+- `helix_code/tests/integration/cmd/p1f17_challenge/main.go` (Go harness; 7 always-runs phases against real `*multiedit.MultiFileEditor` per-tempdir).
 - `challenges/p1-f17-smart-file-editing/CHALLENGE.md` (procedure + pass criteria + anti-bluff anchors).
 - `challenges/p1-f17-smart-file-editing/run.sh` (set -euo pipefail; build, run, anti-bluff smoke with fragment-built regex, cross-compile linux).
 
@@ -2352,7 +2352,7 @@ EXIT=0
 
 **Files added:**
 
-- `HelixCode/tests/integration/cmd/p1f18_challenge/main.go` — real Go program;
+- `helix_code/tests/integration/cmd/p1f18_challenge/main.go` — real Go program;
   five phases A-E, each carrying byte-level positive-evidence assertions.
 - `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` — narrative spec.
 - `challenges/p1-f18-no-flicker-rendering/run.sh` — bash driver (build → run →
@@ -2400,7 +2400,7 @@ $ file /tmp/p1f18_challenge_linux
 **Anti-bluff smoke (both clean):**
 
 ```
-$ grep -rn "<bluff-regex>" HelixCode/internal/render/ HelixCode/tests/integration/cmd/p1f18_challenge/
+$ grep -rn "<bluff-regex>" helix_code/internal/render/ helix_code/tests/integration/cmd/p1f18_challenge/
 clean
 $ grep -rn "<bluff-regex>" challenges/p1-f18-no-flicker-rendering/
 clean
@@ -2513,7 +2513,7 @@ EXIT=0
 ### P1-F19-T06 — Challenge harness: 5 always-run phases + reader-position + byte-offset positive evidence
 
 Files:
-- `HelixCode/tests/integration/cmd/p1f19_challenge/main.go` — 5-phase harness against real `bytes.Buffer` reader/writer.
+- `helix_code/tests/integration/cmd/p1f19_challenge/main.go` — 5-phase harness against real `bytes.Buffer` reader/writer.
 - `challenges/p1-f19-ask-user-question/CHALLENGE.md` — challenge spec.
 - `challenges/p1-f19-ask-user-question/run.sh` — driver (anti-self-match string-fragment regex; chmod +x).
 
@@ -2654,7 +2654,7 @@ Two-line summary: F19 ships a real `ask_user` tool with non-TTY short-circuit (z
 Files:
 - `challenges/p1-f20-theme-system/CHALLENGE.md`
 - `challenges/p1-f20-theme-system/run.sh` (executable)
-- `HelixCode/tests/integration/cmd/p1f20_challenge/main.go`
+- `helix_code/tests/integration/cmd/p1f20_challenge/main.go`
 
 Verbatim run.sh stdout (host):
 
@@ -3181,8 +3181,8 @@ Goal: every Helix* repo loads API keys with `$HOME/api_keys.sh` first, `.env` fa
 |---|---|
 | `scripts/load_api_keys.sh` | Canonical bash loader. Walks up from cwd to find `.gitmodules`-rooted `.env`. Honours `HELIXCODE_LOAD_API_KEYS=0`. |
 | `scripts/test_load_api_keys.sh` | 4-branch self-test (shell-present, env-fallback, neither-present-silent, opt-out). |
-| `HelixCode/internal/secrets/loader.go` | Go counterpart. Same precedence; `os.Setenv`-based; CONST-042-clean (values never logged). |
-| `HelixCode/internal/secrets/loader_test.go` | 8 unit tests covering shell-format, env-fallback, precedence, quoting, comments, blanks, missing-export skip, neither-found-error. |
+| `helix_code/internal/secrets/loader.go` | Go counterpart. Same precedence; `os.Setenv`-based; CONST-042-clean (values never logged). |
+| `helix_code/internal/secrets/loader_test.go` | 8 unit tests covering shell-format, env-fallback, precedence, quoting, comments, blanks, missing-export skip, neither-found-error. |
 
 #### Verbatim test output
 
@@ -3266,13 +3266,13 @@ Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependenc
 | .env file | Before | After | Removed |
 |---|---:|---:|---:|
 | `./.env`                       |  93 |  57 | 36 |
-| `./HelixCode/.env`             | 186 | 148 | 38 |
+| `./helix_code/.env`             | 186 | 148 | 38 |
 | `./helix_qa/.env`               |  80 |  44 | 36 |
 | `./helix_agent/.env`            |  80 |  44 | 36 |
 | `./helix_agent/HelixLLM/.env`   |  80 |  44 | 36 |
 | **Total**                       | **519** | **337** | **182** |
 
-Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 names emitted by `$HOME/api_keys.sh`. The `HelixCode/.env` removed-count of 38 includes 2 extra lines that were duplicates inside that single file; the underlying *unique* key-name set deleted per file is the same 36-name subset (5 files share the same loader source).
+Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 names emitted by `$HOME/api_keys.sh`. The `helix_code/.env` removed-count of 38 includes 2 extra lines that were duplicates inside that single file; the underlying *unique* key-name set deleted per file is the same 36-name subset (5 files share the same loader source).
 
 #### Sample of removed key NAMES (values redacted, never logged)
 
@@ -3281,13 +3281,13 @@ Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 
 #### Non-API content preserved (spot-check)
 
 - `./.env` retains `HELIXAGENT_API_KEY=…`, `CLAUDE_CODE_USE_OAUTH_CREDENTIALS=true`, `QWEN_CODE_USE_OAUTH_CREDENTIALS=true`, plus all `ApiKey_*` aliases (Tavily, Astica, etc.) the central loader does not yet emit.
-- `./HelixCode/.env` retains `USE_HELIX_LLM=true`, `PORT=8100`, `HELIXAGENT_PORT_*`, `LOG_LEVEL=info`, `LOG_FORMAT=json`, `REDIS_PASSWORD=`, `HELIXAGENT_API_KEY=…`.
+- `./helix_code/.env` retains `USE_HELIX_LLM=true`, `PORT=8100`, `HELIXAGENT_PORT_*`, `LOG_LEVEL=info`, `LOG_FORMAT=json`, `REDIS_PASSWORD=`, `HELIXAGENT_API_KEY=…`.
 - `./helix_qa/.env`, `./helix_agent/.env`, `./helix_agent/HelixLLM/.env` retain `ApiKey_*` aliases (`ApiKey_Tavily`, `ApiKey_Astica_Vision`, `ApiKey_Tencent_Cloud`, etc.) and the `ASTICA_API_KEY=…` / `TAVILY_API_KEY=$ApiKey_Tavily` indirect bindings — none of these names are in the 41-key SAFE_KEYS list, so they were correctly preserved.
 
 #### Backups + diff files (local only, gitignored)
 
 - `./.env.backup_p1-5` + `./.env.diff_p1-5`
-- `./HelixCode/.env.backup_p1-5` + `./HelixCode/.env.diff_p1-5`
+- `./helix_code/.env.backup_p1-5` + `./helix_code/.env.diff_p1-5`
 - `./helix_qa/.env.backup_p1-5` + `./helix_qa/.env.diff_p1-5`
 - `./helix_agent/.env.backup_p1-5` + `./helix_agent/.env.diff_p1-5`
 - `./helix_agent/HelixLLM/.env.backup_p1-5` + `./helix_agent/HelixLLM/.env.diff_p1-5`
@@ -3305,19 +3305,19 @@ Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` wa
 #### Defects / deviations
 
 1. The dedup spec in the task body assumed each `.env` would get its own commit. In reality every `.env` is already covered by `.gitignore` (root + each submodule's own), so `git add .env` is a no-op and would silently produce empty commits. Confirmed via `git check-ignore -v` for each path. Outcome: collapsed to a single commit on the root `.gitignore` + this evidence file only — no submodule commits, no submodule-pointer bumps. Backups + diffs are likewise gitignored, so the working tree stays clean apart from `.gitignore` itself.
-2. `./HelixCode/.env` removed 38 lines vs the 36-line baseline because that file historically had two duplicate `KEY=$ApiKey_Foo` lines for the same key (likely an editing accident). Both were removed correctly because both matched a SAFE_KEY name. Net result is identical to removing the canonical 36 keys, just with the dup tax taken.
+2. `./helix_code/.env` removed 38 lines vs the 36-line baseline because that file historically had two duplicate `KEY=$ApiKey_Foo` lines for the same key (likely an editing accident). Both were removed correctly because both matched a SAFE_KEY name. Net result is identical to removing the canonical 36 keys, just with the dup tax taken.
 
 
 ### P1.5-WP6 — Docs consolidation (Documentation/ → docs/)
 
-**Goal**: Eliminate every `Documentation/` directory in the tree by merging into the canonical `docs/`. Update all live internal links. Three directories tracked by inventory (`./Documentation`, `./HelixCode/Documentation`, `helix_agent/skills/development/documentation`).
+**Goal**: Eliminate every `Documentation/` directory in the tree by merging into the canonical `docs/`. Update all live internal links. Three directories tracked by inventory (`./Documentation`, `./helix_code/Documentation`, `helix_agent/skills/development/documentation`).
 
 #### Per-directory summary
 
 | Source | Target | Items moved | Collisions | Commit |
 |---|---|---:|---:|---|
 | `./Documentation/` | `./docs/` | 3 dirs (`General/`, `Materials/`, `User_Manual/`) — recursively contains 5 + 2 + (4 examples + 8 tutorials + 4 top md) = 23 files in 6 subtrees | 0 (no name overlap with existing `docs/` content) | `0d832b3` |
-| `HelixCode/Documentation/` | `HelixCode/docs/` | 6 entries (`Architecture/`, `General/`, `Testing/`, `User_Manual/`, plus `AUDIT_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_AUDIT_REPORT.md`) — over 60 markdown + html + yaml files | 0 (HelixCode/docs/ did not exist) | `4530efc` |
+| `helix_code/Documentation/` | `helix_code/docs/` | 6 entries (`Architecture/`, `General/`, `Testing/`, `User_Manual/`, plus `AUDIT_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_AUDIT_REPORT.md`) — over 60 markdown + html + yaml files | 0 (helix_code/docs/ did not exist) | `4530efc` |
 | `helix_agent/skills/development/documentation/` | `helix_agent/docs/skills/development/` | 1 file (`SKILL.md`) | 0 | HelixAgent: `2a6e11c4`; meta-repo gitlink: `1470b2e` |
 
 All moves used `git mv` (rename detection preserved 100% for every file).
@@ -3331,9 +3331,9 @@ Root scope (T06.01) — 7 files:
 - `docs/user_manual/INDEX.md`, `docs/user_manual/SUMMARY.md` (self-refs in tree-diagrams updated)
 
 HelixCode scope (T06.02) — 5 files (live operational paths, not historical):
-- `HelixCode/scripts/generate-manual.sh`, `HelixCode/scripts/sync-manual.sh` (PROJECT_ROOT path constants)
-- `HelixCode/scripts/generate_test_catalog/generate-test-catalog.go` (hard-coded `os.MkdirAll`/`os.Create` paths)
-- `HelixCode/TEST_RESULTS.md`, `HelixCode/COMPLETION_REPORT.md`, `HelixCode/QUICK_REFERENCE_MANUAL_SYSTEM.md`, `HelixCode/DOCUMENTATION_SYSTEM_SUMMARY.md`, `HelixCode/tests/e2e/FINAL_SUMMARY.md`, `HelixCode/docs/architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md`, `HelixCode/docs/user_manual/README.md`
+- `helix_code/scripts/generate-manual.sh`, `helix_code/scripts/sync-manual.sh` (PROJECT_ROOT path constants)
+- `helix_code/scripts/generate_test_catalog/generate-test-catalog.go` (hard-coded `os.MkdirAll`/`os.Create` paths)
+- `helix_code/TEST_RESULTS.md`, `helix_code/COMPLETION_REPORT.md`, `helix_code/QUICK_REFERENCE_MANUAL_SYSTEM.md`, `helix_code/DOCUMENTATION_SYSTEM_SUMMARY.md`, `helix_code/tests/e2e/FINAL_SUMMARY.md`, `helix_code/docs/architecture/DYNAMIC_PORT_BINDING_AND_SERVICE_DISCOVERY.md`, `helix_code/docs/user_manual/README.md`
 
 #### Deliberately untouched
 
@@ -3361,7 +3361,7 @@ The four lowercase `documentation/` directories belong to **third-party `cli_age
 | SHA | Scope |
 |---|---|
 | `0d832b3` | T06.01 — root `Documentation/` → `docs/` (3 subtrees + 7 link-update files) |
-| `4530efc` | T06.02 — `HelixCode/Documentation/` → `HelixCode/docs/` (6 entries + 5 link-update files; scripts incl. Go) |
+| `4530efc` | T06.02 — `helix_code/Documentation/` → `helix_code/docs/` (6 entries + 5 link-update files; scripts incl. Go) |
 | `2a6e11c4` (HelixAgent) | T06.03 — `helix_agent/skills/development/documentation/SKILL.md` → `helix_agent/docs/skills/development/SKILL.md` |
 | `1470b2e` | T06.03 — meta-repo gitlink bump for HelixAgent |
 
@@ -3401,24 +3401,24 @@ Sample of 10 (full list logged in commit diff):
 | `docs/llms_verifier/LLMsVerifier_Integration` | `docs/llms_verifier/llms_verifier_integration` |
 | `docs/improvements/04_main_plan_step_02/Kimi_Agent_Helix CLI Integration Blueprint` | `…/kimi_agent_helix_cli_integration_blueprint` |
 | `docs/improvements/03_main_plan_step_01/Deep Dive Submodule Integration` | `…/deep_dive_submodule_integration` |
-| `HelixCode/docs/Architecture` | `HelixCode/docs/architecture` |
-| `HelixCode/docs/General` | `HelixCode/docs/general` |
-| `HelixCode/docs/General/video-courses` | `HelixCode/docs/general/video_courses` |
-| `HelixCode/docs/Testing` | `HelixCode/docs/testing` |
-| `HelixCode/docs/User_Manual` | `HelixCode/docs/user_manual` |
-| `HelixCode/benchmark-reports` | `HelixCode/benchmark_reports` |
-| `HelixCode/doc-reports` | `HelixCode/doc_reports` |
-| `HelixCode/test-reports` | `HelixCode/test_reports` |
-| `HelixCode/test-programs` | `HelixCode/test_programs` |
-| `HelixCode/examples/multi-agent-system` | `HelixCode/examples/multi_agent_system` |
-| `HelixCode/examples/qa-integration` | `HelixCode/examples/qa_integration` |
-| `HelixCode/examples/phase3/code-review` | `HelixCode/examples/phase3/code_review` |
-| `HelixCode/examples/phase3/feature-dev` | `HelixCode/examples/phase3/feature_dev` |
-| `HelixCode/examples/phase3/multi-session` | `HelixCode/examples/phase3/multi_session` |
-| `HelixCode/scripts/generate-test-catalog` | `HelixCode/scripts/generate_test_catalog` |
-| `HelixCode/shared/mobile-core` | `HelixCode/shared/mobile_core` |
-| `HelixCode/test/workers/ssh-keys` | `HelixCode/test/workers/ssh_keys` |
-| `HelixCode/tests/e2e/test-bank` | `HelixCode/tests/e2e/test_bank` |
+| `helix_code/docs/Architecture` | `helix_code/docs/architecture` |
+| `helix_code/docs/General` | `helix_code/docs/general` |
+| `helix_code/docs/General/video-courses` | `helix_code/docs/general/video_courses` |
+| `helix_code/docs/Testing` | `helix_code/docs/testing` |
+| `helix_code/docs/User_Manual` | `helix_code/docs/user_manual` |
+| `helix_code/benchmark-reports` | `helix_code/benchmark_reports` |
+| `helix_code/doc-reports` | `helix_code/doc_reports` |
+| `helix_code/test-reports` | `helix_code/test_reports` |
+| `helix_code/test-programs` | `helix_code/test_programs` |
+| `helix_code/examples/multi-agent-system` | `helix_code/examples/multi_agent_system` |
+| `helix_code/examples/qa-integration` | `helix_code/examples/qa_integration` |
+| `helix_code/examples/phase3/code-review` | `helix_code/examples/phase3/code_review` |
+| `helix_code/examples/phase3/feature-dev` | `helix_code/examples/phase3/feature_dev` |
+| `helix_code/examples/phase3/multi-session` | `helix_code/examples/phase3/multi_session` |
+| `helix_code/scripts/generate-test-catalog` | `helix_code/scripts/generate_test_catalog` |
+| `helix_code/shared/mobile-core` | `helix_code/shared/mobile_core` |
+| `helix_code/test/workers/ssh-keys` | `helix_code/test/workers/ssh_keys` |
+| `helix_code/tests/e2e/test-bank` | `helix_code/tests/e2e/test_bank` |
 | `scripts/git-hooks` | `scripts/git_hooks` |
 | `scripts/host-power-management` | `scripts/host_power_management` |
 
@@ -3439,13 +3439,13 @@ None — all 29 renames applied cleanly.
 Reason categories:
 
 **Umbrella / submodule-root-like dirs (10)** — heavily referenced top-level project dirs whose rename would cascade through dozens of docs, scripts, and `.env.*` examples; left as-is to avoid risk:
-- `assets/`, `Dependencies/`, `HelixCode/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
+- `assets/`, `Dependencies/`, `helix_code/` (the inner application root), `Upstreams/`, `Website/`, `Implementation_Guide/`, `Specification/`, `Specification/CLI_Specs_4`, `Specification/CLI_Specs_5`, `Specification/TODO`
 
 **Go `cmd/<binary>` packages (9)** — renaming changes `go build` import paths, Makefile target args, and produced `bin/<name>` artifact names:
-- `cmd/security_test`, `HelixCode/cmd/config_test`, `HelixCode/cmd/helix_config`, `HelixCode/cmd/performance_optimization`, `HelixCode/cmd/performance_optimization_standalone`, `HelixCode/cmd/security_fix`, `HelixCode/cmd/security_fix_standalone`, `HelixCode/cmd/security_scan`, `HelixCode/cmd/security_test`
+- `cmd/security_test`, `helix_code/cmd/config_test`, `helix_code/cmd/helix_config`, `helix_code/cmd/performance_optimization`, `helix_code/cmd/performance_optimization_standalone`, `helix_code/cmd/security_fix`, `helix_code/cmd/security_fix_standalone`, `helix_code/cmd/security_scan`, `helix_code/cmd/security_test`
 
-**Go application packages (4)** — referenced as Go import paths in `HelixCode/Makefile` (`./applications/aurora_os`, etc.):
-- `HelixCode/applications/aurora_os`, `HelixCode/applications/harmony_os`, `HelixCode/applications/terminal_ui`, `HelixCode/applications/ios/HelixCode`
+**Go application packages (4)** — referenced as Go import paths in `helix_code/Makefile` (`./applications/aurora_os`, etc.):
+- `helix_code/applications/aurora_os`, `helix_code/applications/harmony_os`, `helix_code/applications/terminal_ui`, `helix_code/applications/ios/HelixCode`
 
 These should be addressed in a future WP that combines (a) the rename, (b) Makefile import-path updates, (c) Go package name updates inside each `main.go`, and (d) re-running `make verify-compile` to prove correctness.
 
@@ -3459,7 +3459,7 @@ These should be addressed in a future WP that combines (a) the rename, (b) Makef
 
 #### Defects / deviations
 
-1. **Top-level umbrella dirs deferred** — `HelixCode/`, `assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
+1. **Top-level umbrella dirs deferred** — `helix_code/`, `assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
 2. **Go-package-affecting renames deferred** — see deferred list above.
 3. **Submodule pointer drift** — committing inside helix_agent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
 
@@ -3495,7 +3495,7 @@ Confirm CONST-035 / Article XI §11.9 verbatim user mandate is present in every 
 | helix_agent/HelixSpecifier | PRESENT | PRESENT | PRESENT |
 | helix_agent/HelixMemory | PRESENT | PRESENT | PRESENT |
 
-Inner Go application `HelixCode/HelixCode/` (same repo as root) carries all three files PRESENT — same set of files as root via the shared submodule structure.
+Inner Go application `helix_code/helix_code/` (same repo as root) carries all three files PRESENT — same set of files as root via the shared submodule structure.
 
 #### Gaps closed (1)
 
@@ -3579,17 +3579,17 @@ HelixQA, Security, HelixLLM, HelixMemory, HelixSpecifier submodules: each `CLAUD
 ```
 helix_agent/internal/clis/agents/claude_code/claude_code.go:144
 - sourceDir = "/run/media/.../helix_agent/cli_agents/claude-code-source"
-+ sourceDir = "/run/media/.../HelixCode/cli_agents/claude-code-source"
++ sourceDir = "/run/media/.../helix_code/cli_agents/claude-code-source"
 
 helix_agent/internal/config/config.go:782
 - "/run/media/.../helix_agent/containers/.env",
-+ "/run/media/.../HelixCode/containers/.env",
++ "/run/media/.../helix_code/containers/.env",
 
 helix_agent/tests/integration/cli_agents_test.go:26-29
-- openCodePath = "/run/media/.../HelixCode/Example_Projects/OpenCode/OpenCode"
-+ openCodePath = "/run/media/.../HelixCode/cli_agents/opencode"
-- clinePath    = "/run/media/.../HelixCode/Example_Projects/Cline"
-+ clinePath    = "/run/media/.../HelixCode/cli_agents/cline"
+- openCodePath = "/run/media/.../helix_code/Example_Projects/OpenCode/OpenCode"
++ openCodePath = "/run/media/.../helix_code/cli_agents/opencode"
+- clinePath    = "/run/media/.../helix_code/Example_Projects/Cline"
++ clinePath    = "/run/media/.../helix_code/cli_agents/cline"
 
 scripts/regenerate-diagrams.py:84
 - f"helix_agent/cli_agents/  ({...} agents — canonical source; ...)",
@@ -3620,8 +3620,8 @@ helix_agent/docs/CLI_AGENT_PLUGINS_PLAN.md
   Mass sed: Example_Projects/ → cli_agents/  (50 occurrences)
 
 helix_agent/docs/CLI_AGENTS_TEST_DOCUMENTATION.md
-  OpenCode test path:  /HelixCode/Example_Projects/OpenCode/OpenCode/  → /HelixCode/cli_agents/opencode/
-  Cline test path:     /HelixCode/Example_Projects/Cline/             → /HelixCode/cli_agents/cline/
+  OpenCode test path:  /helix_code/Example_Projects/OpenCode/OpenCode/  → /helix_code/cli_agents/opencode/
+  Cline test path:     /helix_code/Example_Projects/Cline/             → /helix_code/cli_agents/cline/
 
 docs/bluff_proofing/{,full_plan/}STEP_BY_STEP_GUIDE.md
 - ls Example_Projects/   # Should show: Aider, Cline, Codex, OpenHands, etc.
@@ -3719,7 +3719,7 @@ Every PASS in the per-repo table corresponds to a real `go build` / `go test` in
 
 | SHA | Repo | Scope |
 |---|---|---|
-| `45be827` | meta-repo root | T10.03 fix — MockLLMProvider drift in `HelixCode/internal/tools/git/git_test.go` |
+| `45be827` | meta-repo root | T10.03 fix — MockLLMProvider drift in `helix_code/internal/tools/git/git_test.go` |
 | (this commit) | meta-repo root | WP10 close-out evidence |
 
 #### Defects / deviations
@@ -3735,7 +3735,7 @@ None of substance. The only deviation from the WP10 task spec is that `examples/
 
 #### Artefacts produced
 
-- `HelixCode/tests/integration/cmd/p1_5_challenge/main.go` — 5-phase Go harness (stdlib only).
+- `helix_code/tests/integration/cmd/p1_5_challenge/main.go` — 5-phase Go harness (stdlib only).
 - `challenges/p1-5-foundation-cleanup/CHALLENGE.md` — phase-by-phase contract + anti-bluff anchors.
 - `challenges/p1-5-foundation-cleanup/run.sh` — build + run + bluff smoke + cross-compile, F11–F20 anti-self-match string-fragment trick applied.
 
@@ -3755,7 +3755,7 @@ phaseA: mcp_servers at mcp_servers (1 location, no duplicates)
 ==> Phase B — API-KEYS-LOADER
 phaseB: branch1=PASS branch2=PASS branch3=PASS
 ==> Phase C — DOCS-UNDER-DOCS-DIR
-phaseC: zero Documentation/ uppercase dirs in first-party tree; docs/ canonical at [HelixCode/docs HelixCode/tests/automation/results/docs docs]
+phaseC: zero Documentation/ uppercase dirs in first-party tree; docs/ canonical at [helix_code/docs helix_code/tests/automation/results/docs docs]
 ==> Phase D — SNAKE_CASE
 phaseD: 259 conformant first-party directories scanned; 88 allowlisted (cmd/, repo names); 0 violations
 ==> Phase E — ANTI-BLUFF-ANCHOR
@@ -3793,14 +3793,14 @@ The `challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the
 |---|---|---|
 | A — NO-DUPLICATE-SUBMODULES | PASS | 5/5 canonical submodules at expected root paths; meta-repo-tracked `.gitmodules` URL-uniqueness check returns zero duplicates |
 | B — API-KEYS-LOADER | PASS | three real bash subshells with synthesised HOME + tempdir pwd captured `value_from_sh`, `value_from_env`, and empty respectively |
-| C — DOCS-UNDER-DOCS-DIR | PASS | zero `Documentation/` (any non-`docs` casing) directories in scoped tree; canonical `docs/` confirmed at `docs`, `HelixCode/docs`, and `HelixCode/tests/automation/results/docs` |
+| C — DOCS-UNDER-DOCS-DIR | PASS | zero `Documentation/` (any non-`docs` casing) directories in scoped tree; canonical `docs/` confirmed at `docs`, `helix_code/docs`, and `helix_code/tests/automation/results/docs` |
 | D — SNAKE_CASE | PASS | 259 directories scanned, 88 allowlisted (Go-application packages, repo names from `.gitmodules`, well-known artefact dirs, WP7 deferred list), 0 violations |
 | E — ANTI-BLUFF-ANCHOR | PASS | `scripts/verify_anti_bluff_cascade.sh` exit 0; "OK: anti-bluff anchor present in all 39 files across 13 repos" line captured |
 
 #### Defects / deviations
 
 1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `helix_agent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `helix_agent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
-2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
+2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `helix_code/` tree; submodule-internal layouts (e.g., `challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
 3. **Snake-case regex relaxed for digit prefixes.** Initial regex `^[a-z][a-z0-9_]*$` flagged `01_analysis_step_01`, `06_diagrams_real`, etc. used throughout `docs/improvements/`. Relaxed to `^[a-z0-9][a-z0-9_]*$` to accept digit-prefixed sequence names; the rest of the snake_case discipline (lowercase + digits + underscores only) is preserved.
 4. **No commits or pushes performed in WP11.** Per CONST-043 + WP12 ownership of the push step, this WP only produces artefacts. The dual commit (Challenges submodule first, then meta-repo) is captured in the WP12 work plan.
 
@@ -3842,7 +3842,7 @@ phaseA: mcp_servers at mcp_servers (1 location, no duplicates)
 ==> Phase B — API-KEYS-LOADER
 phaseB: branch1=PASS branch2=PASS branch3=PASS
 ==> Phase C — DOCS-UNDER-DOCS-DIR
-phaseC: zero Documentation/ uppercase dirs in first-party tree; docs/ canonical at [HelixCode/docs HelixCode/tests/automation/results/docs docs]
+phaseC: zero Documentation/ uppercase dirs in first-party tree; docs/ canonical at [helix_code/docs helix_code/tests/automation/results/docs docs]
 ==> Phase D — SNAKE_CASE
 phaseD: 259 conformant first-party directories scanned; 88 allowlisted (cmd/, repo names); 0 violations
 ==> Phase E — ANTI-BLUFF-ANCHOR
@@ -3868,8 +3868,8 @@ EXIT=0
 ```
 $ grep -rn "simulated\|for now\|TODO implement\|placeholder" \
     scripts/load_api_keys.sh scripts/test_load_api_keys.sh scripts/verify_anti_bluff_cascade.sh \
-    HelixCode/internal/secrets/ \
-    HelixCode/tests/integration/cmd/p1_5_challenge/ \
+    helix_code/internal/secrets/ \
+    helix_code/tests/integration/cmd/p1_5_challenge/ \
     2>/dev/null && echo BLUFF || echo clean
 clean
 ```

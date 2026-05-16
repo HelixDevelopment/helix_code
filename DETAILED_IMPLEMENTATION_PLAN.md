@@ -1049,7 +1049,7 @@ cd HelixCode
 ### Daily Workflow:
 ```bash
 # Start of day
-cd /Users/milosvasic/Projects/HelixCode/HelixCode
+cd /Users/milosvasic/Projects/helix_code/HelixCode
 git pull origin main
 git checkout -b phase-N-day-X
 

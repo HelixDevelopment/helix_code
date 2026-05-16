@@ -315,8 +315,8 @@ being committed.
 # This file extends the HelixCode constitutional governance to this third-party
 # submodule. The full governance documents are at:
 #
-#   https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md
-#   https://github.com/HelixDevelopment/HelixCode/blob/main/AGENTS.md
+#   https://github.com/HelixDevelopment/helix_code/blob/main/CONSTITUTION.md
+#   https://github.com/HelixDevelopment/helix_code/blob/main/AGENTS.md
 #
 # Key constraints applicable to all submodules:
 #

@@ -54,7 +54,7 @@
 ## 🗺️ Project Structure
 
 ```
-HelixCode/
+helix_code/
 ├── internal/
 │   └── notification/
 │       ├── engine.go                    ✅ Modified (Email fix, Telegram added)
@@ -200,7 +200,7 @@ HelixCode/
 
 1. **Open the guide:**
    ```bash
-   cat /home/milosvasic/Projects/HelixDevelopment/HelixCode/QUICK_START_TOMORROW.md
+   cat /home/milosvasic/Projects/HelixDevelopment/helix_code/QUICK_START_TOMORROW.md
    ```
 
 2. **Follow the steps exactly** - it has:
@@ -218,7 +218,7 @@ HelixCode/
 
 1. **Read the roadmap:**
    ```bash
-   cat /home/milosvasic/Projects/HelixDevelopment/HelixCode/IMPLEMENTATION_ROADMAP.md
+   cat /home/milosvasic/Projects/HelixDevelopment/helix_code/IMPLEMENTATION_ROADMAP.md
    ```
 
 2. **Go to Phase 1, Day 1** section
@@ -251,9 +251,9 @@ HelixCode/
 ### Files Modified/Created
 
 **Modified:**
-- `HelixCode/internal/notification/engine.go`
-- `HelixCode/.env.example`
-- `HelixCode/config/config.yaml`
+- `helix_code/internal/notification/engine.go`
+- `helix_code/.env.example`
+- `helix_code/config/config.yaml`
 - `github_pages_website/docs/index.html`
 
 **Created:**
@@ -267,7 +267,7 @@ HelixCode/
 
 ### Run All Tests
 ```bash
-cd /home/milosvasic/Projects/HelixDevelopment/HelixCode/HelixCode
+cd /home/milosvasic/Projects/HelixDevelopment/helix_code/HelixCode
 
 # All notification tests
 go test ./internal/notification/... -v
@@ -362,7 +362,7 @@ notifications:
 
 ## 📖 Setup Guides Location
 
-All guides are in: `HelixCode/docs/integrations/`
+All guides are in: `helix_code/docs/integrations/`
 
 - **Slack:** `SLACK_SETUP.md`
 - **Telegram:** `TELEGRAM_SETUP.md`
@@ -456,7 +456,7 @@ go mod tidy
 - [Discord Webhooks](https://discord.com/developers/docs/resources/webhook)
 
 ### Internal Docs
-- All docs in `HelixCode/docs/integrations/`
+- All docs in `helix_code/docs/integrations/`
 - See `IMPLEMENTATION_ROADMAP.md` for detailed guides
 
 ---
@@ -499,7 +499,7 @@ go mod tidy
 
 **All documents are in:**
 ```
-/home/milosvasic/Projects/HelixDevelopment/HelixCode/
+/home/milosvasic/Projects/HelixDevelopment/helix_code/
 ```
 
 **Good luck! 🚀✨**

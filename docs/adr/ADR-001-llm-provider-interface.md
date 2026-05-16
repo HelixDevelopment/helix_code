@@ -204,7 +204,7 @@ When `llm.selection.fallback_enabled` is configured:
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/local_provider.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/README.md`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/LOCAL_PROVIDERS.md`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/local_provider.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/README.md`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/LOCAL_PROVIDERS.md`

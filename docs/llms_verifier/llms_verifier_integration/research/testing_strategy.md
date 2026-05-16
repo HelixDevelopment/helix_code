@@ -88,7 +88,7 @@ Before a test is accepted into the suite, it must answer **YES** to all of these
 
 ### 2.2 Unit Test File Inventory
 
-All new files go under `HelixCode/internal/verifier/` unless noted otherwise.
+All new files go under `helix_code/internal/verifier/` unless noted otherwise.
 
 | # | File Path | Purpose | Lines Est. |
 |---|-----------|---------|------------|
@@ -635,7 +635,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 VERIFIER_DB="${PROJECT_ROOT}/test_data/verifier.db"
 
 # --- Setup ---
@@ -709,7 +709,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 
 # --- Setup ---
 echo "[CHALLENGE] verifier_model_select_challenge: START"
@@ -768,7 +768,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 CONFIG_FILE="/tmp/verifier_disabled_config.yaml"
 
 # --- Setup: Create config with verifier disabled ---
@@ -824,7 +824,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CONFIG_FILE="${PROJECT_ROOT}/HelixCode/config/config.yaml"
+CONFIG_FILE="${PROJECT_ROOT}/helix_code/config/config.yaml"
 ENV_FILE="${PROJECT_ROOT}/.env"
 
 echo "[CHALLENGE] verifier_api_key_provision_challenge: START"
@@ -893,7 +893,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 REFRESH_INTERVAL=30  # seconds
 
 echo "[CHALLENGE] verifier_rate_limit_display_challenge: START"
@@ -941,7 +941,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 REFRESH_INTERVAL=30
 MAX_WAIT=$((REFRESH_INTERVAL + 10))
 
@@ -1058,7 +1058,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 
 echo "[CHALLENGE] verifier_cross_platform_cli_challenge: START"
 
@@ -1132,7 +1132,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-SERVER_BIN="${PROJECT_ROOT}/HelixCode/bin/server"
+SERVER_BIN="${PROJECT_ROOT}/helix_code/bin/server"
 LOG_FILE="/tmp/verifier_startup_pipeline.log"
 
 echo "[CHALLENGE] verifier_startup_pipeline_challenge: START"
@@ -1261,7 +1261,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-CLI_BIN="${PROJECT_ROOT}/HelixCode/bin/cli"
+CLI_BIN="${PROJECT_ROOT}/helix_code/bin/cli"
 SERVER_LOG="/tmp/verifier_security_server.log"
 CLI_LOG="/tmp/verifier_security_cli.log"
 
@@ -1290,8 +1290,8 @@ if grep -q "${FAKE_KEY}" "${CLI_LOG}"; then
     exit 1
 fi
 
-# ANTI-BLUFF 2: Fake key must NOT appear in any log file under HelixCode/
-if grep -r "${FAKE_KEY}" "${PROJECT_ROOT}/HelixCode/" > /dev/null 2>&1; then
+# ANTI-BLUFF 2: Fake key must NOT appear in any log file under helix_code/
+if grep -r "${FAKE_KEY}" "${PROJECT_ROOT}/helix_code/" > /dev/null 2>&1; then
     echo "[FAIL] API key found somewhere in HelixCode logs or output"
     exit 1
 fi
@@ -1912,7 +1912,7 @@ This matrix maps every user-facing feature to the test that proves it works and 
 
 ## Appendix A: Makefile Target Definitions
 
-Add these targets to `HelixCode/Makefile`:
+Add these targets to `helix_code/Makefile`:
 
 ```makefile
 # --- Test Infrastructure ---
@@ -2058,7 +2058,7 @@ test-docs:
 | **Test Fixtures** | 5+ | `tests/fixtures/*` |
 | **Setup/Teardown Scripts** | 3 | `scripts/setup_test_env.sh`, `scripts/teardown_test_env.sh`, `scripts/run_tests.sh` |
 | **Coverage Enforcement** | 2 | `scripts/enforce_coverage.sh`, `scripts/no_mocks_above_unit.sh` |
-| **Makefile Targets** | 20+ | Added to `HelixCode/Makefile` |
+| **Makefile Targets** | 20+ | Added to `helix_code/Makefile` |
 
 **Total New Files**: ~75  
 **Total Estimated Lines**: ~12,000+  

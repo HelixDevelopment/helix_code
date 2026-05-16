@@ -266,7 +266,7 @@ story.append(Spacer(1, 6))
 
 story.extend(H3('3.1.1 Critical Gaps in HelixCode'))
 story.append(bullet('ALL 87 git submodules are UNINITIALIZED - build WILL FAIL for any code importing digital.vasic.* packages'))
-story.append(bullet('Dual go.mod confusion: root declares Go 1.25.2, HelixCode/ declares Go 1.26, both use module dev.helix.code'))
+story.append(bullet('Dual go.mod confusion: root declares Go 1.25.2, helix_code/ declares Go 1.26, both use module dev.helix.code'))
 story.append(bullet('HelixAgent is NOT integrated - no code references, no submodule entry'))
 story.append(bullet('HelixSpecifier is NOT integrated - no code references, no submodule entry'))
 story.append(bullet('Redis/Memcached memory providers use local maps instead of real connections (stubs)'))
@@ -326,7 +326,7 @@ story.append(Spacer(1, 18))
 # SECTION 4: CLI AGENT COMPARATIVE ANALYSIS
 # ═══════════════════════════════════════════════════════════
 story.extend(H1('4. CLI Agent Comparative Analysis'))
-story.append(P('This section provides a detailed comparative analysis of what each CLI agent does better than the current HelixCode/HelixAgent codebase, identifying missing features, performance advantages, and game-changing innovations that must be ported.'))
+story.append(P('This section provides a detailed comparative analysis of what each CLI agent does better than the current helix_code/HelixAgent codebase, identifying missing features, performance advantages, and game-changing innovations that must be ported.'))
 
 story.extend(H2('4.1 Tier 1 CLI Agent Feature Matrix'))
 data = [
@@ -462,7 +462,7 @@ story.append(Spacer(1, 6))
 data = [
     [TH('Task ID'), TH('Task'), TH('Deliverable'), TH('Priority')],
     [TC('0.1'), TC('Initialize ALL git submodules recursively via SSH'), TC('All 87+ submodules checked out and building'), TCC('CRITICAL')],
-    [TC('0.2'), TC('Fix dual go.mod - remove root go.mod, keep HelixCode/go.mod'), TC('Single go.mod with consistent Go version'), TCC('CRITICAL')],
+    [TC('0.2'), TC('Fix dual go.mod - remove root go.mod, keep helix_code/go.mod'), TC('Single go.mod with consistent Go version'), TCC('CRITICAL')],
     [TC('0.3'), TC('Add missing submodules (HelixAgent, HelixSpecifier, HelixMemory, HelixLLM)'), TC('git submodule add entries with SSH URLs'), TCC('CRITICAL')],
     [TC('0.4'), TC('Wire go.mod replace directives for all new submodules'), TC('Replace directives for dev.helix.agent, specifier, memory, llm'), TCC('CRITICAL')],
     [TC('0.5'), TC('Verify build succeeds with all submodules initialized'), TC('go build ./... passes without errors'), TCC('CRITICAL')],

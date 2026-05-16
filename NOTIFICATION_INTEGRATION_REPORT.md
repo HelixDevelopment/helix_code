@@ -35,7 +35,7 @@ This report provides a comprehensive analysis of the HelixCode notification and 
 
 ### 1.1 Slack Integration
 
-**Implementation Location:** `/HelixCode/internal/notification/engine.go:315-393`
+**Implementation Location:** `/helix_code/internal/notification/engine.go:315-393`
 
 **Current Features:**
 - ✅ Webhook-based integration
@@ -99,7 +99,7 @@ type SlackChannel struct {
 
 ### 1.3 Email Integration
 
-**Implementation Location:** `/HelixCode/internal/notification/engine.go:395-459`
+**Implementation Location:** `/helix_code/internal/notification/engine.go:395-459`
 
 **Current Features:**
 - ✅ SMTP-based email sending
@@ -151,7 +151,7 @@ if to == "" {
 
 ### 1.4 Discord Integration
 
-**Implementation Location:** `/HelixCode/internal/notification/engine.go:461-515`
+**Implementation Location:** `/helix_code/internal/notification/engine.go:461-515`
 
 **Current Features:**
 - ✅ Webhook-based integration
@@ -1642,7 +1642,7 @@ discord:
 ### 9.1 Test File Structure
 
 ```
-HelixCode/
+helix_code/
 ├── internal/
 │   └── notification/
 │       ├── engine.go

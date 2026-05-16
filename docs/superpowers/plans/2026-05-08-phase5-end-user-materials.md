@@ -60,7 +60,7 @@
 - [ ] **Step 1: Read existing Part III structure**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 grep -n "^### " docs/user_manual/README.md | grep -E "(6\.|7\.|Anthropic|Gemini|Bedrock|Azure|XAI|OpenRouter)"
 ```
 
@@ -315,7 +315,7 @@ web:
     max_results: 8
     safe_search: true
   fetch:
-    user_agent: "HelixCode/2.0"
+    user_agent: "helix_code/2.0"
     timeout: 30
     max_size: 5242880  # 5MB
 ```
@@ -514,7 +514,7 @@ func (t *CalculatorTool) RequiresConfirmation() bool {
 - [ ] **Step 3: Update SUMMARY.md to include new tutorials**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 ```
 
 Add to `docs/user_manual/SUMMARY.md`:
@@ -601,7 +601,7 @@ git commit -m "docs: add troubleshooting guide (SSH, LLM, rate limits)"
 - [ ] **Step 1: Walk SUMMARY.md against README.md sections**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 grep -n "^### " docs/user_manual/README.md > /tmp/readme_sections.txt
 grep -n "|.*|" docs/user_manual/SUMMARY.md > /tmp/summary_entries.txt
 diff <(cut -d' ' -f2- /tmp/readme_sections.txt | sort) <(cut -d'|' -f2 /tmp/summary_entries.txt | sed 's/^ *//' | sort) || true
@@ -659,7 +659,7 @@ git commit -m "docs: cross-reference sync (SUMMARY, INDEX, COMPLETE docs, tutori
 
 - [ ] **Step 1: Create debian control file**
 
-Write `HelixCode/packaging/debian/control`:
+Write `helix_code/packaging/debian/control`:
 ```
 Source: helixcode
 Section: devel
@@ -681,7 +681,7 @@ Description: Distributed AI Development Platform
 
 - [ ] **Step 2: Create systemd service unit**
 
-Write `HelixCode/packaging/debian/helixcode.service`:
+Write `helix_code/packaging/debian/helixcode.service`:
 ```
 [Unit]
 Description=HelixCode AI Development Server
@@ -704,7 +704,7 @@ WantedBy=multi-user.target
 
 - [ ] **Step 3: Create postinst script**
 
-Write `HelixCode/packaging/debian/postinst`:
+Write `helix_code/packaging/debian/postinst`:
 ```bash
 #!/bin/sh
 set -e
@@ -732,7 +732,7 @@ esac
 
 - [ ] **Step 4: Create prerm script**
 
-Write `HelixCode/packaging/debian/prerm`:
+Write `helix_code/packaging/debian/prerm`:
 ```bash
 #!/bin/sh
 set -e
@@ -747,7 +747,7 @@ esac
 
 - [ ] **Step 5: Add Makefile target**
 
-Add to `HelixCode/Makefile`:
+Add to `helix_code/Makefile`:
 ```makefile
 .PHONY: deb
 deb: build
@@ -777,7 +777,7 @@ installers: deb rpm homebrew windows
 - [ ] **Step 6: Build and verify**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 make deb
 ls -la packaging/helixcode_*.deb
 dpkg-deb --info packaging/helixcode_*.deb | grep -E "Package|Version|Architecture"
@@ -801,7 +801,7 @@ git commit -m "feat: add Debian packaging (.deb)"
 
 - [ ] **Step 1: Create RPM spec file**
 
-Write `HelixCode/packaging/rpm/helixcode.spec`:
+Write `helix_code/packaging/rpm/helixcode.spec`:
 ```
 Name: helixcode
 Version: 3.0.0
@@ -861,7 +861,7 @@ systemctl disable helixcode.service || true
 
 - [ ] **Step 2: Create RPM systemd service**
 
-Write `HelixCode/packaging/rpm/helixcode.service`:
+Write `helix_code/packaging/rpm/helixcode.service`:
 ```
 [Unit]
 Description=HelixCode AI Development Server
@@ -884,7 +884,7 @@ WantedBy=multi-user.target
 
 - [ ] **Step 3: Add Makefile rpm target**
 
-Add to `HelixCode/Makefile`:
+Add to `helix_code/Makefile`:
 ```makefile
 .PHONY: rpm
 rpm: build
@@ -902,7 +902,7 @@ rpm: build
 - [ ] **Step 4: Build and verify**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 make rpm
 ls -la packaging/helixcode-*.rpm
 rpm -qip packaging/helixcode-*.rpm | grep -E "Name|Version|Architecture"
@@ -925,7 +925,7 @@ git commit -m "feat: add RPM packaging (.rpm)"
 
 - [ ] **Step 1: Create Homebrew formula**
 
-Write `HelixCode/packaging/homebrew/helixcode.rb`:
+Write `helix_code/packaging/homebrew/helixcode.rb`:
 ```ruby
 class Helixcode < Formula
   desc "Distributed AI Development Platform"
@@ -998,7 +998,7 @@ git commit -m "feat: add macOS Homebrew formula"
 
 - [ ] **Step 1: Create NSIS installer script**
 
-Write `HelixCode/packaging/windows/installer.nsi`:
+Write `helix_code/packaging/windows/installer.nsi`:
 ```nsis
 !define PRODUCT_NAME "HelixCode"
 !define PRODUCT_VERSION "3.0.0"
@@ -1031,7 +1031,7 @@ SectionEnd
 
 - [ ] **Step 2: Create PowerShell installer**
 
-Write `HelixCode/scripts/install.ps1`:
+Write `helix_code/scripts/install.ps1`:
 ```powershell
 #!/usr/bin/env pwsh
 <#
@@ -1106,7 +1106,7 @@ git commit -m "feat: add Windows installer (NSIS + PowerShell)"
 
 - [ ] **Step 1: Create install.sh**
 
-Write `HelixCode/scripts/install.sh`:
+Write `helix_code/scripts/install.sh`:
 ```bash
 #!/bin/sh
 set -eu
@@ -1187,7 +1187,7 @@ main "$@"
 
 - [ ] **Step 2: Create production Dockerfile**
 
-Write `HelixCode/packaging/docker/Dockerfile`:
+Write `helix_code/packaging/docker/Dockerfile`:
 ```dockerfile
 FROM golang:1.24-alpine AS builder
 WORKDIR /build
@@ -1214,7 +1214,7 @@ CMD ["server"]
 - [ ] **Step 3: Verify install.sh works (dry-run)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 chmod +x scripts/install.sh
 bash -n scripts/install.sh
 echo "Syntax OK"
@@ -1237,7 +1237,7 @@ git commit -m "feat: add platform-agnostic installer script and production Docke
 - [ ] **Step 1: Audit actual provider count from code**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 echo "Provider implementations:"
 ls -d internal/llm/providers/*/
 echo ""
@@ -1268,7 +1268,7 @@ Replace the statistics section in `index.html`. Find and update:
 - Lines of code
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/Github-Pages-Website
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/Github-Pages-Website
 ```
 
 - [ ] **Step 5: Fix GitHub links**
@@ -1298,7 +1298,7 @@ git commit -m "website: update stats, provider count, and fix links"
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
 # Extract section headings from both
-grep -n "^### " HelixCode/docs/user_manual/README.md | head -50
+grep -n "^### " helix_code/docs/user_manual/README.md | head -50
 grep -n "class=\"section\"\|<h[23]" github_pages_website/docs/manual/index.html | head -50
 ```
 
@@ -1334,7 +1334,7 @@ git commit -m "website: sync manual and courses with latest docs"
 - [ ] **Step 1: Run local test script**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/Github-Pages-Website
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/Github-Pages-Website
 ./test-local.sh 2>&1 | tail -20
 ```
 
@@ -1376,7 +1376,7 @@ git commit -m "website: fix test failures and broken links"
 - [ ] **Step 1: Verify all expansion plan items ticked**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 grep -c "Extended Thinking\|Prompt Caching\|Multimodal\|IAM\|Entra ID\|Memory System\|Sandbox\|Web Tools\|Custom Provider\|MCP SDK\|SSH Worker\|LLM Connection\|Rate Limit" docs/user_manual/README.md
 ```
 Expected: 13+ matches (all expansion plan topics present).

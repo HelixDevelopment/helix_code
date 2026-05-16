@@ -11,15 +11,15 @@
 
 ```
 # New files to create
-HelixCode/internal/anti_bluff/types.go              — create (bluff taxonomy scanner)
-HelixCode/internal/anti_bluff/scanner.go            — create (grep + static analysis)
-HelixCode/internal/anti_bluff/verifier_test.go      — create (self-test)
-HelixCode/tests/e2e/challenges/challenges/anti-bluff-verifier-001.json — create
+helix_code/internal/anti_bluff/types.go              — create (bluff taxonomy scanner)
+helix_code/internal/anti_bluff/scanner.go            — create (grep + static analysis)
+helix_code/internal/anti_bluff/verifier_test.go      — create (self-test)
+helix_code/tests/e2e/challenges/challenges/anti-bluff-verifier-001.json — create
 
 # Files to audit/modify
-HelixCode/internal/*/ *_test.go                     — audit all test files for bluffs
-HelixCode/tests/e2e/challenges/                     — audit all challenges
-HelixCode/cmd/                                      — audit test files
+helix_code/internal/*/ *_test.go                     — audit all test files for bluffs
+helix_code/tests/e2e/challenges/                     — audit all challenges
+helix_code/cmd/                                      — audit test files
 ```
 
 ---
@@ -29,7 +29,7 @@ HelixCode/cmd/                                      — audit test files
 **Goal:** Classify every test file, identify skip/silent-pass/no-evidence patterns.
 
 **Steps:**
-- [ ] Scan all `*_test.go` files under `HelixCode/internal/`, `HelixCode/cmd/`
+- [ ] Scan all `*_test.go` files under `helix_code/internal/`, `helix_code/cmd/`
 - [ ] Count by type (unit, integration, e2e, benchmark)
 - [ ] Identify `t.Skip()` without `SKIP-OK:` marker
 - [ ] Identify tests that assert on metadata-only (e.g., `assert.NotNil`) without runtime evidence
@@ -57,7 +57,7 @@ grep -rn "^func Test" ./internal/ ./cmd/ | wc -l
 - [x] Run a representative sample of challenges against real providers
 
 ```bash
-cd HelixCode/tests/e2e/challenges
+cd helix_code/tests/e2e/challenges
 # List all challenges
 ls challenges/
 # Run challenge runner with --dry-run to validate structure

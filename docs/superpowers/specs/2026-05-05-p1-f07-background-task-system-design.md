@@ -27,15 +27,15 @@ Extend `internal/workflow/` with a new `background.go` file holding `BackgroundM
 
 | File | Responsibility |
 |------|----------------|
-| `HelixCode/internal/workflow/background.go` | `BackgroundManager`, `BackgroundTask`, `TaskState`, `ManagerConfig`, sweeper |
-| `HelixCode/internal/workflow/background_test.go` | Unit tests for the manager + task |
-| `HelixCode/internal/tools/task_tools.go` | `TaskOutputTool`, `TaskStopTool` (agent-callable) |
-| `HelixCode/internal/tools/task_tools_test.go` | Unit tests for the agent tools |
-| `HelixCode/internal/tools/shell/background.go` | `BackgroundAware` adapter for the shell tool |
-| `HelixCode/internal/tools/shell/background_test.go` | Unit tests for the shell adapter |
-| `HelixCode/internal/commands/tasks_command.go` | `/tasks` slash command |
-| `HelixCode/internal/commands/tasks_command_test.go` | Unit tests for the slash command |
-| `HelixCode/tests/integration/background_shell_test.go` | Real-subprocess integration tests (`//go:build integration`) |
+| `helix_code/internal/workflow/background.go` | `BackgroundManager`, `BackgroundTask`, `TaskState`, `ManagerConfig`, sweeper |
+| `helix_code/internal/workflow/background_test.go` | Unit tests for the manager + task |
+| `helix_code/internal/tools/task_tools.go` | `TaskOutputTool`, `TaskStopTool` (agent-callable) |
+| `helix_code/internal/tools/task_tools_test.go` | Unit tests for the agent tools |
+| `helix_code/internal/tools/shell/background.go` | `BackgroundAware` adapter for the shell tool |
+| `helix_code/internal/tools/shell/background_test.go` | Unit tests for the shell adapter |
+| `helix_code/internal/commands/tasks_command.go` | `/tasks` slash command |
+| `helix_code/internal/commands/tasks_command_test.go` | Unit tests for the slash command |
+| `helix_code/tests/integration/background_shell_test.go` | Real-subprocess integration tests (`//go:build integration`) |
 | `challenges/p1-f07-background-tasks/CHALLENGE.md` | Runtime-evidence Challenge spec |
 | `challenges/p1-f07-background-tasks/run.sh` | Challenge runner |
 
@@ -43,9 +43,9 @@ Extend `internal/workflow/` with a new `background.go` file holding `BackgroundM
 
 | File | Change |
 |------|--------|
-| `HelixCode/internal/tools/registry.go` | `Execute` detects `run_in_background: true`, calls `BackgroundManager.StartTask`; new `SetBackgroundManager(*workflow.BackgroundManager)` and `RegisterTaskTools(*workflow.BackgroundManager)` methods |
-| `HelixCode/internal/commands/builtin/register.go` | New `RegisterBuiltinCommandsWithTasks(registry, mgr)` mirroring the Hooks/MCP pattern |
-| `HelixCode/cmd/cli/main.go` | Construct `BackgroundManager`, wire into ToolRegistry + RegisterBuiltinCommandsWithTasks |
+| `helix_code/internal/tools/registry.go` | `Execute` detects `run_in_background: true`, calls `BackgroundManager.StartTask`; new `SetBackgroundManager(*workflow.BackgroundManager)` and `RegisterTaskTools(*workflow.BackgroundManager)` methods |
+| `helix_code/internal/commands/builtin/register.go` | New `RegisterBuiltinCommandsWithTasks(registry, mgr)` mirroring the Hooks/MCP pattern |
+| `helix_code/cmd/cli/main.go` | Construct `BackgroundManager`, wire into ToolRegistry + RegisterBuiltinCommandsWithTasks |
 
 ### 3.3 `BackgroundAware` interface (`internal/tools/`)
 

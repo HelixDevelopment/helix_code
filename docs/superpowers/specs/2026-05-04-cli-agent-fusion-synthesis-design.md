@@ -49,8 +49,8 @@ A staged programme — *not* a single feature — that produces, in order:
 ### 2.1 Final repo layout (post-Phase-0)
 
 ```
-HelixCode/                              # meta-repo (this repo)
-├── HelixCode/                          # tracked subdirectory (Go app, NOT a submodule)
+helix_code/                              # meta-repo (this repo)
+├── helix_code/                          # tracked subdirectory (Go app, NOT a submodule)
 │   ├── CLAUDE.md / AGENTS.md / CONSTITUTION.md   # NEW — governance triplet (currently missing)
 │   ├── cmd/  internal/  applications/  tests/  ...
 │   └── go.mod                          # module dev.helix.code, go 1.26
@@ -82,7 +82,7 @@ HelixCode/                              # meta-repo (this repo)
 ### 2.2 Submodule rules
 - **Protocol: SSH only.** `git@github.com:…` or `git@gitlab.com:…`. Constitution Rule 3 already prohibits HTTPS — re-affirmed.
 - **Recursion: deep.** `git submodule update --init --recursive --jobs 8`. `setup.sh` wraps this; we add a verifier that fails if any submodule is uninitialised.
-- **`HelixCode/HelixCode/` stays a tracked subdirectory.** Promoting it to a submodule would create a circular reference (this repo *is* `HelixDevelopment/HelixCode`). Documented explicitly in `HelixCode/HelixCode/CLAUDE.md`.
+- **`helix_code/helix_code/` stays a tracked subdirectory.** Promoting it to a submodule would create a circular reference (this repo *is* `HelixDevelopment/HelixCode`). Documented explicitly in `helix_code/helix_code/CLAUDE.md`.
 - **LLMsVerifier dual-pinning.** `Dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
 - **Agent-Deck nested-worktree fix.** `Example_Projects/Agent-Deck/.claude/worktrees/agent-*` paths are git worktrees, not submodules. Add to `.git/info/exclude` (local) and document.
 
@@ -92,16 +92,16 @@ HelixCode/                              # meta-repo (this repo)
 > No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital, transitively or otherwise. All secrets live in `.env` files (mode 0600) listed in `.gitignore`. Any leak — to git, logs, build artefacts, screenshots, or external services — is a release blocker until rotated and post-mortemed.
 
 **Implementation:**
-- `HelixCode/HelixCode/.env` — copied (not symlinked) from `../helix_agent/.env` during Phase 0; mode 0600; owner-only.
-- `HelixCode/HelixCode/.env.example` — every key from real `.env` with `<REDACTED>` placeholders; under git.
-- `.gitignore` (root + `HelixCode/HelixCode/`) — explicit `.env`, `.env.local`, `.env.*` (with `!.env.example` exception), `*.pem`, `*.key`, `*.crt`, `id_rsa*`, plus `helix.security.json` if it ever holds secrets.
+- `helix_code/helix_code/.env` — copied (not symlinked) from `../helix_agent/.env` during Phase 0; mode 0600; owner-only.
+- `helix_code/helix_code/.env.example` — every key from real `.env` with `<REDACTED>` placeholders; under git.
+- `.gitignore` (root + `helix_code/helix_code/`) — explicit `.env`, `.env.local`, `.env.*` (with `!.env.example` exception), `*.pem`, `*.key`, `*.crt`, `id_rsa*`, plus `helix.security.json` if it ever holds secrets.
 - **Secret-scan gate** — `scripts/scan-secrets.sh` runs gitleaks (or fallback grep over working tree); wired into `make ci-validate-all`. Failing it blocks any phase work.
 - **Migration steps (Phase 0 P0-04):**
   ```
-  cp -p ../helix_agent/.env HelixCode/HelixCode/.env
-  chmod 600 HelixCode/HelixCode/.env
-  ls -la HelixCode/HelixCode/.env             # must show -rw-------
-  git check-ignore HelixCode/HelixCode/.env   # must exit 0
+  cp -p ../helix_agent/.env helix_code/helix_code/.env
+  chmod 600 helix_code/helix_code/.env
+  ls -la helix_code/helix_code/.env             # must show -rw-------
+  git check-ignore helix_code/helix_code/.env   # must exit 0
   ```
 
 ### 2.4 Push protections
@@ -129,16 +129,16 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 | **P0-01** | Resolve `Example_Projects/Agent-Deck/.claude/worktrees/` recursion error: add path to `.git/info/exclude` (local); document fix in `helix_agent/cli_agents/agent-deck/CLAUDE.md` (after P0-02) | `git submodule foreach --recursive 'echo OK' \| grep -c OK` returns ≥87 with no `fatal:` | P0-02 |
 | **P0-02** | Add HelixAgent submodule: `git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent && git submodule update --init --recursive HelixAgent` | `ls helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}` all exist | P0-03, P1+ |
 | **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `Dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
-| **P0-04** | Migrate API keys: `cp -p ../helix_agent/.env HelixCode/HelixCode/.env && chmod 600 HelixCode/HelixCode/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
-| **P0-05** | Update `.gitignore` (root + `HelixCode/HelixCode/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
-| **P0-06** | Refresh `HelixCode/HelixCode/.env.example`: every key from `../helix_agent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env\|sort) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example\|sort)` empty | P0-07 |
+| **P0-04** | Migrate API keys: `cp -p ../helix_agent/.env helix_code/helix_code/.env && chmod 600 helix_code/helix_code/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
+| **P0-05** | Update `.gitignore` (root + `helix_code/helix_code/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
+| **P0-06** | Refresh `helix_code/helix_code/.env.example`: every key from `../helix_agent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env\|sort) <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env.example\|sort)` empty | P0-07 |
 | **P0-07** | `scripts/scan-secrets.sh` — gitleaks or fallback grep for `sk-`, `gho_`, `glpat-`, `xoxb-`, `AKIA`, `eyJ`; wired into `make ci-validate-all` | Exits 0 on clean tree; intentionally fails on planted test secret | P0-08 |
 | **P0-08** | `scripts/git_hooks/pre-push` rejecting `--force` unless `HELIX_FORCE_PUSH_APPROVED=1`; idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh` | Hook blocks `git push --force github main` (verify by reading hook output text only — do not actually run a force push) | P0-09 |
-| **P0-09** | Create governance triplet for `HelixCode/HelixCode/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
+| **P0-09** | Create governance triplet for `helix_code/helix_code/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
 | **P0-10** | Add CONST-042 + CONST-043 to root `CONSTITUTION.md` Article XII (NEW) | `grep -E "CONST-042\|CONST-043" CONSTITUTION.md` returns both | P0-11 |
 | **P0-11** | Cascade CONST-042 + CONST-043 to root `CLAUDE.md`, `AGENTS.md`, `CRUSH.md`, `QWEN.md`. Backfill anti-bluff anchor to `CRUSH.md` and `QWEN.md` (currently missing) | `for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE "11.9\|CONST-042\|CONST-043" $f; done` returns all four | P0-12 |
 | **P0-12** | Cascade all three anchors to every owned submodule: HelixQA, Challenges, Containers, Security, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, plus new HelixAgent and its nested HelixLLM/HelixMemory/HelixSpecifier. Backfill missing anti-bluff anchor in LLMsVerifier (all 3) and CONSTITUTION.md anchor in the four Dependencies repos | `scripts/verify-governance-cascade.sh` (extended) exits 0 | P0-13 |
-| **P0-13** | Fix root `CLAUDE.md` §3.2 bluff: change `HelixCode/ ← SUBMODULE` to `HelixCode/ ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted)` | `grep -A1 '^├── HelixCode/' CLAUDE.md` shows corrected label | P0-14 |
+| **P0-13** | Fix root `CLAUDE.md` §3.2 bluff: change `helix_code/ ← SUBMODULE` to `helix_code/ ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted)` | `grep -A1 '^├── helix_code/' CLAUDE.md` shows corrected label | P0-14 |
 | **P0-14** | Wire P0 gates into Makefile: `make verify-foundation` runs P0-01, 03, 05, 07, 12 checks plus `no-silent-skips` and `verify-governance-cascade.sh` | Exits 0 with no warnings; output committed to evidence log | P0-15 |
 | **P0-15** | Refresh PNG diagrams: regenerate `overall_architecture.png`, `dependency_graph.png`, `feature_gap_matrix.png`, `integration_phases.png` against real module set. Output to `docs/improvements/06_diagrams_real/`; deprecate 01/02 with `DEPRECATED.md` pointers | New diagrams exist; `01/DEPRECATED.md` and `02/DEPRECATED.md` reference new location | P0-16 |
 | **P0-16** | Write `docs/improvements/05_phase_0_evidence.md` — pasted output of every P0 acceptance check with timestamps. Single atomic commit listing all 16 tasks. Push to all four remotes (no force) | `git ls-remote --heads <r> main` for `github`/`gitlab`/`origin`/`upstream` shows matching SHAs | P0 done → P1 unblocked |
@@ -176,13 +176,13 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 19. AskUserQuestion with Previews
 20. Theme System
 
-**Source of truth:** `helix_agent/cli_agents/claude-code/` (canonical) — *not* `HelixCode/Example_Projects/Claude_Code/`. claude-code core is closed-source; porting derives features from public SDK + observable CLI behaviour. No reverse-engineering of binaries.
+**Source of truth:** `helix_agent/cli_agents/claude-code/` (canonical) — *not* `helix_code/Example_Projects/Claude_Code/`. claude-code core is closed-source; porting derives features from public SDK + observable CLI behaviour. No reverse-engineering of binaries.
 
 **Per-feature deliverables (all six required):**
-- (a) Source landed at the documented HelixCode path under `HelixCode/internal/<package>/`.
+- (a) Source landed at the documented HelixCode path under `helix_code/internal/<package>/`.
 - (b) Unit tests using existing testify pattern; mocks allowed only here.
-- (c) Integration test under `HelixCode/tests/integration/` with `-tags=integration`, **no mocks**, real PostgreSQL/Redis.
-- (d) Challenge script under `HelixCode/tests/e2e/challenges/<feature>/` against the docker-compose-full-test stack with positive runtime evidence.
+- (c) Integration test under `helix_code/tests/integration/` with `-tags=integration`, **no mocks**, real PostgreSQL/Redis.
+- (d) Challenge script under `helix_code/tests/e2e/challenges/<feature>/` against the docker-compose-full-test stack with positive runtime evidence.
 - (e) Updated reference docs in `docs/COMPLETE_API_REFERENCE.md` / `docs/COMPLETE_CLI_REFERENCE.md` if applicable.
 - (f) Anti-bluff smoke check — `grep -rn "simulated\|for now\|TODO implement\|placeholder" <new_files>` empty.
 
@@ -226,7 +226,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 **Per-agent deliverable shape:** identical to Phase 1 (a)-(f).
 
 **Acceptance criteria for Phase 2:**
-- Every priority-listed agent has its sub-spec executed; features land under `HelixCode/internal/<package>/` or `HelixCode/applications/...`.
+- Every priority-listed agent has its sub-spec executed; features land under `helix_code/internal/<package>/` or `helix_code/applications/...`.
 - No silent feature skips — intentional omissions get `SKIP-OK: <reason>` in the porting doc.
 - Fusion goal verified: a single end-user can invoke claude-code's Plan Mode on a task using Aider's repo-map + Cline's browser automation + OpenHands' sandbox — and it works end-to-end.
 
@@ -278,7 +278,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 ### 4.5 Phase 5 — End-user materials uplift
 
 **Deliverables:**
-- `HelixCode/HelixCode/docs/USER_MANUAL.md` — full rewrite covering every Phase-1+2 feature; rendered to HTML at `github_pages_website/manual/`.
+- `helix_code/helix_code/docs/USER_MANUAL.md` — full rewrite covering every Phase-1+2 feature; rendered to HTML at `github_pages_website/manual/`.
 - `github_pages_website/` — feature pages, comparison-with-{claude-code,aider,cline} matrix, screenshots/asciinema demos.
 - `docs/VIDEO_COURSE_CURRICULUM.md` — per-feature episode outlines with sample scripts (full filming out of scope).
 - `docs/adr/NNN-<topic>.md` — one ADR per non-trivial port.
@@ -321,8 +321,8 @@ A composite scanner; wired into `make ci-validate-all`. Components:
 - **Check 1 — `t.Skip()` audit (B7):** every `t.Skip()`, `testing.Short()`, build-tag exclusion must have `SKIP-OK: #<ticket>` within 3 lines OR be flagged. Existing `scripts/no-silent-skips.sh` reused + extended.
 - **Check 2 — assertion-density audit (B1, B2, B3):** for every `*_test.go`, count NoError/assert.NoError ratio vs. behavioural assertions (assert.Equal, assert.Contains, assert.JSONEq, custom matchers). NoError-density > 60% AND behavioural-assertion count < 2 → flagged for human review (smell, doesn't gate).
 - **Check 3 — challenge runtime-evidence audit (B4):** every `tests/e2e/challenges/<feature>/run.sh` must (1) make a real network call (curl/nc/psql/redis-cli/docker exec) OR (2) spawn a real subprocess via `go run` / `./bin/helixcode` AND (3) print at least one line containing the feature's expected output pattern. Greps without (1) or (2) → fail.
-- **Check 4 — integration-test purity (B5):** files matching `tests/integration/**/*.go` with `-tags=integration` build constraint must NOT import `internal/mocks/`. `grep -rn "internal/mocks" HelixCode/tests/integration/` empty.
-- **Check 5 — simulation-string scan (B6):** `grep -rn "simulated\|for now\|TODO implement\|placeholder\|This is a simulated\|simulate generation\|For now," HelixCode/internal HelixCode/cmd HelixCode/applications` empty.
+- **Check 4 — integration-test purity (B5):** files matching `tests/integration/**/*.go` with `-tags=integration` build constraint must NOT import `internal/mocks/`. `grep -rn "internal/mocks" helix_code/tests/integration/` empty.
+- **Check 5 — simulation-string scan (B6):** `grep -rn "simulated\|for now\|TODO implement\|placeholder\|This is a simulated\|simulate generation\|For now," helix_code/internal helix_code/cmd helix_code/applications` empty.
 - **Check 6 — print-and-sleep pattern:** AST scan flags any function with `fmt.Print*` followed by `time.Sleep` followed by `return nil` with no `exec.*Command` between them.
 
 ### 5.3 Runtime evidence — what counts
@@ -383,7 +383,7 @@ Every owned-by-us repo's governance triplet (`CONSTITUTION.md`, `CLAUDE.md`, `AG
 ### 6.2 CLAUDE.md / AGENTS.md structure
 
 Both files contain:
-- **§ Peer Governance** — pointer to sister files, links to parent `HelixCode/`.
+- **§ Peer Governance** — pointer to sister files, links to parent `helix_code/`.
 - **§ Mandatory Rules** — full enumeration of every applicable CONST-xxx with one-line summary.
 - **§ Anti-Bluff** — Article XI §11.9 verbatim quote + operative rule + cascade requirement.
 - **§ Repo-Specific Addenda** — only here may submodules diverge. Tech stack, build commands, single-test invocation. Delimited by `<!-- BEGIN: REPO-SPECIFIC ADDENDA -->` / `<!-- END: REPO-SPECIFIC ADDENDA -->` markers.
@@ -397,7 +397,7 @@ Both files contain:
 canonical/CONSTITUTION_ANCHORS.md      # canonical wording for the three articles
 canonical/CLAUDE_TEMPLATE.md           # template with addenda placeholder
 canonical/AGENTS_TEMPLATE.md
-owned-repos.txt                        # HelixCode (root), HelixCode/HelixCode (subdir),
+owned-repos.txt                        # HelixCode (root), helix_code/HelixCode (subdir),
                                        # HelixAgent, helix_agent/HelixLLM, helix_agent/HelixMemory,
                                        # helix_agent/HelixSpecifier, HelixQA, Challenges,
                                        # Containers, Security, Dependencies/HelixDevelopment/*
@@ -409,7 +409,7 @@ Run via `make propagate-governance`. Verifier `scripts/verify-governance-cascade
 
 ### 6.4 End-user materials
 
-**Inside `HelixCode/HelixCode/`:**
+**Inside `helix_code/helix_code/`:**
 - `docs/USER_MANUAL.md` — end-to-end user guide (Phase 5); HTML via `make manual-html`.
 - `docs/COMPLETE_API_REFERENCE.md`, `docs/COMPLETE_CLI_REFERENCE.md`, `docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md`, `docs/COMPLETE_DEPLOYMENT_GUIDE.md`, `docs/COMPLETE_TROUBLESHOOTING_GUIDE.md` — refreshed per port.
 - `docs/adr/` — ADRs added per non-trivial port.

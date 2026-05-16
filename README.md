@@ -82,11 +82,11 @@ HelixCode Architecture
 ## 📦 Project Structure
 
 ```
-HelixCode/
+helix_code/
 ├── Specification/          # Technical specifications and requirements
 ├── Implementation_Guide/   # Implementation plans and guides
 ├── Design/                 # Design assets and specifications
-├── HelixCode/              # Main Go implementation
+├── helix_code/              # Main Go implementation
 │   ├── cmd/
 │   │   ├── server/         # HTTP server application
 │   │   └── cli/            # CLI client
@@ -252,10 +252,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Documentation
 
-- [Architecture Overview](HelixCode/docs/ARCHITECTURE.md)
-- [Development Guide](HelixCode/docs/DEVELOPMENT.md)
-- [User Guide](HelixCode/docs/USER_GUIDE.md)
-- [API Documentation](HelixCode/docs/API.md)
+- [Architecture Overview](helix_code/docs/ARCHITECTURE.md)
+- [Development Guide](helix_code/docs/DEVELOPMENT.md)
+- [User Guide](helix_code/docs/USER_GUIDE.md)
+- [API Documentation](helix_code/docs/API.md)
 
 ## 🆘 Support
 

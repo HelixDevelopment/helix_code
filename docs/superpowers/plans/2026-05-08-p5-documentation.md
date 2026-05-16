@@ -21,9 +21,9 @@ docs/guides/api-reference.md               — create
 docs/guides/deployment-guide.md            — create
 docs/guides/troubleshooting.md             — create
 docs/guides/challenge-authoring.md         — create
-HelixCode/internal/**/*.go                 — modify (add doc comments)
-HelixCode/cmd/**/*.go                      — modify (add doc comments)
-HelixCode/applications/**/*.go             — modify (add doc comments)
+helix_code/internal/**/*.go                 — modify (add doc comments)
+helix_code/cmd/**/*.go                      — modify (add doc comments)
+helix_code/applications/**/*.go             — modify (add doc comments)
 GAP_ANALYSIS.md                            — modify
 HELIXCODE_FEATURE_GAP_ANALYSIS.md          — modify
 HELIXCODE_GAP_ANALYSIS.md                  — modify
@@ -522,7 +522,7 @@ if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey == "" {
 - [ ] **Step 1: Audit current doc comment coverage**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 go doc -all ./... 2>&1 | grep "no Go files\|undefined\|no exported" | wc -l
 ```
 
@@ -550,7 +550,7 @@ All must have doc comments.
 ```bash
 for pkg in internal/auth internal/llm internal/server internal/tools internal/worker internal/task internal/memory internal/config internal/verifier; do
   cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-  git add "HelixCode/$pkg/"
+  git add "helix_code/$pkg/"
   git commit -m "docs(P5-T07): add Go doc comments to $pkg
 
 Phase: 5  Task: P5-T07"
@@ -622,7 +622,7 @@ Phase: 5  Tasks: P5-T08 through P5-T13"
 - [ ] **Step 1: Verify every documented feature has a working challenge**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 # For each guide, verify referenced features exist in tree
 for guide in docs/guides/*.md; do
   echo "=== $guide ==="
@@ -655,7 +655,7 @@ Phase: 5  Task: P5-T14"
 - [ ] **Step 1: Complete anti-bluff grep across all source**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 echo "=== Simulated ===" && grep -rn "simulated\|Simulated" internal/ cmd/ applications/ --include="*.go" | grep -v "_test.go" | grep -v "doc.go" | grep -v "faiss_fallback" || echo "PASS"
 echo "=== Placeholder ===" && grep -rn "placeholder\|Placeholder" internal/ cmd/ --include="*.go" | grep -v "_test.go" | grep -v "doc.go" || echo "PASS"
 echo "=== Stub ===" && grep -rn "stub\|Stub" internal/ cmd/ --include="*.go" | grep -v "_test.go" | grep -v "doc.go" || echo "PASS"
@@ -723,7 +723,7 @@ Expected: `PASS`
 - [ ] **Step 4: Run anti-bluff verifier challenge**
 
 ```bash
-cd HelixCode/tests/e2e/challenges/anti_bluff_verifier && go run challenge.go
+cd helix_code/tests/e2e/challenges/anti_bluff_verifier && go run challenge.go
 ```
 
 Expected: `ANTI-BLUFF: ALL CLEAN`

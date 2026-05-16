@@ -22,14 +22,14 @@ ci-validate-all: no-silent-skips-warn demo-all-warn verify-foundation
 
 # ---------------------------------------------------------------------------
 # Top-level scan convenience targets (P0-T08.7)
-# These cd into HelixCode/ and invoke the inner Makefile security targets.
+# These cd into helix_code/ and invoke the inner Makefile security targets.
 # Usage: make scan-sonarqube   (from root)
 # ---------------------------------------------------------------------------
 
-scan-sonarqube: ## Run SonarQube analysis (requires SONAR_TOKEN in HelixCode/.env)
+scan-sonarqube: ## Run SonarQube analysis (requires SONAR_TOKEN in helix_code/.env)
 	$(MAKE) -C HelixCode security-scan-sonarqube
 
-scan-snyk: ## Run Snyk vulnerability scan (requires SNYK_TOKEN in HelixCode/.env)
+scan-snyk: ## Run Snyk vulnerability scan (requires SNYK_TOKEN in helix_code/.env)
 	$(MAKE) -C HelixCode security-scan-snyk
 
 scan-all: ## Run all HelixCode security scanners
@@ -65,7 +65,7 @@ bluff-detector: ## Run bluff-detector (Phase 4 deliverable; stub-tolerant)
 
 # scan-secrets-root: run the root-level credential scanner (scripts/scan-secrets.sh).
 # Used by verify-foundation. Distinct from scan-secrets which runs the inner
-# HelixCode/scripts/scan-secrets.sh targeting only the Go app subdirectory.
+# helix_code/scripts/scan-secrets.sh targeting only the Go app subdirectory.
 scan-secrets-root: ## Run root scripts/scan-secrets.sh (whole-repo credential scan)
 	@bash scripts/scan-secrets.sh
 

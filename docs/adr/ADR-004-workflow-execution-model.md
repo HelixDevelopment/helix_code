@@ -320,7 +320,7 @@ The workflow system supports different autonomy levels through the `autonomy` su
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/workflow/workflow.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/workflow/executor.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/workflow/autonomy/`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/workflow/planmode/`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/workflow/workflow.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/workflow/executor.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/workflow/autonomy/`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/workflow/planmode/`

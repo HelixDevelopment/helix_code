@@ -17,22 +17,22 @@ New `internal/session/resume.go` holds `ResumeFinder`, `ResumeMode` enum (`Resum
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/session/resume.go` — `ResumeFinder`, `ResumeMode`, `SessionMetadata`, `FindResumeTarget`, `ResumeSession`
-- `HelixCode/internal/session/resume_test.go`
-- `HelixCode/internal/session/transcript_store.go` — JSONL transcript I/O (`Append`, `Read`, `List`, `Delete`)
-- `HelixCode/internal/session/transcript_store_test.go`
-- `HelixCode/internal/session/identity.go` — `computeProjectIdentity()` (Git root, fallback cwd)
-- `HelixCode/internal/session/identity_test.go`
-- `HelixCode/internal/commands/sessions_command.go` — `/sessions` slash
-- `HelixCode/internal/commands/sessions_command_test.go`
-- `HelixCode/cmd/cli/sessions_cmd.go` — cobra subcommand
-- `HelixCode/cmd/cli/sessions_cmd_test.go`
-- `HelixCode/tests/integration/sessions_resume_test.go` — `//go:build integration`
+- `helix_code/internal/session/resume.go` — `ResumeFinder`, `ResumeMode`, `SessionMetadata`, `FindResumeTarget`, `ResumeSession`
+- `helix_code/internal/session/resume_test.go`
+- `helix_code/internal/session/transcript_store.go` — JSONL transcript I/O (`Append`, `Read`, `List`, `Delete`)
+- `helix_code/internal/session/transcript_store_test.go`
+- `helix_code/internal/session/identity.go` — `computeProjectIdentity()` (Git root, fallback cwd)
+- `helix_code/internal/session/identity_test.go`
+- `helix_code/internal/commands/sessions_command.go` — `/sessions` slash
+- `helix_code/internal/commands/sessions_command_test.go`
+- `helix_code/cmd/cli/sessions_cmd.go` — cobra subcommand
+- `helix_code/cmd/cli/sessions_cmd_test.go`
+- `helix_code/tests/integration/sessions_resume_test.go` — `//go:build integration`
 - `challenges/p1-f11-session-resume/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
-- `HelixCode/internal/session/session_manager.go` — `Append(msg Message) error` (calls store), `Resume(ctx, id) error`, expose `CurrentID()`.
-- `HelixCode/cmd/cli/main.go` — parse `--resume`/`--continue` flags before dispatcher; if set, call `ResumeFinder.FindResumeTarget` + `sessionMgr.Resume`. Register `/sessions` slash + `helixcode sessions` cobra.
+- `helix_code/internal/session/session_manager.go` — `Append(msg Message) error` (calls store), `Resume(ctx, id) error`, expose `CurrentID()`.
+- `helix_code/cmd/cli/main.go` — parse `--resume`/`--continue` flags before dispatcher; if set, call `ResumeFinder.FindResumeTarget` + `sessionMgr.Resume`. Register `/sessions` slash + `helixcode sessions` cobra.
 
 ### 3.3 Types
 

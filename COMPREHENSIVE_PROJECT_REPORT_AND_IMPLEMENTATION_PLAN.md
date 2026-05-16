@@ -194,7 +194,7 @@ The implementation plan is organized into **6 phases** to achieve 100% completio
 
 | Document | Status | Location |
 |----------|--------|----------|
-| Main README | Complete | `HelixCode/README.md` |
+| Main README | Complete | `helix_code/README.md` |
 | CLAUDE.md | Complete | `CLAUDE.md` |
 | Enterprise Guide | Complete | `ENTERPRISE_DEPLOYMENT_GUIDE.md` |
 | User Manual | Complete | `docs/user_manual/` |

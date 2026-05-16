@@ -60,7 +60,7 @@ prescribed by:
    pointer AND every cross-reference. They CAN NOT be unilaterally
    renamed locally because the rename has to land atomically across
    all consumers:
-   - `HelixCode/`, `challenges/`, `containers/`, `Dependencies/`,
+   - `helix_code/`, `challenges/`, `containers/`, `Dependencies/`,
      `github_pages_website/`, `helix_agent/`, `helix_qa/`, `security/`,
      `panoptic/`, `Upstreams/`, `assets/`, `mcp_servers/`.
 

@@ -36,13 +36,13 @@
 
 **Tech Stack:** bash (POSIX-portable), `git submodule`, `git mv`, `git rm --cached`, GNU sed/grep, ripgrep (`rg`), Go 1.26 (for the loader and harness), testify, GNU Make. **Zero new external dependencies.**
 
-**Working directory:** `/run/media/milosvasic/DATA4TB/Projects/HelixCode` (meta-repo root). Inner Go module commands run from `HelixCode/`.
+**Working directory:** `/run/media/milosvasic/DATA4TB/Projects/HelixCode` (meta-repo root). Inner Go module commands run from `helix_code/`.
 
 **Anti-bluff smoke (run at the END of every task):**
 
 ```bash
 grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  HelixCode/internal HelixCode/cmd 2>/dev/null \
+  helix_code/internal helix_code/cmd 2>/dev/null \
   && echo "BLUFF FOUND" || echo "clean"
 ```
 
@@ -419,7 +419,7 @@ Commit: `feat(P1.5-WP4-T04.02): scripts/load_api_keys.sh canonical bash loader`.
 
 ## P1.5-WP4-T04.03 — Implement Go counterpart `internal/secrets/loader.go`
 
-In `HelixCode/internal/secrets/loader.go`. TDD-first (failing tests in `loader_test.go`):
+In `helix_code/internal/secrets/loader.go`. TDD-first (failing tests in `loader_test.go`):
 - `Load(env Env) (Source, error)` where `Env` is an interface for `Getenv` / `Stat` / `Open` (so tests inject tempdirs).
 - Parses `export VAR=value` lines from `~/api_keys.sh` (refuses non-0600).
 - Parses `VAR=value` lines from `.env` (handles `# comment` and quoted values).
@@ -448,7 +448,7 @@ One commit per repo.
 
 ## P1.5-WP4-T04.05 — Test loader (both branches + no-secrets branch)
 
-`HelixCode/internal/secrets/loader_test.go` covers:
+`helix_code/internal/secrets/loader_test.go` covers:
 - Happy: `~/api_keys.sh` mode=0600 with 2 vars → both set, source=APIKeysSh.
 - Refusal: `~/api_keys.sh` mode=0644 → error, no env mutation.
 - Fallback: no `~/api_keys.sh`, `.env` present → vars set, source=DotEnv.
@@ -525,9 +525,9 @@ git add -A
 git commit -m "docs(P1.5-WP6-T06.01): merge ./Documentation -> ./docs (root)"
 ```
 
-## P1.5-WP6-T06.02 — Merge `HelixCode/Documentation/` → `HelixCode/docs/`
+## P1.5-WP6-T06.02 — Merge `helix_code/Documentation/` → `helix_code/docs/`
 
-Same pattern, scoped to `HelixCode/`. Inner-module commit.
+Same pattern, scoped to `helix_code/`. Inner-module commit.
 
 ## P1.5-WP6-T06.03 — Move `helix_agent/skills/development/documentation/` → `helix_agent/docs/skills/development/`
 
@@ -556,12 +556,12 @@ find . -type d \
   -not -path "./Security" -not -path "./Assets" \
   -not -path "./Dependencies/*" -not -path "./mcp_servers/*" \
   -not -path "./Github-Pages-Website" \
-  -not -path "./HelixCode/cmd" -not -path "./HelixCode/internal" \
+  -not -path "./helix_code/cmd" -not -path "./helix_code/internal" \
   | grep -E "[A-Z]|-" \
   | tee docs/improvements/p1-5-snakecase-inventory.md
 ```
 
-Filter the inventory: drop allowlist items; drop Go-import-path-affecting renames inside `HelixCode/internal/` unless trivial-case-only.
+Filter the inventory: drop allowlist items; drop Go-import-path-affecting renames inside `helix_code/internal/` unless trivial-case-only.
 
 Commit: `docs(P1.5-WP7-T07.01): non-conforming directory inventory`.
 

@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f07-background-task-system-design.md` (commit `d11885e`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/HelixCode/` per the F01–F06 convention.
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/helix_code/` per the F01–F06 convention.
 
 **Anti-bluff smoke (run on every commit, FULL pattern):**
 ```bash
@@ -113,12 +113,12 @@ EOF
 ## Task 2: workflow/background.go — BackgroundTask + TaskState (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/workflow/background.go` (initial — types only; manager added in T03)
-- Create: `HelixCode/internal/workflow/background_test.go` (initial)
+- Create: `helix_code/internal/workflow/background.go` (initial — types only; manager added in T03)
+- Create: `helix_code/internal/workflow/background_test.go` (initial)
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/workflow/background_test.go`:
+Create `helix_code/internal/workflow/background_test.go`:
 
 ```go
 package workflow
@@ -207,7 +207,7 @@ Expected: FAIL with `undefined: TaskPending, BackgroundTask, newBackgroundTask, 
 
 - [ ] **Step 3: Write workflow/background.go with types only**
 
-Create `HelixCode/internal/workflow/background.go`:
+Create `helix_code/internal/workflow/background.go`:
 
 ```go
 // Package workflow's background.go provides BackgroundManager and BackgroundTask
@@ -411,7 +411,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/workflow/background.go HelixCode/internal/workflow/background_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/workflow/background.go helix_code/internal/workflow/background_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T02): add BackgroundTask + TaskState with bounded output ring
 
@@ -425,12 +425,12 @@ EOF
 ## Task 3: workflow/background.go — BackgroundManager + sweeper (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/workflow/background.go` (append manager)
-- Modify: `HelixCode/internal/workflow/background_test.go` (append tests)
+- Modify: `helix_code/internal/workflow/background.go` (append manager)
+- Modify: `helix_code/internal/workflow/background_test.go` (append tests)
 
 - [ ] **Step 1: Write failing manager tests**
 
-Append to `HelixCode/internal/workflow/background_test.go`:
+Append to `helix_code/internal/workflow/background_test.go`:
 
 ```go
 import (
@@ -654,7 +654,7 @@ Expected: FAIL with `undefined: NewBackgroundManager, ManagerConfig, LineSink, E
 
 - [ ] **Step 3: Append manager + sweeper to background.go**
 
-Append to `HelixCode/internal/workflow/background.go`:
+Append to `helix_code/internal/workflow/background.go`:
 
 ```go
 import (
@@ -912,7 +912,7 @@ func (bm *BackgroundManager) sweep() {
 
 - [ ] **Step 4: Verify imports merged correctly**
 
-The two import blocks (one in T02's initial file, one appended above) must be merged. Open `HelixCode/internal/workflow/background.go` and ensure there is exactly ONE `import (...)` block at the top with these entries (sorted):
+The two import blocks (one in T02's initial file, one appended above) must be merged. Open `helix_code/internal/workflow/background.go` and ensure there is exactly ONE `import (...)` block at the top with these entries (sorted):
 
 ```go
 import (
@@ -928,7 +928,7 @@ import (
 )
 ```
 
-Then run `gofmt -w HelixCode/internal/workflow/background.go`.
+Then run `gofmt -w helix_code/internal/workflow/background.go`.
 
 - [ ] **Step 5: Run tests**
 
@@ -949,7 +949,7 @@ Expected: `clean`.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/workflow/background.go HelixCode/internal/workflow/background_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/workflow/background.go helix_code/internal/workflow/background_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T03): add BackgroundManager with sweeper, panic recovery, MaxConcurrent
 
@@ -963,12 +963,12 @@ EOF
 ## Task 4: tools/types_background.go — BackgroundAware interface
 
 **Files:**
-- Create: `HelixCode/internal/tools/types_background.go`
-- Create: `HelixCode/internal/tools/types_background_test.go`
+- Create: `helix_code/internal/tools/types_background.go`
+- Create: `helix_code/internal/tools/types_background_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/types_background_test.go`:
+Create `helix_code/internal/tools/types_background_test.go`:
 
 ```go
 package tools
@@ -1031,7 +1031,7 @@ Expected: FAIL with undefined: `BackgroundAware`, `LineSink`, `ErrNoBackgroundMg
 
 - [ ] **Step 3: Write types_background.go**
 
-Create `HelixCode/internal/tools/types_background.go`:
+Create `helix_code/internal/tools/types_background.go`:
 
 ```go
 package tools
@@ -1080,7 +1080,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/types_background.go HelixCode/internal/tools/types_background_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/types_background.go helix_code/internal/tools/types_background_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T04): add BackgroundAware interface + LineSink + error sentinel
 
@@ -1094,21 +1094,21 @@ EOF
 ## Task 5: tools/shell/background.go — shell BackgroundAware adapter (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/shell/background.go`
-- Create: `HelixCode/internal/tools/shell/background_test.go`
+- Create: `helix_code/internal/tools/shell/background.go`
+- Create: `helix_code/internal/tools/shell/background_test.go`
 
 - [ ] **Step 1: Read existing shell tool**
 
 ```bash
-cat HelixCode/internal/tools/shell/shell.go
-cat HelixCode/internal/tools/shell/executor.go
+cat helix_code/internal/tools/shell/shell.go
+cat helix_code/internal/tools/shell/executor.go
 ```
 
 Identify the existing tool struct name (likely `ShellTool`), the existing Execute signature, and the path through which subprocess is spawned. The new background.go file adds an `ExecuteWithProgress` method on the existing tool struct (or a wrapper) that uses pipes + bufio.Scanner.
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/tools/shell/background_test.go`:
+Create `helix_code/internal/tools/shell/background_test.go`:
 
 ```go
 package shell
@@ -1204,7 +1204,7 @@ Expected: FAIL with `ExecuteWithProgress` undefined or interface assertion failu
 
 - [ ] **Step 4: Write background.go**
 
-Create `HelixCode/internal/tools/shell/background.go`:
+Create `helix_code/internal/tools/shell/background.go`:
 
 ```go
 package shell
@@ -1336,7 +1336,7 @@ Expected: `clean`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/shell/background.go HelixCode/internal/tools/shell/background_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/shell/background.go helix_code/internal/tools/shell/background_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T05): shell tool implements BackgroundAware (streaming stdout/stderr)
 
@@ -1350,12 +1350,12 @@ EOF
 ## Task 6: tools/registry.go — SetBackgroundManager + Execute dispatch (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/registry.go`
-- Create: `HelixCode/internal/tools/registry_background_test.go`
+- Modify: `helix_code/internal/tools/registry.go`
+- Create: `helix_code/internal/tools/registry_background_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/registry_background_test.go`:
+Create `helix_code/internal/tools/registry_background_test.go`:
 
 ```go
 package tools
@@ -1508,7 +1508,7 @@ Expected: FAIL with `r.SetBackgroundManager` undefined.
 
 - [ ] **Step 3: Modify registry.go**
 
-Open `HelixCode/internal/tools/registry.go`. Add to the `ToolRegistry` struct:
+Open `helix_code/internal/tools/registry.go`. Add to the `ToolRegistry` struct:
 
 ```go
 type ToolRegistry struct {
@@ -1606,7 +1606,7 @@ If `r.mu` doesn't exist or has a different name, use the actual field. If `Get` 
 
 - [ ] **Step 4: Verify imports**
 
-`HelixCode/internal/tools/registry.go` should now import `dev.helix.code/internal/workflow`. Run `gofmt -w HelixCode/internal/tools/registry.go`.
+`helix_code/internal/tools/registry.go` should now import `dev.helix.code/internal/workflow`. Run `gofmt -w helix_code/internal/tools/registry.go`.
 
 - [ ] **Step 5: Run failing tests now passing**
 
@@ -1635,7 +1635,7 @@ Expected: `clean`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/registry.go HelixCode/internal/tools/registry_background_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/registry.go helix_code/internal/tools/registry_background_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T06): ToolRegistry dispatches run_in_background flag to BackgroundManager
 
@@ -1649,12 +1649,12 @@ EOF
 ## Task 7: tools/task_tools.go — TaskOutputTool + TaskStopTool (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/task_tools.go`
-- Create: `HelixCode/internal/tools/task_tools_test.go`
+- Create: `helix_code/internal/tools/task_tools.go`
+- Create: `helix_code/internal/tools/task_tools_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/task_tools_test.go`:
+Create `helix_code/internal/tools/task_tools_test.go`:
 
 ```go
 package tools
@@ -1768,7 +1768,7 @@ Expected: FAIL with undefined: `NewTaskOutputTool`, `NewTaskStopTool`.
 
 - [ ] **Step 3: Write task_tools.go**
 
-Create `HelixCode/internal/tools/task_tools.go`:
+Create `helix_code/internal/tools/task_tools.go`:
 
 ```go
 package tools
@@ -1926,7 +1926,7 @@ Expected: `clean`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/task_tools.go HelixCode/internal/tools/task_tools_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/task_tools.go helix_code/internal/tools/task_tools_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T07): add TaskOutput + TaskStop agent tools and registration
 
@@ -1940,23 +1940,23 @@ EOF
 ## Task 8: commands/tasks_command.go — /tasks slash + builtin registration (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/commands/tasks_command.go`
-- Create: `HelixCode/internal/commands/tasks_command_test.go`
-- Modify: `HelixCode/internal/commands/builtin/register.go` — add `RegisterBuiltinCommandsWithTasks`
-- Create: `HelixCode/internal/commands/builtin/tasks_register_test.go`
+- Create: `helix_code/internal/commands/tasks_command.go`
+- Create: `helix_code/internal/commands/tasks_command_test.go`
+- Modify: `helix_code/internal/commands/builtin/register.go` — add `RegisterBuiltinCommandsWithTasks`
+- Create: `helix_code/internal/commands/builtin/tasks_register_test.go`
 
 - [ ] **Step 1: Read existing command interface**
 
 ```bash
-grep -n "type CommandContext\|type CommandResult\|type Command interface\|func .* Execute" HelixCode/internal/commands/types.go HelixCode/internal/commands/registry.go 2>/dev/null | head -30
-cat HelixCode/internal/commands/builtin/hooks_register_test.go 2>/dev/null
+grep -n "type CommandContext\|type CommandResult\|type Command interface\|func .* Execute" helix_code/internal/commands/types.go helix_code/internal/commands/registry.go 2>/dev/null | head -30
+cat helix_code/internal/commands/builtin/hooks_register_test.go 2>/dev/null
 ```
 
 Use the same `Command` interface pattern + `RegisterBuiltinCommandsWithHooks` style proven in F05 and F06.
 
 - [ ] **Step 2: Write failing slash test**
 
-Create `HelixCode/internal/commands/tasks_command_test.go`:
+Create `helix_code/internal/commands/tasks_command_test.go`:
 
 ```go
 package commands
@@ -2058,7 +2058,7 @@ Expected: FAIL with `NewTasksCommand` undefined.
 
 - [ ] **Step 4: Write tasks_command.go**
 
-Create `HelixCode/internal/commands/tasks_command.go`:
+Create `helix_code/internal/commands/tasks_command.go`:
 
 ```go
 package commands
@@ -2154,7 +2154,7 @@ Expected: PASS (5/5).
 
 - [ ] **Step 6: Add RegisterBuiltinCommandsWithTasks**
 
-Modify `HelixCode/internal/commands/builtin/register.go` to add (mirroring the existing `RegisterBuiltinCommandsWithMCP` pattern from F06):
+Modify `helix_code/internal/commands/builtin/register.go` to add (mirroring the existing `RegisterBuiltinCommandsWithMCP` pattern from F06):
 
 ```go
 // Add the workflow + commands imports if missing.
@@ -2177,7 +2177,7 @@ Then update `GetBuiltinCommandNames()` to include `"tasks"`. If the existing `Te
 
 - [ ] **Step 7: Add register test**
 
-Create `HelixCode/internal/commands/builtin/tasks_register_test.go`:
+Create `helix_code/internal/commands/builtin/tasks_register_test.go`:
 
 ```go
 package builtin
@@ -2226,7 +2226,7 @@ Expected: `clean`.
 - [ ] **Step 10: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/commands/tasks_command.go HelixCode/internal/commands/tasks_command_test.go HelixCode/internal/commands/builtin/register.go HelixCode/internal/commands/builtin/tasks_register_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/commands/tasks_command.go helix_code/internal/commands/tasks_command_test.go helix_code/internal/commands/builtin/register.go helix_code/internal/commands/builtin/tasks_register_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T08): add /tasks slash command + builtin registration helper
 
@@ -2240,12 +2240,12 @@ EOF
 ## Task 9: cmd/cli/main.go startup wiring + integration test (real subprocess)
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go` — construct BackgroundManager, wire into ToolRegistry + RegisterBuiltinCommandsWithTasks
-- Create: `HelixCode/tests/integration/background_shell_test.go`
+- Modify: `helix_code/cmd/cli/main.go` — construct BackgroundManager, wire into ToolRegistry + RegisterBuiltinCommandsWithTasks
+- Create: `helix_code/tests/integration/background_shell_test.go`
 
 - [ ] **Step 1: Wire BackgroundManager into main.go**
 
-Find the existing F06 wiring block in `HelixCode/cmd/cli/main.go` where `mcp.NewManager()` is constructed and `RegisterBuiltinCommandsWithMCP` is called. Add adjacent:
+Find the existing F06 wiring block in `helix_code/cmd/cli/main.go` where `mcp.NewManager()` is constructed and `RegisterBuiltinCommandsWithMCP` is called. Add adjacent:
 
 ```go
 // F07: background task manager
@@ -2270,7 +2270,7 @@ Expected: success.
 
 - [ ] **Step 3: Write integration test**
 
-Create `HelixCode/tests/integration/background_shell_test.go`:
+Create `helix_code/tests/integration/background_shell_test.go`:
 
 ```go
 //go:build integration
@@ -2436,7 +2436,7 @@ Expected: `clean`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/cmd/cli/main.go HelixCode/tests/integration/background_shell_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/cmd/cli/main.go helix_code/tests/integration/background_shell_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T09): wire BackgroundManager into cmd/cli startup + integration test (real subprocess)
 
@@ -2452,12 +2452,12 @@ EOF
 **Files:**
 - Create: `challenges/p1-f07-background-tasks/CHALLENGE.md` (in the Challenges submodule)
 - Create: `challenges/p1-f07-background-tasks/run.sh`
-- Create: `HelixCode/tests/integration/cmd/p1f07_challenge/main.go` — small harness that polls TaskOutput across a streaming task
+- Create: `helix_code/tests/integration/cmd/p1f07_challenge/main.go` — small harness that polls TaskOutput across a streaming task
 - Modify: `docs/improvements/06_phase_1_evidence.md` — append T10 section with pasted runtime output
 
 - [ ] **Step 1: Write challenge harness**
 
-Create `HelixCode/tests/integration/cmd/p1f07_challenge/main.go`:
+Create `helix_code/tests/integration/cmd/p1f07_challenge/main.go`:
 
 ```go
 // p1f07_challenge runs a real background task and prints its polling timeline,
@@ -2600,7 +2600,7 @@ output and successfully cancels long-running shell processes. Per Article XI
    c. Asserts the polling timeline shows growing line counts (not just final).
    d. Starts `sleep 30`, cancels it after 200ms, asserts cancel within 3s.
    e. Logs `pgrep -x sleep` output as supporting evidence.
-3. Anti-bluff smoke: `grep -rn "simulated\|for now\|TODO implement\|placeholder" HelixCode/internal/workflow/ HelixCode/internal/tools/task_tools.go HelixCode/internal/tools/shell/background.go HelixCode/internal/commands/tasks_command.go` returns empty.
+3. Anti-bluff smoke: `grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal/workflow/ helix_code/internal/tools/task_tools.go helix_code/internal/tools/shell/background.go helix_code/internal/commands/tasks_command.go` returns empty.
 4. Cross-compile linux: `cd HelixCode && go build ./cmd/cli/... ./internal/workflow/... ./internal/tools/...`.
 
 ## Pass criteria
@@ -2651,8 +2651,8 @@ echo "==> P1-F07 challenge PASS"
 - [ ] **Step 4: chmod and run**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh 2>&1 | tee /tmp/p1f07-run.log
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f07-background-tasks/run.sh
+/run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f07-background-tasks/run.sh 2>&1 | tee /tmp/p1f07-run.log
 ```
 
 Expected: exits 0 with final line `==> P1-F07 challenge PASS`.
@@ -2683,7 +2683,7 @@ Use the actual content from `/tmp/p1f07-run.log` and the actual `git log` output
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add challenges/p1-f07-background-tasks/ HelixCode/tests/integration/cmd/p1f07_challenge docs/improvements/06_phase_1_evidence.md
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add challenges/p1-f07-background-tasks/ helix_code/tests/integration/cmd/p1f07_challenge docs/improvements/06_phase_1_evidence.md
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F07-T10): challenge with runtime evidence + cross-compile check
 
@@ -2724,7 +2724,7 @@ In the existing P1-F07 task list block, change every `- [ ]` to `- [x]` for item
 - [ ] **Step 3: Final verification sweep**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 # Unit + race
 go test -count=1 -race ./internal/workflow/... ./internal/tools/ ./internal/tools/shell/ ./internal/commands/ ./internal/commands/builtin/ ./cmd/cli/...
@@ -2745,8 +2745,8 @@ go build ./cmd/cli/... ./internal/workflow/... ./internal/tools/
 go vet ./internal/workflow/... ./internal/tools/ ./internal/tools/shell/ ./internal/commands/... ./cmd/cli/...
 
 # Final challenge re-run
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
-/run/media/milosvasic/DATA4TB/Projects/HelixCode/challenges/p1-f07-background-tasks/run.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f07-background-tasks/run.sh
+/run/media/milosvasic/DATA4TB/Projects/helix_code/challenges/p1-f07-background-tasks/run.sh
 ```
 
 If any step fails, STOP and report. Do NOT push.

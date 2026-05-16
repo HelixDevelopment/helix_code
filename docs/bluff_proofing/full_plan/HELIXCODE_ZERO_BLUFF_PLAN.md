@@ -12,7 +12,7 @@ This is the authoritative implementation roadmap to transform HelixCode from its
 ## PHASE 0: FOUNDATION REPAIR (Week 1)
 
 ### P0-001: Fix go.mod - Add All Advertised Dependencies
-**File**: `HelixCode/go.mod` (replace root go.mod)
+**File**: `helix_code/go.mod` (replace root go.mod)
 **Current State**: Only 3 dependencies (uuid, errors, yaml)
 **Required State**: Full dependency manifest
 

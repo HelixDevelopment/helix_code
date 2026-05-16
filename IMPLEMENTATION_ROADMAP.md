@@ -51,7 +51,7 @@
 
 #### Task 1.1: Create Mock Server Utility Package
 
-**File:** `HelixCode/internal/notification/testutil/mock_servers.go`
+**File:** `helix_code/internal/notification/testutil/mock_servers.go`
 
 **Implementation:**
 
@@ -265,7 +265,7 @@ go test ./internal/notification/testutil/... -v
 
 #### Task 1.2: Create Mock SMTP Server
 
-**File:** `HelixCode/internal/notification/testutil/mock_smtp.go`
+**File:** `helix_code/internal/notification/testutil/mock_smtp.go`
 
 **Implementation Options:**
 
@@ -363,7 +363,7 @@ func (m *MockSMTPServer) Close() error {
 
 #### Task 1.3: Slack Integration Tests
 
-**File:** `HelixCode/test/integration/slack_integration_test.go`
+**File:** `helix_code/test/integration/slack_integration_test.go`
 
 ```go
 //go:build integration
@@ -494,7 +494,7 @@ go test ./test/integration/... -v -tags=integration
 
 #### Task 1.4: Complete Discord Testing
 
-**File:** `HelixCode/internal/notification/discord_test.go`
+**File:** `helix_code/internal/notification/discord_test.go`
 
 ```go
 package notification
@@ -564,8 +564,8 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'HelixCode/internal/notification/**'
-      - 'HelixCode/test/integration/**'
+      - 'helix_code/internal/notification/**'
+      - 'helix_code/test/integration/**'
   pull_request:
     branches: [ main, develop ]
 
@@ -590,7 +590,7 @@ jobs:
     - name: Upload Coverage
       uses: codecov/codecov-action@v3
       with:
-        files: ./HelixCode/coverage.out
+        files: ./helix_code/coverage.out
         flags: notifications
 
   integration-tests:
@@ -627,7 +627,7 @@ jobs:
 
 #### Task 1.6: Test Documentation
 
-**File:** `HelixCode/docs/TESTING.md`
+**File:** `helix_code/docs/TESTING.md`
 
 ```markdown
 # HelixCode Notification Testing Guide
@@ -692,7 +692,7 @@ go tool cover -html=coverage.out
 
 #### Task 2.1: Implement Event Bus
 
-**File:** `HelixCode/internal/event/bus.go`
+**File:** `helix_code/internal/event/bus.go`
 
 ```go
 package event
@@ -865,7 +865,7 @@ func (bus *EventBus) GetTotalSubscribers() int {
 }
 ```
 
-**Tests:** `HelixCode/internal/event/bus_test.go`
+**Tests:** `helix_code/internal/event/bus_test.go`
 
 ```go
 package event
@@ -977,7 +977,7 @@ func TestEventBus_AsyncMode(t *testing.T) {
 
 #### Task 2.2: Global Event Bus Instance
 
-**File:** `HelixCode/internal/event/instance.go`
+**File:** `helix_code/internal/event/instance.go`
 
 ```go
 package event
@@ -1014,7 +1014,7 @@ func SetGlobalBus(bus *EventBus) {
 
 #### Task 2.3: Notification Event Handler
 
-**File:** `HelixCode/internal/notification/event_handler.go`
+**File:** `helix_code/internal/notification/event_handler.go`
 
 ```go
 package notification
@@ -1164,7 +1164,7 @@ func (h *NotificationEventHandler) RegisterWithEventBus(bus *event.EventBus) {
 }
 ```
 
-**Tests:** `HelixCode/internal/notification/event_handler_test.go`
+**Tests:** `helix_code/internal/notification/event_handler_test.go`
 
 **Acceptance Criteria:**
 - ✅ Events converted to notifications correctly
@@ -1178,7 +1178,7 @@ func (h *NotificationEventHandler) RegisterWithEventBus(bus *event.EventBus) {
 
 #### Task 2.4: Add Event Emission to Task Manager
 
-**File:** `HelixCode/internal/task/manager.go` (modify existing)
+**File:** `helix_code/internal/task/manager.go` (modify existing)
 
 **Changes needed:**
 
@@ -1309,7 +1309,7 @@ func TestTaskManager_EmitsEvents(t *testing.T) {
 
 #### Task 2.5: Add Event Emission to Workflow Executor
 
-**File:** `HelixCode/internal/workflow/executor.go` (modify existing)
+**File:** `helix_code/internal/workflow/executor.go` (modify existing)
 
 Similar changes as Task Manager:
 - Emit EventWorkflowStarted
@@ -1320,7 +1320,7 @@ Similar changes as Task Manager:
 
 #### Task 2.6: Add Event Emission to Worker Pool
 
-**File:** `HelixCode/internal/worker/pool.go` (modify existing)
+**File:** `helix_code/internal/worker/pool.go` (modify existing)
 
 - Emit EventWorkerConnected
 - Emit EventWorkerDisconnected
@@ -1338,7 +1338,7 @@ Similar changes as Task Manager:
 
 #### Task 2.7: E2E Event Flow Tests
 
-**File:** `HelixCode/test/e2e/event_notification_e2e_test.go`
+**File:** `helix_code/test/e2e/event_notification_e2e_test.go`
 
 ```go
 //go:build e2e
@@ -1446,7 +1446,7 @@ go test ./test/e2e/... -v -tags=e2e
 
 #### Task 3.1: Implement Retry Logic
 
-**File:** `HelixCode/internal/notification/retry.go`
+**File:** `helix_code/internal/notification/retry.go`
 
 ```go
 package notification
@@ -1587,7 +1587,7 @@ func (rc *RetryableChannel) GetConfig() map[string]interface{} {
 }
 ```
 
-**Tests:** `HelixCode/internal/notification/retry_test.go`
+**Tests:** `helix_code/internal/notification/retry_test.go`
 
 ```go
 package notification
@@ -1709,7 +1709,7 @@ func TestRetryableChannel_FailsAfterMaxAttempts(t *testing.T) {
 
 #### Task 3.2: Implement Rate Limiter
 
-**File:** `HelixCode/internal/notification/ratelimit.go`
+**File:** `helix_code/internal/notification/ratelimit.go`
 
 ```go
 package notification
@@ -1848,7 +1848,7 @@ func (rlc *RateLimitedChannel) GetConfig() map[string]interface{} {
 
 #### Task 3.3: Redis-backed Notification Queue
 
-**File:** `HelixCode/internal/notification/queue.go`
+**File:** `helix_code/internal/notification/queue.go`
 
 ```go
 package notification
@@ -2019,7 +2019,7 @@ func (q *NotificationQueue) GetQueueStats(ctx context.Context) (map[string]int64
 
 **Worker to process queue:**
 
-**File:** `HelixCode/internal/notification/queue_worker.go`
+**File:** `helix_code/internal/notification/queue_worker.go`
 
 ```go
 package notification
@@ -2128,7 +2128,7 @@ func (w *QueueWorker) processRetryQueue(ctx context.Context) {
 
 #### Task 3.4: Metrics & Monitoring
 
-**File:** `HelixCode/internal/notification/metrics.go`
+**File:** `helix_code/internal/notification/metrics.go`
 
 ```go
 package notification
@@ -2253,7 +2253,7 @@ func (e *NotificationEngine) sendToChannels(ctx context.Context, notification *N
 
 **API endpoint for metrics:**
 
-**File:** `HelixCode/internal/api/handlers/notification_stats.go`
+**File:** `helix_code/internal/api/handlers/notification_stats.go`
 
 ```go
 package handlers
@@ -2293,7 +2293,7 @@ func GetNotificationStats(engine *notification.NotificationEngine) gin.HandlerFu
 
 #### Task 4.1: Implement Generic Webhook Channel
 
-**File:** `HelixCode/internal/notification/webhook.go`
+**File:** `helix_code/internal/notification/webhook.go`
 
 ```go
 package notification
@@ -2491,7 +2491,7 @@ notifications:
 
 #### Task 4.2: Implement Microsoft Teams (Workflows API)
 
-**File:** `HelixCode/internal/notification/teams.go`
+**File:** `helix_code/internal/notification/teams.go`
 
 ```go
 package notification
@@ -2714,7 +2714,7 @@ Each integration follows the same pattern:
 
 ### Day 1-3: PagerDuty Integration
 
-**File:** `HelixCode/internal/notification/pagerduty.go`
+**File:** `helix_code/internal/notification/pagerduty.go`
 
 ```go
 package notification
@@ -2816,7 +2816,7 @@ func (c *PagerDutyChannel) getSeverity(notifType NotificationType) string {
 
 ### Day 4-6: Jira Integration
 
-**File:** `HelixCode/internal/notification/jira.go`
+**File:** `helix_code/internal/notification/jira.go`
 
 Implementation includes:
 - Create issue on error/failure
@@ -2830,7 +2830,7 @@ Implementation includes:
 
 ### Day 7-9: GitHub Issues Integration
 
-**File:** `HelixCode/internal/notification/github.go`
+**File:** `helix_code/internal/notification/github.go`
 
 Implementation includes:
 - Create issue on failure
@@ -2894,7 +2894,7 @@ Implementation includes:
 
 ### Day 1-2: Load Testing
 
-**File:** `HelixCode/test/performance/notification_load_test.go`
+**File:** `helix_code/test/performance/notification_load_test.go`
 
 ```go
 //go:build performance
@@ -3040,7 +3040,7 @@ func TestNotificationThroughput(t *testing.T) {
 
 **Start with Phase 1, Day 1:**
 
-1. Create `HelixCode/internal/notification/testutil/` directory
+1. Create `helix_code/internal/notification/testutil/` directory
 2. Implement `mock_servers.go`
 3. Write tests for mock servers
 4. Verify tests pass
@@ -3048,7 +3048,7 @@ func TestNotificationThroughput(t *testing.T) {
 
 **Command to run:**
 ```bash
-cd /home/milosvasic/Projects/HelixDevelopment/HelixCode/HelixCode
+cd /home/milosvasic/Projects/HelixDevelopment/helix_code/HelixCode
 mkdir -p internal/notification/testutil
 # Start implementing Task 1.1
 ```

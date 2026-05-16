@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f03-tool-result-persistence-design.md` (commit `f813fc9`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/HelixCode/` per the F01/F02 convention.
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/helix_code/` per the F01/F02 convention.
 
 **Anti-bluff smoke (run on every commit):**
 ```bash
@@ -97,12 +97,12 @@ EOF
 ## Task 2: Permissions package skeleton (types + doc)
 
 **Files:**
-- Create: `HelixCode/internal/tools/persistence/doc.go`
-- Create: `HelixCode/internal/tools/persistence/types.go`
+- Create: `helix_code/internal/tools/persistence/doc.go`
+- Create: `helix_code/internal/tools/persistence/types.go`
 
 - [ ] **Step 1: Create doc.go**
 
-Create `HelixCode/internal/tools/persistence/doc.go`:
+Create `helix_code/internal/tools/persistence/doc.go`:
 
 ```go
 // Package persistence implements claude-code-style tool-result persistence.
@@ -119,7 +119,7 @@ package persistence
 
 - [ ] **Step 2: Create types.go**
 
-Create `HelixCode/internal/tools/persistence/types.go`:
+Create `helix_code/internal/tools/persistence/types.go`:
 
 ```go
 package persistence
@@ -159,21 +159,21 @@ type PersistedResult struct {
 - [ ] **Step 3: Verify the package compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./internal/tools/persistence/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./internal/tools/persistence/...
 ```
 Expected: clean compile, exit 0.
 
 - [ ] **Step 4: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/persistence/doc.go HelixCode/internal/tools/persistence/types.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/persistence/doc.go helix_code/internal/tools/persistence/types.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T02): add internal/tools/persistence package skeleton
 
@@ -191,12 +191,12 @@ EOF
 ## Task 3: Manager.MaybePersist with hash idempotence (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/persistence/manager.go`
-- Create: `HelixCode/internal/tools/persistence/manager_test.go`
+- Create: `helix_code/internal/tools/persistence/manager.go`
+- Create: `helix_code/internal/tools/persistence/manager_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/persistence/manager_test.go`:
+Create `helix_code/internal/tools/persistence/manager_test.go`:
 
 ```go
 package persistence
@@ -336,13 +336,13 @@ func TestMaybePersist_DiskFullFallsBackToInline(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run TestMaybePersist ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run TestMaybePersist ./internal/tools/persistence/
 ```
 Expected: FAIL — `Manager`, `NewManager`, `MaybePersist` undefined.
 
 - [ ] **Step 3: Implement manager.go**
 
-Create `HelixCode/internal/tools/persistence/manager.go`:
+Create `helix_code/internal/tools/persistence/manager.go`:
 
 ```go
 package persistence
@@ -458,21 +458,21 @@ var ErrPathTraversal = errors.New("path outside persistence directory")
 - [ ] **Step 4: Run tests to verify they pass**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run TestMaybePersist ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run TestMaybePersist ./internal/tools/persistence/
 ```
 Expected: PASS for all 8 named tests.
 
 - [ ] **Step 5: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/persistence/manager.go HelixCode/internal/tools/persistence/manager_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/persistence/manager.go helix_code/internal/tools/persistence/manager_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T03): Manager.MaybePersist with hash idempotence (TDD)
 
@@ -494,12 +494,12 @@ EOF
 ## Task 4: LoadPersisted with path-traversal guard (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/persistence/manager.go` (add `LoadPersisted`)
-- Create: `HelixCode/internal/tools/persistence/load_test.go`
+- Modify: `helix_code/internal/tools/persistence/manager.go` (add `LoadPersisted`)
+- Create: `helix_code/internal/tools/persistence/load_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/persistence/load_test.go`:
+Create `helix_code/internal/tools/persistence/load_test.go`:
 
 ```go
 package persistence
@@ -574,13 +574,13 @@ func TestLoadPersisted_MissingFileWrapsErrNotExist(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run TestLoadPersisted ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run TestLoadPersisted ./internal/tools/persistence/
 ```
 Expected: FAIL — `LoadPersisted` undefined.
 
 - [ ] **Step 3: Add LoadPersisted to manager.go**
 
-Append to `HelixCode/internal/tools/persistence/manager.go`:
+Append to `helix_code/internal/tools/persistence/manager.go`:
 
 ```go
 // LoadPersisted reads a previously-persisted output by absolute path.
@@ -616,21 +616,21 @@ func (m *Manager) LoadPersisted(path string) (string, error) {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestLoadPersisted|TestMaybePersist' ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestLoadPersisted|TestMaybePersist' ./internal/tools/persistence/
 ```
 Expected: PASS for all 4 LoadPersisted tests + the 8 MaybePersist tests from T03.
 
 - [ ] **Step 5: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/persistence/manager.go HelixCode/internal/tools/persistence/load_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/persistence/manager.go helix_code/internal/tools/persistence/load_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T04): LoadPersisted with path-traversal guard (TDD)
 
@@ -650,12 +650,12 @@ EOF
 ## Task 5: CleanupOld with filename-pattern matching (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/persistence/manager.go` (add `CleanupOld`)
-- Create: `HelixCode/internal/tools/persistence/cleanup_test.go`
+- Modify: `helix_code/internal/tools/persistence/manager.go` (add `CleanupOld`)
+- Create: `helix_code/internal/tools/persistence/cleanup_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/persistence/cleanup_test.go`:
+Create `helix_code/internal/tools/persistence/cleanup_test.go`:
 
 ```go
 package persistence
@@ -734,13 +734,13 @@ func TestCleanupOld_MissingBaseDirIsNoOp(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run TestCleanupOld ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run TestCleanupOld ./internal/tools/persistence/
 ```
 Expected: FAIL — `CleanupOld` undefined.
 
 - [ ] **Step 3: Add CleanupOld to manager.go**
 
-Append to `HelixCode/internal/tools/persistence/manager.go`:
+Append to `helix_code/internal/tools/persistence/manager.go`:
 
 ```go
 // filenamePattern matches the canonical persistence filename format:
@@ -798,28 +798,28 @@ func (m *Manager) CleanupOld(maxAge time.Duration) error {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run TestCleanupOld ./internal/tools/persistence/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run TestCleanupOld ./internal/tools/persistence/
 ```
 Expected: PASS for 4 named tests.
 
 - [ ] **Step 5: Run full package tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/persistence/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/persistence/...
 ```
 Expected: PASS — 8 + 4 + 4 = 16 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/persistence/manager.go HelixCode/internal/tools/persistence/cleanup_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/persistence/manager.go helix_code/internal/tools/persistence/cleanup_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T05): CleanupOld with filename-pattern matching (TDD)
 
@@ -841,15 +841,15 @@ EOF
 ## Task 6: Wire into internal/llm/tool_provider.go orchestration loop
 
 **Files:**
-- Modify: `HelixCode/internal/llm/tool_provider.go`
-- Create: `HelixCode/internal/llm/tool_provider_persistence_test.go`
+- Modify: `helix_code/internal/llm/tool_provider.go`
+- Create: `helix_code/internal/llm/tool_provider_persistence_test.go`
 
 - [ ] **Step 1: Investigate current tool_provider.go**
 
 Read the file to confirm `ToolCallingProvider` struct shape and where `executeToolCalls` is called:
 
 ```bash
-grep -n 'type ToolCallingProvider\|executeToolCalls\|toolExecutor\|buildFinalPrompt' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/internal/llm/tool_provider.go
+grep -n 'type ToolCallingProvider\|executeToolCalls\|toolExecutor\|buildFinalPrompt' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/tool_provider.go
 ```
 
 Confirm:
@@ -861,7 +861,7 @@ The wiring strategy: add a `*persistence.Manager` field to `ToolCallingProvider`
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/llm/tool_provider_persistence_test.go`:
+Create `helix_code/internal/llm/tool_provider_persistence_test.go`:
 
 ```go
 package llm
@@ -946,7 +946,7 @@ func TestPersistResults_NonStringResultStringified(t *testing.T) {
 - [ ] **Step 3: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestToolCallingProvider_SetsPersistence|TestPersistResults' ./internal/llm/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestToolCallingProvider_SetsPersistence|TestPersistResults' ./internal/llm/
 ```
 Expected: FAIL — field and methods undefined.
 
@@ -1039,30 +1039,30 @@ finalPrompt := p.buildFinalPrompt(originalPrompt, initialResponse, p.persistResu
 - [ ] **Step 5: Run failing tests + new tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestToolCallingProvider_SetsPersistence|TestPersistResults' ./internal/llm/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestToolCallingProvider_SetsPersistence|TestPersistResults' ./internal/llm/
 ```
 Expected: PASS for all 5 named tests.
 
 - [ ] **Step 6: Run the full LLM package + persistence package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/llm/... ./internal/tools/persistence/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/llm/... ./internal/tools/persistence/...
 ```
 Expected: PASS for both. If existing `internal/llm` tests fail because of the `buildFinalPrompt` signature change, fix the callers — `tool_provider_test.go` may need updates.
 
 - [ ] **Step 7: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ internal/llm/tool_provider.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/persistence/ internal/llm/tool_provider.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/llm/tool_provider.go HelixCode/internal/llm/tool_provider_persistence_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/llm/tool_provider.go helix_code/internal/llm/tool_provider_persistence_test.go
 # If existing tool_provider_test.go was modified to fix call signatures:
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/llm/tool_provider_test.go 2>/dev/null || true
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/llm/tool_provider_test.go 2>/dev/null || true
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T06): wire persistence.Manager into tool_provider orchestration
 
@@ -1083,15 +1083,15 @@ EOF
 ## Task 7: Audit + wire individual LLM providers
 
 **Files:**
-- Modify (audit-driven): subset of `HelixCode/internal/llm/{anthropic,azure,bedrock,copilot,gemini,groq,koboldai,llamacpp,local,ollama,openai_compatible,openai,openrouter,qwen,vertexai,xai}_provider.go`
-- Test: `HelixCode/internal/llm/provider_persistence_audit_test.go`
+- Modify (audit-driven): subset of `helix_code/internal/llm/{anthropic,azure,bedrock,copilot,gemini,groq,koboldai,llamacpp,local,ollama,openai_compatible,openai,openrouter,qwen,vertexai,xai}_provider.go`
+- Test: `helix_code/internal/llm/provider_persistence_audit_test.go`
 
 This task EXAMINES every provider file to determine which ones independently handle `tool_result` content (and thus bypass `tool_provider.go`'s orchestration). Each non-conforming provider gets its own `MaybePersist` call.
 
 - [ ] **Step 1: Run the audit grep**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 for f in internal/llm/*_provider.go; do
   case "$(basename "$f")" in
     tool_provider.go) continue;;
@@ -1107,7 +1107,7 @@ Document the audit result in the commit message.
 
 - [ ] **Step 2: For each non-conforming provider, write a failing test**
 
-Create `HelixCode/internal/llm/provider_persistence_audit_test.go`:
+Create `helix_code/internal/llm/provider_persistence_audit_test.go`:
 
 ```go
 package llm
@@ -1165,7 +1165,7 @@ func TestPersistResults_ProducesExpectedRenderedString(t *testing.T) {
 - [ ] **Step 3: Run the test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestAllProvidersAcceptPersistenceManager|TestPersistResults_ProducesExpectedRenderedString' ./internal/llm/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestAllProvidersAcceptPersistenceManager|TestPersistResults_ProducesExpectedRenderedString' ./internal/llm/
 ```
 Expected: PASS — both tests rely on `ToolCallingProvider` from T06.
 
@@ -1184,16 +1184,16 @@ If the audit at Step 1 shows that NO provider bypasses `tool_provider.go` (likel
 - [ ] **Step 5: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/llm/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/llm/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/llm/provider_persistence_audit_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/llm/provider_persistence_audit_test.go
 # Plus any per-provider wiring identified at Step 4:
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/llm/<provider>_provider.go 2>/dev/null || true
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/llm/<provider>_provider.go 2>/dev/null || true
 
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T07): audit + wire individual LLM providers for persistence
@@ -1232,12 +1232,12 @@ EOF
 ## Task 8: System prompt note about persistedOutputPath
 
 **Files:**
-- Modify: `HelixCode/internal/agent/base_agent.go` (around line 596 — `getSystemPrompt`)
-- Create: `HelixCode/internal/agent/system_prompt_persistence_test.go`
+- Modify: `helix_code/internal/agent/base_agent.go` (around line 596 — `getSystemPrompt`)
+- Create: `helix_code/internal/agent/system_prompt_persistence_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/agent/system_prompt_persistence_test.go`:
+Create `helix_code/internal/agent/system_prompt_persistence_test.go`:
 
 ```go
 package agent
@@ -1283,13 +1283,13 @@ func TestGetSystemPrompt_StillDescribesAgent(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run TestGetSystemPrompt_IncludesPersistedOutputNote ./internal/agent/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run TestGetSystemPrompt_IncludesPersistedOutputNote ./internal/agent/
 ```
 Expected: FAIL — prompt does not yet mention `persistedOutputPath`.
 
 - [ ] **Step 3: Modify base_agent.go's getSystemPrompt**
 
-Update `HelixCode/internal/agent/base_agent.go` `getSystemPrompt` (around line 596) to:
+Update `helix_code/internal/agent/base_agent.go` `getSystemPrompt` (around line 596) to:
 
 ```go
 // getSystemPrompt returns the system prompt for the agent
@@ -1310,28 +1310,28 @@ Always respond with valid JSON only, no additional text.`, a.agentType, a.name, 
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run TestGetSystemPrompt ./internal/agent/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run TestGetSystemPrompt ./internal/agent/
 ```
 Expected: PASS for both tests.
 
 - [ ] **Step 5: Run the whole agent package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/agent/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/agent/...
 ```
 Expected: PASS — confirm no regression in other agent tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/agent/base_agent.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/agent/base_agent.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/agent/base_agent.go HelixCode/internal/agent/system_prompt_persistence_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/agent/base_agent.go helix_code/internal/agent/system_prompt_persistence_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T08): system prompt note about persistedOutputPath
 
@@ -1351,13 +1351,13 @@ EOF
 ## Task 9: cmd/cli/main.go startup + integration test (no mocks)
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go`
-- Test: `HelixCode/tests/integration/persistence/persistence_integration_test.go`
+- Modify: `helix_code/cmd/cli/main.go`
+- Test: `helix_code/tests/integration/persistence/persistence_integration_test.go`
 
 - [ ] **Step 1: Investigate cmd/cli/main.go's CLI struct**
 
 ```bash
-grep -n 'type CLI\|type cli\|func.*\*CLI.*Run\|persistenceManager\|permissionsEngine' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/cmd/cli/main.go | head -10
+grep -n 'type CLI\|type cli\|func.*\*CLI.*Run\|persistenceManager\|permissionsEngine' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/cmd/cli/main.go | head -10
 ```
 
 Confirm where the CLI struct + bootstrap path live. From F02 we know the CLI is `flag`-based with `(*CLI).Run()`. The persistence wiring follows the same pattern.
@@ -1413,7 +1413,7 @@ if err := c.initPersistence(); err != nil {
 - [ ] **Step 3: Verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./cmd/cli/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./cmd/cli/...
 ```
 Expected: clean compile.
 
@@ -1422,10 +1422,10 @@ Expected: clean compile.
 Create the directory and test file:
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/integration/persistence
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/integration/persistence
 ```
 
-Create `HelixCode/tests/integration/persistence/persistence_integration_test.go`:
+Create `helix_code/tests/integration/persistence/persistence_integration_test.go`:
 
 ```go
 //go:build integration
@@ -1516,21 +1516,21 @@ func TestIntegration_PathTraversalIsRejected(t *testing.T) {
 - [ ] **Step 5: Run integration tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/persistence/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/persistence/...
 ```
 Expected: PASS for 3 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/tools/persistence/ tests/integration/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/tools/persistence/ tests/integration/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/cmd/cli/main.go HelixCode/tests/integration/persistence/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/cmd/cli/main.go helix_code/tests/integration/persistence/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T09): cmd/cli/main.go startup + integration tests (no mocks)
 
@@ -1550,19 +1550,19 @@ EOF
 ## Task 10: Challenge with three runtime-evidence scenarios
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/persistence/expected.json`
-- Create: `HelixCode/tests/e2e/challenges/persistence/run.sh`
-- Create: `HelixCode/tests/e2e/challenges/persistence/README.md`
+- Create: `helix_code/tests/e2e/challenges/persistence/expected.json`
+- Create: `helix_code/tests/e2e/challenges/persistence/run.sh`
+- Create: `helix_code/tests/e2e/challenges/persistence/README.md`
 
 - [ ] **Step 1: Create the directory**
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/persistence
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/persistence
 ```
 
 - [ ] **Step 2: Write expected.json**
 
-Create `HelixCode/tests/e2e/challenges/persistence/expected.json`:
+Create `helix_code/tests/e2e/challenges/persistence/expected.json`:
 
 ```json
 {
@@ -1593,7 +1593,7 @@ Create `HelixCode/tests/e2e/challenges/persistence/expected.json`:
 
 - [ ] **Step 3: Write run.sh**
 
-Create `HelixCode/tests/e2e/challenges/persistence/run.sh`:
+Create `helix_code/tests/e2e/challenges/persistence/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -1740,12 +1740,12 @@ echo "PASS: all three scenarios produced expected outcomes"
 - [ ] **Step 4: Make it executable**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/persistence/run.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/persistence/run.sh
 ```
 
 - [ ] **Step 5: Write README.md**
 
-Create `HelixCode/tests/e2e/challenges/persistence/README.md`:
+Create `helix_code/tests/e2e/challenges/persistence/README.md`:
 
 ```markdown
 # Challenge — Tool Result Persistence (P1-F03)
@@ -1782,21 +1782,21 @@ Re-run `run.sh`. S1 MUST FAIL because every output now triggers persistence (`wa
 - [ ] **Step 6: Run the Challenge**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/persistence/run.sh 2>&1 | tee /tmp/p1-f03-t10-evidence.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/persistence/run.sh 2>&1 | tee /tmp/p1-f03-t10-evidence.txt
 ```
 Expected: PASS at the end. Exit 0.
 
 - [ ] **Step 7: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/persistence/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/persistence/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/tests/e2e/challenges/persistence/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/tests/e2e/challenges/persistence/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F03-T10): Challenge for tool-result persistence with runtime evidence
 
@@ -1828,14 +1828,14 @@ EOF
 - [ ] **Step 1: Re-run the Challenge to capture fresh evidence**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/persistence/run.sh 2>&1 | tee /tmp/p1-f03-t11-rerun.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/persistence/run.sh 2>&1 | tee /tmp/p1-f03-t11-rerun.txt
 ```
 Expected: PASS. If FAIL, STOP and investigate.
 
 - [ ] **Step 2: Run final regression test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && \
   go test -count=1 -race ./internal/tools/persistence/... ./internal/tools/permissions/... ./internal/tools/confirmation/... ./internal/llm/... ./internal/agent/... ./cmd/cli/... 2>&1 | tee /tmp/p1-f03-t11-tests.txt && \
   go test -count=1 -race -tags=integration ./tests/integration/persistence/... ./tests/integration/permissions/... 2>&1 | tee -a /tmp/p1-f03-t11-tests.txt
 ```
@@ -1852,7 +1852,7 @@ The LLMsVerifier dual-pin parking lot from Phase 0 may cause exit 2 (same baseli
 - [ ] **Step 4: Anti-bluff smoke (broad)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
   internal/tools/persistence/ tests/e2e/challenges/persistence/ \
   tests/integration/persistence/ internal/llm/tool_provider.go \
   internal/llm/tool_provider_persistence_test.go \

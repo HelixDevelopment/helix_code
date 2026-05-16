@@ -18,7 +18,7 @@
 docs/improvements/test_audit_p4.md                  — create (audit report)
 tests/e2e/challenges/anti_bluff_verifier/challenge.go — create
 tests/e2e/challenges/anti_bluff_verifier/expected.json — create
-HelixCode/**/*_test.go                               — modify (fix identified bluffs)
+helix_code/**/*_test.go                               — modify (fix identified bluffs)
 ```
 
 ---
@@ -31,14 +31,14 @@ HelixCode/**/*_test.go                               — modify (fix identified 
 - [ ] **Step 1: Run full test suite, capture output**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 go test -v ./... -count=1 2>&1 | tee /tmp/full_test_output.txt
 ```
 
 - [ ] **Step 2: Classify every test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 cat > /tmp/audit.sh << 'EOF'
 #!/bin/bash
 echo "# Test Suite Audit Report" > docs/improvements/test_audit_p4.md
@@ -94,7 +94,7 @@ Phase: 4  Task: P4-T01"
 - [ ] **Step 1: Audit challenge runner for exit-code bugs (wrapper bluff)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges
 grep -rn "os.Exit\|exitCode\|exit code\|PASS.*but\|FAIL.*but" --include="*.go" . | head -20
 ```
 
@@ -143,7 +143,7 @@ Phase: 4  Task: P4-T02"
 - [ ] **Step 1: Automated bluff pattern scan**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 echo "=== Wrapper Bluff: exit-code masking ==="
 grep -rn "os.Exit(0)" --include="*_test.go" . && echo "warn: tests should not os.Exit(0)"
 echo "=== Comment Bluff: comment vs code mismatch ==="
@@ -155,7 +155,7 @@ find . -name "*.go" -not -name "*_test.go" -exec grep -l "FIXME\|BROKEN\|DOES NO
 - [ ] **Step 2: Document findings, commit**
 
 ```bash
-cat >> HelixCode/docs/improvements/test_audit_p4.md << 'EOF'
+cat >> helix_code/docs/improvements/test_audit_p4.md << 'EOF'
 
 ## Bluff Taxonomy Sweep
 - Wrapper: [findings]
@@ -178,7 +178,7 @@ Phase: 4  Task: P4-T03"
 - [ ] **Step 1: Fix skip bluffs** — Add `SKIP-OK: #<ticket>` to every bare `t.Skip()`
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 # For each skip without marker, add: t.Skip("SKIP-OK: #<ticket> <reason>")
 ```
 
@@ -200,7 +200,7 @@ If the runner returns 0 even when assertions fail, fix it.
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/
+git add helix_code/
 git commit -m "fix(P4-T04): fix all identified test bluffs — skip markers, assertions, mocks
 
 Phase: 4  Task: P4-T04"
@@ -211,8 +211,8 @@ Phase: 4  Task: P4-T04"
 ### Task P4-T05: Anti-bluff verifier challenge
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/anti_bluff_verifier/challenge.go`
-- Create: `HelixCode/tests/e2e/challenges/anti_bluff_verifier/expected.json`
+- Create: `helix_code/tests/e2e/challenges/anti_bluff_verifier/challenge.go`
+- Create: `helix_code/tests/e2e/challenges/anti_bluff_verifier/expected.json`
 
 - [ ] **Step 1: Create the challenge**
 
@@ -272,7 +272,7 @@ func main() {
 - [ ] **Step 3: Run challenge, verify it passes**
 
 ```bash
-cd HelixCode/tests/e2e/challenges/anti_bluff_verifier && go run challenge.go
+cd helix_code/tests/e2e/challenges/anti_bluff_verifier && go run challenge.go
 ```
 
 Expected: `ANTI-BLUFF: ALL CLEAN`
@@ -281,7 +281,7 @@ Expected: `ANTI-BLUFF: ALL CLEAN`
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/tests/e2e/challenges/anti_bluff_verifier/
+git add helix_code/tests/e2e/challenges/anti_bluff_verifier/
 git commit -m "feat(P4-T05): add anti_bluff_verifier challenge gate
 
 Phase: 4  Task: P4-T05"
@@ -294,7 +294,7 @@ Phase: 4  Task: P4-T05"
 - [ ] **Step 1: Identify packages lacking challenges**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 for pkg in $(go list ./internal/... | grep -v test | grep -v mock); do
   pkgPath=$(echo $pkg | sed 's|dev.helix.code/||')
   if [ ! -d "tests/e2e/challenges/${pkgPath//\//_}" ]; then
@@ -325,7 +325,7 @@ done
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/tests/e2e/challenges/
+git add helix_code/tests/e2e/challenges/
 git commit -m "feat(P4-T06): fill challenge coverage gaps for all internal packages
 
 Phase: 4  Task: P4-T06"
@@ -338,7 +338,7 @@ Phase: 4  Task: P4-T06"
 - [ ] **Step 1: Start full test infrastructure**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 make test-infra-up
 ```
 
@@ -359,7 +359,7 @@ make test-infra-down
 - [ ] **Step 4: Document results**
 
 ```bash
-cat > HelixCode/docs/improvements/full_infra_test_results_p4.md << 'EOF'
+cat > helix_code/docs/improvements/full_infra_test_results_p4.md << 'EOF'
 # Full Infrastructure Test Results (P4-T07)
 Date: $(date)
 Command: make test-complete
@@ -381,7 +381,7 @@ Phase: 4  Task: P4-T07"
 - [ ] **Step 1: Build for all target platforms**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 GOOS=linux GOARCH=amd64 go build ./... && echo "linux/amd64: PASS" || echo "linux/amd64: FAIL"
 GOOS=darwin GOARCH=arm64 go build ./... && echo "darwin/arm64: PASS" || echo "darwin/arm64: FAIL"
 GOOS=windows GOARCH=amd64 go build ./... && echo "windows/amd64: PASS" || echo "windows/amd64: FAIL"

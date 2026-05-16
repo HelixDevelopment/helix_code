@@ -12,7 +12,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p2-f22-aider-git-auto-commit-design.md` (commit `8be7fba`).
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F22 surface):**
 ```bash
@@ -57,7 +57,7 @@ Commit: `docs(P2-F22-T01): bootstrap F22 evidence + advance PROGRESS to F22 (Aid
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/autocommit/types.go`, new `HelixCode/internal/autocommit/types_test.go`.
+**Files:** new `helix_code/internal/autocommit/types.go`, new `helix_code/internal/autocommit/types_test.go`.
 
 Define:
 - `CommitContext struct { ToolName string; Args map[string]interface{}; MutatedPaths []string; SkipRequested bool }`.
@@ -95,7 +95,7 @@ Subject: `feat(P2-F22-T02): autocommit types - CommitContext + CommitResult + Op
 
 ## Task 3: git.go thin wrapper (TDD with real tempdir)
 
-**Files:** new `HelixCode/internal/autocommit/git.go`, new `HelixCode/internal/autocommit/git_test.go`.
+**Files:** new `helix_code/internal/autocommit/git.go`, new `helix_code/internal/autocommit/git_test.go`.
 
 `git.go`:
 
@@ -203,7 +203,7 @@ Subject: `feat(P2-F22-T03): autocommit git wrapper - IsRepo/StatusPorcelain/Diff
 
 ## Task 4: summariser.go + secret_filter.go (TDD)
 
-**Files:** new `HelixCode/internal/autocommit/summariser.go`, new `HelixCode/internal/autocommit/summariser_test.go`, new `HelixCode/internal/autocommit/secret_filter.go`, new `HelixCode/internal/autocommit/secret_filter_test.go`.
+**Files:** new `helix_code/internal/autocommit/summariser.go`, new `helix_code/internal/autocommit/summariser_test.go`, new `helix_code/internal/autocommit/secret_filter.go`, new `helix_code/internal/autocommit/secret_filter_test.go`.
 
 `summariser.go`:
 
@@ -381,7 +381,7 @@ Subject: `feat(P2-F22-T04): autocommit summariser + secret filter - LLM + determ
 
 ## Task 5: committer.go (TDD with real git tempdir)
 
-**Files:** new `HelixCode/internal/autocommit/committer.go`, new `HelixCode/internal/autocommit/committer_test.go`.
+**Files:** new `helix_code/internal/autocommit/committer.go`, new `helix_code/internal/autocommit/committer_test.go`.
 
 `committer.go` per spec §3.3 (full pipeline). Key points:
 - `atomic.Bool` enabled flag.
@@ -514,7 +514,7 @@ Subject: `feat(P2-F22-T05): autocommit committer - MaybeCommit pipeline + atomic
 
 ## Task 6: registry.go SetAutoCommitter + post-Execute hook + mutated-paths derivation (TDD)
 
-**Files:** modify `HelixCode/internal/tools/registry.go`; new `HelixCode/internal/tools/registry_autocommit_test.go`.
+**Files:** modify `helix_code/internal/tools/registry.go`; new `helix_code/internal/tools/registry_autocommit_test.go`.
 
 Steps:
 
@@ -663,7 +663,7 @@ Subject: `feat(P2-F22-T06): registry post-Execute fireAutoCommit hook + per-tool
 
 ## Task 7: /git_auto_commit slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/git_auto_commit_command.go`, new `HelixCode/internal/commands/git_auto_commit_command_test.go`.
+**Files:** new `helix_code/internal/commands/git_auto_commit_command.go`, new `helix_code/internal/commands/git_auto_commit_command_test.go`.
 
 `git_auto_commit_command.go`:
 
@@ -764,7 +764,7 @@ Subject: `feat(P2-F22-T07): /git_auto_commit slash command (status/on/off/show) 
 
 ## Task 8: main.go wiring + integration test (TDD)
 
-**Files:** modify `HelixCode/cmd/cli/main.go`; new `HelixCode/tests/integration/autocommit_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go`; new `helix_code/tests/integration/autocommit_test.go` (`//go:build integration`).
 
 `main.go` changes (additive only):
 
@@ -889,7 +889,7 @@ Subject: `feat(P2-F22-T08): main.go wiring (env + autocommit construct + registr
 
 ## Task 9: Challenge harness + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f22_challenge/main.go`, new `challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md`, new `challenges/p2-f22-aider-git-auto-commit/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p2f22_challenge/main.go`, new `challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md`, new `challenges/p2-f22-aider-git-auto-commit/run.sh`.
 
 Harness phases (per spec §6.3):
 

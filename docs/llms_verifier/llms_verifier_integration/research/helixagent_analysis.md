@@ -1095,7 +1095,7 @@ Stored JSON results from challenge executions:
 **Directory:** `cli_agents/`
 
 Contains analysis markdown files for 20+ CLI agents:
-- `HelixCode/` — **Submodule** pointing to `HelixDevelopment/HelixCode`
+- `helix_code/` — **Submodule** pointing to `HelixDevelopment/HelixCode`
 - `AGENT_DECK_ANALYSIS.md`, `AIDER_ANALYSIS.md`, `CLINE_ANALYSIS.md`, `CODEX_ANALYSIS.md`, etc.
 - `MASTER_INTEGRATION_PLAN.md` — Master plan for all CLI agents
 - `TIER_1_SUMMARY.md`, `TIER_3_4_5_ANALYSIS.md` — Tiered analysis summaries

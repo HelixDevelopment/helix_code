@@ -12,7 +12,7 @@ Ship a real, end-to-end **no-flicker terminal renderer** for the HelixCode CLI a
 
 Three concrete user surfaces ship together:
 
-1. **`render` package** (`HelixCode/internal/render/`) — a small custom ANSI/carriage-return renderer (claude-code's approach; Q1=A). NO new external dependencies. Uses `\r\033[K` for in-place line updates, ANSI cursor positioning (`\033[<n>A` / `\033[<n>B`) for multi-line blocks, and a double-buffered viewport for tool-result rendering. Two implementations behind a single `Renderer` interface: `ansiRenderer` (TTY mode) and `plainRenderer` (non-TTY fallback). A `RendererFactory` selects between them at startup based on the env var + `term.IsTerminal(int(os.Stdout.Fd()))`.
+1. **`render` package** (`helix_code/internal/render/`) — a small custom ANSI/carriage-return renderer (claude-code's approach; Q1=A). NO new external dependencies. Uses `\r\033[K` for in-place line updates, ANSI cursor positioning (`\033[<n>A` / `\033[<n>B`) for multi-line blocks, and a double-buffered viewport for tool-result rendering. Two implementations behind a single `Renderer` interface: `ansiRenderer` (TTY mode) and `plainRenderer` (non-TTY fallback). A `RendererFactory` selects between them at startup based on the env var + `term.IsTerminal(int(os.Stdout.Fd()))`.
 2. **Streaming LLM tokens + tool result blocks instrumentation** (Q2=B) — the agent loop's existing `provider.GenerateStream` callback feeds tokens into the renderer's `WriteToken(text)` so a multi-token reply appears as ONE in-place updating line per logical line, NOT one new printed line per token. Tool result blocks (LSP diagnostics from F13, sandbox stdout from F14, subagent results from F15, smart-edit diffs from F17) are rendered as `Frame` (slice of lines) via `Renderer.RenderFrame(frame)`; if a previous frame for the same block id exists, dirty-region diff (Q3=B) emits *only* the changed lines via cursor-positioning + clear-line. Other CLI output (start-up banners, `/command` outputs, `helixcode` cobra command output, build-time logs) remains line-based as today — it does not flow through the renderer.
 3. **Env-var configuration** (Q5=B) — `HELIXCODE_RENDER=plain|fancy|auto` (default `auto`). `auto` = `fancy` when stdout is a TTY, `plain` otherwise. NO slash command. NO cobra subcommand. The variable is read once at process startup and snapshotted into the `RenderMode` selected by the factory.
 
@@ -28,7 +28,7 @@ Anti-bluff: a `render` package whose code exists but is never wired into the age
 
 ## 2. Architecture
 
-Three layers, all under `HelixCode/internal/render/`, plus thin wiring into the existing CLI streaming path and tool-result printing path:
+Three layers, all under `helix_code/internal/render/`, plus thin wiring into the existing CLI streaming path and tool-result printing path:
 
 - **`Renderer` interface** (`types.go`) — five methods: `Begin(blockID string)` (mark a new in-progress streaming/frame block, returns the block's frame handle), `WriteToken(blockID string, text string)` (append streaming text into the current line of the block; the renderer batches and emits in-place updates), `RenderFrame(blockID string, frame Frame)` (replace the block's content with the given frame; dirty-region diff against the previous frame for that block emits only changed lines), `Commit(blockID string)` (finalise the block — emits a trailing `\n` for `ansiRenderer` so the cursor leaves the in-place region; no-op for `plainRenderer`), `Close() error` (renderer-wide cleanup; restores cursor visibility on `ansiRenderer`). The renderer is **single-writer** — the agent loop drives it; concurrent calls from goroutines are serialised by an internal mutex but the spec does NOT promise interleaved-stream rendering (see §5.3).
 - **`ansiRenderer`** (`ansi_renderer.go`) — TTY-mode impl. Owns an `io.Writer` (typically `os.Stdout`) + a `map[string]*Viewport` keyed by block id. `WriteToken` appends to the active line of the block's viewport, then emits `\r\033[K<currentLine>` to redraw THAT line in place. `RenderFrame` runs `Viewport.Diff(newFrame)` to compute the dirty line set, then for each dirty line emits `\033[<n>A\r\033[K<line>\033[<n>B` (move up n, carriage-return, clear-line, write, move down n). On `Commit`, emits `\n` to push the cursor past the block. Hides the cursor (`\033[?25l`) at `Begin`, restores it (`\033[?25h`) at `Close`.
@@ -95,26 +95,26 @@ Why env-var only (Q5=B) and not slash + cobra:
 
 ### 3.1 New files
 
-- `HelixCode/internal/render/types.go` — `Renderer` interface, `Frame` struct, `RenderMode` enum (`RenderModePlain`, `RenderModeFancy`), error sentinels.
-- `HelixCode/internal/render/types_test.go`.
-- `HelixCode/internal/render/ansi_renderer.go` — `ansiRenderer`; in-place line update via `\r\033[K`; multi-line frame rendering via `\033[<n>A` + `\r\033[K` + `\033[<n>B`; cursor hide/show via `\033[?25l` / `\033[?25h`.
-- `HelixCode/internal/render/ansi_renderer_test.go` — `bytes.Buffer` capture; assert exact byte sequences for known WriteToken / RenderFrame inputs.
-- `HelixCode/internal/render/plain_renderer.go` — line-by-line `fmt.Fprint` fallback. Zero ANSI. Zero `\r`.
-- `HelixCode/internal/render/plain_renderer_test.go` — assert captured buffer contains NO `0x1b` and NO `0x0d` bytes for any input.
-- `HelixCode/internal/render/viewport.go` — `Viewport{lines, lastLines}` + `Diff(newFrame Frame) []int`. Pure Go.
-- `HelixCode/internal/render/viewport_test.go`.
-- `HelixCode/internal/render/factory.go` — `NewRenderer(opts Options) (Renderer, RenderMode)`; reads env + isatty; constructor-injection of writer + IsTTY for tests.
-- `HelixCode/internal/render/factory_test.go` — fake writer + `IsTTY=true` / `IsTTY=false`; assert correct impl chosen for every (env, isatty) combination.
-- `HelixCode/internal/render/tool_helpers.go` — `RenderToolResult(r Renderer, id string, result interface{})` glue for known tool-result types.
-- `HelixCode/internal/render/tool_helpers_test.go`.
-- `HelixCode/tests/integration/render_test.go` — `//go:build integration`. Real fake-TTY (a `bytes.Buffer` + `IsTTY=true` injected via constructor option) and real non-TTY (`bytes.Buffer` only). Exercises full pipeline.
-- `HelixCode/tests/integration/cmd/p1f18_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/render/types.go` — `Renderer` interface, `Frame` struct, `RenderMode` enum (`RenderModePlain`, `RenderModeFancy`), error sentinels.
+- `helix_code/internal/render/types_test.go`.
+- `helix_code/internal/render/ansi_renderer.go` — `ansiRenderer`; in-place line update via `\r\033[K`; multi-line frame rendering via `\033[<n>A` + `\r\033[K` + `\033[<n>B`; cursor hide/show via `\033[?25l` / `\033[?25h`.
+- `helix_code/internal/render/ansi_renderer_test.go` — `bytes.Buffer` capture; assert exact byte sequences for known WriteToken / RenderFrame inputs.
+- `helix_code/internal/render/plain_renderer.go` — line-by-line `fmt.Fprint` fallback. Zero ANSI. Zero `\r`.
+- `helix_code/internal/render/plain_renderer_test.go` — assert captured buffer contains NO `0x1b` and NO `0x0d` bytes for any input.
+- `helix_code/internal/render/viewport.go` — `Viewport{lines, lastLines}` + `Diff(newFrame Frame) []int`. Pure Go.
+- `helix_code/internal/render/viewport_test.go`.
+- `helix_code/internal/render/factory.go` — `NewRenderer(opts Options) (Renderer, RenderMode)`; reads env + isatty; constructor-injection of writer + IsTTY for tests.
+- `helix_code/internal/render/factory_test.go` — fake writer + `IsTTY=true` / `IsTTY=false`; assert correct impl chosen for every (env, isatty) combination.
+- `helix_code/internal/render/tool_helpers.go` — `RenderToolResult(r Renderer, id string, result interface{})` glue for known tool-result types.
+- `helix_code/internal/render/tool_helpers_test.go`.
+- `helix_code/tests/integration/render_test.go` — `//go:build integration`. Real fake-TTY (a `bytes.Buffer` + `IsTTY=true` injected via constructor option) and real non-TTY (`bytes.Buffer` only). Exercises full pipeline.
+- `helix_code/tests/integration/cmd/p1f18_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f18-no-flicker-rendering/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/cmd/cli/main.go` — three blocks: (1) construct the renderer at startup via `render.NewRenderer(...)`; (2) replace the streaming-print loop in `handleGenerate` (lines 1080–1090) with `Begin/WriteToken/Commit`; (3) wrap tool-result printing through `render.RenderToolResult`.
-- `HelixCode/cmd/cli/main.go` — register a `defer renderer.Close()` so the cursor is restored if the process exits mid-render.
+- `helix_code/cmd/cli/main.go` — three blocks: (1) construct the renderer at startup via `render.NewRenderer(...)`; (2) replace the streaming-print loop in `handleGenerate` (lines 1080–1090) with `Begin/WriteToken/Commit`; (3) wrap tool-result printing through `render.RenderToolResult`.
+- `helix_code/cmd/cli/main.go` — register a `defer renderer.Close()` so the cursor is restored if the process exits mid-render.
 
 **No new external dependencies** (§3.5).
 
@@ -287,7 +287,7 @@ The chosen mode is logged at INFO at startup (`render mode: fancy (auto-resolved
 
 ### 3.5 New external dependencies
 
-**None.** F18 is built entirely on the Go standard library (`io`, `os`, `bytes`, `strings`, `fmt`, `sync`, `errors`) plus `golang.org/x/term` (already in `go.mod` of the inner module, currently as `// indirect` at v0.41.0 — confirmed via `grep "golang.org/x/term" HelixCode/go.sum`). After T02 introduces a direct import of `golang.org/x/term`, `go mod tidy` will promote the line in `go.mod` from `// indirect` to a direct require — that is the one expected `go.mod` change for F18, and **no new entries in `go.sum`** (it's already pinned at v0.41.0). Brief justification:
+**None.** F18 is built entirely on the Go standard library (`io`, `os`, `bytes`, `strings`, `fmt`, `sync`, `errors`) plus `golang.org/x/term` (already in `go.mod` of the inner module, currently as `// indirect` at v0.41.0 — confirmed via `grep "golang.org/x/term" helix_code/go.sum`). After T02 introduces a direct import of `golang.org/x/term`, `go mod tidy` will promote the line in `go.mod` from `// indirect` to a direct require — that is the one expected `go.mod` change for F18, and **no new entries in `go.sum`** (it's already pinned at v0.41.0). Brief justification:
 
 - ANSI control is a small finite set of byte sequences — pure constants + `fmt.Sprintf` for the parameterised ones.
 - Dirty-region diff is a `for i := range max(len(old), len(new))` line-comparison loop.

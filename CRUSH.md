@@ -22,7 +22,7 @@ No feature/functionality/flow/use-case/edge-case/service/application on any supp
 Before any modification to `constitution/{Constitution,CLAUDE,AGENTS}.md`: (1) fetch + pull first; (2) apply with §11.4.17 classification + verbatim mandate; (3) validate; (4) commit + push to EVERY configured upstream; (5) resolve conflicts preserving union — force-push forbidden; (6) cascade verification (CONST-047); (7) bump `.gitmodules` pointer in SAME commit. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
 
 ### CONST-050 — No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
-**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now"/empty-implementation patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise the real, fully implemented system. Production code MUST NOT import `HelixCode/internal/mocks/`. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (vasic-digital/Challenges submodule at `./challenges/`) + helix_qa (HelixDevelopment/HelixQA submodule at `./helix_qa/`, with full autonomous QA sessions). See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
+**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now"/empty-implementation patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise the real, fully implemented system. Production code MUST NOT import `helix_code/internal/mocks/`. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (vasic-digital/Challenges submodule at `./challenges/`) + helix_qa (HelixDevelopment/HelixQA submodule at `./helix_qa/`, with full autonomous QA sessions). See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 
 ### CONST-051 — Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout Mandate (cascaded from constitution submodule §11.4.28)
 **(A)** Every owned-by-us submodule (orgs: vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory — dynamically discoverable via gh/glab) is an EQUAL part of HelixCode's codebase. Same engineering attention as main (analysis, tests, gap-fill, bug-fix, docs/diagrams/SQL/website materials). **(B)** Submodules MUST stay fully decoupled — NEVER inject HelixCode-specific context; use configuration injection when needed. **(C)** Dependencies of owned submodules MUST live at HelixCode root (`<root>/<name>/` or `<root>/submodules/<name>/`); nested own-org submodule chains FORBIDDEN. Third-party submodules exempt. See constitution submodule `Constitution.md` §11.4.28 for the full mandate.
@@ -41,7 +41,7 @@ HelixCode is an enterprise-grade distributed AI development platform built in Go
 ## Project Structure
 
 ```
-HelixCode/
+helix_code/
 ├── cmd/                      # Application entry points
 │   ├── server/              # Main HTTP server
 │   ├── cli/                 # CLI client

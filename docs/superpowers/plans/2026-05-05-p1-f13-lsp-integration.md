@@ -12,7 +12,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f13-lsp-integration-design.md` (commit `ed36237`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F13 surface):**
 ```bash
@@ -52,7 +52,7 @@ Append F13 evidence section header (spec `ed36237`), update PROGRESS current foc
 
 ## Task 2: go.mod — add LSP deps (TDD)
 
-**Files:** `HelixCode/go.mod`, `HelixCode/go.sum`, new `HelixCode/internal/tools/lsp_deps_smoke_test.go`.
+**Files:** `helix_code/go.mod`, `helix_code/go.sum`, new `helix_code/internal/tools/lsp_deps_smoke_test.go`.
 
 Failing test FIRST (proves the deps are needed and pinned):
 ```go
@@ -83,7 +83,7 @@ Subject: `feat(P1-F13-T02): add go.lsp.dev/jsonrpc2 v0.10.0 + go.lsp.dev/protoco
 
 ## Task 3: lsp_types.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/lsp_types.go`, new `HelixCode/internal/tools/lsp_types_test.go`.
+**Files:** new `helix_code/internal/tools/lsp_types.go`, new `helix_code/internal/tools/lsp_types_test.go`.
 
 Define `Diagnostic`, `DiagnosticSummary`, `DiagnosticSeverity`, `DiagnosticRange`, `Position`, `LSPServerSpec`, `ServerStatus`. Mirror spec §3.3 exactly. Add a `Diagnostic.ComputeID()` helper that hashes `(FilePath|Range|Source|Code|Message)` into a stable string for `LSPAnalyzeDiagnostic` lookup.
 
@@ -119,7 +119,7 @@ Subject: `feat(P1-F13-T03): LSP type definitions (Diagnostic, DiagnosticSummary,
 
 ## Task 4: lsp_client.go (TDD with paired in-memory pipes)
 
-**Files:** new `HelixCode/internal/tools/lsp_client.go`, new `HelixCode/internal/tools/lsp_client_test.go`.
+**Files:** new `helix_code/internal/tools/lsp_client.go`, new `helix_code/internal/tools/lsp_client_test.go`.
 
 `LSPClient` is a `jsonrpc2.Conn` wrapper. Constructor accepts an `io.ReadWriteCloser` (so unit tests can hand it `net.Pipe()`-paired conns; production wires it to `cmd.StdoutPipe()` + `cmd.StdinPipe()`).
 
@@ -173,7 +173,7 @@ Subject: `feat(P1-F13-T04): LSPClient jsonrpc2 wrapper with initialize/didOpen/d
 
 ## Task 5: lsp_manager.go (TDD with in-tree fake server subprocess)
 
-**Files:** new `HelixCode/internal/tools/lsp_manager.go`, new `HelixCode/internal/tools/lsp_manager_test.go`, new `HelixCode/internal/tools/lsp_fakeserver/main.go`.
+**Files:** new `helix_code/internal/tools/lsp_manager.go`, new `helix_code/internal/tools/lsp_manager_test.go`, new `helix_code/internal/tools/lsp_fakeserver/main.go`.
 
 The fake server (`lsp_fakeserver/main.go`) is a tiny standalone Go program that:
 - reads LSP-framed JSON-RPC from stdin,
@@ -224,7 +224,7 @@ Subject: `feat(P1-F13-T05): LSPManager with lazy spawn, idle timeout, file-exten
 
 ## Task 6: lsp_servers.go — curated allowlist (TDD)
 
-**Files:** new `HelixCode/internal/tools/lsp_servers.go`, new `HelixCode/internal/tools/lsp_servers_test.go`.
+**Files:** new `helix_code/internal/tools/lsp_servers.go`, new `helix_code/internal/tools/lsp_servers_test.go`.
 
 ```go
 func DefaultLSPServerSpecs() []LSPServerSpec {
@@ -249,7 +249,7 @@ Subject: `feat(P1-F13-T06): curated 5-server allowlist + Detect via exec.LookPat
 
 ## Task 7: lsp.go — agent tools (TDD)
 
-**Files:** new `HelixCode/internal/tools/lsp.go`, new `HelixCode/internal/tools/lsp_test.go`.
+**Files:** new `helix_code/internal/tools/lsp.go`, new `helix_code/internal/tools/lsp_test.go`.
 
 Adapters that satisfy the existing `Tool` interface (`Name`/`Description`/`Schema`/`Category`/`Validate`/`Execute`). Both wrap an `*LSPManager` injected via constructor. Category constant `CategoryLSP ToolCategory = "lsp"` added in `registry.go`.
 
@@ -275,7 +275,7 @@ Subject: `feat(P1-F13-T07): LSPGetDiagnostics + LSPAnalyzeDiagnostic agent tools
 
 ## Task 8: registry.go — SetLSPManager + auto-trigger (TDD)
 
-**Files:** modify `HelixCode/internal/tools/registry.go`, new `HelixCode/internal/tools/registry_lsp_test.go`.
+**Files:** modify `helix_code/internal/tools/registry.go`, new `helix_code/internal/tools/registry_lsp_test.go`.
 
 Add to `ToolRegistry`:
 ```go
@@ -315,7 +315,7 @@ Subject: `feat(P1-F13-T08): registry.SetLSPManager + post-Execute auto-trigger f
 
 ## Task 9: /lsp slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/lsp_command.go`, new `HelixCode/internal/commands/lsp_command_test.go`.
+**Files:** new `helix_code/internal/commands/lsp_command.go`, new `helix_code/internal/commands/lsp_command_test.go`.
 
 Mirrors F09 `commands_command.go` and F11 `sessions_command.go` patterns. Subcommands:
 - `/lsp status` — calls `manager.Status()`, renders a `text/tabwriter` table.
@@ -338,7 +338,7 @@ Subject: `feat(P1-F13-T09): /lsp slash command (status / restart / list-servers 
 
 ## Task 10: helixcode lsp cobra + main.go wiring + integration test
 
-**Files:** new `HelixCode/cmd/cli/lsp_cmd.go`, new `HelixCode/cmd/cli/lsp_cmd_test.go`, modify `HelixCode/cmd/cli/main.go`, new `HelixCode/tests/integration/lsp_test.go` (`//go:build integration`).
+**Files:** new `helix_code/cmd/cli/lsp_cmd.go`, new `helix_code/cmd/cli/lsp_cmd_test.go`, modify `helix_code/cmd/cli/main.go`, new `helix_code/tests/integration/lsp_test.go` (`//go:build integration`).
 
 Cobra mirrors F11 `sessions_cmd.go`:
 ```go
@@ -389,7 +389,7 @@ Subject: `feat(P1-F13-T10): wire LSPManager into main.go + helixcode lsp cobra +
 
 ## Task 11: Challenge with runtime evidence
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f13_challenge/main.go`, new `challenges/p1-f13-lsp-integration/CHALLENGE.md`, new `challenges/p1-f13-lsp-integration/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f13_challenge/main.go`, new `challenges/p1-f13-lsp-integration/CHALLENGE.md`, new `challenges/p1-f13-lsp-integration/run.sh`.
 
 The harness builds the in-tree fake LSP server, then runs two phases. Output skeleton:
 ```
@@ -433,7 +433,7 @@ Tick all 12 items in PROGRESS, advance PROGRESS focus to F14 candidate, run fina
 1. **Spec coverage:** every spec section maps to a task — T03 types (§3.3), T04 client (§3.3, §4), T05 manager (§3.3, §4.2, §4.4, §4.5), T06 servers (§1, §3.3), T07 tools (§3.4), T08 registry auto-trigger (§4.3), T09 slash (§3.4), T10 cobra + integration (§3.4, §5.2, §6.2), T11 Challenge (§5.2, §6.3), T12 close-out (§9).
 2. **TDD:** every code task starts with a failing test that exercises the real code path (paired in-memory pipes for client; real subprocess for manager; auto-trigger asserted via the registry's actual Execute path).
 3. **Type consistency:** `Diagnostic`, `DiagnosticSummary`, `DiagnosticSeverity`, `LSPServerSpec`, `ServerStatus`, `LSPManager`, `LSPClient`, `LSPGetDiagnosticsTool`, `LSPAnalyzeDiagnosticTool` — names match across spec §3.3 and plan T03–T08.
-4. **Two new external deps:** `go.lsp.dev/jsonrpc2 v0.10.0` + `go.lsp.dev/protocol v0.12.0`. Both confirmed absent from `HelixCode/go.mod` at spec time. Justification: these are the canonical Go LSP libraries (used by gopls itself); hand-rolling JSON-RPC framing + ~200 LSP types is exactly the bluff-prone work the Constitution asks us to avoid.
+4. **Two new external deps:** `go.lsp.dev/jsonrpc2 v0.10.0` + `go.lsp.dev/protocol v0.12.0`. Both confirmed absent from `helix_code/go.mod` at spec time. Justification: these are the canonical Go LSP libraries (used by gopls itself); hand-rolling JSON-RPC framing + ~200 LSP types is exactly the bluff-prone work the Constitution asks us to avoid.
 5. **Anti-bluff (§5.2):** Challenge has TWO sections; the always-runs section uses a real OS subprocess (the in-tree fake server) speaking real LSP-framed JSON-RPC over real stdio, NOT a Go in-process stub. The gated section explicitly skips with `SKIP-OK: P1-F13 <binary> not installed (install: <hint>)` per server.
 6. **Auto-trigger never blocks the user:** `r.lspManager.NotifyChange` errors are logged WARN and dropped; the user's edit always succeeds. This is asserted by `TestRegistry_AutoTriggerNeverBlocksOnLSPError`.
 7. **CONST-042:** INFO logs in `LSPClient` log only `len(message)` and basenames; full diagnostic content is DEBUG-only behind `HELIX_LSP_DEBUG=1`. Challenge verifies INFO log lines do not contain test-diagnostic substrings.

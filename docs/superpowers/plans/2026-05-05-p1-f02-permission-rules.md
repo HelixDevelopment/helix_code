@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f02-permission-rules-design.md` (commit `f9e97ff`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module).
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module).
 
 **Anti-bluff smoke (run on every commit):**
 ```bash
@@ -99,12 +99,12 @@ EOF
 ## Task 2: Add Wildcard field to confirmation.Condition (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/confirmation/policies.go` (the `Condition` struct + `Matches`)
-- Test: `HelixCode/internal/tools/confirmation/policies_wildcard_test.go` (NEW)
+- Modify: `helix_code/internal/tools/confirmation/policies.go` (the `Condition` struct + `Matches`)
+- Test: `helix_code/internal/tools/confirmation/policies_wildcard_test.go` (NEW)
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/confirmation/policies_wildcard_test.go`:
+Create `helix_code/internal/tools/confirmation/policies_wildcard_test.go`:
 
 ```go
 package confirmation
@@ -185,7 +185,7 @@ Expected: FAIL — `Condition` has no `Wildcard` field.
 
 - [ ] **Step 3: Add Wildcard field + matching logic**
 
-In `HelixCode/internal/tools/confirmation/policies.go`, modify the `Condition` struct (around line 30-36):
+In `helix_code/internal/tools/confirmation/policies.go`, modify the `Condition` struct (around line 30-36):
 
 ```go
 // Condition defines matching criteria
@@ -340,12 +340,12 @@ EOF
 ## Task 3: Permissions package skeleton
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/doc.go`
-- Create: `HelixCode/internal/tools/permissions/types.go`
+- Create: `helix_code/internal/tools/permissions/doc.go`
+- Create: `helix_code/internal/tools/permissions/types.go`
 
 - [ ] **Step 1: Create doc.go**
 
-Create `HelixCode/internal/tools/permissions/doc.go`:
+Create `helix_code/internal/tools/permissions/doc.go`:
 
 ```go
 // Package permissions implements the claude-code-style permission rule system.
@@ -363,7 +363,7 @@ package permissions
 
 - [ ] **Step 2: Create types.go**
 
-Create `HelixCode/internal/tools/permissions/types.go`:
+Create `helix_code/internal/tools/permissions/types.go`:
 
 ```go
 package permissions
@@ -462,13 +462,13 @@ EOF
 ## Task 4: Shell splitter with mvdan.cc/sh (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/shell_splitter.go`
-- Test: `HelixCode/internal/tools/permissions/shell_splitter_test.go`
-- Modify: `HelixCode/go.mod` + `HelixCode/go.sum` (auto-generated)
+- Create: `helix_code/internal/tools/permissions/shell_splitter.go`
+- Test: `helix_code/internal/tools/permissions/shell_splitter_test.go`
+- Modify: `helix_code/go.mod` + `helix_code/go.sum` (auto-generated)
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/permissions/shell_splitter_test.go`:
+Create `helix_code/internal/tools/permissions/shell_splitter_test.go`:
 
 ```go
 package permissions
@@ -559,7 +559,7 @@ Expected: FAIL — `SplitCommands` undefined.
 
 - [ ] **Step 4: Implement SplitCommands**
 
-Create `HelixCode/internal/tools/permissions/shell_splitter.go`:
+Create `helix_code/internal/tools/permissions/shell_splitter.go`:
 
 ```go
 package permissions
@@ -684,12 +684,12 @@ EOF
 ## Task 5: Rule engine — pattern parse, match, priority sort (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/rule_engine.go`
-- Test: `HelixCode/internal/tools/permissions/rule_engine_test.go`
+- Create: `helix_code/internal/tools/permissions/rule_engine.go`
+- Test: `helix_code/internal/tools/permissions/rule_engine_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/permissions/rule_engine_test.go`:
+Create `helix_code/internal/tools/permissions/rule_engine_test.go`:
 
 ```go
 package permissions
@@ -821,7 +821,7 @@ Expected: FAIL — `ParsePattern`, `NewRuleEngine`, etc. undefined.
 
 - [ ] **Step 3: Implement rule_engine.go**
 
-Create `HelixCode/internal/tools/permissions/rule_engine.go`:
+Create `helix_code/internal/tools/permissions/rule_engine.go`:
 
 ```go
 package permissions
@@ -1088,12 +1088,12 @@ EOF
 ## Task 6: Mode presets (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/mode_presets.go`
-- Test: `HelixCode/internal/tools/permissions/mode_presets_test.go`
+- Create: `helix_code/internal/tools/permissions/mode_presets.go`
+- Test: `helix_code/internal/tools/permissions/mode_presets_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/permissions/mode_presets_test.go`:
+Create `helix_code/internal/tools/permissions/mode_presets_test.go`:
 
 ```go
 package permissions
@@ -1180,7 +1180,7 @@ Expected: FAIL — `PresetRules`, `IsReadOnlyCommand`, `IsWriteCommand` undefine
 
 - [ ] **Step 3: Implement mode_presets.go**
 
-Create `HelixCode/internal/tools/permissions/mode_presets.go`:
+Create `helix_code/internal/tools/permissions/mode_presets.go`:
 
 ```go
 package permissions
@@ -1341,12 +1341,12 @@ EOF
 ## Task 7: Rule loader — YAML + file precedence (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/rule_loader.go`
-- Test: `HelixCode/internal/tools/permissions/rule_loader_test.go`
+- Create: `helix_code/internal/tools/permissions/rule_loader.go`
+- Test: `helix_code/internal/tools/permissions/rule_loader_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/permissions/rule_loader_test.go`:
+Create `helix_code/internal/tools/permissions/rule_loader_test.go`:
 
 ```go
 package permissions
@@ -1494,7 +1494,7 @@ Expected: FAIL — `FileLoader` undefined.
 
 - [ ] **Step 3: Implement rule_loader.go**
 
-Create `HelixCode/internal/tools/permissions/rule_loader.go`:
+Create `helix_code/internal/tools/permissions/rule_loader.go`:
 
 ```go
 package permissions
@@ -1812,12 +1812,12 @@ EOF
 ## Task 8: Permissions facade — register Policy with PolicyEngine
 
 **Files:**
-- Create: `HelixCode/internal/tools/permissions/permissions.go`
-- Test: `HelixCode/internal/tools/permissions/permissions_test.go`
+- Create: `helix_code/internal/tools/permissions/permissions.go`
+- Test: `helix_code/internal/tools/permissions/permissions_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/permissions/permissions_test.go`:
+Create `helix_code/internal/tools/permissions/permissions_test.go`:
 
 ```go
 package permissions
@@ -1914,7 +1914,7 @@ Expected: FAIL — `NewEngine` undefined.
 
 - [ ] **Step 3: Implement permissions.go**
 
-Create `HelixCode/internal/tools/permissions/permissions.go`:
+Create `helix_code/internal/tools/permissions/permissions.go`:
 
 ```go
 package permissions
@@ -2102,8 +2102,8 @@ EOF
 ## Task 9: Wire --permission-mode flag + integration test (no mocks)
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go` (add flag + permissions.Engine bootstrap)
-- Test: `HelixCode/tests/integration/permissions/permissions_integration_test.go`
+- Modify: `helix_code/cmd/cli/main.go` (add flag + permissions.Engine bootstrap)
+- Test: `helix_code/tests/integration/permissions/permissions_integration_test.go`
 
 - [ ] **Step 1: Locate the CLI flag block**
 
@@ -2114,7 +2114,7 @@ Note the line range where flags are declared and the function that builds the CL
 
 - [ ] **Step 2: Add the --permission-mode flag**
 
-In `HelixCode/cmd/cli/main.go`, find the flag-registration block (where existing flags are added with `flags.StringVar` or `cmd.Flags().StringVar`). Add:
+In `helix_code/cmd/cli/main.go`, find the flag-registration block (where existing flags are added with `flags.StringVar` or `cmd.Flags().StringVar`). Add:
 
 ```go
 // Permission mode preset (default | auto | acceptEdits | dontAsk | bypassPermissions)
@@ -2181,10 +2181,10 @@ Expected: clean compile.
 
 Create directory:
 ```bash
-mkdir -p HelixCode/tests/integration/permissions
+mkdir -p helix_code/tests/integration/permissions
 ```
 
-Create `HelixCode/tests/integration/permissions/permissions_integration_test.go`:
+Create `helix_code/tests/integration/permissions/permissions_integration_test.go`:
 
 ```go
 //go:build integration
@@ -2350,12 +2350,12 @@ EOF
 ## Task 10: helixcode permissions {list,add,remove,check} subcommands
 
 **Files:**
-- Create: `HelixCode/cmd/cli/permissions_cmd.go`
-- Test: `HelixCode/cmd/cli/permissions_cmd_test.go`
+- Create: `helix_code/cmd/cli/permissions_cmd.go`
+- Test: `helix_code/cmd/cli/permissions_cmd_test.go`
 
 - [ ] **Step 1: Write failing test for list**
 
-Create `HelixCode/cmd/cli/permissions_cmd_test.go`:
+Create `helix_code/cmd/cli/permissions_cmd_test.go`:
 
 ```go
 package main
@@ -2435,7 +2435,7 @@ Expected: FAIL — `runPermissionsList` etc. undefined.
 
 - [ ] **Step 3: Implement permissions_cmd.go**
 
-Create `HelixCode/cmd/cli/permissions_cmd.go`:
+Create `helix_code/cmd/cli/permissions_cmd.go`:
 
 ```go
 package main
@@ -2714,8 +2714,8 @@ EOF
 ## Task 11: /permissions slash command
 
 **Files:**
-- Create: `HelixCode/internal/commands/permissions_command.go`
-- Test: `HelixCode/internal/commands/permissions_command_test.go`
+- Create: `helix_code/internal/commands/permissions_command.go`
+- Test: `helix_code/internal/commands/permissions_command_test.go`
 
 - [ ] **Step 1: Inspect the Command interface**
 
@@ -2726,7 +2726,7 @@ Confirm the `Command` interface signature: `Name`, `Aliases`, `Description`, `Us
 
 - [ ] **Step 2: Write failing test**
 
-Create `HelixCode/internal/commands/permissions_command_test.go`:
+Create `helix_code/internal/commands/permissions_command_test.go`:
 
 ```go
 package commands
@@ -2803,7 +2803,7 @@ Expected: FAIL — `NewPermissionsCommand` undefined.
 
 - [ ] **Step 4: Implement permissions_command.go**
 
-Create `HelixCode/internal/commands/permissions_command.go`:
+Create `helix_code/internal/commands/permissions_command.go`:
 
 ```go
 package commands
@@ -3015,19 +3015,19 @@ EOF
 ## Task 12: Challenge with three runtime-evidence scenarios
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/permissions/expected.json`
-- Create: `HelixCode/tests/e2e/challenges/permissions/run.sh`
-- Create: `HelixCode/tests/e2e/challenges/permissions/README.md`
+- Create: `helix_code/tests/e2e/challenges/permissions/expected.json`
+- Create: `helix_code/tests/e2e/challenges/permissions/run.sh`
+- Create: `helix_code/tests/e2e/challenges/permissions/README.md`
 
 - [ ] **Step 1: Create the Challenge directory**
 
 ```bash
-mkdir -p HelixCode/tests/e2e/challenges/permissions
+mkdir -p helix_code/tests/e2e/challenges/permissions
 ```
 
 - [ ] **Step 2: Write expected.json**
 
-Create `HelixCode/tests/e2e/challenges/permissions/expected.json`:
+Create `helix_code/tests/e2e/challenges/permissions/expected.json`:
 
 ```json
 {
@@ -3074,7 +3074,7 @@ Create `HelixCode/tests/e2e/challenges/permissions/expected.json`:
 
 - [ ] **Step 3: Write run.sh (the Challenge driver)**
 
-Create `HelixCode/tests/e2e/challenges/permissions/run.sh`:
+Create `helix_code/tests/e2e/challenges/permissions/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -3156,12 +3156,12 @@ echo "PASS: all three scenarios produced expected decisions and markers preserve
 - [ ] **Step 4: Make it executable**
 
 ```bash
-chmod +x HelixCode/tests/e2e/challenges/permissions/run.sh
+chmod +x helix_code/tests/e2e/challenges/permissions/run.sh
 ```
 
 - [ ] **Step 5: Write README.md**
 
-Create `HelixCode/tests/e2e/challenges/permissions/README.md`:
+Create `helix_code/tests/e2e/challenges/permissions/README.md`:
 
 ```markdown
 # Challenge — Permission Rule System (P1-F02)

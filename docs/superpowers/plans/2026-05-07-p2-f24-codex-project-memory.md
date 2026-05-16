@@ -6,13 +6,13 @@
 
 **Goal:** Ship a real, end-to-end **project memory** subsystem for the HelixCode CLI agent. F24 ADDS a NEW `internal/projectmemory/` package: `Memory` (immutable value), `MemoryLoader` (parent-walk discovery + user overlay reader), `MemoryRegistry` (atomic-pointer Snapshot/Set/Reload), `MemoryWatcher` (fsnotify wrapper with 200 ms debounce). ADDS a NEW `internal/commands/memory_command.go` with `/memory` slash (`status` / `show` / `edit` / `reload`). MODIFIES `BaseAgent` to optionally prepend `Memory.Render()` to the system prompt per-call (nil-safe; existing tests unchanged). MODIFIES `cmd/cli/main.go` to wire registry + watcher at startup adjacent to F23's browser block. Discovery filenames: `helixcode.md` / `codex.md` / `AGENTS.md` (first match wins; case-insensitive). User overlay: `$XDG_CONFIG_HOME/helixcode/memory.md` (loaded AFTER project memory). 64 KB cap with positive `TruncatedProject` / `TruncatedUser` flags. Hot-reload via fsnotify (existing direct dep `github.com/fsnotify/fsnotify v1.9.0`). Graceful degradation: missing files return empty Memory + nil error; fsnotify watch failure degrades to slash-only reload.
 
-**Architecture:** New files under `HelixCode/internal/projectmemory/` — `types.go` (Memory + MemorySource + sentinels `ErrNoMemoryFile` / `ErrMemoryFileTooLarge` + `MaxMemoryBytes = 64 * 1024` + `DebounceWindow = 200 * time.Millisecond` + `DiscoveryFilenames = []string{"helixcode.md", "codex.md", "AGENTS.md"}`), `loader.go` (`MemoryLoader` with `Discover(cwd) (Memory, error)` + parent-walk + git-root-stop + user-overlay), `registry.go` (`MemoryRegistry` with `atomic.Pointer[Memory]` + `Snapshot()` lock-free + `Set` + `Reload(ctx)` + `MemorySnapshotter` interface), `watcher.go` (`MemoryWatcher` with fsnotify + 200 ms debounce + graceful degradation), `doc.go`. New `internal/commands/memory_command.go` for the `/memory` slash. Two existing files get small additions: `cmd/cli/main.go` (4 lines: construct loader → registry → call Reload → start watcher → register slash); `internal/agent/base_agent.go` (3 lines: field `memoryRegistry projectmemory.MemorySnapshotter`, setter `SetMemoryRegistry`, prepend in `getSystemPrompt` when non-nil). Backward-compat: BaseAgent without `SetMemoryRegistry` is byte-for-byte unchanged.
+**Architecture:** New files under `helix_code/internal/projectmemory/` — `types.go` (Memory + MemorySource + sentinels `ErrNoMemoryFile` / `ErrMemoryFileTooLarge` + `MaxMemoryBytes = 64 * 1024` + `DebounceWindow = 200 * time.Millisecond` + `DiscoveryFilenames = []string{"helixcode.md", "codex.md", "AGENTS.md"}`), `loader.go` (`MemoryLoader` with `Discover(cwd) (Memory, error)` + parent-walk + git-root-stop + user-overlay), `registry.go` (`MemoryRegistry` with `atomic.Pointer[Memory]` + `Snapshot()` lock-free + `Set` + `Reload(ctx)` + `MemorySnapshotter` interface), `watcher.go` (`MemoryWatcher` with fsnotify + 200 ms debounce + graceful degradation), `doc.go`. New `internal/commands/memory_command.go` for the `/memory` slash. Two existing files get small additions: `cmd/cli/main.go` (4 lines: construct loader → registry → call Reload → start watcher → register slash); `internal/agent/base_agent.go` (3 lines: field `memoryRegistry projectmemory.MemorySnapshotter`, setter `SetMemoryRegistry`, prepend in `getSystemPrompt` when non-nil). Backward-compat: BaseAgent without `SetMemoryRegistry` is byte-for-byte unchanged.
 
-**Tech Stack:** Go 1.26, testify v1.11, zap (already direct), fsnotify v1.9.0 (ALREADY direct in `HelixCode/go.mod`). **Zero new external deps** (`os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `os/exec` all stdlib). `go mod tidy` after T07 must produce no diff in either `go.mod` or `go.sum`. T08's verification step asserts this loudly.
+**Tech Stack:** Go 1.26, testify v1.11, zap (already direct), fsnotify v1.9.0 (ALREADY direct in `helix_code/go.mod`). **Zero new external deps** (`os`, `sync`, `sync/atomic`, `time`, `errors`, `fmt`, `strings`, `path/filepath`, `context`, `os/exec` all stdlib). `go mod tidy` after T07 must produce no diff in either `go.mod` or `go.sum`. T08's verification step asserts this loudly.
 
 **Spec:** `docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md` (commit `c31b9ac`).
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (full 4-term applied to F24 surface):**
 ```bash
@@ -58,7 +58,7 @@ Commit: `docs(P2-F24-T01): bootstrap F24 evidence + advance PROGRESS to F24 (Cod
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/projectmemory/types.go`, new `HelixCode/internal/projectmemory/types_test.go`, new `HelixCode/internal/projectmemory/doc.go`.
+**Files:** new `helix_code/internal/projectmemory/types.go`, new `helix_code/internal/projectmemory/types_test.go`, new `helix_code/internal/projectmemory/doc.go`.
 
 Define in `types.go`:
 - `Memory struct { Project, User, ProjectPath, UserPath string; LoadedAt time.Time; TruncatedProject, TruncatedUser bool }`.
@@ -108,7 +108,7 @@ Subject: `feat(P2-F24-T02): projectmemory types - Memory + Render + sentinels + 
 
 ## Task 3: loader.go (TDD)
 
-**Files:** new `HelixCode/internal/projectmemory/loader.go`, new `HelixCode/internal/projectmemory/loader_test.go`.
+**Files:** new `helix_code/internal/projectmemory/loader.go`, new `helix_code/internal/projectmemory/loader_test.go`.
 
 ```go
 type MemoryLoader struct {
@@ -248,7 +248,7 @@ Subject: `feat(P2-F24-T03): projectmemory loader - parent-walk + git-root-stop +
 
 ## Task 4: registry.go (TDD with -race)
 
-**Files:** new `HelixCode/internal/projectmemory/registry.go`, new `HelixCode/internal/projectmemory/registry_test.go`.
+**Files:** new `helix_code/internal/projectmemory/registry.go`, new `helix_code/internal/projectmemory/registry_test.go`.
 
 ```go
 type MemorySnapshotter interface {
@@ -357,7 +357,7 @@ Subject: `feat(P2-F24-T04): projectmemory registry - atomic-pointer Snapshot/Set
 
 ## Task 5: watcher.go (TDD with real fsnotify)
 
-**Files:** new `HelixCode/internal/projectmemory/watcher.go`, new `HelixCode/internal/projectmemory/watcher_test.go`.
+**Files:** new `helix_code/internal/projectmemory/watcher.go`, new `helix_code/internal/projectmemory/watcher_test.go`.
 
 ```go
 type MemoryWatcher struct {
@@ -476,7 +476,7 @@ Subject: `feat(P2-F24-T05): projectmemory watcher - fsnotify + 200ms debounce + 
 
 ## Task 6: memory_command.go (TDD)
 
-**Files:** new `HelixCode/internal/commands/memory_command.go`, new `HelixCode/internal/commands/memory_command_test.go`.
+**Files:** new `helix_code/internal/commands/memory_command.go`, new `helix_code/internal/commands/memory_command_test.go`.
 
 ```go
 type MemoryCommand struct {
@@ -579,7 +579,7 @@ Subject: `feat(P2-F24-T06): /memory slash command - status/show/edit/reload + ed
 
 ## Task 7: BaseAgent integration + main.go wiring + integration test
 
-**Files:** modify `HelixCode/internal/agent/base_agent.go`, modify `HelixCode/cmd/cli/main.go`, new `HelixCode/internal/agent/base_agent_memory_test.go`, new `HelixCode/tests/integration/memory_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/internal/agent/base_agent.go`, modify `helix_code/cmd/cli/main.go`, new `helix_code/internal/agent/base_agent_memory_test.go`, new `helix_code/tests/integration/memory_test.go` (`//go:build integration`).
 
 `base_agent.go` (MINIMAL additions):
 
@@ -704,7 +704,7 @@ Subject: `feat(P2-F24-T07): BaseAgent SetMemoryRegistry + main.go wiring + integ
 
 ## Task 8: Challenge harness 5 phases + close-out + push 4 remotes non-force
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f24_challenge/main.go`, new `challenges/p2-f24-codex-project-memory/CHALLENGE.md`, new `challenges/p2-f24-codex-project-memory/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p2f24_challenge/main.go`, new `challenges/p2-f24-codex-project-memory/CHALLENGE.md`, new `challenges/p2-f24-codex-project-memory/run.sh`.
 
 Harness phases (per spec §6.3):
 
@@ -778,7 +778,7 @@ Subject: `chore(P2-F24-T08): close out feature 24 — Codex Project Memory`.
 1. **Spec coverage:** every spec section maps to a task — T02 types (§3.3), T03 loader (§4.1), T04 registry (§4.2 + concurrency), T05 watcher (§4.3), T06 /memory slash (§3.4), T07 BaseAgent + main.go wiring (§3.5 + §4.1), T08 Challenge 5 phases + close-out (§6.3).
 2. **TDD:** every code task starts with failing tests. Loader tests use real `t.TempDir()`. Registry tests run with -race. Watcher tests use real fsnotify against real tempdir.
 3. **Type consistency:** `Memory`, `MemorySource`, `MemoryLoader`, `MemoryRegistry`, `MemoryWatcher`, `MemorySnapshotter`, `MemoryCommand`, sentinel errors (`ErrNoMemoryFile`, `ErrMemoryFileTooLarge`), constants (`MaxMemoryBytes`, `DebounceWindow`, `DiscoveryFilenames`) — all match across spec §3 and plan T02-T08.
-4. **Zero new external deps:** fsnotify v1.9.0 already direct in `HelixCode/go.mod`. T08 verifies `git diff --exit-code go.mod go.sum` is no-op.
+4. **Zero new external deps:** fsnotify v1.9.0 already direct in `helix_code/go.mod`. T08 verifies `git diff --exit-code go.mod go.sum` is no-op.
 5. **Anti-bluff (§5.2):** Challenge has 5 phases, each with positive byte-evidence: tempdir-scoped sentinel byte equality (PHASE-A), nil-Memory + nil-error (PHASE-B), pre/post-Reload byte differential within 500 ms (PHASE-C), Project + User render order byte equality (PHASE-D), `TruncatedProject == true` + first-64-KB byte equality (PHASE-E). Byte-evidence mismatch is hard failure. Absence-of-error never acceptable.
 6. **CONST-042:** memory contents NEVER logged at INFO level. Loader logs only path + byte counts. Per-tool descriptions and telemetry NEVER include memory body.
 7. **CONST-043:** F24 emits zero `git push` commands. T08 close-out push to 4 remotes requires explicit user authorisation per push.

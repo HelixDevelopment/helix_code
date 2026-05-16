@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.24, cgo (FAISS), go-redis/v9, gomemcache, SonarQube CLI, Snyk CLI
 
-**Working dir:** `HelixCode/` (all go commands here)
+**Working dir:** `helix_code/` (all go commands here)
 
 **Spec:** `docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md`
 
@@ -17,23 +17,23 @@
 ## File Structure Map
 
 ```
-HelixCode/internal/security/scanner.go              — create (Scanner interface)
-HelixCode/internal/security/sonarqube_client.go      — create
-HelixCode/internal/security/snyk_client.go           — create
-HelixCode/internal/security/security.go              — modify (real ScanFeature)
-HelixCode/internal/security/security_real_test.go    — create (TDD tests)
-HelixCode/cmd/other_commands.go                      — rewrite (wire to real)
-HelixCode/cmd/helix_config/main.go                   — modify (fix any stubs)
-HelixCode/internal/memory/providers/faiss_native.go  — create (cgo wrapper)
-HelixCode/internal/memory/providers/faiss_fallback.go — create (pure-Go brute force)
-HelixCode/internal/memory/providers/faiss_provider.go — modify (use real backends)
-HelixCode/internal/memory/providers/character_ai_provider.go — modify (real API)
-HelixCode/internal/memory/providers/anima_provider.go — modify (real backup/restore)
-HelixCode/cmd/security_test/main.go                  — rewrite (real scanning)
-HelixCode/internal/memory/redis_provider.go          — modify (real go-redis)
-HelixCode/internal/memory/memcached_provider.go      — modify (real gomemcache)
-HelixCode/internal/tools/mapping/treesitter.go       — modify (fix line 266)
-HelixCode/cmd/cli/main.go.old                        — DELETE
+helix_code/internal/security/scanner.go              — create (Scanner interface)
+helix_code/internal/security/sonarqube_client.go      — create
+helix_code/internal/security/snyk_client.go           — create
+helix_code/internal/security/security.go              — modify (real ScanFeature)
+helix_code/internal/security/security_real_test.go    — create (TDD tests)
+helix_code/cmd/other_commands.go                      — rewrite (wire to real)
+helix_code/cmd/helix_config/main.go                   — modify (fix any stubs)
+helix_code/internal/memory/providers/faiss_native.go  — create (cgo wrapper)
+helix_code/internal/memory/providers/faiss_fallback.go — create (pure-Go brute force)
+helix_code/internal/memory/providers/faiss_provider.go — modify (use real backends)
+helix_code/internal/memory/providers/character_ai_provider.go — modify (real API)
+helix_code/internal/memory/providers/anima_provider.go — modify (real backup/restore)
+helix_code/cmd/security_test/main.go                  — rewrite (real scanning)
+helix_code/internal/memory/redis_provider.go          — modify (real go-redis)
+helix_code/internal/memory/memcached_provider.go      — modify (real gomemcache)
+helix_code/internal/tools/mapping/treesitter.go       — modify (fix line 266)
+helix_code/cmd/cli/main.go.old                        — DELETE
 AGENTS.md                                             — modify (mark resolved)
 ```
 
@@ -42,15 +42,15 @@ AGENTS.md                                             — modify (mark resolved)
 ### Task P2-T01: Replace simulated security scanning with real SAST/DAST
 
 **Files:**
-- Create: `HelixCode/internal/security/scanner.go`
-- Create: `HelixCode/internal/security/sonarqube_client.go`
-- Create: `HelixCode/internal/security/snyk_client.go`
-- Modify: `HelixCode/internal/security/security.go`
-- Create: `HelixCode/internal/security/security_real_test.go`
+- Create: `helix_code/internal/security/scanner.go`
+- Create: `helix_code/internal/security/sonarqube_client.go`
+- Create: `helix_code/internal/security/snyk_client.go`
+- Modify: `helix_code/internal/security/security.go`
+- Create: `helix_code/internal/security/security_real_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/security/security_real_test.go`:
+Create `helix_code/internal/security/security_real_test.go`:
 
 ```go
 package security
@@ -102,7 +102,7 @@ Expected: FAIL — score is 95
 
 - [ ] **Step 3: Create Scanner interface**
 
-Create `HelixCode/internal/security/scanner.go`:
+Create `helix_code/internal/security/scanner.go`:
 
 ```go
 package security
@@ -149,7 +149,7 @@ type ScannerConfig struct {
 
 - [ ] **Step 4: Create SonarQube scanner**
 
-Create `HelixCode/internal/security/sonarqube_client.go`:
+Create `helix_code/internal/security/sonarqube_client.go`:
 
 ```go
 package security
@@ -240,7 +240,7 @@ func (s *SonarQubeScanner) Close() error { s.client.CloseIdleConnections(); retu
 
 - [ ] **Step 5: Create Snyk scanner**
 
-Create `HelixCode/internal/security/snyk_client.go`:
+Create `helix_code/internal/security/snyk_client.go`:
 
 ```go
 package security
@@ -292,7 +292,7 @@ func (s *SnykScanner) Close() error { return nil }
 
 - [ ] **Step 6: Rewrite SecurityManager.ScanFeature**
 
-In `HelixCode/internal/security/security.go`, replace the `ScanFeature` method body (which currently has a comment like "Simulate security scanning logic" and returns `Success=true, Score=95`) with the real implementation described in the design spec.
+In `helix_code/internal/security/security.go`, replace the `ScanFeature` method body (which currently has a comment like "Simulate security scanning logic" and returns `Success=true, Score=95`) with the real implementation described in the design spec.
 
 Key changes:
 - Add `context` and `os` to imports
@@ -313,7 +313,7 @@ Expected: PASS — score is NOT 95, real scan duration, proper input validation
 - [ ] **Step 8: Anti-bluff grep**
 
 ```bash
-grep -rn "simulated\|hardcoded.*95\|Simulate security" HelixCode/internal/security/ | grep -v "_test.go" && echo "BLUFF FOUND" || echo "clean"
+grep -rn "simulated\|hardcoded.*95\|Simulate security" helix_code/internal/security/ | grep -v "_test.go" && echo "BLUFF FOUND" || echo "clean"
 ```
 
 Expected: `clean`
@@ -324,7 +324,7 @@ Expected: `clean`
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
 cd HelixCode && go fmt ./internal/security/... && go vet ./internal/security/...
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/security/
+git add helix_code/internal/security/
 git commit -m "fix(P2-T01): replace simulated security scanning with real SonarQube/Snyk integration
 
 Phase: 2  Task: P2-T01
@@ -335,11 +335,11 @@ Evidence: go test ./internal/security/ PASS, zero simulated keywords"
 
 ### Task P2-T02: Wire stubbed CLI commands to real implementations
 
-**Files:** Modify `HelixCode/cmd/other_commands.go`
+**Files:** Modify `helix_code/cmd/other_commands.go`
 
 - [ ] **Step 1: Write anti-stub test**
 
-Create or add to `HelixCode/cmd/other_commands_test.go`:
+Create or add to `helix_code/cmd/other_commands_test.go`:
 
 ```go
 package cmd
@@ -401,7 +401,7 @@ Expected: exit 0
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/other_commands.go HelixCode/cmd/other_commands_test.go
+git add helix_code/cmd/other_commands.go helix_code/cmd/other_commands_test.go
 git commit -m "fix(P2-T02): wire stubbed CLI commands to real implementations
 
 Phase: 2  Task: P2-T02"
@@ -411,7 +411,7 @@ Phase: 2  Task: P2-T02"
 
 ### Task P2-T03: Fix helix-config placeholder subcommands
 
-**Files:** Modify `HelixCode/cmd/helix_config/main.go`
+**Files:** Modify `helix_code/cmd/helix_config/main.go`
 
 - [ ] **Step 1: Audit for stubs**
 
@@ -449,7 +449,7 @@ Run: func(cmd *cobra.Command, args []string) {
 - [ ] **Step 3: Verify zero stubs**
 
 ```bash
-grep -n "not yet implemented" HelixCode/cmd/helix_config/main.go
+grep -n "not yet implemented" helix_code/cmd/helix_config/main.go
 ```
 
 Expected: zero output
@@ -459,7 +459,7 @@ Expected: zero output
 ```bash
 cd HelixCode && go build ./cmd/helix_config/...
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/helix_config/
+git add helix_code/cmd/helix_config/
 git commit -m "fix(P2-T03): wire helix-config templ ates/history/schema to real implementations
 
 Phase: 2  Task: P2-T03"
@@ -470,10 +470,10 @@ Phase: 2  Task: P2-T03"
 ### Task P2-T04: Replace simulated FAISS with real native + fallback
 
 **Files:**
-- Create: `HelixCode/internal/memory/providers/faiss_native.go` (cgo build tag)
-- Create: `HelixCode/internal/memory/providers/faiss_fallback.go` (pure Go)
-- Modify: `HelixCode/internal/memory/providers/faiss_provider.go`
-- Create: `HelixCode/internal/memory/providers/faiss_real_test.go`
+- Create: `helix_code/internal/memory/providers/faiss_native.go` (cgo build tag)
+- Create: `helix_code/internal/memory/providers/faiss_fallback.go` (pure Go)
+- Modify: `helix_code/internal/memory/providers/faiss_provider.go`
+- Create: `helix_code/internal/memory/providers/faiss_real_test.go`
 
 - [ ] **Step 1: Write failing test**
 
@@ -501,7 +501,7 @@ Expected: FAIL — name contains "simulated"
 
 - [ ] **Step 2: Create FAISS fallback (pure Go brute-force)**
 
-Create `HelixCode/internal/memory/providers/faiss_fallback.go`:
+Create `helix_code/internal/memory/providers/faiss_fallback.go`:
 
 ```go
 package providers
@@ -554,7 +554,7 @@ func l2(a, b []float32) float32 {
 
 - [ ] **Step 3: Create FAISS native wrapper (build-tag gated)**
 
-Create `HelixCode/internal/memory/providers/faiss_native.go`:
+Create `helix_code/internal/memory/providers/faiss_native.go`:
 
 ```go
 //go:build cgo && faiss
@@ -620,7 +620,7 @@ Expected: `clean` + PASS
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/memory/providers/
+git add helix_code/internal/memory/providers/
 git commit -m "fix(P2-T04): replace simulated FAISS with real native + Go fallback
 
 Phase: 2  Task: P2-T04  Evidence: zero 'simulated' in faiss_provider.go"
@@ -630,7 +630,7 @@ Phase: 2  Task: P2-T04  Evidence: zero 'simulated' in faiss_provider.go"
 
 ### Task P2-T05: Replace simulated CharacterAI with real API
 
-**Files:** Modify `HelixCode/internal/memory/providers/character_ai_provider.go`
+**Files:** Modify `helix_code/internal/memory/providers/character_ai_provider.go`
 
 - [ ] **Step 1: Replace** `generateSimulatedResponse()` **with** `callRealAPI()`
 
@@ -662,7 +662,7 @@ func (p *CharacterAIProvider) callRealAPI(ctx context.Context, charID, msg strin
 - [ ] **Step 2: Verify simulation is gone**
 
 ```bash
-grep -rn "simulated\|Simulated\|generateSimulated" HelixCode/internal/memory/providers/character_ai_provider.go && echo "BLUFF" || echo "clean"
+grep -rn "simulated\|Simulated\|generateSimulated" helix_code/internal/memory/providers/character_ai_provider.go && echo "BLUFF" || echo "clean"
 cd HelixCode && go test ./internal/memory/providers/ -run CharacterAI -count=1
 ```
 
@@ -670,7 +670,7 @@ cd HelixCode && go test ./internal/memory/providers/ -run CharacterAI -count=1
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/memory/providers/character_ai_provider.go
+git add helix_code/internal/memory/providers/character_ai_provider.go
 git commit -m "fix(P2-T05): replace simulated CharacterAI responses with real API calls
 
 Phase: 2  Task: P2-T05"
@@ -680,7 +680,7 @@ Phase: 2  Task: P2-T05"
 
 ### Task P2-T06: Replace Anima simulated backup/restore
 
-**Files:** Modify `HelixCode/internal/memory/providers/anima_provider.go`
+**Files:** Modify `helix_code/internal/memory/providers/anima_provider.go`
 
 - [ ] **Step 1: Replace Backup() and Restore() with real JSON serialization**
 
@@ -712,10 +712,10 @@ Remove "(simulated)" from log messages.
 - [ ] **Step 2: Verify and commit**
 
 ```bash
-grep -rn "simulated" HelixCode/internal/memory/providers/anima_provider.go && echo "BLUFF" || echo "clean"
+grep -rn "simulated" helix_code/internal/memory/providers/anima_provider.go && echo "BLUFF" || echo "clean"
 cd HelixCode && go test ./internal/memory/providers/ -run Anima -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/memory/providers/anima_provider.go
+git add helix_code/internal/memory/providers/anima_provider.go
 git commit -m "fix(P2-T06): replace simulated Anima backup/restore with real file I/O
 
 Phase: 2  Task: P2-T06"
@@ -725,12 +725,12 @@ Phase: 2  Task: P2-T06"
 
 ### Task P2-T07: Replace security-test entry point
 
-**Files:** Rewrite `HelixCode/cmd/security_test/main.go`
+**Files:** Rewrite `helix_code/cmd/security_test/main.go`
 
 - [ ] **Step 1: Rewrite with real scanner dispatch**
 
 ```bash
-grep -c "simulated\|hardcoded" HelixCode/cmd/security_test/main.go
+grep -c "simulated\|hardcoded" helix_code/cmd/security_test/main.go
 ```
 
 Rewrite the file to use `security.NewSecurityManager()` with `ScanFeature()` for each of the 12 security categories. Output real results. Exit code based on pass/fail.
@@ -738,10 +738,10 @@ Rewrite the file to use `security.NewSecurityManager()` with `ScanFeature()` for
 - [ ] **Step 2: Verify zero simulated results, build, commit**
 
 ```bash
-grep -rn "simulated\|hardcoded\|simulateSecurity" HelixCode/cmd/security_test/main.go && echo "BLUFF" || echo "clean"
+grep -rn "simulated\|hardcoded\|simulateSecurity" helix_code/cmd/security_test/main.go && echo "BLUFF" || echo "clean"
 cd HelixCode && go build ./cmd/security_test/...
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/security_test/main.go
+git add helix_code/cmd/security_test/main.go
 git commit -m "fix(P2-T07): replace simulated security-test with real scanner dispatch
 
 Phase: 2  Task: P2-T07"
@@ -752,14 +752,14 @@ Phase: 2  Task: P2-T07"
 ### Task P2-T08: Wire Redis and Memcached to real services
 
 **Files:**
-- Modify: `HelixCode/internal/memory/redis_provider.go`
-- Modify: `HelixCode/internal/memory/memcached_provider.go`
+- Modify: `helix_code/internal/memory/redis_provider.go`
+- Modify: `helix_code/internal/memory/memcached_provider.go`
 
 - [ ] **Step 1: Locate and check current providers**
 
 ```bash
-find HelixCode/internal/memory -name "*redis*" -o -name "*memcached*" | grep -v _test
-grep -rn "localData\|localMap\|in-memory" HelixCode/internal/memory/redis* HelixCode/internal/memory/memcached* 2>/dev/null | head -5
+find helix_code/internal/memory -name "*redis*" -o -name "*memcached*" | grep -v _test
+grep -rn "localData\|localMap\|in-memory" helix_code/internal/memory/redis* helix_code/internal/memory/memcached* 2>/dev/null | head -5
 ```
 
 - [ ] **Step 2: Replace local-storage with real go-redis and gomemcache clients**
@@ -780,9 +780,9 @@ func TestMemcachedProvider_RealConnection(t *testing.T) { /* SKIP-OK if Memcache
 - [ ] **Step 4: Run, verify no local storage, commit**
 
 ```bash
-grep -rn "localData\|localMap\|in-memory.*map" HelixCode/internal/memory/ | grep -v "_test" && echo "LOCAL" || echo "clean"
+grep -rn "localData\|localMap\|in-memory.*map" helix_code/internal/memory/ | grep -v "_test" && echo "LOCAL" || echo "clean"
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/memory/
+git add helix_code/internal/memory/
 git commit -m "fix(P2-T08): wire Redis and Memcached to real service clients
 
 Phase: 2  Task: P2-T08"
@@ -792,12 +792,12 @@ Phase: 2  Task: P2-T08"
 
 ### Task P2-T09: Fix treesitter placeholder at line 266
 
-**Files:** Modify `HelixCode/internal/tools/mapping/treesitter.go`
+**Files:** Modify `helix_code/internal/tools/mapping/treesitter.go`
 
 - [ ] **Step 1: Read the placeholder**
 
 ```bash
-sed -n '260,275p' HelixCode/internal/tools/mapping/treesitter.go
+sed -n '260,275p' helix_code/internal/tools/mapping/treesitter.go
 ```
 
 - [ ] **Step 2: Implement or remove**
@@ -821,10 +821,10 @@ func (p *TreeSitterParser) parseNode(node *sitter.Node, source []byte) *ASTNode 
 - [ ] **Step 3: Verify and commit**
 
 ```bash
-grep -n "placeholder\|For now" HelixCode/internal/tools/mapping/treesitter.go && echo "BLUFF" || echo "clean"
+grep -n "placeholder\|For now" helix_code/internal/tools/mapping/treesitter.go && echo "BLUFF" || echo "clean"
 cd HelixCode && go test ./internal/tools/mapping/ -count=1
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/internal/tools/mapping/treesitter.go
+git add helix_code/internal/tools/mapping/treesitter.go
 git commit -m "fix(P2-T09): remove treesitter placeholder, implement real AST parsing
 
 Phase: 2  Task: P2-T09"
@@ -879,13 +879,13 @@ Phase: 2  Task: P2-T10"
 - [ ] **Step 1: Delete stale files**
 
 ```bash
-rm -f /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/cmd/cli/main.go.old
+rm -f /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/cmd/cli/main.go.old
 ```
 
 - [ ] **Step 2: Run comprehensive anti-bluff grep**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 echo "=== Simulated ==="
 grep -rn "simulated\|Simulated" internal/ cmd/ --include="*.go" | grep -v "_test.go" | grep -v "faiss_fallback\|SimulationNotice" | grep -v "doc.go" || echo "PASS: clean"
 echo "=== Placeholder ==="
@@ -908,7 +908,7 @@ Mark all resolved items as FIXED:
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
-git add HelixCode/cmd/cli/main.go.old AGENTS.md HelixCode/
+git add helix_code/cmd/cli/main.go.old AGENTS.md helix_code/
 git commit -m "chore(P2-T11): Phase 2 complete — zero bluffs in production code
 
 Phase: 2  Task: P2-T11

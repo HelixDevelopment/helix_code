@@ -12,7 +12,7 @@ Ship a real, end-to-end **`ask_user` tool** for the HelixCode CLI agent so that 
 
 Three concrete user surfaces ship together:
 
-1. **`ask_user` tool** (`HelixCode/internal/tools/askuser/`) — a `tools.Tool` impl registered under the stable name `ask_user` (HelixCode snake_case convention; Q3=A) and category `tools.CategoryAskUser` (new). Argument shape: `question string` (required), `choices []map[string]string` (required; each entry has `label`, `value`, optional `preview`), `default string` (optional choice value). Result shape: `{value string, label string, index int, source string}` where `source ∈ {"stdin", "default"}`.
+1. **`ask_user` tool** (`helix_code/internal/tools/askuser/`) — a `tools.Tool` impl registered under the stable name `ask_user` (HelixCode snake_case convention; Q3=A) and category `tools.CategoryAskUser` (new). Argument shape: `question string` (required), `choices []map[string]string` (required; each entry has `label`, `value`, optional `preview`), `default string` (optional choice value). Result shape: `{value string, label string, index int, source string}` where `source ∈ {"stdin", "default"}`.
 2. **Stdin readline UI** (Q1=A) — plain stdin readline, NO arrow-key cursor library, NO bubbletea, NO promptui. The renderer from F18 (`render.RenderTextBlock` / `RenderLines`) formats the question, the optional per-choice preview, the numbered menu (`"1. <label>"`, `"2. <label>"`, …), and the prompt line. The user types `1`, `2`, ... + Enter; pressing ENTER alone with `default` set picks the default; invalid input re-prompts up to 3 times then errors.
 3. **Non-interactive fallback** (Q4=B) — at Execute time, the tool calls `term.IsTerminal(int(stdinFd))` (the same `golang.org/x/term` already promoted to a direct dep in F18). If false: if `default` is set and matches a choice value → return that choice immediately with `source="default"`; else → return `ErrNoTTYNoDefault` (`"ask_user requires interactive terminal AND no default specified"`). NEVER block on a stdin read in non-TTY mode.
 
@@ -30,7 +30,7 @@ Anti-bluff hot zone (loud): a tool that passes its tests by short-circuiting to 
 
 ## 2. Architecture
 
-Two layers under `HelixCode/internal/tools/askuser/`, plus thin wiring at the registry call site:
+Two layers under `helix_code/internal/tools/askuser/`, plus thin wiring at the registry call site:
 
 - **`AskUserTool`** (`ask_user_tool.go`) — implements `tools.Tool`. Wraps a `Prompter`. `Execute` parses args → `Question` → calls `prompter.Prompt(ctx, q)` → returns the resolved `Choice` as `map[string]interface{}` (so the LLM-side JSON-decoder sees a stable shape). Validation: ≥2 choices, every choice has non-empty `label` and `value`, if `default` is set it MUST match a choice value (validation-time error, not Prompt-time).
 - **`Prompter` interface** (`types.go`) — single method:
@@ -124,20 +124,20 @@ Why tool-only (Q5=A) and not slash + cobra:
 
 ### 3.1 New files
 
-- `HelixCode/internal/tools/askuser/types.go` — `Choice{Label, Value, Preview}`, `Question{Question, Choices, Default}`, `Result{Value, Label, Index, Source}`, `Prompter` interface, sentinel errors (`ErrInvalidQuestion`, `ErrNoTTYNoDefault`, `ErrUserCancelled`, `ErrPromptTimeout`, `ErrTooManyInvalidAttempts`), constants (`DefaultTimeout = 5 * time.Minute`, `DefaultMaxRetries = 3`, `SourceStdin = "stdin"`, `SourceDefault = "default"`).
-- `HelixCode/internal/tools/askuser/types_test.go`.
-- `HelixCode/internal/tools/askuser/stdin_prompter.go` — `stdinPrompter` impl with `Reader / Writer / IsTTY / Renderer / Timeout / MaxRetries` constructor seams. Uses F18's `render.RenderLines` for menu output. Stdlib only (`bufio`, `context`, `errors`, `fmt`, `io`, `os`, `strconv`, `strings`, `time`).
-- `HelixCode/internal/tools/askuser/stdin_prompter_test.go` — unit tests with `bytes.Buffer` reader + writer + injectable `IsTTY` closure. NO mocks (constructor injection only).
-- `HelixCode/internal/tools/askuser/ask_user_tool.go` — `AskUserTool` (`tools.Tool` impl). `Name() == "ask_user"`; `Category() == tools.CategoryAskUser`; `Schema()` returns the JSON schema; `Execute` parses args, builds `Question`, calls `prompter.Prompt`, returns `Result` as `map[string]interface{}`.
-- `HelixCode/internal/tools/askuser/ask_user_tool_test.go`.
-- `HelixCode/tests/integration/askuser_test.go` — `//go:build integration`. Always-runs both branches (TTY-with-input + non-TTY-with-default + non-TTY-without-default error path) using real `bytes.Buffer` readers/writers + injected `IsTTY`. Asserts byte content on the captured prompt and the parsed result.
-- `HelixCode/tests/integration/cmd/p1f19_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/tools/askuser/types.go` — `Choice{Label, Value, Preview}`, `Question{Question, Choices, Default}`, `Result{Value, Label, Index, Source}`, `Prompter` interface, sentinel errors (`ErrInvalidQuestion`, `ErrNoTTYNoDefault`, `ErrUserCancelled`, `ErrPromptTimeout`, `ErrTooManyInvalidAttempts`), constants (`DefaultTimeout = 5 * time.Minute`, `DefaultMaxRetries = 3`, `SourceStdin = "stdin"`, `SourceDefault = "default"`).
+- `helix_code/internal/tools/askuser/types_test.go`.
+- `helix_code/internal/tools/askuser/stdin_prompter.go` — `stdinPrompter` impl with `Reader / Writer / IsTTY / Renderer / Timeout / MaxRetries` constructor seams. Uses F18's `render.RenderLines` for menu output. Stdlib only (`bufio`, `context`, `errors`, `fmt`, `io`, `os`, `strconv`, `strings`, `time`).
+- `helix_code/internal/tools/askuser/stdin_prompter_test.go` — unit tests with `bytes.Buffer` reader + writer + injectable `IsTTY` closure. NO mocks (constructor injection only).
+- `helix_code/internal/tools/askuser/ask_user_tool.go` — `AskUserTool` (`tools.Tool` impl). `Name() == "ask_user"`; `Category() == tools.CategoryAskUser`; `Schema()` returns the JSON schema; `Execute` parses args, builds `Question`, calls `prompter.Prompt`, returns `Result` as `map[string]interface{}`.
+- `helix_code/internal/tools/askuser/ask_user_tool_test.go`.
+- `helix_code/tests/integration/askuser_test.go` — `//go:build integration`. Always-runs both branches (TTY-with-input + non-TTY-with-default + non-TTY-without-default error path) using real `bytes.Buffer` readers/writers + injected `IsTTY`. Asserts byte content on the captured prompt and the parsed result.
+- `helix_code/tests/integration/cmd/p1f19_challenge/main.go` — runtime evidence harness.
 - `challenges/p1-f19-ask-user-question/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/internal/tools/registry.go` — add `CategoryAskUser ToolCategory = "ask-user"` to the const block; add optional `AskUserPrompter askuser.Prompter` to `RegistryConfig`; register `askuser.NewAskUserTool(...)` in `buildToolList` (or equivalent). One new import: `dev.helix.code/internal/tools/askuser`.
-- `HelixCode/cmd/cli/main.go` — no changes needed beyond passing `c.renderer` via `RegistryConfig.AskUserPrompter` if the CLI wants the prompter to share the renderer (optional polish; default construction works without it).
+- `helix_code/internal/tools/registry.go` — add `CategoryAskUser ToolCategory = "ask-user"` to the const block; add optional `AskUserPrompter askuser.Prompter` to `RegistryConfig`; register `askuser.NewAskUserTool(...)` in `buildToolList` (or equivalent). One new import: `dev.helix.code/internal/tools/askuser`.
+- `helix_code/cmd/cli/main.go` — no changes needed beyond passing `c.renderer` via `RegistryConfig.AskUserPrompter` if the CLI wants the prompter to share the renderer (optional polish; default construction works without it).
 
 **No new external dependencies** (§3.5).
 

@@ -16,8 +16,8 @@
 #### **Morning Session (4 hours)**
 ```bash
 # Task 1.1: Complete build error catalog
-09:00-10:30 - Analyze HelixCode/ build errors
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+09:00-10:30 - Analyze helix_code/ build errors
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 go build -v ./... 2>&1 | tee build_errors_day1.log
 
 10:30-12:00 - Categorize errors by severity
@@ -54,7 +54,7 @@ go build -v ./applications/terminal_ui/...
 #### **Morning Session (4 hours)**
 ```bash
 # Task 2.1: Fix memory_mocks.go compilation
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 09:00-10:30 - Analyze memory_mocks.go errors
 vim internal/mocks/memory_mocks.go
@@ -114,7 +114,7 @@ ls -la isolated_files/
 #### **Afternoon Session (4 hours)**
 ```bash
 # Task 3.2: Fix missing internal packages
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 13:00-15:00 - Create missing internal packages
 mkdir -p internal/hardware internal/cognee internal/provider
@@ -141,7 +141,7 @@ go test -c ./isolated_files/...
 #### **Morning Session (4 hours)**
 ```bash
 # Task 4.1: Test complete build
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 09:00-10:30 - Full project build test
 go build -v ./... 2>&1 | tee build_validation.log
@@ -156,7 +156,7 @@ go build -v ./... 2>&1 | tee build_validation.log
 #### **Afternoon Session (4 hours)**
 ```bash
 # Task 4.2: Validate make targets
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 13:00-15:00 - Test make commands
 make clean
@@ -185,7 +185,7 @@ make test
 #### **Morning Session (4 hours)**
 ```bash
 # Task 5.1: Analyze skipped tests
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 09:00-10:30 - Find all skipped tests
 grep -r "t.Skip" . --include="*.go" | tee skipped_tests.log
@@ -201,7 +201,7 @@ grep -r "t.Skip" . --include="*.go" | tee skipped_tests.log
 #### **Afternoon Session (4 hours)**
 ```bash
 # Task 5.2: Fix critical skipped tests
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 13:00-15:00 - Fix high-priority skipped tests
 # Focus on core functionality tests
@@ -230,7 +230,7 @@ cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
 #### **Morning Session (4 hours)**
 ```bash
 # Task 6.1: Run unit test suite
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 09:00-10:30 - Execute unit tests
 go test -v ./internal/... -short | tee unit_test_results.log
@@ -245,7 +245,7 @@ go test -v ./internal/... -short | tee unit_test_results.log
 #### **Afternoon Session (4 hours)**
 ```bash
 # Task 6.2: Validate integration tests
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 13:00-15:00 - Run integration tests
 go test -v ./tests/integration/... -short | tee integration_test_results.log
@@ -271,7 +271,7 @@ go test -v ./tests/performance/... -short | tee performance_test_results.log
 #### **Morning Session (4 hours)**
 ```bash
 # Task 7.1: Complete validation
-cd /media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode
+cd /media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
 
 09:00-10:30 - Final build test
 go build -v ./... 

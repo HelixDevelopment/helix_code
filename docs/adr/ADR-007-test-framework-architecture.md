@@ -386,8 +386,8 @@ Test pipeline stages:
 
 ## References
 
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/types.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/executor.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/validator.go`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/README.md`
-- `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/testinfra/testinfra.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/types.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/executor.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/validator.go`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/README.md`
+- `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/testinfra/testinfra.go`

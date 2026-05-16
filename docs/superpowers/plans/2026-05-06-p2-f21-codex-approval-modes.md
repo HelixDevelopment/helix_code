@@ -12,7 +12,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md` (commit `7128289`).
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F21 surface):**
 ```bash
@@ -56,7 +56,7 @@ Commit: `docs(P2-F21-T01): bootstrap Phase 2 evidence + advance PROGRESS to F21 
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/approval/types.go`, new `HelixCode/internal/approval/types_test.go`.
+**Files:** new `helix_code/internal/approval/types.go`, new `helix_code/internal/approval/types_test.go`.
 
 Define:
 - `ApprovalMode int` enum + 4 values (`ModeSuggest` / `ModeAutoEdit` / `ModeFullAuto` / `ModeDangerous`) + private `numModes` sentinel.
@@ -147,7 +147,7 @@ Subject: `feat(P2-F21-T02): approval types - Mode + Level + Action + Decision + 
 
 ## Task 3: selector.go (TDD; mirror F12 Selector)
 
-**Files:** new `HelixCode/internal/approval/selector.go`, new `HelixCode/internal/approval/selector_test.go`.
+**Files:** new `helix_code/internal/approval/selector.go`, new `helix_code/internal/approval/selector_test.go`.
 
 `selector.go`:
 
@@ -280,7 +280,7 @@ Subject: `feat(P2-F21-T03): approval selector - flag/env/config/default preceden
 
 ## Task 4: manager.go + yaml_loader.go (TDD; F02/F14/F19 integration)
 
-**Files:** new `HelixCode/internal/approval/manager.go`, new `HelixCode/internal/approval/manager_test.go`, new `HelixCode/internal/approval/yaml_loader.go`, new `HelixCode/internal/approval/yaml_loader_test.go`.
+**Files:** new `helix_code/internal/approval/manager.go`, new `helix_code/internal/approval/manager_test.go`, new `helix_code/internal/approval/yaml_loader.go`, new `helix_code/internal/approval/yaml_loader_test.go`.
 
 `manager.go`:
 
@@ -520,7 +520,7 @@ Subject: `feat(P2-F21-T04): approval manager + yaml loader - 4x4 matrix gate + a
 
 ## Task 5: Tool.RequiresApproval interface extension + migrate ~30 existing tools (TDD)
 
-**Files:** modify `HelixCode/internal/tools/registry.go` (add `RequiresApproval() approval.ApprovalLevel` to `Tool` interface); modify ~30 existing tool files to add a one-line `RequiresApproval()` method per spec §3.6 table; new `HelixCode/internal/tools/registry_requires_approval_test.go` (table-driven coverage test).
+**Files:** modify `helix_code/internal/tools/registry.go` (add `RequiresApproval() approval.ApprovalLevel` to `Tool` interface); modify ~30 existing tool files to add a one-line `RequiresApproval()` method per spec §3.6 table; new `helix_code/internal/tools/registry_requires_approval_test.go` (table-driven coverage test).
 
 Steps:
 
@@ -589,7 +589,7 @@ Subject: `feat(P2-F21-T05): Tool.RequiresApproval interface + migrate ~30 existi
 
 ## Task 6: /approval slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/approval_command.go`, new `HelixCode/internal/commands/approval_command_test.go`.
+**Files:** new `helix_code/internal/commands/approval_command.go`, new `helix_code/internal/commands/approval_command_test.go`.
 
 `approval_command.go`:
 
@@ -716,7 +716,7 @@ Subject: `feat(P2-F21-T06): /approval slash command (status/set/show) with dange
 
 ## Task 7: main.go wiring + integration test (TDD)
 
-**Files:** modify `HelixCode/cmd/cli/main.go` (wiring); new `HelixCode/tests/integration/approval_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go` (wiring); new `helix_code/tests/integration/approval_test.go` (`//go:build integration`).
 
 `main.go` changes (additive only; no new selectors needed beyond approval.Selector — F12's pattern is reused for shape):
 
@@ -843,7 +843,7 @@ Subject: `feat(P2-F21-T07): main.go wiring (--approval pflag + manager + registr
 
 ## Task 8: Challenge harness (5 phases, positive byte evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p2f21_challenge/main.go`, new `challenges/p2-f21-codex-approval-modes/CHALLENGE.md`, new `challenges/p2-f21-codex-approval-modes/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p2f21_challenge/main.go`, new `challenges/p2-f21-codex-approval-modes/CHALLENGE.md`, new `challenges/p2-f21-codex-approval-modes/run.sh`.
 
 Harness phases (per spec §6.3):
 

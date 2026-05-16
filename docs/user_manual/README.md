@@ -1000,7 +1000,7 @@ tools:
   browser:
     headless: true
     timeout: 30s
-    user_agent: "HelixCode/2.0"
+    user_agent: "helix_code/2.0"
     viewport_width: 1920
     viewport_height: 1080
     enable_javascript: true
@@ -1009,7 +1009,7 @@ tools:
     default_provider: "duckduckgo"
     timeout: 10s
     max_results: 10
-    user_agent: "HelixCode/2.0"
+    user_agent: "helix_code/2.0"
 
   voice:
     sample_rate: 16000
@@ -3133,7 +3133,7 @@ web:
     max_results: 8
     safe_search: true
   fetch:
-    user_agent: "HelixCode/2.0"
+    user_agent: "helix_code/2.0"
     timeout: 30
     max_size: 5242880  # 5MB
 ```

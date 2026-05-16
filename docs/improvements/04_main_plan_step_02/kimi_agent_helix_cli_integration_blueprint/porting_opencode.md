@@ -3967,7 +3967,7 @@ func (wft *WebFetchTool) Execute(ctx context.Context, args json.RawMessage) (str
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "HelixCode/1.0 WebFetch")
+	req.Header.Set("User-Agent", "helix_code/1.0 WebFetch")
 
 	resp, err := wft.client.Do(req)
 	if err != nil {

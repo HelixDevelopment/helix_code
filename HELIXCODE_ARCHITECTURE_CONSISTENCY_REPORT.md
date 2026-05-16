@@ -15,7 +15,7 @@ This report analyzes the consistency of LLM provider implementations across Heli
 
 ### ✅ **Status: EXCELLENT**
 
-All providers correctly implement the `Provider` interface defined in `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go` (lines 117-132).
+All providers correctly implement the `Provider` interface defined in `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go` (lines 117-132).
 
 ### Interface Methods
 
@@ -123,7 +123,7 @@ req.Header.Set("X-DashScope-CacheControl", "enable")
 
 **Issue:** Reasoning support is defined in shared code but not consistently referenced in provider implementations.
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/reasoning.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/reasoning.go`
 
 **Recommendation:** Add explicit reasoning model detection to each provider's model list.
 
@@ -131,7 +131,7 @@ req.Header.Set("X-DashScope-CacheControl", "enable")
 
 **✅ Universal Support** - Token budgets are implemented at the manager level.
 
-**File:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/token_budget.go`
+**File:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/token_budget.go`
 - Lines 13-31: `TokenBudget` structure
 - Lines 45-84: `TokenTracker` implementation
 - Lines 86-138: `CheckBudget` enforcement
@@ -392,16 +392,16 @@ var (
 ### 6.1 Test File Coverage
 
 **Test Files Found:**
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/integration_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/gemini_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/bedrock_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/groq_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/azure_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/vertexai_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/qwen_provider_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/reasoning_test.go`
-- `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/cache_control_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/integration_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/anthropic_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/gemini_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/bedrock_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/groq_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/azure_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/vertexai_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/qwen_provider_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/reasoning_test.go`
+- `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/cache_control_test.go`
 
 ### ⚠️ Missing Tests:
 - OpenAI provider
@@ -776,27 +776,27 @@ With these improvements, HelixCode will have a **world-class LLM provider abstra
 ## Appendix A: File Locations Reference
 
 ### Core Files
-- **Provider Interface:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/provider.go`
-- **Cache Control:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/cache_control.go`
-- **Reasoning:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/reasoning.go`
-- **Token Budget:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/token_budget.go`
+- **Provider Interface:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/provider.go`
+- **Cache Control:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/cache_control.go`
+- **Reasoning:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/reasoning.go`
+- **Token Budget:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/token_budget.go`
 
 ### Provider Implementations
-- **Anthropic:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/anthropic_provider.go`
-- **OpenAI:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/openai_provider.go`
-- **Gemini:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/gemini_provider.go`
-- **Bedrock:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/bedrock_provider.go`
-- **Ollama:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/ollama_provider.go`
-- **XAI:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/xai_provider.go`
-- **Qwen:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/qwen_provider.go`
-- **Groq:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/groq_provider.go`
-- **Azure:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/azure_provider.go`
-- **VertexAI:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/vertexai_provider.go`
-- **OpenRouter:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/openrouter_provider.go`
-- **Copilot:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/copilot_provider.go`
+- **Anthropic:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go`
+- **OpenAI:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/openai_provider.go`
+- **Gemini:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/gemini_provider.go`
+- **Bedrock:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/bedrock_provider.go`
+- **Ollama:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/ollama_provider.go`
+- **XAI:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/xai_provider.go`
+- **Qwen:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/qwen_provider.go`
+- **Groq:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/groq_provider.go`
+- **Azure:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/azure_provider.go`
+- **VertexAI:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/vertexai_provider.go`
+- **OpenRouter:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/openrouter_provider.go`
+- **Copilot:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/copilot_provider.go`
 
 ### Test Files
-- **Integration Tests:** `/Users/milosvasic/Projects/HelixCode/HelixCode/internal/llm/integration_test.go`
+- **Integration Tests:** `/Users/milosvasic/Projects/helix_code/helix_code/internal/llm/integration_test.go`
 - **Provider Tests:** `*_provider_test.go` (7 out of 12 providers)
 - **Feature Tests:** `reasoning_test.go`, `cache_control_test.go`
 

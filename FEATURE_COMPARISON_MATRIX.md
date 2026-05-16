@@ -920,7 +920,7 @@ Based on exploration of test files:
 ### Required Testing Additions
 
 #### 1. Provider Compatibility Tests
-**Location**: `/HelixCode/internal/llm/providers/`
+**Location**: `/helix_code/internal/llm/providers/`
 **Coverage**: Test all 13 providers with:
 - Basic generation
 - Tool calling
@@ -931,7 +931,7 @@ Based on exploration of test files:
 - Fallback behavior
 
 #### 2. Edit Format Tests
-**Location**: `/HelixCode/internal/editor/`
+**Location**: `/helix_code/internal/editor/`
 **Coverage**: Test each edit format with:
 - Simple edits
 - Complex multi-line edits
@@ -940,7 +940,7 @@ Based on exploration of test files:
 - All supported languages
 
 #### 3. Multi-Agent Tests
-**Location**: `/HelixCode/internal/agent/`
+**Location**: `/helix_code/internal/agent/`
 **Coverage**: Test agent coordination:
 - Multi-agent workflows
 - Task delegation
@@ -949,7 +949,7 @@ Based on exploration of test files:
 - Error recovery
 
 #### 4. Workflow Tests
-**Location**: `/HelixCode/internal/workflow/`
+**Location**: `/helix_code/internal/workflow/`
 **Coverage**: Test all autonomy modes:
 - Mode None (manual)
 - Mode Basic (single iteration)
@@ -960,7 +960,7 @@ Based on exploration of test files:
 - Safety limits
 
 #### 5. MCP Protocol Tests
-**Location**: `/HelixCode/internal/mcp/`
+**Location**: `/helix_code/internal/mcp/`
 **Coverage**: Test MCP features:
 - Tool calling
 - Resource access
@@ -969,7 +969,7 @@ Based on exploration of test files:
 - Error handling
 
 #### 6. Distributed Worker Tests
-**Location**: `/HelixCode/internal/worker/`
+**Location**: `/helix_code/internal/worker/`
 **Coverage**: Test worker pool:
 - SSH connection
 - Auto-installation
@@ -979,7 +979,7 @@ Based on exploration of test files:
 - Failure recovery
 
 #### 7. End-to-End Workflow Tests
-**Location**: `/HelixCode/tests/e2e/`
+**Location**: `/helix_code/tests/e2e/`
 **Coverage**: Test complete workflows:
 - Planning → Coding → Testing → Deployment
 - Multi-file code generation

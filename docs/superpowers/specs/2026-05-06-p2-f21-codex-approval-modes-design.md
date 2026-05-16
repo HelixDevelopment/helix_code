@@ -14,7 +14,7 @@ Ship a real, end-to-end **4-mode codex-compatible approval system** for the Heli
 
 Three concrete user surfaces ship together:
 
-1. **`approval` package** (`HelixCode/internal/approval/`) — `ApprovalMode` enum (4 values: `ModeSuggest`, `ModeAutoEdit`, `ModeFullAuto`, `ModeDangerous`) + `ApprovalLevel` enum (4 values: `LevelReadOnly`, `LevelEdit`, `LevelRun`, `LevelAll`) + `Decision` value (Allow/Deny/Prompt + reason) + `ApprovalManager` (resolves the active mode, calls `tool.RequiresApproval()`, consults F02's permission engine FIRST, then enforces the mode gate, then for `full-auto` + `LevelRun` rewires shell calls through F14's sandbox manager with network DENY forced on) + `Selector` resolving flag > env > config > default `suggest` (Q2=C; mirrors F12's `SelectorInput`). Pure-function selector; no env reads inside the function body — env closure injected via `SelectorInput.Env`.
+1. **`approval` package** (`helix_code/internal/approval/`) — `ApprovalMode` enum (4 values: `ModeSuggest`, `ModeAutoEdit`, `ModeFullAuto`, `ModeDangerous`) + `ApprovalLevel` enum (4 values: `LevelReadOnly`, `LevelEdit`, `LevelRun`, `LevelAll`) + `Decision` value (Allow/Deny/Prompt + reason) + `ApprovalManager` (resolves the active mode, calls `tool.RequiresApproval()`, consults F02's permission engine FIRST, then enforces the mode gate, then for `full-auto` + `LevelRun` rewires shell calls through F14's sandbox manager with network DENY forced on) + `Selector` resolving flag > env > config > default `suggest` (Q2=C; mirrors F12's `SelectorInput`). Pure-function selector; no env reads inside the function body — env closure injected via `SelectorInput.Env`.
 2. **`Tool.RequiresApproval()` interface extension** (Q3=B) — `internal/tools/registry.go`'s `Tool` interface gains a new method `RequiresApproval() approval.ApprovalLevel`. Existing tools without an implementation default to `LevelEdit` via a one-line embedding helper (`approval.DefaultLevelEdit`) injected during a one-pass migration in T05; read-only tools (LSP queries, file reads, repomap dumps, mapping queries, browser reads) override to `LevelReadOnly`; shell/exec tools override to `LevelRun`; subagent dispatch + permission-rule writes override to `LevelAll`. The registry's `Execute` method (already a hook point for F02 + F14) acquires one new pre-execute branch: `manager.CheckApproval(ctx, tool, params)` returning `Decision{Allow|Deny|Prompt, Reason}`; `Deny` propagates as `ErrApprovalRequired` with the operative-mode hint; `Prompt` calls into F19's `Prompter` (already resident on `*CLI`) to read y/n; `Allow` proceeds to the existing F02 + F14 path.
 3. **`/approval` slash command + CLI flag + env var** (Q5=A) — `--approval=<mode>` CLI flag (highest precedence); `HELIXCODE_APPROVAL=<mode>` env var; `~/.config/helixcode/approval.yaml` config file (lowest user-supplied precedence; reuses F12's wizard-writer YAML loader pattern); default `suggest`. `/approval` slash command with three subcommands: `/approval status` (active mode + source + per-mode summary line), `/approval set <mode>` (mutates the active manager's mode at runtime via an `atomic.Value` swap; takes effect on the very next tool call), `/approval show <mode>` (prints the four-line semantic summary of `<mode>` per §3.4). NO cobra subcommand.
 
@@ -32,7 +32,7 @@ Anti-bluff hot zone (loud): an approval mode loaded but never enforced (the test
 
 ## 2. Architecture
 
-Four layers, all under `HelixCode/internal/approval/`, plus thin wiring at the registry boundary, the F02 + F14 integration points, and one slash command:
+Four layers, all under `helix_code/internal/approval/`, plus thin wiring at the registry boundary, the F02 + F14 integration points, and one slash command:
 
 - **`ApprovalMode` enum + `ApprovalLevel` enum + `Decision` value type** (`types.go`) — pure value types; the mode and level are `int` so the 4×4 lookup table is a `[4][4]Action` array (zero allocations).
 - **`Selector`** (`selector.go`) — pure function `Select(SelectorInput) (ApprovalMode, ResolvedSource, error)` resolving flag > env > config > default `suggest`. Mirrors F12's `Select` shape verbatim. `SelectorInput.Env func(string) string` so unit tests inject closures (no `os.Getenv` in the function body).
@@ -118,27 +118,27 @@ Why slash + flag + env + config (Q5=A) and not cobra:
 
 ### 3.1 New files
 
-- `HelixCode/internal/approval/types.go` — `ApprovalMode`, `ApprovalLevel`, `Action`, `Decision`, `ResolvedSource`, sentinel errors (`ErrApprovalRequired`, `ErrUnknownMode`, `ErrSandboxRequired`), constants, mode descriptors (`ModeDescriptor` table for `/approval show`).
-- `HelixCode/internal/approval/types_test.go`.
-- `HelixCode/internal/approval/selector.go` — `SelectorInput`, `Select(input) (ApprovalMode, ResolvedSource, error)`, `ParseMode(s string) (ApprovalMode, error)`.
-- `HelixCode/internal/approval/selector_test.go` — table-driven over (flag, env, config) precedence + every mode-string parse case + unknown-mode error.
-- `HelixCode/internal/approval/manager.go` — `ApprovalManager`, `NewManager(opts ManagerOptions)`, `CheckApproval(ctx, tool, params) Decision`, `Set(mode)`, `Mode()`, `Source()`, `DefaultLevelEdit` helper struct.
-- `HelixCode/internal/approval/manager_test.go` — 4×4 mode×level matrix + F02 final-deny composition + F14 sandbox-required marker + atomic-swap runtime change + Prompter integration for `auto-edit` + `LevelRun`.
-- `HelixCode/internal/approval/yaml_loader.go` — `LoadConfigFile(path string) (ApprovalMode, error)`; mirrors F12's `wizard_writer.go::LoadWizardConfig` style. File mode 0644 OK (no secrets — the chosen mode is not sensitive).
-- `HelixCode/internal/approval/yaml_loader_test.go` — real tempdir + os.WriteFile + parse 4 valid + 1 invalid YAML.
-- `HelixCode/internal/commands/approval_command.go` — `ApprovalCommand` (`Command` impl); `/approval status`, `/approval set <mode>`, `/approval show <mode>`.
-- `HelixCode/internal/commands/approval_command_test.go`.
-- `HelixCode/tests/integration/approval_test.go` — `//go:build integration`; ALWAYS-runs; real registry + real F02 PE + real F14 SM + real Prompter (or fake-tty Prompter); per-mode behaviour assertions.
-- `HelixCode/tests/integration/cmd/p2f21_challenge/main.go` — runtime evidence harness.
+- `helix_code/internal/approval/types.go` — `ApprovalMode`, `ApprovalLevel`, `Action`, `Decision`, `ResolvedSource`, sentinel errors (`ErrApprovalRequired`, `ErrUnknownMode`, `ErrSandboxRequired`), constants, mode descriptors (`ModeDescriptor` table for `/approval show`).
+- `helix_code/internal/approval/types_test.go`.
+- `helix_code/internal/approval/selector.go` — `SelectorInput`, `Select(input) (ApprovalMode, ResolvedSource, error)`, `ParseMode(s string) (ApprovalMode, error)`.
+- `helix_code/internal/approval/selector_test.go` — table-driven over (flag, env, config) precedence + every mode-string parse case + unknown-mode error.
+- `helix_code/internal/approval/manager.go` — `ApprovalManager`, `NewManager(opts ManagerOptions)`, `CheckApproval(ctx, tool, params) Decision`, `Set(mode)`, `Mode()`, `Source()`, `DefaultLevelEdit` helper struct.
+- `helix_code/internal/approval/manager_test.go` — 4×4 mode×level matrix + F02 final-deny composition + F14 sandbox-required marker + atomic-swap runtime change + Prompter integration for `auto-edit` + `LevelRun`.
+- `helix_code/internal/approval/yaml_loader.go` — `LoadConfigFile(path string) (ApprovalMode, error)`; mirrors F12's `wizard_writer.go::LoadWizardConfig` style. File mode 0644 OK (no secrets — the chosen mode is not sensitive).
+- `helix_code/internal/approval/yaml_loader_test.go` — real tempdir + os.WriteFile + parse 4 valid + 1 invalid YAML.
+- `helix_code/internal/commands/approval_command.go` — `ApprovalCommand` (`Command` impl); `/approval status`, `/approval set <mode>`, `/approval show <mode>`.
+- `helix_code/internal/commands/approval_command_test.go`.
+- `helix_code/tests/integration/approval_test.go` — `//go:build integration`; ALWAYS-runs; real registry + real F02 PE + real F14 SM + real Prompter (or fake-tty Prompter); per-mode behaviour assertions.
+- `helix_code/tests/integration/cmd/p2f21_challenge/main.go` — runtime evidence harness.
 - `challenges/p2-f21-codex-approval-modes/CHALLENGE.md` + `run.sh`.
 
 ### 3.2 Modified files
 
-- `HelixCode/internal/tools/registry.go` — three additions: (1) `Tool` interface gains `RequiresApproval() approval.ApprovalLevel`; (2) `ToolRegistry` struct gains `approvalMgr *approval.ApprovalManager` field + `SetApprovalManager(mgr)` setter; (3) `Execute` gains a new pre-execute branch (FIRST in the chain) calling `manager.CheckApproval` and short-circuiting on `Deny` or routing through Prompter on `Prompt`.
-- `HelixCode/internal/tools/**/*.go` — every existing tool gains a one-line `RequiresApproval()` method (~30 tools across filesystem, shell, browser, mapping, multiedit, lsp, sandbox, plan, askuser, smartedit, subagent, mcp, web, git, notebook, interactive). T05 enumerates them in §3.6 with the explicit level + rationale per tool. Tools without an explicit override embed `approval.DefaultLevelEdit` for the safe default.
-- `HelixCode/cmd/cli/main.go` — three additions: (1) construct `approval.Selector` + resolve mode at startup; (2) construct `approval.ApprovalManager` adjacent to the F02 + F14 + F19 wiring; (3) `c.toolRegistry.SetApprovalManager(c.approvalMgr)` + register `/approval` slash; (4) one new pflag `--approval=<mode>` wired into the existing flag set.
-- `HelixCode/internal/commands/registry.go` — no schema change; one new `Register(...)` call site for `/approval`.
-- `HelixCode/go.mod` — **zero new external deps**. `gopkg.in/yaml.v3` is already a direct dep (promoted in F20). `sync/atomic` is stdlib.
+- `helix_code/internal/tools/registry.go` — three additions: (1) `Tool` interface gains `RequiresApproval() approval.ApprovalLevel`; (2) `ToolRegistry` struct gains `approvalMgr *approval.ApprovalManager` field + `SetApprovalManager(mgr)` setter; (3) `Execute` gains a new pre-execute branch (FIRST in the chain) calling `manager.CheckApproval` and short-circuiting on `Deny` or routing through Prompter on `Prompt`.
+- `helix_code/internal/tools/**/*.go` — every existing tool gains a one-line `RequiresApproval()` method (~30 tools across filesystem, shell, browser, mapping, multiedit, lsp, sandbox, plan, askuser, smartedit, subagent, mcp, web, git, notebook, interactive). T05 enumerates them in §3.6 with the explicit level + rationale per tool. Tools without an explicit override embed `approval.DefaultLevelEdit` for the safe default.
+- `helix_code/cmd/cli/main.go` — three additions: (1) construct `approval.Selector` + resolve mode at startup; (2) construct `approval.ApprovalManager` adjacent to the F02 + F14 + F19 wiring; (3) `c.toolRegistry.SetApprovalManager(c.approvalMgr)` + register `/approval` slash; (4) one new pflag `--approval=<mode>` wired into the existing flag set.
+- `helix_code/internal/commands/registry.go` — no schema change; one new `Register(...)` call site for `/approval`.
+- `helix_code/go.mod` — **zero new external deps**. `gopkg.in/yaml.v3` is already a direct dep (promoted in F20). `sync/atomic` is stdlib.
 
 ### 3.3 Types
 

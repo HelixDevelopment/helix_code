@@ -58,7 +58,7 @@ go test ./isolated_files/api_key_integration_test.go -v
 
 ```bash
 # Find and analyze all skipped tests
-grep -r "t.Skip" HelixCode/tests/
+grep -r "t.Skip" helix_code/tests/
 
 # For each skipped test:
 1. Determine skip reason
@@ -1187,11 +1187,11 @@ Integration Tasks:
 
 1. Website Directory Integration
    # Create Website directory in main project
-   mkdir -p HelixCode/Website
-   cd HelixCode/Website
+   mkdir -p helix_code/Website
+   cd helix_code/Website
    
    # Copy existing website content
-   cp -r /Users/milosvasic/Projects/HelixCode/github_pages_website/docs/* .
+   cp -r /Users/milosvasic/Projects/helix_code/github_pages_website/docs/* .
    
    # Update build system
    echo "website:" >> ../Makefile

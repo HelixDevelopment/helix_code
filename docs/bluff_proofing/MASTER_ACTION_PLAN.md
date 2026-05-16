@@ -55,7 +55,7 @@ Every PASS result MUST guarantee:
 
 ### P0-001: Fix go.mod - Add All Advertised Dependencies
 
-**File**: `HelixCode/go.mod` (replace root go.mod)
+**File**: `helix_code/go.mod` (replace root go.mod)
 **Current State**: Only 3 dependencies (uuid, errors, yaml)
 **Target State**: Full dependency manifest with 20+ dependencies
 
@@ -1744,7 +1744,7 @@ HelixCode achieves zero-bluff status when ALL of the following are TRUE:
 - [ ] `CONSTITUTION.md` (root, 330+ lines)
 - [ ] `CLAUDE.md` (root, 490+ lines)
 - [ ] `AGENTS.md` (root, 390+ lines)
-- [ ] `HelixCode/go.mod` (full dependencies)
+- [ ] `helix_code/go.mod` (full dependencies)
 - [ ] `docker/docker-entrypoint.sh`
 - [ ] `internal/llm/provider.go` (interface)
 - [ ] `internal/llm/manager.go` (provider manager)
@@ -1824,7 +1824,7 @@ curl http://localhost:8080/api/v1/llm/models
 # Should output "hello world", not just "Command completed successfully"
 
 # Verify go.mod dependencies
-cat HelixCode/go.mod | grep -E "gin|pgx|viper|cobra|chromedp|tview|fyne"
+cat helix_code/go.mod | grep -E "gin|pgx|viper|cobra|chromedp|tview|fyne"
 # Should return all advertised dependencies
 
 # Verify tests use real infrastructure

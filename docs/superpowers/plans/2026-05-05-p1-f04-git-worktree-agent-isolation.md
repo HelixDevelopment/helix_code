@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md` (commit `7ba8907`)
 
-**Working directory for all `go` commands:** `HelixCode/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/HelixCode/` per the F01/F02/F03 convention.
+**Working directory for all `go` commands:** `helix_code/` (the inner Go module). Git commands run from the meta-repo root `/run/media/milosvasic/DATA4TB/Projects/helix_code/` per the F01/F02/F03 convention.
 
 **Anti-bluff smoke (run on every commit):**
 ```bash
@@ -25,7 +25,7 @@ cd HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" inter
 - Modify: `docs/improvements/06_phase_1_evidence.md`
 - Modify: `docs/improvements/PROGRESS.md`
 - Modify: `.gitignore` (root)
-- Modify: `HelixCode/.gitignore` (inner module)
+- Modify: `helix_code/.gitignore` (inner module)
 
 - [ ] **Step 1: Append F04 section header to evidence file**
 
@@ -86,7 +86,7 @@ After the existing F03 task list block (all 11 items checked), insert:
 
 - [ ] **Step 4: Add `.helix-worktrees/` to root `.gitignore`**
 
-Append to `/run/media/milosvasic/DATA4TB/Projects/HelixCode/.gitignore`:
+Append to `/run/media/milosvasic/DATA4TB/Projects/helix_code/.gitignore`:
 
 ```
 # Worktrees created by HelixCode P1-F04 EnterWorktree (do NOT commit)
@@ -95,7 +95,7 @@ Append to `/run/media/milosvasic/DATA4TB/Projects/HelixCode/.gitignore`:
 
 - [ ] **Step 5: Add `.helix-worktrees/` to inner module `.gitignore`**
 
-Append to `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/.gitignore`:
+Append to `/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/.gitignore`:
 
 ```
 # Worktrees created by HelixCode P1-F04 EnterWorktree (do NOT commit)
@@ -105,7 +105,7 @@ Append to `/run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/.gitignore
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add docs/improvements/06_phase_1_evidence.md docs/improvements/PROGRESS.md .gitignore HelixCode/.gitignore
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add docs/improvements/06_phase_1_evidence.md docs/improvements/PROGRESS.md .gitignore helix_code/.gitignore
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 docs(P1-F04-T01): bootstrap Phase 1 / Feature 4 evidence + advance PROGRESS
 
@@ -122,12 +122,12 @@ EOF
 ## Task 2: Persistence package skeleton (types + doc)
 
 **Files:**
-- Create: `HelixCode/internal/tools/worktree/doc.go`
-- Create: `HelixCode/internal/tools/worktree/types.go`
+- Create: `helix_code/internal/tools/worktree/doc.go`
+- Create: `helix_code/internal/tools/worktree/types.go`
 
 - [ ] **Step 1: Create doc.go**
 
-Create `HelixCode/internal/tools/worktree/doc.go`:
+Create `helix_code/internal/tools/worktree/doc.go`:
 
 ```go
 // Package worktree implements claude-code-style git worktree agent isolation.
@@ -137,7 +137,7 @@ Create `HelixCode/internal/tools/worktree/doc.go`:
 // parallel branch without polluting main, and exit via Manager.ExitWorktree.
 // All worktree operations shell out to the git binary, consistent with
 // internal/tools/git/. Submodules are NOT initialised — the meta-repo and
-// the inner Go module at HelixCode/ are present, but submodule directories
+// the inner Go module at helix_code/ are present, but submodule directories
 // under helix_agent/, Dependencies/, etc. are empty placeholders.
 //
 // See: docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md
@@ -146,7 +146,7 @@ package worktree
 
 - [ ] **Step 2: Create types.go**
 
-Create `HelixCode/internal/tools/worktree/types.go`:
+Create `helix_code/internal/tools/worktree/types.go`:
 
 ```go
 package worktree
@@ -184,21 +184,21 @@ type Worktree struct {
 - [ ] **Step 3: Verify the package compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./internal/tools/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./internal/tools/worktree/...
 ```
 Expected: clean compile, exit 0.
 
 - [ ] **Step 4: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/doc.go HelixCode/internal/tools/worktree/types.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/doc.go helix_code/internal/tools/worktree/types.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T02): add internal/tools/worktree package skeleton
 
@@ -216,12 +216,12 @@ EOF
 ## Task 3: git.go thin git-binary wrappers (TDD against ephemeral repo)
 
 **Files:**
-- Create: `HelixCode/internal/tools/worktree/git.go`
-- Create: `HelixCode/internal/tools/worktree/git_test.go`
+- Create: `helix_code/internal/tools/worktree/git.go`
+- Create: `helix_code/internal/tools/worktree/git_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/worktree/git_test.go`:
+Create `helix_code/internal/tools/worktree/git_test.go`:
 
 ```go
 package worktree
@@ -354,13 +354,13 @@ func TestGitWorktreeRemove_Roundtrip(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestGit' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestGit' ./internal/tools/worktree/
 ```
 Expected: FAIL — git wrapper functions undefined.
 
 - [ ] **Step 3: Implement git.go**
 
-Create `HelixCode/internal/tools/worktree/git.go`:
+Create `helix_code/internal/tools/worktree/git.go`:
 
 ```go
 package worktree
@@ -455,21 +455,21 @@ func gitStatusPorcelain(ctx context.Context, dir string) ([]byte, error) {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestGit' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestGit' ./internal/tools/worktree/
 ```
 Expected: PASS — 7 tests against real ephemeral repos.
 
 - [ ] **Step 5: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/git.go HelixCode/internal/tools/worktree/git_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/git.go helix_code/internal/tools/worktree/git_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T03): git binary wrappers for worktree operations (TDD)
 
@@ -490,12 +490,12 @@ EOF
 ## Task 4: Manager + ValidateName + GetCurrentDirectory + IsIsolated (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/worktree/manager.go`
-- Create: `HelixCode/internal/tools/worktree/manager_validate_test.go`
+- Create: `helix_code/internal/tools/worktree/manager.go`
+- Create: `helix_code/internal/tools/worktree/manager_validate_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/worktree/manager_validate_test.go`:
+Create `helix_code/internal/tools/worktree/manager_validate_test.go`:
 
 ```go
 package worktree
@@ -560,13 +560,13 @@ func TestIsIsolated_DefaultIsFalse(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestValidateName|TestGetCurrentDirectory_DefaultIsRepoRoot|TestIsIsolated_DefaultIsFalse' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestValidateName|TestGetCurrentDirectory_DefaultIsRepoRoot|TestIsIsolated_DefaultIsFalse' ./internal/tools/worktree/
 ```
 Expected: FAIL — `Manager`, `NewManager`, `ValidateName`, `GetCurrentDirectory`, `IsIsolated` undefined.
 
 - [ ] **Step 3: Implement manager.go (skeleton + 3 methods)**
 
-Create `HelixCode/internal/tools/worktree/manager.go`:
+Create `helix_code/internal/tools/worktree/manager.go`:
 
 ```go
 package worktree
@@ -630,28 +630,28 @@ func (m *Manager) IsIsolated() bool {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestValidateName|TestGetCurrentDirectory_DefaultIsRepoRoot|TestIsIsolated_DefaultIsFalse' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestValidateName|TestGetCurrentDirectory_DefaultIsRepoRoot|TestIsIsolated_DefaultIsFalse' ./internal/tools/worktree/
 ```
 Expected: PASS — 7 tests.
 
 - [ ] **Step 5: Run full package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
 ```
 Expected: PASS — 7 (T03) + 7 (T04) = 14 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/manager.go HelixCode/internal/tools/worktree/manager_validate_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/manager.go helix_code/internal/tools/worktree/manager_validate_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T04): Manager + ValidateName + GetCurrentDirectory + IsIsolated (TDD)
 
@@ -672,12 +672,12 @@ EOF
 ## Task 5: Manager.EnterWorktree (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/worktree/manager.go` (add `EnterWorktree`)
-- Create: `HelixCode/internal/tools/worktree/manager_enter_test.go`
+- Modify: `helix_code/internal/tools/worktree/manager.go` (add `EnterWorktree`)
+- Create: `helix_code/internal/tools/worktree/manager_enter_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/worktree/manager_enter_test.go`:
+Create `helix_code/internal/tools/worktree/manager_enter_test.go`:
 
 ```go
 package worktree
@@ -797,13 +797,13 @@ func TestEnterWorktree_BaseBranchOverridesName(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestEnterWorktree' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestEnterWorktree' ./internal/tools/worktree/
 ```
 Expected: FAIL — `EnterWorktree` undefined.
 
 - [ ] **Step 3: Add EnterWorktree to manager.go**
 
-Append to `HelixCode/internal/tools/worktree/manager.go`:
+Append to `helix_code/internal/tools/worktree/manager.go`:
 
 ```go
 import (
@@ -886,28 +886,28 @@ func (m *Manager) EnterWorktree(ctx context.Context, name, baseBranch string) (s
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestEnterWorktree' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestEnterWorktree' ./internal/tools/worktree/
 ```
 Expected: PASS — 7 tests.
 
 - [ ] **Step 5: Run full package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
 ```
 Expected: PASS — 7 + 7 + 7 = 21 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/manager.go HelixCode/internal/tools/worktree/manager_enter_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/manager.go helix_code/internal/tools/worktree/manager_enter_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T05): Manager.EnterWorktree (TDD)
 
@@ -927,12 +927,12 @@ EOF
 ## Task 6: Manager.ExitWorktree + ListWorktrees + RemoveWorktree (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/tools/worktree/manager.go`
-- Create: `HelixCode/internal/tools/worktree/manager_lifecycle_test.go`
+- Modify: `helix_code/internal/tools/worktree/manager.go`
+- Create: `helix_code/internal/tools/worktree/manager_lifecycle_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/worktree/manager_lifecycle_test.go`:
+Create `helix_code/internal/tools/worktree/manager_lifecycle_test.go`:
 
 ```go
 package worktree
@@ -1042,13 +1042,13 @@ func TestRemoveWorktree_InvalidNameRejected(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestExitWorktree|TestListWorktrees|TestRemoveWorktree' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestExitWorktree|TestListWorktrees|TestRemoveWorktree' ./internal/tools/worktree/
 ```
 Expected: FAIL — methods undefined.
 
 - [ ] **Step 3: Add methods to manager.go**
 
-Append to `HelixCode/internal/tools/worktree/manager.go`:
+Append to `helix_code/internal/tools/worktree/manager.go`:
 
 ```go
 // ExitWorktree clears the active-worktree state and returns the agent to
@@ -1158,28 +1158,28 @@ func (m *Manager) RemoveWorktree(ctx context.Context, name string) error {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestExitWorktree|TestListWorktrees|TestRemoveWorktree' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestExitWorktree|TestListWorktrees|TestRemoveWorktree' ./internal/tools/worktree/
 ```
 Expected: PASS — 7 tests.
 
 - [ ] **Step 5: Run full package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
 ```
 Expected: PASS — 21 + 7 = 28 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/manager.go HelixCode/internal/tools/worktree/manager_lifecycle_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/manager.go helix_code/internal/tools/worktree/manager_lifecycle_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T06): Manager.ExitWorktree + ListWorktrees + RemoveWorktree (TDD)
 
@@ -1200,12 +1200,12 @@ EOF
 ## Task 7: 4 tools.Tool interface implementations (TDD)
 
 **Files:**
-- Create: `HelixCode/internal/tools/worktree/tools.go`
-- Create: `HelixCode/internal/tools/worktree/tools_test.go`
+- Create: `helix_code/internal/tools/worktree/tools.go`
+- Create: `helix_code/internal/tools/worktree/tools_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/tools/worktree/tools_test.go`:
+Create `helix_code/internal/tools/worktree/tools_test.go`:
 
 ```go
 package worktree
@@ -1347,13 +1347,13 @@ func TestEnterWorktreeTool_DescriptionMentionsBaseBranch(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestEnterWorktreeTool|TestExitWorktreeTool|TestListWorktreesTool|TestRemoveWorktreeTool' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestEnterWorktreeTool|TestExitWorktreeTool|TestListWorktreesTool|TestRemoveWorktreeTool' ./internal/tools/worktree/
 ```
 Expected: FAIL — Tool constructors undefined.
 
 - [ ] **Step 3: Implement tools.go**
 
-Create `HelixCode/internal/tools/worktree/tools.go`:
+Create `helix_code/internal/tools/worktree/tools.go`:
 
 ```go
 package worktree
@@ -1376,7 +1376,7 @@ func NewEnterWorktreeTool(m *Manager) *EnterWorktreeTool { return &EnterWorktree
 func (t *EnterWorktreeTool) Name() string { return "EnterWorktree" }
 
 func (t *EnterWorktreeTool) Description() string {
-	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at HelixCode/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
+	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at helix_code/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty placeholders. If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
 }
 
 func (t *EnterWorktreeTool) Schema() tools.ToolSchema {
@@ -1538,28 +1538,28 @@ func (t *RemoveWorktreeTool) Execute(ctx context.Context, params map[string]inte
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestEnterWorktreeTool|TestExitWorktreeTool|TestListWorktreesTool|TestRemoveWorktreeTool' ./internal/tools/worktree/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestEnterWorktreeTool|TestExitWorktreeTool|TestListWorktreesTool|TestRemoveWorktreeTool' ./internal/tools/worktree/
 ```
 Expected: PASS — 8 tests.
 
 - [ ] **Step 5: Run full package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/tools/worktree/...
 ```
 Expected: PASS — 28 + 8 = 36 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/tools/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/tools/worktree/tools.go HelixCode/internal/tools/worktree/tools_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/tools/worktree/tools.go helix_code/internal/tools/worktree/tools_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T07): 4 tools.Tool implementations for worktree (TDD)
 
@@ -1581,12 +1581,12 @@ EOF
 ## Task 8: session.Manager currentWorktree field + getter/setter (TDD)
 
 **Files:**
-- Modify: `HelixCode/internal/session/manager.go`
-- Create: `HelixCode/internal/session/manager_worktree_test.go`
+- Modify: `helix_code/internal/session/manager.go`
+- Create: `helix_code/internal/session/manager_worktree_test.go`
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/internal/session/manager_worktree_test.go`:
+Create `helix_code/internal/session/manager_worktree_test.go`:
 
 ```go
 package session
@@ -1619,13 +1619,13 @@ func TestManager_SetCurrentWorktree_Empty(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestManager_GetCurrentWorktree|TestManager_SetCurrentWorktree' ./internal/session/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestManager_GetCurrentWorktree|TestManager_SetCurrentWorktree' ./internal/session/
 ```
 Expected: FAIL — methods undefined.
 
 - [ ] **Step 3: Modify manager.go**
 
-In `HelixCode/internal/session/manager.go`, find the `Manager` struct (around line 15-34) and add `currentWorktree string` as the last field BEFORE the closing brace. The existing `mu sync.RWMutex` already covers the field for thread-safety.
+In `helix_code/internal/session/manager.go`, find the `Manager` struct (around line 15-34) and add `currentWorktree string` as the last field BEFORE the closing brace. The existing `mu sync.RWMutex` already covers the field for thread-safety.
 
 ```go
 type Manager struct {
@@ -1670,28 +1670,28 @@ func (m *Manager) SetCurrentWorktree(path string) {
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestManager_GetCurrentWorktree|TestManager_SetCurrentWorktree' ./internal/session/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestManager_GetCurrentWorktree|TestManager_SetCurrentWorktree' ./internal/session/
 ```
 Expected: PASS — 3 tests.
 
 - [ ] **Step 5: Run full session package (regression check)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/session/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/session/...
 ```
 Expected: PASS — no regression in existing session tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/session/manager.go internal/session/manager_worktree_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/session/manager.go internal/session/manager_worktree_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/session/manager.go HelixCode/internal/session/manager_worktree_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/session/manager.go helix_code/internal/session/manager_worktree_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T08): session.Manager.currentWorktree field + getter/setter
 
@@ -1712,13 +1712,13 @@ EOF
 ## Task 9: helixcode worktree {list,enter,exit,remove} Cobra subcommands
 
 **Files:**
-- Create: `HelixCode/cmd/cli/worktree_cmd.go`
-- Create: `HelixCode/cmd/cli/worktree_cmd_test.go`
-- Modify: `HelixCode/cmd/cli/main.go` (add dispatcher entry)
+- Create: `helix_code/cmd/cli/worktree_cmd.go`
+- Create: `helix_code/cmd/cli/worktree_cmd_test.go`
+- Modify: `helix_code/cmd/cli/main.go` (add dispatcher entry)
 
 - [ ] **Step 1: Write failing test**
 
-Create `HelixCode/cmd/cli/worktree_cmd_test.go`:
+Create `helix_code/cmd/cli/worktree_cmd_test.go`:
 
 ```go
 package main
@@ -1808,13 +1808,13 @@ func TestRunWorktreeExit_PrintsHelpAndErrors(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestRunWorktree' ./cmd/cli/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestRunWorktree' ./cmd/cli/
 ```
 Expected: FAIL — functions undefined.
 
 - [ ] **Step 3: Implement worktree_cmd.go**
 
-Create `HelixCode/cmd/cli/worktree_cmd.go`:
+Create `helix_code/cmd/cli/worktree_cmd.go`:
 
 ```go
 package main
@@ -1926,7 +1926,7 @@ func runWorktreeExit(out io.Writer) error {
 
 - [ ] **Step 4: Wire the dispatcher in main.go**
 
-Find the existing dispatcher block in `HelixCode/cmd/cli/main.go` (added by F02 — it intercepts `os.Args[1] == "permissions"`). Add an analogous block immediately after it for "worktree":
+Find the existing dispatcher block in `helix_code/cmd/cli/main.go` (added by F02 — it intercepts `os.Args[1] == "permissions"`). Add an analogous block immediately after it for "worktree":
 
 ```go
 if len(os.Args) >= 2 && os.Args[1] == "worktree" {
@@ -1947,37 +1947,37 @@ Add the import for `dev.helix.code/internal/tools/worktree` at the top of `main.
 - [ ] **Step 5: Verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./cmd/cli/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./cmd/cli/...
 ```
 Expected: clean compile.
 
 - [ ] **Step 6: Run tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestRunWorktree' ./cmd/cli/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestRunWorktree' ./cmd/cli/
 ```
 Expected: PASS — 5 tests.
 
 - [ ] **Step 7: Smoke-test the binary**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build -o bin/helixcode ./cmd/cli && ./bin/helixcode worktree --help
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build -o bin/helixcode ./cmd/cli && ./bin/helixcode worktree --help
 ```
 Expected: prints subcommand list including `list`, `enter`, `exit`, `remove`.
 
 - [ ] **Step 8: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/worktree_cmd.go cmd/cli/worktree_cmd_test.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/worktree_cmd.go cmd/cli/worktree_cmd_test.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 9: Commit**
 
-Note: `cmd/cli/` is matched by `HelixCode/.gitignore` line 124 (bare `cli`), so new files there need `git add -f`.
+Note: `cmd/cli/` is matched by `helix_code/.gitignore` line 124 (bare `cli`), so new files there need `git add -f`.
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f HelixCode/cmd/cli/worktree_cmd.go HelixCode/cmd/cli/worktree_cmd_test.go HelixCode/cmd/cli/main.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f helix_code/cmd/cli/worktree_cmd.go helix_code/cmd/cli/worktree_cmd_test.go helix_code/cmd/cli/main.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T09): helixcode worktree {list,enter,exit,remove} subcommands
 
@@ -1999,14 +1999,14 @@ EOF
 ## Task 10: /worktree slash command + register in builtin/register.go
 
 **Files:**
-- Create: `HelixCode/internal/commands/worktree_command.go`
-- Create: `HelixCode/internal/commands/worktree_command_test.go`
-- Modify: `HelixCode/internal/commands/builtin/register.go`
-- Create: `HelixCode/internal/commands/builtin/worktree_register_test.go`
+- Create: `helix_code/internal/commands/worktree_command.go`
+- Create: `helix_code/internal/commands/worktree_command_test.go`
+- Modify: `helix_code/internal/commands/builtin/register.go`
+- Create: `helix_code/internal/commands/builtin/worktree_register_test.go`
 
 - [ ] **Step 1: Write failing test for the slash command itself**
 
-Create `HelixCode/internal/commands/worktree_command_test.go`:
+Create `helix_code/internal/commands/worktree_command_test.go`:
 
 ```go
 package commands
@@ -2133,13 +2133,13 @@ func TestWorktreeCommand_EnterRequiresName(t *testing.T) {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestWorktreeCommand' ./internal/commands/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestWorktreeCommand' ./internal/commands/
 ```
 Expected: FAIL — `NewWorktreeCommand` undefined.
 
 - [ ] **Step 3: Implement worktree_command.go**
 
-Create `HelixCode/internal/commands/worktree_command.go`:
+Create `helix_code/internal/commands/worktree_command.go`:
 
 ```go
 package commands
@@ -2256,13 +2256,13 @@ func (c *WorktreeCommand) remove(ctx context.Context, name string) (*CommandResu
 - [ ] **Step 4: Run slash command tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestWorktreeCommand' ./internal/commands/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestWorktreeCommand' ./internal/commands/
 ```
 Expected: PASS — 7 tests.
 
 - [ ] **Step 5: Write registration test**
 
-Create `HelixCode/internal/commands/builtin/worktree_register_test.go`:
+Create `helix_code/internal/commands/builtin/worktree_register_test.go`:
 
 ```go
 package builtin_test
@@ -2306,13 +2306,13 @@ func TestRegisterBuiltinCommands_IncludesWorktree(t *testing.T) {
 - [ ] **Step 6: Run failing registration test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -run 'TestRegisterBuiltinCommands_IncludesWorktree' ./internal/commands/builtin/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -run 'TestRegisterBuiltinCommands_IncludesWorktree' ./internal/commands/builtin/
 ```
 Expected: FAIL — `RegisterBuiltinCommandsWithWorktree` undefined.
 
 - [ ] **Step 7: Modify builtin/register.go**
 
-In `HelixCode/internal/commands/builtin/register.go`:
+In `helix_code/internal/commands/builtin/register.go`:
 
 1. Add the import for `dev.helix.code/internal/tools/worktree` at the top (existing imports include `"dev.helix.code/internal/commands"` from F02).
 
@@ -2337,28 +2337,28 @@ func RegisterBuiltinCommandsWithWorktree(registry *commands.Registry, m *worktre
 - [ ] **Step 8: Run registration test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -run 'TestRegisterBuiltinCommands_IncludesWorktree' ./internal/commands/builtin/
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -run 'TestRegisterBuiltinCommands_IncludesWorktree' ./internal/commands/builtin/
 ```
 Expected: PASS.
 
 - [ ] **Step 9: Run full commands package + builtin package**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race ./internal/commands/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race ./internal/commands/...
 ```
 Expected: PASS — no regression in F02's permissions tests.
 
 - [ ] **Step 10: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/commands/worktree_command.go internal/commands/builtin/register.go && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" internal/commands/worktree_command.go internal/commands/builtin/register.go && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 11: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/internal/commands/worktree_command.go HelixCode/internal/commands/worktree_command_test.go HelixCode/internal/commands/builtin/register.go HelixCode/internal/commands/builtin/worktree_register_test.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/internal/commands/worktree_command.go helix_code/internal/commands/worktree_command_test.go helix_code/internal/commands/builtin/register.go helix_code/internal/commands/builtin/worktree_register_test.go
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T10): /worktree slash command + register in builtin
 
@@ -2384,13 +2384,13 @@ EOF
 ## Task 11: cmd/cli/main.go startup wiring + integration test (no mocks)
 
 **Files:**
-- Modify: `HelixCode/cmd/cli/main.go`
-- Create: `HelixCode/tests/integration/worktree/worktree_integration_test.go`
+- Modify: `helix_code/cmd/cli/main.go`
+- Create: `helix_code/tests/integration/worktree/worktree_integration_test.go`
 
 - [ ] **Step 1: Investigate main.go's CLI struct + init pattern**
 
 ```bash
-grep -n 'permissionsEngine\|persistenceManager\|initPermissions\|initPersistence' /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/cmd/cli/main.go | head
+grep -n 'permissionsEngine\|persistenceManager\|initPermissions\|initPersistence' /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/cmd/cli/main.go | head
 ```
 
 Confirm the F02/F03 pattern: a field on the CLI struct + an `initX` method called during `Run()` after the dispatcher's other inits.
@@ -2460,17 +2460,17 @@ if err := c.initWorktree(ctx); err != nil {
 - [ ] **Step 3: Verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go build ./cmd/cli/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go build ./cmd/cli/...
 ```
 Expected: clean compile.
 
 - [ ] **Step 4: Write the integration test**
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/integration/worktree
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/integration/worktree
 ```
 
-Create `HelixCode/tests/integration/worktree/worktree_integration_test.go`:
+Create `helix_code/tests/integration/worktree/worktree_integration_test.go`:
 
 ```go
 //go:build integration
@@ -2582,22 +2582,22 @@ func TestIntegration_PathTraversalRejected(t *testing.T) {
 - [ ] **Step 5: Run integration tests**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/worktree/...
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && go test -count=1 -race -v -tags=integration ./tests/integration/worktree/...
 ```
 Expected: PASS — 3 tests.
 
 - [ ] **Step 6: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/tools/worktree/ tests/integration/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" cmd/cli/main.go internal/tools/worktree/ tests/integration/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`. Note: `cmd/cli/main.go` may have pre-existing hits — only flag NEW ones.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f HelixCode/cmd/cli/main.go
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/tests/integration/worktree/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add -f helix_code/cmd/cli/main.go
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/tests/integration/worktree/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T11): cmd/cli/main.go startup wiring + integration tests
 
@@ -2617,19 +2617,19 @@ EOF
 ## Task 12: Challenge with three runtime-evidence scenarios
 
 **Files:**
-- Create: `HelixCode/tests/e2e/challenges/worktree/expected.json`
-- Create: `HelixCode/tests/e2e/challenges/worktree/run.sh`
-- Create: `HelixCode/tests/e2e/challenges/worktree/README.md`
+- Create: `helix_code/tests/e2e/challenges/worktree/expected.json`
+- Create: `helix_code/tests/e2e/challenges/worktree/run.sh`
+- Create: `helix_code/tests/e2e/challenges/worktree/README.md`
 
 - [ ] **Step 1: Create the directory**
 
 ```bash
-mkdir -p /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/worktree
+mkdir -p /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/worktree
 ```
 
 - [ ] **Step 2: Write expected.json**
 
-Create `HelixCode/tests/e2e/challenges/worktree/expected.json`:
+Create `helix_code/tests/e2e/challenges/worktree/expected.json`:
 
 ```json
 {
@@ -2656,7 +2656,7 @@ Create `HelixCode/tests/e2e/challenges/worktree/expected.json`:
 
 - [ ] **Step 3: Write run.sh**
 
-Create `HelixCode/tests/e2e/challenges/worktree/run.sh`:
+Create `helix_code/tests/e2e/challenges/worktree/run.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -2814,12 +2814,12 @@ echo "PASS: all three scenarios produced expected outcomes"
 - [ ] **Step 4: Make it executable**
 
 ```bash
-chmod +x /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/tests/e2e/challenges/worktree/run.sh
+chmod +x /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/worktree/run.sh
 ```
 
 - [ ] **Step 5: Write README.md**
 
-Create `HelixCode/tests/e2e/challenges/worktree/README.md`:
+Create `helix_code/tests/e2e/challenges/worktree/README.md`:
 
 ```markdown
 # Challenge — Git Worktree Agent Isolation (P1-F04)
@@ -2865,21 +2865,21 @@ Revert the mutation and confirm PASS.
 - [ ] **Step 6: Run the Challenge**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/worktree/run.sh 2>&1 | tee /tmp/p1-f04-t12-evidence.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/worktree/run.sh 2>&1 | tee /tmp/p1-f04-t12-evidence.txt
 ```
 Expected: PASS at the end. Exit 0.
 
 - [ ] **Step 7: Anti-bluff smoke**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/worktree/ && echo "BLUFF FOUND" || echo "clean"
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" tests/e2e/challenges/worktree/ && echo "BLUFF FOUND" || echo "clean"
 ```
 Expected: `clean`.
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add HelixCode/tests/e2e/challenges/worktree/
+git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode add helix_code/tests/e2e/challenges/worktree/
 git -C /run/media/milosvasic/DATA4TB/Projects/HelixCode commit -m "$(cat <<'EOF'
 feat(P1-F04-T12): Challenge for worktree isolation with runtime evidence
 
@@ -2913,14 +2913,14 @@ EOF
 - [ ] **Step 1: Re-run the Challenge to capture fresh evidence**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && tests/e2e/challenges/worktree/run.sh 2>&1 | tee /tmp/p1-f04-t13-rerun.txt
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && tests/e2e/challenges/worktree/run.sh 2>&1 | tee /tmp/p1-f04-t13-rerun.txt
 ```
 Expected: PASS. If FAIL, STOP.
 
 - [ ] **Step 2: Run final regression test**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && \
   go test -count=1 -race ./internal/tools/worktree/... ./internal/tools/persistence/... ./internal/tools/permissions/... ./internal/tools/confirmation/... ./internal/llm/... ./internal/agent/... ./internal/session/... ./internal/commands/... ./cmd/cli/... 2>&1 | tee /tmp/p1-f04-t13-tests.txt && \
   go test -count=1 -race -tags=integration ./tests/integration/worktree/... ./tests/integration/persistence/... ./tests/integration/permissions/... 2>&1 | tee -a /tmp/p1-f04-t13-tests.txt
 ```
@@ -2937,7 +2937,7 @@ Phase 0 LLMsVerifier-pin baseline (exit 2 warn-only) is acceptable — same as F
 - [ ] **Step 4: Anti-bluff smoke (broad)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode && grep -rn "simulated\|for now\|TODO implement\|placeholder" \
   internal/tools/worktree/ tests/e2e/challenges/worktree/ \
   tests/integration/worktree/ \
   internal/commands/worktree_command.go internal/commands/worktree_command_test.go \

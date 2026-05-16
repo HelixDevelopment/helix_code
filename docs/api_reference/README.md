@@ -1,7 +1,7 @@
 # HelixCode API Reference — Zero-Bluff Phase 5
 
 **Audience**: Developers integrating against HelixCode internals.
-**Scope**: 20 key `internal/` packages from the inner Go module (`HelixCode/HelixCode/`).
+**Scope**: 20 key `internal/` packages from the inner Go module (`helix_code/helix_code/`).
 **Generation**: Content sourced from `go doc ./internal/<pkg>` — real signatures, no invention (CONST-035).
 **Companion**: REST API at [`docs/COMPLETE_API_REFERENCE.md`](../COMPLETE_API_REFERENCE.md) (1,362 lines).
 **Last updated**: 2026-05-12
@@ -15,7 +15,7 @@ module dev.helix.code
 go 1.26
 ```
 
-Located at `HelixCode/HelixCode/` (inner submodule). The meta-repo root has a thin module also called `dev.helix.code` on Go 1.25.2 used only for governance tooling.
+Located at `helix_code/helix_code/` (inner submodule). The meta-repo root has a thin module also called `dev.helix.code` on Go 1.25.2 used only for governance tooling.
 
 ## Package Index
 
@@ -126,7 +126,7 @@ ed, _ := editor.NewCodeEditor(editor.EditFormatDiff)
 ed.ApplyEdit(editor.Edit{FilePath: "test.go", Format: editor.EditFormatDiff, Content: "..."})
 ```
 
-Built-in validation, backup support, and syntax checks. See `HelixCode/internal/editor/README.md`.
+Built-in validation, backup support, and syntax checks. See `helix_code/internal/editor/README.md`.
 
 ## 5. `internal/task`
 

@@ -8,13 +8,13 @@
 # stay honest + in-sync.
 #
 # What it does:
-#  1. Inventories supported platforms from `HelixCode/Makefile`
+#  1. Inventories supported platforms from `helix_code/Makefile`
 #     (`make desktop-{linux,macos,windows} mobile-{ios,android}
 #     aurora-os harmony-os`) + container targets.
 #  2. Extracts feature catalogue (F01..FNN) from the user manual
 #     at `docs/user_manual/ZERO_BLUFF_USER_MANUAL.md`.
-#  3. Inventories test-type presence from `HelixCode/tests/<type>/`
-#     directories + scans `HelixCode/Makefile` for `make test-<type>`
+#  3. Inventories test-type presence from `helix_code/tests/<type>/`
+#     directories + scans `helix_code/Makefile` for `make test-<type>`
 #     targets.
 #  4. Walks each owned submodule's `.gitmodules` for nested own-org
 #     submodule chains (CONST-051(C) audit signal).
@@ -58,7 +58,7 @@ cd "$REPO_ROOT"
 LEDGER="docs/coverage/ledger.md"
 OWNED_FILE="docs/improvements/submodule_owned.txt"
 USER_MANUAL="docs/user_manual/ZERO_BLUFF_USER_MANUAL.md"
-INNER_MAKEFILE="HelixCode/Makefile"
+INNER_MAKEFILE="helix_code/Makefile"
 TODAY="$(date +%Y-%m-%d)"
 ROUND_TAG="${ROUND_TAG:-mechanical-regeneration}"
 
@@ -92,7 +92,7 @@ fi
 test_type_status() {
     local name="$1" path_pattern="$2" make_target="$3"
     local present="NO"
-    if [[ -d "HelixCode/tests/$path_pattern" ]] || find "HelixCode/tests" -path "*$path_pattern*" -type f 2>/dev/null | grep -q . ; then
+    if [[ -d "helix_code/tests/$path_pattern" ]] || find "helix_code/tests" -path "*$path_pattern*" -type f 2>/dev/null | grep -q . ; then
         present="YES"
     fi
     local has_make="NO"
@@ -164,7 +164,7 @@ PRESERVED_VERIFIED_COUNT=${#EXISTING_VERIFIED[@]}
 # HelixCode Coverage Ledger (CONST-048 / §11.4.25)
 
 **Last regenerated:** $TODAY (mechanical, via \`scripts/regenerate-coverage-ledger.sh\` — round tag: \`$ROUND_TAG\`)
-**Sources:** Feature catalogue from \`$USER_MANUAL\`; test-type inventory from \`$INNER_MAKEFILE\` + \`HelixCode/tests/\`; submodule audit from \`$OWNED_FILE\`; governance verifier from \`scripts/verify-governance-cascade.sh\`.
+**Sources:** Feature catalogue from \`$USER_MANUAL\`; test-type inventory from \`$INNER_MAKEFILE\` + \`helix_code/tests/\`; submodule audit from \`$OWNED_FILE\`; governance verifier from \`scripts/verify-governance-cascade.sh\`.
 
 ## Mechanical-regeneration notes
 

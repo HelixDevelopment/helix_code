@@ -1,7 +1,7 @@
 # HelixCode Coverage Ledger (CONST-048 / §11.4.25)
 
 **Last regenerated:** 2026-05-15 (mechanical, via `scripts/regenerate-coverage-ledger.sh` — round tag: `mechanical-regeneration`)
-**Sources:** Feature catalogue from `docs/user_manual/ZERO_BLUFF_USER_MANUAL.md`; test-type inventory from `HelixCode/Makefile` + `HelixCode/tests/`; submodule audit from `docs/improvements/submodule_owned.txt`; governance verifier from `scripts/verify-governance-cascade.sh`.
+**Sources:** Feature catalogue from `docs/user_manual/ZERO_BLUFF_USER_MANUAL.md`; test-type inventory from `helix_code/Makefile` + `helix_code/tests/`; submodule audit from `docs/improvements/submodule_owned.txt`; governance verifier from `scripts/verify-governance-cascade.sh`.
 
 ## Mechanical-regeneration notes
 

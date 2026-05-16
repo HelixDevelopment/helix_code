@@ -17,21 +17,21 @@ Add `internal/commands/markdown_commands.go` (in the same package as built-ins s
 ## 3. Components
 
 ### 3.1 New files
-- `HelixCode/internal/commands/markdown_commands.go` — `MarkdownCommand`, `MarkdownLoader`, `tokenResolver`, frontmatter parser, regex substitution
-- `HelixCode/internal/commands/markdown_commands_test.go` — unit tests
-- `HelixCode/internal/commands/markdown_watcher.go` — fsnotify-driven reloader (separate file for cross-platform isolation)
-- `HelixCode/internal/commands/markdown_watcher_test.go`
-- `HelixCode/internal/commands/commands_command.go` — `/commands` slash command (list/show/reload/run)
-- `HelixCode/internal/commands/commands_command_test.go`
-- `HelixCode/cmd/cli/commands_cmd.go` — `helixcode commands` cobra subcommand
-- `HelixCode/cmd/cli/commands_cmd_test.go`
-- `HelixCode/internal/commands/builtin/commands_register_test.go`
-- `HelixCode/tests/integration/markdown_commands_test.go`
+- `helix_code/internal/commands/markdown_commands.go` — `MarkdownCommand`, `MarkdownLoader`, `tokenResolver`, frontmatter parser, regex substitution
+- `helix_code/internal/commands/markdown_commands_test.go` — unit tests
+- `helix_code/internal/commands/markdown_watcher.go` — fsnotify-driven reloader (separate file for cross-platform isolation)
+- `helix_code/internal/commands/markdown_watcher_test.go`
+- `helix_code/internal/commands/commands_command.go` — `/commands` slash command (list/show/reload/run)
+- `helix_code/internal/commands/commands_command_test.go`
+- `helix_code/cmd/cli/commands_cmd.go` — `helixcode commands` cobra subcommand
+- `helix_code/cmd/cli/commands_cmd_test.go`
+- `helix_code/internal/commands/builtin/commands_register_test.go`
+- `helix_code/tests/integration/markdown_commands_test.go`
 - `challenges/p1-f09-slash-commands/CHALLENGE.md` + `run.sh`
 
 ### 3.2 Modified
-- `HelixCode/internal/commands/builtin/register.go` — `RegisterBuiltinCommandsWithMarkdown(registry, loader)`; add `"commands"` to `GetBuiltinCommandNames` + builtin_test.go skip set
-- `HelixCode/cmd/cli/main.go` — construct `MarkdownLoader`, start watcher, register `/commands` slash + `helixcode commands` cobra dispatcher
+- `helix_code/internal/commands/builtin/register.go` — `RegisterBuiltinCommandsWithMarkdown(registry, loader)`; add `"commands"` to `GetBuiltinCommandNames` + builtin_test.go skip set
+- `helix_code/cmd/cli/main.go` — construct `MarkdownLoader`, start watcher, register `/commands` slash + `helixcode commands` cobra dispatcher
 
 ### 3.3 Types
 

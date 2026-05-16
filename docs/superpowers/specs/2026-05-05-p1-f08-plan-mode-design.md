@@ -28,25 +28,25 @@ Extend `internal/workflow/planmode/` with a new `gating.go` file holding `ToolGa
 
 | File | Responsibility |
 |------|----------------|
-| `HelixCode/internal/workflow/planmode/gating.go` | `ToolGate` struct + allow-list + key-arg map + `IsBlocked()`, `MatchApprovedAction()` |
-| `HelixCode/internal/workflow/planmode/gating_test.go` | Unit tests for gate logic |
-| `HelixCode/internal/tools/plan_tools.go` | `EnterPlanModeTool`, `ExitPlanModeTool` (both implement `Tool`) |
-| `HelixCode/internal/tools/plan_tools_test.go` | Unit tests for the agent tools |
-| `HelixCode/internal/tools/types_planmode.go` | `ErrPlanModeGated` sentinel |
-| `HelixCode/internal/commands/plan_command.go` | `/plan` slash command |
-| `HelixCode/internal/commands/plan_command_test.go` | Unit tests for the slash command |
-| `HelixCode/internal/commands/builtin/plan_register_test.go` | Test for `RegisterBuiltinCommandsWithPlanMode` |
-| `HelixCode/tests/integration/planmode_gating_test.go` | `//go:build integration` end-to-end test |
+| `helix_code/internal/workflow/planmode/gating.go` | `ToolGate` struct + allow-list + key-arg map + `IsBlocked()`, `MatchApprovedAction()` |
+| `helix_code/internal/workflow/planmode/gating_test.go` | Unit tests for gate logic |
+| `helix_code/internal/tools/plan_tools.go` | `EnterPlanModeTool`, `ExitPlanModeTool` (both implement `Tool`) |
+| `helix_code/internal/tools/plan_tools_test.go` | Unit tests for the agent tools |
+| `helix_code/internal/tools/types_planmode.go` | `ErrPlanModeGated` sentinel |
+| `helix_code/internal/commands/plan_command.go` | `/plan` slash command |
+| `helix_code/internal/commands/plan_command_test.go` | Unit tests for the slash command |
+| `helix_code/internal/commands/builtin/plan_register_test.go` | Test for `RegisterBuiltinCommandsWithPlanMode` |
+| `helix_code/tests/integration/planmode_gating_test.go` | `//go:build integration` end-to-end test |
 | `challenges/p1-f08-plan-mode/CHALLENGE.md` + `run.sh` | Runtime-evidence Challenge |
 
 ### 3.2 Modified files
 
 | File | Change |
 |------|--------|
-| `HelixCode/internal/tools/registry.go` | `SetPlanModeGate(*planmode.ToolGate)` method; `Execute` consults gate; returns `ErrPlanModeGated` on block. Foreground + background paths both gated. |
-| `HelixCode/internal/commands/builtin/register.go` | New `RegisterBuiltinCommandsWithPlanMode(registry, planner, mc)` mirroring the Hooks/MCP/Tasks pattern. Add `"plan"` to `GetBuiltinCommandNames`. |
-| `HelixCode/internal/hooks/hook.go` | Add `OnPlanApproval`, `OnPlanReject` hook type constants. |
-| `HelixCode/cmd/cli/main.go` | Construct `ToolGate`, wire to registry + slash registration. |
+| `helix_code/internal/tools/registry.go` | `SetPlanModeGate(*planmode.ToolGate)` method; `Execute` consults gate; returns `ErrPlanModeGated` on block. Foreground + background paths both gated. |
+| `helix_code/internal/commands/builtin/register.go` | New `RegisterBuiltinCommandsWithPlanMode(registry, planner, mc)` mirroring the Hooks/MCP/Tasks pattern. Add `"plan"` to `GetBuiltinCommandNames`. |
+| `helix_code/internal/hooks/hook.go` | Add `OnPlanApproval`, `OnPlanReject` hook type constants. |
+| `helix_code/cmd/cli/main.go` | Construct `ToolGate`, wire to registry + slash registration. |
 
 ### 3.3 `ToolGate` (`internal/workflow/planmode/gating.go`)
 

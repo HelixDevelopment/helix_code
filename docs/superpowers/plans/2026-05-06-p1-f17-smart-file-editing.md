@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-06-p1-f17-smart-file-editing-design.md` (commit `fa77f09`)
 
-**Working directory for `go` commands:** `HelixCode/`. Git from meta-repo root.
+**Working directory for `go` commands:** `helix_code/`. Git from meta-repo root.
 
 **Anti-bluff smoke (FULL 4-term applied to F17 surface):**
 ```bash
@@ -51,7 +51,7 @@ Commit: `docs(P1-F17-T01): bootstrap Phase 1 / Feature 17 evidence + advance PRO
 
 ## Task 2: types.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/smartedit/types.go`, new `HelixCode/internal/tools/smartedit/types_test.go`.
+**Files:** new `helix_code/internal/tools/smartedit/types.go`, new `helix_code/internal/tools/smartedit/types_test.go`.
 
 Define:
 - Marker constants (`searchMarker = "<<<<<<< SEARCH"`, `dividerMarker = "======="`, `replaceMarker = ">>>>>>> REPLACE"`).
@@ -102,7 +102,7 @@ Subject: `feat(P1-F17-T02): EditBlock + EditResult + marker constants + error se
 
 ## Task 3: parser.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/smartedit/parser.go`, new `HelixCode/internal/tools/smartedit/parser_test.go`.
+**Files:** new `helix_code/internal/tools/smartedit/parser.go`, new `helix_code/internal/tools/smartedit/parser_test.go`.
 
 `parser.go` exports:
 - `Parse(prompt string) ([]EditBlock, error)` — state-machine over lines: `scanPath` → on marker → `scanSearch` → on divider → `scanReplace` → on terminator → emit block, back to `scanPath` (path-line sticky for next block targeting same file). Reject malformed prompts (missing markers, marker without preceding path, EOF mid-block).
@@ -201,7 +201,7 @@ Subject: `feat(P1-F17-T03): SmartEditParser with path-line stickiness + line tra
 
 ## Task 4: applier.go + binary_detect.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/smartedit/applier.go`, new `HelixCode/internal/tools/smartedit/applier_test.go`, new `HelixCode/internal/tools/smartedit/binary_detect.go`, new `HelixCode/internal/tools/smartedit/binary_detect_test.go`.
+**Files:** new `helix_code/internal/tools/smartedit/applier.go`, new `helix_code/internal/tools/smartedit/applier_test.go`, new `helix_code/internal/tools/smartedit/binary_detect.go`, new `helix_code/internal/tools/smartedit/binary_detect_test.go`.
 
 `applier.go`:
 - `Apply(content string, blocks []EditBlock) (string, []BlockResult, error)` — for each block, `strings.Count(current, b.Search)` decides outcome: `0 → ErrSearchNotFound`; `1 → strings.Replace` and continue; `>1 → ErrSearchAmbiguous`. Empty `Search` → `ErrEmptySearch`. First block-level failure aborts the file (returns the failing block result + sentinel error).
@@ -299,7 +299,7 @@ Subject: `feat(P1-F17-T04): SmartEditApplier + binary detect; lenient re-search 
 
 ## Task 5: diff.go (TDD)
 
-**Files:** new `HelixCode/internal/tools/smartedit/diff.go`, new `HelixCode/internal/tools/smartedit/diff_test.go`.
+**Files:** new `helix_code/internal/tools/smartedit/diff.go`, new `helix_code/internal/tools/smartedit/diff_test.go`.
 
 `diff.go`:
 
@@ -360,7 +360,7 @@ Subject: `feat(P1-F17-T05): unified-diff wrapper re-using F08 multiedit DiffMana
 
 ## Task 6: smart_edit_tool.go (TDD; real disk via tempdirs + real `MultiFileEditor`)
 
-**Files:** new `HelixCode/internal/tools/smartedit/smart_edit_tool.go`, new `HelixCode/internal/tools/smartedit/smart_edit_tool_test.go`.
+**Files:** new `helix_code/internal/tools/smartedit/smart_edit_tool.go`, new `helix_code/internal/tools/smartedit/smart_edit_tool_test.go`.
 
 Implementation outline:
 
@@ -537,7 +537,7 @@ Subject: `feat(P1-F17-T06): SmartEditTool with multiedit transaction + post-writ
 
 ## Task 7: /edit slash command (TDD)
 
-**Files:** new `HelixCode/internal/commands/edit_command.go`, new `HelixCode/internal/commands/edit_command_test.go`.
+**Files:** new `helix_code/internal/commands/edit_command.go`, new `helix_code/internal/commands/edit_command_test.go`.
 
 Mirrors F14 `/sandbox` and F16 `/telemetry` shape: defines `SmartEditInspector` interface in the commands package so the slash is testable with a fake.
 
@@ -647,7 +647,7 @@ Subject: `feat(P1-F17-T07): /edit slash command (status/diff/dry-run/commit) + S
 
 ## Task 8: main.go wiring + registry registration + integration tests
 
-**Files:** modify `HelixCode/cmd/cli/main.go`, modify `HelixCode/internal/tools/registry.go`, new `HelixCode/tests/integration/smartedit_test.go` (`//go:build integration`).
+**Files:** modify `helix_code/cmd/cli/main.go`, modify `helix_code/internal/tools/registry.go`, new `helix_code/tests/integration/smartedit_test.go` (`//go:build integration`).
 
 `main.go` additions (alongside the existing `multiedit.NewMultiFileEditor(...)` call):
 
@@ -690,7 +690,7 @@ Subject: `feat(P1-F17-T08): wire SmartEditTool + /edit slash into main + always-
 
 ## Task 9: Challenge harness (7-phase, sha-256 positive evidence)
 
-**Files:** new `HelixCode/tests/integration/cmd/p1f17_challenge/main.go`, new `challenges/p1-f17-smart-file-editing/CHALLENGE.md`, new `challenges/p1-f17-smart-file-editing/run.sh`.
+**Files:** new `helix_code/tests/integration/cmd/p1f17_challenge/main.go`, new `challenges/p1-f17-smart-file-editing/CHALLENGE.md`, new `challenges/p1-f17-smart-file-editing/run.sh`.
 
 Harness phases (per spec §6.3):
 

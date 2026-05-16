@@ -110,7 +110,7 @@ fmt.Printf("Command completed successfully\n")
 
 ## Essential Build Commands
 
-**CRITICAL**: All commands must be run from the `HelixCode/` subdirectory.
+**CRITICAL**: All commands must be run from the `helix_code/` subdirectory.
 
 ### Core Commands
 - **Build**: `make build` (generates logo assets and builds to bin/helixcode)
@@ -145,7 +145,7 @@ fmt.Printf("Command completed successfully\n")
 
 ### Core Structure
 ```
-HelixCode/
+helix_code/
 ├── cmd/                    # Application entry points
 │   ├── server/            # Main HTTP server
 │   ├── cli/               # CLI client
@@ -309,7 +309,7 @@ curl http://localhost/health
 ## Important Gotchas
 
 ### Critical Requirements
-- **Always work from HelixCode/ subdirectory**
+- **Always work from helix_code/ subdirectory**
 - **Generate logo assets before first build**: `make logo-assets`
 - **Database/Redis optional**: Disable by setting `database.host: ""`
 - **Environment variables override config file**

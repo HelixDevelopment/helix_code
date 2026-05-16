@@ -842,7 +842,7 @@ This document provides a detailed breakdown of how to divide the remaining Helix
 ### File Structure
 
 ```
-HelixCode/
+helix_code/
 ├── internal/
 │   ├── context/
 │   │   └── mentions/        # @ Mentions (✅ Complete)

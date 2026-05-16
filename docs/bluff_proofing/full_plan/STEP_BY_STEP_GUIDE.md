@@ -114,7 +114,7 @@ ls cli_agents/
 ```bash
 # Should show key directories
 ls -la
-# Expected: AGENTS.md, Dockerfile, HelixCode/, docker-compose.helix.yml, etc.
+# Expected: AGENTS.md, Dockerfile, helix_code/, docker-compose.helix.yml, etc.
 
 # Navigate to main code directory
 cd HelixCode
@@ -122,7 +122,7 @@ ls -la
 # Expected: cmd/, internal/, applications/, tests/, config/, go.mod
 ```
 
-**CRITICAL**: All build commands MUST be run from the `HelixCode/` subdirectory, NOT repository root.
+**CRITICAL**: All build commands MUST be run from the `helix_code/` subdirectory, NOT repository root.
 
 ### 2.3 Configure Environment
 
@@ -484,7 +484,7 @@ make test-infra-down
 ### 8.3 Run Challenges (Anti-Bluff Verification)
 
 ```bash
-cd HelixCode/tests/e2e/challenges
+cd helix_code/tests/e2e/challenges
 
 # Run all challenges
 ./run_all_challenges.sh
@@ -652,7 +652,7 @@ docker-compose logs helixcode-server
 ```bash
 # Setup
 git clone git@github.com:HelixDevelopment/HelixCode.git
-cd HelixCode/HelixCode
+cd helix_code/HelixCode
 cp .env.example .env
 make logo-assets
 
