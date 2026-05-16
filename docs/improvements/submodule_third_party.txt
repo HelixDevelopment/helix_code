@@ -58,4 +58,4 @@ cli_agents/zeroshot | git@github.com:covibes/zeroshot.git
 dependencies/HuggingFace_Hub | git@github.com:huggingface/huggingface_hub.git
 dependencies/LLama_CPP | git@github.com:ggml-org/llama.cpp.git
 dependencies/Ollama | git@github.com:ollama/ollama.git
-MCP-Servers | git@github.com:modelcontextprotocol/servers.git
+mcp_servers | git@github.com:modelcontextprotocol/servers.git

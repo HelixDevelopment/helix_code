@@ -283,9 +283,9 @@ NEVER_RENAME_PATTERNS=(
     # but the rename includes coordinated upstream-repo renames + every
     # consumer's .gitmodules update, so the local-dir-only check should
     # NOT flag them as "easy fixes". They're explicitly tracked.
-    'HelixCode' 'Challenges' 'Containers' 'Dependencies'
-    'Github-Pages-Website' 'HelixAgent' 'HelixQA' 'Security' 'Panoptic'
-    'Upstreams' 'Assets' 'MCP-Servers'
+    'helix_code' 'challenges' 'containers' 'dependencies'
+    'github_pages_website' 'helix_agent' 'helix_qa' 'security' 'panoptic'
+    'upstreams' 'assets' 'mcp_servers'
 )
 
 is_protected_name() {
