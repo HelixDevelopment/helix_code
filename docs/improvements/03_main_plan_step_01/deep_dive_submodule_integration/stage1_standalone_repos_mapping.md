@@ -107,7 +107,7 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 
 ---
 
-## 5. HelixQA (github.com/HelixDevelopment/HelixQA)
+## 5. helix_qa (github.com/HelixDevelopment/HelixQA)
 
 | Property | Value |
 |----------|-------|
@@ -172,7 +172,7 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 ### Purpose
 - Generic container abstraction layer
 - Runtime-agnostic deployment
-- Used by HelixCode and HelixQA for test isolation
+- Used by HelixCode and helix_qa for test isolation
 - Infrastructure abstraction
 
 ---
@@ -186,9 +186,9 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 | HelixLLM | NOT IN HELIXCODE | 43 (replace) | HelixCode, HelixAgent |
 | HelixMemory | NOT IN HELIXCODE | Unknown | HelixCode, HelixAgent |
 | HelixSpecifier | NOT IN HELIXCODE | Unknown | HelixCode, HelixAgent |
-| HelixQA | IN HELIXCODE | Unknown | HelixCode, Challenges, containers |
+| helix_qa | IN HELIXCODE | Unknown | HelixCode, Challenges, containers |
 | LLMsVerifier | IN HELIXCODE | Unknown | HelixCode, HelixLLM |
-| Challenges | IN HELIXCODE | Unknown | HelixCode, HelixQA |
+| Challenges | IN HELIXCODE | Unknown | HelixCode, helix_qa |
 | containers | IN HELIXCODE | Unknown | HelixCode, HelixQA, HelixAgent |
 
 ---
@@ -213,4 +213,4 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 2. **HIGH**: HelixLLM - Core LLM infrastructure with 43 submodules
 3. **HIGH**: HelixMemory - Memory systems for context persistence
 4. **HIGH**: HelixSpecifier - Specification and contract system
-5. **MEDIUM**: Challenges/containers/HelixQA/LLMsVerifier - Already present, need full initialization
+5. **MEDIUM**: Challenges/containers/helix_qa/LLMsVerifier - Already present, need full initialization

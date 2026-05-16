@@ -19,7 +19,7 @@ HelixCode/                            ← meta-repo (governance + submodule wiri
 │   ├── internal/                     ← ~55 internal packages (the domain)
 │   ├── applications/                 ← desktop / mobile / TUI
 │   └── tests/                        ← unit, integration, e2e, security, perf
-├── HelixQA/                          ← QA submodule
+├── helix_qa/                          ← QA submodule
 ├── Challenges/                       ← Challenge bank
 ├── containers/                       ← Docker/container artefacts
 └── docs/                             ← meta-level docs (this directory)
@@ -220,5 +220,5 @@ Last verified at 39/39 governance files (Phase 4 close-out, commit `21e6686`).
 - ADRs: `docs/adr/`
 - Bluff-proofing history: `docs/bluff_proofing/`
 - LLMs verifier integration: `docs/llms_verifier/`
-- HelixQA integration: `docs/helix_qa/`
+- helix_qa integration: `docs/helix_qa/`
 - Phase-by-phase evidence: `docs/improvements/PROGRESS.md`

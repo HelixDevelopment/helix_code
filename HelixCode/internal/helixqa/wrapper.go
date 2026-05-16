@@ -1,4 +1,4 @@
-// Package helixqa provides an embedded wrapper for the HelixQA testing framework.
+// Package helixqa provides an embedded wrapper for the helix_qa testing framework.
 package helixqa
 
 import (

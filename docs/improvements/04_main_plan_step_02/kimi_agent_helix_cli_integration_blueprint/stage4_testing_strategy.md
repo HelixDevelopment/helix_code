@@ -149,13 +149,13 @@ func TestPermissionEvaluator_Evaluate(t *testing.T) {
 | HelixAgent | HelixMemory | 60 | Context persistence |
 | HelixAgent | HelixSpecifier | 70 | Spec parsing → action |
 | HelixLLM | LLMsVerifier | 50 | Provider verification |
-| HelixQA | HelixAgent | 90 | QA-driven agent testing |
+| helix_qa | HelixAgent | 90 | QA-driven agent testing |
 | Challenges | HelixAgent | 80 | Challenge → agent execution |
 | containers | HelixAgent | 100 | Containerized agent runs |
 | HelixMemory | HelixLLM | 40 | Token tracking → LLM |
 | HelixSpecifier | HelixLLM | 30 | Spec → prompt generation |
 | HelixAgent | containers | 60 | Agent sandbox spawning |
-| HelixQA | Challenges | 50 | QA validation of challenge results |
+| helix_qa | Challenges | 50 | QA validation of challenge results |
 | LLMsVerifier | HelixLLM | 40 | Verified provider integration |
 | HelixAgent | HelixAgent | 50 | Multi-agent coordination |
 
@@ -328,7 +328,7 @@ var securityTests = []SecurityTest{
 
 ### 1.7 QA Session Tests (HelixQA Framework) -- ~200 Tests
 
-**Framework:** HelixQA 4-phase autonomous framework
+**Framework:** helix_qa 4-phase autonomous framework
 
 **4-Phase QA Protocol:**
 
@@ -2958,7 +2958,7 @@ reporting:
 | HelixMemory | 100% | 90% | 75% | 100% |
 | HelixSpecifier | 100% | 85% | 70% | 100% |
 | LLMsVerifier | 95% (existing) | 90% | 60% | 100% |
-| HelixQA | 100% | 95% | 85% | 100% |
+| helix_qa | 100% | 95% | 85% | 100% |
 | Challenges | 100% | 90% | 80% | 100% |
 | containers | 95% | 90% | 75% | 100% |
 
@@ -3441,7 +3441,7 @@ jobs:
   # Phase 7: QA Session Tests
   # ──────────────────────────────────────────
   qa-tests:
-    name: HelixQA 4-Phase Session
+    name: helix_qa 4-Phase Session
     runs-on: ubuntu-latest
     needs: integration-tests
     steps:
@@ -4393,7 +4393,7 @@ func (m *FixtureManager) Cleanup() error {
 - [ ] Complete Git workflow tests
 
 ### Phase 5: QA & Challenges (Weeks 9-10)
-- [ ] Expand HelixQA test bank (47 → 200)
+- [ ] Expand helix_qa test bank (47 → 200)
 - [ ] Implement automated ActionExecutor
 - [ ] Implement CLIAgentAdapter
 - [ ] Implement MCPFlowChallenge
@@ -4422,7 +4422,7 @@ func (m *FixtureManager) Cleanup() error {
 | HelixLLM | LLM provider abstraction layer |
 | HelixMemory | Context and memory management |
 | HelixSpecifier | Task specification and parsing |
-| HelixQA | 4-phase autonomous QA framework |
+| helix_qa | 4-phase autonomous QA framework |
 | Challenges | Capability evaluation framework |
 | containers | Containerized test isolation |
 | LLMsVerifier | LLM provider verification with ACP |

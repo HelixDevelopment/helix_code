@@ -66,7 +66,7 @@ Must always print `clean`.
 2. **WP3 — consumer breakage.** Removing the HelixAgent-internal copy of e.g. LLMsVerifier may break code that does `import "../../HelixAgent/LLMsVerifier/..."` or `cd HelixAgent/LLMsVerifier && make`. **Mitigation:** comprehensive `rg` for the old path BEFORE removal; build-test the affected repo after each dedup; rollback recipe documented per-WP.
 3. **WP5 — destructive secret removal.** Removing keys from `.env` without a verified loader leaves the user unable to run anything. **Mitigation:** explicit USER GATE at T05.01 (the agent stops and asks); per-key dry-run report listing exactly which keys-to-remove and which file each is in; only proceed on user OK.
 4. **WP7 — case-rename on case-insensitive filesystems.** macOS default APFS is case-insensitive; `git mv Foo foo` looks like a no-op. **Mitigation:** all renames done on Linux (the working host is Linux 6.12 per env); document that contributors on macOS must use `git config core.ignorecase false` and clone fresh after Phase 1.5 lands.
-5. **WP12 — push-order cascade.** Pushing a parent before its child means the parent points at a SHA the remote doesn't have; the push succeeds but other clones break. **Mitigation:** deepest-first push order (cli_agents/<NAME> → HelixAgent/HelixQA → HelixAgent → HelixQA root → meta-repo); per-remote `git ls-remote` verification at T12.05.
+5. **WP12 — push-order cascade.** Pushing a parent before its child means the parent points at a SHA the remote doesn't have; the push succeeds but other clones break. **Mitigation:** deepest-first push order (cli_agents/<NAME> → HelixAgent/HelixQA → HelixAgent → helix_qa root → meta-repo); per-remote `git ls-remote` verification at T12.05.
 
 ---
 
@@ -162,7 +162,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `HelixAgent/LLMsVerifier` | HelixAgent/Makefile, HelixAgent/scripts/*, HelixAgent/internal references |
 | containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `Security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
-| HelixQA | `HelixQA/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
+| helix_qa | `helix_qa/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
 | mcp_servers | TBD at T03.05 | TBD | TBD |
 
 Commit: `docs(P1.5-WP1-T01.04): submodule deduplication decisions`.
@@ -347,9 +347,9 @@ Keep root `containers/`. Enumerate the 3 nested copies. Per nested copy: `rg`, r
 
 Keep root `Security/`. 2 nested copies. Same pattern.
 
-## P1.5-WP3-T03.04 — HelixQA dedup
+## P1.5-WP3-T03.04 — helix_qa dedup
 
-Keep root `HelixQA/`. Remove `HelixAgent/HelixQA`. Same pattern.
+Keep root `helix_qa/`. Remove `HelixAgent/HelixQA`. Same pattern.
 
 ## P1.5-WP3-T03.05 — mcp_servers dedup (canonical TBD)
 
@@ -602,7 +602,7 @@ For each Helix* repo: if `CONSTITUTION.md` / `CLAUDE.md` / `AGENTS.md` lacks the
 set -e
 ANCHOR="Article XI §11.9"
 fails=0
-for repo in . HelixAgent HelixQA HelixCode \
+for repo in . HelixAgent helix_qa HelixCode \
             Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine} \
             HelixAgent/{HelixMemory,HelixSpecifier,HelixLLM}; do
   for f in CONSTITUTION.md CLAUDE.md AGENTS.md; do

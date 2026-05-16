@@ -1,10 +1,10 @@
-# HelixQA QA-Evidence Directory
+# helix_qa QA-Evidence Directory
 
 Per operator mandate 2026-05-13:
 
 > "Once all is up and running execute all existing tests and Challenges +
-> HelixQA full testing and in-depth QA sessions! ... Obtain all apps and
-> services we have screenshots during the HelixQA testing and put them in
+> helix_qa full testing and in-depth QA sessions! ... Obtain all apps and
+> services we have screenshots during the helix_qa testing and put them in
 > proper directories! non-bluff verification and validation MUST check
 > generated screenshots to confirm System really being used and working!
 > Created screenshots and video recording materials during the HelixQA
@@ -15,7 +15,7 @@ Per operator mandate 2026-05-13:
 ```
 docs/qa_evidence/
 ├── README.md                          # this file (tracked)
-└── qa_session_<UTC-timestamp>/        # one dir per HelixQA session (gitignored)
+└── qa_session_<UTC-timestamp>/        # one dir per helix_qa session (gitignored)
     ├── summary.json                   # session metadata + overall PASS/FAIL
     ├── platforms/                     # platform-specific evidence
     │   ├── web/                       # browser screenshots / DOM snapshots
@@ -29,7 +29,7 @@ docs/qa_evidence/
 ## Anti-bluff role
 
 Per CONST-035 / Article XI §11.9: every PASS in this codebase MUST carry
-positive runtime evidence captured during execution. HelixQA captures
+positive runtime evidence captured during execution. helix_qa captures
 that evidence into `qa_session_<timestamp>/`; the post-session anti-bluff
 verifier (a Go program under `tests/e2e/challenges/`) scans the directory
 and asserts that:

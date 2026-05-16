@@ -135,7 +135,7 @@ See root `CONSTITUTION.md` §CONST-048 and constitution submodule `Constitution.
 
 > Verbatim user mandate (2026-05-15): *"Mocks, stubs, placeholders, TODOs or FIXMEs are allowed to exist ONLY in Unit tests! All other test types MUST interract with real fully implemented System! ... All codebase of the project MUST BE 100% covered with every supported test type."*
 
-**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now" patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise this Go application against real infrastructure. Production code MUST NOT import `internal/mocks/`. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (`../Challenges/`) + HelixQA (`../HelixQA/`).
+**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now" patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise this Go application against real infrastructure. Production code MUST NOT import `internal/mocks/`. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (`../Challenges/`) + helix_qa (`../helix_qa/`).
 
 See root `CONSTITUTION.md` §CONST-050 and constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 

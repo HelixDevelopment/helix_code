@@ -301,7 +301,7 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 | Submodule | Purpose | Required in prod? |
 |---|---|---|
 | `HelixCode/` | Core Go application | yes |
-| `HelixQA/` | QA + challenge orchestration | recommended |
+| `helix_qa/` | QA + challenge orchestration | recommended |
 | `Challenges/` | Challenge bank | recommended for verification |
 | `containers/` | Docker/container artefacts | yes |
 | `Security/` | Security tooling | yes |

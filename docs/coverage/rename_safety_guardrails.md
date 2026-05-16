@@ -61,7 +61,7 @@ prescribed by:
    renamed locally because the rename has to land atomically across
    all consumers:
    - `HelixCode/`, `Challenges/`, `containers/`, `Dependencies/`,
-     `github_pages_website/`, `HelixAgent/`, `HelixQA/`, `Security/`,
+     `github_pages_website/`, `HelixAgent/`, `helix_qa/`, `Security/`,
      `panoptic/`, `Upstreams/`, `assets/`, `mcp_servers/`.
 
 ## Soft target

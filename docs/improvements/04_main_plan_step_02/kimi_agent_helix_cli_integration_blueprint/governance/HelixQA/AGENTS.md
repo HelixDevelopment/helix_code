@@ -10,15 +10,15 @@
 > agent dispatch, any code review that allows green tests on broken
 > features is a violation and MUST be rejected.
 
-This file defines agent constraints, capabilities, and collaboration rules for automated agents working on the HelixQA codebase.
+This file defines agent constraints, capabilities, and collaboration rules for automated agents working on the helix_qa codebase.
 
 ---
 
 ## Project Overview
 
-**Submodule:** HelixQA  
+**Submodule:** helix_qa  
 **Repository:** `github.com/HelixDevelopment/HelixQA`  
-**Mission:** HelixQA is the autonomous quality assurance framework for the HelixAgent ecosystem. It provides visual assertions, manual recording, Challenge scenario validation, and anti-bluff scanning.
+**Mission:** helix_qa is the autonomous quality assurance framework for the HelixAgent ecosystem. It provides visual assertions, manual recording, Challenge scenario validation, and anti-bluff scanning.
 
 This file assumes the reader knows nothing about the project. Deeper `AGENTS.md` or `CLAUDE.md` files in subdirectories take precedence over this root file for files within those subtrees.
 

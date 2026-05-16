@@ -17,7 +17,7 @@ A staged programme — *not* a single feature — that produces, in order:
 
 1. A **clean foundation** (governance, secrets, submodule topology) that no later phase can be silently built on top of broken state.
 2. A **ported feature set** from claude-code-source first, then every other CLI agent, each landed with runtime-evidence Challenges proving end-user usability.
-3. A **verified test infrastructure** spanning unit / e2e / integration / full-automation / performance / concurrency / benchmarking / security / scanning (SonarQube + Snyk + others) / DDoS / Challenge banks / HelixQA banks — every test type configured to fail loudly when bluffing rather than green-PASS on absence-of-error.
+3. A **verified test infrastructure** spanning unit / e2e / integration / full-automation / performance / concurrency / benchmarking / security / scanning (SonarQube + Snyk + others) / DDoS / Challenge banks / helix_qa banks — every test type configured to fail loudly when bluffing rather than green-PASS on absence-of-error.
 4. **Cascaded documentation** — Constitution / CLAUDE.md / AGENTS.md across the meta-repo and every owned submodule, plus user manuals, website, video curriculum, ADRs, and refreshed architectural diagrams.
 
 ### 1.2 Goals (priority order)
@@ -63,7 +63,7 @@ HelixCode/                              # meta-repo (this repo)
 │   └── cli_agents/                     # 39 CLI-agent submodules — canonical source
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
-├── HelixQA/                            # existing submodule
+├── helix_qa/                            # existing submodule
 ├── Challenges/                         # existing submodule (now with containers + panoptic init'd)
 ├── containers/                         # existing submodule
 ├── Security/                           # existing submodule
@@ -249,7 +249,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 | Scanning | n/a | `scripts/scan-{sonarqube,snyk,gitleaks,trivy,grype,osv}.sh` | All scanners run; SonarQube + Snyk mandatory |
 | DDoS | ✗ | `tests/security/ddos/` (NEW) | Rate-limit verification with vegeta or wrk; HTTP 429 verified |
 | Challenge banks | ✗ | `Challenges/banks/<bank-name>/` | Each bank carries runtime evidence |
-| HelixQA banks | ✗ | `HelixQA/banks/<bank-name>/` | Heavy QA sessions with multi-platform verification |
+| helix_qa banks | ✗ | `helix_qa/banks/<bank-name>/` | Heavy QA sessions with multi-platform verification |
 
 **Acceptance criteria for Phase 3:**
 - `make test-full` runs all test types; zero `t.Skip()` without justified markers.

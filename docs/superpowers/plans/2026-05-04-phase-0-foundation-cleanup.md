@@ -1853,7 +1853,7 @@ Expected: `exit=0`. If still non-zero, the failing submodule(s) need manual tria
 
 ```bash
 git status
-git add HelixQA Challenges containers Security Dependencies HelixAgent scripts/verify-governance-cascade.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add helix_qa Challenges containers Security Dependencies HelixAgent scripts/verify-governance-cascade.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 
 cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 

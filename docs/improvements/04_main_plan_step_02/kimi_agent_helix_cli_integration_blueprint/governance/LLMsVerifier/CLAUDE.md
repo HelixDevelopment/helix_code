@@ -94,7 +94,7 @@ cd LLMsVerifier/llm-verifier && GOMAXPROCS=2 nice -n 19 go test -count=1 -race -
 | Direction | Sibling modules |
 |-----------|-----------------|
 | Upstream (this module imports) | Challenges |
-| Downstream (these import this module) | HelixQA |
+| Downstream (these import this module) | helix_qa |
 
 *Siblings* means other project-owned modules. Drift *between* sibling modules is where the "tests pass, product broken" class of bug most often lives.
 

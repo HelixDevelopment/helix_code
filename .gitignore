@@ -119,10 +119,10 @@ HelixCode/.helixcode/
 **/*.env.diff_p1-5
 
 # ============================================================================
-# HelixQA evidence — screenshots, recordings, traces (NEVER committed)
+# helix_qa evidence — screenshots, recordings, traces (NEVER committed)
 # ============================================================================
 # Per operator mandate 2026-05-13: "Created screenshots and video recording
-# materials during the HelixQA QA sessions MUST BE Git ignored!"
+# materials during the helix_qa QA sessions MUST BE Git ignored!"
 # These directories collect runtime evidence used for anti-bluff verification
 # (CONST-035 / Article XI §11.9). Evidence files are inherently per-run, can
 # be very large, and may contain sensitive UI state — they MUST stay local
@@ -134,7 +134,7 @@ docs/qa_evidence/*
 !docs/qa_evidence/README.md
 HelixCode/qa_evidence/*
 HelixCode/docs/qa_evidence/*
-HelixQA/qa_evidence/*
+helix_qa/qa_evidence/*
 **/qa_session_*/
 **/*.qa-screenshot.png
 **/*.qa-screenshot.jpg

@@ -633,7 +633,7 @@ make run-dev
 ┌──────────────────────────────────────────────────────────────────────┐
 │                         HelixAgent (Parent)                           │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │  HelixLLM   │  │ HelixMemory │  │HelixSpecifier│  │   HelixQA   │  │
+│  │  HelixLLM   │  │ HelixMemory │  │HelixSpecifier│  │   helix_qa   │  │
 │  │  submodule  │  │  submodule  │  │  submodule   │  │  submodule  │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
 │         │                │                │                │        │

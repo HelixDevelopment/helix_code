@@ -273,7 +273,7 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 ./HelixCode/internal/worker/ssh_pool_test.go:569:
 ./HelixCode/tests/e2e/test_bank/performance_security_tests.go:1073:
 ./HelixCode/test/workers/ssh_keys/id_rsa:1:
-./HelixQA/pkg/llm/google_test.go:334:
+./helix_qa/pkg/llm/google_test.go:334:
 ./Security/pkg/securestorage/securestorage_test.go:129:
 ```
 
@@ -294,7 +294,7 @@ Filenames flagged by the scanner (file:line only — values redacted per CONST-0
 
 **Not-tracked files flagged** (untracked working-tree files — not a commit risk):
 - `.env`, `HelixCode/.env`: the real secret-bearing env files (correctly untracked per P0-06 gitignore)
-- `Challenges/panoptic/...`, `HelixQA/...`, `Security/...`: submodule working-tree files, not tracked at root
+- `Challenges/panoptic/...`, `helix_qa/...`, `Security/...`: submodule working-tree files, not tracked at root
 
 **The 3 pre-existing tracked credentials from T06 polish:**
 - `HelixCode/test/workers/ssh_keys/id_rsa` — correctly detected by scanner (pattern: `-----BEGIN ... PRIVATE KEY-----`)
@@ -845,7 +845,7 @@ exit=0
 
 | Submodule | SHA | Branch |
 |---|---|---|
-| HelixQA | ecebe9a | main |
+| helix_qa | ecebe9a | main |
 | Challenges | 53d47c8 | main |
 | containers | 6736040 | main |
 | Security | e7c09c1 | main |

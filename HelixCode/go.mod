@@ -182,7 +182,7 @@ require (
 
 replace digital.vasic.containers => ../containers
 
-replace digital.vasic.helixqa => ../HelixQA
+replace digital.vasic.helixqa => ../helix_qa
 
 replace digital.vasic.docprocessor => ../Dependencies/HelixDevelopment/DocProcessor
 

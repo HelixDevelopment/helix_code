@@ -11,8 +11,8 @@ Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-part
   - `./Challenges/.gitmodules`
   - `./HelixAgent/.gitmodules`
   - `./HelixAgent/HelixLLM/.gitmodules`
-  - `./HelixQA/.gitmodules`
-  - `./HelixQA/tools/opensource/skyvern/.gitmodules`
+  - `./helix_qa/.gitmodules`
+  - `./helix_qa/tools/opensource/skyvern/.gitmodules`
 - (URL, path) entries collected: **244**
 - URLs appearing at >1 path (potential duplicates): **27**
 

@@ -47,7 +47,7 @@ The repository is a **Go monorepo** with ~60 Git submodules. Key directories at 
 | `scripts/` | Directory | Automation scripts |
 | `challenges/` | Directory | Challenge system for validation |
 | `challenge-results/` | Directory | Stored challenge outputs |
-| `HelixLLM/`, `HelixMemory/`, `HelixQA/`, etc. | Submodules | Supporting modules |
+| `HelixLLM/`, `HelixMemory/`, `helix_qa/`, etc. | Submodules | Supporting modules |
 
 ### 1.2 LLMsVerifier-Related Files (Exact Paths)
 

@@ -34,7 +34,7 @@
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== HelixQA ===
+=== helix_qa ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md

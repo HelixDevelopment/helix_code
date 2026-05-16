@@ -80,11 +80,11 @@ fi
 #
 # Path-based post-filter: grep's --exclude-dir matches BASENAME only,
 # but vendored trees nested under our own dirs (e.g.
-# HelixAgent/MCP/submodules/python-sdk/, HelixQA/tools/opensource/...)
+# HelixAgent/MCP/submodules/python-sdk/, helix_qa/tools/opensource/...)
 # slip through because the basename of the leaf is unique-looking but
 # the PARENT path tags the file as not-ours-to-annotate. Strip those
 # paths after the grep.
-VENDORED_PATH_REGEX='HelixAgent/MCP/submodules/|HelixQA/tools/opensource/|/python-sdk/|/llama-index/|/llama_index/|/chroma[/_]|/unstructured/|/browser-use/|/atlassian-mcp/|/opensource/'
+VENDORED_PATH_REGEX='HelixAgent/MCP/submodules/|helix_qa/tools/opensource/|/python-sdk/|/llama-index/|/llama_index/|/chroma[/_]|/unstructured/|/browser-use/|/atlassian-mcp/|/opensource/'
 
 # Anti-bluff (CONST-035 / §11.9): the original SKIP-OK marker regex
 # `#?[A-Za-z0-9][A-Za-z0-9_-]*` required the marker body to START with

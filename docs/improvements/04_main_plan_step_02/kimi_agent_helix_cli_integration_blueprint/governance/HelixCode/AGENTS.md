@@ -77,7 +77,7 @@ Code generation, AST transform, static analysis, LLM integration, verification
 
 ## Integration Patterns
 
-LLMProvider (interface-based dispatch), DocProcessor (documentation contract preservation), LLMsVerifier (score-based provider selection), HelixQA (quality assertion integration)
+LLMProvider (interface-based dispatch), DocProcessor (documentation contract preservation), LLMsVerifier (score-based provider selection), helix_qa (quality assertion integration)
 
 ---
 

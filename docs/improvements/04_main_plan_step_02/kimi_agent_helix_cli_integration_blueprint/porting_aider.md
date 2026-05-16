@@ -3326,7 +3326,7 @@ func TestFixLoopMaxIterations(t *testing.T) {
 
 ### Target Location (in HelixCode)
 - **NEW**: `tests/benchmark/aider_accuracy_test.go`
-- **MODIFY**: HelixQA integration
+- **MODIFY**: helix_qa integration
 
 ### Exact Code Changes
 
@@ -3450,7 +3450,7 @@ func applyEdit(content string, edit editor.FileEdit) (string, error) {
 
 ### Integration Verification
 - `RUN_BENCHMARKS=1 go test ./tests/benchmark/...` executes
-- HelixQA challenge sessions validate end-to-end
+- helix_qa challenge sessions validate end-to-end
 - Results logged to PostgreSQL for trend tracking
 
 ---

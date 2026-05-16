@@ -179,9 +179,9 @@ See root `CONSTITUTION.md` §CONST-049 and constitution submodule `Constitution.
 
 > Verbatim user mandate (2026-05-15): *"Mocks, stubs, placeholders, TODOs or FIXMEs are allowed to exist ONLY in Unit tests! All other test types MUST interract with real fully implemented System! No fakes, empty implementations or bluffing is allowed of any kind! All codebase of the project MUST BE 100% covered with every supported test type."*
 
-**(A) No-fakes-beyond-unit-tests.** Mocks/stubs/fakes/placeholders/TODO/FIXME/"for now"/empty-implementation patterns PERMITTED only in `*_test.go` files invoked without the integration build tag (or under `tests/unit/`). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, HelixQA — MUST exercise this Go application against real infrastructure (real PostgreSQL, real Redis, real LLM endpoints, real containers). Production code under `cmd/`, `applications/`, and non-`_test.go` files in `internal/<pkg>/` MUST NOT import from `internal/mocks/`.
+**(A) No-fakes-beyond-unit-tests.** Mocks/stubs/fakes/placeholders/TODO/FIXME/"for now"/empty-implementation patterns PERMITTED only in `*_test.go` files invoked without the integration build tag (or under `tests/unit/`). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, helix_qa — MUST exercise this Go application against real infrastructure (real PostgreSQL, real Redis, real LLM endpoints, real containers). Production code under `cmd/`, `applications/`, and non-`_test.go` files in `internal/<pkg>/` MUST NOT import from `internal/mocks/`.
 
-**(B) 100% test-type coverage** with every supported test type. Required submodules incorporated recursively per CONST-047: Challenges (`../Challenges/`) + HelixQA (`../HelixQA/`).
+**(B) 100% test-type coverage** with every supported test type. Required submodules incorporated recursively per CONST-047: Challenges (`../Challenges/`) + helix_qa (`../helix_qa/`).
 
 See root `CONSTITUTION.md` §CONST-050 and constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 

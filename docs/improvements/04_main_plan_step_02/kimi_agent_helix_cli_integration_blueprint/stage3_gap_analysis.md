@@ -441,7 +441,7 @@
 | 9 | Benchmark Runner | ✅ Present | Standard objectives | - |
 | 10 | Screenshot Testing | ✅ Present | Multi-platform engines | - |
 
-**Analysis:** HelixCode has benchmark infrastructure and screenshot testing (via HelixQA submodule) but the submodules are EMPTY. LLMsVerifier (25+ providers, ACP protocol), HelixQA (235 tests, 47-agent test bank), Challenges (209 tests, 16 evaluators), and containers (6 runtimes) all exist as uninitialized directories. The testing gap is primarily about activating existing infrastructure, not building from scratch.
+**Analysis:** HelixCode has benchmark infrastructure and screenshot testing (via helix_qa submodule) but the submodules are EMPTY. LLMsVerifier (25+ providers, ACP protocol), helix_qa (235 tests, 47-agent test bank), Challenges (209 tests, 16 evaluators), and containers (6 runtimes) all exist as uninitialized directories. The testing gap is primarily about activating existing infrastructure, not building from scratch.
 
 ---
 
@@ -523,7 +523,7 @@
 | 39 | **Subprocess Env Scrub** | Security | Low | Medium | 3 days | Bash tool can add env filtering |
 | 40 | **Challenge Framework** activation | Testing | Medium | Medium | 2 weeks | Challenges submodule empty; needs initialization |
 | 41 | **ACP Protocol Tests** | Testing | Medium | Medium | 2 weeks | LLMsVerifier submodule empty; needs initialization |
-| 42 | **Autonomous QA Session** | Testing | High | Medium | 4 weeks | HelixQA submodule empty; needs initialization |
+| 42 | **Autonomous QA Session** | Testing | High | Medium | 4 weeks | helix_qa submodule empty; needs initialization |
 
 ---
 

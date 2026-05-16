@@ -568,7 +568,7 @@ dev-setup: setup-deps logo-deps
 	@echo "  6. Run 'make aurora-os' to build Aurora OS client"
 	@echo "  7. Run 'make harmony-os' to build Harmony OS client"
 # ---------------------------------------------------------------------------
-# HelixQA integration targets
+# helix_qa integration targets
 # ---------------------------------------------------------------------------
 
 .PHONY: helixqa-build helixqa-test helixqa-challenge helixqa-bump-submodules
@@ -576,7 +576,7 @@ dev-setup: setup-deps logo-deps
 HELIXQA_DIR := ../HelixQA
 HELIXQA_DEPS := ../Dependencies/HelixDevelopment
 
-helixqa-build: ## Build HelixQA and all dependency modules
+helixqa-build: ## Build helix_qa and all dependency modules
 	@echo "Building HelixQA..."
 	cd $(HELIXQA_DIR) && go build ./...
 	@echo "Building DocProcessor..."
@@ -589,10 +589,10 @@ helixqa-build: ## Build HelixQA and all dependency modules
 	cd $(HELIXQA_DEPS)/VisionEngine && go build ./...
 	@echo "HelixQA build complete."
 
-helixqa-test: ## Run HelixQA test suite with race detector
+helixqa-test: ## Run helix_qa test suite with race detector
 	cd $(HELIXQA_DIR) && go test ./... -race -count=1 -p 2
 
-helixqa-challenge: ## Run HelixQA challenge banks against local HelixCode stack
+helixqa-challenge: ## Run helix_qa challenge banks against local HelixCode stack
 	cd $(HELIXQA_DIR) && go run ./cmd/helixqa run \
 		--banks ./banks/full-qa-api,./banks/full-qa-web \
 		--platform api,web \
@@ -602,8 +602,8 @@ helixqa-challenge: ## Run HelixQA challenge banks against local HelixCode stack
 		--validate \
 		--tickets
 
-helixqa-bump-submodules: ## Bump all HelixQA dependency submodules with verification
-	@echo "Fetching updates for HelixQA dependencies..."
+helixqa-bump-submodules: ## Bump all helix_qa dependency submodules with verification
+	@echo "Fetching updates for helix_qa dependencies..."
 	@for dep in DocProcessor LLMOrchestrator LLMProvider VisionEngine; do \
 		path="$(HELIXQA_DEPS)/$$dep"; \
 		echo "  Checking $$dep ($$path)..."; \

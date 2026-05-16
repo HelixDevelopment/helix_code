@@ -35,7 +35,7 @@ api/                        # OpenAPI specifications
 applications/               # UI frontends
 ```
 
-### HelixQA Dependency Structure (`digital.vasic.helixqa`)
+### helix_qa Dependency Structure (`digital.vasic.helixqa`)
 ```
 pkg/llm/                    # Provider interface + 30+ providers
 pkg/agent/                  # Agent action/explore/graph/ground/omniparser/sglang/uitars

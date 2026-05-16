@@ -16,9 +16,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Agent Identity and Purpose
 
-**Submodule:** HelixQA  
+**Submodule:** helix_qa  
 **Repository:** `github.com/HelixDevelopment/HelixQA`  
-**Mission:** HelixQA is the autonomous quality assurance framework for the HelixAgent ecosystem. It provides visual assertions, manual recording, Challenge scenario validation, and anti-bluff scanning.
+**Mission:** helix_qa is the autonomous quality assurance framework for the HelixAgent ecosystem. It provides visual assertions, manual recording, Challenge scenario validation, and anti-bluff scanning.
 
 HelixQA is governed by `Constitution.md` (supreme law). This file (`CLAUDE.md`) is the AI agent operating manual that cascades from the Constitution. `AGENTS.md` defines agent capabilities and integration patterns.
 
@@ -84,7 +84,7 @@ make test-unit, make test-integration, make test-mutation, make test-antibluff
 ## Acceptance Demo for This Module
 
 ```bash
-cd HelixQA && make build
+cd helix_qa && make build
 bash scripts/anti-bluff-scan.sh
 ```
 

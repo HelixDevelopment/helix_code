@@ -34,8 +34,8 @@
 [submodule "containers"]
 	path = containers
 	url = git@github.com:vasic-digital/Containers.git
-[submodule "HelixQA"]
-	path = HelixQA
+[submodule "helix_qa"]
+	path = helix_qa
 	url = git@github.com:HelixDevelopment/HelixQA.git
 [submodule "Dependencies/HelixDevelopment/DocProcessor"]
 	path = Dependencies/HelixDevelopment/DocProcessor

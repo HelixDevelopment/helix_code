@@ -8,7 +8,7 @@
 
 HelixQA is the autonomous quality assurance framework for the HelixAgent ecosystem. It provides visual assertions, manual recording, Challenge scenario validation, and anti-bluff scanning.
 
-This Constitution is the supreme law of the HelixQA submodule. All other governance documents (`CLAUDE.md`, `AGENTS.md`) cascade from this Constitution and MUST NOT weaken or override any article herein.
+This Constitution is the supreme law of the helix_qa submodule. All other governance documents (`CLAUDE.md`, `AGENTS.md`) cascade from this Constitution and MUST NOT weaken or override any article herein.
 
 ---
 
@@ -35,7 +35,7 @@ This Constitution is the supreme law of the HelixQA submodule. All other governa
 ## Article III: Integration Requirements
 
 - §3.1: **SSH-only Git (CONST-003).** All Git operations MUST use SSH URLs (`git@github.com:…`). HTTPS is STRICTLY FORBIDDEN.
-- §3.2: **Submodule dependencies.** HelixQA declares its upstream and downstream submodule dependencies explicitly. Changes to integration seams MUST be contract-tested.
+- §3.2: **Submodule dependencies.** helix_qa declares its upstream and downstream submodule dependencies explicitly. Changes to integration seams MUST be contract-tested.
 - §3.3: **API contracts.** All API surfaces MUST be documented with OpenAPI / protobuf contracts. Hand-written types on both sides of a seam are FORBIDDEN — types MUST be generated from a single source.
 - §3.4: **Container orchestration.** All services run in containers via the Containers module. The project binary is the sole orchestrator. Direct `docker`/`podman` commands are prohibited as workflows.
 
@@ -247,7 +247,7 @@ All submodules within the HelixAgent monorepo MUST reference each other's integr
 
 ### §10.3: Downstream Cascade
 
-Any submodule that imports HelixQA MUST inherit HelixQA's testing and anti-bluff requirements for all integration points.
+Any submodule that imports helix_qa MUST inherit HelixQA's testing and anti-bluff requirements for all integration points.
 
 ---
 

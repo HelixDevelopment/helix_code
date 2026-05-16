@@ -313,7 +313,7 @@ func phaseA(root string) error {
 		}
 		// Some submodules are deliberately referenced in BOTH the meta-repo
 		// .gitmodules and a child .gitmodules (e.g. HelixAgent's nested
-		// HelixQA copy referencing the same URL). That is a real duplicate
+		// helix_qa copy referencing the same URL). That is a real duplicate
 		// only when both declarations are first-party AND the URL is a
 		// canonical Helix repo. WP3 collapsed the canonical ones; anything
 		// remaining here is a regression.

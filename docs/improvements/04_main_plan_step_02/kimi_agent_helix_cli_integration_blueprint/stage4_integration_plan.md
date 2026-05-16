@@ -27,7 +27,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 - **Database schema evolution**: PostgreSQL migrations for tool persistence, sessions, transcripts
 - **Redis data structures**: Context windows, caches, session state
 - **API surface expansion**: OpenAPI 3.0 spec updates for new endpoints
-- **Testing integration**: 100% coverage mandate with HelixQA challenge sessions
+- **Testing integration**: 100% coverage mandate with helix_qa challenge sessions
 
 #### OUT OF SCOPE (for this plan)
 - **Custom model training or fine-tuning** (inference only)
@@ -55,7 +55,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 | 7 | Sandboxed shell execution | Security audit + functional test | No escapes |
 | 8 | Plan/Act mode separation | User acceptance test | Seamless switching |
 | 9 | 100% test coverage | `go test -cover` | >= 100% (all new code) |
-| 10 | HelixQA challenge sessions | Challenge completion rate | >90% pass |
+| 10 | helix_qa challenge sessions | Challenge completion rate | >90% pass |
 | 11 | OpenTelemetry observability | Trace coverage | All major flows traced |
 | 12 | Performance baseline | p95 latency for key operations | <500ms edit, <2s plan |
 | 13 | Theme system operational | UI rendering test | 6 platform themes render |
@@ -131,13 +131,13 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 
 ---
 
-### Phase 5: Testing & QA -- 100% Coverage, Challenges, HelixQA Sessions
+### Phase 5: Testing & QA -- 100% Coverage, Challenges, helix_qa Sessions
 
 | Attribute | Detail |
 |-----------|--------|
-| **Phase Goal** | Achieve production readiness through comprehensive testing: 100% code coverage on all new code, HelixQA automated challenge sessions, LLMsVerifier integration for model output validation, Containers-based integration testing, and performance benchmarking against baselines. |
+| **Phase Goal** | Achieve production readiness through comprehensive testing: 100% code coverage on all new code, helix_qa automated challenge sessions, LLMsVerifier integration for model output validation, Containers-based integration testing, and performance benchmarking against baselines. |
 | **Entry Criteria** | - Phase 4 exit criteria met<br>- Test infrastructure can execute containerized tests<br>- Challenge dataset prepared (>= 50 challenges)<br>- Performance benchmarks defined |
-| **Exit Criteria** | - `go test -cover` reports >= 100% for all new packages<br>- HelixQA completes >= 50 challenge sessions with >90% pass rate<br>- LLMsVerifier validates model outputs with <5% false positive rate<br>- Integration tests run in containers with full feature matrix<br>- Performance benchmarks meet all p95 targets<br>- Security audit of sandboxed execution passes<br>- Load test: 100 concurrent sessions stable for 1 hour |
+| **Exit Criteria** | - `go test -cover` reports >= 100% for all new packages<br>- helix_qa completes >= 50 challenge sessions with >90% pass rate<br>- LLMsVerifier validates model outputs with <5% false positive rate<br>- Integration tests run in containers with full feature matrix<br>- Performance benchmarks meet all p95 targets<br>- Security audit of sandboxed execution passes<br>- Load test: 100 concurrent sessions stable for 1 hour |
 | **Duration Estimate** | 14-18 calendar days |
 | **Risk Level** | **MEDIUM** -- 100% coverage is time-consuming; challenge flakiness; load test infrastructure |
 | **Rollback Strategy** | - Coverage gates can be temporarily lowered to 95% with technical debt ticket<br>- Challenges can be rerun; flaky tests are quarantined<br>- Load tests run on staging environment only |
@@ -173,7 +173,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 #### P0-T3: Initialize Dormant Submodules
 - **Task ID**: P0-T3
 - **Task Name**: Initialize LLMsVerifier, HelixQA, Challenges, Containers
-- **Description**: The 4 present-but-uninitialized submodules need to be initialized and their builds verified. Check if they have independent build requirements (e.g., containers may need Docker, HelixQA may need test datasets).
+- **Description**: The 4 present-but-uninitialized submodules need to be initialized and their builds verified. Check if they have independent build requirements (e.g., containers may need Docker, helix_qa may need test datasets).
 - **Dependencies**: P0-T2
 - **Estimated Effort**: 1 day
 - **Submodule(s) Involved**: LLMsVerifier, HelixQA, Challenges, Containers
@@ -628,7 +628,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 
 ---
 
-### Phase 5: Testing & QA -- 100% Coverage, Challenges, HelixQA Sessions
+### Phase 5: Testing & QA -- 100% Coverage, Challenges, helix_qa Sessions
 
 #### P5-T1: Unit Test Coverage Enforcement
 - **Task ID**: P5-T1
@@ -650,10 +650,10 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 - **Files/Modules to Modify**: `tests/integration/*.go`, `docker-compose.test.yml`, `.github/workflows/integration.yml`
 - **Acceptance Criteria**: >= 20 integration scenarios pass; test stack starts in <30s; tests complete in <10 minutes.
 
-#### P5-T3: HelixQA Challenge Sessions
+#### P5-T3: helix_qa Challenge Sessions
 - **Task ID**: P5-T3
 - **Task Name**: Automated Challenge-Based QA Testing
-- **Description**: Configure HelixQA submodule to run >= 50 challenge sessions against the integrated HelixCode. Challenges cover: bug fixing, feature implementation, refactoring, test writing, and documentation. Track pass rate and regression rate.
+- **Description**: Configure helix_qa submodule to run >= 50 challenge sessions against the integrated HelixCode. Challenges cover: bug fixing, feature implementation, refactoring, test writing, and documentation. Track pass rate and regression rate.
 - **Dependencies**: P0-T3 (HelixQA initialized), P5-T2
 - **Estimated Effort**: 3 days
 - **Submodule(s) Involved**: HelixQA, Challenges
@@ -1139,7 +1139,7 @@ PHASE 5: TESTING & QA
 [P5-T2] Integration Tests
     |
     v
-[P5-T3] HelixQA Challenges
+[P5-T3] helix_qa Challenges
     |
     v
 [P5-T4] LLMsVerifier

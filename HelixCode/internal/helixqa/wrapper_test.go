@@ -85,7 +85,7 @@ func TestEngine_StartSession(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, state.ID, s.ID)
 
-	// Wait for session to complete or fail (banks may not be valid HelixQA banks)
+	// Wait for session to complete or fail (banks may not be valid helix_qa banks)
 	done := make(chan struct{})
 	go func() {
 		for {

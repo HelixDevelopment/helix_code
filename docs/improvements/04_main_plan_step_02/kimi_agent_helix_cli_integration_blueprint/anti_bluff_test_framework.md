@@ -93,7 +93,7 @@ anti_bluff/
 ├── unit/              # Fast, mocked, behavior verification
 ├── integration/        # Real infrastructure, no mocks
 ├── e2e/               # Full CLI workflow simulation
-├── challenge/           # HelixQA framework integration
+├── challenge/           # helix_qa framework integration
 ├── security/            # Attack vectors
 └── performance/         # Latency, throughput, resource usage
 ```
@@ -4146,12 +4146,12 @@ func TestEdit_ActuallyApplied_NotJustReported_Negative(t *testing.T) {
 ## Challenge Tests (HelixQA Framework)
 
 **Test Count:** 10 challenge tests  
-**Infrastructure:** HelixQA test runner  
+**Infrastructure:** helix_qa test runner  
 **Average Runtime:** 30-120 seconds each  
 
 ```go
 // ============================================================================
-// Challenge Tests - HelixQA Framework Integration
+// Challenge Tests - helix_qa Framework Integration
 // ============================================================================
 
 package challenge

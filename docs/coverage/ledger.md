@@ -201,7 +201,7 @@ flagged per-platform.
 | Dependencies/vasic-digital/Watcher | VERIFIED | 0 |  |
 | github_pages_website | VERIFIED | 0 |  |
 | HelixAgent | VERIFIED | 0 |  |
-| HelixQA | VERIFIED | 0 |  |
+| helix_qa | VERIFIED | 0 |  |
 | panoptic | VERIFIED | 0 |  |
 | Security | VERIFIED | 0 |  |
 

@@ -33,7 +33,7 @@ Perform exhaustive analysis of all Helix repositories and CLI agent codebases, c
 - **Agent A3**: HelixLLM - LLM integration layer, providers, APIs
 - **Agent A4**: HelixMemory - Memory systems, storage, retrieval
 - **Agent A5**: HelixSpecifier - Spec parsing, requirements engineering
-- **Agent A6**: HelixQA - Testing framework, test banks, QA sessions
+- **Agent A6**: helix_qa - Testing framework, test banks, QA sessions
 
 ### 2.2 Supporting Infrastructure Analysis (Parallel Agents)
 - **Agent B1**: LLMsVerifier - Verification logic, model evaluation
@@ -79,7 +79,7 @@ Perform exhaustive analysis of all Helix repositories and CLI agent codebases, c
 ### 4.3 Testing Strategy
 - Test coverage requirements (100%)
 - Challenges integration
-- HelixQA test suite expansion
+- helix_qa test suite expansion
 - QA session protocols
 
 ## Stage 5: Submodule Integration & Verification
@@ -94,7 +94,7 @@ Perform exhaustive analysis of all Helix repositories and CLI agent codebases, c
 - Build system verification
 - Test execution across all submodules
 - Challenges execution
-- HelixQA sessions
+- helix_qa sessions
 
 ## Stage 6: Final Documentation Assembly
 **Skill**: `report-writing` + `docx`/`pdf`

@@ -193,7 +193,7 @@ Registry.Register(challenges) -> Runner.RunAll(ctx, config)
 
 ---
 
-## 2. HelixQA (`github.com/HelixDevelopment/HelixQA`)
+## 2. helix_qa (`github.com/HelixDevelopment/HelixQA`)
 
 ### 2.1 Architecture & Key Components
 
@@ -351,7 +351,7 @@ Already defines test cases for 47 CLI agents including:
 
 - Defined in `.gitmodules`: `url = git@github.com:HelixDevelopment/HelixQA.git`
 - Directory exists but is empty
-- HelixCode's `README.md` references HelixQA for testing
+- HelixCode's `README.md` references helix_qa for testing
 - `helixqa-final` binary (21MB) present in repo but not wired to CI
 
 ### 2.9 What's Working vs Missing
@@ -756,7 +756,7 @@ LLMsVerifier (standalone)
 | All submodules empty in HelixCode | Cannot build/test | `git submodule update --init --recursive` |
 | No `verifier.yaml` in HelixCode | No LLM verification config | Create from LLMsVerifier template |
 | No CLI agent container definitions | Can't isolate agent tests | Add to containers profiles |
-| No automated CLI agent test runner | Manual test execution only | Build into HelixQA autonomous |
+| No automated CLI agent test runner | Manual test execution only | Build into helix_qa autonomous |
 | No MCP tool challenge evaluator | Can't verify MCP functionality | Add to Challenges evaluators |
 | Test banks have `_conversion_note: manual-review-required` | Not fully automated | Build automated adapters |
 
@@ -806,7 +806,7 @@ integration:
 2. Create `verifier.yaml` config specific to CLI agent verification
 3. Extend ACP protocol tests to cover CLI agent endpoints (not just LLM models)
 4. Add MCP tool verification scoring
-5. Bridge `StrategyScore` to HelixQA test bank selection
+5. Bridge `StrategyScore` to helix_qa test bank selection
 6. Add ensemble verification for multi-model outputs
 
 **Deliverable:** CLI agent-aware verification pipeline

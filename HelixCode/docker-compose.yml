@@ -123,7 +123,7 @@ services:
       - helixcode-prod
     restart: unless-stopped
 
-  # HelixQA runner (optional, requires --profile qa)
+  # helix_qa runner (optional, requires --profile qa)
   helixqa-runner:
     build:
       context: ../HelixQA
@@ -135,7 +135,7 @@ services:
       - HELIXQA_API_KEY=${HELIX_AUTH_JWT_SECRET}
       - HELIXQA_OUTPUT_DIR=/qa-results
     volumes:
-      - ../HelixQA/banks:/qa-banks:ro
+      - ../helix_qa/banks:/qa-banks:ro
       - qa_results:/qa-results
     depends_on:
       helixcode-server:

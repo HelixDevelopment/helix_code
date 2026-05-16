@@ -701,7 +701,7 @@ Phase: 5  Task: P5-T15  Evidence: zero hits on all 5 patterns"
 cd /run/media/milosvasic/DATA4TB/Projects/HelixCode
 git status  # must be clean
 git -C HelixAgent status  # must be clean
-git -C HelixQA status  # must be clean
+git -C helix_qa status  # must be clean
 git -C HelixCode status  # must be clean
 ```
 

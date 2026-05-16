@@ -436,7 +436,7 @@ HelixCode/
 │   ├── test_runner.go
 │   ├── test_*.go                          (various test files)
 │   └── (extensive Go source tree)
-├── HelixQA/                               ← SUBMODULE (REQUIRED ✓)
+├── helix_qa/                               ← SUBMODULE (REQUIRED ✓)
 ├── IMPLEMENTATION_COMPLETE.md
 ├── IMPLEMENTATION_COMPLETION_PLAN.md
 ├── IMPLEMENTATION_PLAN.md
@@ -615,7 +615,7 @@ HelixCode/
 | 83 | Challenges | Challenges | git@github.com:vasic-digital/Challenges.git | SSH |
 | 84 | containers | containers | git@github.com:vasic-digital/Containers.git | SSH |
 | 85 | Example_Resources/Taches-CC-Resources | Example_Resources/Taches-CC-Resources | git@github.com:tachescode/resources.git | SSH |
-| 86 | HelixQA | HelixQA | git@github.com:HelixDevelopment/HelixQA.git | SSH |
+| 86 | helix_qa | helix_qa | git@github.com:HelixDevelopment/HelixQA.git | SSH |
 | 87 | (additional submodule beyond listed 86) | - | - | - |
 
 **Protocol Summary:**
@@ -632,7 +632,7 @@ HelixCode/
 | Required Submodule | Status | Path | Actual URL | Protocol |
 |--------------------|--------|------|------------|----------|
 | **LLMsVerifier** | PRESENT ✓ | Dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
-| **HelixQA** | PRESENT ✓ | HelixQA (root) | git@github.com:HelixDevelopment/HelixQA.git | SSH |
+| **HelixQA** | PRESENT ✓ | helix_qa (root) | git@github.com:HelixDevelopment/HelixQA.git | SSH |
 | **Challenges** | PRESENT ✓ | Challenges (root) | git@github.com:vasic-digital/Challenges.git | SSH |
 | **Containers** | PRESENT ✓ | containers (root) | git@github.com:vasic-digital/Containers.git | SSH |
 
@@ -768,7 +768,7 @@ HelixCode (root)
 │   └── VisionEngine (HelixDevelopment/VisionEngine)
 │
 ├── Quality Assurance (submodules)
-│   ├── HelixQA (HelixDevelopment/HelixQA) ✓
+│   ├── helix_qa (HelixDevelopment/HelixQA) ✓
 │   ├── Challenges (vasic-digital/Challenges) ✓
 │   └── containers (vasic-digital/Containers) ✓
 │

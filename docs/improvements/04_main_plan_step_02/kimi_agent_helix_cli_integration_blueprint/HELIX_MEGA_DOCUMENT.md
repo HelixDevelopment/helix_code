@@ -167,7 +167,7 @@ This mega-document is the master index. All detailed porting plans are in separa
 | HelixMemory | ✅ | ✅ | ✅ |
 | HelixSpecifier | ✅ | ✅ | ✅ |
 | LLMsVerifier | ✅ | ✅ | ✅ |
-| HelixQA | ✅ | ✅ | ✅ |
+| helix_qa | ✅ | ✅ | ✅ |
 | Challenges | ✅ | ✅ | ✅ |
 | containers | ✅ | ✅ | ✅ |
 | DocProcessor | ✅ | ✅ | ✅ |
@@ -297,7 +297,7 @@ git submodule update --init --recursive
 | Week | Deliverable | Anti-Bluff Test |
 |------|-------------|----------------|
 | 11 | 100% unit test coverage | `go test -cover` >= 100% |
-| 11 | HelixQA challenge sessions | >90% pass rate on 50+ challenges |
+| 11 | helix_qa challenge sessions | >90% pass rate on 50+ challenges |
 | 12 | Security audit | All escape attempts blocked |
 | 12 | Load testing | 100 concurrent sessions, 1 hour stable |
 

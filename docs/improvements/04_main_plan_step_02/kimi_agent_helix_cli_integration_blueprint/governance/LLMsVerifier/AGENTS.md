@@ -77,7 +77,7 @@ Model verification (20+ tests), provider scoring, CLI agent generation (48 agent
 
 ## Integration Patterns
 
-Challenges (challenge validation), HelixQA (QA pipeline), HelixAgent (startup verification), HelixLLM (ScorerBridge polling)
+Challenges (challenge validation), helix_qa (QA pipeline), HelixAgent (startup verification), HelixLLM (ScorerBridge polling)
 
 ---
 

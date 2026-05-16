@@ -125,7 +125,7 @@ HelixCode (root)
 │   └── 3GB memory main container
 │
 ├── Quality Assurance
-│   ├── HelixQA (submodule — EMPTY)
+│   ├── helix_qa (submodule — EMPTY)
 │   ├── Challenges (submodule — EMPTY)
 │   ├── LLMsVerifier (submodule — EMPTY)
 │   └── containers (submodule — EMPTY)
@@ -147,7 +147,7 @@ All 4 quality assurance submodules are **declared in `.gitmodules` but their dir
 
 ```bash
 # Current state (EMPTY — requires initialization)
-HelixQA/        # 235 tests, 4-phase QA, 47-agent test bank
+helix_qa/        # 235 tests, 4-phase QA, 47-agent test bank
 Challenges/     # 209 tests, 16 evaluators, 21 adapters
 containers/     # 6 runtime implementations, Docker/Podman/K8s
 Dependencies/HelixDevelopment/LLMsVerifier/  # 12 provider adapters, ACP protocol
@@ -381,7 +381,7 @@ git push origin main
 | 2 | CLI Agent Foundation | 18-22 days | MEDIUM-HIGH | Tool framework, context, edit system |
 | 3 | Power Features | 21-28 days | **HIGH** | Plan mode, sandboxing, MCP, permissions |
 | 4 | UI/UX & TUI | 14-18 days | MEDIUM | Streaming TUI, themes, intellisense |
-| 5 | Testing & QA | 14-18 days | MEDIUM | 100% coverage, challenges, HelixQA |
+| 5 | Testing & QA | 14-18 days | MEDIUM | 100% coverage, challenges, helix_qa |
 
 **Critical Path Total**: ~63 working days (~76-95 calendar days)
 
@@ -496,7 +496,7 @@ git push origin main
 | Task ID | Name | Effort | Dependencies |
 |---------|------|--------|--------------|
 | P5-T1 | Unit Test Coverage (100%) | 5d | P4-T6 |
-| P5-T2 | HelixQA Challenge Sessions | 4d | P5-T1 |
+| P5-T2 | helix_qa Challenge Sessions | 4d | P5-T1 |
 | P5-T3 | LLMsVerifier Integration | 3d | P5-T1 |
 | P5-T4 | containers Test Isolation | 3d | P5-T1 |
 | P5-T5 | Performance Benchmarking | 2d | P5-T1 |
@@ -505,7 +505,7 @@ git push origin main
 
 #### Exit Criteria
 - `go test -cover` reports >= 100% for new packages
-- HelixQA completes >= 50 challenges with >90% pass rate
+- helix_qa completes >= 50 challenges with >90% pass rate
 - LLMsVerifier validates with <5% false positive
 - Security audit of sandbox passes
 - 100 concurrent sessions stable for 1 hour
@@ -823,7 +823,7 @@ func (a *HelixSpecifierAdapter) DecomposeTask(input string) (*TaskSpec, error) {
 | Performance | 100+ | Benchmarks | `benchmarks/` + pprof |
 | Security | 232+ | Attack vectors | Custom harness |
 | Challenges | 100+ | Capability verification | Challenges framework |
-| QA Sessions | 800+ | HelixQA test banks | `cli-agents-test-*.json` |
+| QA Sessions | 800+ | helix_qa test banks | `cli-agents-test-*.json` |
 | containers | 100+ | Isolation testing | Docker/Podman/K8s |
 
 **Total: 5,245+ tests**
@@ -978,7 +978,7 @@ jobs:
 | # | Action | Deliverable |
 |---|--------|-------------|
 | 1 | 100% test coverage | Coverage report |
-| 2 | HelixQA challenges | >90% pass rate |
+| 2 | helix_qa challenges | >90% pass rate |
 | 3 | Security audit | Pass report |
 | 4 | Performance benchmarks | p95 targets met |
 | 5 | Load testing | 100 concurrent sessions |
@@ -1001,7 +1001,7 @@ jobs:
 | HelixMemory | `git@github.com:HelixDevelopment/HelixMemory.git` | `Dependencies/HelixDevelopment/HelixMemory` |
 | HelixSpecifier | `git@github.com:HelixDevelopment/HelixSpecifier.git` | `Dependencies/HelixDevelopment/HelixSpecifier` |
 | LLMsVerifier | `git@github.com:vasic-digital/LLMsVerifier.git` | `Dependencies/HelixDevelopment/LLMsVerifier` |
-| HelixQA | `git@github.com:HelixDevelopment/HelixQA.git` | `HelixQA` |
+| helix_qa | `git@github.com:HelixDevelopment/HelixQA.git` | `HelixQA` |
 | Challenges | `git@github.com:vasic-digital/Challenges.git` | `Challenges` |
 | containers | `git@github.com:vasic-digital/Containers.git` | `Containers` |
 

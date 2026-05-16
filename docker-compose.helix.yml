@@ -164,7 +164,7 @@ services:
           cpus: '2.0'
           memory: 2G
 
-  # HelixQA runner for autonomous QA sessions
+  # helix_qa runner for autonomous QA sessions
   helixqa-runner:
     build:
       context: ./HelixQA
@@ -192,7 +192,7 @@ services:
       HELIX_VERIFIER_URL: "http://llmsverifier:9090"
     volumes:
       - ./qa-results:/qa-results
-      - ./HelixQA/banks:/qa-banks:ro
+      - ./helix_qa/banks:/qa-banks:ro
     networks:
       - helixcode-network
     profiles:

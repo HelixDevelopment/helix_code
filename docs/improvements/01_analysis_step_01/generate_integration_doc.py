@@ -300,7 +300,7 @@ story.append(Spacer(1, 6))
 story.append(P('Power features include intelligent multi-provider fallback with LLMsVerifier scoring and circuit breakers, small model optimization (system prompt replacement, tool compression, request orchestration), HTTP/3 + HTTP/2 dual-stack with TLS 1.3, 3-tier agent memory (working/episodic/semantic), and multi-agent coordination with a 4-phase pipeline. However, critical gaps include: PostgreSQL, Kafka, and ClickHouse are configured but not wired, no persistent conversation storage (in-memory only), distributed mode is scaffolding not implemented, and tool call extraction uses fragile string-matching heuristics.'))
 story.append(Spacer(1, 10))
 
-story.extend(H2('3.4 HelixQA Architecture'))
+story.extend(H2('3.4 helix_qa Architecture'))
 story.append(P('HelixQA v0.2.0 is the quality assurance engine with 383 source files, 350 test files, and 126 test banks containing approximately 106K lines of test definitions. Its flagship feature is the autonomous 4-phase LLM-driven QA session (Setup, Doc-Driven, Curiosity, Report). Key capabilities include a dual-model vision architecture, Anti-Bluff system (CONST-035), cognitive memory layer, cheaper vision with 5 adapters, PELT change-point detection, and 13 structured action types. Critical gaps include inability to build standalone (requires sibling dependencies), 4K+ prose actions in test banks that need migration to structured types, Playwright runtime pending, and iOS executor missing.'))
 story.append(Spacer(1, 10))
 
@@ -523,7 +523,7 @@ data = [
     [TC('3.5'), TC('Implement panoptic ML-based vision'), TC('Panoptic'), TC('Replace pixel heuristics with ML model for image analysis')],
     [TC('3.6'), TC('Wire Challenges anti-bluff into HelixCode'), TC('Challenges'), TC('Constitutional anti-bluff verification for all operations')],
     [TC('3.7'), TC('Implement conversation persistent storage'), TC('HelixLLM'), TC('PostgreSQL-backed conversation persistence layer')],
-    [TC('3.8'), TC('Add HelixQA autonomous QA session integration'), TC('HelixQA'), TC('4-phase LLM-driven QA with Setup/Doc/Curiosity/Report')],
+    [TC('3.8'), TC('Add helix_qa autonomous QA session integration'), TC('HelixQA'), TC('4-phase LLM-driven QA with Setup/Doc/Curiosity/Report')],
 ]
 story.append(make_table(data, [0.07, 0.32, 0.16, 0.40]))
 story.append(Spacer(1, 10))
@@ -540,14 +540,14 @@ story.append(bullet('<b>Mobile</b>: Update shared mobile core with API bindings 
 story.append(Spacer(1, 10))
 
 story.extend(H2('6.6 Phase 5: Testing and Hardening (Week 14-16)'))
-story.append(P('This phase implements the comprehensive testing strategy detailed in Section 7 and performs security hardening, performance optimization, and documentation finalization. Every implementation from Phases 1-4 must achieve 90%+ test coverage and pass all Challenges and HelixQA test suites.'))
+story.append(P('This phase implements the comprehensive testing strategy detailed in Section 7 and performs security hardening, performance optimization, and documentation finalization. Every implementation from Phases 1-4 must achieve 90%+ test coverage and pass all Challenges and helix_qa test suites.'))
 story.append(Spacer(1, 18))
 
 # ═══════════════════════════════════════════════════════════
 # SECTION 7: TESTING STRATEGY
 # ═══════════════════════════════════════════════════════════
 story.extend(H1('7. Testing Strategy'))
-story.append(P('The testing strategy leverages three pillars: the Challenges framework for constitutional anti-bluff verification, HelixQA for autonomous QA sessions with LLM-driven test generation, and LLMsVerifier for model quality assurance. No change or implementation is considered complete until it passes all three testing pillars with 90%+ coverage.'))
+story.append(P('The testing strategy leverages three pillars: the Challenges framework for constitutional anti-bluff verification, helix_qa for autonomous QA sessions with LLM-driven test generation, and LLMsVerifier for model quality assurance. No change or implementation is considered complete until it passes all three testing pillars with 90%+ coverage.'))
 story.append(Spacer(1, 6))
 
 story.extend(H2('7.1 Testing Pyramid'))
@@ -589,8 +589,8 @@ data = [
 story.append(make_table(data, [0.12, 0.28, 0.48]))
 story.append(Spacer(1, 10))
 
-story.extend(H2('7.3 HelixQA Test Suite Integration'))
-story.append(P('HelixQA provides 126 test banks with approximately 106K lines of test definitions and an autonomous 4-phase LLM-driven QA session. Each feature implementation must undergo a HelixQA autonomous session that validates the feature through Setup, Documentation-Driven testing, Curiosity-driven exploration, and comprehensive Report generation. The Anti-Bluff system (CONST-035) ensures that no test can be bypassed and all results are verified against actual execution rather than claimed behavior. Additionally, the Cheaper Vision system with 5 adapters can validate UI components across different rendering contexts.'))
+story.extend(H2('7.3 helix_qa Test Suite Integration'))
+story.append(P('HelixQA provides 126 test banks with approximately 106K lines of test definitions and an autonomous 4-phase LLM-driven QA session. Each feature implementation must undergo a helix_qa autonomous session that validates the feature through Setup, Documentation-Driven testing, Curiosity-driven exploration, and comprehensive Report generation. The Anti-Bluff system (CONST-035) ensures that no test can be bypassed and all results are verified against actual execution rather than claimed behavior. Additionally, the Cheaper Vision system with 5 adapters can validate UI components across different rendering contexts.'))
 story.append(Spacer(1, 10))
 
 story.extend(H2('7.4 LLMsVerifier Quality Gates'))
@@ -684,11 +684,11 @@ data = [
     [TC('8'), TC('Phase 2'), TC('HelixMemory bridge, HelixLLM integration, containers SDK'), TC('Module Integration')],
     [TC('9'), TC('Phase 3'), TC('Agent modes, TUI framework, ML YOLO'), TC('Advanced Features')],
     [TC('10'), TC('Phase 3'), TC('Event-driven arch, panoptic vision, anti-bluff'), TC('Verification Layer')],
-    [TC('11'), TC('Phase 3'), TC('Persistent conversations, HelixQA sessions'), TC('QA Integration')],
+    [TC('11'), TC('Phase 3'), TC('Persistent conversations, helix_qa sessions'), TC('QA Integration')],
     [TC('12'), TC('Phase 4'), TC('REST API endpoints for all features'), TC('API Complete')],
     [TC('13'), TC('Phase 4'), TC('CLI commands, TUI panels, WebSocket, Desktop, Mobile'), TC('UI/UX Complete')],
     [TC('14'), TC('Phase 5'), TC('Unit + integration tests, 90% coverage'), TC('Test Coverage')],
-    [TC('15'), TC('Phase 5'), TC('Challenges + HelixQA sessions, security hardening'), TC('QA Verified')],
+    [TC('15'), TC('Phase 5'), TC('Challenges + helix_qa sessions, security hardening'), TC('QA Verified')],
     [TC('16'), TC('Phase 5'), TC('Performance optimization, documentation, release'), TC('RELEASE')],
 ]
 story.append(make_table(data, [0.07, 0.10, 0.48, 0.18]))
@@ -701,7 +701,7 @@ story.extend(H1('11. CLI Agent Step-by-Step Porting Guide'))
 story.append(P('This section provides detailed step-by-step guides for incorporating each CLI agent features into HelixAgent and HelixCode, starting with claude-code-source as the priority.'))
 
 story.extend(H2('11.1 Claude Code Source Porting Guide'))
-story.append(P('Claude Code Source is the canonical implementation for KAIROS, Dream, Teams, YOLO, and Plan Mode features. The porting process involves analyzing the original TypeScript implementation, extracting the core logic and algorithms, reimplementing in Go with HelixAgent architecture patterns (safe.Slice, safe.Store, atomic operations per CONST-029), and writing comprehensive tests using the Challenges and HelixQA frameworks.'))
+story.append(P('Claude Code Source is the canonical implementation for KAIROS, Dream, Teams, YOLO, and Plan Mode features. The porting process involves analyzing the original TypeScript implementation, extracting the core logic and algorithms, reimplementing in Go with HelixAgent architecture patterns (safe.Slice, safe.Store, atomic operations per CONST-029), and writing comprehensive tests using the Challenges and helix_qa frameworks.'))
 story.append(Spacer(1, 6))
 
 story.extend(H3('11.1.1 KAIROS Full Implementation'))
@@ -709,7 +709,7 @@ story.append(P('<b>Step 1:</b> Replace getGitBranch() stub with actual git comma
 story.append(Spacer(1, 6))
 
 story.extend(H3('11.1.2 Dream System Full Implementation'))
-story.append(P('<b>Step 1:</b> Implement gatherPhase to search KAIROS daily logs for patterns, extract session transcripts, and identify drifting memories (accessed but never updated). <b>Step 2:</b> Implement consolidationPhase using LLM calls to extract patterns from gathered signals, identify facts worth preserving, update existing memories with new information, translate relative dates to absolute, and remove disproven facts. <b>Step 3:</b> Enhance cleanupPhase from simple line trimming to intelligent MEMORY.md maintenance with stale pointer removal and contradiction resolution. <b>Step 4:</b> Wire Dream to HelixMemory for persistent storage across restarts. <b>Step 5:</b> Add Dream session API endpoints for triggering, monitoring, and reviewing dream sessions. <b>Step 6:</b> Write HelixQA autonomous session verifying Dream produces meaningful consolidations.'))
+story.append(P('<b>Step 1:</b> Implement gatherPhase to search KAIROS daily logs for patterns, extract session transcripts, and identify drifting memories (accessed but never updated). <b>Step 2:</b> Implement consolidationPhase using LLM calls to extract patterns from gathered signals, identify facts worth preserving, update existing memories with new information, translate relative dates to absolute, and remove disproven facts. <b>Step 3:</b> Enhance cleanupPhase from simple line trimming to intelligent MEMORY.md maintenance with stale pointer removal and contradiction resolution. <b>Step 4:</b> Wire Dream to HelixMemory for persistent storage across restarts. <b>Step 5:</b> Add Dream session API endpoints for triggering, monitoring, and reviewing dream sessions. <b>Step 6:</b> Write helix_qa autonomous session verifying Dream produces meaningful consolidations.'))
 story.append(Spacer(1, 10))
 
 story.extend(H2('11.2 Aider Porting Guide'))
@@ -767,7 +767,7 @@ story.append(P('This document provides the comprehensive technical foundation fo
 story.append(Spacer(1, 6))
 story.append(P('The immediate next actions are: (1) Execute Phase 0 on a machine with SSH access to initialize all git submodules recursively, (2) Fix the dual go.mod issue and add missing submodule entries, (3) Verify the complete build succeeds, and (4) Begin Phase 1 with tree-sitter repository mapping and SubAgent real LLM execution. Every feature, optimization, workaround, and innovation identified in this analysis must be ported without exception, and every implementation must pass Challenges, HelixQA, and LLMsVerifier verification before being considered complete.'))
 story.append(Spacer(1, 6))
-story.append(P('The testing strategy ensures no gaps, bluffing, or incomplete implementations through three independent verification pillars: Challenges for constitutional anti-bluff checks, HelixQA for autonomous LLM-driven QA sessions, and LLMsVerifier for model quality assurance. The 90% coverage gate at Phase 5 completion ensures production readiness. All UI, WEB, REST, CLI, TUI, and other applicative components must be fully covered across all interface types by Phase 4, ensuring no feature is inaccessible from any supported interface.'))
+story.append(P('The testing strategy ensures no gaps, bluffing, or incomplete implementations through three independent verification pillars: Challenges for constitutional anti-bluff checks, helix_qa for autonomous LLM-driven QA sessions, and LLMsVerifier for model quality assurance. The 90% coverage gate at Phase 5 completion ensures production readiness. All UI, WEB, REST, CLI, TUI, and other applicative components must be fully covered across all interface types by Phase 4, ensuring no feature is inaccessible from any supported interface.'))
 
 # ━━ Build ━━
 doc.multiBuild(story)

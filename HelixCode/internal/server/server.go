@@ -105,15 +105,15 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		}
 	}
 
-	// Initialize HelixQA engine if enabled
+	// Initialize helix_qa engine if enabled
 	var qaEngine *helixqa.Engine
 	if cfg.QA.Enabled {
 		var err error
 		qaEngine, err = helixqa.NewEngine(cfg)
 		if err != nil {
-			log.Printf("⚠️  Failed to initialize HelixQA engine: %v (continuing without)", err)
+			log.Printf("⚠️  Failed to initialize helix_qa engine: %v (continuing without)", err)
 		} else {
-			log.Printf("✅ HelixQA engine initialized (output: %s)", cfg.QA.OutputDir)
+			log.Printf("✅ helix_qa engine initialized (output: %s)", cfg.QA.OutputDir)
 		}
 	}
 
