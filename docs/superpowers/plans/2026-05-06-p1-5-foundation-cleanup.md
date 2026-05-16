@@ -63,10 +63,10 @@ Must always print `clean`.
 ## Risks (read these BEFORE starting any WP)
 
 1. **WP2 — submodule-tree fragility.** ~60 sequential `git submodule deinit` + `git rm --cached` + `git submodule add` operations. One missed step can leave dangling gitlinks that break `git submodule update --init --recursive` for fresh clones. **Mitigation:** WP1.T01.02 captures a full snapshot to `docs/improvements/p1-5-snapshot-pre.md`; one submodule per commit; verify each commit with `git submodule status` before moving to the next.
-2. **WP3 — consumer breakage.** Removing the HelixAgent-internal copy of e.g. LLMsVerifier may break code that does `import "../../HelixAgent/LLMsVerifier/..."` or `cd HelixAgent/LLMsVerifier && make`. **Mitigation:** comprehensive `rg` for the old path BEFORE removal; build-test the affected repo after each dedup; rollback recipe documented per-WP.
+2. **WP3 — consumer breakage.** Removing the HelixAgent-internal copy of e.g. LLMsVerifier may break code that does `import "../../helix_agent/LLMsVerifier/..."` or `cd helix_agent/LLMsVerifier && make`. **Mitigation:** comprehensive `rg` for the old path BEFORE removal; build-test the affected repo after each dedup; rollback recipe documented per-WP.
 3. **WP5 — destructive secret removal.** Removing keys from `.env` without a verified loader leaves the user unable to run anything. **Mitigation:** explicit USER GATE at T05.01 (the agent stops and asks); per-key dry-run report listing exactly which keys-to-remove and which file each is in; only proceed on user OK.
 4. **WP7 — case-rename on case-insensitive filesystems.** macOS default APFS is case-insensitive; `git mv Foo foo` looks like a no-op. **Mitigation:** all renames done on Linux (the working host is Linux 6.12 per env); document that contributors on macOS must use `git config core.ignorecase false` and clone fresh after Phase 1.5 lands.
-5. **WP12 — push-order cascade.** Pushing a parent before its child means the parent points at a SHA the remote doesn't have; the push succeeds but other clones break. **Mitigation:** deepest-first push order (cli_agents/<NAME> → HelixAgent/HelixQA → HelixAgent → helix_qa root → meta-repo); per-remote `git ls-remote` verification at T12.05.
+5. **WP12 — push-order cascade.** Pushing a parent before its child means the parent points at a SHA the remote doesn't have; the push succeeds but other clones break. **Mitigation:** deepest-first push order (cli_agents/<NAME> → helix_agent/HelixQA → HelixAgent → helix_qa root → meta-repo); per-remote `git ls-remote` verification at T12.05.
 
 ---
 
@@ -159,10 +159,10 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 
 | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|
-| LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `HelixAgent/LLMsVerifier` | HelixAgent/Makefile, HelixAgent/scripts/*, HelixAgent/internal references |
+| LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `helix_agent/LLMsVerifier` | helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal references |
 | containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
-| helix_qa | `helix_qa/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
+| helix_qa | `helix_qa/` | `helix_agent/HelixQA` | helix_agent/Makefile, HelixAgent test wiring |
 | mcp_servers | TBD at T03.05 | TBD | TBD |
 
 Commit: `docs(P1.5-WP1-T01.04): submodule deduplication decisions`.
@@ -177,11 +177,11 @@ Commit: `docs(P1.5-WP1-T01.05): bootstrap Phase 1.5 evidence + advance PROGRESS`
 
 # Work Package 2 — Submodule restructuring (~67 tasks)
 
-**Goal:** Move every cli_agents/<NAME> submodule from `HelixAgent/cli_agents/` to root-level `cli_agents/`. Eliminate the circular `HelixAgent/cli_agents/HelixCode` entry. Move `cli_agents_configs/` (plain content) and `Example_Resources/` (rename to `cli_agents_resources/`). Delete `Example_Projects/` after collision reconciliation.
+**Goal:** Move every cli_agents/<NAME> submodule from `helix_agent/cli_agents/` to root-level `cli_agents/`. Eliminate the circular `helix_agent/cli_agents/HelixCode` entry. Move `cli_agents_configs/` (plain content) and `Example_Resources/` (rename to `cli_agents_resources/`). Delete `Example_Projects/` after collision reconciliation.
 
 ## P1.5-WP2-T02.01 — Delete circular `cli_agents/HelixCode` entry
 
-The meta-repo cannot be its own grandchild. From `HelixAgent/`:
+The meta-repo cannot be its own grandchild. From `helix_agent/`:
 
 ```bash
 cd HelixAgent
@@ -200,12 +200,12 @@ Verify: `git submodule status --recursive | grep -c "cli_agents/HelixCode"` retu
 
 ## P1.5-WP2-T02.02 .. P1.5-WP2-T02.61 — Move each `cli_agents/<NAME>` to root `cli_agents/`
 
-For each of the ~60 entries (enumerate from `HelixAgent/.gitmodules`), one task per submodule. Per-task pattern:
+For each of the ~60 entries (enumerate from `helix_agent/.gitmodules`), one task per submodule. Per-task pattern:
 
 ```bash
 NAME=<entry-name>
-URL=$(git config -f HelixAgent/.gitmodules --get "submodule.cli_agents/${NAME}.url")
-SHA_BEFORE=$(cd "HelixAgent/cli_agents/${NAME}" && git rev-parse HEAD)
+URL=$(git config -f helix_agent/.gitmodules --get "submodule.cli_agents/${NAME}.url")
+SHA_BEFORE=$(cd "helix_agent/cli_agents/${NAME}" && git rev-parse HEAD)
 
 # 1. Inside HelixAgent — deinit + remove
 (cd HelixAgent && \
@@ -233,10 +233,10 @@ git commit -m "chore(P1.5-WP2-T02.NN): move cli_agents/${NAME} to meta-repo root
 
 Commit one submodule per commit. Numbering: T02.02 .. T02.61 corresponds to alphabetical ordering of the 60 entries (record exact order in `docs/improvements/p1-5-wp2-order.md` at start of WP2).
 
-## P1.5-WP2-T02.62 — `git mv HelixAgent/cli_agents_configs cli_agents_configs`
+## P1.5-WP2-T02.62 — `git mv helix_agent/cli_agents_configs cli_agents_configs`
 
 ```bash
-git mv HelixAgent/cli_agents_configs cli_agents_configs
+git mv helix_agent/cli_agents_configs cli_agents_configs
 git commit -m "chore(P1.5-WP2-T02.62): move cli_agents_configs (plain content) to meta-repo root"
 ```
 
@@ -322,9 +322,9 @@ Commit: `chore(P1.5-WP2-T02.67): push HelixAgent post-restructure to all remotes
 
 ## P1.5-WP3-T03.01 — LLMsVerifier dedup
 
-Keep `Dependencies/HelixDevelopment/LLMsVerifier`. Remove `HelixAgent/LLMsVerifier`.
+Keep `Dependencies/HelixDevelopment/LLMsVerifier`. Remove `helix_agent/LLMsVerifier`.
 
-Pre-flight: `rg "HelixAgent/LLMsVerifier" -l HelixAgent/` lists every consumer. Update each to `../../Dependencies/HelixDevelopment/LLMsVerifier` (relative from `HelixAgent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
+Pre-flight: `rg "helix_agent/LLMsVerifier" -l helix_agent/` lists every consumer. Update each to `../../Dependencies/HelixDevelopment/LLMsVerifier` (relative from `helix_agent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
 
 ```bash
 cd HelixAgent
@@ -349,7 +349,7 @@ Keep root `security/`. 2 nested copies. Same pattern.
 
 ## P1.5-WP3-T03.04 — helix_qa dedup
 
-Keep root `helix_qa/`. Remove `HelixAgent/HelixQA`. Same pattern.
+Keep root `helix_qa/`. Remove `helix_agent/HelixQA`. Same pattern.
 
 ## P1.5-WP3-T03.05 — mcp_servers dedup (canonical TBD)
 
@@ -529,7 +529,7 @@ git commit -m "docs(P1.5-WP6-T06.01): merge ./Documentation -> ./docs (root)"
 
 Same pattern, scoped to `HelixCode/`. Inner-module commit.
 
-## P1.5-WP6-T06.03 — Move `HelixAgent/skills/development/documentation/` → `HelixAgent/docs/skills/development/`
+## P1.5-WP6-T06.03 — Move `helix_agent/skills/development/documentation/` → `helix_agent/docs/skills/development/`
 
 ```bash
 cd HelixAgent
@@ -604,7 +604,7 @@ ANCHOR="Article XI §11.9"
 fails=0
 for repo in . HelixAgent helix_qa HelixCode \
             Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine} \
-            HelixAgent/{HelixMemory,HelixSpecifier,HelixLLM}; do
+            helix_agent/{HelixMemory,HelixSpecifier,HelixLLM}; do
   for f in CONSTITUTION.md CLAUDE.md AGENTS.md; do
     p="$repo/$f"
     [ -f "$p" ] || continue
@@ -627,8 +627,8 @@ Wire into root Makefile target `verify-anti-bluff-cascade`. Commit.
 ## P1.5-WP9-T09.01 — Comprehensive grep sweep for old paths
 
 ```bash
-for old in "Example_Projects" "Example_Resources" "HelixAgent/cli_agents" \
-           "HelixAgent/LLMsVerifier" "HelixAgent/HelixQA" "Documentation/"; do
+for old in "Example_Projects" "Example_Resources" "helix_agent/cli_agents" \
+           "helix_agent/LLMsVerifier" "helix_agent/HelixQA" "Documentation/"; do
   echo "=== $old ==="
   rg "$old" --type-add 'all:*' --type all -n | grep -v ".git/" || echo "(none)"
 done | tee docs/improvements/p1-5-stale-refs.md
@@ -710,8 +710,8 @@ Must show every phase's positive evidence. Any FAIL is a Phase 1.5 blocker until
 
 Order:
 1. Each `cli_agents/<NAME>` (root-level submodules, leaves of the tree).
-2. `HelixAgent/HelixQA` (already removed in WP3, no-op for already-clean).
-3. `HelixAgent/{HelixMemory,HelixSpecifier,HelixLLM}` (any pending governance commits from WP8).
+2. `helix_agent/HelixQA` (already removed in WP3, no-op for already-clean).
+3. `helix_agent/{HelixMemory,HelixSpecifier,HelixLLM}` (any pending governance commits from WP8).
 4. `HelixAgent` itself.
 5. `HelixQA` root.
 6. `Dependencies/HelixDevelopment/*` (each).

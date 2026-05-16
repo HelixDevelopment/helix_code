@@ -34,7 +34,7 @@ This mega-document is the master index. All detailed porting plans are in separa
 
 ### 1.4 CLI Agent Catalog
 - **File**: `stage2_cli_agents_catalog.md` (36KB)
-- **Content**: 60+ CLI agents cataloged from HelixAgent/cli_agents
+- **Content**: 60+ CLI agents cataloged from helix_agent/cli_agents
 
 ### 1.5 Multi-Agent Comparison
 - **File**: `stage2_multi_cli_comparison.md` (60KB)

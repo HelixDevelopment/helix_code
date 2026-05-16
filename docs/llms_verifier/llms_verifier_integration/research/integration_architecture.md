@@ -2091,7 +2091,7 @@ echo "PASS: Model list is dynamically sourced from LLMsVerifier."
 - [^18^]: `LLMsVerifier/README.md` — Scoring weights: Code 40%, Responsiveness 20%, Reliability 20%, Feature 15%, Value 5%
 - [^28^]: `LLMsVerifier/verification/verification.go` — Stub returning hardcoded 8.5 scores; minimal API server at `api/server.go`
 - [^29^]: `HelixCode/internal/llm/model_discovery.go` — Hardcoded `fetchExternalModels()`
-- [^33^]: `HelixAgent/internal/verifier/` — Reference implementation: service.go, discovery.go, startup.go, scoring.go, events.go, health.go
+- [^33^]: `helix_agent/internal/verifier/` — Reference implementation: service.go, discovery.go, startup.go, scoring.go, events.go, health.go
 - [^34^]: `HelixCode/CONSTITUTION.md` — CONST-035 Anti-Bluff Mandate; CONST-020 Provider Fallback Chain Reality
 - [^38^]: `HelixCode/internal/llm/missing_types.go` — Provider interface with 35+ provider types
 - [^40^]: `LLMsVerifier/llmverifier/models.go` — `ModelInfo` struct with full metadata fields

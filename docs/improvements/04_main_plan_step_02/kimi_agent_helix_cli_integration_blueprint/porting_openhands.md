@@ -2,7 +2,7 @@
 
 **Agent**: OpenHands (OpenHands/OpenHands) — Python, 50K stars, Event-driven architecture
 **Target**: HelixCode (github.com/HelixDevelopment/HelixCode)
-**Target Module**: `github.com/HelixDevelopment/HelixAgent/Toolkit`
+**Target Module**: `github.com/HelixDevelopment/helix_agent/Toolkit`
 **Date**: 2026
 
 ---
@@ -24,7 +24,7 @@
 
 ## HelixCode Architecture Context
 
-HelixCode (`github.com/HelixDevelopment/HelixAgent/Toolkit`) uses a modular toolkit architecture:
+HelixCode (`github.com/HelixDevelopment/helix_agent/Toolkit`) uses a modular toolkit architecture:
 
 - `pkg/toolkit/interfaces.go` — Core `Provider` and `Agent` interfaces
 - `pkg/toolkit/toolkit.go` — Toolkit registry for providers and agents
@@ -1257,7 +1257,7 @@ And add import for the event package at the top:
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 ```
 
@@ -1307,7 +1307,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -1344,7 +1344,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -1510,7 +1510,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // Runtime is the abstract sandbox runtime interface (V1 — SandboxService inspired)
@@ -1665,7 +1665,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -2273,7 +2273,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func init() {
@@ -2456,7 +2456,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func init() {
@@ -2642,8 +2642,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/sandbox"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/sandbox"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -2680,8 +2680,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/sandbox"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/sandbox"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -2841,8 +2841,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/sandbox"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/sandbox"
 )
 
 // Harness runs benchmark evaluation against agent solutions
@@ -3185,7 +3185,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // TrajectoryAnalyzer evaluates agent trajectories for quality metrics
@@ -3366,8 +3366,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/benchmark"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/sandbox"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/benchmark"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/sandbox"
 	"github.com/spf13/cobra"
 )
 
@@ -3461,7 +3461,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/benchmark"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/benchmark"
 )
 
 func main() {
@@ -3483,8 +3483,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/benchmark"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/benchmark"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -3551,7 +3551,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // TheoryOfMind provides agent self-awareness, state estimation, and reflection
@@ -3646,7 +3646,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // AgentState is the real-time state estimation of an agent session
@@ -3788,7 +3788,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // Reflection captures agent self-reflection output
@@ -3911,7 +3911,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // StuckReport identifies if/when an agent got stuck
@@ -4142,8 +4142,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/mind"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/mind"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -4196,8 +4196,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/mind"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/mind"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -4231,7 +4231,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/mind"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/mind"
 )
 
 func main() {
@@ -4699,7 +4699,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // AuditEvent represents a security audit log entry
@@ -4987,7 +4987,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/enterprise"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/enterprise"
 )
 
 func main() {
@@ -5023,7 +5023,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/enterprise"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/enterprise"
 )
 
 func main() {
@@ -5055,8 +5055,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/enterprise"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/enterprise"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -5116,7 +5116,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // AgentAnalyzer analyzes agent performance and behavior
@@ -5201,7 +5201,7 @@ package analysis
 import (
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // SessionMetrics captures quantitative session metrics
@@ -5307,7 +5307,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // Bottleneck identifies a performance or behavior bottleneck
@@ -5567,8 +5567,8 @@ package main
 import (
 	"fmt"
 	"time"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/analysis"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/analysis"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -5757,8 +5757,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/toolkit"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/toolkit"
 )
 
 // LiteLLMClient wraps LiteLLM API for unified LLM access
@@ -5985,7 +5985,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/toolkit"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/toolkit"
 )
 
 // RouterLLM selects the appropriate LLM based on message content
@@ -6144,7 +6144,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/llm"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/llm"
 )
 
 func main() {
@@ -6175,8 +6175,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/llm"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/toolkit"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/llm"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/toolkit"
 )
 
 func main() {
@@ -6218,7 +6218,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/llm"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/llm"
 )
 
 func main() {
@@ -6700,7 +6700,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/skill"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/skill"
 )
 
 func main() {
@@ -6750,7 +6750,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/skill"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/skill"
 )
 
 func main() {
@@ -6823,8 +6823,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/toolkit"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/toolkit"
 )
 
 // MicroAgent is a specialized sub-agent with a narrow focus
@@ -6948,7 +6948,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // Coordinator orchestrates multiple micro-agents
@@ -7091,8 +7091,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/toolkit"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/toolkit"
 )
 
 // CodeSpecialist is a micro-agent specialized in code tasks
@@ -7197,8 +7197,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/agent"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/agent"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 func main() {
@@ -7270,7 +7270,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 	"github.com/chromedp/chromedp"
 )
 
@@ -7438,7 +7438,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/event"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/event"
 )
 
 // BrowserActionExecutor executes browser actions and produces observations
@@ -7564,7 +7564,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/browser"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/browser"
 )
 
 func main() {
@@ -7605,7 +7605,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/browser"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/browser"
 )
 
 func main() {
@@ -7635,7 +7635,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HelixDevelopment/HelixAgent/Toolkit/pkg/browser"
+	"github.com/HelixDevelopment/helix_agent/Toolkit/pkg/browser"
 )
 
 func main() {

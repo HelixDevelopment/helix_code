@@ -22,7 +22,7 @@ func NewEnterWorktreeTool(m *Manager) *EnterWorktreeTool { return &EnterWorktree
 func (t *EnterWorktreeTool) Name() string { return "EnterWorktree" }
 
 func (t *EnterWorktreeTool) Description() string {
-	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at HelixCode/ are present, but submodule directories under HelixAgent/, Dependencies/, etc. are empty (uninitialised). If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
+	return "Enter a named git worktree for isolated development. Creates the worktree if it doesn't exist (using the worktree name as the branch name when no base-branch is supplied; otherwise uses the supplied base-branch). Submodules are NOT initialised — the meta-repo and the inner Go module at HelixCode/ are present, but submodule directories under helix_agent/, Dependencies/, etc. are empty (uninitialised). If your work needs submodule code, run `git submodule update --init --recursive` from inside the worktree using Bash."
 }
 
 func (t *EnterWorktreeTool) Schema() tools.ToolSchema {

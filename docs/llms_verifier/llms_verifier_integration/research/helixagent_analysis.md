@@ -123,7 +123,7 @@ The root `README.md` (687 lines, 23 KB) references LLMsVerifier in these key pla
 - **Line 88**: Architecture diagram includes `LLMsVerifier` as a core component
 - **Line 318**: Capability Detection links to `LLMsVerifier/docs/CAPABILITY_DETECTION.md`
 
-[^6^](https://github.com/HelixDevelopment/HelixAgent/blob/main/README.md)
+[^6^](https://github.com/HelixDevelopment/helix_agent/blob/main/README.md)
 
 ### 2.2 HELIXLLM_INTEGRATION_SUMMARY.md
 
@@ -153,7 +153,7 @@ Exists at root (`HELIXLLM_INTEGRATION_SUMMARY.md`) and documents the HelixLLM �
 
 **Anti-Bluff Connection:** The verifier's `IsCannedErrorResponse()` function (in `internal/verifier/service.go` lines 44-67) directly implements CONST-035's anti-bluff mandate by detecting fake "I cannot assist" responses.
 
-[^36^](https://github.com/HelixDevelopment/HelixAgent/blob/main/CONSTITUTION.md)
+[^36^](https://github.com/HelixDevelopment/helix_agent/blob/main/CONSTITUTION.md)
 
 ### 3.2 AGENTS.md
 
@@ -164,7 +164,7 @@ Key verifier-related content:
 - Documents the monorepo structure, technology stack, and module boundaries
 - States that deeper `AGENTS.md` or `CLAUDE.md` files in subdirectories take precedence for files within those subtrees
 
-[^42^](https://github.com/HelixDevelopment/HelixAgent/blob/main/AGENTS.md)
+[^42^](https://github.com/HelixDevelopment/helix_agent/blob/main/AGENTS.md)
 
 ### 3.3 CLAUDE.md
 
@@ -172,7 +172,7 @@ Key verifier-related content:
 
 Contains the comprehensive developer guide. The verifier integration follows CLAUDE.md's TLS/security posture (no `InsecureSkipVerify`, `helixLLMTLSConfig()` in `startup.go` lines 49-90 implements this).
 
-[^None^](https://github.com/HelixDevelopment/HelixAgent/blob/main/CLAUDE.md)
+[^None^](https://github.com/HelixDevelopment/helix_agent/blob/main/CLAUDE.md)
 
 ---
 
@@ -1179,10 +1179,10 @@ sort.Slice(providerTypes, func(i, j int) bool {
 ## Citations
 
 - [^33^](https://github.com/HelixDevelopment/HelixAgent) — Main repository page
-- [^6^](https://github.com/HelixDevelopment/HelixAgent/blob/main/README.md) — README.md
-- [^36^](https://github.com/HelixDevelopment/HelixAgent/blob/main/CONSTITUTION.md) — CONSTITUTION.md
-- [^42^](https://github.com/HelixDevelopment/HelixAgent/blob/main/AGENTS.md) — AGENTS.md
-- [^None^](https://github.com/HelixDevelopment/HelixAgent/blob/main/CLAUDE.md) — CLAUDE.md
+- [^6^](https://github.com/HelixDevelopment/helix_agent/blob/main/README.md) — README.md
+- [^36^](https://github.com/HelixDevelopment/helix_agent/blob/main/CONSTITUTION.md) — CONSTITUTION.md
+- [^42^](https://github.com/HelixDevelopment/helix_agent/blob/main/AGENTS.md) — AGENTS.md
+- [^None^](https://github.com/HelixDevelopment/helix_agent/blob/main/CLAUDE.md) — CLAUDE.md
 - All code excerpts verified against raw files via GitHub Contents API at commit `fe3f69e`
 
 ---

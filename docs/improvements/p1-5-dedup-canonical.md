@@ -10,11 +10,11 @@
 
 | # | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|---|
-| 1 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier/` (root) | `HelixAgent/LLMsVerifier/` | `HelixAgent/Makefile`, `HelixAgent/scripts/*`, any `internal/...` refs to old path |
-| 2 | containers   | `containers/` (root) | `challenges/containers/`, `HelixAgent/containers/`, `HelixAgent/HelixLLM/submodules/containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
-| 3 | Security     | `security/` (root) | `HelixAgent/security/`, `HelixAgent/HelixLLM/submodules/security/` (if present) | HelixAgent/scripts/security-*.sh, root cmd/security_test wiring |
-| 4 | helix_qa      | `helix_qa/` (root) | `HelixAgent/helix_qa/` | `HelixAgent/Makefile` test wiring; root `scripts/run-all-tests.sh` |
-| 5 | mcp_servers  | TBD at WP3.T03.05 — current candidates: `mcp_servers/` (root, may not exist), `HelixAgent/mcp_servers/`, `HelixAgent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
+| 1 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier/` (root) | `helix_agent/LLMsVerifier/` | `helix_agent/Makefile`, `helix_agent/scripts/*`, any `internal/...` refs to old path |
+| 2 | containers   | `containers/` (root) | `challenges/containers/`, `helix_agent/containers/`, `helix_agent/HelixLLM/submodules/containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
+| 3 | Security     | `security/` (root) | `helix_agent/security/`, `helix_agent/HelixLLM/submodules/security/` (if present) | helix_agent/scripts/security-*.sh, root cmd/security_test wiring |
+| 4 | helix_qa      | `helix_qa/` (root) | `helix_agent/helix_qa/` | `helix_agent/Makefile` test wiring; root `scripts/run-all-tests.sh` |
+| 5 | mcp_servers  | TBD at WP3.T03.05 — current candidates: `mcp_servers/` (root, may not exist), `helix_agent/mcp_servers/`, `helix_agent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
 
 **Note on set #5 (MCP-Servers):** The HelixAgent submodule tree has both
 `mcp_servers/` (potentially a single aggregator) and `MCP/submodules/<NAME>/`

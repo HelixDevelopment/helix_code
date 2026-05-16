@@ -36,9 +36,9 @@ HelixLLM.
 
 ### Before Tasks #254 / #273 (CONST-051(C) violation)
 ```go
-// HelixAgent/go.mod
+// helix_agent/go.mod
 replace digital.vasic.eventbus => ./EventBus
-// HelixAgent/.gitmodules
+// helix_agent/.gitmodules
 [submodule "EventBus"]
     path = EventBus
     url = git@github.com:vasic-digital/EventBus.git
@@ -49,9 +49,9 @@ chain).
 
 ### After Tasks #254 / #273 (CONST-051(B) violation)
 ```go
-// HelixAgent/go.mod
+// helix_agent/go.mod
 replace digital.vasic.eventbus => ../Dependencies/vasic-digital/EventBus
-// HelixAgent/.gitmodules
+// helix_agent/.gitmodules
 (no EventBus entry — moved to parent root)
 ```
 
@@ -104,7 +104,7 @@ parent-build coexistence is incidental.
 **Finding 3 — The two consumers split on which fork they consume.**
 - `HelixCode/go.mod` → `replace digital.vasic.docprocessor =>
   ../Dependencies/HelixDevelopment/DocProcessor`
-- `HelixAgent/go.mod` → `replace digital.vasic.docprocessor =>
+- `helix_agent/go.mod` → `replace digital.vasic.docprocessor =>
   ../Dependencies/vasic-digital/DocProcessor`
 
 The previous `go.work` attempt failed because it tried to register

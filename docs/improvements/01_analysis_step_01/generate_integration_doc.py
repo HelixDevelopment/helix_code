@@ -363,7 +363,7 @@ story.append(bullet('<b>Verification Gates</b> - Multi-step plan mode with verif
 story.append(Spacer(1, 10))
 
 story.extend(H2('4.3 Aider - Git-Native Pair Programming'))
-story.append(P('Aider is the most popular open-source AI pair programming tool with 5.7M+ PyPI installs and 15B+ tokens processed weekly. Its key differentiators that HelixAgent/HelixCode must incorporate include tree-sitter based Repository Mapping (repomap.py, 867 lines) supporting 100+ programming languages with intelligent file context selection, the EditBlock Format for surgical code modifications with search/replace blocks and minimal diff generation, Voice-to-Code integration (voice.py, 187 lines) for hands-free coding, and its Git-Native Workflow with automatic commits, diff reviews, and lint/test integration loops. HelixAgent already has a basic RepoMap using regex instead of tree-sitter, and EditBlock is implemented but lacks the flexible matching algorithms from Aider.'))
+story.append(P('Aider is the most popular open-source AI pair programming tool with 5.7M+ PyPI installs and 15B+ tokens processed weekly. Its key differentiators that helix_agent/HelixCode must incorporate include tree-sitter based Repository Mapping (repomap.py, 867 lines) supporting 100+ programming languages with intelligent file context selection, the EditBlock Format for surgical code modifications with search/replace blocks and minimal diff generation, Voice-to-Code integration (voice.py, 187 lines) for hands-free coding, and its Git-Native Workflow with automatic commits, diff reviews, and lint/test integration loops. HelixAgent already has a basic RepoMap using regex instead of tree-sitter, and EditBlock is implemented but lacks the flexible matching algorithms from Aider.'))
 story.append(Spacer(1, 10))
 
 story.extend(H2('4.4 OpenAI Codex - Sandboxed Execution'))
@@ -421,7 +421,7 @@ story.append(Spacer(1, 6))
 story.extend(H3('5.1.2 Add Missing Submodules to HelixCode'))
 story.append(P('HelixCode currently lacks submodule entries for HelixAgent, HelixSpecifier, and HelixMemory. These must be added as proper Git submodules with SSH URLs and fully integrated into the go.mod replace directives. The following submodules need to be added:'))
 story.append(Spacer(1, 4))
-story.append(bullet('HelixAgent: git@github.com:HelixDevelopment/HelixAgent.git - Path: HelixAgent/'))
+story.append(bullet('HelixAgent: git@github.com:HelixDevelopment/HelixAgent.git - Path: helix_agent/'))
 story.append(bullet('HelixSpecifier: git@github.com:HelixDevelopment/HelixSpecifier.git - Path: HelixSpecifier/'))
 story.append(bullet('HelixMemory: git@github.com:HelixDevelopment/HelixMemory.git - Path: HelixMemory/'))
 story.append(bullet('HelixLLM: git@github.com:HelixDevelopment/HelixLLM.git - Path: HelixLLM/'))

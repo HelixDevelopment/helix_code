@@ -33,9 +33,9 @@ Root HEAD at capture: `cff2d90fe550fe069eb3632b7074c412e69c6ddb` (`main`).
 | Root meta-repo `.gitmodules`  | 21 |  | 21 |
 | HelixAgent `.gitmodules`      | ~134 | 36 | 170 |
 
-Top-level uninitialised: HelixAgent/DebateOrchestrator (unreachable),
-HelixAgent/HelixLLM/submodules/* (~33 entries deferred since Phase 0),
-HelixAgent/cli_agents/{kiro-cli,ollama-code} (unreachable upstream).
+Top-level uninitialised: helix_agent/DebateOrchestrator (unreachable),
+helix_agent/HelixLLM/submodules/* (~33 entries deferred since Phase 0),
+helix_agent/cli_agents/{kiro-cli,ollama-code} (unreachable upstream).
 
 Captured listing: `docs/improvements/p1-5-fetch.log` (init log) and
 `docs/improvements/p1-5-remote-reachability.md` (per-URL ls-remote result).
@@ -48,14 +48,14 @@ filter 2 false-positives caused by 15s-timeout flake on cold SSH sessions):
 
 | Submodule (HelixAgent path)        | URL                                                         | Status        | Disposition |
 |---|---|---|---|
-| HelixAgent/DebateOrchestrator      | `git@github.com:vasic-digital/DebateOrchestrator.git`        | UNREACHABLE   | vasic-digital owned — repo missing/never-created. Needs user decision: create vs delete. |
-| HelixAgent/cli_agents/kiro-cli     | `git@github.com:stark1tty/kiro-cli.git`                     | UNREACHABLE   | Third-party fork deleted upstream. Already in Phase 0 §3.3 parking lot. |
-| HelixAgent/cli_agents/ollama-code  | `git@github.com:tcsenpai/ollama-code.git`                   | UNREACHABLE   | Third-party repo deleted upstream. Same parking-lot disposition. |
+| helix_agent/DebateOrchestrator      | `git@github.com:vasic-digital/DebateOrchestrator.git`        | UNREACHABLE   | vasic-digital owned — repo missing/never-created. Needs user decision: create vs delete. |
+| helix_agent/cli_agents/kiro-cli     | `git@github.com:stark1tty/kiro-cli.git`                     | UNREACHABLE   | Third-party fork deleted upstream. Already in Phase 0 §3.3 parking lot. |
+| helix_agent/cli_agents/ollama-code  | `git@github.com:tcsenpai/ollama-code.git`                   | UNREACHABLE   | Third-party repo deleted upstream. Same parking-lot disposition. |
 
 `git submodule update --init --recursive` aborted on DebateOrchestrator
 (double-failure-aborts behaviour). The pull-loop (`foreach --recursive ... git
 fetch + git pull --ff-only`) ran against ~155 initialised submodules in
-sequence, then was killed at `HelixAgent/cli_agents/HelixCode` (a circular
+sequence, then was killed at `helix_agent/cli_agents/HelixCode` (a circular
 self-reference whose HEAD is `refs/heads/.invalid` and therefore non-fetchable
 — scheduled for removal in plan T02.01).
 
@@ -129,7 +129,7 @@ left the tree unrecoverable.
    See §Reachability. **WP1 STOP — user decision required.**
 2. HelixAgent has 94 nested `-dirty` gitlinks. Captured in commit `aad6a67d`
    but not walked deeper.
-3. HelixAgent/HelixLLM/submodules/* (~33 entries) remain uninitialised
+3. helix_agent/HelixLLM/submodules/* (~33 entries) remain uninitialised
    from Phase 0 — out of scope for P1.5.
 4. Recursive fetch+pull-loop (T01.01 second half) was started but is still
    running at capture; partial output in `/tmp/p1-5-pull.log`.

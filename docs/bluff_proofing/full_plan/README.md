@@ -175,7 +175,7 @@ HelixCode achieves zero-bluff status when ALL are true:
 | Repository | Role | Key Capabilities to Port |
 |------------|------|--------------------------|
 | [HelixAgent](https://github.com/HelixDevelopment/HelixAgent) | Main reference | Constitution, circuit breakers, ensemble, skills system, debate framework |
-| [HelixAgent CLI](https://github.com/HelixDevelopment/HelixAgent/tree/main/cli_agents) | CLI reference | Tier 1 agent capabilities, tool ecosystems, provider support |
+| [HelixAgent CLI](https://github.com/HelixDevelopment/helix_agent/tree/main/cli_agents) | CLI reference | Tier 1 agent capabilities, tool ecosystems, provider support |
 
 ---
 

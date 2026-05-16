@@ -19,16 +19,16 @@ modules:
   helix_libs:
     - name: HelixLLM
       url: git@github.com:HelixDevelopment/HelixLLM.git
-      pin: HelixAgent/HelixLLM
+      pin: helix_agent/HelixLLM
     - name: HelixMemory
       url: git@github.com:HelixDevelopment/HelixMemory.git
-      pin: HelixAgent/HelixMemory
+      pin: helix_agent/HelixMemory
     - name: HelixSpecifier
       url: git@github.com:HelixDevelopment/HelixSpecifier.git
-      pin: HelixAgent/HelixSpecifier
+      pin: helix_agent/HelixSpecifier
     - name: LLMsVerifier
       url: git@github.com:vasic-digital/LLMsVerifier.git
-      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + HelixAgent/LLMsVerifier (transitive)
+      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + helix_agent/LLMsVerifier (transitive)
 
   helix_apps:
     - name: HelixQA
@@ -51,7 +51,7 @@ modules:
     - name: LLama_CPP
     - name: Ollama
 
-  cli_agents_canonical_root: HelixAgent/cli_agents/
+  cli_agents_canonical_root: helix_agent/cli_agents/
   cli_agent_count: 60   # 47 populated, 13 deferred to Phase 2 sub-specs (see PROGRESS.md parking lot)
 
 phases:

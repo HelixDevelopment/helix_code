@@ -20,9 +20,9 @@ TARGETS=(
     "Dependencies/HelixDevelopment/VisionEngine"
     "Containers"
     "Security"
-    "HelixAgent/HelixLLM"
-    "HelixAgent/HelixSpecifier"
-    "HelixAgent/HelixMemory"
+    "helix_agent/HelixLLM"
+    "helix_agent/HelixSpecifier"
+    "helix_agent/HelixMemory"
 )
 
 GAPS=0

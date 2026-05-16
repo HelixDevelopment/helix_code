@@ -6,7 +6,7 @@
 // All worktree operations shell out to the git binary, consistent with
 // internal/tools/git/. Submodules are NOT initialised — the meta-repo and
 // the inner Go module at HelixCode/ are present, but submodule directories
-// under HelixAgent/, Dependencies/, etc. are uninitialised (empty directories).
+// under helix_agent/, Dependencies/, etc. are uninitialised (empty directories).
 //
 // See: docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md
 package worktree

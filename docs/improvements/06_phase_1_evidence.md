@@ -121,7 +121,7 @@ clean
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -203,7 +203,7 @@ clean
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -276,7 +276,7 @@ clean
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -347,7 +347,7 @@ clean
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -2857,9 +2857,9 @@ HelixQA opensource submodules totalling >1.5 GB on disk.
 
 ```
 ERROR: Repository not found.
-fatal: clone of 'git@github.com:vasic-digital/DebateOrchestrator.git' into submodule path '...HelixAgent/DebateOrchestrator' failed
-fatal: clone of 'git@github.com:stark1tty/kiro-cli.git' into submodule path '...HelixAgent/cli_agents/kiro-cli' failed
-fatal: clone of 'git@github.com:tcsenpai/ollama-code.git' into submodule path '...HelixAgent/cli_agents/ollama-code' failed
+fatal: clone of 'git@github.com:vasic-digital/DebateOrchestrator.git' into submodule path '...helix_agent/DebateOrchestrator' failed
+fatal: clone of 'git@github.com:stark1tty/kiro-cli.git' into submodule path '...helix_agent/cli_agents/kiro-cli' failed
+fatal: clone of 'git@github.com:tcsenpai/ollama-code.git' into submodule path '...helix_agent/cli_agents/ollama-code' failed
 Failed to clone 'DebateOrchestrator' a second time, aborting
 fatal: Failed to recurse into submodule path 'HelixAgent'
 ```
@@ -2934,7 +2934,7 @@ WP1 close-out (this batch):
 
 **Decisions executed:**
 
-1. Dropped 3 unreachable submodule entries from `HelixAgent/.gitmodules`
+1. Dropped 3 unreachable submodule entries from `helix_agent/.gitmodules`
    per Phase 0 §3.3 parking lot. Result: `.gitmodules` block count went
    170 → 167; gitlinks pointing to those paths removed from index;
    `.git/modules/<path>` cleaned (never had real clones — they 404'd).
@@ -2958,7 +2958,7 @@ all submodule SHAs for rollback reference.
 
 Post-pull advances now committed at all three parent levels. WP2..WP12
 remain. Pre-existing nested-submodule worktree dirty state (empty
-checkouts inside HelixAgent/HelixLLM/submodules/* and similar) is *not*
+checkouts inside helix_agent/HelixLLM/submodules/* and similar) is *not*
 a WP1 concern — it's a checkout/init issue tracked under WP2 restructuring
 and WP10 validation; root sees them as `-dirty` SHAs but no gitlink advance
 exists to commit.
@@ -2970,7 +2970,7 @@ exists to commit.
 
 ### Summary
 
-Mechanical move of `HelixAgent/cli_agents/*` submodules to meta-repo root,
+Mechanical move of `helix_agent/cli_agents/*` submodules to meta-repo root,
 plus the related plain-content directory `cli_agents_configs/` and rename
 of `Example_Resources/` -> `cli_agents_resources/`. Submodule moves use
 `deinit -f` + `git rm` in HelixAgent followed by `git submodule add --force`
@@ -2998,7 +2998,7 @@ Across 8 batched commits (P1.5-T02.02-pre … P1.5-T02.12):
 ### cli_agents — FAILED (6 of 57)
 
 Network/clone instability from large or rate-limited repos. All entries
-remain in `HelixAgent/.gitmodules` and HEAD gitlinks. Commits T02.10 +
+remain in `helix_agent/.gitmodules` and HEAD gitlinks. Commits T02.10 +
 T02.11 restored `opencode-cli` and `openhands` after side effects of
 the killed retry job (script left them mid-state).
 
@@ -3041,7 +3041,7 @@ updated to reflect new gitdir.
 | metric                                             | value                                |
 |----------------------------------------------------|--------------------------------------|
 | `ls cli_agents/ \| wc -l` at root                  | 51                                   |
-| `ls HelixAgent/cli_agents/` (excl `.md`)           | 5                                    |
+| `ls helix_agent/cli_agents/` (excl `.md`)           | 5                                    |
 | HelixAgent `.gitmodules` cli_agents entries        | 6                                    |
 | Root `.gitmodules` cli_agents entries              | 51                                   |
 | Root `.gitmodules` cli_agents_resources entries    | 6                                    |
@@ -3075,7 +3075,7 @@ Anti-divergence canonicalisation per `docs/improvements/p1-5-dedup-canonical.md`
 ### T03.01 — LLMsVerifier dedup
 
 Canonical: `Dependencies/HelixDevelopment/LLMsVerifier` (kept).
-Removed: `HelixAgent/LLMsVerifier` (1 copy).
+Removed: `helix_agent/LLMsVerifier` (1 copy).
 
 | commit  | scope                                                         |
 |---------|---------------------------------------------------------------|
@@ -3083,15 +3083,15 @@ Removed: `HelixAgent/LLMsVerifier` (1 copy).
 | `cb6fd9c` | meta-repo: bump HelixAgent gitlink                          |
 
 Consumer updates (HelixAgent):
-- `HelixAgent/Makefile` `verifier-init` / `verifier-update` / `verifier-build` targets retargeted to `../Dependencies/HelixDevelopment/LLMsVerifier`.
-- `HelixAgent/.trivy.yaml` `skip-dirs` updated to canonical relative path.
-- `HelixAgent/go.mod` `replace digital.vasic.llmsverifier => ../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
-- `HelixAgent/challenges/scripts/challenge_framework.sh` `get_verifier_binary()` retargeted (committed in T03.03).
+- `helix_agent/Makefile` `verifier-init` / `verifier-update` / `verifier-build` targets retargeted to `../Dependencies/HelixDevelopment/LLMsVerifier`.
+- `helix_agent/.trivy.yaml` `skip-dirs` updated to canonical relative path.
+- `helix_agent/go.mod` `replace digital.vasic.llmsverifier => ../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
+- `helix_agent/challenges/scripts/challenge_framework.sh` `get_verifier_binary()` retargeted (committed in T03.03).
 
 ### T03.02 — containers dedup (3 nested copies)
 
 Canonical: root `Containers` (kept).
-Removed: `HelixAgent/Containers`, `challenges/Containers`, `HelixAgent/HelixLLM/submodules/Containers` (3 copies).
+Removed: `helix_agent/Containers`, `challenges/Containers`, `helix_agent/HelixLLM/submodules/Containers` (3 copies).
 
 | commit    | scope                                                    |
 |-----------|----------------------------------------------------------|
@@ -3102,14 +3102,14 @@ Removed: `HelixAgent/Containers`, `challenges/Containers`, `HelixAgent/HelixLLM/
 | `0e685b6` | meta-repo: bump HelixAgent + Challenges gitlinks         |
 
 Consumer updates:
-- `HelixAgent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: `Containers` removed from per-module loops (replaced with comment marker).
-- `HelixAgent/go.mod` `replace digital.vasic.containers => ../Containers` (committed in T03.03).
+- `helix_agent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: `Containers` removed from per-module loops (replaced with comment marker).
+- `helix_agent/go.mod` `replace digital.vasic.containers => ../Containers` (committed in T03.03).
 - `challenges/pkg/container/verifier.go` already uses runtime path-discovery (`findContainersDir()` walks `tools/containers`, `../tools/containers`, …) — no edit needed.
 
 ### T03.03 — Security dedup (2 nested copies)
 
 Canonical: root `Security` (kept).
-Removed: `HelixAgent/Security`, `HelixAgent/HelixLLM/submodules/Security` (2 copies).
+Removed: `helix_agent/Security`, `helix_agent/HelixLLM/submodules/Security` (2 copies).
 
 | commit    | scope                                                         |
 |-----------|--------------------------------------------------------------|
@@ -3119,15 +3119,15 @@ Removed: `HelixAgent/Security`, `HelixAgent/HelixLLM/submodules/Security` (2 cop
 | `3a50b79` | meta-repo: bump HelixAgent gitlink                            |
 
 Consumer updates (HelixAgent):
-- `HelixAgent/go.mod`: `replace` directives pointed to canonical paths for `digital.vasic.security` (`../Security`), `digital.vasic.containers` (`../Containers`), `digital.vasic.llmsverifier` (`../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`), `digital.vasic.helixqa` (`../HelixQA`).
-- `HelixAgent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: drop `Security` loop entry.
-- `HelixAgent/challenges/scripts/security_module_challenge.sh`: `$PROJECT_ROOT/Security` → `$PROJECT_ROOT/../Security`; replace-directive grep updated.
-- `HelixAgent/challenges/scripts/challenge_framework.sh`: `get_verifier_binary()` retargets canonical LLMsVerifier path.
+- `helix_agent/go.mod`: `replace` directives pointed to canonical paths for `digital.vasic.security` (`../Security`), `digital.vasic.containers` (`../Containers`), `digital.vasic.llmsverifier` (`../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`), `digital.vasic.helixqa` (`../HelixQA`).
+- `helix_agent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: drop `Security` loop entry.
+- `helix_agent/challenges/scripts/security_module_challenge.sh`: `$PROJECT_ROOT/Security` → `$PROJECT_ROOT/../Security`; replace-directive grep updated.
+- `helix_agent/challenges/scripts/challenge_framework.sh`: `get_verifier_binary()` retargets canonical LLMsVerifier path.
 
 ### T03.04 — helix_qa dedup
 
 Canonical: root `HelixQA` (kept).
-Removed: `HelixAgent/HelixQA` (1 copy).
+Removed: `helix_agent/HelixQA` (1 copy).
 
 | commit    | scope                                                     |
 |-----------|----------------------------------------------------------|
@@ -3139,11 +3139,11 @@ Consumer updates (HelixAgent):
 - `scripts/run_all_tests_and_challenges.sh`: `./HelixQA` → `../HelixQA` (all occurrences).
 - `challenges/scripts/helixllm_integration_challenge.sh`, `helixqa_validation_challenge.sh`: `$PROJECT_ROOT/HelixQA` → `$PROJECT_ROOT/../HelixQA`.
 - `tests/integration/submodule_sync_test.go`: `helixQAPath := "HelixQA"` → `"../HelixQA"`; benchmark `git submodule status` arg updated.
-- `HelixAgent/go.mod` already updated in T03.03.
+- `helix_agent/go.mod` already updated in T03.03.
 
 ### T03.05 — mcp_servers dedup
 
-Action: PROMOTE — root `MCP-Servers` did not exist; promoted from `HelixAgent/MCP-Servers` (URL `git@github.com:modelcontextprotocol/servers.git`, SHA `4503e2d`). Removed 2 HelixAgent duplicates: `HelixAgent/MCP-Servers` and `HelixAgent/external/mcp-servers/servers` (both pointing at same upstream URL + SHA — verified equivalent before promotion).
+Action: PROMOTE — root `MCP-Servers` did not exist; promoted from `helix_agent/MCP-Servers` (URL `git@github.com:modelcontextprotocol/servers.git`, SHA `4503e2d`). Removed 2 HelixAgent duplicates: `helix_agent/MCP-Servers` and `helix_agent/external/mcp-servers/servers` (both pointing at same upstream URL + SHA — verified equivalent before promotion).
 
 | commit    | scope                                                   |
 |-----------|--------------------------------------------------------|
@@ -3163,11 +3163,11 @@ $ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|H
  e7c09c15... Security (heads/main)
 ```
 
-No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere under `HelixAgent/`, `challenges/`, or `HelixAgent/HelixLLM/`.
+No nested duplicate of any of the 5 dedup-set canonical paths remains anywhere under `helix_agent/`, `challenges/`, or `helix_agent/HelixLLM/`.
 
 ### Defects observed during execution
 
-1. `git submodule deinit` for nested-three-level submodules (e.g. `HelixAgent/HelixLLM/submodules/Security`) prints a non-fatal warning `error: could not lock config file .git/modules/HelixAgent/modules/HelixLLM/modules/submodules/security/config: No such file or directory` because the per-submodule git dir was already pruned by an earlier WP1/WP2 operation. The deinit and `git rm` still succeed; the warning is cosmetic.
+1. `git submodule deinit` for nested-three-level submodules (e.g. `helix_agent/HelixLLM/submodules/Security`) prints a non-fatal warning `error: could not lock config file .git/modules/helix_agent/modules/HelixLLM/modules/submodules/security/config: No such file or directory` because the per-submodule git dir was already pruned by an earlier WP1/WP2 operation. The deinit and `git rm` still succeed; the warning is cosmetic.
 2. `git config --file .gitmodules --remove-section submodule.X` returns exit 1 with `fatal: no such section` when the section was already removed by a successful `git rm` — expected, suppressed via `|| true`.
 3. After `git rm` of a submodule path, the gitlink is auto-staged; passing the same path to a follow-up `git add` errors with `pathspec did not match any files` — solved by skipping the redundant add.
 
@@ -3239,7 +3239,7 @@ LLMsVerifier required a precise `.gitignore` allow-exception (`!scripts/load_api
 
 #### Submodules NOT propagated to (deferred per "pragmatic v1" plan)
 
-Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependencies/HelixDevelopment/Ollama, Dependencies/HelixDevelopment/HuggingFace_Hub, Github-Pages-Website, MCP-Servers, plus any other submodule under HelixAgent/HelixLLM/. These can adopt the loader later when their build flows need it.
+Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependencies/HelixDevelopment/Ollama, Dependencies/HelixDevelopment/HuggingFace_Hub, Github-Pages-Website, MCP-Servers, plus any other submodule under helix_agent/HelixLLM/. These can adopt the loader later when their build flows need it.
 
 #### Commit chain
 
@@ -3268,8 +3268,8 @@ Challenges, Security, Assets, Dependencies/HelixDevelopment/LLama_CPP, Dependenc
 | `./.env`                       |  93 |  57 | 36 |
 | `./HelixCode/.env`             | 186 | 148 | 38 |
 | `./helix_qa/.env`               |  80 |  44 | 36 |
-| `./HelixAgent/.env`            |  80 |  44 | 36 |
-| `./HelixAgent/HelixLLM/.env`   |  80 |  44 | 36 |
+| `./helix_agent/.env`            |  80 |  44 | 36 |
+| `./helix_agent/HelixLLM/.env`   |  80 |  44 | 36 |
 | **Total**                       | **519** | **337** | **182** |
 
 Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 names emitted by `$HOME/api_keys.sh`. The `HelixCode/.env` removed-count of 38 includes 2 extra lines that were duplicates inside that single file; the underlying *unique* key-name set deleted per file is the same 36-name subset (5 files share the same loader source).
@@ -3282,15 +3282,15 @@ Removed entries are exact-match `KEY=...` lines whose key-name is one of the 41 
 
 - `./.env` retains `HELIXAGENT_API_KEY=…`, `CLAUDE_CODE_USE_OAUTH_CREDENTIALS=true`, `QWEN_CODE_USE_OAUTH_CREDENTIALS=true`, plus all `ApiKey_*` aliases (Tavily, Astica, etc.) the central loader does not yet emit.
 - `./HelixCode/.env` retains `USE_HELIX_LLM=true`, `PORT=8100`, `HELIXAGENT_PORT_*`, `LOG_LEVEL=info`, `LOG_FORMAT=json`, `REDIS_PASSWORD=`, `HELIXAGENT_API_KEY=…`.
-- `./helix_qa/.env`, `./HelixAgent/.env`, `./HelixAgent/HelixLLM/.env` retain `ApiKey_*` aliases (`ApiKey_Tavily`, `ApiKey_Astica_Vision`, `ApiKey_Tencent_Cloud`, etc.) and the `ASTICA_API_KEY=…` / `TAVILY_API_KEY=$ApiKey_Tavily` indirect bindings — none of these names are in the 41-key SAFE_KEYS list, so they were correctly preserved.
+- `./helix_qa/.env`, `./helix_agent/.env`, `./helix_agent/HelixLLM/.env` retain `ApiKey_*` aliases (`ApiKey_Tavily`, `ApiKey_Astica_Vision`, `ApiKey_Tencent_Cloud`, etc.) and the `ASTICA_API_KEY=…` / `TAVILY_API_KEY=$ApiKey_Tavily` indirect bindings — none of these names are in the 41-key SAFE_KEYS list, so they were correctly preserved.
 
 #### Backups + diff files (local only, gitignored)
 
 - `./.env.backup_p1-5` + `./.env.diff_p1-5`
 - `./HelixCode/.env.backup_p1-5` + `./HelixCode/.env.diff_p1-5`
 - `./helix_qa/.env.backup_p1-5` + `./helix_qa/.env.diff_p1-5`
-- `./HelixAgent/.env.backup_p1-5` + `./HelixAgent/.env.diff_p1-5`
-- `./HelixAgent/HelixLLM/.env.backup_p1-5` + `./HelixAgent/HelixLLM/.env.diff_p1-5`
+- `./helix_agent/.env.backup_p1-5` + `./helix_agent/.env.diff_p1-5`
+- `./helix_agent/HelixLLM/.env.backup_p1-5` + `./helix_agent/HelixLLM/.env.diff_p1-5`
 
 Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` was extended with `**/*.env.backup_p1-5` and `**/*.env.diff_p1-5` so they cannot be tracked from any subdirectory.
 
@@ -3310,7 +3310,7 @@ Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` wa
 
 ### P1.5-WP6 — Docs consolidation (Documentation/ → docs/)
 
-**Goal**: Eliminate every `Documentation/` directory in the tree by merging into the canonical `docs/`. Update all live internal links. Three directories tracked by inventory (`./Documentation`, `./HelixCode/Documentation`, `HelixAgent/skills/development/documentation`).
+**Goal**: Eliminate every `Documentation/` directory in the tree by merging into the canonical `docs/`. Update all live internal links. Three directories tracked by inventory (`./Documentation`, `./HelixCode/Documentation`, `helix_agent/skills/development/documentation`).
 
 #### Per-directory summary
 
@@ -3318,7 +3318,7 @@ Restoration is `mv <file>.backup_p1-5 <file>` per .env. The root `.gitignore` wa
 |---|---|---:|---:|---|
 | `./Documentation/` | `./docs/` | 3 dirs (`General/`, `Materials/`, `User_Manual/`) — recursively contains 5 + 2 + (4 examples + 8 tutorials + 4 top md) = 23 files in 6 subtrees | 0 (no name overlap with existing `docs/` content) | `0d832b3` |
 | `HelixCode/Documentation/` | `HelixCode/docs/` | 6 entries (`Architecture/`, `General/`, `Testing/`, `User_Manual/`, plus `AUDIT_IMPLEMENTATION_PLAN.md`, `COMPREHENSIVE_AUDIT_REPORT.md`) — over 60 markdown + html + yaml files | 0 (HelixCode/docs/ did not exist) | `4530efc` |
-| `HelixAgent/skills/development/documentation/` | `HelixAgent/docs/skills/development/` | 1 file (`SKILL.md`) | 0 | HelixAgent: `2a6e11c4`; meta-repo gitlink: `1470b2e` |
+| `helix_agent/skills/development/documentation/` | `helix_agent/docs/skills/development/` | 1 file (`SKILL.md`) | 0 | HelixAgent: `2a6e11c4`; meta-repo gitlink: `1470b2e` |
 
 All moves used `git mv` (rename detection preserved 100% for every file).
 
@@ -3362,7 +3362,7 @@ The four lowercase `documentation/` directories belong to **third-party `cli_age
 |---|---|
 | `0d832b3` | T06.01 — root `Documentation/` → `docs/` (3 subtrees + 7 link-update files) |
 | `4530efc` | T06.02 — `HelixCode/Documentation/` → `HelixCode/docs/` (6 entries + 5 link-update files; scripts incl. Go) |
-| `2a6e11c4` (HelixAgent) | T06.03 — `HelixAgent/skills/development/documentation/SKILL.md` → `HelixAgent/docs/skills/development/SKILL.md` |
+| `2a6e11c4` (HelixAgent) | T06.03 — `helix_agent/skills/development/documentation/SKILL.md` → `helix_agent/docs/skills/development/SKILL.md` |
 | `1470b2e` | T06.03 — meta-repo gitlink bump for HelixAgent |
 
 #### Defects / deviations
@@ -3428,7 +3428,7 @@ Sample of 10 (full list logged in commit diff):
 
 - **35 files** rewritten in the meta-repo to point at new paths (sed-applied substitution from old→new).
 - **3 files** updated inside `helix_qa/` (CONSTITUTION + host_power_management refs).
-- **7 files** updated inside `HelixAgent/` (CONSTITUTION, .gosec-baseline.json, host_power_management refs, BUGFIXES history).
+- **7 files** updated inside `helix_agent/` (CONSTITUTION, .gosec-baseline.json, host_power_management refs, BUGFIXES history).
 
 #### Collisions / failures
 
@@ -3455,13 +3455,13 @@ These should be addressed in a future WP that combines (a) the rename, (b) Makef
 |---|---|---|
 | `e54dbea` | helix_qa | host_power_management ref updates inside CONSTITUTION + challenges + docs |
 | `5b131a76` | HelixAgent | host_power_management + test_bank ref updates (CONSTITUTION, .gosec-baseline.json, BUGFIXES, etc.) |
-| (pending) | meta-repo | 29 dir renames + 35 file ref updates + HelixAgent/HelixQA gitlink bumps |
+| (pending) | meta-repo | 29 dir renames + 35 file ref updates + helix_agent/HelixQA gitlink bumps |
 
 #### Defects / deviations
 
 1. **Top-level umbrella dirs deferred** — `HelixCode/`, `assets/`, `Dependencies/`, `Upstreams/`, `Website/`, `Specification/`, `Implementation_Guide/`. Renaming any of these is a cross-cutting refactor (hundreds of references across CLAUDE.md, AGENTS.md, CONSTITUTION.md, Makefile, scripts) and was deferred to keep WP7 within its 30-min budget.
 2. **Go-package-affecting renames deferred** — see deferred list above.
-3. **Submodule pointer drift** — committing inside HelixAgent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
+3. **Submodule pointer drift** — committing inside helix_agent/HelixQA bumped their gitlinks; meta-repo records the new pointers as part of its WP7 commit. This is the standard pattern from WP3/WP6.
 
 ---
 
@@ -3477,7 +3477,7 @@ Confirm CONST-035 / Article XI §11.9 verbatim user mandate is present in every 
 
 #### Audit results (before)
 
-13 targets surveyed (`.`, HelixAgent, HelixQA, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, Containers, Security, HelixAgent/{HelixLLM,HelixSpecifier,HelixMemory}). Results:
+13 targets surveyed (`.`, HelixAgent, HelixQA, Dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}, Containers, Security, helix_agent/{HelixLLM,HelixSpecifier,HelixMemory}). Results:
 
 | Target | CONSTITUTION.md | CLAUDE.md | AGENTS.md |
 |---|---|---|---|
@@ -3491,9 +3491,9 @@ Confirm CONST-035 / Article XI §11.9 verbatim user mandate is present in every 
 | Dependencies/HelixDevelopment/VisionEngine | PRESENT | PRESENT | PRESENT |
 | **Containers** | **MISSING** | PRESENT | PRESENT |
 | Security | PRESENT | PRESENT | PRESENT |
-| HelixAgent/HelixLLM | PRESENT | PRESENT | PRESENT |
-| HelixAgent/HelixSpecifier | PRESENT | PRESENT | PRESENT |
-| HelixAgent/HelixMemory | PRESENT | PRESENT | PRESENT |
+| helix_agent/HelixLLM | PRESENT | PRESENT | PRESENT |
+| helix_agent/HelixSpecifier | PRESENT | PRESENT | PRESENT |
+| helix_agent/HelixMemory | PRESENT | PRESENT | PRESENT |
 
 Inner Go application `HelixCode/HelixCode/` (same repo as root) carries all three files PRESENT — same set of files as root via the shared submodule structure.
 
@@ -3538,13 +3538,13 @@ After WP2-WP7's mass moves/renames, swept all source code, tests, scripts, Docke
 |---|---|---|---|
 | `Example_Projects/` | 19 | 11 | Active code/scripts/docs updated; 11 residual = audit-trail (specs/plans/reports + intentional "(formerly …)" markers in CLAUDE.md cascade) |
 | `Example_Resources/` | 2 | 9 | After CLAUDE.md cascade update; 9 residual = "(formerly Example_Resources/)" annotations + spec/plan audit trail |
-| `HelixAgent/cli_agents/` | 6 | 4 | Active script + Go code fixed; 4 residual = specs/plans + frozen `.gosec-baseline.json` |
-| `HelixAgent/cli_agents_configs/` | 0 | 0 | None to fix |
-| `HelixAgent/LLMsVerifier` | 7 | 7 | `verify-llmsverifier-pin-parity.sh` rewritten as single-canonical guard; rest = specs/plans + frozen security reports |
-| `HelixAgent/Containers` | 3 | 2 | `internal/config/config.go` fallback path fixed; 2 residual = historical apply-report + plan |
+| `helix_agent/cli_agents/` | 6 | 4 | Active script + Go code fixed; 4 residual = specs/plans + frozen `.gosec-baseline.json` |
+| `helix_agent/cli_agents_configs/` | 0 | 0 | None to fix |
+| `helix_agent/LLMsVerifier` | 7 | 7 | `verify-llmsverifier-pin-parity.sh` rewritten as single-canonical guard; rest = specs/plans + frozen security reports |
+| `helix_agent/Containers` | 3 | 2 | `internal/config/config.go` fallback path fixed; 2 residual = historical apply-report + plan |
 | `challenges/Containers` | 3 | 3 | All historical (session log, BUGFIXES, audit report) |
-| `HelixAgent/HelixQA` | 1 | 1 | spec/plan audit trail |
-| Other (`HelixAgent/HelixLLM/submodules/Containers`, `HelixAgent/HelixLLM/submodules/Security`, `HelixAgent/Security`, `HelixAgent/MCP-Servers`, `HelixAgent/external/mcp-servers/servers`) | 0 | 0 | Nothing to do |
+| `helix_agent/HelixQA` | 1 | 1 | spec/plan audit trail |
+| Other (`helix_agent/HelixLLM/submodules/Containers`, `helix_agent/HelixLLM/submodules/Security`, `helix_agent/Security`, `helix_agent/MCP-Servers`, `helix_agent/external/mcp-servers/servers`) | 0 | 0 | Nothing to do |
 
 #### Total file count modified (in scope; excluding third-party + audit trail)
 
@@ -3577,27 +3577,27 @@ HelixQA, Security, HelixLLM, HelixMemory, HelixSpecifier submodules: each `CLAUD
 #### Sample of representative changes
 
 ```
-HelixAgent/internal/clis/agents/claude_code/claude_code.go:144
-- sourceDir = "/run/media/.../HelixAgent/cli_agents/claude-code-source"
+helix_agent/internal/clis/agents/claude_code/claude_code.go:144
+- sourceDir = "/run/media/.../helix_agent/cli_agents/claude-code-source"
 + sourceDir = "/run/media/.../HelixCode/cli_agents/claude-code-source"
 
-HelixAgent/internal/config/config.go:782
-- "/run/media/.../HelixAgent/containers/.env",
+helix_agent/internal/config/config.go:782
+- "/run/media/.../helix_agent/containers/.env",
 + "/run/media/.../HelixCode/containers/.env",
 
-HelixAgent/tests/integration/cli_agents_test.go:26-29
+helix_agent/tests/integration/cli_agents_test.go:26-29
 - openCodePath = "/run/media/.../HelixCode/Example_Projects/OpenCode/OpenCode"
 + openCodePath = "/run/media/.../HelixCode/cli_agents/opencode"
 - clinePath    = "/run/media/.../HelixCode/Example_Projects/Cline"
 + clinePath    = "/run/media/.../HelixCode/cli_agents/cline"
 
 scripts/regenerate-diagrams.py:84
-- f"HelixAgent/cli_agents/  ({...} agents — canonical source; ...)",
+- f"helix_agent/cli_agents/  ({...} agents — canonical source; ...)",
 + f"cli_agents/  ({...} agents — canonical source; ...)",
 
 scripts/verify-llmsverifier-pin-parity.sh
   Pin-parity check is degenerate post-WP2 (single canonical pin).
-  Converted to a re-introduction tripwire that fails if HelixAgent/LLMsVerifier
+  Converted to a re-introduction tripwire that fails if helix_agent/LLMsVerifier
   ever reappears, otherwise prints the canonical SHA and exits 0.
 
 CLAUDE.md (root + 7 cascaded copies)
@@ -3616,10 +3616,10 @@ ANALYSIS_SOURCES.md / EXAMPLE_PROJECTS_INDEX.md / EXAMPLE_PROJECTS_QUICK_REFEREN
             Example_Projects/DeepSeek_CLI/ → cli_agents/deepseek-cli/
             Example_Projects/             → cli_agents/   (catch-all)
 
-HelixAgent/docs/CLI_AGENT_PLUGINS_PLAN.md
+helix_agent/docs/CLI_AGENT_PLUGINS_PLAN.md
   Mass sed: Example_Projects/ → cli_agents/  (50 occurrences)
 
-HelixAgent/docs/CLI_AGENTS_TEST_DOCUMENTATION.md
+helix_agent/docs/CLI_AGENTS_TEST_DOCUMENTATION.md
   OpenCode test path:  /HelixCode/Example_Projects/OpenCode/OpenCode/  → /HelixCode/cli_agents/opencode/
   Cline test path:     /HelixCode/Example_Projects/Cline/             → /HelixCode/cli_agents/cline/
 
@@ -3635,13 +3635,13 @@ docs/bluff_proofing/{,full_plan/}STEP_BY_STEP_GUIDE.md
 | `docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md` | Historical design spec authored under pre-WP2 layout — preserved as audit trail of the migration design |
 | `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md` | Historical Phase 0 plan |
 | `docs/superpowers/plans/2026-05-06-p1-5-foundation-cleanup.md` | The Phase 1.5 plan itself — describes the migration in flight |
-| `HelixAgent/.gosec-baseline.json` | Frozen baseline of a historical security scan run; absolute paths reflect scan-time layout |
-| `HelixAgent/reports/security/gosec-report.json`, `gosec-report-final.json` | Frozen scan output |
-| `HelixAgent/docs/reports/COMPREHENSIVE_UNFINISHED_WORK_REPORT.md` | Historical report |
-| `HelixAgent/docs/superpowers/plans/2026-03-26-phase1-phase2-dead-code-memory-safety.md` | Historical plan |
-| `HelixAgent/docs/development/SESSION_2026-04-24.md` | Historical session log |
-| `HelixAgent/docs/issues/fixed/BUGFIXES.md` | Historical bugfix audit log |
-| `HelixAgent/reports/audit/full-report.md` | Historical audit report |
+| `helix_agent/.gosec-baseline.json` | Frozen baseline of a historical security scan run; absolute paths reflect scan-time layout |
+| `helix_agent/reports/security/gosec-report.json`, `gosec-report-final.json` | Frozen scan output |
+| `helix_agent/docs/reports/COMPREHENSIVE_UNFINISHED_WORK_REPORT.md` | Historical report |
+| `helix_agent/docs/superpowers/plans/2026-03-26-phase1-phase2-dead-code-memory-safety.md` | Historical plan |
+| `helix_agent/docs/development/SESSION_2026-04-24.md` | Historical session log |
+| `helix_agent/docs/issues/fixed/BUGFIXES.md` | Historical bugfix audit log |
+| `helix_agent/reports/audit/full-report.md` | Historical audit report |
 | `containers/scripts/resource-policy/apply-report.md` | Historical policy-application report |
 | "formerly Example_Projects/" / "formerly Example_Resources/" annotations in CLAUDE.md (8 files) + helixcode_architecture.md | Deliberately retained migration-context markers for future readers |
 | `scripts/verify-llmsverifier-pin-parity.sh` deprecation comment | Documents WP2's elimination of the duplicate transitive submodule |
@@ -3799,7 +3799,7 @@ The `challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the
 
 #### Defects / deviations
 
-1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `HelixAgent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `HelixAgent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
+1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `helix_agent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `helix_agent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
 2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
 3. **Snake-case regex relaxed for digit prefixes.** Initial regex `^[a-z][a-z0-9_]*$` flagged `01_analysis_step_01`, `06_diagrams_real`, etc. used throughout `docs/improvements/`. Relaxed to `^[a-z0-9][a-z0-9_]*$` to accept digit-prefixed sequence names; the rest of the snake_case discipline (lowercase + digits + underscores only) is preserved.
 4. **No commits or pushes performed in WP11.** Per CONST-043 + WP12 ownership of the push step, this WP only produces artefacts. The dual commit (Challenges submodule first, then meta-repo) is captured in the WP12 work plan.
@@ -3888,9 +3888,9 @@ All inner-module unit tests pass; pre-existing meta-repo build issues (out of P1
 
 | Submodule | Pre-rebase HEAD | Rebase? | Post-rebase HEAD | Push status | Origin remote |
 |---|---|---|---|---|---|
-| `HelixAgent/HelixLLM` | `19b9eeb` | N (FF, 3 ahead) | `19b9eeb` | `4a412c7..19b9eeb main -> main` | `git@github.com:HelixDevelopment/HelixLLM.git` |
-| `HelixAgent/HelixMemory` | `c309f92` | N (FF, 1 ahead) | `c309f92` | `e464257..c309f92 main -> main` | `git@github.com:HelixDevelopment/HelixMemory.git` |
-| `HelixAgent/HelixSpecifier` | `53b8c98` | N (FF, 1 ahead) | `53b8c98` | `f1f9927..53b8c98 main -> main` | `git@github.com:HelixDevelopment/HelixSpecifier.git` |
+| `helix_agent/HelixLLM` | `19b9eeb` | N (FF, 3 ahead) | `19b9eeb` | `4a412c7..19b9eeb main -> main` | `git@github.com:HelixDevelopment/HelixLLM.git` |
+| `helix_agent/HelixMemory` | `c309f92` | N (FF, 1 ahead) | `c309f92` | `e464257..c309f92 main -> main` | `git@github.com:HelixDevelopment/HelixMemory.git` |
+| `helix_agent/HelixSpecifier` | `53b8c98` | N (FF, 1 ahead) | `53b8c98` | `f1f9927..53b8c98 main -> main` | `git@github.com:HelixDevelopment/HelixSpecifier.git` |
 | `Containers` | `7bed5c5` | N (FF, 2 ahead) | `7bed5c5` | `2ba3e56..7bed5c5 main -> main` | `git@github.com:vasic-digital/Containers.git` |
 | `Security` | `a4c381b` | Y (NON-FF, 1 ahead 12 behind; `git rebase --skip` — WP9 1-line patch did not apply: target lines absent in upstream security/CLAUDE.md, so the patch was correctly dropped) | `7fc1e26` (= upstream tip, no extra local commits) | already at remote tip after skip; no push needed | `git@github.com:HelixDevelopment/Security.git` |
 | `HelixAgent` | `9a314ab7` | N (FF, 28 ahead — full P1.5-WP1 through P1.5-WP9 batch) | `9a314ab7` | `9a19ac12..9a314ab7 main -> main` | `git@github.com:HelixDevelopment/HelixAgent.git` |

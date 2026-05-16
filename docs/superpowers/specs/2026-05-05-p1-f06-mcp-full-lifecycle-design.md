@@ -345,7 +345,7 @@ Each has a build tag and minimal platform-specific surface. Compile-tested on bo
 - **Sampling** (`sampling/createMessage`) — protocol exists; defer to F06.5 if needed.
 - **Roots** (`roots/list`) — publish working dir as the only root in initialize capabilities; full negotiation deferred.
 - **Server-initiated tool calls** — handlers wired but no agent surface yet.
-- **HelixAgent submodule auto-discovery** — registry of 40+ MCP submodules under `HelixAgent/MCP/submodules` not auto-loaded; users opt in via YAML.
+- **HelixAgent submodule auto-discovery** — registry of 40+ MCP submodules under `helix_agent/MCP/submodules` not auto-loaded; users opt in via YAML.
 
 ## 9. Constitutional compliance
 

@@ -9,8 +9,8 @@ Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-part
 - `.gitmodules` files inspected: 6
   - `./.gitmodules` (meta-repo root)
   - `./challenges/.gitmodules`
-  - `./HelixAgent/.gitmodules`
-  - `./HelixAgent/HelixLLM/.gitmodules`
+  - `./helix_agent/.gitmodules`
+  - `./helix_agent/HelixLLM/.gitmodules`
   - `./helix_qa/.gitmodules`
   - `./helix_qa/tools/opensource/skyvern/.gitmodules`
 - (URL, path) entries collected: **244**
@@ -26,21 +26,21 @@ Scope: All 6 reachable `.gitmodules` in the meta-repo tree (excluding third-part
 
 ### Category B — Orphan `.gitmodules` entries with NO tracked gitlink (3)
 
-These are stale `[submodule]` blocks in `HelixAgent/.gitmodules`. The corresponding directories are tracked as plain files (not gitlinks), or are not tracked at all. Safe to remove.
+These are stale `[submodule]` blocks in `helix_agent/.gitmodules`. The corresponding directories are tracked as plain files (not gitlinks), or are not tracked at all. Safe to remove.
 
 | Name | Path | Notes |
 |------|------|-------|
-| `Toolkit/SiliconFlow` | `HelixAgent/Toolkit/SiliconFlow` | `HelixAgent/Toolkit/` is checked in as plain files. No gitlink. |
-| `Toolkit/Chutes` | `HelixAgent/Toolkit/Chutes` | Same. URL also has duplicate (next row). |
-| `Toolkit/Toolkit/Chutes` | `HelixAgent/Toolkit/Toolkit/Chutes` | Pathological double-nest. Path doesn't exist on disk. |
+| `Toolkit/SiliconFlow` | `helix_agent/Toolkit/SiliconFlow` | `helix_agent/Toolkit/` is checked in as plain files. No gitlink. |
+| `Toolkit/Chutes` | `helix_agent/Toolkit/Chutes` | Same. URL also has duplicate (next row). |
+| `Toolkit/Toolkit/Chutes` | `helix_agent/Toolkit/Toolkit/Chutes` | Pathological double-nest. Path doesn't exist on disk. |
 
 ### Category C — Vendored dependency layout via `go.mod` `replace` (23) — **DO NOT REMOVE**
 
 These look like duplicates by URL but are **legitimate vendored dependency trees** required for compilation:
 
-#### C1: `HelixAgent/HelixLLM/submodules/*` (22 entries)
+#### C1: `helix_agent/HelixLLM/submodules/*` (22 entries)
 
-Wired into `HelixAgent/HelixLLM/go.mod` via `replace` directives. Removing them breaks HelixLLM's build:
+Wired into `helix_agent/HelixLLM/go.mod` via `replace` directives. Removing them breaks HelixLLM's build:
 
 ```
 replace digital.vasic.agentic       => ./submodules/Agentic
@@ -68,9 +68,9 @@ replace digital.vasic.vectordb      => ./submodules/VectorDB
 replace digital.vasic.conversation  => ./submodules/conversation
 ```
 
-#### C2: `HelixAgent/<Name>` paired with root or HelixAgent/Toolkit (1)
+#### C2: `helix_agent/<Name>` paired with root or helix_agent/Toolkit (1)
 
-`HelixAgent/Challenges` (160000 gitlink) is wired into `HelixAgent/go.mod`:
+`helix_agent/Challenges` (160000 gitlink) is wired into `helix_agent/go.mod`:
 
 ```
 replace digital.vasic.challenges => ./Challenges
@@ -80,17 +80,17 @@ It is duplicated by URL with the root `challenges/` submodule, but removal would
 
 #### Architectural decision required (NOT performed)
 
-Promoting `HelixAgent/HelixLLM` to consume `../../../Containers`, `../../../Security`, `../../HelixAgent/Auth`, etc. via root canonicals requires:
+Promoting `helix_agent/HelixLLM` to consume `../../../Containers`, `../../../Security`, `../../helix_agent/Auth`, etc. via root canonicals requires:
 1. Rewriting all `replace` paths in HelixLLM's `go.mod`.
 2. Verifying `go mod tidy` + full HelixLLM build still pass.
-3. Same for HelixAgent/go.mod.
+3. Same for helix_agent/go.mod.
 4. Confirming with the user that **submodule reuse via parent-traversal `replace` paths** is the desired architecture (vs. each module having its own vendored dep tree, which is the current — and arguably intentional — state).
 
 This is **out of scope for a mechanical dedup pass** and demands a Phase 2 architectural ticket.
 
 ## What was removed (this WP)
 
-Only the 3 orphan `Toolkit/*` entries from `HelixAgent/.gitmodules`. They had no corresponding tracked gitlinks, so removal is purely a config cleanup with zero functional impact.
+Only the 3 orphan `Toolkit/*` entries from `helix_agent/.gitmodules`. They had no corresponding tracked gitlinks, so removal is purely a config cleanup with zero functional impact.
 
 ## Possibly-unused submodules (REPORT ONLY — NOT removed)
 

@@ -19,7 +19,7 @@ Perform exhaustive analysis of all Helix repositories and CLI agent codebases, c
 - Document submodule relationships and interdependencies
 
 ### 1.3 CLI Agent Discovery
-- Explore `HelixAgent/cli_agents` directory completely
+- Explore `helix_agent/cli_agents` directory completely
 - Identify ALL CLI agent implementations
 - Map features, APIs, optimizations per agent
 - Priority: `claude-code-source` first

@@ -20,15 +20,15 @@ the meta-repo and HelixAgent `.gitmodules`.
 
 | URL | Submodule path(s) | Status | Action required |
 |---|---|---|---|
-| `git@github.com:vasic-digital/DebateOrchestrator.git` | `HelixAgent/DebateOrchestrator` | UNREACHABLE | Repo does not exist under vasic-digital. Either create the repo, point gitlink at correct upstream, or remove the entry from HelixAgent/.gitmodules. |
-| `git@github.com:stark1tty/kiro-cli.git` | `HelixAgent/cli_agents/kiro-cli` (will be moved to root in WP2) | UNREACHABLE | Upstream third-party fork was deleted. Already in Phase 0 §3.3 "13 deferred to Phase 2 sub-specs" parking lot. WP2 should drop the entry. |
-| `git@github.com:tcsenpai/ollama-code.git` | `HelixAgent/cli_agents/ollama-code` (will be moved to root in WP2) | UNREACHABLE | Upstream third-party repo was deleted. Same parking-lot disposition. |
+| `git@github.com:vasic-digital/DebateOrchestrator.git` | `helix_agent/DebateOrchestrator` | UNREACHABLE | Repo does not exist under vasic-digital. Either create the repo, point gitlink at correct upstream, or remove the entry from helix_agent/.gitmodules. |
+| `git@github.com:stark1tty/kiro-cli.git` | `helix_agent/cli_agents/kiro-cli` (will be moved to root in WP2) | UNREACHABLE | Upstream third-party fork was deleted. Already in Phase 0 §3.3 "13 deferred to Phase 2 sub-specs" parking lot. WP2 should drop the entry. |
+| `git@github.com:tcsenpai/ollama-code.git` | `helix_agent/cli_agents/ollama-code` (will be moved to root in WP2) | UNREACHABLE | Upstream third-party repo was deleted. Same parking-lot disposition. |
 
 ## Reachability impact on WP1 close-out
 
 `git submodule update --init --recursive` aborted on DebateOrchestrator (the
 double-failure-aborts behaviour); the recursive pull-loop ran against the
-already-initialised tree and was killed at HelixAgent/cli_agents/HelixCode
+already-initialised tree and was killed at helix_agent/cli_agents/HelixCode
 because that submodule has a placeholder `refs/heads/.invalid` HEAD which is
 not pull-able (see plan T02.01 — circular reference, scheduled for explicit
 removal).

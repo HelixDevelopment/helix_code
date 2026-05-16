@@ -440,7 +440,7 @@ go test -tags nohelixspecifier ./...  # Opt-out build tag
 ### Repository
 - **URL:** `https://github.com/HelixDevelopment/HelixAgent`
 - **Language:** Go 1.24+ (main), 1.24.11 (Toolkit)
-- **Module:** `dev.helix.agent` (main), `github.com/HelixDevelopment/HelixAgent/Toolkit`
+- **Module:** `dev.helix.agent` (main), `github.com/HelixDevelopment/helix_agent/Toolkit`
 - **Submodules:** 90+ git submodules (confirmed via `.gitmodules`)
 
 ### Critical Discovery: HelixCode is a Submodule of HelixAgent

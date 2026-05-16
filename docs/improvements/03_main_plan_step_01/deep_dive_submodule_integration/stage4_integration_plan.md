@@ -785,8 +785,8 @@ helixagent:
   enabled: true
   path: "submodules/HelixAgent"
   reference_only: true
-  cli_agents_path: "submodules/HelixAgent/cli_agents"
-  integrations_path: "submodules/HelixAgent/integrations"
+  cli_agents_path: "submodules/helix_agent/cli_agents"
+  integrations_path: "submodules/helix_agent/integrations"
 ```
 
 #### Build System Changes

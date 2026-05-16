@@ -6,7 +6,7 @@
 **Successor:** to be handed to `superpowers:writing-plans` for executable plan
 **Supersedes (partially):** the aspirational diagrams in `docs/improvements/01_*` and `02_*` (those used a fictional module set — HelixML/HelixSDK/HelixDB/etc. — that does not exist as real repositories under `HelixDevelopment` or `vasic-digital`)
 
-This spec is the single planning artefact for an integration programme that fuses every power-feature, optimisation, and design innovation from every CLI agent in `HelixAgent/cli_agents/` into HelixCode, with anti-bluff guarantees applied at every layer.
+This spec is the single planning artefact for an integration programme that fuses every power-feature, optimisation, and design innovation from every CLI agent in `helix_agent/cli_agents/` into HelixCode, with anti-bluff guarantees applied at every layer.
 
 ---
 
@@ -22,7 +22,7 @@ A staged programme — *not* a single feature — that produces, in order:
 
 ### 1.2 Goals (priority order)
 - **G1 — No bluffs.** Every PASS in the system carries positive runtime evidence (Constitution Article XI §11.9, CONST-035). Tests/Challenges that go green on a broken feature are themselves the defect.
-- **G2 — Single source of truth.** HelixAgent is the integration substrate; cli_agents come from `HelixAgent/cli_agents/<name>` only — never from `Example_Projects/`.
+- **G2 — Single source of truth.** HelixAgent is the integration substrate; cli_agents come from `helix_agent/cli_agents/<name>` only — never from `Example_Projects/`.
 - **G3 — Secrets safe.** API keys live in `.env` files mode 0600, never in git, never in logs, never in docs.
 - **G4 — No force pushes without explicit user approval.** New constitutional mandate cascaded everywhere.
 - **G5 — Real production readiness for every ported feature.** "Done" means a Challenge demonstrates end-user usability, not "tests pass."
@@ -55,7 +55,7 @@ HelixCode/                              # meta-repo (this repo)
 │   ├── cmd/  internal/  applications/  tests/  ...
 │   └── go.mod                          # module dev.helix.code, go 1.26
 │
-├── HelixAgent/                         # NEW SUBMODULE — git@github.com:HelixDevelopment/HelixAgent.git
+├── helix_agent/                         # NEW SUBMODULE — git@github.com:HelixDevelopment/HelixAgent.git
 │   ├── HelixLLM/                       # nested submodule (canonical)
 │   ├── HelixMemory/                    # nested submodule (canonical)
 │   ├── HelixSpecifier/                 # nested submodule (canonical)
@@ -69,10 +69,10 @@ HelixCode/                              # meta-repo (this repo)
 ├── security/                           # existing submodule
 │
 ├── Dependencies/HelixDevelopment/      # keep as-is for direct Go imports
-│   ├── LLMsVerifier/                   # canonical pin (HelixAgent/LLMsVerifier defers to this)
+│   ├── LLMsVerifier/                   # canonical pin (helix_agent/LLMsVerifier defers to this)
 │   ├── DocProcessor/  LLMOrchestrator/  LLMProvider/  VisionEngine/
 │
-├── Example_Projects/                   # DEPRECATE — replaced by HelixAgent/cli_agents/ as canonical
+├── Example_Projects/                   # DEPRECATE — replaced by helix_agent/cli_agents/ as canonical
 │                                       # (preserved through Phase 4; Phase 5 cleanup once import paths migrated)
 │
 ├── assets/  github_pages_website/  Dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
@@ -83,7 +83,7 @@ HelixCode/                              # meta-repo (this repo)
 - **Protocol: SSH only.** `git@github.com:…` or `git@gitlab.com:…`. Constitution Rule 3 already prohibits HTTPS — re-affirmed.
 - **Recursion: deep.** `git submodule update --init --recursive --jobs 8`. `setup.sh` wraps this; we add a verifier that fails if any submodule is uninitialised.
 - **`HelixCode/HelixCode/` stays a tracked subdirectory.** Promoting it to a submodule would create a circular reference (this repo *is* `HelixDevelopment/HelixCode`). Documented explicitly in `HelixCode/HelixCode/CLAUDE.md`.
-- **LLMsVerifier dual-pinning.** `Dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `HelixAgent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
+- **LLMsVerifier dual-pinning.** `Dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
 - **Agent-Deck nested-worktree fix.** `Example_Projects/Agent-Deck/.claude/worktrees/agent-*` paths are git worktrees, not submodules. Add to `.git/info/exclude` (local) and document.
 
 ### 2.3 Secret handling
@@ -92,13 +92,13 @@ HelixCode/                              # meta-repo (this repo)
 > No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital, transitively or otherwise. All secrets live in `.env` files (mode 0600) listed in `.gitignore`. Any leak — to git, logs, build artefacts, screenshots, or external services — is a release blocker until rotated and post-mortemed.
 
 **Implementation:**
-- `HelixCode/HelixCode/.env` — copied (not symlinked) from `../HelixAgent/.env` during Phase 0; mode 0600; owner-only.
+- `HelixCode/HelixCode/.env` — copied (not symlinked) from `../helix_agent/.env` during Phase 0; mode 0600; owner-only.
 - `HelixCode/HelixCode/.env.example` — every key from real `.env` with `<REDACTED>` placeholders; under git.
 - `.gitignore` (root + `HelixCode/HelixCode/`) — explicit `.env`, `.env.local`, `.env.*` (with `!.env.example` exception), `*.pem`, `*.key`, `*.crt`, `id_rsa*`, plus `helix.security.json` if it ever holds secrets.
 - **Secret-scan gate** — `scripts/scan-secrets.sh` runs gitleaks (or fallback grep over working tree); wired into `make ci-validate-all`. Failing it blocks any phase work.
 - **Migration steps (Phase 0 P0-04):**
   ```
-  cp -p ../HelixAgent/.env HelixCode/HelixCode/.env
+  cp -p ../helix_agent/.env HelixCode/HelixCode/.env
   chmod 600 HelixCode/HelixCode/.env
   ls -la HelixCode/HelixCode/.env             # must show -rw-------
   git check-ignore HelixCode/HelixCode/.env   # must exit 0
@@ -126,12 +126,12 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 
 | # | Task | Acceptance check | Blocks |
 |---|---|---|---|
-| **P0-01** | Resolve `Example_Projects/Agent-Deck/.claude/worktrees/` recursion error: add path to `.git/info/exclude` (local); document fix in `HelixAgent/cli_agents/agent-deck/CLAUDE.md` (after P0-02) | `git submodule foreach --recursive 'echo OK' \| grep -c OK` returns ≥87 with no `fatal:` | P0-02 |
-| **P0-02** | Add HelixAgent submodule: `git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent && git submodule update --init --recursive HelixAgent` | `ls HelixAgent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}` all exist | P0-03, P1+ |
-| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `Dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `HelixAgent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
-| **P0-04** | Migrate API keys: `cp -p ../HelixAgent/.env HelixCode/HelixCode/.env && chmod 600 HelixCode/HelixCode/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
+| **P0-01** | Resolve `Example_Projects/Agent-Deck/.claude/worktrees/` recursion error: add path to `.git/info/exclude` (local); document fix in `helix_agent/cli_agents/agent-deck/CLAUDE.md` (after P0-02) | `git submodule foreach --recursive 'echo OK' \| grep -c OK` returns ≥87 with no `fatal:` | P0-02 |
+| **P0-02** | Add HelixAgent submodule: `git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent && git submodule update --init --recursive HelixAgent` | `ls helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}` all exist | P0-03, P1+ |
+| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `Dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
+| **P0-04** | Migrate API keys: `cp -p ../helix_agent/.env HelixCode/HelixCode/.env && chmod 600 HelixCode/HelixCode/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
 | **P0-05** | Update `.gitignore` (root + `HelixCode/HelixCode/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
-| **P0-06** | Refresh `HelixCode/HelixCode/.env.example`: every key from `../HelixAgent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env\|sort) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example\|sort)` empty | P0-07 |
+| **P0-06** | Refresh `HelixCode/HelixCode/.env.example`: every key from `../helix_agent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env\|sort) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example\|sort)` empty | P0-07 |
 | **P0-07** | `scripts/scan-secrets.sh` — gitleaks or fallback grep for `sk-`, `gho_`, `glpat-`, `xoxb-`, `AKIA`, `eyJ`; wired into `make ci-validate-all` | Exits 0 on clean tree; intentionally fails on planted test secret | P0-08 |
 | **P0-08** | `scripts/git_hooks/pre-push` rejecting `--force` unless `HELIX_FORCE_PUSH_APPROVED=1`; idempotent installer at `scripts/install-git-hooks.sh` invoked from `setup.sh` | Hook blocks `git push --force github main` (verify by reading hook output text only — do not actually run a force push) | P0-09 |
 | **P0-09** | Create governance triplet for `HelixCode/HelixCode/`: `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, each derived from root + Go-module-specific addenda | All three files exist; each contains all three anchors (§11.9, CONST-042, CONST-043) | P0-13 |
@@ -176,7 +176,7 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 19. AskUserQuestion with Previews
 20. Theme System
 
-**Source of truth:** `HelixAgent/cli_agents/claude-code/` (canonical) — *not* `HelixCode/Example_Projects/Claude_Code/`. claude-code core is closed-source; porting derives features from public SDK + observable CLI behaviour. No reverse-engineering of binaries.
+**Source of truth:** `helix_agent/cli_agents/claude-code/` (canonical) — *not* `HelixCode/Example_Projects/Claude_Code/`. claude-code core is closed-source; porting derives features from public SDK + observable CLI behaviour. No reverse-engineering of binaries.
 
 **Per-feature deliverables (all six required):**
 - (a) Source landed at the documented HelixCode path under `HelixCode/internal/<package>/`.
@@ -200,26 +200,26 @@ Each phase is its own future spec → plan → implementation cycle. The synthes
 
 | Order | Agent | Source | Highlight features |
 |---|---|---|---|
-| 1 | Aider | `HelixAgent/cli_agents/aider/` | Architect/Editor dual-model, 4-layer fuzzy matching, repo-map (tree-sitter), unified diff, voice-to-code, IDE watch mode, prompt caching |
-| 2 | Cline | `HelixAgent/cli_agents/cline/` | Plan/Act modes, browser automation, file-watching, MCP marketplace, autonomous task chains |
-| 3 | OpenHands | `HelixAgent/cli_agents/openhands/` | Sandbox runtimes (Docker/E2B/Local), agent micro-framework, evaluation harness, multi-agent delegation |
-| 4 | Codex | `HelixAgent/cli_agents/codex/` | Approval workflows, sandboxed exec, multi-turn refinement |
-| 5 | Continue | `HelixAgent/cli_agents/continue/` | IDE-native context, slash commands, custom providers |
-| 6 | Forge | `HelixAgent/cli_agents/forge/` | Multi-tier model routing, retrieval optimisation |
-| 7 | Plandex | `HelixAgent/cli_agents/plandex/` | Long-running plans with branching, cost ceiling, partial-apply |
-| 8 | Kilo Code | `HelixAgent/cli_agents/kilo-code/` | Mode profiles, custom modes, MCP integration |
-| 9 | GPT-Engineer | `HelixAgent/cli_agents/gpt-engineer/` | Project bootstrapping from prompt, file-by-file generation |
-| 10 | OpenCode (sst) | `HelixAgent/cli_agents/opencode/` | TUI patterns, session management, model switching |
-| 11 | Gemini-CLI | `HelixAgent/cli_agents/gemini-cli/` | Long-context strategies, Gemini-specific tool calling |
-| 12 | DeepSeek-CLI | `HelixAgent/cli_agents/deepseek-cli/` | Reasoning-mode wrapper, prompt patterns |
-| 13 | GPTme | `HelixAgent/cli_agents/gptme/` | Local-first agent, terminal-native UX, plugin ecosystem |
-| 14 | Qwen-Code | `HelixAgent/cli_agents/qwen-code/` | Qwen-tuned reasoning prompts, model-specific tool calling |
-| 15 | TaskWeaver | `HelixAgent/cli_agents/taskweaver/` | Code-as-action orchestration, role-playing planner-executor |
-| 16 | Codex (open-source CLI variant) | `HelixAgent/cli_agents/codex/` | Approval workflows, sandboxed exec, multi-turn refinement (clarify in P2 spec whether this points at OpenAI's open-source CLI or the legacy closed Codex; if the latter, move to N1) |
-| 17 | Bundled remainder | `HelixAgent/cli_agents/{octogen,multiagent-coding,nanocoder,ollama-code,get-shit-done,vtcode,conduit,bridle,noi,roo-code,spec-kit,swe-agent,junie,agent-deck,codename-goose,fauxpilot,gpt-engineer-sub-variants,…}` | Single sub-spec (`porting_remaining_agents.md`); per-agent feature audit done at sub-spec time; agents lacking unique features → noted as "no porting needed, archived as reference" |
-| 18 | MCP/skill supplements | `HelixAgent/cli_agents/{git-mcp,postgres-mcp,claude-plugins,codex-skills,ui-ux-pro-max}/` | Not agents — MCP servers and skill packs that supplement Phase 1 features (MCP Lifecycle, Skill System); fold in during the corresponding Phase 1 feature work |
+| 1 | Aider | `helix_agent/cli_agents/aider/` | Architect/Editor dual-model, 4-layer fuzzy matching, repo-map (tree-sitter), unified diff, voice-to-code, IDE watch mode, prompt caching |
+| 2 | Cline | `helix_agent/cli_agents/cline/` | Plan/Act modes, browser automation, file-watching, MCP marketplace, autonomous task chains |
+| 3 | OpenHands | `helix_agent/cli_agents/openhands/` | Sandbox runtimes (Docker/E2B/Local), agent micro-framework, evaluation harness, multi-agent delegation |
+| 4 | Codex | `helix_agent/cli_agents/codex/` | Approval workflows, sandboxed exec, multi-turn refinement |
+| 5 | Continue | `helix_agent/cli_agents/continue/` | IDE-native context, slash commands, custom providers |
+| 6 | Forge | `helix_agent/cli_agents/forge/` | Multi-tier model routing, retrieval optimisation |
+| 7 | Plandex | `helix_agent/cli_agents/plandex/` | Long-running plans with branching, cost ceiling, partial-apply |
+| 8 | Kilo Code | `helix_agent/cli_agents/kilo-code/` | Mode profiles, custom modes, MCP integration |
+| 9 | GPT-Engineer | `helix_agent/cli_agents/gpt-engineer/` | Project bootstrapping from prompt, file-by-file generation |
+| 10 | OpenCode (sst) | `helix_agent/cli_agents/opencode/` | TUI patterns, session management, model switching |
+| 11 | Gemini-CLI | `helix_agent/cli_agents/gemini-cli/` | Long-context strategies, Gemini-specific tool calling |
+| 12 | DeepSeek-CLI | `helix_agent/cli_agents/deepseek-cli/` | Reasoning-mode wrapper, prompt patterns |
+| 13 | GPTme | `helix_agent/cli_agents/gptme/` | Local-first agent, terminal-native UX, plugin ecosystem |
+| 14 | Qwen-Code | `helix_agent/cli_agents/qwen-code/` | Qwen-tuned reasoning prompts, model-specific tool calling |
+| 15 | TaskWeaver | `helix_agent/cli_agents/taskweaver/` | Code-as-action orchestration, role-playing planner-executor |
+| 16 | Codex (open-source CLI variant) | `helix_agent/cli_agents/codex/` | Approval workflows, sandboxed exec, multi-turn refinement (clarify in P2 spec whether this points at OpenAI's open-source CLI or the legacy closed Codex; if the latter, move to N1) |
+| 17 | Bundled remainder | `helix_agent/cli_agents/{octogen,multiagent-coding,nanocoder,ollama-code,get-shit-done,vtcode,conduit,bridle,noi,roo-code,spec-kit,swe-agent,junie,agent-deck,codename-goose,fauxpilot,gpt-engineer-sub-variants,…}` | Single sub-spec (`porting_remaining_agents.md`); per-agent feature audit done at sub-spec time; agents lacking unique features → noted as "no porting needed, archived as reference" |
+| 18 | MCP/skill supplements | `helix_agent/cli_agents/{git-mcp,postgres-mcp,claude-plugins,codex-skills,ui-ux-pro-max}/` | Not agents — MCP servers and skill packs that supplement Phase 1 features (MCP Lifecycle, Skill System); fold in during the corresponding Phase 1 feature work |
 
-**Phase 2 scope is exhaustive:** every subdirectory under `HelixAgent/cli_agents/` is in scope unless it appears in the N1 closed-source list. Agents not enumerated above by name are covered by row 17 (Bundled remainder). At Phase 2 sub-spec time, do `ls HelixAgent/cli_agents/` and reconcile every entry against this table; any new agent that has appeared upstream since spec authoring gets added to row 17 and processed.
+**Phase 2 scope is exhaustive:** every subdirectory under `helix_agent/cli_agents/` is in scope unless it appears in the N1 closed-source list. Agents not enumerated above by name are covered by row 17 (Bundled remainder). At Phase 2 sub-spec time, do `ls helix_agent/cli_agents/` and reconcile every entry against this table; any new agent that has appeared upstream since spec authoring gets added to row 17 and processed.
 
 **Out of scope per N1 (closed-source / no portable code):** `claude-squad`, `amazon-q`, `copilot-cli`, `warp`, `kiro-cli`, `shai`. Treat as observable behaviour studies if UX patterns inspire features. `superset`, `snow-cli` — note that despite being in `cli_agents/`, these are non-agent products (Apache Superset analytics, Snowflake CLI) and contribute no porting features; document and skip.
 
@@ -398,8 +398,8 @@ canonical/CONSTITUTION_ANCHORS.md      # canonical wording for the three article
 canonical/CLAUDE_TEMPLATE.md           # template with addenda placeholder
 canonical/AGENTS_TEMPLATE.md
 owned-repos.txt                        # HelixCode (root), HelixCode/HelixCode (subdir),
-                                       # HelixAgent, HelixAgent/HelixLLM, HelixAgent/HelixMemory,
-                                       # HelixAgent/HelixSpecifier, HelixQA, Challenges,
+                                       # HelixAgent, helix_agent/HelixLLM, helix_agent/HelixMemory,
+                                       # helix_agent/HelixSpecifier, HelixQA, Challenges,
                                        # Containers, Security, Dependencies/HelixDevelopment/*
                                        # NOT included: cli_agents/* (third-party), Example_Projects/*,
                                        #                Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}
@@ -580,12 +580,12 @@ Pass executed 2026-05-04 by the authoring agent immediately before handing the s
 2. **Internal consistency** — Phase boundaries, anchor names (CONST-035 / -041 / -042), and acceptance-criteria references match across §1, §3, §4, §5, §6. CONST numbering matches the existing root `CONSTITUTION.md` style. **No fix needed.**
 3. **Scope check** — single spec covers a multi-phase programme but each phase has its own writing-plans cycle; this spec only commits to scope, dependencies, acceptance criteria, and operational continuity. The decomposition is appropriate for the brainstorming → writing-plans handoff. **No fix needed.**
 4. **Ambiguity check** — push authorisation rule clarified: regular non-force pushes pre-authorised for the duration of the programme; force pushes / hook bypasses / new branches / new remotes still require per-operation approval. **§7.3 was already explicit; reaffirmed during review.**
-5. **Coverage of "ALL CLI agents" mandate** — original Phase-2 priority table only enumerated 13 explicit agents + a "bundled remainder" without specifying the bundled set. The user's mandate is "all CLI agents" with no exceptions. **FIXED inline:** Phase 2 table extended to row 18; explicit clause added that scope is every `HelixAgent/cli_agents/` subdirectory minus N1 closed-source set, with a Phase-2-time reconciliation step.
+5. **Coverage of "ALL CLI agents" mandate** — original Phase-2 priority table only enumerated 13 explicit agents + a "bundled remainder" without specifying the bundled set. The user's mandate is "all CLI agents" with no exceptions. **FIXED inline:** Phase 2 table extended to row 18; explicit clause added that scope is every `helix_agent/cli_agents/` subdirectory minus N1 closed-source set, with a Phase-2-time reconciliation step.
 6. **Codex ambiguity** — spec was unclear whether "Codex" refers to OpenAI's legacy closed-source CLI or the modern open-source successor. **FIXED inline:** row 16 explicitly defers the disambiguation to the Phase 2 sub-spec; if it's the closed variant it moves to N1.
 7. **Decision-log column in PROGRESS.md** — present and used for in-band-but-out-of-spec calls (e.g., the Codex disambiguation, any submodule pointer rollback). Adequate.
 
 **Open spec-level uncertainty (deferred to writing-plans):**
-- Exact Go module import path under `dev.helix.code/HelixAgent/HelixLLM/...` — needs reading `HelixAgent/HelixLLM/go.mod` after P0-02 lands. Recorded as an open item; does not block the spec.
+- Exact Go module import path under `dev.helix.code/helix_agent/HelixLLM/...` — needs reading `helix_agent/HelixLLM/go.mod` after P0-02 lands. Recorded as an open item; does not block the spec.
 - Whether `Example_Projects/` is deleted in Phase 5 or kept as read-only mirror — decided after Phase 4 verification per §2.1.
 - Submodule depth (`--depth=1` shallow vs. full clone) — measured during P0-02; default to full clone unless a submodule exceeds 500 MB.
 

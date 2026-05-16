@@ -1413,7 +1413,7 @@ for r in github gitlab origin upstream; do printf "%-10s " "$r"; git ls-remote -
 **4. Open spec-level uncertainties (carried as `expected.json` regex tolerance):**
 - `compressioniface.CompressionResult.TokensAfter` field name verified at T06.5 — adjust if different.
 - `compressioniface.Message.Metadata` field presence verified at T05.4 — adjust if metadata lives on `Conversation` instead.
-- The integration test's required env var `HELIX_LLM_ANTHROPIC_KEY` matches the key in `../HelixAgent/.env` (per T05's migration). If that key isn't set on the runner, the test SKIP-OK's gracefully — not a defect.
+- The integration test's required env var `HELIX_LLM_ANTHROPIC_KEY` matches the key in `../helix_agent/.env` (per T05's migration). If that key isn't set on the runner, the test SKIP-OK's gracefully — not a defect.
 
 ---
 

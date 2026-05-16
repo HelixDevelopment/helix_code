@@ -1,6 +1,6 @@
 # Comprehensive Porting Plan: ALL REMAINING CLI Agents into HelixCode
 
-> **Mission**: Port 27 remaining CLI agents from HelixAgent/cli_agents into HelixCode
+> **Mission**: Port 27 remaining CLI agents from helix_agent/cli_agents into HelixCode
 > **Date**: 2026-05-04
 > **HelixCode Module**: `dev.helix.code`
 > **Agents Covered**: 27
@@ -4275,5 +4275,5 @@ github.com/snowflakedb/gosnowflake v1.7.0 // Snowflake
 
 ---
 
-*Document generated for HelixCode integration. All agents analyzed from HelixAgent/cli_agents submodule references.*
+*Document generated for HelixCode integration. All agents analyzed from helix_agent/cli_agents submodule references.*
 *For each feature, the Anti-Bluff Test provides an objective verification that the port is functional end-to-end.*

@@ -21,7 +21,7 @@ Each task's acceptance check output is pasted below with a timestamp. This file 
 
 - **Total directory entries:** 60
 - **Populated (≥2 files):** 47 (78%)
-- **Phase 1 priority `claude-code`:** ✓ populated (`HelixAgent/cli_agents/claude-code/`)
+- **Phase 1 priority `claude-code`:** ✓ populated (`helix_agent/cli_agents/claude-code/`)
 - **Empty (need Phase 2 sub-spec attention to fix HelixAgent's pin first):** 13
   - `aider, conduit, continue, HelixCode (recursive ref), kilo-code, kiro-cli (no upstream access), mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset`
 
@@ -51,9 +51,9 @@ SSH URL per Constitution Rule 3.
 | Plan acceptance criterion | Result |
 |---|---|
 | `.gitmodules` has `[submodule "HelixAgent"]` SSH | ✓ |
-| `HelixAgent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier}` exist + populated | ✓ all four |
-| `HelixAgent/cli_agents/` count ≥35 | ✓ 60 entries (47 fully populated) |
-| `HelixAgent/cli_agents/claude-code` populated (Phase 1 priority) | ✓ |
+| `helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier}` exist + populated | ✓ all four |
+| `helix_agent/cli_agents/` count ≥35 | ✓ 60 entries (47 fully populated) |
+| `helix_agent/cli_agents/claude-code` populated (Phase 1 priority) | ✓ |
 | Pre-commit secret scan clean | ✓ |
 | No third-party submodule modifications | ✓ verified — no commits made inside any submodule |
 | HelixAgent total size measured | ✓ 777 MB |
@@ -69,7 +69,7 @@ SSH URL per Constitution Rule 3.
 ```
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 exit=1
@@ -89,7 +89,7 @@ After restoring canonical to `PARENT_SHA` (`629c5bd5`):
 ```
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 exit=1  (matches Step 4.2 — back to original live state)
@@ -102,15 +102,15 @@ Restore verified: `git -C Dependencies/HelixDevelopment/LLMsVerifier rev-parse H
 Pins diverge — see PROGRESS.md parking lot for resolution.
 
 - `Dependencies/HelixDevelopment/LLMsVerifier` → `629c5bd5d141351270e72b6fb7359fa4b7881d7c`
-- `HelixAgent/LLMsVerifier` → `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`
+- `helix_agent/LLMsVerifier` → `1d53ae3b72c77c1f27171c0677431c48d2d02bdd`
 
 The canonical pin is one commit ahead of the transitive (HelixAgent) pin. Resolution deferred per spec §1.3 N2.
 
-## P0-05 — API-key migration from ../HelixAgent/.env
+## P0-05 — API-key migration from ../helix_agent/.env
 
 **Timestamp:** 2026-05-04T21:15:12+03:00
 
-**Source:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/HelixAgent/.env`
+**Source:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/helix_agent/.env`
 
 **Destination:** `-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/HelixCode/HelixCode/.env`
 
@@ -195,7 +195,7 @@ Verifications:
 
 **Timestamp:** 2026-05-04T21:36:23+03:00
 
-**Key parity vs ../HelixAgent/.env:** OK (identical)
+**Key parity vs ../helix_agent/.env:** OK (identical)
 
 **Real values present:** 0 (must be 0)
 
@@ -204,11 +204,11 @@ Verifications:
 **Verification commands and output:**
 
 ```
-$ grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u > /tmp/p0-07-canonical-keys.txt
+$ grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u > /tmp/p0-07-canonical-keys.txt
 $ wc -l /tmp/p0-07-canonical-keys.txt
 109 /tmp/p0-07-canonical-keys.txt
 
-$ diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) \
+$ diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
        <(grep -oE '^[A-Z_]+=' HelixCode/.env.example | sort -u)
 key-diff-exit=0
 
@@ -855,11 +855,11 @@ exit=0
 | Dependencies/HelixDevelopment/LLMProvider | afe0ac5 | master |
 | Dependencies/HelixDevelopment/VisionEngine | 9a35a9f | master |
 | HelixAgent | 9a19ac12 | main |
-| HelixAgent/HelixLLM | 4a412c7 | main |
-| HelixAgent/HelixMemory | e464257 | main |
-| HelixAgent/HelixSpecifier | f1f9927 | main |
+| helix_agent/HelixLLM | 4a412c7 | main |
+| helix_agent/HelixMemory | e464257 | main |
+| helix_agent/HelixSpecifier | f1f9927 | main |
 
-**Excluded from cascade (third-party):** `HelixAgent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `github_pages_website`, `Assets`.
+**Excluded from cascade (third-party):** `helix_agent/cli_agents/*`, `Example_Projects/*`, `Dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}`, `awesome-ai-memory`, `github_pages_website`, `Assets`.
 
 **Scripts modified:**
 - `scripts/verify-governance-cascade.sh`: Added CONST-042, CONST-043 to MANDATORY_PATTERNS; excluded assets/github_pages_website from `is_helixcode_owned`; added HelixAgent nested submodules to ownership list.
@@ -891,7 +891,7 @@ exit=0
 $ make verify-llmsverifier-pin-parity 2>&1 | tail -5; echo "exit=$?"
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 exit=1    ← expected (known divergence, parking-lot item)
@@ -916,7 +916,7 @@ exit=0    ← expected
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -984,7 +984,7 @@ comment so the skip is tracked, or remove the skip if it is no longer needed.
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
   Dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
-  HelixAgent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
 make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
@@ -999,11 +999,11 @@ make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
 **Final SHA on all 4 remotes:** `3676f411073f1fa9ac4841eb184d3a6734231fd3` — all 4 remotes (github, gitlab, origin, upstream) converge at this SHA.
 
 **Open carry-forward items (Phase 1+):**
-1. **LLMsVerifier dual-pin divergence** — `Dependencies/HelixDevelopment/LLMsVerifier` ahead of `HelixAgent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
+1. **LLMsVerifier dual-pin divergence** — `Dependencies/HelixDevelopment/LLMsVerifier` ahead of `helix_agent/LLMsVerifier`. Resolution requires HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1 sub-spec for any feature that depends on LLMsVerifier behaviour must include the pin coordination.
    > **Resolution annotation (close-out⁴⁵, 2026-05-15):** RESOLVED in P1.5-WP2. Transitive duplicate eliminated; HelixAgent now consumes the canonical pin via `go.mod` replace at `../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`. `make verify-foundation` exits 0. Original divergence text preserved above as historical record per evidence-doc convention.
 2. **3 historical credential leaks** — already remediated in P0-T08.5 (files removed from index, replaced with .example templates, ephemeral generation script for SSH keys). Required operator action (separate from this programme): rotate the SonarQube + Snyk tokens; reject the leaked SSH public key wherever trusted.
 3. **13 cli_agents with stale HelixAgent pins** — `aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset` will need their HelixAgent pin bumped before Phase 2 sub-specs touch them.
 4. **Submodule recursion cosmetic error** — `Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}` cause `git submodule foreach --recursive` to fatal-out; modifying third-party submodules is forbidden. Scripts wrap with `|| true`.
 
-**Phase 1 unblocked:** claude-code-source porting can proceed. The HelixAgent/cli_agents/claude-code/ source is fully populated; the inner Go app (HelixCode/) has its governance triplet; secret hygiene is in place; pre-push hook is installed; scan-secrets gates pre-push; SonarQube + Snyk infrastructure is wired (live scans pending operator credential rotation).
+**Phase 1 unblocked:** claude-code-source porting can proceed. The helix_agent/cli_agents/claude-code/ source is fully populated; the inner Go app (HelixCode/) has its governance triplet; secret hygiene is in place; pre-push hook is installed; scan-secrets gates pre-push; SonarQube + Snyk infrastructure is wired (live scans pending operator credential rotation).
 | No third-party submodule modifications | ✓ |

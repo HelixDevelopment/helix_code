@@ -2,7 +2,7 @@
 # scripts/verify-llmsverifier-pin-parity.sh
 #
 # Historical note (P1.5-WP2): the duplicate transitive submodule
-# HelixAgent/LLMsVerifier was eliminated in WP2 — there is now exactly
+# helix_agent/LLMsVerifier was eliminated in WP2 — there is now exactly
 # ONE LLMsVerifier checkout (Dependencies/HelixDevelopment/LLMsVerifier).
 # The pin-parity gate is therefore degenerate. We retain this script as
 # a no-op pass so the make ci-validate-all wiring stays intact and any
@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 CANONICAL_PATH="Dependencies/HelixDevelopment/LLMsVerifier"
-LEGACY_TRANSITIVE_PATH="HelixAgent/LLMsVerifier"
+LEGACY_TRANSITIVE_PATH="helix_agent/LLMsVerifier"
 
 if [ ! -d "$CANONICAL_PATH/.git" ] && [ ! -f "$CANONICAL_PATH/.git" ]; then
   echo "ERROR: $CANONICAL_PATH not initialised. Run: git submodule update --init --recursive" >&2

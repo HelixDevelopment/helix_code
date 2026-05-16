@@ -4,7 +4,7 @@
 
 **Goal:** Land the unblocking foundation for the CLI-Agent Fusion programme — submodule topology, secret-handling, push protections, governance cascade, and verification gates — so that Phase 1 (claude-code porting) can begin on top of a verifiably-clean base.
 
-**Architecture:** Sixteen sequenced sub-tasks producing concrete artefacts: scripts (`scan-secrets.sh`, `verify-llmsverifier-pin-parity.sh`, `bluff-detector.sh`, `pre-push` hook + installer), governance files (new `HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md`, root `CONSTITUTION.md` Article XII, root `CRUSH.md` / `QWEN.md` anchor backfills), submodule integration (`HelixAgent` at `HelixCode/HelixAgent/` with deep recursive init), `.env` migration from `../HelixAgent/.env`, governance cascade across all owned-by-us submodules, refreshed PNG diagrams in `docs/improvements/06_diagrams_real/`, a single `make verify-foundation` Makefile target wiring the gates, and a rolled-up evidence log.
+**Architecture:** Sixteen sequenced sub-tasks producing concrete artefacts: scripts (`scan-secrets.sh`, `verify-llmsverifier-pin-parity.sh`, `bluff-detector.sh`, `pre-push` hook + installer), governance files (new `HelixCode/HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md`, root `CONSTITUTION.md` Article XII, root `CRUSH.md` / `QWEN.md` anchor backfills), submodule integration (`HelixAgent` at `HelixCode/helix_agent/` with deep recursive init), `.env` migration from `../helix_agent/.env`, governance cascade across all owned-by-us submodules, refreshed PNG diagrams in `docs/improvements/06_diagrams_real/`, a single `make verify-foundation` Makefile target wiring the gates, and a rolled-up evidence log.
 
 **Tech Stack:** bash scripts (POSIX-portable where possible), Go test patterns (testify), git submodules over SSH, Python 3 + matplotlib for diagram regeneration, gitleaks (with grep fallback) for secret scanning, GNU Make for orchestration, gh + glab CLIs for cross-platform verification.
 
@@ -18,7 +18,7 @@
 | Path | Responsibility |
 |---|---|
 | `scripts/scan-secrets.sh` | Scan working tree + diff for credentials; gitleaks if installed, else regex fallback (sk-, gho_, glpat-, xoxb-, AKIA, eyJ) |
-| `scripts/verify-llmsverifier-pin-parity.sh` | Compare `Dependencies/HelixDevelopment/LLMsVerifier` SHA vs. `HelixAgent/LLMsVerifier` SHA; fail on divergence |
+| `scripts/verify-llmsverifier-pin-parity.sh` | Compare `Dependencies/HelixDevelopment/LLMsVerifier` SHA vs. `helix_agent/LLMsVerifier` SHA; fail on divergence |
 | `scripts/bluff-detector.sh` | Composite bluff scanner: skip-audit + assertion-density + challenge-evidence + integration-purity + simulation-string + print-and-sleep |
 | `scripts/git_hooks/pre-push` | Reject `git push --force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` |
 | `scripts/install-git-hooks.sh` | Idempotent hook installer; called by `setup.sh` |
@@ -39,7 +39,7 @@
 | `.gitmodules` | Add `[submodule "HelixAgent"]` block, SSH URL, deep recursive |
 | `.gitignore` (root) | Add `.env`, `.env.local`, `.env.*` (with `!.env.example`), `*.pem`, `*.key`, `*.crt`, `id_rsa*` |
 | `HelixCode/HelixCode/.gitignore` | Same patterns |
-| `HelixCode/HelixCode/.env.example` | Refresh: enumerate every key from `../HelixAgent/.env` with `<REDACTED>` placeholders |
+| `HelixCode/HelixCode/.env.example` | Refresh: enumerate every key from `../helix_agent/.env` with `<REDACTED>` placeholders |
 | `CONSTITUTION.md` (root) | Append Article XII §12.1 (CONST-042) + §12.2 (CONST-043) |
 | `CLAUDE.md` (root) | Add CONST-042/042 sections; fix §3.2 bluff (`HelixCode/ ← SUBMODULE` → `← TRACKED SUBDIRECTORY`) |
 | `AGENTS.md` (root) | Add CONST-042/042 sections |
@@ -55,7 +55,7 @@
 ### NEW files INSIDE HelixCode/HelixCode/ (not the meta-repo)
 | Path | Responsibility |
 |---|---|
-| `HelixCode/HelixCode/.env` | Copy of `../HelixAgent/.env`, mode 0600, gitignored (NOT under git) |
+| `HelixCode/HelixCode/.env` | Copy of `../helix_agent/.env`, mode 0600, gitignored (NOT under git) |
 
 ---
 
@@ -122,7 +122,7 @@
 - [ ] P0-02 — resolve Agent-Deck nested-worktree recursion error
 - [ ] P0-03 — add HelixAgent submodule
 - [ ] P0-04 — verify-llmsverifier-pin-parity.sh
-- [ ] P0-05 — migrate API keys from ../HelixAgent/.env
+- [ ] P0-05 — migrate API keys from ../helix_agent/.env
 - [ ] P0-06 — update .gitignore (root + inner)
 - [ ] P0-07 — refresh HelixCode/HelixCode/.env.example
 - [ ] P0-08 — scan-secrets.sh + planted-secret test
@@ -264,7 +264,7 @@ Expected: commit lands, all 4 remotes converge.
 
 **Files:**
 - Modify: `.gitmodules`
-- Create (gitlink): `HelixAgent/` (submodule pointer)
+- Create (gitlink): `helix_agent/` (submodule pointer)
 
 - [ ] **Step 3.1: Pre-flight — confirm SSH access to the upstream**
 
@@ -294,9 +294,9 @@ Expected: many "Submodule path '...' registered" + "checked out" lines, eventual
 - [ ] **Step 3.4: Verify the four core nested submodules + cli_agents**
 
 ```bash
-ls HelixAgent/HelixLLM HelixAgent/HelixMemory HelixAgent/HelixSpecifier HelixAgent/LLMsVerifier 2>&1 | head -3
-ls HelixAgent/cli_agents/claude-code HelixAgent/cli_agents/aider HelixAgent/cli_agents/cline 2>&1 | head -5
-ls HelixAgent/cli_agents/ | wc -l
+ls helix_agent/HelixLLM helix_agent/HelixMemory helix_agent/HelixSpecifier helix_agent/LLMsVerifier 2>&1 | head -3
+ls helix_agent/cli_agents/claude-code helix_agent/cli_agents/aider helix_agent/cli_agents/cline 2>&1 | head -5
+ls helix_agent/cli_agents/ | wc -l
 ```
 
 Expected: each `ls` returns directory contents (no "No such file" errors); cli_agents count ≥35.
@@ -304,11 +304,11 @@ Expected: each `ls` returns directory contents (no "No such file" errors); cli_a
 - [ ] **Step 3.5: Measure clone size for the parking-lot risk**
 
 ```bash
-du -sh HelixAgent/ 2>&1 | head -1
-du -sh HelixAgent/cli_agents/ 2>&1 | head -1
+du -sh helix_agent/ 2>&1 | head -1
+du -sh helix_agent/cli_agents/ 2>&1 | head -1
 ```
 
-Record the size. If `HelixAgent/` exceeds 1 GB, file an open risk in PROGRESS.md to consider `--depth=1` for cli_agents subset in a follow-up.
+Record the size. If `helix_agent/` exceeds 1 GB, file an open risk in PROGRESS.md to consider `--depth=1` for cli_agents subset in a follow-up.
 
 - [ ] **Step 3.6: Capture evidence**
 
@@ -325,11 +325,11 @@ $(grep -A3 'submodule "HelixAgent"' .gitmodules)
 
 Core nested submodules verified:
 \`\`\`
-$(ls -d HelixAgent/HelixLLM HelixAgent/HelixMemory HelixAgent/HelixSpecifier HelixAgent/LLMsVerifier 2>&1)
+$(ls -d helix_agent/HelixLLM helix_agent/HelixMemory helix_agent/HelixSpecifier helix_agent/LLMsVerifier 2>&1)
 \`\`\`
 
-cli_agents count: $(ls HelixAgent/cli_agents/ | wc -l)
-HelixAgent total size: $(du -sh HelixAgent/ | cut -f1)
+cli_agents count: $(ls helix_agent/cli_agents/ | wc -l)
+HelixAgent total size: $(du -sh helix_agent/ | cut -f1)
 EOF
 ```
 
@@ -354,12 +354,12 @@ git add .gitmodules HelixAgent docs/improvements/05_phase_0_evidence.md docs/imp
 git commit -m "$(cat <<'EOF'
 feat(P0-03): integrate HelixAgent as submodule (Approach A substrate)
 
-Adds HelixAgent at HelixCode/HelixAgent/ via SSH per Constitution Rule 3.
+Adds HelixAgent at HelixCode/helix_agent/ via SSH per Constitution Rule 3.
 Brings HelixLLM, HelixMemory, HelixSpecifier, LLMsVerifier, and 39
 cli_agents/ submodules transitively. Recursive deep init verified.
 
 This unblocks Phase 1 (claude-code porting) — the canonical source is
-HelixAgent/cli_agents/claude-code/ from this commit forward, not
+helix_agent/cli_agents/claude-code/ from this commit forward, not
 Example_Projects/Claude_Code/.
 
 Phase: P0
@@ -388,14 +388,14 @@ Expected: all four remotes converge.
 cat > scripts/verify-llmsverifier-pin-parity.sh <<'BASH'
 #!/usr/bin/env bash
 # scripts/verify-llmsverifier-pin-parity.sh
-# Fail if Dependencies/HelixDevelopment/LLMsVerifier and HelixAgent/LLMsVerifier
+# Fail if Dependencies/HelixDevelopment/LLMsVerifier and helix_agent/LLMsVerifier
 # point at different SHAs. Wired into make ci-validate-all.
 
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 CANONICAL_PATH="Dependencies/HelixDevelopment/LLMsVerifier"
-TRANSITIVE_PATH="HelixAgent/LLMsVerifier"
+TRANSITIVE_PATH="helix_agent/LLMsVerifier"
 
 if [ ! -d "$CANONICAL_PATH/.git" ] && [ ! -f "$CANONICAL_PATH/.git" ]; then
   echo "ERROR: $CANONICAL_PATH not initialised. Run: git submodule update --init --recursive" >&2
@@ -440,8 +440,8 @@ Expected: `OK: LLMsVerifier pin parity — both at <sha>` and `exit=0`. If pins 
 # Inspect both commits to decide which is canonical (usually the newer one)
 echo "Dependencies/HelixDevelopment/LLMsVerifier:"
 git -C Dependencies/HelixDevelopment/LLMsVerifier log -1 --format='%H %ci %s'
-echo "HelixAgent/LLMsVerifier:"
-git -C HelixAgent/LLMsVerifier log -1 --format='%H %ci %s'
+echo "helix_agent/LLMsVerifier:"
+git -C helix_agent/LLMsVerifier log -1 --format='%H %ci %s'
 # (no automated bump — defer to user; abort the task and ask which to converge on)
 ```
 
@@ -488,7 +488,7 @@ git commit -m "$(cat <<'EOF'
 feat(P0-04): add LLMsVerifier dual-pin parity verifier
 
 Fails if Dependencies/HelixDevelopment/LLMsVerifier (canonical Go-import pin)
-and HelixAgent/LLMsVerifier (HelixAgent's transitive view) point at
+and helix_agent/LLMsVerifier (HelixAgent's transitive view) point at
 different SHAs. Will be wired into make ci-validate-all in P0-15.
 
 Phase: P0
@@ -503,7 +503,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 
 ---
 
-## Task 5: Migrate API keys from `../HelixAgent/.env` (P0-05 / spec P0-04)
+## Task 5: Migrate API keys from `../helix_agent/.env` (P0-05 / spec P0-04)
 
 **Files:**
 - Create: `HelixCode/HelixCode/.env` (NOT under git — gitignored in next task)
@@ -511,8 +511,8 @@ for r in github gitlab origin upstream; do git push $r main; done
 - [ ] **Step 5.1: Verify source exists with proper permissions**
 
 ```bash
-ls -la ../HelixAgent/.env
-test -r ../HelixAgent/.env && echo "readable" || echo "NOT readable"
+ls -la ../helix_agent/.env
+test -r ../helix_agent/.env && echo "readable" || echo "NOT readable"
 ```
 
 Expected: `-rw-------` mode and "readable". If not, STOP and fix permissions on source.
@@ -528,7 +528,7 @@ Expected: directory listing + "dir exists".
 - [ ] **Step 5.3: Copy preserving mode**
 
 ```bash
-cp -p ../HelixAgent/.env HelixCode/HelixCode/.env
+cp -p ../helix_agent/.env HelixCode/HelixCode/.env
 chmod 600 HelixCode/HelixCode/.env
 ls -la HelixCode/HelixCode/.env
 ```
@@ -538,7 +538,7 @@ Expected: `-rw-------` mode on the destination, owner = current user.
 - [ ] **Step 5.4: Verify content shape matches (key sets identical)**
 
 ```bash
-diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) \
+diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
      <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env | sort -u)
 echo "exit=$?"
 ```
@@ -565,17 +565,17 @@ Expected: empty output and `exit=1`.
 ```bash
 cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 
-## P0-05 — API-key migration from ../HelixAgent/.env
+## P0-05 — API-key migration from ../helix_agent/.env
 Timestamp: $(date -Iseconds)
 
-Source: $(ls -la ../HelixAgent/.env | awk '{print $1, $3, $4, $5, $9}')
+Source: $(ls -la ../helix_agent/.env | awk '{print $1, $3, $4, $5, $9}')
 Destination: $(ls -la HelixCode/HelixCode/.env | awk '{print $1, $3, $4, $5, $9}')
 
 Key count: $(grep -cE '^[A-Z_]+=' HelixCode/HelixCode/.env)
 
 Key set diff (source vs destination):
 \`\`\`
-$(diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) \
+$(diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
        <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env | sort -u) 2>&1 | head -20)
 \`\`\`
 (empty diff = identical key set)
@@ -688,7 +688,7 @@ git add .gitignore HelixCode/HelixCode/.gitignore docs/improvements/05_phase_0_e
 git commit -m "$(cat <<'EOF'
 chore(P0-05/P0-06): migrate API keys + harden .gitignore against secret leaks
 
-Copies ../HelixAgent/.env to HelixCode/HelixCode/.env (mode 0600, NOT
+Copies ../helix_agent/.env to HelixCode/HelixCode/.env (mode 0600, NOT
 committed) and adds .env / .env.local / .env.* / *.pem / *.key / *.crt
 / id_rsa* / helix.security.json patterns to root and inner .gitignore.
 Per CONST-042, no credential artefact may be committed.
@@ -713,7 +713,7 @@ for r in github gitlab origin upstream; do git push $r main; done
 - [ ] **Step 7.1: Generate the canonical key set from the real .env**
 
 ```bash
-grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u > /tmp/p0-07-canonical-keys.txt
+grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u > /tmp/p0-07-canonical-keys.txt
 wc -l /tmp/p0-07-canonical-keys.txt
 ```
 
@@ -725,7 +725,7 @@ Expected: line count matches the count from Step 5.6.
 {
   echo "# HelixCode environment variables — example (no real values)"
   echo "#"
-  echo "# Generated by P0-07 from ../HelixAgent/.env key set."
+  echo "# Generated by P0-07 from ../helix_agent/.env key set."
   echo "# Replace <REDACTED> with real values in your local .env (mode 0600,"
   echo "# .gitignored). NEVER commit real values. CONST-042 absolute."
   echo "#"
@@ -747,7 +747,7 @@ mv HelixCode/HelixCode/.env.example.new HelixCode/HelixCode/.env.example
 - [ ] **Step 7.4: Verify keys parity with real .env, no real values present**
 
 ```bash
-diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) \
+diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) \
      <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example | sort -u)
 echo "key-diff-exit=$?"
 
@@ -766,14 +766,14 @@ cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 ## P0-07 — .env.example refresh
 Timestamp: $(date -Iseconds)
 
-Key parity vs ../HelixAgent/.env: $(diff <(grep -oE '^[A-Z_]+=' ../HelixAgent/.env | sort -u) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example | sort -u) > /dev/null && echo "OK (identical)" || echo "DIVERGENT")
+Key parity vs ../helix_agent/.env: $(diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env | sort -u) <(grep -oE '^[A-Z_]+=' HelixCode/HelixCode/.env.example | sort -u) > /dev/null && echo "OK (identical)" || echo "DIVERGENT")
 Real values present: $(grep -E '^[A-Z_]+=[^<]' HelixCode/HelixCode/.env.example | grep -vE '=$' | wc -l)
 Total keys: $(grep -cE '^[A-Z_]+=' HelixCode/HelixCode/.env.example)
 EOF
 
 git add HelixCode/HelixCode/.env.example docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 git commit -m "$(cat <<'EOF'
-chore(P0-07): refresh HelixCode/.env.example from ../HelixAgent/.env key set
+chore(P0-07): refresh HelixCode/.env.example from ../helix_agent/.env key set
 
 All keys present, all values <REDACTED>. Verified zero real values.
 
@@ -1503,7 +1503,7 @@ No API key, token, password, certificate, or other credential may be committed t
 **Operational requirements:**
 - Every repo must have `.env`, `.env.local`, `.env.*` (with `!.env.example` exception), `*.pem`, `*.key`, `*.crt`, `id_rsa*` in `.gitignore`.
 - `scripts/scan-secrets.sh` (or equivalent) must run before every push; failing it blocks the push.
-- API keys for development are sourced from the canonical `../HelixAgent/.env` (mode 0600, never under git) and copied — never symlinked, never committed — into per-repo `.env` files.
+- API keys for development are sourced from the canonical `../helix_agent/.env` (mode 0600, never under git) and copied — never symlinked, never committed — into per-repo `.env` files.
 
 **Cascade requirement:** This article must appear verbatim in every owned-by-us repository's `CONSTITUTION.md`, `CLAUDE.md`, and `AGENTS.md`. Owned-by-us repos are listed in the meta-repo `scripts/owned-repos.txt`.
 
@@ -1801,7 +1801,7 @@ OWNED=(HelixQA Challenges containers Security \
        Dependencies/HelixDevelopment/LLMProvider \
        Dependencies/HelixDevelopment/VisionEngine \
        HelixAgent \
-       HelixAgent/HelixLLM HelixAgent/HelixMemory HelixAgent/HelixSpecifier)
+       helix_agent/HelixLLM helix_agent/HelixMemory helix_agent/HelixSpecifier)
 
 for sub in "${OWNED[@]}"; do
   if [ ! -d "$sub/.git" ] && [ ! -f "$sub/.git" ]; then
@@ -2042,16 +2042,16 @@ modules:
   helix_libs:
     - name: HelixLLM
       url: git@github.com:HelixDevelopment/HelixLLM.git
-      pin: HelixAgent/HelixLLM
+      pin: helix_agent/HelixLLM
     - name: HelixMemory
       url: git@github.com:HelixDevelopment/HelixMemory.git
-      pin: HelixAgent/HelixMemory
+      pin: helix_agent/HelixMemory
     - name: HelixSpecifier
       url: git@github.com:HelixDevelopment/HelixSpecifier.git
-      pin: HelixAgent/HelixSpecifier
+      pin: helix_agent/HelixSpecifier
     - name: LLMsVerifier
       url: git@github.com:vasic-digital/LLMsVerifier.git
-      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + HelixAgent/LLMsVerifier (transitive)
+      pin: Dependencies/HelixDevelopment/LLMsVerifier (canonical) + helix_agent/LLMsVerifier (transitive)
 
   helix_apps:
     - name: HelixQA
@@ -2074,7 +2074,7 @@ modules:
     - name: LLama_CPP
     - name: Ollama
 
-  cli_agents_canonical_root: HelixAgent/cli_agents/
+  cli_agents_canonical_root: helix_agent/cli_agents/
   cli_agent_count: 39
 
 phases:
@@ -2210,7 +2210,7 @@ def emit_overall_architecture(t, out: Path):
     # cli_agents indicator
     ax.add_patch(mpatches.FancyBboxPatch((0.30, 0.05), 0.40, 0.08,
                                           boxstyle="round,pad=0.01", facecolor="lavender"))
-    ax.text(0.50, 0.09, f"HelixAgent/cli_agents/  ({t['modules']['cli_agent_count']} agents — canonical source)",
+    ax.text(0.50, 0.09, f"helix_agent/cli_agents/  ({t['modules']['cli_agent_count']} agents — canonical source)",
             ha="center", va="center", fontsize=9, style="italic")
 
     plt.tight_layout()
@@ -2468,11 +2468,11 @@ Expected: all four remotes converge. Working tree clean.
 - `scripts/git_hooks/pre-push` and `scripts/install-git-hooks.sh` consistent in Task 9.
 - CONST-042 / CONST-043 numbering consistent across Tasks 10, 11, 12, 14.
 - Article numbering: §11.9 (existing) and §12.1/§12.2 (new) consistent.
-- Submodule path `HelixCode/HelixAgent/` consistent across Tasks 3, 4, 14.
+- Submodule path `HelixCode/helix_agent/` consistent across Tasks 3, 4, 14.
 - File-mode 0600 referenced consistently for `.env` (Tasks 5, 6, 10).
 
 **4. Identified open spec-level uncertainties (carried forward, not blockers):**
-- Go module import path under `HelixAgent/HelixLLM/...` — needs reading `HelixAgent/HelixLLM/go.mod` after Task 3 lands; not in scope of P0 tasks themselves.
+- Go module import path under `helix_agent/HelixLLM/...` — needs reading `helix_agent/HelixLLM/go.mod` after Task 3 lands; not in scope of P0 tasks themselves.
 - Whether `Example_Projects/` is deleted in Phase 5 — deferred per spec.
 - Submodule depth shallow vs full — measured during Task 3 Step 3.5; if HelixAgent > 1 GB, file follow-up risk in PROGRESS.md.
 - `bluff-detector.sh` is a Phase 4 deliverable — Task 15 wires it as a stub-tolerant target so Phase 0 doesn't block on it.
