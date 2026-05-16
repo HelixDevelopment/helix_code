@@ -316,10 +316,10 @@ story.extend(H2('3.7 HelixSpecifier Architecture'))
 story.append(P('HelixSpecifier implements a 3-pillar fusion engine (SpecKit + Superpowers + GSD) with adaptive ceremony scaling. It provides a 7-phase SDD (Constitution, Specify, Clarify, Plan, Tasks, Analyze, Implement) with phases selected by ceremony level, 10 pre-configured CLI adapters, and 835+ tests across 7 test suites, all race-detector clean. Critical gaps include no persistence (SpecMemory is in-memory only), task execution is stubbed (Superpowers returns hardcoded success), placeholder output without injected DebateFunc, and no spec validation. The highest-value integration opportunity is bridging SpecMemory to HelixMemory for persistent storage and semantic search.'))
 story.append(Spacer(1, 10))
 
-story.extend(H2('3.8 Challenges and Containers (Special Attention)'))
-story.append(P('The Challenges module is the most architecturally sophisticated supporting module, featuring a constitutional anti-bluff system with no bypass possible, 16 built-in assertion evaluators, a multi-platform userflow automation framework with 21 adapters and 19 challenge templates, topological dependency ordering using Kahn algorithm, liveness monitoring with progress reporters, and direct integration with the Containers module via callback adapters. It contains 209+ tests in the userflow package alone.'))
+story.extend(H2('3.8 Challenges and containers (Special Attention)'))
+story.append(P('The Challenges module is the most architecturally sophisticated supporting module, featuring a constitutional anti-bluff system with no bypass possible, 16 built-in assertion evaluators, a multi-platform userflow automation framework with 21 adapters and 19 challenge templates, topological dependency ordering using Kahn algorithm, liveness monitoring with progress reporters, and direct integration with the containers module via callback adapters. It contains 209+ tests in the userflow package alone.'))
 story.append(Spacer(1, 6))
-story.append(P('The Containers module is the most feature-rich supporting module, supporting 7 container runtime backends (Docker, Podman, Kubernetes, LXD, nerdctl, CRI-O, plus RemoteRuntime over SSH), GPU-aware scheduling with 6 strategies, lifecycle management (lazy boot, idle shutdown, concurrency semaphores), a ctop TUI, remote distribution with failover, and 20 event types with aggressive test coverage and multiple coverage escalation files. Both modules use the CLI-shim pattern (shelling out to CLI tools rather than native SDKs), and the Containers module should be upgraded with native Go SDK clients for Docker and Kubernetes.'))
+story.append(P('The containers module is the most feature-rich supporting module, supporting 7 container runtime backends (Docker, Podman, Kubernetes, LXD, nerdctl, CRI-O, plus RemoteRuntime over SSH), GPU-aware scheduling with 6 strategies, lifecycle management (lazy boot, idle shutdown, concurrency semaphores), a ctop TUI, remote distribution with failover, and 20 event types with aggressive test coverage and multiple coverage escalation files. Both modules use the CLI-shim pattern (shelling out to CLI tools rather than native SDKs), and the containers module should be upgraded with native Go SDK clients for Docker and Kubernetes.'))
 story.append(Spacer(1, 18))
 
 # ═══════════════════════════════════════════════════════════
@@ -681,7 +681,7 @@ data = [
     [TC('5'), TC('Phase 1'), TC('KAIROS context, EditBlock matching, JSON-RPC'), TC('CLI Agent Core')],
     [TC('6'), TC('Phase 2'), TC('Browser automation, SWE-bench framework'), TC('Automation Ready')],
     [TC('7'), TC('Phase 2'), TC('Voice commands, auto-commit, context providers'), TC('UX Features')],
-    [TC('8'), TC('Phase 2'), TC('HelixMemory bridge, HelixLLM integration, Containers SDK'), TC('Module Integration')],
+    [TC('8'), TC('Phase 2'), TC('HelixMemory bridge, HelixLLM integration, containers SDK'), TC('Module Integration')],
     [TC('9'), TC('Phase 3'), TC('Agent modes, TUI framework, ML YOLO'), TC('Advanced Features')],
     [TC('10'), TC('Phase 3'), TC('Event-driven arch, panoptic vision, anti-bluff'), TC('Verification Layer')],
     [TC('11'), TC('Phase 3'), TC('Persistent conversations, HelixQA sessions'), TC('QA Integration')],

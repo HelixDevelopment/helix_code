@@ -38,7 +38,7 @@ Perform exhaustive analysis of all Helix repositories and CLI agent codebases, c
 ### 2.2 Supporting Infrastructure Analysis (Parallel Agents)
 - **Agent B1**: LLMsVerifier - Verification logic, model evaluation
 - **Agent B2**: Challenges - Test challenges, benchmarking suite
-- **Agent B3**: Containers - Containerization, deployment, runtime
+- **Agent B3**: containers - Containerization, deployment, runtime
 
 ### 2.3 CLI Agent Deep Dive (Priority Pipeline)
 - **Agent C1**: claude-code-source - PRIMARY (architecture, features, APIs, hacks)

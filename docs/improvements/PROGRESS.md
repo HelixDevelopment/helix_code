@@ -64,7 +64,7 @@
 - [x] P0-07 — refresh HelixCode/HelixCode/.env.example  ← (this commit)
 - [x] P0-08 — scan-secrets.sh + planted-secret test  ← (this commit)
 - [x] P0-08.5 — remediate 3 pre-existing tracked credentials  ← commits `8d30add` + `15cca9b` + `45bd4d4`
-- [x] P0-08.7 — Port SonarQube + Snyk security scan integration through Containers ← commits `1d728de` + `2494bc8` + `e29e2f6` + `16a4490` + sub5; Challenges: 33/33 + 26/26 PASS; Go BootManager wiring landed (go build exits 0); live scans deferred pending credential rotation (see evidence §P0-08.7)
+- [x] P0-08.7 — Port SonarQube + Snyk security scan integration through containers ← commits `1d728de` + `2494bc8` + `e29e2f6` + `16a4490` + sub5; Challenges: 33/33 + 26/26 PASS; Go BootManager wiring landed (go build exits 0); live scans deferred pending credential rotation (see evidence §P0-08.7)
 - [x] P0-08.7-fix — T08.7 code-quality review findings (Critical 1+2, Important 3-7) ← commits `b21b051`; evidence: §P0-T08.7 (fix-it) in 05_phase_0_evidence.md
 - [x] P0-09 — pre-push hook + installer + setup.sh wiring ← (this commit)
 - [x] P0-10 — create HelixCode/{CLAUDE,AGENTS,CONSTITUTION}.md (inner Go-app governance triplet) ← (this commit)
@@ -458,7 +458,7 @@
 - **F23 browser_legacy_* approval test** — `TestAllRegisteredTools_DefaultIsLevelEdit_ForUnclassifiedTools` now PASSES.
 - **F02 permissions engine wired** — `ConfirmationCoordinator.SetPolicyEngine()` method added. `main.go` now injects permissions-loaded `PolicyEngine` into the confirmation pipeline. Deny rules from `.yaml` files now actually block tool execution.
 - **Challenges submodule mirrors** — `gitlab` and `upstream` remotes added to Challenges submodule.
-- **Governance cascade** — CONST-033/035/042/043/045 cascaded to Security and Containers submodules.
+- **Governance cascade** — CONST-033/035/042/043/045 cascaded to Security and containers submodules.
 - **LLMsVerifier build** — Fixed go.mod replace path `../../Challenges` → `../../../Challenges` (LLMsVerifier at `Dependencies/HelixDevelopment/LLMsVerifier/`, Challenges at meta-repo root `Challenges/`). `go build ./...` and `go mod tidy` both pass clean.
 - **HelixQA build** — Fixed 4 replace directives that pointed to wrong paths: `../LLMsVerifier/llm-verifier` → `../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`, `../DocProcessor` → `../Dependencies/HelixDevelopment/DocProcessor`, `../LLMOrchestrator` → `../Dependencies/HelixDevelopment/LLMOrchestrator`, `../VisionEngine` → `../Dependencies/HelixDevelopment/VisionEngine`. `go build ./...` and `go mod tidy` both pass clean.
 - **6 internal/server tests** — Now 0 FAIL. All internal/server tests PASS (fresh `-count=1` run). Previously listed as "pre-existing, environment-dependent" but now passing in current environment.
@@ -492,7 +492,7 @@ Spec: `docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.
 | User Manual | `docs/user_manual/ZERO_BLUFF_USER_MANUAL.md` | End-user installation, configuration, F01-F30 usage |
 | Developer Guide | `docs/developer_guide/README.md` | Architecture, Tool/Command/Skill interfaces, anti-bluff discipline |
 | API Reference | `docs/api_reference/README.md` | 20 key internal packages, content from `go doc` |
-| Deployment Guide | `docs/deployment_guide/README.md` | Containers submodule, observability, manual CI/CD, security |
+| Deployment Guide | `docs/deployment_guide/README.md` | containers submodule, observability, manual CI/CD, security |
 
 Anti-bluff smoke at close-out: `clean` (template `placeholder` matches in
 `internal/config/config.go`, `internal/template/template.go`,
@@ -509,5 +509,5 @@ CLI examples validated against the codebase:
 ### Zero-Bluff Programme: COMPLETE
 
 No further programme work pending. Backlog / parking-lot items:
-- `cmd/infrastructure/` pre-existing compile errors against the Containers submodule API — **RESOLVED 2026-05-12**: `go build ./cmd/infrastructure/...` exits 0. Fixes applied: `NewSlogAdapter()` → `NewSlogAdapter(nil)`; removed 16 `WithDescription(...)` calls (no longer on `endpoint.Builder`); migrated `boot.Option` → `boot.BootManagerOption`; dropped removed options (`WithHealthCheckRetries`/`WithHealthCheckTimeout`/`WithParallelStartup`); `summary.Errors` → walk `summary.Results` filtering by `Status == "failed"`; `GetHealthStatus()` → `HealthCheckAll(ctx)`; removed unused `time` + `compose` imports; replaced `ep.Description` with `ep.ServiceName` in status output.
+- `cmd/infrastructure/` pre-existing compile errors against the containers submodule API — **RESOLVED 2026-05-12**: `go build ./cmd/infrastructure/...` exits 0. Fixes applied: `NewSlogAdapter()` → `NewSlogAdapter(nil)`; removed 16 `WithDescription(...)` calls (no longer on `endpoint.Builder`); migrated `boot.Option` → `boot.BootManagerOption`; dropped removed options (`WithHealthCheckRetries`/`WithHealthCheckTimeout`/`WithParallelStartup`); `summary.Errors` → walk `summary.Results` filtering by `Status == "failed"`; `GetHealthStatus()` → `HealthCheckAll(ctx)`; removed unused `time` + `compose` imports; replaced `ep.Description` with `ep.ServiceName` in status output.
 - Fyne desktop build requires `libxcursor-dev` system package; documented as a prerequisite in the user manual.

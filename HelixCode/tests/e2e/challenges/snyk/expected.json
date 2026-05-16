@@ -15,7 +15,7 @@
     "PASS.*Dockerfile uses official snyk/snyk-cli base image",
     "PASS.*\\.snyk has policy version",
     "PASS.*security-scan\\.sh --help shows snyk mode",
-    "PASS.*cmd/security_scan imports Containers BootManager",
+    "PASS.*cmd/security_scan imports containers BootManager",
     "PASS.*cmd/security_scan handles snyk scanner"
   ],
   "must_not_appear": [

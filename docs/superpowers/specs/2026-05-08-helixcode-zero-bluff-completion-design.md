@@ -112,7 +112,7 @@ Create `.helix-governance` marker file with:
 
 | Task | File(s) | What | TDD |
 |------|---------|------|-----|
-| P2-T01 | `internal/security/security.go` | Replace `ScanFeature()` simulated result with real SonarQube/Snyk scanning via Containers orchestration | Challenge expecting real scan results |
+| P2-T01 | `internal/security/security.go` | Replace `ScanFeature()` simulated result with real SonarQube/Snyk scanning via containers orchestration | Challenge expecting real scan results |
 | P2-T02 | `cmd/other_commands.go` | Wire `server`, `generate`, `test`, `worker`, `notify` to real implementations | CLI integration tests |
 | P2-T03 | `cmd/helix_config/main.go` | Audit and fix any placeholder subcommands | Config subcommand tests |
 

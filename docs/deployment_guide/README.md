@@ -7,9 +7,9 @@
 
 ---
 
-## 1. Containers Submodule
+## 1. containers Submodule
 
-HelixCode ships an orchestration layer in the `Containers/` submodule. All container artefacts live there — `Dockerfile`s, `compose`/`podman-compose` files, environment templates.
+HelixCode ships an orchestration layer in the `containers/` submodule. All container artefacts live there — `Dockerfile`s, `compose`/`podman-compose` files, environment templates.
 
 ```bash
 git submodule update --init Containers
@@ -55,9 +55,9 @@ Per CONST-042, secrets MUST NOT appear in any repository, image, or log.
 
 ### 2.3 Distribution hosts (CONST-045)
 
-Container distribution targets are configured **exclusively** through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env` (mode 0600, gitignored).
+Container distribution targets are configured **exclusively** through `CONTAINERS_REMOTE_HOST_N_*` env vars in `containers/.env` (mode 0600, gitignored).
 
-Adding / removing a host is an edit to `Containers/.env` — never a code change. Tests read `.env` at runtime and skip with `SKIP-OK:` when `CONTAINERS_REMOTE_ENABLED=false`.
+Adding / removing a host is an edit to `containers/.env` — never a code change. Tests read `.env` at runtime and skip with `SKIP-OK:` when `CONTAINERS_REMOTE_ENABLED=false`.
 
 ### 2.4 Reference `config.yaml`
 
@@ -98,7 +98,7 @@ Full field reference: [`docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md`](../COMPLE
 | `telemetry.enabled` | `true` | Visibility into approval/sandbox denials |
 | `quality.gate` | `strict` | Reject low-confidence LLM outputs |
 | File mode for `api_keys.sh` | `0600` | CONST-042 |
-| File mode for `Containers/.env` | `0600` | CONST-045 |
+| File mode for `containers/.env` | `0600` | CONST-045 |
 
 ### 3.2 Approval matrix in production
 
@@ -141,7 +141,7 @@ Default transport: gRPC. Use `HELIXCODE_OTEL_PROTOCOL=http/protobuf` for HTTP.
 
 ### 4.3 Dashboards
 
-Reference dashboard at `Containers/dashboards/grafana-helixcode.json` (when present). Key panels:
+Reference dashboard at `containers/dashboards/grafana-helixcode.json` (when present). Key panels:
 
 - Approval denials by mode/level (24h)
 - Sandbox violation rate (1h sliding)
@@ -303,7 +303,7 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 | `HelixCode/` | Core Go application | yes |
 | `HelixQA/` | QA + challenge orchestration | recommended |
 | `Challenges/` | Challenge bank | recommended for verification |
-| `Containers/` | Docker/container artefacts | yes |
+| `containers/` | Docker/container artefacts | yes |
 | `Security/` | Security tooling | yes |
 | `assets/` | Logos, themes, brand | optional |
 | `github_pages_website/` | Marketing site | optional |

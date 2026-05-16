@@ -24,7 +24,7 @@ const (
 ██║  ██║███████╗   ██║       ██║ ╚═╝ ██║██║╚██████╗╚██████╔╝██████╔╝███████╗
 ╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═╝     ╚═╝╚═╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
                                                                             
-   Infrastructure Orchestration — Powered by Containers Module
+   Infrastructure Orchestration — Powered by containers Module
    
 `
 )

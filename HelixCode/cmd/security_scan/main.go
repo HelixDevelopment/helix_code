@@ -1,4 +1,4 @@
-// cmd/security_scan — HelixCode security scanner bootstrap via Containers BootManager.
+// cmd/security_scan — HelixCode security scanner bootstrap via containers BootManager.
 //
 // This binary wires the SonarQube and Snyk container lifecycle through the
 // digital.vasic.containers BootManager (pkg/boot, pkg/endpoint, pkg/health, pkg/runtime).
@@ -120,7 +120,7 @@ func handleSonarQube(ctx context.Context, projectDir string, rt runtime.Containe
 
 	switch action {
 	case "start":
-		log.Println("security-scan: booting SonarQube via Containers BootManager...")
+		log.Println("security-scan: booting SonarQube via containers BootManager...")
 		summary, err := mgr.BootAll(ctx)
 		if err != nil {
 			return fmt.Errorf("BootAll failed: %w", err)
@@ -182,7 +182,7 @@ func handleSnyk(ctx context.Context, projectDir string, rt runtime.ContainerRunt
 
 	switch action {
 	case "start":
-		log.Println("security-scan: starting Snyk container via Containers BootManager...")
+		log.Println("security-scan: starting Snyk container via containers BootManager...")
 		summary, err := mgr.BootAll(ctx)
 		if err != nil {
 			return fmt.Errorf("BootAll failed: %w", err)

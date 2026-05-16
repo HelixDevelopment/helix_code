@@ -21,7 +21,7 @@ HelixCode/                            ← meta-repo (governance + submodule wiri
 │   └── tests/                        ← unit, integration, e2e, security, perf
 ├── HelixQA/                          ← QA submodule
 ├── Challenges/                       ← Challenge bank
-├── Containers/                       ← Docker/container artefacts
+├── containers/                       ← Docker/container artefacts
 └── docs/                             ← meta-level docs (this directory)
 ```
 

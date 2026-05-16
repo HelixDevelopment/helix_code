@@ -2899,7 +2899,7 @@ already (DebateOrchestrator, kiro-cli, ollama-code).
 `docs/improvements/p1-5-dedup-canonical.md` — 5 canonical paths recorded:
 
 1. LLMsVerifier → `Dependencies/HelixDevelopment/LLMsVerifier/`
-2. Containers   → `Containers/`
+2. containers   → `containers/`
 3. Security     → `Security/`
 4. HelixQA      → `HelixQA/`
 5. mcp_servers  → TBD at WP3.T03.05 (mcp_servers/ vs MCP/submodules/* — needs audit)
@@ -3088,7 +3088,7 @@ Consumer updates (HelixAgent):
 - `HelixAgent/go.mod` `replace digital.vasic.llmsverifier => ../Dependencies/HelixDevelopment/LLMsVerifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
 - `HelixAgent/challenges/scripts/challenge_framework.sh` `get_verifier_binary()` retargeted (committed in T03.03).
 
-### T03.02 — Containers dedup (3 nested copies)
+### T03.02 — containers dedup (3 nested copies)
 
 Canonical: root `Containers` (kept).
 Removed: `HelixAgent/Containers`, `Challenges/Containers`, `HelixAgent/HelixLLM/submodules/Containers` (3 copies).
@@ -3156,7 +3156,7 @@ Consumer updates: none required — the remaining HelixAgent references in `Make
 
 ```
 $ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|HelixQA|MCP-Servers" | head -5
- 2ba3e56c... Containers (1.0.2-dev-0.0.2-126-g2ba3e56)
+ 2ba3e56c... containers (1.0.2-dev-0.0.2-126-g2ba3e56)
  d473231d... Dependencies/HelixDevelopment/LLMsVerifier (heads/main)
  ecebe9a5... HelixQA (v4.0.0-210-gecebe9a)
  4503e2d1... mcp_servers (typescript-servers-0.6.2-3796-g4503e2d)
@@ -3230,7 +3230,7 @@ clean
 |---|---|---|---|
 | HelixAgent                                | yes | `test:` | `d5ab478` |
 | HelixQA                                   | yes | `build:` + `test:` | `d6e7a3e` |
-| Containers                                | yes | `build:` + `test:` | `9c2bb3e` |
+| containers                                | yes | `build:` + `test:` | `9c2bb3e` |
 | Dependencies/HelixDevelopment/LLMsVerifier | yes | `build:` + `test:` | `b4db2f9` |
 
 Decision: copy (not symlink) across submodule repo boundaries — symlinks across separate git repos break standalone checkouts.
@@ -3499,7 +3499,7 @@ Inner Go application `HelixCode/HelixCode/` (same repo as root) carries all thre
 
 #### Gaps closed (1)
 
-1. `Containers/CONSTITUTION.md` — file existed with substantial anti-bluff content (Sixth/Seventh Law inheritance, parent ATMOSphere covenant, clauses 6.L/6.O/6.P/6.Q) but lacked the **verbatim** user mandate quote. Appended a new "Article XI §11.9 — Anti-Bluff Forensic Anchor (CONST-035) — cascaded from HelixCode root" section containing the verbatim quote + operative rule + repository-scope statement. No legitimate per-repo paraphrase was overwritten — the addition is purely additive.
+1. `containers/CONSTITUTION.md` — file existed with substantial anti-bluff content (Sixth/Seventh Law inheritance, parent ATMOSphere covenant, clauses 6.L/6.O/6.P/6.Q) but lacked the **verbatim** user mandate quote. Appended a new "Article XI §11.9 — Anti-Bluff Forensic Anchor (CONST-035) — cascaded from HelixCode root" section containing the verbatim quote + operative rule + repository-scope statement. No legitimate per-repo paraphrase was overwritten — the addition is purely additive.
 
 #### New files created (0)
 
@@ -3519,8 +3519,8 @@ EXIT=0
 
 | SHA | Repo | Scope |
 |---|---|---|
-| `7bed5c5` | Containers (submodule) | append verbatim CONST-035 anchor to CONSTITUTION.md |
-| (this commit) | meta-repo root | bump Containers gitlink + add verify_anti_bluff_cascade.sh + close-out doc |
+| `7bed5c5` | containers (submodule) | append verbatim CONST-035 anchor to CONSTITUTION.md |
+| (this commit) | meta-repo root | bump containers gitlink + add verify_anti_bluff_cascade.sh + close-out doc |
 
 #### Defects / deviations
 
@@ -3567,7 +3567,7 @@ Root meta-repo (12 files):
 HelixAgent submodule (6 files):
 1. `CLAUDE.md`
 2. `internal/clis/agents/claude_code/claude_code.go` — sourceDir fallback (HelixAgent → HelixCode + cli_agents)
-3. `internal/config/config.go` — Containers/.env fallback (HelixAgent → HelixCode)
+3. `internal/config/config.go` — containers/.env fallback (HelixAgent → HelixCode)
 4. `tests/integration/cli_agents_test.go` — OpenCode/Cline test paths (Example_Projects → cli_agents)
 5. `docs/CLI_AGENTS_TEST_DOCUMENTATION.md`
 6. `docs/CLI_AGENT_PLUGINS_PLAN.md` — 50 path entries
@@ -3582,8 +3582,8 @@ HelixAgent/internal/clis/agents/claude_code/claude_code.go:144
 + sourceDir = "/run/media/.../HelixCode/cli_agents/claude-code-source"
 
 HelixAgent/internal/config/config.go:782
-- "/run/media/.../HelixAgent/Containers/.env",
-+ "/run/media/.../HelixCode/Containers/.env",
+- "/run/media/.../HelixAgent/containers/.env",
++ "/run/media/.../HelixCode/containers/.env",
 
 HelixAgent/tests/integration/cli_agents_test.go:26-29
 - openCodePath = "/run/media/.../HelixCode/Example_Projects/OpenCode/OpenCode"
@@ -3642,7 +3642,7 @@ docs/bluff_proofing/{,full_plan/}STEP_BY_STEP_GUIDE.md
 | `HelixAgent/docs/development/SESSION_2026-04-24.md` | Historical session log |
 | `HelixAgent/docs/issues/fixed/BUGFIXES.md` | Historical bugfix audit log |
 | `HelixAgent/reports/audit/full-report.md` | Historical audit report |
-| `Containers/scripts/resource-policy/apply-report.md` | Historical policy-application report |
+| `containers/scripts/resource-policy/apply-report.md` | Historical policy-application report |
 | "formerly Example_Projects/" / "formerly Example_Resources/" annotations in CLAUDE.md (8 files) + helixcode_architecture.md | Deliberately retained migration-context markers for future readers |
 | `scripts/verify-llmsverifier-pin-parity.sh` deprecation comment | Documents WP2's elimination of the duplicate transitive submodule |
 
@@ -3680,7 +3680,7 @@ None. All updates are mechanical sed-driven substitutions on real-world paths. R
 | HelixAgent (`dev.helix.agent`) | FAIL (replace `digital.vasic.agentic => ./Agentic` but `Agentic/go.mod` missing — empty submodule). Many `internal/adapters/...` and `cmd/...` fail on this. | 79 packages PASS, 302 FAIL (almost all `[setup failed]` cascading from the same missing-Agentic-go.mod). | Pre-existing submodule init issue. Out of P1.5 scope. |
 | HelixQA (`digital.vasic.helixqa`) | FAIL (replace `digital.vasic.{visionengine,llmorchestrator,llmsverifier}` point at sibling dirs `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` that don't exist; missing go.sum entries for `golang.org/x/{sys,text}`, `nats-io`). | 100 packages PASS, 35 FAIL (all `[setup failed]` from the same replace-dir-missing issue). | Pre-existing dependency-graph wiring issue. Out of P1.5 scope. |
 | LLMsVerifier (`Dependencies/HelixDevelopment/LLMsVerifier`, module `llmsverifier`) | FAIL (`make build` fails — Makefile points at `cmd/` which doesn't exist; `go build ./...` fails on missing go.sum entries for kafka-go, rabbitmq, etc.). | All 5 `tests/...` fail `[setup failed]` on missing go.sum + replace-dir issues. | Pre-existing. |
-| Containers | `make build` FAIL (pre-existing missing go.sum entries for `golang.org/x/{sys,crypto,term}`, prometheus/procfs). | Not run (build precondition fails). | Pre-existing. |
+| containers | `make build` FAIL (pre-existing missing go.sum entries for `golang.org/x/{sys,crypto,term}`, prometheus/procfs). | Not run (build precondition fails). | Pre-existing. |
 | Security | `make build` PASS (single line: `go build ./...` returned successfully). | Not exercised in this WP. | Clean. |
 
 Logs captured: `/tmp/wp10-meta-build.log`, `/tmp/wp10-meta-test.log`, `/tmp/wp10-inner-build.log`, `/tmp/wp10-inner-test.log`, `/tmp/wp10-helixagent-build.log`, `/tmp/wp10-helixagent-test.log`, `/tmp/wp10-helixqa-build.log`, `/tmp/wp10-helixqa-test.log`, `/tmp/wp10-llmsverifier-test.log`.
@@ -3704,7 +3704,7 @@ Logs captured: `/tmp/wp10-meta-build.log`, `/tmp/wp10-meta-test.log`, `/tmp/wp10
 | `Implementation_Guide/scripts/ascii_art_generator.go`: unused `os` import | meta-repo | Script-style file; not part of any module build target. |
 | `Agentic/go.mod` missing | HelixAgent | `replace digital.vasic.agentic => ./Agentic` but submodule init never populated `Agentic/`. Fix is `git submodule update --init --recursive` plus probably committing the missing `Agentic` submodule pointer at HelixAgent root. |
 | `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` dirs missing | HelixQA | Replace-dir paths assume sibling layout that doesn't exist in current repo. Same class as HelixAgent issue. |
-| Missing go.sum entries (kafka-go, rabbitmq/amqp091-go, golang.org/x/{sys,text,crypto,term}) | LLMsVerifier, HelixQA, Containers | `go mod tidy` not run after recent dep changes. Mechanical fix once submodule wiring above is resolved. |
+| Missing go.sum entries (kafka-go, rabbitmq/amqp091-go, golang.org/x/{sys,text,crypto,term}) | LLMsVerifier, HelixQA, containers | `go mod tidy` not run after recent dep changes. Mechanical fix once submodule wiring above is resolved. |
 | LLMsVerifier `make build` references `./cmd` which doesn't exist | Dependencies/HelixDevelopment/LLMsVerifier | Makefile target out of date with current package layout. |
 | `applications/desktop` Fyne-GLFW build needs `libxcursor-dev` headers | HelixCode inner | Host environment issue; not a code defect. |
 | `examples/multi_agent_system` MockLLMProvider drift (same root cause as T10.03) | HelixCode inner | Same fix can be applied; deferred because `examples/` is not on the WP10 scope critical path and the demo isn't shipped to end users. Captured for a future cleanup ticket. |
@@ -3748,7 +3748,7 @@ $ cd HelixCode && go build -o /tmp/p1_5_challenge ./tests/integration/cmd/p1_5_c
 ==> Phase A — NO-DUPLICATE-SUBMODULES
 phaseA: scanned 1 meta-repo-tracked .gitmodules file(s)
 phaseA: LLMsVerifier at Dependencies/HelixDevelopment/LLMsVerifier (1 location, no duplicates)
-phaseA: Containers at Containers (1 location, no duplicates)
+phaseA: containers at containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: HelixQA at HelixQA (1 location, no duplicates)
 phaseA: mcp_servers at mcp_servers (1 location, no duplicates)
@@ -3800,7 +3800,7 @@ The `Challenges/p1-5-foundation-cleanup/run.sh` end-to-end execution matches the
 #### Defects / deviations
 
 1. **Phase A scope clarification.** The original task spec said "for each repo URL across all .gitmodules in the tree". Initial implementation walked every `.gitmodules` recursively and flagged a duplicate canonical URL `HelixDevelopment/HelixQA.git` declared in `HelixAgent/HelixLLM/.gitmodules` at `submodules/HelixQA`. This entry is owned by the HelixLLM submodule (not the meta-repo's tracked `.gitmodules`) and was outside WP3.T03.04's scope. The harness was scoped down to `git ls-files .gitmodules` — the meta-repo's directly-tracked `.gitmodules` only — which matches the architectural reality that nested submodules' `.gitmodules` are owned and validated by those submodules themselves. **A follow-up cleanup work package should remove the stale `submodules/HelixQA` declaration from `HelixAgent/HelixLLM/.gitmodules` (the directory is not on disk; only the declaration remains).**
-2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `Challenges/p1-f06-mcp-full-lifecycle`, `Containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
+2. **Phase D scope clarification.** Initial run reported 657 violations because the walk descended into every submodule subtree (Challenges, Containers, HelixAgent, etc.). WP7 explicitly normalised only the meta-repo's directly-tracked dirs and the inner `HelixCode/` tree; submodule-internal layouts (e.g., `Challenges/p1-f06-mcp-full-lifecycle`, `containers/scripts/host-power-management`) are owned by those repos and follow their own conventions. Phase D was scoped via `git submodule status --recursive` to skip into all submodule subtrees, matching WP7's actual scope. The harness still catches WP7-deferred kebab-case items inside the meta-repo proper (e.g., `applications/aurora_os`) by allowlisting them explicitly with reference to the WP7 deferred list — adding any new kebab-case dir to the meta-repo's directly-tracked surface trips the gate immediately.
 3. **Snake-case regex relaxed for digit prefixes.** Initial regex `^[a-z][a-z0-9_]*$` flagged `01_analysis_step_01`, `06_diagrams_real`, etc. used throughout `docs/improvements/`. Relaxed to `^[a-z0-9][a-z0-9_]*$` to accept digit-prefixed sequence names; the rest of the snake_case discipline (lowercase + digits + underscores only) is preserved.
 4. **No commits or pushes performed in WP11.** Per CONST-043 + WP12 ownership of the push step, this WP only produces artefacts. The dual commit (Challenges submodule first, then meta-repo) is captured in the WP12 work plan.
 
@@ -3835,7 +3835,7 @@ $ cd HelixCode && go build -o /tmp/p1_5_challenge ./tests/integration/cmd/p1_5_c
 ==> Phase A — NO-DUPLICATE-SUBMODULES
 phaseA: scanned 1 meta-repo-tracked .gitmodules file(s)
 phaseA: LLMsVerifier at Dependencies/HelixDevelopment/LLMsVerifier (1 location, no duplicates)
-phaseA: Containers at Containers (1 location, no duplicates)
+phaseA: containers at containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: HelixQA at HelixQA (1 location, no duplicates)
 phaseA: mcp_servers at mcp_servers (1 location, no duplicates)

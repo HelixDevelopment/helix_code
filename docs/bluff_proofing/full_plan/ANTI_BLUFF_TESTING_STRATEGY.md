@@ -247,7 +247,7 @@ Challenge Requirements (per CONST-035):
 | Security | 5 | Auth, sandboxing, input validation | `auth_penetration_challenge.sh` |
 | Performance | 5 | Load testing, resource limits | `concurrent_tasks_challenge.sh` |
 | Anti-Bluff | 10 | Detect simulated/placeholder behavior | `no_simulation_challenge.sh` |
-| Containers | 5 | Docker builds, compose orchestration | `docker_health_challenge.sh` |
+| containers | 5 | Docker builds, compose orchestration | `docker_health_challenge.sh` |
 
 #### Challenge Framework
 

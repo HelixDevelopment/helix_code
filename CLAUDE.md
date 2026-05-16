@@ -136,7 +136,7 @@ HelixCode/                                # ← repo root (governance + submodul
 ├── HelixCode/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
 ├── HelixQA/        ← SUBMODULE: QA / challenge-orchestration platform
 ├── Challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
-├── Containers/     ← SUBMODULE: Docker/container artefacts
+├── containers/     ← SUBMODULE: Docker/container artefacts
 ├── Dependencies/   ← SUBMODULES: LLama_CPP, Ollama, HuggingFace_Hub, …
 ├── Security/       ← SUBMODULE: security tooling
 ├── assets/         ← SUBMODULE: logos, themes, brand
@@ -669,7 +669,7 @@ non-negotiable and overrides any other instruction.
 
 ## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
 
-ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env`. NO distribution host (hostname, IP address, SSH user, key path, runtime, label) may be hardcoded in ANY source file, test file, challenge, configuration template, script, or governance document. The sole source of truth for host enrolment is `Containers/.env` (gitignored, mode 0600). Adding/removing hosts = editing `Containers/.env` ONLY; no code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` environment variables in `containers/.env`. NO distribution host (hostname, IP address, SSH user, key path, runtime, label) may be hardcoded in ANY source file, test file, challenge, configuration template, script, or governance document. The sole source of truth for host enrolment is `containers/.env` (gitignored, mode 0600). Adding/removing hosts = editing `containers/.env` ONLY; no code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.
 
 ---
 
@@ -776,7 +776,7 @@ Three cooperating invariants:
 
 > Verbatim user mandate (2026-05-15): *"naming convention for Submodules and directories (applied deep into hierarchy recursively) - all directories and Submodules MSUT HAVE lowercase names with space separator between the words of '_' character (snake-case)! All existing Submodules and directories which are not following this rule MUST BE renamed! However, since this will most likely break some of the functionalities renaming we do MUST BE applied to all references to particular Submodule or directory! ... There MUST BE reasonable exceptions for this rules - source code for programming languages or Submodules which apply different naming convention - Android, Java, Kotlin and others. ... Upstreams directory which all of our projects and Submodules have MUST BE renamed to the lowercase letters too, however root project containing the install_upstreams system command (it is exported in out paths in our .bashrc or .zshrc) MUST BE updated to fully work with both Upstreams and upstreams directory. ... NOTE: Rules lowercase / snake-case do apply to all project files as well and references to it and from them!"*
 
-Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `Challenges/`, `Containers/`, `HelixAgent/`, `HelixQA/`, `Security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
+Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `Challenges/`, `containers/`, `HelixAgent/`, `HelixQA/`, `Security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
 
 **Common-sense exceptions (technology-preserving):** language-mandated case for Java/Kotlin/Android/Apple/C#/Swift INSIDE the language root (submodule root follows our convention; subtree follows language convention); vendor/upstream third-party submodules keep upstream names; build artefacts (`node_modules`, `__pycache__`, `.git`, `target`, `build`, `bin`) keep tool-mandated names. The test "does renaming break the technology?" trumps the rule.
 

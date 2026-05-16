@@ -43,7 +43,7 @@
 | 26 | Dashboard-Analytics-React | `Dashboard-Analytics-React` | `git@github.com:vasic-digital/Dashboard-Analytics-React.git` | `af0af64` | vasic-digital | Analytics dashboard React component |
 | 27 | Media-Player-React | `Media-Player-React` | `git@github.com:vasic-digital/Media-Player-React.git` | `0385c5b` | vasic-digital | Media player React component |
 | 28 | Collection-Manager-React | `Collection-Manager-React` | `git@github.com:vasic-digital/Collection-Manager-React.git` | `778966b` | vasic-digital | Collection manager React component |
-| 29 | Containers | `Containers` | `git@github.com:vasic-digital/Containers.git` | `9f9f52a` | vasic-digital | Containerized build and runtime environments (rootless Podman/Docker) |
+| 29 | containers | `Containers` | `git@github.com:vasic-digital/Containers.git` | `9f9f52a` | vasic-digital | Containerized build and runtime environments (rootless Podman/Docker) |
 | 30 | Lazy | `Lazy` | `git@github.com:vasic-digital/Lazy.git` | `a3d15db` | vasic-digital | Lazy/deferred initialization patterns |
 | 31 | Memory | `Memory` | `git@github.com:vasic-digital/Memory.git` | `292ae4f` | vasic-digital | Memory management utilities |
 | 32 | Recovery | `Recovery` | `git@github.com:vasic-digital/Recovery.git` | — | vasic-digital | Recovery and resilience patterns |
@@ -590,7 +590,7 @@ Each session directory contains:
 
 | Phase | Status | Closed Date | What Was Delivered |
 |-------|--------|-------------|-------------------|
-| **P0 Foundation** | **CLOSED** | 2026-04-17 | Contracts + Containers GPU extension + vertical-slice CLIs. All 10 P0 test categories green. |
+| **P0 Foundation** | **CLOSED** | 2026-04-17 | Contracts + containers GPU extension + vertical-slice CLIs. All 10 P0 test categories green. |
 | **P1 Capture** | **CLOSED** | 2026-04-18 | Factory + 4 CaptureSource backends (web/CDP, linux/X11, android, androidtv). Bank `ocu-capture.json` shipped. |
 | **P2 Vision** | **CLOSED** | 2026-04-18 | Pipeline + CPU backend + remote-dispatch plumbing. Bank `ocu-vision.json` (13 entries) shipped. |
 | **P3 Interact** | **CLOSED** | 2026-04-18 | Factory + 4 Interactor backends (linux/uinput, web/CDP, android, androidtv). Bank `ocu-interact.json` (19 entries) shipped. |

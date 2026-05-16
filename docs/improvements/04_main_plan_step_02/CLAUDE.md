@@ -49,7 +49,7 @@ These rules are non-negotiable across every project, submodule, and sibling repo
 
 11. **Real Infrastructure for All Non-Unit Tests.** Mocks/fakes MAY be used ONLY in unit tests. ALL other test types MUST execute against the REAL running system.
 12. **Reproduction-Before-Fix (CONST-032 — MANDATORY).** Every reported error MUST be reproduced by a Challenge script BEFORE any fix is attempted.
-13. **Concurrent-Safe Containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
+13. **Concurrent-Safe containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
 
 ### Definition of Done (universal)
 

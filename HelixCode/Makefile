@@ -680,7 +680,7 @@ secrets-scan: ## Run scan-secrets.sh to verify no credentials are committed
 		echo "Error: scripts/scan-secrets.sh not found"; exit 1; \
 	fi
 
-scan-start-sonar: ## Start SonarQube server (uses Containers BootManager once wired, T08.7/4)
+scan-start-sonar: ## Start SonarQube server (uses containers BootManager once wired, T08.7/4)
 	@./scripts/security-scan.sh start-sonar
 
 scan-stop: ## Stop SonarQube services

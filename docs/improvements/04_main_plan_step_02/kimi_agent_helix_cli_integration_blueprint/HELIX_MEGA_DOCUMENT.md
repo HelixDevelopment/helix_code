@@ -169,7 +169,7 @@ This mega-document is the master index. All detailed porting plans are in separa
 | LLMsVerifier | ✅ | ✅ | ✅ |
 | HelixQA | ✅ | ✅ | ✅ |
 | Challenges | ✅ | ✅ | ✅ |
-| Containers | ✅ | ✅ | ✅ |
+| containers | ✅ | ✅ | ✅ |
 | DocProcessor | ✅ | ✅ | ✅ |
 | LLMOrchestrator | ✅ | ✅ | ✅ |
 | LLMProvider | ✅ | ✅ | ✅ |

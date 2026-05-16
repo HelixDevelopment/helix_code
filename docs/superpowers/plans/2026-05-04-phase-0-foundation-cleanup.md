@@ -1794,7 +1794,7 @@ This is the critical multi-submodule push step. Per spec §7.3 cascade order —
 
 ```bash
 # Owned-by-us submodules; for each, push to every configured remote
-OWNED=(HelixQA Challenges Containers Security \
+OWNED=(HelixQA Challenges containers Security \
        Dependencies/HelixDevelopment/LLMsVerifier \
        Dependencies/HelixDevelopment/DocProcessor \
        Dependencies/HelixDevelopment/LLMOrchestrator \
@@ -1853,7 +1853,7 @@ Expected: `exit=0`. If still non-zero, the failing submodule(s) need manual tria
 
 ```bash
 git status
-git add HelixQA Challenges Containers Security Dependencies HelixAgent scripts/verify-governance-cascade.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
+git add HelixQA Challenges containers Security Dependencies HelixAgent scripts/verify-governance-cascade.sh docs/improvements/05_phase_0_evidence.md docs/improvements/PROGRESS.md
 
 cat >> docs/improvements/05_phase_0_evidence.md <<EOF
 

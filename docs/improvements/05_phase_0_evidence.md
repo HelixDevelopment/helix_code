@@ -361,7 +361,7 @@ make -C HelixCode security-scan-sonarqube
 ./scripts/security-scan.sh sonarqube
 ```
 
-### Sub-commit 4 — Containers BootManager wiring (`16a4490`)
+### Sub-commit 4 — containers BootManager wiring (`16a4490`)
 
 - `HelixCode/cmd/security_scan/main.go` (~170 lines) wires:
   - `digital.vasic.containers/pkg/runtime.AutoDetect(ctx)` for runtime detection
@@ -404,7 +404,7 @@ Challenge run output (both 100% PASS):
 [PASS] SonarQube health check uses /api/system/status
 [PASS] Security network defined
 [PASS] security-scan.sh --help shows sonarqube mode
-[PASS] cmd/security_scan imports Containers BootManager
+[PASS] cmd/security_scan imports containers BootManager
 [PASS] cmd/security_scan uses runtime.AutoDetect
 Results: 33/33 passed, 0 failed
 
@@ -419,7 +419,7 @@ Results: 33/33 passed, 0 failed
 [PASS] Dockerfile uses official snyk/snyk-cli base image
 [PASS] .snyk has policy version
 [PASS] security-scan.sh reads SNYK_TOKEN from env
-[PASS] cmd/security_scan imports Containers BootManager
+[PASS] cmd/security_scan imports containers BootManager
 [PASS] cmd/security_scan handles snyk scanner
 Results: 26/26 passed, 0 failed
 ```
@@ -492,9 +492,9 @@ $ grep -nE "PASSWORD:.*sonar" HelixCode/docker/security/sonarqube/docker-compose
 
 `HelixCode/scripts/security-scan.sh` lines 31-34 removed. Original stale text:
 ```
-# TODO(P0-T08.7/4): replace docker-compose invocations below with Containers BootManager call:
+# TODO(P0-T08.7/4): replace docker-compose invocations below with containers BootManager call:
 #   go run ./cmd/security_scan -scanner=sonarqube
-# For now, direct compose calls are used as an MVP; the Containers BootManager wiring
+# For now, direct compose calls are used as an MVP; the containers BootManager wiring
 # is deferred to Sub-commit 4 / Phase 3.
 ```
 Replaced with single-line accurate status note. Sub-commit 4 (`16a4490`) had already landed.
@@ -847,7 +847,7 @@ exit=0
 |---|---|---|
 | HelixQA | ecebe9a | main |
 | Challenges | 53d47c8 | main |
-| Containers | 6736040 | main |
+| containers | 6736040 | main |
 | Security | e7c09c1 | main |
 | Dependencies/HelixDevelopment/LLMsVerifier | d473231d | main |
 | Dependencies/HelixDevelopment/DocProcessor | 764a9a9 | master |

@@ -514,17 +514,17 @@ BY AN END USER IN THE SAME BUILD.
 
 ---
 
-## CONST-045: No Hardcoded Distribution Hosts — All Distribution Via Containers/.env
+## CONST-045: No Hardcoded Distribution Hosts — All Distribution Via containers/.env
 
-**Rule**: ALL container distribution targets SHALL be configured exclusively through the `CONTAINERS_REMOTE_HOST_N_*` environment variables in `Containers/.env` (N=1..100; iteration stops at first absent `_NAME`). The Containers module's `pkg/envconfig/parser.go` is the authoritative loader.
+**Rule**: ALL container distribution targets SHALL be configured exclusively through the `CONTAINERS_REMOTE_HOST_N_*` environment variables in `containers/.env` (N=1..100; iteration stops at first absent `_NAME`). The containers module's `pkg/envconfig/parser.go` is the authoritative loader.
 
 **Prohibition**: NO distribution host (hostname, IP address, SSH user, SSH key path, runtime, labels) may be hardcoded in ANY HelixCode-owned source file, test file, challenge, configuration template, script, documentation, governance document (CONSTITUTION.md, CLAUDE.md, AGENTS.md), or any other committed artefact.
 
-**The sole source of truth for host enrolment is `Containers/.env`** (gitignored, mode 0600). `Containers/.env.example` documents the format but contains NO operative host entries. Adding, removing, or modifying a distribution host MUST be done by editing `Containers/.env` ONLY; no code change is required or permitted.
+**The sole source of truth for host enrolment is `containers/.env`** (gitignored, mode 0600). `containers/.env.example` documents the format but contains NO operative host entries. Adding, removing, or modifying a distribution host MUST be done by editing `containers/.env` ONLY; no code change is required or permitted.
 
-**Audit command**: `grep -rn 'CONTAINERS_REMOTE_HOST_' Containers/.env`. The configured set at any point is whatever `.env` declares. At rule introduction time (2026-05-07), the configured hosts are `thinker.local`, but the rule applies to whatever set is in `.env` at any future point.
+**Audit command**: `grep -rn 'CONTAINERS_REMOTE_HOST_' containers/.env`. The configured set at any point is whatever `.env` declares. At rule introduction time (2026-05-07), the configured hosts are `thinker.local`, but the rule applies to whatever set is in `.env` at any future point.
 
-**Testing**: Non-unit tests and Challenges that require remote distribution SHALL read `Containers/.env` at runtime. They SHALL skip (with `SKIP-OK: #P{X} no remote hosts configured`) when `CONTAINERS_REMOTE_ENABLED` is `false` or unset, and SHALL use whatever hosts are configured when enabled. No test may hardcode a host name.
+**Testing**: Non-unit tests and Challenges that require remote distribution SHALL read `containers/.env` at runtime. They SHALL skip (with `SKIP-OK: #P{X} no remote hosts configured`) when `CONTAINERS_REMOTE_ENABLED` is `false` or unset, and SHALL use whatever hosts are configured when enabled. No test may hardcode a host name.
 
 **Cascade requirement:** This rule (verbatim or by CONST-045 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md.
 
@@ -703,7 +703,7 @@ Constitution amendments require:
 
 > Verbatim user mandate (2026-05-15): *"naming convention for Submodules and directories (applied deep into hierarchy recursively) - all directories and Submodules MSUT HAVE lowercase names with space separator between the words of '_' character (snake-case)! All existing Submodules and directories which are not following this rule MUST BE renamed! However, since this will most likely break some of the functionalities renaming we do MUST BE applied to all references to particular Submodule or directory! ... There MUST BE reasonable exceptions for this rules - source code for programming languages or Submodules which apply different naming convention - Android, Java, Kotlin and others. ... Upstreams directory which all of our projects and Submodules have MUST BE renamed to the lowercase letters too, however root project containing the install_upstreams system command (it is exported in out paths in our .bashrc or .zshrc) MUST BE updated to fully work with both Upstreams and upstreams directory. ... NOTE: Rules lowercase / snake-case do apply to all project files as well and references to it and from them!"*
 
-Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `Challenges/`, `Containers/`, `HelixAgent/`, `HelixQA/`, `Security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
+Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`HelixCode/`, `Challenges/`, `containers/`, `HelixAgent/`, `HelixQA/`, `Security/`, `github_pages_website/`, `Upstreams/`, `Dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
 
 **Common-sense exceptions (technology-preserving):** language-mandated case for Java/Kotlin/Android/Apple/C#/Swift INSIDE the language root (submodule root follows our convention; subtree follows language convention); vendor/upstream third-party submodules keep upstream names; build artefacts (`node_modules`, `__pycache__`, `.git`, `target`, `build`, `bin`) keep tool-mandated names. The test "does renaming break the technology?" trumps the rule.
 

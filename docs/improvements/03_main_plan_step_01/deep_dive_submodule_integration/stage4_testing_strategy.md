@@ -151,10 +151,10 @@ func TestPermissionEvaluator_Evaluate(t *testing.T) {
 | HelixLLM | LLMsVerifier | 50 | Provider verification |
 | HelixQA | HelixAgent | 90 | QA-driven agent testing |
 | Challenges | HelixAgent | 80 | Challenge → agent execution |
-| Containers | HelixAgent | 100 | Containerized agent runs |
+| containers | HelixAgent | 100 | Containerized agent runs |
 | HelixMemory | HelixLLM | 40 | Token tracking → LLM |
 | HelixSpecifier | HelixLLM | 30 | Spec → prompt generation |
-| HelixAgent | Containers | 60 | Agent sandbox spawning |
+| HelixAgent | containers | 60 | Agent sandbox spawning |
 | HelixQA | Challenges | 50 | QA validation of challenge results |
 | LLMsVerifier | HelixLLM | 40 | Verified provider integration |
 | HelixAgent | HelixAgent | 50 | Multi-agent coordination |
@@ -2960,7 +2960,7 @@ reporting:
 | LLMsVerifier | 95% (existing) | 90% | 60% | 100% |
 | HelixQA | 100% | 95% | 85% | 100% |
 | Challenges | 100% | 90% | 80% | 100% |
-| Containers | 95% | 90% | 75% | 100% |
+| containers | 95% | 90% | 75% | 100% |
 
 ### 6.3 Critical Paths Requiring 100% Branch Coverage
 
@@ -4424,7 +4424,7 @@ func (m *FixtureManager) Cleanup() error {
 | HelixSpecifier | Task specification and parsing |
 | HelixQA | 4-phase autonomous QA framework |
 | Challenges | Capability evaluation framework |
-| Containers | Containerized test isolation |
+| containers | Containerized test isolation |
 | LLMsVerifier | LLM provider verification with ACP |
 | MCP | Model Context Protocol |
 | ACP | Agent Communication Protocol |

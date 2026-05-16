@@ -262,7 +262,7 @@ test_cases:
 **Docker Integration:**
 - Dockerfile present for containerized QA
 - `docker-compose.stack.yml` for multi-service QA stack
-- Uses Containers module for orchestration
+- Uses containers module for orchestration
 
 **OpenCV Integration:**
 - Document: `OPENCV_INTEGRATION_ARCHITECTURE.md`
@@ -549,7 +549,7 @@ Docs in `docs/userflow/writing-adapters.md` guide adapter creation.
 
 ---
 
-## 4. Containers (`github.com/vasic-digital/Containers`)
+## 4. containers (`github.com/vasic-digital/Containers`)
 
 ### 4.1 Architecture & Key Components
 
@@ -683,7 +683,7 @@ c.ComposeOrchestrator().Down(ctx, composeFile, profile)
 ```
 
 **Features for Test Isolation:**
-- **Lazy boot**: Containers start only when test needs them
+- **Lazy boot**: containers start only when test needs them
 - **Idle shutdown**: Auto-cleanup after test completion
 - **Network isolation**: Each compose stack gets isolated network
 - **Volume management**: SSHFS/NFS/rsync for shared test data
@@ -736,14 +736,14 @@ c.ComposeOrchestrator().Down(ctx, composeFile, profile)
 ```
 HelixQA (orchestration)
   ├── Challenges (test execution)
-  │     └── Containers (infrastructure)
+  │     └── containers (infrastructure)
   ├── LLMsVerifier (model selection)
   ├── LLMOrchestrator (agent management)
   ├── VisionEngine (computer vision)
   └── DocProcessor (documentation)
 
 Challenges (standalone)
-  └── Containers (optional infrastructure bridge)
+  └── containers (optional infrastructure bridge)
 
 LLMsVerifier (standalone)
   └── External: OpenAI, Anthropic, etc.
@@ -755,7 +755,7 @@ LLMsVerifier (standalone)
 |-----|--------|------------|
 | All submodules empty in HelixCode | Cannot build/test | `git submodule update --init --recursive` |
 | No `verifier.yaml` in HelixCode | No LLM verification config | Create from LLMsVerifier template |
-| No CLI agent container definitions | Can't isolate agent tests | Add to Containers profiles |
+| No CLI agent container definitions | Can't isolate agent tests | Add to containers profiles |
 | No automated CLI agent test runner | Manual test execution only | Build into HelixQA autonomous |
 | No MCP tool challenge evaluator | Can't verify MCP functionality | Add to Challenges evaluators |
 | Test banks have `_conversion_note: manual-review-required` | Not fully automated | Build automated adapters |
@@ -854,7 +854,7 @@ integration:
 | CLI agent config loading | Test bank defined | Need automated execution | High |
 | MCP tool use per agent | None | Need challenge templates | High |
 | Ensemble output quality | LLM verification | Need agent-specific scoring | Medium |
-| Containerized agent execution | None | Need Containers integration | High |
+| Containerized agent execution | None | Need containers integration | High |
 | Cross-agent interaction | None | Need multi-agent challenges | Medium |
 | Agent checkpoint/rollback | None | Need stateful challenges | Low |
 | Streaming compatibility | Capability detection | Need runtime tests | Medium |

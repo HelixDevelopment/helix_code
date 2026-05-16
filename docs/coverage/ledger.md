@@ -137,7 +137,7 @@ flagged per-platform.
 | Submodule | CONST-051(C) layout | Nested own-org submodules | Notes |
 |---|---|---|---|
 | Challenges | VERIFIED | 0 |  |
-| Containers | VERIFIED | 0 |  |
+| containers | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/DocProcessor | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/HelixLLM | VERIFIED | 0 |  |
 | Dependencies/HelixDevelopment/HelixMemory | VERIFIED | 0 |  |

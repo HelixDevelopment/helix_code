@@ -1393,7 +1393,7 @@ go run /tmp/test_action_obs.go
 - `openhands/core/config/sandbox_config.py` — Configuration
 
 ### Target Location (HelixCode)
-- `pkg/sandbox/runtime.go` (NEW — fills `Containers/` placeholder)
+- `pkg/sandbox/runtime.go` (NEW — fills `containers/` placeholder)
 - `pkg/sandbox/docker.go` (NEW)
 - `pkg/sandbox/local.go` (NEW)
 - `pkg/sandbox/e2b.go` (NEW)

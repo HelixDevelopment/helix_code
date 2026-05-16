@@ -64,8 +64,8 @@ HelixCode/                              # meta-repo (this repo)
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
 ├── HelixQA/                            # existing submodule
-├── Challenges/                         # existing submodule (now with Containers + panoptic init'd)
-├── Containers/                         # existing submodule
+├── Challenges/                         # existing submodule (now with containers + panoptic init'd)
+├── containers/                         # existing submodule
 ├── Security/                           # existing submodule
 │
 ├── Dependencies/HelixDevelopment/      # keep as-is for direct Go imports

@@ -2,7 +2,7 @@
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md
-=== Containers ===
+=== containers ===
   EXISTS: CONSTITUTION.md
   EXISTS: CLAUDE.md
   EXISTS: AGENTS.md

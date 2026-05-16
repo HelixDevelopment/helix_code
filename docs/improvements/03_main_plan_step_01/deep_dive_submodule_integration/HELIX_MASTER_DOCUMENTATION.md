@@ -84,7 +84,7 @@ HelixCode contains **87 declared submodules**, all using SSH (`git@github.com` f
 | Example Projects (AI CLI Tools) | ~35 | Claude_Code, Aider, Cline, Codex, Plandex, GPT_Engineer, Gemini_CLI, Amazon-Q, etc. |
 | Example Resources | ~5 | Awesome-AI-Agents, Awesome-AI-GPTs, OpenAI-Cookbook |
 | Core Dependencies | 8 | LLama_CPP, Ollama, HuggingFace_Hub, DocProcessor, LLMOrchestrator, LLMProvider, LLMsVerifier, VisionEngine |
-| Quality Assurance | 3 | HelixQA, Challenges, Containers |
+| Quality Assurance | 3 | HelixQA, Challenges, containers |
 | Website | 1 | github_pages_website |
 
 ### 2.2 Missing Required Submodules
@@ -128,7 +128,7 @@ HelixCode (root)
 │   ├── HelixQA (submodule — EMPTY)
 │   ├── Challenges (submodule — EMPTY)
 │   ├── LLMsVerifier (submodule — EMPTY)
-│   └── Containers (submodule — EMPTY)
+│   └── containers (submodule — EMPTY)
 │
 └── Missing Core Components
     ├── HelixAgent (ancestor, 60+ cli_agents)
@@ -149,7 +149,7 @@ All 4 quality assurance submodules are **declared in `.gitmodules` but their dir
 # Current state (EMPTY — requires initialization)
 HelixQA/        # 235 tests, 4-phase QA, 47-agent test bank
 Challenges/     # 209 tests, 16 evaluators, 21 adapters
-Containers/     # 6 runtime implementations, Docker/Podman/K8s
+containers/     # 6 runtime implementations, Docker/Podman/K8s
 Dependencies/HelixDevelopment/LLMsVerifier/  # 12 provider adapters, ACP protocol
 ```
 
@@ -498,7 +498,7 @@ git push origin main
 | P5-T1 | Unit Test Coverage (100%) | 5d | P4-T6 |
 | P5-T2 | HelixQA Challenge Sessions | 4d | P5-T1 |
 | P5-T3 | LLMsVerifier Integration | 3d | P5-T1 |
-| P5-T4 | Containers Test Isolation | 3d | P5-T1 |
+| P5-T4 | containers Test Isolation | 3d | P5-T1 |
 | P5-T5 | Performance Benchmarking | 2d | P5-T1 |
 | P5-T6 | Security Audit | 3d | P5-T1 |
 | P5-T7 | Load Testing | 2d | P5-T5 |
@@ -824,7 +824,7 @@ func (a *HelixSpecifierAdapter) DecomposeTask(input string) (*TaskSpec, error) {
 | Security | 232+ | Attack vectors | Custom harness |
 | Challenges | 100+ | Capability verification | Challenges framework |
 | QA Sessions | 800+ | HelixQA test banks | `cli-agents-test-*.json` |
-| Containers | 100+ | Isolation testing | Docker/Podman/K8s |
+| containers | 100+ | Isolation testing | Docker/Podman/K8s |
 
 **Total: 5,245+ tests**
 
@@ -1003,7 +1003,7 @@ jobs:
 | LLMsVerifier | `git@github.com:vasic-digital/LLMsVerifier.git` | `Dependencies/HelixDevelopment/LLMsVerifier` |
 | HelixQA | `git@github.com:HelixDevelopment/HelixQA.git` | `HelixQA` |
 | Challenges | `git@github.com:vasic-digital/Challenges.git` | `Challenges` |
-| Containers | `git@github.com:vasic-digital/Containers.git` | `Containers` |
+| containers | `git@github.com:vasic-digital/Containers.git` | `Containers` |
 
 ### Appendix C: CLI Agent Catalog
 

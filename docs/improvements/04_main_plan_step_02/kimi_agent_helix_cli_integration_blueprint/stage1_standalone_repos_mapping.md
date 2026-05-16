@@ -18,7 +18,7 @@ All 8 required standalone repositories have been analyzed via GitHub API and par
 | **Special** | Playwright dependency for browser automation |
 
 ### Submodules Declared
-- Containers (vasic-digital)
+- containers (vasic-digital)
 - Challenges (vasic-digital)
 - EventBus, Concurrency, Observability
 - Auth, Storage, Streaming, Security
@@ -161,7 +161,7 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 
 ---
 
-## 8. Containers (github.com/vasic-digital/Containers)
+## 8. containers (github.com/vasic-digital/Containers)
 
 | Property | Value |
 |----------|-------|
@@ -186,10 +186,10 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 | HelixLLM | NOT IN HELIXCODE | 43 (replace) | HelixCode, HelixAgent |
 | HelixMemory | NOT IN HELIXCODE | Unknown | HelixCode, HelixAgent |
 | HelixSpecifier | NOT IN HELIXCODE | Unknown | HelixCode, HelixAgent |
-| HelixQA | IN HELIXCODE | Unknown | HelixCode, Challenges, Containers |
+| HelixQA | IN HELIXCODE | Unknown | HelixCode, Challenges, containers |
 | LLMsVerifier | IN HELIXCODE | Unknown | HelixCode, HelixLLM |
 | Challenges | IN HELIXCODE | Unknown | HelixCode, HelixQA |
-| Containers | IN HELIXCODE | Unknown | HelixCode, HelixQA, HelixAgent |
+| containers | IN HELIXCODE | Unknown | HelixCode, HelixQA, HelixAgent |
 
 ---
 
@@ -213,4 +213,4 @@ Config, EventBus, Observability, Concurrency, Auth, Storage, Streaming, Security
 2. **HIGH**: HelixLLM - Core LLM infrastructure with 43 submodules
 3. **HIGH**: HelixMemory - Memory systems for context persistence
 4. **HIGH**: HelixSpecifier - Specification and contract system
-5. **MEDIUM**: Challenges/Containers/HelixQA/LLMsVerifier - Already present, need full initialization
+5. **MEDIUM**: Challenges/containers/HelixQA/LLMsVerifier - Already present, need full initialization

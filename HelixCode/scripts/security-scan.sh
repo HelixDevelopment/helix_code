@@ -289,7 +289,7 @@ run_snyk() {
         echo -e "${YELLOW}Set SNYK_TOKEN in HelixCode/.env for full features.${NC}"
     fi
 
-    # Containers BootManager call (P0-T08.7/4): use Go binary if go is available.
+    # containers BootManager call (P0-T08.7/4): use Go binary if go is available.
     if command -v snyk &>/dev/null; then
         echo -e "${GREEN}Using local snyk installation${NC}"
         cd "$PROJECT_DIR"
@@ -318,7 +318,7 @@ run_snyk() {
 # -------------------------------------------------------------------
 start_sonarqube() {
     echo -e "${BLUE}Starting SonarQube server via compose...${NC}"
-    # Containers BootManager call (P0-T08.7/4): use Go binary if go is available.
+    # containers BootManager call (P0-T08.7/4): use Go binary if go is available.
     # Falls back to direct compose when go is not on PATH.
     if command -v go &>/dev/null && [ -f "${PROJECT_DIR}/cmd/security_scan/main.go" ]; then
         (cd "$PROJECT_DIR" && go run ./cmd/security_scan -scanner=sonarqube -action=start)

@@ -11,7 +11,7 @@
 | # | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|---|
 | 1 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier/` (root) | `HelixAgent/LLMsVerifier/` | `HelixAgent/Makefile`, `HelixAgent/scripts/*`, any `internal/...` refs to old path |
-| 2 | Containers   | `Containers/` (root) | `Challenges/Containers/`, `HelixAgent/Containers/`, `HelixAgent/HelixLLM/submodules/Containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
+| 2 | containers   | `containers/` (root) | `Challenges/containers/`, `HelixAgent/containers/`, `HelixAgent/HelixLLM/submodules/containers/` | Each removed parent's Makefile + nested verifier scripts (per-WP2 audit) |
 | 3 | Security     | `Security/` (root) | `HelixAgent/Security/`, `HelixAgent/HelixLLM/submodules/Security/` (if present) | HelixAgent/scripts/security-*.sh, root cmd/security_test wiring |
 | 4 | HelixQA      | `HelixQA/` (root) | `HelixAgent/HelixQA/` | `HelixAgent/Makefile` test wiring; root `scripts/run-all-tests.sh` |
 | 5 | mcp_servers  | TBD at WP3.T03.05 — current candidates: `mcp_servers/` (root, may not exist), `HelixAgent/mcp_servers/`, `HelixAgent/MCP/submodules/...` (per-server) | TBD per resolution | TBD per resolution |
@@ -27,7 +27,7 @@ plan defers the canonical decision to WP3.T03.05 with audit-at-execution.
 
 - LLMsVerifier dedup blocks WP3 until `make verify-llmsverifier-pin-parity` is
   reproduced from the new canonical path.
-- Containers dedup affects all three Helix* submodules; per-removal rebuild
+- containers dedup affects all three Helix* submodules; per-removal rebuild
   required (T03.0X completion gate).
 - HelixQA dedup affects HelixAgent's test wiring; integration test must still
   pass post-dedup.

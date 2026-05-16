@@ -8,7 +8,7 @@
 
 Containers is the container orchestration and remote distribution module for HelixAgent. It provides Docker/Podman abstraction, compose resource normalization, capability-aware placement, and partitioned distribution.
 
-This Constitution is the supreme law of the Containers submodule. All other governance documents (`CLAUDE.md`, `AGENTS.md`) cascade from this Constitution and MUST NOT weaken or override any article herein.
+This Constitution is the supreme law of the containers submodule. All other governance documents (`CLAUDE.md`, `AGENTS.md`) cascade from this Constitution and MUST NOT weaken or override any article herein.
 
 ---
 
@@ -35,9 +35,9 @@ This Constitution is the supreme law of the Containers submodule. All other gove
 ## Article III: Integration Requirements
 
 - §3.1: **SSH-only Git (CONST-003).** All Git operations MUST use SSH URLs (`git@github.com:…`). HTTPS is STRICTLY FORBIDDEN.
-- §3.2: **Submodule dependencies.** Containers declares its upstream and downstream submodule dependencies explicitly. Changes to integration seams MUST be contract-tested.
+- §3.2: **Submodule dependencies.** containers declares its upstream and downstream submodule dependencies explicitly. Changes to integration seams MUST be contract-tested.
 - §3.3: **API contracts.** All API surfaces MUST be documented with OpenAPI / protobuf contracts. Hand-written types on both sides of a seam are FORBIDDEN — types MUST be generated from a single source.
-- §3.4: **Container orchestration.** All services run in containers via the Containers module. The project binary is the sole orchestrator. Direct `docker`/`podman` commands are prohibited as workflows.
+- §3.4: **Container orchestration.** All services run in containers via the containers module. The project binary is the sole orchestrator. Direct `docker`/`podman` commands are prohibited as workflows.
 
 ---
 
@@ -81,7 +81,7 @@ This Constitution is the supreme law of the Containers submodule. All other gove
 - §6.1: The project binary (helixagent) is the SOLE orchestrator. Direct docker/podman commands are FORBIDDEN as workflows.
 - §6.2: Every service in docker-compose.yml MUST declare resources via deploy.resources.limits + deploy.resources.reservations only.
 - §6.3: When CONTAINERS_REMOTE_ENABLED=true, every containerized service runs on EXACTLY ONE host across the registered set.
-- §6.4: Remote distribution hosts MUST be registered dynamically via Containers/.env — no hardcoded hosts.
+- §6.4: Remote distribution hosts MUST be registered dynamically via containers/.env — no hardcoded hosts.
 - §6.5: Replication across hosts is FORBIDDEN for stateful services.
 
 ---
@@ -247,7 +247,7 @@ All submodules within the HelixAgent monorepo MUST reference each other's integr
 
 ### §10.3: Downstream Cascade
 
-Any submodule that imports Containers MUST inherit Containers's testing and anti-bluff requirements for all integration points.
+Any submodule that imports containers MUST inherit Containers's testing and anti-bluff requirements for all integration points.
 
 ---
 
@@ -271,7 +271,7 @@ Any submodule that imports Containers MUST inherit Containers's testing and anti
 | CONST-002 | Test Coverage | Article II §2.2 |
 | CONST-003 | SSH-Only Git | Article III §3.1 |
 | CONST-025 | No Mocks Outside Unit Tests | Article II §2.4 |
-| CONST-029 | Concurrent-Safe Containers | Article VI |
+| CONST-029 | Concurrent-Safe containers | Article VI |
 | CONST-030 | Real Infrastructure for All Non-Unit Tests | Article II §2.5 |
 | CONST-032 | Reproduction-Before-Fix | Article II §2.5 |
 | CONST-033 | Host Power Management Hard Ban | Article VII |

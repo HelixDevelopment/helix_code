@@ -38,9 +38,9 @@ reusable — by adding a new project's Challenge directory tree.
 
 **Action:** none.
 
-### Containers (2 files)
+### containers (2 files)
 
-**`Containers/scripts/load_api_keys.sh`** (1 file)
+**`containers/scripts/load_api_keys.sh`** (1 file)
 
 Two `HelixCode` references in comments:
 - Line 3: `# HelixCode API-key loader: prefers $HOME/api_keys.sh ...`
@@ -57,7 +57,7 @@ prefix as a namespace.
 target for forkers but aren't an impediment to reuse (forkers
 override or alias). Tracked as Task #262.
 
-**`Containers/scripts/resource-policy/apply_caps.py`**
+**`containers/scripts/resource-policy/apply_caps.py`**
 
 Lines 67, 82, 85, 87, 89 reference HelixCode-internal paths:
 ```python
@@ -71,20 +71,20 @@ Lines 67, 82, 85, 87, 89 reference HelixCode-internal paths:
 These are filesystem paths under HelixCode's directory tree
 hardcoded into a Containers-submodule resource-cap policy script.
 
-**Classification:** genuine-violation. The Containers submodule
+**Classification:** genuine-violation. The containers submodule
 should not enumerate consuming-project-internal paths.
 
 **Action complete (close-out¹⁹, Task #263):** refactored. New
 `SKIP_PATH_FRAGMENTS_DEFAULT` is universal-only; new
 `--skip-paths-file` flag (+ `RESOURCE_POLICY_SKIP_PATHS_FILE` env
 var) loads project-specific fragments from a one-per-line file
-supplied by the consuming project. Containers commit `400ccbb`.
+supplied by the consuming project. containers commit `400ccbb`.
 HelixCode-side concrete list at `scripts/containers/resource-
 policy-skip-paths.list`.
 
 ### Dependencies/HelixDevelopment/LLMsVerifier (6 files)
 
-- `scripts/load_api_keys.sh` — same shared utility as Containers above.
+- `scripts/load_api_keys.sh` — same shared utility as containers above.
   Classification: cosmetic-only. Tracked under Task #262.
 
 - `llm-verifier/capabilities/config_generator.go`
@@ -169,11 +169,11 @@ underway.
 |---|---|---|---|
 | legitimate-cross-project | 21 (Challenges) + 5 (LLMsVerifier cliagents) + 12 (github_pages_website content) = 38 | Challenges, LLMsVerifier, github_pages_website | None. |
 | cosmetic-only | 4 × `load_api_keys.sh` (HelixQA, Security, Containers, LLMsVerifier) | 4 submodules | Task #262 — genericise comments. |
-| genuine-violation | 1 × `apply_caps.py` paths-list | Containers | Task #263 — refactor to config-file input. |
+| genuine-violation | 1 × `apply_caps.py` paths-list | containers | Task #263 — refactor to config-file input. |
 | deferred-to-#254 | 105 (HelixAgent) | HelixAgent | Roll into Task #254 (the larger HelixAgent remediation). |
 
 **Total decoupling-violation count after this audit:** 1 genuine
-violation (Containers/apply_caps.py) + 1 cosmetic batch (4 × load_api_keys.sh)
+violation (containers/apply_caps.py) + 1 cosmetic batch (4 × load_api_keys.sh)
 + 1 audit-pending (github_pages_website build scripts).
 
 ## Audit trail

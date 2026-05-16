@@ -89,7 +89,7 @@ VENDORED_PATH_REGEX='HelixAgent/MCP/submodules/|HelixQA/tools/opensource/|/pytho
 # Anti-bluff (CONST-035 / §11.9): the original SKIP-OK marker regex
 # `#?[A-Za-z0-9][A-Za-z0-9_-]*` required the marker body to START with
 # an ASCII alphanumeric or `#`. Markers that start with a Unicode
-# section-sign like `§6.X-debt` (used in Containers/ to cite the parent
+# section-sign like `§6.X-debt` (used in containers/ to cite the parent
 # project's clause numbers) were silently FLAGGED as unannotated even
 # though the annotation was present — a false-positive bluff on the
 # bluff-scanner itself. Broaden the marker syntax: anything after

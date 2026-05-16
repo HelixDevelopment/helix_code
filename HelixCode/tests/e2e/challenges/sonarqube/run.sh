@@ -172,11 +172,11 @@ else
     record_result "security-scan.sh --help shows snyk mode" "FAIL"
 fi
 
-# Boot binary references Containers BootManager imports
+# Boot binary references containers BootManager imports
 if grep -q "digital.vasic.containers/pkg/boot" "$BOOT_BINARY"; then
-    record_result "cmd/security_scan imports Containers BootManager" "PASS"
+    record_result "cmd/security_scan imports containers BootManager" "PASS"
 else
-    record_result "cmd/security_scan imports Containers BootManager" "FAIL"
+    record_result "cmd/security_scan imports containers BootManager" "FAIL"
 fi
 
 # Boot binary references runtime.AutoDetect

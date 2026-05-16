@@ -154,7 +154,7 @@ The following rules are present in all three repositories:
 | Zero Warning / Zero Error | Catalogizer, HelixQA | HelixCode |
 | HTTP/3 + Brotli requirement | Catalogizer | HelixQA, HelixCode |
 | No sudo / root operations | Catalogizer, HelixQA | HelixCode |
-| Concurrent-Safe Containers (Go-specific) | Catalogizer, HelixQA | HelixCode |
+| Concurrent-Safe containers (Go-specific) | Catalogizer, HelixQA | HelixCode |
 
 ### 3.4 Contradictions
 

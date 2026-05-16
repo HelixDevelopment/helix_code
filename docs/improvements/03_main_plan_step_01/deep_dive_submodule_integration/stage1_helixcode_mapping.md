@@ -77,7 +77,7 @@ HelixCode/
 ├── CONTINUE_HERE.md
 ├── CRUSH.md
 ├── Challenges/                            ← SUBMODULE (vasic-digital/Challenges)
-├── Containers/                            ← SUBMODULE (vasic-digital/Containers)
+├── containers/                            ← SUBMODULE (vasic-digital/Containers)
 ├── DETAILED_IMPLEMENTATION_PLAN.md
 ├── DETAILED_IMPLEMENTATION_TRACKER.md
 ├── DOCKER_COMPLETION_SUMMARY.md
@@ -613,7 +613,7 @@ HelixCode/
 | 81 | Dependencies/HelixDevelopment/LLMsVerifier | Dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
 | 82 | Dependencies/HelixDevelopment/VisionEngine | Dependencies/HelixDevelopment/VisionEngine | git@github.com:HelixDevelopment/VisionEngine.git | SSH |
 | 83 | Challenges | Challenges | git@github.com:vasic-digital/Challenges.git | SSH |
-| 84 | Containers | Containers | git@github.com:vasic-digital/Containers.git | SSH |
+| 84 | containers | containers | git@github.com:vasic-digital/Containers.git | SSH |
 | 85 | Example_Resources/Taches-CC-Resources | Example_Resources/Taches-CC-Resources | git@github.com:tachescode/resources.git | SSH |
 | 86 | HelixQA | HelixQA | git@github.com:HelixDevelopment/HelixQA.git | SSH |
 | 87 | (additional submodule beyond listed 86) | - | - | - |
@@ -634,7 +634,7 @@ HelixCode/
 | **LLMsVerifier** | PRESENT ✓ | Dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
 | **HelixQA** | PRESENT ✓ | HelixQA (root) | git@github.com:HelixDevelopment/HelixQA.git | SSH |
 | **Challenges** | PRESENT ✓ | Challenges (root) | git@github.com:vasic-digital/Challenges.git | SSH |
-| **Containers** | PRESENT ✓ | Containers (root) | git@github.com:vasic-digital/Containers.git | SSH |
+| **Containers** | PRESENT ✓ | containers (root) | git@github.com:vasic-digital/Containers.git | SSH |
 
 ### 5.2 MISSING (4 of 8)
 
@@ -770,7 +770,7 @@ HelixCode (root)
 ├── Quality Assurance (submodules)
 │   ├── HelixQA (HelixDevelopment/HelixQA) ✓
 │   ├── Challenges (vasic-digital/Challenges) ✓
-│   └── Containers (vasic-digital/Containers) ✓
+│   └── containers (vasic-digital/Containers) ✓
 │
 ├── Missing Core Components
 │   ├── HelixAgent (MISSING)

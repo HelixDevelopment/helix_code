@@ -98,7 +98,7 @@ Co-Authored-By: <agent-name> <email>
 
 ## CONST-045 — No Hardcoded Distribution Hosts (cascaded from root CONSTITUTION.md)
 
-ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host hardcoded in ANY source, test, challenge, config, script, or governance document. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate and cascade requirements.
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `containers/.env`. NO host hardcoded in ANY source, test, challenge, config, script, or governance document. Adding/removing hosts = editing `containers/.env` only; NO code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate and cascade requirements.
 
 ---
 

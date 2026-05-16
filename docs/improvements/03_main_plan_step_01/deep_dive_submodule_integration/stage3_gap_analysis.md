@@ -441,7 +441,7 @@
 | 9 | Benchmark Runner | ✅ Present | Standard objectives | - |
 | 10 | Screenshot Testing | ✅ Present | Multi-platform engines | - |
 
-**Analysis:** HelixCode has benchmark infrastructure and screenshot testing (via HelixQA submodule) but the submodules are EMPTY. LLMsVerifier (25+ providers, ACP protocol), HelixQA (235 tests, 47-agent test bank), Challenges (209 tests, 16 evaluators), and Containers (6 runtimes) all exist as uninitialized directories. The testing gap is primarily about activating existing infrastructure, not building from scratch.
+**Analysis:** HelixCode has benchmark infrastructure and screenshot testing (via HelixQA submodule) but the submodules are EMPTY. LLMsVerifier (25+ providers, ACP protocol), HelixQA (235 tests, 47-agent test bank), Challenges (209 tests, 16 evaluators), and containers (6 runtimes) all exist as uninitialized directories. The testing gap is primarily about activating existing infrastructure, not building from scratch.
 
 ---
 
@@ -475,7 +475,7 @@
 
 | # | Gap | Category | Complexity | Business Impact | Effort | Integration Readiness |
 |---|-----|----------|-----------|-----------------|--------|----------------------|
-| 1 | **OS-Native Sandboxed Execution** | Security | Very High | Critical | 8 weeks | Containers submodule (6 runtimes) provides foundation |
+| 1 | **OS-Native Sandboxed Execution** | Security | Very High | Critical | 8 weeks | containers submodule (6 runtimes) provides foundation |
 | 2 | **Auto-Compaction System** | Context | High | Critical | 4 weeks | LLM compression system exists in `internal/llm/compression/` |
 | 3 | **Permission Rule System** (5 modes + wildcards) | Security | High | Critical | 4 weeks | Confirmation coordinator exists in `internal/tools/confirmation/` |
 | 4 | **LSP Integration** with diagnostics | Tool Use | High | High | 4 weeks | No existing LSP client; OpenCode is Go-based reference |
@@ -628,7 +628,7 @@
 
 | Gap | Why Low Readiness | Required Foundation |
 |-----|-----------------|--------------------|
-| OS-Native Sandboxing | No OS-level integration exists | Containers submodule + seccomp/Seatbelt/iptables knowledge |
+| OS-Native Sandboxing | No OS-level integration exists | containers submodule + seccomp/Seatbelt/iptables knowledge |
 | LSP Integration | No LSP client exists | New LSP client subsystem + language server connections |
 | IDE Extension | No extension framework | VS Code Extension API or Language Server Protocol |
 | Web Dashboard | No web frontend | React/Vue + Chart.js or similar dashboard framework |
@@ -682,7 +682,7 @@ digital.vasic.llmprovider => ../Dependencies/HelixDevelopment/LLMProvider
 
 | # | Gap | Risk Level | Risk Type | Description | Mitigation Strategy |
 |---|-----|-----------|-----------|-------------|----------------------|
-| 1 | OS-Native Sandboxing | **CRITICAL** | Security, Platform | Seccomp/Seatbelt/iptables require root/kernel-level access. Mistakes cause system instability. Platform differences (macOS/Linux/Windows) multiply complexity. | Use proven libraries (libseccomp, Docker SDK). Containers submodule has 6 runtime configs. Start with Docker-based sandbox. |
+| 1 | OS-Native Sandboxing | **CRITICAL** | Security, Platform | Seccomp/Seatbelt/iptables require root/kernel-level access. Mistakes cause system instability. Platform differences (macOS/Linux/Windows) multiply complexity. | Use proven libraries (libseccomp, Docker SDK). containers submodule has 6 runtime configs. Start with Docker-based sandbox. |
 | 2 | MCP Full Lifecycle | **HIGH** | Architecture, Compatibility | 4 transports + OAuth + auto-reconnection is a moving target. Anthropic updates spec frequently. Breaking changes likely. | Abstract behind interfaces. Implement stdio first (simplest). Add SSE/HTTP incrementally. Monitor MCP spec repo for changes. |
 | 3 | Auto-Compaction System | **HIGH** | Performance, Cost | Bad summarization loses critical context. Over-aggressive compaction = broken code. Under-aggressive = API cost blowout. | Implement conservative thresholds. Require user confirmation for compaction. Test with real codebase scenarios. Add "undo compaction" feature. |
 | 4 | Subagent Delegation | **HIGH** | Architecture, Coordination | Race conditions between parent/child agents. Git worktree conflicts. Message routing complexity. | Use existing Actor model mailbox. Implement worktree-based isolation. Add timeout/cancellation propagation. |

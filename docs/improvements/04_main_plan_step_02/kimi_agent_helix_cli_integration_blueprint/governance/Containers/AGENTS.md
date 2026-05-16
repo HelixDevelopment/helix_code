@@ -10,15 +10,15 @@
 > agent dispatch, any code review that allows green tests on broken
 > features is a violation and MUST be rejected.
 
-This file defines agent constraints, capabilities, and collaboration rules for automated agents working on the Containers codebase.
+This file defines agent constraints, capabilities, and collaboration rules for automated agents working on the containers codebase.
 
 ---
 
 ## Project Overview
 
-**Submodule:** Containers  
+**Submodule:** containers  
 **Repository:** `github.com/vasic-digital/Containers`  
-**Mission:** Containers is the container orchestration and remote distribution module for HelixAgent. It provides Docker/Podman abstraction, compose resource normalization, capability-aware placement, and partitioned distribution.
+**Mission:** containers is the container orchestration and remote distribution module for HelixAgent. It provides Docker/Podman abstraction, compose resource normalization, capability-aware placement, and partitioned distribution.
 
 This file assumes the reader knows nothing about the project. Deeper `AGENTS.md` or `CLAUDE.md` files in subdirectories take precedence over this root file for files within those subtrees.
 
@@ -49,7 +49,7 @@ These rules are non-negotiable across every project, submodule, and sibling repo
 
 11. **Real Infrastructure for All Non-Unit Tests.** Mocks/fakes MAY be used ONLY in unit tests. ALL other test types MUST execute against the REAL running system.
 12. **Reproduction-Before-Fix (CONST-032 — MANDATORY).** Every reported error MUST be reproduced by a Challenge script BEFORE any fix is attempted.
-13. **Concurrent-Safe Containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
+13. **Concurrent-Safe containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
 
 ### Definition of Done (universal)
 
@@ -199,7 +199,7 @@ Words like *verified, tested, working, complete, fixed, passing* are FORBIDDEN w
 
 ## Submodule-Specific Notes
 
-The Containers module is the INFRASTRUCTURE FOUNDATION. Every service depends on it. Compose resource normalization and placement are CRITICAL for remote distribution correctness.
+The containers module is the INFRASTRUCTURE FOUNDATION. Every service depends on it. Compose resource normalization and placement are CRITICAL for remote distribution correctness.
 
 ---
 

@@ -16,9 +16,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Agent Identity and Purpose
 
-**Submodule:** Containers  
+**Submodule:** containers  
 **Repository:** `github.com/vasic-digital/Containers`  
-**Mission:** Containers is the container orchestration and remote distribution module for HelixAgent. It provides Docker/Podman abstraction, compose resource normalization, capability-aware placement, and partitioned distribution.
+**Mission:** containers is the container orchestration and remote distribution module for HelixAgent. It provides Docker/Podman abstraction, compose resource normalization, capability-aware placement, and partitioned distribution.
 
 Containers is governed by `Constitution.md` (supreme law). This file (`CLAUDE.md`) is the AI agent operating manual that cascades from the Constitution. `AGENTS.md` defines agent capabilities and integration patterns.
 
@@ -49,7 +49,7 @@ These rules are non-negotiable across every project, submodule, and sibling repo
 
 11. **Real Infrastructure for All Non-Unit Tests.** Mocks/fakes MAY be used ONLY in unit tests. ALL other test types MUST execute against the REAL running system.
 12. **Reproduction-Before-Fix (CONST-032 — MANDATORY).** Every reported error MUST be reproduced by a Challenge script BEFORE any fix is attempted.
-13. **Concurrent-Safe Containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
+13. **Concurrent-Safe containers (CONST-029).** Mutable shared collections MUST use `safe.Store[K,V]` / `safe.Slice[T]`. Bare `sync.Mutex + map/slice` is prohibited for new code.
 
 ### Definition of Done (universal)
 
@@ -84,7 +84,7 @@ make test-unit, make test-integration, make test-compose, make test-placement
 ## Acceptance Demo for This Module
 
 ```bash
-cd Containers && make build
+cd containers && make build
 bash challenges/scripts/compose_resource_limits_challenge.sh
 ```
 
@@ -155,7 +155,7 @@ When modifying integration seams:
 
 ## Submodule-Specific Notes
 
-The Containers module is the INFRASTRUCTURE FOUNDATION. Every service depends on it. Compose resource normalization and placement are CRITICAL for remote distribution correctness.
+The containers module is the INFRASTRUCTURE FOUNDATION. Every service depends on it. Compose resource normalization and placement are CRITICAL for remote distribution correctness.
 
 ---
 

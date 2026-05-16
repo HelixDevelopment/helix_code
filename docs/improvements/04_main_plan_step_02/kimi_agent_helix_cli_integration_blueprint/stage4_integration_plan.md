@@ -137,7 +137,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 |-----------|--------|
 | **Phase Goal** | Achieve production readiness through comprehensive testing: 100% code coverage on all new code, HelixQA automated challenge sessions, LLMsVerifier integration for model output validation, Containers-based integration testing, and performance benchmarking against baselines. |
 | **Entry Criteria** | - Phase 4 exit criteria met<br>- Test infrastructure can execute containerized tests<br>- Challenge dataset prepared (>= 50 challenges)<br>- Performance benchmarks defined |
-| **Exit Criteria** | - `go test -cover` reports >= 100% for all new packages<br>- HelixQA completes >= 50 challenge sessions with >90% pass rate<br>- LLMsVerifier validates model outputs with <5% false positive rate<br>- Integration tests run in Containers with full feature matrix<br>- Performance benchmarks meet all p95 targets<br>- Security audit of sandboxed execution passes<br>- Load test: 100 concurrent sessions stable for 1 hour |
+| **Exit Criteria** | - `go test -cover` reports >= 100% for all new packages<br>- HelixQA completes >= 50 challenge sessions with >90% pass rate<br>- LLMsVerifier validates model outputs with <5% false positive rate<br>- Integration tests run in containers with full feature matrix<br>- Performance benchmarks meet all p95 targets<br>- Security audit of sandboxed execution passes<br>- Load test: 100 concurrent sessions stable for 1 hour |
 | **Duration Estimate** | 14-18 calendar days |
 | **Risk Level** | **MEDIUM** -- 100% coverage is time-consuming; challenge flakiness; load test infrastructure |
 | **Rollback Strategy** | - Coverage gates can be temporarily lowered to 95% with technical debt ticket<br>- Challenges can be rerun; flaky tests are quarantined<br>- Load tests run on staging environment only |
@@ -173,7 +173,7 @@ The vision is not to bolt features onto HelixCode, but to **deeply integrate** e
 #### P0-T3: Initialize Dormant Submodules
 - **Task ID**: P0-T3
 - **Task Name**: Initialize LLMsVerifier, HelixQA, Challenges, Containers
-- **Description**: The 4 present-but-uninitialized submodules need to be initialized and their builds verified. Check if they have independent build requirements (e.g., Containers may need Docker, HelixQA may need test datasets).
+- **Description**: The 4 present-but-uninitialized submodules need to be initialized and their builds verified. Check if they have independent build requirements (e.g., containers may need Docker, HelixQA may need test datasets).
 - **Dependencies**: P0-T2
 - **Estimated Effort**: 1 day
 - **Submodule(s) Involved**: LLMsVerifier, HelixQA, Challenges, Containers

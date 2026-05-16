@@ -148,9 +148,9 @@ else
 fi
 
 if grep -q "digital.vasic.containers/pkg/boot" "$BOOT_BINARY"; then
-    record_result "cmd/security_scan imports Containers BootManager" "PASS"
+    record_result "cmd/security_scan imports containers BootManager" "PASS"
 else
-    record_result "cmd/security_scan imports Containers BootManager" "FAIL"
+    record_result "cmd/security_scan imports containers BootManager" "FAIL"
 fi
 
 if grep -q '"snyk"' "$BOOT_BINARY"; then

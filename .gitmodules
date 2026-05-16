@@ -31,8 +31,8 @@
 [submodule "cli_agents_resources/Taches-CC-Resources"]
 	path = cli_agents_resources/Taches-CC-Resources
 	url = git@github.com:glittercowboy/taches-cc-resources.git
-[submodule "Containers"]
-	path = Containers
+[submodule "containers"]
+	path = containers
 	url = git@github.com:vasic-digital/Containers.git
 [submodule "HelixQA"]
 	path = HelixQA

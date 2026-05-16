@@ -4,7 +4,7 @@
 
 > **Programme position:** F26 is the **sixth** Phase 2 feature (after F21-F25).
 
-**Goal:** Ship container-based workspace management, a plan-tree-aware task planner, and a sequential step executor. Three new packages: `internal/workspace/`, `internal/planner/`. Reuses F25 plan trees and the Containers submodule.
+**Goal:** Ship container-based workspace management, a plan-tree-aware task planner, and a sequential step executor. Three new packages: `internal/workspace/`, `internal/planner/`. Reuses F25 plan trees and the containers submodule.
 
 **Spec:** `docs/superpowers/specs/2026-05-07-p2-f26-openhands-workspace-design.md`
 **Q1-Q5:** Openhands / Core / Container-based / F25 plan tree + executor / Tools+slash+cobra

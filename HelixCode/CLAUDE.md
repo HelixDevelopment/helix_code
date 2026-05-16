@@ -145,7 +145,7 @@ make ci-validate-all
 
 ## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
 
-ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `Containers/.env`. NO host hardcoded anywhere. Adding/removing hosts = editing `Containers/.env` only; NO code change. Tests read `.env` at runtime and skip with `SKIP-OK:` when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate.
+ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` env vars in `containers/.env`. NO host hardcoded anywhere. Adding/removing hosts = editing `containers/.env` only; NO code change. Tests read `.env` at runtime and skip with `SKIP-OK:` when `CONTAINERS_REMOTE_ENABLED=false`. See root `CONSTITUTION.md` §CONST-045 for full mandate.
 
 ---
 

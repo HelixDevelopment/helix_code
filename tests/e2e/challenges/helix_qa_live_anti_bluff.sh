@@ -76,7 +76,7 @@ if printf '%s' "$INFO_BODY" | grep -q '"connected":\s*false' \
     || printf '%s' "$INFO_BODY" | grep -qi 'failed SASL\|SQLSTATE 28P01\|Database connection failed\|connection refused'; then
     echo "  SKIP: HelixCode reports database NOT connected (Step 3b infra check)"
     echo "  SKIP-OK: #env-db-unreachable — mistborn-postgres credentials/availability drift"
-    echo "  Resolve by setting HELIX_POSTGRES_PASSWORD in Containers/.env to the value"
+    echo "  Resolve by setting HELIX_POSTGRES_PASSWORD in containers/.env to the value"
     echo "  the data volume was initialized with, then re-run scripts/mistborn-up.sh."
     echo "✅ helix_qa_live_anti_bluff: PASSED (SKIP-OK)"
     exit 0

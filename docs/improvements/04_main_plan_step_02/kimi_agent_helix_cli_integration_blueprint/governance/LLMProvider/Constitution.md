@@ -37,7 +37,7 @@ This Constitution is the supreme law of the LLMProvider submodule. All other gov
 - §3.1: **SSH-only Git (CONST-003).** All Git operations MUST use SSH URLs (`git@github.com:…`). HTTPS is STRICTLY FORBIDDEN.
 - §3.2: **Submodule dependencies.** LLMProvider declares its upstream and downstream submodule dependencies explicitly. Changes to integration seams MUST be contract-tested.
 - §3.3: **API contracts.** All API surfaces MUST be documented with OpenAPI / protobuf contracts. Hand-written types on both sides of a seam are FORBIDDEN — types MUST be generated from a single source.
-- §3.4: **Container orchestration.** All services run in containers via the Containers module. The project binary is the sole orchestrator. Direct `docker`/`podman` commands are prohibited as workflows.
+- §3.4: **Container orchestration.** All services run in containers via the containers module. The project binary is the sole orchestrator. Direct `docker`/`podman` commands are prohibited as workflows.
 
 ---
 
@@ -270,7 +270,7 @@ Any submodule that imports LLMProvider MUST inherit LLMProvider's testing and an
 | CONST-002 | Test Coverage | Article II §2.2 |
 | CONST-003 | SSH-Only Git | Article III §3.1 |
 | CONST-025 | No Mocks Outside Unit Tests | Article II §2.4 |
-| CONST-029 | Concurrent-Safe Containers | Article VI |
+| CONST-029 | Concurrent-Safe containers | Article VI |
 | CONST-030 | Real Infrastructure for All Non-Unit Tests | Article II §2.5 |
 | CONST-032 | Reproduction-Before-Fix | Article II §2.5 |
 | CONST-033 | Host Power Management Hard Ban | Article VII |

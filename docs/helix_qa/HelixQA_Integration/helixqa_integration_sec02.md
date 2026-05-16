@@ -19,7 +19,7 @@ Analysis of `HelixQA/go.mod` (commit `0bca023`, retrieved 2026-04-30)[^1^] revea
 | `digital.vasic.security` | `../Security` | `git@github.com:vasic-digital/Security.git` | CORS, CSP, request sanitization[^6^] | sibling directory |
 | `digital.vasic.visionengine` | `VisionEngine/` | `git@github.com:HelixDevelopment/VisionEngine.git` | Computer vision / OCR engine[^7^] | sibling directory |
 
-The `digital.vasic.challenges` and `digital.vasic.containers` modules originate from the `vasic-digital` GitHub organization and are already present in the Catalogizer workspace (Challenges at commit `4390e48`, Containers at `9f9f52a`)[^8^]. The remaining four modules—DocProcessor, LLMOrchestrator, Security, and VisionEngine—come from the `HelixDevelopment` organization. Catalogizer already contains DocProcessor, LLMOrchestrator, and VisionEngine as registered submodules, but HelixCode does not. The Security module is shared infrastructure and is already present in any workspace that has Catalogizer's full submodule set.
+The `digital.vasic.challenges` and `digital.vasic.containers` modules originate from the `vasic-digital` GitHub organization and are already present in the Catalogizer workspace (Challenges at commit `4390e48`, containers at `9f9f52a`)[^8^]. The remaining four modules—DocProcessor, LLMOrchestrator, Security, and VisionEngine—come from the `HelixDevelopment` organization. Catalogizer already contains DocProcessor, LLMOrchestrator, and VisionEngine as registered submodules, but HelixCode does not. The Security module is shared infrastructure and is already present in any workspace that has Catalogizer's full submodule set.
 
 A critical observation concerns the path convention. HelixQA's `go.mod` expects these modules at sibling paths (`../Challenges`, `../Containers`). Inside HelixCode the submodule layout will place HelixQA at `HelixQA/` and its dependencies at `Dependencies/HelixDevelopment/` to avoid polluting the repository root. This means the `replace` directives in HelixCode's `go.mod` must map to the actual checkout paths, not the relative paths encoded in HelixQA's own `go.mod`.
 
@@ -462,7 +462,7 @@ Table 1 below consolidates the full dependency matrix that drives all registrati
 |---|---|---|---|---|---|---|
 | 1 | `digital.vasic.helixqa` | `git@github.com:HelixDevelopment/HelixQA.git` | `35deb43` → `0bca023` | `HelixQA/` | 1 (root) | Low — direct control |
 | 2 | `digital.vasic.challenges` | `git@github.com:vasic-digital/Challenges.git` | `4390e48` | `Challenges/` (shared) | 0 (pre-existing) | Low — stable API |
-| 3 | `digital.vasic.containers` | `git@github.com:vasic-digital/Containers.git` | `9f9f52a` | `Containers/` (shared) | 0 (pre-existing) | Low — stable API |
+| 3 | `digital.vasic.containers` | `git@github.com:vasic-digital/Containers.git` | `9f9f52a` | `containers/` (shared) | 0 (pre-existing) | Low — stable API |
 | 4 | `digital.vasic.docprocessor` | `git@github.com:HelixDevelopment/DocProcessor.git` | `5f1e58a` | `Dependencies/HelixDevelopment/DocProcessor` | 2 | Medium — feature map drift |
 | 5 | `digital.vasic.llmorchestrator` | `git@github.com:HelixDevelopment/LLMOrchestrator.git` | `1b95823` | `Dependencies/HelixDevelopment/LLMOrchestrator` | 2 | Medium — agent API changes |
 | 6 | `digital.vasic.visionengine` | `git@github.com:HelixDevelopment/VisionEngine.git` | *unpinned* | `Dependencies/HelixDevelopment/VisionEngine` | 2 | High — floating track |

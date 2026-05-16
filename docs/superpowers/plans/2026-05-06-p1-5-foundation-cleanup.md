@@ -160,7 +160,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|
 | LLMsVerifier | `Dependencies/HelixDevelopment/LLMsVerifier` | `HelixAgent/LLMsVerifier` | HelixAgent/Makefile, HelixAgent/scripts/*, HelixAgent/internal references |
-| Containers | `Containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
+| containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `Security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
 | HelixQA | `HelixQA/` | `HelixAgent/HelixQA` | HelixAgent/Makefile, HelixAgent test wiring |
 | mcp_servers | TBD at T03.05 | TBD | TBD |
@@ -339,9 +339,9 @@ git add HelixAgent
 git commit -m "chore(P1.5-WP3-T03.01): bump HelixAgent gitlink after LLMsVerifier dedup"
 ```
 
-## P1.5-WP3-T03.02 — Containers dedup
+## P1.5-WP3-T03.02 — containers dedup
 
-Keep root `Containers/`. Enumerate the 3 nested copies. Per nested copy: `rg`, rewrite consumers, deinit+rm, commit per repo. Final HelixAgent gitlink bump.
+Keep root `containers/`. Enumerate the 3 nested copies. Per nested copy: `rg`, rewrite consumers, deinit+rm, commit per repo. Final HelixAgent gitlink bump.
 
 ## P1.5-WP3-T03.03 — Security dedup
 

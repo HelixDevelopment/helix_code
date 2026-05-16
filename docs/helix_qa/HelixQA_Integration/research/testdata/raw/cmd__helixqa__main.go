@@ -723,7 +723,7 @@ func cmdAutonomous(args []string) {
 	fmt.Println("Process ctrl:     enabled (90s stale threshold)")
 
 	// ── QA Infrastructure boot ──────────────────────────────────
-	// When HELIX_INFRA_HOST is set, use the Containers module
+	// When HELIX_INFRA_HOST is set, use the containers module
 	// to verify that backend services (database, cache, API) are
 	// healthy before starting the pipeline. The API service name,
 	// port, and health path are read from env so HelixQA stays

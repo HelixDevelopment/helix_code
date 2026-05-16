@@ -17,7 +17,7 @@
     "PASS.*SonarQube health check uses /api/system/status",
     "PASS.*Security network defined",
     "PASS.*security-scan\\.sh --help shows sonarqube mode",
-    "PASS.*cmd/security_scan imports Containers BootManager",
+    "PASS.*cmd/security_scan imports containers BootManager",
     "PASS.*cmd/security_scan uses runtime\\.AutoDetect"
   ],
   "must_not_appear": [
@@ -26,7 +26,7 @@
     "FAIL.*SONAR_TOKEN uses env-var",
     "FAIL.*SonarQube service defined",
     "FAIL.*Memory limits configured",
-    "FAIL.*cmd/security_scan imports Containers BootManager",
+    "FAIL.*cmd/security_scan imports containers BootManager",
     "helixagent",
     "hardcoded",
     "TODO.*implement"

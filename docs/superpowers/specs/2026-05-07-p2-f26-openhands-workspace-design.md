@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Ship a real, end-to-end **workspace + task planner + step executor** subsystem for the HelixCode CLI agent, modelled on Openhands' agent orchestration architecture (`cli_agents/openhands/`). Three components: (1) container-based per-task workspaces managed through the Containers submodule (`digital.vasic.containers`), (2) a sequential step executor that walks F25 plan trees and dispatches shell/LLM steps, and (3) a task planner that bridges F25's structured plan trees with Openhands-style execution pipelines. Tools surface: `workspace_create`, `workspace_list`, `workspace_cleanup`, `task_plan`, `task_step`. Slash: `/openhands`. Cobra: `helixcode workspace {create,list,cleanup}`.
+Ship a real, end-to-end **workspace + task planner + step executor** subsystem for the HelixCode CLI agent, modelled on Openhands' agent orchestration architecture (`cli_agents/openhands/`). Three components: (1) container-based per-task workspaces managed through the containers submodule (`digital.vasic.containers`), (2) a sequential step executor that walks F25 plan trees and dispatches shell/LLM steps, and (3) a task planner that bridges F25's structured plan trees with Openhands-style execution pipelines. Tools surface: `workspace_create`, `workspace_list`, `workspace_cleanup`, `task_plan`, `task_step`. Slash: `/openhands`. Cobra: `helixcode workspace {create,list,cleanup}`.
 
 ---
 
@@ -27,7 +27,7 @@ Ship a real, end-to-end **workspace + task planner + step executor** subsystem f
      lifecycle)                    dispatch)
          │            │              │
          ▼            ▼              ▼
-    Containers    plantree        llm.Provider
+    containers    plantree        llm.Provider
     (Docker/      PlanTree/       workflow.
      Podman)      PlanNode        Executor
 ```
@@ -125,7 +125,7 @@ type TaskPlan struct {
 | File | Purpose |
 |------|---------|
 | `internal/workspace/types.go` | Workspace, WorkspaceStatus, sentinels |
-| `internal/workspace/manager.go` | Container lifecycle via Containers orchestrator |
+| `internal/workspace/manager.go` | Container lifecycle via containers orchestrator |
 | `internal/workspace/workspace_tools.go` | workspace_create/list/cleanup tools.Tool impls |
 | `internal/planner/types.go` | TaskStep, TaskPlan, StepType, StepStatus |
 | `internal/planner/executor.go` | Sequential step executor with retry |
