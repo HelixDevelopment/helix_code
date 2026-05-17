@@ -21,6 +21,17 @@ func NewClient(cfg *config.RedisConfig) (*Client, error) {
 		return &Client{config: cfg}, nil
 	}
 
+	// CONST-035: validate non-empty host before attempting connection.
+	// Otherwise `Sprintf("%s:%d", "", 6379)` produces ":6379" which
+	// resolves to localhost:6379 if a Redis is running — making the
+	// caller's empty-host bug silently "succeed". The
+	// TestNewClient_EmptyHost test relies on this validation to FAIL
+	// fast on misconfigured callers; without it, the test only passes
+	// when no local Redis is running (host-dependent flake).
+	if cfg.Host == "" {
+		return nil, fmt.Errorf("redis: empty host (Enabled=true requires non-empty Host)")
+	}
+
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password: cfg.Password,
