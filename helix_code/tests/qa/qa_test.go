@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -688,11 +689,28 @@ func TestQA_Compatibility_APIVersioning(t *testing.T) {
 // Build and Test Quality
 // =============================================================================
 
-// TestQA_BuildQuality_NoRaceConditions is a placeholder for race detection
+// TestQA_BuildQuality_NoRaceConditions verifies the test process was
+// actually invoked with -race. Previously this test PASSed unconditionally
+// after only `t.Log("Run tests with -race ...")` — a textbook §11.4
+// PASS-bluff: the failure mode (race detector not active during CI)
+// could not trigger a test failure under any circumstances.
+//
+// Detection mechanism: the `raceDetectorActive` constant is set via
+// two build-tagged files (race_detect.go for !race, race_detect_on.go
+// for race) — when `go test -race` is invoked, the race-tagged file
+// wins and the const is true. This is the canonical Go idiom for
+// compile-time race-detector presence detection.
+//
+// SKIP-OK: #qa-race-conditional — skips loudly (not silently passes)
+// in non-race builds; CI Makefile target `test-coverage` passes -race
+// and exercises this gate.
 func TestQA_BuildQuality_NoRaceConditions(t *testing.T) {
-	// This test should be run with -race flag
-	// go test -race ./...
-	t.Log("Run tests with -race flag to detect race conditions")
+	if !raceDetectorActive {
+		t.Skip("SKIP-OK: #qa-race-conditional — `go test -race` not in effect (raceDetectorActive=false); rerun with `make test-coverage` (uses -race) to exercise this gate")
+	}
+	if runtime.NumGoroutine() < 1 {
+		t.Fatal("runtime reports zero goroutines — race-enabled test runtime is broken")
+	}
 }
 
 // TestQA_BuildQuality_TestCoverage reports on test coverage

@@ -945,13 +945,57 @@ func runMigrateCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to read source: %w", err)
 	}
 
-	// Simple migration - just copy for now
-	// In production, this would handle version upgrades
+	srcVer, dstVer, err := configVersions(to, data)
+	if err != nil {
+		return fmt.Errorf("inspect config versions: %w", err)
+	}
+	if srcVer != dstVer {
+		return fmt.Errorf(
+			"helix-config migrate: source version %q ≠ target version %q — "+
+				"version-aware schema migration is not yet implemented. "+
+				"Previous behavior silently copied source bytes verbatim, "+
+				"which masked schema upgrades and was a §11.4 PASS-bluff. "+
+				"To proceed: either edit %s to set version=%q before retry, "+
+				"or implement a per-version migrator under internal/config/migrations/",
+			srcVer, dstVer, from, dstVer,
+		)
+	}
 	if err := os.WriteFile(to, data, 0644); err != nil {
 		return fmt.Errorf("failed to write target: %w", err)
 	}
-	fmt.Printf("Configuration migrated from %s to %s\n", from, to)
+	fmt.Printf("Configuration copied (versions match: %q) from %s to %s\n", srcVer, from, to)
 	return nil
+}
+
+// configVersions extracts the `version:` field from source bytes and
+// the target file (if present). Missing version defaults to "" /
+// matches source (no migration needed).
+func configVersions(dstPath string, srcData []byte) (string, string, error) {
+	srcVer := extractConfigVersion(srcData)
+	dstVer := srcVer
+	if dstData, err := os.ReadFile(dstPath); err == nil {
+		dstVer = extractConfigVersion(dstData)
+	} else if !os.IsNotExist(err) {
+		return "", "", fmt.Errorf("read target %s: %w", dstPath, err)
+	}
+	return srcVer, dstVer, nil
+}
+
+// extractConfigVersion scans for `version:` (YAML) or `"version":` (JSON).
+// Returns "" when absent.
+func extractConfigVersion(data []byte) string {
+	for _, line := range strings.Split(string(data), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "version:") {
+			return strings.TrimSpace(strings.TrimPrefix(trimmed, "version:"))
+		}
+		if strings.HasPrefix(trimmed, `"version":`) {
+			rest := strings.TrimSpace(strings.TrimPrefix(trimmed, `"version":`))
+			rest = strings.TrimSuffix(rest, ",")
+			return strings.Trim(rest, `"`)
+		}
+	}
+	return ""
 }
 
 func runBenchmarkCommand(cmd *cobra.Command, args []string) error {

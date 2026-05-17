@@ -845,54 +845,48 @@ type OverallImprovement struct {
 	OverallScore          float64 `json:"overall_improvement_score"`
 }
 
-// Simulation functions for demonstration
-func simulateCPUUsage() float64 {
-	return 45.5 + (float64(time.Now().UnixNano()%100)/100)*10
+// Telemetry stubs — sentinel-returning placeholders for the 11
+// performance metrics not yet wired to real instrumentation.
+//
+// Previously these functions returned jittered fabricated values
+// (e.g. `45.5 + time.Now().UnixNano()%100 / 100 * 10`) which made
+// every optimizer test PASS against fake numbers — the canonical
+// §11.4 simulate-return bluff. Returning zero is the honest sentinel:
+// any test asserting non-zero will FAIL, forcing the gap to be wired
+// before "performance improvement" claims can land.
+//
+// Wire-up pointers:
+//   - CPUUsage      → github.com/shirou/gopsutil/v3/cpu.Percent
+//   - Throughput    → atomic counter in worker pool
+//   - Latency/P95/P99 → histogram at provider layer
+//   - CacheHitRate  → counter ratio from internal/cache
+//   - ErrorRate     → counter ratio from internal/monitoring
+//   - WorkerUtil    → poll worker.Pool.Stats()
+//   - LLMRespTime   → histogram from internal/llm provider
+//   - DatabaseQ     → histogram from internal/database
+//   - NetworkLatency → histogram from internal/server middleware
+//
+// Logged once-per-process via sync.Once so operators see the gap
+// without log spam.
+var telemetryGapLogged sync.Once
+
+func logTelemetryGap() {
+	telemetryGapLogged.Do(func() {
+		log.Printf("WARN [§11.4 / CONST-035 / optimizer.go]: 9 performance-telemetry functions return sentinel zero — wire them to real instrumentation (gopsutil / internal/cache / internal/monitoring / internal/worker / internal/llm / internal/database) before relying on collectMetrics for optimization decisions.")
+	})
 }
 
-func simulateThroughput() int {
-	return 1000 + (int(time.Now().UnixNano()) % 500)
-}
-
-func simulateLatency() time.Duration {
-	return time.Duration(50+int(time.Now().UnixNano())%100) * time.Millisecond
-}
-
-func simulateP95Latency() time.Duration {
-	return time.Duration(100+int(time.Now().UnixNano())%150) * time.Millisecond
-}
-
-func simulateP99Latency() time.Duration {
-	return time.Duration(200+int(time.Now().UnixNano())%200) * time.Millisecond
-}
-
-func simulateCacheHitRate() float64 {
-	return 0.85 + (float64(time.Now().UnixNano()%100)/100)*0.1
-}
-
-func simulateErrorRate() float64 {
-	return 0.01 + (float64(time.Now().UnixNano()%100)/100)*0.005
-}
-
-func simulateWorkerUtilization() []float64 {
-	utilization := make([]float64, 10)
-	for i := range utilization {
-		utilization[i] = 60.0 + (float64(time.Now().UnixNano()%100)/100)*20
-	}
-	return utilization
-}
-
-func simulateLLMResponseTime() time.Duration {
-	return time.Duration(500+int(time.Now().UnixNano())%1000) * time.Millisecond
-}
-
-func simulateDatabaseQueryTime() time.Duration {
-	return time.Duration(10+int(time.Now().UnixNano())%50) * time.Millisecond
-}
-
-func simulateNetworkLatency() time.Duration {
-	return time.Duration(5+int(time.Now().UnixNano())%20) * time.Millisecond
-}
+func simulateCPUUsage() float64                { logTelemetryGap(); return 0 }
+func simulateThroughput() int                  { logTelemetryGap(); return 0 }
+func simulateLatency() time.Duration           { logTelemetryGap(); return 0 }
+func simulateP95Latency() time.Duration        { logTelemetryGap(); return 0 }
+func simulateP99Latency() time.Duration        { logTelemetryGap(); return 0 }
+func simulateCacheHitRate() float64            { logTelemetryGap(); return 0 }
+func simulateErrorRate() float64               { logTelemetryGap(); return 0 }
+func simulateWorkerUtilization() []float64     { logTelemetryGap(); return nil }
+func simulateLLMResponseTime() time.Duration   { logTelemetryGap(); return 0 }
+func simulateDatabaseQueryTime() time.Duration { logTelemetryGap(); return 0 }
+func simulateNetworkLatency() time.Duration    { logTelemetryGap(); return 0 }
 
 func calculateImprovement(before, after float64) float64 {
 	if before == 0 {

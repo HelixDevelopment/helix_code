@@ -3,6 +3,8 @@ package automation
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -831,19 +833,98 @@ func downloadTestModel(t *testing.T, baseDir, modelName string) string {
 	return modelFile
 }
 
+// testModelInference performs a real inference call to the provider's
+// endpoint. Previously returned true unconditionally after a t.Logf —
+// §11.4 PASS-bluff. Now: SKIPs honestly if no endpoint env var is
+// set, otherwise issues a real HTTP POST and asserts non-empty body.
 func testModelInference(t *testing.T, provider, modelName string, hwInfo *HardwareInfo) bool {
-	// This would implement actual model inference testing
-	// For now, return true to indicate test framework works
-	t.Logf("Testing inference for %s on %s", modelName, provider)
+	t.Helper()
+	endpoint := providerEndpoint(provider)
+	if endpoint == "" {
+		t.Skipf("SKIP-OK: #hardware-inference — no endpoint env var set for provider %q (e.g. OLLAMA_BASE_URL); previously this returned `true` unconditionally — §11.4 bluff", provider)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	body := fmt.Sprintf(`{"model":%q,"prompt":"2+2=","stream":false}`, modelName)
+	req, err := http.NewRequestWithContext(ctx, "POST",
+		strings.TrimRight(endpoint, "/")+"/api/generate",
+		strings.NewReader(body))
+	if err != nil {
+		t.Logf("inference request build failed: %v", err)
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Logf("inference HTTP call failed for %s on %s: %v", modelName, provider, err)
+		return false
+	}
+	defer resp.Body.Close()
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil || len(respBytes) == 0 || resp.StatusCode >= 400 {
+		t.Logf("inference response invalid (status=%d, len=%d, err=%v)",
+			resp.StatusCode, len(respBytes), err)
+		return false
+	}
+	t.Logf("inference OK for %s on %s: %d response bytes", modelName, provider, len(respBytes))
 	return true
 }
 
+// runInferenceWorkload issues `duration`-worth of real inference calls
+// so the resource-utilization test can measure actual memory delta.
+// Previously was time.Sleep(duration) — §11.4 bluff masking missing
+// endpoint. Now: real HTTP loop or honest SKIP-OK.
 func runInferenceWorkload(t *testing.T, provider string, model TestModel, duration time.Duration) {
-	t.Logf("Running inference workload for %s on %s for %v", model.Name, provider, duration)
+	t.Helper()
+	endpoint := providerEndpoint(provider)
+	if endpoint == "" {
+		t.Skipf("SKIP-OK: #hardware-workload — no endpoint env var set for provider %q (e.g. OLLAMA_BASE_URL); previously time.Sleep(%v) — §11.4 bluff",
+			provider, duration)
+	}
+	deadline := time.Now().Add(duration)
+	calls := 0
+	for time.Now().Before(deadline) {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		body := fmt.Sprintf(`{"model":%q,"prompt":"counter %d","stream":false}`, model.Name, calls)
+		req, err := http.NewRequestWithContext(ctx, "POST",
+			strings.TrimRight(endpoint, "/")+"/api/generate",
+			strings.NewReader(body))
+		if err != nil {
+			cancel()
+			t.Logf("workload request build failed at call %d: %v", calls, err)
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := http.DefaultClient.Do(req)
+		cancel()
+		if err != nil {
+			t.Logf("workload call %d failed: %v (continuing)", calls, err)
+			continue
+		}
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+		calls++
+	}
+	t.Logf("inference workload: %d calls in %v on %s/%s", calls, duration, provider, model.Name)
+}
 
-	// This would implement actual workload generation
-	// For now, simulate with sleep
-	time.Sleep(duration)
+// providerEndpoint returns the configured endpoint env var for the
+// named provider, or "" if unset.
+func providerEndpoint(provider string) string {
+	switch strings.ToLower(provider) {
+	case "ollama":
+		if v := os.Getenv("OLLAMA_BASE_URL"); v != "" {
+			return v
+		}
+	case "llamacpp", "llama.cpp":
+		if v := os.Getenv("LLAMACPP_BASE_URL"); v != "" {
+			return v
+		}
+	}
+	if v := os.Getenv("LLM_BASE_URL"); v != "" {
+		return v
+	}
+	return ""
 }
 
 func getMemoryUsage() (int64, error) {

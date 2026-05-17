@@ -18,18 +18,77 @@ func NewUIComponents(tui *TerminalUI) *UIComponents {
 	}
 }
 
-// CreateForm creates a reusable form component
+// CreateForm creates a reusable form component. Each FormField is
+// dispatched on its Type into the matching tview widget — "input",
+// "password", "checkbox", "dropdown", "button". Fields with empty
+// Type default to "input". Fields with Type "button" become form
+// buttons; all other types become input widgets. Unknown Type
+// strings panic-free: the field is skipped and a debug entry is
+// logged via the form title (no silent ignore — the previous
+// implementation ignored every field, which was a §11.4 stub bluff).
 func (uc *UIComponents) CreateForm(title string, fields []FormField) *tview.Form {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitle(title)
 	form.SetTitleAlign(tview.AlignLeft)
 
-	// Add basic text input for now
-	form.AddInputField("Input", "", 20, nil, nil)
-	form.AddButton("Submit", nil)
+	if len(fields) == 0 {
+		// No fields configured — caller intentionally wants an empty
+		// form. Do NOT silently inject a generic "Input" widget; the
+		// previous behavior masked configuration errors.
+		return form
+	}
+
+	for _, f := range fields {
+		width := f.Width
+		if width <= 0 {
+			width = 20
+		}
+		switch f.Type {
+		case "", "input", "text":
+			form.AddInputField(f.Label, f.DefaultValue, width, nil, asStringChange(f.OnChange))
+		case "password":
+			form.AddPasswordField(f.Label, f.DefaultValue, width, '*', asStringChange(f.OnChange))
+		case "checkbox", "bool":
+			form.AddCheckbox(f.Label, f.BoolValue, asBoolChange(f.OnChange))
+		case "dropdown", "select":
+			form.AddDropDown(f.Label, f.Options, f.SelectedIndex, asSelectChange(f.OnChange))
+		case "button":
+			form.AddButton(f.Label, f.OnClick)
+		default:
+			// Unknown type — surface in the form title so the misuse
+			// is visible to the user (anti-bluff: no silent skips).
+			form.SetTitle(fmt.Sprintf("%s [skipped unknown field type %q]", title, f.Type))
+		}
+	}
 
 	return form
+}
+
+// asStringChange casts an interface{} OnChange handler into the
+// signature tview.Form.AddInputField expects. Returns nil if the
+// handler is nil or the wrong type.
+func asStringChange(h interface{}) func(string) {
+	if fn, ok := h.(func(string)); ok {
+		return fn
+	}
+	return nil
+}
+
+// asBoolChange casts an interface{} OnChange handler for checkboxes.
+func asBoolChange(h interface{}) func(bool) {
+	if fn, ok := h.(func(bool)); ok {
+		return fn
+	}
+	return nil
+}
+
+// asSelectChange casts an interface{} OnChange handler for dropdowns.
+func asSelectChange(h interface{}) func(string, int) {
+	if fn, ok := h.(func(string, int)); ok {
+		return fn
+	}
+	return nil
 }
 
 // CreateList creates a reusable list component

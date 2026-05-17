@@ -193,12 +193,28 @@ func (cm *ConsensusManager) startElection() {
 
 	log.Printf("Node %s starting election for term %d", cm.nodeID, cm.currentTerm)
 
-	// In a real implementation, send to peers
-	// For now, simulate quorum
 	if len(cm.peers) == 0 {
-		// Single node cluster - become leader immediately
+		// Single-node cluster — become leader immediately. No peers
+		// to canvass, no quorum to gather. This is the only honest
+		// path the current implementation supports.
 		cm.becomeLeader()
+		return
 	}
+
+	// Multi-peer election: the transport-level vote-request fan-out
+	// (sending a VoteRequest to every peer and tallying responses
+	// into cm.votes / cm.voteResponses) is NOT implemented. The
+	// previous code did nothing in the multi-peer case, leaving the
+	// Candidate state set forever — any test exercising a peers>0
+	// cluster PASSed by not crashing while the election never
+	// completed. §11.4 stub bluff.
+	//
+	// Surface the gap loudly so operators see it during deployment
+	// and monitoring catches it. Until the transport is wired, do
+	// NOT silently transition; remain Candidate and let the next
+	// election-timeout retry.
+	log.Printf("CRITICAL [§11.4 / CONST-035 / consensus.go]: multi-peer election requested but vote-request transport is not implemented (peers=%d). Node %s remains Candidate until vote-request transport is wired into startElection. See internal/worker/consensus.go for the implementation pointer.",
+		len(cm.peers), cm.nodeID)
 }
 
 // handleVoteRequest handles incoming vote requests

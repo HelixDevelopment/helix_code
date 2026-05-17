@@ -273,75 +273,51 @@ func TestGetOptimizationMetric(t *testing.T) {
 	})
 }
 
-// TestSimulationFunctions tests all simulation functions
+// TestSimulationFunctions verifies the sentinel-zero behavior of the
+// telemetry stubs. The previous version asserted simulate* returned
+// values in specific fabricated ranges (e.g. 45.5-55.5 for CPU) —
+// which made the test itself part of the §11.4 bluff infrastructure
+// (certifying that the lies fell in the right shape).
+//
+// The honest contract now: every stub returns zero (sentinel for
+// "telemetry not wired"). Any caller asserting non-zero will FAIL,
+// surfacing the wiring gap at the assertion boundary. When real
+// telemetry lands (per the wire-up pointer comment in optimizer.go),
+// these tests should be tightened to assert value-range invariants
+// from real instrumentation.
 func TestSimulationFunctions(t *testing.T) {
-	t.Run("simulateCPUUsage", func(t *testing.T) {
-		cpu := simulateCPUUsage()
-		assert.GreaterOrEqual(t, cpu, 0.0)
-		assert.LessOrEqual(t, cpu, 100.0)
+	t.Run("simulateCPUUsage_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, 0.0, simulateCPUUsage())
 	})
-
-	t.Run("simulateThroughput", func(t *testing.T) {
-		throughput := simulateThroughput()
-		assert.GreaterOrEqual(t, throughput, 1000)
-		assert.LessOrEqual(t, throughput, 1500)
+	t.Run("simulateThroughput_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, 0, simulateThroughput())
 	})
-
-	t.Run("simulateLatency", func(t *testing.T) {
-		latency := simulateLatency()
-		assert.GreaterOrEqual(t, latency, 50*time.Millisecond)
-		assert.LessOrEqual(t, latency, 150*time.Millisecond)
+	t.Run("simulateLatency_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateLatency())
 	})
-
-	t.Run("simulateP95Latency", func(t *testing.T) {
-		p95 := simulateP95Latency()
-		assert.GreaterOrEqual(t, p95, 100*time.Millisecond)
-		assert.LessOrEqual(t, p95, 250*time.Millisecond)
+	t.Run("simulateP95Latency_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateP95Latency())
 	})
-
-	t.Run("simulateP99Latency", func(t *testing.T) {
-		p99 := simulateP99Latency()
-		assert.GreaterOrEqual(t, p99, 200*time.Millisecond)
-		assert.LessOrEqual(t, p99, 400*time.Millisecond)
+	t.Run("simulateP99Latency_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateP99Latency())
 	})
-
-	t.Run("simulateCacheHitRate", func(t *testing.T) {
-		hitRate := simulateCacheHitRate()
-		assert.GreaterOrEqual(t, hitRate, 0.85)
-		assert.LessOrEqual(t, hitRate, 0.95)
+	t.Run("simulateCacheHitRate_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, 0.0, simulateCacheHitRate())
 	})
-
-	t.Run("simulateErrorRate", func(t *testing.T) {
-		errorRate := simulateErrorRate()
-		assert.GreaterOrEqual(t, errorRate, 0.01)
-		assert.LessOrEqual(t, errorRate, 0.015)
+	t.Run("simulateErrorRate_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, 0.0, simulateErrorRate())
 	})
-
-	t.Run("simulateWorkerUtilization", func(t *testing.T) {
-		utilization := simulateWorkerUtilization()
-		assert.Len(t, utilization, 10)
-		for _, u := range utilization {
-			assert.GreaterOrEqual(t, u, 60.0)
-			assert.LessOrEqual(t, u, 80.0)
-		}
+	t.Run("simulateWorkerUtilization_is_nil_sentinel", func(t *testing.T) {
+		assert.Nil(t, simulateWorkerUtilization())
 	})
-
-	t.Run("simulateLLMResponseTime", func(t *testing.T) {
-		llmTime := simulateLLMResponseTime()
-		assert.GreaterOrEqual(t, llmTime, 500*time.Millisecond)
-		assert.LessOrEqual(t, llmTime, 1500*time.Millisecond)
+	t.Run("simulateLLMResponseTime_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateLLMResponseTime())
 	})
-
-	t.Run("simulateDatabaseQueryTime", func(t *testing.T) {
-		dbTime := simulateDatabaseQueryTime()
-		assert.GreaterOrEqual(t, dbTime, 10*time.Millisecond)
-		assert.LessOrEqual(t, dbTime, 60*time.Millisecond)
+	t.Run("simulateDatabaseQueryTime_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateDatabaseQueryTime())
 	})
-
-	t.Run("simulateNetworkLatency", func(t *testing.T) {
-		netLatency := simulateNetworkLatency()
-		assert.GreaterOrEqual(t, netLatency, 5*time.Millisecond)
-		assert.LessOrEqual(t, netLatency, 25*time.Millisecond)
+	t.Run("simulateNetworkLatency_is_sentinel_zero", func(t *testing.T) {
+		assert.Equal(t, time.Duration(0), simulateNetworkLatency())
 	})
 }
 
