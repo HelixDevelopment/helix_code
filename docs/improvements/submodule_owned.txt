@@ -1,5 +1,5 @@
-Challenges | git@github.com:vasic-digital/Challenges.git
-Containers | git@github.com:vasic-digital/Containers.git
+challenges | git@github.com:vasic-digital/Challenges.git
+containers | git@github.com:vasic-digital/Containers.git
 dependencies/HelixDevelopment/DocProcessor | git@github.com:HelixDevelopment/DocProcessor.git
 dependencies/HelixDevelopment/HelixLLM | git@github.com:HelixDevelopment/HelixLLM.git
 dependencies/HelixDevelopment/HelixMemory | git@github.com:HelixDevelopment/HelixMemory.git
@@ -61,8 +61,8 @@ dependencies/vasic-digital/VectorDB | git@github.com:vasic-digital/VectorDB.git
 dependencies/vasic-digital/Veritas | git@github.com:vasic-digital/Veritas.git
 dependencies/vasic-digital/VisionEngine | git@github.com:vasic-digital/VisionEngine.git
 dependencies/vasic-digital/Watcher | git@github.com:vasic-digital/Watcher.git
-Github-Pages-Website | git@github.com:HelixDevelopment-Code/Welcome.git
-HelixAgent | git@github.com:HelixDevelopment/HelixAgent.git
-HelixQA | git@github.com:HelixDevelopment/HelixQA.git
-Panoptic | git@github.com:vasic-digital/Panoptic.git
-Security | git@github.com:vasic-digital/Security.git
+github_pages_website | git@github.com:HelixDevelopment-Code/Welcome.git
+helix_agent | git@github.com:HelixDevelopment/HelixAgent.git
+helix_qa | git@github.com:HelixDevelopment/HelixQA.git
+panoptic | git@github.com:vasic-digital/Panoptic.git
+security | git@github.com:vasic-digital/Security.git

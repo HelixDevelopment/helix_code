@@ -34,12 +34,29 @@ for f in CONSTITUTION.md AGENTS.md; do
 done
 
 # 2. Owned-by-us submodules (require CONSTITUTION.md, CLAUDE.md, AGENTS.md with anchor)
+#
+# Canonical-path convention (CONST-052 snake_case + CONST-051(C) dependencies layout):
+#  - Owned-by-us submodule paths in docs/improvements/submodule_owned.txt MUST be
+#    the canonical on-disk paths matching the current submodule layout.
+#  - Top-level submodules: lowercase snake_case (`challenges`, `containers`,
+#    `github_pages_website`, `helix_agent`, `helix_qa`, `panoptic`, `security`).
+#  - Nested-dependency submodules: `dependencies/<org>/<Name>` per CONST-051(C).
+#    Mixed-case `<Name>` segment retained per CONST-052 vendor-naming exemption.
+#  - Anti-regression: if a listed path does NOT exist on disk, the verifier now
+#    FAILS loudly (was previously a silent SKIP, which masked the round-56
+#    blemish where 7 stale capitalized entries hid behind "not initialized").
+#    A genuinely-uninitialized submodule MUST be initialized BEFORE the cascade
+#    can be verified — there is no honest middle state.
 echo ""
 echo "--- Owned-by-us submodules ---"
 if [ -f "$OWNED_FILE" ]; then
   while IFS=' |' read -r sm rest; do
     [ -z "$sm" ] && continue
-    [ ! -d "$ROOT/$sm" ] && echo "SKIP: $sm (not initialized)" && continue
+    if [ ! -d "$ROOT/$sm" ]; then
+      echo "FAIL: $sm — path does not exist on disk (verifier path list out of sync; see submodule_owned.txt and CONST-052 / CONST-051(C))"
+      FAILURES=$((FAILURES+1))
+      continue
+    fi
     for f in CONSTITUTION.md CLAUDE.md AGENTS.md; do
       if [ ! -f "$ROOT/$sm/$f" ]; then
         echo "FAIL: $sm/$f — file missing"; FAILURES=$((FAILURES+1))
