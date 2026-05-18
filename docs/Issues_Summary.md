@@ -9,7 +9,7 @@
 | ISSUE-003 | HelixLLM `analysis_test.go` hardcoded absolute path (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via t.TempDir + fixtures (a5e56d4) |
 | ISSUE-004 | HelixLLM `gateway/middleware` TOON `WriteTOON` 500 (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via json.Marshal fallback (a5e56d4) |
 | ISSUE-005 | CONST-052 rename programme: meta-repo dirs still PascalCase | Task | Queued | 2026-05-15 | Renames break path-encoded refs; phased migration required |
-| ISSUE-006 | Round-74 environmental-class residual LOGIC FAILs (~7 submodules) | Bug | Queued | 2026-05-19 | HelixMemory + vasic-digital/Planning + helix_agent inner test bugs |
+| ISSUE-006 | Round-74 residual LOGIC FAILs | Bug | In progress (2/3 closed) | 2026-05-19 | HelixMemory ✓ (round 106), Planning ✓ (round 107 no-op), helix_agent inner pending |
 | ISSUE-007 | CONST-046 migration backlog (57,329 violations, baselined, shrinking) | Feature | In progress | 2026-05-19 | Phase 4 (rounds 100+) actively migrating; audit-gate `--fail-on-new` enforced |
 | ISSUE-008 | helix_qa intermittent TestPerformance flake (host-load-sensitive) | Bug | Queued — BLOCKED on operator | 2026-05-19 | Either loosen tolerance or gate behind HOST_LOAD_DEDICATED env var |
 

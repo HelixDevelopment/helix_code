@@ -67,14 +67,18 @@
 
 ---
 
-## ISSUE-006 — Round-74 environmental-class FAILs not yet classified by audit-gate filter
+## ISSUE-006 — Round-74 residual LOGIC-class FAILs (HelixMemory ✓ + Planning ✓ + helix_agent inner pending)
 
-**Status:** Queued
+**Status:** In progress (2/3 components closed)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 74 — release-gate-test.sh creation; classified by round 89)
 **Discovered-By:** AI release-gate sweep
-**Evidence:** Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; remaining ~7 are HelixMemory + vasic-digital/Planning + helix_agent inner test bugs. Round 89's `--skip-env-failures` filter classifies env-vs-logic FAILs but the LOGIC-class residual still needs per-submodule fix-up.
-**Resolution path:** Per-submodule investigation; likely small focused fixes similar to rounds 82-87 pattern.
+**Closure progress:**
+- ✓ HelixMemory: closed round 106 (commit `69016df` — single-line `go.mod` fix; 6 FAIL → 0 FAIL)
+- ✓ vasic-digital/Planning: round 107 NO-OP — 275 PASS / 0 FAIL / 20 SKIP-OK; likely incidentally fixed by round 98 i18n migration
+- ◯ helix_agent inner: PENDING (not yet investigated; may have already been fixed elsewhere — round 105 found ISSUE-003/004 were actually in HelixLLM)
+**Evidence:** Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; this Issue tracked the residual 7 across 3 submodules. 2 closed; 1 remaining.
+**Resolution path:** Future round investigates helix_agent inner test suite for LOGIC-class residuals; may be no-op if already resolved.
 
 ---
 
