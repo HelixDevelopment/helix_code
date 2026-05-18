@@ -32,6 +32,7 @@
 | 2026-05-19 | Tracker HTML + PDF exports per §11.4.19 | Feature | Implemented (→ Fixed.md) | 110 | e028073 | pandoc 3.9 + weasyprint; 10 artefacts (4 HTML + 4 PDF + script + README ~160KB); validated + mutation-tested |
 | 2026-05-19 | helix_code/cmd/helix_config/main.go × 10 migration | Feature | Implemented (→ Fixed.md) | 108 | 878fcfc + 5b5c3c6 | Phase 4 next-tier; dynamic-pick agent selected helix_config CLI |
 | 2026-05-19 | helix_qa i18n kickoff (Phase 4 round 7) | Feature | Implemented (→ Fixed.md) | 112 | a676ba2 + c538642 | Submodule pointer + baseline refresh; formal report truncated |
+| 2026-05-19 | CONST-052 rename programme phased plan (ISSUE-005 plan) | Task | Completed (→ Fixed.md) | 113 | f666410 | 522 LOC / 4709 words / 9 sections; 107 renames inventoried; 12 operator decisions; estimated 5 days execution |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
