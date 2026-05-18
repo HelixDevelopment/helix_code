@@ -1,0 +1,66 @@
+# android i18n bundle — active English (en) locale.
+#
+# Round-139 §11.4 anti-bluff sweep (2026-05-18): infrastructure
+# bundle for the android Go-bridge surface.
+#
+# IMPORTANT — language-exemption documentation:
+# The android application's user-visible Kotlin/XML code is governed
+# by the Android platform's OWN resource system
+# (`app/src/main/res/values/strings.xml` /
+# `values-<locale>/strings.xml`). Migrating Kotlin-side literals
+# into a Go bundle would itself be a CONST-051(B) decoupling
+# violation (Go-specific context bleeding into a platform-correct
+# Kotlin surface). The following Kotlin/XML hardcoded literals are
+# tracked here as DOCUMENTATION ONLY — their canonical fix is to
+# migrate them to Android's strings.xml when the Android UI receives
+# its full localization pass (future Android-i18n round):
+#
+#   MainActivity.kt:
+#     - "Connection Failed", "Could not connect to server"
+#     - "Connected", "Disconnected"
+#     - "Connect", "Disconnect"
+#     - "OK" (dialog buttons)
+#   activity_main.xml:
+#     - "Disconnected", "User: Not connected", "Connect"
+#   item_task.xml:
+#     - "Task Name", "Status: Running"
+#
+# The bundle entries below mirror the Kotlin literals so that when
+# the Go-bridge (HelixCoreMobileCore) eventually surfaces equivalent
+# strings (e.g. via the dashboardData / theme / sendNotification
+# JSON payloads consumed by MobileCore.kt), the migration can wire
+# them straight through.
+#
+# Naming convention: android_<area>_<short_description>. All IDs
+# prefixed with android_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+
+android_connection_status_connected:
+  other: "Connected"
+
+android_connection_status_disconnected:
+  other: "Disconnected"
+
+android_button_connect:
+  other: "Connect"
+
+android_button_disconnect:
+  other: "Disconnect"
+
+android_button_ok:
+  other: "OK"
+
+android_alert_connection_failed_title:
+  other: "Connection Failed"
+
+android_alert_connection_failed_message:
+  other: "Could not connect to server"
+
+android_user_not_connected:
+  other: "User: Not connected"
+
+android_layout_task_name_default:
+  other: "Task Name"
+
+android_layout_task_status_default:
+  other: "Status: Running"

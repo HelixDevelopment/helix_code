@@ -1,0 +1,45 @@
+# desktop i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/applications/desktop/main.go to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: desktop_<area>_<short_description>. All IDs
+# prefixed with desktop_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-136 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# UI labels migrated. Remaining hardcoded strings tracked for
+# future rounds.
+
+desktop_window_title:
+  other: "HelixCode - Distributed AI Development Platform"
+
+desktop_status_bar_default:
+  other: "Ready | User: Not logged in | Session: None"
+
+desktop_dashboard_header:
+  other: "HelixCode - Distributed AI Development Platform"
+
+desktop_projects_select_prompt:
+  other: "Select a project to view details"
+
+desktop_projects_create_header:
+  other: "Create New Project:"
+
+desktop_projects_delete_confirm:
+  other: "Are you sure you want to delete this project?"
+
+desktop_sessions_select_prompt:
+  other: "Select a session to view details"
+
+desktop_sessions_create_header:
+  other: "Create New Session:"
+
+desktop_models_available_header:
+  other: "Available Models"
+
+desktop_chat_input_placeholder:
+  other: "Type your message here..."

@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"dev.helix.code/applications/desktop/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
@@ -211,9 +212,18 @@ type DesktopApp struct {
 	// Update ticker for real-time data
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+
+	// translator resolves CONST-046 user-facing message IDs. Defaults
+	// to i18n.NoopTranslator{} (loud message-ID echo) when nil — set
+	// by helix_code at boot via SetTranslator to a real
+	// *i18nadapter.Translator wired to the active.en.yaml bundle.
+	translator i18n.Translator
 }
 
-// NewDesktopApp creates a new desktop application
+// NewDesktopApp creates a new desktop application. The app starts
+// with i18n.NoopTranslator{} for backward compat — production
+// wiring calls SetTranslator with a real Translator (e.g.
+// helix_code's *i18nadapter.Translator) before Run.
 func NewDesktopApp() *DesktopApp {
 	fyneApp := app.New()
 	fyneApp.Settings().SetTheme(&CustomTheme{})
@@ -224,7 +234,36 @@ func NewDesktopApp() *DesktopApp {
 		sessions:     make([]*session.Session, 0),
 		llmProviders: make([]string, 0),
 		stopUpdate:   make(chan struct{}),
+		translator:   i18n.NoopTranslator{},
 	}
+}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func (da *DesktopApp) SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		da.translator = i18n.NoopTranslator{}
+		return
+	}
+	da.translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func (da *DesktopApp) tr(ctx context.Context, msgID string, data map[string]any) string {
+	if da.translator == nil {
+		da.translator = i18n.NoopTranslator{}
+	}
+	out, err := da.translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
 }
 
 // Initialize sets up the desktop application
@@ -341,7 +380,10 @@ func (da *DesktopApp) refreshData() {
 // setupUI initializes the user interface
 func (da *DesktopApp) setupUI() {
 	// Create main window
-	da.mainWindow = da.fyneApp.NewWindow("HelixCode - Distributed AI Development Platform")
+	// CONST-046: window title resolved via applications/desktop/i18n
+	// bundle through injected Translator; NoopTranslator echoes ID.
+	ctx := context.Background()
+	da.mainWindow = da.fyneApp.NewWindow(da.tr(ctx, "desktop_window_title", nil))
 	da.mainWindow.SetMaster()
 	da.mainWindow.Resize(fyne.NewSize(1200, 800))
 
@@ -357,7 +399,8 @@ func (da *DesktopApp) setupUI() {
 	)
 
 	// Create status bar
-	da.statusBar = widget.NewLabel("Ready | User: Not logged in | Session: None")
+	// CONST-046: status bar default text resolved via i18n bundle.
+	da.statusBar = widget.NewLabel(da.tr(ctx, "desktop_status_bar_default", nil))
 	da.statusBar.Alignment = fyne.TextAlignCenter
 
 	// Create main layout
@@ -369,7 +412,9 @@ func (da *DesktopApp) setupUI() {
 // createDashboardTab creates the dashboard tab
 func (da *DesktopApp) createDashboardTab() fyne.CanvasObject {
 	// Header with integrated logo
-	header := widget.NewLabel("HelixCode - Distributed AI Development Platform")
+	// CONST-046: dashboard header resolved via i18n bundle.
+	ctx := context.Background()
+	header := widget.NewLabel(da.tr(ctx, "desktop_dashboard_header", nil))
 	header.Alignment = fyne.TextAlignCenter
 	header.TextStyle = fyne.TextStyle{Bold: true}
 
@@ -623,7 +668,9 @@ func (da *DesktopApp) createProjectsTab() fyne.CanvasObject {
 	)
 
 	// Project details panel
-	projectDetailsLabel := widget.NewLabel("Select a project to view details")
+	// CONST-046: select-prompt resolved via i18n bundle.
+	ctxProjects := context.Background()
+	projectDetailsLabel := widget.NewLabel(da.tr(ctxProjects, "desktop_projects_select_prompt", nil))
 	projectDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	da.projectList.OnSelected = func(id widget.ListItemID) {
@@ -653,7 +700,8 @@ func (da *DesktopApp) createProjectsTab() fyne.CanvasObject {
 	typeSelect.SetSelected("go")
 
 	createForm := container.NewVBox(
-		widget.NewLabel("Create New Project:"),
+		// CONST-046: create-project header resolved via i18n bundle.
+		widget.NewLabel(da.tr(ctxProjects, "desktop_projects_create_header", nil)),
 		widget.NewLabel("Name:"),
 		nameEntry,
 		widget.NewLabel("Description:"),
@@ -700,7 +748,8 @@ func (da *DesktopApp) createProjectsTab() fyne.CanvasObject {
 			}
 		}),
 		widget.NewButton("Delete Project", func() {
-			dialog.ShowConfirm("Confirm Delete", "Are you sure you want to delete this project?", func(confirmed bool) {
+			// CONST-046: delete-confirm prompt resolved via i18n bundle.
+			dialog.ShowConfirm("Confirm Delete", da.tr(ctxProjects, "desktop_projects_delete_confirm", nil), func(confirmed bool) {
 				if confirmed {
 					// Delete selected project
 					da.dataMu.RLock()
@@ -749,7 +798,9 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 	)
 
 	// Session details panel
-	sessionDetailsLabel := widget.NewLabel("Select a session to view details")
+	// CONST-046: select-prompt resolved via i18n bundle.
+	ctxSessions := context.Background()
+	sessionDetailsLabel := widget.NewLabel(da.tr(ctxSessions, "desktop_sessions_select_prompt", nil))
 	sessionDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	da.sessionList.OnSelected = func(id widget.ListItemID) {
@@ -795,7 +846,8 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 	}
 
 	actions := container.NewVBox(
-		widget.NewLabel("Create New Session:"),
+		// CONST-046: create-session header resolved via i18n bundle.
+		widget.NewLabel(da.tr(ctxSessions, "desktop_sessions_create_header", nil)),
 		widget.NewLabel("Name:"),
 		nameEntry,
 		widget.NewLabel("Description:"),
@@ -906,7 +958,9 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 		},
 	)
 
-	modelListCard := widget.NewCard("Available Models", "", modelList)
+	// CONST-046: "Available Models" card title resolved via i18n bundle.
+	ctxLLM := context.Background()
+	modelListCard := widget.NewCard(da.tr(ctxLLM, "desktop_models_available_header", nil), "", modelList)
 
 	// Model details panel
 	modelDetailsLabel := widget.NewLabel("Select a model to view details")
@@ -935,7 +989,8 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	da.chatHistory.Wrapping = fyne.TextWrapWord
 
 	da.chatInput = widget.NewMultiLineEntry()
-	da.chatInput.SetPlaceHolder("Type your message here...")
+	// CONST-046: chat input placeholder resolved via i18n bundle.
+	da.chatInput.SetPlaceHolder(da.tr(ctxLLM, "desktop_chat_input_placeholder", nil))
 	da.chatInput.SetMinRowsVisible(3)
 
 	// Provider/model selection for chat
