@@ -459,10 +459,14 @@ func TestProductionDeployerConcurrency(t *testing.T) {
 			}
 		}
 
-		// At least some should fail with "already running"
+		// At least some should fail with "already running" — the
+		// message is CONST-046 i18n-resolved (round 153) so it
+		// surfaces as the bundle ID under the package's default
+		// NoopTranslator. Match the message ID, not the legacy
+		// literal.
 		hasAlreadyRunning := false
 		for _, err := range errors {
-			if err != nil && err.Error() == "deployment already running" {
+			if err != nil && err.Error() == "internal_deployment_already_running" {
 				hasAlreadyRunning = true
 				break
 			}
@@ -585,7 +589,9 @@ func TestStartProductionDeployment(t *testing.T) {
 		status, err := deployer.StartProductionDeployment(ctx)
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "deployment already running")
+		// CONST-046 round 153: literal migrated to bundle ID;
+		// NoopTranslator (the package default) echoes the ID.
+		assert.Contains(t, err.Error(), "internal_deployment_already_running")
 		assert.Nil(t, status)
 	})
 
@@ -639,7 +645,9 @@ func TestExecutePhase(t *testing.T) {
 		success, err := deployer.executePhase(ctx, DeploymentPhase("unknown"))
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "unknown deployment phase")
+		// CONST-046 round 153: literal migrated to bundle ID;
+		// NoopTranslator (the package default) echoes the ID.
+		assert.Contains(t, err.Error(), "internal_deployment_unknown_phase")
 	})
 
 	t.Run("ExecutePhase_Preparation_Failure", func(t *testing.T) {
@@ -845,7 +853,8 @@ func TestExecuteProductionDeploy(t *testing.T) {
 		// Deployment should fail without SSH infrastructure
 		assert.False(t, success)
 		if err != nil {
-			assert.Contains(t, err.Error(), "deployment failed")
+			// CONST-046 round 153: literal migrated to bundle ID.
+			assert.Contains(t, err.Error(), "internal_deployment_insufficient_success_rate")
 		} else {
 			assert.False(t, success, "Deployment should fail without SSH infrastructure")
 		}
@@ -871,7 +880,8 @@ func TestExecuteProductionDeploy(t *testing.T) {
 		// With no servers, success rate calculation would fail or return false
 		assert.False(t, success)
 		if err != nil {
-			assert.Contains(t, err.Error(), "no target servers")
+			// CONST-046 round 153: literal migrated to bundle ID.
+			assert.Contains(t, err.Error(), "internal_deployment_no_target_servers_configured")
 		}
 	})
 }
@@ -1042,7 +1052,8 @@ func TestExecuteValidation(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "no servers deployed")
+		// CONST-046 round 153: literal migrated to bundle ID.
+		assert.Contains(t, err.Error(), "internal_deployment_validation_no_servers_deployed")
 	})
 
 	t.Run("Validation_WithServersDeployed", func(t *testing.T) {
@@ -1084,7 +1095,8 @@ func TestExecuteValidation(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "security gate not passed")
+		// CONST-046 round 153: literal migrated to bundle ID.
+		assert.Contains(t, err.Error(), "internal_deployment_validation_security_gate_failed")
 	})
 
 	t.Run("Validation_PerformanceGateFailed", func(t *testing.T) {
@@ -1106,7 +1118,8 @@ func TestExecuteValidation(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "performance gate not passed")
+		// CONST-046 round 153: literal migrated to bundle ID.
+		assert.Contains(t, err.Error(), "internal_deployment_validation_performance_gate_failed")
 	})
 
 	t.Run("Validation_HealthCheckFailed", func(t *testing.T) {
@@ -1128,7 +1141,8 @@ func TestExecuteValidation(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "health checks not passed")
+		// CONST-046 round 153: literal migrated to bundle ID.
+		assert.Contains(t, err.Error(), "internal_deployment_validation_health_checks_failed")
 	})
 }
 
@@ -1418,7 +1432,8 @@ func TestExecuteDeployment(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.False(t, success)
-		assert.Contains(t, err.Error(), "unknown deployment strategy")
+		// CONST-046 round 153: literal migrated to bundle ID.
+		assert.Contains(t, err.Error(), "internal_deployment_unknown_strategy")
 	})
 
 	t.Run("ExecuteDeployment_ProductionStrategy", func(t *testing.T) {
@@ -1445,10 +1460,13 @@ func TestExecuteDeployment(t *testing.T) {
 		// only pass if the test happened to hit a different fail path.
 		assert.Error(t, err, "production deploy without SSH must error")
 		assert.False(t, success, "production deploy without SSH must not report success")
-		assert.Contains(t, err.Error(), "% servers deployed",
+		// CONST-046 round 153: literal migrated to bundle ID
+		// (internal_deployment_insufficient_success_rate, rendered
+		// "deployment failed - only {{.SuccessRate}}%% servers
+		// deployed (need 80%%)" by the resolved bundle). The
+		// NoopTranslator default echoes the ID.
+		assert.Contains(t, err.Error(), "internal_deployment_insufficient_success_rate",
 			"error must surface the percentage-deployed reason emitted by production code")
-		assert.Contains(t, err.Error(), "need 80%",
-			"error must surface the 80% threshold requirement")
 	})
 }
 

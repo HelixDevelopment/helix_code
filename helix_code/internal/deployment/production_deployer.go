@@ -221,7 +221,7 @@ func NewProductionDeployer(config *DeploymentConfig) (*ProductionDeployer, error
 // StartProductionDeployment starts comprehensive production deployment
 func (pd *ProductionDeployer) StartProductionDeployment(ctx context.Context) (*DeploymentStatus, error) {
 	if !pd.running.CompareAndSwap(false, true) {
-		return nil, fmt.Errorf("deployment already running")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_deployment_already_running", nil))
 	}
 
 	defer pd.running.Store(false)
@@ -288,7 +288,7 @@ func (pd *ProductionDeployer) executePhase(ctx context.Context, phase Deployment
 	case PhaseMonitoring:
 		return pd.executeMonitoring(ctx)
 	default:
-		return false, fmt.Errorf("unknown deployment phase: %s", phase)
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_unknown_phase", map[string]any{"Phase": string(phase)}))
 	}
 }
 
@@ -488,7 +488,7 @@ func (pd *ProductionDeployer) executeDeployment(ctx context.Context) (bool, erro
 	case RecreateDeploy:
 		success, err = pd.executeRecreateDeploy(ctx)
 	default:
-		return false, fmt.Errorf("unknown deployment strategy: %s", pd.config.DeploymentStrategy)
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_unknown_strategy", map[string]any{"Strategy": string(pd.config.DeploymentStrategy)}))
 	}
 
 	if err != nil {
@@ -522,7 +522,7 @@ func (pd *ProductionDeployer) executeProductionDeploy(ctx context.Context) (bool
 	log.Printf("🚀 Executing direct production deployment to %d servers", len(pd.config.TargetServers))
 
 	if len(pd.config.TargetServers) == 0 {
-		return false, fmt.Errorf("no target servers configured")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_no_target_servers_configured", nil))
 	}
 
 	successfulDeployments := 0
@@ -551,7 +551,7 @@ func (pd *ProductionDeployer) executeProductionDeploy(ctx context.Context) (bool
 	// Require at least 80% success rate for production deployment
 	successRate := float64(successfulDeployments) / float64(len(pd.config.TargetServers))
 	if successRate < 0.8 {
-		return false, fmt.Errorf("deployment failed - only %.1f%% servers deployed (need 80%%)", successRate*100)
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_insufficient_success_rate", map[string]any{"SuccessRate": fmt.Sprintf("%.1f", successRate*100)}))
 	}
 	return true, nil
 }
@@ -671,7 +671,7 @@ func (pd *ProductionDeployer) executeHealthCheck(ctx context.Context) (bool, err
 		healthStatus.Reason = fmt.Sprintf("Insufficient healthy servers: %d/%d (%.1f%% < 90%%)", healthyServers, totalServers, float64(healthyServers)/float64(totalServers)*100)
 
 		pd.addNotification("health_check_failed", fmt.Sprintf("Health check failed: only %d/%d servers healthy", healthyServers, totalServers), "health")
-		return false, fmt.Errorf("health check failed: insufficient healthy servers")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_health_check_insufficient_servers", nil))
 	}
 
 	log.Printf("✅ Health check passed")
@@ -713,22 +713,22 @@ func (pd *ProductionDeployer) executeValidation(ctx context.Context) (bool, erro
 
 	// Validate deployment success
 	if len(pd.status.ServersDeployed) == 0 {
-		return false, fmt.Errorf("no servers deployed successfully")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_validation_no_servers_deployed", nil))
 	}
 
 	// Validate security gate (if enabled)
 	if pd.config.SecurityGateEnabled && !pd.status.SecurityGateStatus.Passed {
-		return false, fmt.Errorf("security gate not passed")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_validation_security_gate_failed", nil))
 	}
 
 	// Validate performance gate (if enabled)
 	if pd.config.PerformanceGateEnabled && !pd.status.PerformanceGate.Passed {
-		return false, fmt.Errorf("performance gate not passed")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_validation_performance_gate_failed", nil))
 	}
 
 	// Validate health checks (if enabled)
 	if pd.config.HealthCheckEnabled && !pd.status.HealthStatus.Passed {
-		return false, fmt.Errorf("health checks not passed")
+		return false, fmt.Errorf("%s", tr(ctx, "internal_deployment_validation_health_checks_failed", nil))
 	}
 
 	log.Printf("✅ Deployment validation passed")

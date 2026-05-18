@@ -1,0 +1,49 @@
+# internal/deployment i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/deployment/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_deployment_<area>_<short_description>.
+# All IDs prefixed with internal_deployment_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-153 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# top-level user-facing fmt.Errorf strings emitted by
+# production_deployer.go. These are the error values surfaced to API
+# callers when deployment fails — the operator-facing log.Printf and
+# notification message strings are deferred to future rounds to stay
+# under the 400-LOC ceiling.
+
+internal_deployment_already_running:
+  other: "deployment already running"
+
+internal_deployment_unknown_phase:
+  other: "unknown deployment phase: {{.Phase}}"
+
+internal_deployment_unknown_strategy:
+  other: "unknown deployment strategy: {{.Strategy}}"
+
+internal_deployment_no_target_servers_configured:
+  other: "no target servers configured"
+
+internal_deployment_insufficient_success_rate:
+  other: "deployment failed - only {{.SuccessRate}}%% servers deployed (need 80%%)"
+
+internal_deployment_health_check_insufficient_servers:
+  other: "health check failed: insufficient healthy servers"
+
+internal_deployment_validation_no_servers_deployed:
+  other: "no servers deployed successfully"
+
+internal_deployment_validation_security_gate_failed:
+  other: "security gate not passed"
+
+internal_deployment_validation_performance_gate_failed:
+  other: "performance gate not passed"
+
+internal_deployment_validation_health_checks_failed:
+  other: "health checks not passed"
