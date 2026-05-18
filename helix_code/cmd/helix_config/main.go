@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -15,8 +16,51 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 
+	"dev.helix.code/cmd/helix_config/i18n"
 	"dev.helix.code/internal/config"
 )
+
+// translator resolves CONST-046 message IDs for every user-facing
+// string emitted by this CLI. Defaults to i18n.NoopTranslator{} (loud
+// message-ID echo) so unit tests + ad-hoc invocations remain obvious.
+// helix_code wires a real *i18nadapter.Translator at boot via
+// SetTranslator (round-108 §11.4 anti-bluff sweep, 2026-05-18).
+//
+// A package-level variable is the chosen DI seam because cobra's
+// RunE signature (func(*cobra.Command, []string) error) does not
+// support extra parameters without restructuring the command tree —
+// global injection matches cobra's own use of package-level state
+// (viper, the *cobra.Command tree itself) and keeps the migration
+// minimally invasive.
+var translator i18n.Translator = i18n.NoopTranslator{}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		translator = i18n.NoopTranslator{}
+		return
+	}
+	translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func tr(ctx context.Context, msgID string, data map[string]any) string {
+	if translator == nil {
+		translator = i18n.NoopTranslator{}
+	}
+	out, err := translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
+}
 
 var (
 	configFile   string
@@ -696,10 +740,14 @@ func runShowCommand(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Println(string(data))
 	default:
-		fmt.Printf("Configuration loaded from: %s\n", viper.ConfigFileUsed())
-		fmt.Printf("Server Port: %d\n", cfg.Server.Port)
-		fmt.Printf("Database Host: %s\n", cfg.Database.Host)
-		fmt.Printf("Redis Enabled: %t\n", cfg.Redis.Enabled)
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		fmt.Println(tr(ctx, "helix_config_show_loaded_from", map[string]any{"Path": viper.ConfigFileUsed()}))
+		fmt.Println(tr(ctx, "helix_config_show_server_port", map[string]any{"Port": cfg.Server.Port}))
+		fmt.Println(tr(ctx, "helix_config_show_database_host", map[string]any{"Host": cfg.Database.Host}))
+		fmt.Println(tr(ctx, "helix_config_show_redis_enabled", map[string]any{"Enabled": cfg.Redis.Enabled}))
 	}
 	return nil
 }
@@ -772,15 +820,19 @@ func runValidateCommand(cmd *cobra.Command, args []string) error {
 		errors = append(errors, "auth.jwt_secret should be at least 32 characters")
 	}
 
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if len(errors) > 0 {
-		fmt.Println("Validation FAILED:")
+		fmt.Println(tr(ctx, "helix_config_validate_failed_header", nil))
 		for _, e := range errors {
 			fmt.Printf("  - %s\n", e)
 		}
 		return fmt.Errorf("validation failed with %d errors", len(errors))
 	}
 
-	fmt.Println("Configuration is valid")
+	fmt.Println(tr(ctx, "helix_config_validate_ok", nil))
 	return nil
 }
 
@@ -810,7 +862,11 @@ func runExportCommand(cmd *cobra.Command, args []string) error {
 		if err := os.WriteFile(output, data, 0644); err != nil {
 			return fmt.Errorf("failed to write file: %w", err)
 		}
-		fmt.Printf("Configuration exported to: %s\n", output)
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		fmt.Println(tr(ctx, "helix_config_export_written", map[string]any{"Path": output}))
 	}
 	return nil
 }
@@ -852,7 +908,11 @@ func runImportCommand(cmd *cobra.Command, args []string) error {
 	if err := viper.WriteConfig(); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
-	fmt.Printf("Configuration imported from: %s\n", file)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_import_done", map[string]any{"Path": file}))
 	return nil
 }
 
@@ -871,7 +931,11 @@ func runBackupCommand(cmd *cobra.Command, args []string) error {
 	if err := os.WriteFile(backupPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write backup: %w", err)
 	}
-	fmt.Printf("Configuration backed up to: %s\n", backupPath)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_backup_written", map[string]any{"Path": backupPath}))
 	return nil
 }
 
@@ -894,7 +958,11 @@ func runRestoreCommand(cmd *cobra.Command, args []string) error {
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to restore config: %w", err)
 	}
-	fmt.Printf("Configuration restored from: %s\n", backupPath)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_restore_done", map[string]any{"Path": backupPath}))
 	return nil
 }
 

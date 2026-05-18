@@ -1,0 +1,47 @@
+# helix_config i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/helix_config/main.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: helix_config_<area>_<short_description>. All IDs
+# prefixed with helix_config_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-108 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# user-facing strings from the CLI command handlers migrated.
+# Remaining 251 hardcoded strings tracked for future rounds — this
+# round prioritises the "show / validate / export / import / backup
+# / restore" success messages that end users see on every run.
+
+helix_config_show_loaded_from:
+  other: "Configuration loaded from: {{.Path}}"
+
+helix_config_show_server_port:
+  other: "Server Port: {{.Port}}"
+
+helix_config_show_database_host:
+  other: "Database Host: {{.Host}}"
+
+helix_config_show_redis_enabled:
+  other: "Redis Enabled: {{.Enabled}}"
+
+helix_config_validate_failed_header:
+  other: "Validation FAILED:"
+
+helix_config_validate_ok:
+  other: "Configuration is valid"
+
+helix_config_export_written:
+  other: "Configuration exported to: {{.Path}}"
+
+helix_config_import_done:
+  other: "Configuration imported from: {{.Path}}"
+
+helix_config_backup_written:
+  other: "Configuration backed up to: {{.Path}}"
+
+helix_config_restore_done:
+  other: "Configuration restored from: {{.Path}}"
