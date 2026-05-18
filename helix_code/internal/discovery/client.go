@@ -159,14 +159,14 @@ func (c *DiscoveryClient) DiscoverWithTimeout(serviceName string, timeout time.D
 	case err := <-errorChan:
 		return nil, err
 	case <-time.After(timeout):
-		return nil, fmt.Errorf("discovery timeout after %v for service: %s", timeout, serviceName)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_discovery_timeout_after_for_service", map[string]any{"Timeout": timeout.String(), "ServiceName": serviceName}))
 	}
 }
 
 // Register registers a service with the discovery system
 func (c *DiscoveryClient) Register(info ServiceInfo) error {
 	if !c.config.EnableRegistry || c.config.Registry == nil {
-		return errors.New("registry not enabled or not configured")
+		return errors.New(tr(context.Background(), "internal_discovery_registry_not_enabled_or_not_configured", nil))
 	}
 
 	// Allocate port if needed
@@ -186,7 +186,7 @@ func (c *DiscoveryClient) Register(info ServiceInfo) error {
 // Deregister removes a service from the discovery system
 func (c *DiscoveryClient) Deregister(serviceName string) error {
 	if !c.config.EnableRegistry || c.config.Registry == nil {
-		return errors.New("registry not enabled or not configured")
+		return errors.New(tr(context.Background(), "internal_discovery_registry_not_enabled_or_not_configured", nil))
 	}
 
 	// Release port
@@ -201,7 +201,7 @@ func (c *DiscoveryClient) Deregister(serviceName string) error {
 // Heartbeat sends a heartbeat for a service
 func (c *DiscoveryClient) Heartbeat(serviceName string) error {
 	if !c.config.EnableRegistry || c.config.Registry == nil {
-		return errors.New("registry not enabled or not configured")
+		return errors.New(tr(context.Background(), "internal_discovery_registry_not_enabled_or_not_configured", nil))
 	}
 
 	return c.config.Registry.Heartbeat(serviceName)
@@ -230,7 +230,7 @@ func (c *DiscoveryClient) ListHealthyServices() []*ServiceInfo {
 func (c *DiscoveryClient) discoverByDefaultPort(serviceName string) (*DiscoveryResult, error) {
 	defaultPort := c.getDefaultPort(serviceName)
 	if defaultPort == 0 {
-		return nil, errors.New("no default port configured")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_no_default_port_configured", nil))
 	}
 
 	// Check if the port is reachable
@@ -248,12 +248,12 @@ func (c *DiscoveryClient) discoverByDefaultPort(serviceName string) (*DiscoveryR
 		}, nil
 	}
 
-	return nil, errors.New("default port not reachable")
+	return nil, errors.New(tr(context.Background(), "internal_discovery_default_port_not_reachable", nil))
 }
 
 func (c *DiscoveryClient) discoverByRegistry(serviceName string) (*DiscoveryResult, error) {
 	if !c.config.EnableRegistry || c.config.Registry == nil {
-		return nil, errors.New("registry not enabled")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_registry_not_enabled", nil))
 	}
 
 	serviceInfo, err := c.config.Registry.Get(serviceName)
@@ -263,7 +263,7 @@ func (c *DiscoveryClient) discoverByRegistry(serviceName string) (*DiscoveryResu
 
 	// Verify service is healthy and not expired
 	if !serviceInfo.Healthy || serviceInfo.IsExpired() {
-		return nil, errors.New("service unhealthy or expired")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_service_unhealthy_or_expired", nil))
 	}
 
 	return &DiscoveryResult{
@@ -274,11 +274,11 @@ func (c *DiscoveryClient) discoverByRegistry(serviceName string) (*DiscoveryResu
 
 func (c *DiscoveryClient) discoverByBroadcast(serviceName string) (*DiscoveryResult, error) {
 	if !c.config.EnableBroadcast {
-		return nil, errors.New("broadcast discovery not enabled")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_broadcast_discovery_not_enabled", nil))
 	}
 
 	if c.config.BroadcastService == nil {
-		return nil, errors.New("broadcast service not configured")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_broadcast_service_not_configured", nil))
 	}
 
 	// Ensure broadcast service is running
@@ -302,7 +302,7 @@ func (c *DiscoveryClient) discoverByBroadcast(serviceName string) (*DiscoveryRes
 
 func (c *DiscoveryClient) discoverByDNS(serviceName string) (*DiscoveryResult, error) {
 	if !c.config.EnableDNS {
-		return nil, errors.New("DNS discovery not enabled")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_dns_discovery_not_enabled", nil))
 	}
 
 	// Bound DNS lookup with a short context so a slow or unreachable resolver
@@ -317,7 +317,7 @@ func (c *DiscoveryClient) discoverByDNS(serviceName string) (*DiscoveryResult, e
 	}
 
 	if len(addresses) == 0 {
-		return nil, errors.New("no addresses found in DNS")
+		return nil, errors.New(tr(context.Background(), "internal_discovery_no_addresses_found_in_dns", nil))
 	}
 
 	// Use first address and try to determine port

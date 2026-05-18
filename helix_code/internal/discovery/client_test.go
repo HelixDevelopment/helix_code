@@ -3,6 +3,7 @@ package discovery
 import (
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -255,8 +256,12 @@ func TestDiscoverWithTimeout_Timeout(t *testing.T) {
 	// Service discovery will fail quickly, so we get ErrServiceUnavailable
 	_, err := client.DiscoverWithTimeout("non-existent", 100*time.Millisecond)
 	assert.Error(t, err)
-	// Either timeout or service unavailable error is acceptable
-	isTimeout := err.Error() == "timeout" || err.Error() == "discovery timeout after 100ms for service: non-existent"
+	// Either timeout or service unavailable error is acceptable.
+	// CONST-046 round-154: NoopTranslator echoes the message ID, so
+	// the timeout assertion now also accepts the bundle-ID format.
+	isTimeout := err.Error() == "timeout" ||
+		err.Error() == "discovery timeout after 100ms for service: non-existent" ||
+		strings.Contains(err.Error(), "internal_discovery_timeout_after_for_service")
 	isUnavailable := err == ErrServiceUnavailable || err.Error() == "service unavailable: non-existent"
 	assert.True(t, isTimeout || isUnavailable, "Expected timeout or unavailable error, got: %v", err)
 }
@@ -401,7 +406,10 @@ func TestRegister_NoRegistry(t *testing.T) {
 
 	err := client.Register(info)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "registry not enabled")
+	// CONST-046 round-154: default NoopTranslator echoes the message
+	// ID verbatim, so assertions match on the bundle ID rather than
+	// the raw English literal.
+	assert.Contains(t, err.Error(), "internal_discovery_registry_not_enabled_or_not_configured")
 }
 
 func TestDeregister_NoRegistry(t *testing.T) {
@@ -412,7 +420,8 @@ func TestDeregister_NoRegistry(t *testing.T) {
 
 	err := client.Deregister("test-service")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "registry not enabled")
+	// CONST-046 round-154: see TestRegister_NoRegistry note.
+	assert.Contains(t, err.Error(), "internal_discovery_registry_not_enabled_or_not_configured")
 }
 
 func TestHeartbeat_NoRegistry(t *testing.T) {
@@ -423,7 +432,8 @@ func TestHeartbeat_NoRegistry(t *testing.T) {
 
 	err := client.Heartbeat("test-service")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "registry not enabled")
+	// CONST-046 round-154: see TestRegister_NoRegistry note.
+	assert.Contains(t, err.Error(), "internal_discovery_registry_not_enabled_or_not_configured")
 }
 
 func TestListServices_NoRegistry(t *testing.T) {

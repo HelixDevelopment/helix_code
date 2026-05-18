@@ -1,0 +1,59 @@
+# internal/discovery i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/discovery/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_discovery_<area>_<short_description>.
+# All IDs prefixed with internal_discovery_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-154 §11.4 anti-bluff sweep (2026-05-18): migrated 10 distinct
+# user-facing error strings emitted by client.go covering the
+# discovery-timeout path, the three registry-not-enabled-or-not-
+# configured guards across Register/Deregister/Heartbeat, the
+# default-port and DNS fall-back paths, and the broadcast-discovery
+# enablement guards.
+#
+# Sentinel errors.New(...) declared at package level
+# (ErrServiceUnavailable, ErrInvalidServiceName, etc.) are NOT
+# migrated in this round because they retain singleton identity for
+# errors.Is matching and are referenced as named tokens by downstream
+# code — migrating their construction string would silently change
+# the error.Error() output without breaking errors.Is, but the
+# sentinel error message itself is treated by upstream packages as a
+# stable token, not user-facing display content. Future rounds may
+# revisit if a wrapping helper is introduced.
+
+internal_discovery_timeout_after_for_service:
+  other: "discovery timeout after {{.Timeout}} for service: {{.ServiceName}}"
+
+internal_discovery_registry_not_enabled_or_not_configured:
+  other: "registry not enabled or not configured"
+
+internal_discovery_no_default_port_configured:
+  other: "no default port configured"
+
+internal_discovery_default_port_not_reachable:
+  other: "default port not reachable"
+
+internal_discovery_registry_not_enabled:
+  other: "registry not enabled"
+
+internal_discovery_service_unhealthy_or_expired:
+  other: "service unhealthy or expired"
+
+internal_discovery_broadcast_discovery_not_enabled:
+  other: "broadcast discovery not enabled"
+
+internal_discovery_broadcast_service_not_configured:
+  other: "broadcast service not configured"
+
+internal_discovery_dns_discovery_not_enabled:
+  other: "DNS discovery not enabled"
+
+internal_discovery_no_addresses_found_in_dns:
+  other: "no addresses found in DNS"
