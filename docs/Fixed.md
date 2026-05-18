@@ -46,6 +46,8 @@
 | 2026-05-19 | Messaging i18n kickoff (Phase 4 round 16) | Feature | Implemented (→ Fixed.md) | 123 | 51ff3ab + b762b79 | vasic-digital (attribution correction); 5 sites; atomic.Value per-pkg wiring + NoopTranslator-key-verbatim fallback; +326 LOC |
 | 2026-05-19 | Middleware i18n kickoff (Phase 4 round 17) | Feature | Implemented (→ Fixed.md) | 124 | f491c45 + 5e61707 | vasic-digital (3rd attribution correction); 3 http.Error strings (401/429/415); Option/Config wiring; 4 tests + mutation; +343 LOC |
 | 2026-05-19 | Plugins i18n kickoff (Phase 4 round 18) | Feature | Implemented (→ Fixed.md) | 125 | c37b2b2 + 3699b31 | vasic-digital (4th attribution correction); 5 sites (Metadata.Validate × 2 + sandbox × 3); 8 tests + mutation; +399 LOC |
+| 2026-05-19 | Streaming i18n kickoff (Phase 4 round 19) | Feature | Implemented (→ Fixed.md) | 126 | f32380d + 70e1724 | vasic-digital (5th attribution correction); 5 sites (SSE × 2 + WS × 2 + Transport × 1); mixed Config-field + package-seam; 9 packages PASS + mutation; +377 LOC |
+| 2026-05-19 | Watcher i18n kickoff (Phase 4 round 20) | Feature | Implemented (→ Fixed.md) | 127 | (submodule TBD) + 66322c2 | Pointer visible; formal report pending |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
