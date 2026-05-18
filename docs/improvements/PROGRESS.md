@@ -8,13 +8,13 @@
 > Plan: `docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md`
 
 ## Current focus
-- **Active phase:** Phase 5 — End-user materials uplift (done)
-- **Active feature:** —
-- **Active task:** —
-- **Last completed:** Phase 5 CLOSED — documentation, installers, website uplift complete
-- **Owner:** agent (Claude Opus 4.7)
-- **Started:** 2026-05-04
-- **Last touched:** 2026-05-08
+- **Active phase:** Post-design — CONST-046 i18n campaign (Phase 4 active)
+- **Active feature:** Systematic challenges/pkg/userflow/ migration (rounds 100+)
+- **Active task:** Rounds 99a (panoptic) + 100 (evaluators.go) + 101 (ai_testgen.go) + 102 (challenge_desktop.go) running concurrently
+- **Last completed:** Round 99b — CONST-046 audit-gate tightening with baseline (commit 3f4f110)
+- **Owner:** agent (Claude Opus 4.7 1M-context)
+- **Started:** 2026-05-04 (P0)
+- **Last touched:** 2026-05-19 (round 99b close-out¹²⁶)
 - **Blocked-on:** —
 
 ## Phase status
@@ -27,6 +27,18 @@
 | P3 — Test infra | done | 2026-05-07 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 3 |
 | P4 — Anti-bluff audit | done | 2026-05-08 | 2026-05-08 | docs/improvements/PROGRESS.md §Phase 4 |
 | P5 — End-user materials | done | 2026-05-08 | 2026-05-08 | this section |
+| Round 37-89 — Governance + stabilization + LLM wiring | done | 2026-05-08 | 2026-05-19 | `docs/CONTINUATION.md` close-outs⁹⁴-¹¹⁶ |
+| CONST-046 Phase 1 (rounds 91-93) — pkg/i18n core + audit + injection | done | 2026-05-19 | 2026-05-19 | `docs/CONTINUATION.md` close-outs¹¹⁸-¹²⁰; commits e29b075/57de105/03e131f |
+| CONST-046 Phase 2 (rounds 94-96) — SelfImprove×8 + HelixLLM×2 + harmony_os×5 | done | 2026-05-19 | 2026-05-19 | `docs/CONTINUATION.md` close-outs¹²¹-¹²³; commits a39d855/abe0319/1eb1851 |
+| CONST-046 Phase 3 (rounds 97-99) — DocProcessor + Planning + VisionEngine + audit-gate | 99b done; 99a/97/98 closed; formal reports pending | 2026-05-19 | (in progress) | `docs/CONTINUATION.md` close-outs¹²⁴-¹²⁶; commits e584e4b/6abed9b/2d0c35b/3f4f110 |
+| CONST-046 Phase 4 (rounds 100+) — challenges/pkg/userflow/ systematic | active | 2026-05-19 | (in progress) | `docs/CONTINUATION.md` (pending); rounds 100/101/102 concurrent |
+
+**Authoritative round-by-round narrative**: `docs/CONTINUATION.md` (CONST-044). This file complements with phase-level rollup.
+
+**Governance trackers** (per Constitution §11.4.15-19 + CONST-057):
+- `docs/Issues.md` + `docs/Issues_Summary.md` — open items (8 open as of 2026-05-19; 3 BLOCKED on operator)
+- `docs/Fixed.md` + `docs/Fixed_Summary.md` — closure ledger (17 items closed in round-system)
+- All four kept in sync with this file via CONST-049 §11.4.17 commit discipline.
 
 ## P1.5 Work-package list (12 WPs) — ALL CLOSED
 - [x] P1.5-WP1 — Inventory + foundation safety (5 tasks)  ← commit `421495a`
