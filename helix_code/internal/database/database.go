@@ -38,7 +38,7 @@ func New(config Config) (*Database, error) {
 
 	poolConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse database config: %v", err)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_database_config_parse_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Configure connection pool
@@ -49,7 +49,7 @@ func New(config Config) (*Database, error) {
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create connection pool: %v", err)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_database_pool_create_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Test the connection
@@ -57,7 +57,7 @@ func New(config Config) (*Database, error) {
 	defer cancel()
 
 	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %v", err)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_database_ping_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	log.Println("✅ Database connection established successfully")
@@ -111,7 +111,7 @@ func (db *Database) InitializeSchema() error {
 	`).Scan(&schemaExists)
 
 	if err != nil {
-		return fmt.Errorf("failed to check schema existence: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_database_schema_check_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	if schemaExists {
@@ -125,14 +125,14 @@ func (db *Database) InitializeSchema() error {
 		`).Scan(&columnExists)
 
 		if err != nil {
-			return fmt.Errorf("failed to check display_name column: %v", err)
+			return fmt.Errorf("%s", tr(ctx, "internal_database_display_name_check_failed", map[string]any{"Err": err.Error()}))
 		}
 
 		if !columnExists {
 			log.Println("🔧 Adding missing display_name column...")
 			_, err = db.Pool.Exec(ctx, `ALTER TABLE users ADD COLUMN display_name VARCHAR(255)`)
 			if err != nil {
-				return fmt.Errorf("failed to add display_name column: %v", err)
+				return fmt.Errorf("%s", tr(ctx, "internal_database_display_name_add_failed", map[string]any{"Err": err.Error()}))
 			}
 			log.Println("✅ Added display_name column")
 		}
@@ -146,7 +146,7 @@ func (db *Database) InitializeSchema() error {
 	// Execute schema creation
 	_, err = db.Pool.Exec(ctx, createSchemaSQL)
 	if err != nil {
-		return fmt.Errorf("failed to create schema: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_database_schema_create_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	log.Println("✅ Database schema created successfully")
@@ -156,7 +156,7 @@ func (db *Database) InitializeSchema() error {
 // GetDB returns a standard sql.DB for compatibility with other libraries
 func (db *Database) GetDB() (*sql.DB, error) {
 	if db.Pool == nil {
-		return nil, fmt.Errorf("database pool is not initialized")
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_database_pool_not_initialized", nil))
 	}
 
 	// Convert pgxpool.Pool to *sql.DB
@@ -166,7 +166,7 @@ func (db *Database) GetDB() (*sql.DB, error) {
 // HealthCheck performs a health check on the database
 func (db *Database) HealthCheck() error {
 	if db.Pool == nil {
-		return fmt.Errorf("database pool is not initialized")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_database_pool_not_initialized", nil))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

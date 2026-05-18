@@ -1,0 +1,45 @@
+# internal/database i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/database/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_database_<area>_<short_description>.
+# All IDs prefixed with internal_database_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-152 §11.4 anti-bluff sweep (2026-05-18): migrated the 10
+# user-facing errors emitted by database.go covering connection-pool
+# setup, schema-existence probing, schema-DDL application, the
+# display_name column patch, and the GetDB/HealthCheck pre-init
+# guards. SQL string constants (createSchemaSQL et al.) are NOT
+# user-facing per round-148 cognee precedent — they are runtime
+# parameters to the DB engine, not displayed text — so they are
+# intentionally NOT migrated.
+
+internal_database_config_parse_failed:
+  other: "failed to parse database config: {{.Err}}"
+
+internal_database_pool_create_failed:
+  other: "failed to create connection pool: {{.Err}}"
+
+internal_database_ping_failed:
+  other: "failed to ping database: {{.Err}}"
+
+internal_database_schema_check_failed:
+  other: "failed to check schema existence: {{.Err}}"
+
+internal_database_display_name_check_failed:
+  other: "failed to check display_name column: {{.Err}}"
+
+internal_database_display_name_add_failed:
+  other: "failed to add display_name column: {{.Err}}"
+
+internal_database_schema_create_failed:
+  other: "failed to create schema: {{.Err}}"
+
+internal_database_pool_not_initialized:
+  other: "database pool is not initialized"
