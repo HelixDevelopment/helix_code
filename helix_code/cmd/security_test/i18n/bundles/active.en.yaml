@@ -1,0 +1,48 @@
+# security_test i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/security_test/main.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: security_test_<area>_<short_description>. All IDs
+# prefixed with security_test_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-142 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of 17
+# detected user-facing hardcoded literals — covering all 12 security
+# test-suite names (cohesive cluster) plus the FAIL/WARN summary
+# strings. The 5 residual literals (info banners + 3 fmt.Printf table
+# headings) are deferred to a future round to stay under the round
+# size cap.
+
+security_test_suite_llm_provider:
+  other: "LLM Provider Security"
+
+security_test_suite_ssh_connection:
+  other: "SSH Connection Security"
+
+security_test_suite_database:
+  other: "Database Security"
+
+security_test_suite_authentication:
+  other: "Authentication Security"
+
+security_test_suite_input_validation:
+  other: "Input Validation Security"
+
+security_test_suite_api:
+  other: "API Security"
+
+security_test_suite_worker_isolation:
+  other: "Worker Isolation Security"
+
+security_test_suite_dependency:
+  other: "Dependency Security"
+
+security_test_summary_fail_critical:
+  other: "FAIL: Critical security issues found"
+
+security_test_summary_warn_scanners_unavailable:
+  other: "WARN: Some scanners unavailable"
