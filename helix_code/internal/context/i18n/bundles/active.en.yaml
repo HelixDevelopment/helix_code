@@ -1,0 +1,36 @@
+# internal/context i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/context/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_context_<area>_<short_description>.
+# All IDs prefixed with internal_context_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-151 §11.4 anti-bluff sweep (2026-05-18): migrated the 8
+# top-level package user-facing errors emitted by context_manager.go.
+# These surface every time a caller misuses ContextManager API:
+# missing-item lookups, expired-item lookups, missing-session lookup,
+# missing-project lookup, and the three global-manager pre-init
+# guards (Store/Retrieve/SearchGlobal). The 60+ remaining literals in
+# the builder/ and mentions/ subpackages are deferred to future
+# rounds to stay under the 400-LOC ceiling.
+
+internal_context_item_not_found:
+  other: "context item {{.ID}} not found"
+
+internal_context_item_expired:
+  other: "context item {{.ID}} has expired"
+
+internal_context_session_not_found:
+  other: "session {{.SessionID}} not found"
+
+internal_context_project_not_found:
+  other: "project {{.ProjectID}} not found"
+
+internal_context_global_manager_not_initialized:
+  other: "global context manager not initialized"

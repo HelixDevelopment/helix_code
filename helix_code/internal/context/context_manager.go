@@ -102,13 +102,13 @@ func (cm *ContextManager) Retrieve(ctx context.Context, id string) (*ContextItem
 
 	item, exists := cm.items[id]
 	if !exists {
-		return nil, fmt.Errorf("context item %s not found", id)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_context_item_not_found", map[string]any{"ID": id}))
 	}
 
 	if item.IsExpired() {
 		// Remove expired item
 		go cm.Delete(context.Background(), id)
-		return nil, fmt.Errorf("context item %s has expired", id)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_context_item_expired", map[string]any{"ID": id}))
 	}
 
 	return item, nil
@@ -144,7 +144,7 @@ func (cm *ContextManager) Delete(ctx context.Context, id string) error {
 
 	item, exists := cm.items[id]
 	if !exists {
-		return fmt.Errorf("context item %s not found", id)
+		return fmt.Errorf("%s", tr(ctx, "internal_context_item_not_found", map[string]any{"ID": id}))
 	}
 
 	delete(cm.items, id)
@@ -190,7 +190,7 @@ func (cm *ContextManager) GetSessionContext(sessionID string) (*SessionContext, 
 
 	session, exists := cm.sessions[sessionID]
 	if !exists {
-		return nil, fmt.Errorf("session %s not found", sessionID)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_context_session_not_found", map[string]any{"SessionID": sessionID}))
 	}
 
 	return session, nil
@@ -203,7 +203,7 @@ func (cm *ContextManager) GetProjectContext(projectID string) (*ProjectContext, 
 
 	project, exists := cm.projects[projectID]
 	if !exists {
-		return nil, fmt.Errorf("project %s not found", projectID)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_context_project_not_found", map[string]any{"ProjectID": projectID}))
 	}
 
 	return project, nil
@@ -490,7 +490,7 @@ func InitializeGlobalManager(config *config.ContextConfig) {
 // StoreGlobal stores an item in the global context
 func StoreGlobal(ctx context.Context, item *ContextItem) error {
 	if globalManager == nil {
-		return fmt.Errorf("global context manager not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_context_global_manager_not_initialized", nil))
 	}
 	return globalManager.Store(ctx, item)
 }
@@ -498,7 +498,7 @@ func StoreGlobal(ctx context.Context, item *ContextItem) error {
 // RetrieveGlobal retrieves an item from the global context
 func RetrieveGlobal(ctx context.Context, id string) (*ContextItem, error) {
 	if globalManager == nil {
-		return nil, fmt.Errorf("global context manager not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_context_global_manager_not_initialized", nil))
 	}
 	return globalManager.Retrieve(ctx, id)
 }
@@ -506,7 +506,7 @@ func RetrieveGlobal(ctx context.Context, id string) (*ContextItem, error) {
 // SearchGlobal searches for items in the global context
 func SearchGlobal(ctx context.Context, keyPattern string, contextType ContextType) ([]*ContextItem, error) {
 	if globalManager == nil {
-		return nil, fmt.Errorf("global context manager not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_context_global_manager_not_initialized", nil))
 	}
 	return globalManager.Search(ctx, keyPattern, contextType)
 }
