@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# audit-const046-hardcoded-content.sh — orchestrates the CONST-046
+# audit walker over HelixCode's scannable roots. Round 92: SOFT-WARN
+# (always exits 0). Round 99 will tighten to exit 1 on findings.
+# Usage: bash scripts/audit-const046-hardcoded-content.sh [--json] [--quiet]
+set -euo pipefail
+
+# Resolve repo root (location of this script's parent's parent).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+AUDITOR_DIR="${REPO_ROOT}/scripts/audit_const046"
+ALLOWLIST="${AUDITOR_DIR}/.allowlist"
+
+# Default roots — the set of trees CONST-046 actively governs in this
+# repo. Third-party reference projects (cli_agents/, cli_agents_resources/)
+# are excluded by the walker's directory-prune list.
+DEFAULT_ROOTS=(
+  "${REPO_ROOT}/helix_code"
+  "${REPO_ROOT}/helix_agent"
+  "${REPO_ROOT}/helix_qa"
+  "${REPO_ROOT}/challenges"
+  "${REPO_ROOT}/panoptic"
+)
+
+# Add every dependencies/<org>/<project> directory that exists.
+if [[ -d "${REPO_ROOT}/dependencies/HelixDevelopment" ]]; then
+  for d in "${REPO_ROOT}"/dependencies/HelixDevelopment/*/; do
+    [[ -d "${d}" ]] && DEFAULT_ROOTS+=("${d%/}")
+  done
+fi
+if [[ -d "${REPO_ROOT}/dependencies/vasic-digital" ]]; then
+  for d in "${REPO_ROOT}"/dependencies/vasic-digital/*/; do
+    [[ -d "${d}" ]] && DEFAULT_ROOTS+=("${d%/}")
+  done
+fi
+
+# Filter to only existing directories (some submodules may not be initialised).
+ROOTS=()
+for r in "${DEFAULT_ROOTS[@]}"; do
+  [[ -d "${r}" ]] && ROOTS+=("${r}")
+done
+
+if [[ ${#ROOTS[@]} -eq 0 ]]; then
+  echo "audit-const046: no scannable roots found under ${REPO_ROOT}" >&2
+  exit 0
+fi
+
+# Join with commas for the auditor's --roots flag.
+ROOTS_CSV=$(IFS=','; echo "${ROOTS[*]}")
+
+# Build the auditor binary once into a tmp path. Avoid polluting bin/.
+BUILD_TMP=$(mktemp -d)
+trap 'rm -rf "${BUILD_TMP}"' EXIT
+
+BIN="${BUILD_TMP}/audit_const046"
+(
+  cd "${AUDITOR_DIR}"
+  go build -o "${BIN}" .
+)
+
+# Pass through any flags from the caller (--json, --quiet).
+exec "${BIN}" --roots "${ROOTS_CSV}" --allowlist "${ALLOWLIST}" "$@"

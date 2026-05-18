@@ -1,0 +1,20 @@
+// fixture_clean.go.txt: synthetic source that uses the i18n localizer
+// pattern. No literal user-facing English strings — every user message
+// is sourced from the bundle by message ID.
+package fixture
+
+type Localizer interface {
+	Localize(messageID string) (string, error)
+}
+
+func ask(l Localizer) (string, error) {
+	return l.Localize("clarify.which_file")
+}
+
+func render(l Localizer) (string, error) {
+	return l.Localize("ui.press_enter_to_continue")
+}
+
+// Short identifier-like strings (under threshold) are not flagged.
+const apiVersion = "v1"
+const endpoint = "/api/v1/users"

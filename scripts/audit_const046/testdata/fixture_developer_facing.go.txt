@@ -1,0 +1,27 @@
+// fixture_developer_facing.go.txt: synthetic source with strings that
+// LOOK like prose but live in exempt contexts (errors, logging, test
+// helpers, comments). Walker must report ZERO findings here.
+package fixture
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"log/slog"
+)
+
+var ErrSomething = errors.New("Database connection refused by the host")
+
+func wrapErr(name string) error {
+	return fmt.Errorf("failed to open file %s for reading: not a directory", name)
+}
+
+func logSomething() {
+	log.Printf("Worker pool initialised with %d shards", 4)
+	slog.Info("Replication lag exceeded threshold")
+}
+
+// CONST-046: the following struct tag is metadata, not content.
+type Payload struct {
+	Foo string `json:"foo_bar_baz_field"`
+}

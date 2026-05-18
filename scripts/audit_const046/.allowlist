@@ -1,0 +1,5 @@
+# CONST-046 audit allowlist (round 92 soft-warn seed).
+# Format: "<path-substring><TAB><literal-prefix>" — both must match for
+# suppression. Path-only entries suppress every literal under that path.
+# Round 92: empty seed (no known intentional English banners yet).
+# Rounds 94+ refine as migration discovers true-positives vs true-negatives.

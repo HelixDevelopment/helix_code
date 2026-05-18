@@ -1,0 +1,5 @@
+// fixture_allowlist.go.txt: synthetic source containing a literal that
+// the allowlist will declare intentional.
+package fixture
+
+var banner = "Welcome to the synthetic allowlist demo banner string"

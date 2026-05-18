@@ -1,0 +1,21 @@
+// fixture_violation.go.txt: synthetic source containing known CONST-046
+// violations. Stored with .txt extension so the parent module's "go build"
+// does not try to compile it. Tests parse it via parser.ParseFile.
+package fixture
+
+import "fmt"
+
+var questions = []string{
+	"Which file has the bug?",
+	"What is the expected behavior?",
+	"Please describe the error you observed.",
+}
+
+func askUser() string {
+	prompt := "You are a helpful AI assistant. Please answer the following question:"
+	return prompt
+}
+
+func renderHelp() {
+	fmt.Println("Press Enter to continue or Ctrl-C to cancel.")
+}
