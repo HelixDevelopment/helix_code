@@ -1,0 +1,47 @@
+# cli i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/cli/main.go to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: cli_<area>_<short_description>. All IDs prefixed
+# with cli_ to avoid namespace collision with other submodules'
+# bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-131 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# user-facing strings from the REPL, worker-stats, and QA handlers
+# migrated. Remaining 27 hardcoded strings (37 total) tracked for
+# future rounds — this round prioritises the strings end users see
+# on every interactive REPL invocation and QA-subcommand run.
+
+cli_workers_total:
+  other: "Total Workers: {{.Count}}"
+
+cli_workers_active:
+  other: "Active Workers: {{.Count}}"
+
+cli_workers_healthy:
+  other: "Healthy Workers: {{.Count}}"
+
+cli_repl_intro:
+  other: "Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit."
+
+cli_repl_shutting_down:
+  other: "Shutting down..."
+
+cli_repl_unknown_slash:
+  other: "Unknown slash command: {{.Input}}. Type '/help' for available commands."
+
+cli_qa_session_started:
+  other: "QA Session started: {{.ID}}"
+
+cli_qa_waiting:
+  other: "Waiting for session to complete..."
+
+cli_qa_session_completed:
+  other: "Session completed!"
+
+cli_qa_no_sessions:
+  other: "No QA sessions found."

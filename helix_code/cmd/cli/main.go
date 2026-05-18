@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/cmd/cli/i18n"
 	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/agent/subagent"
 	"dev.helix.code/internal/approval"
@@ -56,6 +57,48 @@ import (
 	"dev.helix.code/internal/workspace"
 	"go.uber.org/zap"
 )
+
+// translator resolves CONST-046 message IDs for every user-facing
+// string emitted by this CLI. Defaults to i18n.NoopTranslator{} (loud
+// message-ID echo) so unit tests + ad-hoc invocations remain obvious.
+// helix_code wires a real *i18nadapter.Translator at boot via
+// SetTranslator (round-131 §11.4 anti-bluff sweep, 2026-05-18).
+//
+// A package-level variable is the chosen DI seam because the legacy
+// CLI handler signatures (func(*CLI, context.Context) error) do not
+// support extra parameters without restructuring the handler tree —
+// global injection matches the cli's existing use of package-level
+// state (the flag.CommandLine, the *CLI receiver tree) and keeps the
+// migration minimally invasive.
+var translator i18n.Translator = i18n.NoopTranslator{}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func SetTranslator(t i18n.Translator) {
+	if t == nil {
+		translator = i18n.NoopTranslator{}
+		return
+	}
+	translator = t
+}
+
+// tr is the internal CONST-046 resolver used by every migrated
+// user-facing string emission in this file. It NEVER returns an error
+// to the caller — translation failures degrade to the message ID
+// itself (matching NoopTranslator behaviour) so production output
+// remains loud + obvious instead of silently empty.
+func tr(ctx context.Context, msgID string, data map[string]any) string {
+	if translator == nil {
+		translator = i18n.NoopTranslator{}
+	}
+	out, err := translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
+}
 
 // defaultConfigPathFromEnv resolves the on-disk wizard config path using the
 // supplied env-lookup. Mirrors internal/llm.defaultWizardConfigPath but lives
@@ -1217,9 +1260,9 @@ func (c *CLI) handleListWorkers(ctx context.Context) error {
 	stats := c.workerPool.GetWorkerStats(ctx)
 
 	fmt.Println("\n=== Worker Statistics ===")
-	fmt.Printf("Total Workers: %d\n", stats.TotalWorkers)
-	fmt.Printf("Active Workers: %d\n", stats.ActiveWorkers)
-	fmt.Printf("Healthy Workers: %d\n", stats.HealthyWorkers)
+	fmt.Println(tr(ctx, "cli_workers_total", map[string]any{"Count": stats.TotalWorkers}))
+	fmt.Println(tr(ctx, "cli_workers_active", map[string]any{"Count": stats.ActiveWorkers}))
+	fmt.Println(tr(ctx, "cli_workers_healthy", map[string]any{"Count": stats.HealthyWorkers}))
 	fmt.Printf("Total CPU: %d\n", stats.TotalCPU)
 	fmt.Printf("Total Memory: %.2f GB\n", float64(stats.TotalMemory)/(1024*1024*1024))
 	fmt.Printf("Total GPU: %d\n", stats.TotalGPU)
@@ -1814,7 +1857,7 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 // preserved across turns within a single REPL session.
 func (c *CLI) handleInteractive(ctx context.Context) error {
 	fmt.Println("=== Helix CLI Interactive Mode ===")
-	fmt.Println("Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit.")
+	fmt.Println(tr(ctx, "cli_repl_intro", nil))
 	if c.llmProvider != nil {
 		if models := c.llmProvider.GetModels(); len(models) > 0 {
 			fmt.Printf("Provider: %s   Default model: %s\n", c.llmProvider.GetName(), models[0].Name)
@@ -1837,7 +1880,9 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 	for {
 		select {
 		case <-sigChan:
-			fmt.Println("\n\nShutting down...")
+			fmt.Println()
+			fmt.Println()
+			fmt.Println(tr(ctx, "cli_repl_shutting_down", nil))
 			return nil
 		default:
 		}
@@ -1884,7 +1929,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 		}
 		// Unknown slash command: surface clearly, don't send to LLM
 		if strings.HasPrefix(input, "/") {
-			fmt.Printf("Unknown slash command: %s. Type '/help' for available commands.\n", input)
+			fmt.Println(tr(ctx, "cli_repl_unknown_slash", map[string]any{"Input": input}))
 			continue
 		}
 
@@ -2160,16 +2205,16 @@ func (c *CLI) handleQARun(ctx context.Context, serverURL, platforms, banks strin
 	if err != nil {
 		return fmt.Errorf("failed to start QA session: %w", err)
 	}
-	fmt.Printf("QA Session started: %s\n", state.ID)
+	fmt.Println(tr(ctx, "cli_qa_session_started", map[string]any{"ID": state.ID}))
 	fmt.Printf("Platforms: %s\n", strings.Join(state.Platforms, ", "))
 	fmt.Printf("Status: %s\n", state.Status)
 
 	if wait {
-		fmt.Println("Waiting for session to complete...")
+		fmt.Println(tr(ctx, "cli_qa_waiting", nil))
 		if err := client.WaitForSession(state.ID, os.Stdout); err != nil {
 			return err
 		}
-		fmt.Println("Session completed!")
+		fmt.Println(tr(ctx, "cli_qa_session_completed", nil))
 	}
 	return nil
 }
@@ -2181,7 +2226,7 @@ func (c *CLI) handleQAList(ctx context.Context, serverURL string) error {
 		return fmt.Errorf("failed to list sessions: %w", err)
 	}
 	if len(sessions) == 0 {
-		fmt.Println("No QA sessions found.")
+		fmt.Println(tr(ctx, "cli_qa_no_sessions", nil))
 		return nil
 	}
 	fmt.Println("\n=== QA Sessions ===")
