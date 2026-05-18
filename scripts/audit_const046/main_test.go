@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"go/parser"
 	"go/token"
 	"os"
@@ -130,5 +131,189 @@ var Question = "Which file has the bug today, dear user?"
 	}
 	if !strings.Contains(out, "Which file has the bug") {
 		t.Fatalf("expected violation excerpt in stdout, got: %s", out)
+	}
+}
+
+// scratchTreeWithViolation creates a scratch dir with a single Go file
+// containing one known CONST-046 violation. Returns the scratch root
+// (suitable for --roots) and the literal text used (for hash recompute
+// in baseline-priming helpers).
+func scratchTreeWithViolation(t *testing.T) (root string, literal string) {
+	t.Helper()
+	tmp := t.TempDir()
+	scratch := filepath.Join(tmp, "scratch_tree", "pkg")
+	if err := os.MkdirAll(scratch, 0o755); err != nil {
+		t.Fatalf("mkdir scratch: %v", err)
+	}
+	literal = "Which file has the bug today, dear user?"
+	src := []byte("package pkg\n\nvar Question = \"" + literal + "\"\n")
+	if err := os.WriteFile(filepath.Join(scratch, "v.go"), src, 0o644); err != nil {
+		t.Fatalf("write violation: %v", err)
+	}
+	return filepath.Join(tmp, "scratch_tree"), literal
+}
+
+// runInProcess invokes the testable run() entry point and returns
+// (exitCode, stdout, stderr) — no subprocess required.
+func runInProcess(args ...string) (int, string, string) {
+	var stdout, stderr bytes.Buffer
+	code := run(args, &stdout, &stderr)
+	return code, stdout.String(), stderr.String()
+}
+
+func TestBaseline_FailOnNew_NewViolationFails(t *testing.T) {
+	root, _ := scratchTreeWithViolation(t)
+	baselinePath := filepath.Join(t.TempDir(), "empty_baseline.json")
+	// Empty baseline (no violations recorded).
+	empty := Baseline{SchemaVersion: 1, GeneratedAt: "2026-05-19T00:00:00Z", ToolVersion: toolVersion, Violations: nil}
+	data, _ := json.MarshalIndent(&empty, "", "  ")
+	if err := os.WriteFile(baselinePath, data, 0o644); err != nil {
+		t.Fatalf("seed empty baseline: %v", err)
+	}
+
+	code, stdout, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--fail-on-new",
+	)
+	if code != 1 {
+		t.Fatalf("expected exit 1 for new violation, got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stdout, "NEW: 1") {
+		t.Fatalf("expected 'NEW: 1' in stdout, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, "Which file has the bug") {
+		t.Fatalf("expected violation excerpt in stdout, got: %s", stdout)
+	}
+}
+
+func TestBaseline_FailOnNew_PreExistingPasses(t *testing.T) {
+	root, _ := scratchTreeWithViolation(t)
+	baselinePath := filepath.Join(t.TempDir(), "seeded_baseline.json")
+
+	// Seed the baseline by running --update-baseline first.
+	code, stdout, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--update-baseline",
+	)
+	if code != 0 {
+		t.Fatalf("update-baseline expected exit 0, got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+
+	// Re-run with --fail-on-new — the violation is now in baseline.
+	code, stdout, stderr = runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--fail-on-new",
+	)
+	if code != 0 {
+		t.Fatalf("expected exit 0 for pre-existing violation, got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stdout, "NEW: 0") {
+		t.Fatalf("expected 'NEW: 0' in stdout, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, "PRE-EXISTING: 1") {
+		t.Fatalf("expected 'PRE-EXISTING: 1' in stdout, got: %s", stdout)
+	}
+}
+
+func TestBaseline_UpdateBaseline_WritesFile(t *testing.T) {
+	root, _ := scratchTreeWithViolation(t)
+	baselinePath := filepath.Join(t.TempDir(), "fresh.json")
+
+	code, stdout, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--update-baseline",
+	)
+	if code != 0 {
+		t.Fatalf("expected exit 0 from update-baseline, got %d; stderr=%s", code, stderr)
+	}
+	if !strings.Contains(stdout, "baseline updated") {
+		t.Fatalf("expected 'baseline updated' message, got: %s", stdout)
+	}
+
+	data, err := os.ReadFile(baselinePath)
+	if err != nil {
+		t.Fatalf("read written baseline: %v", err)
+	}
+	var b Baseline
+	if err := json.Unmarshal(data, &b); err != nil {
+		t.Fatalf("baseline is not valid JSON: %v; raw=%s", err, string(data))
+	}
+	if b.SchemaVersion != 1 {
+		t.Fatalf("expected schema_version=1, got %d", b.SchemaVersion)
+	}
+	if b.ToolVersion != toolVersion {
+		t.Fatalf("expected tool_version=%q, got %q", toolVersion, b.ToolVersion)
+	}
+	if len(b.Violations) != 1 {
+		t.Fatalf("expected 1 violation in baseline, got %d", len(b.Violations))
+	}
+	if b.Violations[0].LiteralHash == "" {
+		t.Fatalf("expected literal_hash populated, got empty")
+	}
+	if len(b.Violations[0].LiteralHash) != 16 {
+		t.Fatalf("expected 16-hex-char hash, got %q", b.Violations[0].LiteralHash)
+	}
+}
+
+func TestBaseline_MissingFile_TreatsAsEmpty(t *testing.T) {
+	root, _ := scratchTreeWithViolation(t)
+	bogus := filepath.Join(t.TempDir(), "does_not_exist.json")
+
+	code, stdout, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", bogus,
+		"--fail-on-new",
+	)
+	if code != 1 {
+		t.Fatalf("expected exit 1 (missing baseline ⇒ all NEW), got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stderr, "WARNING: baseline file not found") {
+		t.Fatalf("expected warning about missing baseline in stderr, got: %s", stderr)
+	}
+	if !strings.Contains(stdout, "NEW: 1") {
+		t.Fatalf("expected 'NEW: 1' in stdout, got: %s", stdout)
+	}
+}
+
+func TestBaseline_HashStability_LineShiftIgnored(t *testing.T) {
+	root, literal := scratchTreeWithViolation(t)
+	baselinePath := filepath.Join(t.TempDir(), "seed.json")
+
+	// Seed baseline from initial tree.
+	code, _, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--update-baseline",
+	)
+	if code != 0 {
+		t.Fatalf("seed baseline failed: %d / %s", code, stderr)
+	}
+
+	// Re-write the violating file with the SAME literal but shifted
+	// down by inserting a blank-line comment block above it. The line
+	// number changes; literal hash must stay stable.
+	violationFile := filepath.Join(root, "pkg", "v.go")
+	shifted := []byte("package pkg\n\n// Unrelated comment block inserted to push the\n// violation down a few lines and prove the baseline\n// matches by literal-hash, not by line number.\n//\n//\n\nvar Question = \"" + literal + "\"\n")
+	if err := os.WriteFile(violationFile, shifted, 0o644); err != nil {
+		t.Fatalf("rewrite file with shifted line: %v", err)
+	}
+
+	code, stdout, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--fail-on-new",
+	)
+	if code != 0 {
+		t.Fatalf("expected exit 0 (line shift, same literal → PRE-EXISTING), got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stdout, "NEW: 0") {
+		t.Fatalf("expected 'NEW: 0' after line shift, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, "PRE-EXISTING: 1") {
+		t.Fatalf("expected 'PRE-EXISTING: 1' after line shift, got: %s", stdout)
 	}
 }

@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # audit-const046-hardcoded-content.sh — orchestrates the CONST-046
 # audit walker over HelixCode's scannable roots. Round 92: SOFT-WARN
-# (always exits 0). Round 99 will tighten to exit 1 on findings.
-# Usage: bash scripts/audit-const046-hardcoded-content.sh [--json] [--quiet]
+# (always exits 0). Round 99b: BASELINE-AWARE — pre-existing findings
+# are accepted via baseline snapshot, but NEW violations beyond the
+# baseline cause exit 1 in --fail-on-new mode.
+# Usage:
+#   bash scripts/audit-const046-hardcoded-content.sh                    # soft-warn (default)
+#   bash scripts/audit-const046-hardcoded-content.sh --fail-on-new      # gate mode
+#   bash scripts/audit-const046-hardcoded-content.sh --update-baseline  # refresh snapshot
+#   bash scripts/audit-const046-hardcoded-content.sh --json --quiet     # JSON soft-warn
 set -euo pipefail
 
 # Resolve repo root (location of this script's parent's parent).
@@ -11,6 +17,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 AUDITOR_DIR="${REPO_ROOT}/scripts/audit_const046"
 ALLOWLIST="${AUDITOR_DIR}/.allowlist"
+BASELINE="${AUDITOR_DIR}/.baseline.json"
 
 # Default roots — the set of trees CONST-046 actively governs in this
 # repo. Third-party reference projects (cli_agents/, cli_agents_resources/)
@@ -59,5 +66,7 @@ BIN="${BUILD_TMP}/audit_const046"
   go build -o "${BIN}" .
 )
 
-# Pass through any flags from the caller (--json, --quiet).
-exec "${BIN}" --roots "${ROOTS_CSV}" --allowlist "${ALLOWLIST}" "$@"
+# Pass through any flags from the caller (--json, --quiet, --fail-on-new,
+# --update-baseline). The --baseline path defaults to ${BASELINE} unless
+# the caller supplies their own --baseline flag.
+exec "${BIN}" --roots "${ROOTS_CSV}" --allowlist "${ALLOWLIST}" --baseline "${BASELINE}" "$@"
