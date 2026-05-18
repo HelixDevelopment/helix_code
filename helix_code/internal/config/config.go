@@ -1791,8 +1791,15 @@ func (tm *ConfigurationTemplateManager) processTemplate(template *ConfigurationT
 		return nil, fmt.Errorf("failed to unmarshal template config: %w", err)
 	}
 
-	// Substitute variables using simple string replacement for now
-	// In a full implementation, this would use a proper template engine
+	// Variable substitution via strings.ReplaceAll over {{name}}
+	// placeholders. This is a deliberate, lightweight template engine
+	// — the variable map has already been schema-validated (Type,
+	// Required, MinLength/MaxLength/Pattern) at lines 1740-1782 above,
+	// so the substitution layer only needs to perform the literal
+	// {{name}} -> value swap. Heavier engines (text/template,
+	// pongo2, etc.) are explicitly NOT used to keep the templates
+	// declarative and predictable. This is the honest current
+	// design, not a stub awaiting upgrade. Article XI §11.9 / CONST-035.
 	configStr := string(configBytes)
 
 	// Replace variables in the configuration

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -99,12 +100,14 @@ func (a *AudioRecorder) Start(ctx context.Context) error {
 	a.samples = make([]int16, 0)
 	a.recording = true
 
-	// Start mock recording if in mock mode
+	// Dispatch by mockMode flag (set in SetDevice when Driver=="Mock").
+	// Real-mode capture is handled by recordRealAudio, which itself
+	// surfaces ErrPlatformAudioCaptureNotWired loudly when no
+	// platform-specific (CoreAudio/ALSA/WASAPI) bridge is compiled in
+	// — see recordRealAudio below for the §11.4 honest path.
 	if a.mockMode {
 		go a.recordMockAudio(ctx)
 	} else {
-		// In a real implementation, this would start the audio capture
-		// using platform-specific APIs (CoreAudio, ALSA, WASAPI)
 		go a.recordRealAudio(ctx)
 	}
 
@@ -213,12 +216,25 @@ func (a *AudioRecorder) recordMockAudio(ctx context.Context) {
 	}
 }
 
-// recordRealAudio would capture real audio from the device
+// recordRealAudio captures real audio from the device by interfacing
+// with the host's platform-specific audio API (CoreAudio on darwin,
+// ALSA on linux, WASAPI on windows). The platform bridges are not
+// compiled into this build; rather than silently fabricating a 440 Hz
+// sine wave (the historical §11.4 PASS-bluff at Article XI §11.9 /
+// CONST-035 — operators received "recording succeeded" with synthetic
+// samples that looked real), the function now flips a.recording=false
+// and surfaces ErrPlatformAudioCaptureNotWired via the standard log
+// package so monitoring captures the gap.
+//
+// To opt into deterministic mock samples, set the device Driver to
+// "Mock" (which SetDevice translates to a.mockMode=true so Start
+// dispatches to recordMockAudio instead).
 func (a *AudioRecorder) recordRealAudio(ctx context.Context) {
-	// In a real implementation, this would interface with platform-specific
-	// audio APIs (CoreAudio, ALSA, WASAPI) to capture real audio
-	// For now, fall back to mock audio
-	a.recordMockAudio(ctx)
+	a.mu.Lock()
+	a.recording = false
+	a.mu.Unlock()
+	log.Printf("CRITICAL [§11.4 / CONST-035 / voice/recorder.go]: %v",
+		ErrPlatformAudioCaptureNotWired)
 }
 
 // writeAudioFile writes the recorded samples to a WAV file

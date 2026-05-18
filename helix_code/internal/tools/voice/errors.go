@@ -31,6 +31,21 @@ var (
 	ErrFileNotFound    = errors.New("audio file not found")
 	ErrFileReadFailed  = errors.New("failed to read audio file")
 	ErrFileWriteFailed = errors.New("failed to write audio file")
+
+	// ErrPlatformAudioCaptureNotWired surfaces the historical §11.4
+	// PASS-bluff in AudioRecorder.recordRealAudio: when the device's
+	// driver was not "Mock" (i.e. real-mode capture was requested),
+	// the function silently fell back to recordMockAudio and
+	// produced a 440 Hz sine wave instead of any platform-level
+	// capture. Operators saw "recording succeeded" + a WAV file with
+	// fabricated samples. Article XI §11.9 / CONST-035 / CONST-050(A).
+	// The new recordRealAudio path flips a.recording=false and logs
+	// this sentinel loudly so monitoring catches the missing
+	// platform bridge (CoreAudio/ALSA/WASAPI not yet wired).
+	ErrPlatformAudioCaptureNotWired = errors.New(
+		"voice: platform audio capture (CoreAudio/ALSA/WASAPI) not wired — " +
+			"set the device Driver to \"Mock\" for deterministic test samples, " +
+			"or compile in a platform-specific capture bridge (§11.4 PASS-bluff removed)")
 )
 
 // VoiceError wraps errors with additional context

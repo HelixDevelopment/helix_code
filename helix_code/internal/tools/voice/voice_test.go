@@ -369,58 +369,64 @@ func TestVoiceInputManager_Integration(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	config := &VoiceConfig{
-		SampleRate:       16000,
-		Channels:         1,
-		BitDepth:         16,
-		Format:           FormatWAV,
-		MaxDuration:      30 * time.Second,
-		SilenceTimeout:   2 * time.Second,
-		SilenceThreshold: -40.0,
-		WhisperModel:     "whisper-1",
-		AutoSelect:       true,
-		OutputDirectory:  tmpDir,
+	// Construct a Mock-driver device directly and drive the recorder
+	// at the lowest level so this test does not depend on the host
+	// platform's audio enumeration (Linux ALSA, macOS CoreAudio,
+	// Windows WASAPI) producing a Mock device. The round-32 §11.4 fix
+	// removed the silent recordRealAudio→recordMockAudio fallback
+	// (ErrPlatformAudioCaptureNotWired now surfaces loudly), so going
+	// through VoiceInputManager's AutoSelect path on Linux would have
+	// picked an ALSA device and flipped a.recording=false — masking
+	// the bluff fix. The lower-level path below faithfully exercises
+	// the same code (Start → recordMockAudio → Stop → writeAudioFile)
+	// without the platform-enumeration coupling.
+	mockDevice := &AudioDevice{
+		ID:          "mock-default",
+		Name:        "Mock Default Microphone",
+		IsDefault:   true,
+		SampleRates: []int{8000, 16000, 44100, 48000},
+		Channels:    1,
+		IsAvailable: true,
+		Driver:      "Mock",
+	}
+	audioConfig := &AudioConfig{
+		SampleRate:      16000,
+		Channels:        1,
+		BitDepth:        16,
+		Format:          FormatWAV,
+		OutputDirectory: tmpDir,
 	}
 
-	manager, err := NewVoiceInputManager(config)
+	recorder, err := NewAudioRecorder(mockDevice, audioConfig)
 	if err != nil {
-		t.Fatalf("NewVoiceInputManager() error = %v", err)
+		t.Fatalf("NewAudioRecorder() error = %v", err)
 	}
 
 	ctx := context.Background()
 
-	// Test device listing
-	devices, err := manager.ListDevices(ctx)
-	if err != nil {
-		t.Fatalf("ListDevices() error = %v", err)
-	}
-
-	if len(devices) == 0 {
-		t.Error("expected at least one device")
-	}
-
 	// Test recording
-	if err := manager.StartRecording(ctx); err != nil {
-		t.Fatalf("StartRecording() error = %v", err)
+	if err := recorder.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
 	}
 
-	if !manager.GetRecorderStatus() {
+	if !recorder.IsRecording() {
 		t.Error("expected recorder to be active")
 	}
 
 	// Wait a bit
 	time.Sleep(100 * time.Millisecond)
 
-	// Get audio levels
-	levels := manager.GetAudioLevels()
+	// Get audio levels via the recorder directly (manager removed; see
+	// platform-decoupling rationale above).
+	levels := recorder.GetLevels()
 	if levels == nil {
 		t.Error("expected non-nil audio levels")
 	}
 
 	// Stop recording
-	audioPath, err := manager.StopRecording(ctx)
+	audioPath, err := recorder.Stop(ctx)
 	if err != nil {
-		t.Fatalf("StopRecording() error = %v", err)
+		t.Fatalf("Stop() error = %v", err)
 	}
 
 	if audioPath == "" {
@@ -430,6 +436,63 @@ func TestVoiceInputManager_Integration(t *testing.T) {
 	// Verify file exists
 	if _, err := os.Stat(audioPath); os.IsNotExist(err) {
 		t.Errorf("audio file does not exist: %s", audioPath)
+	}
+}
+
+// TestAudioRecorder_RealMode_NoPlatformBridge asserts the round-32
+// §11.4 PASS-bluff guard: when a non-Mock driver device is passed and
+// Start() dispatches to recordRealAudio, the recorder MUST flip
+// a.recording=false (so subsequent Stop returns ErrNotRecording rather
+// than silently writing fabricated mock samples). Article XI §11.9 /
+// CONST-035 / CONST-050(A) — this test pins the loud-fail contract.
+func TestAudioRecorder_RealMode_NoPlatformBridge(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "voice_realmode_*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	device := &AudioDevice{
+		ID:          "real-alsa",
+		Name:        "Real ALSA Microphone",
+		IsDefault:   true,
+		SampleRates: []int{16000},
+		Channels:    1,
+		IsAvailable: true,
+		Driver:      "ALSA",
+	}
+
+	config := &AudioConfig{
+		SampleRate:      16000,
+		Channels:        1,
+		BitDepth:        16,
+		Format:          FormatWAV,
+		OutputDirectory: tmpDir,
+	}
+
+	recorder, err := NewAudioRecorder(device, config)
+	if err != nil {
+		t.Fatalf("NewAudioRecorder() error = %v", err)
+	}
+
+	ctx := context.Background()
+	if err := recorder.Start(ctx); err != nil {
+		t.Fatalf("Start() should not return immediate error; got %v", err)
+	}
+
+	// Give the goroutine a moment to flip a.recording=false through
+	// recordRealAudio's loud-fail path.
+	time.Sleep(50 * time.Millisecond)
+
+	if recorder.IsRecording() {
+		t.Fatal("expected recorder to have flipped recording=false via recordRealAudio's loud-fail path, but it is still recording (§11.4 PASS-bluff regression)")
+	}
+
+	// Stop should now report ErrNotRecording — the honest signal that
+	// no platform bridge captured anything.
+	_, err = recorder.Stop(ctx)
+	if err != ErrNotRecording {
+		t.Fatalf("expected ErrNotRecording from Stop after real-mode loud-fail, got %v", err)
 	}
 }
 

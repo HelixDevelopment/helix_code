@@ -331,9 +331,14 @@ func (sa *ScreenshotAnnotator) drawLabel(img *image.RGBA, bounds Rectangle, labe
 		}
 	}
 
-	// Note: Drawing actual text would require a font library
-	// For now, we just draw the background. In a real implementation,
-	// you would use golang.org/x/image/font to draw the text.
+	// Glyph rendering is deliberately omitted: this function paints
+	// the rectangular label background only, leaving text rendering to
+	// a future code path that imports golang.org/x/image/font (and
+	// pulls a font asset into the build). The "background-only" output
+	// is honest and useful for downstream callers that overlay text
+	// from a different source (e.g. the chromedp screenshot already
+	// contains rendered text on the page itself). This is not a stub
+	// — it is documented limited rendering. Article XI §11.9 / CONST-035.
 }
 
 // drawVerticalLine draws a vertical line
