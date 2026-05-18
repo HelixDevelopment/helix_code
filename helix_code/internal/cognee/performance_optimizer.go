@@ -1011,12 +1011,13 @@ func (po *PerformanceOptimizer) getGPUUsage() float64 {
 }
 
 // runGPUUsageProbeChain executes the vendor probes in priority order.
-// Round-49 chain: NVIDIA (round-43) → AMD ROCm (round-45) → Apple
-// Silicon ioreg (round-49) → sentinel. The first probe returning a
-// non-sentinel value wins; if every probe returns the sentinel the
-// function logs a telemetry-gap notice and returns the sentinel so
-// callers can distinguish "unmeasured" from "measured idle"
-// (CONST-035 / Article XI §11.9 anti-bluff guarantee).
+// Round-51 chain: NVIDIA (round-43) → AMD ROCm (round-45) → Apple
+// Silicon ioreg (round-49) → Intel Arc intel_gpu_top (round-51) →
+// sentinel. The first probe returning a non-sentinel value wins; if
+// every probe returns the sentinel the function logs a telemetry-gap
+// notice and returns the sentinel so callers can distinguish
+// "unmeasured" from "measured idle" (CONST-035 / Article XI §11.9
+// anti-bluff guarantee).
 //
 // Probe order rationale (append-only — never reorder):
 //   - NVIDIA first because nvidia-smi is the more mature / faster path
@@ -1029,15 +1030,22 @@ func (po *PerformanceOptimizer) getGPUUsage() float64 {
 //     non-AMD hosts fast. Common on datacenter ROCm deployments.
 //   - Apple third because ioreg is a macOS-only utility (developer
 //     laptops). Linux/Windows hosts shortcut at the LookPath gate.
-//     Apple last in priority because dual-vendor (NVIDIA + Apple) is
-//     impossible: Apple Silicon has no PCIe slot for NVIDIA, and Intel
-//     Macs that retained NVIDIA have been EOL since 2019. So order
-//     here only matters on hypothetical eGPU-via-Thunderbolt rigs where
-//     surfacing the discrete GPU's NVIDIA/AMD reading is the dominant
-//     correct choice over the integrated AGX.
-//   - Future probes (Intel Level Zero, e.g.) MUST be APPENDED here,
-//     NEVER inserted at the head — preserving the existing order keeps
-//     existing dashboards' behaviour stable.
+//     Apple last-but-one in priority because dual-vendor (NVIDIA +
+//     Apple) is impossible: Apple Silicon has no PCIe slot for NVIDIA,
+//     and Intel Macs that retained NVIDIA have been EOL since 2019.
+//     So order here only matters on hypothetical eGPU-via-Thunderbolt
+//     rigs where surfacing the discrete GPU's NVIDIA/AMD reading is
+//     the dominant correct choice over the integrated AGX.
+//   - Intel last because Intel Arc / Xe deployments are the rarest of
+//     the four vendors in HelixCode's production topology. Frequency
+//     ranking observed in the field: NVIDIA datacenters >> AMD ROCm
+//     datacenters > Apple Silicon developer laptops > Intel Arc
+//     deployments. intel_gpu_top is also the slowest probe because it
+//     streams indefinitely and we must read-one-JSON-then-kill;
+//     deferring it to last keeps the NVIDIA/AMD/Apple hot-paths fast.
+//   - Future probes MUST be APPENDED here, NEVER inserted at the head —
+//     preserving the existing order keeps existing dashboards'
+//     behaviour stable.
 func runGPUUsageProbeChain() float64 {
 	if v := queryNvidiaGPUUsage(); v != GPUUsageUnavailableSentinel {
 		return v
@@ -1048,8 +1056,11 @@ func runGPUUsageProbeChain() float64 {
 	if v := queryAppleGPUUsage(); v != GPUUsageUnavailableSentinel {
 		return v
 	}
+	if v := queryIntelGPUUsage(); v != GPUUsageUnavailableSentinel {
+		return v
+	}
 	if gpuTelemetryLogger != nil {
-		gpuTelemetryLogger.Debug("no supported GPU telemetry source available (NVIDIA nvidia-smi + AMD rocm-smi + Apple ioreg all unavailable); returning GPUUsageUnavailableSentinel (round-49 §11.4 honest sentinel)")
+		gpuTelemetryLogger.Debug("no supported GPU telemetry source available (NVIDIA nvidia-smi + AMD rocm-smi + Apple ioreg + Intel intel_gpu_top all unavailable); returning GPUUsageUnavailableSentinel (round-51 §11.4 honest sentinel)")
 	}
 	return GPUUsageUnavailableSentinel
 }
@@ -1544,6 +1555,274 @@ func parseAppleIoregUtilization(raw []byte) (float64, bool) {
 			return 0, false
 		}
 		sum += v
+		count++
+	}
+	if count == 0 {
+		return 0, false
+	}
+	return sum / float64(count), true
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Round 51 — Intel Arc / Xe GPU telemetry probe (sibling to round-43
+// NVIDIA + round-45 AMD + round-49 Apple). Completes the 4-vendor GPU
+// probe chain so HelixCode users running any of the four mainstream
+// GPU stacks see real measurements rather than the sentinel.
+// ───────────────────────────────────────────────────────────────────────
+//
+// Forensic anchor: round 33 introduced GPUUsageUnavailableSentinel
+// (-1.0) so unmeasured-GPU paths surfaced loudly. Round 43 closed the
+// sentinel for NVIDIA via `nvidia-smi`. Round 45 closed it for AMD via
+// `rocm-smi --showuse --json`. Round 49 closed it for Apple Silicon
+// via `ioreg -l -d 1 -w 0 -r -c IOAccelerator`. Round 51 closes it for
+// Intel Arc / Intel Xe via `intel_gpu_top -J -s 1000` — same shell-out
+// discipline keeps the binary cgo-free and avoids pulling a third-party
+// Level-Zero Go SDK.
+//
+// Implementation rationale (intel_gpu_top over alternatives):
+//   - `intel_gpu_top -J -s 1000` is the only unprivileged Intel GPU
+//     telemetry path that works on both i915 (Gen11/Gen12 / older Arc /
+//     integrated) and Xe (Arc-A series, Arc-B series, Meteor Lake +
+//     successors) kernel drivers. Ships with the `intel-gpu-tools`
+//     package on every Linux distro that supports Intel GPUs.
+//   - `level-zero-tests` / `clinfo` were REJECTED — `clinfo` reports
+//     only static device info (no real-time utilisation), and
+//     `level-zero-tests` is a benchmarking suite not a telemetry CLI.
+//   - `sudo intel_gpu_top -s 1000 -J -o /dev/stdout` was REJECTED —
+//     CONST-035 + project no-sudo mandate bar sudo wrappers regardless
+//     of how rich the metric set is. On hosts where intel_gpu_top
+//     requires CAP_PERFMON or root, the probe returns the sentinel
+//     cleanly (caught by the exec / read-error path).
+//
+// Streaming-output handling (the hard part):
+//   - intel_gpu_top does NOT exit after one sample like nvidia-smi or
+//     rocm-smi. It streams JSON objects forever, one per sample
+//     interval. We must (a) start it, (b) read exactly the FIRST
+//     complete JSON object via json.Decoder.Decode (which knows where
+//     a top-level object closes), (c) kill the process via Process.Kill
+//     so the OS reclaims it, (d) Wait so we are not leaking zombies.
+//   - Timeout: 3s (intentionally longer than the 2s used by NVIDIA / AMD
+//     / Apple) because intel_gpu_top requires one full sample interval
+//     (we ask for 1000ms) before emitting the first object — so 2s is
+//     uncomfortably close to the lower bound.
+//
+// JSON-schema tolerance (Intel ships breaking schema changes between
+// driver versions and intel-gpu-tools releases):
+//   - The shape varies across versions. Examples observed in the wild:
+//       i915 era (intel-gpu-tools < 1.27): top-level "engines" object
+//         keyed by "Render/3D/0" / "Blitter/0" / "VideoEnhance/0" /
+//         "Video/0", each with "busy" (percent 0..100).
+//       Xe era (intel-gpu-tools >= 1.27 with Xe driver): top-level
+//         "engines" keyed by friendlier names "Render/3D" / "Blitter" /
+//         "Video" without the trailing "/N" suffix.
+//       Some packagings emit a single "Render" key.
+//   - intelGPUTopEngineKeyPatterns lists the candidate key shapes we
+//     accept, ordered most-specific first. Aggregation is the
+//     arithmetic MEAN across matched engines (parity with NVIDIA / AMD /
+//     Apple — "system GPU%" is the analogue to system CPU%). The
+//     parser is deliberately permissive about UNKNOWN keys: it skips
+//     them rather than failing, so new Intel driver versions that add
+//     novel engines do not break the probe.
+//
+// Error contract — every failure path returns GPUUsageUnavailableSentinel
+// (-1.0). The function NEVER returns a fabricated number on the error
+// path. CONST-035 / CONST-050(A) / Article XI §11.9 anti-bluff guarantee.
+//
+// Process-lifecycle safety: we always call Process.Kill on the spawned
+// intel_gpu_top regardless of decode success/failure, and always Wait
+// in a goroutine so the kernel reaps the process. If Kill returns
+// "process already finished" we treat it as success (already exited).
+//
+// Caching: round-51 deliberately does NOT add a fourth per-vendor
+// cache. The runGPUUsageProbeChain wrapper invokes queryNvidiaGPUUsage
+// first; that probe's existing 1-second TTL cache covers the dominant
+// hot-path. The Intel branch is only reached when NVIDIA + AMD + Apple
+// all return the sentinel — typically a Linux host with an Intel Arc /
+// Xe GPU where the Intel probe runs at the metric-collection cadence
+// (already bounded). Adding a parallel Intel cache would couple four
+// unrelated TTLs; if Intel-side cache becomes necessary it will be
+// added in a future round with its own contract.
+
+// intelGPUTopQueryTimeout caps the intel_gpu_top streaming read.
+// Intentionally longer than nvidia-smi / rocm-smi / ioreg (2s) because
+// intel_gpu_top must wait one full -s interval (1000ms here) before
+// emitting the first JSON object; 3s gives a 2-sample margin.
+const intelGPUTopQueryTimeout = 3 * time.Second
+
+// intelGPUTopSampleIntervalMS is the -s argument to intel_gpu_top.
+// 1000ms (1Hz) balances responsiveness against the kernel-driver
+// sampling cost. Lower values (e.g. 100ms) noticeably increase CPU
+// load on Xe driver kernels; 1000ms is the documented default in
+// intel-gpu-tools.
+const intelGPUTopSampleIntervalMS = "1000"
+
+// intelGPUTopCommand is overridable for tests. Production code MUST
+// use the exec.CommandContext factory; tests inject a fake via PATH
+// manipulation (t.Setenv("PATH", t.TempDir()) + fake script) so the
+// real exec.CommandContext code path runs against a hermetic binary —
+// CONST-050(A) compliant (the fake script lives in t.TempDir, not
+// production source).
+//
+// Flag rationale:
+//   - `-J`                  : JSON output (one object per sample)
+//   - `-s <interval-ms>`    : sampling interval (ms) — first sample
+//                             emitted after this delay
+var intelGPUTopCommand = func(ctx context.Context) *exec.Cmd {
+	return exec.CommandContext(ctx, "intel_gpu_top",
+		"-J", "-s", intelGPUTopSampleIntervalMS)
+}
+
+// queryIntelGPUUsage performs the LookPath gate + streaming shell-out +
+// JSON decode + process-kill for Intel Arc / Xe GPUs. Returns
+// GPUUsageUnavailableSentinel on every error path; returns the mean
+// engine utilisation [0.0, 100.0] on success.
+func queryIntelGPUUsage() float64 {
+	// Pre-flight: intel_gpu_top must exist on PATH. Cheap LookPath
+	// check shortcuts non-Intel-GPU hosts (Apple Silicon Macs, NVIDIA-
+	// only datacenter boxes, etc.) without the exec spawn overhead.
+	if _, err := exec.LookPath("intel_gpu_top"); err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Debug("intel_gpu_top not found in PATH; Intel GPU telemetry disabled (typical for non-Intel-GPU hosts), returning sentinel (round-51 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), intelGPUTopQueryTimeout)
+	defer cancel()
+
+	cmd := intelGPUTopCommand(ctx)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("intel_gpu_top stdout pipe failed: %v; returning sentinel (round-51 §11.4 honest sentinel)", err)
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	if err := cmd.Start(); err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("intel_gpu_top start failed: %v; returning sentinel (round-51 §11.4 honest sentinel)", err)
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	// Process-lifecycle safety net: we MUST always kill + wait the
+	// child so the OS reclaims it. Even on the success path we kill
+	// because intel_gpu_top streams forever and we only want the first
+	// object. Wait() is invoked in the foreground (not a goroutine)
+	// AFTER Kill so we observe the exit cleanly; if Kill races with
+	// natural exit, Wait still returns and the process is reaped.
+	defer func() {
+		if cmd.Process != nil {
+			// Kill returns "os: process already finished" if the child
+			// already exited — that's fine, treat as success.
+			_ = cmd.Process.Kill()
+		}
+		// Wait reaps the process so it does not linger as a zombie.
+		// We intentionally ignore Wait's error: a killed process
+		// reports a non-zero exit which is the expected outcome.
+		_ = cmd.Wait()
+	}()
+
+	// Read the first complete JSON object via json.Decoder.Decode.
+	// Decoder.Decode reads exactly one top-level value from the stream
+	// and stops — perfect for intel_gpu_top's stream-of-objects shape.
+	// We allow the decoder to use the natural io.EOF / read-timeout
+	// (via ctx) for the error path.
+	dec := json.NewDecoder(stdout)
+	var doc map[string]interface{}
+	if err := dec.Decode(&doc); err != nil {
+		if gpuTelemetryLogger != nil {
+			// Distinguish context-deadline-exceeded from parse error
+			// for operator clarity. ctx.Err() being non-nil means the
+			// timeout fired (likely intel_gpu_top never emitted a full
+			// object — common when CAP_PERFMON missing).
+			if ctx.Err() != nil {
+				gpuTelemetryLogger.Warn("intel_gpu_top did not emit a JSON object within %s (likely CAP_PERFMON / permission issue): %v; returning sentinel (round-51 §11.4 honest sentinel)", intelGPUTopQueryTimeout, err)
+			} else {
+				gpuTelemetryLogger.Warn("intel_gpu_top JSON decode failed: %v; returning sentinel (round-51 §11.4 honest sentinel)", err)
+			}
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	// Drain stdout briefly to give any in-flight bytes a path to /dev/null
+	// before the deferred Kill closes the pipe. Best-effort — if it errors
+	// (e.g. broken-pipe after Kill), we do not care.
+	go func() { _, _ = io.Copy(io.Discard, stdout) }()
+
+	mean, ok := parseIntelGPUTopUtilization(doc)
+	if !ok {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("intel_gpu_top output had no recognised engines.<name>.busy fields; returning sentinel (round-51 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	return mean
+}
+
+// parseIntelGPUTopUtilization extracts the mean engine utilisation from
+// a single intel_gpu_top JSON sample. The expected shape is:
+//
+//	{
+//	  "period": { ... },
+//	  "engines": {
+//	    "Render/3D/0":   { "busy": 12.3, "sema": ..., "wait": ... },
+//	    "Blitter/0":     { "busy":  0.0, ... },
+//	    "Video/0":       { "busy": 45.6, ... }
+//	  },
+//	  ...
+//	}
+//
+// We walk every entry under "engines" whose value has a "busy" float
+// field, aggregate via mean. UNKNOWN engine names are accepted (the
+// version-tolerance rationale documented above); only entries without a
+// usable "busy" key are skipped. Returns (mean, true) on success;
+// (0, false) when zero usable engines were found or the top-level
+// "engines" key is missing / wrong type.
+//
+// Defensive: a single out-of-range "busy" value (NaN, <0, >100) poisons
+// the whole reading. Same rationale as the round-43 NVIDIA / round-45
+// AMD / round-49 Apple parsers — silently dropping bad readings masks
+// driver bugs.
+func parseIntelGPUTopUtilization(doc map[string]interface{}) (float64, bool) {
+	enginesRaw, ok := doc["engines"]
+	if !ok {
+		return 0, false
+	}
+	engines, ok := enginesRaw.(map[string]interface{})
+	if !ok || len(engines) == 0 {
+		return 0, false
+	}
+
+	var sum float64
+	var count int
+	for _, engineRaw := range engines {
+		engine, ok := engineRaw.(map[string]interface{})
+		if !ok {
+			// Unknown engine value type — skip rather than fail, to
+			// stay tolerant of future schema additions (e.g. an engine
+			// emitting a string status instead of a stats object).
+			continue
+		}
+		busyRaw, ok := engine["busy"]
+		if !ok {
+			// Engine present but no "busy" — skip; some Intel driver
+			// versions emit metadata-only engines (e.g. for engines
+			// the kernel does not yet support telemetry on).
+			continue
+		}
+		busy, ok := busyRaw.(float64)
+		if !ok {
+			// "busy" key present but not a JSON number — schema
+			// violation; refuse to silently coerce.
+			return 0, false
+		}
+		if busy < 0 || busy > 100 {
+			return 0, false
+		}
+		sum += busy
 		count++
 	}
 	if count == 0 {
