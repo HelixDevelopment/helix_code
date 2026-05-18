@@ -417,6 +417,18 @@ func (p *OpenAICompatibleProvider) convertFromOpenAIResponse(response *OpenAICom
 		llmResponse.Content = choice.Message.Content
 		llmResponse.ToolCalls = choice.Message.ToolCalls
 		llmResponse.FinishReason = choice.FinishReason
+		// Round-53 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// the OpenAICompatibleProvider fans out to ~11 backends (VLLM,
+		// LMStudio, Jan, LocalAI, FastChat, TextGen WebUI, KoboldAI,
+		// GPT4All, TabbyAPI, MLX, MistralRS) — all advertise
+		// OpenAI-compatible Chat Completions semantics including
+		// `finish_reason: "length" | "stop" | "tool_calls" |
+		// "content_filter"`. Reuse the round-46 OpenAI mapper. If any
+		// individual backend diverges from this contract in the
+		// future, TestRound53_OpenAICompatible_ReusesOpenAIMapper will
+		// surface the regression and a backend-specific path MUST be
+		// introduced in the same commit.
+		llmResponse.Err = mapOpenAIFinishReasonToErr(choice.FinishReason)
 	}
 
 	llmResponse.Usage = Usage{
@@ -547,6 +559,28 @@ func (p *OpenAICompatibleProvider) makeStreamingRequest(ctx context.Context, req
 				}
 
 				if choice.FinishReason != "" {
+					// Round-53 LLMResponse.Err wiring for the streaming
+					// path (CONST-035 / Article XI §11.9): when the
+					// final frame carries finish_reason="length"/
+					// "content_filter", emit a terminal LLMResponse
+					// with Err populated so stream consumers (notably
+					// tool_provider.go :201/:251) can distinguish a
+					// clean stop from a partial-error stop on any of
+					// the 11 OpenAI-compatible local backends fronted
+					// by this provider (VLLM, LMStudio, Jan, etc.).
+					if errSentinel := mapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
+						select {
+						case ch <- LLMResponse{
+							ID:           uuid.New(),
+							RequestID:    requestID,
+							FinishReason: choice.FinishReason,
+							CreatedAt:    time.Now(),
+							Err:          errSentinel,
+						}:
+						case <-ctx.Done():
+							return ctx.Err()
+						}
+					}
 					break
 				}
 			}

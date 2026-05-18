@@ -192,10 +192,30 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 		return nil, fmt.Errorf("llama.cpp returned status %d", resp.StatusCode)
 	}
 
-	// Parse REAL response
+	// Parse REAL response. llama.cpp's /v1/completions emits an
+	// OpenAI-compatible envelope when the request used the chat-completions
+	// shape (modern llama-server v0.0.5+); older payloads carry a top-level
+	// `content` + legacy stop flags (stopped_eos / stopped_limit /
+	// stopped_word). We decode BOTH shapes so the mapper sees whichever
+	// signal the server actually emitted (round-53 anti-bluff: callers can
+	// distinguish a clean stop from a truncated max-tokens stop on either
+	// API path).
 	var result struct {
-		Content string `json:"content"`
-		Usage   struct {
+		// OpenAI-compatible shape
+		Choices []struct {
+			Index   int `json:"index"`
+			Message struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		// Legacy llama.cpp shape
+		Content       string `json:"content"`
+		StoppedEOS    bool   `json:"stopped_eos"`
+		StoppedLimit  bool   `json:"stopped_limit"`
+		StoppedWord   bool   `json:"stopped_word"`
+		Usage         struct {
 			PromptTokens     int `json:"prompt_tokens"`
 			CompletionTokens int `json:"completion_tokens"`
 			TotalTokens      int `json:"total_tokens"`
@@ -206,18 +226,68 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	// Round-53 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+	// resolve the effective content, finish_reason, and Err sentinel from
+	// whichever response shape the server emitted. OpenAI-compatible path
+	// reuses the round-46 mapOpenAIFinishReasonToErr helper; legacy path
+	// uses the round-53-new mapLlamaCppStopFlagsToErr helper. Llama.cpp
+	// exposes NO content-filter signal on the wire (no safety classifier),
+	// so ErrResponseContentBlocked is not reachable here — documented in
+	// the helper's doc comment.
+	content := result.Content
+	finishReason := ""
+	var sentinel error
+	if len(result.Choices) > 0 {
+		// OpenAI-compatible path takes precedence when populated
+		content = result.Choices[0].Message.Content
+		finishReason = result.Choices[0].FinishReason
+		sentinel = mapOpenAIFinishReasonToErr(finishReason)
+	} else {
+		// Legacy /completion or /v1/completions emitting legacy shape
+		finishReason, sentinel = mapLlamaCppStopFlagsToErr(result.StoppedEOS, result.StoppedLimit, result.StoppedWord)
+	}
+
 	return &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: request.ID,
-		Content:   result.Content,
+		Content:   content,
 		Usage: Usage{
 			PromptTokens:     result.Usage.PromptTokens,
 			CompletionTokens: result.Usage.CompletionTokens,
 			TotalTokens:      result.Usage.TotalTokens,
 		},
+		FinishReason:   finishReason,
 		ProcessingTime: time.Since(time.Now()),
 		CreatedAt:      time.Now(),
+		Err:            sentinel,
 	}, nil
+}
+
+// mapLlamaCppStopFlagsToErr maps llama.cpp's legacy `/completion` boolean
+// stop-cause flags to the round-46 LLMResponse.Err sentinel + a synthetic
+// finish_reason string for FinishReason. Reference:
+//   https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
+// (server response fields: stopped_eos / stopped_limit / stopped_word /
+//  stopped_word_str). Closed mapping:
+//   - stopped_limit=true                                       → "length",  ErrResponseTruncated
+//   - stopped_eos=true                                         → "stop",    nil
+//   - stopped_word=true                                        → "stop",    nil  (custom stop seq hit)
+//   - all-false (mid-stream chunk or unknown termination)      → "",        nil
+// llama.cpp exposes NO content-filter / safety-classifier signal on the
+// wire, so ErrResponseContentBlocked is NOT reachable here. If a future
+// llama.cpp release adds one, the helper + paired pinning test MUST be
+// extended in the same commit (CONST-050(B) paired-mutation).
+func mapLlamaCppStopFlagsToErr(stoppedEOS, stoppedLimit, stoppedWord bool) (string, error) {
+	switch {
+	case stoppedLimit:
+		return "length", ErrResponseTruncated
+	case stoppedEOS:
+		return "stop", nil
+	case stoppedWord:
+		return "stop", nil
+	default:
+		return "", nil
+	}
 }
 
 // GenerateStream generates a streaming response
@@ -279,22 +349,58 @@ func (p *LlamaCPPProvider) GenerateStream(ctx context.Context, request *LLMReque
 			break
 		}
 
+		// Llama.cpp's /completion SSE delivers per-token chunks with a
+		// `content` field, then a terminal chunk with `stop:true` plus
+		// the boolean cause flags (stopped_eos / stopped_limit /
+		// stopped_word). Round-53 LLMResponse.Err wiring (CONST-035 /
+		// Article XI §11.9): when the terminal chunk indicates
+		// max-tokens truncation (stopped_limit=true), emit a final
+		// LLMResponse with Err=ErrResponseTruncated so tool_provider.go
+		// :201/:251 can distinguish a clean stop from a truncated stop.
 		var chunk struct {
-			Content string `json:"content"`
+			Content      string `json:"content"`
+			Stop         bool   `json:"stop"`
+			StoppedEOS   bool   `json:"stopped_eos"`
+			StoppedLimit bool   `json:"stopped_limit"`
+			StoppedWord  bool   `json:"stopped_word"`
 		}
 		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
 			continue
 		}
 
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case ch <- LLMResponse{
-			ID:        uuid.New(),
-			RequestID: request.ID,
-			Content:   chunk.Content,
-			CreatedAt: time.Now(),
-		}:
+		// Emit content-bearing chunks as before (backward-compat).
+		if chunk.Content != "" {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- LLMResponse{
+				ID:        uuid.New(),
+				RequestID: request.ID,
+				Content:   chunk.Content,
+				CreatedAt: time.Now(),
+			}:
+			}
+		}
+
+		// On the terminal chunk, if the legacy stop flags signal a
+		// known-degradation cause, emit one final Err-bearing
+		// LLMResponse + break out of the loop.
+		if chunk.Stop {
+			finishReason, sentinel := mapLlamaCppStopFlagsToErr(chunk.StoppedEOS, chunk.StoppedLimit, chunk.StoppedWord)
+			if sentinel != nil {
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case ch <- LLMResponse{
+					ID:           uuid.New(),
+					RequestID:    request.ID,
+					FinishReason: finishReason,
+					CreatedAt:    time.Now(),
+					Err:          sentinel,
+				}:
+				}
+			}
+			break
 		}
 	}
 

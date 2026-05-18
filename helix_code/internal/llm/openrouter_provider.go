@@ -392,10 +392,12 @@ func (orp *OpenRouterProvider) convertToOpenAIRequest(request *LLMRequest) (*Ope
 
 func (orp *OpenRouterProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var finish string
 
 	if len(openaiResp.Choices) > 0 {
 		choice := openaiResp.Choices[0]
 		content = choice.Message.Content
+		finish = choice.FinishReason
 	}
 
 	return &LLMResponse{
@@ -407,9 +409,22 @@ func (orp *OpenRouterProvider) convertFromOpenAIResponse(openaiResp *OpenAIRespo
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
 			TotalTokens:      openaiResp.Usage.TotalTokens,
 		},
-		FinishReason:   openaiResp.Choices[0].FinishReason,
+		FinishReason:   finish,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+		// Round-53 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// OpenRouter is a proxy that fans out to many backend providers
+		// (OpenAI, Anthropic, Cohere, etc.) and normalises the response
+		// to OpenAI-compatible finish_reason values per
+		// https://openrouter.ai/docs/responses. Reuse the round-46
+		// OpenAI mapper helper (same closed mapping: "length",
+		// "content_filter"). If OpenRouter diverges from OpenAI in the
+		// future, TestRound53_OpenRouter_ReusesOpenAIMapper will fail
+		// and a dedicated mapOpenRouterFinishReasonToErr helper MUST
+		// be introduced in the same commit. Bonus fix: previously
+		// openaiResp.Choices[0].FinishReason was dereferenced without
+		// the len > 0 guard — now guarded.
+		Err: mapOpenAIFinishReasonToErr(finish),
 	}
 }
 
@@ -501,7 +516,27 @@ func (orp *OpenRouterProvider) makeOpenAIStreamRequest(ctx context.Context, requ
 			}
 		}
 
-		if streamResp.Choices[0].FinishReason != "" {
+		if len(streamResp.Choices) > 0 && streamResp.Choices[0].FinishReason != "" {
+			// Round-53 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): when the final frame
+			// carries finish_reason="length"/"content_filter", emit a
+			// terminal LLMResponse with Err populated so stream
+			// consumers (notably tool_provider.go :201/:251) can
+			// distinguish a clean stop from a partial-error stop.
+			finishReason := streamResp.Choices[0].FinishReason
+			if errSentinel := mapOpenAIFinishReasonToErr(finishReason); errSentinel != nil {
+				select {
+				case ch <- LLMResponse{
+					ID:           uuid.New(),
+					RequestID:    requestID,
+					FinishReason: finishReason,
+					CreatedAt:    time.Now(),
+					Err:          errSentinel,
+				}:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+			}
 			break
 		}
 	}
