@@ -49,7 +49,11 @@
 | 2026-05-19 | Streaming i18n kickoff (Phase 4 round 19) | Feature | Implemented (→ Fixed.md) | 126 | f32380d + 70e1724 | vasic-digital (5th attribution correction); 5 sites (SSE × 2 + WS × 2 + Transport × 1); mixed Config-field + package-seam; 9 packages PASS + mutation; +377 LOC |
 | 2026-05-19 | Watcher i18n kickoff (Phase 4 round 20) | Feature | Implemented (→ Fixed.md) | 127 | f1b4538 + 66322c2 | vasic-digital (6th attribution correction); pure infrastructure (Translator+NoopTranslator+6 watcher_event_* bundle keys); no call-sites — EventType.String() returns programmatic IDs; +174 LOC |
 | 2026-05-19 | conversation i18n kickoff (Phase 4 round 21) | Feature | Implemented (→ Fixed.md) | 128 | (submodule TBD) + 12c2349 | Pointer visible; formal report truncated |
-| 2026-05-19 | security i18n kickoff (Phase 4 round 23) | Feature | Implemented (→ Fixed.md) | 130 | (submodule TBD) + 6119741 | Pointer visible; formal report pending |
+| 2026-05-19 | security i18n kickoff (Phase 4 round 23) | Feature | Implemented (→ Fixed.md) | 130 | fd81a84 + 6119741 | 27→2 violations (92% reduction); 26 PrivEscCheck Description/Details + 1 Summary template; +342 LOC; mutation-falsifiability test |
+| 2026-05-19 | helix_code/cmd/cli/main.go × 10 migration (Phase 4 round 24) | Feature | Implemented (→ Fixed.md) | 131 | 3a01303 + 7f78077 baseline | Main CLI client; Option B pattern (cmd-local i18n pkg) consistent with round 108 |
+| 2026-05-19 | AutoTemp i18n kickoff (Phase 4 round 25) | Feature | Implemented (→ Fixed.md) | 132 | (submodule TBD) + 20344f5 | Pointer visible; formal report truncated |
+| 2026-05-19 | Auth i18n kickoff (Phase 4 round 26) | Feature | Implemented (→ Fixed.md) | 133 | (submodule TBD) + 4e78c99 | Pointer visible; formal report pending |
+| 2026-05-19 | helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27) | Feature | Implemented (→ Fixed.md) | 134 | 69189d0 | HTTP server entry; Option B pattern |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
