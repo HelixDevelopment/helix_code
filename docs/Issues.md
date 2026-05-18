@@ -32,25 +32,27 @@
 
 ---
 
-## ISSUE-003 — helix_agent `internal/agents/tools/analysis_test.go` hardcoded absolute path
+## ISSUE-003 — HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 95 — HelixLLM migration; surfaced as pre-existing failure)
 **Discovered-By:** AI subagent during HelixLLM standalone test run
-**Evidence:** Test references path `/run/media/milosvasic/DATA4TB/Projects/helix_agent/HelixLLM/...` that does not exist; introduced commit `0a84310`.
-**Resolution path:** Replace hardcoded path with `t.TempDir()` or `testing.TB.Helper()` parametrization. Test bluff per CONST-035 (passes locally only on a host with that exact directory tree).
+**Closed-By:** Round 105 (commit `a5e56d4` in HelixLLM; meta pointer `fedd152`)
+**Attribution correction:** Originally documented as helix_agent; actual location is HelixLLM submodule (`dependencies/HelixDevelopment/HelixLLM/internal/agents/tools/`). Commit SHAs `0a84310` resolved there.
+**Resolution:** Replaced hardcoded path with `t.TempDir()` + 2 synthesised fixture files. Bonus: same bug-pattern discovered in `git_test.go` (constant `helixLLMRoot` + 7 tests) — refactored `gitSandbox()` signature. 6 tests now PASS on any host. Mutation verified.
 
 ---
 
-## ISSUE-004 — helix_agent `internal/gateway/middleware` TOON negotiation_test.go returns 500
+## ISSUE-004 — HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 95)
 **Discovered-By:** AI subagent
-**Evidence:** Negotiation handler returns HTTP 500 instead of expected status; introduced commit `6f11c56`. Test currently asserts incorrect expected status OR handler is broken.
-**Resolution path:** Investigate whether bug is in test expectation or handler logic. Tighten test per CONST-035.
+**Closed-By:** Round 105 (commit `a5e56d4`)
+**Attribution correction:** Originally documented as helix_agent; actual location is HelixLLM submodule. Commit `6f11c56` resolved there.
+**Resolution:** Root cause was vasic-digital/TOON's round-27 anti-bluff change (Marshal returns `ErrTOONEncodingNotImplemented` unconditionally) combined with `WriteTOON` treating ANY Marshal error as 500. Fix: fall back to `json.Marshal` while preserving `application/toon` Content-Type (matches ContentNegotiation middleware). 500 still returned for genuinely unmarshallable values (channels). 19 middleware tests now PASS. Mutation verified.
 
 ---
 
