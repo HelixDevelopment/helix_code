@@ -339,6 +339,14 @@ func (ap *AnthropicProvider) Generate(ctx context.Context, request *LLMRequest) 
 			TotalTokens:      resp.Usage.InputTokens + resp.Usage.OutputTokens,
 		},
 		FinishReason: resp.StopReason,
+		// Round-46 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// Anthropic surfaces partial-error conditions via stop_reason
+		// ("max_tokens" → truncation, "refusal"/safety → content block).
+		// Without this mapping the round-33 anchored limitation in
+		// tool_provider.go:201/:251 (no way to distinguish OK-empty
+		// from mid-stream failure) remained even after the HTTP layer
+		// returned nil error.
+		Err: mapAnthropicStopReasonToErr(resp.StopReason),
 	}
 
 	// Extract content and tool calls
@@ -374,6 +382,21 @@ func (ap *AnthropicProvider) Generate(ctx context.Context, request *LLMRequest) 
 	}
 
 	return response, nil
+}
+
+// mapAnthropicStopReasonToErr returns the round-46 sentinel matching an
+// Anthropic stop_reason, or nil for clean stops ("end_turn", "stop_sequence",
+// "tool_use", empty). Documented values:
+// https://docs.anthropic.com/en/api/messages#response-stop-reason
+func mapAnthropicStopReasonToErr(reason string) error {
+	switch reason {
+	case "max_tokens":
+		return ErrResponseTruncated
+	case "refusal", "safety":
+		return ErrResponseContentBlocked
+	default:
+		return nil
+	}
 }
 
 // GenerateStream generates a streaming response
@@ -643,6 +666,10 @@ func (ap *AnthropicProvider) parseStreamingResponse(body io.Reader, ch chan<- LL
 	decoder := json.NewDecoder(body)
 	var currentContent strings.Builder
 	var currentToolCalls []ToolCall
+	// Round-46 LLMResponse.Err wiring: Anthropic SSE delivers the final
+	// stop_reason via a `message_delta` event ahead of `message_stop`;
+	// remember the most-recent one so the terminal frame can populate Err.
+	var lastStopReason string
 
 	for {
 		var event anthropicStreamEvent
@@ -680,14 +707,28 @@ func (ap *AnthropicProvider) parseStreamingResponse(body io.Reader, ch chan<- LL
 				})
 			}
 
+		case "message_delta":
+			// Round-46 LLMResponse.Err wiring (CONST-035 / Article XI
+			// §11.9): Anthropic SSE delivers the final stop_reason via
+			// a message_delta event BEFORE the message_stop event, so
+			// capture it here and let it flow into the message_stop
+			// terminal frame's Err field.
+			if event.Delta != nil && event.Delta.StopReason != "" {
+				// Defer to message_stop emission below; record on a
+				// pseudo-current-event so the inspector sees it.
+				lastStopReason = event.Delta.StopReason
+			}
+
 		case "message_stop":
 			// Send final response with complete content
 			finalResponse := LLMResponse{
-				ID:        uuid.New(),
-				RequestID: requestID,
-				Content:   currentContent.String(),
-				ToolCalls: currentToolCalls,
-				CreatedAt: time.Now(),
+				ID:           uuid.New(),
+				RequestID:    requestID,
+				Content:      currentContent.String(),
+				ToolCalls:    currentToolCalls,
+				CreatedAt:    time.Now(),
+				FinishReason: lastStopReason,
+				Err:          mapAnthropicStopReasonToErr(lastStopReason),
 			}
 
 			if event.Usage != nil {

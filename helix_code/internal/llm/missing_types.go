@@ -2,6 +2,8 @@ package llm
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -171,6 +173,137 @@ type LLMResponse struct {
 	ProcessingTime   time.Duration          `json:"processing_time"`
 	CreatedAt        time.Time              `json:"created_at"`
 	ProviderMetadata map[string]interface{} `json:"provider_metadata"`
+
+	// Err carries a partial-error or non-fatal warning surfaced by the LLM
+	// provider (e.g., truncation, content-filter block, mid-stream parse
+	// error). nil when the response succeeded cleanly. Round 46 added this
+	// field — round 33 anchored the prior limitation in tool_provider.go
+	// :201 / :251 (the streaming channel had no error-frame mechanism, so
+	// callers could not distinguish "ok empty chunk" from "mid-stream
+	// failure"). Round 46 closes that gap.
+	//
+	// IMPORTANT: even when Err != nil, Content may still hold a valid
+	// partial output (e.g., the first N tokens before the response was
+	// truncated by max-tokens). Callers SHOULD inspect Content AND Err
+	// rather than discarding the whole response on a non-nil Err.
+	//
+	// JSON serialization: errors do not naturally JSON-marshal, so Err is
+	// elided with `omitempty` on the standard struct tag. Custom marshal/
+	// unmarshal logic in this package (MarshalJSON / UnmarshalJSON below)
+	// serializes Err as a `{"error_message": "...", "error_type": "..."}`
+	// envelope and reconstructs it on decode via errors.New(msg) with
+	// sentinel-mapping for the well-known round-46 sentinels
+	// (ErrResponseTruncated, ErrResponseContentBlocked).
+	Err error `json:"-"`
+}
+
+// llmResponseJSON is the on-wire JSON shape of LLMResponse. It mirrors
+// every public field but replaces the un-marshallable `error` interface
+// with a serializable {error_message, error_type} envelope (per the
+// round-46 LLMResponse.Err doc comment).
+type llmResponseJSON struct {
+	ID               uuid.UUID              `json:"id"`
+	RequestID        uuid.UUID              `json:"request_id"`
+	Content          string                 `json:"content"`
+	ToolCalls        []ToolCall             `json:"tool_calls"`
+	Usage            Usage                  `json:"usage"`
+	FinishReason     string                 `json:"finish_reason"`
+	ProcessingTime   time.Duration          `json:"processing_time"`
+	CreatedAt        time.Time              `json:"created_at"`
+	ProviderMetadata map[string]interface{} `json:"provider_metadata"`
+	Err              *llmErrorEnvelope      `json:"err,omitempty"`
+}
+
+// llmErrorEnvelope is the JSON shape of LLMResponse.Err on the wire.
+// `error_type` permits the unmarshal path to map back to the canonical
+// round-46 sentinel (ErrResponseTruncated / ErrResponseContentBlocked) so
+// `errors.Is(...)` comparisons survive a JSON round-trip; other values
+// reconstruct as generic errors.New(error_message).
+type llmErrorEnvelope struct {
+	Message string `json:"error_message"`
+	Type    string `json:"error_type"`
+}
+
+const (
+	llmErrTypeResponseTruncated      = "ResponseTruncated"
+	llmErrTypeResponseContentBlocked = "ResponseContentBlocked"
+	llmErrTypeGeneric                = "Generic"
+)
+
+// MarshalJSON implements json.Marshaler for LLMResponse.
+// Round-46 adds Err handling — the field is otherwise un-marshallable.
+func (r LLMResponse) MarshalJSON() ([]byte, error) {
+	envelope := llmResponseJSON{
+		ID:               r.ID,
+		RequestID:        r.RequestID,
+		Content:          r.Content,
+		ToolCalls:        r.ToolCalls,
+		Usage:            r.Usage,
+		FinishReason:     r.FinishReason,
+		ProcessingTime:   r.ProcessingTime,
+		CreatedAt:        r.CreatedAt,
+		ProviderMetadata: r.ProviderMetadata,
+	}
+	if r.Err != nil {
+		envelope.Err = &llmErrorEnvelope{
+			Message: r.Err.Error(),
+			Type:    llmErrTypeForSentinel(r.Err),
+		}
+	}
+	return json.Marshal(envelope)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for LLMResponse.
+// Round-46 reconstructs Err from the {error_message, error_type} envelope,
+// mapping known type names back to the canonical sentinels.
+func (r *LLMResponse) UnmarshalJSON(data []byte) error {
+	var envelope llmResponseJSON
+	if err := json.Unmarshal(data, &envelope); err != nil {
+		return err
+	}
+	r.ID = envelope.ID
+	r.RequestID = envelope.RequestID
+	r.Content = envelope.Content
+	r.ToolCalls = envelope.ToolCalls
+	r.Usage = envelope.Usage
+	r.FinishReason = envelope.FinishReason
+	r.ProcessingTime = envelope.ProcessingTime
+	r.CreatedAt = envelope.CreatedAt
+	r.ProviderMetadata = envelope.ProviderMetadata
+	if envelope.Err != nil {
+		r.Err = sentinelForLLMErrType(envelope.Err.Type, envelope.Err.Message)
+	}
+	return nil
+}
+
+// llmErrTypeForSentinel returns the wire-format `error_type` label for a
+// known round-46 sentinel, or "Generic" otherwise. Used by MarshalJSON.
+func llmErrTypeForSentinel(e error) string {
+	switch {
+	case errors.Is(e, ErrResponseTruncated):
+		return llmErrTypeResponseTruncated
+	case errors.Is(e, ErrResponseContentBlocked):
+		return llmErrTypeResponseContentBlocked
+	default:
+		return llmErrTypeGeneric
+	}
+}
+
+// sentinelForLLMErrType reconstructs a round-46 sentinel from its
+// wire-format `error_type` label, falling back to errors.New(message)
+// when the type is unknown or Generic. Used by UnmarshalJSON.
+func sentinelForLLMErrType(typ, message string) error {
+	switch typ {
+	case llmErrTypeResponseTruncated:
+		return ErrResponseTruncated
+	case llmErrTypeResponseContentBlocked:
+		return ErrResponseContentBlocked
+	default:
+		if message == "" {
+			return nil
+		}
+		return errors.New(message)
+	}
 }
 
 type Usage struct {
@@ -186,6 +319,25 @@ var (
 	ErrRateLimited         = fmt.Errorf("rate limited")
 	ErrContextTooLong      = fmt.Errorf("context too long")
 	ErrProviderUnavailable = fmt.Errorf("provider unavailable")
+
+	// Round-46 LLMResponse.Err sentinels — see LLMResponse.Err doc comment.
+	// Providers populate one of these when a response succeeds at the HTTP
+	// layer but the provider has flagged a partial-success condition on
+	// the payload (truncation, content-filter block, etc.). Callers compare
+	// via errors.Is(resp.Err, ErrResponseTruncated) etc.
+
+	// ErrResponseTruncated indicates the provider stopped generation due
+	// to the max-tokens limit (OpenAI finish_reason="length",
+	// Anthropic stop_reason="max_tokens"). Content holds the partial
+	// output up to the limit; callers SHOULD treat it as usable but
+	// known-incomplete.
+	ErrResponseTruncated = errors.New("llm response: truncated due to max-tokens limit; Content contains partial output")
+
+	// ErrResponseContentBlocked indicates the provider's content-safety
+	// filter rejected (part of) the response (OpenAI
+	// finish_reason="content_filter", Anthropic stop_reason values like
+	// "safety" or "refusal"). Content may be empty or partial.
+	ErrResponseContentBlocked = errors.New("llm response: blocked by content-safety filter; Content may be empty or partial")
 )
 
 // Provider interface

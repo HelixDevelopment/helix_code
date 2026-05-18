@@ -64,6 +64,14 @@ type OllamaAPIResponse struct {
 	CreatedAt          string `json:"created_at"`
 	Response           string `json:"response"`
 	Done               bool   `json:"done"`
+	// DoneReason is set by Ollama 0.1.30+ on the terminal frame and
+	// indicates why generation stopped: "stop" (clean end-of-turn),
+	// "length" (num_predict / max-tokens reached → ErrResponseTruncated),
+	// "load" / "unload" (model lifecycle), "" (older Ollama versions).
+	// Round-46 LLMResponse.Err wiring consumes this field; older versions
+	// fall through to no Err since the truncation signal is not knowable
+	// from the on-wire payload.
+	DoneReason         string `json:"done_reason,omitempty"`
 	Context            []int  `json:"context"`
 	TotalDuration      int64  `json:"total_duration"`
 	LoadDuration       int64  `json:"load_duration"`
@@ -71,6 +79,20 @@ type OllamaAPIResponse struct {
 	PromptEvalDuration int64  `json:"prompt_eval_duration"`
 	EvalCount          int    `json:"eval_count"`
 	EvalDuration       int64  `json:"eval_duration"`
+}
+
+// mapOllamaDoneReasonToErr returns the round-46 sentinel matching an
+// Ollama done_reason, or nil if the reason indicates a clean stop or
+// is empty (older Ollama versions). Ollama exposes no content-filter
+// hook on the wire, so ErrResponseContentBlocked is not reachable here.
+// Reference: https://github.com/ollama/ollama/blob/main/docs/api.md
+func mapOllamaDoneReasonToErr(reason string) error {
+	switch reason {
+	case "length":
+		return ErrResponseTruncated
+	default:
+		return nil
+	}
 }
 
 // NewOllamaProvider creates a new Ollama provider
@@ -172,8 +194,13 @@ func (p *OllamaProvider) Generate(ctx context.Context, request *LLMRequest) (*LL
 			CompletionTokens: response.EvalCount,
 			TotalTokens:      response.PromptEvalCount + response.EvalCount,
 		},
+		FinishReason:   response.DoneReason,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+		// Round-46 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// Ollama signals truncation via done_reason="length". See
+		// mapOllamaDoneReasonToErr doc comment for the closed mapping.
+		Err: mapOllamaDoneReasonToErr(response.DoneReason),
 	}, nil
 }
 
@@ -400,14 +427,23 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 			return fmt.Errorf("failed to decode NDJSON chunk: %w", err)
 		}
 		// ANTI-BLUFF: Send REAL streaming chunk from Ollama (one per NDJSON line).
+		// Round-46 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// the terminal frame (chunk.Done==true) carries done_reason; map
+		// it into Err so downstream stream consumers can distinguish a
+		// clean stop from truncation. FinishReason is also preserved.
+		out := LLMResponse{
+			ID:           uuid.New(),
+			Content:      chunk.Response,
+			CreatedAt:    time.Now(),
+			FinishReason: chunk.DoneReason,
+		}
+		if chunk.Done {
+			out.Err = mapOllamaDoneReasonToErr(chunk.DoneReason)
+		}
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case ch <- LLMResponse{
-			ID:        uuid.New(),
-			Content:   chunk.Response,
-			CreatedAt: time.Now(),
-		}:
+		case ch <- out:
 		}
 		if chunk.Done {
 			break

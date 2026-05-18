@@ -197,24 +197,51 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 		var toolCalls []ToolCall
 		var reasoning string
 
+		var firstStreamErr error
 		for resp := range streamCh {
-			// LLMResponse channel does not currently carry a separate error
-			// field; the underlying provider closes streamCh on error so
-			// downstream consumers see EOF rather than an explicit error
-			// frame. Surfacing the error class to the ToolStreamChunk
-			// receiver requires extending LLMResponse with an Err field —
-			// tracked as a follow-up; do NOT add a "would have error
-			// handling" placeholder comment back (round-33 §11.4 honest
-			// limitation anchor; CONST-035 / Article XI §11.9).
+			// Round-46 LLMResponse.Err honoring (CONST-035 / Article XI
+			// §11.9; closes round-33 anchored limitation): the streamCh
+			// now carries a partial-error signal in resp.Err. Strategy
+			// chosen for round 46: forward partial content + propagate
+			// the error verbatim on the next ToolStreamChunk's Error
+			// field so consumers see WHICH chunk degraded; also log the
+			// error so operators see it in the helix-server log. We do
+			// NOT abort the loop on a partial error — Content may hold
+			// usable bytes the consumer wants. The first observed Err
+			// is remembered and surfaced on the terminal chunk so that
+			// downstream callers who only inspect the final frame still
+			// observe the failure.
+			if resp.Err != nil && firstStreamErr == nil {
+				firstStreamErr = resp.Err
+				log.Printf("tool_provider: stream chunk carried partial error: %v", resp.Err)
+			}
 			fullResponse += resp.Content
 
-			// Send streaming chunk
-			ch <- ToolStreamChunk{
+			// Send streaming chunk; surface partial-error on the chunk
+			// that carried it so consumers can react chunk-by-chunk.
+			chunk := ToolStreamChunk{
 				ID:        uuid.New(),
 				Content:   resp.Content,
 				ToolCalls: []ToolCall{},
 				Reasoning: "",
 				Done:      false,
+			}
+			if resp.Err != nil {
+				chunk.Error = resp.Err.Error()
+			}
+			ch <- chunk
+		}
+		// If the stream ended with a remembered partial error and we
+		// have NO tool calls to chase, emit a terminal chunk so the
+		// consumer's `for chunk := range ch` loop observes the error
+		// even when the underlying streamCh closed silently. When tool
+		// calls follow (handled below) the error rides on the next
+		// loop's terminal chunk instead.
+		if firstStreamErr != nil {
+			ch <- ToolStreamChunk{
+				ID:    uuid.New(),
+				Error: fmt.Sprintf("upstream LLM partial error: %v", firstStreamErr),
+				Done:  false,
 			}
 		}
 
@@ -252,19 +279,26 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 			}
 
 			for resp := range finalStreamCh {
-				// Same LLMResponse channel limitation as the first loop
-				// above — the channel close-on-error contract is the
-				// only signal available; an Err field on LLMResponse is
-				// the follow-up. Do NOT replace this comment with a
-				// "would have error handling" stub (round-33 §11.4
-				// honest limitation anchor; CONST-035 / Article XI §11.9).
-				ch <- ToolStreamChunk{
+				// Round-46 LLMResponse.Err honoring (CONST-035 /
+				// Article XI §11.9; closes round-33 anchored
+				// limitation): resp.Err now carries partial-error
+				// state when the upstream provider hits truncation,
+				// content-safety block, or mid-stream parse error.
+				// Strategy: same as the first loop — log + propagate
+				// on the chunk's Error field. Do NOT skip the chunk:
+				// Content may still hold useful bytes.
+				chunk := ToolStreamChunk{
 					ID:        uuid.New(),
 					Content:   resp.Content,
 					ToolCalls: toolCalls,
 					Reasoning: reasoning,
 					Done:      true, // Assume done when we get the final response
 				}
+				if resp.Err != nil {
+					log.Printf("tool_provider: final-stream chunk carried partial error: %v", resp.Err)
+					chunk.Error = resp.Err.Error()
+				}
+				ch <- chunk
 			}
 		} else {
 			// No tool calls, send final chunk

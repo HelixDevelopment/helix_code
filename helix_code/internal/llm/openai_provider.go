@@ -250,13 +250,15 @@ func (op *OpenAIProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRe
 
 func (op *OpenAIProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var finishReason string
 
 	if len(openaiResp.Choices) > 0 {
 		choice := openaiResp.Choices[0]
 		content = choice.Message.Content
+		finishReason = choice.FinishReason
 	}
 
-	return &LLMResponse{
+	resp := &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
@@ -265,9 +267,32 @@ func (op *OpenAIProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, 
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
 			TotalTokens:      openaiResp.Usage.TotalTokens,
 		},
-		FinishReason:   openaiResp.Choices[0].FinishReason,
+		FinishReason:   finishReason,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+	}
+
+	// Round-46 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+	// OpenAI signals partial-error conditions in the choice's finish_reason
+	// rather than the HTTP status code, so callers that only checked the
+	// returned `error` previously dropped these signals on the floor.
+	// Map well-known finish_reason values to the canonical sentinels.
+	resp.Err = mapOpenAIFinishReasonToErr(finishReason)
+	return resp
+}
+
+// mapOpenAIFinishReasonToErr returns the round-46 sentinel that matches
+// an OpenAI finish_reason, or nil if the reason indicates a clean stop
+// ("stop", "tool_calls", "function_call", empty). Documented values:
+// https://platform.openai.com/docs/api-reference/chat/object#chat/object-choices
+func mapOpenAIFinishReasonToErr(reason string) error {
+	switch reason {
+	case "length":
+		return ErrResponseTruncated
+	case "content_filter":
+		return ErrResponseContentBlocked
+	default:
+		return nil
 	}
 }
 
@@ -353,10 +378,32 @@ func (op *OpenAIProvider) makeOpenAIStreamRequest(ctx context.Context, request *
 					return ctx.Err()
 				}
 			}
-		}
 
-		if streamResp.Choices[0].FinishReason != "" {
-			break
+			// Round-46 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): when the final frame
+			// carries a finish_reason of "length" or "content_filter",
+			// emit a terminal LLMResponse with Err populated so
+			// downstream stream consumers (notably tool_provider.go
+			// :201/:251) can distinguish a clean stop from a
+			// partial-error stop. The chunk is sent with FinishReason
+			// preserved so callers that care about the literal reason
+			// can still see it.
+			if choice.FinishReason != "" {
+				if errSentinel := mapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
+					select {
+					case ch <- LLMResponse{
+						ID:           uuid.New(),
+						RequestID:    requestID,
+						FinishReason: choice.FinishReason,
+						CreatedAt:    time.Now(),
+						Err:          errSentinel,
+					}:
+					case <-ctx.Done():
+						return ctx.Err()
+					}
+				}
+				break
+			}
 		}
 	}
 
