@@ -84,7 +84,7 @@ func (c *Coordinator) SubmitTask(ctx context.Context, t *task.Task) error {
 	defer c.mu.Unlock()
 
 	if t == nil {
-		return fmt.Errorf("task cannot be nil")
+		return fmt.Errorf("%s", tr(ctx, "internal_agent_task_cannot_be_nil", nil))
 	}
 
 	c.tasks[t.ID] = t
@@ -100,13 +100,13 @@ func (c *Coordinator) ExecuteTask(ctx context.Context, taskID string) (*task.Res
 	c.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("task not found: %s", taskID)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_task_not_found", map[string]any{"TaskID": taskID}))
 	}
 
 	// Find suitable agent
 	agent, err := c.findSuitableAgent(t)
 	if err != nil {
-		return nil, fmt.Errorf("no suitable agent found: %w", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_agent_no_suitable_agent_found", map[string]any{"Err": err.Error()}), err)
 	}
 
 	// Execute task with or without resilience
@@ -147,7 +147,7 @@ func (c *Coordinator) findSuitableAgent(t *task.Task) (Agent, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no available agent found")
+	return nil, fmt.Errorf("%s", tr(context.Background(), "internal_agent_no_available_agent_found", nil))
 }
 
 // GetTaskStatus returns the status of a task
@@ -157,7 +157,7 @@ func (c *Coordinator) GetTaskStatus(taskID string) (*task.Task, error) {
 
 	t, exists := c.tasks[taskID]
 	if !exists {
-		return nil, fmt.Errorf("task not found: %s", taskID)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_agent_task_not_found", map[string]any{"TaskID": taskID}))
 	}
 
 	return t, nil
@@ -170,7 +170,7 @@ func (c *Coordinator) GetResult(taskID string) (*task.Result, error) {
 
 	result, exists := c.results[taskID]
 	if !exists {
-		return nil, fmt.Errorf("result not found: %s", taskID)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_agent_result_not_found", map[string]any{"TaskID": taskID}))
 	}
 
 	return result, nil
@@ -219,7 +219,7 @@ func (c *Coordinator) Shutdown(ctx context.Context) error {
 
 	for _, agent := range agents {
 		if err := agent.Shutdown(ctx); err != nil {
-			return fmt.Errorf("failed to shutdown agent %s: %w", agent.ID(), err)
+			return fmt.Errorf("%s: %w", tr(ctx, "internal_agent_failed_shutdown_agent", map[string]any{"AgentID": agent.ID(), "Err": err.Error()}), err)
 		}
 	}
 
@@ -229,7 +229,7 @@ func (c *Coordinator) Shutdown(ctx context.Context) error {
 // ExecuteWorkflow executes a multi-step workflow
 func (c *Coordinator) ExecuteWorkflow(ctx context.Context, workflow *Workflow) error {
 	if c.workflowExecutor == nil {
-		return fmt.Errorf("workflow executor not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_agent_workflow_executor_not_initialized", nil))
 	}
 	return c.workflowExecutor.Execute(ctx, workflow)
 }
@@ -237,7 +237,7 @@ func (c *Coordinator) ExecuteWorkflow(ctx context.Context, workflow *Workflow) e
 // GetWorkflow retrieves a workflow by ID
 func (c *Coordinator) GetWorkflow(id string) (*Workflow, error) {
 	if c.workflowExecutor == nil {
-		return nil, fmt.Errorf("workflow executor not initialized")
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_agent_workflow_executor_not_initialized", nil))
 	}
 	return c.workflowExecutor.GetWorkflow(id)
 }

@@ -1,0 +1,50 @@
+# internal/agent i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/agent/coordinator.go and base_agent.go to a
+# message ID resolved at runtime via Translator.T. helix_code wires a
+# real *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_agent_<area>_<short_description>. All
+# IDs prefixed with internal_agent_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-147 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# user-facing literals emitted by coordinator.go + base_agent.go —
+# the nil-task / not-found / no-agent / shutdown-failure / workflow-
+# executor / unsupported-task-type / LLM-required messages.
+# Sentinel ErrX vars in agent.go (fmt.Errorf wrapping) remain
+# untouched to preserve public API. Remaining hardcoded prompts and
+# logging strings are deferred to a future round to stay under the
+# size cap.
+
+internal_agent_task_cannot_be_nil:
+  other: "task cannot be nil"
+
+internal_agent_task_not_found:
+  other: "task not found: {{.TaskID}}"
+
+internal_agent_no_suitable_agent_found:
+  other: "no suitable agent found: {{.Err}}"
+
+internal_agent_no_available_agent_found:
+  other: "no available agent found"
+
+internal_agent_result_not_found:
+  other: "result not found: {{.TaskID}}"
+
+internal_agent_failed_shutdown_agent:
+  other: "failed to shutdown agent {{.AgentID}}: {{.Err}}"
+
+internal_agent_workflow_executor_not_initialized:
+  other: "workflow executor not initialized"
+
+internal_agent_cannot_handle_task_type:
+  other: "agent cannot handle task type: {{.TaskType}}"
+
+internal_agent_code_tasks_require_llm:
+  other: "code tasks require LLM provider to be configured"
+
+internal_agent_debugging_tasks_require_llm:
+  other: "debugging tasks require LLM provider to be configured"

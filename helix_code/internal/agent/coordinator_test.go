@@ -90,7 +90,12 @@ func TestCoordinatorSubmitNilTask(t *testing.T) {
 	ctx := context.Background()
 	err := coordinator.SubmitTask(ctx, nil)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "cannot be nil")
+	// CONST-046 round-147: error now resolves via Translator; with
+	// NoopTranslator (default in unit tests) we get the loud message
+	// ID echoed verbatim. Assertion intentionally matches the ID, not
+	// the English literal — proves the call-site went through tr()
+	// rather than emitting a hardcoded string (paired-mutation guard).
+	assert.Contains(t, err.Error(), "internal_agent_task_cannot_be_nil")
 }
 
 // TestCoordinatorExecuteTask tests task execution
@@ -132,7 +137,9 @@ func TestCoordinatorExecuteTaskNotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "not found")
+	// CONST-046 round-147: assertion targets the message ID (loud
+	// echo from NoopTranslator) — paired-mutation guard per §11.4.
+	assert.Contains(t, err.Error(), "internal_agent_task_not_found")
 }
 
 // TestCoordinatorExecuteTaskNoAgent tests execution when no suitable agent exists
@@ -157,7 +164,9 @@ func TestCoordinatorExecuteTaskNoAgent(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "no suitable agent")
+	// CONST-046 round-147: assertion targets message ID (loud echo
+	// from NoopTranslator) — paired-mutation guard per §11.4.
+	assert.Contains(t, err.Error(), "internal_agent_no_suitable_agent_found")
 }
 
 // TestCoordinatorExecuteTaskAgentError tests handling of agent execution errors
@@ -220,7 +229,9 @@ func TestCoordinatorGetTaskStatusNotFound(t *testing.T) {
 	retrievedTask, err := coordinator.GetTaskStatus("non-existent")
 	assert.Error(t, err)
 	assert.Nil(t, retrievedTask)
-	assert.Contains(t, err.Error(), "not found")
+	// CONST-046 round-147: assertion targets message ID (loud echo
+	// from NoopTranslator) — paired-mutation guard per §11.4.
+	assert.Contains(t, err.Error(), "internal_agent_task_not_found")
 }
 
 // TestCoordinatorGetResult tests result retrieval
@@ -261,7 +272,9 @@ func TestCoordinatorGetResultNotFound(t *testing.T) {
 	result, err := coordinator.GetResult("non-existent")
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "not found")
+	// CONST-046 round-147: assertion targets message ID (loud echo
+	// from NoopTranslator) — paired-mutation guard per §11.4.
+	assert.Contains(t, err.Error(), "internal_agent_result_not_found")
 }
 
 // TestCoordinatorListAgents tests agent listing

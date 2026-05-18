@@ -212,7 +212,7 @@ func (a *BaseAgent) SubmitTask(ctx context.Context, task *Task) (*TaskResult, er
 
 	// Check if agent can handle this task type
 	if !a.CanHandleTaskType(string(task.Type)) {
-		return nil, fmt.Errorf("agent cannot handle task type: %s", task.Type)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_cannot_handle_task_type", map[string]any{"TaskType": string(task.Type)}))
 	}
 
 	// Set status to busy
@@ -280,11 +280,11 @@ func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{},
 	case task.TaskTypeAnalysis:
 		return a.basicAnalysis(t)
 	case task.TaskTypeCodeGeneration, task.TaskTypeCodeEdit:
-		return nil, fmt.Errorf("code tasks require LLM provider to be configured")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_code_tasks_require_llm", nil))
 	case task.TaskTypeTesting:
 		return a.basicTesting(ctx, t)
 	case task.TaskTypeDebugging:
-		return nil, fmt.Errorf("debugging tasks require LLM provider to be configured")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_debugging_tasks_require_llm", nil))
 	case task.TaskTypeReview:
 		return nil, fmt.Errorf("review tasks require LLM provider to be configured")
 	case task.TaskTypeRefactoring:
