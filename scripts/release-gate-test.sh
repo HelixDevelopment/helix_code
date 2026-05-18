@@ -42,16 +42,30 @@
 #     (release-gate honest signal per CONST-035)
 #
 # Flags:
-#   --json          Emit machine-readable JSON summary
-#   --quick         Stop on first FAIL (faster CI signal)
-#   --only=<glob>   Restrict to matching submodules (e.g. --only='dependencies/*')
-#   --check         Self-validate script + paths without running real tests
-#   --help / -h     Usage
+#   --json                 Emit machine-readable JSON summary
+#   --quick                Stop on first FAIL (faster CI signal)
+#   --only=<glob>          Restrict to matching submodules (e.g. --only='dependencies/*')
+#   --check                Self-validate script + paths without running real tests
+#                          (round 89 extends this to also exercise the env-vs-logic classifier)
+#   --skip-env-failures    Round 89 — classify each FAIL as ENV-CLASS (operator-fixable
+#                          via `go mod tidy` / install missing system dep) vs LOGIC-CLASS
+#                          (genuine test-code / production-code defect). When set,
+#                          ENV-CLASS failures are reported but do NOT trigger non-zero
+#                          exit. LOGIC-CLASS failures ALWAYS trigger non-zero exit.
+#                          Mixed (some LOGIC + some skipped-ENV) exits 3 so CI can
+#                          distinguish "all clear" from "skipped some env".
+#                          Classification is deterministic regex (no LLM grading);
+#                          ambiguous patterns fail-closed to LOGIC-CLASS (anti-bluff).
+#   --help / -h            Usage
 #
 # Exit codes:
 #   0 = all owned submodules passed (or were legitimately SKIP-NO-GOMOD)
+#       — OR with --skip-env-failures, only ENV-CLASS failures occurred and were skipped
 #   1 = at least one submodule FAILed OR at least one bare SKIP detected
+#       (round-74 default behaviour preserved when --skip-env-failures NOT set)
 #   2 = invalid args / missing required files / script self-check failed
+#   3 = round 89 — mixed: LOGIC-CLASS FAILs PLUS skipped ENV-CLASS FAILs (only when
+#       --skip-env-failures is set; tells CI "logic-broken AND env-dirty")
 #
 # Cross-references:
 #   * scripts/generate-coverage-ledger.sh   (round 68 — structural ledger)
@@ -82,6 +96,7 @@ GO_TEST_CMD=(env GOMAXPROCS=2 nice -n 19 go test -count=1 -race -timeout=180s ./
 MODE_JSON=0
 MODE_QUICK=0
 MODE_CHECK=0
+MODE_SKIP_ENV=0   # round 89 — --skip-env-failures opt-in filter
 ONLY_GLOB=""
 
 usage() {
@@ -94,14 +109,23 @@ each (where a go.mod exists), aggregates PASS/FAIL/SKIP/BARE-SKIP counts,
 and produces an honest release-gate signal.
 
 Flags:
-  --json          Emit machine-readable JSON summary instead of human text
-  --quick         Stop on first FAIL (faster CI signal)
-  --only=<glob>   Restrict to submodules matching <glob> (shell-glob, not regex)
-                  e.g. --only='dependencies/*'
-                       --only='helix_qa'
-  --check         Self-validate script + paths without running real tests
-                  (used by CI sanity-check + by the smoke-test below)
-  -h, --help      Show this help
+  --json                Emit machine-readable JSON summary instead of human text
+  --quick               Stop on first FAIL (faster CI signal)
+  --only=<glob>         Restrict to submodules matching <glob> (shell-glob, not regex)
+                        e.g. --only='dependencies/*'
+                             --only='helix_qa'
+  --check               Self-validate script + paths without running real tests
+                        (round 89 — also exercises the env-vs-logic classifier
+                        against synthetic fixtures)
+  --skip-env-failures   Round 89 — classify each FAIL as ENV-CLASS vs LOGIC-CLASS
+                        and treat ENV-CLASS as non-blocking. ENV-CLASS = missing
+                        go.sum, cannot find package, missing C/X11 headers,
+                        missing executables (chromium, etc.), permission-denied,
+                        no required module provides package. Classification is
+                        deterministic regex; ambiguous patterns fail-closed to
+                        LOGIC-CLASS (anti-bluff guarantee). Use day-to-day for
+                        CI; OMIT for release gates.
+  -h, --help            Show this help
 
 Per-submodule test command (default):
   GOMAXPROCS=2 nice -n 19 go test -count=1 -race -timeout=180s ./...
@@ -111,23 +135,98 @@ Per-submodule log files written under:
 
 Exit codes:
   0 = all owned submodules passed (or were legitimately SKIP-NO-GOMOD)
+      — OR with --skip-env-failures, only ENV-CLASS failures were skipped
   1 = at least one submodule FAILed OR at least one bare SKIP detected
+      (round 74 default; preserved when --skip-env-failures NOT set)
   2 = invalid args / missing required files / script self-check failed
+  3 = round 89 — LOGIC-CLASS FAIL plus skipped ENV-CLASS FAIL (only emitted
+      when --skip-env-failures is set; signals "logic-broken AND env-dirty")
 
-See script header for the full forensic anchor (round 74, CONST-048 invariant 6).
+See script header for the full forensic anchor (round 74, CONST-048 invariant 6;
+round 89, env-vs-logic classification filter).
 EOF
 }
 
 for arg in "$@"; do
     case "$arg" in
-        --json)         MODE_JSON=1 ;;
-        --quick)        MODE_QUICK=1 ;;
-        --check)        MODE_CHECK=1 ;;
-        --only=*)       ONLY_GLOB="${arg#--only=}" ;;
-        -h|--help)      usage; exit 0 ;;
-        *)              echo "ERROR: unknown flag: $arg" >&2; usage; exit 2 ;;
+        --json)                 MODE_JSON=1 ;;
+        --quick)                MODE_QUICK=1 ;;
+        --check)                MODE_CHECK=1 ;;
+        --skip-env-failures)    MODE_SKIP_ENV=1 ;;
+        --only=*)               ONLY_GLOB="${arg#--only=}" ;;
+        -h|--help)              usage; exit 0 ;;
+        *)                      echo "ERROR: unknown flag: $arg" >&2; usage; exit 2 ;;
     esac
 done
+
+# --------- Round 89 — env-vs-logic FAIL classifier ---------
+#
+# Inputs:   $1 = path to go-test log file
+# Outputs:  sets CLASS_RESULT ∈ {env, logic} and CLASS_REASON (matched pattern
+#           or "no env-pattern match — fail-closed to LOGIC")
+# Anti-bluff invariant: deterministic regex, ambiguous → LOGIC (fail-closed).
+#
+# Pattern catalogue (env-class; if ANY hit → ENV-CLASS):
+#   * "missing go.sum entry"             → operator: go mod tidy
+#   * "cannot find package"              → operator: go mod tidy
+#   * "no required module provides"      → operator: go mod tidy
+#   * "updates to go.mod needed"         → operator: go mod tidy
+#   * "inconsistent vendoring"           → operator: go mod vendor
+#   * "package .* is not in std"         → operator: go mod tidy / check go version
+#   * "command not found"                → operator: install missing tool
+#   * "executable file not found"        → operator: install missing tool (chromium, etc.)
+#   * "permission denied"                → operator: chmod / chown / port-binding
+#   * Cgo / X11 header errors            → operator: install -dev package
+#       - "fatal error: .*\.h: No such file"
+#       - "X11/.*\.h"
+#       - "Xcursor/Xcursor.h"
+#       - "gtk/gtk.h"
+#       - "cannot find -l"               (linker missing system lib)
+#   * "[setup failed]" preceded WITHIN log by any of the above env-patterns → ENV
+#
+# Anything else (including [setup failed] with NO env-pattern preceding,
+# real `--- FAIL: Test` lines, compile errors that are syntax/build defects
+# in OUR code rather than env-deps) → LOGIC-CLASS.
+classify_failure() {
+    local logfile="$1"
+    CLASS_RESULT="logic"
+    CLASS_REASON="no env-pattern match — fail-closed to LOGIC-CLASS"
+
+    [[ ! -f "$logfile" ]] && return 0
+
+    # Env-pattern regex catalogue — extended POSIX (grep -E).
+    # Each pattern is anchored loosely; we just need ONE hit.
+    local env_patterns=(
+        'missing go\.sum entry'
+        'cannot find package'
+        'no required module provides'
+        'updates to go\.mod needed'
+        'inconsistent vendoring'
+        'package [^ ]+ is not in std'
+        'command not found'
+        'executable file not found'
+        'permission denied'
+        'fatal error: .*\.h: No such file'
+        'X11/[A-Za-z]+\.h'
+        'Xcursor/Xcursor\.h'
+        'gtk/gtk\.h'
+        'cannot find -l[A-Za-z]'
+    )
+
+    local pat
+    for pat in "${env_patterns[@]}"; do
+        if grep -qE "$pat" "$logfile" 2>/dev/null; then
+            CLASS_RESULT="env"
+            CLASS_REASON="matched env-pattern: $pat"
+            return 0
+        fi
+    done
+
+    # If [setup failed] appears AND no env-pattern matched, leave as LOGIC
+    # (fail-closed). This means a compile-time build error in OUR code is
+    # treated as a real defect, NOT an env issue.
+    return 0
+}
 
 # --------- Self-check / sanity ---------
 self_check() {
@@ -151,13 +250,121 @@ self_check() {
 }
 
 if [[ $MODE_CHECK -eq 1 ]]; then
-    if self_check; then
-        echo "release-gate-test.sh --check: PASS"
-        exit 0
-    else
-        echo "release-gate-test.sh --check: FAIL"
+    if ! self_check; then
+        echo "release-gate-test.sh --check: FAIL (self_check)"
         exit 2
     fi
+
+    # Round 89 — exercise classifier against synthetic fixtures.
+    classifier_check_fail=0
+    tmpdir=$(mktemp -d -t release-gate-check.XXXXXX)
+    trap 'rm -rf "$tmpdir"' EXIT
+
+    # Fixture 1: ENV-CLASS — missing go.sum entry
+    f1="$tmpdir/env_missing_gosum.log"
+    cat >"$f1" <<'FIX1'
+go: github.com/example/foo@v1.2.3: missing go.sum entry; to add it: go mod download github.com/example/foo
+FAIL	github.com/example/bar [setup failed]
+FIX1
+    classify_failure "$f1"
+    if [[ "$CLASS_RESULT" != "env" ]]; then
+        echo "FAIL: fixture env_missing_gosum classified as $CLASS_RESULT, expected env" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture env_missing_gosum → ENV ($CLASS_REASON)"
+    fi
+
+    # Fixture 2: ENV-CLASS — missing X11 header
+    f2="$tmpdir/env_missing_x11.log"
+    cat >"$f2" <<'FIX2'
+# fyne.io/fyne/v2/internal/driver/glfw
+In file included from glfw_x11.go:5:0:
+./glfw/glfw3.h:1: fatal error: X11/Xlib.h: No such file or directory
+FAIL	fyne.io/fyne/v2/app [build failed]
+FIX2
+    classify_failure "$f2"
+    if [[ "$CLASS_RESULT" != "env" ]]; then
+        echo "FAIL: fixture env_missing_x11 classified as $CLASS_RESULT, expected env" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture env_missing_x11 → ENV ($CLASS_REASON)"
+    fi
+
+    # Fixture 2b: ENV-CLASS — go.mod needs tidying (real-world: most common
+    # operator-fixable failure; surfaced by smoke-test against HelixLLM
+    # submodule on 2026-05-18). Without this pattern, the classifier
+    # mis-routes the failure to LOGIC-CLASS and reddens the gate falsely.
+    f2b="$tmpdir/env_gomod_needs_tidy.log"
+    cat >"$f2b" <<'FIX2B'
+go: updates to go.mod needed; to update it:
+	go mod tidy
+FIX2B
+    classify_failure "$f2b"
+    if [[ "$CLASS_RESULT" != "env" ]]; then
+        echo "FAIL: fixture env_gomod_needs_tidy classified as $CLASS_RESULT, expected env" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture env_gomod_needs_tidy → ENV ($CLASS_REASON)"
+    fi
+
+    # Fixture 3: ENV-CLASS — missing executable (chromedp scenario)
+    f3="$tmpdir/env_missing_chromium.log"
+    cat >"$f3" <<'FIX3'
+--- FAIL: TestChromedp (0.01s)
+    runner.go:42: exec: "chromium": executable file not found in $PATH
+FAIL
+FIX3
+    classify_failure "$f3"
+    if [[ "$CLASS_RESULT" != "env" ]]; then
+        echo "FAIL: fixture env_missing_chromium classified as $CLASS_RESULT, expected env" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture env_missing_chromium → ENV ($CLASS_REASON)"
+    fi
+
+    # Fixture 4: LOGIC-CLASS — assertion mismatch (real test-logic failure)
+    f4="$tmpdir/logic_assert_mismatch.log"
+    cat >"$f4" <<'FIX4'
+--- FAIL: TestAdd (0.00s)
+    math_test.go:17:
+        Error Trace: math_test.go:17
+        Error:       Not equal:
+                     expected: 4
+                     actual:   5
+        Test:        TestAdd
+FAIL
+FAIL    example.com/math 0.005s
+FIX4
+    classify_failure "$f4"
+    if [[ "$CLASS_RESULT" != "logic" ]]; then
+        echo "FAIL: fixture logic_assert_mismatch classified as $CLASS_RESULT, expected logic" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture logic_assert_mismatch → LOGIC ($CLASS_REASON)"
+    fi
+
+    # Fixture 5: LOGIC-CLASS — compile error in OUR code (syntax), no env-pattern
+    f5="$tmpdir/logic_compile_error.log"
+    cat >"$f5" <<'FIX5'
+# example.com/broken
+./broken.go:7:2: syntax error: unexpected }, expecting expression
+FAIL    example.com/broken [build failed]
+FIX5
+    classify_failure "$f5"
+    if [[ "$CLASS_RESULT" != "logic" ]]; then
+        echo "FAIL: fixture logic_compile_error classified as $CLASS_RESULT, expected logic" >&2
+        classifier_check_fail=1
+    else
+        echo "PASS: fixture logic_compile_error → LOGIC ($CLASS_REASON)"
+    fi
+
+    if [[ $classifier_check_fail -ne 0 ]]; then
+        echo "release-gate-test.sh --check: FAIL (classifier fixtures)" >&2
+        exit 2
+    fi
+
+    echo "release-gate-test.sh --check: PASS"
+    exit 0
 fi
 
 if ! self_check; then
@@ -175,13 +382,15 @@ match_only() {
 }
 
 # --------- Per-submodule runner ---------
-# Returns via globals: STATUS, PASS_N, FAIL_N, SKIP_N, BARE_SKIP_N, DURATION
+# Returns via globals: STATUS, PASS_N, FAIL_N, SKIP_N, BARE_SKIP_N, DURATION,
+#                      FAIL_CLASS (round 89: "env"|"logic"|""), FAIL_REASON
 run_one() {
     local sm="$1"
     local logfile="$LOG_DIR/${sm//\//__}.log"
     local start_ts end_ts
     STATUS="unknown"
     PASS_N=0; FAIL_N=0; SKIP_N=0; BARE_SKIP_N=0; DURATION=0
+    FAIL_CLASS=""; FAIL_REASON=""
 
     if [[ ! -d "$sm" ]]; then
         STATUS="missing-directory"
@@ -230,6 +439,10 @@ run_one() {
 
     if [[ $rc -ne 0 ]] || [[ $FAIL_N -gt 0 ]]; then
         STATUS="fail"
+        # Round 89 — classify the failure as ENV vs LOGIC.
+        classify_failure "$logfile"
+        FAIL_CLASS="$CLASS_RESULT"
+        FAIL_REASON="$CLASS_REASON"
     elif [[ $BARE_SKIP_N -gt 0 ]]; then
         STATUS="bare-skip"
     else
@@ -239,8 +452,10 @@ run_one() {
 
 # --------- Walk all owned submodules ---------
 declare -a RESULTS_SM RESULTS_STATUS RESULTS_PASS RESULTS_FAIL RESULTS_SKIP RESULTS_BARE RESULTS_DUR
+declare -a RESULTS_CLASS RESULTS_CLASS_REASON   # round 89
 TOTAL_PASS=0; TOTAL_FAIL=0; TOTAL_SKIP=0; TOTAL_BARE=0
 N_OK=0; N_FAIL=0; N_SKIP_NO_GOMOD=0; N_MISSING=0; N_BARE=0; N_WALKED=0
+N_ENV_CLASS=0; N_LOGIC_CLASS=0   # round 89 — per-submodule classification counts
 EARLY_STOP=0
 
 while IFS= read -r line; do
@@ -263,6 +478,8 @@ while IFS= read -r line; do
     RESULTS_SKIP+=("$SKIP_N")
     RESULTS_BARE+=("$BARE_SKIP_N")
     RESULTS_DUR+=("$DURATION")
+    RESULTS_CLASS+=("$FAIL_CLASS")
+    RESULTS_CLASS_REASON+=("$FAIL_REASON")
 
     TOTAL_PASS=$((TOTAL_PASS + PASS_N))
     TOTAL_FAIL=$((TOTAL_FAIL + FAIL_N))
@@ -271,37 +488,80 @@ while IFS= read -r line; do
 
     case "$STATUS" in
         ok)             N_OK=$((N_OK + 1)) ;;
-        fail)           N_FAIL=$((N_FAIL + 1)) ;;
+        fail)
+            N_FAIL=$((N_FAIL + 1))
+            # Round 89 — increment per-class counters
+            case "$FAIL_CLASS" in
+                env)    N_ENV_CLASS=$((N_ENV_CLASS + 1)) ;;
+                logic)  N_LOGIC_CLASS=$((N_LOGIC_CLASS + 1)) ;;
+            esac
+            ;;
         skip-no-gomod)  N_SKIP_NO_GOMOD=$((N_SKIP_NO_GOMOD + 1)) ;;
         missing-directory) N_MISSING=$((N_MISSING + 1)) ;;
         bare-skip)      N_BARE=$((N_BARE + 1)) ;;
     esac
 
     if [[ $MODE_JSON -eq 0 ]]; then
-        printf '%-60s | PASS=%-4s FAIL=%-3s SKIP=%-3s BARE=%-3s DUR=%-4ss STATUS=%s\n' \
-            "$sm" "$PASS_N" "$FAIL_N" "$SKIP_N" "$BARE_SKIP_N" "$DURATION" "$STATUS"
+        # Round 89 — render CLASS tag on FAILed rows (env/logic) for at-a-glance triage.
+        class_tag=""
+        if [[ "$STATUS" == "fail" ]]; then
+            class_tag=" CLASS=$FAIL_CLASS"
+        fi
+        printf '%-60s | PASS=%-4s FAIL=%-3s SKIP=%-3s BARE=%-3s DUR=%-4ss STATUS=%s%s\n' \
+            "$sm" "$PASS_N" "$FAIL_N" "$SKIP_N" "$BARE_SKIP_N" "$DURATION" "$STATUS" "$class_tag"
     fi
 
+    # Round 89 — --quick early-stop only triggers on LOGIC-class FAIL when
+    # --skip-env-failures is active. Without --skip-env-failures, round-74
+    # behaviour is preserved (any FAIL triggers early-stop).
     if [[ $MODE_QUICK -eq 1 ]] && [[ "$STATUS" == "fail" ]]; then
-        EARLY_STOP=1
-        break
+        if [[ $MODE_SKIP_ENV -eq 1 ]] && [[ "$FAIL_CLASS" == "env" ]]; then
+            : # skip — env-class is non-blocking under --skip-env-failures
+        else
+            EARLY_STOP=1
+            break
+        fi
     fi
 done < "$OWNED_FILE"
 
 # --------- Aggregate output ---------
+# Round 89 — exit-code semantics:
+#   default behaviour (round 74, preserved): any FAIL or bare-SKIP → 1
+#   --skip-env-failures:
+#     no FAIL and no bare-SKIP            → 0
+#     only ENV-class FAILs (no LOGIC)     → 0 (skipped)
+#     LOGIC-class FAIL, no skipped ENV    → 1
+#     LOGIC-class FAIL + skipped ENV      → 3 (mixed signal)
+#     bare-SKIP without LOGIC FAIL        → 1 (CONST-035 bare-skip is always blocking)
 EXIT_CODE=0
-if [[ $N_FAIL -gt 0 ]] || [[ $TOTAL_BARE -gt 0 ]]; then
-    EXIT_CODE=1
+if [[ $MODE_SKIP_ENV -eq 1 ]]; then
+    if [[ $N_LOGIC_CLASS -gt 0 ]] && [[ $N_ENV_CLASS -gt 0 ]]; then
+        EXIT_CODE=3
+    elif [[ $N_LOGIC_CLASS -gt 0 ]]; then
+        EXIT_CODE=1
+    elif [[ $TOTAL_BARE -gt 0 ]]; then
+        EXIT_CODE=1
+    else
+        EXIT_CODE=0
+    fi
+else
+    if [[ $N_FAIL -gt 0 ]] || [[ $TOTAL_BARE -gt 0 ]]; then
+        EXIT_CODE=1
+    fi
 fi
 
 if [[ $MODE_JSON -eq 1 ]]; then
-    # Hand-rolled JSON (no jq dependency)
+    # Hand-rolled JSON (no jq dependency). Round 89 adds env/logic split.
     printf '{\n'
     printf '  "round": 74,\n'
-    printf '  "anchors": ["CONST-035","CONST-048-invariant-6","CONST-051-A","Article-XI-11.9"],\n'
+    printf '  "round_89_extension": "skip-env-failures classification filter",\n'
+    printf '  "anchors": ["CONST-035","CONST-044","CONST-048-invariant-6","CONST-051-A","Article-XI-11.9"],\n'
+    printf '  "skip_env_failures": %s,\n' "$([[ $MODE_SKIP_ENV -eq 1 ]] && echo true || echo false)"
     printf '  "owned_walked": %d,\n' "$N_WALKED"
     printf '  "n_ok": %d,\n' "$N_OK"
     printf '  "n_fail": %d,\n' "$N_FAIL"
+    printf '  "n_env_class_fail": %d,\n' "$N_ENV_CLASS"
+    printf '  "n_logic_class_fail": %d,\n' "$N_LOGIC_CLASS"
     printf '  "n_skip_no_gomod": %d,\n' "$N_SKIP_NO_GOMOD"
     printf '  "n_missing_dir": %d,\n' "$N_MISSING"
     printf '  "n_bare_skip_subs": %d,\n' "$N_BARE"
@@ -317,19 +577,20 @@ if [[ $MODE_JSON -eq 1 ]]; then
     for ((i=0; i<n; i++)); do
         sep=","
         [[ $i -eq $((n - 1)) ]] && sep=""
-        printf '    {"submodule":"%s","status":"%s","pass":%s,"fail":%s,"skip":%s,"bare_skip":%s,"duration_s":%s}%s\n' \
+        printf '    {"submodule":"%s","status":"%s","pass":%s,"fail":%s,"skip":%s,"bare_skip":%s,"duration_s":%s,"fail_class":"%s","fail_reason":"%s"}%s\n' \
             "${RESULTS_SM[$i]}" "${RESULTS_STATUS[$i]}" \
             "${RESULTS_PASS[$i]}" "${RESULTS_FAIL[$i]}" \
             "${RESULTS_SKIP[$i]}" "${RESULTS_BARE[$i]}" \
-            "${RESULTS_DUR[$i]}" "$sep"
+            "${RESULTS_DUR[$i]}" "${RESULTS_CLASS[$i]}" \
+            "${RESULTS_CLASS_REASON[$i]//\"/\\\"}" "$sep"
     done
     printf '  ]\n}\n'
 else
     echo
-    echo "=== release-gate-test.sh aggregate summary (round 74) ==="
+    echo "=== release-gate-test.sh aggregate summary (round 74 + round 89 classifier) ==="
     echo "  owned submodules walked: $N_WALKED"
     echo "  ok:                      $N_OK"
-    echo "  failed:                  $N_FAIL"
+    echo "  failed:                  $N_FAIL  (ENV-CLASS=$N_ENV_CLASS  LOGIC-CLASS=$N_LOGIC_CLASS)"
     echo "  skip-no-gomod:           $N_SKIP_NO_GOMOD"
     echo "  missing-directory:       $N_MISSING"
     echo "  bare-skip submodules:    $N_BARE (CONST-035 violation if > 0)"
@@ -337,18 +598,26 @@ else
     echo "  total go-test FAIL:      $TOTAL_FAIL"
     echo "  total go-test SKIP:      $TOTAL_SKIP"
     echo "  total bare-SKIP:         $TOTAL_BARE"
+    echo "  ENV-CLASS total:         $N_ENV_CLASS"
+    echo "  LOGIC-CLASS total:       $N_LOGIC_CLASS"
     echo "  log dir:                 $LOG_DIR"
+    if [[ $MODE_SKIP_ENV -eq 1 ]]; then
+        echo "  --skip-env-failures:     ON (ENV-CLASS reported but non-blocking)"
+    fi
     if [[ $EARLY_STOP -eq 1 ]]; then
         echo "  early-stop:              YES (--quick)"
     fi
 
     if [[ $N_FAIL -gt 0 ]]; then
         echo
-        echo "Failing submodules:"
+        echo "Failing submodules (with round-89 classification + reasoning):"
         n=${#RESULTS_SM[@]}
         for ((i=0; i<n; i++)); do
             if [[ "${RESULTS_STATUS[$i]}" == "fail" ]]; then
-                echo "  - ${RESULTS_SM[$i]} (log: $LOG_DIR/${RESULTS_SM[$i]//\//__}.log)"
+                echo "  - ${RESULTS_SM[$i]}"
+                echo "      class:   ${RESULTS_CLASS[$i]}"
+                echo "      reason:  ${RESULTS_CLASS_REASON[$i]}"
+                echo "      log:     $LOG_DIR/${RESULTS_SM[$i]//\//__}.log"
             fi
         done
     fi
@@ -362,13 +631,25 @@ else
             fi
         done
     fi
+    if [[ $N_ENV_CLASS -gt 0 ]]; then
+        echo
+        echo "Operator-actionable env failures detected. Recommended next step:"
+        n=${#RESULTS_SM[@]}
+        for ((i=0; i<n; i++)); do
+            if [[ "${RESULTS_CLASS[$i]}" == "env" ]]; then
+                echo "  Run: cd \"${RESULTS_SM[$i]}\" && go mod tidy"
+                echo "       (then re-run: bash scripts/release-gate-test.sh --only='${RESULTS_SM[$i]}')"
+            fi
+        done
+    fi
 
     echo
-    if [[ $EXIT_CODE -eq 0 ]]; then
-        echo "  RESULT: PASS (release gate green)"
-    else
-        echo "  RESULT: FAIL (release gate red — see above)"
-    fi
+    case "$EXIT_CODE" in
+        0) echo "  RESULT: PASS (release gate green$([[ $MODE_SKIP_ENV -eq 1 && $N_ENV_CLASS -gt 0 ]] && echo " — $N_ENV_CLASS ENV-CLASS skipped per --skip-env-failures"))" ;;
+        1) echo "  RESULT: FAIL (release gate red — see above)" ;;
+        3) echo "  RESULT: FAIL-MIXED (LOGIC-CLASS=$N_LOGIC_CLASS PLUS skipped ENV-CLASS=$N_ENV_CLASS)" ;;
+        *) echo "  RESULT: UNKNOWN exit_code=$EXIT_CODE" ;;
+    esac
 fi
 
 exit $EXIT_CODE

@@ -94,35 +94,76 @@ Subsequent rounds promote cells `UNCONFIRMED:` → `PASS` ONLY by adding (a) the
 
 | Exit | Meaning |
 |------|---------|
-| 0 | All owned submodules either PASSed (`go test` succeeded) or were legitimately SKIP-NO-GOMOD. Release gate GREEN. |
-| 1 | At least one submodule FAILed OR at least one bare SKIP detected. Release gate RED — see the human summary or `--json` output for the failing list. |
+| 0 | All owned submodules either PASSed (`go test` succeeded) or were legitimately SKIP-NO-GOMOD. Release gate GREEN. With `--skip-env-failures`, also returned when ONLY ENV-CLASS failures occurred and were skipped. |
+| 1 | At least one submodule FAILed OR at least one bare SKIP detected. Release gate RED — see the human summary or `--json` output for the failing list. (Round 74 default behaviour, preserved when `--skip-env-failures` not set.) |
 | 2 | Invalid flag, missing required file, or `--check` self-validation failed. |
+| 3 | **Round 89 — mixed**: at least one LOGIC-CLASS FAIL **plus** at least one skipped ENV-CLASS FAIL. Only emitted when `--skip-env-failures` is set. Tells CI "logic-broken AND env-dirty" so the operator can distinguish from a clean run that simply skipped some env churn. |
 
 ### Flags
 
 | Flag | Effect |
 |------|--------|
-| `--json` | Emit machine-readable JSON summary for CI integration. Includes per-submodule + aggregate counts + log_dir path. |
-| `--quick` | Stop on first FAIL. Useful for fast CI signal where any failure should block. |
+| `--json` | Emit machine-readable JSON summary for CI integration. Includes per-submodule + aggregate counts + log_dir path + (round 89) `fail_class` + `fail_reason` + `n_env_class_fail` + `n_logic_class_fail`. |
+| `--quick` | Stop on first FAIL. Useful for fast CI signal where any failure should block. Under `--skip-env-failures`, only LOGIC-CLASS FAIL triggers early-stop (ENV-CLASS is non-blocking). |
 | `--only=<glob>` | Restrict to submodules matching the shell glob (e.g. `--only='dependencies/vasic-digital/*'`). Useful for targeted re-runs. |
-| `--check` | Self-validate script + paths without running real tests. Used by smoke-tests and CI sanity. |
+| `--check` | Self-validate script + paths without running real tests. Round 89 extends this to exercise the env-vs-logic classifier against five synthetic fixtures (3 ENV, 2 LOGIC) and assert correct classification. |
+| `--skip-env-failures` | **Round 89** — classify each FAIL as ENV-CLASS (operator-fixable; `go mod tidy` / install dep) vs LOGIC-CLASS (genuine code defect). Report ENV-CLASS but treat as non-blocking. LOGIC-CLASS always blocks. Use day-to-day; OMIT for release gates. |
+
+### Round 89 — env-vs-logic FAIL classification
+
+Round 74 reports raw FAIL counts. Round 89 layers a deterministic regex-based classifier on top to distinguish:
+
+- **ENV-CLASS FAIL** — caller environment is missing something (`go mod tidy` hasn't run, system header/library absent, executable not on PATH, port permission denied). Operator-actionable; not a code defect.
+- **LOGIC-CLASS FAIL** — genuine test-logic or production-code defect. Always blocks.
+
+**Detection patterns (env-class — ANY hit reclassifies the FAIL as ENV):**
+
+| Pattern (extended grep) | Operator action |
+|-------------------------|-----------------|
+| `missing go\.sum entry` | `go mod tidy` |
+| `cannot find package` | `go mod tidy` |
+| `no required module provides` | `go mod tidy` |
+| `updates to go\.mod needed` | `go mod tidy` |
+| `inconsistent vendoring` | `go mod vendor` |
+| `package [^ ]+ is not in std` | `go mod tidy` / check Go version |
+| `command not found` | install missing tool |
+| `executable file not found` | install missing tool (e.g. `chromium` for chromedp) |
+| `permission denied` | chmod / chown / use non-privileged port |
+| `fatal error: .*\.h: No such file` | install `-dev` package for the C header |
+| `X11/[A-Za-z]+\.h` | install `libX11-dev` / equivalent |
+| `Xcursor/Xcursor\.h` | install `libxcursor-dev` |
+| `gtk/gtk\.h` | install `libgtk-3-dev` |
+| `cannot find -l[A-Za-z]` | install matching system library |
+
+**Anti-bluff invariant**: classification is deterministic regex — **no LLM grading**. Ambiguous patterns fail-closed to LOGIC-CLASS, never silently downgraded to ENV. Per-failure output includes the matched pattern (or "no env-pattern match — fail-closed") so the classification is auditable + reproducible.
+
+**Why this matters**: round 74 reported 26 FAILs across owned submodules. Rounds 72/74/87 forensics confirmed most were environmental (caller hadn't run `go mod tidy`, missing system libs, etc.) — not genuine code defects. Without the classifier, CI cannot distinguish "operator needs to run `go mod tidy`" from "developer wrote broken code". Round 89 makes that distinction mechanical.
 
 ### Recommended invocation pattern
 
 ```bash
-# Manual pre-release sweep (full, human-readable):
+# Day-to-day CI (env churn non-blocking, logic defects still blocking):
+bash scripts/release-gate-test.sh --skip-env-failures --json > release-gate.json
+case $(jq '.exit_code' release-gate.json) in
+    0) echo "green (possibly some ENV skipped)" ;;
+    1) echo "LOGIC-CLASS failure — block merge" ;;
+    3) echo "LOGIC-CLASS failure AND env-dirty — block merge + ask operator to tidy" ;;
+esac
+
+# Release gate (strict — every FAIL blocks, including env):
 bash scripts/release-gate-test.sh
 
-# CI integration (machine-readable, fail-fast):
-bash scripts/release-gate-test.sh --json --quick > release-gate.json
-jq '.exit_code' release-gate.json   # 0 = green, 1 = red
+# Manual pre-release sweep (full, human-readable, with classification):
+bash scripts/release-gate-test.sh --skip-env-failures
 
-# Targeted re-run after fixing a specific submodule:
+# Targeted re-run after operator runs `go mod tidy` to clear ENV-CLASS:
 bash scripts/release-gate-test.sh --only='dependencies/vasic-digital/Cache'
 
-# Sanity check that the script itself is healthy (no real test runs):
+# Sanity check that the script + classifier are healthy (no real test runs):
 bash scripts/release-gate-test.sh --check
 ```
+
+**CI integration recipe**: use `--skip-env-failures` in the day-to-day per-PR gate so a teammate who hasn't run `go mod tidy` doesn't redden the board for everyone. Use the **bare** `release-gate-test.sh` (no flag) in the release-tag gate so env churn cannot ship past a tagged release. The two gates answer different questions: "is the code OK?" vs "is the WORLD ready to ship?".
 
 ### Cross-reference with the coverage ledger
 
