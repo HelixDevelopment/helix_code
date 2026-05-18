@@ -504,16 +504,90 @@ func (e *HarmonyDistributedEngine) findPerformanceDevice(devices []HarmonyDevice
 	return best
 }
 
-// findPowerEfficientDevice finds the most power-efficient available device
+// ErrPowerMetricsNotAvailable signals that
+// (*HarmonyDistributedEngine).findPowerEfficientDevice could not honour
+// the "power_efficient" scheduling policy with real power telemetry
+// because the HarmonyResources type does not carry a power-consumption
+// field (no battery level, no watts-drawn, no thermal-design-power
+// envelope). The caller (ScheduleTask) consumes the returned device
+// nonetheless — using lowest-aggregate-resource-usage as a proxy
+// (CPUUsage + MemoryUsage + GPUUsage minimisation, which positively
+// correlates with active-state power draw) — but logs the sentinel so
+// the surface does not claim it has performed real power-efficient
+// scheduling.
+//
+// Forensic anchor (round-34 §11.4 audit, 2026-05-18): the previous
+// implementation returned the FIRST active+available device with the
+// comment "in a real implementation, would consider power metrics".
+// The caller (ScheduleTask, "power_efficient" branch) routed real
+// workloads to that device, certifying to operators that the platform
+// was making power-conscious scheduling decisions when it was making
+// arrival-order decisions. That is a §11.4 HIGH PASS-bluff: the
+// scheduling-policy surface promised power awareness, the body
+// performed arrival-order fallback.
+//
+// The new implementation:
+//
+//   - Uses lowest-aggregate-active-resource-usage as the honest proxy
+//     (rationale: idle CPUs/GPUs draw less power than busy ones — this
+//     is a strictly better signal than arrival-order even without a
+//     dedicated power field, but it is still a proxy, not a real
+//     measurement).
+//   - Returns nil when no device is active+available (matches the prior
+//     contract that ScheduleTask handles by routing to "local").
+//   - Surfaces the sentinel via log.Printf so the gap is loudly
+//     visible in runtime evidence captures, not silently swallowed.
+//
+// Wire real power telemetry (HarmonyOS PowerManager.getBatteryInfo /
+// getChargingInfo / HiSysEvent power-domain probes) and add the
+// corresponding fields to HarmonyResources to clear this sentinel.
+var ErrPowerMetricsNotAvailable = errors.New(
+	"harmony_os: power-efficient scheduling has no real power telemetry — " +
+		"HarmonyResources does not carry battery level, watts drawn, or thermal " +
+		"envelope fields. Falling back to lowest-aggregate-resource-usage as a " +
+		"proxy. Wire HarmonyOS PowerManager API + extend HarmonyResources to " +
+		"clear this sentinel",
+)
+
+// findPowerEfficientDevice picks the available device that — in the
+// absence of real HarmonyOS power telemetry on the HarmonyDevice /
+// HarmonyResources types — minimises aggregate active-resource usage
+// (CPU+Memory+GPU). This is a documented proxy, not a real
+// power-consumption measurement; see ErrPowerMetricsNotAvailable for
+// the §11.4 forensic anchor explaining the gap.
+//
+// Returns nil if no device is active+available.
 func (e *HarmonyDistributedEngine) findPowerEfficientDevice(devices []HarmonyDevice) *HarmonyDevice {
-	// Return the first available device (in a real implementation, would consider power metrics)
+	// Loudly mark the gap in runtime evidence captures. Operators
+	// inspecting logs of a scheduling decision routed through the
+	// "power_efficient" policy SHOULD see this line before the chosen
+	// device is committed to the task queue.
+	log.Printf("harmony_os: %v", ErrPowerMetricsNotAvailable)
+
+	var best *HarmonyDevice
+	// Use +Inf as a "no candidate yet" sentinel so even the worst real
+	// score (300 = 100+100+100) beats it.
+	const noCandidate = float64(1 << 30)
+	bestScore := noCandidate
+
 	for i := range devices {
 		d := &devices[i]
-		if d.Status == "active" && d.Resources.Available {
-			return d
+		if d.Status != "active" || !d.Resources.Available {
+			continue
+		}
+		// Lower score = lower aggregate active-resource usage = better
+		// proxy for lower active-state power draw. GPU usage is the
+		// dominant term in absolute watts; CPU + memory are kept in
+		// the sum because they still contribute (and because two
+		// otherwise-equal-GPU candidates should prefer the lower-CPU
+		// one).
+		score := d.Resources.CPUUsage + d.Resources.MemoryUsage + d.Resources.GPUUsage
+		if score < bestScore {
+			bestScore = score
+			best = d
 		}
 	}
-	return nil
+	return best
 }
 
 // GetScheduledTasks returns all scheduled tasks

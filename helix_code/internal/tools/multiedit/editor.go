@@ -2,6 +2,7 @@ package multiedit
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
@@ -337,11 +338,33 @@ func (pf *PreviewFormatter) formatMarkdown(result *PreviewResult) (string, error
 	return output, nil
 }
 
-// formatJSON formats as JSON
+// formatJSON formats as JSON.
+//
+// Forensic anchor (round-34 §11.4 audit, 2026-05-18): the previous
+// implementation returned a hand-rolled JSON snippet that included only
+// {transaction_id, summary.total_files} and silently dropped every other
+// field that the plain / markdown / html formatters render — Files,
+// Conflicts, Summary.{FilesCreated, FilesModified, FilesDeleted,
+// FilesRenamed, TotalLinesAdded, TotalLinesDeleted, HasConflicts}. A
+// caller asking for FormatJSON expecting machine-readable parity with
+// the human-readable formats received a stub that hid every diff and
+// every conflict. That is a §11.4 HIGH PASS-bluff: the surface
+// (FormatJSON) advertised JSON serialization of a PreviewResult, the
+// body produced a two-field placeholder labelled "this would use
+// encoding/json in a real implementation".
+//
+// The new implementation uses encoding/json (now wired) with
+// MarshalIndent for human-debuggable output and surfaces marshalling
+// failures as honest errors instead of swallowing them.
 func (pf *PreviewFormatter) formatJSON(result *PreviewResult) (string, error) {
-	// This would use encoding/json in a real implementation
-	return fmt.Sprintf(`{"transaction_id":"%s","summary":{"total_files":%d}}`,
-		result.TransactionID, result.Summary.TotalFiles), nil
+	if result == nil {
+		return "", fmt.Errorf("multiedit: nil PreviewResult cannot be JSON-formatted")
+	}
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("multiedit: failed to marshal PreviewResult to JSON: %w", err)
+	}
+	return string(data), nil
 }
 
 // formatHTML formats as HTML

@@ -1526,9 +1526,34 @@ func (p *MemontoProvider) callAPI(ctx context.Context, req MemontoRequest) (*Mem
 	return &apiResp, cost, nil
 }
 
-// extractConcepts extracts concepts from text
+// extractConcepts performs stopword-filtered keyword extraction on the
+// supplied text and returns up to 10 unique candidate concepts.
+//
+// Forensic anchor (round-34 §11.4 audit, 2026-05-18): this function
+// previously carried the comment "Simple concept extraction - in a real
+// implementation, this would use NLP", which advertised an upgrade path
+// (named-entity recognition, dependency parsing, topic modelling, etc.)
+// that had not landed. The downstream BuildKnowledgeGraph path then
+// fabricated MemontoNode entries of type=="concept" from raw stopword-
+// filtered tokens, surfacing them to operators as though they were
+// semantically meaningful concepts. That is a §11.4 MEDIUM PASS-bluff:
+// the misleading-comment variety where the body is honest but the
+// docstring promised more than was delivered, encouraging callers to
+// trust the output as NLP-grade output.
+//
+// The new contract names the algorithm honestly — this IS what it is, a
+// best-effort keyword skim — and downstream callers should treat the
+// returned strings as token candidates, NOT as named entities or
+// disambiguated concepts. Wiring a real NLP backend (e.g. spaCy via
+// gRPC, stanza, or a tree-sitter-driven dependency parse) remains
+// future work tracked in docs/improvements/PROGRESS.md; until then the
+// honest name + docstring carries the gap.
 func (p *MemontoProvider) extractConcepts(text string) []string {
-	// Simple concept extraction - in a real implementation, this would use NLP
+	// Best-effort keyword skim: lowercase + tokenize on whitespace +
+	// drop short tokens + drop stopwords + de-duplicate + cap at 10.
+	// NOT a real NLP pipeline (no stemming, no lemmatization, no NER,
+	// no disambiguation, no POS-tagging). See function-level forensic
+	// anchor above for the §11.4 rationale.
 	words := strings.Fields(strings.ToLower(text))
 	concepts := []string{}
 	seen := make(map[string]bool)
