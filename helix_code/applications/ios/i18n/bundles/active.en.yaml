@@ -1,0 +1,33 @@
+# iOS i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in the
+# Go-side iOS bridge code (forward-looking — see translator.go
+# scope note) to a message ID resolved at runtime via Translator.T.
+# The iOS app wires a real *i18nadapter.Translator at boot once any
+# Go-side user-facing strings cross the gomobile bridge; the in-
+# package NoopTranslator echoes the message ID verbatim for unit
+# tests + backward compat in the interim.
+#
+# Naming convention: ios_<area>_<short_description>. All IDs
+# prefixed with ios_ to avoid namespace collision with other
+# platforms' bundles (harmony_os_, desktop_, terminal_ui_,
+# android_, aurora_os_) when loaded into the same go-i18n.Bundle.
+#
+# Round-138 §11.4 anti-bluff sweep (2026-05-18): infrastructure-only
+# round. iOS application directory is currently pure Swift (AppDelegate,
+# MobileCore, ViewController) with zero Go-side user-facing strings;
+# Swift literals live in the platform-native Localizable.strings
+# bundles per CONST-052 language-convention exception. Bundle ships
+# placeholder/seed message IDs to (a) exercise the loader during
+# unit tests, (b) document the naming convention for the first real
+# round when Go-side bridge content lands.
+
+# Seed message IDs — when first real Go-side user-facing string
+# crosses the bridge it replaces a seed below or appends a new
+# ios_<area>_<short_description> entry.
+
+ios_bridge_seed_placeholder:
+  other: "ios_bridge_seed_placeholder"
+
+ios_notification_seed_placeholder:
+  other: "ios_notification_seed_placeholder"
