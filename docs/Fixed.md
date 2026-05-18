@@ -71,6 +71,7 @@
 | 2026-05-19 | helix_code/internal/cognee × migration (Phase 4 round 41) | Feature | Implemented (→ Fixed.md) | 148 | 37dc2a1 | Formal report pending |
 | 2026-05-19 | helix_code/internal/commands × 10 migration (Phase 4 round 42) | Feature | Implemented (→ Fixed.md) | 149 | 77b6041 | 4 ValidateContext + 2 manager-not-init + 1 hooks + 3 permissions usage hints; 11 tests + mutation; +400 LOC |
 | 2026-05-19 | helix_code/internal/config × 10 migration (Phase 4 round 43) | Feature | Implemented (→ Fixed.md) | 150 | adf001f + 5a0934e baseline | 2 boot warn/info + 8 validate-* required/range checks; 9-case table-test paired-mutation + translator-error guard; +384 LOC |
+| 2026-05-19 | helix_code/internal/context × 8 sites / 5 IDs (Phase 4 round 44) | Feature | Implemented (→ Fixed.md) | 151 | fc4592c | item_not_found/expired + session/project + global_manager_not_initialized; 41 tests + mutation; ~60 in builder/mentions subpackages deferred; +369 LOC |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
