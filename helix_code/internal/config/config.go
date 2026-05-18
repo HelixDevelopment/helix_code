@@ -271,9 +271,9 @@ func Load() (*Config, error) {
 			return nil, fmt.Errorf("failed to read config file: %v", err)
 		}
 		// Config file not found, but we can continue with defaults
-		fmt.Println("⚠️  No config file found, using defaults and environment variables")
+		fmt.Println(tr(context.Background(), "internal_config_warn_no_config_file_using_defaults", nil))
 	} else {
-		fmt.Printf("📁 Using config file: %s\n", viper.ConfigFileUsed())
+		fmt.Println(tr(context.Background(), "internal_config_info_using_config_file", map[string]any{"Path": viper.ConfigFileUsed()}))
 	}
 
 	// Unmarshal config
@@ -422,25 +422,25 @@ func findConfigFile() string {
 func validateConfig(cfg *Config) error {
 	// Version validation
 	if cfg.Version == "" {
-		return fmt.Errorf("version is required")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_version_required", nil))
 	}
 
 	// Application validation
 	if cfg.Application.Name == "" {
-		return fmt.Errorf("application name is required")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_application_name_required", nil))
 	}
 
 	// Server validation
 	if cfg.Server.Port < 1 || cfg.Server.Port > 65535 {
-		return fmt.Errorf("server port must be between 1 and 65535")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_server_port_out_of_range", nil))
 	}
 
 	// Database validation
 	if cfg.Database.Host == "" {
-		return fmt.Errorf("database host is required")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_database_host_required", nil))
 	}
 	if cfg.Database.DBName == "" {
-		return fmt.Errorf("database name is required")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_database_name_required", nil))
 	}
 
 	// Redis validation
@@ -455,15 +455,15 @@ func validateConfig(cfg *Config) error {
 
 	// Auth validation
 	if cfg.Auth.JWTSecret == "" || cfg.Auth.JWTSecret == "default-secret-change-in-production" {
-		return fmt.Errorf("JWT secret must be set and not use default value")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_jwt_secret_must_be_set", nil))
 	}
 
 	// Workers validation
 	if cfg.Workers.HealthCheckInterval < 1 {
-		return fmt.Errorf("health check interval must be positive")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_health_check_interval_positive", nil))
 	}
 	if cfg.Workers.MaxConcurrentTasks < 1 {
-		return fmt.Errorf("max concurrent tasks must be positive")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_max_concurrent_tasks_positive", nil))
 	}
 
 	// Tasks validation

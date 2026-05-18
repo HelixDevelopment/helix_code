@@ -1,0 +1,53 @@
+# internal/config i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/config/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_config_<area>_<short_description>.
+# All IDs prefixed with internal_config_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-150 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# most user-facing literals emitted by config.go — 2 boot-time
+# console notices (no-config-file warning, using-config-file info)
+# + 8 high-frequency validateConfig() errors that surface every
+# time a misconfigured Helix server attempts to start (version,
+# application name, server port range, database host/name, JWT
+# secret, worker health-check interval, worker max-concurrent-tasks).
+# Remaining hardcoded validation messages, error wrappers, and
+# cognee_config.go literals are deferred to future rounds to stay
+# under the size cap.
+
+internal_config_warn_no_config_file_using_defaults:
+  other: "WARN: No config file found, using defaults and environment variables"
+
+internal_config_info_using_config_file:
+  other: "INFO: Using config file: {{.Path}}"
+
+internal_config_validate_version_required:
+  other: "version is required"
+
+internal_config_validate_application_name_required:
+  other: "application name is required"
+
+internal_config_validate_server_port_out_of_range:
+  other: "server port must be between 1 and 65535"
+
+internal_config_validate_database_host_required:
+  other: "database host is required"
+
+internal_config_validate_database_name_required:
+  other: "database name is required"
+
+internal_config_validate_jwt_secret_must_be_set:
+  other: "JWT secret must be set and not use default value"
+
+internal_config_validate_health_check_interval_positive:
+  other: "health check interval must be positive"
+
+internal_config_validate_max_concurrent_tasks_positive:
+  other: "max concurrent tasks must be positive"
