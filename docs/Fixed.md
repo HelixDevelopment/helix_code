@@ -22,6 +22,8 @@
 | 2026-05-19 | challenges/pkg/i18n/ Phase 4 infrastructure + evaluators.go migration | Feature | Implemented (→ Fixed.md) | 100 | 898e39f + ba5b76d | Infrastructure reused by rounds 101+; formal report pending |
 | 2026-05-19 | challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25 migration | Feature | Implemented (→ Fixed.md) | 101 | 67a6c9d + 1a1b270 | 10 user-facing AssertionResult.Message; 10 tests + mutation; baseline-preserving fallback pattern |
 | 2026-05-19 | challenges/pkg/userflow/challenge_desktop.go migration | Feature | Implemented (→ Fixed.md) | 102 | (submodule TBD) + 74c43ec | Formal report truncated; commit visible |
+| 2026-05-19 | challenges/pkg/userflow/challenge_ai_testgen.go × 10 user-facing migration | Feature | Implemented (→ Fixed.md) | 103 | 73bd0e7 + 5002c97 | 9 tests + mutation; baseline-preserving fallback pattern |
+| 2026-05-19 | challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14 call sites | Feature | Implemented (→ Fixed.md) | 104 | 012164c + 852c172 + cdb753f | 12 tests + mutation; launch+flow dedup; baseline refresh applied |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
