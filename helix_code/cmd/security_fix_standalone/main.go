@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,19 +9,62 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"dev.helix.code/cmd/security_fix_standalone/i18n"
 )
 
+// translator resolves CONST-046 message IDs for every user-facing
+// string emitted by this CLI. Defaults to i18n.NoopTranslator{} (loud
+// message-ID echo) so unit tests + ad-hoc invocations remain obvious.
+// helix_code wires a real *i18nadapter.Translator at boot via
+// SetTranslator (round-145 §11.4 anti-bluff sweep, 2026-05-18).
+//
+// A package-level variable is the chosen DI seam to keep the
+// migration minimally invasive — main()'s linear call graph does
+// not warrant a constructor-injected struct.
+var translator i18n.Translator = i18n.NoopTranslator{}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		translator = i18n.NoopTranslator{}
+		return
+	}
+	translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func tr(ctx context.Context, msgID string, data map[string]any) string {
+	if translator == nil {
+		translator = i18n.NoopTranslator{}
+	}
+	out, err := translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
+}
+
 func main() {
-	log.Println("🔧 Starting Zero-Tolerance Security Issue Resolution")
-	log.Println("🎯 Policy: ALL CRITICAL SECURITY ISSUES MUST BE FIXED")
+	ctx := context.Background()
+
+	log.Println(tr(ctx, "security_fix_standalone_banner_start", nil))
+	log.Println(tr(ctx, "security_fix_standalone_banner_policy", nil))
 
 	projectPath, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("❌ Failed to get current directory: %v", err)
 	}
 
-	log.Printf("📁 Project Path: %s", projectPath)
-	log.Printf("🔒 Critical Only: true (Zero Tolerance Policy)")
+	log.Println(tr(ctx, "security_fix_standalone_path_echo", map[string]any{"Path": projectPath}))
+	log.Println(tr(ctx, "security_fix_standalone_critical_only_echo", nil))
 	log.Println("")
 
 	// Find and fix critical security issues
@@ -63,7 +107,7 @@ func main() {
 	}
 
 	// Validate fixes
-	log.Printf("\n🔍 Validating security fixes...")
+	log.Println(tr(ctx, "security_fix_standalone_validating", nil))
 	remainingIssues := findCriticalSecurityIssues(projectPath)
 	log.Printf("📊 Validation Results:")
 	log.Printf("   Issues Fixed: %d", fixedCount)
@@ -76,7 +120,7 @@ func main() {
 	generateFinalFixReport(criticalIssues, fixedCount, failedCount, len(remainingIssues), success)
 
 	log.Printf("\n========================================")
-	log.Printf("🎯 ZERO-TOLERANCE SECURITY FIX COMPLETE")
+	log.Println(tr(ctx, "security_fix_standalone_header_complete", nil))
 	log.Printf("========================================")
 	log.Printf("Critical Issues Addressed: %d", len(criticalIssues))
 	log.Printf("Issues Fixed: %d", fixedCount)
@@ -84,13 +128,13 @@ func main() {
 	log.Printf("Remaining Critical Issues: %d", len(remainingIssues))
 
 	if success {
-		log.Printf("🎉 SUCCESS: All critical security issues resolved")
-		log.Printf("✅ Zero-Tolerance Policy SATISFIED")
+		log.Println(tr(ctx, "security_fix_standalone_result_success_satisfied", nil))
+		log.Println(tr(ctx, "security_fix_standalone_result_success_policy", nil))
 		log.Printf("🚀 HelixCode platform ready for production")
 	} else {
-		log.Printf("❌ FAILURE: Critical security issues remain")
+		log.Println(tr(ctx, "security_fix_standalone_result_failure_remain", nil))
 		log.Printf("🔧 Manual intervention required")
-		log.Printf("🚨 ZERO TOLERANCE POLICY: Production BLOCKED")
+		log.Println(tr(ctx, "security_fix_standalone_result_failure_blocked", nil))
 	}
 
 	log.Printf("========================================")
