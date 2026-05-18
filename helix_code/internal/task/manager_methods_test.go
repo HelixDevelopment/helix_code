@@ -1,13 +1,17 @@
 package task
 
 import (
+	"errors"
+	"strings"
 	"testing"
 	"time"
 
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/redis"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,6 +31,11 @@ func (m *MockSplitStrategy) GenerateSubtasks(parent *Task, analysis *TaskAnalysi
 // TestSplitTask tests task splitting functionality
 func TestSplitTask(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT through tm.db.Exec (was log-only stub). Pre-mock
+	// success for any Exec — including subsequent subtask inserts and
+	// the parent-task UPDATE that SplitTask performs.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a large task
@@ -83,6 +92,10 @@ func TestSplitTask_NotFound(t *testing.T) {
 // TestAssignTask tests task assignment to workers
 func TestAssignTask(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask runs a
+	// real INSERT through tm.db.Exec. Pre-mock for the INSERT plus the
+	// later worker/task UPDATEs that AssignTask performs.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a task
@@ -141,6 +154,10 @@ func TestAssignTask_NotFound(t *testing.T) {
 // TestCompleteTask tests task completion
 func TestCompleteTask(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT through tm.db.Exec. Pre-mock so the create call
+	// doesn't crash before we reach the completion path.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a task
@@ -153,7 +170,8 @@ func TestCompleteTask(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// Mock database update
+	// Mock database update (redundant with the pre-mock above but
+	// preserved for documentation of intent)
 	mockDB.MockExecSuccess(1)
 
 	// Complete the task
@@ -170,6 +188,10 @@ func TestCompleteTask(t *testing.T) {
 // TestFailTask tests marking a task as failed
 func TestFailTask(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT through tm.db.Exec. Pre-mock so the create call
+	// doesn't crash before we reach the fail-task path.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a task
@@ -207,6 +229,9 @@ func TestFailTask_NotFound(t *testing.T) {
 // TestCreateCheckpoint tests checkpoint creation
 func TestCreateCheckpoint(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT through tm.db.Exec.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a task
@@ -247,6 +272,9 @@ func TestCreateCheckpoint_NotFound(t *testing.T) {
 // TestGetTaskProgress tests retrieving task progress
 func TestGetTaskProgress(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT through tm.db.Exec.
+	mockDB.MockExecSuccess(1)
 	tm := NewTaskManager(mockDB, &redis.Client{})
 
 	// Create a task
@@ -496,4 +524,158 @@ func TestUpdateWorkerInDB(t *testing.T) {
 
 	// Should complete without error
 	assert.NoError(t, err)
+}
+
+// ========================================
+// Anti-bluff regression tests (round-31 §11.4 audit, 2026-05-18)
+// ========================================
+//
+// The three functions below were CRITICAL persistence bluffs prior to
+// this audit — log-only stubs that returned nil success regardless of
+// actual database state. These regressions assert two invariants:
+//
+//   (1) When tm.db is nil, the functions return the sentinel
+//       ErrTaskPersistenceNotWired (loud failure mode, not silent
+//       success); composes with CONST-035 / Article XI §11.9.
+//
+//   (2) When tm.db is wired, the functions issue a real Exec call
+//       against the expected SQL statement (proves the wiring is
+//       in place — not just a comment claiming intent).
+//
+// If any of these regressions ever fails, the persistence bluff has
+// regressed and the fix in manager_methods.go must be re-applied.
+
+// TestStoreTaskInDB_NilDB_ReturnsSentinel asserts the loud-failure path
+// when no database backend is wired into the TaskManager.
+func TestStoreTaskInDB_NilDB_ReturnsSentinel(t *testing.T) {
+	tm := &TaskManager{} // bypass NewTaskManager — db deliberately nil
+	err := tm.storeTaskInDB(&Task{ID: uuid.New()})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrTaskPersistenceNotWired,
+		"storeTaskInDB on a nil-db TaskManager must surface the sentinel "+
+			"(was: silent success that vanished tasks across restarts)")
+}
+
+// TestUpdateTaskInDB_NilDB_ReturnsSentinel asserts the loud-failure path
+// for the update side.
+func TestUpdateTaskInDB_NilDB_ReturnsSentinel(t *testing.T) {
+	tm := &TaskManager{}
+	err := tm.updateTaskInDB(&Task{ID: uuid.New()})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrTaskPersistenceNotWired,
+		"updateTaskInDB on a nil-db TaskManager must surface the sentinel "+
+			"(was: silent success that lost task-state updates)")
+}
+
+// TestUpdateWorkerInDB_NilDB_ReturnsSentinel asserts the loud-failure
+// path for the worker update side.
+func TestUpdateWorkerInDB_NilDB_ReturnsSentinel(t *testing.T) {
+	tm := &TaskManager{}
+	err := tm.updateWorkerInDB(&Worker{ID: uuid.New()})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrTaskPersistenceNotWired,
+		"updateWorkerInDB on a nil-db TaskManager must surface the sentinel "+
+			"(was: silent success that lost worker-state updates)")
+}
+
+// TestStoreTaskInDB_IssuesRealExecCall asserts the function actually
+// invokes tm.db.Exec with an INSERT statement targeting distributed_tasks
+// — proving the SQL wiring is in place, not just a comment promising it.
+func TestStoreTaskInDB_IssuesRealExecCall(t *testing.T) {
+	mockDB := database.NewMockDatabase()
+	// Match Exec calls whose SQL contains "INSERT INTO distributed_tasks"
+	// using a custom matcher so we verify the statement, not just any Exec.
+	mockDB.On("Exec",
+		mock.Anything,
+		mock.MatchedBy(func(sql string) bool {
+			return strings.Contains(sql, "INSERT INTO distributed_tasks")
+		}),
+		mock.Anything,
+	).Return(pgconn.NewCommandTag("INSERT 0 1"), nil).Once()
+
+	tm := NewTaskManager(mockDB, &redis.Client{})
+	task := &Task{
+		ID:        uuid.New(),
+		Type:      TaskTypeBuilding,
+		Status:    TaskStatusPending,
+		Priority:  PriorityNormal,
+		Data:      map[string]interface{}{"k": "v"},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	err := tm.storeTaskInDB(task)
+	require.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
+
+// TestUpdateTaskInDB_IssuesRealExecCall mirrors the above for UPDATE
+// statements against distributed_tasks.
+func TestUpdateTaskInDB_IssuesRealExecCall(t *testing.T) {
+	mockDB := database.NewMockDatabase()
+	mockDB.On("Exec",
+		mock.Anything,
+		mock.MatchedBy(func(sql string) bool {
+			return strings.Contains(sql, "UPDATE distributed_tasks")
+		}),
+		mock.Anything,
+	).Return(pgconn.NewCommandTag("UPDATE 1"), nil).Once()
+
+	tm := NewTaskManager(mockDB, &redis.Client{})
+	task := &Task{
+		ID:        uuid.New(),
+		Type:      TaskTypeBuilding,
+		Status:    TaskStatusRunning,
+		Priority:  PriorityHigh,
+		Data:      map[string]interface{}{"k": "v"},
+		UpdatedAt: time.Now(),
+	}
+
+	err := tm.updateTaskInDB(task)
+	require.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
+
+// TestUpdateWorkerInDB_IssuesRealExecCall mirrors the above for UPDATE
+// statements against the workers table.
+func TestUpdateWorkerInDB_IssuesRealExecCall(t *testing.T) {
+	mockDB := database.NewMockDatabase()
+	mockDB.On("Exec",
+		mock.Anything,
+		mock.MatchedBy(func(sql string) bool {
+			return strings.Contains(sql, "UPDATE workers")
+		}),
+		mock.Anything,
+	).Return(pgconn.NewCommandTag("UPDATE 1"), nil).Once()
+
+	tm := NewTaskManager(mockDB, &redis.Client{})
+	w := &Worker{
+		ID:                 uuid.New(),
+		Hostname:           "test-worker",
+		Status:             "active",
+		HealthStatus:       "healthy",
+		Capabilities:       []string{"general_computation"},
+		MaxConcurrentTasks: 5,
+		UpdatedAt:          time.Now(),
+	}
+
+	err := tm.updateWorkerInDB(w)
+	require.NoError(t, err)
+	mockDB.AssertExpectations(t)
+}
+
+// TestStoreTaskInDB_PropagatesDBError asserts that a database-side error
+// is wrapped + returned to the caller (was: log-only stub that always
+// returned nil regardless of any underlying failure).
+func TestStoreTaskInDB_PropagatesDBError(t *testing.T) {
+	mockDB := database.NewMockDatabase()
+	dbErr := errors.New("simulated connection lost")
+	mockDB.MockExecError(dbErr)
+
+	tm := NewTaskManager(mockDB, &redis.Client{})
+	err := tm.storeTaskInDB(&Task{ID: uuid.New(), Type: TaskTypeBuilding})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, dbErr,
+		"storeTaskInDB must propagate the underlying db error so callers can react "+
+			"(was: silent nil-return that hid every DB failure)")
 }

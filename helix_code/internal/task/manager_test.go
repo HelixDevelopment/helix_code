@@ -9,11 +9,27 @@ import (
 	"github.com/google/uuid"
 )
 
-// MockDatabase creates a mock database for testing
-func MockDatabase() *database.Database {
-	// In a real test, you would use a test database
-	// For now, return nil since we're testing the logic
-	return nil
+// MockDatabase creates a mock database for testing.
+//
+// Anti-bluff (round-31 §11.4 audit, 2026-05-18): the previous version of
+// this helper returned `nil *database.Database`. That worked only because
+// storeTaskInDB / updateTaskInDB / updateWorkerInDB were log-only stubs
+// that ignored tm.db entirely (the CRITICAL persistence-bluff this audit
+// closed). Now that those functions execute real SQL through tm.db.Exec,
+// a nil-typed-pointer would panic on first call — so this helper returns
+// a proper testify-mock with Exec/QueryRow pre-stubbed for success so
+// the legacy tests (which never asserted persistence anyway) continue
+// to compile + run unchanged. Tests that need to assert SQL execution
+// should use database.NewMockDatabase() directly + MockExecWithSQL etc.
+//
+// CONST-050(A): this helper lives in *_test.go and is therefore allowed
+// to fake the DB layer (unit-test-only scope).
+func MockDatabase() database.DatabaseInterface {
+	m := database.NewMockDatabase()
+	// Permissive defaults: any Exec / QueryRow / Query succeeds. Tests
+	// that need stricter expectations should construct their own mock.
+	m.MockExecSuccess(1)
+	return m
 }
 
 // MockRedis creates a mock Redis client for testing

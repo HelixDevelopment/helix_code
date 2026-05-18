@@ -1,13 +1,35 @@
 package task
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// ErrTaskPersistenceNotWired is returned by storeTaskInDB / updateTaskInDB /
+// updateWorkerInDB when the TaskManager has been constructed without a
+// database backend (`tm.db == nil`).
+//
+// Forensic anchor (round-31 §11.4 audit, 2026-05-18): the previous
+// implementations of these three functions were log-only stubs that
+// always returned nil — tasks and worker state were claimed-persisted
+// at API contract level but actually vanished across restarts. The
+// stubs have been replaced with real INSERT/UPDATE statements against
+// the schemas defined in internal/database/database.go (distributed_tasks
+// and workers). When no db backend is wired, callers now surface this
+// sentinel instead of the previous silent success, so the failure mode
+// is loud + auditable instead of bluffing.
+//
+// Tests under internal/task/ continue to use database.NewMockDatabase()
+// (test-only fakes are CONST-050(A)-compliant) and pre-mock Exec via
+// mockDB.MockExecSuccess(N); production must wire a real
+// *database.Database.
+var ErrTaskPersistenceNotWired = errors.New("helixcode task manager: persistence has not been wired into the manager (tm.db == nil) — previously storeTaskInDB/updateTaskInDB/updateWorkerInDB logged the intent and returned nil while no data was actually stored anywhere (§11.4 CRITICAL persistence-bluff: tasks and worker state vanished across restarts); construct the TaskManager via NewTaskManager(db, redisClient) with a non-nil *database.Database before invoking persist operations")
 
 // SplitTask intelligently splits a large task into subtasks
 func (tm *TaskManager) SplitTask(parentTaskID uuid.UUID, strategy SplitStrategy) ([]*Task, error) {
@@ -302,26 +324,204 @@ func (tm *TaskManager) getRequiredCapabilities(taskType TaskType) []string {
 }
 
 // Database operations
+//
+// All three functions below were previously log-only stubs returning nil
+// (round-31 §11.4 audit, 2026-05-18). The API contract claimed task and
+// worker state were persisted, but no SQL ever ran — restarts wiped
+// everything. They now execute real INSERT/UPDATE statements against
+// the schemas in internal/database/database.go (distributed_tasks and
+// workers), using the same DatabaseInterface (pgx-compatible) that
+// internal/task/manager_db.go already exercises.
+//
+// dbExecContext returns a fresh context with a 10-second timeout. The
+// public TaskManager methods (AssignTask, CompleteTask, FailTask, etc.)
+// do not yet take a context.Context — adding one is a breaking API
+// change and out of scope for this anti-bluff fix; the local timeout
+// prevents the DB call from hanging indefinitely.
+func (tm *TaskManager) dbExecContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 10*time.Second)
+}
 
+// storeTaskInDB inserts a brand-new task row into distributed_tasks.
+// Columns map 1:1 to the Task struct fields persisted by
+// (*DatabaseManager).CreateTask in manager_db.go.
 func (tm *TaskManager) storeTaskInDB(task *Task) error {
-	// For now, just log the operation
-	// In a real implementation, this would store the task in the database
-	log.Printf("Storing task %s in database", task.ID)
+	if tm.db == nil {
+		return fmt.Errorf("storeTaskInDB: %w", ErrTaskPersistenceNotWired)
+	}
+
+	ctx, cancel := tm.dbExecContext()
+	defer cancel()
+
+	// task_data is JSONB NOT NULL — defend the not-null invariant the
+	// same way DatabaseManager.CreateTask does (manager_db.go:55-57).
+	taskData := task.Data
+	if taskData == nil {
+		taskData = map[string]interface{}{}
+	}
+
+	const query = `
+		INSERT INTO distributed_tasks (
+			id, task_type, task_data, status, priority, criticality,
+			assigned_worker_id, original_worker_id, dependencies,
+			retry_count, max_retries, error_message, result_data,
+			checkpoint_data, started_at, completed_at,
+			created_at, updated_at
+		)
+		VALUES (
+			$1, $2, $3, $4, $5, $6,
+			$7, $8, $9,
+			$10, $11, $12, $13,
+			$14, $15, $16,
+			$17, $18
+		)
+	`
+
+	errorMessage := nullStringIfEmpty(task.ErrorMessage)
+	dependencies := task.Dependencies
+	if dependencies == nil {
+		dependencies = []uuid.UUID{}
+	}
+
+	if _, err := tm.db.Exec(ctx, query,
+		task.ID, string(task.Type), taskData, string(task.Status), int(task.Priority), string(task.Criticality),
+		task.AssignedWorker, task.OriginalWorker, dependencies,
+		task.RetryCount, task.MaxRetries, errorMessage, task.ResultData,
+		task.CheckpointData, task.StartedAt, task.CompletedAt,
+		task.CreatedAt, task.UpdatedAt,
+	); err != nil {
+		return fmt.Errorf("storeTaskInDB: failed to insert task %s: %w", task.ID, err)
+	}
+
+	log.Printf("Stored task %s in database", task.ID)
 	return nil
 }
 
+// updateTaskInDB persists the current in-memory state of a task back to
+// distributed_tasks. Every mutable column is written, mirroring how
+// (*DatabaseManager).StartTask / CompleteTask / FailTask write specific
+// subsets — this is the manager's generic "save everything" path used
+// by SplitTask, AssignTask, CompleteTask, FailTask after they mutate
+// the in-memory Task struct.
 func (tm *TaskManager) updateTaskInDB(task *Task) error {
-	// For now, just log the operation
-	// In a real implementation, this would update the task in the database
-	log.Printf("Updating task %s in database", task.ID)
+	if tm.db == nil {
+		return fmt.Errorf("updateTaskInDB: %w", ErrTaskPersistenceNotWired)
+	}
+
+	ctx, cancel := tm.dbExecContext()
+	defer cancel()
+
+	taskData := task.Data
+	if taskData == nil {
+		taskData = map[string]interface{}{}
+	}
+	dependencies := task.Dependencies
+	if dependencies == nil {
+		dependencies = []uuid.UUID{}
+	}
+	errorMessage := nullStringIfEmpty(task.ErrorMessage)
+
+	const query = `
+		UPDATE distributed_tasks SET
+			task_type = $2,
+			task_data = $3,
+			status = $4,
+			priority = $5,
+			criticality = $6,
+			assigned_worker_id = $7,
+			original_worker_id = $8,
+			dependencies = $9,
+			retry_count = $10,
+			max_retries = $11,
+			error_message = $12,
+			result_data = $13,
+			checkpoint_data = $14,
+			started_at = $15,
+			completed_at = $16,
+			updated_at = $17
+		WHERE id = $1
+	`
+
+	if _, err := tm.db.Exec(ctx, query,
+		task.ID,
+		string(task.Type), taskData, string(task.Status), int(task.Priority), string(task.Criticality),
+		task.AssignedWorker, task.OriginalWorker, dependencies,
+		task.RetryCount, task.MaxRetries, errorMessage, task.ResultData,
+		task.CheckpointData, task.StartedAt, task.CompletedAt,
+		task.UpdatedAt,
+	); err != nil {
+		return fmt.Errorf("updateTaskInDB: failed to update task %s: %w", task.ID, err)
+	}
+
+	log.Printf("Updated task %s in database", task.ID)
 	return nil
 }
 
+// updateWorkerInDB persists the current in-memory state of a worker
+// back to the workers table. Used by AssignTask / CompleteTask / FailTask
+// to keep current_tasks_count + health snapshot in sync with reality.
 func (tm *TaskManager) updateWorkerInDB(worker *Worker) error {
-	// For now, just log the operation
-	// In a real implementation, this would update the worker in the database
-	log.Printf("Updating worker %s in database", worker.ID)
+	if tm.db == nil {
+		return fmt.Errorf("updateWorkerInDB: %w", ErrTaskPersistenceNotWired)
+	}
+
+	ctx, cancel := tm.dbExecContext()
+	defer cancel()
+
+	// ssh_config + resources are JSONB NOT NULL — defend the invariant.
+	sshConfig := worker.SSHConfig
+	if sshConfig == nil {
+		sshConfig = map[string]interface{}{}
+	}
+	resources := worker.Resources
+	if resources == nil {
+		resources = map[string]interface{}{}
+	}
+	capabilities := worker.Capabilities
+	if capabilities == nil {
+		capabilities = []string{}
+	}
+
+	const query = `
+		UPDATE workers SET
+			hostname = $2,
+			display_name = $3,
+			ssh_config = $4,
+			capabilities = $5,
+			resources = $6,
+			status = $7,
+			health_status = $8,
+			last_heartbeat = $9,
+			cpu_usage_percent = $10,
+			memory_usage_percent = $11,
+			disk_usage_percent = $12,
+			current_tasks_count = $13,
+			max_concurrent_tasks = $14,
+			updated_at = $15
+		WHERE id = $1
+	`
+
+	if _, err := tm.db.Exec(ctx, query,
+		worker.ID,
+		worker.Hostname, worker.DisplayName, sshConfig, capabilities, resources,
+		worker.Status, worker.HealthStatus, worker.LastHeartbeat,
+		worker.CPUUsagePercent, worker.MemoryUsagePercent, worker.DiskUsagePercent,
+		worker.CurrentTasksCount, worker.MaxConcurrentTasks, worker.UpdatedAt,
+	); err != nil {
+		return fmt.Errorf("updateWorkerInDB: failed to update worker %s: %w", worker.ID, err)
+	}
+
+	log.Printf("Updated worker %s in database", worker.ID)
 	return nil
+}
+
+// nullStringIfEmpty returns nil for an empty string so the DB column
+// receives SQL NULL instead of '' — error_message is a nullable TEXT.
+func nullStringIfEmpty(s string) interface{} {
+	if s == "" {
+		return nil
+	}
+	return s
 }
 
 // Helper functions

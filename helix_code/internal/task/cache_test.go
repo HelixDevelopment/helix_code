@@ -388,6 +388,10 @@ func TestGetCachedWorkerTasks_NilRedis(t *testing.T) {
 // TestGetTaskWithCache tests the cache-aware task retrieval
 func TestGetTaskWithCache(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask now runs
+	// a real INSERT against tm.db (previously a log-only stub). Pre-mock
+	// Exec so the unit test doesn't crash when the call reaches mockDB.
+	mockDB.MockExecSuccess(1)
 	mockRedis := &redis.Client{}
 
 	tm := NewTaskManager(mockDB, mockRedis)
@@ -431,6 +435,10 @@ func TestGetTaskWithCache_NotFound(t *testing.T) {
 // TestUpdateTaskWithCache tests cache-aware task update
 func TestUpdateTaskWithCache(t *testing.T) {
 	mockDB := database.NewMockDatabase()
+	// Anti-bluff (round-31 §11.4 audit, 2026-05-18): CreateTask and the
+	// subsequent UpdateTaskWithCache both run real SQL (INSERT then UPDATE)
+	// through tm.db.Exec. Pre-mock so neither call crashes.
+	mockDB.MockExecSuccess(1)
 	// Redis client without config - will be disabled, testing no-op behavior
 	mockRedis := &redis.Client{}
 
