@@ -108,7 +108,10 @@ func (bus *EventBus) Subscribe(eventType EventType, handler EventHandler) {
 	}
 
 	bus.subscribers[eventType] = append(bus.subscribers[eventType], handler)
-	log.Printf("Event handler subscribed to: %s (total: %d handlers)", eventType, len(bus.subscribers[eventType]))
+	log.Printf("%s", tr(context.Background(), "internal_event_handler_subscribed_log", map[string]any{
+		"EventType": string(eventType),
+		"Count":     len(bus.subscribers[eventType]),
+	}))
 }
 
 // SubscribeMultiple subscribes a handler to multiple event types
@@ -124,7 +127,9 @@ func (bus *EventBus) Unsubscribe(eventType EventType) {
 	defer bus.mutex.Unlock()
 
 	delete(bus.subscribers, eventType)
-	log.Printf("All handlers unsubscribed from: %s", eventType)
+	log.Printf("%s", tr(context.Background(), "internal_event_handlers_unsubscribed_log", map[string]any{
+		"EventType": string(eventType),
+	}))
 }
 
 // Publish sends an event to all registered handlers
@@ -142,7 +147,9 @@ func (bus *EventBus) Publish(ctx context.Context, event Event) error {
 	bus.mutex.RUnlock()
 
 	if !exists || len(handlers) == 0 {
-		log.Printf("No subscribers for event type: %s", event.Type)
+		log.Printf("%s", tr(ctx, "internal_event_no_subscribers_log", map[string]any{
+			"EventType": string(event.Type),
+		}))
 		return nil
 	}
 
@@ -154,8 +161,14 @@ func (bus *EventBus) Publish(ctx context.Context, event Event) error {
 			h := handler // capture for goroutine
 			go func() {
 				if err := h(ctx, event); err != nil {
-					bus.logError(fmt.Errorf("async handler error for event %s: %w", event.Type, err))
-					log.Printf("Error handling event %s: %v", event.Type, err)
+					bus.logError(fmt.Errorf("%s", tr(ctx, "internal_event_async_handler_error", map[string]any{
+						"EventType": string(event.Type),
+						"Err":       err.Error(),
+					})))
+					log.Printf("%s", tr(ctx, "internal_event_async_handler_error_log", map[string]any{
+						"EventType": string(event.Type),
+						"Err":       err.Error(),
+					}))
 				}
 			}()
 		}
@@ -166,15 +179,27 @@ func (bus *EventBus) Publish(ctx context.Context, event Event) error {
 	var errors []string
 	for i, handler := range handlers {
 		if err := handler(ctx, event); err != nil {
-			errorMsg := fmt.Sprintf("handler %d failed: %v", i, err)
+			errorMsg := tr(ctx, "internal_event_sync_handler_failed", map[string]any{
+				"Index": i,
+				"Err":   err.Error(),
+			})
 			errors = append(errors, errorMsg)
-			bus.logError(fmt.Errorf("sync handler error for event %s: %w", event.Type, err))
-			log.Printf("Error handling event %s (handler %d): %v", event.Type, i, err)
+			bus.logError(fmt.Errorf("%s", tr(ctx, "internal_event_sync_handler_error", map[string]any{
+				"EventType": string(event.Type),
+				"Err":       err.Error(),
+			})))
+			log.Printf("%s", tr(ctx, "internal_event_sync_handler_error_log", map[string]any{
+				"EventType": string(event.Type),
+				"Index":     i,
+				"Err":       err.Error(),
+			}))
 		}
 	}
 
 	if len(errors) > 0 {
-		return fmt.Errorf("event handling errors: %v", errors)
+		return fmt.Errorf("%s", tr(ctx, "internal_event_handling_errors", map[string]any{
+			"Errors": fmt.Sprintf("%v", errors),
+		}))
 	}
 	return nil
 }
@@ -199,7 +224,9 @@ func (bus *EventBus) PublishAndWait(ctx context.Context, event Event) error {
 	bus.mutex.RUnlock()
 
 	if !exists || len(handlers) == 0 {
-		log.Printf("No subscribers for event type: %s", event.Type)
+		log.Printf("%s", tr(ctx, "internal_event_no_subscribers_log", map[string]any{
+			"EventType": string(event.Type),
+		}))
 		return nil
 	}
 
@@ -214,7 +241,10 @@ func (bus *EventBus) PublishAndWait(ctx context.Context, event Event) error {
 		go func() {
 			defer wg.Done()
 			if err := h(ctx, event); err != nil {
-				errorsChan <- fmt.Errorf("handler error for event %s: %w", event.Type, err)
+				errorsChan <- fmt.Errorf("%s", tr(ctx, "internal_event_wait_handler_error", map[string]any{
+					"EventType": string(event.Type),
+					"Err":       err.Error(),
+				}))
 			}
 		}()
 	}
@@ -229,7 +259,9 @@ func (bus *EventBus) PublishAndWait(ctx context.Context, event Event) error {
 	}
 
 	if len(errors) > 0 {
-		return fmt.Errorf("event handling errors: %v", errors)
+		return fmt.Errorf("%s", tr(ctx, "internal_event_handling_errors", map[string]any{
+			"Errors": fmt.Sprintf("%v", errors),
+		}))
 	}
 	return nil
 }

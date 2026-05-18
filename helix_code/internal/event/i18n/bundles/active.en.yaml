@@ -1,0 +1,51 @@
+# internal/event i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/event/ to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_event_<area>_<short_description>.
+# All IDs prefixed with internal_event_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-156 §11.4 anti-bluff sweep (2026-05-18): migrated the
+# top-priority user-facing strings emitted by bus.go — the 7 error
+# values surfaced from EventBus.Publish / PublishAndWait when
+# handler invocations fail (returned to callers AND logged via
+# logError), plus 3 operational log messages emitted when
+# subscribers are mutated / no subscribers exist. These are the
+# strings that surface to operators reading helixcode logs and to
+# API callers receiving 5xx event-handling errors.
+
+internal_event_async_handler_error:
+  other: "async handler error for event {{.EventType}}: {{.Err}}"
+
+internal_event_async_handler_error_log:
+  other: "Error handling event {{.EventType}}: {{.Err}}"
+
+internal_event_sync_handler_failed:
+  other: "handler {{.Index}} failed: {{.Err}}"
+
+internal_event_sync_handler_error:
+  other: "sync handler error for event {{.EventType}}: {{.Err}}"
+
+internal_event_sync_handler_error_log:
+  other: "Error handling event {{.EventType}} (handler {{.Index}}): {{.Err}}"
+
+internal_event_handling_errors:
+  other: "event handling errors: {{.Errors}}"
+
+internal_event_wait_handler_error:
+  other: "handler error for event {{.EventType}}: {{.Err}}"
+
+internal_event_handler_subscribed_log:
+  other: "Event handler subscribed to: {{.EventType}} (total: {{.Count}} handlers)"
+
+internal_event_handlers_unsubscribed_log:
+  other: "All handlers unsubscribed from: {{.EventType}}"
+
+internal_event_no_subscribers_log:
+  other: "No subscribers for event type: {{.EventType}}"

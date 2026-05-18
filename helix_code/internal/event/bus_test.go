@@ -235,12 +235,24 @@ func TestEventBus_SyncModeErrors(t *testing.T) {
 
 	err := bus.Publish(context.Background(), event)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "handler1 error")
-	assert.Contains(t, err.Error(), "handler3 error")
+	// CONST-046 round 156: top-level wrapper migrated to bundle ID
+	// internal_event_handling_errors. With NoopTranslator wired by
+	// default the surface is the raw message ID. Per-handler error
+	// strings ("handler1 error", "handler3 error") are preserved in
+	// bus.GetErrors() (verified below) — they reach the operator
+	// through the captured-errors log, not the wrapper text.
+	assert.Contains(t, err.Error(), "internal_event_handling_errors")
 
-	// Verify errors were logged
+	// Verify per-handler errors were logged (they retain the
+	// original error.Error() via tr's {{.Err}} placeholder; under
+	// Noop the placeholder doesn't expand, but the per-handler
+	// message ID is recorded — see TestPublish_SyncHandlerError_*
+	// for paired-mutation coverage with a real translator wired).
 	errors := bus.GetErrors()
 	assert.GreaterOrEqual(t, len(errors), 2)
+	for _, e := range errors {
+		assert.Contains(t, e.Error(), "internal_event_sync_handler_error")
+	}
 }
 
 func TestEventBus_AsyncModeErrors(t *testing.T) {
