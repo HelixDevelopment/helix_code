@@ -3,17 +3,20 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"syscall"
 	"text/tabwriter"
 	"time"
 
 	"dev.helix.code/internal/llm"
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
 
@@ -435,23 +438,168 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	}
 }
 
+// watchDebounceDefault is the default coalescing window applied to a burst of
+// filesystem events produced by editors that perform atomic saves
+// (Write + Rename + Chmod within a few milliseconds). 80 ms is short enough
+// to feel real-time to a human operator but long enough to collapse the
+// typical save burst on Linux/macOS/Windows into a single status refresh.
+const watchDebounceDefault = 80 * time.Millisecond
+
 // runWatch is the entry point for the `local_llm watch` subcommand.
 //
-// Honest contract (round-33 §11.4 anti-bluff sweep, 2026-05-18):
-// real fsnotify/inotify-based filesystem watching for provider
-// directory changes has NOT been wired in yet. Until it lands the
-// command transparently falls through to the polling-based monitor
-// loop (runMonitor). The banner makes the fallback explicit instead
-// of advertising "real-time" capability that the implementation does
-// not deliver. The previous implementation printed
-// "Changes will be displayed in real-time" and silently degraded to
-// polling, which was a CRITICAL §11.4 UX PASS-bluff —
-// CONST-035 / Article XI §11.9 / CONST-050(A).
+// Honest contract (round-42 §11.4 anti-bluff sweep, 2026-05-18 — supersedes
+// round-33's honest-fallback banner):
+//
+// Real filesystem-event watching is now wired via github.com/fsnotify/fsnotify
+// (inotify on Linux, kqueue on BSD/macOS, ReadDirectoryChangesW on Windows).
+// The four LocalLLMManager directories — baseDir, binaryDir, configDir,
+// dataDir — are added to the watcher; Write / Create / Remove / Rename
+// events trigger a debounced (watchDebounceDefault, default 80 ms) status
+// refresh. Chmod-only events are ignored to avoid spurious refreshes from
+// the manager's own permission-fixup logic. SIGINT/SIGTERM terminates the
+// loop cleanly via context cancellation; the watcher is always Close()d on
+// exit.
+//
+// CONST-035 / Article XI §11.9 / CONST-050(A): the previous implementation
+// (pre-round-33) advertised "Changes will be displayed in real-time" but
+// silently fell through to runMonitor's polling ticker. Round 33 made the
+// fallback honest in the banner. Round 42 (this change) delivers the real
+// capability the banner originally promised.
 func runWatch(cmd *cobra.Command, args []string) error {
-	fmt.Println("👀 Starting local LLM provider monitor (watch mode)…")
-	fmt.Println("Real filesystem-event watching (fsnotify) is not wired in yet;")
-	fmt.Println("falling through to polling-based status monitor. Press Ctrl+C to stop.")
-	return runMonitor(cmd, args)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigChan)
+
+	go func() {
+		select {
+		case <-sigChan:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
+
+	manager := llm.NewLocalLLMManager(localLLMDir)
+	if err := manager.Initialize(ctx); err != nil {
+		return fmt.Errorf("failed to initialize manager: %w", err)
+	}
+
+	baseDir := manager.GetBaseDir()
+	watchPaths := []string{
+		baseDir,
+		filepath.Join(baseDir, "bin"),
+		filepath.Join(baseDir, "config"),
+		filepath.Join(baseDir, "data"),
+	}
+
+	fmt.Println("👀 Starting local LLM provider watch (fsnotify, real filesystem events)…")
+	fmt.Printf("Watching %d paths under %s; events debounced %s. Press Ctrl+C to stop.\n",
+		len(watchPaths), baseDir, watchDebounceDefault)
+
+	return runWatchLoop(ctx, watchPaths, watchDebounceDefault, os.Stdout, func() {
+		clearScreen()
+		fmt.Fprintf(os.Stdout, "🔍 Local LLM Provider Status (fs-event triggered) — %s\n\n",
+			time.Now().Format("2006-01-02 15:04:05"))
+		if err := runStatus(cmd, args); err != nil {
+			fmt.Fprintf(os.Stdout, "❌ Error getting status: %v\n", err)
+		}
+	})
+}
+
+// runWatchLoop is the testable core of runWatch. It creates an fsnotify
+// watcher, registers every path in paths (non-existent paths surface as
+// wrapped errors), debounces inbound events into a single onChange
+// invocation per debounce window, and returns when ctx is cancelled or the
+// watcher fails irrecoverably.
+//
+// Filtering policy: Write / Create / Remove / Rename events trigger
+// onChange; Chmod-only events are ignored (CONST-050(A) — real behaviour,
+// not a fake: chmod-driven refreshes are operationally useless and were the
+// source of refresh storms during testing).
+//
+// Debounce policy: each qualifying event resets a time.Timer; onChange runs
+// once when the timer expires with no further events. This collapses the
+// classic editor-save burst (typically 2–5 events within 10 ms) into a
+// single status refresh.
+//
+// Lifecycle: the watcher is unconditionally Close()d on exit (defer); a
+// pending debounce timer is stopped on ctx cancellation to avoid a final
+// post-cancel refresh.
+func runWatchLoop(
+	ctx context.Context,
+	paths []string,
+	debounce time.Duration,
+	logOut io.Writer,
+	onChange func(),
+) error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("fsnotify.NewWatcher failed: %w", err)
+	}
+	defer watcher.Close()
+
+	for _, p := range paths {
+		if p == "" {
+			continue
+		}
+		if err := watcher.Add(p); err != nil {
+			return fmt.Errorf("fsnotify add %q: %w", p, err)
+		}
+	}
+
+	var (
+		timerMu sync.Mutex
+		timer   *time.Timer
+	)
+	schedule := func() {
+		timerMu.Lock()
+		defer timerMu.Unlock()
+		if timer != nil {
+			timer.Stop()
+		}
+		timer = time.AfterFunc(debounce, func() {
+			if onChange != nil {
+				onChange()
+			}
+		})
+	}
+	cancelTimer := func() {
+		timerMu.Lock()
+		defer timerMu.Unlock()
+		if timer != nil {
+			timer.Stop()
+			timer = nil
+		}
+	}
+
+	const interestingOps = fsnotify.Create | fsnotify.Write | fsnotify.Remove | fsnotify.Rename
+
+	for {
+		select {
+		case <-ctx.Done():
+			cancelTimer()
+			return nil
+		case ev, ok := <-watcher.Events:
+			if !ok {
+				cancelTimer()
+				return nil
+			}
+			if ev.Op&interestingOps == 0 {
+				continue
+			}
+			schedule()
+		case werr, ok := <-watcher.Errors:
+			if !ok {
+				cancelTimer()
+				return nil
+			}
+			if logOut != nil {
+				fmt.Fprintf(logOut, "watch: fsnotify error: %v\n", werr)
+			}
+		}
+	}
 }
 
 func clearScreen() {
