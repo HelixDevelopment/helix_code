@@ -1,0 +1,49 @@
+# internal/auth i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/auth/auth.go (and auth_db.go) to a message ID
+# resolved at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_auth_<area>_<short_description>. All
+# IDs prefixed with internal_auth_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-146 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# user-facing literals emitted by auth.go — the account-deactivated
+# / invalid-email / username + password validation messages, the
+# four "failed to ..." wrapped errors, and the unexpected-signing
+# JWT method message. Sentinel ErrX vars (errors.New) remain
+# untouched to preserve public API. Remaining auth_db.go fmt.Errorf
+# strings are deferred to a future round to stay under the size cap.
+
+internal_auth_account_deactivated:
+  other: "account is deactivated"
+
+internal_auth_invalid_email:
+  other: "invalid email address"
+
+internal_auth_username_length:
+  other: "username must be between 3 and 255 characters"
+
+internal_auth_password_too_short:
+  other: "password must be at least 8 characters"
+
+internal_auth_failed_hash_password:
+  other: "failed to hash password: {{.Err}}"
+
+internal_auth_failed_create_user:
+  other: "failed to create user: {{.Err}}"
+
+internal_auth_failed_update_last_login:
+  other: "failed to update last login: {{.Err}}"
+
+internal_auth_failed_generate_session_token:
+  other: "failed to generate session token: {{.Err}}"
+
+internal_auth_failed_create_session:
+  other: "failed to create session: {{.Err}}"
+
+internal_auth_unexpected_signing_method:
+  other: "unexpected signing method: {{.Alg}}"

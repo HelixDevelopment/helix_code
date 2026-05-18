@@ -126,7 +126,7 @@ func (s *AuthService) Register(ctx context.Context, username, email, password, d
 	// Hash password
 	passwordHash, err := s.hashPassword(password)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %v", err)
+		return nil, errors.New(tr(ctx, "internal_auth_failed_hash_password", map[string]any{"Err": err.Error()}))
 	}
 
 	// Create user
@@ -144,7 +144,7 @@ func (s *AuthService) Register(ctx context.Context, username, email, password, d
 
 	// Save user to database
 	if err := s.db.CreateUser(ctx, user, passwordHash); err != nil {
-		return nil, fmt.Errorf("failed to create user: %v", err)
+		return nil, errors.New(tr(ctx, "internal_auth_failed_create_user", map[string]any{"Err": err.Error()}))
 	}
 
 	return user, nil
@@ -164,7 +164,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, clientType,
 
 	// Check if user is active
 	if !user.IsActive {
-		return nil, nil, errors.New("account is deactivated")
+		return nil, nil, errors.New(tr(ctx, "internal_auth_account_deactivated", nil))
 	}
 
 	// Verify password
@@ -174,13 +174,13 @@ func (s *AuthService) Login(ctx context.Context, username, password, clientType,
 
 	// Update last login
 	if err := s.db.UpdateUserLastLogin(ctx, user.ID); err != nil {
-		return nil, nil, fmt.Errorf("failed to update last login: %v", err)
+		return nil, nil, errors.New(tr(ctx, "internal_auth_failed_update_last_login", map[string]any{"Err": err.Error()}))
 	}
 
 	// Create session
 	sessionToken, err := s.generateSessionToken()
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to generate session token: %v", err)
+		return nil, nil, errors.New(tr(ctx, "internal_auth_failed_generate_session_token", map[string]any{"Err": err.Error()}))
 	}
 
 	var ip net.IP
@@ -200,7 +200,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, clientType,
 	}
 
 	if err := s.db.CreateSession(ctx, session); err != nil {
-		return nil, nil, fmt.Errorf("failed to create session: %v", err)
+		return nil, nil, errors.New(tr(ctx, "internal_auth_failed_create_session", map[string]any{"Err": err.Error()}))
 	}
 
 	return session, user, nil
@@ -225,7 +225,7 @@ func (s *AuthService) VerifySession(ctx context.Context, sessionToken string) (*
 	}
 
 	if !user.IsActive {
-		return nil, errors.New("account is deactivated")
+		return nil, errors.New(tr(ctx, "internal_auth_account_deactivated", nil))
 	}
 
 	return user, nil
@@ -245,7 +245,7 @@ func (s *AuthService) LogoutAll(ctx context.Context, userID uuid.UUID) error {
 func (s *AuthService) UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error) {
 	// Validate email if provided
 	if email != "" && (len(email) < 5 || len(email) > 255 || !strings.Contains(email, "@")) {
-		return nil, errors.New("invalid email address")
+		return nil, errors.New(tr(ctx, "internal_auth_invalid_email", nil))
 	}
 
 	return s.db.UpdateUser(ctx, userID, displayName, email)
@@ -273,9 +273,10 @@ func (s *AuthService) GenerateJWT(user *User) (string, error) {
 // VerifyJWT verifies a JWT token and returns a minimal user from claims.
 // Use VerifyJWTWithDB for a complete user object from database.
 func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
+	ctx := context.Background()
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, errors.New(tr(ctx, "internal_auth_unexpected_signing_method", map[string]any{"Alg": token.Header["alg"]}))
 		}
 		return []byte(s.config.JWTSecret), nil
 	})
@@ -313,7 +314,7 @@ func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
 func (s *AuthService) VerifyJWTWithDB(ctx context.Context, tokenString string) (*User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, errors.New(tr(ctx, "internal_auth_unexpected_signing_method", map[string]any{"Alg": token.Header["alg"]}))
 		}
 		return []byte(s.config.JWTSecret), nil
 	})
@@ -341,7 +342,7 @@ func (s *AuthService) VerifyJWTWithDB(ctx context.Context, tokenString string) (
 
 		// Verify user is still active
 		if !user.IsActive {
-			return nil, errors.New("account is deactivated")
+			return nil, errors.New(tr(ctx, "internal_auth_account_deactivated", nil))
 		}
 
 		return user, nil
@@ -353,16 +354,17 @@ func (s *AuthService) VerifyJWTWithDB(ctx context.Context, tokenString string) (
 // Helper methods
 
 func (s *AuthService) validateRegistration(username, email, password string) error {
+	ctx := context.Background()
 	if len(username) < 3 || len(username) > 255 {
-		return errors.New("username must be between 3 and 255 characters")
+		return errors.New(tr(ctx, "internal_auth_username_length", nil))
 	}
 
 	if len(email) < 5 || len(email) > 255 || !strings.Contains(email, "@") {
-		return errors.New("invalid email address")
+		return errors.New(tr(ctx, "internal_auth_invalid_email", nil))
 	}
 
 	if len(password) < 8 {
-		return errors.New("password must be at least 8 characters")
+		return errors.New(tr(ctx, "internal_auth_password_too_short", nil))
 	}
 
 	return nil
