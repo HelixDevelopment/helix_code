@@ -29,6 +29,7 @@
 | 2026-05-19 | ISSUE-006 (partial): HelixMemory LOGIC-class FAIL cleanup | Bug | Fixed (→ Fixed.md) | 106 | 69016df + 6862cc7 | 6 FAIL/23 PASS → 0 FAIL/29 PASS. Single root cause: go.mod replace ../Memory → ../../vasic-digital/Memory (wrong depth). +5 LOC. Mutation verified |
 | 2026-05-19 | ISSUE-006 (partial): Planning LOGIC FAIL audit confirms clean | Task | Completed (→ Fixed.md) | 107 | (no-op) | 275 PASS / 0 FAIL / 20 SKIP-OK. Zero LOGIC FAILs needed fixing. Likely incidentally fixed by round 98 i18n migration. No commit per dispatch spec |
 | 2026-05-19 | CONST-046 i18n implemented-architecture overview doc | Task | Completed (→ Fixed.md) | 111 | 2bbd516 | 325 lines / 3048 words / 9 sections; 28 commit SHA citations + 14 file-path refs; zero [unverified] markings |
+| 2026-05-19 | Tracker HTML + PDF exports per §11.4.19 | Feature | Implemented (→ Fixed.md) | 110 | e028073 | pandoc 3.9 + weasyprint; 10 artefacts (4 HTML + 4 PDF + script + README ~160KB); validated + mutation-tested |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
