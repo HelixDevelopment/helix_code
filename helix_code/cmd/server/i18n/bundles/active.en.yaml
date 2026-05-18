@@ -1,0 +1,46 @@
+# cmd/server i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/server/main.go to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: server_<area>_<short_description>. All IDs
+# prefixed with server_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-134 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# user-facing startup/lifecycle/fatal strings from cmd/server/main.go
+# migrated. Anything fmt.Printf'd or log.Fatalf'd at process boundary
+# is observable by an end user reading the server's stdout/stderr.
+
+server_startup_banner_version:
+  other: "🚀 Starting HelixCode Server v{{.Version}}"
+
+server_startup_banner_build:
+  other: "📅 Build: {{.BuildTime}}"
+
+server_startup_banner_commit:
+  other: "🔧 Commit: {{.GitCommit}}"
+
+server_fatal_load_config:
+  other: "❌ Failed to load configuration: {{.Err}}"
+
+server_warn_db_init_skipped:
+  other: "⚠️  Failed to initialize database (continuing without): {{.Err}}"
+
+server_fatal_redis_init:
+  other: "❌ Failed to initialize Redis: {{.Err}}"
+
+server_runtime_http_start:
+  other: "🌐 Starting HTTP server on {{.Address}}"
+
+server_fatal_http_start:
+  other: "❌ Failed to start server: {{.Err}}"
+
+server_lifecycle_shutting_down:
+  other: "🛑 Shutting down server..."
+
+server_lifecycle_exited_properly:
+  other: "✅ Server exited properly"
