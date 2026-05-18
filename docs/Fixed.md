@@ -59,6 +59,7 @@
 | 2026-05-19 | helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) | Feature | Implemented (→ Fixed.md) | 137 | 4eba31b | tview/tcell TUI; formal report pending |
 | 2026-05-19 | helix_code/applications/ios infrastructure-only (Phase 4 round 31) | Feature | Implemented (→ Fixed.md) | 138 | 27d121b (mislabelled as round-139 due to race; CONST-043 preserved) | Swift native per CONST-052 Apple exemption; 6 tests PASS |
 | 2026-05-19 | helix_code/applications/android infrastructure-only (Phase 4 round 32) | Feature | Implemented (→ Fixed.md) | 139 | b5a9487 (re-commit after parallel 27d121b) | Android primarily native Kotlin/Java per CONST-052 language exemption; Go bridge surface minimal — infrastructure pattern |
+| 2026-05-19 | helix_code/applications/aurora_os × up to 10 migration (Phase 4 round 33) | Feature | Implemented (→ Fixed.md) | 140 | 75f35f6 | Aurora-OS platform; formal report pending |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
