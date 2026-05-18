@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os/exec"
@@ -966,10 +967,16 @@ func (po *PerformanceOptimizer) getCPUUsage() float64 {
 // replaced the fabrication with GPUUsageUnavailableSentinel (-1.0) +
 // logTelemetryGap() so the gap was loud instead of silent.
 //
-// Round 43 (this revision, 2026-05-18): wire REAL NVIDIA GPU telemetry
+// Round 43 (commit acffbf3, 2026-05-18): wire REAL NVIDIA GPU telemetry
 // via `nvidia-smi` shell-out, closing the sentinel for the NVIDIA case.
-// Other vendors (AMD ROCm, Apple Silicon IOReport, Intel Arc Level Zero)
-// are DEFERRED to future rounds and continue to surface the sentinel.
+//
+// Round 45 (this revision, 2026-05-18): extend to AMD GPUs via the
+// `rocm-smi --showuse --json` shell-out, organised as a probe chain.
+// Detection order is NVIDIA → AMD → sentinel; the first probe to return
+// a non-sentinel value wins. Apple Silicon (IOReport) and Intel Arc
+// (Level Zero) remain DEFERRED and continue to surface the sentinel for
+// those vendors. The hwProfile NIL-GPU branch still returns honest 0.0
+// ("no GPU at all", distinct from "GPU present but unmeasured").
 //
 // Implementation rationale (shell-out over cgo NVML):
 //   - The host has documented cgo / X11 / Xcursor header issues that
@@ -999,7 +1006,37 @@ func (po *PerformanceOptimizer) getGPUUsage() float64 {
 	if po.hwProfile == nil || po.hwProfile.GPU == nil {
 		return 0.0
 	}
-	return queryNvidiaGPUUsage()
+	return runGPUUsageProbeChain()
+}
+
+// runGPUUsageProbeChain executes the vendor probes in priority order.
+// Round-45 chain: NVIDIA (round-43) → AMD ROCm (round-45) → sentinel.
+// The first probe returning a non-sentinel value wins; if every probe
+// returns the sentinel the function logs a telemetry-gap notice and
+// returns the sentinel so callers can distinguish "unmeasured" from
+// "measured idle" (CONST-035 / Article XI §11.9 anti-bluff guarantee).
+//
+// Probe order rationale:
+//   - NVIDIA first because nvidia-smi is the more mature / faster path
+//     and an NVIDIA + ROCm dual-vendor host is exceedingly rare; when
+//     it happens, surfacing the NVIDIA reading is the dominant case.
+//   - AMD second because rocm-smi requires the ROCm stack which is
+//     less universally installed; LookPath is the cheap gate that keeps
+//     non-AMD hosts fast.
+//   - Future probes (Apple IOReport, Intel Level Zero) MUST be appended
+//     here, NEVER inserted at the head — preserving the existing order
+//     keeps existing dashboards' behaviour stable.
+func runGPUUsageProbeChain() float64 {
+	if v := queryNvidiaGPUUsage(); v != GPUUsageUnavailableSentinel {
+		return v
+	}
+	if v := queryAMDGPUUsage(); v != GPUUsageUnavailableSentinel {
+		return v
+	}
+	if gpuTelemetryLogger != nil {
+		gpuTelemetryLogger.Debug("no supported GPU telemetry source available (NVIDIA nvidia-smi + AMD rocm-smi both unavailable); returning GPUUsageUnavailableSentinel (round-45 §11.4 honest sentinel)")
+	}
+	return GPUUsageUnavailableSentinel
 }
 
 // GPUUsageUnavailableSentinel is returned by getGPUUsage() (and the
@@ -1148,6 +1185,178 @@ func resetGPUUsageCacheForTest() {
 	gpuUsageCache.value = 0
 	gpuUsageCache.taken = time.Time{}
 	gpuUsageCache.mu.Unlock()
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Round 45 — AMD ROCm GPU telemetry probe (sibling to round-43 NVIDIA).
+// ───────────────────────────────────────────────────────────────────────
+//
+// Forensic anchor: round 33 introduced GPUUsageUnavailableSentinel
+// (-1.0) so unmeasured-GPU paths surfaced loudly. Round 43 closed the
+// sentinel for NVIDIA via `nvidia-smi`. Round 45 closes it for AMD via
+// `rocm-smi --showuse --json` — the same shell-out discipline keeps
+// the binary cgo-free and avoids pulling a third-party ROCm Go SDK.
+//
+// Implementation rationale (shell-out over cgo / native SDK):
+//   - rocm-smi ships with the ROCm stack — zero build-time dependency,
+//     present on every machine that can actually use an AMD GPU.
+//   - --showuse --json produces a machine-stable shape: a top-level
+//     object keyed by card ID ("card0", "card1", ...), each value a
+//     sub-object whose GPU-utilisation key VARIES across ROCm versions
+//     ("GPU use (%)" on modern builds, "GPU%" on older builds,
+//     "gpu_utilization" on some packaging). The parser tries each in
+//     order to be tolerant of all in-the-wild shapes.
+//   - Stays consistent with the round-43 NVIDIA path: same timeout
+//     budget, same sentinel-on-any-failure contract, same dedicated
+//     telemetry logger channel.
+//
+// Multi-GPU aggregation: arithmetic MEAN of all cards (same rationale
+// as the round-43 NVIDIA path — "system GPU%" is the analogue to
+// system CPU%).
+//
+// Error contract — every failure path returns GPUUsageUnavailableSentinel
+// (-1.0). The function NEVER returns a fabricated number on the error
+// path. CONST-035 / CONST-050(A) / Article XI §11.9 anti-bluff guarantee.
+//
+// Caching: round-45 deliberately does NOT add a second per-vendor
+// cache. The runGPUUsageProbeChain wrapper invokes queryNvidiaGPUUsage
+// first; that probe's existing 1-second TTL cache covers the dominant
+// hot-path. The AMD branch is only reached when NVIDIA returns the
+// sentinel — typically a non-NVIDIA host where the AMD probe runs at
+// the metric-collection cadence (already bounded). Adding a parallel
+// AMD cache would couple two unrelated TTLs; if AMD-side cache becomes
+// necessary it will be added in a future round with its own contract.
+
+// rocmSmiQueryTimeout caps the rocm-smi shell-out. Same 2-second
+// budget as nvidia-smi — typical rocm-smi completion is 30-100ms,
+// 2s covers ROCm driver warmup on first invocation.
+const rocmSmiQueryTimeout = 2 * time.Second
+
+// rocmSmiCommand is overridable for tests. Production code MUST use
+// the exec.CommandContext factory; tests inject a fake via PATH
+// manipulation (t.Setenv("PATH", t.TempDir()) + fake script) so the
+// real exec.CommandContext code path runs against a hermetic binary —
+// CONST-050(A) compliant (the fake script lives in t.TempDir, not
+// production source).
+var rocmSmiCommand = func(ctx context.Context) *exec.Cmd {
+	return exec.CommandContext(ctx, "rocm-smi", "--showuse", "--json")
+}
+
+// rocmUtilisationKeys is the ordered list of keys to try when reading
+// per-card GPU utilisation from rocm-smi JSON output. ROCm versions
+// disagree on the key name; the parser walks this list and uses the
+// first one present. Append-only: new variants discovered in the
+// wild should be added at the END so existing version semantics stay
+// stable.
+var rocmUtilisationKeys = []string{
+	"GPU use (%)",
+	"GPU%",
+	"gpu_utilization",
+}
+
+// queryAMDGPUUsage performs the LookPath gate + shell-out + JSON parse
+// for AMD ROCm GPUs. Returns GPUUsageUnavailableSentinel on every
+// error path; returns the mean utilisation [0.0, 100.0] on success.
+func queryAMDGPUUsage() float64 {
+	// Pre-flight: rocm-smi must exist on PATH. Cheap LookPath check
+	// avoids the exec spawn overhead on non-AMD hosts.
+	if _, err := exec.LookPath("rocm-smi"); err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Debug("rocm-smi not found in PATH; AMD GPU telemetry disabled, returning sentinel (round-45 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), rocmSmiQueryTimeout)
+	defer cancel()
+
+	out, err := rocmSmiCommand(ctx).Output()
+	if err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("rocm-smi probe failed: %v; returning sentinel (round-45 §11.4 honest sentinel)", err)
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	mean, ok := parseRocmSmiUtilization(out)
+	if !ok {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("rocm-smi output parse failed: %q; returning sentinel (round-45 §11.4 honest sentinel)", string(out))
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	return mean
+}
+
+// parseRocmSmiUtilization extracts the mean GPU utilisation from the
+// rocm-smi --showuse --json output. Top-level keys are card IDs
+// ("card0", "card1", ...) whose values are string-keyed sub-objects.
+// The utilisation value lives under one of rocmUtilisationKeys; the
+// parser tries each key in order. Values are strings (rocm-smi emits
+// "23" not 23) so a strconv.ParseFloat is required.
+//
+// Returns (mean, true) on success; (0, false) when:
+//   - JSON is malformed.
+//   - Zero top-level entries.
+//   - No card produces a parseable utilisation under any known key.
+//   - Any parsed value is out of [0, 100].
+//
+// Defensive: a single garbage card poisons the whole reading. Same
+// rationale as the round-43 NVIDIA parser — silently dropping bad
+// readings masks driver bugs.
+func parseRocmSmiUtilization(raw []byte) (float64, bool) {
+	if len(bytes.TrimSpace(raw)) == 0 {
+		return 0, false
+	}
+
+	var doc map[string]map[string]string
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		return 0, false
+	}
+	if len(doc) == 0 {
+		return 0, false
+	}
+
+	var sum float64
+	var count int
+	for cardID, fields := range doc {
+		// Skip top-level non-card entries some rocm-smi versions emit
+		// (e.g. "system": {...}). Card keys begin with "card".
+		if !strings.HasPrefix(cardID, "card") {
+			continue
+		}
+		raw, ok := lookupRocmUtilisation(fields)
+		if !ok {
+			// Card present but no recognised utilisation key — refuse
+			// to silently drop; signal failure to caller.
+			return 0, false
+		}
+		v, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
+		if err != nil {
+			return 0, false
+		}
+		if v < 0 || v > 100 {
+			return 0, false
+		}
+		sum += v
+		count++
+	}
+	if count == 0 {
+		return 0, false
+	}
+	return sum / float64(count), true
+}
+
+// lookupRocmUtilisation walks rocmUtilisationKeys in order, returning
+// the first value found. Returns ("", false) if no known key matches.
+func lookupRocmUtilisation(fields map[string]string) (string, bool) {
+	for _, key := range rocmUtilisationKeys {
+		if v, ok := fields[key]; ok {
+			return v, true
+		}
+	}
+	return "", false
 }
 
 func (po *PerformanceOptimizer) getCacheHitRate() float64 {
