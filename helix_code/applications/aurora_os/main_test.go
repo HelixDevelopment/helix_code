@@ -3,10 +3,101 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"testing"
 
+	"dev.helix.code/applications/aurora_os/i18n"
 	"github.com/stretchr/testify/assert"
 )
+
+// sentinelTranslator is a unit-test-only stub (CONST-050(A): mocks
+// allowed in *_test.go) that wraps every message ID in a recognisable
+// sentinel envelope. Call-site tests use this to PROVE the migrated
+// expression actually goes through Translator.T — a bluff-resistant
+// alternative to grepping for "i18n" in the source.
+type sentinelTranslator struct {
+	calls []string
+}
+
+func (s *sentinelTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	s.calls = append(s.calls, id)
+	return "<SENTINEL:" + id + ">", nil
+}
+
+func (s *sentinelTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	s.calls = append(s.calls, id)
+	return "<SENTINEL:" + id + ">", nil
+}
+
+// errTranslator simulates a Translator.T failure so we can assert
+// auroraApp.t() falls back to the literal message ID (loud echo)
+// rather than returning an empty string and silently breaking the
+// UI — that would be a §11.4 PASS-bluff at the i18n error path.
+type errTranslator struct{}
+
+func (errTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	return "", errors.New("translator boom")
+}
+func (errTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return "", errors.New("translator boom")
+}
+
+// minimalAuroraAppForT builds the smallest AuroraApp value needed to
+// exercise auroraApp.t() without booting Fyne. The full NewAuroraApp
+// constructor calls app.New() which requires a display environment;
+// these tests target ONLY the i18n helper so they construct the
+// struct directly with the NoopTranslator default.
+func minimalAuroraAppForT() *AuroraApp {
+	return &AuroraApp{translator: i18n.NoopTranslator{}}
+}
+
+func TestAuroraApp_NoopTranslator_DefaultIsLoudEcho(t *testing.T) {
+	auroraApp := minimalAuroraAppForT()
+	// Round-140 §11.4: the NoopTranslator default MUST loud-echo
+	// the message ID so a missing SetTranslator call never produces
+	// a silently-empty UI element.
+	assert.Equal(t, "aurora_os_window_title", auroraApp.t("aurora_os_window_title"))
+}
+
+func TestAuroraApp_SetTranslator_InstallsCustom(t *testing.T) {
+	auroraApp := minimalAuroraAppForT()
+	tr := &sentinelTranslator{}
+	auroraApp.SetTranslator(tr)
+	got := auroraApp.t("aurora_os_tab_aurora_dashboard")
+	assert.Equal(t, "<SENTINEL:aurora_os_tab_aurora_dashboard>", got,
+		"auroraApp.t() must route through the injected Translator")
+	assert.Equal(t, []string{"aurora_os_tab_aurora_dashboard"}, tr.calls,
+		"sentinelTranslator must record the message ID it was asked to resolve")
+}
+
+func TestAuroraApp_SetTranslator_NilPreservesDefault(t *testing.T) {
+	auroraApp := minimalAuroraAppForT()
+	defaultTr := auroraApp.translator
+	auroraApp.SetTranslator(nil)
+	assert.Equal(t, defaultTr, auroraApp.translator,
+		"SetTranslator(nil) must NOT destroy the NoopTranslator safety net")
+	// And auroraApp.t() must still yield a loud echo of the ID.
+	assert.Equal(t, "aurora_os_window_title", auroraApp.t("aurora_os_window_title"))
+}
+
+func TestAuroraApp_T_FallsBackToIDOnError(t *testing.T) {
+	auroraApp := minimalAuroraAppForT()
+	auroraApp.SetTranslator(errTranslator{})
+	got := auroraApp.t("aurora_os_tab_security")
+	assert.Equal(t, "aurora_os_tab_security", got,
+		"auroraApp.t() must loud-echo the ID when Translator.T returns an error")
+}
+
+// Ensure the i18n package's NoopTranslator (the constructor default)
+// echoes the ID — paired sanity check against the in-package test in
+// applications/aurora_os/i18n/translator_test.go.
+func TestAuroraApp_NoopTranslator_LoudEcho(t *testing.T) {
+	tr := i18n.NoopTranslator{}
+	got, err := tr.T(context.Background(), "aurora_os_tab_aurora_dashboard", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "aurora_os_tab_aurora_dashboard", got)
+}
 
 func TestAuroraAppCreation(t *testing.T) {
 	// Test that we can create the basic structs without panicking

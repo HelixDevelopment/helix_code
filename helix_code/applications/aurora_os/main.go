@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"dev.helix.code/applications/aurora_os/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
@@ -229,6 +230,13 @@ type AuroraApp struct {
 	// Update ticker for real-time data
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+
+	// translator resolves user-facing strings per CONST-046
+	// (round-140 §11.4 migration). Defaults to NoopTranslator
+	// (loud echo of message IDs) until SetTranslator wires a real
+	// *i18nadapter.Translator at boot. Never nil after
+	// NewAuroraApp returns.
+	translator i18n.Translator
 }
 
 // AuroraIntegration handles Aurora OS specific integrations
@@ -315,7 +323,35 @@ func NewAuroraApp() *AuroraApp {
 		sessions:        make([]*session.Session, 0),
 		llmProviders:    make([]string, 0),
 		stopUpdate:      make(chan struct{}),
+		translator:      i18n.NoopTranslator{},
 	}
+}
+
+// SetTranslator injects the runtime Translator (per CONST-046
+// round-140). Passing nil is a no-op — the NoopTranslator default
+// installed by NewAuroraApp is preserved so the loud-echo safety
+// net never disappears silently. helix_code wires
+// *i18nadapter.Translator at boot.
+func (auroraApp *AuroraApp) SetTranslator(t i18n.Translator) {
+	if t == nil {
+		return
+	}
+	auroraApp.translator = t
+}
+
+// t is a tiny call-site helper that resolves a message ID through
+// the injected Translator and falls back to the literal id on error
+// (loud echo — never silently swallow). Centralising the
+// boilerplate keeps migrated call sites a single expression long.
+func (auroraApp *AuroraApp) t(id string) string {
+	if auroraApp.translator == nil {
+		return id
+	}
+	got, err := auroraApp.translator.T(context.Background(), id, nil)
+	if err != nil || got == "" {
+		return id
+	}
+	return got
 }
 
 // Initialize sets up the Aurora OS application
@@ -455,22 +491,26 @@ func (auroraApp *AuroraApp) refreshData() {
 
 // setupUI initializes the user interface with Aurora OS optimizations
 func (auroraApp *AuroraApp) setupUI() {
-	// Create main window with Aurora OS branding
-	auroraApp.mainWindow = auroraApp.fyneApp.NewWindow("HelixCode - Aurora OS Edition")
+	// Create main window with Aurora OS branding. Window title +
+	// every top-level tab label resolved via i18n.Translator per
+	// CONST-046 round-140. Card titles, button labels, and dialog
+	// titles deeper in the UI are intentionally kept hardcoded in
+	// this round and tracked for migration in later rounds.
+	auroraApp.mainWindow = auroraApp.fyneApp.NewWindow(auroraApp.t("aurora_os_window_title"))
 	auroraApp.mainWindow.SetMaster()
 	auroraApp.mainWindow.Resize(fyne.NewSize(1400, 900)) // Larger for Aurora OS displays
 
 	// Create tabs with Aurora OS specific tabs
 	auroraApp.tabs = container.NewAppTabs(
-		container.NewTabItem("Aurora Dashboard", auroraApp.createAuroraDashboardTab()),
-		container.NewTabItem("Tasks", auroraApp.createTasksTab()),
-		container.NewTabItem("Workers", auroraApp.createWorkersTab()),
-		container.NewTabItem("Aurora System", auroraApp.createAuroraSystemTab()),
-		container.NewTabItem("Security", auroraApp.createAuroraSecurityTab()),
-		container.NewTabItem("Projects", auroraApp.createProjectsTab()),
-		container.NewTabItem("Sessions", auroraApp.createSessionsTab()),
-		container.NewTabItem("LLM", auroraApp.createLLMTab()),
-		container.NewTabItem("Settings", auroraApp.createSettingsTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_aurora_dashboard"), auroraApp.createAuroraDashboardTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_tasks"), auroraApp.createTasksTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_workers"), auroraApp.createWorkersTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_aurora_system"), auroraApp.createAuroraSystemTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_security"), auroraApp.createAuroraSecurityTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_projects"), auroraApp.createProjectsTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_sessions"), auroraApp.createSessionsTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_llm"), auroraApp.createLLMTab()),
+		container.NewTabItem(auroraApp.t("aurora_os_tab_settings"), auroraApp.createSettingsTab()),
 	)
 
 	// Create enhanced status bar for Aurora OS

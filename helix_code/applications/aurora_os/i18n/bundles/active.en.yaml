@@ -1,0 +1,47 @@
+# aurora_os i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/applications/aurora_os/main.go to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: aurora_os_<area>_<short_description>. All IDs
+# prefixed with aurora_os_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-140 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# main-window strings migrated — the OS-window title plus the nine
+# top-level tab labels that anchor every navigation gesture in the
+# Aurora OS Fyne client. Remaining hardcoded strings (card titles,
+# button labels, dialog titles) tracked for future rounds.
+
+aurora_os_window_title:
+  other: "HelixCode - Aurora OS Edition"
+
+aurora_os_tab_aurora_dashboard:
+  other: "Aurora Dashboard"
+
+aurora_os_tab_tasks:
+  other: "Tasks"
+
+aurora_os_tab_workers:
+  other: "Workers"
+
+aurora_os_tab_aurora_system:
+  other: "Aurora System"
+
+aurora_os_tab_security:
+  other: "Security"
+
+aurora_os_tab_projects:
+  other: "Projects"
+
+aurora_os_tab_sessions:
+  other: "Sessions"
+
+aurora_os_tab_llm:
+  other: "LLM"
+
+aurora_os_tab_settings:
+  other: "Settings"
