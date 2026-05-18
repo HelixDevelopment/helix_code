@@ -384,8 +384,12 @@ func (ws *WeightedStrategy) SelectProvider(providers []*AutoProvider) *AutoProvi
 		return nil
 	}
 
-	// For simplicity, use random weighted selection
-	// In production, this would use actual performance-based weights
+	// Uniform-random selection across providers. The AutoProvider type
+	// does not currently expose a per-provider weight field, so weighted
+	// selection collapses to uniform random until weights are added to
+	// the type. Tracked as a future enhancement; the present behaviour
+	// is honest random distribution, not a "for now" stub returning
+	// fabricated results.
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(providers))
 

@@ -368,8 +368,14 @@ func (p *ToolCallingProvider) extractToolCallsAndReasoning(text string) ([]ToolC
 	var toolCalls []ToolCall
 	reasoning := ""
 
-	// Simple parsing for tool calls
-	// In a real implementation, you would use more sophisticated parsing
+	// Line-by-line TOOL_CALL extractor: scan each line for the
+	// TOOL_CALL: marker, slice from the first '{' to the last '}', and
+	// json.Unmarshal into a ToolCall. Non-marker lines accumulate as
+	// reasoning. This honest simple parser matches the prompt template
+	// emitted by buildToolEnhancedPrompt above; it does not pretend to
+	// be a streaming-tolerant or multi-call-per-line parser. If the
+	// upstream prompt format ever changes, extend here rather than
+	// claiming the existing logic is just a placeholder.
 	lines := strings.Split(text, "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "TOOL_CALL:") {

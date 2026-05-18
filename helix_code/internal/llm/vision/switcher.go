@@ -28,8 +28,40 @@ type VisionSwitchManager struct {
 	currentModel  *Model
 	originalModel *Model
 	switchActive  bool
+	prompter      ConfirmationPrompter
 	mu            sync.RWMutex
 }
+
+// ConfirmationPrompter abstracts the user-confirmation surface used when
+// VisionSwitchManager.config.RequireConfirm is true. Production callers
+// inject an implementation that performs the real interactive prompt
+// (TUI dialogue, IDE modal, web confirm endpoint, etc.). When no
+// prompter is wired, ConfirmSwitch on the manager surfaces
+// ErrVisionConfirmationPrompterNotConfigured loudly instead of silently
+// fabricating UserConfirmed=true (the historical §11.4 bluff).
+type ConfirmationPrompter interface {
+	ConfirmVisionSwitch(ctx context.Context, from, to *Model) (bool, error)
+}
+
+// SetConfirmationPrompter wires a ConfirmationPrompter so CheckAndSwitch
+// can obtain real user confirmation when RequireConfirm is enabled.
+func (v *VisionSwitchManager) SetConfirmationPrompter(p ConfirmationPrompter) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.prompter = p
+}
+
+// ErrVisionConfirmationPrompterNotConfigured surfaces the historical
+// §11.4 bluff in CheckAndSwitch where RequireConfirm=true silently
+// fabricated UserConfirmed=true (Article XI §11.9 / CONST-035 /
+// CONST-050(A)). When the operator demands confirmation but no
+// ConfirmationPrompter is wired via SetConfirmationPrompter, the
+// historical code lied to monitoring by certifying confirmation that
+// no user ever gave. This sentinel surfaces that gap.
+var ErrVisionConfirmationPrompterNotConfigured = fmt.Errorf(
+	"vision: RequireConfirm=true but no ConfirmationPrompter wired via SetConfirmationPrompter — " +
+		"call SetConfirmationPrompter with a real interactive prompter, or set RequireConfirm=false " +
+		"if auto-switch is acceptable (§11.4 PASS-bluff removed)")
 
 // SwitchResult contains the result of switch processing
 type SwitchResult struct {
@@ -162,13 +194,26 @@ func (v *VisionSwitchManager) CheckAndSwitch(ctx context.Context, hasImages bool
 		return nil, fmt.Errorf("no vision-capable model found: %w", err)
 	}
 
-	// If confirmation required, set flag
+	// If confirmation required, obtain it through the injected prompter.
+	// The previous code unconditionally set UserConfirmed=true even when
+	// RequireConfirm was true — a §11.4 PASS-bluff that certified
+	// confirmation that no user ever gave. With no prompter wired,
+	// surface ErrVisionConfirmationPrompterNotConfigured.
 	result.RequiredConfirm = v.config.RequireConfirm
 	if v.config.RequireConfirm {
-		// In a real implementation, this would prompt the user
-		// For now, we'll assume confirmation
-		result.UserConfirmed = true
+		v.mu.RLock()
+		prompter := v.prompter
+		v.mu.RUnlock()
+		if prompter == nil {
+			return nil, ErrVisionConfirmationPrompterNotConfigured
+		}
+		confirmed, err := prompter.ConfirmVisionSwitch(ctx, currentModel, visionModel)
+		if err != nil {
+			return nil, fmt.Errorf("vision confirmation prompter failed: %w", err)
+		}
+		result.UserConfirmed = confirmed
 	} else {
+		// No confirmation gate; auto-approve.
 		result.UserConfirmed = true
 	}
 

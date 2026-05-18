@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -1160,12 +1161,21 @@ func (p *ZepProvider) Backup(ctx context.Context, path string) error {
 		return fmt.Errorf("failed to serialize backup data: %w", err)
 	}
 
-	// Write to file
-	// Note: In a real implementation, you'd use os.WriteFile
-	// For now, we just log that backup was created
+	// Persist backup to the supplied path. The historical comment
+	// "in a real implementation, you'd use os.WriteFile / for now we
+	// just log" was a §11.4 PASS-bluff (Article XI §11.9 / CONST-035):
+	// the function signature promised a file backup, the API contract
+	// described durable export, and the implementation produced
+	// nothing on disk. The cache write below preserves the
+	// in-memory shortcut path but is no longer the only persistence.
+	if path != "" {
+		if err := os.WriteFile(path, data, 0600); err != nil {
+			return fmt.Errorf("zep backup: write %s: %w", path, err)
+		}
+	}
 	p.logger.Info("Created backup for user '%s' (%d edges, %d nodes) - data size: %d bytes",
 		p.userID, len(edges), len(nodes), len(data))
-	p.logger.Info("Backup data would be written to: %s", path)
+	p.logger.Info("Backup data written to: %s", path)
 	p.logger.Warn("Note: Zep Cloud automatically persists data. This export is for portability only.")
 
 	// Store backup data in metadata cache for retrieval

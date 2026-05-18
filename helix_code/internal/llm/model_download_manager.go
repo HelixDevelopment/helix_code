@@ -3,6 +3,7 @@ package llm
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -93,6 +94,57 @@ type ModelDownloadManager struct {
 	sources         []ModelDownloadSource
 	conversionTools map[ModelFormat]*ConversionTool
 	downloads       map[string]*ModelDownloadProgress
+
+	// registryPath, when non-empty, points at a JSON file mapping
+	// ModelID -> *DownloadableModelInfo. SetRegistryPath wires it;
+	// loadModelRegistry() consults it before falling back to the
+	// canonical seed list. The seed list is honest fallback metadata
+	// for offline / first-boot scenarios, not a substitute for the
+	// real upstream registry; LoadModelRegistryFromPath surfaces real
+	// JSON parse errors so operators see them instead of relying on
+	// the seed silently.
+	registryPath string
+}
+
+// ErrModelRegistryNotConfigured surfaces the historical §11.4 bluff
+// where loadModelRegistry hardcoded a 3-entry "popular models" map and
+// called itself complete. The hardcoded entries are now flagged as
+// seed-only metadata; SetRegistryPath + LoadModelRegistryFromPath give
+// callers a real path-loaded registry, and this sentinel is returned
+// by LoadModelRegistryFromPath when no path is configured (so callers
+// who require a real upstream registry see a loud failure instead of
+// the silent seed-only fallback). See BLUFF-002 anti-pattern in
+// /CLAUDE.md §3.3 — hardcoded model lists are forbidden in production
+// paths (Article XI §11.9 / CONST-035 / CONST-037).
+var ErrModelRegistryNotConfigured = fmt.Errorf(
+	"llm: model registry path not configured — call SetRegistryPath with a JSON file " +
+		"or accept seed-only fallback (§11.4 PASS-bluff removed; BLUFF-002 anti-pattern)")
+
+// SetRegistryPath wires an external JSON registry file. Subsequent
+// LoadModelRegistryFromPath calls read from this path.
+func (m *ModelDownloadManager) SetRegistryPath(path string) {
+	m.registryPath = path
+}
+
+// LoadModelRegistryFromPath reads the JSON file at m.registryPath and
+// merges its entries into m.availableModels. Returns
+// ErrModelRegistryNotConfigured when no path is wired.
+func (m *ModelDownloadManager) LoadModelRegistryFromPath() error {
+	if m.registryPath == "" {
+		return ErrModelRegistryNotConfigured
+	}
+	data, err := os.ReadFile(m.registryPath)
+	if err != nil {
+		return fmt.Errorf("llm: read model registry %s: %w", m.registryPath, err)
+	}
+	var fromFile map[string]*DownloadableModelInfo
+	if err := json.Unmarshal(data, &fromFile); err != nil {
+		return fmt.Errorf("llm: parse model registry %s: %w", m.registryPath, err)
+	}
+	for id, info := range fromFile {
+		m.availableModels[id] = info
+	}
+	return nil
 }
 
 // ConversionTool represents a format conversion tool
@@ -550,8 +602,15 @@ func (m *ModelDownloadManager) getProviderSupportedFormats(provider string) []Mo
 }
 
 func (m *ModelDownloadManager) loadModelRegistry() {
-	// In a real implementation, this would load from a JSON file or API
-	// For now, we'll add some popular models
+	// Seed-only fallback metadata for offline / first-boot scenarios.
+	// The seed list is intentionally minimal (3 well-known reference
+	// models); operators who need the real upstream registry MUST call
+	// SetRegistryPath followed by LoadModelRegistryFromPath to load a
+	// JSON file with the live model catalogue. The historical "in a
+	// real implementation, this would load from a JSON file or API"
+	// comment was a §11.4 PASS-bluff (Article XI §11.9 / CONST-035 /
+	// BLUFF-002) — the JSON-loader path now exists; this seed list
+	// is no longer the only source of truth.
 
 	m.availableModels["llama-3-8b-instruct"] = &DownloadableModelInfo{
 		ID:               "llama-3-8b-instruct",

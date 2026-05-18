@@ -3,6 +3,7 @@ package vision
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -406,6 +407,114 @@ func TestAutoSwitch(t *testing.T) {
 			t.Error("expected switch to be active")
 		}
 	})
+}
+
+// TestVisionSwitch_RequireConfirm_NoPrompterReturnsSentinel asserts the
+// round-32 §11.4 PASS-bluff guard: when RequireConfirm=true but no
+// ConfirmationPrompter has been wired via SetConfirmationPrompter,
+// CheckAndSwitch MUST return ErrVisionConfirmationPrompterNotConfigured
+// instead of fabricating UserConfirmed=true. Article XI §11.9 /
+// CONST-035 / CONST-050(A) — pins the loud-fail contract.
+func TestVisionSwitch_RequireConfirm_NoPrompterReturnsSentinel(t *testing.T) {
+	registry := NewModelRegistry()
+	visionModel := &Model{
+		ID:   "vision-model",
+		Name: "Vision-Capable Model",
+		Capabilities: &Capabilities{
+			SupportsVision: true,
+		},
+	}
+	if err := registry.Register(visionModel); err != nil {
+		t.Fatalf("registry.Register: %v", err)
+	}
+
+	config := DefaultConfig()
+	config.RequireConfirm = true // demand confirmation
+
+	manager, err := NewVisionSwitchManager(config, registry)
+	if err != nil {
+		t.Fatalf("NewVisionSwitchManager() error = %v", err)
+	}
+
+	// No SetConfirmationPrompter call — sentinel must surface.
+	textModel := &Model{
+		ID:   "text-model",
+		Name: "Text Only Model",
+		Capabilities: &Capabilities{
+			SupportsVision: false,
+		},
+	}
+	manager.mu.Lock()
+	manager.currentModel = textModel
+	manager.mu.Unlock()
+
+	_, err = manager.CheckAndSwitch(context.Background(), true)
+	if !errors.Is(err, ErrVisionConfirmationPrompterNotConfigured) {
+		t.Fatalf("expected ErrVisionConfirmationPrompterNotConfigured, got %v (§11.4 PASS-bluff regression)", err)
+	}
+}
+
+// stubVisionPrompter is a CONST-050(A) unit-test-only ConfirmationPrompter
+// used to assert the wire-through path. NOT permitted in production code.
+type stubVisionPrompter struct {
+	confirmed bool
+	err       error
+	called    bool
+}
+
+func (s *stubVisionPrompter) ConfirmVisionSwitch(ctx context.Context, from, to *Model) (bool, error) {
+	s.called = true
+	return s.confirmed, s.err
+}
+
+// TestVisionSwitch_RequireConfirm_WithPrompterRoutesThroughIt asserts
+// that when a ConfirmationPrompter is wired, CheckAndSwitch routes to
+// it rather than the sentinel — the wire-through invariant matching
+// the round-31 ActionHandler injection pattern.
+func TestVisionSwitch_RequireConfirm_WithPrompterRoutesThroughIt(t *testing.T) {
+	registry := NewModelRegistry()
+	visionModel := &Model{
+		ID:           "vision-model",
+		Name:         "Vision-Capable Model",
+		Capabilities: &Capabilities{SupportsVision: true},
+	}
+	if err := registry.Register(visionModel); err != nil {
+		t.Fatalf("registry.Register: %v", err)
+	}
+
+	config := DefaultConfig()
+	config.RequireConfirm = true
+
+	manager, err := NewVisionSwitchManager(config, registry)
+	if err != nil {
+		t.Fatalf("NewVisionSwitchManager() error = %v", err)
+	}
+
+	prompter := &stubVisionPrompter{confirmed: true}
+	manager.SetConfirmationPrompter(prompter)
+
+	textModel := &Model{
+		ID:           "text-model",
+		Name:         "Text Only Model",
+		Capabilities: &Capabilities{SupportsVision: false},
+	}
+	manager.mu.Lock()
+	manager.currentModel = textModel
+	manager.mu.Unlock()
+
+	result, err := manager.CheckAndSwitch(context.Background(), true)
+	if err != nil {
+		t.Fatalf("CheckAndSwitch unexpected error: %v", err)
+	}
+	if !prompter.called {
+		t.Fatal("expected prompter.ConfirmVisionSwitch to be called")
+	}
+	if !result.UserConfirmed {
+		t.Fatal("expected UserConfirmed=true after prompter approved")
+	}
+	if !result.SwitchPerformed {
+		t.Fatal("expected SwitchPerformed=true after prompter approved")
+	}
 }
 
 // TestSwitchModes tests different switch modes

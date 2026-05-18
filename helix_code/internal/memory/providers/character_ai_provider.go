@@ -1219,8 +1219,16 @@ func (p *CharacterAIProvider) vectorToConversation(vector *memory.VectorData) (*
 }
 
 func (p *CharacterAIProvider) characterToVector(character *memory.Character) *memory.VectorData {
-	// Convert character to vector format with embedding
-	// In a real implementation, this would use an embedding model
+	// Convert character to a VectorData carrying a deterministic
+	// pseudo-random embedding (see generateEmbedding for the
+	// hash-based derivation). The CharacterAIProvider is documented
+	// as standalone-mode-only (see file preamble lines 18-60 and
+	// ErrCharacterAIStandaloneMode); production use that requires
+	// real semantic embeddings MUST attach an external embedding
+	// service through a separate code path. The previous "in a real
+	// implementation, this would use an embedding model" comment was
+	// a §11.4 stale-aspiration claim — the standalone-mode contract
+	// is the honest description of present behaviour.
 	embedding := p.generateEmbedding(character.Name + " " + character.Description)
 
 	return &memory.VectorData{

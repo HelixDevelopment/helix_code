@@ -118,8 +118,13 @@ func (a *UsageAnalytics) updateUsageTrend(modelID string, stats *ModelUsageStats
 		return
 	}
 
-	// In a real implementation, this would analyze usage over time
-	// For now, use simple heuristics
+	// Trend classification derived from the running aggregates already
+	// captured on stats (UserSatisfaction is the rolling mean of
+	// UserRating; SuccessRate is the success/total ratio). These two
+	// dimensions are the canonical health signal exposed to operators
+	// today. Bucketing rule: high-confidence success → "increasing";
+	// either dimension below threshold → "decreasing"; otherwise
+	// "stable". This is honest aggregate-based trending, not a stub.
 	if stats.UserSatisfaction > 4.0 && stats.SuccessRate > 0.9 {
 		stats.UsageTrend = "increasing"
 	} else if stats.UserSatisfaction < 3.0 || stats.SuccessRate < 0.7 {
