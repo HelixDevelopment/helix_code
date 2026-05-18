@@ -67,18 +67,51 @@
 
 ---
 
-## ISSUE-006 — Round-74 residual LOGIC-class FAILs (HelixMemory ✓ + Planning ✓ + helix_agent inner pending)
+## ISSUE-006 — Round-74 residual LOGIC-class FAILs (CLOSED)
 
-**Status:** In progress (2/3 components closed)
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 74 — release-gate-test.sh creation; classified by round 89)
 **Discovered-By:** AI release-gate sweep
 **Closure progress:**
 - ✓ HelixMemory: closed round 106 (commit `69016df` — single-line `go.mod` fix; 6 FAIL → 0 FAIL)
 - ✓ vasic-digital/Planning: round 107 NO-OP — 275 PASS / 0 FAIL / 20 SKIP-OK; likely incidentally fixed by round 98 i18n migration
-- ◯ helix_agent inner: PENDING (not yet investigated; may have already been fixed elsewhere — round 105 found ISSUE-003/004 were actually in HelixLLM)
-**Evidence:** Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; this Issue tracked the residual 7 across 3 submodules. 2 closed; 1 remaining.
-**Resolution path:** Future round investigates helix_agent inner test suite for LOGIC-class residuals; may be no-op if already resolved.
+- ✓ helix_agent inner: closed round 109 (commit `0f492e98` — 5 test-side bluff fixes, zero production changes)
+**Evidence:** Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; this Issue tracked the residual 7 across 3 submodules. All 3 components closed by rounds 106 + 107 + 109.
+**Follow-ups surfaced (NEW issues to file)**: 4 helix_agent handler tests previously masked by mid-run panic (now visible) + 3 build-failed packages depending on sibling submodule API drift (`digital.vasic.debate`) + 2 LOGIC FAILs reclassified as cross-cutting work (venice CONST-037 model-wiring + compliance CONST-051 architectural reconciliation). See ISSUE-009 through ISSUE-013 (TBD next sweep).
+
+---
+
+## ISSUE-009 — helix_agent handler tests surfaced after round-109 fix
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-19 (round 109)
+**Discovered-By:** AI subagent (helix_agent LOGIC audit)
+**Evidence:** Mid-run panic in `TestIsProviderAvailable_NotAvailable` aborted test binary; round 109's fix unblocked execution, surfacing 4 pre-existing FAILs: `TestFormattersHandler_FormatCode_UnsupportedLanguage`, `TestEmbeddingHandler_WithRealManager`, `TestGetTaskResources`, `TestGetTaskLogs`. Out of round-109's 5-fix cap.
+**Resolution path:** Per-handler investigation, similar to round 109's test-side bluff pattern.
+
+---
+
+## ISSUE-010 — helix_agent 3 build-failed packages (sibling submodule API drift)
+
+**Status:** Queued — BLOCKED on cross-submodule coordination
+**Type:** Bug
+**Discovered:** 2026-05-19 (round 109)
+**Discovered-By:** AI subagent
+**Evidence:** 3 packages in helix_agent depend on `digital.vasic.debate` API surface that changed; build fails with type/method mismatches. Pre-existing.
+**Resolution path:** Either rebuild the consuming code to new debate API OR pin older debate version in helix_agent go.mod. Cross-submodule coordination required.
+
+---
+
+## ISSUE-011 — venice `TestGetCapabilities` model-list drift (CONST-037)
+
+**Status:** Queued — needs CONST-037 canonical-model wiring
+**Type:** Bug
+**Discovered:** 2026-05-19 (round 109)
+**Discovered-By:** AI subagent
+**Evidence:** Test hardcodes `venice-uncensored` as expected model; Venice API no longer returns it. CONST-037 mandates LLMsVerifier as single source of truth for model metadata.
+**Resolution path:** Replace hardcoded expectation with LLMsVerifier dynamic lookup OR pin against a stable model that's not subject to vendor list changes.
 
 ---
 

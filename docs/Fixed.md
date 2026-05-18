@@ -34,6 +34,7 @@
 | 2026-05-19 | helix_qa i18n kickoff (Phase 4 round 7) | Feature | Implemented (→ Fixed.md) | 112 | a676ba2 + c538642 | Submodule pointer + baseline refresh; formal report truncated |
 | 2026-05-19 | CONST-052 rename programme phased plan (ISSUE-005 plan) | Task | Completed (→ Fixed.md) | 113 | f666410 | 522 LOC / 4709 words / 9 sections; 107 renames inventoried; 12 operator decisions; estimated 5 days execution |
 | 2026-05-19 | LLMOrchestrator i18n kickoff (Phase 4 round 9) | Feature | Implemented (→ Fixed.md) | 115 | 26b7609 + 954ab7a | 5/17 strings migrated (1 invocationError per 5 builder agents); NoopTranslator-fallback pattern keeps bare ID from leaking; +410 LOC |
+| 2026-05-19 | ISSUE-006 (final): helix_agent inner LOGIC FAIL cleanup | Bug | Fixed (→ Fixed.md) | 109 | 0f492e98 + 35e0d52 | 5/7 LOGIC FAILs fixed (all test-side bluffs, zero production); 2 reclassified as cross-cutting; +49 LOC; ISSUE-006 fully CLOSED |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
