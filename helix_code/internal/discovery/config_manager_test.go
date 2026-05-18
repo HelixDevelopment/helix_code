@@ -443,6 +443,47 @@ func TestConfigManager_RegisterComponents(t *testing.T) {
 	cm.RegisterComponents(registry, nil, broadcast, nil)
 }
 
+// TestConfigManager_ApplyToComponents_SentinelWhenWired asserts the
+// round-32 §11.4 PASS-bluff guard: when components are registered but
+// no UpdateConfig hook exists on them, applyToComponents() (indirectly
+// invoked via UpdateConfig / UpdatePartial) returns
+// ErrConfigComponentsApplyNotWired instead of silently succeeding.
+// Article XI §11.9 / CONST-035 / CONST-050(A).
+func TestConfigManager_ApplyToComponents_SentinelWhenWired(t *testing.T) {
+	config := DefaultDiscoveryConfig()
+	cm, err := NewConfigManager(config)
+	require.NoError(t, err)
+
+	// Wire a component (any non-nil value triggers the sentinel branch
+	// because no UpdateConfig hook exists on the underlying types yet).
+	registry := NewServiceRegistry(DefaultRegistryConfig())
+	cm.RegisterComponents(registry, nil, nil, nil)
+
+	newConfig := DefaultDiscoveryConfig()
+	newConfig.MaxServices = 1234
+	err = cm.UpdateConfig(newConfig)
+	if !errors.Is(err, ErrConfigComponentsApplyNotWired) {
+		t.Fatalf("expected ErrConfigComponentsApplyNotWired when components wired without UpdateConfig hook, got %v (§11.4 PASS-bluff regression)", err)
+	}
+}
+
+// TestConfigManager_ApplyToComponents_NilSuccess asserts that the
+// test-only path (no RegisterComponents call) still returns nil from
+// applyToComponents so tests of pure config-mutation paths keep
+// working. Pairs with the sentinel test above.
+func TestConfigManager_ApplyToComponents_NilSuccess(t *testing.T) {
+	config := DefaultDiscoveryConfig()
+	cm, err := NewConfigManager(config)
+	require.NoError(t, err)
+
+	newConfig := DefaultDiscoveryConfig()
+	newConfig.MaxServices = 4321
+	// No RegisterComponents call — all four component fields nil.
+	if err := cm.UpdateConfig(newConfig); err != nil {
+		t.Fatalf("expected nil error when no components registered, got %v", err)
+	}
+}
+
 func TestDiscoveryConfig_Validate_ComprehensiveErrors(t *testing.T) {
 	tests := []struct {
 		name         string

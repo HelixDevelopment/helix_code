@@ -1727,3 +1727,77 @@ func containsHelper(s, substr string) bool {
 	}
 	return false
 }
+
+// stubEscalationNotifier is a CONST-050(A) unit-test-only
+// EscalationNotifier used to assert wire-through behaviour.
+type stubEscalationNotifier struct {
+	called    bool
+	gotEsc    *Escalation
+	returnErr error
+}
+
+func (s *stubEscalationNotifier) NotifyEscalationReverted(ctx context.Context, esc *Escalation) error {
+	s.called = true
+	s.gotEsc = esc
+	return s.returnErr
+}
+
+// TestEscalation_NotifyOnRevert_WithNotifier asserts the round-32
+// §11.4 wire-through invariant: when SetNotifier is wired and
+// NotifyOnRevert=true, CheckExpired MUST call the notifier rather
+// than writing to stdout. Article XI §11.9 / CONST-035 / CONST-050(A).
+func TestEscalation_NotifyOnRevert_WithNotifier(t *testing.T) {
+	config := NewDefaultModeConfig()
+	config.PersistPath = ""
+	modeManager, err := NewModeManager(config)
+	if err != nil {
+		t.Fatalf("NewModeManager: %v", err)
+	}
+
+	escConfig := NewDefaultEscalationConfig()
+	escConfig.NotifyOnRevert = true
+	engine := NewEscalationEngine(modeManager, escConfig)
+
+	notifier := &stubEscalationNotifier{}
+	engine.SetNotifier(notifier)
+
+	// Inject an already-expired escalation directly so CheckExpired
+	// will trip the revert+notify path on the next sweep without
+	// requiring real time to pass.
+	engine.mu.Lock()
+	engine.escalations["expired-1"] = &Escalation{
+		ID:        "expired-1",
+		From:      ModeBasic,
+		To:        ModeFullAuto,
+		Reason:    "test",
+		ExpiresAt: time.Now().Add(-1 * time.Hour),
+		Active:    true,
+	}
+	engine.mu.Unlock()
+
+	// Switch mode manager to elevated so RevertMode has work to do.
+	_ = modeManager.SetMode(context.Background(), ModeFullAuto, "test-elevate")
+
+	if err := engine.CheckExpired(context.Background()); err != nil {
+		t.Fatalf("CheckExpired: %v", err)
+	}
+
+	if !notifier.called {
+		t.Fatal("expected notifier.NotifyEscalationReverted to be called (§11.4 wire-through)")
+	}
+	if notifier.gotEsc == nil || notifier.gotEsc.ID != "expired-1" {
+		t.Fatalf("notifier did not receive expected escalation, got %+v", notifier.gotEsc)
+	}
+}
+
+// TestErrEscalationNotifierNotConfigured_IsSentinel asserts the
+// sentinel is non-nil and has a recognisable message — guards against
+// accidental nil-ing or message corruption during refactors.
+func TestErrEscalationNotifierNotConfigured_IsSentinel(t *testing.T) {
+	if ErrEscalationNotifierNotConfigured == nil {
+		t.Fatal("ErrEscalationNotifierNotConfigured must not be nil")
+	}
+	if !errors.Is(ErrEscalationNotifierNotConfigured, ErrEscalationNotifierNotConfigured) {
+		t.Fatal("ErrEscalationNotifierNotConfigured must satisfy errors.Is reflexivity")
+	}
+}

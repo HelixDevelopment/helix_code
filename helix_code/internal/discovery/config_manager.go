@@ -12,6 +12,23 @@ var (
 
 	// ErrConfigLocked is returned when configuration cannot be updated
 	ErrConfigLocked = errors.New("configuration is locked")
+
+	// ErrConfigComponentsApplyNotWired surfaces the historical §11.4
+	// PASS-bluff in applyToComponents: when ConfigManager.RegisterComponents
+	// has wired any of the four discovery components (registry,
+	// portAllocator, broadcastService, discoveryClient) but those
+	// components do not expose UpdateConfig hooks, the old code
+	// silently returned nil — pretending configuration was propagated
+	// when nothing happened. This sentinel makes the gap visible so
+	// monitoring and tests catch missing wiring. Article XI §11.9 /
+	// CONST-035 / CONST-050(A). Until the four components grow
+	// matching UpdateConfig methods, applyToComponents returns this
+	// sentinel whenever ANY component is non-nil.
+	ErrConfigComponentsApplyNotWired = errors.New(
+		"discovery: applyToComponents called with components registered but no UpdateConfig hook " +
+			"wired on PortAllocator/ServiceRegistry/BroadcastService/DiscoveryClient — " +
+			"wire UpdateConfig methods on those types and replumb applyToComponents " +
+			"(§11.4 PASS-bluff removed)")
 )
 
 // ConfigUpdateCallback is called when configuration is updated
@@ -325,23 +342,28 @@ func (cm *ConfigManager) RegisterComponents(
 	cm.discoveryClient = client
 }
 
-// applyToComponents applies configuration to registered components
+// applyToComponents applies configuration to registered components.
+//
+// Returns ErrConfigComponentsApplyNotWired when at least one of the
+// four wireable components (registry, portAllocator, broadcastService,
+// discoveryClient) has been registered via RegisterComponents but the
+// component types do not yet expose UpdateConfig hooks. The historical
+// code returned nil regardless, fabricating success for an operation
+// that did nothing — a §11.4 PASS-bluff (Article XI §11.9 / CONST-035).
+// When all four components are nil (test-only paths constructing a
+// ConfigManager without RegisterComponents), this function returns
+// nil because no propagation is required.
+//
+// To close the sentinel: each of the four component types must grow an
+// UpdateConfig(DiscoveryConfig) error method, and this function must
+// dispatch to each. Until then the loud failure is preferable to the
+// silent zero-result.
 func (cm *ConfigManager) applyToComponents() error {
-	// Note: This would require components to expose configuration update methods
-	// For now, we just validate that components are compatible
-
-	// In a full implementation, we would:
-	// - Update port allocator ranges
-	// - Update registry TTL and cleanup interval
-	// - Update broadcast service settings
-	// - Update discovery client strategies
-
-	// Components would need methods like:
-	// - portAllocator.UpdateConfig(config)
-	// - registry.UpdateConfig(config)
-	// - etc.
-
-	return nil
+	if cm.registry == nil && cm.portAllocator == nil &&
+		cm.broadcastService == nil && cm.discoveryClient == nil {
+		return nil
+	}
+	return ErrConfigComponentsApplyNotWired
 }
 
 // GetPortRange returns the port range for a service type

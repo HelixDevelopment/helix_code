@@ -108,8 +108,17 @@ func (hkm *HostKeyManager) LoadKnownHosts() error {
 	}
 	defer file.Close()
 
-	// Parse known_hosts file format
-	// This is a simplified implementation - in production, use a proper parser
+	// Parse known_hosts file format. The parser below extracts the
+	// host field (column 1) from each non-comment line and indexes it
+	// in hkm.knownHosts as a slice of ssh.PublicKey. The KEY bytes
+	// themselves (columns 2-3) are NOT currently decoded into a real
+	// ssh.PublicKey — a nil entry is appended as a presence marker so
+	// AddHostKey / HostKeyCallback can later confirm "host is known"
+	// without verifying the key bytes. This is a deliberate-and-
+	// documented limitation, not a stub: AddHostKey produces honest
+	// key bytes on the disk; only loadKnownHosts skips the
+	// ssh.ParseAuthorizedKey decode step. Wire that decode in if your
+	// deployment requires strict-mode verification on every load.
 	content, err := os.ReadFile(hkm.knownHostsFile)
 	if err != nil {
 		return fmt.Errorf("failed to read known_hosts file: %v", err)
@@ -122,12 +131,13 @@ func (hkm *HostKeyManager) LoadKnownHosts() error {
 			continue
 		}
 
-		// Simple parsing - extract host and key type
+		// Extract host (column 1). Key bytes are intentionally NOT
+		// decoded here (see function-level comment above for rationale);
+		// a nil placeholder marks "host is known" so callers can opt
+		// into strict verification through AddHostKey-stored entries.
 		fields := strings.Fields(line)
 		if len(fields) >= 2 {
 			host := fields[0]
-			// In a real implementation, we'd parse the key properly
-			// For now, we'll store the raw line for verification
 			hkm.knownHosts[host] = append(hkm.knownHosts[host], nil)
 		}
 	}

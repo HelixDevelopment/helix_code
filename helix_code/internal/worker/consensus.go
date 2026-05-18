@@ -143,7 +143,13 @@ func (cm *ConsensusManager) GetLeader() string {
 	if cm.state == Leader {
 		return cm.nodeID
 	}
-	// In a real implementation, this would track the known leader
+	// Followers/Candidates do not currently learn the leader's ID:
+	// the AppendRequest handler (handleAppendRequest at the bottom of
+	// this file) does not persist req.LeaderID into the ConsensusManager
+	// struct, so non-leader nodes can only honestly answer "" here.
+	// Wiring leader-tracking is contingent on the same vote-request
+	// transport gap documented at startElection (lines 204-217); both
+	// land together. Returning "" is the §11.4-honest result, not a stub.
 	return ""
 }
 
@@ -259,15 +265,23 @@ func (cm *ConsensusManager) handleVoteResponse(resp VoteResponse) {
 	}
 
 	if cm.state == Candidate && resp.Term == cm.currentTerm && resp.VoteGranted {
-		// In a real implementation, track by responding node ID
-		// For now, just increment a counter
+		// Vote tally without responder-ID deduplication. VoteResponse
+		// does not carry a NodeID field today, so a peer that sends
+		// the same VoteResponse twice (network retry, duplicate
+		// delivery) would double-count. Until VoteResponse grows a
+		// NodeID + this branch dedupes via cm.votes[nodeID]=true, the
+		// loud-failure log below surfaces the limitation so monitoring
+		// catches it during multi-peer election storms. §11.4 honest
+		// path: noisy log + best-effort tally, not silent
+		// double-counting that pretends to be correct.
+		log.Printf("WARN [§11.4 / CONST-035 / consensus.go]: handleVoteResponse received granted vote without responder NodeID — counting it but cannot dedupe (peer retry would inflate quorum). Add NodeID to VoteResponse and dedupe via cm.votes[id]=true to close.")
 		currentVotes := 0
 		for _, granted := range cm.votes {
 			if granted {
 				currentVotes++
 			}
 		}
-		currentVotes++ // Count this vote
+		currentVotes++ // Count this vote (best-effort, no dedupe)
 
 		// Check if we have quorum
 		voteCount := currentVotes
@@ -317,8 +331,22 @@ func (cm *ConsensusManager) sendHeartbeats() {
 		appendReq.PrevLogTerm = cm.log[len(cm.log)-1].Term
 	}
 
-	// In a real implementation, send to peers
-	log.Printf("Leader %s sending heartbeat for term %d", cm.nodeID, cm.currentTerm)
+	// Heartbeat transport: the AppendRequest above is fully built but
+	// the per-peer fan-out (a network call sending appendReq to every
+	// entry in cm.peers and feeding cm.appendRequests on the receiver
+	// side) is NOT wired. Followers therefore never see leader
+	// heartbeats; the election-timeout-driven re-election path is the
+	// only thing keeping multi-peer clusters from silently splitting.
+	// Same gap as startElection (lines 204-217) and handleVoteResponse;
+	// all three close together when the consensus transport layer is
+	// added. §11.4 honest path: loud-fail log instead of silent no-op
+	// success. Article XI §11.9 / CONST-035 / CONST-050(A).
+	if len(cm.peers) > 0 {
+		log.Printf("CRITICAL [§11.4 / CONST-035 / consensus.go]: sendHeartbeats built AppendRequest for term %d but per-peer transport is not wired (peers=%d). Followers will not see heartbeats from leader %s until transport lands. See startElection for the matching multi-peer transport gap.",
+			cm.currentTerm, len(cm.peers), cm.nodeID)
+	} else {
+		log.Printf("Leader %s sending heartbeat for term %d (single-node cluster, no transport needed)", cm.nodeID, cm.currentTerm)
+	}
 	_ = appendReq
 }
 

@@ -15,7 +15,35 @@ type EscalationEngine struct {
 	modeManager *ModeManager
 	escalations map[string]*Escalation
 	config      *EscalationConfig
+	notifier    EscalationNotifier
 }
+
+// EscalationNotifier delivers operator-visible notifications when an
+// escalation expires and is auto-reverted by CheckExpired. Inject one
+// via SetNotifier; otherwise CheckExpired surfaces
+// ErrEscalationNotifierNotConfigured via a loud log per Article XI §11.9.
+type EscalationNotifier interface {
+	NotifyEscalationReverted(ctx context.Context, escalation *Escalation) error
+}
+
+// SetNotifier wires the EscalationNotifier used by CheckExpired.
+func (e *EscalationEngine) SetNotifier(n EscalationNotifier) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.notifier = n
+}
+
+// ErrEscalationNotifierNotConfigured surfaces the historical §11.4
+// PASS-bluff in CheckExpired: the code previously printed
+// "Escalation X expired and reverted" to stdout under the false comment
+// "In production, this would send a notification" — operators relying
+// on real notification channels (email, Slack, dashboard) saw nothing,
+// while the function reported success. Article XI §11.9 / CONST-035 /
+// CONST-050(A). The loud log below makes the missing wire visible.
+var ErrEscalationNotifierNotConfigured = fmt.Errorf(
+	"autonomy: NotifyOnRevert=true but no EscalationNotifier wired via SetNotifier — " +
+		"call SetNotifier with a real notifier or set NotifyOnRevert=false " +
+		"(§11.4 PASS-bluff removed)")
 
 // Escalation represents a temporary mode increase
 type Escalation struct {
@@ -215,8 +243,16 @@ func (e *EscalationEngine) CheckExpired(ctx context.Context) error {
 		delete(e.escalations, id)
 
 		if e.config.NotifyOnRevert {
-			// In production, this would send a notification
-			fmt.Printf("Escalation %s expired and reverted\n", id)
+			if e.notifier == nil {
+				// Surface the §11.4 PASS-bluff via loud log without
+				// aborting the revert sweep (other expired escalations
+				// in this batch still need to be reverted; failing fast
+				// would mask them).
+				fmt.Printf("WARN [§11.4 / CONST-035 / escalation.go]: %v (escalation_id=%s reverted in-memory but no notification dispatched)\n",
+					ErrEscalationNotifierNotConfigured, id)
+			} else if nerr := e.notifier.NotifyEscalationReverted(ctx, escalation); nerr != nil {
+				fmt.Printf("WARN [escalation.go]: notifier.NotifyEscalationReverted failed for %s: %v\n", id, nerr)
+			}
 		}
 	}
 

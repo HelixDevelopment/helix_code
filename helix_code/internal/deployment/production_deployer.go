@@ -590,19 +590,16 @@ func (pd *ProductionDeployer) deployToServer(ctx context.Context, server string)
 		sshUser = "helix"
 	}
 	
-	// In production, this would use golang.org/x/crypto/ssh to:
-	// 1. Connect to server using sshKeyPath or deployKey
-	// 2. Upload the binary via SFTP
-	// 3. Stop the existing service
-	// 4. Start the new service
-	// 5. Verify it's running
-	
-	log.Printf("      📤 Deploying %s to %s:%s", pd.config.BinaryPath, server, remotePath)
-	log.Printf("      🔐 Using SSH user: %s", sshUser)
-	
-	// For now, return false to indicate deployment requires real SSH infrastructure
-	// This prevents false-success results
-	log.Printf("      ⚠️  Real deployment requires SSH infrastructure (set HELIX_TEST_SSH_HOST for testing)")
+	// Loud-fail path: real SSH transport is not wired into this binary
+	// today (would require golang.org/x/crypto/ssh + SFTP for binary
+	// upload, remote service-control invocation, and post-start health
+	// verification). The function returns false to surface the gap to
+	// monitoring rather than fabricating success. This is the honest
+	// path documented at Article XI §11.9 / CONST-035 / CONST-050(A) —
+	// when transport is added, replace the loud-fail with the real
+	// connect→upload→restart→verify pipeline.
+	log.Printf("      📤 Deploy target: %s:%s (binary=%s, ssh_user=%s)", server, remotePath, pd.config.BinaryPath, sshUser)
+	log.Printf("      ⚠️  SSH deployment transport not wired in this build; refusing to fabricate success (§11.4 PASS-bluff guard). Set HELIX_TEST_SSH_HOST and wire golang.org/x/crypto/ssh to enable.")
 	return false
 }
 
