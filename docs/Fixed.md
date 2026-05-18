@@ -62,6 +62,8 @@
 | 2026-05-19 | helix_code/applications/android infrastructure-only (Phase 4 round 32) | Feature | Implemented (→ Fixed.md) | 139 | b5a9487 (re-commit after parallel 27d121b) | Android primarily native Kotlin/Java per CONST-052 language exemption; Go bridge surface minimal — infrastructure pattern |
 | 2026-05-19 | helix_code/applications/aurora_os × up to 10 migration (Phase 4 round 33) | Feature | Implemented (→ Fixed.md) | 140 | 75f35f6 | Aurora-OS platform; formal report pending |
 | 2026-05-19 | helix_code/cmd/config_test × 12 migration (Phase 4 round 34) | Feature | Implemented (→ Fixed.md) | 141 | 83993ac | config_test (snake_case correction); all 4 pre-existing CONST-046 entries eliminated; 11 tests + mutation; baseline -4; +504 LOC |
+| 2026-05-19 | helix_code/cmd/security_fix × 10 migration (Phase 4 round 36) | Feature | Implemented (→ Fixed.md) | 143 | bbbf121 | security_fix (alphabetically first variant); security_fix_standalone deferred (27 violations); tests + mutation; +446 LOC |
+| 2026-05-19 | helix_code/cmd/performance_optimization × migration (Phase 4 round 37) | Feature | Implemented (→ Fixed.md) | 144 | c7c8b2d | Formal report pending |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
