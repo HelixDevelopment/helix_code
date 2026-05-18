@@ -407,13 +407,15 @@ func (cp *CopilotProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIR
 
 func (cp *CopilotProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var finishReason string
 
 	if len(openaiResp.Choices) > 0 {
 		choice := openaiResp.Choices[0]
 		content = choice.Message.Content
+		finishReason = choice.FinishReason
 	}
 
-	return &LLMResponse{
+	resp := &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
@@ -422,10 +424,22 @@ func (cp *CopilotProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse,
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
 			TotalTokens:      openaiResp.Usage.TotalTokens,
 		},
-		FinishReason:   openaiResp.Choices[0].FinishReason,
+		FinishReason:   finishReason,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
 	}
+
+	// Round-63 LLMResponse.Err wiring (CONST-035 / CONST-050(A)+(B) / Article XI §11.9):
+	// GitHub Copilot is OpenAI-compatible — it proxies GPT-4o, GPT-3.5-turbo,
+	// Claude 3.5/3.7 Sonnet, o1, o3-mini, Gemini 2.0 Flash all via the
+	// /chat/completions OpenAI-shape contract, normalising every backend's
+	// terminator to OpenAI's finish_reason vocabulary ("stop", "length",
+	// "content_filter", "tool_calls"). Reuses mapOpenAIFinishReasonToErr
+	// verbatim. If Copilot stops normalising (e.g. surfaces Claude's
+	// "max_tokens" raw), this MUST be replaced with a Copilot-specific
+	// helper in the same commit.
+	resp.Err = mapOpenAIFinishReasonToErr(finishReason)
+	return resp
 }
 
 func (cp *CopilotProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
@@ -508,6 +522,30 @@ func (cp *CopilotProvider) makeOpenAIStreamRequest(ctx context.Context, request 
 				case ch <- response:
 				case <-ctx.Done():
 					return ctx.Err()
+				}
+			}
+
+			// Round-63 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): on a terminal finish_reason
+			// of "length" or "content_filter", emit a terminal LLMResponse
+			// with Err populated so downstream consumers (notably
+			// tool_provider.go :201/:251) can distinguish a clean stop
+			// from a partial-error stop. Reuses the round-46 OpenAI mapper
+			// since Copilot normalises every upstream model's terminator
+			// to the OpenAI vocabulary.
+			if choice.FinishReason != "" {
+				if errSentinel := mapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
+					select {
+					case ch <- LLMResponse{
+						ID:           uuid.New(),
+						RequestID:    requestID,
+						FinishReason: choice.FinishReason,
+						CreatedAt:    time.Now(),
+						Err:          errSentinel,
+					}:
+					case <-ctx.Done():
+						return ctx.Err()
+					}
 				}
 			}
 		}

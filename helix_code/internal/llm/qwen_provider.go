@@ -315,13 +315,15 @@ func (qp *QwenProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequ
 
 func (qp *QwenProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var finishReason string
 
 	if len(openaiResp.Choices) > 0 {
 		choice := openaiResp.Choices[0]
 		content = choice.Message.Content
+		finishReason = choice.FinishReason
 	}
 
-	return &LLMResponse{
+	resp := &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
@@ -330,10 +332,20 @@ func (qp *QwenProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, re
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
 			TotalTokens:      openaiResp.Usage.TotalTokens,
 		},
-		FinishReason:   openaiResp.Choices[0].FinishReason,
+		FinishReason:   finishReason,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
 	}
+
+	// Round-63 LLMResponse.Err wiring (CONST-035 / CONST-050(A)+(B) / Article XI §11.9):
+	// Qwen DashScope's compatible-mode endpoint exposes the SAME finish_reason
+	// vocabulary as OpenAI ("stop", "length", "content_filter", "tool_calls"),
+	// so we reuse mapOpenAIFinishReasonToErr verbatim. If DashScope diverges in
+	// the future (e.g. DashScope-native API path with custom values like
+	// "sensitive" for the safety filter), this MUST be replaced with a
+	// Qwen-specific helper in the same commit.
+	resp.Err = mapOpenAIFinishReasonToErr(finishReason)
+	return resp
 }
 
 func (qp *QwenProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
@@ -416,6 +428,31 @@ func (qp *QwenProvider) makeOpenAIStreamRequest(ctx context.Context, request *Op
 				case ch <- response:
 				case <-ctx.Done():
 					return ctx.Err()
+				}
+			}
+
+			// Round-63 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): when the final frame carries
+			// a finish_reason of "length" or "content_filter", emit a
+			// terminal LLMResponse with Err populated so downstream
+			// consumers (notably tool_provider.go :201/:251) can
+			// distinguish a clean stop from a partial-error stop.
+			// Reuses the round-46 OpenAI mapper because Qwen DashScope's
+			// compatible-mode endpoint advertises OpenAI-compatible
+			// finish_reason values verbatim.
+			if choice.FinishReason != "" {
+				if errSentinel := mapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
+					select {
+					case ch <- LLMResponse{
+						ID:           uuid.New(),
+						RequestID:    requestID,
+						FinishReason: choice.FinishReason,
+						CreatedAt:    time.Now(),
+						Err:          errSentinel,
+					}:
+					case <-ctx.Done():
+						return ctx.Err()
+					}
 				}
 			}
 		}

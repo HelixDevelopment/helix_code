@@ -46,6 +46,7 @@ const (
 	ProviderTypeQwen        ProviderType = "qwen"
 	ProviderTypeCopilot     ProviderType = "copilot"
 	ProviderTypeOpenRouter  ProviderType = "openrouter"
+	ProviderTypeCerebras    ProviderType = "cerebras"
 	ProviderTypeXAI         ProviderType = "xai"
 	ProviderTypeOllama      ProviderType = "ollama"
 	ProviderTypeLocal       ProviderType = "local"
