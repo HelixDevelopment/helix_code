@@ -52,6 +52,25 @@ services:
     volumes:
       - redis-full-data:/data
 
+  # Round-37 §11.4 anti-bluff sweep (2026-05-18): added Memcached service
+  # so MemcachedMemoryProvider integration tests can exercise the real
+  # gomemcache client wired in by round 37 against a real backend per
+  # CONST-050(A)+(B). Tests under internal/memory/integration_test.go
+  # read MEMCACHED_HOST/MEMCACHED_PORT env vars; defaults map here.
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: helixcode-memcached-full
+    command: memcached -m 64
+    ports:
+      - "11211:11211"
+    healthcheck:
+      test: ["CMD-SHELL", "echo stats | nc -w 1 127.0.0.1 11211 | grep -q uptime"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - helixcode-full-test
+
   # ============================================
   # LLM PROVIDERS
   # ============================================

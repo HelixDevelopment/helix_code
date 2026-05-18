@@ -532,10 +532,20 @@ func BenchmarkInMemoryProviderRetrieve(b *testing.B) {
 }
 
 // =============================================================================
-// Redis Memory Provider Tests (In-Memory Mode)
+// Redis Memory Provider Tests
+//
+// Round-37 §11.4 anti-bluff sweep (2026-05-18): the data path was wired
+// to a real go-redis/v9 client. The legacy "In-Memory Mode" unit tests
+// (Store / Retrieve / Delete / Clear / Search round-trip) were
+// themselves bluffs — they certified an in-memory map masquerade while
+// the contract promised Redis persistence. Round-37 retires the
+// round-trip tests at the unit layer; real round-trip coverage now
+// lives in integration_test.go against a real Redis container per
+// CONST-050(A) and CONST-050(B). The unit tests below assert the
+// nil-client sentinel contract (paired-mutation per CONST-055).
 // =============================================================================
 
-func TestRedisMemoryProvider_Creation(t *testing.T) {
+func TestRedisMemoryProvider_Creation_RealClientMode(t *testing.T) {
 	provider, err := NewRedisMemoryProvider(map[string]interface{}{
 		"host": "localhost",
 		"port": 6379,
@@ -552,102 +562,97 @@ func TestRedisMemoryProvider_Creation(t *testing.T) {
 	if provider.Type() != "redis" {
 		t.Errorf("Expected type 'redis', got '%s'", provider.Type())
 	}
-}
 
-func TestRedisMemoryProvider_StoreRetrieve(t *testing.T) {
-	provider, _ := NewRedisMemoryProvider(map[string]interface{}{
-		"host":   "localhost",
-		"port":   6379,
-		"prefix": "test",
-	})
-	ctx := context.Background()
-
-	testData := map[string]interface{}{
-		"name":  "test-redis",
-		"value": 123,
+	// Round-37 contract: with host configured the constructor wires a
+	// real client without blocking on Ping. Close releases it.
+	if provider.client == nil {
+		t.Fatal("Expected non-nil client when host is configured (round-37 contract)")
 	}
-
-	// Store
-	err := provider.Store(ctx, "redis-key", testData)
-	if err != nil {
-		t.Fatalf("Failed to store data: %v", err)
-	}
-
-	// Retrieve
-	retrieved, err := provider.Retrieve(ctx, "redis-key")
-	if err != nil {
-		t.Fatalf("Failed to retrieve data: %v", err)
-	}
-
-	retrievedMap, ok := retrieved.(map[string]interface{})
-	if !ok {
-		t.Fatal("Retrieved data is not a map")
-	}
-
-	if retrievedMap["name"] != "test-redis" {
-		t.Errorf("Expected name 'test-redis', got %v", retrievedMap["name"])
+	if err := provider.Close(); err != nil {
+		t.Errorf("Close failed: %v", err)
 	}
 }
 
-func TestRedisMemoryProvider_Delete(t *testing.T) {
+func TestRedisMemoryProvider_Creation_NilClientMode(t *testing.T) {
+	// Empty config → nil-client mode (preserves round-31 behaviour for
+	// unconfigured providers and supports unit tests that don't have a
+	// Redis container available).
+	provider, err := NewRedisMemoryProvider(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("Failed to create Redis provider: %v", err)
+	}
+	if provider.client != nil {
+		t.Fatal("Expected nil client for empty config (round-37 nil-client mode)")
+	}
+}
+
+// TestRedisMemoryProvider_NilClient_Store_ReturnsSentinel asserts the
+// round-37 §11.4 anti-bluff contract for the data path: when no real
+// client is wired in, Store MUST return ErrRedisClientNotInitialized
+// (errors.Is-detectable for paired-mutation per CONST-055) rather than
+// silently storing into an in-memory map (the round-31..36 bluff).
+func TestRedisMemoryProvider_NilClient_Store_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	// Store
-	provider.Store(ctx, "delete-key", "delete-value")
-
-	// Delete
-	err := provider.Delete(ctx, "delete-key")
-	if err != nil {
-		t.Fatalf("Failed to delete: %v", err)
-	}
-
-	// Verify deleted
-	_, err = provider.Retrieve(ctx, "delete-key")
+	err := provider.Store(ctx, "key", "value")
 	if err == nil {
-		t.Error("Expected error for deleted key")
+		t.Fatal("Store() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Store() = %v, want errors.Is(err, ErrRedisClientNotInitialized)", err)
 	}
 }
 
-func TestRedisMemoryProvider_Clear(t *testing.T) {
+func TestRedisMemoryProvider_NilClient_Retrieve_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	// Store multiple
-	provider.Store(ctx, "key1", "value1")
-	provider.Store(ctx, "key2", "value2")
+	_, err := provider.Retrieve(ctx, "key")
+	if err == nil {
+		t.Fatal("Retrieve() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Retrieve() = %v, want errors.Is(err, ErrRedisClientNotInitialized)", err)
+	}
+}
 
-	// Clear
+func TestRedisMemoryProvider_NilClient_Delete_ReturnsSentinel(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	err := provider.Delete(ctx, "key")
+	if err == nil {
+		t.Fatal("Delete() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Delete() = %v, want errors.Is(err, ErrRedisClientNotInitialized)", err)
+	}
+}
+
+func TestRedisMemoryProvider_NilClient_Clear_ReturnsSentinel(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
 	err := provider.Clear(ctx)
-	if err != nil {
-		t.Fatalf("Failed to clear: %v", err)
+	if err == nil {
+		t.Fatal("Clear() returned nil for nil-client provider — anti-bluff regression")
 	}
-
-	// Verify cleared
-	_, err1 := provider.Retrieve(ctx, "key1")
-	_, err2 := provider.Retrieve(ctx, "key2")
-
-	if err1 == nil || err2 == nil {
-		t.Error("Expected errors for cleared keys")
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Clear() = %v, want errors.Is(err, ErrRedisClientNotInitialized)", err)
 	}
 }
 
-func TestRedisMemoryProvider_Search(t *testing.T) {
+func TestRedisMemoryProvider_NilClient_Search_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	provider.Store(ctx, "alice", "John")
-	provider.Store(ctx, "bob", "John")
-	provider.Store(ctx, "charlie", "Jane")
-
-	// Search for value "John" - should find 2 results
-	results, err := provider.Search(ctx, "John", 10)
-	if err != nil {
-		t.Fatalf("Search failed: %v", err)
+	_, err := provider.Search(ctx, "query", 10)
+	if err == nil {
+		t.Fatal("Search() returned nil for nil-client provider — anti-bluff regression")
 	}
-
-	if len(results) != 2 {
-		t.Errorf("Expected 2 results for value 'John', got %d", len(results))
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Search() = %v, want errors.Is(err, ErrRedisClientNotInitialized)", err)
 	}
 }
 
@@ -655,9 +660,9 @@ func TestRedisMemoryProvider_Search(t *testing.T) {
 // contract: Health MUST surface ErrRedisClientNotInitialized whenever no
 // real go-redis/v9 client has been wired into the provider, instead of
 // the previous unconditional nil return (which fabricated PASS for dead
-// Redis backends). When a real client is wired in this test must be
-// updated to assert real connectivity against a real Redis container per
-// CONST-050(A).
+// Redis backends). Round-37 extends the same fail-closed contract to
+// every data method (Store / Retrieve / Delete / Clear / Search). Real
+// connectivity coverage lives in integration_test.go.
 func TestRedisMemoryProvider_Health(t *testing.T) {
 	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
@@ -671,11 +676,28 @@ func TestRedisMemoryProvider_Health(t *testing.T) {
 	}
 }
 
+// TestRedisMemoryProvider_Close_NilClient asserts Close is safe on a
+// provider that never had a client wired in.
+func TestRedisMemoryProvider_Close_NilClient(t *testing.T) {
+	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
+	if err := provider.Close(); err != nil {
+		t.Errorf("Close on nil-client provider returned error: %v", err)
+	}
+}
+
 // =============================================================================
-// Memcached Memory Provider Tests (In-Memory Mode)
+// Memcached Memory Provider Tests
+//
+// Round-37 §11.4 anti-bluff sweep (2026-05-18): the data path was wired
+// to a real gomemcache client. Legacy in-memory map round-trip tests
+// were themselves bluffs (certified a masquerade); they are retired
+// here. Real round-trip coverage lives in integration_test.go against
+// a real Memcached container per CONST-050(A)+(B). Additionally Search
+// always returns ErrListNotSupportedByBackend (Memcached's wire
+// protocol has no SCAN equivalent — the honest contract per CONST-035).
 // =============================================================================
 
-func TestMemcachedMemoryProvider_Creation(t *testing.T) {
+func TestMemcachedMemoryProvider_Creation_RealClientMode(t *testing.T) {
 	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{
 		"host": "localhost",
 		"port": 11211,
@@ -692,101 +714,117 @@ func TestMemcachedMemoryProvider_Creation(t *testing.T) {
 	if provider.Type() != "memcached" {
 		t.Errorf("Expected type 'memcached', got '%s'", provider.Type())
 	}
-}
 
-func TestMemcachedMemoryProvider_StoreRetrieve(t *testing.T) {
-	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
-	ctx := context.Background()
-
-	testData := map[string]interface{}{
-		"name":  "test-memcached",
-		"value": 456,
+	if provider.client == nil {
+		t.Fatal("Expected non-nil client when host is configured (round-37 contract)")
 	}
-
-	// Store
-	err := provider.Store(ctx, "mc-key", testData)
-	if err != nil {
-		t.Fatalf("Failed to store data: %v", err)
-	}
-
-	// Retrieve
-	retrieved, err := provider.Retrieve(ctx, "mc-key")
-	if err != nil {
-		t.Fatalf("Failed to retrieve data: %v", err)
-	}
-
-	retrievedMap, ok := retrieved.(map[string]interface{})
-	if !ok {
-		t.Fatal("Retrieved data is not a map")
-	}
-
-	if retrievedMap["name"] != "test-memcached" {
-		t.Errorf("Expected name 'test-memcached', got %v", retrievedMap["name"])
+	if err := provider.Close(); err != nil {
+		t.Errorf("Close failed: %v", err)
 	}
 }
 
-func TestMemcachedMemoryProvider_Delete(t *testing.T) {
+func TestMemcachedMemoryProvider_Creation_NilClientMode(t *testing.T) {
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("Failed to create Memcached provider: %v", err)
+	}
+	if provider.client != nil {
+		t.Fatal("Expected nil client for empty config (round-37 nil-client mode)")
+	}
+}
+
+func TestMemcachedMemoryProvider_NilClient_Store_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	provider.Store(ctx, "delete-key", "value")
-
-	err := provider.Delete(ctx, "delete-key")
-	if err != nil {
-		t.Fatalf("Failed to delete: %v", err)
-	}
-
-	_, err = provider.Retrieve(ctx, "delete-key")
+	err := provider.Store(ctx, "key", "value")
 	if err == nil {
-		t.Error("Expected error for deleted key")
+		t.Fatal("Store() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Store() = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", err)
 	}
 }
 
-func TestMemcachedMemoryProvider_Clear(t *testing.T) {
+func TestMemcachedMemoryProvider_NilClient_Retrieve_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	provider.Store(ctx, "key1", "value1")
-	provider.Store(ctx, "key2", "value2")
+	_, err := provider.Retrieve(ctx, "key")
+	if err == nil {
+		t.Fatal("Retrieve() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Retrieve() = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", err)
+	}
+}
+
+func TestMemcachedMemoryProvider_NilClient_Delete_ReturnsSentinel(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
+
+	err := provider.Delete(ctx, "key")
+	if err == nil {
+		t.Fatal("Delete() returned nil for nil-client provider — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Delete() = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", err)
+	}
+}
+
+func TestMemcachedMemoryProvider_NilClient_Clear_ReturnsSentinel(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	ctx := context.Background()
 
 	err := provider.Clear(ctx)
-	if err != nil {
-		t.Fatalf("Failed to clear: %v", err)
+	if err == nil {
+		t.Fatal("Clear() returned nil for nil-client provider — anti-bluff regression")
 	}
-
-	_, err1 := provider.Retrieve(ctx, "key1")
-	_, err2 := provider.Retrieve(ctx, "key2")
-
-	if err1 == nil || err2 == nil {
-		t.Error("Expected errors for cleared keys")
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Clear() = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", err)
 	}
 }
 
-func TestMemcachedMemoryProvider_Search(t *testing.T) {
+func TestMemcachedMemoryProvider_NilClient_Search_ReturnsSentinel(t *testing.T) {
 	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
-	provider.Store(ctx, "alpha", "SearchValue")
-	provider.Store(ctx, "beta", "SearchValue")
-	provider.Store(ctx, "gamma", "OtherValue")
-
-	results, err := provider.Search(ctx, "SearchValue", 10)
-	if err != nil {
-		t.Fatalf("Search failed: %v", err)
+	_, err := provider.Search(ctx, "query", 10)
+	if err == nil {
+		t.Fatal("Search() returned nil for nil-client provider — anti-bluff regression")
 	}
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Search() = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", err)
+	}
+}
 
-	if len(results) != 2 {
-		t.Errorf("Expected 2 results for value 'SearchValue', got %d", len(results))
+// TestMemcachedMemoryProvider_Search_AlwaysListNotSupported asserts the
+// round-37 honest-contract sentinel: even with a real client wired in,
+// Memcached's wire protocol has no SCAN equivalent. Search MUST return
+// ErrListNotSupportedByBackend rather than pretending (round-36 and
+// prior shipped a fake walk over a local in-memory map — CRITICAL
+// fabricated-capability bluff per CONST-035).
+func TestMemcachedMemoryProvider_Search_AlwaysListNotSupported(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{
+		"host": "localhost",
+		"port": 11211,
+	})
+	defer provider.Close()
+	ctx := context.Background()
+
+	_, err := provider.Search(ctx, "query", 10)
+	if err == nil {
+		t.Fatal("Search() returned nil — anti-bluff regression: Memcached protocol cannot honour Search")
+	}
+	if !errors.Is(err, ErrListNotSupportedByBackend) {
+		t.Errorf("Search() = %v, want errors.Is(err, ErrListNotSupportedByBackend)", err)
 	}
 }
 
 // TestMemcachedMemoryProvider_Health asserts the round-31 §11.4 anti-bluff
 // contract: Health MUST surface ErrMemcachedClientNotInitialized whenever
 // no real gomemcache client has been wired into the provider, instead of
-// the previous unconditional nil return (which fabricated PASS for dead
-// Memcached backends). When a real client is wired in this test must be
-// updated to assert real connectivity against a real Memcached container
-// per CONST-050(A).
+// the previous unconditional nil return.
 func TestMemcachedMemoryProvider_Health(t *testing.T) {
 	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
@@ -797,6 +835,13 @@ func TestMemcachedMemoryProvider_Health(t *testing.T) {
 	}
 	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
 		t.Errorf("Health() = %v, want error wrapping ErrMemcachedClientNotInitialized", err)
+	}
+}
+
+func TestMemcachedMemoryProvider_Close_NilClient(t *testing.T) {
+	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
+	if err := provider.Close(); err != nil {
+		t.Errorf("Close on nil-client provider returned error: %v", err)
 	}
 }
 

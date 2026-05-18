@@ -5,6 +5,7 @@ package memory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -28,7 +29,15 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-// TestRedisIntegration tests Redis provider with real Redis server
+// TestRedisIntegration tests Redis provider with real Redis server.
+//
+// Round-37 §11.4 anti-bluff sweep (2026-05-18): with the data path now
+// wired to a real go-redis/v9 client, the parent test gates ALL
+// subtests on Health(). Without this guard the previously sibling-only
+// Health skip would let dependent subtests run against an unreachable
+// backend and produce noisy failures unrelated to the unit under test.
+// Per CONST-035 honest contract, unreachable infrastructure is a SKIP,
+// not a FAIL.
 func TestRedisIntegration(t *testing.T) {
 	host := getEnvOrDefault("REDIS_HOST", "localhost")
 	port := getEnvOrDefault("REDIS_PORT", "6380")
@@ -45,15 +54,19 @@ func TestRedisIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create Redis provider: %v", err)
 	}
+	defer provider.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	if hErr := provider.Health(ctx); hErr != nil {
+		t.Skipf("Redis not available at %s:%s - skipping integration tests: %v (SKIP-OK: #infra-redis-unavailable)", host, port, hErr)
+	}
+
 	// Test Health
 	t.Run("Health", func(t *testing.T) {
-		err := provider.Health(ctx)
-		if err != nil {
-			t.Skipf("Redis not available at %s:%s - skipping integration tests: %v (SKIP-OK: #infra-redis-unavailable)", host, port, err)
+		if err := provider.Health(ctx); err != nil {
+			t.Fatalf("Health failed: %v", err)
 		}
 	})
 
@@ -174,7 +187,15 @@ func TestRedisIntegration(t *testing.T) {
 	})
 }
 
-// TestMemcachedIntegration tests Memcached provider with real Memcached server
+// TestMemcachedIntegration tests Memcached provider with real Memcached server.
+//
+// Round-37 §11.4 anti-bluff sweep (2026-05-18): with the data path now
+// wired to a real gomemcache client, the parent test gates ALL subtests
+// on Health(). The Search subtest is also updated to assert the honest
+// contract — Memcached's wire protocol has no SCAN equivalent, so
+// Search now ALWAYS returns ErrListNotSupportedByBackend (round 36 and
+// prior shipped a fake walk over a local in-memory map and pretended
+// it worked — CRITICAL fabricated-capability bluff per CONST-035).
 func TestMemcachedIntegration(t *testing.T) {
 	host := getEnvOrDefault("MEMCACHED_HOST", "localhost")
 	port := getEnvOrDefault("MEMCACHED_PORT", "11212")
@@ -189,15 +210,19 @@ func TestMemcachedIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create Memcached provider: %v", err)
 	}
+	defer provider.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	if hErr := provider.Health(ctx); hErr != nil {
+		t.Skipf("Memcached not available at %s:%s - skipping integration tests: %v (SKIP-OK: #infra-memcached-unavailable)", host, port, hErr)
+	}
+
 	// Test Health
 	t.Run("Health", func(t *testing.T) {
-		err := provider.Health(ctx)
-		if err != nil {
-			t.Skipf("Memcached not available at %s:%s - skipping integration tests: %v (SKIP-OK: #integration-only)", host, port, err)
+		if err := provider.Health(ctx); err != nil {
+			t.Fatalf("Health failed: %v", err)
 		}
 	})
 
@@ -228,19 +253,17 @@ func TestMemcachedIntegration(t *testing.T) {
 		}
 	})
 
-	// Test Search
+	// Test Search: round-37 honest contract — Memcached has no SCAN
+	// equivalent, so Search MUST return ErrListNotSupportedByBackend.
+	// The previous "store 3, search 2" assertion certified a
+	// fabricated capability.
 	t.Run("Search", func(t *testing.T) {
-		provider.Store(ctx, "mc-search-1", "target")
-		provider.Store(ctx, "mc-search-2", "target")
-		provider.Store(ctx, "mc-search-3", "other")
-
-		results, err := provider.Search(ctx, "target", 10)
-		if err != nil {
-			t.Fatalf("Search failed: %v", err)
+		_, err := provider.Search(ctx, "anything", 10)
+		if err == nil {
+			t.Fatal("Search returned nil error — anti-bluff regression")
 		}
-
-		if len(results) != 2 {
-			t.Errorf("Expected 2 results, got %d", len(results))
+		if !errors.Is(err, ErrListNotSupportedByBackend) {
+			t.Errorf("Search err = %v, want errors.Is(err, ErrListNotSupportedByBackend)", err)
 		}
 	})
 
@@ -522,6 +545,301 @@ func TestDatabaseIntegration(t *testing.T) {
 		}
 		t.Logf("Database connection string format validated: %s", connStr[:50]+"...")
 	})
+}
+
+// =============================================================================
+// Round-37 §11.4 anti-bluff — real-backend round-trip integration tests
+//
+// These tests exercise the real go-redis/v9 and gomemcache clients wired
+// in by round 37 against real containers (helix_code/docker-compose.full-test.yml
+// or helix_code/docker-compose.test.yml). Per CONST-050(A)+(B) the
+// integration layer MUST hit real infrastructure — no mocks.
+//
+// Run via:
+//   make test-infra-up
+//   go test -tags=integration -count=1 -race ./internal/memory/...
+//   make test-infra-down
+// =============================================================================
+
+func TestRedisMemoryProvider_Set_Get_Roundtrip_Round37(t *testing.T) {
+	host := getEnvOrDefault("REDIS_HOST", "localhost")
+	port := getEnvOrDefault("REDIS_PORT", "6380")
+	password := getEnvOrDefault("REDIS_PASSWORD", "")
+
+	config := map[string]interface{}{
+		"host":     host,
+		"port":     6380,
+		"password": password,
+		"prefix":   fmt.Sprintf("round37:%d:", time.Now().UnixNano()),
+	}
+	if p := os.Getenv("REDIS_PORT"); p == "" {
+		// Default mapping when running via docker-compose.full-test.yml (Redis on 6379).
+		config["port"] = 6379
+	}
+	_ = port // referenced by Skipf below
+
+	provider, err := NewRedisMemoryProvider(config)
+	if err != nil {
+		t.Fatalf("Failed to construct Redis provider: %v", err)
+	}
+	defer provider.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := provider.Health(ctx); err != nil {
+		t.Skipf("Redis not reachable at %s:%v: %v (SKIP-OK: #infra-redis-unavailable)", host, config["port"], err)
+	}
+
+	want := map[string]interface{}{
+		"phase":  "round-37",
+		"answer": 42.0,
+	}
+	if err := provider.Store(ctx, "round37-roundtrip", want); err != nil {
+		t.Fatalf("Store returned error: %v", err)
+	}
+
+	got, err := provider.Retrieve(ctx, "round37-roundtrip")
+	if err != nil {
+		t.Fatalf("Retrieve returned error: %v", err)
+	}
+	gotMap, ok := got.(map[string]interface{})
+	if !ok {
+		t.Fatalf("Retrieved value is not map[string]interface{}: %T", got)
+	}
+	if gotMap["phase"] != want["phase"] {
+		t.Errorf("phase: got %v, want %v", gotMap["phase"], want["phase"])
+	}
+	if gotMap["answer"] != want["answer"] {
+		t.Errorf("answer: got %v, want %v", gotMap["answer"], want["answer"])
+	}
+}
+
+func TestRedisMemoryProvider_Get_NotFound_Round37(t *testing.T) {
+	host := getEnvOrDefault("REDIS_HOST", "localhost")
+	port := 6379
+	if p := os.Getenv("REDIS_PORT"); p != "" {
+		fmt.Sscanf(p, "%d", &port)
+	}
+
+	provider, err := NewRedisMemoryProvider(map[string]interface{}{
+		"host":   host,
+		"port":   port,
+		"prefix": fmt.Sprintf("round37-nf:%d:", time.Now().UnixNano()),
+	})
+	if err != nil {
+		t.Fatalf("Failed to construct Redis provider: %v", err)
+	}
+	defer provider.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := provider.Health(ctx); err != nil {
+		t.Skipf("Redis not reachable: %v (SKIP-OK: #infra-redis-unavailable)", err)
+	}
+
+	_, err = provider.Retrieve(ctx, "this-key-was-never-set")
+	if err == nil {
+		t.Fatal("Retrieve of unknown key returned nil error")
+	}
+	if !errors.Is(err, ErrKeyNotFound) {
+		t.Errorf("Retrieve unknown key: err = %v, want errors.Is(err, ErrKeyNotFound)", err)
+	}
+}
+
+func TestRedisMemoryProvider_Set_TTL_Expires_Round37(t *testing.T) {
+	host := getEnvOrDefault("REDIS_HOST", "localhost")
+	port := 6379
+	if p := os.Getenv("REDIS_PORT"); p != "" {
+		fmt.Sscanf(p, "%d", &port)
+	}
+
+	provider, err := NewRedisMemoryProvider(map[string]interface{}{
+		"host":   host,
+		"port":   port,
+		"prefix": fmt.Sprintf("round37-ttl:%d:", time.Now().UnixNano()),
+	})
+	if err != nil {
+		t.Fatalf("Failed to construct Redis provider: %v", err)
+	}
+	defer provider.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := provider.Health(ctx); err != nil {
+		t.Skipf("Redis not reachable: %v (SKIP-OK: #infra-redis-unavailable)", err)
+	}
+
+	ttlCtx := WithMemoryTTL(ctx, 1*time.Second)
+	if err := provider.Store(ttlCtx, "ephemeral", "value-that-should-expire"); err != nil {
+		t.Fatalf("Store with TTL failed: %v", err)
+	}
+
+	// Confirm present immediately
+	if _, err := provider.Retrieve(ctx, "ephemeral"); err != nil {
+		t.Fatalf("Retrieve immediately after Set: %v", err)
+	}
+
+	// Wait past TTL + grace
+	time.Sleep(1500 * time.Millisecond)
+
+	_, err = provider.Retrieve(ctx, "ephemeral")
+	if err == nil {
+		t.Fatal("Retrieve after TTL expiry returned nil error — TTL not honoured")
+	}
+	if !errors.Is(err, ErrKeyNotFound) {
+		t.Errorf("Retrieve after TTL: err = %v, want errors.Is(err, ErrKeyNotFound)", err)
+	}
+}
+
+func TestRedisMemoryProvider_NilClient_ReturnsSentinel_Round37(t *testing.T) {
+	// Even in integration mode, the nil-client invariant must hold —
+	// constructing with no host/url MUST surface
+	// ErrRedisClientNotInitialized on every data method.
+	provider, err := NewRedisMemoryProvider(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("Failed to construct nil-client Redis provider: %v", err)
+	}
+	ctx := context.Background()
+
+	for name, op := range map[string]func() error{
+		"Store":    func() error { return provider.Store(ctx, "k", "v") },
+		"Retrieve": func() error { _, e := provider.Retrieve(ctx, "k"); return e },
+		"Delete":   func() error { return provider.Delete(ctx, "k") },
+		"Clear":    func() error { return provider.Clear(ctx) },
+		"Search":   func() error { _, e := provider.Search(ctx, "q", 10); return e },
+		"Health":   func() error { return provider.Health(ctx) },
+	} {
+		err := op()
+		if !errors.Is(err, ErrRedisClientNotInitialized) {
+			t.Errorf("%s on nil-client: err = %v, want errors.Is(err, ErrRedisClientNotInitialized)", name, err)
+		}
+	}
+}
+
+func TestMemcachedMemoryProvider_Set_Get_Roundtrip_Round37(t *testing.T) {
+	host := getEnvOrDefault("MEMCACHED_HOST", "localhost")
+	port := 11211
+	if p := os.Getenv("MEMCACHED_PORT"); p != "" {
+		fmt.Sscanf(p, "%d", &port)
+	}
+
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{
+		"host":   host,
+		"port":   port,
+		"prefix": fmt.Sprintf("round37mc:%d:", time.Now().UnixNano()),
+	})
+	if err != nil {
+		t.Fatalf("Failed to construct Memcached provider: %v", err)
+	}
+	defer provider.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := provider.Health(ctx); err != nil {
+		t.Skipf("Memcached not reachable at %s:%d: %v (SKIP-OK: #infra-memcached-unavailable)", host, port, err)
+	}
+
+	want := map[string]interface{}{
+		"phase": "round-37",
+		"item":  "memcached-roundtrip",
+	}
+	if err := provider.Store(ctx, "mc-roundtrip", want); err != nil {
+		t.Fatalf("Store returned error: %v", err)
+	}
+
+	got, err := provider.Retrieve(ctx, "mc-roundtrip")
+	if err != nil {
+		t.Fatalf("Retrieve returned error: %v", err)
+	}
+	gotMap, ok := got.(map[string]interface{})
+	if !ok {
+		t.Fatalf("Retrieved value is not map[string]interface{}: %T", got)
+	}
+	if gotMap["phase"] != want["phase"] {
+		t.Errorf("phase: got %v, want %v", gotMap["phase"], want["phase"])
+	}
+}
+
+func TestMemcachedMemoryProvider_Get_NotFound_Round37(t *testing.T) {
+	host := getEnvOrDefault("MEMCACHED_HOST", "localhost")
+	port := 11211
+	if p := os.Getenv("MEMCACHED_PORT"); p != "" {
+		fmt.Sscanf(p, "%d", &port)
+	}
+
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{
+		"host":   host,
+		"port":   port,
+		"prefix": fmt.Sprintf("round37mc-nf:%d:", time.Now().UnixNano()),
+	})
+	if err != nil {
+		t.Fatalf("Failed to construct Memcached provider: %v", err)
+	}
+	defer provider.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := provider.Health(ctx); err != nil {
+		t.Skipf("Memcached not reachable: %v (SKIP-OK: #infra-memcached-unavailable)", err)
+	}
+
+	_, err = provider.Retrieve(ctx, "this-key-was-never-set")
+	if err == nil {
+		t.Fatal("Retrieve of unknown key returned nil error")
+	}
+	if !errors.Is(err, ErrKeyNotFound) {
+		t.Errorf("Retrieve unknown key: err = %v, want errors.Is(err, ErrKeyNotFound)", err)
+	}
+}
+
+func TestMemcachedMemoryProvider_List_NotSupported_Round37(t *testing.T) {
+	// Real client; Memcached Search MUST always surface
+	// ErrListNotSupportedByBackend regardless of backend reachability,
+	// because the wire protocol has no SCAN equivalent. This is the
+	// honest-contract sentinel introduced by round 37.
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{
+		"host": "localhost",
+		"port": 11211,
+	})
+	if err != nil {
+		t.Fatalf("Failed to construct Memcached provider: %v", err)
+	}
+	defer provider.Close()
+
+	_, err = provider.Search(context.Background(), "anything", 10)
+	if err == nil {
+		t.Fatal("Search returned nil error — anti-bluff regression")
+	}
+	if !errors.Is(err, ErrListNotSupportedByBackend) {
+		t.Errorf("Search err = %v, want errors.Is(err, ErrListNotSupportedByBackend)", err)
+	}
+}
+
+func TestMemcachedMemoryProvider_NilClient_ReturnsSentinel_Round37(t *testing.T) {
+	provider, err := NewMemcachedMemoryProvider(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("Failed to construct nil-client Memcached provider: %v", err)
+	}
+	ctx := context.Background()
+
+	for name, op := range map[string]func() error{
+		"Store":    func() error { return provider.Store(ctx, "k", "v") },
+		"Retrieve": func() error { _, e := provider.Retrieve(ctx, "k"); return e },
+		"Delete":   func() error { return provider.Delete(ctx, "k") },
+		"Clear":    func() error { return provider.Clear(ctx) },
+		"Search":   func() error { _, e := provider.Search(ctx, "q", 10); return e },
+		"Health":   func() error { return provider.Health(ctx) },
+	} {
+		err := op()
+		if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+			t.Errorf("%s on nil-client: err = %v, want errors.Is(err, ErrMemcachedClientNotInitialized)", name, err)
+		}
+	}
 }
 
 // BenchmarkRedisIntegration benchmarks Redis operations with real server
