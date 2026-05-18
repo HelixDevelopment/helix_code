@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -62,10 +63,33 @@ var ErrCharacterAINotStarted = errors.New("provider not started")
 // ErrCharacterAINotInitialized indicates the provider has not been initialized
 var ErrCharacterAINotInitialized = errors.New("provider not initialized")
 
-// parseConfig parses configuration map into target struct
+// parseConfig parses a configuration map into the target struct via a
+// JSON marshal/unmarshal round-trip. This is the real, honest
+// implementation that replaces a §11.4 CRITICAL PASS-bluff: the
+// previous body returned nil unconditionally with the comment "For
+// now, just return nil to avoid compilation error", which silently
+// dropped every operator-supplied configuration field on the floor
+// while certifying success — CharacterAIProvider.Initialize then
+// proceeded with whatever defaults its caller had pre-populated
+// (CONST-035 / Article XI §11.9 / CONST-050(A)).
+//
+// Contract: target MUST be a non-nil pointer. JSON-tag-driven
+// unmarshalling means CharacterAIConfig (and any other consumer) gets
+// real values for every field whose JSON name appears in the config
+// map. Unknown keys are ignored (forward-compatible). Errors are
+// surfaced — never swallowed — so callers see real parse failures.
+// (Round-33 §11.4 stub-replacement; CONST-035 / Article XI §11.9.)
 func parseConfig(config map[string]interface{}, target interface{}) error {
-	// Simple implementation - in real code, use a proper config parser
-	// For now, just return nil to avoid compilation error
+	if target == nil {
+		return fmt.Errorf("parseConfig: target is nil")
+	}
+	raw, err := json.Marshal(config)
+	if err != nil {
+		return fmt.Errorf("parseConfig: failed to marshal config map: %w", err)
+	}
+	if err := json.Unmarshal(raw, target); err != nil {
+		return fmt.Errorf("parseConfig: failed to unmarshal into target: %w", err)
+	}
 	return nil
 }
 

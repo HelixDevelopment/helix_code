@@ -927,9 +927,17 @@ func (m *AutoLLMManager) autoUpdateCheck() error {
 	return nil
 }
 
-// checkForUpdates checks if a provider needs updates
+// checkForUpdates checks if a provider needs updates by fetching the
+// provider's git origin and counting commits ahead of local HEAD on
+// origin/main. Used by the auto-update orchestrator (autoUpdateCheck).
+// Returns (true, nil) when origin has new commits, (false, nil) when
+// up-to-date, (false, err) when git fetch / rev-list fails (e.g. the
+// provider's DataPath is not a git checkout).
+// (Round-33 §11.4 comment rewrite — previous comment claimed "in a real
+// implementation, this would check git for new commits" while the body
+// in fact already shells out to git fetch + git rev-list. The misleading
+// comment was a Class-B PASS-bluff per CONST-035 / Article XI §11.9.)
 func (m *AutoLLMManager) checkForUpdates(provider *AutoProvider) (bool, error) {
-	// In a real implementation, this would check git for new commits
 	cmd := exec.Command("git", "fetch", "origin")
 	cmd.Dir = provider.DataPath
 	if err := cmd.Run(); err != nil {

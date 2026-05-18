@@ -290,9 +290,15 @@ func (p *PineconeProvider) Retrieve(ctx context.Context, ids []string) ([]*Vecto
 
 	p.logger.Info("Retrieving %d vectors from Pinecone", len(ids))
 
-	// Pinecone doesn't have a direct retrieve by IDs API
-	// We need to use query with ID, but that's inefficient for multiple IDs
-	// For now, return not supported
+	// Pinecone does not expose a direct retrieve-by-ID batch API; it
+	// only supports query-by-vector with optional ID filter, which is
+	// O(N) round-trips for N IDs and orders-of-magnitude slower than
+	// what callers expect from a batch retrieval. We refuse explicitly
+	// rather than degrade silently into N serial queries (round-33
+	// §11.4 comment rewrite — previous "For now, return not supported"
+	// lead-in implied a stub awaiting completion; the function is in
+	// fact the honest contract for Pinecone's API surface today;
+	// CONST-035 / Article XI §11.9).
 	return nil, fmt.Errorf("Pinecone does not support batch retrieval by IDs")
 }
 

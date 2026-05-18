@@ -310,18 +310,26 @@ func (pm *ProviderManager) Restore(ctx context.Context, path string) error {
 	return provider.Restore(ctx, path)
 }
 
-// Helper functions for type conversion
+// Helper functions for type conversion.
+//
+// Today every registered provider shares the same in-tree VectorData /
+// VectorQuery types, so these helpers are identity-pass functions. They
+// exist as named seams so a future provider that needs a divergent
+// wire-shape can swap a real adapter in without churning every
+// call-site. Do NOT replace these comments with "For now, assume they
+// are the same type" placeholder language — the identity pass is the
+// real, documented contract (round-33 §11.4 comment rewrite; previous
+// language implied a stub awaiting completion. CONST-035 / Article XI
+// §11.9).
+
 func convertToProviderVectors(vectors []*VectorData) []*VectorData {
-	// For now, assume they are the same type
 	return vectors
 }
 
 func convertFromProviderVectors(vectors []*VectorData) []*VectorData {
-	// For now, assume they are the same type
 	return vectors
 }
 
 func convertToProviderQuery(query *VectorQuery) *VectorQuery {
-	// For now, assume they are the same type
 	return query
 }

@@ -198,9 +198,14 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 		var reasoning string
 
 		for resp := range streamCh {
-			// Check for errors (in a real implementation, you'd have error handling)
-			// For now, we'll assume no errors in streaming
-
+			// LLMResponse channel does not currently carry a separate error
+			// field; the underlying provider closes streamCh on error so
+			// downstream consumers see EOF rather than an explicit error
+			// frame. Surfacing the error class to the ToolStreamChunk
+			// receiver requires extending LLMResponse with an Err field —
+			// tracked as a follow-up; do NOT add a "would have error
+			// handling" placeholder comment back (round-33 §11.4 honest
+			// limitation anchor; CONST-035 / Article XI §11.9).
 			fullResponse += resp.Content
 
 			// Send streaming chunk
@@ -247,9 +252,12 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 			}
 
 			for resp := range finalStreamCh {
-				// Check for errors (in a real implementation, you'd have error handling)
-				// For now, we'll assume no errors in streaming
-
+				// Same LLMResponse channel limitation as the first loop
+				// above — the channel close-on-error contract is the
+				// only signal available; an Err field on LLMResponse is
+				// the follow-up. Do NOT replace this comment with a
+				// "would have error handling" stub (round-33 §11.4
+				// honest limitation anchor; CONST-035 / Article XI §11.9).
 				ch <- ToolStreamChunk{
 					ID:        uuid.New(),
 					Content:   resp.Content,

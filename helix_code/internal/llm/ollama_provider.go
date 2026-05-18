@@ -1,9 +1,11 @@
 package llm
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -353,9 +355,12 @@ func (p *OllamaProvider) makeAPIRequest(ctx context.Context, request OllamaAPIRe
 }
 
 func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request OllamaAPIRequest, ch chan<- LLMResponse) error {
-	// Simplified streaming implementation
-	// In a real implementation, this would handle Server-Sent Events (SSE)
-
+	// Ollama streaming wire-format: NDJSON (newline-delimited JSON). Each line
+	// is a complete OllamaAPIResponse; the terminal frame carries Done=true.
+	// We line-iterate via bufio.Scanner and forward each chunk as a separate
+	// LLMResponse so consumers see incremental output (round-33 §11.4 fix —
+	// previous body only decoded ONE frame, fabricating streaming for callers
+	// while silently discarding subsequent chunks; CONST-035 / Article XI §11.9).
 	url := p.getAPIURL("/api/chat")
 
 	requestBody, err := json.Marshal(request)
@@ -369,6 +374,7 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/x-ndjson")
 
 	resp, err := p.apiClient.Do(req)
 	if err != nil {
@@ -380,20 +386,35 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 		return fmt.Errorf("API returned status %d", resp.StatusCode)
 	}
 
-	var response OllamaAPIResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
-	}
+	scanner := bufio.NewScanner(resp.Body)
+	// Ollama chunks can carry full prompt-eval echoes; raise the buffer cap.
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 
-	// ANTI-BLUFF: Send REAL response chunk from Ollama
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case ch <- LLMResponse{
-		ID:        uuid.New(),
-		Content:   response.Response,
-		CreatedAt: time.Now(),
-	}:
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+		var chunk OllamaAPIResponse
+		if err := json.Unmarshal(line, &chunk); err != nil {
+			return fmt.Errorf("failed to decode NDJSON chunk: %w", err)
+		}
+		// ANTI-BLUFF: Send REAL streaming chunk from Ollama (one per NDJSON line).
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case ch <- LLMResponse{
+			ID:        uuid.New(),
+			Content:   chunk.Response,
+			CreatedAt: time.Now(),
+		}:
+		}
+		if chunk.Done {
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil && err != io.EOF {
+		return fmt.Errorf("streaming read failed: %w", err)
 	}
 
 	return nil

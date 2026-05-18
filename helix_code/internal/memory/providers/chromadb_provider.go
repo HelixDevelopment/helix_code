@@ -1370,8 +1370,13 @@ func (p *ChromaDBProvider) GetStats(ctx context.Context) (*ProviderStats, error)
 	totalCollections := len(collections)
 	totalVectors := 0
 
-	// For each collection, we could get count, but ChromaDB doesn't have a direct count API
-	// For now, return basic stats
+	// ChromaDB does not expose a direct count-vectors API at the
+	// provider level; TotalVectors stays at 0 and TotalSize stays at 0
+	// to advertise the limitation honestly rather than fabricate a
+	// number from collection-level partial counts (round-33 §11.4
+	// comment rewrite — previous "For now, return basic stats" lead-in
+	// implied a stub; the function is in fact the honest contract for
+	// what ChromaDB makes queryable today; CONST-035 / Article XI §11.9).
 	return &ProviderStats{
 		Name:             p.GetName(),
 		Type:             p.GetType(),

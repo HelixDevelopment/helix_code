@@ -124,10 +124,24 @@ func (cp *CopilotProvider) loadGitHubCLIToken() string {
 	return ""
 }
 
-// extractTokenFromFile attempts to extract token from config file
+// extractTokenFromFile is a not-implemented stub kept only as a named
+// seam for a future YAML/JSON-aware token extractor. Today it always
+// returns "" — the documented contract that callers MUST treat as
+// "no token on disk, fall back to env-var / config" (round-33 §11.4
+// honest-stub anchor — the previous body was the same `return ""` but
+// the comment block read "For now, we'll rely on environment variables
+// and config" which downstream maintainers could read as "this works
+// today"; in reality the function performs zero file IO and returns
+// the empty string unconditionally. CONST-035 / Article XI §11.9 /
+// CONST-050(A)).
+//
+// When the real extractor lands it MUST:
+//   1. Validate `path` (no symlink escape, mode 0600 per CONST-042),
+//   2. Detect format from extension (.yaml/.yml/.json/.toml),
+//   3. Parse and locate the canonical "token" key,
+//   4. Return the extracted string or "" on absence/parse-failure.
 func (cp *CopilotProvider) extractTokenFromFile(path string) string {
-	// This is a simplified implementation - in production you'd parse YAML/JSON
-	// For now, we'll rely on environment variables and config
+	_ = path
 	return ""
 }
 
