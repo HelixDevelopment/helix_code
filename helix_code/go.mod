@@ -7,6 +7,7 @@ require (
 	digital.vasic.debate v0.0.0-00010101000000-000000000000
 	digital.vasic.helixqa v0.0.0-00010101000000-000000000000
 	digital.vasic.helixspecifier v0.0.0-00010101000000-000000000000
+	digital.vasic.lazy v0.0.0-00010101000000-000000000000
 	fyne.io/fyne/v2 v2.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
@@ -206,3 +207,5 @@ replace digital.vasic.security => ../security
 replace digital.vasic.debate => ../dependencies/HelixDevelopment/DebateOrchestrator
 
 replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/HelixSpecifier
+
+replace digital.vasic.lazy => ../dependencies/vasic-digital/Lazy
