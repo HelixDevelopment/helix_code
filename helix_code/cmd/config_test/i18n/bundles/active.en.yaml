@@ -1,0 +1,51 @@
+# config_test i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/config_test/main.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: config_test_<area>_<short_description>. All IDs
+# prefixed with config_test_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-141 §11.4 anti-bluff sweep (2026-05-18): every user-facing
+# string in this CLI migrated in a single round (the file is small
+# enough to migrate fully — no future-round residue).
+
+config_test_header_title:
+  other: "🔧 Testing Configuration Hot-Reload System"
+
+config_test_header_divider:
+  other: "=========================================="
+
+config_test_load_failed:
+  other: "❌ Failed to load configuration: {{.Err}}"
+
+config_test_initial_loaded:
+  other: "✅ Initial configuration loaded:"
+
+config_test_config_path:
+  other: "📁 Config path: {{.Path}}"
+
+config_test_press_ctrl_c:
+  other: "⏹️  Press Ctrl+C to exit"
+
+config_test_shutting_down:
+  other: "👋 Shutting down configuration test..."
+
+config_test_info_server:
+  other: "   🖥️  Server: {{.Address}}:{{.Port}}"
+
+config_test_info_database:
+  other: "   🗄️  Database: {{.Host}}:{{.Port}}/{{.DBName}}"
+
+config_test_info_redis:
+  other: "   🔴 Redis: {{.Host}}:{{.Port}} (enabled: {{.Enabled}})"
+
+config_test_info_auth:
+  other: "   🔐 Auth: JWT Secret Length: {{.Length}}"
+
+config_test_info_llm:
+  other: "   🤖 LLM: {{.Provider}} (tokens: {{.MaxTokens}}, temp: {{.Temperature}})"
