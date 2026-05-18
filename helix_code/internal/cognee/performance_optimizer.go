@@ -7,7 +7,10 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"os/exec"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -952,44 +955,200 @@ func (po *PerformanceOptimizer) getCPUUsage() float64 {
 
 // getGPUUsage returns the current GPU utilisation percentage [0.0, 100.0].
 //
-// Honest sentinel contract (round-33 §11.4 anti-bluff sweep, 2026-05-18):
+// Forensic anchor — round 33 (commit 151572b, 2026-05-18, §11.4 anti-bluff sweep):
 // the previous implementation FABRICATED utilisation numbers based on
 // whether the optimizer was running (35.0 / 30.0 / 20.0 when running,
 // 5.0 / 3.0 / 0.0 when idle) for CUDA / Metal / other GPUs respectively
-// — values that have NO grounding in actual GPU telemetry. The fabricated
+// — values that had NO grounding in actual GPU telemetry. The fabricated
 // numbers were written into PerformanceOptimizer.metrics.GPUUsage and
 // surfaced to operators as real measurements, certifying utilisation that
-// was never measured (CONST-035 / Article XI §11.9 PASS-bluff).
+// was never measured (CONST-035 / Article XI §11.9 PASS-bluff). Round 33
+// replaced the fabrication with GPUUsageUnavailableSentinel (-1.0) +
+// logTelemetryGap() so the gap was loud instead of silent.
 //
-// Real telemetry requires a vendor-specific integration:
-//   - NVIDIA: parse `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader`
-//     or use NVML via cgo
-//   - AMD: parse `rocm-smi --showuse` or use ROCm SMI lib
-//   - Apple Silicon: IOReport framework via cgo
-//   - Intel Arc: `intel_gpu_top` / Level Zero
+// Round 43 (this revision, 2026-05-18): wire REAL NVIDIA GPU telemetry
+// via `nvidia-smi` shell-out, closing the sentinel for the NVIDIA case.
+// Other vendors (AMD ROCm, Apple Silicon IOReport, Intel Arc Level Zero)
+// are DEFERRED to future rounds and continue to surface the sentinel.
 //
-// Until any of those land we surface the GPUUnavailableSentinel (-1.0)
-// so dashboards and challenge runners detect the gap loudly instead of
-// silently consuming fabricated numbers.
+// Implementation rationale (shell-out over cgo NVML):
+//   - The host has documented cgo / X11 / Xcursor header issues that
+//     would block any cgo binding (NVIDIA/go-nvml or similar).
+//   - nvidia-smi ships with the NVIDIA driver — zero build-time
+//     dependency, runs on every machine that can actually use the GPU.
+//   - Output is stable: `--query-gpu=utilization.gpu` with
+//     `--format=csv,noheader,nounits` produces one decimal integer per
+//     GPU per line, machine-parseable since at least driver 304.x.
+//
+// Multi-GPU aggregation: returns the arithmetic MEAN of all GPUs.
+// Chosen over MAX because the field is "system GPU utilization"
+// (analogous to system CPU%) — mean is the representative figure when a
+// multi-GPU workload spans devices. If a future caller needs per-GPU or
+// max, add a sibling method rather than changing this aggregation.
+//
+// Error contract — every failure path returns GPUUsageUnavailableSentinel
+// (-1.0). The function NEVER returns a fabricated number on the error
+// path (CONST-035 anti-bluff guarantee).
+//
+// Caching: a 1-second TTL cache prevents nvidia-smi storms when
+// callers (GetMetrics + collectMetrics) invoke us in tight loops. TTL
+// kept short so dashboards still see fresh data within a metric-tick.
 func (po *PerformanceOptimizer) getGPUUsage() float64 {
 	// No GPU on the hardware profile: this branch is honest — 0.0
 	// genuinely reflects "no GPU available", not fabricated idle %.
 	if po.hwProfile == nil || po.hwProfile.GPU == nil {
 		return 0.0
 	}
-	// GPU present but no real telemetry integration wired: surface
-	// the sentinel so callers can distinguish "unmeasured" from
-	// "measured idle" (which would honestly be 0.0).
-	return GPUUsageUnavailableSentinel
+	return queryNvidiaGPUUsage()
 }
 
-// GPUUsageUnavailableSentinel is returned by getGPUUsage() when a GPU
-// is present on the hardware profile but no real telemetry integration
-// (NVML / ROCm SMI / IOReport / Level Zero) has been wired in yet.
-// Surfacing -1.0 makes the gap loud — dashboards and challenge runners
-// can branch on the sentinel and refuse to render fabricated numbers
-// (round-33 §11.4 sentinel anchor; CONST-035 / Article XI §11.9).
+// GPUUsageUnavailableSentinel is returned by getGPUUsage() (and the
+// underlying queryNvidiaGPUUsage()) when GPU utilisation cannot be
+// measured: nvidia-smi missing from PATH, exec failure, parse failure,
+// timeout, or empty output. Surfacing -1.0 makes the gap loud —
+// dashboards and challenge runners can branch on the sentinel and
+// refuse to render fabricated numbers (round-33 §11.4 sentinel anchor,
+// preserved through round-43 NVIDIA wiring; CONST-035 / Article XI §11.9).
 const GPUUsageUnavailableSentinel = -1.0
+
+// gpuTelemetryLogger surfaces GPU-telemetry events (gap, parse error,
+// timeout) on a dedicated logger channel so operators can separate
+// GPU-side gaps from broader optimizer noise.
+var gpuTelemetryLogger = logging.NewLoggerWithName("cognee_gpu_telemetry")
+
+// nvidiaSmiQueryTimeout caps the nvidia-smi shell-out. Bounded short
+// because nvidia-smi typically completes in 10-50ms; 2s is generous
+// for first-invocation driver warmup yet still well under the
+// metric-collection cadence.
+const nvidiaSmiQueryTimeout = 2 * time.Second
+
+// nvidiaSmiCacheTTL is the lifetime of the most-recent successful
+// reading. Round 43 deliberately keeps this short so the value tracks
+// real workload changes; long enough to elide redundant shell-outs
+// across GetMetrics + collectMetrics back-to-back invocations.
+const nvidiaSmiCacheTTL = 1 * time.Second
+
+// gpuUsageCache memoises the last successful nvidia-smi result.
+// Only successful readings populate the cache; sentinel returns do
+// NOT poison the cache so a transient nvidia-smi blip does not freeze
+// the metric at -1.0 for the TTL window.
+type gpuUsageCacheT struct {
+	mu     sync.Mutex
+	value  float64
+	taken  time.Time
+	hasVal bool
+}
+
+var gpuUsageCache gpuUsageCacheT
+
+// nvidiaSmiCommand is overridable for tests. Production code MUST use
+// the exec.CommandContext factory; the tests inject a fake via
+// PATH manipulation (t.Setenv("PATH", t.TempDir()) + fake script) so
+// the real exec.CommandContext code path executes against a hermetic
+// binary — CONST-050(A) compliant (the fake script lives in t.TempDir,
+// not in production source).
+var nvidiaSmiCommand = func(ctx context.Context) *exec.Cmd {
+	return exec.CommandContext(ctx, "nvidia-smi",
+		"--query-gpu=utilization.gpu",
+		"--format=csv,noheader,nounits")
+}
+
+// queryNvidiaGPUUsage performs the cache lookup + shell-out + parse.
+// Returns GPUUsageUnavailableSentinel on every error path; returns the
+// mean utilisation [0.0, 100.0] on success.
+func queryNvidiaGPUUsage() float64 {
+	// Cache fast-path — honour TTL on successful readings only.
+	gpuUsageCache.mu.Lock()
+	if gpuUsageCache.hasVal && time.Since(gpuUsageCache.taken) < nvidiaSmiCacheTTL {
+		v := gpuUsageCache.value
+		gpuUsageCache.mu.Unlock()
+		return v
+	}
+	gpuUsageCache.mu.Unlock()
+
+	// Pre-flight: nvidia-smi must exist on PATH. Cheap LookPath check
+	// avoids the exec spawn overhead on non-NVIDIA hosts.
+	if _, err := exec.LookPath("nvidia-smi"); err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Debug("nvidia-smi not found in PATH; GPU telemetry disabled, returning sentinel (round-43 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), nvidiaSmiQueryTimeout)
+	defer cancel()
+
+	out, err := nvidiaSmiCommand(ctx).Output()
+	if err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("nvidia-smi invocation failed: %v; returning sentinel (round-43 §11.4 honest sentinel)", err)
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	mean, ok := parseNvidiaSmiUtilization(out)
+	if !ok {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("nvidia-smi output parse failed: %q; returning sentinel (round-43 §11.4 honest sentinel)", string(out))
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	// Cache successful reading.
+	gpuUsageCache.mu.Lock()
+	gpuUsageCache.value = mean
+	gpuUsageCache.taken = time.Now()
+	gpuUsageCache.hasVal = true
+	gpuUsageCache.mu.Unlock()
+
+	return mean
+}
+
+// parseNvidiaSmiUtilization extracts the mean GPU utilisation from the
+// nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits
+// output. Each non-empty line is a per-GPU integer percent (0-100).
+// Returns (mean, true) on success; (0, false) if zero parseable lines
+// are produced.
+func parseNvidiaSmiUtilization(raw []byte) (float64, bool) {
+	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	var sum float64
+	var count int
+	for _, line := range lines {
+		s := strings.TrimSpace(line)
+		if s == "" {
+			continue
+		}
+		v, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			// A single garbage line poisons the whole reading — the
+			// driver should never emit mixed valid/invalid lines, and
+			// silently dropping bad lines would mask driver bugs.
+			return 0, false
+		}
+		if v < 0 || v > 100 {
+			// Out-of-range readings indicate a driver issue; refuse to
+			// surface them as honest measurements.
+			return 0, false
+		}
+		sum += v
+		count++
+	}
+	if count == 0 {
+		return 0, false
+	}
+	return sum / float64(count), true
+}
+
+// resetGPUUsageCacheForTest clears the package-level cache. Tests use
+// this to ensure each subtest starts from a clean slate; production
+// code MUST NOT call it.
+func resetGPUUsageCacheForTest() {
+	gpuUsageCache.mu.Lock()
+	gpuUsageCache.hasVal = false
+	gpuUsageCache.value = 0
+	gpuUsageCache.taken = time.Time{}
+	gpuUsageCache.mu.Unlock()
+}
 
 func (po *PerformanceOptimizer) getCacheHitRate() float64 {
 	if po.cache == nil {
