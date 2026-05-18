@@ -2,6 +2,7 @@ package hardware
 
 import (
 	"bufio"
+	stdctx "context"
 	"fmt"
 	"log"
 	"os"
@@ -41,29 +42,30 @@ func NewDetector() *Detector {
 
 // Detect performs comprehensive hardware detection
 func (d *Detector) Detect() (*HardwareInfo, error) {
-	log.Println("🔍 Starting hardware detection...")
+	ctx := stdctx.Background()
+	log.Println(tr(ctx, "internal_hardware_detection_starting", nil))
 
 	// Detect CPU information
 	if err := d.detectCPU(); err != nil {
-		log.Printf("Warning: CPU detection failed: %v", err)
+		log.Print(tr(ctx, "internal_hardware_cpu_detection_failed", map[string]any{"Error": err}))
 	}
 
 	// Detect GPU information
 	if err := d.detectGPU(); err != nil {
-		log.Printf("Warning: GPU detection failed: %v", err)
+		log.Print(tr(ctx, "internal_hardware_gpu_detection_failed", map[string]any{"Error": err}))
 	}
 
 	// Detect memory information
 	if err := d.detectMemory(); err != nil {
-		log.Printf("Warning: Memory detection failed: %v", err)
+		log.Print(tr(ctx, "internal_hardware_memory_detection_failed", map[string]any{"Error": err}))
 	}
 
 	// Detect platform information
 	if err := d.detectPlatform(); err != nil {
-		log.Printf("Warning: Platform detection failed: %v", err)
+		log.Print(tr(ctx, "internal_hardware_platform_detection_failed", map[string]any{"Error": err}))
 	}
 
-	log.Println("✅ Hardware detection completed")
+	log.Println(tr(ctx, "internal_hardware_detection_completed", nil))
 	return d.info, nil
 }
 
@@ -100,13 +102,13 @@ func (d *Detector) parseMemorySize(sizeStr string) int {
 	re := regexp.MustCompile(`(\d+(?:\.\d+)?)\s*(GB|MB|TB|G|M|T)?`)
 	matches := re.FindStringSubmatch(strings.ToUpper(sizeStr))
 	if len(matches) < 2 {
-		log.Printf("Warning: failed to parse memory size: %s", sizeStr)
+		log.Print(tr(stdctx.Background(), "internal_hardware_parse_memory_size_failed", map[string]any{"SizeStr": sizeStr}))
 		return 0
 	}
 
 	value, err := strconv.ParseFloat(matches[1], 64)
 	if err != nil {
-		log.Printf("Warning: failed to parse memory value: %s, error: %v", matches[1], err)
+		log.Print(tr(stdctx.Background(), "internal_hardware_parse_memory_value_failed", map[string]any{"Value": matches[1], "Error": err}))
 		return 0
 	}
 
@@ -317,7 +319,7 @@ func (d *Detector) detectMemory() error {
 func (d *Detector) detectMemoryLinux() error {
 	file, err := os.Open("/proc/meminfo")
 	if err != nil {
-		log.Printf("Warning: failed to open /proc/meminfo: %v", err)
+		log.Print(tr(stdctx.Background(), "internal_hardware_open_meminfo_failed", map[string]any{"Error": err}))
 		return d.detectMemoryGeneric()
 	}
 	defer file.Close()
@@ -385,7 +387,7 @@ func (d *Detector) detectMemoryGeneric() error {
 	}
 
 	d.info.Memory.TotalRAM = fmt.Sprintf("%dGB", memGB)
-	log.Printf("Warning: memory detection fell back to estimate: %s", d.info.Memory.TotalRAM)
+	log.Print(tr(stdctx.Background(), "internal_hardware_memory_fallback_to_estimate", map[string]any{"Estimate": d.info.Memory.TotalRAM}))
 	return nil
 }
 

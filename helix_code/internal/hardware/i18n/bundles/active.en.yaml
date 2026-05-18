@@ -1,0 +1,57 @@
+# internal/hardware i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/hardware/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_hardware_<area>_<short_description>.
+# All IDs prefixed with internal_hardware_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-158 §11.4 anti-bluff sweep (2026-05-18): migrated 10 distinct
+# user-facing log strings emitted by detector.go covering the
+# detection lifecycle (start/complete), the four sub-detector failure
+# warnings (CPU/GPU/Memory/Platform), the memory-parse-warning path
+# (size + value), and the three memory-detection fall-back warnings
+# (open /proc/meminfo, parse MemTotal, sysctl run, sysctl parse,
+# generic estimate).
+#
+# Model-size identifier returns ("70B", "34B", "13B", "7B", "3B") are
+# NOT migrated in this round because they are stable model-class
+# tokens consumed by downstream provider/discovery code as identity
+# keys, not user-facing display content. Migrating them would silently
+# rewrite identity tokens used in equality checks. Future rounds may
+# introduce a separate display-name translator if these surface in UI.
+
+internal_hardware_detection_starting:
+  other: "Starting hardware detection..."
+
+internal_hardware_detection_completed:
+  other: "Hardware detection completed"
+
+internal_hardware_cpu_detection_failed:
+  other: "Warning: CPU detection failed: {{.Error}}"
+
+internal_hardware_gpu_detection_failed:
+  other: "Warning: GPU detection failed: {{.Error}}"
+
+internal_hardware_memory_detection_failed:
+  other: "Warning: Memory detection failed: {{.Error}}"
+
+internal_hardware_platform_detection_failed:
+  other: "Warning: Platform detection failed: {{.Error}}"
+
+internal_hardware_parse_memory_size_failed:
+  other: "Warning: failed to parse memory size: {{.SizeStr}}"
+
+internal_hardware_parse_memory_value_failed:
+  other: "Warning: failed to parse memory value: {{.Value}}, error: {{.Error}}"
+
+internal_hardware_open_meminfo_failed:
+  other: "Warning: failed to open /proc/meminfo: {{.Error}}"
+
+internal_hardware_memory_fallback_to_estimate:
+  other: "Warning: memory detection fell back to estimate: {{.Estimate}}"
