@@ -1,0 +1,53 @@
+# performance_optimization i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/performance_optimization/main.go to a message ID
+# resolved at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: performance_optimization_<area>_<short_desc>.
+# All IDs prefixed with performance_optimization_ to avoid namespace
+# collision with other submodules' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-144 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# detected user-facing hardcoded literals in main.go — covering the
+# top-of-run banner pair, the configuration heading, the completion
+# banner pair, the readiness-assessment heading, the two readiness
+# verdict literals ("PRODUCTION READY" + "OPTIMIZATION NEEDED"), and
+# the final summary banner + heading. Residual literals (metrics
+# subheadings, helper-functions inside generateOptimizationSummary,
+# fmt.Sprintf'd report bodies) are deferred to a future round to
+# stay under the round size cap. Residual lines remain detectable by
+# the CONST-046 audit walker until migrated.
+
+performance_optimization_banner_start:
+  other: "🚀 Starting HelixCode Production Performance Optimization"
+
+performance_optimization_banner_goal:
+  other: "📊 Goal: Optimize system for production deployment while maintaining zero-tolerance security"
+
+performance_optimization_config_heading:
+  other: "📋 Production Optimization Configuration:"
+
+performance_optimization_complete_divider:
+  other: "========================================"
+
+performance_optimization_complete_heading:
+  other: "🎯 PRODUCTION OPTIMIZATION COMPLETE"
+
+performance_optimization_readiness_heading:
+  other: "🚀 PRODUCTION READINESS ASSESSMENT:"
+
+performance_optimization_readiness_ready:
+  other: "✅ PRODUCTION READY"
+
+performance_optimization_readiness_not_ready:
+  other: "⚠️ OPTIMIZATION NEEDED"
+
+performance_optimization_summary_heading:
+  other: "🎯 PRODUCTION OPTIMIZATION SUMMARY"
+
+performance_optimization_summary_excellent:
+  other: "🎉 EXCELLENT: HelixCode production-ready with optimized performance"

@@ -7,12 +7,54 @@ import (
 	"os"
 	"time"
 
+	"dev.helix.code/cmd/performance_optimization/i18n"
 	"dev.helix.code/internal/performance"
 )
 
+// translator resolves CONST-046 message IDs for every user-facing
+// string emitted by this CLI. Defaults to i18n.NoopTranslator{} (loud
+// message-ID echo) so unit tests + ad-hoc invocations remain obvious.
+// helix_code wires a real *i18nadapter.Translator at boot via
+// SetTranslator (round-144 §11.4 anti-bluff sweep, 2026-05-18).
+//
+// A package-level variable is the chosen DI seam to keep the
+// migration minimally invasive — main()'s linear call graph does
+// not warrant a constructor-injected struct.
+var translator i18n.Translator = i18n.NoopTranslator{}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		translator = i18n.NoopTranslator{}
+		return
+	}
+	translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func tr(ctx context.Context, msgID string, data map[string]any) string {
+	if translator == nil {
+		translator = i18n.NoopTranslator{}
+	}
+	out, err := translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
+}
+
 func main() {
-	log.Println("🚀 Starting HelixCode Production Performance Optimization")
-	log.Println("📊 Goal: Optimize system for production deployment while maintaining zero-tolerance security")
+	ctx := context.Background()
+
+	log.Println(tr(ctx, "performance_optimization_banner_start", nil))
+	log.Println(tr(ctx, "performance_optimization_banner_goal", nil))
 
 	// Define production optimization configuration
 	config := performance.PerformanceConfig{
@@ -34,7 +76,7 @@ func main() {
 		MaxErrorRate:            0.01,                   // 1% max error rate
 	}
 
-	log.Printf("📋 Production Optimization Configuration:")
+	log.Printf("%s", tr(ctx, "performance_optimization_config_heading", nil))
 	log.Printf("   Target Throughput: %d ops/sec", config.TargetThroughput)
 	log.Printf("   Target Latency: %s", config.TargetLatency)
 	log.Printf("   Target CPU Utilization: %.1f%%", config.TargetCPUUtilization)
@@ -49,8 +91,11 @@ func main() {
 		log.Fatalf("❌ Failed to create performance optimizer: %v", err)
 	}
 
-	// Create context with timeout for optimization
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	// Create context with timeout for optimization (overrides the
+	// background ctx used by the i18n calls above with a timeout-bounded
+	// child).
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, 30*time.Minute)
 	defer cancel()
 
 	// Start comprehensive production optimization
@@ -65,9 +110,9 @@ func main() {
 
 	// Display comprehensive results
 	log.Println("")
-	log.Println("========================================")
-	log.Println("🎯 PRODUCTION OPTIMIZATION COMPLETE")
-	log.Println("========================================")
+	log.Println(tr(ctx, "performance_optimization_complete_divider", nil))
+	log.Println(tr(ctx, "performance_optimization_complete_heading", nil))
+	log.Println(tr(ctx, "performance_optimization_complete_divider", nil))
 	log.Printf("Duration: %v", optimizationResult.Duration)
 	log.Printf("Total Optimizations Applied: %d", optimizationResult.TotalApplied)
 	log.Printf("Successful Optimizations: %d", optimizationResult.Successful)
@@ -106,15 +151,15 @@ func main() {
 	productionReady := evaluateProductionReadiness(optimizationResult, config)
 
 	log.Println("")
-	log.Println("🚀 PRODUCTION READINESS ASSESSMENT:")
+	log.Println(tr(ctx, "performance_optimization_readiness_heading", nil))
 	if productionReady {
-		log.Println("✅ PRODUCTION READY")
+		log.Println(tr(ctx, "performance_optimization_readiness_ready", nil))
 		log.Println("   All performance targets achieved")
 		log.Println("   System optimized for production deployment")
 		log.Println("   Zero-tolerance security maintained")
 		log.Println("   Ready for production release")
 	} else {
-		log.Println("⚠️ OPTIMIZATION NEEDED")
+		log.Println(tr(ctx, "performance_optimization_readiness_not_ready", nil))
 		log.Println("   Some performance targets not met")
 		log.Println("   Additional optimization recommended")
 		log.Println("   Review metrics before production")
@@ -124,15 +169,15 @@ func main() {
 	generateOptimizationSummary(optimizationResult, productionReady, config)
 
 	log.Println("")
-	log.Println("========================================")
-	log.Println("🎯 PRODUCTION OPTIMIZATION SUMMARY")
-	log.Println("========================================")
+	log.Println(tr(ctx, "performance_optimization_complete_divider", nil))
+	log.Println(tr(ctx, "performance_optimization_summary_heading", nil))
+	log.Println(tr(ctx, "performance_optimization_complete_divider", nil))
 	log.Printf("Overall Success: %t", optimizationResult.OverallImprovement.OverallScore > 10)
 	log.Printf("Production Ready: %t", productionReady)
 	log.Printf("Performance Score: %.1f%%", optimizationResult.OverallImprovement.OverallScore)
 
 	if productionReady {
-		log.Println("🎉 EXCELLENT: HelixCode production-ready with optimized performance")
+		log.Println(tr(ctx, "performance_optimization_summary_excellent", nil))
 		log.Println("🚀 Platform ready for production deployment")
 		log.Println("✅ Zero-tolerance security policy maintained")
 	} else {
