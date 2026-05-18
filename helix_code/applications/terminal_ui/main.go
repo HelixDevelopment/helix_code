@@ -1717,9 +1717,17 @@ func (tui *TerminalUI) createThemeSettingsView() tview.Primitive {
 
 	themes := tui.themeManager.GetAvailableThemes()
 	for _, themeName := range themes {
-		themeList.AddItem(themeName, "", 0, func() {
-			// This will be called when theme is selected
-			// For now, just show a message
+		// Capture themeName by value — Go's loop variable was the
+		// previous gotcha that hid the bluff (every callback would
+		// have closed over the same final value). Round-33 §11.4
+		// anti-bluff fix: previous closure body was empty with the
+		// comment "// For now, just show a message" — the
+		// "Theme Selection" UI element rendered every theme but
+		// selecting one was a no-op, fabricating UX completion.
+		// CONST-035 / Article XI §11.9 / CONST-050(A).
+		name := themeName
+		themeList.AddItem(name, "", 0, func() {
+			tui.themeManager.SetTheme(name)
 		})
 	}
 

@@ -252,7 +252,10 @@ func (ct *CustomTheme) DisabledIconColor() color.Color {
 	return parseHexColor(ct.currentTheme.Border)
 }
 
-// PrimaryBorderColor returns the placeholder color
+// PrimaryBorderColor returns the active theme's Border color (round-33
+// §11.4 doc-comment correction — the prior "returns the placeholder
+// color" comment was mechanically wrong, the function returns the real
+// configured border color; CONST-035 / Article XI §11.9).
 func (ct *CustomTheme) PrimaryBorderColor() color.Color {
 	return parseHexColor(ct.currentTheme.Border)
 }

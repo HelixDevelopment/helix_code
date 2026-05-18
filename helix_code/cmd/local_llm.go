@@ -435,13 +435,22 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	}
 }
 
-// runWatch starts the watch mode for real-time updates
+// runWatch is the entry point for the `local_llm watch` subcommand.
+//
+// Honest contract (round-33 §11.4 anti-bluff sweep, 2026-05-18):
+// real fsnotify/inotify-based filesystem watching for provider
+// directory changes has NOT been wired in yet. Until it lands the
+// command transparently falls through to the polling-based monitor
+// loop (runMonitor). The banner makes the fallback explicit instead
+// of advertising "real-time" capability that the implementation does
+// not deliver. The previous implementation printed
+// "Changes will be displayed in real-time" and silently degraded to
+// polling, which was a CRITICAL §11.4 UX PASS-bluff —
+// CONST-035 / Article XI §11.9 / CONST-050(A).
 func runWatch(cmd *cobra.Command, args []string) error {
-	fmt.Println("👀 Starting watch mode for local LLM providers...")
-	fmt.Println("Changes will be displayed in real-time. Press Ctrl+C to stop.")
-
-	// This would implement file system watching for provider changes
-	// For now, just call monitor
+	fmt.Println("👀 Starting local LLM provider monitor (watch mode)…")
+	fmt.Println("Real filesystem-event watching (fsnotify) is not wired in yet;")
+	fmt.Println("falling through to polling-based status monitor. Press Ctrl+C to stop.")
 	return runMonitor(cmd, args)
 }
 

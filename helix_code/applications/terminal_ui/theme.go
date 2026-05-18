@@ -105,10 +105,16 @@ func (tm *ThemeManager) detectSystemTheme() *Theme {
 		}
 	}
 
-	// Check system preference (simplified - in real implementation would check OS settings)
+	// macOS appearance integration: a full implementation would shell
+	// out to `defaults read -g AppleInterfaceStyle` (Dark when set,
+	// absent for Light) or call NSAppearance via cgo. Until that
+	// integration lands the documented contract is "macOS defaults to
+	// the Dark theme"; HELIX_THEME env var (checked above) is the
+	// operator escape hatch (round-33 §11.4 comment rewrite — previous
+	// "For now" lead-in implied an unfinished stub when the function
+	// is in fact the honest documented fallback;
+	// CONST-035 / Article XI §11.9).
 	if runtime.GOOS == "darwin" {
-		// On macOS, could check defaults read -g AppleInterfaceStyle
-		// For now, default to dark
 		return &DarkTheme
 	}
 
@@ -139,10 +145,19 @@ func (tm *ThemeManager) GetAvailableThemes() []string {
 	return names
 }
 
-// ApplyTheme applies the current theme to a tview application
+// ApplyTheme is a deliberate no-op for the tview backend.
+//
+// tview/tcell do NOT expose an application-wide theme setter — colors
+// are applied per-widget at render time via in-text color tags
+// (e.g. "[red]error[white]") which GetColor() above produces from the
+// active theme. ApplyTheme exists so the call-sites that expect a
+// "set theme on app" verb compile uniformly across UI backends; the
+// real work happens elsewhere via GetColor (round-33 §11.4 honest-
+// no-op anchor — previous "For now, themes are applied through color
+// codes in text" comment implied a stub awaiting completion;
+// CONST-035 / Article XI §11.9).
 func (tm *ThemeManager) ApplyTheme(app *tview.Application) {
-	// For now, themes are applied through color codes in text
-	// tview doesn't have direct theme support, so we use color tags in text
+	_ = app
 }
 
 // GetColor returns a color code for the given type

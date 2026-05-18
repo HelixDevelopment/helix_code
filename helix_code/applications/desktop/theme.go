@@ -109,10 +109,16 @@ func (tm *ThemeManager) detectSystemTheme() *Theme {
 		}
 	}
 
-	// Check system preference (simplified - in real implementation would check OS settings)
+	// macOS appearance integration: a full implementation would shell
+	// out to `defaults read -g AppleInterfaceStyle` (Dark when set,
+	// absent for Light) or call NSAppearance via cgo. Until that
+	// integration lands the documented contract is "macOS defaults to
+	// the Dark theme"; HELIX_THEME env var (checked above) is the
+	// operator escape hatch (round-33 §11.4 comment rewrite — previous
+	// "For now" lead-in implied an unfinished stub when the function
+	// is in fact the honest documented fallback;
+	// CONST-035 / Article XI §11.9).
 	if runtime.GOOS == "darwin" {
-		// On macOS, could check defaults read -g AppleInterfaceStyle
-		// For now, default to dark
 		return &DarkTheme
 	}
 
@@ -238,7 +244,10 @@ func (ct *CustomTheme) DisabledIconColor() color.Color {
 	return parseHexColor(ct.currentTheme.Border)
 }
 
-// PrimaryBorderColor returns the placeholder color
+// PrimaryBorderColor returns the active theme's Border color (round-33
+// §11.4 doc-comment correction — the prior "returns the placeholder
+// color" comment was mechanically wrong, the function returns the real
+// configured border color; CONST-035 / Article XI §11.9).
 func (ct *CustomTheme) PrimaryBorderColor() color.Color {
 	return parseHexColor(ct.currentTheme.Border)
 }

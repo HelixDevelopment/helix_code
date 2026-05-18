@@ -252,15 +252,22 @@ func (a *AutonomyController) LoadContext(ctx context.Context, task string) error
 	return a.executor.LoadContext(ctx, task)
 }
 
-// ApplyChange applies a code change
+// ApplyChange applies a code change.
+//
+// Confirmation is NOT enforced by this controller method directly —
+// it is enforced upstream by ActionExecutor.Execute, which consults
+// PermissionManager.Check, sees RequiresConfirm=true for ActionApplyChange
+// when AutoApply=false, and blocks on PermissionManager.RequestConfirmation
+// until a real ProvideConfirmation call (or 5-minute timeout) resolves
+// it. The controller therefore does not need a local "would need
+// confirmation" branch; the empty branch the previous implementation
+// carried with a "For now, we allow it but mark it as requiring
+// confirmation" comment was dead code AND a misleading PASS-bluff
+// (read by future maintainers as "confirmation is unimplemented"
+// when in fact it is implemented in executor.Execute upstream).
+// (Round-33 §11.4 dead-code removal + honest-comment anchor;
+// CONST-035 / Article XI §11.9.)
 func (a *AutonomyController) ApplyChange(ctx context.Context, change *CodeChange) error {
-	caps := a.GetCapabilities()
-
-	if !caps.AutoApply && caps.RequireConfirm {
-		// Would need user confirmation
-		// For now, we allow it but mark it as requiring confirmation
-	}
-
 	return a.executor.ApplyChange(ctx, change)
 }
 
