@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Issues</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Issues</h1>
+</header>
+<h1 id="helixcode-open-issues-tracker">HelixCode — Open Issues
+Tracker</h1>
+<blockquote>
+<p>Per Constitution §11.4.15 (Item-status tracking) + §11.4.16
+(Item-type tracking) + §11.4.19 (Fixed-document column-alignment) +
+CONST-057 (Type-aware closure vocabulary) + CONST-058 (Reopened-source
+attribution).</p>
+<p><strong>Authoritative resumption ledger</strong>:
+<code>docs/CONTINUATION.md</code> (CONST-044). This file complements it
+with item-level granularity for currently-open work.</p>
+<p><strong>Status vocabulary</strong> (closed set): <code>Queued</code>
+| <code>In progress</code> | <code>Ready for testing</code> |
+<code>In testing</code> | <code>Reopened</code> |
+<code>Fixed/Implemented/Completed (→ Fixed.md)</code></p>
+<p><strong>Type vocabulary</strong> (closed set): <code>Bug</code> |
+<code>Feature</code> | <code>Task</code></p>
+</blockquote>
+<hr />
+<h2
+id="issue-001-visionengine-helix-gitlab-remote-repo-missing-404">ISSUE-001
+— VisionEngine <code>helix-gitlab</code> remote repo missing (404)</h2>
+<p><strong>Status:</strong> Queued — BLOCKED on operator (gitlab repo
+creation) <strong>Type:</strong> Task <strong>Discovered:</strong>
+2026-05-19 (round 98 — Planning + VisionEngine i18n migration)
+<strong>Discovered-By:</strong> AI subagent during 4-remote push attempt
+<strong>Evidence:</strong> Push attempt against
+<code>git@gitlab.com:HelixDevelopment/visionengine.git</code> returned
+<code>404 not found</code>. CONST-043 honoured (no force-push
+attempted). <strong>Resolution path:</strong> Operator creates the
+gitlab.com repository OR removes the <code>helix-gitlab</code> named
+remote from VisionEngine’s local config. Pre-existing infra gap, not
+introduced by round-98 work.</p>
+<hr />
+<h2
+id="issue-002-visionengine-vasic-digital-github-fork-lineage-divergent-at-sha-93c830a">ISSUE-002
+— VisionEngine <code>vasic-digital-github</code> fork lineage divergent
+at SHA 93c830a</h2>
+<p><strong>Status:</strong> Queued — BLOCKED on operator (CONST-061
+merge-first investigation) <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-19 (round 98)
+<strong>Discovered-By:</strong> AI subagent during 4-remote push attempt
+<strong>Evidence:</strong> vasic-digital-github HEAD
+<code>93c830a</code> carries round-48/52/57 commits absent from
+HelixDevelopment local main. Non-FF push rejected. NO force-push
+attempted (CONST-043). <strong>Resolution path:</strong> Operator-led
+CONST-061 merge-first pipeline — fetch divergent commits, audit conflict
+surface, integrate or document divergence as intentional fork, then
+either FF-push or designate one lineage as canonical.</p>
+<hr />
+<h2
+id="issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">ISSUE-003
+— HelixLLM <code>internal/agents/tools/analysis_test.go</code> hardcoded
+absolute path</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 95 — HelixLLM
+migration; surfaced as pre-existing failure)
+<strong>Discovered-By:</strong> AI subagent during HelixLLM standalone
+test run <strong>Closed-By:</strong> Round 105 (commit
+<code>a5e56d4</code> in HelixLLM; meta pointer <code>fedd152</code>)
+<strong>Attribution correction:</strong> Originally documented as
+helix_agent; actual location is HelixLLM submodule
+(<code>dependencies/HelixDevelopment/HelixLLM/internal/agents/tools/</code>).
+Commit SHAs <code>0a84310</code> resolved there.
+<strong>Resolution:</strong> Replaced hardcoded path with
+<code>t.TempDir()</code> + 2 synthesised fixture files. Bonus: same
+bug-pattern discovered in <code>git_test.go</code> (constant
+<code>helixLLMRoot</code> + 7 tests) — refactored
+<code>gitSandbox()</code> signature. 6 tests now PASS on any host.
+Mutation verified.</p>
+<hr />
+<h2
+id="issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">ISSUE-004
+— HelixLLM <code>internal/gateway/middleware</code> TOON
+<code>WriteTOON</code> returns 500</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 95)
+<strong>Discovered-By:</strong> AI subagent <strong>Closed-By:</strong>
+Round 105 (commit <code>a5e56d4</code>) <strong>Attribution
+correction:</strong> Originally documented as helix_agent; actual
+location is HelixLLM submodule. Commit <code>6f11c56</code> resolved
+there. <strong>Resolution:</strong> Root cause was vasic-digital/TOON’s
+round-27 anti-bluff change (Marshal returns
+<code>ErrTOONEncodingNotImplemented</code> unconditionally) combined
+with <code>WriteTOON</code> treating ANY Marshal error as 500. Fix: fall
+back to <code>json.Marshal</code> while preserving
+<code>application/toon</code> Content-Type (matches ContentNegotiation
+middleware). 500 still returned for genuinely unmarshallable values
+(channels). 19 middleware tests now PASS. Mutation verified.</p>
+<hr />
+<h2
+id="issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase">ISSUE-005
+— CONST-052 rename programme: meta-repo directories still
+PascalCase</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-15 (CONST-052 cascade landed)
+<strong>Discovered-By:</strong> Constitution <strong>Evidence:</strong>
+Meta-repo directories like <code>helix_code/</code>,
+<code>challenges/</code>, <code>helix_qa/</code>,
+<code>helix_agent/</code> still PascalCase despite CONST-052 mandating
+snake_case. Renames deferred because they break path-encoded references
+throughout governance docs, CI scripts, and tracker URLs.
+<strong>Resolution path:</strong> Phased migration per CONST-052
+§11.4.29: comprehensive brainstorming → phase-divided plan →
+fine-grained tasks → every change covered by every applicable test type.
+Round 88 made partial progress (3 submodules with drift fixed) but root
+directories remain.</p>
+<hr />
+<h2
+id="issue-006-round-74-residual-logic-class-fails-helixmemory-planning-helix_agent-inner-pending">ISSUE-006
+— Round-74 residual LOGIC-class FAILs (HelixMemory ✓ + Planning ✓ +
+helix_agent inner pending)</h2>
+<p><strong>Status:</strong> In progress (2/3 components closed)
+<strong>Type:</strong> Bug <strong>Discovered:</strong> 2026-05-19
+(round 74 — release-gate-test.sh creation; classified by round 89)
+<strong>Discovered-By:</strong> AI release-gate sweep <strong>Closure
+progress:</strong> - ✓ HelixMemory: closed round 106 (commit
+<code>69016df</code> — single-line <code>go.mod</code> fix; 6 FAIL → 0
+FAIL) - ✓ vasic-digital/Planning: round 107 NO-OP — 275 PASS / 0 FAIL /
+20 SKIP-OK; likely incidentally fixed by round 98 i18n migration - ◯
+helix_agent inner: PENDING (not yet investigated; may have already been
+fixed elsewhere — round 105 found ISSUE-003/004 were actually in
+HelixLLM) <strong>Evidence:</strong> Round 74 surfaced 26 FAILs across
+submodules; rounds 82-87 closed 19; this Issue tracked the residual 7
+across 3 submodules. 2 closed; 1 remaining. <strong>Resolution
+path:</strong> Future round investigates helix_agent inner test suite
+for LOGIC-class residuals; may be no-op if already resolved.</p>
+<hr />
+<h2
+id="issue-007-const-046-migration-backlog-57329-violations-baselined-shrinking">ISSUE-007
+— CONST-046 migration backlog (57,329 violations baselined;
+shrinking)</h2>
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Feature
+<strong>Discovered:</strong> 2026-05-19 (round 92 — audit script)
+<strong>Discovered-By:</strong> AI subagent ground-truth scan
+<strong>Evidence:</strong> Round-92 scan reported 57,345 violations
+across 21,937 files. Round 99b baseline collapsed to 54,803 unique
+<code>(path, literal_hash)</code> keys. Phase 4 (rounds 100+)
+systematically migrating top-concentration files: round 100
+(evaluators.go), 101 (challenge_recorded_ai_testgen.go), 102
+(challenge_desktop.go) — see CONTINUATION.md close-outs.
+<strong>Resolution path:</strong> Continued Phase 4 cadence; audit-gate
+<code>--fail-on-new</code> already enforced; each migration round MUST
+re-run <code>--update-baseline</code> so snapshot shrinks toward
+zero.</p>
+<hr />
+<h2
+id="issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">ISSUE-008
+— helix_qa intermittent TestPerformance flake (host-load-sensitive)</h2>
+<p><strong>Status:</strong> Queued — BLOCKED on operator (host topology
+decision) <strong>Type:</strong> Bug <strong>Discovered:</strong>
+2026-05-19 (round 82) <strong>Discovered-By:</strong> AI subagent
+<strong>Evidence:</strong> helix_qa TestPerformance fails intermittently
+under high host load (concurrent containers + builds). Not a code bug
+per se; a sensitivity issue. <strong>Resolution path:</strong> Either
+(a) loosen timing tolerance with explicit comment + reference to host
+topology, or (b) gate the test behind a
+<code>HOST_LOAD_DEDICATED=1</code> env var to run only on quiescent
+hosts. Operator decision needed.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-19. To update Issues_Summary.md
+mechanically, run <code>scripts/generate_issues_summary.sh</code> (TODO:
+create — currently this Issues.md is the source of truth and Summary is
+hand-maintained).</em></p>
+</body>
+</html>

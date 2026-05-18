@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fixed</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Fixed</h1>
+</header>
+<h1 id="helixcode-fixed-items-tracker">HelixCode — Fixed Items
+Tracker</h1>
+<blockquote>
+<p>Per Constitution §11.4.19 (Fixed-document column-alignment) +
+CONST-057 (Type-aware closure vocabulary: <code>Bug</code> →
+<code>Fixed</code>, <code>Feature</code> → <code>Implemented</code>,
+<code>Task</code> → <code>Completed</code>, all with
+<code>(→ Fixed.md)</code> suffix preserved).</p>
+<p>This file is a <strong>closure ledger</strong> — items migrate here
+from <code>docs/Issues.md</code> ONLY after positive captured-evidence
+per §11.4.5.</p>
+<p><strong>Authoritative round-by-round narrative</strong>:
+<code>docs/CONTINUATION.md</code> (CONST-044). Each row below points to
+the relevant close-out section there. Items predating the round-system
+are not retroactively captured (would be impractical) — they live in
+commit history + the <code>docs/improvements/</code> evidence chain
+(P0-P5 phases).</p>
+</blockquote>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Closure</th>
+<th>Title</th>
+<th>Type</th>
+<th>Status</th>
+<th>Round</th>
+<th>Commit(s)</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-19</td>
+<td>CONST-046 i18n architecture design doc</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>90</td>
+<td>f9dc102</td>
+<td>368 LOC design; Option D (nicksnyder/go-i18n/v2) selected</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>pkg/i18n core foundation</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>91</td>
+<td>e29b075</td>
+<td>11 tests + mutation; Bundle/Localizer + sentinel errors</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>CONST-046 audit script (soft-warn)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>92</td>
+<td>57de105</td>
+<td>5 tests; real-tree scan 57,345 violations across 21,937 files</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Per-submodule i18n injection wiring + i18nadapter</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>93</td>
+<td>03e131f + 930c6fe</td>
+<td>3-layer pattern; Lazy proof-of-life; bilingual EN+SR</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>SelfImprove × 8 hardcoded-content migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>94</td>
+<td>a39d855 + c73a8f4</td>
+<td>LLM prompt-builder strings; 11 test assertions + mutation</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>HelixLLM × 2 CLI strings migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>95</td>
+<td>abe0319 + 380e1c0</td>
+<td>TranslatorAPI surface added; 7 new tests</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>harmony_os × 5 CLI headers migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>96</td>
+<td>1eb1851</td>
+<td>7 tests + mutation; Option A uniform pattern</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>DocProcessor CLI × 8 migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>97</td>
+<td>e584e4b + ae83bc8</td>
+<td>Refactored to runCLI(); 6 tests + mutation; Upstreams recipe fix
+bonus</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Planning × 3 + VisionEngine × 4 migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>98</td>
+<td>6abed9b + 2d0c35b + a79e022</td>
+<td>13 tests + dual mutation; ISSUE-001 + ISSUE-002 surfaced</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>CONST-046 audit-gate fail-on-new + baseline</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>99b</td>
+<td>3f4f110</td>
+<td>54,803 baseline keys; 10 tests + mutation + 4-scenario smoke</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>panoptic × 5 cobra Short descriptions migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>99a</td>
+<td>3074c77 + c4e50d8</td>
+<td>8 tests + mutation; pkg/i18n/global.go package-level seam pattern;
+install_upstreams bonus</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges/pkg/i18n/ Phase 4 infrastructure + evaluators.go
+migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>100</td>
+<td>898e39f + ba5b76d</td>
+<td>Infrastructure reused by rounds 101+; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25
+migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>101</td>
+<td>67a6c9d + 1a1b270</td>
+<td>10 user-facing AssertionResult.Message; 10 tests + mutation;
+baseline-preserving fallback pattern</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges/pkg/userflow/challenge_desktop.go migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>102</td>
+<td>(submodule TBD) + 74c43ec</td>
+<td>Formal report truncated; commit visible</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges/pkg/userflow/challenge_ai_testgen.go × 10 user-facing
+migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>103</td>
+<td>73bd0e7 + 5002c97</td>
+<td>9 tests + mutation; baseline-preserving fallback pattern</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14
+call sites</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>104</td>
+<td>012164c + 852c172 + cdb753f</td>
+<td>12 tests + mutation; launch+flow dedup; baseline refresh
+applied</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-003: HelixLLM analysis_test.go hardcoded path</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>105</td>
+<td>a5e56d4 + fedd152</td>
+<td>t.TempDir + fixtures; bonus git_test.go same-pattern fix (7 more
+tests); 6 tests PASS + mutation</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-004: HelixLLM TOON WriteTOON 500</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>105</td>
+<td>a5e56d4 + fedd152</td>
+<td>Root cause: round-27 TOON Marshal anti-bluff change + WriteTOON
+treating any error as 500. Fix: json.Marshal fallback preserving
+application/toon; 19 middleware tests PASS + mutation</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-006 (partial): HelixMemory LOGIC-class FAIL cleanup</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>106</td>
+<td>69016df + 6862cc7</td>
+<td>6 FAIL/23 PASS → 0 FAIL/29 PASS. Single root cause: go.mod replace
+../Memory → ../../vasic-digital/Memory (wrong depth). +5 LOC. Mutation
+verified</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-006 (partial): Planning LOGIC FAIL audit confirms clean</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>107</td>
+<td>(no-op)</td>
+<td>275 PASS / 0 FAIL / 20 SKIP-OK. Zero LOGIC FAILs needed fixing.
+Likely incidentally fixed by round 98 i18n migration. No commit per
+dispatch spec</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Round 74-87 release-gate stabilization</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>82-87</td>
+<td>various</td>
+<td>19 of 26 round-74 FAILs closed
+(helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges)</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>release-gate-test.sh –skip-env-failures filter</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>89</td>
+<td>d3b0b92</td>
+<td>13 regex catalogue + 6 fixtures + HelixLLM smoke validation</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>CONST-052 reference-drift sweep (73 submodules)</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>88</td>
+<td>a1d3de8</td>
+<td>3 with drift fixed (helix_agent + challenges + LLMsVerifier)</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>challenges go.mod path fix
+<code>../Containers</code>→<code>../containers</code></td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>87</td>
+<td>a1348d9</td>
+<td>CONST-052 drift; 17/17 PASS post-fix</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>LLMOrchestrator builders × 5 wired</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>64-76</td>
+<td>various</td>
+<td>gemini/junie/opencode/claudecode/qwencode CLI binaries</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>4-vendor GPU telemetry chain (NVIDIA+AMD+Apple+Intel)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>43-51</td>
+<td>various</td>
+<td>cognee/performance_optimizer.go probe chain</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>LLM Err coverage 100% across 17 providers</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>46-63</td>
+<td>various</td>
+<td>missing_types.go Err field + wiring</td>
+</tr>
+</tbody>
+</table>
+<p><em>Last regenerated: 2026-05-19. Earlier closures (P0-P5 phases)
+tracked via <code>docs/improvements/PROGRESS.md</code> +
+<code>docs/improvements/*evidence*.md</code>.</em></p>
+</body>
+</html>
