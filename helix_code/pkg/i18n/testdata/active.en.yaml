@@ -1,0 +1,7 @@
+greeting:
+  other: "Hello, {{.Name}}!"
+unread_messages:
+  one: "You have {{.PluralCount}} unread message."
+  other: "You have {{.PluralCount}} unread messages."
+farewell:
+  other: "Goodbye."
