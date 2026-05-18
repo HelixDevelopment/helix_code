@@ -22,12 +22,26 @@ type ModelManager struct {
 	mu               sync.RWMutex
 }
 
-// ModelSelectionCriteria defines criteria for model selection
+// ModelSelectionCriteria defines criteria for model selection.
+//
+// Round-36 §11.4 anti-bluff disclosure (CONST-035 / Article XI §11.9):
+// Budget and LatencyRequirement are accepted by callers but the
+// per-model scoring in calculateModelScore does NOT consult them — the
+// project's local ModelInfo type does not carry per-token cost or
+// per-call latency data. These two fields are honoured at the cross-
+// provider layer via the LLMsVerifier adapter blended-score path
+// (calculateModelScore → m.verifierAdapter.GetModelScore). Callers
+// targeting cost-bounded or latency-bounded selection MUST therefore
+// enable the verifier adapter (SetVerifierAdapter) — otherwise the two
+// fields are advisory metadata stored on the criteria object but not
+// reflected in ranking. This is an honest contract: the fields are not
+// silently dropped (they reach the adapter when wired) but they are
+// also not enforced when the adapter is absent.
 type ModelSelectionCriteria struct {
 	TaskType             string
 	RequiredCapabilities []ModelCapability
 	MaxTokens            int
-	Budget               float64 // Cost budget in USD
+	Budget               float64 // Cost budget in USD — honoured only when verifierAdapter set; see type doc-comment.
 	LatencyRequirement   time.Duration
 	QualityPreference    string // "fast", "balanced", "quality"
 }

@@ -301,19 +301,36 @@ func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{},
 	}
 }
 
-// basicPlanning provides basic planning without LLM
+// basicPlanning provides a deterministic, no-LLM planning fallback.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous implementation read t.Input["requirements"]
+// only for the validation gate and then ignored its content, returning a
+// hardcoded "plan" map that was byte-identical for every caller.
+// Callers asking "plan a CRUD backend for a recipe app" got the same
+// output as "plan a satellite ground-station controller" — a §11.4
+// PASS-bluff at the planning surface for users on no-LLM deployments.
+// The fix echoes the requirements verbatim into the plan payload, adds
+// the task ID + agent ID so the output is provenance-traceable, and
+// flags the no-LLM contract explicitly. The plan remains intentionally
+// non-decomposed (no subtasks) since LLM-free decomposition would be a
+// real bluff — but the caller now receives their actual request back,
+// not a fabricated generic.
 func (a *BaseAgent) basicPlanning(t *Task) (interface{}, error) {
 	requirements, _ := t.Input["requirements"].(string)
 	if requirements == "" {
 		return nil, fmt.Errorf("requirements not found in task input")
 	}
 
-	// Return a basic plan structure
 	return map[string]interface{}{
-		"plan":        "Basic plan generated without LLM assistance",
-		"subtasks":    []map[string]interface{}{},
-		"total_tasks": 0,
-		"note":        "For detailed planning, configure an LLM provider",
+		"plan":         "No-LLM fallback plan: requirements echoed verbatim. Configure an LLM provider for real decomposition.",
+		"requirements": requirements,
+		"task_id":      t.ID,
+		"agent_id":     a.id,
+		"subtasks":     []map[string]interface{}{},
+		"total_tasks":  0,
+		"mode":         "no_llm_fallback",
+		"note":         "For detailed planning, configure an LLM provider via SetLLMProvider.",
 	}, nil
 }
 

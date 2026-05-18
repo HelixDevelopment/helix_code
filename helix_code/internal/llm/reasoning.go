@@ -416,8 +416,20 @@ func GetReasoningBudgetRecommendation(useCase string) int {
 	}
 }
 
-// OptimizeReasoningConfig optimizes reasoning configuration based on context
+// OptimizeReasoningConfig optimizes reasoning configuration based on effort
+// level.
+//
+// Round-36 §11.4 anti-bluff disclosure (CONST-035 / Article XI §11.9,
+// Pattern A1-LOW parameter-discard): the `ctx` parameter is currently
+// not consulted by the optimisation body — all decisions derive from
+// the supplied `config`. ctx is retained on the signature for API
+// symmetry with the rest of the LLM optimisation surface (most of which
+// makes context-bound RPCs when the verifier adapter is wired) and to
+// avoid a breaking signature change for downstream callers. When this
+// function evolves to query verifier metadata or per-tenant budgets,
+// ctx will become live; until then it is honest unused infrastructure.
 func OptimizeReasoningConfig(config *ReasoningConfig, ctx context.Context) *ReasoningConfig {
+	_ = ctx // intentionally unused — see doc-comment above
 	if !config.Enabled {
 		return config
 	}

@@ -227,8 +227,9 @@ func (r *CrossProviderRegistry) RegisterDownloadedModel(model *DownloadedModel) 
 	// Generate unique key
 	key := fmt.Sprintf("%s:%s:%s", model.Provider, model.ModelID, model.Format)
 
-	// Update compatible providers
-	model.CompatibleProviders = r.findCompatibleProvidersForModel(model.ModelID, model.Format)
+	// Update compatible providers (use lock-free internal helper — we
+	// already hold the write lock).
+	model.CompatibleProviders = r.findCompatibleProvidersForModelLocked(model.ModelID, model.Format)
 
 	r.downloadedModels[key] = model
 
@@ -558,13 +559,51 @@ func (r *CrossProviderRegistry) findConversionPath(sourceFormat ModelFormat, tar
 	return nil
 }
 
+// findAlternativeProviders returns providers that can serve `format` either
+// natively or via a known conversion path.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous body discarded `modelID` entirely.
+// Callers asking for alternatives for a specific downloaded model received
+// the same provider set as callers asking about a model that does not
+// exist in the registry — leaking the model-specific
+// `CompatibleProviders` constraint that RegisterDownloadedModel had set.
+// The fix gives preference to providers already known to be compatible
+// with the specific downloaded model (when the model is known to the
+// registry), then back-fills with format-compatible providers.
 func (r *CrossProviderRegistry) findAlternativeProviders(modelID string, format ModelFormat) []string {
-	var alternatives []string
+	// downloadedModels is keyed by "provider:modelID:format"; iterate to
+	// gather every entry matching the requested modelID.
+	preferred := make(map[string]bool)
+	for _, downloaded := range r.downloadedModels {
+		if downloaded == nil || downloaded.ModelID != modelID {
+			continue
+		}
+		for _, p := range downloaded.CompatibleProviders {
+			preferred[p] = true
+		}
+	}
 
+	var alternatives []string
+	seen := make(map[string]bool)
+
+	// First pass: providers explicitly compatible with this specific model.
+	for provider := range preferred {
+		if !seen[provider] {
+			alternatives = append(alternatives, provider)
+			seen[provider] = true
+		}
+	}
+
+	// Second pass: format-compatible providers (with or without conversion).
 	for provider, compat := range r.compatibility {
+		if seen[provider] {
+			continue
+		}
 		for _, supportedFormat := range compat.SupportedFormats {
 			if supportedFormat == format || r.findConversionPath(format, provider, "") != nil {
 				alternatives = append(alternatives, provider)
+				seen[provider] = true
 				break
 			}
 		}
@@ -573,10 +612,54 @@ func (r *CrossProviderRegistry) findAlternativeProviders(modelID string, format 
 	return alternatives
 }
 
+// findCompatibleProvidersForModel returns providers that can serve the
+// (modelID, format) pair.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous body discarded `modelID`. Callers
+// were left to assume every model worked on every format-matching
+// provider — wrong when a downloaded model carries an explicit
+// CompatibleProviders allowlist set by the downloader. The fix
+// intersects: if the model is registered as downloaded with a specific
+// allowlist, only providers from that allowlist that ALSO support the
+// format are returned; otherwise, all format-compatible providers.
+//
+// Thread-safe wrapper around findCompatibleProvidersForModelLocked.
+// Callers already holding r.mu (e.g. RegisterDownloadedModel) MUST use
+// the Locked variant directly.
 func (r *CrossProviderRegistry) findCompatibleProvidersForModel(modelID string, format ModelFormat) []string {
-	var compatible []string
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.findCompatibleProvidersForModelLocked(modelID, format)
+}
 
+// findCompatibleProvidersForModelLocked is the lock-free body of
+// findCompatibleProvidersForModel. Callers MUST hold r.mu (read or write)
+// for the duration of the call.
+func (r *CrossProviderRegistry) findCompatibleProvidersForModelLocked(modelID string, format ModelFormat) []string {
+	// downloadedModels is keyed by "provider:modelID:format"; iterate to
+	// gather the union of compatible-provider allowlists across every
+	// downloaded entry for this modelID. If any entry carries an
+	// allowlist, that union becomes the hard filter.
+	allowlist := map[string]bool{}
+	useAllowlist := false
+	for _, downloaded := range r.downloadedModels {
+		if downloaded == nil || downloaded.ModelID != modelID {
+			continue
+		}
+		if len(downloaded.CompatibleProviders) > 0 {
+			useAllowlist = true
+			for _, p := range downloaded.CompatibleProviders {
+				allowlist[p] = true
+			}
+		}
+	}
+
+	var compatible []string
 	for provider, compat := range r.compatibility {
+		if useAllowlist && !allowlist[provider] {
+			continue
+		}
 		for _, supportedFormat := range compat.SupportedFormats {
 			if supportedFormat == format {
 				compatible = append(compatible, provider)

@@ -514,6 +514,84 @@ func TestCrossProviderRegistry_findCompatibleProvidersForModel(t *testing.T) {
 		assert.Contains(t, compatible, "vllm")
 		assert.NotContains(t, compatible, "ollama")
 	})
+
+	// Round-36 §11.4 anti-bluff regression: the previous body discarded
+	// the modelID parameter, so a registered model's CompatibleProviders
+	// allowlist had no effect. Pre-fix, this test would have returned
+	// BOTH vllm AND tgi (format-match alone). Post-fix, only vllm
+	// because the model's allowlist excludes tgi.
+	//
+	// We populate r.downloadedModels directly (rather than via
+	// RegisterDownloadedModel) because RegisterDownloadedModel itself
+	// computes & overwrites CompatibleProviders during registration —
+	// suitable for production but useless for testing the allowlist
+	// filter in isolation.
+	t.Run("ModelIDAllowlistFiltersFormatMatches", func(t *testing.T) {
+		tempDir := t.TempDir()
+		registry := NewCrossProviderRegistry(tempDir)
+
+		// Two providers both supporting GPTQ
+		registry.compatibility["vllm"] = &ProviderCompatibility{
+			Provider:         "vllm",
+			SupportedFormats: []ModelFormat{FormatGPTQ},
+		}
+		registry.compatibility["tgi"] = &ProviderCompatibility{
+			Provider:         "tgi",
+			SupportedFormats: []ModelFormat{FormatGPTQ},
+		}
+
+		// Populate the downloaded-models map directly so the allowlist
+		// survives without being recomputed by RegisterDownloadedModel.
+		registry.downloadedModels["vllm:restricted-model:gptq"] = &DownloadedModel{
+			ModelID:             "restricted-model",
+			Provider:            "vllm",
+			Format:              FormatGPTQ,
+			Path:                "/tmp/restricted-model",
+			CompatibleProviders: []string{"vllm"},
+		}
+
+		compatible := registry.findCompatibleProvidersForModel("restricted-model", FormatGPTQ)
+		assert.Contains(t, compatible, "vllm")
+		assert.NotContains(t, compatible, "tgi",
+			"tgi supports GPTQ but is excluded from this model's allowlist; presence here means modelID is being discarded — A1 anti-bluff regression")
+	})
+}
+
+// TestCrossProviderRegistry_findAlternativeProviders_PrefersModelAllowlist
+// is the round-36 regression for the findAlternativeProviders A1 fix.
+// Pre-fix, the function ignored modelID; the model's per-instance
+// CompatibleProviders allowlist was leaked. Post-fix, allowlist providers
+// appear FIRST in the result.
+//
+// We populate r.downloadedModels directly because RegisterDownloadedModel
+// recomputes CompatibleProviders on registration, which would defeat the
+// allowlist scenario this test is asserting.
+func TestCrossProviderRegistry_findAlternativeProviders_PrefersModelAllowlist(t *testing.T) {
+	tempDir := t.TempDir()
+	registry := NewCrossProviderRegistry(tempDir)
+
+	// Two providers both supporting GGUF
+	registry.compatibility["llamacpp"] = &ProviderCompatibility{
+		Provider:         "llamacpp",
+		SupportedFormats: []ModelFormat{FormatGGUF},
+	}
+	registry.compatibility["ollama"] = &ProviderCompatibility{
+		Provider:         "ollama",
+		SupportedFormats: []ModelFormat{FormatGGUF},
+	}
+
+	registry.downloadedModels["ollama:preferred-route-model:gguf"] = &DownloadedModel{
+		ModelID:             "preferred-route-model",
+		Provider:            "ollama",
+		Format:              FormatGGUF,
+		Path:                "/tmp/preferred-route-model",
+		CompatibleProviders: []string{"ollama"},
+	}
+
+	alternatives := registry.findAlternativeProviders("preferred-route-model", FormatGGUF)
+	require.NotEmpty(t, alternatives)
+	assert.Equal(t, "ollama", alternatives[0],
+		"the model's allowlist provider must appear first; equal-position with llamacpp means modelID is being discarded — A1 anti-bluff regression")
 }
 
 func TestCrossProviderRegistry_estimateConversionTime(t *testing.T) {

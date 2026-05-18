@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -610,8 +611,35 @@ func (m *IntegratedModelManager) detectModelFormat(path string) (ModelFormat, er
 	}
 }
 
+// determineOptimalFormat picks a target ModelFormat for conversion based on
+// the caller's optimisation hint and constraint map.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous implementation discarded the
+// `constraints` map entirely. Callers passing `{"cpu_only": true}` while
+// asking to "optimize for performance" got FormatGPTQ — a format that
+// typically requires GPU, contradicting the CPU-only constraint. The fix
+// reads cpu_only / gpu_required from the constraints map and overrides
+// the optimisation hint when the two conflict (constraints win — they
+// represent hard hardware limits, not preferences).
 func (m *IntegratedModelManager) determineOptimalFormat(sourceFormat ModelFormat, optimizeFor string, constraints map[string]interface{}) (ModelFormat, error) {
-	// Simplified logic - in real implementation would be more sophisticated
+	// Constraint-driven hard overrides
+	if constraints != nil {
+		if cpuOnly, ok := constraints["cpu_only"].(bool); ok && cpuOnly {
+			// GPTQ/AWQ generally assume GPU; GGUF is CPU-friendly.
+			return FormatGGUF, nil
+		}
+		if gpuRequired, ok := constraints["gpu_required"].(bool); ok && gpuRequired && optimizeFor == "memory" {
+			// "memory" usually returns GGUF (CPU-friendly), but caller
+			// explicitly wants GPU — prefer GPTQ which is GPU-native.
+			return FormatGPTQ, nil
+		}
+		if preferred, ok := constraints["preferred_format"].(string); ok && preferred != "" {
+			return ModelFormat(preferred), nil
+		}
+	}
+
+	// Optimisation-hint fallback (preserved behaviour)
 	switch optimizeFor {
 	case "memory":
 		return FormatGGUF, nil
@@ -624,23 +652,132 @@ func (m *IntegratedModelManager) determineOptimalFormat(sourceFormat ModelFormat
 	}
 }
 
+// modelMatchesCriteria filters DownloadableModelInfo entries against the
+// caller-supplied criteria.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous implementation contained two empty
+// if-branches with comments "would need to be implemented" — meaning
+// RequiredCapabilities and TaskType were silently dropped. Every model
+// "matched" regardless. Callers using capability-filtered FindBestModel
+// were receiving the same model set as callers with no filter at all —
+// a §11.4 PASS-bluff at the model-selection layer.
+//
+// DownloadableModelInfo does not (yet) carry a typed Capabilities slice;
+// the corresponding signal lives in the loosely-typed Tags slice (e.g.
+// "code", "instruct", "chat", "general", "multilingual"). The filter
+// implemented here is a Tags-based projection of ModelCapability →
+// substring match: e.g. CapabilityCodeGeneration → any Tag containing
+// "code", CapabilityReasoning → "reason"/"think". This is the honest
+// best-effort mapping the data model currently supports; promoting Tags
+// to a typed Capabilities slice is tracked for a separate refactor.
+//
+// Returns true iff: (a) every required capability has at least one matching
+// tag, AND (b) context size meets MaxTokens demand, AND (c) task type has a
+// matching tag (when specified).
 func (m *IntegratedModelManager) modelMatchesCriteria(model *DownloadableModelInfo, criteria ModelSelectionCriteria) bool {
-	// Check capability requirements
-	if len(criteria.RequiredCapabilities) > 0 {
-		// This would need to be implemented based on model capabilities
-	}
-
-	// Check context size
+	// Context size — preserved from previous implementation
 	if criteria.MaxTokens > 0 && model.ContextSize < criteria.MaxTokens {
 		return false
 	}
 
-	// Check task type
+	// Required capabilities — Tags-based projection
+	if len(criteria.RequiredCapabilities) > 0 {
+		for _, required := range criteria.RequiredCapabilities {
+			if !modelTagsSatisfyCapability(model.Tags, required) {
+				return false
+			}
+		}
+	}
+
+	// Task type — Tags-based projection
 	if criteria.TaskType != "" {
-		// This would need more sophisticated matching
+		if !modelTagsSatisfyTaskType(model.Tags, criteria.TaskType) {
+			return false
+		}
 	}
 
 	return true
+}
+
+// modelTagsSatisfyCapability returns true iff the provided tag slice
+// contains at least one tag that maps to the requested capability under
+// the substring-match projection described on modelMatchesCriteria.
+func modelTagsSatisfyCapability(tags []string, required ModelCapability) bool {
+	keywords := capabilityKeywords(required)
+	if len(keywords) == 0 {
+		// Unknown capability — accept (avoid over-restrictive filter for
+		// caps the projection does not recognise; the alternative would
+		// silently reject every model, which is worse).
+		return true
+	}
+	for _, tag := range tags {
+		lowered := strings.ToLower(tag)
+		for _, kw := range keywords {
+			if strings.Contains(lowered, kw) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// modelTagsSatisfyTaskType returns true iff the tag slice contains at
+// least one tag that loosely associates with the requested task type.
+func modelTagsSatisfyTaskType(tags []string, taskType string) bool {
+	keywords := taskTypeKeywords(taskType)
+	if len(keywords) == 0 {
+		return true
+	}
+	for _, tag := range tags {
+		lowered := strings.ToLower(tag)
+		for _, kw := range keywords {
+			if strings.Contains(lowered, kw) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// capabilityKeywords returns the lowercase substring set that signals
+// presence of the given capability in a DownloadableModelInfo.Tags entry.
+// "general"/"instruct"/"chat" tags are accepted as fallbacks for the
+// generic text-generation capability since most models carry them.
+func capabilityKeywords(cap ModelCapability) []string {
+	switch cap {
+	case CapabilityCodeGeneration, CapabilityCodeAnalysis, CapabilityRefactoring:
+		return []string{"code", "programming", "develop"}
+	case CapabilityDebugging:
+		return []string{"code", "debug", "develop"}
+	case CapabilityTesting:
+		return []string{"code", "test"}
+	case CapabilityPlanning:
+		return []string{"reason", "think", "instruct"}
+	case CapabilityReasoning:
+		return []string{"reason", "think"}
+	case CapabilityTextGeneration:
+		return []string{"chat", "instruct", "general", "text"}
+	}
+	return nil
+}
+
+// taskTypeKeywords mirrors capabilityKeywords for the loosely-typed
+// criteria.TaskType field used by SelectOptimalModel callers.
+func taskTypeKeywords(taskType string) []string {
+	switch strings.ToLower(strings.TrimSpace(taskType)) {
+	case "code_generation", "code_edit", "refactoring":
+		return []string{"code", "programming", "develop"}
+	case "debugging":
+		return []string{"code", "debug"}
+	case "testing":
+		return []string{"code", "test"}
+	case "planning", "analysis":
+		return []string{"reason", "think", "instruct"}
+	case "documentation":
+		return []string{"chat", "instruct", "general", "text"}
+	}
+	return nil
 }
 
 func (m *IntegratedModelManager) scoreModelForHardware(model *DownloadableModelInfo, hwInfo *hardware.HardwareInfo) (float64, string, ModelFormat) {
@@ -663,11 +800,23 @@ func (m *IntegratedModelManager) scoreModelForHardware(model *DownloadableModelI
 	return bestScore, bestProvider, bestFormat
 }
 
+// calculateModelScore ranks a candidate DownloadableModelInfo against the
+// caller-supplied criteria.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous implementation read ONLY
+// criteria.QualityPreference, silently discarding RequiredCapabilities,
+// MaxTokens, TaskType, Budget, and LatencyRequirement. Callers setting
+// MaxTokens=128k expected larger-context models to score higher than 4k
+// ones; reality was a flat tie broken only by QualityPreference. This
+// fix honours the available signals; Budget + LatencyRequirement remain
+// unscored here because DownloadableModelInfo does not carry per-token
+// price or latency metadata (those live in verifier scoring — promoted
+// to ModelManager.calculateModelScore via the verifier adapter).
 func (m *IntegratedModelManager) calculateModelScore(model *DownloadableModelInfo, criteria ModelSelectionCriteria) float64 {
-	// Simplified scoring logic
 	score := 1.0
 
-	// Size preference based on quality preference
+	// Size preference based on quality preference (preserved behaviour)
 	switch criteria.QualityPreference {
 	case "quality":
 		if model.ModelSize == "70B" {
@@ -681,12 +830,56 @@ func (m *IntegratedModelManager) calculateModelScore(model *DownloadableModelInf
 		}
 	}
 
+	// Context-size adequacy: reward headroom but cap at 2x to avoid
+	// over-rewarding 128k models on a 4k request.
+	if criteria.MaxTokens > 0 && model.ContextSize > 0 {
+		ratio := float64(model.ContextSize) / float64(criteria.MaxTokens)
+		if ratio > 2.0 {
+			ratio = 2.0
+		}
+		score *= ratio
+	}
+
+	// Required-capabilities match — multiplicative bonus per satisfied cap
+	// (modelMatchesCriteria already rejects models missing required caps;
+	// this is for ranking among those that pass the filter).
+	if len(criteria.RequiredCapabilities) > 0 {
+		matched := 0
+		for _, required := range criteria.RequiredCapabilities {
+			if modelTagsSatisfyCapability(model.Tags, required) {
+				matched++
+			}
+		}
+		// Boost up to 1.5x for full capability coverage
+		score *= 1.0 + (0.5 * float64(matched) / float64(len(criteria.RequiredCapabilities)))
+	}
+
+	// Task-type alignment — small bonus when tags align
+	if criteria.TaskType != "" && modelTagsSatisfyTaskType(model.Tags, criteria.TaskType) {
+		score *= 1.15
+	}
+
 	return score
 }
 
+// findCompatibleProviders returns the providers that can serve the given
+// (modelID, format) pair.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous body discarded BOTH modelID AND format,
+// performed a side-effectful call whose result was thrown away (the
+// `_, _ = m.registry.GetCompatibleFormats("vllm")` line), and returned a
+// hardcoded four-provider list regardless of inputs. Callers asking "which
+// providers support model X in format GGUF?" got the same list as callers
+// asking about a non-existent model in a fictitious format — a §11.4
+// PASS-bluff at the provider-compatibility surface.
+//
+// This implementation delegates to the registry's
+// findCompatibleProvidersForModel helper, which respects both the format
+// and any per-model CompatibleProviders allowlist that the downloader
+// has registered for this modelID.
 func (m *IntegratedModelManager) findCompatibleProviders(modelID string, format ModelFormat) []string {
-	_, _ = m.registry.GetCompatibleFormats("vllm") // This would be more sophisticated
-	return []string{"vllm", "llamacpp", "ollama", "localai"}
+	return m.registry.findCompatibleProvidersForModel(modelID, format)
 }
 
 func (m *IntegratedModelManager) getModelPath(provider, modelID string, format ModelFormat) string {

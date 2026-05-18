@@ -681,6 +681,52 @@ func TestWorkflowExecutorCapabilityMatching(t *testing.T) {
 	assert.Equal(t, "specialized-agent", result.AgentID)
 }
 
+// TestWorkflowExecutorCapabilityMatching_RequiresAllCaps is the round-36
+// §11.4 anti-bluff regression for the executeStep A1-CRITICAL fix.
+// Pre-fix, executeStep read only step.RequiredCaps[0]; an agent declaring
+// only the first cap would have been picked even when the step required
+// MORE caps. Post-fix, the agent must satisfy EVERY cap.
+func TestWorkflowExecutorCapabilityMatching_RequiresAllCaps(t *testing.T) {
+	coordinator := NewCoordinator(nil)
+
+	// Agent with ONLY CapabilityCodeGeneration (lacks Review and Testing).
+	partial := &mockWorkflowAgent{
+		id:           "partial-agent",
+		agentType:    AgentTypeCoding,
+		capabilities: []Capability{CapabilityCodeGeneration},
+	}
+	coordinator.RegisterAgent(partial)
+
+	workflow := NewWorkflow("Multi-Cap Workflow", "Test multi-cap requirement")
+
+	// Step requires THREE caps; partial-agent satisfies only the first.
+	// Mark Optional=true so the executor records a failed-result instead
+	// of returning a hard error — keeps the assertion deterministic.
+	step := &WorkflowStep{
+		ID:        "review-step",
+		Name:      "Review Step",
+		AgentType: AgentTypeCoding,
+		RequiredCaps: []Capability{
+			CapabilityCodeGeneration,
+			CapabilityCodeReview,
+			CapabilityTestGeneration,
+		},
+		Optional: true,
+	}
+	workflow.AddStep(step)
+
+	ctx := context.Background()
+	err := coordinator.ExecuteWorkflow(ctx, workflow)
+	require.NoError(t, err) // optional step → workflow proceeds
+
+	result, ok := workflow.GetStepResult("review-step")
+	require.True(t, ok)
+	assert.False(t, result.Success,
+		"step required Code+Review+Testing but only Code-capable agent exists; success here means the executor took the first agent matching any single cap — A1 anti-bluff regression")
+	assert.Equal(t, "none", result.AgentID,
+		"no agent satisfies the full cap set; AgentID must be 'none'")
+}
+
 // TestWorkflowComplexDependencies tests workflows with complex dependency chains
 func TestWorkflowComplexDependencies(t *testing.T) {
 	workflow := NewWorkflow("Complex Dependencies", "Test complex dependency graph")

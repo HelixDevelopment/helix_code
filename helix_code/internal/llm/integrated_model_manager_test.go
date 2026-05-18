@@ -288,7 +288,17 @@ func TestIntegratedModelManager_calculateModelScore(t *testing.T) {
 }
 
 func TestIntegratedModelManager_findCompatibleProviders(t *testing.T) {
-	t.Run("ReturnsDefaultProviders", func(t *testing.T) {
+	// Round-36 §11.4 anti-bluff: the previous assertion contained
+	// "localai", a provider never initialised by the registry. The old
+	// findCompatibleProviders body returned a hardcoded slice that
+	// included it regardless of inputs — testing the bluff rather than
+	// the contract. The post-fix implementation derives the result from
+	// the registry's actual provider+format compatibility map, so this
+	// test now asserts the providers that DO declare GGUF support
+	// (vllm, llamacpp, ollama per initializeDefaultProviders) and
+	// asserts that an unsupported format produces an EMPTY slice — the
+	// canonical anti-bluff: "filter actually filters".
+	t.Run("ReturnsGGUFCompatibleProviders", func(t *testing.T) {
 		tempDir := t.TempDir()
 		manager := NewIntegratedModelManager(tempDir)
 
@@ -296,7 +306,124 @@ func TestIntegratedModelManager_findCompatibleProviders(t *testing.T) {
 		assert.Contains(t, providers, "vllm")
 		assert.Contains(t, providers, "llamacpp")
 		assert.Contains(t, providers, "ollama")
-		assert.Contains(t, providers, "localai")
+		// Round-36: do NOT assert "localai" — it was never a registered
+		// provider; the old assertion was testing a discarded-parameter
+		// bluff (the hardcoded return value), not the actual contract.
+	})
+
+	t.Run("FormatFilterActuallyFilters", func(t *testing.T) {
+		tempDir := t.TempDir()
+		manager := NewIntegratedModelManager(tempDir)
+
+		// llamacpp and ollama declare ONLY GGUF; vllm declares
+		// GPTQ/AWQ/HF/etc. So a format-specific query MUST shrink the
+		// candidate set.
+		providers := manager.findCompatibleProviders("test-model", FormatAWQ)
+		assert.NotContains(t, providers, "llamacpp",
+			"llamacpp does not declare AWQ support; presence here means format filter is being discarded")
+		assert.NotContains(t, providers, "ollama",
+			"ollama does not declare AWQ support; presence here means format filter is being discarded")
+	})
+}
+
+// TestIntegratedModelManager_modelMatchesCriteria_TagsFilter is the
+// round-36 regression test that catches the original A1-CRITICAL bluff
+// where modelMatchesCriteria silently passed RequiredCapabilities + TaskType
+// through empty if-branches. With the bluff in place, all three sub-tests
+// here return TRUE (false-pass). With the fix in place, the tag-mismatched
+// cases return FALSE — proving the criteria are honored.
+func TestIntegratedModelManager_modelMatchesCriteria_TagsFilter(t *testing.T) {
+	tempDir := t.TempDir()
+	manager := NewIntegratedModelManager(tempDir)
+
+	codeModel := &DownloadableModelInfo{
+		ID:          "code-llama-7b",
+		ContextSize: 16384,
+		Tags:        []string{"instruct", "code", "programming"},
+	}
+	chatModel := &DownloadableModelInfo{
+		ID:          "general-chat-7b",
+		ContextSize: 8192,
+		Tags:        []string{"instruct", "chat", "general"},
+	}
+
+	t.Run("CodeCriteriaAcceptsCodeModel", func(t *testing.T) {
+		criteria := ModelSelectionCriteria{
+			RequiredCapabilities: []ModelCapability{CapabilityCodeGeneration},
+		}
+		assert.True(t, manager.modelMatchesCriteria(codeModel, criteria))
+	})
+
+	t.Run("CodeCriteriaRejectsChatModel", func(t *testing.T) {
+		// Pre-fix: chatModel would have "matched" because the
+		// RequiredCapabilities branch was empty. Post-fix: rejected
+		// because "chat"/"general"/"instruct" tags do not satisfy
+		// CapabilityCodeGeneration's keyword set.
+		criteria := ModelSelectionCriteria{
+			RequiredCapabilities: []ModelCapability{CapabilityCodeGeneration},
+		}
+		assert.False(t, manager.modelMatchesCriteria(chatModel, criteria),
+			"chat model lacks code-related tags; must NOT match a code-generation criteria — A1 anti-bluff regression")
+	})
+
+	t.Run("TaskTypeDebuggingRejectsChatModel", func(t *testing.T) {
+		criteria := ModelSelectionCriteria{
+			TaskType: "debugging",
+		}
+		assert.False(t, manager.modelMatchesCriteria(chatModel, criteria),
+			"chat model lacks debugging-related tags; must NOT match — A1 anti-bluff regression")
+	})
+}
+
+// TestIntegratedModelManager_calculateModelScore_HonorsCapabilities is the
+// round-36 regression test for the calculateModelScore A1 fix. Pre-fix,
+// the function read only QualityPreference. Post-fix, RequiredCapabilities
+// and MaxTokens influence the score. The test asserts the post-fix
+// score is STRICTLY GREATER when a code model satisfies a code criteria,
+// vs. a flat baseline — locking in that the additional inputs MOVE the
+// score.
+func TestIntegratedModelManager_calculateModelScore_HonorsCapabilities(t *testing.T) {
+	tempDir := t.TempDir()
+	manager := NewIntegratedModelManager(tempDir)
+
+	model := &DownloadableModelInfo{
+		ID:          "code-llama-13b",
+		ModelSize:   "13B",
+		ContextSize: 16384,
+		Tags:        []string{"instruct", "code", "programming"},
+	}
+
+	baseline := manager.calculateModelScore(model, ModelSelectionCriteria{})
+	withCaps := manager.calculateModelScore(model, ModelSelectionCriteria{
+		RequiredCapabilities: []ModelCapability{CapabilityCodeGeneration},
+	})
+
+	assert.Greater(t, withCaps, baseline,
+		"RequiredCapabilities must increase the score when satisfied; equality means the parameter is being discarded — A1 anti-bluff regression")
+}
+
+// TestIntegratedModelManager_determineOptimalFormat_HonorsConstraints is the
+// round-36 regression test for the determineOptimalFormat A1 fix.
+// Pre-fix, constraints was discarded; cpu_only=true + optimize_for="performance"
+// returned FormatGPTQ (GPU-only). Post-fix, cpu_only wins.
+func TestIntegratedModelManager_determineOptimalFormat_HonorsConstraints(t *testing.T) {
+	tempDir := t.TempDir()
+	manager := NewIntegratedModelManager(tempDir)
+
+	t.Run("CPUOnlyOverridesPerformanceHint", func(t *testing.T) {
+		constraints := map[string]interface{}{"cpu_only": true}
+		format, err := manager.determineOptimalFormat(FormatHF, "performance", constraints)
+		require.NoError(t, err)
+		assert.Equal(t, FormatGGUF, format,
+			"cpu_only constraint must override the performance hint; GPTQ means constraints are being discarded — A1 anti-bluff regression")
+	})
+
+	t.Run("PreferredFormatOverridesHint", func(t *testing.T) {
+		constraints := map[string]interface{}{"preferred_format": string(FormatAWQ)}
+		format, err := manager.determineOptimalFormat(FormatHF, "memory", constraints)
+		require.NoError(t, err)
+		assert.Equal(t, FormatAWQ, format,
+			"preferred_format constraint must win; GGUF means constraints are being discarded")
 	})
 }
 

@@ -967,3 +967,52 @@ func TestBaseAgentConcurrentExecute(t *testing.T) {
 		t.Errorf("Expected task count 10, got %d", health.TaskCount)
 	}
 }
+
+// TestBaseAgent_basicPlanning_EchoesRequirementsAndProvenance is the
+// round-36 §11.4 anti-bluff regression for the basicPlanning A1 fix.
+// Pre-fix, basicPlanning read t.Input["requirements"] only as a
+// validation gate and returned a hardcoded plan map identical for every
+// caller. The output was a §11.4 PASS-bluff at the planning surface for
+// no-LLM deployments. Post-fix, the requirements MUST be reflected in
+// the output and the agent ID + task ID MUST appear (provenance).
+func TestBaseAgent_basicPlanning_EchoesRequirementsAndProvenance(t *testing.T) {
+	agent := NewBaseAgent("test-planner-agent", "Test Planner", AgentTypePlanning, nil)
+	_ = agent.Initialize(context.Background(), &AgentConfig{})
+	defer func() { _ = agent.Shutdown(context.Background()) }()
+
+	requirements := "Build a CRUD backend for a recipe app with PostgreSQL and Gin"
+	planningTask := task.NewTask(task.TaskTypePlanning, "Plan", "Test", task.PriorityNormal)
+	planningTask.Input = map[string]interface{}{
+		"requirements": requirements,
+	}
+
+	out, err := agent.basicPlanning(planningTask)
+	if err != nil {
+		t.Fatalf("basicPlanning returned error: %v", err)
+	}
+
+	asMap, ok := out.(map[string]interface{})
+	if !ok {
+		t.Fatalf("basicPlanning output is not a map: %T", out)
+	}
+
+	// Requirements MUST be present verbatim (pre-fix this field did not exist)
+	gotReq, ok := asMap["requirements"].(string)
+	if !ok || gotReq != requirements {
+		t.Errorf("basicPlanning output dropped requirements; got %q, want %q — A1 anti-bluff regression",
+			gotReq, requirements)
+	}
+
+	// Provenance: task ID + agent ID + mode marker
+	if gotTaskID, ok := asMap["task_id"].(string); !ok || gotTaskID != planningTask.ID {
+		t.Errorf("basicPlanning output missing task_id provenance; got %q, want %q",
+			gotTaskID, planningTask.ID)
+	}
+	if gotAgentID, ok := asMap["agent_id"].(string); !ok || gotAgentID != agent.ID() {
+		t.Errorf("basicPlanning output missing agent_id provenance; got %q, want %q",
+			gotAgentID, agent.ID())
+	}
+	if mode, ok := asMap["mode"].(string); !ok || mode != "no_llm_fallback" {
+		t.Errorf("basicPlanning output missing mode='no_llm_fallback' marker; got %v", asMap["mode"])
+	}
+}

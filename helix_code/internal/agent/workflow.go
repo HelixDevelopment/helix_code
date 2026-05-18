@@ -265,31 +265,55 @@ func (we *WorkflowExecutor) Execute(ctx context.Context, workflow *Workflow) err
 	}
 }
 
-// executeStep executes a single workflow step
+// executeStep executes a single workflow step.
+//
+// Round-36 §11.4 anti-bluff fix (CONST-035 / Article XI §11.9, Pattern A1
+// parameter-discard): the previous implementation read only
+// step.RequiredCaps[0] when the WorkflowStep.RequiredCaps field is a
+// SLICE — meaning a step declaring RequiredCaps=[CodeGen, Testing,
+// Review] was satisfied by any agent with CodeGen alone. The downstream
+// task DID propagate the full RequiredCapabilities list (lines below),
+// so the workflow operator's intent ("the step needs ALL of these") was
+// silently downgraded to "ANY of these" at agent-selection time. Real
+// workflows could schedule code-review steps onto agents that lack
+// review capability — the actual execution would then fail with a
+// less-informative error or, worse, fabricate a review because Agent
+// implementations rarely re-check their capabilities. The fix is to
+// require the candidate agent to satisfy EVERY entry in
+// step.RequiredCaps, not just the first.
 func (we *WorkflowExecutor) executeStep(ctx context.Context, workflow *Workflow, step *WorkflowStep) error {
 	// Find suitable agent
 	var agent Agent
 	var err error
 
 	if len(step.RequiredCaps) > 0 {
-		// Find by capability
-		agents := we.coordinator.registry.GetByCapability(step.RequiredCaps[0])
-		if len(agents) == 0 {
+		// Find by capability — pick the first agent that satisfies ALL
+		// required capabilities. Anchor primary search on the first cap
+		// (cheap candidate set), then intersect against the remainder.
+		candidates := we.coordinator.registry.GetByCapability(step.RequiredCaps[0])
+		var matched []Agent
+		for _, candidate := range candidates {
+			if agentHasAllCapabilities(candidate, step.RequiredCaps) {
+				matched = append(matched, candidate)
+			}
+		}
+		if len(matched) == 0 {
+			capsStr := formatCapabilities(step.RequiredCaps)
 			if step.Optional {
 				// Create a failed result for optional step
 				result := &task.Result{
 					TaskID:    step.ID,
 					AgentID:   "none",
 					Success:   false,
-					Error:     fmt.Sprintf("no agent found with capability %s", step.RequiredCaps[0]),
+					Error:     fmt.Sprintf("no agent found with all required capabilities %s", capsStr),
 					Timestamp: time.Now(),
 				}
 				workflow.SetStepResult(step.ID, result)
 				return nil
 			}
-			return fmt.Errorf("no agent found with capability %s for step %s", step.RequiredCaps[0], step.ID)
+			return fmt.Errorf("no agent found with all required capabilities %s for step %s", capsStr, step.ID)
 		}
-		agent = agents[0]
+		agent = matched[0]
 	} else {
 		// Find by type
 		agents := we.coordinator.registry.GetByType(step.AgentType)
@@ -393,4 +417,55 @@ func (we *WorkflowExecutor) ListWorkflows() []*Workflow {
 func GenerateWorkflowID() string {
 	// Use UUID for better uniqueness guarantee
 	return fmt.Sprintf("workflow-%s", uuid.New().String())
+}
+
+// agentHasAllCapabilities reports whether the given agent declares every
+// capability in required.
+//
+// Helper for executeStep — see the round-36 doc-comment there for the
+// §11.4 anti-bluff rationale behind tightening RequiredCaps from
+// "any-of" to "all-of" semantics.
+func agentHasAllCapabilities(agent Agent, required []Capability) bool {
+	if agent == nil || len(required) == 0 {
+		return true
+	}
+	declared := agent.Capabilities()
+	have := make(map[Capability]bool, len(declared))
+	for _, c := range declared {
+		have[c] = true
+	}
+	for _, req := range required {
+		if !have[req] {
+			return false
+		}
+	}
+	return true
+}
+
+// formatCapabilities renders a []Capability for inclusion in error
+// messages. Used by executeStep when reporting "no agent satisfies all
+// of these caps".
+func formatCapabilities(caps []Capability) string {
+	if len(caps) == 0 {
+		return "[]"
+	}
+	parts := make([]string, len(caps))
+	for i, c := range caps {
+		parts[i] = string(c)
+	}
+	return "[" + joinStrings(parts, ", ") + "]"
+}
+
+// joinStrings is a tiny strings.Join shim. We avoid importing strings
+// here because the rest of workflow.go does not use it; a single shim
+// keeps the import surface stable.
+func joinStrings(parts []string, sep string) string {
+	if len(parts) == 0 {
+		return ""
+	}
+	out := parts[0]
+	for _, p := range parts[1:] {
+		out += sep + p
+	}
+	return out
 }
