@@ -18,6 +18,7 @@
 | 2026-05-19 | DocProcessor CLI × 8 migration | Feature | Implemented (→ Fixed.md) | 97 | e584e4b + ae83bc8 | Refactored to runCLI(); 6 tests + mutation; Upstreams recipe fix bonus |
 | 2026-05-19 | Planning × 3 + VisionEngine × 4 migration | Feature | Implemented (→ Fixed.md) | 98 | 6abed9b + 2d0c35b + a79e022 | 13 tests + dual mutation; ISSUE-001 + ISSUE-002 surfaced |
 | 2026-05-19 | CONST-046 audit-gate fail-on-new + baseline | Feature | Implemented (→ Fixed.md) | 99b | 3f4f110 | 54,803 baseline keys; 10 tests + mutation + 4-scenario smoke |
+| 2026-05-19 | panoptic × 5 cobra Short descriptions migration | Feature | Implemented (→ Fixed.md) | 99a | 3074c77 + c4e50d8 | 8 tests + mutation; pkg/i18n/global.go package-level seam pattern; install_upstreams bonus |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
