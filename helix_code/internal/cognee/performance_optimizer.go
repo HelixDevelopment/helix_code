@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -1010,22 +1011,33 @@ func (po *PerformanceOptimizer) getGPUUsage() float64 {
 }
 
 // runGPUUsageProbeChain executes the vendor probes in priority order.
-// Round-45 chain: NVIDIA (round-43) → AMD ROCm (round-45) → sentinel.
-// The first probe returning a non-sentinel value wins; if every probe
-// returns the sentinel the function logs a telemetry-gap notice and
-// returns the sentinel so callers can distinguish "unmeasured" from
-// "measured idle" (CONST-035 / Article XI §11.9 anti-bluff guarantee).
+// Round-49 chain: NVIDIA (round-43) → AMD ROCm (round-45) → Apple
+// Silicon ioreg (round-49) → sentinel. The first probe returning a
+// non-sentinel value wins; if every probe returns the sentinel the
+// function logs a telemetry-gap notice and returns the sentinel so
+// callers can distinguish "unmeasured" from "measured idle"
+// (CONST-035 / Article XI §11.9 anti-bluff guarantee).
 //
-// Probe order rationale:
+// Probe order rationale (append-only — never reorder):
 //   - NVIDIA first because nvidia-smi is the more mature / faster path
 //     and an NVIDIA + ROCm dual-vendor host is exceedingly rare; when
 //     it happens, surfacing the NVIDIA reading is the dominant case.
+//     Also the dominant case across Linux server fleets where most of
+//     our deployment topology lives.
 //   - AMD second because rocm-smi requires the ROCm stack which is
 //     less universally installed; LookPath is the cheap gate that keeps
-//     non-AMD hosts fast.
-//   - Future probes (Apple IOReport, Intel Level Zero) MUST be appended
-//     here, NEVER inserted at the head — preserving the existing order
-//     keeps existing dashboards' behaviour stable.
+//     non-AMD hosts fast. Common on datacenter ROCm deployments.
+//   - Apple third because ioreg is a macOS-only utility (developer
+//     laptops). Linux/Windows hosts shortcut at the LookPath gate.
+//     Apple last in priority because dual-vendor (NVIDIA + Apple) is
+//     impossible: Apple Silicon has no PCIe slot for NVIDIA, and Intel
+//     Macs that retained NVIDIA have been EOL since 2019. So order
+//     here only matters on hypothetical eGPU-via-Thunderbolt rigs where
+//     surfacing the discrete GPU's NVIDIA/AMD reading is the dominant
+//     correct choice over the integrated AGX.
+//   - Future probes (Intel Level Zero, e.g.) MUST be APPENDED here,
+//     NEVER inserted at the head — preserving the existing order keeps
+//     existing dashboards' behaviour stable.
 func runGPUUsageProbeChain() float64 {
 	if v := queryNvidiaGPUUsage(); v != GPUUsageUnavailableSentinel {
 		return v
@@ -1033,8 +1045,11 @@ func runGPUUsageProbeChain() float64 {
 	if v := queryAMDGPUUsage(); v != GPUUsageUnavailableSentinel {
 		return v
 	}
+	if v := queryAppleGPUUsage(); v != GPUUsageUnavailableSentinel {
+		return v
+	}
 	if gpuTelemetryLogger != nil {
-		gpuTelemetryLogger.Debug("no supported GPU telemetry source available (NVIDIA nvidia-smi + AMD rocm-smi both unavailable); returning GPUUsageUnavailableSentinel (round-45 §11.4 honest sentinel)")
+		gpuTelemetryLogger.Debug("no supported GPU telemetry source available (NVIDIA nvidia-smi + AMD rocm-smi + Apple ioreg all unavailable); returning GPUUsageUnavailableSentinel (round-49 §11.4 honest sentinel)")
 	}
 	return GPUUsageUnavailableSentinel
 }
@@ -1357,6 +1372,184 @@ func lookupRocmUtilisation(fields map[string]string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Round 49 — Apple Silicon GPU telemetry probe (sibling to round-43
+// NVIDIA + round-45 AMD). Completes the multi-vendor GPU probe chain
+// for the three GPU vendors HelixCode users actually run today.
+// ───────────────────────────────────────────────────────────────────────
+//
+// Forensic anchor: round 33 introduced GPUUsageUnavailableSentinel
+// (-1.0) so unmeasured-GPU paths surfaced loudly. Round 43 closed the
+// sentinel for NVIDIA via `nvidia-smi`. Round 45 closed it for AMD via
+// `rocm-smi --showuse --json`. Round 49 closes it for Apple Silicon
+// via `ioreg -l -d 1 -w 0 -r -c IOAccelerator` — same shell-out
+// discipline keeps the binary cgo-free and avoids pulling a third-party
+// IOKit Go SDK.
+//
+// Implementation rationale (ioreg over alternatives):
+//   - `ioreg -l -d 1 -w 0 -r -c IOAccelerator` is unprivileged (no sudo
+//     required — CRITICAL given CONST-035 + project's no-sudo mandate),
+//     ships in /usr/sbin on every macOS release, and produces real-time
+//     utilisation via the IOAccelerator driver's PerformanceStatistics
+//     dict containing the "Device Utilization %" integer key.
+//   - `system_profiler SPDisplaysDataType -json` was REJECTED — produces
+//     only static device info (model, VRAM, displays); no real-time
+//     utilisation. Useless for our purpose.
+//   - `powermetrics --samplers gpu_power -i 100 -n 1` was REJECTED —
+//     requires sudo; CONST-035 + project no-sudo mandate bar this
+//     regardless of how rich the metric set is.
+//
+// The "Device Utilization %" key is emitted by the Apple-AGX driver
+// (Apple Silicon M1/M2/M3/M4 GPUs and successors) AND by some Intel
+// integrated GPU drivers. On Intel Macs without an Apple Silicon GPU,
+// zero matches → sentinel returned correctly (intentional — no Intel
+// integrated-GPU stack qualifies as "useful telemetry" for compute
+// workloads). On Intel Macs with a discrete NVIDIA / AMD GPU, the
+// chain would have already returned via the NVIDIA / AMD probe before
+// reaching this one — Apple ordering is intentionally last (see
+// runGPUUsageProbeChain rationale).
+//
+// Multi-GPU aggregation: arithmetic MEAN of all matched
+// "Device Utilization %" lines (same rationale as round-43 NVIDIA and
+// round-45 AMD — "system GPU%" is the analogue to system CPU%). Most
+// Apple Silicon hosts have exactly one GPU so the mean reduces to a
+// single reading; multi-GPU Intel Macs with both integrated + discrete
+// AGX-aware drivers would aggregate.
+//
+// Error contract — every failure path returns GPUUsageUnavailableSentinel
+// (-1.0). The function NEVER returns a fabricated number on the error
+// path. CONST-035 / CONST-050(A) / Article XI §11.9 anti-bluff guarantee.
+//
+// Caching: round-49 deliberately does NOT add a third per-vendor cache.
+// The runGPUUsageProbeChain wrapper invokes queryNvidiaGPUUsage first;
+// that probe's existing 1-second TTL cache covers the dominant
+// hot-path. The Apple branch is only reached when both NVIDIA and AMD
+// return the sentinel — typically a macOS host where the Apple probe
+// runs at the metric-collection cadence (already bounded). Adding a
+// parallel Apple cache would couple three unrelated TTLs; if
+// Apple-side cache becomes necessary it will be added in a future
+// round with its own contract.
+
+// appleIoregQueryTimeout caps the ioreg shell-out. Same 2-second
+// budget as nvidia-smi + rocm-smi — typical ioreg completion is
+// 50-200ms on Apple Silicon, 2s covers cold-cache + larger device
+// trees on Intel Macs with multiple display controllers.
+const appleIoregQueryTimeout = 2 * time.Second
+
+// appleIoregCommand is overridable for tests. Production code MUST use
+// the exec.CommandContext factory; tests inject a fake via PATH
+// manipulation (t.Setenv("PATH", t.TempDir()) + fake script) so the
+// real exec.CommandContext code path runs against a hermetic binary —
+// CONST-050(A) compliant (the fake script lives in t.TempDir, not
+// production source).
+//
+// Flag rationale:
+//   - `-l`     : list properties for matching nodes
+//   - `-d 1`   : depth limit 1 below IOAccelerator class roots (keeps
+//                output bounded; PerformanceStatistics sits at the root)
+//   - `-w 0`   : disable line wrapping (so the regex sees the full
+//                "Device Utilization %" = NN tuple on one line)
+//   - `-r`     : root from the matching class (not from the IORegistry root)
+//   - `-c IOAccelerator` : restrict to IOAccelerator-derived nodes
+//                (Apple AGX driver + Intel integrated GPU driver both
+//                qualify; non-GPU IOKit nodes filtered out)
+var appleIoregCommand = func(ctx context.Context) *exec.Cmd {
+	return exec.CommandContext(ctx, "ioreg",
+		"-l", "-d", "1", "-w", "0", "-r", "-c", "IOAccelerator")
+}
+
+// appleIoregDeviceUtilizationRegex extracts the integer GPU utilisation
+// percentage from each "Device Utilization %" line in ioreg output.
+// Real ioreg formatting examples (the regex tolerates all three):
+//
+//	    "Device Utilization %" = 42
+//	"Device Utilization %"=42
+//	          "Device Utilization %"   =   0
+//
+// Compiled once at package init for hot-path efficiency; the same
+// regex is reused across every probe invocation.
+var appleIoregDeviceUtilizationRegex = regexp.MustCompile(`"Device Utilization %"\s*=\s*(\d+)`)
+
+// queryAppleGPUUsage performs the LookPath gate + shell-out + regex
+// parse for Apple Silicon GPUs (and IOAccelerator-derived Intel GPUs).
+// Returns GPUUsageUnavailableSentinel on every error path; returns the
+// mean utilisation [0.0, 100.0] on success.
+func queryAppleGPUUsage() float64 {
+	// Pre-flight: ioreg must exist on PATH. Cheap LookPath check
+	// shortcuts non-macOS hosts (Linux/Windows; FreeBSD; etc.) without
+	// the exec spawn overhead. Note ioreg is macOS-only — on Linux
+	// LookPath will always fail and this probe is a no-op.
+	if _, err := exec.LookPath("ioreg"); err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Debug("ioreg not found in PATH; Apple GPU telemetry disabled (typical for non-macOS hosts), returning sentinel (round-49 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), appleIoregQueryTimeout)
+	defer cancel()
+
+	out, err := appleIoregCommand(ctx).Output()
+	if err != nil {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("ioreg probe failed: %v; returning sentinel (round-49 §11.4 honest sentinel)", err)
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	mean, ok := parseAppleIoregUtilization(out)
+	if !ok {
+		if gpuTelemetryLogger != nil {
+			gpuTelemetryLogger.Warn("ioreg output parse failed (no \"Device Utilization %%\" lines or all unparseable); returning sentinel (round-49 §11.4 honest sentinel)")
+		}
+		return GPUUsageUnavailableSentinel
+	}
+
+	return mean
+}
+
+// parseAppleIoregUtilization extracts the mean GPU utilisation from
+// the ioreg -c IOAccelerator output. Each "Device Utilization %" line
+// is a per-GPU integer percent (0-100). Returns (mean, true) on
+// success; (0, false) when:
+//   - Zero "Device Utilization %" matches (Intel Mac with no Apple
+//     Silicon GPU and no IOAccelerator-compatible integrated GPU is
+//     the dominant case).
+//   - Any parsed value is out of [0, 100] (defensive — driver bug).
+//   - Any matched group fails strconv.ParseFloat (impossible with the
+//     \d+ regex but kept as belt-and-suspenders for future regex
+//     widening).
+//
+// Defensive: a single garbage line poisons the whole reading. Same
+// rationale as the round-43 NVIDIA / round-45 AMD parsers — silently
+// dropping bad readings masks driver bugs.
+func parseAppleIoregUtilization(raw []byte) (float64, bool) {
+	matches := appleIoregDeviceUtilizationRegex.FindAllSubmatch(raw, -1)
+	if len(matches) == 0 {
+		return 0, false
+	}
+	var sum float64
+	var count int
+	for _, m := range matches {
+		if len(m) < 2 {
+			return 0, false
+		}
+		v, err := strconv.ParseFloat(strings.TrimSpace(string(m[1])), 64)
+		if err != nil {
+			return 0, false
+		}
+		if v < 0 || v > 100 {
+			return 0, false
+		}
+		sum += v
+		count++
+	}
+	if count == 0 {
+		return 0, false
+	}
+	return sum / float64(count), true
 }
 
 func (po *PerformanceOptimizer) getCacheHitRate() float64 {
