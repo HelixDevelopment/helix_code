@@ -338,6 +338,17 @@ var (
 	// finish_reason="content_filter", Anthropic stop_reason values like
 	// "safety" or "refusal"). Content may be empty or partial.
 	ErrResponseContentBlocked = errors.New("llm response: blocked by content-safety filter; Content may be empty or partial")
+
+	// ErrReplicatePredictionFailed is the round-54 sentinel for a Replicate
+	// prediction-completion API response whose `status` field is `"failed"`.
+	// The provider's raw `error` field is wrapped via fmt.Errorf with `%w` so
+	// callers can both `errors.Is(err, ErrReplicatePredictionFailed)` AND
+	// inspect the human-readable upstream message. Replicate does not expose
+	// truncation or content-filter signals natively on its
+	// prediction-completion envelope — those still degrade to nil Err unless
+	// the underlying model writes them into the output payload. See
+	// helix_code/internal/llm/providers/replicate/client.go for the wire.
+	ErrReplicatePredictionFailed = errors.New("llm response: Replicate prediction status=failed")
 )
 
 // Provider interface

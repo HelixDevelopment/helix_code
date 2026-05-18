@@ -719,6 +719,11 @@ func (bp *BedrockProvider) parseClaudeResponse(body []byte, requestID uuid.UUID,
 			CompletionTokens: claudeResp.Usage.OutputTokens,
 			TotalTokens:      claudeResp.Usage.InputTokens + claudeResp.Usage.OutputTokens,
 		},
+		// Round-54 §11.4 anti-bluff: Claude-on-Bedrock emits the same
+		// Anthropic `stop_reason` vocabulary as the direct Anthropic API,
+		// so reuse the round-46 helper (`max_tokens` → ErrResponseTruncated,
+		// `refusal`/`safety` → ErrResponseContentBlocked).
+		Err: mapBedrockStopReasonToErr(modelFamilyClaude, claudeResp.StopReason),
 	}
 
 	// Extract content and tool calls
@@ -767,6 +772,10 @@ func (bp *BedrockProvider) parseTitanResponse(body []byte, requestID uuid.UUID, 
 			CompletionTokens: result.TokenCount,
 			TotalTokens:      totalTokens,
 		},
+		// Round-54 §11.4 anti-bluff: Titan emits `completionReason`
+		// (LENGTH | FINISH | CONTENT_FILTERED | STOP) — see
+		// mapBedrockStopReasonToErr for the closed mapping.
+		Err: mapBedrockStopReasonToErr(modelFamilyTitan, result.CompletionReason),
 	}, nil
 }
 
@@ -797,6 +806,9 @@ func (bp *BedrockProvider) parseJurassicResponse(body []byte, requestID uuid.UUI
 			CompletionTokens: completionTokens,
 			TotalTokens:      promptTokens + completionTokens,
 		},
+		// Round-54 §11.4 anti-bluff: AI21 Jurassic emits
+		// finishReason.reason: `endoftext` (clean) | `length` (truncation).
+		Err: mapBedrockStopReasonToErr(modelFamilyJurassic, completion.FinishReason.Reason),
 	}, nil
 }
 
@@ -819,6 +831,9 @@ func (bp *BedrockProvider) parseCommandResponse(body []byte, requestID uuid.UUID
 			CompletionTokens: commandResp.Meta.BilledUnits.OutputTokens,
 			TotalTokens:      commandResp.Meta.BilledUnits.InputTokens + commandResp.Meta.BilledUnits.OutputTokens,
 		},
+		// Round-54 §11.4 anti-bluff: Cohere Command emits
+		// finish_reason: `COMPLETE` | `MAX_TOKENS` | `ERROR_TOXIC` | `ERROR`.
+		Err: mapBedrockStopReasonToErr(modelFamilyCommand, commandResp.FinishReason),
 	}
 
 	// Extract tool calls
@@ -855,12 +870,19 @@ func (bp *BedrockProvider) parseLlamaResponse(body []byte, requestID uuid.UUID, 
 			CompletionTokens: llamaResp.GenerationTokenCount,
 			TotalTokens:      llamaResp.PromptTokenCount + llamaResp.GenerationTokenCount,
 		},
+		// Round-54 §11.4 anti-bluff: Meta Llama emits
+		// stop_reason: `stop` (clean) | `length` (truncation).
+		Err: mapBedrockStopReasonToErr(modelFamilyLlama, llamaResp.StopReason),
 	}, nil
 }
 
 // processEventStream processes the Bedrock event stream
 func (bp *BedrockProvider) processEventStream(reader bedrockruntime.ResponseStreamReader, ch chan<- LLMResponse, requestID uuid.UUID, family bedrockModelFamily) error {
 	var contentBuilder strings.Builder
+	// Round-54 §11.4 anti-bluff: track the last observed stop_reason across
+	// per-chunk frames so the terminal frame can carry the right Err sentinel
+	// (see mapBedrockStopReasonToErr — family-specific dispatch).
+	var lastStopReason string
 
 	for event := range reader.Events() {
 		switch e := event.(type) {
@@ -878,6 +900,10 @@ func (bp *BedrockProvider) processEventStream(reader bedrockruntime.ResponseStre
 			}
 			if delta == "" {
 				delta = chunk.OutputText
+			}
+
+			if chunk.StopReason != "" {
+				lastStopReason = chunk.StopReason
 			}
 
 			if delta != "" {
@@ -903,13 +929,20 @@ func (bp *BedrockProvider) processEventStream(reader bedrockruntime.ResponseStre
 		return bp.handleBedrockError(err)
 	}
 
-	// Send final complete response
+	// Round-54 §11.4 anti-bluff: terminal frame's FinishReason now reflects
+	// the family-specific stop_reason observed on the wire (or "stop" if the
+	// event stream emitted none). Err propagates via the same family helper.
+	terminalReason := lastStopReason
+	if terminalReason == "" {
+		terminalReason = "stop"
+	}
 	ch <- LLMResponse{
 		ID:           uuid.New(),
 		RequestID:    requestID,
 		Content:      contentBuilder.String(),
-		FinishReason: "stop",
+		FinishReason: terminalReason,
 		CreatedAt:    time.Now(),
+		Err:          mapBedrockStopReasonToErr(family, lastStopReason),
 	}
 
 	return nil
@@ -1083,4 +1116,88 @@ func (bp *BedrockProvider) GetContextWindow() int {
 // to the Bedrock tokenize endpoint.
 func (bp *BedrockProvider) CountTokens(text string) (int, error) {
 	return CharBasedTokenCount(text)
+}
+
+// mapBedrockStopReasonToErr returns the round-46 LLMResponse.Err sentinel
+// matching a Bedrock per-family stop_reason / completionReason /
+// finishReason value, or nil for clean stops / unknown reasons. AWS Bedrock
+// proxies multiple model families with DIFFERENT response shapes; each
+// family carries its own stop_reason vocabulary, so dispatch is required.
+//
+// Closed mappings per AWS Bedrock Runtime API reference
+// (https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html):
+//
+//   - modelFamilyClaude (Anthropic-on-Bedrock):
+//     reuses the round-46 mapAnthropicStopReasonToErr semantics:
+//       "max_tokens"               → ErrResponseTruncated
+//       "refusal" / "safety"       → ErrResponseContentBlocked
+//       "end_turn" / "stop_sequence" / "tool_use" / empty → nil
+//
+//   - modelFamilyTitan (Amazon Titan):
+//     completionReason:
+//       "LENGTH"                   → ErrResponseTruncated
+//       "CONTENT_FILTERED"         → ErrResponseContentBlocked
+//       "FINISH" / "STOP" / empty  → nil
+//
+//   - modelFamilyJurassic (AI21 Jurassic / Jamba):
+//     finishReason.reason (lower-case):
+//       "length"                   → ErrResponseTruncated
+//       "endoftext" / "stop" / empty → nil
+//     AI21 exposes no content-filter signal at the completion-envelope layer.
+//
+//   - modelFamilyCommand (Cohere Command via Bedrock):
+//     finish_reason (upper-case):
+//       "MAX_TOKENS"               → ErrResponseTruncated
+//       "ERROR_TOXIC"              → ErrResponseContentBlocked
+//       "COMPLETE" / "STOP_SEQUENCE" / "ERROR" / empty → nil
+//
+//   - modelFamilyLlama (Meta Llama-on-Bedrock):
+//     stop_reason (lower-case):
+//       "length"                   → ErrResponseTruncated
+//       "stop" / empty             → nil
+//     Llama-on-Bedrock exposes no content-filter signal on the wire.
+//
+// Future family additions MUST extend this helper + ship a paired pinning
+// test in the same commit (CONST-050(B) paired-mutation).
+func mapBedrockStopReasonToErr(family bedrockModelFamily, reason string) error {
+	switch family {
+	case modelFamilyClaude:
+		// Direct delegation to the round-46 Anthropic helper — Claude-on-
+		// Bedrock IS the Anthropic API, just transported over AWS.
+		return mapAnthropicStopReasonToErr(reason)
+	case modelFamilyTitan:
+		switch reason {
+		case "LENGTH":
+			return ErrResponseTruncated
+		case "CONTENT_FILTERED":
+			return ErrResponseContentBlocked
+		default:
+			return nil
+		}
+	case modelFamilyJurassic:
+		switch reason {
+		case "length":
+			return ErrResponseTruncated
+		default:
+			return nil
+		}
+	case modelFamilyCommand:
+		switch reason {
+		case "MAX_TOKENS":
+			return ErrResponseTruncated
+		case "ERROR_TOXIC":
+			return ErrResponseContentBlocked
+		default:
+			return nil
+		}
+	case modelFamilyLlama:
+		switch reason {
+		case "length":
+			return ErrResponseTruncated
+		default:
+			return nil
+		}
+	default:
+		return nil
+	}
 }

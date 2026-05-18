@@ -514,6 +514,21 @@ func (vp *VertexAIProvider) generateGemini(ctx context.Context, request *LLMRequ
 		ProcessingTime: time.Since(startTime),
 		CreatedAt:      time.Now(),
 		FinishReason:   candidate.FinishReason,
+		// Round-54 §11.4 anti-bluff: Vertex AI hosts Gemini using the SAME
+		// finishReason vocabulary as the direct Gemini API, so reuse the
+		// round-50 mapGeminiFinishReasonToErr helper
+		// ("MAX_TOKENS" → ErrResponseTruncated, "SAFETY"/"RECITATION"/etc
+		// → ErrResponseContentBlocked).
+		Err: mapGeminiFinishReasonToErr(candidate.FinishReason),
+	}
+
+	// Round-54 §11.4 anti-bluff: Vertex also surfaces a prompt-side
+	// PromptFeedback.BlockReason for safety blocks raised on the input.
+	// When present, override Err to ErrResponseContentBlocked (don't
+	// downgrade an existing truncation signal). Mirrors the
+	// gemini_provider.go round-50 pattern.
+	if resp.PromptFeedback != nil && resp.PromptFeedback.BlockReason != "" && response.Err == nil {
+		response.Err = ErrResponseContentBlocked
 	}
 
 	// Extract content and tool calls
@@ -611,6 +626,11 @@ func (vp *VertexAIProvider) generateClaude(ctx context.Context, request *LLMRequ
 		ProcessingTime: time.Since(startTime),
 		CreatedAt:      time.Now(),
 		FinishReason:   claudeResp.StopReason,
+		// Round-54 §11.4 anti-bluff: Claude-on-Vertex (Model Garden) uses
+		// the SAME stop_reason vocabulary as the direct Anthropic API
+		// (`max_tokens` → ErrResponseTruncated, `refusal`/`safety` →
+		// ErrResponseContentBlocked), so reuse the round-46 helper.
+		Err: mapAnthropicStopReasonToErr(claudeResp.StopReason),
 	}
 
 	// Extract content
@@ -745,6 +765,15 @@ func (vp *VertexAIProvider) parseSSEStream(reader io.Reader, ch chan<- LLMRespon
 				Content:      contentBuilder.String(),
 				FinishReason: candidate.FinishReason,
 				CreatedAt:    time.Now(),
+				// Round-54 §11.4 anti-bluff: terminal stream frame carries
+				// Err per the round-50 Gemini finishReason mapping.
+				Err: mapGeminiFinishReasonToErr(candidate.FinishReason),
+			}
+			// Round-54 §11.4 anti-bluff: prompt-side block raised mid-stream
+			// also surfaces via PromptFeedback — don't downgrade an existing
+			// truncation/safety candidate-side signal.
+			if streamResp.PromptFeedback != nil && streamResp.PromptFeedback.BlockReason != "" && finalResponse.Err == nil {
+				finalResponse.Err = ErrResponseContentBlocked
 			}
 
 			if streamResp.UsageMetadata != nil {

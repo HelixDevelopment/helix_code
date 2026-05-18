@@ -706,6 +706,32 @@ func (ap *AzureProvider) parseAzureResponse(body []byte, requestID uuid.UUID, st
 			TotalTokens:      azureResp.Usage.TotalTokens,
 		},
 		FinishReason: choice.FinishReason,
+		// Round-54 §11.4 anti-bluff: Azure OpenAI Service is OpenAI-
+		// compatible — reuse the round-46 mapOpenAIFinishReasonToErr helper
+		// for the standard finish_reason vocabulary
+		// (`length`/`content_filter`/`stop`/`tool_calls`/`function_call`).
+		Err: mapOpenAIFinishReasonToErr(choice.FinishReason),
+	}
+
+	// Round-54 §11.4 anti-bluff: Azure adds an additional content-safety
+	// signal — `content_filter_results` may indicate filtering even when
+	// finish_reason="stop". When ANY category is filtered=true on the
+	// completion-side filter, override Err with ErrResponseContentBlocked
+	// (don't downgrade an existing truncation signal). Existing pre-round-54
+	// code returned a hard error from parseAzureResponse for these cases;
+	// that behavior is preserved above (lines 671-695) for prompt-side AND
+	// completion-side filters, so reaching this code path with a
+	// non-nil-filter ContentFilterResults that was NOT severe enough to
+	// raise IS in practice unreachable today. The override exists for
+	// defense-in-depth + forward-compatibility if Azure later relaxes the
+	// severity gating.
+	if choice.ContentFilterResults != nil {
+		filters := choice.ContentFilterResults
+		anyFiltered := filters.Hate.Filtered || filters.SelfHarm.Filtered ||
+			filters.Sexual.Filtered || filters.Violence.Filtered
+		if anyFiltered && response.Err == nil {
+			response.Err = ErrResponseContentBlocked
+		}
 	}
 
 	return response, nil
@@ -762,12 +788,27 @@ func (ap *AzureProvider) parseSSEStream(reader io.Reader, ch chan<- LLMResponse,
 
 		// Check for completion
 		if chunk.Choices[0].FinishReason != "" {
+			// Round-54 §11.4 anti-bluff: terminal SSE frame carries Err per
+			// the round-46 OpenAI-compatible finish_reason mapping; if
+			// Azure's per-chunk content_filter_results report a filtered
+			// category, override to ErrResponseContentBlocked (defense-in-
+			// depth — same pattern as parseAzureResponse above).
+			sentinel := mapOpenAIFinishReasonToErr(chunk.Choices[0].FinishReason)
+			if cfr := chunk.Choices[0].ContentFilterResults; cfr != nil {
+				if cfr.Hate.Filtered || cfr.SelfHarm.Filtered ||
+					cfr.Sexual.Filtered || cfr.Violence.Filtered {
+					if sentinel == nil {
+						sentinel = ErrResponseContentBlocked
+					}
+				}
+			}
 			ch <- LLMResponse{
 				ID:           uuid.New(),
 				RequestID:    requestID,
 				Content:      contentBuilder.String(),
 				FinishReason: chunk.Choices[0].FinishReason,
 				CreatedAt:    time.Now(),
+				Err:          sentinel,
 			}
 		}
 	}
