@@ -46,12 +46,16 @@ func (c *PermissionsCommand) Execute(ctx context.Context, cmdCtx *CommandContext
 	switch cmdCtx.Args[0] {
 	case "mode":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("usage: /permissions mode <preset>")
+			// CONST-046 (round-149): usage hint resolved
+			// through the package-level translator.
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_usage_permissions_mode", nil))
 		}
 		return c.setMode(cmdCtx.Args[1])
 	case "add":
 		if len(cmdCtx.Args) < 3 {
-			return nil, fmt.Errorf("usage: /permissions add <pattern> <action> [priority]")
+			// CONST-046 (round-149): usage hint resolved
+			// through the package-level translator.
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_usage_permissions_add", nil))
 		}
 		priority := 0
 		if len(cmdCtx.Args) >= 4 {
@@ -60,7 +64,9 @@ func (c *PermissionsCommand) Execute(ctx context.Context, cmdCtx *CommandContext
 		return c.addSession(cmdCtx.Args[1], cmdCtx.Args[2], priority)
 	case "remove":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("usage: /permissions remove <pattern>")
+			// CONST-046 (round-149): usage hint resolved
+			// through the package-level translator.
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_usage_permissions_remove", nil))
 		}
 		return c.removeSession(cmdCtx.Args[1])
 	default:

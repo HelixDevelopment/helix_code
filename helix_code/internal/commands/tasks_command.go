@@ -34,7 +34,9 @@ func (c *TasksCommand) Usage() string       { return "/tasks [list | output <id>
 // Execute runs the slash command. Subcommands: list (default), output <id>, stop <id>.
 func (c *TasksCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if c.manager == nil {
-		return nil, fmt.Errorf("tasks: manager not initialised")
+		// CONST-046 (round-149): manager-not-initialised message
+		// resolved through the package-level translator.
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_tasks_manager_not_initialised", nil))
 	}
 	sub := "list"
 	if len(cmdCtx.Args) > 0 {

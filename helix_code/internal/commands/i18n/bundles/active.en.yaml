@@ -1,0 +1,50 @@
+# internal/commands i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/commands/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_commands_<area>_<short_description>.
+# All IDs prefixed with internal_commands_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-149 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# most user-facing literals emitted by executor.go (4 required-field
+# messages), mcp_command.go + tasks_command.go (2 manager-not-init
+# messages), hooks_command.go + permissions_command.go (4 usage
+# hints). Remaining hardcoded prompts, log strings, and table headers
+# in 50+ other commands files are deferred to future rounds to stay
+# under the size cap.
+
+internal_commands_user_id_is_required:
+  other: "user_id is required"
+
+internal_commands_session_id_is_required:
+  other: "session_id is required"
+
+internal_commands_project_id_is_required:
+  other: "project_id is required"
+
+internal_commands_working_dir_is_required:
+  other: "working_dir is required"
+
+internal_commands_mcp_manager_not_initialised:
+  other: "mcp: manager not initialised"
+
+internal_commands_tasks_manager_not_initialised:
+  other: "tasks: manager not initialised"
+
+internal_commands_usage_hooks_test:
+  other: "usage: /hooks test <event>"
+
+internal_commands_usage_permissions_mode:
+  other: "usage: /permissions mode <preset>"
+
+internal_commands_usage_permissions_add:
+  other: "usage: /permissions add <pattern> <action> [priority]"
+
+internal_commands_usage_permissions_remove:
+  other: "usage: /permissions remove <pattern>"

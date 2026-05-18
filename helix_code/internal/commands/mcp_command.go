@@ -33,7 +33,9 @@ func (c *MCPCommand) Usage() string       { return "/mcp [list | test <name> | r
 
 func (c *MCPCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if c.manager == nil {
-		return nil, fmt.Errorf("mcp: manager not initialised")
+		// CONST-046 (round-149): manager-not-initialised message
+		// resolved through the package-level translator.
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_mcp_manager_not_initialised", nil))
 	}
 	sub := "list"
 	if len(cmdCtx.Args) > 0 {

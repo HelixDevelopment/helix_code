@@ -119,25 +119,32 @@ func (e *Executor) Autocomplete(partial string) []string {
 	return matches
 }
 
-// ValidateContext validates that the command context has required fields
+// ValidateContext validates that the command context has required fields.
+//
+// CONST-046 (round-149): the four "<field> is required" error strings
+// are resolved through the package-level translator. We thread
+// context.Background() because ValidateContext does not currently
+// accept a context — future signature change should pass the caller's
+// context for locale-aware resolution.
 func (e *Executor) ValidateContext(cmdCtx *CommandContext, required []string) error {
+	ctx := context.Background()
 	for _, field := range required {
 		switch field {
 		case "user_id":
 			if cmdCtx.UserID == "" {
-				return fmt.Errorf("user_id is required")
+				return fmt.Errorf("%s", tr(ctx, "internal_commands_user_id_is_required", nil))
 			}
 		case "session_id":
 			if cmdCtx.SessionID == "" {
-				return fmt.Errorf("session_id is required")
+				return fmt.Errorf("%s", tr(ctx, "internal_commands_session_id_is_required", nil))
 			}
 		case "project_id":
 			if cmdCtx.ProjectID == "" {
-				return fmt.Errorf("project_id is required")
+				return fmt.Errorf("%s", tr(ctx, "internal_commands_project_id_is_required", nil))
 			}
 		case "working_dir":
 			if cmdCtx.WorkingDir == "" {
-				return fmt.Errorf("working_dir is required")
+				return fmt.Errorf("%s", tr(ctx, "internal_commands_working_dir_is_required", nil))
 			}
 		}
 	}

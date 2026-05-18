@@ -39,7 +39,9 @@ func (c *HooksCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Co
 		return c.list()
 	case "test":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("usage: /hooks test <event>")
+			// CONST-046 (round-149): usage hint resolved
+			// through the package-level translator.
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_usage_hooks_test", nil))
 		}
 		return c.test(ctx, cmdCtx.Args[1])
 	default:
