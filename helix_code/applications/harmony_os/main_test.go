@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -242,6 +243,124 @@ func TestAddRemoveTheme(t *testing.T) {
 	tm.RemoveTheme("Harmony")
 	themes = tm.GetAvailableThemes()
 	assert.Contains(t, themes, "Harmony")
+}
+
+// TestHarmonyDataSync_PerformSync_ReturnsSentinel asserts the round-31
+// §11.4 anti-bluff fix: performSync MUST return the
+// ErrHarmonyDistributedSyncNotImplemented sentinel (and MUST NOT advance
+// lastSync) until the real Harmony OS distributed-data SDK is wired in.
+// Regression of this assertion = regression of the
+// "Last Sync: Just now / Synced Devices: 0 forever" PASS-bluff.
+func TestHarmonyDataSync_PerformSync_ReturnsSentinel(t *testing.T) {
+	ds := NewHarmonyDataSync()
+	require.NotNil(t, ds)
+
+	// Capture the pre-call lastSync — we expect performSync to NOT advance it.
+	beforeLastSync := ds.lastSync
+
+	// Sleep a tiny bit so a buggy implementation that re-stamps lastSync = Now()
+	// would produce a value strictly greater than beforeLastSync.
+	time.Sleep(2 * time.Millisecond)
+
+	err := ds.performSync()
+	require.Error(t, err, "performSync MUST return an error in this build (sentinel)")
+	require.ErrorIs(t, err, ErrHarmonyDistributedSyncNotImplemented,
+		"performSync MUST return ErrHarmonyDistributedSyncNotImplemented — anything else is a regression of the round-31 §11.4 anti-bluff fix")
+
+	// Crucial anti-bluff assertion: lastSync was NOT advanced by the failing
+	// performSync call. The previous bluff implementation stamped
+	// lastSync = time.Now() unconditionally.
+	assert.Equal(t, beforeLastSync, ds.lastSync,
+		"performSync MUST NOT advance lastSync when sync did not actually happen — the previous bluff stamped lastSync = time.Now() unconditionally and reported 'Just now' forever")
+}
+
+// TestHarmonyDataSync_GetSyncStatus_ReportsError asserts that the
+// 4-tuple return from GetSyncStatus surfaces the sentinel error after a
+// failed performSync. Without this, UI / CLI callers reading only the
+// (enabled, lastSync, syncedCount) prefix recreate the original bluff.
+func TestHarmonyDataSync_GetSyncStatus_ReportsError(t *testing.T) {
+	ds := NewHarmonyDataSync()
+	require.NotNil(t, ds)
+
+	// Before any sync attempt, lastSyncErr is nil — the receiver was just
+	// constructed and no sync has been run. This documents the contract.
+	_, _, _, errBefore := ds.GetSyncStatus()
+	assert.NoError(t, errBefore, "newly-constructed HarmonyDataSync has no lastSyncErr")
+
+	require.Error(t, ds.performSync())
+
+	enabled, _, syncedCount, errAfter := ds.GetSyncStatus()
+	assert.True(t, enabled, "GetSyncStatus continues to report the static syncEnabled flag")
+	assert.Equal(t, 0, syncedCount, "no devices were synced — the count MUST remain 0")
+	require.Error(t, errAfter, "GetSyncStatus MUST surface the failed-performSync sentinel")
+	assert.True(t, errors.Is(errAfter, ErrHarmonyDistributedSyncNotImplemented),
+		"GetSyncStatus error MUST be (or wrap) ErrHarmonyDistributedSyncNotImplemented")
+}
+
+// TestHarmonyDistributedEngine_DiscoverDevices_EmptyReturnsSentinel
+// asserts the round-31 §11.4 anti-bluff fix: DiscoverDevices on an
+// engine with no enrolled devices MUST return
+// ErrHarmonyDiscoveryNotImplemented so callers can distinguish "real
+// discovery genuinely found zero devices" from "discovery was a no-op
+// stub that never ran" — exactly the bluff that produced the previous
+// "Found 0 Harmony devices" / "No devices found (running in standalone
+// mode)" output.
+func TestHarmonyDistributedEngine_DiscoverDevices_EmptyReturnsSentinel(t *testing.T) {
+	engine := NewHarmonyDistributedEngine()
+	require.NotNil(t, engine)
+
+	devices, err := engine.DiscoverDevices()
+	require.Error(t, err, "empty-engine DiscoverDevices MUST return the sentinel (round-31 §11.4 fix)")
+	require.ErrorIs(t, err, ErrHarmonyDiscoveryNotImplemented,
+		"DiscoverDevices MUST return ErrHarmonyDiscoveryNotImplemented when no devices have been enrolled")
+	assert.Empty(t, devices, "no devices have been enrolled — the slice MUST be empty")
+}
+
+// TestHarmonyDistributedEngine_DiscoverDevices_AfterAddDeviceNoSentinel
+// asserts the complementary contract: once at least one device is
+// enrolled through the AddDevice path (worker-tab enrolment), the
+// non-discovery legitimate caller MUST receive a nil error so we
+// don't break that workflow. This isolates the sentinel to the
+// "discovery never ran" branch.
+func TestHarmonyDistributedEngine_DiscoverDevices_AfterAddDeviceNoSentinel(t *testing.T) {
+	engine := NewHarmonyDistributedEngine()
+	require.NotNil(t, engine)
+
+	engine.AddDevice(HarmonyDevice{
+		ID:     "device-test-1",
+		Name:   "Test Device",
+		Type:   "remote_worker",
+		Status: "active",
+		Resources: HarmonyResources{
+			Available: true,
+		},
+		LastSeen: time.Now(),
+	})
+
+	devices, err := engine.DiscoverDevices()
+	require.NoError(t, err, "after AddDevice, DiscoverDevices on a non-empty engine MUST NOT return the sentinel")
+	require.Len(t, devices, 1)
+	assert.Equal(t, "device-test-1", devices[0].ID)
+}
+
+// TestSentinelErrorMessages_ContainForensicAnchor asserts that the two
+// sentinel error messages contain the §11.4 forensic anchor strings the
+// CLAUDE.md anti-bluff smoke check looks for, so that a future scan
+// can recognize these as deliberate sentinel surfaces (not a regression).
+func TestSentinelErrorMessages_ContainForensicAnchor(t *testing.T) {
+	assert.Contains(t, ErrHarmonyDistributedSyncNotImplemented.Error(),
+		"distributed sync has not been wired",
+		"sentinel message MUST anchor on the implementation gap")
+	assert.Contains(t, ErrHarmonyDistributedSyncNotImplemented.Error(),
+		"§11.4",
+		"sentinel message MUST carry the §11.4 forensic anchor")
+
+	assert.Contains(t, ErrHarmonyDiscoveryNotImplemented.Error(),
+		"distributed device discovery has not been wired",
+		"sentinel message MUST anchor on the implementation gap")
+	assert.Contains(t, ErrHarmonyDiscoveryNotImplemented.Error(),
+		"§11.4",
+		"sentinel message MUST carry the §11.4 forensic anchor")
 }
 
 func TestCleanup(t *testing.T) {

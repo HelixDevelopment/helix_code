@@ -709,32 +709,60 @@ func (cliApp *HarmonyCLIApp) cmdDistributed(args []string) error {
 
 	switch args[0] {
 	case "status":
+		// Round-31 §11.4 fix: previous output advertised
+		// "Data synchronization: Enabled" and "Device discovery:
+		// Available" — both are PASS-bluffs in this build because
+		// neither the Harmony OS distributed-data SDK nor the
+		// device-manager SDK is wired. New output reports the real
+		// implementation state honestly so the user (and any wrapper
+		// script) knows the gaps before invoking `discover` or `sync`.
 		fmt.Println("=== Harmony OS Distributed Status ===")
 		fmt.Println()
 		fmt.Println("Distributed Features:")
-		fmt.Println("  - Cross-device task scheduling: Enabled")
-		fmt.Println("  - Data synchronization: Enabled")
-		fmt.Println("  - Device discovery: Available")
+		fmt.Println("  - Cross-device task scheduling: stub (local-only scheduler; no remote dispatch)")
+		fmt.Println("  - Data synchronization: NOT WIRED (Harmony distributed-data SDK absent — `sync` returns error)")
+		fmt.Println("  - Device discovery: NOT WIRED (Harmony device-manager SDK absent — `discover` returns error)")
 		fmt.Println()
-		fmt.Println("Note: Full distributed features require running on actual Harmony OS devices.")
+		fmt.Println("Implementation gap tracked in applications/harmony_os/main.go via")
+		fmt.Println("ErrHarmonyDistributedSyncNotImplemented and ErrHarmonyDiscoveryNotImplemented.")
 
 	case "discover":
-		fmt.Println("=== Discovering Harmony OS Devices ===")
-		fmt.Println()
-		fmt.Println("Scanning for nearby Harmony OS devices...")
-		fmt.Println("Note: Device discovery requires Harmony OS distributed capabilities.")
-		fmt.Println("On non-Harmony platforms, this will show simulated results.")
-		fmt.Println()
-		fmt.Println("No devices found (running in standalone mode)")
+		// Round-31 §11.4 fix: previous output was a PASS-bluff —
+		// it printed "Scanning..." then "No devices found (running
+		// in standalone mode)" plus a self-admission that on
+		// non-Harmony platforms the command would show fabricated
+		// results, giving the user a fake "successful but empty"
+		// outcome from a feature that never ran. New output mirrors
+		// the ErrHarmonyDiscoveryNotImplemented sentinel surfaced by
+		// (*HarmonyDistributedEngine).DiscoverDevices in the GUI
+		// build: distributed discovery is NOT WIRED in this build,
+		// report that loudly with a non-zero exit so scripts can
+		// detect the gap.
+		fmt.Fprintln(os.Stderr, "ERROR: Harmony OS distributed device discovery is not wired in this build.")
+		fmt.Fprintln(os.Stderr, "The Harmony OS device-manager SDK is required and not present. This")
+		fmt.Fprintln(os.Stderr, "command previously printed a fake 'No devices found' success message;")
+		fmt.Fprintln(os.Stderr, "it now refuses to fabricate a result. See applications/harmony_os/main.go")
+		fmt.Fprintln(os.Stderr, "(ErrHarmonyDiscoveryNotImplemented) for the full implementation gap.")
+		return fmt.Errorf("harmony distributed discover: not wired in this build")
 
 	case "sync":
-		fmt.Println("=== Data Synchronization ===")
-		fmt.Println()
-		fmt.Println("Sync Status: Enabled")
-		fmt.Println("Last Sync: Just now")
-		fmt.Println("Synced Devices: 0")
-		fmt.Println()
-		fmt.Println("Note: Data sync requires connected Harmony OS devices.")
+		// Round-31 §11.4 fix: previous output was a PASS-bluff —
+		// it printed "Sync Status: Enabled / Last Sync: Just now /
+		// Synced Devices: 0" without ever calling the underlying
+		// sync engine, so callers got fake "successful" sync data
+		// on every invocation. New output mirrors the
+		// ErrHarmonyDistributedSyncNotImplemented sentinel surfaced
+		// by (*HarmonyDataSync).performSync in the GUI build:
+		// distributed sync is NOT WIRED in this build, report that
+		// loudly with a non-zero exit so scripts can detect the gap.
+		fmt.Fprintln(os.Stderr, "ERROR: Harmony OS distributed data synchronization is not wired in this build.")
+		fmt.Fprintln(os.Stderr, "The Harmony OS distributed-data SDK (KVManager / SingleKVStore /")
+		fmt.Fprintln(os.Stderr, "DeviceKVStore) is required and not present. This command previously")
+		fmt.Fprintln(os.Stderr, "printed 'Last Sync: Just now / Synced Devices: 0' without exchanging")
+		fmt.Fprintln(os.Stderr, "any state with any device; it now refuses to fabricate a result.")
+		fmt.Fprintln(os.Stderr, "See applications/harmony_os/main.go (ErrHarmonyDistributedSyncNotImplemented)")
+		fmt.Fprintln(os.Stderr, "for the full implementation gap.")
+		return fmt.Errorf("harmony distributed sync: not wired in this build")
 
 	default:
 		fmt.Printf("Unknown subcommand: %s\n", args[0])

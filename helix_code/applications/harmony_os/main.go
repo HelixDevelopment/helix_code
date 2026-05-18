@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -247,7 +248,86 @@ type HarmonyDataSync struct {
 	mu            sync.RWMutex
 	ctx           context.Context
 	cancel        context.CancelFunc
+
+	// lastSyncErr captures the most recent (*HarmonyDataSync).performSync()
+	// outcome. nil means "the last sync attempt actually exchanged state with
+	// the Harmony OS distributed data manager"; non-nil means "the last
+	// attempt failed and the values reported by GetSyncStatus are stale".
+	// Replaces the previous design where performSync stamped lastSync = now
+	// unconditionally and reported PASS-bluff via GetSyncStatus.
+	lastSyncErr error
 }
+
+// ErrHarmonyDistributedSyncNotImplemented is returned by
+// (*HarmonyDataSync).performSync() and surfaced through GetSyncStatus
+// when the Harmony OS distributed-data SDK has not been wired into
+// this build.
+//
+// Forensic anchor (round-31 §11.4 audit, 2026-05-18): the previous
+// implementation only did `ds.lastSync = time.Now()` + a log line and
+// returned no error. helix-harmony's distributed-sync UI (the
+// `createDistributedServicesTab` card) and the nogui `distributed sync`
+// CLI command therefore reported "Sync Status: Enabled / Last Sync:
+// Just now / Synced Devices: 0" forever regardless of actual cluster
+// state — a §11.4 CRITICAL PASS-bluff because the surface promised
+// cross-device synchronization while the body did nothing of the kind.
+//
+// Implement against the Harmony OS distributed data manager
+// (https://developer.harmonyos.com/en/docs/documentation/doc-references-V3/js-apis-distributeddatamanager-0000001478341417-V3)
+// — wire a real KVManager / SingleKVStore / DeviceKVStore session,
+// enumerate connected devices through the device-manager API, push
+// + pull deltas, and only THEN clear this sentinel. Until that
+// happens the sentinel is the loud, programmatically-detectable
+// signal that the surface is non-functional, replacing the earlier
+// silent bluff.
+var ErrHarmonyDistributedSyncNotImplemented = errors.New(
+	"harmony_os: distributed sync has not been wired to the real Harmony OS " +
+		"distributed-data SDK — performSync previously only stamped " +
+		"lastSync=time.Now() and logged success, reporting 'Synced Devices: 0' " +
+		"forever regardless of actual cluster state (§11.4 CRITICAL: " +
+		"helix-harmony distributed sync is a no-op). Implement against the " +
+		"Harmony OS distributed data manager API (KVManager / SingleKVStore / " +
+		"DeviceKVStore) or remove the command and document non-support",
+)
+
+// ErrHarmonyDiscoveryNotImplemented is returned by
+// (*HarmonyDistributedEngine).DiscoverDevices when invoked without
+// any devices having been added through AddDevice (the synthetic
+// path used by the workers tab) AND the Harmony OS device-manager
+// SDK has not been wired in.
+//
+// Forensic anchor (round-31 §11.4 audit, 2026-05-18): the previous
+// implementation returned `e.connectedDevices` unconditionally with
+// no error and the inline comment "In a real implementation, this
+// would use Harmony OS distributed device discovery / For now, we
+// return the currently connected devices". On a fresh app launch
+// (no AddDevice calls yet) the workers-tab "Discover Devices" button
+// always reported "Found 0 Harmony devices" with no indication that
+// discovery was a stub. That is a §11.4 HIGH PASS-bluff: the surface
+// promised real distributed discovery, the body did nothing.
+//
+// The new contract:
+//
+//   - DiscoverDevices returns the live `connectedDevices` slice AND
+//     a nil error when at least one device has been added through
+//     AddDevice (worker enrolment path — the legitimate non-discovery
+//     callers exercise this).
+//   - DiscoverDevices returns the same slice AND this sentinel error
+//     when the slice is empty, because in that branch the function
+//     would otherwise be indistinguishable from a real discovery that
+//     genuinely found no devices — exactly the bluff we are fixing.
+//
+// Implement against the Harmony OS device-manager / distributed
+// device API (HiSysEvent + DeviceManager) to clear this sentinel.
+var ErrHarmonyDiscoveryNotImplemented = errors.New(
+	"harmony_os: distributed device discovery has not been wired to the " +
+		"real Harmony OS device manager — DiscoverDevices previously logged " +
+		"and returned an empty list, so helix-harmony 'distributed discover' " +
+		"always reports 'No devices found' regardless of cluster state " +
+		"(§11.4 HIGH: discovery feature is a no-op). Implement against the " +
+		"Harmony OS device discovery API (DeviceManager) or remove the " +
+		"command and document non-support",
+)
 
 // NewHarmonyDistributedEngine creates a new distributed engine
 func NewHarmonyDistributedEngine() *HarmonyDistributedEngine {
@@ -278,14 +358,36 @@ func NewHarmonyDataSync() *HarmonyDataSync {
 	}
 }
 
-// DiscoverDevices discovers nearby Harmony OS devices
-func (e *HarmonyDistributedEngine) DiscoverDevices() []HarmonyDevice {
+// DiscoverDevices discovers nearby Harmony OS devices. The error
+// return is non-nil when no devices have been enrolled through
+// AddDevice (worker-tab enrolment path) AND the Harmony OS
+// device-manager SDK has not been wired in — in that branch the
+// previous implementation returned (nil-or-empty slice, no error)
+// which was indistinguishable from a real discovery that found
+// zero devices: a §11.4 HIGH PASS-bluff because the surface
+// promised real discovery and the body did nothing.
+//
+// New contract:
+//
+//   - If at least one HarmonyDevice has been added through AddDevice,
+//     return that slice with a nil error (the AddDevice call-path is
+//     the legitimate non-discovery enrolment surface and remains
+//     functional).
+//   - If the slice is empty, return it with
+//     ErrHarmonyDiscoveryNotImplemented so callers can distinguish
+//     "real discovery genuinely found zero devices" (still a TODO
+//     once the SDK is wired) from "discovery never ran". The UI and
+//     CLI MUST surface this error instead of printing the
+//     previous "Found 0 Harmony devices" / "No devices found"
+//     bluff message.
+func (e *HarmonyDistributedEngine) DiscoverDevices() ([]HarmonyDevice, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	// In a real implementation, this would use Harmony OS distributed device discovery
-	// For now, we return the currently connected devices
-	return e.connectedDevices
+	if len(e.connectedDevices) == 0 {
+		return e.connectedDevices, ErrHarmonyDiscoveryNotImplemented
+	}
+	return e.connectedDevices, nil
 }
 
 // AddDevice adds a device to the distributed network
@@ -456,22 +558,40 @@ func (ds *HarmonyDataSync) Stop() {
 	ds.cancel()
 }
 
-// performSync performs the actual data synchronization
-func (ds *HarmonyDataSync) performSync() {
+// performSync performs the actual data synchronization. Returns
+// ErrHarmonyDistributedSyncNotImplemented in this build because the
+// Harmony OS distributed-data SDK has not been wired in. Crucially:
+// in the not-implemented branch this function NO LONGER stamps
+// lastSync = time.Now() — the previous implementation did, which
+// produced a silent "Last Sync: Just now" PASS-bluff (§11.4
+// CRITICAL) on every UI render. The error is recorded on the
+// receiver so GetSyncStatus and any future caller (CLI, monitoring,
+// telemetry) can surface the gap loudly instead of trusting the
+// stale timestamp.
+//
+// When the real SDK lands, replace the body with the real KV-store
+// push/pull, update lastSync ONLY on success, populate
+// syncedDevices with the device IDs that actually round-tripped,
+// and clear lastSyncErr.
+func (ds *HarmonyDataSync) performSync() error {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
-	// In a real implementation, this would sync data across Harmony OS devices
-	ds.lastSync = time.Now()
-	log.Printf("Harmony data sync completed at %s", ds.lastSync.Format(time.RFC3339))
+	ds.lastSyncErr = ErrHarmonyDistributedSyncNotImplemented
+	log.Printf("Harmony data sync NOT performed: %v (lastSync timestamp NOT advanced)", ds.lastSyncErr)
+	return ds.lastSyncErr
 }
 
-// GetSyncStatus returns the current sync status
-func (ds *HarmonyDataSync) GetSyncStatus() (bool, time.Time, int) {
+// GetSyncStatus returns the current sync status. The final error
+// return is non-nil if the most recent performSync call failed —
+// callers MUST inspect it instead of trusting the (enabled, lastSync,
+// syncedDevices) tuple in isolation, otherwise they recreate the
+// PASS-bluff fixed in round-31 §11.4.
+func (ds *HarmonyDataSync) GetSyncStatus() (bool, time.Time, int, error) {
 	ds.mu.RLock()
 	defer ds.mu.RUnlock()
 
-	return ds.syncEnabled, ds.lastSync, len(ds.syncedDevices)
+	return ds.syncEnabled, ds.lastSync, len(ds.syncedDevices), ds.lastSyncErr
 }
 
 // HarmonySystemMonitor monitors Harmony OS system resources and performance
@@ -1166,8 +1286,17 @@ func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
 			app.statusBar.SetText("Workers refreshed")
 		}),
 		widget.NewButton("Discover Devices", func() {
-			devices := app.harmonyIntegration.distributedEngine.DiscoverDevices()
-			app.statusBar.SetText(fmt.Sprintf("Found %d Harmony devices", len(devices)))
+			devices, err := app.harmonyIntegration.distributedEngine.DiscoverDevices()
+			if err != nil {
+				// Surface the sentinel loudly instead of printing the
+				// previous "Found 0 Harmony devices" PASS-bluff (round-31
+				// §11.4). The dialog text mirrors the sentinel message so
+				// the user sees WHY 0 devices were returned.
+				app.statusBar.SetText(fmt.Sprintf("Discover Devices: %v", err))
+				dialog.ShowError(err, app.mainWindow)
+				return
+			}
+			app.statusBar.SetText(fmt.Sprintf("Found %d Harmony devices (enrolled via AddDevice)", len(devices)))
 		}),
 	)
 
@@ -1704,16 +1833,24 @@ func (app *HarmonyApp) createDistributedServicesTab() fyne.CanvasObject {
 		)),
 	)
 
-	// Data sync info
+	// Data sync info. Reads sync status through GetSyncStatus so the
+	// lastSyncErr sentinel surface from round-31 §11.4 is shown to the
+	// user instead of the previous "Last Sync: Just now" PASS-bluff.
+	enabled, lastSync, syncedCount, lastSyncErr := app.harmonyIntegration.distributedEngine.dataSync.GetSyncStatus()
+	syncStatusText := fmt.Sprintf(
+		"Sync Enabled: %v\nInterval: %v\nLast Successful Sync: %s\nSynced Devices: %d",
+		enabled,
+		app.harmonyIntegration.distributedEngine.dataSync.syncInterval,
+		lastSync.Format(time.RFC3339),
+		syncedCount,
+	)
+	if lastSyncErr != nil {
+		syncStatusText += fmt.Sprintf("\n\nLast Sync Result: FAILED\nError: %v", lastSyncErr)
+	}
 	syncCard := widget.NewCard(
 		"Data Synchronization",
 		"Cross-Device Data Sync",
-		widget.NewLabel(fmt.Sprintf(
-			"Sync Enabled: %v\nInterval: %v\nLast Sync: %s",
-			app.harmonyIntegration.distributedEngine.dataSync.syncEnabled,
-			app.harmonyIntegration.distributedEngine.dataSync.syncInterval,
-			app.harmonyIntegration.distributedEngine.dataSync.lastSync.Format(time.RFC3339),
-		)),
+		widget.NewLabel(syncStatusText),
 	)
 
 	return container.NewVBox(
