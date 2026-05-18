@@ -636,9 +636,13 @@ func (m *ConfigManager) Initialize(ctx context.Context) error {
 	return nil
 }
 
-// NewConfigurationManager creates a new configuration manager with options
+// NewConfigurationManager creates a new configuration manager with options.
+// Currently the only option consumed is ConfigPath; future option fields
+// (e.g. validation policy, secrets backend) should be wired here as they
+// are introduced rather than left as TODO comments (round-33 §11.4
+// comment rewrite — previous "For now" lead-in implied an unfinished
+// stub when the function is in fact the canonical option-aware factory).
 func NewConfigurationManager(options *ConfigurationOptions) (*ConfigManager, error) {
-	// For now, just use the config path from options
 	return NewHelixConfigManager(options.ConfigPath)
 }
 

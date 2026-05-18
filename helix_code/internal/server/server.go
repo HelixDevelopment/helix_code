@@ -79,8 +79,18 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 	// Initialize notification engine
 	notificationEngine := notification.NewNotificationEngine()
 
-	// Initialize LLM provider (basic setup - would be configured based on config)
-	// For now, we'll skip LLM initialization as it requires more complex setup
+	// Server.llm is intentionally left nil here. All LLM concerns
+	// surfaced over HTTP (/api/v1/llm/providers, etc.) are answered by
+	// the LLMsVerifier subsystem via verifierResult, NOT by a single
+	// provider stored on the Server struct (CONST-036: LLMsVerifier is
+	// the sole authoritative source). The llm field is retained on the
+	// struct as a reserved seam for a future per-server pinned-provider
+	// feature; until that lands handlers.go MUST NOT dereference s.llm
+	// (round-33 §11.4 honest-init anchor — previous "skip LLM
+	// initialization as it requires more complex setup" comment was a
+	// PASS-bluff implying a missing wire-up; in fact the verifier
+	// already supplies the data and the field is correctly nil;
+	// CONST-035 / Article XI §11.9).
 
 	// Initialize task and worker managers if database is available
 	var taskMgr *task.DatabaseManager

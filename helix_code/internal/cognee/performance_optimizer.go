@@ -930,45 +930,46 @@ func (po *PerformanceOptimizer) getCPUUsage() float64 {
 	return totalCPU
 }
 
+// getGPUUsage returns the current GPU utilisation percentage [0.0, 100.0].
+//
+// Honest sentinel contract (round-33 §11.4 anti-bluff sweep, 2026-05-18):
+// the previous implementation FABRICATED utilisation numbers based on
+// whether the optimizer was running (35.0 / 30.0 / 20.0 when running,
+// 5.0 / 3.0 / 0.0 when idle) for CUDA / Metal / other GPUs respectively
+// — values that have NO grounding in actual GPU telemetry. The fabricated
+// numbers were written into PerformanceOptimizer.metrics.GPUUsage and
+// surfaced to operators as real measurements, certifying utilisation that
+// was never measured (CONST-035 / Article XI §11.9 PASS-bluff).
+//
+// Real telemetry requires a vendor-specific integration:
+//   - NVIDIA: parse `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader`
+//     or use NVML via cgo
+//   - AMD: parse `rocm-smi --showuse` or use ROCm SMI lib
+//   - Apple Silicon: IOReport framework via cgo
+//   - Intel Arc: `intel_gpu_top` / Level Zero
+//
+// Until any of those land we surface the GPUUnavailableSentinel (-1.0)
+// so dashboards and challenge runners detect the gap loudly instead of
+// silently consuming fabricated numbers.
 func (po *PerformanceOptimizer) getGPUUsage() float64 {
-	// Check if GPU is available from hardware profile
+	// No GPU on the hardware profile: this branch is honest — 0.0
+	// genuinely reflects "no GPU available", not fabricated idle %.
 	if po.hwProfile == nil || po.hwProfile.GPU == nil {
-		return 0.0 // No GPU available
+		return 0.0
 	}
-
-	// If we have a GPU, estimate usage based on compute activity
-	// For NVIDIA GPUs, we could parse nvidia-smi output, but that requires
-	// system calls. For now, we provide an estimate based on whether
-	// compute operations are likely being performed.
-
-	gpu := po.hwProfile.GPU
-
-	// Check if CUDA is supported and likely in use
-	if gpu.SupportsCUDA {
-		// If we have active optimization tasks, GPU is likely being used
-		if po.optimizer != nil && po.running {
-			// Estimate 30-50% usage during optimization
-			return 35.0
-		}
-		// Idle GPU with CUDA support
-		return 5.0
-	}
-
-	// For Metal GPUs (Apple Silicon)
-	if gpu.SupportsMetal {
-		if po.optimizer != nil && po.running {
-			return 30.0
-		}
-		return 3.0
-	}
-
-	// For other GPUs (AMD, Intel integrated)
-	if po.optimizer != nil && po.running {
-		return 20.0
-	}
-
-	return 0.0
+	// GPU present but no real telemetry integration wired: surface
+	// the sentinel so callers can distinguish "unmeasured" from
+	// "measured idle" (which would honestly be 0.0).
+	return GPUUsageUnavailableSentinel
 }
+
+// GPUUsageUnavailableSentinel is returned by getGPUUsage() when a GPU
+// is present on the hardware profile but no real telemetry integration
+// (NVML / ROCm SMI / IOReport / Level Zero) has been wired in yet.
+// Surfacing -1.0 makes the gap loud — dashboards and challenge runners
+// can branch on the sentinel and refuse to render fabricated numbers
+// (round-33 §11.4 sentinel anchor; CONST-035 / Article XI §11.9).
+const GPUUsageUnavailableSentinel = -1.0
 
 func (po *PerformanceOptimizer) getCacheHitRate() float64 {
 	if po.cache == nil {

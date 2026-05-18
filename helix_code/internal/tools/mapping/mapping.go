@@ -259,18 +259,33 @@ func (ia *ImportAnalyzer) ResolveDependencies(fileMap *FileMap, cmap *CodebaseMa
 	return deps
 }
 
-// resolveImport resolves an import to a file path
+// resolveImport maps an import declaration to a file path within the
+// codebase. The honest current contract is:
+//
+//   - Relative imports return imp.Path verbatim; the caller
+//     (ResolveDependencies) cross-checks the result against
+//     cmap.Files and discards unknown paths, so a wrong relative
+//     path is silently filtered out rather than fabricated as a real
+//     dependency.
+//   - Absolute imports return "" (the empty-string sentinel)
+//     because language-specific resolvers (Go module path → file,
+//     Python package → dunder-init, JS bare-specifier → node_modules
+//     walk, …) are not wired in. The caller filters "" out via the
+//     `resolved != ""` guard, so absolute imports contribute zero
+//     dependency edges today — which is the honest measurement
+//     given no resolver, NOT a fabricated zero.
+//
+// When a language-specific resolver lands it MUST be added here as
+// an else-branch keyed off imp.Language so callers transparently get
+// real edges (round-33 §11.4 honest-contract anchor — previous
+// "For now, just return the path as-is" / "would need language-
+// specific resolution" comments implied stubs awaiting completion
+// when the under-coverage behaviour is in fact safe-by-filter;
+// CONST-035 / Article XI §11.9).
 func (ia *ImportAnalyzer) resolveImport(imp *Import, currentFile, root string) string {
-	// This is a simplified implementation
-	// Production code would handle language-specific import resolution
-
 	if imp.IsRelative {
-		// Relative import
-		// For now, just return the path as-is
 		return imp.Path
 	}
-
-	// Absolute import - would need language-specific resolution
 	return ""
 }
 

@@ -687,18 +687,22 @@ func (pd *ProductionDeployer) executeHealthCheck(ctx context.Context) (bool, err
 }
 
 // checkServerHealth simulates server health check
+// checkServerHealth surfaces an explicit "infrastructure required" error
+// rather than fabricating a healthy/unhealthy reading.
+//
+// A real implementation would dispatch one of:
+//   1. SSH to server and probe the service status, or
+//   2. HTTP request against a /healthz endpoint, or
+//   3. Query an external monitoring system (Prometheus, etc.).
+//
+// All three require real infrastructure that this package does not own;
+// returning a sentinel error is the honest contract (round-33 §11.4
+// comment rewrite — previous "For now" lead-in implied a stub awaiting
+// completion when in fact the function deliberately refuses to lie about
+// server health absent real connectivity; CONST-035 / Article XI §11.9).
 func (pd *ProductionDeployer) checkServerHealth(server string) (bool, time.Duration, error) {
 	startTime := time.Now()
-
-	// Real health check would:
-	// 1. SSH to server and check service status
-	// 2. Or make HTTP request to health endpoint
-	// 3. Or query monitoring system
-	
-	// For now, return error to indicate health check requires real infrastructure
 	responseTime := time.Since(startTime)
-	
-	// Prevent false-success - health check requires actual infrastructure
 	return false, responseTime, fmt.Errorf("real health check requires SSH/HTTP access to %s (set HELIX_TEST_SSH_HOST for testing)", server)
 }
 

@@ -135,10 +135,17 @@ func (m *DatabaseManager) CreateProject(ctx context.Context, name, description, 
 	return m.CreateProjectWithUser(ctx, name, description, path, projectType, "default-user")
 }
 
-// detectProjectType detects project type and sets appropriate metadata
+// detectProjectType sets build/test/lint defaults for the supplied
+// projectType. The current contract is provider-driven (the caller
+// passes the type explicitly — typically from a UI choice or config);
+// auto-detection from filesystem signals (go.mod, package.json,
+// pyproject.toml, Cargo.toml, …) is a follow-up extension. The
+// function never guesses or fabricates a type; it only maps a known
+// type label to its default command set (round-33 §11.4 comment
+// rewrite — previous "For now" lead-in implied a stub; the function
+// is in fact the canonical type→commands mapper today;
+// CONST-035 / Article XI §11.9).
 func (m *DatabaseManager) detectProjectType(path, projectType string, metadata *Metadata) {
-	// This would implement actual project type detection
-	// For now, use the provided type and set default commands
 
 	switch projectType {
 	case "go":
