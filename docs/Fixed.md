@@ -43,7 +43,8 @@
 | 2026-05-19 | Observability i18n kickoff (Phase 4 round 14) | Feature | Implemented (→ Fixed.md) | 121 | (submodule TBD) + b95877a + 9380b02 | Pointer + baseline refresh visible; formal report pending |
 | 2026-05-19 | MCP_Module i18n kickoff (Phase 4 round 15) | Feature | Implemented (→ Fixed.md) | 122 | d7b5e6c + 76b4a29 | 6→0 violations (clean); 5 migrated (RPCError × 2 + server × 3); package-level seam; 0 remaining |
 | 2026-05-19 | ISSUE-009: helix_agent 4 handler tests | Bug | Fixed (→ Fixed.md) | 116 | (submodule TBD) + da782d4 | Pointer visible; formal report pending |
-| 2026-05-19 | Messaging i18n kickoff (Phase 4 round 16) | Feature | Implemented (→ Fixed.md) | 123 | (submodule TBD) + b762b79 | Pointer visible; formal report pending |
+| 2026-05-19 | Messaging i18n kickoff (Phase 4 round 16) | Feature | Implemented (→ Fixed.md) | 123 | 51ff3ab + b762b79 | vasic-digital (attribution correction); 5 sites; atomic.Value per-pkg wiring + NoopTranslator-key-verbatim fallback; +326 LOC |
+| 2026-05-19 | Middleware i18n kickoff (Phase 4 round 17) | Feature | Implemented (→ Fixed.md) | 124 | f491c45 + 5e61707 | vasic-digital (3rd attribution correction); 3 http.Error strings (401/429/415); Option/Config wiring; 4 tests + mutation; +343 LOC |
 | 2026-05-19 | Round 74-87 release-gate stabilization | Task | Completed (→ Fixed.md) | 82-87 | various | 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
 | 2026-05-19 | release-gate-test.sh --skip-env-failures filter | Feature | Implemented (→ Fixed.md) | 89 | d3b0b92 | 13 regex catalogue + 6 fixtures + HelixLLM smoke validation |
 | 2026-05-19 | CONST-052 reference-drift sweep (73 submodules) | Task | Completed (→ Fixed.md) | 88 | a1d3de8 | 3 with drift fixed (helix_agent + challenges + LLMsVerifier) |
