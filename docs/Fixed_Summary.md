@@ -8,9 +8,9 @@
 |---|---|---|
 | Bug | 4 | `Fixed (→ Fixed.md)` |
 | Feature | 19 | `Implemented (→ Fixed.md)` |
-| Task | 4 | `Completed (→ Fixed.md)` |
+| Task | 5 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 27 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`).
+**Total closed items**: 28 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`).
 
 ## Coverage by round-system phase
 
