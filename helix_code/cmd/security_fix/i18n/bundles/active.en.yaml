@@ -1,0 +1,48 @@
+# security_fix i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/security_fix/main.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: security_fix_<area>_<short_description>. All IDs
+# prefixed with security_fix_ to avoid namespace collision with other
+# CLIs' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-143 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# user-facing literals emitted by main.go — the start/policy banners,
+# the path/critical-only echo lines, the four headline result rows,
+# and the success / failure terminal lines. Remaining log.Printf
+# format strings (validation block + details rows) are deferred to a
+# future round to stay under the round size cap.
+
+security_fix_banner_start:
+  other: "Starting Zero-Tolerance Security Issue Resolution"
+
+security_fix_banner_policy:
+  other: "Policy: ALL CRITICAL SECURITY ISSUES MUST BE FIXED"
+
+security_fix_path_echo:
+  other: "Project Path: {{.Path}}"
+
+security_fix_critical_only_echo:
+  other: "Critical Only: true (Zero Tolerance Policy)"
+
+security_fix_executing:
+  other: "Executing Zero-Tolerance Security Issue Resolution..."
+
+security_fix_summary_total:
+  other: "Total Issues Addressed: {{.Count}}"
+
+security_fix_summary_fixed:
+  other: "Critical Issues Fixed: {{.Count}}"
+
+security_fix_result_success:
+  other: "SUCCESS: Zero-Tolerance Security Policy SATISFIED"
+
+security_fix_result_failure:
+  other: "FAILURE: Zero-Tolerance Security Policy VIOLATED"
+
+security_fix_report_pointer:
+  other: "See detailed fix report: reports/security/fixes/"
