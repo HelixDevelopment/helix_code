@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -73,7 +74,7 @@ func NewCodeEditor(format EditFormat) (*CodeEditor, error) {
 	// Set the default applier
 	applier, ok := ce.editors[format]
 	if !ok {
-		return nil, fmt.Errorf("unsupported edit format: %s", format)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_editor_unsupported_format", map[string]any{"Format": string(format)}))
 	}
 	ce.applier = applier
 
@@ -90,25 +91,25 @@ func (ce *CodeEditor) ApplyEdit(edit Edit) error {
 
 	// Validate the edit first
 	if err := ce.validator.Validate(edit); err != nil {
-		return fmt.Errorf("validation failed: %w", err)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_editor_validation_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Get the appropriate applier for this format
 	applier, ok := ce.editors[edit.Format]
 	if !ok {
-		return fmt.Errorf("unsupported edit format: %s", edit.Format)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_editor_unsupported_format", map[string]any{"Format": string(edit.Format)}))
 	}
 
 	// Create backup if requested
 	if edit.Backup {
 		if err := ce.createBackup(edit.FilePath); err != nil {
-			return fmt.Errorf("backup failed: %w", err)
+			return fmt.Errorf("%s", tr(context.Background(), "internal_editor_backup_failed", map[string]any{"Err": err.Error()}))
 		}
 	}
 
 	// Apply the edit
 	if err := applier.Apply(edit); err != nil {
-		return fmt.Errorf("apply failed: %w", err)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_editor_apply_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	return nil
@@ -129,7 +130,7 @@ func (ce *CodeEditor) SetFormat(format EditFormat) error {
 
 	applier, ok := ce.editors[format]
 	if !ok {
-		return fmt.Errorf("unsupported edit format: %s", format)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_editor_unsupported_format", map[string]any{"Format": string(format)}))
 	}
 
 	ce.format = format
@@ -194,9 +195,11 @@ func NewDefaultValidator() *DefaultValidator {
 
 // Validate performs basic validation on an edit
 func (dv *DefaultValidator) Validate(edit Edit) error {
+	ctx := context.Background()
+
 	// Check file path is provided
 	if edit.FilePath == "" {
-		return fmt.Errorf("file path is required")
+		return fmt.Errorf("%s", tr(ctx, "internal_editor_file_path_required", nil))
 	}
 
 	// Check format is valid
@@ -204,31 +207,31 @@ func (dv *DefaultValidator) Validate(edit Edit) error {
 	case EditFormatDiff, EditFormatWhole, EditFormatSearchReplace, EditFormatLines:
 		// Valid format
 	default:
-		return fmt.Errorf("invalid edit format: %s", edit.Format)
+		return fmt.Errorf("%s", tr(ctx, "internal_editor_invalid_format", map[string]any{"Format": string(edit.Format)}))
 	}
 
 	// Check content is provided
 	if edit.Content == nil {
-		return fmt.Errorf("edit content is required")
+		return fmt.Errorf("%s", tr(ctx, "internal_editor_content_required", nil))
 	}
 
 	// Format-specific validation
 	switch edit.Format {
 	case EditFormatDiff:
 		if _, ok := edit.Content.(string); !ok {
-			return fmt.Errorf("diff format requires string content")
+			return fmt.Errorf("%s", tr(ctx, "internal_editor_diff_requires_string", nil))
 		}
 	case EditFormatWhole:
 		if _, ok := edit.Content.(string); !ok {
-			return fmt.Errorf("whole format requires string content")
+			return fmt.Errorf("%s", tr(ctx, "internal_editor_whole_requires_string", nil))
 		}
 	case EditFormatSearchReplace:
 		if _, ok := edit.Content.([]SearchReplace); !ok {
-			return fmt.Errorf("search_replace format requires []SearchReplace content")
+			return fmt.Errorf("%s", tr(ctx, "internal_editor_search_replace_requires_slice", nil))
 		}
 	case EditFormatLines:
 		if _, ok := edit.Content.([]LineEdit); !ok {
-			return fmt.Errorf("lines format requires []LineEdit content")
+			return fmt.Errorf("%s", tr(ctx, "internal_editor_lines_requires_slice", nil))
 		}
 	}
 

@@ -535,8 +535,11 @@ func TestCodeEditor_ApplyEditErrorPaths(t *testing.T) {
 		if err == nil {
 			t.Error("Expected error for unsupported format")
 		}
-		// Validator catches this first, so check for validation error
-		if !strings.Contains(err.Error(), "validation failed") && !strings.Contains(err.Error(), "invalid edit format") {
+		// Validator catches this first, so check for validation error.
+		// CONST-046 round 155: literals migrated to bundle IDs
+		// (internal_editor_validation_failed / internal_editor_invalid_format).
+		if !strings.Contains(err.Error(), "internal_editor_validation_failed") &&
+			!strings.Contains(err.Error(), "internal_editor_invalid_format") {
 			t.Errorf("Expected validation or format error, got: %v", err)
 		}
 	})
@@ -557,8 +560,9 @@ func TestCodeEditor_ApplyEditErrorPaths(t *testing.T) {
 		if err == nil {
 			t.Error("Expected validation error")
 		}
-		if !strings.Contains(err.Error(), "validation failed") {
-			t.Errorf("Expected 'validation failed' error, got: %v", err)
+		// CONST-046 round 155: literal migrated to bundle ID.
+		if !strings.Contains(err.Error(), "internal_editor_validation_failed") {
+			t.Errorf("Expected 'internal_editor_validation_failed' error, got: %v", err)
 		}
 	})
 

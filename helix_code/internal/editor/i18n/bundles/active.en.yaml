@@ -1,0 +1,53 @@
+# internal/editor i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/editor/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_editor_<area>_<short_description>.
+# All IDs prefixed with internal_editor_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-155 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# top-level user-facing fmt.Errorf strings emitted by editor.go.
+# These are the error values surfaced to API callers when CodeEditor
+# construction / ApplyEdit / SetFormat / Validate fails — the
+# format-specific error strings inside diff_editor.go,
+# search_replace_editor.go, line_editor.go, whole_editor.go are
+# deferred to future rounds to stay under the 400-LOC ceiling.
+
+internal_editor_unsupported_format:
+  other: "unsupported edit format: {{.Format}}"
+
+internal_editor_validation_failed:
+  other: "validation failed: {{.Err}}"
+
+internal_editor_backup_failed:
+  other: "backup failed: {{.Err}}"
+
+internal_editor_apply_failed:
+  other: "apply failed: {{.Err}}"
+
+internal_editor_file_path_required:
+  other: "file path is required"
+
+internal_editor_invalid_format:
+  other: "invalid edit format: {{.Format}}"
+
+internal_editor_content_required:
+  other: "edit content is required"
+
+internal_editor_diff_requires_string:
+  other: "diff format requires string content"
+
+internal_editor_whole_requires_string:
+  other: "whole format requires string content"
+
+internal_editor_search_replace_requires_slice:
+  other: "search_replace format requires []SearchReplace content"
+
+internal_editor_lines_requires_slice:
+  other: "lines format requires []LineEdit content"
