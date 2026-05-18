@@ -8,12 +8,27 @@ import (
 	"time"
 )
 
+// ActionHandler runs the real side-effect for an Action. Handlers MUST be
+// registered via ActionExecutor.RegisterHandler before executeAction will
+// dispatch the corresponding ActionType. The handler returns the Output that
+// will be surfaced on the ActionResult and any error encountered; the
+// executor wraps the return into an ActionResult and records metrics.
+//
+// Round-31 §11.4 anti-bluff sweep (2026-05-18): the previous executeAction
+// fabricated Success=true with a hardcoded placeholder string regardless of
+// action type — a CRITICAL anti-bluff defect that certified every action as
+// PASS. ActionHandler is the injection point that lets callers supply the
+// real side-effect (file edit, command exec, network call, …) rather than
+// a fixed-PASS lie.
+type ActionHandler func(ctx context.Context, action *Action) (output string, err error)
+
 // ActionExecutor executes actions with proper permission checks
 type ActionExecutor struct {
 	mu          sync.RWMutex
 	permManager *PermissionManager
 	retryEngine *RetryEngine
 	metrics     *Metrics
+	handlers    map[ActionType]ActionHandler
 }
 
 // RetryEngine handles automatic retries
@@ -30,8 +45,46 @@ func NewActionExecutor(permManager *PermissionManager) *ActionExecutor {
 			maxRetries: 3,
 			delay:      2 * time.Second,
 		},
-		metrics: NewMetrics(),
+		metrics:  NewMetrics(),
+		handlers: make(map[ActionType]ActionHandler),
 	}
+}
+
+// RegisterHandler registers an ActionHandler for a specific ActionType. The
+// handler will be invoked by executeAction whenever an Action of that type
+// is executed. Registering a handler for an already-registered type
+// silently replaces the previous handler (last-write-wins) so callers can
+// swap implementations at runtime; this is intentional and matches the
+// existing Metrics.RecordExecution pattern. handler MUST NOT be nil — a
+// nil handler is rejected with ErrActionHandlerNotRegistered so the caller
+// is never silently left with a placeholder dispatch.
+func (a *ActionExecutor) RegisterHandler(actionType ActionType, handler ActionHandler) error {
+	if handler == nil {
+		return fmt.Errorf("%w: cannot register nil handler for action type %q",
+			ErrActionHandlerNotRegistered, actionType)
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.handlers[actionType] = handler
+	return nil
+}
+
+// UnregisterHandler removes the handler for the given ActionType. After
+// removal, executeAction for that ActionType will return
+// ErrActionHandlerNotRegistered until a fresh handler is registered.
+func (a *ActionExecutor) UnregisterHandler(actionType ActionType) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	delete(a.handlers, actionType)
+}
+
+// HasHandler reports whether a handler is currently registered for the
+// given ActionType.
+func (a *ActionExecutor) HasHandler(actionType ActionType) bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	_, ok := a.handlers[actionType]
+	return ok
 }
 
 // Execute runs an action with permission checking
@@ -129,40 +182,47 @@ func (a *ActionExecutor) CanExecuteAutomatically(action *Action) bool {
 	return !perm.RequiresConfirm
 }
 
-// executeAction performs the actual action execution
+// executeAction performs the actual action execution by dispatching to the
+// ActionHandler registered for the action's Type via RegisterHandler.
+//
+// Round-31 §11.4 anti-bluff sweep (2026-05-18): the previous implementation
+// returned Success=true with a hardcoded placeholder Output ("Executed:
+// <description>", "Context loaded successfully", "Debug retry executed",
+// etc.) regardless of action type — a CRITICAL bluff (Article XI §11.9 /
+// CONST-035 / CONST-050(A)) that certified every action as PASS independent
+// of whether any real side-effect occurred. The new dispatch returns
+// ErrActionHandlerNotRegistered (wrapped with the action type) when no
+// handler is registered, so the caller can never confuse a missing
+// implementation with a successful run.
 func (a *ActionExecutor) executeAction(ctx context.Context, action *Action) *ActionResult {
-	// This is a simplified implementation
-	// In production, this would dispatch to actual action handlers
+	if action == nil {
+		return &ActionResult{
+			Success: false,
+			Error:   fmt.Errorf("%w: cannot execute nil action", ErrActionFailed),
+		}
+	}
 
-	result := &ActionResult{
+	a.mu.RLock()
+	handler, ok := a.handlers[action.Type]
+	a.mu.RUnlock()
+
+	if !ok || handler == nil {
+		err := fmt.Errorf("%w: action type %q", ErrActionHandlerNotRegistered, action.Type)
+		return &ActionResult{
+			Action:  action,
+			Success: false,
+			Error:   err,
+			Output:  "",
+		}
+	}
+
+	output, err := handler(ctx, action)
+	return &ActionResult{
 		Action:  action,
-		Success: true,
-		Output:  fmt.Sprintf("Executed: %s", action.Description),
+		Success: err == nil,
+		Output:  output,
+		Error:   err,
 	}
-
-	// Simulate different action types
-	switch action.Type {
-	case ActionLoadContext:
-		result.Output = "Context loaded successfully"
-
-	case ActionApplyChange:
-		if action.Context != nil && len(action.Context.FilesAffected) > 0 {
-			result.Output = fmt.Sprintf("Applied changes to %d files", len(action.Context.FilesAffected))
-		}
-
-	case ActionExecuteCmd:
-		if action.Context != nil && action.Context.CommandToRun != "" {
-			result.Output = fmt.Sprintf("Executed: %s", action.Context.CommandToRun)
-		}
-
-	case ActionDebugRetry:
-		result.Output = "Debug retry executed"
-
-	default:
-		result.Output = fmt.Sprintf("Action %s completed", action.Type)
-	}
-
-	return result
 }
 
 // LoadContext automatically loads relevant context

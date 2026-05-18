@@ -378,11 +378,26 @@ func TestEscalation(t *testing.T) {
 	assert.Equal(t, ModeBasic, modeManager.GetMode(), "Mode should have reverted to Basic")
 }
 
+// stubHandler is a unit-test-only ActionHandler that records invocations and
+// returns a deterministic Output. CONST-050(A) permits stubs in *_test.go;
+// production callers MUST inject a real handler via RegisterHandler.
+func stubHandler(output string) ActionHandler {
+	return func(ctx context.Context, action *Action) (string, error) {
+		return output, nil
+	}
+}
+
 // TestActionExecution tests action execution
 func TestActionExecution(t *testing.T) {
 	guardrails := NewGuardrailsChecker()
 	permManager := NewPermissionManager(ModeFullAuto, guardrails)
 	executor := NewActionExecutor(permManager)
+
+	// Round-31 §11.4 anti-bluff: executor no longer fabricates Success=true
+	// for missing handlers. Tests MUST register a stub handler to exercise
+	// the success path (CONST-050(A) permits stubs in unit tests only).
+	require.NoError(t, executor.RegisterHandler(ActionLoadContext,
+		stubHandler("test context loaded")))
 
 	ctx := context.Background()
 
@@ -400,6 +415,50 @@ func TestActionExecution(t *testing.T) {
 	if result.Action != action {
 		t.Error("Result action mismatch")
 	}
+
+	if result.Output != "test context loaded" {
+		t.Errorf("Output = %q, want %q (handler output, NOT a placeholder)",
+			result.Output, "test context loaded")
+	}
+}
+
+// TestActionExecution_NoHandlerRegistered asserts that executor.Execute
+// surfaces ErrActionHandlerNotRegistered when no handler is wired for the
+// action's Type, instead of fabricating Success=true with a placeholder
+// string as it did before round-31 §11.4. This is a regression guard for
+// the CRITICAL bluff documented in internal/workflow/autonomy/errors.go.
+func TestActionExecution_NoHandlerRegistered(t *testing.T) {
+	guardrails := NewGuardrailsChecker()
+	permManager := NewPermissionManager(ModeFullAuto, guardrails)
+	executor := NewActionExecutor(permManager)
+	// Intentionally do NOT register any handler.
+
+	ctx := context.Background()
+	action := NewAction(ActionLoadContext, "Load test context", RiskNone)
+
+	result, err := executor.Execute(ctx, action)
+
+	require.Error(t, err, "Execute MUST surface a real error when no handler is registered")
+	require.NotNil(t, result, "result MUST be non-nil even on failure so caller can inspect")
+	assert.False(t, result.Success, "Success MUST be false when no handler is registered (previously fabricated true)")
+	assert.ErrorIs(t, result.Error, ErrActionHandlerNotRegistered,
+		"result.Error MUST wrap ErrActionHandlerNotRegistered")
+	assert.ErrorIs(t, err, ErrActionHandlerNotRegistered,
+		"Execute returned error MUST wrap ErrActionHandlerNotRegistered")
+	assert.Empty(t, result.Output, "Output MUST be empty (previously contained 'Executed: <desc>' placeholder)")
+}
+
+// TestRegisterHandler_NilRejected asserts that RegisterHandler refuses a nil
+// handler so callers cannot silently end up in the "no handler" state.
+func TestRegisterHandler_NilRejected(t *testing.T) {
+	guardrails := NewGuardrailsChecker()
+	permManager := NewPermissionManager(ModeFullAuto, guardrails)
+	executor := NewActionExecutor(permManager)
+
+	err := executor.RegisterHandler(ActionLoadContext, nil)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrActionHandlerNotRegistered)
+	assert.False(t, executor.HasHandler(ActionLoadContext))
 }
 
 // TestControllerIntegration tests full controller integration
@@ -449,6 +508,12 @@ func TestControllerIntegration(t *testing.T) {
 	if !perm.Granted {
 		t.Error("Permission should be granted for load context in semi-auto")
 	}
+
+	// Round-31 §11.4 anti-bluff: register a stub handler so the executor
+	// has a real dispatch target. Previously the executor fabricated
+	// Success=true for every unknown action type.
+	require.NoError(t, controller.executor.RegisterHandler(ActionLoadContext,
+		stubHandler("controller-integration context loaded")))
 
 	// Test action execution
 	result, err := controller.ExecuteAction(ctx, action)
@@ -663,6 +728,14 @@ func BenchmarkActionExecution(b *testing.B) {
 	guardrails := NewGuardrailsChecker()
 	permManager := NewPermissionManager(ModeFullAuto, guardrails)
 	executor := NewActionExecutor(permManager)
+
+	// Round-31 §11.4 anti-bluff: register a stub handler so the executor
+	// has a real dispatch target rather than returning the sentinel.
+	if err := executor.RegisterHandler(ActionLoadContext,
+		stubHandler("benchmark dispatch")); err != nil {
+		b.Fatalf("RegisterHandler error = %v", err)
+	}
+
 	ctx := context.Background()
 
 	action := NewAction(ActionLoadContext, "Benchmark", RiskNone)
@@ -1394,6 +1467,11 @@ func TestExecutorAdditional(t *testing.T) {
 		guardrails := NewGuardrailsChecker()
 		permManager := NewPermissionManager(ModeFullAuto, guardrails)
 		executor := NewActionExecutor(permManager)
+
+		// Round-31 §11.4 anti-bluff: register a stub handler so the
+		// executor has a real dispatch target.
+		require.NoError(t, executor.RegisterHandler(ActionLoadContext,
+			stubHandler("retry-config probe ok")))
 
 		// Set custom retry config (maxRetries, delay)
 		executor.SetRetryConfig(5, 100*time.Millisecond)

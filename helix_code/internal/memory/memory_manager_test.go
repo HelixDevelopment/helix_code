@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -650,13 +651,23 @@ func TestRedisMemoryProvider_Search(t *testing.T) {
 	}
 }
 
+// TestRedisMemoryProvider_Health asserts the round-31 §11.4 anti-bluff
+// contract: Health MUST surface ErrRedisClientNotInitialized whenever no
+// real go-redis/v9 client has been wired into the provider, instead of
+// the previous unconditional nil return (which fabricated PASS for dead
+// Redis backends). When a real client is wired in this test must be
+// updated to assert real connectivity against a real Redis container per
+// CONST-050(A).
 func TestRedisMemoryProvider_Health(t *testing.T) {
 	provider, _ := NewRedisMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
 	err := provider.Health(ctx)
-	if err != nil {
-		t.Errorf("In-memory mode Redis should be healthy: %v", err)
+	if err == nil {
+		t.Fatal("Health() returned nil — anti-bluff regression: a Redis provider with no real client wired in MUST NOT report healthy")
+	}
+	if !errors.Is(err, ErrRedisClientNotInitialized) {
+		t.Errorf("Health() = %v, want error wrapping ErrRedisClientNotInitialized", err)
 	}
 }
 
@@ -769,13 +780,23 @@ func TestMemcachedMemoryProvider_Search(t *testing.T) {
 	}
 }
 
+// TestMemcachedMemoryProvider_Health asserts the round-31 §11.4 anti-bluff
+// contract: Health MUST surface ErrMemcachedClientNotInitialized whenever
+// no real gomemcache client has been wired into the provider, instead of
+// the previous unconditional nil return (which fabricated PASS for dead
+// Memcached backends). When a real client is wired in this test must be
+// updated to assert real connectivity against a real Memcached container
+// per CONST-050(A).
 func TestMemcachedMemoryProvider_Health(t *testing.T) {
 	provider, _ := NewMemcachedMemoryProvider(map[string]interface{}{})
 	ctx := context.Background()
 
 	err := provider.Health(ctx)
-	if err != nil {
-		t.Errorf("In-memory mode Memcached should be healthy: %v", err)
+	if err == nil {
+		t.Fatal("Health() returned nil — anti-bluff regression: a Memcached provider with no real client wired in MUST NOT report healthy")
+	}
+	if !errors.Is(err, ErrMemcachedClientNotInitialized) {
+		t.Errorf("Health() = %v, want error wrapping ErrMemcachedClientNotInitialized", err)
 	}
 }
 

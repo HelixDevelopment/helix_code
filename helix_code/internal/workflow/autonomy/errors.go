@@ -21,6 +21,17 @@ var (
 	ErrRetryExhausted  = errors.New("retry attempts exhausted")
 	ErrUnsafeOperation = errors.New("operation deemed unsafe")
 
+	// ErrActionHandlerNotRegistered is returned by ActionExecutor.executeAction when
+	// no handler has been registered for the action's Type. Before round-31
+	// (§11.4 CRITICAL anti-bluff sweep, 2026-05-18) executeAction fabricated
+	// Success=true with a placeholder "Executed: <description>" output regardless
+	// of action type, certifying every action as PASS independent of reality.
+	// The autonomy workflow now requires callers to register a real handler via
+	// ActionExecutor.RegisterHandler(actionType, handler) before executing
+	// actions of that type; absent a handler this sentinel surfaces so the
+	// caller knows the action genuinely did not run.
+	ErrActionHandlerNotRegistered = errors.New("autonomy executor: no handler registered for action type — executeAction previously fabricated Success=true with a placeholder 'Executed: ...' string regardless of action type (§11.4 CRITICAL: autonomy workflow certified every action as PASS, masking real failures); register a handler via executor.RegisterHandler(actionType, handler) before executing actions of that type")
+
 	// Escalation errors
 	ErrEscalationDenied  = errors.New("escalation request denied")
 	ErrEscalationExpired = errors.New("escalation has expired")

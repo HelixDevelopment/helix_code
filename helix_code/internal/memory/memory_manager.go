@@ -3,11 +3,40 @@ package memory
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
 	"time"
 )
+
+// ErrRedisClientNotInitialized is returned by RedisMemoryProvider.Health
+// when no real Redis client has been wired into the provider. Before
+// round-31 §11.4 anti-bluff sweep (2026-05-18) Health returned nil
+// unconditionally — even when no client existed — so the health endpoint
+// reported OK for a backend that was never even attempted. The
+// RedisMemoryProvider struct currently keeps state in a local in-memory
+// map (no real client field exists), so Health now surfaces this sentinel
+// to make the absence of real Redis connectivity unambiguous to operators
+// and monitoring systems. Wiring a real go-redis/v9 client and replacing
+// the in-memory map MUST happen before this provider is fit for the
+// "redis" name; until then Health correctly fails closed.
+//
+// §11.4 CRITICAL: false health for dead Redis is a release blocker under
+// Article XI §11.9 / CONST-035.
+var ErrRedisClientNotInitialized = errors.New("redis memory provider: client has not been initialized — Health() previously returned nil regardless of backend state (§11.4 CRITICAL: false health for dead Redis); the current RedisMemoryProvider holds state in an in-memory map and does NOT yet talk to a real Redis server, so Health fails closed until a real go-redis/v9 client is wired in")
+
+// ErrMemcachedClientNotInitialized is returned by
+// MemcachedMemoryProvider.Health when no real Memcached client has been
+// wired into the provider. Same story as ErrRedisClientNotInitialized:
+// the previous implementation returned nil unconditionally so the health
+// endpoint advertised OK regardless of backend state. Until a real
+// gomemcache client is wired in and the local in-memory map is replaced,
+// Health fails closed via this sentinel.
+//
+// §11.4 CRITICAL: false health for dead Memcached is a release blocker
+// under Article XI §11.9 / CONST-035.
+var ErrMemcachedClientNotInitialized = errors.New("memcached memory provider: client has not been initialized — Health() previously returned nil regardless of backend state (§11.4 CRITICAL: false health for dead Memcached); the current MemcachedMemoryProvider holds state in an in-memory map and does NOT yet talk to a real Memcached server, so Health fails closed until a real gomemcache client is wired in")
 
 // MemoryConfig represents configuration for memory operations
 type MemoryConfig struct {
@@ -480,10 +509,30 @@ func (p *RedisMemoryProvider) Clear(ctx context.Context) error {
 	return nil
 }
 
-// Health checks Redis health
+// Health checks Redis health by attempting to PING the configured backend.
+//
+// Round-31 §11.4 anti-bluff sweep (2026-05-18): the previous implementation
+// returned nil unconditionally — a placeholder labelled "In production,
+// this would ping the Redis server" — so monitoring endpoints reported OK
+// regardless of whether Redis was alive or even reachable. That is a
+// CRITICAL false-health bluff under Article XI §11.9 / CONST-035.
+//
+// The current RedisMemoryProvider struct holds state in an in-memory map
+// and does NOT yet embed a real go-redis/v9 client (no client field is
+// declared). Until a real client is wired in (tracked in the close-out
+// log under §11.4 follow-ups), Health fails closed with
+// ErrRedisClientNotInitialized so operators and dashboards see the
+// missing-implementation state honestly rather than a fabricated PASS.
 func (p *RedisMemoryProvider) Health(ctx context.Context) error {
-	// In production, this would ping the Redis server
-	return nil
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("redis memory provider: health check aborted: %w", err)
+	}
+	// No real Redis client is wired in yet (see ErrRedisClientNotInitialized
+	// doc-comment). Return the sentinel rather than a fabricated PASS.
+	return ErrRedisClientNotInitialized
 }
 
 // Name returns the provider name
@@ -599,10 +648,31 @@ func (p *MemcachedMemoryProvider) Clear(ctx context.Context) error {
 	return nil
 }
 
-// Health checks Memcached health
+// Health checks Memcached health by probing the configured backend.
+//
+// Round-31 §11.4 anti-bluff sweep (2026-05-18): the previous implementation
+// returned nil unconditionally — a placeholder labelled "In production,
+// this would ping the Memcached server" — so monitoring endpoints reported
+// OK regardless of whether Memcached was alive or even reachable. That is
+// a CRITICAL false-health bluff under Article XI §11.9 / CONST-035.
+//
+// The current MemcachedMemoryProvider struct holds state in an in-memory
+// map and does NOT yet embed a real gomemcache client (no client field is
+// declared). Until a real client is wired in (tracked in the close-out
+// log under §11.4 follow-ups), Health fails closed with
+// ErrMemcachedClientNotInitialized so operators and dashboards see the
+// missing-implementation state honestly rather than a fabricated PASS.
 func (p *MemcachedMemoryProvider) Health(ctx context.Context) error {
-	// In production, this would ping the Memcached server
-	return nil
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("memcached memory provider: health check aborted: %w", err)
+	}
+	// No real Memcached client is wired in yet (see
+	// ErrMemcachedClientNotInitialized doc-comment). Return the sentinel
+	// rather than a fabricated PASS.
+	return ErrMemcachedClientNotInitialized
 }
 
 // Name returns the provider name

@@ -3,6 +3,7 @@ package llm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,63 @@ import (
 
 	"github.com/google/uuid"
 )
+
+// ErrPerformanceMetricsNotInstrumented is returned by
+// (*AutoLLMManager).updatePerformanceMetrics when no MetricsRecorder has
+// been wired into the manager. Before round-31 §11.4 anti-bluff sweep
+// (2026-05-18) updatePerformanceMetrics zeroed out ActiveRequests and
+// ErrorRate and bumped LastUpdated, regardless of reality — a HIGH
+// monitoring-bluff under Article XI §11.9 / CONST-035 that caused
+// dashboards to report 0% error rate for every provider while real
+// failures piled up unrecorded. The function now requires callers to
+// inject a MetricsRecorder via SetMetricsRecorder; absent a recorder
+// this sentinel surfaces so the caller knows monitoring is not live.
+var ErrPerformanceMetricsNotInstrumented = errors.New("auto llm manager: performance metrics have not been instrumented — updatePerformanceMetrics previously zeroed out ActiveRequests/ErrorRate then bumped LastUpdated, causing monitoring dashboards to report 0% error rate regardless of reality (§11.4 HIGH: silent monitoring bluff under Article XI §11.9 / CONST-035); inject a MetricsRecorder via SetMetricsRecorder before relying on PerformanceMetrics")
+
+// MetricsSnapshot is the per-provider point-in-time view of runtime
+// metrics returned by MetricsRecorder.Snapshot. Implementations MUST
+// reflect actual observed traffic against the named provider — fabricated
+// or hardcoded values are an Article XI §11.9 / CONST-035 violation.
+type MetricsSnapshot struct {
+	// ActiveRequests is the number of requests currently in flight for
+	// the provider at observation time.
+	ActiveRequests int
+	// TotalRequests is the cumulative number of requests dispatched to
+	// the provider since the recorder was created.
+	TotalRequests int64
+	// ErrorRate is the fraction of requests that ended in error since
+	// the recorder was created, in the range [0.0, 1.0]. A recorder
+	// with zero observed requests MAY return 0.0 BUT only if the
+	// implementation tracks TotalRequests==0 honestly.
+	ErrorRate float64
+	// TokensPerSecond is the observed throughput averaged across the
+	// recorder's sampling window. Zero is permitted when no traffic
+	// was observed.
+	TokensPerSecond float64
+	// MemoryUsage is the observed memory footprint of the provider
+	// process in bytes. Zero is permitted when the recorder cannot
+	// observe the process (e.g. remote provider).
+	MemoryUsage int64
+	// CPUUsage is the observed CPU utilisation of the provider process
+	// as a percentage in [0.0, 100.0]. Zero is permitted when the
+	// recorder cannot observe the process.
+	CPUUsage float64
+}
+
+// MetricsRecorder produces per-provider runtime metrics for the auto LLM
+// manager. Implementations MUST source numbers from real instrumentation
+// (atomic counters bumped at request start/end/error, /proc parsers,
+// cgroup stats, etc.) — never from hardcoded constants. CONST-050(A)
+// permits in-package test fakes (e.g. *testMetricsRecorder) only inside
+// *_test.go files; production wiring MUST use a real recorder.
+type MetricsRecorder interface {
+	// Snapshot returns the current MetricsSnapshot for the named
+	// provider. An implementation MAY return an error when the
+	// underlying instrumentation is degraded (e.g. /proc unreadable);
+	// the caller treats the error as a metrics-update failure rather
+	// than fabricating defaults.
+	Snapshot(providerName string) (MetricsSnapshot, error)
+}
 
 // AutoLLMManager provides fully automated, zero-configuration management
 type AutoLLMManager struct {
@@ -29,6 +87,20 @@ type AutoLLMManager struct {
 	isInitialized   bool
 	isRunning       bool
 	config          *AutoConfig
+	// metricsRecorder produces per-provider runtime metrics. MUST be
+	// injected via SetMetricsRecorder before updatePerformanceMetrics
+	// can write a real snapshot — see ErrPerformanceMetricsNotInstrumented.
+	metricsRecorder MetricsRecorder
+}
+
+// SetMetricsRecorder wires a MetricsRecorder into the manager. Subsequent
+// calls to updatePerformanceMetrics will read snapshots from this
+// recorder. Passing nil clears the recorder, causing future metric
+// updates to surface ErrPerformanceMetricsNotInstrumented.
+func (m *AutoLLMManager) SetMetricsRecorder(rec MetricsRecorder) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	m.metricsRecorder = rec
 }
 
 // AutoConfig represents zero-touch configuration
@@ -765,8 +837,12 @@ func (m *AutoLLMManager) autoPerformanceOptimization() error {
 			continue
 		}
 
-		// Update metrics
-		m.updatePerformanceMetrics(provider)
+		// Update metrics — surface instrumentation failures honestly
+		// rather than continuing against fabricated (zero) values.
+		if err := m.updatePerformanceMetrics(provider); err != nil {
+			log.Printf("⚠️  Performance metrics update failed for %s: %v", name, err)
+			continue
+		}
 
 		// Optimize based on metrics
 		if provider.Metrics.CPUUsage > 80.0 {
@@ -781,12 +857,51 @@ func (m *AutoLLMManager) autoPerformanceOptimization() error {
 	return nil
 }
 
-// updatePerformanceMetrics updates performance metrics for a provider
-func (m *AutoLLMManager) updatePerformanceMetrics(provider *AutoProvider) {
-	// In a real implementation, this would collect actual metrics
+// updatePerformanceMetrics updates the PerformanceMetrics for a provider
+// from the injected MetricsRecorder. Returns
+// ErrPerformanceMetricsNotInstrumented when no recorder has been wired in
+// via SetMetricsRecorder. Returns any error surfaced by the recorder's
+// Snapshot method without overwriting the existing Metrics — the caller
+// (autoPerformanceOptimization) logs the failure so it is visible in
+// operator dashboards, rather than silently propagating zeroed-out data.
+//
+// Round-31 §11.4 anti-bluff sweep (2026-05-18): the previous body
+// hardcoded ActiveRequests=0 and ErrorRate=0.0, then bumped LastUpdated.
+// Monitoring consumers therefore reported 0% error rate for every
+// provider regardless of reality — a HIGH bluff under Article XI §11.9 /
+// CONST-035. The new body reads from real instrumentation; absent a
+// recorder it fails closed with ErrPerformanceMetricsNotInstrumented so
+// the missing-instrumentation state is unambiguous.
+func (m *AutoLLMManager) updatePerformanceMetrics(provider *AutoProvider) error {
+	if provider == nil {
+		return fmt.Errorf("auto llm manager: cannot update metrics for nil provider")
+	}
+	if provider.Metrics == nil {
+		provider.Metrics = &PerformanceMetrics{}
+	}
+
+	m.mutex.RLock()
+	recorder := m.metricsRecorder
+	m.mutex.RUnlock()
+
+	if recorder == nil {
+		return ErrPerformanceMetricsNotInstrumented
+	}
+
+	snapshot, err := recorder.Snapshot(provider.Name)
+	if err != nil {
+		return fmt.Errorf("auto llm manager: metrics recorder snapshot for %q failed: %w",
+			provider.Name, err)
+	}
+
+	provider.Metrics.ActiveRequests = snapshot.ActiveRequests
+	provider.Metrics.TotalRequests = snapshot.TotalRequests
+	provider.Metrics.ErrorRate = snapshot.ErrorRate
+	provider.Metrics.TokensPerSecond = snapshot.TokensPerSecond
+	provider.Metrics.MemoryUsage = snapshot.MemoryUsage
+	provider.Metrics.CPUUsage = snapshot.CPUUsage
 	provider.Metrics.LastUpdated = time.Now()
-	provider.Metrics.ActiveRequests = 0
-	provider.Metrics.ErrorRate = 0.0
+	return nil
 }
 
 // autoUpdateCheck checks for provider updates

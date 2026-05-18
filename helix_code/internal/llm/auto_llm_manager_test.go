@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// fakeMetricsRecorder is a unit-test-only MetricsRecorder. CONST-050(A)
+// permits fakes in *_test.go only; production callers MUST inject a real
+// recorder backed by atomic counters / cgroup reads / etc.
+type fakeMetricsRecorder struct {
+	snapshot MetricsSnapshot
+	err      error
+}
+
+func (f *fakeMetricsRecorder) Snapshot(providerName string) (MetricsSnapshot, error) {
+	if f.err != nil {
+		return MetricsSnapshot{}, f.err
+	}
+	return f.snapshot, nil
+}
 
 func TestNewAutoLLMManager(t *testing.T) {
 	t.Run("with empty base dir uses default", func(t *testing.T) {
@@ -298,7 +314,14 @@ func TestAutoLLMManager_Stop(t *testing.T) {
 	})
 }
 
-func TestAutoLLMManager_UpdatePerformanceMetrics(t *testing.T) {
+// TestAutoLLMManager_UpdatePerformanceMetrics_NoRecorder asserts the
+// round-31 §11.4 anti-bluff contract: updatePerformanceMetrics MUST
+// surface ErrPerformanceMetricsNotInstrumented when no MetricsRecorder
+// has been wired in, instead of the previous behaviour which zeroed out
+// ActiveRequests + ErrorRate then bumped LastUpdated regardless of
+// reality. The original metric values MUST be preserved so the caller
+// can detect the missing-instrumentation state.
+func TestAutoLLMManager_UpdatePerformanceMetrics_NoRecorder(t *testing.T) {
 	manager := NewAutoLLMManager("")
 
 	provider := &AutoProvider{
@@ -309,12 +332,77 @@ func TestAutoLLMManager_UpdatePerformanceMetrics(t *testing.T) {
 		},
 	}
 
-	manager.updatePerformanceMetrics(provider)
+	err := manager.updatePerformanceMetrics(provider)
+	require.Error(t, err, "updatePerformanceMetrics MUST surface a real error when no recorder is wired")
+	assert.ErrorIs(t, err, ErrPerformanceMetricsNotInstrumented,
+		"error MUST wrap ErrPerformanceMetricsNotInstrumented")
 
-	// After update, metrics should be reset
-	assert.Equal(t, 0, provider.Metrics.ActiveRequests)
-	assert.Equal(t, 0.0, provider.Metrics.ErrorRate)
+	// Anti-bluff regression guard: the previous implementation zeroed
+	// these values. The new implementation MUST preserve them so the
+	// caller knows the state is stale rather than freshly-zero.
+	assert.Equal(t, 10, provider.Metrics.ActiveRequests,
+		"ActiveRequests MUST be preserved when no recorder (previously zeroed)")
+	assert.Equal(t, 0.5, provider.Metrics.ErrorRate,
+		"ErrorRate MUST be preserved when no recorder (previously zeroed)")
+}
+
+// TestAutoLLMManager_UpdatePerformanceMetrics_WithRecorder asserts the
+// happy path: when a real MetricsRecorder is wired in, the recorder's
+// snapshot fields propagate to the provider's PerformanceMetrics.
+func TestAutoLLMManager_UpdatePerformanceMetrics_WithRecorder(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	manager.SetMetricsRecorder(&fakeMetricsRecorder{
+		snapshot: MetricsSnapshot{
+			ActiveRequests:  7,
+			TotalRequests:   42,
+			ErrorRate:       0.125,
+			TokensPerSecond: 13.5,
+			MemoryUsage:     int64(2 * 1024 * 1024 * 1024),
+			CPUUsage:        47.5,
+		},
+	})
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+		Metrics:          &PerformanceMetrics{},
+	}
+
+	err := manager.updatePerformanceMetrics(provider)
+	require.NoError(t, err)
+
+	assert.Equal(t, 7, provider.Metrics.ActiveRequests)
+	assert.Equal(t, int64(42), provider.Metrics.TotalRequests)
+	assert.InEpsilon(t, 0.125, provider.Metrics.ErrorRate, 1e-9)
+	assert.InEpsilon(t, 13.5, provider.Metrics.TokensPerSecond, 1e-9)
+	assert.Equal(t, int64(2*1024*1024*1024), provider.Metrics.MemoryUsage)
+	assert.InEpsilon(t, 47.5, provider.Metrics.CPUUsage, 1e-9)
 	assert.False(t, provider.Metrics.LastUpdated.IsZero())
+}
+
+// TestAutoLLMManager_UpdatePerformanceMetrics_RecorderError asserts that
+// a recorder Snapshot failure surfaces to the caller and does NOT
+// overwrite existing metric values with zeros (anti-bluff: a transient
+// instrumentation failure must not look like "no errors observed").
+func TestAutoLLMManager_UpdatePerformanceMetrics_RecorderError(t *testing.T) {
+	manager := NewAutoLLMManager("")
+	probeErr := errors.New("probe failed")
+	manager.SetMetricsRecorder(&fakeMetricsRecorder{err: probeErr})
+
+	provider := &AutoProvider{
+		LocalLLMProvider: LocalLLMProvider{Name: "TestProvider"},
+		Metrics: &PerformanceMetrics{
+			ActiveRequests: 3,
+			ErrorRate:      0.25,
+		},
+	}
+
+	err := manager.updatePerformanceMetrics(provider)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, probeErr)
+
+	// Previous values preserved — recorder failure must NOT zero out.
+	assert.Equal(t, 3, provider.Metrics.ActiveRequests)
+	assert.Equal(t, 0.25, provider.Metrics.ErrorRate)
 }
 
 func TestAutoLLMManager_CreateStartupScriptForProvider(t *testing.T) {
