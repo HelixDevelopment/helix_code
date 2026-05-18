@@ -71,9 +71,80 @@ Per the round 68 brief and CONST-035 anti-bluff discipline: the ledger is popula
 
 Subsequent rounds promote cells `UNCONFIRMED:` → `PASS` ONLY by adding (a) the CONTINUATION round reference, AND (b) the captured evidence path/snippet in Notes. The generator NEVER auto-promotes.
 
+## Release-gate test runner (round 74)
+
+`scripts/release-gate-test.sh` is the EXECUTION counterpart to `generate-coverage-ledger.sh`. Where the ledger tracks STRUCTURAL coverage (what we believe is tested, with captured evidence), the release-gate runner ACTUALLY EXECUTES tests against every owned-org submodule and reports an honest aggregate signal.
+
+### What it covers
+
+- Walks every submodule listed in `docs/improvements/submodule_owned.txt` (round 56 canonical roster).
+- For each submodule with a `go.mod`, runs `GOMAXPROCS=2 nice -n 19 go test -count=1 -race -timeout=180s ./...` inside the submodule root.
+- Captures stdout+stderr to per-submodule log files under `$RELEASE_GATE_LOG_DIR` (default `/tmp/release-gate-<pid>/`).
+- Parses PASS/FAIL/SKIP line counts.
+- Detects bare `--- SKIP:` lines without `SKIP-OK:` markers — these are CONST-035 skip-bluff violations.
+
+### What it does NOT cover
+
+- The inner `helix_code/` Go module — that's covered by `make test-full` per CLAUDE.md §3.4 (its own four-layer floor with real PostgreSQL + Redis + Ollama infra).
+- Non-Go submodules (`assets/`, `github_pages_website/`) — these are SKIP-NO-GOMOD, legitimately untested by this runner. Their coverage lives elsewhere (the asset/static-site pipelines).
+- Integration / E2E tests requiring docker-compose — those need `make test-infra-up` per submodule.
+- Mutation tests — paired-mutation runs are tracked in `COVERAGE_LEDGER.md` cell-by-cell.
+
+### Exit code semantics
+
+| Exit | Meaning |
+|------|---------|
+| 0 | All owned submodules either PASSed (`go test` succeeded) or were legitimately SKIP-NO-GOMOD. Release gate GREEN. |
+| 1 | At least one submodule FAILed OR at least one bare SKIP detected. Release gate RED — see the human summary or `--json` output for the failing list. |
+| 2 | Invalid flag, missing required file, or `--check` self-validation failed. |
+
+### Flags
+
+| Flag | Effect |
+|------|--------|
+| `--json` | Emit machine-readable JSON summary for CI integration. Includes per-submodule + aggregate counts + log_dir path. |
+| `--quick` | Stop on first FAIL. Useful for fast CI signal where any failure should block. |
+| `--only=<glob>` | Restrict to submodules matching the shell glob (e.g. `--only='dependencies/vasic-digital/*'`). Useful for targeted re-runs. |
+| `--check` | Self-validate script + paths without running real tests. Used by smoke-tests and CI sanity. |
+
+### Recommended invocation pattern
+
+```bash
+# Manual pre-release sweep (full, human-readable):
+bash scripts/release-gate-test.sh
+
+# CI integration (machine-readable, fail-fast):
+bash scripts/release-gate-test.sh --json --quick > release-gate.json
+jq '.exit_code' release-gate.json   # 0 = green, 1 = red
+
+# Targeted re-run after fixing a specific submodule:
+bash scripts/release-gate-test.sh --only='dependencies/vasic-digital/Cache'
+
+# Sanity check that the script itself is healthy (no real test runs):
+bash scripts/release-gate-test.sh --check
+```
+
+### Cross-reference with the coverage ledger
+
+The two tools answer different questions about CONST-048 invariant 6:
+
+- `COVERAGE_LEDGER.md` answers *"do we BELIEVE this submodule × platform combo has captured runtime evidence?"* (structural state).
+- `release-gate-test.sh` answers *"does `go test ./...` ACTUALLY pass for this submodule RIGHT NOW?"* (live execution).
+
+When the ledger says `PASS` for invariant I6 on a submodule but `release-gate-test.sh` reports FAIL for that same submodule, the ledger is stale — a §11.4 PASS-bluff at the governance layer. Operator demotes the cell to `PENDING_FORENSICS:` or `OPERATOR-BLOCKED:` until reconciled.
+
+### CONST-048 invariant 6 — closure note (round 74)
+
+Round 68 landed the STRUCTURAL view of invariant 6. Round 74 lands the EXECUTION view. Together they constitute CONST-048 invariant 6's meta-repo-level closure. The inner-module level was already covered by `make test-full` per CLAUDE.md §3.4 + the round 41 feature-axis `ledger.md`.
+
+The verbatim 2026-05-19 operator mandate that motivated round 74 (preserved per CONST-049 §11.4.17 in the script header):
+
+> "all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product!"
+
 ## See also
 
-- `scripts/generate-coverage-ledger.sh` — scaffold generator + violation checker (round 68)
+- `scripts/release-gate-test.sh` — programme-wide release-gate test runner (round 74; execution counterpart)
+- `scripts/generate-coverage-ledger.sh` — scaffold generator + violation checker (round 68; structural counterpart)
 - `scripts/regenerate-coverage-ledger.sh` — pre-existing feature-axis regenerator (round 41+)
 - `docs/coverage/ledger.md` — pre-existing feature-axis ledger
 - `docs/coverage/SCHEMA.md` — full schema documentation
