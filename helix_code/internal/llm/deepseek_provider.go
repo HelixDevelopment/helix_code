@@ -238,6 +238,12 @@ func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 		FinishReason:   finish,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+		// Round-50 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// DeepSeek is OpenAI-compatible — finish_reason "length" /
+		// "content_filter" indicate truncation / content block. Reuse
+		// the round-46 OpenAI mapper helper (same closed mapping per
+		// https://api-docs.deepseek.com/api/create-chat-completion).
+		Err: mapOpenAIFinishReasonToErr(finish),
 	}
 }
 
@@ -322,6 +328,26 @@ func (dp *DeepSeekProvider) makeOpenAIStreamRequest(ctx context.Context, request
 		}
 
 		if len(streamResp.Choices) > 0 && streamResp.Choices[0].FinishReason != "" {
+			// Round-50 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): when the final frame
+			// carries finish_reason="length"/"content_filter", emit a
+			// terminal LLMResponse with Err populated so stream
+			// consumers (notably tool_provider.go :201/:251) can
+			// distinguish a clean stop from a partial-error stop.
+			finishReason := streamResp.Choices[0].FinishReason
+			if errSentinel := mapOpenAIFinishReasonToErr(finishReason); errSentinel != nil {
+				select {
+				case ch <- LLMResponse{
+					ID:           uuid.New(),
+					RequestID:    requestID,
+					FinishReason: finishReason,
+					CreatedAt:    time.Now(),
+					Err:          errSentinel,
+				}:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+			}
 			break
 		}
 	}

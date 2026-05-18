@@ -329,6 +329,18 @@ func (gp *GeminiProvider) Generate(ctx context.Context, request *LLMRequest) (*L
 		FinishReason:   candidate.FinishReason,
 	}
 
+	// Round-50 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+	// Gemini signals partial-error conditions in the candidate's
+	// finishReason rather than via HTTP status, so callers that only
+	// checked the returned `error` previously dropped these signals on
+	// the floor. Map well-known finishReason values to the canonical
+	// sentinels. Bonus: if promptFeedback.blockReason is set the
+	// prompt itself was blocked by safety filters → ContentBlocked.
+	response.Err = mapGeminiFinishReasonToErr(candidate.FinishReason)
+	if response.Err == nil && resp.PromptFeedback != nil && resp.PromptFeedback.BlockReason != "" {
+		response.Err = ErrResponseContentBlocked
+	}
+
 	// Extract content and tool calls
 	for _, part := range candidate.Content.Parts {
 		switch p := part.(type) {
@@ -624,11 +636,42 @@ func (gp *GeminiProvider) parseStreamingResponse(body io.Reader, ch chan<- LLMRe
 				}
 			}
 
+			// Round-50 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): map MAX_TOKENS / SAFETY /
+			// RECITATION into the canonical sentinels so stream
+			// consumers (notably tool_provider.go :201/:251) can
+			// distinguish a clean stop from a partial-error stop.
+			finalResponse.Err = mapGeminiFinishReasonToErr(candidate.FinishReason)
+
 			ch <- finalResponse
 		}
 	}
 
 	return nil
+}
+
+// mapGeminiFinishReasonToErr returns the round-50 sentinel that matches
+// a Gemini candidate.finishReason value, or nil if the reason indicates
+// a clean stop ("STOP", "" — including the leniently-handled lowercase
+// "stop" variant emitted by some preview SDKs). Documented values per
+// https://ai.google.dev/api/generate-content#FinishReason :
+//   - "STOP"                            : clean → nil
+//   - "MAX_TOKENS"                      : token-cap   → ErrResponseTruncated
+//   - "SAFETY"                          : safety       → ErrResponseContentBlocked
+//   - "RECITATION"                      : recitation   → ErrResponseContentBlocked
+//   - "BLOCKLIST"/"PROHIBITED_CONTENT"/"SPII" : policy → ErrResponseContentBlocked
+//   - "OTHER"/"LANGUAGE"/"MALFORMED_FUNCTION_CALL"/...: unknown → nil
+//     (we cannot synthesise the right sentinel from an unknown reason;
+//     leave Err nil and rely on FinishReason for the literal value).
+func mapGeminiFinishReasonToErr(reason string) error {
+	switch reason {
+	case "MAX_TOKENS":
+		return ErrResponseTruncated
+	case "SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII":
+		return ErrResponseContentBlocked
+	default:
+		return nil
+	}
 }
 
 // IsAvailable checks if the provider is available

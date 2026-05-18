@@ -416,6 +416,12 @@ func (gp *GroqProvider) convertFromGroqResponse(groqResp *GroqResponse, requestI
 		FinishReason:   finishReason,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+		// Round-50 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// Groq is OpenAI-compatible — finish_reason "length" /
+		// "content_filter" indicate truncation / content block. Reuse
+		// the round-46 OpenAI mapper helper (same closed mapping per
+		// https://console.groq.com/docs/api-reference#chat).
+		Err: mapOpenAIFinishReasonToErr(finishReason),
 	}
 }
 
@@ -560,6 +566,12 @@ func (gp *GroqProvider) parseSSEStreamWithMetrics(reader io.Reader, ch chan<- LL
 					"total_latency_ms":       totalTime.Milliseconds(),
 					"tokens_per_second":      tokensPerSecond,
 				},
+				// Round-50 LLMResponse.Err wiring for the streaming path
+				// (CONST-035 / Article XI §11.9): same OpenAI-compat
+				// mapping as Generate above — terminal frame carries
+				// Err on truncation / content-filter so tool_provider
+				// :201/:251 can surface it on the ToolStreamChunk.
+				Err: mapOpenAIFinishReasonToErr(chunk.Choices[0].FinishReason),
 			}
 
 			if chunk.Usage != nil {

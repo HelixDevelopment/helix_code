@@ -261,6 +261,30 @@ func (mp *MistralProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse,
 		FinishReason:   finish,
 		ProcessingTime: processingTime,
 		CreatedAt:      time.Now(),
+		// Round-50 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
+		// Mistral OpenAI-compat with provider-specific extensions —
+		// uses both "length" and "model_length" for truncation (per
+		// https://docs.mistral.ai/api/#tag/chat). No content-filter at
+		// protocol level; safety lives in separate guardrails layer.
+		Err: mapMistralFinishReasonToErr(finish),
+	}
+}
+
+// mapMistralFinishReasonToErr returns the round-50 sentinel that matches
+// a Mistral finish_reason value, or nil for clean stops. Documented
+// values per https://docs.mistral.ai/api/#tag/chat :
+//   - "stop" / "tool_calls" / "" : clean → nil
+//   - "length" / "model_length"  : both = max-tokens-reached → ErrResponseTruncated
+//
+// Mistral surfaces NO content-filter signal on the wire (safety lives
+// in a separate guardrails layer), so ErrResponseContentBlocked is not
+// reachable here.
+func mapMistralFinishReasonToErr(reason string) error {
+	switch reason {
+	case "length", "model_length":
+		return ErrResponseTruncated
+	default:
+		return nil
 	}
 }
 
@@ -345,6 +369,26 @@ func (mp *MistralProvider) makeOpenAIStreamRequest(ctx context.Context, request 
 		}
 
 		if len(streamResp.Choices) > 0 && streamResp.Choices[0].FinishReason != "" {
+			// Round-50 LLMResponse.Err wiring for the streaming path
+			// (CONST-035 / Article XI §11.9): when the final frame
+			// carries finish_reason="length"/"model_length", emit a
+			// terminal LLMResponse with Err populated so stream
+			// consumers (notably tool_provider.go :201/:251) can
+			// distinguish a clean stop from a truncation.
+			finishReason := streamResp.Choices[0].FinishReason
+			if errSentinel := mapMistralFinishReasonToErr(finishReason); errSentinel != nil {
+				select {
+				case ch <- LLMResponse{
+					ID:           uuid.New(),
+					RequestID:    requestID,
+					FinishReason: finishReason,
+					CreatedAt:    time.Now(),
+					Err:          errSentinel,
+				}:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+			}
 			break
 		}
 	}
