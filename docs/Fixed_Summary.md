@@ -7,10 +7,10 @@
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
 | Bug | 4 | `Fixed (→ Fixed.md)` |
-| Feature | 20 | `Implemented (→ Fixed.md)` |
+| Feature | 22 | `Implemented (→ Fixed.md)` |
 | Task | 5 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 29 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`).
+**Total closed items**: 31 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`).
 
 ## Coverage by round-system phase
 
