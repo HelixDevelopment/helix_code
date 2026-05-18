@@ -204,6 +204,26 @@ type TraversalAlgorithm interface {
 	GetName() string
 }
 
+// metricGapLogger is the package-private telemetry-gap logger used by
+// the partitioning + compression helper structs (AdaptiveMemoryAwarePartitioning,
+// NeuralBasedPartitioning, SymbolicOptimizedPartitioning, NeuralSymbolicCompression,
+// AdaptiveHuffmanCompression, NeuralEmbeddingCompression) when an
+// operator asks for a quality/ratio metric BEFORE any work has been
+// performed (lastQuality / lastRatio still zero). Round-35 §11.4
+// PASS-bluff repair (CONST-035 / Article XI §11.9): the previous
+// implementations of GetPartitionQuality / GetCompressionRatio
+// returned hardcoded constants (0.85, 0.90, 0.80, 0.75, 0.65, 0.80)
+// when their lastQuality/lastRatio fields were unset — fabricating
+// telemetry. The honest sentinel is 0 (no measurement available);
+// callers MUST treat 0 as "not measured", not "perfect/terrible".
+var metricGapLogger = logging.NewLoggerWithName("cognee_telemetry_gap")
+
+func logMetricGap(metric, strategy string) {
+	if metricGapLogger != nil {
+		metricGapLogger.Debug("telemetry gap: %s requested for strategy %q before any measurement; returning 0 sentinel (round-35 §11.4 honest sentinel)", metric, strategy)
+	}
+}
+
 // GraphPartitioner implements intelligent graph partitioning
 type GraphPartitioner struct {
 	partitionStrategy string
@@ -1255,7 +1275,13 @@ func (nsc *NeuralSymbolicCompression) GetCompressionRatio() float64 {
 	if nsc.lastRatio > 0 {
 		return nsc.lastRatio
 	}
-	return 0.75 // Default estimate
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.75 // Default estimate` which
+	// silently fabricated a 75% compression ratio operators could quote
+	// in benchmark reports / capacity planning before any payload had
+	// been compressed (CONST-035 / Article XI §11.9).
+	logMetricGap("CompressionRatio", "neural_symbolic")
+	return 0
 }
 func (nsc *NeuralSymbolicCompression) GetName() string { return "neural_symbolic" }
 
@@ -1318,7 +1344,11 @@ func (ahc *AdaptiveHuffmanCompression) GetCompressionRatio() float64 {
 	if ahc.lastRatio > 0 {
 		return ahc.lastRatio
 	}
-	return 0.65
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.65` which fabricated a 65%
+	// pre-measurement compression ratio (CONST-035 / Article XI §11.9).
+	logMetricGap("CompressionRatio", "adaptive_huffman")
+	return 0
 }
 func (ahc *AdaptiveHuffmanCompression) GetName() string { return "adaptive_huffman" }
 
@@ -1381,7 +1411,11 @@ func (nec *NeuralEmbeddingCompression) GetCompressionRatio() float64 {
 	if nec.lastRatio > 0 {
 		return nec.lastRatio
 	}
-	return 0.80
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.80` which fabricated an 80%
+	// pre-measurement compression ratio (CONST-035 / Article XI §11.9).
+	logMetricGap("CompressionRatio", "neural_embedding")
+	return 0
 }
 func (nec *NeuralEmbeddingCompression) GetName() string { return "neural_embedding" }
 
@@ -1734,7 +1768,13 @@ func (amap *AdaptiveMemoryAwarePartitioning) GetPartitionQuality() float64 {
 	if amap.lastQuality > 0 {
 		return amap.lastQuality
 	}
-	return 0.85
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.85` which fabricated an 85%
+	// partition-quality score before any Partition() call had computed
+	// balance — operators reading the score for scheduler tuning got
+	// pure noise (CONST-035 / Article XI §11.9).
+	logMetricGap("PartitionQuality", "adaptive_memory_aware")
+	return 0
 }
 func (amap *AdaptiveMemoryAwarePartitioning) GetName() string { return "adaptive_memory_aware" }
 
@@ -1816,7 +1856,12 @@ func (nbp *NeuralBasedPartitioning) GetPartitionQuality() float64 {
 	if nbp.lastQuality > 0 {
 		return nbp.lastQuality
 	}
-	return 0.90
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.90` which fabricated a 90%
+	// partition-quality score before any measurement (CONST-035 / Article
+	// XI §11.9).
+	logMetricGap("PartitionQuality", "neural_based")
+	return 0
 }
 func (nbp *NeuralBasedPartitioning) GetName() string { return "neural_based" }
 
@@ -1905,7 +1950,12 @@ func (sop *SymbolicOptimizedPartitioning) GetPartitionQuality() float64 {
 	if sop.lastQuality > 0 {
 		return sop.lastQuality
 	}
-	return 0.80
+	// Round-35 §11.4 PASS-bluff repair: honest 0-sentinel + telemetry-gap
+	// log instead of the prior `return 0.80` which fabricated an 80%
+	// partition-quality score before any measurement (CONST-035 / Article
+	// XI §11.9).
+	logMetricGap("PartitionQuality", "symbolic_optimized")
+	return 0
 }
 func (sop *SymbolicOptimizedPartitioning) GetName() string { return "symbolic_optimized" }
 

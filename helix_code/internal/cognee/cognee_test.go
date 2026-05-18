@@ -640,12 +640,23 @@ func TestOptimizationCache(t *testing.T) {
 	})
 }
 
-// TestCompressionAlgorithms tests algorithm implementations
+// TestCompressionAlgorithms tests algorithm implementations.
+//
+// Round-35 §11.4 PASS-bluff repair (CONST-035 / Article XI §11.9): the
+// previous assertions `assert.Equal(t, 0.75, alg.GetCompressionRatio())`
+// (and the 0.65 / 0.80 siblings) certified the production-code bluff
+// that returned a hardcoded constant whenever no real measurement had
+// taken place. The honest contract — production now returns 0 as the
+// "no measurement available" sentinel and only reports a real value
+// AFTER Compress() has run and populated lastRatio — is asserted here.
+// Pre-Compress: ratio MUST be 0 (the honest sentinel). Post-Compress:
+// ratio MUST be > 0 and ≤ 1 (a real ratio observed during compression).
 func TestCompressionAlgorithms(t *testing.T) {
 	t.Run("NeuralSymbolicCompression", func(t *testing.T) {
 		alg := &NeuralSymbolicCompression{}
 		assert.Equal(t, "neural_symbolic", alg.GetName())
-		assert.Equal(t, 0.75, alg.GetCompressionRatio())
+		assert.Equal(t, 0.0, alg.GetCompressionRatio(),
+			"honest sentinel: ratio MUST be 0 before any Compress() call (round-35 §11.4)")
 
 		// Test compression round-trip
 		testData := "test data for compression"
@@ -660,15 +671,16 @@ func TestCompressionAlgorithms(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, testData, decompressed)
 
-		// Test compression ratio is updated
+		// Test compression ratio is updated to a REAL measurement
 		ratio := alg.GetCompressionRatio()
-		assert.Greater(t, ratio, 0.0)
+		assert.Greater(t, ratio, 0.0, "post-Compress ratio MUST be a real measurement > 0")
 	})
 
 	t.Run("AdaptiveHuffmanCompression", func(t *testing.T) {
 		alg := &AdaptiveHuffmanCompression{}
 		assert.Equal(t, "adaptive_huffman", alg.GetName())
-		assert.Equal(t, 0.65, alg.GetCompressionRatio())
+		assert.Equal(t, 0.0, alg.GetCompressionRatio(),
+			"honest sentinel: ratio MUST be 0 before any Compress() call (round-35 §11.4)")
 
 		// Test compression round-trip
 		testData := "test data for adaptive huffman"
@@ -680,12 +692,16 @@ func TestCompressionAlgorithms(t *testing.T) {
 		err = alg.Decompress(compressed, &decompressed)
 		assert.NoError(t, err)
 		assert.Equal(t, testData, decompressed)
+
+		ratio := alg.GetCompressionRatio()
+		assert.Greater(t, ratio, 0.0, "post-Compress ratio MUST be a real measurement > 0")
 	})
 
 	t.Run("NeuralEmbeddingCompression", func(t *testing.T) {
 		alg := &NeuralEmbeddingCompression{}
 		assert.Equal(t, "neural_embedding", alg.GetName())
-		assert.Equal(t, 0.80, alg.GetCompressionRatio())
+		assert.Equal(t, 0.0, alg.GetCompressionRatio(),
+			"honest sentinel: ratio MUST be 0 before any Compress() call (round-35 §11.4)")
 
 		// Test compression round-trip
 		testData := "test data for neural embedding"
@@ -697,6 +713,9 @@ func TestCompressionAlgorithms(t *testing.T) {
 		err = alg.Decompress(compressed, &decompressed)
 		assert.NoError(t, err)
 		assert.Equal(t, testData, decompressed)
+
+		ratio := alg.GetCompressionRatio()
+		assert.Greater(t, ratio, 0.0, "post-Compress ratio MUST be a real measurement > 0")
 	})
 }
 
@@ -730,12 +749,20 @@ func TestTraversalAlgorithms(t *testing.T) {
 	})
 }
 
-// TestPartitioningAlgorithms tests partitioning implementations
+// TestPartitioningAlgorithms tests partitioning implementations.
+//
+// Round-35 §11.4 PASS-bluff repair (CONST-035 / Article XI §11.9): the
+// prior `assert.Equal(t, 0.85, alg.GetPartitionQuality())` (and the
+// 0.90 / 0.80 siblings) certified the production-code bluff that
+// returned a hardcoded constant before any Partition() call. The
+// honest contract — production returns 0 as the "no measurement"
+// sentinel until Partition() populates lastQuality — is asserted here.
 func TestPartitioningAlgorithms(t *testing.T) {
 	t.Run("AdaptiveMemoryAwarePartitioning", func(t *testing.T) {
 		alg := &AdaptiveMemoryAwarePartitioning{}
 		assert.Equal(t, "adaptive_memory_aware", alg.GetName())
-		assert.Equal(t, 0.85, alg.GetPartitionQuality())
+		assert.Equal(t, 0.0, alg.GetPartitionQuality(),
+			"honest sentinel: quality MUST be 0 before any Partition() call (round-35 §11.4)")
 
 		_, err := alg.Partition(nil, 4)
 		assert.NoError(t, err)
@@ -744,7 +771,8 @@ func TestPartitioningAlgorithms(t *testing.T) {
 	t.Run("NeuralBasedPartitioning", func(t *testing.T) {
 		alg := &NeuralBasedPartitioning{}
 		assert.Equal(t, "neural_based", alg.GetName())
-		assert.Equal(t, 0.90, alg.GetPartitionQuality())
+		assert.Equal(t, 0.0, alg.GetPartitionQuality(),
+			"honest sentinel: quality MUST be 0 before any Partition() call (round-35 §11.4)")
 
 		_, err := alg.Partition(nil, 4)
 		assert.NoError(t, err)
@@ -753,7 +781,8 @@ func TestPartitioningAlgorithms(t *testing.T) {
 	t.Run("SymbolicOptimizedPartitioning", func(t *testing.T) {
 		alg := &SymbolicOptimizedPartitioning{}
 		assert.Equal(t, "symbolic_optimized", alg.GetName())
-		assert.Equal(t, 0.80, alg.GetPartitionQuality())
+		assert.Equal(t, 0.0, alg.GetPartitionQuality(),
+			"honest sentinel: quality MUST be 0 before any Partition() call (round-35 §11.4)")
 
 		_, err := alg.Partition(nil, 4)
 		assert.NoError(t, err)

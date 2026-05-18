@@ -164,27 +164,51 @@ func (dwm *DistributedWorkerManager) SubmitTask(task *DistributedTask) error {
 	worker := availableWorkers[0]
 	task.WorkerID = worker.ID
 
-	// Execute task (in real implementation, this would be async)
+	// Hand the task to executeTask. The dispatch is synchronous in this
+	// abstraction; a real async pipeline would push onto a queue consumed
+	// by an ssh_pool.SSHWorkerPool.ExecuteCommand worker goroutine. Round-35
+	// §11.4 PASS-bluff repair (CONST-035 / Article XI §11.9): the prior
+	// "in real implementation, this would be async" tail and the executeTask
+	// body's sleep+fabricated-success have been replaced with an honest
+	// no-SSH-transport-wired error path. See executeTask docstring for the
+	// full forensic.
 	return dwm.executeTask(task)
 }
 
-// executeTask executes a task on the assigned worker
+// executeTask is the synchronous task dispatch point for the
+// DistributedWorkerManager. Round-35 §11.4 PASS-bluff repair
+// (CONST-035 / Article XI §11.9 — CRITICAL severity, distributed-work
+// completion fabrication): the previous body slept 100ms then set
+// Status=TaskStatusCompleted and Result={"output":"Task completed
+// successfully"} unconditionally — every task submitted to a
+// DistributedWorkerManager certified as a successful distributed
+// execution regardless of whether any actual SSH transport, worker
+// daemon, or remote command existed. Operators relying on the
+// TaskStatusCompleted signal to gate downstream stages (deployment
+// promotion, billing, audit) were misled at the worst possible layer.
+//
+// The honest contract: DistributedWorkerManager does NOT own an SSH
+// transport (that lives in ssh_pool.SSHWorkerPool / ssh_pool.go).
+// Until a transport adapter is wired in (planned follow-up), this
+// function transitions the task to TaskStatusFailed with a forensic
+// error and returns the error to the caller. Tests that previously
+// asserted TaskStatusCompleted MUST be updated to match the honest
+// contract (paired update in distributed_manager_test.go same commit).
 func (dwm *DistributedWorkerManager) executeTask(task *DistributedTask) error {
 	now := time.Now()
 	task.StartedAt = &now
 	task.Status = TaskStatusRunning
 
-	// Simulate task execution
-	// In real implementation, this would execute via SSH
-	time.Sleep(100 * time.Millisecond)
-
-	completedAt := time.Now()
-	task.CompletedAt = &completedAt
-	task.Status = TaskStatusCompleted
+	// No SSH transport is wired into DistributedWorkerManager yet; refuse
+	// to fabricate completion. The error message names the integration gap
+	// so the operator (or a follow-up Issues.md entry) can wire ssh_pool.
+	err := fmt.Errorf("distributed task execution is not wired to an SSH transport in DistributedWorkerManager — integrate ssh_pool.SSHWorkerPool.ExecuteCommand or a local exec adapter before submitting tasks (round-35 §11.4 honest-no-op; previous code fabricated TaskStatusCompleted regardless of transport)")
+	failedAt := time.Now()
+	task.CompletedAt = &failedAt
+	task.Status = TaskStatusFailed
 	task.Result = map[string]interface{}{
-		"output":   "Task completed successfully",
-		"duration": completedAt.Sub(now).String(),
+		"error":    err.Error(),
+		"duration": failedAt.Sub(now).String(),
 	}
-
-	return nil
+	return err
 }

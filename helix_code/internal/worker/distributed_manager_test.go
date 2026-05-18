@@ -481,8 +481,19 @@ func TestDistributedWorkerManager_SubmitTask(t *testing.T) {
 		}
 	})
 
-	t.Run("with available worker", func(t *testing.T) {
-		// Add an available worker
+	t.Run("with available worker — honest no-SSH-transport failure", func(t *testing.T) {
+		// Round-35 §11.4 PASS-bluff repair test update (CONST-035 / Article
+		// XI §11.9): the previous assertion expected TaskStatusCompleted and
+		// "no error" from a manager that had no real SSH transport, no
+		// remote worker daemon, and no command executor wired in. That
+		// passing assertion was certifying the production-code bluff that
+		// fabricated TaskStatusCompleted regardless of whether any work
+		// actually ran. The honest contract — executeTask now returns an
+		// error transitioning the task to TaskStatusFailed — is asserted
+		// here. When an SSH transport adapter is wired into
+		// DistributedWorkerManager (future feature work), this test MUST be
+		// re-tightened to drive the adapter against a real ssh sandbox /
+		// the integration-tagged fixtures, NOT relaxed back to "Completed".
 		worker := &Worker{
 			Status:       WorkerStatusActive,
 			HealthStatus: WorkerHealthHealthy,
@@ -497,22 +508,23 @@ func TestDistributedWorkerManager_SubmitTask(t *testing.T) {
 		}
 
 		err := manager.SubmitTask(task)
-		if err != nil {
-			t.Errorf("Expected no error, got %v", err)
+		if err == nil {
+			t.Fatal("Expected honest no-SSH-transport error from executeTask, got nil — round-35 §11.4 anti-bluff regression")
 		}
-
-		// Verify task was processed
-		if task.Status != TaskStatusCompleted {
-			t.Errorf("Expected task status completed, got %s", task.Status)
+		if task.Status != TaskStatusFailed {
+			t.Errorf("Expected task status failed, got %s", task.Status)
 		}
 		if task.StartedAt == nil {
-			t.Error("Expected StartedAt to be set")
+			t.Error("Expected StartedAt to be set even on the failure path")
 		}
 		if task.CompletedAt == nil {
-			t.Error("Expected CompletedAt to be set")
+			t.Error("Expected CompletedAt to be set even on the failure path")
 		}
 		if task.Result == nil {
-			t.Error("Expected Result to be set")
+			t.Error("Expected Result to be set (carrying the error message)")
+		}
+		if msg, _ := task.Result["error"].(string); msg == "" {
+			t.Error("Expected Result[\"error\"] to carry the no-transport diagnostic")
 		}
 	})
 }

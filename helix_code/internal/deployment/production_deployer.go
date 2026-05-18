@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -740,15 +741,24 @@ func (pd *ProductionDeployer) executeMonitoring(ctx context.Context) (bool, erro
 	log.Printf("📊 Implementing production monitoring...")
 
 	if pd.config.MonitoringEnabled && pd.monitoring != nil {
-		// Set up monitoring for deployed servers
+		// Set up monitoring for deployed servers.
+		// Round-35 §11.4 PASS-bluff repair (CONST-035 / Article XI §11.9):
+		// the previous loop body was `time.Sleep(100 * time.Millisecond)`
+		// with a comment "Simulate monitoring setup", then logged "Production
+		// monitoring implemented for N servers". The sleep performed no
+		// real work — operators reading the success log were told monitoring
+		// was implemented when in fact NOTHING was set up server-side. The
+		// honest contract: this DeploymentMonitor abstraction does not yet
+		// own per-server agent installation/registration; it can only log
+		// the gap and let downstream tooling (e.g. monitoring.Monitor.
+		// RegisterTarget / RegisterScrapeTarget if available) wire in the
+		// real flow. Until then we surface the gap explicitly instead of
+		// fabricating success.
 		for _, server := range pd.status.ServersDeployed {
-			log.Printf("   📈 Setting up monitoring for server: %s", server)
-
-			// Simulate monitoring setup
-			time.Sleep(100 * time.Millisecond)
+			log.Printf("   📈 Per-server monitoring registration is not wired in yet for %s (round-35 honest gap; previous code slept 100ms and claimed setup); using process-local monitor only", server)
 		}
 
-		log.Printf("✅ Production monitoring implemented for %d servers", len(pd.status.ServersDeployed))
+		log.Printf("✅ Production monitoring process-local hooks attached for %d servers (per-server agent installation pending real implementation)", len(pd.status.ServersDeployed))
 	} else {
 		log.Printf("⏭️  Monitoring disabled - skipping")
 	}
@@ -1027,15 +1037,91 @@ type PerformanceMetrics struct {
 	MemoryUsage    int64         `json:"memory_usage"`
 }
 
-// Helper functions for issue counting
+// countCriticalIssues and countHighIssues classify the entries in
+// result.Issues by severity so the SecurityGateStatus the production
+// deployer publishes reflects the actual scan output. Round-35 §11.4
+// PASS-bluff repair (CONST-035 / Article XI §11.9): the previous
+// implementations of both functions returned 0 unconditionally with the
+// admission "Simulating no critical issues for production deployment" —
+// a CRITICAL security-gate bluff: the zero-tolerance check at
+// executeSecurityCheck (lines 341–377 of this file) logs and notifies
+// on `CriticalIssues` / `HighIssues`, so a real scanner finding
+// (e.g. "Running as root - security risk" or "Binary signature
+// verification failed" appended to result.Issues at lines 834 / 843)
+// was silently downgraded to "0 critical" before the operator saw it.
+//
+// FeatureScanResult.Issues is typed `[]interface{}` and is populated
+// today as plain strings by runSecurityScan; in other code paths it
+// may carry security.SecurityIssue structs (which DO have a Severity
+// field). We accept both shapes: type-assert to SecurityIssue first,
+// fall back to substring classification on the string representation.
+// Unknown severities fall through (no double-counting).
 func countCriticalIssues(result *security.FeatureScanResult) int {
-	// In real implementation, this would count critical security issues
-	return 0 // Simulating no critical issues for production deployment
+	if result == nil {
+		return 0
+	}
+	return countIssuesBySeverity(result.Issues, []string{"BLOCKER", "CRITICAL"}, []string{"root", "signature", "critical", "rce", "injection"})
 }
 
 func countHighIssues(result *security.FeatureScanResult) int {
-	// In real implementation, this would count high security issues
-	return 0 // Simulating no high issues for production deployment
+	if result == nil {
+		return 0
+	}
+	return countIssuesBySeverity(result.Issues, []string{"MAJOR", "HIGH"}, []string{"loose permissions", "outdated", "deprecated", "high"})
+}
+
+// countIssuesBySeverity walks the heterogeneous Issues slice, looking
+// first for security.SecurityIssue structs with an explicit Severity
+// field, then falling back to case-insensitive substring matching on
+// the string representation of each issue against the supplied keyword
+// sets. Keeps both classification paths honest — neither short-circuits
+// to a hardcoded count.
+func countIssuesBySeverity(issues []interface{}, severityTags []string, fallbackKeywords []string) int {
+	if len(issues) == 0 {
+		return 0
+	}
+	count := 0
+	for _, raw := range issues {
+		if classifyIssue(raw, severityTags, fallbackKeywords) {
+			count++
+		}
+	}
+	return count
+}
+
+// classifyIssue returns true when the supplied issue matches one of the
+// severity tags (via direct SecurityIssue.Severity comparison) OR matches
+// one of the fallback keywords on its stringified form. Centralises the
+// three-way match (value-struct, pointer-struct, string-fallback) so the
+// outer counter has no goto and no shadowed variable declarations.
+func classifyIssue(raw interface{}, severityTags []string, fallbackKeywords []string) bool {
+	switch v := raw.(type) {
+	case security.SecurityIssue:
+		for _, tag := range severityTags {
+			if strings.EqualFold(v.Severity, tag) {
+				return true
+			}
+		}
+		return false
+	case *security.SecurityIssue:
+		if v == nil {
+			return false
+		}
+		for _, tag := range severityTags {
+			if strings.EqualFold(v.Severity, tag) {
+				return true
+			}
+		}
+		return false
+	default:
+		lower := strings.ToLower(fmt.Sprintf("%v", raw))
+		for _, kw := range fallbackKeywords {
+			if strings.Contains(lower, kw) {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 func parseDuration(durationStr string) time.Duration {
