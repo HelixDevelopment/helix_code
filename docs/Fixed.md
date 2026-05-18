@@ -56,7 +56,8 @@
 | 2026-05-19 | Auth i18n kickoff (Phase 4 round 26) | Feature | Implemented (→ Fixed.md) | 133 | (submodule TBD) + 4e78c99 | Pointer visible; formal report pending |
 | 2026-05-19 | helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27) | Feature | Implemented (→ Fixed.md) | 134 | 69189d0 | HTTP server entry; Option B pattern |
 | 2026-05-19 | PliniusCommon i18n kickoff (Phase 4 round 28) | Feature | Implemented (→ Fixed.md) | 135 | fbbe695 + ae6699b | Infrastructure-only (Watcher 127 precedent); 36 bundle keys seeded; 64×256 concurrent-safe; +250 LOC |
-| 2026-05-19 | helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) | Feature | Implemented (→ Fixed.md) | 137 | 4eba31b | tview/tcell TUI; formal report pending |
+| 2026-05-19 | helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) | Feature | Implemented (→ Fixed.md) | 137 | 4eba31b | tview/tcell TUI; 10 sidebar items + title + status; 296 LOC; -10 baseline |
+| 2026-05-19 | helix_code/applications/desktop i18n (Phase 4 round 29) | Feature | Implemented (→ Fixed.md) | 136 | b5a9487 (content absorbed alongside android; CONST-043 preserved) | Fyne GUI; content landed in tree |
 | 2026-05-19 | helix_code/applications/ios infrastructure-only (Phase 4 round 31) | Feature | Implemented (→ Fixed.md) | 138 | 27d121b (mislabelled as round-139 due to race; CONST-043 preserved) | Swift native per CONST-052 Apple exemption; 6 tests PASS |
 | 2026-05-19 | helix_code/applications/android infrastructure-only (Phase 4 round 32) | Feature | Implemented (→ Fixed.md) | 139 | b5a9487 (re-commit after parallel 27d121b) | Android primarily native Kotlin/Java per CONST-052 language exemption; Go bridge surface minimal — infrastructure pattern |
 | 2026-05-19 | helix_code/applications/aurora_os × up to 10 migration (Phase 4 round 33) | Feature | Implemented (→ Fixed.md) | 140 | 75f35f6 | Aurora-OS platform; formal report pending |
