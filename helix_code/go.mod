@@ -4,7 +4,9 @@ go 1.26
 
 require (
 	digital.vasic.containers v0.0.0-00010101000000-000000000000
+	digital.vasic.debate v0.0.0-00010101000000-000000000000
 	digital.vasic.helixqa v0.0.0-00010101000000-000000000000
+	digital.vasic.helixspecifier v0.0.0-00010101000000-000000000000
 	fyne.io/fyne/v2 v2.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
@@ -155,6 +157,7 @@ require (
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
 	github.com/segmentio/encoding v0.3.4 // indirect
+	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -199,3 +202,7 @@ replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/VisionEng
 replace digital.vasic.challenges => ../challenges
 
 replace digital.vasic.security => ../security
+
+replace digital.vasic.debate => ../dependencies/HelixDevelopment/DebateOrchestrator
+
+replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/HelixSpecifier
