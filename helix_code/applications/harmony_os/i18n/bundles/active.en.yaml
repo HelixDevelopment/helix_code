@@ -1,0 +1,30 @@
+# harmony_os i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/applications/harmony_os/main_nogui.go to a message ID
+# resolved at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: harmony_os_<area>_<short_description>. All IDs
+# prefixed with harmony_os_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-96 §11.4 anti-bluff sweep (2026-05-18): 5 highest-impact
+# CLI section headers migrated. Remaining hardcoded strings tracked
+# for future rounds.
+
+harmony_os_cli_status_header:
+  other: "=== HelixCode Harmony OS Status ==="
+
+harmony_os_cli_system_header:
+  other: "=== Harmony OS System Information ==="
+
+harmony_os_cli_projects_header:
+  other: "=== Projects ==="
+
+harmony_os_cli_sessions_header:
+  other: "=== Sessions ==="
+
+harmony_os_cli_tasks_header:
+  other: "=== Tasks ==="

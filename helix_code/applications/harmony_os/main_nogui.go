@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/applications/harmony_os/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/hardware"
@@ -170,11 +171,50 @@ type HarmonyCLIApp struct {
 	sessionManager   *session.Manager
 	llmManager       *llm.ModelManager
 	hardwareDetector *hardware.HardwareDetector
+
+	// translator resolves CONST-046 user-facing message IDs. Defaults
+	// to i18n.NoopTranslator{} (loud message-ID echo) when nil — set
+	// by helix_code at boot via SetTranslator to a real
+	// *i18nadapter.Translator wired to the active.en.yaml bundle.
+	translator i18n.Translator
 }
 
-// NewHarmonyCLIApp creates a new CLI application
+// NewHarmonyCLIApp creates a new CLI application. The CLI starts with
+// i18n.NoopTranslator{} for backward compat — production wiring calls
+// SetTranslator with a real Translator (e.g. helix_code's
+// *i18nadapter.Translator) before Run.
 func NewHarmonyCLIApp() *HarmonyCLIApp {
-	return &HarmonyCLIApp{}
+	return &HarmonyCLIApp{
+		translator: i18n.NoopTranslator{},
+	}
+}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func (cliApp *HarmonyCLIApp) SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		cliApp.translator = i18n.NoopTranslator{}
+		return
+	}
+	cliApp.translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func (cliApp *HarmonyCLIApp) tr(ctx context.Context, msgID string, data map[string]any) string {
+	if cliApp.translator == nil {
+		cliApp.translator = i18n.NoopTranslator{}
+	}
+	out, err := cliApp.translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
 }
 
 // Initialize sets up the CLI application
@@ -301,7 +341,10 @@ Build with GUI disabled using: go build -tags nogui`)
 }
 
 func (cliApp *HarmonyCLIApp) cmdStatus() error {
-	fmt.Println("=== HelixCode Harmony OS Status ===")
+	// CONST-046 (round-96 §11.4): section header sourced from
+	// applications/harmony_os/i18n bundle via injected Translator;
+	// NoopTranslator echoes the message ID.
+	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_status_header", nil))
 	fmt.Println()
 
 	// System info
@@ -354,7 +397,9 @@ func (cliApp *HarmonyCLIApp) cmdStatus() error {
 }
 
 func (cliApp *HarmonyCLIApp) cmdSystem() error {
-	fmt.Println("=== Harmony OS System Information ===")
+	// CONST-046 (round-96 §11.4): section header sourced from
+	// applications/harmony_os/i18n bundle via injected Translator.
+	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_system_header", nil))
 	fmt.Println()
 
 	profile := cliApp.hardwareDetector.GetProfile()
@@ -405,7 +450,9 @@ func (cliApp *HarmonyCLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("=== Projects ===")
+		// CONST-046 (round-96 §11.4): section header sourced from
+		// applications/harmony_os/i18n bundle via injected Translator.
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_projects_header", nil))
 		if len(projects) == 0 {
 			fmt.Println("No projects found.")
 			return nil
@@ -474,7 +521,9 @@ func (cliApp *HarmonyCLIApp) cmdSessions(args []string) error {
 	switch args[0] {
 	case "list":
 		sessions := cliApp.sessionManager.GetAll()
-		fmt.Println("=== Sessions ===")
+		// CONST-046 (round-96 §11.4): section header sourced from
+		// applications/harmony_os/i18n bundle via injected Translator.
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_sessions_header", nil))
 		if len(sessions) == 0 {
 			fmt.Println("No sessions found.")
 			return nil
@@ -552,7 +601,9 @@ func (cliApp *HarmonyCLIApp) cmdTasks(args []string) error {
 	switch args[0] {
 	case "list":
 		tasks := cliApp.taskManager.GetAllTasks()
-		fmt.Println("=== Tasks ===")
+		// CONST-046 (round-96 §11.4): section header sourced from
+		// applications/harmony_os/i18n bundle via injected Translator.
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_tasks_header", nil))
 		if len(tasks) == 0 {
 			fmt.Println("No tasks found.")
 			return nil
