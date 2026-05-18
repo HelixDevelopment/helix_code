@@ -723,8 +723,11 @@ func (cliApp *HarmonyCLIApp) cmdDistributed(args []string) error {
 		fmt.Println("  - Data synchronization: NOT WIRED (Harmony distributed-data SDK absent — `sync` returns error)")
 		fmt.Println("  - Device discovery: NOT WIRED (Harmony device-manager SDK absent — `discover` returns error)")
 		fmt.Println()
-		fmt.Println("Implementation gap tracked in applications/harmony_os/main.go via")
+		fmt.Println("Implementation gap tracked in applications/harmony_os/distributed.go via")
 		fmt.Println("ErrHarmonyDistributedSyncNotImplemented and ErrHarmonyDiscoveryNotImplemented.")
+		fmt.Println("Resolution path (round-67 §11.4): consumers with a real Harmony OS Go")
+		fmt.Println("binding (cgo shim around OHOS::DistributedKv / JS bridge to ArkTS /")
+		fmt.Println("OEM SDK) call (*HarmonyDistributedEngine).SetDistributedSDK(impl) at boot.")
 
 	case "discover":
 		// Round-31 §11.4 fix: previous output was a PASS-bluff —
@@ -741,8 +744,10 @@ func (cliApp *HarmonyCLIApp) cmdDistributed(args []string) error {
 		fmt.Fprintln(os.Stderr, "ERROR: Harmony OS distributed device discovery is not wired in this build.")
 		fmt.Fprintln(os.Stderr, "The Harmony OS device-manager SDK is required and not present. This")
 		fmt.Fprintln(os.Stderr, "command previously printed a fake 'No devices found' success message;")
-		fmt.Fprintln(os.Stderr, "it now refuses to fabricate a result. See applications/harmony_os/main.go")
+		fmt.Fprintln(os.Stderr, "it now refuses to fabricate a result. See applications/harmony_os/distributed.go")
 		fmt.Fprintln(os.Stderr, "(ErrHarmonyDiscoveryNotImplemented) for the full implementation gap.")
+		fmt.Fprintln(os.Stderr, "Round-67 §11.4 resolution path: inject a HarmonyDistributedSDK via")
+		fmt.Fprintln(os.Stderr, "(*HarmonyDistributedEngine).SetDistributedSDK(impl) at boot.")
 		return fmt.Errorf("harmony distributed discover: not wired in this build")
 
 	case "sync":
@@ -760,8 +765,10 @@ func (cliApp *HarmonyCLIApp) cmdDistributed(args []string) error {
 		fmt.Fprintln(os.Stderr, "DeviceKVStore) is required and not present. This command previously")
 		fmt.Fprintln(os.Stderr, "printed 'Last Sync: Just now / Synced Devices: 0' without exchanging")
 		fmt.Fprintln(os.Stderr, "any state with any device; it now refuses to fabricate a result.")
-		fmt.Fprintln(os.Stderr, "See applications/harmony_os/main.go (ErrHarmonyDistributedSyncNotImplemented)")
+		fmt.Fprintln(os.Stderr, "See applications/harmony_os/distributed.go (ErrHarmonyDistributedSyncNotImplemented)")
 		fmt.Fprintln(os.Stderr, "for the full implementation gap.")
+		fmt.Fprintln(os.Stderr, "Round-67 §11.4 resolution path: inject a HarmonyDistributedSDK via")
+		fmt.Fprintln(os.Stderr, "(*HarmonyDataSync).SetDistributedSDK(impl) at boot.")
 		return fmt.Errorf("harmony distributed sync: not wired in this build")
 
 	default:
