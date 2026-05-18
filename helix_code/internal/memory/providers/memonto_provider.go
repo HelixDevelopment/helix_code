@@ -14,6 +14,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jdkato/prose/v2"
+
 	"dev.helix.code/internal/logging"
 	"dev.helix.code/internal/memory"
 )
@@ -1526,71 +1528,115 @@ func (p *MemontoProvider) callAPI(ctx context.Context, req MemontoRequest) (*Mem
 	return &apiResp, cost, nil
 }
 
-// extractConcepts performs stopword-filtered keyword extraction on the
-// supplied text and returns up to 10 unique candidate concepts.
+// extractConcepts performs real NLP-driven concept extraction over the
+// supplied text using the pure-Go jdkato/prose v2 library. It returns
+// up to 10 unique candidate concepts composed of:
 //
-// Forensic anchor (round-34 §11.4 audit, 2026-05-18): this function
-// previously carried the comment "Simple concept extraction - in a real
-// implementation, this would use NLP", which advertised an upgrade path
-// (named-entity recognition, dependency parsing, topic modelling, etc.)
-// that had not landed. The downstream BuildKnowledgeGraph path then
-// fabricated MemontoNode entries of type=="concept" from raw stopword-
-// filtered tokens, surfacing them to operators as though they were
-// semantically meaningful concepts. That is a §11.4 MEDIUM PASS-bluff:
-// the misleading-comment variety where the body is honest but the
-// docstring promised more than was delivered, encouraging callers to
-// trust the output as NLP-grade output.
+//   1. Named entities recognised by prose's NER model (PERSON, ORG, GPE,
+//      LOCATION, FACILITY, etc.). These are emitted in priority order
+//      because they carry the strongest semantic signal for the
+//      downstream Memonto knowledge-graph builder.
+//   2. Singular and plural proper / common nouns identified via POS
+//      tagging (Penn-Treebank tags NN, NNS, NNP, NNPS). These widen
+//      coverage for texts that contain few formal named entities.
 //
-// The new contract names the algorithm honestly — this IS what it is, a
-// best-effort keyword skim — and downstream callers should treat the
-// returned strings as token candidates, NOT as named entities or
-// disambiguated concepts. Wiring a real NLP backend (e.g. spaCy via
-// gRPC, stanza, or a tree-sitter-driven dependency parse) remains
-// future work tracked in docs/improvements/PROGRESS.md; until then the
-// honest name + docstring carries the gap.
+// Results are de-duplicated (case-insensitive bucket but original
+// surface form preserved on first occurrence), trimmed of incidental
+// punctuation, and capped at 10 to match the previous contract used by
+// callers in BuildKnowledgeGraph (see line ~252 above).
+//
+// Forensic anchor (round-55 §11.4 audit, 2026-05-18): replaces the
+// round-34 stopword-skim implementation (commit be1097b), which had
+// updated only the docstring to admit "best-effort keyword skim, NOT
+// NER/disambiguation". The body still tokenised on whitespace and
+// dropped stopwords — surfacing every remaining English word as a
+// "concept" node in the knowledge graph regardless of whether the word
+// carried semantic weight. That residual gap satisfied a Class-B
+// honest-rewrite under round-34 but left a Class-A capability-bluff
+// open: the function name and its caller's downstream behaviour
+// (creating MemontoNode entries of type=="concept") still promised NLP
+// concepts. Round-55 closes the gap by wiring real NER + POS-based
+// noun extraction via jdkato/prose v2.
+//
+// Library rationale (CONST-050(A) compliant): jdkato/prose v2 is a
+// pure-Go NLP toolkit (no cgo, no Python bridge, no external service
+// dependency). Its embedded Averaged Perceptron model adds ~5MB to the
+// final binary — accepted tradeoff for in-process NER without
+// operational complexity. Limitations: English-only; reasonably
+// well-formed prose required (heavily structured code/log lines yield
+// noisy results); not a substitute for a domain-tuned model.
+//
+// Failure semantics: prose.NewDocument is fail-soft for this caller —
+// if document construction errors (very unusual for valid UTF-8
+// input), the function logs at debug level and returns nil so the
+// knowledge-graph build proceeds without concept enrichment rather
+// than failing the whole call. Empty input returns nil without
+// invoking prose at all.
 func (p *MemontoProvider) extractConcepts(text string) []string {
-	// Best-effort keyword skim: lowercase + tokenize on whitespace +
-	// drop short tokens + drop stopwords + de-duplicate + cap at 10.
-	// NOT a real NLP pipeline (no stemming, no lemmatization, no NER,
-	// no disambiguation, no POS-tagging). See function-level forensic
-	// anchor above for the §11.4 rationale.
-	words := strings.Fields(strings.ToLower(text))
-	concepts := []string{}
-	seen := make(map[string]bool)
-
-	// Filter out common words and extract potential concepts
-	stopWords := map[string]bool{
-		"the": true, "a": true, "an": true, "and": true, "or": true, "but": true,
-		"in": true, "on": true, "at": true, "to": true, "for": true, "of": true,
-		"with": true, "by": true, "is": true, "are": true, "was": true, "were": true,
-		"be": true, "been": true, "being": true, "have": true, "has": true, "had": true,
-		"do": true, "does": true, "did": true, "will": true, "would": true, "could": true,
-		"should": true, "may": true, "might": true, "shall": true,
-		"can": true, "cannot": true, "must": true, "i": true, "you": true, "he": true,
-		"she": true, "it": true, "we": true, "they": true, "me": true, "him": true,
-		"her": true, "us": true, "them": true, "my": true, "your": true, "his": true,
-		"its": true, "our": true, "their": true, "this": true, "that": true, "these": true,
-		"those": true, "what": true, "which": true, "who": true, "when": true, "where": true,
-		"why": true, "how": true, "all": true, "both": true, "each": true, "few": true,
-		"more": true, "most": true, "other": true, "some": true, "such": true, "no": true,
-		"nor": true, "not": true, "only": true, "own": true, "same": true, "so": true,
-		"than": true, "too": true, "very": true, "just": true, "now": true, "also": true,
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return nil
 	}
 
-	for _, word := range words {
-		// Clean word
-		word = strings.Trim(word, ".,!?;:\"'()[]{}")
-		if len(word) < 3 || stopWords[word] || seen[word] {
+	const maxConcepts = 10
+
+	doc, err := prose.NewDocument(text)
+	if err != nil {
+		// Fail-soft per the contract documented above. Concept
+		// enrichment is best-effort; absence of concepts must not
+		// abort knowledge-graph construction.
+		if p.logger != nil {
+			p.logger.Debug("extractConcepts: prose.NewDocument failed (%v); returning no concepts", err)
+		}
+		return nil
+	}
+
+	concepts := make([]string, 0, maxConcepts)
+	seen := make(map[string]bool)
+
+	// Pass 1: named entities (highest semantic priority).
+	for _, ent := range doc.Entities() {
+		token := strings.TrimSpace(ent.Text)
+		token = strings.Trim(token, ".,!?;:\"'()[]{}")
+		if token == "" {
 			continue
 		}
+		key := strings.ToLower(token)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		concepts = append(concepts, token)
+		if len(concepts) >= maxConcepts {
+			return concepts
+		}
+	}
 
-		// Add as concept
-		concepts = append(concepts, word)
-		seen[word] = true
-
-		// Limit concepts
-		if len(concepts) >= 10 {
-			break
+	// Pass 2: noun phrases — proper nouns (NNP/NNPS) and common nouns
+	// (NN/NNS). Penn-Treebank tags emitted by prose's POS tagger.
+	nounTags := map[string]bool{
+		"NN":   true, // singular common noun
+		"NNS":  true, // plural common noun
+		"NNP":  true, // singular proper noun
+		"NNPS": true, // plural proper noun
+	}
+	for _, tok := range doc.Tokens() {
+		if !nounTags[tok.Tag] {
+			continue
+		}
+		token := strings.TrimSpace(tok.Text)
+		token = strings.Trim(token, ".,!?;:\"'()[]{}")
+		if len(token) < 2 {
+			continue
+		}
+		key := strings.ToLower(token)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		concepts = append(concepts, token)
+		if len(concepts) >= maxConcepts {
+			return concepts
 		}
 	}
 
