@@ -78,7 +78,8 @@ func TestCogneeManager(t *testing.T) {
 		err := cm.ProcessKnowledge(ctx, "test content")
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 
 	t.Run("ProcessKnowledge_EmptyContent", func(t *testing.T) {
@@ -104,7 +105,8 @@ func TestCogneeManager(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 
 	t.Run("SearchKnowledge_EmptyQuery", func(t *testing.T) {
@@ -297,6 +299,8 @@ func TestPerformanceOptimizer(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
+		// performance_optimizer.go literal still hardcoded ("optimizer
+		// not initialized") — deferred to a future CONST-046 round.
 		assert.Contains(t, err.Error(), "not initialized")
 	})
 
@@ -308,6 +312,8 @@ func TestPerformanceOptimizer(t *testing.T) {
 		err := po.Start(ctx)
 
 		assert.Error(t, err)
+		// performance_optimizer.go literal still hardcoded ("optimizer
+		// not initialized") — deferred to a future CONST-046 round.
 		assert.Contains(t, err.Error(), "not initialized")
 	})
 
@@ -1874,7 +1880,8 @@ func TestCogneeManagerStart(t *testing.T) {
 
 		err := cm.Start(context.Background())
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -1899,7 +1906,8 @@ func TestCogneeManagerCognify(t *testing.T) {
 
 		err := cm.Cognify(context.Background(), []string{"test"})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -1912,7 +1920,8 @@ func TestCogneeManagerGetInsights(t *testing.T) {
 
 		_, err := cm.GetInsights(context.Background(), "test query")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 
 	t.Run("GetInsights_EmptyQuery", func(t *testing.T) {
@@ -1924,7 +1933,8 @@ func TestCogneeManagerGetInsights(t *testing.T) {
 
 		_, err := cm.GetInsights(context.Background(), "")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "cannot be empty")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "cannot_be_empty" survives migration.
+		assert.Contains(t, err.Error(), "cannot_be_empty")
 	})
 }
 
@@ -1937,7 +1947,8 @@ func TestCogneeManagerProcessCode(t *testing.T) {
 
 		err := cm.ProcessCode(context.Background(), "func main() {}", "go")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 
 	t.Run("ProcessCode_EmptyCode", func(t *testing.T) {
@@ -1949,7 +1960,8 @@ func TestCogneeManagerProcessCode(t *testing.T) {
 
 		err := cm.ProcessCode(context.Background(), "", "go")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "cannot be empty")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "cannot_be_empty" survives migration.
+		assert.Contains(t, err.Error(), "cannot_be_empty")
 	})
 }
 
@@ -2000,7 +2012,8 @@ func TestCogneeManagerGetStatistics(t *testing.T) {
 
 		_, err := cm.GetStatistics(context.Background())
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -2013,7 +2026,8 @@ func TestCogneeManagerCreateDataset(t *testing.T) {
 
 		err := cm.CreateDataset(context.Background(), "test", "description")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -2026,7 +2040,8 @@ func TestCogneeManagerListDatasets(t *testing.T) {
 
 		_, err := cm.ListDatasets(context.Background())
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -2039,7 +2054,8 @@ func TestCogneeManagerDeleteDataset(t *testing.T) {
 
 		err := cm.DeleteDataset(context.Background(), "test")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 
@@ -2052,7 +2068,8 @@ func TestCogneeManagerVisualizeGraph(t *testing.T) {
 
 		_, err := cm.VisualizeGraph(context.Background(), "test")
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not initialized")
+		// CONST-046 round-148: NoopTranslator echoes message-ID verbatim; substring "not_initialized" survives migration.
+		assert.Contains(t, err.Error(), "not_initialized")
 	})
 }
 

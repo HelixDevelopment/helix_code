@@ -75,7 +75,7 @@ func NewCogneeManager(cfg *config.HelixConfig, hwProfile *hardware.HardwareProfi
 // Start starts the Cognee manager
 func (cm *CogneeManager) Start(ctx context.Context) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 	return cm.service.Start(ctx)
 }
@@ -91,11 +91,11 @@ func (cm *CogneeManager) Stop(ctx context.Context) error {
 // ProcessKnowledge processes knowledge content
 func (cm *CogneeManager) ProcessKnowledge(ctx context.Context, content string) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	if content == "" {
-		return fmt.Errorf("content cannot be empty")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_content_cannot_be_empty", nil))
 	}
 
 	req := &AddMemoryRequest{
@@ -106,7 +106,7 @@ func (cm *CogneeManager) ProcessKnowledge(ctx context.Context, content string) e
 
 	_, err := cm.service.AddMemory(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to process knowledge: %w", err)
+		return fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_process_knowledge", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return nil
@@ -115,11 +115,11 @@ func (cm *CogneeManager) ProcessKnowledge(ctx context.Context, content string) e
 // SearchKnowledge searches the knowledge base
 func (cm *CogneeManager) SearchKnowledge(ctx context.Context, query string) (interface{}, error) {
 	if cm.service == nil {
-		return nil, fmt.Errorf("Cognee service not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	if query == "" {
-		return nil, fmt.Errorf("query cannot be empty")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_query_cannot_be_empty", nil))
 	}
 
 	req := &SearchMemoryRequest{
@@ -130,7 +130,7 @@ func (cm *CogneeManager) SearchKnowledge(ctx context.Context, query string) (int
 
 	resp, err := cm.service.SearchMemory(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to search knowledge: %w", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_search_knowledge", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return resp, nil
@@ -139,7 +139,7 @@ func (cm *CogneeManager) SearchKnowledge(ctx context.Context, query string) (int
 // Cognify processes data into knowledge graphs
 func (cm *CogneeManager) Cognify(ctx context.Context, datasets []string) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	req := &CognifyRequest{
@@ -148,7 +148,7 @@ func (cm *CogneeManager) Cognify(ctx context.Context, datasets []string) error {
 
 	_, err := cm.service.Cognify(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to cognify: %w", err)
+		return fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_cognify", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return nil
@@ -157,11 +157,11 @@ func (cm *CogneeManager) Cognify(ctx context.Context, datasets []string) error {
 // GetInsights retrieves insights from the knowledge graph
 func (cm *CogneeManager) GetInsights(ctx context.Context, query string) (interface{}, error) {
 	if cm.service == nil {
-		return nil, fmt.Errorf("Cognee service not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	if query == "" {
-		return nil, fmt.Errorf("query cannot be empty")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_query_cannot_be_empty", nil))
 	}
 
 	req := &InsightsRequest{
@@ -171,7 +171,7 @@ func (cm *CogneeManager) GetInsights(ctx context.Context, query string) (interfa
 
 	resp, err := cm.service.GetInsights(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get insights: %w", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_get_insights", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return resp, nil
@@ -180,11 +180,11 @@ func (cm *CogneeManager) GetInsights(ctx context.Context, query string) (interfa
 // ProcessCode processes code through the code understanding pipeline
 func (cm *CogneeManager) ProcessCode(ctx context.Context, code string, language string) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	if code == "" {
-		return fmt.Errorf("code cannot be empty")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_code_cannot_be_empty", nil))
 	}
 
 	req := &CodePipelineRequest{
@@ -195,7 +195,7 @@ func (cm *CogneeManager) ProcessCode(ctx context.Context, code string, language 
 
 	_, err := cm.service.ProcessCode(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to process code: %w", err)
+		return fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_process_code", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return nil
@@ -225,7 +225,7 @@ func (cm *CogneeManager) GetHealth(ctx context.Context) (*HealthStatus, error) {
 // GetStatistics returns service statistics
 func (cm *CogneeManager) GetStatistics(ctx context.Context) (*CogneeStatistics, error) {
 	if cm.service == nil {
-		return nil, fmt.Errorf("Cognee service not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	return cm.service.GetStatistics(ctx)
@@ -234,7 +234,7 @@ func (cm *CogneeManager) GetStatistics(ctx context.Context) (*CogneeStatistics, 
 // CreateDataset creates a new dataset
 func (cm *CogneeManager) CreateDataset(ctx context.Context, name, description string) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	req := &CreateDatasetRequest{
@@ -244,7 +244,7 @@ func (cm *CogneeManager) CreateDataset(ctx context.Context, name, description st
 
 	_, err := cm.service.CreateDataset(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create dataset: %w", err)
+		return fmt.Errorf("%s: %w", tr(ctx, "internal_cognee_failed_create_dataset", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return nil
@@ -253,7 +253,7 @@ func (cm *CogneeManager) CreateDataset(ctx context.Context, name, description st
 // ListDatasets retrieves all datasets
 func (cm *CogneeManager) ListDatasets(ctx context.Context) ([]Dataset, error) {
 	if cm.service == nil {
-		return nil, fmt.Errorf("Cognee service not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	resp, err := cm.service.ListDatasets(ctx)
@@ -267,7 +267,7 @@ func (cm *CogneeManager) ListDatasets(ctx context.Context) ([]Dataset, error) {
 // DeleteDataset deletes a dataset
 func (cm *CogneeManager) DeleteDataset(ctx context.Context, name string) error {
 	if cm.service == nil {
-		return fmt.Errorf("Cognee service not initialized")
+		return fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	return cm.service.DeleteDataset(ctx, name)
@@ -276,7 +276,7 @@ func (cm *CogneeManager) DeleteDataset(ctx context.Context, name string) error {
 // VisualizeGraph retrieves graph visualization data
 func (cm *CogneeManager) VisualizeGraph(ctx context.Context, datasetName string) (*GraphVisualizationResponse, error) {
 	if cm.service == nil {
-		return nil, fmt.Errorf("Cognee service not initialized")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_cognee_service_not_initialized", nil))
 	}
 
 	req := &GraphVisualizationRequest{

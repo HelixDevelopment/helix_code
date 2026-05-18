@@ -1,0 +1,52 @@
+# internal/cognee i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/cognee/cognee_manager.go (and other cognee
+# package source files) to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_cognee_<area>_<short_description>. All
+# IDs prefixed with internal_cognee_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-148 §11.4 anti-bluff sweep (2026-05-18): migrated 10 of the
+# user-facing literals emitted by cognee_manager.go — the
+# service-not-initialized message (de-duplicated across many sites,
+# previously written as multiple fmt.Errorf literals), the empty-input
+# guards (content/query/code cannot be empty), and the
+# operation-failure wrappers for process-knowledge / search-knowledge /
+# cognify / get-insights / process-code / create-dataset. handler.go
+# JSON literals and client.go HTTP-error wrappers are deferred to
+# future rounds to stay under the size cap.
+
+internal_cognee_service_not_initialized:
+  other: "Cognee service not initialized"
+
+internal_cognee_content_cannot_be_empty:
+  other: "content cannot be empty"
+
+internal_cognee_query_cannot_be_empty:
+  other: "query cannot be empty"
+
+internal_cognee_code_cannot_be_empty:
+  other: "code cannot be empty"
+
+internal_cognee_failed_process_knowledge:
+  other: "failed to process knowledge: {{.Err}}"
+
+internal_cognee_failed_search_knowledge:
+  other: "failed to search knowledge: {{.Err}}"
+
+internal_cognee_failed_cognify:
+  other: "failed to cognify: {{.Err}}"
+
+internal_cognee_failed_get_insights:
+  other: "failed to get insights: {{.Err}}"
+
+internal_cognee_failed_process_code:
+  other: "failed to process code: {{.Err}}"
+
+internal_cognee_failed_create_dataset:
+  other: "failed to create dataset: {{.Err}}"
