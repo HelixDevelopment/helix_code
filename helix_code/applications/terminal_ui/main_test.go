@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"testing"
 
+	"dev.helix.code/applications/terminal_ui/i18n"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,6 +13,81 @@ func TestNewTerminalUI(t *testing.T) {
 	tui := NewTerminalUI()
 	assert.NotNil(t, tui)
 	assert.NotNil(t, tui.app)
+	// Round-137 §11.4: NewTerminalUI MUST install the
+	// NoopTranslator default so tui.t() never panics on a nil
+	// translator. Loud-echo safety net.
+	assert.NotNil(t, tui.translator, "NewTerminalUI must install a non-nil Translator default")
+}
+
+// sentinelTranslator is a unit-test-only stub (CONST-050(A): mocks
+// allowed in *_test.go) that wraps every message ID in a recognisable
+// sentinel envelope. Call-site tests use this to PROVE the migrated
+// expression actually goes through Translator.T — a bluff-resistant
+// alternative to grepping for "i18n" in the source.
+type sentinelTranslator struct {
+	calls []string
+}
+
+func (s *sentinelTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	s.calls = append(s.calls, id)
+	return "<SENTINEL:" + id + ">", nil
+}
+
+func (s *sentinelTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	s.calls = append(s.calls, id)
+	return "<SENTINEL:" + id + ">", nil
+}
+
+func TestTerminalUI_SetTranslator_InstallsCustom(t *testing.T) {
+	tui := NewTerminalUI()
+	tr := &sentinelTranslator{}
+	tui.SetTranslator(tr)
+	got := tui.t("terminal_ui_sidebar_title")
+	assert.Equal(t, "<SENTINEL:terminal_ui_sidebar_title>", got,
+		"tui.t() must route through the injected Translator")
+	assert.Equal(t, []string{"terminal_ui_sidebar_title"}, tr.calls,
+		"sentinelTranslator must record the message ID it was asked to resolve")
+}
+
+func TestTerminalUI_SetTranslator_NilPreservesDefault(t *testing.T) {
+	tui := NewTerminalUI()
+	defaultTr := tui.translator
+	tui.SetTranslator(nil)
+	assert.Equal(t, defaultTr, tui.translator,
+		"SetTranslator(nil) must NOT destroy the NoopTranslator safety net")
+	// And tui.t() must still yield a loud echo of the ID.
+	assert.Equal(t, "terminal_ui_sidebar_title", tui.t("terminal_ui_sidebar_title"))
+}
+
+// errTranslator simulates a Translator.T failure so we can assert
+// tui.t() falls back to the literal message ID (loud echo) rather
+// than returning an empty string and silently breaking the UI —
+// that would be a §11.4 PASS-bluff at the i18n error path.
+type errTranslator struct{}
+
+func (errTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	return "", errors.New("translator boom")
+}
+func (errTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return "", errors.New("translator boom")
+}
+
+func TestTerminalUI_T_FallsBackToIDOnError(t *testing.T) {
+	tui := NewTerminalUI()
+	tui.SetTranslator(errTranslator{})
+	got := tui.t("terminal_ui_status_bar_default")
+	assert.Equal(t, "terminal_ui_status_bar_default", got,
+		"tui.t() must loud-echo the ID when Translator.T returns an error")
+}
+
+// Ensure the i18n package's NoopTranslator (the constructor default)
+// echoes the ID — paired sanity check against the in-package test in
+// applications/terminal_ui/i18n/translator_test.go.
+func TestTerminalUI_NoopTranslator_LoudEcho(t *testing.T) {
+	tr := i18n.NoopTranslator{}
+	got, err := tr.T(context.Background(), "terminal_ui_sidebar_dashboard_desc", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "terminal_ui_sidebar_dashboard_desc", got)
 }
 
 func TestNewThemeManager(t *testing.T) {

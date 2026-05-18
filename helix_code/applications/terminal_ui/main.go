@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/applications/terminal_ui/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/helixqa"
@@ -61,13 +62,48 @@ type TerminalUI struct {
 	// Current state
 	currentUser    string
 	currentSession string
+
+	// translator resolves user-facing strings per CONST-046
+	// (round-137 §11.4 migration). Defaults to NoopTranslator (loud
+	// echo of message IDs) until SetTranslator wires a real
+	// *i18nadapter.Translator at boot. Never nil after
+	// NewTerminalUI returns.
+	translator i18n.Translator
 }
 
 // NewTerminalUI creates a new Terminal UI instance
 func NewTerminalUI() *TerminalUI {
 	return &TerminalUI{
-		app: tview.NewApplication(),
+		app:        tview.NewApplication(),
+		translator: i18n.NoopTranslator{},
 	}
+}
+
+// SetTranslator injects the runtime Translator (per CONST-046
+// round-137). Passing nil is a no-op — the NoopTranslator default
+// installed by NewTerminalUI is preserved so the loud-echo safety
+// net never disappears silently. helix_code wires
+// *i18nadapter.Translator at boot.
+func (tui *TerminalUI) SetTranslator(t i18n.Translator) {
+	if t == nil {
+		return
+	}
+	tui.translator = t
+}
+
+// t is a tiny call-site helper that resolves a message ID through
+// the injected Translator and falls back to the literal id on error
+// (loud echo — never silently swallow). Centralising the
+// boilerplate keeps migrated call sites a single expression long.
+func (tui *TerminalUI) t(id string) string {
+	if tui.translator == nil {
+		return id
+	}
+	got, err := tui.translator.T(context.Background(), id, nil)
+	if err != nil || got == "" {
+		return id
+	}
+	return got
 }
 
 // Initialize sets up the Terminal UI with all dependencies
@@ -146,19 +182,24 @@ func (tui *TerminalUI) setupUI() {
 	// Create main layout
 	tui.mainFlex = tview.NewFlex().SetDirection(tview.FlexColumn)
 
-	// Create sidebar navigation
+	// Create sidebar navigation. Sidebar descriptions + title are
+	// resolved via i18n.Translator per CONST-046 round-137. The
+	// primary item labels (Dashboard/Tasks/...) are short proper
+	// nouns / mnemonic-letter anchors and are intentionally kept
+	// hardcoded in this round; they are tracked for migration in a
+	// later round once the i18n surface stabilises.
 	tui.sidebar = tview.NewList().
-		AddItem("Dashboard", "System overview and status", 'd', tui.showDashboard).
-		AddItem("Tasks", "Manage distributed tasks", 't', tui.showTasks).
-		AddItem("Workers", "Monitor worker nodes", 'w', tui.showWorkers).
-		AddItem("Projects", "Project management", 'p', tui.showProjects).
-		AddItem("Sessions", "Active development sessions", 's', tui.showSessions).
-		AddItem("LLM", "AI model interaction", 'l', tui.showLLM).
-		AddItem("QA", "Quality assurance dashboard", 'q', tui.showQA).
-		AddItem("Settings", "Configuration and preferences", 'c', tui.showSettings).
+		AddItem("Dashboard", tui.t("terminal_ui_sidebar_dashboard_desc"), 'd', tui.showDashboard).
+		AddItem("Tasks", tui.t("terminal_ui_sidebar_tasks_desc"), 't', tui.showTasks).
+		AddItem("Workers", tui.t("terminal_ui_sidebar_workers_desc"), 'w', tui.showWorkers).
+		AddItem("Projects", tui.t("terminal_ui_sidebar_projects_desc"), 'p', tui.showProjects).
+		AddItem("Sessions", tui.t("terminal_ui_sidebar_sessions_desc"), 's', tui.showSessions).
+		AddItem("LLM", tui.t("terminal_ui_sidebar_llm_desc"), 'l', tui.showLLM).
+		AddItem("QA", tui.t("terminal_ui_sidebar_qa_desc"), 'q', tui.showQA).
+		AddItem("Settings", tui.t("terminal_ui_sidebar_settings_desc"), 'c', tui.showSettings).
 		ShowSecondaryText(false)
 
-	tui.sidebar.SetBorder(true).SetTitle("HelixCode v1.0.0")
+	tui.sidebar.SetBorder(true).SetTitle(tui.t("terminal_ui_sidebar_title"))
 
 	// Create content area
 	tui.content = tview.NewPages()
@@ -166,7 +207,7 @@ func (tui *TerminalUI) setupUI() {
 	// Create status bar
 	tui.statusBar = tview.NewTextView().
 		SetDynamicColors(true).
-		SetText("[green]Ready[white] | User: [yellow]Not logged in[white] | Session: [yellow]None").
+		SetText(tui.t("terminal_ui_status_bar_default")).
 		SetTextAlign(tview.AlignCenter)
 	tui.statusBar.SetBorder(true).SetTitle("Status")
 
