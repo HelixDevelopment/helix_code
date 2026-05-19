@@ -1,0 +1,56 @@
+# internal/persistence i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/persistence/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_persistence_<area>_<short_description>.
+# All IDs prefixed with internal_persistence_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-169 §11.4 anti-bluff sweep (2026-05-19): migrated 10 distinct
+# user-facing error wrap strings emitted by store.go and serializer.go
+# covering the persistence lifecycle (base-path creation, save/load
+# failures for sessions, conversations, focus chains) plus serializer
+# validation/detection paths (unknown format, binary data too short,
+# empty data).
+#
+# JSON-format identifier returns ("json", "json.gz", "bin") and
+# directory names ("sessions", "conversations", "focus") are NOT
+# migrated in this round because they are stable identity tokens
+# consumed as protocol / filesystem keys, not user-facing display
+# content. Migrating them would silently rewrite identity tokens used
+# in equality checks and filesystem layout.
+
+internal_persistence_base_path_create_failed:
+  other: "failed to create base path: {{.Error}}"
+
+internal_persistence_save_sessions_failed:
+  other: "failed to save sessions: {{.Error}}"
+
+internal_persistence_save_conversations_failed:
+  other: "failed to save conversations: {{.Error}}"
+
+internal_persistence_save_focus_chains_failed:
+  other: "failed to save focus chains: {{.Error}}"
+
+internal_persistence_load_sessions_failed:
+  other: "failed to load sessions: {{.Error}}"
+
+internal_persistence_load_conversations_failed:
+  other: "failed to load conversations: {{.Error}}"
+
+internal_persistence_load_focus_chains_failed:
+  other: "failed to load focus chains: {{.Error}}"
+
+internal_persistence_serializer_unknown_format:
+  other: "unknown format: {{.Format}}"
+
+internal_persistence_binary_data_too_short:
+  other: "binary data too short"
+
+internal_persistence_detect_empty_data:
+  other: "empty data"

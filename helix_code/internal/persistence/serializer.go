@@ -2,8 +2,9 @@ package persistence
 
 import (
 	"compress/gzip"
+	stdctx "context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 )
 
@@ -198,7 +199,8 @@ func Validate(data []byte, format Format) error {
 	case FormatBinary:
 		return validateBinary(data)
 	default:
-		return fmt.Errorf("unknown format: %s", format)
+		return errors.New(tr(stdctx.Background(), "internal_persistence_serializer_unknown_format",
+			map[string]any{"Format": string(format)}))
 	}
 }
 
@@ -221,7 +223,7 @@ func validateJSONGzip(data []byte) error {
 func validateBinary(data []byte) error {
 	// Simple check: must have at least 4 bytes for header
 	if len(data) < 4 {
-		return fmt.Errorf("binary data too short")
+		return errors.New(tr(stdctx.Background(), "internal_persistence_binary_data_too_short", nil))
 	}
 	return nil
 }
@@ -229,7 +231,7 @@ func validateBinary(data []byte) error {
 // DetectFormat attempts to detect the format from data
 func DetectFormat(data []byte) (Format, error) {
 	if len(data) == 0 {
-		return "", fmt.Errorf("empty data")
+		return "", errors.New(tr(stdctx.Background(), "internal_persistence_detect_empty_data", nil))
 	}
 
 	// Check for gzip magic bytes (0x1f, 0x8b)

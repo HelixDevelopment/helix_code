@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	stdctx "context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -62,7 +63,9 @@ type LoadMetadata struct {
 func NewStore(basePath string) (*Store, error) {
 	// Ensure base path exists
 	if err := os.MkdirAll(basePath, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create base path: %w", err)
+		return nil, fmt.Errorf("%s: %w",
+			tr(stdctx.Background(), "internal_persistence_base_path_create_failed",
+				map[string]any{"Error": err.Error()}), err)
 	}
 
 	return &Store{
@@ -170,7 +173,9 @@ func (s *Store) SaveAll() error {
 	if s.sessionMgr != nil {
 		size, items, err := s.saveSessions()
 		if err != nil {
-			return fmt.Errorf("failed to save sessions: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_save_sessions_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
@@ -180,7 +185,9 @@ func (s *Store) SaveAll() error {
 	if s.memoryMgr != nil {
 		size, items, err := s.saveConversations()
 		if err != nil {
-			return fmt.Errorf("failed to save conversations: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_save_conversations_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
@@ -190,7 +197,9 @@ func (s *Store) SaveAll() error {
 	if s.focusMgr != nil {
 		size, items, err := s.saveFocusChains()
 		if err != nil {
-			return fmt.Errorf("failed to save focus chains: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_save_focus_chains_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
@@ -343,7 +352,9 @@ func (s *Store) LoadAll() error {
 	if s.sessionMgr != nil {
 		size, items, err := s.loadSessions()
 		if err != nil {
-			return fmt.Errorf("failed to load sessions: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_load_sessions_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
@@ -353,7 +364,9 @@ func (s *Store) LoadAll() error {
 	if s.memoryMgr != nil {
 		size, items, err := s.loadConversations()
 		if err != nil {
-			return fmt.Errorf("failed to load conversations: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_load_conversations_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
@@ -363,7 +376,9 @@ func (s *Store) LoadAll() error {
 	if s.focusMgr != nil {
 		size, items, err := s.loadFocusChains()
 		if err != nil {
-			return fmt.Errorf("failed to load focus chains: %w", err)
+			return fmt.Errorf("%s: %w",
+				tr(stdctx.Background(), "internal_persistence_load_focus_chains_failed",
+					map[string]any{"Error": err.Error()}), err)
 		}
 		totalSize += size
 		totalItems += items
