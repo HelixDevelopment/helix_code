@@ -177,7 +177,7 @@ logs for all running providers will be displayed.`,
 func runInit(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 
-	fmt.Println("🚀 Initializing Local LLM Provider Manager...")
+	fmt.Println(tr(ctx, "cmd_local_llm_init_start", nil))
 
 	// Create manager instance
 	manager := llm.NewLocalLLMManager(localLLMDir)
@@ -187,11 +187,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to initialize manager: %w", err)
 	}
 
-	fmt.Println("✅ Initialization complete!")
+	fmt.Println(tr(ctx, "cmd_local_llm_init_complete", nil))
 
 	// Auto-start if requested
 	if autoStart {
-		fmt.Println("\n🚀 Auto-starting all providers...")
+		fmt.Println("\n" + tr(ctx, "cmd_local_llm_autostart", nil))
 		if err := manager.StartAllProviders(ctx); err != nil {
 			return fmt.Errorf("failed to start providers: %w", err)
 		}
@@ -217,13 +217,13 @@ func runStart(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		// Start all providers
-		fmt.Println("🚀 Starting all local LLM providers...")
+		fmt.Println(tr(ctx, "cmd_local_llm_start_all", nil))
 		return manager.StartAllProviders(ctx)
 	}
 
 	// Start specific provider
 	providerName := args[0]
-	fmt.Printf("🚀 Starting provider: %s\n", providerName)
+	fmt.Println(tr(ctx, "cmd_local_llm_start_provider", map[string]any{"Provider": providerName}))
 	return manager.StartProvider(ctx, providerName)
 }
 
@@ -233,13 +233,13 @@ func runStop(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		// Stop all providers
-		fmt.Println("🛑 Stopping all local LLM providers...")
+		fmt.Println(tr(ctx, "cmd_local_llm_stop_all", nil))
 		return manager.StopAllProviders(ctx)
 	}
 
 	// Stop specific provider
 	providerName := args[0]
-	fmt.Printf("🛑 Stopping provider: %s\n", providerName)
+	fmt.Println(tr(ctx, "cmd_local_llm_stop_provider", map[string]any{"Provider": providerName}))
 	return manager.StopProvider(ctx, providerName)
 }
 
@@ -251,7 +251,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	status := manager.GetProviderStatus(ctx)
 
 	if len(status) == 0 {
-		fmt.Println("❌ No local LLM providers found. Run 'helix local-llm init' to install providers.")
+		fmt.Println(tr(ctx, "cmd_local_llm_status_none", nil))
 		return nil
 	}
 
@@ -275,7 +275,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	// Show running endpoints
 	running := manager.GetRunningProviders(ctx)
 	if len(running) > 0 {
-		fmt.Println("\n📡 Running Provider Endpoints:")
+		fmt.Println("\n" + tr(ctx, "cmd_local_llm_running_endpoints", nil))
 		for _, endpoint := range running {
 			fmt.Printf("  • %s\n", endpoint)
 		}
@@ -320,7 +320,7 @@ func runCleanup(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	manager := llm.NewLocalLLMManager(localLLMDir)
 
-	fmt.Println("🧹 Cleaning up local LLM providers...")
+	fmt.Println(tr(ctx, "cmd_local_llm_cleanup_start", nil))
 	return manager.Cleanup(ctx)
 }
 
@@ -335,19 +335,19 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		// Update all providers
-		fmt.Println("🔄 Updating all local LLM providers...")
+		fmt.Println(tr(ctx, "cmd_local_llm_update_all", nil))
 		status := manager.GetProviderStatus(ctx)
 		for name := range status {
 			if err := manager.UpdateProvider(ctx, name); err != nil {
-				fmt.Printf("⚠️  Failed to update %s: %v\n", name, err)
+				fmt.Printf("⚠️  %s\n", tr(ctx, "cmd_local_llm_update_failed", map[string]any{"Provider": name, "Error": err}))
 			} else {
-				fmt.Printf("✅ Updated %s\n", name)
+				fmt.Println(tr(ctx, "cmd_local_llm_update_done", map[string]any{"Provider": name}))
 			}
 		}
 	} else {
 		// Update specific provider
 		providerName := args[0]
-		fmt.Printf("🔄 Updating provider: %s\n", providerName)
+		fmt.Println(tr(ctx, "cmd_local_llm_update_provider", map[string]any{"Provider": providerName}))
 		return manager.UpdateProvider(ctx, providerName)
 	}
 
@@ -416,23 +416,23 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	ticker := time.NewTicker(time.Duration(healthInterval) * time.Second)
 	defer ticker.Stop()
 
-	fmt.Println("🔍 Starting Local LLM Provider Monitoring...")
-	fmt.Println("Press Ctrl+C to stop monitoring")
+	fmt.Println(tr(ctx, "cmd_local_llm_monitor_start", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_monitor_stop_hint", nil))
 
 	for {
 		select {
 		case <-sigChan:
-			fmt.Println("\n👋 Stopping monitoring...")
+			fmt.Println("\n" + tr(ctx, "cmd_local_llm_monitor_stopping", nil))
 			return nil
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
 			// Clear screen and show status
 			clearScreen()
-			fmt.Printf("🔍 Local LLM Provider Status - %s\n\n", time.Now().Format("2006-01-02 15:04:05"))
+			fmt.Printf("%s\n\n", tr(ctx, "cmd_local_llm_monitor_status_header", map[string]any{"Timestamp": time.Now().Format("2006-01-02 15:04:05")}))
 
 			if err := runStatus(cmd, args); err != nil {
-				fmt.Printf("❌ Error getting status: %v\n", err)
+				fmt.Printf("❌ %s\n", tr(ctx, "cmd_local_llm_monitor_status_error", map[string]any{"Error": err}))
 			}
 		}
 	}
@@ -748,13 +748,13 @@ func runDownloadModel(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("model not found: %w", err)
 	}
 
-	fmt.Printf("📥 Downloading model: %s\n", model.Name)
-	fmt.Printf("📝 Description: %s\n", model.Description)
-	fmt.Printf("📊 Model size: %s, Context: %d tokens\n", model.ModelSize, model.ContextSize)
+	fmt.Println(tr(ctx, "cmd_local_llm_download_model", map[string]any{"Name": model.Name}))
+	fmt.Println(tr(ctx, "cmd_local_llm_download_desc", map[string]any{"Description": model.Description}))
+	fmt.Println(tr(ctx, "cmd_local_llm_download_size", map[string]any{"Size": model.ModelSize, "Context": model.ContextSize}))
 
 	// Get compatible formats
 	if downloadProvider == "" {
-		fmt.Println("⚠️  No provider specified, showing compatible formats for all providers:")
+		fmt.Println(tr(ctx, "cmd_local_llm_download_no_provider", nil))
 		formats := map[string]bool{}
 		for _, provider := range []string{"vllm", "localai", "ollama", "llamacpp"} {
 			compatible, _ := manager.GetCompatibleFormats(provider, modelID)
@@ -805,7 +805,7 @@ func runDownloadModel(cmd *cobra.Command, args []string) error {
 	}
 
 	// Monitor progress
-	fmt.Println("\n🚀 Starting download...")
+	fmt.Println("\n" + tr(ctx, "cmd_local_llm_download_starting", nil))
 	lastProgress := -1.0
 
 	for progress := range progressChan {
@@ -826,7 +826,7 @@ func runDownloadModel(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("\n✅ Download completed successfully!")
+	fmt.Println("\n" + tr(ctx, "cmd_local_llm_download_complete", nil))
 	if downloadTargetPath != "" {
 		fmt.Printf("📁 Model saved to: %s\n", downloadTargetPath)
 	} else if downloadProvider != "" {

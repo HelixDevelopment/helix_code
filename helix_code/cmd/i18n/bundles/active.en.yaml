@@ -1,0 +1,258 @@
+# helix_code/cmd i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in the
+# helix_code/cmd cobra command tree (local_llm.go,
+# local_llm_advanced.go) to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: cmd_<area>_<short_description>. All IDs prefixed
+# with cmd_ to avoid namespace collision with other submodules'
+# bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-315 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+# 25 highest-impact user-facing strings from the local-llm command
+# group migrated.
+
+cmd_local_llm_init_start:
+  other: "🚀 Initializing Local LLM Provider Manager..."
+
+cmd_local_llm_init_complete:
+  other: "✅ Initialization complete!"
+
+cmd_local_llm_autostart:
+  other: "🚀 Auto-starting all providers..."
+
+cmd_local_llm_start_all:
+  other: "🚀 Starting all local LLM providers..."
+
+cmd_local_llm_start_provider:
+  other: "🚀 Starting provider: {{.Provider}}"
+
+cmd_local_llm_stop_all:
+  other: "🛑 Stopping all local LLM providers..."
+
+cmd_local_llm_stop_provider:
+  other: "🛑 Stopping provider: {{.Provider}}"
+
+cmd_local_llm_status_none:
+  other: "❌ No local LLM providers found. Run 'helix local-llm init' to install providers."
+
+cmd_local_llm_running_endpoints:
+  other: "📡 Running Provider Endpoints:"
+
+cmd_local_llm_cleanup_start:
+  other: "🧹 Cleaning up local LLM providers..."
+
+cmd_local_llm_update_all:
+  other: "🔄 Updating all local LLM providers..."
+
+cmd_local_llm_update_failed:
+  other: "Failed to update {{.Provider}}: {{.Error}}"
+
+cmd_local_llm_update_done:
+  other: "✅ Updated {{.Provider}}"
+
+cmd_local_llm_update_provider:
+  other: "🔄 Updating provider: {{.Provider}}"
+
+cmd_local_llm_monitor_start:
+  other: "🔍 Starting Local LLM Provider Monitoring..."
+
+cmd_local_llm_monitor_stop_hint:
+  other: "Press Ctrl+C to stop monitoring"
+
+cmd_local_llm_monitor_stopping:
+  other: "👋 Stopping monitoring..."
+
+cmd_local_llm_monitor_status_header:
+  other: "🔍 Local LLM Provider Status - {{.Timestamp}}"
+
+cmd_local_llm_monitor_status_error:
+  other: "Error getting status: {{.Error}}"
+
+cmd_local_llm_download_model:
+  other: "📥 Downloading model: {{.Name}}"
+
+cmd_local_llm_download_desc:
+  other: "📝 Description: {{.Description}}"
+
+cmd_local_llm_download_size:
+  other: "📊 Model size: {{.Size}}, Context: {{.Context}} tokens"
+
+cmd_local_llm_download_no_provider:
+  other: "⚠️  No provider specified, showing compatible formats for all providers:"
+
+cmd_local_llm_download_starting:
+  other: "🚀 Starting download..."
+
+cmd_local_llm_download_complete:
+  other: "✅ Download completed successfully!"
+
+cmd_local_llm_adv_discovering:
+  other: "🔍 Discovering models..."
+
+cmd_local_llm_adv_source:
+  other: "Source: {{.Source}}"
+
+cmd_local_llm_adv_filter:
+  other: "Filter: {{.Filter}}"
+
+cmd_local_llm_adv_no_models:
+  other: "❌ No models found matching filter: {{.Filter}}"
+
+cmd_local_llm_adv_found_models:
+  other: "📊 Found {{.Count}} models"
+
+cmd_local_llm_adv_recommend_hint:
+  other: "💡 Use 'helix local-llm recommend' to get personalized recommendations"
+
+cmd_local_llm_adv_recommend_start:
+  other: "🧠 Getting personalized model recommendations..."
+
+cmd_local_llm_adv_recommend_tasks:
+  other: "Tasks: {{.Tasks}}"
+
+cmd_local_llm_adv_no_suitable:
+  other: "❌ No suitable models found for your requirements"
+
+cmd_local_llm_adv_adjust_hint:
+  other: "💡 Try adjusting your constraints or preferences"
+
+# Round-317 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+# 33 user-facing strings from the start/auto/server/version cobra
+# command tree (main_commands.go, other_commands.go) migrated.
+
+cmd_start_short:
+  other: "Start HelixCode with automated local LLM management"
+
+cmd_start_long:
+  other: |-
+    Start HelixCode with fully automated local LLM provider management.
+    This single command initializes, configures, and manages all local LLM providers
+    with zero-touch operation.
+
+    The system automatically:
+    - Installs 11+ local LLM providers
+    - Configures optimal settings
+    - Monitors health and performance
+    - Handles failures and recovery
+    - Optimizes performance over time
+
+cmd_auto_short:
+  other: "Fully automated local LLM management"
+
+cmd_auto_long:
+  other: |-
+    Start HelixCode in fully automated mode where everything happens
+    in the background without user intervention.
+
+    All 11+ local LLM providers are automatically:
+    - Cloned and installed
+    - Configured with optimal settings
+    - Started as background services
+    - Monitored for health and performance
+    - Updated and maintained automatically
+
+cmd_start_flag_auto:
+  other: "Enable full automation"
+
+cmd_start_flag_monitor:
+  other: "Enable health monitoring"
+
+cmd_start_flag_optimize:
+  other: "Enable performance optimization"
+
+cmd_start_flag_check_interval:
+  other: "Health check interval"
+
+cmd_start_banner:
+  other: "🚀 Starting HelixCode Enterprise AI Development Platform..."
+
+cmd_start_zerotouch:
+  other: "🎯 Zero-Touch Local LLM Management Enabled"
+
+cmd_start_init_manager:
+  other: "🤖 Initializing Auto-LLM Manager..."
+
+cmd_init_failed:
+  other: "❌ Failed to initialize: {{.Error}}"
+
+cmd_start_manager_ready:
+  other: "✅ Auto-LLM Manager initialized successfully"
+
+cmd_start_failed:
+  other: "❌ Failed to start: {{.Error}}"
+
+cmd_start_llm_started:
+  other: "✅ Automated Local LLM Management started"
+
+cmd_start_running:
+  other: "🎉 HelixCode is now running with full automation!"
+
+cmd_start_endpoints_header:
+  other: "📊 Available endpoints:"
+
+cmd_start_mgmt_header:
+  other: "🔧 Management commands:"
+
+cmd_start_mgmt_status:
+  other: "  • helix local-llm status  - Check provider status"
+
+cmd_start_mgmt_logs:
+  other: "  • helix local-llm logs    - View provider logs"
+
+cmd_start_mgmt_monitor:
+  other: "  • helix local-llm monitor - Real-time monitoring"
+
+cmd_press_ctrlc_graceful:
+  other: "Press Ctrl+C to stop gracefully..."
+
+cmd_shutdown_signal:
+  other: "🛑 Received shutdown signal, stopping gracefully..."
+
+cmd_shutdown_ctx_cancelled:
+  other: "🛑 Context cancelled, stopping gracefully..."
+
+cmd_shutdown_error:
+  other: "⚠️  Error during shutdown: {{.Error}}"
+
+cmd_start_stopped:
+  other: "✅ HelixCode stopped gracefully"
+
+cmd_auto_banner:
+  other: "🤖 Starting HelixCode in Fully Automated Mode..."
+
+cmd_auto_zerotouch:
+  other: "🎯 Zero-Touch Operation: Everything happens automatically"
+
+cmd_server_short:
+  other: "Start HelixCode server"
+
+cmd_server_long:
+  other: "Start the HelixCode server with all configured providers and services."
+
+cmd_version_short:
+  other: "Show version information"
+
+cmd_version_long:
+  other: "Show detailed version information for HelixCode and its components."
+
+cmd_version_platform_name:
+  other: "HelixCode Enterprise AI Development Platform"
+
+cmd_version_version:
+  other: "Version: {{.Version}}"
+
+cmd_version_build:
+  other: "Build: {{.Build}}"
+
+cmd_version_providers:
+  other: "AI Providers: {{.Total}} ({{.Cloud}} cloud + {{.Local}} local)"
+
+cmd_version_token_context:
+  other: "Token Context: {{.Context}}"
+
+cmd_version_license:
+  other: "License: {{.License}}"

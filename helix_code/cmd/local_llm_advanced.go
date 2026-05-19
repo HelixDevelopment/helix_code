@@ -22,10 +22,10 @@ func runDiscover(cmd *cobra.Command, args []string) error {
 	// Initialize model discovery engine
 	discoveryEngine := llm.NewModelDiscoveryEngine(getLocalLLMBaseDir())
 
-	fmt.Println("🔍 Discovering models...")
-	fmt.Printf("Source: %s\n", discoverSource)
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_discovering", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_source", map[string]any{"Source": discoverSource}))
 	if discoverFilter != "" {
-		fmt.Printf("Filter: %s\n", discoverFilter)
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_filter", map[string]any{"Filter": discoverFilter}))
 	}
 	fmt.Println()
 
@@ -94,7 +94,7 @@ func runDiscover(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(models) == 0 {
-		fmt.Printf("❌ No models found matching filter: %s\n", discoverFilter)
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_no_models", map[string]any{"Filter": discoverFilter}))
 		return nil
 	}
 
@@ -120,8 +120,8 @@ func runDiscover(cmd *cobra.Command, args []string) error {
 
 	w.Flush()
 
-	fmt.Printf("\n📊 Found %d models\n", len(models))
-	fmt.Println("💡 Use 'helix local-llm recommend' to get personalized recommendations")
+	fmt.Printf("\n%s\n", tr(ctx, "cmd_local_llm_adv_found_models", map[string]any{"Count": len(models)}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_recommend_hint", nil))
 
 	return nil
 }
@@ -154,9 +154,9 @@ func runRecommend(cmd *cobra.Command, args []string) error {
 		req.IncludeProviders = recommendProviders
 	}
 
-	fmt.Println("🧠 Getting personalized model recommendations...")
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_recommend_start", nil))
 	if len(req.TaskTypes) > 0 {
-		fmt.Printf("Tasks: %s\n", strings.Join(req.TaskTypes, ", "))
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_recommend_tasks", map[string]any{"Tasks": strings.Join(req.TaskTypes, ", ")}))
 	}
 	fmt.Printf("Quality: %s\n", req.QualityPreference)
 	fmt.Printf("Privacy: %s\n", req.PrivacyLevel)
@@ -175,8 +175,8 @@ func runRecommend(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(resp.Recommendations) == 0 {
-		fmt.Println("❌ No suitable models found for your requirements")
-		fmt.Println("💡 Try adjusting your constraints or preferences")
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_no_suitable", nil))
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_adjust_hint", nil))
 		return nil
 	}
 
