@@ -1,0 +1,29 @@
+# internal/redis i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/redis/redis.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_redis_<short_description>. All IDs
+# prefixed with internal_redis_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-173 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# user-facing literals emitted by redis.go — the empty-host
+# validation error, the connection-failure wrapping error, and the
+# eight "Redis is disabled" failures returned by Get/Exists/TTL/HGet/
+# HGetAll/RPop/BRPop/LLen/SMembers/ZRange (the last two share the
+# same disabled message; collapsed into one message ID).
+#
+# Counted by unique call sites in redis.go: 10 migrated literals.
+
+internal_redis_empty_host:
+  other: "redis: empty host (Enabled=true requires non-empty Host)"
+
+internal_redis_failed_connect:
+  other: "failed to connect to Redis"
+
+internal_redis_disabled:
+  other: "Redis is disabled"

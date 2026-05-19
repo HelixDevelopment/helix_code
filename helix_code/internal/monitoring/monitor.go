@@ -47,7 +47,7 @@ func (m *Monitor) CollectMetrics(ctx context.Context) error {
 	for _, collector := range m.collectors {
 		metrics, err := collector.Collect()
 		if err != nil {
-			m.logger.Error("Failed to collect metrics from %s: %v", collector.Name(), err)
+			m.logger.Error("%s", tr(ctx, "internal_monitoring_failed_collect_metrics_named", map[string]any{"Name": collector.Name(), "Err": err.Error()}))
 			continue
 		}
 
@@ -91,7 +91,7 @@ func (m *Monitor) StartPeriodicCollection(ctx context.Context, interval time.Dur
 			return
 		case <-ticker.C:
 			if err := m.CollectMetrics(ctx); err != nil {
-				m.logger.Error("Failed to collect metrics: %v", err)
+				m.logger.Error("%s", tr(ctx, "internal_monitoring_failed_collect_metrics", map[string]any{"Err": err.Error()}))
 			}
 		}
 	}
@@ -101,7 +101,7 @@ func (m *Monitor) StartPeriodicCollection(ctx context.Context, interval time.Dur
 func (m *Monitor) HealthCheck() error {
 	// Basic health check - can be extended
 	if len(m.collectors) == 0 {
-		return fmt.Errorf("no collectors registered")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_monitoring_no_collectors_registered", nil))
 	}
 	return nil
 }

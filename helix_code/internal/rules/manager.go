@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -43,7 +44,8 @@ func (m *Manager) LoadFromDirectory(dir string) error {
 		parser := NewParser(workspacePath)
 		ruleSet, err := parser.Parse()
 		if err != nil {
-			return fmt.Errorf("failed to load workspace rules: %w", err)
+			// CONST-046: error wrapper localised via package-level tr().
+			return fmt.Errorf("%s", tr(context.Background(), "internal_rules_failed_to_load_workspace_rules", map[string]any{"Err": err.Error()}))
 		}
 		m.workspaceRules = ruleSet
 		m.workspaceRules.Name = "workspace"
@@ -55,7 +57,8 @@ func (m *Manager) LoadFromDirectory(dir string) error {
 		parser := NewParser(projectPath)
 		ruleSet, err := parser.Parse()
 		if err != nil {
-			return fmt.Errorf("failed to load project rules: %w", err)
+			// CONST-046: error wrapper localised via package-level tr().
+			return fmt.Errorf("%s", tr(context.Background(), "internal_rules_failed_to_load_project_rules", map[string]any{"Err": err.Error()}))
 		}
 		m.projectRules = ruleSet
 		m.projectRules.Name = "project"
@@ -78,8 +81,8 @@ func (m *Manager) LoadFromDirectory(dir string) error {
 				parser := NewParser(path)
 				ruleSet, err := parser.Parse()
 				if err != nil {
-					// Log error but continue
-					log.Printf("Warning: failed to load rules from %s: %v", path, err)
+					// Log error but continue. CONST-046: warning localised via tr().
+					log.Print(tr(context.Background(), "internal_rules_warning_failed_to_load_rules_from", map[string]any{"Path": path, "Err": err.Error()}))
 					return nil
 				}
 
@@ -103,7 +106,8 @@ func (m *Manager) LoadWorkspaceRules(path string) error {
 	parser := NewParser(path)
 	ruleSet, err := parser.Parse()
 	if err != nil {
-		return fmt.Errorf("failed to load workspace rules: %w", err)
+		// CONST-046: error wrapper localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_failed_to_load_workspace_rules", map[string]any{"Err": err.Error()}))
 	}
 
 	m.workspaceRules = ruleSet
@@ -119,7 +123,8 @@ func (m *Manager) LoadProjectRules(path string) error {
 	parser := NewParser(path)
 	ruleSet, err := parser.Parse()
 	if err != nil {
-		return fmt.Errorf("failed to load project rules: %w", err)
+		// CONST-046: error wrapper localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_failed_to_load_project_rules", map[string]any{"Err": err.Error()}))
 	}
 
 	m.projectRules = ruleSet
@@ -135,7 +140,8 @@ func (m *Manager) LoadFileRules(fileKey, path string) error {
 	parser := NewParser(path)
 	ruleSet, err := parser.Parse()
 	if err != nil {
-		return fmt.Errorf("failed to load file rules: %w", err)
+		// CONST-046: error wrapper localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_failed_to_load_file_rules", map[string]any{"Err": err.Error()}))
 	}
 
 	m.fileRules[fileKey] = ruleSet
@@ -252,7 +258,9 @@ func (m *Manager) FormatRulesForFile(filePath string) string {
 
 	var builder strings.Builder
 	builder.WriteString("# Project Rules\n\n")
-	builder.WriteString("Please follow these rules when making changes:\n\n")
+	// CONST-046: header text localised via package-level tr().
+	builder.WriteString(tr(context.Background(), "internal_rules_please_follow_rules_header", nil))
+	builder.WriteString("\n\n")
 
 	for i, match := range matches {
 		builder.WriteString(fmt.Sprintf("## Rule %d: %s\n", i+1, match.Rule.Name))

@@ -68,18 +68,22 @@ func NewManagerWithIntegrations(focusMgr *focus.Manager, hooksMgr *hooks.Manager
 	return m
 }
 
-// Create creates a new session
+// Create creates a new session. User-facing validation literals
+// resolved through tr() (CONST-046 round-178 §11.4).
 func (m *Manager) Create(projectID, name, description string, mode Mode) (*Session, error) {
+	ctx := context.Background()
 	if projectID == "" {
-		return nil, fmt.Errorf("project ID cannot be empty")
+		return nil, errors.New(tr(ctx, "internal_session_project_id_empty", nil))
 	}
 
 	if name == "" {
-		return nil, fmt.Errorf("session name cannot be empty")
+		return nil, errors.New(tr(ctx, "internal_session_name_empty", nil))
 	}
 
 	if !mode.IsValid() {
-		return nil, fmt.Errorf("invalid session mode: %s", mode)
+		return nil, errors.New(tr(ctx, "internal_session_create_invalid_mode", map[string]any{
+			"Mode": fmt.Sprintf("%s", mode),
+		}))
 	}
 
 	m.mu.Lock()
@@ -132,11 +136,11 @@ func (m *Manager) Start(sessionID string) error {
 	}
 
 	if session.Status == StatusCompleted {
-		return fmt.Errorf("cannot start completed session")
+		return errors.New(tr(context.Background(), "internal_session_start_completed", nil))
 	}
 
 	if session.Status == StatusFailed {
-		return fmt.Errorf("cannot start failed session")
+		return errors.New(tr(context.Background(), "internal_session_start_failed", nil))
 	}
 
 	oldActive := m.activeSession

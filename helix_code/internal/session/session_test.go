@@ -180,7 +180,9 @@ func TestSession_Validate(t *testing.T) {
 
 		err := session.Validate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "session ID cannot be empty")
+		// CONST-046 round-178: error text now resolved via tr(); with
+		// no Translator wired, NoopTranslator echoes the message ID.
+		assert.Contains(t, err.Error(), "internal_session_id_empty")
 	})
 
 	t.Run("empty project ID", func(t *testing.T) {
@@ -192,7 +194,7 @@ func TestSession_Validate(t *testing.T) {
 
 		err := session.Validate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "project ID cannot be empty")
+		assert.Contains(t, err.Error(), "internal_session_project_id_empty")
 	})
 
 	t.Run("empty name", func(t *testing.T) {
@@ -204,7 +206,7 @@ func TestSession_Validate(t *testing.T) {
 
 		err := session.Validate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "name cannot be empty")
+		assert.Contains(t, err.Error(), "internal_session_name_empty")
 	})
 
 	t.Run("invalid mode", func(t *testing.T) {
@@ -218,7 +220,7 @@ func TestSession_Validate(t *testing.T) {
 
 		err := session.Validate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid mode")
+		assert.Contains(t, err.Error(), "internal_session_invalid_mode")
 	})
 
 	t.Run("invalid status", func(t *testing.T) {
@@ -232,6 +234,6 @@ func TestSession_Validate(t *testing.T) {
 
 		err := session.Validate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid status")
+		assert.Contains(t, err.Error(), "internal_session_invalid_status")
 	})
 }

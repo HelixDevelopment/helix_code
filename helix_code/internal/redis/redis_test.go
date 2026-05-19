@@ -40,7 +40,9 @@ func TestNewClient_InvalidConfig(t *testing.T) {
 	client, err := NewClient(cfg)
 	assert.Error(t, err)
 	assert.Nil(t, client)
-	assert.Contains(t, err.Error(), "failed to connect to Redis")
+	// CONST-046 round-173: error wraps the message-ID under NoopTranslator
+	// (loud-echo seam used in unit tests; production wires the real bundle).
+	assert.Contains(t, err.Error(), "internal_redis_failed_connect")
 }
 
 func TestNewClient_InvalidPort(t *testing.T) {
@@ -53,7 +55,9 @@ func TestNewClient_InvalidPort(t *testing.T) {
 	client, err := NewClient(cfg)
 	assert.Error(t, err)
 	assert.Nil(t, client)
-	assert.Contains(t, err.Error(), "failed to connect to Redis")
+	// CONST-046 round-173: error wraps the message-ID under NoopTranslator
+	// (loud-echo seam used in unit tests; production wires the real bundle).
+	assert.Contains(t, err.Error(), "internal_redis_failed_connect")
 }
 
 func TestNewClient_EmptyHost(t *testing.T) {
@@ -196,43 +200,43 @@ func TestClient_Methods_Disabled(t *testing.T) {
 	// Test methods that should return errors when disabled
 	_, err := client.Get(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.Exists(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.TTL(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.HGet(ctx, "key", "field")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.HGetAll(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.RPop(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.BRPop(ctx, time.Second, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.LLen(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.SMembers(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.ZRange(ctx, "key", 0, -1)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	// Test Subscribe (should return nil when disabled)
 	pubsub := client.Subscribe(ctx, "channel")
@@ -268,7 +272,7 @@ func TestClient_Exists_DisabledMultipleKeys(t *testing.T) {
 
 	_, err := client.Exists(ctx, "key1", "key2", "key3")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 }
 
 // =============================================================================
@@ -316,7 +320,7 @@ func TestClient_BRPop_DisabledMultipleKeys(t *testing.T) {
 
 	_, err := client.BRPop(ctx, time.Second, "list1", "list2")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 }
 
 // =============================================================================
@@ -379,7 +383,7 @@ func TestClient_ZRange_DisabledVariousRanges(t *testing.T) {
 	// ZRange with various ranges should return error
 	_, err := client.ZRange(ctx, "zset", 0, -1)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 
 	_, err = client.ZRange(ctx, "zset", 0, 10)
 	assert.Error(t, err)
@@ -452,7 +456,7 @@ func TestClient_ContextCancellation_Disabled(t *testing.T) {
 	// Read operations should return "Redis is disabled" error, not context error
 	_, err := client.Get(ctx, "key")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 }
 
 func TestClient_ContextTimeout_Disabled(t *testing.T) {
@@ -468,7 +472,7 @@ func TestClient_ContextTimeout_Disabled(t *testing.T) {
 
 	// Read operations should return "Redis is disabled" error
 	_, err := client.Get(ctx, "key")
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 }
 
 // =============================================================================
@@ -500,7 +504,7 @@ func TestClient_ConcurrentAccess_Disabled(t *testing.T) {
 			defer wg.Done()
 			_, err := client.Get(ctx, "key")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "Redis is disabled")
+			assert.Contains(t, err.Error(), "internal_redis_disabled")
 		}()
 	}
 
@@ -665,7 +669,7 @@ func TestClient_EmptyKey_Disabled(t *testing.T) {
 
 	_, err := client.Get(ctx, "")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Redis is disabled")
+	assert.Contains(t, err.Error(), "internal_redis_disabled")
 }
 
 func TestClient_SpecialCharactersInKey_Disabled(t *testing.T) {
@@ -687,7 +691,7 @@ func TestClient_SpecialCharactersInKey_Disabled(t *testing.T) {
 		assert.NoError(t, client.Set(ctx, key, "value", 0))
 		_, err := client.Get(ctx, key)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "Redis is disabled")
+		assert.Contains(t, err.Error(), "internal_redis_disabled")
 	}
 }
 
@@ -900,7 +904,7 @@ func TestClient_DisabledErrorMessages(t *testing.T) {
 		t.Run(op.name, func(t *testing.T) {
 			err := op.fn()
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "Redis is disabled")
+			assert.Contains(t, err.Error(), "internal_redis_disabled")
 		})
 	}
 }

@@ -1,0 +1,49 @@
+# internal/session i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/session/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_session_<area>_<short_description>.
+# All IDs prefixed with internal_session_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-178 §11.4 anti-bluff sweep (2026-05-19): migrated 10
+# user-facing validation/transition errors covering:
+#   - session.Validate (5: ID/ProjectID/Name empty, invalid
+#     mode/status)
+#   - Manager.Create (3: projectID empty, name empty, invalid mode)
+#   - Manager.Start (2: cannot start completed/failed session)
+# Sentinel errors (ErrSessionNotFound), wrapping verbs like "failed
+# to create focus chain: %w", internal namespacing prefixes
+# ("transcript_store: ..."), and constants used in path/file
+# composition are NOT user-facing per round-148/152 precedent — they
+# are diagnostics for handlers/operators, not displayed text — so
+# they are intentionally NOT migrated in this round.
+
+internal_session_id_empty:
+  other: "session ID cannot be empty"
+
+internal_session_project_id_empty:
+  other: "project ID cannot be empty"
+
+internal_session_name_empty:
+  other: "session name cannot be empty"
+
+internal_session_invalid_mode:
+  other: "invalid mode: {{.Mode}}"
+
+internal_session_invalid_status:
+  other: "invalid status: {{.Status}}"
+
+internal_session_create_invalid_mode:
+  other: "invalid session mode: {{.Mode}}"
+
+internal_session_start_completed:
+  other: "cannot start completed session"
+
+internal_session_start_failed:
+  other: "cannot start failed session"

@@ -1,0 +1,53 @@
+# internal/rules i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/rules/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_rules_<area>_<short_description>.
+# All IDs prefixed with internal_rules_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-175 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# most user-facing literals emitted by the rules package — the
+# FormatRulesForFile prompt header (audit-baseline entry from
+# manager.go), the manager load-failure error/warning messages
+# (manager.go LoadFromDirectory + LoadWorkspaceRules +
+# LoadProjectRules + LoadFileRules), and rule validation errors
+# (rule.go Validate + AddRule). Remaining literals (parser open/read
+# errors, regex-validation wrappers, prompt builder "Description:" /
+# "Applies to:" labels, "Rule %d:" heading) are deferred to future
+# rounds to stay under the per-round size cap.
+
+internal_rules_please_follow_rules_header:
+  other: "Please follow these rules when making changes:"
+
+internal_rules_warning_failed_to_load_rules_from:
+  other: "Warning: failed to load rules from {{.Path}}: {{.Err}}"
+
+internal_rules_failed_to_load_workspace_rules:
+  other: "failed to load workspace rules: {{.Err}}"
+
+internal_rules_failed_to_load_project_rules:
+  other: "failed to load project rules: {{.Err}}"
+
+internal_rules_failed_to_load_file_rules:
+  other: "failed to load file rules: {{.Err}}"
+
+internal_rules_rule_name_cannot_be_empty:
+  other: "rule name cannot be empty"
+
+internal_rules_rule_pattern_cannot_be_empty:
+  other: "rule pattern cannot be empty"
+
+internal_rules_rule_content_cannot_be_empty:
+  other: "rule content cannot be empty"
+
+internal_rules_invalid_glob_pattern_triple_star:
+  other: "invalid glob pattern: *** is not valid"
+
+internal_rules_rule_with_id_already_exists:
+  other: "rule with ID '{{.RuleID}}' already exists"

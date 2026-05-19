@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -172,15 +173,18 @@ func (r *Rule) MatchScore(filePath string) int {
 // Validate validates the rule
 func (r *Rule) Validate() error {
 	if r.Name == "" {
-		return fmt.Errorf("rule name cannot be empty")
+		// CONST-046: error message localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_rule_name_cannot_be_empty", nil))
 	}
 
 	if r.Pattern == "" && r.PatternType != PatternTypeAny {
-		return fmt.Errorf("rule pattern cannot be empty")
+		// CONST-046: error message localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_rule_pattern_cannot_be_empty", nil))
 	}
 
 	if r.Content == "" {
-		return fmt.Errorf("rule content cannot be empty")
+		// CONST-046: error message localised via package-level tr().
+		return fmt.Errorf("%s", tr(context.Background(), "internal_rules_rule_content_cannot_be_empty", nil))
 	}
 
 	// Validate pattern based on type
@@ -192,7 +196,8 @@ func (r *Rule) Validate() error {
 	case PatternTypeGlob:
 		// Basic validation - check for valid glob syntax
 		if strings.Contains(r.Pattern, "***") {
-			return fmt.Errorf("invalid glob pattern: *** is not valid")
+			// CONST-046: error message localised via package-level tr().
+			return fmt.Errorf("%s", tr(context.Background(), "internal_rules_invalid_glob_pattern_triple_star", nil))
 		}
 	}
 
@@ -243,10 +248,10 @@ func (rs *RuleSet) AddRule(rule *Rule) error {
 		return fmt.Errorf("invalid rule: %w", err)
 	}
 
-	// Check for duplicate IDs
+	// Check for duplicate IDs. CONST-046: message localised via tr().
 	for _, r := range rs.Rules {
 		if r.ID == rule.ID {
-			return fmt.Errorf("rule with ID '%s' already exists", rule.ID)
+			return fmt.Errorf("%s", tr(context.Background(), "internal_rules_rule_with_id_already_exists", map[string]any{"RuleID": rule.ID}))
 		}
 	}
 

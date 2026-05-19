@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -29,7 +30,7 @@ func NewClient(cfg *config.RedisConfig) (*Client, error) {
 	// fast on misconfigured callers; without it, the test only passes
 	// when no local Redis is running (host-dependent flake).
 	if cfg.Host == "" {
-		return nil, fmt.Errorf("redis: empty host (Enabled=true requires non-empty Host)")
+		return nil, errors.New(tr(context.Background(), "internal_redis_empty_host", nil))
 	}
 
 	rdb := redis.NewClient(&redis.Options{
@@ -43,7 +44,7 @@ func NewClient(cfg *config.RedisConfig) (*Client, error) {
 	defer cancel()
 
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_redis_failed_connect", map[string]any{"Err": err.Error()}), err)
 	}
 
 	return &Client{
@@ -81,7 +82,7 @@ func (c *Client) Set(ctx context.Context, key string, value interface{}, expirat
 // Get gets a value by key
 func (c *Client) Get(ctx context.Context, key string) (string, error) {
 	if !c.IsEnabled() {
-		return "", fmt.Errorf("Redis is disabled")
+		return "", errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.Get(ctx, key).Result()
 }
@@ -97,7 +98,7 @@ func (c *Client) Del(ctx context.Context, keys ...string) error {
 // Exists checks if keys exist
 func (c *Client) Exists(ctx context.Context, keys ...string) (int64, error) {
 	if !c.IsEnabled() {
-		return 0, fmt.Errorf("Redis is disabled")
+		return 0, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.Exists(ctx, keys...).Result()
 }
@@ -113,7 +114,7 @@ func (c *Client) Expire(ctx context.Context, key string, expiration time.Duratio
 // TTL gets the time to live for a key
 func (c *Client) TTL(ctx context.Context, key string) (time.Duration, error) {
 	if !c.IsEnabled() {
-		return 0, fmt.Errorf("Redis is disabled")
+		return 0, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.TTL(ctx, key).Result()
 }
@@ -129,7 +130,7 @@ func (c *Client) HSet(ctx context.Context, key string, values ...interface{}) er
 // HGet gets the value of a hash field
 func (c *Client) HGet(ctx context.Context, key, field string) (string, error) {
 	if !c.IsEnabled() {
-		return "", fmt.Errorf("Redis is disabled")
+		return "", errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.HGet(ctx, key, field).Result()
 }
@@ -137,7 +138,7 @@ func (c *Client) HGet(ctx context.Context, key, field string) (string, error) {
 // HGetAll gets all the fields and values in a hash
 func (c *Client) HGetAll(ctx context.Context, key string) (map[string]string, error) {
 	if !c.IsEnabled() {
-		return nil, fmt.Errorf("Redis is disabled")
+		return nil, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.HGetAll(ctx, key).Result()
 }
@@ -177,7 +178,7 @@ func (c *Client) LPush(ctx context.Context, key string, values ...interface{}) e
 // RPop removes and returns the last element of the list
 func (c *Client) RPop(ctx context.Context, key string) (string, error) {
 	if !c.IsEnabled() {
-		return "", fmt.Errorf("Redis is disabled")
+		return "", errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.RPop(ctx, key).Result()
 }
@@ -185,7 +186,7 @@ func (c *Client) RPop(ctx context.Context, key string) (string, error) {
 // BRPop is a blocking list pop primitive
 func (c *Client) BRPop(ctx context.Context, timeout time.Duration, keys ...string) ([]string, error) {
 	if !c.IsEnabled() {
-		return nil, fmt.Errorf("Redis is disabled")
+		return nil, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.BRPop(ctx, timeout, keys...).Result()
 }
@@ -193,7 +194,7 @@ func (c *Client) BRPop(ctx context.Context, timeout time.Duration, keys ...strin
 // LLen returns the length of a list
 func (c *Client) LLen(ctx context.Context, key string) (int64, error) {
 	if !c.IsEnabled() {
-		return 0, fmt.Errorf("Redis is disabled")
+		return 0, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.LLen(ctx, key).Result()
 }
@@ -209,7 +210,7 @@ func (c *Client) SAdd(ctx context.Context, key string, members ...interface{}) e
 // SMembers returns all members of a set
 func (c *Client) SMembers(ctx context.Context, key string) ([]string, error) {
 	if !c.IsEnabled() {
-		return nil, fmt.Errorf("Redis is disabled")
+		return nil, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.SMembers(ctx, key).Result()
 }
@@ -233,7 +234,7 @@ func (c *Client) ZAdd(ctx context.Context, key string, members ...redis.Z) error
 // ZRange returns members of a sorted set
 func (c *Client) ZRange(ctx context.Context, key string, start, stop int64) ([]string, error) {
 	if !c.IsEnabled() {
-		return nil, fmt.Errorf("Redis is disabled")
+		return nil, errors.New(tr(ctx, "internal_redis_disabled", nil))
 	}
 	return c.client.ZRange(ctx, key, start, stop).Result()
 }

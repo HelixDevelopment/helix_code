@@ -1,0 +1,29 @@
+# internal/monitoring i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/monitoring/monitor.go to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_monitoring_<area>_<short_description>.
+# All IDs prefixed with internal_monitoring_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-166 §11.4 anti-bluff sweep (2026-05-19): migrated all 3
+# user-facing literals emitted by monitor.go — the named-collector
+# failure log message, the unnamed periodic-collection failure log
+# message, and the no-collectors-registered health-check error.
+# Remaining package contents (doc.go GoDoc, struct + interface
+# definitions, sync primitives) are not user-facing runtime strings
+# and therefore out of CONST-046 scope.
+
+internal_monitoring_failed_collect_metrics_named:
+  other: "Failed to collect metrics from {{.Name}}: {{.Err}}"
+
+internal_monitoring_failed_collect_metrics:
+  other: "Failed to collect metrics: {{.Err}}"
+
+internal_monitoring_no_collectors_registered:
+  other: "no collectors registered"

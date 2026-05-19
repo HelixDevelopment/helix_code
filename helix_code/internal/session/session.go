@@ -1,6 +1,8 @@
 package session
 
 import (
+	stdctx "context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -180,26 +182,32 @@ func (s *Session) String() string {
 	return fmt.Sprintf("Session %s: %s (%s) - %s", s.ID, s.Name, s.Mode, s.Status)
 }
 
-// Validate validates the session
+// Validate validates the session. All user-facing error literals
+// resolved through tr() (CONST-046 round-178 §11.4).
 func (s *Session) Validate() error {
+	ctx := stdctx.Background()
 	if s.ID == "" {
-		return fmt.Errorf("session ID cannot be empty")
+		return errors.New(tr(ctx, "internal_session_id_empty", nil))
 	}
 
 	if s.ProjectID == "" {
-		return fmt.Errorf("project ID cannot be empty")
+		return errors.New(tr(ctx, "internal_session_project_id_empty", nil))
 	}
 
 	if s.Name == "" {
-		return fmt.Errorf("session name cannot be empty")
+		return errors.New(tr(ctx, "internal_session_name_empty", nil))
 	}
 
 	if !s.Mode.IsValid() {
-		return fmt.Errorf("invalid mode: %s", s.Mode)
+		return errors.New(tr(ctx, "internal_session_invalid_mode", map[string]any{
+			"Mode": fmt.Sprintf("%s", s.Mode),
+		}))
 	}
 
 	if !s.Status.IsValid() {
-		return fmt.Errorf("invalid status: %s", s.Status)
+		return errors.New(tr(ctx, "internal_session_invalid_status", map[string]any{
+			"Status": fmt.Sprintf("%s", s.Status),
+		}))
 	}
 
 	return nil
