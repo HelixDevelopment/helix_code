@@ -1,0 +1,50 @@
+# internal/server i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/server/*.go to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_server_<area>_<short_description>. All
+# IDs prefixed with internal_server_ to avoid namespace collision
+# with other submodules' bundles when loaded into the same
+# go-i18n.Bundle (e.g. cmd/server's own `server_*` IDs migrated in
+# round 134).
+#
+# Round-177 §11.4 anti-bluff sweep (2026-05-19, CONST-046 Phase 4
+# round 70): 10 highest-impact user-facing handler-layer response
+# messages migrated. Anything written as `"message": "..."` in a
+# JSON error response, or surfaced as `"error": "..."`, is observable
+# by every API consumer (CLI, desktop, mobile, third-party) and must
+# adapt to the caller's locale per CONST-046.
+
+internal_server_qa_engine_disabled:
+  other: "QA engine is disabled"
+
+internal_server_invalid_task_id:
+  other: "Invalid task ID format"
+
+internal_server_invalid_worker_id:
+  other: "Invalid worker ID format"
+
+internal_server_invalid_project_id:
+  other: "Invalid project ID format"
+
+internal_server_invalid_owner_id:
+  other: "Invalid owner ID format"
+
+internal_server_authentication_required:
+  other: "Authentication required"
+
+internal_server_invalid_user_context:
+  other: "Invalid user context"
+
+internal_server_failed_list_projects:
+  other: "Failed to list projects"
+
+internal_server_registration_failed:
+  other: "Registration failed"
+
+internal_server_failed_generate_token:
+  other: "Failed to generate token"

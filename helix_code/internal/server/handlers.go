@@ -29,28 +29,28 @@ func respondInvalidID(c *gin.Context, err error, what string) bool {
 	case errors.Is(err, task.ErrInvalidTaskID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid task ID format",
+			"message": tr(c.Request.Context(), "internal_server_invalid_task_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, worker.ErrInvalidWorkerID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid worker ID format",
+			"message": tr(c.Request.Context(), "internal_server_invalid_worker_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, project.ErrInvalidProjectID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid project ID format",
+			"message": tr(c.Request.Context(), "internal_server_invalid_project_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, project.ErrInvalidOwnerID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid owner ID format",
+			"message": tr(c.Request.Context(), "internal_server_invalid_owner_id", nil),
 			"error":   err.Error(),
 		})
 		return true
