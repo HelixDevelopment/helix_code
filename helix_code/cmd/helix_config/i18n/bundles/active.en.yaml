@@ -120,3 +120,54 @@ helix_config_load_error:
 
 helix_config_history_clean_start:
   other: "Cleaning old history entries..."
+
+# Round-310 §11.4 anti-bluff sweep (2026-05-20): 14 additional
+# high-impact user-facing strings migrated. Targets the
+# template (show/create/update/delete/search/validate) +
+# history (show/restore/compare/search) + schema
+# (validate/generate/export/import) command handlers — every line
+# a normal CLI user sees when running these subcommands.
+# Cumulative round-108 + 195 + 203 + 310 coverage: 44 of ~261.
+# Remaining ~217 hardcoded strings tracked for future rounds.
+
+helix_config_template_show_action:
+  other: "Showing template: {{.Name}}"
+
+helix_config_template_create_action:
+  other: "Creating template: {{.Name}}"
+
+helix_config_template_update_action:
+  other: "Updating template: {{.Name}}"
+
+helix_config_template_delete_action:
+  other: "Deleting template: {{.Name}}"
+
+helix_config_template_search_action:
+  other: "Searching templates: {{.Query}}"
+
+helix_config_template_validate_action:
+  other: "Validating template: {{.Name}}"
+
+helix_config_history_show_action:
+  other: "Showing history entry: {{.ID}}"
+
+helix_config_history_restore_action:
+  other: "Restoring configuration from: {{.ID}}"
+
+helix_config_history_compare_action:
+  other: "Comparing history entries: {{.First}} vs {{.Second}}"
+
+helix_config_history_search_action:
+  other: "Searching history: {{.Query}}"
+
+helix_config_schema_validate_action:
+  other: "Validating configuration: {{.File}}"
+
+helix_config_schema_generate_action:
+  other: "Generating schema..."
+
+helix_config_schema_export_action:
+  other: "Exporting schema to: {{.File}}"
+
+helix_config_schema_import_action:
+  other: "Importing schema from: {{.File}}"

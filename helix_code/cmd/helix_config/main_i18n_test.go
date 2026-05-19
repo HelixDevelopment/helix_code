@@ -661,3 +661,110 @@ func TestHistoryCleanCommand_TranslatesStart(t *testing.T) {
 
 	assertTranslated(t, out, "helix_config_history_clean_start", "Cleaning old history entries...")
 }
+
+// --- Round-310 §11.4 anti-bluff sweep (2026-05-20) -----------------
+// 14 call-site tests for the template / history / schema command
+// handlers migrated this round. Each drives the cobra Run closure
+// directly with required positional args, captures stdout, and uses
+// assertTranslated for the joint sentinel+absence invariant. The
+// absence-of-literal half of every assertion is the paired-mutation
+// guard: reverting any handler to fmt.Printf would re-introduce the
+// English literal and FAIL the test.
+
+func TestTemplateShowCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateShowCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"web"}) })
+	assertTranslated(t, out, "helix_config_template_show_action", "Showing template:")
+}
+
+func TestTemplateCreateCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateCreateCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"web"}) })
+	assertTranslated(t, out, "helix_config_template_create_action", "Creating template:")
+}
+
+func TestTemplateUpdateCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateUpdateCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"web"}) })
+	assertTranslated(t, out, "helix_config_template_update_action", "Updating template:")
+}
+
+func TestTemplateDeleteCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateDeleteCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"web"}) })
+	assertTranslated(t, out, "helix_config_template_delete_action", "Deleting template:")
+}
+
+func TestTemplateSearchCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateSearchCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"db"}) })
+	assertTranslated(t, out, "helix_config_template_search_action", "Searching templates:")
+}
+
+func TestTemplateValidateCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateValidateCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"web"}) })
+	assertTranslated(t, out, "helix_config_template_validate_action", "Validating template:")
+}
+
+func TestHistoryShowCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistoryShowCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"42"}) })
+	assertTranslated(t, out, "helix_config_history_show_action", "Showing history entry:")
+}
+
+func TestHistoryRestoreCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistoryRestoreCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"42"}) })
+	assertTranslated(t, out, "helix_config_history_restore_action", "Restoring configuration from:")
+}
+
+func TestHistoryCompareCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistoryCompareCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"1", "2"}) })
+	assertTranslated(t, out, "helix_config_history_compare_action", "Comparing history entries:")
+}
+
+func TestHistorySearchCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistorySearchCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"db"}) })
+	assertTranslated(t, out, "helix_config_history_search_action", "Searching history:")
+}
+
+func TestSchemaValidateCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaValidateCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"config.yaml"}) })
+	assertTranslated(t, out, "helix_config_schema_validate_action", "Validating configuration:")
+}
+
+func TestSchemaGenerateCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaGenerateCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, nil) })
+	assertTranslated(t, out, "helix_config_schema_generate_action", "Generating schema...")
+}
+
+func TestSchemaExportCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaExportCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"schema.json"}) })
+	assertTranslated(t, out, "helix_config_schema_export_action", "Exporting schema to:")
+}
+
+func TestSchemaImportCommand_TranslatesAction(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaImportCommand()
+	out := captureStdout(t, func() { cmd.Run(cmd, []string{"schema.json"}) })
+	assertTranslated(t, out, "helix_config_schema_import_action", "Importing schema from:")
+}

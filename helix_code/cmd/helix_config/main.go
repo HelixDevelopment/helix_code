@@ -1668,7 +1668,11 @@ func createTemplateShowCommand() *cobra.Command {
 		Short: "Show template details",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Showing template: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_show_action", map[string]any{"Name": args[0]}))
 		},
 	}
 }
@@ -1679,7 +1683,11 @@ func createTemplateCreateCommand() *cobra.Command {
 		Short: "Create a new template",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Creating template: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_create_action", map[string]any{"Name": args[0]}))
 		},
 	}
 }
@@ -1690,7 +1698,11 @@ func createTemplateUpdateCommand() *cobra.Command {
 		Short: "Update an existing template",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Updating template: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_update_action", map[string]any{"Name": args[0]}))
 		},
 	}
 }
@@ -1701,7 +1713,11 @@ func createTemplateDeleteCommand() *cobra.Command {
 		Short: "Delete a template",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Deleting template: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_delete_action", map[string]any{"Name": args[0]}))
 		},
 	}
 }
@@ -1712,7 +1728,11 @@ func createTemplateSearchCommand() *cobra.Command {
 		Short: "Search templates",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Searching templates: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_search_action", map[string]any{"Query": args[0]}))
 		},
 	}
 }
@@ -1723,7 +1743,11 @@ func createTemplateValidateCommand() *cobra.Command {
 		Short: "Validate a template",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Validating template: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_template_validate_action", map[string]any{"Name": args[0]}))
 		},
 	}
 }
@@ -1735,7 +1759,11 @@ func createHistoryShowCommand() *cobra.Command {
 		Short: "Show history entry details",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Showing history entry: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_history_show_action", map[string]any{"ID": args[0]}))
 		},
 	}
 }
@@ -1746,7 +1774,11 @@ func createHistoryRestoreCommand() *cobra.Command {
 		Short: "Restore configuration from history",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Restoring configuration from: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_history_restore_action", map[string]any{"ID": args[0]}))
 		},
 	}
 }
@@ -1757,7 +1789,11 @@ func createHistoryCompareCommand() *cobra.Command {
 		Short: "Compare two history entries",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Comparing history entries: %s vs %s\n", args[0], args[1])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_history_compare_action", map[string]any{"First": args[0], "Second": args[1]}))
 		},
 	}
 }
@@ -1768,7 +1804,11 @@ func createHistorySearchCommand() *cobra.Command {
 		Short: "Search configuration history",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Searching history: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_history_search_action", map[string]any{"Query": args[0]}))
 		},
 	}
 }
@@ -1794,7 +1834,11 @@ func createSchemaValidateCommand() *cobra.Command {
 		Short: "Validate configuration against schema",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Validating configuration: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_schema_validate_action", map[string]any{"File": args[0]}))
 		},
 	}
 }
@@ -1804,7 +1848,11 @@ func createSchemaGenerateCommand() *cobra.Command {
 		Use:   "generate",
 		Short: "Generate schema from configuration",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Generating schema...")
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_schema_generate_action", nil))
 		},
 	}
 }
@@ -1815,7 +1863,11 @@ func createSchemaExportCommand() *cobra.Command {
 		Short: "Export schema to file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Exporting schema to: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_schema_export_action", map[string]any{"File": args[0]}))
 		},
 	}
 }
@@ -1826,7 +1878,11 @@ func createSchemaImportCommand() *cobra.Command {
 		Short: "Import schema from file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Importing schema from: %s\n", args[0])
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_schema_import_action", map[string]any{"File": args[0]}))
 		},
 	}
 }
