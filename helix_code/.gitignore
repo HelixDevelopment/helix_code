@@ -173,6 +173,8 @@ internal/**/.helix/
 internal/**/.helixcode/
 # Performance optimisation auto-regenerated reports
 internal/performance/reports/
+cmd/performance_optimization/reports/
+reports/performance/
 # === END runtime test artefacts ===
 /terminal_ui
 /aurora_os

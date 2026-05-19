@@ -139,8 +139,6 @@ This audit analyzed the HelixCode project against its documentation to identify:
 
 - cmd/config_test
 - cmd/helix_config
-- cmd/performance_optimization
-- cmd/performance_optimization_standalone
 - cmd/security_fix
 - cmd/security_fix_standalone
 - cmd/security_test

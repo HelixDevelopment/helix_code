@@ -721,32 +721,48 @@ hosts. Operator decision needed.</p>
 id="hxc-005-cmdperformance_optimization_standalonemain.go-is-a-const-035-simulation-bluff">HXC-005
 — <code>cmd/performance_optimization_standalone/main.go</code> is a
 CONST-035 simulation bluff</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-20 (round 317 — cmd i18n migration
-subagent) <strong>Discovered-By:</strong> AI subagent — refused to
-localize the file because doing so would polish a bluff
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-20 (round 317 — cmd i18n
+migration subagent) <strong>Discovered-By:</strong> AI subagent —
+refused to localize the file because doing so would polish a bluff
+<strong>Fixed:</strong> 2026-05-20 (round 318)
 <strong>Evidence:</strong>
 <code>helix_code/cmd/performance_optimization_standalone/main.go</code>
-is a <code>package main</code> that prints “🚀 Starting HelixCode
-Production Performance Optimization” then <em>simulates</em> every
+was a <code>package main</code> that printed “🚀 Starting HelixCode
+Production Performance Optimization” then <em>simulated</em> every
 optimization phase:
 <code>// Simulate production optimization phases</code>,
 <code>time.Sleep(500 * time.Millisecond)</code> per phase, and
 <code>improvement := 5.0 + rand.Float64()*20.0</code> — fabricated
 improvement percentages from a random number generator. No real
-profiling, no real optimization, no real measurement. This is the
-canonical BLUFF-001-class anti-pattern (CLAUDE.md §3.3 / §6 ANTI-PATTERN
-1) — a binary that reports success for work it never performed. Violates
-CONST-035 / Article XI §11.9. <strong>Resolution path:</strong> Either
-(a) replace the simulation with a real optimizer that performs actual
-<code>runtime</code>/<code>pprof</code>-based measurement + real
-GOGC/GOMAXPROCS/pool-size tuning + real before/after benchmarks, OR (b)
-if the standalone tool is obsolete (superseded by
-<code>cmd/performance-optimization*/</code>), delete it entirely.
-Reproduce-before-fix: write a Challenge asserting the tool’s output
-reflects real measured deltas (not RNG). NOT a localization target —
-i18n migration of bluff strings is explicitly out of scope until the
-bluff itself is fixed.</p>
+profiling, no real optimization, no real measurement. The canonical
+BLUFF-001-class anti-pattern (CLAUDE.md §3.3 / §6 ANTI-PATTERN 1) — a
+binary that reports success for work it never performed. Violated
+CONST-035 / Article XI §11.9. <strong>Resolution:</strong> Decision —
+<strong>DELETE</strong> (resolution path b). The standalone tool was
+genuinely obsolete: fully superseded by
+<code>cmd/performance_optimization/</code> (snake_case post-CONST-052),
+which calls the REAL
+<code>dev.helix.code/internal/performance.PerformanceOptimizer</code> —
+real <code>runtime.ReadMemStats</code>, real <code>GOMAXPROCS</code>
+tuning, real before/after measurement — and carries CONST-046 i18n + a
+unit-test file.
+<code>git rm -r cmd/performance_optimization_standalone/</code> removed
+the dead bluff; stale references purged from
+<code>docs/COMPREHENSIVE_AUDIT_REPORT.md</code>. Reproduce-before-fix
+Challenge added at
+<code>cmd/performance_optimization/bluff_regression_test.go</code>:
+<code>TestHXC005_BluffStandaloneDirectoryDeleted</code> asserts the
+obsolete path is gone + the real command survives;
+<code>TestHXC005_RealOptimizerMeasuresActualMemory</code> allocates a
+retained 32 MiB buffer and asserts the optimizer’s baseline
+<code>MemoryUsage</code> tracks a genuine <code>runtime.HeapAlloc</code>
+reading (not an RNG single-digit). Post-fix evidence:
+<code>go build ./cmd/...</code> exit 0;
+<code>go test -count=1 -run TestHXC005 ./cmd/performance_optimization/</code>
+→ both PASS (literal log:
+<code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements, same order of magnitude. No RNG-fabricated improvement percentages.</code>);
+anti-bluff smoke on the deleted path returns N/A (directory gone).</p>
 <hr />
 <h2
 id="pan-001-panoptic-appendjsonstring-truncates-multi-byte-utf-8-runes-to-bytes-testresult.marshaljson-corrupts-non-ascii">PAN-001

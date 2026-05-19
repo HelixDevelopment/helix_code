@@ -1057,8 +1057,37 @@ clean; <code>go test -race -count=1 ./internal/executor/...</code> → ok
 <code>PASS [executor-marshal:utf8-detector:fixed]</code> +
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
 Probe <code>AppName="ü"</code> (UTF-8 <code>0xC3 0xBC</code>) preserved
-end-to-end through MarshalJSON. |</div>
-<p><em>Last regenerated: 2026-05-19 (round 302 — PAN-001 closure).
+end-to-end through MarshalJSON. |<br />
+2026-05-20 | HXC-005:
+<code>cmd/performance_optimization_standalone/main.go</code> is a
+CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) | 318 | (this
+commit) | Decision: DELETE (obsolete). The standalone binary fabricated
+improvement percentages via
+<code>improvement := 5.0 + rand.Float64()*20.0</code>, slept
+<code>time.Sleep(500ms)</code> per fake phase, and reported success for
+work it never performed (canonical BLUFF-001 anti-pattern, CONST-035 /
+Article XI §11.9). Genuinely obsolete — fully superseded by
+<code>cmd/performance_optimization/</code> (snake_case post-CONST-052)
+which calls the REAL
+<code>internal/performance.PerformanceOptimizer</code> (real
+<code>runtime.ReadMemStats</code>, real <code>GOMAXPROCS</code> tuning,
+real before/after measurement) + CONST-046 i18n + unit tests.
+<code>git rm -r cmd/performance_optimization_standalone/</code>; stale
+refs purged from <code>docs/COMPREHENSIVE_AUDIT_REPORT.md</code>;
+gitignore extended for auto-generated perf reports (CONST-053).
+Reproduce-before-fix regression test
+<code>cmd/performance_optimization/bluff_regression_test.go</code>:
+<code>TestHXC005_BluffStandaloneDirectoryDeleted</code> (obsolete path
+gone + real cmd survives) +
+<code>TestHXC005_RealOptimizerMeasuresActualMemory</code> (retained 32
+MiB buffer → optimizer baseline <code>MemoryUsage</code> must track
+genuine <code>runtime.HeapAlloc</code>, not RNG). Evidence:
+<code>go build ./cmd/...</code> exit 0;
+<code>go test -count=1 -run TestHXC005 ./cmd/performance_optimization/</code>
+→ both PASS (literal:
+<code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements</code>).
+|</div>
+<p><em>Last regenerated: 2026-05-20 (round 318 — HXC-005 closure).
 Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>

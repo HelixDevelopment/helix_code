@@ -8,11 +8,11 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 9 | `Fixed (→ Fixed.md)` |
+| Bug | 10 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 80 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 302 added PAN-001 (panoptic UTF-8 truncation fix).
+**Total closed items**: 81 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 318 added HXC-005 (perf-opt-standalone simulation bluff deleted).
 
 ## Coverage by round-system phase
 

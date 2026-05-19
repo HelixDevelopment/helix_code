@@ -19,8 +19,8 @@
 | HXC-004 | Recovery-batch under-verification (40% FAIL rate per round 193) | Bug | Queued | 2026-05-19 | 4 packages broken: llm/logo/notification (test-assertion drift) + performance (build break); audit at docs/audits/2026-05-19-recovery-batch-verification.md |
 | HXQ-001 | helix_qa intermittent TestPerformance flake (host-load-sensitive) | Bug | Queued — BLOCKED on operator | 2026-05-19 | Either loosen tolerance or gate behind HOST_LOAD_DEDICATED env var |
 | PAN-001 | panoptic `appendJSONString` truncates multi-byte UTF-8 runes (TestResult.MarshalJSON) | Bug | Fixed (→ Fixed.md) round 302 | 2026-05-19 | Closed: utf8.AppendRune applied (panoptic 24aa627); detector flipped regression-present → fixed; 39/39 challenge PASS |
-| HXC-005 | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff | Bug | Queued | 2026-05-20 | time.Sleep + rand.Float64() fake improvements; replace with real pprof-based optimizer OR delete if obsolete |
+| HXC-005 | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) round 318 | 2026-05-20 | Closed: obsolete bluff DELETED (superseded by real cmd/performance_optimization → internal/performance); regression test added |
 
-**Counts**: 5 open (HXC-005 added round 317; PAN-001 closed round 302; HXC-004 closed round 200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 4 Bugs open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3 BLOCKED (VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)
+**Counts**: 4 open (HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed round 200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 3 Bugs open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3 BLOCKED (VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)
 
-*Last regenerated: 2026-05-20 (round 317 — HXC-005 added). See `docs/Issues.md` for full details + prefix convention table. PDF/HTML exports auto-regenerated via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-05-20 (round 318 — HXC-005 closed). See `docs/Issues.md` for full details + prefix convention table. PDF/HTML exports auto-regenerated via `scripts/regenerate-tracker-exports.sh`.*
