@@ -125,3 +125,10 @@ The audit gate result is advisory for this round; gating closure of these violat
 All four failures are §11.4 PASS-bluffs at the recovery-batch layer: the recovery batches reported successful content capture but the resulting trees do not build/test green. This confirms the operator's 2026-05-19 mandate: tests-pass-as-summary-line without runtime evidence is no longer acceptable as a closure signal — even for stalled-agent recovery flows.
 
 Remediation per failure is scoped above. Fixes will be executed in a follow-up round (separate scope per the round-193 charter — this round documents, does not fix).
+
+---
+
+## Provenance correction
+
+The initial filesystem-write of this file at round-193 was captured by a parallel session's commit `c41bc2f` (round-190 HXA-003 venice fix) due to a race in pre-commit staging. The audit content is unchanged; this commit re-anchors the round-193 audit to its proper subject line per the round-193 charter.
+
