@@ -1259,13 +1259,14 @@ func (c *CLI) Run() error {
 func (c *CLI) handleListWorkers(ctx context.Context) error {
 	stats := c.workerPool.GetWorkerStats(ctx)
 
-	fmt.Println("\n=== Worker Statistics ===")
+	fmt.Println()
+	fmt.Println(tr(ctx, "cli_workers_header", nil))
 	fmt.Println(tr(ctx, "cli_workers_total", map[string]any{"Count": stats.TotalWorkers}))
 	fmt.Println(tr(ctx, "cli_workers_active", map[string]any{"Count": stats.ActiveWorkers}))
 	fmt.Println(tr(ctx, "cli_workers_healthy", map[string]any{"Count": stats.HealthyWorkers}))
-	fmt.Printf("Total CPU: %d\n", stats.TotalCPU)
-	fmt.Printf("Total Memory: %.2f GB\n", float64(stats.TotalMemory)/(1024*1024*1024))
-	fmt.Printf("Total GPU: %d\n", stats.TotalGPU)
+	fmt.Println(tr(ctx, "cli_workers_total_cpu", map[string]any{"Count": stats.TotalCPU}))
+	fmt.Println(tr(ctx, "cli_workers_total_memory_gb", map[string]any{"GB": fmt.Sprintf("%.2f", float64(stats.TotalMemory)/(1024*1024*1024))}))
+	fmt.Println(tr(ctx, "cli_workers_total_gpu", map[string]any{"Count": stats.TotalGPU}))
 
 	return nil
 }
@@ -1274,7 +1275,8 @@ func (c *CLI) handleListWorkers(ctx context.Context) error {
 // BLUFF-002 FIX: Uses LLMsVerifier as the single source of truth when enabled.
 // Falls back to provider discovery and then to the constitutional fallback list.
 func (c *CLI) handleListModels(ctx context.Context) error {
-	fmt.Println("\n=== Available Models ===")
+	fmt.Println()
+	fmt.Println(tr(ctx, "cli_models_header", nil))
 
 	// Priority 1: LLMsVerifier adapter (CONST-036 single source of truth)
 	if c.verifierAdapter != nil && c.verifierAdapter.IsEnabled() {
@@ -1301,7 +1303,7 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 
 	// Priority 3: Constitutional fallback list (CONST-035 compliance)
 	c.printVerifiedModels(verifier.FallbackModels)
-	fmt.Println("ℹ️  Using fallback model list. Start LLMsVerifier for live data.")
+	fmt.Printf("ℹ️  %s\n", tr(ctx, "cli_models_fallback_notice", nil))
 	return nil
 }
 
@@ -1325,7 +1327,8 @@ func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
 
 // handleHealthCheck performs system health check
 func (c *CLI) handleHealthCheck(ctx context.Context) error {
-	fmt.Println("\n=== System Health Check ===")
+	fmt.Println()
+	fmt.Println(tr(ctx, "cli_health_header", nil))
 
 	// Check worker pool
 	stats := c.workerPool.GetWorkerStats(ctx)
@@ -1352,7 +1355,7 @@ func (c *CLI) handleHealthCheck(ctx context.Context) error {
 		fmt.Printf("⚠️ Notification System: No enabled channels\n")
 	}
 
-	fmt.Println("✅ System is operational")
+	fmt.Printf("✅ %s\n", tr(ctx, "cli_health_operational", nil))
 	return nil
 }
 
@@ -1856,7 +1859,7 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 // LLM provider and the response is printed. Multi-turn context is
 // preserved across turns within a single REPL session.
 func (c *CLI) handleInteractive(ctx context.Context) error {
-	fmt.Println("=== Helix CLI Interactive Mode ===")
+	fmt.Println(tr(ctx, "cli_repl_header", nil))
 	fmt.Println(tr(ctx, "cli_repl_intro", nil))
 	if c.llmProvider != nil {
 		if models := c.llmProvider.GetModels(); len(models) > 0 {
@@ -1893,7 +1896,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 				return fmt.Errorf("REPL read error: %w", err)
 			}
 			// EOF — clean exit
-			fmt.Println("Goodbye!")
+			fmt.Println(tr(ctx, "cli_repl_goodbye", nil))
 			return nil
 		}
 
@@ -1908,7 +1911,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 		lower := strings.ToLower(input)
 		switch lower {
 		case "/exit", "/quit", "exit", "quit":
-			fmt.Println("Goodbye!")
+			fmt.Println(tr(ctx, "cli_repl_goodbye", nil))
 			return nil
 		case "/help", "help":
 			c.showHelp()

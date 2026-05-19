@@ -10,11 +10,18 @@
 # with cli_ to avoid namespace collision with other submodules'
 # bundles when loaded into the same go-i18n.Bundle.
 #
-# Round-131 §11.4 anti-bluff sweep (2026-05-18): 10 highest-impact
+# Round-131 §11.4 anti-bluff sweep (2026-05-18): first 10 highest-impact
 # user-facing strings from the REPL, worker-stats, and QA handlers
-# migrated. Remaining 27 hardcoded strings (37 total) tracked for
-# future rounds — this round prioritises the strings end users see
-# on every interactive REPL invocation and QA-subcommand run.
+# migrated.
+#
+# Round-196 §11.4 anti-bluff sweep (2026-05-19): NEXT 10 high-impact
+# strings — section headers ("=== Worker Statistics ==="), system-health
+# success line, REPL greeting + goodbye, fallback-model notice, and
+# CPU/memory/GPU stat lines. These are the next-most-likely strings a
+# non-English end user sees on every CLI invocation; they were ranked
+# #11-#20 by emission frequency in the round-131 baseline.
+#
+# After round-196, 20 of 37 strings (54%) have been migrated.
 
 cli_workers_total:
   other: "Total Workers: {{.Count}}"
@@ -45,3 +52,35 @@ cli_qa_session_completed:
 
 cli_qa_no_sessions:
   other: "No QA sessions found."
+
+# --- Round-196 (2026-05-19) additions ---
+
+cli_workers_header:
+  other: "=== Worker Statistics ==="
+
+cli_workers_total_cpu:
+  other: "Total CPU: {{.Count}}"
+
+cli_workers_total_memory_gb:
+  other: "Total Memory: {{.GB}} GB"
+
+cli_workers_total_gpu:
+  other: "Total GPU: {{.Count}}"
+
+cli_models_header:
+  other: "=== Available Models ==="
+
+cli_models_fallback_notice:
+  other: "Using fallback model list. Start LLMsVerifier for live data."
+
+cli_health_header:
+  other: "=== System Health Check ==="
+
+cli_health_operational:
+  other: "System is operational"
+
+cli_repl_header:
+  other: "=== Helix CLI Interactive Mode ==="
+
+cli_repl_goodbye:
+  other: "Goodbye!"
