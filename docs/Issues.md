@@ -181,6 +181,23 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
+## HXC-004 — Recovery-batch under-verification (40% FAIL rate per round-193 audit)
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-19 (round 193 — recovery-batch verification audit)
+**Discovered-By:** AI subagent
+**Evidence:** Round-193 audit of 10 recovery-batch-landed packages (recovery commits `b7f8672` + `5c94696`) found 6 PASS / **4 FAIL**:
+  - `internal/llm` (round 161): test-assertion drift — tests still expect pre-i18n English literals, but i18n migration replaced them with message-ID echoes under NoopTranslator
+  - `internal/logo` (round 163): same test-assertion drift pattern
+  - `internal/notification` (round 167): same test-assertion drift pattern
+  - `internal/performance` (round 168): build break — `translator.go` references `stdctx.Context` but imports plain `"context"` (unused import + undefined identifier)
+**Root cause:** Recovery-batch commits captured stalled-agent file content but did NOT re-run consuming-test updates + did NOT verify build/test green per-package.
+**Resolution path:** Per-package fix round. Update consuming-test assertions to expect message-ID echoes (use `internal_<pkg>_*` prefix). Fix performance/translator.go import (either drop `stdctx` alias and use plain `context`, OR keep `stdctx` alias and remove plain import).
+**Audit reference:** `docs/audits/2026-05-19-recovery-batch-verification.md` (commit `1badef1`).
+
+---
+
 ## HXC-003 (ex-ISSUE-007) — CONST-046 migration backlog (57,329 violations baselined; shrinking)
 
 **Status:** In progress

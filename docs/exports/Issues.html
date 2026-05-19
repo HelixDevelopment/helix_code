@@ -647,6 +647,36 @@ PASS). Mutation-verified (revert → FAIL with the original drift, restore
 → PASS).</p>
 <hr />
 <h2
+id="hxc-004-recovery-batch-under-verification-40-fail-rate-per-round-193-audit">HXC-004
+— Recovery-batch under-verification (40% FAIL rate per round-193
+audit)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-19 (round 193 — recovery-batch
+verification audit) <strong>Discovered-By:</strong> AI subagent
+<strong>Evidence:</strong> Round-193 audit of 10 recovery-batch-landed
+packages (recovery commits <code>b7f8672</code> + <code>5c94696</code>)
+found 6 PASS / <strong>4 FAIL</strong>: - <code>internal/llm</code>
+(round 161): test-assertion drift — tests still expect pre-i18n English
+literals, but i18n migration replaced them with message-ID echoes under
+NoopTranslator - <code>internal/logo</code> (round 163): same
+test-assertion drift pattern - <code>internal/notification</code> (round
+167): same test-assertion drift pattern -
+<code>internal/performance</code> (round 168): build break —
+<code>translator.go</code> references <code>stdctx.Context</code> but
+imports plain <code>"context"</code> (unused import + undefined
+identifier) <strong>Root cause:</strong> Recovery-batch commits captured
+stalled-agent file content but did NOT re-run consuming-test updates +
+did NOT verify build/test green per-package. <strong>Resolution
+path:</strong> Per-package fix round. Update consuming-test assertions
+to expect message-ID echoes (use <code>internal_&lt;pkg&gt;_*</code>
+prefix). Fix performance/translator.go import (either drop
+<code>stdctx</code> alias and use plain <code>context</code>, OR keep
+<code>stdctx</code> alias and remove plain import). <strong>Audit
+reference:</strong>
+<code>docs/audits/2026-05-19-recovery-batch-verification.md</code>
+(commit <code>1badef1</code>).</p>
+<hr />
+<h2
 id="hxc-003-ex-issue-007-const-046-migration-backlog-57329-violations-baselined-shrinking">HXC-003
 (ex-ISSUE-007) — CONST-046 migration backlog (57,329 violations
 baselined; shrinking)</h2>

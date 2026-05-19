@@ -300,6 +300,16 @@ shrinking)</td>
 <code>--fail-on-new</code> enforced</td>
 </tr>
 <tr>
+<td>HXC-004</td>
+<td>Recovery-batch under-verification (40% FAIL rate per round 193)</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>2026-05-19</td>
+<td>4 packages broken: llm/logo/notification (test-assertion drift) +
+performance (build break); audit at
+docs/audits/2026-05-19-recovery-batch-verification.md</td>
+</tr>
+<tr>
 <td>HXQ-001</td>
 <td>helix_qa intermittent TestPerformance flake
 (host-load-sensitive)</td>
@@ -311,11 +321,10 @@ var</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 4 open (VEN-001 closed round 188; HXA-001
-closed round 116; HXA-003 closed round 190; HXC-002/HXL-001/HXL-002 also
-closed) | 3 Bugs open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature
-open (HXC-003) | 3 BLOCKED (VEN-002 + HXQ-001 operator + HXA-002
-cross-submodule coord)</p>
+<p><strong>Counts</strong>: 5 open (HXC-004 new from round 193;
+VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 4 Bugs
+open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3
+BLOCKED (VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)</p>
 <p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename). See
 <code>docs/Issues.md</code> for full details + prefix convention table.
 PDF/HTML exports auto-regenerated via
