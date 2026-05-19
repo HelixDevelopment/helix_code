@@ -1,0 +1,40 @@
+# internal/logging i18n bundle — active English (en) locale.
+#
+# Round-162 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# zero CONST-046 hardcoded-content violations in helix_code/internal/logging/
+# at HEAD. The package emits no user-facing narrative strings — only:
+#
+#   * Log-level identifier tokens: "DEBUG", "INFO", "WARN", "ERROR",
+#     "FATAL", "UNKNOWN" — consumed by downstream log parsers,
+#     aggregators, and filters as STABLE IDENTITY KEYS. Per round-158's
+#     hardware model-size-identifier precedent (see
+#     internal/hardware/i18n/bundles/active.en.yaml header), identity
+#     tokens used in equality checks / parsing pipelines are explicitly
+#     OUT of scope for CONST-046. Translating them would silently
+#     rewrite the contract with log-aggregation tooling.
+#
+#   * Log format strings: "[%s] %s" and prefix "[<name>] " — structural
+#     log framing emitted by stdlib log.Logger and the local log()
+#     helper. Not narrative content; not adapted per-locale.
+#
+#   * doc.go content — Go package documentation comments, never emitted
+#     at runtime; rendered by godoc/pkgsite which itself is not i18n-aware.
+#
+#   * README.md — repository documentation; covered by separate doc-i18n
+#     workflow (not the CONST-046 source-string scope).
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_logging_<area>_<short_description>. All IDs prefixed with
+# internal_logging_ to avoid namespace collision when loaded into the
+# same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in logger.go — it exists purely to keep the i18n surface live + ready
+# for the first real migration target a future round identifies.
+
+internal_logging_reserved_placeholder:
+  other: "RESERVED: internal/logging i18n bundle placeholder — no production caller (round-162 no-op infra)"
