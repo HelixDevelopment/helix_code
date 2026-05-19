@@ -11,6 +11,7 @@ package secrets
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -37,7 +38,11 @@ func LoadAPIKeys() error {
 
 	envPath, ok := findEnvFile()
 	if !ok {
-		return errors.New("no api_keys.sh or .env found")
+		// CONST-046: resolve through the translator seam so non-English
+		// operators see this boot-time error in their active locale.
+		// CONST-042 §12.1: no secret material is involved here — the
+		// message describes only the ABSENCE of the secret files.
+		return errors.New(tr(context.Background(), "internal_secrets_no_source_found", nil))
 	}
 	return loadFromEnv(envPath)
 }
