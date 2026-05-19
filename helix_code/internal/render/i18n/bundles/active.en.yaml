@@ -1,0 +1,59 @@
+# internal/render i18n bundle — active English (en) locale.
+#
+# Round-224 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# zero CONST-046 hardcoded-content violations in helix_code/internal/render/
+# at HEAD. The package is a low-level terminal-rendering library and
+# emits no user-facing narrative strings — only:
+#
+#   * RenderMode constants ("fancy" / "plain" / "auto") — env-var
+#     parse-domain values consumed by os.LookupEnv → switch
+#     resolution in factory.go. Per round-158's hardware
+#     identifier-token precedent, parse-domain tokens used in
+#     equality comparisons are explicitly OUT of scope for CONST-046.
+#     Translating "fancy" to "ausgefallen" would silently break the
+#     HELIXCODE_RENDER=fancy invocation path on every non-en locale.
+#
+#   * Env-var key (HELIXCODE_RENDER) — configuration token, not
+#     narrative; the literal name appears in user docs but the value
+#     is read via os.LookupEnv(EnvVarName) from a const.
+#
+#   * BlockID tokens ("oneshot-<n>", "_auto", "lsp-diagnostics",
+#     "smart-edit-diff") — diff anchors consumed by successive
+#     RenderFrame calls for differential ANSI updates. Stable across
+#     invocations regardless of locale; translating them would
+#     silently break the in-place re-render diffing contract.
+#
+#   * ANSI escape sequences (\x1b[1A, \x1b[1B, \r\x1b[K, etc.) —
+#     terminal control bytes consumed by the host terminal emulator,
+#     not text shown to the user.
+#
+#   * Sentinel errors ("invalid render mode", "renderer is closed",
+#     "frame block ID required") — created via errors.New + compared
+#     via errors.Is by call sites; not surfaced as user-facing labels
+#     in their literal form (consumers re-render via their own
+#     locale-aware UI layer when reporting to humans).
+#
+#   * Wrapped-error technical strings ("render: opts.Mode %q: %w",
+#     "render: resolveMode returned %q: %w", "render: %s=%q: %w") —
+#     surfaced to logs / error chains for developers, not end-user UI
+#     narrative.
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_render_<area>_<short_description>. All IDs prefixed with
+# internal_render_ to avoid namespace collision when loaded into the
+# same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through
+# the Translator seam). The placeholder is NOT consumed by any call
+# site in ansi_renderer.go / plain_renderer.go / factory.go /
+# tool_helpers.go / types.go / viewport.go — it exists purely to keep
+# the i18n surface live + ready for the first real migration target
+# a future round identifies (e.g. a renderer-mode help banner for
+# invalid HELIXCODE_RENDER values, a "no terminal detected"
+# fallback notice, a viewport overflow toast).
+
+internal_render_reserved_placeholder:
+  other: "RESERVED: internal/render i18n bundle placeholder — no production caller (round-224 no-op infra)"
