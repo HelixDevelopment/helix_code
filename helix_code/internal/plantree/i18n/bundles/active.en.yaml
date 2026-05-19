@@ -1,0 +1,41 @@
+# internal/plantree i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/plantree/plan_tools.go (and other plantree
+# package source files) to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_plantree_<area>_<short_description>.
+# All IDs prefixed with internal_plantree_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-233 §11.4 anti-bluff sweep (2026-05-19): migrated the six
+# user-facing tool.Description() literals emitted by plan_tools.go
+# (plan_create / plan_branch / plan_merge / plan_list / plan_show /
+# plan_delete). These descriptions surface to operators through the
+# CLI tool registry and `tool --help` output. Hardcoded English here
+# silently broke the help surface for every non-English operator per
+# CONST-046. Error-wrap literals (fmt.Errorf "save tree", "list plans"
+# etc.) and validation messages ("name is required" etc.) are
+# deferred to future rounds to stay under the 10-literal cap.
+
+internal_plantree_tool_create_description:
+  other: "Create a new plan tree with a root node"
+
+internal_plantree_tool_branch_description:
+  other: "Add a child node under an existing plan node"
+
+internal_plantree_tool_merge_description:
+  other: "Merge a completed child node back into its parent"
+
+internal_plantree_tool_list_description:
+  other: "List all saved plan trees with summaries"
+
+internal_plantree_tool_show_description:
+  other: "Display a plan tree with status markers"
+
+internal_plantree_tool_delete_description:
+  other: "Delete a plan tree"

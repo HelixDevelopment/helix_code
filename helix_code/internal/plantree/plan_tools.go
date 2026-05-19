@@ -19,8 +19,10 @@ func NewPlanCreateTool(store Store) *PlanCreateTool {
 	return &PlanCreateTool{store: store}
 }
 
-func (t *PlanCreateTool) Name() string        { return "plan_create" }
-func (t *PlanCreateTool) Description() string { return "Create a new plan tree with a root node" }
+func (t *PlanCreateTool) Name() string { return "plan_create" }
+func (t *PlanCreateTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_create_description", nil)
+}
 func (t *PlanCreateTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
@@ -84,8 +86,10 @@ func NewPlanBranchTool(store Store) *PlanBranchTool {
 	return &PlanBranchTool{store: store}
 }
 
-func (t *PlanBranchTool) Name() string        { return "plan_branch" }
-func (t *PlanBranchTool) Description() string { return "Add a child node under an existing plan node" }
+func (t *PlanBranchTool) Name() string { return "plan_branch" }
+func (t *PlanBranchTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_branch_description", nil)
+}
 func (t *PlanBranchTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
@@ -149,8 +153,10 @@ func NewPlanMergeTool(store Store) *PlanMergeTool {
 	return &PlanMergeTool{store: store}
 }
 
-func (t *PlanMergeTool) Name() string        { return "plan_merge" }
-func (t *PlanMergeTool) Description() string { return "Merge a completed child node back into its parent" }
+func (t *PlanMergeTool) Name() string { return "plan_merge" }
+func (t *PlanMergeTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_merge_description", nil)
+}
 func (t *PlanMergeTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
@@ -209,8 +215,10 @@ func NewPlanListTool(store Store) *PlanListTool {
 	return &PlanListTool{store: store}
 }
 
-func (t *PlanListTool) Name() string        { return "plan_list" }
-func (t *PlanListTool) Description() string { return "List all saved plan trees with summaries" }
+func (t *PlanListTool) Name() string { return "plan_list" }
+func (t *PlanListTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_list_description", nil)
+}
 func (t *PlanListTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
@@ -250,8 +258,10 @@ func NewPlanShowTool(store Store) *PlanShowTool {
 	return &PlanShowTool{store: store}
 }
 
-func (t *PlanShowTool) Name() string        { return "plan_show" }
-func (t *PlanShowTool) Description() string { return "Display a plan tree with status markers" }
+func (t *PlanShowTool) Name() string { return "plan_show" }
+func (t *PlanShowTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_show_description", nil)
+}
 func (t *PlanShowTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
@@ -295,8 +305,10 @@ func NewPlanDeleteTool(store Store) *PlanDeleteTool {
 	return &PlanDeleteTool{store: store}
 }
 
-func (t *PlanDeleteTool) Name() string        { return "plan_delete" }
-func (t *PlanDeleteTool) Description() string { return "Delete a plan tree" }
+func (t *PlanDeleteTool) Name() string { return "plan_delete" }
+func (t *PlanDeleteTool) Description() string {
+	return tr(context.Background(), "internal_plantree_tool_delete_description", nil)
+}
 func (t *PlanDeleteTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("plan")
 }
