@@ -16,34 +16,17 @@ import (
 // mainCmd represents the main command that starts everything
 var mainCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start HelixCode with automated local LLM management",
-	Long: `Start HelixCode with fully automated local LLM provider management.
-This single command initializes, configures, and manages all local LLM providers
-with zero-touch operation.
-
-The system automatically:
-- Installs 11+ local LLM providers
-- Configures optimal settings
-- Monitors health and performance
-- Handles failures and recovery
-- Optimizes performance over time`,
-	Run: runMainStart,
+	Short: trc("cmd_start_short", nil),
+	Long:  trc("cmd_start_long", nil),
+	Run:   runMainStart,
 }
 
 // autoCmd represents the auto command
 var autoCmd = &cobra.Command{
 	Use:   "auto",
-	Short: "Fully automated local LLM management",
-	Long: `Start HelixCode in fully automated mode where everything happens
-in the background without user intervention.
-
-All 11+ local LLM providers are automatically:
-- Cloned and installed
-- Configured with optimal settings
-- Started as background services
-- Monitored for health and performance
-- Updated and maintained automatically`,
-	Run: runAutoMode,
+	Short: trc("cmd_auto_short", nil),
+	Long:  trc("cmd_auto_long", nil),
+	Run:   runAutoMode,
 }
 
 func init() {
@@ -51,15 +34,16 @@ func init() {
 	rootCmd.AddCommand(autoCmd)
 
 	// Add flags for main command
-	mainCmd.Flags().Bool("auto", true, "Enable full automation")
-	mainCmd.Flags().Bool("monitor", true, "Enable health monitoring")
-	mainCmd.Flags().Bool("optimize", true, "Enable performance optimization")
-	mainCmd.Flags().Duration("check-interval", 30*time.Second, "Health check interval")
+	mainCmd.Flags().Bool("auto", true, trc("cmd_start_flag_auto", nil))
+	mainCmd.Flags().Bool("monitor", true, trc("cmd_start_flag_monitor", nil))
+	mainCmd.Flags().Bool("optimize", true, trc("cmd_start_flag_optimize", nil))
+	mainCmd.Flags().Duration("check-interval", 30*time.Second, trc("cmd_start_flag_check_interval", nil))
 }
 
 func runMainStart(cmd *cobra.Command, args []string) {
-	fmt.Println("🚀 Starting HelixCode Enterprise AI Development Platform...")
-	fmt.Println("🎯 Zero-Touch Local LLM Management Enabled")
+	ctx0 := context.Background()
+	fmt.Println(tr(ctx0, "cmd_start_banner", nil))
+	fmt.Println(tr(ctx0, "cmd_start_zerotouch", nil))
 	fmt.Println()
 
 	// Create context with graceful shutdown
@@ -71,24 +55,24 @@ func runMainStart(cmd *cobra.Command, args []string) {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Create auto-LLM manager
-	fmt.Println("🤖 Initializing Auto-LLM Manager...")
+	fmt.Println(tr(ctx, "cmd_start_init_manager", nil))
 	manager := llm.NewAutoLLMManager("")
 
 	// Initialize system
 	if err := manager.Initialize(ctx); err != nil {
-		fmt.Printf("❌ Failed to initialize: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_init_failed", map[string]any{"Error": err.Error()}))
 		os.Exit(1)
 	}
 
-	fmt.Println("✅ Auto-LLM Manager initialized successfully")
+	fmt.Println(tr(ctx, "cmd_start_manager_ready", nil))
 
 	// Start automated system
 	if err := manager.Start(ctx); err != nil {
-		fmt.Printf("❌ Failed to start: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_start_failed", map[string]any{"Error": err.Error()}))
 		os.Exit(1)
 	}
 
-	fmt.Println("✅ Automated Local LLM Management started")
+	fmt.Println(tr(ctx, "cmd_start_llm_started", nil))
 	fmt.Println()
 
 	// Show status
@@ -100,37 +84,38 @@ func runMainStart(cmd *cobra.Command, args []string) {
 	// Start monitoring dashboard
 	go startMonitoringDashboard(manager)
 
-	fmt.Println("🎉 HelixCode is now running with full automation!")
+	fmt.Println(tr(ctx, "cmd_start_running", nil))
 	fmt.Println()
-	fmt.Println("📊 Available endpoints:")
+	fmt.Println(tr(ctx, "cmd_start_endpoints_header", nil))
 	showRunningEndpoints(manager)
 	fmt.Println()
-	fmt.Println("🔧 Management commands:")
-	fmt.Println("  • helix local-llm status  - Check provider status")
-	fmt.Println("  • helix local-llm logs    - View provider logs")
-	fmt.Println("  • helix local-llm monitor - Real-time monitoring")
+	fmt.Println(tr(ctx, "cmd_start_mgmt_header", nil))
+	fmt.Println(tr(ctx, "cmd_start_mgmt_status", nil))
+	fmt.Println(tr(ctx, "cmd_start_mgmt_logs", nil))
+	fmt.Println(tr(ctx, "cmd_start_mgmt_monitor", nil))
 	fmt.Println()
-	fmt.Println("Press Ctrl+C to stop gracefully...")
+	fmt.Println(tr(ctx, "cmd_press_ctrlc_graceful", nil))
 
 	// Wait for signals
 	select {
 	case <-sigChan:
-		fmt.Println("\n🛑 Received shutdown signal, stopping gracefully...")
+		fmt.Println("\n" + tr(ctx, "cmd_shutdown_signal", nil))
 	case <-ctx.Done():
-		fmt.Println("\n🛑 Context cancelled, stopping gracefully...")
+		fmt.Println("\n" + tr(ctx, "cmd_shutdown_ctx_cancelled", nil))
 	}
 
 	// Graceful shutdown
 	if err := manager.Stop(); err != nil {
-		fmt.Printf("⚠️  Error during shutdown: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_shutdown_error", map[string]any{"Error": err.Error()}))
 	}
 
-	fmt.Println("✅ HelixCode stopped gracefully")
+	fmt.Println(tr(ctx, "cmd_start_stopped", nil))
 }
 
 func runAutoMode(cmd *cobra.Command, args []string) {
-	fmt.Println("🤖 Starting HelixCode in Fully Automated Mode...")
-	fmt.Println("🎯 Zero-Touch Operation: Everything happens automatically")
+	ctx0 := context.Background()
+	fmt.Println(tr(ctx0, "cmd_auto_banner", nil))
+	fmt.Println(tr(ctx0, "cmd_auto_zerotouch", nil))
 	fmt.Println()
 
 	// Create context for auto mode

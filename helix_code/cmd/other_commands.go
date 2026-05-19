@@ -20,8 +20,8 @@ import (
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start HelixCode server",
-	Long:  `Start the HelixCode server with all configured providers and services.`,
+	Short: trc("cmd_server_short", nil),
+	Long:  trc("cmd_server_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.Load()
 		if err != nil {
@@ -79,15 +79,16 @@ var serverCmd = &cobra.Command{
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Show version information",
-	Long:  `Show detailed version information for HelixCode and its components.`,
+	Short: trc("cmd_version_short", nil),
+	Long:  trc("cmd_version_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("HelixCode Enterprise AI Development Platform")
-		fmt.Println("Version: 1.0.0")
-		fmt.Println("Build: 2025.01.20")
-		fmt.Println("AI Providers: 29 (18 cloud + 11 local)")
-		fmt.Println("Token Context: 2M")
-		fmt.Println("License: MIT")
+		ctx := context.Background()
+		fmt.Println(tr(ctx, "cmd_version_platform_name", nil))
+		fmt.Println(tr(ctx, "cmd_version_version", map[string]any{"Version": "1.0.0"}))
+		fmt.Println(tr(ctx, "cmd_version_build", map[string]any{"Build": "2025.01.20"}))
+		fmt.Println(tr(ctx, "cmd_version_providers", map[string]any{"Total": 29, "Cloud": 18, "Local": 11}))
+		fmt.Println(tr(ctx, "cmd_version_token_context", map[string]any{"Context": "2M"}))
+		fmt.Println(tr(ctx, "cmd_version_license", map[string]any{"License": "MIT"}))
 	},
 }
 
