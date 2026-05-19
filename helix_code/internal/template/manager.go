@@ -1,7 +1,9 @@
 package template
 
 import (
+	stdctx "context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -47,7 +49,7 @@ func (m *Manager) Register(template *Template) error {
 
 	// Check for duplicate name
 	if _, exists := m.byName[template.Name]; exists {
-		return fmt.Errorf("template with name '%s' already exists", template.Name)
+		return errors.New(tr(stdctx.Background(), "internal_template_manager_duplicate_name", map[string]any{"Name": template.Name}))
 	}
 
 	// Register
@@ -75,7 +77,7 @@ func (m *Manager) Get(id string) (*Template, error) {
 
 	template, exists := m.templates[id]
 	if !exists {
-		return nil, fmt.Errorf("template not found: %s", id)
+		return nil, errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": id}))
 	}
 
 	return template, nil
@@ -88,7 +90,7 @@ func (m *Manager) GetByName(name string) (*Template, error) {
 
 	template, exists := m.byName[name]
 	if !exists {
-		return nil, fmt.Errorf("template not found: %s", name)
+		return nil, errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": name}))
 	}
 
 	return template, nil
@@ -130,7 +132,7 @@ func (m *Manager) Update(id string, updater func(*Template)) error {
 
 	template, exists := m.templates[id]
 	if !exists {
-		return fmt.Errorf("template not found: %s", id)
+		return errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": id}))
 	}
 
 	// Apply update
@@ -156,7 +158,7 @@ func (m *Manager) Delete(id string) error {
 
 	template, exists := m.templates[id]
 	if !exists {
-		return fmt.Errorf("template not found: %s", id)
+		return errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": id}))
 	}
 
 	// Remove from all indexes

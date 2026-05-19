@@ -1,0 +1,46 @@
+# internal/template i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/template/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_template_<area>_<short_description>.
+# All IDs prefixed with internal_template_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-180 §11.4 anti-bluff sweep (2026-05-19, Phase 4 round 73):
+# migrated 10 user-facing error literals returned from the template
+# subsystem — Manager registration (manager.go: duplicate name,
+# not-found), Template validation (template.go: required-variable
+# missing, unreplaced placeholders, name/content empty, invalid
+# type, declared-variable not in content). These are the strings
+# that surface to operators when a template definition is malformed,
+# is rendered with missing variables, or is looked up by a wrong
+# ID/name.
+
+internal_template_manager_duplicate_name:
+  other: "template with name '{{.Name}}' already exists"
+
+internal_template_manager_not_found:
+  other: "template not found: {{.ID}}"
+
+internal_template_render_unreplaced_placeholders:
+  other: "template has unreplaced placeholders"
+
+internal_template_render_required_variable_missing:
+  other: "required variable '{{.Name}}' is missing"
+
+internal_template_validate_name_empty:
+  other: "template name cannot be empty"
+
+internal_template_validate_content_empty:
+  other: "template content cannot be empty"
+
+internal_template_validate_invalid_type:
+  other: "invalid template type: {{.Type}}"
+
+internal_template_validate_declared_variable_missing:
+  other: "declared variable '{{.Name}}' not found in template content"

@@ -1,6 +1,8 @@
 package template
 
 import (
+	stdctx "context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -107,7 +109,7 @@ func (t *Template) Render(vars map[string]interface{}) (string, error) {
 
 	// Check for unreplaced placeholders
 	if hasUnreplacedPlaceholders(result) {
-		return "", fmt.Errorf("template has unreplaced placeholders")
+		return "", errors.New(tr(stdctx.Background(), "internal_template_render_unreplaced_placeholders", nil))
 	}
 
 	return result, nil
@@ -118,7 +120,7 @@ func (t *Template) ValidateVariables(vars map[string]interface{}) error {
 	for _, variable := range t.Variables {
 		if variable.Required {
 			if _, exists := vars[variable.Name]; !exists {
-				return fmt.Errorf("required variable '%s' is missing", variable.Name)
+				return errors.New(tr(stdctx.Background(), "internal_template_render_required_variable_missing", map[string]any{"Name": variable.Name}))
 			}
 		}
 	}
@@ -168,15 +170,15 @@ func (t *Template) ExtractVariables() []string {
 // Validate validates the template
 func (t *Template) Validate() error {
 	if t.Name == "" {
-		return fmt.Errorf("template name cannot be empty")
+		return errors.New(tr(stdctx.Background(), "internal_template_validate_name_empty", nil))
 	}
 
 	if t.Content == "" {
-		return fmt.Errorf("template content cannot be empty")
+		return errors.New(tr(stdctx.Background(), "internal_template_validate_content_empty", nil))
 	}
 
 	if !t.Type.IsValid() {
-		return fmt.Errorf("invalid template type: %s", t.Type)
+		return errors.New(tr(stdctx.Background(), "internal_template_validate_invalid_type", map[string]any{"Type": string(t.Type)}))
 	}
 
 	// Check that all declared variables exist in content
@@ -188,7 +190,7 @@ func (t *Template) Validate() error {
 
 	for _, variable := range t.Variables {
 		if !extractedSet[variable.Name] {
-			return fmt.Errorf("declared variable '%s' not found in template content", variable.Name)
+			return errors.New(tr(stdctx.Background(), "internal_template_validate_declared_variable_missing", map[string]any{"Name": variable.Name}))
 		}
 	}
 
