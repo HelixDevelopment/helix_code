@@ -102,7 +102,9 @@ func (t *TaskStopTool) Name() string { return "TaskStop" }
 
 // RequiresApproval — terminates a running background task / process (spec §3.6).
 func (t *TaskStopTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelRun }
-func (t *TaskStopTool) Description() string    { return "Cancel a running background task by ID." }
+func (t *TaskStopTool) Description() string {
+	return tr(context.Background(), "internal_tools_task_stop_description", nil)
+}
 func (t *TaskStopTool) Category() ToolCategory { return CategoryFileSystem }
 func (t *TaskStopTool) Schema() ToolSchema {
 	return ToolSchema{

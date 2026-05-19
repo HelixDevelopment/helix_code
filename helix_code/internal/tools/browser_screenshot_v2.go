@@ -41,7 +41,9 @@ func NewBrowserScreenshotTool(mgr *browser.BrowserManager, opts browser.BrowserO
 }
 
 func (t *BrowserScreenshotToolV2) Name() string                                    { return "browser_screenshot" }
-func (t *BrowserScreenshotToolV2) Description() string                             { return "Capture a screenshot of the current page as a PNG file." }
+func (t *BrowserScreenshotToolV2) Description() string {
+	return tr(context.Background(), "internal_tools_browser_screenshot_v2_description", nil)
+}
 func (t *BrowserScreenshotToolV2) Category() ToolCategory                          { return CategoryBrowser }
 func (t *BrowserScreenshotToolV2) RequiresApproval() approval.ApprovalLevel        { return approval.LevelReadOnly }
 func (t *BrowserScreenshotToolV2) Schema() ToolSchema {

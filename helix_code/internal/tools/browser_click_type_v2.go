@@ -31,7 +31,9 @@ func NewBrowserClickTool(mgr *browser.BrowserManager, opts browser.BrowserOption
 }
 
 func (t *BrowserClickTool) Name() string                                    { return "browser_click" }
-func (t *BrowserClickTool) Description() string                             { return "Click an element by CSS selector." }
+func (t *BrowserClickTool) Description() string {
+	return tr(context.Background(), "internal_tools_browser_click_description", nil)
+}
 func (t *BrowserClickTool) Category() ToolCategory                          { return CategoryBrowser }
 func (t *BrowserClickTool) RequiresApproval() approval.ApprovalLevel        { return approval.LevelEdit }
 func (t *BrowserClickTool) Schema() ToolSchema {
@@ -96,7 +98,9 @@ func NewBrowserTypeTool(mgr *browser.BrowserManager, opts browser.BrowserOptions
 }
 
 func (t *BrowserTypeTool) Name() string                                    { return "browser_type" }
-func (t *BrowserTypeTool) Description() string                             { return "Type text into an input/textarea/contenteditable element by selector." }
+func (t *BrowserTypeTool) Description() string {
+	return tr(context.Background(), "internal_tools_browser_type_description", nil)
+}
 func (t *BrowserTypeTool) Category() ToolCategory                          { return CategoryBrowser }
 func (t *BrowserTypeTool) RequiresApproval() approval.ApprovalLevel        { return approval.LevelEdit }
 func (t *BrowserTypeTool) Schema() ToolSchema {

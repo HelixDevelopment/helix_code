@@ -1,0 +1,57 @@
+# internal/tools i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/tools/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_tools_<area>_<short_description>.
+# All IDs prefixed with internal_tools_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-181 §11.4 anti-bluff sweep (2026-05-19): migrated 10
+# user-facing Tool.Description() literals covering:
+#   - filesystem_tools.go (5: FSRead, FSWrite, FSEdit, Glob, Grep)
+#   - browser_click_type_v2.go (2: BrowserClick, BrowserType)
+#   - browser_close_v2.go (1: BrowserCloseV2)
+#   - browser_screenshot_v2.go (1: BrowserScreenshotV2)
+#   - task_tools.go (1: TaskStop)
+# Schema-embedded "description" fields (passed as map[string]any
+# JSON schema attributes consumed by LLM tool-calling) and the
+# Schema.Description field are NOT migrated in this round — they
+# require a richer Schema()-level translation pass that is out of
+# scope for round-181's 10-target budget. Top-level Tool.Description()
+# is the immediate user-/operator-facing surface (tool listings,
+# help output, autocomplete) and is the highest-impact migration.
+
+internal_tools_fs_read_description:
+  other: "Read file contents from the filesystem"
+
+internal_tools_fs_write_description:
+  other: "Write content to a file"
+
+internal_tools_fs_edit_description:
+  other: "Edit file contents with structured operations"
+
+internal_tools_glob_description:
+  other: "Find files matching a glob pattern"
+
+internal_tools_grep_description:
+  other: "Search file contents for a pattern"
+
+internal_tools_browser_click_description:
+  other: "Click an element by CSS selector."
+
+internal_tools_browser_type_description:
+  other: "Type text into an input/textarea/contenteditable element by selector."
+
+internal_tools_browser_close_v2_description:
+  other: "Close the active browser session and terminate the chromium subprocess."
+
+internal_tools_browser_screenshot_v2_description:
+  other: "Capture a screenshot of the current page as a PNG file."
+
+internal_tools_task_stop_description:
+  other: "Cancel a running background task by ID."

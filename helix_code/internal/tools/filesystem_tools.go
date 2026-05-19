@@ -19,7 +19,7 @@ func (t *FSReadTool) Name() string { return "fs_read" }
 func (t *FSReadTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *FSReadTool) Description() string {
-	return "Read file contents from the filesystem"
+	return tr(context.Background(), "internal_tools_fs_read_description", nil)
 }
 
 func (t *FSReadTool) Category() ToolCategory {
@@ -75,7 +75,7 @@ type FSWriteTool struct {
 func (t *FSWriteTool) Name() string { return "fs_write" }
 
 func (t *FSWriteTool) Description() string {
-	return "Write content to a file"
+	return tr(context.Background(), "internal_tools_fs_write_description", nil)
 }
 
 func (t *FSWriteTool) Category() ToolCategory {
@@ -130,7 +130,7 @@ type FSEditTool struct {
 func (t *FSEditTool) Name() string { return "fs_edit" }
 
 func (t *FSEditTool) Description() string {
-	return "Edit file contents with structured operations"
+	return tr(context.Background(), "internal_tools_fs_edit_description", nil)
 }
 
 func (t *FSEditTool) Category() ToolCategory {
@@ -200,7 +200,7 @@ func (t *GlobTool) Name() string { return "glob" }
 func (t *GlobTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *GlobTool) Description() string {
-	return "Find files matching a glob pattern"
+	return tr(context.Background(), "internal_tools_glob_description", nil)
 }
 
 func (t *GlobTool) Category() ToolCategory {
@@ -248,7 +248,7 @@ func (t *GrepTool) Name() string { return "grep" }
 func (t *GrepTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *GrepTool) Description() string {
-	return "Search file contents for a pattern"
+	return tr(context.Background(), "internal_tools_grep_description", nil)
 }
 
 func (t *GrepTool) Category() ToolCategory {

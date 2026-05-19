@@ -25,7 +25,9 @@ func NewBrowserCloseTool(mgr *browser.BrowserManager) *BrowserCloseToolV2 {
 }
 
 func (t *BrowserCloseToolV2) Name() string                                    { return "browser_close" }
-func (t *BrowserCloseToolV2) Description() string                             { return "Close the active browser session and terminate the chromium subprocess." }
+func (t *BrowserCloseToolV2) Description() string {
+	return tr(context.Background(), "internal_tools_browser_close_v2_description", nil)
+}
 func (t *BrowserCloseToolV2) Category() ToolCategory                          { return CategoryBrowser }
 func (t *BrowserCloseToolV2) RequiresApproval() approval.ApprovalLevel        { return approval.LevelEdit }
 func (t *BrowserCloseToolV2) Schema() ToolSchema {
