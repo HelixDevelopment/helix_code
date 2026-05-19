@@ -1,0 +1,52 @@
+# internal/verifier i18n bundle — active English (en) locale.
+#
+# Round-182 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# only two findings in helix_code/internal/verifier/ at HEAD, both for
+# the model DisplayName/Name string "Grok-3 Fast Beta" in
+# fallback_models.go. The package emits no user-facing narrative
+# strings — only:
+#
+#   * Model identity tokens: Name / DisplayName fields populated from
+#     fallback_models.go (the CONST-035-permitted hardcoded fallback
+#     list when LLMsVerifier is unreachable). These are STABLE IDENTITY
+#     KEYS consumed downstream by provider routing, the LLMsVerifier
+#     scoring pipeline (CONST-036/037 single source of truth), and
+#     end-user UI where the model name is itself the user-recognised
+#     brand — "Grok-3 Fast Beta" is xAI's product name, not a
+#     translatable descriptive phrase. Per round-158's hardware
+#     model-size-identifier precedent and round-162's logging
+#     log-level-identifier precedent, identity tokens used in equality
+#     checks / parsing pipelines / brand-name lookups are explicitly
+#     OUT of scope for CONST-046. Translating them would silently
+#     rewrite the contract with model-routing and break CONST-037's
+#     LLMsVerifier-as-single-source-of-truth promise.
+#
+#   * Provider name keys ("openai", "anthropic", "ollama", "mistral",
+#     "gemini", "deepseek", "xai"): structural lookup keys used by
+#     ProviderManager.GetProviders() and the verifier scoring map —
+#     not human-readable display content, never adapted per-locale.
+#
+#   * Field tags / JSON keys / error format strings: structural log
+#     framing emitted by the verifier client + circuit breaker, not
+#     narrative content.
+#
+#   * doc.go content — Go package documentation comments, never
+#     emitted at runtime; rendered by godoc/pkgsite which itself is
+#     not i18n-aware.
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_verifier_<area>_<short_description>. All IDs prefixed with
+# internal_verifier_ to avoid namespace collision when loaded into
+# the same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in the verifier package — it exists purely to keep the i18n surface
+# live + ready for the first real migration target a future round
+# identifies.
+
+internal_verifier_reserved_placeholder:
+  other: "RESERVED: internal/verifier i18n bundle placeholder — no production caller (round-182 no-op infra)"
