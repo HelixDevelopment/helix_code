@@ -15,6 +15,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"dev.helix.code/internal/hardware"
+	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/project"
+	"dev.helix.code/internal/session"
+	"dev.helix.code/internal/task"
+	"dev.helix.code/internal/worker"
 )
 
 type fakeTranslator struct{}
@@ -58,11 +65,34 @@ func newCLIAppForTest(t *testing.T) *HarmonyCLIApp {
 	t.Helper()
 	app := NewHarmonyCLIApp()
 	app.SetTranslator(fakeTranslator{})
-	// Initialize wires managers needed by cmd* methods. Backend
-	// errors are non-fatal — section headers print BEFORE backend
-	// access in every migrated call site.
+	// Initialize wires managers needed by cmd* methods. In CI without
+	// a populated config, config.Load() fails and Initialize returns
+	// early leaving managers nil — which crashes cmd* call sites. To
+	// keep the i18n seam tests deterministic without real
+	// infrastructure (CONST-050(A): mocks/fakes permitted in unit
+	// tests), wire the managers directly when Initialize fails. Every
+	// manager here uses in-memory backends — no docker / network.
 	if err := app.Initialize(); err != nil {
-		t.Logf("Initialize non-fatal (no docker): %v", err)
+		t.Logf("Initialize non-fatal (no docker/config): %v — wiring in-memory managers", err)
+	}
+	if app.taskManager == nil {
+		app.taskManager = NewCLITaskManager(task.NewTaskManager(nil, nil))
+	}
+	if app.workerManager == nil {
+		wr := worker.NewInMemoryWorkerRepository()
+		app.workerManager = NewCLIWorkerManager(worker.NewWorkerManager(wr, 30*time.Second))
+	}
+	if app.projectManager == nil {
+		app.projectManager = project.NewManager()
+	}
+	if app.sessionManager == nil {
+		app.sessionManager = session.NewManager()
+	}
+	if app.llmManager == nil {
+		app.llmManager = llm.NewModelManager()
+	}
+	if app.hardwareDetector == nil {
+		app.hardwareDetector = hardware.NewHardwareDetector()
 	}
 	return app
 }
@@ -123,4 +153,61 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	if got != "harmony_os_cli_status_header" {
 		t.Fatalf("after SetTranslator(nil), tr returned %q, want loud message-ID echo", got)
 	}
+}
+
+// --- Round-330 §11.4 paired-mutation seam tests ---
+// Each asserts a round-330-migrated call site consults the injected
+// Translator (sentinel present) and no longer emits the original
+// English literal (literal absent). Joint invariant = anti-bluff.
+
+func TestPrintHelp_UsesTranslator_NotHardcodedBody(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { app.printHelp() })
+	assertTranslated(t, out, "harmony_os_cli_help_body", "HelixCode Harmony OS CLI (nogui mode)")
+}
+
+func TestRun_UnknownCommand_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.Run([]string{"definitely-not-a-command"}) })
+	want := "<TRANSLATED:harmony_os_cli_unknown_command>"
+	if !strings.Contains(out, want) {
+		t.Fatalf("unknown-command output missing translator sentinel %q.\nFull:\n%s", want, out)
+	}
+	if strings.Contains(out, "Unknown command: definitely-not-a-command") {
+		t.Fatalf("output still contains original literal — migration reverted.\nFull:\n%s", out)
+	}
+}
+
+func TestCmdStatus_StatusLines_UseTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdStatus() })
+	// Status info lines (placeholder-bearing) MUST route through the
+	// Translator — sentinel for the platform + LLM-models IDs present.
+	for _, id := range []string{
+		"harmony_os_cli_status_platform",
+		"harmony_os_cli_status_workers",
+		"harmony_os_cli_status_llm_models",
+	} {
+		if !strings.Contains(out, "<TRANSLATED:"+id+">") {
+			t.Fatalf("cmdStatus output missing sentinel for %q.\nFull:\n%s", id, out)
+		}
+	}
+}
+
+func TestCmdProjects_UnknownSubcommand_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdProjects([]string{"bogus-subcmd"}) })
+	want := "<TRANSLATED:harmony_os_cli_unknown_subcommand>"
+	if !strings.Contains(out, want) {
+		t.Fatalf("unknown-subcommand output missing translator sentinel %q.\nFull:\n%s", want, out)
+	}
+	if strings.Contains(out, "Unknown subcommand: bogus-subcmd") {
+		t.Fatalf("output still contains original literal — migration reverted.\nFull:\n%s", out)
+	}
+}
+
+func TestCmdProjects_CreateMissingArgs_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdProjects([]string{"create"}) })
+	assertTranslated(t, out, "harmony_os_cli_err_name_path_required", "Error: --name and --path are required")
 }

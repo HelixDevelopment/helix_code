@@ -11,8 +11,14 @@
 # submodules' bundles when loaded into the same go-i18n.Bundle.
 #
 # Round-96 §11.4 anti-bluff sweep (2026-05-18): 5 highest-impact
-# CLI section headers migrated. Remaining hardcoded strings tracked
-# for future rounds.
+# CLI section headers migrated.
+#
+# Round-330 §11.4 anti-bluff sweep (2026-05-20): 20 additional
+# nogui CLI strings migrated — the full help body, status info
+# lines, command/subcommand error messages, empty-list notices,
+# and CRUD confirmation messages that anchor every text-mode
+# interaction with the Harmony OS CLI client (main_nogui.go).
+# Placeholder-bearing entries use go-i18n {{.Name}} interpolation.
 
 harmony_os_cli_status_header:
   other: "=== HelixCode Harmony OS Status ==="
@@ -28,3 +34,132 @@ harmony_os_cli_sessions_header:
 
 harmony_os_cli_tasks_header:
   other: "=== Tasks ==="
+
+harmony_os_cli_workers_header:
+  other: "=== Workers ==="
+
+# --- Round-330 additions ---
+
+harmony_os_cli_help_body:
+  other: |-
+    HelixCode Harmony OS CLI (nogui mode)
+
+    Usage: helix-harmony [command] [arguments]
+
+    Commands:
+      help          Show this help message
+      status        Show system status
+      system        Show Harmony OS system information
+      projects      Manage projects (list, create, delete, set-active)
+      sessions      Manage sessions (list, create, start, pause, complete)
+      tasks         Manage tasks (list, create, cancel)
+      workers       Manage workers (list, add, remove)
+      llm           LLM operations (providers, models, chat)
+      distributed   Distributed device operations (discover, list, sync)
+      interactive   Start interactive mode
+
+    Examples:
+      helix-harmony status
+      helix-harmony system
+      helix-harmony projects list
+      helix-harmony projects create --name "MyProject" --path "/path/to/project"
+      helix-harmony sessions create --project "proj_123" --name "Dev Session"
+      helix-harmony tasks create --type building --desc "Build the project"
+      helix-harmony distributed discover
+      helix-harmony llm providers
+      helix-harmony interactive
+
+    Harmony OS Features:
+      - Distributed computing across Harmony devices
+      - Cross-device data synchronization
+      - AI acceleration support
+      - Multi-screen collaboration
+
+    Build with GUI disabled using: go build -tags nogui
+
+harmony_os_cli_unknown_command:
+  other: "Unknown command: {{.Command}}"
+
+harmony_os_cli_unknown_subcommand:
+  other: "Unknown subcommand: {{.Subcommand}}"
+
+harmony_os_cli_status_platform:
+  other: "Platform: HarmonyOS (via {{.OSName}}/{{.OSArch}})"
+
+harmony_os_cli_status_cpu_cores:
+  other: "CPU Cores: {{.Cores}}"
+
+harmony_os_cli_status_go_version:
+  other: "Go Version: {{.Version}}"
+
+harmony_os_cli_status_workers:
+  other: "Workers: {{.Total}} total, {{.Active}} active"
+
+harmony_os_cli_status_tasks:
+  other: "Tasks: {{.Total}} total, {{.Running}} running, {{.Completed}} completed"
+
+harmony_os_cli_status_projects:
+  other: "Projects: {{.Total}} total, active: {{.Active}}"
+
+harmony_os_cli_status_sessions:
+  other: "Sessions: {{.Total}} total, {{.Active}} active"
+
+harmony_os_cli_status_llm_models:
+  other: "LLM Models: {{.Count}} available"
+
+harmony_os_cli_no_projects:
+  other: "No projects found."
+
+harmony_os_cli_no_sessions:
+  other: "No sessions found."
+
+harmony_os_cli_no_tasks:
+  other: "No tasks found."
+
+harmony_os_cli_no_workers:
+  other: "No workers found."
+
+harmony_os_cli_err_name_path_required:
+  other: "Error: --name and --path are required"
+
+harmony_os_cli_err_name_project_required:
+  other: "Error: --name and --project are required"
+
+harmony_os_cli_err_project_id_required:
+  other: "Error: project ID required"
+
+harmony_os_cli_err_session_id_required:
+  other: "Error: session ID required"
+
+harmony_os_cli_err_task_id_required:
+  other: "Error: task ID required"
+
+harmony_os_cli_err_desc_required:
+  other: "Error: --desc is required"
+
+harmony_os_cli_project_created:
+  other: "Created project: {{.Name}} (ID: {{.ID}})"
+
+harmony_os_cli_project_set_active:
+  other: "Set active project: {{.ID}}"
+
+harmony_os_cli_project_deleted:
+  other: "Deleted project: {{.ID}}"
+
+harmony_os_cli_session_created:
+  other: "Created session: {{.Name}} (ID: {{.ID}})"
+
+harmony_os_cli_session_started:
+  other: "Started session: {{.ID}}"
+
+harmony_os_cli_session_paused:
+  other: "Paused session: {{.ID}}"
+
+harmony_os_cli_session_completed:
+  other: "Completed session: {{.ID}}"
+
+harmony_os_cli_task_created:
+  other: "Created task: {{.Description}} (ID: {{.ID}})"
+
+harmony_os_cli_task_cancelled:
+  other: "Cancelled task: {{.ID}}"

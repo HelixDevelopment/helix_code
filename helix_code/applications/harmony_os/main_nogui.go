@@ -295,7 +295,10 @@ func (cliApp *HarmonyCLIApp) Run(args []string) error {
 	case "interactive":
 		return cliApp.cmdInteractive()
 	default:
-		fmt.Printf("Unknown command: %s\n", command)
+		// CONST-046 (round-330 §11.4): unknown-command error sourced
+		// from applications/harmony_os/i18n bundle via injected
+		// Translator; NoopTranslator echoes the message ID.
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_unknown_command", map[string]any{"Command": command}))
 		cliApp.printHelp()
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -304,40 +307,9 @@ func (cliApp *HarmonyCLIApp) Run(args []string) error {
 }
 
 func (cliApp *HarmonyCLIApp) printHelp() {
-	fmt.Println(`HelixCode Harmony OS CLI (nogui mode)
-
-Usage: helix-harmony [command] [arguments]
-
-Commands:
-  help          Show this help message
-  status        Show system status
-  system        Show Harmony OS system information
-  projects      Manage projects (list, create, delete, set-active)
-  sessions      Manage sessions (list, create, start, pause, complete)
-  tasks         Manage tasks (list, create, cancel)
-  workers       Manage workers (list, add, remove)
-  llm           LLM operations (providers, models, chat)
-  distributed   Distributed device operations (discover, list, sync)
-  interactive   Start interactive mode
-
-Examples:
-  helix-harmony status
-  helix-harmony system
-  helix-harmony projects list
-  helix-harmony projects create --name "MyProject" --path "/path/to/project"
-  helix-harmony sessions create --project "proj_123" --name "Dev Session"
-  helix-harmony tasks create --type building --desc "Build the project"
-  helix-harmony distributed discover
-  helix-harmony llm providers
-  helix-harmony interactive
-
-Harmony OS Features:
-  - Distributed computing across Harmony devices
-  - Cross-device data synchronization
-  - AI acceleration support
-  - Multi-screen collaboration
-
-Build with GUI disabled using: go build -tags nogui`)
+	// CONST-046 (round-330 §11.4): help body sourced from
+	// applications/harmony_os/i18n bundle via injected Translator.
+	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_help_body", nil))
 }
 
 func (cliApp *HarmonyCLIApp) cmdStatus() error {
@@ -347,11 +319,13 @@ func (cliApp *HarmonyCLIApp) cmdStatus() error {
 	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_status_header", nil))
 	fmt.Println()
 
-	// System info
+	// System info — CONST-046 (round-330 §11.4): info lines sourced
+	// from i18n bundle with named placeholders via injected Translator.
+	ctxStatus := context.Background()
 	profile := cliApp.hardwareDetector.GetProfile()
-	fmt.Printf("Platform: HarmonyOS (via %s/%s)\n", profile.OS.Name, profile.OS.Arch)
-	fmt.Printf("CPU Cores: %d\n", profile.CPU.Cores)
-	fmt.Printf("Go Version: %s\n", runtime.Version())
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_platform", map[string]any{"OSName": profile.OS.Name, "OSArch": profile.OS.Arch}))
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_cpu_cores", map[string]any{"Cores": profile.CPU.Cores}))
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_go_version", map[string]any{"Version": runtime.Version()}))
 	fmt.Println()
 
 	// Workers
@@ -362,22 +336,21 @@ func (cliApp *HarmonyCLIApp) cmdStatus() error {
 			activeWorkers++
 		}
 	}
-	fmt.Printf("Workers: %d total, %d active\n", len(workers), activeWorkers)
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_workers", map[string]any{"Total": len(workers), "Active": activeWorkers}))
 
 	// Tasks
 	totalTasks, completedTasks, runningTasks := cliApp.taskManager.GetStats()
-	fmt.Printf("Tasks: %d total, %d running, %d completed\n",
-		totalTasks, runningTasks, completedTasks)
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_tasks", map[string]any{"Total": totalTasks, "Running": runningTasks, "Completed": completedTasks}))
 
 	// Projects
-	ctx := context.Background()
+	ctx := ctxStatus
 	projects, _ := cliApp.projectManager.ListProjects(ctx, "")
 	activeProject, _ := cliApp.projectManager.GetActiveProject(ctx)
 	activeProjectName := "none"
 	if activeProject != nil {
 		activeProjectName = activeProject.Name
 	}
-	fmt.Printf("Projects: %d total, active: %s\n", len(projects), activeProjectName)
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_projects", map[string]any{"Total": len(projects), "Active": activeProjectName}))
 
 	// Sessions
 	sessions := cliApp.sessionManager.GetAll()
@@ -387,11 +360,11 @@ func (cliApp *HarmonyCLIApp) cmdStatus() error {
 			activeSessions++
 		}
 	}
-	fmt.Printf("Sessions: %d total, %d active\n", len(sessions), activeSessions)
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_sessions", map[string]any{"Total": len(sessions), "Active": activeSessions}))
 
 	// LLM
 	models := cliApp.llmManager.GetAvailableModels()
-	fmt.Printf("LLM Models: %d available\n", len(models))
+	fmt.Println(cliApp.tr(ctxStatus, "harmony_os_cli_status_llm_models", map[string]any{"Count": len(models)}))
 
 	return nil
 }
@@ -454,7 +427,8 @@ func (cliApp *HarmonyCLIApp) cmdProjects(args []string) error {
 		// applications/harmony_os/i18n bundle via injected Translator.
 		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_projects_header", nil))
 		if len(projects) == 0 {
-			fmt.Println("No projects found.")
+			// CONST-046 (round-330 §11.4): empty-list notice via Translator.
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_no_projects", nil))
 			return nil
 		}
 		for _, p := range projects {
@@ -474,7 +448,7 @@ func (cliApp *HarmonyCLIApp) cmdProjects(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *path == "" {
-			fmt.Println("Error: --name and --path are required")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_err_name_path_required", nil))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -482,32 +456,33 @@ func (cliApp *HarmonyCLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created project: %s (ID: %s)\n", proj.Name, proj.ID)
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_project_created", map[string]any{"Name": proj.Name, "ID": proj.ID}))
 
 	case "set-active":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_err_project_id_required", nil))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.SetActiveProject(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Set active project: %s\n", args[1])
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_project_set_active", map[string]any{"ID": args[1]}))
 
 	case "delete":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_err_project_id_required", nil))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.DeleteProject(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted project: %s\n", args[1])
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_project_deleted", map[string]any{"ID": args[1]}))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		// CONST-046 (round-330 §11.4): unknown-subcommand notice via Translator.
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
 	}
 
 	return nil
@@ -525,7 +500,8 @@ func (cliApp *HarmonyCLIApp) cmdSessions(args []string) error {
 		// applications/harmony_os/i18n bundle via injected Translator.
 		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_sessions_header", nil))
 		if len(sessions) == 0 {
-			fmt.Println("No sessions found.")
+			// CONST-046 (round-330 §11.4): empty-list notice via Translator.
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_no_sessions", nil))
 			return nil
 		}
 		for _, s := range sessions {
@@ -541,7 +517,7 @@ func (cliApp *HarmonyCLIApp) cmdSessions(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *projectID == "" {
-			fmt.Println("Error: --name and --project are required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_name_project_required", nil))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -549,43 +525,43 @@ func (cliApp *HarmonyCLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created session: %s (ID: %s)\n", sess.Name, sess.ID)
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_session_created", map[string]any{"Name": sess.Name, "ID": sess.ID}))
 
 	case "start":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_session_id_required", nil))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Start(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Started session: %s\n", args[1])
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_session_started", map[string]any{"ID": args[1]}))
 
 	case "pause":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_session_id_required", nil))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Pause(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Paused session: %s\n", args[1])
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_session_paused", map[string]any{"ID": args[1]}))
 
 	case "complete":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_session_id_required", nil))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Complete(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Completed session: %s\n", args[1])
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_session_completed", map[string]any{"ID": args[1]}))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
 	}
 
 	return nil
@@ -605,7 +581,8 @@ func (cliApp *HarmonyCLIApp) cmdTasks(args []string) error {
 		// applications/harmony_os/i18n bundle via injected Translator.
 		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_tasks_header", nil))
 		if len(tasks) == 0 {
-			fmt.Println("No tasks found.")
+			// CONST-046 (round-330 §11.4): empty-list notice via Translator.
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_no_tasks", nil))
 			return nil
 		}
 		for _, t := range tasks {
@@ -620,7 +597,7 @@ func (cliApp *HarmonyCLIApp) cmdTasks(args []string) error {
 		fs.Parse(args[1:])
 
 		if *desc == "" {
-			fmt.Println("Error: --desc is required")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_err_desc_required", nil))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -628,21 +605,21 @@ func (cliApp *HarmonyCLIApp) cmdTasks(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created task: %s (ID: %s)\n", t.Description, t.ID)
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_task_created", map[string]any{"Description": t.Description, "ID": t.ID}))
 
 	case "cancel":
 		if len(args) < 2 {
-			fmt.Println("Error: task ID required")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_err_task_id_required", nil))
 			return fmt.Errorf("missing task ID")
 		}
 		err := cliApp.taskManager.CancelTask(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Cancelled task: %s\n", args[1])
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_task_cancelled", map[string]any{"ID": args[1]}))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
 	}
 
 	return nil
@@ -656,9 +633,10 @@ func (cliApp *HarmonyCLIApp) cmdWorkers(args []string) error {
 	switch args[0] {
 	case "list":
 		workers := cliApp.workerManager.GetWorkers()
-		fmt.Println("=== Workers ===")
+		// CONST-046 (round-330 §11.4): section header + empty notice via Translator.
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_workers_header", nil))
 		if len(workers) == 0 {
-			fmt.Println("No workers found.")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_no_workers", nil))
 			return nil
 		}
 		for _, w := range workers {
