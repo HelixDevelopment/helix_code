@@ -800,7 +800,11 @@ func runDeleteCommand(cmd *cobra.Command, args []string) error {
 	if err := viper.WriteConfig(); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
-	fmt.Printf("Deleted key: %s\n", key)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_delete_done", map[string]any{"Key": key}))
 	return nil
 }
 
@@ -967,9 +971,13 @@ func runRestoreCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runResetCommand(cmd *cobra.Command, args []string) error {
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	force, _ := cmd.Flags().GetBool("force")
 	if !force {
-		fmt.Println("This will reset configuration to defaults. Use --force to confirm.")
+		fmt.Println(tr(ctx, "helix_config_reset_confirm_required", nil))
 		return nil
 	}
 
@@ -978,7 +986,7 @@ func runResetCommand(cmd *cobra.Command, args []string) error {
 	if err := config.SaveHelixConfig(defaultCfg); err != nil {
 		return fmt.Errorf("failed to save default config: %w", err)
 	}
-	fmt.Println("Configuration reset to defaults")
+	fmt.Println(tr(ctx, "helix_config_reset_done", nil))
 	return nil
 }
 
@@ -986,12 +994,20 @@ func runReloadCommand(cmd *cobra.Command, args []string) error {
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("failed to reload config: %w", err)
 	}
-	fmt.Println("Configuration reloaded")
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_reload_done", nil))
 	return nil
 }
 
 func runWatchCommand(cmd *cobra.Command, args []string) error {
-	fmt.Println("Watching for configuration changes... (Press Ctrl+C to stop)")
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_watch_start", nil))
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Printf("Config changed: %s\n", e.Name)
@@ -1031,7 +1047,15 @@ func runMigrateCommand(cmd *cobra.Command, args []string) error {
 	if err := os.WriteFile(to, data, 0644); err != nil {
 		return fmt.Errorf("failed to write target: %w", err)
 	}
-	fmt.Printf("Configuration copied (versions match: %q) from %s to %s\n", srcVer, from, to)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_migrate_copied", map[string]any{
+		"Version": fmt.Sprintf("%q", srcVer),
+		"From":    from,
+		"To":      to,
+	}))
 	return nil
 }
 
@@ -1142,7 +1166,11 @@ func runTemplateApplyCommand(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("failed to save config: %w", err)
 		}
 	}
-	fmt.Printf("Template '%s' applied successfully\n", templateName)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_template_applied", map[string]any{"Name": templateName}))
 	return nil
 }
 
@@ -1164,12 +1192,16 @@ func runHistoryListCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to list backups: %w", err)
 	}
 
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if len(matches) == 0 {
-		fmt.Println("No backup history found")
+		fmt.Println(tr(ctx, "helix_config_history_none", nil))
 		return nil
 	}
 
-	fmt.Println("Configuration history:")
+	fmt.Println(tr(ctx, "helix_config_history_header", nil))
 	for _, m := range matches {
 		info, _ := os.Stat(m)
 		if info != nil {
@@ -1233,7 +1265,11 @@ func runCompletionCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runVersionCommand(cmd *cobra.Command, args []string) error {
-	fmt.Printf("helix-config version %s\n", version)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_version_line", map[string]any{"Version": version}))
 	fmt.Printf("Build time: %s\n", buildTime)
 	fmt.Printf("Git commit: %s\n", gitCommit)
 	return nil

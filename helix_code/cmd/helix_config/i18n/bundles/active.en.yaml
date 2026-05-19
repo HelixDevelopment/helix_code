@@ -45,3 +45,40 @@ helix_config_backup_written:
 
 helix_config_restore_done:
   other: "Configuration restored from: {{.Path}}"
+
+# Round-195 §11.4 anti-bluff sweep (2026-05-19): 10 additional
+# high-impact user-facing strings migrated. Targets the
+# delete/reset/reload/watch/migrate/history/template/version flows —
+# every line a normal CLI user sees when running these commands.
+# Cumulative round-108 + round-195 coverage: 20 of ~261 strings.
+# Remaining ~241 hardcoded strings tracked for future rounds.
+
+helix_config_delete_done:
+  other: "Deleted key: {{.Key}}"
+
+helix_config_reset_confirm_required:
+  other: "This will reset configuration to defaults. Use --force to confirm."
+
+helix_config_reset_done:
+  other: "Configuration reset to defaults"
+
+helix_config_reload_done:
+  other: "Configuration reloaded"
+
+helix_config_watch_start:
+  other: "Watching for configuration changes... (Press Ctrl+C to stop)"
+
+helix_config_migrate_copied:
+  other: "Configuration copied (versions match: {{.Version}}) from {{.From}} to {{.To}}"
+
+helix_config_history_none:
+  other: "No backup history found"
+
+helix_config_history_header:
+  other: "Configuration history:"
+
+helix_config_template_applied:
+  other: "Template '{{.Name}}' applied successfully"
+
+helix_config_version_line:
+  other: "helix-config version {{.Version}}"
