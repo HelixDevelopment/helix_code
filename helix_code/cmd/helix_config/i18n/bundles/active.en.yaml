@@ -82,3 +82,41 @@ helix_config_template_applied:
 
 helix_config_version_line:
   other: "helix-config version {{.Version}}"
+
+# Round-203 §11.4 anti-bluff sweep (2026-05-19): 10 additional
+# high-impact user-facing strings migrated. Targets the set/validate-
+# error/watch-notification/template-list/version-build/merge/search/
+# config-load-error/history-clean flows — every line a normal CLI
+# user sees when running these commands.
+# Cumulative round-108 + round-195 + round-203 coverage: 30 of ~261.
+# Remaining ~231 hardcoded strings tracked for future rounds.
+
+helix_config_set_done:
+  other: "Set {{.Key}} = {{.Value}}"
+
+helix_config_validate_failed_line:
+  other: "Validation FAILED: {{.Error}}"
+
+helix_config_watch_config_changed:
+  other: "Config changed: {{.Name}}"
+
+helix_config_template_list_header:
+  other: "Available templates:"
+
+helix_config_version_build_time:
+  other: "Build time: {{.BuildTime}}"
+
+helix_config_version_git_commit:
+  other: "Git commit: {{.GitCommit}}"
+
+helix_config_merge_written:
+  other: "Merged configuration written to: {{.Path}}"
+
+helix_config_search_no_results:
+  other: "No results found"
+
+helix_config_load_error:
+  other: "Error reading config file: {{.Error}}"
+
+helix_config_history_clean_start:
+  other: "Cleaning old history entries..."

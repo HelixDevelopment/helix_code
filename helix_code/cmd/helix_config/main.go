@@ -785,7 +785,11 @@ func runSetCommand(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("failed to write config: %w", err)
 		}
 	}
-	fmt.Printf("Set %s = %s\n", key, value)
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_set_done", map[string]any{"Key": key, "Value": value}))
 	return nil
 }
 
@@ -811,7 +815,11 @@ func runDeleteCommand(cmd *cobra.Command, args []string) error {
 func runValidateCommand(cmd *cobra.Command, args []string) error {
 	cfg, err := getConfig()
 	if err != nil {
-		fmt.Printf("Validation FAILED: %v\n", err)
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		fmt.Println(tr(ctx, "helix_config_validate_failed_line", map[string]any{"Error": err.Error()}))
 		return err
 	}
 
@@ -1010,7 +1018,7 @@ func runWatchCommand(cmd *cobra.Command, args []string) error {
 	fmt.Println(tr(ctx, "helix_config_watch_start", nil))
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Printf("Config changed: %s\n", e.Name)
+		fmt.Println(tr(ctx, "helix_config_watch_config_changed", map[string]any{"Name": e.Name}))
 	})
 	// Block until interrupted
 	select {}
@@ -1123,7 +1131,11 @@ func runTemplateListCommand(cmd *cobra.Command, args []string) error {
 		"development - Development configuration with debug enabled",
 		"enterprise - Enterprise configuration with all features",
 	}
-	fmt.Println("Available templates:")
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_template_list_header", nil))
 	for _, t := range templates {
 		fmt.Printf("  %s\n", t)
 	}
@@ -1270,8 +1282,8 @@ func runVersionCommand(cmd *cobra.Command, args []string) error {
 		ctx = context.Background()
 	}
 	fmt.Println(tr(ctx, "helix_config_version_line", map[string]any{"Version": version}))
-	fmt.Printf("Build time: %s\n", buildTime)
-	fmt.Printf("Git commit: %s\n", gitCommit)
+	fmt.Println(tr(ctx, "helix_config_version_build_time", map[string]any{"BuildTime": buildTime}))
+	fmt.Println(tr(ctx, "helix_config_version_git_commit", map[string]any{"GitCommit": gitCommit}))
 	return nil
 }
 
@@ -1395,7 +1407,11 @@ func runMergeCommand(cmd *cobra.Command, args []string) error {
 		if err := os.WriteFile(output, data, 0644); err != nil {
 			return fmt.Errorf("failed to write merged config: %w", err)
 		}
-		fmt.Printf("Merged configuration written to: %s\n", output)
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		fmt.Println(tr(ctx, "helix_config_merge_written", map[string]any{"Path": output}))
 	}
 	return nil
 }
@@ -1439,7 +1455,11 @@ func runSearchCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(results) == 0 {
-		fmt.Println("No results found")
+		ctx := cmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		fmt.Println(tr(ctx, "helix_config_search_no_results", nil))
 		return nil
 	}
 
@@ -1464,7 +1484,7 @@ func loadConfig() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if !strings.Contains(err.Error(), "Not Found") {
-			fmt.Printf("Error reading config file: %v\n", err)
+			fmt.Println(tr(context.Background(), "helix_config_load_error", map[string]any{"Error": err.Error()}))
 		}
 	}
 }
@@ -1758,7 +1778,11 @@ func createHistoryCleanCommand() *cobra.Command {
 		Use:   "clean",
 		Short: "Clean old history entries",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Cleaning old history entries...")
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			fmt.Println(tr(ctx, "helix_config_history_clean_start", nil))
 		},
 	}
 }
