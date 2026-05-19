@@ -186,6 +186,12 @@ CONST-057 (Type-aware closure vocabulary: <code>Bug</code> →
 <p>This file is a <strong>closure ledger</strong> — items migrate here
 from <code>docs/Issues.md</code> ONLY after positive captured-evidence
 per §11.4.5.</p>
+<p><strong>Round 189 prefix convention:</strong> Closures originally
+tracked as <code>ISSUE-NNN</code> are now annotated with their new scope
+prefix and the legacy ID preserved in parentheses
+(e.g. <code>HXL-001 (ex-ISSUE-003)</code>) for git-history traceability.
+See <code>docs/Issues.md</code> “Prefix convention” for the full mapping
+table.</p>
 <p><strong>Authoritative round-by-round narrative</strong>:
 <code>docs/CONTINUATION.md</code> (CONST-044). Each row below points to
 the relevant close-out section there. Items predating the round-system
@@ -295,7 +301,8 @@ bonus</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>98</td>
 <td>6abed9b + 2d0c35b + a79e022</td>
-<td>13 tests + dual mutation; ISSUE-001 + ISSUE-002 surfaced</td>
+<td>13 tests + dual mutation; VEN-001 (ex-ISSUE-001) + VEN-002
+(ex-ISSUE-002) surfaced</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
@@ -369,7 +376,8 @@ applied</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-003: HelixLLM analysis_test.go hardcoded path</td>
+<td>HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded
+path</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>105</td>
@@ -379,7 +387,7 @@ tests); 6 tests PASS + mutation</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-004: HelixLLM TOON WriteTOON 500</td>
+<td>HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>105</td>
@@ -390,7 +398,8 @@ application/toon; 19 middleware tests PASS + mutation</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-006 (partial): HelixMemory LOGIC-class FAIL cleanup</td>
+<td>HXC-002 (ex-ISSUE-006) (partial): HelixMemory LOGIC-class FAIL
+cleanup</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>106</td>
@@ -401,7 +410,8 @@ verified</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-006 (partial): Planning LOGIC FAIL audit confirms clean</td>
+<td>HXC-002 (ex-ISSUE-006) (partial): Planning LOGIC FAIL audit confirms
+clean</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
 <td>107</td>
@@ -450,7 +460,8 @@ README ~160KB); validated + mutation-tested</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>CONST-052 rename programme phased plan (ISSUE-005 plan)</td>
+<td>CONST-052 rename programme phased plan (HXC-001 plan,
+ex-ISSUE-005)</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
 <td>113</td>
@@ -471,13 +482,14 @@ LOC</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-006 (final): helix_agent inner LOGIC FAIL cleanup</td>
+<td>HXC-002 (ex-ISSUE-006) (final): helix_agent inner LOGIC FAIL
+cleanup</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>109</td>
 <td>0f492e98 + 35e0d52</td>
 <td>5/7 LOGIC FAILs fixed (all test-side bluffs, zero production); 2
-reclassified as cross-cutting; +49 LOC; ISSUE-006 fully CLOSED</td>
+reclassified as cross-cutting; +49 LOC; HXC-002 fully CLOSED</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
@@ -546,7 +558,7 @@ package-level seam; 0 remaining</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-009: helix_agent 4 handler tests</td>
+<td>HXA-001 (ex-ISSUE-009): helix_agent 4 handler tests</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>116</td>
@@ -994,8 +1006,8 @@ i18n/ present in tree</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>ISSUE-001: VisionEngine <code>helix-gitlab</code> URL fix (was
-misconfigured, not missing)</td>
+<td>VEN-001 (ex-ISSUE-001): VisionEngine <code>helix-gitlab</code> URL
+fix (was misconfigured, not missing)</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
 <td>188</td>
@@ -1009,8 +1021,9 @@ URLs probed = OK pre-fix, 100/100 = OK post-fix</td>
 </tr>
 </tbody>
 </table>
-<p><em>Last regenerated: 2026-05-19. Earlier closures (P0-P5 phases)
-tracked via <code>docs/improvements/PROGRESS.md</code> +
+<p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename
+annotation pass). Earlier closures (P0-P5 phases) tracked via
+<code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>
 </html>

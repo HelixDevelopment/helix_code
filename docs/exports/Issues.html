@@ -193,10 +193,278 @@ with item-level granularity for currently-open work.</p>
 <code>Feature</code> | <code>Task</code></p>
 </blockquote>
 <hr />
+<h2 id="prefix-convention">Prefix convention</h2>
+<p>Round 189 (2026-05-19) introduced per-project / per-submodule ID
+prefixes replacing the legacy <code>ISSUE-NNN</code> flat namespace. New
+items MUST use the prefix matching their scope; cross-cutting items
+affecting two or more submodules (or any meta-repo concern) live under
+<code>HXC</code>. Numeric portion is per-prefix (each prefix starts at
+<code>001</code>). Legacy <code>ISSUE-NNN</code> IDs renamed
+forward-only per CONST-043; historical close-out narratives in
+<code>docs/CONTINUATION.md</code> preserve original IDs verbatim, and
+<code>docs/Fixed.md</code> annotates each closure with
+<code>(ex-ISSUE-NNN)</code> for git-history traceability.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 30%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Scope</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HXC</td>
+<td>HelixCode root project (project-wide, multi-submodule, governance,
+infrastructure)</td>
+<td>this repo</td>
+</tr>
+<tr>
+<td>HXA</td>
+<td>HelixAgent submodule</td>
+<td><code>dependencies/HelixDevelopment/HelixAgent</code> (when present)
+/ <code>helix_agent/</code> tree</td>
+</tr>
+<tr>
+<td>HXM</td>
+<td>HelixMemory submodule</td>
+<td><code>dependencies/HelixDevelopment/HelixMemory</code></td>
+</tr>
+<tr>
+<td>HXL</td>
+<td>HelixLLM submodule</td>
+<td><code>dependencies/HelixDevelopment/HelixLLM</code></td>
+</tr>
+<tr>
+<td>HXQ</td>
+<td>HelixQA submodule</td>
+<td><code>dependencies/HelixDevelopment/HelixQA</code>
+(<code>helix_qa/</code>)</td>
+</tr>
+<tr>
+<td>HXS</td>
+<td>HelixSpecifier submodule</td>
+<td><code>dependencies/HelixDevelopment/HelixSpecifier</code></td>
+</tr>
+<tr>
+<td>HXO</td>
+<td>HelixOrchestrator (= LLMOrchestrator) submodule</td>
+<td><code>dependencies/HelixDevelopment/LLMOrchestrator</code></td>
+</tr>
+<tr>
+<td>HXV</td>
+<td>HelixVerifier (= LLMsVerifier) submodule</td>
+<td><code>dependencies/HelixDevelopment/LLMsVerifier</code></td>
+</tr>
+<tr>
+<td>HXD</td>
+<td>HelixDocProcessor (= DocProcessor) submodule</td>
+<td><code>dependencies/HelixDevelopment/DocProcessor</code></td>
+</tr>
+<tr>
+<td>HXI</td>
+<td>HelixI18n (when added)</td>
+<td>tba</td>
+</tr>
+<tr>
+<td>PLN</td>
+<td>Planning submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Planning</code></td>
+</tr>
+<tr>
+<td>VEN</td>
+<td>VisionEngine submodule (HelixDevelopment)</td>
+<td><code>dependencies/HelixDevelopment/VisionEngine</code></td>
+</tr>
+<tr>
+<td>SLF</td>
+<td>SelfImprove submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/SelfImprove</code></td>
+</tr>
+<tr>
+<td>STO</td>
+<td>Storage submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Storage</code></td>
+</tr>
+<tr>
+<td>OPS</td>
+<td>LLMOps submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/LLMOps</code></td>
+</tr>
+<tr>
+<td>VDB</td>
+<td>VectorDB submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/VectorDB</code></td>
+</tr>
+<tr>
+<td>OBS</td>
+<td>Observability submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Observability</code></td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>MCP_Module submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/MCP_Module</code></td>
+</tr>
+<tr>
+<td>MSG</td>
+<td>Messaging submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Messaging</code></td>
+</tr>
+<tr>
+<td>MDW</td>
+<td>Middleware submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Middleware</code></td>
+</tr>
+<tr>
+<td>PLG</td>
+<td>Plugins submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Plugins</code></td>
+</tr>
+<tr>
+<td>STR</td>
+<td>Streaming submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Streaming</code></td>
+</tr>
+<tr>
+<td>WAT</td>
+<td>Watcher submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Watcher</code></td>
+</tr>
+<tr>
+<td>CNV</td>
+<td>conversation submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/conversation</code></td>
+</tr>
+<tr>
+<td>AUT</td>
+<td>Auth submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Auth</code></td>
+</tr>
+<tr>
+<td>LZY</td>
+<td>Lazy submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/Lazy</code></td>
+</tr>
+<tr>
+<td>ATP</td>
+<td>AutoTemp submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/AutoTemp</code></td>
+</tr>
+<tr>
+<td>PLI</td>
+<td>PliniusCommon submodule (vasic-digital)</td>
+<td><code>dependencies/vasic-digital/PliniusCommon</code></td>
+</tr>
+<tr>
+<td>CHL</td>
+<td>challenges submodule (vasic-digital)</td>
+<td><code>challenges/</code></td>
+</tr>
+<tr>
+<td>CNT</td>
+<td>containers submodule</td>
+<td><code>containers/</code></td>
+</tr>
+<tr>
+<td>SEC</td>
+<td>security submodule</td>
+<td><code>security/</code></td>
+</tr>
+<tr>
+<td>PAN</td>
+<td>panoptic submodule</td>
+<td><code>panoptic/</code></td>
+</tr>
+</tbody>
+</table>
+<p>For submodules not listed above, default to the first 3 letters of
+the submodule name, uppercase (e.g. <code>Watcher</code> →
+<code>WAT</code>). Document the new prefix in this table on first
+use.</p>
+<h3 id="legacy-new-mapping-round-189">Legacy → new mapping (round
+189)</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th>Old ID</th>
+<th>New ID</th>
+<th>Scope rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ISSUE-001</td>
+<td>VEN-001</td>
+<td>VisionEngine <code>helix-gitlab</code> URL</td>
+</tr>
+<tr>
+<td>ISSUE-002</td>
+<td>VEN-002</td>
+<td>VisionEngine <code>vasic-digital-github</code> fork divergent</td>
+</tr>
+<tr>
+<td>ISSUE-003</td>
+<td>HXL-001</td>
+<td>HelixLLM <code>analysis_test.go</code> hardcoded path</td>
+</tr>
+<tr>
+<td>ISSUE-004</td>
+<td>HXL-002</td>
+<td>HelixLLM TOON <code>WriteTOON</code> 500</td>
+</tr>
+<tr>
+<td>ISSUE-005</td>
+<td>HXC-001</td>
+<td>CONST-052 rename programme (project-wide)</td>
+</tr>
+<tr>
+<td>ISSUE-006</td>
+<td>HXC-002</td>
+<td>Round-74 residual LOGIC FAILs (multi-submodule cross-cutting)</td>
+</tr>
+<tr>
+<td>ISSUE-007</td>
+<td>HXC-003</td>
+<td>CONST-046 migration backlog (project-wide)</td>
+</tr>
+<tr>
+<td>ISSUE-008</td>
+<td>HXQ-001</td>
+<td>helix_qa <code>TestPerformance</code> flake</td>
+</tr>
+<tr>
+<td>ISSUE-009</td>
+<td>HXA-001</td>
+<td>helix_agent handler tests (4)</td>
+</tr>
+<tr>
+<td>ISSUE-010</td>
+<td>HXA-002</td>
+<td>helix_agent debate API drift</td>
+</tr>
+<tr>
+<td>ISSUE-011</td>
+<td>HXA-003</td>
+<td>venice CONST-037 (in helix_agent)</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h2
-id="issue-001-visionengine-helix-gitlab-remote-repo-missing-404-closed-fixed.md">ISSUE-001
-— VisionEngine <code>helix-gitlab</code> remote repo missing (404) —
-CLOSED (→ Fixed.md)</h2>
+id="ven-001-ex-issue-001-visionengine-helix-gitlab-remote-repo-missing-404-closed-fixed.md">VEN-001
+(ex-ISSUE-001) — VisionEngine <code>helix-gitlab</code> remote repo
+missing (404) — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-19
 (round 98 — Planning + VisionEngine i18n migration)
@@ -226,9 +494,9 @@ HEAD) - Original broken URL still 404s when probed directly (proves URL
 was the issue, not perms)</p>
 <hr />
 <h2
-id="issue-002-visionengine-vasic-digital-github-fork-lineage-divergent-at-sha-93c830a">ISSUE-002
-— VisionEngine <code>vasic-digital-github</code> fork lineage divergent
-at SHA 93c830a</h2>
+id="ven-002-ex-issue-002-visionengine-vasic-digital-github-fork-lineage-divergent-at-sha-93c830a">VEN-002
+(ex-ISSUE-002) — VisionEngine <code>vasic-digital-github</code> fork
+lineage divergent at SHA 93c830a</h2>
 <p><strong>Status:</strong> Queued — BLOCKED on operator (CONST-061
 merge-first investigation) <strong>Type:</strong> Bug
 <strong>Discovered:</strong> 2026-05-19 (round 98)
@@ -242,9 +510,10 @@ surface, integrate or document divergence as intentional fork, then
 either FF-push or designate one lineage as canonical.</p>
 <hr />
 <h2
-id="issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">ISSUE-003
-— HelixLLM <code>internal/agents/tools/analysis_test.go</code> hardcoded
-absolute path</h2>
+id="hxl-001-ex-issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">HXL-001
+(ex-ISSUE-003) — HelixLLM
+<code>internal/agents/tools/analysis_test.go</code> hardcoded absolute
+path</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Discovered:</strong> 2026-05-19 (round 95 — HelixLLM
 migration; surfaced as pre-existing failure)
@@ -263,8 +532,8 @@ bug-pattern discovered in <code>git_test.go</code> (constant
 Mutation verified.</p>
 <hr />
 <h2
-id="issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">ISSUE-004
-— HelixLLM <code>internal/gateway/middleware</code> TOON
+id="hxl-002-ex-issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">HXL-002
+(ex-ISSUE-004) — HelixLLM <code>internal/gateway/middleware</code> TOON
 <code>WriteTOON</code> returns 500</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Discovered:</strong> 2026-05-19 (round 95)
@@ -282,8 +551,8 @@ middleware). 500 still returned for genuinely unmarshallable values
 (channels). 19 middleware tests now PASS. Mutation verified.</p>
 <hr />
 <h2
-id="issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase">ISSUE-005
-— CONST-052 rename programme: meta-repo directories still
+id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase">HXC-001
+(ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still
 PascalCase</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Task
 <strong>Discovered:</strong> 2026-05-15 (CONST-052 cascade landed)
@@ -299,8 +568,9 @@ fine-grained tasks → every change covered by every applicable test type.
 Round 88 made partial progress (3 submodules with drift fixed) but root
 directories remain.</p>
 <hr />
-<h2 id="issue-006-round-74-residual-logic-class-fails-closed">ISSUE-006
-— Round-74 residual LOGIC-class FAILs (CLOSED)</h2>
+<h2
+id="hxc-002-ex-issue-006-round-74-residual-logic-class-fails-closed">HXC-002
+(ex-ISSUE-006) — Round-74 residual LOGIC-class FAILs (CLOSED)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Discovered:</strong> 2026-05-19 (round 74 —
 release-gate-test.sh creation; classified by round 89)
@@ -314,17 +584,18 @@ test-side bluff fixes, zero production changes)
 <strong>Evidence:</strong> Round 74 surfaced 26 FAILs across submodules;
 rounds 82-87 closed 19; this Issue tracked the residual 7 across 3
 submodules. All 3 components closed by rounds 106 + 107 + 109.
-<strong>Follow-ups surfaced (NEW issues to file)</strong>: 4 helix_agent
+<strong>Follow-ups surfaced (NEW issues filed)</strong>: 4 helix_agent
 handler tests previously masked by mid-run panic (now visible) + 3
 build-failed packages depending on sibling submodule API drift
 (<code>digital.vasic.debate</code>) + 2 LOGIC FAILs reclassified as
 cross-cutting work (venice CONST-037 model-wiring + compliance CONST-051
-architectural reconciliation). See ISSUE-009 through ISSUE-013 (TBD next
-sweep).</p>
+architectural reconciliation). See HXA-001 through HXA-003 (filed
+below).</p>
 <hr />
 <h2
-id="issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">ISSUE-009
-— helix_agent handler tests surfaced after round-109 fix</h2>
+id="hxa-001-ex-issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">HXA-001
+(ex-ISSUE-009) — helix_agent handler tests surfaced after round-109
+fix</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
 <strong>Discovered:</strong> 2026-05-19 (round 109)
 <strong>Discovered-By:</strong> AI subagent (helix_agent LOGIC audit)
@@ -338,8 +609,9 @@ round-109’s 5-fix cap. <strong>Resolution path:</strong> Per-handler
 investigation, similar to round 109’s test-side bluff pattern.</p>
 <hr />
 <h2
-id="issue-010-helix_agent-3-build-failed-packages-sibling-submodule-api-drift">ISSUE-010
-— helix_agent 3 build-failed packages (sibling submodule API drift)</h2>
+id="hxa-002-ex-issue-010-helix_agent-3-build-failed-packages-sibling-submodule-api-drift">HXA-002
+(ex-ISSUE-010) — helix_agent 3 build-failed packages (sibling submodule
+API drift)</h2>
 <p><strong>Status:</strong> Queued — BLOCKED on cross-submodule
 coordination <strong>Type:</strong> Bug <strong>Discovered:</strong>
 2026-05-19 (round 109) <strong>Discovered-By:</strong> AI subagent
@@ -351,9 +623,9 @@ pin older debate version in helix_agent go.mod. Cross-submodule
 coordination required.</p>
 <hr />
 <h2
-id="issue-011-venice-testgetcapabilities-model-list-drift-const-037">ISSUE-011
-— venice <code>TestGetCapabilities</code> model-list drift
-(CONST-037)</h2>
+id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003
+(ex-ISSUE-011) — venice <code>TestGetCapabilities</code> model-list
+drift (CONST-037)</h2>
 <p><strong>Status:</strong> Queued — needs CONST-037 canonical-model
 wiring <strong>Type:</strong> Bug <strong>Discovered:</strong>
 2026-05-19 (round 109) <strong>Discovered-By:</strong> AI subagent
@@ -365,9 +637,9 @@ LLMsVerifier dynamic lookup OR pin against a stable model that’s not
 subject to vendor list changes.</p>
 <hr />
 <h2
-id="issue-007-const-046-migration-backlog-57329-violations-baselined-shrinking">ISSUE-007
-— CONST-046 migration backlog (57,329 violations baselined;
-shrinking)</h2>
+id="hxc-003-ex-issue-007-const-046-migration-backlog-57329-violations-baselined-shrinking">HXC-003
+(ex-ISSUE-007) — CONST-046 migration backlog (57,329 violations
+baselined; shrinking)</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Feature
 <strong>Discovered:</strong> 2026-05-19 (round 92 — audit script)
 <strong>Discovered-By:</strong> AI subagent ground-truth scan
@@ -383,8 +655,9 @@ re-run <code>--update-baseline</code> so snapshot shrinks toward
 zero.</p>
 <hr />
 <h2
-id="issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">ISSUE-008
-— helix_qa intermittent TestPerformance flake (host-load-sensitive)</h2>
+id="hxq-001-ex-issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">HXQ-001
+(ex-ISSUE-008) — helix_qa intermittent TestPerformance flake
+(host-load-sensitive)</h2>
 <p><strong>Status:</strong> Queued — BLOCKED on operator (host topology
 decision) <strong>Type:</strong> Bug <strong>Discovered:</strong>
 2026-05-19 (round 82) <strong>Discovered-By:</strong> AI subagent
@@ -396,7 +669,8 @@ topology, or (b) gate the test behind a
 <code>HOST_LOAD_DEDICATED=1</code> env var to run only on quiescent
 hosts. Operator decision needed.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-19. To update Issues_Summary.md
+<p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename ISSUE-NNN
+→ per-scope per CONST-049 cascade). To update Issues_Summary.md
 mechanically, run <code>scripts/generate_issues_summary.sh</code> (TODO:
 create — currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>

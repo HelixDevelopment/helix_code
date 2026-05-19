@@ -180,6 +180,12 @@
 <p>Generated from <code>docs/Issues.md</code> per Constitution §11.4.15
 + §11.4.16. Must stay in sync with the source via
 <code>CM-DOCS-EXPORT-SYNC</code> discipline.</p>
+<p><strong>Round 189 prefix convention:</strong> IDs are now
+scope-prefixed (<code>HXC</code> = root project; <code>HXA</code> =
+HelixAgent; <code>HXL</code> = HelixLLM; <code>HXQ</code> = HelixQA;
+<code>VEN</code> = VisionEngine; etc.). See <code>docs/Issues.md</code>
+“Prefix convention” section for the full table + legacy
+<code>ISSUE-NNN</code> → new mapping.</p>
 </blockquote>
 <table style="width:100%;">
 <colgroup>
@@ -202,7 +208,7 @@
 </thead>
 <tbody>
 <tr>
-<td>ISSUE-001</td>
+<td>VEN-001</td>
 <td>VisionEngine <code>helix-gitlab</code> remote repo missing
 (404)</td>
 <td>Task</td>
@@ -213,7 +219,7 @@ path); fixed via git remote set-url; 100/100 owned-org URLs
 reachable</td>
 </tr>
 <tr>
-<td>ISSUE-002</td>
+<td>VEN-002</td>
 <td>VisionEngine <code>vasic-digital-github</code> fork lineage
 divergent at SHA 93c830a</td>
 <td>Bug</td>
@@ -223,7 +229,7 @@ divergent at SHA 93c830a</td>
 commits</td>
 </tr>
 <tr>
-<td>ISSUE-003</td>
+<td>HXL-001</td>
 <td>HelixLLM <code>analysis_test.go</code> hardcoded absolute path (was:
 helix_agent)</td>
 <td>Bug</td>
@@ -232,7 +238,7 @@ helix_agent)</td>
 <td>Closed via t.TempDir + fixtures (a5e56d4)</td>
 </tr>
 <tr>
-<td>ISSUE-004</td>
+<td>HXL-002</td>
 <td>HelixLLM <code>gateway/middleware</code> TOON <code>WriteTOON</code>
 500 (was: helix_agent)</td>
 <td>Bug</td>
@@ -241,7 +247,7 @@ helix_agent)</td>
 <td>Closed via json.Marshal fallback (a5e56d4)</td>
 </tr>
 <tr>
-<td>ISSUE-005</td>
+<td>HXC-001</td>
 <td>CONST-052 rename programme: meta-repo dirs still PascalCase</td>
 <td>Task</td>
 <td>Plan-Ready (→ specs round 113)</td>
@@ -250,7 +256,7 @@ helix_agent)</td>
 needed before execution</td>
 </tr>
 <tr>
-<td>ISSUE-006</td>
+<td>HXC-002</td>
 <td>Round-74 residual LOGIC FAILs</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
@@ -259,7 +265,7 @@ needed before execution</td>
 helix_agent (109)</td>
 </tr>
 <tr>
-<td>ISSUE-009</td>
+<td>HXA-001</td>
 <td>helix_agent handler tests surfaced after round-109 fix</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md) round 116</td>
@@ -267,7 +273,7 @@ helix_agent (109)</td>
 <td>Closed: 4 tests fixed (da782d4)</td>
 </tr>
 <tr>
-<td>ISSUE-010</td>
+<td>HXA-002</td>
 <td>helix_agent 3 build-failed packages (sibling debate API drift)</td>
 <td>Bug</td>
 <td>Queued — BLOCKED on cross-submodule coord</td>
@@ -275,7 +281,7 @@ helix_agent (109)</td>
 <td>digital.vasic.debate API changed; helix_agent consumers broken</td>
 </tr>
 <tr>
-<td>ISSUE-011</td>
+<td>HXA-003</td>
 <td>venice TestGetCapabilities model-list drift (CONST-037)</td>
 <td>Bug</td>
 <td>Queued</td>
@@ -284,7 +290,7 @@ helix_agent (109)</td>
 dynamic lookup</td>
 </tr>
 <tr>
-<td>ISSUE-007</td>
+<td>HXC-003</td>
 <td>CONST-046 migration backlog (57,329 violations, baselined,
 shrinking)</td>
 <td>Feature</td>
@@ -294,7 +300,7 @@ shrinking)</td>
 <code>--fail-on-new</code> enforced</td>
 </tr>
 <tr>
-<td>ISSUE-008</td>
+<td>HXQ-001</td>
 <td>helix_qa intermittent TestPerformance flake
 (host-load-sensitive)</td>
 <td>Bug</td>
@@ -305,12 +311,13 @@ var</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 5 open (ISSUE-001 closed round 188;
-ISSUE-009 closed round 116) | 4 Bugs | 1 Task (ISSUE-005 Plan-Ready) | 1
-Feature | 3 BLOCKED (ISSUE-002 + ISSUE-008 operator + ISSUE-010
-cross-submodule coord)</p>
-<p><em>Last regenerated: 2026-05-19. See <code>docs/Issues.md</code> for
-full details. PDF/HTML exports deferred — generate via pandoc on
-demand.</em></p>
+<p><strong>Counts</strong>: 5 open (VEN-001 closed round 188; HXA-001
+closed round 116; HXC-002/HXL-001/HXL-002 also closed) | 4 Bugs open | 1
+Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3 BLOCKED
+(VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)</p>
+<p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename). See
+<code>docs/Issues.md</code> for full details + prefix convention table.
+PDF/HTML exports auto-regenerated via
+<code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>

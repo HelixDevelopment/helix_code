@@ -1,6 +1,8 @@
 # HelixCode — Fixed Items Summary
 
 > Generated from `docs/Fixed.md` per Constitution §11.4.19. Counts only.
+>
+> **Round 189 prefix convention:** Open- and closed-item IDs are now scope-prefixed (`HXC`, `HXA`, `HXL`, `HXQ`, `VEN`, …). See `docs/Issues.md` "Prefix convention" section for the full table + legacy `ISSUE-NNN` mapping. The aggregate counts below are unaffected by the rename — only labels change.
 
 ## Aggregate counts (post round-system rebaseline 2026-05-19)
 
@@ -26,4 +28,4 @@
 
 8 open issues: 5 Bugs / 2 Tasks / 1 Feature; 3 BLOCKED on operator decision.
 
-*Last regenerated: 2026-05-19. See `docs/Fixed.md` for full closure entries with commit SHAs.*
+*Last regenerated: 2026-05-19 (round 189 — prefix-convention header note added). See `docs/Fixed.md` for full closure entries with commit SHAs.*
