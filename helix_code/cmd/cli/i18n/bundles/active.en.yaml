@@ -22,6 +22,18 @@
 # #11-#20 by emission frequency in the round-131 baseline.
 #
 # After round-196, 20 of 37 strings (54%) have been migrated.
+#
+# Round-202 §11.4 anti-bluff sweep (2026-05-19): NEXT 10 high-impact
+# strings — the showHelp() section headers + five slash-command help
+# lines, worker-add success message, and the LLM-generation header +
+# prompt-echo lines. The Command-Line-Options block stays literal in
+# round-202 because every line is anchored to a verbatim flag name
+# (--list-workers, --worker, --user, --key, --prompt, --model,
+# --stream, --notify, --notify-type, --notify-priority) which MUST stay
+# machine-stable across locales — they are shell tokens, not human
+# content. A future round MAY migrate the trailing description half.
+#
+# After round-202, 30 of 37 strings (81%) have been migrated.
 
 cli_workers_total:
   other: "Total Workers: {{.Count}}"
@@ -84,3 +96,35 @@ cli_repl_header:
 
 cli_repl_goodbye:
   other: "Goodbye!"
+
+# --- Round-202 (2026-05-19) additions ---
+
+cli_help_commands_header:
+  other: "=== Available Commands ==="
+
+cli_help_cmd_workers:
+  other: "workers          - List all workers"
+
+cli_help_cmd_models:
+  other: "models           - List available models"
+
+cli_help_cmd_health:
+  other: "health           - Perform system health check"
+
+cli_help_cmd_help:
+  other: "help             - Show this help message"
+
+cli_help_cmd_exit:
+  other: "exit/quit        - Exit the CLI"
+
+cli_help_options_header:
+  other: "=== Command Line Options ==="
+
+cli_worker_added_success:
+  other: "Worker added successfully: {{.Host}}"
+
+cli_generating_header:
+  other: "=== Generating with {{.Model}} ==="
+
+cli_generating_prompt:
+  other: "Prompt: {{.Prompt}}"

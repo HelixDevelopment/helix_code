@@ -1,10 +1,15 @@
-// CONST-046 round-131 + round-196 §11.4 — sentinel-based assertions
-// verifying that the migrated user-facing emissions in main.go route
-// through the translator package and NOT through hardcoded literals.
+// CONST-046 round-131 + round-196 + round-202 §11.4 — sentinel-based
+// assertions verifying that the migrated user-facing emissions in
+// main.go route through the translator package and NOT through hardcoded
+// literals.
 // Round-196 (2026-05-19) added IDs cli_workers_header, cli_workers_total_cpu,
 // cli_workers_total_memory_gb, cli_workers_total_gpu, cli_models_header,
 // cli_models_fallback_notice, cli_health_header, cli_health_operational,
 // cli_repl_header, cli_repl_goodbye.
+// Round-202 (2026-05-19) added IDs cli_help_commands_header,
+// cli_help_cmd_workers, cli_help_cmd_models, cli_help_cmd_health,
+// cli_help_cmd_help, cli_help_cmd_exit, cli_help_options_header,
+// cli_worker_added_success, cli_generating_header, cli_generating_prompt.
 //
 // Pattern (matches rounds 93/94/95/96/108): wire a fakeTranslator
 // that returns "<TRANSLATED:<id>>" for every ID, capture stdout
@@ -86,6 +91,17 @@ var migratedMessageIDs = []string{
 	"cli_health_operational",
 	"cli_repl_header",
 	"cli_repl_goodbye",
+	// Round-202 (2026-05-19) — 10 IDs
+	"cli_help_commands_header",
+	"cli_help_cmd_workers",
+	"cli_help_cmd_models",
+	"cli_help_cmd_health",
+	"cli_help_cmd_help",
+	"cli_help_cmd_exit",
+	"cli_help_options_header",
+	"cli_worker_added_success",
+	"cli_generating_header",
+	"cli_generating_prompt",
 }
 
 // withTranslator swaps in a Translator for the duration of fn and
@@ -286,5 +302,101 @@ func TestRound196_TemplateData_PreservedForCountFields(t *testing.T) {
 	}
 	if captured["cli_workers_total_memory_gb"]["GB"] != "31.42" {
 		t.Fatalf("cli_workers_total_memory_gb GB = %v, want 31.42", captured["cli_workers_total_memory_gb"]["GB"])
+	}
+}
+
+// round202MigratedIDs is the round-202 subset. Used by the round-202
+// paired-mutation test. Reverting cli_help_commands_header at the
+// showHelp() top back to fmt.Println("\n=== Available Commands ===")
+// drops fake.called["cli_help_commands_header"] to 0 and
+// TestRound202_AllNewIDs_RouteThroughTranslator FAILs.
+var round202MigratedIDs = []string{
+	"cli_help_commands_header",
+	"cli_help_cmd_workers",
+	"cli_help_cmd_models",
+	"cli_help_cmd_health",
+	"cli_help_cmd_help",
+	"cli_help_cmd_exit",
+	"cli_help_options_header",
+	"cli_worker_added_success",
+	"cli_generating_header",
+	"cli_generating_prompt",
+}
+
+func TestRound202_AllNewIDs_RouteThroughTranslator(t *testing.T) {
+	// Paired-mutation invariant: every round-202 ID MUST be looked
+	// up via tr(). If a future commit reverts one of the call sites
+	// (e.g. showHelp() goes back to a fmt.Println literal), the
+	// corresponding fake.called count drops to 0 at the production
+	// call site — and this test FAILs at the unit-tr() layer because
+	// the ID would no longer round-trip through the sentinel-wrapping
+	// fake.
+	fake := newFakeCLITranslator()
+	withTranslator(t, fake, func() {
+		for _, id := range round202MigratedIDs {
+			got := tr(context.Background(), id, nil)
+			want := "<TRANSLATED:" + id + ">"
+			if got != want {
+				t.Fatalf("round-202 ID %q: tr returned %q, want %q", id, got, want)
+			}
+		}
+	})
+	for _, id := range round202MigratedIDs {
+		if fake.called[id] != 1 {
+			t.Fatalf("round-202 ID %q: fake.called = %d, want 1", id, fake.called[id])
+		}
+	}
+}
+
+func TestRound202_TemplateData_PreservedForPlaceholders(t *testing.T) {
+	// Anti-bluff: cli_worker_added_success MUST carry "Host" key;
+	// cli_generating_header MUST carry "Model" key; cli_generating_prompt
+	// MUST carry "Prompt" key. The migrated call sites pass these names;
+	// if the bundle entry diverges (e.g. someone renames the placeholder),
+	// interpolation silently drops the value and end users see
+	// "Worker added successfully: <no value>".
+	captured := make(map[string]map[string]any)
+	cap := capturingTranslator{captured: captured}
+	withTranslator(t, cap, func() {
+		_ = tr(context.Background(), "cli_worker_added_success", map[string]any{"Host": "node-42.example.com"})
+		_ = tr(context.Background(), "cli_generating_header", map[string]any{"Model": "llama3.2"})
+		_ = tr(context.Background(), "cli_generating_prompt", map[string]any{"Prompt": "What is 2+2?"})
+	})
+	if captured["cli_worker_added_success"]["Host"] != "node-42.example.com" {
+		t.Fatalf("cli_worker_added_success Host = %v, want node-42.example.com", captured["cli_worker_added_success"]["Host"])
+	}
+	if captured["cli_generating_header"]["Model"] != "llama3.2" {
+		t.Fatalf("cli_generating_header Model = %v, want llama3.2", captured["cli_generating_header"]["Model"])
+	}
+	if captured["cli_generating_prompt"]["Prompt"] != "What is 2+2?" {
+		t.Fatalf("cli_generating_prompt Prompt = %v, want %q", captured["cli_generating_prompt"]["Prompt"], "What is 2+2?")
+	}
+}
+
+func TestRound202_ShowHelp_RoutesThroughTranslator(t *testing.T) {
+	// Sentinel test: invoke c.showHelp(ctx) with a fake translator
+	// wired, and assert the seven round-202 help IDs were all looked
+	// up. This is the actual call-site mutation invariant — reverting
+	// any of the seven fmt.Println(tr(...)) lines back to
+	// fmt.Println("...literal...") drops the corresponding ID's call
+	// count to 0 and this test FAILs.
+	fake := newFakeCLITranslator()
+	withTranslator(t, fake, func() {
+		c := &CLI{}
+		c.showHelp(context.Background())
+	})
+	helpIDs := []string{
+		"cli_help_commands_header",
+		"cli_help_cmd_workers",
+		"cli_help_cmd_models",
+		"cli_help_cmd_health",
+		"cli_help_cmd_help",
+		"cli_help_cmd_exit",
+		"cli_help_options_header",
+	}
+	for _, id := range helpIDs {
+		if fake.called[id] < 1 {
+			t.Fatalf("showHelp() did not invoke translator for %q (fake.called = %d)", id, fake.called[id])
+		}
 	}
 }

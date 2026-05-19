@@ -1382,7 +1382,7 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 		return fmt.Errorf("failed to add worker: %v", err)
 	}
 
-	fmt.Printf("✅ Worker added successfully: %s\n", host)
+	fmt.Printf("✅ %s\n", tr(ctx, "cli_worker_added_success", map[string]any{"Host": host}))
 	return nil
 }
 
@@ -1415,8 +1415,10 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		}
 	}
 
-	fmt.Printf("\n=== Generating with %s ===\n", modelName)
-	fmt.Printf("Prompt: %s\n\n", prompt)
+	fmt.Println()
+	fmt.Println(tr(ctx, "cli_generating_header", map[string]any{"Model": modelName}))
+	fmt.Println(tr(ctx, "cli_generating_prompt", map[string]any{"Prompt": prompt}))
+	fmt.Println()
 
 	// Get provider
 	provider := c.llmProvider
@@ -1914,7 +1916,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			fmt.Println(tr(ctx, "cli_repl_goodbye", nil))
 			return nil
 		case "/help", "help":
-			c.showHelp()
+			c.showHelp(ctx)
 			continue
 		case "/workers", "workers":
 			_ = c.handleListWorkers(ctx)
@@ -1983,16 +1985,28 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 	}
 }
 
-// showHelp displays available commands
-func (c *CLI) showHelp() {
-	fmt.Println("\n=== Available Commands ===")
-	fmt.Println("workers          - List all workers")
-	fmt.Println("models           - List available models")
-	fmt.Println("health           - Perform system health check")
-	fmt.Println("help             - Show this help message")
-	fmt.Println("exit/quit        - Exit the CLI")
+// showHelp displays available commands.
+//
+// Round-202 §11.4 (CONST-046 Phase 4 round 85, 2026-05-19): the seven
+// highest-impact help-screen lines (section headers + the five `slash`
+// command entries) are routed through tr() so non-English users see a
+// locale-appropriate help screen. The eleven Command-Line-Options lines
+// remain literal in this round because they refer to verbatim flag
+// names (--list-workers, --user, etc.) which MUST stay machine-stable
+// across locales — they are command-line tokens, not human-readable
+// content, and translating them would break shell scripts that parse
+// the help screen. A future round MAY migrate the trailing description
+// half of each option line while keeping the flag-name half literal.
+func (c *CLI) showHelp(ctx context.Context) {
+	fmt.Println()
+	fmt.Println(tr(ctx, "cli_help_commands_header", nil))
+	fmt.Println(tr(ctx, "cli_help_cmd_workers", nil))
+	fmt.Println(tr(ctx, "cli_help_cmd_models", nil))
+	fmt.Println(tr(ctx, "cli_help_cmd_health", nil))
+	fmt.Println(tr(ctx, "cli_help_cmd_help", nil))
+	fmt.Println(tr(ctx, "cli_help_cmd_exit", nil))
 	fmt.Println("")
-	fmt.Println("=== Command Line Options ===")
+	fmt.Println(tr(ctx, "cli_help_options_header", nil))
 	fmt.Println("--list-workers   - List all workers")
 	fmt.Println("--list-models    - List available models")
 	fmt.Println("--health         - Perform health check")
