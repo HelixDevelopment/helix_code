@@ -453,3 +453,510 @@ helix_config_cmd_backup_long:
     Create a backup of the current configuration.
 
     The backup includes all configuration files and can be used for restoration.
+
+# Round-329 §11.4 anti-bluff sweep (2026-05-20): cmd/helix_config
+# round-3 — backup flags + restore / reset / reload / watch /
+# migrate / template / history / schema / benchmark / completion /
+# version / info / status / diff / merge / search command help text,
+# flag descriptions, and the schema-show field descriptions.
+
+helix_config_flag_incremental_backup:
+  other: "Create incremental backup"
+
+helix_config_flag_compress_backup:
+  other: "Compress the backup"
+
+helix_config_flag_description_backup:
+  other: "Backup description"
+
+helix_config_flag_tags_backup:
+  other: "Backup tags (comma-separated)"
+
+helix_config_flag_encrypt_backup:
+  other: "Encrypt the backup"
+
+helix_config_flag_password_backup:
+  other: "Password for encryption"
+
+helix_config_cmd_restore_short:
+  other: "Restore configuration from backup"
+
+helix_config_cmd_restore_long:
+  other: |-
+    Restore configuration from a previously created backup.
+
+    The current configuration will be backed up before restoration.
+
+helix_config_flag_validate_restore:
+  other: "Validate restored configuration"
+
+helix_config_flag_backup_restore:
+  other: "Backup current configuration"
+
+helix_config_flag_confirm_restore:
+  other: "Require confirmation before restoration"
+
+helix_config_flag_to_restore:
+  other: "Restore to specific version"
+
+helix_config_flag_merge_restore:
+  other: "Merge with existing configuration"
+
+helix_config_cmd_reset_short:
+  other: "Reset configuration"
+
+helix_config_cmd_reset_long:
+  other: |-
+    Reset configuration to default values.
+
+    A specific section can be reset, or the entire configuration.
+
+helix_config_flag_confirm_reset:
+  other: "Require confirmation before reset"
+
+helix_config_flag_backup_reset:
+  other: "Create backup before reset"
+
+helix_config_flag_template_reset:
+  other: "Reset to specific template instead of defaults"
+
+helix_config_flag_hard_reset:
+  other: "Hard reset (remove all custom settings)"
+
+helix_config_cmd_reload_short:
+  other: "Reload configuration"
+
+helix_config_cmd_reload_long:
+  other: |-
+    Reload configuration from disk.
+
+    This re-reads the configuration file and applies any changes.
+
+helix_config_flag_cache_reload:
+  other: "Reload configuration cache"
+
+helix_config_flag_watchers_reload:
+  other: "Reload configuration watchers"
+
+helix_config_flag_services_reload:
+  other: "Reload affected services"
+
+helix_config_cmd_watch_short:
+  other: "Watch configuration changes"
+
+helix_config_cmd_watch_long:
+  other: |-
+    Monitor configuration changes in real-time.
+
+    Specific keys can be watched, or the entire configuration.
+
+helix_config_flag_changes_watch:
+  other: "Show value changes"
+
+helix_config_flag_timestamps_watch:
+  other: "Show change timestamps"
+
+helix_config_flag_user_watch:
+  other: "Show user who made changes"
+
+helix_config_flag_format_watch:
+  other: "Output format (table, json, yaml)"
+
+helix_config_flag_follow_watch:
+  other: "Continue watching until interrupted"
+
+helix_config_flag_summary_watch:
+  other: "Show periodic summary"
+
+helix_config_cmd_migrate_short:
+  other: "Migrate configuration"
+
+helix_config_cmd_migrate_long:
+  other: |-
+    Migrate configuration to a different version.
+
+    Migration is performed safely with automatic backups.
+
+helix_config_flag_from_migrate:
+  other: "Source version (auto-detected if not specified)"
+
+helix_config_flag_backup_migrate:
+  other: "Create backup before migration"
+
+helix_config_flag_dry_run_migrate:
+  other: "Perform dry run without making changes"
+
+helix_config_flag_force_migrate:
+  other: "Force migration even with warnings"
+
+helix_config_flag_path_migrate:
+  other: "Custom migration path"
+
+helix_config_flag_validate_migrate:
+  other: "Validate after migration"
+
+helix_config_cmd_template_short:
+  other: "Manage configuration templates"
+
+helix_config_cmd_template_long:
+  other: |-
+    Manage configuration templates.
+
+    Templates can be listed, applied, created, and managed.
+
+helix_config_cmd_history_short:
+  other: "Manage configuration history"
+
+helix_config_cmd_history_long:
+  other: |-
+    Manage configuration change history.
+
+    History can be viewed, compared, and restored.
+
+helix_config_cmd_schema_short:
+  other: "Manage configuration schema"
+
+helix_config_cmd_schema_long:
+  other: |-
+    Manage configuration JSON schema.
+
+    Schema can be generated, validated, and customized.
+
+helix_config_cmd_benchmark_short:
+  other: "Benchmark configuration operations"
+
+helix_config_cmd_benchmark_long:
+  other: "Benchmark various configuration operations for performance testing."
+
+helix_config_flag_operation_benchmark:
+  other: "Operation to benchmark (load, save, validate, transform, template)"
+
+helix_config_flag_iterations_benchmark:
+  other: "Number of iterations to run"
+
+helix_config_flag_parallel_benchmark:
+  other: "Run operations in parallel"
+
+helix_config_flag_profile_benchmark:
+  other: "Enable profiling (cpu, memory, heap)"
+
+helix_config_flag_output_benchmark:
+  other: "Output file for benchmark results"
+
+helix_config_flag_compare_benchmark:
+  other: "Compare with previous benchmark results"
+
+helix_config_flag_warmup_benchmark:
+  other: "Perform warmup iterations"
+
+helix_config_cmd_template_list_short:
+  other: "List available templates"
+
+helix_config_cmd_template_list_long:
+  other: "List all available configuration templates with their metadata."
+
+helix_config_flag_category_template:
+  other: "Filter by category"
+
+helix_config_flag_tag_template:
+  other: "Filter by tag"
+
+helix_config_flag_search_template:
+  other: "Search in templates"
+
+helix_config_flag_sort_template:
+  other: "Sort by (name, created, updated, author)"
+
+helix_config_flag_details_template:
+  other: "Show detailed template information"
+
+helix_config_cmd_template_apply_short:
+  other: "Apply configuration template"
+
+helix_config_cmd_template_apply_long:
+  other: "Apply a configuration template with optional variable substitution."
+
+helix_config_flag_var_template:
+  other: "Template variables (key=value)"
+
+helix_config_flag_vars_file_template:
+  other: "Template variables file"
+
+helix_config_flag_backup_template:
+  other: "Create backup before applying"
+
+helix_config_flag_preview_template:
+  other: "Preview changes without applying"
+
+helix_config_flag_validate_template:
+  other: "Validate applied configuration"
+
+helix_config_flag_force_template:
+  other: "Force apply even with validation errors"
+
+helix_config_cmd_history_list_short:
+  other: "List configuration history"
+
+helix_config_cmd_history_list_long:
+  other: "List configuration change history with details."
+
+helix_config_flag_limit_history:
+  other: "Maximum number of entries to show"
+
+helix_config_flag_since_history:
+  other: "Show changes since (timestamp or duration)"
+
+helix_config_flag_until_history:
+  other: "Show changes until (timestamp or duration)"
+
+helix_config_flag_user_history:
+  other: "Filter by user"
+
+helix_config_flag_section_history:
+  other: "Filter by configuration section"
+
+helix_config_flag_sort_history:
+  other: "Sort by (time, user, section)"
+
+helix_config_flag_details_history:
+  other: "Show detailed change information"
+
+helix_config_cmd_schema_show_short:
+  other: "Show configuration schema"
+
+helix_config_cmd_schema_show_long:
+  other: "Display the JSON schema for the configuration."
+
+helix_config_flag_section_schema:
+  other: "Show schema for specific section"
+
+helix_config_flag_examples_schema:
+  other: "Include example values in schema"
+
+helix_config_flag_format_schema:
+  other: "Output format (json, yaml)"
+
+helix_config_flag_validate_schema:
+  other: "Validate configuration against schema"
+
+helix_config_cmd_completion_short:
+  other: "Generate shell completion"
+
+helix_config_cmd_completion_long:
+  other: "Generate shell completion scripts for bash, zsh, fish, or powershell."
+
+helix_config_flag_install_completion:
+  other: "Install completion script"
+
+helix_config_flag_shell_completion:
+  other: "Shell type (bash, zsh, fish, powershell)"
+
+helix_config_cmd_version_short:
+  other: "Show version information"
+
+helix_config_cmd_version_long:
+  other: "Display detailed version and build information."
+
+helix_config_flag_short_version:
+  other: "Show short version only"
+
+helix_config_flag_build_version:
+  other: "Show build information"
+
+helix_config_flag_deps_version:
+  other: "Show dependency versions"
+
+helix_config_cmd_info_short:
+  other: "Show configuration information"
+
+helix_config_cmd_info_long:
+  other: "Display detailed information about the configuration system."
+
+helix_config_flag_system_info:
+  other: "Show system information"
+
+helix_config_flag_files_info:
+  other: "Show configuration file locations"
+
+helix_config_flag_stats_info:
+  other: "Show configuration statistics"
+
+helix_config_flag_environment_info:
+  other: "Show environment variables"
+
+helix_config_cmd_status_short:
+  other: "Show configuration status"
+
+helix_config_cmd_status_long:
+  other: "Display the current status of the configuration system."
+
+helix_config_flag_watchers_status:
+  other: "Show configuration watcher status"
+
+helix_config_flag_cache_status:
+  other: "Show configuration cache status"
+
+helix_config_flag_locks_status:
+  other: "Show lock status"
+
+helix_config_flag_performance_status:
+  other: "Show performance metrics"
+
+helix_config_cmd_diff_short:
+  other: "Compare configuration files"
+
+helix_config_cmd_diff_long:
+  other: "Compare two configuration files and show differences."
+
+helix_config_flag_format_diff:
+  other: "Output format (table, json, yaml, diff)"
+
+helix_config_flag_unified_diff:
+  other: "Unified diff format"
+
+helix_config_flag_context_diff:
+  other: "Context lines for diff"
+
+helix_config_flag_color_diff:
+  other: "Colorized output"
+
+helix_config_flag_semantic_diff:
+  other: "Semantic diff (understands configuration structure)"
+
+helix_config_cmd_merge_short:
+  other: "Merge configuration files"
+
+helix_config_cmd_merge_long:
+  other: "Merge two configuration files into one."
+
+helix_config_flag_strategy_merge:
+  other: "Merge strategy (override, merge, intersect)"
+
+helix_config_flag_conflict_merge:
+  other: "Conflict resolution (first, second, error)"
+
+helix_config_flag_validate_merge_cmd:
+  other: "Validate merged configuration"
+
+helix_config_flag_base_merge:
+  other: "Base file for three-way merge"
+
+helix_config_flag_preview_merge:
+  other: "Preview merge result without saving"
+
+helix_config_cmd_search_short:
+  other: "Search configuration"
+
+helix_config_cmd_search_long:
+  other: "Search configuration values by pattern or regex."
+
+helix_config_flag_section_search:
+  other: "Search in specific section"
+
+helix_config_flag_regex_search:
+  other: "Use regular expression"
+
+helix_config_flag_case_sensitive_search:
+  other: "Case sensitive search"
+
+helix_config_flag_values_search:
+  other: "Search in values"
+
+helix_config_flag_keys_search:
+  other: "Search in keys"
+
+helix_config_flag_limit_search:
+  other: "Maximum number of results"
+
+helix_config_flag_sort_search:
+  other: "Sort results (relevance, key, value)"
+
+helix_config_cmd_template_show_short:
+  other: "Show template details"
+
+helix_config_cmd_template_create_short:
+  other: "Create a new template"
+
+helix_config_cmd_template_update_short:
+  other: "Update an existing template"
+
+helix_config_cmd_template_delete_short:
+  other: "Delete a template"
+
+helix_config_cmd_template_search_short:
+  other: "Search templates"
+
+helix_config_cmd_template_validate_short:
+  other: "Validate a template"
+
+helix_config_cmd_history_show_short:
+  other: "Show history entry details"
+
+helix_config_cmd_history_restore_short:
+  other: "Restore configuration from history"
+
+helix_config_cmd_history_compare_short:
+  other: "Compare two history entries"
+
+helix_config_cmd_history_search_short:
+  other: "Search configuration history"
+
+helix_config_cmd_history_clean_short:
+  other: "Clean old history entries"
+
+helix_config_cmd_schema_validate_short:
+  other: "Validate configuration against schema"
+
+helix_config_cmd_schema_generate_short:
+  other: "Generate schema from configuration"
+
+helix_config_cmd_schema_export_short:
+  other: "Export schema to file"
+
+helix_config_cmd_schema_import_short:
+  other: "Import schema from file"
+
+helix_config_schema_server_port:
+  other: "int - Server port (default: 8080)"
+
+helix_config_schema_server_host:
+  other: "string - Server host (default: localhost)"
+
+helix_config_schema_server_read_timeout:
+  other: "duration - Read timeout (default: 30s)"
+
+helix_config_schema_database_enabled:
+  other: "bool - Enable database (default: false)"
+
+helix_config_schema_database_host:
+  other: "string - Database host"
+
+helix_config_schema_database_port:
+  other: "int - Database port (default: 5432)"
+
+helix_config_schema_database_user:
+  other: "string - Database user"
+
+helix_config_schema_database_password:
+  other: "string - Database password"
+
+helix_config_schema_database_dbname:
+  other: "string - Database name"
+
+helix_config_schema_redis_enabled:
+  other: "bool - Enable Redis (default: false)"
+
+helix_config_schema_redis_host:
+  other: "string - Redis host"
+
+helix_config_schema_redis_port:
+  other: "int - Redis port (default: 6379)"
+
+helix_config_schema_redis_password:
+  other: "string - Redis password"
+
+helix_config_schema_auth_jwt_secret:
+  other: "string - JWT signing secret (min 32 chars)"
+
+helix_config_schema_auth_token_expiry:
+  other: "duration - Token expiry time"

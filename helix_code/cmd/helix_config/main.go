@@ -307,122 +307,116 @@ func createBackupCommand() *cobra.Command {
 		RunE:  runBackupCommand,
 	}
 
-	cmd.Flags().Bool("incremental", false, "Create incremental backup")
-	cmd.Flags().Bool("compress", false, "Compress the backup")
-	cmd.Flags().String("description", "", "Backup description")
-	cmd.Flags().String("tags", "", "Backup tags (comma-separated)")
-	cmd.Flags().Bool("encrypt", false, "Encrypt the backup")
-	cmd.Flags().String("password", "", "Password for encryption")
+	cmd.Flags().Bool("incremental", false, tr(ctx, "helix_config_flag_incremental_backup", nil))
+	cmd.Flags().Bool("compress", false, tr(ctx, "helix_config_flag_compress_backup", nil))
+	cmd.Flags().String("description", "", tr(ctx, "helix_config_flag_description_backup", nil))
+	cmd.Flags().String("tags", "", tr(ctx, "helix_config_flag_tags_backup", nil))
+	cmd.Flags().Bool("encrypt", false, tr(ctx, "helix_config_flag_encrypt_backup", nil))
+	cmd.Flags().String("password", "", tr(ctx, "helix_config_flag_password_backup", nil))
 
 	return cmd
 }
 
 func createRestoreCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "restore <backup>",
-		Short: "Restore configuration from backup",
-		Long: `Restore configuration from a previously created backup.
-
-The current configuration will be backed up before restoration.`,
-		Args: cobra.ExactArgs(1),
-		RunE: runRestoreCommand,
+		Short: tr(ctx, "helix_config_cmd_restore_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_restore_long", nil),
+		Args:  cobra.ExactArgs(1),
+		RunE:  runRestoreCommand,
 	}
 
-	cmd.Flags().Bool("validate", true, "Validate restored configuration")
-	cmd.Flags().Bool("backup", true, "Backup current configuration")
-	cmd.Flags().Bool("confirm", false, "Require confirmation before restoration")
-	cmd.Flags().String("to", "", "Restore to specific version")
-	cmd.Flags().Bool("merge", false, "Merge with existing configuration")
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_restore", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_restore", nil))
+	cmd.Flags().Bool("confirm", false, tr(ctx, "helix_config_flag_confirm_restore", nil))
+	cmd.Flags().String("to", "", tr(ctx, "helix_config_flag_to_restore", nil))
+	cmd.Flags().Bool("merge", false, tr(ctx, "helix_config_flag_merge_restore", nil))
 
 	return cmd
 }
 
 func createResetCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "reset [section]",
-		Short: "Reset configuration",
-		Long: `Reset configuration to default values.
-
-A specific section can be reset, or the entire configuration.`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: runResetCommand,
+		Short: tr(ctx, "helix_config_cmd_reset_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_reset_long", nil),
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  runResetCommand,
 	}
 
-	cmd.Flags().Bool("confirm", false, "Require confirmation before reset")
-	cmd.Flags().Bool("backup", true, "Create backup before reset")
-	cmd.Flags().String("template", "", "Reset to specific template instead of defaults")
-	cmd.Flags().Bool("hard", false, "Hard reset (remove all custom settings)")
+	cmd.Flags().Bool("confirm", false, tr(ctx, "helix_config_flag_confirm_reset", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_reset", nil))
+	cmd.Flags().String("template", "", tr(ctx, "helix_config_flag_template_reset", nil))
+	cmd.Flags().Bool("hard", false, tr(ctx, "helix_config_flag_hard_reset", nil))
 
 	return cmd
 }
 
 func createReloadCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "reload",
-		Short: "Reload configuration",
-		Long: `Reload configuration from disk.
-
-This re-reads the configuration file and applies any changes.`,
-		Args: cobra.NoArgs,
-		RunE: runReloadCommand,
+		Short: tr(ctx, "helix_config_cmd_reload_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_reload_long", nil),
+		Args:  cobra.NoArgs,
+		RunE:  runReloadCommand,
 	}
 
-	cmd.Flags().Bool("cache", true, "Reload configuration cache")
-	cmd.Flags().Bool("watchers", true, "Reload configuration watchers")
-	cmd.Flags().Bool("services", false, "Reload affected services")
+	cmd.Flags().Bool("cache", true, tr(ctx, "helix_config_flag_cache_reload", nil))
+	cmd.Flags().Bool("watchers", true, tr(ctx, "helix_config_flag_watchers_reload", nil))
+	cmd.Flags().Bool("services", false, tr(ctx, "helix_config_flag_services_reload", nil))
 
 	return cmd
 }
 
 func createWatchCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "watch [key...]",
-		Short: "Watch configuration changes",
-		Long: `Monitor configuration changes in real-time.
-
-Specific keys can be watched, or the entire configuration.`,
-		Args: cobra.MinimumNArgs(0),
-		RunE: runWatchCommand,
+		Short: tr(ctx, "helix_config_cmd_watch_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_watch_long", nil),
+		Args:  cobra.MinimumNArgs(0),
+		RunE:  runWatchCommand,
 	}
 
-	cmd.Flags().Bool("changes", true, "Show value changes")
-	cmd.Flags().Bool("timestamps", true, "Show change timestamps")
-	cmd.Flags().Bool("user", false, "Show user who made changes")
-	cmd.Flags().String("format", "table", "Output format (table, json, yaml)")
-	cmd.Flags().Bool("follow", true, "Continue watching until interrupted")
-	cmd.Flags().Bool("summary", false, "Show periodic summary")
+	cmd.Flags().Bool("changes", true, tr(ctx, "helix_config_flag_changes_watch", nil))
+	cmd.Flags().Bool("timestamps", true, tr(ctx, "helix_config_flag_timestamps_watch", nil))
+	cmd.Flags().Bool("user", false, tr(ctx, "helix_config_flag_user_watch", nil))
+	cmd.Flags().String("format", "table", tr(ctx, "helix_config_flag_format_watch", nil))
+	cmd.Flags().Bool("follow", true, tr(ctx, "helix_config_flag_follow_watch", nil))
+	cmd.Flags().Bool("summary", false, tr(ctx, "helix_config_flag_summary_watch", nil))
 
 	return cmd
 }
 
 func createMigrateCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "migrate <to>",
-		Short: "Migrate configuration",
-		Long: `Migrate configuration to a different version.
-
-Migration is performed safely with automatic backups.`,
-		Args: cobra.ExactArgs(1),
-		RunE: runMigrateCommand,
+		Short: tr(ctx, "helix_config_cmd_migrate_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_migrate_long", nil),
+		Args:  cobra.ExactArgs(1),
+		RunE:  runMigrateCommand,
 	}
 
-	cmd.Flags().String("from", "", "Source version (auto-detected if not specified)")
-	cmd.Flags().Bool("backup", true, "Create backup before migration")
-	cmd.Flags().Bool("dry-run", false, "Perform dry run without making changes")
-	cmd.Flags().Bool("force", false, "Force migration even with warnings")
-	cmd.Flags().String("path", "", "Custom migration path")
-	cmd.Flags().Bool("validate", true, "Validate after migration")
+	cmd.Flags().String("from", "", tr(ctx, "helix_config_flag_from_migrate", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_migrate", nil))
+	cmd.Flags().Bool("dry-run", false, tr(ctx, "helix_config_flag_dry_run_migrate", nil))
+	cmd.Flags().Bool("force", false, tr(ctx, "helix_config_flag_force_migrate", nil))
+	cmd.Flags().String("path", "", tr(ctx, "helix_config_flag_path_migrate", nil))
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_migrate", nil))
 
 	return cmd
 }
 
 func createTemplateCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "template",
-		Short: "Manage configuration templates",
-		Long: `Manage configuration templates.
-
-Templates can be listed, applied, created, and managed.`,
+		Short: tr(ctx, "helix_config_cmd_template_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_template_long", nil),
 	}
 
 	cmd.AddCommand(createTemplateListCommand())
@@ -438,12 +432,11 @@ Templates can be listed, applied, created, and managed.`,
 }
 
 func createHistoryCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "history",
-		Short: "Manage configuration history",
-		Long: `Manage configuration change history.
-
-History can be viewed, compared, and restored.`,
+		Short: tr(ctx, "helix_config_cmd_history_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_history_long", nil),
 	}
 
 	cmd.AddCommand(createHistoryListCommand())
@@ -457,12 +450,11 @@ History can be viewed, compared, and restored.`,
 }
 
 func createSchemaCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "schema",
-		Short: "Manage configuration schema",
-		Long: `Manage configuration JSON schema.
-
-Schema can be generated, validated, and customized.`,
+		Short: tr(ctx, "helix_config_cmd_schema_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_schema_long", nil),
 	}
 
 	cmd.AddCommand(createSchemaShowCommand())
@@ -475,21 +467,22 @@ Schema can be generated, validated, and customized.`,
 }
 
 func createBenchmarkCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "benchmark",
-		Short: "Benchmark configuration operations",
-		Long:  `Benchmark various configuration operations for performance testing.`,
+		Short: tr(ctx, "helix_config_cmd_benchmark_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_benchmark_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runBenchmarkCommand,
 	}
 
-	cmd.Flags().String("operation", "all", "Operation to benchmark (load, save, validate, transform, template)")
-	cmd.Flags().Int("iterations", 1000, "Number of iterations to run")
-	cmd.Flags().Bool("parallel", false, "Run operations in parallel")
-	cmd.Flags().String("profile", "", "Enable profiling (cpu, memory, heap)")
-	cmd.Flags().String("output", "", "Output file for benchmark results")
-	cmd.Flags().Bool("compare", false, "Compare with previous benchmark results")
-	cmd.Flags().Bool("warmup", true, "Perform warmup iterations")
+	cmd.Flags().String("operation", "all", tr(ctx, "helix_config_flag_operation_benchmark", nil))
+	cmd.Flags().Int("iterations", 1000, tr(ctx, "helix_config_flag_iterations_benchmark", nil))
+	cmd.Flags().Bool("parallel", false, tr(ctx, "helix_config_flag_parallel_benchmark", nil))
+	cmd.Flags().String("profile", "", tr(ctx, "helix_config_flag_profile_benchmark", nil))
+	cmd.Flags().String("output", "", tr(ctx, "helix_config_flag_output_benchmark", nil))
+	cmd.Flags().Bool("compare", false, tr(ctx, "helix_config_flag_compare_benchmark", nil))
+	cmd.Flags().Bool("warmup", true, tr(ctx, "helix_config_flag_warmup_benchmark", nil))
 
 	return cmd
 }
@@ -497,38 +490,40 @@ func createBenchmarkCommand() *cobra.Command {
 // Template subcommands
 
 func createTemplateListCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List available templates",
-		Long:  `List all available configuration templates with their metadata.`,
+		Short: tr(ctx, "helix_config_cmd_template_list_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_template_list_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runTemplateListCommand,
 	}
 
-	cmd.Flags().String("category", "", "Filter by category")
-	cmd.Flags().String("tag", "", "Filter by tag")
-	cmd.Flags().String("search", "", "Search in templates")
-	cmd.Flags().String("sort", "name", "Sort by (name, created, updated, author)")
-	cmd.Flags().Bool("details", false, "Show detailed template information")
+	cmd.Flags().String("category", "", tr(ctx, "helix_config_flag_category_template", nil))
+	cmd.Flags().String("tag", "", tr(ctx, "helix_config_flag_tag_template", nil))
+	cmd.Flags().String("search", "", tr(ctx, "helix_config_flag_search_template", nil))
+	cmd.Flags().String("sort", "name", tr(ctx, "helix_config_flag_sort_template", nil))
+	cmd.Flags().Bool("details", false, tr(ctx, "helix_config_flag_details_template", nil))
 
 	return cmd
 }
 
 func createTemplateApplyCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "apply <template>",
-		Short: "Apply configuration template",
-		Long:  `Apply a configuration template with optional variable substitution.`,
+		Short: tr(ctx, "helix_config_cmd_template_apply_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_template_apply_long", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE:  runTemplateApplyCommand,
 	}
 
-	cmd.Flags().StringSliceP("var", "v", nil, "Template variables (key=value)")
-	cmd.Flags().String("vars-file", "", "Template variables file")
-	cmd.Flags().Bool("backup", true, "Create backup before applying")
-	cmd.Flags().Bool("preview", false, "Preview changes without applying")
-	cmd.Flags().Bool("validate", true, "Validate applied configuration")
-	cmd.Flags().Bool("force", false, "Force apply even with validation errors")
+	cmd.Flags().StringSliceP("var", "v", nil, tr(ctx, "helix_config_flag_var_template", nil))
+	cmd.Flags().String("vars-file", "", tr(ctx, "helix_config_flag_vars_file_template", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_template", nil))
+	cmd.Flags().Bool("preview", false, tr(ctx, "helix_config_flag_preview_template", nil))
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_template", nil))
+	cmd.Flags().Bool("force", false, tr(ctx, "helix_config_flag_force_template", nil))
 
 	return cmd
 }
@@ -536,21 +531,22 @@ func createTemplateApplyCommand() *cobra.Command {
 // History subcommands
 
 func createHistoryListCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List configuration history",
-		Long:  `List configuration change history with details.`,
+		Short: tr(ctx, "helix_config_cmd_history_list_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_history_list_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runHistoryListCommand,
 	}
 
-	cmd.Flags().Int("limit", 50, "Maximum number of entries to show")
-	cmd.Flags().String("since", "", "Show changes since (timestamp or duration)")
-	cmd.Flags().String("until", "", "Show changes until (timestamp or duration)")
-	cmd.Flags().String("user", "", "Filter by user")
-	cmd.Flags().String("section", "", "Filter by configuration section")
-	cmd.Flags().String("sort", "time", "Sort by (time, user, section)")
-	cmd.Flags().Bool("details", false, "Show detailed change information")
+	cmd.Flags().Int("limit", 50, tr(ctx, "helix_config_flag_limit_history", nil))
+	cmd.Flags().String("since", "", tr(ctx, "helix_config_flag_since_history", nil))
+	cmd.Flags().String("until", "", tr(ctx, "helix_config_flag_until_history", nil))
+	cmd.Flags().String("user", "", tr(ctx, "helix_config_flag_user_history", nil))
+	cmd.Flags().String("section", "", tr(ctx, "helix_config_flag_section_history", nil))
+	cmd.Flags().String("sort", "time", tr(ctx, "helix_config_flag_sort_history", nil))
+	cmd.Flags().Bool("details", false, tr(ctx, "helix_config_flag_details_history", nil))
 
 	return cmd
 }
@@ -558,18 +554,19 @@ func createHistoryListCommand() *cobra.Command {
 // Schema subcommands
 
 func createSchemaShowCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "show",
-		Short: "Show configuration schema",
-		Long:  `Display the JSON schema for the configuration.`,
+		Short: tr(ctx, "helix_config_cmd_schema_show_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_schema_show_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runSchemaShowCommand,
 	}
 
-	cmd.Flags().String("section", "", "Show schema for specific section")
-	cmd.Flags().Bool("examples", true, "Include example values in schema")
-	cmd.Flags().String("format", "json", "Output format (json, yaml)")
-	cmd.Flags().Bool("validate", false, "Validate configuration against schema")
+	cmd.Flags().String("section", "", tr(ctx, "helix_config_flag_section_schema", nil))
+	cmd.Flags().Bool("examples", true, tr(ctx, "helix_config_flag_examples_schema", nil))
+	cmd.Flags().String("format", "json", tr(ctx, "helix_config_flag_format_schema", nil))
+	cmd.Flags().Bool("validate", false, tr(ctx, "helix_config_flag_validate_schema", nil))
 
 	return cmd
 }
@@ -577,122 +574,129 @@ func createSchemaShowCommand() *cobra.Command {
 // Utility commands
 
 func createCompletionCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "completion [shell]",
-		Short: "Generate shell completion",
-		Long:  `Generate shell completion scripts for bash, zsh, fish, or powershell.`,
+		Short: tr(ctx, "helix_config_cmd_completion_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_completion_long", nil),
 		Args:  cobra.MaximumNArgs(1),
 		RunE:  runCompletionCommand,
 	}
 
-	cmd.Flags().Bool("install", false, "Install completion script")
-	cmd.Flags().String("shell", "", "Shell type (bash, zsh, fish, powershell)")
+	cmd.Flags().Bool("install", false, tr(ctx, "helix_config_flag_install_completion", nil))
+	cmd.Flags().String("shell", "", tr(ctx, "helix_config_flag_shell_completion", nil))
 
 	return cmd
 }
 
 func createVersionCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Show version information",
-		Long:  `Display detailed version and build information.`,
+		Short: tr(ctx, "helix_config_cmd_version_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_version_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runVersionCommand,
 	}
 
-	cmd.Flags().Bool("short", false, "Show short version only")
-	cmd.Flags().Bool("build", false, "Show build information")
-	cmd.Flags().Bool("deps", false, "Show dependency versions")
+	cmd.Flags().Bool("short", false, tr(ctx, "helix_config_flag_short_version", nil))
+	cmd.Flags().Bool("build", false, tr(ctx, "helix_config_flag_build_version", nil))
+	cmd.Flags().Bool("deps", false, tr(ctx, "helix_config_flag_deps_version", nil))
 
 	return cmd
 }
 
 func createInfoCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "info",
-		Short: "Show configuration information",
-		Long:  `Display detailed information about the configuration system.`,
+		Short: tr(ctx, "helix_config_cmd_info_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_info_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runInfoCommand,
 	}
 
-	cmd.Flags().Bool("system", false, "Show system information")
-	cmd.Flags().Bool("files", false, "Show configuration file locations")
-	cmd.Flags().Bool("stats", false, "Show configuration statistics")
-	cmd.Flags().Bool("environment", false, "Show environment variables")
+	cmd.Flags().Bool("system", false, tr(ctx, "helix_config_flag_system_info", nil))
+	cmd.Flags().Bool("files", false, tr(ctx, "helix_config_flag_files_info", nil))
+	cmd.Flags().Bool("stats", false, tr(ctx, "helix_config_flag_stats_info", nil))
+	cmd.Flags().Bool("environment", false, tr(ctx, "helix_config_flag_environment_info", nil))
 
 	return cmd
 }
 
 func createStatusCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "status",
-		Short: "Show configuration status",
-		Long:  `Display the current status of the configuration system.`,
+		Short: tr(ctx, "helix_config_cmd_status_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_status_long", nil),
 		Args:  cobra.NoArgs,
 		RunE:  runStatusCommand,
 	}
 
-	cmd.Flags().Bool("watchers", false, "Show configuration watcher status")
-	cmd.Flags().Bool("cache", false, "Show configuration cache status")
-	cmd.Flags().Bool("locks", false, "Show lock status")
-	cmd.Flags().Bool("performance", false, "Show performance metrics")
+	cmd.Flags().Bool("watchers", false, tr(ctx, "helix_config_flag_watchers_status", nil))
+	cmd.Flags().Bool("cache", false, tr(ctx, "helix_config_flag_cache_status", nil))
+	cmd.Flags().Bool("locks", false, tr(ctx, "helix_config_flag_locks_status", nil))
+	cmd.Flags().Bool("performance", false, tr(ctx, "helix_config_flag_performance_status", nil))
 
 	return cmd
 }
 
 func createDiffCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "diff <file1> <file2>",
-		Short: "Compare configuration files",
-		Long:  `Compare two configuration files and show differences.`,
+		Short: tr(ctx, "helix_config_cmd_diff_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_diff_long", nil),
 		Args:  cobra.ExactArgs(2),
 		RunE:  runDiffCommand,
 	}
 
-	cmd.Flags().String("format", "table", "Output format (table, json, yaml, diff)")
-	cmd.Flags().Bool("unified", false, "Unified diff format")
-	cmd.Flags().Int("context", 3, "Context lines for diff")
-	cmd.Flags().Bool("color", true, "Colorized output")
-	cmd.Flags().Bool("semantic", false, "Semantic diff (understands configuration structure)")
+	cmd.Flags().String("format", "table", tr(ctx, "helix_config_flag_format_diff", nil))
+	cmd.Flags().Bool("unified", false, tr(ctx, "helix_config_flag_unified_diff", nil))
+	cmd.Flags().Int("context", 3, tr(ctx, "helix_config_flag_context_diff", nil))
+	cmd.Flags().Bool("color", true, tr(ctx, "helix_config_flag_color_diff", nil))
+	cmd.Flags().Bool("semantic", false, tr(ctx, "helix_config_flag_semantic_diff", nil))
 
 	return cmd
 }
 
 func createMergeCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "merge <file1> <file2> [output]",
-		Short: "Merge configuration files",
-		Long:  `Merge two configuration files into one.`,
+		Short: tr(ctx, "helix_config_cmd_merge_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_merge_long", nil),
 		Args:  cobra.RangeArgs(2, 3),
 		RunE:  runMergeCommand,
 	}
 
-	cmd.Flags().String("strategy", "override", "Merge strategy (override, merge, intersect)")
-	cmd.Flags().String("conflict", "first", "Conflict resolution (first, second, error)")
-	cmd.Flags().Bool("validate", true, "Validate merged configuration")
-	cmd.Flags().String("base", "", "Base file for three-way merge")
-	cmd.Flags().Bool("preview", false, "Preview merge result without saving")
+	cmd.Flags().String("strategy", "override", tr(ctx, "helix_config_flag_strategy_merge", nil))
+	cmd.Flags().String("conflict", "first", tr(ctx, "helix_config_flag_conflict_merge", nil))
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_merge_cmd", nil))
+	cmd.Flags().String("base", "", tr(ctx, "helix_config_flag_base_merge", nil))
+	cmd.Flags().Bool("preview", false, tr(ctx, "helix_config_flag_preview_merge", nil))
 
 	return cmd
 }
 
 func createSearchCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "search <pattern>",
-		Short: "Search configuration",
-		Long:  `Search configuration values by pattern or regex.`,
+		Short: tr(ctx, "helix_config_cmd_search_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_search_long", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE:  runSearchCommand,
 	}
 
-	cmd.Flags().String("section", "", "Search in specific section")
-	cmd.Flags().Bool("regex", false, "Use regular expression")
-	cmd.Flags().Bool("case-sensitive", false, "Case sensitive search")
-	cmd.Flags().Bool("values", true, "Search in values")
-	cmd.Flags().Bool("keys", true, "Search in keys")
-	cmd.Flags().Int("limit", 100, "Maximum number of results")
-	cmd.Flags().String("sort", "relevance", "Sort results (relevance, key, value)")
+	cmd.Flags().String("section", "", tr(ctx, "helix_config_flag_section_search", nil))
+	cmd.Flags().Bool("regex", false, tr(ctx, "helix_config_flag_regex_search", nil))
+	cmd.Flags().Bool("case-sensitive", false, tr(ctx, "helix_config_flag_case_sensitive_search", nil))
+	cmd.Flags().Bool("values", true, tr(ctx, "helix_config_flag_values_search", nil))
+	cmd.Flags().Bool("keys", true, tr(ctx, "helix_config_flag_keys_search", nil))
+	cmd.Flags().Int("limit", 100, tr(ctx, "helix_config_flag_limit_search", nil))
+	cmd.Flags().String("sort", "relevance", tr(ctx, "helix_config_flag_sort_search", nil))
 
 	return cmd
 }
@@ -1212,29 +1216,33 @@ func runHistoryListCommand(cmd *cobra.Command, args []string) error {
 // Schema command implementations
 
 func runSchemaShowCommand(cmd *cobra.Command, args []string) error {
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	schema := map[string]interface{}{
 		"server": map[string]string{
-			"port":         "int - Server port (default: 8080)",
-			"host":         "string - Server host (default: localhost)",
-			"read_timeout": "duration - Read timeout (default: 30s)",
+			"port":         tr(ctx, "helix_config_schema_server_port", nil),
+			"host":         tr(ctx, "helix_config_schema_server_host", nil),
+			"read_timeout": tr(ctx, "helix_config_schema_server_read_timeout", nil),
 		},
 		"database": map[string]string{
-			"enabled":  "bool - Enable database (default: false)",
-			"host":     "string - Database host",
-			"port":     "int - Database port (default: 5432)",
-			"user":     "string - Database user",
-			"password": "string - Database password",
-			"dbname":   "string - Database name",
+			"enabled":  tr(ctx, "helix_config_schema_database_enabled", nil),
+			"host":     tr(ctx, "helix_config_schema_database_host", nil),
+			"port":     tr(ctx, "helix_config_schema_database_port", nil),
+			"user":     tr(ctx, "helix_config_schema_database_user", nil),
+			"password": tr(ctx, "helix_config_schema_database_password", nil),
+			"dbname":   tr(ctx, "helix_config_schema_database_dbname", nil),
 		},
 		"redis": map[string]string{
-			"enabled":  "bool - Enable Redis (default: false)",
-			"host":     "string - Redis host",
-			"port":     "int - Redis port (default: 6379)",
-			"password": "string - Redis password",
+			"enabled":  tr(ctx, "helix_config_schema_redis_enabled", nil),
+			"host":     tr(ctx, "helix_config_schema_redis_host", nil),
+			"port":     tr(ctx, "helix_config_schema_redis_port", nil),
+			"password": tr(ctx, "helix_config_schema_redis_password", nil),
 		},
 		"auth": map[string]string{
-			"jwt_secret":   "string - JWT signing secret (min 32 chars)",
-			"token_expiry": "duration - Token expiry time",
+			"jwt_secret":   tr(ctx, "helix_config_schema_auth_jwt_secret", nil),
+			"token_expiry": tr(ctx, "helix_config_schema_auth_token_expiry", nil),
 		},
 	}
 	return printJSON(schema)
@@ -1654,7 +1662,7 @@ func successf(format string, args ...interface{}) {
 func createTemplateShowCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <template>",
-		Short: "Show template details",
+		Short: tr(context.Background(), "helix_config_cmd_template_show_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1669,7 +1677,7 @@ func createTemplateShowCommand() *cobra.Command {
 func createTemplateCreateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create <name>",
-		Short: "Create a new template",
+		Short: tr(context.Background(), "helix_config_cmd_template_create_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1684,7 +1692,7 @@ func createTemplateCreateCommand() *cobra.Command {
 func createTemplateUpdateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update <template>",
-		Short: "Update an existing template",
+		Short: tr(context.Background(), "helix_config_cmd_template_update_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1699,7 +1707,7 @@ func createTemplateUpdateCommand() *cobra.Command {
 func createTemplateDeleteCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "delete <template>",
-		Short: "Delete a template",
+		Short: tr(context.Background(), "helix_config_cmd_template_delete_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1714,7 +1722,7 @@ func createTemplateDeleteCommand() *cobra.Command {
 func createTemplateSearchCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "search <query>",
-		Short: "Search templates",
+		Short: tr(context.Background(), "helix_config_cmd_template_search_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1729,7 +1737,7 @@ func createTemplateSearchCommand() *cobra.Command {
 func createTemplateValidateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "validate <template>",
-		Short: "Validate a template",
+		Short: tr(context.Background(), "helix_config_cmd_template_validate_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1745,7 +1753,7 @@ func createTemplateValidateCommand() *cobra.Command {
 func createHistoryShowCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <id>",
-		Short: "Show history entry details",
+		Short: tr(context.Background(), "helix_config_cmd_history_show_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1760,7 +1768,7 @@ func createHistoryShowCommand() *cobra.Command {
 func createHistoryRestoreCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "restore <id>",
-		Short: "Restore configuration from history",
+		Short: tr(context.Background(), "helix_config_cmd_history_restore_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1775,7 +1783,7 @@ func createHistoryRestoreCommand() *cobra.Command {
 func createHistoryCompareCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "compare <id1> <id2>",
-		Short: "Compare two history entries",
+		Short: tr(context.Background(), "helix_config_cmd_history_compare_short", nil),
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1790,7 +1798,7 @@ func createHistoryCompareCommand() *cobra.Command {
 func createHistorySearchCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "search <query>",
-		Short: "Search configuration history",
+		Short: tr(context.Background(), "helix_config_cmd_history_search_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1805,7 +1813,7 @@ func createHistorySearchCommand() *cobra.Command {
 func createHistoryCleanCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "clean",
-		Short: "Clean old history entries",
+		Short: tr(context.Background(), "helix_config_cmd_history_clean_short", nil),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -1820,7 +1828,7 @@ func createHistoryCleanCommand() *cobra.Command {
 func createSchemaValidateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "validate <file>",
-		Short: "Validate configuration against schema",
+		Short: tr(context.Background(), "helix_config_cmd_schema_validate_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1835,7 +1843,7 @@ func createSchemaValidateCommand() *cobra.Command {
 func createSchemaGenerateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "generate",
-		Short: "Generate schema from configuration",
+		Short: tr(context.Background(), "helix_config_cmd_schema_generate_short", nil),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -1849,7 +1857,7 @@ func createSchemaGenerateCommand() *cobra.Command {
 func createSchemaExportCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "export <file>",
-		Short: "Export schema to file",
+		Short: tr(context.Background(), "helix_config_cmd_schema_export_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
@@ -1864,7 +1872,7 @@ func createSchemaExportCommand() *cobra.Command {
 func createSchemaImportCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "import <file>",
-		Short: "Import schema from file",
+		Short: tr(context.Background(), "helix_config_cmd_schema_import_short", nil),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()

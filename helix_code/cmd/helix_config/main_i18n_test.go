@@ -1054,3 +1054,375 @@ func TestBackupCommand_TranslatesHelp(t *testing.T) {
 		"helix_config_cmd_backup_short", "helix_config_cmd_backup_long",
 		"Create configuration backup", "Create a backup of the current configuration")
 }
+
+// ---------------------------------------------------------------------
+// Round-329 §11.4 anti-bluff sweep (2026-05-20): cmd/helix_config
+// round-3 — paired-mutation coverage for the backup flags, the
+// restore / reset / reload / watch / migrate / template / history /
+// schema / benchmark parent commands, their subcommands, the
+// completion / version / info / status / diff / merge / search
+// utility commands, and the schema-show field descriptions.
+//
+// Each test asserts the translator sentinel is present (the migration
+// landed) AND the original English literal is absent (the paired
+// mutation — restoring the literal flips the test red).
+// ---------------------------------------------------------------------
+
+// assertCmdShortOnly covers subcommands that carry a Short but no Long.
+func assertCmdShortOnly(t *testing.T, cmd *cobra.Command, shortID, shortLiteral string) {
+	t.Helper()
+	if !strings.Contains(cmd.Short, "<TRANSLATED:"+shortID+">") {
+		t.Fatalf("%s Short not translated: %q", cmd.Name(), cmd.Short)
+	}
+	if shortLiteral != "" && strings.Contains(cmd.Short, shortLiteral) {
+		t.Fatalf("%s Short still contains original literal %q", cmd.Name(), shortLiteral)
+	}
+}
+
+func TestR329_BackupCommand_TranslatesFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createBackupCommand()
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"incremental": {"helix_config_flag_incremental_backup", "Create incremental backup"},
+		"compress":    {"helix_config_flag_compress_backup", "Compress the backup"},
+		"description": {"helix_config_flag_description_backup", "Backup description"},
+		"tags":        {"helix_config_flag_tags_backup", "Backup tags"},
+		"encrypt":     {"helix_config_flag_encrypt_backup", "Encrypt the backup"},
+		"password":    {"helix_config_flag_password_backup", "Password for encryption"},
+	})
+}
+
+func TestR329_RestoreCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createRestoreCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_restore_short", "helix_config_cmd_restore_long",
+		"Restore configuration from backup", "previously created backup")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"validate": {"helix_config_flag_validate_restore", "Validate restored configuration"},
+		"backup":   {"helix_config_flag_backup_restore", "Backup current configuration"},
+		"confirm":  {"helix_config_flag_confirm_restore", "Require confirmation"},
+		"to":       {"helix_config_flag_to_restore", "Restore to specific version"},
+		"merge":    {"helix_config_flag_merge_restore", "Merge with existing configuration"},
+	})
+}
+
+func TestR329_ResetCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createResetCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_reset_short", "helix_config_cmd_reset_long",
+		"Reset configuration", "Reset configuration to default values")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"confirm":  {"helix_config_flag_confirm_reset", "Require confirmation before reset"},
+		"backup":   {"helix_config_flag_backup_reset", "Create backup before reset"},
+		"template": {"helix_config_flag_template_reset", "Reset to specific template"},
+		"hard":     {"helix_config_flag_hard_reset", "Hard reset"},
+	})
+}
+
+func TestR329_ReloadCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createReloadCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_reload_short", "helix_config_cmd_reload_long",
+		"Reload configuration", "Reload configuration from disk")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"cache":    {"helix_config_flag_cache_reload", "Reload configuration cache"},
+		"watchers": {"helix_config_flag_watchers_reload", "Reload configuration watchers"},
+		"services": {"helix_config_flag_services_reload", "Reload affected services"},
+	})
+}
+
+func TestR329_WatchCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createWatchCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_watch_short", "helix_config_cmd_watch_long",
+		"Watch configuration changes", "Monitor configuration changes in real-time")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"changes":    {"helix_config_flag_changes_watch", "Show value changes"},
+		"timestamps": {"helix_config_flag_timestamps_watch", "Show change timestamps"},
+		"user":       {"helix_config_flag_user_watch", "Show user who made changes"},
+		"format":     {"helix_config_flag_format_watch", "Output format"},
+		"follow":     {"helix_config_flag_follow_watch", "Continue watching"},
+		"summary":    {"helix_config_flag_summary_watch", "Show periodic summary"},
+	})
+}
+
+func TestR329_MigrateCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createMigrateCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_migrate_short", "helix_config_cmd_migrate_long",
+		"Migrate configuration", "Migrate configuration to a different version")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"from":     {"helix_config_flag_from_migrate", "Source version"},
+		"backup":   {"helix_config_flag_backup_migrate", "Create backup before migration"},
+		"dry-run":  {"helix_config_flag_dry_run_migrate", "Perform dry run"},
+		"force":    {"helix_config_flag_force_migrate", "Force migration"},
+		"path":     {"helix_config_flag_path_migrate", "Custom migration path"},
+		"validate": {"helix_config_flag_validate_migrate", "Validate after migration"},
+	})
+}
+
+func TestR329_TemplateCommand_TranslatesHelp(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_template_short", "helix_config_cmd_template_long",
+		"Manage configuration templates", "Templates can be listed")
+}
+
+func TestR329_HistoryCommand_TranslatesHelp(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistoryCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_history_short", "helix_config_cmd_history_long",
+		"Manage configuration history", "History can be viewed")
+}
+
+func TestR329_SchemaCommand_TranslatesHelp(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_schema_short", "helix_config_cmd_schema_long",
+		"Manage configuration schema", "Schema can be generated")
+}
+
+func TestR329_BenchmarkCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createBenchmarkCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_benchmark_short", "helix_config_cmd_benchmark_long",
+		"Benchmark configuration operations", "Benchmark various configuration operations")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"operation":  {"helix_config_flag_operation_benchmark", "Operation to benchmark"},
+		"iterations": {"helix_config_flag_iterations_benchmark", "Number of iterations"},
+		"parallel":   {"helix_config_flag_parallel_benchmark", "Run operations in parallel"},
+		"profile":    {"helix_config_flag_profile_benchmark", "Enable profiling"},
+		"output":     {"helix_config_flag_output_benchmark", "Output file for benchmark"},
+		"compare":    {"helix_config_flag_compare_benchmark", "Compare with previous"},
+		"warmup":     {"helix_config_flag_warmup_benchmark", "Perform warmup"},
+	})
+}
+
+func TestR329_TemplateListCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateListCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_template_list_short", "helix_config_cmd_template_list_long",
+		"List available templates", "List all available configuration templates")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"category": {"helix_config_flag_category_template", "Filter by category"},
+		"tag":      {"helix_config_flag_tag_template", "Filter by tag"},
+		"search":   {"helix_config_flag_search_template", "Search in templates"},
+		"sort":     {"helix_config_flag_sort_template", "Sort by"},
+		"details":  {"helix_config_flag_details_template", "Show detailed template"},
+	})
+}
+
+func TestR329_TemplateApplyCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createTemplateApplyCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_template_apply_short", "helix_config_cmd_template_apply_long",
+		"Apply configuration template", "optional variable substitution")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"var":       {"helix_config_flag_var_template", "Template variables"},
+		"vars-file": {"helix_config_flag_vars_file_template", "Template variables file"},
+		"backup":    {"helix_config_flag_backup_template", "Create backup before applying"},
+		"preview":   {"helix_config_flag_preview_template", "Preview changes"},
+		"validate":  {"helix_config_flag_validate_template", "Validate applied configuration"},
+		"force":     {"helix_config_flag_force_template", "Force apply"},
+	})
+}
+
+func TestR329_HistoryListCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createHistoryListCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_history_list_short", "helix_config_cmd_history_list_long",
+		"List configuration history", "List configuration change history")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"limit":   {"helix_config_flag_limit_history", "Maximum number of entries"},
+		"since":   {"helix_config_flag_since_history", "Show changes since"},
+		"until":   {"helix_config_flag_until_history", "Show changes until"},
+		"user":    {"helix_config_flag_user_history", "Filter by user"},
+		"section": {"helix_config_flag_section_history", "Filter by configuration section"},
+		"sort":    {"helix_config_flag_sort_history", "Sort by"},
+		"details": {"helix_config_flag_details_history", "Show detailed change"},
+	})
+}
+
+func TestR329_SchemaShowCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSchemaShowCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_schema_show_short", "helix_config_cmd_schema_show_long",
+		"Show configuration schema", "Display the JSON schema")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"section":  {"helix_config_flag_section_schema", "Show schema for specific section"},
+		"examples": {"helix_config_flag_examples_schema", "Include example values"},
+		"format":   {"helix_config_flag_format_schema", "Output format"},
+		"validate": {"helix_config_flag_validate_schema", "Validate configuration against schema"},
+	})
+}
+
+func TestR329_CompletionCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createCompletionCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_completion_short", "helix_config_cmd_completion_long",
+		"Generate shell completion", "Generate shell completion scripts")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"install": {"helix_config_flag_install_completion", "Install completion script"},
+		"shell":   {"helix_config_flag_shell_completion", "Shell type"},
+	})
+}
+
+func TestR329_VersionCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createVersionCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_version_short", "helix_config_cmd_version_long",
+		"Show version information", "Display detailed version and build information")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"short": {"helix_config_flag_short_version", "Show short version only"},
+		"build": {"helix_config_flag_build_version", "Show build information"},
+		"deps":  {"helix_config_flag_deps_version", "Show dependency versions"},
+	})
+}
+
+func TestR329_InfoCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createInfoCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_info_short", "helix_config_cmd_info_long",
+		"Show configuration information", "Display detailed information about the configuration system")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"system":      {"helix_config_flag_system_info", "Show system information"},
+		"files":       {"helix_config_flag_files_info", "Show configuration file locations"},
+		"stats":       {"helix_config_flag_stats_info", "Show configuration statistics"},
+		"environment": {"helix_config_flag_environment_info", "Show environment variables"},
+	})
+}
+
+func TestR329_StatusCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createStatusCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_status_short", "helix_config_cmd_status_long",
+		"Show configuration status", "Display the current status of the configuration system")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"watchers":    {"helix_config_flag_watchers_status", "Show configuration watcher status"},
+		"cache":       {"helix_config_flag_cache_status", "Show configuration cache status"},
+		"locks":       {"helix_config_flag_locks_status", "Show lock status"},
+		"performance": {"helix_config_flag_performance_status", "Show performance metrics"},
+	})
+}
+
+func TestR329_DiffCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createDiffCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_diff_short", "helix_config_cmd_diff_long",
+		"Compare configuration files", "Compare two configuration files")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"format":   {"helix_config_flag_format_diff", "Output format"},
+		"unified":  {"helix_config_flag_unified_diff", "Unified diff format"},
+		"context":  {"helix_config_flag_context_diff", "Context lines for diff"},
+		"color":    {"helix_config_flag_color_diff", "Colorized output"},
+		"semantic": {"helix_config_flag_semantic_diff", "Semantic diff"},
+	})
+}
+
+func TestR329_MergeCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createMergeCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_merge_short", "helix_config_cmd_merge_long",
+		"Merge configuration files", "Merge two configuration files into one")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"strategy": {"helix_config_flag_strategy_merge", "Merge strategy"},
+		"conflict": {"helix_config_flag_conflict_merge", "Conflict resolution"},
+		"validate": {"helix_config_flag_validate_merge_cmd", "Validate merged configuration"},
+		"base":     {"helix_config_flag_base_merge", "Base file for three-way merge"},
+		"preview":  {"helix_config_flag_preview_merge", "Preview merge result"},
+	})
+}
+
+func TestR329_SearchCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSearchCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_search_short", "helix_config_cmd_search_long",
+		"Search configuration", "Search configuration values by pattern")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"section":        {"helix_config_flag_section_search", "Search in specific section"},
+		"regex":          {"helix_config_flag_regex_search", "Use regular expression"},
+		"case-sensitive": {"helix_config_flag_case_sensitive_search", "Case sensitive search"},
+		"values":         {"helix_config_flag_values_search", "Search in values"},
+		"keys":           {"helix_config_flag_keys_search", "Search in keys"},
+		"limit":          {"helix_config_flag_limit_search", "Maximum number of results"},
+		"sort":           {"helix_config_flag_sort_search", "Sort results"},
+	})
+}
+
+func TestR329_TemplateSubcommands_TranslateShort(t *testing.T) {
+	withFakeTranslator(t)
+	assertCmdShortOnly(t, createTemplateShowCommand(), "helix_config_cmd_template_show_short", "Show template details")
+	assertCmdShortOnly(t, createTemplateCreateCommand(), "helix_config_cmd_template_create_short", "Create a new template")
+	assertCmdShortOnly(t, createTemplateUpdateCommand(), "helix_config_cmd_template_update_short", "Update an existing template")
+	assertCmdShortOnly(t, createTemplateDeleteCommand(), "helix_config_cmd_template_delete_short", "Delete a template")
+	assertCmdShortOnly(t, createTemplateSearchCommand(), "helix_config_cmd_template_search_short", "Search templates")
+	assertCmdShortOnly(t, createTemplateValidateCommand(), "helix_config_cmd_template_validate_short", "Validate a template")
+}
+
+func TestR329_HistorySubcommands_TranslateShort(t *testing.T) {
+	withFakeTranslator(t)
+	assertCmdShortOnly(t, createHistoryShowCommand(), "helix_config_cmd_history_show_short", "Show history entry details")
+	assertCmdShortOnly(t, createHistoryRestoreCommand(), "helix_config_cmd_history_restore_short", "Restore configuration from history")
+	assertCmdShortOnly(t, createHistoryCompareCommand(), "helix_config_cmd_history_compare_short", "Compare two history entries")
+	assertCmdShortOnly(t, createHistorySearchCommand(), "helix_config_cmd_history_search_short", "Search configuration history")
+	assertCmdShortOnly(t, createHistoryCleanCommand(), "helix_config_cmd_history_clean_short", "Clean old history entries")
+}
+
+func TestR329_SchemaSubcommands_TranslateShort(t *testing.T) {
+	withFakeTranslator(t)
+	assertCmdShortOnly(t, createSchemaValidateCommand(), "helix_config_cmd_schema_validate_short", "Validate configuration against schema")
+	assertCmdShortOnly(t, createSchemaGenerateCommand(), "helix_config_cmd_schema_generate_short", "Generate schema from configuration")
+	assertCmdShortOnly(t, createSchemaExportCommand(), "helix_config_cmd_schema_export_short", "Export schema to file")
+	assertCmdShortOnly(t, createSchemaImportCommand(), "helix_config_cmd_schema_import_short", "Import schema from file")
+}
+
+func TestR329_SchemaShowCommand_TranslatesFieldDescriptions(t *testing.T) {
+	withFakeTranslator(t)
+	out := captureStdout(t, func() {
+		if err := runSchemaShowCommand(createSchemaShowCommand(), nil); err != nil {
+			t.Fatalf("runSchemaShowCommand: %v", err)
+		}
+	})
+	// printJSON HTML-escapes "<"/">" to < / >, so the
+	// sentinel is JSON-encoded; match the JSON-safe core of it.
+	for _, id := range []string{
+		"helix_config_schema_server_port",
+		"helix_config_schema_database_enabled",
+		"helix_config_schema_redis_port",
+		"helix_config_schema_auth_jwt_secret",
+	} {
+		if !strings.Contains(out, "TRANSLATED:"+id) {
+			t.Fatalf("schema field %q not translated; output: %q", id, out)
+		}
+	}
+	// Paired mutation: the original English literals must be gone.
+	for _, literal := range []string{
+		"int - Server port (default: 8080)",
+		"bool - Enable database (default: false)",
+		"string - JWT signing secret (min 32 chars)",
+	} {
+		if strings.Contains(out, literal) {
+			t.Fatalf("schema output still carries original literal %q", literal)
+		}
+	}
+}
