@@ -221,6 +221,17 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
+## HXC-005 — `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (round 317 — cmd i18n migration subagent)
+**Discovered-By:** AI subagent — refused to localize the file because doing so would polish a bluff
+**Evidence:** `helix_code/cmd/performance_optimization_standalone/main.go` is a `package main` that prints "🚀 Starting HelixCode Production Performance Optimization" then *simulates* every optimization phase: `// Simulate production optimization phases`, `time.Sleep(500 * time.Millisecond)` per phase, and `improvement := 5.0 + rand.Float64()*20.0` — fabricated improvement percentages from a random number generator. No real profiling, no real optimization, no real measurement. This is the canonical BLUFF-001-class anti-pattern (CLAUDE.md §3.3 / §6 ANTI-PATTERN 1) — a binary that reports success for work it never performed. Violates CONST-035 / Article XI §11.9.
+**Resolution path:** Either (a) replace the simulation with a real optimizer that performs actual `runtime`/`pprof`-based measurement + real GOGC/GOMAXPROCS/pool-size tuning + real before/after benchmarks, OR (b) if the standalone tool is obsolete (superseded by `cmd/performance-optimization*/`), delete it entirely. Reproduce-before-fix: write a Challenge asserting the tool's output reflects real measured deltas (not RNG). NOT a localization target — i18n migration of bluff strings is explicitly out of scope until the bluff itself is fixed.
+
+---
+
 ## PAN-001 — panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII)
 
 **Status:** Fixed (→ Fixed.md)
