@@ -1,0 +1,43 @@
+# internal/clarification i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/clarification/engine.go (and other clarification
+# package source files) to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_clarification_<area>_<short_description>.
+# All IDs prefixed with internal_clarification_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-222 §11.4 anti-bluff sweep (2026-05-19): migrated 3 of the
+# user-facing literals emitted by engine.go — the LLM system-prompt
+# template (instructs the model how to phrase clarification questions
+# — locale-aware so non-English operators get questions in their own
+# language), the per-turn "User request: %s" model-input wrapper, and
+# the "Clarifications received:\n" header prefixed to the resolved
+# context. This is the round-1 kickoff for internal/clarification.
+# Subsequent rounds will sweep any remaining literals that surface
+# once additional handlers / API layers are added on top of the
+# engine.
+
+internal_clarification_llm_system_prompt:
+  other: |-
+    You are an AI assistant that helps clarify user requests.
+    Given the user's request, generate a list of clarification questions that would help clarify the request.
+    Each question should be short and open-ended.
+    Return a JSON array of objects with the following fields:
+    - id: a unique string identifier for the question
+    - text: the question text
+    - type: one of "yes_no", "multiple_choice", "free_text"
+    - options: (optional) array of strings for multiple choice questions
+    - default: (optional) default value for the question
+    Only return the JSON array, nothing else.
+
+internal_clarification_user_request_wrapper:
+  other: "User request: {{.Prompt}}"
+
+internal_clarification_clarifications_received_header:
+  other: "Clarifications received:\n"

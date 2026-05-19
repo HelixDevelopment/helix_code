@@ -27,17 +27,12 @@ func (e *Engine) DetectAmbiguity(ctx context.Context, prompt string) []Question 
 	if e.llmProvider == nil {
 		return []Question{}
 	}
-	system := `You are an AI assistant that helps clarify user requests. 
-Given the user's request, generate a list of clarification questions that would help clarify the request. 
-Each question should be short and open-ended. 
-Return a JSON array of objects with the following fields:
-- id: a unique string identifier for the question
-- text: the question text
-- type: one of "yes_no", "multiple_choice", "free_text"
-- options: (optional) array of strings for multiple choice questions
-- default: (optional) default value for the question
-Only return the JSON array, nothing else.`
-	userPrompt := fmt.Sprintf("User request: %s", prompt)
+	// CONST-046 round-222: system prompt resolved via i18n so non-English
+	// operators get clarification questions phrased in their own language.
+	system := tr(ctx, "internal_clarification_llm_system_prompt", nil)
+	// CONST-046 round-222: user-request wrapper resolved via i18n with
+	// the prompt interpolated as a named placeholder.
+	userPrompt := tr(ctx, "internal_clarification_user_request_wrapper", map[string]any{"Prompt": prompt})
 	req := &llm.LLMRequest{
 		Model: "",
 		Messages: []llm.Message{
@@ -69,7 +64,9 @@ func (e *Engine) Resolve(sessionID string, answers []Answer) string {
 	if session.Context != "" {
 		resolved = session.Context + "\n\n"
 	}
-	resolved += "Clarifications received:\n"
+	// CONST-046 round-222: resolved-context header resolved via i18n so
+	// the user-facing summary is locale-aware.
+	resolved += tr(context.Background(), "internal_clarification_clarifications_received_header", nil)
 	for _, answer := range answers {
 		resolved += fmt.Sprintf("- %s: %s\n", answer.QuestionID, answer.Value)
 	}
