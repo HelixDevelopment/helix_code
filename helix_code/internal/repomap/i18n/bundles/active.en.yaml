@@ -1,0 +1,32 @@
+# internal/repomap i18n bundle — active English (en) locale.
+#
+# Round-198 §11.4 anti-bluff sweep (2026-05-19; recovery from
+# round-174 stall in which the scaffolding was dispatched but never
+# written). ONE real migration target landed: the RepoMapTool
+# Description() string emitted to end users via the tool registry.
+#
+# Other strings in internal/repomap/ are NOT in CONST-046 scope:
+#
+#   * Log framing strings (log.Printf format strings in cache.go —
+#     debug/warn output, not user-facing UI per the round-162
+#     logging-identifier-token precedent).
+#
+#   * Tool category identifiers ("mapping" in repomap_tool.go) —
+#     structural lookup keys, never adapted per-locale per the
+#     round-158/162 identifier-token precedent.
+#
+#   * doc.go comments — Go package documentation comments, never
+#     emitted at runtime; rendered by godoc/pkgsite which is not
+#     i18n-aware.
+#
+# Naming convention: internal_repomap_<area>_<short_description>.
+# All IDs prefixed with internal_repomap_ to avoid namespace
+# collision when loaded into the same go-i18n.Bundle alongside
+# other packages' entries.
+#
+# When future rounds identify additional user-facing strings (e.g.
+# new tool surfaces, public error wrapping, CLI subcommand help
+# text), add them here following the existing naming convention and
+# wire the call site via the package-level tr() helper.
+
+internal_repomap_tool_description: "Generate a semantic map of the codebase using tree-sitter"

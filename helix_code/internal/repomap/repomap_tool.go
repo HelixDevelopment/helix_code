@@ -17,8 +17,17 @@ func NewRepoMapTool(repoMap *RepoMap) *RepoMapTool {
 	return &RepoMapTool{repoMap: repoMap}
 }
 
-func (t *RepoMapTool) Name() string        { return "repomap" }
-func (t *RepoMapTool) Description() string { return "Generate a semantic map of the codebase using tree-sitter" }
+func (t *RepoMapTool) Name() string { return "repomap" }
+
+// Description resolves the user-facing tool description through the
+// CONST-046 Translator seam (round-198 §11.4 anti-bluff sweep,
+// 2026-05-19). The default NoopTranslator returns the raw message ID
+// "internal_repomap_tool_description" — loud-echo failure mode by
+// design so silent translation loss surfaces immediately. helix_code
+// wires a real *i18nadapter.Translator at boot via SetTranslator.
+func (t *RepoMapTool) Description() string {
+	return tr(context.Background(), "internal_repomap_tool_description", nil)
+}
 func (t *RepoMapTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("mapping")
 }
