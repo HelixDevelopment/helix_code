@@ -43,3 +43,43 @@ desktop_models_available_header:
 
 desktop_chat_input_placeholder:
   other: "Type your message here..."
+
+# Round-313 §11.4 anti-bluff sweep (2026-05-20): 14 further
+# user-facing GUI literals migrated (dashboard activity, tasks tab,
+# LLM/model panels, settings about).
+
+desktop_dashboard_activity_seed:
+  other: "System initialized\nWorker pool started\nTask manager ready\nLLM providers loaded"
+
+desktop_dashboard_activity_title:
+  other: "Recent Activity"
+
+desktop_tasks_description_placeholder:
+  other: "Task description..."
+
+desktop_tasks_new_label:
+  other: "New Task:"
+
+desktop_tasks_create_button:
+  other: "Create Task"
+
+desktop_common_refresh_button:
+  other: "Refresh"
+
+desktop_models_select_prompt:
+  other: "Select a model to view details"
+
+desktop_models_details_title:
+  other: "Model Details"
+
+desktop_chat_history_placeholder:
+  other: "Chat history will appear here..."
+
+desktop_chat_model_name_placeholder:
+  other: "Model name (e.g., llama2)"
+
+desktop_settings_about_text:
+  other: "HelixCode Desktop Application\nVersion: 1.0.0\nDistributed AI Development Platform"
+
+desktop_settings_about_title:
+  other: "About"

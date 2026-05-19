@@ -95,6 +95,19 @@ func TestDesktopApp_Tr_RoutesThroughTranslator(t *testing.T) {
 		"desktop_sessions_create_header",
 		"desktop_models_available_header",
 		"desktop_chat_input_placeholder",
+		// Round-313 §11.4 sweep additions.
+		"desktop_dashboard_activity_seed",
+		"desktop_dashboard_activity_title",
+		"desktop_tasks_description_placeholder",
+		"desktop_tasks_new_label",
+		"desktop_tasks_create_button",
+		"desktop_common_refresh_button",
+		"desktop_models_select_prompt",
+		"desktop_models_details_title",
+		"desktop_chat_history_placeholder",
+		"desktop_chat_model_name_placeholder",
+		"desktop_settings_about_text",
+		"desktop_settings_about_title",
 	}
 
 	s := &sentinelTranslator{}

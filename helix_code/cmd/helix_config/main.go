@@ -100,13 +100,11 @@ func main() {
 
 // createRootCommand creates the root CLI command
 func createRootCommand() *cobra.Command {
+	ctx := context.Background()
 	rootCmd := &cobra.Command{
-		Use:   "helix-config",
-		Short: "HelixCode Configuration Management CLI",
-		Long: `HelixCode Configuration Management CLI
-
-Manage HelixCode configuration across all platforms with comprehensive
-validation, migration, and templating support.`,
+		Use:     "helix-config",
+		Short:   tr(ctx, "helix_config_root_short", nil),
+		Long:    tr(ctx, "helix_config_root_long", nil),
 		Version: fmt.Sprintf("%s (built: %s, commit: %s)", version, buildTime, gitCommit),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			setupViper()
@@ -115,25 +113,25 @@ validation, migration, and templating support.`,
 	}
 
 	// Global flags
-	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "Configuration file path")
-	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "auto", "Configuration format (json, yaml, toml)")
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "json", "Output format (json, yaml, table, pretty)")
-	rootCmd.PersistentFlags().StringVar(&sessionID, "session-id", "", "Session ID for tracking")
-	rootCmd.PersistentFlags().StringVar(&user, "user", "", "User name for audit")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
-	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run without making changes")
-	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Quiet mode (no output)")
-	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable color output")
-	rootCmd.PersistentFlags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
-	rootCmd.PersistentFlags().BoolVarP(&force, "force", "F", false, "Force operation without confirmation")
-	rootCmd.PersistentFlags().BoolVar(&backup, "backup", true, "Create backup before making changes")
-	rootCmd.PersistentFlags().DurationVar(&timeout, "timeout", 30*time.Second, "Operation timeout")
-	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 3, "Maximum number of retries")
-	rootCmd.PersistentFlags().BoolVar(&showSecrets, "show-secrets", false, "Show sensitive configuration values")
-	rootCmd.PersistentFlags().BoolVar(&noValidate, "no-validate", false, "Skip configuration validation")
-	rootCmd.PersistentFlags().BoolVar(&strictMode, "strict", false, "Enable strict validation mode")
-	rootCmd.PersistentFlags().BoolVar(&prettyPrint, "pretty", true, "Pretty print JSON output")
-	rootCmd.PersistentFlags().BoolVar(&sortKeys, "sort-keys", true, "Sort object keys in output")
+	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", tr(ctx, "helix_config_flag_config", nil))
+	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "auto", tr(ctx, "helix_config_flag_format", nil))
+	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "json", tr(ctx, "helix_config_flag_output", nil))
+	rootCmd.PersistentFlags().StringVar(&sessionID, "session-id", "", tr(ctx, "helix_config_flag_session_id", nil))
+	rootCmd.PersistentFlags().StringVar(&user, "user", "", tr(ctx, "helix_config_flag_user", nil))
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, tr(ctx, "helix_config_flag_verbose", nil))
+	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, tr(ctx, "helix_config_flag_dry_run", nil))
+	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, tr(ctx, "helix_config_flag_quiet", nil))
+	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, tr(ctx, "helix_config_flag_no_color", nil))
+	rootCmd.PersistentFlags().BoolVarP(&interactive, "interactive", "i", false, tr(ctx, "helix_config_flag_interactive", nil))
+	rootCmd.PersistentFlags().BoolVarP(&force, "force", "F", false, tr(ctx, "helix_config_flag_force", nil))
+	rootCmd.PersistentFlags().BoolVar(&backup, "backup", true, tr(ctx, "helix_config_flag_backup", nil))
+	rootCmd.PersistentFlags().DurationVar(&timeout, "timeout", 30*time.Second, tr(ctx, "helix_config_flag_timeout", nil))
+	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 3, tr(ctx, "helix_config_flag_max_retries", nil))
+	rootCmd.PersistentFlags().BoolVar(&showSecrets, "show-secrets", false, tr(ctx, "helix_config_flag_show_secrets", nil))
+	rootCmd.PersistentFlags().BoolVar(&noValidate, "no-validate", false, tr(ctx, "helix_config_flag_no_validate", nil))
+	rootCmd.PersistentFlags().BoolVar(&strictMode, "strict", false, tr(ctx, "helix_config_flag_strict", nil))
+	rootCmd.PersistentFlags().BoolVar(&prettyPrint, "pretty", true, tr(ctx, "helix_config_flag_pretty", nil))
+	rootCmd.PersistentFlags().BoolVar(&sortKeys, "sort-keys", true, tr(ctx, "helix_config_flag_sort_keys", nil))
 
 	// Bind flags to viper
 	bindFlags(rootCmd.PersistentFlags())
@@ -1116,9 +1114,19 @@ func runBenchmarkCommand(cmd *cobra.Command, args []string) error {
 	}
 	writeDuration := time.Since(start)
 
-	fmt.Printf("Benchmark Results (%d iterations):\n", iterations)
-	fmt.Printf("  Read operations:  %v (%.2f ops/sec)\n", readDuration, float64(iterations)/readDuration.Seconds())
-	fmt.Printf("  Write operations: %v (%.2f ops/sec)\n", writeDuration, float64(iterations)/writeDuration.Seconds())
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fmt.Println(tr(ctx, "helix_config_benchmark_header", map[string]any{"Iterations": iterations}))
+	fmt.Println(tr(ctx, "helix_config_benchmark_read", map[string]any{
+		"Duration": readDuration.String(),
+		"Rate":     fmt.Sprintf("%.2f", float64(iterations)/readDuration.Seconds()),
+	}))
+	fmt.Println(tr(ctx, "helix_config_benchmark_write", map[string]any{
+		"Duration": writeDuration.String(),
+		"Rate":     fmt.Sprintf("%.2f", float64(iterations)/writeDuration.Seconds()),
+	}))
 	return nil
 }
 
@@ -1633,13 +1641,15 @@ func confirm(prompt string) bool {
 
 func errorf(format string, args ...interface{}) {
 	if !quiet {
-		fmt.Fprintf(os.Stderr, "ERROR: "+format+"\n", args...)
+		prefix := tr(context.Background(), "helix_config_msg_prefix_error", nil)
+		fmt.Fprintf(os.Stderr, prefix+" "+format+"\n", args...)
 	}
 }
 
 func warnf(format string, args ...interface{}) {
 	if !quiet {
-		fmt.Fprintf(os.Stderr, "WARNING: "+format+"\n", args...)
+		prefix := tr(context.Background(), "helix_config_msg_prefix_warning", nil)
+		fmt.Fprintf(os.Stderr, prefix+" "+format+"\n", args...)
 	}
 }
 
@@ -1651,7 +1661,8 @@ func infof(format string, args ...interface{}) {
 
 func debugf(format string, args ...interface{}) {
 	if verbose && !quiet {
-		fmt.Printf("DEBUG: "+format+"\n", args...)
+		prefix := tr(context.Background(), "helix_config_msg_prefix_debug", nil)
+		fmt.Printf(prefix+" "+format+"\n", args...)
 	}
 }
 

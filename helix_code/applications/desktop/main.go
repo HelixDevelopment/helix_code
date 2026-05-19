@@ -469,11 +469,12 @@ func (da *DesktopApp) createDashboardTab() fyne.CanvasObject {
 	statsContainer := container.NewGridWithColumns(3, workerCard, taskCard, systemCard)
 
 	// Activity log
+	// CONST-046: activity-log seed text + card title resolved via i18n bundle.
 	activityLog := widget.NewMultiLineEntry()
-	activityLog.SetText("System initialized\nWorker pool started\nTask manager ready\nLLM providers loaded")
+	activityLog.SetText(da.tr(ctx, "desktop_dashboard_activity_seed", nil))
 	activityLog.Disable()
 
-	activityCard := widget.NewCard("Recent Activity", "", activityLog)
+	activityCard := widget.NewCard(da.tr(ctx, "desktop_dashboard_activity_title", nil), "", activityLog)
 
 	// Quick actions
 	actionsCard := widget.NewCard("Quick Actions", "",
@@ -530,18 +531,20 @@ func (da *DesktopApp) createTasksTab() fyne.CanvasObject {
 	taskTypeSelect.SetSelected("building")
 
 	// Task description input
+	// CONST-046: task-description placeholder resolved via i18n bundle.
+	ctx := context.Background()
 	taskDescEntry := widget.NewEntry()
-	taskDescEntry.SetPlaceHolder("Task description...")
+	taskDescEntry.SetPlaceHolder(da.tr(ctx, "desktop_tasks_description_placeholder", nil))
 
 	// Action buttons
 	actions := container.NewVBox(
-		widget.NewLabel("New Task:"),
+		widget.NewLabel(da.tr(ctx, "desktop_tasks_new_label", nil)),
 		taskTypeSelect,
 		taskDescEntry,
-		widget.NewButton("Create Task", func() {
+		widget.NewButton(da.tr(ctx, "desktop_tasks_create_button", nil), func() {
 			if da.taskManager != nil && taskDescEntry.Text != "" {
-				ctx := context.Background()
-				_, err := da.taskManager.CreateTask(ctx, taskTypeSelect.Selected, taskDescEntry.Text, "normal")
+				createCtx := context.Background()
+				_, err := da.taskManager.CreateTask(createCtx, taskTypeSelect.Selected, taskDescEntry.Text, "normal")
 				if err != nil {
 					dialog.ShowError(err, da.mainWindow)
 				} else {
@@ -551,7 +554,7 @@ func (da *DesktopApp) createTasksTab() fyne.CanvasObject {
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(da.tr(ctx, "desktop_common_refresh_button", nil), func() {
 			taskList.Refresh()
 		}),
 	)
@@ -963,7 +966,8 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	modelListCard := widget.NewCard(da.tr(ctxLLM, "desktop_models_available_header", nil), "", modelList)
 
 	// Model details panel
-	modelDetailsLabel := widget.NewLabel("Select a model to view details")
+	// CONST-046: model-details prompt resolved via i18n bundle.
+	modelDetailsLabel := widget.NewLabel(da.tr(ctxLLM, "desktop_models_select_prompt", nil))
 	modelDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	modelList.OnSelected = func(id widget.ListItemID) {
@@ -980,11 +984,12 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 		}
 	}
 
-	modelDetailsCard := widget.NewCard("Model Details", "", modelDetailsLabel)
+	modelDetailsCard := widget.NewCard(da.tr(ctxLLM, "desktop_models_details_title", nil), "", modelDetailsLabel)
 
 	// Chat interface
+	// CONST-046: chat-history placeholder resolved via i18n bundle.
 	da.chatHistory = widget.NewMultiLineEntry()
-	da.chatHistory.SetPlaceHolder("Chat history will appear here...")
+	da.chatHistory.SetPlaceHolder(da.tr(ctxLLM, "desktop_chat_history_placeholder", nil))
 	da.chatHistory.Disable()
 	da.chatHistory.Wrapping = fyne.TextWrapWord
 
@@ -998,7 +1003,7 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	da.llmProviderSel.SetSelected("ollama")
 
 	modelNameEntry := widget.NewEntry()
-	modelNameEntry.SetPlaceHolder("Model name (e.g., llama2)")
+	modelNameEntry.SetPlaceHolder(da.tr(ctxLLM, "desktop_chat_model_name_placeholder", nil))
 	modelNameEntry.SetText("llama2")
 
 	sendButton := widget.NewButton("Send Message", func() {
@@ -1129,6 +1134,8 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 
 // createSettingsTab creates the settings tab
 func (da *DesktopApp) createSettingsTab() fyne.CanvasObject {
+	// CONST-046: settings-tab user-facing strings resolved via i18n bundle.
+	ctxSettings := context.Background()
 	// Theme selection
 	themeInfoLabel := widget.NewLabel("")
 	updateThemeInfo := func() {
@@ -1207,9 +1214,10 @@ func (da *DesktopApp) createSettingsTab() fyne.CanvasObject {
 	)
 
 	// About section
-	aboutLabel := widget.NewLabel("HelixCode Desktop Application\nVersion: 1.0.0\nDistributed AI Development Platform")
+	// CONST-046: about text + card title resolved via i18n bundle.
+	aboutLabel := widget.NewLabel(da.tr(ctxSettings, "desktop_settings_about_text", nil))
 	aboutLabel.Alignment = fyne.TextAlignCenter
-	aboutCard := widget.NewCard("About", "", aboutLabel)
+	aboutCard := widget.NewCard(da.tr(ctxSettings, "desktop_settings_about_title", nil), "", aboutLabel)
 
 	// Layout in scrollable container
 	settingsContent := container.NewVBox(

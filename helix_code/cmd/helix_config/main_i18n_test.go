@@ -768,3 +768,132 @@ func TestSchemaImportCommand_TranslatesAction(t *testing.T) {
 	out := captureStdout(t, func() { cmd.Run(cmd, []string{"schema.json"}) })
 	assertTranslated(t, out, "helix_config_schema_import_action", "Importing schema from:")
 }
+
+// --- Round-314 §11.4 CONST-046 Phase 4 (2026-05-20) ---
+// Paired-mutation seam tests for the root-help / global-flag /
+// benchmark / message-prefix literals migrated this round. Each
+// test exercises the real code path through the i18n seam and
+// asserts (a) the translator sentinel appears AND (b) the original
+// English literal is absent — the joint anti-bluff invariant per
+// §11.9 (a PASS that only confirms "sentinel present" but not
+// "literal absent" is a bluff: the migration could be half-done).
+
+// TestRootCommand_TranslatesShortLong proves createRootCommand
+// resolves its Short/Long through tr() — the help text shown on
+// every `helix-config --help` invocation.
+func TestRootCommand_TranslatesShortLong(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createRootCommand()
+	if !strings.Contains(cmd.Short, "<TRANSLATED:helix_config_root_short>") {
+		t.Fatalf("root Short not translated: %q", cmd.Short)
+	}
+	if strings.Contains(cmd.Short, "HelixCode Configuration Management CLI") {
+		t.Fatalf("root Short still contains original literal: %q", cmd.Short)
+	}
+	if !strings.Contains(cmd.Long, "<TRANSLATED:helix_config_root_long>") {
+		t.Fatalf("root Long not translated: %q", cmd.Long)
+	}
+}
+
+// TestRootCommand_TranslatesGlobalFlags proves every migrated global
+// flag description resolves through tr(). Walks the persistent flag
+// set and asserts each migrated flag's Usage carries the sentinel.
+func TestRootCommand_TranslatesGlobalFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createRootCommand()
+	cases := map[string]string{
+		"config":       "helix_config_flag_config",
+		"format":       "helix_config_flag_format",
+		"output":       "helix_config_flag_output",
+		"session-id":   "helix_config_flag_session_id",
+		"user":         "helix_config_flag_user",
+		"verbose":      "helix_config_flag_verbose",
+		"dry-run":      "helix_config_flag_dry_run",
+		"quiet":        "helix_config_flag_quiet",
+		"no-color":     "helix_config_flag_no_color",
+		"interactive":  "helix_config_flag_interactive",
+		"force":        "helix_config_flag_force",
+		"backup":       "helix_config_flag_backup",
+		"timeout":      "helix_config_flag_timeout",
+		"max-retries":  "helix_config_flag_max_retries",
+		"show-secrets": "helix_config_flag_show_secrets",
+		"no-validate":  "helix_config_flag_no_validate",
+		"strict":       "helix_config_flag_strict",
+		"pretty":       "helix_config_flag_pretty",
+		"sort-keys":    "helix_config_flag_sort_keys",
+	}
+	for flagName, msgID := range cases {
+		f := cmd.PersistentFlags().Lookup(flagName)
+		if f == nil {
+			t.Fatalf("global flag %q not registered", flagName)
+		}
+		want := "<TRANSLATED:" + msgID + ">"
+		if f.Usage != want {
+			t.Fatalf("flag %q Usage = %q, want %q", flagName, f.Usage, want)
+		}
+	}
+}
+
+// TestBenchmarkCommand_TranslatesResults exercises runBenchmarkCommand
+// with a small iteration count so the three migrated benchmark output
+// lines (header / read / write) fire through tr().
+func TestBenchmarkCommand_TranslatesResults(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createBenchmarkCommand()
+	cmd.SetArgs([]string{})
+	if err := cmd.Flags().Set("iterations", "5"); err != nil {
+		t.Fatalf("set iterations flag: %v", err)
+	}
+	out := captureStdout(t, func() {
+		if err := runBenchmarkCommand(cmd, nil); err != nil {
+			t.Fatalf("runBenchmarkCommand: %v", err)
+		}
+	})
+	assertTranslated(t, out, "helix_config_benchmark_header", "Benchmark Results (")
+	assertTranslated(t, out, "helix_config_benchmark_read", "Read operations:  ")
+	assertTranslated(t, out, "helix_config_benchmark_write", "Write operations: ")
+}
+
+// TestMessagePrefixes_TranslateViaTr proves errorf/warnf/debugf resolve
+// their ERROR:/WARNING:/DEBUG: prefixes through the i18n seam. errorf
+// and warnf write to stderr; debugf to stdout. We swap stderr for the
+// first two and reuse captureStdout for debugf.
+func TestMessagePrefixes_TranslateViaTr(t *testing.T) {
+	withFakeTranslator(t)
+
+	capStderr := func(fn func()) string {
+		orig := os.Stderr
+		r, w, err := os.Pipe()
+		if err != nil {
+			t.Fatalf("os.Pipe: %v", err)
+		}
+		os.Stderr = w
+		done := make(chan string)
+		go func() { b, _ := io.ReadAll(r); done <- string(b) }()
+		fn()
+		_ = w.Close()
+		os.Stderr = orig
+		return <-done
+	}
+
+	errOut := capStderr(func() { errorf("boom") })
+	if !strings.Contains(errOut, "<TRANSLATED:helix_config_msg_prefix_error>") {
+		t.Fatalf("errorf prefix not translated: %q", errOut)
+	}
+	if strings.Contains(errOut, "ERROR: boom") {
+		t.Fatalf("errorf still emits original prefix: %q", errOut)
+	}
+
+	warnOut := capStderr(func() { warnf("careful") })
+	if !strings.Contains(warnOut, "<TRANSLATED:helix_config_msg_prefix_warning>") {
+		t.Fatalf("warnf prefix not translated: %q", warnOut)
+	}
+
+	prevVerbose := verbose
+	verbose = true
+	t.Cleanup(func() { verbose = prevVerbose })
+	dbgOut := captureStdout(t, func() { debugf("trace") })
+	if !strings.Contains(dbgOut, "<TRANSLATED:helix_config_msg_prefix_debug>") {
+		t.Fatalf("debugf prefix not translated: %q", dbgOut)
+	}
+}

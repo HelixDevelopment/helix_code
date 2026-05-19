@@ -171,3 +171,94 @@ helix_config_schema_export_action:
 
 helix_config_schema_import_action:
   other: "Importing schema from: {{.File}}"
+
+# --- Round-314 §11.4 CONST-046 Phase 4 (2026-05-20): root command help
+# text, global flag descriptions, benchmark output + message-helper
+# prefixes migrated. 27 highest-frequency user-facing literals (root
+# --help is shown on every invocation; ERROR/WARNING/DEBUG prefixes
+# appear on every diagnostic line).
+
+helix_config_root_short:
+  other: "HelixCode Configuration Management CLI"
+
+helix_config_root_long:
+  other: |-
+    HelixCode Configuration Management CLI
+
+    Manage HelixCode configuration across all platforms with comprehensive
+    validation, migration, and templating support.
+
+helix_config_flag_config:
+  other: "Configuration file path"
+
+helix_config_flag_format:
+  other: "Configuration format (json, yaml, toml)"
+
+helix_config_flag_output:
+  other: "Output format (json, yaml, table, pretty)"
+
+helix_config_flag_session_id:
+  other: "Session ID for tracking"
+
+helix_config_flag_user:
+  other: "User name for audit"
+
+helix_config_flag_verbose:
+  other: "Verbose output"
+
+helix_config_flag_dry_run:
+  other: "Dry run without making changes"
+
+helix_config_flag_quiet:
+  other: "Quiet mode (no output)"
+
+helix_config_flag_no_color:
+  other: "Disable color output"
+
+helix_config_flag_interactive:
+  other: "Interactive mode"
+
+helix_config_flag_force:
+  other: "Force operation without confirmation"
+
+helix_config_flag_backup:
+  other: "Create backup before making changes"
+
+helix_config_flag_timeout:
+  other: "Operation timeout"
+
+helix_config_flag_max_retries:
+  other: "Maximum number of retries"
+
+helix_config_flag_show_secrets:
+  other: "Show sensitive configuration values"
+
+helix_config_flag_no_validate:
+  other: "Skip configuration validation"
+
+helix_config_flag_strict:
+  other: "Enable strict validation mode"
+
+helix_config_flag_pretty:
+  other: "Pretty print JSON output"
+
+helix_config_flag_sort_keys:
+  other: "Sort object keys in output"
+
+helix_config_benchmark_header:
+  other: "Benchmark Results ({{.Iterations}} iterations):"
+
+helix_config_benchmark_read:
+  other: "  Read operations:  {{.Duration}} ({{.Rate}} ops/sec)"
+
+helix_config_benchmark_write:
+  other: "  Write operations: {{.Duration}} ({{.Rate}} ops/sec)"
+
+helix_config_msg_prefix_error:
+  other: "ERROR:"
+
+helix_config_msg_prefix_warning:
+  other: "WARNING:"
+
+helix_config_msg_prefix_debug:
+  other: "DEBUG:"
