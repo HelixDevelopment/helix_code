@@ -1,0 +1,50 @@
+# internal/kilocode i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/kilocode/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_kilocode_<area>_<short_description>.
+# All IDs prefixed with internal_kilocode_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-231 §11.4 anti-bluff sweep (2026-05-19): migrated 8 of the
+# user-facing literals in kilocode_tools.go — the three tool
+# Description() surfaces (cross-file rename, impact analysis,
+# multi-edit refactor) plus five JSON-schema property descriptions
+# consumed by LLM/UI when tool argument hints are surfaced. Two
+# reserved IDs (_separator, _reserved_future) land for paired-mutation
+# coverage + future-round composition.
+
+internal_kilocode_rename_tool_description:
+  other: "AST-aware cross-file symbol rename"
+
+internal_kilocode_rename_old_name_description:
+  other: "Current symbol name"
+
+internal_kilocode_impact_tool_description:
+  other: "Analyze the impact of changing a symbol"
+
+internal_kilocode_impact_symbol_description:
+  other: "Symbol name to analyze"
+
+internal_kilocode_multi_edit_tool_description:
+  other: "Multi-file refactoring: extract method, inline call"
+
+internal_kilocode_multi_edit_file_description:
+  other: "Source file path"
+
+internal_kilocode_multi_edit_start_line_description:
+  other: "Start line for extract"
+
+internal_kilocode_multi_edit_end_line_description:
+  other: "End line for extract"
+
+internal_kilocode_prompt_separator:
+  other: " "
+
+internal_kilocode_reserved_future:
+  other: "RESERVED: internal/kilocode i18n bundle placeholder — future-round composition slot"

@@ -1,0 +1,28 @@
+# internal/approvalwire i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/approvalwire/ to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_approvalwire_<area>_<short_description>.
+# All IDs prefixed with internal_approvalwire_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-228 §11.4 anti-bluff sweep (2026-05-19): migrated the two
+# user-facing Choice.Label strings emitted by AskUserYesNoPrompter
+# ("Yes" / "No"). These labels are rendered verbatim to the user by
+# the F19 stdin prompter at internal/tools/askuser/stdin_prompter.go
+# via fmt.Fprintf(&b, "%d. %s\n", i+1, c.Label), so they qualify as
+# user-facing strings under CONST-046 and MUST adapt to the active
+# locale. The string sentinel "yes"/"no" Choice.Value tokens are
+# structural identifiers (enum-tokens compared by ==) and are NOT
+# migrated — they are not rendered to the user.
+
+internal_approvalwire_yesno_label_yes:
+  other: "Yes"
+
+internal_approvalwire_yesno_label_no:
+  other: "No"

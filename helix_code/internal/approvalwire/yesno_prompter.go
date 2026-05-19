@@ -66,8 +66,8 @@ func (p *AskUserYesNoPrompter) PromptYesNo(ctx context.Context, question string,
 	q := askuser.Question{
 		Question: question,
 		Choices: []askuser.Choice{
-			{Label: "Yes", Value: "yes"},
-			{Label: "No", Value: "no"},
+			{Label: tr(ctx, "internal_approvalwire_yesno_label_yes", nil), Value: "yes"},
+			{Label: tr(ctx, "internal_approvalwire_yesno_label_no", nil), Value: "no"},
 		},
 		Default: defaultVal,
 	}

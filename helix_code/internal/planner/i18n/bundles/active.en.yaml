@@ -1,0 +1,53 @@
+# internal/planner i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/planner/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_planner_<area>_<short_description>.
+# All IDs prefixed with internal_planner_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-232 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# most user-facing literals — 4 executor.go error/format messages
+# surfaced to callers / the user-visible step.Error field, 2 tool
+# Description() strings exposed via the tools.Tool registry, and 4
+# validation error strings raised by TaskPlanTool / TaskStepTool when
+# users supply malformed parameters. The package-level sentinel
+# errors in types.go are deliberately NOT migrated — their .Error()
+# text is part of the errors.Is identity contract used by callers
+# and the existing executor_test.go suite; rotating those texts
+# behind a tr() call would change the sentinel identity surface.
+
+internal_planner_err_command_failed_fmt:
+  other: "command failed"
+
+internal_planner_err_unsupported_step_type:
+  other: "unsupported step type: {{.Type}}"
+
+internal_planner_err_nil_plan:
+  other: "nil plan"
+
+internal_planner_err_step_failed_fmt:
+  other: "step {{.Index}} ({{.ID}}) failed"
+
+internal_planner_task_plan_description:
+  other: "Create and execute a task plan from a plan tree"
+
+internal_planner_task_step_description:
+  other: "Execute a single task step"
+
+internal_planner_validation_name_required:
+  other: "name is required"
+
+internal_planner_validation_steps_non_empty_array:
+  other: "steps must be a non-empty array"
+
+internal_planner_validation_step_needs_command_or_prompt:
+  other: "step must have 'command' or 'prompt'"
+
+internal_planner_validation_command_required:
+  other: "command is required"

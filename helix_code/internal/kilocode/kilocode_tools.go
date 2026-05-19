@@ -19,17 +19,20 @@ func NewKiloRenameTool(engine *RenameEngine) *KiloRenameTool {
 	return &KiloRenameTool{engine: engine}
 }
 
-func (t *KiloRenameTool) Name() string        { return "kilocode_rename" }
-func (t *KiloRenameTool) Description() string { return "AST-aware cross-file symbol rename" }
+func (t *KiloRenameTool) Name() string { return "kilocode_rename" }
+func (t *KiloRenameTool) Description() string {
+	return tr(context.Background(), "internal_kilocode_rename_tool_description", nil)
+}
 func (t *KiloRenameTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("kilocode")
 }
 
 func (t *KiloRenameTool) Schema() tools.ToolSchema {
+	ctx := context.Background()
 	return tools.ToolSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
-			"old_name": map[string]interface{}{"type": "string", "description": "Current symbol name"},
+			"old_name": map[string]interface{}{"type": "string", "description": tr(ctx, "internal_kilocode_rename_old_name_description", nil)},
 			"new_name": map[string]interface{}{"type": "string", "description": "New symbol name"},
 		},
 		Required: []string{"old_name", "new_name"},
@@ -70,18 +73,21 @@ func NewKiloImpactTool(analyzer *ImpactAnalyzer) *KiloImpactTool {
 	return &KiloImpactTool{analyzer: analyzer}
 }
 
-func (t *KiloImpactTool) Name() string        { return "kilocode_impact" }
-func (t *KiloImpactTool) Description() string { return "Analyze the impact of changing a symbol" }
+func (t *KiloImpactTool) Name() string { return "kilocode_impact" }
+func (t *KiloImpactTool) Description() string {
+	return tr(context.Background(), "internal_kilocode_impact_tool_description", nil)
+}
 func (t *KiloImpactTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("kilocode")
 }
 func (t *KiloImpactTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (t *KiloImpactTool) Schema() tools.ToolSchema {
+	ctx := context.Background()
 	return tools.ToolSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
-			"symbol": map[string]interface{}{"type": "string", "description": "Symbol name to analyze"},
+			"symbol": map[string]interface{}{"type": "string", "description": tr(ctx, "internal_kilocode_impact_symbol_description", nil)},
 		},
 		Required: []string{"symbol"},
 	}
@@ -117,21 +123,24 @@ func NewKiloMultiEditTool(refactorer *Refactorer) *KiloMultiEditTool {
 	return &KiloMultiEditTool{refactorer: refactorer}
 }
 
-func (t *KiloMultiEditTool) Name() string        { return "kilocode_multi_edit" }
-func (t *KiloMultiEditTool) Description() string { return "Multi-file refactoring: extract method, inline call" }
+func (t *KiloMultiEditTool) Name() string { return "kilocode_multi_edit" }
+func (t *KiloMultiEditTool) Description() string {
+	return tr(context.Background(), "internal_kilocode_multi_edit_tool_description", nil)
+}
 func (t *KiloMultiEditTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("kilocode")
 }
 
 func (t *KiloMultiEditTool) Schema() tools.ToolSchema {
+	ctx := context.Background()
 	return tools.ToolSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
-			"action":      map[string]interface{}{"type": "string", "description": "extract or inline"},
-			"file":        map[string]interface{}{"type": "string", "description": "Source file path"},
-			"func_name":   map[string]interface{}{"type": "string", "description": "Function name"},
-			"start_line":  map[string]interface{}{"type": "number", "description": "Start line for extract"},
-			"end_line":    map[string]interface{}{"type": "number", "description": "End line for extract"},
+			"action":     map[string]interface{}{"type": "string", "description": "extract or inline"},
+			"file":       map[string]interface{}{"type": "string", "description": tr(ctx, "internal_kilocode_multi_edit_file_description", nil)},
+			"func_name":  map[string]interface{}{"type": "string", "description": "Function name"},
+			"start_line": map[string]interface{}{"type": "number", "description": tr(ctx, "internal_kilocode_multi_edit_start_line_description", nil)},
+			"end_line":   map[string]interface{}{"type": "number", "description": tr(ctx, "internal_kilocode_multi_edit_end_line_description", nil)},
 		},
 		Required: []string{"action", "file"},
 	}

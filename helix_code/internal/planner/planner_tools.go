@@ -21,8 +21,10 @@ func NewTaskPlanTool(executor *SequentialExecutor) *TaskPlanTool {
 	return &TaskPlanTool{executor: executor}
 }
 
-func (t *TaskPlanTool) Name() string        { return "task_plan" }
-func (t *TaskPlanTool) Description() string { return "Create and execute a task plan from a plan tree" }
+func (t *TaskPlanTool) Name() string { return "task_plan" }
+func (t *TaskPlanTool) Description() string {
+	return tr(context.Background(), "internal_planner_task_plan_description", nil)
+}
 func (t *TaskPlanTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("planner")
 }
@@ -40,7 +42,7 @@ func (t *TaskPlanTool) Schema() tools.ToolSchema {
 
 func (t *TaskPlanTool) Validate(params map[string]interface{}) error {
 	if _, ok := params["name"].(string); !ok || params["name"].(string) == "" {
-		return errors.New("name is required")
+		return errors.New(tr(context.Background(), "internal_planner_validation_name_required", nil))
 	}
 	return nil
 }
@@ -50,7 +52,7 @@ func (t *TaskPlanTool) Execute(ctx context.Context, params map[string]interface{
 
 	stepsRaw, ok := params["steps"].([]interface{})
 	if !ok || len(stepsRaw) == 0 {
-		return nil, errors.New("steps must be a non-empty array")
+		return nil, errors.New(tr(ctx, "internal_planner_validation_steps_non_empty_array", nil))
 	}
 
 	plan := &TaskPlan{
@@ -78,7 +80,7 @@ func (t *TaskPlanTool) Execute(ctx context.Context, params map[string]interface{
 			step.Prompt = prompt
 			step.Type = StepLLM
 		} else {
-			return nil, errors.New("step must have 'command' or 'prompt'")
+			return nil, errors.New(tr(ctx, "internal_planner_validation_step_needs_command_or_prompt", nil))
 		}
 
 		if nodeID, ok := stepMap["plan_node_id"].(string); ok {
@@ -113,8 +115,10 @@ func NewTaskStepTool(executor *SequentialExecutor) *TaskStepTool {
 	return &TaskStepTool{executor: executor}
 }
 
-func (t *TaskStepTool) Name() string        { return "task_step" }
-func (t *TaskStepTool) Description() string { return "Execute a single task step" }
+func (t *TaskStepTool) Name() string { return "task_step" }
+func (t *TaskStepTool) Description() string {
+	return tr(context.Background(), "internal_planner_task_step_description", nil)
+}
 func (t *TaskStepTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("planner")
 }
@@ -133,7 +137,7 @@ func (t *TaskStepTool) Schema() tools.ToolSchema {
 
 func (t *TaskStepTool) Validate(params map[string]interface{}) error {
 	if _, ok := params["command"].(string); !ok || params["command"].(string) == "" {
-		return errors.New("command is required")
+		return errors.New(tr(context.Background(), "internal_planner_validation_command_required", nil))
 	}
 	return nil
 }

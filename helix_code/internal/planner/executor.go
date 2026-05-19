@@ -24,7 +24,8 @@ func DefaultShellRunner(ctx context.Context, command string) (string, error) {
 	out, err := cmd.CombinedOutput()
 	output := string(out)
 	if err != nil {
-		return output, fmt.Errorf("command failed: %w\n%s", err, output)
+		prefix := tr(ctx, "internal_planner_err_command_failed_fmt", nil)
+		return output, fmt.Errorf("%s: %w\n%s", prefix, err, output)
 	}
 	return output, nil
 }
@@ -66,7 +67,9 @@ func (e *SequentialExecutor) ExecuteStep(ctx context.Context, step *TaskStep) er
 		default:
 			cancel()
 			step.Status = StepFailed
-			step.Error = fmt.Sprintf("unsupported step type: %s", step.Type)
+			step.Error = tr(ctx, "internal_planner_err_unsupported_step_type", map[string]any{
+				"Type": step.Type.String(),
+			})
 			return fmt.Errorf("%w: %s", ErrInvalidStep, step.Type)
 		}
 
@@ -93,7 +96,7 @@ func (e *SequentialExecutor) ExecuteStep(ctx context.Context, step *TaskStep) er
 
 func (e *SequentialExecutor) ExecutePlan(ctx context.Context, plan *TaskPlan) error {
 	if plan == nil {
-		return errors.New("nil plan")
+		return errors.New(tr(ctx, "internal_planner_err_nil_plan", nil))
 	}
 	if plan.Status == PlanStatusCompleted {
 		return ErrPlanComplete
@@ -107,7 +110,15 @@ func (e *SequentialExecutor) ExecutePlan(ctx context.Context, plan *TaskPlan) er
 
 		if err := e.ExecuteStep(ctx, step); err != nil {
 			plan.Status = PlanStatusFailed
-			return fmt.Errorf("step %d (%s) failed: %w", i, step.ID, err)
+			prefix := tr(ctx, "internal_planner_err_step_failed_fmt", map[string]any{
+				"Index": i,
+				"ID":    step.ID,
+			})
+			// Wrap via fmt.Errorf("%s: %w", ...) so callers retain
+			// errors.Is identity against the underlying step error
+			// (e.g. ErrMaxRetries, context.DeadlineExceeded), while the
+			// human-facing prefix is fully translator-resolved.
+			return fmt.Errorf("%s: %w", prefix, err)
 		}
 	}
 
