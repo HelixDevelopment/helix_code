@@ -1,0 +1,22 @@
+# internal/theme i18n bundle — active English (en) locale.
+#
+# Scaffold-only at round 238 (2026-05-19): the helix_code/internal/theme
+# package currently emits only sentinel errors via fmt.Errorf wrapping
+# (ErrInvalidColorDepth, ErrInvalidThemeName, ErrThemeNotFound,
+# ErrInvalidYAML) which are caller-side errors.Is targets — technical
+# labels, not user-facing prose. No literals qualified for the round-238
+# migration. The Translator + NoopTranslator abstraction lands now so a
+# future round can adopt it without re-doing infrastructure (e.g., when
+# a CLI/TUI surface introduces "available themes: …" or "theme file not
+# readable: …" prose).
+#
+# Naming convention (forward-looking): internal_theme_<short_description>.
+# All IDs prefixed with internal_theme_ to avoid namespace collision
+# with other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Sample placeholder retained so the YAML is non-empty and the bundle
+# parses cleanly when picked up by a future bundle-loader sweep. NOT
+# referenced from theme.go-tree at round 238.
+
+internal_theme_placeholder:
+  other: "internal/theme i18n scaffold (round-238) — no live message IDs yet"

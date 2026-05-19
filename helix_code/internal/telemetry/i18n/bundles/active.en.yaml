@@ -1,0 +1,82 @@
+# internal/telemetry i18n bundle — active English (en) locale.
+#
+# Round-237 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# zero CONST-046 hardcoded-content violations in
+# helix_code/internal/telemetry/ at HEAD. The package emits no
+# user-facing narrative strings — only:
+#
+#   * OTLP wire-protocol metric names ("helixcode_llm_calls_total",
+#     "helixcode_llm_latency_seconds",
+#     "helixcode_llm_prompt_tokens_total",
+#     "helixcode_llm_completion_tokens_total",
+#     "helixcode_tool_calls_total", "helixcode_tool_latency_seconds",
+#     "helixcode_agent_iterations_total",
+#     "helixcode_agent_iteration_latency_seconds") — load-bearing
+#     identifiers consumed by Prometheus / Grafana / OTLP backends.
+#     Per round-158's hardware identifier-token precedent, identity
+#     keys used in equality checks / dashboard joins are explicitly
+#     OUT of CONST-046 scope.
+#
+#   * OTLP attribute / span-attribute keys ("llm.model", "llm.provider",
+#     "llm.message_count", "llm.max_tokens", "llm.usage.prompt_tokens",
+#     "llm.usage.completion_tokens", "llm.finish_reason",
+#     "tool.category", "tool.outcome", "agent.iteration",
+#     "agent.outcome") — OpenTelemetry semantic convention keys,
+#     namespaced wire-format identifiers, NOT user-display content.
+#
+#   * Instrumentation scope identifiers ("dev.helix.code/internal/
+#     telemetry/llm", "dev.helix.code/internal/telemetry/tool",
+#     "dev.helix.code/internal/telemetry/agent") — module-path
+#     identity used by OTLP collectors to route + filter spans /
+#     metrics by source.
+#
+#   * OpenTelemetry metric.WithDescription strings ("Total LLM
+#     Generate / GenerateStream calls.", "LLM end-to-end latency in
+#     seconds.", "Total prompt tokens consumed across LLM calls.",
+#     "Total completion tokens emitted across LLM calls.", "Total
+#     tool dispatch calls.", "Tool dispatch latency in seconds.",
+#     "Total agent iterations.", "Agent iteration latency in
+#     seconds.") — metric-metadata text surfaced ONLY to operators in
+#     OTLP backend UIs. NOT end-user-product narrative; per round-235's
+#     logger-WARN precedent, ops/debug surfaces are explicitly OUT of
+#     CONST-046 scope.
+#
+#   * Outcome tag literals ("success", "failure", "stream_success",
+#     "stream_failure") — closed-set attribute values used for
+#     cardinality-bounded metric grouping. Identity-tag precedent
+#     applies.
+#
+#   * Sentinel-error static fragments ("telemetry disabled",
+#     "unsupported exporter kind", "telemetry provider not
+#     initialised") + constructor-error wrapped messages ("telemetry:
+#     NewTracedLLMProvider: inner provider must not be nil",
+#     "telemetry: build call counter: %w", "telemetry: build latency
+#     histogram: %w", etc.) — surfaced to logs / errors.Is comparisons
+#     / error chains for developers + ops, not end-user UI narrative.
+#
+#   * Environment-variable name tokens ("HELIXCODE_OTEL_EXPORTER",
+#     "OTEL_TRACES_EXPORTER", "OTEL_EXPORTER_OTLP_PROTOCOL") —
+#     filesystem-style environment-variable identifiers consumed by
+#     os.Getenv. Translating them would silently disconnect the
+#     config-resolution pipeline from the documented operator contract.
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_telemetry_<area>_<short_description>. All IDs prefixed with
+# internal_telemetry_ to avoid namespace collision when loaded into
+# the same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in config.go / provider.go / llm_instrumentation.go /
+# tool_instrumentation.go / agent_instrumentation.go / types.go — it
+# exists purely to keep the i18n surface live + ready for the first
+# real migration target a future round identifies (e.g. a /telemetry
+# status TUI banner, a CLI summary line surfacing exporter-disabled
+# state to end users, a TUI startup hint about ErrTelemetryDisabled
+# being surfaced as user-visible UI text instead of a sentinel error).
+
+internal_telemetry_reserved_placeholder:
+  other: "RESERVED: internal/telemetry i18n bundle placeholder — no production caller (round-237 no-op infra)"
