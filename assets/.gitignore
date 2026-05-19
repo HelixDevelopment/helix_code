@@ -1,0 +1,60 @@
+# CONST-053 — Assets .gitignore (round-305 minimal enrichment, Template C)
+# Forbidden-from-version-control classes per constitution submodule §11.4.30.
+# Assets directory holds brand artefacts (logos, images); these patterns prevent
+# accidental commits of derived/sensitive content.
+
+# 1. Build artefacts (re-derivable)
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+/bin/
+/build/
+/dist/
+/out/
+
+# 2. Cache files
+.cache/
+__pycache__/
+.pytest_cache/
+node_modules/
+
+# 3. Temp / OS / editor
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+*.orig
+*.rej
+
+# 4. Sensitive — CONST-042 / §11.4.10
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+id_rsa*
+id_ed25519*
+.netrc
+secrets/
+api_keys.sh
+
+# 5. Logs / generated reports
+*.log
+coverage.out
+htmlcov/
+challenges/scripts/*.evidence.log
+
+# 6. IDE personal state
+.idea/
+.vscode/
+.history/
+
+# 7. Image derivatives (re-generatable from source PNGs)
+*.png.bak
+*.thumb.*
+*.optimized.*

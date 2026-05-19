@@ -26,3 +26,24 @@ This submodule contains brand assets (logos, images). Changes should be minimal 
 
 Full text: root `CONSTITUTION.md` Article XI §11.9.
 
+---
+
+## Round-305 Minimal Enrichment (Template C — owned-static-content)
+
+This directory holds brand artefacts (logos, images). The only verifiable
+runtime invariants are file existence, non-zero size, and PNG magic-number
+integrity. Per CONST-035 + CONST-050(B), even minimal enrichment ships an
+anti-bluff Challenge with paired-mutation self-test rather than
+metadata-only / file-existence-only assertions.
+
+**Wire-evidence Challenge:** `challenges/scripts/asset_integrity_challenge.sh`
+- Verifies each expected PNG is present, above 1 KiB sanity floor, and
+  starts with the canonical PNG magic header `89504e470d0a1a0a` (compared
+  via `xxd` to avoid bash variable-expansion mangling of `\x89`).
+- Paired mutation: `MUTATION_TEST=1` writes a known-bad sentinel and the
+  Challenge MUST reject it; absence of rejection is a meta-bluff regression.
+- Captures runtime evidence: byte size + measured magic-number per asset.
+
+**Governance hygiene (CONST-053):** `.gitignore` blocks build derivatives,
+caches, OS detritus, secrets, and image-derivative artefacts.
+

@@ -84,6 +84,11 @@ challenges/
 helix_code/tests/e2e/challenges/test-results/
 helix_code/tests/e2e/challenges/.DS_Store
 
+# Allow per-submodule anti-bluff challenge framework (CONST-035 / CONST-050(B))
+# — round-305 minimal enrichment template exempts owned-static-content
+!assets/challenges/
+!assets/challenges/**
+
 
 reports/demos/
 governance-cascade-report-*.txt
