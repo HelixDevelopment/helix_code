@@ -412,6 +412,523 @@ dispatch spec</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
+<td>CONST-046 i18n implemented-architecture overview doc</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>111</td>
+<td>2bbd516</td>
+<td>325 lines / 3048 words / 9 sections; 28 commit SHA citations + 14
+file-path refs; zero [unverified] markings</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Tracker HTML + PDF exports per §11.4.19</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>110</td>
+<td>e028073</td>
+<td>pandoc 3.9 + weasyprint; 10 artefacts (4 HTML + 4 PDF + script +
+README ~160KB); validated + mutation-tested</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/helix_config/main.go × 10 migration</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>108</td>
+<td>878fcfc + 5b5c3c6</td>
+<td>Phase 4 next-tier; dynamic-pick agent selected helix_config CLI</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_qa i18n kickoff (Phase 4 round 7)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>112</td>
+<td>a676ba2 + c538642</td>
+<td>Submodule pointer + baseline refresh; formal report truncated</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>CONST-052 rename programme phased plan (ISSUE-005 plan)</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>113</td>
+<td>f666410</td>
+<td>522 LOC / 4709 words / 9 sections; 107 renames inventoried; 12
+operator decisions; estimated 5 days execution</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>LLMOrchestrator i18n kickoff (Phase 4 round 9)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>115</td>
+<td>26b7609 + 954ab7a</td>
+<td>5/17 strings migrated (1 invocationError per 5 builder agents);
+NoopTranslator-fallback pattern keeps bare ID from leaking; +410
+LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-006 (final): helix_agent inner LOGIC FAIL cleanup</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>109</td>
+<td>0f492e98 + 35e0d52</td>
+<td>5/7 LOGIC FAILs fixed (all test-side bluffs, zero production); 2
+reclassified as cross-cutting; +49 LOC; ISSUE-006 fully CLOSED</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>LLMsVerifier i18n kickoff (Phase 4 round 8)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>114</td>
+<td>2e670bb2 + c5675e6 + e959a4f</td>
+<td>5/1819 strings migrated (CLI table headers/empties); package-level
+seam pattern; 8 tests + mutation; baseline 57,320; ~1814 remain</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>HelixSpecifier i18n kickoff (Phase 4 round 10)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>117</td>
+<td>(submodule TBD) + 2d97af3 + 156c931</td>
+<td>Pointer + baseline refresh visible; formal report truncated</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Storage i18n kickoff (Phase 4 round 11)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>118</td>
+<td>(submodule TBD) + 938dd9f</td>
+<td>Pointer visible; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>LLMOps i18n kickoff (Phase 4 round 12)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>119</td>
+<td>(submodule TBD) + 8afad84</td>
+<td>Pointer visible; formal report minimal</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>VectorDB i18n kickoff (Phase 4 round 13)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>120</td>
+<td>(submodule TBD) + c74e7ed + 6ea87b8</td>
+<td>Pointer + baseline refresh visible; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Observability i18n kickoff (Phase 4 round 14)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>121</td>
+<td>(submodule TBD) + b95877a + 9380b02</td>
+<td>Pointer + baseline refresh visible; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>MCP_Module i18n kickoff (Phase 4 round 15)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>122</td>
+<td>d7b5e6c + 76b4a29</td>
+<td>6→0 violations (clean); 5 migrated (RPCError × 2 + server × 3);
+package-level seam; 0 remaining</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-009: helix_agent 4 handler tests</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>116</td>
+<td>(submodule TBD) + da782d4</td>
+<td>Pointer visible; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Messaging i18n kickoff (Phase 4 round 16)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>123</td>
+<td>51ff3ab + b762b79</td>
+<td>vasic-digital (attribution correction); 5 sites; atomic.Value
+per-pkg wiring + NoopTranslator-key-verbatim fallback; +326 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Middleware i18n kickoff (Phase 4 round 17)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>124</td>
+<td>f491c45 + 5e61707</td>
+<td>vasic-digital (3rd attribution correction); 3 http.Error strings
+(401/429/415); Option/Config wiring; 4 tests + mutation; +343 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Plugins i18n kickoff (Phase 4 round 18)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>125</td>
+<td>c37b2b2 + 3699b31</td>
+<td>vasic-digital (4th attribution correction); 5 sites
+(Metadata.Validate × 2 + sandbox × 3); 8 tests + mutation; +399 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Streaming i18n kickoff (Phase 4 round 19)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>126</td>
+<td>f32380d + 70e1724</td>
+<td>vasic-digital (5th attribution correction); 5 sites (SSE × 2 + WS ×
+2 + Transport × 1); mixed Config-field + package-seam; 9 packages PASS +
+mutation; +377 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Watcher i18n kickoff (Phase 4 round 20)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>127</td>
+<td>f1b4538 + 66322c2</td>
+<td>vasic-digital (6th attribution correction); pure infrastructure
+(Translator+NoopTranslator+6 watcher_event_* bundle keys); no call-sites
+— EventType.String() returns programmatic IDs; +174 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>conversation i18n kickoff (Phase 4 round 21)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>128</td>
+<td>(submodule TBD) + 12c2349</td>
+<td>Pointer visible; formal report truncated</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>containers i18n kickoff (Phase 4 round 22)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>129</td>
+<td>ca7dbd7 + b905db5 (absorbed)</td>
+<td>73→64 violations; 9 migrated (8 phase narrative + 2
+BuildResult.Error); meta-pointer absorbed in sibling close-out commit
+(race); +332 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>security i18n kickoff (Phase 4 round 23)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>130</td>
+<td>fd81a84 + 6119741</td>
+<td>27→2 violations (92% reduction); 26 PrivEscCheck Description/Details
++ 1 Summary template; +342 LOC; mutation-falsifiability test</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/cli/main.go × 10 migration (Phase 4 round 24)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>131</td>
+<td>3a01303 + 7f78077 baseline</td>
+<td>Main CLI client; Option B pattern (cmd-local i18n pkg) consistent
+with round 108</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>AutoTemp i18n kickoff (Phase 4 round 25)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>132</td>
+<td>(submodule TBD) + 20344f5</td>
+<td>Pointer visible; formal report truncated</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>Auth i18n kickoff (Phase 4 round 26)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>133</td>
+<td>(submodule TBD) + 4e78c99</td>
+<td>Pointer visible; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>134</td>
+<td>69189d0</td>
+<td>HTTP server entry; Option B pattern</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>PliniusCommon i18n kickoff (Phase 4 round 28)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>135</td>
+<td>fbbe695 + ae6699b</td>
+<td>Infrastructure-only (Watcher 127 precedent); 36 bundle keys seeded;
+64×256 concurrent-safe; +250 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/applications/terminal_ui × up to 10 migration (Phase 4
+round 30)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>137</td>
+<td>4eba31b</td>
+<td>tview/tcell TUI; 10 sidebar items + title + status; 296 LOC; -10
+baseline</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/applications/desktop i18n (Phase 4 round 29)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>136</td>
+<td>b5a9487 (content absorbed alongside android; CONST-043
+preserved)</td>
+<td>Fyne GUI; content landed in tree</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/applications/ios infrastructure-only (Phase 4 round
+31)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>138</td>
+<td>27d121b (mislabelled as round-139 due to race; CONST-043
+preserved)</td>
+<td>Swift native per CONST-052 Apple exemption; 6 tests PASS</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/applications/android infrastructure-only (Phase 4 round
+32)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>139</td>
+<td>b5a9487 (re-commit after parallel 27d121b)</td>
+<td>Android primarily native Kotlin/Java per CONST-052 language
+exemption; Go bridge surface minimal — infrastructure pattern</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/applications/aurora_os × up to 10 migration (Phase 4
+round 33)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>140</td>
+<td>75f35f6</td>
+<td>Aurora-OS platform; formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/config_test × 12 migration (Phase 4 round 34)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>141</td>
+<td>83993ac</td>
+<td>config_test (snake_case correction); all 4 pre-existing CONST-046
+entries eliminated; 11 tests + mutation; baseline -4; +504 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/security_test × 10 migration (Phase 4 round 35)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>142</td>
+<td>57d34c8</td>
+<td>17→8 violations (-9); 8 suite names + 2 summary lines; 4 residual
+deferred; tests + mutation; +423 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/security_fix × 10 migration (Phase 4 round 36)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>143</td>
+<td>bbbf121</td>
+<td>security_fix (alphabetically first variant); security_fix_standalone
+deferred (27 violations); tests + mutation; +446 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/performance_optimization × 10 migration (Phase 4
+round 37)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>144</td>
+<td>c7c8b2d</td>
+<td>Banner + config heading + readiness verdicts + summary; 17 residual
++ entire _standalone (562 LOC) deferred; +438 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/cmd/security_fix_standalone × 10 of 27 migration (Phase 4
+round 38)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>145</td>
+<td>53460d0</td>
+<td>banner_start/policy + path_echo + critical_only + validating +
+header_complete + 4 result outcomes; 17 deferred; 6 tests + mutation;
++358 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/auth × up to 10 migration (Phase 4 round
+39)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>146</td>
+<td>3b5ced5</td>
+<td>First helix_code/internal/* package; 10 auth.go validation/error
+sites; 11 tests + mutation; SQL auth_db.go deferred (not
+user-facing)</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/agent × 10 of 64 migration (Phase 4 round
+40)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>147</td>
+<td>9a3ee5e</td>
+<td>coordinator + base_agent task/workflow errors; 10 IDs
+(task_cannot_be_nil/not_found/no_suitable_agent + workflow +
+code/debugging LLM); 8 tests + sentinelTranslator mutation; 64 deferred;
++433 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/cognee × migration (Phase 4 round 41)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>148</td>
+<td>37dc2a1</td>
+<td>Formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/commands × 10 migration (Phase 4 round 42)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>149</td>
+<td>77b6041</td>
+<td>4 ValidateContext + 2 manager-not-init + 1 hooks + 3 permissions
+usage hints; 11 tests + mutation; +400 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/config × 10 migration (Phase 4 round 43)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>150</td>
+<td>adf001f + 5a0934e baseline</td>
+<td>2 boot warn/info + 8 validate-* required/range checks; 9-case
+table-test paired-mutation + translator-error guard; +384 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/context × 8 sites / 5 IDs (Phase 4 round
+44)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>151</td>
+<td>fc4592c</td>
+<td>item_not_found/expired + session/project +
+global_manager_not_initialized; 41 tests + mutation; ~60 in
+builder/mentions subpackages deferred; +369 LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/database × 8 migration (Phase 4 round 45)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>152</td>
+<td>509e89f</td>
+<td>8 fmt.Errorf sites (config_parse + pool_create + ping + schema_check
++ display_name × 2 + schema_create + pool_not_init); SQL queries
+deferred (round-148 cognee precedent); 10 tests + mutation; +317
+LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/discovery migration (Phase 4 round 47)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>154</td>
+<td>0fc080d</td>
+<td>Agent stalled on push monitor but commit reached all 4 remotes;
+formal report not captured</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/deployment × 10 migration (Phase 4 round
+46)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>153</td>
+<td>2df1a23 (mislabelled round-155) + fdd93dd fixup</td>
+<td>already_running + unknown_phase/strategy + 4 validation gates +
+others; sibling-race: content in mislabelled commit per fixup; +447
+LOC</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/editor migration (Phase 4 round 48)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>155</td>
+<td>3099fee (re-commit after race)</td>
+<td>Re-commit after sibling-agent commit-message race; formal report
+pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/event migration (Phase 4 round 49)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>156</td>
+<td>7b27a3c (mislabelled round-155) + 0cb32f2 fixup</td>
+<td>content in mislabelled commit per fixup; push monitor stalled but
+content in tree</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/focus migration (Phase 4 round 50)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>157</td>
+<td>(TBD - in tree)</td>
+<td>“chain not found” sites × 4 (same ID); agent stalled on push but
+i18n/ present in tree</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>helix_code/internal/hardware migration (Phase 4 round 51)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>158</td>
+<td>5757f9d</td>
+<td>Formal report pending</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
 <td>Round 74-87 release-gate stabilization</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
@@ -474,6 +991,21 @@ dispatch spec</td>
 <td>46-63</td>
 <td>various</td>
 <td>missing_types.go Err field + wiring</td>
+</tr>
+<tr>
+<td>2026-05-19</td>
+<td>ISSUE-001: VisionEngine <code>helix-gitlab</code> URL fix (was
+misconfigured, not missing)</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>188</td>
+<td>(submodule + meta pointer)</td>
+<td>Repo <code>helixdevelopment1/VisionEngine</code> (id 80411994)
+existed since 2026-03-19; remote URL pointed at non-existent
+<code>HelixDevelopment/</code> group. Fix:
+<code>git remote set-url helix-gitlab git@gitlab.com:helixdevelopment1/VisionEngine.git</code>
++ FF-safe push (46 commits → SHA <code>2d0c35b</code>). 99/100 owned-org
+URLs probed = OK pre-fix, 100/100 = OK post-fix</td>
 </tr>
 </tbody>
 </table>

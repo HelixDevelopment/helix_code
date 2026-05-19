@@ -206,9 +206,11 @@
 <td>VisionEngine <code>helix-gitlab</code> remote repo missing
 (404)</td>
 <td>Task</td>
-<td>Queued — BLOCKED on operator</td>
+<td>Completed (→ Fixed.md) round 188</td>
 <td>2026-05-19</td>
-<td>Operator must create the GitLab repo or remove the named remote</td>
+<td>NOT missing — URL misconfig (HelixDevelopment vs helixdevelopment1
+path); fixed via git remote set-url; 100/100 owned-org URLs
+reachable</td>
 </tr>
 <tr>
 <td>ISSUE-002</td>
@@ -242,18 +244,44 @@ helix_agent)</td>
 <td>ISSUE-005</td>
 <td>CONST-052 rename programme: meta-repo dirs still PascalCase</td>
 <td>Task</td>
-<td>Queued</td>
+<td>Plan-Ready (→ specs round 113)</td>
 <td>2026-05-15</td>
-<td>Renames break path-encoded refs; phased migration required</td>
+<td>Round 113 produced phased plan (f666410). 12 operator decisions
+needed before execution</td>
 </tr>
 <tr>
 <td>ISSUE-006</td>
 <td>Round-74 residual LOGIC FAILs</td>
 <td>Bug</td>
-<td>In progress (2/3 closed)</td>
+<td>Fixed (→ Fixed.md)</td>
 <td>2026-05-19</td>
-<td>HelixMemory ✓ (round 106), Planning ✓ (round 107 no-op), helix_agent
-inner pending</td>
+<td>All 3 components closed: HelixMemory (106), Planning (107),
+helix_agent (109)</td>
+</tr>
+<tr>
+<td>ISSUE-009</td>
+<td>helix_agent handler tests surfaced after round-109 fix</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md) round 116</td>
+<td>2026-05-19</td>
+<td>Closed: 4 tests fixed (da782d4)</td>
+</tr>
+<tr>
+<td>ISSUE-010</td>
+<td>helix_agent 3 build-failed packages (sibling debate API drift)</td>
+<td>Bug</td>
+<td>Queued — BLOCKED on cross-submodule coord</td>
+<td>2026-05-19</td>
+<td>digital.vasic.debate API changed; helix_agent consumers broken</td>
+</tr>
+<tr>
+<td>ISSUE-011</td>
+<td>venice TestGetCapabilities model-list drift (CONST-037)</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>2026-05-19</td>
+<td>Hardcoded venice-uncensored no longer in API; needs LLMsVerifier
+dynamic lookup</td>
 </tr>
 <tr>
 <td>ISSUE-007</td>
@@ -277,10 +305,10 @@ var</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 5 open (ISSUE-003/004 closed round 105;
-ISSUE-006 partially closed round 106 — HelixMemory done,
-vasic-digital/Planning + helix_agent inner deferred) | 2 Bugs | 2 Tasks
-| 1 Feature | 3 BLOCKED-on-operator</p>
+<p><strong>Counts</strong>: 5 open (ISSUE-001 closed round 188;
+ISSUE-009 closed round 116) | 4 Bugs | 1 Task (ISSUE-005 Plan-Ready) | 1
+Feature | 3 BLOCKED (ISSUE-002 + ISSUE-008 operator + ISSUE-010
+cross-submodule coord)</p>
 <p><em>Last regenerated: 2026-05-19. See <code>docs/Issues.md</code> for
 full details. PDF/HTML exports deferred — generate via pandoc on
 demand.</em></p>

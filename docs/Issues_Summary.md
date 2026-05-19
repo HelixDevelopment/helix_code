@@ -4,7 +4,7 @@
 
 | ID | Title | Type | Status | Discovered | Notes |
 |---|---|---|---|---|---|
-| ISSUE-001 | VisionEngine `helix-gitlab` remote repo missing (404) | Task | Queued — BLOCKED on operator | 2026-05-19 | Operator must create the GitLab repo or remove the named remote |
+| ISSUE-001 | VisionEngine `helix-gitlab` remote repo missing (404) | Task | Completed (→ Fixed.md) round 188 | 2026-05-19 | NOT missing — URL misconfig (HelixDevelopment vs helixdevelopment1 path); fixed via git remote set-url; 100/100 owned-org URLs reachable |
 | ISSUE-002 | VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a | Bug | Queued — BLOCKED on operator | 2026-05-19 | CONST-061 merge-first investigation needed; carries round-48/52/57 commits |
 | ISSUE-003 | HelixLLM `analysis_test.go` hardcoded absolute path (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via t.TempDir + fixtures (a5e56d4) |
 | ISSUE-004 | HelixLLM `gateway/middleware` TOON `WriteTOON` 500 (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via json.Marshal fallback (a5e56d4) |
@@ -16,6 +16,6 @@
 | ISSUE-007 | CONST-046 migration backlog (57,329 violations, baselined, shrinking) | Feature | In progress | 2026-05-19 | Phase 4 (rounds 100+) actively migrating; audit-gate `--fail-on-new` enforced |
 | ISSUE-008 | helix_qa intermittent TestPerformance flake (host-load-sensitive) | Bug | Queued — BLOCKED on operator | 2026-05-19 | Either loosen tolerance or gate behind HOST_LOAD_DEDICATED env var |
 
-**Counts**: 6 open (ISSUE-009 closed round 116) | 4 Bugs | 1 Task (ISSUE-005 Plan-Ready) | 1 Feature | 4 BLOCKED (3 original + ISSUE-010 cross-submodule coord)
+**Counts**: 5 open (ISSUE-001 closed round 188; ISSUE-009 closed round 116) | 4 Bugs | 1 Task (ISSUE-005 Plan-Ready) | 1 Feature | 3 BLOCKED (ISSUE-002 + ISSUE-008 operator + ISSUE-010 cross-submodule coord)
 
 *Last regenerated: 2026-05-19. See `docs/Issues.md` for full details. PDF/HTML exports deferred — generate via pandoc on demand.*
