@@ -43,3 +43,81 @@ terminal_ui_sidebar_title:
 
 terminal_ui_status_bar_default:
   other: "[green]Ready[white] | User: [yellow]Not logged in[white] | Session: [yellow]None"
+
+# Round-331 §11.4 anti-bluff sweep (2026-05-19): 21 user-facing
+# quick-action / dashboard / worker / project / session / LLM-chat
+# labels + status messages migrated. Placeholder-bearing entries use
+# go-i18n {{.Name}} interpolation resolved via Translator.T template
+# data (tui.td helper).
+
+terminal_ui_quickaction_new_task_desc:
+  other: "Create a new distributed task"
+
+terminal_ui_quickaction_add_worker_desc:
+  other: "Register a new worker node"
+
+terminal_ui_quickaction_new_project_desc:
+  other: "Create a new project"
+
+terminal_ui_quickaction_llm_chat_desc:
+  other: "Start AI conversation"
+
+terminal_ui_dashboard_no_llm_providers:
+  other: "No LLM providers configured"
+
+terminal_ui_workers_none_registered:
+  other: "No workers registered"
+
+terminal_ui_worker_add_failed:
+  other: "Failed to add worker: {{.Error}}"
+
+terminal_ui_worker_added:
+  other: "Worker added: {{.Hostname}}"
+
+terminal_ui_projects_none_found:
+  other: "No projects found. Click 'New Project' to create one."
+
+terminal_ui_project_create_failed:
+  other: "Failed to create project: {{.Error}}"
+
+terminal_ui_project_created:
+  other: "Project created: {{.Name}}"
+
+terminal_ui_sessions_none_found:
+  other: "No sessions found. Click 'New Session' to create one."
+
+terminal_ui_session_create_failed:
+  other: "Failed to create session: {{.Error}}"
+
+terminal_ui_session_created:
+  other: "Session created: {{.Name}}"
+
+terminal_ui_chat_no_provider_error:
+  other: "Error: No LLM provider configured. Please configure a provider in Settings > System to enable AI responses, then try again."
+
+terminal_ui_chat_no_provider_status:
+  other: "No LLM provider configured"
+
+terminal_ui_chat_generating:
+  other: "Generating response..."
+
+terminal_ui_chat_response_received:
+  other: "Response received (tokens: {{.Tokens}})"
+
+terminal_ui_chat_unknown_command:
+  other: "Unknown command: {{.Command}}. Type /help for available commands."
+
+terminal_ui_models_none_available:
+  other: "No models available"
+
+terminal_ui_models_configure_hint:
+  other: "Configure providers in Settings"
+
+terminal_ui_models_ollama_desc:
+  other: "Local LLM provider"
+
+terminal_ui_provider_get_failed:
+  other: "Failed to get provider: {{.Error}}"
+
+terminal_ui_model_selected:
+  other: "Selected model: {{.Name}} ({{.Provider}})"

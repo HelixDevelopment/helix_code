@@ -106,6 +106,22 @@ func (tui *TerminalUI) t(id string) string {
 	return got
 }
 
+// td resolves a message ID with go-i18n style template placeholders.
+// It mirrors tui.t but threads templateData through Translator.T so
+// CONST-046-migrated strings that embed runtime values (error text,
+// counts, provider names) stay i18n-aware. Loud-echo fallback on a
+// nil/erroring Translator — same anti-bluff posture as tui.t.
+func (tui *TerminalUI) td(id string, data map[string]any) string {
+	if tui.translator == nil {
+		return id
+	}
+	got, err := tui.translator.T(context.Background(), id, data)
+	if err != nil || got == "" {
+		return id
+	}
+	return got
+}
+
 // Initialize sets up the Terminal UI with all dependencies
 func (tui *TerminalUI) Initialize() error {
 	// Load configuration
@@ -482,7 +498,7 @@ func (tui *TerminalUI) createActivityView() tview.Primitive {
 	if len(models) > 0 {
 		activities = append(activities, fmt.Sprintf("[magenta]+ %d LLM models available", len(models)))
 	} else {
-		activities = append(activities, "[yellow]! No LLM providers configured")
+		activities = append(activities, "[yellow]! "+tui.t("terminal_ui_dashboard_no_llm_providers"))
 	}
 
 	if len(activities) == 1 {
@@ -496,16 +512,16 @@ func (tui *TerminalUI) createActivityView() tview.Primitive {
 // createQuickActionsView creates the quick actions view
 func (tui *TerminalUI) createQuickActionsView() *tview.List {
 	list := tview.NewList().
-		AddItem("New Task", "Create a new distributed task", 'n', func() {
+		AddItem("New Task", tui.t("terminal_ui_quickaction_new_task_desc"), 'n', func() {
 			tui.showNewTaskForm()
 		}).
-		AddItem("Add Worker", "Register a new worker node", 'a', func() {
+		AddItem("Add Worker", tui.t("terminal_ui_quickaction_add_worker_desc"), 'a', func() {
 			tui.showAddWorkerForm()
 		}).
-		AddItem("New Project", "Create a new project", 'p', func() {
+		AddItem("New Project", tui.t("terminal_ui_quickaction_new_project_desc"), 'p', func() {
 			tui.showNewProjectForm()
 		}).
-		AddItem("LLM Chat", "Start AI conversation", 'c', func() {
+		AddItem("LLM Chat", tui.t("terminal_ui_quickaction_llm_chat_desc"), 'c', func() {
 			tui.showLLM()
 		})
 
@@ -584,7 +600,7 @@ func (tui *TerminalUI) showWorkers() {
 	}
 
 	if len(workers) == 0 {
-		workerTable.SetCell(1, 0, tview.NewTableCell("No workers registered").
+		workerTable.SetCell(1, 0, tview.NewTableCell(tui.t("terminal_ui_workers_none_registered")).
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false))
 	} else {
@@ -739,9 +755,9 @@ func (tui *TerminalUI) showAddWorkerForm() {
 		}
 
 		if err := tui.workerRepo.CreateWorker(ctx, newWorker); err != nil {
-			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to add worker: %v", err))
+			tui.statusBar.SetText("[red]" + tui.td("terminal_ui_worker_add_failed", map[string]any{"Error": err.Error()}))
 		} else {
-			tui.statusBar.SetText(fmt.Sprintf("[green]Worker added: %s", hostname))
+			tui.statusBar.SetText("[green]" + tui.td("terminal_ui_worker_added", map[string]any{"Hostname": hostname}))
 			tui.showWorkers()
 		}
 
@@ -799,7 +815,7 @@ func (tui *TerminalUI) showProjects() {
 	}
 
 	if len(projects) == 0 {
-		projectTable.SetCell(1, 0, tview.NewTableCell("No projects found. Click 'New Project' to create one.").
+		projectTable.SetCell(1, 0, tview.NewTableCell(tui.t("terminal_ui_projects_none_found")).
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false))
 	} else {
@@ -958,9 +974,9 @@ func (tui *TerminalUI) showNewProjectForm() {
 
 		newProject, err := tui.projectManager.CreateProject(ctx, name, description, path, projectType)
 		if err != nil {
-			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to create project: %v", err))
+			tui.statusBar.SetText("[red]" + tui.td("terminal_ui_project_create_failed", map[string]any{"Error": err.Error()}))
 		} else {
-			tui.statusBar.SetText(fmt.Sprintf("[green]Project created: %s", newProject.Name))
+			tui.statusBar.SetText("[green]" + tui.td("terminal_ui_project_created", map[string]any{"Name": newProject.Name}))
 			tui.showProjects()
 		}
 
@@ -1022,7 +1038,7 @@ func (tui *TerminalUI) showSessions() {
 	sessions := tui.sessionManager.GetAll()
 
 	if len(sessions) == 0 {
-		sessionTable.SetCell(1, 0, tview.NewTableCell("No sessions found. Click 'New Session' to create one.").
+		sessionTable.SetCell(1, 0, tview.NewTableCell(tui.t("terminal_ui_sessions_none_found")).
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false))
 	} else {
@@ -1267,9 +1283,9 @@ func (tui *TerminalUI) showNewSessionForm() {
 
 		newSession, err := tui.sessionManager.Create(projectID, name, description, mode)
 		if err != nil {
-			tui.statusBar.SetText(fmt.Sprintf("[red]Failed to create session: %v", err))
+			tui.statusBar.SetText("[red]" + tui.td("terminal_ui_session_create_failed", map[string]any{"Error": err.Error()}))
 		} else {
-			tui.statusBar.SetText(fmt.Sprintf("[green]Session created: %s", newSession.Name))
+			tui.statusBar.SetText("[green]" + tui.td("terminal_ui_session_created", map[string]any{"Name": newSession.Name}))
 			tui.showSessions()
 		}
 
@@ -1489,11 +1505,11 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 	if tui.llmProvider == nil {
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
 			Role:    "assistant",
-			Content: "Error: No LLM provider configured. Please configure a provider in Settings > System to enable AI responses, then try again.",
+			Content: tui.t("terminal_ui_chat_no_provider_error"),
 		})
 		tui.chatOutput.SetText(tui.formatChatHistory())
 		tui.chatOutput.ScrollToEnd()
-		tui.statusBar.SetText("[red]No LLM provider configured")
+		tui.statusBar.SetText("[red]" + tui.t("terminal_ui_chat_no_provider_status"))
 		return
 	}
 
@@ -1506,7 +1522,7 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 		Temperature: 0.7,
 	}
 
-	tui.statusBar.SetText("[yellow]Generating response...")
+	tui.statusBar.SetText("[yellow]" + tui.t("terminal_ui_chat_generating"))
 	tui.app.Draw()
 
 	response, err := tui.llmProvider.Generate(ctx, request)
@@ -1521,7 +1537,7 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 			Role:    "assistant",
 			Content: response.Content,
 		})
-		tui.statusBar.SetText(fmt.Sprintf("[green]Response received (tokens: %d)", response.Usage.TotalTokens))
+		tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": response.Usage.TotalTokens}))
 	}
 
 	tui.chatOutput.SetText(tui.formatChatHistory())
@@ -1565,7 +1581,7 @@ func (tui *TerminalUI) handleChatCommand(cmd string) {
 	default:
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
 			Role:    "system",
-			Content: fmt.Sprintf("Unknown command: %s. Type /help for available commands.", cmd),
+			Content: tui.td("terminal_ui_chat_unknown_command", map[string]any{"Command": cmd}),
 		})
 	}
 
@@ -1582,8 +1598,8 @@ func (tui *TerminalUI) showModelSelector() {
 	models := tui.llmManager.GetAvailableModels()
 
 	if len(models) == 0 {
-		list.AddItem("No models available", "Configure providers in Settings", 0, nil)
-		list.AddItem("Configure Ollama", "Local LLM provider", 'o', func() {
+		list.AddItem(tui.t("terminal_ui_models_none_available"), tui.t("terminal_ui_models_configure_hint"), 0, nil)
+		list.AddItem("Configure Ollama", tui.t("terminal_ui_models_ollama_desc"), 'o', func() {
 			tui.statusBar.SetText("[yellow]Configure Ollama in Settings > System")
 			tui.pages.RemovePage("modelSelector")
 		})
@@ -1622,12 +1638,12 @@ func (tui *TerminalUI) selectModel(model *llm.ModelInfo) {
 	ctx := context.Background()
 	provider, err := tui.llmManager.GetProviderForModel(model.Name, model.Provider)
 	if err != nil {
-		tui.statusBar.SetText(fmt.Sprintf("[red]Failed to get provider: %v", err))
+		tui.statusBar.SetText("[red]" + tui.td("terminal_ui_provider_get_failed", map[string]any{"Error": err.Error()}))
 		return
 	}
 
 	tui.llmProvider = provider
-	tui.statusBar.SetText(fmt.Sprintf("[green]Selected model: %s (%s)", model.Name, model.Provider))
+	tui.statusBar.SetText("[green]" + tui.td("terminal_ui_model_selected", map[string]any{"Name": model.Name, "Provider": model.Provider}))
 
 	// Add system message about model selection
 	tui.chatHistory = append(tui.chatHistory, llm.Message{

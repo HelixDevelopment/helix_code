@@ -90,6 +90,58 @@ func TestTerminalUI_NoopTranslator_LoudEcho(t *testing.T) {
 	assert.Equal(t, "terminal_ui_sidebar_dashboard_desc", got)
 }
 
+// dataTranslator is a unit-test-only stub (CONST-050(A)) that records
+// both the message ID and the templateData map it was handed, so
+// round-331 placeholder-bearing call sites can be PROVEN to thread
+// runtime values through Translator.T rather than fmt.Sprintf'ing a
+// hardcoded literal.
+type dataTranslator struct {
+	lastID   string
+	lastData map[string]any
+}
+
+func (d *dataTranslator) T(_ context.Context, id string, data map[string]any) (string, error) {
+	d.lastID = id
+	d.lastData = data
+	return "<SENTINEL:" + id + ">", nil
+}
+
+func (d *dataTranslator) TPlural(_ context.Context, id string, _ int, data map[string]any) (string, error) {
+	d.lastID = id
+	d.lastData = data
+	return "<SENTINEL:" + id + ">", nil
+}
+
+func TestTerminalUI_TD_RoutesThroughTranslatorWithData(t *testing.T) {
+	tui := NewTerminalUI()
+	tr := &dataTranslator{}
+	tui.SetTranslator(tr)
+	got := tui.td("terminal_ui_worker_added", map[string]any{"Hostname": "node-7"})
+	assert.Equal(t, "<SENTINEL:terminal_ui_worker_added>", got,
+		"tui.td() must route through the injected Translator")
+	assert.Equal(t, "terminal_ui_worker_added", tr.lastID)
+	assert.Equal(t, "node-7", tr.lastData["Hostname"],
+		"tui.td() must forward templateData to Translator.T")
+}
+
+func TestTerminalUI_TD_FallsBackToIDOnError(t *testing.T) {
+	tui := NewTerminalUI()
+	tui.SetTranslator(errTranslator{})
+	// Paired mutation: an erroring translator MUST yield a loud echo
+	// of the message ID, never an empty status bar (a §11.4 PASS-bluff
+	// at the i18n error path).
+	got := tui.td("terminal_ui_model_selected", map[string]any{"Name": "x"})
+	assert.Equal(t, "terminal_ui_model_selected", got,
+		"tui.td() must loud-echo the ID when Translator.T returns an error")
+}
+
+func TestTerminalUI_TD_NilTranslatorLoudEcho(t *testing.T) {
+	tui := &TerminalUI{}
+	got := tui.td("terminal_ui_project_created", map[string]any{"Name": "p"})
+	assert.Equal(t, "terminal_ui_project_created", got,
+		"tui.td() must loud-echo the ID when no Translator is installed")
+}
+
 func TestNewThemeManager(t *testing.T) {
 	tm := NewThemeManager()
 	assert.NotNil(t, tm)
