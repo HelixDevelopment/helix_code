@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -209,27 +210,35 @@ func (h *Hook) String() string {
 	return fmt.Sprintf("%s (%s) - priority %d", h.Name, h.Type, h.Priority)
 }
 
-// Validate validates the hook
+// Validate validates the hook.
+//
+// CONST-046 (round-160): all user-facing error literals resolved via
+// tr(). Validate has no caller-supplied context — Background is the
+// canonical fallback per rounds 146..159.
 func (h *Hook) Validate() error {
 	if h.ID == "" {
-		return fmt.Errorf("hook ID cannot be empty")
+		return errors.New(tr(context.Background(), "internal_hooks_id_empty", nil))
 	}
 
 	if h.Name == "" {
-		return fmt.Errorf("hook name cannot be empty")
+		return errors.New(tr(context.Background(), "internal_hooks_name_empty", nil))
 	}
 
 	if h.Type == "" {
-		return fmt.Errorf("hook type cannot be empty")
+		return errors.New(tr(context.Background(), "internal_hooks_type_empty", nil))
 	}
 
 	if h.Handler == nil {
-		return fmt.Errorf("hook handler cannot be nil")
+		return errors.New(tr(context.Background(), "internal_hooks_handler_nil", nil))
 	}
 
 	if h.Priority < PriorityLowest || h.Priority > PriorityHighest {
-		return fmt.Errorf("invalid priority: %d (must be between %d and %d)",
-			h.Priority, PriorityLowest, PriorityHighest)
+		return errors.New(tr(context.Background(), "internal_hooks_priority_out_of_range",
+			map[string]any{
+				"Priority": h.Priority,
+				"Min":      PriorityLowest,
+				"Max":      PriorityHighest,
+			}))
 	}
 
 	return nil

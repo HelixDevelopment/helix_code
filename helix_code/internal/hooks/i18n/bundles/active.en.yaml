@@ -1,0 +1,53 @@
+# internal/hooks i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/hooks/ to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_hooks_<area>_<short_description>.
+# All IDs prefixed with internal_hooks_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-160 §11.4 anti-bluff sweep (2026-05-19): migrated 10
+# user-facing error literals returned from the hooks subsystem —
+# the hook validation guards (hook.go: ID/name/type/handler empty,
+# priority range), the Manager registration / lookup guards
+# (manager.go: invalid hook, duplicate ID, hook not found), and the
+# YAML loader's apiVersion validation guards (yaml_loader.go: missing
+# apiVersion, unsupported apiVersion). These are the strings that
+# surface to operators when a hook is mis-authored, the registry is
+# in a bad state, or the on-disk YAML uses an incompatible schema
+# version.
+
+internal_hooks_invalid_hook:
+  other: "invalid hook: {{.Err}}"
+
+internal_hooks_id_already_registered:
+  other: "hook with ID '{{.ID}}' already registered"
+
+internal_hooks_not_found:
+  other: "hook not found: {{.ID}}"
+
+internal_hooks_id_empty:
+  other: "hook ID cannot be empty"
+
+internal_hooks_name_empty:
+  other: "hook name cannot be empty"
+
+internal_hooks_type_empty:
+  other: "hook type cannot be empty"
+
+internal_hooks_handler_nil:
+  other: "hook handler cannot be nil"
+
+internal_hooks_priority_out_of_range:
+  other: "invalid priority: {{.Priority}} (must be between {{.Min}} and {{.Max}})"
+
+internal_hooks_yaml_missing_api_version:
+  other: "missing apiVersion (expected \"{{.Expected}}\")"
+
+internal_hooks_yaml_unsupported_api_version:
+  other: "unsupported apiVersion \"{{.Got}}\" (expected \"{{.Expected}}\")"

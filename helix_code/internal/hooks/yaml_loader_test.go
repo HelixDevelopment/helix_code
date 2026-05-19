@@ -122,7 +122,11 @@ func TestFileLoader_MissingAPIVersionIsError(t *testing.T) {
 	loader := &FileLoader{UserPath: userPath, ProjectPath: filepath.Join(tmp, "missing.yaml")}
 	_, _, err := loader.Load(context.Background())
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "apiVersion")
+	// CONST-046 round-160: literal moved to i18n bundle
+	// (internal/hooks/i18n/bundles/active.en.yaml). Noop default
+	// echoes the message ID; assert against the message ID so the
+	// test no longer depends on the English copy.
+	assert.Contains(t, err.Error(), "internal_hooks_yaml_missing_api_version")
 }
 
 func TestFileLoader_UnknownAPIVersionIsError(t *testing.T) {
@@ -134,7 +138,8 @@ hooks: []
 	loader := &FileLoader{UserPath: userPath, ProjectPath: filepath.Join(tmp, "missing.yaml")}
 	_, _, err := loader.Load(context.Background())
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "unsupported apiVersion")
+	// CONST-046 round-160: see TestFileLoader_MissingAPIVersionIsError.
+	assert.Contains(t, err.Error(), "internal_hooks_yaml_unsupported_api_version")
 }
 
 func TestFileLoader_UnknownEventTypeRejectedAtLoad(t *testing.T) {

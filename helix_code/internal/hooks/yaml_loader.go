@@ -89,12 +89,17 @@ func readFileIfExists(path string) (*fileSchema, error) {
 	return &f, nil
 }
 
+// validateAPIVersion enforces the on-disk YAML schema version.
+//
+// CONST-046 (round-160): apiVersion error literals resolved via
+// tr(). validateAPIVersion has no caller-supplied context —
+// Background is the canonical fallback per rounds 146..159.
 func validateAPIVersion(v string) error {
 	if v == "" {
-		return fmt.Errorf("missing apiVersion (expected %q)", expectedAPIVersion)
+		return errors.New(tr(context.Background(), "internal_hooks_yaml_missing_api_version", map[string]any{"Expected": expectedAPIVersion}))
 	}
 	if v != expectedAPIVersion {
-		return fmt.Errorf("unsupported apiVersion %q (expected %q)", v, expectedAPIVersion)
+		return errors.New(tr(context.Background(), "internal_hooks_yaml_unsupported_api_version", map[string]any{"Got": v, "Expected": expectedAPIVersion}))
 	}
 	return nil
 }

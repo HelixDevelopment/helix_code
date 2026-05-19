@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -42,10 +43,15 @@ func NewManagerWithExecutor(executor *Executor) *Manager {
 	return m
 }
 
-// Register registers a new hook
+// Register registers a new hook.
+//
+// CONST-046 (round-160): "invalid hook" + "already registered"
+// user-facing literals resolved via tr(). Register has no
+// caller-supplied context — Background is the canonical fallback
+// per rounds 146..159.
 func (m *Manager) Register(hook *Hook) error {
 	if err := hook.Validate(); err != nil {
-		return fmt.Errorf("invalid hook: %w", err)
+		return fmt.Errorf("%s: %w", tr(context.Background(), "internal_hooks_invalid_hook", map[string]any{"Err": err.Error()}), err)
 	}
 
 	m.mu.Lock()
@@ -53,7 +59,7 @@ func (m *Manager) Register(hook *Hook) error {
 
 	// Check for duplicate ID
 	if _, exists := m.hooksAll[hook.ID]; exists {
-		return fmt.Errorf("hook with ID '%s' already registered", hook.ID)
+		return errors.New(tr(context.Background(), "internal_hooks_id_already_registered", map[string]any{"ID": hook.ID}))
 	}
 
 	// Add to type-specific list
@@ -90,7 +96,7 @@ func (m *Manager) Unregister(id string) error {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return fmt.Errorf("hook not found: %s", id)
+		return errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	// Remove from type-specific list
@@ -120,7 +126,7 @@ func (m *Manager) Get(id string) (*Hook, error) {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return nil, fmt.Errorf("hook not found: %s", id)
+		return nil, errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	return hook, nil
@@ -189,7 +195,7 @@ func (m *Manager) Enable(id string) error {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return fmt.Errorf("hook not found: %s", id)
+		return errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	hook.Enabled = true
@@ -203,7 +209,7 @@ func (m *Manager) Disable(id string) error {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return fmt.Errorf("hook not found: %s", id)
+		return errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	hook.Enabled = false
@@ -398,7 +404,7 @@ func (m *Manager) UpdatePriority(id string, priority HookPriority) error {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return fmt.Errorf("hook not found: %s", id)
+		return errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	hook.Priority = priority
@@ -412,7 +418,7 @@ func (m *Manager) Clone(id string) (*Hook, error) {
 
 	hook, exists := m.hooksAll[id]
 	if !exists {
-		return nil, fmt.Errorf("hook not found: %s", id)
+		return nil, errors.New(tr(context.Background(), "internal_hooks_not_found", map[string]any{"ID": id}))
 	}
 
 	return hook.Clone(), nil
