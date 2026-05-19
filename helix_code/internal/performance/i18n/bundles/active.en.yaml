@@ -1,0 +1,58 @@
+# internal/performance i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/performance/ to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_performance_<area>_<short_description>.
+# All IDs prefixed with internal_performance_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-168 §11.4 anti-bluff sweep (2026-05-19): migrated 10 distinct
+# user-facing log strings emitted by optimizer.go covering the
+# production-optimization lifecycle (initialization summary, start
+# banner, target metrics header, baseline metrics header, optimization
+# group header, disabled-skip notice, apply notice, failure notice,
+# applied-successfully notice, complete summary banner).
+#
+# Structural log lines containing only template values (target
+# throughput / latency / CPU / memory raw values, per-metric
+# improvement deltas) are NOT migrated in this round — they require
+# a richer interpolation contract (formatted decimals, percentages,
+# units) that is best handled in a subsequent dedicated round to
+# avoid bloating this batch. The 10 entries below cover the
+# headline user-facing surface (start, complete, lifecycle headers,
+# per-optimization outcome lines).
+
+internal_performance_optimizations_initialized:
+  other: "🚀 Initialized {{.Count}} performance optimizations"
+
+internal_performance_production_optimization_start:
+  other: "🚀 Starting Comprehensive Production Performance Optimization"
+
+internal_performance_target_metrics_header:
+  other: "📊 Target Metrics:"
+
+internal_performance_baseline_metrics_header:
+  other: "📊 Baseline Metrics Collected:"
+
+internal_performance_applying_group_header:
+  other: "\n🔧 Applying {{.OptType}} optimizations..."
+
+internal_performance_skipping_disabled_optimization:
+  other: "   ⏭️  Skipping disabled optimization: {{.Name}}"
+
+internal_performance_applying_optimization:
+  other: "   🔧 Applying: {{.Name}}"
+
+internal_performance_apply_optimization_failed:
+  other: "   ❌ Failed to apply {{.Name}}: {{.Error}}"
+
+internal_performance_optimization_applied_successfully:
+  other: "   ✅ {{.Name}} applied successfully"
+
+internal_performance_production_optimization_complete_header:
+  other: "\n📊 Production Optimization Complete:"

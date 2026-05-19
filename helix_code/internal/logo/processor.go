@@ -2,6 +2,8 @@ package logo
 
 import (
 	"bufio"
+	stdctx "context"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -46,15 +48,16 @@ func NewLogoProcessor(sourcePath, outputDir string) *LogoProcessor {
 
 // ExtractColors extracts the dominant colors from the logo
 func (lp *LogoProcessor) ExtractColors() error {
+	ctx := stdctx.Background()
 	file, err := os.Open(lp.SourcePath)
 	if err != nil {
-		return fmt.Errorf("failed to open logo file: %v", err)
+		return errors.New(tr(ctx, "internal_logo_open_source_failed", map[string]any{"Error": err.Error()}))
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return fmt.Errorf("failed to decode logo image: %v", err)
+		return errors.New(tr(ctx, "internal_logo_decode_source_failed", map[string]any{"Error": err.Error()}))
 	}
 
 	// Analyze image for dominant colors
@@ -100,15 +103,16 @@ func (lp *LogoProcessor) updateColorScheme(colors []color.Color) {
 
 // GenerateASCIIArt creates ASCII art from the logo
 func (lp *LogoProcessor) GenerateASCIIArt() (string, error) {
+	ctx := stdctx.Background()
 	file, err := os.Open(lp.SourcePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to open logo file: %v", err)
+		return "", errors.New(tr(ctx, "internal_logo_open_source_failed", map[string]any{"Error": err.Error()}))
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return "", fmt.Errorf("failed to decode logo image: %v", err)
+		return "", errors.New(tr(ctx, "internal_logo_decode_source_failed", map[string]any{"Error": err.Error()}))
 	}
 
 	// Resize to a reasonable size for ASCII art
@@ -148,15 +152,16 @@ func (lp *LogoProcessor) GenerateIcons() error {
 		{512, 512, "icon-512x512.png"},
 	}
 
+	ctx := stdctx.Background()
 	file, err := os.Open(lp.SourcePath)
 	if err != nil {
-		return err
+		return errors.New(tr(ctx, "internal_logo_open_source_failed", map[string]any{"Error": err.Error()}))
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return err
+		return errors.New(tr(ctx, "internal_logo_decode_source_failed", map[string]any{"Error": err.Error()}))
 	}
 
 	for _, size := range sizes {
@@ -165,13 +170,13 @@ func (lp *LogoProcessor) GenerateIcons() error {
 		outputPath := filepath.Join(lp.OutputDir, "icons", size.name)
 		outputFile, err := os.Create(outputPath)
 		if err != nil {
-			return err
+			return errors.New(tr(ctx, "internal_logo_create_icon_file_failed", map[string]any{"Path": outputPath, "Error": err.Error()}))
 		}
 		defer outputFile.Close()
 
 		err = png.Encode(outputFile, resized)
 		if err != nil {
-			return err
+			return errors.New(tr(ctx, "internal_logo_encode_icon_png_failed", map[string]any{"Path": outputPath, "Error": err.Error()}))
 		}
 	}
 
@@ -180,17 +185,18 @@ func (lp *LogoProcessor) GenerateIcons() error {
 
 // SaveColorScheme saves the extracted color scheme to a file
 func (lp *LogoProcessor) SaveColorScheme() error {
+	ctx := stdctx.Background()
 	colorFile := filepath.Join(lp.OutputDir, "colors", "color-scheme.json")
 	file, err := os.Create(colorFile)
 	if err != nil {
-		return err
+		return errors.New(tr(ctx, "internal_logo_create_color_scheme_failed", map[string]any{"Path": colorFile, "Error": err.Error()}))
 	}
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
 	colorJSON := fmt.Sprintf(`{
   "primary": "%s",
-  "secondary": "%s", 
+  "secondary": "%s",
   "accent": "%s",
   "text": "%s",
   "background": "%s"
@@ -198,7 +204,7 @@ func (lp *LogoProcessor) SaveColorScheme() error {
 
 	_, err = writer.WriteString(colorJSON)
 	if err != nil {
-		return err
+		return errors.New(tr(ctx, "internal_logo_write_color_scheme_failed", map[string]any{"Path": colorFile, "Error": err.Error()}))
 	}
 
 	return writer.Flush()
@@ -226,10 +232,11 @@ func (lp *LogoProcessor) GenerateThemeFiles() error {
 		lp.Colors.Background, lp.Colors.Primary, lp.Colors.Primary,
 		lp.Colors.Primary, lp.Colors.Secondary, lp.Colors.Accent, lp.Colors.Background)
 
+	ctx := stdctx.Background()
 	cssPath := filepath.Join(lp.OutputDir, "colors", "helix-theme.css")
 	err := os.WriteFile(cssPath, []byte(cssTheme), 0644)
 	if err != nil {
-		return err
+		return errors.New(tr(ctx, "internal_logo_write_theme_file_failed", map[string]any{"Path": cssPath, "Error": err.Error()}))
 	}
 
 	// Generate Go theme constants

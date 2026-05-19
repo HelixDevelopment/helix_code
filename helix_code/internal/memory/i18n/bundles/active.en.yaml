@@ -1,0 +1,58 @@
+# internal/memory i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/memory/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_memory_<area>_<short_description>.
+# All IDs prefixed with internal_memory_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-165 §11.4 anti-bluff sweep (2026-05-19): migrated 10 distinct
+# user-facing error messages covering the MemoryManager provider
+# lifecycle (registration / lookup / default-provider selection /
+# unknown-provider-type construction / key-lookup), the global
+# manager guard (uninitialised global), and the Cognee integration
+# lifecycle (client-not-configured, nil-config, already-initialized).
+#
+# Wire-format identity tokens (Redis "redis:" key prefixes, JSON
+# field tags, on-disk filename schemes like "%d.json", message-ID
+# generators like "msg-%d-%d") are NOT migrated in this round — they
+# are protocol/identity tokens, not user-facing display content.
+# Migrating them would silently rewrite wire identifiers used in
+# downstream equality checks + on-disk layout. Future rounds may
+# introduce a separate display-name translator if any of these
+# surface in a UI.
+
+internal_memory_provider_already_registered:
+  other: "provider {{.Name}} already registered"
+
+internal_memory_provider_not_registered:
+  other: "provider {{.Name}} not registered"
+
+internal_memory_provider_not_found:
+  other: "provider {{.Name}} not found"
+
+internal_memory_no_default_provider_set:
+  other: "no default provider set"
+
+internal_memory_unsupported_provider_type:
+  other: "unsupported memory provider type: {{.ProviderType}}"
+
+internal_memory_key_not_found:
+  other: "key not found: {{.Key}}"
+
+internal_memory_global_manager_not_initialized:
+  other: "global memory manager not initialized"
+
+internal_memory_cognee_client_not_configured:
+  other: "Cognee client not configured"
+
+internal_memory_cognee_config_cannot_be_nil:
+  other: "config cannot be nil"
+
+internal_memory_cognee_integration_already_initialized:
+  other: "Cognee integration already initialized"

@@ -322,31 +322,32 @@ func wizardFieldsFor(t ProviderType) []wizardField {
 //
 // Pure-logic — testable without any TUI.
 func validateWizardForm(t ProviderType, values map[string]string) error {
+	ctx := context.Background()
 	switch t {
 	case ProviderTypeAnthropic:
 		if strings.TrimSpace(values["api_key"]) == "" {
-			return errors.New("anthropic: api_key is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_anthropic_apikey_required", nil))
 		}
 		return nil
 	case ProviderTypeBedrock:
 		if strings.TrimSpace(values["region"]) == "" {
-			return errors.New("bedrock: region is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_bedrock_region_required", nil))
 		}
 		return nil
 	case ProviderTypeVertexAI:
 		if strings.TrimSpace(values["project_id"]) == "" {
-			return errors.New("vertexai: project_id is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_vertexai_project_required", nil))
 		}
 		if strings.TrimSpace(values["location"]) == "" {
-			return errors.New("vertexai: location is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_vertexai_location_required", nil))
 		}
 		return nil
 	case ProviderTypeAzure:
 		if strings.TrimSpace(values["endpoint"]) == "" {
-			return errors.New("azure: endpoint is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_azure_endpoint_required", nil))
 		}
 		if strings.TrimSpace(values["api_key"]) == "" {
-			return errors.New("azure: api_key is required")
+			return errors.New(tr(ctx, "internal_llm_wizard_azure_apikey_required", nil))
 		}
 		return nil
 	default:

@@ -25,6 +25,7 @@ package llm
 // product, not a test-only seam.
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -49,11 +50,12 @@ var ErrWizardConfigExists = fmt.Errorf("wizard config already exists: %w", os.Er
 //     re-run validation, it just persists.
 //   - On any error, no partial file is left at path.
 func WriteWizardConfig(path string, result *WizardResult) error {
+	ctx := context.Background()
 	if result == nil {
-		return errors.New("WriteWizardConfig: nil result")
+		return errors.New(tr(ctx, "internal_llm_writer_write_nil_result", nil))
 	}
 	if path == "" {
-		return errors.New("WriteWizardConfig: empty path")
+		return errors.New(tr(ctx, "internal_llm_writer_write_empty_path", nil))
 	}
 
 	if err := ensureSecretSafeParent(path); err != nil {
@@ -103,11 +105,12 @@ func WriteWizardConfig(path string, result *WizardResult) error {
 // so readers never observe a partially-written file. Final file mode is
 // 0600; final parent dir mode is 0700.
 func OverwriteWizardConfig(path string, result *WizardResult) error {
+	ctx := context.Background()
 	if result == nil {
-		return errors.New("OverwriteWizardConfig: nil result")
+		return errors.New(tr(ctx, "internal_llm_writer_overwrite_nil_result", nil))
 	}
 	if path == "" {
-		return errors.New("OverwriteWizardConfig: empty path")
+		return errors.New(tr(ctx, "internal_llm_writer_overwrite_empty_path", nil))
 	}
 
 	if err := ensureSecretSafeParent(path); err != nil {

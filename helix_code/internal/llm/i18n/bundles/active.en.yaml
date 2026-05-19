@@ -1,0 +1,51 @@
+# internal/llm i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/llm/wizard.go and wizard_writer.go to a
+# message ID resolved at runtime via Translator.T. helix_code wires
+# a real *i18nadapter.Translator at boot; the in-package
+# NoopTranslator echoes the message ID verbatim for unit tests +
+# backward compat.
+#
+# Naming convention: internal_llm_<area>_<short_description>. All
+# IDs prefixed with internal_llm_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-161 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# user-facing literals emitted by wizard.go (provider config form
+# validation messages for Anthropic / Bedrock / Vertex AI / Azure)
+# and wizard_writer.go (config write / overwrite nil-result and
+# empty-path guards). Remaining wizard.go fmt.Errorf strings
+# (unsupported provider type, marshal/write/sync/close I/O wrapped
+# errors with %w) are deferred to a future round to stay under the
+# size cap and preserve error-wrap chains.
+
+internal_llm_wizard_anthropic_apikey_required:
+  other: "anthropic: api_key is required"
+
+internal_llm_wizard_bedrock_region_required:
+  other: "bedrock: region is required"
+
+internal_llm_wizard_vertexai_project_required:
+  other: "vertexai: project_id is required"
+
+internal_llm_wizard_vertexai_location_required:
+  other: "vertexai: location is required"
+
+internal_llm_wizard_azure_endpoint_required:
+  other: "azure: endpoint is required"
+
+internal_llm_wizard_azure_apikey_required:
+  other: "azure: api_key is required"
+
+internal_llm_writer_write_nil_result:
+  other: "WriteWizardConfig: nil result"
+
+internal_llm_writer_write_empty_path:
+  other: "WriteWizardConfig: empty path"
+
+internal_llm_writer_overwrite_nil_result:
+  other: "OverwriteWizardConfig: nil result"
+
+internal_llm_writer_overwrite_empty_path:
+  other: "OverwriteWizardConfig: empty path"

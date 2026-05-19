@@ -1,6 +1,7 @@
 package focus
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -99,7 +100,7 @@ func (m *Manager) GetChain(id string) (*Chain, error) {
 
 	chain, ok := m.chains[id]
 	if !ok {
-		return nil, fmt.Errorf("chain not found: %s", id)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_focus_manager_chain_not_found", map[string]any{"ID": id}))
 	}
 
 	return chain, nil
@@ -412,7 +413,7 @@ func (m *Manager) ExportChain(id string) (*ChainSnapshot, error) {
 
 	chain, ok := m.chains[id]
 	if !ok {
-		return nil, fmt.Errorf("chain not found: %s", id)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_focus_manager_chain_not_found", map[string]any{"ID": id}))
 	}
 
 	return &ChainSnapshot{

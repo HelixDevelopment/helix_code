@@ -1,6 +1,8 @@
 package focus
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -69,7 +71,7 @@ func (c *Chain) Push(focus *Focus) error {
 // Pop removes and returns the last focus
 func (c *Chain) Pop() (*Focus, error) {
 	if len(c.Focuses) == 0 {
-		return nil, fmt.Errorf("chain is empty")
+		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
 
 	focus := c.Focuses[len(c.Focuses)-1]
@@ -87,7 +89,7 @@ func (c *Chain) Pop() (*Focus, error) {
 // Current returns the current focus
 func (c *Chain) Current() (*Focus, error) {
 	if c.CurrentIdx < 0 || c.CurrentIdx >= len(c.Focuses) {
-		return nil, fmt.Errorf("no current focus")
+		return nil, errors.New(tr(context.Background(), "internal_focus_chain_no_current_focus", nil))
 	}
 	return c.Focuses[c.CurrentIdx], nil
 }
@@ -95,7 +97,7 @@ func (c *Chain) Current() (*Focus, error) {
 // SetCurrent sets the current focus by index
 func (c *Chain) SetCurrent(index int) error {
 	if index < 0 || index >= len(c.Focuses) {
-		return fmt.Errorf("index out of range: %d", index)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_index_out_of_range", map[string]any{"Index": index}))
 	}
 	c.CurrentIdx = index
 	c.UpdatedAt = time.Now()
@@ -125,7 +127,7 @@ func (c *Chain) Previous() (*Focus, error) {
 // First returns the first focus
 func (c *Chain) First() (*Focus, error) {
 	if len(c.Focuses) == 0 {
-		return nil, fmt.Errorf("chain is empty")
+		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
 	return c.Focuses[0], nil
 }
@@ -133,7 +135,7 @@ func (c *Chain) First() (*Focus, error) {
 // Last returns the last focus
 func (c *Chain) Last() (*Focus, error) {
 	if len(c.Focuses) == 0 {
-		return nil, fmt.Errorf("chain is empty")
+		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
 	return c.Focuses[len(c.Focuses)-1], nil
 }
@@ -141,7 +143,7 @@ func (c *Chain) Last() (*Focus, error) {
 // Get returns the focus at the specified index
 func (c *Chain) Get(index int) (*Focus, error) {
 	if index < 0 || index >= len(c.Focuses) {
-		return nil, fmt.Errorf("index out of range: %d", index)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_index_out_of_range", map[string]any{"Index": index}))
 	}
 	return c.Focuses[index], nil
 }
@@ -153,7 +155,7 @@ func (c *Chain) GetByID(id string) (*Focus, error) {
 			return focus, nil
 		}
 	}
-	return nil, fmt.Errorf("focus not found: %s", id)
+	return nil, fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_focus_not_found", map[string]any{"ID": id}))
 }
 
 // Remove removes a focus by ID
@@ -171,7 +173,7 @@ func (c *Chain) Remove(id string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("focus not found: %s", id)
+	return fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_focus_not_found", map[string]any{"ID": id}))
 }
 
 // Clear removes all focuses from the chain

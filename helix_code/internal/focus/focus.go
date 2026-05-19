@@ -1,6 +1,8 @@
 package focus
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -205,24 +207,24 @@ func (f *Focus) String() string {
 // Validate validates the focus
 func (f *Focus) Validate() error {
 	if f.ID == "" {
-		return fmt.Errorf("focus ID cannot be empty")
+		return errors.New(tr(context.Background(), "internal_focus_validate_id_empty", nil))
 	}
 
 	if f.Type == "" {
-		return fmt.Errorf("focus type cannot be empty")
+		return errors.New(tr(context.Background(), "internal_focus_validate_type_empty", nil))
 	}
 
 	if f.Target == "" {
-		return fmt.Errorf("focus target cannot be empty")
+		return errors.New(tr(context.Background(), "internal_focus_validate_target_empty", nil))
 	}
 
 	if f.Priority < PriorityLow || f.Priority > PriorityCritical {
-		return fmt.Errorf("invalid priority: %d", f.Priority)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_focus_validate_invalid_priority", map[string]any{"Priority": f.Priority}))
 	}
 
 	// Validate expiration time
 	if f.ExpiresAt != nil && f.ExpiresAt.Before(f.CreatedAt) {
-		return fmt.Errorf("expiration time cannot be before creation time")
+		return errors.New(tr(context.Background(), "internal_focus_validate_expiration_before_creation", nil))
 	}
 
 	return nil

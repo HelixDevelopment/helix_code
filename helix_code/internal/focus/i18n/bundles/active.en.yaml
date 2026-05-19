@@ -1,0 +1,49 @@
+# internal/focus i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/focus/ to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_focus_<area>_<short_description>.
+# All IDs prefixed with internal_focus_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-157 §11.4 anti-bluff sweep (2026-05-18): migrated 10 distinct
+# user-facing error strings emitted across focus.go (Validate guards),
+# chain.go (Push/Pop/Current/navigation/lookup guards), and manager.go
+# (chain-lookup and active-chain guards). These cover the highest-
+# traffic error surfaces of the package — the validation layer and
+# the chain/manager not-found paths.
+
+internal_focus_validate_id_empty:
+  other: "focus ID cannot be empty"
+
+internal_focus_validate_type_empty:
+  other: "focus type cannot be empty"
+
+internal_focus_validate_target_empty:
+  other: "focus target cannot be empty"
+
+internal_focus_validate_invalid_priority:
+  other: "invalid priority: {{.Priority}}"
+
+internal_focus_validate_expiration_before_creation:
+  other: "expiration time cannot be before creation time"
+
+internal_focus_chain_is_empty:
+  other: "chain is empty"
+
+internal_focus_chain_no_current_focus:
+  other: "no current focus"
+
+internal_focus_chain_index_out_of_range:
+  other: "index out of range: {{.Index}}"
+
+internal_focus_chain_focus_not_found:
+  other: "focus not found: {{.ID}}"
+
+internal_focus_manager_chain_not_found:
+  other: "chain not found: {{.ID}}"

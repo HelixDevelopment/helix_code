@@ -134,7 +134,7 @@ func (mm *MemoryManager) RegisterProvider(name string, provider MemoryProvider) 
 	defer mm.mu.Unlock()
 
 	if _, exists := mm.providers[name]; exists {
-		return fmt.Errorf("provider %s already registered", name)
+		return errors.New(tr(context.Background(), "internal_memory_provider_already_registered", map[string]any{"Name": name}))
 	}
 
 	mm.providers[name] = provider
@@ -153,7 +153,7 @@ func (mm *MemoryManager) UnregisterProvider(name string) error {
 	defer mm.mu.Unlock()
 
 	if _, exists := mm.providers[name]; !exists {
-		return fmt.Errorf("provider %s not registered", name)
+		return errors.New(tr(context.Background(), "internal_memory_provider_not_registered", map[string]any{"Name": name}))
 	}
 
 	delete(mm.providers, name)
@@ -177,7 +177,7 @@ func (mm *MemoryManager) SetDefaultProvider(name string) error {
 	defer mm.mu.Unlock()
 
 	if _, exists := mm.providers[name]; !exists {
-		return fmt.Errorf("provider %s not registered", name)
+		return errors.New(tr(context.Background(), "internal_memory_provider_not_registered", map[string]any{"Name": name}))
 	}
 
 	mm.defaultProvider = name
@@ -191,7 +191,7 @@ func (mm *MemoryManager) GetProvider(name string) (MemoryProvider, error) {
 
 	provider, exists := mm.providers[name]
 	if !exists {
-		return nil, fmt.Errorf("provider %s not found", name)
+		return nil, errors.New(tr(context.Background(), "internal_memory_provider_not_found", map[string]any{"Name": name}))
 	}
 
 	return provider, nil
@@ -203,7 +203,7 @@ func (mm *MemoryManager) GetDefaultProvider() (MemoryProvider, error) {
 	defer mm.mu.RUnlock()
 
 	if mm.defaultProvider == "" {
-		return nil, fmt.Errorf("no default provider set")
+		return nil, errors.New(tr(context.Background(), "internal_memory_no_default_provider_set", nil))
 	}
 
 	return mm.GetProvider(mm.defaultProvider)
@@ -333,7 +333,7 @@ func (f *MemoryProviderFactory) CreateProvider(providerType string, config map[s
 	case "filesystem":
 		return NewFilesystemMemoryProvider(config)
 	default:
-		return nil, fmt.Errorf("unsupported memory provider type: %s", providerType)
+		return nil, errors.New(tr(context.Background(), "internal_memory_unsupported_provider_type", map[string]any{"ProviderType": providerType}))
 	}
 }
 

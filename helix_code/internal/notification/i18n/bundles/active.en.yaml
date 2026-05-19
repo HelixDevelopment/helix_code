@@ -1,0 +1,51 @@
+# internal/notification i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/notification/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_notification_<area>_<short_description>.
+# All IDs prefixed with internal_notification_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-167 §11.4 anti-bluff sweep (2026-05-19): migrated the top-10
+# user-facing strings emitted by event_handler.go — the 9 Title fields
+# that surface in operator notifications (Task Completed/Failed,
+# Workflow Completed/Failed, Worker Disconnected/Health-Degraded,
+# System Error/Started/Shutdown) plus the canonical "HelixCode system
+# started" message body. These are the strings that reach end users
+# via Slack/Discord/Email/Telegram/Webhook payloads and operator
+# dashboards.
+
+internal_notification_title_task_completed:
+  other: "Task Completed"
+
+internal_notification_title_task_failed:
+  other: "Task Failed"
+
+internal_notification_title_workflow_completed:
+  other: "Workflow Completed"
+
+internal_notification_title_workflow_failed:
+  other: "Workflow Failed"
+
+internal_notification_title_worker_disconnected:
+  other: "Worker Disconnected"
+
+internal_notification_title_worker_health_degraded:
+  other: "Worker Health Degraded"
+
+internal_notification_title_system_error:
+  other: "System Error"
+
+internal_notification_title_system_started:
+  other: "System Started"
+
+internal_notification_title_system_shutdown:
+  other: "System Shutdown"
+
+internal_notification_message_system_started:
+  other: "HelixCode system started"
