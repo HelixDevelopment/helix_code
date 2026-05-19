@@ -1087,7 +1087,42 @@ genuine <code>runtime.HeapAlloc</code>, not RNG). Evidence:
 → both PASS (literal:
 <code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements</code>).
 |</div>
-<p><em>Last regenerated: 2026-05-20 (round 318 — HXC-005 closure).
+<div class="line-block">2026-05-20 | HXV-001: LLMsVerifier 18
+pre-existing <code>tests/</code> failures (CLI-integration +
+verification/scoring) | Bug | Fixed (→ Fixed.md) | 323 | LLMsVerifier
+<code>59f542ba</code> (github+gitlab) + meta pointer-bump | Round-323
+§11.4 / CONST-035. 18 failures classified: <strong>(A) test-build
+drift</strong> — 9 CLI tests (<code>tests/automation_test.go</code>) ran
+<code>go run ../cmd/main.go</code> which compiles ONLY
+<code>main.go</code>; i18n rounds 194/308/309/312/316/319 correctly
+placed <code>tr()</code>/<code>trData()</code> in
+<code>cmd/i18n.go</code> (same <code>package main</code>), so
+single-file <code>go run</code> broke with <code>undefined: tr</code>
+(<code>go build ./cmd</code> was always fine). Fix: re-keyed all 14
+invocations to <code>go run ../cmd</code> (whole package — exercises the
+real CLI binary). <strong>(A) test-assertion drift</strong> — 9
+<code>tests/unit/model_verification_test.go</code> cases asserted the
+OLD §11.4 PASS-bluff (<code>verification.Verify()</code> returning
+all-capabilities-true / all-scores-8.5); round-17 commit
+<code>a6328629</code> correctly removed that fabrication →
+<code>ErrVerificationNotWired</code>. Fix: rewrote the unit suite to
+certify the HONEST contract (input validation; well-formed-but-unwired →
+loud <code>ErrVerificationNotWired</code> sentinel; verifier stateless +
+race-free). Real e2e verification stays in <code>llmverifier/</code>
+integration suite. <strong>(C) environment gate</strong> —
+<code>TestCommandFlagValidation</code>/<code>TestOutputFormats</code>
+list sub-tests dispatch real HTTP; tolerance only covered
+<code>connection refused</code>/<code>dial tcp</code> but a
+non-LLMsVerifier service answered 404. Fix: added
+<code>serverUnavailable()</code> recognising 404/5xx/no-host as a
+<code>SKIP-OK: #HXV-001</code> env gate per CONST-035 (8 sub-tests now
+honest SKIP-OK). Evidence: before <code>go test ./tests/...</code> = 18
+FAIL; after = <code>ok digital.vasic.llmsverifier/tests</code> (17.9s),
+<code>ok .../tests/integration</code> (3.1s),
+<code>ok .../tests/unit</code> (0.003s); <code>go build ./...</code>
+clean. No production code changed — round-17 production fix was already
+correct; only test re-keying. |</div>
+<p><em>Last regenerated: 2026-05-20 (round 323 — HXV-001 closure).
 Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>

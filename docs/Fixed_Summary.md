@@ -8,11 +8,11 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 10 | `Fixed (→ Fixed.md)` |
+| Bug | 11 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 81 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 318 added HXC-005 (perf-opt-standalone simulation bluff deleted).
+**Total closed items**: 82 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 323 added HXV-001 (LLMsVerifier 18 pre-existing `tests/` failures resolved — CLI test-build drift + scoring test-assertion drift to honest contract + env-gated SKIP-OK).
 
 ## Coverage by round-system phase
 
@@ -26,6 +26,6 @@
 
 ## Open issues snapshot (cross-ref `docs/Issues_Summary.md`)
 
-7 open issues: 4 Bugs / 2 Tasks / 1 Feature; 3 BLOCKED on operator decision.
+4 open issues: 3 Bugs / 1 Task / 1 Feature; 3 BLOCKED on operator decision.
 
-*Last regenerated: 2026-05-19 (round 302 — PAN-001 closed). See `docs/Fixed.md` for full closure entries with commit SHAs.*
+*Last regenerated: 2026-05-20 (round 323 — HXV-001 closed). See `docs/Fixed.md` for full closure entries with commit SHAs.*

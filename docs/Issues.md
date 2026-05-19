@@ -245,15 +245,4 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## HXV-001 — LLMsVerifier 18 pre-existing `tests/` failures (CLI + scoring)
-
-**Status:** Queued
-**Type:** Bug
-**Discovered:** 2026-05-20 (round 319 — LLMsVerifier i18n round-7 subagent)
-**Discovered-By:** AI subagent — verified failures reproduce at submodule HEAD `6d661d34` *without* the round-319 i18n change, proving they are pre-existing and unrelated to the migration
-**Evidence:** `go test ./tests/...` in `dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/` reports 18 failures across CLI-integration and scoring test suites. Round-319 subagent isolated them via `git stash` on clean HEAD — failures persist, so they predate the i18n work. Not yet root-caused (subagent scope was strictly i18n).
-**Resolution path:** Dedicated round — run `go test -v ./tests/...` in LLMsVerifier, capture the 18 failure signatures, classify each (test-assertion drift vs. genuine production-code regression vs. environment dependency), then fix root causes per CONST-035 reproduction-before-fix. If any are test-assertion drift from earlier i18n rounds (message-ID vs English-literal), re-key the assertions; if genuine regressions, fix the production code.
-
----
-
-*Last regenerated: 2026-05-20 (round 319 — HXV-001 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+*Last regenerated: 2026-05-20 (round 323 — HXV-001 closed → Fixed.md). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
