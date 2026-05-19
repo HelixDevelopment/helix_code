@@ -1,0 +1,48 @@
+# internal/workspace i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/workspace/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_workspace_<area>_<short_description>.
+# All IDs prefixed with internal_workspace_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-241 §11.4 anti-bluff sweep (2026-05-19): migrated 8 of the
+# most user-facing literals from workspace_tools.go — 3 tool
+# descriptions surfaced via the tools.Tool.Description() contract
+# (workspace_create, workspace_list, workspace_cleanup) + 3 tool
+# schema parameter descriptions surfaced in tool schema output
+# (workspace name, host project_dir, workspace id) + 2 validate-error
+# fragments shown verbatim to tool-invocation callers ("name is
+# required", "project_dir is required"). Remaining literals
+# (manager.go runtime-error wrappers, types.go sentinel-error
+# messages, container_image hint) deferred to future rounds to stay
+# under the round size cap (10).
+
+internal_workspace_tool_create_description:
+  other: "Create a new container-based workspace"
+
+internal_workspace_tool_list_description:
+  other: "List all workspaces"
+
+internal_workspace_tool_cleanup_description:
+  other: "Stop and remove a workspace container"
+
+internal_workspace_schema_param_name:
+  other: "Workspace name"
+
+internal_workspace_schema_param_project_dir:
+  other: "Host project directory to mount"
+
+internal_workspace_schema_param_id:
+  other: "Workspace ID"
+
+internal_workspace_validate_name_required:
+  other: "name is required"
+
+internal_workspace_validate_project_dir_required:
+  other: "project_dir is required"

@@ -18,19 +18,22 @@ func NewWorkspaceCreateTool(mgr *WorkspaceManager) *WorkspaceCreateTool {
 	return &WorkspaceCreateTool{mgr: mgr}
 }
 
-func (t *WorkspaceCreateTool) Name() string        { return "workspace_create" }
-func (t *WorkspaceCreateTool) Description() string { return "Create a new container-based workspace" }
+func (t *WorkspaceCreateTool) Name() string { return "workspace_create" }
+func (t *WorkspaceCreateTool) Description() string {
+	return tr(context.Background(), "internal_workspace_tool_create_description", nil)
+}
 func (t *WorkspaceCreateTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("workspace")
 }
 
 func (t *WorkspaceCreateTool) Schema() tools.ToolSchema {
+	ctx := context.Background()
 	return tools.ToolSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
-			"name":        map[string]interface{}{"type": "string", "description": "Workspace name"},
+			"name":        map[string]interface{}{"type": "string", "description": tr(ctx, "internal_workspace_schema_param_name", nil)},
 			"image":       map[string]interface{}{"type": "string", "description": "Container image (default: alpine:latest)"},
-			"project_dir": map[string]interface{}{"type": "string", "description": "Host project directory to mount"},
+			"project_dir": map[string]interface{}{"type": "string", "description": tr(ctx, "internal_workspace_schema_param_project_dir", nil)},
 		},
 		Required: []string{"name", "project_dir"},
 	}
@@ -38,10 +41,10 @@ func (t *WorkspaceCreateTool) Schema() tools.ToolSchema {
 
 func (t *WorkspaceCreateTool) Validate(params map[string]interface{}) error {
 	if _, ok := params["name"].(string); !ok || params["name"].(string) == "" {
-		return errors.New("name is required")
+		return errors.New(tr(context.Background(), "internal_workspace_validate_name_required", nil))
 	}
 	if _, ok := params["project_dir"].(string); !ok || params["project_dir"].(string) == "" {
-		return errors.New("project_dir is required")
+		return errors.New(tr(context.Background(), "internal_workspace_validate_project_dir_required", nil))
 	}
 	return nil
 }
@@ -71,8 +74,10 @@ func NewWorkspaceListTool(mgr *WorkspaceManager) *WorkspaceListTool {
 	return &WorkspaceListTool{mgr: mgr}
 }
 
-func (t *WorkspaceListTool) Name() string        { return "workspace_list" }
-func (t *WorkspaceListTool) Description() string { return "List all workspaces" }
+func (t *WorkspaceListTool) Name() string { return "workspace_list" }
+func (t *WorkspaceListTool) Description() string {
+	return tr(context.Background(), "internal_workspace_tool_list_description", nil)
+}
 func (t *WorkspaceListTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("workspace")
 }
@@ -108,17 +113,20 @@ func NewWorkspaceCleanupTool(mgr *WorkspaceManager) *WorkspaceCleanupTool {
 	return &WorkspaceCleanupTool{mgr: mgr}
 }
 
-func (t *WorkspaceCleanupTool) Name() string        { return "workspace_cleanup" }
-func (t *WorkspaceCleanupTool) Description() string { return "Stop and remove a workspace container" }
+func (t *WorkspaceCleanupTool) Name() string { return "workspace_cleanup" }
+func (t *WorkspaceCleanupTool) Description() string {
+	return tr(context.Background(), "internal_workspace_tool_cleanup_description", nil)
+}
 func (t *WorkspaceCleanupTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("workspace")
 }
 
 func (t *WorkspaceCleanupTool) Schema() tools.ToolSchema {
+	ctx := context.Background()
 	return tools.ToolSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
-			"id": map[string]interface{}{"type": "string", "description": "Workspace ID"},
+			"id": map[string]interface{}{"type": "string", "description": tr(ctx, "internal_workspace_schema_param_id", nil)},
 		},
 		Required: []string{"id"},
 	}
