@@ -1,0 +1,48 @@
+# internal/continua i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/continua/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_continua_<area>_<short_description>.
+# All IDs prefixed with internal_continua_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-230 §11.4 anti-bluff sweep (2026-05-19): migrated 4 of the
+# audit-gate-flagged user-facing literals plus 2 reserved
+# placeholders for future composition:
+#   - 2 completion-suggestion narratives (CompletionEngine.Complete:
+#     the inline-completion comment + the "add your code here" stub
+#     emitted when the cursor is past the end of file)
+#   - 2 tool-description narratives (ContinueEditTool.Description +
+#     ContinueCompleteTool.Description; surfaced to the user via the
+#     tool registry's `/tools list` view).
+#
+# Out-of-scope (NOT migrated, per round-158 identifier-token
+# precedent): tool-name IDs ("continue_edit", "continue_complete"),
+# category tokens ("continue"), JSON schema property names, sentinel
+# error developer-log strings ("action required", "file required",
+# "unknown action: %s"), wrapped-error developer surfaces ("open
+# file: %w", "edit file: %w"), session-import marker ("imported" —
+# programmatic title, downstream code matches on it).
+
+internal_continua_completion_inferred_suffix:
+  other: "// continue: inferred completion"
+
+internal_continua_completion_stub_placeholder:
+  other: "// continue: add your code here"
+
+internal_continua_tool_edit_description:
+  other: "Open, edit, or save a file in the workspace"
+
+internal_continua_tool_complete_description:
+  other: "Get inline code completion at cursor"
+
+internal_continua_reserved_separator:
+  other: " "
+
+internal_continua_reserved_placeholder:
+  other: "RESERVED: internal/continua i18n bundle placeholder for future composition rounds"

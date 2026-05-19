@@ -17,7 +17,9 @@ type ContinueEditTool struct {
 
 func NewContinueEditTool(e *WorkspaceEditor) *ContinueEditTool { return &ContinueEditTool{editor: e} }
 func (t *ContinueEditTool) Name() string             { return "continue_edit" }
-func (t *ContinueEditTool) Description() string      { return "Open, edit, or save a file in the workspace" }
+func (t *ContinueEditTool) Description() string      {
+	return tr(context.Background(), "internal_continua_tool_edit_description", nil)
+}
 func (t *ContinueEditTool) Category() tools.ToolCategory { return tools.ToolCategory("continue") }
 
 func (t *ContinueEditTool) Schema() tools.ToolSchema {
@@ -71,7 +73,9 @@ func NewContinueCompleteTool(c *CompletionEngine) *ContinueCompleteTool {
 	return &ContinueCompleteTool{completion: c}
 }
 func (t *ContinueCompleteTool) Name() string             { return "continue_complete" }
-func (t *ContinueCompleteTool) Description() string      { return "Get inline code completion at cursor" }
+func (t *ContinueCompleteTool) Description() string      {
+	return tr(context.Background(), "internal_continua_tool_complete_description", nil)
+}
 func (t *ContinueCompleteTool) Category() tools.ToolCategory { return tools.ToolCategory("continue") }
 
 func (t *ContinueCompleteTool) Schema() tools.ToolSchema {

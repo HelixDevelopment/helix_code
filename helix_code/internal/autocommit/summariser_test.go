@@ -62,14 +62,18 @@ func TestSummariser_LLMError_FallsBackToDeterministic(t *testing.T) {
 	p := &fakeProvider{err: errors.New("boom")}
 	s := NewSummariser(p)
 	got := s.Summarise(context.Background(), "diff body", "fs_edit", []string{"x.go"})
-	require.Equal(t, "Auto-edit: fs_edit on x.go", got)
+	// CONST-046 round-229: deterministic-fallback subject routed
+	// through NoopTranslator → loud echo of the raw message ID.
+	require.Equal(t, "internal_autocommit_subject_auto_edit_prefix", got)
 }
 
 func TestSummariser_LLMEmpty_FallsBackToDeterministic(t *testing.T) {
 	p := &fakeProvider{response: "   \n\t"}
 	s := NewSummariser(p)
 	got := s.Summarise(context.Background(), "diff body", "fs_edit", []string{"x.go"})
-	require.Equal(t, "Auto-edit: fs_edit on x.go", got)
+	// CONST-046 round-229: same NoopTranslator echo path as the error
+	// case above.
+	require.Equal(t, "internal_autocommit_subject_auto_edit_prefix", got)
 }
 
 func TestSummariser_LLMTooLong_TruncatedAt72(t *testing.T) {
@@ -83,20 +87,46 @@ func TestSummariser_LLMTooLong_TruncatedAt72(t *testing.T) {
 func TestSummariser_NilProvider_UsesDeterministicFallback(t *testing.T) {
 	s := NewSummariser(nil)
 	got := s.Summarise(context.Background(), "diff", "fs_edit", []string{"x.go"})
-	require.Equal(t, "Auto-edit: fs_edit on x.go", got)
+	// CONST-046 round-229: NoopTranslator default → loud echo of the
+	// raw message ID (a real Translator wired at boot returns the
+	// localized "Auto-edit: fs_edit on x.go" form).
+	require.Equal(t, "internal_autocommit_subject_auto_edit_prefix", got)
 }
 
 func TestDeterministicFallback_Format_ByteForByte(t *testing.T) {
 	var d DeterministicFallback
-	require.Equal(t, "Auto-edit: fs_edit on foo.go, bar.go",
+	// CONST-046 round-229: NoopTranslator echo of the raw message ID;
+	// placeholder interpolation happens only when a real Translator
+	// is wired (sentinel translator test below exercises that path).
+	require.Equal(t, "internal_autocommit_subject_auto_edit_prefix",
 		d.Summarise(context.Background(), "", "fs_edit", []string{"foo.go", "bar.go"}))
 }
 
 func TestDeterministicFallback_TruncatedAt72(t *testing.T) {
+	// CONST-046 round-229: the 72-char ceiling MUST hold even when
+	// the resolved string is large. With NoopTranslator the resolved
+	// value is the raw message ID (37 chars) — to actually exercise
+	// the truncation path we install a sentinel translator that
+	// returns a giant string. Per CONST-050(A) this is a unit test;
+	// mocks allowed.
+	defer SetTranslator(nil)
+	SetTranslator(longSentinelTranslator{})
+
 	var d DeterministicFallback
 	long := strings.Repeat("longpath/file.go,", 10)
 	got := d.Summarise(context.Background(), "", "t", []string{long})
 	require.LessOrEqual(t, len(got), 72)
+}
+
+// longSentinelTranslator returns a 200-char wall of As so the
+// DeterministicFallback truncation path is actually exercised.
+type longSentinelTranslator struct{}
+
+func (longSentinelTranslator) T(_ context.Context, _ string, _ map[string]any) (string, error) {
+	return strings.Repeat("A", 200), nil
+}
+func (longSentinelTranslator) TPlural(_ context.Context, _ string, _ int, _ map[string]any) (string, error) {
+	return strings.Repeat("A", 200), nil
 }
 
 func TestSummariser_Truncates_LongDiff_Before_LLMCall(t *testing.T) {

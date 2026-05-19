@@ -17,7 +17,6 @@ package autocommit
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -107,8 +106,15 @@ func (s *LLMSummariser) Summarise(ctx context.Context, diff, toolName string, pa
 
 // Summarise (DeterministicFallback) returns "Auto-edit: <tool> on <paths>".
 // Truncates to 72 chars without ellipsis.
-func (DeterministicFallback) Summarise(_ context.Context, _, toolName string, paths []string) string {
-	msg := fmt.Sprintf("Auto-edit: %s on %s", toolName, strings.Join(paths, ", "))
+//
+// CONST-046: the subject literal is user-facing (it appears verbatim
+// in every `git log` output when the LLM is unavailable) — resolved
+// via tr() with the active locale + caller-supplied placeholders.
+func (DeterministicFallback) Summarise(ctx context.Context, _, toolName string, paths []string) string {
+	msg := tr(ctx, "internal_autocommit_subject_auto_edit_prefix", map[string]any{
+		"ToolName": toolName,
+		"Paths":    strings.Join(paths, ", "),
+	})
 	if len(msg) > maxSubjectChars {
 		msg = msg[:maxSubjectChars]
 	}

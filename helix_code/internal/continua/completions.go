@@ -27,10 +27,10 @@ func (e *CompletionEngine) Complete(ctx context.Context, filePath string, line, 
 		if col-1 <= len(lines[line-1]) {
 			prefix = lines[line-1][:col-1]
 		}
-		suggestion := fmt.Sprintf("%s// continue: inferred completion", strings.TrimSpace(prefix))
+		suggestion := fmt.Sprintf("%s%s", strings.TrimSpace(prefix), tr(ctx, "internal_continua_completion_inferred_suffix", nil))
 		return &CompletionResult{Suggestion: suggestion, Line: line, Column: col}, nil
 	}
 
-	suggestion := "// continue: add your code here"
+	suggestion := tr(ctx, "internal_continua_completion_stub_placeholder", nil)
 	return &CompletionResult{Suggestion: suggestion, Line: line, Column: col}, nil
 }

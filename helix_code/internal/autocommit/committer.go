@@ -103,26 +103,28 @@ func (c *AutoCommitter) IsGitRepo() bool {
 // pipeline failure; the caller is expected to log + continue.
 func (c *AutoCommitter) MaybeCommit(ctx context.Context, cctx CommitContext) (CommitResult, error) {
 	// Step 1: per-call skip request takes precedence over everything.
+	// CONST-046: Reason is user-facing (returned to /git_auto_commit
+	// observers + zap log fields); resolved via tr().
 	if cctx.SkipRequested {
-		return CommitResult{Skipped: true, Reason: "per-edit skip requested"}, nil
+		return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_per_edit_skip_requested", nil)}, nil
 	}
 	// Backup: check Args for SkipParamKey:true.
 	if cctx.Args != nil {
 		if v, ok := cctx.Args[SkipParamKey].(bool); ok && v {
-			return CommitResult{Skipped: true, Reason: "per-edit skip via " + SkipParamKey}, nil
+			return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_per_edit_skip_via_param", map[string]any{"ParamKey": SkipParamKey})}, nil
 		}
 	}
 
 	// Step 2: enabled check — atomic.Bool.Load is the single
 	// re-entry point that observes /git_auto_commit on/off swaps.
 	if !c.enabled.Load() {
-		return CommitResult{Skipped: true, Reason: "auto-commit disabled"}, nil
+		return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_disabled", nil)}, nil
 	}
 
 	// Step 3: must be a git repo.
 	isRepo, _ := c.git.IsRepo(ctx)
 	if !isRepo {
-		return CommitResult{Skipped: true, Reason: "not a git repo"}, nil
+		return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_not_a_git_repo", nil)}, nil
 	}
 
 	// Step 4: check porcelain — clean tree means nothing to do.
@@ -131,7 +133,7 @@ func (c *AutoCommitter) MaybeCommit(ctx context.Context, cctx CommitContext) (Co
 		return CommitResult{}, fmt.Errorf("%w: status: %v", ErrCommitFailed, err)
 	}
 	if strings.TrimSpace(porcelain) == "" {
-		return CommitResult{Skipped: true, Reason: "no changes to commit"}, nil
+		return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_no_changes_to_commit", nil)}, nil
 	}
 
 	// Step 5: stage paths. If MutatedPaths is non-empty, add only
@@ -157,7 +159,7 @@ func (c *AutoCommitter) MaybeCommit(ctx context.Context, cctx CommitContext) (Co
 		// Race: porcelain showed dirt but diff is empty. Bail
 		// without committing. Possible on race with concurrent
 		// editor; rare in practice.
-		return CommitResult{Skipped: true, Reason: "no staged changes after add"}, nil
+		return CommitResult{Skipped: true, Reason: tr(ctx, "internal_autocommit_skipped_no_staged_changes_after_add", nil)}, nil
 	}
 
 	// Step 7: summarise.

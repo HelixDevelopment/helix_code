@@ -1,0 +1,42 @@
+# internal/autocommit i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/autocommit/ to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_autocommit_<area>_<short_description>.
+# All IDs prefixed with internal_autocommit_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-229 §11.4 anti-bluff sweep (2026-05-19): migrated 7 of the
+# most user-facing literals — the six CommitResult.Reason strings
+# returned to /git_auto_commit + post-Execute hook observers, plus
+# the deterministic-fallback commit-subject prefix that appears in
+# every git log line when the LLM provider is unavailable. Wrapped
+# internal error messages ("%w: status: %v" etc.) are developer-
+# facing — deferred to a future round (they only surface in zap
+# WARN logs, not in user-facing UI).
+
+internal_autocommit_skipped_per_edit_skip_requested:
+  other: "per-edit skip requested"
+
+internal_autocommit_skipped_per_edit_skip_via_param:
+  other: "per-edit skip via {{.ParamKey}}"
+
+internal_autocommit_skipped_disabled:
+  other: "auto-commit disabled"
+
+internal_autocommit_skipped_not_a_git_repo:
+  other: "not a git repo"
+
+internal_autocommit_skipped_no_changes_to_commit:
+  other: "no changes to commit"
+
+internal_autocommit_skipped_no_staged_changes_after_add:
+  other: "no staged changes after add"
+
+internal_autocommit_subject_auto_edit_prefix:
+  other: "Auto-edit: {{.ToolName}} on {{.Paths}}"
