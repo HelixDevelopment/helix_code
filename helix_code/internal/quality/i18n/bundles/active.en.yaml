@@ -1,0 +1,54 @@
+# internal/quality i18n bundle — active English (en) locale.
+#
+# Round-223 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# zero CONST-046 hardcoded-content violations in helix_code/internal/quality/
+# at HEAD. The package emits no user-facing narrative strings — only:
+#
+#   * Numeric quality-score thresholds (MinScore 70.0/90.0, LintScore
+#     floor 80.0, TestPassRate 1.0) — algorithmic constants consumed by
+#     gate.Check, not user-display content.
+#
+#   * Boolean gate flags (RequireBuild, RequireTests, RequireLint) —
+#     configuration toggles, not narrative.
+#
+#   * Struct-tag keys ("overall", "compilation", "test_pass_rate",
+#     "lint_score", "security", "details", "passed", "min_score",
+#     "require_build", "require_tests", "require_lint", "entries",
+#     "path") — JSON/YAML serialization keys consumed by downstream
+#     parsers as STABLE IDENTITY KEYS. Per round-158's hardware
+#     model-size-identifier precedent (see
+#     internal/hardware/i18n/bundles/active.en.yaml header), identity
+#     keys used in equality checks / parsing pipelines are explicitly
+#     OUT of scope for CONST-046. Translating them would silently
+#     rewrite the contract with any consuming JSON/YAML reader.
+#
+#   * Internal Details map keys ("build_error", "test_error",
+#     "test_output") — programmatic lookup keys consumed by callers,
+#     not displayed verbatim to end users.
+#
+#   * Wrapped-error technical strings ("create temp dir: %w", "write
+#     output: %w") — surfaced to logs / error chains for developers,
+#     not end-user UI narrative.
+#
+#   * Filesystem / process tokens ("quality-score-*", "main.go",
+#     "go.mod", "temp-quality", "go", "build", "test", "-o", "-count=1",
+#     "./...", "module %s\ngo 1.24\n") — exec.Command argv / file
+#     paths, NOT translatable content.
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_quality_<area>_<short_description>. All IDs prefixed with
+# internal_quality_ to avoid namespace collision when loaded into the
+# same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in scorer.go / gate.go / history.go — it exists purely to keep the
+# i18n surface live + ready for the first real migration target a
+# future round identifies (e.g. a CLI quality-report banner, a
+# gate-failure explanation surfaced to a developer dashboard).
+
+internal_quality_reserved_placeholder:
+  other: "RESERVED: internal/quality i18n bundle placeholder — no production caller (round-223 no-op infra)"
