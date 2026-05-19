@@ -46,7 +46,7 @@ func InitGlobalSecurityManager() error {
 			scanResults: make(map[string]*FeatureScanResult),
 			mutex:       sync.RWMutex{},
 		}
-		logger.Info("Global security manager initialized")
+		logger.Info("%s", tr(context.Background(), "internal_security_global_manager_initialized", nil))
 	})
 	return err
 }
@@ -89,7 +89,8 @@ func (sm *SecurityManager) ScanFeature(featureName string) (*FeatureScanResult, 
 }
 
 func (sm *SecurityManager) ScanFeatureContext(ctx context.Context, featureName string) (*FeatureScanResult, error) {
-	sm.logger.Info("Starting security scan for feature: %s", featureName)
+	sm.logger.Info("%s", tr(ctx, "internal_security_scan_starting",
+		map[string]any{"Feature": featureName}))
 
 	if featureName == "" {
 		return &FeatureScanResult{
@@ -124,7 +125,8 @@ func (sm *SecurityManager) ScanFeatureContext(ctx context.Context, featureName s
 		}
 		scanResult, err := scanner.Scan(ctx, featureName)
 		if err != nil {
-			sm.logger.Info("Scanner %s error: %v", scanner.Name(), err)
+			sm.logger.Info("%s", tr(ctx, "internal_security_scanner_error",
+				map[string]any{"Scanner": scanner.Name(), "Error": err.Error()}))
 			continue
 		}
 		anySucceeded = true
@@ -132,15 +134,16 @@ func (sm *SecurityManager) ScanFeatureContext(ctx context.Context, featureName s
 	}
 
 	if !anySucceeded {
-		sm.logger.Info("No security scanners available for: %s", featureName)
-		sm.logger.Info("Set SONARQUBE_URL/SONARQUBE_TOKEN or SNYK_TOKEN to enable security scanning")
+		sm.logger.Info("%s", tr(ctx, "internal_security_no_scanners_available",
+			map[string]any{"Feature": featureName}))
+		sm.logger.Info("%s", tr(ctx, "internal_security_no_scanners_hint", nil))
 		result := &FeatureScanResult{
 			FeatureName:     featureName,
 			Success:         false,
 			CanProceed:      true,
 			SecurityScore:   0,
 			Issues:          []interface{}{},
-			Recommendations: []string{"No security scanners configured"},
+			Recommendations: []string{tr(ctx, "internal_security_recommendation_no_scanners", nil)},
 			ScanTime:        time.Since(startTime),
 			Timestamp:       time.Now(),
 		}
@@ -156,7 +159,7 @@ func (sm *SecurityManager) ScanFeatureContext(ctx context.Context, featureName s
 	}
 
 	score := calculateScore(allIssues)
-	recs = append(recs, "Review and address all identified security issues")
+	recs = append(recs, tr(ctx, "internal_security_recommendation_review_issues", nil))
 
 	result := &FeatureScanResult{
 		FeatureName:     featureName,
@@ -173,7 +176,8 @@ func (sm *SecurityManager) ScanFeatureContext(ctx context.Context, featureName s
 	sm.scanResults[featureName] = result
 	sm.mutex.Unlock()
 
-	sm.logger.Info("Security scan completed for feature: %s, score: %d", featureName, score)
+	sm.logger.Info("%s", tr(ctx, "internal_security_scan_completed",
+		map[string]any{"Feature": featureName, "Score": score}))
 	return result, nil
 }
 
@@ -214,6 +218,6 @@ func (sm *SecurityManager) UpdateSecurityMetrics(critical, high int, score int) 
 	sm.highIssues = high
 	sm.securityScore = score
 
-	sm.logger.Info("Security metrics updated - Critical: %d, High: %d, Score: %d",
-		critical, high, score)
+	sm.logger.Info("%s", tr(context.Background(), "internal_security_metrics_updated",
+		map[string]any{"Critical": critical, "High": high, "Score": score}))
 }

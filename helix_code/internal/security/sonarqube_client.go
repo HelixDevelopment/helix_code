@@ -57,7 +57,8 @@ func (s *SonarQubeScanner) Scan(ctx context.Context, target string) (*ScanResult
 		Success:     err == nil,
 	}
 	if err != nil {
-		result.ErrText = fmt.Sprintf("sonar-scanner: %v", err)
+		result.ErrText = tr(ctx, "internal_security_sonar_scanner_error",
+			map[string]any{"Error": err.Error()})
 		result.Score = 100
 		return result, nil
 	}

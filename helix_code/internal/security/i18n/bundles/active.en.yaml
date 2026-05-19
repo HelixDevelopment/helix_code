@@ -1,0 +1,58 @@
+# internal/security i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/security/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_security_<area>_<short_description>.
+# All IDs prefixed with internal_security_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle. NOTE: this prefix distinguishes this package's
+# bundle from the root-level security/ submodule (round 130 scope)
+# which uses its own translator surface.
+#
+# Round-176 §11.4 anti-bluff sweep (2026-05-19): migrated 10 distinct
+# user-facing strings emitted by security.go and sonarqube_client.go
+# covering the SecurityManager lifecycle (init, scan start, scanner
+# errors, no-scanner-available + remediation hint, recommendations,
+# scan complete, metric updates) plus the sonar-scanner exec error
+# wrap.
+#
+# Scanner identity tokens ("Snyk", "SonarQube" returned by Name())
+# and environment-variable names (SONARQUBE_URL, SONARQUBE_TOKEN,
+# SNYK_TOKEN as keys) are NOT migrated — they are stable protocol /
+# configuration identifiers consumed by downstream code, not
+# user-facing display content. Migrating them would silently rewrite
+# identity tokens used in scanner dispatch + env-var lookup.
+
+internal_security_global_manager_initialized:
+  other: "Global security manager initialized"
+
+internal_security_scan_starting:
+  other: "Starting security scan for feature: {{.Feature}}"
+
+internal_security_scanner_error:
+  other: "Scanner {{.Scanner}} error: {{.Error}}"
+
+internal_security_no_scanners_available:
+  other: "No security scanners available for: {{.Feature}}"
+
+internal_security_no_scanners_hint:
+  other: "Set SONARQUBE_URL/SONARQUBE_TOKEN or SNYK_TOKEN to enable security scanning"
+
+internal_security_recommendation_no_scanners:
+  other: "No security scanners configured"
+
+internal_security_recommendation_review_issues:
+  other: "Review and address all identified security issues"
+
+internal_security_scan_completed:
+  other: "Security scan completed for feature: {{.Feature}}, score: {{.Score}}"
+
+internal_security_metrics_updated:
+  other: "Security metrics updated - Critical: {{.Critical}}, High: {{.High}}, Score: {{.Score}}"
+
+internal_security_sonar_scanner_error:
+  other: "sonar-scanner: {{.Error}}"
