@@ -14,10 +14,10 @@
 | HXC-002 | Round-74 residual LOGIC FAILs | Bug | Fixed (→ Fixed.md) | 2026-05-19 | All 3 components closed: HelixMemory (106), Planning (107), helix_agent (109) |
 | HXA-001 | helix_agent handler tests surfaced after round-109 fix | Bug | Fixed (→ Fixed.md) round 116 | 2026-05-19 | Closed: 4 tests fixed (da782d4) |
 | HXA-002 | helix_agent 3 build-failed packages (sibling debate API drift) | Bug | Queued — BLOCKED on cross-submodule coord | 2026-05-19 | digital.vasic.debate API changed; helix_agent consumers broken |
-| HXA-003 | venice TestGetCapabilities model-list drift (CONST-037) | Bug | Queued | 2026-05-19 | Hardcoded venice-uncensored no longer in API; needs LLMsVerifier dynamic lookup |
+| HXA-003 | venice TestGetCapabilities model-list drift (CONST-037) | Bug | Fixed (→ Fixed.md) round 190 | 2026-05-19 | Closed: structural assertion (NotEmpty + family-substring) + SKIP-OK fallback per CONST-035 (220eff0f) |
 | HXC-003 | CONST-046 migration backlog (57,329 violations, baselined, shrinking) | Feature | In progress | 2026-05-19 | Phase 4 (rounds 100+) actively migrating; audit-gate `--fail-on-new` enforced |
 | HXQ-001 | helix_qa intermittent TestPerformance flake (host-load-sensitive) | Bug | Queued — BLOCKED on operator | 2026-05-19 | Either loosen tolerance or gate behind HOST_LOAD_DEDICATED env var |
 
-**Counts**: 5 open (VEN-001 closed round 188; HXA-001 closed round 116; HXC-002/HXL-001/HXL-002 also closed) | 4 Bugs open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3 BLOCKED (VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)
+**Counts**: 4 open (VEN-001 closed round 188; HXA-001 closed round 116; HXA-003 closed round 190; HXC-002/HXL-001/HXL-002 also closed) | 3 Bugs open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 3 BLOCKED (VEN-002 + HXQ-001 operator + HXA-002 cross-submodule coord)
 
 *Last regenerated: 2026-05-19 (round 189 — prefix rename). See `docs/Issues.md` for full details + prefix convention table. PDF/HTML exports auto-regenerated via `scripts/regenerate-tracker-exports.sh`.*

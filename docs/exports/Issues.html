@@ -626,15 +626,25 @@ coordination required.</p>
 id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003
 (ex-ISSUE-011) — venice <code>TestGetCapabilities</code> model-list
 drift (CONST-037)</h2>
-<p><strong>Status:</strong> Queued — needs CONST-037 canonical-model
-wiring <strong>Type:</strong> Bug <strong>Discovered:</strong>
-2026-05-19 (round 109) <strong>Discovered-By:</strong> AI subagent
-<strong>Evidence:</strong> Test hardcodes <code>venice-uncensored</code>
-as expected model; Venice API no longer returns it. CONST-037 mandates
-LLMsVerifier as single source of truth for model metadata.
-<strong>Resolution path:</strong> Replace hardcoded expectation with
-LLMsVerifier dynamic lookup OR pin against a stable model that’s not
-subject to vendor list changes.</p>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
+<strong>Discovered-By:</strong> AI subagent <strong>Closed:</strong>
+2026-05-19 (round 190) <strong>Closure-Ref:</strong> helix_agent commit
+(round-190 venice CONST-037 model-list drift) + meta-repo pointer-bump
+<strong>Evidence:</strong> Test hardcoded
+<code>venice-uncensored</code>; Venice API returned 75 models with the
+family rotated to <code>venice-uncensored-1-2</code> /
+<code>venice-uncensored-role-play</code>. Per CONST-037 (LLMsVerifier is
+the single source of truth for model metadata) the assertion violated
+the no-hardcoded-list rule. <strong>Resolution:</strong>
+<code>helix_agent/internal/llm/providers/venice/venice_test.go::TestGetCapabilities</code>
+— replaced <code>assert.Contains(..., "venice-uncensored")</code> and
+<code>assert.Contains(..., "llama-3.3-70b")</code> with structural
+assertion: <code>NotEmpty(SupportedModels)</code> plus a substring scan
+for the <code>venice-uncensored*</code> family. SKIP-OK marker per
+CONST-035 fires if the entire family disappears (avoids false-positive
+PASS). Mutation-verified (revert → FAIL with the original drift, restore
+→ PASS).</p>
 <hr />
 <h2
 id="hxc-003-ex-issue-007-const-046-migration-backlog-57329-violations-baselined-shrinking">HXC-003

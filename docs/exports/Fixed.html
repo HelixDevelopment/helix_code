@@ -1021,8 +1021,16 @@ URLs probed = OK pre-fix, 100/100 = OK post-fix</td>
 </tr>
 </tbody>
 </table>
-<p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename
-annotation pass). Earlier closures (P0-P5 phases) tracked via
+<div class="line-block">2026-05-19 | HXA-003 (ex-ISSUE-011): venice
+<code>TestGetCapabilities</code> CONST-037 model-list drift | Bug |
+Fixed (→ Fixed.md) | 190 | helix_agent (round-190) + meta pointer-bump |
+Replaced hardcoded <code>venice-uncensored</code> +
+<code>llama-3.3-70b</code> literals with structural assertion (NotEmpty
++ <code>venice-uncensored*</code> family substring scan); SKIP-OK
+CONST-035 marker on full-family rotation; mutation-verified revert→FAIL
+/ restore→PASS |</div>
+<p><em>Last regenerated: 2026-05-19 (round 190 — HXA-003 closure).
+Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>

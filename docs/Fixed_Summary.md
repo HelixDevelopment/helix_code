@@ -8,7 +8,7 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 6 | `Fixed (→ Fixed.md)` |
+| Bug | 7 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
