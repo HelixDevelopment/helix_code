@@ -124,7 +124,11 @@ func TestEngine_StartSession_InvalidBank(t *testing.T) {
 
 	_, err = engine.StartSession(context.Background(), "test-session-2", []string{"web"}, []string{"/nonexistent/bank.yaml"}, false)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "bank not found")
+	// CONST-046 round-159: literal moved to i18n bundle; with the
+	// default NoopTranslator the message ID echoes verbatim. See
+	// translator_test.go for the paired-mutation sentinel-injection
+	// proof that this path goes through tr().
+	assert.Contains(t, err.Error(), "internal_helixqa_bank_not_found")
 }
 
 func TestEngine_CancelSession(t *testing.T) {
@@ -179,7 +183,11 @@ func TestEngine_CancelSession_NotFound(t *testing.T) {
 
 	err = engine.CancelSession("nonexistent")
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "not found")
+	// CONST-046 round-159: literal moved to i18n bundle; with the
+	// default NoopTranslator the message ID echoes verbatim. See
+	// translator_test.go for the paired-mutation sentinel-injection
+	// proof that this path goes through tr().
+	assert.Contains(t, err.Error(), "internal_helixqa_session_not_found")
 }
 
 func TestEngine_ListSessions(t *testing.T) {

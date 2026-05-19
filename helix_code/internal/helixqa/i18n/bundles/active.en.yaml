@@ -1,0 +1,41 @@
+# internal/helixqa i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/helixqa/ to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_helixqa_<area>_<short_description>.
+# All IDs prefixed with internal_helixqa_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-159 §11.4 anti-bluff sweep (2026-05-19): migrated the 8
+# user-facing error literals returned from the embedded QA wrapper —
+# the high-traffic guards on engine construction, session start,
+# session cancellation, report generation, and screenshot capture.
+# These are the strings that surface to API callers when the QA
+# subsystem is disabled, misconfigured, or asked to operate on an
+# unknown / missing artefact.
+
+internal_helixqa_qa_disabled:
+  other: "QA is disabled"
+
+internal_helixqa_config_build_failed:
+  other: "helixqa config build: {{.Err}}"
+
+internal_helixqa_session_id_required:
+  other: "session ID is required"
+
+internal_helixqa_bank_not_found:
+  other: "bank not found: {{.Bank}}"
+
+internal_helixqa_session_not_found:
+  other: "session {{.ID}} not found"
+
+internal_helixqa_no_report_available:
+  other: "no report available"
+
+internal_helixqa_parse_platforms_failed:
+  other: "parse platforms: {{.Err}}"

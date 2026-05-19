@@ -4,7 +4,7 @@ package helixqa
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
 	"strings"
 	"sync"
@@ -79,7 +79,11 @@ func NewEngine(cfg *config.Config) (*Engine, error) {
 	}
 	qaCfg, err := buildQAConfig(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("helixqa config build: %w", err)
+		// CONST-046: user-facing error literal resolved via tr().
+		// NewEngine has no caller-supplied context; Background is
+		// the canonical fallback per rounds 146..158.
+		msg := tr(context.Background(), "internal_helixqa_config_build_failed", map[string]any{"Err": err.Error()})
+		return nil, errors.New(msg)
 	}
 	return &Engine{
 		sessions:    make(map[string]*SessionState),
@@ -98,16 +102,18 @@ func (e *Engine) Enabled() bool {
 // StartSession begins a new QA session and returns its ID.
 func (e *Engine) StartSession(ctx context.Context, id string, platforms, banks []string, autonomous bool) (*SessionState, error) {
 	if !e.enabled {
-		return nil, fmt.Errorf("QA is disabled")
+		// CONST-046: tr() resolves the literal via the package-level
+		// Translator (NoopTranslator echoes the message ID).
+		return nil, errors.New(tr(ctx, "internal_helixqa_qa_disabled", nil))
 	}
 	if id == "" {
-		return nil, fmt.Errorf("session ID is required")
+		return nil, errors.New(tr(ctx, "internal_helixqa_session_id_required", nil))
 	}
 
 	// Validate banks exist
 	for _, bank := range banks {
 		if _, err := os.Stat(bank); err != nil {
-			return nil, fmt.Errorf("bank not found: %s", bank)
+			return nil, errors.New(tr(ctx, "internal_helixqa_bank_not_found", map[string]any{"Bank": bank}))
 		}
 	}
 
@@ -217,7 +223,9 @@ func (e *Engine) CancelSession(id string) error {
 	defer e.sessionMu.Unlock()
 	s, ok := e.sessions[id]
 	if !ok {
-		return fmt.Errorf("session %s not found", id)
+		// CONST-046: CancelSession has no caller-supplied context;
+		// Background is the canonical fallback per rounds 146..158.
+		return errors.New(tr(context.Background(), "internal_helixqa_session_not_found", map[string]any{"ID": id}))
 	}
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
@@ -252,7 +260,9 @@ func (e *Engine) EvidenceCollector(platform hqaConfig.Platform) *hqaEvidence.Col
 // GenerateReport creates a report for a completed session in the requested format.
 func (e *Engine) GenerateReport(state *SessionState, format string) ([]byte, string, error) {
 	if state == nil || state.Result == nil || state.Result.Report == nil {
-		return nil, "", fmt.Errorf("no report available")
+		// CONST-046: GenerateReport has no caller-supplied context;
+		// Background is the canonical fallback per rounds 146..158.
+		return nil, "", errors.New(tr(context.Background(), "internal_helixqa_no_report_available", nil))
 	}
 	rpt := reporter.New(
 		reporter.WithOutputDir(e.evidenceDir),
@@ -283,7 +293,9 @@ func (e *Engine) GenerateReport(state *SessionState, format string) ([]byte, str
 // CaptureScreenshot captures a standalone screenshot for the given platform.
 func (e *Engine) CaptureScreenshot(ctx context.Context, platform string, opts hqaScreenshot.CaptureOptions) (*hqaScreenshot.Result, error) {
 	if !e.enabled {
-		return nil, fmt.Errorf("QA is disabled")
+		// CONST-046: tr() resolves the literal via the package-level
+		// Translator (NoopTranslator echoes the message ID).
+		return nil, errors.New(tr(ctx, "internal_helixqa_qa_disabled", nil))
 	}
 	mgr := hqaScreenshot.NewManager(nil)
 	// Register all available engines
@@ -317,7 +329,10 @@ func buildQAConfig(cfg *config.Config) (*hqaConfig.Config, error) {
 	qc := cfg.QA
 	platforms, err := hqaConfig.ParsePlatforms(strings.Join(qc.Platforms, ","))
 	if err != nil {
-		return nil, fmt.Errorf("parse platforms: %w", err)
+		// CONST-046: buildQAConfig has no caller-supplied context;
+		// Background is the canonical fallback per rounds 146..158.
+		msg := tr(context.Background(), "internal_helixqa_parse_platforms_failed", map[string]any{"Err": err.Error()})
+		return nil, errors.New(msg)
 	}
 	banks := hqaConfig.ParseBanks(qc.BanksDir)
 	if len(banks) == 0 && qc.BanksDir != "" {
