@@ -2,6 +2,7 @@
 package fix
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -53,14 +54,15 @@ func FixAllCriticalSecurityIssues(projectPath string, criticalOnly bool) (*FixRe
 	}
 
 	// Initialize security manager
+	ctx := context.Background()
 	if err := security.InitGlobalSecurityManager(); err != nil {
-		return nil, fmt.Errorf("failed to initialize security manager: %v", err)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_fix_failed_init_security_manager", map[string]any{"Err": err.Error()}))
 	}
 
 	// Scan for security issues
 	scanResult, err := security.GetGlobalSecurityManager().ScanFeature("comprehensive_security_scan")
 	if err != nil {
-		return nil, fmt.Errorf("failed to perform security scan: %v", err)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_fix_failed_perform_security_scan", map[string]any{"Err": err.Error()}))
 	}
 
 	result.TotalIssues = len(scanResult.Issues)
@@ -159,10 +161,11 @@ func attemptFix(projectPath string, issue interface{}) bool {
 }
 
 func fixHardcodedSecret(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix hardcoded secret: %s", issue)
 	files, err := findGoFiles(projectPath)
 	if err != nil {
-		logger.Error("Failed to find Go files: %v", err)
+		logger.Error("%s", tr(ctx, "internal_fix_failed_find_go_files", map[string]any{"Err": err.Error()}))
 		return false
 	}
 
@@ -176,7 +179,7 @@ func fixHardcodedSecret(projectPath, issue string, logger *logging.Logger) bool 
 		if strings.Contains(contentStr, "password") || strings.Contains(contentStr, "secret") ||
 			strings.Contains(contentStr, "api_key") || strings.Contains(contentStr, "token") {
 			if strings.Contains(contentStr, "= \"") && !strings.Contains(contentStr, "os.Getenv") {
-				logger.Warn("Hardcoded credential found in %s - requires manual review", file)
+				logger.Warn("%s", tr(ctx, "internal_fix_hardcoded_credential_found", map[string]any{"File": file}))
 				return false
 			}
 		}
@@ -187,10 +190,11 @@ func fixHardcodedSecret(projectPath, issue string, logger *logging.Logger) bool 
 }
 
 func fixSQLInjection(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix SQL injection: %s", issue)
 	files, err := findGoFiles(projectPath)
 	if err != nil {
-		logger.Error("Failed to find Go files: %v", err)
+		logger.Error("%s", tr(ctx, "internal_fix_failed_find_go_files", map[string]any{"Err": err.Error()}))
 		return false
 	}
 
@@ -202,11 +206,11 @@ func fixSQLInjection(projectPath, issue string, logger *logging.Logger) bool {
 
 		contentStr := string(content)
 		if strings.Contains(contentStr, "fmt.Sprintf") && strings.Contains(contentStr, "SELECT") {
-			logger.Warn("Potential SQL injection via fmt.Sprintf in %s - requires manual review", file)
+			logger.Warn("%s", tr(ctx, "internal_fix_sql_injection_sprintf", map[string]any{"File": file}))
 			return false
 		}
 		if strings.Contains(contentStr, "+") && strings.Contains(contentStr, "SELECT") {
-			logger.Warn("Potential SQL injection via string concat in %s - requires manual review", file)
+			logger.Warn("%s", tr(ctx, "internal_fix_sql_injection_concat", map[string]any{"File": file}))
 			return false
 		}
 	}
@@ -216,10 +220,11 @@ func fixSQLInjection(projectPath, issue string, logger *logging.Logger) bool {
 }
 
 func fixPathTraversal(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix path traversal: %s", issue)
 	files, err := findGoFiles(projectPath)
 	if err != nil {
-		logger.Error("Failed to find Go files: %v", err)
+		logger.Error("%s", tr(ctx, "internal_fix_failed_find_go_files", map[string]any{"Err": err.Error()}))
 		return false
 	}
 
@@ -232,7 +237,7 @@ func fixPathTraversal(projectPath, issue string, logger *logging.Logger) bool {
 		contentStr := string(content)
 		if strings.Contains(contentStr, "os.Open") || strings.Contains(contentStr, "ioutil.ReadFile") {
 			if strings.Contains(contentStr, "..") || !strings.Contains(contentStr, "filepath.Clean") {
-				logger.Warn("Potential path traversal in %s - requires manual review", file)
+				logger.Warn("%s", tr(ctx, "internal_fix_path_traversal_detected", map[string]any{"File": file}))
 				return false
 			}
 		}
@@ -243,14 +248,16 @@ func fixPathTraversal(projectPath, issue string, logger *logging.Logger) bool {
 }
 
 func fixXSS(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix XSS: %s", issue)
-	logger.Warn("XSS fix requires manual review of HTML templates and output encoding")
+	logger.Warn("%s", tr(ctx, "internal_fix_xss_manual_review_required", nil))
 	return false
 }
 
 func fixCSRF(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix CSRF: %s", issue)
-	logger.Warn("CSRF fix requires manual implementation of CSRF tokens")
+	logger.Warn("%s", tr(ctx, "internal_fix_csrf_manual_review_required", nil))
 	return false
 }
 
@@ -267,10 +274,11 @@ func fixMissingAuth(projectPath, issue string, logger *logging.Logger) bool {
 }
 
 func fixWeakCrypto(projectPath, issue string, logger *logging.Logger) bool {
+	ctx := context.Background()
 	logger.Info("Attempting to fix weak crypto: %s", issue)
 	files, err := findGoFiles(projectPath)
 	if err != nil {
-		logger.Error("Failed to find Go files: %v", err)
+		logger.Error("%s", tr(ctx, "internal_fix_failed_find_go_files", map[string]any{"Err": err.Error()}))
 		return false
 	}
 
@@ -299,9 +307,10 @@ func validateFixes(projectPath string) (*FixValidationResult, error) {
 	logger.Info("Validating security fixes...")
 
 	// Perform post-fix security scan
+	ctx := context.Background()
 	validationScan, err := security.GetGlobalSecurityManager().ScanFeature("post_fix_validation")
 	if err != nil {
-		return nil, fmt.Errorf("validation scan failed: %v", err)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_fix_validation_scan_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	result := &FixValidationResult{

@@ -1214,9 +1214,12 @@ func TestAutonomyError(t *testing.T) {
 		if !contains(errStr, "test_operation") {
 			t.Errorf("Error() = %s, should contain operation", errStr)
 		}
-		// Mode is displayed with its description, e.g. "Semi Auto (Automated with Approval)"
-		if !contains(errStr, "Semi Auto") {
-			t.Errorf("Error() = %s, should contain mode", errStr)
+		// Mode is displayed via the CONST-046 i18n seam (round-185
+		// migration). With no translator wired, NoopTranslator echoes
+		// the message ID — assert against the message-ID form so the
+		// test is locale-independent and survives bundle changes.
+		if !contains(errStr, "internal_workflow_mode_semi_auto_label") {
+			t.Errorf("Error() = %s, should contain mode message ID", errStr)
 		}
 	})
 

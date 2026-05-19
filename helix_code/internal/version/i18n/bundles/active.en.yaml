@@ -1,0 +1,41 @@
+# internal/version i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/version/version.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_version_<area>_<short_description>. All
+# IDs prefixed with internal_version_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle (e.g. cmd/server `server_*`, internal/server
+# `internal_server_*`, helix_config `helix_config_*`).
+#
+# Round-183 §11.4 anti-bluff sweep (2026-05-19, CONST-046 Phase 4
+# round 76): migrated the two user-facing format strings emitted by
+# version.go — GetVersion's "<semver>-<short-sha>" composition and
+# GetFullVersion's "HelixCode <semver> (commit: <sha>, built: <date>,
+# go: <goversion>)" banner. The default-value sentinels (Version =
+# "0.1.0", GitCommit = "dev", BuildDate = "unknown") remain
+# untouched: they are ldflag-injection placeholders, not user-facing
+# content per CONST-046, and migrating them would conflict with the
+# build-time -X dev.helix.code/internal/version.Version=... wiring
+# documented in doc.go and the inner Makefile. The map keys returned
+# by GetBuildInfo (version/commit/build_date/go_version/os/arch) are
+# stable JSON/CLI field identifiers, not localised text, and stay
+# unchanged to preserve the GetBuildInfo public contract verified by
+# version_test.go.
+
+# GetVersion: rendered when a non-"dev" GitCommit longer than 7 chars
+# is present. Placeholders: {{.Version}} (semver), {{.ShortCommit}}
+# (first 7 chars of GitCommit). Example output: "1.2.3-abc1234".
+internal_version_short_with_commit:
+  other: "{{.Version}}-{{.ShortCommit}}"
+
+# GetFullVersion: detailed banner suitable for CLI `--version`
+# output and HTTP /health responses. Placeholders: {{.Version}}
+# (semver), {{.Commit}} (full git SHA), {{.BuildDate}} (RFC3339 build
+# timestamp), {{.GoVersion}} (output of runtime.Version()).
+internal_version_full_version_banner:
+  other: "HelixCode {{.Version}} (commit: {{.Commit}}, built: {{.BuildDate}}, go: {{.GoVersion}})"

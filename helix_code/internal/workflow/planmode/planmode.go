@@ -219,7 +219,7 @@ func (w *PlanModeWorkflow) ExecuteWithProgress(
 ) (*ExecutionResult, error) {
 	progress := &WorkflowProgress{
 		Phase:  "Planning",
-		Status: "Generating options",
+		Status: tr(ctx, "internal_workflow_planmode_status_generating_options", nil),
 	}
 	progressFn(progress)
 
@@ -239,7 +239,7 @@ func (w *PlanModeWorkflow) ExecuteWithProgress(
 	planID := uuid.New().String()
 	w.stateManager.StoreOptions(planID, options)
 
-	progress.Status = "Presenting options"
+	progress.Status = tr(ctx, "internal_workflow_planmode_status_presenting_options", nil)
 	progress.OptionsCount = len(options)
 	progressFn(progress)
 
@@ -260,7 +260,7 @@ func (w *PlanModeWorkflow) ExecuteWithProgress(
 
 	// Phase 2: Execution
 	progress.Phase = "Execution"
-	progress.Status = "Preparing execution"
+	progress.Status = tr(ctx, "internal_workflow_planmode_status_preparing_execution", nil)
 	progressFn(progress)
 
 	if err := w.controller.TransitionTo(ModeAct); err != nil {
@@ -284,7 +284,7 @@ func (w *PlanModeWorkflow) ExecuteWithProgress(
 	w.stateManager.StoreExecution(result)
 
 	progress.Phase = "Completed"
-	progress.Status = "Plan executed successfully"
+	progress.Status = tr(ctx, "internal_workflow_planmode_status_plan_executed_successfully", nil)
 	progressFn(progress)
 
 	w.controller.TransitionTo(ModeNormal)

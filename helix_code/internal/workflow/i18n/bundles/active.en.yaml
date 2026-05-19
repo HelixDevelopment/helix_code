@@ -1,0 +1,50 @@
+# internal/workflow i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/workflow/**/*.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_workflow_<area>_<short_description>.
+# All IDs prefixed with internal_workflow_ to avoid namespace
+# collision with other submodules' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-185 §11.4 anti-bluff sweep (2026-05-19, CONST-046 Phase 4
+# round 78): 10 highest-impact user-facing strings migrated —
+# autonomy-mode display labels (6) shown to every CLI/TUI/desktop
+# user toggling autonomy, plus plan-mode execution-progress phase
+# labels (4) that stream live to the same surfaces during plan
+# execution. Both classes are user-observable text and must adapt
+# to caller locale per CONST-046.
+
+internal_workflow_mode_none_label:
+  other: "None (Manual Control)"
+
+internal_workflow_mode_basic_label:
+  other: "Basic (Manual Steps)"
+
+internal_workflow_mode_basic_plus_label:
+  other: "Basic Plus (Smart Semi-Automation)"
+
+internal_workflow_mode_semi_auto_label:
+  other: "Semi Auto (Automated with Approval)"
+
+internal_workflow_mode_full_auto_label:
+  other: "Full Auto (Fully Autonomous)"
+
+internal_workflow_mode_unknown_label:
+  other: "Unknown"
+
+internal_workflow_planmode_status_generating_options:
+  other: "Generating options"
+
+internal_workflow_planmode_status_presenting_options:
+  other: "Presenting options"
+
+internal_workflow_planmode_status_preparing_execution:
+  other: "Preparing execution"
+
+internal_workflow_planmode_status_plan_executed_successfully:
+  other: "Plan executed successfully"

@@ -1,6 +1,9 @@
 package autonomy
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // AutonomyMode represents the level of AI autonomy
 type AutonomyMode string
@@ -148,21 +151,27 @@ func (m AutonomyMode) Level() int {
 	}
 }
 
-// String returns a human-readable string for the mode
+// String returns a human-readable string for the mode. Resolves
+// against the CONST-046 i18n seam (internal_workflow_mode_*_label)
+// so display labels adapt to the caller's locale at boot-time-wired
+// translator state. When no translator is wired (tests, early-boot),
+// the NoopTranslator echoes the message ID verbatim — loud failure
+// mode rather than silent wrong-locale display.
 func (m AutonomyMode) String() string {
+	ctx := context.Background()
 	switch m {
 	case ModeNone:
-		return "None (Manual Control)"
+		return tr(ctx, "internal_workflow_mode_none_label", nil)
 	case ModeBasic:
-		return "Basic (Manual Steps)"
+		return tr(ctx, "internal_workflow_mode_basic_label", nil)
 	case ModeBasicPlus:
-		return "Basic Plus (Smart Semi-Automation)"
+		return tr(ctx, "internal_workflow_mode_basic_plus_label", nil)
 	case ModeSemiAuto:
-		return "Semi Auto (Automated with Approval)"
+		return tr(ctx, "internal_workflow_mode_semi_auto_label", nil)
 	case ModeFullAuto:
-		return "Full Auto (Fully Autonomous)"
+		return tr(ctx, "internal_workflow_mode_full_auto_label", nil)
 	default:
-		return "Unknown"
+		return tr(ctx, "internal_workflow_mode_unknown_label", nil)
 	}
 }
 

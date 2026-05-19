@@ -1,0 +1,52 @@
+# internal/fix i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/fix/fix.go to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_fix_<area>_<short_description>. All IDs
+# prefixed with internal_fix_ to avoid namespace collision with other
+# packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-187 §11.4 anti-bluff sweep (2026-05-19, CONST-046 Phase 4
+# round 80): migrated 10 of the highest-impact user-facing literals
+# emitted by fix.go — the two fmt.Errorf wrapped errors from
+# FixAllCriticalSecurityIssues, the logger.Error("Failed to find Go
+# files") echoed across four detector helpers, the four
+# remediation-guidance "requires manual review" warnings shown to
+# the developer in the security-fix report, and the validateFixes
+# fmt.Errorf wrap. Remaining logger.Info/Warn lines (Attempting to
+# fix..., Successfully fixed issue, No obvious patterns, etc.) are
+# deferred to a future round to stay under the §11.4 size cap.
+
+internal_fix_failed_init_security_manager:
+  other: "failed to initialize security manager: {{.Err}}"
+
+internal_fix_failed_perform_security_scan:
+  other: "failed to perform security scan: {{.Err}}"
+
+internal_fix_failed_find_go_files:
+  other: "Failed to find Go files: {{.Err}}"
+
+internal_fix_hardcoded_credential_found:
+  other: "Hardcoded credential found in {{.File}} - requires manual review"
+
+internal_fix_sql_injection_sprintf:
+  other: "Potential SQL injection via fmt.Sprintf in {{.File}} - requires manual review"
+
+internal_fix_sql_injection_concat:
+  other: "Potential SQL injection via string concat in {{.File}} - requires manual review"
+
+internal_fix_path_traversal_detected:
+  other: "Potential path traversal in {{.File}} - requires manual review"
+
+internal_fix_xss_manual_review_required:
+  other: "XSS fix requires manual review of HTML templates and output encoding"
+
+internal_fix_csrf_manual_review_required:
+  other: "CSRF fix requires manual implementation of CSRF tokens"
+
+internal_fix_validation_scan_failed:
+  other: "validation scan failed: {{.Err}}"
