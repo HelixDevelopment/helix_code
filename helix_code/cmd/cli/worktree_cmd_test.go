@@ -67,7 +67,16 @@ func TestRunWorktreeRemove_Works(t *testing.T) {
 	assert.True(t, os.IsNotExist(statErr))
 }
 
+// TestRunWorktreeEnter_PrintsHelpAndErrors / ...Exit... — round-311: the
+// stateful-subcommand help lines route through the i18n seam. The shared
+// round311TestTranslator (i18n_test_translator_test.go) resolves the
+// round-311 worktree IDs to their bundle text so these assertions check
+// the real user-facing content rather than raw message IDs.
 func TestRunWorktreeEnter_PrintsHelpAndErrors(t *testing.T) {
+	prev := translator
+	SetTranslator(round311TestTranslator{})
+	defer func() { translator = prev }()
+
 	var buf bytes.Buffer
 	err := runWorktreeEnter(&buf, "feature-x", "")
 	assert.Error(t, err, "stateful subcommand must error from CLI")
@@ -76,6 +85,10 @@ func TestRunWorktreeEnter_PrintsHelpAndErrors(t *testing.T) {
 }
 
 func TestRunWorktreeExit_PrintsHelpAndErrors(t *testing.T) {
+	prev := translator
+	SetTranslator(round311TestTranslator{})
+	defer func() { translator = prev }()
+
 	var buf bytes.Buffer
 	err := runWorktreeExit(&buf)
 	assert.Error(t, err)

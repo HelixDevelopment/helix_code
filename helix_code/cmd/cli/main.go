@@ -100,6 +100,19 @@ func tr(ctx context.Context, msgID string, data map[string]any) string {
 	return out
 }
 
+// trc is the CONST-046 resolver for strings that are needed at cobra
+// command-construction time (Short / Long descriptions, flag-help text)
+// — points where no request-scoped context.Context is available. It
+// resolves against context.Background() through the same package-level
+// translator the runtime tr() helper uses, so cobra metadata is just as
+// locale-aware as runtime output. The package-level translator is wired
+// via SetTranslator before main() builds the cobra tree, so trc() sees a
+// real Translator in production and i18n.NoopTranslator{} (loud message-
+// ID echo) in unit tests that build commands without wiring one.
+func trc(msgID string, data map[string]any) string {
+	return tr(context.Background(), msgID, data)
+}
+
 // defaultConfigPathFromEnv resolves the on-disk wizard config path using the
 // supplied env-lookup. Mirrors internal/llm.defaultWizardConfigPath but lives
 // here so cmd/cli does not need to import an unexported helper. Honours
@@ -438,7 +451,10 @@ func (c *CLI) Run() error {
 	flag.Parse()
 
 	// Debug: print flag values
-	fmt.Fprintf(os.Stderr, "Flags parsed: listWorkers=%v, nonInteractive=%v\n", *listWorkers, *nonInteractive)
+	fmt.Fprintln(os.Stderr, trc("cli_debug_flags_parsed", map[string]any{
+		"ListWorkers":    fmt.Sprintf("%v", *listWorkers),
+		"NonInteractive": fmt.Sprintf("%v", *nonInteractive),
+	}))
 
 	ctx := context.Background()
 
@@ -964,8 +980,10 @@ func (c *CLI) Run() error {
 		if err := resumeMgr.Resume(ctx, *resumeSessionFlag); err != nil {
 			return fmt.Errorf("resume session %s: %w", *resumeSessionFlag, err)
 		}
-		fmt.Fprintf(os.Stderr, "Resumed session %s (%d messages).\n",
-			resumeMgr.CurrentID(), resumeMgr.LoadedMessageCountForTestF11())
+		fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed", map[string]any{
+			"ID":    resumeMgr.CurrentID(),
+			"Count": resumeMgr.LoadedMessageCountForTestF11(),
+		}))
 	} else if *resumeFlag || *continueFlag {
 		mode := session.ResumeProject
 		scope := currentProject
@@ -975,15 +993,17 @@ func (c *CLI) Run() error {
 		}
 		target, ferr := resumeFinder.FindResumeTarget(ctx, mode, scope)
 		if ferr != nil {
-			fmt.Fprintf(os.Stderr, "No resumable session found (%v); starting fresh.\n", ferr)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_no_resumable",
+				map[string]any{"Error": fmt.Sprintf("%v", ferr)}))
 		} else {
 			if err := resumeMgr.Resume(ctx, target.SessionID); err != nil {
 				return fmt.Errorf("resume session %s: %w", target.SessionID, err)
 			}
-			fmt.Fprintf(os.Stderr, "Resumed session %s (%d messages, last active %s).\n",
-				resumeMgr.CurrentID(),
-				resumeMgr.LoadedMessageCountForTestF11(),
-				target.LastActivity.Format("2006-01-02 15:04:05"))
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed_active", map[string]any{
+				"ID":         resumeMgr.CurrentID(),
+				"Count":      resumeMgr.LoadedMessageCountForTestF11(),
+				"LastActive": target.LastActivity.Format("2006-01-02 15:04:05"),
+			}))
 		}
 	}
 
@@ -1011,10 +1031,7 @@ func (c *CLI) Run() error {
 	switch {
 	case errors.Is(selErr, llm.ErrNoProviderConfigured):
 		// Friendly hint, then keep the default provider.
-		fmt.Fprintln(os.Stderr,
-			"F12 provider: no cloud provider configured. "+
-				"Run `helixcode wizard` or set HELIX_LLM_PROVIDER. "+
-				"Continuing with the default local provider.")
+		fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_no_cloud_provider", nil))
 	case selErr != nil:
 		// User typed an unknown value -> fail loudly. This is non-zero exit
 		// because it's an explicit, fixable user error.
@@ -1028,9 +1045,10 @@ func (c *CLI) Run() error {
 		entry.Type = ptype
 		cloud, cErr := llm.NewCloudProvider(ptype, entry)
 		if cErr != nil {
-			fmt.Fprintf(os.Stderr,
-				"F12 provider: failed to construct %q (%v); "+
-					"falling back to default local provider.\n", ptype, cErr)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_construct_failed", map[string]any{
+				"Provider": fmt.Sprintf("%q", ptype),
+				"Error":    fmt.Sprintf("%v", cErr),
+			}))
 		} else if cloud != nil {
 			c.llmProvider = cloud
 			fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
@@ -1294,8 +1312,12 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 		providerModels := c.llmProvider.GetModels()
 		if len(providerModels) > 0 {
 			for _, m := range providerModels {
-				fmt.Printf("ID: %s\n  Name: %s\n  Provider: %s\n  Context Size: %d\n  Status: available\n\n",
-					m.ID, m.Name, m.Provider, m.ContextSize)
+				fmt.Printf("%s\n\n", tr(ctx, "cli_model_info_provider", map[string]any{
+					"ID":          m.ID,
+					"Name":        m.Name,
+					"Provider":    m.Provider,
+					"ContextSize": m.ContextSize,
+				}))
 			}
 			return nil
 		}
@@ -1320,8 +1342,14 @@ func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
 			status = "⏳ rate-limited"
 		}
 		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
-		fmt.Printf("ID: %s\n  Name: %s\n  Provider: %s\n  Score: %s\n  Context Size: %d\n  Status: %s\n\n",
-			m.ID, m.DisplayName, m.Provider, scoreStr, m.ContextSize, status)
+		fmt.Printf("%s\n\n", trc("cli_model_info_verified", map[string]any{
+			"ID":          m.ID,
+			"Name":        m.DisplayName,
+			"Provider":    m.Provider,
+			"Score":       scoreStr,
+			"ContextSize": m.ContextSize,
+			"Status":      status,
+		}))
 	}
 }
 
@@ -1333,9 +1361,10 @@ func (c *CLI) handleHealthCheck(ctx context.Context) error {
 	// Check worker pool
 	stats := c.workerPool.GetWorkerStats(ctx)
 	if stats.HealthyWorkers > 0 {
-		fmt.Printf("✅ Worker Pool: %d healthy workers\n", stats.HealthyWorkers)
+		fmt.Printf("✅ %s\n", tr(ctx, "cli_health_worker_pool_ok",
+			map[string]any{"Count": stats.HealthyWorkers}))
 	} else {
-		fmt.Printf("⚠️ Worker Pool: No healthy workers\n")
+		fmt.Printf("⚠️ %s\n", tr(ctx, "cli_health_worker_pool_none", nil))
 	}
 
 	// Check notification engine
@@ -1350,9 +1379,10 @@ func (c *CLI) handleHealthCheck(ctx context.Context) error {
 	}
 
 	if enabledChannels > 0 {
-		fmt.Printf("✅ Notification System: %d enabled channels\n", enabledChannels)
+		fmt.Printf("✅ %s\n", tr(ctx, "cli_health_notification_ok",
+			map[string]any{"Count": enabledChannels}))
 	} else {
-		fmt.Printf("⚠️ Notification System: No enabled channels\n")
+		fmt.Printf("⚠️ %s\n", tr(ctx, "cli_health_notification_none", nil))
 	}
 
 	fmt.Printf("✅ %s\n", tr(ctx, "cli_health_operational", nil))
@@ -1555,7 +1585,9 @@ func printGenerationStats(resp *llm.LLMResponse) {
 		// Provider didn't populate any telemetry; don't fabricate it.
 		return
 	}
-	fmt.Printf("\n📊 tokens: in=%d out=%d total=%d", in, out, in+out)
+	fmt.Printf("\n📊 %s", trc("cli_tokens_summary", map[string]any{
+		"In": in, "Out": out, "Total": in + out,
+	}))
 	if resp.ProcessingTime > 0 {
 		fmt.Printf("   time: %s", resp.ProcessingTime.Round(time.Millisecond))
 		if out > 0 && resp.ProcessingTime.Seconds() > 0 {
@@ -1616,9 +1648,9 @@ func expandAtMentions(prompt *string) []string {
 			blocks = append(blocks, fmt.Sprintf(
 				`<file path=%q size_bytes=%d>%s</file>`,
 				path, info.Size(),
-				"... [skipped: file exceeds 256 KiB context cap; show a subset with `head` / `grep` first]",
+				trc("cli_file_skipped_too_large", nil),
 			))
-			attached = append(attached, path+" (skipped: too large)")
+			attached = append(attached, path+trc("cli_file_skipped_label", nil))
 			continue
 		}
 		body, err := os.ReadFile(path)
@@ -1823,7 +1855,7 @@ func (c *CLI) handleNotification(ctx context.Context, message, notifyType, prior
 		return fmt.Errorf("failed to send notification: %v", err)
 	}
 
-	fmt.Printf("✅ Notification sent: %s\n", message)
+	fmt.Printf("✅ %s\n", tr(ctx, "cli_notification_sent", map[string]any{"Message": message}))
 	return nil
 }
 
@@ -1841,7 +1873,8 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 		return fmt.Errorf("command failed: %w", err)
 	}
 
-	fmt.Printf("\n✅ Command completed (exit code: %d)\n", cmd.ProcessState.ExitCode())
+	fmt.Printf("\n✅ %s\n", tr(ctx, "cli_command_completed",
+		map[string]any{"ExitCode": cmd.ProcessState.ExitCode()}))
 	return nil
 }
 
@@ -1865,7 +1898,10 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 	fmt.Println(tr(ctx, "cli_repl_intro", nil))
 	if c.llmProvider != nil {
 		if models := c.llmProvider.GetModels(); len(models) > 0 {
-			fmt.Printf("Provider: %s   Default model: %s\n", c.llmProvider.GetName(), models[0].Name)
+			fmt.Println(tr(ctx, "cli_provider_default_model", map[string]any{
+				"Provider": c.llmProvider.GetName(),
+				"Model":    models[0].Name,
+			}))
 		}
 	}
 
@@ -1940,8 +1976,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 
 		// Plain text: send as LLM prompt (the core REPL contract).
 		if c.llmProvider == nil {
-			fmt.Println("No LLM provider configured — set HELIX_LLM_PROVIDER or run `wizard`. " +
-				"Slash commands (/workers, /models, /health, /exit) still work.")
+			fmt.Println(tr(ctx, "cli_repl_no_provider", nil))
 			continue
 		}
 
@@ -2279,7 +2314,11 @@ func (c *CLI) handleQAScreenshot(ctx context.Context, serverURL, sessionID strin
 	if err := os.WriteFile(filename, data, 0644); err != nil {
 		return err
 	}
-	fmt.Printf("Screenshot saved: %s (%d bytes, platform=%s)\n", filename, len(data), meta["platform"])
+	fmt.Println(tr(ctx, "cli_screenshot_saved", map[string]any{
+		"Filename": filename,
+		"Bytes":    len(data),
+		"Platform": fmt.Sprintf("%v", meta["platform"]),
+	}))
 	return nil
 }
 
@@ -2288,6 +2327,6 @@ func (c *CLI) handleQACancel(ctx context.Context, serverURL, sessionID string) e
 	if err := client.CancelQASession(sessionID); err != nil {
 		return fmt.Errorf("failed to cancel session: %w", err)
 	}
-	fmt.Printf("Session %s cancelled.\n", sessionID)
+	fmt.Println(tr(ctx, "cli_session_cancelled", map[string]any{"ID": sessionID}))
 	return nil
 }

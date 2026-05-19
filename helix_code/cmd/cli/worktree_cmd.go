@@ -15,7 +15,7 @@ import (
 func newWorktreeCommand(m *worktree.Manager) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "worktree",
-		Short: "Manage HelixCode-tracked git worktrees",
+		Short: trc("cli_worktree_root_short", nil),
 	}
 	cmd.AddCommand(newWorktreeListCommand(m))
 	cmd.AddCommand(newWorktreeEnterCommand())
@@ -27,7 +27,7 @@ func newWorktreeCommand(m *worktree.Manager) *cobra.Command {
 func newWorktreeListCommand(m *worktree.Manager) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "List helix-managed worktrees under .helix-worktrees/",
+		Short: trc("cli_worktree_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWorktreeList(os.Stdout, m)
 		},
@@ -37,7 +37,7 @@ func newWorktreeListCommand(m *worktree.Manager) *cobra.Command {
 func newWorktreeRemoveCommand(m *worktree.Manager) *cobra.Command {
 	return &cobra.Command{
 		Use:   "remove <name>",
-		Short: "Remove a helix-managed worktree",
+		Short: trc("cli_worktree_remove_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWorktreeRemove(m, args[0])
@@ -91,15 +91,15 @@ func runWorktreeRemove(m *worktree.Manager, name string) error {
 }
 
 func runWorktreeEnter(out io.Writer, name, baseBranch string) error {
-	fmt.Fprintln(out, "`helixcode worktree enter` is a stateful operation.")
-	fmt.Fprintln(out, "Run it from inside a `helixcode chat` session via the agent's EnterWorktree tool")
-	fmt.Fprintln(out, "or the /worktree slash command. The CLI subcommand cannot persist worktree state across invocations.")
+	fmt.Fprintln(out, trc("cli_worktree_enter_stateful_l1", nil))
+	fmt.Fprintln(out, trc("cli_worktree_enter_stateful_l2", nil))
+	fmt.Fprintln(out, trc("cli_worktree_stateful_l3", nil))
 	return fmt.Errorf("stateful subcommand: use from inside helixcode chat")
 }
 
 func runWorktreeExit(out io.Writer) error {
-	fmt.Fprintln(out, "`helixcode worktree exit` is a stateful operation.")
-	fmt.Fprintln(out, "Run it from inside a `helixcode chat` session via the agent's ExitWorktree tool")
-	fmt.Fprintln(out, "or the /worktree slash command. The CLI subcommand cannot persist worktree state across invocations.")
+	fmt.Fprintln(out, trc("cli_worktree_exit_stateful_l1", nil))
+	fmt.Fprintln(out, trc("cli_worktree_exit_stateful_l2", nil))
+	fmt.Fprintln(out, trc("cli_worktree_stateful_l3", nil))
 	return fmt.Errorf("stateful subcommand: use from inside helixcode chat")
 }

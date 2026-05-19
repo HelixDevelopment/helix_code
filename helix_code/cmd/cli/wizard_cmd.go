@@ -81,10 +81,8 @@ func newWizardCmd(deps wizardCmdDeps) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "wizard",
-		Short: "First-run setup for cloud LLM providers (Anthropic / Bedrock / Vertex / Azure)",
-		Long: "Launch the interactive provider-setup wizard, or use --provider with the\n" +
-			"per-provider flags to write a config without TUI input. The resulting\n" +
-			"YAML is saved to $XDG_CONFIG_HOME/helixcode/llm.yaml with mode 0600.",
+		Short: trc("cli_wizard_short", nil),
+		Long:  trc("cli_wizard_long", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWizardCmd(cmd.Context(), deps, wizardCmdFlags{
 				Provider:   providerFlag,
@@ -99,16 +97,15 @@ func newWizardCmd(deps wizardCmdDeps) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&providerFlag, "provider", "",
-		"non-interactive: provider type "+
-			"(anthropic|bedrock|vertexai|azure|groq|openai|gemini|openrouter|xai|qwen|copilot|mistral|deepseek|ollama|llamacpp)")
+		trc("cli_wizard_provider_flag", nil))
 	cmd.Flags().StringVar(&apiKeyFlag, "api-key", "",
-		"API key (anthropic, azure, groq, openai, gemini, openrouter, xai, qwen, mistral, deepseek)")
-	cmd.Flags().StringVar(&regionFlag, "region", "", "AWS region (bedrock)")
+		trc("cli_wizard_apikey_flag", nil))
+	cmd.Flags().StringVar(&regionFlag, "region", "", trc("cli_wizard_region_flag", nil))
 	cmd.Flags().StringVar(&endpointFlag, "endpoint", "",
 		"endpoint URL (azure | ollama | llamacpp — defaults to provider-standard localhost)")
-	cmd.Flags().StringVar(&projectFlag, "project", "", "GCP project ID (vertexai)")
-	cmd.Flags().StringVar(&locationFlag, "location", "", "GCP location (vertexai)")
-	cmd.Flags().StringVar(&apiVersionFlag, "api-version", "", "API version (azure)")
+	cmd.Flags().StringVar(&projectFlag, "project", "", trc("cli_wizard_project_flag", nil))
+	cmd.Flags().StringVar(&locationFlag, "location", "", trc("cli_wizard_location_flag", nil))
+	cmd.Flags().StringVar(&apiVersionFlag, "api-version", "", trc("cli_wizard_apiversion_flag", nil))
 	cmd.Flags().BoolVar(&forceFlag, "force", false, "overwrite existing config without prompting")
 	return cmd
 }
@@ -168,7 +165,7 @@ func runWizardCmd(ctx context.Context, deps wizardCmdDeps, flags wizardCmdFlags)
 		return fmt.Errorf("wizard: %w", err)
 	}
 	if result == nil || result.Cancelled {
-		fmt.Fprintln(stdout, "wizard cancelled; no changes written.")
+		fmt.Fprintln(stdout, tr(ctx, "cli_wizard_cancelled", nil))
 		return nil
 	}
 
@@ -193,13 +190,14 @@ func runWizardCmd(ctx context.Context, deps wizardCmdDeps, flags wizardCmdFlags)
 		}
 		// Existing file. Decide whether to overwrite.
 		if !flags.Force {
-			fmt.Fprintf(stdout, "Config already exists at %s. Overwrite? [y/N]: ", result.ConfigPath)
+			fmt.Fprint(stdout, tr(ctx, "cli_wizard_config_exists_prompt",
+				map[string]any{"Path": result.ConfigPath}))
 			ans, readErr := readSingleLine(stdin)
 			if readErr != nil {
 				return fmt.Errorf("wizard: read overwrite prompt: %w", readErr)
 			}
 			if !isYes(ans) {
-				fmt.Fprintln(stdout, "wizard: keeping existing config; no changes written.")
+				fmt.Fprintln(stdout, tr(ctx, "cli_wizard_keeping_existing", nil))
 				return nil
 			}
 		}
@@ -208,7 +206,10 @@ func runWizardCmd(ctx context.Context, deps wizardCmdDeps, flags wizardCmdFlags)
 		}
 	}
 
-	fmt.Fprintf(stdout, "wizard: wrote provider %q to %s\n", result.ProviderType, result.ConfigPath)
+	fmt.Fprintln(stdout, tr(ctx, "cli_wizard_wrote_provider", map[string]any{
+		"Provider": fmt.Sprintf("%q", result.ProviderType),
+		"Path":     result.ConfigPath,
+	}))
 	return nil
 }
 

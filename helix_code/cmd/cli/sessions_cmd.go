@@ -23,7 +23,7 @@ type sessionsCmdDeps struct {
 func newSessionsCmd(deps sessionsCmdDeps) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "sessions",
-		Short: "Inspect, resume, or delete persisted session transcripts",
+		Short: trc("cli_sessions_root_short", nil),
 	}
 	root.AddCommand(newSessionsListCmd(deps))
 	root.AddCommand(newSessionsShowCmd(deps))
@@ -35,7 +35,7 @@ func newSessionsListCmd(deps sessionsCmdDeps) *cobra.Command {
 	var allFlag bool
 	c := &cobra.Command{
 		Use:   "list",
-		Short: "List sessions (project-scoped by default; --all for global)",
+		Short: trc("cli_sessions_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			scope := deps.CurrentProject
 			if allFlag {
@@ -64,7 +64,7 @@ func newSessionsListCmd(deps sessionsCmdDeps) *cobra.Command {
 func newSessionsShowCmd(deps sessionsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <id>",
-		Short: "Show metadata + last 20 messages of a session",
+		Short: trc("cli_sessions_show_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -73,12 +73,15 @@ func newSessionsShowCmd(deps sessionsCmdDeps) *cobra.Command {
 				return err
 			}
 			msgs, _ := deps.Store.ReadTranscript(ctx, args[0])
-			fmt.Fprintf(cmd.OutOrStdout(),
-				"Session: %s\nProject: %s (%s)\nStarted: %s\nLast activity: %s\nMessages: %d\n\n--- Transcript (last 20) ---\n",
-				meta.SessionID, meta.ProjectName, meta.ProjectPath,
-				meta.StartedAt.Format("2006-01-02 15:04:05"),
-				meta.LastActivity.Format("2006-01-02 15:04:05"),
-				meta.MessageCount)
+			fmt.Fprintf(cmd.OutOrStdout(), "%s\n\n--- Transcript (last 20) ---\n",
+				tr(ctx, "cli_sessions_show_header", map[string]any{
+					"ID":           meta.SessionID,
+					"Project":      meta.ProjectName,
+					"Path":         meta.ProjectPath,
+					"Started":      meta.StartedAt.Format("2006-01-02 15:04:05"),
+					"LastActivity": meta.LastActivity.Format("2006-01-02 15:04:05"),
+					"MessageCount": meta.MessageCount,
+				}))
 			start := 0
 			if len(msgs) > 20 {
 				start = len(msgs) - 20
@@ -94,7 +97,7 @@ func newSessionsShowCmd(deps sessionsCmdDeps) *cobra.Command {
 func newSessionsDeleteCmd(deps sessionsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "delete <id>",
-		Short: "Delete a session and its transcript",
+		Short: trc("cli_sessions_delete_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := deps.Store.DeleteSession(context.Background(), args[0]); err != nil {

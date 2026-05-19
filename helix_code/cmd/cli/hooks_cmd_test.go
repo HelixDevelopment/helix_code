@@ -62,6 +62,13 @@ hooks:
     event: on_error
     script: `+script+`
 `)
+	// Round-311: runHooksValidate's success line routes through the i18n
+	// seam. Wire a translator resolving the round-311 IDs so the assertion
+	// below checks the real user-facing text.
+	prevTr := translator
+	SetTranslator(round311TestTranslator{})
+	defer func() { translator = prevTr }()
+
 	var buf bytes.Buffer
 	require.NoError(t, runHooksValidate(&buf, user, filepath.Join(tmp, "missing.yaml")))
 	assert.Contains(t, buf.String(), "OK")

@@ -31,7 +31,7 @@ type MCPCommandDeps struct {
 func newMCPCommand(deps MCPCommandDeps) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "mcp",
-		Short: "Manage MCP server connections",
+		Short: trc("cli_mcp_root_short", nil),
 	}
 	root.AddCommand(newMCPAdd(deps))
 	root.AddCommand(newMCPRemove(deps))
@@ -57,7 +57,7 @@ func newMCPAdd(deps MCPCommandDeps) *cobra.Command {
 	var oauth bool
 	cmd := &cobra.Command{
 		Use:   "add <name>",
-		Short: "Add an MCP server",
+		Short: trc("cli_mcp_add_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadOrEmpty(deps.ConfigPath)
@@ -91,7 +91,7 @@ func newMCPAdd(deps MCPCommandDeps) *cobra.Command {
 func newMCPRemove(deps MCPCommandDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "remove <name>",
-		Short: "Remove an MCP server",
+		Short: trc("cli_mcp_remove_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadOrEmpty(deps.ConfigPath)
@@ -123,7 +123,7 @@ func newMCPRemove(deps MCPCommandDeps) *cobra.Command {
 func newMCPList(deps MCPCommandDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "List configured MCP servers",
+		Short: trc("cli_mcp_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadOrEmpty(deps.ConfigPath)
 			if err != nil {
@@ -146,7 +146,7 @@ func newMCPList(deps MCPCommandDeps) *cobra.Command {
 func newMCPTest(deps MCPCommandDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "test <name>",
-		Short: "Probe a server (connect → tools/list → close)",
+		Short: trc("cli_mcp_test_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(cmd.Context(), 30*time.Second)
@@ -176,7 +176,7 @@ func newMCPTest(deps MCPCommandDeps) *cobra.Command {
 func newMCPAuth(deps MCPCommandDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "auth <name>",
-		Short: "Run OAuth flow for a server",
+		Short: trc("cli_mcp_auth_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -191,7 +191,7 @@ func newMCPAuth(deps MCPCommandDeps) *cobra.Command {
 func newMCPLogs(deps MCPCommandDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "logs <name>",
-		Short: "Show recent stderr + lifecycle events for a server",
+		Short: trc("cli_mcp_logs_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if deps.Logs != nil {

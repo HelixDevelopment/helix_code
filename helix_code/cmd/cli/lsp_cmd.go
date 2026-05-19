@@ -43,12 +43,8 @@ type lspCmdDeps struct {
 func newLSPCmd(deps lspCmdDeps) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "lsp",
-		Short: "Inspect, list, restart, or stop managed LSP servers",
-		Long: "Operator surface for the LSPManager. Subcommands:\n" +
-			"  status         show running servers (default when no subcommand supplied)\n" +
-			"  list-servers   show curated allowlist with on-path + running annotations\n" +
-			"  restart <name> tear down the named server (next file-open respawns it)\n" +
-			"  stop <name>    stop the named server without auto-respawn",
+		Short: trc("cli_lsp_root_short", nil),
+		Long:  trc("cli_lsp_root_long", nil),
 		// Default subcommand: when invoked as `helixcode lsp` with no args,
 		// run status. cobra resolves this via RunE on the root command.
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -65,7 +61,7 @@ func newLSPCmd(deps lspCmdDeps) *cobra.Command {
 func newLSPStatusCmd(deps lspCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
-		Short: "Show currently-running LSP servers in a tab-aligned table",
+		Short: trc("cli_lsp_status_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLSPSubcommand(cmd, deps, "status", nil)
 		},
@@ -75,7 +71,7 @@ func newLSPStatusCmd(deps lspCmdDeps) *cobra.Command {
 func newLSPListServersCmd(deps lspCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list-servers",
-		Short: "Show curated server allowlist with on-path + running annotations",
+		Short: trc("cli_lsp_list_servers_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLSPSubcommand(cmd, deps, "list-servers", nil)
 		},
@@ -85,7 +81,7 @@ func newLSPListServersCmd(deps lspCmdDeps) *cobra.Command {
 func newLSPRestartCmd(deps lspCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "restart <name>",
-		Short: "Restart the named server (next matching file open will respawn it)",
+		Short: trc("cli_lsp_restart_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLSPSubcommand(cmd, deps, "restart", args)
@@ -96,7 +92,7 @@ func newLSPRestartCmd(deps lspCmdDeps) *cobra.Command {
 func newLSPStopCmd(deps lspCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "stop <name>",
-		Short: "Stop the named server without auto-respawn",
+		Short: trc("cli_lsp_stop_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLSPSubcommand(cmd, deps, "stop", args)

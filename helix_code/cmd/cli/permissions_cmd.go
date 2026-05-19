@@ -20,7 +20,7 @@ import (
 func newPermissionsCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "permissions",
-		Short: "Manage HelixCode permission rules",
+		Short: trc("cli_permissions_root_short", nil),
 	}
 	cmd.AddCommand(newPermissionsListCommand())
 	cmd.AddCommand(newPermissionsAddCommand())
@@ -33,7 +33,7 @@ func newPermissionsListCommand() *cobra.Command {
 	var mode string
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Show effective permission rules",
+		Short: trc("cli_permissions_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, project := defaultPaths()
 			return runPermissionsList(os.Stdout, user, project, mode)
@@ -51,7 +51,7 @@ func newPermissionsAddCommand() *cobra.Command {
 	)
 	cmd := &cobra.Command{
 		Use:   "add <pattern> <action>",
-		Short: "Add a permission rule",
+		Short: trc("cli_permissions_add_short", nil),
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			path, err := pathForScope(scope)
@@ -71,7 +71,7 @@ func newPermissionsRemoveCommand() *cobra.Command {
 	var scope string
 	cmd := &cobra.Command{
 		Use:   "remove <pattern>",
-		Short: "Remove a permission rule",
+		Short: trc("cli_permissions_remove_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			path, err := pathForScope(scope)
@@ -92,7 +92,7 @@ func newPermissionsCheckCommand() *cobra.Command {
 	)
 	cmd := &cobra.Command{
 		Use:   "check <tool>",
-		Short: "Dry-run a tool call against the rules",
+		Short: trc("cli_permissions_check_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, project := defaultPaths()
@@ -100,7 +100,7 @@ func newPermissionsCheckCommand() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&mode, "permission-mode", "", "override mode preset")
-	cmd.Flags().StringVar(&body, "command", "", "Bash command (or path for file tools)")
+	cmd.Flags().StringVar(&body, "command", "", trc("cli_permissions_check_command_flag", nil))
 	return cmd
 }
 

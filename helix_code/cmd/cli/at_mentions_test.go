@@ -100,6 +100,13 @@ func TestExpandAtMentions_SkipsOversizedFile(t *testing.T) {
 	if err := os.Chdir(dir); err != nil {
 		t.Fatalf("chdir: %v", err)
 	}
+	// Round-311: expandAtMentions's oversize-skip strings route through
+	// the i18n seam. Wire a translator resolving the round-311 IDs so the
+	// assertions below check the real user-facing text.
+	prevTr := translator
+	SetTranslator(round311TestTranslator{})
+	defer func() { translator = prevTr }()
+
 	prompt := "look at @huge.bin"
 	attached := expandAtMentions(&prompt)
 	if len(attached) != 1 {

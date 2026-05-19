@@ -23,7 +23,7 @@ type commandsCmdDeps struct {
 func newCommandsCmd(deps commandsCmdDeps) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "commands",
-		Short: "Inspect or run user-defined Markdown slash commands",
+		Short: trc("cli_commands_root_short", nil),
 	}
 	root.AddCommand(newCommandsListCmd(deps))
 	root.AddCommand(newCommandsShowCmd(deps))
@@ -35,7 +35,7 @@ func newCommandsCmd(deps commandsCmdDeps) *cobra.Command {
 func newCommandsListCmd(deps commandsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "List loaded user-defined commands",
+		Short: trc("cli_commands_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tw := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 			fmt.Fprintln(tw, "NAME\tDESCRIPTION\tSOURCE")
@@ -56,7 +56,7 @@ func newCommandsListCmd(deps commandsCmdDeps) *cobra.Command {
 func newCommandsShowCmd(deps commandsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <name>",
-		Short: "Show the body of a user-defined command",
+		Short: trc("cli_commands_show_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -78,7 +78,7 @@ func newCommandsShowCmd(deps commandsCmdDeps) *cobra.Command {
 func newCommandsRunCmd(deps commandsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "run <name> [args...]",
-		Short: "Render a user-defined command body to stdout",
+		Short: trc("cli_commands_run_short", nil),
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -101,14 +101,15 @@ func newCommandsRunCmd(deps commandsCmdDeps) *cobra.Command {
 func newCommandsReloadCmd(deps commandsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "reload",
-		Short: "Re-scan project + user command directories",
+		Short: trc("cli_commands_reload_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			before := len(deps.Loader.Loaded())
 			if err := deps.Loader.Reload(); err != nil {
 				return err
 			}
 			after := len(deps.Loader.Loaded())
-			fmt.Fprintf(cmd.OutOrStdout(), "commands reload: %d → %d\n", before, after)
+			fmt.Fprintln(cmd.OutOrStdout(),
+				trc("cli_commands_reload_result", map[string]any{"Before": before, "After": after}))
 			return nil
 		},
 	}

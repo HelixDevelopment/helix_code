@@ -22,7 +22,7 @@ type skillsCmdDeps struct {
 func newSkillsCmd(deps skillsCmdDeps) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "skills",
-		Short: "Inspect, invoke, or reload agent-loaded skills",
+		Short: trc("cli_skills_root_short", nil),
 	}
 	root.AddCommand(newSkillsListCmd(deps))
 	root.AddCommand(newSkillsShowCmd(deps))
@@ -34,7 +34,7 @@ func newSkillsCmd(deps skillsCmdDeps) *cobra.Command {
 func newSkillsListCmd(deps skillsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "List loaded skills",
+		Short: trc("cli_skills_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tw := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 			fmt.Fprintln(tw, "NAME\tDESCRIPTION\tTRIGGERS\tSOURCE")
@@ -50,7 +50,7 @@ func newSkillsListCmd(deps skillsCmdDeps) *cobra.Command {
 func newSkillsShowCmd(deps skillsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <name>",
-		Short: "Show metadata + body of a skill",
+		Short: trc("cli_skills_show_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -59,8 +59,13 @@ func newSkillsShowCmd(deps skillsCmdDeps) *cobra.Command {
 				return fmt.Errorf("skills show: %q not found", name)
 			}
 			fmt.Fprintf(cmd.OutOrStdout(),
-				"Name: %s\nDescription: %s\nSource: %s\nRequires isolation: %t\nTriggers:\n  %s\n\n--- Body ---\n%s\n",
-				s.Name(), s.Description(), s.SourcePath(), s.RequiresIsolation(),
+				"%s\nTriggers:\n  %s\n\n--- Body ---\n%s\n",
+				trc("cli_skills_show_header", map[string]any{
+					"Name":              s.Name(),
+					"Description":       s.Description(),
+					"Source":            s.SourcePath(),
+					"RequiresIsolation": s.RequiresIsolation(),
+				}),
 				strings.Join(s.TriggerPatterns(), "\n  "), s.Body())
 			return nil
 		},
@@ -70,7 +75,7 @@ func newSkillsShowCmd(deps skillsCmdDeps) *cobra.Command {
 func newSkillsInvokeCmd(deps skillsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "invoke <name> [args...]",
-		Short: "Render a skill body to stdout (bypassing trigger matching)",
+		Short: trc("cli_skills_invoke_short", nil),
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -92,14 +97,15 @@ func newSkillsInvokeCmd(deps skillsCmdDeps) *cobra.Command {
 func newSkillsReloadCmd(deps skillsCmdDeps) *cobra.Command {
 	return &cobra.Command{
 		Use:   "reload",
-		Short: "Re-scan project + user skill directories",
+		Short: trc("cli_skills_reload_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			before := len(deps.Loader.Loaded())
 			if err := deps.Loader.Reload(); err != nil {
 				return err
 			}
 			after := len(deps.Loader.Loaded())
-			fmt.Fprintf(cmd.OutOrStdout(), "skills reload: %d → %d\n", before, after)
+			fmt.Fprintln(cmd.OutOrStdout(),
+				trc("cli_skills_reload_result", map[string]any{"Before": before, "After": after}))
 			return nil
 		},
 	}

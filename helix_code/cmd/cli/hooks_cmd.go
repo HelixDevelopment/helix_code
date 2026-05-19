@@ -17,7 +17,7 @@ import (
 func newHooksCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "hooks",
-		Short: "Manage HelixCode hook scripts",
+		Short: trc("cli_hooks_root_short", nil),
 	}
 	cmd.AddCommand(newHooksListCommand())
 	cmd.AddCommand(newHooksValidateCommand())
@@ -30,7 +30,7 @@ func newHooksCommand() *cobra.Command {
 func newHooksListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "List all enabled hooks loaded from user + project hooks.yaml",
+		Short: trc("cli_hooks_list_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, project := defaultHooksPaths()
 			return runHooksList(os.Stdout, user, project)
@@ -41,7 +41,7 @@ func newHooksListCommand() *cobra.Command {
 func newHooksValidateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "validate",
-		Short: "Parse hooks.yaml and report errors without running anything",
+		Short: trc("cli_hooks_validate_short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, project := defaultHooksPaths()
 			return runHooksValidate(os.Stdout, user, project)
@@ -52,7 +52,7 @@ func newHooksValidateCommand() *cobra.Command {
 func newHooksTestCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "test <event-name>",
-		Short: "Simulate an event and run all registered hooks for it",
+		Short: trc("cli_hooks_test_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, project := defaultHooksPaths()
@@ -64,7 +64,7 @@ func newHooksTestCommand() *cobra.Command {
 func newHooksEnableCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "enable <id>",
-		Short: "Set enabled=true for a hook in user's hooks.yaml",
+		Short: trc("cli_hooks_enable_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, _ := defaultHooksPaths()
@@ -76,7 +76,7 @@ func newHooksEnableCommand() *cobra.Command {
 func newHooksDisableCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "disable <id>",
-		Short: "Set enabled=false for a hook in user's hooks.yaml",
+		Short: trc("cli_hooks_disable_short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			user, _ := defaultHooksPaths()
@@ -116,7 +116,8 @@ func runHooksValidate(out io.Writer, userPath, projectPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "OK: %d hook(s) loaded from %v\n", len(hs), sources)
+	fmt.Fprintln(out, trc("cli_hooks_validate_ok",
+		map[string]any{"Count": len(hs), "Sources": fmt.Sprintf("%v", sources)}))
 	return nil
 }
 
@@ -141,7 +142,12 @@ func runHooksTest(out io.Writer, userPath, projectPath, eventName string) error 
 	event := hooks.NewEvent(hooks.HookType(eventName))
 	results := mgr.TriggerEventAndWait(event)
 	for _, r := range results {
-		fmt.Fprintf(out, "%s: status=%s err=%v duration=%s\n", r.HookID, r.Status, r.Error, r.Duration)
+		fmt.Fprintln(out, trc("cli_hooks_test_result", map[string]any{
+			"HookID":   r.HookID,
+			"Status":   fmt.Sprintf("%v", r.Status),
+			"Error":    fmt.Sprintf("%v", r.Error),
+			"Duration": fmt.Sprintf("%v", r.Duration),
+		}))
 	}
 	if len(results) == 0 {
 		fmt.Fprintf(out, "(no hooks registered for event %q)\n", eventName)

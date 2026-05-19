@@ -128,3 +128,231 @@ cli_generating_header:
 
 cli_generating_prompt:
   other: "Prompt: {{.Prompt}}"
+
+# --- Round-311 (2026-05-19) additions — FINAL cmd/cli migration ---
+# Clears the LAST remaining hardcoded user-facing literals in cmd/cli:
+# the cobra subcommand Short/Long descriptions + flag-help strings for
+# the commands / hooks / lsp / mcp / permissions / sessions / skills /
+# wizard / worktree subcommand groups, plus the residual REPL / health
+# / model-info / generation runtime lines in main.go. After round-311
+# cmd/cli reaches ZERO CONST-046 violations (Phase 4 close-out).
+
+# commands_cmd.go
+cli_commands_root_short:
+  other: "Inspect or run user-defined Markdown slash commands"
+cli_commands_list_short:
+  other: "List loaded user-defined commands"
+cli_commands_show_short:
+  other: "Show the body of a user-defined command"
+cli_commands_run_short:
+  other: "Render a user-defined command body to stdout"
+cli_commands_reload_short:
+  other: "Re-scan project + user command directories"
+cli_commands_reload_result:
+  other: "commands reload: {{.Before}} → {{.After}}"
+
+# hooks_cmd.go
+cli_hooks_root_short:
+  other: "Manage HelixCode hook scripts"
+cli_hooks_list_short:
+  other: "List all enabled hooks loaded from user + project hooks.yaml"
+cli_hooks_validate_short:
+  other: "Parse hooks.yaml and report errors without running anything"
+cli_hooks_test_short:
+  other: "Simulate an event and run all registered hooks for it"
+cli_hooks_enable_short:
+  other: "Set enabled=true for a hook in user's hooks.yaml"
+cli_hooks_disable_short:
+  other: "Set enabled=false for a hook in user's hooks.yaml"
+cli_hooks_validate_ok:
+  other: "OK: {{.Count}} hook(s) loaded from {{.Sources}}"
+cli_hooks_test_result:
+  other: "{{.HookID}}: status={{.Status}} err={{.Error}} duration={{.Duration}}"
+
+# lsp_cmd.go
+cli_lsp_root_short:
+  other: "Inspect, list, restart, or stop managed LSP servers"
+cli_lsp_root_long:
+  other: |-
+    Operator surface for the LSPManager. Subcommands:
+      status         show running servers (default when no subcommand supplied)
+      list-servers   show curated allowlist with on-path + running annotations
+      restart <name> tear down the named server (next file-open respawns it)
+      stop <name>    stop the named server without auto-respawn
+cli_lsp_status_short:
+  other: "Show currently-running LSP servers in a tab-aligned table"
+cli_lsp_list_servers_short:
+  other: "Show curated server allowlist with on-path + running annotations"
+cli_lsp_restart_short:
+  other: "Restart the named server (next matching file open will respawn it)"
+cli_lsp_stop_short:
+  other: "Stop the named server without auto-respawn"
+
+# mcp_cmd.go
+cli_mcp_root_short:
+  other: "Manage MCP server connections"
+cli_mcp_add_short:
+  other: "Add an MCP server"
+cli_mcp_remove_short:
+  other: "Remove an MCP server"
+cli_mcp_list_short:
+  other: "List configured MCP servers"
+cli_mcp_test_short:
+  other: "Probe a server (connect → tools/list → close)"
+cli_mcp_auth_short:
+  other: "Run OAuth flow for a server"
+cli_mcp_logs_short:
+  other: "Show recent stderr + lifecycle events for a server"
+
+# permissions_cmd.go
+cli_permissions_root_short:
+  other: "Manage HelixCode permission rules"
+cli_permissions_list_short:
+  other: "Show effective permission rules"
+cli_permissions_add_short:
+  other: "Add a permission rule"
+cli_permissions_remove_short:
+  other: "Remove a permission rule"
+cli_permissions_check_short:
+  other: "Dry-run a tool call against the rules"
+cli_permissions_check_command_flag:
+  other: "Bash command (or path for file tools)"
+
+# sessions_cmd.go
+cli_sessions_root_short:
+  other: "Inspect, resume, or delete persisted session transcripts"
+cli_sessions_list_short:
+  other: "List sessions (project-scoped by default; --all for global)"
+cli_sessions_show_short:
+  other: "Show metadata + last 20 messages of a session"
+cli_sessions_show_header:
+  other: |-
+    Session: {{.ID}}
+    Project: {{.Project}} ({{.Path}})
+    Started: {{.Started}}
+    Last activity: {{.LastActivity}}
+    Messages: {{.MessageCount}}
+cli_sessions_delete_short:
+  other: "Delete a session and its transcript"
+
+# skills_cmd.go
+cli_skills_root_short:
+  other: "Inspect, invoke, or reload agent-loaded skills"
+cli_skills_list_short:
+  other: "List loaded skills"
+cli_skills_show_short:
+  other: "Show metadata + body of a skill"
+cli_skills_show_header:
+  other: |-
+    Name: {{.Name}}
+    Description: {{.Description}}
+    Source: {{.Source}}
+    Requires isolation: {{.RequiresIsolation}}
+cli_skills_invoke_short:
+  other: "Render a skill body to stdout (bypassing trigger matching)"
+cli_skills_reload_short:
+  other: "Re-scan project + user skill directories"
+cli_skills_reload_result:
+  other: "skills reload: {{.Before}} → {{.After}}"
+
+# wizard_cmd.go
+cli_wizard_short:
+  other: "First-run setup for cloud LLM providers (Anthropic / Bedrock / Vertex / Azure)"
+cli_wizard_long:
+  other: |-
+    Launch the interactive provider-setup wizard, or use --provider with the
+    per-provider flags to write a config without TUI input. The resulting
+    YAML is saved to $XDG_CONFIG_HOME/helixcode/llm.yaml with mode 0600.
+cli_wizard_provider_flag:
+  other: "non-interactive: provider type (anthropic|bedrock|vertexai|azure|groq|openai|gemini|openrouter|xai|qwen|copilot|mistral|deepseek|ollama|llamacpp)"
+cli_wizard_apikey_flag:
+  other: "API key (anthropic, azure, groq, openai, gemini, openrouter, xai, qwen, mistral, deepseek)"
+cli_wizard_region_flag:
+  other: "AWS region (bedrock)"
+cli_wizard_project_flag:
+  other: "GCP project ID (vertexai)"
+cli_wizard_location_flag:
+  other: "GCP location (vertexai)"
+cli_wizard_apiversion_flag:
+  other: "API version (azure)"
+cli_wizard_cancelled:
+  other: "wizard cancelled; no changes written."
+cli_wizard_config_exists_prompt:
+  other: "Config already exists at {{.Path}}. Overwrite? [y/N]: "
+cli_wizard_keeping_existing:
+  other: "wizard: keeping existing config; no changes written."
+cli_wizard_wrote_provider:
+  other: "wizard: wrote provider {{.Provider}} to {{.Path}}"
+
+# worktree_cmd.go
+cli_worktree_root_short:
+  other: "Manage HelixCode-tracked git worktrees"
+cli_worktree_list_short:
+  other: "List helix-managed worktrees under .helix-worktrees/"
+cli_worktree_remove_short:
+  other: "Remove a helix-managed worktree"
+cli_worktree_enter_stateful_l1:
+  other: "`helixcode worktree enter` is a stateful operation."
+cli_worktree_enter_stateful_l2:
+  other: "Run it from inside a `helixcode chat` session via the agent's EnterWorktree tool"
+cli_worktree_stateful_l3:
+  other: "or the /worktree slash command. The CLI subcommand cannot persist worktree state across invocations."
+cli_worktree_exit_stateful_l1:
+  other: "`helixcode worktree exit` is a stateful operation."
+cli_worktree_exit_stateful_l2:
+  other: "Run it from inside a `helixcode chat` session via the agent's ExitWorktree tool"
+
+# main.go residual runtime lines
+cli_debug_flags_parsed:
+  other: "Flags parsed: listWorkers={{.ListWorkers}}, nonInteractive={{.NonInteractive}}"
+cli_session_resumed:
+  other: "Resumed session {{.ID}} ({{.Count}} messages)."
+cli_session_no_resumable:
+  other: "No resumable session found ({{.Error}}); starting fresh."
+cli_session_resumed_active:
+  other: "Resumed session {{.ID}} ({{.Count}} messages, last active {{.LastActive}})."
+cli_f12_no_cloud_provider:
+  other: "F12 provider: no cloud provider configured. Run `helixcode wizard` or set HELIX_LLM_PROVIDER. Continuing with the default local provider."
+cli_f12_construct_failed:
+  other: "F12 provider: failed to construct {{.Provider}} ({{.Error}}); falling back to default local provider."
+cli_model_info_provider:
+  other: |-
+    ID: {{.ID}}
+      Name: {{.Name}}
+      Provider: {{.Provider}}
+      Context Size: {{.ContextSize}}
+      Status: available
+cli_model_info_verified:
+  other: |-
+    ID: {{.ID}}
+      Name: {{.Name}}
+      Provider: {{.Provider}}
+      Score: {{.Score}}
+      Context Size: {{.ContextSize}}
+      Status: {{.Status}}
+cli_health_worker_pool_ok:
+  other: "Worker Pool: {{.Count}} healthy workers"
+cli_health_worker_pool_none:
+  other: "Worker Pool: No healthy workers"
+cli_health_notification_ok:
+  other: "Notification System: {{.Count}} enabled channels"
+cli_health_notification_none:
+  other: "Notification System: No enabled channels"
+cli_tokens_summary:
+  other: "tokens: in={{.In}} out={{.Out}} total={{.Total}}"
+cli_file_skipped_too_large:
+  other: "... [skipped: file exceeds 256 KiB context cap; show a subset with `head` / `grep` first]"
+cli_file_skipped_label:
+  other: " (skipped: too large)"
+cli_notification_sent:
+  other: "Notification sent: {{.Message}}"
+cli_command_completed:
+  other: "Command completed (exit code: {{.ExitCode}})"
+cli_provider_default_model:
+  other: "Provider: {{.Provider}}   Default model: {{.Model}}"
+cli_repl_no_provider:
+  other: "No LLM provider configured — set HELIX_LLM_PROVIDER or run `wizard`. Slash commands (/workers, /models, /health, /exit) still work."
+cli_screenshot_saved:
+  other: "Screenshot saved: {{.Filename}} ({{.Bytes}} bytes, platform={{.Platform}})"
+cli_session_cancelled:
+  other: "Session {{.ID}} cancelled."

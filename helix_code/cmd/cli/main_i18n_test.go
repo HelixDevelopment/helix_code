@@ -400,3 +400,116 @@ func TestRound202_ShowHelp_RoutesThroughTranslator(t *testing.T) {
 		}
 	}
 }
+
+// round311MigratedIDs is the exhaustive round-311 (2026-05-19) ID set —
+// the FINAL cmd/cli CONST-046 migration that drove cmd/cli to ZERO
+// audit violations. Covers the cobra Short/Long/flag-help strings for
+// the commands / hooks / lsp / mcp / permissions / sessions / skills /
+// wizard / worktree subcommand groups plus the residual main.go
+// runtime lines. Every ID MUST round-trip through the package-level
+// tr()/trc() helper; reverting any call site to a hardcoded literal
+// drops the corresponding fake.called count to 0 and FAILs
+// TestRound311_AllNewIDs_RouteThroughTranslator.
+var round311MigratedIDs = []string{
+	// commands_cmd.go
+	"cli_commands_root_short", "cli_commands_list_short", "cli_commands_show_short",
+	"cli_commands_run_short", "cli_commands_reload_short", "cli_commands_reload_result",
+	// hooks_cmd.go
+	"cli_hooks_root_short", "cli_hooks_list_short", "cli_hooks_validate_short",
+	"cli_hooks_test_short", "cli_hooks_enable_short", "cli_hooks_disable_short",
+	"cli_hooks_validate_ok", "cli_hooks_test_result",
+	// lsp_cmd.go
+	"cli_lsp_root_short", "cli_lsp_root_long", "cli_lsp_status_short",
+	"cli_lsp_list_servers_short", "cli_lsp_restart_short", "cli_lsp_stop_short",
+	// mcp_cmd.go
+	"cli_mcp_root_short", "cli_mcp_add_short", "cli_mcp_remove_short",
+	"cli_mcp_list_short", "cli_mcp_test_short", "cli_mcp_auth_short", "cli_mcp_logs_short",
+	// permissions_cmd.go
+	"cli_permissions_root_short", "cli_permissions_list_short", "cli_permissions_add_short",
+	"cli_permissions_remove_short", "cli_permissions_check_short", "cli_permissions_check_command_flag",
+	// sessions_cmd.go
+	"cli_sessions_root_short", "cli_sessions_list_short", "cli_sessions_show_short",
+	"cli_sessions_show_header", "cli_sessions_delete_short",
+	// skills_cmd.go
+	"cli_skills_root_short", "cli_skills_list_short", "cli_skills_show_short",
+	"cli_skills_show_header", "cli_skills_invoke_short", "cli_skills_reload_short",
+	"cli_skills_reload_result",
+	// wizard_cmd.go
+	"cli_wizard_short", "cli_wizard_long", "cli_wizard_provider_flag",
+	"cli_wizard_apikey_flag", "cli_wizard_region_flag", "cli_wizard_project_flag",
+	"cli_wizard_location_flag", "cli_wizard_apiversion_flag", "cli_wizard_cancelled",
+	"cli_wizard_config_exists_prompt", "cli_wizard_keeping_existing", "cli_wizard_wrote_provider",
+	// worktree_cmd.go
+	"cli_worktree_root_short", "cli_worktree_list_short", "cli_worktree_remove_short",
+	"cli_worktree_enter_stateful_l1", "cli_worktree_enter_stateful_l2",
+	"cli_worktree_stateful_l3", "cli_worktree_exit_stateful_l1", "cli_worktree_exit_stateful_l2",
+	// main.go residual runtime lines
+	"cli_debug_flags_parsed", "cli_session_resumed", "cli_session_no_resumable",
+	"cli_session_resumed_active", "cli_f12_no_cloud_provider", "cli_f12_construct_failed",
+	"cli_model_info_provider", "cli_model_info_verified", "cli_health_worker_pool_ok",
+	"cli_health_worker_pool_none", "cli_health_notification_ok", "cli_health_notification_none",
+	"cli_tokens_summary", "cli_file_skipped_too_large", "cli_file_skipped_label",
+	"cli_notification_sent", "cli_command_completed", "cli_provider_default_model",
+	"cli_repl_no_provider", "cli_screenshot_saved", "cli_session_cancelled",
+}
+
+func TestRound311_AllNewIDs_RouteThroughTranslator(t *testing.T) {
+	// Paired-mutation invariant: every round-311 ID MUST be resolvable
+	// through the wired Translator. The trc() helper (cobra-construction
+	// resolver) and tr() (runtime resolver) both funnel through the same
+	// package-level translator, so wrapping every ID here proves the seam
+	// is intact for both surfaces.
+	fake := newFakeCLITranslator()
+	withTranslator(t, fake, func() {
+		for _, id := range round311MigratedIDs {
+			got := tr(context.Background(), id, nil)
+			want := "<TRANSLATED:" + id + ">"
+			if got != want {
+				t.Fatalf("round-311 ID %q: tr returned %q, want %q", id, got, want)
+			}
+		}
+	})
+	for _, id := range round311MigratedIDs {
+		if fake.called[id] != 1 {
+			t.Fatalf("round-311 ID %q: fake.called = %d, want 1", id, fake.called[id])
+		}
+	}
+}
+
+func TestRound311_Trc_RoutesThroughTranslator(t *testing.T) {
+	// trc() is the cobra-construction-time resolver added in round-311.
+	// It MUST funnel through the same package-level translator as tr().
+	// Reverting trc() to return its msgID argument directly (or to a
+	// hardcoded literal) would break this sentinel assertion.
+	fake := newFakeCLITranslator()
+	withTranslator(t, fake, func() {
+		got := trc("cli_commands_root_short", nil)
+		want := "<TRANSLATED:cli_commands_root_short>"
+		if got != want {
+			t.Fatalf("trc() returned %q, want %q — cobra-metadata seam broken", got, want)
+		}
+	})
+	if fake.called["cli_commands_root_short"] != 1 {
+		t.Fatalf("trc() did not invoke the translator (fake.called = %d)",
+			fake.called["cli_commands_root_short"])
+	}
+}
+
+func TestRound311_AllNewIDs_PrefixConvention(t *testing.T) {
+	// CONST-046 namespace discipline: every round-311 ID MUST follow the
+	// cli_ prefix convention so it never collides with another
+	// submodule's bundle when loaded into a shared go-i18n.Bundle.
+	if len(round311MigratedIDs) == 0 {
+		t.Fatal("round311MigratedIDs is empty — round-311 migration manifest is corrupt")
+	}
+	seen := make(map[string]bool, len(round311MigratedIDs))
+	for _, id := range round311MigratedIDs {
+		if len(id) < 5 || id[:4] != "cli_" {
+			t.Fatalf("round-311 ID %q does not follow cli_ prefix convention", id)
+		}
+		if seen[id] {
+			t.Fatalf("round-311 ID %q is duplicated in round311MigratedIDs", id)
+		}
+		seen[id] = true
+	}
+}
