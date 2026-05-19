@@ -1,0 +1,25 @@
+# internal/plugins i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/plugins/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_plugins_<area>_<short_description>.
+# All IDs prefixed with internal_plugins_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-234 §11.4 anti-bluff sweep (2026-05-19): migrated the sole
+# user-facing literal emitted by exec.go — the warning string
+# returned by ExecutePlugin when the requested plugin entrypoint
+# cannot be located inside the sandbox tree. This is the only
+# operator-visible message in the package; the rest of the surface
+# is structural (manifest YAML keys, exec argv tokens, identifier
+# dependency-name strings, sandbox directory paths) which are NOT
+# in CONST-046 scope per round-158's hardware identifier-token
+# precedent.
+
+internal_plugins_sandbox_entrypoint_not_found:
+  other: "plugin sandbox: {{.Name}} entrypoint not found at {{.Entrypoint}}"

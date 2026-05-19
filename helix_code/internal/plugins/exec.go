@@ -21,7 +21,11 @@ func ExecutePlugin(ctx context.Context, plugin Plugin, action string, args []str
 	os.MkdirAll(pluginDir, 0755)
 	entrypoint := filepath.Join("plugins", name, "main")
 	if _, err := os.Stat(entrypoint); os.IsNotExist(err) {
-		return fmt.Sprintf("plugin sandbox: %s entrypoint not found at %s", name, entrypoint), fmt.Errorf("plugin entrypoint not found: %s", entrypoint)
+		msg := tr(ctx, "internal_plugins_sandbox_entrypoint_not_found", map[string]any{
+			"Name":       name,
+			"Entrypoint": entrypoint,
+		})
+		return msg, fmt.Errorf("plugin entrypoint not found: %s", entrypoint)
 	}
 	cmd := exec.CommandContext(ctx, entrypoint, action)
 	cmd.Args = append(cmd.Args, args...)
