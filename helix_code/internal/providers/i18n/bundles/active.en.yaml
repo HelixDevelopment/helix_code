@@ -1,0 +1,40 @@
+# internal/providers i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/providers/ai_integration.go and
+# vector_integration.go to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_providers_<area>_<short_description>.
+# All IDs prefixed with internal_providers_ to avoid namespace
+# collision with sibling packages (notably internal/provider singular
+# migrated in round 171) when loaded into the same go-i18n.Bundle.
+#
+# Round-172 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# user-facing literals — unsupported-AI-provider-type (1×), AI-
+# provider-not-found across GenerateText / Chat / Embedding /
+# Classify / ExtractEntities / GetProvider (6×), conversation-not-
+# found across AddMessage + GetConversation (2×), and vector-not-
+# found in VectorIntegration.RetrieveVector (1×).
+#
+# Personality manager error strings (personality-not-found ×3,
+# personality-is-disabled, personality-id-empty, personality-
+# already-exists, cannot-remove-default-personality), NotImplemented
+# Provider stub errors, "provider not initialized" guards, prompt-
+# template Sprintf literals, and debug/logging strings remain
+# untouched in this round to stay under the size cap; deferred to a
+# future round.
+
+internal_providers_unsupported_ai_provider_type:
+  other: "unsupported AI provider type: {{.Type}}"
+
+internal_providers_ai_provider_not_found:
+  other: "AI provider not found: {{.Name}}"
+
+internal_providers_conversation_not_found:
+  other: "conversation not found: {{.ID}}"
+
+internal_providers_vector_not_found:
+  other: "vector not found: {{.ID}}"

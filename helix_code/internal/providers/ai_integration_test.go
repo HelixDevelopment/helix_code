@@ -70,7 +70,7 @@ func TestAIIntegration_GetProvider_NotFound(t *testing.T) {
 	provider, err := ai.GetProvider("nonexistent")
 	assert.Error(t, err)
 	assert.Nil(t, provider)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_GetVector(t *testing.T) {
@@ -98,7 +98,7 @@ func TestAIIntegration_GenerateTextWithProvider_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_GenerateChatWithProvider_NotFound(t *testing.T) {
@@ -113,7 +113,7 @@ func TestAIIntegration_GenerateChatWithProvider_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_GenerateEmbeddingWithProvider_NotFound(t *testing.T) {
@@ -127,7 +127,7 @@ func TestAIIntegration_GenerateEmbeddingWithProvider_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, embedding)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_ClassifyTextWithProvider_NotFound(t *testing.T) {
@@ -141,7 +141,7 @@ func TestAIIntegration_ClassifyTextWithProvider_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_ExtractEntitiesWithProvider_NotFound(t *testing.T) {
@@ -155,7 +155,7 @@ func TestAIIntegration_ExtractEntitiesWithProvider_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, entities)
-	assert.Contains(t, err.Error(), "AI provider not found")
+	assert.Contains(t, err.Error(), "internal_providers_ai_provider_not_found")
 }
 
 func TestAIIntegration_GetStats(t *testing.T) {
@@ -486,7 +486,7 @@ func TestConversationManager_AddMessage_NotFound(t *testing.T) {
 	err := cm.AddMessage(ctx, "nonexistent", msg)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "conversation not found")
+	assert.Contains(t, err.Error(), "internal_providers_conversation_not_found")
 }
 
 func TestConversationManager_GetConversation(t *testing.T) {
@@ -513,7 +513,7 @@ func TestConversationManager_GetConversation_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, conv)
-	assert.Contains(t, err.Error(), "conversation not found")
+	assert.Contains(t, err.Error(), "internal_providers_conversation_not_found")
 }
 
 func TestConversationManager_Stop(t *testing.T) {

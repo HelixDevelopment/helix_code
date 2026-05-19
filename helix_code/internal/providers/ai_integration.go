@@ -296,7 +296,7 @@ func (ai *AIIntegration) createAIProvider(config *AIProviderConfig) (AIProvider,
 	case providers.ProviderTypeAnima:
 		return NewAnimaAIProvider(config), nil
 	default:
-		return nil, fmt.Errorf("unsupported AI provider type: %s", config.Type)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_providers_unsupported_ai_provider_type", map[string]any{"Type": string(config.Type)}))
 	}
 }
 
@@ -312,7 +312,7 @@ func (ai *AIIntegration) GenerateTextWithProvider(ctx context.Context, providerN
 	ai.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", providerName)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_ai_provider_not_found", map[string]any{"Name": providerName}))
 	}
 
 	start := time.Now()
@@ -346,7 +346,7 @@ func (ai *AIIntegration) GenerateChatWithProvider(ctx context.Context, providerN
 	ai.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", providerName)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_ai_provider_not_found", map[string]any{"Name": providerName}))
 	}
 
 	start := time.Now()
@@ -380,7 +380,7 @@ func (ai *AIIntegration) GenerateEmbeddingWithProvider(ctx context.Context, prov
 	ai.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", providerName)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_ai_provider_not_found", map[string]any{"Name": providerName}))
 	}
 
 	start := time.Now()
@@ -429,7 +429,7 @@ func (ai *AIIntegration) ClassifyTextWithProvider(ctx context.Context, providerN
 	ai.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", providerName)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_ai_provider_not_found", map[string]any{"Name": providerName}))
 	}
 
 	start := time.Now()
@@ -458,7 +458,7 @@ func (ai *AIIntegration) ExtractEntitiesWithProvider(ctx context.Context, provid
 	ai.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", providerName)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_ai_provider_not_found", map[string]any{"Name": providerName}))
 	}
 
 	start := time.Now()
@@ -502,7 +502,7 @@ func (ai *AIIntegration) GetProvider(name string) (AIProvider, error) {
 
 	provider, exists := ai.providers[name]
 	if !exists {
-		return nil, fmt.Errorf("AI provider not found: %s", name)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_providers_ai_provider_not_found", map[string]any{"Name": name}))
 	}
 
 	return provider, nil
@@ -946,7 +946,7 @@ func (cm *ConversationManager) AddMessage(ctx context.Context, conversationID st
 
 	conv, exists := cm.conversations[conversationID]
 	if !exists {
-		return fmt.Errorf("conversation not found: %s", conversationID)
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_conversation_not_found", map[string]any{"ID": conversationID}))
 	}
 
 	conv.Messages = append(conv.Messages, message)
@@ -969,7 +969,7 @@ func (cm *ConversationManager) GetConversation(ctx context.Context, id string) (
 
 	conv, exists := cm.conversations[id]
 	if !exists {
-		return nil, fmt.Errorf("conversation not found: %s", id)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_conversation_not_found", map[string]any{"ID": id}))
 	}
 
 	return conv, nil

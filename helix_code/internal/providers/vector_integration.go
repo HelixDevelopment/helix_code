@@ -120,7 +120,7 @@ func (vi *VectorIntegration) RetrieveVector(ctx context.Context, id string) (*Ve
 	}
 
 	if len(results) == 0 {
-		return nil, fmt.Errorf("vector not found: %s", id)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_found", map[string]any{"ID": id}))
 	}
 
 	// Convert from provider format
