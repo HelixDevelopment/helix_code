@@ -170,12 +170,14 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ## HXA-003 (ex-ISSUE-011) — venice `TestGetCapabilities` model-list drift (CONST-037)
 
-**Status:** Queued — needs CONST-037 canonical-model wiring
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 109)
 **Discovered-By:** AI subagent
-**Evidence:** Test hardcodes `venice-uncensored` as expected model; Venice API no longer returns it. CONST-037 mandates LLMsVerifier as single source of truth for model metadata.
-**Resolution path:** Replace hardcoded expectation with LLMsVerifier dynamic lookup OR pin against a stable model that's not subject to vendor list changes.
+**Closed:** 2026-05-19 (round 190)
+**Closure-Ref:** helix_agent commit (round-190 venice CONST-037 model-list drift) + meta-repo pointer-bump
+**Evidence:** Test hardcoded `venice-uncensored`; Venice API returned 75 models with the family rotated to `venice-uncensored-1-2` / `venice-uncensored-role-play`. Per CONST-037 (LLMsVerifier is the single source of truth for model metadata) the assertion violated the no-hardcoded-list rule.
+**Resolution:** `helix_agent/internal/llm/providers/venice/venice_test.go::TestGetCapabilities` — replaced `assert.Contains(..., "venice-uncensored")` and `assert.Contains(..., "llama-3.3-70b")` with structural assertion: `NotEmpty(SupportedModels)` plus a substring scan for the `venice-uncensored*` family. SKIP-OK marker per CONST-035 fires if the entire family disappears (avoids false-positive PASS). Mutation-verified (revert → FAIL with the original drift, restore → PASS).
 
 ---
 
