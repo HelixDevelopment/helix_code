@@ -8,11 +8,11 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 11 | `Fixed (→ Fixed.md)` |
+| Bug | 12 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 82 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 323 added HXV-001 (LLMsVerifier 18 pre-existing `tests/` failures resolved — CLI test-build drift + scoring test-assertion drift to honest contract + env-gated SKIP-OK).
+**Total closed items**: 83 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 325 added HXQ-001 (helix_qa `TestPerformance` flake resolved — 3 `pkg/vision/` perf tests gated behind `HOST_LOAD_DEDICATED` env var; resolution path (b), timing tolerance NOT loosened, anti-bluff strictness preserved per CONST-035).
 
 ## Coverage by round-system phase
 
@@ -26,6 +26,6 @@
 
 ## Open issues snapshot (cross-ref `docs/Issues_Summary.md`)
 
-4 open issues: 3 Bugs / 1 Task / 1 Feature; 3 BLOCKED on operator decision.
+3 open issues: 1 Bug / 1 Task / 1 Feature; 2 BLOCKED (VEN-002 operator decision + HXA-002 cross-submodule coord).
 
-*Last regenerated: 2026-05-20 (round 323 — HXV-001 closed). See `docs/Fixed.md` for full closure entries with commit SHAs.*
+*Last regenerated: 2026-05-20 (round 325 — HXQ-001 closed). See `docs/Fixed.md` for full closure entries with commit SHAs.*

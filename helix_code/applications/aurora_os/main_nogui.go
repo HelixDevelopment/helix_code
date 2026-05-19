@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/applications/aurora_os/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
@@ -223,6 +224,13 @@ type CLIApp struct {
 	// Aurora OS specific
 	performanceMode bool
 	diagnosticsLog  []string
+
+	// translator resolves user-facing strings per CONST-046
+	// (round-327 §11.4 migration). Defaults to NoopTranslator
+	// (loud echo of message IDs) until SetTranslator wires a real
+	// *i18nadapter.Translator at boot. Never nil after NewCLIApp
+	// returns.
+	translator i18n.Translator
 }
 
 // NewCLIApp creates a new CLI application
@@ -230,7 +238,35 @@ func NewCLIApp() *CLIApp {
 	return &CLIApp{
 		securityManager: NewAuroraSecurityManager(),
 		diagnosticsLog:  make([]string, 0),
+		translator:      i18n.NoopTranslator{},
 	}
+}
+
+// SetTranslator injects the runtime Translator (per CONST-046
+// round-327). Passing nil is a no-op — the NoopTranslator default
+// installed by NewCLIApp is preserved so the loud-echo safety net
+// never disappears silently. helix_code wires
+// *i18nadapter.Translator at boot.
+func (cliApp *CLIApp) SetTranslator(t i18n.Translator) {
+	if t == nil {
+		return
+	}
+	cliApp.translator = t
+}
+
+// t is a tiny call-site helper that resolves a message ID through
+// the injected Translator and falls back to the literal id on error
+// (loud echo — never silently swallow). Centralising the
+// boilerplate keeps migrated call sites a single expression long.
+func (cliApp *CLIApp) t(id string) string {
+	if cliApp.translator == nil {
+		return id
+	}
+	got, err := cliApp.translator.T(context.Background(), id, nil)
+	if err != nil || got == "" {
+		return id
+	}
+	return got
 }
 
 // Initialize sets up the CLI application
@@ -314,7 +350,7 @@ func (cliApp *CLIApp) Run(args []string) error {
 	case "interactive":
 		return cliApp.cmdInteractive()
 	default:
-		fmt.Printf("Unknown command: %s\n", command)
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_command")+"\n", command)
 		cliApp.printHelp()
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -323,45 +359,11 @@ func (cliApp *CLIApp) Run(args []string) error {
 }
 
 func (cliApp *CLIApp) printHelp() {
-	fmt.Println(`HelixCode Aurora OS CLI (nogui mode)
-
-Usage: helix-aurora [command] [arguments]
-
-Commands:
-  help          Show this help message
-  status        Show system status
-  projects      Manage projects (list, create, delete, set-active)
-  sessions      Manage sessions (list, create, start, pause, complete)
-  tasks         Manage tasks (list, create, cancel)
-  workers       Manage workers (list, add, remove)
-  llm           LLM operations (providers, models, chat)
-  aurora        Aurora OS specific commands (diagnostics, performance, optimize)
-  security      Security commands (audit, encryption, access)
-  interactive   Start interactive mode
-
-Aurora OS Specific Commands:
-  aurora diagnostics    Run system diagnostics
-  aurora performance    Toggle performance mode
-  aurora optimize       Run system optimization
-  aurora info           Show Aurora OS information
-
-Security Commands:
-  security audit        Show audit log
-  security encryption   Configure encryption settings
-  security access       Manage access control
-
-Examples:
-  helix-aurora status
-  helix-aurora projects list
-  helix-aurora aurora diagnostics
-  helix-aurora security audit
-  helix-aurora interactive
-
-Build with GUI disabled using: go build -tags nogui`)
+	fmt.Println(cliApp.t("aurora_os_cli_help_body"))
 }
 
 func (cliApp *CLIApp) cmdStatus() error {
-	fmt.Println("=== HelixCode Aurora OS Status ===")
+	fmt.Println(cliApp.t("aurora_os_cli_status_header"))
 	fmt.Println()
 
 	// System info
@@ -430,9 +432,9 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("=== Projects ===")
+		fmt.Println(cliApp.t("aurora_os_cli_projects_header"))
 		if len(projects) == 0 {
-			fmt.Println("No projects found.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_projects"))
 			return nil
 		}
 		for _, p := range projects {
@@ -453,7 +455,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *path == "" {
-			fmt.Println("Error: --name and --path are required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_name_path_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -466,7 +468,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 
 	case "set-active":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_project_id_required"))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.SetActiveProject(ctx, args[1])
@@ -478,7 +480,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 
 	case "delete":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_project_id_required"))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.DeleteProject(ctx, args[1])
@@ -602,7 +604,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		fs.Parse(args[1:])
 
 		if *desc == "" {
-			fmt.Println("Error: --desc is required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_desc_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -615,7 +617,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 
 	case "cancel":
 		if len(args) < 2 {
-			fmt.Println("Error: task ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_task_id_required"))
 			return fmt.Errorf("missing task ID")
 		}
 		err := cliApp.taskManager.CancelTask(ctx, args[1])
@@ -640,9 +642,9 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 	switch args[0] {
 	case "list":
 		workers := cliApp.workerManager.GetWorkers()
-		fmt.Println("=== Workers ===")
+		fmt.Println(cliApp.t("aurora_os_cli_workers_header"))
 		if len(workers) == 0 {
-			fmt.Println("No workers found.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_workers"))
 			return nil
 		}
 		for _, w := range workers {
@@ -661,7 +663,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		fs.Parse(args[1:])
 
 		if *host == "" {
-			fmt.Println("Error: --host is required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_host_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -923,13 +925,13 @@ func (cliApp *CLIApp) cmdSecurity(args []string) error {
 		if len(args) > 1 {
 			switch args[1] {
 			case "list":
-				fmt.Println("=== Access Control Roles ===")
+				fmt.Println(cliApp.t("aurora_os_cli_access_roles_header"))
 				for role, perms := range cliApp.securityManager.accessControl {
 					fmt.Printf("  %s: %v\n", role, perms)
 				}
 			case "add":
 				if len(args) < 4 {
-					fmt.Println("Usage: security access add <role> <permission>")
+					fmt.Println(cliApp.t("aurora_os_cli_access_add_usage"))
 					return nil
 				}
 				role := args[2]
@@ -941,22 +943,22 @@ func (cliApp *CLIApp) cmdSecurity(args []string) error {
 				fmt.Printf("Added permission '%s' to role '%s'\n", perm, role)
 				cliApp.securityManager.AddAuditEntry("access_add", "user", fmt.Sprintf("Added permission %s to role %s", perm, role), "info")
 			default:
-				fmt.Printf("Unknown access command: %s\n", args[1])
+				fmt.Printf(cliApp.t("aurora_os_cli_unknown_access_command")+"\n", args[1])
 			}
 		} else {
-			fmt.Println("Usage: security access [list|add]")
+			fmt.Println(cliApp.t("aurora_os_cli_access_usage"))
 		}
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
 }
 
 func (cliApp *CLIApp) cmdInteractive() error {
-	fmt.Println("=== HelixCode Aurora OS Interactive Mode ===")
-	fmt.Println("Type 'help' for commands, 'quit' to exit")
+	fmt.Println(cliApp.t("aurora_os_cli_interactive_header"))
+	fmt.Println(cliApp.t("aurora_os_cli_interactive_hint"))
 	fmt.Println()
 
 	// Setup signal handling
@@ -1009,7 +1011,8 @@ func main() {
 
 	// Handle version command without initialization
 	if args[0] == "version" || args[0] == "-v" || args[0] == "--version" {
-		fmt.Println("HelixCode Aurora OS CLI v1.0.0")
+		app := NewCLIApp()
+		fmt.Println(app.t("aurora_os_cli_version_banner"))
 		fmt.Printf("Go: %s\n", runtime.Version())
 		fmt.Printf("Platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 		return

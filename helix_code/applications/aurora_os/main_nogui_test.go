@@ -4,8 +4,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"dev.helix.code/applications/aurora_os/i18n"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +17,88 @@ func TestCLIAppCreation(t *testing.T) {
 	assert.NotNil(t, app)
 	assert.NotNil(t, app.securityManager)
 	assert.NotNil(t, app.diagnosticsLog)
+}
+
+// fakeTranslator is a unit-test-only translator (CONST-050(A): fakes
+// permitted in *_test.go). calls captures the message IDs the CLI
+// resolves so the paired-mutation tests below can assert the seam
+// actually routes through Translator.T rather than echoing a literal.
+type fakeTranslator struct {
+	prefix string
+	fail   bool
+	calls  []string
+}
+
+func (f *fakeTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	f.calls = append(f.calls, id)
+	if f.fail {
+		return "", errors.New("translate failed")
+	}
+	return f.prefix + id, nil
+}
+
+func (f *fakeTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	f.calls = append(f.calls, id)
+	if f.fail {
+		return "", errors.New("translate failed")
+	}
+	return f.prefix + id, nil
+}
+
+// TestCLIAppTranslatorDefault verifies NewCLIApp installs a non-nil
+// NoopTranslator (loud-echo safety net) per CONST-046 round-327.
+func TestCLIAppTranslatorDefault(t *testing.T) {
+	app := NewCLIApp()
+	assert.NotNil(t, app.translator)
+	assert.Equal(t, "aurora_os_cli_status_header", app.t("aurora_os_cli_status_header"))
+}
+
+// TestCLIAppSetTranslator is the positive case: a wired translator
+// IS consulted and its output replaces the message ID.
+func TestCLIAppSetTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "XL:"}
+	app.SetTranslator(ft)
+
+	got := app.t("aurora_os_cli_version_banner")
+	assert.Equal(t, "XL:aurora_os_cli_version_banner", got)
+	assert.Equal(t, []string{"aurora_os_cli_version_banner"}, ft.calls)
+}
+
+// TestCLIAppSetTranslatorNilNoop is the paired-mutation guard:
+// passing nil MUST NOT clear the NoopTranslator default — the
+// loud-echo safety net must never disappear silently.
+func TestCLIAppSetTranslatorNilNoop(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "XL:"}
+	app.SetTranslator(ft)
+	app.SetTranslator(nil) // no-op — must NOT wipe ft
+
+	got := app.t("aurora_os_cli_help_body")
+	assert.Equal(t, "XL:aurora_os_cli_help_body", got,
+		"SetTranslator(nil) must be a no-op, not a reset")
+}
+
+// TestCLIAppTranslatorFallbackOnError is the paired-mutation guard
+// for the error path: when Translator.T returns an error the helper
+// MUST fall back to the literal message ID (loud echo), never an
+// empty string.
+func TestCLIAppTranslatorFallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&fakeTranslator{fail: true})
+
+	got := app.t("aurora_os_cli_no_projects")
+	assert.Equal(t, "aurora_os_cli_no_projects", got,
+		"on translate error the helper must echo the message ID")
+}
+
+// TestCLIAppTranslatorNoopType confirms i18n.NoopTranslator
+// satisfies the i18n.Translator contract used by SetTranslator.
+func TestCLIAppTranslatorNoopType(t *testing.T) {
+	var _ i18n.Translator = i18n.NoopTranslator{}
+	app := NewCLIApp()
+	app.SetTranslator(i18n.NoopTranslator{})
+	assert.Equal(t, "aurora_os_cli_workers_header", app.t("aurora_os_cli_workers_header"))
 }
 
 func TestCLISecurityManager(t *testing.T) {

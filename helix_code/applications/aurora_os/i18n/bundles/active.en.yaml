@@ -45,3 +45,104 @@ aurora_os_tab_llm:
 
 aurora_os_tab_settings:
   other: "Settings"
+
+# Round-327 §11.4 anti-bluff sweep (2026-05-20): 17 highest-impact
+# nogui CLI strings migrated — the help body, version banner, status
+# header, command/subcommand error messages, and interactive-mode
+# labels that anchor every text-mode interaction with the Aurora OS
+# CLI client (main_nogui.go). Resolved at runtime via Translator.T.
+
+aurora_os_cli_help_body:
+  other: |-
+    HelixCode Aurora OS CLI (nogui mode)
+
+    Usage: helix-aurora [command] [arguments]
+
+    Commands:
+      help          Show this help message
+      status        Show system status
+      projects      Manage projects (list, create, delete, set-active)
+      sessions      Manage sessions (list, create, start, pause, complete)
+      tasks         Manage tasks (list, create, cancel)
+      workers       Manage workers (list, add, remove)
+      llm           LLM operations (providers, models, chat)
+      aurora        Aurora OS specific commands (diagnostics, performance, optimize)
+      security      Security commands (audit, encryption, access)
+      interactive   Start interactive mode
+
+    Aurora OS Specific Commands:
+      aurora diagnostics    Run system diagnostics
+      aurora performance    Toggle performance mode
+      aurora optimize       Run system optimization
+      aurora info           Show Aurora OS information
+
+    Security Commands:
+      security audit        Show audit log
+      security encryption   Configure encryption settings
+      security access       Manage access control
+
+    Examples:
+      helix-aurora status
+      helix-aurora projects list
+      helix-aurora aurora diagnostics
+      helix-aurora security audit
+      helix-aurora interactive
+
+    Build with GUI disabled using: go build -tags nogui
+
+aurora_os_cli_version_banner:
+  other: "HelixCode Aurora OS CLI v1.0.0"
+
+aurora_os_cli_status_header:
+  other: "=== HelixCode Aurora OS Status ==="
+
+aurora_os_cli_unknown_command:
+  other: "Unknown command: %s"
+
+aurora_os_cli_unknown_subcommand:
+  other: "Unknown subcommand: %s"
+
+aurora_os_cli_unknown_access_command:
+  other: "Unknown access command: %s"
+
+aurora_os_cli_projects_header:
+  other: "=== Projects ==="
+
+aurora_os_cli_no_projects:
+  other: "No projects found."
+
+aurora_os_cli_workers_header:
+  other: "=== Workers ==="
+
+aurora_os_cli_no_workers:
+  other: "No workers found."
+
+aurora_os_cli_err_name_path_required:
+  other: "Error: --name and --path are required"
+
+aurora_os_cli_err_project_id_required:
+  other: "Error: project ID required"
+
+aurora_os_cli_err_desc_required:
+  other: "Error: --desc is required"
+
+aurora_os_cli_err_task_id_required:
+  other: "Error: task ID required"
+
+aurora_os_cli_err_host_required:
+  other: "Error: --host is required"
+
+aurora_os_cli_access_roles_header:
+  other: "=== Access Control Roles ==="
+
+aurora_os_cli_access_add_usage:
+  other: "Usage: security access add <role> <permission>"
+
+aurora_os_cli_access_usage:
+  other: "Usage: security access [list|add]"
+
+aurora_os_cli_interactive_header:
+  other: "=== HelixCode Aurora OS Interactive Mode ==="
+
+aurora_os_cli_interactive_hint:
+  other: "Type 'help' for commands, 'quit' to exit"
