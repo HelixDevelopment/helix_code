@@ -86,5 +86,6 @@
 | 2026-05-19 | LLMOrchestrator builders × 5 wired | Feature | Implemented (→ Fixed.md) | 64-76 | various | gemini/junie/opencode/claudecode/qwencode CLI binaries |
 | 2026-05-19 | 4-vendor GPU telemetry chain (NVIDIA+AMD+Apple+Intel) | Feature | Implemented (→ Fixed.md) | 43-51 | various | cognee/performance_optimizer.go probe chain |
 | 2026-05-19 | LLM Err coverage 100% across 17 providers | Feature | Implemented (→ Fixed.md) | 46-63 | various | missing_types.go Err field + wiring |
+| 2026-05-19 | ISSUE-001: VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) | Task | Completed (→ Fixed.md) | 188 | (submodule + meta pointer) | Repo `helixdevelopment1/VisionEngine` (id 80411994) existed since 2026-03-19; remote URL pointed at non-existent `HelixDevelopment/` group. Fix: `git remote set-url helix-gitlab git@gitlab.com:helixdevelopment1/VisionEngine.git` + FF-safe push (46 commits → SHA `2d0c35b`). 99/100 owned-org URLs probed = OK pre-fix, 100/100 = OK post-fix |
 
 *Last regenerated: 2026-05-19. Earlier closures (P0-P5 phases) tracked via `docs/improvements/PROGRESS.md` + `docs/improvements/*evidence*.md`.*

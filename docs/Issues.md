@@ -10,14 +10,19 @@
 
 ---
 
-## ISSUE-001 — VisionEngine `helix-gitlab` remote repo missing (404)
+## ISSUE-001 — VisionEngine `helix-gitlab` remote repo missing (404) — CLOSED (→ Fixed.md)
 
-**Status:** Queued — BLOCKED on operator (gitlab repo creation)
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
 **Discovered:** 2026-05-19 (round 98 — Planning + VisionEngine i18n migration)
 **Discovered-By:** AI subagent during 4-remote push attempt
-**Evidence:** Push attempt against `git@gitlab.com:HelixDevelopment/visionengine.git` returned `404 not found`. CONST-043 honoured (no force-push attempted).
-**Resolution path:** Operator creates the gitlab.com repository OR removes the `helix-gitlab` named remote from VisionEngine's local config. Pre-existing infra gap, not introduced by round-98 work.
+**Closed-By:** Round 188 (subagent repo-inventory sweep)
+**Root cause:** The `helix-gitlab` remote URL in `dependencies/HelixDevelopment/VisionEngine/.git/config` pointed at `git@gitlab.com:HelixDevelopment/visionengine.git` — a non-existent group path. The actual GitLab group is `helixdevelopment1` (path) / `HelixDevelopment` (display name). The repository `helixdevelopment1/VisionEngine` (id 80411994) already existed since 2026-03-19. NOT a missing-repo issue — a URL-misconfiguration issue.
+**Fix:** `git remote set-url helix-gitlab git@gitlab.com:helixdevelopment1/VisionEngine.git` in the VisionEngine submodule, then `git push helix-gitlab master` (FF-safe: local was 46 commits ahead, remote 0 ahead). Push landed at SHA `2d0c35b` (verified via `git ls-remote helix-gitlab master`). The Upstreams recipe `push-helix-gitlab.sh` references the remote by name (not URL), so it continues to work unchanged.
+**Evidence:**
+- `glab api projects/helixdevelopment1%2Fvisionengine` → id 80411994 OK
+- `git ls-remote helix-gitlab HEAD` → `2d0c35bebb199a9a199fbf899eaeb292e38eaf17` (matches local HEAD)
+- Original broken URL still 404s when probed directly (proves URL was the issue, not perms)
 
 ---
 
