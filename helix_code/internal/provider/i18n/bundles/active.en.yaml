@@ -1,0 +1,29 @@
+# internal/provider i18n bundle — active English (en) locale.
+#
+# Round-171 §11.4 anti-bluff sweep (2026-05-19).
+#
+# CONST-046 Phase 4 round 64 / round-171 produced ZERO migrated
+# literals from this package: internal/provider contains only the
+# unified Provider interface contract + ProviderType enum
+# constants. The literal strings ("openai", "anthropic", "gemini",
+# ...) are wire-protocol identifiers exempt under CONST-046 §3
+# (protocol identifiers ≠ user-facing content). doc.go is Go
+# doc-comment reference material (compile-time godoc). The unit
+# test file contains only developer-diagnostic t.Errorf strings,
+# exempt as test-only.
+#
+# The bundle is provisioned now (with a single placeholder entry)
+# so the standard i18n loader can resolve internal/provider in
+# the consuming-binary bundle aggregation step without a missing
+# file panic. Future rounds that introduce user-facing error
+# messages, validation feedback, or operator-visible labels into
+# this package will append entries here under the
+# internal_provider_ prefix.
+#
+# Naming convention: internal_provider_<area>_<short_description>.
+# All IDs prefixed with internal_provider_ to avoid namespace
+# collision with other packages' bundles when loaded into the
+# same go-i18n.Bundle.
+
+internal_provider_i18n_scaffold_placeholder:
+  other: "internal/provider i18n scaffold ready (round-171, 2026-05-19)"
