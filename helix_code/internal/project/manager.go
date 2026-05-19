@@ -71,7 +71,7 @@ func (m *Manager) CreateProject(ctx context.Context, name, description, path, pr
 
 	// Validate project path
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("project path does not exist: %s", path)
+		return nil, errors.New(tr(ctx, "internal_project_path_does_not_exist", map[string]any{"Path": path}))
 	}
 
 	// Generate unique ID
@@ -93,7 +93,7 @@ func (m *Manager) CreateProject(ctx context.Context, name, description, path, pr
 
 	// Detect project type and set appropriate metadata
 	if err := m.detectProjectType(project); err != nil {
-		return nil, fmt.Errorf("failed to detect project type: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_detect_type_failed", nil), err)
 	}
 
 	m.projects[id] = project
@@ -174,7 +174,7 @@ func (m *Manager) GetActiveProject(ctx context.Context) (*Project, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no active project found")
+	return nil, errors.New(tr(ctx, "internal_project_no_active_project", nil))
 }
 
 // CreateProjectWithUser creates a new project with user ID (for compatibility with DatabaseManager)

@@ -1,0 +1,51 @@
+# internal/project i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/project/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_project_<area>_<short_description>.
+# All IDs prefixed with internal_project_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-170 §11.4 anti-bluff sweep (2026-05-19): migrated the 10
+# user-facing errors emitted by manager.go + manager_db.go covering
+# in-memory + database-persisted project lifecycle paths (create,
+# get, list, update, update-metadata, delete, type-detection, active
+# tracking). SQL query strings + JSON struct tags are NOT
+# user-facing per round-148 cognee precedent — they are runtime
+# parameters to the persistence engine / serializer, not displayed
+# text — so they are intentionally NOT migrated.
+
+internal_project_path_does_not_exist:
+  other: "project path does not exist: {{.Path}}"
+
+internal_project_detect_type_failed:
+  other: "failed to detect project type: {{.Err}}"
+
+internal_project_no_active_project:
+  other: "no active project found"
+
+internal_project_create_failed:
+  other: "failed to create project in database: {{.Err}}"
+
+internal_project_get_failed:
+  other: "failed to get project from database: {{.Err}}"
+
+internal_project_list_query_failed:
+  other: "failed to query projects: {{.Err}}"
+
+internal_project_list_scan_failed:
+  other: "failed to scan project row: {{.Err}}"
+
+internal_project_list_iter_failed:
+  other: "error iterating project rows: {{.Err}}"
+
+internal_project_update_failed:
+  other: "failed to update project: {{.Err}}"
+
+internal_project_update_metadata_failed:
+  other: "failed to update project metadata: {{.Err}}"

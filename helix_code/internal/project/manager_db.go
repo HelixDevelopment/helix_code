@@ -65,7 +65,7 @@ func (m *DatabaseManager) CreateProjectWithUser(ctx context.Context, name, descr
 	).Scan(&createdAt, &updatedAt)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to create project in database: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_create_failed", nil), err)
 	}
 
 	project.CreatedAt = createdAt
@@ -107,7 +107,7 @@ func (m *DatabaseManager) GetProject(ctx context.Context, id string) (*Project, 
 		if err == pgx.ErrNoRows {
 			return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, id)
 		}
-		return nil, fmt.Errorf("failed to get project from database: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_get_failed", nil), err)
 	}
 
 	// Extract type and metadata from config
@@ -218,7 +218,7 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 
 	rows, err := m.db.Query(ctx, query, ownerUUID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query projects: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_list_query_failed", nil), err)
 	}
 	defer rows.Close()
 
@@ -239,7 +239,7 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 		if err := rows.Scan(
 			&dbID, &name, &description, &ownerID, &workspacePath, &config, &status, &createdAt, &updatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan project row: %v", err)
+			return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_list_scan_failed", nil), err)
 		}
 
 		// Extract type and metadata from config
@@ -263,7 +263,7 @@ func (m *DatabaseManager) ListProjects(ctx context.Context, ownerID string) ([]*
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating project rows: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_list_iter_failed", nil), err)
 	}
 
 	return projects, nil
@@ -315,7 +315,7 @@ func (m *DatabaseManager) UpdateProject(ctx context.Context, projectID, name, de
 		&dbID, &retName, &retDesc, &workspacePath, &ownerID, &createdAt, &updatedAt, &status, &config,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update project: %v", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_update_failed", nil), err)
 	}
 
 	// Match GetProject's mapping: type lives inside config JSONB, not
@@ -346,7 +346,7 @@ func (m *DatabaseManager) UpdateProjectMetadata(ctx context.Context, projectID s
 
 	_, err := m.db.Exec(ctx, query, metadata, time.Now(), projectID)
 	if err != nil {
-		return fmt.Errorf("failed to update project metadata: %v", err)
+		return fmt.Errorf("%s: %w", tr(ctx, "internal_project_update_metadata_failed", nil), err)
 	}
 
 	return nil
