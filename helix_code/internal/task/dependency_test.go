@@ -49,7 +49,9 @@ func TestDependencyManager_ValidateDependenciesNotFound(t *testing.T) {
 	err := dm.ValidateDependencies(dependencies)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "dependency task not found")
+	// CONST-046 round-240 migration: literal is now Translator
+	// message ID. Noop default echoes the ID verbatim.
+	assert.Contains(t, err.Error(), "internal_task_dep_not_found")
 	mockDB.AssertExpectations(t)
 }
 
@@ -67,7 +69,9 @@ func TestDependencyManager_ValidateDependenciesQueryError(t *testing.T) {
 	err := dm.ValidateDependencies(dependencies)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to check dependency existence")
+	// CONST-046 round-240 migration: literal is now Translator
+	// message ID. Noop default echoes the ID verbatim.
+	assert.Contains(t, err.Error(), "internal_task_dep_check_existence_failed")
 	mockDB.AssertExpectations(t)
 }
 
@@ -123,7 +127,9 @@ func TestDependencyManager_CheckDependenciesCompletedQueryError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.False(t, completed)
-	assert.Contains(t, err.Error(), "failed to check dependency status")
+	// CONST-046 round-240 migration: literal is now Translator
+	// message ID. Noop default echoes the ID verbatim.
+	assert.Contains(t, err.Error(), "internal_task_dep_check_status_failed")
 	mockDB.AssertExpectations(t)
 }
 

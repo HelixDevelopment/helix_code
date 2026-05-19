@@ -216,7 +216,7 @@ func (tm *TaskManager) createTaskUnsafe(taskType TaskType, data map[string]inter
 
 	// Validate dependencies
 	if err := tm.dependencyMgr.ValidateDependencies(dependencies); err != nil {
-		return nil, fmt.Errorf("invalid dependencies: %v", err)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_task_invalid_dependencies", map[string]any{"Err": err.Error()}))
 	}
 
 	// Store in memory
@@ -225,7 +225,7 @@ func (tm *TaskManager) createTaskUnsafe(taskType TaskType, data map[string]inter
 	// Add to database
 	if err := tm.storeTaskInDB(task); err != nil {
 		delete(tm.tasks, task.ID)
-		return nil, fmt.Errorf("failed to store task in database: %v", err)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_task_store_in_db_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Add to appropriate queue
@@ -246,7 +246,7 @@ func (tm *TaskManager) cacheTask(ctx context.Context, task *Task) error {
 	key := fmt.Sprintf("task:%s", task.ID)
 	data, err := json.Marshal(task)
 	if err != nil {
-		return fmt.Errorf("failed to marshal task: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_task_marshal_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Cache for 1 hour
@@ -298,7 +298,7 @@ func (tm *TaskManager) cacheTaskStats(ctx context.Context, stats map[string]inte
 
 	data, err := json.Marshal(stats)
 	if err != nil {
-		return fmt.Errorf("failed to marshal task stats: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_task_marshal_stats_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Cache for 5 minutes
@@ -340,7 +340,7 @@ func (tm *TaskManager) cacheWorkerTasks(ctx context.Context, workerID uuid.UUID,
 	key := fmt.Sprintf("worker:%s:tasks", workerID)
 	data, err := json.Marshal(taskIDs)
 	if err != nil {
-		return fmt.Errorf("failed to marshal task IDs: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_task_marshal_ids_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Cache for 10 minutes
@@ -386,7 +386,7 @@ func (tm *TaskManager) GetTaskWithCache(ctx context.Context, taskID uuid.UUID) (
 	tm.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("task not found: %s", taskID)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_task_not_found", map[string]any{"ID": taskID.String()}))
 	}
 
 	// Cache the result

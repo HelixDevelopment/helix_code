@@ -25,7 +25,7 @@ func (cm *CheckpointManager) CreateCheckpoint(taskID uuid.UUID, workerID uuid.UU
 	// Convert checkpoint data to JSON
 	checkpointDataJSON, err := json.Marshal(checkpointData)
 	if err != nil {
-		return fmt.Errorf("failed to marshal checkpoint data: %v", err)
+		return fmt.Errorf("%s", tr(ctx, "internal_task_marshal_checkpoint_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	// Insert checkpoint into database

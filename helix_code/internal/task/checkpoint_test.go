@@ -54,7 +54,9 @@ func TestCheckpointManager_CreateCheckpointMarshalError(t *testing.T) {
 	err := cm.CreateCheckpoint(taskID, workerID, checkpointName, invalidData)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to marshal checkpoint data")
+	// CONST-046 round-240 migration: literal is now Translator
+	// message ID. Noop default echoes the ID verbatim.
+	assert.Contains(t, err.Error(), "internal_task_marshal_checkpoint_failed")
 }
 
 func TestCheckpointManager_CreateCheckpointDatabaseError(t *testing.T) {

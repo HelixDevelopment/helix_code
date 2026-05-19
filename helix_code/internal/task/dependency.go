@@ -31,11 +31,11 @@ func (dm *DependencyManager) ValidateDependencies(dependencies []uuid.UUID) erro
 		`, depID).Scan(&exists)
 
 		if err != nil {
-			return fmt.Errorf("failed to check dependency existence: %v", err)
+			return fmt.Errorf("%s", tr(ctx, "internal_task_dep_check_existence_failed", map[string]any{"Err": err.Error()}))
 		}
 
 		if !exists {
-			return fmt.Errorf("dependency task not found: %s", depID)
+			return fmt.Errorf("%s", tr(ctx, "internal_task_dep_not_found", map[string]any{"ID": depID.String()}))
 		}
 	}
 
@@ -58,7 +58,7 @@ func (dm *DependencyManager) CheckDependenciesCompleted(dependencies []uuid.UUID
 	`, dependencies).Scan(&completedCount)
 
 	if err != nil {
-		return false, fmt.Errorf("failed to check dependency status: %v", err)
+		return false, fmt.Errorf("%s", tr(ctx, "internal_task_dep_check_status_failed", map[string]any{"Err": err.Error()}))
 	}
 
 	return completedCount == len(dependencies), nil

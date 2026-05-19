@@ -1,0 +1,51 @@
+# internal/task i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/task/ to a message ID resolved at runtime via
+# Translator.T. helix_code wires a real *i18nadapter.Translator at
+# boot; the in-package NoopTranslator echoes the message ID verbatim
+# for unit tests + backward compat.
+#
+# Naming convention: internal_task_<area>_<short_description>.
+# All IDs prefixed with internal_task_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-240 §11.4 anti-bluff sweep (2026-05-19): kickoff scaffold +
+# 10 user-facing error literals returned from the task subsystem —
+# manager.go core CRUD guards (invalid deps, DB store failed,
+# marshal task / stats / IDs failed, task not found), dependency.go
+# validation guards (check-existence failed, dep not found, check-
+# status failed), and checkpoint.go marshal guard. These are the
+# strings that surface to operators when task creation, persistence,
+# dependency validation, or checkpointing trips.
+
+internal_task_invalid_dependencies:
+  other: "invalid dependencies: {{.Err}}"
+
+internal_task_store_in_db_failed:
+  other: "failed to store task in database: {{.Err}}"
+
+internal_task_marshal_failed:
+  other: "failed to marshal task: {{.Err}}"
+
+internal_task_marshal_stats_failed:
+  other: "failed to marshal task stats: {{.Err}}"
+
+internal_task_marshal_ids_failed:
+  other: "failed to marshal task IDs: {{.Err}}"
+
+internal_task_not_found:
+  other: "task not found: {{.ID}}"
+
+internal_task_dep_check_existence_failed:
+  other: "failed to check dependency existence: {{.Err}}"
+
+internal_task_dep_not_found:
+  other: "dependency task not found: {{.ID}}"
+
+internal_task_dep_check_status_failed:
+  other: "failed to check dependency status: {{.Err}}"
+
+internal_task_marshal_checkpoint_failed:
+  other: "failed to marshal checkpoint data: {{.Err}}"

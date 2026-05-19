@@ -429,7 +429,9 @@ func TestGetTaskWithCache_NotFound(t *testing.T) {
 	retrievedTask, err := tm.GetTaskWithCache(ctx, nonExistentID)
 	assert.Error(t, err)
 	assert.Nil(t, retrievedTask)
-	assert.Contains(t, err.Error(), "task not found")
+	// CONST-046 round-240 migration: literal "task not found" is now
+	// a Translator message ID. Noop default echoes the ID verbatim.
+	assert.Contains(t, err.Error(), "internal_task_not_found")
 }
 
 // TestUpdateTaskWithCache tests cache-aware task update
