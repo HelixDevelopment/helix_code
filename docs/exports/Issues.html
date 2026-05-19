@@ -717,10 +717,44 @@ topology, or (b) gate the test behind a
 <code>HOST_LOAD_DEDICATED=1</code> env var to run only on quiescent
 hosts. Operator decision needed.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-19 (round 189 — prefix rename ISSUE-NNN
-→ per-scope per CONST-049 cascade). To update Issues_Summary.md
-mechanically, run <code>scripts/generate_issues_summary.sh</code> (TODO:
-create — currently this Issues.md is the source of truth and Summary is
+<h2
+id="pan-001-panoptic-appendjsonstring-truncates-multi-byte-utf-8-runes-to-bytes-testresult.marshaljson-corrupts-non-ascii">PAN-001
+— panoptic <code>appendJSONString</code> truncates multi-byte UTF-8
+runes to bytes (<code>TestResult.MarshalJSON</code> corrupts
+non-ASCII)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 298 — panoptic
+enrichment subagent) <strong>Discovered-By:</strong> AI subagent
+runner-detector against real
+<code>executor.TestResult.MarshalJSON</code> <strong>Fixed:</strong>
+2026-05-19 (round 302 — panoptic submodule commit <code>24aa627</code> +
+meta pointer bump) <strong>Evidence:</strong>
+<code>panoptic/internal/executor/executor.go:120</code> —
+<code>buf = append(buf, byte(r))</code> in the <code>else</code> branch
+of <code>appendJSONString</code> casts a <code>rune</code> to a single
+byte. Multi-byte UTF-8 codepoints (German umlauts, Spanish accents,
+Japanese CJK, Serbian Cyrillic, Chinese Han) get truncated to one byte
+each, producing corrupted JSON output. Honestly tracked via the
+round-298 Challenge runner’s
+<code>executor-marshal:utf8-detector:regression-present</code> PASS line
++ KNOWN-ISSUE entry in <code>panoptic/docs/test-coverage.md</code> §7.
+Affects every consumer that JSON-marshals a <code>TestResult</code>
+containing non-ASCII text. <strong>Resolution:</strong> Replaced
+<code>buf = append(buf, byte(r))</code> with
+<code>buf = utf8.AppendRune(buf, r)</code> (Go 1.21+) + added
+<code>unicode/utf8</code> import. Single-line functional fix. Post-fix
+evidence: <code>go test -race -count=1 ./internal/executor/...</code> →
+ok 4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
+39/39 PASS, 0 FAIL; runner UTF-8 detector flipped from
+<code>regression-present</code> → <code>fixed</code> (literal log:
+<code>PASS [executor-marshal:utf8-detector:fixed]</code> +
+<code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
+Closed in this round.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-19 (round 302 — PAN-001 closed). To
+update Issues_Summary.md mechanically, run
+<code>scripts/generate_issues_summary.sh</code> (TODO: create —
+currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>
 </body>
 </html>

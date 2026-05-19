@@ -1042,8 +1042,23 @@ test assertions (1 llm + 4 logo + 6 notification + 2 notification
 additional). 4th package (performance) build-break already fixed inline
 by parent agent. All 4 packages PASS (llm 51.8s, logo 0.07s,
 notification 0.89s, performance 8.4s). Mutation-verified per CONST-035:
-3 mutations (one per package), revert→FAIL, restore→PASS. |</div>
-<p><em>Last regenerated: 2026-05-19 (round 200 — HXC-004 closure).
+3 mutations (one per package), revert→FAIL, restore→PASS. |<br />
+2026-05-19 | PAN-001: panoptic <code>appendJSONString</code> truncates
+multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
+corrupts non-ASCII) | Bug | Fixed (→ Fixed.md) | 302 | panoptic 24aa627
++ meta pointer-bump | Replaced <code>buf = append(buf, byte(r))</code>
+with <code>buf = utf8.AppendRune(buf, r)</code> in
+<code>panoptic/internal/executor/executor.go:120</code> + added
+<code>unicode/utf8</code> import. Evidence: <code>go build ./...</code>
+clean; <code>go test -race -count=1 ./internal/executor/...</code> → ok
+4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
+39/39 PASS, 0 FAIL; UTF-8 detector flipped
+<code>regression-present</code> → <code>fixed</code> (literal:
+<code>PASS [executor-marshal:utf8-detector:fixed]</code> +
+<code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
+Probe <code>AppName="ü"</code> (UTF-8 <code>0xC3 0xBC</code>) preserved
+end-to-end through MarshalJSON. |</div>
+<p><em>Last regenerated: 2026-05-19 (round 302 — PAN-001 closure).
 Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>

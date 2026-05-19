@@ -8,11 +8,11 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 8 | `Fixed (→ Fixed.md)` |
+| Bug | 9 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 79 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`).
+**Total closed items**: 80 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 302 added PAN-001 (panoptic UTF-8 truncation fix).
 
 ## Coverage by round-system phase
 
@@ -26,6 +26,6 @@
 
 ## Open issues snapshot (cross-ref `docs/Issues_Summary.md`)
 
-8 open issues: 5 Bugs / 2 Tasks / 1 Feature; 3 BLOCKED on operator decision.
+7 open issues: 4 Bugs / 2 Tasks / 1 Feature; 3 BLOCKED on operator decision.
 
-*Last regenerated: 2026-05-19 (round 189 — prefix-convention header note added). See `docs/Fixed.md` for full closure entries with commit SHAs.*
+*Last regenerated: 2026-05-19 (round 302 — PAN-001 closed). See `docs/Fixed.md` for full closure entries with commit SHAs.*
