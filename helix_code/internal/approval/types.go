@@ -18,6 +18,7 @@
 package approval
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -238,33 +239,37 @@ type ModeDescriptor struct {
 }
 
 // ModeDescriptors returns the four canonical mode descriptors keyed by mode.
-// The map has exactly four entries; callers may rely on len()==4.
+// The map has exactly four entries; callers may rely on len()==4. Description
+// fields resolve via the CONST-046 translator seam so non-English locales can
+// localise /approval show output; the NoopTranslator fallback yields loud
+// message-ID echoes (anti-bluff — silent empty would hide the regression).
 func ModeDescriptors() map[ApprovalMode]ModeDescriptor {
+	ctx := context.Background()
 	return map[ApprovalMode]ModeDescriptor{
 		ModeSuggest: {
 			Mode:        ModeSuggest,
-			Description: "Read-only mode. The agent may inspect files and propose changes but cannot apply edits or run commands.",
+			Description: tr(ctx, "internal_approval_mode_suggest_description", nil),
 			SafetyOrder: 0,
 			SandboxRule: "n/a",
 			NetworkRule: "n/a",
 		},
 		ModeAutoEdit: {
 			Mode:        ModeAutoEdit,
-			Description: "File edits proceed without prompting; shell and subprocess execution prompts the user. Sandboxing is optional.",
+			Description: tr(ctx, "internal_approval_mode_auto_edit_description", nil),
 			SafetyOrder: 1,
 			SandboxRule: "optional",
 			NetworkRule: "n/a",
 		},
 		ModeFullAuto: {
 			Mode:        ModeFullAuto,
-			Description: "Edits and shell execution proceed without prompts. The sandbox is forced on and network egress is denied.",
+			Description: tr(ctx, "internal_approval_mode_full_auto_description", nil),
 			SafetyOrder: 2,
 			SandboxRule: "required",
 			NetworkRule: "denied",
 		},
 		ModeDangerous: {
 			Mode:        ModeDangerous,
-			Description: "All approval checks are bypassed and the sandbox is skipped. Only for trusted automation contexts.",
+			Description: tr(ctx, "internal_approval_mode_dangerous_description", nil),
 			SafetyOrder: 3,
 			SandboxRule: "skipped",
 			NetworkRule: "n/a",
@@ -278,7 +283,7 @@ func ModeDescriptors() map[ApprovalMode]ModeDescriptor {
 // input yields ErrInvalidMode wrapped with the offending value.
 func ParseMode(s string) (ApprovalMode, error) {
 	if s == "" {
-		return "", fmt.Errorf("%w: empty string", ErrInvalidMode)
+		return "", fmt.Errorf("%w: %s", ErrInvalidMode, tr(context.Background(), "internal_approval_invalid_mode_empty", nil))
 	}
 	normalised := strings.ToLower(strings.ReplaceAll(s, "_", "-"))
 	candidate := ApprovalMode(normalised)

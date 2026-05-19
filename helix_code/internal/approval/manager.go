@@ -214,9 +214,13 @@ func (m *ApprovalManager) CheckApproval(req ApprovalRequest) (Action, error) {
 		if req.Level == LevelReadOnly {
 			return ActionAllow, nil
 		}
+		reason := tr(context.Background(), "internal_approval_denied_read_only", map[string]any{
+			"Tool":  fmt.Sprintf("%q", req.ToolName),
+			"Level": req.Level.String(),
+			"Mode":  ModeSuggest.String(),
+		})
 		return ActionDenyWithReason,
-			fmt.Errorf("%w: tool %q requires %s but mode is %s (read-only)",
-				ErrApprovalDenied, req.ToolName, req.Level, ModeSuggest)
+			fmt.Errorf("%w: %s", ErrApprovalDenied, reason)
 
 	case ModeAutoEdit:
 		switch req.Level {
@@ -294,14 +298,23 @@ func (m *ApprovalManager) NetworkAllowed() bool {
 
 // buildPromptQuestion renders the human-facing question shown by the F19
 // prompter. Kept private; tests assert via the recorded question text on
-// the fake responder.
+// the fake responder. All user-facing fragments resolve via the CONST-046
+// translator seam so non-English locales can localise the prompt.
 func buildPromptQuestion(req ApprovalRequest) string {
-	q := fmt.Sprintf("Allow tool %q (level=%s)?", req.ToolName, req.Level)
+	ctx := context.Background()
+	q := tr(ctx, "internal_approval_prompt_allow_tool", map[string]any{
+		"Tool":  fmt.Sprintf("%q", req.ToolName),
+		"Level": req.Level.String(),
+	})
 	if len(req.Args) > 0 {
-		q += fmt.Sprintf(" args=%v", req.Args)
+		q += tr(ctx, "internal_approval_prompt_args_suffix", map[string]any{
+			"Args": fmt.Sprintf("%v", req.Args),
+		})
 	}
 	if req.Context != "" {
-		q += " " + req.Context
+		q += tr(ctx, "internal_approval_prompt_context_suffix", map[string]any{
+			"Context": req.Context,
+		})
 	}
 	return q
 }

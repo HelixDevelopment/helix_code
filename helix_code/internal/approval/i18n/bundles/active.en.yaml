@@ -1,0 +1,52 @@
+# internal/approval i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/approval/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_approval_<area>_<short_description>.
+# All IDs prefixed with internal_approval_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-221 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# most user-facing literals: 1 denial-reason in manager.CheckApproval
+# (ModeSuggest path), 1 invalid-mode parse error, 4 mode description
+# strings from ModeDescriptors, 2 prompt-question fragments emitted
+# by buildPromptQuestion (the actual yes/no prompt shown to the
+# user via the F19 PromptResponder), 2 prompt-question affixes for
+# args and free-form context. Remaining low-priority literals (debug
+# String() formats, "tool %q" inline error fragments) deferred to
+# future rounds to stay under the size cap.
+
+internal_approval_denied_read_only:
+  other: "tool {{.Tool}} requires {{.Level}} but mode is {{.Mode}} (read-only)"
+
+internal_approval_invalid_mode_empty:
+  other: "empty string"
+
+internal_approval_mode_suggest_description:
+  other: "Read-only mode. The agent may inspect files and propose changes but cannot apply edits or run commands."
+
+internal_approval_mode_auto_edit_description:
+  other: "File edits proceed without prompting; shell and subprocess execution prompts the user. Sandboxing is optional."
+
+internal_approval_mode_full_auto_description:
+  other: "Edits and shell execution proceed without prompts. The sandbox is forced on and network egress is denied."
+
+internal_approval_mode_dangerous_description:
+  other: "All approval checks are bypassed and the sandbox is skipped. Only for trusted automation contexts."
+
+internal_approval_prompt_allow_tool:
+  other: "Allow tool {{.Tool}} (level={{.Level}})?"
+
+internal_approval_prompt_args_suffix:
+  other: " args={{.Args}}"
+
+internal_approval_prompt_context_suffix:
+  other: " {{.Context}}"
+
+internal_approval_prompt_separator:
+  other: " "
