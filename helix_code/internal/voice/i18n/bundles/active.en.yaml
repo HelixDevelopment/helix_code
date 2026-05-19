@@ -1,0 +1,30 @@
+# internal/voice i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/voice/voice_tools.go to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_voice_<area>_<short_description>.
+# All IDs prefixed with internal_voice_ to avoid namespace collision
+# with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-226 §11.4 anti-bluff sweep (2026-05-19): migrated the three
+# tool-description literals emitted by voice_tools.go through
+# tools.Tool.Description() — the voice_start, voice_stop, and
+# voice_transcribe tool descriptions rendered in CLI help output
+# and tool-registry surfaces. These are the only operator-visible
+# strings in the package; the rest of the surface is technical
+# tokens (audio file paths, exec.Cmd args, sentinel error names)
+# explicitly out of CONST-046 scope.
+
+internal_voice_tool_start_description:
+  other: "Start recording audio from microphone"
+
+internal_voice_tool_stop_description:
+  other: "Stop recording and save audio file"
+
+internal_voice_tool_transcribe_description:
+  other: "Transcribe recorded audio to text"

@@ -19,8 +19,12 @@ func NewVoiceStartTool(recorder *VoiceRecorder) *VoiceStartTool {
 	return &VoiceStartTool{recorder: recorder}
 }
 
-func (t *VoiceStartTool) Name() string        { return "voice_start" }
-func (t *VoiceStartTool) Description() string { return "Start recording audio from microphone" }
+func (t *VoiceStartTool) Name() string { return "voice_start" }
+func (t *VoiceStartTool) Description() string {
+	// CONST-046: resolve through the translator seam so non-English
+	// operators see this tool description in their active locale.
+	return tr(context.Background(), "internal_voice_tool_start_description", nil)
+}
 func (t *VoiceStartTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("voice")
 }
@@ -59,8 +63,12 @@ func NewVoiceStopTool(recorder *VoiceRecorder) *VoiceStopTool {
 	return &VoiceStopTool{recorder: recorder}
 }
 
-func (t *VoiceStopTool) Name() string        { return "voice_stop" }
-func (t *VoiceStopTool) Description() string { return "Stop recording and save audio file" }
+func (t *VoiceStopTool) Name() string { return "voice_stop" }
+func (t *VoiceStopTool) Description() string {
+	// CONST-046: resolve through the translator seam so non-English
+	// operators see this tool description in their active locale.
+	return tr(context.Background(), "internal_voice_tool_stop_description", nil)
+}
 func (t *VoiceStopTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("voice")
 }
@@ -105,8 +113,12 @@ func NewVoiceTranscribeTool(recorder *VoiceRecorder, transcriber *VoiceTranscrib
 	return &VoiceTranscribeTool{recorder: recorder, transcriber: transcriber}
 }
 
-func (t *VoiceTranscribeTool) Name() string        { return "voice_transcribe" }
-func (t *VoiceTranscribeTool) Description() string { return "Transcribe recorded audio to text" }
+func (t *VoiceTranscribeTool) Name() string { return "voice_transcribe" }
+func (t *VoiceTranscribeTool) Description() string {
+	// CONST-046: resolve through the translator seam so non-English
+	// operators see this tool description in their active locale.
+	return tr(context.Background(), "internal_voice_tool_transcribe_description", nil)
+}
 func (t *VoiceTranscribeTool) Category() tools.ToolCategory {
 	return tools.ToolCategory("voice")
 }
