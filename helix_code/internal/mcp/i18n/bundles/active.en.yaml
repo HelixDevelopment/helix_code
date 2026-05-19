@@ -1,0 +1,65 @@
+# internal/mcp i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/mcp/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_mcp_<area>_<short_description>.
+# All IDs prefixed with internal_mcp_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-164 §11.4 anti-bluff sweep (2026-05-19): migrated 10 distinct
+# user-facing strings emitted by server.go + config.go covering tool
+# registration confirmation, WebSocket lifecycle (upgrade failure,
+# session start/end, message read failure), JSON-RPC error texts
+# ("Method not found", "Tool execution failed"), the published
+# serverInfo name ("HelixCode MCP Server") returned in handleInitialize
+# responses, the duplicate-tool registration error, and the env-var
+# expansion warning emitted by config.LoadConfig.
+#
+# JSON-RPC protocol field names (e.g. "jsonrpc", "id", "method",
+# "params", "result", "error", "tools", "initialize", "tools/list",
+# "tools/call", "ping", "notifications/capabilities",
+# "notifications/initialized") are NOT migrated — those are
+# wire-format identity tokens consumed by remote peers per
+# MCP/JSON-RPC 2.0 specification; migrating them would silently
+# rewrite protocol identifiers and break interoperability with every
+# spec-compliant peer.
+#
+# Protocol version "2024-11-05" + serverInfo "version" string "1.0.0"
+# are likewise NOT migrated — those are identity tokens advertised in
+# capability handshake and consumed by clients for compatibility
+# selection, not user-facing display content.
+
+internal_mcp_server_tool_already_registered:
+  other: "tool with ID {{.ToolID}} already registered"
+
+internal_mcp_server_tool_registered:
+  other: "✅ MCP Tool registered: {{.ToolName}} ({{.ToolID}})"
+
+internal_mcp_server_websocket_upgrade_failed:
+  other: "❌ Failed to upgrade WebSocket connection: {{.Error}}"
+
+internal_mcp_server_session_started:
+  other: "🔌 MCP Session started: {{.SessionID}}"
+
+internal_mcp_server_session_ended:
+  other: "🔌 MCP Session ended: {{.SessionID}}"
+
+internal_mcp_server_read_message_failed:
+  other: "❌ Failed to read MCP message: {{.Error}}"
+
+internal_mcp_server_method_not_found:
+  other: "Method not found"
+
+internal_mcp_server_info_name:
+  other: "HelixCode MCP Server"
+
+internal_mcp_server_tool_execution_failed:
+  other: "Tool execution failed"
+
+internal_mcp_config_env_vars_unset:
+  other: "mcp config {{.Path}}: env var(s) not set, expanded to empty: {{.Keys}}"

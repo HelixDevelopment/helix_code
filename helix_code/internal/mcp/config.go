@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	stdctx "context"
 	"errors"
 	"fmt"
 	"log"
@@ -93,7 +94,7 @@ func LoadConfig(path string) (*Config, error) {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
-		log.Printf("mcp config %s: env var(s) not set, expanded to empty: %v", path, keys)
+		log.Print(tr(stdctx.Background(), "internal_mcp_config_env_vars_unset", map[string]any{"Path": path, "Keys": keys}))
 	}
 	if err := cfg.Validate(); err != nil {
 		return nil, err

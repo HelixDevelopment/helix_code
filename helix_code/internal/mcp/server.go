@@ -117,11 +117,11 @@ func (s *MCPServer) RegisterTool(tool *Tool) error {
 	defer s.toolMux.Unlock()
 
 	if _, exists := s.tools[tool.ID]; exists {
-		return fmt.Errorf("tool with ID %s already registered", tool.ID)
+		return fmt.Errorf("%s", tr(context.Background(), "internal_mcp_server_tool_already_registered", map[string]any{"ToolID": tool.ID}))
 	}
 
 	s.tools[tool.ID] = tool
-	log.Printf("✅ MCP Tool registered: %s (%s)", tool.Name, tool.ID)
+	log.Print(tr(context.Background(), "internal_mcp_server_tool_registered", map[string]any{"ToolName": tool.Name, "ToolID": tool.ID}))
 	return nil
 }
 
@@ -129,7 +129,7 @@ func (s *MCPServer) RegisterTool(tool *Tool) error {
 func (s *MCPServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("❌ Failed to upgrade WebSocket connection: %v", err)
+		log.Print(tr(context.Background(), "internal_mcp_server_websocket_upgrade_failed", map[string]any{"Error": err}))
 		return
 	}
 
@@ -147,7 +147,7 @@ func (s *MCPServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	s.sessions[session.ID] = session
 	s.sessionMux.Unlock()
 
-	log.Printf("🔌 MCP Session started: %s", session.ID)
+	log.Print(tr(context.Background(), "internal_mcp_server_session_started", map[string]any{"SessionID": session.ID}))
 
 	// Handle session
 	go s.handleSession(session)
@@ -160,14 +160,14 @@ func (s *MCPServer) handleSession(session *MCPSession) {
 		s.sessionMux.Lock()
 		delete(s.sessions, session.ID)
 		s.sessionMux.Unlock()
-		log.Printf("🔌 MCP Session ended: %s", session.ID)
+		log.Print(tr(context.Background(), "internal_mcp_server_session_ended", map[string]any{"SessionID": session.ID}))
 	}()
 
 	for {
 		var message MCPMessage
 		err := session.Conn.ReadJSON(&message)
 		if err != nil {
-			log.Printf("❌ Failed to read MCP message: %v", err)
+			log.Print(tr(context.Background(), "internal_mcp_server_read_message_failed", map[string]any{"Error": err}))
 			break
 		}
 
@@ -194,7 +194,7 @@ func (s *MCPServer) handleMessage(session *MCPSession, message *MCPMessage) {
 	case "ping":
 		s.handlePing(session, message)
 	default:
-		s.sendError(session, message.ID, -32601, "Method not found", nil)
+		s.sendError(session, message.ID, -32601, tr(context.Background(), "internal_mcp_server_method_not_found", nil), nil)
 	}
 }
 
@@ -228,7 +228,7 @@ func (s *MCPServer) handleInitialize(session *MCPSession, message *MCPMessage) {
 				},
 			},
 			"serverInfo": map[string]interface{}{
-				"name":    "HelixCode MCP Server",
+				"name":    tr(context.Background(), "internal_mcp_server_info_name", nil),
 				"version": "1.0.0",
 			},
 		},
@@ -286,7 +286,7 @@ func (s *MCPServer) handleCallTool(ctx context.Context, session *MCPSession, mes
 	// Execute tool
 	result, err := tool.Handler(ctx, session, params.Arguments)
 	if err != nil {
-		s.sendError(session, message.ID, -32000, "Tool execution failed", err.Error())
+		s.sendError(session, message.ID, -32000, tr(context.Background(), "internal_mcp_server_tool_execution_failed", nil), err.Error())
 		return
 	}
 
