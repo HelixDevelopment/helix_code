@@ -262,3 +262,194 @@ helix_config_msg_prefix_warning:
 
 helix_config_msg_prefix_debug:
   other: "DEBUG:"
+
+# --- Round-320 §11.4 CONST-046 Phase 4 (2026-05-20): subcommand help
+# text (Short/Long) + per-subcommand flag descriptions for the show /
+# get / set / delete / validate / export / import / backup commands.
+# 52 user-facing literals — these appear on every `helix-config
+# <subcommand> --help` invocation.
+
+helix_config_cmd_show_short:
+  other: "Show current configuration"
+
+helix_config_cmd_show_long:
+  other: |-
+    Display the current HelixCode configuration.
+
+    The configuration can be filtered by section or displayed in its entirety.
+    Sensitive values are masked by default unless --show-secrets is used.
+
+helix_config_flag_section_show:
+  other: "Show only specific section"
+
+helix_config_flag_masked:
+  other: "Show masked sensitive values"
+
+helix_config_flag_defaults_show:
+  other: "Show default values for unset fields"
+
+helix_config_flag_flattened:
+  other: "Show configuration in flattened key-value format"
+
+helix_config_cmd_get_short:
+  other: "Get a configuration value"
+
+helix_config_cmd_get_long:
+  other: |-
+    Retrieve a specific configuration value by key path.
+
+    Examples:
+      helix-config get application.name
+      helix-config get server.port
+      helix-config get llm.default_provider
+
+helix_config_flag_type_show:
+  other: "Show the type of the value"
+
+helix_config_flag_source_show:
+  other: "Show the source of the value"
+
+helix_config_flag_valid:
+  other: "Validate the retrieved value"
+
+helix_config_cmd_set_short:
+  other: "Set a configuration value"
+
+helix_config_cmd_set_long:
+  other: |-
+    Set a specific configuration value by key path.
+
+    The value is interpreted based on the target field type.
+    Use quotes for string values containing spaces.
+
+    Examples:
+      helix-config set application.name "My App"
+      helix-config set server.port 8080
+      helix-config set llm.temperature 0.8
+
+helix_config_flag_create:
+  other: "Create field if it doesn't exist"
+
+helix_config_flag_validate_set:
+  other: "Validate value before setting"
+
+helix_config_flag_type_force:
+  other: "Force value type (string, int, float, bool)"
+
+helix_config_flag_format_parse:
+  other: "Value format for parsing"
+
+helix_config_flag_backup_set:
+  other: "Create backup before setting"
+
+helix_config_flag_restart:
+  other: "Restart affected services after setting"
+
+helix_config_cmd_delete_short:
+  other: "Delete a configuration value"
+
+helix_config_cmd_delete_long:
+  other: |-
+    Delete a specific configuration value by key path.
+
+    The field is reset to its default value.
+
+    Examples:
+      helix-config delete server.custom_headers
+      helix-config delete llm.api_keys.test
+
+helix_config_flag_reset_delete:
+  other: "Reset to default value instead of deleting"
+
+helix_config_flag_confirm_delete:
+  other: "Require confirmation before deleting"
+
+helix_config_flag_backup_delete:
+  other: "Create backup before deleting"
+
+helix_config_cmd_validate_short:
+  other: "Validate configuration"
+
+helix_config_cmd_validate_long:
+  other: |-
+    Validate the current or specified configuration file.
+
+    All validation rules are applied and detailed error information is provided.
+
+helix_config_flag_strict_validate:
+  other: "Enable strict validation mode"
+
+helix_config_flag_warnings:
+  other: "Show validation warnings"
+
+helix_config_flag_details_validate:
+  other: "Show detailed validation information"
+
+helix_config_flag_section_validate:
+  other: "Validate only specific section"
+
+helix_config_flag_schema_validate:
+  other: "Validate against JSON schema"
+
+helix_config_cmd_export_short:
+  other: "Export configuration"
+
+helix_config_cmd_export_long:
+  other: |-
+    Export the current configuration to a file.
+
+    The configuration can be exported in various formats.
+
+helix_config_flag_format_export:
+  other: "Export format (json, yaml, toml)"
+
+helix_config_flag_secrets_export:
+  other: "Include sensitive values in export"
+
+helix_config_flag_defaults_export:
+  other: "Include default values"
+
+helix_config_flag_comments_export:
+  other: "Include comments in export"
+
+helix_config_flag_compress_export:
+  other: "Compress the exported file"
+
+helix_config_flag_encrypt_export:
+  other: "Encrypt the exported file"
+
+helix_config_flag_password_export:
+  other: "Password for encryption"
+
+helix_config_cmd_import_short:
+  other: "Import configuration"
+
+helix_config_cmd_import_long:
+  other: |-
+    Import configuration from a file.
+
+    The imported configuration is validated before being applied.
+
+helix_config_flag_validate_import:
+  other: "Validate imported configuration"
+
+helix_config_flag_backup_import:
+  other: "Create backup before import"
+
+helix_config_flag_merge_import:
+  other: "Merge with existing configuration"
+
+helix_config_flag_force_import:
+  other: "Force import even with validation errors"
+
+helix_config_flag_from_import:
+  other: "Source configuration version for migration"
+
+helix_config_cmd_backup_short:
+  other: "Create configuration backup"
+
+helix_config_cmd_backup_long:
+  other: |-
+    Create a backup of the current configuration.
+
+    The backup includes all configuration files and can be used for restoration.

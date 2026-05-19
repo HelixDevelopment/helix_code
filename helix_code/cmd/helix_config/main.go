@@ -168,165 +168,143 @@ func createRootCommand() *cobra.Command {
 // Subcommands
 
 func createShowCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "show",
-		Short: "Show current configuration",
-		Long: `Display the current HelixCode configuration.
-
-The configuration can be filtered by section or displayed in its entirety.
-Sensitive values are masked by default unless --show-secrets is used.`,
-		RunE: runShowCommand,
+		Short: tr(ctx, "helix_config_cmd_show_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_show_long", nil),
+		RunE:  runShowCommand,
 	}
 
-	cmd.Flags().StringP("section", "s", "", "Show only specific section")
-	cmd.Flags().Bool("masked", true, "Show masked sensitive values")
-	cmd.Flags().Bool("defaults", false, "Show default values for unset fields")
-	cmd.Flags().Bool("flattened", false, "Show configuration in flattened key-value format")
+	cmd.Flags().StringP("section", "s", "", tr(ctx, "helix_config_flag_section_show", nil))
+	cmd.Flags().Bool("masked", true, tr(ctx, "helix_config_flag_masked", nil))
+	cmd.Flags().Bool("defaults", false, tr(ctx, "helix_config_flag_defaults_show", nil))
+	cmd.Flags().Bool("flattened", false, tr(ctx, "helix_config_flag_flattened", nil))
 
 	return cmd
 }
 
 func createGetCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "get <key>",
-		Short: "Get a configuration value",
-		Long: `Retrieve a specific configuration value by key path.
-
-Examples:
-  helix-config get application.name
-  helix-config get server.port
-  helix-config get llm.default_provider`,
-		Args: cobra.ExactArgs(1),
-		RunE: runGetCommand,
+		Short: tr(ctx, "helix_config_cmd_get_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_get_long", nil),
+		Args:  cobra.ExactArgs(1),
+		RunE:  runGetCommand,
 	}
 
-	cmd.Flags().Bool("type", false, "Show the type of the value")
-	cmd.Flags().Bool("source", false, "Show the source of the value")
-	cmd.Flags().Bool("valid", false, "Validate the retrieved value")
+	cmd.Flags().Bool("type", false, tr(ctx, "helix_config_flag_type_show", nil))
+	cmd.Flags().Bool("source", false, tr(ctx, "helix_config_flag_source_show", nil))
+	cmd.Flags().Bool("valid", false, tr(ctx, "helix_config_flag_valid", nil))
 
 	return cmd
 }
 
 func createSetCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "set <key> <value>",
-		Short: "Set a configuration value",
-		Long: `Set a specific configuration value by key path.
-
-The value is interpreted based on the target field type.
-Use quotes for string values containing spaces.
-
-Examples:
-  helix-config set application.name "My App"
-  helix-config set server.port 8080
-  helix-config set llm.temperature 0.8`,
-		Args: cobra.ExactArgs(2),
-		RunE: runSetCommand,
+		Short: tr(ctx, "helix_config_cmd_set_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_set_long", nil),
+		Args:  cobra.ExactArgs(2),
+		RunE:  runSetCommand,
 	}
 
-	cmd.Flags().Bool("create", false, "Create field if it doesn't exist")
-	cmd.Flags().Bool("validate", true, "Validate value before setting")
-	cmd.Flags().String("type", "", "Force value type (string, int, float, bool)")
-	cmd.Flags().String("format", "", "Value format for parsing")
-	cmd.Flags().Bool("backup", true, "Create backup before setting")
-	cmd.Flags().Bool("restart", false, "Restart affected services after setting")
+	cmd.Flags().Bool("create", false, tr(ctx, "helix_config_flag_create", nil))
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_set", nil))
+	cmd.Flags().String("type", "", tr(ctx, "helix_config_flag_type_force", nil))
+	cmd.Flags().String("format", "", tr(ctx, "helix_config_flag_format_parse", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_set", nil))
+	cmd.Flags().Bool("restart", false, tr(ctx, "helix_config_flag_restart", nil))
 
 	return cmd
 }
 
 func createDeleteCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "delete <key>",
-		Short: "Delete a configuration value",
-		Long: `Delete a specific configuration value by key path.
-
-The field is reset to its default value.
-
-Examples:
-  helix-config delete server.custom_headers
-  helix-config delete llm.api_keys.test`,
-		Args: cobra.ExactArgs(1),
-		RunE: runDeleteCommand,
+		Short: tr(ctx, "helix_config_cmd_delete_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_delete_long", nil),
+		Args:  cobra.ExactArgs(1),
+		RunE:  runDeleteCommand,
 	}
 
-	cmd.Flags().Bool("reset", true, "Reset to default value instead of deleting")
-	cmd.Flags().Bool("confirm", false, "Require confirmation before deleting")
-	cmd.Flags().Bool("backup", true, "Create backup before deleting")
+	cmd.Flags().Bool("reset", true, tr(ctx, "helix_config_flag_reset_delete", nil))
+	cmd.Flags().Bool("confirm", false, tr(ctx, "helix_config_flag_confirm_delete", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_delete", nil))
 
 	return cmd
 }
 
 func createValidateCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "validate [file]",
-		Short: "Validate configuration",
-		Long: `Validate the current or specified configuration file.
-
-All validation rules are applied and detailed error information is provided.`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: runValidateCommand,
+		Short: tr(ctx, "helix_config_cmd_validate_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_validate_long", nil),
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  runValidateCommand,
 	}
 
-	cmd.Flags().Bool("strict", false, "Enable strict validation mode")
-	cmd.Flags().Bool("warnings", true, "Show validation warnings")
-	cmd.Flags().Bool("details", false, "Show detailed validation information")
-	cmd.Flags().String("section", "", "Validate only specific section")
-	cmd.Flags().Bool("schema", false, "Validate against JSON schema")
+	cmd.Flags().Bool("strict", false, tr(ctx, "helix_config_flag_strict_validate", nil))
+	cmd.Flags().Bool("warnings", true, tr(ctx, "helix_config_flag_warnings", nil))
+	cmd.Flags().Bool("details", false, tr(ctx, "helix_config_flag_details_validate", nil))
+	cmd.Flags().String("section", "", tr(ctx, "helix_config_flag_section_validate", nil))
+	cmd.Flags().Bool("schema", false, tr(ctx, "helix_config_flag_schema_validate", nil))
 
 	return cmd
 }
 
 func createExportCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "export [file]",
-		Short: "Export configuration",
-		Long: `Export the current configuration to a file.
-
-The configuration can be exported in various formats.`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: runExportCommand,
+		Short: tr(ctx, "helix_config_cmd_export_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_export_long", nil),
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  runExportCommand,
 	}
 
-	cmd.Flags().StringP("format", "f", "auto", "Export format (json, yaml, toml)")
-	cmd.Flags().Bool("secrets", false, "Include sensitive values in export")
-	cmd.Flags().Bool("defaults", false, "Include default values")
-	cmd.Flags().Bool("comments", false, "Include comments in export")
-	cmd.Flags().Bool("compress", false, "Compress the exported file")
-	cmd.Flags().Bool("encrypt", false, "Encrypt the exported file")
-	cmd.Flags().String("password", "", "Password for encryption")
+	cmd.Flags().StringP("format", "f", "auto", tr(ctx, "helix_config_flag_format_export", nil))
+	cmd.Flags().Bool("secrets", false, tr(ctx, "helix_config_flag_secrets_export", nil))
+	cmd.Flags().Bool("defaults", false, tr(ctx, "helix_config_flag_defaults_export", nil))
+	cmd.Flags().Bool("comments", false, tr(ctx, "helix_config_flag_comments_export", nil))
+	cmd.Flags().Bool("compress", false, tr(ctx, "helix_config_flag_compress_export", nil))
+	cmd.Flags().Bool("encrypt", false, tr(ctx, "helix_config_flag_encrypt_export", nil))
+	cmd.Flags().String("password", "", tr(ctx, "helix_config_flag_password_export", nil))
 
 	return cmd
 }
 
 func createImportCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "import <file>",
-		Short: "Import configuration",
-		Long: `Import configuration from a file.
-
-The imported configuration is validated before being applied.`,
-		Args: cobra.ExactArgs(1),
-		RunE: runImportCommand,
+		Short: tr(ctx, "helix_config_cmd_import_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_import_long", nil),
+		Args:  cobra.ExactArgs(1),
+		RunE:  runImportCommand,
 	}
 
-	cmd.Flags().Bool("validate", true, "Validate imported configuration")
-	cmd.Flags().Bool("backup", true, "Create backup before import")
-	cmd.Flags().Bool("merge", false, "Merge with existing configuration")
-	cmd.Flags().Bool("force", false, "Force import even with validation errors")
-	cmd.Flags().String("from", "", "Source configuration version for migration")
+	cmd.Flags().Bool("validate", true, tr(ctx, "helix_config_flag_validate_import", nil))
+	cmd.Flags().Bool("backup", true, tr(ctx, "helix_config_flag_backup_import", nil))
+	cmd.Flags().Bool("merge", false, tr(ctx, "helix_config_flag_merge_import", nil))
+	cmd.Flags().Bool("force", false, tr(ctx, "helix_config_flag_force_import", nil))
+	cmd.Flags().String("from", "", tr(ctx, "helix_config_flag_from_import", nil))
 
 	return cmd
 }
 
 func createBackupCommand() *cobra.Command {
+	ctx := context.Background()
 	cmd := &cobra.Command{
 		Use:   "backup [path]",
-		Short: "Create configuration backup",
-		Long: `Create a backup of the current configuration.
-
-The backup includes all configuration files and can be used for restoration.`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: runBackupCommand,
+		Short: tr(ctx, "helix_config_cmd_backup_short", nil),
+		Long:  tr(ctx, "helix_config_cmd_backup_long", nil),
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  runBackupCommand,
 	}
 
 	cmd.Flags().Bool("incremental", false, "Create incremental backup")

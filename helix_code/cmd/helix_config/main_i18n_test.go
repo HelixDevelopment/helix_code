@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"dev.helix.code/cmd/helix_config/i18n"
@@ -896,4 +897,160 @@ func TestMessagePrefixes_TranslateViaTr(t *testing.T) {
 	if !strings.Contains(dbgOut, "<TRANSLATED:helix_config_msg_prefix_debug>") {
 		t.Fatalf("debugf prefix not translated: %q", dbgOut)
 	}
+}
+
+// --- Round-320 §11.4 CONST-046 Phase 4 (2026-05-20) ---
+// Paired-mutation seam tests for the subcommand help-text (Short/Long)
+// + per-subcommand flag descriptions migrated this round (show / get /
+// set / delete / validate / export / import / backup). Each test
+// asserts (a) the translator sentinel appears in the cobra metadata
+// AND (b) the original English literal is absent — the joint anti-
+// bluff invariant per §11.9.
+
+// assertCmdHelpTranslated checks a subcommand's Short and Long both
+// resolve through tr() and no longer carry their original literals.
+func assertCmdHelpTranslated(t *testing.T, cmd *cobra.Command, shortID, longID, shortLiteral, longLiteral string) {
+	t.Helper()
+	if !strings.Contains(cmd.Short, "<TRANSLATED:"+shortID+">") {
+		t.Fatalf("%s Short not translated: %q", cmd.Name(), cmd.Short)
+	}
+	if strings.Contains(cmd.Short, shortLiteral) {
+		t.Fatalf("%s Short still contains original literal %q", cmd.Name(), shortLiteral)
+	}
+	if !strings.Contains(cmd.Long, "<TRANSLATED:"+longID+">") {
+		t.Fatalf("%s Long not translated: %q", cmd.Name(), cmd.Long)
+	}
+	if strings.Contains(cmd.Long, longLiteral) {
+		t.Fatalf("%s Long still contains original literal %q", cmd.Name(), longLiteral)
+	}
+}
+
+// assertFlagsTranslated walks a subcommand's local flag set and asserts
+// each named flag's Usage carries the translator sentinel and not the
+// original literal.
+func assertFlagsTranslated(t *testing.T, cmd *cobra.Command, cases map[string]struct{ msgID, literal string }) {
+	t.Helper()
+	for flagName, want := range cases {
+		f := cmd.Flags().Lookup(flagName)
+		if f == nil {
+			t.Fatalf("%s flag %q not registered", cmd.Name(), flagName)
+		}
+		if f.Usage != "<TRANSLATED:"+want.msgID+">" {
+			t.Fatalf("%s flag %q usage not translated: %q", cmd.Name(), flagName, f.Usage)
+		}
+		if want.literal != "" && strings.Contains(f.Usage, want.literal) {
+			t.Fatalf("%s flag %q still carries original literal %q", cmd.Name(), flagName, want.literal)
+		}
+	}
+}
+
+func TestShowCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createShowCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_show_short", "helix_config_cmd_show_long",
+		"Show current configuration", "Display the current HelixCode configuration")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"section":   {"helix_config_flag_section_show", "Show only specific section"},
+		"masked":    {"helix_config_flag_masked", "Show masked sensitive values"},
+		"defaults":  {"helix_config_flag_defaults_show", "Show default values"},
+		"flattened": {"helix_config_flag_flattened", "flattened key-value format"},
+	})
+}
+
+func TestGetCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createGetCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_get_short", "helix_config_cmd_get_long",
+		"Get a configuration value", "Retrieve a specific configuration value")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"type":   {"helix_config_flag_type_show", "Show the type of the value"},
+		"source": {"helix_config_flag_source_show", "Show the source of the value"},
+		"valid":  {"helix_config_flag_valid", "Validate the retrieved value"},
+	})
+}
+
+func TestSetCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createSetCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_set_short", "helix_config_cmd_set_long",
+		"Set a configuration value", "Set a specific configuration value")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"create":   {"helix_config_flag_create", "Create field if it doesn't exist"},
+		"validate": {"helix_config_flag_validate_set", "Validate value before setting"},
+		"type":     {"helix_config_flag_type_force", "Force value type"},
+		"format":   {"helix_config_flag_format_parse", "Value format for parsing"},
+		"backup":   {"helix_config_flag_backup_set", "Create backup before setting"},
+		"restart":  {"helix_config_flag_restart", "Restart affected services"},
+	})
+}
+
+func TestDeleteCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createDeleteCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_delete_short", "helix_config_cmd_delete_long",
+		"Delete a configuration value", "Delete a specific configuration value")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"reset":   {"helix_config_flag_reset_delete", "Reset to default value"},
+		"confirm": {"helix_config_flag_confirm_delete", "Require confirmation"},
+		"backup":  {"helix_config_flag_backup_delete", "Create backup before deleting"},
+	})
+}
+
+func TestValidateCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createValidateCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_validate_short", "helix_config_cmd_validate_long",
+		"Validate configuration", "Validate the current or specified")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"strict":   {"helix_config_flag_strict_validate", "Enable strict validation"},
+		"warnings": {"helix_config_flag_warnings", "Show validation warnings"},
+		"details":  {"helix_config_flag_details_validate", "Show detailed validation"},
+		"section":  {"helix_config_flag_section_validate", "Validate only specific section"},
+		"schema":   {"helix_config_flag_schema_validate", "Validate against JSON schema"},
+	})
+}
+
+func TestExportCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createExportCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_export_short", "helix_config_cmd_export_long",
+		"Export configuration", "Export the current configuration to a file")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"format":   {"helix_config_flag_format_export", "Export format"},
+		"secrets":  {"helix_config_flag_secrets_export", "Include sensitive values"},
+		"defaults": {"helix_config_flag_defaults_export", "Include default values"},
+		"comments": {"helix_config_flag_comments_export", "Include comments in export"},
+		"compress": {"helix_config_flag_compress_export", "Compress the exported file"},
+		"encrypt":  {"helix_config_flag_encrypt_export", "Encrypt the exported file"},
+		"password": {"helix_config_flag_password_export", "Password for encryption"},
+	})
+}
+
+func TestImportCommand_TranslatesHelpAndFlags(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createImportCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_import_short", "helix_config_cmd_import_long",
+		"Import configuration", "Import configuration from a file")
+	assertFlagsTranslated(t, cmd, map[string]struct{ msgID, literal string }{
+		"validate": {"helix_config_flag_validate_import", "Validate imported configuration"},
+		"backup":   {"helix_config_flag_backup_import", "Create backup before import"},
+		"merge":    {"helix_config_flag_merge_import", "Merge with existing configuration"},
+		"force":    {"helix_config_flag_force_import", "Force import even with"},
+		"from":     {"helix_config_flag_from_import", "Source configuration version"},
+	})
+}
+
+func TestBackupCommand_TranslatesHelp(t *testing.T) {
+	withFakeTranslator(t)
+	cmd := createBackupCommand()
+	assertCmdHelpTranslated(t, cmd,
+		"helix_config_cmd_backup_short", "helix_config_cmd_backup_long",
+		"Create configuration backup", "Create a backup of the current configuration")
 }
