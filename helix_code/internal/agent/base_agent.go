@@ -276,9 +276,9 @@ func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{},
 	// For basic execution without LLM, just process based on task type
 	switch t.Type {
 	case task.TaskTypePlanning:
-		return a.basicPlanning(t)
+		return a.basicPlanning(ctx, t)
 	case task.TaskTypeAnalysis:
-		return a.basicAnalysis(t)
+		return a.basicAnalysis(ctx, t)
 	case task.TaskTypeCodeGeneration, task.TaskTypeCodeEdit:
 		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_code_tasks_require_llm", nil))
 	case task.TaskTypeTesting:
@@ -286,11 +286,11 @@ func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{},
 	case task.TaskTypeDebugging:
 		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_debugging_tasks_require_llm", nil))
 	case task.TaskTypeReview:
-		return nil, fmt.Errorf("review tasks require LLM provider to be configured")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_review_tasks_require_llm", nil))
 	case task.TaskTypeRefactoring:
-		return nil, fmt.Errorf("refactoring tasks require LLM provider to be configured")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_refactoring_tasks_require_llm", nil))
 	case task.TaskTypeDocumentation:
-		return nil, fmt.Errorf("documentation tasks require LLM provider to be configured")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_documentation_tasks_require_llm", nil))
 	default:
 		return map[string]interface{}{
 			"message":   "Task processed",
@@ -316,10 +316,10 @@ func (a *BaseAgent) executeTaskBasic(ctx context.Context, t *Task) (interface{},
 // non-decomposed (no subtasks) since LLM-free decomposition would be a
 // real bluff — but the caller now receives their actual request back,
 // not a fabricated generic.
-func (a *BaseAgent) basicPlanning(t *Task) (interface{}, error) {
+func (a *BaseAgent) basicPlanning(ctx context.Context, t *Task) (interface{}, error) {
 	requirements, _ := t.Input["requirements"].(string)
 	if requirements == "" {
-		return nil, fmt.Errorf("requirements not found in task input")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_requirements_not_found_in_input", nil))
 	}
 
 	return map[string]interface{}{
@@ -335,10 +335,10 @@ func (a *BaseAgent) basicPlanning(t *Task) (interface{}, error) {
 }
 
 // basicAnalysis provides basic analysis without LLM
-func (a *BaseAgent) basicAnalysis(t *Task) (interface{}, error) {
+func (a *BaseAgent) basicAnalysis(ctx context.Context, t *Task) (interface{}, error) {
 	content, _ := t.Input["content"].(string)
 	if content == "" {
-		return nil, fmt.Errorf("content not found in task input")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_content_not_found_in_input", nil))
 	}
 
 	// Return basic analysis metrics
@@ -353,7 +353,7 @@ func (a *BaseAgent) basicAnalysis(t *Task) (interface{}, error) {
 // basicTesting provides basic test execution using shell tools
 func (a *BaseAgent) basicTesting(ctx context.Context, t *Task) (interface{}, error) {
 	if a.toolRegistry == nil {
-		return nil, fmt.Errorf("tool registry required for test execution")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_agent_tool_registry_required_for_testing", nil))
 	}
 
 	// Get test command from input or use default

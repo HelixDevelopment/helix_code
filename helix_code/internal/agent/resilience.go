@@ -65,7 +65,7 @@ func (cb *CircuitBreaker) Call(ctx context.Context, fn func(context.Context) err
 			cb.successCount = 0
 			cb.mu.Unlock()
 		} else {
-			return fmt.Errorf("circuit breaker open for agent %s", cb.agentID)
+			return fmt.Errorf("%s", tr(ctx, "internal_agent_circuit_breaker_open", map[string]any{"AgentID": cb.agentID}))
 		}
 	}
 

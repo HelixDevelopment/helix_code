@@ -124,7 +124,12 @@ func TestCircuitBreakerCallWhenOpen(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "circuit breaker open")
+	// Round-197 CONST-046 migration: error text is sourced via
+	// tr() → NoopTranslator (loud echo of message ID) in unit
+	// tests; production wires a real Translator. Assert on the
+	// stable message ID so the test exercises the i18n path
+	// rather than re-pinning the obsolete literal.
+	assert.Contains(t, err.Error(), "internal_agent_circuit_breaker_open")
 }
 
 func TestCircuitBreakerReset(t *testing.T) {
@@ -434,7 +439,10 @@ func TestResilientExecutorCircuitBreakerTrip(t *testing.T) {
 	// Next call should be rejected by circuit breaker
 	result, err := executor.Execute(context.Background(), t1)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "circuit breaker open")
+	// Round-197 CONST-046 migration: assert on the message ID
+	// surfaced by NoopTranslator's loud echo (production wires a
+	// real Translator).
+	assert.Contains(t, err.Error(), "internal_agent_circuit_breaker_open")
 	assert.NotNil(t, result)
 	assert.False(t, result.Success)
 }

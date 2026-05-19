@@ -986,7 +986,7 @@ func TestBaseAgent_basicPlanning_EchoesRequirementsAndProvenance(t *testing.T) {
 		"requirements": requirements,
 	}
 
-	out, err := agent.basicPlanning(planningTask)
+	out, err := agent.basicPlanning(context.Background(), planningTask)
 	if err != nil {
 		t.Fatalf("basicPlanning returned error: %v", err)
 	}

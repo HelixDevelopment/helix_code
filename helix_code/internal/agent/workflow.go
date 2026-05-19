@@ -228,7 +228,7 @@ func (we *WorkflowExecutor) Execute(ctx context.Context, workflow *Workflow) err
 			if !allStepsDone {
 				// We have unexecuted steps but none are ready - workflow is stuck
 				workflow.Fail()
-				return fmt.Errorf("workflow stuck: remaining steps have unsatisfied dependencies")
+				return fmt.Errorf("%s", tr(ctx, "internal_agent_workflow_stuck_unsatisfied_deps", nil))
 			}
 
 			// All steps are done
@@ -305,13 +305,13 @@ func (we *WorkflowExecutor) executeStep(ctx context.Context, workflow *Workflow,
 					TaskID:    step.ID,
 					AgentID:   "none",
 					Success:   false,
-					Error:     fmt.Sprintf("no agent found with all required capabilities %s", capsStr),
+					Error:     tr(ctx, "internal_agent_no_agent_with_required_capabilities", map[string]any{"Capabilities": capsStr, "StepID": step.ID}),
 					Timestamp: time.Now(),
 				}
 				workflow.SetStepResult(step.ID, result)
 				return nil
 			}
-			return fmt.Errorf("no agent found with all required capabilities %s for step %s", capsStr, step.ID)
+			return fmt.Errorf("%s", tr(ctx, "internal_agent_no_agent_with_required_capabilities", map[string]any{"Capabilities": capsStr, "StepID": step.ID}))
 		}
 		agent = matched[0]
 	} else {
@@ -396,7 +396,7 @@ func (we *WorkflowExecutor) GetWorkflow(id string) (*Workflow, error) {
 
 	workflow, ok := we.workflows[id]
 	if !ok {
-		return nil, fmt.Errorf("workflow not found: %s", id)
+		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_agent_workflow_not_found", map[string]any{"WorkflowID": id}))
 	}
 	return workflow, nil
 }

@@ -1,10 +1,11 @@
 # internal/agent i18n bundle — active English (en) locale.
 #
 # Every entry maps a CONST-046-migrated hardcoded literal in
-# helix_code/internal/agent/coordinator.go and base_agent.go to a
-# message ID resolved at runtime via Translator.T. helix_code wires a
-# real *i18nadapter.Translator at boot; the in-package NoopTranslator
-# echoes the message ID verbatim for unit tests + backward compat.
+# helix_code/internal/agent/coordinator.go, base_agent.go,
+# resilience.go and workflow.go to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
 #
 # Naming convention: internal_agent_<area>_<short_description>. All
 # IDs prefixed with internal_agent_ to avoid namespace collision with
@@ -18,6 +19,17 @@
 # untouched to preserve public API. Remaining hardcoded prompts and
 # logging strings are deferred to a future round to stay under the
 # size cap.
+#
+# Round-197 §11.4 anti-bluff sweep (2026-05-19): migrated next-10
+# user-facing literals across base_agent.go (LLM-required messages
+# for review/refactoring/documentation, missing-input validators,
+# tool-registry) + resilience.go (circuit-breaker open) +
+# workflow.go (workflow-stuck / workflow-not-found / no-agent-for-
+# capability). Skip log lines + dev-facing fmt.Errorf wrapping (per
+# round-197 mandate). Skip ErrX sentinel errors.New (round 146
+# precedent — public API surface stability). Prompt templates in
+# buildPromptForTask deferred (large multi-line YAML payloads better
+# served by a dedicated future round).
 
 internal_agent_task_cannot_be_nil:
   other: "task cannot be nil"
@@ -48,3 +60,39 @@ internal_agent_code_tasks_require_llm:
 
 internal_agent_debugging_tasks_require_llm:
   other: "debugging tasks require LLM provider to be configured"
+
+# Round-197 additions — base_agent.go fallback dispatch ------------
+
+internal_agent_review_tasks_require_llm:
+  other: "review tasks require LLM provider to be configured"
+
+internal_agent_refactoring_tasks_require_llm:
+  other: "refactoring tasks require LLM provider to be configured"
+
+internal_agent_documentation_tasks_require_llm:
+  other: "documentation tasks require LLM provider to be configured"
+
+internal_agent_requirements_not_found_in_input:
+  other: "requirements not found in task input"
+
+internal_agent_content_not_found_in_input:
+  other: "content not found in task input"
+
+internal_agent_tool_registry_required_for_testing:
+  other: "tool registry required for test execution"
+
+# Round-197 additions — resilience.go ------------------------------
+
+internal_agent_circuit_breaker_open:
+  other: "circuit breaker open for agent {{.AgentID}}"
+
+# Round-197 additions — workflow.go --------------------------------
+
+internal_agent_workflow_stuck_unsatisfied_deps:
+  other: "workflow stuck: remaining steps have unsatisfied dependencies"
+
+internal_agent_workflow_not_found:
+  other: "workflow not found: {{.WorkflowID}}"
+
+internal_agent_no_agent_with_required_capabilities:
+  other: "no agent found with all required capabilities {{.Capabilities}} for step {{.StepID}}"

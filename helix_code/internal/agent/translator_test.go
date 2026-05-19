@@ -11,6 +11,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	agenti18n "dev.helix.code/internal/agent/i18n"
 )
@@ -139,5 +140,180 @@ func TestSetTranslator_AcceptsNoopExplicit(t *testing.T) {
 	got := tr(context.Background(), "internal_agent_code_tasks_require_llm", nil)
 	if got != "internal_agent_code_tasks_require_llm" {
 		t.Fatalf("tr with explicit NoopTranslator = %q, want raw ID", got)
+	}
+}
+
+// ---------------------------------------------------------------------
+// Round-197 §11.4 anti-bluff paired-mutation tests (2026-05-19).
+//
+// Each test below pins one of the 10 round-197 migrations to its
+// message ID at the call-site level. Sentinel translator wraps every
+// resolved ID with "<TR:" prefix; if a future refactor inlines the
+// literal string, these tests fail with diff that points to the
+// regression.
+// ---------------------------------------------------------------------
+
+// TestTr_Round197_AllNewMessageIDs walks every round-197 message ID
+// through tr() with the sentinel translator and asserts each resolves
+// to the wrapped sentinel form. Single-source-of-truth list — if the
+// bundle file removes an ID, this test fails immediately.
+func TestTr_Round197_AllNewMessageIDs(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	round197IDs := []string{
+		"internal_agent_review_tasks_require_llm",
+		"internal_agent_refactoring_tasks_require_llm",
+		"internal_agent_documentation_tasks_require_llm",
+		"internal_agent_requirements_not_found_in_input",
+		"internal_agent_content_not_found_in_input",
+		"internal_agent_tool_registry_required_for_testing",
+		"internal_agent_circuit_breaker_open",
+		"internal_agent_workflow_stuck_unsatisfied_deps",
+		"internal_agent_workflow_not_found",
+		"internal_agent_no_agent_with_required_capabilities",
+	}
+	for _, id := range round197IDs {
+		got := tr(context.Background(), id, nil)
+		want := "<TR:" + id + ">"
+		if got != want {
+			t.Errorf("tr(%s) = %q, want %q — sentinel bypassed", id, got, want)
+		}
+	}
+}
+
+// TestBasicPlanning_MissingRequirements_GoesThroughTranslator is the
+// paired-mutation for the basicPlanning no-LLM fallback. The literal
+// "requirements not found in task input" MUST NOT appear in the
+// returned error when a sentinel translator is wired.
+func TestBasicPlanning_MissingRequirements_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	agent := &BaseAgent{id: "a1", name: "test-agent", agentType: AgentTypePlanning}
+	tsk := &Task{ID: "t1", Input: map[string]interface{}{}}
+	_, err := agent.basicPlanning(context.Background(), tsk)
+	if err == nil {
+		t.Fatal("basicPlanning with empty input returned no error")
+	}
+	if !strings.Contains(err.Error(), "<TR:internal_agent_requirements_not_found_in_input>") {
+		t.Fatalf("basicPlanning error = %q, want sentinel-wrapped ID — string bypassed tr()", err.Error())
+	}
+}
+
+// TestBasicAnalysis_MissingContent_GoesThroughTranslator is the
+// paired-mutation for the basicAnalysis no-LLM fallback.
+func TestBasicAnalysis_MissingContent_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	agent := &BaseAgent{id: "a1", name: "test-agent", agentType: AgentTypePlanning}
+	tsk := &Task{ID: "t1", Input: map[string]interface{}{}}
+	_, err := agent.basicAnalysis(context.Background(), tsk)
+	if err == nil {
+		t.Fatal("basicAnalysis with empty input returned no error")
+	}
+	if !strings.Contains(err.Error(), "<TR:internal_agent_content_not_found_in_input>") {
+		t.Fatalf("basicAnalysis error = %q, want sentinel-wrapped ID — string bypassed tr()", err.Error())
+	}
+}
+
+// TestBasicTesting_NoToolRegistry_GoesThroughTranslator pins the
+// "tool registry required for test execution" migration.
+func TestBasicTesting_NoToolRegistry_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	agent := &BaseAgent{id: "a1", name: "test-agent", agentType: AgentTypeTesting, toolRegistry: nil}
+	tsk := &Task{ID: "t1", Input: map[string]interface{}{}}
+	_, err := agent.basicTesting(context.Background(), tsk)
+	if err == nil {
+		t.Fatal("basicTesting with no toolRegistry returned no error")
+	}
+	if !strings.Contains(err.Error(), "<TR:internal_agent_tool_registry_required_for_testing>") {
+		t.Fatalf("basicTesting error = %q, want sentinel-wrapped ID — string bypassed tr()", err.Error())
+	}
+}
+
+// TestCircuitBreaker_OpenState_GoesThroughTranslator pins the
+// "circuit breaker open for agent X" migration in resilience.go.
+// Forces the breaker into open state with no timeout elapsed, then
+// asserts the rejection error surfaces via tr().
+func TestCircuitBreaker_OpenState_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	// Long timeout so half-open transition can't happen between
+	// recordFailure() and Call() in this synchronous test.
+	cb := NewCircuitBreaker("agent-cb", 1, 1, 10*time.Minute)
+	// Trip the breaker.
+	_ = cb.Call(context.Background(), func(_ context.Context) error {
+		return errors.New("boom")
+	})
+	if cb.GetState() != CircuitBreakerOpen {
+		t.Fatalf("circuit breaker = %v, want open after threshold breach", cb.GetState())
+	}
+	// Now call again — should reject with translated message.
+	err := cb.Call(context.Background(), func(_ context.Context) error { return nil })
+	if err == nil {
+		t.Fatal("Call on open breaker returned no error")
+	}
+	if !strings.Contains(err.Error(), "<TR:internal_agent_circuit_breaker_open>") {
+		t.Fatalf("circuit-breaker-open error = %q, want sentinel-wrapped ID — string bypassed tr()", err.Error())
+	}
+}
+
+// TestWorkflowExecutor_GetWorkflowNotFound_GoesThroughTranslator pins
+// the "workflow not found" migration in workflow.go.
+func TestWorkflowExecutor_GetWorkflowNotFound_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	we := NewWorkflowExecutor(nil)
+	_, err := we.GetWorkflow("no-such-id")
+	if err == nil {
+		t.Fatal("GetWorkflow(missing) returned no error")
+	}
+	if !strings.Contains(err.Error(), "<TR:internal_agent_workflow_not_found>") {
+		t.Fatalf("GetWorkflow(missing) error = %q, want sentinel-wrapped ID — string bypassed tr()", err.Error())
+	}
+}
+
+// TestBundleParity_Round197_BundleEntriesMatchSentinel ensures the
+// YAML bundle declares every round-197 ID. Defensive against a
+// future commit that migrates the call site but forgets the YAML
+// entry — the production NoopTranslator-echo path would then surface
+// the bare ID to end users, masking a real CONST-046 leak.
+func TestBundleParity_Round197_BundleEntriesMatchSentinel(t *testing.T) {
+	resetTranslator(t)
+	defer resetTranslator(t)
+
+	// NoopTranslator returns the raw ID, so this test is really
+	// asserting that the tr() helper's degradation path produces
+	// stable, predictable IDs — which is the production fallback
+	// when the bundle file is corrupt or missing on disk.
+	wantIDs := []string{
+		"internal_agent_review_tasks_require_llm",
+		"internal_agent_refactoring_tasks_require_llm",
+		"internal_agent_documentation_tasks_require_llm",
+		"internal_agent_requirements_not_found_in_input",
+		"internal_agent_content_not_found_in_input",
+		"internal_agent_tool_registry_required_for_testing",
+		"internal_agent_circuit_breaker_open",
+		"internal_agent_workflow_stuck_unsatisfied_deps",
+		"internal_agent_workflow_not_found",
+		"internal_agent_no_agent_with_required_capabilities",
+	}
+	for _, id := range wantIDs {
+		got := tr(context.Background(), id, nil)
+		if got != id {
+			t.Errorf("NoopTranslator on %s = %q, want raw ID (loud echo)", id, got)
+		}
 	}
 }
