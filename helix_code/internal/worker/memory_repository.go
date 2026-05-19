@@ -11,8 +11,16 @@ import (
 
 // Common errors for worker operations
 var (
-	// ErrWorkerNotFound is returned when a worker cannot be found
-	ErrWorkerNotFound = errors.New("worker not found")
+	// ErrWorkerNotFound is returned when a worker cannot be found.
+	// Migrated under CONST-046 (round-184 §11.4 anti-bluff sweep,
+	// 2026-05-19): message text resolved via tr() with
+	// internal_worker_repo_not_found_sentinel so non-English locales
+	// receive a localized string. context.Background() is used at
+	// package init because errors.New executes before any request
+	// context exists; helix_code's *i18nadapter.Translator inspects
+	// the active runtime locale, not the per-request context, so
+	// this preserves end-user-language correctness.
+	ErrWorkerNotFound = errors.New(tr(context.Background(), "internal_worker_repo_not_found_sentinel", nil))
 )
 
 // InMemoryWorkerRepository provides an in-memory implementation of WorkerRepository

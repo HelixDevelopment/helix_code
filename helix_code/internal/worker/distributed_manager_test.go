@@ -476,8 +476,13 @@ func TestDistributedWorkerManager_SubmitTask(t *testing.T) {
 		if err == nil {
 			t.Error("Expected error when no workers available")
 		}
-		if err.Error() != "no available workers" {
-			t.Errorf("Expected 'no available workers' error, got %s", err.Error())
+		// Round-184 CONST-046: the literal "no available workers" is
+		// now resolved through the internal/worker i18n Translator seam
+		// (NoopTranslator echoes the message ID); assert against the
+		// message ID instead of the literal English string so the test
+		// stays locale-agnostic.
+		if err.Error() != "internal_worker_no_available_workers" {
+			t.Errorf("Expected 'internal_worker_no_available_workers' error, got %s", err.Error())
 		}
 	})
 

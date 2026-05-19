@@ -461,10 +461,14 @@ func TestWorkerManager_AssignTask_AtCapacity(t *testing.T) {
 	}
 	repo.CreateWorker(ctx, worker)
 
-	// Try to assign task to full worker
+	// Try to assign task to full worker. Round-184 CONST-046: the literal
+	// "worker at maximum capacity" string is now resolved through the
+	// internal/worker i18n Translator seam (NoopTranslator default echoes
+	// the message ID verbatim); assert against the message ID so the
+	// test remains locale-agnostic.
 	err := manager.AssignTask(ctx, worker.ID)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "maximum capacity")
+	assert.Contains(t, err.Error(), "internal_worker_at_max_capacity")
 }
 
 func TestWorkerManager_AssignTask_NotFound(t *testing.T) {

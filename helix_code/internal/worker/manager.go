@@ -129,7 +129,7 @@ func (wm *WorkerManager) RegisterWorker(ctx context.Context, worker *Worker) err
 	worker.LastHeartbeat = time.Now()
 
 	if err := wm.repo.CreateWorker(ctx, worker); err != nil {
-		return fmt.Errorf("failed to register worker: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_failed_register", nil), err)
 	}
 
 	// Cache worker
@@ -146,7 +146,7 @@ func (wm *WorkerManager) UpdateWorkerHeartbeat(ctx context.Context, workerID uui
 
 	worker, err := wm.repo.GetWorker(ctx, workerID)
 	if err != nil {
-		return fmt.Errorf("worker not found: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_not_found", nil), err)
 	}
 
 	worker.LastHeartbeat = time.Now()
@@ -172,7 +172,7 @@ func (wm *WorkerManager) UpdateWorkerHeartbeat(ctx context.Context, workerID uui
 	}
 
 	if err := wm.repo.UpdateWorker(ctx, worker); err != nil {
-		return fmt.Errorf("failed to update worker heartbeat: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_failed_update_heartbeat", nil), err)
 	}
 
 	// Update cache
@@ -213,18 +213,18 @@ func (wm *WorkerManager) AssignTask(ctx context.Context, workerID uuid.UUID) err
 
 	worker, err := wm.repo.GetWorker(ctx, workerID)
 	if err != nil {
-		return fmt.Errorf("worker not found: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_not_found", nil), err)
 	}
 
 	if worker.CurrentTasksCount >= worker.MaxConcurrentTasks {
-		return errors.New("worker at maximum capacity")
+		return errors.New(tr(ctx, "internal_worker_at_max_capacity", nil))
 	}
 
 	worker.CurrentTasksCount++
 	worker.UpdatedAt = time.Now()
 
 	if err := wm.repo.UpdateWorker(ctx, worker); err != nil {
-		return fmt.Errorf("failed to assign task: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_failed_assign_task", nil), err)
 	}
 
 	// Update cache
@@ -240,7 +240,7 @@ func (wm *WorkerManager) CompleteTask(ctx context.Context, workerID uuid.UUID) e
 
 	worker, err := wm.repo.GetWorker(ctx, workerID)
 	if err != nil {
-		return fmt.Errorf("worker not found: %v", err)
+		return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_not_found", nil), err)
 	}
 
 	if worker.CurrentTasksCount > 0 {
@@ -248,7 +248,7 @@ func (wm *WorkerManager) CompleteTask(ctx context.Context, workerID uuid.UUID) e
 		worker.UpdatedAt = time.Now()
 
 		if err := wm.repo.UpdateWorker(ctx, worker); err != nil {
-			return fmt.Errorf("failed to complete task: %v", err)
+			return fmt.Errorf("%s: %v", tr(ctx, "internal_worker_failed_complete_task", nil), err)
 		}
 
 		// Update cache

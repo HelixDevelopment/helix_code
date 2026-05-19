@@ -157,7 +157,7 @@ func (dwm *DistributedWorkerManager) SubmitTask(task *DistributedTask) error {
 	// Find suitable worker
 	availableWorkers := dwm.GetAvailableWorkers()
 	if len(availableWorkers) == 0 {
-		return fmt.Errorf("no available workers")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_worker_no_available_workers", nil))
 	}
 
 	// Round-robin assignment

@@ -390,7 +390,7 @@ func (cm *ConsensusManager) ProposeTask(task interface{}) error {
 	defer cm.mutex.Unlock()
 
 	if cm.state != Leader {
-		return fmt.Errorf("not leader - cannot propose tasks")
+		return fmt.Errorf("%s", tr(context.Background(), "internal_worker_not_leader", nil))
 	}
 
 	// Add to log

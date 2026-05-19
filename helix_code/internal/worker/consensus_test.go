@@ -166,10 +166,13 @@ func TestConsensusManager_ProposeTask(t *testing.T) {
 		NodeID: "node-1",
 	})
 
-	// Should fail when not leader
+	// Should fail when not leader. Round-184 CONST-046: the literal
+	// "not leader - cannot propose tasks" is now resolved through the
+	// internal/worker i18n Translator seam (NoopTranslator echoes the
+	// message ID); assert on the ID substring instead.
 	err := cm.ProposeTask("test task")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "not leader")
+	assert.Contains(t, err.Error(), "internal_worker_not_leader")
 
 	// Set as leader
 	cm.state = Leader

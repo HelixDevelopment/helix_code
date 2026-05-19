@@ -1,0 +1,119 @@
+// Unit tests for the internal/worker Translator interface + NoopTranslator
+// default. Mocks ALLOWED per CONST-050(A) (unit tests only).
+package i18n
+
+import (
+	"context"
+	"errors"
+	"testing"
+)
+
+func TestNoopTranslator_T_ReturnsID(t *testing.T) {
+	tr := NoopTranslator{}
+	got, err := tr.T(context.Background(), "internal_worker_not_found", nil)
+	if err != nil {
+		t.Fatalf("NoopTranslator.T returned error: %v", err)
+	}
+	if got != "internal_worker_not_found" {
+		t.Fatalf("NoopTranslator.T returned %q, want loud echo of message ID", got)
+	}
+}
+
+func TestNoopTranslator_TPlural_ReturnsID(t *testing.T) {
+	tr := NoopTranslator{}
+	got, err := tr.TPlural(context.Background(), "internal_worker_at_max_capacity", 3, nil)
+	if err != nil {
+		t.Fatalf("NoopTranslator.TPlural returned error: %v", err)
+	}
+	if got != "internal_worker_at_max_capacity" {
+		t.Fatalf("NoopTranslator.TPlural returned %q, want loud echo of message ID", got)
+	}
+}
+
+func TestNoopTranslator_T_IgnoresTemplateData(t *testing.T) {
+	// Anti-bluff: NoopTranslator returns the raw ID even when
+	// templateData is provided. This guarantees a test using
+	// NoopTranslator can detect a non-i18n call site by the literal
+	// remaining unchanged (sentinel = raw ID, not interpolated).
+	tr := NoopTranslator{}
+	got, err := tr.T(context.Background(), "internal_worker_failed_register", map[string]any{"Err": "boom"})
+	if err != nil {
+		t.Fatalf("NoopTranslator.T returned error: %v", err)
+	}
+	if got != "internal_worker_failed_register" {
+		t.Fatalf("NoopTranslator.T returned %q, want raw message ID (ignoring templateData)", got)
+	}
+}
+
+func TestNoopTranslator_T_AllTenBundleIDs(t *testing.T) {
+	// Anti-bluff: walk every message ID declared in active.en.yaml
+	// and assert NoopTranslator echoes each one verbatim. A future
+	// drift where the bundle declares an ID but no test asserts the
+	// echo behaviour would be a §11.4 PASS-bluff at the i18n surface.
+	tr := NoopTranslator{}
+	ids := []string{
+		"internal_worker_failed_register",
+		"internal_worker_not_found",
+		"internal_worker_failed_update_heartbeat",
+		"internal_worker_at_max_capacity",
+		"internal_worker_failed_assign_task",
+		"internal_worker_failed_complete_task",
+		"internal_worker_failed_add_to_pool",
+		"internal_worker_no_available_workers",
+		"internal_worker_not_leader",
+		"internal_worker_repo_not_found_sentinel",
+	}
+	for _, id := range ids {
+		got, err := tr.T(context.Background(), id, nil)
+		if err != nil {
+			t.Fatalf("NoopTranslator.T(%q) returned error: %v", id, err)
+		}
+		if got != id {
+			t.Fatalf("NoopTranslator.T(%q) returned %q, want loud echo", id, got)
+		}
+	}
+}
+
+// fakeTranslator returns a sentinel-wrapped message ID so call-site
+// tests can assert the lookup actually went through Translator.T,
+// not a hardcoded literal that happens to match the bundle value.
+type fakeTranslator struct {
+	failOnID string
+}
+
+func (f fakeTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	if f.failOnID != "" && id == f.failOnID {
+		return "", errors.New("fakeTranslator: deliberate failure for " + id)
+	}
+	return "<TRANSLATED:" + id + ">", nil
+}
+
+func (f fakeTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	if f.failOnID != "" && id == f.failOnID {
+		return "", errors.New("fakeTranslator: deliberate failure for " + id)
+	}
+	return "<TRANSLATED:" + id + ">", nil
+}
+
+func TestFakeTranslator_T_WrapsID(t *testing.T) {
+	tr := fakeTranslator{}
+	got, err := tr.T(context.Background(), "internal_worker_no_available_workers", nil)
+	if err != nil {
+		t.Fatalf("fakeTranslator.T returned error: %v", err)
+	}
+	want := "<TRANSLATED:internal_worker_no_available_workers>"
+	if got != want {
+		t.Fatalf("fakeTranslator.T returned %q, want %q", got, want)
+	}
+}
+
+func TestFakeTranslator_T_FailOnID(t *testing.T) {
+	tr := fakeTranslator{failOnID: "internal_worker_not_leader"}
+	if _, err := tr.T(context.Background(), "internal_worker_not_leader", nil); err == nil {
+		t.Fatal("fakeTranslator.T expected to fail for matching ID, got nil error")
+	}
+	// Non-matching IDs should still succeed.
+	if _, err := tr.T(context.Background(), "internal_worker_not_found", nil); err != nil {
+		t.Fatalf("fakeTranslator.T returned error for non-failing ID: %v", err)
+	}
+}

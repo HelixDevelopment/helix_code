@@ -1,0 +1,50 @@
+# internal/worker i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/worker/{manager,types,consensus,memory_repository}.go
+# to a message ID resolved at runtime via Translator.T. helix_code
+# wires a real *i18nadapter.Translator at boot; the in-package
+# NoopTranslator echoes the message ID verbatim for unit tests +
+# backward compat.
+#
+# Naming convention: internal_worker_<short_description>. All IDs
+# prefixed with internal_worker_ to avoid namespace collision with
+# other packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-184 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# user-facing literals emitted by manager.go (register / heartbeat /
+# assign / complete / capacity / not-found), types.go (pool add /
+# no-available-workers), consensus.go (not-leader), and
+# memory_repository.go (ErrWorkerNotFound sentinel).
+#
+# Counted by unique message IDs: 10 migrated literals.
+
+internal_worker_failed_register:
+  other: "failed to register worker"
+
+internal_worker_not_found:
+  other: "worker not found"
+
+internal_worker_failed_update_heartbeat:
+  other: "failed to update worker heartbeat"
+
+internal_worker_at_max_capacity:
+  other: "worker at maximum capacity"
+
+internal_worker_failed_assign_task:
+  other: "failed to assign task"
+
+internal_worker_failed_complete_task:
+  other: "failed to complete task"
+
+internal_worker_failed_add_to_pool:
+  other: "failed to add worker to pool"
+
+internal_worker_no_available_workers:
+  other: "no available workers"
+
+internal_worker_not_leader:
+  other: "not leader - cannot propose tasks"
+
+internal_worker_repo_not_found_sentinel:
+  other: "worker not found"
