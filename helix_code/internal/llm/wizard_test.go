@@ -51,8 +51,15 @@ func TestValidateWizardForm_AnthropicRequiresAPIKey(t *testing.T) {
 	if err == nil {
 		t.Fatalf("validateWizardForm(anthropic, empty api_key) = nil, want error")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "api_key") {
-		t.Fatalf("error %q must mention api_key", err.Error())
+	// HXC-004 round-200 §11.4 (post-i18n): production code emits the
+	// message-ID via NoopTranslator until a real translator is wired at
+	// boot. The message-ID for the Anthropic missing-api-key path is
+	// internal_llm_wizard_anthropic_apikey_required (see
+	// internal/llm/i18n/bundles/active.en.yaml). Assert on the ID so the
+	// test reflects what the production code actually emits, not the
+	// pre-i18n English literal.
+	if !strings.Contains(err.Error(), "internal_llm_wizard_anthropic_apikey_required") {
+		t.Fatalf("error %q must contain message-ID internal_llm_wizard_anthropic_apikey_required", err.Error())
 	}
 }
 

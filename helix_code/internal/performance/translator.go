@@ -46,7 +46,7 @@ func SetTranslator(tr performancei18n.Translator) {
 // caller — translation failures degrade to the message ID itself
 // (matching NoopTranslator behaviour) so production output remains
 // loud + obvious instead of silently empty.
-func tr(ctx stdctx.Context, msgID string, data map[string]any) string {
+func tr(ctx context.Context, msgID string, data map[string]any) string {
 	if translator == nil {
 		translator = performancei18n.NoopTranslator{}
 	}

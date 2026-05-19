@@ -1029,7 +1029,21 @@ Replaced hardcoded <code>venice-uncensored</code> +
 + <code>venice-uncensored*</code> family substring scan); SKIP-OK
 CONST-035 marker on full-family rotation; mutation-verified revert→FAIL
 / restore→PASS |</div>
-<p><em>Last regenerated: 2026-05-19 (round 190 — HXA-003 closure).
+<div class="line-block">2026-05-19 | HXC-004: recovery-batch 4-package
+under-verification (llm + logo + notification test-assertion drift +
+performance translator.go build break) | Bug | Fixed (→ Fixed.md) | 200
+| (this commit) | Round-200 §11.4: 3 packages had test-assertion drift
+after round 161/163/167 i18n migration (tests still expected pre-i18n
+English literals; production now emits NoopTranslator-echoed message-IDs
+e.g. <code>internal_llm_wizard_anthropic_apikey_required</code>,
+<code>internal_logo_open_source_failed</code>,
+<code>internal_notification_title_task_completed</code>). Updated 11
+test assertions (1 llm + 4 logo + 6 notification + 2 notification
+additional). 4th package (performance) build-break already fixed inline
+by parent agent. All 4 packages PASS (llm 51.8s, logo 0.07s,
+notification 0.89s, performance 8.4s). Mutation-verified per CONST-035:
+3 mutations (one per package), revert→FAIL, restore→PASS. |</div>
+<p><em>Last regenerated: 2026-05-19 (round 200 — HXC-004 closure).
 Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>

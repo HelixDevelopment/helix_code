@@ -162,7 +162,9 @@ func TestExtractColors(t *testing.T) {
 		processor := NewLogoProcessor("/nonexistent/file.png", tempDir)
 		err := processor.ExtractColors()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to open")
+		// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID
+		// via NoopTranslator. See internal/logo/i18n/bundles/active.en.yaml.
+		assert.Contains(t, err.Error(), "internal_logo_open_source_failed")
 	})
 
 	t.Run("extract colors from invalid image", func(t *testing.T) {
@@ -174,7 +176,9 @@ func TestExtractColors(t *testing.T) {
 		processor := NewLogoProcessor(invalidFile, tempDir)
 		err = processor.ExtractColors()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to decode")
+		// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID
+		// via NoopTranslator. See internal/logo/i18n/bundles/active.en.yaml.
+		assert.Contains(t, err.Error(), "internal_logo_decode_source_failed")
 	})
 }
 
@@ -205,7 +209,9 @@ func TestGenerateASCIIArt(t *testing.T) {
 		processor := NewLogoProcessor("/nonexistent/file.png", tempDir)
 		_, err := processor.GenerateASCIIArt()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to open")
+		// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID
+		// via NoopTranslator. See internal/logo/i18n/bundles/active.en.yaml.
+		assert.Contains(t, err.Error(), "internal_logo_open_source_failed")
 	})
 
 	t.Run("generate ASCII from invalid image", func(t *testing.T) {
@@ -216,7 +222,9 @@ func TestGenerateASCIIArt(t *testing.T) {
 		processor := NewLogoProcessor(invalidFile, tempDir)
 		_, err = processor.GenerateASCIIArt()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to decode")
+		// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID
+		// via NoopTranslator. See internal/logo/i18n/bundles/active.en.yaml.
+		assert.Contains(t, err.Error(), "internal_logo_decode_source_failed")
 	})
 }
 
