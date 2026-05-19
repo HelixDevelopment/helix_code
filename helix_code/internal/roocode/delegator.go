@@ -2,6 +2,7 @@ package roocode
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -48,7 +49,7 @@ func (d *TaskDelegator) GetTask(id string) (*TaskSpec, error) {
 
 	task, ok := d.tasks[id]
 	if !ok {
-		return nil, fmt.Errorf("task %s not found", id)
+		return nil, errors.New(tr(context.Background(), "internal_roocode_delegator_task_not_found", map[string]any{"ID": id}))
 	}
 	return task, nil
 }

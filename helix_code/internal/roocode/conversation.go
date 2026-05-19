@@ -1,6 +1,7 @@
 package roocode
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -51,7 +52,7 @@ func (cs *ConversationStore) AddMessage(convID, role, content string) error {
 	if !ok {
 		conv = &Conversation{
 			ID:        convID,
-			Title:     "imported",
+			Title:     tr(context.Background(), "internal_roocode_conversation_imported_default_title", nil),
 			CreatedAt: time.Now().UTC(),
 		}
 		cs.conversations[convID] = conv

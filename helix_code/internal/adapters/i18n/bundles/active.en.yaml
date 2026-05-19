@@ -1,0 +1,47 @@
+# internal/adapters i18n bundle — active English (en) locale.
+#
+# Round-239 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) exits 0
+# on helix_code/internal/adapters/ at HEAD. The package emits no
+# user-facing narrative strings — only:
+#
+#   * speckit_debate_adapter/adapter.go: debate-transcript format
+#     markers ("FOR:", "AGAINST:", "SYNTHESIS:", "CONCLUSION:",
+#     "## Rounds conducted:", "## Quality score:", "## Phase",
+#     "## Metrics:") explicitly engineered to satisfy HelixSpecifier's
+#     heuristic scorer (round-70 commit f2cb17a — see adapter.go lines
+#     281-309). Per round-158's hardware identifier-token precedent
+#     and round-223's struct-tag identity-key precedent, identity /
+#     scoring-marker keys consumed by downstream parsers / heuristic
+#     scorers are explicitly OUT of scope for CONST-046 migration.
+#     Translating them would silently rewrite the scoring contract.
+#
+#   * speckit_debate_adapter/adapter.go: adapter-context diagnostic
+#     metadata ("Invoked via HelixCode speckit_debate_adapter
+#     (round-70 wiring).") surfaced to orchestrator.DebateRequest.Context
+#     — developer/log surface, not end-user UI narrative.
+#
+#   * containers/adapter.go: wrapped-error technical strings
+#     ("compose up cancelled: %w", "no container runtime detected
+#     (docker/podman required): %w", "health check failed for %s: %s")
+#     — developer-log surface for error chains, not end-user UI.
+#     Explicitly out of CONST-046 scope per the established
+#     wrapped-error precedent (rounds 152/153/154/158/162/223).
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_adapters_<area>_<short_description>. All IDs prefixed with
+# internal_adapters_ to avoid namespace collision when loaded into the
+# same go-i18n.Bundle alongside other packages' entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in speckit_debate_adapter/adapter.go or containers/adapter.go — it
+# exists purely to keep the i18n surface live + ready for the first
+# real migration target a future round identifies (e.g. an
+# adapter-health banner surfaced to a developer dashboard, a CLI
+# summary line describing wire-evidence capture status).
+
+internal_adapters_reserved_placeholder:
+  other: "RESERVED: internal/adapters i18n bundle placeholder — no production caller (round-239 no-op infra)"

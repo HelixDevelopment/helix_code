@@ -19,7 +19,9 @@ func NewRooDelegateTool(d *TaskDelegator) *RooDelegateTool {
 }
 
 func (t *RooDelegateTool) Name() string  { return "roo_delegate" }
-func (t *RooDelegateTool) Description() string { return "Delegate a task to a subagent" }
+func (t *RooDelegateTool) Description() string {
+	return tr(context.Background(), "internal_roocode_tool_delegate_description", nil)
+}
 func (t *RooDelegateTool) Category() tools.ToolCategory { return tools.ToolCategory("roocode") }
 
 func (t *RooDelegateTool) Schema() tools.ToolSchema {
@@ -35,7 +37,9 @@ func (t *RooDelegateTool) Schema() tools.ToolSchema {
 }
 
 func (t *RooDelegateTool) Validate(p map[string]interface{}) error {
-	if _, ok := p["title"].(string); !ok { return errors.New("title required") }
+	if _, ok := p["title"].(string); !ok {
+		return errors.New(tr(context.Background(), "internal_roocode_validate_title_required", nil))
+	}
 	return nil
 }
 
@@ -61,7 +65,9 @@ type RooGenerateTool struct {
 
 func NewRooGenerateTool(g *CodeGenerator) *RooGenerateTool { return &RooGenerateTool{gen: g} }
 func (t *RooGenerateTool) Name() string { return "roo_generate" }
-func (t *RooGenerateTool) Description() string { return "Generate code from a template" }
+func (t *RooGenerateTool) Description() string {
+	return tr(context.Background(), "internal_roocode_tool_generate_description", nil)
+}
 func (t *RooGenerateTool) Category() tools.ToolCategory { return tools.ToolCategory("roocode") }
 
 func (t *RooGenerateTool) Schema() tools.ToolSchema {
@@ -78,8 +84,12 @@ func (t *RooGenerateTool) Schema() tools.ToolSchema {
 }
 
 func (t *RooGenerateTool) Validate(p map[string]interface{}) error {
-	if _, ok := p["type"].(string); !ok { return errors.New("type required") }
-	if _, ok := p["name"].(string); !ok { return errors.New("name required") }
+	if _, ok := p["type"].(string); !ok {
+		return errors.New(tr(context.Background(), "internal_roocode_validate_type_required", nil))
+	}
+	if _, ok := p["name"].(string); !ok {
+		return errors.New(tr(context.Background(), "internal_roocode_validate_name_required", nil))
+	}
 	return nil
 }
 
@@ -103,7 +113,9 @@ type RooBootstrapTool struct {
 
 func NewRooBootstrapTool(g *CodeGenerator) *RooBootstrapTool { return &RooBootstrapTool{gen: g} }
 func (t *RooBootstrapTool) Name() string { return "roo_bootstrap" }
-func (t *RooBootstrapTool) Description() string { return "Bootstrap a new project" }
+func (t *RooBootstrapTool) Description() string {
+	return tr(context.Background(), "internal_roocode_tool_bootstrap_description", nil)
+}
 func (t *RooBootstrapTool) Category() tools.ToolCategory { return tools.ToolCategory("roocode") }
 
 func (t *RooBootstrapTool) Schema() tools.ToolSchema {
@@ -119,7 +131,9 @@ func (t *RooBootstrapTool) Schema() tools.ToolSchema {
 }
 
 func (t *RooBootstrapTool) Validate(p map[string]interface{}) error {
-	if _, ok := p["project_type"].(string); !ok { return errors.New("project_type required") }
+	if _, ok := p["project_type"].(string); !ok {
+		return errors.New(tr(context.Background(), "internal_roocode_validate_project_type_required", nil))
+	}
 	return nil
 }
 

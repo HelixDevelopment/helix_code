@@ -1,0 +1,56 @@
+# internal/roocode i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/roocode/ to a message ID resolved at runtime
+# via Translator.T. helix_code wires a real *i18nadapter.Translator
+# at boot; the in-package NoopTranslator echoes the message ID
+# verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_roocode_<area>_<short_description>.
+# All IDs prefixed with internal_roocode_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-236 §11.4 anti-bluff sweep (2026-05-19): migrated 10 of the
+# most user-facing literals: 3 tool descriptions surfaced via the
+# tools.Tool.Description() contract (roo_delegate, roo_generate,
+# roo_bootstrap), 4 validate-error fragments shown verbatim to
+# tool-invocation callers ("title required", "type required",
+# "name required", "project_type required"), 1 delegator
+# task-not-found error wrapper, 1 conversation imported-title
+# default surfaced when AddMessage targets an unknown conversation,
+# 1 reviewer file-overflow finding emitted as a user-visible Issues
+# entry. Remaining literals (reviewer's TODO/FIXME line-number
+# format strings, generator's source-code comment templates,
+# delegator's second task-not-found duplicate) deferred to future
+# rounds to stay under the round size cap (10).
+
+internal_roocode_tool_delegate_description:
+  other: "Delegate a task to a subagent"
+
+internal_roocode_tool_generate_description:
+  other: "Generate code from a template"
+
+internal_roocode_tool_bootstrap_description:
+  other: "Bootstrap a new project"
+
+internal_roocode_validate_title_required:
+  other: "title required"
+
+internal_roocode_validate_type_required:
+  other: "type required"
+
+internal_roocode_validate_name_required:
+  other: "name required"
+
+internal_roocode_validate_project_type_required:
+  other: "project_type required"
+
+internal_roocode_delegator_task_not_found:
+  other: "task {{.ID}} not found"
+
+internal_roocode_conversation_imported_default_title:
+  other: "imported"
+
+internal_roocode_reviewer_file_exceeds_limit:
+  other: "File exceeds 300 lines"

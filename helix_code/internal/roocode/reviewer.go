@@ -36,7 +36,7 @@ func (r *CodeReviewer) Review(ctx context.Context, filePath string) (*ReviewResu
 	}
 
 	if len(lines) > 300 {
-		issues = append(issues, "File exceeds 300 lines")
+		issues = append(issues, tr(ctx, "internal_roocode_reviewer_file_exceeds_limit", nil))
 		suggestions = append(suggestions, "Consider splitting into smaller files")
 	}
 
