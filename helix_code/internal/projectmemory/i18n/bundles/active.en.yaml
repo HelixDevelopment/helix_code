@@ -1,0 +1,66 @@
+# internal/projectmemory i18n bundle — active English (en) locale.
+#
+# Round-235 §11.4 anti-bluff sweep (2026-05-19): NO-OP INFRA round.
+# The audit gate (scripts/audit-const046-hardcoded-content.sh) reports
+# zero CONST-046 hardcoded-content violations in
+# helix_code/internal/projectmemory/ at HEAD. The package emits no
+# user-facing narrative strings — only:
+#
+#   * Discovery filename tokens ("helixcode.md", "codex.md",
+#     "AGENTS.md" in DiscoveryFilenames) — filesystem identifiers
+#     consumed by os.Stat / case-insensitive directory scan, NOT
+#     user-display content. Per round-158's hardware
+#     model-size-identifier precedent (see
+#     internal/hardware/i18n/bundles/active.en.yaml header), identity
+#     keys used in equality checks / parsing pipelines are explicitly
+#     OUT of scope for CONST-046. Translating them would silently
+#     rewrite the parent-walk lookup contract.
+#
+#   * Filesystem-path tokens ("helixcode", "memory.md") used to build
+#     $XDG_CONFIG_HOME/helixcode/memory.md — path fragments, not
+#     translatable. Translating them would silently relocate the user
+#     overlay file and break every consumer.
+#
+#   * Memory.Render() concatenation delimiter
+#     "\n\n--- USER MEMORY OVERLAY ---\n\n" — protocol marker pinned
+#     by types_test.go (line 122 contract) and consumed by downstream
+#     LLM-side parsing to distinguish project- vs user-memory source.
+#     Identity marker, not user-narrative; round-158 identifier-token
+#     precedent applies.
+#
+#   * Sentinel-error static fragments ("projectmemory: no memory file
+#     found", "projectmemory: memory file exceeds MaxMemoryBytes") +
+#     wrapped-error format strings ("projectmemory: read %s: %w",
+#     "projectmemory: resolve %s: %w", "projectmemory: registry has
+#     no loader") — surfaced to logs / errors.Is comparisons / error
+#     chains for developers, not end-user UI narrative.
+#
+#   * Zap-logger WARN messages ("project memory file truncated", "user
+#     memory file truncated", "projectmemory: fsnotify new watcher
+#     failed; degrading to slash-only reload", "projectmemory:
+#     fsnotify add failed", "projectmemory: reload after fsnotify
+#     failed") — ops / debug surface; CONST-042 already constrains the
+#     logger to never include memory content body.
+#
+#   * Struct-tag-style sentinel fragments embedded in test fixtures
+#     (memory_test.go markers like "<<TRUNCATION SENTINEL>>") —
+#     test-internal markers, not production code.
+#
+# Naming convention (RESERVED FOR FUTURE MIGRATIONS):
+# internal_projectmemory_<area>_<short_description>. All IDs prefixed
+# with internal_projectmemory_ to avoid namespace collision when
+# loaded into the same go-i18n.Bundle alongside other packages'
+# entries.
+#
+# The bundle currently declares one RESERVED placeholder so the YAML
+# parser has a concrete entry to exercise (and so the paired-mutation
+# tests in translator_test.go have a real ID to round-trip through the
+# Translator seam). The placeholder is NOT consumed by any call site
+# in loader.go / registry.go / watcher.go / types.go — it exists
+# purely to keep the i18n surface live + ready for the first real
+# migration target a future round identifies (e.g. a /memory status
+# TUI banner, a TruncatedProject warning surfaced as user-visible UI
+# text instead of a zap-log, a /memory edit empty-state hint).
+
+internal_projectmemory_reserved_placeholder:
+  other: "RESERVED: internal/projectmemory i18n bundle placeholder — no production caller (round-235 no-op infra)"
