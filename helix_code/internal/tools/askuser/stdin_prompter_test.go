@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -30,6 +31,64 @@ func validQuestionWithDefault() Question {
 	q := validQuestion()
 	q.Default = "no"
 	return q
+}
+
+// bundleTranslator is a test-local CONST-046 Translator that mirrors the
+// active.en.yaml message catalogue for internal/tools/askuser. A fake is
+// permitted here per CONST-050(A) (unit-test scope only). It performs the
+// same {{.Name}} placeholder interpolation a real *i18nadapter.Translator
+// would, so FormatQuestion / invalidChoiceHint tests assert on genuine
+// localised CLI output rather than raw message IDs — the anti-bluff
+// requirement that a passing test confirms what the operator actually sees.
+type bundleTranslator struct{}
+
+func (bundleTranslator) T(_ context.Context, id string, data map[string]any) (string, error) {
+	get := func(k string) string {
+		if data == nil {
+			return ""
+		}
+		if v, ok := data[k]; ok {
+			return strings.TrimSpace(fmtAny(v))
+		}
+		return ""
+	}
+	switch id {
+	case "askuser_prompt_invalid_choice_hint":
+		return "Please enter a number 1-" + get("Max") + ".", nil
+	case "askuser_prompt_choice_preview_label":
+		return "   preview: " + get("Preview"), nil
+	case "askuser_prompt_enter_choice_with_default":
+		return "Enter choice [1-" + get("Max") + ", default " + get("Default") + "]: ", nil
+	case "askuser_prompt_enter_choice_no_default":
+		return "Enter choice [1-" + get("Max") + "]: ", nil
+	}
+	return id, nil
+}
+
+func (bundleTranslator) TPlural(ctx context.Context, id string, _ int, data map[string]any) (string, error) {
+	return bundleTranslator{}.T(ctx, id, data)
+}
+
+// fmtAny renders a placeholder value the way go-i18n would for the small set
+// of types the askuser bundle uses (int counts, string defaults).
+func fmtAny(v any) string {
+	switch t := v.(type) {
+	case string:
+		return t
+	case int:
+		return strconv.Itoa(t)
+	default:
+		return ""
+	}
+}
+
+// withBundleTranslator installs the bundle-backed translator for the duration
+// of a test and restores NoopTranslator afterwards so cross-test pollution
+// cannot mask a regression.
+func withBundleTranslator(t *testing.T) {
+	t.Helper()
+	SetTranslator(bundleTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
 }
 
 // slowReader blocks for delay before returning EOF (or the supplied bytes).
@@ -224,6 +283,7 @@ func TestStdinPrompter_TTY_EmptyInputNoDefault_Reprompts(t *testing.T) {
 }
 
 func TestStdinPrompter_TTY_OutOfRange_Reprompts(t *testing.T) {
+	withBundleTranslator(t)
 	buf := &bytes.Buffer{}
 	p, err := NewStdinPrompter(StdinPrompterOptions{
 		Reader: bytes.NewBufferString("9\n1\n"),
@@ -377,6 +437,7 @@ func TestFormatQuestion_NumberedChoices(t *testing.T) {
 }
 
 func TestFormatQuestion_PreviewBeforeLabel(t *testing.T) {
+	withBundleTranslator(t)
 	q := Question{
 		Question: "Pick one",
 		Choices: []Choice{
@@ -406,6 +467,7 @@ func TestFormatQuestion_PreviewBeforeLabel(t *testing.T) {
 }
 
 func TestFormatQuestion_DefaultHint(t *testing.T) {
+	withBundleTranslator(t)
 	q := validQuestionWithDefault()
 	out := FormatQuestion(q)
 	if !strings.Contains(strings.ToLower(out), "default") {

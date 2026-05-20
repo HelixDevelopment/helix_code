@@ -1,0 +1,45 @@
+# internal/tools/askuser i18n bundle — active English (en) locale.
+#
+# Round-440 §11.4 anti-bluff sweep (2026-05-20), CONST-046 Phase 4.
+# Genuine (C) user-facing CLI prompt narrative migrated out of
+# internal/tools/askuser/stdin_prompter.go. These strings are written
+# directly to the operator's terminal through the F18 renderer when
+# the ask_user tool blocks for a multiple-choice answer.
+#
+# Naming convention: askuser_<area>_<short_description>. All IDs
+# prefixed with askuser_ to avoid namespace collision when loaded
+# into the same go-i18n.Bundle alongside other packages' entries.
+#
+# Placeholders use go-i18n {{.Name}} template syntax. The consuming
+# *i18nadapter.Translator performs the interpolation; NoopTranslator
+# echoes the raw ID (loud failure mode for un-wired callers).
+#
+# OUT OF SCOPE (intentionally NOT migrated):
+#   * ask_user_tool.go Schema() parameter descriptions — LLM-facing
+#     (A); the agent reads them, not the human operator.
+#   * types.go errors.New sentinels (ErrInteractiveTerminalRequired
+#     etc.) — compared via errors.Is by call sites; technical-token
+#     precedent from round-158.
+#   * "askuser:" error-wrap prefixes — developer-facing log/error
+#     chain strings (B).
+
+# Retry hint shown after empty / non-numeric / out-of-range input.
+# {{.Max}} is the highest valid choice number.
+askuser_prompt_invalid_choice_hint:
+  other: "Please enter a number 1-{{.Max}}."
+
+# Label prefix for a choice's optional preview line in the rendered
+# numbered menu. {{.Preview}} carries the choice's preview text.
+askuser_prompt_choice_preview_label:
+  other: "   preview: {{.Preview}}"
+
+# Numbered-menu footer when the question carries a default value.
+# {{.Max}} is the highest valid choice number; {{.Default}} is the
+# default choice value accepted on an empty Enter.
+askuser_prompt_enter_choice_with_default:
+  other: "Enter choice [1-{{.Max}}, default {{.Default}}]: "
+
+# Numbered-menu footer when the question has no default value.
+# {{.Max}} is the highest valid choice number.
+askuser_prompt_enter_choice_no_default:
+  other: "Enter choice [1-{{.Max}}]: "

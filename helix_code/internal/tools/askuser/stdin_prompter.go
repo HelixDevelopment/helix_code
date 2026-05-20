@@ -176,18 +176,18 @@ func (p *stdinPrompter) Prompt(ctx context.Context, q Question) (*Result, error)
 					UsedDefault: true,
 				}, nil
 			}
-			hint = "Please enter a number 1-" + strconv.Itoa(len(q.Choices)) + "."
+			hint = invalidChoiceHint(ctx, len(q.Choices))
 			continue
 		}
 
 		// Numeric input.
 		n, perr := strconv.Atoi(raw)
 		if perr != nil {
-			hint = "Please enter a number 1-" + strconv.Itoa(len(q.Choices)) + "."
+			hint = invalidChoiceHint(ctx, len(q.Choices))
 			continue
 		}
 		if n < 1 || n > len(q.Choices) {
-			hint = "Please enter a number 1-" + strconv.Itoa(len(q.Choices)) + "."
+			hint = invalidChoiceHint(ctx, len(q.Choices))
 			continue
 		}
 
@@ -259,10 +259,23 @@ func nextAskBlockID() string {
 	return fmt.Sprintf("ask-user-%d", n)
 }
 
+// invalidChoiceHint resolves the CONST-046 retry hint shown after empty,
+// non-numeric, or out-of-range input. max is the highest valid choice number.
+// Routed through the package translator seam (tr) so non-English operators see
+// the prompt in their locale — see translator.go / i18n/translator.go.
+func invalidChoiceHint(ctx context.Context, max int) string {
+	return tr(ctx, "askuser_prompt_invalid_choice_hint", map[string]any{
+		"Max": max,
+	})
+}
+
 // FormatQuestion renders a Question into the human-readable string that the
 // prompter writes to the output. Exported so tests can assert on the format
 // directly and so the future /ask slash command can reuse it without
-// constructing a prompter. Pure: no I/O, no globals, no time.
+// constructing a prompter. Pure relative to its inputs: no I/O, no time —
+// user-facing literals resolve through the package translator seam (CONST-046)
+// against context.Background(), so a wired *i18nadapter.Translator localises
+// the menu footer + preview label without changing the call signature.
 //
 // Format:
 //
@@ -274,20 +287,29 @@ func nextAskBlockID() string {
 //	...
 //	Enter choice [1-N][, default <Default>]:
 func FormatQuestion(q Question) string {
+	ctx := context.Background()
 	var b strings.Builder
 	b.WriteString(q.Question)
 	b.WriteString("\n\n")
 	for i, c := range q.Choices {
 		fmt.Fprintf(&b, "%d. %s\n", i+1, c.Label)
 		if c.Preview != "" {
-			fmt.Fprintf(&b, "   preview: %s\n", c.Preview)
+			b.WriteString(tr(ctx, "askuser_prompt_choice_preview_label", map[string]any{
+				"Preview": c.Preview,
+			}))
+			b.WriteString("\n")
 		}
 	}
 	b.WriteString("\n")
 	if q.HasDefault() {
-		fmt.Fprintf(&b, "Enter choice [1-%d, default %s]: ", len(q.Choices), q.Default)
+		b.WriteString(tr(ctx, "askuser_prompt_enter_choice_with_default", map[string]any{
+			"Max":     len(q.Choices),
+			"Default": q.Default,
+		}))
 	} else {
-		fmt.Fprintf(&b, "Enter choice [1-%d]: ", len(q.Choices))
+		b.WriteString(tr(ctx, "askuser_prompt_enter_choice_no_default", map[string]any{
+			"Max": len(q.Choices),
+		}))
 	}
 	return b.String()
 }
