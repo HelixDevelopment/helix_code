@@ -82,13 +82,13 @@ func (c *SandboxCommand) Execute(ctx context.Context, cc *CommandContext) (*Comm
 	}
 	switch sub {
 	case "status":
-		return c.handleStatus(), nil
+		return c.handleStatus(ctx), nil
 	case "test":
 		return c.handleTest(ctx, args[1:])
 	case "policy":
-		return c.handlePolicy(), nil
+		return c.handlePolicy(ctx), nil
 	default:
-		return nil, fmt.Errorf("/sandbox: unknown subcommand %q (want status|test|policy)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sandbox_unknown_subcommand", map[string]any{"Subcommand": sub}))
 	}
 }
 
@@ -98,18 +98,18 @@ func (c *SandboxCommand) Execute(ctx context.Context, cc *CommandContext) (*Comm
 //
 // When SelectedBackend is BackendNone we lead with a "Sandbox unavailable:
 // <reason>" line so the user immediately sees why nothing else will work.
-func (c *SandboxCommand) handleStatus() *CommandResult {
+func (c *SandboxCommand) handleStatus(ctx context.Context) *CommandResult {
 	caps := c.manager.Capabilities()
 	cfg := c.manager.Config()
 
 	var sb strings.Builder
-	sb.WriteString("Sandbox status\n")
+	sb.WriteString(tr(ctx, "internal_commands_sandbox_status_header", nil) + "\n")
 	if caps.SelectedBackend == sandbox.BackendNone {
 		reason := caps.UnavailableReason
 		if reason == "" {
-			reason = "no usable sandbox backend selected"
+			reason = tr(ctx, "internal_commands_sandbox_no_backend_selected", nil)
 		}
-		fmt.Fprintf(&sb, "Sandbox unavailable: %s\n", reason)
+		fmt.Fprintf(&sb, "%s\n", tr(ctx, "internal_commands_sandbox_unavailable", map[string]any{"Reason": reason}))
 	}
 
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
@@ -157,7 +157,7 @@ func (c *SandboxCommand) handleTest(ctx context.Context, args []string) (*Comman
 		return nil, fmt.Errorf("/sandbox test: %w", err)
 	}
 	if result == nil {
-		return nil, fmt.Errorf("/sandbox test: backend returned no result")
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sandbox_test_no_result", nil))
 	}
 
 	var sb strings.Builder
@@ -172,14 +172,14 @@ func (c *SandboxCommand) handleTest(ctx context.Context, args []string) (*Comman
 	tw.Flush()
 
 	if result.Stdout != "" {
-		sb.WriteString("Stdout:\n")
+		sb.WriteString(tr(ctx, "internal_commands_sandbox_stdout_label", nil) + "\n")
 		sb.WriteString(indent(result.Stdout, "  "))
 		if !strings.HasSuffix(result.Stdout, "\n") {
 			sb.WriteString("\n")
 		}
 	}
 	if result.Stderr != "" {
-		sb.WriteString("Stderr:\n")
+		sb.WriteString(tr(ctx, "internal_commands_sandbox_stderr_label", nil) + "\n")
 		sb.WriteString(indent(result.Stderr, "  "))
 		if !strings.HasSuffix(result.Stderr, "\n") {
 			sb.WriteString("\n")
@@ -196,12 +196,12 @@ func (c *SandboxCommand) handleTest(ctx context.Context, args []string) (*Comman
 // `MergedDenyList` first slice contains entry descriptions, not raw
 // regex sources); the user list is the raw user-authored patterns so
 // the operator can copy them back into config to edit.
-func (c *SandboxCommand) handlePolicy() *CommandResult {
+func (c *SandboxCommand) handlePolicy(ctx context.Context) *CommandResult {
 	cfg := c.manager.Config()
 	constDeny, userDeny := c.manager.MergedDenyList()
 
 	var sb strings.Builder
-	sb.WriteString("Default policy:\n")
+	sb.WriteString(tr(ctx, "internal_commands_sandbox_default_policy_header", nil) + "\n")
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "  network_allowed:\t%t\n", cfg.DefaultPolicy.NetworkAllowed)
 	fmt.Fprintf(tw, "  timeout:\t%s\n", cfg.DefaultPolicy.Timeout.String())
@@ -210,14 +210,14 @@ func (c *SandboxCommand) handlePolicy() *CommandResult {
 	fmt.Fprintf(tw, "  cpu_limit_pct:\t%d\n", cfg.DefaultPolicy.CPULimitPct)
 	tw.Flush()
 
-	fmt.Fprintf(&sb, "\nCONST-033 deny-list (%d rules, immutable):\n", len(constDeny))
+	fmt.Fprintf(&sb, "\n%s\n", tr(ctx, "internal_commands_sandbox_const_denylist_header", map[string]any{"Count": len(constDeny)}))
 	for _, d := range constDeny {
 		fmt.Fprintf(&sb, "  - %s\n", d)
 	}
 
-	fmt.Fprintf(&sb, "\nUser deny-list (%d rules):\n", len(userDeny))
+	fmt.Fprintf(&sb, "\n%s\n", tr(ctx, "internal_commands_sandbox_user_denylist_header", map[string]any{"Count": len(userDeny)}))
 	if len(userDeny) == 0 {
-		sb.WriteString("  (empty - add patterns to user_deny_list in ~/.config/helixcode/sandbox.yaml)\n")
+		sb.WriteString("  " + tr(ctx, "internal_commands_sandbox_user_denylist_empty", nil) + "\n")
 	} else {
 		for _, d := range userDeny {
 			fmt.Fprintf(&sb, "  - %s\n", d)

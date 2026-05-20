@@ -48,3 +48,89 @@ internal_commands_usage_permissions_add:
 
 internal_commands_usage_permissions_remove:
   other: "usage: /permissions remove <pattern>"
+
+# Round-346 §11.4 anti-bluff sweep (2026-05-19): migrated 23 of the
+# most user-facing literals emitted by plan_tree_command.go (14
+# slash-command output strings) + sandbox_command.go (9 status /
+# test / policy output strings) via the existing tr() seam.
+
+internal_commands_plantree_unknown_subcommand:
+  other: "unknown subcommand: {{.Subcommand}}. Available: list, show, compact, verify"
+
+internal_commands_plantree_none_found:
+  other: "No plan trees found."
+
+internal_commands_plantree_count:
+  other: "{{.Count}} plan tree(s)"
+
+internal_commands_plantree_usage_show:
+  other: "usage: /plantree show <name>"
+
+internal_commands_plantree_usage_compact:
+  other: "usage: /plantree compact <name>"
+
+internal_commands_plantree_usage_verify:
+  other: "usage: /plantree verify <name>"
+
+internal_commands_plantree_load_failed:
+  other: "plan tree '{{.Name}}': {{.Error}}"
+
+internal_commands_plantree_compact_failed:
+  other: "compact: {{.Error}}"
+
+internal_commands_plantree_save_failed:
+  other: "save compacted plan tree: {{.Error}}"
+
+internal_commands_plantree_node_not_found:
+  other: "node {{.NodeID}} not found in plan tree '{{.Name}}'"
+
+internal_commands_plantree_show_header:
+  other: "Plan Tree: {{.Name}}"
+
+internal_commands_plantree_show_subtree_header:
+  other: "Plan Tree: {{.Name}} (subtree at {{.NodeID}})"
+
+internal_commands_plantree_compact_not_needed:
+  other: "Plan tree '{{.Name}}': {{.Nodes}} nodes, no compaction needed ({{.Bytes}} bytes under threshold)."
+
+internal_commands_plantree_compacted:
+  other: "Plan tree '{{.Name}}' compacted: {{.Nodes}} nodes ({{.OriginalBytes}} bytes → {{.NewBytes}} bytes, -{{.Reduction}} bytes)."
+
+internal_commands_plantree_valid:
+  other: "Plan tree '{{.Name}}' is valid."
+
+internal_commands_plantree_has_issues:
+  other: "Plan tree '{{.Name}}' has {{.Count}} issue(s):"
+
+internal_commands_sandbox_unknown_subcommand:
+  other: "/sandbox: unknown subcommand \"{{.Subcommand}}\" (want status|test|policy)"
+
+internal_commands_sandbox_status_header:
+  other: "Sandbox status"
+
+internal_commands_sandbox_no_backend_selected:
+  other: "no usable sandbox backend selected"
+
+internal_commands_sandbox_unavailable:
+  other: "Sandbox unavailable: {{.Reason}}"
+
+internal_commands_sandbox_test_no_result:
+  other: "/sandbox test: backend returned no result"
+
+internal_commands_sandbox_stdout_label:
+  other: "Stdout:"
+
+internal_commands_sandbox_stderr_label:
+  other: "Stderr:"
+
+internal_commands_sandbox_default_policy_header:
+  other: "Default policy:"
+
+internal_commands_sandbox_const_denylist_header:
+  other: "CONST-033 deny-list ({{.Count}} rules, immutable):"
+
+internal_commands_sandbox_user_denylist_header:
+  other: "User deny-list ({{.Count}} rules):"
+
+internal_commands_sandbox_user_denylist_empty:
+  other: "(empty - add patterns to user_deny_list in ~/.config/helixcode/sandbox.yaml)"

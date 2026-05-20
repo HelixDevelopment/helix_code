@@ -99,7 +99,7 @@ func TestPlanTreeCommand_ListEmpty(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "No plan trees found")
+	assert.Contains(t, result.Message, "internal_commands_plantree_none_found")
 }
 
 func TestPlanTreeCommand_ListWithPlans(t *testing.T) {
@@ -111,7 +111,7 @@ func TestPlanTreeCommand_ListWithPlans(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "1 plan tree")
+	assert.Contains(t, result.Message, "internal_commands_plantree_count")
 	assert.Contains(t, result.Output, "test-plan")
 }
 
@@ -142,7 +142,7 @@ func TestPlanTreeCommand_Show_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.False(t, result.Success)
-	assert.Contains(t, result.Message, "plan not found")
+	assert.Contains(t, result.Message, "internal_commands_plantree_load_failed")
 }
 
 func TestPlanTreeCommand_Show_Subtree(t *testing.T) {
@@ -158,7 +158,7 @@ func TestPlanTreeCommand_Show_Subtree(t *testing.T) {
 
 	assert.True(t, result.Success)
 	assert.Contains(t, result.Output, "Task One")
-	assert.Contains(t, result.Output, "subtree")
+	assert.Contains(t, result.Output, "internal_commands_plantree_show_subtree_header")
 }
 
 func TestPlanTreeCommand_Verify_Clean(t *testing.T) {
@@ -172,7 +172,7 @@ func TestPlanTreeCommand_Verify_Clean(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "valid")
+	assert.Contains(t, result.Message, "internal_commands_plantree_valid")
 }
 
 func TestPlanTreeCommand_Verify_Corrupt(t *testing.T) {
@@ -200,7 +200,7 @@ func TestPlanTreeCommand_DefaultToList(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.Contains(t, result.Message, "No plan trees found")
+	assert.Contains(t, result.Message, "internal_commands_plantree_none_found")
 }
 
 func TestPlanTreeCommand_UnknownSubcommand(t *testing.T) {
@@ -213,7 +213,7 @@ func TestPlanTreeCommand_UnknownSubcommand(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.False(t, result.Success)
-	assert.Contains(t, result.Message, "unknown subcommand")
+	assert.Contains(t, result.Message, "internal_commands_plantree_unknown_subcommand")
 }
 
 func TestPlanTreeCommand_Compact(t *testing.T) {
@@ -228,5 +228,78 @@ func TestPlanTreeCommand_Compact(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, result.Success)
-	assert.True(t, strings.Contains(result.Message, "no compaction needed") || strings.Contains(result.Message, "compacted"))
+	// CONST-046: both the no-op and the compacted message are translated;
+	// the default NoopTranslator echoes the message ID.
+	assert.True(t,
+		strings.Contains(result.Message, "internal_commands_plantree_compact_not_needed") ||
+			strings.Contains(result.Message, "internal_commands_plantree_compacted"),
+		"compact message %q routed neither path through tr()", result.Message)
+}
+
+// --- Round-346 CONST-046 paired-mutation tests -----------------------------
+//
+// Each asserts the migrated user-facing literal now routes through the
+// package tr() seam: with a sentinel translator wired, the output MUST
+// contain the sentinel-wrapped message ID. If a future refactor inlines
+// the string, these tests fail.
+
+func TestPlanTreeCommand_UnknownSubcommand_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewPlanTreeCommand(newMockPlanTreeStore(), &mockPTSummariser{summary: "s"})
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"bogus"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Message, "<TR:internal_commands_plantree_unknown_subcommand>")
+}
+
+func TestPlanTreeCommand_NoneFound_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewPlanTreeCommand(newMockPlanTreeStore(), &mockPTSummariser{summary: "s"})
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Message, "<TR:internal_commands_plantree_none_found>")
+}
+
+func TestPlanTreeCommand_ShowUsage_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewPlanTreeCommand(newMockPlanTreeStore(), &mockPTSummariser{summary: "s"})
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Message, "<TR:internal_commands_plantree_usage_show>")
+}
+
+func TestPlanTreeCommand_VerifyValid_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	store := newMockPlanTreeStore()
+	store.Save(makeTestPlanTree())
+	cmd := NewPlanTreeCommand(store, &mockPTSummariser{summary: "s"})
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"verify", "test-plan"}})
+	require.NoError(t, err)
+	// Tree is either valid or has issues; both paths are migrated literals.
+	assert.True(t,
+		strings.Contains(res.Message, "<TR:internal_commands_plantree_valid>") ||
+			strings.Contains(res.Message, "<TR:internal_commands_plantree_has_issues>"),
+		"verify message %q routed neither valid nor has_issues through tr()", res.Message)
+}
+
+func TestPlanTreeCommand_LoadFailed_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewPlanTreeCommand(newMockPlanTreeStore(), &mockPTSummariser{summary: "s"})
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show", "missing-plan"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Message, "<TR:internal_commands_plantree_load_failed>")
 }

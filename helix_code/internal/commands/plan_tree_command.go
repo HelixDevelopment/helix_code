@@ -45,7 +45,7 @@ func (c *PlanTreeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (
 	default:
 		return &CommandResult{
 			Success: false,
-			Message: fmt.Sprintf("unknown subcommand: %s. Available: list, show, compact, verify", subcmd),
+			Message: tr(ctx, "internal_commands_plantree_unknown_subcommand", map[string]any{"Subcommand": subcmd}),
 		}, nil
 	}
 }
@@ -57,7 +57,8 @@ func (c *PlanTreeCommand) handleList(ctx context.Context, cmdCtx *CommandContext
 	}
 
 	if len(summaries) == 0 {
-		return &CommandResult{Success: true, Message: "No plan trees found.", Output: "No plan trees found."}, nil
+		none := tr(ctx, "internal_commands_plantree_none_found", nil)
+		return &CommandResult{Success: true, Message: none, Output: none}, nil
 	}
 
 	var sb strings.Builder
@@ -68,18 +69,22 @@ func (c *PlanTreeCommand) handleList(ctx context.Context, cmdCtx *CommandContext
 	}
 
 	output := sb.String()
-	return &CommandResult{Success: true, Message: fmt.Sprintf("%d plan tree(s)", len(summaries)), Output: output}, nil
+	return &CommandResult{
+		Success: true,
+		Message: tr(ctx, "internal_commands_plantree_count", map[string]any{"Count": len(summaries)}),
+		Output:  output,
+	}, nil
 }
 
 func (c *PlanTreeCommand) handleShow(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plantree show <name>"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_usage_show", nil)}, nil
 	}
 
 	name := cmdCtx.Args[1]
 	tree, err := c.store.Load(name)
 	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan tree '%s': %v", name, err)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_load_failed", map[string]any{"Name": name, "Error": err.Error()})}, nil
 	}
 
 	nodeID := cmdCtx.Flags["id"]
@@ -87,11 +92,11 @@ func (c *PlanTreeCommand) handleShow(ctx context.Context, cmdCtx *CommandContext
 	if nodeID != "" {
 		node := findNodeByID(tree.Root, nodeID)
 		if node == nil {
-			return &CommandResult{Success: false, Message: fmt.Sprintf("node %s not found in plan tree '%s'", nodeID, name)}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_node_not_found", map[string]any{"NodeID": nodeID, "Name": name})}, nil
 		}
-		output = fmt.Sprintf("Plan Tree: %s (subtree at %s)\n\n%s", name, nodeID, plantree.RenderTree(node, 0))
+		output = tr(ctx, "internal_commands_plantree_show_subtree_header", map[string]any{"Name": name, "NodeID": nodeID}) + "\n\n" + plantree.RenderTree(node, 0)
 	} else {
-		output = fmt.Sprintf("Plan Tree: %s\n\n%s", name, plantree.RenderTree(tree.Root, 0))
+		output = tr(ctx, "internal_commands_plantree_show_header", map[string]any{"Name": name}) + "\n\n" + plantree.RenderTree(tree.Root, 0)
 	}
 
 	return &CommandResult{Success: true, Message: output, Output: output}, nil
@@ -99,58 +104,62 @@ func (c *PlanTreeCommand) handleShow(ctx context.Context, cmdCtx *CommandContext
 
 func (c *PlanTreeCommand) handleCompact(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plantree compact <name>"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_usage_compact", nil)}, nil
 	}
 
 	name := cmdCtx.Args[1]
 	tree, err := c.store.Load(name)
 	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan tree '%s': %v", name, err)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_load_failed", map[string]any{"Name": name, "Error": err.Error()})}, nil
 	}
 
 	result, err := plantree.CompactTree(&tree, c.summariser)
 	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("compact: %v", err)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_compact_failed", map[string]any{"Error": err.Error()})}, nil
 	}
 
 	if result.NodesCompacted == 0 {
 		return &CommandResult{
 			Success: true,
-			Message: fmt.Sprintf("Plan tree '%s': %d nodes, no compaction needed (%d bytes under threshold).", name, plantree.CountNodes(tree.Root), result.OriginalBytes),
+			Message: tr(ctx, "internal_commands_plantree_compact_not_needed", map[string]any{
+				"Name": name, "Nodes": plantree.CountNodes(tree.Root), "Bytes": result.OriginalBytes,
+			}),
 		}, nil
 	}
 
 	if err := c.store.Save(result.Tree); err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("save compacted plan tree: %v", err)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_save_failed", map[string]any{"Error": err.Error()})}, nil
 	}
 
 	reduction := result.OriginalBytes - result.NewBytes
 	return &CommandResult{
 		Success: true,
-		Message: fmt.Sprintf("Plan tree '%s' compacted: %d nodes (%d bytes → %d bytes, -%d bytes).",
-			name, result.NodesCompacted, result.OriginalBytes, result.NewBytes, reduction),
+		Message: tr(ctx, "internal_commands_plantree_compacted", map[string]any{
+			"Name": name, "Nodes": result.NodesCompacted,
+			"OriginalBytes": result.OriginalBytes, "NewBytes": result.NewBytes, "Reduction": reduction,
+		}),
 	}, nil
 }
 
 func (c *PlanTreeCommand) handleVerify(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /plantree verify <name>"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_usage_verify", nil)}, nil
 	}
 
 	name := cmdCtx.Args[1]
 	tree, err := c.store.Load(name)
 	if err != nil {
-		return &CommandResult{Success: false, Message: fmt.Sprintf("plan tree '%s': %v", name, err)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_plantree_load_failed", map[string]any{"Name": name, "Error": err.Error()})}, nil
 	}
 
 	result := plantree.VerifyTree(&tree)
 
 	if result.Valid {
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Plan tree '%s' is valid.", name)}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_plantree_valid", map[string]any{"Name": name})}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Plan tree '%s' has %d issue(s):\n", name, len(result.Issues)))
+	sb.WriteString(tr(ctx, "internal_commands_plantree_has_issues", map[string]any{"Name": name, "Count": len(result.Issues)}) + "\n")
 	for _, issue := range result.Issues {
 		severity := "WARN"
 		if issue.Severity == plantree.SeverityError {

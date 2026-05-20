@@ -85,8 +85,9 @@ func TestSandboxCommand_DefaultIsStatus(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	// status output mentions backend + GOOS lines.
-	assert.Contains(t, res.Output, "Sandbox status")
+	// status output mentions the status header (CONST-046 message ID
+	// under the default NoopTranslator) + the Backend table line.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_status_header")
 	assert.Contains(t, res.Output, "Backend")
 }
 
@@ -112,8 +113,10 @@ func TestSandboxCommand_StatusShowsFailClosedReason(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "Sandbox unavailable")
-	assert.Contains(t, res.Output, "bubblewrap not found; install bwrap")
+	// CONST-046: the "Sandbox unavailable: <reason>" line is translated;
+	// the default NoopTranslator echoes the message ID and the reason is
+	// only interpolated into {{.Reason}} under a real translator.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_unavailable")
 }
 
 func TestSandboxCommand_TestRunsExecute(t *testing.T) {
@@ -187,11 +190,11 @@ func TestSandboxCommand_PolicyShowsDenyList(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 	assert.Contains(t, res.Output, "CONST-033")
-	assert.Contains(t, res.Output, "User deny-list")
+	// CONST-046: deny-list headers are translated message IDs under the
+	// default NoopTranslator.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_user_denylist_header")
 	assert.Contains(t, res.Output, "^rm -rf /")
 	assert.Contains(t, res.Output, "dd\\s+if=")
-	// Reports user deny count of 2.
-	assert.Contains(t, res.Output, "2")
 }
 
 func TestSandboxCommand_PolicyEmptyUserList(t *testing.T) {
@@ -199,8 +202,10 @@ func TestSandboxCommand_PolicyEmptyUserList(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"policy"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "User deny-list")
-	assert.Contains(t, res.Output, "empty")
+	// CONST-046: header + empty-list note are translated message IDs
+	// under the default NoopTranslator.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_user_denylist_header")
+	assert.Contains(t, res.Output, "internal_commands_sandbox_user_denylist_empty")
 }
 
 func TestSandboxCommand_PolicyShowsDefaultPolicy(t *testing.T) {
@@ -208,7 +213,10 @@ func TestSandboxCommand_PolicyShowsDefaultPolicy(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"policy"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "Default policy")
+	// CONST-046: the "Default policy:" header is a translated message ID
+	// under the default NoopTranslator; the tabwriter field labels and
+	// data values below it are not migrated and remain literal.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_default_policy_header")
 	assert.Contains(t, res.Output, "network_allowed")
 	assert.Contains(t, res.Output, "timeout")
 	assert.Contains(t, res.Output, "read_only_root")
@@ -219,4 +227,61 @@ func TestSandboxCommand_UnknownSubcommandErrors(t *testing.T) {
 	c, _ := newSandboxCommand(t)
 	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"bogus"}})
 	require.Error(t, err)
+}
+
+// --- Round-346 CONST-046 paired-mutation tests -----------------------------
+//
+// Each asserts the migrated user-facing literal now routes through the
+// package tr() seam. With a sentinel translator wired the output MUST
+// contain the sentinel-wrapped message ID; an inlined literal fails it.
+
+func TestSandboxCommand_StatusHeader_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newSandboxCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_status_header>")
+}
+
+func TestSandboxCommand_Unavailable_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, mgr := newSandboxCommand(t)
+	mgr.caps = sandbox.SandboxCapabilities{
+		GOOS:              "linux",
+		SelectedBackend:   sandbox.BackendNone,
+		UnavailableReason: "bubblewrap not found",
+	}
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_unavailable>")
+}
+
+func TestSandboxCommand_UnknownSubcommand_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newSandboxCommand(t)
+	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"bogus"}})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "<TR:internal_commands_sandbox_unknown_subcommand>")
+}
+
+func TestSandboxCommand_PolicyHeader_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newSandboxCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"policy"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_default_policy_header>")
+	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_const_denylist_header>")
+	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_user_denylist_header>")
 }
