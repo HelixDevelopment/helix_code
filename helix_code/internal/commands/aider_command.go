@@ -19,10 +19,10 @@ func NewAiderCommand(recorder *voice.VoiceRecorder, transcriber *voice.VoiceTran
 func (c *AiderCommand) Name() string      { return "aider" }
 func (c *AiderCommand) Aliases() []string { return []string{"ai"} }
 func (c *AiderCommand) Description() string {
-	return "Aider integration: voice input and repo-map control"
+	return tr(context.Background(), "internal_commands_aider_description", nil)
 }
 func (c *AiderCommand) Usage() string {
-	return "/aider [voice|repomap] [start|stop|transcribe|show]"
+	return tr(context.Background(), "internal_commands_aider_usage", nil)
 }
 
 func (c *AiderCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
@@ -30,7 +30,7 @@ func (c *AiderCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Co
 	if len(args) == 0 {
 		return &CommandResult{
 			Success: true,
-			Message: "/aider voice [start|stop|transcribe] — voice input\n/aider repomap show — repository map",
+			Message: tr(ctx, "internal_commands_aider_usage_full", nil),
 		}, nil
 	}
 
@@ -41,13 +41,13 @@ func (c *AiderCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Co
 	case "repomap":
 		return c.handleRepoMap(ctx, cmdCtx, args[1:])
 	default:
-		return &CommandResult{Success: false, Message: fmt.Sprintf("unknown: %s. Use 'voice' or 'repomap'", subcmd)}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_aider_unknown_subcommand", map[string]any{"Subcommand": subcmd})}, nil
 	}
 }
 
 func (c *AiderCommand) handleVoice(ctx context.Context, cmdCtx *CommandContext, args []string) (*CommandResult, error) {
 	if len(args) == 0 {
-		return &CommandResult{Success: false, Message: "usage: /aider voice [start|stop|transcribe]"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_aider_voice_usage", nil)}, nil
 	}
 
 	switch args[0] {
@@ -56,34 +56,35 @@ func (c *AiderCommand) handleVoice(ctx context.Context, cmdCtx *CommandContext, 
 		if err := c.recorder.Start(path); err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("start recording: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Recording started → %s", path)}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_aider_recording_started", map[string]any{"Path": path})}, nil
 
 	case "stop":
 		if err := c.recorder.Stop(); err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("stop recording: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Recording stopped. File: %s, Duration: %s",
-			c.recorder.FilePath(), c.recorder.Duration().String())}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_aider_recording_stopped", map[string]any{
+			"File": c.recorder.FilePath(), "Duration": c.recorder.Duration().String()})}, nil
 
 	case "transcribe":
 		path := c.recorder.FilePath()
 		if path == "" {
-			return &CommandResult{Success: false, Message: "No recording available. Use /aider voice start first."}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_aider_no_recording", nil)}, nil
 		}
 		result, err := c.transcriber.Transcribe(ctx, path)
 		if err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("transcribe: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Transcribed (%s): %s", result.Engine, result.Text)}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_aider_transcribed", map[string]any{
+			"Engine": result.Engine, "Text": result.Text})}, nil
 
 	default:
-		return &CommandResult{Success: false, Message: fmt.Sprintf("unknown voice subcommand: %s", args[0])}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_aider_unknown_voice_subcommand", map[string]any{"Subcommand": args[0]})}, nil
 	}
 }
 
 func (c *AiderCommand) handleRepoMap(ctx context.Context, cmdCtx *CommandContext, args []string) (*CommandResult, error) {
 	return &CommandResult{
 		Success: true,
-		Message: "Repo-map: use the 'repomap' tool for structured codebase analysis. The tree-sitter-based map includes function, class, and import definitions across Go, Python, JavaScript, TypeScript, Java, C, C++, Rust, and Ruby files.",
+		Message: tr(ctx, "internal_commands_aider_repomap_hint", nil),
 	}, nil
 }

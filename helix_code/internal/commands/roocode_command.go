@@ -21,22 +21,22 @@ func NewRooCodeCommand(d *roocode.TaskDelegator, g *roocode.CodeGenerator, r *ro
 func (c *RooCodeCommand) Name() string      { return "roocode" }
 func (c *RooCodeCommand) Aliases() []string { return []string{"rc"} }
 func (c *RooCodeCommand) Description() string {
-	return "Roo-code: delegate tasks, generate code, review, conversations"
+	return tr(context.Background(), "internal_commands_roocode_description", nil)
 }
 func (c *RooCodeCommand) Usage() string {
-	return "/roocode [delegate|generate|bootstrap|review|conv]"
+	return tr(context.Background(), "internal_commands_roocode_usage", nil)
 }
 
 func (c *RooCodeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	args := cmdCtx.Args
 	if len(args) == 0 {
-		return &CommandResult{Success: true, Message: "/roocode delegate <title> <desc> | generate <lang> <name> | bootstrap <lang> <name> | review <file> | conv [list|create|add]"}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_usage_full", nil)}, nil
 	}
 
 	switch args[0] {
 	case "delegate":
 		if len(args) < 2 {
-			return &CommandResult{Success: false, Message: "usage: /roocode delegate <title> [desc]"}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_roocode_delegate_usage", nil)}, nil
 		}
 		desc := ""
 		if len(args) > 2 { desc = args[2] }
@@ -44,31 +44,31 @@ func (c *RooCodeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*
 		if err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("delegate: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Task delegated: %s (ID: %s)", task.Title, task.ID)}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_task_delegated", map[string]any{"Title": task.Title, "ID": task.ID})}, nil
 
 	case "generate":
 		if len(args) < 3 {
-			return &CommandResult{Success: false, Message: "usage: /roocode generate <lang> <name>"}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_roocode_generate_usage", nil)}, nil
 		}
 		path, err := c.gen.Generate(ctx, roocode.GenerateSpec{Type: args[1], Name: args[2]})
 		if err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("generate: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Generated: %s", path)}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_generated", map[string]any{"Path": path})}, nil
 
 	case "bootstrap":
 		if len(args) < 3 {
-			return &CommandResult{Success: false, Message: "usage: /roocode bootstrap <go|python|node> <name>"}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_roocode_bootstrap_usage", nil)}, nil
 		}
 		files, err := c.gen.Bootstrap(ctx, roocode.BootstrapSpec{ProjectType: args[1], Name: args[2]})
 		if err != nil {
 			return &CommandResult{Success: false, Message: fmt.Sprintf("bootstrap: %v", err)}, nil
 		}
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Bootstrapped %s project: %d files", args[1], len(files))}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_bootstrapped", map[string]any{"Type": args[1], "Files": len(files)})}, nil
 
 	case "review":
 		if len(args) < 2 {
-			return &CommandResult{Success: false, Message: "usage: /roocode review <file>"}, nil
+			return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_roocode_review_usage", nil)}, nil
 		}
 		result, err := c.reviewer.Review(ctx, args[1])
 		if err != nil {
@@ -76,7 +76,8 @@ func (c *RooCodeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*
 		}
 		status := "REJECTED"
 		if result.Approved { status = "APPROVED" }
-		return &CommandResult{Success: true, Message: fmt.Sprintf("Review: %s — %d issues, %d suggestions", status, len(result.Issues), len(result.Suggestions))}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_review_result", map[string]any{
+			"Status": status, "Issues": len(result.Issues), "Suggestions": len(result.Suggestions)})}, nil
 
 	case "conv":
 		subcmd := "list"
@@ -86,15 +87,15 @@ func (c *RooCodeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*
 			title := "conversation"
 			if len(args) > 2 { title = args[2] }
 			conv := c.convStore.Create(title)
-			return &CommandResult{Success: true, Message: fmt.Sprintf("Conversation created: %s", conv.ID)}, nil
+			return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_conversation_created", map[string]any{"ID": conv.ID})}, nil
 		case "add":
-			return &CommandResult{Success: true, Message: "Use tools to add messages to conversations"}, nil
+			return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_conv_add_hint", nil)}, nil
 		default:
 			list := c.convStore.List()
-			return &CommandResult{Success: true, Message: fmt.Sprintf("%d conversation(s)", len(list))}, nil
+			return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_roocode_conv_count", map[string]any{"Count": len(list)})}, nil
 		}
 
 	default:
-		return &CommandResult{Success: false, Message: fmt.Sprintf("unknown: %s", args[0])}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_roocode_unknown_subcommand", map[string]any{"Subcommand": args[0]})}, nil
 	}
 }

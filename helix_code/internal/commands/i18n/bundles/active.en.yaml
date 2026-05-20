@@ -260,3 +260,120 @@ internal_commands_continue_diff_usage:
 
 internal_commands_continue_diff_hint:
   other: "Diff: use continue_edit tool to compare file versions"
+
+# Round-366 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4
+# round-86): genuine (C) user-facing slash-command help text +
+# Execute-method result messages migrated across aider_command.go,
+# kilocode_command.go, roocode_command.go. (A) LLM prompt templates
+# and (B) wrapped-error tech strings (fmt.Sprintf("rename: %v", err)
+# etc.) deliberately left in place per the round-346/350/355/358/362
+# classification (docs/audits/2026-05-20-internal-const046-
+# classification.md).
+
+# --- aider_command.go ---
+internal_commands_aider_description:
+  other: "Aider integration: voice input and repo-map control"
+
+internal_commands_aider_usage:
+  other: "/aider [voice|repomap] [start|stop|transcribe|show]"
+
+internal_commands_aider_usage_full:
+  other: "/aider voice [start|stop|transcribe] — voice input\n/aider repomap show — repository map"
+
+internal_commands_aider_unknown_subcommand:
+  other: "unknown: {{.Subcommand}}. Use 'voice' or 'repomap'"
+
+internal_commands_aider_voice_usage:
+  other: "usage: /aider voice [start|stop|transcribe]"
+
+internal_commands_aider_recording_started:
+  other: "Recording started → {{.Path}}"
+
+internal_commands_aider_recording_stopped:
+  other: "Recording stopped. File: {{.File}}, Duration: {{.Duration}}"
+
+internal_commands_aider_no_recording:
+  other: "No recording available. Use /aider voice start first."
+
+internal_commands_aider_transcribed:
+  other: "Transcribed ({{.Engine}}): {{.Text}}"
+
+internal_commands_aider_unknown_voice_subcommand:
+  other: "unknown voice subcommand: {{.Subcommand}}"
+
+internal_commands_aider_repomap_hint:
+  other: "Repo-map: use the 'repomap' tool for structured codebase analysis. The tree-sitter-based map includes function, class, and import definitions across Go, Python, JavaScript, TypeScript, Java, C, C++, Rust, and Ruby files."
+
+# --- kilocode_command.go ---
+internal_commands_kilocode_description:
+  other: "AST-aware refactoring: rename, impact analysis, multi-edit"
+
+internal_commands_kilocode_usage:
+  other: "/kilocode [rename|impact|edit]"
+
+internal_commands_kilocode_usage_full:
+  other: "/kilocode rename <old> <new> | impact <symbol> | edit <extract|inline> <file>"
+
+internal_commands_kilocode_rename_usage:
+  other: "usage: /kilocode rename <old_name> <new_name>"
+
+internal_commands_kilocode_renamed:
+  other: "Renamed '{{.Old}}' → '{{.New}}': {{.Files}} files, {{.Occurrences}} occurrences"
+
+internal_commands_kilocode_impact_usage:
+  other: "usage: /kilocode impact <symbol>"
+
+internal_commands_kilocode_impact_result:
+  other: "Impact of '{{.Symbol}}': {{.Callers}} callers, {{.Callees}} callees, {{.AffectedFiles}} affected files (blast radius: {{.BlastRadius}}, risk: {{.Risk}})"
+
+internal_commands_kilocode_edit_hint:
+  other: "Use the kilocode_extract or kilocode_inline tools for AST-aware refactoring."
+
+internal_commands_kilocode_unknown_subcommand:
+  other: "unknown: {{.Subcommand}}. Use rename, impact, or edit"
+
+# --- roocode_command.go ---
+internal_commands_roocode_description:
+  other: "Roo-code: delegate tasks, generate code, review, conversations"
+
+internal_commands_roocode_usage:
+  other: "/roocode [delegate|generate|bootstrap|review|conv]"
+
+internal_commands_roocode_usage_full:
+  other: "/roocode delegate <title> <desc> | generate <lang> <name> | bootstrap <lang> <name> | review <file> | conv [list|create|add]"
+
+internal_commands_roocode_delegate_usage:
+  other: "usage: /roocode delegate <title> [desc]"
+
+internal_commands_roocode_task_delegated:
+  other: "Task delegated: {{.Title}} (ID: {{.ID}})"
+
+internal_commands_roocode_generate_usage:
+  other: "usage: /roocode generate <lang> <name>"
+
+internal_commands_roocode_generated:
+  other: "Generated: {{.Path}}"
+
+internal_commands_roocode_bootstrap_usage:
+  other: "usage: /roocode bootstrap <go|python|node> <name>"
+
+internal_commands_roocode_bootstrapped:
+  other: "Bootstrapped {{.Type}} project: {{.Files}} files"
+
+internal_commands_roocode_review_usage:
+  other: "usage: /roocode review <file>"
+
+internal_commands_roocode_review_result:
+  other: "Review: {{.Status}} — {{.Issues}} issues, {{.Suggestions}} suggestions"
+
+internal_commands_roocode_conversation_created:
+  other: "Conversation created: {{.ID}}"
+
+internal_commands_roocode_conv_add_hint:
+  other: "Use tools to add messages to conversations"
+
+internal_commands_roocode_conv_count:
+  other: "{{.Count}} conversation(s)"
+
+internal_commands_roocode_unknown_subcommand:
+  other: "unknown: {{.Subcommand}}"
