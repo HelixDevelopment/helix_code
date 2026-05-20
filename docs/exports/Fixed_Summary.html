@@ -201,7 +201,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>15</td>
+<td>16</td>
 <td><code>Fixed (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,9 +216,17 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 86 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 87 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 344 added HXQ-002
+<code>docs/improvements/PROGRESS.md</code>). Round 348 added HXV-002
+(LLMsVerifier <code>verification/</code> package 10 pre-existing test
+failures resolved — all 10 classified (A) test-assertion drift: 8
+<code>verification_test.go</code> Verify tests re-keyed to the round-17
+honest <code>ErrVerificationNotWired</code> contract, 2
+<code>code_verification_test.go</code> tests re-keyed to honest
+API-error-propagation / zero-response→<code>failed</code> contracts; no
+production code changed; <code>go test ./verification/...</code> 10 FAIL
+→ 0 FAIL, <code>go build ./...</code> clean). Round 344 added HXQ-002
 (helix_qa <code>pkg/autonomous</code> ↔︎ VisionEngine <code>remote</code>
 API drift resolved — mechanical 3-signature drift:
 <code>ProbeHosts</code>/<code>SelectStrongestModel</code>/<code>PlanDistribution</code>
@@ -293,8 +301,7 @@ recorded_mobile, ~40 strings)</td>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>3 open issues: 1 Bug / 1 Task / 1 Feature; 2 BLOCKED (VEN-002
-operator decision + HXA-002 cross-submodule coord).</p>
+<p>2 open issues: 0 Bug / 1 Task / 1 Feature; 0 BLOCKED.</p>
 <p><em>Last regenerated: 2026-05-20 (round 325 — HXQ-001 closed). See
 <code>docs/Fixed.md</code> for full closure entries with commit
 SHAs.</em></p>

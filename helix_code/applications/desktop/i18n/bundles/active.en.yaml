@@ -83,3 +83,65 @@ desktop_settings_about_text:
 
 desktop_settings_about_title:
   other: "About"
+
+# Round-351 §11.4 anti-bluff sweep (2026-05-20): 18 further
+# user-facing GUI literals migrated (project/session/model detail
+# templates, success dialogs, chat AI status messages, provider
+# health labels, settings card titles/labels).
+
+desktop_projects_details_template:
+  other: "Name: {{.Name}}\nType: {{.Type}}\nPath: {{.Path}}\nDescription: {{.Description}}\nCreated: {{.Created}}\nBuild Command: {{.BuildCommand}}\nTest Command: {{.TestCommand}}"
+
+desktop_sessions_details_template:
+  other: "Name: {{.Name}}\nMode: {{.Mode}}\nStatus: {{.Status}}\nProject ID: {{.ProjectID}}\nDescription: {{.Description}}\nCreated: {{.Created}}\nDuration: {{.Duration}}"
+
+desktop_models_details_template:
+  other: "Name: {{.Name}}\nProvider: {{.Provider}}\nContext Size: {{.ContextSize}}\nCapabilities: {{.Capabilities}}"
+
+desktop_common_success_title:
+  other: "Success"
+
+desktop_projects_created_success:
+  other: "Project created successfully"
+
+desktop_sessions_created_success:
+  other: "Session created successfully"
+
+desktop_sessions_controls_label:
+  other: "Session Controls:"
+
+desktop_sessions_complete_button:
+  other: "Complete Session"
+
+desktop_chat_provider_unavailable:
+  other: "[AI ({{.Provider}}/{{.Model}})]: Provider '{{.Provider}}' not available or model not configured. Please configure it in Settings."
+
+desktop_chat_llm_not_initialized:
+  other: "[AI ({{.Provider}}/{{.Model}})]: LLM service not initialized. Please restart the application or check configuration."
+
+desktop_health_checking:
+  other: "Provider Health:\nChecking..."
+
+desktop_health_no_manager:
+  other: "Provider Health:\nNo LLM manager available"
+
+desktop_health_header:
+  other: "Provider Health:"
+
+desktop_health_none_configured:
+  other: "No providers configured"
+
+desktop_settings_theme_subtitle:
+  other: "Select application theme"
+
+desktop_settings_server_title:
+  other: "Server Connection"
+
+desktop_settings_conn_test_title:
+  other: "Connection Test"
+
+desktop_settings_conn_test_body:
+  other: "Server connection test would be performed here."
+
+desktop_settings_anthropic_key_label:
+  other: "Anthropic API Key:"

@@ -915,28 +915,124 @@ Closed in this round.</p>
 id="hxv-002-llmsverifier-verification-package-10-pre-existing-test-failures">HXV-002
 — LLMsVerifier <code>verification/</code> package 10 pre-existing test
 failures</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-20 (round 345 — LLMsVerifier i18n
-round-12 subagent) <strong>Discovered-By:</strong> AI subagent —
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-20 (round 345 — LLMsVerifier
+i18n round-12 subagent) <strong>Discovered-By:</strong> AI subagent —
 <code>git stash</code> test confirmed the 10 failures reproduce at
 submodule HEAD <code>582ae9c7</code> (round-336) <em>without</em> the
 round-345 i18n change, proving pre-existing and unrelated
-<strong>Evidence:</strong> <code>go test ./...</code> in
+<strong>Resolved:</strong> 2026-05-20 (round 348)
+<strong>Evidence:</strong> <code>go test ./verification/...</code> in
 <code>dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/</code>
-reports 10 failures in the <code>verification/</code> package. Distinct
-from HXV-001 (which closed the <code>tests/</code> CLI+scoring suite
-round 323). Not yet root-caused — round-345 scope was strictly i18n.
-Likely related to the round-17 <code>ErrVerificationNotWired</code>
-honest-contract change (verification was deliberately un-wired to remove
-a §11.4 PASS-bluff; some <code>verification/</code> package tests may
-still assert the pre-honesty fabricated all-capabilities-true /
-all-scores-8.5 behaviour). <strong>Resolution path:</strong> Dedicated
-round — run <code>go test -v ./verification/...</code>, capture the 10
-signatures, classify each (test-assertion drift to the honest
-<code>ErrVerificationNotWired</code> contract vs genuine production
-regression). Mirror the HXV-001 round-323 classification approach:
-re-key drifted assertions to certify the honest contract; fix any
-genuine production regression at root.</p>
+reported 10 failures; after round-348 fix
+<code>ok digital.vasic.llmsverifier/verification (1.635s)</code>, 0
+failures, <code>go build ./...</code> clean.
+<strong>Resolution:</strong> All 10 failures classified <strong>(A)
+test-assertion drift</strong> — every failing test asserted pre-honesty
+fabricated behaviour that round-17 commit <code>a6328629</code>
+correctly removed. <strong>No production code changed.</strong>
+Per-failure classification table:</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 30%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Test</th>
+<th>File</th>
+<th>Drifted assertion</th>
+<th>Re-keyed to honest contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>TestVerifier_Verify_Success</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + all-capabilities-true + scores&gt;0</td>
+<td><code>ErrVerificationNotWired</code> sentinel; renamed
+<code>TestVerifier_Verify_NotWiredContract</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>TestVerifier_Verify_ResultScores</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated 0-10 scores</td>
+<td><code>ErrVerificationNotWired</code>; no score fabrication</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>TestVerifier_Verify_LatencyMetrics</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated latency metrics</td>
+<td><code>ErrVerificationNotWired</code>; latency from real call
+only</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>TestVerifier_Verify_CodeLanguageSupport</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated python/go/js support</td>
+<td><code>ErrVerificationNotWired</code>; support must be measured</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>TestVerifier_Verify_CodeCapabilities</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + all code-capability flags true</td>
+<td><code>ErrVerificationNotWired</code>; flags must be tested</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>TestVerifier_Verify_ModelStatusFlags</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated ModelExists/Responsive</td>
+<td><code>ErrVerificationNotWired</code>; status from real probe</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>TestVerifier_Verify_ContextCancellation</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated completed result</td>
+<td><code>ErrVerificationNotWired</code> regardless of ctx state</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>TestVerifier_Verify_MultipleRequests</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + <code>Status=="completed"</code> per
+request</td>
+<td><code>ErrVerificationNotWired</code> for every request in batch</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>TestCodeVerificationService_TestCodeVisibility_Error</code></td>
+<td>code_verification_test.go</td>
+<td><code>NoError</code> (API 503 swallowed)</td>
+<td><code>require.Error</code> + <code>503</code>; response still
+carries <code>Verified=false</code>+<code>Error</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>TestCodeVerificationService_VerifyModelCodeVisibility_ServerError</code></td>
+<td>code_verification_test.go</td>
+<td><code>Status=="verified"</code> + score≥0.7 on HTTP 500</td>
+<td><code>Status=="failed"</code> + non-empty <code>ErrorMessage</code>;
+a 500 server never yields a passing verification</td>
+</tr>
+</tbody>
+</table>
+<p>Mirrors HXV-001 round-323’s classification approach. The production
+code (<code>verification.go</code> round-17
+<code>ErrVerificationNotWired</code>, <code>code_verification.go</code>
+error propagation + zero-response→<code>failed</code>) was already
+honest; only the stale test assertions needed re-keying to certify
+it.</p>
 <hr />
 <p><em>Last regenerated: 2026-05-20 (round 345 — HXV-002 added). To
 update Issues_Summary.md mechanically, run

@@ -255,12 +255,28 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ## HXV-002 — LLMsVerifier `verification/` package 10 pre-existing test failures
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-20 (round 345 — LLMsVerifier i18n round-12 subagent)
 **Discovered-By:** AI subagent — `git stash` test confirmed the 10 failures reproduce at submodule HEAD `582ae9c7` (round-336) *without* the round-345 i18n change, proving pre-existing and unrelated
-**Evidence:** `go test ./...` in `dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/` reports 10 failures in the `verification/` package. Distinct from HXV-001 (which closed the `tests/` CLI+scoring suite round 323). Not yet root-caused — round-345 scope was strictly i18n. Likely related to the round-17 `ErrVerificationNotWired` honest-contract change (verification was deliberately un-wired to remove a §11.4 PASS-bluff; some `verification/` package tests may still assert the pre-honesty fabricated all-capabilities-true / all-scores-8.5 behaviour).
-**Resolution path:** Dedicated round — run `go test -v ./verification/...`, capture the 10 signatures, classify each (test-assertion drift to the honest `ErrVerificationNotWired` contract vs genuine production regression). Mirror the HXV-001 round-323 classification approach: re-key drifted assertions to certify the honest contract; fix any genuine production regression at root.
+**Resolved:** 2026-05-20 (round 348)
+**Evidence:** `go test ./verification/...` in `dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/` reported 10 failures; after round-348 fix `ok digital.vasic.llmsverifier/verification (1.635s)`, 0 failures, `go build ./...` clean.
+**Resolution:** All 10 failures classified **(A) test-assertion drift** — every failing test asserted pre-honesty fabricated behaviour that round-17 commit `a6328629` correctly removed. **No production code changed.** Per-failure classification table:
+
+| # | Test | File | Drifted assertion | Re-keyed to honest contract |
+|---|------|------|-------------------|-----------------------------|
+| 1 | `TestVerifier_Verify_Success` | verification_test.go | `NoError` + all-capabilities-true + scores>0 | `ErrVerificationNotWired` sentinel; renamed `TestVerifier_Verify_NotWiredContract` |
+| 2 | `TestVerifier_Verify_ResultScores` | verification_test.go | `NoError` + fabricated 0-10 scores | `ErrVerificationNotWired`; no score fabrication |
+| 3 | `TestVerifier_Verify_LatencyMetrics` | verification_test.go | `NoError` + fabricated latency metrics | `ErrVerificationNotWired`; latency from real call only |
+| 4 | `TestVerifier_Verify_CodeLanguageSupport` | verification_test.go | `NoError` + fabricated python/go/js support | `ErrVerificationNotWired`; support must be measured |
+| 5 | `TestVerifier_Verify_CodeCapabilities` | verification_test.go | `NoError` + all code-capability flags true | `ErrVerificationNotWired`; flags must be tested |
+| 6 | `TestVerifier_Verify_ModelStatusFlags` | verification_test.go | `NoError` + fabricated ModelExists/Responsive | `ErrVerificationNotWired`; status from real probe |
+| 7 | `TestVerifier_Verify_ContextCancellation` | verification_test.go | `NoError` + fabricated completed result | `ErrVerificationNotWired` regardless of ctx state |
+| 8 | `TestVerifier_Verify_MultipleRequests` | verification_test.go | `NoError` + `Status=="completed"` per request | `ErrVerificationNotWired` for every request in batch |
+| 9 | `TestCodeVerificationService_TestCodeVisibility_Error` | code_verification_test.go | `NoError` (API 503 swallowed) | `require.Error` + `503`; response still carries `Verified=false`+`Error` |
+| 10 | `TestCodeVerificationService_VerifyModelCodeVisibility_ServerError` | code_verification_test.go | `Status=="verified"` + score≥0.7 on HTTP 500 | `Status=="failed"` + non-empty `ErrorMessage`; a 500 server never yields a passing verification |
+
+Mirrors HXV-001 round-323's classification approach. The production code (`verification.go` round-17 `ErrVerificationNotWired`, `code_verification.go` error propagation + zero-response→`failed`) was already honest; only the stale test assertions needed re-keying to certify it.
 
 ---
 

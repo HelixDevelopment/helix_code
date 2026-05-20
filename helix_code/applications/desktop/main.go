@@ -681,10 +681,16 @@ func (da *DesktopApp) createProjectsTab() fyne.CanvasObject {
 		defer da.dataMu.RUnlock()
 		if id < len(da.projects) {
 			p := da.projects[id]
-			details := fmt.Sprintf("Name: %s\nType: %s\nPath: %s\nDescription: %s\nCreated: %s\nBuild Command: %s\nTest Command: %s",
-				p.Name, p.Type, p.Path, p.Description,
-				p.CreatedAt.Format(time.RFC822),
-				p.Metadata.BuildCommand, p.Metadata.TestCommand)
+			// CONST-046: project-details template resolved via i18n bundle.
+			details := da.tr(ctxProjects, "desktop_projects_details_template", map[string]any{
+				"Name":         p.Name,
+				"Type":         p.Type,
+				"Path":         p.Path,
+				"Description":  p.Description,
+				"Created":      p.CreatedAt.Format(time.RFC822),
+				"BuildCommand": p.Metadata.BuildCommand,
+				"TestCommand":  p.Metadata.TestCommand,
+			})
 			projectDetailsLabel.SetText(details)
 		}
 	}
@@ -725,7 +731,11 @@ func (da *DesktopApp) createProjectsTab() fyne.CanvasObject {
 					pathEntry.SetText("")
 					da.refreshData()
 					da.projectList.Refresh()
-					dialog.ShowInformation("Success", "Project created successfully", da.mainWindow)
+					// CONST-046: success dialog title + body resolved via i18n bundle.
+					dialog.ShowInformation(
+						da.tr(ctxProjects, "desktop_common_success_title", nil),
+						da.tr(ctxProjects, "desktop_projects_created_success", nil),
+						da.mainWindow)
 				}
 			}
 		}),
@@ -812,9 +822,16 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 		if id < len(da.sessions) {
 			s := da.sessions[id]
 			durationStr := s.Duration.String()
-			details := fmt.Sprintf("Name: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s\nDuration: %s",
-				s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
-				s.CreatedAt.Format(time.RFC822), durationStr)
+			// CONST-046: session-details template resolved via i18n bundle.
+			details := da.tr(ctxSessions, "desktop_sessions_details_template", map[string]any{
+				"Name":        s.Name,
+				"Mode":        s.Mode,
+				"Status":      s.Status,
+				"ProjectID":   s.ProjectID,
+				"Description": s.Description,
+				"Created":     s.CreatedAt.Format(time.RFC822),
+				"Duration":    durationStr,
+			})
 			sessionDetailsLabel.SetText(details)
 		}
 	}
@@ -841,9 +858,16 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 			s := da.sessions[id]
 			selectedSessionID = s.ID
 			durationStr := s.Duration.String()
-			details := fmt.Sprintf("Name: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s\nDuration: %s",
-				s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
-				s.CreatedAt.Format(time.RFC822), durationStr)
+			// CONST-046: session-details template resolved via i18n bundle.
+			details := da.tr(ctxSessions, "desktop_sessions_details_template", map[string]any{
+				"Name":        s.Name,
+				"Mode":        s.Mode,
+				"Status":      s.Status,
+				"ProjectID":   s.ProjectID,
+				"Description": s.Description,
+				"Created":     s.CreatedAt.Format(time.RFC822),
+				"Duration":    durationStr,
+			})
 			sessionDetailsLabel.SetText(details)
 		}
 	}
@@ -871,12 +895,17 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 					projectIDEntry.SetText("")
 					da.refreshData()
 					da.sessionList.Refresh()
-					dialog.ShowInformation("Success", "Session created successfully", da.mainWindow)
+					// CONST-046: success dialog title + body resolved via i18n bundle.
+					dialog.ShowInformation(
+						da.tr(ctxSessions, "desktop_common_success_title", nil),
+						da.tr(ctxSessions, "desktop_sessions_created_success", nil),
+						da.mainWindow)
 				}
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewLabel("Session Controls:"),
+		// CONST-046: session-controls label resolved via i18n bundle.
+		widget.NewLabel(da.tr(ctxSessions, "desktop_sessions_controls_label", nil)),
 		widget.NewButton("Start Session", func() {
 			if da.sessionManager != nil && selectedSessionID != "" {
 				err := da.sessionManager.Start(selectedSessionID)
@@ -910,7 +939,8 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 				}
 			}
 		}),
-		widget.NewButton("Complete Session", func() {
+		// CONST-046: complete-session button resolved via i18n bundle.
+		widget.NewButton(da.tr(ctxSessions, "desktop_sessions_complete_button", nil), func() {
 			if da.sessionManager != nil && selectedSessionID != "" {
 				err := da.sessionManager.Complete(selectedSessionID)
 				if err != nil {
@@ -978,8 +1008,13 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 			for i, c := range m.Capabilities {
 				caps[i] = string(c)
 			}
-			details := fmt.Sprintf("Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v",
-				m.Name, m.Provider, m.ContextSize, caps)
+			// CONST-046: model-details template resolved via i18n bundle.
+			details := da.tr(ctxLLM, "desktop_models_details_template", map[string]any{
+				"Name":         m.Name,
+				"Provider":     m.Provider,
+				"ContextSize":  m.ContextSize,
+				"Capabilities": fmt.Sprintf("%v", caps),
+			})
 			modelDetailsLabel.SetText(details)
 		}
 	}
@@ -1051,13 +1086,19 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
 					}
 				} else {
-					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available or model not configured. Please configure it in Settings.\n",
-						providerName, modelName, providerName)
+					// CONST-046: provider-unavailable message resolved via i18n bundle.
+					responseMsg = da.tr(ctxLLM, "desktop_chat_provider_unavailable", map[string]any{
+						"Provider": providerName,
+						"Model":    modelName,
+					}) + "\n"
 				}
 			} else {
 				// No LLM manager configured - show informative message
-				responseMsg = fmt.Sprintf("[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n",
-					providerName, modelName)
+				// CONST-046: llm-not-initialized message resolved via i18n bundle.
+				responseMsg = da.tr(ctxLLM, "desktop_chat_llm_not_initialized", map[string]any{
+					"Provider": providerName,
+					"Model":    modelName,
+				}) + "\n"
 			}
 
 			// Update UI on main thread
@@ -1090,7 +1131,8 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	chatCard := widget.NewCard("LLM Chat", "", chatPanel)
 
 	// Provider health status
-	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
+	// CONST-046: provider-health labels resolved via i18n bundle.
+	healthLabel := widget.NewLabel(da.tr(ctxLLM, "desktop_health_checking", nil))
 
 	// Start health check goroutine
 	go func() {
@@ -1099,17 +1141,17 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 
 		checkHealth := func() {
 			if da.llmManager == nil {
-				healthLabel.SetText("Provider Health:\nNo LLM manager available")
+				healthLabel.SetText(da.tr(ctxLLM, "desktop_health_no_manager", nil))
 				return
 			}
 			ctx := context.Background()
 			health := da.llmManager.HealthCheck(ctx)
-			healthText := "Provider Health:\n"
+			healthText := da.tr(ctxLLM, "desktop_health_header", nil) + "\n"
 			for provider, status := range health {
 				healthText += fmt.Sprintf("- %s: %s\n", provider, status.Status)
 			}
 			if len(health) == 0 {
-				healthText += "No providers configured"
+				healthText += da.tr(ctxLLM, "desktop_health_none_configured", nil)
 			}
 			healthLabel.SetText(healthText)
 		}
@@ -1152,7 +1194,8 @@ func (da *DesktopApp) createSettingsTab() fyne.CanvasObject {
 	})
 	themeSelect.SetSelected(da.themeManager.GetCurrentTheme().Name)
 
-	themeCard := widget.NewCard("Theme", "Select application theme", themeSelect)
+	// CONST-046: theme-card subtitle resolved via i18n bundle.
+	themeCard := widget.NewCard("Theme", da.tr(ctxSettings, "desktop_settings_theme_subtitle", nil), themeSelect)
 
 	// Current theme info
 	updateThemeInfo()
@@ -1167,14 +1210,19 @@ func (da *DesktopApp) createSettingsTab() fyne.CanvasObject {
 	serverTimeoutEntry.SetText("30")
 	serverTimeoutEntry.SetPlaceHolder("Timeout (seconds)")
 
-	serverCard := widget.NewCard("Server Connection", "",
+	// CONST-046: server-connection card title resolved via i18n bundle.
+	serverCard := widget.NewCard(da.tr(ctxSettings, "desktop_settings_server_title", nil), "",
 		container.NewVBox(
 			widget.NewLabel("Server URL:"),
 			serverURLEntry,
 			widget.NewLabel("Timeout (seconds):"),
 			serverTimeoutEntry,
 			widget.NewButton("Test Connection", func() {
-				dialog.ShowInformation("Connection Test", "Server connection test would be performed here.", da.mainWindow)
+				// CONST-046: connection-test dialog resolved via i18n bundle.
+				dialog.ShowInformation(
+					da.tr(ctxSettings, "desktop_settings_conn_test_title", nil),
+					da.tr(ctxSettings, "desktop_settings_conn_test_body", nil),
+					da.mainWindow)
 			}),
 		),
 	)
@@ -1208,7 +1256,8 @@ func (da *DesktopApp) createSettingsTab() fyne.CanvasObject {
 			ollamaURLEntry,
 			widget.NewLabel("OpenAI API Key:"),
 			widget.NewPasswordEntry(),
-			widget.NewLabel("Anthropic API Key:"),
+			// CONST-046: anthropic-key label resolved via i18n bundle.
+			widget.NewLabel(da.tr(ctxSettings, "desktop_settings_anthropic_key_label", nil)),
 			widget.NewPasswordEntry(),
 		),
 	)

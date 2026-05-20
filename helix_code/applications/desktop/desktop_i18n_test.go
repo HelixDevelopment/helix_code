@@ -30,15 +30,22 @@ import (
 // to match the bundle value.
 type sentinelTranslator struct {
 	calls []string
+	// lastData records the templateData of the most recent T call,
+	// so paired-mutation tests can assert placeholder-bearing call
+	// sites actually route their interpolation arguments through the
+	// Translator seam (not a residual fmt.Sprintf bypass).
+	lastData map[string]any
 }
 
-func (s *sentinelTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+func (s *sentinelTranslator) T(_ context.Context, id string, data map[string]any) (string, error) {
 	s.calls = append(s.calls, id)
+	s.lastData = data
 	return "<SENTINEL:" + id + ">", nil
 }
 
-func (s *sentinelTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+func (s *sentinelTranslator) TPlural(_ context.Context, id string, _ int, data map[string]any) (string, error) {
 	s.calls = append(s.calls, id)
+	s.lastData = data
 	return "<SENTINEL:" + id + ">", nil
 }
 
@@ -108,6 +115,26 @@ func TestDesktopApp_Tr_RoutesThroughTranslator(t *testing.T) {
 		"desktop_chat_model_name_placeholder",
 		"desktop_settings_about_text",
 		"desktop_settings_about_title",
+		// Round-351 §11.4 sweep additions.
+		"desktop_projects_details_template",
+		"desktop_sessions_details_template",
+		"desktop_models_details_template",
+		"desktop_common_success_title",
+		"desktop_projects_created_success",
+		"desktop_sessions_created_success",
+		"desktop_sessions_controls_label",
+		"desktop_sessions_complete_button",
+		"desktop_chat_provider_unavailable",
+		"desktop_chat_llm_not_initialized",
+		"desktop_health_checking",
+		"desktop_health_no_manager",
+		"desktop_health_header",
+		"desktop_health_none_configured",
+		"desktop_settings_theme_subtitle",
+		"desktop_settings_server_title",
+		"desktop_settings_conn_test_title",
+		"desktop_settings_conn_test_body",
+		"desktop_settings_anthropic_key_label",
 	}
 
 	s := &sentinelTranslator{}
@@ -130,6 +157,41 @@ func TestDesktopApp_Tr_RoutesThroughTranslator(t *testing.T) {
 	for i, id := range migratedIDs {
 		if s.calls[i] != id {
 			t.Fatalf("calls[%d] = %q, want %q", i, s.calls[i], id)
+		}
+	}
+}
+
+// TestDesktopApp_Tr_RoutesTemplateData is the round-351
+// paired-mutation seam test: it verifies the tr() helper passes the
+// templateData map through to Translator.T verbatim. Placeholder-
+// bearing message IDs (project/session/model detail templates, chat
+// status messages) MUST interpolate via the bundle's go-i18n
+// {{.Field}} syntax — a regression that reverts a call site to
+// fmt.Sprintf would drop the data map and this test would FAIL.
+func TestDesktopApp_Tr_RoutesTemplateData(t *testing.T) {
+	s := &sentinelTranslator{}
+	da := &DesktopApp{}
+	da.SetTranslator(s)
+
+	data := map[string]any{
+		"Name":         "demo-project",
+		"Type":         "go",
+		"Path":         "/tmp/demo",
+		"Description":  "round-351 seam test",
+		"Created":      "01 Jan 26 00:00 UTC",
+		"BuildCommand": "make build",
+		"TestCommand":  "make test",
+	}
+	got := da.tr(context.Background(), "desktop_projects_details_template", data)
+	if got != "<SENTINEL:desktop_projects_details_template>" {
+		t.Fatalf("tr() returned %q, want sentinel envelope", got)
+	}
+	if s.lastData == nil {
+		t.Fatal("tr() dropped templateData — call site likely bypasses the Translator seam (CONST-046 regression)")
+	}
+	for k, want := range data {
+		if s.lastData[k] != want {
+			t.Fatalf("templateData[%q] = %v, want %v — interpolation argument lost in transit", k, s.lastData[k], want)
 		}
 	}
 }
