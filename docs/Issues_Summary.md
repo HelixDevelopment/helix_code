@@ -7,7 +7,7 @@
 | ID | Title | Type | Status | Discovered | Notes |
 |---|---|---|---|---|---|
 | VEN-001 | VisionEngine `helix-gitlab` remote repo missing (404) | Task | Completed (→ Fixed.md) round 188 | 2026-05-19 | NOT missing — URL misconfig (HelixDevelopment vs helixdevelopment1 path); fixed via git remote set-url; 100/100 owned-org URLs reachable |
-| VEN-002 | VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a | Bug | Queued — BLOCKED on operator | 2026-05-19 | CONST-061 merge-first investigation needed; carries round-48/52/57 commits |
+| VEN-002 | VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a | Bug | Fixed (→ Fixed.md) round 340 | 2026-05-19 | Closed: CONST-061 merge-first — real 2-parent merge `70c9e0c` (NO force); 16-file conflict surface resolved; 7 pkgs build+test PASS; 4 remotes FF-pushed |
 | HXL-001 | HelixLLM `analysis_test.go` hardcoded absolute path (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via t.TempDir + fixtures (a5e56d4) |
 | HXL-002 | HelixLLM `gateway/middleware` TOON `WriteTOON` 500 (was: helix_agent) | Bug | Fixed (→ Fixed.md) round 105 | 2026-05-19 | Closed via json.Marshal fallback (a5e56d4) |
 | HXC-001 | CONST-052 rename programme: meta-repo dirs still PascalCase | Task | Plan-Ready (→ specs round 113) | 2026-05-15 | Round 113 produced phased plan (f666410). 12 operator decisions needed before execution |
@@ -22,6 +22,6 @@
 | HXC-005 | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) round 318 | 2026-05-20 | Closed: obsolete bluff DELETED (superseded by real cmd/performance_optimization → internal/performance); regression test added |
 | HXV-001 | LLMsVerifier 18 pre-existing `tests/` failures (CLI + scoring) | Bug | Fixed (→ Fixed.md) round 323 | 2026-05-20 | Closed: 18 failures classified (test-build drift `go run` single-file → whole-package + test-assertion drift to honest `ErrVerificationNotWired` contract + env-gated SKIP-OK 404 tolerance); all `tests/...` PASS; LLMsVerifier `59f542ba` |
 
-**Counts**: 3 open (HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed round 200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open (VEN-002) | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 2 BLOCKED (VEN-002 operator + HXA-002 cross-submodule coord)
+**Counts**: 3 open (VEN-002 closed round 340; HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed round 200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open (HXA-002) | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 1 BLOCKED (HXA-002 cross-submodule coord)
 
-*Last regenerated: 2026-05-20 (round 325 — HXQ-001 closed → Fixed.md). See `docs/Issues.md` for full details + prefix convention table. PDF/HTML exports auto-regenerated via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-05-20 (round 340 — VEN-002 closed → Fixed.md via CONST-061 merge-first). See `docs/Issues.md` for full details + prefix convention table. PDF/HTML exports auto-regenerated via `scripts/regenerate-tracker-exports.sh`.*

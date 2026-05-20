@@ -85,17 +85,6 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## VEN-002 (ex-ISSUE-002) — VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a
-
-**Status:** Queued — BLOCKED on operator (CONST-061 merge-first investigation)
-**Type:** Bug
-**Discovered:** 2026-05-19 (round 98)
-**Discovered-By:** AI subagent during 4-remote push attempt
-**Evidence:** vasic-digital-github HEAD `93c830a` carries round-48/52/57 commits absent from HelixDevelopment local main. Non-FF push rejected. NO force-push attempted (CONST-043).
-**Resolution path:** Operator-led CONST-061 merge-first pipeline — fetch divergent commits, audit conflict surface, integrate or document divergence as intentional fork, then either FF-push or designate one lineage as canonical.
-
----
-
 ## HXL-001 (ex-ISSUE-003) — HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path
 
 **Status:** Fixed (→ Fixed.md)

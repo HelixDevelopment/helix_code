@@ -1149,9 +1149,62 @@ clean;
 <code>SKIP-OK: #HXQ-001</code> marker;
 <code>HOST_LOAD_DEDICATED=1 go test …</code> → all 3
 <code>--- PASS</code> strict (DHash64 average 741ns, PHash average
-88.969µs — well under the 5 ms / 25 ms ceilings). |</div>
-<p><em>Last regenerated: 2026-05-20 (round 325 — HXQ-001 closure).
-Earlier closures (P0-P5 phases) tracked via
+88.969µs — well under the 5 ms / 25 ms ceilings). |<br />
+2026-05-20 | VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA 93c830a
+| Bug | Fixed (→ Fixed.md) | 340 | VisionEngine merge
+<code>70c9e0c</code> (4 remotes) + meta pointer-bump | Round-340
+§11.4.41 / CONST-061 merge-first.
+<code>vasic-digital-github/master</code> HEAD
+<code>93c830a</code>→<code>256cce1</code> carried 15 commits absent from
+HelixDevelopment local <code>master</code> (<code>6e3888e</code>); local
+carried 60 absent from vd. <strong>Decision: merge-first</strong>
+(operator-approved) — real 2-parent merge commit <code>70c9e0c</code>
+(parents <code>6e3888e</code> HelixDevelopment + <code>256cce1</code>
+vasic-digital), NO force-push, NO rebase, ALL commits from both lineages
+preserved. Integrated vd round-48 (<code>aaf9bda</code> RPC lifecycle
+sentinels) / round-52 (<code>7c0455b</code> real RPC server lifecycle) /
+round-57 (<code>93c830a</code> real ProbeHosts + planning) / round-47
+(<code>5496b2d</code>) / round-40 (<code>1169213</code> SSH Shutdown) /
+<code>76452da</code> + governance cascades. <strong>16-file conflict
+resolution:</strong> (1) 6 challenge scripts — kept HEAD canonical
+<code>VISIONENGINE_*</code> env names, dropped fork-specific
+<code>VISIONENGINE_VD_*</code> prefix per CONST-051(B) decoupling; (2)
+<code>go.mod</code>/<code>go.sum</code> — kept HEAD newer
+testify-v1.11.1 transitive graph, <code>go mod tidy</code> reconciled
+clean; (3) <code>pkg/analyzer/stub.go</code> — took vd anti-bluff
+sentinel bodies: HEAD body had RE-INTRODUCED the fabricated
+<code>ScreenAnalysis{Title:"Unknown Screen"}</code>+<code>err=nil</code>
+PASS-bluff that the file’s own unconflicted doc comments declare removed
+round-27 — per CONST-035/Article XI §11.9 the bluff must not survive;
+removed bluff-only
+<code>i18n_defaults.go</code>+<code>i18n_callsites_test.go</code> (sole
+consumer was the removed path; <code>pkg/i18n</code> package untouched);
+(4) <code>pkg/remote/{remote,ssh,remote_test}.go</code> — took HEAD:
+<code>EnsureReady</code> SSH-probe is a strict functional superset of
+vd’s config-only <code>EnsureReady</code>, HEAD defines
+<code>ErrBackendNotReachable</code>+<code>SSHConfig.BackendProbePort</code>
+the merged body needs, HEAD <code>SSHConfig</code> is a field-superset
+so vd RPC code compiles unchanged; (5)
+<code>pkg/remote/deployer_test.go</code> — modify/delete conflict, kept
+vd’s 1026-line real anti-bluff RPC test suite per CONST-061 union-merge
+(<code>deployer.go</code>+<code>distributed.go</code> auto-merged as
+pure vd additions); (6)
+<code>CONSTITUTION.md</code>/<code>CLAUDE.md</code>/<code>AGENTS.md</code>
+— took HEAD (current governance lineage: 52 §11.4.x anchors +
+CONST-001..061 + §11.4.67; vd-unique CONST-030 superseded by CONST-035,
+vd-unique CONST-068 is the ID-form of §11.4.67 HEAD carries by literal).
+Evidence: zero conflict markers
+(<code>grep -rn '&lt;&lt;&lt;&lt;&lt;&lt;&lt;\|=======\|&gt;&gt;&gt;&gt;&gt;&gt;&gt;' --include='*.go'</code>
+empty); <code>go build ./...</code> exit 0; <code>go vet ./...</code>
+clean; <code>go test -count=1 ./...</code> → 7 packages PASS
+(<code>analyzer config graph i18n llmvision opencv remote</code>); all 4
+remotes fast-forwarded (<code>6e3888e..70c9e0c</code>
+helix-github/gitlab + vasic-digital-gitlab,
+<code>256cce1..70c9e0c</code> vasic-digital-github — NO force on any).
+|</div>
+<p><em>Last regenerated: 2026-05-20 (round 340 — VEN-002 closure via
+CONST-061 merge-first). Earlier closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>

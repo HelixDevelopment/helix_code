@@ -8,11 +8,11 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 12 | `Fixed (→ Fixed.md)` |
+| Bug | 13 | `Fixed (→ Fixed.md)` |
 | Feature | 66 | `Implemented (→ Fixed.md)` |
 | Task | 7 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 83 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 325 added HXQ-001 (helix_qa `TestPerformance` flake resolved — 3 `pkg/vision/` perf tests gated behind `HOST_LOAD_DEDICATED` env var; resolution path (b), timing tolerance NOT loosened, anti-bluff strictness preserved per CONST-035).
+**Total closed items**: 84 (in the round-system tracker; pre-round closures tracked separately in `docs/improvements/PROGRESS.md`). Round 340 added VEN-002 (VisionEngine `vasic-digital-github` divergent fork lineage resolved via CONST-061 §11.4.41 merge-first — real 2-parent merge commit `70c9e0c`, NO force-push, 16-file conflict surface resolved preserving the anti-bluff truth per CONST-035; 7 packages build+test PASS; 4 remotes fast-forwarded). Round 325 added HXQ-001 (helix_qa `TestPerformance` flake resolved — 3 `pkg/vision/` perf tests gated behind `HOST_LOAD_DEDICATED` env var; resolution path (b), timing tolerance NOT loosened, anti-bluff strictness preserved per CONST-035).
 
 ## Coverage by round-system phase
 
