@@ -87,9 +87,9 @@ func (h *EventNotificationHandler) createTaskCompletedNotification(ctx context.C
 	taskID := h.getDataString(evt.Data, "task_id", evt.TaskID)
 	duration := h.getDataString(evt.Data, "duration", "")
 
-	message := fmt.Sprintf("Task %s completed successfully", taskID)
+	message := tr(ctx, "internal_notification_message_task_completed", map[string]any{"TaskID": taskID})
 	if duration != "" {
-		message += fmt.Sprintf(" in %s", duration)
+		message += tr(ctx, "internal_notification_message_duration_suffix", map[string]any{"Duration": duration})
 	}
 
 	return &Notification{
@@ -110,9 +110,9 @@ func (h *EventNotificationHandler) createTaskCompletedNotification(ctx context.C
 
 func (h *EventNotificationHandler) createTaskFailedNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
 	taskID := h.getDataString(evt.Data, "task_id", evt.TaskID)
-	errorMsg := h.getDataString(evt.Data, "error", "Unknown error")
+	errorMsg := h.getDataString(evt.Data, "error", tr(ctx, "internal_notification_value_unknown_error", nil))
 
-	message := fmt.Sprintf("Task %s failed: %s", taskID, errorMsg)
+	message := tr(ctx, "internal_notification_message_task_failed", map[string]any{"TaskID": taskID, "Error": errorMsg})
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_task_failed", nil),
@@ -138,7 +138,7 @@ func (h *EventNotificationHandler) createWorkflowCompletedNotification(ctx conte
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_workflow_completed", nil),
-		Message:  fmt.Sprintf("Workflow '%s' completed successfully", workflowName),
+		Message:  tr(ctx, "internal_notification_message_workflow_completed", map[string]any{"WorkflowName": workflowName}),
 		Type:     NotificationTypeSuccess,
 		Priority: NotificationPriorityMedium,
 		Metadata: map[string]interface{}{
@@ -155,11 +155,11 @@ func (h *EventNotificationHandler) createWorkflowCompletedNotification(ctx conte
 func (h *EventNotificationHandler) createWorkflowFailedNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
 	workflowID := h.getDataString(evt.Data, "workflow_id", "")
 	workflowName := h.getDataString(evt.Data, "workflow_name", workflowID)
-	errorMsg := h.getDataString(evt.Data, "error", "Unknown error")
+	errorMsg := h.getDataString(evt.Data, "error", tr(ctx, "internal_notification_value_unknown_error", nil))
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_workflow_failed", nil),
-		Message:  fmt.Sprintf("Workflow '%s' failed: %s", workflowName, errorMsg),
+		Message:  tr(ctx, "internal_notification_message_workflow_failed", map[string]any{"WorkflowName": workflowName, "Error": errorMsg}),
 		Type:     NotificationTypeError,
 		Priority: NotificationPriorityHigh,
 		Metadata: map[string]interface{}{
@@ -178,12 +178,12 @@ func (h *EventNotificationHandler) createWorkflowFailedNotification(ctx context.
 
 func (h *EventNotificationHandler) createWorkerDisconnectedNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
 	workerID := h.getDataString(evt.Data, "worker_id", evt.WorkerID)
-	workerHost := h.getDataString(evt.Data, "host", "unknown")
-	reason := h.getDataString(evt.Data, "reason", "Unknown reason")
+	workerHost := h.getDataString(evt.Data, "host", tr(ctx, "internal_notification_value_unknown_host", nil))
+	reason := h.getDataString(evt.Data, "reason", tr(ctx, "internal_notification_value_unknown_reason", nil))
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_worker_disconnected", nil),
-		Message:  fmt.Sprintf("Worker %s (%s) disconnected: %s", workerID, workerHost, reason),
+		Message:  tr(ctx, "internal_notification_message_worker_disconnected", map[string]any{"WorkerID": workerID, "Host": workerHost, "Reason": reason}),
 		Type:     NotificationTypeWarning,
 		Priority: NotificationPriorityMedium,
 		Metadata: map[string]interface{}{
@@ -198,12 +198,12 @@ func (h *EventNotificationHandler) createWorkerDisconnectedNotification(ctx cont
 
 func (h *EventNotificationHandler) createWorkerHealthDegradedNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
 	workerID := h.getDataString(evt.Data, "worker_id", evt.WorkerID)
-	workerHost := h.getDataString(evt.Data, "host", "unknown")
-	healthStatus := h.getDataString(evt.Data, "health_status", "degraded")
+	workerHost := h.getDataString(evt.Data, "host", tr(ctx, "internal_notification_value_unknown_host", nil))
+	healthStatus := h.getDataString(evt.Data, "health_status", tr(ctx, "internal_notification_value_health_degraded", nil))
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_worker_health_degraded", nil),
-		Message:  fmt.Sprintf("Worker %s (%s) health status: %s", workerID, workerHost, healthStatus),
+		Message:  tr(ctx, "internal_notification_message_worker_health_degraded", map[string]any{"WorkerID": workerID, "Host": workerHost, "HealthStatus": healthStatus}),
 		Type:     NotificationTypeWarning,
 		Priority: NotificationPriorityMedium,
 		Metadata: map[string]interface{}{
@@ -220,11 +220,11 @@ func (h *EventNotificationHandler) createWorkerHealthDegradedNotification(ctx co
 
 func (h *EventNotificationHandler) createSystemErrorNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
 	component := h.getDataString(evt.Data, "component", evt.Source)
-	errorMsg := h.getDataString(evt.Data, "error", "Unknown error")
+	errorMsg := h.getDataString(evt.Data, "error", tr(ctx, "internal_notification_value_unknown_error", nil))
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_system_error", nil),
-		Message:  fmt.Sprintf("Error in %s: %s", component, errorMsg),
+		Message:  tr(ctx, "internal_notification_message_system_error", map[string]any{"Component": component, "Error": errorMsg}),
 		Type:     NotificationTypeError,
 		Priority: NotificationPriorityUrgent,
 		Metadata: map[string]interface{}{
@@ -241,7 +241,7 @@ func (h *EventNotificationHandler) createSystemStartupNotification(ctx context.C
 
 	message := tr(ctx, "internal_notification_message_system_started", nil)
 	if version != "" {
-		message += fmt.Sprintf(" (version %s)", version)
+		message += tr(ctx, "internal_notification_message_version_suffix", map[string]any{"Version": version})
 	}
 
 	return &Notification{
@@ -258,11 +258,11 @@ func (h *EventNotificationHandler) createSystemStartupNotification(ctx context.C
 }
 
 func (h *EventNotificationHandler) createSystemShutdownNotification(ctx context.Context, evt event.Event, notifType NotificationType, priority NotificationPriority) *Notification {
-	reason := h.getDataString(evt.Data, "reason", "Normal shutdown")
+	reason := h.getDataString(evt.Data, "reason", tr(ctx, "internal_notification_value_normal_shutdown", nil))
 
 	return &Notification{
 		Title:    tr(ctx, "internal_notification_title_system_shutdown", nil),
-		Message:  fmt.Sprintf("HelixCode system shutting down: %s", reason),
+		Message:  tr(ctx, "internal_notification_message_system_shutdown", map[string]any{"Reason": reason}),
 		Type:     NotificationTypeWarning,
 		Priority: NotificationPriorityMedium,
 		Metadata: map[string]interface{}{

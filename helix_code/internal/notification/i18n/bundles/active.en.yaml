@@ -19,6 +19,10 @@
 # started" message body. These are the strings that reach end users
 # via Slack/Discord/Email/Telegram/Webhook payloads and operator
 # dashboards.
+#
+# Round-385 §11.4 anti-bluff sweep (2026-05-20): completed the
+# event_handler.go migration — the 10 Message bodies + 5 default
+# fallback values that round-167 left as fmt.Sprintf English literals.
 
 internal_notification_title_task_completed:
   other: "Task Completed"
@@ -49,3 +53,57 @@ internal_notification_title_system_shutdown:
 
 internal_notification_message_system_started:
   other: "HelixCode system started"
+
+# Round-385 §11.4 anti-bluff sweep (2026-05-20): migrated the
+# remaining genuine user-facing Message bodies emitted by
+# event_handler.go. These strings reach end users via
+# Slack/Discord/Email/Telegram/Webhook payloads and operator
+# dashboards — round-167 covered the Title fields but left the
+# Message bodies as fmt.Sprintf English literals. Placeholders use
+# go-i18n {{.Name}} template syntax resolved at runtime.
+
+internal_notification_message_task_completed:
+  other: "Task {{.TaskID}} completed successfully"
+
+internal_notification_message_duration_suffix:
+  other: " in {{.Duration}}"
+
+internal_notification_message_task_failed:
+  other: "Task {{.TaskID}} failed: {{.Error}}"
+
+internal_notification_message_workflow_completed:
+  other: "Workflow '{{.WorkflowName}}' completed successfully"
+
+internal_notification_message_workflow_failed:
+  other: "Workflow '{{.WorkflowName}}' failed: {{.Error}}"
+
+internal_notification_message_worker_disconnected:
+  other: "Worker {{.WorkerID}} ({{.Host}}) disconnected: {{.Reason}}"
+
+internal_notification_message_worker_health_degraded:
+  other: "Worker {{.WorkerID}} ({{.Host}}) health status: {{.HealthStatus}}"
+
+internal_notification_message_system_error:
+  other: "Error in {{.Component}}: {{.Error}}"
+
+internal_notification_message_version_suffix:
+  other: " (version {{.Version}})"
+
+internal_notification_message_system_shutdown:
+  other: "HelixCode system shutting down: {{.Reason}}"
+
+# Default fallback values used when event Data omits a field.
+internal_notification_value_unknown_error:
+  other: "Unknown error"
+
+internal_notification_value_unknown_reason:
+  other: "Unknown reason"
+
+internal_notification_value_unknown_host:
+  other: "unknown"
+
+internal_notification_value_health_degraded:
+  other: "degraded"
+
+internal_notification_value_normal_shutdown:
+  other: "Normal shutdown"

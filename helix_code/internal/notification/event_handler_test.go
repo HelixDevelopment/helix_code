@@ -61,9 +61,12 @@ func TestEventNotificationHandler_HandleEvent_TaskCompleted(t *testing.T) {
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID via
 	// NoopTranslator. See internal/notification/i18n/bundles/active.en.yaml.
+	// Round-385: Message body is now also a CONST-046 message ID — under
+	// NoopTranslator placeholders are NOT interpolated (loud echo). The
+	// interpolating-translator round-trip is asserted in translator_test.go.
 	assert.Equal(t, "internal_notification_title_task_completed", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "task-123")
-	assert.Contains(t, capturedNotification.Message, "2m30s")
+	assert.Equal(t, "internal_notification_message_task_completed"+
+		"internal_notification_message_duration_suffix", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeSuccess, capturedNotification.Type)
 	assert.Equal(t, NotificationPriorityLow, capturedNotification.Priority)
 	assert.Equal(t, "task-123", capturedNotification.Metadata["task_id"])
@@ -107,9 +110,9 @@ func TestEventNotificationHandler_HandleEvent_TaskFailed(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_task_failed", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "task-456")
-	assert.Contains(t, capturedNotification.Message, "Connection timeout")
+	assert.Equal(t, "internal_notification_message_task_failed", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeError, capturedNotification.Type)
 	assert.Equal(t, NotificationPriorityHigh, capturedNotification.Priority)
 }
@@ -150,8 +153,9 @@ func TestEventNotificationHandler_HandleEvent_WorkflowCompleted(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_workflow_completed", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "Build and Deploy")
+	assert.Equal(t, "internal_notification_message_workflow_completed", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeSuccess, capturedNotification.Type)
 	assert.Equal(t, NotificationPriorityMedium, capturedNotification.Priority)
 }
@@ -193,9 +197,9 @@ func TestEventNotificationHandler_HandleEvent_WorkflowFailed(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_workflow_failed", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "Build and Deploy")
-	assert.Contains(t, capturedNotification.Message, "exit code 1")
+	assert.Equal(t, "internal_notification_message_workflow_failed", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeError, capturedNotification.Type)
 }
 
@@ -237,10 +241,9 @@ func TestEventNotificationHandler_HandleEvent_WorkerDisconnected(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_worker_disconnected", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "worker-001")
-	assert.Contains(t, capturedNotification.Message, "worker-01.example.com")
-	assert.Contains(t, capturedNotification.Message, "SSH connection lost")
+	assert.Equal(t, "internal_notification_message_worker_disconnected", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeWarning, capturedNotification.Type)
 }
 
@@ -280,9 +283,9 @@ func TestEventNotificationHandler_HandleEvent_SystemError(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_system_error", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "database")
-	assert.Contains(t, capturedNotification.Message, "Connection pool exhausted")
+	assert.Equal(t, "internal_notification_message_system_error", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeError, capturedNotification.Type)
 	assert.Equal(t, NotificationPriorityUrgent, capturedNotification.Priority)
 }
@@ -322,11 +325,11 @@ func TestEventNotificationHandler_HandleEvent_SystemStartup(t *testing.T) {
 	require.NotNil(t, capturedNotification)
 
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-IDs.
-	// The Title is internal_notification_title_system_started and the
-	// Message is internal_notification_message_system_started + appended
-	// version info (e.g., "internal_notification_message_system_started 1.0.0").
+	// Round-385: Message body + version suffix are CONST-046 message IDs;
+	// under NoopTranslator they concatenate as raw IDs (no interpolation).
 	assert.Equal(t, "internal_notification_title_system_started", capturedNotification.Title)
-	assert.Contains(t, capturedNotification.Message, "1.0.0")
+	assert.Equal(t, "internal_notification_message_system_started"+
+		"internal_notification_message_version_suffix", capturedNotification.Message)
 	assert.Equal(t, NotificationTypeInfo, capturedNotification.Type)
 }
 
@@ -416,9 +419,9 @@ func TestEventNotificationHandler_EndToEnd(t *testing.T) {
 	// Verify notification was sent
 	assert.Equal(t, 1, len(notifications))
 	// HXC-004 round-200 §11.4 (post-i18n): production emits message-ID.
+	// Round-385: Message body is a CONST-046 message ID under NoopTranslator.
 	assert.Equal(t, "internal_notification_title_task_failed", notifications[0].Title)
-	assert.Contains(t, notifications[0].Message, "task-999")
-	assert.Contains(t, notifications[0].Message, "Unexpected error")
+	assert.Equal(t, "internal_notification_message_task_failed", notifications[0].Message)
 }
 
 // Mock channel for capturing notifications
