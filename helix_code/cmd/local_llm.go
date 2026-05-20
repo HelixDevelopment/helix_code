@@ -23,12 +23,8 @@ import (
 // localLLMCmd represents the local-llm command
 var localLLMCmd = &cobra.Command{
 	Use:   "local-llm",
-	Short: "Manage local LLM providers",
-	Long: `Manage local LLM providers including VLLM, LocalAI, FastChat, TextGen,
-LM Studio, Jan AI, KoboldAI, GPT4All, TabbyAPI, MLX, and MistralRS.
-
-This command automatically clones, builds, configures, and manages all local
-LLM providers with zero configuration required.`,
+	Short: trc("cmd_local_llm_short", nil),
+	Long:  trc("cmd_local_llm_long", nil),
 }
 
 var (
@@ -53,9 +49,9 @@ func init() {
 	rootCmd.AddCommand(localLLMCmd)
 
 	// Persistent flags
-	localLLMCmd.PersistentFlags().StringVar(&localLLMDir, "dir", "", "Base directory for local LLM providers (default: ~/.helixcode/local-llm)")
-	localLLMCmd.PersistentFlags().BoolVar(&autoStart, "auto-start", true, "Auto-start all providers after initialization")
-	localLLMCmd.PersistentFlags().IntVar(&healthInterval, "health-interval", 30, "Health check interval in seconds")
+	localLLMCmd.PersistentFlags().StringVar(&localLLMDir, "dir", "", trc("cmd_local_llm_flag_dir", nil))
+	localLLMCmd.PersistentFlags().BoolVar(&autoStart, "auto-start", true, trc("cmd_local_llm_flag_autostart", nil))
+	localLLMCmd.PersistentFlags().IntVar(&healthInterval, "health-interval", 30, trc("cmd_local_llm_flag_health_interval", nil))
 
 	// Subcommands
 	localLLMCmd.AddCommand(initCmd)
@@ -92,84 +88,65 @@ func init() {
 // initCmd represents the local-llm init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize and install all local LLM providers",
-	Long: `Initialize and install all local LLM providers. This command will:
-- Clone provider repositories
-- Build and configure providers
-- Create startup scripts
-- Set up default configurations
-
-This may take 10-30 minutes depending on your system and internet speed.`,
-	RunE: runInit,
+	Short: trc("cmd_local_llm_init_short", nil),
+	Long:  trc("cmd_local_llm_init_long", nil),
+	RunE:  runInit,
 }
 
 // startCmd represents the local-llm start command
 var startCmd = &cobra.Command{
 	Use:   "start [provider]",
-	Short: "Start local LLM providers",
-	Long: `Start local LLM providers. If no provider is specified, all providers will be started.
-You can start individual providers by specifying their name.
-
-Available providers: vllm, localai, fastchat, textgen, lmstudio, jan, koboldai, gpt4all, tabbyapi, mlx, mistralrs`,
-	RunE: runStart,
+	Short: trc("cmd_local_llm_start_short", nil),
+	Long:  trc("cmd_local_llm_start_long", nil),
+	RunE:  runStart,
 }
 
 // stopCmd represents the local-llm stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop [provider]",
-	Short: "Stop local LLM providers",
-	Long: `Stop local LLM providers. If no provider is specified, all providers will be stopped.
-You can stop individual providers by specifying their name.`,
-	RunE: runStop,
+	Short: trc("cmd_local_llm_stop_short", nil),
+	Long:  trc("cmd_local_llm_stop_long", nil),
+	RunE:  runStop,
 }
 
 // statusCmd represents the local-llm status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show status of all local LLM providers",
-	Long: `Show detailed status of all local LLM providers including:
-- Installation status
-- Running status
-- Health check results
-- Process information
-- Last check timestamp`,
-	RunE: runStatus,
+	Short: trc("cmd_local_llm_status_short", nil),
+	Long:  trc("cmd_local_llm_status_long", nil),
+	RunE:  runStatus,
 }
 
 // listCmd represents the local-llm list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all available local LLM providers",
-	Long: `List all available local LLM providers with their descriptions,
-default ports, and current status.`,
-	RunE: runList,
+	Short: trc("cmd_local_llm_list_short", nil),
+	Long:  trc("cmd_local_llm_list_long", nil),
+	RunE:  runList,
 }
 
 // cleanupCmd represents the local-llm cleanup command
 var cleanupCmd = &cobra.Command{
 	Use:   "cleanup",
-	Short: "Stop all providers and clean up resources",
-	Long: `Stop all running local LLM providers and clean up temporary resources.
-Downloaded models and configurations will be preserved.`,
-	RunE: runCleanup,
+	Short: trc("cmd_local_llm_cleanup_short", nil),
+	Long:  trc("cmd_local_llm_cleanup_long", nil),
+	RunE:  runCleanup,
 }
 
 // updateCmd represents the local-llm update command
 var updateCmd = &cobra.Command{
 	Use:   "update [provider]",
-	Short: "Update local LLM providers",
-	Long: `Update local LLM providers to their latest versions.
-If no provider is specified, all providers will be updated.`,
-	RunE: runUpdate,
+	Short: trc("cmd_local_llm_update_short", nil),
+	Long:  trc("cmd_local_llm_update_long", nil),
+	RunE:  runUpdate,
 }
 
 // logsCmd represents the local-llm logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs [provider]",
-	Short: "Show logs for local LLM providers",
-	Long: `Show logs for local LLM providers. If no provider is specified,
-logs for all running providers will be displayed.`,
-	RunE: runLogs,
+	Short: trc("cmd_local_llm_logs_short", nil),
+	Long:  trc("cmd_local_llm_logs_long", nil),
+	RunE:  runLogs,
 }
 
 // Command implementations
@@ -295,17 +272,17 @@ func runList(cmd *cobra.Command, args []string) error {
 		port int
 		typ  string
 	}{
-		{"vllm", "High-throughput inference engine", 8000, "OpenAI-compatible"},
-		{"localai", "Drop-in OpenAI replacement", 8080, "OpenAI-compatible"},
-		{"fastchat", "Training and serving platform", 7860, "OpenAI-compatible"},
-		{"textgen", "Popular Gradio interface", 5000, "OpenAI-compatible"},
-		{"lmstudio", "User-friendly desktop app", 1234, "OpenAI-compatible"},
-		{"jan", "Open-source AI assistant", 1337, "OpenAI-compatible"},
-		{"koboldai", "Writing-focused interface", 5001, "Custom API"},
-		{"gpt4all", "CPU-focused inference", 4891, "OpenAI-compatible"},
-		{"tabbyapi", "High-performance server", 5000, "OpenAI-compatible"},
-		{"mlx", "Apple Silicon optimized", 8080, "OpenAI-compatible"},
-		{"mistralrs", "Rust-based inference", 8080, "OpenAI-compatible"},
+		{"vllm", trc("cmd_local_llm_provider_desc_vllm", nil), 8000, "OpenAI-compatible"},
+		{"localai", trc("cmd_local_llm_provider_desc_localai", nil), 8080, "OpenAI-compatible"},
+		{"fastchat", trc("cmd_local_llm_provider_desc_fastchat", nil), 7860, "OpenAI-compatible"},
+		{"textgen", trc("cmd_local_llm_provider_desc_textgen", nil), 5000, "OpenAI-compatible"},
+		{"lmstudio", trc("cmd_local_llm_provider_desc_lmstudio", nil), 1234, "OpenAI-compatible"},
+		{"jan", trc("cmd_local_llm_provider_desc_jan", nil), 1337, "OpenAI-compatible"},
+		{"koboldai", trc("cmd_local_llm_provider_desc_koboldai", nil), 5001, "Custom API"},
+		{"gpt4all", trc("cmd_local_llm_provider_desc_gpt4all", nil), 4891, "OpenAI-compatible"},
+		{"tabbyapi", trc("cmd_local_llm_provider_desc_tabbyapi", nil), 5000, "OpenAI-compatible"},
+		{"mlx", trc("cmd_local_llm_provider_desc_mlx", nil), 8080, "OpenAI-compatible"},
+		{"mistralrs", trc("cmd_local_llm_provider_desc_mistralrs", nil), 8080, "OpenAI-compatible"},
 	}
 
 	for _, p := range providers {

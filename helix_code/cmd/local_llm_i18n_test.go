@@ -77,6 +77,92 @@ var migratedMessageIDs = []string{
 	"cmd_local_llm_adv_recommend_tasks",
 	"cmd_local_llm_adv_no_suitable",
 	"cmd_local_llm_adv_adjust_hint",
+	// Round-422 §11.4 (2026-05-20, CONST-046 Phase 4): local-llm cobra
+	// command Short/Long descriptions + flag-help + provider descriptions.
+	"cmd_local_llm_short",
+	"cmd_local_llm_long",
+	"cmd_local_llm_flag_dir",
+	"cmd_local_llm_flag_autostart",
+	"cmd_local_llm_flag_health_interval",
+	"cmd_local_llm_init_short",
+	"cmd_local_llm_init_long",
+	"cmd_local_llm_start_short",
+	"cmd_local_llm_start_long",
+	"cmd_local_llm_stop_short",
+	"cmd_local_llm_stop_long",
+	"cmd_local_llm_status_short",
+	"cmd_local_llm_status_long",
+	"cmd_local_llm_list_short",
+	"cmd_local_llm_list_long",
+	"cmd_local_llm_cleanup_short",
+	"cmd_local_llm_cleanup_long",
+	"cmd_local_llm_update_short",
+	"cmd_local_llm_update_long",
+	"cmd_local_llm_logs_short",
+	"cmd_local_llm_logs_long",
+	"cmd_local_llm_provider_desc_vllm",
+	"cmd_local_llm_provider_desc_localai",
+	"cmd_local_llm_provider_desc_fastchat",
+	"cmd_local_llm_provider_desc_textgen",
+	"cmd_local_llm_provider_desc_lmstudio",
+	"cmd_local_llm_provider_desc_jan",
+	"cmd_local_llm_provider_desc_koboldai",
+	"cmd_local_llm_provider_desc_gpt4all",
+	"cmd_local_llm_provider_desc_tabbyapi",
+	"cmd_local_llm_provider_desc_mlx",
+	"cmd_local_llm_provider_desc_mistralrs",
+}
+
+// round422CobraMetadataIDs is the closed set of message IDs that feed the
+// local-llm cobra command tree's Short/Long descriptions and flag-help
+// text. Unlike runtime strings, these are resolved at command-construction
+// time via trc() — so the paired-mutation guard below proves that even
+// construction-time metadata is locale-aware rather than a frozen English
+// literal.
+var round422CobraMetadataIDs = []string{
+	"cmd_local_llm_short",
+	"cmd_local_llm_long",
+	"cmd_local_llm_flag_dir",
+	"cmd_local_llm_flag_autostart",
+	"cmd_local_llm_flag_health_interval",
+	"cmd_local_llm_init_short",
+	"cmd_local_llm_init_long",
+	"cmd_local_llm_start_short",
+	"cmd_local_llm_start_long",
+	"cmd_local_llm_stop_short",
+	"cmd_local_llm_stop_long",
+	"cmd_local_llm_status_short",
+	"cmd_local_llm_status_long",
+	"cmd_local_llm_list_short",
+	"cmd_local_llm_list_long",
+	"cmd_local_llm_cleanup_short",
+	"cmd_local_llm_cleanup_long",
+	"cmd_local_llm_update_short",
+	"cmd_local_llm_update_long",
+	"cmd_local_llm_logs_short",
+	"cmd_local_llm_logs_long",
+}
+
+// TestLocalLLMI18n_Round422CobraMetadataRoutesThroughSeam is the
+// paired-mutation anti-bluff guard for the round-422 migration: it wires a
+// sentinel Translator and asserts every construction-time message ID
+// resolves THROUGH it (sentinel present) — proving the cobra Short/Long
+// descriptions are no longer frozen English literals. If a future change
+// re-inlines any of these strings, the literal would not contain the
+// sentinel and this test FAILs.
+func TestLocalLLMI18n_Round422CobraMetadataRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	for _, id := range round422CobraMetadataIDs {
+		got := trc(id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-422 cobra metadata ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-422 cobra metadata ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
 }
 
 // TestLocalLLMI18n_SeamRoutesThroughTranslator wires a sentinel Translator
