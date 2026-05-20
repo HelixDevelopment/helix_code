@@ -344,3 +344,88 @@ harmony_os_gui_card_sync_title:
 
 harmony_os_gui_card_sync_subtitle:
   other: "Cross-Device Data Sync"
+
+# Round-456 §11.4 anti-bluff sweep (2026-05-20): 25 additional GUI
+# strings migrated from main.go — task/project/session form
+# placeholders + create-headers, status-bar confirmations, dialog
+# bodies, the Discover Devices / Complete Session buttons, the
+# Available Models card, and the LLM chat-interface placeholders.
+# Placeholder-bearing entries use go-i18n {{.Name}} interpolation.
+
+harmony_os_gui_placeholder_task_description:
+  other: "Task description..."
+
+harmony_os_gui_status_task_created:
+  other: "Task created: {{.ID}} on device {{.Device}}"
+
+harmony_os_gui_dialog_task_scheduled:
+  other: "Task {{.ID}} created and scheduled"
+
+harmony_os_gui_status_workers_refreshed:
+  other: "Workers refreshed"
+
+harmony_os_gui_button_discover_devices:
+  other: "Discover Devices"
+
+harmony_os_gui_status_discover_failed:
+  other: "Discover Devices: {{.Error}}"
+
+harmony_os_gui_status_devices_found:
+  other: "Found {{.Count}} Harmony devices (enrolled via AddDevice)"
+
+harmony_os_gui_project_select_prompt:
+  other: "Select a project to view details"
+
+harmony_os_gui_project_create_header:
+  other: "Create New Project:"
+
+harmony_os_gui_status_project_created:
+  other: "Project {{.Name}} created"
+
+harmony_os_gui_dialog_project_created:
+  other: "Project created successfully"
+
+harmony_os_gui_status_project_active:
+  other: "Project {{.Name}} set as active"
+
+harmony_os_gui_status_projects_refreshed:
+  other: "Projects refreshed"
+
+harmony_os_gui_session_select_prompt:
+  other: "Select a session to view details"
+
+harmony_os_gui_session_create_header:
+  other: "Create New Session:"
+
+harmony_os_gui_status_session_created:
+  other: "Session {{.Name}} created"
+
+harmony_os_gui_dialog_session_created:
+  other: "Session created successfully"
+
+harmony_os_gui_session_controls_header:
+  other: "Session Controls:"
+
+harmony_os_gui_button_complete_session:
+  other: "Complete Session"
+
+harmony_os_gui_status_session_completed:
+  other: "Session completed"
+
+harmony_os_gui_status_sessions_refreshed:
+  other: "Sessions refreshed"
+
+harmony_os_gui_card_available_models:
+  other: "Available Models"
+
+harmony_os_gui_model_select_prompt:
+  other: "Select a model to view details"
+
+harmony_os_gui_placeholder_chat_history:
+  other: "Chat history will appear here..."
+
+harmony_os_gui_placeholder_chat_input:
+  other: "Type your message here..."
+
+harmony_os_gui_placeholder_model_name:
+  other: "Model name (e.g., llama2)"

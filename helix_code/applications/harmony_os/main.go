@@ -772,7 +772,7 @@ func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
 
 	// Task description input
 	taskDescEntry := widget.NewEntry()
-	taskDescEntry.SetPlaceHolder("Task description...")
+	taskDescEntry.SetPlaceHolder(app.tr("harmony_os_gui_placeholder_task_description", nil))
 
 	// Action buttons
 	actions := container.NewVBox(
@@ -801,8 +801,8 @@ func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
 			} else {
 				taskDescEntry.SetText("")
 				taskList.Refresh()
-				app.statusBar.SetText(fmt.Sprintf("Task created: %s on device %s", task.ID, task.DeviceID))
-				dialog.ShowInformation("Success", fmt.Sprintf("Task %s created and scheduled", task.ID), app.mainWindow)
+				app.statusBar.SetText(app.tr("harmony_os_gui_status_task_created", map[string]any{"ID": task.ID, "Device": task.DeviceID}))
+				dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_task_scheduled", map[string]any{"ID": task.ID}), app.mainWindow)
 			}
 		}),
 		widget.NewSeparator(),
@@ -922,20 +922,20 @@ func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
 		widget.NewButton("Refresh", func() {
 			app.refreshData()
 			workerList.Refresh()
-			app.statusBar.SetText("Workers refreshed")
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_workers_refreshed", nil))
 		}),
-		widget.NewButton("Discover Devices", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_discover_devices", nil), func() {
 			devices, err := app.harmonyIntegration.distributedEngine.DiscoverDevices()
 			if err != nil {
 				// Surface the sentinel loudly instead of printing the
 				// previous "Found 0 Harmony devices" PASS-bluff (round-31
 				// §11.4). The dialog text mirrors the sentinel message so
 				// the user sees WHY 0 devices were returned.
-				app.statusBar.SetText(fmt.Sprintf("Discover Devices: %v", err))
+				app.statusBar.SetText(app.tr("harmony_os_gui_status_discover_failed", map[string]any{"Error": fmt.Sprintf("%v", err)}))
 				dialog.ShowError(err, app.mainWindow)
 				return
 			}
-			app.statusBar.SetText(fmt.Sprintf("Found %d Harmony devices (enrolled via AddDevice)", len(devices)))
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_devices_found", map[string]any{"Count": len(devices)}))
 		}),
 	)
 
@@ -976,7 +976,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 	)
 
 	// Project details panel
-	projectDetailsLabel := widget.NewLabel("Select a project to view details")
+	projectDetailsLabel := widget.NewLabel(app.tr("harmony_os_gui_project_select_prompt", nil))
 	projectDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	app.projectList.OnSelected = func(id widget.ListItemID) {
@@ -1005,7 +1005,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 	typeSelect.SetSelected("go")
 
 	createForm := container.NewVBox(
-		widget.NewLabel("Create New Project:"),
+		widget.NewLabel(app.tr("harmony_os_gui_project_create_header", nil)),
 		widget.NewLabel("Name:"),
 		nameEntry,
 		widget.NewLabel("Description:"),
@@ -1026,8 +1026,8 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 					pathEntry.SetText("")
 					app.refreshData()
 					app.projectList.Refresh()
-					app.statusBar.SetText(fmt.Sprintf("Project %s created", proj.Name))
-					dialog.ShowInformation("Success", "Project created successfully", app.mainWindow)
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_project_created", map[string]any{"Name": proj.Name}))
+					dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_project_created", nil), app.mainWindow)
 				}
 			} else {
 				dialog.ShowError(fmt.Errorf("name and path are required"), app.mainWindow)
@@ -1051,7 +1051,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 					} else {
 						app.refreshData()
 						app.projectList.Refresh()
-						app.statusBar.SetText(fmt.Sprintf("Project %s set as active", p.Name))
+						app.statusBar.SetText(app.tr("harmony_os_gui_status_project_active", map[string]any{"Name": p.Name}))
 					}
 				}
 			}
@@ -1059,7 +1059,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 		widget.NewButton("Refresh", func() {
 			app.refreshData()
 			app.projectList.Refresh()
-			app.statusBar.SetText("Projects refreshed")
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_projects_refreshed", nil))
 		}),
 	)
 
@@ -1099,7 +1099,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 	)
 
 	// Session details panel
-	sessionDetailsLabel := widget.NewLabel("Select a session to view details")
+	sessionDetailsLabel := widget.NewLabel(app.tr("harmony_os_gui_session_select_prompt", nil))
 	sessionDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	selectedSessionID := ""
@@ -1130,7 +1130,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 	modeSelect.SetSelected("building")
 
 	actions := container.NewVBox(
-		widget.NewLabel("Create New Session:"),
+		widget.NewLabel(app.tr("harmony_os_gui_session_create_header", nil)),
 		widget.NewLabel("Name:"),
 		nameEntry,
 		widget.NewLabel("Description:"),
@@ -1151,15 +1151,15 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 					projectIDEntry.SetText("")
 					app.refreshData()
 					app.sessionList.Refresh()
-					app.statusBar.SetText(fmt.Sprintf("Session %s created", sess.Name))
-					dialog.ShowInformation("Success", "Session created successfully", app.mainWindow)
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_created", map[string]any{"Name": sess.Name}))
+					dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_session_created", nil), app.mainWindow)
 				}
 			} else {
 				dialog.ShowError(fmt.Errorf("name and project ID are required"), app.mainWindow)
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewLabel("Session Controls:"),
+		widget.NewLabel(app.tr("harmony_os_gui_session_controls_header", nil)),
 		widget.NewButton("Start Session", func() {
 			if app.sessionManager != nil && selectedSessionID != "" {
 				err := app.sessionManager.Start(selectedSessionID)
@@ -1196,7 +1196,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 				}
 			}
 		}),
-		widget.NewButton("Complete Session", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_complete_session", nil), func() {
 			if app.sessionManager != nil && selectedSessionID != "" {
 				err := app.sessionManager.Complete(selectedSessionID)
 				if err != nil {
@@ -1204,7 +1204,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 				} else {
 					app.refreshData()
 					app.sessionList.Refresh()
-					app.statusBar.SetText("Session completed")
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_completed", nil))
 				}
 			}
 		}),
@@ -1212,7 +1212,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 		widget.NewButton("Refresh", func() {
 			app.refreshData()
 			app.sessionList.Refresh()
-			app.statusBar.SetText("Sessions refreshed")
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_sessions_refreshed", nil))
 		}),
 	)
 
@@ -1249,10 +1249,10 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 		},
 	)
 
-	modelListCard := widget.NewCard("Available Models", "", modelList)
+	modelListCard := widget.NewCard(app.tr("harmony_os_gui_card_available_models", nil), "", modelList)
 
 	// Model details panel
-	modelDetailsLabel := widget.NewLabel("Select a model to view details")
+	modelDetailsLabel := widget.NewLabel(app.tr("harmony_os_gui_model_select_prompt", nil))
 	modelDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	modelList.OnSelected = func(id widget.ListItemID) {
@@ -1273,12 +1273,12 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 
 	// Chat interface
 	app.chatHistory = widget.NewMultiLineEntry()
-	app.chatHistory.SetPlaceHolder("Chat history will appear here...")
+	app.chatHistory.SetPlaceHolder(app.tr("harmony_os_gui_placeholder_chat_history", nil))
 	app.chatHistory.Disable()
 	app.chatHistory.Wrapping = fyne.TextWrapWord
 
 	app.chatInput = widget.NewMultiLineEntry()
-	app.chatInput.SetPlaceHolder("Type your message here...")
+	app.chatInput.SetPlaceHolder(app.tr("harmony_os_gui_placeholder_chat_input", nil))
 	app.chatInput.SetMinRowsVisible(3)
 
 	// Provider/model selection for chat
@@ -1286,7 +1286,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 	app.llmProviderSel.SetSelected("ollama")
 
 	modelNameEntry := widget.NewEntry()
-	modelNameEntry.SetPlaceHolder("Model name (e.g., llama2)")
+	modelNameEntry.SetPlaceHolder(app.tr("harmony_os_gui_placeholder_model_name", nil))
 	modelNameEntry.SetText("llama2")
 
 	sendButton := widget.NewButton("Send Message", func() {
