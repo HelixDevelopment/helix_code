@@ -109,3 +109,39 @@ internal_workflow_planmode_test_unknown_project_warning:
 
 internal_workflow_planmode_test_unknown_project_hint:
   other: "Cannot determine test command. Please specify a custom test command in the step action."
+
+# --- round-457 §11.4 CONST-046 Phase 4: planmode CLI option-presenter UI ---
+# Interactive option-selection surface shown to every CLI user when
+# plan mode presents multiple implementation options for a choice.
+internal_workflow_planmode_options_header:
+  other: "Implementation Options"
+
+internal_workflow_planmode_options_option_label:
+  other: "Option {{.Index}}: {{.Title}}"
+
+internal_workflow_planmode_options_recommended_tag:
+  other: "RECOMMENDED"
+
+internal_workflow_planmode_options_score_line:
+  other: "Score: {{.Score}}/100"
+
+internal_workflow_planmode_options_description_line:
+  other: "Description: {{.Description}}"
+
+internal_workflow_planmode_options_pros_heading:
+  other: "Pros:"
+
+internal_workflow_planmode_options_cons_heading:
+  other: "Cons:"
+
+internal_workflow_planmode_options_duration_line:
+  other: "Estimated Duration: {{.Duration}}"
+
+internal_workflow_planmode_options_complexity_line:
+  other: "Complexity: {{.Complexity}}"
+
+internal_workflow_planmode_options_confidence_line:
+  other: "Confidence: {{.Confidence}}%"
+
+internal_workflow_planmode_options_select_prompt:
+  other: "Select an option (1-{{.Count}}): "

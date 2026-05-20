@@ -105,38 +105,45 @@ func NewCLIOptionPresenter(output io.Writer, input io.Reader) OptionPresenter {
 
 // Present presents options to the user
 func (p *CLIOptionPresenter) Present(ctx context.Context, options []*PlanOption) (*Selection, error) {
-	fmt.Fprintln(p.output, "\n=== Implementation Options ===")
+	fmt.Fprintln(p.output, "\n=== "+tr(ctx, "internal_workflow_planmode_options_header", nil)+" ===")
 
 	for i, opt := range options {
-		fmt.Fprintf(p.output, "Option %d: %s", i+1, opt.Title)
+		fmt.Fprint(p.output, tr(ctx, "internal_workflow_planmode_options_option_label",
+			map[string]any{"Index": i + 1, "Title": opt.Title}))
 		if opt.Recommended {
-			fmt.Fprint(p.output, " [RECOMMENDED]")
+			fmt.Fprint(p.output, " ["+tr(ctx, "internal_workflow_planmode_options_recommended_tag", nil)+"]")
 		}
 		fmt.Fprintln(p.output)
-		fmt.Fprintf(p.output, "Score: %.1f/100\n", opt.Score)
-		fmt.Fprintf(p.output, "Description: %s\n", opt.Description)
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_score_line",
+			map[string]any{"Score": fmt.Sprintf("%.1f", opt.Score)}))
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_description_line",
+			map[string]any{"Description": opt.Description}))
 		fmt.Fprintln(p.output)
 
-		fmt.Fprintln(p.output, "Pros:")
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_pros_heading", nil))
 		for _, pro := range opt.Pros {
 			fmt.Fprintf(p.output, "  + %s\n", pro)
 		}
 		fmt.Fprintln(p.output)
 
-		fmt.Fprintln(p.output, "Cons:")
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_cons_heading", nil))
 		for _, con := range opt.Cons {
 			fmt.Fprintf(p.output, "  - %s\n", con)
 		}
 		fmt.Fprintln(p.output)
 
-		fmt.Fprintf(p.output, "Estimated Duration: %s\n", opt.Plan.Estimates.Duration)
-		fmt.Fprintf(p.output, "Complexity: %s\n", opt.Plan.Estimates.Complexity)
-		fmt.Fprintf(p.output, "Confidence: %.0f%%\n", opt.Plan.Estimates.Confidence*100)
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_duration_line",
+			map[string]any{"Duration": opt.Plan.Estimates.Duration.String()}))
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_complexity_line",
+			map[string]any{"Complexity": opt.Plan.Estimates.Complexity.String()}))
+		fmt.Fprintln(p.output, tr(ctx, "internal_workflow_planmode_options_confidence_line",
+			map[string]any{"Confidence": fmt.Sprintf("%.0f", opt.Plan.Estimates.Confidence*100)}))
 		fmt.Fprintln(p.output, "\n---")
 	}
 
 	// Prompt for selection
-	fmt.Fprintf(p.output, "Select an option (1-%d): ", len(options))
+	fmt.Fprint(p.output, tr(ctx, "internal_workflow_planmode_options_select_prompt",
+		map[string]any{"Count": len(options)}))
 
 	var choice int
 	_, err := fmt.Fscanln(p.input, &choice)

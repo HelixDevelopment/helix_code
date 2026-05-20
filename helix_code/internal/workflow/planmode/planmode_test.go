@@ -514,6 +514,13 @@ func TestExecutor(t *testing.T) {
 // Test Option Presenter
 func TestOptionPresenter(t *testing.T) {
 	t.Run("CLIPresenter", func(t *testing.T) {
+		// Round-457 CONST-046: the presenter routes every user-facing
+		// label through the i18n seam. Wire fakeTranslator so the
+		// rendered output carries the seam sentinel rather than a
+		// NoopTranslator raw message-ID echo.
+		SetTranslator(fakeTranslator{})
+		t.Cleanup(func() { SetTranslator(nil) })
+
 		var output bytes.Buffer
 		input := strings.NewReader("1\n")
 
@@ -543,8 +550,11 @@ func TestOptionPresenter(t *testing.T) {
 		assert.Equal(t, "opt-1", selection.OptionID)
 
 		outputStr := output.String()
-		assert.Contains(t, outputStr, "Option 1")
-		assert.Contains(t, outputStr, "[RECOMMENDED]")
+		// Seam routing: each user-facing label resolves via tr().
+		assert.Contains(t, outputStr, "XLATE:internal_workflow_planmode_options_option_label")
+		assert.Contains(t, outputStr, "XLATE:internal_workflow_planmode_options_recommended_tag")
+		assert.Contains(t, outputStr, "XLATE:internal_workflow_planmode_options_select_prompt")
+		// Non-migrated dynamic data (pros entries) still passes through verbatim.
 		assert.Contains(t, outputStr, "Fast")
 	})
 

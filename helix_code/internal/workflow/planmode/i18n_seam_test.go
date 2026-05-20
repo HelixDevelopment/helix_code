@@ -85,3 +85,57 @@ func TestPlanmodeSeam_MutationDetectsRegression(t *testing.T) {
 		t.Fatalf("seam output %q lost translator routing", rendered)
 	}
 }
+
+// TestPlanmodeSeam_OptionPresenterIDs covers the round-457 CONST-046
+// migration of the CLIOptionPresenter.Present interactive surface.
+// Every message ID emitted by the option-selection UI must route
+// through the wired translator.
+func TestPlanmodeSeam_OptionPresenterIDs(t *testing.T) {
+	SetTranslator(fakeTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	ids := []string{
+		"internal_workflow_planmode_options_header",
+		"internal_workflow_planmode_options_option_label",
+		"internal_workflow_planmode_options_recommended_tag",
+		"internal_workflow_planmode_options_score_line",
+		"internal_workflow_planmode_options_description_line",
+		"internal_workflow_planmode_options_pros_heading",
+		"internal_workflow_planmode_options_cons_heading",
+		"internal_workflow_planmode_options_duration_line",
+		"internal_workflow_planmode_options_complexity_line",
+		"internal_workflow_planmode_options_confidence_line",
+		"internal_workflow_planmode_options_select_prompt",
+	}
+	for _, id := range ids {
+		got := tr(context.Background(), id, nil)
+		want := "XLATE:" + id
+		if got != want {
+			t.Fatalf("wired seam for %q returned %q, want %q", id, got, want)
+		}
+	}
+}
+
+// TestPlanmodeSeam_OptionPresenterMutation is the paired-mutation
+// guard for the round-457 migration: it proves the option-selection
+// header and prompt are produced exclusively by the seam. A future
+// revert to hardcoded English would no longer invoke tr() and this
+// test would catch the lost sentinel.
+func TestPlanmodeSeam_OptionPresenterMutation(t *testing.T) {
+	SetTranslator(fakeTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	for _, c := range []struct{ id, regression string }{
+		{"internal_workflow_planmode_options_header", "Implementation Options"},
+		{"internal_workflow_planmode_options_select_prompt", "Select an option"},
+		{"internal_workflow_planmode_options_recommended_tag", "RECOMMENDED"},
+	} {
+		rendered := tr(context.Background(), c.id, nil)
+		if strings.Contains(rendered, c.regression) {
+			t.Fatalf("seam rendered hardcoded English %q — CONST-046 regression", c.regression)
+		}
+		if !strings.HasPrefix(rendered, "XLATE:") {
+			t.Fatalf("seam output %q lost translator routing", rendered)
+		}
+	}
+}
