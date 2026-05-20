@@ -315,3 +315,86 @@ aurora_os_cli_memory_freed:
 
 aurora_os_cli_setting_gomaxprocs:
   other: "Setting GOMAXPROCS to %d"
+
+# Round-373 §11.4 anti-bluff sweep (2026-05-20): 24 residual nogui CLI
+# format-string literals migrated — the list-item render lines for
+# projects/sessions/tasks/workers/providers/models, the security
+# encryption/role render lines, the aurora-info system report lines,
+# the diagnostics-complete + diagnostic-entry lines, the
+# permission-add confirmation, the interactive-mode prompt + error
+# line, and the version-command Go/Platform lines (main_nogui.go).
+# Lines with `%`-verb placeholders are resolved by Translator.T then
+# interpolated by fmt.Printf at the call site. Resolved at runtime
+# via Translator.T.
+
+aurora_os_cli_encryption_status:
+  other: "Encryption: %s"
+
+aurora_os_cli_project_list_item:
+  other: "- %s (%s): %s%s"
+
+aurora_os_cli_session_list_item:
+  other: "- %s [%s] %s (Project: %s)"
+
+aurora_os_cli_task_list_item:
+  other: "- [%s] %s: %s (Priority: %s)"
+
+aurora_os_cli_worker_list_item:
+  other: "- %s [%s] %s:%s (%s)"
+
+aurora_os_cli_provider_list_item:
+  other: "- %s: %s"
+
+aurora_os_cli_model_list_item:
+  other: "- %s (%s) - Context: %d"
+
+aurora_os_cli_info_platform:
+  other: "Platform: %s/%s"
+
+aurora_os_cli_info_go_version:
+  other: "Go Version: %s"
+
+aurora_os_cli_info_cpus:
+  other: "CPUs: %d"
+
+aurora_os_cli_info_goroutines:
+  other: "Goroutines: %d"
+
+aurora_os_cli_info_performance_mode:
+  other: "Performance Mode: %s"
+
+aurora_os_cli_info_memory_alloc:
+  other: "Memory Alloc: %.2f MB"
+
+aurora_os_cli_info_memory_sys:
+  other: "Memory Sys: %.2f MB"
+
+aurora_os_cli_info_gc_cycles:
+  other: "GC Cycles: %d"
+
+aurora_os_cli_diagnostic_entry:
+  other: "[%s] %s: %s"
+
+aurora_os_cli_diagnostics_complete:
+  other: "Diagnostics complete: %d checks performed"
+
+aurora_os_cli_role_perms_item:
+  other: "  %s: %v"
+
+aurora_os_cli_audit_entry_line:
+  other: "[%s] %s - %s: %s (%s)"
+
+aurora_os_cli_permission_added:
+  other: "Added permission '%s' to role '%s'"
+
+aurora_os_cli_interactive_prompt:
+  other: "aurora> "
+
+aurora_os_cli_runtime_error:
+  other: "Error: %v"
+
+aurora_os_cli_version_go:
+  other: "Go: %s"
+
+aurora_os_cli_version_platform:
+  other: "Platform: %s/%s"

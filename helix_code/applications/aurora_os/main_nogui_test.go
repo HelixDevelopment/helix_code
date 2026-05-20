@@ -224,6 +224,70 @@ func TestCLIAppRound361FallbackOnError(t *testing.T) {
 	}
 }
 
+// round373IDs is the closed set of message IDs migrated by the
+// round-373 §11.4 residual sweep (list-item render lines, security
+// encryption/role render lines, aurora-info system report lines,
+// diagnostics-entry/-complete lines, permission-add confirmation,
+// interactive-mode prompt/error lines, version Go/Platform lines).
+var round373IDs = []string{
+	"aurora_os_cli_encryption_status",
+	"aurora_os_cli_project_list_item",
+	"aurora_os_cli_session_list_item",
+	"aurora_os_cli_task_list_item",
+	"aurora_os_cli_worker_list_item",
+	"aurora_os_cli_provider_list_item",
+	"aurora_os_cli_model_list_item",
+	"aurora_os_cli_info_platform",
+	"aurora_os_cli_info_go_version",
+	"aurora_os_cli_info_cpus",
+	"aurora_os_cli_info_goroutines",
+	"aurora_os_cli_info_performance_mode",
+	"aurora_os_cli_info_memory_alloc",
+	"aurora_os_cli_info_memory_sys",
+	"aurora_os_cli_info_gc_cycles",
+	"aurora_os_cli_diagnostic_entry",
+	"aurora_os_cli_diagnostics_complete",
+	"aurora_os_cli_role_perms_item",
+	"aurora_os_cli_audit_entry_line",
+	"aurora_os_cli_permission_added",
+	"aurora_os_cli_interactive_prompt",
+	"aurora_os_cli_runtime_error",
+	"aurora_os_cli_version_go",
+	"aurora_os_cli_version_platform",
+}
+
+// TestCLIAppRound373IDsResolveThroughTranslator is the positive case
+// for the round-373 §11.4 residual migration: every newly migrated
+// format-string ID MUST route through Translator.T (not echo a
+// literal). These IDs carry %-verb placeholders bound by fmt.Printf/
+// fmt.Sprintf at the call site; this test asserts the seam.
+func TestCLIAppRound373IDsResolveThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "R373:"}
+	app.SetTranslator(ft)
+
+	for _, id := range round373IDs {
+		got := app.t(id)
+		assert.Equal(t, "R373:"+id, got, "id %q must route through Translator.T", id)
+	}
+	assert.Equal(t, round373IDs, ft.calls, "every round-373 id must be consulted in order")
+}
+
+// TestCLIAppRound373FallbackOnError is the paired-mutation guard for
+// the round-373 IDs: on translate error the helper MUST echo the
+// literal message ID (loud echo), never an empty string — otherwise
+// fmt.Printf would receive an empty format string and silently drop
+// the runtime values, a §11.4 PASS-bluff at the i18n layer.
+func TestCLIAppRound373FallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&fakeTranslator{fail: true})
+
+	for _, id := range round373IDs {
+		assert.Equal(t, id, app.t(id),
+			"on translate error the helper must echo the message ID for %q", id)
+	}
+}
+
 func TestCLISecurityManager(t *testing.T) {
 	sm := NewAuroraSecurityManager()
 
