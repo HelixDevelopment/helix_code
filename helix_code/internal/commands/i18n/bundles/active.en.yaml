@@ -868,3 +868,57 @@ internal_commands_approval_safety_least_restrictive:
 
 internal_commands_approval_safety_rank:
   other: "rank {{.Order}}"
+
+# --- browser_command.go residual UI (round-416 §11.4 CONST-046 migration) ---
+# User-facing CLI output + operator errors for the /browser subcommands.
+
+internal_commands_browser_navigate_url_required:
+  other: "/browser navigate: url is required"
+
+internal_commands_browser_unknown_subcommand:
+  other: "/browser: unknown subcommand {{.Sub}} (want: status|navigate|close)"
+
+internal_commands_browser_status_line:
+  other: "/browser status: active={{.Active}} headed={{.Headed}} chromium={{.Chromium}} screenshot_dir={{.ScreenshotDir}} created_at={{.CreatedAt}}"
+
+internal_commands_browser_navigated:
+  other: "navigated to {{.URL}} (title={{.Title}})"
+
+internal_commands_browser_closed:
+  other: "closed"
+
+# --- hooks_command.go residual UI (round-416 §11.4 CONST-046 migration) ---
+# User-facing CLI output, table headers + operator errors for /hooks.
+
+internal_commands_hooks_description:
+  other: "manage hook scripts"
+
+internal_commands_hooks_usage:
+  other: "/hooks [list | test <event>]"
+
+internal_commands_hooks_unknown_subaction:
+  other: "unknown /hooks subaction {{.Sub}} (valid: list, test)"
+
+internal_commands_hooks_col_id:
+  other: "ID"
+
+internal_commands_hooks_col_event:
+  other: "EVENT"
+
+internal_commands_hooks_col_priority:
+  other: "PRIORITY"
+
+internal_commands_hooks_col_async:
+  other: "ASYNC"
+
+internal_commands_hooks_col_enabled:
+  other: "ENABLED"
+
+internal_commands_hooks_none_registered:
+  other: "(no hooks registered)"
+
+internal_commands_hooks_test_result:
+  other: "{{.HookID}}: status={{.Status}} err={{.Error}} duration={{.Duration}}"
+
+internal_commands_hooks_none_for_event:
+  other: "(no hooks registered for event {{.Event}})"

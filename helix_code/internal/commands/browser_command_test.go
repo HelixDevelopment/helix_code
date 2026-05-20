@@ -27,7 +27,9 @@ func TestBrowserCommand_Status_Inactive(t *testing.T) {
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	require.True(t, res.Success)
-	require.Contains(t, res.Output, "active=false")
+	// CONST-046 round-416: status line routes through tr(); the
+	// NoopTranslator (test default) returns the message ID verbatim.
+	require.Contains(t, res.Output, "internal_commands_browser_status_line")
 }
 
 func TestBrowserCommand_Status_NoArgs_DefaultsToStatus(t *testing.T) {
@@ -35,7 +37,7 @@ func TestBrowserCommand_Status_NoArgs_DefaultsToStatus(t *testing.T) {
 	cmd := NewBrowserCommand(mgr)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "active=false")
+	require.Contains(t, res.Output, "internal_commands_browser_status_line")
 }
 
 func TestBrowserCommand_Close_NoActiveSession_OK(t *testing.T) {
@@ -44,7 +46,8 @@ func TestBrowserCommand_Close_NoActiveSession_OK(t *testing.T) {
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"close"}})
 	require.NoError(t, err)
 	require.True(t, res.Success)
-	require.Contains(t, res.Output, "closed")
+	// CONST-046 round-416: "closed" routes through tr().
+	require.Contains(t, res.Output, "internal_commands_browser_closed")
 }
 
 func TestBrowserCommand_Navigate_RequiresURL(t *testing.T) {
@@ -74,5 +77,60 @@ func TestBrowserCommand_CaseInsensitiveSubcommand(t *testing.T) {
 	cmd := NewBrowserCommand(mgr)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"STATUS"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "active=false")
+	require.Contains(t, res.Output, "internal_commands_browser_status_line")
+}
+
+// --- CONST-046 round-416 paired-mutation tests ---
+//
+// With sentinelTranslator wired, every migrated /browser user-facing
+// literal MUST surface the sentinel-wrapped message ID. If a future
+// change re-inlines any literal, these assertions fail — proving the
+// migration is real, not a bluff (§11.4 anti-bluff).
+
+func TestBrowserCommand_Status_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	mgr := browser.NewBrowserManager(nil, zap.NewNop())
+	cmd := NewBrowserCommand(mgr)
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	require.Contains(t, res.Output, "<TR:internal_commands_browser_status_line>")
+}
+
+func TestBrowserCommand_Close_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	mgr := browser.NewBrowserManager(nil, zap.NewNop())
+	cmd := NewBrowserCommand(mgr)
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"close"}})
+	require.NoError(t, err)
+	require.Contains(t, res.Output, "<TR:internal_commands_browser_closed>")
+}
+
+func TestBrowserCommand_NavigateRequiresURL_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	mgr := browser.NewBrowserManager(nil, zap.NewNop())
+	cmd := NewBrowserCommand(mgr)
+	_, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"navigate"}})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "<TR:internal_commands_browser_navigate_url_required>")
+}
+
+func TestBrowserCommand_UnknownSubcommand_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	mgr := browser.NewBrowserManager(nil, zap.NewNop())
+	cmd := NewBrowserCommand(mgr)
+	_, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"nope"}})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "<TR:internal_commands_browser_unknown_subcommand>")
 }

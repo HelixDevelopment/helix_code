@@ -53,20 +53,28 @@ func (c *BrowserCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*
 		return c.handleStatus(ctx)
 	case "navigate":
 		if len(args) < 2 || strings.TrimSpace(args[1]) == "" {
-			return nil, fmt.Errorf("/browser navigate: url is required")
+			// CONST-046 (round-416): operator error resolved
+			// through the package-level translator.
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_browser_navigate_url_required", nil))
 		}
 		return c.handleNavigate(ctx, args[1])
 	case "close":
 		return c.handleClose(ctx)
 	default:
-		return nil, fmt.Errorf("/browser: unknown subcommand %q (want: status|navigate|close)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_browser_unknown_subcommand",
+			map[string]any{"Sub": sub}))
 	}
 }
 
 func (c *BrowserCommand) handleStatus(ctx context.Context) (*CommandResult, error) {
 	st := c.mgr.Status()
-	out := fmt.Sprintf("/browser status: active=%t headed=%t chromium=%q screenshot_dir=%q created_at=%s",
-		st.Active, st.Headed, st.ChromiumPath, st.ScreenshotDir, st.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+	out := tr(ctx, "internal_commands_browser_status_line", map[string]any{
+		"Active":        st.Active,
+		"Headed":        st.Headed,
+		"Chromium":      st.ChromiumPath,
+		"ScreenshotDir": st.ScreenshotDir,
+		"CreatedAt":     st.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	})
 	return &CommandResult{
 		Success:     true,
 		Output:      out,
@@ -100,8 +108,10 @@ func (c *BrowserCommand) handleNavigate(ctx context.Context, url string) (*Comma
 		return nil, fmt.Errorf("/browser navigate: %w", err)
 	}
 	return &CommandResult{
-		Success:     true,
-		Output:      fmt.Sprintf("navigated to %s (title=%q)", resolvedURL, title),
+		Success: true,
+		Output: tr(ctx, "internal_commands_browser_navigated", map[string]any{
+			"URL": resolvedURL, "Title": title,
+		}),
 		ShouldReply: true,
 		Data:        map[string]interface{}{"url": resolvedURL, "title": title},
 	}, nil
@@ -113,7 +123,7 @@ func (c *BrowserCommand) handleClose(ctx context.Context) (*CommandResult, error
 	}
 	return &CommandResult{
 		Success:     true,
-		Output:      "closed",
+		Output:      tr(ctx, "internal_commands_browser_closed", nil),
 		ShouldReply: true,
 	}, nil
 }

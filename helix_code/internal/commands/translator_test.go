@@ -9,6 +9,7 @@ package commands
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -25,6 +26,26 @@ func (sentinelTranslator) T(_ context.Context, id string, _ map[string]any) (str
 }
 func (sentinelTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
 	return "<TR:" + id + ">", nil
+}
+
+// interpolatingTranslator renders a tiny set of known message IDs
+// with their templateData. Used by call-site tests that need the
+// *rendered* output (with real data interpolated) rather than the
+// sentinel-wrapped message ID — e.g. asserting a hook ID surfaces in
+// a /hooks test result line.
+type interpolatingTranslator struct{}
+
+func (interpolatingTranslator) T(_ context.Context, id string, data map[string]any) (string, error) {
+	switch id {
+	case "internal_commands_hooks_test_result":
+		return fmt.Sprintf("%v: status=%v err=%v duration=%v",
+			data["HookID"], data["Status"], data["Error"], data["Duration"]), nil
+	default:
+		return id, nil
+	}
+}
+func (interpolatingTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return id, nil
 }
 
 type errTranslator struct{}
