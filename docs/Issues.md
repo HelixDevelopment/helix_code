@@ -288,38 +288,27 @@ All 6 phases / 31 tasks landed; CONST-048 coverage ledger at `docs/research/spee
 
 ---
 
-## HXC-007 — Constitution §11.4.68/70-74 cascade + meta-pointer bump
+## HXC-007 — Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** In progress
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
-**Discovered:** 2026-05-20 (constitution-submodule pull)
-**Discovered-By:** AI subagent (CONST-049 fetch-before-edit pipeline)
-**Evidence:** Per CONST-049 the constitution submodule was fetched + pulled first (`584b3ee` → `34a82b3`). The pull carried 6 new rules (§11.4.68 + §11.4.70-74). All 6 cascaded — verbatim or by ID reference per CONST-047 — into the meta-repo governance files and 67 owned-submodule `CONSTITUTION.md` / `CLAUDE.md` / `AGENTS.md`. Meta-repo `.gitmodules` constitution pointer bumped to the new HEAD.
-**Resolution path:** Cascade itself is complete; this item stays `In progress` because the CONST-049 step-4 multi-upstream reconciliation (push to every configured upstream of every cascaded submodule) is running concurrently and the GitHub ↔ GitLab mirrors are still converging. Closes to `Completed (→ Fixed.md)` once every cascaded submodule's mirrors are confirmed at parity. Tracked alongside HXC-009 (mirror-divergence reconciliation).
+Cascade verified complete (round 403): constitution `584b3ee`→`34a82b3`, all 6 rules cascaded to the meta-repo + 67 owned submodules, meta pointer confirmed at `34a82b3`. Section retained as a migration tombstone per §11.4.19.
 
 ---
 
-## HXC-008 — CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep
+## HXC-008 — CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** In progress
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Bug
-**Discovered:** 2026-05-20 (CONST-055 post-pull validation sweep, gate G1)
-**Discovered-By:** AI subagent (`scripts/verify-all-constitution-rules.sh` run after the §11.4.68/70-74 pull)
-**Evidence:** The CONST-055 mandatory post-constitution-pull sweep surfaced two pre-existing governance gaps (NOT regressions introduced by the round's cascade work):
-  - (a) `scripts/verify-all-constitution-rules.sh` references a non-existent `dependencies/HelixDevelopment/Models` path — stale verifier config. The actual on-disk directories are lowercase `dependencies/HelixDevelopment/models` (post-CONST-052 rename, batch 1, commit `a1ea3c8`) plus `dependencies/vasic-digital/Models`. The verifier config drifted out of sync with the rename.
-  - (b) `helix_qa/CONSTITUTION.md` is missing the older anchors `CONST-047` through `CONST-057`; `dependencies/HelixDevelopment/VisionEngine/CONSTITUTION.md` is missing §11.4.69.
-**Resolution path:** (a) update the verifier's path reference to the lowercase `models` directory; (b) cascade the missing CONST-047..057 anchors into `helix_qa/CONSTITUTION.md` and §11.4.69 into VisionEngine's `CONSTITUTION.md` per CONST-047. Both gaps are pre-existing cascade-drift defects; closure requires a re-run of `scripts/verify-all-constitution-rules.sh` reporting G1 clean.
+Both gaps fixed (round 403): (a) `submodule_owned.txt` corrected `HelixDevelopment/Models`→`models`; (b) CONST-047..057 cascaded into `helix_qa/CONSTITUTION.md`, §11.4.69 cascaded into `VisionEngine/CONSTITUTION.md`. `verify-governance-cascade.sh` → 0 failures; `verify-all-constitution-rules.sh` → 6 gates / 0 failures. Section retained as a migration tombstone per §11.4.19.
 
 ---
 
-## HXC-009 — Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation
+## HXC-009 — Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** In progress
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
-**Discovered:** 2026-05-20 (multi-upstream push during §11.4.68/70-74 cascade)
-**Discovered-By:** AI subagent (4-remote push attempt during HXC-007 cascade)
-**Evidence:** Systemic lineage divergence between the `vasic-digital` ↔ `HelixDevelopment` GitHub/GitLab mirrors of several owned submodules — the org mirrors of the same logical repository had drifted apart (each carrying commits absent from the other), so a plain push to all upstreams would be non-FF. `helix_qa` already reconciled via a merge-first 2-parent commit `a0397a4`. `VisionEngine`, `LLMProvider`, and other owned submodules are still under reconciliation.
-**Resolution path:** Per CONST-061 / §11.4.71 merge-first discipline — real 2-parent merge commits preserving the union of both lineages, NO force-push, NO history rewrite, NO branch deletion. Each reconciled submodule pushes the merge to every configured upstream once FF-safe. Closes once every divergent owned submodule's mirrors are confirmed at parity. Composes with HXC-007 (the cascade push that surfaced the divergence).
+Reconciliation verified complete (round 403): helix_qa, VisionEngine, LLMProvider, challenges, containers, DocProcessor all reconciled via merge-first (CONST-061 / §11.4.71), all owned submodules converged + pushed to all upstreams. Section retained as a migration tombstone per §11.4.19.
 
 ---
 

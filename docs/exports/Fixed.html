@@ -223,6 +223,85 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-20</td>
+<td>HXC-008: CONST-055 G1 governance gaps surfaced by
+post-constitution-pull validation sweep</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>403</td>
+<td><code>docs/improvements/submodule_owned.txt</code> fix + helix_qa
+<code>1364d23</code> + VisionEngine <code>b3a13d8</code> + meta pointer
+bumps</td>
+<td>Two pre-existing cascade-drift defects fixed. (a)
+<code>docs/improvements/submodule_owned.txt</code> line 10 referenced a
+non-existent <code>dependencies/HelixDevelopment/Models</code> path
+(post-CONST-052 batch-1 rename <code>a1ea3c8</code> lowercased it to
+<code>models</code>); corrected to
+<code>dependencies/HelixDevelopment/models</code>.
+<code>scripts/verify-governance-cascade.sh</code> re-run: the
+<code>FAIL: dependencies/HelixDevelopment/Models — path does not exist on disk</code>
+line is gone, now
+<code>PASS: dependencies/HelixDevelopment/models/{CONSTITUTION,CLAUDE,AGENTS}.md</code>.
+(b) <code>helix_qa/CONSTITUTION.md</code> was missing anchors
+CONST-047..057 (CLAUDE.md/AGENTS.md already carried them) — cascaded the
+contiguous CONST-047..057 block from the meta-repo CONSTITUTION.md (217
+lines, helix_qa <code>1364d23</code>);
+<code>VisionEngine/CONSTITUTION.md</code> was missing §11.4.69
+(CLAUDE.md/AGENTS.md already carried it) — cascaded the §11.4.69 anchor
+(80 lines, VisionEngine <code>b3a13d8</code>). Verification:
+<code>scripts/verify-governance-cascade.sh</code> →
+<code>=== Result: 0 failures === PASS</code>;
+<code>scripts/verify-all-constitution-rules.sh</code> →
+<code>Gates run: 6 / Failures: 0</code> (G1-G6 all PASS). Both
+submodules pushed to all upstreams.</td>
+</tr>
+<tr>
+<td>2026-05-20</td>
+<td>HXC-007: Constitution §11.4.68/70-74 cascade + meta-pointer
+bump</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>403</td>
+<td>constitution <code>584b3ee</code>→<code>34a82b3</code> + 67
+owned-submodule governance commits + meta pointer bump</td>
+<td>Cascade verified complete. Constitution submodule pulled
+<code>584b3ee</code>→<code>34a82b3</code> (carried §11.4.68 +
+§11.4.70-74). All 6 rules cascaded into the meta-repo governance files
+and 67 owned-submodule
+<code>CONSTITUTION.md</code>/<code>CLAUDE.md</code>/<code>AGENTS.md</code>.
+Meta <code>.gitmodules</code> constitution pointer confirmed at
+<code>34a82b3</code> (<code>git ls-tree HEAD constitution</code> →
+<code>160000 commit 34a82b3859...</code>). Spot-check:
+<code>grep -c "11.4.70\|11.4.74"</code> returns 6 for
+<code>helix_qa/CLAUDE.md</code>,
+<code>dependencies/HelixDevelopment/LLMProvider/CLAUDE.md</code>,
+<code>challenges/CLAUDE.md</code> — all carry §11.4.70-74. CONST-049
+step-4 multi-upstream reconciliation that kept this item
+<code>In progress</code> is itself closed (see HXC-009).</td>
+</tr>
+<tr>
+<td>2026-05-20</td>
+<td>HXC-009: Owned-submodule GitHub ↔︎ GitLab mirror-divergence
+reconciliation</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>403</td>
+<td><code>68309b8e</code> + per-submodule merge commits</td>
+<td>Reconciliation verified complete. helix_qa, VisionEngine,
+LLMProvider, challenges, containers, DocProcessor all reconciled via
+merge-first (CONST-061 / §11.4.71) — real 2-parent merge commits
+preserving the union of both org-mirror lineages, no force-push, no
+history rewrite. Spot-check: <code>VisionEngine</code> carries
+convergence merge <code>3485f5f</code> (“converge VisionEngine mirror
+divergence — merge rebased-away f534b22 into 0512fa4
+(CONST-061/§11.4.71)”) and pushed FF-clean to all 4 upstreams
+(<code>3485f5f..b3a13d8</code> to helix-gitlab + vasic-digital-github +
+vasic-digital-gitlab during the HXC-008 push); <code>helix_qa</code>
+HEAD was at parity across github+gitlab <code>origin</code> before this
+round’s push. All owned submodules converged + pushed to all upstreams;
+meta pointers bumped (<code>68309b8e</code>).</td>
+</tr>
+<tr>
+<td>2026-05-20</td>
 <td>HXC-011: helix_qa runner emits hollow sub-microsecond “PASSED” rows
 for desktop-platform bank cases instead of executing the case’s
 <code>action:</code></td>

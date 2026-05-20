@@ -433,39 +433,45 @@ sweep clean of speed-attributable failures; headline wins lazy-startup
 <td>HXC-007</td>
 <td>Constitution §11.4.68/70-74 cascade + meta-pointer bump</td>
 <td>Task</td>
-<td>In progress</td>
+<td>Completed (→ Fixed.md) round 403</td>
 <td>2026-05-20</td>
-<td>Constitution pulled <code>584b3ee</code>→<code>34a82b3</code> per
-CONST-049; 6 rules cascaded to meta + 67 submodules per CONST-047; meta
-<code>.gitmodules</code> pointer bumped. Stays open while CONST-049
-step-4 multi-upstream reconciliation converges mirrors (see
-HXC-009)</td>
+<td>Closed: cascade verified complete — constitution
+<code>584b3ee</code>→<code>34a82b3</code>, 6 rules cascaded to meta + 67
+owned submodules per CONST-047, meta <code>.gitmodules</code> pointer
+confirmed at <code>34a82b3</code>; spot-check
+<code>grep -c "11.4.70\|11.4.74"</code>=6 for
+helix_qa/LLMProvider/challenges CLAUDE.md. Migrated to
+<code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-008</td>
 <td>CONST-055 G1 governance gaps surfaced by post-constitution-pull
 validation sweep</td>
 <td>Bug</td>
-<td>In progress</td>
+<td>Fixed (→ Fixed.md) round 403</td>
 <td>2026-05-20</td>
-<td>Pre-existing (not regressions): (a)
-<code>verify-all-constitution-rules.sh</code> references non-existent
-<code>dependencies/HelixDevelopment/Models</code> — actual dirs are
-lowercase <code>models</code> + <code>vasic-digital/Models</code>; (b)
-<code>helix_qa/CONSTITUTION.md</code> missing CONST-047..057,
-<code>VisionEngine/CONSTITUTION.md</code> missing §11.4.69</td>
+<td>Closed: both gaps fixed — (a)
+<code>docs/improvements/submodule_owned.txt</code> corrected
+<code>HelixDevelopment/Models</code>→lowercase <code>models</code>; (b)
+CONST-047..057 cascaded into <code>helix_qa/CONSTITUTION.md</code>
+(<code>1364d23</code>) + §11.4.69 into
+<code>VisionEngine/CONSTITUTION.md</code> (<code>b3a13d8</code>).
+<code>verify-governance-cascade.sh</code> → 0 failures;
+<code>verify-all-constitution-rules.sh</code> → 6 gates / 0 failures.
+Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-009</td>
 <td>Owned-submodule GitHub ↔︎ GitLab mirror-divergence
 reconciliation</td>
 <td>Task</td>
-<td>In progress</td>
+<td>Completed (→ Fixed.md) round 403</td>
 <td>2026-05-20</td>
-<td>Systemic divergence between vasic-digital ↔︎ HelixDevelopment mirrors
-of several owned submodules. helix_qa reconciled via merge-first commit
-<code>a0397a4</code>; VisionEngine, LLMProvider, others under
-reconciliation per CONST-061/§11.4.71 merge-first, no force-push</td>
+<td>Closed: reconciliation verified complete — helix_qa, VisionEngine,
+LLMProvider, challenges, containers, DocProcessor all reconciled via
+merge-first (CONST-061/§11.4.71), all owned submodules converged +
+pushed to all upstreams, meta pointers bumped (<code>68309b8e</code>).
+Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-010</td>
@@ -500,28 +506,33 @@ Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 6 open (HXC-011 closed round 402; HXC-012
-closed round 401; HXC-006 closed round 400; HXC-010 filed round 399;
-HXC-007/008/009 filed round 398; HXV-003 closed round 396; OPS-001
-closed round 397; HXV-002 closed round 348; HXQ-002 closed round 344;
-HXA-002 closed round 342; VEN-002 closed round 340; HXQ-001 closed round
-325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed
-round 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open
-(HXC-008) | 3 Task open (HXC-001, HXC-007, HXC-009) + 1 Operator-blocked
-(HXC-010) | 1 Feature open (HXC-003) | 0 BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 402 — HXC-011 closed
+<p><strong>Counts</strong>: 3 open (HXC-008/007/009 closed round 403;
+HXC-011 closed round 402; HXC-012 closed round 401; HXC-006 closed round
+400; HXC-010 filed round 399; HXC-007/008/009 filed round 398; HXV-003
+closed round 396; OPS-001 closed round 397; HXV-002 closed round 348;
+HXQ-002 closed round 344; HXA-002 closed round 342; VEN-002 closed round
+340; HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005 closed
+round 318; PAN-001 closed round 302; HXC-004 closed round 200;
+VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
+| 1 Task open (HXC-001) + 1 Operator-blocked (HXC-010) | 1 Feature open
+(HXC-003) | 0 BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 403 — HXC-008 closed
+<code>Fixed (→ Fixed.md)</code> + HXC-007/HXC-009 closed
+<code>Completed (→ Fixed.md)</code>: HXC-008 corrected the CONST-055
+verifier path drift (<code>submodule_owned.txt</code>
+<code>HelixDevelopment/Models</code>→lowercase <code>models</code>) and
+cascaded the missing CONST-047..057 anchors into
+<code>helix_qa/CONSTITUTION.md</code> + §11.4.69 into
+<code>VisionEngine/CONSTITUTION.md</code> —
+<code>verify-governance-cascade.sh</code> 0 failures,
+<code>verify-all-constitution-rules.sh</code> 6 gates / 0 failures;
+HXC-007 cascade + HXC-009 mirror-reconciliation verified genuinely
+complete. Previous round 402 — HXC-011 closed
 <code>Fixed (→ Fixed.md)</code>: the helix_qa runner’s <code>run</code>
-path on the <code>desktop</code> platform now genuinely executes a bank
-case’s <code>shell:</code> action via <code>os/exec</code> and scores
-PASS/FAIL on the real exit code — no more hollow sub-µs
-<code>PASSED</code> metadata rows; reproduce-before-fix RED→GREEN,
-helix_qa commit <code>6b46df0</code>). Previous round 401 — HXC-012
-closed <code>Fixed (→ Fixed.md)</code>: data race in
-<code>helix_code/internal/llm/load_balancer.go</code> stat-collector
-synchronised via reproduce-before-fix <code>-race</code> test, commit
-<code>9d8c1cdc</code>. See <code>docs/Issues.md</code> for full details
-+ prefix convention table. PDF/HTML exports auto-regenerated via
+path on <code>desktop</code> now genuinely executes a bank case’s
+<code>shell:</code> action via <code>os/exec</code>. See
+<code>docs/Issues.md</code> for full details + prefix convention table.
+PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>

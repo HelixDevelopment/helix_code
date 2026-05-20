@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-20 (close-out¹³⁵ — HelixCode Speed Programme COMPLETE: P5-T04 landed — CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md` (29 PASS + 2 PARTIAL + 0 DEFERRED across all 31 tasks), release-gate sweep, HXC-006 closed `Implemented (→ Fixed.md)`, HXC-011 + HXC-012 filed).**
+**Last updated: 2026-05-20 (close-out¹³⁶ — round 403: HXC-008 closed `Fixed (→ Fixed.md)` (CONST-055 verifier path drift corrected + CONST-047..057 cascaded into `helix_qa/CONSTITUTION.md` + §11.4.69 into `VisionEngine/CONSTITUTION.md` — `verify-governance-cascade.sh` 0 failures, `verify-all-constitution-rules.sh` 6 gates/0 failures), HXC-007 + HXC-009 closed `Completed (→ Fixed.md)` after verification — cascade + mirror-reconciliation genuinely complete; all migrated to `docs/Fixed.md`).**
 
 > **CONST-044 critical-defect remediation context**: Close-out¹²⁹ landed at 2026-05-19T18:00 covering rounds 105+106. Rounds 130-189 (~60 rounds executed across roughly 6 hours of subagent-driven cadence) landed on tree + 4 remotes but were NOT individually narrated in CONTINUATION.md. Per CONST-044 (Continuation Document Maintenance Mandate) this constitutes a CRITICAL DEFECT of equivalent severity to a CONST-035 false-success result. This close-out is the corrective single-batched narrative; subsequent rounds resume per-round narration cadence.
 
@@ -1098,4 +1098,27 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 
 - HXC-011 (helix_qa desktop-platform hollow-PASS) closed round 402 — `Fixed (→ Fixed.md)`: the runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec` and scores PASS/FAIL on the real exit code (reproduce-before-fix RED→GREEN; helix_qa commit `6b46df0`, meta pointer bumped). HXC-012 (load_balancer.go race) closed round 401. Both pre-existing speed-programme findings now resolved.
 - The speed programme is complete; no further speed tasks queued.
+
+---
+
+## close-out¹³⁶ — round 403: HXC-008 governance-gap fix + HXC-007/HXC-009 verified-complete closure
+
+### What landed
+
+1. **HXC-008 closed `Fixed (→ Fixed.md)`** (`Bug`). The two pre-existing CONST-055 G1 cascade-drift gaps surfaced in close-out¹³² / CG16 are fixed:
+   - (a) `docs/improvements/submodule_owned.txt` line 10 referenced `dependencies/HelixDevelopment/Models` — a path that does not exist on disk; the CONST-052 batch-1 rename (`a1ea3c8`) had lowercased it to `models` (`.gitmodules` registers it lowercase). Corrected to `dependencies/HelixDevelopment/models`. The cascade verifier (`scripts/verify-governance-cascade.sh`) reads this file, so the false `FAIL: dependencies/HelixDevelopment/Models — path does not exist on disk` line is now gone.
+   - (b) `helix_qa/CONSTITUTION.md` was missing anchors CONST-047..057 (CLAUDE.md/AGENTS.md already carried them); `VisionEngine/CONSTITUTION.md` was missing §11.4.69 (likewise). The contiguous CONST-047..057 block (217 lines) was cascaded into `helix_qa/CONSTITUTION.md` from the meta CONSTITUTION.md; the §11.4.69 anchor (80 lines) into `VisionEngine/CONSTITUTION.md`. Both submodules committed + pushed to all upstreams (helix_qa `1364d23`; VisionEngine `b3a13d8`, integrating upstream docs commit `bfe3b06` first per §11.4.71).
+   - Verification: `scripts/verify-governance-cascade.sh` → `=== Result: 0 failures === PASS`; `scripts/verify-all-constitution-rules.sh` → `Gates run: 6 / Failures: 0` (G1-G6 all PASS).
+2. **HXC-007 closed `Completed (→ Fixed.md)`** (`Task`). Constitution §11.4.68/70-74 cascade verified genuinely complete: meta `.gitmodules` constitution pointer confirmed at `34a82b3`; spot-check `grep -c "11.4.70\|11.4.74"`=6 across `helix_qa`, `dependencies/HelixDevelopment/LLMProvider`, `challenges` CLAUDE.md.
+3. **HXC-009 closed `Completed (→ Fixed.md)`** (`Task`). Owned-submodule mirror-divergence reconciliation verified complete: VisionEngine carries convergence merge `3485f5f` and pushes FF-clean to all 4 upstreams; helix_qa, LLMProvider, challenges, containers, DocProcessor all converged per CONST-061/§11.4.71 merge-first.
+
+### State
+
+- All three items migrated to `docs/Fixed.md` per §11.4.19; `docs/Issues.md` sections retained as migration tombstones.
+- `docs/Issues_Summary.md` + `docs/Fixed_Summary.md` updated (open count 6→3); all 8 tracker exports (4 HTML + 4 PDF) regenerated via `scripts/regenerate-tracker-exports.sh`.
+- Meta-repo: verifier-input fix + tracker migrations + exports committed; helix_qa + VisionEngine meta pointers bumped.
+
+### Next
+
+- No open Bug items remain. Open: HXC-001 (Task), HXC-003 (Feature), HXC-010 (Operator-blocked Task — CodeGraph end-to-end verification awaiting LLM-backend credentials).
 

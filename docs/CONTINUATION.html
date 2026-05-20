@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CONTINUATION</title>
+  <title>HelixCode CONTINUATION</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -173,15 +173,21 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">CONTINUATION</h1>
+<h1 class="title">HelixCode CONTINUATION</h1>
 </header>
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-19T23:59:00Z (close-out¹³¹ — 115-round
-BATCHED CATCH-UP NARRATIVE (rounds 191-305) — CONST-044 drift
-remediation; constitution cascade + helix_code/internal i18n complete +
-65+ per-repo enrichment rounds + PAN-001 fix).</strong></p>
+<p><strong>Last updated: 2026-05-20 (close-out¹³⁶ — round 403: HXC-008
+closed <code>Fixed (→ Fixed.md)</code> (CONST-055 verifier path drift
+corrected + CONST-047..057 cascaded into
+<code>helix_qa/CONSTITUTION.md</code> + §11.4.69 into
+<code>VisionEngine/CONSTITUTION.md</code> —
+<code>verify-governance-cascade.sh</code> 0 failures,
+<code>verify-all-constitution-rules.sh</code> 6 gates/0 failures),
+HXC-007 + HXC-009 closed <code>Completed (→ Fixed.md)</code> after
+verification — cascade + mirror-reconciliation genuinely complete; all
+migrated to <code>docs/Fixed.md</code>).</strong></p>
 <blockquote>
 <p><strong>CONST-044 critical-defect remediation context</strong>:
 Close-out¹²⁹ landed at 2026-05-19T18:00 covering rounds 105+106. Rounds
@@ -5709,6 +5715,250 @@ failures.</li>
 <li>CodeGraph Phase C anti-bluff Challenges (CG10-CG13) remain the
 outstanding incorporation work if not yet landed by a sibling
 session.</li>
+</ul>
+<hr />
+<h2
+id="close-out¹³⁴-codegraph-incorporation-phase-c-cg10-cg13">close-out¹³⁴
+— CodeGraph incorporation Phase C (CG10-CG13)</h2>
+<p><strong>Date:</strong> 2026-05-20 <strong>Theme:</strong> CodeGraph
+(MCP code-graph server) incorporation Phase C — anti-bluff verification
+per <code>docs/research/codegraph/incorporation-plan.md</code> §5 + §6.
+Proves CodeGraph genuinely works end-to-end on the real HelixCode repo
+and reaches all five CLI agents (CONST-035 / Article XI §11.9).</p>
+<h3 id="work-performed-1">Work performed</h3>
+<ol type="1">
+<li><p><strong>CG10 — Layer A.</strong> Replaced the
+<code>tools/codegraph/verify.sh</code> stub with the real end-to-end
+proof: <code>codegraph status</code> (asserts non-zero files/nodes/edges
+— 39 022 / 624 092 / 1 644 454 captured),
+<code>codegraph query Provider</code> (asserts real Go symbols),
+<code>codegraph context</code> (asserts real repo files), plus an
+anti-bluff token guard. Wrapped as Challenge
+<code>CG-CHALLENGE-01</code>. <strong>PASS</strong> — evidence
+<code>docs/research/codegraph/evidence/phase-c/cg-challenge-01-*</code>.</p></li>
+<li><p><strong>CG11 — Layer B.</strong> Challenge
+<code>CG-CHALLENGE-02</code> drives <code>codegraph serve --mcp</code>
+over stdio with real JSON-RPC: <code>initialize</code> → serverInfo,
+<code>tools/list</code> → 9 <code>codegraph_*</code> tools,
+<code>tools/call codegraph_search</code> → real graph data. JSON-RPC
+wire transcript captured
+(<code>cg-challenge-02-jsonrpc-wire.jsonl</code>).
+<strong>PASS</strong>.</p></li>
+<li><p><strong>CG12 — Layer C.</strong> Challenges
+<code>CG-CHALLENGE-03..07</code>, one per agent, with a shared
+<code>lib-agent-challenge.sh</code> driver: tier-1 drives the agent CLI
+non-interactively and asserts a real <code>.go</code> symbol path;
+tier-2 (§11.4.3 topology dispatch) falls back HONESTLY to connect-only +
+tool-discovery proof when an agent cannot be driven to a real answer.
+<strong>Results:</strong> Claude Code (primary) — <strong>true
+end-to-end PASS</strong>; OpenCode — true end-to-end PASS; Crush — true
+end-to-end PASS; Kimi CLI — connect-only PASS (LLM monthly-quota 429
+blocked the answer; its MCP loader did enumerate all 9 codegraph tools);
+Qwen Code — connect-only PASS (bundled OAuth free tier discontinued
+upstream 2026-04-15). 3/5 agents true end-to-end, 2/5 connect-only —
+reported honestly, no false end-to-end claims.</p></li>
+<li><p><strong>CG13 — helix_qa bank.</strong> Registered the 7
+Challenges as a helix_qa test bank
+<code>tools/codegraph/challenges/codegraph-integration.bank.yaml</code>.
+Per CONST-051(B) the bank lives in the HelixCode tree — NOT inside the
+project-not-aware helix_qa submodule (the bank hardcodes HelixCode
+Challenge paths, which would couple the reusable submodule to
+HelixCode). The helix_qa runner accepts arbitrary bank paths via
+<code>-banks</code>, so it is fully consumable:
+<code>helixqa run -banks tools/codegraph/challenges/codegraph-integration.bank.yaml</code>.
+Runner <code>tools/codegraph/challenges/run-all.sh</code> executes all 7
+with per-Challenge captured evidence.</p></li>
+</ol>
+<h3 id="state-2">State</h3>
+<ul>
+<li>7 Challenges under <code>tools/codegraph/challenges/</code> — all
+<code>bash -n</code>-clean with §11.4.18 doc blocks; bank run
+<strong>7/7 PASS</strong> after the CG-CHALLENGE-03 arg-shift fix.</li>
+<li><code>tools/codegraph/verify.sh</code> is now a real anti-bluff
+proof (no longer a stub).</li>
+<li>All runtime evidence under
+<code>docs/research/codegraph/evidence/phase-c/</code> — status JSON,
+query JSON, JSON-RPC wire transcript, 5 agent transcripts, per-Challenge
+run logs.</li>
+<li>helix_qa autonomous-session integration: bank registered +
+discoverable; direct execution via <code>run-all.sh</code> captures
+per-check evidence. Full autonomous-session orchestration left to a
+helix_qa QA run.</li>
+</ul>
+<h3 id="next-3">Next</h3>
+<ul>
+<li>CodeGraph Phase D (CG14-CG16) already landed (close-out¹³³).</li>
+<li>A helix_qa autonomous QA session may execute the
+<code>codegraph-integration</code> bank for orchestrated per-check
+evidence capture.</li>
+</ul>
+<hr />
+<h2
+id="close-out¹³⁵-helixcode-speed-programme-complete-p5-t04-all-6-phases-31-tasks-landed">close-out¹³⁵
+— HelixCode Speed Programme COMPLETE (P5-T04 — all 6 phases / 31 tasks
+landed)</h2>
+<p><strong>Date:</strong> 2026-05-20 <strong>Theme:</strong>
+Speed-programme final task P5-T04 — CONST-048 coverage ledger,
+release-gate sweep, and programme close-out. Closes
+<strong>HXC-006</strong> (HelixCode Speed Programme, Feature). Operator
+mandate 2026-05-20: make HelixCode + owned-submodule code 3-5× faster
+than competitor AI CLI agents without breaking any feature or weakening
+anti-bluff posture.</p>
+<blockquote>
+<p>Verbatim 2026-05-19 operator mandate (preserved per CONST-049
+§11.4.17): <em>“all existing tests and Challenges do work in anti-bluff
+manner - they MUST confirm that all tested codebase really works as
+expected! We had been in position that all tests do execute with success
+and all Challenges as well, but in reality the most of the features does
+not work and can’t be used! This MUST NOT be the case and execution of
+tests and Challenges MUST guarantee the quality, the completition and
+full usability by end users of the product!”</em></p>
+</blockquote>
+<h3 id="work-performed-p5-t04">Work performed (P5-T04)</h3>
+<ol type="1">
+<li><p><strong>CONST-048 coverage ledger.</strong> Created
+<code>docs/research/speed/05-coverage-ledger.md</code> (constitution
+§11.4.44 metadata header) — one row per task P0-T01..P5-T04 (mapped to
+opportunities O1–O21), each carrying the commit SHA, the captured
+before→after measurement, and the six CONST-048 invariants
+(<code>[AB][WC][MD][NB][DS][TF]</code>). Roll-up: <strong>29 PASS + 2
+PARTIAL + 0 DEFERRED</strong> across all 31 tasks.</p></li>
+<li><p><strong>Release-gate sweep.</strong>
+<code>scripts/audit-const046-hardcoded-content.sh</code> ran exit 0
+(speed work added no user-facing strings — no new hardcoded content).
+<code>scripts/verify-governance-cascade.sh</code> reported 2 failures =
+the already-tracked <strong>HXC-008</strong> pre-existing drift (stale
+<code>Models</code> path + <code>helix_qa/CONSTITUTION.md</code> missing
+CONST-047..057), NOT speed-programme regressions. Anti-bluff smoke
+<code>grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd</code>
+(prod, non-<code>_test.go</code>) = clean.
+<code>make verify-compile</code> not re-run (P5-T04 is docs-only;
+compile state unchanged from <code>98315a14</code>).</p></li>
+<li><p><strong>Two deferred findings filed</strong> per §11.4.15/16:
+<strong>HXC-011</strong> (Bug — helix_qa runner emits hollow sub-µs
+<code>PASSED</code> metadata rows for desktop-platform bank cases
+without executing them — a §11.4 PASS-bluff in the QA runner) and
+<strong>HXC-012</strong> (Bug — data race in
+<code>helix_code/internal/llm/load_balancer.go</code> stat-collector
+goroutine under full-package <code>-race</code>). Both pre-existing;
+surfaced during the speed programme; reported honestly.</p></li>
+<li><p><strong>HXC-006 closed.</strong> All 31 tasks genuinely landed →
+HXC-006 updated to <code>Implemented (→ Fixed.md)</code> per
+CONST-057/§11.4.33 and migrated to <code>docs/Fixed.md</code> per
+§11.4.19. Issues_Summary.md + Fixed_Summary.md regenerated; HTML/PDF
+exports refreshed.</p></li>
+</ol>
+<h3 id="speed-programme-outcome">Speed-programme outcome</h3>
+<p>All 6 phases / 31 tasks landed across rounds — P0 (baseline harness),
+P1 (LLM &amp; startup wins), P2 (context-build speed), P3 (interactive
+&amp; agent-loop levers), P4 (profile-gated tuning), P5 (dev-experience
++ submodule cascade + close-out). Headline measured wins (each with
+pasted in-session evidence per CONST-035): lazy Ollama discovery
+67µs→2.7ns, lazy CLI startup ~8.85×, cache pre-warm ~7.6×, regexp hoist
+~7.4×, repo-map cache ~10.6× warm, parallel search ~4.39×, incremental
+tree-sitter ~21×, small-model routing ~5.87×, diff edits 94-99% token
+cut, fast-apply ~516×, tool parallelism ~5.99×, PGO −46% CPU-bound.</p>
+<p><strong>Honest PARTIALs (no green PASS claimed):</strong> P5-T01
+build/test parallelism tuning is landed and correct but the
+suite-wall-time before/after delta was not captured as a pasted
+benchmark; P5-T02 is a partial single-provider <code>internal/llm</code>
+split (Cerebras extracted to
+<code>internal/llm/providers/cerebras/</code>) — a full 18-provider
+extraction is infeasible without an import cycle.</p>
+<h3 id="state-3">State</h3>
+<ul>
+<li><code>docs/research/speed/05-coverage-ledger.md</code> committed (+
+HTML/PDF exports).</li>
+<li>HXC-006 closed in <code>docs/Issues.md</code> (migration tombstone)
+→ full record in <code>docs/Fixed.md</code>.</li>
+<li>HXC-011 + HXC-012 filed <code>Queued</code> in
+<code>docs/Issues.md</code>.</li>
+<li>Issues_Summary.md / Fixed_Summary.md regenerated; tracker exports
+refreshed.</li>
+</ul>
+<h3 id="next-4">Next</h3>
+<ul>
+<li>HXC-011 (helix_qa desktop-platform hollow-PASS) closed round 402 —
+<code>Fixed (→ Fixed.md)</code>: the runner’s <code>run</code> path on
+the <code>desktop</code> platform now genuinely executes a bank case’s
+<code>shell:</code> action via <code>os/exec</code> and scores PASS/FAIL
+on the real exit code (reproduce-before-fix RED→GREEN; helix_qa commit
+<code>6b46df0</code>, meta pointer bumped). HXC-012 (load_balancer.go
+race) closed round 401. Both pre-existing speed-programme findings now
+resolved.</li>
+<li>The speed programme is complete; no further speed tasks queued.</li>
+</ul>
+<hr />
+<h2
+id="close-out¹³⁶-round-403-hxc-008-governance-gap-fix-hxc-007hxc-009-verified-complete-closure">close-out¹³⁶
+— round 403: HXC-008 governance-gap fix + HXC-007/HXC-009
+verified-complete closure</h2>
+<h3 id="what-landed">What landed</h3>
+<ol type="1">
+<li><strong>HXC-008 closed <code>Fixed (→ Fixed.md)</code></strong>
+(<code>Bug</code>). The two pre-existing CONST-055 G1 cascade-drift gaps
+surfaced in close-out¹³² / CG16 are fixed:
+<ul>
+<li><ol type="a">
+<li><code>docs/improvements/submodule_owned.txt</code> line 10
+referenced <code>dependencies/HelixDevelopment/Models</code> — a path
+that does not exist on disk; the CONST-052 batch-1 rename
+(<code>a1ea3c8</code>) had lowercased it to <code>models</code>
+(<code>.gitmodules</code> registers it lowercase). Corrected to
+<code>dependencies/HelixDevelopment/models</code>. The cascade verifier
+(<code>scripts/verify-governance-cascade.sh</code>) reads this file, so
+the false
+<code>FAIL: dependencies/HelixDevelopment/Models — path does not exist on disk</code>
+line is now gone.</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li><code>helix_qa/CONSTITUTION.md</code> was missing anchors
+CONST-047..057 (CLAUDE.md/AGENTS.md already carried them);
+<code>VisionEngine/CONSTITUTION.md</code> was missing §11.4.69
+(likewise). The contiguous CONST-047..057 block (217 lines) was cascaded
+into <code>helix_qa/CONSTITUTION.md</code> from the meta
+CONSTITUTION.md; the §11.4.69 anchor (80 lines) into
+<code>VisionEngine/CONSTITUTION.md</code>. Both submodules committed +
+pushed to all upstreams (helix_qa <code>1364d23</code>; VisionEngine
+<code>b3a13d8</code>, integrating upstream docs commit
+<code>bfe3b06</code> first per §11.4.71).</li>
+</ol></li>
+<li>Verification: <code>scripts/verify-governance-cascade.sh</code> →
+<code>=== Result: 0 failures === PASS</code>;
+<code>scripts/verify-all-constitution-rules.sh</code> →
+<code>Gates run: 6 / Failures: 0</code> (G1-G6 all PASS).</li>
+</ul></li>
+<li><strong>HXC-007 closed <code>Completed (→ Fixed.md)</code></strong>
+(<code>Task</code>). Constitution §11.4.68/70-74 cascade verified
+genuinely complete: meta <code>.gitmodules</code> constitution pointer
+confirmed at <code>34a82b3</code>; spot-check
+<code>grep -c "11.4.70\|11.4.74"</code>=6 across <code>helix_qa</code>,
+<code>dependencies/HelixDevelopment/LLMProvider</code>,
+<code>challenges</code> CLAUDE.md.</li>
+<li><strong>HXC-009 closed <code>Completed (→ Fixed.md)</code></strong>
+(<code>Task</code>). Owned-submodule mirror-divergence reconciliation
+verified complete: VisionEngine carries convergence merge
+<code>3485f5f</code> and pushes FF-clean to all 4 upstreams; helix_qa,
+LLMProvider, challenges, containers, DocProcessor all converged per
+CONST-061/§11.4.71 merge-first.</li>
+</ol>
+<h3 id="state-4">State</h3>
+<ul>
+<li>All three items migrated to <code>docs/Fixed.md</code> per §11.4.19;
+<code>docs/Issues.md</code> sections retained as migration
+tombstones.</li>
+<li><code>docs/Issues_Summary.md</code> +
+<code>docs/Fixed_Summary.md</code> updated (open count 6→3); all 8
+tracker exports (4 HTML + 4 PDF) regenerated via
+<code>scripts/regenerate-tracker-exports.sh</code>.</li>
+<li>Meta-repo: verifier-input fix + tracker migrations + exports
+committed; helix_qa + VisionEngine meta pointers bumped.</li>
+</ul>
+<h3 id="next-5">Next</h3>
+<ul>
+<li>No open Bug items remain. Open: HXC-001 (Task), HXC-003 (Feature),
+HXC-010 (Operator-blocked Task — CodeGraph end-to-end verification
+awaiting LLM-backend credentials).</li>
 </ul>
 </body>
 </html>

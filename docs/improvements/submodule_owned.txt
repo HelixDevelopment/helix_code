@@ -7,7 +7,7 @@ dependencies/HelixDevelopment/HelixSpecifier | git@github.com:HelixDevelopment/H
 dependencies/HelixDevelopment/LLMOrchestrator | git@github.com:HelixDevelopment/LLMOrchestrator.git
 dependencies/HelixDevelopment/LLMProvider | git@github.com:HelixDevelopment/LLMProvider.git
 dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git
-dependencies/HelixDevelopment/Models | git@github.com:vasic-digital/Models.git
+dependencies/HelixDevelopment/models | git@github.com:vasic-digital/Models.git
 dependencies/HelixDevelopment/VisionEngine | git@github.com:HelixDevelopment/VisionEngine.git
 dependencies/vasic-digital/Agentic | git@github.com:vasic-digital/Agentic.git
 dependencies/vasic-digital/Auth | git@github.com:vasic-digital/Auth.git

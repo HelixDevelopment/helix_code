@@ -216,13 +216,41 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 92 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 95 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 402 added HXC-011
-(helix_qa runner emitted hollow sub-microsecond <code>PASSED</code> rows
-for desktop-platform bank cases instead of executing the case’s
-<code>action:</code> — §11.4 / CONST-035 PASS-bluff in the QA runner
-itself; reproduce-before-fix Rule 7 / §11.4.43 TDD-fix; root cause:
+<code>docs/improvements/PROGRESS.md</code>). Round 403 added HXC-008
+(CONST-055 G1 governance gaps surfaced by the post-constitution-pull
+validation sweep — two pre-existing cascade-drift defects: (a)
+<code>docs/improvements/submodule_owned.txt</code> line 10 referenced a
+non-existent <code>dependencies/HelixDevelopment/Models</code> path
+which the CONST-052 batch-1 rename <code>a1ea3c8</code> had lowercased
+to <code>models</code>, corrected to
+<code>dependencies/HelixDevelopment/models</code> —
+<code>verify-governance-cascade.sh</code> re-run dropped the false
+<code>path does not exist on disk</code> FAIL; (b)
+<code>helix_qa/CONSTITUTION.md</code> was missing anchors CONST-047..057
+and <code>VisionEngine/CONSTITUTION.md</code> was missing §11.4.69 —
+both CLAUDE.md/AGENTS.md already carried them, so the CONST-047..057
+block was cascaded into <code>helix_qa/CONSTITUTION.md</code> from the
+meta CONSTITUTION.md and §11.4.69 into
+<code>VisionEngine/CONSTITUTION.md</code>;
+<code>verify-governance-cascade.sh</code> → 0 failures,
+<code>verify-all-constitution-rules.sh</code> → 6 gates / 0 failures;
+helix_qa <code>1364d23</code> + VisionEngine <code>b3a13d8</code> pushed
+to all upstreams), HXC-007 (Constitution §11.4.68/70-74 cascade verified
+genuinely complete — constitution
+<code>584b3ee</code>→<code>34a82b3</code>, 6 rules cascaded to the
+meta-repo + 67 owned submodules, meta <code>.gitmodules</code> pointer
+confirmed at <code>34a82b3</code>), and HXC-009 (owned-submodule
+GitHub↔︎GitLab mirror-divergence reconciliation verified complete —
+helix_qa, VisionEngine, LLMProvider, challenges, containers,
+DocProcessor all reconciled via merge-first per CONST-061/§11.4.71, all
+converged + pushed to all upstreams, meta pointers bumped
+<code>68309b8e</code>). Round 402 added HXC-011 (helix_qa runner emitted
+hollow sub-microsecond <code>PASSED</code> rows for desktop-platform
+bank cases instead of executing the case’s <code>action:</code> — §11.4
+/ CONST-035 PASS-bluff in the QA runner itself; reproduce-before-fix
+Rule 7 / §11.4.43 TDD-fix; root cause:
 <code>definitionChallenge.Execute</code> unconditionally returned
 <code>Status=Skipped</code> and never shelled out, and the generic
 <code>challenges/pkg/bank</code> loader drops each case’s
@@ -385,14 +413,17 @@ recorded_mobile, ~40 strings)</td>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>6 open issues: 1 Bug (HXC-008) / 3 Task (HXC-001, HXC-007, HXC-009) +
-1 Operator-blocked Task (HXC-010) / 1 Feature (HXC-003); 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-20 (round 401 — HXC-012 closed:
-<code>internal/llm/load_balancer.go</code> stat-collector data race
-synchronised, reproduce-before-fix <code>-race</code> test, commit
-<code>9d8c1cdc</code>). Previous round 400 — HXC-006 closed: HelixCode
-Speed Programme — all 6 phases / 31 tasks landed. See
-<code>docs/Fixed.md</code> for full closure entries with commit
-SHAs.</em></p>
+<p>3 open issues: 0 Bug / 1 Task (HXC-001) + 1 Operator-blocked Task
+(HXC-010) / 1 Feature (HXC-003); 0 BLOCKED.</p>
+<p><em>Last regenerated: 2026-05-20 (round 403 — HXC-008 closed
+<code>Fixed (→ Fixed.md)</code> + HXC-007/HXC-009 closed
+<code>Completed (→ Fixed.md)</code>: HXC-008 fixed the CONST-055
+verifier path drift + cascaded the missing CONST-047..057 anchors into
+<code>helix_qa/CONSTITUTION.md</code> and §11.4.69 into
+<code>VisionEngine/CONSTITUTION.md</code>; HXC-007 cascade + HXC-009
+mirror-reconciliation verified genuinely complete. Previous round 402 —
+HXC-011 closed: helix_qa runner now genuinely executes desktop-platform
+bank <code>shell:</code> actions. See <code>docs/Fixed.md</code> for
+full closure entries with commit SHAs.</em></p>
 </body>
 </html>
