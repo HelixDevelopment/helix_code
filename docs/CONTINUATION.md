@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-19T23:59:00Z (close-out¹³¹ — 115-round BATCHED CATCH-UP NARRATIVE (rounds 191-305) — CONST-044 drift remediation; constitution cascade + helix_code/internal i18n complete + 65+ per-repo enrichment rounds + PAN-001 fix).**
+**Last updated: 2026-05-20 (close-out¹³⁵ — HelixCode Speed Programme COMPLETE: P5-T04 landed — CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md` (29 PASS + 2 PARTIAL + 0 DEFERRED across all 31 tasks), release-gate sweep, HXC-006 closed `Implemented (→ Fixed.md)`, HXC-011 + HXC-012 filed).**
 
 > **CONST-044 critical-defect remediation context**: Close-out¹²⁹ landed at 2026-05-19T18:00 covering rounds 105+106. Rounds 130-189 (~60 rounds executed across roughly 6 hours of subagent-driven cadence) landed on tree + 4 remotes but were NOT individually narrated in CONTINUATION.md. Per CONST-044 (Continuation Document Maintenance Mandate) this constitutes a CRITICAL DEFECT of equivalent severity to a CONST-035 false-success result. This close-out is the corrective single-batched narrative; subsequent rounds resume per-round narration cadence.
 
@@ -1061,4 +1061,41 @@ Read /run/media/milosvasic/DATA4TB/Projects/helix_code/docs/CONTINUATION.md and 
 
 - CodeGraph Phase D (CG14-CG16) already landed (close-out¹³³).
 - A helix_qa autonomous QA session may execute the `codegraph-integration` bank for orchestrated per-check evidence capture.
+
+---
+
+## close-out¹³⁵ — HelixCode Speed Programme COMPLETE (P5-T04 — all 6 phases / 31 tasks landed)
+
+**Date:** 2026-05-20
+**Theme:** Speed-programme final task P5-T04 — CONST-048 coverage ledger, release-gate sweep, and programme close-out. Closes **HXC-006** (HelixCode Speed Programme, Feature). Operator mandate 2026-05-20: make HelixCode + owned-submodule code 3-5× faster than competitor AI CLI agents without breaking any feature or weakening anti-bluff posture.
+
+> Verbatim 2026-05-19 operator mandate (preserved per CONST-049 §11.4.17): *"all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product!"*
+
+### Work performed (P5-T04)
+
+1. **CONST-048 coverage ledger.** Created `docs/research/speed/05-coverage-ledger.md` (constitution §11.4.44 metadata header) — one row per task P0-T01..P5-T04 (mapped to opportunities O1–O21), each carrying the commit SHA, the captured before→after measurement, and the six CONST-048 invariants (`[AB][WC][MD][NB][DS][TF]`). Roll-up: **29 PASS + 2 PARTIAL + 0 DEFERRED** across all 31 tasks.
+
+2. **Release-gate sweep.** `scripts/audit-const046-hardcoded-content.sh` ran exit 0 (speed work added no user-facing strings — no new hardcoded content). `scripts/verify-governance-cascade.sh` reported 2 failures = the already-tracked **HXC-008** pre-existing drift (stale `Models` path + `helix_qa/CONSTITUTION.md` missing CONST-047..057), NOT speed-programme regressions. Anti-bluff smoke `grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd` (prod, non-`_test.go`) = clean. `make verify-compile` not re-run (P5-T04 is docs-only; compile state unchanged from `98315a14`).
+
+3. **Two deferred findings filed** per §11.4.15/16: **HXC-011** (Bug — helix_qa runner emits hollow sub-µs `PASSED` metadata rows for desktop-platform bank cases without executing them — a §11.4 PASS-bluff in the QA runner) and **HXC-012** (Bug — data race in `helix_code/internal/llm/load_balancer.go` stat-collector goroutine under full-package `-race`). Both pre-existing; surfaced during the speed programme; reported honestly.
+
+4. **HXC-006 closed.** All 31 tasks genuinely landed → HXC-006 updated to `Implemented (→ Fixed.md)` per CONST-057/§11.4.33 and migrated to `docs/Fixed.md` per §11.4.19. Issues_Summary.md + Fixed_Summary.md regenerated; HTML/PDF exports refreshed.
+
+### Speed-programme outcome
+
+All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM & startup wins), P2 (context-build speed), P3 (interactive & agent-loop levers), P4 (profile-gated tuning), P5 (dev-experience + submodule cascade + close-out). Headline measured wins (each with pasted in-session evidence per CONST-035): lazy Ollama discovery 67µs→2.7ns, lazy CLI startup ~8.85×, cache pre-warm ~7.6×, regexp hoist ~7.4×, repo-map cache ~10.6× warm, parallel search ~4.39×, incremental tree-sitter ~21×, small-model routing ~5.87×, diff edits 94-99% token cut, fast-apply ~516×, tool parallelism ~5.99×, PGO −46% CPU-bound.
+
+**Honest PARTIALs (no green PASS claimed):** P5-T01 build/test parallelism tuning is landed and correct but the suite-wall-time before/after delta was not captured as a pasted benchmark; P5-T02 is a partial single-provider `internal/llm` split (Cerebras extracted to `internal/llm/providers/cerebras/`) — a full 18-provider extraction is infeasible without an import cycle.
+
+### State
+
+- `docs/research/speed/05-coverage-ledger.md` committed (+ HTML/PDF exports).
+- HXC-006 closed in `docs/Issues.md` (migration tombstone) → full record in `docs/Fixed.md`.
+- HXC-011 + HXC-012 filed `Queued` in `docs/Issues.md`.
+- Issues_Summary.md / Fixed_Summary.md regenerated; tracker exports refreshed.
+
+### Next
+
+- HXC-011 (helix_qa desktop-platform hollow-PASS) and HXC-012 (load_balancer.go race) are open for a future remediation round.
+- The speed programme is complete; no further speed tasks queued.
 

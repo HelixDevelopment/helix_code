@@ -206,7 +206,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 <tr>
 <td>Feature</td>
-<td>66</td>
+<td>67</td>
 <td><code>Implemented (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,19 +216,35 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 89 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 90 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 396 added HXV-003
-(LLMsVerifier <code>ProviderAdapterForBenchmark.Complete</code>
-CONST-050(A) production mock-bluff resolved — WIRE-not-delete decision:
-the adapter is live code wired by
-<code>BenchmarkSystem.Initialize</code>, so honest deletion was not
-applicable; the <code>provider</code> field was retyped from an unused
-<code>interface{}</code> to the real <code>benchmark.LLMProvider</code>
-interface, <code>Complete</code> now dispatches to
-<code>a.provider.Complete</code> returning genuine response text / token
-count / error, and an honest <code>ErrProviderAdapterNotWired</code>
-sentinel is returned when no real provider is wired — the hardcoded
+<code>docs/improvements/PROGRESS.md</code>). Round 400 added HXC-006
+(HelixCode Speed Programme — all 6 phases / 31 tasks landed making
+HelixCode 3-5× faster than competitor AI CLI agents; CONST-048 coverage
+ledger <code>docs/research/speed/05-coverage-ledger.md</code> = 29 PASS
++ 2 honestly-bounded PARTIAL [P5-T01 build/test parallelism tuning
+landed but suite-wall-time delta not captured as a pasted benchmark;
+P5-T02 partial single-provider <code>internal/llm</code> split —
+Cerebras extracted, full 18-provider split infeasible without an import
+cycle] + 0 DEFERRED; headline measured wins P1-T02 lazy Ollama
+67µs→2.7ns / P1-T03 lazy CLI startup ~8.85× / P2-T03 repo-map cache
+~10.6× warm / P2-T06 incremental tree-sitter ~21× / P3-T03 fast-apply
+~516× / P4-T01 PGO −46% CPU-bound, every number carrying pasted
+in-session captured evidence per CONST-035; release-gate sweep —
+anti-bluff smoke clean, CONST-046 audit no new hardcoded content,
+governance-cascade verifier’s 2 failures are the pre-existing HXC-008
+drift not speed regressions; two pre-existing defects surfaced filed
+honestly as HXC-011 + HXC-012). Round 396 added HXV-003 (LLMsVerifier
+<code>ProviderAdapterForBenchmark.Complete</code> CONST-050(A)
+production mock-bluff resolved — WIRE-not-delete decision: the adapter
+is live code wired by <code>BenchmarkSystem.Initialize</code>, so honest
+deletion was not applicable; the <code>provider</code> field was retyped
+from an unused <code>interface{}</code> to the real
+<code>benchmark.LLMProvider</code> interface, <code>Complete</code> now
+dispatches to <code>a.provider.Complete</code> returning genuine
+response text / token count / error, and an honest
+<code>ErrProviderAdapterNotWired</code> sentinel is returned when no
+real provider is wired — the hardcoded
 <code>return "Response", 50, nil</code> BLUFF-001 fabrication is
 removed; reproduce-before-fix <code>httptest</code> real-dispatch test
 asserts the adapter actually hits an OpenAI-shim server and returns the
@@ -329,8 +345,12 @@ recorded_mobile, ~40 strings)</td>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>2 open issues: 0 Bug / 1 Task / 1 Feature; 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-20 (round 397 — OPS-001 closed). See
+<p>8 open issues: 3 Bug (HXC-008, HXC-011, HXC-012) / 3 Task (HXC-001,
+HXC-007, HXC-009) + 1 Operator-blocked Task (HXC-010) / 1 Feature
+(HXC-003); 0 BLOCKED.</p>
+<p><em>Last regenerated: 2026-05-20 (round 400 — HXC-006 closed:
+HelixCode Speed Programme — all 6 phases / 31 tasks landed, CONST-048
+coverage ledger committed). Previous round 397 — OPS-001 closed. See
 <code>docs/Fixed.md</code> for full closure entries with commit
 SHAs.</em></p>
 </body>

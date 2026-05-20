@@ -280,14 +280,33 @@ Mirrors HXV-001 round-323's classification approach. The production code (`verif
 
 ---
 
-## HXC-006 — HelixCode Speed Programme (3-5x faster than competitor AI CLI agents)
+## HXC-006 — HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** In progress
+**Status:** Implemented (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Feature
-**Discovered:** 2026-05-20 (operator mandate)
-**Discovered-By:** Operator (verbatim 2026-05-20 mandate)
-**Evidence:** Operator mandate to make all HelixCode + owned-submodule code 3-5x faster than competitor AI CLI agents (aider, cline, plandex, openhands, etc.) without breaking any existing feature or weakening anti-bluff posture. Research corpus complete under `docs/research/speed/` — 5 documents: bottleneck audit, competitive analysis, optimization techniques catalogue, programme overview, and the 6-phase / 31-task phased plan. The phased plan is the authoritative source of the 31 sub-tasks.
-**Resolution path:** Execute the 6-phase / 31-task phased plan from `docs/research/speed/`. Phase 0 (measurement baseline — establish reproducible per-operation latency/throughput baselines before any optimization, so every later speed-up carries before/after captured evidence per CONST-035) execution has started this session. Each subsequent phase MUST land with mutation-verified anti-bluff evidence and zero feature regression. Speed-up claims require pasted before/after measurement output — no self-certified percentages.
+All 6 phases / 31 tasks landed; CONST-048 coverage ledger at `docs/research/speed/05-coverage-ledger.md` (29 PASS + 2 PARTIAL + 0 DEFERRED). Closed by P5-T04 round 400. Section retained as a migration tombstone per §11.4.19 — the authoritative closure narrative is in `docs/Fixed.md`.
+
+---
+
+## HXC-011 — helix_qa runner emits hollow sub-microsecond "PASSED" metadata rows for desktop-platform bank cases
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (speed-programme HelixQA bank registration)
+**Discovered-By:** AI subagent (speed-programme P5-T04 close-out — surfaced during Phase 0–5 HelixQA bank registration)
+**Evidence:** The `helix_qa` autonomous runner emits `PASSED` rows for test-bank cases on the `desktop` platform with sub-microsecond reported durations — durations physically impossible for a case that actually executed (no process spawn, no I/O, no real workload could complete that fast). The runner records the metadata `PASSED` row without ever executing the case. This is a §11.4 PASS-bluff in the QA runner itself (Article XI §11.9 — a PASS that carries no positive runtime evidence). Pre-existing; not introduced by the speed programme — surfaced while registering the speed-programme banks for the desktop platform.
+**Resolution path:** Audit the `helix_qa` runner's per-platform dispatch for the `desktop` target; the case-execution path must actually invoke the bank case and capture real wire evidence (process exit code, stdout/stderr, duration ≥ a plausible floor) before emitting `PASSED`. A case that cannot be executed on the `desktop` platform MUST report `SKIP-OK` with a marker — never a hollow `PASSED`. Closure requires a reproduce-before-fix test that plants a known-failing case and asserts the desktop dispatch reports `FAIL`/`SKIP-OK` (never `PASSED`) when the case did not really run. Cascaded into the `helix_qa` submodule per CONST-047.
+
+---
+
+## HXC-012 — data race in `helix_code/internal/llm/load_balancer.go` background stat-collector goroutine
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (speed-programme `-race` test floors)
+**Discovered-By:** AI subagent (speed-programme Phase 2/3 `-race` runs)
+**Evidence:** A data race in `helix_code/internal/llm/load_balancer.go` — the background stat-collector goroutine reads/writes shared load-balancer statistics without synchronisation, and surfaces under full-package parallel `go test -race` of `internal/llm`. Pre-existing; not introduced by the speed programme — surfaced while running the Phase 2/3 `-race` test floors mandated by the per-task test template (`04-phased-implementation-plan.md` §10). Reported honestly: the speed-programme tasks that touched `internal/llm` (P1-T01..07, P3-T01) ran `-race` clean on the *specific units they changed*; the race is in the pre-existing stat-collector path, which no speed task modified.
+**Resolution path:** Guard the shared stat-collector state with a `sync.Mutex`/`sync.RWMutex` (or convert the counters to `sync/atomic`), per the CLAUDE.md §4.2 manager pattern. Closure requires a reproduce-before-fix test that runs the load balancer under `-race` with concurrent stat collection and FAILS pre-fix, PASSES post-fix. Composes with P4-T04 (profile-gated contention tuning) — the fix should not regress the contention profile.
 
 ---
 
@@ -341,4 +360,4 @@ This is reported HONESTLY per §11.4.3 — the connect-only fallback is never cl
 
 ---
 
-*Last regenerated: 2026-05-20 (round 399 — HXC-010 filed: Kimi/Qwen end-to-end CodeGraph verification operator-blocked on LLM backend quota/credentials). Previous round 398 — HXC-006/007/008/009 filed: speed programme launched, constitution §11.4.68/70-74 cascade, CONST-055 G1 gaps, mirror-divergence reconciliation. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+*Last regenerated: 2026-05-20 (round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`; HXC-011 + HXC-012 filed — two pre-existing defects surfaced during the programme: helix_qa desktop-platform hollow-PASS runner bluff + `internal/llm/load_balancer.go` stat-collector data race). Previous round 399 — HXC-010 filed: Kimi/Qwen end-to-end CodeGraph verification operator-blocked. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

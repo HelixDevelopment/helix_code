@@ -1035,28 +1035,76 @@ honest; only the stale test assertions needed re-keying to certify
 it.</p>
 <hr />
 <h2
-id="hxc-006-helixcode-speed-programme-3-5x-faster-than-competitor-ai-cli-agents">HXC-006
-— HelixCode Speed Programme (3-5x faster than competitor AI CLI
-agents)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Feature
-<strong>Discovered:</strong> 2026-05-20 (operator mandate)
-<strong>Discovered-By:</strong> Operator (verbatim 2026-05-20 mandate)
-<strong>Evidence:</strong> Operator mandate to make all HelixCode +
-owned-submodule code 3-5x faster than competitor AI CLI agents (aider,
-cline, plandex, openhands, etc.) without breaking any existing feature
-or weakening anti-bluff posture. Research corpus complete under
-<code>docs/research/speed/</code> — 5 documents: bottleneck audit,
-competitive analysis, optimization techniques catalogue, programme
-overview, and the 6-phase / 31-task phased plan. The phased plan is the
-authoritative source of the 31 sub-tasks. <strong>Resolution
-path:</strong> Execute the 6-phase / 31-task phased plan from
-<code>docs/research/speed/</code>. Phase 0 (measurement baseline —
-establish reproducible per-operation latency/throughput baselines before
-any optimization, so every later speed-up carries before/after captured
-evidence per CONST-035) execution has started this session. Each
-subsequent phase MUST land with mutation-verified anti-bluff evidence
-and zero feature regression. Speed-up claims require pasted before/after
-measurement output — no self-certified percentages.</p>
+id="hxc-006-helixcode-speed-programme-closed-migrated-to-docsfixed.md">HXC-006
+— HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Feature All 6 phases / 31 tasks landed; CONST-048
+coverage ledger at
+<code>docs/research/speed/05-coverage-ledger.md</code> (29 PASS + 2
+PARTIAL + 0 DEFERRED). Closed by P5-T04 round 400. Section retained as a
+migration tombstone per §11.4.19 — the authoritative closure narrative
+is in <code>docs/Fixed.md</code>.</p>
+<hr />
+<h2
+id="hxc-011-helix_qa-runner-emits-hollow-sub-microsecond-passed-metadata-rows-for-desktop-platform-bank-cases">HXC-011
+— helix_qa runner emits hollow sub-microsecond “PASSED” metadata rows
+for desktop-platform bank cases</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-20 (speed-programme HelixQA bank
+registration) <strong>Discovered-By:</strong> AI subagent
+(speed-programme P5-T04 close-out — surfaced during Phase 0–5 HelixQA
+bank registration) <strong>Evidence:</strong> The <code>helix_qa</code>
+autonomous runner emits <code>PASSED</code> rows for test-bank cases on
+the <code>desktop</code> platform with sub-microsecond reported
+durations — durations physically impossible for a case that actually
+executed (no process spawn, no I/O, no real workload could complete that
+fast). The runner records the metadata <code>PASSED</code> row without
+ever executing the case. This is a §11.4 PASS-bluff in the QA runner
+itself (Article XI §11.9 — a PASS that carries no positive runtime
+evidence). Pre-existing; not introduced by the speed programme —
+surfaced while registering the speed-programme banks for the desktop
+platform. <strong>Resolution path:</strong> Audit the
+<code>helix_qa</code> runner’s per-platform dispatch for the
+<code>desktop</code> target; the case-execution path must actually
+invoke the bank case and capture real wire evidence (process exit code,
+stdout/stderr, duration ≥ a plausible floor) before emitting
+<code>PASSED</code>. A case that cannot be executed on the
+<code>desktop</code> platform MUST report <code>SKIP-OK</code> with a
+marker — never a hollow <code>PASSED</code>. Closure requires a
+reproduce-before-fix test that plants a known-failing case and asserts
+the desktop dispatch reports <code>FAIL</code>/<code>SKIP-OK</code>
+(never <code>PASSED</code>) when the case did not really run. Cascaded
+into the <code>helix_qa</code> submodule per CONST-047.</p>
+<hr />
+<h2
+id="hxc-012-data-race-in-helix_codeinternalllmload_balancer.go-background-stat-collector-goroutine">HXC-012
+— data race in <code>helix_code/internal/llm/load_balancer.go</code>
+background stat-collector goroutine</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-20 (speed-programme
+<code>-race</code> test floors) <strong>Discovered-By:</strong> AI
+subagent (speed-programme Phase 2/3 <code>-race</code> runs)
+<strong>Evidence:</strong> A data race in
+<code>helix_code/internal/llm/load_balancer.go</code> — the background
+stat-collector goroutine reads/writes shared load-balancer statistics
+without synchronisation, and surfaces under full-package parallel
+<code>go test -race</code> of <code>internal/llm</code>. Pre-existing;
+not introduced by the speed programme — surfaced while running the Phase
+2/3 <code>-race</code> test floors mandated by the per-task test
+template (<code>04-phased-implementation-plan.md</code> §10). Reported
+honestly: the speed-programme tasks that touched
+<code>internal/llm</code> (P1-T01..07, P3-T01) ran <code>-race</code>
+clean on the <em>specific units they changed</em>; the race is in the
+pre-existing stat-collector path, which no speed task modified.
+<strong>Resolution path:</strong> Guard the shared stat-collector state
+with a <code>sync.Mutex</code>/<code>sync.RWMutex</code> (or convert the
+counters to <code>sync/atomic</code>), per the CLAUDE.md §4.2 manager
+pattern. Closure requires a reproduce-before-fix test that runs the load
+balancer under <code>-race</code> with concurrent stat collection and
+FAILS pre-fix, PASSES post-fix. Composes with P4-T04 (profile-gated
+contention tuning) — the fix should not regress the contention
+profile.</p>
 <hr />
 <h2
 id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump">HXC-007
@@ -1133,11 +1181,69 @@ upstream once FF-safe. Closes once every divergent owned submodule’s
 mirrors are confirmed at parity. Composes with HXC-007 (the cascade push
 that surfaced the divergence).</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 398 — HXC-006/007/008/009
-filed: speed programme launched, constitution §11.4.68/70-74 cascade,
-CONST-055 G1 gaps, mirror-divergence reconciliation). To update
-Issues_Summary.md mechanically, run
-<code>scripts/generate_issues_summary.sh</code> (TODO: create —
+<h2
+id="hxc-010-end-to-end-kimi-cli-qwen-code-codegraph-verification-blocked-by-llm-backend-quotacredentials">HXC-010
+— End-to-end Kimi CLI + Qwen Code CodeGraph verification blocked by LLM
+backend quota/credentials</h2>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-20 (CodeGraph incorporation Phase C
+close-out — caveat 1 re-attempt) <strong>Discovered-By:</strong> AI
+subagent
+(<code>tools/codegraph/challenges/cg-challenge-05-kimi.sh</code> +
+<code>cg-challenge-07-qwen.sh</code> re-run) <strong>Evidence:</strong>
+Both per-agent Challenges were re-driven non-interactively this session
+against the real CodeGraph MCP server (624,092-node graph of the
+HelixCode repo). Neither agent could be driven to a true end-to-end
+answer because their LLM backends are blocked: - <strong>Kimi
+CLI</strong> — MCP transport works fully: the transcript
+(<code>docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-05-kimi-transcript.txt</code>)
+shows Kimi’s MCP loader connecting to the <code>codegraph</code> server
+and enumerating all 9 <code>codegraph_*</code> tools
+(<code>codegraph_search</code>, <code>codegraph_context</code>,
+<code>codegraph_callers</code>, <code>codegraph_callees</code>,
+<code>codegraph_impact</code>, <code>codegraph_node</code>,
+<code>codegraph_explore</code>, <code>codegraph_status</code>,
+<code>codegraph_files</code>). The agent step then aborts with
+<code>Error code: 429 — You've reached kimi monthly usage limit for this billing cycle.</code>
+Connect-only + tool-discovery PASS captured; end-to-end NOT proven. -
+<strong>Qwen Code</strong> — the transcript
+(<code>docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-07-qwen-transcript.txt</code>)
+shows
+<code>Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.</code>
+Connect-only PASS captured (config registers codegraph MCP server +
+binary reachable); end-to-end NOT proven. This is reported HONESTLY per
+§11.4.3 — the connect-only fallback is never claimed as end-to-end.
+Claude Code, OpenCode, and Crush remain true-end-to-end verified (Phase
+C). <strong>Operator-Block-Details:</strong> WHAT: true end-to-end
+CodeGraph verification for Kimi CLI and Qwen Code (each agent invokes a
+<code>codegraph_*</code> tool and returns real graph data in its
+transcript). WHY: every agent-side self-resolution path is exhausted —
+Kimi’s backend returns HTTP 429 monthly-quota-exceeded, Qwen’s bundled
+OAuth free tier was discontinued upstream on 2026-04-15; neither can be
+unblocked without paid/credentialed access the agent does not possess.
+UNBLOCK CONDITION: operator supplies (a) Kimi API quota/credentials with
+remaining billing-cycle budget AND/OR (b) Qwen Code LLM credentials
+(Coding Plan, OpenRouter, Fireworks AI, or another supported provider
+via <code>qwen /auth</code>); then re-run
+<code>tools/codegraph/challenges/cg-challenge-05-kimi.sh</code> +
+<code>cg-challenge-07-qwen.sh</code>. WHO: operator. <strong>Resolution
+path:</strong> Closes to <code>Completed (→ Fixed.md)</code> once the
+operator supplies the credentials and the two Challenges are re-run
+producing tier-1 PASS (a real <code>.go</code> symbol path in each
+transcript). Until then the connect-only + tool-discovery evidence is
+the strongest honest proof and is captured under
+<code>docs/research/codegraph/evidence/phase-c/</code>.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-20 (round 400 — speed-programme
+close-out: HXC-006 closed <code>Implemented (→ Fixed.md)</code> after
+all 31 tasks landed + CONST-048 coverage ledger
+<code>docs/research/speed/05-coverage-ledger.md</code>; HXC-011 +
+HXC-012 filed — two pre-existing defects surfaced during the programme:
+helix_qa desktop-platform hollow-PASS runner bluff +
+<code>internal/llm/load_balancer.go</code> stat-collector data race).
+Previous round 399 — HXC-010 filed: Kimi/Qwen end-to-end CodeGraph
+verification operator-blocked. To update Issues_Summary.md mechanically,
+run <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>
 </body>

@@ -1426,12 +1426,60 @@ the server (hit-counter == 1) and returns the real server payload
 <code>--- PASS</code>; anti-bluff smoke
 <code>grep -rn "Mock implementation\|simulated\|for now" internal/benchmark/*.go</code>
 (prod only) = clean. |</div>
-<p><em>Last regenerated: 2026-05-20 (round 396 — HXV-003 closure:
-LLMsVerifier <code>ProviderAdapterForBenchmark.Complete</code>
-mock-bluff replaced with real <code>LLMProvider</code> dispatch + honest
-<code>ErrProviderAdapterNotWired</code> sentinel; reproduce-before-fix
-httptest real-dispatch test). Earlier closures (P0-P5 phases) tracked
-via <code>docs/improvements/PROGRESS.md</code> +
+<div class="line-block">2026-05-20 | HXC-006: HelixCode Speed Programme
+— 3-5× faster than competitor AI CLI agents (6-phase / 31-task) |
+Feature | Implemented (→ Fixed.md) | 400 | P5-T04 (this commit) + 30
+prior task commits | Round-400 / CONST-048 / CONST-035. Operator mandate
+2026-05-20: make HelixCode + owned-submodule code 3-5× faster than
+competitor AI CLI agents without breaking any feature or weakening
+anti-bluff posture. <strong>All 6 phases / 31 tasks landed</strong> —
+P0-T01..04 (baseline harness: pprof + benchmarks + competitor wall-clock
++ scenario runner), P1-T01..07 (LLM &amp; startup wins), P2-T01..07
+(context-build speed), P3-T01..05 (interactive &amp; agent-loop levers),
+P4-T01..04 (profile-gated tuning), P5-T01..04 (dev-experience +
+submodule cascade + this close-out). <strong>CONST-048 coverage
+ledger</strong> committed at
+<code>docs/research/speed/05-coverage-ledger.md</code>: <strong>29 PASS
++ 2 honestly-bounded PARTIAL + 0 DEFERRED</strong>. PARTIALs reported
+truthfully — P5-T01 (<code>98315a14</code>) build/test parallelism
+tuning is landed and correct but the suite-wall-time before/after delta
+was not captured as a pasted benchmark; P5-T02 (<code>4ee771d7</code>)
+is a partial single-provider <code>internal/llm</code> split (Cerebras
+extracted to <code>internal/llm/providers/cerebras/</code>) — a full
+18-provider extraction is genuinely infeasible without an import cycle
+(<code>factory.go</code> in <code>package llm</code> constructs every
+provider). <strong>Headline measured wins</strong> (each carries pasted
+in-session evidence per CONST-035, transcribed in the ledger): P1-T01
+HTTP/2 transport ~2×, P1-T02 lazy Ollama discovery 67µs→2.7ns, P1-T03
+lazy CLI startup ~8.85×, P1-T06 cache pre-warm ~7.6×, P2-T02 regexp
+hoist ~7.4×, P2-T03 repo-map cache ~10.6× warm, P2-T04 parallel repo-map
+~1.67×, P2-T05 parallel search ~4.39×, P2-T06 incremental tree-sitter
+~21×, P3-T01 small-model routing ~5.87×, P3-T02 diff edits 94-99% token
+cut, P3-T03 fast-apply ~516×, P3-T04 tool parallelism ~5.99×, P4-T01 PGO
+−46% CPU-bound. <strong>Release-gate sweep (P5-T04):</strong> anti-bluff
+smoke
+<code>grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd</code>
+(prod) = clean; <code>scripts/audit-const046-hardcoded-content.sh</code>
+ran exit 0 (speed work added no user-facing strings, no new hardcoded
+content); <code>scripts/verify-governance-cascade.sh</code> = 2
+pre-existing failures = the already-tracked HXC-008 drift (verifier
+stale <code>Models</code> path + <code>helix_qa/CONSTITUTION.md</code>
+missing CONST-047..057), NOT speed-programme regressions. Two
+pre-existing defects surfaced during the programme filed honestly as
+<strong>HXC-011</strong> (helix_qa runner hollow sub-µs
+<code>PASSED</code> rows on desktop platform — §11.4 PASS-bluff) +
+<strong>HXC-012</strong> (<code>internal/llm/load_balancer.go</code>
+stat-collector data race under <code>-race</code>). No speed task
+introduced a regression, a new bluff pattern, or new hardcoded content.
+|</div>
+<p><em>Last regenerated: 2026-05-20 (round 400 — HXC-006 closure:
+HelixCode Speed Programme — all 6 phases / 31 tasks landed; CONST-048
+coverage ledger <code>docs/research/speed/05-coverage-ledger.md</code> =
+29 PASS + 2 PARTIAL + 0 DEFERRED; release-gate sweep clean of
+speed-attributable failures; HXC-011 + HXC-012 filed for two
+pre-existing defects surfaced during the programme). Previous round 396
+— HXV-003 closure. Earlier closures (P0-P5 phases) tracked via
+<code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>
 </html>

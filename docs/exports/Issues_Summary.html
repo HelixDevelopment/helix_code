@@ -419,13 +419,15 @@ round-396</td>
 <td>HelixCode Speed Programme (3-5x faster than competitor AI CLI
 agents)</td>
 <td>Feature</td>
-<td>In progress</td>
+<td>Implemented (→ Fixed.md) round 400</td>
 <td>2026-05-20</td>
-<td>2026-05-20 operator mandate. Research corpus complete
-(<code>docs/research/speed/</code> — 5 docs: bottleneck audit,
-competitive analysis, optimization techniques, overview, 6-phase/31-task
-phased plan). Phase 0 measurement-baseline execution started; speed-ups
-require before/after captured evidence per CONST-035</td>
+<td>Closed: all 6 phases / 31 tasks landed; CONST-048 coverage ledger
+<code>docs/research/speed/05-coverage-ledger.md</code> = 29 PASS + 2
+PARTIAL (P5-T01 build-tuning wall-time delta not captured; P5-T02
+partial single-provider internal/llm split) + 0 DEFERRED; release-gate
+sweep clean of speed-attributable failures; headline wins lazy-startup
+~8.85×, repo-map cache ~10.6×, incremental tree-sitter ~21×, fast-apply
+~516×, PGO −46%. Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-007</td>
@@ -465,21 +467,61 @@ of several owned submodules. helix_qa reconciled via merge-first commit
 <code>a0397a4</code>; VisionEngine, LLMProvider, others under
 reconciliation per CONST-061/§11.4.71 merge-first, no force-push</td>
 </tr>
+<tr>
+<td>HXC-010</td>
+<td>End-to-end Kimi CLI + Qwen Code CodeGraph verification blocked by
+LLM backend quota/credentials</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>2026-05-20</td>
+<td>Both per-agent Challenges re-driven against the real CodeGraph MCP
+server; neither agent reaches a true end-to-end answer — Kimi backend
+HTTP 429 monthly-quota, Qwen bundled OAuth free tier discontinued
+2026-04-15. Connect-only + tool-discovery PASS captured honestly; closes
+when operator supplies credentials</td>
+</tr>
+<tr>
+<td>HXC-011</td>
+<td>helix_qa runner emits hollow sub-µs “PASSED” metadata rows for
+desktop-platform bank cases</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>2026-05-20</td>
+<td>Filed round 400. Pre-existing §11.4 PASS-bluff in the helix_qa
+runner surfaced during speed-programme HelixQA bank registration —
+desktop-platform dispatch records <code>PASSED</code> with
+physically-impossible sub-µs durations without executing the case</td>
+</tr>
+<tr>
+<td>HXC-012</td>
+<td>data race in <code>helix_code/internal/llm/load_balancer.go</code>
+stat-collector goroutine</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>2026-05-20</td>
+<td>Filed round 400. Pre-existing data race surfaced under full-package
+parallel <code>-race</code> during speed-programme Phase 2/3 test floors
+— background stat-collector reads/writes shared statistics without
+synchronisation</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 6 open (HXC-006/007/008/009 filed round 398;
-HXV-003 closed round 396; OPS-001 closed round 397; HXV-002 closed round
-348; HXQ-002 closed round 344; HXA-002 closed round 342; VEN-002 closed
-round 340; HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005
-closed round 318; PAN-001 closed round 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open
-(HXC-008) | 3 Task open (HXC-001, HXC-007, HXC-009 — all In progress) |
-2 Feature open (HXC-003, HXC-006) | 0 BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 398 — HXC-006/007/008/009
-filed: speed programme, constitution §11.4.68/70-74 cascade, CONST-055
-G1 gaps, mirror-divergence reconciliation). See
-<code>docs/Issues.md</code> for full details + prefix convention table.
-PDF/HTML exports auto-regenerated via
+<p><strong>Counts</strong>: 8 open (HXC-011/012 filed round 400; HXC-006
+closed round 400; HXC-010 filed round 399; HXC-007/008/009 filed round
+398; HXV-003 closed round 396; OPS-001 closed round 397; HXV-002 closed
+round 348; HXQ-002 closed round 344; HXA-002 closed round 342; VEN-002
+closed round 340; HXQ-001 closed round 325; HXV-001 closed round 323;
+HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed round
+200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 3 Bug
+open (HXC-008, HXC-011, HXC-012) | 3 Task open (HXC-001, HXC-007,
+HXC-009) + 1 Operator-blocked (HXC-010) | 1 Feature open (HXC-003) | 0
+BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 400 — speed-programme
+close-out: HXC-006 closed <code>Implemented (→ Fixed.md)</code> after
+all 31 tasks landed + CONST-048 coverage ledger; HXC-011 + HXC-012 filed
+for two pre-existing defects surfaced during the programme). Previous
+round 399 — HXC-010 filed. See <code>docs/Issues.md</code> for full
+details + prefix convention table. PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>
