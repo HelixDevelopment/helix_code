@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -409,7 +410,10 @@ func TestToolCallingProvider_executeToolCalls(t *testing.T) {
 
 		results, err := provider.executeToolCalls(ctx, toolCalls)
 		require.NoError(t, err)
-		assert.Contains(t, results, "test_tool")
+		require.Len(t, results, 1)
+		assert.Equal(t, "test_tool", results[0].ToolName)
+		assert.Equal(t, "1", results[0].CallID)
+		assert.Equal(t, "executed: test_tool", results[0].Result)
 	})
 
 	t.Run("HandlesUnregisteredTool", func(t *testing.T) {
@@ -430,7 +434,9 @@ func TestToolCallingProvider_executeToolCalls(t *testing.T) {
 
 		results, err := provider.executeToolCalls(ctx, toolCalls)
 		require.NoError(t, err)
-		assert.Contains(t, results["unknown_tool"].(string), "Tool not found")
+		require.Len(t, results, 1)
+		assert.Equal(t, "unknown_tool", results[0].ToolName)
+		assert.Contains(t, results[0].Result.(string), "Tool not found")
 	})
 }
 
@@ -438,9 +444,9 @@ func TestToolCallingProvider_buildFinalPrompt(t *testing.T) {
 	mockBase := &MockProvider{}
 	provider := NewToolCallingProvider(mockBase)
 
-	results := map[string]*persistence.PersistedResult{
-		"calculator": {Output: "4", ToolName: "calculator"},
-		"search":     {Output: "Found information", ToolName: "search"},
+	results := []persistedToolResult{
+		{callID: "c1", persisted: &persistence.PersistedResult{Output: "4", ToolName: "calculator"}},
+		{callID: "c2", persisted: &persistence.PersistedResult{Output: "Found information", ToolName: "search"}},
 	}
 
 	prompt := provider.buildFinalPrompt("What is 2+2?", "Let me calculate", results)
@@ -449,6 +455,10 @@ func TestToolCallingProvider_buildFinalPrompt(t *testing.T) {
 	assert.Contains(t, prompt, "Let me calculate")
 	assert.Contains(t, prompt, "calculator")
 	assert.Contains(t, prompt, "4")
+	// P3-T04 follow-up: results render in the LLM-requested order — calculator
+	// (call c1) before search (call c2).
+	assert.Less(t, strings.Index(prompt, "calculator"), strings.Index(prompt, "search"),
+		"tool results must render in request order, not random map order")
 }
 
 func TestToolGenerationRequest_Struct(t *testing.T) {

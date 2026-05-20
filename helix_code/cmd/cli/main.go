@@ -25,16 +25,18 @@ import (
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
-	"dev.helix.code/internal/hooks"
-	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/continua"
-	"dev.helix.code/internal/mcp"
+	"dev.helix.code/internal/hooks"
 	"dev.helix.code/internal/kilocode"
+	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	taskplanner "dev.helix.code/internal/planner"
+	"dev.helix.code/internal/plantree"
 	"dev.helix.code/internal/pprofutil"
-	"dev.helix.code/internal/roocode"
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
+	"dev.helix.code/internal/roocode"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/telemetry"
@@ -44,8 +46,6 @@ import (
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
-	"dev.helix.code/internal/plantree"
-	taskplanner "dev.helix.code/internal/planner"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
 	"dev.helix.code/internal/tools/smartedit"
@@ -225,9 +225,9 @@ type CLI struct {
 	toolRegistry       *tools.ToolRegistry
 	commandRegistry    *commands.Registry
 	mcpManager         *mcp.Manager
-	browserManager     *browser.BrowserManager        // F23: cline-style single-session browser façade
-	memoryRegistry     *projectmemory.MemoryRegistry  // F24: codex-style project memory + hot-reload
-	hooksLoaded        int                            // count of hooks loaded at startup (for diagnostics)
+	browserManager     *browser.BrowserManager       // F23: cline-style single-session browser façade
+	memoryRegistry     *projectmemory.MemoryRegistry // F24: codex-style project memory + hot-reload
+	hooksLoaded        int                           // count of hooks loaded at startup (for diagnostics)
 
 	// --- Speed programme P1-T03: lazy CLI startup (R1 B01/B13/B14/B18) ---
 	//
@@ -337,7 +337,7 @@ func NewCLI() *CLI {
 	// deferred to first real use (GetModels/GetHealth), so every CLI
 	// start (including `--help`) is freed of one synchronous Ollama call.
 	llmProvider, _ := llm.NewOllamaProvider(llm.OllamaConfig{
-		DefaultModel: "llama3.2",         // Use Ollama's model name
+		DefaultModel: "llama3.2",               // Use Ollama's model name
 		BaseURL:      "http://localhost:11434", // Ollama default port
 	})
 
@@ -1463,7 +1463,7 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 	return nil
 }
 
-	// handleGenerate performs LLM generation
+// handleGenerate performs LLM generation
 func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
 	// ANTI-BLUFF: MUST use real LLM provider, not simulation
 	if c.llmProvider == nil {
@@ -2398,7 +2398,6 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 }
-
 
 // QA command handlers
 

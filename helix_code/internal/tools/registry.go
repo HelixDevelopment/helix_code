@@ -10,6 +10,7 @@ import (
 	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/autocommit"
 	"dev.helix.code/internal/hooks"
+	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools/browser"
@@ -1259,6 +1260,64 @@ func (r *ToolRegistry) ExecuteBatch(ctx context.Context, reqs []ToolCallRequest,
 	}
 
 	return results
+}
+
+// ExecuteToolBatch is the P3-T04 bridging method that makes *ToolRegistry
+// satisfy the llm.BatchToolExecutor interface — the seam that wires the
+// parallel tool-dispatch facility into the live internal/llm tool-execution
+// path (ToolCallingProvider.executeToolCalls).
+//
+// It adapts the LLM-layer call shape ([]llm.ToolCall) to the lower-level
+// ExecuteBatch primitive ([]ToolCallRequest), dispatches the turn — independent
+// calls concurrently, conflicting / ordering-dependent calls serially in
+// request order — and adapts the results back to []llm.ToolCallResult in the
+// SAME order as the input slice.
+//
+// Cycle note: internal/llm CANNOT import internal/tools (internal/tools already
+// transitively imports internal/llm). The dependency is therefore inverted:
+// internal/llm DEFINES the BatchToolExecutor interface, and internal/tools — a
+// downstream package that may import internal/llm — provides this satisfying
+// method. internal/llm discovers the capability through a runtime type
+// assertion on the ToolExecutor it was handed.
+//
+// maxConcurrency <= 0 selects defaultBatchConcurrency (10).
+//
+// GUARANTEE (inherited from ExecuteBatch): the returned slice has one entry per
+// input call, in input (LLM-requested) order, regardless of completion order;
+// the turn outcome is identical to fully serial execution.
+func (r *ToolRegistry) ExecuteToolBatch(ctx context.Context, calls []llm.ToolCall, maxConcurrency int) []llm.ToolCallResult {
+	out := make([]llm.ToolCallResult, len(calls))
+	if len(calls) == 0 {
+		return out
+	}
+
+	reqs := make([]ToolCallRequest, len(calls))
+	for i, c := range calls {
+		reqs[i] = ToolCallRequest{
+			ID:     c.ID,
+			Name:   c.Function.Name,
+			Params: c.Function.Arguments,
+		}
+	}
+
+	batch := r.ExecuteBatch(ctx, reqs, maxConcurrency)
+	for i, b := range batch {
+		entry := llm.ToolCallResult{
+			CallID:      b.ID,
+			ToolName:    b.Name,
+			RanParallel: b.RanParallel,
+		}
+		// Normalise an execution error into the same informative-string shape
+		// the serial path in ToolCallingProvider.executeToolCalls produces, so
+		// the final prompt renders identically regardless of dispatch path.
+		if b.Err != nil {
+			entry.Result = fmt.Sprintf("Tool error: %v", b.Err)
+		} else {
+			entry.Result = b.Result
+		}
+		out[i] = entry
+	}
+	return out
 }
 
 // Close closes the registry and releases all resources

@@ -60,6 +60,47 @@ type ToolExecutor interface {
 	Execute(ctx context.Context, name string, params map[string]interface{}) (interface{}, error)
 }
 
+// ToolCallResult is one tool call's outcome inside a dispatched LLM turn. The
+// slice returned by the ordered execution path has exactly one entry per
+// requested call, in the SAME order as the input []ToolCall (the LLM-requested
+// order) — never completion order, never collapsed by tool name. CallID carries
+// the LLM-assigned tool-call ID so callers can correlate two calls to the same
+// tool inside one turn (which a name-keyed map would silently merge).
+type ToolCallResult struct {
+	// CallID is the LLM-assigned tool-call ID (e.g. Anthropic tool_use id).
+	CallID string
+	// ToolName is the dispatched tool name.
+	ToolName string
+	// Result is the tool's return value (an informative string on error or
+	// when the tool is not registered).
+	Result interface{}
+	// RanParallel is true when the call ran in the concurrent wave. Diagnostic
+	// only — surfaced as anti-bluff evidence that real parallelism happened.
+	RanParallel bool
+}
+
+// BatchToolExecutor is an OPTIONAL extension a ToolExecutor may also implement
+// to dispatch a whole LLM turn through the P3-T04 parallel tool-dispatch
+// facility: independent (read-only / side-effect-free / non-conflicting) calls
+// run concurrently through a bounded worker pool, while conflicting or
+// ordering-dependent calls run serially in request order. Results are assembled
+// back in the LLM-requested order, so the turn outcome is identical to fully
+// serial execution.
+//
+// This interface is consumer-defined in internal/llm (rather than imported from
+// internal/tools) deliberately: internal/tools transitively imports internal/llm
+// — a direct internal/llm → internal/tools import would be an import cycle. The
+// concrete tools.ToolRegistry satisfies BatchToolExecutor via its
+// ExecuteToolBatch bridging method, which adapts to the lower-level
+// tools.ToolRegistry.ExecuteBatch primitive.
+//
+// maxConcurrency <= 0 selects the registry default (10). The returned slice has
+// one ToolCallResult per input call, in input (request) order.
+type BatchToolExecutor interface {
+	ToolExecutor
+	ExecuteToolBatch(ctx context.Context, calls []ToolCall, maxConcurrency int) []ToolCallResult
+}
+
 // ToolCallingProvider implements EnhancedLLMProvider with tool calling support
 type ToolCallingProvider struct {
 	baseProvider       Provider
@@ -88,23 +129,35 @@ func (p *ToolCallingProvider) SetPersistenceManager(m *persistence.Manager) {
 	p.persistenceManager = m
 }
 
-// persistResults wraps each tool result through MaybePersist. Non-string
-// results are stringified via fmt.Sprintf("%v", v) before the size check.
-func (p *ToolCallingProvider) persistResults(raw map[string]interface{}) map[string]*persistence.PersistedResult {
-	out := make(map[string]*persistence.PersistedResult, len(raw))
-	for toolName, val := range raw {
+// persistedToolResult pairs a PersistedResult with its tool-call ID so the
+// final-prompt builder can render results in the LLM-requested order. Keying by
+// tool name alone (the pre-P3-T04 behaviour) silently merged two calls to the
+// same tool in one turn and rendered results in random Go-map-iteration order —
+// both correctness defects that this ID-keyed slice fixes.
+type persistedToolResult struct {
+	callID    string
+	persisted *persistence.PersistedResult
+}
+
+// persistResults wraps each tool result through MaybePersist, PRESERVING the
+// LLM-requested call order. Non-string results are stringified via
+// fmt.Sprintf("%v", v) before the size check. The output slice has one entry
+// per input ToolCallResult, in the same order — never collapsed by tool name.
+func (p *ToolCallingProvider) persistResults(raw []ToolCallResult) []persistedToolResult {
+	out := make([]persistedToolResult, 0, len(raw))
+	for _, r := range raw {
 		var s string
-		switch v := val.(type) {
+		switch v := r.Result.(type) {
 		case string:
 			s = v
 		default:
 			s = fmt.Sprintf("%v", v)
 		}
-		res, err := p.persistenceManager.MaybePersist(toolName, "", s)
+		res, err := p.persistenceManager.MaybePersist(r.ToolName, "", s)
 		if err != nil {
-			res = &persistence.PersistedResult{Output: s, ToolName: toolName}
+			res = &persistence.PersistedResult{Output: s, ToolName: r.ToolName}
 		}
-		out[toolName] = res
+		out = append(out, persistedToolResult{callID: r.CallID, persisted: res})
 	}
 	return out
 }
@@ -140,7 +193,8 @@ func (p *ToolCallingProvider) GenerateWithTools(ctx context.Context, req ToolGen
 			log.Printf("Warning: Some tool calls failed: %v", err)
 		}
 
-		// Generate final response with tool results
+		// Generate final response with tool results — results are kept in the
+		// LLM-requested order through persistResults + buildFinalPrompt.
 		finalPrompt := p.buildFinalPrompt(req.Prompt, resp.Content, p.persistResults(results))
 		genReq.Messages = []Message{{Role: "user", Content: finalPrompt}}
 
@@ -255,7 +309,8 @@ func (p *ToolCallingProvider) StreamWithTools(ctx context.Context, req ToolGener
 				log.Printf("Warning: Some tool calls failed: %v", err)
 			}
 
-			// Generate final response with tool results
+			// Generate final response with tool results — results stay in the
+			// LLM-requested order through persistResults + buildFinalPrompt.
 			finalPrompt := p.buildFinalPrompt(req.Prompt, fullResponse, p.persistResults(results))
 
 			// Stream final response
@@ -440,24 +495,58 @@ func (p *ToolCallingProvider) extractToolCallsAndReasoning(text string) ([]ToolC
 	return toolCalls, strings.TrimSpace(reasoning)
 }
 
-func (p *ToolCallingProvider) executeToolCalls(ctx context.Context, toolCalls []ToolCall) (map[string]interface{}, error) {
-	results := make(map[string]interface{})
-
-	for _, toolCall := range toolCalls {
-		_, exists := p.tools[toolCall.Function.Name]
-		if !exists {
-			results[toolCall.Function.Name] = fmt.Sprintf("Tool not found: %s", toolCall.Function.Name)
-			continue
+// executeToolCalls runs every tool call requested in a single LLM turn and
+// returns an ORDERED slice with exactly one ToolCallResult per input call, in
+// the LLM-requested order.
+//
+// P3-T04 follow-up — the live parallel-dispatch path. When the configured
+// ToolExecutor also implements BatchToolExecutor (the concrete
+// tools.ToolRegistry does), the whole turn is routed through ExecuteToolBatch:
+// independent (read-only / side-effect-free / non-conflicting) calls run
+// concurrently through a bounded worker pool, conflicting / ordering-dependent
+// calls run serially in request order, and results are assembled back in
+// request order — identical outcome to fully serial execution, only faster.
+//
+// When the executor does NOT implement BatchToolExecutor (or none is wired) the
+// function degrades to the serial path below, which is byte-for-byte equivalent
+// to the pre-P3-T04 behaviour except that it now returns an ordered slice
+// instead of a name-keyed map (the name-keyed map silently merged two calls to
+// the same tool inside one turn — a correctness defect).
+func (p *ToolCallingProvider) executeToolCalls(ctx context.Context, toolCalls []ToolCall) ([]ToolCallResult, error) {
+	// Fast path: the executor supports batch dispatch — route the whole turn
+	// through the P3-T04 parallel facility so independent calls run concurrently.
+	if batcher, ok := p.toolExecutor.(BatchToolExecutor); ok {
+		batch := batcher.ExecuteToolBatch(ctx, toolCalls, 0)
+		results := make([]ToolCallResult, len(batch))
+		for i, b := range batch {
+			results[i] = b
+			// Normalise tool-not-found / tool-error into the same informative
+			// string shape the serial path produces, so downstream prompt
+			// rendering is identical regardless of dispatch path.
+			if _, exists := p.tools[b.ToolName]; !exists && b.Result == nil {
+				results[i].Result = fmt.Sprintf("Tool not found: %s", b.ToolName)
+			}
 		}
-
-		result, err := p.executeToolHandler(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
-		if err != nil {
-			results[toolCall.Function.Name] = fmt.Sprintf("Tool error: %v", err)
-		} else {
-			results[toolCall.Function.Name] = result
-		}
+		return results, nil
 	}
 
+	// Serial path: no batch-capable executor wired — run calls in request order.
+	results := make([]ToolCallResult, 0, len(toolCalls))
+	for _, toolCall := range toolCalls {
+		entry := ToolCallResult{CallID: toolCall.ID, ToolName: toolCall.Function.Name}
+		if _, exists := p.tools[toolCall.Function.Name]; !exists {
+			entry.Result = fmt.Sprintf("Tool not found: %s", toolCall.Function.Name)
+			results = append(results, entry)
+			continue
+		}
+		result, err := p.executeToolHandler(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
+		if err != nil {
+			entry.Result = fmt.Sprintf("Tool error: %v", err)
+		} else {
+			entry.Result = result
+		}
+		results = append(results, entry)
+	}
 	return results, nil
 }
 
@@ -489,14 +578,19 @@ func (p *ToolCallingProvider) executeToolHandler(ctx context.Context, toolName s
 	}, nil
 }
 
-func (p *ToolCallingProvider) buildFinalPrompt(originalPrompt, initialResponse string, toolResults map[string]*persistence.PersistedResult) string {
+// buildFinalPrompt renders the tool-execution results into the final-answer
+// prompt. The toolResults slice is in the LLM-requested call order — each entry
+// is rendered in that order so the LLM sees results positioned exactly as it
+// requested them, even when a turn calls the same tool more than once.
+func (p *ToolCallingProvider) buildFinalPrompt(originalPrompt, initialResponse string, toolResults []persistedToolResult) string {
 	resultsStr := ""
-	for toolName, result := range toolResults {
+	for _, entry := range toolResults {
+		result := entry.persisted
 		if result.WasPersisted {
 			resultsStr += fmt.Sprintf("- %s: [persisted to %s — %d chars. Use Read with that path to fetch full content.]\n",
-				toolName, result.PersistedOutputPath, result.PersistedOutputSize)
+				result.ToolName, result.PersistedOutputPath, result.PersistedOutputSize)
 		} else {
-			resultsStr += fmt.Sprintf("- %s: %v\n", toolName, result.Output)
+			resultsStr += fmt.Sprintf("- %s: %v\n", result.ToolName, result.Output)
 		}
 	}
 

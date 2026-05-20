@@ -62,7 +62,7 @@ func TestPersistResults_ProducesExpectedRenderedString(t *testing.T) {
 	tcp := &ToolCallingProvider{persistenceManager: m}
 
 	big := strings.Repeat("X", persistence.PersistThreshold+1)
-	wrapped := tcp.persistResults(map[string]interface{}{"Bash": big})
+	wrapped := tcp.persistResults([]ToolCallResult{{CallID: "c1", ToolName: "Bash", Result: big}})
 	rendered := tcp.buildFinalPrompt("orig", "init", wrapped)
 
 	assert.Contains(t, rendered, "persisted to")
