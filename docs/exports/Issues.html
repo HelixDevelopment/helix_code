@@ -1047,37 +1047,6 @@ migration tombstone per §11.4.19 — the authoritative closure narrative
 is in <code>docs/Fixed.md</code>.</p>
 <hr />
 <h2
-id="hxc-011-helix_qa-runner-emits-hollow-sub-microsecond-passed-metadata-rows-for-desktop-platform-bank-cases">HXC-011
-— helix_qa runner emits hollow sub-microsecond “PASSED” metadata rows
-for desktop-platform bank cases</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-20 (speed-programme HelixQA bank
-registration) <strong>Discovered-By:</strong> AI subagent
-(speed-programme P5-T04 close-out — surfaced during Phase 0–5 HelixQA
-bank registration) <strong>Evidence:</strong> The <code>helix_qa</code>
-autonomous runner emits <code>PASSED</code> rows for test-bank cases on
-the <code>desktop</code> platform with sub-microsecond reported
-durations — durations physically impossible for a case that actually
-executed (no process spawn, no I/O, no real workload could complete that
-fast). The runner records the metadata <code>PASSED</code> row without
-ever executing the case. This is a §11.4 PASS-bluff in the QA runner
-itself (Article XI §11.9 — a PASS that carries no positive runtime
-evidence). Pre-existing; not introduced by the speed programme —
-surfaced while registering the speed-programme banks for the desktop
-platform. <strong>Resolution path:</strong> Audit the
-<code>helix_qa</code> runner’s per-platform dispatch for the
-<code>desktop</code> target; the case-execution path must actually
-invoke the bank case and capture real wire evidence (process exit code,
-stdout/stderr, duration ≥ a plausible floor) before emitting
-<code>PASSED</code>. A case that cannot be executed on the
-<code>desktop</code> platform MUST report <code>SKIP-OK</code> with a
-marker — never a hollow <code>PASSED</code>. Closure requires a
-reproduce-before-fix test that plants a known-failing case and asserts
-the desktop dispatch reports <code>FAIL</code>/<code>SKIP-OK</code>
-(never <code>PASSED</code>) when the case did not really run. Cascaded
-into the <code>helix_qa</code> submodule per CONST-047.</p>
-<hr />
-<h2
 id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump">HXC-007
 — Constitution §11.4.68/70-74 cascade + meta-pointer bump</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Task
@@ -1205,17 +1174,22 @@ transcript). Until then the connect-only + tool-discovery evidence is
 the strongest honest proof and is captured under
 <code>docs/research/codegraph/evidence/phase-c/</code>.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 401 — HXC-012 closed
+<p><em>Last regenerated: 2026-05-20 (round 402 — HXC-011 closed
 <code>Fixed (→ Fixed.md)</code> and migrated to
-<code>docs/Fixed.md</code>: data race in
+<code>docs/Fixed.md</code>: the helix_qa runner’s <code>run</code> path
+on the <code>desktop</code> platform now genuinely executes a bank
+case’s <code>shell:</code> action via <code>os/exec</code> and scores
+PASS/FAIL on the real exit code — no more hollow sub-µs
+<code>PASSED</code> metadata rows; reproduce-before-fix RED→GREEN,
+helix_qa commit <code>6b46df0</code>). Previous round 401 — HXC-012
+closed <code>Fixed (→ Fixed.md)</code>: data race in
 <code>internal/llm/load_balancer.go</code> stat-collector path
 synchronised via reproduce-before-fix <code>-race</code> test, commit
-<code>9d8c1cdc</code>). Previous round 400 — speed-programme close-out:
-HXC-006 closed <code>Implemented (→ Fixed.md)</code> after all 31 tasks
-landed + CONST-048 coverage ledger
-<code>docs/research/speed/05-coverage-ledger.md</code>; HXC-011 +
-HXC-012 filed — two pre-existing defects surfaced during the programme.
-To update Issues_Summary.md mechanically, run
+<code>9d8c1cdc</code>. Round 400 — speed-programme close-out: HXC-006
+closed <code>Implemented (→ Fixed.md)</code> after all 31 tasks landed +
+CONST-048 coverage ledger
+<code>docs/research/speed/05-coverage-ledger.md</code>. To update
+Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>

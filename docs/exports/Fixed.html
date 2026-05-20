@@ -223,6 +223,49 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-20</td>
+<td>HXC-011: helix_qa runner emits hollow sub-microsecond “PASSED” rows
+for desktop-platform bank cases instead of executing the case’s
+<code>action:</code></td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>402</td>
+<td>helix_qa <code>6b46df0</code> + meta pointer bump</td>
+<td>Reproduce-before-fix (Rule 7 / §11.4.43 TDD-fix). Root cause: the
+orchestrator <code>run</code> path’s
+<code>definitionChallenge.Execute</code> unconditionally returned
+<code>Status=Skipped</code> and never shelled out to a bank case’s
+<code>action:</code> — and the generic <code>challenges/pkg/bank</code>
+loader drops each case’s <code>steps</code> array, so executable action
+data never reached the orchestrator. RED (fix reverted):
+<code>TestHXC011_RED_DesktopShellExecutes</code> FAILed — a desktop bank
+case whose <code>shell:</code> action writes a sentinel file ran through
+<code>helixqa run -platform desktop</code> and the sentinel was never
+written (<code>open .../sentinel.txt: no such file or directory</code>);
+<code>TestHXC011_RED_DesktopFailingActionScoresFAIL</code> FAILed — a
+deliberately-failing <code>shell: exit 17</code> case produced 0
+failures (hollow non-FAIL). Fix (all in <code>helix_qa</code>,
+challenges submodule untouched per CONST-051(B)): new
+<code>testbank.ActionTypeShell</code> (<code>shell:</code> host command
+via <code>os/exec</code>); orchestrator
+<code>loadExecutableCases()</code> re-parses banks through
+<code>pkg/testbank</code> (preserves <code>steps</code>) +
+<code>runPlatform</code> builds a per-platform registry of
+<code>definitionChallenge</code> wrappers carrying the executable case +
+target platform; <code>definitionChallenge.Execute</code> on
+<code>desktop</code> runs each <code>shell:</code> step via
+<code>exec.CommandContext</code>, captures real exit code + combined
+output, scores PASS only when every step exits 0 (non-zero → FAIL) —
+cases with no desktop-executable action emit an honest SKIP with
+explicit reason (§11.4.3), never a PASS. GREEN: 3 HXC-011 tests PASS
+(real execution writes the sentinel, failing action scores FAIL,
+executed case carries real wall-clock duration); full
+<code>pkg/...</code> suite 122 ok / 0 FAIL; <code>go build ./...</code>
+clean; <code>go vet</code> clean. codegraph integration bank through the
+fixed runner: 2/2 PASSED with real durations (1.4ms, 13ms — not sub-µs);
+deliberately-failing codegraph case scored 0/1 — FAIL.</td>
+</tr>
+<tr>
+<td>2026-05-20</td>
 <td>HXC-012: data race in
 <code>helix_code/internal/llm/load_balancer.go</code> background
 stat-collector goroutine</td>

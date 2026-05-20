@@ -201,7 +201,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>18</td>
+<td>19</td>
 <td><code>Fixed (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,11 +216,38 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 91 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 92 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 401 added HXC-012
-(data race in <code>helix_code/internal/llm/load_balancer.go</code>
-background stat-collector goroutine resolved via reproduce-before-fix
+<code>docs/improvements/PROGRESS.md</code>). Round 402 added HXC-011
+(helix_qa runner emitted hollow sub-microsecond <code>PASSED</code> rows
+for desktop-platform bank cases instead of executing the case’s
+<code>action:</code> — §11.4 / CONST-035 PASS-bluff in the QA runner
+itself; reproduce-before-fix Rule 7 / §11.4.43 TDD-fix; root cause:
+<code>definitionChallenge.Execute</code> unconditionally returned
+<code>Status=Skipped</code> and never shelled out, and the generic
+<code>challenges/pkg/bank</code> loader drops each case’s
+<code>steps</code> array so executable action data never reached the
+orchestrator; RED-with-fix-reverted captured the bluff — a desktop
+<code>shell:</code> sentinel-write action ran through
+<code>helixqa run -platform desktop</code> and the sentinel was never
+written + a <code>shell: exit 17</code> case produced 0 failures; fix
+all in <code>helix_qa</code> keeping the challenges submodule decoupled
+per CONST-051(B) — new <code>testbank.ActionTypeShell</code> runs a host
+command via <code>os/exec</code>, <code>loadExecutableCases()</code>
+re-parses banks through <code>pkg/testbank</code> which preserves
+<code>steps</code>, <code>runPlatform</code> builds a per-platform
+registry of <code>definitionChallenge</code> wrappers carrying the
+executable case + target platform, and <code>Execute</code> on
+<code>desktop</code> runs each <code>shell:</code> step capturing the
+real exit code + output and scores PASS only when every step exits 0 —
+non-zero scores FAIL, no-executable-action cases emit an honest SKIP
+with explicit reason per §11.4.3; GREEN: 3 HXC-011 tests PASS, full
+<code>pkg/...</code> suite 122 ok / 0 FAIL,
+<code>go build</code>/<code>go vet</code> clean, codegraph bank through
+the fixed runner 2/2 PASSED real durations + failing case 0/1 FAIL;
+helix_qa commit <code>6b46df0</code>). Round 401 added HXC-012 (data
+race in <code>helix_code/internal/llm/load_balancer.go</code> background
+stat-collector goroutine resolved via reproduce-before-fix
 <code>-race</code> test — Rule 7 / §11.4.43 TDD-fix;
 <code>SelectOptimalProvider</code> read <code>lb.currentStrategy</code>
 / <code>lb.strategies</code> on the hot path without holding
@@ -358,9 +385,8 @@ recorded_mobile, ~40 strings)</td>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>7 open issues: 2 Bug (HXC-008, HXC-011) / 3 Task (HXC-001, HXC-007,
-HXC-009) + 1 Operator-blocked Task (HXC-010) / 1 Feature (HXC-003); 0
-BLOCKED.</p>
+<p>6 open issues: 1 Bug (HXC-008) / 3 Task (HXC-001, HXC-007, HXC-009) +
+1 Operator-blocked Task (HXC-010) / 1 Feature (HXC-003); 0 BLOCKED.</p>
 <p><em>Last regenerated: 2026-05-20 (round 401 — HXC-012 closed:
 <code>internal/llm/load_balancer.go</code> stat-collector data race
 synchronised, reproduce-before-fix <code>-race</code> test, commit

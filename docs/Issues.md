@@ -288,17 +288,6 @@ All 6 phases / 31 tasks landed; CONST-048 coverage ledger at `docs/research/spee
 
 ---
 
-## HXC-011 — helix_qa runner emits hollow sub-microsecond "PASSED" metadata rows for desktop-platform bank cases
-
-**Status:** Queued
-**Type:** Bug
-**Discovered:** 2026-05-20 (speed-programme HelixQA bank registration)
-**Discovered-By:** AI subagent (speed-programme P5-T04 close-out — surfaced during Phase 0–5 HelixQA bank registration)
-**Evidence:** The `helix_qa` autonomous runner emits `PASSED` rows for test-bank cases on the `desktop` platform with sub-microsecond reported durations — durations physically impossible for a case that actually executed (no process spawn, no I/O, no real workload could complete that fast). The runner records the metadata `PASSED` row without ever executing the case. This is a §11.4 PASS-bluff in the QA runner itself (Article XI §11.9 — a PASS that carries no positive runtime evidence). Pre-existing; not introduced by the speed programme — surfaced while registering the speed-programme banks for the desktop platform.
-**Resolution path:** Audit the `helix_qa` runner's per-platform dispatch for the `desktop` target; the case-execution path must actually invoke the bank case and capture real wire evidence (process exit code, stdout/stderr, duration ≥ a plausible floor) before emitting `PASSED`. A case that cannot be executed on the `desktop` platform MUST report `SKIP-OK` with a marker — never a hollow `PASSED`. Closure requires a reproduce-before-fix test that plants a known-failing case and asserts the desktop dispatch reports `FAIL`/`SKIP-OK` (never `PASSED`) when the case did not really run. Cascaded into the `helix_qa` submodule per CONST-047.
-
----
-
 ## HXC-007 — Constitution §11.4.68/70-74 cascade + meta-pointer bump
 
 **Status:** In progress
@@ -349,4 +338,4 @@ This is reported HONESTLY per §11.4.3 — the connect-only fallback is never cl
 
 ---
 
-*Last regenerated: 2026-05-20 (round 401 — HXC-012 closed `Fixed (→ Fixed.md)` and migrated to `docs/Fixed.md`: data race in `internal/llm/load_balancer.go` stat-collector path synchronised via reproduce-before-fix `-race` test, commit `9d8c1cdc`). Previous round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`; HXC-011 + HXC-012 filed — two pre-existing defects surfaced during the programme. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+*Last regenerated: 2026-05-20 (round 402 — HXC-011 closed `Fixed (→ Fixed.md)` and migrated to `docs/Fixed.md`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec` and scores PASS/FAIL on the real exit code — no more hollow sub-µs `PASSED` metadata rows; reproduce-before-fix RED→GREEN, helix_qa commit `6b46df0`). Previous round 401 — HXC-012 closed `Fixed (→ Fixed.md)`: data race in `internal/llm/load_balancer.go` stat-collector path synchronised via reproduce-before-fix `-race` test, commit `9d8c1cdc`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

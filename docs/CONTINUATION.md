@@ -1096,6 +1096,6 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 
 ### Next
 
-- HXC-011 (helix_qa desktop-platform hollow-PASS) and HXC-012 (load_balancer.go race) are open for a future remediation round.
+- HXC-011 (helix_qa desktop-platform hollow-PASS) closed round 402 — `Fixed (→ Fixed.md)`: the runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec` and scores PASS/FAIL on the real exit code (reproduce-before-fix RED→GREEN; helix_qa commit `6b46df0`, meta pointer bumped). HXC-012 (load_balancer.go race) closed round 401. Both pre-existing speed-programme findings now resolved.
 - The speed programme is complete; no further speed tasks queued.
 
