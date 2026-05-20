@@ -204,7 +204,7 @@ replace digital.vasic.challenges => ../challenges
 
 replace digital.vasic.security => ../security
 
-replace digital.vasic.debate => ../dependencies/HelixDevelopment/DebateOrchestrator
+replace digital.vasic.debate => ../dependencies/HelixDevelopment/debate_orchestrator
 
 replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/HelixSpecifier
 

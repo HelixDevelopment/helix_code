@@ -388,6 +388,6 @@
 [submodule "dependencies/vasic-digital/TOON"]
 	path = dependencies/vasic-digital/TOON
 	url = git@github.com:vasic-digital/TOON.git
-[submodule "dependencies/HelixDevelopment/DebateOrchestrator"]
-	path = dependencies/HelixDevelopment/DebateOrchestrator
+[submodule "dependencies/HelixDevelopment/debate_orchestrator"]
+	path = dependencies/HelixDevelopment/debate_orchestrator
 	url = git@github.com:HelixDevelopment/DebateOrchestrator.git

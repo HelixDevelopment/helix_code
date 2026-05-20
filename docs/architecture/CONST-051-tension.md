@@ -17,7 +17,7 @@ Task #274 (DebateOrchestrator) — the long-blocked sibling of this
 tension — was resolved in the same close-out by reconstruction from
 import surface; the new repo at
 `github.com/HelixDevelopment/DebateOrchestrator` is added as a
-submodule at `dependencies/HelixDevelopment/DebateOrchestrator`.
+submodule at `dependencies/HelixDevelopment/debate_orchestrator`.
 
 **Historical analysis preserved below for posterity.** Original
 "operator decision required" section retained verbatim so the
