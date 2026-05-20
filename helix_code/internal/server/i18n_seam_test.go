@@ -9,6 +9,9 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -112,5 +115,82 @@ func TestTr_TranslatorErrorFallsBackToID(t *testing.T) {
 
 	if got := tr(context.Background(), id, nil); got != id {
 		t.Fatalf("tr did not fall back to message ID on translator error: got %q", got)
+	}
+}
+
+// round408MessageIDs is the closed set of message IDs introduced by
+// the round-408 §11.4 CONST-046 genuine-UI residual sweep (auth,
+// project, task and worker HTTP-handler response messages). Every ID
+// migrated in handlers.go MUST have a backing bundle entry — a
+// missing entry is a §11.4 PASS-bluff because the real
+// *i18nadapter.Translator would silently echo the raw ID to API
+// consumers.
+var round408MessageIDs = []string{
+	"internal_server_invalid_authorization_header",
+	"internal_server_logged_out_successfully",
+	"internal_server_authorization_header_required",
+	"internal_server_invalid_or_expired_token",
+	"internal_server_failed_create_project_directory",
+	"internal_server_failed_create_project",
+	"internal_server_failed_update_project",
+	"internal_server_failed_delete_project",
+	"internal_server_project_deleted",
+	"internal_server_failed_list_tasks",
+	"internal_server_failed_create_task",
+	"internal_server_invalid_task_status",
+	"internal_server_failed_update_task",
+	"internal_server_task_updated_failed_retrieve",
+	"internal_server_failed_delete_task",
+	"internal_server_task_deleted",
+	"internal_server_failed_list_workers",
+	"internal_server_worker_hostname_too_long",
+	"internal_server_worker_hostname_in_use",
+	"internal_server_failed_register_worker",
+	"internal_server_failed_update_worker",
+	"internal_server_failed_delete_worker",
+	"internal_server_worker_deleted_successfully",
+	"internal_server_heartbeat_received",
+	"internal_server_failed_update_heartbeat",
+}
+
+// TestRound408BundleCoverage is the paired-mutation guard for the
+// round-408 CONST-046 migration: it asserts every message ID newly
+// referenced in handlers.go has a corresponding key in the active
+// English bundle. If a future edit deletes a bundle entry (the bluff
+// this guards against), the real translator would echo the raw ID to
+// every API consumer — this test FAILs and catches it pre-build.
+func TestRound408BundleCoverage(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("i18n", "bundles", "active.en.yaml"))
+	if err != nil {
+		t.Fatalf("read active.en.yaml bundle: %v", err)
+	}
+	bundle := string(raw)
+	for _, id := range round408MessageIDs {
+		if !strings.Contains(bundle, id+":") {
+			t.Errorf("round-408 message ID %q missing from active.en.yaml bundle", id)
+		}
+	}
+}
+
+// TestRound408IDsRouteThroughTranslator proves each round-408 ID is
+// genuinely resolved by a wired Translator — not a no-op. If tr()
+// regressed to echoing IDs, the asserted locale strings below would
+// not appear and this test FAILs.
+func TestRound408IDsRouteThroughTranslator(t *testing.T) {
+	defer SetTranslator(nil)
+
+	resolved := make(map[string]string, len(round408MessageIDs))
+	for i, id := range round408MessageIDs {
+		// Distinct synthetic locale string per ID so a swapped or
+		// dropped mapping is detectable.
+		resolved[id] = "loc-" + id + "-" + string(rune('A'+i%26))
+	}
+	SetTranslator(fakeTranslator{resolved: resolved})
+
+	for _, id := range round408MessageIDs {
+		got := tr(context.Background(), id, nil)
+		if got != resolved[id] {
+			t.Errorf("tr(%q) did not route through wired Translator: got %q, want %q", id, got, resolved[id])
+		}
 	}
 }

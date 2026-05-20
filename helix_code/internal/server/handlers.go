@@ -194,7 +194,7 @@ func (s *Server) logout(c *gin.Context) {
 	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid authorization header",
+			"message": tr(reqCtx(c), "internal_server_invalid_authorization_header", nil),
 		})
 		return
 	}
@@ -210,7 +210,7 @@ func (s *Server) logout(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": "Logged out successfully",
+		"message": tr(reqCtx(c), "internal_server_logged_out_successfully", nil),
 	})
 }
 
@@ -232,7 +232,7 @@ func (s *Server) refreshToken(c *gin.Context) {
 	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "Authorization header required",
+			"message": tr(reqCtx(c), "internal_server_authorization_header_required", nil),
 		})
 		return
 	}
@@ -240,7 +240,7 @@ func (s *Server) refreshToken(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "Invalid or expired token",
+			"message": tr(reqCtx(c), "internal_server_invalid_or_expired_token", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -333,7 +333,7 @@ func (s *Server) createProject(c *gin.Context) {
 	if err := os.MkdirAll(req.Path, 0755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to create project directory",
+			"message": tr(reqCtx(c), "internal_server_failed_create_project_directory", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -344,7 +344,7 @@ func (s *Server) createProject(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to create project",
+			"message": tr(reqCtx(c), "internal_server_failed_create_project", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -418,7 +418,7 @@ func (s *Server) updateProject(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to update project",
+			"message": tr(reqCtx(c), "internal_server_failed_update_project", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -458,7 +458,7 @@ func (s *Server) deleteProject(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to delete project",
+			"message": tr(reqCtx(c), "internal_server_failed_delete_project", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -466,7 +466,7 @@ func (s *Server) deleteProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": "Project deleted",
+		"message": tr(reqCtx(c), "internal_server_project_deleted", nil),
 	})
 }
 
@@ -485,7 +485,7 @@ func (s *Server) listTasks(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to list tasks",
+			"message": tr(reqCtx(c), "internal_server_failed_list_tasks", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -543,7 +543,7 @@ func (s *Server) createTask(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":  "error",
-				"message": "Failed to create task",
+				"message": tr(reqCtx(c), "internal_server_failed_create_task", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -623,7 +623,7 @@ func (s *Server) updateTask(c *gin.Context) {
 		default:
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",
-				"message": "Invalid status. Use: running, completed, or failed",
+				"message": tr(reqCtx(c), "internal_server_invalid_task_status", nil),
 			})
 			return
 		}
@@ -631,7 +631,7 @@ func (s *Server) updateTask(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":  "error",
-				"message": "Failed to update task",
+				"message": tr(reqCtx(c), "internal_server_failed_update_task", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -642,7 +642,7 @@ func (s *Server) updateTask(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":  "error",
-				"message": "Task updated but failed to retrieve",
+				"message": tr(reqCtx(c), "internal_server_task_updated_failed_retrieve", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -692,7 +692,7 @@ func (s *Server) deleteTask(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to delete task",
+			"message": tr(reqCtx(c), "internal_server_failed_delete_task", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -700,7 +700,7 @@ func (s *Server) deleteTask(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": "Task deleted",
+		"message": tr(reqCtx(c), "internal_server_task_deleted", nil),
 	})
 }
 
@@ -719,7 +719,7 @@ func (s *Server) listWorkers(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to list workers",
+			"message": tr(reqCtx(c), "internal_server_failed_list_workers", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1487,7 +1487,7 @@ func (s *Server) createWorker(c *gin.Context) {
 		if errors.Is(err, worker.ErrWorkerHostnameTooLong) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",
-				"message": "Worker hostname exceeds 255-character limit",
+				"message": tr(reqCtx(c), "internal_server_worker_hostname_too_long", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -1495,14 +1495,14 @@ func (s *Server) createWorker(c *gin.Context) {
 		if errors.Is(err, worker.ErrWorkerHostnameTaken) {
 			c.JSON(http.StatusConflict, gin.H{
 				"status":  "error",
-				"message": "Worker hostname already in use",
+				"message": tr(reqCtx(c), "internal_server_worker_hostname_in_use", nil),
 				"error":   err.Error(),
 			})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to register worker",
+			"message": tr(reqCtx(c), "internal_server_failed_register_worker", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1559,7 +1559,7 @@ func (s *Server) updateWorker(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to update worker",
+			"message": tr(reqCtx(c), "internal_server_failed_update_worker", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1600,7 +1600,7 @@ func (s *Server) deleteWorker(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to delete worker",
+			"message": tr(reqCtx(c), "internal_server_failed_delete_worker", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1608,7 +1608,7 @@ func (s *Server) deleteWorker(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": "Worker deleted successfully",
+		"message": tr(reqCtx(c), "internal_server_worker_deleted_successfully", nil),
 	})
 }
 
@@ -1657,7 +1657,7 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to update heartbeat",
+			"message": tr(reqCtx(c), "internal_server_failed_update_heartbeat", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1665,7 +1665,7 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": "Heartbeat received",
+		"message": tr(reqCtx(c), "internal_server_heartbeat_received", nil),
 	})
 }
 

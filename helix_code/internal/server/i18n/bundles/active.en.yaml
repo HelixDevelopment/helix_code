@@ -84,3 +84,81 @@ internal_server_session_not_found:
 
 internal_server_session_manager_unavailable:
   other: "Session manager not available"
+
+# round-408 §11.4 CONST-046 — genuine-UI residual round-14: auth,
+# project, task and worker HTTP-handler response messages. Each is a
+# JSON-response `"message"` literal observable by every API consumer.
+internal_server_invalid_authorization_header:
+  other: "Invalid authorization header"
+
+internal_server_logged_out_successfully:
+  other: "Logged out successfully"
+
+internal_server_authorization_header_required:
+  other: "Authorization header required"
+
+internal_server_invalid_or_expired_token:
+  other: "Invalid or expired token"
+
+internal_server_failed_create_project_directory:
+  other: "Failed to create project directory"
+
+internal_server_failed_create_project:
+  other: "Failed to create project"
+
+internal_server_failed_update_project:
+  other: "Failed to update project"
+
+internal_server_failed_delete_project:
+  other: "Failed to delete project"
+
+internal_server_project_deleted:
+  other: "Project deleted"
+
+internal_server_failed_list_tasks:
+  other: "Failed to list tasks"
+
+internal_server_failed_create_task:
+  other: "Failed to create task"
+
+internal_server_invalid_task_status:
+  other: "Invalid status. Use: running, completed, or failed"
+
+internal_server_failed_update_task:
+  other: "Failed to update task"
+
+internal_server_task_updated_failed_retrieve:
+  other: "Task updated but failed to retrieve"
+
+internal_server_failed_delete_task:
+  other: "Failed to delete task"
+
+internal_server_task_deleted:
+  other: "Task deleted"
+
+internal_server_failed_list_workers:
+  other: "Failed to list workers"
+
+internal_server_worker_hostname_too_long:
+  other: "Worker hostname exceeds 255-character limit"
+
+internal_server_worker_hostname_in_use:
+  other: "Worker hostname already in use"
+
+internal_server_failed_register_worker:
+  other: "Failed to register worker"
+
+internal_server_failed_update_worker:
+  other: "Failed to update worker"
+
+internal_server_failed_delete_worker:
+  other: "Failed to delete worker"
+
+internal_server_worker_deleted_successfully:
+  other: "Worker deleted successfully"
+
+internal_server_heartbeat_received:
+  other: "Heartbeat received"
+
+internal_server_failed_update_heartbeat:
+  other: "Failed to update heartbeat"
