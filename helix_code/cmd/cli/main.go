@@ -231,7 +231,11 @@ type CLI struct {
 
 // NewCLI creates a new CLI instance
 func NewCLI() *CLI {
-	// Initialize LLM provider from config - use Ollama on port 11434
+	// Initialize LLM provider from config - use Ollama on port 11434.
+	// Speed programme P1-T02: NewOllamaProvider no longer performs a
+	// blocking /api/tags discovery round-trip here — model discovery is
+	// deferred to first real use (GetModels/GetHealth), so every CLI
+	// start (including `--help`) is freed of one synchronous Ollama call.
 	llmProvider, _ := llm.NewOllamaProvider(llm.OllamaConfig{
 		DefaultModel: "llama3.2",         // Use Ollama's model name
 		BaseURL:      "http://localhost:11434", // Ollama default port

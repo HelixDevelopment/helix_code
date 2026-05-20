@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,6 +21,11 @@ type OllamaProvider struct {
 	apiClient *http.Client
 	models    []OllamaModel
 	isRunning bool
+
+	// discoverOnce guards lazy model discovery so the blocking HTTP
+	// round-trip to /api/tags runs at most once, on first real use —
+	// never in the constructor (speed programme P1-T02 / R1 B02).
+	discoverOnce sync.Once
 }
 
 // OllamaConfig holds configuration for Ollama
@@ -95,7 +101,14 @@ func mapOllamaDoneReasonToErr(reason string) error {
 	}
 }
 
-// NewOllamaProvider creates a new Ollama provider
+// NewOllamaProvider creates a new Ollama provider.
+//
+// Speed programme P1-T02 (R1 B02): the constructor performs ZERO network
+// I/O. Model discovery (the blocking GET /api/tags round-trip) is deferred
+// to first real use — see ensureModelsDiscovered — so every CLI start (even
+// `--help`) no longer pays a synchronous Ollama round-trip. Discovery still
+// runs exactly once, on first GetModels/GetHealth/getModelName call, and
+// behaves identically to the previous eager path thereafter.
 func NewOllamaProvider(config OllamaConfig) (*OllamaProvider, error) {
 	provider := &OllamaProvider{
 		config: config,
@@ -105,13 +118,22 @@ func NewOllamaProvider(config OllamaConfig) (*OllamaProvider, error) {
 		isRunning: true,
 	}
 
-	// Discover available models
-	if err := provider.discoverModels(); err != nil {
-		log.Printf("Warning: Failed to discover Ollama models: %v", err)
-	}
-
-	log.Printf("✅ Ollama provider initialized with %d models", len(provider.models))
 	return provider, nil
+}
+
+// ensureModelsDiscovered runs model discovery lazily, at most once, on the
+// first real use of the provider. The blocking HTTP round-trip to /api/tags
+// is paid here instead of in the constructor (speed programme P1-T02). A
+// discovery failure is logged (same posture as the previous eager path) and
+// leaves p.models empty; a subsequent successful call cannot re-run because
+// sync.Once fires only once — discovery is best-effort exactly as before.
+func (p *OllamaProvider) ensureModelsDiscovered() {
+	p.discoverOnce.Do(func() {
+		if err := p.discoverModels(); err != nil {
+			log.Printf("Warning: Failed to discover Ollama models: %v", err)
+		}
+		log.Printf("✅ Ollama provider discovered %d models", len(p.models))
+	})
 }
 
 // GetType returns the provider type
@@ -124,8 +146,11 @@ func (p *OllamaProvider) GetName() string {
 	return "ollama"
 }
 
-// GetModels returns available models
+// GetModels returns available models. Discovery is triggered lazily on the
+// first call (speed programme P1-T02) and the result is reused thereafter.
 func (p *OllamaProvider) GetModels() []ModelInfo {
+	p.ensureModelsDiscovered()
+
 	var modelInfos []ModelInfo
 
 	for _, model := range p.models {
@@ -242,8 +267,12 @@ func (p *OllamaProvider) IsAvailable(ctx context.Context) bool {
 	return resp.StatusCode == http.StatusOK
 }
 
-// GetHealth returns provider health status
+// GetHealth returns provider health status. ModelCount reflects the
+// discovered model list, so discovery is ensured first (speed programme
+// P1-T02) — preserving the pre-change ModelCount semantics.
 func (p *OllamaProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	p.ensureModelsDiscovered()
+
 	if !p.isRunning {
 		return &ProviderHealth{
 			Status:     "unhealthy",
@@ -331,7 +360,10 @@ func (p *OllamaProvider) getModelName(requestedModel string) string {
 		return p.config.DefaultModel
 	}
 
-	// Return first available model
+	// Fall back to the first discovered model — ensure discovery has run
+	// (speed programme P1-T02) so this fallback path still works when no
+	// model was explicitly requested and no DefaultModel is configured.
+	p.ensureModelsDiscovered()
 	if len(p.models) > 0 {
 		return p.models[0].Name
 	}
