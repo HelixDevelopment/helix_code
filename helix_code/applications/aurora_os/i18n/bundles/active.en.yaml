@@ -547,3 +547,73 @@ aurora_os_dialog_system_diagnostics_title:
 
 aurora_os_dialog_security_scan_title:
   other: "Security Scan"
+
+# Round-454 §11.4 anti-bluff sweep (2026-05-20): 24 residual GUI-mode
+# Fyne strings migrated — the dashboard header label, status bar, the
+# initial-state stat-label placeholders, the live-update stat/resource
+# format strings, the activity-log seed text, the generic loading
+# placeholder, the native-service + access-control list-item
+# templates, and the security-status report format string + its
+# Enabled/Disabled/Never/no-scan tokens. These anchor every visible
+# label and dynamically-refreshed readout across the Aurora Dashboard,
+# Aurora System, and Aurora Security tabs of the desktop Fyne client
+# (main.go). Format-string entries carry `%`-verb placeholders the
+# call site binds via fmt.Sprintf after Translator.T resolution.
+# Resolved at runtime via Translator.T (CONST-046 Phase 4).
+
+aurora_os_dashboard_header:
+  other: "HelixCode - Aurora OS Edition"
+
+aurora_os_status_bar_default:
+  other: "Aurora OS | Ready | User: Not logged in | Session: None | Security: Active"
+
+aurora_os_stat_system_initial:
+  other: "CPU: 0.0%\nMemory: 0.0%\nDisk: 0.0%\nNetwork: Active"
+
+aurora_os_stat_worker_initial:
+  other: "Total: 0\nActive: 0\nHealthy: 0"
+
+aurora_os_stat_task_initial:
+  other: "Total: 0\nCompleted: 0\nRunning: 0"
+
+aurora_os_stat_system_fmt:
+  other: "CPU: %.1f%%\nMemory: %.1f%%\nDisk: %.1f%%\nNetwork: Active"
+
+aurora_os_stat_worker_fmt:
+  other: "Total: %d\nActive: %d\nHealthy: %d"
+
+aurora_os_stat_task_fmt:
+  other: "Total: %d\nCompleted: %d\nRunning: %d"
+
+aurora_os_activity_log_seed:
+  other: "Aurora OS integration active\nSystem monitoring enabled\nSecurity protocols initialized\nNative services connected\nPerformance optimization available"
+
+aurora_os_label_loading:
+  other: "Loading..."
+
+aurora_os_resources_fmt:
+  other: "CPU Usage: %.1f%%\nMemory Usage: %.1f%%\nDisk Usage: %.1f%%\n\nGo Runtime:\n  Goroutines: %d\n  Heap Alloc: %.2f MB\n  Sys Memory: %.2f MB\n  GC Cycles: %d"
+
+aurora_os_service_list_template:
+  other: "Service: Status"
+
+aurora_os_service_list_item_fmt:
+  other: "%s: Active"
+
+aurora_os_security_status_fmt:
+  other: "Encryption: %s\nAlgorithm: %s\nAccess Control: Active\nAudit Logging: Enabled\nLast Scan: %s\nScan Result: %s\nAudit Entries: %d"
+
+aurora_os_token_enabled:
+  other: "Enabled"
+
+aurora_os_token_disabled:
+  other: "Disabled"
+
+aurora_os_token_never:
+  other: "Never"
+
+aurora_os_security_no_scan:
+  other: "No scan performed"
+
+aurora_os_access_list_template:
+  other: "Role: permissions"

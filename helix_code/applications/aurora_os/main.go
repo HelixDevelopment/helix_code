@@ -514,7 +514,7 @@ func (auroraApp *AuroraApp) setupUI() {
 	)
 
 	// Create enhanced status bar for Aurora OS
-	auroraApp.statusBar = widget.NewLabel("Aurora OS | Ready | User: Not logged in | Session: None | Security: Active")
+	auroraApp.statusBar = widget.NewLabel(auroraApp.t("aurora_os_status_bar_default"))
 	auroraApp.statusBar.Alignment = fyne.TextAlignCenter
 
 	// Create main layout
@@ -526,14 +526,14 @@ func (auroraApp *AuroraApp) setupUI() {
 // createAuroraDashboardTab creates the Aurora OS specialized dashboard
 func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 	// Header with Aurora OS branding
-	header := widget.NewLabel("HelixCode - Aurora OS Edition")
+	header := widget.NewLabel(auroraApp.t("aurora_os_dashboard_header"))
 	header.Alignment = fyne.TextAlignCenter
 	header.TextStyle = fyne.TextStyle{Bold: true}
 
 	// Aurora OS specific stats with dynamic updates
-	systemStatsLabel := widget.NewLabel("CPU: 0.0%\nMemory: 0.0%\nDisk: 0.0%\nNetwork: Active")
-	workerStatsLabel := widget.NewLabel("Total: 0\nActive: 0\nHealthy: 0")
-	taskStatsLabel := widget.NewLabel("Total: 0\nCompleted: 0\nRunning: 0")
+	systemStatsLabel := widget.NewLabel(auroraApp.t("aurora_os_stat_system_initial"))
+	workerStatsLabel := widget.NewLabel(auroraApp.t("aurora_os_stat_worker_initial"))
+	taskStatsLabel := widget.NewLabel(auroraApp.t("aurora_os_stat_task_initial"))
 
 	systemCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_system"), "", systemStatsLabel)
 	workerCard := widget.NewCard(auroraApp.t("aurora_os_card_workers"), "", workerStatsLabel)
@@ -547,7 +547,7 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 		for range ticker.C {
 			// Update system stats
 			auroraApp.systemMonitor.mu.RLock()
-			systemStatsLabel.SetText(fmt.Sprintf("CPU: %.1f%%\nMemory: %.1f%%\nDisk: %.1f%%\nNetwork: Active",
+			systemStatsLabel.SetText(fmt.Sprintf(auroraApp.t("aurora_os_stat_system_fmt"),
 				auroraApp.systemMonitor.cpuUsage, auroraApp.systemMonitor.memoryUsage, auroraApp.systemMonitor.diskUsage))
 			auroraApp.systemMonitor.mu.RUnlock()
 
@@ -564,13 +564,13 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 						healthy++
 					}
 				}
-				workerStatsLabel.SetText(fmt.Sprintf("Total: %d\nActive: %d\nHealthy: %d", len(workers), active, healthy))
+				workerStatsLabel.SetText(fmt.Sprintf(auroraApp.t("aurora_os_stat_worker_fmt"), len(workers), active, healthy))
 			}
 
 			// Update task stats
 			if auroraApp.taskManager != nil {
 				stats := auroraApp.taskManager.GetStats()
-				taskStatsLabel.SetText(fmt.Sprintf("Total: %d\nCompleted: %d\nRunning: %d",
+				taskStatsLabel.SetText(fmt.Sprintf(auroraApp.t("aurora_os_stat_task_fmt"),
 					stats.TotalTasks, stats.CompletedTasks, stats.RunningTasks))
 			}
 		}
@@ -580,7 +580,7 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 
 	// Aurora OS activity log
 	activityLog := widget.NewMultiLineEntry()
-	activityLog.SetText("Aurora OS integration active\nSystem monitoring enabled\nSecurity protocols initialized\nNative services connected\nPerformance optimization available")
+	activityLog.SetText(auroraApp.t("aurora_os_activity_log_seed"))
 	activityLog.Disable()
 
 	activityCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_activity"), "", activityLog)
@@ -608,7 +608,7 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 // createAuroraSystemTab creates the Aurora OS system monitoring tab
 func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 	// System resources with dynamic updates
-	resourcesLabel := widget.NewLabel("Loading...")
+	resourcesLabel := widget.NewLabel(auroraApp.t("aurora_os_label_loading"))
 	resourcesCard := widget.NewCard(auroraApp.t("aurora_os_card_system_resources"), "", resourcesLabel)
 
 	// Update resources display
@@ -621,7 +621,7 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
 			resourcesLabel.SetText(fmt.Sprintf(
-				"CPU Usage: %.1f%%\nMemory Usage: %.1f%%\nDisk Usage: %.1f%%\n\nGo Runtime:\n  Goroutines: %d\n  Heap Alloc: %.2f MB\n  Sys Memory: %.2f MB\n  GC Cycles: %d",
+				auroraApp.t("aurora_os_resources_fmt"),
 				auroraApp.systemMonitor.cpuUsage, auroraApp.systemMonitor.memoryUsage, auroraApp.systemMonitor.diskUsage,
 				runtime.NumGoroutine(), float64(m.Alloc)/1024/1024, float64(m.Sys)/1024/1024, m.NumGC))
 			auroraApp.systemMonitor.mu.RUnlock()
@@ -632,7 +632,7 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 	servicesList := widget.NewList(
 		func() int { return len(auroraApp.auroraIntegration.nativeServices) },
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Service: Status")
+			return widget.NewLabel(auroraApp.t("aurora_os_service_list_template"))
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 			services := make([]string, 0, len(auroraApp.auroraIntegration.nativeServices))
@@ -640,7 +640,7 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 				services = append(services, service)
 			}
 			if id < len(services) {
-				obj.(*widget.Label).SetText(fmt.Sprintf("%s: Active", services[id]))
+				obj.(*widget.Label).SetText(fmt.Sprintf(auroraApp.t("aurora_os_service_list_item_fmt"), services[id]))
 			}
 		},
 	)
@@ -667,23 +667,23 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 // createAuroraSecurityTab creates the Aurora OS security management tab
 func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 	// Security status with dynamic updates
-	statusLabel := widget.NewLabel("Loading...")
+	statusLabel := widget.NewLabel(auroraApp.t("aurora_os_label_loading"))
 	statusCard := widget.NewCard(auroraApp.t("aurora_os_card_security_status"), "", statusLabel)
 
 	// Update status display
 	updateStatus := func() {
 		auroraApp.securityManager.mu.RLock()
-		lastScan := "Never"
+		lastScan := auroraApp.t("aurora_os_token_never")
 		if !auroraApp.securityManager.lastSecurityScan.IsZero() {
 			lastScan = auroraApp.securityManager.lastSecurityScan.Format("2006-01-02 15:04:05")
 		}
 		scanResult := auroraApp.securityManager.securityScanResult
 		if scanResult == "" {
-			scanResult = "No scan performed"
+			scanResult = auroraApp.t("aurora_os_security_no_scan")
 		}
 		statusLabel.SetText(fmt.Sprintf(
-			"Encryption: %s\nAlgorithm: %s\nAccess Control: Active\nAudit Logging: Enabled\nLast Scan: %s\nScan Result: %s\nAudit Entries: %d",
-			map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.securityManager.encryptionEnabled],
+			auroraApp.t("aurora_os_security_status_fmt"),
+			map[bool]string{true: auroraApp.t("aurora_os_token_enabled"), false: auroraApp.t("aurora_os_token_disabled")}[auroraApp.securityManager.encryptionEnabled],
 			auroraApp.securityManager.encryptionAlgo,
 			lastScan, scanResult, len(auroraApp.securityManager.auditLog)))
 		auroraApp.securityManager.mu.RUnlock()
@@ -698,7 +698,7 @@ func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 			return len(auroraApp.securityManager.accessControl)
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Role: permissions")
+			return widget.NewLabel(auroraApp.t("aurora_os_access_list_template"))
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 			auroraApp.securityManager.mu.RLock()
