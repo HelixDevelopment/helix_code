@@ -73,8 +73,10 @@ func newEditCommand(t *testing.T) (*EditCommand, *fakeSmartEditInspector) {
 func TestEditCommand_NameDescription(t *testing.T) {
 	c, _ := newEditCommand(t)
 	assert.Equal(t, "edit", c.Name())
+	// Description/Usage route through the CONST-046 tr() seam; under
+	// the default NoopTranslator they echo the message ID (round-399).
 	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/edit")
+	assert.Contains(t, c.Usage(), "internal_commands_edit_usage")
 	assert.Nil(t, c.Aliases())
 }
 

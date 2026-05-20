@@ -82,12 +82,12 @@ func (c *MemoryCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *MemoryCommand) Description() string {
-	return "Inspect, show, edit, or reload project memory."
+	return tr(context.Background(), "internal_commands_memory_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *MemoryCommand) Usage() string {
-	return "/memory [status|show|edit|reload]"
+	return tr(context.Background(), "internal_commands_memory_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.

@@ -44,11 +44,12 @@ func TestGitAutoCommit_Description_NonEmpty(t *testing.T) {
 }
 
 func TestGitAutoCommit_Usage_HasSubcommands(t *testing.T) {
+	// Usage routes through the CONST-046 tr() seam; under the default
+	// NoopTranslator it echoes the message ID (round-399). The
+	// subcommand-substring contract is enforced by the bundle entry
+	// internal_commands_git_auto_commit_usage in active.en.yaml.
 	u := NewGitAutoCommitCommand(nil).Usage()
-	require.Contains(t, u, "status")
-	require.Contains(t, u, "on")
-	require.Contains(t, u, "off")
-	require.Contains(t, u, "show")
+	require.Contains(t, u, "internal_commands_git_auto_commit_usage")
 }
 
 func TestGitAutoCommit_Status_Default_PrintsState(t *testing.T) {

@@ -61,12 +61,12 @@ func (c *GitAutoCommitCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *GitAutoCommitCommand) Description() string {
-	return "Show or change git auto-commit (per-edit) state."
+	return tr(context.Background(), "internal_commands_git_auto_commit_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *GitAutoCommitCommand) Usage() string {
-	return "/git_auto_commit [status|on|off|show]"
+	return tr(context.Background(), "internal_commands_git_auto_commit_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler. Default

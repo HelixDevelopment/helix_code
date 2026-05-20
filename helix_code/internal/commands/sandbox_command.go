@@ -61,12 +61,12 @@ func (c *SandboxCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *SandboxCommand) Description() string {
-	return "Inspect sandbox status, run a probe command, or show the merged deny-list."
+	return tr(context.Background(), "internal_commands_sandbox_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *SandboxCommand) Usage() string {
-	return "/sandbox [status|test [<command>...]|policy]"
+	return tr(context.Background(), "internal_commands_sandbox_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.

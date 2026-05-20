@@ -42,8 +42,10 @@ func TestMemoryCommand_Aliases_Empty(t *testing.T) {
 
 func TestMemoryCommand_DescriptionAndUsage(t *testing.T) {
 	cmd := NewMemoryCommand(nil)
+	// Description/Usage route through the CONST-046 tr() seam; under
+	// the default NoopTranslator they echo the message ID (round-399).
 	require.NotEmpty(t, cmd.Description())
-	require.Contains(t, cmd.Usage(), "/memory")
+	require.Contains(t, cmd.Usage(), "internal_commands_memory_usage")
 }
 
 func TestMemoryCommand_Status_NoMemory(t *testing.T) {

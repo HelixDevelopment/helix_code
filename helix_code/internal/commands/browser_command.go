@@ -27,11 +27,13 @@ func NewBrowserCommand(mgr *browser.BrowserManager) *BrowserCommand {
 	return &BrowserCommand{mgr: mgr}
 }
 
-func (c *BrowserCommand) Name() string         { return "browser" }
-func (c *BrowserCommand) Aliases() []string    { return []string{} }
-func (c *BrowserCommand) Description() string  { return "Manage the browser session: status / navigate <url> / close" }
+func (c *BrowserCommand) Name() string      { return "browser" }
+func (c *BrowserCommand) Aliases() []string { return []string{} }
+func (c *BrowserCommand) Description() string {
+	return tr(context.Background(), "internal_commands_browser_description", nil)
+}
 func (c *BrowserCommand) Usage() string {
-	return "/browser <status|navigate <url>|close>"
+	return tr(context.Background(), "internal_commands_browser_usage", nil)
 }
 
 func (c *BrowserCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {

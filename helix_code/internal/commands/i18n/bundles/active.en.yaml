@@ -644,3 +644,57 @@ internal_commands_plantree_description:
 
 internal_commands_plantree_usage:
   other: "/plantree [list|show <name>|compact <name>|verify <name>]"
+
+# --- browser_command.go (round-399) ---
+internal_commands_browser_description:
+  other: "Manage the browser session: status / navigate <url> / close"
+
+internal_commands_browser_usage:
+  other: "/browser <status|navigate <url>|close>"
+
+# --- edit_command.go (round-399) ---
+internal_commands_edit_description:
+  other: "Inspect smart-edit status, parse a SEARCH/REPLACE prompt, dry-run the apply, or commit it."
+
+internal_commands_edit_usage:
+  other: "/edit [status|diff <prompt>|dry-run <prompt>|commit <prompt>] (use --from <path> to read prompt from file)"
+
+# --- git_auto_commit_command.go (round-399) ---
+internal_commands_git_auto_commit_description:
+  other: "Show or change git auto-commit (per-edit) state."
+
+internal_commands_git_auto_commit_usage:
+  other: "/git_auto_commit [status|on|off|show]"
+
+# --- memory_command.go (round-399) ---
+internal_commands_memory_description:
+  other: "Inspect, show, edit, or reload project memory."
+
+internal_commands_memory_usage:
+  other: "/memory [status|show|edit|reload]"
+
+# --- sandbox_command.go (round-399) ---
+internal_commands_sandbox_description:
+  other: "Inspect sandbox status, run a probe command, or show the merged deny-list."
+
+internal_commands_sandbox_usage:
+  other: "/sandbox [status|test [<command>...]|policy]"
+
+# --- registry.go (round-399) ---
+internal_commands_registry_command_not_found:
+  other: "Command '{{.Name}}' not found"
+
+internal_commands_registry_help_command:
+  other: "Command: /{{.Name}}"
+
+internal_commands_registry_help_aliases:
+  other: "Aliases: /{{.Aliases}}"
+
+internal_commands_registry_help_description:
+  other: "Description: {{.Description}}"
+
+internal_commands_registry_help_usage:
+  other: "Usage: {{.Usage}}"
+
+internal_commands_registry_available_header:
+  other: "Available Commands:"

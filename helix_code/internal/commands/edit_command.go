@@ -99,12 +99,12 @@ func (c *EditCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *EditCommand) Description() string {
-	return "Inspect smart-edit status, parse a SEARCH/REPLACE prompt, dry-run the apply, or commit it."
+	return tr(context.Background(), "internal_commands_edit_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *EditCommand) Usage() string {
-	return "/edit [status|diff <prompt>|dry-run <prompt>|commit <prompt>] (use --from <path> to read prompt from file)"
+	return tr(context.Background(), "internal_commands_edit_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -123,20 +124,21 @@ func (r *Registry) ListNames() []string {
 
 // GetHelp returns help text for a command
 func (r *Registry) GetHelp(name string) string {
+	ctx := context.Background()
 	cmd, exists := r.Get(name)
 	if !exists {
-		return fmt.Sprintf("Command '%s' not found", name)
+		return tr(ctx, "internal_commands_registry_command_not_found", map[string]any{"Name": name})
 	}
 
 	var help strings.Builder
-	help.WriteString(fmt.Sprintf("Command: /%s\n", cmd.Name()))
+	help.WriteString(tr(ctx, "internal_commands_registry_help_command", map[string]any{"Name": cmd.Name()}) + "\n")
 
 	if len(cmd.Aliases()) > 0 {
-		help.WriteString(fmt.Sprintf("Aliases: /%s\n", strings.Join(cmd.Aliases(), ", /")))
+		help.WriteString(tr(ctx, "internal_commands_registry_help_aliases", map[string]any{"Aliases": strings.Join(cmd.Aliases(), ", /")}) + "\n")
 	}
 
-	help.WriteString(fmt.Sprintf("Description: %s\n", cmd.Description()))
-	help.WriteString(fmt.Sprintf("Usage: %s\n", cmd.Usage()))
+	help.WriteString(tr(ctx, "internal_commands_registry_help_description", map[string]any{"Description": cmd.Description()}) + "\n")
+	help.WriteString(tr(ctx, "internal_commands_registry_help_usage", map[string]any{"Usage": cmd.Usage()}) + "\n")
 
 	return help.String()
 }
@@ -145,8 +147,9 @@ func (r *Registry) GetHelp(name string) string {
 func (r *Registry) GetAllHelp() string {
 	commands := r.List()
 
+	ctx := context.Background()
 	var help strings.Builder
-	help.WriteString("Available Commands:\n\n")
+	help.WriteString(tr(ctx, "internal_commands_registry_available_header", nil) + "\n\n")
 
 	for _, cmd := range commands {
 		help.WriteString(fmt.Sprintf("/%s", cmd.Name()))
