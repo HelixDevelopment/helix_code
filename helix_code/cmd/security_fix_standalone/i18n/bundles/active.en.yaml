@@ -19,6 +19,13 @@
 # per-handler manual-intervention messages, report-template static
 # content) are deferred to a future round to stay under the round
 # size cap.
+#
+# Round-460 §11.4 anti-bluff sweep (2026-05-20): migrated the
+# report-helper verdict strings — the zero-tolerance / production-
+# readiness / security-posture / compliance-status evaluation blocks,
+# the empty-issues placeholder, and the static fix-recommendation
+# lines. These multi-line verdicts are end-user-visible report body
+# content written to zero_tolerance_security_fix_report.txt.
 
 security_fix_standalone_banner_start:
   other: "Starting Zero-Tolerance Security Issue Resolution"
@@ -49,3 +56,57 @@ security_fix_standalone_result_failure_remain:
 
 security_fix_standalone_result_failure_blocked:
   other: "ZERO TOLERANCE POLICY: Production BLOCKED"
+
+security_fix_standalone_report_no_issues:
+  other: "None - No critical security issues found"
+
+security_fix_standalone_zerotol_satisfied:
+  other: "✅ ZERO TOLERANCE POLICY SATISFIED\n   No critical security violations\n   Platform meets enterprise security standards\n   Production deployment APPROVED"
+
+security_fix_standalone_zerotol_violated:
+  other: "❌ ZERO TOLERANCE POLICY VIOLATED\n   {{.Count}} critical security violations remain\n   Production deployment BLOCKED\n   Immediate remediation required"
+
+security_fix_standalone_readiness_ready:
+  other: "🎉 PRODUCTION READY\n   All critical security issues resolved\n   Zero-tolerance policy satisfied\n   Enterprise security requirements met"
+
+security_fix_standalone_readiness_critical:
+  other: "🚨 NOT READY - CRITICAL ISSUES\n   {{.Count}} critical security vulnerabilities present\n   Production deployment PROHIBITED\n   Zero-tolerance policy violated"
+
+security_fix_standalone_readiness_fix_failed:
+  other: "⚠️ NOT READY - FIX ISSUES\n   Some security fixes failed\n   Review and retry fix process"
+
+security_fix_standalone_rec_urgent_failed:
+  other: "URGENT: {{.Count}} security fixes failed - manual intervention required"
+
+security_fix_standalone_rec_address_remaining:
+  other: "IMPORTANT: Address remaining critical security vulnerabilities"
+
+security_fix_standalone_rec_comprehensive_testing:
+  other: "IMPORTANT: Implement comprehensive security testing"
+
+security_fix_standalone_rec_success_resolved:
+  other: "SUCCESS: {{.Count}} security issues automatically resolved"
+
+security_fix_standalone_rec_validate_fixes:
+  other: "SUCCESS: Validate all automated fixes with security testing"
+
+security_fix_standalone_rec_all_resolved:
+  other: "EXCELLENT: All security issues resolved"
+
+security_fix_standalone_rec_proactive_monitoring:
+  other: "EXCELLENT: Continue proactive security monitoring"
+
+security_fix_standalone_posture_strong:
+  other: "STRONG: Zero critical vulnerabilities\n      Enterprise-grade security achieved\n      Continuous monitoring required"
+
+security_fix_standalone_posture_critical:
+  other: "CRITICAL: Security vulnerabilities present\n      Immediate action required\n      Production deployment blocked"
+
+security_fix_standalone_posture_weak:
+  other: "WEAK: Some security fixes failed\n      Additional work needed\n      Security review required"
+
+security_fix_standalone_compliance_compliant:
+  other: "✅ FULLY COMPLIANT\n      Zero-tolerance policy satisfied\n      Enterprise security standards met\n      Audit requirements fulfilled"
+
+security_fix_standalone_compliance_noncompliant:
+  other: "❌ NON-COMPLIANT\n      Zero-tolerance policy violated\n      Security standards not met\n      Audit requirements unmet"

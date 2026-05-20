@@ -540,7 +540,7 @@ COMPLIANCE STATUS:
 // Report helper functions
 func formatCriticalIssues(issues []SecurityIssue) string {
 	if len(issues) == 0 {
-		return "None - No critical security issues found"
+		return tr(context.Background(), "security_fix_standalone_report_no_issues", nil)
 	}
 
 	result := ""
@@ -554,42 +554,45 @@ func formatCriticalIssues(issues []SecurityIssue) string {
 }
 
 func evaluateZeroTolerance(remainingCount int) string {
+	ctx := context.Background()
 	if remainingCount == 0 {
-		return "✅ ZERO TOLERANCE POLICY SATISFIED\n   No critical security violations\n   Platform meets enterprise security standards\n   Production deployment APPROVED"
+		return tr(ctx, "security_fix_standalone_zerotol_satisfied", nil)
 	}
-	return fmt.Sprintf("❌ ZERO TOLERANCE POLICY VIOLATED\n   %d critical security violations remain\n   Production deployment BLOCKED\n   Immediate remediation required", remainingCount)
+	return tr(ctx, "security_fix_standalone_zerotol_violated", map[string]any{"Count": remainingCount})
 }
 
 func evaluateProductionReadiness(success bool, remainingCount int) string {
+	ctx := context.Background()
 	if success && remainingCount == 0 {
-		return "🎉 PRODUCTION READY\n   All critical security issues resolved\n   Zero-tolerance policy satisfied\n   Enterprise security requirements met"
+		return tr(ctx, "security_fix_standalone_readiness_ready", nil)
 	}
 	if remainingCount > 0 {
-		return fmt.Sprintf("🚨 NOT READY - CRITICAL ISSUES\n   %d critical security vulnerabilities present\n   Production deployment PROHIBITED\n   Zero-tolerance policy violated", remainingCount)
+		return tr(ctx, "security_fix_standalone_readiness_critical", map[string]any{"Count": remainingCount})
 	}
-	return "⚠️ NOT READY - FIX ISSUES\n   Some security fixes failed\n   Review and retry fix process"
+	return tr(ctx, "security_fix_standalone_readiness_fix_failed", nil)
 }
 
 func generateFixRecommendations(issues []SecurityIssue, fixedCount, failedCount int) string {
+	ctx := context.Background()
 	var recs []string
 
 	if failedCount > 0 {
-		recs = append(recs, fmt.Sprintf("URGENT: %d security fixes failed - manual intervention required", failedCount))
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_urgent_failed", map[string]any{"Count": failedCount}))
 	}
 
 	if len(issues) > fixedCount {
-		recs = append(recs, "IMPORTANT: Address remaining critical security vulnerabilities")
-		recs = append(recs, "IMPORTANT: Implement comprehensive security testing")
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_address_remaining", nil))
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_comprehensive_testing", nil))
 	}
 
 	if fixedCount > 0 {
-		recs = append(recs, fmt.Sprintf("SUCCESS: %d security issues automatically resolved", fixedCount))
-		recs = append(recs, "SUCCESS: Validate all automated fixes with security testing")
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_success_resolved", map[string]any{"Count": fixedCount}))
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_validate_fixes", nil))
 	}
 
 	if len(recs) == 0 {
-		recs = append(recs, "EXCELLENT: All security issues resolved")
-		recs = append(recs, "EXCELLENT: Continue proactive security monitoring")
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_all_resolved", nil))
+		recs = append(recs, tr(ctx, "security_fix_standalone_rec_proactive_monitoring", nil))
 	}
 
 	result := ""
@@ -600,18 +603,20 @@ func generateFixRecommendations(issues []SecurityIssue, fixedCount, failedCount 
 }
 
 func evaluateSecurityPosture(success bool, remainingCount, totalIssues int) string {
+	ctx := context.Background()
 	if success && remainingCount == 0 {
-		return "STRONG: Zero critical vulnerabilities\n      Enterprise-grade security achieved\n      Continuous monitoring required"
+		return tr(ctx, "security_fix_standalone_posture_strong", nil)
 	}
 	if remainingCount > 0 {
-		return "CRITICAL: Security vulnerabilities present\n      Immediate action required\n      Production deployment blocked"
+		return tr(ctx, "security_fix_standalone_posture_critical", nil)
 	}
-	return "WEAK: Some security fixes failed\n      Additional work needed\n      Security review required"
+	return tr(ctx, "security_fix_standalone_posture_weak", nil)
 }
 
 func evaluateComplianceStatus(success bool, remainingCount int) string {
+	ctx := context.Background()
 	if success && remainingCount == 0 {
-		return "✅ FULLY COMPLIANT\n      Zero-tolerance policy satisfied\n      Enterprise security standards met\n      Audit requirements fulfilled"
+		return tr(ctx, "security_fix_standalone_compliance_compliant", nil)
 	}
-	return "❌ NON-COMPLIANT\n      Zero-tolerance policy violated\n      Security standards not met\n      Audit requirements unmet"
+	return tr(ctx, "security_fix_standalone_compliance_noncompliant", nil)
 }

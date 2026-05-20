@@ -55,11 +55,10 @@ func main() {
 
 	ctx := context.Background()
 
-	// Test-suite names — round-142 CONST-046 migration: 8 of 12
-	// resolved via Translator, 4 residual (API / Container /
-	// Configuration / File System / Logging) deferred to future
-	// round to stay under the size cap. Residual lines remain
-	// detectable by the CONST-046 audit walker until migrated.
+	// Test-suite names — round-142 CONST-046 migration resolved the
+	// first 8; round-460 (2026-05-20) migrated the 4 residuals
+	// (Container / Configuration / File System / Logging). All 12
+	// suite names now resolve via Translator.
 	testSuite := []string{
 		tr(ctx, "security_test_suite_llm_provider", nil),
 		tr(ctx, "security_test_suite_ssh_connection", nil),
@@ -69,10 +68,10 @@ func main() {
 		tr(ctx, "security_test_suite_api", nil),
 		tr(ctx, "security_test_suite_worker_isolation", nil),
 		tr(ctx, "security_test_suite_dependency", nil),
-		"Container Security",
-		"Configuration Security",
-		"File System Security",
-		"Logging Security",
+		tr(ctx, "security_test_suite_container", nil),
+		tr(ctx, "security_test_suite_configuration", nil),
+		tr(ctx, "security_test_suite_file_system", nil),
+		tr(ctx, "security_test_suite_logging", nil),
 	}
 
 	sm := security.NewSecurityManager()
@@ -121,11 +120,11 @@ func main() {
 	}
 
 	fmt.Println()
-	fmt.Println("=== SECURITY TEST RESULTS ===")
-	fmt.Printf("Total tests:   %d\n", len(testSuite))
-	fmt.Printf("Failed tests:  %d\n", len(failedTests))
-	fmt.Printf("Total issues:  %d\n", totalIssues)
-	fmt.Printf("Critical:      %d\n", totalCritical)
+	fmt.Println(tr(ctx, "security_test_results_heading", nil))
+	fmt.Println(tr(ctx, "security_test_results_total_tests", map[string]any{"Count": len(testSuite)}))
+	fmt.Println(tr(ctx, "security_test_results_failed_tests", map[string]any{"Count": len(failedTests)}))
+	fmt.Println(tr(ctx, "security_test_results_total_issues", map[string]any{"Count": totalIssues}))
+	fmt.Println(tr(ctx, "security_test_results_critical", map[string]any{"Count": totalCritical}))
 	fmt.Println()
 
 	if len(failedTests) > 0 {
@@ -142,7 +141,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("All security tests completed")
+	fmt.Println(tr(ctx, "security_test_completed", nil))
 }
 
 func resultSuccess(tests, failed []string) bool {

@@ -99,6 +99,18 @@ func TestTr_AllMigratedMessageIDs(t *testing.T) {
 		"security_test_suite_dependency",
 		"security_test_summary_fail_critical",
 		"security_test_summary_warn_scanners_unavailable",
+		// Round-460 (2026-05-20): residual suite names + results
+		// table + completion line.
+		"security_test_suite_container",
+		"security_test_suite_configuration",
+		"security_test_suite_file_system",
+		"security_test_suite_logging",
+		"security_test_results_heading",
+		"security_test_results_total_tests",
+		"security_test_results_failed_tests",
+		"security_test_results_total_issues",
+		"security_test_results_critical",
+		"security_test_completed",
 	}
 
 	ctx := context.Background()
@@ -149,6 +161,42 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	if got != "security_test_suite_api" {
 		t.Fatalf("after SetTranslator(nil), tr() returned %q, want loud echo of message ID", got)
 	}
+}
+
+// TestRound460_ResultsTableTemplateData confirms the round-460
+// results-table message IDs carry their {{.Count}} placeholder data
+// through the Translator — a call site that dropped the map would
+// silently break placeholder interpolation at runtime.
+func TestRound460_ResultsTableTemplateData(t *testing.T) {
+	resetTranslator(t)
+	fake := &recordingFake{seen: make(map[string]map[string]any)}
+	SetTranslator(fake)
+
+	ctx := context.Background()
+	_ = tr(ctx, "security_test_results_total_tests", map[string]any{"Count": 12})
+	_ = tr(ctx, "security_test_results_critical", map[string]any{"Count": 3})
+
+	if got := fake.seen["security_test_results_total_tests"]["Count"]; got != 12 {
+		t.Errorf("security_test_results_total_tests Count = %v, want 12", got)
+	}
+	if got := fake.seen["security_test_results_critical"]["Count"]; got != 3 {
+		t.Errorf("security_test_results_critical Count = %v, want 3", got)
+	}
+}
+
+// recordingFake captures templateData per ID for round-460 assertions.
+type recordingFake struct {
+	seen map[string]map[string]any
+}
+
+func (r *recordingFake) T(_ context.Context, id string, data map[string]any) (string, error) {
+	r.seen[id] = data
+	return "<TRANSLATED:" + id + ">", nil
+}
+
+func (r *recordingFake) TPlural(_ context.Context, id string, _ int, data map[string]any) (string, error) {
+	r.seen[id] = data
+	return "<TRANSLATED:" + id + ">", nil
 }
 
 // TestTr_MutationGuard is the round-142 paired-mutation gate.

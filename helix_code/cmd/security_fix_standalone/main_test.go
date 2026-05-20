@@ -155,6 +155,142 @@ func TestTr_PassesTemplateData(t *testing.T) {
 	}
 }
 
+// round460MessageIDs are the report-helper verdict literals migrated
+// in the round-460 §11.4 sweep (2026-05-20). These IDs are resolved
+// inside the report-helper functions (evaluateZeroTolerance,
+// evaluateProductionReadiness, generateFixRecommendations,
+// evaluateSecurityPosture, evaluateComplianceStatus,
+// formatCriticalIssues).
+var round460MessageIDs = []string{
+	"security_fix_standalone_report_no_issues",
+	"security_fix_standalone_zerotol_satisfied",
+	"security_fix_standalone_zerotol_violated",
+	"security_fix_standalone_readiness_ready",
+	"security_fix_standalone_readiness_critical",
+	"security_fix_standalone_readiness_fix_failed",
+	"security_fix_standalone_rec_urgent_failed",
+	"security_fix_standalone_rec_address_remaining",
+	"security_fix_standalone_rec_comprehensive_testing",
+	"security_fix_standalone_rec_success_resolved",
+	"security_fix_standalone_rec_validate_fixes",
+	"security_fix_standalone_rec_all_resolved",
+	"security_fix_standalone_rec_proactive_monitoring",
+	"security_fix_standalone_posture_strong",
+	"security_fix_standalone_posture_critical",
+	"security_fix_standalone_posture_weak",
+	"security_fix_standalone_compliance_compliant",
+	"security_fix_standalone_compliance_noncompliant",
+}
+
+// TestRound460_ReportHelpersRouteThroughTranslator exercises the
+// actual report-helper functions through an injected translator and
+// asserts each verdict path returns sentinel-wrapped output — proving
+// the helpers no longer emit hardcoded English literals.
+func TestRound460_ReportHelpersRouteThroughTranslator(t *testing.T) {
+	rec := &recordingTranslator{}
+	SetTranslator(rec)
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	// formatCriticalIssues empty-case → report_no_issues.
+	if got := formatCriticalIssues(nil); !strings.Contains(got, "security_fix_standalone_report_no_issues") {
+		t.Errorf("formatCriticalIssues(nil) = %q, want sentinel-wrapped report_no_issues", got)
+	}
+
+	// evaluateZeroTolerance both branches.
+	if got := evaluateZeroTolerance(0); !strings.Contains(got, "security_fix_standalone_zerotol_satisfied") {
+		t.Errorf("evaluateZeroTolerance(0) = %q, want zerotol_satisfied", got)
+	}
+	if got := evaluateZeroTolerance(3); !strings.Contains(got, "security_fix_standalone_zerotol_violated") {
+		t.Errorf("evaluateZeroTolerance(3) = %q, want zerotol_violated", got)
+	}
+
+	// evaluateProductionReadiness all three branches.
+	if got := evaluateProductionReadiness(true, 0); !strings.Contains(got, "security_fix_standalone_readiness_ready") {
+		t.Errorf("evaluateProductionReadiness(true,0) = %q, want readiness_ready", got)
+	}
+	if got := evaluateProductionReadiness(false, 2); !strings.Contains(got, "security_fix_standalone_readiness_critical") {
+		t.Errorf("evaluateProductionReadiness(false,2) = %q, want readiness_critical", got)
+	}
+	if got := evaluateProductionReadiness(false, 0); !strings.Contains(got, "security_fix_standalone_readiness_fix_failed") {
+		t.Errorf("evaluateProductionReadiness(false,0) = %q, want readiness_fix_failed", got)
+	}
+
+	// evaluateSecurityPosture all three branches.
+	if got := evaluateSecurityPosture(true, 0, 0); !strings.Contains(got, "security_fix_standalone_posture_strong") {
+		t.Errorf("evaluateSecurityPosture(true,0,0) = %q, want posture_strong", got)
+	}
+	if got := evaluateSecurityPosture(false, 1, 1); !strings.Contains(got, "security_fix_standalone_posture_critical") {
+		t.Errorf("evaluateSecurityPosture(false,1,1) = %q, want posture_critical", got)
+	}
+	if got := evaluateSecurityPosture(false, 0, 0); !strings.Contains(got, "security_fix_standalone_posture_weak") {
+		t.Errorf("evaluateSecurityPosture(false,0,0) = %q, want posture_weak", got)
+	}
+
+	// evaluateComplianceStatus both branches.
+	if got := evaluateComplianceStatus(true, 0); !strings.Contains(got, "security_fix_standalone_compliance_compliant") {
+		t.Errorf("evaluateComplianceStatus(true,0) = %q, want compliance_compliant", got)
+	}
+	if got := evaluateComplianceStatus(false, 1); !strings.Contains(got, "security_fix_standalone_compliance_noncompliant") {
+		t.Errorf("evaluateComplianceStatus(false,1) = %q, want compliance_noncompliant", got)
+	}
+
+	// generateFixRecommendations exercising every recommendation
+	// branch: failedCount>0, len(issues)>fixedCount, fixedCount>0.
+	twoIssues := []SecurityIssue{{ID: "A"}, {ID: "B"}}
+	recs := generateFixRecommendations(twoIssues, 1, 1)
+	for _, id := range []string{
+		"security_fix_standalone_rec_urgent_failed",
+		"security_fix_standalone_rec_address_remaining",
+		"security_fix_standalone_rec_comprehensive_testing",
+		"security_fix_standalone_rec_success_resolved",
+		"security_fix_standalone_rec_validate_fixes",
+	} {
+		if !strings.Contains(recs, id) {
+			t.Errorf("generateFixRecommendations: missing %q in %q", id, recs)
+		}
+	}
+	// Empty-recs branch (no failures, all issues fixed).
+	cleanRecs := generateFixRecommendations(nil, 0, 0)
+	for _, id := range []string{
+		"security_fix_standalone_rec_all_resolved",
+		"security_fix_standalone_rec_proactive_monitoring",
+	} {
+		if !strings.Contains(cleanRecs, id) {
+			t.Errorf("generateFixRecommendations(clean): missing %q in %q", id, cleanRecs)
+		}
+	}
+
+	// Every round460 ID must have been observed by the translator.
+	seen := map[string]bool{}
+	for _, c := range rec.calls {
+		seen[c.ID] = true
+	}
+	for _, id := range round460MessageIDs {
+		if !seen[id] {
+			t.Errorf("round-460 ID %q never routed through Translator", id)
+		}
+	}
+}
+
+// TestRound460_TemplateDataReachesTranslator confirms the {{.Count}}
+// placeholders in the round-460 verdict messages receive their data.
+func TestRound460_TemplateDataReachesTranslator(t *testing.T) {
+	rec := &recordingTranslator{}
+	SetTranslator(rec)
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	_ = evaluateZeroTolerance(7)
+	var found bool
+	for _, c := range rec.calls {
+		if c.ID == "security_fix_standalone_zerotol_violated" && c.Data["Count"] == 7 {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("evaluateZeroTolerance(7): Count=7 did not reach Translator for zerotol_violated")
+	}
+}
+
 // TestPairedMutation_MessageIDTypoFails is the §1.1 paired-mutation
 // proof that round145MessageIDs genuinely tracks the migrated call
 // sites. If a developer adds a new tr() call but forgets to register

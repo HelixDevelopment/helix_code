@@ -16,6 +16,12 @@
 # strings. The 5 residual literals (info banners + 3 fmt.Printf table
 # headings) are deferred to a future round to stay under the round
 # size cap.
+#
+# Round-460 §11.4 anti-bluff sweep (2026-05-20): migrated the 4
+# residual security-test-suite names (Container / Configuration /
+# File System / Logging) that round-142 deferred, plus the
+# "=== SECURITY TEST RESULTS ===" banner, the four results-table
+# rows, and the terminal "All security tests completed" line.
 
 security_test_suite_llm_provider:
   other: "LLM Provider Security"
@@ -46,3 +52,33 @@ security_test_summary_fail_critical:
 
 security_test_summary_warn_scanners_unavailable:
   other: "WARN: Some scanners unavailable"
+
+security_test_suite_container:
+  other: "Container Security"
+
+security_test_suite_configuration:
+  other: "Configuration Security"
+
+security_test_suite_file_system:
+  other: "File System Security"
+
+security_test_suite_logging:
+  other: "Logging Security"
+
+security_test_results_heading:
+  other: "=== SECURITY TEST RESULTS ==="
+
+security_test_results_total_tests:
+  other: "Total tests:   {{.Count}}"
+
+security_test_results_failed_tests:
+  other: "Failed tests:  {{.Count}}"
+
+security_test_results_total_issues:
+  other: "Total issues:  {{.Count}}"
+
+security_test_results_critical:
+  other: "Critical:      {{.Count}}"
+
+security_test_completed:
+  other: "All security tests completed"
