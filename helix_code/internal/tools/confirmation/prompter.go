@@ -82,7 +82,8 @@ type PromptFormatter struct{}
 // Format formats a prompt request
 func (pf *PromptFormatter) Format(req PromptRequest) *FormattedPrompt {
 	prompt := &FormattedPrompt{
-		Title:   fmt.Sprintf("Confirm %s operation", req.Tool),
+		Title: tr(context.Background(), "internal_tools_confirmation_prompt_title",
+			map[string]any{"Tool": req.Tool}),
 		Level:   req.Level,
 		Options: defaultOptions(),
 	}
@@ -103,7 +104,8 @@ func (pf *PromptFormatter) Format(req PromptRequest) *FormattedPrompt {
 		prompt.Details = append(prompt.Details, "Warnings:")
 		prompt.Details = append(prompt.Details, req.Danger.Dangers...)
 		if !req.Danger.Reversible {
-			prompt.Details = append(prompt.Details, "WARNING: This operation is NOT reversible!")
+			prompt.Details = append(prompt.Details,
+				tr(context.Background(), "internal_tools_confirmation_danger_irreversible_warning", nil))
 		}
 	}
 
@@ -117,30 +119,35 @@ func (pf *PromptFormatter) Format(req PromptRequest) *FormattedPrompt {
 	return prompt
 }
 
-// defaultOptions returns default prompt options
+// defaultOptions returns default prompt options. Every Label and
+// Description is resolved through the CONST-046 i18n seam (tr) so
+// the interactive confirmation prompt adapts to the active locale.
+// Shortcut keys remain ASCII literals — they are keyboard input
+// tokens, not user-facing prose.
 func defaultOptions() []PromptOption {
+	ctx := context.Background()
 	return []PromptOption{
 		{
-			Label:       "Allow",
-			Description: "Allow this operation",
+			Label:       tr(ctx, "internal_tools_confirmation_option_allow_label", nil),
+			Description: tr(ctx, "internal_tools_confirmation_option_allow_description", nil),
 			Choice:      ChoiceAllow,
 			Shortcut:    "y",
 		},
 		{
-			Label:       "Deny",
-			Description: "Deny this operation",
+			Label:       tr(ctx, "internal_tools_confirmation_option_deny_label", nil),
+			Description: tr(ctx, "internal_tools_confirmation_option_deny_description", nil),
 			Choice:      ChoiceDeny,
 			Shortcut:    "n",
 		},
 		{
-			Label:       "Always",
-			Description: "Always allow this tool",
+			Label:       tr(ctx, "internal_tools_confirmation_option_always_label", nil),
+			Description: tr(ctx, "internal_tools_confirmation_option_always_description", nil),
 			Choice:      ChoiceAlways,
 			Shortcut:    "a",
 		},
 		{
-			Label:       "Never",
-			Description: "Never allow this tool",
+			Label:       tr(ctx, "internal_tools_confirmation_option_never_label", nil),
+			Description: tr(ctx, "internal_tools_confirmation_option_never_description", nil),
 			Choice:      ChoiceNever,
 			Shortcut:    "N",
 		},

@@ -1,0 +1,103 @@
+# internal/tools/confirmation i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/tools/confirmation/ to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_tools_confirmation_<area>_<short>.
+# All IDs prefixed with internal_tools_confirmation_ to avoid
+# namespace collision with other packages' bundles when loaded into
+# the same go-i18n.Bundle.
+#
+# Round-382 §11.4 anti-bluff sweep (2026-05-19): migrated 26
+# user-facing literals covering:
+#   - danger.go (16: dangerous-operation descriptions surfaced to
+#     the operator in the confirmation prompt's Warnings section)
+#   - prompter.go (10: prompt title, irreversibility warning, and
+#     the 4 default option label/description pairs shown in the
+#     interactive confirmation prompt).
+# Pattern Name fields (delete_operation, rm_rf_command, etc.) are
+# stable internal identifiers — NOT user-facing — and are NOT
+# migrated. The Risk-level enum strings (.String()) are diagnostic
+# tokens and out of this round's scope.
+
+# --- danger.go: dangerous-operation descriptions ---
+
+internal_tools_confirmation_danger_delete_operation:
+  other: "Deleting files or data"
+
+internal_tools_confirmation_danger_system_files:
+  other: "Operating on system files"
+
+internal_tools_confirmation_danger_rm_rf:
+  other: "Recursive force delete (rm -rf)"
+
+internal_tools_confirmation_danger_git_force_push:
+  other: "Force pushing to git remote"
+
+internal_tools_confirmation_danger_main_branch:
+  other: "Operating on main/master branch"
+
+internal_tools_confirmation_danger_network_request:
+  other: "Making network requests"
+
+internal_tools_confirmation_danger_sudo:
+  other: "Executing with elevated privileges (sudo)"
+
+internal_tools_confirmation_danger_chmod_777:
+  other: "Setting dangerous file permissions (chmod 777)"
+
+internal_tools_confirmation_danger_drop_table:
+  other: "Dropping database tables"
+
+internal_tools_confirmation_danger_truncate_table:
+  other: "Truncating database tables"
+
+internal_tools_confirmation_danger_npm_publish:
+  other: "Publishing to npm registry"
+
+internal_tools_confirmation_danger_pip_upload:
+  other: "Uploading to PyPI"
+
+internal_tools_confirmation_danger_docker_prune:
+  other: "Removing all unused Docker resources"
+
+internal_tools_confirmation_danger_format_disk:
+  other: "Formatting disk or partition"
+
+internal_tools_confirmation_danger_kill_process:
+  other: "Terminating processes"
+
+internal_tools_confirmation_danger_irreversible_warning:
+  other: "WARNING: This operation is NOT reversible!"
+
+# --- prompter.go: confirmation-prompt UI text ---
+
+internal_tools_confirmation_prompt_title:
+  other: "Confirm {{.Tool}} operation"
+
+internal_tools_confirmation_option_allow_label:
+  other: "Allow"
+
+internal_tools_confirmation_option_allow_description:
+  other: "Allow this operation"
+
+internal_tools_confirmation_option_deny_label:
+  other: "Deny"
+
+internal_tools_confirmation_option_deny_description:
+  other: "Deny this operation"
+
+internal_tools_confirmation_option_always_label:
+  other: "Always"
+
+internal_tools_confirmation_option_always_description:
+  other: "Always allow this tool"
+
+internal_tools_confirmation_option_never_label:
+  other: "Never"
+
+internal_tools_confirmation_option_never_description:
+  other: "Never allow this tool"

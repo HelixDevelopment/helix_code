@@ -1,6 +1,7 @@
 package confirmation
 
 import (
+	"context"
 	"strings"
 )
 
@@ -58,12 +59,19 @@ func (dd *DangerDetector) AddPattern(pattern DangerPattern) {
 	dd.patterns = append(dd.patterns, pattern)
 }
 
-// defaultDangerPatterns returns default danger detection patterns
+// defaultDangerPatterns returns default danger detection patterns.
+// Every Description is resolved through the CONST-046 i18n seam
+// (tr) so the operator-facing Warnings section of the confirmation
+// prompt adapts to the active locale. context.Background() is used
+// because pattern construction is package-level with no request
+// context; the active locale is read from the process-wide
+// translator wired at boot via SetTranslator.
 func defaultDangerPatterns() []DangerPattern {
+	ctx := context.Background()
 	return []DangerPattern{
 		{
 			Name:        "delete_operation",
-			Description: "Deleting files or data",
+			Description: tr(ctx, "internal_tools_confirmation_danger_delete_operation", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -72,7 +80,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "system_files",
-			Description: "Operating on system files",
+			Description: tr(ctx, "internal_tools_confirmation_danger_system_files", nil),
 			Risk:        RiskCritical,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -87,7 +95,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "rm_rf_command",
-			Description: "Recursive force delete (rm -rf)",
+			Description: tr(ctx, "internal_tools_confirmation_danger_rm_rf", nil),
 			Risk:        RiskCritical,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -101,7 +109,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "git_force_push",
-			Description: "Force pushing to git remote",
+			Description: tr(ctx, "internal_tools_confirmation_danger_git_force_push", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -115,7 +123,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "main_branch_operation",
-			Description: "Operating on main/master branch",
+			Description: tr(ctx, "internal_tools_confirmation_danger_main_branch", nil),
 			Risk:        RiskMedium,
 			Reversible:  true,
 			Match: func(req ConfirmationRequest) bool {
@@ -127,7 +135,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "network_request",
-			Description: "Making network requests",
+			Description: tr(ctx, "internal_tools_confirmation_danger_network_request", nil),
 			Risk:        RiskMedium,
 			Reversible:  true,
 			Match: func(req ConfirmationRequest) bool {
@@ -136,7 +144,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "sudo_command",
-			Description: "Executing with elevated privileges (sudo)",
+			Description: tr(ctx, "internal_tools_confirmation_danger_sudo", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -150,7 +158,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "chmod_777",
-			Description: "Setting dangerous file permissions (chmod 777)",
+			Description: tr(ctx, "internal_tools_confirmation_danger_chmod_777", nil),
 			Risk:        RiskHigh,
 			Reversible:  true,
 			Match: func(req ConfirmationRequest) bool {
@@ -164,7 +172,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "drop_table",
-			Description: "Dropping database tables",
+			Description: tr(ctx, "internal_tools_confirmation_danger_drop_table", nil),
 			Risk:        RiskCritical,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -177,7 +185,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "truncate_table",
-			Description: "Truncating database tables",
+			Description: tr(ctx, "internal_tools_confirmation_danger_truncate_table", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -190,7 +198,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "npm_publish",
-			Description: "Publishing to npm registry",
+			Description: tr(ctx, "internal_tools_confirmation_danger_npm_publish", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -204,7 +212,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "pip_upload",
-			Description: "Uploading to PyPI",
+			Description: tr(ctx, "internal_tools_confirmation_danger_pip_upload", nil),
 			Risk:        RiskHigh,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -218,7 +226,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "docker_system_prune",
-			Description: "Removing all unused Docker resources",
+			Description: tr(ctx, "internal_tools_confirmation_danger_docker_prune", nil),
 			Risk:        RiskMedium,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -232,7 +240,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "format_disk",
-			Description: "Formatting disk or partition",
+			Description: tr(ctx, "internal_tools_confirmation_danger_format_disk", nil),
 			Risk:        RiskCritical,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
@@ -246,7 +254,7 @@ func defaultDangerPatterns() []DangerPattern {
 		},
 		{
 			Name:        "kill_process",
-			Description: "Terminating processes",
+			Description: tr(ctx, "internal_tools_confirmation_danger_kill_process", nil),
 			Risk:        RiskMedium,
 			Reversible:  false,
 			Match: func(req ConfirmationRequest) bool {
