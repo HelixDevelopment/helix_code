@@ -469,3 +469,85 @@ func TestLocalLLMI18n_NoopTranslatorContract(t *testing.T) {
 		t.Fatalf("NoopTranslator.TPlural contract violation: out=%q err=%v", outP, errP)
 	}
 }
+
+// round445ResidualIDs enumerates the round-445 §11.4 CONST-046 Phase-4
+// migration: residual user-facing runtime output literals in
+// local_llm_advanced.go (recommend / analytics / insights output) routed
+// through the cmd/i18n seam in round-445 (helix_code/cmd residual round-5).
+var round445ResidualIDs = []string{
+	"cmd_local_llm_adv_max_memory",
+	"cmd_local_llm_adv_budget",
+	"cmd_local_llm_adv_found_recommendations",
+	"cmd_local_llm_adv_relevance_score",
+	"cmd_local_llm_adv_download_all_hint",
+	"cmd_local_llm_adv_executive_summary",
+	"cmd_local_llm_adv_total_models",
+	"cmd_local_llm_adv_total_requests",
+	"cmd_local_llm_adv_average_latency",
+	"cmd_local_llm_adv_success_rate",
+	"cmd_local_llm_adv_user_satisfaction",
+	"cmd_local_llm_adv_top_models",
+	"cmd_local_llm_adv_top_model_row",
+	"cmd_local_llm_adv_performance_analysis",
+	"cmd_local_llm_adv_average_tps",
+	"cmd_local_llm_adv_generating_insights",
+	"cmd_local_llm_adv_insights_type",
+	"cmd_local_llm_adv_performance_insights",
+	"cmd_local_llm_adv_bottlenecks",
+	"cmd_local_llm_adv_optimization_success_rate",
+	"cmd_local_llm_adv_avg_improvement",
+	"cmd_local_llm_adv_usage_insights",
+	"cmd_local_llm_adv_user_segments",
+	"cmd_local_llm_adv_user_segment_row",
+	"cmd_local_llm_adv_behavioral_trends",
+	"cmd_local_llm_adv_user_retention",
+	"cmd_local_llm_adv_churn_rate",
+	"cmd_local_llm_adv_model_insights",
+	"cmd_local_llm_adv_trending_models",
+	"cmd_local_llm_adv_top_performing_models",
+	"cmd_local_llm_adv_top_performing_row",
+	"cmd_local_llm_adv_task_performance",
+	"cmd_local_llm_adv_task_performance_row",
+}
+
+// TestLocalLLMI18n_Round445ResidualRoutesThroughSeam is the paired-mutation
+// anti-bluff guard for the round-445 migration: it wires a sentinel
+// Translator and asserts every analytics/recommend/insights output message
+// ID resolves THROUGH it (sentinel present) — proving the runtime output is
+// no longer a frozen English literal. Re-inlining any string would drop the
+// sentinel and FAIL this test.
+func TestLocalLLMI18n_Round445ResidualRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	ctx := context.Background()
+	for _, id := range round445ResidualIDs {
+		got := tr(ctx, id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-445 residual ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-445 residual ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
+}
+
+// TestLocalLLMI18n_Round445ResidualNoopEcho proves the round-445 IDs degrade
+// to a loud message-ID echo when no translator is wired — never a silent
+// empty string (which would be a §11.4 PASS-bluff at the i18n layer). Also
+// covers the trc() construction-time path used by the generate*Insights
+// helper functions.
+func TestLocalLLMI18n_Round445ResidualNoopEcho(t *testing.T) {
+	SetTranslator(nil) // explicit NoopTranslator
+	ctx := context.Background()
+	for _, id := range round445ResidualIDs {
+		got := tr(ctx, id, nil)
+		if got != id {
+			t.Errorf("round-445 residual ID %q must echo verbatim under NoopTranslator: got %q", id, got)
+		}
+		gotC := trc(id, nil)
+		if gotC != id {
+			t.Errorf("round-445 residual ID %q must echo verbatim through trc(): got %q", id, gotC)
+		}
+	}
+}

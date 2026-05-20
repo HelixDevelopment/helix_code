@@ -503,9 +503,9 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 	switch args[0] {
 	case "list":
 		tasks := cliApp.taskManager.GetAllTasks()
-		fmt.Println("=== Tasks ===")
+		fmt.Println(cliApp.t("desktop_cli_tasks_header"))
 		if len(tasks) == 0 {
-			fmt.Println("No tasks found.")
+			fmt.Println(cliApp.t("desktop_cli_no_tasks"))
 			return nil
 		}
 		for _, t := range tasks {
@@ -520,7 +520,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		fs.Parse(args[1:])
 
 		if *desc == "" {
-			fmt.Println("Error: --desc is required")
+			fmt.Println(cliApp.t("desktop_cli_err_desc_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -528,21 +528,21 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created task: %s (ID: %s)\n", t.Description, t.ID)
+		fmt.Printf(cliApp.t("desktop_cli_created_task")+"\n", t.Description, t.ID)
 
 	case "cancel":
 		if len(args) < 2 {
-			fmt.Println("Error: task ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_task_id_required"))
 			return fmt.Errorf("missing task ID")
 		}
 		err := cliApp.taskManager.CancelTask(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Cancelled task: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_cancelled_task")+"\n", args[1])
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -556,9 +556,9 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 	switch args[0] {
 	case "list":
 		workers := cliApp.workerManager.GetWorkers()
-		fmt.Println("=== Workers ===")
+		fmt.Println(cliApp.t("desktop_cli_workers_header"))
 		if len(workers) == 0 {
-			fmt.Println("No workers found.")
+			fmt.Println(cliApp.t("desktop_cli_no_workers"))
 			return nil
 		}
 		for _, w := range workers {
@@ -577,7 +577,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		fs.Parse(args[1:])
 
 		if *host == "" {
-			fmt.Println("Error: --host is required")
+			fmt.Println(cliApp.t("desktop_cli_err_host_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -593,21 +593,21 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Added worker: %s\n", w.ID)
+		fmt.Printf(cliApp.t("desktop_cli_added_worker")+"\n", w.ID)
 
 	case "remove":
 		if len(args) < 2 {
-			fmt.Println("Error: worker ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_worker_id_required"))
 			return fmt.Errorf("missing worker ID")
 		}
 		err := cliApp.workerManager.RemoveWorker(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Removed worker: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_removed_worker")+"\n", args[1])
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -622,9 +622,9 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 	case "providers":
 		ctx := context.Background()
 		health := cliApp.llmManager.HealthCheck(ctx)
-		fmt.Println("=== LLM Providers ===")
+		fmt.Println(cliApp.t("desktop_cli_llm_providers_header"))
 		if len(health) == 0 {
-			fmt.Println("No providers configured.")
+			fmt.Println(cliApp.t("desktop_cli_no_providers"))
 			return nil
 		}
 		for provider, status := range health {
@@ -633,9 +633,9 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 
 	case "models":
 		models := cliApp.llmManager.GetAvailableModels()
-		fmt.Println("=== Available Models ===")
+		fmt.Println(cliApp.t("desktop_cli_available_models_header"))
 		if len(models) == 0 {
-			fmt.Println("No models available.")
+			fmt.Println(cliApp.t("desktop_cli_no_models"))
 			return nil
 		}
 		for _, m := range models {
@@ -643,19 +643,19 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 		}
 
 	case "chat":
-		fmt.Println("LLM chat requires a running provider.")
-		fmt.Println("Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat.")
+		fmt.Println(cliApp.t("desktop_cli_chat_requires_provider"))
+		fmt.Println(cliApp.t("desktop_cli_chat_configure_hint"))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
 }
 
 func (cliApp *CLIApp) cmdInteractive() error {
-	fmt.Println("=== HelixCode Interactive Mode ===")
-	fmt.Println("Type 'help' for commands, 'quit' to exit")
+	fmt.Println(cliApp.t("desktop_cli_interactive_header"))
+	fmt.Println(cliApp.t("desktop_cli_interactive_hint"))
 	fmt.Println()
 
 	// Setup signal handling
@@ -664,7 +664,7 @@ func (cliApp *CLIApp) cmdInteractive() error {
 
 	go func() {
 		<-sigChan
-		fmt.Println("\nExiting...")
+		fmt.Println("\n" + cliApp.t("desktop_cli_exiting"))
 		os.Exit(0)
 	}()
 
@@ -682,13 +682,13 @@ func (cliApp *CLIApp) cmdInteractive() error {
 		}
 
 		if input == "quit" || input == "exit" {
-			fmt.Println("Goodbye!")
+			fmt.Println(cliApp.t("desktop_cli_goodbye"))
 			break
 		}
 
 		args := strings.Fields(input)
 		if err := cliApp.Run(args); err != nil {
-			fmt.Printf("Error: %v\n", err)
+			fmt.Printf(cliApp.t("desktop_cli_error_prefix")+"\n", err)
 		}
 		fmt.Println()
 	}

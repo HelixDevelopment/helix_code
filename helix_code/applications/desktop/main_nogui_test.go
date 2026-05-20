@@ -17,9 +17,13 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"dev.helix.code/applications/desktop/i18n"
+	"gopkg.in/yaml.v3"
 )
 
 // cliFakeTranslator is a unit-test-only translator (CONST-050(A):
@@ -198,5 +202,120 @@ func TestCLIAppNilTranslatorAutoHeals(t *testing.T) {
 	}
 	if _, ok := app.translator.(i18n.NoopTranslator); !ok {
 		t.Fatalf("t() failed to auto-heal nil translator; got %T", app.translator)
+	}
+}
+
+// round446IDs is the closed set of message IDs migrated in the
+// round-446 §11.4 sweep of desktop/main_nogui.go (tasks/workers/llm
+// subcommand surfaces + interactive-mode banner/prompts). Completes
+// the desktop nogui CLI hardcoded-content migration begun in
+// round-365.
+var round446IDs = []string{
+	"desktop_cli_tasks_header",
+	"desktop_cli_no_tasks",
+	"desktop_cli_err_desc_required",
+	"desktop_cli_created_task",
+	"desktop_cli_err_task_id_required",
+	"desktop_cli_cancelled_task",
+	"desktop_cli_workers_header",
+	"desktop_cli_no_workers",
+	"desktop_cli_err_host_required",
+	"desktop_cli_added_worker",
+	"desktop_cli_err_worker_id_required",
+	"desktop_cli_removed_worker",
+	"desktop_cli_llm_providers_header",
+	"desktop_cli_no_providers",
+	"desktop_cli_available_models_header",
+	"desktop_cli_no_models",
+	"desktop_cli_chat_requires_provider",
+	"desktop_cli_chat_configure_hint",
+	"desktop_cli_interactive_header",
+	"desktop_cli_interactive_hint",
+	"desktop_cli_exiting",
+	"desktop_cli_goodbye",
+	"desktop_cli_error_prefix",
+}
+
+// TestCLIAppRound446IDsResolveThroughTranslator is the positive case
+// for the round-446 §11.4 residual migration: every newly migrated
+// message ID MUST route through Translator.T (not echo a literal).
+func TestCLIAppRound446IDsResolveThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &cliFakeTranslator{prefix: "R446:"}
+	app.SetTranslator(ft)
+
+	for _, id := range round446IDs {
+		got := app.t(id)
+		if got != "R446:"+id {
+			t.Fatalf("id %q must route through Translator.T; got %q", id, got)
+		}
+	}
+	if len(ft.calls) != len(round446IDs) {
+		t.Fatalf("Translator consulted %d times, want %d", len(ft.calls), len(round446IDs))
+	}
+}
+
+// TestCLIAppRound446FallbackOnError is the paired-mutation guard for
+// the round-446 IDs: on translate error the helper MUST echo the
+// literal message ID (loud echo), never an empty string.
+func TestCLIAppRound446FallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&cliFakeTranslator{fail: true})
+
+	for _, id := range round446IDs {
+		if got := app.t(id); got != id {
+			t.Fatalf("on translate error id %q must echo verbatim; got %q", id, got)
+		}
+	}
+}
+
+// TestRound446BundleEntriesPresent parses the active.en.yaml bundle
+// directly (no X11/Fyne toolchain required) and asserts every
+// round-446 message ID has a non-empty "other" translation. A
+// missing entry would make the i18nadapter-wired Translator fall
+// back to a loud echo at runtime — a degraded user experience that
+// the CONST-046 migration exists to prevent.
+func TestRound446BundleEntriesPresent(t *testing.T) {
+	bundlePath := filepath.Join("i18n", "bundles", "active.en.yaml")
+	raw, err := os.ReadFile(bundlePath)
+	if err != nil {
+		t.Fatalf("read bundle %s: %v", bundlePath, err)
+	}
+
+	var entries map[string]struct {
+		Other string `yaml:"other"`
+	}
+	if err := yaml.Unmarshal(raw, &entries); err != nil {
+		t.Fatalf("parse bundle YAML: %v", err)
+	}
+
+	for _, id := range round446IDs {
+		e, ok := entries[id]
+		if !ok {
+			t.Errorf("round-446 message ID %q missing from %s", id, bundlePath)
+			continue
+		}
+		if strings.TrimSpace(e.Other) == "" {
+			t.Errorf("round-446 message ID %q has empty 'other' translation", id)
+		}
+	}
+}
+
+// TestRound446BundleParityWithCallSites is the paired-mutation guard
+// at the source layer: it asserts every round-446 message ID is
+// actually referenced in main_nogui.go. If a future edit reverts a
+// call site to a hardcoded literal, the ID drops out of the source
+// and this test FAILs — catching the §11.4 PASS-bluff regression.
+func TestRound446BundleParityWithCallSites(t *testing.T) {
+	src, err := os.ReadFile("main_nogui.go")
+	if err != nil {
+		t.Fatalf("read main_nogui.go: %v", err)
+	}
+	body := string(src)
+	for _, id := range round446IDs {
+		if !strings.Contains(body, `"`+id+`"`) {
+			t.Errorf("round-446 message ID %q no longer referenced in main_nogui.go "+
+				"(call site reverted to a hardcoded literal?)", id)
+		}
 	}
 }

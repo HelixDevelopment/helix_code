@@ -120,6 +120,105 @@ cmd_local_llm_adv_no_suitable:
 cmd_local_llm_adv_adjust_hint:
   other: "💡 Try adjusting your constraints or preferences"
 
+cmd_local_llm_adv_max_memory:
+  other: "Max Memory: {{.MB}} MB"
+
+cmd_local_llm_adv_budget:
+  other: "Budget: ${{.Budget}} per 1M tokens"
+
+cmd_local_llm_adv_found_recommendations:
+  other: "🎯 Found {{.Count}} recommendations (search time: {{.SearchTime}})"
+
+cmd_local_llm_adv_relevance_score:
+  other: "📊 Relevance Score: {{.Score}}"
+
+cmd_local_llm_adv_download_all_hint:
+  other: "💡 Use 'helix local-llm download-all <model-id>' to download and share model"
+
+cmd_local_llm_adv_executive_summary:
+  other: "📈 Executive Summary:"
+
+cmd_local_llm_adv_total_models:
+  other: "  Total Models: {{.Count}}"
+
+cmd_local_llm_adv_total_requests:
+  other: "  Total Requests: {{.Count}}"
+
+cmd_local_llm_adv_average_latency:
+  other: "  Average Latency: {{.Latency}} ms"
+
+cmd_local_llm_adv_success_rate:
+  other: "  Success Rate: {{.Rate}}%"
+
+cmd_local_llm_adv_user_satisfaction:
+  other: "  User Satisfaction: {{.Score}}/5.0"
+
+cmd_local_llm_adv_top_models:
+  other: "🏆 Top Models:"
+
+cmd_local_llm_adv_top_model_row:
+  other: "  {{.Rank}}. {{.Model}} ({{.Requests}} requests, {{.Satisfaction}}% satisfaction)"
+
+cmd_local_llm_adv_performance_analysis:
+  other: "⚡ Performance Analysis:"
+
+cmd_local_llm_adv_average_tps:
+  other: "  Average TPS: {{.TPS}}"
+
+cmd_local_llm_adv_generating_insights:
+  other: "🧠 Generating AI-powered insights..."
+
+cmd_local_llm_adv_insights_type:
+  other: "Insights Type: {{.Type}}"
+
+cmd_local_llm_adv_performance_insights:
+  other: "⚡ Performance Insights:"
+
+cmd_local_llm_adv_bottlenecks:
+  other: "  🎯 Identified Bottlenecks: {{.Bottlenecks}}"
+
+cmd_local_llm_adv_optimization_success_rate:
+  other: "  📈 Optimization Success Rate: {{.Rate}}%"
+
+cmd_local_llm_adv_avg_improvement:
+  other: "  🚀 Average Performance Improvement: {{.Improvement}}%"
+
+cmd_local_llm_adv_usage_insights:
+  other: "📊 Usage Insights:"
+
+cmd_local_llm_adv_user_segments:
+  other: "  👥 User Segments:"
+
+cmd_local_llm_adv_user_segment_row:
+  other: "    • {{.Segment}}: {{.Count}} users"
+
+cmd_local_llm_adv_behavioral_trends:
+  other: "  📈 Behavioral Trends:"
+
+cmd_local_llm_adv_user_retention:
+  other: "  🔄 User Retention: Daily {{.Daily}}%, Weekly {{.Weekly}}%, Monthly {{.Monthly}}%"
+
+cmd_local_llm_adv_churn_rate:
+  other: "  📉 Churn Rate: {{.Rate}}%"
+
+cmd_local_llm_adv_model_insights:
+  other: "🏆 Model Insights:"
+
+cmd_local_llm_adv_trending_models:
+  other: "  📈 Trending Models:"
+
+cmd_local_llm_adv_top_performing_models:
+  other: "  🏆 Top Performing Models:"
+
+cmd_local_llm_adv_top_performing_row:
+  other: "    {{.Rank}}. {{.Model}} ({{.Satisfaction}}% satisfaction)"
+
+cmd_local_llm_adv_task_performance:
+  other: "  🎯 Task Performance:"
+
+cmd_local_llm_adv_task_performance_row:
+  other: "    • {{.Task}}: {{.Success}}% success, {{.Latency}} ms average latency"
+
 # Round-317 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
 # 33 user-facing strings from the start/auto/server/version cobra
 # command tree (main_commands.go, other_commands.go) migrated.

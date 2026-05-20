@@ -161,10 +161,10 @@ func runRecommend(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Quality: %s\n", req.QualityPreference)
 	fmt.Printf("Privacy: %s\n", req.PrivacyLevel)
 	if recommendMaxMemory > 0 {
-		fmt.Printf("Max Memory: %d MB\n", recommendMaxMemory)
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_max_memory", map[string]any{"MB": recommendMaxMemory}))
 	}
 	if recommendBudgetLimit > 0 {
-		fmt.Printf("Budget: $%.4f per 1M tokens\n", recommendBudgetLimit)
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_budget", map[string]any{"Budget": fmt.Sprintf("%.4f", recommendBudgetLimit)}))
 	}
 	fmt.Println()
 
@@ -181,8 +181,9 @@ func runRecommend(cmd *cobra.Command, args []string) error {
 	}
 
 	// Display recommendations
-	fmt.Printf("🎯 Found %d recommendations (search time: %v)\n\n",
-		len(resp.Recommendations), resp.SearchTime)
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_found_recommendations", map[string]any{
+		"Count": len(resp.Recommendations), "SearchTime": resp.SearchTime.String()}))
+	fmt.Println()
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "RANK\tMODEL\tSCORE\tPERFORMANCE\tHARDWARE\tREASONS")
@@ -226,8 +227,9 @@ func runRecommend(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("\n📊 Relevance Score: %.2f\n", resp.RelevanceScore)
-	fmt.Println("💡 Use 'helix local-llm download-all <model-id>' to download and share model")
+	fmt.Println()
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_relevance_score", map[string]any{"Score": fmt.Sprintf("%.2f", resp.RelevanceScore)}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_download_all_hint", nil))
 
 	return nil
 }
@@ -250,25 +252,26 @@ func runAnalytics(cmd *cobra.Command, args []string) error {
 	}
 
 	// Display summary
-	fmt.Println("📈 Executive Summary:")
-	fmt.Printf("  Total Models: %d\n", report.Summary.TotalModels)
-	fmt.Printf("  Total Requests: %d\n", report.Summary.TotalRequests)
-	fmt.Printf("  Average Latency: %.1f ms\n", report.Summary.AverageLatency)
-	fmt.Printf("  Success Rate: %.1f%%\n", report.Summary.OverallSuccessRate*100)
-	fmt.Printf("  User Satisfaction: %.1f/5.0\n", report.Summary.AverageSatisfaction)
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_executive_summary", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_total_models", map[string]any{"Count": report.Summary.TotalModels}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_total_requests", map[string]any{"Count": report.Summary.TotalRequests}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_average_latency", map[string]any{"Latency": fmt.Sprintf("%.1f", report.Summary.AverageLatency)}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_success_rate", map[string]any{"Rate": fmt.Sprintf("%.1f", report.Summary.OverallSuccessRate*100)}))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_user_satisfaction", map[string]any{"Score": fmt.Sprintf("%.1f", report.Summary.AverageSatisfaction)}))
 	fmt.Println()
 
 	// Display top models
-	fmt.Println("🏆 Top Models:")
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_top_models", nil))
 	for i, model := range report.TopModels[:min(5, len(report.TopModels))] {
-		fmt.Printf("  %d. %s (%d requests, %.1f%% satisfaction)\n",
-			i+1, model.ModelID, model.TotalRequests, model.UserSatisfaction)
+		fmt.Println(tr(ctx, "cmd_local_llm_adv_top_model_row", map[string]any{
+			"Rank": i + 1, "Model": model.ModelID, "Requests": model.TotalRequests,
+			"Satisfaction": fmt.Sprintf("%.1f", model.UserSatisfaction)}))
 	}
 	fmt.Println()
 
 	// Display performance analysis
-	fmt.Println("⚡ Performance Analysis:")
-	fmt.Printf("  Average TPS: %.1f\n", report.PerformanceAnalysis.AverageTPS)
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_performance_analysis", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_average_tps", map[string]any{"TPS": fmt.Sprintf("%.1f", report.PerformanceAnalysis.AverageTPS)}))
 	for provider, tps := range report.PerformanceAnalysis.OptimalProviders {
 		fmt.Printf("  %s: %.1f TPS\n", provider, tps)
 	}
@@ -326,8 +329,9 @@ func runInsights(cmd *cobra.Command, args []string) error {
 	discoveryEngine := llm.NewModelDiscoveryEngine(getLocalLLMBaseDir())
 	analytics := llm.NewUsageAnalytics(getLocalLLMBaseDir())
 
-	fmt.Println("🧠 Generating AI-powered insights...")
-	fmt.Printf("Insights Type: %s\n\n", insightsType)
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_generating_insights", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_adv_insights_type", map[string]any{"Type": insightsType}))
+	fmt.Println()
 
 	// Get model recommendations from discovery engine for insights
 	recReq := &llm.RecommendationRequest{
@@ -419,7 +423,7 @@ func outputCSVReport(report *llm.UsageReport) {
 }
 
 func generatePerformanceInsights(report *llm.UsageReport) {
-	fmt.Println("⚡ Performance Insights:")
+	fmt.Println(trc("cmd_local_llm_adv_performance_insights", nil))
 
 	// Bottleneck analysis
 	if report.PerformanceAnalysis.BottleneckAnalysis != nil {
@@ -435,7 +439,7 @@ func generatePerformanceInsights(report *llm.UsageReport) {
 		}
 
 		if len(bottlenecks) > 0 {
-			fmt.Printf("  🎯 Identified Bottlenecks: %s\n", strings.Join(bottlenecks, ", "))
+			fmt.Println(trc("cmd_local_llm_adv_bottlenecks", map[string]any{"Bottlenecks": strings.Join(bottlenecks, ", ")}))
 			for _, rec := range report.PerformanceAnalysis.BottleneckAnalysis.Recommendations {
 				fmt.Printf("  💡 Recommendation: %s\n", rec)
 			}
@@ -444,29 +448,29 @@ func generatePerformanceInsights(report *llm.UsageReport) {
 
 	// Optimization impact
 	if report.PerformanceAnalysis.OptimizationImpact != nil {
-		fmt.Printf("  📈 Optimization Success Rate: %.1f%%\n",
-			report.PerformanceAnalysis.OptimizationImpact.SuccessfulRate*100)
-		fmt.Printf("  🚀 Average Performance Improvement: %.1f%%\n",
-			report.PerformanceAnalysis.OptimizationImpact.AverageImprovement)
+		fmt.Println(trc("cmd_local_llm_adv_optimization_success_rate", map[string]any{
+			"Rate": fmt.Sprintf("%.1f", report.PerformanceAnalysis.OptimizationImpact.SuccessfulRate*100)}))
+		fmt.Println(trc("cmd_local_llm_adv_avg_improvement", map[string]any{
+			"Improvement": fmt.Sprintf("%.1f", report.PerformanceAnalysis.OptimizationImpact.AverageImprovement)}))
 	}
 
 	fmt.Println()
 }
 
 func generateUsageInsights(report *llm.UsageReport) {
-	fmt.Println("📊 Usage Insights:")
+	fmt.Println(trc("cmd_local_llm_adv_usage_insights", nil))
 
 	// User segments
 	if report.UserAnalysis.UserSegments != nil {
-		fmt.Println("  👥 User Segments:")
+		fmt.Println(trc("cmd_local_llm_adv_user_segments", nil))
 		for segment, count := range report.UserAnalysis.UserSegments {
-			fmt.Printf("    • %s: %d users\n", segment, count)
+			fmt.Println(trc("cmd_local_llm_adv_user_segment_row", map[string]any{"Segment": segment, "Count": count}))
 		}
 	}
 
 	// Behavioral trends
 	if len(report.UserAnalysis.BehavioralTrends) > 0 {
-		fmt.Println("  📈 Behavioral Trends:")
+		fmt.Println(trc("cmd_local_llm_adv_behavioral_trends", nil))
 		for _, trend := range report.UserAnalysis.BehavioralTrends {
 			fmt.Printf("    • %s\n", trend)
 		}
@@ -474,22 +478,23 @@ func generateUsageInsights(report *llm.UsageReport) {
 
 	// Retention insights
 	if report.UserAnalysis.UserRetention != nil {
-		fmt.Printf("  🔄 User Retention: Daily %.1f%%, Weekly %.1f%%, Monthly %.1f%%\n",
-			report.UserAnalysis.UserRetention.DailyRetention*100,
-			report.UserAnalysis.UserRetention.WeeklyRetention*100,
-			report.UserAnalysis.UserRetention.MonthlyRetention*100)
-		fmt.Printf("  📉 Churn Rate: %.1f%%\n", report.UserAnalysis.UserRetention.ChurnRate*100)
+		fmt.Println(trc("cmd_local_llm_adv_user_retention", map[string]any{
+			"Daily":   fmt.Sprintf("%.1f", report.UserAnalysis.UserRetention.DailyRetention*100),
+			"Weekly":  fmt.Sprintf("%.1f", report.UserAnalysis.UserRetention.WeeklyRetention*100),
+			"Monthly": fmt.Sprintf("%.1f", report.UserAnalysis.UserRetention.MonthlyRetention*100)}))
+		fmt.Println(trc("cmd_local_llm_adv_churn_rate", map[string]any{
+			"Rate": fmt.Sprintf("%.1f", report.UserAnalysis.UserRetention.ChurnRate*100)}))
 	}
 
 	fmt.Println()
 }
 
 func generateModelInsights(report *llm.UsageReport) {
-	fmt.Println("🏆 Model Insights:")
+	fmt.Println(trc("cmd_local_llm_adv_model_insights", nil))
 
 	// Trending models
 	if len(report.Summary.TrendingModels) > 0 {
-		fmt.Println("  📈 Trending Models:")
+		fmt.Println(trc("cmd_local_llm_adv_trending_models", nil))
 		for _, model := range report.Summary.TrendingModels {
 			fmt.Printf("    • %s\n", model)
 		}
@@ -497,18 +502,22 @@ func generateModelInsights(report *llm.UsageReport) {
 
 	// Top performing models
 	if len(report.TopModels) > 0 {
-		fmt.Println("  🏆 Top Performing Models:")
+		fmt.Println(trc("cmd_local_llm_adv_top_performing_models", nil))
 		for i, model := range report.TopModels[:min(3, len(report.TopModels))] {
-			fmt.Printf("    %d. %s (%.1f%% satisfaction)\n", i+1, model.ModelID, model.UserSatisfaction)
+			fmt.Println(trc("cmd_local_llm_adv_top_performing_row", map[string]any{
+				"Rank": i + 1, "Model": model.ModelID,
+				"Satisfaction": fmt.Sprintf("%.1f", model.UserSatisfaction)}))
 		}
 	}
 
 	// Task analysis
 	if report.TaskAnalysis != nil {
-		fmt.Println("  🎯 Task Performance:")
+		fmt.Println(trc("cmd_local_llm_adv_task_performance", nil))
 		for task, analysis := range report.TaskAnalysis {
-			fmt.Printf("    • %s: %.1f%% success, %.1f ms average latency\n",
-				task, analysis.SuccessRate*100, analysis.AverageLatency)
+			fmt.Println(trc("cmd_local_llm_adv_task_performance_row", map[string]any{
+				"Task":    task,
+				"Success": fmt.Sprintf("%.1f", analysis.SuccessRate*100),
+				"Latency": fmt.Sprintf("%.1f", analysis.AverageLatency)}))
 		}
 	}
 
