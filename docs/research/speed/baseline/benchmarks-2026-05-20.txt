@@ -1,0 +1,132 @@
+================================================================================
+HelixCode Speed Programme — Phase 0 baseline benchmarks (task P0-T02)
+================================================================================
+
+Captured:        2026-05-20
+Task:            P0-T02 — Go benchmark suite for the four R1 hot paths
+Authority:       docs/research/speed/04-phased-implementation-plan.md §3 (Phase 0)
+Bottleneck ref:  docs/research/speed/01-current-state-bottleneck-audit.md
+Anti-bluff:      CONST-035 / Article XI §11.9 / CLAUDE.md Rule 9 — a "faster"
+                 claim is a bluff without pasted before/after numbers. This file
+                 IS the "before" number for the four hot paths. Every Phase 1+
+                 speedup task MUST paste its "after" run against these figures.
+
+Why these four paths: R1 §6 item 3 found that CLI startup, LLM dispatch,
+repo-map build and content search — the four measured hot paths — had NO Go
+benchmarks, so no speedup was falsifiable. P0-T02 adds the missing benchmarks.
+
+--------------------------------------------------------------------------------
+ENVIRONMENT
+--------------------------------------------------------------------------------
+go version       go1.26.2-X:nodwarf5 linux/amd64
+OS / kernel      Linux 6.12.61-6.12-alt1 x86_64
+CPU              11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz (8 logical)
+Module           dev.helix.code (helix_code/ inner Go module)
+Repo HEAD        ed5c904f
+External infra   NONE required — LLM dispatch uses a local net/http/httptest
+                 server (real round-trip, zero network); repo-map and search
+                 use synthesized fixtures under b.TempDir(). Real-network calls
+                 are deliberately excluded so the numbers isolate HelixCode's
+                 own per-call CPU/alloc cost (R1 B03 scoping).
+
+--------------------------------------------------------------------------------
+COMMAND
+--------------------------------------------------------------------------------
+cd helix_code && go test -bench='BenchmarkNewCLI|BenchmarkLLMDispatch|BenchmarkRepoMap|BenchmarkSearchContent' \
+  -benchmem -run=^$ ./cmd/cli/ ./internal/llm/ ./internal/repomap/ ./internal/tools/filesystem/
+
+(stderr redirected to /dev/null to drop the application's standard-log bootstrap
+chatter — Ollama-discovery warnings, Raft consensus, SSH known-hosts notices —
+which is unrelated to the measured work. A test-only TestMain additionally
+discards the `log` package and a benchmark-local helper silences os.Stdout
+around NewCLI() so the result lines stay machine-parseable. No production code
+is changed by P0-T02 — only new *_test.go files.)
+
+--------------------------------------------------------------------------------
+CAPTURED OUTPUT — go test -bench -benchmem  (verbatim, 2026-05-20)
+--------------------------------------------------------------------------------
+goos: linux
+goarch: amd64
+pkg: dev.helix.code/cmd/cli
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+BenchmarkNewCLI-8   	     868	   1768900 ns/op	  376984 B/op	    4462 allocs/op
+PASS
+ok  	dev.helix.code/cmd/cli	1.693s
+goos: linux
+goarch: amd64
+pkg: dev.helix.code/internal/llm
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+BenchmarkLLMDispatch_RequestBuild-8        	 7235403	       161.0 ns/op	     144 B/op	       2 allocs/op
+BenchmarkLLMDispatch_RoundTrip-8           	   14220	     82510 ns/op	   11305 B/op	     127 allocs/op
+BenchmarkLLMDispatch_RoundTripParallel-8   	   26790	     43734 ns/op	   15194 B/op	     142 allocs/op
+PASS
+ok  	dev.helix.code/internal/llm	5.008s
+goos: linux
+goarch: amd64
+pkg: dev.helix.code/internal/repomap
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+BenchmarkRepoMapBuild-8            	      72	  16685992 ns/op	 2840559 B/op	   19485 allocs/op
+BenchmarkRepoMapOptimalContext-8   	      64	  17264203 ns/op	 3016090 B/op	   20915 allocs/op
+PASS
+ok  	dev.helix.code/internal/repomap	3.153s
+goos: linux
+goarch: amd64
+pkg: dev.helix.code/internal/tools/filesystem
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+BenchmarkSearchContent-8         	    1764	    716795 ns/op	  322408 B/op	    1820 allocs/op
+BenchmarkSearchContent_Regex-8   	    1350	    967623 ns/op	  317882 B/op	    1122 allocs/op
+PASS
+ok  	dev.helix.code/internal/tools/filesystem	3.749s
+
+--------------------------------------------------------------------------------
+BASELINE SUMMARY TABLE
+--------------------------------------------------------------------------------
+Hot path (R1 ref)              Benchmark                          ns/op       B/op      allocs/op
+-------------------------------------------------------------------------------------------------
+CLI startup (B01/B02)          BenchmarkNewCLI                  1 768 900    376 984      4 462
+LLM dispatch (B03)             BenchmarkLLMDispatch_RequestBuild       161        144          2
+LLM dispatch (B03)             BenchmarkLLMDispatch_RoundTrip       82 510     11 305        127
+LLM dispatch (B03)             BenchmarkLLMDispatch_RoundTripParallel 43 734    15 194        142
+Repo-map build (B04-B07)       BenchmarkRepoMapBuild           16 685 992  2 840 559     19 485
+Repo-map build (B04-B07)       BenchmarkRepoMapOptimalContext  17 264 203  3 016 090     20 915
+Content search (B08)           BenchmarkSearchContent             716 795    322 408      1 820
+Content search (B08)           BenchmarkSearchContent_Regex       967 623    317 882      1 122
+
+--------------------------------------------------------------------------------
+READING NOTES / OBSERVATIONS (for Phase 1+ task authors)
+--------------------------------------------------------------------------------
+* CLI startup — NewCLI() costs ~1.77 ms and ~4 462 allocations cold. This is
+  the number P1-T02 (lazy Ollama discovery) and P1-T03 (sync.Once lazy startup)
+  must move. NOTE: a parallel variant of this benchmark was trialled and
+  EXPOSED A REAL CONCURRENCY DEFECT — NewCLI() -> config.Load() ->
+  process-global viper.SetDefault is not goroutine-safe and concurrent
+  construction panics with "concurrent map writes" (viper.go:1492). NewCLI() is
+  constructed once per process, so this is not a supported usage pattern; the
+  parallel benchmark is deliberately omitted because it would only re-trigger a
+  panic that cannot be fixed without a production-code change (out of P0-T02
+  scope). Flagged here for the speed programme — Phase 1/Phase 4 may want a
+  fix-and-paired-benchmark follow-up.
+
+* LLM dispatch — RequestBuild (request conversion only) is cheap at ~161 ns /
+  2 allocs. The full RoundTrip against the local httptest server is ~82.5 us /
+  127 allocs — this is HelixCode's own per-call overhead (JSON marshal/unmarshal
+  + http.Client dispatch + response conversion), NOT network latency. P1-T01
+  (shared tuned HTTP/2 transport) targets the RoundTripParallel number, which is
+  already ~2x faster per-op than serial here purely from CPU parallelism on the
+  zero-latency local server; the real win on a remote provider is removing the
+  per-call TLS handshake on bursts, which this local-server benchmark cannot
+  show — P1-T01 must additionally capture netstat/idle-conn evidence.
+
+* Repo-map build — ~16.7 ms over a 30-file synthesized Go tree, ~19 485 allocs.
+  This is the serial-parse cost (B04). P2-T03 (content-addressed cache),
+  P2-T04 (worker pool + parser pool + single-pass stats) and P2-T06
+  (incremental parse) all target this number. OptimalContext is slightly higher
+  (~17.3 ms) because it adds ranking + context assembly on top of the build.
+
+* Content search — ~717 us literal / ~968 us regex over a 60-file synthesized
+  text tree, ~1 820 / ~1 122 allocs. This is the serial walk+read cost (B08)
+  that P2-T05 (bounded worker-pool parallel search) must move.
+
+Re-run this exact command after each Phase 1+ task and paste the new numbers
+alongside these to prove the speedup (CONST-035 / Rule 9). benchstat over
+multiple -count runs is recommended for statistically-sound deltas.
