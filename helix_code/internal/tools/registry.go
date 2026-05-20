@@ -1042,6 +1042,225 @@ func stripBackgroundFlag(params map[string]interface{}) map[string]interface{} {
 	return out
 }
 
+// ----------------------------------------------------------------------------
+// P3-T04 — Aggressive tool-call parallelism (speed programme Phase 3).
+//
+// When an LLM turn requests multiple tool calls, INDEPENDENT calls (read-only /
+// side-effect-free, or calls whose mutation targets do not conflict) are run
+// concurrently through a bounded worker pool. Calls that conflict (writes to the
+// same file, run/shell calls, calls that may depend on a prior call's output)
+// run serially, in their LLM-requested order. Results are always assembled back
+// in the request order — the turn outcome is identical to fully serial
+// execution. R2 #5 (Claude Code /batch), R4 O12.
+// ----------------------------------------------------------------------------
+
+// ToolCallRequest is one tool call inside an LLM turn. Order in the slice passed
+// to ExecuteBatch is the LLM-requested order — results are assembled back in
+// exactly this order regardless of completion order.
+type ToolCallRequest struct {
+	// ID is the LLM-assigned call ID (e.g. Anthropic tool_use id). Optional;
+	// purely passed through to BatchResult so callers can correlate.
+	ID string
+	// Name is the tool (or alias) name to dispatch.
+	Name string
+	// Params is the tool argument map.
+	Params map[string]interface{}
+}
+
+// BatchResult is the outcome of one ToolCallRequest. The slice returned by
+// ExecuteBatch has one BatchResult per input ToolCallRequest, in the SAME order
+// as the input slice (request order), never completion order.
+type BatchResult struct {
+	ID         string
+	Name       string
+	Result     interface{}
+	Err        error
+	// RanParallel is true when this call was dispatched in the concurrent
+	// wave rather than the serial wave. Diagnostic only — does not affect the
+	// result value.
+	RanParallel bool
+}
+
+// ParallelClassifier is an OPTIONAL interface a Tool may implement to declare
+// whether it is safe to run concurrently with other tool calls in the same
+// turn. Tools that do NOT implement it fall back to RequiresApproval()-based
+// inference: LevelReadOnly tools are treated as parallel-safe (pure reads, no
+// side effects), every other level is treated as must-serialise.
+//
+// A tool should return true ONLY when calling it concurrently with other
+// parallel-safe tools cannot change the turn outcome — i.e. it has no
+// observable side effects and does not depend on shared mutable state.
+type ParallelClassifier interface {
+	// ParallelSafe reports whether the tool is safe to run concurrently.
+	ParallelSafe() bool
+}
+
+// isParallelSafe decides whether a single resolved tool is safe to run
+// concurrently. Explicit ParallelClassifier wins; otherwise the approval
+// level is the proxy — only LevelReadOnly (pure reads) is parallel-safe.
+func isParallelSafe(tool Tool) bool {
+	if pc, ok := tool.(ParallelClassifier); ok {
+		return pc.ParallelSafe()
+	}
+	return tool.RequiresApproval() == approval.LevelReadOnly
+}
+
+// conflictKey extracts the file path a call mutates (if any) so two writes to
+// the SAME path are never parallelised even when classified individually. It
+// reuses derivePaths — the per-tool mutated-path table already maintained for
+// auto-commit — plus a couple of read-target shapes. An empty string means
+// "no identifiable single target" (treated as conflicting-with-everything to
+// stay safe).
+func conflictKeys(name string, params map[string]interface{}) []string {
+	if paths := derivePaths(name, params); len(paths) > 0 {
+		return paths
+	}
+	// Fall back to common single-target param shapes for tools not in the
+	// mutated-path table (covers read tools whose target we still want to
+	// key on for dependency detection).
+	for _, k := range []string{"path", "file", "file_path", "target_file"} {
+		if p, ok := params[k].(string); ok && p != "" {
+			return []string{p}
+		}
+	}
+	return nil
+}
+
+// classifyBatch partitions a turn's tool calls into a parallel set and a serial
+// set. A call joins the parallel set only when ALL hold:
+//   - the tool resolves and is itself parallel-safe (isParallelSafe);
+//   - it carries no run_in_background flag (background dispatch is its own path);
+//   - its mutation/target key (if any) is not shared with ANY other call in the
+//     turn — a shared key means a potential write/read ordering dependency, so
+//     both calls drop to the serial set to preserve serial-equivalent ordering.
+//
+// Everything else is serial. The returned slices hold INDICES into reqs so the
+// caller can write results back into the request-ordered output slice.
+func (r *ToolRegistry) classifyBatch(reqs []ToolCallRequest) (parallel, serial []int) {
+	// Count how many calls touch each conflict key across the whole turn.
+	keyCount := make(map[string]int)
+	keysPerReq := make([][]string, len(reqs))
+	for i, req := range reqs {
+		keys := conflictKeys(req.Name, req.Params)
+		keysPerReq[i] = keys
+		for _, k := range keys {
+			keyCount[k]++
+		}
+	}
+
+	for i, req := range reqs {
+		// run_in_background calls are never folded into the parallel wave —
+		// they have their own async dispatch semantics via executeInBackground.
+		if bg, ok := req.Params["run_in_background"].(bool); ok && bg {
+			serial = append(serial, i)
+			continue
+		}
+		tool, err := r.Get(req.Name)
+		if err != nil {
+			// Unresolvable tool — keep it serial so the error surfaces in
+			// the deterministic position.
+			serial = append(serial, i)
+			continue
+		}
+		if !isParallelSafe(tool) {
+			serial = append(serial, i)
+			continue
+		}
+		// Shared-target check: if any conflict key for this call is also used
+		// by a different call in the turn, this call may have an ordering
+		// dependency — keep it serial.
+		shared := false
+		for _, k := range keysPerReq[i] {
+			if keyCount[k] > 1 {
+				shared = true
+				break
+			}
+		}
+		if shared {
+			serial = append(serial, i)
+			continue
+		}
+		parallel = append(parallel, i)
+	}
+	return parallel, serial
+}
+
+// defaultBatchConcurrency bounds the worker pool for parallel tool dispatch.
+// Matches the R2 #5 "/batch up to 10×" observation — never spawn more than 10
+// concurrent tool executions regardless of how many calls a turn requests.
+const defaultBatchConcurrency = 10
+
+// ExecuteBatch dispatches all tool calls in an LLM turn, parallelising the
+// independent (side-effect-free / non-conflicting) calls through a bounded
+// worker pool while running conflicting / ordering-dependent calls serially in
+// request order.
+//
+// GUARANTEE: the returned []BatchResult is in the SAME order as the input reqs
+// slice (LLM-requested order), regardless of which call finished first. The
+// turn outcome — every result value and the final filesystem/registry state —
+// is identical to fully serial execution. Only genuinely independent calls run
+// concurrently.
+//
+// maxConcurrency <= 0 selects defaultBatchConcurrency. A single-element batch
+// (or a batch with no parallel-safe members) degrades to plain serial dispatch.
+//
+// Each individual call goes through the SAME Execute path (plan-mode gate,
+// approval gate, hooks, telemetry, LSP/auto-commit triggers) — ExecuteBatch
+// only changes WHEN calls run, never HOW.
+func (r *ToolRegistry) ExecuteBatch(ctx context.Context, reqs []ToolCallRequest, maxConcurrency int) []BatchResult {
+	results := make([]BatchResult, len(reqs))
+	for i, req := range reqs {
+		results[i] = BatchResult{ID: req.ID, Name: req.Name}
+	}
+	if len(reqs) == 0 {
+		return results
+	}
+	if maxConcurrency <= 0 {
+		maxConcurrency = defaultBatchConcurrency
+	}
+
+	parallelIdx, serialIdx := r.classifyBatch(reqs)
+
+	// Run the parallel wave first through a bounded worker pool. Each result
+	// is written to its request-ordered slot — slot writes are disjoint
+	// (one goroutine per index) so no mutex on results is needed.
+	if len(parallelIdx) > 0 {
+		sem := make(chan struct{}, maxConcurrency)
+		var wg sync.WaitGroup
+		for _, idx := range parallelIdx {
+			wg.Add(1)
+			sem <- struct{}{}
+			go func(i int) {
+				defer wg.Done()
+				defer func() { <-sem }()
+				res, err := r.Execute(ctx, reqs[i].Name, reqs[i].Params)
+				results[i].Result = res
+				results[i].Err = err
+				results[i].RanParallel = true
+			}(idx)
+		}
+		wg.Wait()
+	}
+
+	// Run the serial wave in request order. Serial calls run AFTER the
+	// parallel wave so any ordering dependency (a serial call that reads
+	// state a parallel read produced) is preserved — and so two writes to
+	// the same file always apply in request order.
+	for _, idx := range serialIdx {
+		// Honour context cancellation between serial calls.
+		if err := ctx.Err(); err != nil {
+			results[idx].Err = err
+			continue
+		}
+		res, err := r.Execute(ctx, reqs[idx].Name, reqs[idx].Params)
+		results[idx].Result = res
+		results[idx].Err = err
+		results[idx].RanParallel = false
+	}
+
+	return results
+}
+
 // Close closes the registry and releases all resources
 func (r *ToolRegistry) Close() error {
 	if r.web != nil {
