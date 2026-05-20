@@ -23,11 +23,45 @@ SCRIPTS_DIR=scripts
 
 all: build
 
+# ============================================
+# PROFILE-GUIDED OPTIMIZATION (PGO) — speed-programme Phase 4 task P4-T01
+# ============================================
+#
+# Go applies PGO automatically (`-pgo=auto`, the toolchain default since Go
+# 1.21) whenever a `default.pgo` file sits next to the package's `main.go`.
+# This repo commits a representative production profile at:
+#     cmd/cli/default.pgo      — picked up by every `cmd/cli` build
+#     cmd/server/default.pgo   — picked up by every `cmd/server` build
+# Therefore `make build` below, `go build ./cmd/...`, and the container
+# builds are ALL PGO-optimised with no extra flags — the profile is a
+# committed build INPUT, not a regenerable artefact.
+#
+# PGO only changes code generation; it never changes behaviour. The PGO
+# binary passes the full existing test suite identically.
+#
+# Build explicitly without PGO (e.g. for a PGO vs non-PGO comparison):
+#     go build -pgo=off ./cmd/cli/ ./cmd/server/
+#
+# Refresh the profile when the hot paths shift materially (new release,
+# major feature, profile gone stale vs current code):
+#     make pgo-refresh
+# which merges the Phase-0 baseline CPU profiles
+# (docs/research/speed/baseline/pprof/S{1..4}-cpu.pprof) with freshly
+# captured repo-map + filesystem benchmark profiles into one merged
+# default.pgo and copies it to both cmd/ directories.
+
+.PHONY: pgo-refresh
+pgo-refresh:
+	@echo "🔧 Refreshing PGO profile (cmd/cli/default.pgo + cmd/server/default.pgo)..."
+	@bash scripts/pgo-refresh.sh
+
 # Build the application
+# (PGO-optimised automatically — cmd/server/default.pgo is picked up by the
+#  toolchain; see the PGO section above.)
 build: logo-assets
 	@echo "🚀 Building $(BINARY_NAME)..."
 	$(GO_BUILD) -ldflags="-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)" -o bin/$(BINARY_NAME) ./$(CMD_DIR)/server
-	@echo "✅ Build complete: bin/$(BINARY_NAME)"
+	@echo "✅ Build complete: bin/$(BINARY_NAME) (PGO-optimised via cmd/server/default.pgo)"
 
 # Run tests
 test:
