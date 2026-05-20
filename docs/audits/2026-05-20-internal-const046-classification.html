@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-20-internal-const046-classification</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="helix_codeinternal-const-046-hardcoded-content-classification">helix_code/internal
+CONST-046 hardcoded-content classification</h1>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 73%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>docs/Issues.md</td>
+</tr>
+<tr>
+<td>Issues summary</td>
+<td>docs/Issues_Summary.md</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>docs/Fixed.md</td>
+</tr>
+<tr>
+<td>Fixed summary</td>
+<td>docs/Fixed_Summary.md</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>docs/CONTINUATION.md</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#audit-scope">Audit scope</a></li>
+<li><a href="#classification-key">Classification key</a></li>
+<li><a href="#per-file-classification">Per-file classification</a></li>
+<li><a href="#round-350-migration">Round-350 migration</a></li>
+<li><a href="#precedent">Precedent</a></li>
+</ul>
+<h2 id="purpose">Purpose</h2>
+<p>The CONST-046 audit
+(<code>scripts/audit-const046-hardcoded-content.sh</code>) reports ~1484
+hardcoded-content hits under <code>helix_code/internal</code>
+(non-test). Round-346 confirmed these are genuine production literals,
+not test noise. This document classifies the top files so future rounds
+and the audit-gate baseline reflect reality and do not re-examine
+out-of-scope hits indefinitely.</p>
+<p>CONST-046 governs <strong>user-facing</strong> content (UI text,
+prompts shown to the operator, error messages surfaced to end users,
+labels, helper text). It does NOT govern strings addressed to an LLM,
+nor developer-facing wrapped-error / log strings.</p>
+<h2 id="audit-scope">Audit scope</h2>
+<p>Total <code>helix_code/internal</code> non-test hits at round-350:
+<strong>1484</strong>. Top packages by hit count:</p>
+<table>
+<colgroup>
+<col style="width: 77%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package / file</th>
+<th>Hits</th>
+<th>Class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>server/handlers.go</code></td>
+<td>112</td>
+<td>C (migrated round-350)</td>
+</tr>
+<tr>
+<td><code>workflow/planmode/*</code></td>
+<td>70</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>performance/optimizer.go</code></td>
+<td>58</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>memory/providers/*</code></td>
+<td>52</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>workflow/autonomy/*</code></td>
+<td>48</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>commands/builtin/*</code></td>
+<td>43</td>
+<td>C (deferred — see below)</td>
+</tr>
+<tr>
+<td><code>workflow/executor.go</code></td>
+<td>39</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>editor/formats/*</code></td>
+<td>30</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>deployment/production_deployer.go</code></td>
+<td>30</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>providers/ai_integration.go</code></td>
+<td>27</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>repomap/tree_sitter.go</code></td>
+<td>26</td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>agent/base_agent.go</code></td>
+<td>22</td>
+<td>A</td>
+</tr>
+<tr>
+<td><code>agent/profiles/profile.go</code></td>
+<td>~12</td>
+<td>A</td>
+</tr>
+<tr>
+<td><code>agent/types/*</code></td>
+<td>19</td>
+<td>A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="classification-key">Classification key</h2>
+<ul>
+<li><strong>(A) LLM prompt templates</strong> — text addressed to the
+<em>model</em>, not the operator. OUT of CONST-046 scope per round-321
+(HelixLLM <code>openai.go</code>) and round-326 (LLMsVerifier
+<code>verifier.go</code>) precedent. An LLM prompt is consumed by an
+English-trained model regardless of the operator’s locale; translating
+it would degrade output quality.</li>
+<li><strong>(B) Wrapped-error / log / developer-facing tech
+strings</strong> — strings that appear in <code>fmt.Errorf</code>
+wrapping, structured logs, or developer-diagnostic output. OUT of
+CONST-046 scope: these are read by developers/operators inspecting logs,
+not surfaced as localized product UI. CONST-046’s i18n mandate targets
+the product surface.</li>
+<li><strong>(C) Genuine user-facing UI text</strong> — error messages
+returned in API responses, CLI command descriptions/help, labels. IN
+scope — migrate through the package’s i18n seam.</li>
+</ul>
+<h2 id="per-file-classification">Per-file classification</h2>
+<h3 id="a-llm-prompt-templates-out-of-scope">(A) LLM prompt templates —
+OUT of scope</h3>
+<ul>
+<li><strong><code>agent/base_agent.go</code></strong> —
+<code>lines 471-668</code>: “Analyze the following requirements and
+create a detailed technical plan”, “Generate code according to these
+requirements:”, “You are a %s agent named %s…”, etc. These are prompt
+strings passed to <code>provider.Generate</code>. The no-LLM fallback
+strings at <code>lines 326-347</code> (“No-LLM fallback plan:
+requirements echoed verbatim”, “Basic analysis without LLM”) are
+borderline — they are diagnostic status text, classified (B).</li>
+<li><strong><code>agent/profiles/profile.go</code></strong> —
+<code>lines 171-180+</code>: “You are in VERIFIER mode. Your task is to
+review…”, “Fabricate findings: every issue you raise MUST be grounded…”.
+These compose the system prompt sent to the model. OUT of scope.</li>
+<li><strong><code>agent/types/coding_agent.go</code>,
+<code>debugging_agent.go</code></strong> — “You are a code generation
+agent…”, “You are a debugging agent…”. Prompt preambles addressed to the
+model. OUT of scope.</li>
+</ul>
+<h3 id="b-wrapped-error-log-developer-tech-strings-out-of-scope">(B)
+Wrapped-error / log / developer tech strings — OUT of scope</h3>
+<ul>
+<li><strong><code>workflow/planmode/executor.go</code></strong> —
+“Starting execution”, “Skipped: %s (dependencies not met)”,
+“Successfully wrote %d bytes to %s”. Step-execution log/status output
+for developer diagnostics.</li>
+<li><strong><code>workflow/autonomy/controller.go</code></strong> —
+“Mode changed: %s -&gt; %s”, “Escalation approved: %s”, “De-escalated to
+mode: %s”. Autonomy controller state-transition log lines.</li>
+<li><strong><code>workflow/executor.go</code></strong> — “Project
+Architecture Planning”, “Build and compile project”, “Run comprehensive
+test suite”. These are internal workflow-step
+<em>identifiers/labels</em> composed into workflow definitions, not
+localized end-user UI.</li>
+<li><strong><code>performance/optimizer.go</code></strong> — “CPU
+Goroutine Pool”, “Implement goroutine pool for CPU-intensive
+operations”. Optimization-strategy recommendation records consumed by
+performance tooling / reports.</li>
+<li><strong><code>memory/providers/anima_provider.go</code> (+
+siblings)</strong> — “Provider is operating normally”, “Provider has not
+been initialized”, “Anima AI Memory Provider”. Health-check status
+strings + provider display-name metadata in developer-facing
+diagnostics.</li>
+<li><strong><code>agent/subagent/*</code></strong> — “subagent
+subprocess: marshal task: %v”, “failed to construct LLM provider: %v”,
+“InProcessSpawner channel closed without result”. Wrapped-error tech
+strings.</li>
+<li><strong><code>adapters/speckit_debate_adapter/adapter.go</code></strong>
+— “## Rounds conducted: %d”, “- FOR: agent %s (provider=%s …)”. Markdown
+report-assembly fragments for developer-facing debate transcripts.</li>
+</ul>
+<h3 id="c-genuine-user-facing-ui-text-in-scope">(C) Genuine user-facing
+UI text — IN scope</h3>
+<ul>
+<li><strong><code>server/handlers.go</code></strong> — JSON API
+error-response <code>"message"</code> fields (“Authentication required”,
+“Invalid request”, “Task manager not available”, etc.). Observable by
+every API consumer (CLI, desktop, mobile, third-party). <strong>Migrated
+in round-350.</strong></li>
+<li><strong><code>commands/builtin/*</code></strong> — slash-command
+<code>Description()</code> / <code>Usage()</code> return values
+(“Summarize and condense conversation history to save tokens”,
+“/condense [options]”, etc.). Genuinely user-facing CLI help text.
+<strong>Deferred</strong>: the <code>internal/commands/builtin</code>
+package is a sub-package of <code>internal/commands</code>; the
+<code>commands.tr()</code> seam is unexported and not reachable from
+<code>builtin</code>, and <code>Description()</code> /
+<code>Usage()</code> are context-free synchronous methods. Migrating
+this surface requires a dedicated seam refactor (own
+<code>builtin/i18n</code> package + context plumbing) — scoped to a
+future round to keep round-350 focused and low-risk.</li>
+</ul>
+<h2 id="round-350-migration">Round-350 migration</h2>
+<p><code>server/handlers.go</code>: 16 distinct user-facing JSON
+<code>"message"</code> literals migrated to the existing
+<code>internal/server</code> i18n seam
+(<code>internal/server/i18n_seam.go</code> +
+<code>i18n/bundles/active.en.yaml</code>), covering ~73 call sites. Six
+bundle IDs from round-177 that were declared but never wired into
+handler code are now wired; ten new IDs added. A nil-safe
+<code>reqCtx(c)</code> helper was added to the seam, which also repairs
+a pre-existing latent nil-<code>Request</code> panic in
+<code>qa_handlers.go</code> (round-70 wiring assumed a non-nil
+<code>c.Request</code>; <code>gin.CreateTestContext</code> leaves it
+nil). Paired-mutation tests added in <code>i18n_seam_test.go</code>.</p>
+<h2 id="precedent">Precedent</h2>
+<ul>
+<li>Round-321 — HelixLLM <code>openai.go</code>: LLM prompt templates
+ruled OUT of CONST-046 scope.</li>
+<li>Round-326 — LLMsVerifier <code>verifier.go</code>: same ruling
+reaffirmed.</li>
+<li>Round-177 — <code>internal/server</code> i18n seam established
+(round-70 of the CONST-046 Phase-4 numbering).</li>
+</ul>
+</body>
+</html>

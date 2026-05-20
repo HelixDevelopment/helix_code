@@ -48,3 +48,39 @@ internal_server_registration_failed:
 
 internal_server_failed_generate_token:
   other: "Failed to generate token"
+
+# Round-350 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+# the remaining high-frequency user-facing JSON-response `"message"`
+# literals in handlers.go. Each ID below covers 2+ call sites; all
+# are observable by every API consumer (CLI, desktop, mobile,
+# third-party) and must adapt to the caller's locale.
+
+internal_server_invalid_request:
+  other: "Invalid request"
+
+internal_server_user_not_authenticated:
+  other: "User not authenticated"
+
+internal_server_project_not_found:
+  other: "Project not found"
+
+internal_server_project_manager_unavailable:
+  other: "Project manager not available"
+
+internal_server_task_not_found:
+  other: "Task not found"
+
+internal_server_task_manager_unavailable:
+  other: "Task manager not available"
+
+internal_server_worker_not_found:
+  other: "Worker not found"
+
+internal_server_worker_manager_unavailable:
+  other: "Worker manager not available"
+
+internal_server_session_not_found:
+  other: "Session not found"
+
+internal_server_session_manager_unavailable:
+  other: "Session manager not available"

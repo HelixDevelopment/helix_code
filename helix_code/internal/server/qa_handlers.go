@@ -16,7 +16,7 @@ import (
 
 func (s *Server) startQASession(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 
@@ -46,7 +46,7 @@ func (s *Server) startQASession(c *gin.Context) {
 
 func (s *Server) getQASessionStatus(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *Server) getQASessionStatus(c *gin.Context) {
 
 func (s *Server) getQASessionReport(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 
@@ -146,7 +146,7 @@ func (s *Server) getQASessionReport(c *gin.Context) {
 
 func (s *Server) getQASessionScreenshot(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 
@@ -199,7 +199,7 @@ func (s *Server) getQASessionScreenshot(c *gin.Context) {
 
 func (s *Server) cancelQASession(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 
@@ -213,7 +213,7 @@ func (s *Server) cancelQASession(c *gin.Context) {
 
 func (s *Server) listQASessions(c *gin.Context) {
 	if s.qaEngine == nil || !s.qaEngine.Enabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(c.Request.Context(), "internal_server_qa_engine_disabled", nil)})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": tr(reqCtx(c), "internal_server_qa_engine_disabled", nil)})
 		return
 	}
 

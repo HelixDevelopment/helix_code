@@ -29,28 +29,28 @@ func respondInvalidID(c *gin.Context, err error, what string) bool {
 	case errors.Is(err, task.ErrInvalidTaskID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": tr(c.Request.Context(), "internal_server_invalid_task_id", nil),
+			"message": tr(reqCtx(c), "internal_server_invalid_task_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, worker.ErrInvalidWorkerID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": tr(c.Request.Context(), "internal_server_invalid_worker_id", nil),
+			"message": tr(reqCtx(c), "internal_server_invalid_worker_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, project.ErrInvalidProjectID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": tr(c.Request.Context(), "internal_server_invalid_project_id", nil),
+			"message": tr(reqCtx(c), "internal_server_invalid_project_id", nil),
 			"error":   err.Error(),
 		})
 		return true
 	case errors.Is(err, project.ErrInvalidOwnerID):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": tr(c.Request.Context(), "internal_server_invalid_owner_id", nil),
+			"message": tr(reqCtx(c), "internal_server_invalid_owner_id", nil),
 			"error":   err.Error(),
 		})
 		return true
@@ -72,7 +72,7 @@ func (s *Server) listProjects(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "Authentication required",
+			"message": tr(reqCtx(c), "internal_server_authentication_required", nil),
 			"error":   "user not found in context - please authenticate first",
 		})
 		return
@@ -81,7 +81,7 @@ func (s *Server) listProjects(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
 		})
 		return
 	}
@@ -91,7 +91,7 @@ func (s *Server) listProjects(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to list projects",
+			"message": tr(reqCtx(c), "internal_server_failed_list_projects", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -122,7 +122,7 @@ func (s *Server) register(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -132,7 +132,7 @@ func (s *Server) register(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Registration failed",
+			"message": tr(reqCtx(c), "internal_server_registration_failed", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -153,7 +153,7 @@ func (s *Server) login(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -174,7 +174,7 @@ func (s *Server) login(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to generate token",
+			"message": tr(reqCtx(c), "internal_server_failed_generate_token", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -251,7 +251,7 @@ func (s *Server) refreshToken(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Failed to generate token",
+			"message": tr(reqCtx(c), "internal_server_failed_generate_token", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -269,7 +269,7 @@ func (s *Server) getCurrentUser(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "User not authenticated",
+			"message": tr(reqCtx(c), "internal_server_user_not_authenticated", nil),
 		})
 		return
 	}
@@ -278,7 +278,7 @@ func (s *Server) getCurrentUser(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
 		})
 		return
 	}
@@ -300,7 +300,7 @@ func (s *Server) createProject(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -316,7 +316,7 @@ func (s *Server) createProject(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "Authentication required",
+			"message": tr(reqCtx(c), "internal_server_authentication_required", nil),
 		})
 		return
 	}
@@ -324,7 +324,7 @@ func (s *Server) createProject(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
 		})
 		return
 	}
@@ -363,7 +363,7 @@ func (s *Server) getProject(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"status":  "error",
-			"message": "Project not found",
+			"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -386,7 +386,7 @@ func (s *Server) updateProject(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -395,7 +395,7 @@ func (s *Server) updateProject(c *gin.Context) {
 	if s.projectManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Project manager not available",
+			"message": tr(reqCtx(c), "internal_server_project_manager_unavailable", nil),
 			"error":   "database connection required for project management",
 		})
 		return
@@ -411,7 +411,7 @@ func (s *Server) updateProject(c *gin.Context) {
 		if errors.Is(err, project.ErrProjectNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Project not found",
+				"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -436,7 +436,7 @@ func (s *Server) deleteProject(c *gin.Context) {
 	if s.projectManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Project manager not available",
+			"message": tr(reqCtx(c), "internal_server_project_manager_unavailable", nil),
 			"error":   "database connection required for project management",
 		})
 		return
@@ -451,7 +451,7 @@ func (s *Server) deleteProject(c *gin.Context) {
 		if errors.Is(err, project.ErrProjectNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Project not found",
+				"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -518,7 +518,7 @@ func (s *Server) createTask(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -559,7 +559,7 @@ func (s *Server) createTask(c *gin.Context) {
 	// Task manager not available - return service unavailable error
 	c.JSON(http.StatusServiceUnavailable, gin.H{
 		"status":  "error",
-		"message": "Task manager not available",
+		"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		"error":   "database connection required for task management",
 	})
 }
@@ -572,7 +572,7 @@ func (s *Server) getTask(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Task not found",
+				"message": tr(reqCtx(c), "internal_server_task_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -588,7 +588,7 @@ func (s *Server) getTask(c *gin.Context) {
 	// Task manager not available - return service unavailable error
 	c.JSON(http.StatusServiceUnavailable, gin.H{
 		"status":  "error",
-		"message": "Task manager not available",
+		"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		"error":   "database connection required for task management",
 	})
 }
@@ -605,7 +605,7 @@ func (s *Server) updateTask(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -658,7 +658,7 @@ func (s *Server) updateTask(c *gin.Context) {
 	// Task manager not available - return service unavailable error
 	c.JSON(http.StatusServiceUnavailable, gin.H{
 		"status":  "error",
-		"message": "Task manager not available",
+		"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		"error":   "database connection required for task management",
 	})
 }
@@ -669,7 +669,7 @@ func (s *Server) deleteTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 			"error":   "database connection required for task management",
 		})
 		return
@@ -685,7 +685,7 @@ func (s *Server) deleteTask(c *gin.Context) {
 		if errors.Is(err, task.ErrTaskNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Task not found",
+				"message": tr(reqCtx(c), "internal_server_task_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -745,7 +745,7 @@ func (s *Server) getWorker(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Worker not found",
+				"message": tr(reqCtx(c), "internal_server_worker_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -761,7 +761,7 @@ func (s *Server) getWorker(c *gin.Context) {
 	// Worker manager not available - return service unavailable error
 	c.JSON(http.StatusServiceUnavailable, gin.H{
 		"status":  "error",
-		"message": "Worker manager not available",
+		"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		"error":   "database connection required for worker management",
 	})
 }
@@ -871,7 +871,7 @@ func workflowError(c *gin.Context, err error, action string) {
 	if errors.Is(err, project.ErrProjectNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"status":  "error",
-			"message": "Project not found",
+			"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1363,7 +1363,7 @@ func (s *Server) updateCurrentUser(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "User not authenticated",
+			"message": tr(reqCtx(c), "internal_server_user_not_authenticated", nil),
 		})
 		return
 	}
@@ -1372,7 +1372,7 @@ func (s *Server) updateCurrentUser(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
 		})
 		return
 	}
@@ -1385,7 +1385,7 @@ func (s *Server) updateCurrentUser(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1419,7 +1419,7 @@ func (s *Server) deleteCurrentUser(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
-			"message": "User not authenticated",
+			"message": tr(reqCtx(c), "internal_server_user_not_authenticated", nil),
 		})
 		return
 	}
@@ -1428,7 +1428,7 @@ func (s *Server) deleteCurrentUser(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
-			"message": "Invalid user context",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
 		})
 		return
 	}
@@ -1465,7 +1465,7 @@ func (s *Server) createWorker(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1474,7 +1474,7 @@ func (s *Server) createWorker(c *gin.Context) {
 	if s.workerManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Worker manager not available",
+			"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1528,7 +1528,7 @@ func (s *Server) updateWorker(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1537,7 +1537,7 @@ func (s *Server) updateWorker(c *gin.Context) {
 	if s.workerManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Worker manager not available",
+			"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1552,7 +1552,7 @@ func (s *Server) updateWorker(c *gin.Context) {
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Worker not found",
+				"message": tr(reqCtx(c), "internal_server_worker_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -1578,7 +1578,7 @@ func (s *Server) deleteWorker(c *gin.Context) {
 	if s.workerManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Worker manager not available",
+			"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1593,7 +1593,7 @@ func (s *Server) deleteWorker(c *gin.Context) {
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Worker not found",
+				"message": tr(reqCtx(c), "internal_server_worker_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -1623,7 +1623,7 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1632,7 +1632,7 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 	if s.workerManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Worker manager not available",
+			"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1650,7 +1650,7 @@ func (s *Server) workerHeartbeat(c *gin.Context) {
 		if errors.Is(err, worker.ErrWorkerNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Worker not found",
+				"message": tr(reqCtx(c), "internal_server_worker_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -1676,7 +1676,7 @@ func (s *Server) getWorkerMetrics(c *gin.Context) {
 	if s.workerManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Worker manager not available",
+			"message": tr(reqCtx(c), "internal_server_worker_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1723,7 +1723,7 @@ func (s *Server) assignTask(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1732,7 +1732,7 @@ func (s *Server) assignTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1777,7 +1777,7 @@ func (s *Server) startTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1825,7 +1825,7 @@ func (s *Server) completeTask(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1834,7 +1834,7 @@ func (s *Server) completeTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1882,7 +1882,7 @@ func (s *Server) failTask(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1891,7 +1891,7 @@ func (s *Server) failTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1906,7 +1906,7 @@ func (s *Server) failTask(c *gin.Context) {
 		if errors.Is(err, task.ErrTaskNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Task not found",
+				"message": tr(reqCtx(c), "internal_server_task_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -1941,7 +1941,7 @@ func (s *Server) createTaskCheckpoint(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -1950,7 +1950,7 @@ func (s *Server) createTaskCheckpoint(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -1992,7 +1992,7 @@ func (s *Server) getTaskCheckpoints(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2031,7 +2031,7 @@ func (s *Server) retryTask(c *gin.Context) {
 	if s.taskManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Task manager not available",
+			"message": tr(reqCtx(c), "internal_server_task_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2079,7 +2079,7 @@ func (s *Server) getProjectSessions(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2099,7 +2099,7 @@ func (s *Server) listSessions(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2124,7 +2124,7 @@ func (s *Server) createSession(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -2133,7 +2133,7 @@ func (s *Server) createSession(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2190,7 +2190,7 @@ func (s *Server) getSession(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2199,7 +2199,7 @@ func (s *Server) getSession(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"status":  "error",
-			"message": "Session not found",
+			"message": tr(reqCtx(c), "internal_server_session_not_found", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -2223,7 +2223,7 @@ func (s *Server) updateSession(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "Invalid request",
+			"message": tr(reqCtx(c), "internal_server_invalid_request", nil),
 			"error":   err.Error(),
 		})
 		return
@@ -2232,7 +2232,7 @@ func (s *Server) updateSession(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2262,7 +2262,7 @@ func (s *Server) updateSession(c *gin.Context) {
 		if errors.Is(err, session.ErrSessionNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Session not found",
+				"message": tr(reqCtx(c), "internal_server_session_not_found", nil),
 				"error":   err.Error(),
 			})
 			return
@@ -2292,7 +2292,7 @@ func (s *Server) deleteSession(c *gin.Context) {
 	if s.sessionManager == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status":  "error",
-			"message": "Session manager not available",
+			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
 		return
 	}
@@ -2303,7 +2303,7 @@ func (s *Server) deleteSession(c *gin.Context) {
 		if errors.Is(err, session.ErrSessionNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Session not found",
+				"message": tr(reqCtx(c), "internal_server_session_not_found", nil),
 				"error":   err.Error(),
 			})
 			return

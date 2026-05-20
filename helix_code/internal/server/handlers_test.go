@@ -99,7 +99,12 @@ func TestRegister_InvalidRequest(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, "error", response["status"])
-	assert.Equal(t, "Invalid request", response["message"])
+	// CONST-046 round-350: the "Invalid request" literal is now
+	// resolved through the i18n seam. setupTestServer wires no real
+	// Translator, so NoopTranslator echoes the message ID verbatim
+	// (loud-echo fallback). A wired *i18nadapter.Translator at boot
+	// resolves this to the caller's locale.
+	assert.Equal(t, "internal_server_invalid_request", response["message"])
 }
 
 func TestRegister_EmptyBody(t *testing.T) {
@@ -143,7 +148,10 @@ func TestLogin_InvalidRequest(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, "error", response["status"])
-	assert.Equal(t, "Invalid request", response["message"])
+	// CONST-046 round-350: i18n-seam-resolved; NoopTranslator echoes
+	// the message ID when no real Translator is wired (see
+	// TestRegister_InvalidRequest comment).
+	assert.Equal(t, "internal_server_invalid_request", response["message"])
 }
 
 // TestLogin_InvalidCredentials removed - requires full database mocking

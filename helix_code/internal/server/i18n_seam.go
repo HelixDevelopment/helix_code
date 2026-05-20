@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	serveri18n "dev.helix.code/internal/server/i18n"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -31,6 +32,22 @@ func SetTranslator(t serveri18n.Translator) {
 		return
 	}
 	trTranslator = t
+}
+
+// reqCtx returns the request-scoped context for a Gin context,
+// degrading to context.Background() when c or c.Request is nil.
+// gin.CreateTestContext (used pervasively in *_test.go) leaves
+// c.Request nil, so calling c.Request.Context() directly panics —
+// the round-350 §11.4 anti-bluff sweep widened the CONST-046 tr()
+// migration across handlers.go and this helper is the single
+// nil-safe accessor every migrated callsite uses. It also repairs
+// the pre-existing latent panic in qa_handlers.go (round-70 wiring
+// that assumed a non-nil c.Request).
+func reqCtx(c *gin.Context) context.Context {
+	if c == nil || c.Request == nil {
+		return context.Background()
+	}
+	return c.Request.Context()
 }
 
 // tr resolves msgID against the currently-wired Translator. If the
