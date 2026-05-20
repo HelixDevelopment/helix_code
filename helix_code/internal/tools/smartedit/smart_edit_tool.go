@@ -116,6 +116,10 @@ func (t *SmartEditTool) Schema() tools.ToolSchema {
 				"type":        "boolean",
 				"description": "Optional. If true, parse + apply in memory and return the diff without committing to disk.",
 			},
+			"fuzzy": map[string]interface{}{
+				"type":        "boolean",
+				"description": "Optional. If true, locate SEARCH blocks with whitespace-tolerant matching (re-indentation / tab-vs-space drift absorbed). Still fails closed on ambiguity. Default: false (strict byte match).",
+			},
 		},
 		Required:    []string{"prompt"},
 		Description: "Apply SEARCH/REPLACE edits atomically across files.",
@@ -144,6 +148,11 @@ func (t *SmartEditTool) Validate(params map[string]interface{}) error {
 			return fmt.Errorf("dry_run must be a boolean, got %T", v)
 		}
 	}
+	if v, present := params["fuzzy"]; present {
+		if _, ok := v.(bool); !ok {
+			return fmt.Errorf("fuzzy must be a boolean, got %T", v)
+		}
+	}
 	return nil
 }
 
@@ -155,6 +164,7 @@ func (t *SmartEditTool) Execute(ctx context.Context, params map[string]interface
 
 	prompt, _ := params["prompt"].(string)
 	dryRun, _ := params["dry_run"].(bool)
+	fuzzy, _ := params["fuzzy"].(bool)
 	workdir, _ := params["workdir"].(string)
 	if workdir == "" {
 		workdir = t.workdir
@@ -256,7 +266,19 @@ func (t *SmartEditTool) Execute(ctx context.Context, params map[string]interface
 		}
 
 		fa.original = content
-		newContent, blockResults, fileOK := ApplyPlanToContent(content, blocks)
+		// Default is the strict byte-exact applier (no behaviour change for
+		// existing callers). `fuzzy=true` opts into the whitespace-tolerant
+		// applier, which still fails closed on ambiguity / not-found.
+		var (
+			newContent   []byte
+			blockResults []EditResult
+			fileOK       bool
+		)
+		if fuzzy {
+			newContent, blockResults, fileOK = ApplyPlanToContentFuzzy(content, blocks)
+		} else {
+			newContent, blockResults, fileOK = ApplyPlanToContent(content, blocks)
+		}
 		fa.blockResults = blockResults
 		if fileOK {
 			fa.applied = true
