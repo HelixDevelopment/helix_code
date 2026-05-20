@@ -28,30 +28,12 @@ func (c *NewRuleCommand) Aliases() []string {
 
 // Description returns command description
 func (c *NewRuleCommand) Description() string {
-	return "Generate project rules/guidelines from conversation patterns"
+	return trc("builtin_newrule_description", nil)
 }
 
 // Usage returns usage information
 func (c *NewRuleCommand) Usage() string {
-	return `/newrule [category] [options]
-
-Analyzes the conversation and generates coding rules or guidelines based on patterns.
-
-Examples:
-  /newrule
-  /newrule coding-style
-  /newrule testing --global
-  /newrule "error handling"
-
-Categories:
-  coding-style: Code formatting and style preferences
-  testing: Testing requirements and patterns
-  architecture: Architectural decisions
-  documentation: Documentation standards
-
-Flags:
-  --global: Save as global rule (default: workspace)
-  --name: Custom rule name`
+	return trc("builtin_newrule_usage", nil)
 }
 
 // Execute runs the command
@@ -101,8 +83,12 @@ func (c *NewRuleCommand) Execute(ctx context.Context, cmdCtx *commands.CommandCo
 	}
 
 	return &commands.CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Generating %s rule: %s\nLocation: %s", category, ruleName, location),
+		Success: true,
+		Message: tr(ctx, "builtin_newrule_generating", map[string]any{
+			"Category": category,
+			"Name":     ruleName,
+			"Location": location,
+		}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{

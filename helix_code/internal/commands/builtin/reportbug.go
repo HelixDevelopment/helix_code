@@ -34,26 +34,12 @@ func (c *ReportBugCommand) Aliases() []string {
 
 // Description returns command description
 func (c *ReportBugCommand) Description() string {
-	return "File a bug report with system information and logs"
+	return trc("builtin_reportbug_description", nil)
 }
 
 // Usage returns usage information
 func (c *ReportBugCommand) Usage() string {
-	return `/reportbug [description] [options]
-
-Files a bug report to GitHub with system information, logs, and reproduction steps.
-
-Examples:
-  /reportbug "LLM timeout error"
-  /reportbug --title "Memory leak in worker pool" --attach-logs
-  /reportbug "Crash on startup" --labels bug,critical
-  /reportbug --auto-submit
-
-Flags:
-  --title: Custom issue title (default: generated from description)
-  --labels: Comma-separated labels (e.g., bug,high-priority)
-  --attach-logs: Include recent logs (default: true)
-  --auto-submit: Automatically submit to GitHub (requires auth)`
+	return trc("builtin_reportbug_usage", nil)
 }
 
 // Execute runs the command
@@ -61,7 +47,7 @@ func (c *ReportBugCommand) Execute(ctx context.Context, cmdCtx *commands.Command
 	// Extract description
 	description := strings.Join(cmdCtx.Args, " ")
 	if description == "" {
-		description = "Bug report from HelixCode"
+		description = tr(ctx, "builtin_reportbug_default_description", nil)
 	}
 
 	// Parse flags
@@ -109,11 +95,11 @@ func (c *ReportBugCommand) Execute(ctx context.Context, cmdCtx *commands.Command
 		},
 	}
 
-	message := fmt.Sprintf("Bug report prepared: %s", title)
+	message := tr(ctx, "builtin_reportbug_prepared", map[string]any{"Title": title})
 	if autoSubmit {
-		message += " (submitting to GitHub...)"
+		message += tr(ctx, "builtin_reportbug_submitting", nil)
 	} else {
-		message += " (review and submit manually)"
+		message += tr(ctx, "builtin_reportbug_review_manually", nil)
 	}
 
 	return &commands.CommandResult{

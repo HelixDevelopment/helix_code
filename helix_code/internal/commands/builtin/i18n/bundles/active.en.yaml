@@ -1,0 +1,206 @@
+# internal/commands/builtin i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/commands/builtin/*.go to a message ID resolved
+# at runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: builtin_<command>_<description|usage>. All IDs
+# prefixed with builtin_ to avoid namespace collision with other
+# packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-353 §11.4 anti-bluff sweep (2026-05-19): the six built-in
+# slash commands' Description() + Usage() method literals — ~43
+# user-facing strings (description sentences + multi-line usage
+# blocks with examples, flag docs, categories, phases) — migrated via
+# the builtin/i18n seam. Description()/Usage() are context-free
+# metadata accessors, so the trc() resolver resolves against
+# context.Background() (mirrors the cmd/cli round-311 trc() pattern).
+#
+# Each Usage() block is one Go raw-string literal, so it maps to one
+# message ID even though it renders many user-facing lines — keeping
+# the migration faithful to the source structure while every visible
+# line becomes locale-overridable in one place.
+
+# --- /condense ---
+# Round-355 §11.4 CONST-046 Phase-4 sweep (2026-05-20): runtime
+# CommandResult.Message literals returned by the built-in slash
+# commands' Execute() methods. These are surfaced directly to the
+# operator in the CLI/TUI command-result panel, so they are genuine
+# (C) user-facing UI text. Execute() threads a request-scoped
+# context.Context, so the runtime tr() resolver is used (not trc()).
+builtin_condense_no_history:
+  other: "No chat history to condense"
+builtin_condense_not_enough_history:
+  other: "Not enough history to condense"
+builtin_condense_in_progress:
+  other: "Condensing {{.Count}} messages (keeping last {{.Keep}} uncompressed)"
+builtin_condense_description:
+  other: "Summarize and condense conversation history to save tokens"
+builtin_condense_usage:
+  other: |-
+    /condense [options]
+
+    Summarizes the conversation history, preserving important details while reducing token count.
+
+    Examples:
+      /condense
+      /condense --keep-last 5
+      /condense --preserve-code
+
+    Flags:
+      --keep-last N: Keep last N messages uncompressed
+      --preserve-code: Keep all code blocks intact
+      --preserve-errors: Keep all error messages intact
+      --ratio: Target compression ratio (default: 0.5)
+
+# --- /deepplanning ---
+builtin_deepplanning_topic_required:
+  other: "Planning topic is required. Usage: /deepplanning <topic> or /deepplanning --resume <plan-id>"
+builtin_deepplanning_starting:
+  other: "Starting deep planning for: {{.Topic}} (depth: {{.Depth}})"
+builtin_deepplanning_save_location:
+  other: "Plan will be saved to: {{.File}}"
+builtin_deepplanning_resuming:
+  other: "Resuming deep planning session: {{.PlanID}}"
+builtin_deepplanning_description:
+  other: "Enter extended planning mode with detailed analysis and architecture design"
+builtin_deepplanning_usage:
+  other: |-
+    /deepplanning [topic] [options]
+
+    Enters extended planning mode with comprehensive analysis, architecture design,
+    and detailed implementation planning.
+
+    Examples:
+      /deepplanning "new authentication system"
+      /deepplanning --depth 3 --output plan.md
+      /deepplanning microservices --include-diagrams
+      /deepplanning --resume plan-123
+
+    Planning Phases:
+      1. Requirements Analysis: Gather and analyze requirements
+      2. Architecture Design: Design system architecture and components
+      3. Technology Selection: Choose appropriate technologies and tools
+      4. Implementation Planning: Break down into tasks and milestones
+      5. Risk Assessment: Identify potential risks and mitigation strategies
+      6. Resource Estimation: Estimate time, team size, and resources
+
+    Flags:
+      --depth: Planning depth (1-5, default: 3)
+      --output: Save plan to file (markdown or JSON)
+      --include-diagrams: Generate architecture diagrams (ASCII/Mermaid)
+      --resume: Resume previous planning session
+      --focus: Focus areas (comma-separated: architecture,security,performance,scalability)
+      --constraints: Specify constraints (e.g., "budget=low,timeline=2weeks")
+
+# --- /newrule ---
+builtin_newrule_generating:
+  other: "Generating {{.Category}} rule: {{.Name}}\nLocation: {{.Location}}"
+builtin_newrule_description:
+  other: "Generate project rules/guidelines from conversation patterns"
+builtin_newrule_usage:
+  other: |-
+    /newrule [category] [options]
+
+    Analyzes the conversation and generates coding rules or guidelines based on patterns.
+
+    Examples:
+      /newrule
+      /newrule coding-style
+      /newrule testing --global
+      /newrule "error handling"
+
+    Categories:
+      coding-style: Code formatting and style preferences
+      testing: Testing requirements and patterns
+      architecture: Architectural decisions
+      documentation: Documentation standards
+
+    Flags:
+      --global: Save as global rule (default: workspace)
+      --name: Custom rule name
+
+# --- /newtask ---
+builtin_newtask_description_required:
+  other: "Task description is required"
+builtin_newtask_created:
+  other: "Created new task: {{.Description}}"
+builtin_newtask_description:
+  other: "Create a new task with current context preserved"
+builtin_newtask_usage:
+  other: |-
+    /newtask [description]
+
+    Creates a new task while preserving relevant context from the current conversation.
+
+    Examples:
+      /newtask Implement user authentication
+      /newtask --link-previous Fix the bug discussed above
+      /newtask "Refactor database layer" --priority high
+
+    Flags:
+      --link-previous: Link to current task
+      --priority: Set task priority (low, normal, high, critical)
+      --transfer-files: Transfer file references to new task
+
+# --- /reportbug ---
+builtin_reportbug_default_description:
+  other: "Bug report from HelixCode"
+builtin_reportbug_prepared:
+  other: "Bug report prepared: {{.Title}}"
+builtin_reportbug_submitting:
+  other: " (submitting to GitHub...)"
+builtin_reportbug_review_manually:
+  other: " (review and submit manually)"
+builtin_reportbug_description:
+  other: "File a bug report with system information and logs"
+builtin_reportbug_usage:
+  other: |-
+    /reportbug [description] [options]
+
+    Files a bug report to GitHub with system information, logs, and reproduction steps.
+
+    Examples:
+      /reportbug "LLM timeout error"
+      /reportbug --title "Memory leak in worker pool" --attach-logs
+      /reportbug "Crash on startup" --labels bug,critical
+      /reportbug --auto-submit
+
+    Flags:
+      --title: Custom issue title (default: generated from description)
+      --labels: Comma-separated labels (e.g., bug,high-priority)
+      --attach-logs: Include recent logs (default: true)
+      --auto-submit: Automatically submit to GitHub (requires auth)
+
+# --- /workflows ---
+builtin_workflows_description:
+  other: "List, execute, or manage development workflows"
+builtin_workflows_usage:
+  other: |-
+    /workflows [workflow-name] [options]
+
+    Lists available workflows or executes a specific workflow.
+
+    Examples:
+      /workflows                          # List all workflows
+      /workflows planning                 # Execute planning workflow
+      /workflows --list                   # List with details
+      /workflows testing --params "unit"  # Execute with parameters
+      /workflows --status workflow-123    # Check workflow status
+
+    Built-in Workflows:
+      planning: Analyze requirements and create technical specifications
+      building: Generate code and manage dependencies
+      testing: Run unit, integration, and end-to-end tests
+      refactoring: Analyze and optimize code structure
+      debugging: Identify and fix issues
+      deployment: Build, package, and deploy to targets
+
+    Flags:
+      --list: Show detailed workflow information
+      --status: Check status of a running workflow
+      --params: Pass parameters to workflow (JSON or key=value)
+      --async: Run workflow in background
+      --cancel: Cancel a running workflow

@@ -28,36 +28,12 @@ func (c *WorkflowsCommand) Aliases() []string {
 
 // Description returns command description
 func (c *WorkflowsCommand) Description() string {
-	return "List, execute, or manage development workflows"
+	return trc("builtin_workflows_description", nil)
 }
 
 // Usage returns usage information
 func (c *WorkflowsCommand) Usage() string {
-	return `/workflows [workflow-name] [options]
-
-Lists available workflows or executes a specific workflow.
-
-Examples:
-  /workflows                          # List all workflows
-  /workflows planning                 # Execute planning workflow
-  /workflows --list                   # List with details
-  /workflows testing --params "unit"  # Execute with parameters
-  /workflows --status workflow-123    # Check workflow status
-
-Built-in Workflows:
-  planning: Analyze requirements and create technical specifications
-  building: Generate code and manage dependencies
-  testing: Run unit, integration, and end-to-end tests
-  refactoring: Analyze and optimize code structure
-  debugging: Identify and fix issues
-  deployment: Build, package, and deploy to targets
-
-Flags:
-  --list: Show detailed workflow information
-  --status: Check status of a running workflow
-  --params: Pass parameters to workflow (JSON or key=value)
-  --async: Run workflow in background
-  --cancel: Cancel a running workflow`
+	return trc("builtin_workflows_usage", nil)
 }
 
 // Execute runs the command

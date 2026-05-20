@@ -28,37 +28,12 @@ func (c *DeepPlanningCommand) Aliases() []string {
 
 // Description returns command description
 func (c *DeepPlanningCommand) Description() string {
-	return "Enter extended planning mode with detailed analysis and architecture design"
+	return trc("builtin_deepplanning_description", nil)
 }
 
 // Usage returns usage information
 func (c *DeepPlanningCommand) Usage() string {
-	return `/deepplanning [topic] [options]
-
-Enters extended planning mode with comprehensive analysis, architecture design,
-and detailed implementation planning.
-
-Examples:
-  /deepplanning "new authentication system"
-  /deepplanning --depth 3 --output plan.md
-  /deepplanning microservices --include-diagrams
-  /deepplanning --resume plan-123
-
-Planning Phases:
-  1. Requirements Analysis: Gather and analyze requirements
-  2. Architecture Design: Design system architecture and components
-  3. Technology Selection: Choose appropriate technologies and tools
-  4. Implementation Planning: Break down into tasks and milestones
-  5. Risk Assessment: Identify potential risks and mitigation strategies
-  6. Resource Estimation: Estimate time, team size, and resources
-
-Flags:
-  --depth: Planning depth (1-5, default: 3)
-  --output: Save plan to file (markdown or JSON)
-  --include-diagrams: Generate architecture diagrams (ASCII/Mermaid)
-  --resume: Resume previous planning session
-  --focus: Focus areas (comma-separated: architecture,security,performance,scalability)
-  --constraints: Specify constraints (e.g., "budget=low,timeline=2weeks")`
+	return trc("builtin_deepplanning_usage", nil)
 }
 
 // Execute runs the command
@@ -68,13 +43,13 @@ func (c *DeepPlanningCommand) Execute(ctx context.Context, cmdCtx *commands.Comm
 	if topic == "" && cmdCtx.Flags["resume"] == "" {
 		return &commands.CommandResult{
 			Success: false,
-			Message: "Planning topic is required. Usage: /deepplanning <topic> or /deepplanning --resume <plan-id>",
+			Message: tr(ctx, "builtin_deepplanning_topic_required", nil),
 		}, nil
 	}
 
 	// Check for resume
 	if resumeID, ok := cmdCtx.Flags["resume"]; ok {
-		return c.resumePlanning(resumeID, cmdCtx)
+		return c.resumePlanning(ctx, resumeID, cmdCtx)
 	}
 
 	// Parse planning depth
@@ -135,9 +110,12 @@ func (c *DeepPlanningCommand) Execute(ctx context.Context, cmdCtx *commands.Comm
 		},
 	}
 
-	message := fmt.Sprintf("Starting deep planning for: %s (depth: %d)", topic, depth)
+	message := tr(ctx, "builtin_deepplanning_starting", map[string]any{
+		"Topic": topic,
+		"Depth": depth,
+	})
 	if outputFile != "" {
-		message += fmt.Sprintf("\nPlan will be saved to: %s", outputFile)
+		message += "\n" + tr(ctx, "builtin_deepplanning_save_location", map[string]any{"File": outputFile})
 	}
 
 	return &commands.CommandResult{
@@ -155,7 +133,7 @@ func (c *DeepPlanningCommand) Execute(ctx context.Context, cmdCtx *commands.Comm
 }
 
 // resumePlanning resumes a previous planning session
-func (c *DeepPlanningCommand) resumePlanning(planID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
+func (c *DeepPlanningCommand) resumePlanning(ctx context.Context, planID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	actions := []commands.Action{
 		{
 			Type: "resume_deep_planning",
@@ -169,7 +147,7 @@ func (c *DeepPlanningCommand) resumePlanning(planID string, cmdCtx *commands.Com
 
 	return &commands.CommandResult{
 		Success:     true,
-		Message:     fmt.Sprintf("Resuming deep planning session: %s", planID),
+		Message:     tr(ctx, "builtin_deepplanning_resuming", map[string]any{"PlanID": planID}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{

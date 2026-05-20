@@ -2,7 +2,6 @@ package builtin
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"dev.helix.code/internal/commands"
@@ -28,24 +27,12 @@ func (c *NewTaskCommand) Aliases() []string {
 
 // Description returns command description
 func (c *NewTaskCommand) Description() string {
-	return "Create a new task with current context preserved"
+	return trc("builtin_newtask_description", nil)
 }
 
 // Usage returns usage information
 func (c *NewTaskCommand) Usage() string {
-	return `/newtask [description]
-
-Creates a new task while preserving relevant context from the current conversation.
-
-Examples:
-  /newtask Implement user authentication
-  /newtask --link-previous Fix the bug discussed above
-  /newtask "Refactor database layer" --priority high
-
-Flags:
-  --link-previous: Link to current task
-  --priority: Set task priority (low, normal, high, critical)
-  --transfer-files: Transfer file references to new task`
+	return trc("builtin_newtask_usage", nil)
 }
 
 // Execute runs the command
@@ -55,7 +42,7 @@ func (c *NewTaskCommand) Execute(ctx context.Context, cmdCtx *commands.CommandCo
 	if description == "" {
 		return &commands.CommandResult{
 			Success: false,
-			Message: "Task description is required",
+			Message: tr(ctx, "builtin_newtask_description_required", nil),
 		}, nil
 	}
 
@@ -116,7 +103,7 @@ func (c *NewTaskCommand) Execute(ctx context.Context, cmdCtx *commands.CommandCo
 
 	return &commands.CommandResult{
 		Success:     true,
-		Message:     fmt.Sprintf("Created new task: %s", description),
+		Message:     tr(ctx, "builtin_newtask_created", map[string]any{"Description": description}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{

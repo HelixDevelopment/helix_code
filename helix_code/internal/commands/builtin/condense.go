@@ -27,25 +27,12 @@ func (c *CondenseCommand) Aliases() []string {
 
 // Description returns command description
 func (c *CondenseCommand) Description() string {
-	return "Summarize and condense conversation history to save tokens"
+	return trc("builtin_condense_description", nil)
 }
 
 // Usage returns usage information
 func (c *CondenseCommand) Usage() string {
-	return `/condense [options]
-
-Summarizes the conversation history, preserving important details while reducing token count.
-
-Examples:
-  /condense
-  /condense --keep-last 5
-  /condense --preserve-code
-
-Flags:
-  --keep-last N: Keep last N messages uncompressed
-  --preserve-code: Keep all code blocks intact
-  --preserve-errors: Keep all error messages intact
-  --ratio: Target compression ratio (default: 0.5)`
+	return trc("builtin_condense_usage", nil)
 }
 
 // Execute runs the command
@@ -53,7 +40,7 @@ func (c *CondenseCommand) Execute(ctx context.Context, cmdCtx *commands.CommandC
 	if len(cmdCtx.ChatHistory) == 0 {
 		return &commands.CommandResult{
 			Success: false,
-			Message: "No chat history to condense",
+			Message: tr(ctx, "builtin_condense_no_history", nil),
 		}, nil
 	}
 
@@ -79,7 +66,7 @@ func (c *CondenseCommand) Execute(ctx context.Context, cmdCtx *commands.CommandC
 	if condenseCount <= 0 {
 		return &commands.CommandResult{
 			Success: false,
-			Message: "Not enough history to condense",
+			Message: tr(ctx, "builtin_condense_not_enough_history", nil),
 		}, nil
 	}
 
@@ -100,8 +87,11 @@ func (c *CondenseCommand) Execute(ctx context.Context, cmdCtx *commands.CommandC
 	}
 
 	return &commands.CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Condensing %d messages (keeping last %d uncompressed)", condenseCount, keepMessages),
+		Success: true,
+		Message: tr(ctx, "builtin_condense_in_progress", map[string]any{
+			"Count": condenseCount,
+			"Keep":  keepMessages,
+		}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{
