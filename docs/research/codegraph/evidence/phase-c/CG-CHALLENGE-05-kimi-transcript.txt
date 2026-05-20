@@ -62,4 +62,4 @@ for this billing cycle. Your quota will be refreshed in the next cycle. Upgrade
 to get more: https://www.kimi.com/code/console?from=quota-upgrade", 'type': 'exc
 eeded_current_quota_error'}}
 
-To resume this session: kimi -r 7058c907-9e6c-468e-ae2b-f26bc237231d
+To resume this session: kimi -r 949f1f95-505b-4463-ace4-d99b5b1c59e2
