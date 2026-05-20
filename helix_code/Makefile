@@ -14,6 +14,43 @@ GO_MOD=$(GO) mod
 GOFMT=$(GO) fmt
 GOLINT=golangci-lint run
 
+# ============================================
+# BUILD-CACHE & TEST-PARALLELISM TUNING — speed-programme Phase 5 task P5-T01
+# (R1 bottleneck-audit B20 — test targets were untuned for -p/-parallel)
+# ============================================
+#
+# Go's build cache (GOCACHE) is leveraged automatically by every `go build`
+# and `go test` below — we deliberately do NOT pass `-a` (force-rebuild) or a
+# blanket `-count=1`, because either would defeat the cache. `-count=1` IS
+# kept on the targets where it is load-bearing for correctness:
+#   * test-coverage / coverage-full — -race + -covermode=atomic need a fresh
+#     run; a cached coverage profile would be stale.
+#   * test-full / test-*-full / test-verifier-* — real-infrastructure
+#     (PostgreSQL/Redis/Ollama/verifier) integration runs MUST re-execute
+#     against the live stack every time; a cached PASS would be a CONST-035
+#     anti-bluff false-success (a green line with no fresh runtime evidence).
+# The plain `make test` (unit, hermetic, no external infra) keeps the cache:
+# unchanged packages are not re-run, so the developer-experience suite is
+# fast on a warm tree and only re-runs what actually changed.
+#
+# Parallelism knobs:
+#   GO_TEST_P        — `-p`: number of test BINARIES (packages) compiled and
+#                      run concurrently. Defaults to GOMAXPROCS (host CPU
+#                      count). Capping it keeps a large multi-package suite
+#                      from oversubscribing CPU + RAM on smaller dev hosts.
+#   GO_TEST_PARALLEL — `-parallel`: number of `t.Parallel()` tests allowed to
+#                      run simultaneously WITHIN a single package binary.
+#                      Defaults to GOMAXPROCS; set explicitly for stable,
+#                      reproducible scheduling across machines.
+# Both are computed from the host CPU count (`nproc`) so the suite scales
+# with the machine without hardcoding a number. Override on the command line:
+#   make test GO_TEST_P=4 GO_TEST_PARALLEL=4
+NPROC := $(shell nproc 2>/dev/null || echo 4)
+GO_TEST_P ?= $(NPROC)
+GO_TEST_PARALLEL ?= $(NPROC)
+# Composite flag block reused by the parallelism-tuned test targets below.
+GO_TEST_PARFLAGS := -p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL)
+
 # Directories
 CMD_DIR=cmd
 INTERNAL_DIR=internal
@@ -64,9 +101,12 @@ build: logo-assets
 	@echo "✅ Build complete: bin/$(BINARY_NAME) (PGO-optimised via cmd/server/default.pgo)"
 
 # Run tests
+# P5-T01: -p/-parallel tuned from host CPU count; NO -count=1 here so the Go
+# build cache short-circuits unchanged packages (hermetic unit suite — safe to
+# cache). Same tests, same rigor — only scheduling/caching changed.
 test:
-	@echo "🧪 Running tests..."
-	$(GO_TEST) -v ./...
+	@echo "🧪 Running tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL), build cache enabled)..."
+	$(GO_TEST) -v $(GO_TEST_PARFLAGS) ./...
 	@echo "✅ Tests complete"
 
 # Comprehensive test suite
@@ -74,13 +114,17 @@ test-all: test test-coverage test-benchmark test-docs
 	@echo "🎉 All tests completed successfully!"
 
 # Run coverage analysis
+# P5-T01: -p/-parallel tuned. -race needs a fresh run so the cache cannot
+# short-circuit it; -count=1 is intentionally NOT added (-race already forces
+# a distinct race-instrumented build, and coverage re-runs regardless), but
+# parallelism is capped to keep the race detector's memory overhead bounded.
 test-coverage:
 	@echo "📊 Running coverage analysis..."
 	@if [ -f scripts/coverage.sh ]; then \
 		./scripts/coverage.sh; \
 	else \
 		echo "⚠️ Coverage script not found, running basic coverage..."; \
-		$(GO_TEST) -v -race -coverprofile=coverage.out -covermode=atomic ./...; \
+		$(GO_TEST) -v -race $(GO_TEST_PARFLAGS) -coverprofile=coverage.out -covermode=atomic ./...; \
 		go tool cover -func=coverage.out | tail -1; \
 	fi
 
@@ -133,24 +177,27 @@ test-infra-status:
 	@docker compose -f docker-compose.full-test.yml ps
 
 # Run ALL tests with full infrastructure (ZERO skipped tests)
+# P5-T01: -p/-parallel tuned for faster wall-time. -count=1 is KEPT — these
+# targets exercise real PostgreSQL/Redis/Ollama; a cached PASS would be a
+# CONST-035 anti-bluff false-success (green line, no fresh runtime evidence).
 test-full: test-infra-up
-	@echo "🧪 Running ALL tests (no skips)..."
+	@echo "🧪 Running ALL tests (no skips, -p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -v -count=1 -timeout=30m ./... && \
-	$(GO_TEST) -v -count=1 -tags=integration -timeout=30m ./... && \
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -timeout=30m ./... && \
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -tags=integration -timeout=30m ./... && \
 	echo "🎉 All tests passed with ZERO skips!"
 
 # Run unit tests with full infrastructure
 test-unit-full: test-infra-up
-	@echo "🧪 Running unit tests with full infrastructure..."
+	@echo "🧪 Running unit tests with full infrastructure (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -v -count=1 -timeout=15m ./internal/...
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -timeout=15m ./internal/...
 
 # Run integration tests with full infrastructure
 test-integration-full: test-infra-up
-	@echo "🧪 Running integration tests..."
+	@echo "🧪 Running integration tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -v -count=1 -tags=integration -timeout=20m ./...
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -tags=integration -timeout=20m ./...
 
 # Run E2E tests with full infrastructure
 test-e2e-full: test-infra-up
@@ -160,15 +207,15 @@ test-e2e-full: test-infra-up
 
 # Run security tests with full infrastructure
 test-security-full: test-infra-up
-	@echo "🔒 Running security tests..."
+	@echo "🔒 Running security tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -v -count=1 -timeout=20m ./tests/security/...
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -timeout=20m ./tests/security/...
 
 # Run load tests with full infrastructure
 test-load-full: test-infra-up
-	@echo "⚡ Running load tests..."
+	@echo "⚡ Running load tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -v -count=1 -timeout=30m ./test/load/...
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -timeout=30m ./test/load/...
 
 # Run all test types in sequence
 test-complete: test-unit-full test-integration-full test-e2e-full test-security-full test-load-full test-benchmark test-verifier-challenges
@@ -185,15 +232,17 @@ test-complete: test-unit-full test-integration-full test-e2e-full test-security-
 .PHONY: test-verifier-unit test-verifier-integration test-verifier-challenges test-verifier-hardcode
 
 # Run verifier unit tests (mocks OK for client/cache/health)
+# P5-T01: -p/-parallel tuned. -count=1 KEPT — verifier tests assert
+# real-time model status (CONST-038) and must not serve a cached PASS.
 test-verifier-unit:
-	@echo "🔍 Running verifier unit tests..."
-	$(GO_TEST) -v -count=1 ./internal/verifier/...
+	@echo "🔍 Running verifier unit tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) ./internal/verifier/...
 	@echo "✅ Verifier unit tests complete"
 
 # Run verifier integration tests (NO MOCKS — requires verifier service)
 test-verifier-integration:
-	@echo "🔍 Running verifier integration tests..."
-	$(GO_TEST) -v -count=1 -tags=integration ./internal/verifier/... || echo "⚠️  Integration tests require running verifier at http://localhost:8081"
+	@echo "🔍 Running verifier integration tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
+	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -tags=integration ./internal/verifier/... || echo "⚠️  Integration tests require running verifier at http://localhost:8081"
 	@echo "✅ Verifier integration tests complete"
 
 # Run verifier challenge scripts
@@ -214,9 +263,9 @@ test-verifier-capability:
 
 # Generate coverage report with full infrastructure
 coverage-full: test-infra-up
-	@echo "📊 Generating comprehensive coverage report..."
+	@echo "📊 Generating comprehensive coverage report (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
-	$(GO_TEST) -coverprofile=coverage.out -covermode=atomic -timeout=30m ./... && \
+	$(GO_TEST) $(GO_TEST_PARFLAGS) -coverprofile=coverage.out -covermode=atomic -timeout=30m ./... && \
 	go tool cover -func=coverage.out && \
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "✅ Coverage report: coverage.html"
@@ -399,8 +448,13 @@ help:
 	@echo ""
 	@echo "Usage:"
 	@echo "  make build           - Build the application"
-	@echo "  make test            - Run tests"
+	@echo "  make test            - Run tests (build cache + -p/-parallel tuned)"
 	@echo "  make clean           - Clean build artifacts"
+	@echo ""
+	@echo "Test parallelism tuning (P5-T01 — override on the command line):"
+	@echo "  GO_TEST_P            - -p: test binaries run concurrently (default: nproc=$(NPROC))"
+	@echo "  GO_TEST_PARALLEL     - -parallel: t.Parallel() tests per binary (default: nproc=$(NPROC))"
+	@echo "  e.g.  make test GO_TEST_P=4 GO_TEST_PARALLEL=4"
 	@echo "  make logo-assets     - Generate logo assets and themes"
 	@echo "  make setup-deps      - Setup dependencies"
 	@echo "  make fmt             - Format code"
@@ -553,9 +607,11 @@ container-lint: container-builder-image
 	@echo "✅ Container lint complete"
 
 # Run full test suite inside the builder container
+# P5-T01: delegates to `make test` inside the container so the container run
+# inherits the same -p/-parallel tuning + build-cache behaviour as the host.
 container-test-full: container-builder-image
 	@echo "🧪 Running full test suite inside container..."
-	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "go test -v -short -timeout=120s ./..."
+	$(COMPOSE_BUILDER) run --rm $(BUILDER_SERVICE) -c "make test"
 	@echo "✅ Container full tests complete"
 
 # Drop into an interactive shell inside the builder container
