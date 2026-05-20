@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"dev.helix.code/internal/llm/promptcache"
 	"dev.helix.code/internal/providers/httpclient"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,15 @@ type OpenAIProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// prefixDetector watches the request prefix (system prompt + tool
+	// definitions) for mid-session drift. Speed programme P1-T05: OpenAI
+	// performs IMPLICIT prompt caching — there is no request flag, the
+	// provider transparently reuses a cached prefix once it shares a
+	// byte-identical prefix with a prior request. The detector freezes the
+	// prefix on the first request and logs a "cache break" if a later
+	// request mutates it. Observability only — it never alters the request.
+	prefixDetector *promptcache.CacheBreakDetector
 }
 
 // NewOpenAIProvider creates a new OpenAI provider
@@ -52,6 +62,8 @@ func NewOpenAIProvider(config ProviderConfigEntry) (*OpenAIProvider, error) {
 			Status:    "unknown",
 			LastCheck: time.Now(),
 		},
+		// Speed programme P1-T05: prompt-cache prefix-stability detector.
+		prefixDetector: promptcache.NewCacheBreakDetector(),
 	}
 
 	// Initialize models
@@ -229,7 +241,11 @@ func (op *OpenAIProvider) initializeModels() {
 func (op *OpenAIProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
 	// Convert messages to OpenAI format
 	var messages []OpenAIMessage
+	var systemMsg string
 	for _, msg := range request.Messages {
+		if msg.Role == "system" {
+			systemMsg = msg.Content
+		}
 		openaiMsg := OpenAIMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
@@ -239,6 +255,13 @@ func (op *OpenAIProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRe
 		}
 		messages = append(messages, openaiMsg)
 	}
+
+	// Speed programme P1-T05: track prompt-cache prefix stability. OpenAI
+	// performs implicit prompt caching — a stable system-prompt + tool
+	// prefix across a session is the precondition for a cache hit. This is
+	// purely observational; it does NOT alter the request body, so the
+	// OpenAI wire format is byte-identical to the pre-P1-T05 behaviour.
+	trackPromptCachePrefixGeneric(op.prefixDetector, "openai", systemMsg, request.Tools)
 
 	return &OpenAIRequest{
 		Model:       request.Model,
@@ -280,6 +303,14 @@ func (op *OpenAIProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, 
 	// returned `error` previously dropped these signals on the floor.
 	// Map well-known finish_reason values to the canonical sentinels.
 	resp.Err = mapOpenAIFinishReasonToErr(finishReason)
+
+	// Speed programme P1-T05: surface implicit-prompt-cache accounting.
+	// OpenAI reports a cache hit in usage.prompt_tokens_details.cached_tokens.
+	// On a cache MISS cacheMetadata() returns nil and ProviderMetadata is
+	// left unset — so the response stays byte-identical to pre-P1-T05.
+	if meta := openaiResp.Usage.cacheMetadata(); meta != nil {
+		resp.ProviderMetadata = meta
+	}
 	return resp
 }
 
@@ -471,6 +502,14 @@ type OpenAIResponse struct {
 		PromptTokens     int `json:"prompt_tokens"`
 		CompletionTokens int `json:"completion_tokens"`
 		TotalTokens      int `json:"total_tokens"`
+		// openAICacheUsageFields (speed programme P1-T05) carries the
+		// implicit-prompt-cache accounting fields emitted by OpenAI
+		// (`prompt_tokens_details.cached_tokens`) and DeepSeek
+		// (`prompt_cache_hit_tokens` / `prompt_cache_miss_tokens`).
+		// These are RESPONSE-only fields — embedding them here does not
+		// change any request body. A provider that omits them leaves
+		// them zero.
+		openAICacheUsageFields
 	} `json:"usage"`
 }
 

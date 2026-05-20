@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"dev.helix.code/internal/llm/promptcache"
 	"dev.helix.code/internal/providers/httpclient"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,16 @@ type GeminiProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// prefixDetector watches the request prefix (system instruction + tool
+	// declarations) for mid-session drift. Speed programme P1-T05: Gemini 2.5
+	// performs IMPLICIT context caching automatically for a stable prefix and
+	// reports it via usageMetadata.cachedContentTokenCount. There is no
+	// per-request flag for implicit caching, so prefix stability is the whole
+	// game. The detector freezes the prefix on the first request and logs a
+	// "cache break" if a later request mutates it. Observability only — it
+	// never alters the request, so feature behaviour is unaffected.
+	prefixDetector *promptcache.CacheBreakDetector
 }
 
 // Gemini API structures
@@ -170,7 +181,9 @@ func NewGeminiProvider(config ProviderConfigEntry) (*GeminiProvider, error) {
 		// R1 B03 / R3 §4.7) — connection pooling only; request
 		// behaviour is unchanged.
 		httpClient: httpclient.NewHTTPClient(120 * time.Second),
-		models: getGeminiModels(),
+		models:     getGeminiModels(),
+		// Speed programme P1-T05: prompt-cache prefix-stability detector.
+		prefixDetector: promptcache.NewCacheBreakDetector(),
 	}
 
 	return provider, nil
@@ -444,6 +457,12 @@ func (gp *GeminiProvider) buildRequest(request *LLMRequest) (*geminiRequest, err
 		{Category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", Threshold: "BLOCK_ONLY_HIGH"},
 		{Category: "HARM_CATEGORY_DANGEROUS_CONTENT", Threshold: "BLOCK_ONLY_HIGH"},
 	}
+
+	// Speed programme P1-T05: track prompt-cache prefix stability. Gemini 2.5
+	// performs implicit context caching for a byte-stable system-instruction
+	// + tool-declaration prefix. This is purely observational — it does NOT
+	// alter req — so the Gemini wire format is byte-identical to pre-P1-T05.
+	trackPromptCachePrefixGeneric(gp.prefixDetector, "gemini", systemMsg, request.Tools)
 
 	return req, nil
 }

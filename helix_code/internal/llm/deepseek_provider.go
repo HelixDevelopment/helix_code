@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"dev.helix.code/internal/llm/promptcache"
 	"dev.helix.code/internal/providers/httpclient"
 	"github.com/google/uuid"
 )
@@ -27,6 +28,15 @@ type DeepSeekProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// prefixDetector watches the request prefix for mid-session drift.
+	// Speed programme P1-T05: DeepSeek performs IMPLICIT context caching
+	// (cache on disk) — there is no request flag, the provider transparently
+	// reuses a cached prefix and reports the hit/miss split via
+	// usage.prompt_cache_hit_tokens / prompt_cache_miss_tokens. The detector
+	// freezes the prefix on the first request and logs a "cache break" if a
+	// later request mutates it. Observability only — never alters a request.
+	prefixDetector *promptcache.CacheBreakDetector
 }
 
 // NewDeepSeekProvider creates a new DeepSeek provider.
@@ -56,6 +66,8 @@ func NewDeepSeekProvider(config ProviderConfigEntry) (*DeepSeekProvider, error) 
 			Status:    "unknown",
 			LastCheck: time.Now(),
 		},
+		// Speed programme P1-T05: prompt-cache prefix-stability detector.
+		prefixDetector: promptcache.NewCacheBreakDetector(),
 	}
 
 	p.initializeModels()
@@ -196,7 +208,11 @@ func (dp *DeepSeekProvider) initializeModels() {
 
 func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
 	var messages []OpenAIMessage
+	var systemMsg string
 	for _, msg := range request.Messages {
+		if msg.Role == "system" {
+			systemMsg = msg.Content
+		}
 		openaiMsg := OpenAIMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
@@ -206,6 +222,12 @@ func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAI
 		}
 		messages = append(messages, openaiMsg)
 	}
+
+	// Speed programme P1-T05: track prompt-cache prefix stability. DeepSeek
+	// performs implicit context caching — a stable prefix across a session
+	// is the precondition for a cache hit. Observational only; the DeepSeek
+	// request body is byte-identical to the pre-P1-T05 behaviour.
+	trackPromptCachePrefixGeneric(dp.prefixDetector, "deepseek", systemMsg, request.Tools)
 
 	return &OpenAIRequest{
 		Model:       request.Model,
@@ -228,7 +250,7 @@ func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 		finish = openaiResp.Choices[0].FinishReason
 	}
 
-	return &LLMResponse{
+	resp := &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
@@ -247,6 +269,16 @@ func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 		// https://api-docs.deepseek.com/api/create-chat-completion).
 		Err: mapOpenAIFinishReasonToErr(finish),
 	}
+
+	// Speed programme P1-T05: surface implicit-context-cache accounting.
+	// DeepSeek reports the hit/miss split via usage.prompt_cache_hit_tokens
+	// / prompt_cache_miss_tokens. On a full cache MISS cacheMetadata()
+	// returns nil and ProviderMetadata is left unset — byte-identical to
+	// the pre-P1-T05 response shape.
+	if meta := openaiResp.Usage.cacheMetadata(); meta != nil {
+		resp.ProviderMetadata = meta
+	}
+	return resp
 }
 
 func (dp *DeepSeekProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
