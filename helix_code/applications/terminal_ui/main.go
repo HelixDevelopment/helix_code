@@ -1513,36 +1513,133 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 		return
 	}
 
-	// Send to LLM provider
+	// Send to LLM provider.
+	//
+	// P1-T07 (speed programme Phase 1): the TUI consumes the streaming
+	// provider API (GenerateStream) instead of buffering the whole response
+	// via Generate. An empty assistant turn is appended up-front and its
+	// Content is grown chunk-by-chunk as tokens arrive — so the user sees
+	// token-by-token output (time-to-first-visible-token) rather than a
+	// frozen UI until the completion lands.
+	//
+	// Threading: the provider call runs in its own goroutine because
+	// sendChatMessage executes on the tview event loop (SetDoneFunc); a
+	// blocking provider call there would freeze the whole UI. Every
+	// chatHistory mutation + redraw is funnelled through QueueUpdateDraw so
+	// it is applied on the event loop (tview is not goroutine-safe).
+	//
+	// No-regression: the assistant turn's final Content is the concatenation
+	// of every streamed chunk — byte-identical to the buffered Generate
+	// result for any conformant provider. Only WHEN the text appears changes.
 	ctx := context.Background()
 	request := &llm.LLMRequest{
 		ID:          uuid.New(),
-		Messages:    tui.chatHistory,
+		Messages:    append([]llm.Message(nil), tui.chatHistory...),
 		MaxTokens:   2048,
 		Temperature: 0.7,
+		Stream:      true,
 	}
 
 	tui.statusBar.SetText("[yellow]" + tui.t("terminal_ui_chat_generating"))
 	tui.app.Draw()
 
-	response, err := tui.llmProvider.Generate(ctx, request)
-	if err != nil {
-		tui.chatHistory = append(tui.chatHistory, llm.Message{
-			Role:    "assistant",
-			Content: fmt.Sprintf("[Error: %v]", err),
-		})
-		tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", err))
-	} else {
-		tui.chatHistory = append(tui.chatHistory, llm.Message{
-			Role:    "assistant",
-			Content: response.Content,
-		})
-		tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": response.Usage.TotalTokens}))
-	}
+	// Append the placeholder assistant turn the stream will grow in place.
+	tui.chatHistory = append(tui.chatHistory, llm.Message{Role: "assistant", Content: ""})
+	assistantIdx := len(tui.chatHistory) - 1
+	provider := tui.llmProvider
 
-	tui.chatOutput.SetText(tui.formatChatHistory())
-	tui.chatOutput.ScrollToEnd()
-	tui.app.Draw()
+	go func() {
+		streamErr, totalTokens := consumeChatStream(ctx, provider, request, func(content string) {
+			// onChunk: applied on the tview event loop (tview is not
+			// goroutine-safe) so the assistant turn grows visibly.
+			tui.app.QueueUpdateDraw(func() {
+				tui.chatHistory[assistantIdx].Content += content
+				tui.chatOutput.SetText(tui.formatChatHistory())
+				tui.chatOutput.ScrollToEnd()
+			})
+		})
+		tui.app.QueueUpdateDraw(func() {
+			if streamErr != nil {
+				tui.chatHistory[assistantIdx].Content = fmt.Sprintf("[Error: %v]", streamErr)
+				tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", streamErr))
+			} else {
+				tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": totalTokens}))
+			}
+			tui.chatOutput.SetText(tui.formatChatHistory())
+			tui.chatOutput.ScrollToEnd()
+		})
+	}()
+}
+
+// consumeChatStream drives one TUI chat turn over the provider's streaming
+// API (P1-T07, speed programme Phase 1).
+//
+// It calls provider.GenerateStream and invokes onChunk for every non-empty
+// chunk the instant it arrives — so the caller can render token-by-token. The
+// total token count from the telemetry-carrying chunk and any provider error
+// are returned for the post-turn status line.
+//
+// Extracted from sendChatMessage so the chunk-consumption loop is unit-testable
+// without standing up a live tview event loop: a test supplies a fake provider
+// + a recording onChunk and asserts N chunks produce N incremental callbacks.
+//
+// Channel-close robustness: the llm.Provider streaming contract is not uniform
+// (Anthropic/OpenAI/Groq/DeepSeek close the channel from GenerateStream;
+// Ollama and the OpenAI-compatible provider do not). The consumer therefore
+// selects on BOTH the chunk channel AND the provider's return signal so it
+// terminates for either provider family — a naive `for range` would deadlock
+// against the non-closing providers.
+//
+// No-regression: the sum of every onChunk argument is the byte-exact
+// concatenation of the streamed chunks — identical to the buffered Generate
+// result for any conformant provider. Only WHEN the text appears changes.
+func consumeChatStream(ctx context.Context, provider llm.Provider, request *llm.LLMRequest, onChunk func(content string)) (streamErr error, totalTokens int) {
+	chunkChan := make(chan llm.LLMResponse, 100)
+	errCh := make(chan error, 1)
+	go func() { errCh <- provider.GenerateStream(ctx, request, chunkChan) }()
+
+	render := func(chunk llm.LLMResponse) {
+		if chunk.Usage.TotalTokens > 0 {
+			totalTokens = chunk.Usage.TotalTokens
+		}
+		if chunk.Content != "" {
+			onChunk(chunk.Content)
+		}
+	}
+	streamErr = drainProviderStream(chunkChan, errCh, render)
+	return streamErr, totalTokens
+}
+
+// drainProviderStream consumes every chunk a provider's GenerateStream emits
+// onto chunkChan, invoking onChunk for each, and returns the provider's error.
+//
+// It copes with the non-uniform channel-close contract across llm.Provider
+// implementations: some close chunkChan from inside GenerateStream, some return
+// without closing. It selects on both chunkChan and errCh — on channel close it
+// joins errCh; on an errCh send it drains the remaining buffered chunks
+// non-blockingly and returns. Terminates for both provider families.
+func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChunk func(llm.LLMResponse)) error {
+	for {
+		select {
+		case chunk, ok := <-chunkChan:
+			if !ok {
+				return <-errCh
+			}
+			onChunk(chunk)
+		case provErr := <-errCh:
+			for {
+				select {
+				case chunk, ok := <-chunkChan:
+					if !ok {
+						return provErr
+					}
+					onChunk(chunk)
+				default:
+					return provErr
+				}
+			}
+		}
+	}
 }
 
 // handleChatCommand handles chat commands

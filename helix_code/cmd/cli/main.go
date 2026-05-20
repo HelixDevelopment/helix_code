@@ -2046,19 +2046,130 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			Model:       modelName,
 			MaxTokens:   1000,
 			Temperature: 0.7,
-			Messages:    conversation,
+			// P1-T07 (speed programme): the REPL consumes the streaming
+			// provider API so tokens reach the terminal as they arrive
+			// (time-to-first-visible-token is the major perceived-speed
+			// lever). Stream is set true so providers that branch on the
+			// flag take their streaming code path.
+			Stream:   true,
+			Messages: conversation,
 		}
-		resp, err := c.llmProvider.Generate(ctx, req)
+		assembled, stats, err := streamREPLTurn(ctx, c.llmProvider, req)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			// Pop the user turn so a retry doesn't accumulate bad state.
 			conversation = conversation[:len(conversation)-1]
 			continue
 		}
-		if resp != nil && resp.Content != "" {
-			fmt.Println(resp.Content)
-			conversation = append(conversation, llm.Message{Role: "assistant", Content: resp.Content})
-			printGenerationStats(resp)
+		if assembled != "" {
+			conversation = append(conversation, llm.Message{Role: "assistant", Content: assembled})
+		}
+		if stats != nil {
+			printGenerationStats(stats)
+		}
+	}
+}
+
+// streamREPLTurn drives one interactive-REPL turn over the provider's
+// streaming API (P1-T07, speed programme Phase 1).
+//
+// It prints each chunk's Content to stdout the instant it arrives — so the
+// first token is visible long before the completion finishes — while
+// accumulating the full text so the caller can append the assistant turn to
+// the conversation. The final chunk that carries a populated Usage block is
+// returned as `stats` so the caller can print token/usage telemetry exactly
+// as the buffered path did.
+//
+// Channel-close robustness: the llm.Provider streaming contract is NOT
+// uniform — Anthropic/OpenAI/Groq/DeepSeek `defer close(ch)` from inside
+// GenerateStream, but Ollama and the OpenAI-compatible provider return
+// WITHOUT closing the channel. A naive `for range chunkChan` therefore
+// deadlocks against the non-closing providers. We instead select on BOTH the
+// chunk channel AND the provider's return signal: once GenerateStream has
+// returned we drain whatever is still buffered, then stop — correct for both
+// the closing and the non-closing provider families.
+//
+// No-regression guarantee: the assembled string is the concatenation of every
+// chunk's Content, which is byte-identical to the buffered `Generate` result
+// for any conformant provider (each provider's GenerateStream emits the same
+// total content as Generate — verified by the per-provider GenerateStream
+// tests). Only WHEN the bytes appear changes, not WHAT appears.
+func streamREPLTurn(ctx context.Context, provider llm.Provider, req *llm.LLMRequest) (assembled string, stats *llm.LLMResponse, err error) {
+	chunkChan := make(chan llm.LLMResponse, 100)
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- provider.GenerateStream(ctx, req, chunkChan)
+	}()
+
+	var sb strings.Builder
+	var last llm.LLMResponse
+	haveStats := false
+	render := func(chunk llm.LLMResponse) {
+		if chunk.Content != "" {
+			fmt.Print(chunk.Content)
+			sb.WriteString(chunk.Content)
+		}
+		// Capture the most recent chunk that carried usage/timing telemetry
+		// so the post-turn stats line matches the buffered path.
+		if chunk.Usage.TotalTokens > 0 || chunk.Usage.PromptTokens > 0 ||
+			chunk.Usage.CompletionTokens > 0 || chunk.ProcessingTime > 0 {
+			last = chunk
+			haveStats = true
+		}
+	}
+
+	streamErr := drainProviderStream(chunkChan, errCh, render)
+	if streamErr != nil {
+		return "", nil, streamErr
+	}
+	// Terminate the streamed line so the stats line / next prompt start clean.
+	if sb.Len() > 0 {
+		fmt.Println()
+	}
+	if haveStats {
+		stats = &last
+	}
+	return sb.String(), stats, nil
+}
+
+// drainProviderStream consumes every chunk a provider's GenerateStream emits
+// onto chunkChan, invoking onChunk for each, and returns the provider's error.
+//
+// It is the single chokepoint that copes with the non-uniform channel-close
+// contract across llm.Provider implementations (see streamREPLTurn doc). The
+// algorithm:
+//   - Phase 1: select on chunkChan AND errCh. A chunk -> render it. A close of
+//     chunkChan (ok == false) -> the channel-closing providers finished;
+//     join errCh and return. An errCh send -> the non-closing providers
+//     finished; move to phase 2.
+//   - Phase 2: non-blocking drain of whatever is still buffered in chunkChan
+//     (the producer goroutine has already returned, so no more will arrive),
+//     then return the provider error.
+//
+// This terminates for BOTH provider families and never deadlocks.
+func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChunk func(llm.LLMResponse)) error {
+	for {
+		select {
+		case chunk, ok := <-chunkChan:
+			if !ok {
+				// Channel-closing provider: drain done, join the error.
+				return <-errCh
+			}
+			onChunk(chunk)
+		case provErr := <-errCh:
+			// Non-closing provider (Ollama / OpenAI-compatible): the producer
+			// has returned. Drain any chunks it left buffered, then stop.
+			for {
+				select {
+				case chunk, ok := <-chunkChan:
+					if !ok {
+						return provErr
+					}
+					onChunk(chunk)
+				default:
+					return provErr
+				}
+			}
 		}
 	}
 }

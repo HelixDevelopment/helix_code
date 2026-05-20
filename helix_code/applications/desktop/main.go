@@ -31,6 +31,28 @@ import (
 	"dev.helix.code/internal/worker"
 )
 
+// streamDesktopChat drives one desktop-chat turn over the provider's
+// streaming API (P1-T07, speed programme Phase 1).
+//
+// It emits `prefix` once, then appends each streamed chunk's Content to the
+// chat-history Entry the instant the chunk arrives — so the user sees the
+// reply grow token-by-token (time-to-first-visible-token) instead of waiting
+// for the whole completion. (*widget.Entry).SetText is goroutine-safe in
+// Fyne, so calling it from the caller's worker goroutine is correct.
+//
+// The channel-consumption loop is delegated to consumeDesktopChatStream (a
+// build-tag-free helper) so it stays unit-testable without an X11 display.
+//
+// No-regression: the text appended is the concatenation of every chunk's
+// Content, byte-identical to the buffered Generate result for any conformant
+// provider. Only WHEN the bytes appear changes.
+func streamDesktopChat(ctx context.Context, provider llm.Provider, request *llm.LLMRequest, prefix string, history *widget.Entry) error {
+	history.SetText(history.Text + prefix)
+	return consumeDesktopChatStream(ctx, provider, request, func(content string) {
+		history.SetText(history.Text + content)
+	})
+}
+
 // UITask is a simplified task representation for UI display
 type UITask struct {
 	ID          string
@@ -1070,6 +1092,24 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 					ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 					defer cancel()
 
+					// P1-T07 (speed programme Phase 1): the desktop chat
+					// consumes the streaming provider API (GenerateStream)
+					// instead of buffering the whole reply via Generate. Each
+					// streamed chunk is appended to the chat history widget
+					// the moment it arrives, so the user sees token-by-token
+					// output (time-to-first-visible-token) rather than a
+					// frozen panel until the completion lands.
+					//
+					// Threading: this block already runs in a goroutine (the
+					// Send button handler dispatched it). Fyne's
+					// (*widget.Entry).SetText is goroutine-safe — it marshals
+					// the refresh onto Fyne's render queue — so growing the
+					// transcript chunk-by-chunk from here is correct.
+					//
+					// No-regression: the assistant reply is the concatenation
+					// of every streamed chunk, byte-identical to the buffered
+					// Generate result for any conformant provider; only WHEN
+					// the text appears changes.
 					request := &llm.LLMRequest{
 						Messages: []llm.Message{
 							{Role: "user", Content: msg},
@@ -1077,21 +1117,24 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 						Model:       modelName,
 						MaxTokens:   1024,
 						Temperature: 0.7,
+						Stream:      true,
 					}
 
-					response, err := provider.Generate(ctx, request)
-					if err != nil {
-						responseMsg = fmt.Sprintf("[AI (%s/%s)]: Error: %v\n", providerName, modelName, err)
+					prefix := fmt.Sprintf("[AI (%s/%s)]: ", providerName, modelName)
+					streamErr := streamDesktopChat(ctx, provider, request, prefix, da.chatHistory)
+					if streamErr != nil {
+						da.chatHistory.SetText(da.chatHistory.Text +
+							fmt.Sprintf("\n[AI (%s/%s)]: Error: %v\n", providerName, modelName, streamErr))
 					} else {
-						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
+						da.chatHistory.SetText(da.chatHistory.Text + "\n")
 					}
-				} else {
-					// CONST-046: provider-unavailable message resolved via i18n bundle.
-					responseMsg = da.tr(ctxLLM, "desktop_chat_provider_unavailable", map[string]any{
-						"Provider": providerName,
-						"Model":    modelName,
-					}) + "\n"
+					return
 				}
+				// CONST-046: provider-unavailable message resolved via i18n bundle.
+				responseMsg = da.tr(ctxLLM, "desktop_chat_provider_unavailable", map[string]any{
+					"Provider": providerName,
+					"Model":    modelName,
+				}) + "\n"
 			} else {
 				// No LLM manager configured - show informative message
 				// CONST-046: llm-not-initialized message resolved via i18n bundle.
