@@ -1424,25 +1424,7 @@ func (tui *TerminalUI) createLLMInfoPanel() *tview.TextView {
 		currentModel = tui.llmProvider.GetName()
 	}
 
-	content := fmt.Sprintf(`[::b]Current Model[white]
-%s
-
-[::b]Provider Status[white]
-[green]Healthy:[white] %d
-[red]Unhealthy:[white] %d
-
-[::b]Available Models[white]
-Total: %d
-
-[::b]Chat Statistics[white]
-Messages: %d
-Tokens Used: N/A
-
-[::b]Quick Commands[white]
-/help - Show help
-/clear - Clear chat
-/model - Change model
-/system - Set system prompt`,
+	content := fmt.Sprintf(tui.t("terminal_ui_chat_dashboard_content_fmt"),
 		currentModel,
 		healthyProviders,
 		len(health)-healthyProviders,
@@ -1456,17 +1438,7 @@ Tokens Used: N/A
 // formatChatHistory formats the chat history for display
 func (tui *TerminalUI) formatChatHistory() string {
 	if len(tui.chatHistory) == 0 {
-		return `[::b]Welcome to HelixCode AI Chat[white]
-
-Start a conversation by typing a message below.
-Use the buttons to select a model or configure settings.
-
-[::b]Tips:[white]
-- Type your message and press Enter to send
-- Use /help for available commands
-- Select a model before chatting for best results
-
-[gray]No messages yet...`
+		return tui.t("terminal_ui_chat_welcome_body")
 	}
 
 	var sb strings.Builder
@@ -1647,13 +1619,8 @@ func (tui *TerminalUI) handleChatCommand(cmd string) {
 	switch {
 	case cmd == "/help":
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
-			Role: "system",
-			Content: `Available Commands:
-/help - Show this help message
-/clear - Clear chat history
-/model - Show model selector
-/system <prompt> - Set system prompt
-/info - Show current model info`,
+			Role:    "system",
+			Content: tui.t("terminal_ui_chat_help_commands_body"),
 		})
 	case cmd == "/clear":
 		tui.chatHistory = make([]llm.Message, 0)
@@ -1699,8 +1666,8 @@ func (tui *TerminalUI) showModelSelector() {
 
 	if len(models) == 0 {
 		list.AddItem(tui.t("terminal_ui_models_none_available"), tui.t("terminal_ui_models_configure_hint"), 0, nil)
-		list.AddItem("Configure Ollama", tui.t("terminal_ui_models_ollama_desc"), 'o', func() {
-			tui.statusBar.SetText("[yellow]Configure Ollama in Settings > System")
+		list.AddItem(tui.t("terminal_ui_models_configure_ollama"), tui.t("terminal_ui_models_ollama_desc"), 'o', func() {
+			tui.statusBar.SetText(tui.t("terminal_ui_status_configure_ollama_hint"))
 			tui.pages.RemovePage("modelSelector")
 		})
 	} else {
@@ -1980,22 +1947,7 @@ func (tui *TerminalUI) createCogneeSettingsView() tview.Primitive {
 	configView.SetBorder(true)
 	configView.SetTitle(tui.t("terminal_ui_config_options_title"))
 	configView.SetTitleAlign(tview.AlignLeft)
-	configView.SetText(`[::b]Basic Settings:
-• Auto Start: Enabled
-• Mode: Local/Remote
-• Host: localhost
-• Port: 8000
-
-[::b]Features:
-• Knowledge Graph: Enabled
-• Semantic Search: Enabled
-• Real-time Processing: Enabled
-• Multi-modal Support: Enabled
-
-[::b]Performance:
-• Workers: 4
-• Cache: Redis
-• Optimization: High`)
+	configView.SetText(tui.t("terminal_ui_config_basic_settings_body"))
 
 	view.
 		AddItem(statusView, 6, 0, false).
@@ -2024,7 +1976,7 @@ func (tui *TerminalUI) showNewTaskForm() {
 		taskType = option
 	})
 
-	form.AddInputField(tui.t("terminal_ui_form_task_data_json"), `{"description": "Task description"}`, 50, nil, func(text string) {
+	form.AddInputField(tui.t("terminal_ui_form_task_data_json"), tui.t("terminal_ui_form_task_data_default"), 50, nil, func(text string) {
 		taskData = text
 	})
 
@@ -2115,22 +2067,7 @@ func (tui *TerminalUI) createSystemSettingsView() tview.Primitive {
 	view.SetBorder(true)
 	view.SetTitle("System Settings")
 	view.SetTitleAlign(tview.AlignLeft)
-	view.SetText(`[::b]System Configuration:
-
-Database: PostgreSQL
-Redis: Enabled
-Workers: 4 active
-Tasks: 0 running
-
-[::b]Performance:
-CPU Usage: 15%
-Memory: 2.1GB / 8GB
-Disk: 45GB free
-
-[::b]Network:
-Port: 8080
-SSL: Disabled
-CORS: Enabled`)
+	view.SetText(tui.t("terminal_ui_system_config_body"))
 
 	return view
 }

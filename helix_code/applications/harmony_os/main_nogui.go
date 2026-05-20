@@ -446,8 +446,8 @@ func (cliApp *HarmonyCLIApp) cmdProjects(args []string) error {
 		fs := flag.NewFlagSet("projects create", flag.ExitOnError)
 		name := fs.String("name", "", "Project name")
 		path := fs.String("path", "", "Project path")
-		desc := fs.String("desc", "", "Project description")
-		ptype := fs.String("type", "generic", "Project type (go, node, python, rust, generic)")
+		desc := fs.String("desc", "", cliApp.tr(context.Background(), "harmony_os_cli_flag_project_desc", nil))
+		ptype := fs.String("type", "generic", cliApp.tr(context.Background(), "harmony_os_cli_flag_project_type", nil))
 		fs.Parse(args[1:])
 
 		if *name == "" || *path == "" {
@@ -515,8 +515,8 @@ func (cliApp *HarmonyCLIApp) cmdSessions(args []string) error {
 		fs := flag.NewFlagSet("sessions create", flag.ExitOnError)
 		name := fs.String("name", "", "Session name")
 		projectID := fs.String("project", "", "Project ID")
-		desc := fs.String("desc", "", "Session description")
-		mode := fs.String("mode", "building", "Session mode (planning, building, testing, refactoring, debugging, deployment)")
+		desc := fs.String("desc", "", cliApp.tr(context.Background(), "harmony_os_cli_flag_session_desc", nil))
+		mode := fs.String("mode", "building", cliApp.tr(context.Background(), "harmony_os_cli_flag_session_mode", nil))
 		fs.Parse(args[1:])
 
 		if *name == "" || *projectID == "" {
@@ -594,9 +594,9 @@ func (cliApp *HarmonyCLIApp) cmdTasks(args []string) error {
 
 	case "create":
 		fs := flag.NewFlagSet("tasks create", flag.ExitOnError)
-		taskType := fs.String("type", "building", "Task type (planning, building, testing, refactoring, debugging)")
-		desc := fs.String("desc", "", "Task description")
-		priority := fs.String("priority", "normal", "Task priority (low, normal, high, critical)")
+		taskType := fs.String("type", "building", cliApp.tr(context.Background(), "harmony_os_cli_flag_task_type", nil))
+		desc := fs.String("desc", "", cliApp.tr(context.Background(), "harmony_os_cli_flag_task_desc", nil))
+		priority := fs.String("priority", "normal", cliApp.tr(context.Background(), "harmony_os_cli_flag_task_priority", nil))
 		fs.Parse(args[1:])
 
 		if *desc == "" {
@@ -658,7 +658,7 @@ func (cliApp *HarmonyCLIApp) cmdWorkers(args []string) error {
 		fs.Parse(args[1:])
 
 		if *host == "" {
-			fmt.Println("Error: --host is required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_host_required", nil))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -674,18 +674,18 @@ func (cliApp *HarmonyCLIApp) cmdWorkers(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Added worker: %s\n", w.ID)
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_worker_added_fmt", map[string]any{"ID": w.ID}))
 
 	case "remove":
 		if len(args) < 2 {
-			fmt.Println("Error: worker ID required")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_err_worker_id_required", nil))
 			return fmt.Errorf("missing worker ID")
 		}
 		err := cliApp.workerManager.RemoveWorker(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Removed worker: %s\n", args[1])
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_worker_removed_fmt", map[string]any{"ID": args[1]}))
 
 	default:
 		// CONST-046 (round-369 §11.4): unknown-subcommand notice via Translator.

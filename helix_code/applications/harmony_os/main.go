@@ -1109,9 +1109,11 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 		if id < len(app.sessions) {
 			s := app.sessions[id]
 			selectedSessionID = s.ID
-			details := fmt.Sprintf("Name: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s",
-				s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
-				s.CreatedAt.Format(time.RFC822))
+			details := app.tr("harmony_os_gui_session_details_fmt", map[string]any{
+				"Name": s.Name, "Mode": s.Mode, "Status": s.Status,
+				"ProjectID": s.ProjectID, "Description": s.Description,
+				"Created": s.CreatedAt.Format(time.RFC822),
+			})
 			sessionDetailsLabel.SetText(details)
 		}
 	}
@@ -1263,8 +1265,10 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 			for i, c := range m.Capabilities {
 				caps[i] = string(c)
 			}
-			details := fmt.Sprintf("Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v",
-				m.Name, m.Provider, m.ContextSize, caps)
+			details := app.tr("harmony_os_gui_model_details_fmt", map[string]any{
+				"Name": m.Name, "Provider": m.Provider,
+				"ContextSize": m.ContextSize, "Capabilities": fmt.Sprintf("%v", caps),
+			})
 			modelDetailsLabel.SetText(details)
 		}
 	}
@@ -1335,13 +1339,15 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
 					}
 				} else {
-					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available or model not configured. Please configure it in Settings.\n",
-						providerName, modelName, providerName)
+					responseMsg = app.tr("harmony_os_gui_chat_provider_unavailable_fmt", map[string]any{
+						"Provider": providerName, "Model": modelName,
+					})
 				}
 			} else {
 				// No LLM manager configured - show informative message
-				responseMsg = fmt.Sprintf("[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n",
-					providerName, modelName)
+				responseMsg = app.tr("harmony_os_gui_chat_llm_not_initialized_fmt", map[string]any{
+					"Provider": providerName, "Model": modelName,
+				})
 			}
 
 			// Update UI on main thread
@@ -1355,9 +1361,9 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 
 	chatControls := container.NewVBox(
 		widget.NewLabel(app.tr("harmony_os_gui_form_chat_settings_header", nil)),
-		widget.NewLabel("Provider:"),
+		widget.NewLabel(app.tr("harmony_os_gui_label_provider", nil)),
 		app.llmProviderSel,
-		widget.NewLabel("Model:"),
+		widget.NewLabel(app.tr("harmony_os_gui_label_model", nil)),
 		modelNameEntry,
 		widget.NewSeparator(),
 		sendButton,
@@ -1374,7 +1380,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 	chatCard := widget.NewCard(app.tr("harmony_os_gui_card_llm_chat_title", nil), "", chatPanel)
 
 	// Provider health status
-	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
+	healthLabel := widget.NewLabel(app.tr("harmony_os_gui_health_checking", nil))
 
 	// Start health check goroutine
 	go func() {
@@ -1383,17 +1389,17 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 
 		checkHealth := func() {
 			if app.llmManager == nil {
-				healthLabel.SetText("Provider Health:\nNo LLM manager available")
+				healthLabel.SetText(app.tr("harmony_os_gui_health_no_manager", nil))
 				return
 			}
 			ctx := context.Background()
 			health := app.llmManager.HealthCheck(ctx)
-			healthText := "Provider Health:\n"
+			healthText := app.tr("harmony_os_gui_health_header", nil) + "\n"
 			for provider, status := range health {
 				healthText += fmt.Sprintf("- %s: %s\n", provider, status.Status)
 			}
 			if len(health) == 0 {
-				healthText += "No providers configured"
+				healthText += app.tr("harmony_os_gui_health_no_providers", nil)
 			}
 			healthLabel.SetText(healthText)
 		}
@@ -1421,11 +1427,11 @@ func (app *HarmonyApp) createHarmonySystemTab() fyne.CanvasObject {
 	// System metrics
 	metricsLabel := widget.NewLabel(app.tr("harmony_os_gui_label_system_metrics", nil))
 
-	cpuLabel := widget.NewLabel(fmt.Sprintf("CPU Usage: %.1f%%", app.systemMonitor.cpuUsage))
-	memLabel := widget.NewLabel(fmt.Sprintf("Memory Usage: %.0f MB", app.systemMonitor.memoryUsage))
-	gpuLabel := widget.NewLabel(fmt.Sprintf("GPU Usage: %.1f%%", app.systemMonitor.gpuUsage))
-	tempLabel := widget.NewLabel(fmt.Sprintf("Temperature: %.1f°C", app.systemMonitor.temperature))
-	powerLabel := widget.NewLabel(fmt.Sprintf("Power Usage: %.1fW", app.systemMonitor.powerUsage))
+	cpuLabel := widget.NewLabel(app.tr("harmony_os_gui_metric_cpu_usage_fmt", map[string]any{"Value": fmt.Sprintf("%.1f", app.systemMonitor.cpuUsage)}))
+	memLabel := widget.NewLabel(app.tr("harmony_os_gui_metric_memory_usage_fmt", map[string]any{"Value": fmt.Sprintf("%.0f", app.systemMonitor.memoryUsage)}))
+	gpuLabel := widget.NewLabel(app.tr("harmony_os_gui_metric_gpu_usage_fmt", map[string]any{"Value": fmt.Sprintf("%.1f", app.systemMonitor.gpuUsage)}))
+	tempLabel := widget.NewLabel(app.tr("harmony_os_gui_metric_temperature_fmt", map[string]any{"Value": fmt.Sprintf("%.1f", app.systemMonitor.temperature)}))
+	powerLabel := widget.NewLabel(app.tr("harmony_os_gui_metric_power_usage_fmt", map[string]any{"Value": fmt.Sprintf("%.1f", app.systemMonitor.powerUsage)}))
 
 	metricsCard := widget.NewCard(
 		app.tr("harmony_os_gui_card_monitoring_title", nil),
@@ -1458,33 +1464,32 @@ func (app *HarmonyApp) createHarmonySystemTab() fyne.CanvasObject {
 // createDistributedServicesTab creates the distributed services tab
 func (app *HarmonyApp) createDistributedServicesTab() fyne.CanvasObject {
 	// Connected devices
-	devicesLabel := widget.NewLabel(fmt.Sprintf("Connected Devices: %d",
-		len(app.harmonyIntegration.distributedEngine.connectedDevices)))
+	devicesLabel := widget.NewLabel(app.tr("harmony_os_gui_connected_devices_fmt", map[string]any{
+		"Count": len(app.harmonyIntegration.distributedEngine.connectedDevices),
+	}))
 
 	// Task scheduler info
 	schedulerCard := widget.NewCard(
 		app.tr("harmony_os_gui_card_scheduler_title", nil),
 		app.tr("harmony_os_gui_card_scheduler_subtitle", nil),
-		widget.NewLabel(fmt.Sprintf(
-			"Policy: %s\nQueue Size: %d",
-			app.harmonyIntegration.distributedEngine.taskScheduler.schedulingPolicy,
-			len(app.harmonyIntegration.distributedEngine.taskScheduler.taskQueue),
-		)),
+		widget.NewLabel(app.tr("harmony_os_gui_scheduler_info_fmt", map[string]any{
+			"Policy":    app.harmonyIntegration.distributedEngine.taskScheduler.schedulingPolicy,
+			"QueueSize": len(app.harmonyIntegration.distributedEngine.taskScheduler.taskQueue),
+		})),
 	)
 
 	// Data sync info. Reads sync status through GetSyncStatus so the
 	// lastSyncErr sentinel surface from round-31 §11.4 is shown to the
 	// user instead of the previous "Last Sync: Just now" PASS-bluff.
 	enabled, lastSync, syncedCount, lastSyncErr := app.harmonyIntegration.distributedEngine.dataSync.GetSyncStatus()
-	syncStatusText := fmt.Sprintf(
-		"Sync Enabled: %v\nInterval: %v\nLast Successful Sync: %s\nSynced Devices: %d",
-		enabled,
-		app.harmonyIntegration.distributedEngine.dataSync.syncInterval,
-		lastSync.Format(time.RFC3339),
-		syncedCount,
-	)
+	syncStatusText := app.tr("harmony_os_gui_sync_status_fmt", map[string]any{
+		"Enabled":  enabled,
+		"Interval": app.harmonyIntegration.distributedEngine.dataSync.syncInterval,
+		"LastSync": lastSync.Format(time.RFC3339),
+		"Synced":   syncedCount,
+	})
 	if lastSyncErr != nil {
-		syncStatusText += fmt.Sprintf("\n\nLast Sync Result: FAILED\nError: %v", lastSyncErr)
+		syncStatusText += app.tr("harmony_os_gui_sync_failed_fmt", map[string]any{"Error": fmt.Sprintf("%v", lastSyncErr)})
 	}
 	syncCard := widget.NewCard(
 		app.tr("harmony_os_gui_card_sync_title", nil),
@@ -1507,25 +1512,23 @@ func (app *HarmonyApp) createResourceManagementTab() fyne.CanvasObject {
 	policiesCard := widget.NewCard(
 		app.tr("harmony_os_gui_card_active_policies_title", nil),
 		app.tr("harmony_os_gui_card_active_policies_subtitle", nil),
-		widget.NewLabel(fmt.Sprintf(
-			"CPU Policy: %s\nMemory Policy: %s\nPower Policy: %s\nOptimization: %v\nAuto-Tuning: %v",
-			app.resourceManager.resourcePolicies["cpu"],
-			app.resourceManager.resourcePolicies["memory"],
-			app.resourceManager.resourcePolicies["power"],
-			app.resourceManager.optimization,
-			app.resourceManager.autoTuning,
-		)),
+		widget.NewLabel(app.tr("harmony_os_gui_resource_policies_fmt", map[string]any{
+			"CPUPolicy":    app.resourceManager.resourcePolicies["cpu"],
+			"MemoryPolicy": app.resourceManager.resourcePolicies["memory"],
+			"PowerPolicy":  app.resourceManager.resourcePolicies["power"],
+			"Optimization": app.resourceManager.optimization,
+			"AutoTuning":   app.resourceManager.autoTuning,
+		})),
 	)
 
 	// Service coordinator
 	servicesCard := widget.NewCard(
 		app.tr("harmony_os_gui_card_service_coordinator_title", nil),
 		app.tr("harmony_os_gui_card_service_coordinator_subtitle", nil),
-		widget.NewLabel(fmt.Sprintf(
-			"Active Services: %d\nFailover: %v",
-			len(app.serviceCoordinator.coordinator.activeServices),
-			app.serviceCoordinator.coordinator.failoverEnabled,
-		)),
+		widget.NewLabel(app.tr("harmony_os_gui_service_coordinator_fmt", map[string]any{
+			"ActiveServices": len(app.serviceCoordinator.coordinator.activeServices),
+			"Failover":       app.serviceCoordinator.coordinator.failoverEnabled,
+		})),
 	)
 
 	return container.NewVBox(
@@ -1544,7 +1547,7 @@ func (app *HarmonyApp) createSettingsTab() fyne.CanvasObject {
 		func(selected string) {
 			app.themeManager.SetTheme(selected)
 			app.fyneApp.Settings().SetTheme(app.themeManager.GetCustomTheme())
-			app.statusBar.SetText(fmt.Sprintf("Theme changed to: %s", selected))
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_theme_changed_fmt", map[string]any{"Theme": selected}))
 		},
 	)
 	themeSelect.SetSelected("Harmony")
@@ -1555,7 +1558,7 @@ func (app *HarmonyApp) createSettingsTab() fyne.CanvasObject {
 		go func() {
 			if err := app.server.Start(); err != nil {
 				log.Printf("Server error: %v", err)
-				app.statusBar.SetText(fmt.Sprintf("Server error: %v", err))
+				app.statusBar.SetText(app.tr("harmony_os_gui_status_server_error_fmt", map[string]any{"Error": fmt.Sprintf("%v", err)}))
 			}
 		}()
 		app.statusBar.SetText(app.tr("harmony_os_gui_status_server_started", nil))

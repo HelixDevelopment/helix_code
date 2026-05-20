@@ -736,3 +736,468 @@ aurora_os_label_session_controls:
 
 aurora_os_placeholder_project_id:
   other: "Project ID"
+
+# --- round-461 §11.4 CONST-046 Phase-4 applications final-sweep ---
+# Diagnostics / security-scan / performance / audit-log / encryption /
+# LLM-chat / settings residuals migrated out of aurora_os/main.go.
+
+aurora_os_audit_diagnostics_initiated:
+  other: "System diagnostics initiated"
+
+aurora_os_diag_cpu_cores_fmt:
+  other: "CPU Cores: %d - OK"
+
+aurora_os_diag_status_ok:
+  other: "OK"
+
+aurora_os_diag_warn_high_memory:
+  other: "WARNING - High memory usage"
+
+aurora_os_diag_memory_fmt:
+  other: "Memory: %.2f MB allocated - %s"
+
+aurora_os_diag_warn_high_goroutines:
+  other: "WARNING - High goroutine count"
+
+aurora_os_diag_goroutines_fmt:
+  other: "Goroutines: %d - %s"
+
+aurora_os_diag_db_not_connected:
+  other: "Not connected"
+
+aurora_os_diag_db_connected:
+  other: "Connected"
+
+aurora_os_diag_database_fmt:
+  other: "Database: %s"
+
+aurora_os_diag_task_manager_init:
+  other: "Task Manager: Initialized"
+
+aurora_os_diag_worker_manager_init:
+  other: "Worker Manager: Initialized"
+
+aurora_os_diag_project_manager_init:
+  other: "Project Manager: Initialized"
+
+aurora_os_diag_session_manager_init:
+  other: "Session Manager: Initialized"
+
+aurora_os_diag_llm_manager_init:
+  other: "LLM Manager: Initialized"
+
+aurora_os_state_enabled:
+  other: "Enabled"
+
+aurora_os_state_disabled:
+  other: "Disabled"
+
+aurora_os_state_enabled_lower:
+  other: "enabled"
+
+aurora_os_state_disabled_lower:
+  other: "disabled"
+
+aurora_os_diag_encryption_fmt:
+  other: "Encryption: %s"
+
+aurora_os_diag_perf_mode_fmt:
+  other: "Performance Mode: %s"
+
+aurora_os_diag_results_header:
+  other: "=== Aurora OS Diagnostics ==="
+
+aurora_os_diag_completed_ok:
+  other: "Diagnostics completed successfully."
+
+aurora_os_audit_diagnostics_completed_fmt:
+  other: "Diagnostics completed: %d checks performed"
+
+aurora_os_audit_security_scan_initiated:
+  other: "Security scan initiated"
+
+aurora_os_scan_encryption_disabled:
+  other: "[WARNING] Encryption is disabled"
+
+aurora_os_scan_encryption_enabled:
+  other: "[OK] Encryption is enabled"
+
+aurora_os_scan_no_access_roles:
+  other: "[WARNING] No access control roles defined"
+
+aurora_os_scan_access_roles_fmt:
+  other: "[OK] %d access control roles defined"
+
+aurora_os_scan_audit_logging_enabled:
+  other: "[OK] Audit logging is enabled"
+
+aurora_os_scan_db_not_connected:
+  other: "[INFO] Database not connected - data persistence limited"
+
+aurora_os_scan_db_connected:
+  other: "[OK] Database connected"
+
+aurora_os_scan_all_checks_passed:
+  other: "All checks passed"
+
+aurora_os_scan_issues_found_fmt:
+  other: "%d issues found"
+
+aurora_os_scan_results_header:
+  other: "=== Security Scan Results ==="
+
+aurora_os_scan_completed_fmt:
+  other: "Scan completed: %d issues found."
+
+aurora_os_audit_security_scan_completed_fmt:
+  other: "Security scan completed: %d issues found"
+
+aurora_os_dialog_perf_mode_title:
+  other: "Performance Mode"
+
+aurora_os_perf_mode_enabled_intro:
+  other: "Performance mode ENABLED"
+
+aurora_os_perf_mode_optimizations_header:
+  other: "Applied optimizations:"
+
+aurora_os_perf_mode_opt_gomaxprocs_fmt:
+  other: "- GOMAXPROCS set to %d"
+
+aurora_os_perf_mode_opt_gc:
+  other: "- Garbage collection performed"
+
+aurora_os_perf_mode_opt_memory:
+  other: "- Memory optimized"
+
+aurora_os_audit_perf_mode_enabled:
+  other: "Performance mode enabled"
+
+aurora_os_perf_mode_disabled_body:
+  other: "Performance mode DISABLED\n\nSystem running in normal mode."
+
+aurora_os_audit_perf_mode_disabled:
+  other: "Performance mode disabled"
+
+aurora_os_audit_optimization_initiated:
+  other: "Performance optimization initiated"
+
+aurora_os_optimization_report_fmt:
+  other: "=== Performance Optimization ===\n\nGarbage Collection:\n  Memory freed: %.2f MB\n  Before: %.2f MB\n  After: %.2f MB\n\nCPU Optimization:\n  GOMAXPROCS: %d\n\nPerformance Mode: Enabled\n\nOptimization complete!"
+
+aurora_os_dialog_optimization_title:
+  other: "Performance Optimization"
+
+aurora_os_audit_optimization_completed_fmt:
+  other: "Optimization completed, freed %.2f MB"
+
+aurora_os_dialog_audit_log_title:
+  other: "Audit Log"
+
+aurora_os_audit_log_empty:
+  other: "No audit log entries found."
+
+aurora_os_audit_log_header:
+  other: "=== Security Audit Log ==="
+
+aurora_os_audit_log_entry_fmt:
+  other: "[%s] %s\n  Action: %s\n  User: %s\n  Details: %s\n\n"
+
+aurora_os_audit_log_showing_fmt:
+  other: "Showing %d of %d entries"
+
+aurora_os_btn_close:
+  other: "Close"
+
+aurora_os_check_enable_encryption:
+  other: "Enable Encryption"
+
+aurora_os_formitem_encryption_enabled:
+  other: "Encryption Enabled"
+
+aurora_os_formitem_algorithm:
+  other: "Algorithm"
+
+aurora_os_audit_encryption_change_fmt:
+  other: "Encryption %s with algorithm %s"
+
+aurora_os_dialog_encryption_config_title:
+  other: "Encryption Configuration"
+
+aurora_os_encryption_updated_fmt:
+  other: "Encryption settings updated:\n  Enabled: %v\n  Algorithm: %s"
+
+aurora_os_dialog_configure_encryption_title:
+  other: "Configure Encryption"
+
+aurora_os_btn_save:
+  other: "Save"
+
+aurora_os_btn_cancel:
+  other: "Cancel"
+
+aurora_os_audit_app_initialized:
+  other: "Aurora OS application initialized"
+
+aurora_os_audit_task_created_fmt:
+  other: "Created task: %s"
+
+aurora_os_audit_worker_added_fmt:
+  other: "Added worker: %s"
+
+aurora_os_project_details_fmt:
+  other: "Name: %s\nType: %s\nPath: %s\nDescription: %s\nCreated: %s\nBuild Command: %s\nTest Command: %s"
+
+aurora_os_audit_project_created_fmt:
+  other: "Created project: %s"
+
+aurora_os_session_details_fmt:
+  other: "ID: %s\nName: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s\nDuration: %s"
+
+aurora_os_audit_session_created_fmt:
+  other: "Created session: %s"
+
+aurora_os_btn_start_session:
+  other: "Start Session"
+
+aurora_os_audit_session_started_fmt:
+  other: "Started session: %s"
+
+aurora_os_btn_pause_session:
+  other: "Pause Session"
+
+aurora_os_audit_session_paused_fmt:
+  other: "Paused session: %s"
+
+aurora_os_btn_complete_session:
+  other: "Complete Session"
+
+aurora_os_audit_session_completed_fmt:
+  other: "Completed session: %s"
+
+aurora_os_card_available_models:
+  other: "Available Models"
+
+aurora_os_label_select_model:
+  other: "Select a model to view details"
+
+aurora_os_model_details_fmt:
+  other: "Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v"
+
+aurora_os_card_model_details:
+  other: "Model Details"
+
+aurora_os_placeholder_chat_history:
+  other: "Chat history will appear here..."
+
+aurora_os_placeholder_chat_input:
+  other: "Type your message here..."
+
+aurora_os_placeholder_model_name:
+  other: "Model name (e.g., llama2)"
+
+aurora_os_btn_send_message:
+  other: "Send Message"
+
+aurora_os_audit_message_sent_fmt:
+  other: "Sent message to %s/%s"
+
+aurora_os_chat_provider_unavailable_fmt:
+  other: "[AI (%s/%s)]: Provider '%s' not available or model not configured. Please configure it in Settings.\n"
+
+aurora_os_chat_llm_not_initialized_fmt:
+  other: "[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n"
+
+aurora_os_btn_clear_chat:
+  other: "Clear Chat"
+
+aurora_os_label_chat_settings:
+  other: "Chat Settings:"
+
+aurora_os_label_provider:
+  other: "Provider:"
+
+aurora_os_label_model:
+  other: "Model:"
+
+aurora_os_label_chat_with_ai:
+  other: "Chat with AI"
+
+aurora_os_card_llm_chat:
+  other: "LLM Chat"
+
+aurora_os_health_checking:
+  other: "Provider Health:\nChecking..."
+
+aurora_os_health_no_manager:
+  other: "Provider Health:\nNo LLM manager available"
+
+aurora_os_health_header:
+  other: "Provider Health:"
+
+aurora_os_health_no_providers:
+  other: "No providers configured"
+
+aurora_os_card_provider_status:
+  other: "Provider Status"
+
+aurora_os_theme_info_fmt:
+  other: "Name: %s\nDark: %t\nPrimary: %s\nSecondary: %s\nAccent: %s"
+
+aurora_os_card_theme:
+  other: "Theme"
+
+aurora_os_card_theme_subtitle:
+  other: "Select application theme"
+
+aurora_os_card_current_theme:
+  other: "Current Theme"
+
+aurora_os_placeholder_server_url:
+  other: "Server URL"
+
+aurora_os_placeholder_timeout:
+  other: "Timeout (seconds)"
+
+aurora_os_card_server_connection:
+  other: "Server Connection"
+
+aurora_os_label_server_url:
+  other: "Server URL:"
+
+aurora_os_label_timeout:
+  other: "Timeout (seconds):"
+
+aurora_os_btn_test_connection:
+  other: "Test Connection"
+
+aurora_os_dialog_connection_test_title:
+  other: "Connection Test"
+
+aurora_os_connection_test_body:
+  other: "Server connection test would be performed here."
+
+aurora_os_card_database:
+  other: "Database"
+
+aurora_os_label_db_host:
+  other: "Host:"
+
+aurora_os_label_db_port:
+  other: "Port:"
+
+aurora_os_label_db_database:
+  other: "Database:"
+
+aurora_os_card_llm_providers:
+  other: "LLM Providers"
+
+aurora_os_label_ollama_url:
+  other: "Ollama URL:"
+
+aurora_os_label_openai_api_key:
+  other: "OpenAI API Key:"
+
+aurora_os_label_anthropic_api_key:
+  other: "Anthropic API Key:"
+
+aurora_os_check_performance_mode:
+  other: "Performance Mode"
+
+aurora_os_card_aurora_settings:
+  other: "Aurora OS Settings"
+
+aurora_os_btn_run_diagnostics:
+  other: "Run Diagnostics"
+
+aurora_os_about_body:
+  other: "HelixCode Aurora OS Edition\nVersion: 1.0.0\nDistributed AI Development Platform\n\nOptimized for Aurora OS"
+
+aurora_os_card_about:
+  other: "About"
+
+aurora_os_audit_app_shutting_down:
+  other: "Aurora OS application shutting down"
+
+# --- round-461 §11.4 CONST-046 — aurora_os/main_nogui.go CLI residuals ---
+
+aurora_os_cli_audit_app_initialized:
+  other: "CLI application initialized"
+
+aurora_os_cli_audit_app_shutting_down:
+  other: "CLI application shutting down"
+
+aurora_os_cli_audit_projects_listed:
+  other: "Listed all projects"
+
+aurora_os_cli_flag_project_desc:
+  other: "Project description"
+
+aurora_os_cli_flag_project_type:
+  other: "Project type (go, node, python, rust, generic)"
+
+aurora_os_cli_audit_project_created_fmt:
+  other: "Created project: %s"
+
+aurora_os_cli_audit_project_set_active_fmt:
+  other: "Set active project: %s"
+
+aurora_os_cli_audit_project_deleted_fmt:
+  other: "Deleted project: %s"
+
+aurora_os_cli_flag_session_desc:
+  other: "Session description"
+
+aurora_os_cli_flag_session_mode:
+  other: "Session mode (planning, building, testing, refactoring, debugging, deployment)"
+
+aurora_os_cli_audit_session_created_fmt:
+  other: "Created session: %s"
+
+aurora_os_cli_audit_session_started_fmt:
+  other: "Started session: %s"
+
+aurora_os_cli_audit_session_paused_fmt:
+  other: "Paused session: %s"
+
+aurora_os_cli_audit_session_completed_fmt:
+  other: "Completed session: %s"
+
+aurora_os_cli_flag_task_type:
+  other: "Task type (planning, building, testing, refactoring, debugging)"
+
+aurora_os_cli_flag_task_desc:
+  other: "Task description"
+
+aurora_os_cli_flag_task_priority:
+  other: "Task priority (low, normal, high, critical)"
+
+aurora_os_cli_audit_task_created_fmt:
+  other: "Created task: %s"
+
+aurora_os_cli_audit_task_cancelled_fmt:
+  other: "Cancelled task: %s"
+
+aurora_os_cli_audit_worker_added_fmt:
+  other: "Added worker: %s"
+
+aurora_os_cli_audit_worker_removed_fmt:
+  other: "Removed worker: %s"
+
+aurora_os_cli_audit_perf_mode_fmt:
+  other: "Performance mode: %s"
+
+aurora_os_cli_audit_diagnostics_fmt:
+  other: "Ran diagnostics: %d checks"
+
+aurora_os_cli_audit_optimization_fmt:
+  other: "Ran optimization, freed %.2f MB"
+
+aurora_os_cli_audit_encryption_enabled:
+  other: "Enabled encryption"
+
+aurora_os_cli_audit_encryption_disabled:
+  other: "Disabled encryption"
+
+aurora_os_cli_audit_permission_added_fmt:
+  other: "Added permission %s to role %s"

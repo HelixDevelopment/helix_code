@@ -236,3 +236,29 @@ terminal_ui_form_start_qa_session_title:
 
 terminal_ui_qa_start_session_failed:
   other: "Start session failed: {{.Error}}"
+
+# --- round-461 §11.4 CONST-046 Phase-4 — terminal_ui/main.go residuals ---
+
+terminal_ui_chat_dashboard_content_fmt:
+  other: "[::b]Current Model[white]\n%s\n\n[::b]Provider Status[white]\n[green]Healthy:[white] %d\n[red]Unhealthy:[white] %d\n\n[::b]Available Models[white]\nTotal: %d\n\n[::b]Chat Statistics[white]\nMessages: %d\nTokens Used: N/A\n\n[::b]Quick Commands[white]\n/help - Show help\n/clear - Clear chat\n/model - Change model\n/system - Set system prompt"
+
+terminal_ui_chat_welcome_body:
+  other: "[::b]Welcome to HelixCode AI Chat[white]\n\nStart a conversation by typing a message below.\nUse the buttons to select a model or configure settings.\n\n[::b]Tips:[white]\n- Type your message and press Enter to send\n- Use /help for available commands\n- Select a model before chatting for best results\n\n[gray]No messages yet..."
+
+terminal_ui_chat_help_commands_body:
+  other: "Available Commands:\n/help - Show this help message\n/clear - Clear chat history\n/model - Show model selector\n/system <prompt> - Set system prompt\n/info - Show current model info"
+
+terminal_ui_models_configure_ollama:
+  other: "Configure Ollama"
+
+terminal_ui_status_configure_ollama_hint:
+  other: "[yellow]Configure Ollama in Settings > System"
+
+terminal_ui_config_basic_settings_body:
+  other: "[::b]Basic Settings:\n• Auto Start: Enabled\n• Mode: Local/Remote\n• Host: localhost\n• Port: 8000\n\n[::b]Features:\n• Knowledge Graph: Enabled\n• Semantic Search: Enabled\n• Real-time Processing: Enabled\n• Multi-modal Support: Enabled\n\n[::b]Performance:\n• Workers: 4\n• Cache: Redis\n• Optimization: High"
+
+terminal_ui_form_task_data_default:
+  other: "{\"description\": \"Task description\"}"
+
+terminal_ui_system_config_body:
+  other: "[::b]System Configuration:\n\nDatabase: PostgreSQL\nRedis: Enabled\nWorkers: 4 active\nTasks: 0 running\n\n[::b]Performance:\nCPU Usage: 15%\nMemory: 2.1GB / 8GB\nDisk: 45GB free\n\n[::b]Network:\nPort: 8080\nSSL: Disabled\nCORS: Enabled"

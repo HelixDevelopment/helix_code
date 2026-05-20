@@ -373,8 +373,8 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		fs := flag.NewFlagSet("projects create", flag.ExitOnError)
 		name := fs.String("name", "", "Project name")
 		path := fs.String("path", "", "Project path")
-		desc := fs.String("desc", "", "Project description")
-		ptype := fs.String("type", "generic", "Project type (go, node, python, rust, generic)")
+		desc := fs.String("desc", "", cliApp.t("desktop_cli_flag_project_desc"))
+		ptype := fs.String("type", "generic", cliApp.t("desktop_cli_flag_project_type"))
 		fs.Parse(args[1:])
 
 		if *name == "" || *path == "" {
@@ -438,8 +438,8 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		fs := flag.NewFlagSet("sessions create", flag.ExitOnError)
 		name := fs.String("name", "", "Session name")
 		projectID := fs.String("project", "", "Project ID")
-		desc := fs.String("desc", "", "Session description")
-		mode := fs.String("mode", "building", "Session mode (planning, building, testing, refactoring, debugging, deployment)")
+		desc := fs.String("desc", "", cliApp.t("desktop_cli_flag_session_desc"))
+		mode := fs.String("mode", "building", cliApp.t("desktop_cli_flag_session_mode"))
 		fs.Parse(args[1:])
 
 		if *name == "" || *projectID == "" {
@@ -514,9 +514,9 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 
 	case "create":
 		fs := flag.NewFlagSet("tasks create", flag.ExitOnError)
-		taskType := fs.String("type", "building", "Task type (planning, building, testing, refactoring, debugging)")
-		desc := fs.String("desc", "", "Task description")
-		priority := fs.String("priority", "normal", "Task priority (low, normal, high, critical)")
+		taskType := fs.String("type", "building", cliApp.t("desktop_cli_flag_task_type"))
+		desc := fs.String("desc", "", cliApp.t("desktop_cli_flag_task_desc"))
+		priority := fs.String("priority", "normal", cliApp.t("desktop_cli_flag_task_priority"))
 		fs.Parse(args[1:])
 
 		if *desc == "" {

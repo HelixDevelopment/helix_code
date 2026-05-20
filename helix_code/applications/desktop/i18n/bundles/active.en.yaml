@@ -324,3 +324,26 @@ desktop_cli_goodbye:
 
 desktop_cli_error_prefix:
   other: "Error: %v"
+
+# --- round-461 §11.4 CONST-046 — desktop/main_nogui.go CLI flag residuals ---
+
+desktop_cli_flag_project_desc:
+  other: "Project description"
+
+desktop_cli_flag_project_type:
+  other: "Project type (go, node, python, rust, generic)"
+
+desktop_cli_flag_session_desc:
+  other: "Session description"
+
+desktop_cli_flag_session_mode:
+  other: "Session mode (planning, building, testing, refactoring, debugging, deployment)"
+
+desktop_cli_flag_task_type:
+  other: "Task type (planning, building, testing, refactoring, debugging)"
+
+desktop_cli_flag_task_desc:
+  other: "Task description"
+
+desktop_cli_flag_task_priority:
+  other: "Task priority (low, normal, high, critical)"

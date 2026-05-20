@@ -415,7 +415,7 @@ func (auroraApp *AuroraApp) Initialize() error {
 	auroraApp.startDataUpdates()
 
 	// Log initialization
-	auroraApp.securityManager.AddAuditEntry("system_init", "system", "Aurora OS application initialized", "info")
+	auroraApp.securityManager.AddAuditEntry("system_init", "system", auroraApp.t("aurora_os_audit_app_initialized"), "info")
 
 	return nil
 }
@@ -735,73 +735,73 @@ func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 
 func (auroraApp *AuroraApp) runAuroraDiagnostics() {
 	log.Println("Running Aurora OS diagnostics...")
-	auroraApp.securityManager.AddAuditEntry("diagnostics_run", "user", "System diagnostics initiated", "info")
+	auroraApp.securityManager.AddAuditEntry("diagnostics_run", "user", auroraApp.t("aurora_os_audit_diagnostics_initiated"), "info")
 
 	// Perform real diagnostics
 	diagnosticsResults := []string{}
 
 	// Check CPU
 	cpuCount := runtime.NumCPU()
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("CPU Cores: %d - OK", cpuCount))
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_cpu_cores_fmt"), cpuCount))
 
 	// Check memory
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	memStatus := "OK"
+	memStatus := auroraApp.t("aurora_os_diag_status_ok")
 	if m.Alloc > 500*1024*1024 {
-		memStatus = "WARNING - High memory usage"
+		memStatus = auroraApp.t("aurora_os_diag_warn_high_memory")
 	}
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Memory: %.2f MB allocated - %s", float64(m.Alloc)/1024/1024, memStatus))
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_memory_fmt"), float64(m.Alloc)/1024/1024, memStatus))
 
 	// Check goroutines
 	goroutines := runtime.NumGoroutine()
-	goroutineStatus := "OK"
+	goroutineStatus := auroraApp.t("aurora_os_diag_status_ok")
 	if goroutines > 1000 {
-		goroutineStatus = "WARNING - High goroutine count"
+		goroutineStatus = auroraApp.t("aurora_os_diag_warn_high_goroutines")
 	}
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Goroutines: %d - %s", goroutines, goroutineStatus))
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_goroutines_fmt"), goroutines, goroutineStatus))
 
 	// Check database
-	dbStatus := "Not connected"
+	dbStatus := auroraApp.t("aurora_os_diag_db_not_connected")
 	if auroraApp.db != nil {
-		dbStatus = "Connected"
+		dbStatus = auroraApp.t("aurora_os_diag_db_connected")
 	}
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Database: %s", dbStatus))
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_database_fmt"), dbStatus))
 
 	// Check managers
-	diagnosticsResults = append(diagnosticsResults, "Task Manager: Initialized")
-	diagnosticsResults = append(diagnosticsResults, "Worker Manager: Initialized")
-	diagnosticsResults = append(diagnosticsResults, "Project Manager: Initialized")
-	diagnosticsResults = append(diagnosticsResults, "Session Manager: Initialized")
-	diagnosticsResults = append(diagnosticsResults, "LLM Manager: Initialized")
+	diagnosticsResults = append(diagnosticsResults, auroraApp.t("aurora_os_diag_task_manager_init"))
+	diagnosticsResults = append(diagnosticsResults, auroraApp.t("aurora_os_diag_worker_manager_init"))
+	diagnosticsResults = append(diagnosticsResults, auroraApp.t("aurora_os_diag_project_manager_init"))
+	diagnosticsResults = append(diagnosticsResults, auroraApp.t("aurora_os_diag_session_manager_init"))
+	diagnosticsResults = append(diagnosticsResults, auroraApp.t("aurora_os_diag_llm_manager_init"))
 
 	// Check security
 	auroraApp.securityManager.mu.RLock()
-	encStatus := map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.securityManager.encryptionEnabled]
+	encStatus := map[bool]string{true: auroraApp.t("aurora_os_state_enabled"), false: auroraApp.t("aurora_os_state_disabled")}[auroraApp.securityManager.encryptionEnabled]
 	auroraApp.securityManager.mu.RUnlock()
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Encryption: %s", encStatus))
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_encryption_fmt"), encStatus))
 
 	// Check performance mode
-	perfStatus := map[bool]string{true: "Enabled", false: "Disabled"}[auroraApp.performanceMode]
-	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf("Performance Mode: %s", perfStatus))
+	perfStatus := map[bool]string{true: auroraApp.t("aurora_os_state_enabled"), false: auroraApp.t("aurora_os_state_disabled")}[auroraApp.performanceMode]
+	diagnosticsResults = append(diagnosticsResults, fmt.Sprintf(auroraApp.t("aurora_os_diag_perf_mode_fmt"), perfStatus))
 
 	// Build result text
-	resultText := "=== Aurora OS Diagnostics ===\n\n"
+	resultText := auroraApp.t("aurora_os_diag_results_header") + "\n\n"
 	for _, result := range diagnosticsResults {
 		resultText += result + "\n"
 	}
-	resultText += "\nDiagnostics completed successfully."
+	resultText += "\n" + auroraApp.t("aurora_os_diag_completed_ok")
 
 	// Show results in dialog
 	dialog.ShowInformation(auroraApp.t("aurora_os_dialog_system_diagnostics_title"), resultText, auroraApp.mainWindow)
 
 	auroraApp.securityManager.AddAuditEntry("diagnostics_complete", "user",
-		fmt.Sprintf("Diagnostics completed: %d checks performed", len(diagnosticsResults)), "info")
+		fmt.Sprintf(auroraApp.t("aurora_os_audit_diagnostics_completed_fmt"), len(diagnosticsResults)), "info")
 }
 
 func (auroraApp *AuroraApp) runSecurityScan() {
 	log.Println("Running Aurora OS security scan...")
-	auroraApp.securityManager.AddAuditEntry("security_scan_start", "user", "Security scan initiated", "info")
+	auroraApp.securityManager.AddAuditEntry("security_scan_start", "user", auroraApp.t("aurora_os_audit_security_scan_initiated"), "info")
 
 	// Simulate security scan with real checks
 	scanResults := []string{}
@@ -810,55 +810,55 @@ func (auroraApp *AuroraApp) runSecurityScan() {
 	// Check encryption
 	auroraApp.securityManager.mu.RLock()
 	if !auroraApp.securityManager.encryptionEnabled {
-		scanResults = append(scanResults, "[WARNING] Encryption is disabled")
+		scanResults = append(scanResults, auroraApp.t("aurora_os_scan_encryption_disabled"))
 		issues++
 	} else {
-		scanResults = append(scanResults, "[OK] Encryption is enabled")
+		scanResults = append(scanResults, auroraApp.t("aurora_os_scan_encryption_enabled"))
 	}
 	auroraApp.securityManager.mu.RUnlock()
 
 	// Check access control
 	auroraApp.securityManager.mu.RLock()
 	if len(auroraApp.securityManager.accessControl) == 0 {
-		scanResults = append(scanResults, "[WARNING] No access control roles defined")
+		scanResults = append(scanResults, auroraApp.t("aurora_os_scan_no_access_roles"))
 		issues++
 	} else {
-		scanResults = append(scanResults, fmt.Sprintf("[OK] %d access control roles defined", len(auroraApp.securityManager.accessControl)))
+		scanResults = append(scanResults, fmt.Sprintf(auroraApp.t("aurora_os_scan_access_roles_fmt"), len(auroraApp.securityManager.accessControl)))
 	}
 	auroraApp.securityManager.mu.RUnlock()
 
 	// Check audit logging
-	scanResults = append(scanResults, "[OK] Audit logging is enabled")
+	scanResults = append(scanResults, auroraApp.t("aurora_os_scan_audit_logging_enabled"))
 
 	// Check database connection
 	if auroraApp.db == nil {
-		scanResults = append(scanResults, "[INFO] Database not connected - data persistence limited")
+		scanResults = append(scanResults, auroraApp.t("aurora_os_scan_db_not_connected"))
 	} else {
-		scanResults = append(scanResults, "[OK] Database connected")
+		scanResults = append(scanResults, auroraApp.t("aurora_os_scan_db_connected"))
 	}
 
 	// Update security manager
 	auroraApp.securityManager.mu.Lock()
 	auroraApp.securityManager.lastSecurityScan = time.Now()
 	if issues == 0 {
-		auroraApp.securityManager.securityScanResult = "All checks passed"
+		auroraApp.securityManager.securityScanResult = auroraApp.t("aurora_os_scan_all_checks_passed")
 	} else {
-		auroraApp.securityManager.securityScanResult = fmt.Sprintf("%d issues found", issues)
+		auroraApp.securityManager.securityScanResult = fmt.Sprintf(auroraApp.t("aurora_os_scan_issues_found_fmt"), issues)
 	}
 	auroraApp.securityManager.mu.Unlock()
 
 	// Build result text
-	resultText := "=== Security Scan Results ===\n\n"
+	resultText := auroraApp.t("aurora_os_scan_results_header") + "\n\n"
 	for _, result := range scanResults {
 		resultText += result + "\n"
 	}
-	resultText += fmt.Sprintf("\nScan completed: %d issues found.", issues)
+	resultText += "\n" + fmt.Sprintf(auroraApp.t("aurora_os_scan_completed_fmt"), issues)
 
 	// Show results
 	dialog.ShowInformation(auroraApp.t("aurora_os_dialog_security_scan_title"), resultText, auroraApp.mainWindow)
 
 	auroraApp.securityManager.AddAuditEntry("security_scan_complete", "user",
-		fmt.Sprintf("Security scan completed: %d issues found", issues), "info")
+		fmt.Sprintf(auroraApp.t("aurora_os_audit_security_scan_completed_fmt"), issues), "info")
 }
 
 func (auroraApp *AuroraApp) activatePerformanceMode() {
@@ -871,21 +871,21 @@ func (auroraApp *AuroraApp) activatePerformanceMode() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		runtime.GC() // Clean up before performance mode
 
-		dialog.ShowInformation("Performance Mode",
-			"Performance mode ENABLED\n\n"+
-				"Applied optimizations:\n"+
-				fmt.Sprintf("- GOMAXPROCS set to %d\n", runtime.NumCPU())+
-				"- Garbage collection performed\n"+
-				"- Memory optimized",
+		dialog.ShowInformation(auroraApp.t("aurora_os_dialog_perf_mode_title"),
+			auroraApp.t("aurora_os_perf_mode_enabled_intro")+"\n\n"+
+				auroraApp.t("aurora_os_perf_mode_optimizations_header")+"\n"+
+				fmt.Sprintf(auroraApp.t("aurora_os_perf_mode_opt_gomaxprocs_fmt"), runtime.NumCPU())+"\n"+
+				auroraApp.t("aurora_os_perf_mode_opt_gc")+"\n"+
+				auroraApp.t("aurora_os_perf_mode_opt_memory"),
 			auroraApp.mainWindow)
 
-		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", "Performance mode enabled", "info")
+		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", auroraApp.t("aurora_os_audit_perf_mode_enabled"), "info")
 	} else {
-		dialog.ShowInformation("Performance Mode",
-			"Performance mode DISABLED\n\nSystem running in normal mode.",
+		dialog.ShowInformation(auroraApp.t("aurora_os_dialog_perf_mode_title"),
+			auroraApp.t("aurora_os_perf_mode_disabled_body"),
 			auroraApp.mainWindow)
 
-		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", "Performance mode disabled", "info")
+		auroraApp.securityManager.AddAuditEntry("performance_mode", "user", auroraApp.t("aurora_os_audit_perf_mode_disabled"), "info")
 	}
 }
 
@@ -932,7 +932,7 @@ func (auroraApp *AuroraApp) getDiskUsage(path string) float64 {
 
 func (auroraApp *AuroraApp) optimizePerformance() {
 	log.Println("Optimizing Aurora OS performance...")
-	auroraApp.securityManager.AddAuditEntry("optimization_start", "user", "Performance optimization initiated", "info")
+	auroraApp.securityManager.AddAuditEntry("optimization_start", "user", auroraApp.t("aurora_os_audit_optimization_initiated"), "info")
 
 	// Get memory stats before
 	var before runtime.MemStats
@@ -953,17 +953,13 @@ func (auroraApp *AuroraApp) optimizePerformance() {
 	// Enable performance mode
 	auroraApp.performanceMode = true
 
-	resultText := fmt.Sprintf("=== Performance Optimization ===\n\n"+
-		"Garbage Collection:\n  Memory freed: %.2f MB\n  Before: %.2f MB\n  After: %.2f MB\n\n"+
-		"CPU Optimization:\n  GOMAXPROCS: %d\n\n"+
-		"Performance Mode: Enabled\n\n"+
-		"Optimization complete!",
+	resultText := fmt.Sprintf(auroraApp.t("aurora_os_optimization_report_fmt"),
 		freed, float64(before.Alloc)/1024/1024, float64(after.Alloc)/1024/1024, runtime.NumCPU())
 
-	dialog.ShowInformation("Performance Optimization", resultText, auroraApp.mainWindow)
+	dialog.ShowInformation(auroraApp.t("aurora_os_dialog_optimization_title"), resultText, auroraApp.mainWindow)
 
 	auroraApp.securityManager.AddAuditEntry("optimization_complete", "user",
-		fmt.Sprintf("Optimization completed, freed %.2f MB", freed), "info")
+		fmt.Sprintf(auroraApp.t("aurora_os_audit_optimization_completed_fmt"), freed), "info")
 }
 
 func (auroraApp *AuroraApp) showAuditLog() {
@@ -974,12 +970,12 @@ func (auroraApp *AuroraApp) showAuditLog() {
 	auroraApp.securityManager.mu.RUnlock()
 
 	if len(auditLog) == 0 {
-		dialog.ShowInformation("Audit Log", "No audit log entries found.", auroraApp.mainWindow)
+		dialog.ShowInformation(auroraApp.t("aurora_os_dialog_audit_log_title"), auroraApp.t("aurora_os_audit_log_empty"), auroraApp.mainWindow)
 		return
 	}
 
 	// Create scrollable audit log display
-	logText := "=== Security Audit Log ===\n\n"
+	logText := auroraApp.t("aurora_os_audit_log_header") + "\n\n"
 	// Show last 50 entries (most recent first)
 	start := len(auditLog) - 50
 	if start < 0 {
@@ -987,14 +983,14 @@ func (auroraApp *AuroraApp) showAuditLog() {
 	}
 	for i := len(auditLog) - 1; i >= start; i-- {
 		entry := auditLog[i]
-		logText += fmt.Sprintf("[%s] %s\n  Action: %s\n  User: %s\n  Details: %s\n\n",
+		logText += fmt.Sprintf(auroraApp.t("aurora_os_audit_log_entry_fmt"),
 			entry.Timestamp.Format("2006-01-02 15:04:05"),
 			entry.Severity,
 			entry.Action,
 			entry.User,
 			entry.Details)
 	}
-	logText += fmt.Sprintf("Showing %d of %d entries", len(auditLog)-start, len(auditLog))
+	logText += fmt.Sprintf(auroraApp.t("aurora_os_audit_log_showing_fmt"), len(auditLog)-start, len(auditLog))
 
 	// Create a dialog with scrollable content
 	logEntry := widget.NewMultiLineEntry()
@@ -1005,7 +1001,7 @@ func (auroraApp *AuroraApp) showAuditLog() {
 	scrollContainer := container.NewScroll(logEntry)
 	scrollContainer.SetMinSize(fyne.NewSize(600, 400))
 
-	dialog.ShowCustom("Audit Log", "Close", scrollContainer, auroraApp.mainWindow)
+	dialog.ShowCustom(auroraApp.t("aurora_os_dialog_audit_log_title"), auroraApp.t("aurora_os_btn_close"), scrollContainer, auroraApp.mainWindow)
 }
 
 func (auroraApp *AuroraApp) configureEncryption() {
@@ -1017,7 +1013,7 @@ func (auroraApp *AuroraApp) configureEncryption() {
 	auroraApp.securityManager.mu.RUnlock()
 
 	// Create encryption configuration dialog
-	enabledCheck := widget.NewCheck("Enable Encryption", nil)
+	enabledCheck := widget.NewCheck(auroraApp.t("aurora_os_check_enable_encryption"), nil)
 	enabledCheck.Checked = currentEnabled
 
 	algoSelect := widget.NewSelect([]string{"AES-256-GCM", "AES-256-CBC", "ChaCha20-Poly1305"}, nil)
@@ -1025,8 +1021,8 @@ func (auroraApp *AuroraApp) configureEncryption() {
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
-			{Text: "Encryption Enabled", Widget: enabledCheck},
-			{Text: "Algorithm", Widget: algoSelect},
+			{Text: auroraApp.t("aurora_os_formitem_encryption_enabled"), Widget: enabledCheck},
+			{Text: auroraApp.t("aurora_os_formitem_algorithm"), Widget: algoSelect},
 		},
 		OnSubmit: func() {
 			auroraApp.securityManager.mu.Lock()
@@ -1044,19 +1040,19 @@ func (auroraApp *AuroraApp) configureEncryption() {
 					severity = "info"
 				}
 				auroraApp.securityManager.AddAuditEntry(action, "user",
-					fmt.Sprintf("Encryption %s with algorithm %s",
-						map[bool]string{true: "enabled", false: "disabled"}[enabledCheck.Checked],
+					fmt.Sprintf(auroraApp.t("aurora_os_audit_encryption_change_fmt"),
+						map[bool]string{true: auroraApp.t("aurora_os_state_enabled_lower"), false: auroraApp.t("aurora_os_state_disabled_lower")}[enabledCheck.Checked],
 						algoSelect.Selected), severity)
 			}
 
-			dialog.ShowInformation("Encryption Configuration",
-				fmt.Sprintf("Encryption settings updated:\n  Enabled: %v\n  Algorithm: %s",
+			dialog.ShowInformation(auroraApp.t("aurora_os_dialog_encryption_config_title"),
+				fmt.Sprintf(auroraApp.t("aurora_os_encryption_updated_fmt"),
 					enabledCheck.Checked, algoSelect.Selected),
 				auroraApp.mainWindow)
 		},
 	}
 
-	dialog.ShowForm("Configure Encryption", "Save", "Cancel", form.Items, func(b bool) {
+	dialog.ShowForm(auroraApp.t("aurora_os_dialog_configure_encryption_title"), auroraApp.t("aurora_os_btn_save"), auroraApp.t("aurora_os_btn_cancel"), form.Items, func(b bool) {
 		if b {
 			form.OnSubmit()
 		}
@@ -1137,7 +1133,7 @@ func (auroraApp *AuroraApp) createTasksTab() fyne.CanvasObject {
 					taskDescEntry.SetText("")
 					taskList.Refresh()
 					auroraApp.securityManager.AddAuditEntry("task_create", "user",
-						fmt.Sprintf("Created task: %s", taskDescEntry.Text), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_task_created_fmt"), taskDescEntry.Text), "info")
 				}
 			}
 		}),
@@ -1215,7 +1211,7 @@ func (auroraApp *AuroraApp) createWorkersTab() fyne.CanvasObject {
 					userEntry.SetText("")
 					workerList.Refresh()
 					auroraApp.securityManager.AddAuditEntry("worker_add", "user",
-						fmt.Sprintf("Added worker: %s", workerConfig.Host), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_worker_added_fmt"), workerConfig.Host), "info")
 				}
 			}
 		}),
@@ -1268,7 +1264,7 @@ func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
 		defer auroraApp.dataMu.RUnlock()
 		if id < len(auroraApp.projects) {
 			p := auroraApp.projects[id]
-			details := fmt.Sprintf("Name: %s\nType: %s\nPath: %s\nDescription: %s\nCreated: %s\nBuild Command: %s\nTest Command: %s",
+			details := fmt.Sprintf(auroraApp.t("aurora_os_project_details_fmt"),
 				p.Name, p.Type, p.Path, p.Description,
 				p.CreatedAt.Format(time.RFC822),
 				p.Metadata.BuildCommand, p.Metadata.TestCommand)
@@ -1307,7 +1303,7 @@ func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
 					dialog.ShowError(err, auroraApp.mainWindow)
 				} else {
 					auroraApp.securityManager.AddAuditEntry("project_create", "user",
-						fmt.Sprintf("Created project: %s", nameEntry.Text), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_project_created_fmt"), nameEntry.Text), "info")
 					nameEntry.SetText("")
 					descEntry.SetText("")
 					pathEntry.SetText("")
@@ -1369,7 +1365,7 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 			s := auroraApp.sessions[id]
 			selectedSessionID = s.ID
 			durationStr := s.Duration.String()
-			details := fmt.Sprintf("ID: %s\nName: %s\nMode: %s\nStatus: %s\nProject ID: %s\nDescription: %s\nCreated: %s\nDuration: %s",
+			details := fmt.Sprintf(auroraApp.t("aurora_os_session_details_fmt"),
 				s.ID, s.Name, s.Mode, s.Status, s.ProjectID, s.Description,
 				s.CreatedAt.Format(time.RFC822), durationStr)
 			sessionDetailsLabel.SetText(details)
@@ -1407,7 +1403,7 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 					dialog.ShowError(err, auroraApp.mainWindow)
 				} else {
 					auroraApp.securityManager.AddAuditEntry("session_create", "user",
-						fmt.Sprintf("Created session: %s", nameEntry.Text), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_session_created_fmt"), nameEntry.Text), "info")
 					nameEntry.SetText("")
 					descEntry.SetText("")
 					projectIDEntry.SetText("")
@@ -1419,40 +1415,40 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 		}),
 		widget.NewSeparator(),
 		widget.NewLabel(auroraApp.t("aurora_os_label_session_controls")),
-		widget.NewButton("Start Session", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_start_session"), func() {
 			if auroraApp.sessionManager != nil && selectedSessionID != "" {
 				err := auroraApp.sessionManager.Start(selectedSessionID)
 				if err != nil {
 					dialog.ShowError(err, auroraApp.mainWindow)
 				} else {
 					auroraApp.securityManager.AddAuditEntry("session_start", "user",
-						fmt.Sprintf("Started session: %s", selectedSessionID), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_session_started_fmt"), selectedSessionID), "info")
 					auroraApp.refreshData()
 					auroraApp.sessionList.Refresh()
 				}
 			}
 		}),
-		widget.NewButton("Pause Session", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_pause_session"), func() {
 			if auroraApp.sessionManager != nil && selectedSessionID != "" {
 				err := auroraApp.sessionManager.Pause(selectedSessionID)
 				if err != nil {
 					dialog.ShowError(err, auroraApp.mainWindow)
 				} else {
 					auroraApp.securityManager.AddAuditEntry("session_pause", "user",
-						fmt.Sprintf("Paused session: %s", selectedSessionID), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_session_paused_fmt"), selectedSessionID), "info")
 					auroraApp.refreshData()
 					auroraApp.sessionList.Refresh()
 				}
 			}
 		}),
-		widget.NewButton("Complete Session", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_complete_session"), func() {
 			if auroraApp.sessionManager != nil && selectedSessionID != "" {
 				err := auroraApp.sessionManager.Complete(selectedSessionID)
 				if err != nil {
 					dialog.ShowError(err, auroraApp.mainWindow)
 				} else {
 					auroraApp.securityManager.AddAuditEntry("session_complete", "user",
-						fmt.Sprintf("Completed session: %s", selectedSessionID), "info")
+						fmt.Sprintf(auroraApp.t("aurora_os_audit_session_completed_fmt"), selectedSessionID), "info")
 					auroraApp.refreshData()
 					auroraApp.sessionList.Refresh()
 				}
@@ -1498,10 +1494,10 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 		},
 	)
 
-	modelListCard := widget.NewCard("Available Models", "", modelList)
+	modelListCard := widget.NewCard(auroraApp.t("aurora_os_card_available_models"), "", modelList)
 
 	// Model details panel
-	modelDetailsLabel := widget.NewLabel("Select a model to view details")
+	modelDetailsLabel := widget.NewLabel(auroraApp.t("aurora_os_label_select_model"))
 	modelDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	modelList.OnSelected = func(id widget.ListItemID) {
@@ -1512,22 +1508,22 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 			for i, c := range m.Capabilities {
 				caps[i] = string(c)
 			}
-			details := fmt.Sprintf("Name: %s\nProvider: %s\nContext Size: %d\nCapabilities: %v",
+			details := fmt.Sprintf(auroraApp.t("aurora_os_model_details_fmt"),
 				m.Name, m.Provider, m.ContextSize, caps)
 			modelDetailsLabel.SetText(details)
 		}
 	}
 
-	modelDetailsCard := widget.NewCard("Model Details", "", modelDetailsLabel)
+	modelDetailsCard := widget.NewCard(auroraApp.t("aurora_os_card_model_details"), "", modelDetailsLabel)
 
 	// Chat interface
 	auroraApp.chatHistory = widget.NewMultiLineEntry()
-	auroraApp.chatHistory.SetPlaceHolder("Chat history will appear here...")
+	auroraApp.chatHistory.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_chat_history"))
 	auroraApp.chatHistory.Disable()
 	auroraApp.chatHistory.Wrapping = fyne.TextWrapWord
 
 	auroraApp.chatInput = widget.NewMultiLineEntry()
-	auroraApp.chatInput.SetPlaceHolder("Type your message here...")
+	auroraApp.chatInput.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_chat_input"))
 	auroraApp.chatInput.SetMinRowsVisible(3)
 
 	// Provider/model selection for chat
@@ -1535,10 +1531,10 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 	auroraApp.llmProviderSel.SetSelected("ollama")
 
 	modelNameEntry := widget.NewEntry()
-	modelNameEntry.SetPlaceHolder("Model name (e.g., llama2)")
+	modelNameEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_model_name"))
 	modelNameEntry.SetText("llama2")
 
-	sendButton := widget.NewButton("Send Message", func() {
+	sendButton := widget.NewButton(auroraApp.t("aurora_os_btn_send_message"), func() {
 		if auroraApp.chatInput.Text == "" {
 			return
 		}
@@ -1551,7 +1547,7 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 
 		// Log the interaction
 		auroraApp.securityManager.AddAuditEntry("llm_chat", "user",
-			fmt.Sprintf("Sent message to %s/%s", auroraApp.llmProviderSel.Selected, modelNameEntry.Text), "info")
+			fmt.Sprintf(auroraApp.t("aurora_os_audit_message_sent_fmt"), auroraApp.llmProviderSel.Selected, modelNameEntry.Text), "info")
 
 		// Clear input immediately
 		auroraApp.chatInput.SetText("")
@@ -1587,12 +1583,12 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
 					}
 				} else {
-					responseMsg = fmt.Sprintf("[AI (%s/%s)]: Provider '%s' not available or model not configured. Please configure it in Settings.\n",
+					responseMsg = fmt.Sprintf(auroraApp.t("aurora_os_chat_provider_unavailable_fmt"),
 						providerName, modelName, providerName)
 				}
 			} else {
 				// No LLM manager configured - show informative message
-				responseMsg = fmt.Sprintf("[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n",
+				responseMsg = fmt.Sprintf(auroraApp.t("aurora_os_chat_llm_not_initialized_fmt"),
 					providerName, modelName)
 			}
 
@@ -1601,15 +1597,15 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 		}(userMessage)
 	})
 
-	clearButton := widget.NewButton("Clear Chat", func() {
+	clearButton := widget.NewButton(auroraApp.t("aurora_os_btn_clear_chat"), func() {
 		auroraApp.chatHistory.SetText("")
 	})
 
 	chatControls := container.NewVBox(
-		widget.NewLabel("Chat Settings:"),
-		widget.NewLabel("Provider:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_chat_settings")),
+		widget.NewLabel(auroraApp.t("aurora_os_label_provider")),
 		auroraApp.llmProviderSel,
-		widget.NewLabel("Model:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_model")),
 		modelNameEntry,
 		widget.NewSeparator(),
 		sendButton,
@@ -1617,16 +1613,16 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 	)
 
 	chatPanel := container.NewBorder(
-		widget.NewLabel("Chat with AI"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_chat_with_ai")),
 		container.NewBorder(nil, nil, nil, chatControls, auroraApp.chatInput),
 		nil, nil,
 		auroraApp.chatHistory,
 	)
 
-	chatCard := widget.NewCard("LLM Chat", "", chatPanel)
+	chatCard := widget.NewCard(auroraApp.t("aurora_os_card_llm_chat"), "", chatPanel)
 
 	// Provider health status
-	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
+	healthLabel := widget.NewLabel(auroraApp.t("aurora_os_health_checking"))
 
 	// Start health check goroutine
 	go func() {
@@ -1635,17 +1631,17 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 
 		checkHealth := func() {
 			if auroraApp.llmManager == nil {
-				healthLabel.SetText("Provider Health:\nNo LLM manager available")
+				healthLabel.SetText(auroraApp.t("aurora_os_health_no_manager"))
 				return
 			}
 			ctx := context.Background()
 			health := auroraApp.llmManager.HealthCheck(ctx)
-			healthText := "Provider Health:\n"
+			healthText := auroraApp.t("aurora_os_health_header") + "\n"
 			for provider, status := range health {
 				healthText += fmt.Sprintf("- %s: %s\n", provider, status.Status)
 			}
 			if len(health) == 0 {
-				healthText += "No providers configured"
+				healthText += auroraApp.t("aurora_os_health_no_providers")
 			}
 			healthLabel.SetText(healthText)
 		}
@@ -1656,7 +1652,7 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 		}
 	}()
 
-	healthCard := widget.NewCard("Provider Status", "", healthLabel)
+	healthCard := widget.NewCard(auroraApp.t("aurora_os_card_provider_status"), "", healthLabel)
 
 	// Layout
 	leftPanel := container.NewVSplit(modelListCard, modelDetailsCard)
@@ -1674,7 +1670,7 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	themeInfoLabel := widget.NewLabel("")
 	updateThemeInfo := func() {
 		currentTheme := auroraApp.themeManager.GetCurrentTheme()
-		themeInfo := fmt.Sprintf("Name: %s\nDark: %t\nPrimary: %s\nSecondary: %s\nAccent: %s",
+		themeInfo := fmt.Sprintf(auroraApp.t("aurora_os_theme_info_fmt"),
 			currentTheme.Name, currentTheme.IsDark,
 			currentTheme.Primary, currentTheme.Secondary, currentTheme.Accent)
 		themeInfoLabel.SetText(themeInfo)
@@ -1686,29 +1682,29 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	})
 	themeSelect.SetSelected(auroraApp.themeManager.GetCurrentTheme().Name)
 
-	themeCard := widget.NewCard("Theme", "Select application theme", themeSelect)
+	themeCard := widget.NewCard(auroraApp.t("aurora_os_card_theme"), auroraApp.t("aurora_os_card_theme_subtitle"), themeSelect)
 
 	// Current theme info
 	updateThemeInfo()
-	infoCard := widget.NewCard("Current Theme", "", themeInfoLabel)
+	infoCard := widget.NewCard(auroraApp.t("aurora_os_card_current_theme"), "", themeInfoLabel)
 
 	// Server connection settings
 	serverURLEntry := widget.NewEntry()
 	serverURLEntry.SetText("http://localhost:8080")
-	serverURLEntry.SetPlaceHolder("Server URL")
+	serverURLEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_server_url"))
 
 	serverTimeoutEntry := widget.NewEntry()
 	serverTimeoutEntry.SetText("30")
-	serverTimeoutEntry.SetPlaceHolder("Timeout (seconds)")
+	serverTimeoutEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_timeout"))
 
-	serverCard := widget.NewCard("Server Connection", "",
+	serverCard := widget.NewCard(auroraApp.t("aurora_os_card_server_connection"), "",
 		container.NewVBox(
-			widget.NewLabel("Server URL:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_server_url")),
 			serverURLEntry,
-			widget.NewLabel("Timeout (seconds):"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_timeout")),
 			serverTimeoutEntry,
-			widget.NewButton("Test Connection", func() {
-				dialog.ShowInformation("Connection Test", "Server connection test would be performed here.", auroraApp.mainWindow)
+			widget.NewButton(auroraApp.t("aurora_os_btn_test_connection"), func() {
+				dialog.ShowInformation(auroraApp.t("aurora_os_dialog_connection_test_title"), auroraApp.t("aurora_os_connection_test_body"), auroraApp.mainWindow)
 			}),
 		),
 	)
@@ -1721,13 +1717,13 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	dbNameEntry := widget.NewEntry()
 	dbNameEntry.SetPlaceHolder("helixcode")
 
-	dbCard := widget.NewCard("Database", "",
+	dbCard := widget.NewCard(auroraApp.t("aurora_os_card_database"), "",
 		container.NewVBox(
-			widget.NewLabel("Host:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_db_host")),
 			dbHostEntry,
-			widget.NewLabel("Port:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_db_port")),
 			dbPortEntry,
-			widget.NewLabel("Database:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_db_database")),
 			dbNameEntry,
 		),
 	)
@@ -1736,19 +1732,19 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	ollamaURLEntry := widget.NewEntry()
 	ollamaURLEntry.SetText("http://localhost:11434")
 
-	llmCard := widget.NewCard("LLM Providers", "",
+	llmCard := widget.NewCard(auroraApp.t("aurora_os_card_llm_providers"), "",
 		container.NewVBox(
-			widget.NewLabel("Ollama URL:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_ollama_url")),
 			ollamaURLEntry,
-			widget.NewLabel("OpenAI API Key:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_openai_api_key")),
 			widget.NewPasswordEntry(),
-			widget.NewLabel("Anthropic API Key:"),
+			widget.NewLabel(auroraApp.t("aurora_os_label_anthropic_api_key")),
 			widget.NewPasswordEntry(),
 		),
 	)
 
 	// Aurora OS specific settings
-	perfModeCheck := widget.NewCheck("Performance Mode", func(checked bool) {
+	perfModeCheck := widget.NewCheck(auroraApp.t("aurora_os_check_performance_mode"), func(checked bool) {
 		auroraApp.performanceMode = checked
 		if checked {
 			runtime.GOMAXPROCS(runtime.NumCPU())
@@ -1756,22 +1752,22 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	})
 	perfModeCheck.Checked = auroraApp.performanceMode
 
-	auroraCard := widget.NewCard("Aurora OS Settings", "",
+	auroraCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_settings"), "",
 		container.NewVBox(
 			perfModeCheck,
-			widget.NewButton("Run Diagnostics", func() {
+			widget.NewButton(auroraApp.t("aurora_os_btn_run_diagnostics"), func() {
 				auroraApp.runAuroraDiagnostics()
 			}),
-			widget.NewButton("View Audit Log", func() {
+			widget.NewButton(auroraApp.t("aurora_os_btn_view_audit_log"), func() {
 				auroraApp.showAuditLog()
 			}),
 		),
 	)
 
 	// About section
-	aboutLabel := widget.NewLabel("HelixCode Aurora OS Edition\nVersion: 1.0.0\nDistributed AI Development Platform\n\nOptimized for Aurora OS")
+	aboutLabel := widget.NewLabel(auroraApp.t("aurora_os_about_body"))
 	aboutLabel.Alignment = fyne.TextAlignCenter
-	aboutCard := widget.NewCard("About", "", aboutLabel)
+	aboutCard := widget.NewCard(auroraApp.t("aurora_os_card_about"), "", aboutLabel)
 
 	// Layout in scrollable container
 	settingsContent := container.NewVBox(
@@ -1795,7 +1791,7 @@ func (auroraApp *AuroraApp) Close() error {
 	}
 
 	// Log shutdown
-	auroraApp.securityManager.AddAuditEntry("system_shutdown", "system", "Aurora OS application shutting down", "info")
+	auroraApp.securityManager.AddAuditEntry("system_shutdown", "system", auroraApp.t("aurora_os_audit_app_shutting_down"), "info")
 
 	// Close database connection
 	if auroraApp.db != nil {

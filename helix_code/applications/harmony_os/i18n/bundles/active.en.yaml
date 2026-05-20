@@ -559,3 +559,109 @@ harmony_os_gui_status_session_paused:
 
 harmony_os_gui_status_session_resumed:
   other: "Session resumed"
+
+# --- round-461 §11.4 CONST-046 Phase-4 applications final-sweep ---
+# harmony_os/main.go GUI residuals + harmony_os/main_nogui.go CLI residuals.
+# Placeholder entries use go-i18n {{.Name}} interpolation.
+
+harmony_os_gui_session_details_fmt:
+  other: "Name: {{.Name}}\nMode: {{.Mode}}\nStatus: {{.Status}}\nProject ID: {{.ProjectID}}\nDescription: {{.Description}}\nCreated: {{.Created}}"
+
+harmony_os_gui_model_details_fmt:
+  other: "Name: {{.Name}}\nProvider: {{.Provider}}\nContext Size: {{.ContextSize}}\nCapabilities: {{.Capabilities}}"
+
+harmony_os_gui_chat_provider_unavailable_fmt:
+  other: "[AI ({{.Provider}}/{{.Model}})]: Provider '{{.Provider}}' not available or model not configured. Please configure it in Settings.\n"
+
+harmony_os_gui_chat_llm_not_initialized_fmt:
+  other: "[AI ({{.Provider}}/{{.Model}})]: LLM service not initialized. Please restart the application or check configuration.\n"
+
+harmony_os_gui_label_provider:
+  other: "Provider:"
+
+harmony_os_gui_label_model:
+  other: "Model:"
+
+harmony_os_gui_health_checking:
+  other: "Provider Health:\nChecking..."
+
+harmony_os_gui_health_no_manager:
+  other: "Provider Health:\nNo LLM manager available"
+
+harmony_os_gui_health_header:
+  other: "Provider Health:"
+
+harmony_os_gui_health_no_providers:
+  other: "No providers configured"
+
+harmony_os_gui_metric_cpu_usage_fmt:
+  other: "CPU Usage: {{.Value}}%"
+
+harmony_os_gui_metric_memory_usage_fmt:
+  other: "Memory Usage: {{.Value}} MB"
+
+harmony_os_gui_metric_gpu_usage_fmt:
+  other: "GPU Usage: {{.Value}}%"
+
+harmony_os_gui_metric_temperature_fmt:
+  other: "Temperature: {{.Value}}°C"
+
+harmony_os_gui_metric_power_usage_fmt:
+  other: "Power Usage: {{.Value}}W"
+
+harmony_os_gui_connected_devices_fmt:
+  other: "Connected Devices: {{.Count}}"
+
+harmony_os_gui_scheduler_info_fmt:
+  other: "Policy: {{.Policy}}\nQueue Size: {{.QueueSize}}"
+
+harmony_os_gui_sync_status_fmt:
+  other: "Sync Enabled: {{.Enabled}}\nInterval: {{.Interval}}\nLast Successful Sync: {{.LastSync}}\nSynced Devices: {{.Synced}}"
+
+harmony_os_gui_sync_failed_fmt:
+  other: "\n\nLast Sync Result: FAILED\nError: {{.Error}}"
+
+harmony_os_gui_resource_policies_fmt:
+  other: "CPU Policy: {{.CPUPolicy}}\nMemory Policy: {{.MemoryPolicy}}\nPower Policy: {{.PowerPolicy}}\nOptimization: {{.Optimization}}\nAuto-Tuning: {{.AutoTuning}}"
+
+harmony_os_gui_service_coordinator_fmt:
+  other: "Active Services: {{.ActiveServices}}\nFailover: {{.Failover}}"
+
+harmony_os_gui_status_theme_changed_fmt:
+  other: "Theme changed to: {{.Theme}}"
+
+harmony_os_gui_status_server_error_fmt:
+  other: "Server error: {{.Error}}"
+
+harmony_os_cli_flag_project_desc:
+  other: "Project description"
+
+harmony_os_cli_flag_project_type:
+  other: "Project type (go, node, python, rust, generic)"
+
+harmony_os_cli_flag_session_desc:
+  other: "Session description"
+
+harmony_os_cli_flag_session_mode:
+  other: "Session mode (planning, building, testing, refactoring, debugging, deployment)"
+
+harmony_os_cli_flag_task_type:
+  other: "Task type (planning, building, testing, refactoring, debugging)"
+
+harmony_os_cli_flag_task_desc:
+  other: "Task description"
+
+harmony_os_cli_flag_task_priority:
+  other: "Task priority (low, normal, high, critical)"
+
+harmony_os_cli_err_host_required:
+  other: "Error: --host is required"
+
+harmony_os_cli_worker_added_fmt:
+  other: "Added worker: {{.ID}}"
+
+harmony_os_cli_err_worker_id_required:
+  other: "Error: worker ID required"
+
+harmony_os_cli_worker_removed_fmt:
+  other: "Removed worker: {{.ID}}"
