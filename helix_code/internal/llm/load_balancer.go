@@ -104,11 +104,18 @@ func (lb *LoadBalancer) SelectOptimalProvider(ctx context.Context) *AutoProvider
 		return nil
 	}
 
-	// Get current strategy
-	strategy := lb.strategies[lb.currentStrategy]
+	// Snapshot the current strategy under the read lock. currentStrategy is
+	// written by SetStrategy under the same mutex; reading it (and resolving
+	// it against the strategies map) without the lock is a data race. The
+	// lock is released before invoking the strategy and updateStats so the
+	// hot path does not hold the mutex across the selection algorithm.
+	lb.mutex.RLock()
+	strategyName := lb.currentStrategy
+	strategy := lb.strategies[strategyName]
 	if strategy == nil {
 		strategy = lb.strategies["performance_based"]
 	}
+	lb.mutex.RUnlock()
 
 	// Select provider using strategy
 	selected := strategy.SelectProvider(providers)
@@ -116,7 +123,7 @@ func (lb *LoadBalancer) SelectOptimalProvider(ctx context.Context) *AutoProvider
 	// Update statistics
 	lb.updateStats(selected)
 
-	log.Printf("⚖️ Selected provider: %s (strategy: %s)", selected.Name, lb.currentStrategy)
+	log.Printf("⚖️ Selected provider: %s (strategy: %s)", selected.Name, strategyName)
 
 	return selected
 }
