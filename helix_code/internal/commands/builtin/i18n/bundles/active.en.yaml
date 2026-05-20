@@ -272,3 +272,13 @@ builtin_reportbug_logger_configured:
   other: "Logger configured: {{.Logger}}"
 builtin_reportbug_enable_file_logging:
   other: "To enable file logging, configure log output in helixcode config."
+
+# --- reportbug.go / newrule.go residual user-facing strings (round-436 §11.4 CONST-046) ---
+builtin_reportbug_logs_header:
+  other: "=== Recent Logs (Session: {{.Session}}, Limit: {{.Limit}}) ==="
+
+builtin_reportbug_logs_file_header:
+  other: "--- Log file: {{.Path}} ---"
+
+builtin_newrule_repeated_issue:
+  other: "Repeated issue (x{{.Count}}): {{.Pattern}}"

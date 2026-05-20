@@ -23,6 +23,8 @@ package builtin
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -438,5 +440,91 @@ func TestReportBug_NoLogFilesBranchGoesThroughTranslator(t *testing.T) {
 		if !strings.Contains(body, "<TR:"+id+">") {
 			t.Errorf("bug-report body missing sentinel-wrapped %q — literal bypassed tr()", id)
 		}
+	}
+}
+
+// TestReportBug_LogsFoundBranchGoesThroughTranslator is the round-436
+// paired-mutation guard for the collectRecentLogs log-found branch
+// headers (=== Recent Logs ... === and --- Log file: ... ---). It
+// writes a real session log file at one of the standard locations so
+// the found-logs branch fires; with the sentinel translator wired the
+// bug-report body MUST embed the sentinel-wrapped header message IDs.
+// A re-inlined literal would surface raw English text and fail.
+func TestReportBug_LogsFoundBranchGoesThroughTranslator(t *testing.T) {
+	sessionID := "round436-logs-found-session"
+	logDir := filepath.Join(os.TempDir(), "helixcode", "logs")
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
+		t.Fatalf("mkdir log dir: %v", err)
+	}
+	logPath := filepath.Join(logDir, "session_"+sessionID+".log")
+	if err := os.WriteFile(logPath, []byte("2026-05-20 INFO real log line\n"), 0o644); err != nil {
+		t.Fatalf("write log file: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Remove(logPath) })
+
+	SetTranslator(sentinelTranslator{})
+	defer withRealBundleTranslator(t)
+
+	res, err := (&ReportBugCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Args:      []string{"bug", "broken"},
+		SessionID: sessionID,
+	})
+	if err != nil || res == nil {
+		t.Fatalf("reportbug: err=%v res=%v", err, res)
+	}
+	var body string
+	for _, a := range res.Actions {
+		if b, ok := a.Data["body"].(string); ok {
+			body = b
+		}
+	}
+	if body == "" {
+		t.Fatal("reportbug: bug-report body not found in result")
+	}
+	for _, id := range []string{
+		"builtin_reportbug_logs_header",
+		"builtin_reportbug_logs_file_header",
+	} {
+		if !strings.Contains(body, "<TR:"+id+">") {
+			t.Errorf("bug-report body missing sentinel-wrapped %q — literal bypassed tr()", id)
+		}
+	}
+}
+
+// TestNewRule_RepeatedIssuePatternGoesThroughTranslator is the round-436
+// paired-mutation guard for the analyzeConversationPatterns repeated-
+// issue label. A conversation history with a phrase repeated >=2 times
+// (containing "again"/"still") triggers the corrections branch; with
+// the sentinel translator wired the resulting pattern entry MUST be the
+// sentinel-wrapped message ID. A re-inlined literal would fail.
+func TestNewRule_RepeatedIssuePatternGoesThroughTranslator(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	defer withRealBundleTranslator(t)
+
+	history := []commands.ChatMessage{
+		{Role: "user", Content: "the build is broken again"},
+		{Role: "user", Content: "the build is broken again"},
+	}
+	res, err := (&NewRuleCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Args:        []string{"build"},
+		ChatHistory: history,
+	})
+	if err != nil || res == nil {
+		t.Fatalf("newrule: err=%v res=%v", err, res)
+	}
+	var patterns []string
+	for _, a := range res.Actions {
+		if p, ok := a.Data["patterns"].([]string); ok {
+			patterns = p
+		}
+	}
+	found := false
+	for _, p := range patterns {
+		if strings.Contains(p, "<TR:builtin_newrule_repeated_issue>") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("newrule patterns missing sentinel-wrapped builtin_newrule_repeated_issue — literal bypassed trc(); got %v", patterns)
 	}
 }

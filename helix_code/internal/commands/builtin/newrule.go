@@ -132,7 +132,7 @@ func analyzeConversationPatterns(history []commands.ChatMessage) []string {
 	// Add frequently corrected items
 	for pattern, count := range corrections {
 		if count >= 2 {
-			patterns = append(patterns, fmt.Sprintf("Repeated issue (x%d): %s", count, pattern))
+			patterns = append(patterns, trc("builtin_newrule_repeated_issue", map[string]any{"Count": count, "Pattern": pattern}))
 		}
 	}
 

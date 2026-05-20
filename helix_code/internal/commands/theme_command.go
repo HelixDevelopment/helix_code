@@ -47,12 +47,14 @@ type ThemeInspector interface {
 }
 
 // ThemeSourceEnv / ThemeSourceCOLORFGBG / ThemeSourceDefault are the three
-// canonical values for the "active source" line in /theme status. They are
-// set by ResolveThemeSource at startup and threaded through to the command.
+// canonical CONST-046 message IDs for the "active source" line in
+// /theme status. ResolveThemeSource returns one of these IDs at startup;
+// handleStatus resolves it to locale-aware display text via tr() so the
+// rendered /theme status line adapts to the operator's language.
 const (
-	ThemeSourceEnv        = "HELIXCODE_THEME env var"
-	ThemeSourceCOLORFGBG  = "COLORFGBG env var"
-	ThemeSourceDefault    = "default (no env override)"
+	ThemeSourceEnv       = "internal_commands_theme_source_env"
+	ThemeSourceCOLORFGBG = "internal_commands_theme_source_colorfgbg"
+	ThemeSourceDefault   = "internal_commands_theme_source_default"
 )
 
 // ResolveThemeSource returns the human-readable name of the signal that
@@ -151,7 +153,7 @@ func (c *ThemeCommand) Execute(ctx context.Context, cc *CommandContext) (*Comman
 		}
 		return &CommandResult{Success: true, Output: out}, nil
 	default:
-		return nil, fmt.Errorf("/theme: unknown subcommand %q (want status|list|show)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_theme_err_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 
@@ -168,11 +170,13 @@ func (c *ThemeCommand) handleStatus(ctx context.Context) string {
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_name", nil), string(c.activeName))
 	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_depth", nil), c.activeDepth.String())
-	source := c.activeSource
-	if source == "" {
-		source = ThemeSourceDefault
+	sourceID := c.activeSource
+	if sourceID == "" {
+		sourceID = ThemeSourceDefault
 	}
-	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_source", nil), source)
+	// activeSource holds a CONST-046 message ID (ThemeSource* constants);
+	// resolve to locale-aware display text here.
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_source", nil), tr(ctx, sourceID, nil))
 
 	customLine := tr(ctx, "internal_commands_theme_custom_none", nil)
 	if c.registry != nil {
@@ -230,15 +234,15 @@ func (c *ThemeCommand) handleList(ctx context.Context) string {
 // not a hardcoded depth.
 func (c *ThemeCommand) handleShow(ctx context.Context, args []string) (string, error) {
 	if len(args) == 0 {
-		return "", fmt.Errorf("/theme show: missing theme name (usage: /theme show <name>)")
+		return "", fmt.Errorf("%s", tr(ctx, "internal_commands_theme_err_show_missing_name", nil))
 	}
 	if c.registry == nil {
-		return "", fmt.Errorf("/theme show: registry unavailable")
+		return "", fmt.Errorf("%s", tr(ctx, "internal_commands_theme_err_show_registry_unavailable", nil))
 	}
 	name := theme.ThemeName(args[0])
 	t, err := c.registry.Get(name)
 	if err != nil {
-		return "", fmt.Errorf("/theme show: %w", err)
+		return "", fmt.Errorf("%s: %w", tr(ctx, "internal_commands_theme_err_show_prefix", nil), err)
 	}
 
 	// Per-call styler bound to the REQUESTED theme + the ACTIVE depth.

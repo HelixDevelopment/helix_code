@@ -490,6 +490,28 @@ internal_commands_theme_show_heading:
 internal_commands_theme_sample_text:
   other: "Sample {{.Role}} text"
 
+# --- theme_command.go residual user-facing strings (round-436 §11.4 CONST-046) ---
+internal_commands_theme_source_env:
+  other: "HELIXCODE_THEME env var"
+
+internal_commands_theme_source_colorfgbg:
+  other: "COLORFGBG env var"
+
+internal_commands_theme_source_default:
+  other: "default (no env override)"
+
+internal_commands_theme_err_unknown_subcommand:
+  other: "/theme: unknown subcommand {{.Sub}} (want status|list|show)"
+
+internal_commands_theme_err_show_missing_name:
+  other: "/theme show: missing theme name (usage: /theme show <name>)"
+
+internal_commands_theme_err_show_registry_unavailable:
+  other: "/theme show: registry unavailable"
+
+internal_commands_theme_err_show_prefix:
+  other: "/theme show"
+
 # --- lsp_command.go (round-374) ---
 internal_commands_lsp_description:
   other: "Inspect, restart, list, or stop managed LSP servers."
@@ -837,6 +859,22 @@ internal_commands_memory_bytes:
 
 internal_commands_memory_no_memory_loaded:
   other: "(no project memory loaded)"
+
+# --- memory_command.go residual user-facing strings (round-436 §11.4 CONST-046) ---
+internal_commands_memory_err_unknown_subcommand:
+  other: "/memory: unknown subcommand {{.Sub}} (want status|show|edit|reload)"
+
+internal_commands_memory_err_edit:
+  other: "/memory edit: {{.Editor}} {{.Path}}"
+
+internal_commands_memory_edited:
+  other: "edited: {{.Path}}"
+
+internal_commands_memory_err_reload:
+  other: "/memory reload"
+
+internal_commands_memory_reloaded:
+  other: "reloaded: project={{.ProjectBytes}} bytes (truncated={{.ProjectTruncated}}), user={{.UserBytes}} bytes (truncated={{.UserTruncated}})"
 
 # --- /approval slash command (round-412 §11.4 CONST-046 migration) ---
 # User-facing CLI output for the /approval status/set/show subcommands.

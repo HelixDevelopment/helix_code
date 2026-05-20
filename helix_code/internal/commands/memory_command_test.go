@@ -110,7 +110,9 @@ func TestMemoryCommand_Edit_RunsEditor(t *testing.T) {
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"edit"}})
 	require.NoError(t, err)
 	require.True(t, res.Success)
-	require.Contains(t, res.Output, "edited:")
+	// Output routes through the CONST-046 i18n seam; the default
+	// NoopTranslator echoes the message ID verbatim.
+	require.Contains(t, res.Output, "internal_commands_memory_edited")
 }
 
 func TestMemoryCommand_Edit_NoFile_OpensCwdHelixcodeMd(t *testing.T) {
@@ -123,7 +125,12 @@ func TestMemoryCommand_Edit_NoFile_OpensCwdHelixcodeMd(t *testing.T) {
 	wd := t.TempDir()
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"edit"}, WorkingDir: wd})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, filepath.Join(wd, "helixcode.md"))
+	// Output routes through the CONST-046 i18n seam (Path placeholder
+	// supplied to internal_commands_memory_edited); NoopTranslator
+	// echoes the message ID. The real-behavior check is that the
+	// editor ran exit-0 against the cwd helixcode.md path without error.
+	require.Contains(t, res.Output, "internal_commands_memory_edited")
+	require.True(t, res.Success)
 }
 
 func TestMemoryCommand_Edit_EditorFails_PropagatesError(t *testing.T) {
@@ -135,7 +142,9 @@ func TestMemoryCommand_Edit_EditorFails_PropagatesError(t *testing.T) {
 	cmd.editor = func() string { return "false" } // POSIX: exits 1
 	_, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"edit"}})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "/memory edit")
+	// Error message routes through the CONST-046 i18n seam; NoopTranslator
+	// echoes the message ID. The wrapped exec error is still attached.
+	require.Contains(t, err.Error(), "internal_commands_memory_err_edit")
 }
 
 func TestMemoryCommand_Reload_RealTempdir(t *testing.T) {
@@ -147,17 +156,21 @@ func TestMemoryCommand_Reload_RealTempdir(t *testing.T) {
 	r := projectmemory.NewMemoryRegistry(projectmemory.NewMemoryLoader(zap.NewNop()), dir)
 	cmd := NewMemoryCommand(r)
 
-	// First reload sees R1.
+	// First reload sees R1. Output routes through the CONST-046 i18n
+	// seam (internal_commands_memory_reloaded); the real-behavior proof
+	// is the live registry Snapshot reflecting the on-disk content.
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"reload"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "project=2 bytes")
+	require.Contains(t, res.Output, "internal_commands_memory_reloaded")
+	require.Equal(t, 2, len(r.Snapshot().Project))
 	require.Contains(t, r.Snapshot().Project, "R1")
 
 	// Rewrite file; second reload sees R2.
 	require.NoError(t, os.WriteFile(file, []byte("R2_LONGER_24"), 0644))
 	res, err = cmd.Execute(context.Background(), &CommandContext{Args: []string{"reload"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "project=12 bytes")
+	require.Contains(t, res.Output, "internal_commands_memory_reloaded")
+	require.Equal(t, 12, len(r.Snapshot().Project))
 	require.Contains(t, r.Snapshot().Project, "R2_LONGER_24")
 }
 
@@ -166,7 +179,9 @@ func TestMemoryCommand_UnknownSubcommand_Err(t *testing.T) {
 	cmd := NewMemoryCommand(r)
 	_, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"nope"}})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "unknown subcommand")
+	// Error message routes through the CONST-046 i18n seam; NoopTranslator
+	// echoes the message ID verbatim.
+	require.Contains(t, err.Error(), "internal_commands_memory_err_unknown_subcommand")
 }
 
 func TestDefaultEditor_FallsBackToVi(t *testing.T) {

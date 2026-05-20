@@ -190,14 +190,18 @@ func TestThemeCommand_Show_MissingNameArgErrors(t *testing.T) {
 	c := NewThemeCommand(newDarkOnlyInspector(), theme.ThemeDark, theme.DepthTruecolor, ThemeSourceDefault, nil)
 	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "missing theme name")
+	// Error message routes through the CONST-046 i18n seam; NoopTranslator
+	// echoes the message ID verbatim.
+	assert.Contains(t, err.Error(), "internal_commands_theme_err_show_missing_name")
 }
 
 func TestThemeCommand_UnknownSubcommandErrors(t *testing.T) {
 	c := NewThemeCommand(newDarkOnlyInspector(), theme.ThemeDark, theme.DepthTruecolor, ThemeSourceDefault, nil)
 	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"flush"}})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "unknown subcommand")
+	// Error message routes through the CONST-046 i18n seam; NoopTranslator
+	// echoes the message ID verbatim.
+	assert.Contains(t, err.Error(), "internal_commands_theme_err_unknown_subcommand")
 }
 
 func TestResolveThemeSource_EnvOverride(t *testing.T) {

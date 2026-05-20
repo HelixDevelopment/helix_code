@@ -110,7 +110,7 @@ func (c *MemoryCommand) Execute(ctx context.Context, cc *CommandContext) (*Comma
 	case "reload":
 		return c.handleReload(ctx)
 	default:
-		return nil, fmt.Errorf("/memory: unknown subcommand %q (want status|show|edit|reload)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_memory_err_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 
@@ -187,11 +187,12 @@ func (c *MemoryCommand) handleEdit(ctx context.Context, cc *CommandContext) (*Co
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("/memory edit: %s %s: %w", editor, path, err)
+		return nil, fmt.Errorf("%s: %w",
+			tr(ctx, "internal_commands_memory_err_edit", map[string]any{"Editor": editor, "Path": path}), err)
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("edited: %s\n", path),
+		Output:  tr(ctx, "internal_commands_memory_edited", map[string]any{"Path": path}) + "\n",
 	}, nil
 }
 
@@ -201,12 +202,15 @@ func (c *MemoryCommand) handleEdit(ctx context.Context, cc *CommandContext) (*Co
 func (c *MemoryCommand) handleReload(ctx context.Context) (*CommandResult, error) {
 	m, err := c.registry.Reload(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("/memory reload: %w", err)
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_commands_memory_err_reload", nil), err)
 	}
 	return &CommandResult{
 		Success: true,
-		Output: fmt.Sprintf(
-			"reloaded: project=%d bytes (truncated=%t), user=%d bytes (truncated=%t)\n",
-			len(m.Project), m.TruncatedProject, len(m.User), m.TruncatedUser),
+		Output: tr(ctx, "internal_commands_memory_reloaded", map[string]any{
+			"ProjectBytes":     len(m.Project),
+			"ProjectTruncated": m.TruncatedProject,
+			"UserBytes":        len(m.User),
+			"UserTruncated":    m.TruncatedUser,
+		}) + "\n",
 	}, nil
 }

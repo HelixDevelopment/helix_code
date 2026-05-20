@@ -140,7 +140,7 @@ func collectRecentLogs(sessionID string, limit int) string {
 	}
 
 	var logContent strings.Builder
-	logContent.WriteString(fmt.Sprintf("=== Recent Logs (Session: %s, Limit: %d) ===\n\n", sessionID, limit))
+	logContent.WriteString(trc("builtin_reportbug_logs_header", map[string]any{"Session": sessionID, "Limit": limit}) + "\n\n")
 
 	foundLogs := false
 	for _, logPath := range logLocations {
@@ -154,7 +154,7 @@ func collectRecentLogs(sessionID string, limit int) string {
 				start = len(lines) - limit
 			}
 
-			logContent.WriteString(fmt.Sprintf("--- Log file: %s ---\n", logPath))
+			logContent.WriteString(trc("builtin_reportbug_logs_file_header", map[string]any{"Path": logPath}) + "\n")
 			for i := start; i < len(lines); i++ {
 				if strings.TrimSpace(lines[i]) != "" {
 					logContent.WriteString(lines[i])
