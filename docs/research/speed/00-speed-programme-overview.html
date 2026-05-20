@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>00-speed-programme-overview</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">00-speed-programme-overview</h1>
+</header>
+<!--
+Document-Metadata (constitution §11.4.44)
+Revision: 1
+Last modified: 2026-05-20T00:00:00Z
+Authority: HelixCode programme — research deliverable R4 (Speed-programme synthesis & index).
+           Cascaded from CONSTITUTION.md / constitution submodule. Synthesises R1
+           (01-current-state-bottleneck-audit.md), R2 (02-competitive-analysis.md) and
+           R3 (03-optimization-techniques.md) into one actionable programme. Operator
+           speed mandate 2026-05-20: HelixCode + owned submodules 3–5× faster than
+           competitor AI CLI agents without regressing any working feature.
+Scope:     Index + executive synthesis. NO production code changed by this file —
+           implementation follows as phased, subagent-driven rounds (see 04-…).
+-->
+<h1 id="r4-helixcode-speed-programme-overview-executive-synthesis">R4 —
+HelixCode Speed Programme: Overview &amp; Executive Synthesis</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td><strong>Last modified</strong></td>
+<td>2026-05-20T00:00:00Z</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>active</td>
+</tr>
+<tr>
+<td><strong>Authority</strong></td>
+<td>docs/research/speed/ — operator speed mandate 2026-05-20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-the-mandate--this-document">1. The mandate &amp; this
+document</a></li>
+<li><a href="#2-document-set--speed-programme-index">2. Document set —
+speed programme index</a></li>
+<li><a href="#3-the-35-goal-decomposition">3. The 3–5× goal
+decomposition</a></li>
+<li><a href="#4-latency-budget-breakdown--current-vs-target">4.
+Latency-budget breakdown — current vs target</a></li>
+<li><a href="#5-unified-ranked-opportunity-list-r1--r2--r3">5. Unified
+ranked opportunity list (R1 ↔︎ R2 ↔︎ R3)</a></li>
+<li><a href="#6-risk-posture--no-working-feature-may-regress">6. Risk
+posture — no working feature may regress</a></li>
+<li><a href="#7-measurement-strategy--the-baseline-is-mandatory">7.
+Measurement strategy — the baseline is mandatory</a></li>
+<li><a href="#8-how-the-phased-plan-follows-from-this-synthesis">8. How
+the phased plan follows from this synthesis</a></li>
+</ul>
+<h2 id="the-mandate-this-document">1. The mandate &amp; this
+document</h2>
+<p>Operator mandate (2026-05-20): make the entire HelixCode codebase
+<strong>and every owned submodule</strong> 3–5× faster than competitor
+AI CLI coding agents — Claude Code, Gemini CLI, Aider, Cline/Roo Code,
+OpenHands, Cursor, Continue, Plandex, Crush — <strong>without breaking
+any working feature</strong>, with every change covered by all supported
+test types and real anti-bluff proofs, executed in phases via
+subagent-driven rounds.</p>
+<p>This document (R4) is the <strong>synthesis layer</strong>. R1–R3
+each answered one question: <em>where are we slow</em> (R1), <em>how do
+competitors win</em> (R2), <em>what techniques exist</em> (R3). R4
+reconciles all three into a single ranked opportunity list and points to
+the phased implementation plan
+(<code>04-phased-implementation-plan.md</code>). No production code is
+changed by R1–R4; they are research + planning. Execution begins at
+Phase 0 of the plan.</p>
+<h2 id="document-set-speed-programme-index">2. Document set — speed
+programme index</h2>
+<p>The <code>docs/research/speed/</code> directory holds five documents.
+Each <code>.md</code> has an HTML + PDF sibling regenerated per
+constitution §11.4.65.</p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 35%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doc</th>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R4</td>
+<td><a
+href="./00-speed-programme-overview.md"><code>00-speed-programme-overview.md</code></a></td>
+<td><strong>This file</strong> — index + executive synthesis, goal
+decomposition, unified opportunity list, risk posture, measurement
+strategy.</td>
+</tr>
+<tr>
+<td>R1</td>
+<td><a
+href="./01-current-state-bottleneck-audit.md"><code>01-current-state-bottleneck-audit.md</code></a></td>
+<td>23 ranked real-codebase bottlenecks (B01–B23), each with
+<code>file:line</code> evidence.</td>
+</tr>
+<tr>
+<td>R2</td>
+<td><a
+href="./02-competitive-analysis.md"><code>02-competitive-analysis.md</code></a></td>
+<td>How 9 competitor agents achieve speed; 12-technique adoption
+table.</td>
+</tr>
+<tr>
+<td>R3</td>
+<td><a
+href="./03-optimization-techniques.md"><code>03-optimization-techniques.md</code></a></td>
+<td>~70 optimization techniques across 8 areas, impact-to-effort ranked,
+3-wave sequencing.</td>
+</tr>
+<tr>
+<td>Plan</td>
+<td><a
+href="./04-phased-implementation-plan.md"><code>04-phased-implementation-plan.md</code></a></td>
+<td>Phased, subagent-sized task plan — Phase 0 baseline through Phase 5;
+per-task test floor + anti-bluff proofs.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading order:</strong> new readers — R4 (this) → R1 → R2 →
+R3 → Plan. Implementers — R4 §5 (opportunity list) then jump straight to
+the Plan.</p>
+<h2 id="the-35-goal-decomposition">3. The 3–5× goal decomposition</h2>
+<p>Per R3’s central finding, “agent speed” is <strong>not one
+number</strong> — it is four largely independent latency budgets, and
+the 3–5× multiplier is a <em>product</em> of per-budget wins, not a
+single lever. R3’s decomposition table:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Lever group</th>
+<th>Contribution to end-to-end speedup</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching + streaming-first + connection pooling</td>
+<td><strong>~2–3×</strong> on perceived latency
+(time-to-first-token)</td>
+<td>R3 §4, R2 technique #1/#8/#9</td>
+</tr>
+<tr>
+<td>Incremental indexing + content-addressed context caches</td>
+<td><strong>~1.5–2×</strong> on context-build phases</td>
+<td>R3 §5, R2 technique #2</td>
+</tr>
+<tr>
+<td>Go PGO + allocation/GC/concurrency tuning</td>
+<td><strong>~1.05–1.3×</strong> on the CPU-bound slices that remain</td>
+<td>R3 §1–§2</td>
+</tr>
+<tr>
+<td>Startup-time + build/test speed</td>
+<td>developer-experience multiplier (not user-facing runtime)</td>
+<td>R3 §3/§8, R1 B01/B02</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this reaches 3–5×.</strong> The first two budgets are
+multiplicative on different phases of a turn: a turn spends time
+<em>building context</em> then <em>waiting on the LLM</em>. Cutting
+context-build ~1.75× and LLM-wait ~2.5× compounds. Worked example —
+<code>2.5 × 1.75 ≈ 4.4×</code> on a context-heavy turn; a pure chat turn
+with a warm cache is nearer the 2–3× LLM-only figure; a cold cold-start
+command (e.g. <code>--list-models</code>) is dominated by R1 B01/B02
+startup work and gets its largest win there. <strong>The 3–5× band is
+therefore situation-dependent</strong> — the programme must deliver
+across all situations, which is exactly why Phase 0 captures
+<em>per-scenario</em> baselines.</p>
+<p><strong>Goal restatement, measurable:</strong> for each of the four
+canonical scenarios in §7, post-programme wall-clock must be <strong>≤
+1/3 to ≤ 1/5</strong> of the Phase-0 HelixCode baseline, and ≤ the
+fastest competitor’s measured wall-clock on identical hardware.</p>
+<h2 id="latency-budget-breakdown-current-vs-target">4. Latency-budget
+breakdown — current vs target</h2>
+<p>The diagram below shows where wall-clock goes on a representative
+<em>context-heavy agent turn</em> today (R1 evidence) versus the
+programme target. Numbers are illustrative proportions pending Phase-0
+measurement — Phase 0 replaces them with captured pprof + wall-clock
+data.</p>
+<pre class="mermaid"><code>gantt
+    title Context-heavy agent turn — latency budget (illustrative, Phase 0 confirms)
+    dateFormat X
+    axisFormat %s
+    section CURRENT (~100 units)
+    Eager serial startup B01/B02      :c1, 0, 18
+    Repo-map build B04-B07 (serial)   :c2, 18, 30
+    Content search B08 (serial grep)  :c3, 48, 10
+    HTTP connect churn B03            :c4, 58, 7
+    LLM wait — no/partial cache       :crit, c5, 65, 35
+    section TARGET (~25-33 units)
+    Lazy startup (deferred)           :t1, 0, 3
+    Repo-map warm cache + parallel    :t2, 3, 6
+    Content search parallel pool      :t3, 9, 3
+    Pooled HTTP/2 keepalive           :t4, 12, 2
+    LLM wait — warm prompt cache      :active, t5, 14, 14</code></pre>
+<p>Reading: the LLM-wait slice (R3 §4) is the largest single budget and
+the largest absolute win (prompt caching, §4.1/§4.2). Startup (R1
+B01/B02) is the largest <em>perceived</em> win on short commands.
+Repo-map + search (B04–B08) compound on every context-heavy turn. Tuning
+(HTTP, alloc, GC) trims the residue.</p>
+<h2 id="unified-ranked-opportunity-list-r1-r2-r3">5. Unified ranked
+opportunity list (R1 ↔︎ R2 ↔︎ R3)</h2>
+<p>This is the programme’s master list. Each opportunity reconciles a
+<strong>real HelixCode bottleneck (R1)</strong>, the <strong>competitor
+technique that proves it pays (R2)</strong>, and the <strong>technique
+catalogue entry (R3)</strong>. Ordered by impact-to-effort — the order
+the phased plan executes them.</p>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 14%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 9%" />
+<col style="width: 6%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Opportunity</th>
+<th>R1 bottleneck</th>
+<th>R2 technique</th>
+<th>R3 technique</th>
+<th>Est. speedup</th>
+<th>Effort</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O1</td>
+<td><strong>Prompt-cache-stable prefix + <code>cache_control</code> for
+all providers + pre-warm</strong></td>
+<td>— (greenfield discipline)</td>
+<td>#1 (Claude Code <code>promptCacheBreakDetection</code>), #8 (Plandex
+all-provider)</td>
+<td>4.1, 4.2</td>
+<td>~2–3× TTFT</td>
+<td>Low-Med</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O2</td>
+<td><strong>Shared tuned HTTP/2 transport across all 9
+providers</strong></td>
+<td>B03</td>
+<td>#6 (lesson), #9</td>
+<td>4.7</td>
+<td>High per-call</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O3</td>
+<td><strong>Streaming-first verification on every surface
+(CLI/TUI/desktop)</strong></td>
+<td>—</td>
+<td>#9</td>
+<td>4.3</td>
+<td>High perceived</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O4</td>
+<td><strong>Lazy/deferred CLI startup — sync.Once getters on
+<code>*CLI</code></strong></td>
+<td>B01, B13, B14, B18</td>
+<td>#6 (Gemini Go-rewrite 68×, MCP stdio fix)</td>
+<td>3.1, 3.2</td>
+<td>High cold-start</td>
+<td>Low-Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O5</td>
+<td><strong>Lazy/async Ollama discovery (out of
+constructor)</strong></td>
+<td>B02</td>
+<td>#6</td>
+<td>3.1</td>
+<td>High cold-start</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O6</td>
+<td><strong>Persistent content-addressed repo-map cache
+(path+mtime/hash)</strong></td>
+<td>B07, B15, B19</td>
+<td>#2 (Aider diskcache + getmtime)</td>
+<td>5.2, 5.4, 6.1</td>
+<td>~1.5–2× warm context</td>
+<td>Med</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O7</td>
+<td><strong>Parallelise repo-map: worker pool + parser pool +
+single-pass stats</strong></td>
+<td>B04, B05, B06, B16</td>
+<td>#2 (Plandex tree-sitter maps)</td>
+<td>2.1, 2.2, 1.4</td>
+<td>High cold index</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O8</td>
+<td><strong>Parallelise <code>SearchContent</code> grep tool (bounded
+worker pool)</strong></td>
+<td>B08</td>
+<td>#2 (Continue ripgrep), #5</td>
+<td>2.1, 7.2</td>
+<td>High on large trees</td>
+<td>Low-Med</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O9</td>
+<td><strong>Incremental tree-sitter parsing (edit API, not full
+re-parse)</strong></td>
+<td>B06 (extends)</td>
+<td>#2</td>
+<td>5.1, 5.3</td>
+<td>High per-edit</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O10</td>
+<td><strong>Small-model routing for cheap subtasks
+(cascade)</strong></td>
+<td>—</td>
+<td>#7 (Aider architect/editor, Cursor)</td>
+<td>4.4</td>
+<td>High on agent loops</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O11</td>
+<td><strong>Diff-style edits + dedicated fast-apply path</strong></td>
+<td>—</td>
+<td>#3 (Cursor 9–13×, Morph), #4 (Roo <code>apply_diff</code>)</td>
+<td>4.5</td>
+<td>High interactive</td>
+<td>Med-High</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O12</td>
+<td><strong>Aggressive tool-call parallelism + parallel
+sub-agents</strong></td>
+<td>—</td>
+<td>#5 (Claude Code <code>/batch</code> up to 10×)</td>
+<td>2.1</td>
+<td>High multi-file</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O13</td>
+<td><strong><code>filepath.WalkDir</code> migration + buffered
+I/O</strong></td>
+<td>B09</td>
+<td>—</td>
+<td>7.1, 7.2</td>
+<td>Medium</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O14</td>
+<td><strong>Hoist per-call <code>regexp.MustCompile</code>; remove
+redundant body copies</strong></td>
+<td>B11, B12</td>
+<td>—</td>
+<td>1.5</td>
+<td>Medium</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O15</td>
+<td><strong>PGO with a real production
+<code>default.pgo</code></strong></td>
+<td>—</td>
+<td>—</td>
+<td>1.1</td>
+<td>2–14% CPU</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O16</td>
+<td><strong>Config loaded once, threaded down (drop Viper global on hot
+path)</strong></td>
+<td>B10</td>
+<td>—</td>
+<td>3.4</td>
+<td>Low-Med</td>
+<td>Low-Med</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O17</td>
+<td><strong>Multi-tier cache (memory→disk→Redis) for
+context/embeddings</strong></td>
+<td>—</td>
+<td>#2</td>
+<td>6.1, 5.6</td>
+<td>High</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O18</td>
+<td><strong>History condenser/compaction to keep cache prefix
+small</strong></td>
+<td>—</td>
+<td>#10 (OpenHands, <code>/compact</code>)</td>
+<td>(R3 §5 context)</td>
+<td>Med (long runs)</td>
+<td>Med</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O19</td>
+<td><strong>Config-driven DB pool sizing; smaller CLI
+default</strong></td>
+<td>B17</td>
+<td>—</td>
+<td>—</td>
+<td>Low</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>O20</td>
+<td><strong>Profile-gated alloc/GC/contention tuning
+(<code>sync.Pool</code>, sharded locks)</strong></td>
+<td>B22, B23</td>
+<td>—</td>
+<td>1.3, 1.4, 1.7, 2.3</td>
+<td>1.05–1.3×</td>
+<td>Med-High</td>
+<td>Med</td>
+</tr>
+<tr>
+<td>O21</td>
+<td><strong>Sub-package <code>internal/llm</code>; build-cache +
+<code>-p</code> test tuning</strong></td>
+<td>B20, B21</td>
+<td>#6 (lesson)</td>
+<td>8.1, 8.2, 8.3</td>
+<td>Dev-experience</td>
+<td>Low-Med</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<p>The phased plan (<code>04-…</code>) groups O1–O21 into phases by the
+impact-to-effort and risk ordering above: low-risk/high-impact first
+(O1–O8), then medium-effort context wins (O9, O17, O10), then
+interactive levers (O11, O12), then profile-gated tuning (O20) and
+developer-experience (O21).</p>
+<h2 id="risk-posture-no-working-feature-may-regress">6. Risk posture —
+no working feature may regress</h2>
+<p>The mandate’s hard constraint: <strong>no working feature may
+regress.</strong> This is a CONST-035 / Article XI §11.9 anti-bluff
+invariant — a speedup that breaks a feature is a false-success.
+Therefore every task in the plan is gated by the <strong>CONST-048
+six-invariant test floor</strong> <em>per change</em>:</p>
+<ol type="1">
+<li>anti-bluff posture with captured runtime evidence;</li>
+<li>proof of working capability end-to-end on the target topology;</li>
+<li>implementation matching the documented promise;</li>
+<li>no open issues/bugs surfaced;</li>
+<li>documentation in sync;</li>
+<li>four-layer test floor (pre-build + post-build + runtime + paired
+mutation).</li>
+</ol>
+<p>Concretely, every task must show: (a) the <strong>same</strong>
+functional tests that passed before the change still pass after it
+(no-regression proof); (b) a <strong>benchmark</strong> with captured
+before/after numbers proving the claimed speedup (anti-bluff — “faster”
+without numbers is a bluff under CONST-035 Rule 9); (c) a
+<strong>Challenge</strong> exercising the real end-to-end user workflow;
+(d) <strong>HelixQA</strong> bank coverage per CONST-050. Tasks are
+sequenced low-risk-first specifically so the riskiest changes (O7
+repo-map parallelism, O11 fast-apply, O20 contention tuning) land only
+after the measurement harness (Phase 0) and the safe wins (Phase 1) have
+proven the test floor is reliable.</p>
+<p>Per CONST-047/CONST-051, owned submodules are equal-codebase: the
+same speed posture, test floor and anti-bluff proofs apply recursively
+to every owned submodule that contributes to a measured scenario.</p>
+<h2 id="measurement-strategy-the-baseline-is-mandatory">7. Measurement
+strategy — the baseline is mandatory</h2>
+<p>The “3–5×” claim is <strong>unfalsifiable without a
+baseline</strong>. R1 §6 lists seven measurement gaps; the programme
+cannot validate anything until they are closed. This is why
+<strong>Phase 0 of the plan is “establish the measurement baseline” and
+nothing else can be validated before it completes.</strong></p>
+<p><strong>Canonical scenarios</strong> (each measured before and after
+every relevant phase):</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 19%" />
+<col style="width: 30%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>S</th>
+<th>Scenario</th>
+<th>Primary metric</th>
+<th>Bottlenecks exercised</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td><code>cli --help</code> / <code>--list-models</code> cold start</td>
+<td>wall-clock to exit</td>
+<td>B01, B02, B10, B13, B14</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>Cold repo-map index of a large repo (~5k files)</td>
+<td>wall-clock + alloc</td>
+<td>B04–B07, B09, B15, B19</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>Content search (<code>Grep</code>) over a large tree</td>
+<td>wall-clock</td>
+<td>B08, B09</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>Single LLM round-trip (cold cache vs warm cache)</td>
+<td>time-to-first-token</td>
+<td>B02, B03; O1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Instruments</strong> (R3 §1.2, R1 §6):</p>
+<ul>
+<li><strong>pprof</strong> — CPU + heap + mutex + block profiles for
+S2/S3/S4; <code>net/http/pprof</code> for the server path. Profiles are
+committed as evidence and as the input to PGO (O15 / R3 §1.1).</li>
+<li><strong><code>go test -bench -benchmem</code></strong> — the 113
+existing benchmarks plus new ones for the four hot paths (startup, llm
+dispatch, repomap, search) which currently lack dedicated coverage (R1
+§6).</li>
+<li><strong>Competitor wall-clock benchmarks</strong> — Claude Code,
+Gemini CLI, Aider, Cline, Crush measured on <em>identical hardware</em>
+for S1–S4, so 3–5× has a concrete number to beat (R1 §6 item 6, R2 §2
+Go-rewrite data point).</li>
+<li><strong><code>GODEBUG=inittrace=1</code></strong> — to size slow
+<code>init()</code> chains for O4 (R3 §3.2).</li>
+</ul>
+<p><strong>Anti-bluff rule for the whole programme:</strong> no phase
+may claim a speedup without pasted before/after numbers from that
+session (CONST-035 Rule 9). A green benchmark with no captured delta is
+a bluff.</p>
+<h2 id="how-the-phased-plan-follows-from-this-synthesis">8. How the
+phased plan follows from this synthesis</h2>
+<p><code>04-phased-implementation-plan.md</code> turns §5’s opportunity
+list into ~5 phases of subagent-sized tasks:</p>
+<ul>
+<li><strong>Phase 0 — Measurement baseline</strong> (must run first;
+§7).</li>
+<li><strong>Phase 1 — Low-risk high-impact LLM &amp; startup
+wins</strong> (O1–O5: prompt cache, HTTP tuning, streaming, lazy
+startup, lazy Ollama).</li>
+<li><strong>Phase 2 — Context-build speed</strong> (O6–O9, O13, O14:
+repo-map cache + parallelism, parallel search, incremental parsing,
+walk/regex hygiene).</li>
+<li><strong>Phase 3 — Interactive &amp; agent-loop levers</strong>
+(O10–O12, O18: model routing, fast-apply, tool parallelism,
+compaction).</li>
+<li><strong>Phase 4 — Profile-gated tuning &amp; caching
+architecture</strong> (O15, O17, O19, O20: PGO, multi-tier cache, DB
+pool, alloc/GC/contention).</li>
+<li><strong>Phase 5 — Developer-experience &amp; submodule
+cascade</strong> (O16, O21 + recursive application to owned submodules
+per CONST-047/051).</li>
+</ul>
+<p>See the plan for per-task IDs, target files, test floors and
+anti-bluff proofs.</p>
+</body>
+</html>

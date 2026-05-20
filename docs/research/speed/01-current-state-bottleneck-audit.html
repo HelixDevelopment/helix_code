@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>01-current-state-bottleneck-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">01-current-state-bottleneck-audit</h1>
+</header>
+<h1
+id="helixcode-speed-programme-r1-current-state-bottleneck-audit">HelixCode
+Speed Programme — R1: Current-State Bottleneck Audit</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td><strong>Last modified</strong></td>
+<td>2026-05-20T10:36:08Z</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>active</td>
+</tr>
+<tr>
+<td><strong>Authority</strong></td>
+<td>docs/research/speed/ — operator speed mandate 2026-05-20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-executive-summary">1. Executive summary</a></li>
+<li><a href="#2-method--scope">2. Method &amp; scope</a></li>
+<li><a href="#3-ranked-bottleneck-table">3. Ranked bottleneck
+table</a></li>
+<li><a href="#4-per-bottleneck-detail">4. Per-bottleneck detail</a></li>
+<li><a href="#5-cross-cutting-observations">5. Cross-cutting
+observations</a></li>
+<li><a href="#6-measurement-gaps">6. Measurement gaps</a></li>
+<li><a href="#7-recommended-next-research">7. Recommended next
+research</a></li>
+</ul>
+<h2 id="executive-summary">1. Executive summary</h2>
+<p>This audit reads the real HelixCode inner Go module
+(<code>helix_code/</code>, module <code>dev.helix.code</code>, go 1.26,
+~45 internal packages) to inventory where the product is — or will be —
+slow versus competitor AI CLI agents (Claude Code, Gemini CLI, Aider,
+Cline). Every claim below cites a real <code>file:line</code> or a
+measured fact; speculative items are marked
+<code>UNCONFIRMED:</code>.</p>
+<p><strong>Top findings (highest-impact first):</strong></p>
+<ol type="1">
+<li><strong>CLI startup is fully eager and serial.</strong>
+<code>cmd/cli/main.go</code> <code>Run()</code> constructs ~20
+subsystems sequentially before the first user action: telemetry,
+permissions, persistence, worktree (shells out to <code>git</code>),
+hooks (2 YAML reads), tool registry, LSP detection (N×
+<code>exec.LookPath</code>), MCP manager (spawns servers), background
+manager, plan-mode, sandbox detection. Nothing is lazy. This is the
+single biggest perceived-latency gap vs competitors that defer almost
+everything.</li>
+<li><strong><code>NewOllamaProvider</code> does a synchronous network
+round-trip in its constructor</strong>
+(<code>internal/llm/ollama_provider.go:109</code> →
+<code>discoverModels()</code>), and <code>NewCLI()</code> calls it
+unconditionally (<code>cmd/cli/main.go:234</code>). Every CLI invocation
+pays an Ollama discovery call even for non-LLM commands.</li>
+<li><strong>Cloud LLM providers use untuned
+<code>http.Client</code>s.</strong> 8 of 9 providers construct
+<code>&amp;http.Client{Timeout: ...}</code> with the <em>default</em>
+<code>http.Transport</code> (no <code>MaxIdleConnsPerHost</code>, no
+<code>ForceAttemptHTTP2</code>). Only Groq tunes it
+(<code>groq_provider.go:151</code>). Default
+<code>MaxIdleConnsPerHost</code> is 2 — connection churn on every
+concurrent or rapid-fire request.</li>
+<li><strong>Repomap is serial despite a <code>MaxConcurrency</code>
+config field that is never read.</strong>
+<code>internal/repomap/repomap.go</code> walks files serially
+(<code>discoverFiles</code>, line 248), parses serially
+(<code>GetOptimalContext</code> loop, line 117), and
+<code>GetStatistics</code> (line 198) calls
+<code>extractFileSymbols</code> an extra full time per file. Tree-sitter
+parsing dominates and is single- threaded.</li>
+<li><strong>Tree-sitter allocates a fresh parser per file</strong>
+(<code>tree_sitter.go:56</code> <code>sitter.NewParser()</code> inside
+<code>ParseFile</code>) — no parser reuse or pooling across the
+thousands of files in a large repo walk.</li>
+<li><strong>Repomap disk cache spawns one goroutine per
+<code>Set</code></strong>, each doing <code>MkdirAll</code> + gob-encode
++ temp-write + rename (<code>cache.go:101</code>). A cold index of a
+5k-file repo spawns 5k short-lived goroutines hammering the
+filesystem.</li>
+<li><strong><code>SearchContent</code> (the grep tool) walks and reads
+files serially on one goroutine</strong>
+(<code>internal/tools/filesystem/searcher.go:243</code>). Competitor
+grep backends (ripgrep) parallelise per-file aggressively.</li>
+</ol>
+<p>None of these block working features; they are pure latency. The
+codebase compiles cleanly (<code>go build ./cmd/cli/</code> succeeds,
+14.1 s warm) and has 113 benchmark functions, but coverage of the hot
+paths above is thin (see §6).</p>
+<h2 id="method-scope">2. Method &amp; scope</h2>
+<ul>
+<li>Read the real code under <code>helix_code/cmd/</code> and
+<code>helix_code/internal/</code>. Confirmed <code>helix_code/</code> is
+the inner Go module (<code>go.mod</code> →
+<code>module dev.helix.code</code>, <code>go 1.26</code>). The CLAUDE.md
+text describing a deeper <code>helix_code/helix_code/</code> path is
+stale — the module is one level up.</li>
+<li>Verified compilation: <code>go build ./cmd/cli/</code> → exit 0,
+<strong>14.10 s</strong> warm (captured via <code>/usr/bin/time</code>).
+<code>go version go1.26.2 linux/amd64</code>.</li>
+<li>Package-size mapping via
+<code>find … -name '*.go' ! -name '*_test.go'</code>:
+<code>internal/tools</code> 34,480 LOC / 131 files;
+<code>internal/llm</code> 30,564 LOC / 75 files;
+<code>internal/memory</code> 23,365 LOC / 26 files;
+<code>internal/agent</code> 7,601; <code>internal/commands</code> 7,250;
+<code>internal/cognee</code> 6,485; <code>internal/config</code> 4,182;
+<code>internal/server</code> 3,643; <code>internal/context</code> 3,363;
+<code>internal/repomap</code> 2,816.</li>
+<li>113 <code>func Benchmark*</code> exist across the tree
+(<code>grep -rh "func Benchmark"</code>).</li>
+<li>Could NOT run <code>go test -bench</code> against real
+infrastructure (no PostgreSQL/Redis/Ollama up in this session) — see
+§6.</li>
+</ul>
+<h2 id="ranked-bottleneck-table">3. Ranked bottleneck table</h2>
+<p>Severity: <strong>Critical</strong> = dominant user-visible latency;
+<strong>High</strong> = large, broadly hit; <strong>Medium</strong> =
+noticeable on hot paths; <strong>Low</strong> = localised.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Severity</th>
+<th>Location</th>
+<th>What’s slow</th>
+<th>One-line fix direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B01</td>
+<td>Critical</td>
+<td><code>cmd/cli/main.go</code> <code>Run()</code> (lines
+459–680+)</td>
+<td>~20 subsystems initialised eagerly &amp; serially before first
+action</td>
+<td>Lazy-init: build subsystems on first use; only parse flags +
+dispatch eagerly</td>
+</tr>
+<tr>
+<td>B02</td>
+<td>Critical</td>
+<td><code>internal/llm/ollama_provider.go:109</code>;
+<code>cmd/cli/main.go:234</code></td>
+<td><code>NewOllamaProvider</code> does synchronous
+<code>discoverModels()</code> HTTP call in constructor, always</td>
+<td>Make discovery lazy/async; skip provider construction for non-LLM
+commands</td>
+</tr>
+<tr>
+<td>B03</td>
+<td>High</td>
+<td><code>internal/llm/{openai,deepseek,gemini,azure,copilot,cerebras,koboldai,local}_provider.go</code></td>
+<td><code>&amp;http.Client{}</code> with default <code>Transport</code>
+(MaxIdleConnsPerHost=2, no HTTP/2 hint)</td>
+<td>Shared tuned <code>*http.Transport</code> (MaxIdleConnsPerHost≥32,
+ForceAttemptHTTP2)</td>
+</tr>
+<tr>
+<td>B04</td>
+<td>High</td>
+<td><code>internal/repomap/repomap.go:117,184</code></td>
+<td>File parsing serial; <code>RepoMapConfig.MaxConcurrency</code> field
+defined (line 29) but never consumed</td>
+<td>Worker pool over <code>extractFileSymbols</code>, bounded by
+<code>MaxConcurrency</code></td>
+</tr>
+<tr>
+<td>B05</td>
+<td>High</td>
+<td><code>internal/repomap/repomap.go:218–235</code>
+(<code>GetStatistics</code>)</td>
+<td>Calls <code>extractFileSymbols</code> per file <em>again</em> on top
+of <code>discoverFiles</code>; double parse</td>
+<td>Reuse symbols already gathered; compute stats from one pass</td>
+</tr>
+<tr>
+<td>B06</td>
+<td>High</td>
+<td><code>internal/repomap/tree_sitter.go:56</code></td>
+<td><code>sitter.NewParser()</code> allocated per file inside
+<code>ParseFile</code></td>
+<td>Pool parsers per language (<code>sync.Pool</code>), reset between
+files</td>
+</tr>
+<tr>
+<td>B07</td>
+<td>High</td>
+<td><code>internal/repomap/cache.go:101,117,176</code></td>
+<td>One goroutine per cache <code>Set</code>/<code>Invalidate</code>;
+each does MkdirAll+gob+write+rename</td>
+<td>Batch writes via a single async writer + buffered channel</td>
+</tr>
+<tr>
+<td>B08</td>
+<td>High</td>
+<td><code>internal/tools/filesystem/searcher.go:243</code>
+(<code>SearchContent</code>)</td>
+<td>Serial walk + serial per-file read/regex on one goroutine</td>
+<td>Parallel per-file scan with bounded worker pool</td>
+</tr>
+<tr>
+<td>B09</td>
+<td>Medium</td>
+<td><code>internal/repomap/repomap.go:248</code>; 18 other sites</td>
+<td><code>filepath.Walk</code> (does <code>os.Lstat</code> per entry)
+instead of <code>filepath.WalkDir</code></td>
+<td>Switch to <code>filepath.WalkDir</code> (uses cheaper
+<code>fs.DirEntry</code>)</td>
+</tr>
+<tr>
+<td>B10</td>
+<td>Medium</td>
+<td><code>cmd/cli/main.go:241</code> <code>NewCLI()</code> →
+<code>config.Load()</code></td>
+<td>Viper config loaded; later <code>Run()</code> re-loads via other
+paths; Viper is global singleton</td>
+<td>Load config once, pass <code>*Config</code> down; avoid repeat
+<code>viper.ReadInConfig</code></td>
+</tr>
+<tr>
+<td>B11</td>
+<td>Medium</td>
+<td><code>internal/llm/ollama_provider.go:354,393</code></td>
+<td><code>strings.NewReader(string(requestBody))</code> — extra
+<code>[]byte</code>→<code>string</code>→reader copy</td>
+<td>Use <code>bytes.NewReader(requestBody)</code> directly</td>
+</tr>
+<tr>
+<td>B12</td>
+<td>Medium</td>
+<td><code>internal/editor/formats/*.go</code> (≥17 sites)</td>
+<td><code>regexp.MustCompile</code> called inside parse functions,
+recompiled every call</td>
+<td>Hoist to package-level <code>var</code> (compile once)</td>
+</tr>
+<tr>
+<td>B13</td>
+<td>Medium</td>
+<td><code>cmd/cli/main.go:572–573</code></td>
+<td><code>tools.DetectAvailableServers</code> runs N×
+<code>exec.LookPath</code> synchronously at startup</td>
+<td>Defer LSP detection to first edit; or parallelise the lookups</td>
+</tr>
+<tr>
+<td>B14</td>
+<td>Medium</td>
+<td><code>cmd/cli/main.go:589–605</code></td>
+<td>MCP manager <code>Start(ctx)</code> spawns alwaysLoad server
+subprocesses during startup</td>
+<td>Start MCP servers lazily on first MCP tool call</td>
+</tr>
+<tr>
+<td>B15</td>
+<td>Medium</td>
+<td><code>internal/repomap/cache.go:206,332</code>
+(<code>GetStats</code>/<code>estimateSize</code>)</td>
+<td>Size estimate gob-encodes every entry’s value just to measure
+bytes</td>
+<td>Track size on insert, or skip exact sizing</td>
+</tr>
+<tr>
+<td>B16</td>
+<td>Medium</td>
+<td><code>internal/repomap/repomap.go:103</code>
+<code>GetOptimalContext</code></td>
+<td>Whole method holds <code>rm.mu.RLock()</code> across full
+walk+parse+read</td>
+<td>Narrow lock to map mutations; do I/O lock-free</td>
+</tr>
+<tr>
+<td>B17</td>
+<td>Medium</td>
+<td><code>internal/database/database.go:45-48</code></td>
+<td>Fixed pool <code>MaxConns=20/MinConns=5</code>, not config-driven;
+CLI may not need 5 idle conns</td>
+<td>Make pool sizing config-driven; smaller default for CLI</td>
+</tr>
+<tr>
+<td>B18</td>
+<td>Low</td>
+<td><code>cmd/cli/main.go:301</code> <code>initPersistence</code></td>
+<td>Spawns background <code>CleanupOld</code> goroutine walking
+<code>.helix/tool-results/</code> every run</td>
+<td>Throttle: only run cleanup if last-run marker is stale</td>
+</tr>
+<tr>
+<td>B19</td>
+<td>Low</td>
+<td><code>internal/repomap/repomap.go:148</code></td>
+<td>Token estimate <code>len(content)/4</code> requires full file read
+into memory first</td>
+<td>Stream/stat-based estimate before deciding to read</td>
+</tr>
+<tr>
+<td>B20</td>
+<td>Low</td>
+<td><code>Makefile:35,49</code> test targets</td>
+<td><code>make test</code> runs <code>go test ./...</code> with no
+<code>-p</code>/<code>-parallel</code> tuning; race build is
+full-tree</td>
+<td>Add <code>-p</code> cap + split race target; cache-bust only where
+needed</td>
+</tr>
+<tr>
+<td>B21</td>
+<td>Low</td>
+<td><code>internal/llm</code> 30k LOC / 75 files single package</td>
+<td>Large package → slower incremental compile; everything recompiles on
+any edit</td>
+<td>Consider sub-packaging providers
+(<code>internal/llm/providers/...</code>)</td>
+</tr>
+<tr>
+<td>B22</td>
+<td>Low (UNCONFIRMED)</td>
+<td><code>internal/memory</code> 23k LOC, 32 <code>Lock()</code> sites
+in <code>memory_manager.go</code></td>
+<td>Possible lock contention on shared memory manager under concurrent
+agent turns</td>
+<td>Profile under load; consider sharded locks / RWMutex audit</td>
+</tr>
+<tr>
+<td>B23</td>
+<td>Low (UNCONFIRMED)</td>
+<td><code>internal/cognee/service.go</code> (32 lock sites)</td>
+<td>Cognee service mutex density suggests serialised graph ops</td>
+<td>Profile; evaluate read-path lock-free snapshots</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-bottleneck-detail">4. Per-bottleneck detail</h2>
+<h3 id="b01-eager-serial-cli-bootstrap-critical">B01 — Eager, serial CLI
+bootstrap (Critical)</h3>
+<p><code>CLI.Run()</code> (<code>cmd/cli/main.go</code>) parses flags at
+line 451 then, before dispatching to any handler, sequentially
+constructs: telemetry provider (476–504), permissions engine (510–514,
+reads 2 YAML files + resolves home/cwd), persistence manager (515–517),
+worktree manager (518–520, shells out to
+<code>git rev-parse --show-toplevel</code>), session manager (523),
+hooks (528–530, two YAML loads), tool registry (534, which itself
+initialises filesystem/shell/web/browser/mapper/multiedit components —
+<code>registry.go:201</code>), <code>ask_user</code> prompter (558), LSP
+curated-server detection (572–584), MCP manager load+<code>Start</code>
+(589–605, spawns subprocesses), commands registry (614–618), background
+manager (622), plan-mode controller (634–648), sandbox config + detector
+(669–679). Each step is blocking. A user running
+<code>helixcode --list-models</code> still pays the worktree git
+shell-out, hooks YAML parse, LSP <code>exec.LookPath</code> sweep, and
+MCP server spawn. Competitor CLIs defer nearly all of this.
+<strong>Fix:</strong> restructure <code>Run()</code> so only flag
+parsing and the command-dispatch decision are eager; build each
+subsystem lazily inside the handler that needs it (sync.Once-guarded
+getters on <code>*CLI</code>).</p>
+<h3 id="b02-synchronous-ollama-discovery-in-constructor-critical">B02 —
+Synchronous Ollama discovery in constructor (Critical)</h3>
+<p><code>NewOllamaProvider</code> (<code>ollama_provider.go:99</code>)
+calls <code>provider.discoverModels()</code> at line 109 — a blocking
+HTTP GET to <code>localhost:11434/api/tags</code>. <code>NewCLI()</code>
+(<code>main.go:232</code>) calls <code>NewOllamaProvider</code>
+unconditionally for every CLI start. If Ollama is down, this still waits
+out the client <code>Timeout</code>. If Ollama is up, it’s a wasted
+round-trip for non-LLM commands. <strong>Fix:</strong> construct the
+provider without discovery; discover lazily on first
+<code>GetModels</code>/<code>Generate</code>, or async in a goroutine
+whose result is awaited only when needed.</p>
+<h3 id="b03-untuned-http-transports-across-providers-high">B03 — Untuned
+HTTP transports across providers (High)</h3>
+<p>Confirmed via <code>grep</code>: <code>openai_provider.go:46</code>,
+<code>deepseek_provider.go:50</code>,
+<code>gemini_provider.go:168</code>, <code>azure_provider.go:226</code>,
+<code>copilot_provider.go:45</code>,
+<code>cerebras_provider.go:66</code>,
+<code>koboldai_provider.go:86</code>, <code>local_provider.go:36</code>,
+<code>local_llm_manager.go:221</code> all build
+<code>&amp;http.Client{Timeout: …}</code> with no
+<code>Transport</code>. Go’s default transport caps
+<code>MaxIdleConnsPerHost</code> at 2, so a burst of requests to one
+provider opens/closes TCP+TLS repeatedly. Only
+<code>groq_provider.go:151</code> sets
+<code>MaxIdleConnsPerHost: 100</code> + <code>ForceAttemptHTTP2</code>.
+<strong>Fix:</strong> a single shared, tuned
+<code>*http.Transport</code> (or per-provider with
+<code>MaxIdleConnsPerHost ≥ 32</code>, <code>IdleConnTimeout</code>,
+<code>ForceAttemptHTTP2: true</code>), reused across all providers.</p>
+<h3
+id="b04-b05-b06-repomap-parsing-not-parallel-double-parsed-parser-churn-high">B04
+/ B05 / B06 — Repomap parsing not parallel, double-parsed, parser churn
+(High)</h3>
+<p><code>RepoMapConfig.MaxConcurrency</code> is declared
+(<code>repomap.go:29</code>, default 4 in <code>DefaultConfig</code>
+line 59) but <code>grep</code> finds no read of it —
+<code>GetOptimalContext</code> (line 117) and <code>RefreshCache</code>
+(line 184) loop over files serially. <code>GetStatistics</code> (line
+218) loops over every file calling <code>extractFileSymbols</code> again
+even though the same files were just walked.
+<code>TreeSitterParser.ParseFile</code> allocates
+<code>sitter.NewParser()</code> per file
+(<code>tree_sitter.go:56</code>) — parsers are reusable and the
+allocation+language-set is non-trivial across thousands of files.
+<strong>Fix:</strong> bounded worker pool keyed off
+<code>MaxConcurrency</code>; a <code>sync.Pool</code> of parsers per
+language; single-pass stats.</p>
+<h3 id="b07-cache-write-goroutine-storm-high">B07 — Cache write
+goroutine storm (High)</h3>
+<p><code>RepoCache.Set</code> (<code>cache.go:85</code>) spawns a
+goroutine per call (line 101) that does <code>os.MkdirAll</code> +
+<code>gob.Encode</code> + <code>os.WriteFile(tmp)</code> +
+<code>os.Rename</code>. <code>Invalidate</code> (117) and
+<code>Cleanup</code> (176) also spawn per-entry goroutines. Indexing a
+large repo cold → thousands of concurrent tiny FS ops, scheduler churn,
+and inode pressure. <strong>Fix:</strong> one background writer
+goroutine consuming a buffered channel of <code>(key, entry)</code>;
+coalesce directory creation.</p>
+<h3 id="b08-serial-content-search-high">B08 — Serial content search
+(High)</h3>
+<p><code>fileSearcher.SearchContent</code>
+(<code>searcher.go:209</code>) compiles the regex once (good, line 233)
+but then <code>filepath.Walk</code>s and calls
+<code>searchFileContent</code> for each file inline on the walk
+goroutine (line 276). For a large tree this is strictly serial I/O +
+regex. Competitor grep tools parallelise per file. <strong>Fix:</strong>
+feed candidate paths into a bounded worker pool; collect matches via
+channel; this is the agent’s <code>Grep</code> tool hot path.</p>
+<h3 id="b09-filepath.walk-vs-filepath.walkdir-medium">B09 —
+<code>filepath.Walk</code> vs <code>filepath.WalkDir</code>
+(Medium)</h3>
+<p>19 <code>filepath.Walk</code> call sites found (repomap, context
+mentions, fix, rules, tools/mapping, tools/web, tools/filesystem,
+workflow, kilocode). <code>Walk</code> calls <code>os.Lstat</code> on
+every entry to build <code>os.FileInfo</code>; <code>WalkDir</code>
+passes a cheaper <code>fs.DirEntry</code> and only stats on demand. On
+large trees this is a measurable win. <strong>Fix:</strong> mechanical
+migration to <code>filepath.WalkDir</code>.</p>
+<h3 id="b10-repeatedglobal-viper-config-load-medium">B10 —
+Repeated/global Viper config load (Medium)</h3>
+<p><code>config.Load()</code> (<code>config/config.go:215</code>) uses
+the <strong>global</strong> Viper singleton
+(<code>viper.SetConfigFile</code>, <code>viper.ReadInConfig</code>,
+<code>viper.Unmarshal</code>). <code>NewCLI()</code> calls it at
+<code>main.go:241</code>; the server <code>main.go:75</code> calls it
+too; subagent path reads config files independently
+(<code>main.go:172</code>). Each <code>Load()</code> re-reads and
+re-unmarshals YAML. <strong>Fix:</strong> load once into a
+<code>*Config</code>, thread it through constructors; avoid the global
+singleton for testability and to stop repeat disk reads.</p>
+<h3 id="b11-redundant-body-copy-in-ollama-requests-medium">B11 —
+Redundant body copy in Ollama requests (Medium)</h3>
+<p><code>makeAPIRequest</code>/<code>makeStreamingRequest</code> do
+<code>strings.NewReader(string(requestBody))</code> where
+<code>requestBody</code> is already <code>[]byte</code> from
+<code>json.Marshal</code> (<code>ollama_provider.go:359,398</code>). The
+<code>string()</code> conversion copies the whole payload.
+<strong>Fix:</strong> <code>bytes.NewReader(requestBody)</code>.</p>
+<h3 id="b12-per-call-regexp-compilation-medium">B12 — Per-call regexp
+compilation (Medium)</h3>
+<p><code>internal/editor/formats/{editor,diff,architect,whole}_format.go</code>
+compile regexes inside parse functions (≥17 sites,
+e.g. <code>editor_format.go:53,63,120, 133,150,163</code>). These run on
+every LLM-edit-format parse. <strong>Fix:</strong> hoist to
+package-level <code>var … = regexp.MustCompile(…)</code>.</p>
+<h3 id="b13-b14-startup-time-external-probes-medium">B13 / B14 —
+Startup-time external probes (Medium)</h3>
+<p><code>tools.DetectAvailableServers</code> (<code>main.go:573</code>)
+runs <code>exec.LookPath</code> for each curated LSP server
+synchronously. <code>mcpMgr.Start(ctx)</code> (<code>main.go:601</code>)
+launches <code>alwaysLoad</code> MCP server subprocesses during
+bootstrap. Both add fixed startup latency unrelated to the user’s
+command. <strong>Fix:</strong> lazy detection on first edit / first MCP
+call; or at minimum parallelise the <code>LookPath</code> sweep.</p>
+<h3 id="b15b23">B15–B23</h3>
+<p>See table; B15 (gob-encode-to-measure), B16 (over-broad RLock across
+I/O), B17 (non-configurable DB pool), B18 (unconditional cleanup
+goroutine), B19 (full read for token estimate), B20 (untuned test
+parallelism), B21 (30k-LOC <code>internal/llm</code> slows incremental
+compile), B22/B23 (<code>UNCONFIRMED:</code> lock contention in
+<code>memory</code>/<code>cognee</code> — 32 lock sites each; needs
+<code>-race</code> + contention profiling under concurrent load to
+confirm).</p>
+<h2 id="cross-cutting-observations">5. Cross-cutting observations</h2>
+<ul>
+<li><strong>Lazy initialisation is the recurring theme.</strong> B01,
+B02, B13, B14, B18 are all “work done eagerly that the current command
+may not need.” A single architectural pass introducing sync.Once-guarded
+lazy getters on <code>*CLI</code> would address the largest
+perceived-latency gap.</li>
+<li><strong>HTTP client hygiene is inconsistent.</strong> Groq is the
+only provider with a tuned transport; the pattern should be lifted into
+a shared constructor.</li>
+<li><strong>Repomap is the clearest CPU bottleneck</strong> and already
+has the scaffolding (<code>MaxConcurrency</code>, a cache) — it just
+isn’t wired for parallelism.</li>
+<li><strong>No evidence of broken correctness</strong> in any hot path
+inspected; these are pure-throughput/latency issues.
+<code>go build ./cmd/cli/</code> is clean.</li>
+<li><strong>Build/incremental-compile</strong>: warm
+<code>go build ./cmd/cli/</code> = 14.1 s; the 30k-LOC
+<code>internal/llm</code> and 34k-LOC <code>internal/tools</code>
+packages are large enough that any edit in them triggers a sizeable
+recompile (B21).</li>
+</ul>
+<h2 id="measurement-gaps">6. Measurement gaps</h2>
+<p>The following need real profiling that this audit could not perform
+and that R2+ of the speed programme must capture before/after each
+fix:</p>
+<ol type="1">
+<li><strong>Real startup wall-clock</strong> —
+<code>time ./bin/cli --help</code> and <code>--list-models</code> on a
+representative machine; instrument <code>Run()</code> phase-by-phase. No
+binary was run in this session.</li>
+<li><strong><code>pprof</code> CPU + alloc profiles</strong> for: a cold
+repomap index of a large repo (B04–B07), a content search over a large
+tree (B08), and a single LLM round-trip (B02/B03). None captured — needs
+Ollama + a real repo.</li>
+<li><strong><code>go test -bench -benchmem</code></strong> of the 113
+existing benchmarks — not run here (needs
+<code>make test-infra-up</code>: PostgreSQL/Redis/Ollama). Confirm which
+hot paths (repomap, llm dispatch, searcher) actually have benchmark
+coverage; first inspection suggests repomap parsing and CLI startup have
+<strong>no</strong> dedicated benchmarks.</li>
+<li><strong>Lock-contention profile</strong>
+(<code>go test -race</code>, <code>runtime/pprof</code> mutex profile)
+for <code>internal/memory</code> and <code>internal/cognee</code> —
+required to confirm or dismiss B22/B23.</li>
+<li><strong>Connection-reuse verification</strong> — capture
+<code>netstat</code>/transport metrics to prove B03’s idle-conn churn
+under burst load.</li>
+<li><strong>Competitor baseline</strong> — measured startup +
+first-token latency for Claude Code / Gemini CLI / Aider / Cline on
+identical hardware, so the “3–5×” target has a concrete number to
+beat.</li>
+<li><strong>Incremental compile timing</strong> — <code>go build</code>
+after a one-line edit in <code>internal/llm</code> vs a small package,
+to size B21.</li>
+</ol>
+<h2 id="recommended-next-research">7. Recommended next research</h2>
+<ul>
+<li><strong>R2:</strong> Competitor latency baseline (startup,
+first-token, repo-index, grep) on identical hardware — gives the target
+numbers.</li>
+<li><strong>R3:</strong> Profiling harness — wire <code>pprof</code>
+endpoints + a benchmark suite for the four hot paths (startup, llm
+dispatch, repomap, search) so every speed fix has before/after evidence
+(anti-bluff §11.4).</li>
+<li><strong>R4:</strong> Lazy-init architecture design for
+<code>cmd/cli</code> (addresses B01/B02/ B13/B14 — the Critical
+tier).</li>
+</ul>
+</body>
+</html>

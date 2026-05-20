@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>03-optimization-techniques</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">03-optimization-techniques</h1>
+</header>
+<h1 id="r3-optimization-techniques-deep-web-research">R3 —
+Optimization-Techniques Deep-Web Research</h1>
+<!-- Constitution §11.4.44 metadata header -->
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-05-20T00:00:00Z <strong>Authority:</strong> Cascaded from HelixCode
+root <code>CONSTITUTION.md</code> / <code>CLAUDE.md</code>. Research
+deliverable for the “ultra-fast” programme (3–5× faster than competitor
+AI CLI agents without breaking working features). Per §11.4.8 every
+technique cites a source URL. Per §11.4.74, where a technique implies a
+reusable component, a “Submodule-catalogue check” note flags whether the
+vasic-digital / HelixDevelopment owned-submodule catalogue should be
+consulted before building. Document type: research only — <strong>no
+code changes, no commits implied by this file.</strong></p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>HelixCode’s “ultra-fast” target (3–5× over competitor AI CLI agents)
+is achievable but the leverage is <strong>not evenly
+distributed</strong>. The dominant wall-clock cost of an AI coding agent
+is <strong>LLM round-trip latency</strong>, not Go CPU time. Therefore
+the single highest-impact lever is <strong>provider-side prompt
+caching</strong> (Anthropic / OpenAI / Gemini): a warm
+codebase/system-prompt cache cuts time-to-first-token by up to ~85% and
+cost by ~90% on cache hits, with near-zero implementation risk. The
+second tier is <strong>codebase-context speed</strong> — incremental
+tree-sitter parsing + content-addressed caches turn a 22-minute cold
+index into a 45-second warm update. Only the third tier is classic Go
+performance engineering (PGO, allocation reduction, GC tuning,
+concurrency), which buys 2–30% on the CPU-bound slices that remain.</p>
+<p>A realistic decomposition of the 3–5× goal:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Lever</th>
+<th>Contribution to end-to-end speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching + streaming-first + connection pooling</td>
+<td>~2–3× on perceived latency (TTFT)</td>
+</tr>
+<tr>
+<td>Incremental indexing + content-addressed context caches</td>
+<td>~1.5–2× on context-build phases</td>
+</tr>
+<tr>
+<td>Go PGO + allocation/GC/concurrency tuning</td>
+<td>~1.05–1.3× on CPU-bound slices</td>
+</tr>
+<tr>
+<td>Startup-time + build/test speed</td>
+<td>developer-experience multiplier, not user-facing runtime</td>
+</tr>
+</tbody>
+</table>
+<p>The techniques below are ordered by area; a consolidated
+impact-to-effort ranking closes the document.</p>
+<hr />
+<h2 id="area-1-go-performance-engineering">Area 1 — Go Performance
+Engineering</h2>
+<h3 id="profile-guided-optimization-pgo">1.1 Profile-guided optimization
+(PGO)</h3>
+<p>Modern Go (1.21+) auto-detects a <code>default.pgo</code> file in the
+<code>main</code> package directory and feeds a production CPU profile
+back into the compiler for better inlining/devirtualization. Collect via
+<code>net/http/pprof</code>
+(<code>curl .../debug/pprof/profile?seconds=30 &gt; default.pgo</code>),
+commit the profile, rebuild — no flag needed (<code>-pgo=auto</code> is
+default). Go 1.22 benchmarks show <strong>2–14%</strong> gains; Uber
+reports it as a standard part of their efficiency pipeline. - Sources:
+<a href="https://go.dev/doc/pgo" class="uri">https://go.dev/doc/pgo</a>,
+<a href="https://go.dev/blog/pgo"
+class="uri">https://go.dev/blog/pgo</a>, <a
+href="https://www.uber.com/blog/automating-efficiency-of-go-programs-with-pgo/"
+class="uri">https://www.uber.com/blog/automating-efficiency-of-go-programs-with-pgo/</a>,
+<a
+href="https://cloud.google.com/blog/products/application-development/using-profile-guided-optimization-for-your-go-apps"
+class="uri">https://cloud.google.com/blog/products/application-development/using-profile-guided-optimization-for-your-go-apps</a>
+- <strong>Impact:</strong> Medium (2–14% CPU-bound).
+<strong>Difficulty:</strong> Low — one file + a profiling harness. -
+Submodule-catalogue check: the profile-collection harness is a reusable
+component; check the catalogue for an existing
+<code>helix_qa</code>/perf-tooling profiler runner before building
+one.</p>
+<h3 id="pprof-driven-profiling-workflow">1.2 pprof-driven profiling
+workflow</h3>
+<p><code>go tool pprof</code> on CPU + heap + mutex + block profiles is
+the mandatory first step — every later tuning decision (GC, allocation,
+contention) must be evidence-driven, never guessed (also a §11.4.6
+no-guessing requirement). - Sources: <a
+href="https://goperf.dev/01-common-patterns/gc/"
+class="uri">https://goperf.dev/01-common-patterns/gc/</a>, <a
+href="https://dasroot.net/posts/2026/03/go-performance-optimization-profiling-techniques/"
+class="uri">https://dasroot.net/posts/2026/03/go-performance-optimization-profiling-techniques/</a>
+- <strong>Impact:</strong> Enabling (no direct speedup; unlocks
+everything else). <strong>Difficulty:</strong> Low.</p>
+<h3 id="escape-analysis-allocation-reduction">1.3 Escape analysis &amp;
+allocation reduction</h3>
+<p><code>go build -gcflags="-m"</code> reveals heap escapes. Go 1.25
+improved escape analysis + inlining, eliminating escapes after inlining.
+Keep hot-path objects stack-allocated; batch many small structs into one
+large slice to cut GC churn. - Sources: <a
+href="https://goperf.dev/01-common-patterns/gc/"
+class="uri">https://goperf.dev/01-common-patterns/gc/</a>, <a
+href="https://reintech.io/blog/go-performance-optimization-guide-2026"
+class="uri">https://reintech.io/blog/go-performance-optimization-guide-2026</a>
+- <strong>Impact:</strong> Medium-High on allocation-heavy paths
+(parsing, JSON, repo-map). <strong>Difficulty:</strong> Medium.</p>
+<h3 id="sync.pool-for-short-lived-objects">1.4 <code>sync.Pool</code>
+for short-lived objects</h3>
+<p>Reuse expensive transient allocations (buffers, parser scratch,
+request structs). A documented case: a server handling 10k concurrent
+connections cut CPU <strong>~30%</strong> by replacing repeated map
+creation with a <code>sync.Pool</code>-backed cache. - Sources: <a
+href="https://goperf.dev/01-common-patterns/gc/"
+class="uri">https://goperf.dev/01-common-patterns/gc/</a>, <a
+href="https://dasroot.net/posts/2026/03/go-performance-optimization-profiling-techniques/"
+class="uri">https://dasroot.net/posts/2026/03/go-performance-optimization-profiling-techniques/</a>
+- <strong>Impact:</strong> High on hot allocation paths.
+<strong>Difficulty:</strong> Medium (lifecycle correctness; never pool
+things crossing goroutine boundaries unsafely).</p>
+<h3 id="strings.builder-bytes.buffer-over-concatenation">1.5
+<code>strings.Builder</code> / <code>bytes.Buffer</code> over
+<code>+</code> concatenation</h3>
+<p>Repeated string <code>+</code> reallocates;
+<code>strings.Builder</code> grows once. Pre-size with
+<code>Grow()</code> when the final length is known. Relevant for
+repo-map rendering and prompt assembly. - Source: <a
+href="https://goperf.dev/01-common-patterns/gc/"
+class="uri">https://goperf.dev/01-common-patterns/gc/</a> -
+<strong>Impact:</strong> Medium on string-assembly hot paths.
+<strong>Difficulty:</strong> Low.</p>
+<h3 id="struct-layout-avoiding-interface-boxing">1.6 Struct layout &amp;
+avoiding interface boxing</h3>
+<p>Order struct fields large→small to minimize padding; avoid storing
+scalars in <code>interface{}</code> (boxing forces heap allocation). Use
+concrete types in hot loops; reserve interfaces for boundaries. -
+Source: <a
+href="https://reintech.io/blog/go-performance-optimization-guide-2026"
+class="uri">https://reintech.io/blog/go-performance-optimization-guide-2026</a>
+- <strong>Impact:</strong> Low-Medium. <strong>Difficulty:</strong>
+Low-Medium.</p>
+<h3 id="gc-tuning-gogc-gomemlimit">1.7 GC tuning — <code>GOGC</code>,
+<code>GOMEMLIMIT</code></h3>
+<p><code>GOGC</code> (default 100) controls GC frequency;
+<code>GOMEMLIMIT</code> is a soft heap ceiling. For a container, set
+<code>GOMEMLIMIT</code> ~5–10% below the cgroup limit. Raising
+<code>GOGC</code> (or <code>GOGC=off</code> with a
+<code>GOMEMLIMIT</code>) trades memory for CPU on low-allocation
+workloads — Cloudflare reached <strong>22×</strong> in an extreme
+CPU-bound case at <code>GOGC=11300</code>; Uber’s dynamic GC tuner saved
+~70k cores. <strong>Tune only after profiling confirms GC is the
+bottleneck</strong> — the default is usually right. - Sources: <a
+href="https://goperf.dev/01-common-patterns/gc/"
+class="uri">https://goperf.dev/01-common-patterns/gc/</a>, <a
+href="https://go.dev/doc/gc-guide"
+class="uri">https://go.dev/doc/gc-guide</a>, <a
+href="https://oneuptime.com/blog/post/2026-01-25-tune-garbage-collection/view"
+class="uri">https://oneuptime.com/blog/post/2026-01-25-tune-garbage-collection/view</a>
+- <strong>Impact:</strong> Variable — Low default, High if GC-bound.
+<strong>Difficulty:</strong> Low (env vars) but risky without
+evidence.</p>
+<hr />
+<h2 id="area-2-concurrency-parallelism">Area 2 — Concurrency &amp;
+Parallelism</h2>
+<h3 id="errgroup-with-setlimit-for-bounded-parallelism">2.1
+<code>errgroup</code> with <code>SetLimit()</code> for bounded
+parallelism</h3>
+<p><code>golang.org/x/sync/errgroup</code> gives error propagation +
+context cancellation + (via <code>SetLimit(n)</code>) a bounded worker
+pool in one primitive. Replace ad-hoc <code>WaitGroup</code>+channel
+fan-out for parallel file reads, parallel provider calls, parallel index
+shards. - Sources: <a
+href="https://oneuptime.com/blog/post/2026-01-07-go-errgroup/view"
+class="uri">https://oneuptime.com/blog/post/2026-01-07-go-errgroup/view</a>,
+<a href="https://encore.dev/blog/advanced-go-concurrency"
+class="uri">https://encore.dev/blog/advanced-go-concurrency</a> -
+<strong>Impact:</strong> Medium-High (parallelizes I/O-bound work
+without unbounded goroutine blowup). <strong>Difficulty:</strong>
+Low.</p>
+<h3 id="worker-pools-sized-to-the-bottleneck">2.2 Worker pools sized to
+the bottleneck</h3>
+<p>Size pools to <code>runtime.NumCPU()</code> for CPU-bound work, or to
+the downstream limit (DB pool, API concurrency) for I/O-bound work —
+never spawn one goroutine per unit of unbounded work. - Sources: <a
+href="https://www.stanza.dev/courses/go-concurrency/patterns/go-concurrency-worker-pool"
+class="uri">https://www.stanza.dev/courses/go-concurrency/patterns/go-concurrency-worker-pool</a>,
+<a
+href="https://deepengineering.substack.com/p/deep-engineering-14-mihalis-tsoukalos"
+class="uri">https://deepengineering.substack.com/p/deep-engineering-14-mihalis-tsoukalos</a>
+- <strong>Impact:</strong> Medium-High. <strong>Difficulty:</strong>
+Low-Medium. - Submodule-catalogue check: a generic bounded worker-pool /
+scheduler is a textbook reusable component — check
+<code>helix_code/internal/worker</code> and the owned-submodule
+catalogue before writing a new one.</p>
+<h3 id="reducing-mutex-contention">2.3 Reducing mutex contention</h3>
+<p>Profile with the mutex/block profiler. Shrink critical sections;
+shard a hot map into N striped maps; prefer <code>sync.RWMutex</code>
+for read-heavy state; use <code>sync/atomic</code> for simple
+counters/flags; consider lock-free <code>atomic.Pointer</code> swap for
+copy-on-write config. - Sources: <a
+href="https://encore.dev/blog/advanced-go-concurrency"
+class="uri">https://encore.dev/blog/advanced-go-concurrency</a>, <a
+href="https://goperf.dev/blog/2025/04/03/lazy-initialization-in-go-using-atomics/"
+class="uri">https://goperf.dev/blog/2025/04/03/lazy-initialization-in-go-using-atomics/</a>
+- <strong>Impact:</strong> High when a hot lock is the bottleneck.
+<strong>Difficulty:</strong> Medium-High.</p>
+<h3 id="channel-vs-mutex-tradeoff">2.4 Channel vs mutex tradeoff</h3>
+<p>Channels for ownership transfer / pipelines; mutex/atomics for
+protecting in-place shared state. Channels add scheduling overhead —
+don’t use them as a glorified lock around a counter. - Source: <a
+href="https://dev.to/ohugonnot/concurrency-in-go-part-2-channels-select-and-worker-pool-4g4o"
+class="uri">https://dev.to/ohugonnot/concurrency-in-go-part-2-channels-select-and-worker-pool-4g4o</a>
+- <strong>Impact:</strong> Low-Medium. <strong>Difficulty:</strong>
+Low.</p>
+<hr />
+<h2 id="area-3-startup-time-reduction">Area 3 — Startup-Time
+Reduction</h2>
+<h3 id="lazy-initialization-sync.once-atomic">3.1 Lazy initialization
+(<code>sync.Once</code> / atomic)</h3>
+<p>Defer construction of any dependency taking &gt;a few ms (LLM
+clients, DB pools, embedding models) until first use. For Go 1.24+,
+atomic-based lazy init avoids <code>sync.Once</code> overhead on the hot
+read path. - Sources: <a
+href="https://goperf.dev/01-common-patterns/lazy-init/"
+class="uri">https://goperf.dev/01-common-patterns/lazy-init/</a>, <a
+href="https://goperf.dev/blog/2025/04/03/lazy-initialization-in-go-using-atomics/"
+class="uri">https://goperf.dev/blog/2025/04/03/lazy-initialization-in-go-using-atomics/</a>
+- <strong>Impact:</strong> High on CLI cold-start (the user-facing
+“feels instant” metric). <strong>Difficulty:</strong> Low.</p>
+<h3 id="non-blocking-eager-init-inittrace-background-init">3.2
+Non-blocking eager init (<code>inittrace</code> + background
+<code>init</code>)</h3>
+<p>For dependencies genuinely needed soon, kick off
+<code>sync.Once.Do</code> in a goroutine during <code>init()</code> so
+construction overlaps the rest of startup. Diagnose slow
+<code>init()</code> chains with <code>GODEBUG=inittrace=1</code>. -
+Source: <a href="https://eblog.fly.dev/startfast.html"
+class="uri">https://eblog.fly.dev/startfast.html</a> -
+<strong>Impact:</strong> Medium-High on cold-start.
+<strong>Difficulty:</strong> Low-Medium.</p>
+<h3 id="embedded-assets-via-goembed">3.3 Embedded assets via
+<code>go:embed</code></h3>
+<p>Bundle config templates / static assets with <code>go:embed</code> —
+no disk walk, no volume mounts. Parse embedded templates once at startup
+and fail fast. - Source: <a
+href="https://oneuptime.com/blog/post/2026-02-01-go-embed-static-files/view"
+class="uri">https://oneuptime.com/blog/post/2026-02-01-go-embed-static-files/view</a>
+- <strong>Impact:</strong> Low-Medium. <strong>Difficulty:</strong>
+Low.</p>
+<h3 id="fast-config-parsing">3.4 Fast config parsing</h3>
+<p>Parse config once, cache the struct, validate-and-fail-fast. Avoid
+re-reading YAML on every command; avoid heavyweight reflection-based
+decoders on the hot path. - Source: <a
+href="https://eblog.fly.dev/startfast.html"
+class="uri">https://eblog.fly.dev/startfast.html</a> -
+<strong>Impact:</strong> Low-Medium. <strong>Difficulty:</strong>
+Low.</p>
+<hr />
+<h2 id="area-4-llm-latency-reduction-highest-leverage">Area 4 —
+LLM-Latency Reduction (highest leverage)</h2>
+<h3 id="provider-side-prompt-caching-anthropic">4.1 Provider-side prompt
+caching — Anthropic</h3>
+<p>Mark stable prefixes (system prompt, tool definitions, codebase
+context) with <code>cache_control: {"type": "ephemeral"}</code>. Cache
+reads cost <strong>0.1×</strong> input price (~90% savings); writes cost
+1.25× (5-min TTL) or 2× (1-hour TTL, refreshed free on hit). Latency
+drops up to <strong>~85%</strong> on long prompts (a 100k-token example:
+11.5s → 2.4s). Up to 4 breakpoints per request; minimum 4,096 cacheable
+tokens for Opus 4.x. <strong>Go pitfall:</strong> Go randomizes JSON map
+key order — serialize tools/system blocks with deterministic key
+ordering or every request mishashes and never hits cache. - Sources: <a
+href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+class="uri">https://platform.claude.com/docs/en/build-with-claude/prompt-caching</a>,
+<a
+href="https://introl.com/blog/prompt-caching-infrastructure-llm-cost-latency-reduction-guide-2025"
+class="uri">https://introl.com/blog/prompt-caching-infrastructure-llm-cost-latency-reduction-guide-2025</a>,
+<a href="https://www.mager.co/blog/2026-04-29-claude-prompt-caching/"
+class="uri">https://www.mager.co/blog/2026-04-29-claude-prompt-caching/</a>
+- <strong>Impact:</strong> Very High — single biggest user-facing win.
+<strong>Difficulty:</strong> Low-Medium (deterministic serialization is
+the only trap).</p>
+<h3 id="cache-pre-warming">4.2 Cache pre-warming</h3>
+<p>At session start, fire a <code>max_tokens</code> ~0 request to write
+the codebase/system-prompt cache so the first real user request is
+already a cache hit (no first-request penalty). - Source: <a
+href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+class="uri">https://platform.claude.com/docs/en/build-with-claude/prompt-caching</a>
+- <strong>Impact:</strong> High (removes the cold-start latency cliff).
+<strong>Difficulty:</strong> Low.</p>
+<h3 id="streaming-first-design">4.3 Streaming-first design</h3>
+<p>Stream tokens (SSE) so time-to-first-visible-token is the perceived
+latency, not time-to-full-completion. HelixCode already has
+<code>provider.GenerateStream</code> — ensure every surface (CLI, TUI,
+desktop) consumes streaming and renders incrementally. - Source: <a
+href="https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance"
+class="uri">https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance</a>
+- <strong>Impact:</strong> High on perceived latency.
+<strong>Difficulty:</strong> Low (mostly already present — verify, don’t
+regress).</p>
+<h3 id="small-model-routing-for-cheap-subtasks">4.4 Small-model routing
+for cheap subtasks</h3>
+<p>Route trivial subtasks (intent classification, file-relevance
+ranking, commit-message drafting, ambiguity detection) to a fast small
+model (Haiku-class / local Ollama) and reserve the frontier model for
+actual code generation. Cascade architecture: cheap model first,
+escalate only on low confidence. - Sources: <a
+href="https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance"
+class="uri">https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance</a>,
+<a
+href="https://introl.com/blog/speculative-decoding-llm-inference-speedup-guide-2025"
+class="uri">https://introl.com/blog/speculative-decoding-llm-inference-speedup-guide-2025</a>
+- <strong>Impact:</strong> High on multi-step agent loops.
+<strong>Difficulty:</strong> Medium (routing policy + per-task model
+config — must source models from LLMsVerifier per CONST-036).</p>
+<h3 id="speculative-parallel-requests">4.5 Speculative &amp; parallel
+requests</h3>
+<p>Issue independent sub-requests in parallel (e.g., fetch context for N
+files concurrently); overlap action execution with ongoing reasoning.
+Provider-side speculative decoding gives 2–3× inference speedup where
+the provider/runtime supports it (relevant for self-hosted
+Ollama/Llama.cpp). - Sources: <a
+href="https://introl.com/blog/speculative-decoding-llm-inference-speedup-guide-2025"
+class="uri">https://introl.com/blog/speculative-decoding-llm-inference-speedup-guide-2025</a>,
+<a href="https://arxiv.org/html/2511.20048v1"
+class="uri">https://arxiv.org/html/2511.20048v1</a> -
+<strong>Impact:</strong> Medium-High. <strong>Difficulty:</strong>
+Medium-High.</p>
+<h3 id="request-coalescing-batching">4.6 Request coalescing /
+batching</h3>
+<p>De-duplicate identical in-flight requests (singleflight); batch
+independent embedding / classification calls into one provider request.
+- Source: <a
+href="https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance"
+class="uri">https://www.tribe.ai/applied-ai/reducing-latency-and-cost-at-scale-llm-performance</a>
+- <strong>Impact:</strong> Medium. <strong>Difficulty:</strong>
+Low-Medium (<code>golang.org/x/sync/singleflight</code>).</p>
+<h3 id="connection-pooling-http2-keepalive">4.7 Connection pooling /
+HTTP/2 keepalive</h3>
+<p>Go’s default <code>http.Transport</code> allows only <strong>2 idle
+connections per host</strong> — fatal for a provider hammered with
+concurrent calls. Set <code>MaxIdleConns</code> and
+<code>MaxIdleConnsPerHost</code> to ~100, enable TCP
+<code>KeepAlive: 30s</code>, reuse one tuned <code>*http.Client</code>
+(never per-request clients), and use HTTP/2
+(<code>Transport.Protocols</code>) so many requests multiplex one
+connection. This alone eliminates per-request TLS-handshake latency. -
+Sources: <a
+href="https://www.loginradius.com/blog/engineering/tune-the-go-http-client-for-high-performance"
+class="uri">https://www.loginradius.com/blog/engineering/tune-the-go-http-client-for-high-performance</a>,
+<a
+href="https://davidbacisin.com/writing/golang-http-connection-pools-1"
+class="uri">https://davidbacisin.com/writing/golang-http-connection-pools-1</a>,
+<a href="https://goperf.dev/02-networking/efficient-net-use/"
+class="uri">https://goperf.dev/02-networking/efficient-net-use/</a> -
+<strong>Impact:</strong> High (removes handshake latency from every
+call). <strong>Difficulty:</strong> Low. - Submodule-catalogue check: a
+tuned HTTP-client factory is reusable across every provider — check the
+catalogue / <code>helix_code/internal/providers</code> for an existing
+shared transport.</p>
+<hr />
+<h2 id="area-5-codebase-context-speed">Area 5 — Codebase-Context
+Speed</h2>
+<h3 id="incremental-tree-sitter-parsing">5.1 Incremental tree-sitter
+parsing</h3>
+<p>Tree-sitter re-parses only edited regions, sharing unchanged subtrees
+with the prior tree — parse-on-keystroke fast. Reported:
+autocomplete/error-check 60% faster (500ms → 200ms); a static analyzer
+did 1M LOC in &lt;10s vs 22s with the prior parser. - Sources: <a
+href="https://github.com/tree-sitter/tree-sitter"
+class="uri">https://github.com/tree-sitter/tree-sitter</a>, <a
+href="https://dasroot.net/posts/2026/02/incremental-parsing-tree-sitter-code-analysis/"
+class="uri">https://dasroot.net/posts/2026/02/incremental-parsing-tree-sitter-code-analysis/</a>,
+<a href="https://en.wikipedia.org/wiki/Tree-sitter_(parser_generator)"
+class="uri">https://en.wikipedia.org/wiki/Tree-sitter_(parser_generator)</a>
+- <strong>Impact:</strong> High on per-edit context refresh.
+<strong>Difficulty:</strong> Medium (HelixCode already vendors
+<code>smacker/go-tree-sitter</code> — wire the <em>incremental</em> edit
+API, don’t full-reparse).</p>
+<h3 id="content-addressed-caching">5.2 Content-addressed caching</h3>
+<p>Key context/index entries by a hash of source-file content. When a
+file changes its hash changes and dependent entries miss naturally — no
+explicit invalidation sweep. This is the correct invalidation primitive
+for repo-map, tags, and embedding caches. - Sources: <a
+href="https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag"
+class="uri">https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag</a>,
+<a
+href="https://sparkco.ai/blog/deep-dive-into-cache-invalidation-agents-in-2025"
+class="uri">https://sparkco.ai/blog/deep-dive-into-cache-invalidation-agents-in-2025</a>
+- <strong>Impact:</strong> High (correctness + speed).
+<strong>Difficulty:</strong> Low-Medium.</p>
+<h3 id="incremental-indexing-with-lineage-tracking">5.3 Incremental
+indexing with lineage tracking</h3>
+<p>On change recompute only the changed file’s embedding/tags; on delete
+drop it; on unchanged reuse. Benchmark: 12k-file corpus full reindex 22
+min → incremental 45 s. - Source: <a
+href="https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag"
+class="uri">https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag</a>
+- <strong>Impact:</strong> Very High on warm context builds.
+<strong>Difficulty:</strong> Medium.</p>
+<h3 id="file-watch-driven-invalidation-fsnotify">5.4 File-watch-driven
+invalidation (<code>fsnotify</code>)</h3>
+<p>Drive cache invalidation from filesystem events instead of
+polling/full rescan. HelixCode already depends on <code>fsnotify</code>
+— connect it to the content-addressed cache layer. - Sources: <a
+href="https://sparkco.ai/blog/deep-dive-into-cache-invalidation-agents-in-2025"
+class="uri">https://sparkco.ai/blog/deep-dive-into-cache-invalidation-agents-in-2025</a>,
+<a
+href="https://foojay.io/today/distributed-cache-invalidation-patterns/"
+class="uri">https://foojay.io/today/distributed-cache-invalidation-patterns/</a>
+- <strong>Impact:</strong> Medium-High. <strong>Difficulty:</strong>
+Low-Medium.</p>
+<h3 id="repo-map-compression-graph-ranked-budgeting">5.5 Repo-map
+compression / graph-ranked budgeting</h3>
+<p>Aider’s model: build a file-dependency graph, rank with a
+PageRank-style algorithm, emit only the top-ranked
+definitions/signatures that fit the token budget; cache parsed tags
+(<code>TAGS_CACHE</code>), rendered snippets (<code>tree_cache</code>),
+and full maps (<code>map_cache</code>). This keeps the context dense and
+cheap to send. - Sources: <a href="https://aider.chat/docs/repomap.html"
+class="uri">https://aider.chat/docs/repomap.html</a>, <a
+href="https://deepwiki.com/Aider-AI/aider/4.1-repository-mapping-system"
+class="uri">https://deepwiki.com/Aider-AI/aider/4.1-repository-mapping-system</a>
+- <strong>Impact:</strong> High (smaller prompts → faster TTFT +
+cheaper). <strong>Difficulty:</strong> Medium-High. -
+Submodule-catalogue check: HelixCode has
+<code>helix_code/internal/repomap</code>; verify whether an owned
+submodule already implements graph-ranked repo mapping before
+extending.</p>
+<h3 id="embedding-caches">5.6 Embedding caches</h3>
+<p>Cache embeddings keyed by content hash (content-addressed); never
+re-embed unchanged chunks. Combine with the multi-tier cache (Area 6). -
+Source: <a
+href="https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag"
+class="uri">https://tianpan.co/blog/2026-04-20-cache-invalidation-ai-semantic-rag</a>
+- <strong>Impact:</strong> High (embedding API calls are slow + costed).
+<strong>Difficulty:</strong> Low-Medium.</p>
+<hr />
+<h2 id="area-6-caching-architecture">Area 6 — Caching Architecture</h2>
+<h3 id="multi-tier-cache-memory-disk-redis">6.1 Multi-tier cache (memory
+→ disk → Redis)</h3>
+<p>L1 in-process (~0.1 ms), L2 on-disk (persists across process restarts
+— critical for a CLI), L3 Redis (~1–5 ms, shared across
+instances/workers). Read L1→L2→L3, populate upward on hit. - Sources: <a
+href="https://github.com/IBM/mcp-context-forge/issues/289"
+class="uri">https://github.com/IBM/mcp-context-forge/issues/289</a>, <a
+href="https://medium.com/@vinay.georgiatech/building-a-distributed-cache-system-a-deep-dive-into-caching-strategies-and-invalidation-patterns-44fb0c7a5376"
+class="uri">https://medium.com/@vinay.georgiatech/building-a-distributed-cache-system-a-deep-dive-into-caching-strategies-and-invalidation-patterns-44fb0c7a5376</a>
+- <strong>Impact:</strong> High. <strong>Difficulty:</strong> Medium. -
+Submodule-catalogue check: a multi-tier cache is a prime reusable
+component — check the owned-submodule catalogue and
+<code>helix_code/internal/redis</code> before building bespoke.</p>
+<h3 id="cache-key-design">6.2 Cache-key design</h3>
+<p>Namespaced, versioned keys
+(<code>helix:repomap:v3:&lt;contenthash&gt;</code>); content-hash in the
+key for auto-invalidation; a version segment to invalidate a whole
+namespace by bumping the version. - Source: <a
+href="https://leapcell.io/blog/optimizing-database-performance-with-redis-cache-key-design-and-invalidation-strategies"
+class="uri">https://leapcell.io/blog/optimizing-database-performance-with-redis-cache-key-design-and-invalidation-strategies</a>
+- <strong>Impact:</strong> Medium (enabling — prevents stale-cache
+bugs). <strong>Difficulty:</strong> Low.</p>
+<h3 id="invalidation-strategy">6.3 Invalidation strategy</h3>
+<p>Content-addressed keys (preferred — see 5.2), event-based pub/sub for
+distributed L3, Redis tag-sets to invalidate related entries together,
+write-through for must-be-fresh data. - Sources: <a
+href="https://foojay.io/today/distributed-cache-invalidation-patterns/"
+class="uri">https://foojay.io/today/distributed-cache-invalidation-patterns/</a>,
+<a href="https://redis.io/blog/guide-to-cache-optimization-strategies/"
+class="uri">https://redis.io/blog/guide-to-cache-optimization-strategies/</a>
+- <strong>Impact:</strong> Medium-High (correctness).
+<strong>Difficulty:</strong> Medium.</p>
+<h3 id="ttls-eviction">6.4 TTLs &amp; eviction</h3>
+<p>TTLs sized to volatility (provider model lists short; parsed AST tags
+long); Redis LRU eviction
+(<code>allkeys-lru</code>/<code>volatile-lru</code>); align with
+CONST-038’s ≤60s model-status freshness. - Source: <a
+href="https://redis.io/blog/guide-to-cache-optimization-strategies/"
+class="uri">https://redis.io/blog/guide-to-cache-optimization-strategies/</a>
+- <strong>Impact:</strong> Medium. <strong>Difficulty:</strong> Low.</p>
+<hr />
+<h2 id="area-7-io-speed">Area 7 — I/O Speed</h2>
+<h3 id="buffered-io">7.1 Buffered I/O</h3>
+<p>Wrap file/network reads/writes in
+<code>bufio.Reader</code>/<code>bufio.Writer</code> to amortize syscalls
+— each syscall is ~1–5 µs; hundreds of thousands of them dominate before
+any real disk work. - Source: <a
+href="https://modulovalue.com/blog/syscall-overhead-tar-gz-io-performance/"
+class="uri">https://modulovalue.com/blog/syscall-overhead-tar-gz-io-performance/</a>
+- <strong>Impact:</strong> Medium-High on file-walk-heavy paths.
+<strong>Difficulty:</strong> Low.</p>
+<h3 id="parallel-file-walking">7.2 Parallel file walking</h3>
+<p>Walk large repo trees with a bounded worker pool
+(<code>errgroup.SetLimit</code>) instead of a single
+<code>filepath.WalkDir</code> goroutine — directory stats and file reads
+parallelize well. - Sources: <a
+href="https://goperf.dev/02-networking/efficient-net-use/"
+class="uri">https://goperf.dev/02-networking/efficient-net-use/</a>, <a
+href="https://www.stanza.dev/courses/go-concurrency/patterns/go-concurrency-worker-pool"
+class="uri">https://www.stanza.dev/courses/go-concurrency/patterns/go-concurrency-worker-pool</a>
+- <strong>Impact:</strong> Medium-High on cold index.
+<strong>Difficulty:</strong> Low-Medium.</p>
+<h3 id="mmap-for-large-read-mostly-files">7.3 <code>mmap</code> for
+large read-mostly files</h3>
+<p>Memory-map large files (large source files, index shards) for
+zero-copy reads — kernel page cache instead of explicit read syscalls +
+buffers. - Source: <a
+href="https://medium.com/@alpesh.ccet/unleashing-i-o-performance-with-io-uring-a-deep-dive-54924e64791f"
+class="uri">https://medium.com/@alpesh.ccet/unleashing-i-o-performance-with-io-uring-a-deep-dive-54924e64791f</a>
+- <strong>Impact:</strong> Medium. <strong>Difficulty:</strong> Medium
+(lifecycle / unmap correctness; OS-specific).</p>
+<h3 id="io_uring-for-batched-async-io-linux">7.4 <code>io_uring</code>
+for batched async I/O (Linux)</h3>
+<p><code>io_uring</code> batches many I/O submissions into one syscall
+and supports zero-copy fixed buffers — amortizes syscall cost across
+many I/Os. Highest payoff for the index/embedding pipeline doing
+thousands of small reads. <strong>Linux-only</strong>; gate behind a
+build tag with a portable fallback. - Sources: <a
+href="https://developers.mattermost.com/blog/hands-on-iouring-go/"
+class="uri">https://developers.mattermost.com/blog/hands-on-iouring-go/</a>,
+<a href="https://iafisher.com/notes/2025/10/epoll-io-uring"
+class="uri">https://iafisher.com/notes/2025/10/epoll-io-uring</a>, <a
+href="https://arxiv.org/pdf/2512.04859"
+class="uri">https://arxiv.org/pdf/2512.04859</a> -
+<strong>Impact:</strong> High on the I/O-bound indexing path (Linux).
+<strong>Difficulty:</strong> High — only worth it if profiling proves
+syscalls dominate.</p>
+<h3 id="minimize-syscalls-generally">7.5 Minimize syscalls
+generally</h3>
+<p>Batch <code>stat</code>/<code>open</code>/<code>read</code>; read
+whole small files in one <code>os.ReadFile</code>; avoid per-line
+syscalls. Profile syscall count before optimizing. - Source: <a
+href="https://modulovalue.com/blog/syscall-overhead-tar-gz-io-performance/"
+class="uri">https://modulovalue.com/blog/syscall-overhead-tar-gz-io-performance/</a>
+- <strong>Impact:</strong> Medium. <strong>Difficulty:</strong>
+Low-Medium.</p>
+<hr />
+<h2
+id="area-8-build-test-speed-developer-experience-not-user-runtime">Area
+8 — Build / Test Speed (developer-experience, not user runtime)</h2>
+<h3 id="go-build-cache">8.1 Go build cache</h3>
+<p>The build cache (<code>$GOCACHE</code>) makes unchanged packages
+near-free to rebuild — keep it warm in CI/dev containers; never wipe it
+between builds; PGO’s first build rebuilds all packages but subsequent
+builds are cached. - Sources: <a
+href="https://medium.com/@AlexanderObregon/go-build-cache-mechanics-6ada202c0502"
+class="uri">https://medium.com/@AlexanderObregon/go-build-cache-mechanics-6ada202c0502</a>,
+<a
+href="https://www.codingexplorations.com/blog/mastering-gos-build-system-efficiency-through-caching-and-advanced-commands"
+class="uri">https://www.codingexplorations.com/blog/mastering-gos-build-system-efficiency-through-caching-and-advanced-commands</a>
+- <strong>Impact:</strong> High on iteration speed.
+<strong>Difficulty:</strong> Low.</p>
+<h3 id="p-flag-build-parallelism">8.2 <code>-p</code> flag &amp; build
+parallelism</h3>
+<p><code>-p</code> controls how many packages/test binaries build/run in
+parallel (default = NumCPU). Tune <code>GOMAXPROCS</code> and
+<code>-p</code> to the host; in CPU-limited containers set
+<code>GOMAXPROCS</code> explicitly. - Sources: <a
+href="https://dev.to/emil_valeev/the-ultimate-guide-to-parallel-testing-in-go-p-parallel-and-tparallel-demystified-1c1o"
+class="uri">https://dev.to/emil_valeev/the-ultimate-guide-to-parallel-testing-in-go-p-parallel-and-tparallel-demystified-1c1o</a>,
+<a href="https://blog.howardjohn.info/posts/go-build-times/"
+class="uri">https://blog.howardjohn.info/posts/go-build-times/</a> -
+<strong>Impact:</strong> Medium-High. <strong>Difficulty:</strong>
+Low.</p>
+<h3 id="test-parallelism-t.parallel--parallel">8.3 Test parallelism
+(<code>t.Parallel()</code> + <code>-parallel</code>)</h3>
+<p><code>-p</code> = parallel test <em>packages</em>;
+<code>-parallel</code> = parallel test <em>functions within a
+package</em> (requires <code>t.Parallel()</code> in each test). Adding
+cores helps only if tests actually opt in. Note <code>-count=1</code>
+(already in CLAUDE.md §3.4) defeats the test cache deliberately for
+honest runs. - Sources: <a
+href="https://threedots.tech/post/go-test-parallelism/"
+class="uri">https://threedots.tech/post/go-test-parallelism/</a>, <a
+href="https://bryce.is/writing/code/go-test-and-parallelism"
+class="uri">https://bryce.is/writing/code/go-test-and-parallelism</a> -
+<strong>Impact:</strong> Medium-High on suite wall-time.
+<strong>Difficulty:</strong> Low-Medium (audit which tests are safely
+parallelizable — integration tests sharing infra may not be).</p>
+<h3 id="compile-time-reduction">8.4 Compile-time reduction</h3>
+<p>Trim oversized packages, reduce deep dependency graphs, and reduce
+code-generation bloat; analyze with <code>go build -debug-trace</code> /
+build-time tooling. - Sources: <a
+href="https://jsschools.com/golang/go-compilation-optimization-master-techniques-to-/"
+class="uri">https://jsschools.com/golang/go-compilation-optimization-master-techniques-to-/</a>,
+<a href="https://blog.howardjohn.info/posts/go-build-times/"
+class="uri">https://blog.howardjohn.info/posts/go-build-times/</a> -
+<strong>Impact:</strong> Medium. <strong>Difficulty:</strong>
+Medium-High.</p>
+<hr />
+<h2
+id="consolidated-ranking-techniques-by-impact-to-effort">Consolidated
+Ranking — Techniques by Impact-to-Effort</h2>
+<p>Tiers: <strong>S</strong> = do first (high impact, low effort),
+<strong>A</strong> = high value, <strong>B</strong> = solid,
+<strong>C</strong> = situational / evidence-gated.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Technique</th>
+<th>Area</th>
+<th>Impact</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S</td>
+<td>Anthropic-style prompt caching (deterministic JSON
+serialization)</td>
+<td>4.1</td>
+<td>Very High</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Cache pre-warming at session start</td>
+<td>4.2</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>S</td>
+<td>HTTP/2 + connection-pool tuning
+(<code>MaxIdleConnsPerHost</code>≈100)</td>
+<td>4.7</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Streaming-first on every surface (verify, don’t regress)</td>
+<td>4.3</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Content-addressed caching for repo-map / tags / embeddings</td>
+<td>5.2</td>
+<td>High</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Lazy initialization of slow dependencies</td>
+<td>3.1</td>
+<td>High (cold-start)</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Go build cache kept warm + <code>-p</code>/<code>GOMAXPROCS</code>
+tuning</td>
+<td>8.1/8.2</td>
+<td>High (dev-exp)</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Incremental indexing with lineage tracking</td>
+<td>5.3</td>
+<td>Very High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Incremental tree-sitter parsing (use the edit API)</td>
+<td>5.1</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>A</td>
+<td><code>errgroup.SetLimit</code> bounded parallelism (I/O fan-out,
+file walk)</td>
+<td>2.1/7.2</td>
+<td>Med-High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Small-model routing for cheap subtasks (cascade)</td>
+<td>4.4</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>A</td>
+<td><code>sync.Pool</code> on hot allocation paths
+(profile-confirmed)</td>
+<td>1.4</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Multi-tier cache (memory→disk→Redis)</td>
+<td>6.1</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>A</td>
+<td>PGO with a production <code>default.pgo</code></td>
+<td>1.1</td>
+<td>Medium (2–14%)</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>A</td>
+<td>File-watch-driven invalidation (<code>fsnotify</code> → cache)</td>
+<td>5.4</td>
+<td>Med-High</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Buffered I/O on file-walk paths</td>
+<td>7.1</td>
+<td>Med-High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Repo-map graph-ranked compression (Aider model)</td>
+<td>5.5</td>
+<td>High</td>
+<td>Med-High</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Request coalescing / <code>singleflight</code> + embedding
+batching</td>
+<td>4.6</td>
+<td>Medium</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Escape-analysis-driven allocation reduction</td>
+<td>1.3</td>
+<td>Med-High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Mutex-contention reduction (sharding / atomics / RWMutex)</td>
+<td>2.3</td>
+<td>High if locked</td>
+<td>Med-High</td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>strings.Builder</code> / pre-sized buffers</td>
+<td>1.5</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Non-blocking eager init (<code>inittrace</code>)</td>
+<td>3.2</td>
+<td>Med-High</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Test parallelism audit (<code>t.Parallel()</code> +
+<code>-parallel</code>)</td>
+<td>8.3</td>
+<td>Med-High (dev-exp)</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>go:embed</code> assets + fast config parse</td>
+<td>3.3/3.4</td>
+<td>Low-Med</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Cache-key design + TTL/eviction policy</td>
+<td>6.2/6.4</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>C</td>
+<td><code>GOGC</code>/<code>GOMEMLIMIT</code> tuning (only if GC-bound
+by profile)</td>
+<td>1.7</td>
+<td>Variable</td>
+<td>Low (risky)</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Speculative / parallel sub-requests</td>
+<td>4.5</td>
+<td>Med-High</td>
+<td>Med-High</td>
+</tr>
+<tr>
+<td>C</td>
+<td><code>mmap</code> for large read-mostly files</td>
+<td>7.3</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>C</td>
+<td><code>io_uring</code> batched async I/O (Linux, profile-gated)</td>
+<td>7.4</td>
+<td>High (I/O-bound)</td>
+<td>High</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Struct layout / interface-boxing avoidance</td>
+<td>1.6</td>
+<td>Low-Med</td>
+<td>Low-Med</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Compile-time reduction (dependency-graph trimming)</td>
+<td>8.4</td>
+<td>Medium</td>
+<td>Med-High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommended-sequencing">Recommended sequencing</h3>
+<ol type="1">
+<li><strong>Wave 1 (S-tier):</strong> prompt caching + pre-warming +
+HTTP/2 pooling + streaming verification
+<ul>
+<li>content-addressed caching + lazy init. Low risk, ~2–3×
+perceived-latency win — gets most of the way to the 3–5× target.</li>
+</ul></li>
+<li><strong>Wave 2 (A-tier):</strong> incremental indexing + incremental
+tree-sitter + bounded parallelism + small-model routing + multi-tier
+cache + PGO. Adds ~1.5–2× on context phases.</li>
+<li><strong>Wave 3 (B/C-tier):</strong> profile-driven
+allocation/GC/contention work + repo-map compression
+<ul>
+<li>I/O-layer tuning — only where pprof evidence proves the bottleneck
+(per §11.4.6).</li>
+</ul></li>
+</ol>
+<p>Every wave must be guarded by the existing test/Challenge floor
+(CONST-048 four-layer coverage) so “ultra-fast” never trades away a
+working feature — speedups land with captured before/after runtime
+evidence per CONST-035 / Article XI §11.9.</p>
+</body>
+</html>

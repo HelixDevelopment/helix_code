@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>04-phased-implementation-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">04-phased-implementation-plan</h1>
+</header>
+<!--
+Document-Metadata (constitution §11.4.44)
+Revision: 1
+Last modified: 2026-05-20T00:00:00Z
+Authority: HelixCode programme — research deliverable R4 (Phased implementation plan).
+           Cascaded from CONSTITUTION.md / constitution submodule. Turns the unified
+           opportunity list in 00-speed-programme-overview.md §5 into phased,
+           subagent-sized tasks. Operator speed mandate 2026-05-20.
+Scope:     Planning only. NO production code changed by this file — each task below
+           is executed as its own subagent-driven round with the test floor + anti-
+           bluff proofs specified per task. Implementation is NOT done here.
+-->
+<h1 id="r4-helixcode-speed-programme-phased-implementation-plan">R4 —
+HelixCode Speed Programme: Phased Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td><strong>Last modified</strong></td>
+<td>2026-05-20T00:00:00Z</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>active</td>
+</tr>
+<tr>
+<td><strong>Authority</strong></td>
+<td>docs/research/speed/ — operator speed mandate 2026-05-20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-scope-conventions--how-to-read-a-task">1. Scope,
+conventions &amp; how to read a task</a></li>
+<li><a href="#2-phase-dependency-graph">2. Phase-dependency
+graph</a></li>
+<li><a href="#3-phase-0--measurement-baseline">3. Phase 0 — Measurement
+baseline</a></li>
+<li><a href="#4-phase-1--low-risk-high-impact-llm--startup-wins">4.
+Phase 1 — Low-risk high-impact LLM &amp; startup wins</a></li>
+<li><a href="#5-phase-2--context-build-speed">5. Phase 2 — Context-build
+speed</a></li>
+<li><a href="#6-phase-3--interactive--agent-loop-levers">6. Phase 3 —
+Interactive &amp; agent-loop levers</a></li>
+<li><a href="#7-phase-4--profile-gated-tuning--caching-architecture">7.
+Phase 4 — Profile-gated tuning &amp; caching architecture</a></li>
+<li><a href="#8-phase-5--developer-experience--submodule-cascade">8.
+Phase 5 — Developer-experience &amp; submodule cascade</a></li>
+<li><a
+href="#9-1474-submodule-catalogue-check-mandatory-before-any-new-component">9.
+§11.4.74 submodule-catalogue check (mandatory before any new
+component)</a></li>
+<li><a href="#10-per-task-test-floor--anti-bluff-template">10. Per-task
+test-floor &amp; anti-bluff template</a></li>
+<li><a href="#11-task-summary-table">11. Task summary table</a></li>
+</ul>
+<h2 id="scope-conventions-how-to-read-a-task">1. Scope, conventions
+&amp; how to read a task</h2>
+<p>This plan executes the unified opportunity list O1–O21 from <a
+href="./00-speed-programme-overview.md"><code>00-speed-programme-overview.md</code></a>
+§5. It divides the work into <strong>6 phases (Phase 0 through Phase
+5)</strong> containing <strong>31 tasks total</strong>.</p>
+<p><strong>One task ≈ one subagent-sized work unit (≈1 PWU per
+constitution §11.4.58)</strong> — small enough that a single
+subagent-driven round can implement, test, prove and commit it. Tasks
+are ordered within a phase by dependency then impact-to-effort.</p>
+<p>Each task is specified as:</p>
+<ul>
+<li><strong>ID</strong> — <code>Pn-Tnn</code> (phase, task).</li>
+<li><strong>Title</strong>.</li>
+<li><strong>Target files</strong> — the real <code>helix_code/...</code>
+paths to change (from R1 evidence).</li>
+<li><strong>Implements</strong> — cross-reference to R1 bottleneck / R2
+technique / R3 technique / R4 opportunity (O-number).</li>
+<li><strong>Expected speedup</strong> — the claim the benchmark must
+prove.</li>
+<li><strong>Risk</strong> — Low / Med / High (regression risk to working
+features).</li>
+<li><strong>Test types</strong> — per CONST-050: unit + integration +
+benchmark + Challenge + HelixQA. (Mocks permitted ONLY in unit tests —
+CONST-050(A).)</li>
+<li><strong>Anti-bluff proof</strong> — the captured runtime evidence
+each test must produce (CONST-035 / Article XI §11.9). “Faster” without
+pasted before/after numbers is a bluff (Rule 9).</li>
+</ul>
+<p><strong>Path note (R1 §2):</strong> <code>helix_code/</code> IS the
+inner Go module (<code>module dev.helix.code</code>,
+<code>go 1.26</code>). The CLAUDE.md text describing a deeper
+<code>helix_code/helix_code/</code> path is stale — paths below use the
+confirmed layout.</p>
+<p><strong>Hard constraint:</strong> no working feature may regress (R4
+§6). Every task carries the no-regression proof — the functional tests
+that passed before still pass after.</p>
+<h2 id="phase-dependency-graph">2. Phase-dependency graph</h2>
+<pre class="mermaid"><code>graph TD
+    P0[&quot;Phase 0&lt;br/&gt;Measurement baseline&lt;br/&gt;(pprof + competitor benchmarks)&quot;]
+    P1[&quot;Phase 1&lt;br/&gt;LLM &amp; startup wins&lt;br/&gt;O1-O5 — low risk, high impact&quot;]
+    P2[&quot;Phase 2&lt;br/&gt;Context-build speed&lt;br/&gt;O6-O9, O13, O14&quot;]
+    P3[&quot;Phase 3&lt;br/&gt;Interactive &amp; agent-loop&lt;br/&gt;O10-O12, O18&quot;]
+    P4[&quot;Phase 4&lt;br/&gt;Profile-gated tuning&lt;br/&gt;O15, O17, O19, O20&quot;]
+    P5[&quot;Phase 5&lt;br/&gt;Dev-experience &amp; submodule cascade&lt;br/&gt;O16, O21 + CONST-047/051&quot;]
+
+    P0 --&gt;|baseline gates everything| P1
+    P0 --&gt; P2
+    P0 --&gt; P3
+    P0 --&gt;|pprof profiles feed PGO| P4
+    P1 --&gt; P2
+    P1 --&gt;|streaming + routing prereq| P3
+    P2 --&gt;|repo-map cache feeds| P3
+    P2 --&gt; P4
+    P3 --&gt; P4
+    P4 --&gt; P5
+    P1 -.-&gt;|each landed phase cascaded| P5
+    P2 -.-&gt; P5
+    P3 -.-&gt; P5
+
+    classDef gate fill:#fde,stroke:#a04
+    classDef safe fill:#dfe,stroke:#0a4
+    class P0 gate
+    class P1,P2 safe</code></pre>
+<p><strong>Critical path:</strong> Phase 0 → Phase 1 → Phase 2 → Phase 4
+→ Phase 5. Phase 0 is a hard gate — no speedup claim is falsifiable
+before the baseline exists (R4 §7). Phase 3 depends on Phase 1
+(streaming + provider plumbing) and Phase 2 (warm repo-map cache feeds
+context for the agent loop). Phase 5 cascades each landed phase’s work
+into owned submodules and may begin its per-submodule cascade as soon as
+the corresponding meta-repo phase is green (dotted edges).</p>
+<h2 id="phase-0-measurement-baseline">3. Phase 0 — Measurement
+baseline</h2>
+<p><strong>Goal:</strong> capture the before-state. Nothing else in the
+programme can be validated until this phase produces committed baseline
+artefacts. No production code changes in this phase — it builds the
+measurement harness and captures numbers.</p>
+<h3 id="p0-t01-pprof-harness-for-the-four-hot-paths">P0-T01 — pprof
+harness for the four hot paths</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/cmd/cli/main.go</code> (add opt-in <code>--pprof</code>
+flag wiring), <code>helix_code/internal/server/</code> (verify
+<code>net/http/pprof</code> mount), new
+<code>helix_code/tests/performance/pprof_harness_test.go</code>.</li>
+<li><strong>Implements:</strong> R3 §1.2; R1 §6 items 1–4; R4 §7.</li>
+<li><strong>Expected speedup:</strong> none (enabling task).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (harness wiring); integration
+(pprof endpoint serves a profile); benchmark (the harness runs the 4
+scenarios); Challenge (capture-a- profile workflow); HelixQA (perf bank
+registers the harness).</li>
+<li><strong>Anti-bluff proof:</strong> committed <code>.pprof</code>
+files for S1–S4 under <code>docs/research/speed/baseline/</code>; pasted
+<code>go tool pprof -top</code> output.</li>
+</ul>
+<h3
+id="p0-t02-benchmark-suite-for-startup-llm-dispatch-repomap-search">P0-T02
+— Benchmark suite for startup / llm-dispatch / repomap / search</h3>
+<ul>
+<li><strong>Target files:</strong> new <code>*_test.go</code> benchmarks
+in <code>helix_code/cmd/cli/</code>,
+<code>helix_code/internal/llm/</code>,
+<code>helix_code/internal/repomap/</code>,
+<code>helix_code/internal/tools/filesystem/</code>.</li>
+<li><strong>Implements:</strong> R1 §6 item 3 (these hot paths currently
+lack benchmarks); R3 §8.3.</li>
+<li><strong>Expected speedup:</strong> none (enabling).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> benchmark (the suite itself); unit
+(benchmark helpers); HelixQA (benchmark bank registration).</li>
+<li><strong>Anti-bluff proof:</strong> pasted
+<code>go test -bench -benchmem</code> output for each new benchmark,
+committed as <code>baseline/benchmarks-2026-05-20.txt</code>.</li>
+</ul>
+<h3
+id="p0-t03-competitor-wall-clock-baseline-on-identical-hardware">P0-T03
+— Competitor wall-clock baseline on identical hardware</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>scripts/testing/competitor_speed_baseline.sh</code>; results under
+<code>docs/research/speed/baseline/</code>.</li>
+<li><strong>Implements:</strong> R1 §6 item 6; R2 §2 (Go-rewrite 68×
+data point).</li>
+<li><strong>Expected speedup:</strong> none (enabling — sets the number
+to beat).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> integration (script runs each agent for
+S1–S4); Challenge (reproducible competitor-benchmark run); HelixQA
+(bank).</li>
+<li><strong>Anti-bluff proof:</strong> committed table of measured
+wall-clock for Claude Code / Gemini CLI / Aider / Cline / Crush across
+S1–S4; raw <code>/usr/bin/time</code> output.</li>
+</ul>
+<h3 id="p0-t04-scenario-fixtures-the-canonical-scenario-runner">P0-T04 —
+Scenario fixtures + the canonical-scenario runner</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>helix_code/tests/performance/scenarios/</code> (large-repo fixture
+generator), <code>scripts/testing/run_speed_scenarios.sh</code>.</li>
+<li><strong>Implements:</strong> R4 §7 (S1–S4 canonical scenarios).</li>
+<li><strong>Expected speedup:</strong> none (enabling).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> integration (runner produces stable
+numbers across 3 runs); Challenge (end-to-end scenario run); HelixQA
+(bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted 3-run variance for each
+scenario proving the harness is stable enough to detect a 1.3×+
+change.</li>
+</ul>
+<h2 id="phase-1-low-risk-high-impact-llm-startup-wins">4. Phase 1 —
+Low-risk high-impact LLM &amp; startup wins</h2>
+<p><strong>Goal:</strong> the S-tier wins (R3 sequencing Wave 1) — ~2–3×
+perceived-latency from prompt caching + HTTP tuning + streaming + lazy
+startup. Low regression risk.</p>
+<h3 id="p1-t01-shared-tuned-http2-transport-across-all-providers">P1-T01
+— Shared tuned HTTP/2 transport across all providers</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>helix_code/internal/providers/httpclient.go</code> (shared
+factory); edit
+<code>helix_code/internal/llm/{openai,deepseek,gemini,azure,copilot,cerebras,koboldai,local}_provider.go</code>
++ <code>local_llm_manager.go</code>.</li>
+<li><strong>Implements:</strong> R1 B03; R2 #9; R3 §4.7; O2.</li>
+<li><strong>Expected speedup:</strong> removes per-call TLS handshake on
+bursts; high on concurrent/rapid-fire requests.</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (factory returns tuned transport —
+<code>MaxIdleConnsPerHost≥32</code>, <code>ForceAttemptHTTP2</code>);
+integration (real provider call reuses a connection); benchmark (burst
+of N calls, connection-reuse count); Challenge (real LLM generate over a
+warm pool); HelixQA (provider bank).</li>
+<li><strong>Anti-bluff proof:</strong> captured
+<code>netstat</code>/transport idle-conn count before/after proving
+reuse; pasted benchmark delta.</li>
+</ul>
+<h3 id="p1-t02-lazyasync-ollama-discovery-out-of-the-constructor">P1-T02
+— Lazy/async Ollama discovery out of the constructor</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/llm/ollama_provider.go</code> (remove
+<code>discoverModels()</code> from <code>NewOllamaProvider</code>, line
+~109), <code>helix_code/cmd/cli/main.go</code> (~234).</li>
+<li><strong>Implements:</strong> R1 B02; R2 #6; R3 §3.1; O5.</li>
+<li><strong>Expected speedup:</strong> removes one synchronous HTTP
+round-trip from every CLI start.</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (constructor does no network I/O —
+mock asserts zero calls); integration (discovery still works on first
+<code>GetModels</code>); benchmark (<code>NewCLI()</code> wall-clock
+before/after); Challenge (<code>--list-models</code> still returns real
+models); HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted <code>NewCLI()</code>
+benchmark delta; Challenge output showing real Ollama models still
+listed (no regression).</li>
+</ul>
+<h3 id="p1-t03-lazy-cli-startup-sync.once-getters-on-cli">P1-T03 — Lazy
+CLI startup: sync.Once getters on <code>*CLI</code></h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/cmd/cli/main.go</code> <code>Run()</code> (lines
+~459–680) — convert ~20 eager subsystems to
+<code>sync.Once</code>-guarded lazy getters.</li>
+<li><strong>Implements:</strong> R1 B01, B13, B14, B18; R2 #6; R3 §3.1,
+§3.2; O4.</li>
+<li><strong>Expected speedup:</strong> high cold-start — short commands
+skip worktree git shell-out, hooks YAML, LSP <code>LookPath</code>
+sweep, MCP spawn.</li>
+<li><strong>Risk:</strong> Med (touches the bootstrap of every command —
+needs the full no-regression suite).</li>
+<li><strong>Test types:</strong> unit (each getter constructs once,
+lazily); integration (every command path still wires its subsystems on
+demand); benchmark (S1 cold start); Challenge (each top-level command
+still works end-to-end); HelixQA (CLI bank, full command matrix).</li>
+<li><strong>Anti-bluff proof:</strong> pasted S1 wall-clock
+before/after; the full pre-change CLI command test matrix passing
+post-change (no-regression proof).</li>
+</ul>
+<h3
+id="p1-t04-prompt-cache-stable-prefix-deterministic-json-serialization">P1-T04
+— Prompt-cache-stable prefix + deterministic JSON serialization</h3>
+<ul>
+<li><strong>Target files:</strong> <code>helix_code/internal/llm/</code>
+request-builders (system prompt + tool-definition assembly), new
+<code>helix_code/internal/llm/promptcache/</code> (cache-break detection
++ deterministic key ordering).</li>
+<li><strong>Implements:</strong> R2 #1, #8; R3 §4.1; O1. Go pitfall —
+map-key order randomization must be eliminated.</li>
+<li><strong>Expected speedup:</strong> up to ~85% TTFT on long prompts
+(cache hit).</li>
+<li><strong>Risk:</strong> Low-Med (prefix changes must be invisible to
+feature behaviour).</li>
+<li><strong>Test types:</strong> unit (serialization is
+byte-deterministic across 1000 runs; cache-break detector flags a
+mutated prefix); integration (real Anthropic call reports
+<code>cache_read_input_tokens &gt; 0</code> on the 2nd request);
+benchmark (TTFT cold vs warm); Challenge (multi-turn session, 2nd turn
+hits cache); HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted API response showing
+<code>cache_creation_input_tokens</code> then
+<code>cache_read_input_tokens</code> on turn 2; TTFT delta.</li>
+</ul>
+<h3 id="p1-t05-cache_control-opt-in-for-every-supported-provider">P1-T05
+— <code>cache_control</code> opt-in for every supported provider</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/llm/{anthropic,openai,gemini,...}_provider.go</code>
+request paths.</li>
+<li><strong>Implements:</strong> R2 #8 (Plandex all-provider); R3 §4.1;
+O1.</li>
+<li><strong>Expected speedup:</strong> extends T04’s win to
+OpenAI/Gemini (implicit + explicit caching).</li>
+<li><strong>Risk:</strong> Low-Med.</li>
+<li><strong>Test types:</strong> unit (each provider emits
+provider-correct cache directives); integration (real call per provider
+reports cache hit); benchmark (per-provider TTFT cold/warm); Challenge;
+HelixQA (multi-provider bank).</li>
+<li><strong>Anti-bluff proof:</strong> per-provider pasted cache-hit
+metric from the real API.</li>
+</ul>
+<h3 id="p1-t06-cache-pre-warming-at-session-start">P1-T06 — Cache
+pre-warming at session start</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/session/</code> (session-open hook),
+<code>helix_code/internal/llm/promptcache/</code>.</li>
+<li><strong>Implements:</strong> R3 §4.2; O1.</li>
+<li><strong>Expected speedup:</strong> removes the first-request
+cold-cache penalty.</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (warm request is
+<code>max_tokens</code>-minimal); integration (first real user request
+after warm-up is a cache hit); benchmark (first-turn TTFT with vs
+without pre-warm); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted first-turn
+<code>cache_read_input_tokens &gt; 0</code>.</li>
+</ul>
+<h3 id="p1-t07-streaming-first-verification-on-every-surface">P1-T07 —
+Streaming-first verification on every surface</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/cmd/cli/main.go</code>,
+<code>helix_code/applications/terminal-ui/</code>,
+<code>helix_code/applications/desktop/</code> — verify all consume
+<code>GenerateStream</code>.</li>
+<li><strong>Implements:</strong> R2 #9; R3 §4.3; O3. (Verify, do not
+regress — mostly present.)</li>
+<li><strong>Expected speedup:</strong> high perceived
+(time-to-first-visible-token).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (each surface renders
+incrementally); integration (real streamed response renders
+token-by-token); benchmark (time-to-first-token); Challenge (CLI + TUI +
+desktop each show streaming); HelixQA (UI bank).</li>
+<li><strong>Anti-bluff proof:</strong> captured timestamped render log
+proving first token shown before completion arrives.</li>
+</ul>
+<h2 id="phase-2-context-build-speed">5. Phase 2 — Context-build
+speed</h2>
+<p><strong>Goal:</strong> R3 Wave 2 context wins — ~1.5–2× on
+context-build phases via repo-map cache + parallelism + incremental
+parsing.</p>
+<h3 id="p2-t01-filepath.walkdir-migration-buffered-io">P2-T01 —
+<code>filepath.WalkDir</code> migration + buffered I/O</h3>
+<ul>
+<li><strong>Target files:</strong> the 19 <code>filepath.Walk</code>
+sites (R1 B09) — <code>internal/repomap/repomap.go:248</code>,
+<code>internal/context</code>, <code>internal/fix</code>,
+<code>internal/rules</code>,
+<code>internal/tools/{mapping,web,filesystem}</code>,
+<code>internal/workflow</code>, etc.</li>
+<li><strong>Implements:</strong> R1 B09; R3 §7.1, §7.2; O13.</li>
+<li><strong>Expected speedup:</strong> medium on large trees (cheaper
+<code>fs.DirEntry</code>).</li>
+<li><strong>Risk:</strong> Low (mechanical).</li>
+<li><strong>Test types:</strong> unit (walk yields identical file set);
+integration (repo-map + search still cover the same files); benchmark
+(cold walk of S2 fixture); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted before/after walk
+benchmark; file-set equality test.</li>
+</ul>
+<h3
+id="p2-t02-hoist-per-call-regexp-remove-redundant-body-copies">P2-T02 —
+Hoist per-call regexp; remove redundant body copies</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>internal/editor/formats/{editor,diff,architect,whole}_format.go</code>
+(≥17 <code>MustCompile</code> sites — R1 B12);
+<code>internal/llm/ollama_provider.go:359,398</code>
+(<code>bytes.NewReader</code> not
+<code>strings.NewReader(string(...))</code> — R1 B11).</li>
+<li><strong>Implements:</strong> R1 B11, B12; R3 §1.5; O14.</li>
+<li><strong>Expected speedup:</strong> medium on edit-format parse hot
+path.</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (package-level regexes compile
+once; parse output unchanged); integration (real LLM-edit-format parse);
+benchmark (parse loop alloc/op); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted <code>-benchmem</code>
+allocs/op before/after.</li>
+</ul>
+<h3 id="p2-t03-persistent-content-addressed-repo-map-cache">P2-T03 —
+Persistent content-addressed repo-map cache</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/repomap/cache.go</code> (key by path+mtime/
+content-hash; one background writer replacing per-<code>Set</code>
+goroutine — R1 B07), <code>repomap.go:148</code> (stat-based token
+estimate — R1 B19).</li>
+<li><strong>Implements:</strong> R1 B07, B15, B19; R2 #2 (Aider
+diskcache + getmtime); R3 §5.2, §5.4, §6.1; O6.</li>
+<li><strong>Expected speedup:</strong> ~1.5–2× on warm context
+(unchanged files never re-parsed).</li>
+<li><strong>Risk:</strong> Med (cache correctness — stale entry must
+miss).</li>
+<li><strong>Test types:</strong> unit (changed file → cache miss;
+unchanged → hit); integration (warm second index reuses cache);
+benchmark (cold vs warm S2 index); Challenge (edit one file, re-index,
+only that file re-parsed); HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted cold-vs-warm index
+wall-clock; instrumentation log showing N−1 cache hits after a 1-file
+edit.</li>
+</ul>
+<h3
+id="p2-t04-parallelise-repo-map-worker-pool-parser-pool-single-pass-stats">P2-T04
+— Parallelise repo-map: worker pool + parser pool + single-pass
+stats</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/repomap/repomap.go</code> (consume the unused
+<code>MaxConcurrency</code>, line 29 — R1 B04; single-pass
+<code>GetStatistics</code> — R1 B05; narrow lock — R1 B16),
+<code>tree_sitter.go:56</code> (<code>sync.Pool</code> of parsers — R1
+B06).</li>
+<li><strong>Implements:</strong> R1 B04, B05, B06, B16; R2 #2; R3 §2.1,
+§2.2, §1.4; O7.</li>
+<li><strong>Expected speedup:</strong> high on cold index (tree-sitter
+is the CPU bottleneck).</li>
+<li><strong>Risk:</strong> Med (concurrency correctness —
+race-tested).</li>
+<li><strong>Test types:</strong> unit (<code>-race</code>; worker pool
+bounded by <code>MaxConcurrency</code>; parser pool resets between
+files); integration (parallel index = serial index output); benchmark
+(cold S2 index, varying concurrency); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted <code>-race</code> clean
+run; output-equality test (parallel vs serial); benchmark delta vs P0
+baseline.</li>
+</ul>
+<h3 id="p2-t05-parallelise-the-searchcontent-grep-tool">P2-T05 —
+Parallelise the <code>SearchContent</code> grep tool</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/tools/filesystem/searcher.go:243</code> —
+bounded worker pool (<code>errgroup.SetLimit</code>) over candidate
+paths.</li>
+<li><strong>Implements:</strong> R1 B08; R2 #2 (Continue ripgrep); R3
+§2.1, §7.2; O8.</li>
+<li><strong>Expected speedup:</strong> high on large trees (the agent
+<code>Grep</code> hot path).</li>
+<li><strong>Risk:</strong> Low-Med (result ordering — must remain
+deterministic).</li>
+<li><strong>Test types:</strong> unit (parallel search = serial search
+result set, sorted); integration (real grep over S3 fixture); benchmark
+(S3 wall-clock); Challenge (agent <code>Grep</code> tool call
+end-to-end); HelixQA (tools bank).</li>
+<li><strong>Anti-bluff proof:</strong> result-set equality test; pasted
+S3 benchmark delta.</li>
+</ul>
+<h3 id="p2-t06-incremental-tree-sitter-parsing-edit-api">P2-T06 —
+Incremental tree-sitter parsing (edit API)</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/repomap/tree_sitter.go</code> — use the
+<code>smacker/go-tree-sitter</code> incremental edit API instead of full
+re-parse.</li>
+<li><strong>Implements:</strong> R1 B06 (extends); R2 #2; R3 §5.1, §5.3;
+O9.</li>
+<li><strong>Expected speedup:</strong> high on per-edit context refresh
+(re-parse only edited regions).</li>
+<li><strong>Risk:</strong> Med (incremental-parse correctness vs full
+re-parse).</li>
+<li><strong>Test types:</strong> unit (incremental re-parse == full
+re-parse AST for an edited file); integration (edit→re-index produces
+correct symbols); benchmark (per-edit re-parse vs full); Challenge;
+HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> AST-equality test (incremental vs
+full); pasted per-edit benchmark delta.</li>
+</ul>
+<h3 id="p2-t07-config-loaded-once-threaded-down">P2-T07 — Config loaded
+once, threaded down</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/config/config.go:215</code>
+(<code>Load()</code>), <code>helix_code/cmd/cli/main.go:241</code>,
+server + subagent config paths.</li>
+<li><strong>Implements:</strong> R1 B10; R3 §3.4; O16.</li>
+<li><strong>Expected speedup:</strong> low-medium (drops repeat YAML
+reads / Viper global churn).</li>
+<li><strong>Risk:</strong> Low-Med (config plumbing — every consumer
+must get the same struct).</li>
+<li><strong>Test types:</strong> unit (<code>Load()</code> called once;
+struct threaded); integration (CLI + server + subagent see consistent
+config); benchmark (startup config-load count); Challenge; HelixQA
+(bank).</li>
+<li><strong>Anti-bluff proof:</strong> instrumentation log proving a
+single <code>ReadInConfig</code> per process; no-regression config
+tests.</li>
+</ul>
+<h2 id="phase-3-interactive-agent-loop-levers">6. Phase 3 — Interactive
+&amp; agent-loop levers</h2>
+<p><strong>Goal:</strong> the interactive multipliers — model routing,
+fast-apply, tool parallelism, compaction. Depends on Phase 1 (provider
+plumbing) + Phase 2 (repo-map context).</p>
+<h3 id="p3-t01-small-model-routing-for-cheap-subtasks-cascade">P3-T01 —
+Small-model routing for cheap subtasks (cascade)</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>helix_code/internal/llm/routing/</code>; callers in
+<code>internal/agent/</code>, <code>internal/commands/</code>
+(classification, ranking, commit-msg, ambiguity detection).</li>
+<li><strong>Implements:</strong> R2 #7; R3 §4.4; O10. Model metadata
+MUST come from LLMsVerifier (CONST-036/037) — no hardcoded model
+lists.</li>
+<li><strong>Expected speedup:</strong> high on multi-step agent loops
+(cheap tasks on fast models).</li>
+<li><strong>Risk:</strong> Med (routing must not degrade output quality
+— escalate on low confidence).</li>
+<li><strong>Test types:</strong> unit (routing policy picks small model
+for trivial tasks; mock verifier); integration (real cascade — small
+model first, escalate); benchmark (agent-loop wall-clock with vs without
+routing); Challenge (real multi-step task); HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> captured per-subtask model-used
+log; loop wall-clock delta; quality-parity assertion vs
+frontier-only.</li>
+</ul>
+<h3 id="p3-t02-diff-style-edits-searchreplace-only-changed-lines">P3-T02
+— Diff-style edits (SEARCH/REPLACE only changed lines)</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/editor/formats/</code> — emit only changed
+lines; <code>internal/tools/</code> apply path with fuzzy match.</li>
+<li><strong>Implements:</strong> R2 #3, #4 (Roo <code>apply_diff</code>,
+Aider <code>diff</code>/<code>udiff</code>); R3 (edit format); O11.</li>
+<li><strong>Expected speedup:</strong> ~30% fewer output tokens →
+proportional latency cut.</li>
+<li><strong>Risk:</strong> Med (malformed diff = correctness + speed
+loss — benchmark edit-format compliance).</li>
+<li><strong>Test types:</strong> unit (diff round-trips; malformed diff
+rejected); integration (real LLM emits a valid diff that applies);
+benchmark (output-token count full-rewrite vs diff); Challenge (real
+multi-edit); HelixQA (edit bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted output-token delta;
+edit-format compliance rate.</li>
+</ul>
+<h3 id="p3-t03-dedicated-fast-apply-path">P3-T03 — Dedicated fast-apply
+path</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>helix_code/internal/editor/fastapply/</code>; integrates with
+P3-T01 routing.</li>
+<li><strong>Implements:</strong> R2 #3 (Cursor speculative edits 9–13×,
+Morph 4500–10,500 tok/s); R3 §4.5; O11.</li>
+<li><strong>Expected speedup:</strong> high interactive — file apply
+~10× faster.</li>
+<li><strong>Risk:</strong> Med-High (apply correctness is non-negotiable
+— full no-regression edit suite).</li>
+<li><strong>Test types:</strong> unit (fast-apply output == reference
+apply); integration (real apply-model / speculative path produces a
+correct file); benchmark (apply tok/s); Challenge (real file-edit
+workflow); HelixQA (edit bank).</li>
+<li><strong>Anti-bluff proof:</strong> byte-equality of fast-apply vs
+reference apply on a corpus; pasted apply tok/s before/after.</li>
+</ul>
+<h3 id="p3-t04-aggressive-tool-call-parallelism">P3-T04 — Aggressive
+tool-call parallelism</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/agent/</code> tool-dispatch loop;
+<code>internal/tools/registry.go</code>.</li>
+<li><strong>Implements:</strong> R2 #5 (Claude Code <code>/batch</code>
+up to 10×); R3 §2.1; O12.</li>
+<li><strong>Expected speedup:</strong> high on multi-file / multi-tool
+turns.</li>
+<li><strong>Risk:</strong> Med (independent-tool detection — only
+parallelise side-effect-free or non-conflicting calls).</li>
+<li><strong>Test types:</strong> unit (independent calls run
+concurrently, dependent serialised); integration (real multi-tool turn);
+benchmark (multi-tool turn wall-clock); Challenge (real multi-file
+task); HelixQA (agent bank).</li>
+<li><strong>Anti-bluff proof:</strong> captured concurrency trace; turn
+wall-clock delta; output-equality vs serial.</li>
+</ul>
+<h3 id="p3-t05-history-condenser-compaction">P3-T05 — History condenser
+/ compaction</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/context/</code>,
+<code>internal/session/</code> — summarise history to keep the cached
+prefix small.</li>
+<li><strong>Implements:</strong> R2 #10 (OpenHands condenser,
+<code>/compact</code>); R4 O18.</li>
+<li><strong>Expected speedup:</strong> medium on long autonomous runs
+(prevents context bloat).</li>
+<li><strong>Risk:</strong> Med (compaction must not drop task-critical
+context).</li>
+<li><strong>Test types:</strong> unit (condenser preserves key facts);
+integration (long session stays under the window); benchmark (long-run
+turn latency with vs without); Challenge (real long autonomous run);
+HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> captured token-count trajectory;
+task-success parity long-run with vs without compaction.</li>
+</ul>
+<h2 id="phase-4-profile-gated-tuning-caching-architecture">7. Phase 4 —
+Profile-gated tuning &amp; caching architecture</h2>
+<p><strong>Goal:</strong> R3 Wave 3 — only where Phase 0 pprof evidence
+proves the bottleneck (§11.4.6 no-guessing).</p>
+<h3 id="p4-t01-pgo-with-a-real-production-default.pgo">P4-T01 — PGO with
+a real production <code>default.pgo</code></h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/cmd/cli/default.pgo</code> (committed),
+<code>helix_code/cmd/server/default.pgo</code>,
+<code>helix_code/Makefile</code> (PGO build note).</li>
+<li><strong>Implements:</strong> R3 §1.1; O15. Profile sourced from
+Phase 0 P0-T01.</li>
+<li><strong>Expected speedup:</strong> 2–14% CPU-bound.</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (build picks up
+<code>.pgo</code>); benchmark (S2/S3 with vs without PGO); integration
+(PGO binary passes the full suite); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted benchmark delta PGO vs
+non-PGO; committed profile.</li>
+</ul>
+<h3
+id="p4-t02-multi-tier-cache-memorydiskredis-for-contextembeddings">P4-T02
+— Multi-tier cache (memory→disk→Redis) for context/embeddings</h3>
+<ul>
+<li><strong>Target files:</strong> new
+<code>helix_code/internal/cache/</code> (L1/L2/L3); integrate with
+<code>internal/repomap/cache.go</code>, <code>internal/redis/</code>,
+embedding paths.</li>
+<li><strong>Implements:</strong> R2 #2; R3 §6.1, §5.6; O17. §11.4.74
+check — see §9.</li>
+<li><strong>Expected speedup:</strong> high (warm reads ~0.1 ms
+L1).</li>
+<li><strong>Risk:</strong> Med (cache coherence across tiers).</li>
+<li><strong>Test types:</strong> unit (L1→L2→L3 read-through;
+populate-upward); integration (real Redis L3); benchmark (read latency
+per tier); Challenge (warm-cache workflow); HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> per-tier latency measurement;
+coherence test (write invalidates all tiers).</li>
+</ul>
+<h3 id="p4-t03-config-driven-db-pool-sizing">P4-T03 — Config-driven DB
+pool sizing</h3>
+<ul>
+<li><strong>Target files:</strong>
+<code>helix_code/internal/database/database.go:45-48</code> (pool
+<code>MaxConns</code>/<code>MinConns</code> from config; smaller CLI
+default).</li>
+<li><strong>Implements:</strong> R1 B17; O19.</li>
+<li><strong>Expected speedup:</strong> low (fewer idle conns for
+CLI).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> unit (pool sizing reads config);
+integration (real PostgreSQL, pool honours config); benchmark (CLI
+startup conn count); Challenge; HelixQA.</li>
+<li><strong>Anti-bluff proof:</strong> pasted pool-stat output proving
+config-driven sizing.</li>
+</ul>
+<h3 id="p4-t04-profile-gated-alloc-gc-contention-tuning">P4-T04 —
+Profile-gated alloc / GC / contention tuning</h3>
+<ul>
+<li><strong>Target files:</strong> profile-confirmed hot paths only —
+candidates <code>internal/memory/memory_manager.go</code> (32 locks — R1
+B22), <code>internal/cognee/service.go</code> (R1 B23);
+<code>sync.Pool</code> / sharded locks / <code>RWMutex</code> per
+pprof.</li>
+<li><strong>Implements:</strong> R1 B22, B23; R3 §1.3, §1.4, §1.7, §2.3;
+O20.</li>
+<li><strong>Expected speedup:</strong> 1.05–1.3× on CPU/lock-bound
+slices.</li>
+<li><strong>Risk:</strong> Med (concurrency correctness —
+<code>-race</code> mandatory).</li>
+<li><strong>Test types:</strong> unit (<code>-race</code>; pool/lock
+correctness); integration (concurrent agent turns); benchmark
+(mutex-profile contention before/after); Challenge; HelixQA (bank).</li>
+<li><strong>Anti-bluff proof:</strong> pasted mutex/block profile
+before/after proving the bottleneck was real and reduced;
+<code>-race</code> clean.</li>
+</ul>
+<h2 id="phase-5-developer-experience-submodule-cascade">8. Phase 5 —
+Developer-experience &amp; submodule cascade</h2>
+<p><strong>Goal:</strong> developer-experience speed + recursive
+application of every landed speedup to owned submodules (CONST-047,
+CONST-051 — submodules are equal-codebase).</p>
+<h3 id="p5-t01-build-cache--pgomaxprocs-test-parallelism-tuning">P5-T01
+— Build cache, <code>-p</code>/<code>GOMAXPROCS</code>, test parallelism
+tuning</h3>
+<ul>
+<li><strong>Target files:</strong> <code>helix_code/Makefile</code>
+(test targets — R1 B20), <code>Makefile</code>.</li>
+<li><strong>Implements:</strong> R1 B20; R3 §8.1, §8.2, §8.3; O21.</li>
+<li><strong>Expected speedup:</strong> developer-experience (suite
+wall-time).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> integration (suite still passes with
+tuned <code>-p</code>/<code>-parallel</code>); benchmark (suite
+wall-time before/after); Challenge; HelixQA.</li>
+<li><strong>Anti-bluff proof:</strong> pasted suite wall-time delta;
+full suite still green.</li>
+</ul>
+<h3
+id="p5-t02-sub-package-internalllm-for-incremental-compile-speed">P5-T02
+— Sub-package <code>internal/llm</code> for incremental-compile
+speed</h3>
+<ul>
+<li><strong>Target files:</strong> <code>helix_code/internal/llm/</code>
+→ <code>internal/llm/providers/...</code> (30k LOC / 75 files — R1
+B21).</li>
+<li><strong>Implements:</strong> R1 B21; R3 §8.4; O21.</li>
+<li><strong>Expected speedup:</strong> developer-experience (smaller
+recompile unit).</li>
+<li><strong>Risk:</strong> Med (import-path churn — every importer
+updated atomically).</li>
+<li><strong>Test types:</strong> unit (all packages compile + pass);
+integration (no behaviour change); benchmark (incremental compile after
+a 1-line edit); Challenge; HelixQA.</li>
+<li><strong>Anti-bluff proof:</strong> pasted incremental-compile time
+before/after; full suite green; no import-path drift.</li>
+</ul>
+<h3 id="p5-t03-cascade-phase-14-speedups-into-owned-submodules">P5-T03 —
+Cascade Phase 1–4 speedups into owned submodules</h3>
+<ul>
+<li><strong>Target files:</strong> every owned submodule under
+<code>vasic-digital</code> / <code>HelixDevelopment</code> (and the
+other authorised orgs per CONST-051) that contributes to a measured
+scenario — <code>helix_qa/</code>, <code>challenges/</code>,
+<code>security/</code>, etc.</li>
+<li><strong>Implements:</strong> CONST-047, CONST-051(A)
+(equal-codebase); R4 §6.</li>
+<li><strong>Expected speedup:</strong> programme-wide — each submodule
+gets the same posture.</li>
+<li><strong>Risk:</strong> Med (per-submodule regression surface).</li>
+<li><strong>Test types:</strong> per submodule — unit + integration +
+benchmark + Challenge + HelixQA; recursive per CONST-047.</li>
+<li><strong>Anti-bluff proof:</strong> per-submodule before/after
+benchmark; per-submodule no-regression suite; coverage-ledger entry per
+CONST-048.</li>
+</ul>
+<h3
+id="p5-t04-speed-programme-coverage-ledger-release-gate-sweep">P5-T04 —
+Speed-programme coverage ledger &amp; release-gate sweep</h3>
+<ul>
+<li><strong>Target files:</strong> <code>docs/research/speed/</code>
+ledger; <code>scripts/generate-coverage-ledger.sh</code> extended for
+speed metrics.</li>
+<li><strong>Implements:</strong> CONST-048 (coverage ledger — feature ×
+platform × invariant).</li>
+<li><strong>Expected speedup:</strong> none (governance close-out).</li>
+<li><strong>Risk:</strong> Low.</li>
+<li><strong>Test types:</strong> integration (ledger regenerates);
+Challenge (ledger sweep); HelixQA.</li>
+<li><strong>Anti-bluff proof:</strong> committed ledger showing every
+O1–O21 task with captured before/after evidence and a green test
+floor.</li>
+</ul>
+<h2 id="submodule-catalogue-check-mandatory-before-any-new-component">9.
+§11.4.74 submodule-catalogue check (mandatory before any new
+component)</h2>
+<p>Per constitution §11.4.74, <strong>before any task introduces a new
+reusable component, the vasic-digital / HelixDevelopment owned-submodule
+catalogue MUST be checked</strong> — discover dynamically via
+<code>gh repo list vasic-digital</code>,
+<code>gh repo list HelixDevelopment</code> and <code>glab</code> for the
+GitLab mirrors. Incorporate an existing owned component rather than
+rebuilding it (CONST-051(C) — flat layout, no nested own-org chains;
+CONST-054 — record in <code>helix-deps.yaml</code>).</p>
+<p>Tasks that introduce a candidate-reusable component and therefore
+REQUIRE the catalogue check before implementation:</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 33%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>New component</th>
+<th>Check before building</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0-T01</td>
+<td>pprof profiling harness</td>
+<td><code>helix_qa/</code> perf tooling; R3 §1.1 note.</td>
+</tr>
+<tr>
+<td>P1-T01</td>
+<td>shared HTTP-client factory</td>
+<td><code>helix_code/internal/providers</code>; R3 §4.7 note.</td>
+</tr>
+<tr>
+<td>P2-T04</td>
+<td>bounded worker-pool / scheduler</td>
+<td><code>helix_code/internal/worker</code>; owned-submodule catalogue;
+R3 §2.2 note.</td>
+</tr>
+<tr>
+<td>P2-T03 / P4-T02</td>
+<td>content-addressed / multi-tier cache</td>
+<td><code>helix_code/internal/redis</code>; owned-submodule catalogue;
+R3 §6.1 note.</td>
+</tr>
+<tr>
+<td>P3-T01</td>
+<td>model-routing component</td>
+<td>LLMsVerifier (CONST-036) is the model-metadata source — do not
+duplicate.</td>
+</tr>
+<tr>
+<td>P3-T03</td>
+<td>fast-apply component</td>
+<td>owned-submodule catalogue; R2 #3.</td>
+</tr>
+</tbody>
+</table>
+<p>If the catalogue has no suitable component, the new component is
+built <strong>decoupled and project-not-aware</strong> (CONST-051(B)) so
+it can itself become a catalogue entry.</p>
+<h2 id="per-task-test-floor-anti-bluff-template">10. Per-task test-floor
+&amp; anti-bluff template</h2>
+<p>Every task above is closed only when ALL of the following are
+captured in the task’s commit/PR (CONST-035, CONST-048, CONST-050):</p>
+<ol type="1">
+<li><strong>Unit tests</strong> — mocks permitted <em>only here</em>
+(CONST-050(A)). Prove the changed unit behaves; for concurrency tasks,
+<code>-race</code> clean.</li>
+<li><strong>Integration tests</strong> — real infrastructure (real
+PostgreSQL/Redis/Ollama/LLM provider), no mocks. Prove the change works
+in the real system.</li>
+<li><strong>Benchmark</strong> — <code>go test -bench -benchmem</code>,
+<strong>before AND after</strong>, pasted. The delta IS the speedup
+claim. No delta = bluff (CONST-035 Rule 9).</li>
+<li><strong>Challenge</strong> — a <code>challenges/</code> script
+exercising the real end-to-end user workflow the task touches
+(CONST-006/050).</li>
+<li><strong>HelixQA</strong> — the change registered in the relevant
+<code>helix_qa/</code> test bank; autonomous QA session run with
+captured wire evidence (CONST-050).</li>
+<li><strong>No-regression proof</strong> — the functional tests that
+passed before the change still pass after it (R4 §6 — no working feature
+regresses).</li>
+</ol>
+<p><strong>Anti-bluff statement each task’s evidence must
+satisfy:</strong> pasted terminal output from <em>that session</em>
+showing (a) the before number, (b) the after number, (c) the ratio
+meeting the task’s “Expected speedup”, (d) the full functional suite
+green. Words like <em>verified / tested / faster / complete</em> without
+this output are forbidden (CLAUDE.md Rule 9).</p>
+<h2 id="task-summary-table">11. Task summary table</h2>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Tasks</th>
+<th>Theme</th>
+<th>Risk band</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0</td>
+<td>P0-T01 … P0-T04 (4)</td>
+<td>Measurement baseline — pprof + benchmarks + competitor wall-clock +
+scenario harness</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>P1-T01 … P1-T07 (7)</td>
+<td>LLM &amp; startup wins — HTTP tuning, lazy startup/Ollama, prompt
+cache, streaming</td>
+<td>Low–Med</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>P2-T01 … P2-T07 (7)</td>
+<td>Context-build speed — WalkDir, regex hoist, repo-map cache +
+parallelism, incremental parse, config-once</td>
+<td>Low–Med</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>P3-T01 … P3-T05 (5)</td>
+<td>Interactive &amp; agent-loop — model routing, diff edits,
+fast-apply, tool parallelism, compaction</td>
+<td>Med–High</td>
+</tr>
+<tr>
+<td>Phase 4</td>
+<td>P4-T01 … P4-T04 (4)</td>
+<td>Profile-gated tuning — PGO, multi-tier cache, DB pool,
+alloc/GC/contention</td>
+<td>Low–Med</td>
+</tr>
+<tr>
+<td>Phase 5</td>
+<td>P5-T01 … P5-T04 (4)</td>
+<td>Dev-experience &amp; submodule cascade — build/test tuning,
+sub-packaging, CONST-047/051 cascade, coverage ledger</td>
+<td>Low–Med</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>31 tasks</strong></td>
+<td><strong>6 phases</strong></td>
+<td>Phase 0 gates all; low-risk-first ordering</td>
+</tr>
+</tbody>
+</table>
+<p>Execution: each task is one subagent-driven round per the operator’s
+standing preference. Phases run in the dependency order of §2; within a
+phase, tasks run in listed order (dependency then impact-to-effort).
+Phase 0 must complete and commit its baseline artefacts before any Phase
+1+ speedup claim is admissible.</p>
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>02-competitive-analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">02-competitive-analysis</h1>
+</header>
+<!--
+Document-Metadata (constitution §11.4.44)
+Revision: 1
+Last modified: 2026-05-20T00:00:00Z
+Authority: HelixCode programme — research deliverable R2 (Competitive speed analysis).
+           Cascaded from CONSTITUTION.md / constitution submodule §11.4.8 (cite every
+           source URL) and §11.4.6 (mark UNCONFIRMED where public data is absent).
+           This is a research document — NO code changes, NO commits implied by it.
+Scope:     Architecture + performance-technique analysis of leading AI CLI coding
+           agents, written so HelixCode can match and exceed (target 3–5x) their speed.
+-->
+<h1 id="r2-competitive-speed-analysis-of-ai-cli-coding-agents">R2 —
+Competitive Speed Analysis of AI CLI Coding Agents</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The operator’s goal is for HelixCode to be <strong>3–5x faster than
+the leading AI CLI coding agents in every situation</strong>. Research
+into Claude Code, Gemini CLI, Aider, Cline/Roo Code, OpenHands, Cursor,
+Continue, Plandex and Crush/OpenCode shows that <em>“agent speed”</em>
+decomposes into four largely-independent latency budgets, and the
+fastest competitors win different budgets:</p>
+<ol type="1">
+<li><p><strong>Cold-start / process latency.</strong> Pure runtime
+overhead before first interaction. Node.js-based agents (Claude Code,
+Gemini CLI, Cline) pay ~0.95 s just to boot the V8 runtime; a Go rewrite
+of Gemini CLI measured <strong>0.014 s startup — 68x faster</strong> —
+and a 5.6 MB binary vs ~200 MB. HelixCode is already Go: this budget is
+a <em>free win</em> if startup work is kept lazy.</p></li>
+<li><p><strong>LLM time-to-first-token (TTFT).</strong> Dominated by how
+much of the prompt prefix is <em>cached</em> server-side. Anthropic
+prompt caching gives <strong>up to 85% latency reduction</strong> on
+long prompts (a 100K-token example dropped 11.5 s → 2.4 s). Every fast
+agent is architecturally built <em>around</em> keeping the cache prefix
+stable.</p></li>
+<li><p><strong>File-edit / apply latency.</strong> Cursor’s
+purpose-built “Fast Apply” model hits <strong>~1000 tok/s</strong> (13x
+vanilla Llama-3-70B) via <em>speculative edits</em>; Morph’s specialised
+7B apply model reaches <strong>4500–10,500 tok/s at 98%
+accuracy</strong>. Diff-style edits (Roo Code <code>apply_diff</code>,
+Aider SEARCH/REPLACE) cut output tokens ~30% vs full-file
+rewrites.</p></li>
+<li><p><strong>Agent-loop wall-clock.</strong> Parallel tool calls +
+parallel sub-agents collapse sequential work — Claude Code
+<code>/batch</code> reports <strong>up to 10x</strong> on multi-file
+refactors.</p></li>
+</ol>
+<p><strong>Highest-impact techniques HelixCode should adopt</strong>
+(detailed table at the end): prompt-cache-stable prefix discipline;
+persistent on-disk repo-map cache with mtime invalidation (Aider-style);
+a dedicated fast-apply path (speculative or specialised small model);
+aggressive tool-call parallelism; lazy/deferred startup; small-model
+routing for trivial sub-tasks; streaming everywhere.</p>
+<hr />
+<h2 id="per-competitor-analysis">Per-Competitor Analysis</h2>
+<h3 id="claude-code-anthropic-cli">1. Claude Code (Anthropic CLI)</h3>
+<p><strong>Runtime / startup.</strong> Node.js / TypeScript, distributed
+via npm; uses the <code>ink</code> React-for-terminal renderer
+(confirmed in vendored <code>cli_agents/claude-code-source/src/</code> —
+<code>main.tsx</code>, <code>ink.ts</code>). Node runtime boot is the
+floor cost (~0.9–1 s class, same as Gemini CLI — see §2).
+<code>UNCONFIRMED:</code> Anthropic publishes no official cold-start
+number.</p>
+<p><strong>Context management.</strong> No persistent embeddings index.
+Claude Code relies on <em>agentic search</em> — the model issues
+<code>Grep</code>/<code>Glob</code>/<code>Read</code> tool calls on
+demand rather than pre-indexing. Context is assembled into a stable
+prefix (system prompt + tool defs + memory files) plus a growing message
+list; <code>/compact</code> summarises history when the window fills
+(vendored <code>src/services/compact/compact.ts</code>).</p>
+<p><strong>LLM-latency techniques.</strong> Prompt caching is
+<em>the</em> architectural constraint. The system prompt embeds working
+directory, platform, shell, OS version and auto-memory paths, so the
+cache is scoped to one machine+directory; parallel sessions in the same
+directory share cache. Tool definitions are part of the cached prefix —
+<strong>adding one MCP tool changes the prefix and invalidates the
+entire conversation cache</strong>, which is why the tool list is
+<em>locked at session start</em>. The vendored source contains a
+remarkably detailed <code>promptCacheBreakDetection.ts</code> that
+hashes the system prompt, tool schemas, betas, effort value and
+<code>cache_control</code> scope/TTL separately, and writes a diff of
+<em>what broke the cache</em> — direct evidence that cache-prefix
+stability is treated as a first-class performance invariant. Supports
+both the 5-min default and 1-hour extended cache TTL. Streaming is
+default.</p>
+<p><strong>Tool-call parallelism.</strong> Claude 4 models do parallel
+tool use by default (<code>disable_parallel_tool_use</code> opt-out).
+<code>/batch</code> decomposes a change into 5–30 independent units,
+runs each in its own git worktree in parallel — reported up to 10x vs
+sequential (a 50-file migration: 100 min → ~15 min). <em>Programmatic
+tool calling</em> lets the model write code that calls tools inside an
+execution container, reducing round-trips and filtering data before it
+hits context.</p>
+<p><strong>File-edit speed.</strong> <code>Edit</code> tool uses exact
+string-match SEARCH/REPLACE on partial file regions (not full-file
+rewrite). <code>MultiEdit</code> batches several edits to one file in a
+single call.</p>
+<p><strong>Caching layers.</strong> Server-side prompt cache (Anthropic
+API); local message/session history on disk; auto-memory
+(<code>CLAUDE.md</code>) loaded into the cached prefix.</p>
+<p><strong>Benchmarks.</strong> <code>UNCONFIRMED:</code> no official
+latency benchmark; prompt-caching cost data widely reported ($50–100 →
+$10–19 per long Opus session).</p>
+<p>Sources: [1][2][3][4][16][17]</p>
+<hr />
+<h3 id="gemini-cli-google">2. Gemini CLI (Google)</h3>
+<p><strong>Runtime / startup.</strong> Node.js / TypeScript monorepo
+(vendored <code>cli_agents/gemini-cli/packages/</code> —
+<code>cli</code>, <code>core</code>, <code>a2a-server</code>,
+<code>sdk</code>). The Node runtime is the dominant cold-start cost: a
+Go reimplementation (“gmn”) measured the official CLI at <strong>0.95 s
+startup vs 0.014 s for the Go binary — 68x</strong>, and ~200 MB vs 5.6
+MB install size; end-to-end with an API response, 10.9 s → 3.2 s
+(~3.4x). This is the single clearest published data point that
+<strong>runtime choice alone is a multi-x speed lever</strong> and
+validates HelixCode’s Go foundation.</p>
+<p><strong>Context management.</strong> <code>GEMINI.md</code>
+persistent context files; a structured context pipeline (vendored
+<code>core/src/context/</code> — <code>contextManager.ts</code>,
+<code>contextCompressionService.ts</code>,
+<code>memoryContextManager.ts</code>,
+<code>pipeline/contextWorkingBuffer.ts</code>) with token accounting
+(<code>contextTokenCalculator.ts</code>) and JIT context injection
+(<code>tools/jit-context.ts</code>). Compression service summarises when
+the window fills.</p>
+<p><strong>LLM-latency techniques.</strong> Gemini API offers
+<em>implicit caching</em> (automatic, zero setup) and <em>explicit
+caching</em> (developer-controlled <code>CachedContent</code>). Managing
+context at the provider level + a simple in-memory session map yields
+lower latency (no re-upload of large context) without a vector DB.
+Streaming default. <code>UNCONFIRMED:</code> whether the CLI itself opts
+into explicit caching by default.</p>
+<p><strong>Tool-call parallelism.</strong> Supports multiple function
+calls per turn; <code>UNCONFIRMED:</code> exact concurrency policy in
+the CLI.</p>
+<p><strong>File-edit speed.</strong> Diff-based edit tools;
+<code>UNCONFIRMED:</code> no published apply-speed number.</p>
+<p><strong>Known anti-pattern.</strong> Synchronous HTTP handshakes to
+MCP servers at startup caused ~30 s init in some configs; a
+stdio-wrapper fix gave ~15x — i.e. <em>blocking I/O during startup is
+the enemy</em>; defer it.</p>
+<p>Sources: [5][6][18]</p>
+<hr />
+<h3 id="aider">3. Aider</h3>
+<p><strong>Runtime / startup.</strong> Python (vendored
+<code>cli_agents/aider/aider/</code>). Python interpreter + heavy
+imports (tree-sitter, networkx, litellm) make cold start the slowest of
+the surveyed agents; <code>UNCONFIRMED:</code> no official number, but
+Python import cost is structurally larger than Go.</p>
+<p><strong>Context management — the standout technique.</strong> Aider’s
+<strong>repository map</strong> is the most-copied context system in the
+field. <code>repomap.py</code> (867 lines, vendored): - Tree-sitter
+parses every source file into an AST; per-language <code>tags.scm</code>
+query files classify each symbol as <em>definition</em> vs
+<em>reference</em> (130+ languages). - A
+<code>networkx.MultiDiGraph</code> connects files via symbol
+dependencies; <strong>PageRank</strong> ranks symbols by importance,
+with <em>personalisation</em> biasing toward files/identifiers mentioned
+in the chat (<code>repomap.py</code> lines 368–529). - The map is fitted
+to a token budget (<code>--map-tokens</code>, default 1k; multiplied by
+<code>map_mul_no_files=8</code> when no files are in the chat) via
+binary search with a 15% tolerance — only the highest-ranked symbols
+survive. - <strong>Persistent on-disk cache:</strong>
+<code>diskcache.Cache</code> in <code>.aider.tags.cache.v*</code>
+(SQLite), keyed by filename, <strong>invalidated by
+<code>os.path.getmtime</code></strong> — unchanged files are never
+re-parsed. In-memory <code>tree_cache</code>,
+<code>tree_context_cache</code>, <code>map_cache</code> layer on top.
+<code>refresh="auto"</code> only rebuilds when inputs change. This is
+the reference design for <em>incremental, near-zero-cost</em> repo
+context.</p>
+<p><strong>LLM-latency techniques.</strong> Streaming; via LiteLLM,
+inherits provider prompt caching (Anthropic/Gemini). Architect/editor
+split: a strong “architect” model plans, a cheaper/faster “editor” model
+applies — an early form of <strong>model routing</strong>.</p>
+<p><strong>File-edit speed.</strong> Many edit formats (vendored
+<code>coders/</code>): <code>whole</code>, <code>diff</code>
+(SEARCH/REPLACE blocks), <code>udiff</code> (unified diff),
+<code>patch</code>, plus <code>editor_*</code> variants. Aider’s own
+benchmarks show diff formats use <em>far fewer tokens</em> than
+whole-file and that unified diffs made GPT-4 Turbo “3X less lazy”. The
+133-exercise / 225-exercise polyglot benchmarks measure <em>both</em>
+task success and <em>edit-format compliance</em> — a model that emits
+malformed diffs is a speed <em>and</em> correctness loss.</p>
+<p><strong>Caching layers.</strong> On-disk SQLite tags cache; in-memory
+tree/map caches; provider-side prompt cache through LiteLLM.</p>
+<p>Sources: [7][8][13][14][15] + vendored
+<code>cli_agents/aider/aider/repomap.py</code>,
+<code>cli_agents/aider/aider/coders/</code></p>
+<hr />
+<h3 id="cline-roo-code">4. Cline / Roo Code</h3>
+<p><strong>Runtime / startup.</strong> TypeScript VS Code extensions
+(Cline also ships a standalone mode — vendored
+<code>cli_agents/cline/src/standalone/</code>). Runs in the editor’s
+Node host; startup cost is the extension-host class, not a fresh
+process. Heavy dependency surface (vendored <code>package.json</code>:
+full OpenTelemetry stack, every provider SDK).</p>
+<p><strong>Context management.</strong> Documented “context window
+management”: tracks token usage and auto-condenses/truncates as the
+window fills; no persistent embeddings index by default — relies on
+explicit <code>@file</code>/<code>@folder</code> mentions and on-demand
+reads.</p>
+<p><strong>LLM-latency techniques.</strong> Provider-agnostic
+(Anthropic, Bedrock, Vertex, Gemini, Mistral, Cerebras SDKs all
+vendored); inherits provider prompt caching. A community discussion
+(<code>cline/cline#9892</code>) specifically requests a
+persistent-session architecture to better exploit Claude Code’s prompt
+cache — i.e. cache exploitation is a recognised gap.</p>
+<p><strong>File-edit speed — the key Cline/Roo difference.</strong>
+Cline historically <em>rewrites the entire file</em> and shows a full
+diff view (safer, but high output-token cost). Cline
+<strong>v3.12</strong> explicitly shipped “faster diff edits”, markedly
+faster apply on large files. <strong>Roo Code’s
+<code>apply_diff</code></strong> outputs <em>only changed lines</em> —
+for a 500-line file with 10 changes, ~10–20 lines vs a full rewrite —
+independent testing reports <strong>~30% API-cost savings</strong> and
+faster iteration. Vendored Cline source confirms multiple edit paths:
+<code>assistant-message/diff.ts</code>,
+<code>tools/handlers/ApplyPatchHandler.ts</code>,
+<code>prompts/system-prompt/tools/apply_patch.ts</code>.</p>
+<p><strong>Tool-call parallelism.</strong> <code>UNCONFIRMED:</code>
+Cline/Roo are largely sequential per turn (plan/act, or Roo’s
+Code/Architect/Ask modes); Roo allows per-mode model selection (a
+routing lever).</p>
+<p><strong>Caching layers.</strong> Provider prompt cache; VS Code
+workspace state; checkpoint/diff history.</p>
+<p>Sources: [9][10][1] + vendored <code>cli_agents/cline/src/</code></p>
+<hr />
+<h3 id="openhands-formerly-opendevin">5. OpenHands (formerly
+OpenDevin)</h3>
+<p><strong>Runtime / startup.</strong> Python; the agent loop runs in a
+<strong>Docker container</strong> workspace. Container spin-up is a
+real, non-trivial cold-start cost — the slowest startup profile of the
+surveyed agents when a fresh sandbox is provisioned.</p>
+<p><strong>Architecture.</strong> Minimal core: a stateless
+<code>Agent</code> emits <code>Action</code>s; a
+<code>Conversation</code> runs the loop and stores an append-only
+<code>EventLog</code>; a <code>Workspace</code> (local process or
+Docker) executes actions and returns <code>Observation</code>s; the LLM
+is wrapped by LiteLLM. Event-stream loop: Agent → Action → Environment →
+Observation → Agent.</p>
+<p><strong>Context management.</strong> Append-only event log; a
+<em>condenser</em> summarises history to control context growth (cost
+balloons “easily more without a condenser”).</p>
+<p><strong>LLM-latency techniques.</strong> LiteLLM gives provider
+prompt caching. <code>UNCONFIRMED:</code> no OpenHands-specific latency
+optimisation beyond the condenser.</p>
+<p><strong>Benchmarks.</strong> CodeActAgent v1.8 on Claude 3.5 Sonnet:
+<strong>26% SWE-bench Lite at $1.10 /instance</strong>; current agents
+20–45% SWE-bench Verified. Cost-per-task: trivial $0.05–0.30, real
+SWE-bench fixes $0.50–3, multi-hour runs $5–30. These are
+<em>cost/throughput</em> numbers, not wall-clock latency — OpenHands
+optimises for autonomy, not interactive speed.</p>
+<p><strong>Takeaway for HelixCode.</strong> The container sandbox is a
+correctness/safety asset but a <em>latency liability</em>; keep a
+warm-pool / pre-provisioned sandbox if adopting a similar isolation
+model.</p>
+<p>Sources: [11][12]</p>
+<hr />
+<h3 id="cursor-cli-agent-aspects">6. Cursor (CLI / agent aspects)</h3>
+<p><strong>File-edit speed — the headline technique.</strong> Cursor’s
+<strong>“Fast Apply”</strong> turns a terse model-proposed edit into a
+full merged file. Built on <strong>speculative edits</strong>: a custom
+speculative-decoding algorithm where <em>the original file is the
+draft</em> — most output tokens are identical to the source, so future
+tokens are speculated by a <em>deterministic algorithm</em>, no draft
+model needed. A fine-tuned Llama-3-70B (“llama-70b-ft-spec”) on
+Fireworks reaches <strong>&gt;1000 tok/s (~3500 char/s)</strong> — ~13x
+vanilla Llama-3-70B and ~9x Cursor’s prior GPT-4 speculative deployment,
+“equivalent to a full-file rewrite while up to 9x faster”. This is
+<em>the</em> benchmark for file-apply latency and the most directly
+adoptable single technique.</p>
+<p><strong>Context management.</strong> Embeddings index of the codebase
++ AST chunking; agentic retrieval. <code>UNCONFIRMED:</code> Cursor’s
+CLI/agent internals are closed-source; most public detail is
+IDE-side.</p>
+<p><strong>LLM-latency techniques.</strong> Model routing across a
+tab/autocomplete model, apply model, and frontier chat/agent models —
+small/specialised models for narrow tasks.</p>
+<p>Sources: [19][20][21]</p>
+<hr />
+<h3 id="continue">7. Continue</h3>
+<p><strong>Runtime / startup.</strong> TypeScript core, distributed as
+VS Code/JetBrains extensions and a CLI; in-editor host.</p>
+<p><strong>Context management — embeddings-first.</strong> Continue
+<em>does</em> build a persistent codebase index: embeddings + keyword
+search. Embeddings default to <strong>local
+<code>transformers.js</code></strong>, stored under
+<code>~/.continue/index</code>; metadata in
+<code>~/.continue/index/index.sqlite</code>. AST parsing via
+tree-sitter, fast text search via <strong>ripgrep</strong>, optional LLM
+re-ranking of top results. Respects <code>.gitignore</code> /
+<code>.continueignore</code>. This is the reference design for the
+<em>embeddings</em> branch of context (vs Aider’s <em>tree-sitter
+repo-map</em> branch).</p>
+<p><strong>File-edit speed.</strong> Apply step; community comparisons
+note Continue is <em>slower for “real work”</em> because it often
+requires manual “Apply”/“Copy to File” clicks — i.e. human-in-the-loop
+friction is itself a latency cost. Continue integrates external
+fast-apply models (e.g. Morph) to close this gap.</p>
+<p><strong>Caching layers.</strong> Local SQLite index + local
+embeddings cache; provider prompt cache.</p>
+<p>Sources: [9][22] (Morph integration: [23])</p>
+<hr />
+<h3 id="plandex">8. Plandex</h3>
+<p><strong>Runtime / startup.</strong> <strong>Go</strong> client-server
+architecture (vendored <code>cli_agents/plandex/plandex/app/cli/</code>
+and <code>app/server/</code>). CLI on the dev machine talks to a central
+Go server with an embedded LiteLLM Python proxy + PostgreSQL + a
+persistent volume for plan files. Go CLI → fast cold start; the server
+is a separate process.</p>
+<p><strong>Context management.</strong> Handles up to ~2M tokens of
+context directly (~100k/file) and indexes directories of <strong>20M+
+tokens via tree-sitter project maps</strong> — top-level symbols
+(vars/functions/classes) per file, 30+ languages. “Fast project map
+generation and syntax validation with tree-sitter.” Building from source
+needs gcc/g++/make because of the native tree-sitter dependency.</p>
+<p><strong>LLM-latency techniques.</strong> “Context caching is used
+across the board for OpenAI, Anthropic and Google models, reducing costs
+and latency” — i.e. Plandex actively opts into provider prompt caching
+for all three major providers. Model routing via the embedded LiteLLM
+proxy.</p>
+<p><strong>Takeaway.</strong> Plandex is the closest architectural
+analogue to HelixCode (Go + tree-sitter maps + multi-provider caching +
+client/server); its scale numbers (20M tokens indexed) prove tree-sitter
+maps scale far past embeddings.</p>
+<p>Sources: [24] + vendored <code>cli_agents/plandex/</code></p>
+<hr />
+<h3 id="crush-opencode-charm">9. Crush / OpenCode (Charm)</h3>
+<p><strong>Runtime / startup.</strong> <strong>Go</strong> (vendored
+<code>cli_agents/crush/</code>, <code>go 1.26.2</code>; internal
+packages: <code>agent</code>, <code>llm</code>, <code>diff</code>,
+<code>diffdetect</code>, <code>filetracker</code>, <code>lsp</code>…).
+Marketed as “combining the speed of Go with Charm’s design… the fastest
+and most reliable AI CLI coding agent” — i.e. a direct competitor whose
+explicit pitch is <em>Go = speed</em>.</p>
+<p><strong>Context management.</strong> Integrates <strong>LSP</strong>
+for real-time code intelligence from actual project files (not just
+model reasoning); session-based context with multiple simultaneous
+sessions per project and mid-session model switching with context
+preserved.</p>
+<p><strong>File-edit speed.</strong> Dedicated
+<code>internal/diff</code> + <code>internal/diffdetect</code> +
+<code>internal/filetracker</code> packages — structured diff application
+and change tracking.</p>
+<p><strong>LLM-latency techniques.</strong> Multi-model, switchable
+mid-session; <code>UNCONFIRMED:</code> no published latency number.</p>
+<p><strong>Takeaway.</strong> Crush validates the thesis that a
+Go-native, LSP-integrated terminal agent is <em>the</em>
+speed-positioned competitor HelixCode must beat — same language, same
+LSP idea. HelixCode’s 3–5x edge must come from the <em>technique
+stack</em> (caching, fast-apply, parallelism), not language alone.</p>
+<p>Sources: [25] + vendored <code>cli_agents/crush/</code></p>
+<hr />
+<h2 id="cross-cutting-techniques-worth-adopting-table">Cross-Cutting
+“Techniques Worth Adopting” Table</h2>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 11%" />
+<col style="width: 26%" />
+<col style="width: 14%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Technique</th>
+<th>Best-in-class competitor</th>
+<th>What it buys</th>
+<th>HelixCode applicability / estimated impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Prompt-cache-stable prefix discipline</strong> — freeze
+system prompt + tool defs at session start; never mutate mid-session;
+hash &amp; diff every cache-break</td>
+<td>Claude Code (<code>promptCacheBreakDetection.ts</code>)</td>
+<td>Up to <strong>85% TTFT reduction</strong>, ~90% input-cost cut on
+long sessions</td>
+<td><strong>Very high.</strong> Pure architecture. HelixCode must lock
+its tool list at startup and keep a stable cached prefix. Lowest cost /
+highest payoff.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Persistent on-disk repo-map cache with mtime
+invalidation</strong></td>
+<td>Aider (<code>diskcache</code> SQLite, <code>getmtime</code>),
+Plandex (tree-sitter maps, 20M tokens)</td>
+<td>Near-zero re-index cost on warm runs; only changed files
+re-parsed</td>
+<td><strong>Very high.</strong> HelixCode already uses tree-sitter; add
+SQLite tag cache keyed by path+mtime + in-memory tree/map caches.
+Directly enables 3–5x on repeated invocations.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Dedicated fast-apply path</strong> — speculative edits (file
+= draft) or a specialised small apply model</td>
+<td>Cursor (~1000 tok/s, 9–13x), Morph (4500–10,500 tok/s, 98%)</td>
+<td>File writes go from frontier-model-speed to ~10x faster</td>
+<td><strong>Very high.</strong> Biggest <em>interactive</em> speed
+lever. Adopt speculative-edit decoding for self-hosted models and/or
+route apply to a small specialised model.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Diff-style edits (SEARCH/REPLACE / apply_diff), not
+full-file rewrite</strong></td>
+<td>Roo Code <code>apply_diff</code>, Aider
+<code>diff</code>/<code>udiff</code></td>
+<td>~30% fewer output tokens → proportionally lower latency</td>
+<td><strong>High.</strong> HelixCode’s edit format should emit only
+changed lines; pair with fuzzy-match application + benchmark edit-format
+compliance.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Aggressive tool-call parallelism + parallel sub-agents /
+worktrees</strong></td>
+<td>Claude Code parallel tools + <code>/batch</code> (up to 10x)</td>
+<td>Collapses sequential I/O and multi-file work</td>
+<td><strong>High.</strong> Go’s goroutines make this natural; run
+independent tool calls and independent file edits concurrently.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Lazy / deferred startup — no blocking I/O before first
+prompt</strong></td>
+<td>Go-rewrite of Gemini CLI (0.95 s → 0.014 s, 68x); Gemini MCP stdio
+fix (~15x)</td>
+<td>Eliminates cold-start tax; instant first interaction</td>
+<td><strong>High (mostly free).</strong> HelixCode is already Go. Defer
+MCP handshakes, model discovery, index loads off the startup path.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Small-model routing for trivial sub-tasks</strong></td>
+<td>Aider (architect/editor split), Cursor (tab/apply/chat models),
+Plandex (LiteLLM proxy)</td>
+<td>Cheap tasks answered by fast small models; frontier model reserved
+for reasoning</td>
+<td><strong>High.</strong> Route classification/apply/summarise to
+small/local models; respect CONST-036/037 (LLMsVerifier as source of
+truth for routing metadata).</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Provider prompt caching opt-in for ALL
+providers</strong></td>
+<td>Plandex (OpenAI + Anthropic + Google)</td>
+<td>Latency/cost cut not just for Anthropic</td>
+<td><strong>High.</strong> Wire <code>cache_control</code> /
+<code>CachedContent</code> / implicit-cache for every supported
+provider, not only Anthropic.</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Streaming everywhere + token-efficient tool
+use</strong></td>
+<td>Claude Code, Gemini CLI, all</td>
+<td>Perceived latency drops sharply; first token shows immediately</td>
+<td><strong>Medium-high.</strong> Stream every model response and
+tool-result rendering; cheap, expected baseline.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>History condenser / compaction</strong> to keep the cached
+prefix small and the window unsaturated</td>
+<td>OpenHands condenser, Claude Code <code>/compact</code>, Gemini
+compression service</td>
+<td>Prevents context-bloat slowdowns and cost blow-ups in long
+sessions</td>
+<td><strong>Medium.</strong> Needed for long autonomous runs; secondary
+to 1–8 for interactive speed.</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>LSP integration for context</strong> instead of pure model
+reasoning</td>
+<td>Crush, (Cursor IDE)</td>
+<td>Accurate symbol context without round-tripping the model</td>
+<td><strong>Medium.</strong> Improves quality and reduces wasted
+retrieval turns; complements the repo map.</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Warm sandbox pool</strong> if container isolation is
+used</td>
+<td>(anti-pattern lesson from OpenHands)</td>
+<td>Removes container-provision cold start</td>
+<td><strong>Medium / conditional.</strong> Only if HelixCode runs
+containerised workspaces — keep a pre-warmed pool.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sources-citations">Sources / Citations</h2>
+<ol type="1">
+<li>Cline — <em>Enable Prompt Caching for Claude Code Provider
+(Persistent Session Architecture)</em>, GitHub Discussion #9892 —
+https://github.com/cline/cline/discussions/9892</li>
+<li><em>How Prompt Caching Actually Works in Claude Code</em> —
+https://www.claudecodecamp.com/p/how-prompt-caching-actually-works-in-claude-code</li>
+<li>Anthropic — <em>How Claude Code uses prompt caching</em> (Claude
+Code Docs) — https://code.claude.com/docs/en/prompt-caching</li>
+<li>Introl — <em>Claude Code CLI: The Definitive Technical
+Reference</em> —
+https://introl.com/blog/claude-code-cli-comprehensive-guide-2025</li>
+<li>Tanaike — <em>Accelerating Gemini CLI: A Node.js Wrapper for Google
+Apps Script MCP Servers</em> —
+https://medium.com/google-cloud/accelerating-gemini-cli-a-node-js-wrapper-for-google-apps-script-mcp-servers-a4295283d2ca</li>
+<li>Google — <em>Gemini CLI</em> (official docs) —
+https://google-gemini.github.io/gemini-cli/</li>
+<li>Aider — <em>Building a better repository map with tree sitter</em> —
+https://aider.chat/2023/10/22/repomap.html</li>
+<li>Aider — <em>Repository map</em> (docs) —
+https://aider.chat/docs/repomap.html</li>
+<li>DevToolReviews — <em>Cline vs Roo Code vs Continue (2026)</em> —
+https://www.devtoolreviews.com/reviews/cline-vs-roo-code-vs-continue</li>
+<li>Cline — <em>Cline v3.12: Faster Diff Edits, Model Favorites, and
+More</em> —
+https://cline.bot/blog/cline-v3-12-faster-diff-edits-model-favorites-and-more</li>
+<li>mgx.dev — <em>A Comprehensive Analysis of OpenDevin (OpenHands):
+Architecture, Development, Use Cases, and Challenges</em> —
+https://mgx.dev/insights/a-comprehensive-analysis-of-opendevin-openhands-architecture-development-use-cases-and-challenges/62fee7b52567490da851f0ed7cb2bf9f</li>
+<li>OpenHands — <em>OpenHands: An Open Platform for AI Software
+Developers as Generalist Agents</em> (arXiv) —
+https://arxiv.org/pdf/2407.16741</li>
+<li>Aider — <em>Code editing leaderboard</em> —
+https://aider.chat/docs/leaderboards/edit.html</li>
+<li>Aider — <em>Unified diffs make GPT-4 Turbo 3X less lazy</em> —
+https://aider.chat/docs/unified-diffs.html</li>
+<li>Aider — <em>Edit formats</em> —
+https://aider.chat/docs/more/edit-formats.html</li>
+<li>Anthropic — <em>Prompt caching</em> (Claude API docs) —
+https://platform.claude.com/docs/en/build-with-claude/prompt-caching</li>
+<li>Anthropic — <em>Parallel tool use</em> (Claude API docs) —
+https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use</li>
+<li>Owada Tomohiro — <em>I Rewrote Google’s Gemini CLI in Go — 68x
+Faster Startup</em> (DEV) —
+https://dev.to/owada_tomohiro_28ec22f5ee/i-rewrote-googles-gemini-cli-in-go-68x-faster-startup-30em</li>
+<li>Cursor — <em>Editing Files at 1000 Tokens per Second</em> —
+https://cursor.com/blog/instant-apply</li>
+<li>Fireworks — <em>How Cursor built Fast Apply using the Speculative
+Decoding API</em> — https://fireworks.ai/blog/cursor</li>
+<li>Bind AI — <em>How Cursor AI Implemented Instant Apply: File Editing
+at 1000 Tokens per Second</em> —
+https://blog.getbind.co/2024/10/02/how-cursor-ai-implemented-instant-apply-file-editing-at-1000-tokens-per-second/</li>
+<li>Continue — <em>How to Set Up <span class="citation"
+data-cites="Codebase">@Codebase</span> Context Provider in Continue</em>
+— https://docs.continue.dev/customize/context/codebase</li>
+<li>Morph — <em>Fast Apply: Code Merging at 10,500 tok/s for AI
+Agents</em> — https://www.morphllm.com/fast-apply-model</li>
+<li>Plandex — GitHub repository + <em>Context Management</em> docs —
+https://github.com/plandex-ai/plandex and
+https://docs.plandex.ai/core-concepts/context-management/</li>
+<li>Charm — <em>Crush</em> (GitHub) —
+https://github.com/charmbracelet/crush</li>
+<li>Anthropic — <em>Extended 1-hour prompt-cache TTL announcement</em>
+(X) — https://x.com/AnthropicAI/status/1925633128174899453</li>
+</ol>
+<p><strong>Vendored sources inspected</strong> (in-repo,
+<code>/run/media/milosvasic/DATA4TB/Projects/HelixCode/cli_agents/</code>):
+<code>aider/aider/repomap.py</code> (867 lines — tree-sitter + networkx
+PageRank + diskcache SQLite + mtime invalidation),
+<code>aider/aider/coders/</code> (whole/diff/udiff/patch/editor edit
+formats),
+<code>claude-code-source/src/services/api/promptCacheBreakDetection.ts</code>
+(cache-prefix hashing + break diff),
+<code>claude-code-source/src/</code> (<code>main.tsx</code>,
+<code>ink.ts</code> — Node/React-ink runtime;
+<code>services/compact/compact.ts</code>),
+<code>gemini-cli/packages/core/src/context/</code> (contextManager,
+contextCompressionService, pipeline, jit-context),
+<code>cline/src/core/assistant-message/diff.ts</code>,
+<code>cline/src/core/task/tools/handlers/ApplyPatchHandler.ts</code>,
+<code>plandex/plandex/app/cli/</code> + <code>app/server/</code> (Go
+client/server), <code>crush/</code> (<code>go.mod</code> go 1.26.2;
+<code>internal/{agent,llm,diff,diffdetect,filetracker,lsp}</code>).</p>
+</body>
+</html>
