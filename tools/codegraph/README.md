@@ -1,13 +1,15 @@
 <!--
 ================================================================================
 Document:      tools/codegraph/README.md
-Revision:      1
+Revision:      2
 Last modified: 2026-05-20
 Authority:     Cascaded from HelixCode root CLAUDE.md / CONSTITUTION.md.
                Subordinate to constitution/ submodule (CONST-035 anti-bluff,
                CONST-050 no-fakes-beyond-unit-tests, CONST-051 decoupling,
-               CONST-053 .gitignore hygiene, CONST-052 lowercase snake_case).
-Task ID:       CG2 (scaffold tools/codegraph)
+               CONST-053 .gitignore hygiene, CONST-052 lowercase snake_case,
+               §11.4.74 submodule-catalogue-first).
+Task ID:       CG2 (scaffold) + CG15 (Phase D documentation)
+Catalogue-Check: no-match 2026-05-20
 ================================================================================
 -->
 
@@ -80,6 +82,37 @@ tools/codegraph/node_modules/.bin/codegraph query Provider # real symbols
 # 4. Verify end-to-end (Phase C).
 tools/codegraph/verify.sh
 ```
+
+## Per-agent registration
+
+CodeGraph is registered with each of the five HelixCode CLI agents as an MCP
+**stdio** server — the same process (`codegraph serve --mcp`) for all five;
+only the config file location and JSON/TOML shape differ. The `agents/`
+directory holds one idempotent registration helper per agent; run the one(s)
+you need:
+
+```bash
+tools/codegraph/agents/register-claude.sh    # → .mcp.json + mcp__codegraph__* permission
+tools/codegraph/agents/register-opencode.sh  # → opencode.jsonc (mcp.codegraph, command[] array)
+tools/codegraph/agents/register-kimi.sh      # → ~/.kimi/mcp.json (mcpServers shape)
+tools/codegraph/agents/register-crush.sh     # → .crush.json (mcp.codegraph, type stdio)
+tools/codegraph/agents/register-qwen.sh      # → .qwen/settings.json (mcpServers shape)
+```
+
+| Agent       | Config file (project scope) | Wrapper key  | command form      |
+|-------------|-----------------------------|--------------|-------------------|
+| Claude Code | `.mcp.json`                 | `mcpServers` | command + args    |
+| OpenCode    | `opencode.jsonc`            | `mcp`        | `command[]` array |
+| Kimi CLI    | `~/.kimi/mcp.json`          | `mcpServers` | command + args    |
+| Crush       | `.crush.json`               | `mcp`        | command + args    |
+| Qwen Code   | `.qwen/settings.json`       | `mcpServers` | command + args    |
+
+After registration, each agent exposes the eight `codegraph_*` tools. Verify
+the agent actually reaches CodeGraph (not just that the config file exists)
+with the agent's own MCP-list command — e.g. `claude mcp list`, `qwen mcp` —
+and confirm `codegraph` appears with its tools. A config file that merely
+*contains* the entry is NOT proof; the PASS bar is the agent invoking a
+`codegraph_*` tool and returning real graph data (CONST-035).
 
 ## Anti-bluff contract (CONST-035)
 

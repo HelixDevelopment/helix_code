@@ -1006,3 +1006,30 @@ Read /run/media/milosvasic/DATA4TB/Projects/helix_code/docs/CONTINUATION.md and 
 - HXC-009 reconcile remaining divergent owned-submodule mirrors (VisionEngine, LLMProvider).
 - HXC-008 fix the verifier path reference + cascade the missing CONST-047..057 / §11.4.69 anchors; re-run `verify-all-constitution-rules.sh` G1.
 
+---
+
+## close-out¹³³ — CodeGraph incorporation Phase D (CG14-CG16)
+
+**Date:** 2026-05-20
+**Theme:** CodeGraph (MCP code-graph server) incorporation Phase D — governance covenant sync + documentation + CONST-047 recursive sweep. Phases A+B (install, scan, five-agent registration) already landed; this close-out completes the governance/docs phase per `docs/research/codegraph/incorporation-plan.md` §6.
+
+### Work performed
+
+1. **CG14 — anti-bluff covenant gap fix.** Diffed root `QWEN.md` and `CRUSH.md` against the current `CLAUDE.md`/`AGENTS.md` CONST-0xx anchor set. Both were stale (last modified 2026-05-16, before the 2026-05-20 CLAUDE.md/AGENTS.md revisions): each carried CONST-035..059 but was **missing CONST-060 (Fetch-before-edit, §11.4.37) and the §11.4.68/70-74 anchor block** (Positive Sink-Side Evidence, Subagent-Driven-Default, Pre-Push Fetch+Investigate, Audio Top-Priority, Main-Spec Versioning, Submodule-Catalogue-First). Appended all six anchors verbatim from the canonical CLAUDE.md text to both files. Classification: universal (per §11.4.17) — consumer-side extension files mirroring the project-level anchors.
+
+2. **CG15 — documentation.** Updated `tools/codegraph/README.md` (Revision 2) — added per-agent registration section with the cross-agent config table and the `Catalogue-Check: no-match 2026-05-20` metadata line (§11.4.74 — CodeGraph is third-party, not in the vasic-digital/HelixDevelopment catalogue). Added a CodeGraph integration section to `docs/COMPLETE_CLI_REFERENCE.md` (install/init/scan/per-agent registration) and removed a stray closing-tag artefact at the end of that file. This close-out note added per CONST-044.
+
+3. **CG16 — CONST-047 recursive sweep.** Ran `scripts/verify-governance-cascade.sh` — **2 failures, both pre-existing and already tracked as HXC-008**: (a) `dependencies/HelixDevelopment/Models` verifier path-list entry out of sync with on-disk lowercase `models` dir; (b) `helix_qa/CONSTITUTION.md` missing CONST-047..057. Neither failure is caused by the QWEN.md/CRUSH.md/codegraph Phase-D changes — the covenant-sync edits introduce no new cascade gap. Owned-submodule CodeGraph-config assessment: no owned submodule (`helix_qa`, `challenges`, `containers`, `security`) currently warrants its own CodeGraph MCP wiring — the meta-repo + inner `helix_code/` graphs already cover the first-party Go code the agents query; a per-submodule graph would add maintenance cost for marginal benefit. Recorded as assessed-no-follow-up; revisit if a submodule grows a substantial standalone codebase queried independently.
+
+### State
+
+- `QWEN.md` + `CRUSH.md` now carry the complete CONST-035..060 + §11.4.68/70-74 anti-bluff covenant — fully in sync with `CLAUDE.md`/`AGENTS.md`.
+- `tools/codegraph/README.md` Revision 2; `docs/COMPLETE_CLI_REFERENCE.md` gains a CodeGraph section.
+- Cascade verifier: 2 pre-existing failures (HXC-008) unchanged — Phase D introduced no regression.
+- HTML+PDF exports regenerated for touched docs per §11.4.65.
+
+### Next
+
+- HXC-008 remains the path to clearing the 2 cascade-verifier failures.
+- CodeGraph Phase C anti-bluff Challenges (CG10-CG13) remain the outstanding incorporation work if not yet landed by a sibling session.
+

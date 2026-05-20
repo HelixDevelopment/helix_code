@@ -1028,5 +1028,49 @@ grep "ERROR" /var/log/helixcode/*.log
 grep "ERROR" /var/log/helixcode/*.log | cut -d' ' -f4 | sort | uniq -c
 ```
 
-This CLI reference provides comprehensive coverage of all HelixCode command-line tools and their usage patterns. For additional help, use `--help` flag with any command or refer to the specific documentation sections.</content>
-<parameter name="filePath">docs/COMPLETE_CLI_REFERENCE.md
+## CodeGraph integration (MCP code-graph server)
+
+HelixCode incorporates **CodeGraph** (`@colbymchenry/codegraph`, MIT) as a
+pinned, vendored third-party tool under `tools/codegraph/`. CodeGraph parses
+the codebase into a local SQLite knowledge graph of symbols and edges and
+serves it to CLI coding agents over the **Model Context Protocol (MCP)**, so
+an agent queries the graph instantly instead of running grep/glob/Read scans.
+
+It is not part of the `helix` binary — it is a developer-tooling layer wired
+into five CLI agents (Claude Code, OpenCode, Kimi CLI, Crush, Qwen Code).
+
+### Install + initialize + scan
+
+```bash
+# Install the pinned CodeGraph runtime (idempotent).
+tools/codegraph/install.sh
+
+# Initialize + scan (re-runnable any time).
+tools/codegraph/node_modules/.bin/codegraph init -i        # repo root
+cd helix_code && ../tools/codegraph/node_modules/.bin/codegraph init -i
+
+# Inspect the graph — non-zero node/edge/file counts prove the scan worked.
+tools/codegraph/node_modules/.bin/codegraph status .
+tools/codegraph/node_modules/.bin/codegraph query Provider
+```
+
+### Per-agent registration
+
+```bash
+tools/codegraph/agents/register-claude.sh    # .mcp.json + mcp__codegraph__* permission
+tools/codegraph/agents/register-opencode.sh  # opencode.jsonc
+tools/codegraph/agents/register-kimi.sh      # ~/.kimi/mcp.json
+tools/codegraph/agents/register-crush.sh     # .crush.json
+tools/codegraph/agents/register-qwen.sh      # .qwen/settings.json
+```
+
+Each agent then exposes eight `codegraph_*` MCP tools (`codegraph_search`,
+`codegraph_context`, `codegraph_callers`, `codegraph_callees`,
+`codegraph_impact`, `codegraph_node`, `codegraph_files`, `codegraph_status`).
+
+Full detail: `tools/codegraph/README.md` and the incorporation plan at
+`docs/research/codegraph/incorporation-plan.md`.
+
+---
+
+This CLI reference provides comprehensive coverage of all HelixCode command-line tools and their usage patterns. For additional help, use `--help` flag with any command or refer to the specific documentation sections.
