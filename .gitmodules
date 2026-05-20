@@ -307,8 +307,8 @@
 [submodule "dependencies/vasic-digital/BackgroundTasks"]
 	path = dependencies/vasic-digital/BackgroundTasks
 	url = git@github.com:vasic-digital/BackgroundTasks.git
-[submodule "dependencies/vasic-digital/DocProcessor"]
-	path = dependencies/vasic-digital/DocProcessor
+[submodule "dependencies/vasic-digital/doc_processor"]
+	path = dependencies/vasic-digital/doc_processor
 	url = git@github.com:vasic-digital/DocProcessor.git
 [submodule "dependencies/vasic-digital/conversation"]
 	path = dependencies/vasic-digital/conversation
@@ -316,8 +316,8 @@
 [submodule "dependencies/vasic-digital/LLMOrchestrator"]
 	path = dependencies/vasic-digital/LLMOrchestrator
 	url = git@github.com:vasic-digital/LLMOrchestrator.git
-[submodule "dependencies/vasic-digital/VisionEngine"]
-	path = dependencies/vasic-digital/VisionEngine
+[submodule "dependencies/vasic-digital/vision_engine"]
+	path = dependencies/vasic-digital/vision_engine
 	url = git@github.com:vasic-digital/VisionEngine.git
 [submodule "dependencies/HelixDevelopment/HelixLLM"]
 	path = dependencies/HelixDevelopment/HelixLLM
@@ -328,35 +328,35 @@
 [submodule "dependencies/vasic-digital/RedTeam"]
 	path = dependencies/vasic-digital/RedTeam
 	url = git@github.com:vasic-digital/RedTeam.git
-[submodule "dependencies/vasic-digital/PliniusCommon"]
-	path = dependencies/vasic-digital/PliniusCommon
+[submodule "dependencies/vasic-digital/plinius_common"]
+	path = dependencies/vasic-digital/plinius_common
 	url = git@github.com:vasic-digital/PliniusCommon.git
-[submodule "dependencies/vasic-digital/GandalfSolutions"]
-	path = dependencies/vasic-digital/GandalfSolutions
+[submodule "dependencies/vasic-digital/gandalf_solutions"]
+	path = dependencies/vasic-digital/gandalf_solutions
 	url = git@github.com:vasic-digital/GandalfSolutions.git
-[submodule "dependencies/vasic-digital/AutoTemp"]
-	path = dependencies/vasic-digital/AutoTemp
+[submodule "dependencies/vasic-digital/auto_temp"]
+	path = dependencies/vasic-digital/auto_temp
 	url = git@github.com:vasic-digital/AutoTemp.git
-[submodule "dependencies/vasic-digital/HyperTune"]
-	path = dependencies/vasic-digital/HyperTune
+[submodule "dependencies/vasic-digital/hyper_tune"]
+	path = dependencies/vasic-digital/hyper_tune
 	url = git@github.com:vasic-digital/HyperTune.git
-[submodule "dependencies/vasic-digital/I-LLM"]
-	path = dependencies/vasic-digital/I-LLM
+[submodule "dependencies/vasic-digital/i_llm"]
+	path = dependencies/vasic-digital/i_llm
 	url = git@github.com:vasic-digital/I-LLM.git
 [submodule "dependencies/vasic-digital/Streaming"]
 	path = dependencies/vasic-digital/Streaming
 	url = git@github.com:vasic-digital/Streaming.git
-[submodule "dependencies/vasic-digital/Veritas"]
-	path = dependencies/vasic-digital/Veritas
+[submodule "dependencies/vasic-digital/veritas"]
+	path = dependencies/vasic-digital/veritas
 	url = git@github.com:vasic-digital/Veritas.git
-[submodule "dependencies/vasic-digital/LeakHub"]
-	path = dependencies/vasic-digital/LeakHub
+[submodule "dependencies/vasic-digital/leak_hub"]
+	path = dependencies/vasic-digital/leak_hub
 	url = git@github.com:vasic-digital/LeakHub.git
-[submodule "dependencies/vasic-digital/Claritas"]
-	path = dependencies/vasic-digital/Claritas
+[submodule "dependencies/vasic-digital/claritas"]
+	path = dependencies/vasic-digital/claritas
 	url = git@github.com:vasic-digital/Claritas.git
-[submodule "dependencies/vasic-digital/Ouroborous"]
-	path = dependencies/vasic-digital/Ouroborous
+[submodule "dependencies/vasic-digital/ouroborous"]
+	path = dependencies/vasic-digital/ouroborous
 	url = git@github.com:vasic-digital/Ouroborous.git
 [submodule "dependencies/vasic-digital/Config"]
 	path = dependencies/vasic-digital/Config

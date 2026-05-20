@@ -16,7 +16,7 @@ Every data row in `COVERAGE_LEDGER.md` has exactly 11 columns:
 
 | # | Column | Type | Required | Description |
 |---|--------|------|----------|-------------|
-| 1 | Submodule | string | yes | Path-from-repo-root identifier per `docs/improvements/submodule_owned.txt` (e.g. `dependencies/vasic-digital/AutoTemp`, `helix_qa`, `challenges`). |
+| 1 | Submodule | string | yes | Path-from-repo-root identifier per `docs/improvements/submodule_owned.txt` (e.g. `dependencies/vasic-digital/auto_temp`, `helix_qa`, `challenges`). |
 | 2 | Feature | string | yes | Short description of the capability under audit (e.g. `grid-search temperature tuning`, `OpenCode CLI adapter`). May be `whole-module` for submodules audited as one unit. |
 | 3 | Platform | string | yes | Comma-separated platform list from {`linux`, `macos`, `windows`, `ios`, `android`, `aurora-os`, `harmony-os`, `containers`, `headless`}. `all-platforms` permitted only for platform-agnostic Go code. |
 | 4-9 | I1..I6 | status | yes | CONST-048 invariant status per §2 vocabulary below. |

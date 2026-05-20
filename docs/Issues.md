@@ -42,8 +42,8 @@ Round 189 (2026-05-19) introduced per-project / per-submodule ID prefixes replac
 | CNV | conversation submodule (vasic-digital) | `dependencies/vasic-digital/conversation` |
 | AUT | Auth submodule (vasic-digital) | `dependencies/vasic-digital/Auth` |
 | LZY | Lazy submodule (vasic-digital) | `dependencies/vasic-digital/Lazy` |
-| ATP | AutoTemp submodule (vasic-digital) | `dependencies/vasic-digital/AutoTemp` |
-| PLI | PliniusCommon submodule (vasic-digital) | `dependencies/vasic-digital/PliniusCommon` |
+| ATP | AutoTemp submodule (vasic-digital) | `dependencies/vasic-digital/auto_temp` |
+| PLI | PliniusCommon submodule (vasic-digital) | `dependencies/vasic-digital/plinius_common` |
 | CHL | challenges submodule (vasic-digital) | `challenges/` |
 | CNT | containers submodule | `containers/` |
 | SEC | security submodule | `security/` |
@@ -148,23 +148,15 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ## HXA-002 (ex-ISSUE-010) — helix_agent debate/llmprovider sibling-submodule API drift
 
-**Status:** Queued — BLOCKED on cross-submodule API-design decision
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 109)
 **Discovered-By:** AI subagent
 **Investigated:** 2026-05-20 (round 324) — split into a mechanical part and a design-decision part.
-
-**Round-324 findings (forensic, anti-bluff):**
-The original "3 build-failed packages" framing was imprecise. `go build ./...` in `helix_agent/` (replace dirs resolve to the meta-repo's `dependencies/` tree) reveals TWO distinct, layered drift sources — only ONE was the debate submodule:
-
-1. **`digital.vasic.llmprovider` package-move drift — MECHANICAL, ready to apply.**
-   `digital.vasic.llmprovider/provider.go` `LLMProvider` interface now uses its OWN in-module `digital.vasic.llmprovider/pkg/models` type package; it no longer depends on the separate `digital.vasic.models` (`Models`) submodule. `helix_agent/internal/services/debate_integration/provider_bridge.go` (production) + `mock_test.go` + `provider_bridge_leak_test.go` (unit tests) still import `digital.vasic.models`, so `*adaptedProvider` fails to satisfy `llmprovider.LLMProvider`. **Fix is a 1-line import swap per file** (`digital.vasic.models` → `digital.vasic.llmprovider/pkg/models`; the two type packages are structurally identical so the JSON-marshal conversion to internal `models` still holds). Verified: with that swap, `go build ./...` is exit-0 clean. This portion is agent-actionable and was held back ONLY because committing it alone leaves the package's test binary still uncompilable (see point 2) — a CONST-035 partial-state bluff.
-
-2. **`digital.vasic.debate/orchestrator` capability-tier removal — GENUINE DESIGN DECISION, blocked.**
-   After fixing (1), the `debate_integration` test binary still fails: `integration_test.go` + `tests/integration/debate_full_flow_test.go` reference an OLDER, much richer debate orchestrator API that the current slim `orchestrator` package no longer exposes. Removed symbols: `APIAdapter.ConvertAPIRequest`, `APIAdapter.GetDebateStatus`, `APIAdapter.CancelDebate`, `Orchestrator.GetKnowledgeRepository`, `Orchestrator.GetRecommendations`, and `APIStatistics.{TotalLessons,TotalPatterns,TotalDebatesLearned}` (now `{TotalDebates,ActiveDebates,CompletedDebates}`), plus `OrchestratorConfig.{DefaultMinConsensus,MaxAgentsPerDebate,EnableAgentDiversity}`. The current `APIAdapter` exposes only `CreateDebate` + `GetStatistics`. An entire learning / knowledge-repository / recommendations capability tier was deliberately dropped from `DebateOrchestrator`.
-
-**Resolution path (precise operator question):**
-The debate orchestrator is NOT mid-flux — it is a stable, deliberately slimmer rewrite. The blocked decision is: **should `DebateOrchestrator` re-expose the learning / knowledge-repository / recommendations capability tier (so the existing helix_agent integration tests can be restored verbatim), OR should those helix_agent integration tests be rewritten down to the slim `CreateDebate`/`GetStatistics` surface — accepting the loss of test coverage for learning, knowledge-repository, and recommendations behaviour?** A subagent must not pick (it determines whether a whole feature tier is in or out of the debate product). Once decided: if "re-expose", reinstate the removed methods on `DebateOrchestrator` then apply the mechanical (1) swap; if "rewrite tests down", drop the learning/knowledge/recommendations assertions in `integration_test.go` + `debate_full_flow_test.go` and apply the (1) swap. Either way the (1) import swap (3 files, 1 line each, evidence above) ships in the same change.
+**Closed:** 2026-05-20 (round 342)
+**Closure-Ref:** helix_agent commit (round-342 HXA-002 debate API drift) + meta-repo `.gitmodules` pointer-bump
+**Investigation finding (operator's explicit ask — moved vs deleted):** The learning/knowledge/recommendations capability tier was **genuinely DELETED, not moved**. `git log` on the `digital.vasic.debate` submodule (`dependencies/HelixDevelopment/debate_orchestrator`, renamed from `DebateOrchestrator` per CONST-052) shows the orchestrator was rebuilt from scratch — commit `196d0ea` "feat: initial DebateOrchestrator reconstruction (Phase 1)". `orchestrator/api.go` has carried only the slim `CreateDebate`/`GetStatistics` surface since that very first commit (`git log --follow orchestrator/api.go` = single entry). A tree-wide `grep` of `dependencies/` for `KnowledgeRepository`, `GetRecommendations`, `ConvertAPIRequest`, `GetDebateStatus`, `DefaultMinConsensus`, `MaxAgentsPerDebate`, `EnableAgentDiversity` found **zero** surviving copies in any `digital.vasic.*` package or in HelixSpecifier/HelixMemory. The slim API is the first and only version — the richer tier was a pre-reconstruction artifact that no longer exists anywhere. Per the operator's chosen direction for the deleted case, the helix_agent tests were rewritten down to the slim API.
+**Resolution:** See `docs/Fixed.md` row for the full closure narrative (Part-1 import swap + Part-2 slim-API rewrite + score-scale + go.mod rename-drift fix + captured evidence).
 
 ---
 

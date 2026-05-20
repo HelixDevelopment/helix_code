@@ -71,7 +71,7 @@ was attempted (this round). It surfaced a SECOND conflict:
 ```
 go: conflicting replacements for digital.vasic.docprocessor:
     .../dependencies/HelixDevelopment/DocProcessor
-    .../dependencies/vasic-digital/DocProcessor
+    .../dependencies/vasic-digital/doc_processor
 ```
 
 Both repos declare `module digital.vasic.docprocessor` even though
@@ -105,7 +105,7 @@ parent-build coexistence is incidental.
 - `helix_code/go.mod` → `replace digital.vasic.docprocessor =>
   ../dependencies/HelixDevelopment/DocProcessor`
 - `helix_agent/go.mod` → `replace digital.vasic.docprocessor =>
-  ../dependencies/vasic-digital/DocProcessor`
+  ../dependencies/vasic-digital/doc_processor`
 
 The previous `go.work` attempt failed because it tried to register
 **both** sides under one workspace. But neither consumer needs both;
