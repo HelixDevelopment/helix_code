@@ -255,6 +255,88 @@ func TestLocalLLMI18n_Round434ResidualRuntimeNoopEcho(t *testing.T) {
 	}
 }
 
+// round442ResidualIDs is the closed set of message IDs introduced by the
+// round-442 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+// helix_code/cmd/local_llm.go residual round-4 — 5 cobra command groups
+// (share / download-all / list-shared / optimize / sync) Short+Long
+// metadata plus the model-share / download-for-all / optimize / sync
+// runtime output strings.
+var round442ResidualIDs = []string{
+	"cmd_local_llm_share_short",
+	"cmd_local_llm_share_long",
+	"cmd_local_llm_download_all_short",
+	"cmd_local_llm_download_all_long",
+	"cmd_local_llm_list_shared_short",
+	"cmd_local_llm_list_shared_long",
+	"cmd_local_llm_optimize_short",
+	"cmd_local_llm_optimize_long",
+	"cmd_local_llm_sync_short",
+	"cmd_local_llm_sync_long",
+	"cmd_local_llm_sharing_model",
+	"cmd_local_llm_target_provider",
+	"cmd_local_llm_model_shared_ok",
+	"cmd_local_llm_downloading_all",
+	"cmd_local_llm_downloaded_shared_ok",
+	"cmd_local_llm_optimizing_model",
+	"cmd_local_llm_model_optimized_ok",
+	"cmd_local_llm_sync_start",
+	"cmd_local_llm_sync_none_downloaded",
+	"cmd_local_llm_sync_hint_download",
+	"cmd_local_llm_sync_found_count",
+	"cmd_local_llm_sync_processing",
+	"cmd_local_llm_sync_check_failed",
+	"cmd_local_llm_sync_not_compatible",
+	"cmd_local_llm_sync_conversion_required",
+	"cmd_local_llm_sync_conversion_failed",
+	"cmd_local_llm_sync_converted_ok",
+	"cmd_local_llm_sync_already_compatible",
+	"cmd_local_llm_sync_share_failed",
+	"cmd_local_llm_sync_completed",
+	"cmd_local_llm_sync_all_ok",
+	"cmd_local_llm_sync_some_failed",
+}
+
+// TestLocalLLMI18n_Round442ResidualRoutesThroughSeam is the paired-mutation
+// anti-bluff guard for the round-442 migration: it wires a sentinel
+// Translator and asserts every share/download-all/list-shared/optimize/sync
+// message ID resolves THROUGH it (sentinel present) — proving the cobra
+// metadata + runtime output are no longer frozen English literals.
+// Re-inlining any would drop the sentinel and FAIL this test.
+func TestLocalLLMI18n_Round442ResidualRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	ctx := context.Background()
+	for _, id := range round442ResidualIDs {
+		got := tr(ctx, id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-442 residual ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-442 residual ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
+}
+
+// TestLocalLLMI18n_Round442ResidualNoopEcho proves the round-442 IDs
+// degrade to a loud message-ID echo when no translator is wired — never a
+// silent empty string (which would be a §11.4 PASS-bluff at the i18n
+// layer). Also covers the trc() construction-time path for cobra metadata.
+func TestLocalLLMI18n_Round442ResidualNoopEcho(t *testing.T) {
+	SetTranslator(nil) // explicit NoopTranslator
+	ctx := context.Background()
+	for _, id := range round442ResidualIDs {
+		got := tr(ctx, id, nil)
+		if got != id {
+			t.Errorf("round-442 residual ID %q must echo verbatim under NoopTranslator: got %q", id, got)
+		}
+		gotC := trc(id, nil)
+		if gotC != id {
+			t.Errorf("round-442 residual ID %q must echo verbatim through trc(): got %q", id, gotC)
+		}
+	}
+}
+
 // TestLocalLLMI18n_Round426ModelsMetadataRoutesThroughSeam is the
 // paired-mutation anti-bluff guard for the round-426 migration: it wires a
 // sentinel Translator and asserts every `models` command-group + flag-help

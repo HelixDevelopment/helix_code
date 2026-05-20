@@ -601,3 +601,139 @@ cmd_local_llm_models_hint_download:
 
 cmd_local_llm_models_none_for_query:
   other: "❌ No models found for query: {{.Query}}"
+
+# --- round-442 §11.4 — cmd/local_llm.go residual round-4 (CONST-046 Phase 4) ---
+
+cmd_local_llm_share_short:
+  other: "Share a model with all compatible providers"
+
+cmd_local_llm_share_long:
+  other: |-
+    Share a downloaded model with all compatible providers by creating
+    symlinks or copying to provider model directories.
+
+    This enables models downloaded for one provider to be used by
+    all other compatible providers without re-downloading.
+
+    Examples:
+      helix local-llm share ./models/llama-3-8b.gguf
+      helix local-llm share ./models/mistral-7b.gguf --provider vllm
+
+cmd_local_llm_download_all_short:
+  other: "Download a model and make it available to all providers"
+
+cmd_local_llm_download_all_long:
+  other: |-
+    Download a model in the most compatible format and automatically
+    share it with all compatible providers. This ensures the model can
+    be used by any provider without manual conversion.
+
+    Examples:
+      helix local-llm download-all llama-3-8b-instruct
+      helix local-llm download-all mistral-7b-instruct --format gguf
+
+cmd_local_llm_list_shared_short:
+  other: "List models shared across providers"
+
+cmd_local_llm_list_shared_long:
+  other: |-
+    List all models that are shared across multiple providers,
+    showing which providers have access to each model.
+
+    This helps you understand which models are available to
+    which providers without additional downloads.
+
+cmd_local_llm_optimize_short:
+  other: "Optimize a model for a specific provider"
+
+cmd_local_llm_optimize_long:
+  other: |-
+    Optimize a model specifically for a target provider by converting
+    it to the optimal format and applying provider-specific optimizations.
+
+    This ensures maximum performance and compatibility for the target provider.
+
+    Examples:
+      helix local-llm optimize ./model.gguf --provider vllm
+      helix local-llm optimize ./model.hf --provider llamacpp
+
+cmd_local_llm_sync_short:
+  other: "Synchronize models across all providers"
+
+cmd_local_llm_sync_long:
+  other: |-
+    Synchronize all downloaded models across providers by sharing
+    compatible models and converting when necessary. This ensures all
+    providers have access to all available models.
+
+    This command will:
+    - Scan all provider model directories
+    - Share compatible models across providers
+    - Convert models when needed for compatibility
+    - Report any incompatibilities or conversion failures
+
+cmd_local_llm_sharing_model:
+  other: "🔗 Sharing model: {{.Model}}"
+
+cmd_local_llm_target_provider:
+  other: "🎯 Target provider: {{.Provider}}"
+
+cmd_local_llm_model_shared_ok:
+  other: "✅ Model shared successfully!"
+
+cmd_local_llm_downloading_all:
+  other: "🌐 Downloading model for all providers: {{.Model}}"
+
+cmd_local_llm_downloaded_shared_ok:
+  other: "✅ Model downloaded and shared with all compatible providers!"
+
+cmd_local_llm_optimizing_model:
+  other: "⚡ Optimizing model: {{.Model}}"
+
+cmd_local_llm_model_optimized_ok:
+  other: "✅ Model optimized and shared for {{.Provider}}!"
+
+cmd_local_llm_sync_start:
+  other: "🔄 Synchronizing models across all providers..."
+
+cmd_local_llm_sync_none_downloaded:
+  other: "❌ No downloaded models found"
+
+cmd_local_llm_sync_hint_download:
+  other: "💡 Use 'helix local-llm models download <model-id>' to download models first"
+
+cmd_local_llm_sync_found_count:
+  other: "📊 Found {{.Count}} downloaded models"
+
+cmd_local_llm_sync_processing:
+  other: "🔗 Processing: {{.Model}} ({{.Format}})"
+
+cmd_local_llm_sync_check_failed:
+  other: "  ⚠️  {{.Provider}}: failed to check compatibility - {{.Error}}"
+
+cmd_local_llm_sync_not_compatible:
+  other: "  ❌ {{.Provider}}: not compatible"
+
+cmd_local_llm_sync_conversion_required:
+  other: "  🔄 {{.Provider}}: conversion required ({{.Minutes}} min est.)"
+
+cmd_local_llm_sync_conversion_failed:
+  other: "    ❌ Conversion failed: {{.Error}}"
+
+cmd_local_llm_sync_converted_ok:
+  other: "    ✅ Converted successfully"
+
+cmd_local_llm_sync_already_compatible:
+  other: "  ✅ {{.Provider}}: already compatible"
+
+cmd_local_llm_sync_share_failed:
+  other: "    ❌ Failed to share: {{.Error}}"
+
+cmd_local_llm_sync_completed:
+  other: "📊 Sync completed: {{.Synced}} successful, {{.Errors}} errors"
+
+cmd_local_llm_sync_all_ok:
+  other: "✅ All models synchronized successfully!"
+
+cmd_local_llm_sync_some_failed:
+  other: "⚠️  {{.Errors}} models failed to sync. Check logs for details."
