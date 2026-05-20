@@ -1,0 +1,13 @@
+Agent: kimi
+Result: connect-only (agent could not be driven to a real codegraph answer)
+Config: /home/milosvasic/.kimi/mcp.json
+Tools discovered in agent MCP loader: yes
+--- codegraph entry in config ---
+3:    "codegraph": {
+4:      "command": "/run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph/node_modules/.bin/codegraph",
+5-      "args": [
+6-        "serve",
+7-        "--mcp",
+8-        "--path",
+9-        "/run/media/milosvasic/DATA4TB/Projects/HelixCode"
+10-      ]

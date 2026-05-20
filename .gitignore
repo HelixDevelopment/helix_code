@@ -77,7 +77,12 @@ helix_code/external/memory/baseai/
 
 # Generated test challenges and results (but not the framework)
 helix_code/challenges/
-challenges/
+/challenges/
+
+# CodeGraph Phase-C anti-bluff Challenge scripts + bank are first-party
+# source (committed) — exempt from the broad challenges/ ignore (CONST-053
+# recreatable-content test: these are the generator/source, not artefacts).
+!tools/codegraph/challenges/
 
 # Allow the e2e challenge testing framework but ignore test results
 !helix_code/tests/e2e/challenges/

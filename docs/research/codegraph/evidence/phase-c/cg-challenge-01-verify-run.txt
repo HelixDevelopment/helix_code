@@ -1,0 +1,20 @@
+=== CodeGraph Layer-A verification (CG-CHALLENGE-01) ===
+repo-root: /run/media/milosvasic/DATA4TB/Projects/HelixCode
+binary:    /run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph/node_modules/.bin/codegraph
+
+[1/3] codegraph status . --json
+  files=39022 nodes=624092 edges=1644454
+  PASS: status reports non-zero counts (files=39022 nodes=624092 edges=1644454)
+
+[2/3] codegraph query Provider --json --limit 10
+  go-symbol hits=10 of total=10
+  PASS: query returned 10 real Go 'Provider' symbol(s)
+
+[3/3] codegraph context "add a new LLM provider"
+  PASS: context built (2509 bytes) referencing real repo files
+
+[guard] anti-bluff token scan of captured evidence
+  PASS: no simulated/placeholder result tokens in captured evidence
+
+=== Layer-A summary: 4 passed, 0 failed ===
+CG-CHALLENGE-01: PASS — evidence in /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/research/codegraph/evidence/phase-c

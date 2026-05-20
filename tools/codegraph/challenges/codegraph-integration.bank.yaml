@@ -1,0 +1,165 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: CodeGraph Integration (HelixCode Phase C — CG13)
+#
+# Anti-bluff verification that the third-party CodeGraph code-knowledge-graph
+# tool genuinely works end-to-end for HelixCode and its five CLI agents.
+# Every test case shells out to a real CodeGraph Challenge script under
+# tools/codegraph/challenges/ — each Challenge runs real codegraph commands /
+# real JSON-RPC / real agent invocations and FAILS LOUDLY on empty, zero, or
+# simulated results. A green line here is impossible unless codegraph really
+# works (CONST-035, Article XI §11.9, CONST-050(B)).
+#
+# Authority: HelixCode root CLAUDE.md / CONSTITUTION.md (CONST-035,
+#            CONST-050(B), CONST-051(B) decoupling, §11.4.3 topology-aware
+#            dispatch).
+# Plan:      docs/research/codegraph/incorporation-plan.md §5 (anti-bluff
+#            test plan) + §6 Phase C (CG10-CG13).
+#
+# DECOUPLING NOTE (CONST-051(B)): this bank references HelixCode-specific
+# Challenge paths, so it is stored in the HelixCode meta-repo tree — NOT
+# inside the project-not-aware helix_qa submodule. The helix_qa runner
+# consumes it via an explicit path argument, keeping helix_qa fully
+# reusable and decoupled:
+#   helixqa run -banks tools/codegraph/challenges/codegraph-integration.bank.yaml
+#
+# All paths are relative to the HelixCode repo root. Run this bank from the
+# HelixCode repo root so the codegraph .codegraph/ index is discovered.
+
+version: "1.0"
+name: "CodeGraph Integration"
+description: "Anti-bluff Phase-C verification: CodeGraph indexes the real HelixCode repo, the MCP transport answers real JSON-RPC, and all 5 CLI agents reach codegraph. Each test runs a real Challenge script that fails loudly on empty/zero/simulated results."
+metadata:
+  author: "vasic-digital"
+  app: "HelixCode"
+  category: "codegraph-integration"
+  priority: "critical"
+  version: "1.0.0"
+
+test_cases:
+  - id: CG-CHALLENGE-01
+    name: "Layer A — CodeGraph works on the real HelixCode repo"
+    category: integration
+    priority: critical
+    platforms: [linux]
+    steps:
+      - name: "Run codegraph status + query + context against the real repo"
+        action: "bash tools/codegraph/challenges/cg-challenge-01-layer-a.sh"
+        expected: "Exit 0; status reports non-zero files/nodes/edges; query Provider returns real Go symbols; context references real repo files; no simulated/placeholder values"
+    tags: [codegraph, anti-bluff, layer-a]
+    estimated_duration: "120s"
+    expected_result: "CodeGraph genuinely indexed HelixCode and answers real queries"
+    fix_reference:
+      bug_id: "CG10"
+      description: "Layer-A proof that CodeGraph works on the real HelixCode repository"
+      fix_file: "tools/codegraph/verify.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-02
+    name: "Layer B — CodeGraph MCP server answers real JSON-RPC"
+    category: integration
+    priority: critical
+    platforms: [linux]
+    steps:
+      - name: "Drive codegraph serve --mcp with initialize + tools/list + tools/call over stdio"
+        action: "bash tools/codegraph/challenges/cg-challenge-02-layer-b.sh"
+        expected: "Exit 0; initialize returns serverInfo; tools/list lists 9 codegraph_* tools; tools/call codegraph_search returns real graph data; JSON-RPC wire transcript captured"
+    tags: [codegraph, anti-bluff, layer-b, mcp, json-rpc]
+    estimated_duration: "70s"
+    expected_result: "MCP transport works end-to-end; wire transcript captured as evidence"
+    fix_reference:
+      bug_id: "CG11"
+      description: "Layer-B proof that the CodeGraph MCP transport answers real JSON-RPC"
+      fix_file: "tools/codegraph/challenges/cg-challenge-02-layer-b.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-03
+    name: "Layer C — Claude Code reaches CodeGraph (PRIMARY agent)"
+    category: e2e
+    priority: critical
+    platforms: [linux]
+    steps:
+      - name: "Drive claude -p to invoke mcp__codegraph__codegraph_search"
+        action: "bash tools/codegraph/challenges/cg-challenge-03-claude.sh"
+        expected: "Exit 0; Claude Code invokes codegraph_search and returns a real .go symbol path (true end-to-end), or honest connect-only fallback"
+    tags: [codegraph, anti-bluff, layer-c, claude]
+    estimated_duration: "230s"
+    expected_result: "Claude Code (primary) reaches CodeGraph and returns real graph data"
+    fix_reference:
+      bug_id: "CG12"
+      description: "Layer-C proof that Claude Code reaches CodeGraph"
+      fix_file: "tools/codegraph/challenges/cg-challenge-03-claude.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-04
+    name: "Layer C — OpenCode reaches CodeGraph"
+    category: e2e
+    priority: high
+    platforms: [linux]
+    steps:
+      - name: "Drive opencode run to invoke codegraph_search"
+        action: "bash tools/codegraph/challenges/cg-challenge-04-opencode.sh"
+        expected: "Exit 0; OpenCode invokes codegraph_search and returns a real .go symbol path (true end-to-end), or honest connect-only fallback"
+    tags: [codegraph, anti-bluff, layer-c, opencode]
+    estimated_duration: "230s"
+    expected_result: "OpenCode reaches CodeGraph and returns real graph data"
+    fix_reference:
+      bug_id: "CG12"
+      description: "Layer-C proof that OpenCode reaches CodeGraph"
+      fix_file: "tools/codegraph/challenges/cg-challenge-04-opencode.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-05
+    name: "Layer C — Kimi CLI reaches CodeGraph"
+    category: e2e
+    priority: high
+    platforms: [linux]
+    steps:
+      - name: "Drive kimi --print --yolo -p to invoke codegraph_search"
+        action: "bash tools/codegraph/challenges/cg-challenge-05-kimi.sh"
+        expected: "Exit 0; Kimi invokes codegraph_search and returns a real .go symbol path (true end-to-end), or honest connect-only + tool-discovery fallback when LLM quota blocks the answer"
+    tags: [codegraph, anti-bluff, layer-c, kimi]
+    estimated_duration: "230s"
+    expected_result: "Kimi CLI reaches CodeGraph"
+    fix_reference:
+      bug_id: "CG12"
+      description: "Layer-C proof that Kimi CLI reaches CodeGraph"
+      fix_file: "tools/codegraph/challenges/cg-challenge-05-kimi.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-06
+    name: "Layer C — Crush reaches CodeGraph"
+    category: e2e
+    priority: high
+    platforms: [linux]
+    steps:
+      - name: "Drive crush run to invoke codegraph_search"
+        action: "bash tools/codegraph/challenges/cg-challenge-06-crush.sh"
+        expected: "Exit 0; Crush invokes codegraph_search and returns a real .go symbol path (true end-to-end), or honest connect-only fallback"
+    tags: [codegraph, anti-bluff, layer-c, crush]
+    estimated_duration: "230s"
+    expected_result: "Crush reaches CodeGraph"
+    fix_reference:
+      bug_id: "CG12"
+      description: "Layer-C proof that Crush reaches CodeGraph"
+      fix_file: "tools/codegraph/challenges/cg-challenge-06-crush.sh"
+      fix_commit: "pending"
+
+  - id: CG-CHALLENGE-07
+    name: "Layer C — Qwen Code reaches CodeGraph"
+    category: e2e
+    priority: high
+    platforms: [linux]
+    steps:
+      - name: "Drive qwen -p to invoke codegraph_search"
+        action: "bash tools/codegraph/challenges/cg-challenge-07-qwen.sh"
+        expected: "Exit 0; Qwen Code invokes codegraph_search and returns a real .go symbol path (true end-to-end), or honest connect-only fallback when LLM credentials are unavailable"
+    tags: [codegraph, anti-bluff, layer-c, qwen]
+    estimated_duration: "230s"
+    expected_result: "Qwen Code reaches CodeGraph"
+    fix_reference:
+      bug_id: "CG12"
+      description: "Layer-C proof that Qwen Code reaches CodeGraph"
+      fix_file: "tools/codegraph/challenges/cg-challenge-07-qwen.sh"
+      fix_commit: "pending"

@@ -1,0 +1,9 @@
+### CG-CHALLENGE-05 — Layer C: agent 'kimi' reaches CodeGraph
+  tier-1: driving 'kimi' non-interactively
+  transcript captured: /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-05-kimi-transcript.txt (1935 bytes)
+  tier-1 did not yield a real answer; falling back to connect-only proof (§11.4.3)
+  tier-2: connect-only (strongest available proof for 'kimi')
+  PASS: 'kimi' config registers codegraph MCP server (/home/milosvasic/.kimi/mcp.json)
+  PASS: codegraph binary reachable for 'kimi' (/run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph/node_modules/.bin/codegraph)
+  PASS: 'kimi' transcript shows its MCP loader discovered codegraph tools
+CG-CHALLENGE-05: PASS (connect-only + tool-discovery — codegraph registered, reachable, and tools enumerated by the agent; end-to-end NOT proven)

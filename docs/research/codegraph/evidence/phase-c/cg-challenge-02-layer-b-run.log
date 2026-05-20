@@ -1,0 +1,8 @@
+### CG-CHALLENGE-02 — Layer B (MCP JSON-RPC transport)
+  wire transcript captured: /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/research/codegraph/evidence/phase-c/cg-challenge-02-jsonrpc-wire.jsonl (3 lines)
+  PASS: initialize -> serverInfo: {'name': 'codegraph', 'version': '0.1.0'}
+  PASS: tools/list -> 9 codegraph tools: ['codegraph_callees', 'codegraph_callers', 'codegraph_context', 'codegraph_explore', 'codegraph_files', 'codegraph_impact', 'codegraph_node', 'codegraph_search', 'codegraph_status']
+  PASS: tools/call codegraph_search -> real graph data (939 chars)
+        first line: ## Search Results (10 found)
+
+CG-CHALLENGE-02: PASS — JSON-RPC wire transcript proves MCP transport works

@@ -1,0 +1,6 @@
+### CG-CHALLENGE-06 — Layer C: agent 'crush' reaches CodeGraph
+  tier-1: driving 'crush' non-interactively
+  transcript captured: /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-06-crush-transcript.txt (78 bytes)
+  PASS: 'crush' invoked codegraph and returned a REAL symbol path:
+        docs/helix_qa/HelixQA_Integration/research/testdata/raw/pkg_llm_provider.go
+CG-CHALLENGE-06: PASS (true end-to-end — agent invoked codegraph_* and returned real graph data)

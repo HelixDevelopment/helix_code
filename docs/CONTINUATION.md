@@ -1033,3 +1033,32 @@ Read /run/media/milosvasic/DATA4TB/Projects/helix_code/docs/CONTINUATION.md and 
 - HXC-008 remains the path to clearing the 2 cascade-verifier failures.
 - CodeGraph Phase C anti-bluff Challenges (CG10-CG13) remain the outstanding incorporation work if not yet landed by a sibling session.
 
+---
+
+## close-out¹³⁴ — CodeGraph incorporation Phase C (CG10-CG13)
+
+**Date:** 2026-05-20
+**Theme:** CodeGraph (MCP code-graph server) incorporation Phase C — anti-bluff verification per `docs/research/codegraph/incorporation-plan.md` §5 + §6. Proves CodeGraph genuinely works end-to-end on the real HelixCode repo and reaches all five CLI agents (CONST-035 / Article XI §11.9).
+
+### Work performed
+
+1. **CG10 — Layer A.** Replaced the `tools/codegraph/verify.sh` stub with the real end-to-end proof: `codegraph status` (asserts non-zero files/nodes/edges — 39 022 / 624 092 / 1 644 454 captured), `codegraph query Provider` (asserts real Go symbols), `codegraph context` (asserts real repo files), plus an anti-bluff token guard. Wrapped as Challenge `CG-CHALLENGE-01`. **PASS** — evidence `docs/research/codegraph/evidence/phase-c/cg-challenge-01-*`.
+
+2. **CG11 — Layer B.** Challenge `CG-CHALLENGE-02` drives `codegraph serve --mcp` over stdio with real JSON-RPC: `initialize` → serverInfo, `tools/list` → 9 `codegraph_*` tools, `tools/call codegraph_search` → real graph data. JSON-RPC wire transcript captured (`cg-challenge-02-jsonrpc-wire.jsonl`). **PASS**.
+
+3. **CG12 — Layer C.** Challenges `CG-CHALLENGE-03..07`, one per agent, with a shared `lib-agent-challenge.sh` driver: tier-1 drives the agent CLI non-interactively and asserts a real `.go` symbol path; tier-2 (§11.4.3 topology dispatch) falls back HONESTLY to connect-only + tool-discovery proof when an agent cannot be driven to a real answer. **Results:** Claude Code (primary) — **true end-to-end PASS**; OpenCode — true end-to-end PASS; Crush — true end-to-end PASS; Kimi CLI — connect-only PASS (LLM monthly-quota 429 blocked the answer; its MCP loader did enumerate all 9 codegraph tools); Qwen Code — connect-only PASS (bundled OAuth free tier discontinued upstream 2026-04-15). 3/5 agents true end-to-end, 2/5 connect-only — reported honestly, no false end-to-end claims.
+
+4. **CG13 — helix_qa bank.** Registered the 7 Challenges as a helix_qa test bank `tools/codegraph/challenges/codegraph-integration.bank.yaml`. Per CONST-051(B) the bank lives in the HelixCode tree — NOT inside the project-not-aware helix_qa submodule (the bank hardcodes HelixCode Challenge paths, which would couple the reusable submodule to HelixCode). The helix_qa runner accepts arbitrary bank paths via `-banks`, so it is fully consumable: `helixqa run -banks tools/codegraph/challenges/codegraph-integration.bank.yaml`. Runner `tools/codegraph/challenges/run-all.sh` executes all 7 with per-Challenge captured evidence.
+
+### State
+
+- 7 Challenges under `tools/codegraph/challenges/` — all `bash -n`-clean with §11.4.18 doc blocks; bank run **7/7 PASS** after the CG-CHALLENGE-03 arg-shift fix.
+- `tools/codegraph/verify.sh` is now a real anti-bluff proof (no longer a stub).
+- All runtime evidence under `docs/research/codegraph/evidence/phase-c/` — status JSON, query JSON, JSON-RPC wire transcript, 5 agent transcripts, per-Challenge run logs.
+- helix_qa autonomous-session integration: bank registered + discoverable; direct execution via `run-all.sh` captures per-check evidence. Full autonomous-session orchestration left to a helix_qa QA run.
+
+### Next
+
+- CodeGraph Phase D (CG14-CG16) already landed (close-out¹³³).
+- A helix_qa autonomous QA session may execute the `codegraph-integration` bank for orchestrated per-check evidence capture.
+

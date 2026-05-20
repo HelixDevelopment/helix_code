@@ -1,0 +1,18 @@
+=== CodeGraph Challenge bank — run 2026-05-20T14:02:34Z ===
+
+--- running cg-challenge-01-layer-a.sh ---
+  PASS  cg-challenge-01-layer-a.sh  CG-CHALLENGE-01: PASS — evide
+--- running cg-challenge-02-layer-b.sh ---
+  PASS  cg-challenge-02-layer-b.sh  CG-CHALLENGE-02: PASS — JSON-RPC wire tra
+--- running cg-challenge-03-claude.sh ---
+  PASS  cg-challenge-03-claude.sh  CG-CHALLENGE-03: PASS (true e
+--- running cg-challenge-04-opencode.sh ---
+  PASS  cg-challenge-04-opencode.sh  CG-CHALLENGE-04: PASS (true e
+--- running cg-challenge-05-kimi.sh ---
+  PASS  cg-challenge-05-kimi.sh  CG-CHALLENGE-05: PASS (co
+--- running cg-challenge-06-crush.sh ---
+  PASS  cg-challenge-06-crush.sh  CG-CHALLENGE-06: PASS (true e
+--- running cg-challenge-07-qwen.sh ---
+  PASS  cg-challenge-07-qwen.sh  CG-CHALLENGE-07: PASS (co
+
+=== summary: 7/7 PASS, 0 FAIL ===

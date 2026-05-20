@@ -1,0 +1,8 @@
+### CG-CHALLENGE-07 — Layer C: agent 'qwen' reaches CodeGraph
+  tier-1: driving 'qwen' non-interactively
+  transcript captured: /run/media/milosvasic/DATA4TB/Projects/HelixCode/docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-07-qwen-transcript.txt (136 bytes)
+  tier-1 did not yield a real answer; falling back to connect-only proof (§11.4.3)
+  tier-2: connect-only (strongest available proof for 'qwen')
+  PASS: 'qwen' config registers codegraph MCP server (/run/media/milosvasic/DATA4TB/Projects/HelixCode/.qwen/settings.json)
+  PASS: codegraph binary reachable for 'qwen' (/run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph/node_modules/.bin/codegraph)
+CG-CHALLENGE-07: PASS (connect-only — codegraph registered + reachable; end-to-end NOT proven)

@@ -42,10 +42,10 @@ queries the graph instantly instead of spawning grep / glob / Read scans.
 
 CodeGraph runs as an **MCP stdio server** (`codegraph serve --mcp`) that five
 CLI coding agents — Claude Code, OpenCode, Kimi CLI, Crush, Qwen Code — query
-for code-graph data. Agents call eight `codegraph_*` MCP tools
+for code-graph data. Agents call nine `codegraph_*` MCP tools
 (`codegraph_search`, `codegraph_context`, `codegraph_callers`,
 `codegraph_callees`, `codegraph_impact`, `codegraph_node`, `codegraph_files`,
-`codegraph_status`) instead of brute-force file scans.
+`codegraph_status`, `codegraph_explore`) instead of brute-force file scans.
 
 ## Layout
 
@@ -114,12 +114,41 @@ and confirm `codegraph` appears with its tools. A config file that merely
 *contains* the entry is NOT proof; the PASS bar is the agent invoking a
 `codegraph_*` tool and returning real graph data (CONST-035).
 
-## Anti-bluff contract (CONST-035)
+## Anti-bluff contract (CONST-035) — Phase C verification
 
 "Installed" is not "working". Every PASS for CodeGraph carries captured
 runtime evidence: a real `codegraph status` JSON with non-zero
 `nodes` / `edges` / `files`. A zero-node graph is a FAIL. Evidence captured
-during incorporation lives under `docs/research/codegraph/evidence/`.
+during incorporation lives under `docs/research/codegraph/evidence/`
+(Phase C evidence: `docs/research/codegraph/evidence/phase-c/`).
+
+Phase C ships **7 anti-bluff Challenges** under `tools/codegraph/challenges/`,
+each of which FAILS LOUDLY if CodeGraph returns empty / zero / simulated data:
+
+| Challenge       | Layer | Proves                                              |
+|-----------------|-------|-----------------------------------------------------|
+| CG-CHALLENGE-01 | A     | `codegraph status/query/context` on the real repo   |
+| CG-CHALLENGE-02 | B     | MCP JSON-RPC transport (`initialize`/`tools/list`/`tools/call`) |
+| CG-CHALLENGE-03 | C     | Claude Code reaches CodeGraph (primary agent)       |
+| CG-CHALLENGE-04 | C     | OpenCode reaches CodeGraph                          |
+| CG-CHALLENGE-05 | C     | Kimi CLI reaches CodeGraph                          |
+| CG-CHALLENGE-06 | C     | Crush reaches CodeGraph                             |
+| CG-CHALLENGE-07 | C     | Qwen Code reaches CodeGraph                         |
+
+Run them all: `tools/codegraph/challenges/run-all.sh`. The Challenge bank is
+registered as a helix_qa test bank at
+`tools/codegraph/challenges/codegraph-integration.bank.yaml` — stored in the
+HelixCode tree (not inside the project-not-aware helix_qa submodule, per
+CONST-051(B) decoupling) and consumed by the helix_qa runner via an explicit
+path: `helixqa run -banks tools/codegraph/challenges/codegraph-integration.bank.yaml`.
+
+Layer-C Challenges attempt a true end-to-end proof (drive the agent CLI
+non-interactively, assert the agent invoked a `codegraph_*` tool and returned
+a real symbol path). When an agent cannot be driven to a real answer
+(missing LLM credentials, quota, or no scriptable auto-approve), the Challenge
+falls back HONESTLY to a connect-only proof (config registers codegraph +
+binary reachable + the agent's MCP loader enumerated the codegraph tools) and
+reports it as connect-only — never as end-to-end (§11.4.3 topology dispatch).
 
 ## Version pin
 

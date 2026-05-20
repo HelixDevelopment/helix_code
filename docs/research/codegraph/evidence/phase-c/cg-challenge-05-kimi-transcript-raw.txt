@@ -1,0 +1,20 @@
+                    'codegraph_callees',
+                    'codegraph_impact',
+                    'codegraph_node',
+                    'codegraph_explore',
+                    'codegraph_status',
+                    'codegraph_files'
+                )
+            ),
+        )
+    )
+)
+MCPLoadingEnd()
+StepBegin(n=1)
+StepInterrupted()
+Error code: 429 - {'error': {'message': "You've reached kimi monthly usage limit
+for this billing cycle. Your quota will be refreshed in the next cycle. Upgrade 
+to get more: https://www.kimi.com/code/console?from=quota-upgrade", 'type': 'exc
+eeded_current_quota_error'}}
+
+To resume this session: kimi -r 7d65726d-253e-4efe-9b29-86fcec4681c5
