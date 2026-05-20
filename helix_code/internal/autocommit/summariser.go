@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/llm/routing"
 )
 
 // MessageSummariser is the contract the committer depends on. Pure
@@ -52,9 +53,17 @@ const llmTimeout = 5 * time.Second
 
 // LLMSummariser is the production summariser. Uses the configured
 // llm.Provider with a fixed prompt and timeout.
+//
+// Commit-message generation is a trivial LLM subtask — the speed-programme
+// model-cascade lever (Phase 3, task P3-T01). When a subtask router is
+// wired, the Summarise call routes through the small/cheap model tier and
+// escalates to the frontier tier only on a low-confidence small-model
+// result. With no router wired the call runs unchanged on the provider's
+// first model (the no-regression default).
 type LLMSummariser struct {
 	provider llm.Provider
 	timeout  time.Duration
+	router   *routing.Router
 }
 
 // DeterministicFallback is a zero-state summariser that synthesises a
@@ -70,6 +79,23 @@ func NewSummariser(p llm.Provider) MessageSummariser {
 		return &DeterministicFallback{}
 	}
 	return &LLMSummariser{provider: p, timeout: llmTimeout}
+}
+
+// NewRoutedSummariser returns an LLMSummariser whose commit-message
+// generation routes through the supplied small-model router (Phase 3,
+// task P3-T01). A nil provider yields a DeterministicFallback; a nil router
+// behaves identically to NewSummariser (routing disabled).
+func NewRoutedSummariser(p llm.Provider, router *routing.Router) MessageSummariser {
+	if p == nil {
+		return &DeterministicFallback{}
+	}
+	return &LLMSummariser{provider: p, timeout: llmTimeout, router: router}
+}
+
+// SetRouter installs (or clears, with nil) the small-model subtask router on
+// an LLMSummariser. nil-safe.
+func (s *LLMSummariser) SetRouter(r *routing.Router) {
+	s.router = r
 }
 
 // Summarise (LLMSummariser) calls the provider, falls back on any error
@@ -90,7 +116,17 @@ func (s *LLMSummariser) Summarise(ctx context.Context, diff, toolName string, pa
 		Model:    modelID,
 		Messages: []llm.Message{{Role: "user", Content: summarisePrompt + diff}},
 	}
-	resp, err := s.provider.Generate(cctx, req)
+
+	// Route commit-message generation through the small-model cascade when a
+	// router is wired; otherwise call the provider directly on its first
+	// model (the no-regression default). Per speed-programme task P3-T01.
+	var resp *llm.LLMResponse
+	var err error
+	if s.router != nil {
+		resp, err = s.routeSummarise(cctx, req)
+	} else {
+		resp, err = s.provider.Generate(cctx, req)
+	}
 	if err != nil || resp == nil {
 		return (&DeterministicFallback{}).Summarise(ctx, diff, toolName, paths)
 	}
@@ -102,6 +138,48 @@ func (s *LLMSummariser) Summarise(ctx context.Context, diff, toolName string, pa
 		out = out[:maxSubjectChars]
 	}
 	return out
+}
+
+// routeSummarise dispatches the commit-message generation request through
+// the subtask router. The router resolves the policy's model tier
+// (TaskCommitMessage routes to the small tier) to a concrete verifier-sourced
+// model, runs the generation, and escalates to the frontier model when the
+// small-model result is low-confidence (truncated / content-filtered finish).
+// The request's Model field is overwritten with the routed model per attempt.
+func (s *LLMSummariser) routeSummarise(ctx context.Context, req *llm.LLMRequest) (*llm.LLMResponse, error) {
+	var final *llm.LLMResponse
+	gen := func(ctx context.Context, modelID string, _ routing.ModelTier) (routing.Result, error) {
+		req.Model = modelID
+		resp, err := s.provider.Generate(ctx, req)
+		if err != nil {
+			return routing.Result{}, err
+		}
+		final = resp
+		return routing.Result{
+			Content:    resp.Content,
+			Confidence: summariseConfidence(resp),
+		}, nil
+	}
+	if _, err := s.router.Route(ctx, routing.TaskCommitMessage, gen); err != nil {
+		return nil, err
+	}
+	return final, nil
+}
+
+// summariseConfidence maps a commit-message response's finish reason to a
+// routing confidence. A clean stop is confident (1.0); a truncated or
+// blocked finish is low-confidence (0.0) so the router escalates to the
+// frontier model rather than committing a degraded subject line.
+func summariseConfidence(resp *llm.LLMResponse) float64 {
+	if resp == nil || strings.TrimSpace(resp.Content) == "" {
+		return 0.0
+	}
+	switch resp.FinishReason {
+	case "", "stop", "end_turn", "complete", "completed":
+		return 1.0
+	default:
+		return 0.0
+	}
 }
 
 // Summarise (DeterministicFallback) returns "Auto-edit: <tool> on <paths>".

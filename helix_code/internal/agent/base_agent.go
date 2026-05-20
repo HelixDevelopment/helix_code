@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/llm/compression"
 	"dev.helix.code/internal/llm/compressioniface"
+	"dev.helix.code/internal/llm/routing"
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/telemetry"
 	"dev.helix.code/internal/tools"
@@ -85,6 +86,41 @@ type BaseAgent struct {
 	// load — no caching).
 	// Per Feature 24 (codex project memory port), P2-F24-T07.
 	memoryRegistry projectmemory.MemorySnapshotter
+
+	// subtaskRouter is the optional small-model router for cheap LLM
+	// subtasks (classification, ranking, commit-msg, ambiguity detection).
+	// nil = routing disabled — every subtask runs on the provider's first
+	// model exactly as before (graceful degradation, no-regression default).
+	// When set, executeTaskWithLLM resolves the model for trivial task
+	// classes through the router's policy + escalate-on-low-confidence
+	// cascade. Per speed-programme Phase 3, task P3-T01.
+	subtaskRouter *routing.Router
+}
+
+// agentTaskClass maps an agent task.TaskType to a routing.TaskClass so the
+// subtask router can pick a model tier. Trivial subtasks (review, research,
+// documentation, analysis) map to cheap routing classes; reasoning-heavy
+// subtasks (code generation/edit, planning, debugging, refactoring) map to
+// routing.TaskReasoning, which the policy keeps on the frontier tier. An
+// unknown task type returns ("", false) so the caller leaves the existing
+// frontier-only model selection untouched.
+func agentTaskClass(t task.TaskType) (routing.TaskClass, bool) {
+	switch t {
+	case task.TaskTypeReview:
+		return routing.TaskClassification, true
+	case task.TaskTypeResearch:
+		return routing.TaskRanking, true
+	case task.TaskTypeDocumentation:
+		return routing.TaskCommitMessage, true
+	case task.TaskTypeAnalysis:
+		return routing.TaskClassification, true
+	case task.TaskTypeCodeGeneration, task.TaskTypeCodeEdit,
+		task.TaskTypePlanning, task.TaskTypeDebugging, task.TaskTypeRefactoring,
+		task.TaskTypeTesting:
+		return routing.TaskReasoning, true
+	default:
+		return "", false
+	}
 }
 
 // SetMemoryRegistry installs an optional MemorySnapshotter so getSystemPrompt
@@ -418,7 +454,9 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (result int
 		return nil, iterErr
 	}
 
-	// Create LLM request
+	// Create LLM request. The Model field is the provider's first model by
+	// default; when a subtask router is wired it is resolved per task class
+	// below (small tier for cheap subtasks, frontier tier otherwise).
 	request := &llm.LLMRequest{
 		Model: models[0].Name,
 		Messages: []llm.Message{
@@ -439,8 +477,24 @@ func (a *BaseAgent) executeTaskWithLLM(ctx context.Context, t *Task) (result int
 		}
 	}
 
-	// Execute LLM request
-	response, err := a.llmProvider.Generate(ctx, request)
+	// Execute the LLM request. When a subtask router is wired AND the task
+	// type maps to a routing class, dispatch through the router: trivial
+	// subtask classes resolve to the small/cheap model tier, and a
+	// low-confidence small-model result escalates to the frontier tier so a
+	// hard task still reaches the frontier model (no quality regression).
+	// When no router is wired the request runs unchanged on the provider's
+	// first model — the existing behaviour (no-regression default).
+	// Per speed-programme Phase 3, task P3-T01.
+	a.mu.RLock()
+	router := a.subtaskRouter
+	a.mu.RUnlock()
+
+	var response *llm.LLMResponse
+	if class, ok := agentTaskClass(t.Type); ok && router != nil {
+		response, err = a.routeLLMRequest(ctx, router, class, request)
+	} else {
+		response, err = a.llmProvider.Generate(ctx, request)
+	}
 	if err != nil {
 		llmErr := fmt.Errorf("LLM generation failed: %w", err)
 		a.dispatchOnError(ctx, llmErr, "llm")
@@ -787,6 +841,75 @@ func (a *BaseAgent) GetLLMProvider() llm.Provider {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return a.llmProvider
+}
+
+// SetSubtaskRouter installs an optional small-model router for cheap LLM
+// subtasks. nil-safe: passing nil disables routing and every subtask runs on
+// the provider's first model exactly as before (the no-regression default).
+// Per speed-programme Phase 3, task P3-T01.
+func (a *BaseAgent) SetSubtaskRouter(r *routing.Router) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.subtaskRouter = r
+}
+
+// GetSubtaskRouter returns the wired subtask router, or nil when routing is
+// disabled.
+func (a *BaseAgent) GetSubtaskRouter() *routing.Router {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.subtaskRouter
+}
+
+// routeLLMRequest dispatches a single LLM request through the subtask
+// router. The router resolves the policy's model tier for the task class to
+// a concrete verifier-sourced model, runs the generation on it, and — for a
+// low-confidence small-tier result — escalates to the frontier model. The
+// request's Model field is overwritten with the model the router selected
+// for each attempt.
+//
+// Confidence is derived from the provider's finish reason: a clean stop
+// ("stop"/"end_turn"/empty) is treated as confident (1.0); a truncated or
+// content-filtered finish is low-confidence (0.0) and triggers escalation —
+// a hard task that the small model could not complete cleanly still reaches
+// the frontier model.
+func (a *BaseAgent) routeLLMRequest(ctx context.Context, router *routing.Router, class routing.TaskClass, request *llm.LLMRequest) (*llm.LLMResponse, error) {
+	var final *llm.LLMResponse
+	gen := func(ctx context.Context, modelID string, tier routing.ModelTier) (routing.Result, error) {
+		request.Model = modelID
+		resp, err := a.llmProvider.Generate(ctx, request)
+		if err != nil {
+			return routing.Result{}, err
+		}
+		final = resp
+		return routing.Result{
+			Content:    resp.Content,
+			Confidence: responseConfidence(resp),
+		}, nil
+	}
+	if _, err := router.Route(ctx, class, gen); err != nil {
+		return nil, err
+	}
+	return final, nil
+}
+
+// responseConfidence maps an LLM response's finish reason to a [0.0, 1.0]
+// routing confidence. A clean completion is fully confident; a truncated or
+// content-blocked completion is low-confidence so the router escalates.
+func responseConfidence(resp *llm.LLMResponse) float64 {
+	if resp == nil {
+		return 0.0
+	}
+	switch resp.FinishReason {
+	case "", "stop", "end_turn", "complete", "completed":
+		return 1.0
+	case "length", "max_tokens", "content_filter", "safety", "error":
+		return 0.0
+	default:
+		// Unknown finish reason: treat conservatively as low-confidence so a
+		// hard task is escalated rather than silently accepted.
+		return 0.0
+	}
 }
 
 // SetToolRegistry sets the tool registry for the agent
