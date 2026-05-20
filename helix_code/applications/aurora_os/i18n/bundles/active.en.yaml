@@ -146,3 +146,96 @@ aurora_os_cli_interactive_header:
 
 aurora_os_cli_interactive_hint:
   other: "Type 'help' for commands, 'quit' to exit"
+
+# Round-354 §11.4 anti-bluff sweep (2026-05-20): 24 residual nogui CLI
+# strings migrated — section headers, empty-state messages, and
+# error/usage labels across the status, sessions, tasks, workers, llm,
+# aurora, and security subcommands plus interactive-mode exit text
+# (main_nogui.go). Resolved at runtime via Translator.T.
+
+aurora_os_cli_security_status_header:
+  other: "=== Security Status ==="
+
+aurora_os_cli_sessions_header:
+  other: "=== Sessions ==="
+
+aurora_os_cli_no_sessions:
+  other: "No sessions found."
+
+aurora_os_cli_err_name_project_required:
+  other: "Error: --name and --project are required"
+
+aurora_os_cli_err_session_id_required:
+  other: "Error: session ID required"
+
+aurora_os_cli_tasks_header:
+  other: "=== Tasks ==="
+
+aurora_os_cli_no_tasks:
+  other: "No tasks found."
+
+aurora_os_cli_err_worker_id_required:
+  other: "Error: worker ID required"
+
+aurora_os_cli_llm_providers_header:
+  other: "=== LLM Providers ==="
+
+aurora_os_cli_no_providers:
+  other: "No providers configured."
+
+aurora_os_cli_models_header:
+  other: "=== Available Models ==="
+
+aurora_os_cli_no_models:
+  other: "No models available."
+
+aurora_os_cli_llm_chat_requires_provider:
+  other: "LLM chat requires a running provider."
+
+aurora_os_cli_llm_chat_configure_hint:
+  other: "Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat."
+
+aurora_os_cli_info_header:
+  other: "=== Aurora OS Information ==="
+
+aurora_os_cli_diagnostics_header:
+  other: "=== Aurora OS Diagnostics ==="
+
+aurora_os_cli_running_system_checks:
+  other: "Running system checks..."
+
+aurora_os_cli_optimization_header:
+  other: "=== Aurora OS Optimization ==="
+
+aurora_os_cli_running_gc:
+  other: "Running garbage collection..."
+
+aurora_os_cli_performance_mode_enabled:
+  other: "Performance mode enabled"
+
+aurora_os_cli_optimization_complete:
+  other: "Optimization complete!"
+
+aurora_os_cli_access_control_roles_label:
+  other: "Access Control Roles:"
+
+aurora_os_cli_audit_log_header:
+  other: "=== Security Audit Log ==="
+
+aurora_os_cli_no_audit_entries:
+  other: "No audit log entries."
+
+aurora_os_cli_encryption_enabled:
+  other: "Encryption enabled"
+
+aurora_os_cli_encryption_disabled:
+  other: "Encryption disabled"
+
+aurora_os_cli_unknown_encryption_command:
+  other: "Unknown encryption command: %s (use 'enable' or 'disable')"
+
+aurora_os_cli_exiting:
+  other: "Exiting..."
+
+aurora_os_cli_goodbye:
+  other: "Goodbye!"

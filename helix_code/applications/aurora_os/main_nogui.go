@@ -412,7 +412,7 @@ func (cliApp *CLIApp) cmdStatus() error {
 
 	// Security
 	fmt.Println()
-	fmt.Println("=== Security Status ===")
+	fmt.Println(cliApp.t("aurora_os_cli_security_status_header"))
 	fmt.Printf("Encryption: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.securityManager.encryptionEnabled])
 	fmt.Printf("Audit Log Entries: %d\n", len(cliApp.securityManager.GetAuditLog()))
 
@@ -491,7 +491,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		cliApp.securityManager.AddAuditEntry("project_delete", "user", fmt.Sprintf("Deleted project: %s", args[1]), "warning")
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -505,9 +505,9 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 	switch args[0] {
 	case "list":
 		sessions := cliApp.sessionManager.GetAll()
-		fmt.Println("=== Sessions ===")
+		fmt.Println(cliApp.t("aurora_os_cli_sessions_header"))
 		if len(sessions) == 0 {
-			fmt.Println("No sessions found.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_sessions"))
 			return nil
 		}
 		for _, s := range sessions {
@@ -523,7 +523,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *projectID == "" {
-			fmt.Println("Error: --name and --project are required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_name_project_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -536,7 +536,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 
 	case "start":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Start(args[1])
@@ -548,7 +548,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 
 	case "pause":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Pause(args[1])
@@ -560,7 +560,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 
 	case "complete":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Complete(args[1])
@@ -571,7 +571,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		cliApp.securityManager.AddAuditEntry("session_complete", "user", fmt.Sprintf("Completed session: %s", args[1]), "info")
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -587,9 +587,9 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 	switch args[0] {
 	case "list":
 		tasks := cliApp.taskManager.GetAllTasks()
-		fmt.Println("=== Tasks ===")
+		fmt.Println(cliApp.t("aurora_os_cli_tasks_header"))
 		if len(tasks) == 0 {
-			fmt.Println("No tasks found.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_tasks"))
 			return nil
 		}
 		for _, t := range tasks {
@@ -628,7 +628,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		cliApp.securityManager.AddAuditEntry("task_cancel", "user", fmt.Sprintf("Cancelled task: %s", args[1]), "warning")
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -684,7 +684,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 
 	case "remove":
 		if len(args) < 2 {
-			fmt.Println("Error: worker ID required")
+			fmt.Println(cliApp.t("aurora_os_cli_err_worker_id_required"))
 			return fmt.Errorf("missing worker ID")
 		}
 		err := cliApp.workerManager.RemoveWorker(args[1])
@@ -695,7 +695,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		cliApp.securityManager.AddAuditEntry("worker_remove", "user", fmt.Sprintf("Removed worker: %s", args[1]), "warning")
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -710,9 +710,9 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 	case "providers":
 		ctx := context.Background()
 		health := cliApp.llmManager.HealthCheck(ctx)
-		fmt.Println("=== LLM Providers ===")
+		fmt.Println(cliApp.t("aurora_os_cli_llm_providers_header"))
 		if len(health) == 0 {
-			fmt.Println("No providers configured.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_providers"))
 			return nil
 		}
 		for provider, status := range health {
@@ -721,9 +721,9 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 
 	case "models":
 		models := cliApp.llmManager.GetAvailableModels()
-		fmt.Println("=== Available Models ===")
+		fmt.Println(cliApp.t("aurora_os_cli_models_header"))
 		if len(models) == 0 {
-			fmt.Println("No models available.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_models"))
 			return nil
 		}
 		for _, m := range models {
@@ -731,11 +731,11 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 		}
 
 	case "chat":
-		fmt.Println("LLM chat requires a running provider.")
-		fmt.Println("Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat.")
+		fmt.Println(cliApp.t("aurora_os_cli_llm_chat_requires_provider"))
+		fmt.Println(cliApp.t("aurora_os_cli_llm_chat_configure_hint"))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -748,7 +748,7 @@ func (cliApp *CLIApp) cmdAurora(args []string) error {
 
 	switch args[0] {
 	case "info":
-		fmt.Println("=== Aurora OS Information ===")
+		fmt.Println(cliApp.t("aurora_os_cli_info_header"))
 		fmt.Printf("Platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 		fmt.Printf("Go Version: %s\n", runtime.Version())
 		fmt.Printf("CPUs: %d\n", runtime.NumCPU())
@@ -779,14 +779,14 @@ func (cliApp *CLIApp) cmdAurora(args []string) error {
 		return cliApp.runOptimization()
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
 }
 
 func (cliApp *CLIApp) runDiagnostics() error {
-	fmt.Println("=== Aurora OS Diagnostics ===")
+	fmt.Println(cliApp.t("aurora_os_cli_diagnostics_header"))
 	fmt.Println()
 
 	cliApp.diagnosticsLog = make([]string, 0)
@@ -797,7 +797,7 @@ func (cliApp *CLIApp) runDiagnostics() error {
 	}
 
 	// System checks
-	fmt.Println("Running system checks...")
+	fmt.Println(cliApp.t("aurora_os_cli_running_system_checks"))
 	addDiag("CPU Count", "OK", fmt.Sprintf("%d CPUs available", runtime.NumCPU()))
 	addDiag("Goroutines", "OK", fmt.Sprintf("%d active goroutines", runtime.NumGoroutine()))
 
@@ -841,11 +841,11 @@ func (cliApp *CLIApp) runDiagnostics() error {
 }
 
 func (cliApp *CLIApp) runOptimization() error {
-	fmt.Println("=== Aurora OS Optimization ===")
+	fmt.Println(cliApp.t("aurora_os_cli_optimization_header"))
 	fmt.Println()
 
 	// Force garbage collection
-	fmt.Println("Running garbage collection...")
+	fmt.Println(cliApp.t("aurora_os_cli_running_gc"))
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 	runtime.GC()
@@ -861,11 +861,11 @@ func (cliApp *CLIApp) runOptimization() error {
 	// Enable performance mode if not already enabled
 	if !cliApp.performanceMode {
 		cliApp.performanceMode = true
-		fmt.Println("Performance mode enabled")
+		fmt.Println(cliApp.t("aurora_os_cli_performance_mode_enabled"))
 	}
 
 	fmt.Println()
-	fmt.Println("Optimization complete!")
+	fmt.Println(cliApp.t("aurora_os_cli_optimization_complete"))
 
 	cliApp.securityManager.AddAuditEntry("optimization_run", "user", fmt.Sprintf("Ran optimization, freed %.2f MB", freed), "info")
 
@@ -879,19 +879,19 @@ func (cliApp *CLIApp) cmdSecurity(args []string) error {
 
 	switch args[0] {
 	case "status":
-		fmt.Println("=== Security Status ===")
+		fmt.Println(cliApp.t("aurora_os_cli_security_status_header"))
 		fmt.Printf("Encryption: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.securityManager.encryptionEnabled])
 		fmt.Printf("Audit Log Entries: %d\n", len(cliApp.securityManager.GetAuditLog()))
-		fmt.Println("\nAccess Control Roles:")
+		fmt.Println("\n" + cliApp.t("aurora_os_cli_access_control_roles_label"))
 		for role, perms := range cliApp.securityManager.accessControl {
 			fmt.Printf("  %s: %v\n", role, perms)
 		}
 
 	case "audit":
-		fmt.Println("=== Security Audit Log ===")
+		fmt.Println(cliApp.t("aurora_os_cli_audit_log_header"))
 		auditLog := cliApp.securityManager.GetAuditLog()
 		if len(auditLog) == 0 {
-			fmt.Println("No audit log entries.")
+			fmt.Println(cliApp.t("aurora_os_cli_no_audit_entries"))
 			return nil
 		}
 		for _, entry := range auditLog {
@@ -908,14 +908,14 @@ func (cliApp *CLIApp) cmdSecurity(args []string) error {
 			switch args[1] {
 			case "enable":
 				cliApp.securityManager.encryptionEnabled = true
-				fmt.Println("Encryption enabled")
+				fmt.Println(cliApp.t("aurora_os_cli_encryption_enabled"))
 				cliApp.securityManager.AddAuditEntry("encryption_enable", "user", "Enabled encryption", "info")
 			case "disable":
 				cliApp.securityManager.encryptionEnabled = false
-				fmt.Println("Encryption disabled")
+				fmt.Println(cliApp.t("aurora_os_cli_encryption_disabled"))
 				cliApp.securityManager.AddAuditEntry("encryption_disable", "user", "Disabled encryption", "warning")
 			default:
-				fmt.Printf("Unknown encryption command: %s (use 'enable' or 'disable')\n", args[1])
+				fmt.Printf(cliApp.t("aurora_os_cli_unknown_encryption_command")+"\n", args[1])
 			}
 		} else {
 			fmt.Printf("Encryption: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.securityManager.encryptionEnabled])
@@ -967,7 +967,7 @@ func (cliApp *CLIApp) cmdInteractive() error {
 
 	go func() {
 		<-sigChan
-		fmt.Println("\nExiting...")
+		fmt.Println("\n" + cliApp.t("aurora_os_cli_exiting"))
 		os.Exit(0)
 	}()
 
@@ -985,7 +985,7 @@ func (cliApp *CLIApp) cmdInteractive() error {
 		}
 
 		if input == "quit" || input == "exit" {
-			fmt.Println("Goodbye!")
+			fmt.Println(cliApp.t("aurora_os_cli_goodbye"))
 			break
 		}
 

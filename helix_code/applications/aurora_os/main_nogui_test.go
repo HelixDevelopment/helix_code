@@ -101,6 +101,69 @@ func TestCLIAppTranslatorNoopType(t *testing.T) {
 	assert.Equal(t, "aurora_os_cli_workers_header", app.t("aurora_os_cli_workers_header"))
 }
 
+// TestCLIAppRound354IDsResolveThroughTranslator is the positive case
+// for the round-354 §11.4 residual migration: every newly migrated
+// message ID MUST route through Translator.T (not echo a literal).
+func TestCLIAppRound354IDsResolveThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "R354:"}
+	app.SetTranslator(ft)
+
+	ids := []string{
+		"aurora_os_cli_security_status_header",
+		"aurora_os_cli_sessions_header",
+		"aurora_os_cli_no_sessions",
+		"aurora_os_cli_err_name_project_required",
+		"aurora_os_cli_err_session_id_required",
+		"aurora_os_cli_tasks_header",
+		"aurora_os_cli_no_tasks",
+		"aurora_os_cli_err_worker_id_required",
+		"aurora_os_cli_llm_providers_header",
+		"aurora_os_cli_no_providers",
+		"aurora_os_cli_models_header",
+		"aurora_os_cli_no_models",
+		"aurora_os_cli_llm_chat_requires_provider",
+		"aurora_os_cli_llm_chat_configure_hint",
+		"aurora_os_cli_info_header",
+		"aurora_os_cli_diagnostics_header",
+		"aurora_os_cli_running_system_checks",
+		"aurora_os_cli_optimization_header",
+		"aurora_os_cli_running_gc",
+		"aurora_os_cli_performance_mode_enabled",
+		"aurora_os_cli_optimization_complete",
+		"aurora_os_cli_access_control_roles_label",
+		"aurora_os_cli_audit_log_header",
+		"aurora_os_cli_no_audit_entries",
+		"aurora_os_cli_encryption_enabled",
+		"aurora_os_cli_encryption_disabled",
+		"aurora_os_cli_unknown_encryption_command",
+		"aurora_os_cli_exiting",
+		"aurora_os_cli_goodbye",
+	}
+	for _, id := range ids {
+		got := app.t(id)
+		assert.Equal(t, "R354:"+id, got, "id %q must route through Translator.T", id)
+	}
+	assert.Equal(t, ids, ft.calls, "every round-354 id must be consulted in order")
+}
+
+// TestCLIAppRound354FallbackOnError is the paired-mutation guard for
+// the round-354 IDs: on translate error the helper MUST echo the
+// literal message ID (loud echo), never an empty string.
+func TestCLIAppRound354FallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&fakeTranslator{fail: true})
+
+	for _, id := range []string{
+		"aurora_os_cli_tasks_header",
+		"aurora_os_cli_no_audit_entries",
+		"aurora_os_cli_goodbye",
+	} {
+		assert.Equal(t, id, app.t(id),
+			"on translate error the helper must echo the message ID")
+	}
+}
+
 func TestCLISecurityManager(t *testing.T) {
 	sm := NewAuroraSecurityManager()
 
