@@ -911,8 +911,35 @@ ok 4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
 Closed in this round.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 344 — HXQ-002 closed →
-Fixed.md). To update Issues_Summary.md mechanically, run
+<h2
+id="hxv-002-llmsverifier-verification-package-10-pre-existing-test-failures">HXV-002
+— LLMsVerifier <code>verification/</code> package 10 pre-existing test
+failures</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-20 (round 345 — LLMsVerifier i18n
+round-12 subagent) <strong>Discovered-By:</strong> AI subagent —
+<code>git stash</code> test confirmed the 10 failures reproduce at
+submodule HEAD <code>582ae9c7</code> (round-336) <em>without</em> the
+round-345 i18n change, proving pre-existing and unrelated
+<strong>Evidence:</strong> <code>go test ./...</code> in
+<code>dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/</code>
+reports 10 failures in the <code>verification/</code> package. Distinct
+from HXV-001 (which closed the <code>tests/</code> CLI+scoring suite
+round 323). Not yet root-caused — round-345 scope was strictly i18n.
+Likely related to the round-17 <code>ErrVerificationNotWired</code>
+honest-contract change (verification was deliberately un-wired to remove
+a §11.4 PASS-bluff; some <code>verification/</code> package tests may
+still assert the pre-honesty fabricated all-capabilities-true /
+all-scores-8.5 behaviour). <strong>Resolution path:</strong> Dedicated
+round — run <code>go test -v ./verification/...</code>, capture the 10
+signatures, classify each (test-assertion drift to the honest
+<code>ErrVerificationNotWired</code> contract vs genuine production
+regression). Mirror the HXV-001 round-323 classification approach:
+re-key drifted assertions to certify the honest contract; fix any
+genuine production regression at root.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-20 (round 345 — HXV-002 added). To
+update Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>

@@ -253,4 +253,15 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-*Last regenerated: 2026-05-20 (round 344 — HXQ-002 closed → Fixed.md). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXV-002 — LLMsVerifier `verification/` package 10 pre-existing test failures
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (round 345 — LLMsVerifier i18n round-12 subagent)
+**Discovered-By:** AI subagent — `git stash` test confirmed the 10 failures reproduce at submodule HEAD `582ae9c7` (round-336) *without* the round-345 i18n change, proving pre-existing and unrelated
+**Evidence:** `go test ./...` in `dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/` reports 10 failures in the `verification/` package. Distinct from HXV-001 (which closed the `tests/` CLI+scoring suite round 323). Not yet root-caused — round-345 scope was strictly i18n. Likely related to the round-17 `ErrVerificationNotWired` honest-contract change (verification was deliberately un-wired to remove a §11.4 PASS-bluff; some `verification/` package tests may still assert the pre-honesty fabricated all-capabilities-true / all-scores-8.5 behaviour).
+**Resolution path:** Dedicated round — run `go test -v ./verification/...`, capture the 10 signatures, classify each (test-assertion drift to the honest `ErrVerificationNotWired` contract vs genuine production regression). Mirror the HXV-001 round-323 classification approach: re-key drifted assertions to certify the honest contract; fix any genuine production regression at root.
+
+---
+
+*Last regenerated: 2026-05-20 (round 345 — HXV-002 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
