@@ -62,18 +62,22 @@ type ApprovalInspector interface {
 // Source-label strings used by /approval status. Kept distinct from the raw
 // ResolvedSource.String() values so the user surface can read more
 // descriptively (e.g. "HELIXCODE_APPROVAL env var" instead of "env").
-func sourceLabel(s approval.ResolvedSource) string {
+//
+// CONST-046: every branch resolves through the package i18n seam so the
+// /approval status block adapts to the operator's locale.
+func sourceLabel(ctx context.Context, s approval.ResolvedSource) string {
 	switch s {
 	case approval.SourceFlag:
-		return "--approval CLI flag"
+		return tr(ctx, "internal_commands_approval_source_flag", nil)
 	case approval.SourceEnv:
-		return approval.EnvVarName + " env var"
+		return tr(ctx, "internal_commands_approval_source_env",
+			map[string]any{"Var": approval.EnvVarName})
 	case approval.SourceConfig:
-		return "config file"
+		return tr(ctx, "internal_commands_approval_source_config", nil)
 	case approval.SourceDefault:
-		return "default (built-in)"
+		return tr(ctx, "internal_commands_approval_source_default", nil)
 	case approval.SourceRuntime:
-		return "runtime (/approval set or programmatic)"
+		return tr(ctx, "internal_commands_approval_source_runtime", nil)
 	default:
 		return s.String()
 	}
@@ -82,19 +86,22 @@ func sourceLabel(s approval.ResolvedSource) string {
 // networkLabel renders the active network policy for the status block. It
 // derives the value from the descriptor table so /approval status and
 // /approval show stay consistent even if the descriptor changes.
-func networkLabel(m approval.ApprovalMode) string {
+//
+// CONST-046: the descriptor-missing fallback resolves through the i18n
+// seam; descriptor-sourced rules are provider metadata (composed elsewhere).
+func networkLabel(ctx context.Context, m approval.ApprovalMode) string {
 	if d, ok := approval.ModeDescriptors()[m]; ok {
 		return d.NetworkRule
 	}
-	return "n/a"
+	return tr(ctx, "internal_commands_approval_rule_not_available", nil)
 }
 
 // sandboxLabel mirrors networkLabel for sandbox policy.
-func sandboxLabel(m approval.ApprovalMode) string {
+func sandboxLabel(ctx context.Context, m approval.ApprovalMode) string {
 	if d, ok := approval.ModeDescriptors()[m]; ok {
 		return d.SandboxRule
 	}
-	return "n/a"
+	return tr(ctx, "internal_commands_approval_rule_not_available", nil)
 }
 
 // ApprovalCommand is the /approval slash command.
@@ -117,12 +124,12 @@ func (c *ApprovalCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *ApprovalCommand) Description() string {
-	return "Inspect or change the active approval mode, or describe approval modes."
+	return tr(context.Background(), "internal_commands_approval_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *ApprovalCommand) Usage() string {
-	return "/approval [status|set <mode>|show [<mode>|all]]"
+	return tr(context.Background(), "internal_commands_approval_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -137,15 +144,15 @@ func (c *ApprovalCommand) Execute(ctx context.Context, cc *CommandContext) (*Com
 	}
 	switch sub {
 	case "status":
-		return &CommandResult{Success: true, Output: c.handleStatus()}, nil
+		return &CommandResult{Success: true, Output: c.handleStatus(ctx)}, nil
 	case "set":
-		out, err := c.handleSet(args[1:])
+		out, err := c.handleSet(ctx, args[1:])
 		if err != nil {
 			return nil, err
 		}
 		return &CommandResult{Success: true, Output: out}, nil
 	case "show":
-		out, err := c.handleShow(args[1:])
+		out, err := c.handleShow(ctx, args[1:])
 		if err != nil {
 			return nil, err
 		}
@@ -157,18 +164,18 @@ func (c *ApprovalCommand) Execute(ctx context.Context, cc *CommandContext) (*Com
 
 // handleStatus renders the active-mode block: mode, source, sandbox rule,
 // network rule. Format mirrors /theme status (tabwriter-aligned key:value).
-func (c *ApprovalCommand) handleStatus() string {
+func (c *ApprovalCommand) handleStatus(ctx context.Context) string {
 	var sb strings.Builder
-	sb.WriteString("Approval status\n")
+	sb.WriteString(tr(ctx, "internal_commands_approval_status_header", nil) + "\n")
 
 	mode := c.manager.Mode()
 	src := c.manager.Source()
 
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  Mode:\t%s\n", mode.String())
-	fmt.Fprintf(tw, "  Source:\t%s\n", sourceLabel(src))
-	fmt.Fprintf(tw, "  Sandbox:\t%s\n", sandboxLabel(mode))
-	fmt.Fprintf(tw, "  Network:\t%s\n", networkLabel(mode))
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_mode", nil), mode.String())
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_source", nil), sourceLabel(ctx, src))
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_sandbox", nil), sandboxLabel(ctx, mode))
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_network", nil), networkLabel(ctx, mode))
 	tw.Flush()
 	return sb.String()
 }
@@ -183,7 +190,7 @@ func (c *ApprovalCommand) handleStatus() string {
 //
 // followed by mode-specific advisory lines (currently only full-auto, which
 // gets a sandbox warning).
-func (c *ApprovalCommand) handleSet(args []string) (string, error) {
+func (c *ApprovalCommand) handleSet(ctx context.Context, args []string) (string, error) {
 	if len(args) == 0 {
 		return "", fmt.Errorf("/approval set: missing mode (usage: /approval set <suggest|auto-edit|full-auto|dangerously-bypass>)")
 	}
@@ -197,12 +204,15 @@ func (c *ApprovalCommand) handleSet(args []string) (string, error) {
 	}
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Approval mode set: %s -> %s (source: runtime)\n", oldMode.String(), newMode.String())
+	sb.WriteString(tr(ctx, "internal_commands_approval_mode_set", map[string]any{
+		"Old": oldMode.String(),
+		"New": newMode.String(),
+	}) + "\n")
 	if newMode == approval.ModeFullAuto {
-		sb.WriteString("WARNING: full-auto requires sandbox; ensure F14 backend available.\n")
+		sb.WriteString(tr(ctx, "internal_commands_approval_warn_full_auto", nil) + "\n")
 	}
 	if newMode == approval.ModeDangerous {
-		sb.WriteString("WARNING: dangerously-bypass disables ALL approval checks; use only in trusted automation.\n")
+		sb.WriteString(tr(ctx, "internal_commands_approval_warn_dangerous", nil) + "\n")
 	}
 	return sb.String(), nil
 }
@@ -210,12 +220,12 @@ func (c *ApprovalCommand) handleSet(args []string) (string, error) {
 // handleShow renders the descriptor block for a specific mode (or all four
 // when args is empty / "all"). The single-mode rendering is also the per-row
 // shape used by the all-modes path so output stays uniform.
-func (c *ApprovalCommand) handleShow(args []string) (string, error) {
+func (c *ApprovalCommand) handleShow(ctx context.Context, args []string) (string, error) {
 	descriptors := approval.ModeDescriptors()
 	if len(args) == 0 || args[0] == "all" {
 		var sb strings.Builder
 		for _, m := range approval.AllModes() {
-			sb.WriteString(renderDescriptor(descriptors[m]))
+			sb.WriteString(renderDescriptor(ctx, descriptors[m]))
 		}
 		return sb.String(), nil
 	}
@@ -229,19 +239,20 @@ func (c *ApprovalCommand) handleShow(args []string) (string, error) {
 		// unreachable because ModeDescriptors covers all four canonical modes.
 		return "", fmt.Errorf("/approval show: no descriptor for mode %q", mode)
 	}
-	return renderDescriptor(d), nil
+	return renderDescriptor(ctx, d), nil
 }
 
 // renderDescriptor formats a single ModeDescriptor as a labeled block.
 // Identical shape across single-mode and all-modes paths.
-func renderDescriptor(d approval.ModeDescriptor) string {
+func renderDescriptor(ctx context.Context, d approval.ModeDescriptor) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Mode: %s\n", d.Mode.String())
+	fmt.Fprintf(&sb, "%s: %s\n", tr(ctx, "internal_commands_approval_label_mode", nil), d.Mode.String())
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  Description:\t%s\n", d.Description)
-	fmt.Fprintf(tw, "  Sandbox:\t%s\n", d.SandboxRule)
-	fmt.Fprintf(tw, "  Network:\t%s\n", d.NetworkRule)
-	fmt.Fprintf(tw, "  Safety:\t%d (%s)\n", d.SafetyOrder, safetyLabel(d.SafetyOrder))
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_description", nil), d.Description)
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_sandbox", nil), d.SandboxRule)
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_approval_label_network", nil), d.NetworkRule)
+	fmt.Fprintf(tw, "  %s:\t%d (%s)\n", tr(ctx, "internal_commands_approval_label_safety", nil),
+		d.SafetyOrder, safetyLabel(ctx, d.SafetyOrder))
 	tw.Flush()
 	sb.WriteString("\n")
 	return sb.String()
@@ -251,17 +262,19 @@ func renderDescriptor(d approval.ModeDescriptor) string {
 // position on the safety ladder. Kept private; the suggest=0 ↔ dangerous=3
 // ordering matches AllModes() and ModeDescriptors() and is load-bearing for
 // /approval show all output ordering tests.
-func safetyLabel(order int) string {
+//
+// CONST-046: each rung resolves through the package i18n seam.
+func safetyLabel(ctx context.Context, order int) string {
 	switch order {
 	case 0:
-		return "most restrictive"
+		return tr(ctx, "internal_commands_approval_safety_most_restrictive", nil)
 	case 1:
-		return "moderate"
+		return tr(ctx, "internal_commands_approval_safety_moderate", nil)
 	case 2:
-		return "permissive"
+		return tr(ctx, "internal_commands_approval_safety_permissive", nil)
 	case 3:
-		return "least restrictive"
+		return tr(ctx, "internal_commands_approval_safety_least_restrictive", nil)
 	default:
-		return fmt.Sprintf("rank %d", order)
+		return tr(ctx, "internal_commands_approval_safety_rank", map[string]any{"Order": order})
 	}
 }

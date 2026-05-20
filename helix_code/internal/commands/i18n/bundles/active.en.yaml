@@ -796,3 +796,75 @@ internal_commands_memory_bytes:
 
 internal_commands_memory_no_memory_loaded:
   other: "(no project memory loaded)"
+
+# --- /approval slash command (round-412 §11.4 CONST-046 migration) ---
+# User-facing CLI output for the /approval status/set/show subcommands.
+
+internal_commands_approval_description:
+  other: "Inspect or change the active approval mode, or describe approval modes."
+
+internal_commands_approval_usage:
+  other: "/approval [status|set <mode>|show [<mode>|all]]"
+
+internal_commands_approval_status_header:
+  other: "Approval status"
+
+internal_commands_approval_label_mode:
+  other: "Mode"
+
+internal_commands_approval_label_source:
+  other: "Source"
+
+internal_commands_approval_label_sandbox:
+  other: "Sandbox"
+
+internal_commands_approval_label_network:
+  other: "Network"
+
+internal_commands_approval_label_description:
+  other: "Description"
+
+internal_commands_approval_label_safety:
+  other: "Safety"
+
+internal_commands_approval_source_flag:
+  other: "--approval CLI flag"
+
+internal_commands_approval_source_env:
+  other: "{{.Var}} env var"
+
+internal_commands_approval_source_config:
+  other: "config file"
+
+internal_commands_approval_source_default:
+  other: "default (built-in)"
+
+internal_commands_approval_source_runtime:
+  other: "runtime (/approval set or programmatic)"
+
+internal_commands_approval_rule_not_available:
+  other: "n/a"
+
+internal_commands_approval_mode_set:
+  other: "Approval mode set: {{.Old}} -> {{.New}} (source: runtime)"
+
+internal_commands_approval_warn_full_auto:
+  other: "WARNING: full-auto requires sandbox; ensure F14 backend available."
+
+internal_commands_approval_warn_dangerous:
+  other: "WARNING: dangerously-bypass disables ALL approval checks; use only in trusted automation."
+
+internal_commands_approval_safety_most_restrictive:
+  other: "most restrictive"
+
+internal_commands_approval_safety_moderate:
+  other: "moderate"
+
+internal_commands_approval_safety_permissive:
+  other: "permissive"
+
+internal_commands_approval_safety_least_restrictive:
+  other: "least restrictive"
+
+internal_commands_approval_safety_rank:
+  other: "rank {{.Order}}"

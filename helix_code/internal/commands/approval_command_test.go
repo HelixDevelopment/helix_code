@@ -47,8 +47,10 @@ func newFakeInspector(mode approval.ApprovalMode, source approval.ResolvedSource
 func TestApprovalCommand_Name(t *testing.T) {
 	c := NewApprovalCommand(newFakeInspector(approval.ModeSuggest, approval.SourceDefault))
 	assert.Equal(t, "approval", c.Name())
-	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/approval")
+	// CONST-046: Description/Usage route through the i18n seam — default
+	// NoopTranslator echoes the message ID verbatim.
+	assert.Equal(t, "internal_commands_approval_description", c.Description())
+	assert.Equal(t, "internal_commands_approval_usage", c.Usage())
 	assert.Nil(t, c.Aliases())
 }
 
@@ -57,7 +59,9 @@ func TestApprovalCommand_DefaultIsStatus(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "Approval status")
+	// CONST-046: status header routes through the i18n seam — default
+	// NoopTranslator echoes the message ID verbatim.
+	assert.Contains(t, res.Output, "internal_commands_approval_status_header")
 	assert.Contains(t, res.Output, "auto-edit")
 }
 
@@ -73,16 +77,19 @@ func TestApprovalCommand_StatusShowsMode(t *testing.T) {
 }
 
 func TestApprovalCommand_StatusShowsSource(t *testing.T) {
+	// CONST-046: source labels route through the i18n seam — default
+	// NoopTranslator echoes the message ID verbatim, so the assertion
+	// targets the per-source message ID rather than the English literal.
 	cases := []struct {
 		name   string
 		source approval.ResolvedSource
 		want   string
 	}{
-		{"flag", approval.SourceFlag, "--approval CLI flag"},
-		{"env", approval.SourceEnv, approval.EnvVarName + " env var"},
-		{"config", approval.SourceConfig, "config file"},
-		{"default", approval.SourceDefault, "default"},
-		{"runtime", approval.SourceRuntime, "runtime"},
+		{"flag", approval.SourceFlag, "internal_commands_approval_source_flag"},
+		{"env", approval.SourceEnv, "internal_commands_approval_source_env"},
+		{"config", approval.SourceConfig, "internal_commands_approval_source_config"},
+		{"default", approval.SourceDefault, "internal_commands_approval_source_default"},
+		{"runtime", approval.SourceRuntime, "internal_commands_approval_source_runtime"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -109,7 +116,9 @@ func TestApprovalCommand_StatusShowsSandboxRule(t *testing.T) {
 			c := NewApprovalCommand(newFakeInspector(tc.mode, approval.SourceDefault))
 			res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 			require.NoError(t, err)
-			assert.Contains(t, res.Output, "Sandbox:")
+			// CONST-046: label routes through the i18n seam (message-ID
+			// echo); the rule value is descriptor metadata, unchanged.
+			assert.Contains(t, res.Output, "internal_commands_approval_label_sandbox")
 			assert.Contains(t, res.Output, tc.sandbox)
 		})
 	}
@@ -130,10 +139,10 @@ func TestApprovalCommand_SetReportsSuccess(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"set", "auto-edit"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	// Output reports old -> new transition + the new source (runtime).
-	assert.Contains(t, res.Output, "suggest")
-	assert.Contains(t, res.Output, "auto-edit")
-	assert.Contains(t, res.Output, "runtime")
+	// CONST-046: the transition line routes through the i18n seam. The
+	// default NoopTranslator echoes the message ID (old/new mode names
+	// are template data, resolved by a real translator at boot).
+	assert.Contains(t, res.Output, "internal_commands_approval_mode_set")
 }
 
 func TestApprovalCommand_SetFullAutoWarning(t *testing.T) {
@@ -141,8 +150,8 @@ func TestApprovalCommand_SetFullAutoWarning(t *testing.T) {
 	c := NewApprovalCommand(insp)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"set", "full-auto"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "WARNING")
-	assert.Contains(t, res.Output, "sandbox")
+	// CONST-046: the full-auto advisory routes through the i18n seam.
+	assert.Contains(t, res.Output, "internal_commands_approval_warn_full_auto")
 }
 
 func TestApprovalCommand_SetReportsManagerError(t *testing.T) {
@@ -181,12 +190,14 @@ func TestApprovalCommand_ShowSpecificMode(t *testing.T) {
 			c := NewApprovalCommand(newFakeInspector(approval.ModeSuggest, approval.SourceDefault))
 			res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"show", m.String()}})
 			require.NoError(t, err)
-			assert.Contains(t, res.Output, "Mode:")
+			// CONST-046: descriptor labels route through the i18n seam —
+			// default NoopTranslator echoes the message ID verbatim.
+			assert.Contains(t, res.Output, "internal_commands_approval_label_mode")
 			assert.Contains(t, res.Output, m.String())
-			assert.Contains(t, res.Output, "Description:")
-			assert.Contains(t, res.Output, "Sandbox:")
-			assert.Contains(t, res.Output, "Network:")
-			assert.Contains(t, res.Output, "Safety:")
+			assert.Contains(t, res.Output, "internal_commands_approval_label_description")
+			assert.Contains(t, res.Output, "internal_commands_approval_label_sandbox")
+			assert.Contains(t, res.Output, "internal_commands_approval_label_network")
+			assert.Contains(t, res.Output, "internal_commands_approval_label_safety")
 		})
 	}
 }
