@@ -3,6 +3,7 @@ package mentions
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,14 +68,16 @@ func (h *FolderMentionHandler) Resolve(ctx context.Context, target string, optio
 	var totalSize int64
 	tokenCount := 0
 
-	err = filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — fs.DirEntry is lazy (no per-entry stat);
+	// d.Info() is called only on the file branch that needs size.
+	err = filepath.WalkDir(folderPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // Skip errors
 		}
 
 		// Skip if not recursive and not in root folder (but don't skip root itself)
 		if !recursive && path != folderPath && filepath.Dir(path) != folderPath {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
@@ -82,14 +85,14 @@ func (h *FolderMentionHandler) Resolve(ctx context.Context, target string, optio
 
 		// Skip hidden files/folders (but not the root folder itself)
 		if path != folderPath && strings.HasPrefix(filepath.Base(path), ".") {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
 		// Skip common ignore patterns
-		if info.IsDir() {
+		if d.IsDir() {
 			name := filepath.Base(path)
 			if name == "node_modules" || name == "vendor" || name == ".git" ||
 				name == "dist" || name == "build" || name == "bin" {
@@ -104,10 +107,14 @@ func (h *FolderMentionHandler) Resolve(ctx context.Context, target string, optio
 		}
 
 		// Add to content
-		if info.IsDir() {
+		if d.IsDir() {
 			content.WriteString(fmt.Sprintf("📁 %s/\n", relPath))
 		} else {
 			fileCount++
+			info, infoErr := d.Info()
+			if infoErr != nil {
+				return nil // Skip entries whose stat fails
+			}
 			totalSize += info.Size()
 
 			// Add file info

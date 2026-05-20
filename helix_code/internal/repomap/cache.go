@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -264,12 +265,13 @@ func (rc *RepoCache) atomicCopy(src, dst string) error {
 // loadFromDisk loads all cache entries from disk
 func (rc *RepoCache) loadFromDisk() error {
 	// Walk through cache directory
-	return filepath.Walk(rc.cacheDir, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	return filepath.WalkDir(rc.cacheDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // Skip files with errors
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 

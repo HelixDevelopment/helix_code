@@ -3,6 +3,7 @@ package planmode
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -734,15 +735,16 @@ func (e *DefaultExecutor) executeCodeAnalysis(ctx context.Context, step *PlanSte
 	var totalLines int
 	var totalFiles int
 
-	// Walk the target path and collect file stats
-	err := filepath.Walk(targetPath, func(path string, info os.FileInfo, err error) error {
+	// Walk the target path and collect file stats.
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	err := filepath.WalkDir(targetPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // Skip files we can't access
 		}
 
 		// Skip hidden directories and common non-code directories
-		if info.IsDir() {
-			name := info.Name()
+		if d.IsDir() {
+			name := d.Name()
 			if strings.HasPrefix(name, ".") || name == "node_modules" || name == "vendor" || name == "__pycache__" || name == "dist" || name == "build" {
 				return filepath.SkipDir
 			}
@@ -1060,10 +1062,11 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 			cmd := exec.CommandContext(ctx, "python", "-m", "py_compile")
 			cmd.Dir = e.workspaceRoot
 
-			// Find Python files and compile them
+			// Find Python files and compile them.
+			// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
 			var pyFiles []string
-			filepath.Walk(e.workspaceRoot, func(path string, info os.FileInfo, err error) error {
-				if err != nil || info.IsDir() {
+			filepath.WalkDir(e.workspaceRoot, func(path string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() {
 					return nil
 				}
 				if filepath.Ext(path) == ".py" {

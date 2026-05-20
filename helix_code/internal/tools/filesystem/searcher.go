@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -118,8 +119,10 @@ func (s *fileSearcher) Search(ctx context.Context, opts SearchOptions) ([]Search
 	var results []SearchResult
 	resultCount := 0
 
-	// Walk directory tree
-	err = filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+	// Walk directory tree.
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() is resolved once
+	// per visited entry because the result set needs size/mode/mtime.
+	err = filepath.WalkDir(rootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			// Skip files we can't access
 			return nil
@@ -144,7 +147,7 @@ func (s *fileSearcher) Search(ctx context.Context, opts SearchOptions) ([]Search
 
 		// Check max depth
 		if depth > opts.MaxDepth {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
@@ -152,9 +155,15 @@ func (s *fileSearcher) Search(ctx context.Context, opts SearchOptions) ([]Search
 
 		// Skip hidden files/directories if not included
 		if !opts.IncludeHidden && isHidden(path) {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
+			return nil
+		}
+
+		info, infoErr := d.Info()
+		if infoErr != nil {
+			// Skip entries we can't stat
 			return nil
 		}
 
@@ -239,8 +248,10 @@ func (s *fileSearcher) SearchContent(ctx context.Context, opts ContentSearchOpti
 	var matches []ContentMatch
 	matchCount := 0
 
-	// Walk directory tree
-	err = filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+	// Walk directory tree.
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only on
+	// the file branch that needs size.
+	err = filepath.WalkDir(rootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -253,7 +264,7 @@ func (s *fileSearcher) SearchContent(ctx context.Context, opts ContentSearchOpti
 		}
 
 		// Skip directories
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 
@@ -263,8 +274,14 @@ func (s *fileSearcher) SearchContent(ctx context.Context, opts ContentSearchOpti
 		}
 
 		// Check file size
-		if opts.MaxFileSize > 0 && info.Size() > opts.MaxFileSize {
-			return nil
+		if opts.MaxFileSize > 0 {
+			info, infoErr := d.Info()
+			if infoErr != nil {
+				return nil
+			}
+			if info.Size() > opts.MaxFileSize {
+				return nil
+			}
 		}
 
 		// Check include/exclude patterns
@@ -334,7 +351,9 @@ func (s *fileSearcher) Walk(ctx context.Context, root string, fn WalkFunc) error
 		return err
 	}
 
-	return filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved per entry
+	// because the public WalkFunc contract surfaces size/mode/mtime.
+	return filepath.WalkDir(rootPath, func(path string, d fs.DirEntry, err error) error {
 		// Check context cancellation
 		select {
 		case <-ctx.Done():
@@ -344,18 +363,26 @@ func (s *fileSearcher) Walk(ctx context.Context, root string, fn WalkFunc) error
 
 		// Convert to FileInfo
 		var fileInfo FileInfo
-		if info != nil {
-			fileInfo = FileInfo{
-				Path:    path,
-				Name:    info.Name(),
-				Size:    info.Size(),
-				Mode:    info.Mode(),
-				ModTime: info.ModTime(),
-				IsDir:   info.IsDir(),
+		walkErr := err
+		if d != nil {
+			info, infoErr := d.Info()
+			if infoErr != nil {
+				if walkErr == nil {
+					walkErr = infoErr
+				}
+			} else {
+				fileInfo = FileInfo{
+					Path:    path,
+					Name:    info.Name(),
+					Size:    info.Size(),
+					Mode:    info.Mode(),
+					ModTime: info.ModTime(),
+					IsDir:   info.IsDir(),
+				}
 			}
 		}
 
-		return fn(path, fileInfo, err)
+		return fn(path, fileInfo, walkErr)
 	})
 }
 

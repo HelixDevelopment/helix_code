@@ -4,6 +4,7 @@ package fix
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -332,12 +333,13 @@ func validateFixes(projectPath string) (*FixValidationResult, error) {
 func findGoFiles(projectPath string) ([]string, error) {
 	var goFiles []string
 
-	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	err := filepath.WalkDir(projectPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if !info.IsDir() && strings.HasSuffix(path, ".go") {
+		if !d.IsDir() && strings.HasSuffix(path, ".go") {
 			goFiles = append(goFiles, path)
 		}
 

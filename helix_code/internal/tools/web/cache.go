@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -263,9 +264,16 @@ func (dc *DiskCache) Cleanup(ttl time.Duration) error {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 
-	return filepath.Walk(dc.dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only on
+	// the file branch that needs ModTime.
+	return filepath.WalkDir(dc.dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
 			return err
+		}
+
+		info, infoErr := d.Info()
+		if infoErr != nil {
+			return nil
 		}
 
 		// Check if file is expired

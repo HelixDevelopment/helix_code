@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 )
@@ -15,12 +15,13 @@ func BuildCallGraph(rootDir string) (*CallGraph, error) {
 		Nodes: make(map[string]SymbolRef),
 	}
 
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
 	var goFiles []string
-	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+	filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
+		if !d.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
 			goFiles = append(goFiles, path)
 		}
 		return nil

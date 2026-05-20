@@ -3,6 +3,7 @@ package rules
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -65,18 +66,19 @@ func (m *Manager) LoadFromDirectory(dir string) error {
 	}
 
 	// Scan for file-specific rules (*.clinerules)
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// Skip hidden directories
-		if info.IsDir() && strings.HasPrefix(info.Name(), ".") && info.Name() != "." {
+		if d.IsDir() && strings.HasPrefix(d.Name(), ".") && d.Name() != "." {
 			return filepath.SkipDir
 		}
 
 		// Check for .clinerules files (but not the main ones)
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".clinerules") {
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".clinerules") {
 			if path != workspacePath && path != projectPath {
 				parser := NewParser(path)
 				ruleSet, err := parser.Parse()

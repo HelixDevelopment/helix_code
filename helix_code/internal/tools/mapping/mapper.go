@@ -3,6 +3,7 @@ package mapping
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -380,13 +381,15 @@ func (m *DefaultMapper) GetReferences(ctx context.Context, def *Definition, scop
 func (m *DefaultMapper) findSourceFiles(root string, opts *MapOptions) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() called only on the
+	// file branch that needs size for shouldIncludeFile.
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// Skip directories
-		if info.IsDir() {
+		if d.IsDir() {
 			// Check if directory should be excluded
 			if m.shouldExcludeDir(path, root, opts.ExcludeDirs) {
 				return filepath.SkipDir
@@ -395,8 +398,13 @@ func (m *DefaultMapper) findSourceFiles(root string, opts *MapOptions) ([]string
 		}
 
 		// Skip hidden files unless explicitly included
-		if !opts.IncludeHidden && strings.HasPrefix(info.Name(), ".") {
+		if !opts.IncludeHidden && strings.HasPrefix(d.Name(), ".") {
 			return nil
+		}
+
+		info, infoErr := d.Info()
+		if infoErr != nil {
+			return nil // Skip entries whose stat fails
 		}
 
 		// Check if file should be included

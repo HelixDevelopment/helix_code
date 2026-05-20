@@ -2,6 +2,7 @@ package repomap
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -245,15 +246,16 @@ func (rm *RepoMap) GetStatistics() (RepoMapStats, error) {
 func (rm *RepoMap) discoverFiles() ([]string, error) {
 	files := make([]string, 0)
 
-	err := filepath.Walk(rm.rootPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	err := filepath.WalkDir(rm.rootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // Skip inaccessible files
 		}
 
 		// Skip directories and hidden files
-		if info.IsDir() {
+		if d.IsDir() {
 			// Skip common directories to ignore
-			name := info.Name()
+			name := d.Name()
 			if name == ".git" || name == "node_modules" || name == "vendor" ||
 				name == ".helix" || name == "__pycache__" || name == "dist" ||
 				name == "build" || name == "target" {

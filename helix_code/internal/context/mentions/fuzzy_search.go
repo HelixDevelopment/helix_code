@@ -1,7 +1,7 @@
 package mentions
 
 import (
-	"os"
+	gofs "io/fs"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -31,21 +31,22 @@ func NewFuzzySearch(workspaceRoot string) *FuzzySearch {
 
 // buildCache builds the file cache
 func (fs *FuzzySearch) buildCache() {
-	filepath.Walk(fs.workspaceRoot, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	filepath.WalkDir(fs.workspaceRoot, func(path string, d gofs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
 
 		// Skip hidden files and directories
 		if strings.HasPrefix(filepath.Base(path), ".") {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
 		// Skip node_modules, vendor, etc.
-		if info.IsDir() {
+		if d.IsDir() {
 			name := filepath.Base(path)
 			if name == "node_modules" || name == "vendor" || name == ".git" ||
 				name == "dist" || name == "build" || name == "bin" {
@@ -53,7 +54,7 @@ func (fs *FuzzySearch) buildCache() {
 			}
 		}
 
-		if !info.IsDir() {
+		if !d.IsDir() {
 			fs.fileCache = append(fs.fileCache, path)
 		}
 

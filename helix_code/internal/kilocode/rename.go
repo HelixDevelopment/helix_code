@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,12 +25,13 @@ func (e *RenameEngine) Rename(ctx context.Context, oldName, newName string) (*Re
 		return nil, fmt.Errorf("old and new name required")
 	}
 
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
 	var goFiles []string
-	filepath.Walk(e.rootDir, func(path string, info os.FileInfo, err error) error {
+	filepath.WalkDir(e.rootDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
+		if !d.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
 			goFiles = append(goFiles, path)
 		}
 		return nil

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -289,11 +290,17 @@ func (cm *DiskCacheManager) GetCacheStats() (*CacheStats, error) {
 	var totalSize int64
 	var lastUpdated time.Time
 
-	err := filepath.Walk(cm.cacheDir, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only for
+	// the .json files whose size/mtime feed the stats.
+	err := filepath.WalkDir(cm.cacheDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && filepath.Ext(path) == ".json" {
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			info, infoErr := d.Info()
+			if infoErr != nil {
+				return nil
+			}
 			totalFiles++
 			totalSize += info.Size()
 			if info.ModTime().After(lastUpdated) {
@@ -371,11 +378,17 @@ func (cm *DiskCacheManager) evictIfNeeded(newSize int64) error {
 	}
 	var entries []cacheEntry
 
-	err := filepath.Walk(cm.cacheDir, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only for
+	// non-dir entries whose size/mtime drive LRU eviction.
+	err := filepath.WalkDir(cm.cacheDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
+		if !d.IsDir() {
+			info, infoErr := d.Info()
+			if infoErr != nil {
+				return nil
+			}
 			currentSize += info.Size()
 			entries = append(entries, cacheEntry{
 				path:    path,

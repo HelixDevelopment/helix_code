@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -192,12 +193,14 @@ func (bm *BackupManager) Cleanup(ctx context.Context) error {
 
 	cutoff := time.Now().Add(-bm.retention)
 
-	return filepath.Walk(bm.backupDir, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only when
+	// the backup-file metadata fallback needs ModTime.
+	return filepath.WalkDir(bm.backupDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 
@@ -207,6 +210,10 @@ func (bm *BackupManager) Cleanup(ctx context.Context) error {
 			metadata, err := bm.readBackupMetadata(path)
 			if err != nil {
 				// If we can't read metadata, check file modification time
+				info, infoErr := d.Info()
+				if infoErr != nil {
+					return nil
+				}
 				if info.ModTime().Before(cutoff) {
 					return os.Remove(path)
 				}

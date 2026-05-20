@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -427,11 +428,12 @@ func fixPathTraversal(issue *SecurityIssue) bool {
 // Helper functions
 func findGoFiles(projectPath string) []string {
 	var files []string
-	filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	filepath.WalkDir(projectPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") {
+		if !d.IsDir() && strings.HasSuffix(path, ".go") {
 			files = append(files, path)
 		}
 		return nil
@@ -441,11 +443,12 @@ func findGoFiles(projectPath string) []string {
 
 func findAllFiles(projectPath string) []string {
 	var files []string
-	filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+	// P2-T01: filepath.WalkDir — lazy fs.DirEntry, no per-entry stat.
+	filepath.WalkDir(projectPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if !info.IsDir() {
+		if !d.IsDir() {
 			files = append(files, path)
 		}
 		return nil
