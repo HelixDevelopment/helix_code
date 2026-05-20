@@ -535,9 +535,9 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 	workerStatsLabel := widget.NewLabel("Total: 0\nActive: 0\nHealthy: 0")
 	taskStatsLabel := widget.NewLabel("Total: 0\nCompleted: 0\nRunning: 0")
 
-	systemCard := widget.NewCard("Aurora System", "", systemStatsLabel)
-	workerCard := widget.NewCard("Workers", "", workerStatsLabel)
-	taskCard := widget.NewCard("Tasks", "", taskStatsLabel)
+	systemCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_system"), "", systemStatsLabel)
+	workerCard := widget.NewCard(auroraApp.t("aurora_os_card_workers"), "", workerStatsLabel)
+	taskCard := widget.NewCard(auroraApp.t("aurora_os_card_tasks"), "", taskStatsLabel)
 
 	// Start a goroutine to update stats
 	go func() {
@@ -583,18 +583,18 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 	activityLog.SetText("Aurora OS integration active\nSystem monitoring enabled\nSecurity protocols initialized\nNative services connected\nPerformance optimization available")
 	activityLog.Disable()
 
-	activityCard := widget.NewCard("Aurora Activity", "", activityLog)
+	activityCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_activity"), "", activityLog)
 
 	// Aurora OS quick actions
-	actionsCard := widget.NewCard("Aurora Actions", "",
+	actionsCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_actions"), "",
 		container.NewVBox(
-			widget.NewButton("System Diagnostics", func() { auroraApp.runAuroraDiagnostics() }),
-			widget.NewButton("Security Scan", func() { auroraApp.runSecurityScan() }),
-			widget.NewButton("Performance Boost", func() { auroraApp.activatePerformanceMode() }),
-			widget.NewButton("New Task", func() {
+			widget.NewButton(auroraApp.t("aurora_os_btn_system_diagnostics"), func() { auroraApp.runAuroraDiagnostics() }),
+			widget.NewButton(auroraApp.t("aurora_os_btn_security_scan"), func() { auroraApp.runSecurityScan() }),
+			widget.NewButton(auroraApp.t("aurora_os_btn_performance_boost"), func() { auroraApp.activatePerformanceMode() }),
+			widget.NewButton(auroraApp.t("aurora_os_btn_new_task"), func() {
 				auroraApp.tabs.SelectIndex(1) // Switch to Tasks tab
 			}),
-			widget.NewButton("New Project", func() {
+			widget.NewButton(auroraApp.t("aurora_os_btn_new_project"), func() {
 				auroraApp.tabs.SelectIndex(5) // Switch to Projects tab
 			}),
 		),
@@ -609,7 +609,7 @@ func (auroraApp *AuroraApp) createAuroraDashboardTab() fyne.CanvasObject {
 func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 	// System resources with dynamic updates
 	resourcesLabel := widget.NewLabel("Loading...")
-	resourcesCard := widget.NewCard("System Resources", "", resourcesLabel)
+	resourcesCard := widget.NewCard(auroraApp.t("aurora_os_card_system_resources"), "", resourcesLabel)
 
 	// Update resources display
 	go func() {
@@ -645,19 +645,19 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 		},
 	)
 
-	servicesCard := widget.NewCard("Aurora Services", "", servicesList)
+	servicesCard := widget.NewCard(auroraApp.t("aurora_os_card_aurora_services"), "", servicesList)
 
 	// System actions
 	actions := container.NewVBox(
-		widget.NewButton("Refresh System Info", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_refresh_system_info"), func() {
 			auroraApp.refreshSystemInfo()
-			dialog.ShowInformation("Refreshed", "System information has been refreshed", auroraApp.mainWindow)
+			dialog.ShowInformation(auroraApp.t("aurora_os_dialog_refreshed_title"), auroraApp.t("aurora_os_dialog_system_info_refreshed"), auroraApp.mainWindow)
 		}),
-		widget.NewButton("Optimize Performance", func() { auroraApp.optimizePerformance() }),
-		widget.NewButton("System Diagnostics", func() { auroraApp.runAuroraDiagnostics() }),
-		widget.NewButton("Force GC", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_optimize_performance"), func() { auroraApp.optimizePerformance() }),
+		widget.NewButton(auroraApp.t("aurora_os_btn_system_diagnostics"), func() { auroraApp.runAuroraDiagnostics() }),
+		widget.NewButton(auroraApp.t("aurora_os_btn_force_gc"), func() {
 			runtime.GC()
-			dialog.ShowInformation("GC Complete", "Garbage collection completed", auroraApp.mainWindow)
+			dialog.ShowInformation(auroraApp.t("aurora_os_dialog_gc_complete_title"), auroraApp.t("aurora_os_dialog_gc_completed"), auroraApp.mainWindow)
 		}),
 	)
 
@@ -668,7 +668,7 @@ func (auroraApp *AuroraApp) createAuroraSystemTab() fyne.CanvasObject {
 func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 	// Security status with dynamic updates
 	statusLabel := widget.NewLabel("Loading...")
-	statusCard := widget.NewCard("Security Status", "", statusLabel)
+	statusCard := widget.NewCard(auroraApp.t("aurora_os_card_security_status"), "", statusLabel)
 
 	// Update status display
 	updateStatus := func() {
@@ -715,17 +715,17 @@ func (auroraApp *AuroraApp) createAuroraSecurityTab() fyne.CanvasObject {
 		},
 	)
 
-	accessCard := widget.NewCard("Access Control", "", accessList)
+	accessCard := widget.NewCard(auroraApp.t("aurora_os_card_access_control"), "", accessList)
 
 	// Security actions
 	actions := container.NewVBox(
-		widget.NewButton("Run Security Scan", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_run_security_scan"), func() {
 			auroraApp.runSecurityScan()
 			updateStatus()
 		}),
-		widget.NewButton("View Audit Log", func() { auroraApp.showAuditLog() }),
-		widget.NewButton("Configure Encryption", func() { auroraApp.configureEncryption() }),
-		widget.NewButton("Refresh Status", func() { updateStatus() }),
+		widget.NewButton(auroraApp.t("aurora_os_btn_view_audit_log"), func() { auroraApp.showAuditLog() }),
+		widget.NewButton(auroraApp.t("aurora_os_btn_configure_encryption"), func() { auroraApp.configureEncryption() }),
+		widget.NewButton(auroraApp.t("aurora_os_btn_refresh_status"), func() { updateStatus() }),
 	)
 
 	return container.NewBorder(nil, nil, nil, actions, container.NewVBox(statusCard, accessCard))
@@ -793,7 +793,7 @@ func (auroraApp *AuroraApp) runAuroraDiagnostics() {
 	resultText += "\nDiagnostics completed successfully."
 
 	// Show results in dialog
-	dialog.ShowInformation("System Diagnostics", resultText, auroraApp.mainWindow)
+	dialog.ShowInformation(auroraApp.t("aurora_os_dialog_system_diagnostics_title"), resultText, auroraApp.mainWindow)
 
 	auroraApp.securityManager.AddAuditEntry("diagnostics_complete", "user",
 		fmt.Sprintf("Diagnostics completed: %d checks performed", len(diagnosticsResults)), "info")
@@ -855,7 +855,7 @@ func (auroraApp *AuroraApp) runSecurityScan() {
 	resultText += fmt.Sprintf("\nScan completed: %d issues found.", issues)
 
 	// Show results
-	dialog.ShowInformation("Security Scan", resultText, auroraApp.mainWindow)
+	dialog.ShowInformation(auroraApp.t("aurora_os_dialog_security_scan_title"), resultText, auroraApp.mainWindow)
 
 	auroraApp.securityManager.AddAuditEntry("security_scan_complete", "user",
 		fmt.Sprintf("Security scan completed: %d issues found", issues), "info")

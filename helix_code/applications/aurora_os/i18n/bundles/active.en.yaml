@@ -459,3 +459,91 @@ aurora_os_cli_diag_detail_perf_enabled:
 
 aurora_os_cli_diag_detail_perf_disabled:
   other: "Disabled (run 'aurora performance' to enable)"
+
+# Round-430 §11.4 anti-bluff sweep (2026-05-20): 26 GUI-mode Fyne
+# strings migrated — card titles, action-button labels, and dialog
+# titles across the Aurora Dashboard, Aurora System, and Aurora
+# Security tabs. These anchor every visible card header and clickable
+# action in the desktop client window. Resolved at runtime via
+# Translator.T (CONST-046 Phase 4).
+
+aurora_os_card_aurora_system:
+  other: "Aurora System"
+
+aurora_os_card_workers:
+  other: "Workers"
+
+aurora_os_card_tasks:
+  other: "Tasks"
+
+aurora_os_card_aurora_activity:
+  other: "Aurora Activity"
+
+aurora_os_card_aurora_actions:
+  other: "Aurora Actions"
+
+aurora_os_card_system_resources:
+  other: "System Resources"
+
+aurora_os_card_aurora_services:
+  other: "Aurora Services"
+
+aurora_os_card_security_status:
+  other: "Security Status"
+
+aurora_os_card_access_control:
+  other: "Access Control"
+
+aurora_os_btn_system_diagnostics:
+  other: "System Diagnostics"
+
+aurora_os_btn_security_scan:
+  other: "Security Scan"
+
+aurora_os_btn_performance_boost:
+  other: "Performance Boost"
+
+aurora_os_btn_new_task:
+  other: "New Task"
+
+aurora_os_btn_new_project:
+  other: "New Project"
+
+aurora_os_btn_refresh_system_info:
+  other: "Refresh System Info"
+
+aurora_os_btn_optimize_performance:
+  other: "Optimize Performance"
+
+aurora_os_btn_force_gc:
+  other: "Force GC"
+
+aurora_os_btn_run_security_scan:
+  other: "Run Security Scan"
+
+aurora_os_btn_view_audit_log:
+  other: "View Audit Log"
+
+aurora_os_btn_configure_encryption:
+  other: "Configure Encryption"
+
+aurora_os_btn_refresh_status:
+  other: "Refresh Status"
+
+aurora_os_dialog_refreshed_title:
+  other: "Refreshed"
+
+aurora_os_dialog_system_info_refreshed:
+  other: "System information has been refreshed"
+
+aurora_os_dialog_gc_complete_title:
+  other: "GC Complete"
+
+aurora_os_dialog_gc_completed:
+  other: "Garbage collection completed"
+
+aurora_os_dialog_system_diagnostics_title:
+  other: "System Diagnostics"
+
+aurora_os_dialog_security_scan_title:
+  other: "Security Scan"
