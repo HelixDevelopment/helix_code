@@ -544,9 +544,9 @@ func (tui *TerminalUI) showTasks() {
 
 	// Sample task data - will be replaced with real data
 	taskItems := []ListItem{
-		{MainText: "Code Generation Task", SecondaryText: "Generate REST API endpoints", Shortcut: '1'},
-		{MainText: "Testing Task", SecondaryText: "Run unit tests", Shortcut: '2'},
-		{MainText: "Build Task", SecondaryText: "Compile application", Shortcut: '3'},
+		{MainText: tui.t("terminal_ui_sample_task_codegen_title"), SecondaryText: tui.t("terminal_ui_sample_task_codegen_desc"), Shortcut: '1'},
+		{MainText: tui.t("terminal_ui_sample_task_testing_title"), SecondaryText: tui.t("terminal_ui_sample_task_testing_desc"), Shortcut: '2'},
+		{MainText: tui.t("terminal_ui_sample_task_build_title"), SecondaryText: tui.t("terminal_ui_sample_task_build_desc"), Shortcut: '3'},
 	}
 
 	taskList := components.CreateList("Tasks", taskItems)
@@ -731,7 +731,7 @@ func (tui *TerminalUI) showAddWorkerForm() {
 	form.AddInputField("SSH User", "", 20, nil, func(text string) {
 		sshUser = text
 	})
-	form.AddInputField("Max Concurrent Tasks", "4", 10, tview.InputFieldInteger, func(text string) {
+	form.AddInputField(tui.t("terminal_ui_form_max_concurrent_tasks"), "4", 10, tview.InputFieldInteger, func(text string) {
 		fmt.Sscanf(text, "%d", &maxTasks)
 	})
 
@@ -865,9 +865,9 @@ func (tui *TerminalUI) showProjects() {
 		if row > 0 && row <= len(projects) {
 			selectedProject := projects[row-1]
 			if err := tui.projectManager.SetActiveProject(ctx, selectedProject.ID); err != nil {
-				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to set active: %v", err))
+				tui.statusBar.SetText("[red]" + tui.td("terminal_ui_project_set_active_failed", map[string]any{"Error": err.Error()}))
 			} else {
-				tui.statusBar.SetText(fmt.Sprintf("[green]Active project: %s", selectedProject.Name))
+				tui.statusBar.SetText("[green]" + tui.td("terminal_ui_project_set_active", map[string]any{"Name": selectedProject.Name}))
 				tui.showProjects()
 			}
 		}
@@ -948,7 +948,7 @@ func (tui *TerminalUI) showProjectDetails(p *project.Project) {
 // showNewProjectForm displays a form for creating a new project
 func (tui *TerminalUI) showNewProjectForm() {
 	form := tview.NewForm()
-	form.SetBorder(true).SetTitle("Create New Project").SetTitleAlign(tview.AlignLeft)
+	form.SetBorder(true).SetTitle(tui.t("terminal_ui_form_create_project_title")).SetTitleAlign(tview.AlignLeft)
 
 	var name, description, path, projectType string
 
@@ -1023,7 +1023,7 @@ func (tui *TerminalUI) showSessions() {
 	sessionTable := tview.NewTable().
 		SetBorders(true).
 		SetSelectable(true, false)
-	sessionTable.SetBorder(true).SetTitle("Development Sessions")
+	sessionTable.SetBorder(true).SetTitle(tui.t("terminal_ui_sessions_table_title"))
 
 	// Set headers
 	headers := []string{"Name", "Project", "Mode", "Status", "Duration", "Created"}
@@ -1104,7 +1104,7 @@ func (tui *TerminalUI) showSessions() {
 		if row > 0 && row <= len(sessions) {
 			s := sessions[row-1]
 			if err := tui.sessionManager.Start(s.ID); err != nil {
-				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to start: %v", err))
+				tui.statusBar.SetText("[red]" + tui.td("terminal_ui_session_start_failed", map[string]any{"Error": err.Error()}))
 			} else {
 				tui.statusBar.SetText(fmt.Sprintf("[green]Started: %s", s.Name))
 				tui.showSessions()
@@ -1116,7 +1116,7 @@ func (tui *TerminalUI) showSessions() {
 		if row > 0 && row <= len(sessions) {
 			s := sessions[row-1]
 			if err := tui.sessionManager.Pause(s.ID); err != nil {
-				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to pause: %v", err))
+				tui.statusBar.SetText("[red]" + tui.td("terminal_ui_session_pause_failed", map[string]any{"Error": err.Error()}))
 			} else {
 				tui.statusBar.SetText(fmt.Sprintf("[yellow]Paused: %s", s.Name))
 				tui.showSessions()
@@ -1128,7 +1128,7 @@ func (tui *TerminalUI) showSessions() {
 		if row > 0 && row <= len(sessions) {
 			s := sessions[row-1]
 			if err := tui.sessionManager.Complete(s.ID); err != nil {
-				tui.statusBar.SetText(fmt.Sprintf("[red]Failed to complete: %v", err))
+				tui.statusBar.SetText("[red]" + tui.td("terminal_ui_session_complete_failed", map[string]any{"Error": err.Error()}))
 			} else {
 				tui.statusBar.SetText(fmt.Sprintf("[blue]Completed: %s", s.Name))
 				tui.showSessions()
@@ -1238,7 +1238,7 @@ func (tui *TerminalUI) showSessionActions(s *session.Session) {
 // showNewSessionForm displays a form for creating a new session
 func (tui *TerminalUI) showNewSessionForm() {
 	form := tview.NewForm()
-	form.SetBorder(true).SetTitle("Create New Session").SetTitleAlign(tview.AlignLeft)
+	form.SetBorder(true).SetTitle(tui.t("terminal_ui_form_create_session_title")).SetTitleAlign(tview.AlignLeft)
 
 	var name, description string
 	var mode session.Mode = session.ModePlanning
@@ -1565,9 +1565,12 @@ func (tui *TerminalUI) handleChatCommand(cmd string) {
 		tui.showModelSelector()
 		return
 	case cmd == "/info":
-		info := "No model selected"
+		info := tui.t("terminal_ui_chat_info_no_model")
 		if tui.llmProvider != nil {
-			info = fmt.Sprintf("Provider: %s\nModels: %d available", tui.llmProvider.GetName(), len(tui.llmProvider.GetModels()))
+			info = tui.td("terminal_ui_chat_info_provider", map[string]any{
+				"Provider":   tui.llmProvider.GetName(),
+				"ModelCount": len(tui.llmProvider.GetModels()),
+			})
 		}
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
 			Role:    "system",
@@ -1648,7 +1651,7 @@ func (tui *TerminalUI) selectModel(model *llm.ModelInfo) {
 	// Add system message about model selection
 	tui.chatHistory = append(tui.chatHistory, llm.Message{
 		Role:    "system",
-		Content: fmt.Sprintf("Model changed to: %s (Provider: %s)", model.Name, model.Provider),
+		Content: tui.td("terminal_ui_chat_model_changed", map[string]any{"Name": model.Name, "Provider": model.Provider}),
 	})
 	tui.chatOutput.SetText(tui.formatChatHistory())
 
@@ -1682,7 +1685,10 @@ func (tui *TerminalUI) showLLMSettings() {
 			// Add system prompt to beginning of chat
 			tui.chatHistory = append([]llm.Message{{Role: "system", Content: systemPrompt}}, tui.chatHistory...)
 		}
-		tui.statusBar.SetText(fmt.Sprintf("[green]Settings applied: temp=%.2f, max_tokens=%d", temperature, maxTokens))
+		tui.statusBar.SetText("[green]" + tui.td("terminal_ui_settings_applied", map[string]any{
+			"Temperature": fmt.Sprintf("%.2f", temperature),
+			"MaxTokens":   maxTokens,
+		}))
 		tui.pages.RemovePage("llmSettings")
 		tui.showLLM()
 	})
@@ -1719,7 +1725,7 @@ func (tui *TerminalUI) showSettings() {
 	tabs.SetTextAlign(tview.AlignCenter)
 	tabs.SetDynamicColors(true)
 	tabs.SetBorder(true)
-	tabs.SetTitle("Settings Categories")
+	tabs.SetTitle(tui.t("terminal_ui_settings_categories_title"))
 
 	// Theme settings
 	themeView := tui.createThemeSettingsView()
@@ -1852,7 +1858,7 @@ func (tui *TerminalUI) createCogneeSettingsView() tview.Primitive {
 			tui.helixConfig.Cognee.Host,
 			tui.helixConfig.Cognee.Port))
 
-		tui.statusBar.SetText(" Status: Cognee enabled successfully")
+		tui.statusBar.SetText(tui.t("terminal_ui_cognee_enabled_status"))
 	})
 	controls.AddItem(enableBtn, 0, 1, false)
 
@@ -1868,14 +1874,14 @@ func (tui *TerminalUI) createCogneeSettingsView() tview.Primitive {
 		// Update status display
 		statusView.SetText("Status: [red]Disabled\nMode: N/A\nHost: N/A\nPort: N/A")
 
-		tui.statusBar.SetText(" Status: Cognee disabled successfully")
+		tui.statusBar.SetText(tui.t("terminal_ui_cognee_disabled_status"))
 	})
 	controls.AddItem(disableBtn, 0, 1, false)
 
 	// Configuration options
 	configView := tview.NewTextView()
 	configView.SetBorder(true)
-	configView.SetTitle("Configuration Options")
+	configView.SetTitle(tui.t("terminal_ui_config_options_title"))
 	configView.SetTitleAlign(tview.AlignLeft)
 	configView.SetText(`[::b]Basic Settings:
 • Auto Start: Enabled
@@ -1921,7 +1927,7 @@ func (tui *TerminalUI) showNewTaskForm() {
 		taskType = option
 	})
 
-	form.AddInputField("Task Data (JSON)", `{"description": "Task description"}`, 50, nil, func(text string) {
+	form.AddInputField(tui.t("terminal_ui_form_task_data_json"), `{"description": "Task description"}`, 50, nil, func(text string) {
 		taskData = text
 	})
 
@@ -1978,9 +1984,9 @@ func (tui *TerminalUI) showNewTaskForm() {
 		)
 
 		if err != nil {
-			tui.statusBar.SetText(fmt.Sprintf(" Status: Failed to create task: %v", err))
+			tui.statusBar.SetText(tui.td("terminal_ui_task_create_failed", map[string]any{"Error": err.Error()}))
 		} else {
-			tui.statusBar.SetText(fmt.Sprintf(" Status: Task created successfully: %s", newTask.ID))
+			tui.statusBar.SetText(tui.td("terminal_ui_task_created", map[string]any{"TaskID": newTask.ID}))
 		}
 
 		// Close the modal
@@ -2043,9 +2049,9 @@ func (tui *TerminalUI) showQA() {
 	header.SetBorder(true)
 
 	// Engine status line
-	statusText := "[red]QA Engine: DISABLED"
+	statusText := "[red]" + tui.t("terminal_ui_qa_engine_disabled")
 	if tui.qaEngine != nil && tui.qaEngine.Enabled() {
-		statusText = "[green]QA Engine: ENABLED"
+		statusText = "[green]" + tui.t("terminal_ui_qa_engine_enabled")
 	}
 	statusView := tview.NewTextView().
 		SetText(statusText).
@@ -2068,13 +2074,13 @@ func (tui *TerminalUI) showQA() {
 	}
 
 	if tui.qaEngine == nil || !tui.qaEngine.Enabled() {
-		sessionTable.SetCell(1, 0, tview.NewTableCell("QA engine is disabled. Enable in config (qa.enabled = true).").
+		sessionTable.SetCell(1, 0, tview.NewTableCell(tui.t("terminal_ui_qa_engine_disabled_hint")).
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false))
 	} else {
 		sessions := tui.qaEngine.ListSessions()
 		if len(sessions) == 0 {
-			sessionTable.SetCell(1, 0, tview.NewTableCell("No sessions. Start a QA session to see results.").
+			sessionTable.SetCell(1, 0, tview.NewTableCell(tui.t("terminal_ui_qa_no_sessions")).
 				SetAlign(tview.AlignCenter).
 				SetSelectable(false))
 		} else {
@@ -2131,14 +2137,14 @@ func (tui *TerminalUI) showQA() {
 				failed++
 			}
 		}
-		statsBuilder.WriteString(fmt.Sprintf("[white]Total Sessions: [yellow]%d\n", len(sessions)))
+		statsBuilder.WriteString("[white]" + tui.td("terminal_ui_qa_stats_total_sessions", map[string]any{"Count": len(sessions)}) + "\n")
 		statsBuilder.WriteString(fmt.Sprintf("[white]Running: [blue]%d\n", running))
 		statsBuilder.WriteString(fmt.Sprintf("[white]Completed: [green]%d\n", completed))
 		statsBuilder.WriteString(fmt.Sprintf("[white]Failed: [red]%d\n", failed))
-		statsBuilder.WriteString(fmt.Sprintf("[white]Coverage Target: [yellow]%.0f%%", tui.config.QA.CoverageTarget*100))
+		statsBuilder.WriteString("[white]" + tui.td("terminal_ui_qa_stats_coverage_target", map[string]any{"Percent": fmt.Sprintf("%.0f", tui.config.QA.CoverageTarget*100)}))
 	} else {
 		statsBuilder.WriteString("[gray]QA not configured.\n")
-		statsBuilder.WriteString("[gray]Set qa.enabled = true in config.")
+		statsBuilder.WriteString("[gray]" + tui.t("terminal_ui_qa_enable_hint"))
 	}
 	statsPanel.SetText(statsBuilder.String())
 
@@ -2163,7 +2169,7 @@ func (tui *TerminalUI) showQA() {
 				if cell != nil {
 					sessionID := cell.Text
 					if err := tui.qaEngine.CancelSession(sessionID); err != nil {
-						tui.statusBar.SetText(fmt.Sprintf("[red]Cancel failed: %v", err))
+						tui.statusBar.SetText("[red]" + tui.td("terminal_ui_qa_cancel_failed", map[string]any{"Error": err.Error()}))
 					} else {
 						tui.statusBar.SetText(fmt.Sprintf("[green]Session %s cancelled", sessionID))
 						tui.showQA()
@@ -2192,7 +2198,7 @@ func (tui *TerminalUI) showQA() {
 // showStartQAForm displays a form for starting a new QA session.
 func (tui *TerminalUI) showStartQAForm() {
 	form := tview.NewForm()
-	form.SetBorder(true).SetTitle("Start QA Session").SetTitleAlign(tview.AlignLeft)
+	form.SetBorder(true).SetTitle(tui.t("terminal_ui_form_start_qa_session_title")).SetTitleAlign(tview.AlignLeft)
 
 	var platformsStr, banksStr string
 	var autonomous bool
@@ -2225,7 +2231,7 @@ func (tui *TerminalUI) showStartQAForm() {
 		sessionID := uuid.New().String()
 		_, err := tui.qaEngine.StartSession(context.Background(), sessionID, platforms, banks, autonomous)
 		if err != nil {
-			tui.statusBar.SetText(fmt.Sprintf("[red]Start session failed: %v", err))
+			tui.statusBar.SetText("[red]" + tui.td("terminal_ui_qa_start_session_failed", map[string]any{"Error": err.Error()}))
 		} else {
 			tui.statusBar.SetText(fmt.Sprintf("[green]Session %s started", sessionID[:8]))
 		}

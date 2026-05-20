@@ -142,6 +142,54 @@ func TestTerminalUI_TD_NilTranslatorLoudEcho(t *testing.T) {
 		"tui.td() must loud-echo the ID when no Translator is installed")
 }
 
+// TestRound357_TD_ThreadsPlaceholderData proves the round-357 §11.4
+// placeholder-bearing call sites (project/session lifecycle failures,
+// QA stats) forward their runtime values through Translator.T rather
+// than fmt.Sprintf'ing a hardcoded literal. Paired mutation: reverting
+// any tui.td call back to fmt.Sprintf("[red]...%v") would stop routing
+// through the injected translator and this test FAILs.
+func TestRound357_TD_ThreadsPlaceholderData(t *testing.T) {
+	tui := NewTerminalUI()
+	tr := &dataTranslator{}
+	tui.SetTranslator(tr)
+
+	got := tui.td("terminal_ui_session_start_failed", map[string]any{"Error": "connection refused"})
+	assert.Equal(t, "<SENTINEL:terminal_ui_session_start_failed>", got,
+		"round-357 session-start-failed must route through Translator.T")
+	assert.Equal(t, "terminal_ui_session_start_failed", tr.lastID)
+	assert.Equal(t, "connection refused", tr.lastData["Error"],
+		"tui.td must forward the error text as templateData")
+
+	got = tui.td("terminal_ui_qa_stats_total_sessions", map[string]any{"Count": 7})
+	assert.Equal(t, "<SENTINEL:terminal_ui_qa_stats_total_sessions>", got)
+	assert.Equal(t, 7, tr.lastData["Count"],
+		"tui.td must forward the QA session count as templateData")
+}
+
+// TestRound357_T_RoutesPlainLabels proves the round-357 §11.4 plain
+// (no-placeholder) call sites — form titles, QA-engine status labels,
+// sample-task list entries — resolve via tui.t. Paired mutation:
+// reverting any of these to a string literal makes the sentinel
+// envelope absent and this test FAILs.
+func TestRound357_T_RoutesPlainLabels(t *testing.T) {
+	tui := NewTerminalUI()
+	tr := &sentinelTranslator{}
+	tui.SetTranslator(tr)
+
+	for _, id := range []string{
+		"terminal_ui_form_create_project_title",
+		"terminal_ui_qa_engine_disabled",
+		"terminal_ui_qa_engine_enabled",
+		"terminal_ui_sample_task_codegen_title",
+		"terminal_ui_settings_categories_title",
+	} {
+		got := tui.t(id)
+		assert.Equal(t, "<SENTINEL:"+id+">", got,
+			"round-357 label %q must route through Translator.T", id)
+	}
+	assert.Len(t, tr.calls, 5, "all five round-357 plain labels must be resolved via the seam")
+}
+
 func TestNewThemeManager(t *testing.T) {
 	tm := NewThemeManager()
 	assert.NotNil(t, tm)

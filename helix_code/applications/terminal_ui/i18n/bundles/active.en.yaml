@@ -121,3 +121,118 @@ terminal_ui_provider_get_failed:
 
 terminal_ui_model_selected:
   other: "Selected model: {{.Name}} ({{.Provider}})"
+
+# Round-357 §11.4 anti-bluff sweep (2026-05-20): 25 user-facing
+# residual labels migrated — sample-task list, form titles/fields,
+# project/session lifecycle status messages, LLM-chat info, settings,
+# Cognee status, task creation, and the QA dashboard surface.
+# Placeholder-bearing entries use go-i18n {{.Name}} interpolation
+# resolved via Translator.T template data (tui.td helper).
+
+terminal_ui_sample_task_codegen_title:
+  other: "Code Generation Task"
+
+terminal_ui_sample_task_codegen_desc:
+  other: "Generate REST API endpoints"
+
+terminal_ui_sample_task_testing_title:
+  other: "Testing Task"
+
+terminal_ui_sample_task_testing_desc:
+  other: "Run unit tests"
+
+terminal_ui_sample_task_build_title:
+  other: "Build Task"
+
+terminal_ui_sample_task_build_desc:
+  other: "Compile application"
+
+terminal_ui_form_max_concurrent_tasks:
+  other: "Max Concurrent Tasks"
+
+terminal_ui_project_set_active_failed:
+  other: "Failed to set active: {{.Error}}"
+
+terminal_ui_project_set_active:
+  other: "Active project: {{.Name}}"
+
+terminal_ui_form_create_project_title:
+  other: "Create New Project"
+
+terminal_ui_sessions_table_title:
+  other: "Development Sessions"
+
+terminal_ui_form_create_session_title:
+  other: "Create New Session"
+
+terminal_ui_session_start_failed:
+  other: "Failed to start: {{.Error}}"
+
+terminal_ui_session_pause_failed:
+  other: "Failed to pause: {{.Error}}"
+
+terminal_ui_session_complete_failed:
+  other: "Failed to complete: {{.Error}}"
+
+terminal_ui_chat_info_no_model:
+  other: "No model selected"
+
+terminal_ui_chat_info_provider:
+  other: "Provider: {{.Provider}}\nModels: {{.ModelCount}} available"
+
+terminal_ui_chat_model_changed:
+  other: "Model changed to: {{.Name}} (Provider: {{.Provider}})"
+
+terminal_ui_settings_applied:
+  other: "Settings applied: temp={{.Temperature}}, max_tokens={{.MaxTokens}}"
+
+terminal_ui_settings_categories_title:
+  other: "Settings Categories"
+
+terminal_ui_cognee_enabled_status:
+  other: " Status: Cognee enabled successfully"
+
+terminal_ui_cognee_disabled_status:
+  other: " Status: Cognee disabled successfully"
+
+terminal_ui_config_options_title:
+  other: "Configuration Options"
+
+terminal_ui_form_task_data_json:
+  other: "Task Data (JSON)"
+
+terminal_ui_task_create_failed:
+  other: " Status: Failed to create task: {{.Error}}"
+
+terminal_ui_task_created:
+  other: " Status: Task created successfully: {{.TaskID}}"
+
+terminal_ui_qa_engine_disabled:
+  other: "QA Engine: DISABLED"
+
+terminal_ui_qa_engine_enabled:
+  other: "QA Engine: ENABLED"
+
+terminal_ui_qa_engine_disabled_hint:
+  other: "QA engine is disabled. Enable in config (qa.enabled = true)."
+
+terminal_ui_qa_no_sessions:
+  other: "No sessions. Start a QA session to see results."
+
+terminal_ui_qa_stats_total_sessions:
+  other: "Total Sessions: [yellow]{{.Count}}"
+
+terminal_ui_qa_stats_coverage_target:
+  other: "Coverage Target: [yellow]{{.Percent}}%"
+
+terminal_ui_qa_enable_hint:
+  other: "Set qa.enabled = true in config."
+
+terminal_ui_qa_cancel_failed:
+  other: "Cancel failed: {{.Error}}"
+
+terminal_ui_form_start_qa_session_title:
+  other: "Start QA Session"
+
+terminal_ui_qa_start_session_failed:
+  other: "Start session failed: {{.Error}}"
