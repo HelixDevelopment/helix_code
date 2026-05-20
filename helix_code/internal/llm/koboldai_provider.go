@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"dev.helix.code/internal/providers/httpclient"
 	"github.com/google/uuid"
 )
 
@@ -83,9 +84,10 @@ type KoboldAIModel struct {
 func NewKoboldAIProvider(config KoboldAIConfig) (*KoboldAIProvider, error) {
 	provider := &KoboldAIProvider{
 		config: config,
-		httpClient: &http.Client{
-			Timeout: config.Timeout,
-		},
+		// Shared tuned HTTP/2 transport (speed programme P1-T01,
+		// R1 B03 / R3 §4.7) — connection pooling only; request
+		// behaviour is unchanged.
+		httpClient: httpclient.NewHTTPClient(config.Timeout),
 		isRunning: true,
 		lastHealth: &ProviderHealth{
 			Status:    "unknown",

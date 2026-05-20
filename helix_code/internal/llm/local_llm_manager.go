@@ -11,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"dev.helix.code/internal/providers/httpclient"
 )
 
 // LocalLLMManager manages all local LLM providers
@@ -218,7 +220,10 @@ func NewLocalLLMManager(baseDir string) *LocalLLMManager {
 		configDir:     filepath.Join(baseDir, "config"),
 		dataDir:       filepath.Join(baseDir, "data"),
 		providers:     make(map[string]*LocalLLMProvider),
-		httpClient:    &http.Client{Timeout: 10 * time.Second},
+		// Shared tuned HTTP/2 transport (speed programme P1-T01,
+		// R1 B03 / R3 §4.7) — connection pooling only; request
+		// behaviour is unchanged.
+		httpClient: httpclient.NewHTTPClient(10 * time.Second),
 		isInitialized: false,
 	}
 

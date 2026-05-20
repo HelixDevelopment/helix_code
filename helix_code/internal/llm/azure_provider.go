@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"dev.helix.code/internal/providers/httpclient"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -223,9 +224,10 @@ func NewAzureProvider(config ProviderConfigEntry) (*AzureProvider, error) {
 		endpoint:      endpoint,
 		apiVersion:    apiVersion,
 		deploymentMap: deploymentMap,
-		httpClient: &http.Client{
-			Timeout: 120 * time.Second,
-		},
+		// Shared tuned HTTP/2 transport (speed programme P1-T01,
+		// R1 B03 / R3 §4.7) — connection pooling only; request
+		// behaviour is unchanged.
+		httpClient: httpclient.NewHTTPClient(120 * time.Second),
 		models: getAzureModels(),
 	}
 
