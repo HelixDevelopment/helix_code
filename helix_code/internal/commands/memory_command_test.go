@@ -53,9 +53,11 @@ func TestMemoryCommand_Status_NoMemory(t *testing.T) {
 	cmd := NewMemoryCommand(r)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "Project size:")
-	require.Contains(t, res.Output, "0 bytes")
-	require.Contains(t, res.Output, "(none)")
+	// round-406: status labels/values are CONST-046 message IDs under
+	// the default NoopTranslator.
+	require.Contains(t, res.Output, "internal_commands_memory_label_project_size")
+	require.Contains(t, res.Output, "internal_commands_memory_bytes")
+	require.Contains(t, res.Output, "internal_commands_memory_value_none")
 }
 
 func TestMemoryCommand_Status_DefaultSubcommand(t *testing.T) {
@@ -64,7 +66,7 @@ func TestMemoryCommand_Status_DefaultSubcommand(t *testing.T) {
 	cmd := NewMemoryCommand(r)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "Project memory status")
+	require.Contains(t, res.Output, "internal_commands_memory_status_header")
 }
 
 func TestMemoryCommand_Status_WithMemory(t *testing.T) {
@@ -72,10 +74,13 @@ func TestMemoryCommand_Status_WithMemory(t *testing.T) {
 	cmd := NewMemoryCommand(r)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "Project size:")
-	// 17 = len("STATUS_FIXTURE_24")
-	require.Contains(t, res.Output, "17 bytes")
-	require.Contains(t, res.Output, "Project truncated:")
+	require.Contains(t, res.Output, "internal_commands_memory_label_project_size")
+	// round-406: the "{{.Count}} bytes" string is a CONST-046 message ID;
+	// under the default NoopTranslator it echoes the ID (count is only
+	// interpolated under a real translator). The real-interpolation path
+	// is asserted by the i18n bundle tests.
+	require.Contains(t, res.Output, "internal_commands_memory_bytes")
+	require.Contains(t, res.Output, "internal_commands_memory_label_project_truncated")
 	require.Contains(t, res.Output, "false")
 }
 
@@ -84,7 +89,7 @@ func TestMemoryCommand_Show_NoMemory(t *testing.T) {
 	cmd := NewMemoryCommand(r)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "no project memory loaded")
+	require.Contains(t, res.Output, "internal_commands_memory_no_memory_loaded")
 }
 
 func TestMemoryCommand_Show_RendersContent(t *testing.T) {
@@ -196,22 +201,82 @@ func TestMemoryCommand_Show_OnlyUserOverlay(t *testing.T) {
 	require.Contains(t, res.Output, "USER_ONLY_24")
 }
 
-// Sanity check: the status block formatting we depend on contains the
-// substrings the test fixtures expect ("Project size:", "Loaded at:").
+// Sanity check: the status block formatting we depend on contains every
+// CONST-046 message ID the status renderer emits (round-406 migration).
 func TestMemoryCommand_Status_FormatStable(t *testing.T) {
 	r := newTestRegistry(t, map[string]string{"helixcode.md": "S"})
 	cmd := NewMemoryCommand(r)
 	res, _ := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	for _, want := range []string{
-		"Project memory status",
-		"Project path:",
-		"Project size:",
-		"Project truncated:",
-		"User path:",
-		"User size:",
-		"User truncated:",
-		"Loaded at:",
+		"internal_commands_memory_status_header",
+		"internal_commands_memory_label_project_path",
+		"internal_commands_memory_label_project_size",
+		"internal_commands_memory_label_project_truncated",
+		"internal_commands_memory_label_user_path",
+		"internal_commands_memory_label_user_size",
+		"internal_commands_memory_label_user_truncated",
+		"internal_commands_memory_label_loaded_at",
 	} {
 		require.True(t, strings.Contains(res.Output, want), "status output missing %q\nfull:\n%s", want, res.Output)
 	}
+}
+
+// --- Round-406 CONST-046 paired-mutation tests -----------------------------
+//
+// With the sentinel translator wired, every migrated memory-status label
+// MUST surface as a sentinel-wrapped message ID; an inlined literal fails.
+
+func TestMemoryCommand_StatusLabels_GoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	r := newTestRegistry(t, map[string]string{"helixcode.md": "MUT_24"})
+	cmd := NewMemoryCommand(r)
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	for _, id := range []string{
+		"internal_commands_memory_status_header",
+		"internal_commands_memory_label_project_path",
+		"internal_commands_memory_label_project_size",
+		"internal_commands_memory_label_project_truncated",
+		"internal_commands_memory_label_user_path",
+		"internal_commands_memory_label_user_size",
+		"internal_commands_memory_label_user_truncated",
+		"internal_commands_memory_label_loaded_at",
+		"internal_commands_memory_bytes",
+		"internal_commands_memory_value_none",
+	} {
+		require.Contains(t, res.Output, "<TR:"+id+">", "label %q not routed through tr()", id)
+	}
+}
+
+// TestMemoryCommand_StatusNeverLoaded_GoesThroughTranslator covers the
+// LoadedAt-zero branch. A registry that has never run Discover renders
+// the "(never loaded)" placeholder via tr(); we construct the renderer
+// directly against a registry with an unset snapshot to exercise it.
+func TestMemoryCommand_StatusNeverLoaded_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	// A registry constructed but never Discovered keeps a zero-value
+	// snapshot — LoadedAt.IsZero() is true so the placeholder renders.
+	r := projectmemory.NewMemoryRegistry(
+		projectmemory.NewMemoryLoader(zap.NewNop()), t.TempDir())
+	cmd := NewMemoryCommand(r)
+	out := cmd.handleStatus()
+	require.Contains(t, out, "<TR:internal_commands_memory_value_never_loaded>")
+}
+
+func TestMemoryCommand_ShowEmpty_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	r := newTestRegistry(t, nil)
+	cmd := NewMemoryCommand(r)
+	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
+	require.NoError(t, err)
+	require.Contains(t, res.Output, "<TR:internal_commands_memory_no_memory_loaded>")
 }

@@ -698,3 +698,101 @@ internal_commands_registry_help_usage:
 
 internal_commands_registry_available_header:
   other: "Available Commands:"
+
+# --- sandbox_command.go residual UI labels (round-406) ---
+internal_commands_sandbox_label_goos:
+  other: "GOOS:"
+
+internal_commands_sandbox_label_backend:
+  other: "Backend:"
+
+internal_commands_sandbox_label_bubblewrap_path:
+  other: "Bubblewrap path:"
+
+internal_commands_sandbox_label_unprivileged_userns:
+  other: "Unprivileged userns:"
+
+internal_commands_sandbox_label_cgroups_v2:
+  other: "Cgroups v2:"
+
+internal_commands_sandbox_label_default_network:
+  other: "Default network:"
+
+internal_commands_sandbox_label_default_timeout:
+  other: "Default timeout:"
+
+internal_commands_sandbox_label_user_deny_rules:
+  other: "User deny rules:"
+
+internal_commands_sandbox_label_test_command:
+  other: "Test command:"
+
+internal_commands_sandbox_label_exit_code:
+  other: "Exit code:"
+
+internal_commands_sandbox_label_duration:
+  other: "Duration:"
+
+internal_commands_sandbox_label_timed_out:
+  other: "Timed out:"
+
+internal_commands_sandbox_label_network_allowed:
+  other: "network_allowed:"
+
+internal_commands_sandbox_label_timeout:
+  other: "timeout:"
+
+internal_commands_sandbox_label_read_only_root:
+  other: "read_only_root:"
+
+internal_commands_sandbox_label_memory_limit_mb:
+  other: "memory_limit_mb:"
+
+internal_commands_sandbox_label_cpu_limit_pct:
+  other: "cpu_limit_pct:"
+
+internal_commands_sandbox_value_not_found:
+  other: "(not found)"
+
+internal_commands_sandbox_value_deny:
+  other: "deny"
+
+internal_commands_sandbox_value_allow:
+  other: "allow"
+
+# --- memory_command.go residual UI labels (round-406) ---
+internal_commands_memory_status_header:
+  other: "Project memory status"
+
+internal_commands_memory_label_project_path:
+  other: "Project path:"
+
+internal_commands_memory_label_project_size:
+  other: "Project size:"
+
+internal_commands_memory_label_project_truncated:
+  other: "Project truncated:"
+
+internal_commands_memory_label_user_path:
+  other: "User path:"
+
+internal_commands_memory_label_user_size:
+  other: "User size:"
+
+internal_commands_memory_label_user_truncated:
+  other: "User truncated:"
+
+internal_commands_memory_label_loaded_at:
+  other: "Loaded at:"
+
+internal_commands_memory_value_none:
+  other: "(none)"
+
+internal_commands_memory_value_never_loaded:
+  other: "(never loaded)"
+
+internal_commands_memory_bytes:
+  other: "{{.Count}} bytes"
+
+internal_commands_memory_no_memory_loaded:
+  other: "(no project memory loaded)"

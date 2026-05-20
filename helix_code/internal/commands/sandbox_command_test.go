@@ -88,9 +88,10 @@ func TestSandboxCommand_DefaultIsStatus(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 	// status output mentions the status header (CONST-046 message ID
-	// under the default NoopTranslator) + the Backend table line.
+	// under the default NoopTranslator) + the Backend table line
+	// (also a CONST-046 message ID since round-406).
 	assert.Contains(t, res.Output, "internal_commands_sandbox_status_header")
-	assert.Contains(t, res.Output, "Backend")
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_backend")
 }
 
 func TestSandboxCommand_StatusShowsBackend(t *testing.T) {
@@ -140,7 +141,8 @@ func TestSandboxCommand_TestRunsExecute(t *testing.T) {
 	// the fake reported).
 	assert.Contains(t, res.Output, "echo hi")
 	assert.Contains(t, res.Output, "bubblewrap")
-	assert.Contains(t, res.Output, "Exit code")
+	// round-406: "Exit code:" label is now a CONST-046 message ID.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_exit_code")
 	assert.Contains(t, res.Output, "0")
 	assert.Contains(t, res.Output, "hi")
 }
@@ -181,7 +183,8 @@ func TestSandboxCommand_TestShowsExitCode(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"test", "false"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "Exit code")
+	// round-406: "Exit code:" label is now a CONST-046 message ID.
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_exit_code")
 	assert.Contains(t, res.Output, "42")
 }
 
@@ -215,13 +218,13 @@ func TestSandboxCommand_PolicyShowsDefaultPolicy(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"policy"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	// CONST-046: the "Default policy:" header is a translated message ID
-	// under the default NoopTranslator; the tabwriter field labels and
-	// data values below it are not migrated and remain literal.
+	// CONST-046: the "Default policy:" header and (since round-406) the
+	// tabwriter field labels are translated message IDs under the default
+	// NoopTranslator; the data values below them remain literal.
 	assert.Contains(t, res.Output, "internal_commands_sandbox_default_policy_header")
-	assert.Contains(t, res.Output, "network_allowed")
-	assert.Contains(t, res.Output, "timeout")
-	assert.Contains(t, res.Output, "read_only_root")
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_network_allowed")
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_timeout")
+	assert.Contains(t, res.Output, "internal_commands_sandbox_label_read_only_root")
 	assert.Contains(t, res.Output, "30s")
 }
 
@@ -286,4 +289,78 @@ func TestSandboxCommand_PolicyHeader_GoesThroughTranslator(t *testing.T) {
 	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_default_policy_header>")
 	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_const_denylist_header>")
 	assert.Contains(t, res.Output, "<TR:internal_commands_sandbox_user_denylist_header>")
+}
+
+// --- Round-406 CONST-046 paired-mutation tests -----------------------------
+//
+// The status/test/policy tabwriter field labels migrated in round-406.
+// With the sentinel translator wired, every migrated label MUST surface
+// as a sentinel-wrapped message ID; an inlined literal fails the assert.
+
+func TestSandboxCommand_StatusLabels_GoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newSandboxCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	for _, id := range []string{
+		"internal_commands_sandbox_label_goos",
+		"internal_commands_sandbox_label_backend",
+		"internal_commands_sandbox_label_bubblewrap_path",
+		"internal_commands_sandbox_label_unprivileged_userns",
+		"internal_commands_sandbox_label_cgroups_v2",
+		"internal_commands_sandbox_label_default_network",
+		"internal_commands_sandbox_label_default_timeout",
+		"internal_commands_sandbox_label_user_deny_rules",
+		"internal_commands_sandbox_value_deny",
+	} {
+		assert.Contains(t, res.Output, "<TR:"+id+">")
+	}
+}
+
+func TestSandboxCommand_TestLabels_GoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, mgr := newSandboxCommand(t)
+	mgr.executeResult = &sandbox.SandboxResult{
+		Stdout:   "hi\n",
+		ExitCode: 0,
+		Backend:  sandbox.BackendBubblewrap,
+		Duration: 7 * time.Millisecond,
+		TimedOut: true,
+	}
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"test", "echo", "hi"}})
+	require.NoError(t, err)
+	for _, id := range []string{
+		"internal_commands_sandbox_label_test_command",
+		"internal_commands_sandbox_label_backend",
+		"internal_commands_sandbox_label_exit_code",
+		"internal_commands_sandbox_label_duration",
+		"internal_commands_sandbox_label_timed_out",
+	} {
+		assert.Contains(t, res.Output, "<TR:"+id+">")
+	}
+}
+
+func TestSandboxCommand_PolicyLabels_GoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newSandboxCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"policy"}})
+	require.NoError(t, err)
+	for _, id := range []string{
+		"internal_commands_sandbox_label_network_allowed",
+		"internal_commands_sandbox_label_timeout",
+		"internal_commands_sandbox_label_read_only_root",
+		"internal_commands_sandbox_label_memory_limit_mb",
+		"internal_commands_sandbox_label_cpu_limit_pct",
+	} {
+		assert.Contains(t, res.Output, "<TR:"+id+">")
+	}
 }

@@ -120,31 +120,32 @@ func (c *MemoryCommand) Execute(ctx context.Context, cc *CommandContext) (*Comma
 func (c *MemoryCommand) handleStatus() string {
 	m := c.registry.Snapshot()
 
+	ctx := context.Background()
 	var sb strings.Builder
-	sb.WriteString("Project memory status\n")
+	sb.WriteString(tr(ctx, "internal_commands_memory_status_header", nil) + "\n")
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
 
 	projPath := m.ProjectPath
 	if projPath == "" {
-		projPath = "(none)"
+		projPath = tr(ctx, "internal_commands_memory_value_none", nil)
 	}
 	userPath := m.UserPath
 	if userPath == "" {
-		userPath = "(none)"
+		userPath = tr(ctx, "internal_commands_memory_value_none", nil)
 	}
 
-	loadedAt := "(never loaded)"
+	loadedAt := tr(ctx, "internal_commands_memory_value_never_loaded", nil)
 	if !m.LoadedAt.IsZero() {
 		loadedAt = m.LoadedAt.Format(time.RFC3339)
 	}
 
-	fmt.Fprintf(tw, "  Project path:\t%s\n", projPath)
-	fmt.Fprintf(tw, "  Project size:\t%d bytes\n", len(m.Project))
-	fmt.Fprintf(tw, "  Project truncated:\t%t\n", m.TruncatedProject)
-	fmt.Fprintf(tw, "  User path:\t%s\n", userPath)
-	fmt.Fprintf(tw, "  User size:\t%d bytes\n", len(m.User))
-	fmt.Fprintf(tw, "  User truncated:\t%t\n", m.TruncatedUser)
-	fmt.Fprintf(tw, "  Loaded at:\t%s\n", loadedAt)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_memory_label_project_path", nil), projPath)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_memory_label_project_size", nil), tr(ctx, "internal_commands_memory_bytes", map[string]any{"Count": len(m.Project)}))
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_memory_label_project_truncated", nil), m.TruncatedProject)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_memory_label_user_path", nil), userPath)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_memory_label_user_size", nil), tr(ctx, "internal_commands_memory_bytes", map[string]any{"Count": len(m.User)}))
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_memory_label_user_truncated", nil), m.TruncatedUser)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_memory_label_loaded_at", nil), loadedAt)
 	tw.Flush()
 	return sb.String()
 }
@@ -155,7 +156,7 @@ func (c *MemoryCommand) handleStatus() string {
 func (c *MemoryCommand) handleShow() string {
 	rendered := c.registry.Snapshot().Render()
 	if rendered == "" {
-		return "(no project memory loaded)\n"
+		return tr(context.Background(), "internal_commands_memory_no_memory_loaded", nil) + "\n"
 	}
 	return rendered
 }

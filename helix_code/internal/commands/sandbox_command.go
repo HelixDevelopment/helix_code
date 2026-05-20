@@ -113,23 +113,23 @@ func (c *SandboxCommand) handleStatus(ctx context.Context) *CommandResult {
 	}
 
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  GOOS:\t%s\n", caps.GOOS)
-	fmt.Fprintf(tw, "  Backend:\t%s\n", caps.SelectedBackend.String())
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_goos", nil), caps.GOOS)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_backend", nil), caps.SelectedBackend.String())
 	bwPath := caps.BubblewrapPath
 	if bwPath == "" {
-		bwPath = "(not found)"
+		bwPath = tr(ctx, "internal_commands_sandbox_value_not_found", nil)
 	}
-	fmt.Fprintf(tw, "  Bubblewrap path:\t%s\n", bwPath)
-	fmt.Fprintf(tw, "  Unprivileged userns:\t%t\n", caps.UnprivilegedUserNS)
-	fmt.Fprintf(tw, "  Cgroups v2:\t%t\n", caps.CGroupsV2)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_bubblewrap_path", nil), bwPath)
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_sandbox_label_unprivileged_userns", nil), caps.UnprivilegedUserNS)
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_sandbox_label_cgroups_v2", nil), caps.CGroupsV2)
 
-	netDefault := "deny"
+	netDefault := tr(ctx, "internal_commands_sandbox_value_deny", nil)
 	if cfg.DefaultPolicy.NetworkAllowed {
-		netDefault = "allow"
+		netDefault = tr(ctx, "internal_commands_sandbox_value_allow", nil)
 	}
-	fmt.Fprintf(tw, "  Default network:\t%s\n", netDefault)
-	fmt.Fprintf(tw, "  Default timeout:\t%s\n", cfg.DefaultPolicy.Timeout.String())
-	fmt.Fprintf(tw, "  User deny rules:\t%d\n", len(cfg.UserDenyList))
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_default_network", nil), netDefault)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_default_timeout", nil), cfg.DefaultPolicy.Timeout.String())
+	fmt.Fprintf(tw, "  %s\t%d\n", tr(ctx, "internal_commands_sandbox_label_user_deny_rules", nil), len(cfg.UserDenyList))
 	tw.Flush()
 
 	return &CommandResult{Success: true, Output: sb.String()}
@@ -162,12 +162,12 @@ func (c *SandboxCommand) handleTest(ctx context.Context, args []string) (*Comman
 
 	var sb strings.Builder
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Test command:\t%s\n", command)
-	fmt.Fprintf(tw, "Backend:\t%s\n", result.Backend.String())
-	fmt.Fprintf(tw, "Exit code:\t%d\n", result.ExitCode)
-	fmt.Fprintf(tw, "Duration:\t%s\n", result.Duration.String())
+	fmt.Fprintf(tw, "%s\t%s\n", tr(ctx, "internal_commands_sandbox_label_test_command", nil), command)
+	fmt.Fprintf(tw, "%s\t%s\n", tr(ctx, "internal_commands_sandbox_label_backend", nil), result.Backend.String())
+	fmt.Fprintf(tw, "%s\t%d\n", tr(ctx, "internal_commands_sandbox_label_exit_code", nil), result.ExitCode)
+	fmt.Fprintf(tw, "%s\t%s\n", tr(ctx, "internal_commands_sandbox_label_duration", nil), result.Duration.String())
 	if result.TimedOut {
-		fmt.Fprintf(tw, "Timed out:\t%t\n", result.TimedOut)
+		fmt.Fprintf(tw, "%s\t%t\n", tr(ctx, "internal_commands_sandbox_label_timed_out", nil), result.TimedOut)
 	}
 	tw.Flush()
 
@@ -203,11 +203,11 @@ func (c *SandboxCommand) handlePolicy(ctx context.Context) *CommandResult {
 	var sb strings.Builder
 	sb.WriteString(tr(ctx, "internal_commands_sandbox_default_policy_header", nil) + "\n")
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  network_allowed:\t%t\n", cfg.DefaultPolicy.NetworkAllowed)
-	fmt.Fprintf(tw, "  timeout:\t%s\n", cfg.DefaultPolicy.Timeout.String())
-	fmt.Fprintf(tw, "  read_only_root:\t%t\n", cfg.DefaultPolicy.ReadOnlyRoot)
-	fmt.Fprintf(tw, "  memory_limit_mb:\t%d\n", cfg.DefaultPolicy.MemoryLimitMB)
-	fmt.Fprintf(tw, "  cpu_limit_pct:\t%d\n", cfg.DefaultPolicy.CPULimitPct)
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_sandbox_label_network_allowed", nil), cfg.DefaultPolicy.NetworkAllowed)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_sandbox_label_timeout", nil), cfg.DefaultPolicy.Timeout.String())
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_sandbox_label_read_only_root", nil), cfg.DefaultPolicy.ReadOnlyRoot)
+	fmt.Fprintf(tw, "  %s\t%d\n", tr(ctx, "internal_commands_sandbox_label_memory_limit_mb", nil), cfg.DefaultPolicy.MemoryLimitMB)
+	fmt.Fprintf(tw, "  %s\t%d\n", tr(ctx, "internal_commands_sandbox_label_cpu_limit_pct", nil), cfg.DefaultPolicy.CPULimitPct)
 	tw.Flush()
 
 	fmt.Fprintf(&sb, "\n%s\n", tr(ctx, "internal_commands_sandbox_const_denylist_header", map[string]any{"Count": len(constDeny)}))
