@@ -222,6 +222,30 @@ commit history + the <code>docs/improvements/</code> evidence chain
 </thead>
 <tbody>
 <tr>
+<td>2026-05-20</td>
+<td>OPS-001: LLMOps 2 pre-existing <code>CreatePromptExperiment</code>
+test failures</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>397</td>
+<td>LLMOps <code>d2008d0</code> + meta pointer bump</td>
+<td>Classification (A) test-assertion drift:
+<code>ControlPromptCreateFails</code>/<code>TreatmentPromptCreateFails</code>
+asserted pre-idempotency behaviour — they pre-registered a
+same-(name,version) prompt expecting <code>CreatePromptExperiment</code>
+to fail, but commit <code>bb53c38</code> deliberately made prompt
+registration idempotent (duplicates tolerated as no-ops;
+integration.go:233/236 <code>"already exists"</code> tolerance). No
+production regression; production error-wrap code is correct. Fix:
+re-keyed both tests to exercise the genuine non-tolerated failure path
+(structurally-invalid prompt, empty <code>Content</code> → registry
+<code>"prompt content is required"</code> →
+<code>CreatePromptExperiment</code> wraps with
+<code>"control prompt"</code>/<code>"treatment prompt"</code> prefix).
+<code>go test -count=1 ./llmops/...</code> 2 FAIL → 0 FAIL;
+<code>go build ./...</code> clean</td>
+</tr>
+<tr>
 <td>2026-05-19</td>
 <td>CONST-046 i18n architecture design doc</td>
 <td>Feature</td>
@@ -1353,12 +1377,61 @@ classification approach — production code (round-17
 <code>ErrVerificationNotWired</code>, <code>code_verification.go</code>
 error-propagation + zero-response→<code>failed</code>) was already
 honest; only stale test assertions needed re-keying. |</div>
-<p><em>Last regenerated: 2026-05-20 (round 348 — HXV-002 closure:
-LLMsVerifier <code>verification/</code> 10 test-assertion-drift failures
-re-keyed to the round-17 honest <code>ErrVerificationNotWired</code> +
-error-propagation contracts; no production code changed). Earlier
-closures (P0-P5 phases) tracked via
-<code>docs/improvements/PROGRESS.md</code> +
+<div class="line-block">2026-05-20 | HXV-003: LLMsVerifier
+<code>ProviderAdapterForBenchmark.Complete</code> is a CONST-050(A)
+production mock-bluff | Bug | Fixed (→ Fixed.md) | 396 | LLMsVerifier
+(round-396 HXV-003) + meta pointer-bump | Round-396 §11.4 / CONST-050(A)
+/ CONST-035 / BLUFF-001. <strong>Decision: WIRE, not delete.</strong>
+Investigation confirmed <code>ProviderAdapterForBenchmark</code> IS live
+code — <code>BenchmarkSystem.Initialize</code> wires it as the runner’s
+<code>LLMProvider</code> (two call sites in
+<code>benchmark_test.go</code>), so honest deletion was not applicable.
+The bug: <code>Complete(ctx, prompt, systemPrompt)</code> body was
+<code>// Mock implementation - actual would call real provider</code> +
+<code>return "Response", 50, nil</code> — fabricated a hardcoded
+completion for an LLM call it never made (canonical BLUFF-001).
+<strong>Fix:</strong> the adapter’s <code>provider</code> field was an
+untyped <code>interface{}</code> it never used; retyped it to the real
+<code>benchmark.LLMProvider</code> interface (<code>Complete</code> +
+<code>GetName</code>, the same contract
+<code>HTTPBenchmarkProvider</code> satisfies).
+<code>NewProviderAdapterForBenchmark</code> now type-asserts the passed
+value to <code>LLMProvider</code> and stores it; <code>Complete</code>
+dispatches directly to
+<code>a.provider.Complete(ctx, prompt, systemPrompt)</code>, returning
+the underlying provider’s genuine response text + real token count +
+real error verbatim. When no real provider is wired,
+<code>Complete</code> returns the new honest sentinel
+<code>ErrProviderAdapterNotWired</code> — it NEVER fabricates a result
+(mirrors the round-28 <code>ErrBenchmarkProviderNotConfigured</code>
+posture). The real dispatch path is <code>HTTPBenchmarkProvider</code>
+(OpenAI-compatible HTTP <code>LLMProvider</code>, already in the
+package). <strong>Reproduce-before-fix tests</strong>
+(<code>benchmark_coverage_test.go</code>): the pre-existing
+<code>TestProviderAdapterForBenchmark_Complete</code> relied on the
+bluff (<code>nil</code> provider → <code>NoError</code> + non-empty
+resp) — replaced with two honest tests: <code>_Complete_NotWired</code>
+asserts <code>ErrProviderAdapterNotWired</code> + empty resp + zero
+tokens (no fabrication), and <code>_Complete_RealDispatch</code>
+constructs an <code>httptest.NewServer</code> OpenAI shim +
+<code>HTTPBenchmarkProvider</code>, asserts the adapter ACTUALLY hits
+the server (hit-counter == 1) and returns the real server payload
+(<code>"4 is the real answer"</code>, server-reported
+<code>total_tokens</code> 19) — explicitly
+<code>NotEqual("Response")</code> / <code>NotEqual(50)</code>. Evidence:
+<code>go build ./...</code> exit 0;
+<code>go test -count=1 ./internal/benchmark/...</code> →
+<code>ok llmsverifier/internal/benchmark 12.334s</code> (PASS); the 3
+<code>TestProviderAdapterForBenchmark*</code> tests all
+<code>--- PASS</code>; anti-bluff smoke
+<code>grep -rn "Mock implementation\|simulated\|for now" internal/benchmark/*.go</code>
+(prod only) = clean. |</div>
+<p><em>Last regenerated: 2026-05-20 (round 396 — HXV-003 closure:
+LLMsVerifier <code>ProviderAdapterForBenchmark.Complete</code>
+mock-bluff replaced with real <code>LLMProvider</code> dispatch + honest
+<code>ErrProviderAdapterNotWired</code> sentinel; reproduce-before-fix
+httptest real-dispatch test). Earlier closures (P0-P5 phases) tracked
+via <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>
 </html>

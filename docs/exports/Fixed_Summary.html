@@ -201,7 +201,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>16</td>
+<td>18</td>
 <td><code>Fixed (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,9 +216,37 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 87 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 89 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 348 added HXV-002
+<code>docs/improvements/PROGRESS.md</code>). Round 396 added HXV-003
+(LLMsVerifier <code>ProviderAdapterForBenchmark.Complete</code>
+CONST-050(A) production mock-bluff resolved — WIRE-not-delete decision:
+the adapter is live code wired by
+<code>BenchmarkSystem.Initialize</code>, so honest deletion was not
+applicable; the <code>provider</code> field was retyped from an unused
+<code>interface{}</code> to the real <code>benchmark.LLMProvider</code>
+interface, <code>Complete</code> now dispatches to
+<code>a.provider.Complete</code> returning genuine response text / token
+count / error, and an honest <code>ErrProviderAdapterNotWired</code>
+sentinel is returned when no real provider is wired — the hardcoded
+<code>return "Response", 50, nil</code> BLUFF-001 fabrication is
+removed; reproduce-before-fix <code>httptest</code> real-dispatch test
+asserts the adapter actually hits an OpenAI-shim server and returns the
+real payload; <code>go test ./internal/benchmark/...</code> PASS,
+<code>go build ./...</code> clean). Round 397 added OPS-001 (LLMOps 2
+pre-existing <code>CreatePromptExperiment</code> test failures resolved
+— both classified (A) test-assertion drift:
+<code>ControlPromptCreateFails</code>/<code>TreatmentPromptCreateFails</code>
+asserted pre-idempotency behaviour, expecting a same-(name,version)
+duplicate to fail <code>CreatePromptExperiment</code>, but commit
+<code>bb53c38</code> deliberately made prompt registration idempotent so
+duplicates are tolerated as no-ops; no production regression; tests
+re-keyed to the genuine non-tolerated failure path —
+structurally-invalid prompt with empty <code>Content</code> → registry
+<code>"prompt content is required"</code> → wrapped with
+<code>"control prompt"</code>/<code>"treatment prompt"</code> prefix;
+<code>go test -count=1 ./llmops/...</code> 2 FAIL → 0 FAIL,
+<code>go build ./...</code> clean). Round 348 added HXV-002
 (LLMsVerifier <code>verification/</code> package 10 pre-existing test
 failures resolved — all 10 classified (A) test-assertion drift: 8
 <code>verification_test.go</code> Verify tests re-keyed to the round-17
@@ -302,7 +330,7 @@ recorded_mobile, ~40 strings)</td>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
 <p>2 open issues: 0 Bug / 1 Task / 1 Feature; 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-20 (round 325 — HXQ-001 closed). See
+<p><em>Last regenerated: 2026-05-20 (round 397 — OPS-001 closed). See
 <code>docs/Fixed.md</code> for full closure entries with commit
 SHAs.</em></p>
 </body>
