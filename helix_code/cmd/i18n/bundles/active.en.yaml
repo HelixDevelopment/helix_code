@@ -388,3 +388,121 @@ cmd_local_llm_provider_desc_mlx:
 
 cmd_local_llm_provider_desc_mistralrs:
   other: "Rust-based inference"
+
+# Round-426 §11.4 (2026-05-20, CONST-046 Phase 4): local-llm `models`
+# command-group cobra Short/Long descriptions + model-management /
+# cross-provider / advanced flag-help text.
+cmd_local_llm_models_short:
+  other: "Manage LLM models (download, convert, list)"
+
+cmd_local_llm_models_long:
+  other: |-
+    Manage LLM models including downloading from various sources,
+    converting between formats, and listing available models.
+
+cmd_local_llm_models_download_short:
+  other: "Download a model from available sources"
+
+cmd_local_llm_models_download_long:
+  other: |-
+    Download a model from various sources (HuggingFace, TheBloke, etc.)
+    and convert it to the desired format if needed.
+
+    Examples:
+      helix local-llm models download llama-3-8b-instruct --format gguf --provider vllm
+      helix local-llm models download mistral-7b-instruct --format gptq --provider localai
+
+cmd_local_llm_models_convert_short:
+  other: "Convert a model to a different format"
+
+cmd_local_llm_models_convert_long:
+  other: |-
+    Convert a model from one format to another using specialized tools.
+
+    Supported conversions:
+      HF -> GGUF (llama.cpp)
+      HF -> GPTQ (AutoGPTQ)
+      HF -> AWQ (AutoAWQ)
+      HF -> FP16/BF16 (transformers)
+
+    Examples:
+      helix local-llm models convert ./model.hf --format gguf --quantize q4_k_m
+      helix local-llm models convert ./model.gguf --format fp16
+
+cmd_local_llm_models_list_short:
+  other: "List all available models"
+
+cmd_local_llm_models_list_long:
+  other: |-
+    List all available models from the model registry with their
+    information including available formats, sizes, and requirements.
+
+cmd_local_llm_models_search_short:
+  other: "Search for models by name, description, or tags"
+
+cmd_local_llm_models_search_long:
+  other: |-
+    Search for models in the registry by name, description, or tags.
+    This is useful for finding models for specific tasks or requirements.
+
+    Examples:
+      helix local-llm models search "code"
+      helix local-llm models search "instruct"
+      helix local-llm models search "7b"
+
+cmd_local_llm_flag_download_format:
+  other: "Target model format (gguf, gptq, awq, hf, fp16, bf16)"
+
+cmd_local_llm_flag_download_provider:
+  other: "Target provider for the model"
+
+cmd_local_llm_flag_download_output:
+  other: "Custom output path for the model"
+
+cmd_local_llm_flag_download_force:
+  other: "Force download even if model already exists"
+
+cmd_local_llm_flag_convert_format:
+  other: "Target format (required)"
+
+cmd_local_llm_flag_convert_quantize:
+  other: "Quantization method (q4_0, q4_k_m, q8_0, etc.)"
+
+cmd_local_llm_flag_convert_optimize:
+  other: "Optimize for (cpu, gpu, mobile)"
+
+cmd_local_llm_flag_convert_hardware:
+  other: "Target hardware (nvidia, amd, apple, intel)"
+
+cmd_local_llm_flag_share_provider:
+  other: "Share with specific provider only (default: all compatible)"
+
+cmd_local_llm_flag_optimize_provider:
+  other: "Target provider for optimization (required)"
+
+cmd_local_llm_flag_sync_all:
+  other: "Sync with all providers (default: compatible only)"
+
+cmd_local_llm_flag_discover_source:
+  other: "Source for discovery (local, huggingface, all)"
+
+cmd_local_llm_flag_discover_filter:
+  other: "Filter models by name, capability, or size"
+
+cmd_local_llm_flag_recommend_tasks:
+  other: "Task types (code_generation, planning, debugging, etc.)"
+
+cmd_local_llm_flag_recommend_quality:
+  other: "Quality preference (fast, balanced, quality)"
+
+cmd_local_llm_flag_recommend_privacy:
+  other: "Privacy level (local, hybrid, cloud)"
+
+cmd_local_llm_flag_recommend_max_memory:
+  other: "Maximum memory in MB"
+
+cmd_local_llm_flag_recommend_budget:
+  other: "Budget limit per million tokens"
+
+cmd_local_llm_flag_recommend_providers:
+  other: "Include only specific providers"

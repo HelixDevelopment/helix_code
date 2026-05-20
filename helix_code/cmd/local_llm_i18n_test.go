@@ -143,6 +143,79 @@ var round422CobraMetadataIDs = []string{
 	"cmd_local_llm_logs_long",
 }
 
+// round426ModelsMetadataIDs is the closed set of message IDs introduced by
+// the round-426 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+// the `models` command-group cobra Short/Long descriptions plus every
+// model-management / cross-provider / advanced flag-help string. All are
+// resolved at command-construction time via trc().
+var round426ModelsMetadataIDs = []string{
+	"cmd_local_llm_models_short",
+	"cmd_local_llm_models_long",
+	"cmd_local_llm_models_download_short",
+	"cmd_local_llm_models_download_long",
+	"cmd_local_llm_models_convert_short",
+	"cmd_local_llm_models_convert_long",
+	"cmd_local_llm_models_list_short",
+	"cmd_local_llm_models_list_long",
+	"cmd_local_llm_models_search_short",
+	"cmd_local_llm_models_search_long",
+	"cmd_local_llm_flag_download_format",
+	"cmd_local_llm_flag_download_provider",
+	"cmd_local_llm_flag_download_output",
+	"cmd_local_llm_flag_download_force",
+	"cmd_local_llm_flag_convert_format",
+	"cmd_local_llm_flag_convert_quantize",
+	"cmd_local_llm_flag_convert_optimize",
+	"cmd_local_llm_flag_convert_hardware",
+	"cmd_local_llm_flag_share_provider",
+	"cmd_local_llm_flag_optimize_provider",
+	"cmd_local_llm_flag_sync_all",
+	"cmd_local_llm_flag_discover_source",
+	"cmd_local_llm_flag_discover_filter",
+	"cmd_local_llm_flag_recommend_tasks",
+	"cmd_local_llm_flag_recommend_quality",
+	"cmd_local_llm_flag_recommend_privacy",
+	"cmd_local_llm_flag_recommend_max_memory",
+	"cmd_local_llm_flag_recommend_budget",
+	"cmd_local_llm_flag_recommend_providers",
+}
+
+// TestLocalLLMI18n_Round426ModelsMetadataRoutesThroughSeam is the
+// paired-mutation anti-bluff guard for the round-426 migration: it wires a
+// sentinel Translator and asserts every `models` command-group + flag-help
+// message ID resolves THROUGH it (sentinel present) — proving the cobra
+// metadata is no longer a frozen English literal. If a future change
+// re-inlines any of these strings, the literal would not contain the
+// sentinel and this test FAILs.
+func TestLocalLLMI18n_Round426ModelsMetadataRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	for _, id := range round426ModelsMetadataIDs {
+		got := trc(id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-426 models metadata ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-426 models metadata ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
+}
+
+// TestLocalLLMI18n_Round426ModelsMetadataNoopEcho proves the round-426
+// IDs degrade to a loud message-ID echo when no translator is wired —
+// never a silent empty string (which would be a §11.4 PASS-bluff at the
+// i18n layer).
+func TestLocalLLMI18n_Round426ModelsMetadataNoopEcho(t *testing.T) {
+	SetTranslator(nil) // explicit NoopTranslator
+	for _, id := range round426ModelsMetadataIDs {
+		got := trc(id, nil)
+		if got != id {
+			t.Errorf("round-426 metadata ID %q must echo verbatim under NoopTranslator: got %q", id, got)
+		}
+	}
+}
+
 // TestLocalLLMI18n_Round422CobraMetadataRoutesThroughSeam is the
 // paired-mutation anti-bluff guard for the round-422 migration: it wires a
 // sentinel Translator and asserts every construction-time message ID

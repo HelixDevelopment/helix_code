@@ -596,63 +596,40 @@ func clearScreen() {
 // modelsCmd represents the models command group
 var modelsCmd = &cobra.Command{
 	Use:   "models",
-	Short: "Manage LLM models (download, convert, list)",
-	Long: `Manage LLM models including downloading from various sources,
-converting between formats, and listing available models.`,
+	Short: trc("cmd_local_llm_models_short", nil),
+	Long:  trc("cmd_local_llm_models_long", nil),
 }
 
 // downloadModelCmd represents the model download command
 var downloadModelCmd = &cobra.Command{
 	Use:   "download [model-id]",
-	Short: "Download a model from available sources",
-	Long: `Download a model from various sources (HuggingFace, TheBloke, etc.)
-and convert it to the desired format if needed.
-
-Examples:
-  helix local-llm models download llama-3-8b-instruct --format gguf --provider vllm
-  helix local-llm models download mistral-7b-instruct --format gptq --provider localai`,
-	RunE: runDownloadModel,
+	Short: trc("cmd_local_llm_models_download_short", nil),
+	Long:  trc("cmd_local_llm_models_download_long", nil),
+	RunE:  runDownloadModel,
 }
 
 // convertModelCmd represents the model conversion command
 var convertModelCmd = &cobra.Command{
 	Use:   "convert [input-path]",
-	Short: "Convert a model to a different format",
-	Long: `Convert a model from one format to another using specialized tools.
-
-Supported conversions:
-  HF -> GGUF (llama.cpp)
-  HF -> GPTQ (AutoGPTQ)
-  HF -> AWQ (AutoAWQ)
-  HF -> FP16/BF16 (transformers)
-
-Examples:
-  helix local-llm models convert ./model.hf --format gguf --quantize q4_k_m
-  helix local-llm models convert ./model.gguf --format fp16`,
-	RunE: runConvertModel,
+	Short: trc("cmd_local_llm_models_convert_short", nil),
+	Long:  trc("cmd_local_llm_models_convert_long", nil),
+	RunE:  runConvertModel,
 }
 
 // listModelsCmd represents the list models command
 var listModelsCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all available models",
-	Long: `List all available models from the model registry with their
-information including available formats, sizes, and requirements.`,
-	RunE: runListModels,
+	Short: trc("cmd_local_llm_models_list_short", nil),
+	Long:  trc("cmd_local_llm_models_list_long", nil),
+	RunE:  runListModels,
 }
 
 // searchModelsCmd represents the search models command
 var searchModelsCmd = &cobra.Command{
 	Use:   "search [query]",
-	Short: "Search for models by name, description, or tags",
-	Long: `Search for models in the registry by name, description, or tags.
-This is useful for finding models for specific tasks or requirements.
-
-Examples:
-  helix local-llm models search "code"
-  helix local-llm models search "instruct"
-  helix local-llm models search "7b"`,
-	RunE: runSearchModels,
+	Short: trc("cmd_local_llm_models_search_short", nil),
+	Long:  trc("cmd_local_llm_models_search_long", nil),
+	RunE:  runSearchModels,
 }
 
 // Model management flags
@@ -672,35 +649,35 @@ var (
 
 func init() {
 	// Model command flags
-	downloadModelCmd.Flags().StringVar(&downloadFormat, "format", "gguf", "Target model format (gguf, gptq, awq, hf, fp16, bf16)")
-	downloadModelCmd.Flags().StringVar(&downloadProvider, "provider", "", "Target provider for the model")
-	downloadModelCmd.Flags().StringVar(&downloadTargetPath, "output", "", "Custom output path for the model")
-	downloadModelCmd.Flags().BoolVar(&forceDownload, "force", false, "Force download even if model already exists")
+	downloadModelCmd.Flags().StringVar(&downloadFormat, "format", "gguf", trc("cmd_local_llm_flag_download_format", nil))
+	downloadModelCmd.Flags().StringVar(&downloadProvider, "provider", "", trc("cmd_local_llm_flag_download_provider", nil))
+	downloadModelCmd.Flags().StringVar(&downloadTargetPath, "output", "", trc("cmd_local_llm_flag_download_output", nil))
+	downloadModelCmd.Flags().BoolVar(&forceDownload, "force", false, trc("cmd_local_llm_flag_download_force", nil))
 
-	convertModelCmd.Flags().StringVar(&convertTargetFormat, "format", "", "Target format (required)")
-	convertModelCmd.Flags().StringVar(&convertQuantMethod, "quantize", "", "Quantization method (q4_0, q4_k_m, q8_0, etc.)")
-	convertModelCmd.Flags().StringVar(&convertOptimizeFor, "optimize", "", "Optimize for (cpu, gpu, mobile)")
-	convertModelCmd.Flags().StringVar(&convertTargetHardware, "hardware", "", "Target hardware (nvidia, amd, apple, intel)")
+	convertModelCmd.Flags().StringVar(&convertTargetFormat, "format", "", trc("cmd_local_llm_flag_convert_format", nil))
+	convertModelCmd.Flags().StringVar(&convertQuantMethod, "quantize", "", trc("cmd_local_llm_flag_convert_quantize", nil))
+	convertModelCmd.Flags().StringVar(&convertOptimizeFor, "optimize", "", trc("cmd_local_llm_flag_convert_optimize", nil))
+	convertModelCmd.Flags().StringVar(&convertTargetHardware, "hardware", "", trc("cmd_local_llm_flag_convert_hardware", nil))
 
 	convertModelCmd.MarkFlagRequired("format")
 
 	// Cross-provider command flags
-	shareModelCmd.Flags().StringVar(&shareModelProvider, "provider", "", "Share with specific provider only (default: all compatible)")
-	optimizeModelCmd.Flags().StringVar(&optimizeProvider, "provider", "", "Target provider for optimization (required)")
-	syncModelsCmd.Flags().BoolVar(&syncAllProviders, "all", false, "Sync with all providers (default: compatible only)")
+	shareModelCmd.Flags().StringVar(&shareModelProvider, "provider", "", trc("cmd_local_llm_flag_share_provider", nil))
+	optimizeModelCmd.Flags().StringVar(&optimizeProvider, "provider", "", trc("cmd_local_llm_flag_optimize_provider", nil))
+	syncModelsCmd.Flags().BoolVar(&syncAllProviders, "all", false, trc("cmd_local_llm_flag_sync_all", nil))
 
 	optimizeModelCmd.MarkFlagRequired("provider")
 
 	// Advanced command flags
-	discoverCmd.Flags().StringVar(&discoverSource, "source", "all", "Source for discovery (local, huggingface, all)")
-	discoverCmd.Flags().StringVar(&discoverFilter, "filter", "", "Filter models by name, capability, or size")
+	discoverCmd.Flags().StringVar(&discoverSource, "source", "all", trc("cmd_local_llm_flag_discover_source", nil))
+	discoverCmd.Flags().StringVar(&discoverFilter, "filter", "", trc("cmd_local_llm_flag_discover_filter", nil))
 
-	recommendCmd.Flags().StringSliceVar(&recommendTaskTypes, "tasks", []string{}, "Task types (code_generation, planning, debugging, etc.)")
-	recommendCmd.Flags().StringVar(&recommendQualityPreference, "quality", "balanced", "Quality preference (fast, balanced, quality)")
-	recommendCmd.Flags().StringVar(&recommendPrivacyLevel, "privacy", "local", "Privacy level (local, hybrid, cloud)")
-	recommendCmd.Flags().IntVar(&recommendMaxMemory, "max-memory", 0, "Maximum memory in MB")
-	recommendCmd.Flags().Float64Var(&recommendBudgetLimit, "budget", 0, "Budget limit per million tokens")
-	recommendCmd.Flags().StringSliceVar(&recommendProviders, "providers", []string{}, "Include only specific providers")
+	recommendCmd.Flags().StringSliceVar(&recommendTaskTypes, "tasks", []string{}, trc("cmd_local_llm_flag_recommend_tasks", nil))
+	recommendCmd.Flags().StringVar(&recommendQualityPreference, "quality", "balanced", trc("cmd_local_llm_flag_recommend_quality", nil))
+	recommendCmd.Flags().StringVar(&recommendPrivacyLevel, "privacy", "local", trc("cmd_local_llm_flag_recommend_privacy", nil))
+	recommendCmd.Flags().IntVar(&recommendMaxMemory, "max-memory", 0, trc("cmd_local_llm_flag_recommend_max_memory", nil))
+	recommendCmd.Flags().Float64Var(&recommendBudgetLimit, "budget", 0, trc("cmd_local_llm_flag_recommend_budget", nil))
+	recommendCmd.Flags().StringSliceVar(&recommendProviders, "providers", []string{}, trc("cmd_local_llm_flag_recommend_providers", nil))
 
 	analyticsCmd.Flags().StringVar(&analyticsTimeRange, "time-range", "7d", "Time range for analytics (1d, 7d, 30d, all)")
 	reportCmd.Flags().StringVar(&reportFormat, "format", "table", "Report format (table, json, csv)")
