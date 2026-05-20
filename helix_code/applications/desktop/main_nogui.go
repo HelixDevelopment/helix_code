@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"dev.helix.code/applications/desktop/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/llm"
@@ -167,11 +168,48 @@ type CLIApp struct {
 	projectManager *project.Manager
 	sessionManager *session.Manager
 	llmManager     *llm.ModelManager
+
+	// translator resolves user-facing strings per CONST-046
+	// (round-365 §11.4 migration). Defaults to NoopTranslator
+	// (loud echo of message IDs) until SetTranslator wires a real
+	// *i18nadapter.Translator at boot. Never nil after NewCLIApp
+	// returns.
+	translator i18n.Translator
 }
 
 // NewCLIApp creates a new CLI application
 func NewCLIApp() *CLIApp {
-	return &CLIApp{}
+	return &CLIApp{
+		translator: i18n.NoopTranslator{},
+	}
+}
+
+// SetTranslator injects the runtime Translator (per CONST-046
+// round-365). Passing nil is a no-op — the NoopTranslator default
+// installed by NewCLIApp is preserved so the loud-echo safety net
+// never disappears silently. helix_code wires
+// *i18nadapter.Translator at boot.
+func (cliApp *CLIApp) SetTranslator(t i18n.Translator) {
+	if t == nil {
+		return
+	}
+	cliApp.translator = t
+}
+
+// t is a tiny call-site helper that resolves a message ID through
+// the injected Translator and falls back to the literal id on error
+// (loud echo — never silently swallow). Centralising the
+// boilerplate keeps migrated call sites a single expression long.
+func (cliApp *CLIApp) t(id string) string {
+	if cliApp.translator == nil {
+		cliApp.translator = i18n.NoopTranslator{}
+		return id
+	}
+	got, err := cliApp.translator.T(context.Background(), id, nil)
+	if err != nil || got == "" {
+		return id
+	}
+	return got
 }
 
 // Initialize sets up the CLI application
@@ -247,7 +285,7 @@ func (cliApp *CLIApp) Run(args []string) error {
 	case "interactive":
 		return cliApp.cmdInteractive()
 	default:
-		fmt.Printf("Unknown command: %s\n", command)
+		fmt.Printf(cliApp.t("desktop_cli_unknown_command")+"\n", command)
 		cliApp.printHelp()
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -256,34 +294,11 @@ func (cliApp *CLIApp) Run(args []string) error {
 }
 
 func (cliApp *CLIApp) printHelp() {
-	fmt.Println(`HelixCode Desktop CLI (nogui mode)
-
-Usage: helix-desktop [command] [arguments]
-
-Commands:
-  help          Show this help message
-  status        Show system status
-  projects      Manage projects (list, create, delete, set-active)
-  sessions      Manage sessions (list, create, start, pause, complete)
-  tasks         Manage tasks (list, create, cancel)
-  workers       Manage workers (list, add, remove)
-  llm           LLM operations (providers, models, chat)
-  interactive   Start interactive mode
-
-Examples:
-  helix-desktop status
-  helix-desktop projects list
-  helix-desktop projects create --name "MyProject" --path "/path/to/project"
-  helix-desktop sessions create --project "proj_123" --name "Dev Session"
-  helix-desktop tasks create --type building --desc "Build the project"
-  helix-desktop llm providers
-  helix-desktop interactive
-
-Build with GUI disabled using: go build -tags nogui`)
+	fmt.Println(cliApp.t("desktop_cli_help_body"))
 }
 
 func (cliApp *CLIApp) cmdStatus() error {
-	fmt.Println("=== HelixCode System Status ===")
+	fmt.Println(cliApp.t("desktop_cli_status_header"))
 	fmt.Println()
 
 	// Workers
@@ -294,11 +309,11 @@ func (cliApp *CLIApp) cmdStatus() error {
 			activeWorkers++
 		}
 	}
-	fmt.Printf("Workers: %d total, %d active\n", len(workers), activeWorkers)
+	fmt.Printf(cliApp.t("desktop_cli_status_workers")+"\n", len(workers), activeWorkers)
 
 	// Tasks
 	totalTasks, completedTasks, runningTasks := cliApp.taskManager.GetStats()
-	fmt.Printf("Tasks: %d total, %d running, %d completed\n",
+	fmt.Printf(cliApp.t("desktop_cli_status_tasks")+"\n",
 		totalTasks, runningTasks, completedTasks)
 
 	// Projects
@@ -309,7 +324,7 @@ func (cliApp *CLIApp) cmdStatus() error {
 	if activeProject != nil {
 		activeProjectName = activeProject.Name
 	}
-	fmt.Printf("Projects: %d total, active: %s\n", len(projects), activeProjectName)
+	fmt.Printf(cliApp.t("desktop_cli_status_projects")+"\n", len(projects), activeProjectName)
 
 	// Sessions
 	sessions := cliApp.sessionManager.GetAll()
@@ -319,11 +334,11 @@ func (cliApp *CLIApp) cmdStatus() error {
 			activeSessions++
 		}
 	}
-	fmt.Printf("Sessions: %d total, %d active\n", len(sessions), activeSessions)
+	fmt.Printf(cliApp.t("desktop_cli_status_sessions")+"\n", len(sessions), activeSessions)
 
 	// LLM
 	models := cliApp.llmManager.GetAvailableModels()
-	fmt.Printf("LLM Models: %d available\n", len(models))
+	fmt.Printf(cliApp.t("desktop_cli_status_llm_models")+"\n", len(models))
 
 	return nil
 }
@@ -341,9 +356,9 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("=== Projects ===")
+		fmt.Println(cliApp.t("desktop_cli_projects_header"))
 		if len(projects) == 0 {
-			fmt.Println("No projects found.")
+			fmt.Println(cliApp.t("desktop_cli_no_projects"))
 			return nil
 		}
 		for _, p := range projects {
@@ -363,7 +378,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *path == "" {
-			fmt.Println("Error: --name and --path are required")
+			fmt.Println(cliApp.t("desktop_cli_err_name_path_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -371,32 +386,32 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created project: %s (ID: %s)\n", project.Name, project.ID)
+		fmt.Printf(cliApp.t("desktop_cli_created_project")+"\n", project.Name, project.ID)
 
 	case "set-active":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_project_id_required"))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.SetActiveProject(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Set active project: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_set_active_project")+"\n", args[1])
 
 	case "delete":
 		if len(args) < 2 {
-			fmt.Println("Error: project ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_project_id_required"))
 			return fmt.Errorf("missing project ID")
 		}
 		err := cliApp.projectManager.DeleteProject(ctx, args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted project: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_deleted_project")+"\n", args[1])
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil
@@ -410,9 +425,9 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 	switch args[0] {
 	case "list":
 		sessions := cliApp.sessionManager.GetAll()
-		fmt.Println("=== Sessions ===")
+		fmt.Println(cliApp.t("desktop_cli_sessions_header"))
 		if len(sessions) == 0 {
-			fmt.Println("No sessions found.")
+			fmt.Println(cliApp.t("desktop_cli_no_sessions"))
 			return nil
 		}
 		for _, s := range sessions {
@@ -428,7 +443,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		fs.Parse(args[1:])
 
 		if *name == "" || *projectID == "" {
-			fmt.Println("Error: --name and --project are required")
+			fmt.Println(cliApp.t("desktop_cli_err_name_project_required"))
 			return fmt.Errorf("missing required arguments")
 		}
 
@@ -436,43 +451,43 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created session: %s (ID: %s)\n", sess.Name, sess.ID)
+		fmt.Printf(cliApp.t("desktop_cli_created_session")+"\n", sess.Name, sess.ID)
 
 	case "start":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Start(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Started session: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_started_session")+"\n", args[1])
 
 	case "pause":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Pause(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Paused session: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_paused_session")+"\n", args[1])
 
 	case "complete":
 		if len(args) < 2 {
-			fmt.Println("Error: session ID required")
+			fmt.Println(cliApp.t("desktop_cli_err_session_id_required"))
 			return fmt.Errorf("missing session ID")
 		}
 		err := cliApp.sessionManager.Complete(args[1])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Completed session: %s\n", args[1])
+		fmt.Printf(cliApp.t("desktop_cli_completed_session")+"\n", args[1])
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
 	return nil

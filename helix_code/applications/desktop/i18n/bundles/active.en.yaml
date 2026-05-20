@@ -145,3 +145,106 @@ desktop_settings_conn_test_body:
 
 desktop_settings_anthropic_key_label:
   other: "Anthropic API Key:"
+
+# Round-365 §11.4 anti-bluff sweep (2026-05-20): 24 nogui-mode CLI
+# user-facing literals migrated (help body, status report labels,
+# project/session command headers, error + success messages). The
+# nogui CLIApp gained its own Translator seam this round
+# (SetTranslator + t() helper), mirroring the aurora_os nogui
+# pattern from round-327.
+
+desktop_cli_unknown_command:
+  other: "Unknown command: %s"
+
+desktop_cli_unknown_subcommand:
+  other: "Unknown subcommand: %s"
+
+desktop_cli_help_body:
+  other: |-
+    HelixCode Desktop CLI (nogui mode)
+
+    Usage: helix-desktop [command] [arguments]
+
+    Commands:
+      help          Show this help message
+      status        Show system status
+      projects      Manage projects (list, create, delete, set-active)
+      sessions      Manage sessions (list, create, start, pause, complete)
+      tasks         Manage tasks (list, create, cancel)
+      workers       Manage workers (list, add, remove)
+      llm           LLM operations (providers, models, chat)
+      interactive   Start interactive mode
+
+    Examples:
+      helix-desktop status
+      helix-desktop projects list
+      helix-desktop projects create --name "MyProject" --path "/path/to/project"
+      helix-desktop sessions create --project "proj_123" --name "Dev Session"
+      helix-desktop tasks create --type building --desc "Build the project"
+      helix-desktop llm providers
+      helix-desktop interactive
+
+    Build with GUI disabled using: go build -tags nogui
+
+desktop_cli_status_header:
+  other: "=== HelixCode System Status ==="
+
+desktop_cli_status_workers:
+  other: "Workers: %d total, %d active"
+
+desktop_cli_status_tasks:
+  other: "Tasks: %d total, %d running, %d completed"
+
+desktop_cli_status_projects:
+  other: "Projects: %d total, active: %s"
+
+desktop_cli_status_sessions:
+  other: "Sessions: %d total, %d active"
+
+desktop_cli_status_llm_models:
+  other: "LLM Models: %d available"
+
+desktop_cli_projects_header:
+  other: "=== Projects ==="
+
+desktop_cli_no_projects:
+  other: "No projects found."
+
+desktop_cli_err_name_path_required:
+  other: "Error: --name and --path are required"
+
+desktop_cli_created_project:
+  other: "Created project: %s (ID: %s)"
+
+desktop_cli_err_project_id_required:
+  other: "Error: project ID required"
+
+desktop_cli_set_active_project:
+  other: "Set active project: %s"
+
+desktop_cli_deleted_project:
+  other: "Deleted project: %s"
+
+desktop_cli_sessions_header:
+  other: "=== Sessions ==="
+
+desktop_cli_no_sessions:
+  other: "No sessions found."
+
+desktop_cli_err_name_project_required:
+  other: "Error: --name and --project are required"
+
+desktop_cli_created_session:
+  other: "Created session: %s (ID: %s)"
+
+desktop_cli_err_session_id_required:
+  other: "Error: session ID required"
+
+desktop_cli_started_session:
+  other: "Started session: %s"
+
+desktop_cli_paused_session:
+  other: "Paused session: %s"
+
+desktop_cli_completed_session:
+  other: "Completed session: %s"
