@@ -2,7 +2,6 @@ package builtin
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"dev.helix.code/internal/commands"
@@ -40,60 +39,60 @@ func (c *WorkflowsCommand) Usage() string {
 func (c *WorkflowsCommand) Execute(ctx context.Context, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	// Check for list flag
 	if _, ok := cmdCtx.Flags["list"]; ok {
-		return c.listWorkflows(cmdCtx)
+		return c.listWorkflows(ctx, cmdCtx)
 	}
 
 	// Check for status flag
 	if workflowID, ok := cmdCtx.Flags["status"]; ok {
-		return c.checkWorkflowStatus(workflowID, cmdCtx)
+		return c.checkWorkflowStatus(ctx, workflowID, cmdCtx)
 	}
 
 	// Check for cancel flag
 	if workflowID, ok := cmdCtx.Flags["cancel"]; ok {
-		return c.cancelWorkflow(workflowID, cmdCtx)
+		return c.cancelWorkflow(ctx, workflowID, cmdCtx)
 	}
 
 	// Execute workflow if name provided
 	if len(cmdCtx.Args) > 0 {
 		workflowName := cmdCtx.Args[0]
-		return c.executeWorkflow(workflowName, cmdCtx)
+		return c.executeWorkflow(ctx, workflowName, cmdCtx)
 	}
 
 	// Default: list workflows
-	return c.listWorkflows(cmdCtx)
+	return c.listWorkflows(ctx, cmdCtx)
 }
 
 // listWorkflows lists all available workflows
-func (c *WorkflowsCommand) listWorkflows(cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
+func (c *WorkflowsCommand) listWorkflows(ctx context.Context, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	workflows := []map[string]string{
 		{
 			"name":        "planning",
-			"description": "Analyze requirements and create technical specifications",
+			"description": tr(ctx, "builtin_workflows_wf_planning_description", nil),
 			"steps":       "3",
 		},
 		{
 			"name":        "building",
-			"description": "Generate code and manage dependencies",
+			"description": tr(ctx, "builtin_workflows_wf_building_description", nil),
 			"steps":       "4",
 		},
 		{
 			"name":        "testing",
-			"description": "Run unit, integration, and end-to-end tests",
+			"description": tr(ctx, "builtin_workflows_wf_testing_description", nil),
 			"steps":       "5",
 		},
 		{
 			"name":        "refactoring",
-			"description": "Analyze and optimize code structure",
+			"description": tr(ctx, "builtin_workflows_wf_refactoring_description", nil),
 			"steps":       "3",
 		},
 		{
 			"name":        "debugging",
-			"description": "Identify and fix issues",
+			"description": tr(ctx, "builtin_workflows_wf_debugging_description", nil),
 			"steps":       "4",
 		},
 		{
 			"name":        "deployment",
-			"description": "Build, package, and deploy to targets",
+			"description": tr(ctx, "builtin_workflows_wf_deployment_description", nil),
 			"steps":       "6",
 		},
 	}
@@ -112,7 +111,7 @@ func (c *WorkflowsCommand) listWorkflows(cmdCtx *commands.CommandContext) (*comm
 
 	return &commands.CommandResult{
 		Success:     true,
-		Message:     fmt.Sprintf("Found %d available workflows", len(workflows)),
+		Message:     tr(ctx, "builtin_workflows_found", map[string]any{"Count": len(workflows)}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{
@@ -123,7 +122,7 @@ func (c *WorkflowsCommand) listWorkflows(cmdCtx *commands.CommandContext) (*comm
 }
 
 // executeWorkflow executes a specific workflow
-func (c *WorkflowsCommand) executeWorkflow(workflowName string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
+func (c *WorkflowsCommand) executeWorkflow(ctx context.Context, workflowName string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	// Parse workflow parameters
 	params := make(map[string]interface{})
 	if paramsStr, ok := cmdCtx.Flags["params"]; ok {
@@ -146,7 +145,7 @@ func (c *WorkflowsCommand) executeWorkflow(workflowName string, cmdCtx *commands
 	if !validWorkflows[workflowName] {
 		return &commands.CommandResult{
 			Success: false,
-			Message: fmt.Sprintf("Unknown workflow: %s. Use /workflows --list to see available workflows.", workflowName),
+			Message: tr(ctx, "builtin_workflows_unknown", map[string]any{"Name": workflowName}),
 		}, nil
 	}
 
@@ -166,9 +165,9 @@ func (c *WorkflowsCommand) executeWorkflow(workflowName string, cmdCtx *commands
 		},
 	}
 
-	message := fmt.Sprintf("Executing %s workflow", workflowName)
+	message := tr(ctx, "builtin_workflows_executing", map[string]any{"Name": workflowName})
 	if async {
-		message += " (async mode)"
+		message += tr(ctx, "builtin_workflows_async_suffix", nil)
 	}
 
 	return &commands.CommandResult{
@@ -185,7 +184,7 @@ func (c *WorkflowsCommand) executeWorkflow(workflowName string, cmdCtx *commands
 }
 
 // checkWorkflowStatus checks the status of a running workflow
-func (c *WorkflowsCommand) checkWorkflowStatus(workflowID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
+func (c *WorkflowsCommand) checkWorkflowStatus(ctx context.Context, workflowID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	actions := []commands.Action{
 		{
 			Type: "check_workflow_status",
@@ -198,7 +197,7 @@ func (c *WorkflowsCommand) checkWorkflowStatus(workflowID string, cmdCtx *comman
 
 	return &commands.CommandResult{
 		Success:     true,
-		Message:     fmt.Sprintf("Checking status of workflow: %s", workflowID),
+		Message:     tr(ctx, "builtin_workflows_checking_status", map[string]any{"ID": workflowID}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{
@@ -208,7 +207,7 @@ func (c *WorkflowsCommand) checkWorkflowStatus(workflowID string, cmdCtx *comman
 }
 
 // cancelWorkflow cancels a running workflow
-func (c *WorkflowsCommand) cancelWorkflow(workflowID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
+func (c *WorkflowsCommand) cancelWorkflow(ctx context.Context, workflowID string, cmdCtx *commands.CommandContext) (*commands.CommandResult, error) {
 	actions := []commands.Action{
 		{
 			Type: "cancel_workflow",
@@ -222,7 +221,7 @@ func (c *WorkflowsCommand) cancelWorkflow(workflowID string, cmdCtx *commands.Co
 
 	return &commands.CommandResult{
 		Success:     true,
-		Message:     fmt.Sprintf("Cancelling workflow: %s", workflowID),
+		Message:     tr(ctx, "builtin_workflows_cancelling", map[string]any{"ID": workflowID}),
 		Actions:     actions,
 		ShouldReply: true,
 		Metadata: map[string]interface{}{

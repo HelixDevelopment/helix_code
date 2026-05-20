@@ -131,6 +131,56 @@ func TestExecute_RuntimeMessagesGoThroughTranslator(t *testing.T) {
 			},
 			wantID: "builtin_reportbug_prepared",
 		},
+		// Round-358 §11.4 CONST-046 Phase-4: /workflows runtime
+		// CommandResult.Message paired-mutation guards.
+		{
+			name: "workflows_found",
+			run: func() *commands.CommandResult {
+				r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{})
+				return r
+			},
+			wantID: "builtin_workflows_found",
+		},
+		{
+			name: "workflows_unknown",
+			run: func() *commands.CommandResult {
+				r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{
+					Args: []string{"nonexistent-workflow"},
+				})
+				return r
+			},
+			wantID: "builtin_workflows_unknown",
+		},
+		{
+			name: "workflows_executing",
+			run: func() *commands.CommandResult {
+				r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{
+					Args: []string{"planning"},
+				})
+				return r
+			},
+			wantID: "builtin_workflows_executing",
+		},
+		{
+			name: "workflows_checking_status",
+			run: func() *commands.CommandResult {
+				r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{
+					Flags: map[string]string{"status": "workflow-123"},
+				})
+				return r
+			},
+			wantID: "builtin_workflows_checking_status",
+		},
+		{
+			name: "workflows_cancelling",
+			run: func() *commands.CommandResult {
+				r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{
+					Flags: map[string]string{"cancel": "workflow-123"},
+				})
+				return r
+			},
+			wantID: "builtin_workflows_cancelling",
+		},
 	}
 
 	for _, tc := range cases {
@@ -185,6 +235,18 @@ func TestExecute_RuntimeMessagesRealBundleProduceUserText(t *testing.T) {
 			r, _ := (&ReportBugCommand{}).Execute(ctx, &commands.CommandContext{Args: []string{"bug"}})
 			return struct{ name, message, rawID string }{"reportbug_prepared", r.Message, "builtin_reportbug_prepared"}
 		}(),
+		func() struct {
+			name, message, rawID string
+		} {
+			r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{})
+			return struct{ name, message, rawID string }{"workflows_found", r.Message, "builtin_workflows_found"}
+		}(),
+		func() struct {
+			name, message, rawID string
+		} {
+			r, _ := (&WorkflowsCommand{}).Execute(ctx, &commands.CommandContext{Args: []string{"building"}})
+			return struct{ name, message, rawID string }{"workflows_executing", r.Message, "builtin_workflows_executing"}
+		}(),
 	}
 
 	for _, c := range checks {
@@ -196,5 +258,148 @@ func TestExecute_RuntimeMessagesRealBundleProduceUserText(t *testing.T) {
 				t.Errorf("%s: runtime Message echoed raw ID %q — bundle entry missing", c.name, c.rawID)
 			}
 		})
+	}
+}
+
+// TestWorkflows_ListDescriptionsGoThroughTranslator is the round-358
+// paired-mutation guard for the six built-in workflow descriptions
+// surfaced in the /workflows listing metadata. With the sentinel
+// translator wired, every description in the listing MUST be the
+// sentinel-wrapped form of its message ID — a re-inlined literal
+// would surface raw text and fail the assertion.
+func TestWorkflows_ListDescriptionsGoThroughTranslator(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	defer withRealBundleTranslator(t)
+
+	res, err := (&WorkflowsCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Flags: map[string]string{"list": ""},
+	})
+	if err != nil || res == nil {
+		t.Fatalf("workflows --list: err=%v res=%v", err, res)
+	}
+	wfs, ok := res.Metadata["workflows"].([]map[string]string)
+	if !ok {
+		t.Fatalf("workflows metadata missing or wrong type: %T", res.Metadata["workflows"])
+	}
+	wantIDs := map[string]string{
+		"planning":    "builtin_workflows_wf_planning_description",
+		"building":    "builtin_workflows_wf_building_description",
+		"testing":     "builtin_workflows_wf_testing_description",
+		"refactoring": "builtin_workflows_wf_refactoring_description",
+		"debugging":   "builtin_workflows_wf_debugging_description",
+		"deployment":  "builtin_workflows_wf_deployment_description",
+	}
+	for _, wf := range wfs {
+		want := "<TR:" + wantIDs[wf["name"]] + ">"
+		if !strings.Contains(wf["description"], want) {
+			t.Errorf("workflow %q: description = %q, want sentinel-wrapped %q — literal bypassed tr()",
+				wf["name"], wf["description"], wantIDs[wf["name"]])
+		}
+	}
+}
+
+// TestWorkflows_ListDescriptionsRealBundleProduceUserText is the
+// round-358 positive runtime-evidence half: under the real on-disk
+// bundle every workflow description is non-empty and never echoes a
+// raw message ID.
+func TestWorkflows_ListDescriptionsRealBundleProduceUserText(t *testing.T) {
+	res, err := (&WorkflowsCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Flags: map[string]string{"list": ""},
+	})
+	if err != nil || res == nil {
+		t.Fatalf("workflows --list: err=%v res=%v", err, res)
+	}
+	wfs, _ := res.Metadata["workflows"].([]map[string]string)
+	if len(wfs) != 6 {
+		t.Fatalf("expected 6 workflows, got %d", len(wfs))
+	}
+	for _, wf := range wfs {
+		desc := wf["description"]
+		if strings.TrimSpace(desc) == "" {
+			t.Errorf("workflow %q: description empty under real bundle", wf["name"])
+		}
+		if strings.HasPrefix(desc, "builtin_workflows_wf_") {
+			t.Errorf("workflow %q: description echoed raw ID %q — bundle entry missing", wf["name"], desc)
+		}
+	}
+}
+
+// TestReportBug_DocumentTemplateGoesThroughTranslator is the round-358
+// paired-mutation guard for the /reportbug bug-report-document
+// template strings. With the sentinel translator wired, the GitHub
+// issue body produced by formatBugReport (via Execute) MUST embed the
+// sentinel-wrapped section-heading + placeholder message IDs — a
+// re-inlined literal would surface raw text and fail the assertion.
+func TestReportBug_DocumentTemplateGoesThroughTranslator(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	defer withRealBundleTranslator(t)
+
+	res, err := (&ReportBugCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Args: []string{"feature", "broken"},
+	})
+	if err != nil || res == nil {
+		t.Fatalf("reportbug: err=%v res=%v", err, res)
+	}
+	body, _ := res.Metadata["body"].(string)
+	if body == "" {
+		// formatBugReport output is carried in the file_bug_report action.
+		for _, a := range res.Actions {
+			if b, ok := a.Data["body"].(string); ok {
+				body = b
+			}
+		}
+	}
+	if body == "" {
+		t.Fatal("reportbug: bug-report body not found in result")
+	}
+	wantIDs := []string{
+		"builtin_reportbug_section_description",
+		"builtin_reportbug_section_system_info",
+		"builtin_reportbug_section_reproduction",
+		"builtin_reportbug_section_expected",
+		"builtin_reportbug_placeholder_expected",
+		"builtin_reportbug_section_actual",
+		"builtin_reportbug_placeholder_actual",
+		"builtin_reportbug_placeholder_repro_steps",
+		"builtin_reportbug_footer",
+	}
+	for _, id := range wantIDs {
+		if !strings.Contains(body, "<TR:"+id+">") {
+			t.Errorf("bug-report body missing sentinel-wrapped %q — literal bypassed tr()", id)
+		}
+	}
+}
+
+// TestReportBug_DocumentTemplateRealBundleProduceUserText is the
+// round-358 positive runtime-evidence half: under the real on-disk
+// bundle the bug-report document carries genuine localized section
+// text, never raw message IDs.
+func TestReportBug_DocumentTemplateRealBundleProduceUserText(t *testing.T) {
+	res, err := (&ReportBugCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Args: []string{"feature", "broken"},
+	})
+	if err != nil || res == nil {
+		t.Fatalf("reportbug: err=%v res=%v", err, res)
+	}
+	var body string
+	for _, a := range res.Actions {
+		if b, ok := a.Data["body"].(string); ok {
+			body = b
+		}
+	}
+	if strings.TrimSpace(body) == "" {
+		t.Fatal("reportbug: bug-report body empty under real bundle")
+	}
+	for _, raw := range []string{
+		"builtin_reportbug_section_description",
+		"builtin_reportbug_footer",
+		"builtin_reportbug_placeholder_repro_steps",
+	} {
+		if strings.Contains(body, raw) {
+			t.Errorf("bug-report body echoed raw ID %q — bundle entry missing", raw)
+		}
+	}
+	if !strings.Contains(body, "## Description") {
+		t.Errorf("bug-report body missing expected localized section heading; got:\n%s", body)
 	}
 }
