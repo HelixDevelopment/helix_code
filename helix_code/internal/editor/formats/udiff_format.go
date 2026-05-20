@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call (both were previously
+// recompiled before a per-line loop). Patterns are byte-identical to the prior
+// per-call regexp.MustCompile sites.
+var (
+	udiffGitDiffPattern = regexp.MustCompile(`^diff --git a/(.+?) b/(.+?)$`)
+	udiffIndexPattern   = regexp.MustCompile(`^index\s+([a-f0-9]+)\.\.([a-f0-9]+)(?:\s+(\d+))?$`)
+)
+
 // UDiffFormat handles Git-style unified diff format
 type UDiffFormat struct {
 	diffFormat *DiffFormat // Reuse diff format parser
@@ -120,14 +129,9 @@ func (udf *UDiffFormat) parseGitDiff(content string) (*FileEdit, error) {
 	metadata := make(map[string]interface{})
 	metadata["format"] = "udiff"
 
-	// Pattern: diff --git a/path b/path
-	gitDiffPattern := regexp.MustCompile(`^diff --git a/(.+?) b/(.+?)$`)
-	// Pattern: index <hash>..<hash> <mode>
-	indexPattern := regexp.MustCompile(`^index\s+([a-f0-9]+)\.\.([a-f0-9]+)(?:\s+(\d+))?$`)
-
 	for _, line := range lines {
 		// Extract file paths from git diff header
-		if match := gitDiffPattern.FindStringSubmatch(line); match != nil {
+		if match := udiffGitDiffPattern.FindStringSubmatch(line); match != nil {
 			oldFilePath = match[1]
 			filePath = match[2]
 		}
@@ -154,7 +158,7 @@ func (udf *UDiffFormat) parseGitDiff(content string) (*FileEdit, error) {
 		}
 
 		// Extract index information
-		if match := indexPattern.FindStringSubmatch(line); match != nil {
+		if match := udiffIndexPattern.FindStringSubmatch(line); match != nil {
 			metadata["old_hash"] = match[1]
 			metadata["new_hash"] = match[2]
 			if match[3] != "" {

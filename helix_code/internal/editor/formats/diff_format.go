@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call (both were previously
+// recompiled before a per-line loop). Patterns are byte-identical to the prior
+// per-call regexp.MustCompile sites.
+var (
+	diffFilePathPattern = regexp.MustCompile(`^(?:---|\+\+\+)\s+(?:a/|b/)?(.+?)(?:\s+|$)`)
+	diffHunkPattern     = regexp.MustCompile(`@@\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?\s+@@`)
+)
+
 // DiffFormat handles standard unified diff format
 type DiffFormat struct{}
 
@@ -117,11 +126,8 @@ func (df *DiffFormat) parseSingleDiff(content string) (*FileEdit, error) {
 
 	var filePath string
 
-	// Extract file path from --- or +++ lines
-	filePathPattern := regexp.MustCompile(`^(?:---|\+\+\+)\s+(?:a/|b/)?(.+?)(?:\s+|$)`)
-
 	for _, line := range lines {
-		if match := filePathPattern.FindStringSubmatch(line); match != nil {
+		if match := diffFilePathPattern.FindStringSubmatch(line); match != nil {
 			// Use +++ line for the file path (modified file)
 			if strings.HasPrefix(line, "+++") {
 				filePath = strings.TrimSpace(match[1])
@@ -164,14 +170,11 @@ type Hunk struct {
 func (df *DiffFormat) parseHunks(content string) []*Hunk {
 	hunks := make([]*Hunk, 0)
 
-	// Pattern: @@ -old_start,old_count +new_start,new_count @@
-	hunkPattern := regexp.MustCompile(`@@\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?\s+@@`)
-
 	lines := strings.Split(content, "\n")
 	var currentHunk *Hunk
 
 	for _, line := range lines {
-		if match := hunkPattern.FindStringSubmatch(line); match != nil {
+		if match := diffHunkPattern.FindStringSubmatch(line); match != nil {
 			// Save previous hunk
 			if currentHunk != nil {
 				hunks = append(hunks, currentHunk)

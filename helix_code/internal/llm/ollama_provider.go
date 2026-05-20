@@ -2,6 +2,7 @@ package llm
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -388,7 +389,11 @@ func (p *OllamaProvider) makeAPIRequest(ctx context.Context, request OllamaAPIRe
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(string(requestBody)))
+	// speed programme P2-T02 / R1 B11: read the marshalled bytes directly via
+	// bytes.NewReader — the prior strings.NewReader(string(requestBody))
+	// round-tripped []byte→string→reader, allocating a redundant copy of the
+	// whole request body. Wire bytes are byte-identical.
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(requestBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -427,7 +432,9 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(string(requestBody)))
+	// speed programme P2-T02 / R1 B11: bytes.NewReader on the marshalled bytes
+	// directly — no []byte→string→reader round-trip copy. Wire-identical.
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(requestBody))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}

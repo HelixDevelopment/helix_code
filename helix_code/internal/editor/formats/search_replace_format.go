@@ -7,6 +7,42 @@ import (
 	"strings"
 )
 
+// searchReplacePatterns holds the compiled search/replace patterns
+// (speed programme P2-T02 / R1 B12): compiled once at package init instead of
+// rebuilding the slice with three regexp.MustCompile calls on every Parse call.
+// Patterns are byte-identical to the prior per-call sites.
+var searchReplacePatterns = []struct {
+	name    string
+	pattern *regexp.Regexp
+}{
+	{
+		name: "block_style",
+		// File: <path>
+		// <<<<<<< SEARCH
+		// <search pattern>
+		// =======
+		// <replace with>
+		// >>>>>>> REPLACE
+		pattern: regexp.MustCompile(`(?ms)File:\s*(.+?)\s*\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE`),
+	},
+	{
+		name: "keyword_style",
+		// File: <path>
+		// SEARCH:
+		// <search pattern>
+		// REPLACE:
+		// <replace with>
+		pattern: regexp.MustCompile(`(?mis)File:\s*(.+?)\s*\nSEARCH:\s*\n(.*?)(?:\nREPLACE:\s*\n)(.*?)(?:\n(?:File:|$))`),
+	},
+	{
+		name: "inline_style",
+		// File: <path>
+		// search: <pattern>
+		// replace: <text>
+		pattern: regexp.MustCompile(`(?mi)File:\s*(.+?)\s*\nsearch:\s*(.+?)\s*\nreplace:\s*(.+?)(?:\n|$)`),
+	},
+}
+
 // SearchReplaceFormat handles regex-based search and replace
 type SearchReplaceFormat struct{}
 
@@ -57,40 +93,8 @@ func (srf *SearchReplaceFormat) CanHandle(content string) bool {
 func (srf *SearchReplaceFormat) Parse(ctx context.Context, content string) ([]*FileEdit, error) {
 	edits := make([]*FileEdit, 0)
 
-	// Try different search/replace patterns
-	patterns := []struct {
-		name    string
-		pattern *regexp.Regexp
-	}{
-		{
-			name: "block_style",
-			// File: <path>
-			// <<<<<<< SEARCH
-			// <search pattern>
-			// =======
-			// <replace with>
-			// >>>>>>> REPLACE
-			pattern: regexp.MustCompile(`(?ms)File:\s*(.+?)\s*\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE`),
-		},
-		{
-			name: "keyword_style",
-			// File: <path>
-			// SEARCH:
-			// <search pattern>
-			// REPLACE:
-			// <replace with>
-			pattern: regexp.MustCompile(`(?mis)File:\s*(.+?)\s*\nSEARCH:\s*\n(.*?)(?:\nREPLACE:\s*\n)(.*?)(?:\n(?:File:|$))`),
-		},
-		{
-			name: "inline_style",
-			// File: <path>
-			// search: <pattern>
-			// replace: <text>
-			pattern: regexp.MustCompile(`(?mi)File:\s*(.+?)\s*\nsearch:\s*(.+?)\s*\nreplace:\s*(.+?)(?:\n|$)`),
-		},
-	}
-
-	for _, p := range patterns {
+	// Try different search/replace patterns (compiled once at package init).
+	for _, p := range searchReplacePatterns {
 		matches := p.pattern.FindAllStringSubmatch(content, -1)
 		if len(matches) > 0 {
 			for _, match := range matches {

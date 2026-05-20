@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call (lineNumberLinePattern
+// was previously recompiled before a per-line loop). Patterns are byte-identical
+// to the prior per-call regexp.MustCompile sites.
+var (
+	lineNumberDetectPattern = regexp.MustCompile(`(?m)^\s*\d+\s*[|:]\s*.+$`)
+	lineNumberFilePattern   = regexp.MustCompile(`(?ms)File:\s*([^\n]+)\n(.*?)(?:\nFile:|\z)`)
+	lineNumberLinePattern   = regexp.MustCompile(`(?m)^\s*(\d+)\s*[|:]\s*(.*)$`)
+)
+
 // LineNumberFormat handles direct line number editing with line prefixes
 type LineNumberFormat struct{}
 
@@ -35,8 +45,7 @@ func (lnf *LineNumberFormat) Description() string {
 func (lnf *LineNumberFormat) CanHandle(content string) bool {
 	// Look for numbered line patterns
 	// Pattern: <num>|<content> or <num> <content>
-	lineNumPattern := regexp.MustCompile(`(?m)^\s*\d+\s*[|:]\s*.+$`)
-	matches := lineNumPattern.FindAllString(content, -1)
+	matches := lineNumberDetectPattern.FindAllString(content, -1)
 
 	// Need at least 3 consecutive numbered lines to be confident
 	return len(matches) >= 3
@@ -48,8 +57,7 @@ func (lnf *LineNumberFormat) Parse(ctx context.Context, content string) ([]*File
 
 	// Pattern: File: <path>\n<numbered lines>
 	// Use \z for end of string (not $ which matches end of line in multiline mode)
-	filePattern := regexp.MustCompile(`(?ms)File:\s*([^\n]+)\n(.*?)(?:\nFile:|\z)`)
-	fileMatches := filePattern.FindAllStringSubmatch(content, -1)
+	fileMatches := lineNumberFilePattern.FindAllStringSubmatch(content, -1)
 
 	if len(fileMatches) == 0 {
 		return nil, fmt.Errorf("no file sections found")
@@ -110,11 +118,9 @@ func (lnf *LineNumberFormat) parseNumberedLines(content string) ([]*NumberedLine
 	// 1| content
 	// 1: content
 	// 1 content
-	linePattern := regexp.MustCompile(`(?m)^\s*(\d+)\s*[|:]\s*(.*)$`)
-
 	contentLines := strings.Split(content, "\n")
 	for _, line := range contentLines {
-		if match := linePattern.FindStringSubmatch(line); match != nil {
+		if match := lineNumberLinePattern.FindStringSubmatch(line); match != nil {
 			lineNum, _ := strconv.Atoi(match[1])
 			lineContent := match[2]
 

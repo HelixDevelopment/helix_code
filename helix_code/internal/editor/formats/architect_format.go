@@ -7,6 +7,18 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call (architectCodeBlockPattern
+// was previously recompiled inside a per-match loop). Patterns are byte-identical
+// to the prior per-call regexp.MustCompile sites.
+var (
+	architectCreatePattern    = regexp.MustCompile(`(?mis)CREATE FILE[:\s]+([^\n]+)(?:\n(.*?))?(?:(?:\n(?:CREATE|MODIFY|DELETE|RENAME))|\z)`)
+	architectCodeBlockPattern = regexp.MustCompile(`(?s)\x60{3}(?:\w+)?\n(.*?)\n\x60{3}`)
+	architectModifyPattern    = regexp.MustCompile(`(?mis)MODIFY FILE[:\s]+(.+?)\s*\nChanges:\s*\n(.*?)(?:\n(?:CREATE|MODIFY|DELETE|RENAME|$))`)
+	architectDeletePattern    = regexp.MustCompile(`(?mi)DELETE FILE[:\s]+(.+?)(?:\s*\n|$)`)
+	architectRenamePattern    = regexp.MustCompile(`(?mi)RENAME FILE[:\s]+(.+?)\s+TO\s+(.+?)(?:\s*\n|$)`)
+)
+
 // ArchitectFormat handles high-level structural changes
 type ArchitectFormat struct{}
 
@@ -87,16 +99,14 @@ func (af *ArchitectFormat) parseCreateFile(content string) []*FileEdit {
 
 	// Pattern: CREATE FILE <path>[\n<content or description>]
 	// Content is optional - may or may not have newline and content after filepath
-	createPattern := regexp.MustCompile(`(?mis)CREATE FILE[:\s]+([^\n]+)(?:\n(.*?))?(?:(?:\n(?:CREATE|MODIFY|DELETE|RENAME))|\z)`)
-	matches := createPattern.FindAllStringSubmatch(content, -1)
+	matches := architectCreatePattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		filePath := strings.TrimSpace(match[1])
 		fileContent := strings.TrimSpace(match[2])
 
 		// Check if content is in code block
-		codeBlockPattern := regexp.MustCompile(`(?s)\x60{3}(?:\w+)?\n(.*?)\n\x60{3}`)
-		if codeMatch := codeBlockPattern.FindStringSubmatch(fileContent); codeMatch != nil {
+		if codeMatch := architectCodeBlockPattern.FindStringSubmatch(fileContent); codeMatch != nil {
 			fileContent = codeMatch[1]
 		}
 
@@ -119,8 +129,7 @@ func (af *ArchitectFormat) parseModifyFile(content string) []*FileEdit {
 	edits := make([]*FileEdit, 0)
 
 	// Pattern: MODIFY FILE <path>\n<changes description>
-	modifyPattern := regexp.MustCompile(`(?mis)MODIFY FILE[:\s]+(.+?)\s*\nChanges:\s*\n(.*?)(?:\n(?:CREATE|MODIFY|DELETE|RENAME|$))`)
-	matches := modifyPattern.FindAllStringSubmatch(content, -1)
+	matches := architectModifyPattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		filePath := strings.TrimSpace(match[1])
@@ -145,8 +154,7 @@ func (af *ArchitectFormat) parseDeleteFile(content string) []*FileEdit {
 	edits := make([]*FileEdit, 0)
 
 	// Pattern: DELETE FILE <path>
-	deletePattern := regexp.MustCompile(`(?mi)DELETE FILE[:\s]+(.+?)(?:\s*\n|$)`)
-	matches := deletePattern.FindAllStringSubmatch(content, -1)
+	matches := architectDeletePattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		filePath := strings.TrimSpace(match[1])
@@ -169,8 +177,7 @@ func (af *ArchitectFormat) parseRenameFile(content string) []*FileEdit {
 	edits := make([]*FileEdit, 0)
 
 	// Pattern: RENAME FILE <old_path> TO <new_path>
-	renamePattern := regexp.MustCompile(`(?mi)RENAME FILE[:\s]+(.+?)\s+TO\s+(.+?)(?:\s*\n|$)`)
-	matches := renamePattern.FindAllStringSubmatch(content, -1)
+	matches := architectRenamePattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		oldPath := strings.TrimSpace(match[1])

@@ -7,6 +7,14 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call. Patterns are
+// byte-identical to the prior per-call regexp.MustCompile sites.
+var (
+	wholeCodeBlockPattern = regexp.MustCompile(`(?ms)^(?:File|Path):\s*(.+?)\s*\n\x60{3}(?:\w+)?\n(.*?)\n\x60{3}`)
+	wholeAltPattern       = regexp.MustCompile(`(?s)\x60{3}(\S+)\n(.*?)\n\x60{3}`)
+)
+
 // WholeFormat replaces entire file content
 type WholeFormat struct{}
 
@@ -50,8 +58,7 @@ func (wf *WholeFormat) Parse(ctx context.Context, content string) ([]*FileEdit, 
 
 	// Pattern: File: <path>\n```\n<content>\n```
 	// or: <path>\n```\n<content>\n```
-	codeBlockPattern := regexp.MustCompile(`(?ms)^(?:File|Path):\s*(.+?)\s*\n\x60{3}(?:\w+)?\n(.*?)\n\x60{3}`)
-	matches := codeBlockPattern.FindAllStringSubmatch(content, -1)
+	matches := wholeCodeBlockPattern.FindAllStringSubmatch(content, -1)
 
 	if len(matches) > 0 {
 		for _, match := range matches {
@@ -78,8 +85,7 @@ func (wf *WholeFormat) Parse(ctx context.Context, content string) ([]*FileEdit, 
 	// ```filename.go
 	// <content>
 	// ```
-	altPattern := regexp.MustCompile(`(?s)\x60{3}(\S+)\n(.*?)\n\x60{3}`)
-	altMatches := altPattern.FindAllStringSubmatch(content, -1)
+	altMatches := wholeAltPattern.FindAllStringSubmatch(content, -1)
 
 	if len(altMatches) > 0 {
 		for _, match := range altMatches {

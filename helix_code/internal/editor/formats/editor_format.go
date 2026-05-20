@@ -8,6 +8,18 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call. Patterns are
+// byte-identical to the prior per-call regexp.MustCompile sites.
+var (
+	editorLineDetectPattern = regexp.MustCompile(`(?i)L\d+:`)
+	editorFilePattern       = regexp.MustCompile(`(?ms)File:\s*([^\n]+)\n(.*?)(?:\nFile:|\z)`)
+	editorInsertPattern     = regexp.MustCompile(`(?mis)INSERT AT LINE (\d+):\s*\n(.*?)(?:\n(?:INSERT|DELETE|REPLACE)|\z)`)
+	editorDeletePattern     = regexp.MustCompile(`(?mi)DELETE LINE (\d+)(?:-(\d+))?`)
+	editorReplacePattern    = regexp.MustCompile(`(?mis)REPLACE LINE (\d+):\s*\n(.*?)(?:\n(?:INSERT|DELETE|REPLACE)|\z)`)
+	editorLineOpPattern     = regexp.MustCompile(`(?m)^L(\d+):\s*(.*)$`)
+)
+
 // EditorFormat handles line-based editing with line numbers
 type EditorFormat struct{}
 
@@ -50,8 +62,7 @@ func (ef *EditorFormat) CanHandle(content string) bool {
 	}
 
 	// Also check for line number patterns like "L123:"
-	linePattern := regexp.MustCompile(`(?i)L\d+:`)
-	return linePattern.MatchString(content)
+	return editorLineDetectPattern.MatchString(content)
 }
 
 // Parse parses the edit content and returns structured edits
@@ -60,8 +71,7 @@ func (ef *EditorFormat) Parse(ctx context.Context, content string) ([]*FileEdit,
 
 	// Pattern: File: <path>\n<operations>
 	// Use \z for end of string (not $ which matches end of line in multiline mode)
-	filePattern := regexp.MustCompile(`(?ms)File:\s*([^\n]+)\n(.*?)(?:\nFile:|\z)`)
-	fileMatches := filePattern.FindAllStringSubmatch(content, -1)
+	fileMatches := editorFilePattern.FindAllStringSubmatch(content, -1)
 
 	if len(fileMatches) == 0 {
 		return nil, fmt.Errorf("no file sections found")
@@ -117,8 +127,7 @@ func (ef *EditorFormat) parseOperations(text string) ([]*LineOperation, error) {
 	ops := make([]*LineOperation, 0)
 
 	// Pattern: INSERT AT LINE <num>:\n<content>
-	insertPattern := regexp.MustCompile(`(?mis)INSERT AT LINE (\d+):\s*\n(.*?)(?:\n(?:INSERT|DELETE|REPLACE)|\z)`)
-	insertMatches := insertPattern.FindAllStringSubmatch(text, -1)
+	insertMatches := editorInsertPattern.FindAllStringSubmatch(text, -1)
 	for _, match := range insertMatches {
 		lineNum, _ := strconv.Atoi(match[1])
 		content := strings.TrimSpace(match[2])
@@ -130,8 +139,7 @@ func (ef *EditorFormat) parseOperations(text string) ([]*LineOperation, error) {
 	}
 
 	// Pattern: DELETE LINE <num>[-<end>]
-	deletePattern := regexp.MustCompile(`(?mi)DELETE LINE (\d+)(?:-(\d+))?`)
-	deleteMatches := deletePattern.FindAllStringSubmatch(text, -1)
+	deleteMatches := editorDeletePattern.FindAllStringSubmatch(text, -1)
 	for _, match := range deleteMatches {
 		lineNum, _ := strconv.Atoi(match[1])
 		lineCount := 1
@@ -147,8 +155,7 @@ func (ef *EditorFormat) parseOperations(text string) ([]*LineOperation, error) {
 	}
 
 	// Pattern: REPLACE LINE <num>:\n<content>
-	replacePattern := regexp.MustCompile(`(?mis)REPLACE LINE (\d+):\s*\n(.*?)(?:\n(?:INSERT|DELETE|REPLACE)|\z)`)
-	replaceMatches := replacePattern.FindAllStringSubmatch(text, -1)
+	replaceMatches := editorReplacePattern.FindAllStringSubmatch(text, -1)
 	for _, match := range replaceMatches {
 		lineNum, _ := strconv.Atoi(match[1])
 		content := strings.TrimSpace(match[2])
@@ -160,8 +167,7 @@ func (ef *EditorFormat) parseOperations(text string) ([]*LineOperation, error) {
 	}
 
 	// Alternative pattern: L<num>: <content>
-	linePattern := regexp.MustCompile(`(?m)^L(\d+):\s*(.*)$`)
-	lineMatches := linePattern.FindAllStringSubmatch(text, -1)
+	lineMatches := editorLineOpPattern.FindAllStringSubmatch(text, -1)
 	for _, match := range lineMatches {
 		lineNum, _ := strconv.Atoi(match[1])
 		content := match[2]

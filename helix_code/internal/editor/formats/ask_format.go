@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+// Package-level compiled regexes (speed programme P2-T02 / R1 B12): compiled
+// once at package init instead of on every parse call. Patterns are
+// byte-identical to the prior per-call regexp.MustCompile sites.
+var (
+	askQuestionPattern = regexp.MustCompile(`(?mis)QUESTION:\s*([^\?]+)\?(?:\s*\nFile:\s*([^\n]+))?(?:\s*\nContext:\s*([^\n]+))?(?:(?:\n(?:QUESTION|PROPOSAL|CLARIFICATION))|$)`)
+	askInlinePattern   = regexp.MustCompile(`(?m)^(?:Should I|Would you like|Do you want) (.+\?)`)
+	askProposalPattern = regexp.MustCompile(`(?mis)PROPOSED CHANGE:\s*\nFile:\s*([^\n]+)\nDescription:\s*([^\n]+)(?:\s*\nRationale:\s*([^\n]+))?(?:(?:\n(?:PROPOSED|QUESTION))|$)`)
+	askConfirmPattern  = regexp.MustCompile(`(?mi)CONFIRM:\s*(.+?)\s+for\s+(.+?)\?`)
+)
+
 // AskFormat handles question/confirmation mode
 type AskFormat struct{}
 
@@ -109,8 +119,7 @@ func (askf *AskFormat) parseQuestions(content string) []*Question {
 	questions := make([]*Question, 0)
 
 	// Pattern: QUESTION: <text>\nFile: <path>\nContext: <context>
-	questionPattern := regexp.MustCompile(`(?mis)QUESTION:\s*([^\?]+)\?(?:\s*\nFile:\s*([^\n]+))?(?:\s*\nContext:\s*([^\n]+))?(?:(?:\n(?:QUESTION|PROPOSAL|CLARIFICATION))|$)`)
-	matches := questionPattern.FindAllStringSubmatch(content, -1)
+	matches := askQuestionPattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		questionText := strings.TrimSpace(match[1]) + "?"
@@ -131,8 +140,7 @@ func (askf *AskFormat) parseQuestions(content string) []*Question {
 	}
 
 	// Also look for inline questions
-	inlinePattern := regexp.MustCompile(`(?m)^(?:Should I|Would you like|Do you want) (.+\?)`)
-	inlineMatches := inlinePattern.FindAllStringSubmatch(content, -1)
+	inlineMatches := askInlinePattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range inlineMatches {
 		questions = append(questions, &Question{
@@ -148,8 +156,7 @@ func (askf *AskFormat) parseProposals(content string) []*Proposal {
 	proposals := make([]*Proposal, 0)
 
 	// Pattern: PROPOSED CHANGE:\nFile: <path>\nDescription: <desc>\nRationale: <reason>
-	proposalPattern := regexp.MustCompile(`(?mis)PROPOSED CHANGE:\s*\nFile:\s*([^\n]+)\nDescription:\s*([^\n]+)(?:\s*\nRationale:\s*([^\n]+))?(?:(?:\n(?:PROPOSED|QUESTION))|$)`)
-	matches := proposalPattern.FindAllStringSubmatch(content, -1)
+	matches := askProposalPattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range matches {
 		filePath := strings.TrimSpace(match[1])
@@ -167,8 +174,7 @@ func (askf *AskFormat) parseProposals(content string) []*Proposal {
 	}
 
 	// Alternative pattern: CONFIRM: <action> for <file>?
-	confirmPattern := regexp.MustCompile(`(?mi)CONFIRM:\s*(.+?)\s+for\s+(.+?)\?`)
-	confirmMatches := confirmPattern.FindAllStringSubmatch(content, -1)
+	confirmMatches := askConfirmPattern.FindAllStringSubmatch(content, -1)
 
 	for _, match := range confirmMatches {
 		action := strings.TrimSpace(match[1])
