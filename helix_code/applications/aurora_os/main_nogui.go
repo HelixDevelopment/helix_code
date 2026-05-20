@@ -798,8 +798,10 @@ func (cliApp *CLIApp) runDiagnostics() error {
 
 	// System checks
 	fmt.Println(cliApp.t("aurora_os_cli_running_system_checks"))
-	addDiag("CPU Count", "OK", fmt.Sprintf("%d CPUs available", runtime.NumCPU()))
-	addDiag("Goroutines", "OK", fmt.Sprintf("%d active goroutines", runtime.NumGoroutine()))
+	addDiag(cliApp.t("aurora_os_cli_diag_check_cpu_count"), "OK",
+		fmt.Sprintf(cliApp.t("aurora_os_cli_diag_detail_cpus_available"), runtime.NumCPU()))
+	addDiag(cliApp.t("aurora_os_cli_diag_check_goroutines"), "OK",
+		fmt.Sprintf(cliApp.t("aurora_os_cli_diag_detail_goroutines_active"), runtime.NumGoroutine()))
 
 	// Memory check
 	var m runtime.MemStats
@@ -808,29 +810,38 @@ func (cliApp *CLIApp) runDiagnostics() error {
 	if m.Alloc > 500*1024*1024 { // > 500MB
 		memStatus = "WARNING"
 	}
-	addDiag("Memory Usage", memStatus, fmt.Sprintf("%.2f MB allocated", float64(m.Alloc)/1024/1024))
+	addDiag(cliApp.t("aurora_os_cli_diag_check_memory_usage"), memStatus,
+		fmt.Sprintf(cliApp.t("aurora_os_cli_diag_detail_mb_allocated"), float64(m.Alloc)/1024/1024))
 
 	// Database check
 	if cliApp.db != nil {
-		addDiag("Database", "OK", "Connected")
+		addDiag(cliApp.t("aurora_os_cli_diag_check_database"), "OK",
+			cliApp.t("aurora_os_cli_diag_detail_connected"))
 	} else {
-		addDiag("Database", "WARNING", "Not connected (running in memory-only mode)")
+		addDiag(cliApp.t("aurora_os_cli_diag_check_database"), "WARNING",
+			cliApp.t("aurora_os_cli_diag_detail_not_connected"))
 	}
 
 	// Component checks
-	addDiag("Task Manager", "OK", "Initialized")
-	addDiag("Worker Manager", "OK", "Initialized")
-	addDiag("Project Manager", "OK", "Initialized")
-	addDiag("Session Manager", "OK", "Initialized")
-	addDiag("LLM Manager", "OK", "Initialized")
-	addDiag("Security Manager", "OK", fmt.Sprintf("Encryption: %v", cliApp.securityManager.encryptionEnabled))
+	initialized := cliApp.t("aurora_os_cli_diag_detail_initialized")
+	addDiag(cliApp.t("aurora_os_cli_diag_check_task_manager"), "OK", initialized)
+	addDiag(cliApp.t("aurora_os_cli_diag_check_worker_manager"), "OK", initialized)
+	addDiag(cliApp.t("aurora_os_cli_diag_check_project_manager"), "OK", initialized)
+	addDiag(cliApp.t("aurora_os_cli_diag_check_session_manager"), "OK", initialized)
+	addDiag(cliApp.t("aurora_os_cli_diag_check_llm_manager"), "OK", initialized)
+	addDiag(cliApp.t("aurora_os_cli_diag_check_security_manager"), "OK",
+		fmt.Sprintf(cliApp.t("aurora_os_cli_diag_detail_encryption"), cliApp.securityManager.encryptionEnabled))
 
 	// Performance mode check
 	perfStatus := "OK"
 	if !cliApp.performanceMode {
 		perfStatus = "INFO"
 	}
-	addDiag("Performance Mode", perfStatus, map[bool]string{true: "Enabled", false: "Disabled (run 'aurora performance' to enable)"}[cliApp.performanceMode])
+	perfDetail := cliApp.t("aurora_os_cli_diag_detail_perf_enabled")
+	if !cliApp.performanceMode {
+		perfDetail = cliApp.t("aurora_os_cli_diag_detail_perf_disabled")
+	}
+	addDiag(cliApp.t("aurora_os_cli_diag_check_performance_mode"), perfStatus, perfDetail)
 
 	fmt.Println()
 	fmt.Printf(cliApp.t("aurora_os_cli_diagnostics_complete")+"\n", len(cliApp.diagnosticsLog))

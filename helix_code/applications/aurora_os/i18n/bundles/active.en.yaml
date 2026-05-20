@@ -398,3 +398,64 @@ aurora_os_cli_version_go:
 
 aurora_os_cli_version_platform:
   other: "Platform: %s/%s"
+
+# round-418 §11.4 CONST-046 — runtime diagnostics check labels + detail templates
+aurora_os_cli_diag_check_cpu_count:
+  other: "CPU Count"
+
+aurora_os_cli_diag_check_goroutines:
+  other: "Goroutines"
+
+aurora_os_cli_diag_check_memory_usage:
+  other: "Memory Usage"
+
+aurora_os_cli_diag_check_database:
+  other: "Database"
+
+aurora_os_cli_diag_check_task_manager:
+  other: "Task Manager"
+
+aurora_os_cli_diag_check_worker_manager:
+  other: "Worker Manager"
+
+aurora_os_cli_diag_check_project_manager:
+  other: "Project Manager"
+
+aurora_os_cli_diag_check_session_manager:
+  other: "Session Manager"
+
+aurora_os_cli_diag_check_llm_manager:
+  other: "LLM Manager"
+
+aurora_os_cli_diag_check_security_manager:
+  other: "Security Manager"
+
+aurora_os_cli_diag_check_performance_mode:
+  other: "Performance Mode"
+
+aurora_os_cli_diag_detail_cpus_available:
+  other: "%d CPUs available"
+
+aurora_os_cli_diag_detail_goroutines_active:
+  other: "%d active goroutines"
+
+aurora_os_cli_diag_detail_mb_allocated:
+  other: "%.2f MB allocated"
+
+aurora_os_cli_diag_detail_connected:
+  other: "Connected"
+
+aurora_os_cli_diag_detail_not_connected:
+  other: "Not connected (running in memory-only mode)"
+
+aurora_os_cli_diag_detail_initialized:
+  other: "Initialized"
+
+aurora_os_cli_diag_detail_encryption:
+  other: "Encryption: %v"
+
+aurora_os_cli_diag_detail_perf_enabled:
+  other: "Enabled"
+
+aurora_os_cli_diag_detail_perf_disabled:
+  other: "Disabled (run 'aurora performance' to enable)"

@@ -9,6 +9,7 @@ import (
 
 	"dev.helix.code/applications/aurora_os/i18n"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCLIAppCreation(t *testing.T) {
@@ -286,6 +287,117 @@ func TestCLIAppRound373FallbackOnError(t *testing.T) {
 		assert.Equal(t, id, app.t(id),
 			"on translate error the helper must echo the message ID for %q", id)
 	}
+}
+
+// round418IDs is the closed set of message IDs migrated by the
+// round-418 §11.4 CONST-046 residual sweep (runtime diagnostics
+// check labels + detail templates rendered through addDiag and
+// printed to stdout via fmt.Println). These are user-facing: a
+// non-English operator running `aurora diagnostics` would otherwise
+// see English-only check names and status details.
+var round418IDs = []string{
+	"aurora_os_cli_diag_check_cpu_count",
+	"aurora_os_cli_diag_check_goroutines",
+	"aurora_os_cli_diag_check_memory_usage",
+	"aurora_os_cli_diag_check_database",
+	"aurora_os_cli_diag_check_task_manager",
+	"aurora_os_cli_diag_check_worker_manager",
+	"aurora_os_cli_diag_check_project_manager",
+	"aurora_os_cli_diag_check_session_manager",
+	"aurora_os_cli_diag_check_llm_manager",
+	"aurora_os_cli_diag_check_security_manager",
+	"aurora_os_cli_diag_check_performance_mode",
+	"aurora_os_cli_diag_detail_cpus_available",
+	"aurora_os_cli_diag_detail_goroutines_active",
+	"aurora_os_cli_diag_detail_mb_allocated",
+	"aurora_os_cli_diag_detail_connected",
+	"aurora_os_cli_diag_detail_not_connected",
+	"aurora_os_cli_diag_detail_initialized",
+	"aurora_os_cli_diag_detail_encryption",
+	"aurora_os_cli_diag_detail_perf_enabled",
+	"aurora_os_cli_diag_detail_perf_disabled",
+}
+
+// TestCLIAppRound418IDsResolveThroughTranslator is the positive case
+// for the round-418 §11.4 CONST-046 diagnostics migration: every
+// newly migrated check label / detail template ID MUST route
+// through Translator.T (not echo a literal).
+func TestCLIAppRound418IDsResolveThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "R418:"}
+	app.SetTranslator(ft)
+
+	for _, id := range round418IDs {
+		got := app.t(id)
+		assert.Equal(t, "R418:"+id, got, "id %q must route through Translator.T", id)
+	}
+	assert.Equal(t, round418IDs, ft.calls, "every round-418 id must be consulted in order")
+}
+
+// TestCLIAppRound418FallbackOnError is the paired-mutation guard for
+// the round-418 IDs: on translate error the helper MUST echo the
+// literal message ID (loud echo), never an empty string — an empty
+// format string passed to fmt.Sprintf would silently drop the
+// runtime values (CPU count, MB allocated, encryption flag), a
+// §11.4 PASS-bluff at the i18n layer.
+func TestCLIAppRound418FallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&fakeTranslator{fail: true})
+
+	for _, id := range round418IDs {
+		assert.Equal(t, id, app.t(id),
+			"on translate error the helper must echo the message ID for %q", id)
+	}
+}
+
+// round418DiagAlwaysReachedIDs is the subset of round-418 IDs that
+// runDiagnostics consults on EVERY invocation regardless of runtime
+// state. The DB-branch ("connected"/"not_connected") and perf-branch
+// ("perf_enabled"/"perf_disabled") IDs are state-dependent and are
+// asserted separately below.
+var round418DiagAlwaysReachedIDs = []string{
+	"aurora_os_cli_diag_check_cpu_count",
+	"aurora_os_cli_diag_check_goroutines",
+	"aurora_os_cli_diag_check_memory_usage",
+	"aurora_os_cli_diag_check_database",
+	"aurora_os_cli_diag_check_task_manager",
+	"aurora_os_cli_diag_check_worker_manager",
+	"aurora_os_cli_diag_check_project_manager",
+	"aurora_os_cli_diag_check_session_manager",
+	"aurora_os_cli_diag_check_llm_manager",
+	"aurora_os_cli_diag_check_security_manager",
+	"aurora_os_cli_diag_check_performance_mode",
+	"aurora_os_cli_diag_detail_cpus_available",
+	"aurora_os_cli_diag_detail_goroutines_active",
+	"aurora_os_cli_diag_detail_mb_allocated",
+	"aurora_os_cli_diag_detail_initialized",
+	"aurora_os_cli_diag_detail_encryption",
+}
+
+// TestCLIAppRunDiagnosticsRoutesThroughTranslator exercises the full
+// runDiagnostics path end-to-end with a recording translator and
+// asserts every state-independent round-418 check/detail ID is
+// consulted — proving the migration is wired at the real call sites,
+// not just declared. With a fresh CLIApp (nil DB, perf mode off) the
+// "not_connected" + "perf_disabled" state-branch IDs are also hit.
+func TestCLIAppRunDiagnosticsRoutesThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: ""}
+	app.SetTranslator(ft)
+
+	require.NoError(t, app.runDiagnostics())
+	require.NotEmpty(t, app.diagnosticsLog, "diagnostics run must populate the log")
+
+	for _, id := range round418DiagAlwaysReachedIDs {
+		assert.Contains(t, ft.calls, id,
+			"runDiagnostics must consult migrated id %q", id)
+	}
+	// Fresh CLIApp has a nil DB and performance mode off — assert the
+	// negative-branch detail IDs route through the translator too.
+	assert.Contains(t, ft.calls, "aurora_os_cli_diag_detail_not_connected",
+		"nil-DB branch detail must route through the translator")
+	assert.Contains(t, ft.calls, "aurora_os_cli_diag_detail_perf_disabled",
+		"perf-off branch detail must route through the translator")
 }
 
 func TestCLISecurityManager(t *testing.T) {
