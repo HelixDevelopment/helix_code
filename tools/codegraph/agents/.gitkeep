@@ -1,0 +1,3 @@
+# Placeholder so the agents/ directory is tracked before Phase B populates it.
+# Phase B (CG5-CG9) adds register-claude.sh, register-opencode.sh,
+# register-kimi.sh, register-crush.sh, register-qwen.sh here.

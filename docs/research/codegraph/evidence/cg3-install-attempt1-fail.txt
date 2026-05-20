@@ -1,0 +1,12 @@
+==> CodeGraph install
+    pinned version : 0.7.11
+    node           : v22.19.0
+    npm            : 10.9.3
+    prefix         : /run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph
+==> npm install --prefix /run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph @colbymchenry/codegraph@0.7.11
+npm error code ETARGET
+npm error notarget No matching version found for @colbymchenry/codegraph@0.7.11.
+npm error notarget In most cases you or one of your dependencies are requesting
+npm error notarget a package version that doesn't exist.
+npm error A complete log of this run can be found in: /home/milosvasic/.npm/_logs/2026-05-20T13_10_03_682Z-debug-0.log
+EXIT=1

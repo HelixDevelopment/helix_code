@@ -1,0 +1,212 @@
+[
+  {
+    "node": {
+      "id": "interface:83c31bab2faebdabbd8d5f759f2a497e",
+      "kind": "interface",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "docs/helix_qa/HelixQA_Integration/research/testdata/raw/pkg_llm_provider.go",
+      "language": "go",
+      "startLine": 40,
+      "endLine": 57,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282779134
+    },
+    "score": 111.37569190856289
+  },
+  {
+    "node": {
+      "id": "interface:b612135a1bbb4943784d279c9f91560f",
+      "kind": "interface",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "docs/helix_qa/HelixQA_Integration/research/testdata/raw/pkg_visionnav_provider.go",
+      "language": "go",
+      "startLine": 72,
+      "endLine": 82,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282779625
+    },
+    "score": 111.37569190856289
+  },
+  {
+    "node": {
+      "id": "interface:b93294592a78592ba7dab948d1f0d066",
+      "kind": "interface",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/MCP/submodules/kubernetes-mcp/pkg/kubernetes/provider.go",
+      "language": "go",
+      "startLine": 14,
+      "endLine": 34,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282830362
+    },
+    "score": 111.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:a7815f898fdaa8ae06cf7029d6b6c1e9",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/MCP/submodules/registry/deploy/pkg/providers/gcp/provider.go",
+      "language": "go",
+      "startLine": 23,
+      "endLine": 23,
+      "startColumn": 5,
+      "endColumn": 22,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282880583
+    },
+    "score": 110.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:fcb733845a748f82d7de8b1144212bde",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/MCP/submodules/registry/deploy/pkg/providers/local/provider.go",
+      "language": "go",
+      "startLine": 19,
+      "endLine": 19,
+      "startColumn": 5,
+      "endColumn": 22,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282880596
+    },
+    "score": 110.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:bf03570fcf031ea9d39aeaf181a548fa",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/internal/llm/providers/helixllm/provider.go",
+      "language": "go",
+      "startLine": 34,
+      "endLine": 47,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282944094
+    },
+    "score": 110.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:dbc53526b8caea031addaefb611eb956",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/Toolkit/Providers/Chutes/chutes.go",
+      "language": "go",
+      "startLine": 17,
+      "endLine": 21,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282893078
+    },
+    "score": 100.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:d3c673631e582acac85420148ad2ab6c",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/Toolkit/Providers/SiliconFlow/siliconflow.go",
+      "language": "go",
+      "startLine": 17,
+      "endLine": 21,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282893205
+    },
+    "score": 100.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:37b7dd731ae0e4e54b271f6ef2cc5c38",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/internal/llm/providers/ai21/ai21.go",
+      "language": "go",
+      "startLine": 29,
+      "endLine": 36,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282942782
+    },
+    "score": 100.37569190856289
+  },
+  {
+    "node": {
+      "id": "struct:01bf1ac63bdb34ec4cc4485017406124",
+      "kind": "struct",
+      "name": "Provider",
+      "qualifiedName": "Provider",
+      "filePath": "helix_agent/internal/llm/providers/anthropic/anthropic.go",
+      "language": "go",
+      "startLine": 30,
+      "endLine": 37,
+      "startColumn": 5,
+      "endColumn": 1,
+      "visibility": null,
+      "isExported": false,
+      "isAsync": false,
+      "isStatic": false,
+      "isAbstract": false,
+      "updatedAt": 1779282942858
+    },
+    "score": 100.37569190856289
+  }
+]

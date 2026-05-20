@@ -1,0 +1,50 @@
+{
+    "initialized": true,
+    "projectPath": "/run/media/milosvasic/DATA4TB/Projects/HelixCode",
+    "fileCount": 39022,
+    "nodeCount": 624092,
+    "edgeCount": 1644454,
+    "dbSizeBytes": 1687154688,
+    "backend": "native",
+    "nodesByKind": {
+        "class": 24642,
+        "component": 11,
+        "constant": 19820,
+        "enum": 1332,
+        "enum_member": 7930,
+        "field": 4955,
+        "file": 39022,
+        "function": 117940,
+        "import": 209189,
+        "interface": 14905,
+        "method": 132834,
+        "property": 3561,
+        "route": 1137,
+        "struct": 15698,
+        "trait": 97,
+        "type_alias": 12273,
+        "variable": 18746
+    },
+    "languages": [
+        "c",
+        "cpp",
+        "csharp",
+        "go",
+        "java",
+        "javascript",
+        "jsx",
+        "kotlin",
+        "python",
+        "ruby",
+        "rust",
+        "scala",
+        "swift",
+        "tsx",
+        "typescript"
+    ],
+    "pendingChanges": {
+        "added": 0,
+        "modified": 0,
+        "removed": 0
+    }
+}
