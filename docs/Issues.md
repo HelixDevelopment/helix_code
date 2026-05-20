@@ -253,4 +253,15 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-*Last regenerated: 2026-05-20 (round 323 — HXV-001 closed → Fixed.md). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXQ-002 — helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (round 342 — HXA-002 resolution subagent)
+**Discovered-By:** AI subagent — surfaced as a compile failure separate from HXA-002 while verifying the rewritten helix_agent integration tests
+**Evidence:** `helix_agent`'s `tests/integration` package cannot compile because `helix_qa/pkg/autonomous` (committed helix_qa code at `7fa674a`) consumes a VisionEngine `remote` package API that has since drifted. The failure is entirely unrelated to HXA-002's debate-API drift — it is a distinct second drift between the helix_qa autonomous-session package and the VisionEngine `remote` package. Round-342 left it untouched per strict scope.
+**Resolution path:** Dedicated round — diff the VisionEngine `remote` package's current exported surface against what `helix_qa/pkg/autonomous` (at or after `7fa674a`) imports; classify each mismatch (renamed symbol / changed signature / removed type). If mechanical, update the `helix_qa/pkg/autonomous` consumer to the current `remote` API (note: round-340 VEN-002 merge-first made VisionEngine `remote` a strict superset — the `EnsureReady` SSH-probe variant — so the drift may now be resolvable by consuming the merged superset). Verify `helix_agent` `tests/integration` compiles + passes afterward.
+
+---
+
+*Last regenerated: 2026-05-20 (round 342 — HXQ-002 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
