@@ -961,7 +961,7 @@ Read /run/media/milosvasic/DATA4TB/Projects/helix_code/docs/CONTINUATION.md and 
 ### What's still open (rolled forward into the live backlog)
 
 - **VEN-002**, **HXA-002**, **HXQ-001** — still BLOCKED on operator decisions
-- **HXC-001** — awaits 12 operator decisions (scope/topology)
+- **HXC-001** — In progress (round 343). Operator approved "agent defaults" for all 12 decisions; round 343 executed 3 build-verified batches renaming 13 owned-org leaf submodule dirs to snake_case: `HelixDevelopment/{Models→models, DebateOrchestrator→debate_orchestrator}` + 11 `vasic-digital/*` zero-go.mod-consumer leaves (`auto_temp, claritas, doc_processor, gandalf_solutions, hyper_tune, i_llm, leak_hub, ouroborous, plinius_common, veritas, vision_engine`). Deferred (submodule-go.mod-entanglement / parent-dir / cluster-C): ~37 remaining owned-org leaves consumed by helix_agent/helix_qa/HelixLLM go.mod, parent dirs `HelixDevelopment/→helix_development/` + `vasic-digital/` kept (GitHub-org handle), 59 `Upstreams/→upstreams/` dirs inside submodule trees. Each deferred batch needs dedicated per-submodule rounds to avoid entangling pre-existing uncommitted work.
 - **HXC-003** CONST-046 migration backlog — helix_code/internal COMPLETE; remaining pending: LLMsVerifier ~1804 strings + cmd/helix_config ~241 strings + cmd/cli ~7 strings
 - **Veritas CLAUDE.md** stale `RemoveSource` reference — deferred from round 288
 - **Nested third-party submodule pointer drift** in `helix_qa/tools/opensource/*` — deferred per CONST-051(C) (third-party submodules exempt from own-org dependency-layout rules)

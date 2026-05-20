@@ -538,19 +538,102 @@ middleware). 500 still returned for genuinely unmarshallable values
 id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase">HXC-001
 (ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still
 PascalCase</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
 <strong>Discovered:</strong> 2026-05-15 (CONST-052 cascade landed)
 <strong>Discovered-By:</strong> Constitution <strong>Evidence:</strong>
-Meta-repo directories like <code>helix_code/</code>,
-<code>challenges/</code>, <code>helix_qa/</code>,
-<code>helix_agent/</code> still PascalCase despite CONST-052 mandating
-snake_case. Renames deferred because they break path-encoded references
-throughout governance docs, CI scripts, and tracker URLs.
-<strong>Resolution path:</strong> Phased migration per CONST-052
-§11.4.29: comprehensive brainstorming → phase-divided plan →
-fine-grained tasks → every change covered by every applicable test type.
-Round 88 made partial progress (3 submodules with drift fixed) but root
-directories remain.</p>
+Meta-repo top-level dirs already snake_case (round-88 sweep). Remaining
+non-compliance is two layers deeper:
+<code>dependencies/HelixDevelopment/*</code> +
+<code>dependencies/vasic-digital/*</code> owned-org submodule dirs
+(PascalCase), and 59 <code>Upstreams/</code> dirs inside submodule
+trees. <strong>Resolution path:</strong> Phased migration per CONST-052
+§11.4.29. Round 113 produced the phased plan (<code>f666410</code>,
+<code>docs/superpowers/specs/2026-05-19-const052-rename-programme-plan.md</code>).
+Round 343 executed the safe (zero-submodule-go.mod-entanglement)
+batches.</p>
+<p><strong>Round-343 12 chosen snake_case names (operator “agent
+defaults”):</strong> D-1 sequential phases; D-2
+<code>helix_development</code> (parent dir, deferred — touches every
+consumer go.mod); D-3 <code>vasic-digital</code> kept (GitHub-org
+handle, proper-noun carve-out); D-4 n/a (<code>helix_code</code> already
+snake_case); D-5 <code>LLMsVerifier/Assets</code>+<code>Website</code>
+deferred (deployment-wire audit); D-6 <code>mcp_module</code>; D-7
+<code>i_llm</code>; D-8 <code>toon</code>; D-9 <code>rag</code>; D-10
+cluster-C <code>upstreams</code> strict; D-11 yes co-authored; D-12 one
+approval per batch.</p>
+<p><strong>Round-343 per-batch status:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Renamed</th>
+<th>Status</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>HelixDevelopment/Models</code> → <code>models</code></td>
+<td>LANDED <code>a1ea3c8</code></td>
+<td>submodule resolves; <code>go build ./internal/... ./cmd/...</code>
+exit 0</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HelixDevelopment/DebateOrchestrator</code> →
+<code>debate_orchestrator</code></td>
+<td>LANDED <code>416fe8e</code></td>
+<td><code>go list -m digital.vasic.debate</code> → new path; build exit
+0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11 <code>vasic-digital/*</code> zero-go.mod-consumer leaves
+(<code>auto_temp</code>, <code>claritas</code>,
+<code>doc_processor</code>, <code>gandalf_solutions</code>,
+<code>hyper_tune</code>, <code>i_llm</code>, <code>leak_hub</code>,
+<code>ouroborous</code>, <code>plinius_common</code>,
+<code>veritas</code>, <code>vision_engine</code>)</td>
+<td>LANDED <code>e813b5c</code></td>
+<td>11 submodule statuses resolve; build exit 0</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>~37 owned-org leaves consumed by
+<code>helix_agent</code>/<code>helix_qa</code>/<code>HelixLLM</code>
+go.mod</td>
+<td>DEFERRED</td>
+<td>renaming requires submodule-internal go.mod commits entangled with
+pre-existing uncommitted work — needs dedicated per-submodule
+rounds</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>parent dirs
+<code>HelixDevelopment/</code>→<code>helix_development/</code> (D-2),
+<code>vasic-digital/</code> kept (D-3)</td>
+<td>DEFERRED</td>
+<td>parent rename touches every consumer go.mod atomically</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>59 <code>Upstreams/</code>→<code>upstreams/</code> (cluster C,
+D-10)</td>
+<td>DEFERRED</td>
+<td>live inside submodule trees — separate-repo commits</td>
+</tr>
+</tbody>
+</table>
+<p>13 of ~58 owned-org leaf renames done this round (zero build
+breakage). HXC-001 stays In progress pending the deferred
+submodule-entangled and parent-dir batches.</p>
 <hr />
 <h2
 id="hxc-002-ex-issue-006-round-74-residual-logic-class-fails-closed">HXC-002
