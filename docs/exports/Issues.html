@@ -1034,7 +1034,38 @@ error propagation + zero-response→<code>failed</code>) was already
 honest; only the stale test assertions needed re-keying to certify
 it.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 345 — HXV-002 added). To
+<h2
+id="hxv-003-llmsverifier-provideradapterforbenchmark.complete-is-a-const-050a-production-mock-bluff">HXV-003
+— LLMsVerifier <code>ProviderAdapterForBenchmark.Complete</code> is a
+CONST-050(A) production mock-bluff</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-20 (round 392 — LLMsVerifier i18n
+round-24 subagent) <strong>Discovered-By:</strong> AI subagent — spotted
+while migrating <code>internal/benchmark/integration.go</code>
+<strong>Evidence:</strong>
+<code>dependencies/HelixDevelopment/LLMsVerifier/internal/benchmark/integration.go:246-249</code>
+—
+<code>ProviderAdapterForBenchmark.Complete(ctx, prompt, systemPrompt)</code>
+is documented to “call the underlying provider” but the body is
+<code>// Mock implementation - actual would call real provider</code>
+followed by <code>return "Response", 50, nil</code>. It fabricates a
+fake completion (<code>"Response"</code>, 50 tokens, no error) instead
+of dispatching a real LLM request. This is the canonical BLUFF-001
+anti-pattern (CLAUDE.md §3.3) in PRODUCTION code — a benchmark adapter
+that reports success for an LLM call it never makes. Violates
+CONST-050(A) (mocks only in unit-test sources) + CONST-035 / Article XI
+§11.9. Any benchmark run through this adapter produces fabricated
+scores. <strong>Resolution path:</strong> Reproduce-before-fix Challenge
+asserting <code>Complete</code> performs a real provider dispatch. Then
+wire <code>ProviderAdapterForBenchmark</code> to the real provider it
+holds (<code>a.providerName</code>/<code>a.modelName</code> + the
+LLMsVerifier provider registry / HTTP client) so <code>Complete</code>
+issues a genuine request and returns the real response text + real token
+count + real error. If the adapter is genuinely unreachable/unused,
+delete it + its callers (honest-deletion per CLAUDE.md §8). NOT a
+localization target.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-20 (round 392 — HXV-003 added). To
 update Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is

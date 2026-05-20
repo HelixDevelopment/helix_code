@@ -280,4 +280,15 @@ Mirrors HXV-001 round-323's classification approach. The production code (`verif
 
 ---
 
-*Last regenerated: 2026-05-20 (round 345 — HXV-002 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXV-003 — LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (round 392 — LLMsVerifier i18n round-24 subagent)
+**Discovered-By:** AI subagent — spotted while migrating `internal/benchmark/integration.go`
+**Evidence:** `dependencies/HelixDevelopment/LLMsVerifier/internal/benchmark/integration.go:246-249` — `ProviderAdapterForBenchmark.Complete(ctx, prompt, systemPrompt)` is documented to "call the underlying provider" but the body is `// Mock implementation - actual would call real provider` followed by `return "Response", 50, nil`. It fabricates a fake completion (`"Response"`, 50 tokens, no error) instead of dispatching a real LLM request. This is the canonical BLUFF-001 anti-pattern (CLAUDE.md §3.3) in PRODUCTION code — a benchmark adapter that reports success for an LLM call it never makes. Violates CONST-050(A) (mocks only in unit-test sources) + CONST-035 / Article XI §11.9. Any benchmark run through this adapter produces fabricated scores.
+**Resolution path:** Reproduce-before-fix Challenge asserting `Complete` performs a real provider dispatch. Then wire `ProviderAdapterForBenchmark` to the real provider it holds (`a.providerName`/`a.modelName` + the LLMsVerifier provider registry / HTTP client) so `Complete` issues a genuine request and returns the real response text + real token count + real error. If the adapter is genuinely unreachable/unused, delete it + its callers (honest-deletion per CLAUDE.md §8). NOT a localization target.
+
+---
+
+*Last regenerated: 2026-05-20 (round 392 — HXV-003 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

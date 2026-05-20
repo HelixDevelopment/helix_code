@@ -399,13 +399,19 @@ production code changed; <code>go test ./verification/...</code> 10 FAIL
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 2 open (HXV-002 closed round 348; HXQ-002
-closed round 344; HXA-002 closed round 342; VEN-002 closed round 340;
-HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005 closed round
-318; PAN-001 closed round 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
-| 1 Task open (HXC-001 In progress) | 1 Feature open (HXC-003) | 0
-BLOCKED</p>
+<div class="line-block">HXV-003 | LLMsVerifier
+<code>ProviderAdapterForBenchmark.Complete</code> is a CONST-050(A)
+production mock-bluff | Bug | Queued | 2026-05-20 |
+integration.go:246-249 returns hardcoded “Response”,50,nil instead of
+dispatching real LLM call; needs real-provider wiring or honest deletion
+|</div>
+<p><strong>Counts</strong>: 3 open (HXV-003 added round 392; HXV-002
+closed round 348; HXQ-002 closed round 344; HXA-002 closed round 342;
+VEN-002 closed round 340; HXQ-001 closed round 325; HXV-001 closed round
+323; HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed
+round 200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) |
+1 Bug open (HXV-003) | 1 Task open (HXC-001 In progress) | 1 Feature
+open (HXC-003) | 0 BLOCKED</p>
 <p><em>Last regenerated: 2026-05-20 (round 348 — HXV-002 closed). See
 <code>docs/Issues.md</code> for full details + prefix convention table.
 PDF/HTML exports auto-regenerated via
