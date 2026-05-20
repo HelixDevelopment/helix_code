@@ -977,3 +977,32 @@ Read /run/media/milosvasic/DATA4TB/Projects/helix_code/docs/CONTINUATION.md and 
 
 - **Constitutional posture**: CONST-035 anti-bluff + CONST-044 continuation-maintenance + CONST-046 i18n + CONST-047 recursive-submodule-application + CONST-049 verbatim-mandate-preservation + CONST-050(A) no-fakes-beyond-unit-tests + CONST-051(B/C) decoupling + dependency-layout + CONST-052 snake_case + CONST-053 .gitignore-hygiene + CONST-055 post-pull-validation + CONST-056 install_upstreams-on-clone + CONST-057 Type-aware closure vocab + CONST-058 reopened-source-attribution + CONST-059 canonical-root inheritance + CONST-060 fetch-before-edit all honoured per-round. This close-out¹³¹ remediates the CONST-044 drift across rounds 191-305 in a single batched narrative; per-round cadence resumes next round.
 
+---
+
+## close-out¹³² — round 398: Speed Programme launch + constitution §11.4.68/70-74 cascade + mirror reconciliation
+
+**Date:** 2026-05-20
+**Theme:** Three concurrent working points active this session, recorded per CONST-044 in the same commit that advances state (operator docs-sync mandate: *"Keep Issues and relevant documentation up to date and in sync … All working points we are doing MUST BE there as well!"*).
+
+### Working points (filed into the live backlog as Issues)
+
+1. **HXC-006 — HelixCode Speed Programme** (`Feature`, `In progress`). Operator mandate (2026-05-20) to make all HelixCode + owned-submodule code 3-5x faster than competitor AI CLI agents without breaking features or weakening anti-bluff posture. Research corpus complete under `docs/research/speed/` (5 docs — bottleneck audit, competitive analysis, optimization techniques, overview, 6-phase / 31-task phased plan). **Phase 0 (measurement baseline) execution started** — establishing reproducible per-operation latency/throughput baselines so every later speed-up carries before/after captured evidence per CONST-035.
+
+2. **HXC-007 — Constitution §11.4.68/70-74 cascade** (`Task`, `In progress`). Constitution submodule fetched + pulled first per CONST-049 (`584b3ee` → `34a82b3`); 6 new rules cascaded verbatim/by-ID into meta-repo governance files + 67 owned submodules per CONST-047; meta `.gitmodules` constitution pointer bumped. Stays open until the CONST-049 step-4 multi-upstream reconciliation converges all mirrors.
+
+3. **HXC-008 — CONST-055 G1 governance gaps** (`Bug`, `In progress`). Post-constitution-pull validation sweep surfaced two **pre-existing** (not regression) gaps: (a) `scripts/verify-all-constitution-rules.sh` references a non-existent `dependencies/HelixDevelopment/Models` path — actual dirs are lowercase `models` + `vasic-digital/Models`; (b) `helix_qa/CONSTITUTION.md` missing CONST-047..057, `VisionEngine/CONSTITUTION.md` missing §11.4.69.
+
+4. **HXC-009 — Owned-submodule mirror-divergence reconciliation** (`Task`, `In progress`). Systemic divergence between vasic-digital ↔ HelixDevelopment GitHub/GitLab mirrors of several owned submodules. `helix_qa` reconciled via merge-first commit `a0397a4`; `VisionEngine`, `LLMProvider`, others under reconciliation per CONST-061 / §11.4.71 merge-first — NO force-push, NO history rewrite.
+
+### State
+
+- 4 new Issues filed (HXC-006/007/008/009); none closed this session; `Issues_Summary.md` regenerated — 6 open (1 Bug, 3 Task, 2 Feature, 0 BLOCKED).
+- Tracker HTML+PDF exports regenerated for all touched docs per §11.4.12/53/60/65.
+- No production code touched in this docs-sync commit; submodule pointer changes from parallel sessions deliberately NOT staged (parallel sessions share the meta worktree).
+
+### Next
+
+- HXC-006 Phase 0 baseline capture → Phase 1 of the speed phased plan.
+- HXC-009 reconcile remaining divergent owned-submodule mirrors (VisionEngine, LLMProvider).
+- HXC-008 fix the verifier path reference + cascade the missing CONST-047..057 / §11.4.69 anchors; re-run `verify-all-constitution-rules.sh` G1.
+

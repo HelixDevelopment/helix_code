@@ -414,17 +414,70 @@ real-dispatch reproduce-before-fix test;
 <code>go test ./internal/benchmark/...</code> PASS; LLMsVerifier
 round-396</td>
 </tr>
+<tr>
+<td>HXC-006</td>
+<td>HelixCode Speed Programme (3-5x faster than competitor AI CLI
+agents)</td>
+<td>Feature</td>
+<td>In progress</td>
+<td>2026-05-20</td>
+<td>2026-05-20 operator mandate. Research corpus complete
+(<code>docs/research/speed/</code> — 5 docs: bottleneck audit,
+competitive analysis, optimization techniques, overview, 6-phase/31-task
+phased plan). Phase 0 measurement-baseline execution started; speed-ups
+require before/after captured evidence per CONST-035</td>
+</tr>
+<tr>
+<td>HXC-007</td>
+<td>Constitution §11.4.68/70-74 cascade + meta-pointer bump</td>
+<td>Task</td>
+<td>In progress</td>
+<td>2026-05-20</td>
+<td>Constitution pulled <code>584b3ee</code>→<code>34a82b3</code> per
+CONST-049; 6 rules cascaded to meta + 67 submodules per CONST-047; meta
+<code>.gitmodules</code> pointer bumped. Stays open while CONST-049
+step-4 multi-upstream reconciliation converges mirrors (see
+HXC-009)</td>
+</tr>
+<tr>
+<td>HXC-008</td>
+<td>CONST-055 G1 governance gaps surfaced by post-constitution-pull
+validation sweep</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>2026-05-20</td>
+<td>Pre-existing (not regressions): (a)
+<code>verify-all-constitution-rules.sh</code> references non-existent
+<code>dependencies/HelixDevelopment/Models</code> — actual dirs are
+lowercase <code>models</code> + <code>vasic-digital/Models</code>; (b)
+<code>helix_qa/CONSTITUTION.md</code> missing CONST-047..057,
+<code>VisionEngine/CONSTITUTION.md</code> missing §11.4.69</td>
+</tr>
+<tr>
+<td>HXC-009</td>
+<td>Owned-submodule GitHub ↔︎ GitLab mirror-divergence
+reconciliation</td>
+<td>Task</td>
+<td>In progress</td>
+<td>2026-05-20</td>
+<td>Systemic divergence between vasic-digital ↔︎ HelixDevelopment mirrors
+of several owned submodules. helix_qa reconciled via merge-first commit
+<code>a0397a4</code>; VisionEngine, LLMProvider, others under
+reconciliation per CONST-061/§11.4.71 merge-first, no force-push</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 2 open (HXV-003 closed round 396; OPS-001
-closed round 397; HXV-002 closed round 348; HXQ-002 closed round 344;
-HXA-002 closed round 342; VEN-002 closed round 340; HXQ-001 closed round
-325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed
-round 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
-| 1 Task open (HXC-001 In progress) | 1 Feature open (HXC-003) | 0
-BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 396 — HXV-003 closed). See
+<p><strong>Counts</strong>: 6 open (HXC-006/007/008/009 filed round 398;
+HXV-003 closed round 396; OPS-001 closed round 397; HXV-002 closed round
+348; HXQ-002 closed round 344; HXA-002 closed round 342; VEN-002 closed
+round 340; HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005
+closed round 318; PAN-001 closed round 302; HXC-004 closed round 200;
+VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open
+(HXC-008) | 3 Task open (HXC-001, HXC-007, HXC-009 — all In progress) |
+2 Feature open (HXC-003, HXC-006) | 0 BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 398 — HXC-006/007/008/009
+filed: speed programme, constitution §11.4.68/70-74 cascade, CONST-055
+G1 gaps, mirror-divergence reconciliation). See
 <code>docs/Issues.md</code> for full details + prefix convention table.
 PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>

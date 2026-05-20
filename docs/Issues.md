@@ -280,4 +280,50 @@ Mirrors HXV-001 round-323's classification approach. The production code (`verif
 
 ---
 
-*Last regenerated: 2026-05-20 (round 397 — OPS-001 closed → Fixed.md). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-006 — HelixCode Speed Programme (3-5x faster than competitor AI CLI agents)
+
+**Status:** In progress
+**Type:** Feature
+**Discovered:** 2026-05-20 (operator mandate)
+**Discovered-By:** Operator (verbatim 2026-05-20 mandate)
+**Evidence:** Operator mandate to make all HelixCode + owned-submodule code 3-5x faster than competitor AI CLI agents (aider, cline, plandex, openhands, etc.) without breaking any existing feature or weakening anti-bluff posture. Research corpus complete under `docs/research/speed/` — 5 documents: bottleneck audit, competitive analysis, optimization techniques catalogue, programme overview, and the 6-phase / 31-task phased plan. The phased plan is the authoritative source of the 31 sub-tasks.
+**Resolution path:** Execute the 6-phase / 31-task phased plan from `docs/research/speed/`. Phase 0 (measurement baseline — establish reproducible per-operation latency/throughput baselines before any optimization, so every later speed-up carries before/after captured evidence per CONST-035) execution has started this session. Each subsequent phase MUST land with mutation-verified anti-bluff evidence and zero feature regression. Speed-up claims require pasted before/after measurement output — no self-certified percentages.
+
+---
+
+## HXC-007 — Constitution §11.4.68/70-74 cascade + meta-pointer bump
+
+**Status:** In progress
+**Type:** Task
+**Discovered:** 2026-05-20 (constitution-submodule pull)
+**Discovered-By:** AI subagent (CONST-049 fetch-before-edit pipeline)
+**Evidence:** Per CONST-049 the constitution submodule was fetched + pulled first (`584b3ee` → `34a82b3`). The pull carried 6 new rules (§11.4.68 + §11.4.70-74). All 6 cascaded — verbatim or by ID reference per CONST-047 — into the meta-repo governance files and 67 owned-submodule `CONSTITUTION.md` / `CLAUDE.md` / `AGENTS.md`. Meta-repo `.gitmodules` constitution pointer bumped to the new HEAD.
+**Resolution path:** Cascade itself is complete; this item stays `In progress` because the CONST-049 step-4 multi-upstream reconciliation (push to every configured upstream of every cascaded submodule) is running concurrently and the GitHub ↔ GitLab mirrors are still converging. Closes to `Completed (→ Fixed.md)` once every cascaded submodule's mirrors are confirmed at parity. Tracked alongside HXC-009 (mirror-divergence reconciliation).
+
+---
+
+## HXC-008 — CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep
+
+**Status:** In progress
+**Type:** Bug
+**Discovered:** 2026-05-20 (CONST-055 post-pull validation sweep, gate G1)
+**Discovered-By:** AI subagent (`scripts/verify-all-constitution-rules.sh` run after the §11.4.68/70-74 pull)
+**Evidence:** The CONST-055 mandatory post-constitution-pull sweep surfaced two pre-existing governance gaps (NOT regressions introduced by the round's cascade work):
+  - (a) `scripts/verify-all-constitution-rules.sh` references a non-existent `dependencies/HelixDevelopment/Models` path — stale verifier config. The actual on-disk directories are lowercase `dependencies/HelixDevelopment/models` (post-CONST-052 rename, batch 1, commit `a1ea3c8`) plus `dependencies/vasic-digital/Models`. The verifier config drifted out of sync with the rename.
+  - (b) `helix_qa/CONSTITUTION.md` is missing the older anchors `CONST-047` through `CONST-057`; `dependencies/HelixDevelopment/VisionEngine/CONSTITUTION.md` is missing §11.4.69.
+**Resolution path:** (a) update the verifier's path reference to the lowercase `models` directory; (b) cascade the missing CONST-047..057 anchors into `helix_qa/CONSTITUTION.md` and §11.4.69 into VisionEngine's `CONSTITUTION.md` per CONST-047. Both gaps are pre-existing cascade-drift defects; closure requires a re-run of `scripts/verify-all-constitution-rules.sh` reporting G1 clean.
+
+---
+
+## HXC-009 — Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation
+
+**Status:** In progress
+**Type:** Task
+**Discovered:** 2026-05-20 (multi-upstream push during §11.4.68/70-74 cascade)
+**Discovered-By:** AI subagent (4-remote push attempt during HXC-007 cascade)
+**Evidence:** Systemic lineage divergence between the `vasic-digital` ↔ `HelixDevelopment` GitHub/GitLab mirrors of several owned submodules — the org mirrors of the same logical repository had drifted apart (each carrying commits absent from the other), so a plain push to all upstreams would be non-FF. `helix_qa` already reconciled via a merge-first 2-parent commit `a0397a4`. `VisionEngine`, `LLMProvider`, and other owned submodules are still under reconciliation.
+**Resolution path:** Per CONST-061 / §11.4.71 merge-first discipline — real 2-parent merge commits preserving the union of both lineages, NO force-push, NO history rewrite, NO branch deletion. Each reconciled submodule pushes the merge to every configured upstream once FF-safe. Closes once every divergent owned submodule's mirrors are confirmed at parity. Composes with HXC-007 (the cascade push that surfaced the divergence).
+
+---
+
+*Last regenerated: 2026-05-20 (round 398 — HXC-006/007/008/009 filed: speed programme launched, constitution §11.4.68/70-74 cascade, CONST-055 G1 gaps, mirror-divergence reconciliation). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
