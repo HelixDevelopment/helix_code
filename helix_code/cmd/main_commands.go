@@ -130,19 +130,19 @@ func runAutoMode(cmd *cobra.Command, args []string) {
 	manager := llm.NewAutoLLMManager("")
 
 	// Initialize and start in background
-	fmt.Println("🔧 Initializing automated system...")
+	fmt.Println(tr(ctx, "cmd_auto_init_system", nil))
 	if err := manager.Initialize(ctx); err != nil {
-		fmt.Printf("❌ Failed to initialize: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_init_failed", map[string]any{"Error": err.Error()}))
 		os.Exit(1)
 	}
 
-	fmt.Println("🚀 Starting automated operations...")
+	fmt.Println(tr(ctx, "cmd_auto_start_operations", nil))
 	if err := manager.Start(ctx); err != nil {
-		fmt.Printf("❌ Failed to start: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_start_failed", map[string]any{"Error": err.Error()}))
 		os.Exit(1)
 	}
 
-	fmt.Println("✅ Fully Automated Mode Active")
+	fmt.Println(tr(ctx, "cmd_auto_mode_active", nil))
 	fmt.Println()
 
 	// Start all background processes
@@ -151,38 +151,39 @@ func runAutoMode(cmd *cobra.Command, args []string) {
 	// Show initial status
 	showAutomationStatus(manager)
 
-	fmt.Println("🎯 System is now running in fully automated mode!")
-	fmt.Println("📱 Web Dashboard: http://localhost:8080/dashboard")
-	fmt.Println("📊 API Documentation: http://localhost:8080/docs")
+	fmt.Println(tr(ctx, "cmd_auto_mode_running", nil))
+	fmt.Println(tr(ctx, "cmd_auto_web_dashboard", nil))
+	fmt.Println(tr(ctx, "cmd_auto_api_docs", nil))
 	fmt.Println()
-	fmt.Println("🔍 Background processes:")
-	fmt.Println("  • Auto-Installation of providers")
-	fmt.Println("  • Auto-Health monitoring (30-second intervals)")
-	fmt.Println("  • Auto-Performance optimization")
-	fmt.Println("  • Auto-Updates and maintenance")
-	fmt.Println("  • Auto-Recovery from failures")
+	fmt.Println(tr(ctx, "cmd_auto_bg_header", nil))
+	fmt.Println(tr(ctx, "cmd_auto_bg_install", nil))
+	fmt.Println(tr(ctx, "cmd_auto_bg_health", nil))
+	fmt.Println(tr(ctx, "cmd_auto_bg_optimize", nil))
+	fmt.Println(tr(ctx, "cmd_auto_bg_updates", nil))
+	fmt.Println(tr(ctx, "cmd_auto_bg_recovery", nil))
 	fmt.Println()
-	fmt.Println("💡 No user action required - everything is automated!")
-	fmt.Println("Press Ctrl+C to stop...")
+	fmt.Println(tr(ctx, "cmd_auto_no_action", nil))
+	fmt.Println(tr(ctx, "cmd_press_ctrlc_stop", nil))
 
 	// Run forever with automation
 	select {
 	case <-sigChan:
-		fmt.Println("\n🛑 Shutting down automated system...")
+		fmt.Println("\n" + tr(ctx, "cmd_auto_shutdown", nil))
 	case <-ctx.Done():
-		fmt.Println("\n🛑 Automation stopped...")
+		fmt.Println("\n" + tr(ctx, "cmd_auto_stopped_signal", nil))
 	}
 
 	// Stop automation
 	if err := manager.Stop(); err != nil {
-		fmt.Printf("⚠️  Error stopping automation: %v\n", err)
+		fmt.Println(tr(ctx, "cmd_auto_stop_error", map[string]any{"Error": err.Error()}))
 	}
 
-	fmt.Println("✅ Automated system stopped")
+	fmt.Println(tr(ctx, "cmd_auto_system_stopped", nil))
 }
 
 func showProviderStatus(manager *llm.AutoLLMManager) {
-	fmt.Println("📊 Provider Status:")
+	ctx := context.Background()
+	fmt.Println(tr(ctx, "cmd_provider_status_header", nil))
 	fmt.Println(strings.Repeat("─", 50))
 
 	status := manager.GetStatus()
@@ -191,8 +192,12 @@ func showProviderStatus(manager *llm.AutoLLMManager) {
 		healthIcon := getHealthIcon(provider.Health.IsHealthy)
 		port := provider.DefaultPort
 
-		fmt.Printf("%s %-12s %s Port: %d\n",
-			statusIcon, name, healthIcon, port)
+		fmt.Println(tr(ctx, "cmd_provider_status_line", map[string]any{
+			"StatusIcon": statusIcon,
+			"Name":       fmt.Sprintf("%-12s", name),
+			"HealthIcon": healthIcon,
+			"Port":       port,
+		}))
 	}
 	fmt.Println()
 }
@@ -205,9 +210,10 @@ func showRunningEndpoints(manager *llm.AutoLLMManager) {
 }
 
 func showAutomationStatus(manager *llm.AutoLLMManager) {
+	ctx := context.Background()
 	status := manager.GetStatus()
 
-	fmt.Println("🤖 Automation Status:")
+	fmt.Println(tr(ctx, "cmd_automation_status_header", nil))
 	fmt.Println(strings.Repeat("─", 50))
 
 	installedCount := 0
@@ -226,12 +232,12 @@ func showAutomationStatus(manager *llm.AutoLLMManager) {
 		}
 	}
 
-	fmt.Printf("📦 Providers Installed: %d/11\n", installedCount)
-	fmt.Printf("🚀 Providers Running:   %d/11\n", runningCount)
-	fmt.Printf("🟢 Providers Healthy:  %d/11\n", healthyCount)
-	fmt.Printf("⚡ Auto-Optimization: Enabled\n")
-	fmt.Printf("🔄 Auto-Updates:      Enabled\n")
-	fmt.Printf("🛡️ Auto-Recovery:     Enabled\n")
+	fmt.Println(tr(ctx, "cmd_automation_installed", map[string]any{"Count": installedCount}))
+	fmt.Println(tr(ctx, "cmd_automation_running", map[string]any{"Count": runningCount}))
+	fmt.Println(tr(ctx, "cmd_automation_healthy", map[string]any{"Count": healthyCount}))
+	fmt.Println(tr(ctx, "cmd_automation_auto_optimize", nil))
+	fmt.Println(tr(ctx, "cmd_automation_auto_updates", nil))
+	fmt.Println(tr(ctx, "cmd_automation_auto_recovery", nil))
 	fmt.Println()
 }
 
@@ -254,7 +260,7 @@ func runBackgroundProcesses(manager *llm.AutoLLMManager) {
 				}
 			}
 
-			fmt.Printf("\r🤖 Automation Status: %d/11 providers running | Optimizing performance...", running)
+			fmt.Print("\r" + tr(context.Background(), "cmd_automation_bg_status", map[string]any{"Count": running}))
 		}
 	}
 }
@@ -262,13 +268,13 @@ func runBackgroundProcesses(manager *llm.AutoLLMManager) {
 func startMainServer(manager *llm.AutoLLMManager) {
 	// This would start the main HelixCode server
 	// For demo purposes, just log
-	fmt.Println("🌐 Main server started on http://localhost:8080")
+	fmt.Println(tr(context.Background(), "cmd_main_server_started", nil))
 }
 
 func startMonitoringDashboard(manager *llm.AutoLLMManager) {
 	// This would start the monitoring dashboard
 	// For demo purposes, just log
-	fmt.Println("📊 Monitoring dashboard started on http://localhost:8080/dashboard")
+	fmt.Println(tr(context.Background(), "cmd_monitoring_dashboard_started", nil))
 }
 
 func getHealthIcon(isHealthy bool) string {

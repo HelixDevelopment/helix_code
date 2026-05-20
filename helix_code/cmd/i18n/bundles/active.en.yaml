@@ -836,3 +836,214 @@ cmd_local_llm_sync_all_ok:
 
 cmd_local_llm_sync_some_failed:
   other: "⚠️  {{.Errors}} models failed to sync. Check logs for details."
+
+# --- round-453 CONST-046: helix_code/cmd residual migration ---
+
+cmd_auto_init_system:
+  other: "🔧 Initializing automated system..."
+
+cmd_auto_start_operations:
+  other: "🚀 Starting automated operations..."
+
+cmd_auto_mode_active:
+  other: "✅ Fully Automated Mode Active"
+
+cmd_auto_mode_running:
+  other: "🎯 System is now running in fully automated mode!"
+
+cmd_auto_web_dashboard:
+  other: "📱 Web Dashboard: http://localhost:8080/dashboard"
+
+cmd_auto_api_docs:
+  other: "📊 API Documentation: http://localhost:8080/docs"
+
+cmd_auto_bg_header:
+  other: "🔍 Background processes:"
+
+cmd_auto_bg_install:
+  other: "  • Auto-Installation of providers"
+
+cmd_auto_bg_health:
+  other: "  • Auto-Health monitoring (30-second intervals)"
+
+cmd_auto_bg_optimize:
+  other: "  • Auto-Performance optimization"
+
+cmd_auto_bg_updates:
+  other: "  • Auto-Updates and maintenance"
+
+cmd_auto_bg_recovery:
+  other: "  • Auto-Recovery from failures"
+
+cmd_auto_no_action:
+  other: "💡 No user action required - everything is automated!"
+
+cmd_press_ctrlc_stop:
+  other: "Press Ctrl+C to stop..."
+
+cmd_auto_shutdown:
+  other: "🛑 Shutting down automated system..."
+
+cmd_auto_stopped_signal:
+  other: "🛑 Automation stopped..."
+
+cmd_auto_stop_error:
+  other: "⚠️  Error stopping automation: {{.Error}}"
+
+cmd_auto_system_stopped:
+  other: "✅ Automated system stopped"
+
+cmd_provider_status_header:
+  other: "📊 Provider Status:"
+
+cmd_provider_status_line:
+  other: "{{.StatusIcon}} {{.Name}} {{.HealthIcon}} Port: {{.Port}}"
+
+cmd_automation_status_header:
+  other: "🤖 Automation Status:"
+
+cmd_automation_installed:
+  other: "📦 Providers Installed: {{.Count}}/11"
+
+cmd_automation_running:
+  other: "🚀 Providers Running:   {{.Count}}/11"
+
+cmd_automation_healthy:
+  other: "🟢 Providers Healthy:  {{.Count}}/11"
+
+cmd_automation_auto_optimize:
+  other: "⚡ Auto-Optimization: Enabled"
+
+cmd_automation_auto_updates:
+  other: "🔄 Auto-Updates:      Enabled"
+
+cmd_automation_auto_recovery:
+  other: "🛡️ Auto-Recovery:     Enabled"
+
+cmd_automation_bg_status:
+  other: "🤖 Automation Status: {{.Count}}/11 providers running | Optimizing performance..."
+
+cmd_main_server_started:
+  other: "🌐 Main server started on http://localhost:8080"
+
+cmd_monitoring_dashboard_started:
+  other: "📊 Monitoring dashboard started on http://localhost:8080/dashboard"
+
+cmd_err_config:
+  other: "Config error: {{.Error}}"
+
+cmd_err_database_unavailable:
+  other: "Database unavailable: {{.Error}}"
+
+cmd_err_redis_unavailable:
+  other: "Redis unavailable: {{.Error}}"
+
+cmd_err_server:
+  other: "Server error: {{.Error}}"
+
+cmd_server_received_signal:
+  other: "Received {{.Signal}}, shutting down..."
+
+cmd_err_shutdown:
+  other: "Shutdown error: {{.Error}}"
+
+cmd_server_stopped:
+  other: "Server stopped"
+
+cmd_generate_short:
+  other: "Generate code/text with AI"
+
+cmd_generate_long:
+  other: "Generate code or text using configured AI providers."
+
+cmd_generate_need_prompt:
+  other: "Please provide a prompt"
+
+cmd_generate_no_default_provider:
+  other: "No default LLM provider configured in config"
+
+cmd_generate_set_default_provider:
+  other: "Set llm.default_provider in config.yaml"
+
+cmd_generate_no_models:
+  other: "No models available: {{.Error}}"
+
+cmd_generate_provider_unavailable:
+  other: "Provider not available: {{.Error}}"
+
+cmd_generate_failed:
+  other: "Generation failed: {{.Error}}"
+
+cmd_test_short:
+  other: "Run tests"
+
+cmd_test_long:
+  other: "Run HelixCode tests including unit, integration, and E2E tests."
+
+cmd_test_failed:
+  other: "Tests failed: {{.Error}}"
+
+cmd_worker_short:
+  other: "Manage distributed workers"
+
+cmd_worker_long:
+  other: "Add, remove, and manage distributed computing workers."
+
+cmd_worker_needs_database:
+  other: "Worker management requires a configured database"
+
+cmd_worker_set_database:
+  other: "Set database.host in config.yaml"
+
+cmd_worker_config_summary:
+  other: "Workers config: health_ttl={{.HealthTTL}}s, max_concurrent={{.MaxConcurrent}}"
+
+cmd_worker_use_subcommands:
+  other: "Use worker subcommands: add, list, status, remove"
+
+cmd_notify_short:
+  other: "Send notifications"
+
+cmd_notify_long:
+  other: "Send notifications through configured channels (Slack, Discord, etc.)."
+
+cmd_notify_need_message:
+  other: "Please provide a message"
+
+cmd_notify_title:
+  other: "HelixCode CLI Notification"
+
+cmd_notify_failed:
+  other: "Notification failed: {{.Error}}"
+
+cmd_notify_dispatched:
+  other: "Notification dispatched"
+
+cmd_root_short:
+  other: "HelixCode - Enterprise AI Development Platform"
+
+cmd_root_long:
+  other: |-
+    HelixCode is the world's most advanced enterprise AI development platform
+    with 29+ AI providers, 2M token context, and zero-tolerance security.
+
+    Features:
+    - 29+ AI providers (18 cloud + 11 local)
+    - 2M token context window
+    - Extended thinking and reasoning
+    - Distributed computing power
+    - Zero-tolerance security
+    - Advanced development tools
+    - End-to-end testing framework
+
+cmd_root_flag_config:
+  other: "config file (default is $HOME/.helix.yaml)"
+
+cmd_root_flag_debug:
+  other: "enable debug logging"
+
+cmd_root_flag_log_level:
+  other: "log level (debug, info, warn, error)"
+
+cmd_root_using_config_file:
+  other: "Using config file: {{.Path}}"

@@ -12,19 +12,9 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "helix",
-	Short: "HelixCode - Enterprise AI Development Platform",
-	Long: `HelixCode is the world's most advanced enterprise AI development platform 
-with 29+ AI providers, 2M token context, and zero-tolerance security.
-
-Features:
-- 29+ AI providers (18 cloud + 11 local)
-- 2M token context window
-- Extended thinking and reasoning
-- Distributed computing power
-- Zero-tolerance security
-- Advanced development tools
-- End-to-end testing framework`,
+	Use:     "helix",
+	Short:   trc("cmd_root_short", nil),
+	Long:    trc("cmd_root_long", nil),
 	Version: "1.0.0",
 }
 
@@ -38,9 +28,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Global flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.helix.yaml)")
-	rootCmd.PersistentFlags().Bool("debug", false, "enable debug logging")
-	rootCmd.PersistentFlags().String("log-level", "info", "log level (debug, info, warn, error)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", trc("cmd_root_flag_config", nil))
+	rootCmd.PersistentFlags().Bool("debug", false, trc("cmd_root_flag_debug", nil))
+	rootCmd.PersistentFlags().String("log-level", "info", trc("cmd_root_flag_log_level", nil))
 
 	// Bind flags to viper
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
@@ -67,6 +57,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Println(trc("cmd_root_using_config_file", map[string]any{"Path": viper.ConfigFileUsed()}))
 	}
 }

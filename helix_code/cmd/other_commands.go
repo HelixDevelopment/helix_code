@@ -23,10 +23,11 @@ var serverCmd = &cobra.Command{
 	Short: trc("cmd_server_short", nil),
 	Long:  trc("cmd_server_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		// Speed programme P2-T07: config.Get() caches the process config.
 		cfg, err := config.Get()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_config", map[string]any{"Error": err.Error()}))
 			return
 		}
 
@@ -34,7 +35,7 @@ var serverCmd = &cobra.Command{
 		if cfg.Database.Host != "" {
 			db, err = database.New(cfg.Database)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Database unavailable: %v\n", err)
+				fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_database_unavailable", map[string]any{"Error": err.Error()}))
 			} else {
 				defer db.Close()
 			}
@@ -44,7 +45,7 @@ var serverCmd = &cobra.Command{
 		if cfg.Redis.Enabled && cfg.Redis.Host != "" {
 			rds, err = redis.NewClient(&cfg.Redis)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Redis unavailable: %v\n", err)
+				fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_redis_unavailable", map[string]any{"Error": err.Error()}))
 			} else {
 				defer rds.Close()
 			}
@@ -64,17 +65,17 @@ var serverCmd = &cobra.Command{
 
 		select {
 		case err := <-errChan:
-			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_server", map[string]any{"Error": err.Error()}))
 		case sig := <-quit:
-			fmt.Printf("\nReceived %v, shutting down...\n", sig)
+			fmt.Println("\n" + tr(ctx, "cmd_server_received_signal", map[string]any{"Signal": sig.String()}))
 		}
 
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			fmt.Fprintf(os.Stderr, "Shutdown error: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_shutdown", map[string]any{"Error": err.Error()}))
 		}
-		fmt.Println("Server stopped")
+		fmt.Println(tr(ctx, "cmd_server_stopped", nil))
 	},
 }
 
@@ -95,11 +96,12 @@ var versionCmd = &cobra.Command{
 
 var generateCmd = &cobra.Command{
 	Use:   "generate [prompt]",
-	Short: "Generate code/text with AI",
-	Long:  `Generate code or text using configured AI providers.`,
+	Short: trc("cmd_generate_short", nil),
+	Long:  trc("cmd_generate_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx0 := context.Background()
 		if len(args) == 0 {
-			fmt.Fprintf(os.Stderr, "Please provide a prompt\n")
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_need_prompt", nil))
 			return
 		}
 		prompt := args[0]
@@ -107,15 +109,15 @@ var generateCmd = &cobra.Command{
 		// Speed programme P2-T07: config.Get() caches the process config.
 		cfg, err := config.Get()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_err_config", map[string]any{"Error": err.Error()}))
 			return
 		}
 
 		mgr := llm.NewModelManager()
 		defaultProvider := cfg.LLM.DefaultProvider
 		if defaultProvider == "" {
-			fmt.Fprintf(os.Stderr, "No default LLM provider configured in config\n")
-			fmt.Fprintf(os.Stderr, "Set llm.default_provider in config.yaml\n")
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_no_default_provider", nil))
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_set_default_provider", nil))
 			return
 		}
 
@@ -124,14 +126,14 @@ var generateCmd = &cobra.Command{
 			QualityPreference: "balanced",
 		})
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "No models available: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_no_models", map[string]any{"Error": err.Error()}))
 			return
 		}
 
 		entryKey := llm.ProviderType(defaultProvider)
 		prov, err := mgr.GetProviderForModel(modelInfo.Name, entryKey)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Provider not available: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_provider_unavailable", map[string]any{"Error": err.Error()}))
 			return
 		}
 
@@ -148,7 +150,7 @@ var generateCmd = &cobra.Command{
 		}
 		response, err := prov.Generate(ctx, request)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Generation failed: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx0, "cmd_generate_failed", map[string]any{"Error": err.Error()}))
 			return
 		}
 		fmt.Println(response.Content)
@@ -157,8 +159,8 @@ var generateCmd = &cobra.Command{
 
 var testCmd = &cobra.Command{
 	Use:   "test",
-	Short: "Run tests",
-	Long:  `Run HelixCode tests including unit, integration, and E2E tests.`,
+	Short: trc("cmd_test_short", nil),
+	Long:  trc("cmd_test_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
 		testArgs := []string{"test", "-v"}
 		if len(args) > 0 {
@@ -170,7 +172,7 @@ var testCmd = &cobra.Command{
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		if err := c.Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "Tests failed: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(context.Background(), "cmd_test_failed", map[string]any{"Error": err.Error()}))
 			os.Exit(1)
 		}
 	},
@@ -178,35 +180,38 @@ var testCmd = &cobra.Command{
 
 var workerCmd = &cobra.Command{
 	Use:   "worker",
-	Short: "Manage distributed workers",
-	Long:  `Add, remove, and manage distributed computing workers.`,
+	Short: trc("cmd_worker_short", nil),
+	Long:  trc("cmd_worker_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		// Speed programme P2-T07: config.Get() caches the process config.
 		cfg, err := config.Get()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cmd_err_config", map[string]any{"Error": err.Error()}))
 			return
 		}
 
 		if cfg.Database.Host == "" {
-			fmt.Println("Worker management requires a configured database")
-			fmt.Println("Set database.host in config.yaml")
+			fmt.Println(tr(ctx, "cmd_worker_needs_database", nil))
+			fmt.Println(tr(ctx, "cmd_worker_set_database", nil))
 			return
 		}
 
-		fmt.Printf("Workers config: health_ttl=%ds, max_concurrent=%d\n",
-			cfg.Workers.HealthTTL, cfg.Workers.MaxConcurrentTasks)
-		fmt.Println("Use worker subcommands: add, list, status, remove")
+		fmt.Println(tr(ctx, "cmd_worker_config_summary", map[string]any{
+			"HealthTTL":     cfg.Workers.HealthTTL,
+			"MaxConcurrent": cfg.Workers.MaxConcurrentTasks,
+		}))
+		fmt.Println(tr(ctx, "cmd_worker_use_subcommands", nil))
 	},
 }
 
 var notifyCmd = &cobra.Command{
 	Use:   "notify [message]",
-	Short: "Send notifications",
-	Long:  `Send notifications through configured channels (Slack, Discord, etc.).`,
+	Short: trc("cmd_notify_short", nil),
+	Long:  trc("cmd_notify_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			fmt.Fprintf(os.Stderr, "Please provide a message\n")
+			fmt.Fprintln(os.Stderr, tr(context.Background(), "cmd_notify_need_message", nil))
 			return
 		}
 		message := args[0]
@@ -237,7 +242,7 @@ var notifyCmd = &cobra.Command{
 		}
 
 		notif := &notification.Notification{
-			Title:    "HelixCode CLI Notification",
+			Title:    tr(context.Background(), "cmd_notify_title", nil),
 			Message:  message,
 			Type:     notification.NotificationTypeInfo,
 			Priority: notification.NotificationPriorityMedium,
@@ -247,9 +252,9 @@ var notifyCmd = &cobra.Command{
 		defer cancel()
 
 		if err := engine.SendNotification(ctx, notif); err != nil {
-			fmt.Fprintf(os.Stderr, "Notification failed: %v\n", err)
+			fmt.Fprintln(os.Stderr, tr(ctx, "cmd_notify_failed", map[string]any{"Error": err.Error()}))
 			return
 		}
-		fmt.Println("Notification dispatched")
+		fmt.Println(tr(ctx, "cmd_notify_dispatched", nil))
 	},
 }
