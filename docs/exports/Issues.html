@@ -1065,7 +1065,30 @@ count + real error. If the adapter is genuinely unreachable/unused,
 delete it + its callers (honest-deletion per CLAUDE.md §8). NOT a
 localization target.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 392 — HXV-003 added). To
+<h2
+id="ops-001-llmops-2-pre-existing-createpromptexperiment-test-failures">OPS-001
+— LLMOps 2 pre-existing <code>CreatePromptExperiment</code> test
+failures</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-20 (round 394 —
+vasic-digital/LLMOps i18n subagent) <strong>Discovered-By:</strong> AI
+subagent — <code>git stash</code> isolation confirmed both failures
+reproduce at submodule HEAD <code>00392cb</code> <em>without</em> the
+round-394 i18n change <strong>Evidence:</strong>
+<code>dependencies/vasic-digital/LLMOps</code> —
+<code>TestLLMOpsSystem_CreatePromptExperiment_ControlPromptCreateFails</code>
+and
+<code>TestLLMOpsSystem_CreatePromptExperiment_TreatmentPromptCreateFails</code>
+fail. Pre-existing, unrelated to i18n. Not yet root-caused (round-394
+scope was strictly i18n). <strong>Resolution path:</strong> Dedicated
+round — run
+<code>go test -v -run TestLLMOpsSystem_CreatePromptExperiment ./llmops/...</code>,
+capture the 2 failure signatures, classify (test-assertion drift vs
+genuine production regression in the experiment-creation
+control/treatment-prompt-failure error path), fix root cause per
+CONST-035 reproduction-before-fix.</p>
+<hr />
+<p><em>Last regenerated: 2026-05-20 (round 394 — OPS-001 added). To
 update Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is

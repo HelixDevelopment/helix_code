@@ -291,4 +291,15 @@ Mirrors HXV-001 round-323's classification approach. The production code (`verif
 
 ---
 
-*Last regenerated: 2026-05-20 (round 392 — HXV-003 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## OPS-001 — LLMOps 2 pre-existing `CreatePromptExperiment` test failures
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-20 (round 394 — vasic-digital/LLMOps i18n subagent)
+**Discovered-By:** AI subagent — `git stash` isolation confirmed both failures reproduce at submodule HEAD `00392cb` *without* the round-394 i18n change
+**Evidence:** `dependencies/vasic-digital/LLMOps` — `TestLLMOpsSystem_CreatePromptExperiment_ControlPromptCreateFails` and `TestLLMOpsSystem_CreatePromptExperiment_TreatmentPromptCreateFails` fail. Pre-existing, unrelated to i18n. Not yet root-caused (round-394 scope was strictly i18n).
+**Resolution path:** Dedicated round — run `go test -v -run TestLLMOpsSystem_CreatePromptExperiment ./llmops/...`, capture the 2 failure signatures, classify (test-assertion drift vs genuine production regression in the experiment-creation control/treatment-prompt-failure error path), fix root cause per CONST-035 reproduction-before-fix.
+
+---
+
+*Last regenerated: 2026-05-20 (round 394 — OPS-001 added). To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
