@@ -275,11 +275,17 @@ helix_agent (109)</td>
 </tr>
 <tr>
 <td>HXA-002</td>
-<td>helix_agent 3 build-failed packages (sibling debate API drift)</td>
+<td>helix_agent debate/llmprovider sibling-submodule API drift</td>
 <td>Bug</td>
-<td>Queued — BLOCKED on cross-submodule coord</td>
+<td>Fixed (→ Fixed.md) round 342</td>
 <td>2026-05-19</td>
-<td>digital.vasic.debate API changed; helix_agent consumers broken</td>
+<td>Closed: investigation finding — capability tier GENUINELY DELETED
+(not moved; <code>digital.vasic.debate</code> rebuilt from scratch at
+commit <code>196d0ea</code>, slim API is first+only version, tree-wide
+grep found zero surviving copies). Part-1 import swap
+(<code>digital.vasic.models</code>→<code>llmprovider/pkg/models</code>)
++ Part-2 slim-API test rewrite + score-scale 0-10→[0,1] + go.mod
+rename-drift fix; <code>debate_integration</code> tests PASS</td>
 </tr>
 <tr>
 <td>HXA-003</td>
@@ -358,16 +364,17 @@ tolerance); all <code>tests/...</code> PASS; LLMsVerifier
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 3 open (VEN-002 closed round 340; HXQ-001
-closed round 325; HXV-001 closed round 323; HXC-005 closed round 318;
-PAN-001 closed round 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open
-(HXA-002) | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003)
-| 1 BLOCKED (HXA-002 cross-submodule coord)</p>
-<p><em>Last regenerated: 2026-05-20 (round 340 — VEN-002 closed →
-Fixed.md via CONST-061 merge-first). See <code>docs/Issues.md</code> for
-full details + prefix convention table. PDF/HTML exports
-auto-regenerated via
+<p><strong>Counts</strong>: 2 open (HXA-002 closed round 342; VEN-002
+closed round 340; HXQ-001 closed round 325; HXV-001 closed round 323;
+HXC-005 closed round 318; PAN-001 closed round 302; HXC-004 closed round
+200; VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug
+open | 1 Task open (HXC-001 Plan-Ready) | 1 Feature open (HXC-003) | 0
+BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 342 — HXA-002 closed →
+Fixed.md: debate API drift resolved, capability tier confirmed GENUINELY
+DELETED via git-log + tree-wide grep, helix_agent tests rewritten to
+slim API). See <code>docs/Issues.md</code> for full details + prefix
+convention table. PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>

@@ -354,12 +354,12 @@ infrastructure)</td>
 <tr>
 <td>ATP</td>
 <td>AutoTemp submodule (vasic-digital)</td>
-<td><code>dependencies/vasic-digital/AutoTemp</code></td>
+<td><code>dependencies/vasic-digital/auto_temp</code></td>
 </tr>
 <tr>
 <td>PLI</td>
 <td>PliniusCommon submodule (vasic-digital)</td>
-<td><code>dependencies/vasic-digital/PliniusCommon</code></td>
+<td><code>dependencies/vasic-digital/plinius_common</code></td>
 </tr>
 <tr>
 <td>CHL</td>
@@ -596,76 +596,39 @@ investigation, similar to round 109’s test-side bluff pattern.</p>
 id="hxa-002-ex-issue-010-helix_agent-debatellmprovider-sibling-submodule-api-drift">HXA-002
 (ex-ISSUE-010) — helix_agent debate/llmprovider sibling-submodule API
 drift</h2>
-<p><strong>Status:</strong> Queued — BLOCKED on cross-submodule
-API-design decision <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-19 (round 109)
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
 <strong>Discovered-By:</strong> AI subagent
 <strong>Investigated:</strong> 2026-05-20 (round 324) — split into a
-mechanical part and a design-decision part.</p>
-<p><strong>Round-324 findings (forensic, anti-bluff):</strong> The
-original “3 build-failed packages” framing was imprecise.
-<code>go build ./...</code> in <code>helix_agent/</code> (replace dirs
-resolve to the meta-repo’s <code>dependencies/</code> tree) reveals TWO
-distinct, layered drift sources — only ONE was the debate submodule:</p>
-<ol type="1">
-<li><p><strong><code>digital.vasic.llmprovider</code> package-move drift
-— MECHANICAL, ready to apply.</strong>
-<code>digital.vasic.llmprovider/provider.go</code>
-<code>LLMProvider</code> interface now uses its OWN in-module
-<code>digital.vasic.llmprovider/pkg/models</code> type package; it no
-longer depends on the separate <code>digital.vasic.models</code>
-(<code>Models</code>) submodule.
-<code>helix_agent/internal/services/debate_integration/provider_bridge.go</code>
-(production) + <code>mock_test.go</code> +
-<code>provider_bridge_leak_test.go</code> (unit tests) still import
-<code>digital.vasic.models</code>, so <code>*adaptedProvider</code>
-fails to satisfy <code>llmprovider.LLMProvider</code>. <strong>Fix is a
-1-line import swap per file</strong> (<code>digital.vasic.models</code>
-→ <code>digital.vasic.llmprovider/pkg/models</code>; the two type
-packages are structurally identical so the JSON-marshal conversion to
-internal <code>models</code> still holds). Verified: with that swap,
-<code>go build ./...</code> is exit-0 clean. This portion is
-agent-actionable and was held back ONLY because committing it alone
-leaves the package’s test binary still uncompilable (see point 2) — a
-CONST-035 partial-state bluff.</p></li>
-<li><p><strong><code>digital.vasic.debate/orchestrator</code>
-capability-tier removal — GENUINE DESIGN DECISION, blocked.</strong>
-After fixing (1), the <code>debate_integration</code> test binary still
-fails: <code>integration_test.go</code> +
-<code>tests/integration/debate_full_flow_test.go</code> reference an
-OLDER, much richer debate orchestrator API that the current slim
-<code>orchestrator</code> package no longer exposes. Removed symbols:
-<code>APIAdapter.ConvertAPIRequest</code>,
-<code>APIAdapter.GetDebateStatus</code>,
-<code>APIAdapter.CancelDebate</code>,
-<code>Orchestrator.GetKnowledgeRepository</code>,
-<code>Orchestrator.GetRecommendations</code>, and
-<code>APIStatistics.{TotalLessons,TotalPatterns,TotalDebatesLearned}</code>
-(now <code>{TotalDebates,ActiveDebates,CompletedDebates}</code>), plus
-<code>OrchestratorConfig.{DefaultMinConsensus,MaxAgentsPerDebate,EnableAgentDiversity}</code>.
-The current <code>APIAdapter</code> exposes only
-<code>CreateDebate</code> + <code>GetStatistics</code>. An entire
-learning / knowledge-repository / recommendations capability tier was
-deliberately dropped from <code>DebateOrchestrator</code>.</p></li>
-</ol>
-<p><strong>Resolution path (precise operator question):</strong> The
-debate orchestrator is NOT mid-flux — it is a stable, deliberately
-slimmer rewrite. The blocked decision is: <strong>should
-<code>DebateOrchestrator</code> re-expose the learning /
-knowledge-repository / recommendations capability tier (so the existing
-helix_agent integration tests can be restored verbatim), OR should those
-helix_agent integration tests be rewritten down to the slim
-<code>CreateDebate</code>/<code>GetStatistics</code> surface — accepting
-the loss of test coverage for learning, knowledge-repository, and
-recommendations behaviour?</strong> A subagent must not pick (it
-determines whether a whole feature tier is in or out of the debate
-product). Once decided: if “re-expose”, reinstate the removed methods on
-<code>DebateOrchestrator</code> then apply the mechanical (1) swap; if
-“rewrite tests down”, drop the learning/knowledge/recommendations
-assertions in <code>integration_test.go</code> +
-<code>debate_full_flow_test.go</code> and apply the (1) swap. Either way
-the (1) import swap (3 files, 1 line each, evidence above) ships in the
-same change.</p>
+mechanical part and a design-decision part. <strong>Closed:</strong>
+2026-05-20 (round 342) <strong>Closure-Ref:</strong> helix_agent commit
+(round-342 HXA-002 debate API drift) + meta-repo
+<code>.gitmodules</code> pointer-bump <strong>Investigation finding
+(operator’s explicit ask — moved vs deleted):</strong> The
+learning/knowledge/recommendations capability tier was <strong>genuinely
+DELETED, not moved</strong>. <code>git log</code> on the
+<code>digital.vasic.debate</code> submodule
+(<code>dependencies/HelixDevelopment/debate_orchestrator</code>, renamed
+from <code>DebateOrchestrator</code> per CONST-052) shows the
+orchestrator was rebuilt from scratch — commit <code>196d0ea</code>
+“feat: initial DebateOrchestrator reconstruction (Phase 1)”.
+<code>orchestrator/api.go</code> has carried only the slim
+<code>CreateDebate</code>/<code>GetStatistics</code> surface since that
+very first commit (<code>git log --follow orchestrator/api.go</code> =
+single entry). A tree-wide <code>grep</code> of
+<code>dependencies/</code> for <code>KnowledgeRepository</code>,
+<code>GetRecommendations</code>, <code>ConvertAPIRequest</code>,
+<code>GetDebateStatus</code>, <code>DefaultMinConsensus</code>,
+<code>MaxAgentsPerDebate</code>, <code>EnableAgentDiversity</code> found
+<strong>zero</strong> surviving copies in any
+<code>digital.vasic.*</code> package or in HelixSpecifier/HelixMemory.
+The slim API is the first and only version — the richer tier was a
+pre-reconstruction artifact that no longer exists anywhere. Per the
+operator’s chosen direction for the deleted case, the helix_agent tests
+were rewritten down to the slim API. <strong>Resolution:</strong> See
+<code>docs/Fixed.md</code> row for the full closure narrative (Part-1
+import swap + Part-2 slim-API rewrite + score-scale + go.mod
+rename-drift fix + captured evidence).</p>
 <hr />
 <h2
 id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003

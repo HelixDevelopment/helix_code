@@ -1202,10 +1202,78 @@ clean; <code>go test -count=1 ./...</code> → 7 packages PASS
 remotes fast-forwarded (<code>6e3888e..70c9e0c</code>
 helix-github/gitlab + vasic-digital-gitlab,
 <code>256cce1..70c9e0c</code> vasic-digital-github — NO force on any).
+|<br />
+2026-05-20 | HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider
+sibling-submodule API drift | Bug | Fixed (→ Fixed.md) | 342 |
+helix_agent (round-342 HXA-002) + meta pointer-bump | Round-342 §11.4 /
+CONST-035. <strong>Investigation finding (operator’s explicit ask —
+moved vs deleted): GENUINELY DELETED, not moved.</strong>
+<code>git log</code> on <code>digital.vasic.debate</code>
+(<code>dependencies/HelixDevelopment/debate_orchestrator</code>) shows
+the orchestrator was rebuilt from scratch (commit <code>196d0ea</code>
+“initial DebateOrchestrator reconstruction (Phase 1)”);
+<code>git log --follow orchestrator/api.go</code> = single entry — the
+slim <code>CreateDebate</code>/<code>GetStatistics</code> API is the
+first and only version. Tree-wide <code>grep</code> of
+<code>dependencies/</code> for
+<code>KnowledgeRepository</code>/<code>GetRecommendations</code>/<code>ConvertAPIRequest</code>/<code>GetDebateStatus</code>/<code>DefaultMinConsensus</code>/<code>MaxAgentsPerDebate</code>/<code>EnableAgentDiversity</code>
+found ZERO surviving copies in any <code>digital.vasic.*</code> package
+or HelixSpecifier/HelixMemory. The richer
+learning/knowledge/recommendations tier was a pre-reconstruction
+artifact that no longer exists anywhere — not relocated. <strong>Part 1
+(mechanical import swap):</strong>
+<code>digital.vasic.llmprovider</code>‘s <code>LLMProvider</code>
+interface now uses its own in-module
+<code>digital.vasic.llmprovider/pkg/models</code>; swapped
+<code>digital.vasic.models</code> →
+<code>digital.vasic.llmprovider/pkg/models</code> in 3 files
+(<code>provider_bridge.go</code> production + <code>mock_test.go</code>
++ <code>provider_bridge_leak_test.go</code> unit tests). <strong>Part 2
+(slim-API rewrite, deleted-tier path per operator):</strong> rewrote
+<code>internal/services/debate_integration/integration_test.go</code> +
+<code>tests/integration/debate_full_flow_test.go</code> down to the slim
+<code>CreateDebate</code>/<code>GetStatistics</code>/<code>ConductDebate</code>/<code>CancelSession</code>/<code>Bank()</code>
+surface — also fixed <code>provider_bridge_test.go</code>
+(<code>NewProviderInvoker</code> now takes
+<code>(registry, name)</code>;
+<code>GetKnowledgeRepository</code>→<code>Bank()</code>) and
+<code>service_integration_test.go</code>
+(<code>DebateMetrics.TotalResponses</code>→<code>ProviderCalls</code>);
+converted all <code>RegisterProvider</code> scores from the old 0-10
+scale to the reconstructed <code>[0,1]</code> scale (orchestrator now
+rejects score&gt;1). Lost coverage documented honestly in the rewritten
+files’ header comments: request-conversion / knowledge-repository /
+recommendations / status-by-id assertions dropped (those API surfaces no
+longer exist). <strong>Bonus rename-drift fix:</strong>
+<code>helix_agent/go.mod</code>
+<code>replace digital.vasic.debate</code> still pointed at PascalCase
+<code>DebateOrchestrator</code> after a parallel CONST-052 rename to
+<code>debate_orchestrator</code> — corrected (required precondition for
+verification). Evidence:
+<code>go build ./internal/services/debate_integration/...</code> exit 0;
+<code>go test -count=1 ./internal/services/debate_integration/...</code>
+→
+<code>ok dev.helix.agent/internal/services/debate_integration 0.156s</code>
+(PASS); rewritten <code>TestDebateFullFlow_OrchestratorInit</code>
+verified PASS in an isolated standalone package (the
+<code>tests/integration</code> package itself cannot compile due to a
+SEPARATE pre-existing <code>helix_qa/pkg/autonomous</code> ↔︎
+VisionEngine <code>remote</code> API drift, entirely unrelated to
+HXA-002 — <code>helix_qa</code> committed code at <code>7fa674a</code>).
+The standalone verification caught and fixed one wrong assertion in the
+original test (<code>DefaultTimeout</code> is <code>30s</code>, not
+<code>5m</code>). gofmt clean on all 8 changed files. |<br />
+2026-05-20 | VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA 93c830a
+| Bug | Fixed (→ Fixed.md) | 340 | VisionEngine merge
+<code>70c9e0c</code> (4 remotes) + meta pointer-bump | Round-340
+§11.4.41 / CONST-061 merge-first. (See round-340 row above — duplicate
+header retained intentionally for migration-discipline alignment.)
 |</div>
-<p><em>Last regenerated: 2026-05-20 (round 340 — VEN-002 closure via
-CONST-061 merge-first). Earlier closures (P0-P5 phases) tracked via
-<code>docs/improvements/PROGRESS.md</code> +
+<p><em>Last regenerated: 2026-05-20 (round 342 — HXA-002 closure: debate
+API drift resolved, GENUINELY DELETED tier confirmed via git-log +
+tree-wide grep, tests rewritten to slim API). Earlier closures (P0-P5
+phases) tracked via <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>
 </html>
