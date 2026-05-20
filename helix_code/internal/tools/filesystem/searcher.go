@@ -8,9 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // FileSearcher provides methods for searching files
@@ -245,12 +248,32 @@ func (s *fileSearcher) SearchContent(ctx context.Context, opts ContentSearchOpti
 		}
 	}
 
-	var matches []ContentMatch
-	matchCount := 0
+	// P2-T05: parallelise the SearchContent grep hot path (R1 bottleneck B08).
+	//
+	// The old implementation walked the tree and read+scanned every candidate
+	// file inline on the single walk goroutine. This split the work into two
+	// phases:
+	//
+	//  1. Enumerate — filepath.WalkDir (P2-T01, cheap fs.DirEntry) collects the
+	//     candidate file paths, applying the directory/hidden/size/include-
+	//     exclude filters. Walk stays single-threaded but does only I/O-light
+	//     directory traversal.
+	//  2. Scan — a bounded errgroup worker pool (limit = runtime.NumCPU())
+	//     reads + scans the candidate files concurrently; each worker writes
+	//     its result into its own pre-allocated slot, so there is no shared-
+	//     slice mutation and the pool is -race clean.
+	//
+	// Results are then flattened and sorted (by path, then line number) so the
+	// output is byte-identical run-to-run regardless of goroutine scheduling —
+	// the no-regression contract. MaxMatches is applied AFTER the sort, so the
+	// truncated result set is deterministic too (the serial path truncated in
+	// walk order; the parallel path truncates in sorted order — both honour the
+	// "first N matches" cap, the parallel one just makes "first" well-defined).
 
-	// Walk directory tree.
+	// Phase 1: enumerate candidate paths.
 	// P2-T01: filepath.WalkDir — lazy fs.DirEntry; d.Info() resolved only on
 	// the file branch that needs size.
+	var candidates []string
 	err = filepath.WalkDir(rootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
@@ -289,28 +312,85 @@ func (s *fileSearcher) SearchContent(ctx context.Context, opts ContentSearchOpti
 			return nil
 		}
 
-		// Search file content
-		fileMatches, err := s.searchFileContent(path, opts, re)
-		if err != nil {
-			// Skip files we can't read
-			return nil
-		}
-
-		matches = append(matches, fileMatches...)
-		matchCount += len(fileMatches)
-
-		if opts.MaxMatches > 0 && matchCount >= opts.MaxMatches {
-			return filepath.SkipAll
-		}
-
+		candidates = append(candidates, path)
 		return nil
 	})
 
-	if err != nil && err != filepath.SkipAll {
+	if err != nil {
 		return nil, fmt.Errorf("failed to search content: %w", err)
 	}
 
+	if len(candidates) == 0 {
+		return nil, nil
+	}
+
+	// Phase 2: scan candidate files through a bounded worker pool. Each worker
+	// writes into its own slot of perFile, so no synchronisation is needed for
+	// the result collection itself.
+	perFile := make([][]ContentMatch, len(candidates))
+	g, gctx := errgroup.WithContext(ctx)
+
+	limit := runtime.NumCPU()
+	if limit < 1 {
+		limit = 1
+	}
+	if limit > len(candidates) {
+		limit = len(candidates)
+	}
+	g.SetLimit(limit)
+
+	for i, path := range candidates {
+		i, path := i, path
+		g.Go(func() error {
+			// Honour cancellation between dispatched units of work.
+			select {
+			case <-gctx.Done():
+				return gctx.Err()
+			default:
+			}
+
+			fileMatches, scanErr := s.searchFileContent(path, opts, re)
+			if scanErr != nil {
+				// Skip files we can't read — same semantics as the serial path.
+				return nil
+			}
+			perFile[i] = fileMatches
+			return nil
+		})
+	}
+
+	if waitErr := g.Wait(); waitErr != nil {
+		return nil, fmt.Errorf("failed to search content: %w", waitErr)
+	}
+
+	// Phase 3: flatten + deterministically order the result set.
+	var matches []ContentMatch
+	for _, fm := range perFile {
+		matches = append(matches, fm...)
+	}
+	sortContentMatches(matches)
+
+	// Apply MaxMatches cap after the sort so the truncated set is deterministic.
+	if opts.MaxMatches > 0 && len(matches) > opts.MaxMatches {
+		matches = matches[:opts.MaxMatches]
+	}
+
 	return matches, nil
+}
+
+// sortContentMatches orders content matches deterministically by path, then by
+// line number, then by column. This makes SearchContent output byte-identical
+// run-to-run regardless of the worker-pool goroutine scheduling (P2-T05).
+func sortContentMatches(matches []ContentMatch) {
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].Path != matches[j].Path {
+			return matches[i].Path < matches[j].Path
+		}
+		if matches[i].LineNumber != matches[j].LineNumber {
+			return matches[i].LineNumber < matches[j].LineNumber
+		}
+		return matches[i].ColumnNumber < matches[j].ColumnNumber
+	})
 }
 
 // Glob performs glob pattern matching
