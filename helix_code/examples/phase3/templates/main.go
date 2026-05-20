@@ -3,13 +3,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/template"
 )
 
 func main() {
-	fmt.Println("=== Template Library Example ===")
+	ctx := context.Background()
+	fmt.Println(i18n.Tr(ctx, "examples_templates_header", nil))
 
 	mgr := template.NewManager()
 	mgr.RegisterBuiltinTemplates()

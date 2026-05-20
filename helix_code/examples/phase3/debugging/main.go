@@ -3,16 +3,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/memory"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/template"
 )
 
 func main() {
-	fmt.Println("=== Debugging Workflow ===")
+	ctx := context.Background()
+	fmt.Println(i18n.Tr(ctx, "examples_debugging_header", nil))
 
 	sessionMgr := session.NewManager()
 	memoryMgr := memory.NewManager()

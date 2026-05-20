@@ -4,10 +4,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/memory"
 	"dev.helix.code/internal/persistence"
 	"dev.helix.code/internal/session"
@@ -15,7 +17,8 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Feature Development Workflow ===")
+	ctx := context.Background()
+	fmt.Println(i18n.Tr(ctx, "examples_feature_dev_header", nil))
 
 	// Initialize
 	sessionMgr := session.NewManager()
@@ -34,7 +37,7 @@ func main() {
 	templateMgr.RegisterBuiltinTemplates()
 
 	// Phase 1: Planning
-	fmt.Println("📋 Phase 1: Planning")
+	fmt.Println(i18n.Tr(ctx, "examples_feature_dev_phase_planning", nil))
 	planningSession, err := sessionMgr.Create(
 		"api-server",
 		"plan-user-auth",
@@ -69,7 +72,7 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 
 	// Phase 2: Implementation
-	fmt.Println("🔨 Phase 2: Implementation")
+	fmt.Println(i18n.Tr(ctx, "examples_feature_dev_phase_implementation", nil))
 	buildSession, err := sessionMgr.Create(
 		"api-server",
 		"implement-user-auth",
@@ -118,7 +121,7 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 
 	// Phase 3: Testing
-	fmt.Println("🧪 Phase 3: Testing")
+	fmt.Println(i18n.Tr(ctx, "examples_feature_dev_phase_testing", nil))
 	testSession, err := sessionMgr.Create(
 		"api-server",
 		"test-user-auth",
@@ -165,7 +168,7 @@ func main() {
 	store.Save()
 
 	// Show summary
-	fmt.Println("=== Feature Development Summary ===")
+	fmt.Println(i18n.Tr(ctx, "examples_feature_dev_summary_header", nil))
 	stats := sessionMgr.GetStatistics()
 	fmt.Printf("Total sessions: %d\n", stats.Total)
 	fmt.Printf("Completed sessions: %d\n", stats.ByStatus[session.StatusCompleted])

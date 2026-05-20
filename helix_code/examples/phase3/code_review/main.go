@@ -4,16 +4,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/memory"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/template"
 )
 
 func main() {
-	fmt.Println("=== Code Review Workflow ===")
+	ctx := context.Background()
+	fmt.Println(i18n.Tr(ctx, "examples_code_review_header", nil))
 
 	// Initialize managers
 	sessionMgr := session.NewManager()
@@ -118,7 +121,7 @@ func main() {
 	sessionMgr.Complete(sess.ID)
 
 	// Show summary
-	fmt.Println("=== Review Summary ===")
+	fmt.Println(i18n.Tr(ctx, "examples_code_review_summary_header", nil))
 	fmt.Printf("Session: %s\n", sess.Name)
 	fmt.Printf("Duration: %v\n", sess.EndedAt.Sub(sess.StartedAt))
 	if issues, ok := sess.GetMetadata("issues_found"); ok {
@@ -130,7 +133,7 @@ func main() {
 	fmt.Printf("Messages in review: %d\n", len(conv.GetMessages()))
 
 	// Export review for documentation
-	fmt.Println("\nExporting review conversation...")
+	fmt.Println("\n" + i18n.Tr(ctx, "examples_code_review_exporting", nil))
 	snapshot, _ := memoryMgr.Export(conv.ID)
 	fmt.Printf("Exported conversation with %d messages\n", len(snapshot.Conversation.GetMessages()))
 }

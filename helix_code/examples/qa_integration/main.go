@@ -4,29 +4,32 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/server"
 )
 
 func main() {
+	ctx := context.Background()
 	baseURL := os.Getenv("HELIXCODE_URL")
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
 	}
 	token := os.Getenv("HELIXCODE_TOKEN")
 	if token == "" {
-		log.Fatal("HELIXCODE_TOKEN environment variable is required")
+		log.Fatal(i18n.Tr(ctx, "examples_qa_integration_token_required", nil))
 	}
 
 	client := server.NewClient(baseURL)
 	client.SetAuthToken(token)
 
 	// 1. Start a QA session
-	fmt.Println("Starting QA session...")
+	fmt.Println(i18n.Tr(ctx, "examples_qa_integration_starting_session", nil))
 	req := server.StartSessionRequest{
 		Platforms:        []string{"web"},
 		Banks:            []string{"./banks/api", "./banks/web"},
@@ -42,7 +45,7 @@ func main() {
 	fmt.Printf("Session started: %s (status: %s)\n", session.ID, session.Status)
 
 	// 2. Poll for completion
-	fmt.Println("Waiting for session to complete...")
+	fmt.Println(i18n.Tr(ctx, "examples_qa_integration_waiting", nil))
 	for {
 		s, err := client.GetQASession(session.ID)
 		if err != nil {
@@ -58,7 +61,7 @@ func main() {
 	}
 
 	// 3. Retrieve report
-	fmt.Println("Fetching report...")
+	fmt.Println(i18n.Tr(ctx, "examples_qa_integration_fetching_report", nil))
 	report, err := client.GetReport(session.ID, "markdown")
 	if err != nil {
 		log.Printf("Report not available: %v", err)
@@ -67,7 +70,7 @@ func main() {
 	}
 
 	// 4. List all sessions
-	fmt.Println("Listing all sessions...")
+	fmt.Println(i18n.Tr(ctx, "examples_qa_integration_listing_sessions", nil))
 	sessions, err := client.ListQASessions()
 	if err != nil {
 		log.Fatalf("Failed to list sessions: %v", err)

@@ -4,9 +4,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"dev.helix.code/examples/i18n"
 	"dev.helix.code/internal/memory"
 	"dev.helix.code/internal/persistence"
 	"dev.helix.code/internal/session"
@@ -14,7 +16,8 @@ import (
 )
 
 func main() {
-	fmt.Println("=== HelixCode Phase 3 Basic Example ===")
+	ctx := context.Background()
+	fmt.Println(i18n.Tr(ctx, "examples_basic_header", nil))
 
 	// Initialize all managers
 	sessionMgr := session.NewManager()
@@ -40,9 +43,9 @@ func main() {
 
 	// Try to restore previous state
 	if err := store.Load(); err != nil {
-		fmt.Println("No previous state found, starting fresh")
+		fmt.Println(i18n.Tr(ctx, "examples_basic_no_previous_state", nil))
 	} else {
-		fmt.Println("Restored previous state successfully")
+		fmt.Println(i18n.Tr(ctx, "examples_basic_state_restored", nil))
 	}
 
 	// Create a development session
@@ -113,7 +116,7 @@ func main() {
 	))
 
 	// Show statistics
-	fmt.Println("=== Statistics ===")
+	fmt.Println(i18n.Tr(ctx, "examples_basic_statistics_header", nil))
 	fmt.Printf("Sessions: %d\n", sessionMgr.Count())
 	fmt.Printf("Conversations: %d\n", len(memoryMgr.GetAll()))
 	fmt.Printf("Templates: %d\n", templateMgr.Count())
@@ -125,7 +128,7 @@ func main() {
 		log.Fatalf("Failed to save state: %v", err)
 	}
 
-	fmt.Println("State saved successfully")
+	fmt.Println(i18n.Tr(ctx, "examples_basic_state_saved", nil))
 
 	// Complete the session
 	if err := sessionMgr.Complete(sess.ID); err != nil {

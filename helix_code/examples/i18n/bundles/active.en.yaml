@@ -1,0 +1,61 @@
+# examples/ i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/examples/ to a message ID resolved at runtime via
+# Translator.T. A consuming binary wires a real *i18nadapter.Translator;
+# the in-package NoopTranslator echoes the message ID verbatim — which
+# is the honest default for a developer running `go run main.go`.
+#
+# Naming convention: examples_<demo>_<short_description>. All IDs
+# prefixed with examples_ to avoid namespace collision with other
+# packages' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-347 §11.4 anti-bluff sweep (2026-05-20): migrated the
+# developer-facing console-narration literals across the genuine
+# (non-mock) example programs — phase3/basic, phase3/feature_dev,
+# phase3/code_review, phase3/debugging, phase3/templates,
+# phase3/multi_session, and qa_integration. The mock-LLM fixture
+# payloads inside phase3/multi_agent_system/main.go are deliberately
+# NOT migrated: they are test fixtures inside a demo that simulates
+# LLM work via a MockLLMProvider — localizing simulated-work fixtures
+# would itself be a §11.4 / CONST-035 violation. See round-347 report.
+
+# ── phase3/basic ────────────────────────────────────────────────
+examples_basic_header: "=== HelixCode Phase 3 Basic Example ==="
+examples_basic_no_previous_state: "No previous state found, starting fresh"
+examples_basic_state_restored: "Restored previous state successfully"
+examples_basic_state_saved: "State saved successfully"
+examples_basic_statistics_header: "=== Statistics ==="
+
+# ── phase3/feature_dev ──────────────────────────────────────────
+examples_feature_dev_header: "=== Feature Development Workflow ==="
+examples_feature_dev_phase_planning: "📋 Phase 1: Planning"
+examples_feature_dev_phase_implementation: "🔨 Phase 2: Implementation"
+examples_feature_dev_phase_testing: "🧪 Phase 3: Testing"
+examples_feature_dev_summary_header: "=== Feature Development Summary ==="
+
+# ── phase3/code_review ──────────────────────────────────────────
+examples_code_review_header: "=== Code Review Workflow ==="
+examples_code_review_summary_header: "=== Review Summary ==="
+examples_code_review_exporting: "Exporting review conversation..."
+
+# ── phase3/debugging ────────────────────────────────────────────
+examples_debugging_header: "=== Debugging Workflow ==="
+
+# ── phase3/templates ────────────────────────────────────────────
+examples_templates_header: "=== Template Library Example ==="
+
+# ── phase3/multi_session ────────────────────────────────────────
+examples_multi_session_header: "=== Multi-Session Workflow ==="
+examples_multi_session_starting_auth: "Starting auth work..."
+examples_multi_session_switch_payments: "Pausing auth, switching to payments..."
+examples_multi_session_payments_done: "Completed payments work"
+examples_multi_session_resuming_auth: "Resuming auth work..."
+examples_multi_session_summary_header: "=== Sessions Summary ==="
+
+# ── qa_integration ──────────────────────────────────────────────
+examples_qa_integration_token_required: "HELIXCODE_TOKEN environment variable is required"
+examples_qa_integration_starting_session: "Starting QA session..."
+examples_qa_integration_waiting: "Waiting for session to complete..."
+examples_qa_integration_fetching_report: "Fetching report..."
+examples_qa_integration_listing_sessions: "Listing all sessions..."
