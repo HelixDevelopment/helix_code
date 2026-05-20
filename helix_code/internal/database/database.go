@@ -19,7 +19,47 @@ type Database struct {
 	Pool *pgxpool.Pool
 }
 
-// Config holds database configuration
+// PoolProfile selects a sensible default connection-pool size band when
+// the explicit pool-sizing fields on Config are left unset. A CLI process
+// rarely needs a large pool — keeping its idle-connection count small
+// shortens startup and frees server-side connection slots; a long-lived
+// server benefits from a larger pool to absorb concurrent request load.
+type PoolProfile string
+
+const (
+	// PoolProfileServer is the default profile — a larger pool sized for a
+	// long-lived multi-request server process.
+	PoolProfileServer PoolProfile = "server"
+	// PoolProfileCLI is a smaller pool sized for a short-lived CLI process
+	// that issues comparatively few, mostly-sequential queries.
+	PoolProfileCLI PoolProfile = "cli"
+)
+
+// Pool-sizing defaults per profile. These reproduce (server) or shrink (CLI)
+// the values that were previously hardcoded in New(), so server behaviour
+// with an unset config is byte-for-byte equivalent to the pre-P4-T03 code.
+const (
+	// Server profile — preserves the historical hardcoded values exactly.
+	defaultServerMaxConns        = 20
+	defaultServerMinConns        = 5
+	defaultServerMaxConnLifetime = time.Hour
+	defaultServerMaxConnIdleTime = 30 * time.Minute
+
+	// CLI profile — smaller pool: fewer idle connections held open by a
+	// short-lived process. MinConns of 0 means no connections are eagerly
+	// opened at startup; they are created lazily on first query.
+	defaultCLIMaxConns        = 4
+	defaultCLIMinConns        = 0
+	defaultCLIMaxConnLifetime = 30 * time.Minute
+	defaultCLIMaxConnIdleTime = 5 * time.Minute
+)
+
+// Config holds database configuration. The pool-sizing fields
+// (MaxConns/MinConns/MaxConnLifetime/MaxConnIdleTime) are optional — when a
+// field is left at its zero value New() substitutes the profile default
+// selected by Profile (defaulting to the server profile). This keeps the
+// config file / env / flag precedence intact: an explicitly configured
+// value always wins over the profile default.
 type Config struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -27,6 +67,102 @@ type Config struct {
 	Password string `mapstructure:"password"`
 	DBName   string `mapstructure:"dbname"`
 	SSLMode  string `mapstructure:"sslmode"`
+
+	// Profile selects the default pool-size band when the explicit pool
+	// fields below are unset. Empty string is treated as PoolProfileServer
+	// so existing callers (server, desktop, mobile) keep today's pool.
+	Profile PoolProfile `mapstructure:"profile"`
+
+	// MaxConns is the maximum number of connections the pool will hold.
+	// Zero (unset) → the Profile default.
+	MaxConns int `mapstructure:"max_conns"`
+	// MinConns is the minimum number of idle connections the pool keeps
+	// warm. Zero is a valid explicit value AND the unset value — when the
+	// whole pool block is unset the Profile default applies; see
+	// resolvePoolConfig for how an explicit 0 is distinguished.
+	MinConns int `mapstructure:"min_conns"`
+	// MaxConnLifetime caps how long a single connection may live before it
+	// is retired. Zero (unset) → the Profile default.
+	MaxConnLifetime time.Duration `mapstructure:"max_conn_lifetime"`
+	// MaxConnIdleTime caps how long an idle connection is kept before it is
+	// closed. Zero (unset) → the Profile default.
+	MaxConnIdleTime time.Duration `mapstructure:"max_conn_idle_time"`
+}
+
+// resolvedPool is the concrete set of pool-sizing values applied to a
+// pgxpool after profile defaults have filled in any unset Config fields.
+type resolvedPool struct {
+	MaxConns        int32
+	MinConns        int32
+	MaxConnLifetime time.Duration
+	MaxConnIdleTime time.Duration
+}
+
+// poolDefaults returns the default pool sizing for a profile. An unknown or
+// empty profile resolves to the server profile so misconfiguration never
+// silently shrinks a server pool.
+func poolDefaults(profile PoolProfile) resolvedPool {
+	if profile == PoolProfileCLI {
+		return resolvedPool{
+			MaxConns:        defaultCLIMaxConns,
+			MinConns:        defaultCLIMinConns,
+			MaxConnLifetime: defaultCLIMaxConnLifetime,
+			MaxConnIdleTime: defaultCLIMaxConnIdleTime,
+		}
+	}
+	return resolvedPool{
+		MaxConns:        defaultServerMaxConns,
+		MinConns:        defaultServerMinConns,
+		MaxConnLifetime: defaultServerMaxConnLifetime,
+		MaxConnIdleTime: defaultServerMaxConnIdleTime,
+	}
+}
+
+// resolvePoolConfig merges an (optionally partially-filled) Config with its
+// profile defaults and returns the effective pool sizing. Precedence:
+// explicit Config field (non-zero) wins over the profile default. This is
+// the in-process tail of the defaults < file < env < flags chain — by the
+// time a Config reaches here the file/env/flag layers have already been
+// applied by internal/config, so any non-zero field here is operator intent.
+func resolvePoolConfig(c Config) resolvedPool {
+	rp := poolDefaults(c.Profile)
+	if c.MaxConns > 0 {
+		rp.MaxConns = int32(c.MaxConns)
+	}
+	// MinConns: an explicit positive value overrides; an explicit 0 is
+	// indistinguishable from unset, so for 0 the profile default stands.
+	// The CLI profile default is itself 0, so a CLI Config with MinConns
+	// unset still yields 0 — the desired "no eager connections" behaviour.
+	if c.MinConns > 0 {
+		rp.MinConns = int32(c.MinConns)
+	}
+	if c.MaxConnLifetime > 0 {
+		rp.MaxConnLifetime = c.MaxConnLifetime
+	}
+	if c.MaxConnIdleTime > 0 {
+		rp.MaxConnIdleTime = c.MaxConnIdleTime
+	}
+	// MinConns must never exceed MaxConns — clamp defensively so a
+	// misconfigured pair cannot wedge pgxpool at construction time.
+	if rp.MinConns > rp.MaxConns {
+		rp.MinConns = rp.MaxConns
+	}
+	return rp
+}
+
+// NewCLI creates a database connection pool sized for a short-lived CLI
+// process. It is identical to New except that, when the supplied Config
+// leaves Profile unset, it applies the CLI profile (a smaller pool with no
+// eagerly-opened idle connections) instead of the server default. An
+// explicitly configured Profile or explicit pool-sizing field still wins,
+// preserving the defaults < file < env < flags precedence — a CLI user who
+// sets database.profile=server or database.max_conns=N in their config or
+// env gets exactly that.
+func NewCLI(config Config) (*Database, error) {
+	if config.Profile == "" {
+		config.Profile = PoolProfileCLI
+	}
+	return New(config)
 }
 
 // New creates a new database connection pool
@@ -41,11 +177,14 @@ func New(config Config) (*Database, error) {
 		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_database_config_parse_failed", map[string]any{"Err": err.Error()}))
 	}
 
-	// Configure connection pool
-	poolConfig.MaxConns = 20
-	poolConfig.MinConns = 5
-	poolConfig.MaxConnLifetime = time.Hour
-	poolConfig.MaxConnIdleTime = 30 * time.Minute
+	// Configure connection pool. Sizing is config-driven (P4-T03): explicit
+	// Config fields win, otherwise the profile default applies (server
+	// profile by default — equivalent to the historical hardcoded values).
+	rp := resolvePoolConfig(config)
+	poolConfig.MaxConns = rp.MaxConns
+	poolConfig.MinConns = rp.MinConns
+	poolConfig.MaxConnLifetime = rp.MaxConnLifetime
+	poolConfig.MaxConnIdleTime = rp.MaxConnIdleTime
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {

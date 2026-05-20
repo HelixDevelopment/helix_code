@@ -315,6 +315,11 @@ func Load() (*Config, error) {
 	v.BindEnv("database.port", "HELIX_DATABASE_PORT")
 	v.BindEnv("database.user", "HELIX_DATABASE_USER")
 	v.BindEnv("database.dbname", "HELIX_DATABASE_NAME")
+	v.BindEnv("database.profile", "HELIX_DATABASE_POOL_PROFILE")
+	v.BindEnv("database.max_conns", "HELIX_DATABASE_POOL_MAX_CONNS")
+	v.BindEnv("database.min_conns", "HELIX_DATABASE_POOL_MIN_CONNS")
+	v.BindEnv("database.max_conn_lifetime", "HELIX_DATABASE_POOL_MAX_CONN_LIFETIME")
+	v.BindEnv("database.max_conn_idle_time", "HELIX_DATABASE_POOL_MAX_CONN_IDLE_TIME")
 	v.BindEnv("redis.password", "HELIX_REDIS_PASSWORD")
 	v.BindEnv("redis.host", "HELIX_REDIS_HOST")
 	v.BindEnv("redis.port", "HELIX_REDIS_PORT")
@@ -397,6 +402,14 @@ func setDefaultsOn(v *viper.Viper) {
 	v.SetDefault("database.user", "helixcode")
 	v.SetDefault("database.dbname", "helixcode")
 	v.SetDefault("database.sslmode", "disable")
+	// Connection-pool profile (P4-T03). "server" (the default) yields a
+	// larger pool sized for a long-lived multi-request process; "cli"
+	// yields a smaller pool with fewer idle connections at startup. The
+	// individual pool-sizing keys (database.max_conns, database.min_conns,
+	// database.max_conn_lifetime, database.max_conn_idle_time) are left
+	// unset by default so the profile default applies — an explicitly set
+	// key always overrides the profile per defaults < file < env < flags.
+	v.SetDefault("database.profile", "server")
 
 	// Redis defaults
 	v.SetDefault("redis.enabled", false)
