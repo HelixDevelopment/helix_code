@@ -32,11 +32,23 @@ func NewPermissionsCommand() *PermissionsCommand {
 	return &PermissionsCommand{}
 }
 
-func (c *PermissionsCommand) Name() string        { return "permissions" }
-func (c *PermissionsCommand) Aliases() []string   { return []string{"perms"} }
-func (c *PermissionsCommand) Description() string { return "manage permission rules" }
+func (c *PermissionsCommand) Name() string      { return "permissions" }
+func (c *PermissionsCommand) Aliases() []string { return []string{"perms"} }
+
+// Description returns the /permissions slash-command help text.
+//
+// CONST-046 (round-432): genuine user-facing CLI help text resolved
+// through the package-level translator.
+func (c *PermissionsCommand) Description() string {
+	return tr(context.Background(), "internal_commands_permissions_description", nil)
+}
+
+// Usage returns the /permissions slash-command usage line.
+//
+// CONST-046 (round-432): genuine user-facing CLI usage text resolved
+// through the package-level translator.
 func (c *PermissionsCommand) Usage() string {
-	return "/permissions [mode <preset> | add <pattern> <action> [priority] | remove <pattern>]"
+	return tr(context.Background(), "internal_commands_permissions_usage", nil)
 }
 
 func (c *PermissionsCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
@@ -70,7 +82,10 @@ func (c *PermissionsCommand) Execute(ctx context.Context, cmdCtx *CommandContext
 		}
 		return c.removeSession(cmdCtx.Args[1])
 	default:
-		return nil, fmt.Errorf("unknown subcommand %q (valid: mode, add, remove)", cmdCtx.Args[0])
+		// CONST-046 (round-432): operator error message resolved
+		// through the package-level translator.
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_permissions_unknown_subcommand",
+			map[string]any{"Sub": cmdCtx.Args[0]}))
 	}
 }
 
@@ -85,22 +100,36 @@ func (c *PermissionsCommand) list(ctx context.Context) (*CommandResult, error) {
 	}
 	var buf bytes.Buffer
 	tw := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "PATTERN\tACTION\tPRIORITY\tSOURCE\tDESCRIPTION\n")
+	// CONST-046 (round-432): table header + footer resolved through
+	// the package-level translator.
+	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n",
+		tr(ctx, "internal_commands_permissions_col_pattern", nil),
+		tr(ctx, "internal_commands_permissions_col_action", nil),
+		tr(ctx, "internal_commands_permissions_col_priority", nil),
+		tr(ctx, "internal_commands_permissions_col_source", nil),
+		tr(ctx, "internal_commands_permissions_col_description", nil))
 	for _, r := range rs.Rules {
 		fmt.Fprintf(tw, "%s\t%s\t%d\t%s\t%s\n",
 			r.Pattern, actionToName(r.Action), r.Priority, r.Source, r.Description)
 	}
-	fmt.Fprintf(tw, "\nMode: %s\nSources: %s\n", rs.Mode, strings.Join(rs.Sources, ", "))
+	fmt.Fprintf(tw, "\n%s\n", tr(ctx, "internal_commands_permissions_list_footer",
+		map[string]any{"Mode": rs.Mode, "Sources": strings.Join(rs.Sources, ", ")}))
 	tw.Flush()
 	return &CommandResult{Output: buf.String()}, nil
 }
 
 func (c *PermissionsCommand) setMode(mode string) (*CommandResult, error) {
 	if !permissions.IsValidMode(mode) {
-		return nil, fmt.Errorf("unknown mode %q (valid: %v)", mode, permissions.ValidModes)
+		// CONST-046 (round-432): operator error message resolved
+		// through the context-free package translator.
+		return nil, fmt.Errorf("%s", trc("internal_commands_permissions_unknown_mode",
+			map[string]any{"Mode": mode, "Valid": fmt.Sprintf("%v", permissions.ValidModes)}))
 	}
 	c.mode = mode
-	return &CommandResult{Output: fmt.Sprintf("session permission mode set to %s\n", mode)}, nil
+	// CONST-046 (round-432): confirmation message resolved through
+	// the context-free package translator.
+	return &CommandResult{Output: trc("internal_commands_permissions_mode_set",
+		map[string]any{"Mode": mode})}, nil
 }
 
 func (c *PermissionsCommand) addSession(pattern, action string, priority int) (*CommandResult, error) {
@@ -113,15 +142,20 @@ func (c *PermissionsCommand) addSession(pattern, action string, priority int) (*
 	}
 	_ = a
 	_ = priority
+	// CONST-046 (round-432): confirmation message resolved through
+	// the context-free package translator.
 	return &CommandResult{
-		Output: fmt.Sprintf("session-only %s rule added: %s\n(use `helixcode permissions add` to persist)\n",
-			action, pattern),
+		Output: trc("internal_commands_permissions_rule_added",
+			map[string]any{"Action": action, "Pattern": pattern}),
 	}, nil
 }
 
 func (c *PermissionsCommand) removeSession(pattern string) (*CommandResult, error) {
+	// CONST-046 (round-432): confirmation message resolved through
+	// the context-free package translator.
 	return &CommandResult{
-		Output: fmt.Sprintf("session-only rule removed: %s\n(use `helixcode permissions remove` to persist)\n", pattern),
+		Output: trc("internal_commands_permissions_rule_removed",
+			map[string]any{"Pattern": pattern}),
 	}, nil
 }
 
@@ -162,5 +196,8 @@ func actionFromName(s string) (confirmation.Action, error) {
 	case "deny":
 		return confirmation.ActionDeny, nil
 	}
-	return 0, fmt.Errorf("invalid action %q (allow|ask|deny)", s)
+	// CONST-046 (round-432): operator error message resolved through
+	// the context-free package translator.
+	return 0, fmt.Errorf("%s", trc("internal_commands_permissions_invalid_action",
+		map[string]any{"Action": s}))
 }

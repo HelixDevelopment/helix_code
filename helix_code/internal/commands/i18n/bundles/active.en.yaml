@@ -963,3 +963,83 @@ internal_commands_hooks_test_result:
 
 internal_commands_hooks_none_for_event:
   other: "(no hooks registered for event {{.Event}})"
+
+# --- permissions_command.go (round-432) ---
+internal_commands_permissions_description:
+  other: "manage permission rules"
+
+internal_commands_permissions_usage:
+  other: "/permissions [mode <preset> | add <pattern> <action> [priority] | remove <pattern>]"
+
+internal_commands_permissions_unknown_subcommand:
+  other: "unknown subcommand {{.Sub}} (valid: mode, add, remove)"
+
+internal_commands_permissions_col_pattern:
+  other: "PATTERN"
+
+internal_commands_permissions_col_action:
+  other: "ACTION"
+
+internal_commands_permissions_col_priority:
+  other: "PRIORITY"
+
+internal_commands_permissions_col_source:
+  other: "SOURCE"
+
+internal_commands_permissions_col_description:
+  other: "DESCRIPTION"
+
+internal_commands_permissions_list_footer:
+  other: "Mode: {{.Mode}}\nSources: {{.Sources}}"
+
+internal_commands_permissions_unknown_mode:
+  other: "unknown mode {{.Mode}} (valid: {{.Valid}})"
+
+internal_commands_permissions_mode_set:
+  other: "session permission mode set to {{.Mode}}\n"
+
+internal_commands_permissions_rule_added:
+  other: "session-only {{.Action}} rule added: {{.Pattern}}\n(use `helixcode permissions add` to persist)\n"
+
+internal_commands_permissions_rule_removed:
+  other: "session-only rule removed: {{.Pattern}}\n(use `helixcode permissions remove` to persist)\n"
+
+internal_commands_permissions_invalid_action:
+  other: "invalid action {{.Action}} (allow|ask|deny)"
+
+# --- sessions_command.go (round-432) ---
+internal_commands_sessions_col_id:
+  other: "ID"
+
+internal_commands_sessions_col_project:
+  other: "PROJECT"
+
+internal_commands_sessions_col_started:
+  other: "STARTED"
+
+internal_commands_sessions_col_last_activity:
+  other: "LAST-ACTIVITY"
+
+internal_commands_sessions_col_msg_count:
+  other: "MSG-COUNT"
+
+internal_commands_sessions_show_session:
+  other: "Session: {{.ID}}"
+
+internal_commands_sessions_show_project:
+  other: "Project: {{.Name}} ({{.Path}})"
+
+internal_commands_sessions_show_started:
+  other: "Started: {{.Started}}"
+
+internal_commands_sessions_show_last_activity:
+  other: "Last activity: {{.LastActivity}}"
+
+internal_commands_sessions_show_messages:
+  other: "Messages: {{.Count}}"
+
+internal_commands_sessions_show_transcript_header:
+  other: "--- Transcript (last 20) ---"
+
+internal_commands_sessions_deleted:
+  other: "deleted session {{.ID}}"

@@ -84,7 +84,14 @@ func (c *SessionsCommand) list(ctx context.Context, rest []string) (*CommandResu
 	}
 	var sb strings.Builder
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tPROJECT\tSTARTED\tLAST-ACTIVITY\tMSG-COUNT")
+	// CONST-046 (round-432): table header resolved through the
+	// package-level translator.
+	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n",
+		tr(ctx, "internal_commands_sessions_col_id", nil),
+		tr(ctx, "internal_commands_sessions_col_project", nil),
+		tr(ctx, "internal_commands_sessions_col_started", nil),
+		tr(ctx, "internal_commands_sessions_col_last_activity", nil),
+		tr(ctx, "internal_commands_sessions_col_msg_count", nil))
 	for _, m := range metas {
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%d\n",
 			m.SessionID, m.ProjectName,
@@ -104,12 +111,19 @@ func (c *SessionsCommand) show(ctx context.Context, id string) (*CommandResult, 
 	}
 	msgs, _ := c.store.ReadTranscript(ctx, id)
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Session: %s\n", meta.SessionID)
-	fmt.Fprintf(&sb, "Project: %s (%s)\n", meta.ProjectName, meta.ProjectPath)
-	fmt.Fprintf(&sb, "Started: %s\n", meta.StartedAt.Format("2006-01-02 15:04:05"))
-	fmt.Fprintf(&sb, "Last activity: %s\n", meta.LastActivity.Format("2006-01-02 15:04:05"))
-	fmt.Fprintf(&sb, "Messages: %d\n\n", meta.MessageCount)
-	fmt.Fprintln(&sb, "--- Transcript (last 20) ---")
+	// CONST-046 (round-432): session detail report labels resolved
+	// through the package-level translator.
+	fmt.Fprintln(&sb, tr(ctx, "internal_commands_sessions_show_session",
+		map[string]any{"ID": meta.SessionID}))
+	fmt.Fprintln(&sb, tr(ctx, "internal_commands_sessions_show_project",
+		map[string]any{"Name": meta.ProjectName, "Path": meta.ProjectPath}))
+	fmt.Fprintln(&sb, tr(ctx, "internal_commands_sessions_show_started",
+		map[string]any{"Started": meta.StartedAt.Format("2006-01-02 15:04:05")}))
+	fmt.Fprintln(&sb, tr(ctx, "internal_commands_sessions_show_last_activity",
+		map[string]any{"LastActivity": meta.LastActivity.Format("2006-01-02 15:04:05")}))
+	fmt.Fprintf(&sb, "%s\n\n", tr(ctx, "internal_commands_sessions_show_messages",
+		map[string]any{"Count": meta.MessageCount}))
+	fmt.Fprintln(&sb, tr(ctx, "internal_commands_sessions_show_transcript_header", nil))
 	start := 0
 	if len(msgs) > 20 {
 		start = len(msgs) - 20
@@ -141,5 +155,8 @@ func (c *SessionsCommand) delete(ctx context.Context, id string) (*CommandResult
 	if err := c.store.DeleteSession(ctx, id); err != nil {
 		return nil, fmt.Errorf("/sessions delete: %w", err)
 	}
-	return &CommandResult{Success: true, Output: fmt.Sprintf("deleted session %s", id)}, nil
+	// CONST-046 (round-432): confirmation message resolved through
+	// the package-level translator.
+	return &CommandResult{Success: true, Output: tr(ctx, "internal_commands_sessions_deleted",
+		map[string]any{"ID": id})}, nil
 }

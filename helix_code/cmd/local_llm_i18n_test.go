@@ -180,6 +180,81 @@ var round426ModelsMetadataIDs = []string{
 	"cmd_local_llm_flag_recommend_providers",
 }
 
+// round434ResidualRuntimeIDs is the closed set of message IDs introduced
+// by the round-434 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+// helix_code/cmd residual round-3 — 24 user-facing runtime strings from
+// the local-llm logs / watch / download / convert / models command
+// groups. All resolve at runtime via tr().
+var round434ResidualRuntimeIDs = []string{
+	"cmd_local_llm_log_directory",
+	"cmd_local_llm_log_showing",
+	"cmd_local_llm_log_file",
+	"cmd_local_llm_watch_start",
+	"cmd_local_llm_watch_paths",
+	"cmd_local_llm_watch_header",
+	"cmd_local_llm_watch_status_error",
+	"cmd_local_llm_flag_analytics_time_range",
+	"cmd_local_llm_flag_report_format",
+	"cmd_local_llm_flag_insights_type",
+	"cmd_local_llm_download_formats",
+	"cmd_local_llm_download_saved",
+	"cmd_local_llm_download_saved_provider",
+	"cmd_local_llm_convert_model",
+	"cmd_local_llm_convert_source_format",
+	"cmd_local_llm_convert_target_format",
+	"cmd_local_llm_convert_started",
+	"cmd_local_llm_convert_output_pending",
+	"cmd_local_llm_convert_logs",
+	"cmd_local_llm_convert_status_error",
+	"cmd_local_llm_convert_completed",
+	"cmd_local_llm_convert_output_saved",
+	"cmd_local_llm_convert_duration",
+	"cmd_local_llm_convert_failed",
+	"cmd_local_llm_convert_check_logs",
+	"cmd_local_llm_models_none_in_registry",
+	"cmd_local_llm_models_total",
+	"cmd_local_llm_models_hint_search",
+	"cmd_local_llm_models_hint_download",
+	"cmd_local_llm_models_none_for_query",
+}
+
+// TestLocalLLMI18n_Round434ResidualRuntimeRoutesThroughSeam is the
+// paired-mutation anti-bluff guard for the round-434 migration: it wires a
+// sentinel Translator and asserts every residual runtime message ID
+// resolves THROUGH it (sentinel present) — proving the logs/watch/
+// download/convert/models output strings are no longer frozen English
+// literals. Re-inlining any would drop the sentinel and FAIL this test.
+func TestLocalLLMI18n_Round434ResidualRuntimeRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	ctx := context.Background()
+	for _, id := range round434ResidualRuntimeIDs {
+		got := tr(ctx, id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-434 residual runtime ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-434 residual runtime ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
+}
+
+// TestLocalLLMI18n_Round434ResidualRuntimeNoopEcho proves the round-434
+// IDs degrade to a loud message-ID echo when no translator is wired —
+// never a silent empty string (which would be a §11.4 PASS-bluff at the
+// i18n layer).
+func TestLocalLLMI18n_Round434ResidualRuntimeNoopEcho(t *testing.T) {
+	SetTranslator(nil) // explicit NoopTranslator
+	ctx := context.Background()
+	for _, id := range round434ResidualRuntimeIDs {
+		got := tr(ctx, id, nil)
+		if got != id {
+			t.Errorf("round-434 residual runtime ID %q must echo verbatim under NoopTranslator: got %q", id, got)
+		}
+	}
+}
+
 // TestLocalLLMI18n_Round426ModelsMetadataRoutesThroughSeam is the
 // paired-mutation anti-bluff guard for the round-426 migration: it wires a
 // sentinel Translator and asserts every `models` command-group + flag-help

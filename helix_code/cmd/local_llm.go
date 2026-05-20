@@ -336,7 +336,7 @@ func runLogs(cmd *cobra.Command, args []string) error {
 		// Show logs for all providers
 		homeDir, _ := os.UserHomeDir()
 		logsDir := fmt.Sprintf("%s/.helixcode/local-llm/logs", homeDir)
-		fmt.Printf("📋 Log directory: %s\n", logsDir)
+		fmt.Println(tr(cmd.Context(), "cmd_local_llm_log_directory", map[string]any{"Dir": logsDir}))
 		return nil
 	}
 
@@ -344,8 +344,9 @@ func runLogs(cmd *cobra.Command, args []string) error {
 	homeDir, _ := os.UserHomeDir()
 	logFile := fmt.Sprintf("%s/.helixcode/local-llm/logs/%s.log", homeDir, providerName)
 
-	fmt.Printf("📋 Showing logs for %s:\n", providerName)
-	fmt.Printf("Log file: %s\n\n", logFile)
+	fmt.Println(tr(cmd.Context(), "cmd_local_llm_log_showing", map[string]any{"Provider": providerName}))
+	fmt.Println(tr(cmd.Context(), "cmd_local_llm_log_file", map[string]any{"File": logFile}))
+	fmt.Println()
 
 	// Show last 50 lines of log
 	tailCmd := exec.Command("tail", "-50", logFile)
@@ -471,16 +472,19 @@ func runWatch(cmd *cobra.Command, args []string) error {
 		filepath.Join(baseDir, "data"),
 	}
 
-	fmt.Println("👀 Starting local LLM provider watch (fsnotify, real filesystem events)…")
-	fmt.Printf("Watching %d paths under %s; events debounced %s. Press Ctrl+C to stop.\n",
-		len(watchPaths), baseDir, watchDebounceDefault)
+	fmt.Println(tr(ctx, "cmd_local_llm_watch_start", nil))
+	fmt.Println(tr(ctx, "cmd_local_llm_watch_paths", map[string]any{
+		"Count": len(watchPaths), "Dir": baseDir, "Debounce": watchDebounceDefault.String(),
+	}))
 
 	return runWatchLoop(ctx, watchPaths, watchDebounceDefault, os.Stdout, func() {
 		clearScreen()
-		fmt.Fprintf(os.Stdout, "🔍 Local LLM Provider Status (fs-event triggered) — %s\n\n",
-			time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Fprintln(os.Stdout, tr(ctx, "cmd_local_llm_watch_header", map[string]any{
+			"Time": time.Now().Format("2006-01-02 15:04:05"),
+		}))
+		fmt.Fprintln(os.Stdout)
 		if err := runStatus(cmd, args); err != nil {
-			fmt.Fprintf(os.Stdout, "❌ Error getting status: %v\n", err)
+			fmt.Fprintln(os.Stdout, tr(ctx, "cmd_local_llm_watch_status_error", map[string]any{"Error": err.Error()}))
 		}
 	})
 }
@@ -679,9 +683,9 @@ func init() {
 	recommendCmd.Flags().Float64Var(&recommendBudgetLimit, "budget", 0, trc("cmd_local_llm_flag_recommend_budget", nil))
 	recommendCmd.Flags().StringSliceVar(&recommendProviders, "providers", []string{}, trc("cmd_local_llm_flag_recommend_providers", nil))
 
-	analyticsCmd.Flags().StringVar(&analyticsTimeRange, "time-range", "7d", "Time range for analytics (1d, 7d, 30d, all)")
-	reportCmd.Flags().StringVar(&reportFormat, "format", "table", "Report format (table, json, csv)")
-	insightsCmd.Flags().StringVar(&insightsType, "type", "all", "Insights type (performance, usage, models, all)")
+	analyticsCmd.Flags().StringVar(&analyticsTimeRange, "time-range", "7d", trc("cmd_local_llm_flag_analytics_time_range", nil))
+	reportCmd.Flags().StringVar(&reportFormat, "format", "table", trc("cmd_local_llm_flag_report_format", nil))
+	insightsCmd.Flags().StringVar(&insightsType, "type", "all", trc("cmd_local_llm_flag_insights_type", nil))
 }
 
 // Command implementations for model management
@@ -720,7 +724,7 @@ func runDownloadModel(cmd *cobra.Command, args []string) error {
 		for format := range formats {
 			formatList = append(formatList, format)
 		}
-		fmt.Printf("Available formats: %s\n", strings.Join(formatList, ", "))
+		fmt.Println(tr(ctx, "cmd_local_llm_download_formats", map[string]any{"Formats": strings.Join(formatList, ", ")}))
 	}
 
 	// Validate format compatibility
@@ -782,9 +786,11 @@ func runDownloadModel(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("\n" + tr(ctx, "cmd_local_llm_download_complete", nil))
 	if downloadTargetPath != "" {
-		fmt.Printf("📁 Model saved to: %s\n", downloadTargetPath)
+		fmt.Println(tr(ctx, "cmd_local_llm_download_saved", map[string]any{"Path": downloadTargetPath}))
 	} else if downloadProvider != "" {
-		fmt.Printf("📁 Model saved to provider directory: %s\n", filepath.Join(getLocalLLMBaseDir(), downloadProvider, modelID))
+		fmt.Println(tr(ctx, "cmd_local_llm_download_saved_provider", map[string]any{
+			"Path": filepath.Join(getLocalLLMBaseDir(), downloadProvider, modelID),
+		}))
 	}
 
 	return nil
@@ -812,9 +818,9 @@ func runConvertModel(cmd *cobra.Command, args []string) error {
 
 	targetFormat := llm.ModelFormat(convertTargetFormat)
 
-	fmt.Printf("🔄 Converting model: %s\n", inputPath)
-	fmt.Printf("📝 Source format: %s\n", sourceFormat)
-	fmt.Printf("🎯 Target format: %s\n", targetFormat)
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_model", map[string]any{"Path": inputPath}))
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_source_format", map[string]any{"Format": string(sourceFormat)}))
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_target_format", map[string]any{"Format": string(targetFormat)}))
 
 	// Initialize converter
 	converter := llm.NewModelConverter(getLocalLLMBaseDir())
@@ -870,9 +876,9 @@ func runConvertModel(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to start conversion: %w", err)
 	}
 
-	fmt.Printf("🚀 Conversion started (Job ID: %s)\n", job.ID)
-	fmt.Printf("📁 Output will be saved to: %s\n", job.TargetPath)
-	fmt.Printf("📋 Logs available at: %s\n", job.LogPath)
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_started", map[string]any{"JobID": job.ID}))
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_output_pending", map[string]any{"Path": job.TargetPath}))
+	fmt.Println(tr(ctx, "cmd_local_llm_convert_logs", map[string]any{"Path": job.LogPath}))
 
 	// Monitor conversion progress
 	ticker := time.NewTicker(2 * time.Second)
@@ -883,7 +889,7 @@ func runConvertModel(cmd *cobra.Command, args []string) error {
 		case <-ticker.C:
 			status, err := converter.GetConversionStatus(job.ID)
 			if err != nil {
-				fmt.Printf("❌ Failed to get status: %v\n", err)
+				fmt.Println(tr(ctx, "cmd_local_llm_convert_status_error", map[string]any{"Error": err.Error()}))
 				break
 			}
 
@@ -892,16 +898,16 @@ func runConvertModel(cmd *cobra.Command, args []string) error {
 				fmt.Printf("\r⏳ Progress: %.1f%% | Step: %s",
 					status.Progress*100, status.CurrentStep)
 			case llm.StatusCompleted:
-				fmt.Printf("\n✅ Conversion completed successfully!\n")
-				fmt.Printf("📁 Output saved to: %s\n", status.TargetPath)
+				fmt.Println("\n" + tr(ctx, "cmd_local_llm_convert_completed", nil))
+				fmt.Println(tr(ctx, "cmd_local_llm_convert_output_saved", map[string]any{"Path": status.TargetPath}))
 				if status.EndTime != nil {
 					duration := status.EndTime.Sub(status.StartTime)
-					fmt.Printf("⏱️  Duration: %v\n", duration)
+					fmt.Println(tr(ctx, "cmd_local_llm_convert_duration", map[string]any{"Duration": duration.String()}))
 				}
 				return nil
 			case llm.StatusFailed:
-				fmt.Printf("\n❌ Conversion failed: %s\n", status.Error)
-				fmt.Printf("📋 Check logs for details: %s\n", status.LogPath)
+				fmt.Println("\n" + tr(ctx, "cmd_local_llm_convert_failed", map[string]any{"Error": status.Error}))
+				fmt.Println(tr(ctx, "cmd_local_llm_convert_check_logs", map[string]any{"Path": status.LogPath}))
 				return fmt.Errorf("conversion failed")
 			case llm.StatusCancelled:
 				fmt.Println("\n🚫 Conversion was cancelled")
@@ -918,7 +924,7 @@ func runListModels(cmd *cobra.Command, args []string) error {
 	models := manager.GetAvailableModels()
 
 	if len(models) == 0 {
-		fmt.Println("❌ No models available in registry")
+		fmt.Println(tr(cmd.Context(), "cmd_local_llm_models_none_in_registry", nil))
 		return nil
 	}
 
@@ -948,9 +954,9 @@ func runListModels(cmd *cobra.Command, args []string) error {
 
 	w.Flush()
 
-	fmt.Printf("\n📊 Total models: %d\n", len(models))
-	fmt.Println("💡 Use 'helix local-llm models search <query>' to find specific models")
-	fmt.Println("💡 Use 'helix local-llm models download <model-id>' to download a model")
+	fmt.Println("\n" + tr(cmd.Context(), "cmd_local_llm_models_total", map[string]any{"Count": len(models)}))
+	fmt.Println(tr(cmd.Context(), "cmd_local_llm_models_hint_search", nil))
+	fmt.Println(tr(cmd.Context(), "cmd_local_llm_models_hint_download", nil))
 
 	return nil
 }
@@ -965,7 +971,7 @@ func runSearchModels(cmd *cobra.Command, args []string) error {
 	results := manager.SearchModels(query)
 
 	if len(results) == 0 {
-		fmt.Printf("❌ No models found for query: %s\n", query)
+		fmt.Println(tr(cmd.Context(), "cmd_local_llm_models_none_for_query", map[string]any{"Query": query}))
 		return nil
 	}
 

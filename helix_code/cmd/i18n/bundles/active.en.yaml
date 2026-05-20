@@ -506,3 +506,98 @@ cmd_local_llm_flag_recommend_budget:
 
 cmd_local_llm_flag_recommend_providers:
   other: "Include only specific providers"
+
+# Round-434 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+# helix_code/cmd residual round-3 — 24 user-facing runtime strings
+# from the local-llm logs/watch/download/convert/models command
+# groups migrated.
+
+cmd_local_llm_log_directory:
+  other: "📋 Log directory: {{.Dir}}"
+
+cmd_local_llm_log_showing:
+  other: "📋 Showing logs for {{.Provider}}:"
+
+cmd_local_llm_log_file:
+  other: "Log file: {{.File}}"
+
+cmd_local_llm_watch_start:
+  other: "👀 Starting local LLM provider watch (fsnotify, real filesystem events)…"
+
+cmd_local_llm_watch_paths:
+  other: "Watching {{.Count}} paths under {{.Dir}}; events debounced {{.Debounce}}. Press Ctrl+C to stop."
+
+cmd_local_llm_watch_header:
+  other: "🔍 Local LLM Provider Status (fs-event triggered) — {{.Time}}"
+
+cmd_local_llm_watch_status_error:
+  other: "❌ Error getting status: {{.Error}}"
+
+cmd_local_llm_flag_analytics_time_range:
+  other: "Time range for analytics (1d, 7d, 30d, all)"
+
+cmd_local_llm_flag_report_format:
+  other: "Report format (table, json, csv)"
+
+cmd_local_llm_flag_insights_type:
+  other: "Insights type (performance, usage, models, all)"
+
+cmd_local_llm_download_formats:
+  other: "Available formats: {{.Formats}}"
+
+cmd_local_llm_download_saved:
+  other: "📁 Model saved to: {{.Path}}"
+
+cmd_local_llm_download_saved_provider:
+  other: "📁 Model saved to provider directory: {{.Path}}"
+
+cmd_local_llm_convert_model:
+  other: "🔄 Converting model: {{.Path}}"
+
+cmd_local_llm_convert_source_format:
+  other: "📝 Source format: {{.Format}}"
+
+cmd_local_llm_convert_target_format:
+  other: "🎯 Target format: {{.Format}}"
+
+cmd_local_llm_convert_started:
+  other: "🚀 Conversion started (Job ID: {{.JobID}})"
+
+cmd_local_llm_convert_output_pending:
+  other: "📁 Output will be saved to: {{.Path}}"
+
+cmd_local_llm_convert_logs:
+  other: "📋 Logs available at: {{.Path}}"
+
+cmd_local_llm_convert_status_error:
+  other: "❌ Failed to get status: {{.Error}}"
+
+cmd_local_llm_convert_completed:
+  other: "✅ Conversion completed successfully!"
+
+cmd_local_llm_convert_output_saved:
+  other: "📁 Output saved to: {{.Path}}"
+
+cmd_local_llm_convert_duration:
+  other: "⏱️  Duration: {{.Duration}}"
+
+cmd_local_llm_convert_failed:
+  other: "❌ Conversion failed: {{.Error}}"
+
+cmd_local_llm_convert_check_logs:
+  other: "📋 Check logs for details: {{.Path}}"
+
+cmd_local_llm_models_none_in_registry:
+  other: "❌ No models available in registry"
+
+cmd_local_llm_models_total:
+  other: "📊 Total models: {{.Count}}"
+
+cmd_local_llm_models_hint_search:
+  other: "💡 Use 'helix local-llm models search <query>' to find specific models"
+
+cmd_local_llm_models_hint_download:
+  other: "💡 Use 'helix local-llm models download <model-id>' to download a model"
+
+cmd_local_llm_models_none_for_query:
+  other: "❌ No models found for query: {{.Query}}"

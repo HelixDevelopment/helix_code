@@ -41,6 +41,13 @@ func TestPermissionsCommand_ModeSubaction(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 
+	// round-432: /permissions mode confirmation is CONST-046-migrated;
+	// wire the interpolatingTranslator so the rendered output carries
+	// the real mode value for the assertion below.
+	resetTranslator(t)
+	SetTranslator(interpolatingTranslator{})
+	defer resetTranslator(t)
+
 	cmd := NewPermissionsCommand()
 	res, err := cmd.Execute(context.Background(), &CommandContext{
 		Args:     []string{"mode", "dontAsk"},

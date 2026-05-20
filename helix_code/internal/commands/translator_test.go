@@ -40,6 +40,33 @@ func (interpolatingTranslator) T(_ context.Context, id string, data map[string]a
 	case "internal_commands_hooks_test_result":
 		return fmt.Sprintf("%v: status=%v err=%v duration=%v",
 			data["HookID"], data["Status"], data["Error"], data["Duration"]), nil
+	// --- round-432: /permissions + /sessions migrated literals ---
+	case "internal_commands_permissions_mode_set":
+		return fmt.Sprintf("session permission mode set to %v\n", data["Mode"]), nil
+	case "internal_commands_sessions_col_id":
+		return "ID", nil
+	case "internal_commands_sessions_col_project":
+		return "PROJECT", nil
+	case "internal_commands_sessions_col_started":
+		return "STARTED", nil
+	case "internal_commands_sessions_col_last_activity":
+		return "LAST-ACTIVITY", nil
+	case "internal_commands_sessions_col_msg_count":
+		return "MSG-COUNT", nil
+	case "internal_commands_sessions_show_session":
+		return fmt.Sprintf("Session: %v", data["ID"]), nil
+	case "internal_commands_sessions_show_project":
+		return fmt.Sprintf("Project: %v (%v)", data["Name"], data["Path"]), nil
+	case "internal_commands_sessions_show_started":
+		return fmt.Sprintf("Started: %v", data["Started"]), nil
+	case "internal_commands_sessions_show_last_activity":
+		return fmt.Sprintf("Last activity: %v", data["LastActivity"]), nil
+	case "internal_commands_sessions_show_messages":
+		return fmt.Sprintf("Messages: %v", data["Count"]), nil
+	case "internal_commands_sessions_show_transcript_header":
+		return "--- Transcript (last 20) ---", nil
+	case "internal_commands_sessions_deleted":
+		return fmt.Sprintf("deleted session %v", data["ID"]), nil
 	default:
 		return id, nil
 	}

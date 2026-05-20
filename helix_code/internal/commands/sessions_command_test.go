@@ -32,6 +32,12 @@ func seedSession(t *testing.T, store *session.TranscriptStore, id, project strin
 }
 
 func TestSlashSessions_ListEmpty(t *testing.T) {
+	// round-432: /sessions output is CONST-046-migrated; wire the
+	// interpolatingTranslator so column headers render to English.
+	resetTranslator(t)
+	SetTranslator(interpolatingTranslator{})
+	defer resetTranslator(t)
+
 	c, _ := newSessionsCommand(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
@@ -62,6 +68,13 @@ func TestSlashSessions_ListAll(t *testing.T) {
 }
 
 func TestSlashSessions_Show(t *testing.T) {
+	// round-432: /sessions show report is CONST-046-migrated; wire the
+	// interpolatingTranslator so the rendered output carries the real
+	// session ID for the assertion below.
+	resetTranslator(t)
+	SetTranslator(interpolatingTranslator{})
+	defer resetTranslator(t)
+
 	c, store := newSessionsCommand(t)
 	now := time.Now().UTC().Truncate(time.Second)
 	seedSession(t, store, "s1", "/p/test", now)
@@ -99,6 +112,12 @@ func TestSlashSessions_DeleteUnknownErrors(t *testing.T) {
 }
 
 func TestSlashSessions_DefaultIsList(t *testing.T) {
+	// round-432: /sessions output is CONST-046-migrated; wire the
+	// interpolatingTranslator so column headers render to English.
+	resetTranslator(t)
+	SetTranslator(interpolatingTranslator{})
+	defer resetTranslator(t)
+
 	c, _ := newSessionsCommand(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
