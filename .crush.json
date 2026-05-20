@@ -1,0 +1,15 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "mcp": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "/run/media/milosvasic/DATA4TB/Projects/HelixCode/tools/codegraph/node_modules/.bin/codegraph",
+      "args": [
+        "serve",
+        "--mcp",
+        "--path",
+        "/run/media/milosvasic/DATA4TB/Projects/HelixCode"
+      ]
+    }
+  }
+}
