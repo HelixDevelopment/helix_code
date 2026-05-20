@@ -2,7 +2,7 @@
 
 | Field             | Value                                              |
 |-------------------|----------------------------------------------------|
-| Revision          | 1                                                  |
+| Revision          | 2                                                  |
 | Created           | 2026-05-20                                         |
 | Last modified     | 2026-05-20                                         |
 | Status            | active                                             |
@@ -20,6 +20,7 @@
 - [Classification key](#classification-key)
 - [Per-file classification](#per-file-classification)
 - [Round-350 migration](#round-350-migration)
+- [Round-462 cmd+internal final sweep](#round-462-cmdinternal-final-sweep)
 - [Precedent](#precedent)
 
 ## Purpose
@@ -149,6 +150,54 @@ also repairs a pre-existing latent nil-`Request` panic in
 `gin.CreateTestContext` leaves it nil). Paired-mutation tests added
 in `i18n_seam_test.go`.
 
+## Round-462 cmd+internal final sweep
+
+Final confirm-or-NOOP sweep of `helix_code/cmd/` + `helix_code/internal/`
+(2026-05-20). One genuine (C) residual was located and migrated; the
+remainder of the audit surface in both trees is confirmed out-of-scope.
+
+**Migrated — `cmd/local_llm.go`:** the five *advanced* discovery/analytics
+cobra subcommands (`discoverCmd`, `recommendCmd`, `analyticsCmd`,
+`reportCmd`, `insightsCmd`) carried plain `Short:` / `Long:` English
+literals — 10 literals total. These are `--help` text genuinely surfaced
+to operators and were the only `Short:`/`Long:` literals in all of
+`helix_code/cmd/*.go` not already routed through `trc()`. Migrated to the
+`cmd` i18n seam (`cmd/i18n_seam.go`): 10 new bundle IDs in
+`cmd/i18n/bundles/active.en.yaml` (`cmd_local_llm_{discover,recommend,
+analytics,report,insights}_{short,long}`). Paired-mutation tests added to
+`cmd/local_llm_i18n_test.go` (`round462CobraMetadataIDs` +
+`TestLocalLLMI18n_Round462CobraMetadata{RoutesThroughSeam,NoopEcho}`).
+
+**Confirmed exhausted — out-of-scope residual:**
+
+- `cmd/local_llm.go:580` — `"watch: fsnotify error: %v\n"`: class (B)
+  wrapped-error / log diagnostic.
+- `cmd/local_llm_advanced.go` — `"Llama 3 8B Instruct"`,
+  `"Mistral 7B Instruct"`, etc.: model-identifier metadata tokens, not
+  localizable UI; `"Total Models\t%d\n"` etc.: tab-separated report
+  table fragments (class B).
+- `cmd/performance_optimization/main.go`,
+  `cmd/security_fix_standalone/main.go`,
+  `cmd/security_scan/main.go` — recommendation-record / scanner-finding
+  struct fields + report-template strings (round-460 documented these
+  as out-of-scope: scanner-diagnostic struct fields + report templates).
+- `cmd/cli/main.go` — pprof diagnostic strings (class B).
+- `internal/*` — the top packages (`tools`, `llm`, `workflow`, `agent`,
+  `memory`, `performance`, `server`, etc.) were classified A/B in
+  revision 1; `agent/base_agent.go` lines 525-722 are class (A) LLM
+  prompt templates; `adapters/speckit_debate_adapter/adapter.go` markdown
+  report fragments are class (B). The genuine (C) surface
+  (`server/handlers.go` JSON `message` fields, `commands/builtin/*`
+  `Description()`/`Usage()`) was migrated in earlier rounds — the
+  `internal/commands/builtin` package now has its own `builtin/i18n` +
+  `builtin/translator.go` seam and every `Description()`/`Usage()`
+  returns `trc("builtin_*_...", nil)`.
+
+**Verdict:** `helix_code/cmd/` and `helix_code/internal/` genuine
+user-facing (C) hardcoded-content surface is now exhausted. Remaining
+audit hits are all class (A) LLM prompts, class (B) wrapped-error / log /
+report-template strings, or identifier/format-spec tokens.
+
 ## Precedent
 
 - Round-321 — HelixLLM `openai.go`: LLM prompt templates ruled OUT of
@@ -156,3 +205,5 @@ in `i18n_seam_test.go`.
 - Round-326 — LLMsVerifier `verifier.go`: same ruling reaffirmed.
 - Round-177 — `internal/server` i18n seam established (round-70 of
   the CONST-046 Phase-4 numbering).
+- Round-462 — `cmd/local_llm.go` advanced-subcommand cobra Short/Long
+  migrated; cmd+internal genuine (C) surface confirmed exhausted.

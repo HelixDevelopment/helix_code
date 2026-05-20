@@ -551,3 +551,60 @@ func TestLocalLLMI18n_Round445ResidualNoopEcho(t *testing.T) {
 		}
 	}
 }
+
+// round462CobraMetadataIDs is the closed set of message IDs introduced by
+// the round-462 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4):
+// helix_code/cmd/local_llm.go final cmd+internal sweep — the five advanced
+// discovery/analytics cobra command groups (discover / recommend /
+// analytics / report / insights) Short+Long descriptions. These are
+// package-level `var` cobra.Command struct literals; their Short/Long are
+// resolved at command-construction time via trc().
+var round462CobraMetadataIDs = []string{
+	"cmd_local_llm_discover_short",
+	"cmd_local_llm_discover_long",
+	"cmd_local_llm_recommend_short",
+	"cmd_local_llm_recommend_long",
+	"cmd_local_llm_analytics_short",
+	"cmd_local_llm_analytics_long",
+	"cmd_local_llm_report_short",
+	"cmd_local_llm_report_long",
+	"cmd_local_llm_insights_short",
+	"cmd_local_llm_insights_long",
+}
+
+// TestLocalLLMI18n_Round462CobraMetadataRoutesThroughSeam is the
+// paired-mutation anti-bluff guard for the round-462 migration: it wires a
+// sentinel Translator and asserts every discover/recommend/analytics/
+// report/insights Short+Long message ID resolves THROUGH it (sentinel
+// present) — proving the advanced-subcommand cobra descriptions are no
+// longer frozen English literals. Re-inlining any would drop the sentinel
+// and FAIL this test.
+func TestLocalLLMI18n_Round462CobraMetadataRoutesThroughSeam(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	for _, id := range round462CobraMetadataIDs {
+		got := trc(id, nil)
+		if !strings.HasPrefix(got, i18nSentinel) {
+			t.Errorf("round-462 cobra metadata ID %q did not route through the injected Translator: got %q", id, got)
+		}
+		if !strings.Contains(got, id) {
+			t.Errorf("round-462 cobra metadata ID %q lost its identity through the seam: got %q", id, got)
+		}
+	}
+}
+
+// TestLocalLLMI18n_Round462CobraMetadataNoopEcho proves the round-462 IDs
+// degrade to a loud message-ID echo when no translator is wired — never a
+// silent empty string (which would be a §11.4 PASS-bluff at the i18n
+// layer). Covers the trc() construction-time path used by the advanced
+// discovery/analytics cobra command structs.
+func TestLocalLLMI18n_Round462CobraMetadataNoopEcho(t *testing.T) {
+	SetTranslator(nil) // explicit NoopTranslator
+	for _, id := range round462CobraMetadataIDs {
+		got := trc(id, nil)
+		if got != id {
+			t.Errorf("round-462 cobra metadata ID %q must echo verbatim under NoopTranslator: got %q", id, got)
+		}
+	}
+}

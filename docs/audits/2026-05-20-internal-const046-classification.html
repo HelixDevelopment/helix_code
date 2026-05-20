@@ -189,7 +189,7 @@ CONST-046 hardcoded-content classification</h1>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>1</td>
+<td>2</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -236,6 +236,8 @@ CONST-046 hardcoded-content classification</h1>
 <li><a href="#classification-key">Classification key</a></li>
 <li><a href="#per-file-classification">Per-file classification</a></li>
 <li><a href="#round-350-migration">Round-350 migration</a></li>
+<li><a href="#round-462-cmdinternal-final-sweep">Round-462 cmd+internal
+final sweep</a></li>
 <li><a href="#precedent">Precedent</a></li>
 </ul>
 <h2 id="purpose">Purpose</h2>
@@ -444,6 +446,66 @@ a pre-existing latent nil-<code>Request</code> panic in
 <code>qa_handlers.go</code> (round-70 wiring assumed a non-nil
 <code>c.Request</code>; <code>gin.CreateTestContext</code> leaves it
 nil). Paired-mutation tests added in <code>i18n_seam_test.go</code>.</p>
+<h2 id="round-462-cmdinternal-final-sweep">Round-462 cmd+internal final
+sweep</h2>
+<p>Final confirm-or-NOOP sweep of <code>helix_code/cmd/</code> +
+<code>helix_code/internal/</code> (2026-05-20). One genuine (C) residual
+was located and migrated; the remainder of the audit surface in both
+trees is confirmed out-of-scope.</p>
+<p><strong>Migrated — <code>cmd/local_llm.go</code>:</strong> the five
+<em>advanced</em> discovery/analytics cobra subcommands
+(<code>discoverCmd</code>, <code>recommendCmd</code>,
+<code>analyticsCmd</code>, <code>reportCmd</code>,
+<code>insightsCmd</code>) carried plain <code>Short:</code> /
+<code>Long:</code> English literals — 10 literals total. These are
+<code>--help</code> text genuinely surfaced to operators and were the
+only <code>Short:</code>/<code>Long:</code> literals in all of
+<code>helix_code/cmd/*.go</code> not already routed through
+<code>trc()</code>. Migrated to the <code>cmd</code> i18n seam
+(<code>cmd/i18n_seam.go</code>): 10 new bundle IDs in
+<code>cmd/i18n/bundles/active.en.yaml</code>
+(<code>cmd_local_llm_{discover,recommend, analytics,report,insights}_{short,long}</code>).
+Paired-mutation tests added to <code>cmd/local_llm_i18n_test.go</code>
+(<code>round462CobraMetadataIDs</code> +
+<code>TestLocalLLMI18n_Round462CobraMetadata{RoutesThroughSeam,NoopEcho}</code>).</p>
+<p><strong>Confirmed exhausted — out-of-scope residual:</strong></p>
+<ul>
+<li><code>cmd/local_llm.go:580</code> —
+<code>"watch: fsnotify error: %v\n"</code>: class (B) wrapped-error /
+log diagnostic.</li>
+<li><code>cmd/local_llm_advanced.go</code> —
+<code>"Llama 3 8B Instruct"</code>, <code>"Mistral 7B Instruct"</code>,
+etc.: model-identifier metadata tokens, not localizable UI;
+<code>"Total Models\t%d\n"</code> etc.: tab-separated report table
+fragments (class B).</li>
+<li><code>cmd/performance_optimization/main.go</code>,
+<code>cmd/security_fix_standalone/main.go</code>,
+<code>cmd/security_scan/main.go</code> — recommendation-record /
+scanner-finding struct fields + report-template strings (round-460
+documented these as out-of-scope: scanner-diagnostic struct fields +
+report templates).</li>
+<li><code>cmd/cli/main.go</code> — pprof diagnostic strings (class
+B).</li>
+<li><code>internal/*</code> — the top packages (<code>tools</code>,
+<code>llm</code>, <code>workflow</code>, <code>agent</code>,
+<code>memory</code>, <code>performance</code>, <code>server</code>,
+etc.) were classified A/B in revision 1;
+<code>agent/base_agent.go</code> lines 525-722 are class (A) LLM prompt
+templates; <code>adapters/speckit_debate_adapter/adapter.go</code>
+markdown report fragments are class (B). The genuine (C) surface
+(<code>server/handlers.go</code> JSON <code>message</code> fields,
+<code>commands/builtin/*</code>
+<code>Description()</code>/<code>Usage()</code>) was migrated in earlier
+rounds — the <code>internal/commands/builtin</code> package now has its
+own <code>builtin/i18n</code> + <code>builtin/translator.go</code> seam
+and every <code>Description()</code>/<code>Usage()</code> returns
+<code>trc("builtin_*_...", nil)</code>.</li>
+</ul>
+<p><strong>Verdict:</strong> <code>helix_code/cmd/</code> and
+<code>helix_code/internal/</code> genuine user-facing (C)
+hardcoded-content surface is now exhausted. Remaining audit hits are all
+class (A) LLM prompts, class (B) wrapped-error / log / report-template
+strings, or identifier/format-spec tokens.</p>
 <h2 id="precedent">Precedent</h2>
 <ul>
 <li>Round-321 — HelixLLM <code>openai.go</code>: LLM prompt templates
@@ -452,6 +514,9 @@ ruled OUT of CONST-046 scope.</li>
 reaffirmed.</li>
 <li>Round-177 — <code>internal/server</code> i18n seam established
 (round-70 of the CONST-046 Phase-4 numbering).</li>
+<li>Round-462 — <code>cmd/local_llm.go</code> advanced-subcommand cobra
+Short/Long migrated; cmd+internal genuine (C) surface confirmed
+exhausted.</li>
 </ul>
 </body>
 </html>

@@ -439,6 +439,109 @@ cmd_local_llm_cleanup_long:
     Stop all running local LLM providers and clean up temporary resources.
     Downloaded models and configurations will be preserved.
 
+cmd_local_llm_discover_short:
+  other: "Discover and explore available models"
+
+cmd_local_llm_discover_long:
+  other: |-
+    Discover models from various sources with advanced filtering
+    and search capabilities. This command provides a comprehensive
+    catalog of models with detailed information about capabilities,
+    performance, and compatibility.
+
+    Sources include:
+    - Local downloaded models
+    - HuggingFace model hub
+    - Community repositories
+    - Private repositories
+
+    Examples:
+      helix local-llm discover
+      helix local-llm discover --filter "code generation"
+      helix local-llm discover --source huggingface --filter "7b"
+
+cmd_local_llm_recommend_short:
+  other: "Get intelligent model recommendations"
+
+cmd_local_llm_recommend_long:
+  other: |-
+    Get personalized model recommendations based on your
+    specific requirements, hardware, usage patterns, and preferences.
+
+    The recommendation engine considers:
+    - Task requirements and complexity
+    - Hardware capabilities and constraints
+    - Performance preferences (speed vs quality)
+    - Budget limitations
+    - Privacy requirements
+    - Historical usage patterns
+
+    Examples:
+      helix local-llm recommend --tasks code_generation,debugging
+      helix local-llm recommend --quality fast --max-memory 8192
+      helix local-llm recommend --budget 0.1 --privacy local
+
+cmd_local_llm_analytics_short:
+  other: "View usage analytics and statistics"
+
+cmd_local_llm_analytics_long:
+  other: |-
+    View comprehensive usage analytics including model performance,
+    user behavior, task patterns, and system utilization.
+
+    Analytics include:
+    - Model usage statistics and trends
+    - Performance metrics and bottlenecks
+    - User behavior and preferences
+    - Task patterns and efficiency
+    - Optimization impact
+    - Cost analysis
+
+    Examples:
+      helix local-llm analytics
+      helix local-llm analytics --time-range 30d
+
+cmd_local_llm_report_short:
+  other: "Generate comprehensive usage reports"
+
+cmd_local_llm_report_long:
+  other: |-
+    Generate detailed usage reports in various formats.
+    Reports can be exported as tables, JSON, or CSV for further analysis.
+
+    Report types:
+    - Executive summary
+    - Performance analysis
+    - User behavior analysis
+    - Cost analysis
+    - Optimization impact
+    - Recommendations
+
+    Examples:
+      helix local-llm report
+      helix local-llm report --format json --time-range 30d
+
+cmd_local_llm_insights_short:
+  other: "Get AI-powered insights and recommendations"
+
+cmd_local_llm_insights_long:
+  other: |-
+    Get AI-powered insights about your LLM usage, performance,
+    optimization opportunities, and strategic recommendations.
+
+    Insights include:
+    - Performance bottlenecks and solutions
+    - Cost optimization opportunities
+    - Usage pattern analysis
+    - Predictive recommendations
+    - Trend analysis
+    - Competitive insights
+
+    Examples:
+      helix local-llm insights
+      helix local-llm insights --type performance
+      helix local-llm insights --type usage
+
 cmd_local_llm_update_short:
   other: "Update local LLM providers"
 

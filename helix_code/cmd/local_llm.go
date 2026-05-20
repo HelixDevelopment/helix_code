@@ -1103,109 +1103,41 @@ var syncModelsCmd = &cobra.Command{
 // discoverCmd represents the model discovery command
 var discoverCmd = &cobra.Command{
 	Use:   "discover",
-	Short: "Discover and explore available models",
-	Long: `Discover models from various sources with advanced filtering
-and search capabilities. This command provides a comprehensive
-catalog of models with detailed information about capabilities,
-performance, and compatibility.
-
-Sources include:
-- Local downloaded models
-- HuggingFace model hub
-- Community repositories
-- Private repositories
-
-Examples:
-  helix local-llm discover
-  helix local-llm discover --filter "code generation"
-  helix local-llm discover --source huggingface --filter "7b"`,
-	RunE: runDiscover,
+	Short: trc("cmd_local_llm_discover_short", nil),
+	Long:  trc("cmd_local_llm_discover_long", nil),
+	RunE:  runDiscover,
 }
 
 // recommendCmd represents the model recommendation command
 var recommendCmd = &cobra.Command{
 	Use:   "recommend",
-	Short: "Get intelligent model recommendations",
-	Long: `Get personalized model recommendations based on your
-specific requirements, hardware, usage patterns, and preferences.
-
-The recommendation engine considers:
-- Task requirements and complexity
-- Hardware capabilities and constraints
-- Performance preferences (speed vs quality)
-- Budget limitations
-- Privacy requirements
-- Historical usage patterns
-
-Examples:
-  helix local-llm recommend --tasks code_generation,debugging
-  helix local-llm recommend --quality fast --max-memory 8192
-  helix local-llm recommend --budget 0.1 --privacy local`,
-	RunE: runRecommend,
+	Short: trc("cmd_local_llm_recommend_short", nil),
+	Long:  trc("cmd_local_llm_recommend_long", nil),
+	RunE:  runRecommend,
 }
 
 // analyticsCmd represents the usage analytics command
 var analyticsCmd = &cobra.Command{
 	Use:   "analytics",
-	Short: "View usage analytics and statistics",
-	Long: `View comprehensive usage analytics including model performance,
-user behavior, task patterns, and system utilization.
-
-Analytics include:
-- Model usage statistics and trends
-- Performance metrics and bottlenecks
-- User behavior and preferences
-- Task patterns and efficiency
-- Optimization impact
-- Cost analysis
-
-Examples:
-  helix local-llm analytics
-  helix local-llm analytics --time-range 30d`,
-	RunE: runAnalytics,
+	Short: trc("cmd_local_llm_analytics_short", nil),
+	Long:  trc("cmd_local_llm_analytics_long", nil),
+	RunE:  runAnalytics,
 }
 
 // reportCmd represents the report generation command
 var reportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "Generate comprehensive usage reports",
-	Long: `Generate detailed usage reports in various formats.
-Reports can be exported as tables, JSON, or CSV for further analysis.
-
-Report types:
-- Executive summary
-- Performance analysis
-- User behavior analysis
-- Cost analysis
-- Optimization impact
-- Recommendations
-
-Examples:
-  helix local-llm report
-  helix local-llm report --format json --time-range 30d`,
-	RunE: runReport,
+	Short: trc("cmd_local_llm_report_short", nil),
+	Long:  trc("cmd_local_llm_report_long", nil),
+	RunE:  runReport,
 }
 
 // insightsCmd represents the insights command
 var insightsCmd = &cobra.Command{
 	Use:   "insights",
-	Short: "Get AI-powered insights and recommendations",
-	Long: `Get AI-powered insights about your LLM usage, performance,
-optimization opportunities, and strategic recommendations.
-
-Insights include:
-- Performance bottlenecks and solutions
-- Cost optimization opportunities
-- Usage pattern analysis
-- Predictive recommendations
-- Trend analysis
-- Competitive insights
-
-Examples:
-  helix local-llm insights
-  helix local-llm insights --type performance
-  helix local-llm insights --type usage`,
-	RunE: runInsights,
+	Short: trc("cmd_local_llm_insights_short", nil),
+	Long:  trc("cmd_local_llm_insights_long", nil),
+	RunE:  runInsights,
 }
 
 func runShareModel(cmd *cobra.Command, args []string) error {
