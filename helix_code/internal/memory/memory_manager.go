@@ -197,7 +197,15 @@ func (mm *MemoryManager) GetProvider(name string) (MemoryProvider, error) {
 	return provider, nil
 }
 
-// GetDefaultProvider gets the default memory provider
+// GetDefaultProvider gets the default memory provider.
+//
+// Speed programme P4-T04: this resolves the provider directly under a single
+// RLock acquisition rather than re-entering GetProvider (which acquires the
+// same RWMutex again). Go's sync.RWMutex is NOT reentrant — a recursive
+// RLock can deadlock if a writer's Lock() queues between the outer and inner
+// RLock. Resolving inline both removes that deadlock window and narrows the
+// critical section to a single lock round-trip on the Store/Retrieve/Search/
+// Delete/Clear hot path that all funnels through this method.
 func (mm *MemoryManager) GetDefaultProvider() (MemoryProvider, error) {
 	mm.mu.RLock()
 	defer mm.mu.RUnlock()
@@ -206,7 +214,12 @@ func (mm *MemoryManager) GetDefaultProvider() (MemoryProvider, error) {
 		return nil, errors.New(tr(context.Background(), "internal_memory_no_default_provider_set", nil))
 	}
 
-	return mm.GetProvider(mm.defaultProvider)
+	provider, exists := mm.providers[mm.defaultProvider]
+	if !exists {
+		return nil, errors.New(tr(context.Background(), "internal_memory_provider_not_found", map[string]any{"Name": mm.defaultProvider}))
+	}
+
+	return provider, nil
 }
 
 // ListProviders lists all registered providers

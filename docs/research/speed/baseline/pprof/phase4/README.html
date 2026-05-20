@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="speed-programme-phase-4-p4-t04-profile-gated-allocgccontention-tuning">Speed
+Programme Phase 4 / P4-T04 — profile-gated alloc/GC/contention
+tuning</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td><strong>Last modified</strong></td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>active</td>
+</tr>
+<tr>
+<td><strong>Authority</strong></td>
+<td>docs/research/speed/04-phased-implementation-plan.md — P4-T04</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-mandate">1. Mandate</a></li>
+<li><a href="#2-candidates-assessed">2. Candidates assessed</a></li>
+<li><a href="#3-b22--internalmemory--outcome">3. B22 — internal/memory —
+outcome</a></li>
+<li><a href="#4-b23--internalcognee--outcome">4. B23 — internal/cognee —
+outcome</a></li>
+<li><a href="#5-captured-profile-artefacts">5. Captured profile
+artefacts</a></li>
+</ul>
+<h2 id="mandate">1. Mandate</h2>
+<p>P4-T04 tunes <strong>only</strong> hot paths where Phase-0 pprof
+evidence proves a real bottleneck (constitution §11.4.6 — no-guessing).
+Both R1 audit candidates (B22, B23) were marked
+<strong>UNCONFIRMED</strong> in
+<code>01-current-state-bottleneck-audit.md</code>. This round captured
+mutex/block/CPU profiles to confirm or reject each before touching code.
+A change without a profile proving the bottleneck is a §11.4.6 violation
+and was not made.</p>
+<h2 id="candidates-assessed">2. Candidates assessed</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 14%" />
+<col style="width: 25%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>R1 ref</th>
+<th>Audit status</th>
+<th>This round’s verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/memory/memory_manager.go</code> lock density</td>
+<td>B22</td>
+<td>UNCONFIRMED</td>
+<td>Manager-level read-mux NOT confirmed hot (1.5% of mutex delay). One
+real <strong>correctness defect</strong> found + fixed
+(double-RLock).</td>
+</tr>
+<tr>
+<td><code>internal/cognee/service.go</code> <code>ServiceCache</code>
+mutex</td>
+<td>B23</td>
+<td>UNCONFIRMED</td>
+<td>NOT confirmed — no pathological contention. <strong>Left
+untouched.</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="b22-internalmemory-outcome">3. B22 — internal/memory —
+outcome</h2>
+<p>The “32 lock sites” in <code>memory_manager.go</code> are spread
+across <strong>six independent structs</strong>, each with its own
+<code>sync.RWMutex</code> (<code>MemoryManager</code>,
+<code>InMemoryProvider</code>, <code>RedisMemoryProvider</code>,
+<code>MemcachedMemoryProvider</code>,
+<code>FilesystemMemoryProvider</code>, factory) — not one hot lock. The
+mutex profile (<code>memory-mutex-BEFORE.pprof</code>) under a
+deliberately write-mixed <code>RunParallel</code> benchmark
+attributes:</p>
+<ul>
+<li><strong>95.4%</strong> of mutex delay to
+<code>InMemoryProvider.Store</code>’s write-lock — this is
+<em>inherent</em> RWMutex writer-serialization for a map+mutex design,
+NOT a pathology. <code>InMemoryProvider</code> is a dev/fallback
+provider; production uses Redis/Memcached/Filesystem. Converting it
+(sharding / <code>sync.Map</code>) would be a <em>speculative</em>
+optimization the profile does not justify — <strong>left
+untouched</strong>.</li>
+<li><strong>only 1.5%</strong> to the <code>MemoryManager</code>
+read-mux — the B22 hypothesis is <strong>NOT confirmed</strong>.</li>
+</ul>
+<p><strong>Confirmed defect (fixed):</strong>
+<code>GetDefaultProvider()</code> held <code>mm.mu.RLock()</code> then
+re-entered <code>GetProvider()</code> which acquires the <em>same</em>
+<code>RWMutex</code> for reading again. Go’s <code>sync.RWMutex</code>
+is <strong>not reentrant</strong> — a writer’s <code>Lock()</code>
+queued between the outer and inner <code>RLock</code> deadlocks all
+three. Every <code>Store/Retrieve/Search/Delete/Clear</code> call
+funnels through <code>GetDefaultProvider</code>, so this sits on the
+genuine hot path. Fix: resolve the provider inline under the single
+existing RLock — removes the deadlock window AND narrows the critical
+section to one lock round-trip.</p>
+<p><strong>Evidence —
+<code>BenchmarkMemoryManager_GetDefaultProvider</code> (isolated
+path):</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ns/op</th>
+<th>allocs/op</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BEFORE</td>
+<td>116.7</td>
+<td>0</td>
+</tr>
+<tr>
+<td>AFTER</td>
+<td>67.75</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>ratio</strong></td>
+<td><strong>1.72× faster</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Block-profile focus on <code>GetDefaultProvider</code>: 2.63s → 2.19s
+cum delay. <code>-race</code> clean —
+<code>TestMemoryManager_GetDefaultProviderNoReentrantDeadlock</code> (64
+readers × 2000 iter vs 8 contending writers) passes; it reproduces and
+guards the deadlock window.</p>
+<h2 id="b23-internalcognee-outcome">4. B23 — internal/cognee —
+outcome</h2>
+<p><code>ServiceCache</code>’s methods (<code>getCachedMemory</code>,
+<code>cacheSearch</code>, etc.) are all single-level, well-formed
+RLock/Lock holding the lock only for the map op. The mutex profile
+(<code>cognee-mutex-BEFORE.pprof</code>) shows the same shape as memory:
+the write path of the RWMutex dominates under a write-mixed benchmark —
+<em>inherent</em> serialization, not a pathology. No double-lock, no
+over-broad critical section, no production-driven concurrent hot path
+comparable to memory’s <code>GetDefaultProvider</code>. <strong>B23 is
+NOT confirmed — <code>internal/cognee</code> was left
+untouched.</strong> Profiles are committed as the negative evidence.</p>
+<h2 id="captured-profile-artefacts">5. Captured profile artefacts</h2>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>What it proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>memory-mutex-BEFORE.pprof</code> /
+<code>-AFTER.pprof</code></td>
+<td>Manager read-mux only 1.5% — B22 not confirmed; Store write-path
+inherent and unchanged.</td>
+</tr>
+<tr>
+<td><code>memory-block-BEFORE.pprof</code> /
+<code>-AFTER.pprof</code></td>
+<td><code>GetDefaultProvider</code> block delay 2.63s → 2.19s.</td>
+</tr>
+<tr>
+<td><code>memory-cpu-BEFORE.pprof</code> /
+<code>-AFTER.pprof</code></td>
+<td>CPU shape of the memory benchmarks.</td>
+</tr>
+<tr>
+<td><code>cognee-mutex-BEFORE.pprof</code> /
+<code>-AFTER.pprof</code></td>
+<td>No pathological contention — B23 not confirmed (control: code
+unchanged).</td>
+</tr>
+<tr>
+<td><code>cognee-block-BEFORE.pprof</code> /
+<code>-AFTER.pprof</code></td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code>cognee-cpu-BEFORE.pprof</code></td>
+<td>CPU shape of the cognee cache benchmark.</td>
+</tr>
+</tbody>
+</table>
+<p>Capture command (per package):
+<code>GOMAXPROCS=8 go test -run='^$' -bench=... -benchmem -benchtime=2s -mutexprofile=... -blockprofile=... -cpuprofile=...</code>.</p>
+</body>
+</html>
