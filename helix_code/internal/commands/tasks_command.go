@@ -28,8 +28,14 @@ func NewTasksCommand(m *workflow.BackgroundManager) *TasksCommand {
 
 func (c *TasksCommand) Name() string        { return "tasks" }
 func (c *TasksCommand) Aliases() []string   { return []string{} }
-func (c *TasksCommand) Description() string { return "Inspect and control background tasks" }
-func (c *TasksCommand) Usage() string       { return "/tasks [list | output <id> | stop <id>]" }
+func (c *TasksCommand) Description() string {
+	// CONST-046 (round-393): genuine user-facing CLI help text
+	// resolved through the package-level translator.
+	return tr(context.Background(), "internal_commands_tasks_description", nil)
+}
+func (c *TasksCommand) Usage() string {
+	return tr(context.Background(), "internal_commands_tasks_usage", nil)
+}
 
 // Execute runs the slash command. Subcommands: list (default), output <id>, stop <id>.
 func (c *TasksCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
@@ -47,16 +53,16 @@ func (c *TasksCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Co
 		return &CommandResult{Output: c.list(), Success: true}, nil
 	case "output":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("/tasks output <id>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_tasks_output_usage", nil))
 		}
 		return c.output(cmdCtx.Args[1])
 	case "stop":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("/tasks stop <id>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_tasks_stop_usage", nil))
 		}
 		return c.stop(cmdCtx.Args[1])
 	default:
-		return nil, fmt.Errorf("/tasks: unknown subcommand %q (want list|output|stop)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_tasks_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 

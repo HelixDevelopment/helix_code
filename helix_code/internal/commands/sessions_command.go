@@ -23,9 +23,13 @@ func NewSessionsCommand(store session.SessionStore, currentProject string) *Sess
 
 func (c *SessionsCommand) Name() string        { return "sessions" }
 func (c *SessionsCommand) Aliases() []string   { return nil }
-func (c *SessionsCommand) Description() string { return "Inspect, resume, or delete persisted session transcripts." }
+func (c *SessionsCommand) Description() string {
+	// CONST-046 (round-393): genuine user-facing CLI help text
+	// resolved through the package-level translator.
+	return tr(context.Background(), "internal_commands_sessions_description", nil)
+}
 func (c *SessionsCommand) Usage() string {
-	return "/sessions [list [--all]|show <id>|resume <id>|delete <id>]"
+	return tr(context.Background(), "internal_commands_sessions_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -44,21 +48,21 @@ func (c *SessionsCommand) Execute(ctx context.Context, cc *CommandContext) (*Com
 		return c.list(ctx, rest)
 	case "show":
 		if len(rest) == 0 {
-			return nil, fmt.Errorf("/sessions show <id>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sessions_show_usage", nil))
 		}
 		return c.show(ctx, rest[0])
 	case "resume":
 		if len(rest) == 0 {
-			return nil, fmt.Errorf("/sessions resume <id>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sessions_resume_usage", nil))
 		}
 		return c.resume(ctx, rest[0])
 	case "delete":
 		if len(rest) == 0 {
-			return nil, fmt.Errorf("/sessions delete <id>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sessions_delete_usage", nil))
 		}
 		return c.delete(ctx, rest[0])
 	default:
-		return nil, fmt.Errorf("/sessions: unknown subcommand %q (want list|show|resume|delete)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_sessions_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 
@@ -124,11 +128,11 @@ func (c *SessionsCommand) resume(ctx context.Context, id string) (*CommandResult
 	}
 	return &CommandResult{
 		Success: true,
-		Output: fmt.Sprintf(
-			"Resuming session %s (%d messages, last active %s).",
-			meta.SessionID, meta.MessageCount,
-			meta.LastActivity.Format("2006-01-02 15:04:05"),
-		),
+		Output: tr(ctx, "internal_commands_sessions_resume_result", map[string]any{
+			"ID":           meta.SessionID,
+			"MessageCount": meta.MessageCount,
+			"LastActive":   meta.LastActivity.Format("2006-01-02 15:04:05"),
+		}),
 	}, nil
 }
 

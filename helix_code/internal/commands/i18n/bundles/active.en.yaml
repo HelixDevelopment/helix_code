@@ -583,3 +583,64 @@ internal_commands_skills_reload_result:
 
 internal_commands_skills_invoke_not_found:
   other: "/skills invoke: skill {{.Name}} not found"
+
+# --- mcp_command.go (round-393) ---
+internal_commands_mcp_description:
+  other: "Manage MCP server connections"
+
+internal_commands_mcp_usage:
+  other: "/mcp [list | test <name> | reload]"
+
+internal_commands_mcp_test_usage:
+  other: "/mcp test <name>"
+
+internal_commands_mcp_reload_no_config:
+  other: "/mcp reload: no config loaded"
+
+internal_commands_mcp_unknown_subcommand:
+  other: "/mcp: unknown subcommand {{.Sub}} (want list|test|reload)"
+
+# --- tasks_command.go (round-393) ---
+internal_commands_tasks_description:
+  other: "Inspect and control background tasks"
+
+internal_commands_tasks_usage:
+  other: "/tasks [list | output <id> | stop <id>]"
+
+internal_commands_tasks_output_usage:
+  other: "/tasks output <id>"
+
+internal_commands_tasks_stop_usage:
+  other: "/tasks stop <id>"
+
+internal_commands_tasks_unknown_subcommand:
+  other: "/tasks: unknown subcommand {{.Sub}} (want list|output|stop)"
+
+# --- sessions_command.go (round-393) ---
+internal_commands_sessions_description:
+  other: "Inspect, resume, or delete persisted session transcripts."
+
+internal_commands_sessions_usage:
+  other: "/sessions [list [--all]|show <id>|resume <id>|delete <id>]"
+
+internal_commands_sessions_show_usage:
+  other: "/sessions show <id>"
+
+internal_commands_sessions_resume_usage:
+  other: "/sessions resume <id>"
+
+internal_commands_sessions_delete_usage:
+  other: "/sessions delete <id>"
+
+internal_commands_sessions_unknown_subcommand:
+  other: "/sessions: unknown subcommand {{.Sub}} (want list|show|resume|delete)"
+
+internal_commands_sessions_resume_result:
+  other: "Resuming session {{.ID}} ({{.MessageCount}} messages, last active {{.LastActive}})."
+
+# --- plan_tree_command.go (round-393) ---
+internal_commands_plantree_description:
+  other: "Manage plan trees (create, branch, merge, inspect, compact, verify)"
+
+internal_commands_plantree_usage:
+  other: "/plantree [list|show <name>|compact <name>|verify <name>]"

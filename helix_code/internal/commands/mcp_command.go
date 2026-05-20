@@ -28,8 +28,14 @@ func NewMCPCommand(m *mcp.Manager) *MCPCommand {
 
 func (c *MCPCommand) Name() string        { return "mcp" }
 func (c *MCPCommand) Aliases() []string   { return []string{} }
-func (c *MCPCommand) Description() string { return "Manage MCP server connections" }
-func (c *MCPCommand) Usage() string       { return "/mcp [list | test <name> | reload]" }
+func (c *MCPCommand) Description() string {
+	// CONST-046 (round-393): genuine user-facing CLI help text
+	// resolved through the package-level translator.
+	return tr(context.Background(), "internal_commands_mcp_description", nil)
+}
+func (c *MCPCommand) Usage() string {
+	return tr(context.Background(), "internal_commands_mcp_usage", nil)
+}
 
 func (c *MCPCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if c.manager == nil {
@@ -46,7 +52,7 @@ func (c *MCPCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Comm
 		return &CommandResult{Output: c.list(), Success: true}, nil
 	case "test":
 		if len(cmdCtx.Args) < 2 {
-			return nil, fmt.Errorf("/mcp test <name>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_mcp_test_usage", nil))
 		}
 		if err := c.manager.Test(ctx, cmdCtx.Args[1]); err != nil {
 			return nil, err
@@ -55,14 +61,14 @@ func (c *MCPCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*Comm
 	case "reload":
 		cfg := c.manager.Config()
 		if cfg == nil {
-			return nil, fmt.Errorf("/mcp reload: no config loaded")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_mcp_reload_no_config", nil))
 		}
 		if err := c.manager.Reload(ctx, cfg); err != nil {
 			return nil, err
 		}
 		return &CommandResult{Output: "reloaded", Success: true}, nil
 	default:
-		return nil, fmt.Errorf("/mcp: unknown subcommand %q (want list|test|reload)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_mcp_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 

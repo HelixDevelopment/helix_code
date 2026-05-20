@@ -20,10 +20,12 @@ func NewPlanTreeCommand(store plantree.Store, summariser plantree.Summariser) *P
 func (c *PlanTreeCommand) Name() string      { return "plantree" }
 func (c *PlanTreeCommand) Aliases() []string { return []string{"pt", "plans"} }
 func (c *PlanTreeCommand) Description() string {
-	return "Manage plan trees (create, branch, merge, inspect, compact, verify)"
+	// CONST-046 (round-393): genuine user-facing CLI help text
+	// resolved through the package-level translator.
+	return tr(context.Background(), "internal_commands_plantree_description", nil)
 }
 func (c *PlanTreeCommand) Usage() string {
-	return "/plantree [list|show <name>|compact <name>|verify <name>]"
+	return tr(context.Background(), "internal_commands_plantree_usage", nil)
 }
 
 func (c *PlanTreeCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
