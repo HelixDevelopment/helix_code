@@ -163,3 +163,95 @@ harmony_os_cli_task_created:
 
 harmony_os_cli_task_cancelled:
   other: "Cancelled task: {{.ID}}"
+
+# --- round-369 §11.4: cmdSystem / cmdLLM / cmdDistributed / cmdInteractive ---
+
+harmony_os_cli_system_hw_profile:
+  other: "Hardware Profile:"
+
+harmony_os_cli_system_cpu_arch:
+  other: "  CPU Architecture: {{.Arch}}"
+
+harmony_os_cli_system_cpu_cores:
+  other: "  CPU Cores: {{.Cores}}"
+
+harmony_os_cli_system_cpu_threads:
+  other: "  CPU Threads: {{.Threads}}"
+
+harmony_os_cli_system_memory_total:
+  other: "  Memory Total: {{.Total}} bytes"
+
+harmony_os_cli_system_os_info:
+  other: "OS Information:"
+
+harmony_os_cli_system_os_platform:
+  other: "  Platform: HarmonyOS"
+
+harmony_os_cli_system_os_version:
+  other: "  Version: 4.0"
+
+harmony_os_cli_system_os_kernel:
+  other: "  Kernel: Linux 5.10-Harmony"
+
+harmony_os_cli_system_go_runtime:
+  other: "  Go Runtime: {{.OS}}/{{.Arch}}"
+
+harmony_os_cli_system_capabilities:
+  other: "Harmony OS Capabilities:"
+
+harmony_os_cli_system_cap_distributed:
+  other: "  - Distributed Computing"
+
+harmony_os_cli_system_cap_cross_device_sync:
+  other: "  - Cross-Device Sync"
+
+harmony_os_cli_system_cap_ai_acceleration:
+  other: "  - AI Acceleration"
+
+harmony_os_cli_system_cap_multi_screen:
+  other: "  - Multi-Screen Collaboration"
+
+harmony_os_cli_system_cap_super_device:
+  other: "  - Super Device Integration"
+
+harmony_os_cli_system_runtime_stats:
+  other: "Runtime Statistics:"
+
+harmony_os_cli_system_goroutines:
+  other: "  Goroutines: {{.Count}}"
+
+harmony_os_cli_system_mem_allocated:
+  other: "  Memory Allocated: {{.MB}} MB"
+
+harmony_os_cli_system_total_allocated:
+  other: "  Total Allocated: {{.MB}} MB"
+
+harmony_os_cli_system_gc_cycles:
+  other: "  GC Cycles: {{.Count}}"
+
+harmony_os_cli_llm_providers_header:
+  other: "=== LLM Providers ==="
+
+harmony_os_cli_llm_no_providers:
+  other: "No providers configured."
+
+harmony_os_cli_llm_models_header:
+  other: "=== Available Models ==="
+
+harmony_os_cli_llm_no_models:
+  other: "No models available."
+
+harmony_os_cli_llm_chat_needs_provider:
+  other: "LLM chat requires a running provider."
+
+harmony_os_cli_llm_chat_configure_hint:
+  other: "Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat."
+
+harmony_os_cli_distributed_subcommands:
+  other: "Available subcommands: status, discover, sync"
+
+harmony_os_cli_interactive_header:
+  other: "=== HelixCode Harmony OS Interactive Mode ==="
+
+harmony_os_cli_interactive_hint:
+  other: "Type 'help' for commands, 'quit' to exit"

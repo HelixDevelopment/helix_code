@@ -211,3 +211,72 @@ func TestCmdProjects_CreateMissingArgs_UsesTranslator(t *testing.T) {
 	out := captureStdout(t, func() { _ = app.cmdProjects([]string{"create"}) })
 	assertTranslated(t, out, "harmony_os_cli_err_name_path_required", "Error: --name and --path are required")
 }
+
+// --- Round-369 §11.4 paired-mutation seam tests ---
+// cmdSystem report body, cmdLLM subcommand output, cmdDistributed
+// default branch, and cmdInteractive banner. Each asserts the
+// round-369-migrated call sites consult the injected Translator
+// (sentinel present) AND no longer emit the original English literal.
+
+func TestCmdSystem_ReportBody_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdSystem() })
+	for _, id := range []string{
+		"harmony_os_cli_system_hw_profile",
+		"harmony_os_cli_system_os_info",
+		"harmony_os_cli_system_capabilities",
+		"harmony_os_cli_system_runtime_stats",
+		"harmony_os_cli_system_cap_distributed",
+	} {
+		if !strings.Contains(out, "<TRANSLATED:"+id+">") {
+			t.Fatalf("cmdSystem output missing sentinel for %q.\nFull:\n%s", id, out)
+		}
+	}
+	for _, lit := range []string{"Hardware Profile:", "OS Information:", "Harmony OS Capabilities:", "Runtime Statistics:"} {
+		if strings.Contains(out, lit) {
+			t.Fatalf("cmdSystem output still contains original literal %q — migration reverted.\nFull:\n%s", lit, out)
+		}
+	}
+}
+
+func TestCmdLLM_Providers_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdLLM([]string{"providers"}) })
+	assertTranslated(t, out, "harmony_os_cli_llm_providers_header", "=== LLM Providers ===")
+}
+
+func TestCmdLLM_Models_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdLLM([]string{"models"}) })
+	assertTranslated(t, out, "harmony_os_cli_llm_models_header", "=== Available Models ===")
+}
+
+func TestCmdLLM_Chat_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdLLM([]string{"chat"}) })
+	assertTranslated(t, out, "harmony_os_cli_llm_chat_needs_provider", "LLM chat requires a running provider.")
+}
+
+func TestCmdLLM_UnknownSubcommand_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdLLM([]string{"bogus-subcmd"}) })
+	if !strings.Contains(out, "<TRANSLATED:harmony_os_cli_unknown_subcommand>") {
+		t.Fatalf("cmdLLM unknown-subcommand output missing translator sentinel.\nFull:\n%s", out)
+	}
+	if strings.Contains(out, "Unknown subcommand: bogus-subcmd") {
+		t.Fatalf("output still contains original literal — migration reverted.\nFull:\n%s", out)
+	}
+}
+
+func TestCmdDistributed_UnknownSubcommand_UsesTranslator(t *testing.T) {
+	app := newCLIAppForTest(t)
+	out := captureStdout(t, func() { _ = app.cmdDistributed([]string{"bogus-subcmd"}) })
+	for _, id := range []string{"harmony_os_cli_unknown_subcommand", "harmony_os_cli_distributed_subcommands"} {
+		if !strings.Contains(out, "<TRANSLATED:"+id+">") {
+			t.Fatalf("cmdDistributed output missing sentinel for %q.\nFull:\n%s", id, out)
+		}
+	}
+	if strings.Contains(out, "Available subcommands: status, discover, sync") {
+		t.Fatalf("output still contains original literal — migration reverted.\nFull:\n%s", out)
+	}
+}

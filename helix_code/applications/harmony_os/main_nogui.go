@@ -377,35 +377,38 @@ func (cliApp *HarmonyCLIApp) cmdSystem() error {
 
 	profile := cliApp.hardwareDetector.GetProfile()
 
-	fmt.Println("Hardware Profile:")
-	fmt.Printf("  CPU Architecture: %s\n", profile.CPU.Arch)
-	fmt.Printf("  CPU Cores: %d\n", profile.CPU.Cores)
-	fmt.Printf("  CPU Threads: %d\n", profile.CPU.Threads)
-	fmt.Printf("  Memory Total: %d bytes\n", profile.Memory.Total)
+	// CONST-046 (round-369 §11.4): system-report labels sourced from
+	// applications/harmony_os/i18n bundle via injected Translator.
+	ctx := context.Background()
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_hw_profile", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cpu_arch", map[string]any{"Arch": profile.CPU.Arch}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cpu_cores", map[string]any{"Cores": profile.CPU.Cores}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cpu_threads", map[string]any{"Threads": profile.CPU.Threads}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_memory_total", map[string]any{"Total": profile.Memory.Total}))
 	fmt.Println()
 
-	fmt.Println("OS Information:")
-	fmt.Printf("  Platform: HarmonyOS\n")
-	fmt.Printf("  Version: 4.0\n")
-	fmt.Printf("  Kernel: Linux 5.10-Harmony\n")
-	fmt.Printf("  Go Runtime: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_os_info", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_os_platform", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_os_version", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_os_kernel", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_go_runtime", map[string]any{"OS": runtime.GOOS, "Arch": runtime.GOARCH}))
 	fmt.Println()
 
-	fmt.Println("Harmony OS Capabilities:")
-	fmt.Println("  - Distributed Computing")
-	fmt.Println("  - Cross-Device Sync")
-	fmt.Println("  - AI Acceleration")
-	fmt.Println("  - Multi-Screen Collaboration")
-	fmt.Println("  - Super Device Integration")
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_capabilities", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cap_distributed", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cap_cross_device_sync", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cap_ai_acceleration", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cap_multi_screen", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_cap_super_device", nil))
 	fmt.Println()
 
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	fmt.Println("Runtime Statistics:")
-	fmt.Printf("  Goroutines: %d\n", runtime.NumGoroutine())
-	fmt.Printf("  Memory Allocated: %.2f MB\n", float64(memStats.Alloc)/(1024*1024))
-	fmt.Printf("  Total Allocated: %.2f MB\n", float64(memStats.TotalAlloc)/(1024*1024))
-	fmt.Printf("  GC Cycles: %d\n", memStats.NumGC)
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_runtime_stats", nil))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_goroutines", map[string]any{"Count": runtime.NumGoroutine()}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_mem_allocated", map[string]any{"MB": float64(memStats.Alloc) / (1024 * 1024)}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_total_allocated", map[string]any{"MB": float64(memStats.TotalAlloc) / (1024 * 1024)}))
+	fmt.Println(cliApp.tr(ctx, "harmony_os_cli_system_gc_cycles", map[string]any{"Count": memStats.NumGC}))
 
 	return nil
 }
@@ -685,7 +688,8 @@ func (cliApp *HarmonyCLIApp) cmdWorkers(args []string) error {
 		fmt.Printf("Removed worker: %s\n", args[1])
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		// CONST-046 (round-369 §11.4): unknown-subcommand notice via Translator.
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
 	}
 
 	return nil
@@ -696,13 +700,16 @@ func (cliApp *HarmonyCLIApp) cmdLLM(args []string) error {
 		args = []string{"providers"}
 	}
 
+	// CONST-046 (round-369 §11.4): LLM subcommand output sourced from
+	// applications/harmony_os/i18n bundle via injected Translator.
+	ctx := context.Background()
+
 	switch args[0] {
 	case "providers":
-		ctx := context.Background()
 		health := cliApp.llmManager.HealthCheck(ctx)
-		fmt.Println("=== LLM Providers ===")
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_providers_header", nil))
 		if len(health) == 0 {
-			fmt.Println("No providers configured.")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_no_providers", nil))
 			return nil
 		}
 		for provider, status := range health {
@@ -711,9 +718,9 @@ func (cliApp *HarmonyCLIApp) cmdLLM(args []string) error {
 
 	case "models":
 		models := cliApp.llmManager.GetAvailableModels()
-		fmt.Println("=== Available Models ===")
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_models_header", nil))
 		if len(models) == 0 {
-			fmt.Println("No models available.")
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_no_models", nil))
 			return nil
 		}
 		for _, m := range models {
@@ -721,11 +728,11 @@ func (cliApp *HarmonyCLIApp) cmdLLM(args []string) error {
 		}
 
 	case "chat":
-		fmt.Println("LLM chat requires a running provider.")
-		fmt.Println("Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat.")
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_needs_provider", nil))
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_configure_hint", nil))
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
 	}
 
 	return nil
@@ -801,16 +808,18 @@ func (cliApp *HarmonyCLIApp) cmdDistributed(args []string) error {
 		return fmt.Errorf("harmony distributed sync: not wired in this build")
 
 	default:
-		fmt.Printf("Unknown subcommand: %s\n", args[0])
-		fmt.Println("Available subcommands: status, discover, sync")
+		// CONST-046 (round-369 §11.4): unknown-subcommand notices via Translator.
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))
+		fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_distributed_subcommands", nil))
 	}
 
 	return nil
 }
 
 func (cliApp *HarmonyCLIApp) cmdInteractive() error {
-	fmt.Println("=== HelixCode Harmony OS Interactive Mode ===")
-	fmt.Println("Type 'help' for commands, 'quit' to exit")
+	// CONST-046 (round-369 §11.4): interactive-mode banner via Translator.
+	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_interactive_header", nil))
+	fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_interactive_hint", nil))
 	fmt.Println()
 
 	// Setup signal handling
