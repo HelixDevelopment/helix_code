@@ -1,4 +1,18 @@
-package llm
+// Package cerebras hosts the Cerebras Cloud provider implementation as a
+// dedicated sub-package of internal/llm.
+//
+// Speed programme P5-T02 (R1 B21, R3 §8.4): internal/llm was a single
+// ~30k-LOC / ~75-file package, so any 1-line edit to one provider
+// recompiled the whole package. Extracting cohesive provider
+// implementations into sub-packages shrinks the incremental-compile unit
+// — a Cerebras edit now recompiles only this small package, not all of
+// internal/llm. This is a PURE structural move: ZERO behaviour change.
+//
+// Cerebras's constructor is NOT referenced by internal/llm/factory.go
+// (the central provider switch), so moving it out introduces NO import
+// cycle: this package imports dev.helix.code/internal/llm for the shared
+// Provider-interface types, and internal/llm never imports back.
+package cerebras
 
 import (
 	"bytes"
@@ -11,42 +25,56 @@ import (
 	"os"
 	"time"
 
+	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/providers/httpclient"
 	"github.com/google/uuid"
 )
 
-// CerebrasProvider implements the Provider interface for Cerebras Cloud
+// Compile-time assertion that *Provider satisfies the shared
+// llm.Provider interface — this is the structural-move no-regression
+// guard for P5-T02: if a future edit drops a method the build fails here
+// rather than at a distant caller.
+var _ llm.Provider = (*Provider)(nil)
+
+// Provider implements the llm.Provider interface for Cerebras Cloud
 // (https://inference.cerebras.ai/). The Cerebras Cloud Chat Completions
 // API is officially OpenAI-compatible (see
 // https://inference-docs.cerebras.ai/api-reference/chat-completions), so
 // this provider thin-wraps the OpenAI message + response shapes already
-// declared in openai_provider.go and reuses the round-46
-// mapOpenAIFinishReasonToErr helper for LLMResponse.Err wiring.
+// declared in internal/llm/openai_provider.go and reuses the round-46
+// llm.MapOpenAIFinishReasonToErr helper for LLMResponse.Err wiring.
 //
-// Round-63 §11.4 anti-bluff close-out: this file was created to land
+// Round-63 §11.4 anti-bluff close-out: this provider landed
 // LLMResponse.Err coverage for the final provider in the round-46
 // 17-provider deferred list (17/17 = 100% coverage). Real Cerebras SDK
 // integration (proper model discovery, dedicated tokenizer, streaming
 // SSE keep-alive handling) remains future work per the round-63 commit
 // body; today it talks to Cerebras Cloud over the OpenAI-compat
 // endpoint exactly as Qwen, Copilot, xAI, OpenRouter, and Azure do.
-type CerebrasProvider struct {
-	config     ProviderConfigEntry
+//
+// Speed programme P5-T02: this type was named CerebrasProvider while it
+// lived in package llm; in this dedicated sub-package the redundant
+// "Cerebras" prefix is dropped (Go convention — package name already
+// disambiguates: cerebras.Provider). The constructor likewise becomes
+// cerebras.NewProvider. The only external caller of the old
+// llm.NewCerebrasProvider symbol was the round-63 test file, updated in
+// the same commit.
+type Provider struct {
+	config     llm.ProviderConfigEntry
 	endpoint   string
 	apiKey     string
 	httpClient *http.Client
-	models     []ModelInfo
-	lastHealth *ProviderHealth
+	models     []llm.ModelInfo
+	lastHealth *llm.ProviderHealth
 }
 
-// NewCerebrasProvider creates a new Cerebras provider. The endpoint
-// defaults to https://api.cerebras.ai/v1 (the official OpenAI-compat
-// base URL) when ProviderConfigEntry.Endpoint is empty. The API key is
-// read from the config first, then the CEREBRAS_API_KEY environment
-// variable. An empty key surfaces a configuration error so callers can
-// fall back to a different provider per the CONST-039 multi-provider
-// mandate.
-func NewCerebrasProvider(config ProviderConfigEntry) (*CerebrasProvider, error) {
+// NewProvider creates a new Cerebras provider. The endpoint defaults to
+// https://api.cerebras.ai/v1 (the official OpenAI-compat base URL) when
+// ProviderConfigEntry.Endpoint is empty. The API key is read from the
+// config first, then the CEREBRAS_API_KEY environment variable. An empty
+// key surfaces a configuration error so callers can fall back to a
+// different provider per the CONST-039 multi-provider mandate.
+func NewProvider(config llm.ProviderConfigEntry) (*Provider, error) {
 	endpoint := config.Endpoint
 	if endpoint == "" {
 		endpoint = "https://api.cerebras.ai/v1"
@@ -60,7 +88,7 @@ func NewCerebrasProvider(config ProviderConfigEntry) (*CerebrasProvider, error) 
 		return nil, fmt.Errorf("no API key available - configure CEREBRAS_API_KEY environment variable or provide APIKey in config")
 	}
 
-	provider := &CerebrasProvider{
+	provider := &Provider{
 		config:   config,
 		endpoint: endpoint,
 		apiKey:   apiKey,
@@ -68,7 +96,7 @@ func NewCerebrasProvider(config ProviderConfigEntry) (*CerebrasProvider, error) 
 		// R1 B03 / R3 §4.7) — connection pooling only; request
 		// behaviour is unchanged.
 		httpClient: httpclient.NewHTTPClient(60 * time.Second),
-		lastHealth: &ProviderHealth{
+		lastHealth: &llm.ProviderHealth{
 			Status:    "unknown",
 			LastCheck: time.Now(),
 		},
@@ -79,36 +107,36 @@ func NewCerebrasProvider(config ProviderConfigEntry) (*CerebrasProvider, error) 
 }
 
 // GetType returns the provider type.
-func (cb *CerebrasProvider) GetType() ProviderType {
-	return ProviderTypeCerebras
+func (cb *Provider) GetType() llm.ProviderType {
+	return llm.ProviderTypeCerebras
 }
 
 // GetName returns the provider name.
-func (cb *CerebrasProvider) GetName() string {
+func (cb *Provider) GetName() string {
 	return "Cerebras"
 }
 
 // GetModels returns available models.
-func (cb *CerebrasProvider) GetModels() []ModelInfo {
+func (cb *Provider) GetModels() []llm.ModelInfo {
 	return cb.models
 }
 
 // GetCapabilities returns provider capabilities.
-func (cb *CerebrasProvider) GetCapabilities() []ModelCapability {
-	return []ModelCapability{
-		CapabilityTextGeneration,
-		CapabilityCodeGeneration,
-		CapabilityCodeAnalysis,
-		CapabilityPlanning,
-		CapabilityDebugging,
-		CapabilityRefactoring,
-		CapabilityTesting,
-		CapabilityReasoning,
+func (cb *Provider) GetCapabilities() []llm.ModelCapability {
+	return []llm.ModelCapability{
+		llm.CapabilityTextGeneration,
+		llm.CapabilityCodeGeneration,
+		llm.CapabilityCodeAnalysis,
+		llm.CapabilityPlanning,
+		llm.CapabilityDebugging,
+		llm.CapabilityRefactoring,
+		llm.CapabilityTesting,
+		llm.CapabilityReasoning,
 	}
 }
 
 // Generate generates a response using Cerebras-hosted models.
-func (cb *CerebrasProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+func (cb *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.LLMResponse, error) {
 	startTime := time.Now()
 
 	openaiRequest, err := cb.convertToOpenAIRequest(request)
@@ -125,7 +153,7 @@ func (cb *CerebrasProvider) Generate(ctx context.Context, request *LLMRequest) (
 }
 
 // GenerateStream generates a streaming response.
-func (cb *CerebrasProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+func (cb *Provider) GenerateStream(ctx context.Context, request *llm.LLMRequest, ch chan<- llm.LLMResponse) error {
 	defer close(ch)
 
 	openaiRequest, err := cb.convertToOpenAIRequest(request)
@@ -138,13 +166,13 @@ func (cb *CerebrasProvider) GenerateStream(ctx context.Context, request *LLMRequ
 }
 
 // IsAvailable reports whether the provider is reachable + healthy.
-func (cb *CerebrasProvider) IsAvailable(ctx context.Context) bool {
+func (cb *Provider) IsAvailable(ctx context.Context) bool {
 	health, err := cb.GetHealth(ctx)
 	return err == nil && health.Status == "healthy"
 }
 
 // GetHealth returns provider health by probing the /models endpoint.
-func (cb *CerebrasProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+func (cb *Provider) GetHealth(ctx context.Context) (*llm.ProviderHealth, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/models", cb.endpoint), nil)
 	if err != nil {
 		cb.updateHealth("unhealthy", 0, cb.lastHealth.ErrorCount+1)
@@ -184,7 +212,7 @@ func (cb *CerebrasProvider) GetHealth(ctx context.Context) (*ProviderHealth, err
 }
 
 // Close closes the provider.
-func (cb *CerebrasProvider) Close() error {
+func (cb *Provider) Close() error {
 	cb.httpClient.CloseIdleConnections()
 	return nil
 }
@@ -192,42 +220,42 @@ func (cb *CerebrasProvider) Close() error {
 // GetContextWindow returns the model's context window size in tokens.
 // Default: 128_000 — Cerebras-hosted Llama 3.1 70B and 405B both
 // advertise 128k context; safe conservative value.
-func (cb *CerebrasProvider) GetContextWindow() int {
+func (cb *Provider) GetContextWindow() int {
 	return 128_000
 }
 
 // CountTokens returns an estimated token count for text. Uses char-based
 // fallback (1 token ≈ 3.5 chars) — Cerebras does not currently expose a
 // tokenize endpoint.
-func (cb *CerebrasProvider) CountTokens(text string) (int, error) {
-	return CharBasedTokenCount(text)
+func (cb *Provider) CountTokens(text string) (int, error) {
+	return llm.CharBasedTokenCount(text)
 }
 
 // Helper methods
 
-func (cb *CerebrasProvider) initializeModels() {
+func (cb *Provider) initializeModels() {
 	// Predefined Cerebras-hosted models. Real model discovery via /models
 	// happens on GetHealth; this static seed keeps the provider operable
 	// before any /models round-trip and matches the round-46 pattern used
 	// by Qwen and Copilot.
-	cb.models = []ModelInfo{
+	cb.models = []llm.ModelInfo{
 		{
 			Name:        "llama3.1-8b",
-			Provider:    ProviderTypeCerebras,
+			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
 			Description: "Cerebras Llama 3.1 8B - Fast inference-optimised model",
 		},
 		{
 			Name:        "llama3.1-70b",
-			Provider:    ProviderTypeCerebras,
+			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
 			Description: "Cerebras Llama 3.1 70B - Balanced quality and speed",
 		},
 		{
 			Name:        "llama-3.3-70b",
-			Provider:    ProviderTypeCerebras,
+			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
 			Description: "Cerebras Llama 3.3 70B - Latest Meta model on Cerebras CS-3",
@@ -235,16 +263,16 @@ func (cb *CerebrasProvider) initializeModels() {
 	}
 
 	for i := range cb.models {
-		EnrichModelInfo(&cb.models[i])
+		llm.EnrichModelInfo(&cb.models[i])
 	}
 
 	log.Printf("Cerebras provider initialized with %d models", len(cb.models))
 }
 
-func (cb *CerebrasProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
-	var messages []OpenAIMessage
+func (cb *Provider) convertToOpenAIRequest(request *llm.LLMRequest) (*llm.OpenAIRequest, error) {
+	var messages []llm.OpenAIMessage
 	for _, msg := range request.Messages {
-		openaiMsg := OpenAIMessage{
+		openaiMsg := llm.OpenAIMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
 		}
@@ -254,7 +282,7 @@ func (cb *CerebrasProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAI
 		messages = append(messages, openaiMsg)
 	}
 
-	return &OpenAIRequest{
+	return &llm.OpenAIRequest{
 		Model:       request.Model,
 		Messages:    messages,
 		MaxTokens:   request.MaxTokens,
@@ -264,7 +292,7 @@ func (cb *CerebrasProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAI
 	}, nil
 }
 
-func (cb *CerebrasProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
+func (cb *Provider) convertFromOpenAIResponse(openaiResp *llm.OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *llm.LLMResponse {
 	var content string
 	var finishReason string
 
@@ -274,11 +302,11 @@ func (cb *CerebrasProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 		finishReason = choice.FinishReason
 	}
 
-	resp := &LLMResponse{
+	resp := &llm.LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
-		Usage: Usage{
+		Usage: llm.Usage{
 			PromptTokens:     openaiResp.Usage.PromptTokens,
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
 			TotalTokens:      openaiResp.Usage.TotalTokens,
@@ -292,14 +320,14 @@ func (cb *CerebrasProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 	// Cerebras Cloud's chat completions API advertises the SAME finish_reason
 	// vocabulary as OpenAI ("stop", "length", "content_filter", "tool_calls")
 	// per https://inference-docs.cerebras.ai/api-reference/chat-completions —
-	// reuse mapOpenAIFinishReasonToErr verbatim. If Cerebras adds a vendor-
+	// reuse llm.MapOpenAIFinishReasonToErr verbatim. If Cerebras adds a vendor-
 	// specific finish_reason value, this MUST be replaced with a
 	// Cerebras-specific helper in the same commit.
-	resp.Err = mapOpenAIFinishReasonToErr(finishReason)
+	resp.Err = llm.MapOpenAIFinishReasonToErr(finishReason)
 	return resp
 }
 
-func (cb *CerebrasProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
+func (cb *Provider) makeOpenAIRequest(ctx context.Context, request *llm.OpenAIRequest) (*llm.OpenAIResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
@@ -324,7 +352,7 @@ func (cb *CerebrasProvider) makeOpenAIRequest(ctx context.Context, request *Open
 		return nil, fmt.Errorf("Cerebras API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	var response OpenAIResponse
+	var response llm.OpenAIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
@@ -332,7 +360,7 @@ func (cb *CerebrasProvider) makeOpenAIRequest(ctx context.Context, request *Open
 	return &response, nil
 }
 
-func (cb *CerebrasProvider) makeOpenAIStreamRequest(ctx context.Context, request *OpenAIRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
+func (cb *Provider) makeOpenAIStreamRequest(ctx context.Context, request *llm.OpenAIRequest, ch chan<- llm.LLMResponse, requestID uuid.UUID) error {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return err
@@ -359,7 +387,7 @@ func (cb *CerebrasProvider) makeOpenAIStreamRequest(ctx context.Context, request
 
 	decoder := json.NewDecoder(resp.Body)
 	for decoder.More() {
-		var streamResp OpenAIStreamResponse
+		var streamResp llm.OpenAIStreamResponse
 		if err := decoder.Decode(&streamResp); err != nil {
 			return err
 		}
@@ -367,7 +395,7 @@ func (cb *CerebrasProvider) makeOpenAIStreamRequest(ctx context.Context, request
 		if len(streamResp.Choices) > 0 {
 			choice := streamResp.Choices[0]
 			if choice.Delta.Content != "" {
-				response := LLMResponse{
+				response := llm.LLMResponse{
 					ID:        uuid.New(),
 					RequestID: requestID,
 					Content:   choice.Delta.Content,
@@ -387,9 +415,9 @@ func (cb *CerebrasProvider) makeOpenAIStreamRequest(ctx context.Context, request
 			// stream consumers (notably tool_provider.go :201/:251) can
 			// distinguish a clean stop from a partial-error stop.
 			if choice.FinishReason != "" {
-				if errSentinel := mapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
+				if errSentinel := llm.MapOpenAIFinishReasonToErr(choice.FinishReason); errSentinel != nil {
 					select {
-					case ch <- LLMResponse{
+					case ch <- llm.LLMResponse{
 						ID:           uuid.New(),
 						RequestID:    requestID,
 						FinishReason: choice.FinishReason,
@@ -411,17 +439,18 @@ func (cb *CerebrasProvider) makeOpenAIStreamRequest(ctx context.Context, request
 	return nil
 }
 
-func (cb *CerebrasProvider) setAuthHeaders(req *http.Request) {
+func (cb *Provider) setAuthHeaders(req *http.Request) {
 	req.Header.Set("Authorization", "Bearer "+cb.apiKey)
 }
 
-func (cb *CerebrasProvider) updateHealth(status string, latency time.Duration, errorCount int) {
+func (cb *Provider) updateHealth(status string, latency time.Duration, errorCount int) {
 	cb.lastHealth.Status = status
 	cb.lastHealth.Latency = latency
 	cb.lastHealth.ErrorCount = errorCount
 	cb.lastHealth.LastCheck = time.Now()
 }
 
-// Note: OpenAI API types (OpenAIRequest, OpenAIMessage, OpenAIResponse,
-// OpenAIStreamResponse) are reused from openai_provider.go since
-// Cerebras Cloud is OpenAI-compatible.
+// Note: OpenAI API types (llm.OpenAIRequest, llm.OpenAIMessage,
+// llm.OpenAIResponse, llm.OpenAIStreamResponse) are reused from
+// internal/llm/openai_provider.go since Cerebras Cloud is
+// OpenAI-compatible.

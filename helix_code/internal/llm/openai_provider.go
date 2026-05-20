@@ -329,6 +329,17 @@ func mapOpenAIFinishReasonToErr(reason string) error {
 	}
 }
 
+// MapOpenAIFinishReasonToErr is the exported façade over
+// mapOpenAIFinishReasonToErr. It exists so that provider sub-packages
+// (e.g. internal/llm/providers/cerebras — speed programme P5-T02) that
+// thin-wrap the OpenAI-compatible wire format can reuse the canonical
+// finish_reason → LLMResponse.Err mapping without re-implementing it
+// (which would risk the closed-set vocabulary drifting per-provider).
+// Behaviour is byte-identical to the unexported helper — pure delegation.
+func MapOpenAIFinishReasonToErr(reason string) error {
+	return mapOpenAIFinishReasonToErr(reason)
+}
+
 func (op *OpenAIProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {

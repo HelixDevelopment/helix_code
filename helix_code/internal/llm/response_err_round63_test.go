@@ -31,8 +31,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -385,227 +383,16 @@ func TestRound63_Copilot_Generate_CleanStop_LeavesErrNil(t *testing.T) {
 
 // =========================================================================
 // Cerebras Cloud — NEW PROVIDER, OpenAI-compatible
+//
+// Speed programme P5-T02 (R1 B21): the Cerebras provider implementation
+// moved to its own sub-package internal/llm/providers/cerebras/. Its
+// per-provider Err-propagation tests moved with it to
+// internal/llm/providers/cerebras/cerebras_test.go — they must live
+// beside the package they exercise. The mapper-pinning test below
+// (TestRound63_AllRound46DeferredProvidersWired) still asserts Cerebras
+// reuses the OpenAI mapper at the helper layer and stays here, as it
+// only needs the package-llm mapper helper, not the moved provider type.
 // =========================================================================
-
-// TestRound63_Cerebras_NewProvider_NoAPIKey_ReturnsConfigSentinel asserts
-// the Cerebras provider refuses to construct without an API key — neither
-// CEREBRAS_API_KEY nor ProviderConfigEntry.APIKey. Real configuration
-// error surfaces so callers can fall back to a different provider per
-// CONST-039 multi-provider mandate.
-func TestRound63_Cerebras_NewProvider_NoAPIKey_ReturnsConfigSentinel(t *testing.T) {
-	// Clear env to avoid environmental contamination.
-	oldKey := os.Getenv("CEREBRAS_API_KEY")
-	_ = os.Unsetenv("CEREBRAS_API_KEY")
-	defer func() {
-		if oldKey != "" {
-			_ = os.Setenv("CEREBRAS_API_KEY", oldKey)
-		}
-	}()
-
-	_, err := NewCerebrasProvider(ProviderConfigEntry{
-		Type:    ProviderTypeCerebras,
-		Enabled: true,
-	})
-	require.Error(t, err, "NewCerebrasProvider MUST refuse construction without an API key")
-	assert.True(t,
-		strings.Contains(err.Error(), "CEREBRAS_API_KEY") ||
-			strings.Contains(err.Error(), "no API key"),
-		"error MUST mention the env-var name or 'no API key'; got %q", err.Error())
-}
-
-// TestRound63_Cerebras_Generate_FinishReasonLength_PopulatesTruncated
-// asserts that Cerebras's "length" finish_reason maps to
-// ErrResponseTruncated, end-to-end through the real HTTP code path.
-func TestRound63_Cerebras_Generate_FinishReasonLength_PopulatesTruncated(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := map[string]interface{}{
-			"id": "chatcmpl-round63-cerebras-length", "object": "chat.completion",
-			"created": time.Now().Unix(), "model": "llama3.1-70b",
-			"choices": []map[string]interface{}{
-				{
-					"index": 0,
-					"message": map[string]interface{}{
-						"role":    "assistant",
-						"content": "Cerebras partial output here",
-					},
-					"finish_reason": "length",
-				},
-			},
-			"usage": map[string]interface{}{
-				"prompt_tokens": 8, "completion_tokens": 4, "total_tokens": 12,
-			},
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(response)
-	}))
-	defer server.Close()
-
-	provider, err := NewCerebrasProvider(ProviderConfigEntry{
-		Type:     ProviderTypeCerebras,
-		APIKey:   "test-key",
-		Endpoint: server.URL,
-		Enabled:  true,
-	})
-	require.NoError(t, err)
-
-	resp, err := provider.Generate(context.Background(), &LLMRequest{
-		ID:        uuid.New(),
-		Model:     "llama3.1-70b",
-		Messages:  []Message{{Role: "user", Content: "test"}},
-		MaxTokens: 4,
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	assert.NotEmpty(t, resp.Content, "Content MUST hold partial output")
-	require.NotNil(t, resp.Err)
-	assert.True(t, errors.Is(resp.Err, ErrResponseTruncated),
-		"Err MUST be ErrResponseTruncated; got %v", resp.Err)
-	assert.Equal(t, "length", resp.FinishReason)
-}
-
-// TestRound63_Cerebras_Generate_ContentFilter_PopulatesBlocked asserts
-// content_filter mapping.
-func TestRound63_Cerebras_Generate_ContentFilter_PopulatesBlocked(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := map[string]interface{}{
-			"id": "chatcmpl-round63-cerebras-cf", "object": "chat.completion",
-			"created": time.Now().Unix(), "model": "llama3.1-70b",
-			"choices": []map[string]interface{}{
-				{
-					"index":         0,
-					"message":       map[string]interface{}{"role": "assistant", "content": ""},
-					"finish_reason": "content_filter",
-				},
-			},
-			"usage": map[string]interface{}{
-				"prompt_tokens": 3, "completion_tokens": 0, "total_tokens": 3,
-			},
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(response)
-	}))
-	defer server.Close()
-
-	provider, err := NewCerebrasProvider(ProviderConfigEntry{
-		Type: ProviderTypeCerebras, APIKey: "test-key", Endpoint: server.URL, Enabled: true,
-	})
-	require.NoError(t, err)
-
-	resp, err := provider.Generate(context.Background(), &LLMRequest{
-		ID: uuid.New(), Model: "llama3.1-70b",
-		Messages: []Message{{Role: "user", Content: "test"}},
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp.Err)
-	assert.True(t, errors.Is(resp.Err, ErrResponseContentBlocked),
-		"Err MUST be ErrResponseContentBlocked; got %v", resp.Err)
-}
-
-// TestRound63_Cerebras_Generate_CleanStop_LeavesErrNil asserts that the
-// backward-compat invariant (clean stop → Err nil) holds for the new
-// Cerebras provider too.
-func TestRound63_Cerebras_Generate_CleanStop_LeavesErrNil(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := map[string]interface{}{
-			"id": "ok", "object": "chat.completion",
-			"created": time.Now().Unix(), "model": "llama3.1-70b",
-			"choices": []map[string]interface{}{
-				{
-					"index":         0,
-					"message":       map[string]interface{}{"role": "assistant", "content": "OK"},
-					"finish_reason": "stop",
-				},
-			},
-			"usage": map[string]interface{}{
-				"prompt_tokens": 2, "completion_tokens": 1, "total_tokens": 3,
-			},
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(response)
-	}))
-	defer server.Close()
-
-	provider, err := NewCerebrasProvider(ProviderConfigEntry{
-		Type: ProviderTypeCerebras, APIKey: "test-key", Endpoint: server.URL, Enabled: true,
-	})
-	require.NoError(t, err)
-
-	resp, err := provider.Generate(context.Background(), &LLMRequest{
-		ID: uuid.New(), Model: "llama3.1-70b",
-		Messages: []Message{{Role: "user", Content: "test"}},
-	})
-	require.NoError(t, err)
-	assert.Nil(t, resp.Err, "Err MUST be nil for clean finish_reason=stop")
-	assert.Equal(t, "OK", resp.Content)
-}
-
-// TestRound63_Cerebras_Stream_FinishReasonLength_PropagatesToTerminalFrame
-// asserts that streaming-path truncation emits a terminal Err-bearing
-// frame on the channel.
-func TestRound63_Cerebras_Stream_FinishReasonLength_PropagatesToTerminalFrame(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		chunks := []map[string]interface{}{
-			{
-				"id": "s1", "object": "chat.completion.chunk", "model": "llama3.1-70b",
-				"choices": []map[string]interface{}{
-					{"index": 0, "delta": map[string]interface{}{"role": "assistant", "content": "Hi"}, "finish_reason": ""},
-				},
-			},
-			{
-				"id": "s2", "object": "chat.completion.chunk", "model": "llama3.1-70b",
-				"choices": []map[string]interface{}{
-					{"index": 0, "delta": map[string]interface{}{"content": " there"}, "finish_reason": ""},
-				},
-			},
-			{
-				"id": "s3", "object": "chat.completion.chunk", "model": "llama3.1-70b",
-				"choices": []map[string]interface{}{
-					{"index": 0, "delta": map[string]interface{}{}, "finish_reason": "length"},
-				},
-			},
-		}
-		enc := json.NewEncoder(w)
-		for _, c := range chunks {
-			_ = enc.Encode(c)
-		}
-	}))
-	defer server.Close()
-
-	provider, err := NewCerebrasProvider(ProviderConfigEntry{
-		Type: ProviderTypeCerebras, APIKey: "test-key", Endpoint: server.URL, Enabled: true,
-	})
-	require.NoError(t, err)
-
-	ch := make(chan LLMResponse, 16)
-	go func() {
-		_ = provider.GenerateStream(context.Background(), &LLMRequest{
-			ID: uuid.New(), Model: "llama3.1-70b", Stream: true,
-			Messages: []Message{{Role: "user", Content: "Hi"}},
-		}, ch)
-	}()
-
-	var sawErrFrame bool
-	deadline := time.After(3 * time.Second)
-loop:
-	for {
-		select {
-		case resp, ok := <-ch:
-			if !ok {
-				break loop
-			}
-			if resp.Err != nil {
-				sawErrFrame = true
-				assert.True(t, errors.Is(resp.Err, ErrResponseTruncated),
-					"terminal stream Err MUST be ErrResponseTruncated; got %v", resp.Err)
-				assert.Equal(t, "length", resp.FinishReason)
-			}
-		case <-deadline:
-			break loop
-		}
-	}
-	assert.True(t, sawErrFrame, "stream MUST emit a terminal Err-bearing frame on finish_reason=length")
-}
 
 // =========================================================================
 // Paired-mutation mapper-pinning tests (closed-set regression)
@@ -638,17 +425,13 @@ func TestRound63_CopilotReusesOpenAIMapper(t *testing.T) {
 	assert.Nil(t, mapOpenAIFinishReasonToErr("function_call"))
 }
 
-// TestRound63_CerebrasReusesOpenAIMapper pins the architectural decision
-// that Cerebras Cloud advertises an OpenAI-compatible chat completions
-// API and reuses mapOpenAIFinishReasonToErr. If Cerebras adds a
-// vendor-specific finish_reason value, this test MUST be replaced with a
-// Cerebras-specific mapper in the same commit.
-func TestRound63_CerebrasReusesOpenAIMapper(t *testing.T) {
-	assert.True(t, errors.Is(mapOpenAIFinishReasonToErr("length"), ErrResponseTruncated))
-	assert.True(t, errors.Is(mapOpenAIFinishReasonToErr("content_filter"), ErrResponseContentBlocked))
-	assert.Nil(t, mapOpenAIFinishReasonToErr("stop"))
-	assert.Nil(t, mapOpenAIFinishReasonToErr("tool_calls"))
-}
+// Note (speed programme P5-T02): TestRound63_CerebrasReusesOpenAIMapper
+// moved to internal/llm/providers/cerebras/cerebras_test.go alongside the
+// Cerebras provider it pins. It now asserts against the exported
+// llm.MapOpenAIFinishReasonToErr façade. The milestone test below
+// (TestRound63_AllRound46DeferredProvidersWired) still covers Cerebras
+// at the package-llm helper layer, so the 17/17 coverage record is
+// preserved without an import cycle.
 
 // TestRound63_ProvidersWired is a quick smoke that all 3 round-63
 // providers actually wire LLMResponse.Err (catches silent no-op
