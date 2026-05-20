@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"dev.helix.code/internal/llm/promptcache"
 )
 
 // AnthropicProvider implements the Provider interface for Anthropic's Claude models
@@ -28,6 +30,14 @@ type AnthropicProvider struct {
 	// (~5 minutes) has elapsed before sending the next request.
 	// Ported from gptme commit e896ed4ff.
 	cacheAwareness *CacheAwareness
+
+	// prefixDetector watches the request prefix (system prompt + tool
+	// definitions) for mid-session drift. Speed programme P1-T04: provider-side
+	// prompt caching only hits when the prefix is byte-stable across a session.
+	// The detector freezes the prefix on the first request and reports a
+	// "cache break" if a later request mutates it. This is observability only —
+	// it never alters the request — so feature behaviour is unaffected.
+	prefixDetector *promptcache.CacheBreakDetector
 }
 
 // Anthropic API structures
@@ -172,6 +182,7 @@ func NewAnthropicProvider(config ProviderConfigEntry) (*AnthropicProvider, error
 		},
 		models:         getAnthropicModels(),
 		cacheAwareness: NewCacheAwareness(),
+		prefixDetector: promptcache.NewCacheBreakDetector(),
 	}
 
 	return provider, nil
@@ -519,7 +530,49 @@ func (ap *AnthropicProvider) buildRequest(request *LLMRequest) (*anthropicReques
 		}
 	}
 
+	// Speed programme P1-T04: track prompt-cache prefix stability.
+	// The prefix (system prompt + tool definitions) must be byte-stable for
+	// every request in a session or the provider cache never hits. The first
+	// request freezes the prefix as the baseline; subsequent requests are
+	// checked against it and a "cache break" is logged if the prefix drifted.
+	// This is purely observational — it never alters req — so it cannot affect
+	// feature behaviour for any provider or any caller.
+	ap.trackPromptCachePrefix(systemMsg, req.Tools)
+
 	return req, nil
+}
+
+// trackPromptCachePrefix records or verifies the prompt-cache prefix for the
+// current session. On the first call it freezes the prefix as the baseline;
+// on later calls it checks the prefix against the baseline and logs a warning
+// if it changed (cache break). Errors are swallowed: prefix tracking is an
+// optimization-observability concern and MUST NEVER fail a request.
+func (ap *AnthropicProvider) trackPromptCachePrefix(systemMsg string, tools []anthropicTool) {
+	if ap.prefixDetector == nil {
+		return
+	}
+	prefixTools := make([]interface{}, len(tools))
+	for i := range tools {
+		prefixTools[i] = tools[i]
+	}
+	prefix := promptcache.PrefixComponents{
+		SystemPrompt: systemMsg,
+		Tools:        prefixTools,
+	}
+	if !ap.prefixDetector.IsFrozen() {
+		if _, err := ap.prefixDetector.Freeze(prefix); err != nil {
+			log.Printf("anthropic: prompt-cache prefix freeze failed: %v", err)
+		}
+		return
+	}
+	res, err := ap.prefixDetector.Check(prefix)
+	if err != nil {
+		log.Printf("anthropic: prompt-cache prefix check failed: %v", err)
+		return
+	}
+	if res.Broken {
+		log.Printf("anthropic: %s", res.Reason)
+	}
 }
 
 // shouldEnableThinking determines if extended thinking should be enabled
@@ -560,7 +613,21 @@ func (ap *AnthropicProvider) convertMessages(messages []Message) (string, []anth
 	return systemMsg, anthropicMsgs
 }
 
-// convertTools converts LLM tools to Anthropic format
+// convertTools converts LLM tools to Anthropic format.
+//
+// Speed programme P1-T04: the InputSchema is a map[string]interface{}. Go
+// randomizes map iteration order, and JSON-Schema bodies frequently carry
+// set-like arrays (`required`, `enum`) that callers assemble by ranging over a
+// Go map — producing a randomly-ordered slice. encoding/json sorts top-level
+// map keys but faithfully preserves that array randomness, so a naive prefix
+// would mishash and NEVER hit the provider prompt cache.
+//
+// canonicalizeSchema runs each InputSchema through promptcache's deterministic
+// serializer (sorted keys + sorted string-only arrays) so the serialized tool
+// definition is byte-stable across every request in a session. This is a
+// semantics-preserving normalization: the JSON content is logically identical
+// (Anthropic does not care about key/required order) — only the byte order is
+// frozen, which is exactly what the prompt cache needs.
 func (ap *AnthropicProvider) convertTools(tools []Tool) []anthropicTool {
 	anthropicTools := make([]anthropicTool, len(tools))
 
@@ -568,11 +635,33 @@ func (ap *AnthropicProvider) convertTools(tools []Tool) []anthropicTool {
 		anthropicTools[i] = anthropicTool{
 			Name:        tool.Function.Name,
 			Description: tool.Function.Description,
-			InputSchema: tool.Function.Parameters,
+			InputSchema: canonicalizeSchema(tool.Function.Parameters),
 		}
 	}
 
 	return anthropicTools
+}
+
+// canonicalizeSchema returns a copy of schema whose nested set-like string
+// arrays are sorted, so re-serialization is byte-deterministic. If schema is
+// nil or canonicalization fails for any reason, the original map is returned
+// unchanged — this normalization is a cache optimization and MUST NEVER break
+// a request. (encoding/json already sorts map keys on marshal, so an
+// unmodified return still produces correct, though potentially cache-missing,
+// output.)
+func canonicalizeSchema(schema map[string]interface{}) map[string]interface{} {
+	if schema == nil {
+		return nil
+	}
+	canon, err := promptcache.CanonicalJSONSorted(schema)
+	if err != nil {
+		return schema
+	}
+	var normalized map[string]interface{}
+	if err := json.Unmarshal(canon, &normalized); err != nil {
+		return schema
+	}
+	return normalized
 }
 
 // makeRequest makes a non-streaming API request
