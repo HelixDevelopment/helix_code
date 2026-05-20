@@ -140,12 +140,32 @@ func (rm *RepoMap) GetOptimalContext(query string, changedFiles []string) ([]Fil
 	for i := 0; i < len(fileScores) && i < rm.config.MaxFiles; i++ {
 		score := fileScores[i]
 
-		// Estimate token count (rough approximation: 1 token per 4 chars)
-		content, err := rm.readFileContent(score.FilePath)
+		// R1 B19: get the file size from a cheap os.Stat instead of reading
+		// the whole file into memory first. statSize returns -1 on error,
+		// in which case we fall back to the original read-then-measure path
+		// so behaviour is byte-identical to the pre-B19 code.
+		statSize := fileSizeFromStat(score.FilePath)
+
+		var content string
+		var err error
+		if statSize >= 0 {
+			// Token estimate from the stat'd size (1 token ≈ 4 chars) — the
+			// SAME formula the original applied to the read content, so the
+			// budget decision and the resulting context set are identical.
+			tokenCountFromStat := int(statSize) / 4
+			if currentTokens+tokenCountFromStat > rm.config.TokenBudget {
+				// Over budget — stop here exactly as the original `break` did.
+				break
+			}
+			content, err = rm.readFileContent(score.FilePath)
+		} else {
+			content, err = rm.readFileContent(score.FilePath)
+		}
 		if err != nil {
 			continue
 		}
 
+		// Exact token count from the bytes actually read.
 		tokenCount := len(content) / 4
 		if currentTokens+tokenCount > rm.config.TokenBudget {
 			break
@@ -351,6 +371,17 @@ func (rm *RepoMap) extractFileSymbols(filePath string) ([]Symbol, error) {
 	}
 
 	return symbols, nil
+}
+
+// fileSizeFromStat returns a file's size in bytes via a single os.Stat,
+// without reading its contents. Returns -1 if the file cannot be stat'd, so
+// callers can fall back to a read-based measurement (R1 B19).
+func fileSizeFromStat(filePath string) int64 {
+	info, err := os.Stat(filePath)
+	if err != nil || info.IsDir() {
+		return -1
+	}
+	return info.Size()
 }
 
 // readFileContent reads the content of a file
