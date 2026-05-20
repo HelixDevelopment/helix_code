@@ -276,24 +276,28 @@ func (pf *PreviewFormatter) Format(result *PreviewResult) (string, error) {
 func (pf *PreviewFormatter) formatPlain(result *PreviewResult) (string, error) {
 	var output string
 
-	output += fmt.Sprintf("Transaction: %s\n", result.TransactionID)
-	output += fmt.Sprintf("Summary: %d files (%d created, %d modified, %d deleted)\n",
-		result.Summary.TotalFiles,
-		result.Summary.FilesCreated,
-		result.Summary.FilesModified,
-		result.Summary.FilesDeleted)
-	output += fmt.Sprintf("Changes: +%d -%d lines\n",
-		result.Summary.TotalLinesAdded,
-		result.Summary.TotalLinesDeleted)
+	output += trc("internal_tools_multiedit_preview_transaction_line",
+		map[string]any{"ID": result.TransactionID}) + "\n"
+	output += trc("internal_tools_multiedit_preview_summary_line", map[string]any{
+		"TotalFiles": result.Summary.TotalFiles,
+		"Created":    result.Summary.FilesCreated,
+		"Modified":   result.Summary.FilesModified,
+		"Deleted":    result.Summary.FilesDeleted,
+	}) + "\n"
+	output += trc("internal_tools_multiedit_preview_changes_line", map[string]any{
+		"Added":   result.Summary.TotalLinesAdded,
+		"Deleted": result.Summary.TotalLinesDeleted,
+	}) + "\n"
 
 	if result.Summary.HasConflicts {
-		output += fmt.Sprintf("\nConflicts: %d\n", len(result.Conflicts))
+		output += "\n" + trc("internal_tools_multiedit_preview_conflicts_line",
+			map[string]any{"Count": len(result.Conflicts)}) + "\n"
 		for _, conflict := range result.Conflicts {
 			output += fmt.Sprintf("  - %s: %s\n", conflict.FilePath, conflict.Description)
 		}
 	}
 
-	output += "\nFiles:\n"
+	output += "\n" + trc("internal_tools_multiedit_preview_files_heading", nil) + "\n"
 	for _, file := range result.Files {
 		output += fmt.Sprintf("\n%s (%s)\n", file.FilePath, file.Operation)
 		if file.Diff != nil {
@@ -308,24 +312,31 @@ func (pf *PreviewFormatter) formatPlain(result *PreviewResult) (string, error) {
 func (pf *PreviewFormatter) formatMarkdown(result *PreviewResult) (string, error) {
 	var output string
 
-	output += fmt.Sprintf("# Transaction Preview: %s\n\n", result.TransactionID)
-	output += "## Summary\n\n"
-	output += fmt.Sprintf("- **Total Files**: %d\n", result.Summary.TotalFiles)
-	output += fmt.Sprintf("- **Created**: %d\n", result.Summary.FilesCreated)
-	output += fmt.Sprintf("- **Modified**: %d\n", result.Summary.FilesModified)
-	output += fmt.Sprintf("- **Deleted**: %d\n", result.Summary.FilesDeleted)
-	output += fmt.Sprintf("- **Lines Added**: +%d\n", result.Summary.TotalLinesAdded)
-	output += fmt.Sprintf("- **Lines Deleted**: -%d\n\n", result.Summary.TotalLinesDeleted)
+	output += trc("internal_tools_multiedit_preview_md_title",
+		map[string]any{"ID": result.TransactionID}) + "\n\n"
+	output += trc("internal_tools_multiedit_preview_md_summary_heading", nil) + "\n\n"
+	output += trc("internal_tools_multiedit_preview_md_total_files",
+		map[string]any{"Count": result.Summary.TotalFiles}) + "\n"
+	output += trc("internal_tools_multiedit_preview_md_created",
+		map[string]any{"Count": result.Summary.FilesCreated}) + "\n"
+	output += trc("internal_tools_multiedit_preview_md_modified",
+		map[string]any{"Count": result.Summary.FilesModified}) + "\n"
+	output += trc("internal_tools_multiedit_preview_md_deleted",
+		map[string]any{"Count": result.Summary.FilesDeleted}) + "\n"
+	output += trc("internal_tools_multiedit_preview_md_lines_added",
+		map[string]any{"Count": result.Summary.TotalLinesAdded}) + "\n"
+	output += trc("internal_tools_multiedit_preview_md_lines_deleted",
+		map[string]any{"Count": result.Summary.TotalLinesDeleted}) + "\n\n"
 
 	if result.Summary.HasConflicts {
-		output += "## Conflicts\n\n"
+		output += trc("internal_tools_multiedit_preview_md_conflicts_heading", nil) + "\n\n"
 		for _, conflict := range result.Conflicts {
 			output += fmt.Sprintf("- **%s**: %s\n", conflict.FilePath, conflict.Description)
 		}
 		output += "\n"
 	}
 
-	output += "## Files\n\n"
+	output += trc("internal_tools_multiedit_preview_md_files_heading", nil) + "\n\n"
 	for _, file := range result.Files {
 		output += fmt.Sprintf("### %s (%s)\n\n", file.FilePath, file.Operation)
 		if file.Diff != nil {
@@ -372,17 +383,22 @@ func (pf *PreviewFormatter) formatHTML(result *PreviewResult) (string, error) {
 	var output string
 
 	output += "<html><body>\n"
-	output += fmt.Sprintf("<h1>Transaction Preview: %s</h1>\n", result.TransactionID)
-	output += "<h2>Summary</h2>\n"
+	output += fmt.Sprintf("<h1>%s</h1>\n", trc("internal_tools_multiedit_preview_html_title",
+		map[string]any{"ID": result.TransactionID}))
+	output += fmt.Sprintf("<h2>%s</h2>\n", trc("internal_tools_multiedit_preview_html_summary_heading", nil))
 	output += "<ul>\n"
-	output += fmt.Sprintf("<li>Total Files: %d</li>\n", result.Summary.TotalFiles)
-	output += fmt.Sprintf("<li>Created: %d</li>\n", result.Summary.FilesCreated)
-	output += fmt.Sprintf("<li>Modified: %d</li>\n", result.Summary.FilesModified)
-	output += fmt.Sprintf("<li>Deleted: %d</li>\n", result.Summary.FilesDeleted)
+	output += fmt.Sprintf("<li>%s</li>\n", trc("internal_tools_multiedit_preview_html_total_files",
+		map[string]any{"Count": result.Summary.TotalFiles}))
+	output += fmt.Sprintf("<li>%s</li>\n", trc("internal_tools_multiedit_preview_html_created",
+		map[string]any{"Count": result.Summary.FilesCreated}))
+	output += fmt.Sprintf("<li>%s</li>\n", trc("internal_tools_multiedit_preview_html_modified",
+		map[string]any{"Count": result.Summary.FilesModified}))
+	output += fmt.Sprintf("<li>%s</li>\n", trc("internal_tools_multiedit_preview_html_deleted",
+		map[string]any{"Count": result.Summary.FilesDeleted}))
 	output += "</ul>\n"
 
 	if result.Summary.HasConflicts {
-		output += "<h2>Conflicts</h2>\n"
+		output += fmt.Sprintf("<h2>%s</h2>\n", trc("internal_tools_multiedit_preview_html_conflicts_heading", nil))
 		output += "<ul>\n"
 		for _, conflict := range result.Conflicts {
 			output += fmt.Sprintf("<li>%s: %s</li>\n", conflict.FilePath, conflict.Description)
@@ -390,7 +406,7 @@ func (pf *PreviewFormatter) formatHTML(result *PreviewResult) (string, error) {
 		output += "</ul>\n"
 	}
 
-	output += "<h2>Files</h2>\n"
+	output += fmt.Sprintf("<h2>%s</h2>\n", trc("internal_tools_multiedit_preview_html_files_heading", nil))
 	for _, file := range result.Files {
 		output += fmt.Sprintf("<h3>%s (%s)</h3>\n", file.FilePath, file.Operation)
 		if file.Diff != nil {

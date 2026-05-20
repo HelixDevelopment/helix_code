@@ -2,6 +2,7 @@ package multiedit
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -537,7 +538,16 @@ func TestTransactionManager_ListAndCleanup(t *testing.T) {
 }
 
 // Test 17: Preview Formatter
+//
+// Round-428 CONST-046 §11.4: the PreviewFormatter render text is now
+// resolved through the package i18n seam. The test wires a fake
+// Translator that emits the active.en.yaml English strings so the
+// assertions exercise the real end-user output (NoopTranslator would
+// echo message IDs — a §11.4 PASS-bluff if asserted against).
 func TestPreviewFormatter_Format(t *testing.T) {
+	SetTranslator(previewEnglishTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
 	result := &PreviewResult{
 		TransactionID: "test-tx",
 		Summary: &PreviewSummary{
@@ -575,6 +585,121 @@ func TestPreviewFormatter_Format(t *testing.T) {
 	html, err := pf.Format(result)
 	require.NoError(t, err)
 	assert.Contains(t, html, "<html>")
+}
+
+// previewEnglishTranslator is a CONST-046 fake Translator that
+// resolves the multiedit message IDs to their active.en.yaml English
+// renderings with placeholder interpolation. It exists so the
+// formatter tests assert against real end-user output.
+type previewEnglishTranslator struct{}
+
+func (previewEnglishTranslator) T(_ context.Context, id string, d map[string]any) (string, error) {
+	g := func(k string) any { return d[k] }
+	switch id {
+	case "internal_tools_multiedit_preview_transaction_line":
+		return fmt.Sprintf("Transaction: %v", g("ID")), nil
+	case "internal_tools_multiedit_preview_summary_line":
+		return fmt.Sprintf("Summary: %v files (%v created, %v modified, %v deleted)",
+			g("TotalFiles"), g("Created"), g("Modified"), g("Deleted")), nil
+	case "internal_tools_multiedit_preview_changes_line":
+		return fmt.Sprintf("Changes: +%v -%v lines", g("Added"), g("Deleted")), nil
+	case "internal_tools_multiedit_preview_conflicts_line":
+		return fmt.Sprintf("Conflicts: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_files_heading":
+		return "Files:", nil
+	case "internal_tools_multiedit_preview_md_title":
+		return fmt.Sprintf("# Transaction Preview: %v", g("ID")), nil
+	case "internal_tools_multiedit_preview_md_summary_heading":
+		return "## Summary", nil
+	case "internal_tools_multiedit_preview_md_total_files":
+		return fmt.Sprintf("- **Total Files**: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_created":
+		return fmt.Sprintf("- **Created**: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_modified":
+		return fmt.Sprintf("- **Modified**: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_deleted":
+		return fmt.Sprintf("- **Deleted**: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_lines_added":
+		return fmt.Sprintf("- **Lines Added**: +%v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_lines_deleted":
+		return fmt.Sprintf("- **Lines Deleted**: -%v", g("Count")), nil
+	case "internal_tools_multiedit_preview_md_conflicts_heading":
+		return "## Conflicts", nil
+	case "internal_tools_multiedit_preview_md_files_heading":
+		return "## Files", nil
+	case "internal_tools_multiedit_preview_html_title":
+		return fmt.Sprintf("Transaction Preview: %v", g("ID")), nil
+	case "internal_tools_multiedit_preview_html_summary_heading":
+		return "Summary", nil
+	case "internal_tools_multiedit_preview_html_total_files":
+		return fmt.Sprintf("Total Files: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_html_created":
+		return fmt.Sprintf("Created: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_html_modified":
+		return fmt.Sprintf("Modified: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_html_deleted":
+		return fmt.Sprintf("Deleted: %v", g("Count")), nil
+	case "internal_tools_multiedit_preview_html_conflicts_heading":
+		return "Conflicts", nil
+	case "internal_tools_multiedit_preview_html_files_heading":
+		return "Files", nil
+	default:
+		return id, nil
+	}
+}
+
+func (previewEnglishTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return id, nil
+}
+
+// TestPreviewFormatter_CONST046_GoesThroughTranslator is the paired
+// mutation test for round-428: it proves PreviewFormatter routes its
+// user-facing text through the i18n seam rather than emitting
+// hardcoded literals. With a sentinel translator that overrides
+// every message ID, NONE of the original English literals may appear
+// in the rendered output. If a future edit reintroduces a hardcoded
+// literal, this test fails — the CONST-046 regression guard.
+func TestPreviewFormatter_CONST046_GoesThroughTranslator(t *testing.T) {
+	SetTranslator(previewSentinelTranslator{})
+	t.Cleanup(func() { SetTranslator(nil) })
+
+	result := &PreviewResult{
+		TransactionID: "tx-sentinel",
+		Summary: &PreviewSummary{
+			TotalFiles: 1, FilesCreated: 1, HasConflicts: true,
+		},
+		Conflicts: []*Conflict{{FilePath: "c.txt", Description: "clash"}},
+		Files:     []*FilePreview{{FilePath: "f.txt", Operation: OpCreate}},
+	}
+
+	hardcoded := []string{
+		"Transaction:", "Summary:", "Changes:", "Files:",
+		"# Transaction Preview", "## Summary", "Total Files",
+		"Lines Added", "Lines Deleted", "## Conflicts", "## Files",
+		"<h1>Transaction Preview", "<li>Total Files",
+	}
+	for _, format := range []OutputFormat{FormatPlain, FormatMarkdown, FormatHTML} {
+		out, err := NewPreviewFormatter(format).Format(result)
+		require.NoError(t, err)
+		require.Contains(t, out, "SENTINEL",
+			"format %v: translator was bypassed — output has no sentinel marker", format)
+		for _, lit := range hardcoded {
+			assert.NotContains(t, out, lit,
+				"format %v: hardcoded literal %q leaked past the i18n seam", format, lit)
+		}
+	}
+}
+
+// previewSentinelTranslator replaces every resolved message with a
+// marker so any surviving hardcoded literal is detectable.
+type previewSentinelTranslator struct{}
+
+func (previewSentinelTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	return "SENTINEL[" + id + "]", nil
+}
+
+func (previewSentinelTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return "SENTINEL[" + id + "]", nil
 }
 
 // Test 18: Atomic Write Rollback

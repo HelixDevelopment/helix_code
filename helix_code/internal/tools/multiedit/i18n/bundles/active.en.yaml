@@ -1,0 +1,97 @@
+# internal/tools/multiedit i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/internal/tools/multiedit/ to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: internal_tools_multiedit_<area>_<short>.
+# All IDs prefixed with internal_tools_multiedit_ to avoid namespace
+# collision with other packages' bundles when loaded into the same
+# go-i18n.Bundle.
+#
+# Round-428 §11.4 anti-bluff sweep (2026-05-20): migrated 21
+# user-facing literals from PreviewFormatter — the transaction
+# preview report surfaced to the operator before a multi-file edit
+# is applied. Covers the plain-text, markdown, and HTML render
+# variants (formatPlain / formatMarkdown / formatHTML). The JSON
+# variant emits machine-readable struct serialization and carries
+# no human-readable literals. OutputFormat enum tokens and internal
+# struct field names are stable identifiers, not user-facing, and
+# are NOT migrated.
+
+# --- formatPlain: plain-text transaction preview report ---
+
+internal_tools_multiedit_preview_transaction_line:
+  other: "Transaction: {{.ID}}"
+
+internal_tools_multiedit_preview_summary_line:
+  other: "Summary: {{.TotalFiles}} files ({{.Created}} created, {{.Modified}} modified, {{.Deleted}} deleted)"
+
+internal_tools_multiedit_preview_changes_line:
+  other: "Changes: +{{.Added}} -{{.Deleted}} lines"
+
+internal_tools_multiedit_preview_conflicts_line:
+  other: "Conflicts: {{.Count}}"
+
+internal_tools_multiedit_preview_files_heading:
+  other: "Files:"
+
+# --- formatMarkdown: markdown transaction preview report ---
+
+internal_tools_multiedit_preview_md_title:
+  other: "# Transaction Preview: {{.ID}}"
+
+internal_tools_multiedit_preview_md_summary_heading:
+  other: "## Summary"
+
+internal_tools_multiedit_preview_md_total_files:
+  other: "- **Total Files**: {{.Count}}"
+
+internal_tools_multiedit_preview_md_created:
+  other: "- **Created**: {{.Count}}"
+
+internal_tools_multiedit_preview_md_modified:
+  other: "- **Modified**: {{.Count}}"
+
+internal_tools_multiedit_preview_md_deleted:
+  other: "- **Deleted**: {{.Count}}"
+
+internal_tools_multiedit_preview_md_lines_added:
+  other: "- **Lines Added**: +{{.Count}}"
+
+internal_tools_multiedit_preview_md_lines_deleted:
+  other: "- **Lines Deleted**: -{{.Count}}"
+
+internal_tools_multiedit_preview_md_conflicts_heading:
+  other: "## Conflicts"
+
+internal_tools_multiedit_preview_md_files_heading:
+  other: "## Files"
+
+# --- formatHTML: HTML transaction preview report ---
+
+internal_tools_multiedit_preview_html_title:
+  other: "Transaction Preview: {{.ID}}"
+
+internal_tools_multiedit_preview_html_summary_heading:
+  other: "Summary"
+
+internal_tools_multiedit_preview_html_total_files:
+  other: "Total Files: {{.Count}}"
+
+internal_tools_multiedit_preview_html_created:
+  other: "Created: {{.Count}}"
+
+internal_tools_multiedit_preview_html_modified:
+  other: "Modified: {{.Count}}"
+
+internal_tools_multiedit_preview_html_deleted:
+  other: "Deleted: {{.Count}}"
+
+internal_tools_multiedit_preview_html_conflicts_heading:
+  other: "Conflicts"
+
+internal_tools_multiedit_preview_html_files_heading:
+  other: "Files"
