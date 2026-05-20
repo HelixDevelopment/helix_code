@@ -29,10 +29,14 @@ func NewPlanCommand(planner planmode.ApprovalPlanner, mc planmode.ModeController
 	return &PlanCommand{planner: planner, mc: mc}
 }
 
-func (c *PlanCommand) Name() string        { return "plan" }
-func (c *PlanCommand) Aliases() []string   { return nil }
-func (c *PlanCommand) Description() string { return "Inspect, approve, or reject the active plan." }
-func (c *PlanCommand) Usage() string       { return "/plan [show|approve [<action-id>]|reject|status]" }
+func (c *PlanCommand) Name() string      { return "plan" }
+func (c *PlanCommand) Aliases() []string { return nil }
+func (c *PlanCommand) Description() string {
+	return tr(context.Background(), "internal_commands_plan_description", nil)
+}
+func (c *PlanCommand) Usage() string {
+	return tr(context.Background(), "internal_commands_plan_usage", nil)
+}
 
 // Execute dispatches to the appropriate subcommand handler.
 func (c *PlanCommand) Execute(ctx context.Context, cc *CommandContext) (*CommandResult, error) {
@@ -42,23 +46,23 @@ func (c *PlanCommand) Execute(ctx context.Context, cc *CommandContext) (*Command
 	}
 	switch sub {
 	case "show":
-		return c.show()
+		return c.show(ctx)
 	case "approve":
-		return c.approve(cc.Args[1:])
+		return c.approve(ctx, cc.Args[1:])
 	case "reject":
-		return c.reject()
+		return c.reject(ctx)
 	case "status":
-		return c.status()
+		return c.status(ctx)
 	default:
 		return nil, fmt.Errorf("/plan: unknown subcommand %q (want show|approve|reject|status)", sub)
 	}
 }
 
 // show renders the active plan and its actions.
-func (c *PlanCommand) show() (*CommandResult, error) {
+func (c *PlanCommand) show(ctx context.Context) (*CommandResult, error) {
 	plan := c.planner.ActivePlan()
 	if plan == nil {
-		return &CommandResult{Success: true, Output: "No active plan."}, nil
+		return &CommandResult{Success: true, Output: tr(ctx, "internal_commands_plan_no_active_plan", nil)}, nil
 	}
 
 	var sb strings.Builder
@@ -87,7 +91,7 @@ func (c *PlanCommand) show() (*CommandResult, error) {
 }
 
 // approve approves the whole active plan (no args) or a single action (one arg).
-func (c *PlanCommand) approve(rest []string) (*CommandResult, error) {
+func (c *PlanCommand) approve(ctx context.Context, rest []string) (*CommandResult, error) {
 	plan := c.planner.ActivePlan()
 	if plan == nil {
 		return nil, fmt.Errorf("/plan approve: no active plan")
@@ -98,7 +102,10 @@ func (c *PlanCommand) approve(rest []string) (*CommandResult, error) {
 		}
 		return &CommandResult{
 			Success: true,
-			Output:  fmt.Sprintf("Plan %s approved (%d actions).", plan.ID, len(plan.Actions)),
+			Output: tr(ctx, "internal_commands_plan_approved", map[string]any{
+				"PlanID":  plan.ID,
+				"Actions": len(plan.Actions),
+			}),
 		}, nil
 	}
 	actionID := rest[0]
@@ -107,12 +114,12 @@ func (c *PlanCommand) approve(rest []string) (*CommandResult, error) {
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("Approved action %s.", actionID),
+		Output:  tr(ctx, "internal_commands_plan_action_approved", map[string]any{"ActionID": actionID}),
 	}, nil
 }
 
 // reject rejects the active plan and transitions back to ModeNormal if in plan mode.
-func (c *PlanCommand) reject() (*CommandResult, error) {
+func (c *PlanCommand) reject(ctx context.Context) (*CommandResult, error) {
 	plan := c.planner.ActivePlan()
 	if plan == nil {
 		return nil, fmt.Errorf("/plan reject: no active plan")
@@ -125,20 +132,20 @@ func (c *PlanCommand) reject() (*CommandResult, error) {
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("Plan %s rejected. Returning to normal mode.", plan.ID),
+		Output:  tr(ctx, "internal_commands_plan_rejected", map[string]any{"PlanID": plan.ID}),
 	}, nil
 }
 
 // status reports the current mode and a brief plan summary.
-func (c *PlanCommand) status() (*CommandResult, error) {
+func (c *PlanCommand) status(ctx context.Context) (*CommandResult, error) {
 	mode := c.mc.GetMode()
 	plan := c.planner.ActivePlan()
-	planSummary := "no active plan"
+	planSummary := tr(ctx, "internal_commands_plan_status_no_plan", nil)
 	if plan != nil {
 		planSummary = fmt.Sprintf("plan=%s status=%s actions=%d", plan.ID, plan.Status, len(plan.Actions))
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("Mode: %s | %s", mode, planSummary),
+		Output:  tr(ctx, "internal_commands_plan_status", map[string]any{"Mode": mode, "Summary": planSummary}),
 	}, nil
 }

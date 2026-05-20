@@ -377,3 +377,66 @@ internal_commands_roocode_conv_count:
 
 internal_commands_roocode_unknown_subcommand:
   other: "unknown: {{.Subcommand}}"
+
+# Round-370 §11.4 anti-bluff sweep (2026-05-20, CONST-046 Phase 4
+# round-90): genuine (C) user-facing slash-command help text +
+# Execute-method result messages migrated across openhands_command.go
+# (/openhands container-workspace command) and plan_command.go
+# (/plan approval-plan command) via the existing tr() seam. (A) LLM
+# prompt templates and (B) wrapped-error tech strings
+# (fmt.Sprintf("create workspace: %v", err) etc.) deliberately left
+# in place per the round-346/350/355/358/362/366 classification
+# (docs/audits/2026-05-20-internal-const046-classification.md).
+
+# --- openhands_command.go ---
+internal_commands_openhands_description:
+  other: "Manage container-based workspaces (create, list, cleanup)"
+
+internal_commands_openhands_usage:
+  other: "/openhands [list|create <name>|cleanup <id>]"
+
+internal_commands_openhands_unknown_subcommand:
+  other: "unknown subcommand: {{.Subcommand}}. Available: list, create, cleanup"
+
+internal_commands_openhands_none_found:
+  other: "No workspaces found."
+
+internal_commands_openhands_count:
+  other: "{{.Count}} workspace(s)"
+
+internal_commands_openhands_create_usage:
+  other: "usage: /openhands create <name> [image] [project_dir]"
+
+internal_commands_openhands_created:
+  other: "Workspace '{{.Name}}' created (ID: {{.ID}}, container: {{.Container}}, image: {{.Image}})"
+
+internal_commands_openhands_cleanup_usage:
+  other: "usage: /openhands cleanup <id>"
+
+internal_commands_openhands_cleaned_up:
+  other: "Workspace '{{.ID}}' cleaned up."
+
+# --- plan_command.go ---
+internal_commands_plan_description:
+  other: "Inspect, approve, or reject the active plan."
+
+internal_commands_plan_usage:
+  other: "/plan [show|approve [<action-id>]|reject|status]"
+
+internal_commands_plan_no_active_plan:
+  other: "No active plan."
+
+internal_commands_plan_approved:
+  other: "Plan {{.PlanID}} approved ({{.Actions}} actions)."
+
+internal_commands_plan_action_approved:
+  other: "Approved action {{.ActionID}}."
+
+internal_commands_plan_rejected:
+  other: "Plan {{.PlanID}} rejected. Returning to normal mode."
+
+internal_commands_plan_status_no_plan:
+  other: "no active plan"
+
+internal_commands_plan_status:
+  other: "Mode: {{.Mode}} | {{.Summary}}"

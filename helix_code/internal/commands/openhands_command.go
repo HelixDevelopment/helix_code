@@ -19,10 +19,10 @@ func NewOpenhandsCommand(mgr *workspace.WorkspaceManager) *OpenhandsCommand {
 func (c *OpenhandsCommand) Name() string      { return "openhands" }
 func (c *OpenhandsCommand) Aliases() []string { return []string{"oh"} }
 func (c *OpenhandsCommand) Description() string {
-	return "Manage container-based workspaces (create, list, cleanup)"
+	return tr(context.Background(), "internal_commands_openhands_description", nil)
 }
 func (c *OpenhandsCommand) Usage() string {
-	return "/openhands [list|create <name>|cleanup <id>]"
+	return tr(context.Background(), "internal_commands_openhands_usage", nil)
 }
 
 func (c *OpenhandsCommand) Execute(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
@@ -42,7 +42,7 @@ func (c *OpenhandsCommand) Execute(ctx context.Context, cmdCtx *CommandContext) 
 	default:
 		return &CommandResult{
 			Success: false,
-			Message: fmt.Sprintf("unknown subcommand: %s. Available: list, create, cleanup", subcmd),
+			Message: tr(ctx, "internal_commands_openhands_unknown_subcommand", map[string]any{"Subcommand": subcmd}),
 		}, nil
 	}
 }
@@ -50,7 +50,7 @@ func (c *OpenhandsCommand) Execute(ctx context.Context, cmdCtx *CommandContext) 
 func (c *OpenhandsCommand) handleList(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	list := c.mgr.ListWorkspaces()
 	if len(list) == 0 {
-		return &CommandResult{Success: true, Message: "No workspaces found."}, nil
+		return &CommandResult{Success: true, Message: tr(ctx, "internal_commands_openhands_none_found", nil)}, nil
 	}
 
 	var sb strings.Builder
@@ -60,12 +60,16 @@ func (c *OpenhandsCommand) handleList(ctx context.Context, cmdCtx *CommandContex
 		sb.WriteString(fmt.Sprintf("%-36s %-20s %-15s %s\n", ws.ID, ws.Name, ws.Status.String(), ws.Image))
 	}
 	output := sb.String()
-	return &CommandResult{Success: true, Message: fmt.Sprintf("%d workspace(s)", len(list)), Output: output}, nil
+	return &CommandResult{
+		Success: true,
+		Message: tr(ctx, "internal_commands_openhands_count", map[string]any{"Count": len(list)}),
+		Output:  output,
+	}, nil
 }
 
 func (c *OpenhandsCommand) handleCreate(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /openhands create <name> [image] [project_dir]"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_openhands_create_usage", nil)}, nil
 	}
 	name := cmdCtx.Args[1]
 	image := ""
@@ -84,13 +88,18 @@ func (c *OpenhandsCommand) handleCreate(ctx context.Context, cmdCtx *CommandCont
 
 	return &CommandResult{
 		Success: true,
-		Message: fmt.Sprintf("Workspace '%s' created (ID: %s, container: %s, image: %s)", ws.Name, ws.ID, ws.ContainerID, ws.Image),
+		Message: tr(ctx, "internal_commands_openhands_created", map[string]any{
+			"Name":      ws.Name,
+			"ID":        ws.ID,
+			"Container": ws.ContainerID,
+			"Image":     ws.Image,
+		}),
 	}, nil
 }
 
 func (c *OpenhandsCommand) handleCleanup(ctx context.Context, cmdCtx *CommandContext) (*CommandResult, error) {
 	if len(cmdCtx.Args) < 2 {
-		return &CommandResult{Success: false, Message: "usage: /openhands cleanup <id>"}, nil
+		return &CommandResult{Success: false, Message: tr(ctx, "internal_commands_openhands_cleanup_usage", nil)}, nil
 	}
 	id := cmdCtx.Args[1]
 
@@ -98,5 +107,8 @@ func (c *OpenhandsCommand) handleCleanup(ctx context.Context, cmdCtx *CommandCon
 		return &CommandResult{Success: false, Message: fmt.Sprintf("cleanup workspace: %v", err)}, nil
 	}
 
-	return &CommandResult{Success: true, Message: fmt.Sprintf("Workspace '%s' cleaned up.", id)}, nil
+	return &CommandResult{
+		Success: true,
+		Message: tr(ctx, "internal_commands_openhands_cleaned_up", map[string]any{"ID": id}),
+	}, nil
 }
