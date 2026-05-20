@@ -239,3 +239,79 @@ aurora_os_cli_exiting:
 
 aurora_os_cli_goodbye:
   other: "Goodbye!"
+
+# Round-361 §11.4 anti-bluff sweep (2026-05-20): 22 residual nogui CLI
+# format-string literals migrated — the status-report lines (platform,
+# performance mode, workers, tasks, projects, sessions, LLM models,
+# audit-log entries) plus the project/session/task/worker
+# create/start/pause/complete/cancel/add/remove confirmation lines and
+# the aurora performance-toggle + optimize report lines (main_nogui.go).
+# These carry `%`-verb placeholders interpolated by fmt.Printf at the
+# call site; the Translator resolves the format string, fmt.Printf
+# binds the runtime values. Resolved at runtime via Translator.T.
+
+aurora_os_cli_status_platform:
+  other: "Platform: Aurora OS (%s/%s)"
+
+aurora_os_cli_status_performance_mode:
+  other: "Performance Mode: %s"
+
+aurora_os_cli_status_workers:
+  other: "Workers: %d total, %d active"
+
+aurora_os_cli_status_tasks:
+  other: "Tasks: %d total, %d running, %d completed"
+
+aurora_os_cli_status_projects:
+  other: "Projects: %d total, active: %s"
+
+aurora_os_cli_status_sessions:
+  other: "Sessions: %d total, %d active"
+
+aurora_os_cli_status_llm_models:
+  other: "LLM Models: %d available"
+
+aurora_os_cli_audit_log_entries:
+  other: "Audit Log Entries: %d"
+
+aurora_os_cli_created_project:
+  other: "Created project: %s (ID: %s)"
+
+aurora_os_cli_set_active_project:
+  other: "Set active project: %s"
+
+aurora_os_cli_deleted_project:
+  other: "Deleted project: %s"
+
+aurora_os_cli_created_session:
+  other: "Created session: %s (ID: %s)"
+
+aurora_os_cli_started_session:
+  other: "Started session: %s"
+
+aurora_os_cli_paused_session:
+  other: "Paused session: %s"
+
+aurora_os_cli_completed_session:
+  other: "Completed session: %s"
+
+aurora_os_cli_created_task:
+  other: "Created task: %s (ID: %s)"
+
+aurora_os_cli_cancelled_task:
+  other: "Cancelled task: %s"
+
+aurora_os_cli_added_worker:
+  other: "Added worker: %s"
+
+aurora_os_cli_removed_worker:
+  other: "Removed worker: %s"
+
+aurora_os_cli_performance_mode_toggle:
+  other: "Performance mode: %s"
+
+aurora_os_cli_memory_freed:
+  other: "Memory freed: %.2f MB"
+
+aurora_os_cli_setting_gomaxprocs:
+  other: "Setting GOMAXPROCS to %d"

@@ -164,6 +164,66 @@ func TestCLIAppRound354FallbackOnError(t *testing.T) {
 	}
 }
 
+// round361IDs is the closed set of message IDs migrated by the
+// round-361 §11.4 residual sweep (status-report + create/start/pause/
+// complete/cancel/add/remove confirmation + aurora optimize lines).
+var round361IDs = []string{
+	"aurora_os_cli_status_platform",
+	"aurora_os_cli_status_performance_mode",
+	"aurora_os_cli_status_workers",
+	"aurora_os_cli_status_tasks",
+	"aurora_os_cli_status_projects",
+	"aurora_os_cli_status_sessions",
+	"aurora_os_cli_status_llm_models",
+	"aurora_os_cli_audit_log_entries",
+	"aurora_os_cli_created_project",
+	"aurora_os_cli_set_active_project",
+	"aurora_os_cli_deleted_project",
+	"aurora_os_cli_created_session",
+	"aurora_os_cli_started_session",
+	"aurora_os_cli_paused_session",
+	"aurora_os_cli_completed_session",
+	"aurora_os_cli_created_task",
+	"aurora_os_cli_cancelled_task",
+	"aurora_os_cli_added_worker",
+	"aurora_os_cli_removed_worker",
+	"aurora_os_cli_performance_mode_toggle",
+	"aurora_os_cli_memory_freed",
+	"aurora_os_cli_setting_gomaxprocs",
+}
+
+// TestCLIAppRound361IDsResolveThroughTranslator is the positive case
+// for the round-361 §11.4 residual migration: every newly migrated
+// format-string ID MUST route through Translator.T (not echo a
+// literal). These IDs carry %-verb placeholders bound by fmt.Printf
+// at the call site; this test asserts the seam, not the binding.
+func TestCLIAppRound361IDsResolveThroughTranslator(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "R361:"}
+	app.SetTranslator(ft)
+
+	for _, id := range round361IDs {
+		got := app.t(id)
+		assert.Equal(t, "R361:"+id, got, "id %q must route through Translator.T", id)
+	}
+	assert.Equal(t, round361IDs, ft.calls, "every round-361 id must be consulted in order")
+}
+
+// TestCLIAppRound361FallbackOnError is the paired-mutation guard for
+// the round-361 IDs: on translate error the helper MUST echo the
+// literal message ID (loud echo), never an empty string — otherwise
+// fmt.Printf would receive an empty format string and silently drop
+// the runtime values, a §11.4 PASS-bluff at the i18n layer.
+func TestCLIAppRound361FallbackOnError(t *testing.T) {
+	app := NewCLIApp()
+	app.SetTranslator(&fakeTranslator{fail: true})
+
+	for _, id := range round361IDs {
+		assert.Equal(t, id, app.t(id),
+			"on translate error the helper must echo the message ID for %q", id)
+	}
+}
+
 func TestCLISecurityManager(t *testing.T) {
 	sm := NewAuroraSecurityManager()
 

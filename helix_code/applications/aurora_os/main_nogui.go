@@ -367,8 +367,8 @@ func (cliApp *CLIApp) cmdStatus() error {
 	fmt.Println()
 
 	// System info
-	fmt.Printf("Platform: Aurora OS (%s/%s)\n", runtime.GOOS, runtime.GOARCH)
-	fmt.Printf("Performance Mode: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.performanceMode])
+	fmt.Printf(cliApp.t("aurora_os_cli_status_platform")+"\n", runtime.GOOS, runtime.GOARCH)
+	fmt.Printf(cliApp.t("aurora_os_cli_status_performance_mode")+"\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.performanceMode])
 	fmt.Println()
 
 	// Workers
@@ -379,11 +379,11 @@ func (cliApp *CLIApp) cmdStatus() error {
 			activeWorkers++
 		}
 	}
-	fmt.Printf("Workers: %d total, %d active\n", len(workers), activeWorkers)
+	fmt.Printf(cliApp.t("aurora_os_cli_status_workers")+"\n", len(workers), activeWorkers)
 
 	// Tasks
 	totalTasks, completedTasks, runningTasks := cliApp.taskManager.GetStats()
-	fmt.Printf("Tasks: %d total, %d running, %d completed\n",
+	fmt.Printf(cliApp.t("aurora_os_cli_status_tasks")+"\n",
 		totalTasks, runningTasks, completedTasks)
 
 	// Projects
@@ -394,7 +394,7 @@ func (cliApp *CLIApp) cmdStatus() error {
 	if activeProject != nil {
 		activeProjectName = activeProject.Name
 	}
-	fmt.Printf("Projects: %d total, active: %s\n", len(projects), activeProjectName)
+	fmt.Printf(cliApp.t("aurora_os_cli_status_projects")+"\n", len(projects), activeProjectName)
 
 	// Sessions
 	sessions := cliApp.sessionManager.GetAll()
@@ -404,17 +404,17 @@ func (cliApp *CLIApp) cmdStatus() error {
 			activeSessions++
 		}
 	}
-	fmt.Printf("Sessions: %d total, %d active\n", len(sessions), activeSessions)
+	fmt.Printf(cliApp.t("aurora_os_cli_status_sessions")+"\n", len(sessions), activeSessions)
 
 	// LLM
 	models := cliApp.llmManager.GetAvailableModels()
-	fmt.Printf("LLM Models: %d available\n", len(models))
+	fmt.Printf(cliApp.t("aurora_os_cli_status_llm_models")+"\n", len(models))
 
 	// Security
 	fmt.Println()
 	fmt.Println(cliApp.t("aurora_os_cli_security_status_header"))
 	fmt.Printf("Encryption: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.securityManager.encryptionEnabled])
-	fmt.Printf("Audit Log Entries: %d\n", len(cliApp.securityManager.GetAuditLog()))
+	fmt.Printf(cliApp.t("aurora_os_cli_audit_log_entries")+"\n", len(cliApp.securityManager.GetAuditLog()))
 
 	return nil
 }
@@ -463,7 +463,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created project: %s (ID: %s)\n", proj.Name, proj.ID)
+		fmt.Printf(cliApp.t("aurora_os_cli_created_project")+"\n", proj.Name, proj.ID)
 		cliApp.securityManager.AddAuditEntry("project_create", "user", fmt.Sprintf("Created project: %s", *name), "info")
 
 	case "set-active":
@@ -475,7 +475,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Set active project: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_set_active_project")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("project_set_active", "user", fmt.Sprintf("Set active project: %s", args[1]), "info")
 
 	case "delete":
@@ -487,7 +487,7 @@ func (cliApp *CLIApp) cmdProjects(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted project: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_deleted_project")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("project_delete", "user", fmt.Sprintf("Deleted project: %s", args[1]), "warning")
 
 	default:
@@ -531,7 +531,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created session: %s (ID: %s)\n", sess.Name, sess.ID)
+		fmt.Printf(cliApp.t("aurora_os_cli_created_session")+"\n", sess.Name, sess.ID)
 		cliApp.securityManager.AddAuditEntry("session_create", "user", fmt.Sprintf("Created session: %s", *name), "info")
 
 	case "start":
@@ -543,7 +543,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Started session: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_started_session")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("session_start", "user", fmt.Sprintf("Started session: %s", args[1]), "info")
 
 	case "pause":
@@ -555,7 +555,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Paused session: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_paused_session")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("session_pause", "user", fmt.Sprintf("Paused session: %s", args[1]), "info")
 
 	case "complete":
@@ -567,7 +567,7 @@ func (cliApp *CLIApp) cmdSessions(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Completed session: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_completed_session")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("session_complete", "user", fmt.Sprintf("Completed session: %s", args[1]), "info")
 
 	default:
@@ -612,7 +612,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created task: %s (ID: %s)\n", t.Description, t.ID)
+		fmt.Printf(cliApp.t("aurora_os_cli_created_task")+"\n", t.Description, t.ID)
 		cliApp.securityManager.AddAuditEntry("task_create", "user", fmt.Sprintf("Created task: %s", *desc), "info")
 
 	case "cancel":
@@ -624,7 +624,7 @@ func (cliApp *CLIApp) cmdTasks(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Cancelled task: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_cancelled_task")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("task_cancel", "user", fmt.Sprintf("Cancelled task: %s", args[1]), "warning")
 
 	default:
@@ -679,7 +679,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Added worker: %s\n", w.ID)
+		fmt.Printf(cliApp.t("aurora_os_cli_added_worker")+"\n", w.ID)
 		cliApp.securityManager.AddAuditEntry("worker_add", "user", fmt.Sprintf("Added worker: %s", *host), "info")
 
 	case "remove":
@@ -691,7 +691,7 @@ func (cliApp *CLIApp) cmdWorkers(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Removed worker: %s\n", args[1])
+		fmt.Printf(cliApp.t("aurora_os_cli_removed_worker")+"\n", args[1])
 		cliApp.securityManager.AddAuditEntry("worker_remove", "user", fmt.Sprintf("Removed worker: %s", args[1]), "warning")
 
 	default:
@@ -772,7 +772,7 @@ func (cliApp *CLIApp) cmdAurora(args []string) error {
 			// Apply performance optimizations
 			runtime.GOMAXPROCS(runtime.NumCPU())
 		}
-		fmt.Printf("Performance mode: %s\n", status)
+		fmt.Printf(cliApp.t("aurora_os_cli_performance_mode_toggle")+"\n", status)
 		cliApp.securityManager.AddAuditEntry("performance_toggle", "user", fmt.Sprintf("Performance mode: %s", status), "info")
 
 	case "optimize":
@@ -852,10 +852,10 @@ func (cliApp *CLIApp) runOptimization() error {
 	var after runtime.MemStats
 	runtime.ReadMemStats(&after)
 	freed := float64(before.Alloc-after.Alloc) / 1024 / 1024
-	fmt.Printf("Memory freed: %.2f MB\n", freed)
+	fmt.Printf(cliApp.t("aurora_os_cli_memory_freed")+"\n", freed)
 
 	// Optimize GOMAXPROCS
-	fmt.Printf("Setting GOMAXPROCS to %d\n", runtime.NumCPU())
+	fmt.Printf(cliApp.t("aurora_os_cli_setting_gomaxprocs")+"\n", runtime.NumCPU())
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Enable performance mode if not already enabled
@@ -881,7 +881,7 @@ func (cliApp *CLIApp) cmdSecurity(args []string) error {
 	case "status":
 		fmt.Println(cliApp.t("aurora_os_cli_security_status_header"))
 		fmt.Printf("Encryption: %s\n", map[bool]string{true: "Enabled", false: "Disabled"}[cliApp.securityManager.encryptionEnabled])
-		fmt.Printf("Audit Log Entries: %d\n", len(cliApp.securityManager.GetAuditLog()))
+		fmt.Printf(cliApp.t("aurora_os_cli_audit_log_entries")+"\n", len(cliApp.securityManager.GetAuditLog()))
 		fmt.Println("\n" + cliApp.t("aurora_os_cli_access_control_roles_label"))
 		for role, perms := range cliApp.securityManager.accessControl {
 			fmt.Printf("  %s: %v\n", role, perms)
