@@ -1,0 +1,77 @@
+# CodeGraph Phase A — scan evidence (captured 2026-05-20T13:22:36Z)
+
+## codegraph status — repo root
+[1m
+CodeGraph Status
+[0m
+[36mProject:[0m /run/media/milosvasic/DATA4TB/Projects/HelixCode
+
+[1mIndex Statistics:[0m
+  Files:     37,848
+  Nodes:     608,316
+  Edges:     604,982
+  DB Size:   1571.35 MB
+  Backend:   [32mnative[0m
+
+[1mNodes by Kind:[0m
+  import          204,298
+  method          129,914
+  function        113,793
+  file            37,850
+  class           24,095
+  constant        19,192
+  variable        18,221
+  struct          15,458
+  interface       14,565
+  type_alias      12,109
+  enum_member     7,848
+  field           4,924
+  property        3,551
+  enum            1,313
+  route           1,107
+  trait           97
+  component       11
+
+[1mFiles by Language:[0m
+  python          12,146
+  typescript      8,611
+  go              7,264
+  tsx             2,852
+  csharp          2,471
+  cpp             2,115
+  rust            721
+  kotlin          484
+  javascript      482
+  java            372
+  c               275
+  scala           56
+  ruby            7
+  jsx             5
+  swift           4
+
+[1mPending Changes:[0m
+  Added:     7 files
+[34mℹ[0m Run "codegraph sync" to update the index
+
+
+## codegraph status — helix_code/ inner module
+[1m
+CodeGraph Status
+[0m
+[36mProject:[0m /run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code
+
+[1mIndex Statistics:[0m
+  Files:     0
+  Nodes:     0
+  Edges:     0
+  DB Size:   0.13 MB
+  Backend:   [32mnative[0m
+
+[1mNodes by Kind:[0m
+
+[1mFiles by Language:[0m
+
+[1mPending Changes:[0m
+  Added:     7 files
+[34mℹ[0m Run "codegraph sync" to update the index
+
