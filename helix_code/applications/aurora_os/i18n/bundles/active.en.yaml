@@ -617,3 +617,122 @@ aurora_os_security_no_scan:
 
 aurora_os_access_list_template:
   other: "Role: permissions"
+
+# --- round-458 §11.4 CONST-046 Phase-4 residual GUI-tab sweep ---
+# 36 genuine user-facing Fyne strings (tab card titles, form section
+# labels, field labels, button labels, entry placeholders, dialog
+# titles + dialog button/body text) migrated out of main.go.
+
+aurora_os_card_tasks_list:
+  other: "Tasks"
+
+aurora_os_placeholder_task_description:
+  other: "Task description..."
+
+aurora_os_label_new_task:
+  other: "New Task:"
+
+aurora_os_label_field_type:
+  other: "Type:"
+
+aurora_os_label_field_priority:
+  other: "Priority:"
+
+aurora_os_label_field_description:
+  other: "Description:"
+
+aurora_os_btn_create_task:
+  other: "Create Task"
+
+aurora_os_btn_refresh:
+  other: "Refresh"
+
+aurora_os_card_workers_list:
+  other: "Workers"
+
+aurora_os_placeholder_worker_host:
+  other: "hostname or IP"
+
+aurora_os_placeholder_worker_user:
+  other: "username"
+
+aurora_os_label_add_worker:
+  other: "Add Worker:"
+
+aurora_os_label_field_host:
+  other: "Host:"
+
+aurora_os_label_field_port:
+  other: "Port:"
+
+aurora_os_label_field_user:
+  other: "User:"
+
+aurora_os_btn_add_worker:
+  other: "Add Worker"
+
+aurora_os_card_projects_list:
+  other: "Projects"
+
+aurora_os_card_project_details:
+  other: "Project Details"
+
+aurora_os_label_select_project:
+  other: "Select a project to view details"
+
+aurora_os_placeholder_project_name:
+  other: "Project name"
+
+aurora_os_placeholder_description:
+  other: "Description"
+
+aurora_os_label_create_new_project:
+  other: "Create New Project:"
+
+aurora_os_label_field_name:
+  other: "Name:"
+
+aurora_os_label_field_path:
+  other: "Path:"
+
+aurora_os_btn_create_project:
+  other: "Create Project"
+
+aurora_os_dialog_success_title:
+  other: "Success"
+
+aurora_os_dialog_project_created:
+  other: "Project created successfully"
+
+aurora_os_card_sessions_list:
+  other: "Sessions"
+
+aurora_os_card_session_details:
+  other: "Session Details"
+
+aurora_os_label_select_session:
+  other: "Select a session to view details"
+
+aurora_os_placeholder_session_name:
+  other: "Session name"
+
+aurora_os_label_create_new_session:
+  other: "Create New Session:"
+
+aurora_os_label_field_project_id:
+  other: "Project ID:"
+
+aurora_os_label_field_mode:
+  other: "Mode:"
+
+aurora_os_btn_create_session:
+  other: "Create Session"
+
+aurora_os_dialog_session_created:
+  other: "Session created successfully"
+
+aurora_os_label_session_controls:
+  other: "Session Controls:"
+
+aurora_os_placeholder_project_id:
+  other: "Project ID"

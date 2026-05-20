@@ -1104,7 +1104,7 @@ func (auroraApp *AuroraApp) createTasksTab() fyne.CanvasObject {
 		},
 	)
 
-	taskCard := widget.NewCard("Tasks", "", taskList)
+	taskCard := widget.NewCard(auroraApp.t("aurora_os_card_tasks_list"), "", taskList)
 
 	// Task type selector for new tasks
 	taskTypeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging"}, nil)
@@ -1116,18 +1116,18 @@ func (auroraApp *AuroraApp) createTasksTab() fyne.CanvasObject {
 
 	// Task description input
 	taskDescEntry := widget.NewEntry()
-	taskDescEntry.SetPlaceHolder("Task description...")
+	taskDescEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_task_description"))
 
 	// Action buttons
 	actions := container.NewVBox(
-		widget.NewLabel("New Task:"),
-		widget.NewLabel("Type:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_new_task")),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_type")),
 		taskTypeSelect,
-		widget.NewLabel("Priority:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_priority")),
 		prioritySelect,
-		widget.NewLabel("Description:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_description")),
 		taskDescEntry,
-		widget.NewButton("Create Task", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_create_task"), func() {
 			if auroraApp.taskManager != nil && taskDescEntry.Text != "" {
 				ctx := context.Background()
 				_, err := auroraApp.taskManager.CreateTask(ctx, taskTypeSelect.Selected, taskDescEntry.Text, prioritySelect.Selected)
@@ -1142,7 +1142,7 @@ func (auroraApp *AuroraApp) createTasksTab() fyne.CanvasObject {
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_refresh"), func() {
 			taskList.Refresh()
 		}),
 	)
@@ -1178,26 +1178,26 @@ func (auroraApp *AuroraApp) createWorkersTab() fyne.CanvasObject {
 		},
 	)
 
-	workerCard := widget.NewCard("Workers", "", workerList)
+	workerCard := widget.NewCard(auroraApp.t("aurora_os_card_workers_list"), "", workerList)
 
 	// Worker configuration inputs
 	hostEntry := widget.NewEntry()
-	hostEntry.SetPlaceHolder("hostname or IP")
+	hostEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_worker_host"))
 	portEntry := widget.NewEntry()
 	portEntry.SetPlaceHolder("22")
 	portEntry.SetText("22")
 	userEntry := widget.NewEntry()
-	userEntry.SetPlaceHolder("username")
+	userEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_worker_user"))
 
 	actions := container.NewVBox(
-		widget.NewLabel("Add Worker:"),
-		widget.NewLabel("Host:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_add_worker")),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_host")),
 		hostEntry,
-		widget.NewLabel("Port:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_port")),
 		portEntry,
-		widget.NewLabel("User:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_user")),
 		userEntry,
-		widget.NewButton("Add Worker", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_add_worker"), func() {
 			if auroraApp.workerManager != nil && hostEntry.Text != "" {
 				workerConfig := &UIWorker{
 					ID:      fmt.Sprintf("worker-%s-%d", hostEntry.Text, time.Now().UnixNano()),
@@ -1220,7 +1220,7 @@ func (auroraApp *AuroraApp) createWorkersTab() fyne.CanvasObject {
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_refresh"), func() {
 			workerList.Refresh()
 		}),
 	)
@@ -1260,7 +1260,7 @@ func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
 	)
 
 	// Project details panel
-	projectDetailsLabel := widget.NewLabel("Select a project to view details")
+	projectDetailsLabel := widget.NewLabel(auroraApp.t("aurora_os_label_select_project"))
 	projectDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	auroraApp.projectList.OnSelected = func(id widget.ListItemID) {
@@ -1276,30 +1276,30 @@ func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
 		}
 	}
 
-	projectListCard := widget.NewCard("Projects", "", auroraApp.projectList)
-	projectDetailsCard := widget.NewCard("Project Details", "", projectDetailsLabel)
+	projectListCard := widget.NewCard(auroraApp.t("aurora_os_card_projects_list"), "", auroraApp.projectList)
+	projectDetailsCard := widget.NewCard(auroraApp.t("aurora_os_card_project_details"), "", projectDetailsLabel)
 
 	// Project creation form
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("Project name")
+	nameEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_project_name"))
 	descEntry := widget.NewEntry()
-	descEntry.SetPlaceHolder("Description")
+	descEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_description"))
 	pathEntry := widget.NewEntry()
 	pathEntry.SetPlaceHolder("/path/to/project")
 	typeSelect := widget.NewSelect([]string{"go", "node", "python", "rust", "generic"}, nil)
 	typeSelect.SetSelected("go")
 
 	createForm := container.NewVBox(
-		widget.NewLabel("Create New Project:"),
-		widget.NewLabel("Name:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_create_new_project")),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_name")),
 		nameEntry,
-		widget.NewLabel("Description:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_description")),
 		descEntry,
-		widget.NewLabel("Path:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_path")),
 		pathEntry,
-		widget.NewLabel("Type:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_type")),
 		typeSelect,
-		widget.NewButton("Create Project", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_create_project"), func() {
 			if auroraApp.projectManager != nil && nameEntry.Text != "" && pathEntry.Text != "" {
 				ctx := context.Background()
 				_, err := auroraApp.projectManager.CreateProject(ctx, nameEntry.Text, descEntry.Text, pathEntry.Text, typeSelect.Selected)
@@ -1313,12 +1313,12 @@ func (auroraApp *AuroraApp) createProjectsTab() fyne.CanvasObject {
 					pathEntry.SetText("")
 					auroraApp.refreshData()
 					auroraApp.projectList.Refresh()
-					dialog.ShowInformation("Success", "Project created successfully", auroraApp.mainWindow)
+					dialog.ShowInformation(auroraApp.t("aurora_os_dialog_success_title"), auroraApp.t("aurora_os_dialog_project_created"), auroraApp.mainWindow)
 				}
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_refresh"), func() {
 			auroraApp.refreshData()
 			auroraApp.projectList.Refresh()
 		}),
@@ -1358,7 +1358,7 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 	)
 
 	// Session details panel
-	sessionDetailsLabel := widget.NewLabel("Select a session to view details")
+	sessionDetailsLabel := widget.NewLabel(auroraApp.t("aurora_os_label_select_session"))
 	sessionDetailsLabel.Wrapping = fyne.TextWrapWord
 
 	selectedSessionID := ""
@@ -1376,30 +1376,30 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 		}
 	}
 
-	sessionListCard := widget.NewCard("Sessions", "", auroraApp.sessionList)
-	sessionDetailsCard := widget.NewCard("Session Details", "", sessionDetailsLabel)
+	sessionListCard := widget.NewCard(auroraApp.t("aurora_os_card_sessions_list"), "", auroraApp.sessionList)
+	sessionDetailsCard := widget.NewCard(auroraApp.t("aurora_os_card_session_details"), "", sessionDetailsLabel)
 
 	// Session creation form
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("Session name")
+	nameEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_session_name"))
 	descEntry := widget.NewEntry()
-	descEntry.SetPlaceHolder("Description")
+	descEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_description"))
 	projectIDEntry := widget.NewEntry()
-	projectIDEntry.SetPlaceHolder("Project ID")
+	projectIDEntry.SetPlaceHolder(auroraApp.t("aurora_os_placeholder_project_id"))
 	modeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging", "deployment"}, nil)
 	modeSelect.SetSelected("building")
 
 	actions := container.NewVBox(
-		widget.NewLabel("Create New Session:"),
-		widget.NewLabel("Name:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_create_new_session")),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_name")),
 		nameEntry,
-		widget.NewLabel("Description:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_description")),
 		descEntry,
-		widget.NewLabel("Project ID:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_project_id")),
 		projectIDEntry,
-		widget.NewLabel("Mode:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_field_mode")),
 		modeSelect,
-		widget.NewButton("Create Session", func() {
+		widget.NewButton(auroraApp.t("aurora_os_btn_create_session"), func() {
 			if auroraApp.sessionManager != nil && nameEntry.Text != "" && projectIDEntry.Text != "" {
 				mode := session.Mode(modeSelect.Selected)
 				_, err := auroraApp.sessionManager.Create(projectIDEntry.Text, nameEntry.Text, descEntry.Text, mode)
@@ -1413,12 +1413,12 @@ func (auroraApp *AuroraApp) createSessionsTab() fyne.CanvasObject {
 					projectIDEntry.SetText("")
 					auroraApp.refreshData()
 					auroraApp.sessionList.Refresh()
-					dialog.ShowInformation("Success", "Session created successfully", auroraApp.mainWindow)
+					dialog.ShowInformation(auroraApp.t("aurora_os_dialog_success_title"), auroraApp.t("aurora_os_dialog_session_created"), auroraApp.mainWindow)
 				}
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewLabel("Session Controls:"),
+		widget.NewLabel(auroraApp.t("aurora_os_label_session_controls")),
 		widget.NewButton("Start Session", func() {
 			if auroraApp.sessionManager != nil && selectedSessionID != "" {
 				err := auroraApp.sessionManager.Start(selectedSessionID)
