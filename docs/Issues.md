@@ -299,17 +299,6 @@ All 6 phases / 31 tasks landed; CONST-048 coverage ledger at `docs/research/spee
 
 ---
 
-## HXC-012 — data race in `helix_code/internal/llm/load_balancer.go` background stat-collector goroutine
-
-**Status:** Queued
-**Type:** Bug
-**Discovered:** 2026-05-20 (speed-programme `-race` test floors)
-**Discovered-By:** AI subagent (speed-programme Phase 2/3 `-race` runs)
-**Evidence:** A data race in `helix_code/internal/llm/load_balancer.go` — the background stat-collector goroutine reads/writes shared load-balancer statistics without synchronisation, and surfaces under full-package parallel `go test -race` of `internal/llm`. Pre-existing; not introduced by the speed programme — surfaced while running the Phase 2/3 `-race` test floors mandated by the per-task test template (`04-phased-implementation-plan.md` §10). Reported honestly: the speed-programme tasks that touched `internal/llm` (P1-T01..07, P3-T01) ran `-race` clean on the *specific units they changed*; the race is in the pre-existing stat-collector path, which no speed task modified.
-**Resolution path:** Guard the shared stat-collector state with a `sync.Mutex`/`sync.RWMutex` (or convert the counters to `sync/atomic`), per the CLAUDE.md §4.2 manager pattern. Closure requires a reproduce-before-fix test that runs the load balancer under `-race` with concurrent stat collection and FAILS pre-fix, PASSES post-fix. Composes with P4-T04 (profile-gated contention tuning) — the fix should not regress the contention profile.
-
----
-
 ## HXC-007 — Constitution §11.4.68/70-74 cascade + meta-pointer bump
 
 **Status:** In progress
@@ -360,4 +349,4 @@ This is reported HONESTLY per §11.4.3 — the connect-only fallback is never cl
 
 ---
 
-*Last regenerated: 2026-05-20 (round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`; HXC-011 + HXC-012 filed — two pre-existing defects surfaced during the programme: helix_qa desktop-platform hollow-PASS runner bluff + `internal/llm/load_balancer.go` stat-collector data race). Previous round 399 — HXC-010 filed: Kimi/Qwen end-to-end CodeGraph verification operator-blocked. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+*Last regenerated: 2026-05-20 (round 401 — HXC-012 closed `Fixed (→ Fixed.md)` and migrated to `docs/Fixed.md`: data race in `internal/llm/load_balancer.go` stat-collector path synchronised via reproduce-before-fix `-race` test, commit `9d8c1cdc`). Previous round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`; HXC-011 + HXC-012 filed — two pre-existing defects surfaced during the programme. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

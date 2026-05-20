@@ -216,25 +216,38 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 90 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 91 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 400 added HXC-006
-(HelixCode Speed Programme — all 6 phases / 31 tasks landed making
-HelixCode 3-5× faster than competitor AI CLI agents; CONST-048 coverage
-ledger <code>docs/research/speed/05-coverage-ledger.md</code> = 29 PASS
-+ 2 honestly-bounded PARTIAL [P5-T01 build/test parallelism tuning
-landed but suite-wall-time delta not captured as a pasted benchmark;
-P5-T02 partial single-provider <code>internal/llm</code> split —
-Cerebras extracted, full 18-provider split infeasible without an import
-cycle] + 0 DEFERRED; headline measured wins P1-T02 lazy Ollama
-67µs→2.7ns / P1-T03 lazy CLI startup ~8.85× / P2-T03 repo-map cache
-~10.6× warm / P2-T06 incremental tree-sitter ~21× / P3-T03 fast-apply
-~516× / P4-T01 PGO −46% CPU-bound, every number carrying pasted
-in-session captured evidence per CONST-035; release-gate sweep —
-anti-bluff smoke clean, CONST-046 audit no new hardcoded content,
-governance-cascade verifier’s 2 failures are the pre-existing HXC-008
-drift not speed regressions; two pre-existing defects surfaced filed
-honestly as HXC-011 + HXC-012). Round 396 added HXV-003 (LLMsVerifier
+<code>docs/improvements/PROGRESS.md</code>). Round 401 added HXC-012
+(data race in <code>helix_code/internal/llm/load_balancer.go</code>
+background stat-collector goroutine resolved via reproduce-before-fix
+<code>-race</code> test — Rule 7 / §11.4.43 TDD-fix;
+<code>SelectOptimalProvider</code> read <code>lb.currentStrategy</code>
+/ <code>lb.strategies</code> on the hot path without holding
+<code>lb.mutex</code> while <code>SetStrategy</code> writes under the
+mutex and the background <code>collectStats</code> goroutine mutates
+<code>lb.stats</code>; fix snapshots the strategy under
+<code>lb.mutex.RLock()</code> then releases before invoking the strategy
+and <code>updateStats</code>, observable behaviour unchanged; new
+<code>internal/llm/load_balancer_race_test.go</code> FAILed RED then
+PASSes GREEN, full-package <code>go test -race ./internal/llm/...</code>
+PASS, commit <code>9d8c1cdc</code>). Round 400 added HXC-006 (HelixCode
+Speed Programme — all 6 phases / 31 tasks landed making HelixCode 3-5×
+faster than competitor AI CLI agents; CONST-048 coverage ledger
+<code>docs/research/speed/05-coverage-ledger.md</code> = 29 PASS + 2
+honestly-bounded PARTIAL [P5-T01 build/test parallelism tuning landed
+but suite-wall-time delta not captured as a pasted benchmark; P5-T02
+partial single-provider <code>internal/llm</code> split — Cerebras
+extracted, full 18-provider split infeasible without an import cycle] +
+0 DEFERRED; headline measured wins P1-T02 lazy Ollama 67µs→2.7ns /
+P1-T03 lazy CLI startup ~8.85× / P2-T03 repo-map cache ~10.6× warm /
+P2-T06 incremental tree-sitter ~21× / P3-T03 fast-apply ~516× / P4-T01
+PGO −46% CPU-bound, every number carrying pasted in-session captured
+evidence per CONST-035; release-gate sweep — anti-bluff smoke clean,
+CONST-046 audit no new hardcoded content, governance-cascade verifier’s
+2 failures are the pre-existing HXC-008 drift not speed regressions; two
+pre-existing defects surfaced filed honestly as HXC-011 + HXC-012).
+Round 396 added HXV-003 (LLMsVerifier
 <code>ProviderAdapterForBenchmark.Complete</code> CONST-050(A)
 production mock-bluff resolved — WIRE-not-delete decision: the adapter
 is live code wired by <code>BenchmarkSystem.Initialize</code>, so honest
@@ -345,12 +358,14 @@ recorded_mobile, ~40 strings)</td>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>8 open issues: 3 Bug (HXC-008, HXC-011, HXC-012) / 3 Task (HXC-001,
-HXC-007, HXC-009) + 1 Operator-blocked Task (HXC-010) / 1 Feature
-(HXC-003); 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-20 (round 400 — HXC-006 closed:
-HelixCode Speed Programme — all 6 phases / 31 tasks landed, CONST-048
-coverage ledger committed). Previous round 397 — OPS-001 closed. See
+<p>7 open issues: 2 Bug (HXC-008, HXC-011) / 3 Task (HXC-001, HXC-007,
+HXC-009) + 1 Operator-blocked Task (HXC-010) / 1 Feature (HXC-003); 0
+BLOCKED.</p>
+<p><em>Last regenerated: 2026-05-20 (round 401 — HXC-012 closed:
+<code>internal/llm/load_balancer.go</code> stat-collector data race
+synchronised, reproduce-before-fix <code>-race</code> test, commit
+<code>9d8c1cdc</code>). Previous round 400 — HXC-006 closed: HelixCode
+Speed Programme — all 6 phases / 31 tasks landed. See
 <code>docs/Fixed.md</code> for full closure entries with commit
 SHAs.</em></p>
 </body>

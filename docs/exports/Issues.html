@@ -1078,35 +1078,6 @@ the desktop dispatch reports <code>FAIL</code>/<code>SKIP-OK</code>
 into the <code>helix_qa</code> submodule per CONST-047.</p>
 <hr />
 <h2
-id="hxc-012-data-race-in-helix_codeinternalllmload_balancer.go-background-stat-collector-goroutine">HXC-012
-— data race in <code>helix_code/internal/llm/load_balancer.go</code>
-background stat-collector goroutine</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-20 (speed-programme
-<code>-race</code> test floors) <strong>Discovered-By:</strong> AI
-subagent (speed-programme Phase 2/3 <code>-race</code> runs)
-<strong>Evidence:</strong> A data race in
-<code>helix_code/internal/llm/load_balancer.go</code> — the background
-stat-collector goroutine reads/writes shared load-balancer statistics
-without synchronisation, and surfaces under full-package parallel
-<code>go test -race</code> of <code>internal/llm</code>. Pre-existing;
-not introduced by the speed programme — surfaced while running the Phase
-2/3 <code>-race</code> test floors mandated by the per-task test
-template (<code>04-phased-implementation-plan.md</code> §10). Reported
-honestly: the speed-programme tasks that touched
-<code>internal/llm</code> (P1-T01..07, P3-T01) ran <code>-race</code>
-clean on the <em>specific units they changed</em>; the race is in the
-pre-existing stat-collector path, which no speed task modified.
-<strong>Resolution path:</strong> Guard the shared stat-collector state
-with a <code>sync.Mutex</code>/<code>sync.RWMutex</code> (or convert the
-counters to <code>sync/atomic</code>), per the CLAUDE.md §4.2 manager
-pattern. Closure requires a reproduce-before-fix test that runs the load
-balancer under <code>-race</code> with concurrent stat collection and
-FAILS pre-fix, PASSES post-fix. Composes with P4-T04 (profile-gated
-contention tuning) — the fix should not regress the contention
-profile.</p>
-<hr />
-<h2
 id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump">HXC-007
 — Constitution §11.4.68/70-74 cascade + meta-pointer bump</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Task
@@ -1234,16 +1205,18 @@ transcript). Until then the connect-only + tool-discovery evidence is
 the strongest honest proof and is captured under
 <code>docs/research/codegraph/evidence/phase-c/</code>.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 400 — speed-programme
-close-out: HXC-006 closed <code>Implemented (→ Fixed.md)</code> after
-all 31 tasks landed + CONST-048 coverage ledger
+<p><em>Last regenerated: 2026-05-20 (round 401 — HXC-012 closed
+<code>Fixed (→ Fixed.md)</code> and migrated to
+<code>docs/Fixed.md</code>: data race in
+<code>internal/llm/load_balancer.go</code> stat-collector path
+synchronised via reproduce-before-fix <code>-race</code> test, commit
+<code>9d8c1cdc</code>). Previous round 400 — speed-programme close-out:
+HXC-006 closed <code>Implemented (→ Fixed.md)</code> after all 31 tasks
+landed + CONST-048 coverage ledger
 <code>docs/research/speed/05-coverage-ledger.md</code>; HXC-011 +
-HXC-012 filed — two pre-existing defects surfaced during the programme:
-helix_qa desktop-platform hollow-PASS runner bluff +
-<code>internal/llm/load_balancer.go</code> stat-collector data race).
-Previous round 399 — HXC-010 filed: Kimi/Qwen end-to-end CodeGraph
-verification operator-blocked. To update Issues_Summary.md mechanically,
-run <code>scripts/generate_issues_summary.sh</code> (TODO: create —
+HXC-012 filed — two pre-existing defects surfaced during the programme.
+To update Issues_Summary.md mechanically, run
+<code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>
 </body>
