@@ -74,12 +74,12 @@ func (c *SubagentsCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *SubagentsCommand) Description() string {
-	return "List running subagents, show their status, or kill one by id."
+	return tr(context.Background(), "internal_commands_subagents_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *SubagentsCommand) Usage() string {
-	return "/subagents [list|status|kill <id>]"
+	return tr(context.Background(), "internal_commands_subagents_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -96,14 +96,14 @@ func (c *SubagentsCommand) Execute(ctx context.Context, cc *CommandContext) (*Co
 	}
 	switch sub {
 	case "list":
-		return c.handleList(), nil
+		return c.handleList(ctx), nil
 	case "status":
-		return c.handleStatus(), nil
+		return c.handleStatus(ctx), nil
 	case "kill":
 		if len(args) < 2 {
 			return nil, fmt.Errorf("/subagents kill <id>")
 		}
-		return c.handleKill(args[1])
+		return c.handleKill(ctx, args[1])
 	default:
 		return nil, fmt.Errorf("/subagents: unknown subcommand %q (want list|status|kill)", sub)
 	}
@@ -113,10 +113,10 @@ func (c *SubagentsCommand) Execute(ctx context.Context, cc *CommandContext) (*Co
 //
 // Columns: ID / DESCRIPTION / ISOLATION / ELAPSED. ELAPSED is rounded to
 // the nearest second so the table doesn't churn with sub-second jitter.
-func (c *SubagentsCommand) handleList() *CommandResult {
+func (c *SubagentsCommand) handleList(ctx context.Context) *CommandResult {
 	statuses := c.manager.Status()
 	if len(statuses) == 0 {
-		return &CommandResult{Success: true, Output: "no subagents running"}
+		return &CommandResult{Success: true, Output: tr(ctx, "internal_commands_subagents_none_running", nil)}
 	}
 
 	var sb strings.Builder
@@ -140,10 +140,10 @@ func (c *SubagentsCommand) handleList() *CommandResult {
 // Columns: ID / DESCRIPTION / ISOLATION / STARTED-AT / ELAPSED. The
 // timestamp is formatted in RFC3339 (UTC) so it sorts lexically and
 // remains parseable by downstream tooling.
-func (c *SubagentsCommand) handleStatus() *CommandResult {
+func (c *SubagentsCommand) handleStatus(ctx context.Context) *CommandResult {
 	statuses := c.manager.Status()
 	if len(statuses) == 0 {
-		return &CommandResult{Success: true, Output: "no subagents running"}
+		return &CommandResult{Success: true, Output: tr(ctx, "internal_commands_subagents_none_running", nil)}
 	}
 
 	var sb strings.Builder
@@ -169,12 +169,12 @@ func (c *SubagentsCommand) handleStatus() *CommandResult {
 //
 // On error (typically ID not found) we wrap the manager's error in a
 // /subagents-prefixed message so the user knows which surface failed.
-func (c *SubagentsCommand) handleKill(id string) (*CommandResult, error) {
+func (c *SubagentsCommand) handleKill(ctx context.Context, id string) (*CommandResult, error) {
 	if err := c.manager.Kill(id); err != nil {
 		return nil, fmt.Errorf("/subagents kill %s: %w", id, err)
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("killed subagent %s", id),
+		Output:  tr(ctx, "internal_commands_subagents_killed", map[string]any{"ID": id}),
 	}, nil
 }

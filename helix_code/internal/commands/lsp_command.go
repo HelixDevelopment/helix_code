@@ -53,12 +53,12 @@ func (c *LSPCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *LSPCommand) Description() string {
-	return "Inspect, restart, list, or stop managed LSP servers."
+	return tr(context.Background(), "internal_commands_lsp_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *LSPCommand) Usage() string {
-	return "/lsp [status|restart <name>|list-servers|stop <name>]"
+	return tr(context.Background(), "internal_commands_lsp_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -70,7 +70,7 @@ func (c *LSPCommand) Execute(ctx context.Context, cc *CommandContext) (*CommandR
 	}
 	switch sub {
 	case "status":
-		return c.status(), nil
+		return c.status(ctx), nil
 	case "restart":
 		if len(args) < 2 {
 			return nil, fmt.Errorf("/lsp restart <name>")
@@ -92,10 +92,10 @@ func (c *LSPCommand) Execute(ctx context.Context, cc *CommandContext) (*CommandR
 // reported by LSPManager.Servers(). When no servers are running it
 // reports "no servers running" so the operator knows the manager is
 // alive but has nothing spawned.
-func (c *LSPCommand) status() *CommandResult {
+func (c *LSPCommand) status(ctx context.Context) *CommandResult {
 	servers := c.manager.Servers()
 	if len(servers) == 0 {
-		return &CommandResult{Success: true, Output: "no servers running"}
+		return &CommandResult{Success: true, Output: tr(ctx, "internal_commands_lsp_no_servers_running", nil)}
 	}
 	var sb strings.Builder
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
@@ -117,7 +117,7 @@ func (c *LSPCommand) restart(ctx context.Context, name string) (*CommandResult, 
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("restarted %s (next matching file will respawn)", name),
+		Output:  tr(ctx, "internal_commands_lsp_restarted", map[string]any{"Name": name}),
 	}, nil
 }
 
@@ -131,7 +131,7 @@ func (c *LSPCommand) stop(ctx context.Context, name string) (*CommandResult, err
 	}
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("stopped %s", name),
+		Output:  tr(ctx, "internal_commands_lsp_stopped", map[string]any{"Name": name}),
 	}, nil
 }
 

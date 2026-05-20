@@ -120,12 +120,12 @@ func (c *ThemeCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *ThemeCommand) Description() string {
-	return "Inspect the active theme, list available themes, or preview a theme's palette."
+	return tr(context.Background(), "internal_commands_theme_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *ThemeCommand) Usage() string {
-	return "/theme [status|list|show <name>]"
+	return tr(context.Background(), "internal_commands_theme_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -141,11 +141,11 @@ func (c *ThemeCommand) Execute(ctx context.Context, cc *CommandContext) (*Comman
 	}
 	switch sub {
 	case "status":
-		return &CommandResult{Success: true, Output: c.handleStatus()}, nil
+		return &CommandResult{Success: true, Output: c.handleStatus(ctx)}, nil
 	case "list":
-		return &CommandResult{Success: true, Output: c.handleList()}, nil
+		return &CommandResult{Success: true, Output: c.handleList(ctx)}, nil
 	case "show":
-		out, err := c.handleShow(args[1:])
+		out, err := c.handleShow(ctx, args[1:])
 		if err != nil {
 			return nil, err
 		}
@@ -161,26 +161,26 @@ func (c *ThemeCommand) Execute(ctx context.Context, cc *CommandContext) (*Comman
 // whether a user-loaded YAML theme is registered and, when one is, its
 // name. This is informational so an operator running /theme status can see
 // at a glance whether their theme.yaml took effect.
-func (c *ThemeCommand) handleStatus() string {
+func (c *ThemeCommand) handleStatus(ctx context.Context) string {
 	var sb strings.Builder
-	sb.WriteString("Theme status\n")
+	sb.WriteString(tr(ctx, "internal_commands_theme_status_header", nil) + "\n")
 
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  Name:\t%s\n", string(c.activeName))
-	fmt.Fprintf(tw, "  Depth:\t%s\n", c.activeDepth.String())
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_name", nil), string(c.activeName))
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_depth", nil), c.activeDepth.String())
 	source := c.activeSource
 	if source == "" {
 		source = ThemeSourceDefault
 	}
-	fmt.Fprintf(tw, "  Source:\t%s\n", source)
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_source", nil), source)
 
-	customLine := "none"
+	customLine := tr(ctx, "internal_commands_theme_custom_none", nil)
 	if c.registry != nil {
 		if cust := c.registry.Custom(); cust != nil {
-			customLine = string(cust.Name) + " (loaded from theme.yaml)"
+			customLine = tr(ctx, "internal_commands_theme_custom_loaded", map[string]any{"Name": string(cust.Name)})
 		}
 	}
-	fmt.Fprintf(tw, "  Custom:\t%s\n", customLine)
+	fmt.Fprintf(tw, "  %s:\t%s\n", tr(ctx, "internal_commands_theme_label_custom", nil), customLine)
 	tw.Flush()
 	return sb.String()
 }
@@ -190,28 +190,28 @@ func (c *ThemeCommand) handleStatus() string {
 // Built-ins are tagged "(built-in)"; the user-loaded custom theme (if any)
 // is tagged "(user, loaded from theme.yaml)" so the operator can see which
 // entry came from disk.
-func (c *ThemeCommand) handleList() string {
+func (c *ThemeCommand) handleList(ctx context.Context) string {
 	var sb strings.Builder
-	sb.WriteString("Available themes:\n")
+	sb.WriteString(tr(ctx, "internal_commands_theme_list_header", nil) + "\n")
 
 	if c.registry == nil {
-		sb.WriteString("  (registry unavailable)\n")
+		sb.WriteString(tr(ctx, "internal_commands_theme_registry_unavailable", nil) + "\n")
 		return sb.String()
 	}
 
 	var custom *theme.Theme = c.registry.Custom()
 	for _, n := range c.registry.Names() {
-		tag := "(built-in)"
+		tag := tr(ctx, "internal_commands_theme_tag_builtin", nil)
 		if custom != nil && n == custom.Name {
 			// Names() may include the custom theme's name; mark it as such.
 			if !n.IsValid() {
-				tag = "(user, loaded from theme.yaml)"
+				tag = tr(ctx, "internal_commands_theme_tag_user_loaded", nil)
 			} else {
 				// Edge case: custom theme reuses a built-in name (e.g.
 				// "dark"). Get() will resolve to the custom theme; we tag
 				// it as user-loaded so the operator knows the built-in
 				// got overridden.
-				tag = "(user override of built-in, loaded from theme.yaml)"
+				tag = tr(ctx, "internal_commands_theme_tag_user_override", nil)
 			}
 		}
 		fmt.Fprintf(&sb, "  - %s %s\n", string(n), tag)
@@ -228,7 +228,7 @@ func (c *ThemeCommand) handleList() string {
 // glance. The styler is built per-call from the requested theme + the
 // active depth so the output reflects the operator's terminal capability,
 // not a hardcoded depth.
-func (c *ThemeCommand) handleShow(args []string) (string, error) {
+func (c *ThemeCommand) handleShow(ctx context.Context, args []string) (string, error) {
 	if len(args) == 0 {
 		return "", fmt.Errorf("/theme show: missing theme name (usage: /theme show <name>)")
 	}
@@ -248,9 +248,12 @@ func (c *ThemeCommand) handleShow(args []string) (string, error) {
 	styler := theme.NewStyler(t, c.activeDepth)
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Theme: %s (depth=%s)\n", string(t.Name), c.activeDepth.String())
+	fmt.Fprintf(&sb, "%s\n", tr(ctx, "internal_commands_theme_show_heading", map[string]any{
+		"Name":  string(t.Name),
+		"Depth": c.activeDepth.String(),
+	}))
 	for _, role := range theme.AllRoles() {
-		sample := fmt.Sprintf("Sample %s text", string(role))
+		sample := tr(ctx, "internal_commands_theme_sample_text", map[string]any{"Role": string(role)})
 		styled := styler.Stylize(role, sample)
 		fmt.Fprintf(&sb, "  %-10s %s\n", string(role), styled)
 	}

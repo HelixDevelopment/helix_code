@@ -440,3 +440,81 @@ internal_commands_plan_status_no_plan:
 
 internal_commands_plan_status:
   other: "Mode: {{.Mode}} | {{.Summary}}"
+
+# --- theme_command.go (round-374) ---
+internal_commands_theme_description:
+  other: "Inspect the active theme, list available themes, or preview a theme's palette."
+
+internal_commands_theme_usage:
+  other: "/theme [status|list|show <name>]"
+
+internal_commands_theme_status_header:
+  other: "Theme status"
+
+internal_commands_theme_label_name:
+  other: "Name"
+
+internal_commands_theme_label_depth:
+  other: "Depth"
+
+internal_commands_theme_label_source:
+  other: "Source"
+
+internal_commands_theme_label_custom:
+  other: "Custom"
+
+internal_commands_theme_custom_none:
+  other: "none"
+
+internal_commands_theme_custom_loaded:
+  other: "{{.Name}} (loaded from theme.yaml)"
+
+internal_commands_theme_list_header:
+  other: "Available themes:"
+
+internal_commands_theme_registry_unavailable:
+  other: "  (registry unavailable)"
+
+internal_commands_theme_tag_builtin:
+  other: "(built-in)"
+
+internal_commands_theme_tag_user_loaded:
+  other: "(user, loaded from theme.yaml)"
+
+internal_commands_theme_tag_user_override:
+  other: "(user override of built-in, loaded from theme.yaml)"
+
+internal_commands_theme_show_heading:
+  other: "Theme: {{.Name}} (depth={{.Depth}})"
+
+internal_commands_theme_sample_text:
+  other: "Sample {{.Role}} text"
+
+# --- lsp_command.go (round-374) ---
+internal_commands_lsp_description:
+  other: "Inspect, restart, list, or stop managed LSP servers."
+
+internal_commands_lsp_usage:
+  other: "/lsp [status|restart <name>|list-servers|stop <name>]"
+
+internal_commands_lsp_no_servers_running:
+  other: "no servers running"
+
+internal_commands_lsp_restarted:
+  other: "restarted {{.Name}} (next matching file will respawn)"
+
+internal_commands_lsp_stopped:
+  other: "stopped {{.Name}}"
+
+# --- subagents_command.go (round-374) ---
+internal_commands_subagents_description:
+  other: "List running subagents, show their status, or kill one by id."
+
+internal_commands_subagents_usage:
+  other: "/subagents [list|status|kill <id>]"
+
+internal_commands_subagents_none_running:
+  other: "no subagents running"
+
+internal_commands_subagents_killed:
+  other: "killed subagent {{.ID}}"

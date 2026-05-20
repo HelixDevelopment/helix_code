@@ -66,8 +66,10 @@ func newDarkOnlyInspector() *fakeThemeInspector {
 func TestThemeCommand_Name(t *testing.T) {
 	c := NewThemeCommand(newDarkOnlyInspector(), theme.ThemeDark, theme.DepthTruecolor, ThemeSourceEnv, nil)
 	assert.Equal(t, "theme", c.Name())
-	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/theme")
+	// Description()/Usage() route through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Equal(t, "internal_commands_theme_description", c.Description())
+	assert.Equal(t, "internal_commands_theme_usage", c.Usage())
 	assert.Nil(t, c.Aliases())
 }
 
@@ -76,8 +78,8 @@ func TestThemeCommand_DefaultIsStatus(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "Theme status")
-	assert.Contains(t, res.Output, "Name:")
+	assert.Contains(t, res.Output, "internal_commands_theme_status_header")
+	assert.Contains(t, res.Output, "internal_commands_theme_label_name")
 	assert.Contains(t, res.Output, "dark")
 }
 
@@ -112,19 +114,19 @@ func TestThemeCommand_StatusShowsCustomNone(t *testing.T) {
 	c := NewThemeCommand(newDarkOnlyInspector(), theme.ThemeDark, theme.DepthTruecolor, ThemeSourceDefault, nil)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "Custom:")
-	assert.Contains(t, res.Output, "none")
+	assert.Contains(t, res.Output, "internal_commands_theme_label_custom")
+	assert.Contains(t, res.Output, "internal_commands_theme_custom_none")
 }
 
 func TestThemeCommand_ListShowsAllNames(t *testing.T) {
 	c := NewThemeCommand(newDarkOnlyInspector(), theme.ThemeDark, theme.DepthTruecolor, ThemeSourceDefault, nil)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "Available themes")
+	assert.Contains(t, res.Output, "internal_commands_theme_list_header")
 	assert.Contains(t, res.Output, "dark")
 	assert.Contains(t, res.Output, "light")
 	assert.Contains(t, res.Output, "none")
-	assert.Contains(t, res.Output, "(built-in)")
+	assert.Contains(t, res.Output, "internal_commands_theme_tag_builtin")
 }
 
 func TestThemeCommand_ListShowsCustom_WhenLoaded(t *testing.T) {
@@ -148,7 +150,7 @@ func TestThemeCommand_ListShowsCustom_WhenLoaded(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
 	assert.Contains(t, res.Output, "my-custom")
-	assert.Contains(t, res.Output, "user, loaded from theme.yaml")
+	assert.Contains(t, res.Output, "internal_commands_theme_tag_user_loaded")
 }
 
 func TestThemeCommand_Show_RendersAllRoles(t *testing.T) {
@@ -157,8 +159,10 @@ func TestThemeCommand_Show_RendersAllRoles(t *testing.T) {
 	require.NoError(t, err)
 	for _, role := range []string{"info", "warn", "error", "highlight", "dim"} {
 		assert.Contains(t, res.Output, role)
-		assert.Contains(t, res.Output, "Sample "+role+" text")
 	}
+	// The sample line routes through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Contains(t, res.Output, "internal_commands_theme_sample_text")
 	// Truecolor dark theme: every role's Stylize MUST emit a real ANSI
 	// open + Reset around the sample text. Anti-bluff: assert at least
 	// one role produced the truecolor open prefix \x1b[38;2; — proving

@@ -48,8 +48,10 @@ func newLSPCommand(t *testing.T) (*LSPCommand, *fakeLSPManager) {
 func TestLSPCommand_NameDescription(t *testing.T) {
 	c, _ := newLSPCommand(t)
 	assert.Equal(t, "lsp", c.Name())
-	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/lsp")
+	// Description()/Usage() route through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Equal(t, "internal_commands_lsp_description", c.Description())
+	assert.Equal(t, "internal_commands_lsp_usage", c.Usage())
 	assert.Nil(t, c.Aliases())
 }
 
@@ -102,7 +104,7 @@ func TestLSPCommand_StatusEmpty(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "no servers running")
+	assert.Equal(t, "internal_commands_lsp_no_servers_running", res.Output)
 }
 
 func TestLSPCommand_RestartCallsManager(t *testing.T) {
@@ -111,7 +113,9 @@ func TestLSPCommand_RestartCallsManager(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 	assert.Equal(t, []string{"gopls"}, mgr.restartCalls)
-	assert.Contains(t, res.Output, "gopls")
+	// Output routes through the CONST-046 tr() seam; the NoopTranslator
+	// echoes the message ID (the server name is template data).
+	assert.Contains(t, res.Output, "internal_commands_lsp_restarted")
 }
 
 func TestLSPCommand_RestartMissingName(t *testing.T) {
@@ -135,7 +139,9 @@ func TestLSPCommand_StopCallsManager(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 	assert.Equal(t, []string{"gopls"}, mgr.stopCalls)
-	assert.Contains(t, res.Output, "gopls")
+	// Output routes through the CONST-046 tr() seam; the NoopTranslator
+	// echoes the message ID (the server name is template data).
+	assert.Contains(t, res.Output, "internal_commands_lsp_stopped")
 }
 
 func TestLSPCommand_StopMissingName(t *testing.T) {

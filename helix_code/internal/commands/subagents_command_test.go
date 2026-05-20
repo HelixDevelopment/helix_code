@@ -51,8 +51,10 @@ func newSubagentsCommand(t *testing.T) (*SubagentsCommand, *fakeSubagentManager)
 func TestSubagentsCommand_NameDescription(t *testing.T) {
 	c, _ := newSubagentsCommand(t)
 	assert.Equal(t, "subagents", c.Name())
-	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/subagents")
+	// Description()/Usage() route through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Equal(t, "internal_commands_subagents_description", c.Description())
+	assert.Equal(t, "internal_commands_subagents_usage", c.Usage())
 	assert.Nil(t, c.Aliases())
 }
 
@@ -116,7 +118,7 @@ func TestSubagentsCommand_ListEmpty(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Equal(t, "no subagents running", strings.TrimSpace(res.Output))
+	assert.Equal(t, "internal_commands_subagents_none_running", strings.TrimSpace(res.Output))
 }
 
 func TestSubagentsCommand_StatusShowsExtraColumns(t *testing.T) {
@@ -150,7 +152,7 @@ func TestSubagentsCommand_StatusEmpty(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Equal(t, "no subagents running", strings.TrimSpace(res.Output))
+	assert.Equal(t, "internal_commands_subagents_none_running", strings.TrimSpace(res.Output))
 }
 
 func TestSubagentsCommand_KillCallsManager(t *testing.T) {
@@ -159,7 +161,9 @@ func TestSubagentsCommand_KillCallsManager(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 	assert.Equal(t, []string{"sub-abc123"}, mgr.killCalls)
-	assert.Contains(t, res.Output, "killed subagent sub-abc123")
+	// Output routes through the CONST-046 tr() seam; the NoopTranslator
+	// echoes the message ID (the subagent ID is template data).
+	assert.Contains(t, res.Output, "internal_commands_subagents_killed")
 }
 
 func TestSubagentsCommand_KillMissingID(t *testing.T) {
