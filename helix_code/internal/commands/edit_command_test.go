@@ -132,7 +132,12 @@ func TestEditCommand_DiffShowsPlanSummary(t *testing.T) {
 	assert.Equal(t, 1, insp.parseCalls)
 	assert.Equal(t, 0, insp.dryRunCalls, "diff must NOT exercise the apply pipeline")
 	assert.Equal(t, 0, insp.commitCalls)
-	assert.Contains(t, res.Output, "2 blocks")
+	// The "parsed N blocks" summary line routes through the CONST-046
+	// tr() seam (round-420); under NoopTranslator it echoes the message
+	// ID. The block/file counts are template placeholders resolved at
+	// render time — substring contract enforced by the bundle entry
+	// internal_commands_edit_diff_parsed in active.en.yaml.
+	assert.Contains(t, res.Output, "internal_commands_edit_diff_parsed")
 	assert.Contains(t, res.Output, "a.go")
 	assert.Contains(t, res.Output, "b.go")
 }

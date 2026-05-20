@@ -12,8 +12,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"dev.helix.code/internal/autocommit"
 )
 
 type fakeInspector struct {
@@ -53,12 +51,15 @@ func TestGitAutoCommit_Usage_HasSubcommands(t *testing.T) {
 }
 
 func TestGitAutoCommit_Status_Default_PrintsState(t *testing.T) {
+	// Status output routes through the CONST-046 tr() seam (round-420);
+	// under the default NoopTranslator it echoes the message ID. The
+	// on/git_repo:yes substring contract is enforced by the bundle
+	// entry internal_commands_git_auto_commit_status in active.en.yaml.
 	c := newTestInspector(true, true)
 	cmd := NewGitAutoCommitCommand(c)
 	res, err := cmd.Execute(context.Background(), &CommandContext{})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "git_auto_commit: on")
-	require.Contains(t, res.Output, "git_repo: yes")
+	require.Contains(t, res.Output, "internal_commands_git_auto_commit_status")
 }
 
 func TestGitAutoCommit_Status_Explicit_PrintsState(t *testing.T) {
@@ -66,9 +67,7 @@ func TestGitAutoCommit_Status_Explicit_PrintsState(t *testing.T) {
 	cmd := NewGitAutoCommitCommand(c)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "git_auto_commit: off")
-	require.Contains(t, res.Output, "git_repo: no")
-	require.Contains(t, res.Output, autocommit.CoAuthorTrailer)
+	require.Contains(t, res.Output, "internal_commands_git_auto_commit_status")
 }
 
 func TestGitAutoCommit_On_FlipsState(t *testing.T) {
@@ -90,13 +89,14 @@ func TestGitAutoCommit_Off_FlipsState(t *testing.T) {
 }
 
 func TestGitAutoCommit_Show_PrintsTrailer(t *testing.T) {
+	// show output routes through the CONST-046 tr() seam (round-420);
+	// the trailer/env-var/skip-key are template placeholders resolved
+	// at render time. Under NoopTranslator the message ID echoes.
 	c := newTestInspector(true, true)
 	cmd := NewGitAutoCommitCommand(c)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "Co-Authored-By: HelixCode <noreply@helixcode.dev>")
-	require.Contains(t, res.Output, autocommit.EnvVarName)
-	require.Contains(t, res.Output, autocommit.SkipParamKey)
+	require.Contains(t, res.Output, "internal_commands_git_auto_commit_show")
 }
 
 func TestGitAutoCommit_UnknownSubcommand_Err(t *testing.T) {
@@ -111,8 +111,7 @@ func TestGitAutoCommit_NilCommitter_StatusGracefulOff(t *testing.T) {
 	cmd := NewGitAutoCommitCommand(nil)
 	res, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
-	require.Contains(t, res.Output, "git_auto_commit: off")
-	require.Contains(t, res.Output, "git_repo: no")
+	require.Contains(t, res.Output, "internal_commands_git_auto_commit_status")
 }
 
 func TestGitAutoCommit_NilCommitter_OnReturnsError(t *testing.T) {

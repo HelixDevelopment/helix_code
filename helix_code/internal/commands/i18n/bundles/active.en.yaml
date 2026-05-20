@@ -659,12 +659,53 @@ internal_commands_edit_description:
 internal_commands_edit_usage:
   other: "/edit [status|diff <prompt>|dry-run <prompt>|commit <prompt>] (use --from <path> to read prompt from file)"
 
+# --- edit_command.go runtime output (round-420) ---
+internal_commands_edit_status_heading:
+  other: "Smart-edit status"
+
+internal_commands_edit_status_unavailable:
+  other: "smart-edit unavailable: tool not initialised"
+
+internal_commands_edit_status_available:
+  other: "available"
+
+internal_commands_edit_diff_no_blocks:
+  other: "/edit diff: prompt parsed to 0 blocks (nothing to do)."
+
+internal_commands_edit_diff_parsed:
+  other: "Parsed {{.Blocks}} blocks across {{.Files}} files (no changes applied):"
+
+internal_commands_edit_no_result:
+  other: "/edit {{.Sub}}: no result returned"
+
+internal_commands_edit_result_heading:
+  other: "/edit {{.Sub}} result:"
+
+internal_commands_edit_per_block_heading:
+  other: "Per-block outcomes:"
+
+internal_commands_edit_unified_diff_heading:
+  other: "Unified diff:"
+
 # --- git_auto_commit_command.go (round-399) ---
 internal_commands_git_auto_commit_description:
   other: "Show or change git auto-commit (per-edit) state."
 
 internal_commands_git_auto_commit_usage:
   other: "/git_auto_commit [status|on|off|show]"
+
+# --- git_auto_commit_command.go runtime output (round-420) ---
+internal_commands_git_auto_commit_status:
+  other: "git_auto_commit: {{.State}}\ngit_repo: {{.RepoState}}\nco-author trailer: {{.Trailer}}"
+
+internal_commands_git_auto_commit_toggled_on:
+  other: "git_auto_commit -> on"
+
+internal_commands_git_auto_commit_toggled_off:
+  other: "git_auto_commit -> off"
+
+internal_commands_git_auto_commit_show:
+  other: "Auto-commit format:\n  subject: <LLM-summarised, <=72 chars>\n  body:    (blank line)\n           {{.Trailer}}\n\nOpt-out:\n  env:     {{.EnvVar}}=off\n  slash:   /git_auto_commit off\n  per-edit: {{.SkipKey}}:true in tool params"
 
 # --- memory_command.go (round-399) ---
 internal_commands_memory_description:

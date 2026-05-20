@@ -102,10 +102,11 @@ func (c *GitAutoCommitCommand) handleStatus() string {
 			repoState = "yes"
 		}
 	}
-	return fmt.Sprintf(
-		"git_auto_commit: %s\ngit_repo: %s\nco-author trailer: %s\n",
-		state, repoState, autocommit.CoAuthorTrailer,
-	)
+	return trc("internal_commands_git_auto_commit_status", map[string]any{
+		"State":     state,
+		"RepoState": repoState,
+		"Trailer":   autocommit.CoAuthorTrailer,
+	}) + "\n"
 }
 
 // handleOn flips the committer's enabled flag to true.
@@ -114,7 +115,7 @@ func (c *GitAutoCommitCommand) handleOn() (*CommandResult, error) {
 		return nil, fmt.Errorf("/git_auto_commit: committer not configured")
 	}
 	c.committer.SetEnabled(true)
-	return &CommandResult{Success: true, Output: "git_auto_commit -> on\n"}, nil
+	return &CommandResult{Success: true, Output: trc("internal_commands_git_auto_commit_toggled_on", nil) + "\n"}, nil
 }
 
 // handleOff flips the committer's enabled flag to false.
@@ -123,22 +124,14 @@ func (c *GitAutoCommitCommand) handleOff() (*CommandResult, error) {
 		return nil, fmt.Errorf("/git_auto_commit: committer not configured")
 	}
 	c.committer.SetEnabled(false)
-	return &CommandResult{Success: true, Output: "git_auto_commit -> off\n"}, nil
+	return &CommandResult{Success: true, Output: trc("internal_commands_git_auto_commit_toggled_off", nil) + "\n"}, nil
 }
 
 // handleShow returns a descriptive block about the auto-commit format.
 func (c *GitAutoCommitCommand) handleShow() string {
-	return fmt.Sprintf(
-		"Auto-commit format:\n"+
-			"  subject: <LLM-summarised, <=72 chars>\n"+
-			"  body:    (blank line)\n"+
-			"           %s\n\n"+
-			"Opt-out:\n"+
-			"  env:     %s=off\n"+
-			"  slash:   /git_auto_commit off\n"+
-			"  per-edit: %s:true in tool params\n",
-		autocommit.CoAuthorTrailer,
-		autocommit.EnvVarName,
-		autocommit.SkipParamKey,
-	)
+	return trc("internal_commands_git_auto_commit_show", map[string]any{
+		"Trailer":  autocommit.CoAuthorTrailer,
+		"EnvVar":   autocommit.EnvVarName,
+		"SkipKey":  autocommit.SkipParamKey,
+	}) + "\n"
 }

@@ -51,3 +51,14 @@ func tr(ctx context.Context, msgID string, data map[string]any) string {
 	}
 	return out
 }
+
+// trc is the CONST-046 resolver for user-facing strings produced by
+// context-free helpers (subcommand status/render functions that take
+// no request-scoped context.Context). It resolves against
+// context.Background() through the same package-level translator the
+// runtime tr() helper uses, so context-free CLI output is just as
+// locale-aware as context-threaded output. Mirrors the trc() seam in
+// internal/commands/builtin and cmd/cli.
+func trc(msgID string, data map[string]any) string {
+	return tr(context.Background(), msgID, data)
+}

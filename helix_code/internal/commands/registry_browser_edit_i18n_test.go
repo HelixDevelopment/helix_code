@@ -21,6 +21,7 @@
 package commands
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -126,4 +127,56 @@ func TestRegistry_GetAllHelp_GoesThroughTranslator(t *testing.T) {
 	out := r.GetAllHelp()
 	assert.True(t, strings.Contains(out, "<TR:internal_commands_registry_available_header>"),
 		"GetAllHelp header must route through tr(); got %q", out)
+}
+
+// --- round-420: /edit + /git_auto_commit runtime-output migration ---
+//
+// Paired-mutation coverage for the genuine-(C) user-facing CLI output
+// migrated in round-420. With the sentinelTranslator wired the runtime
+// output MUST contain the sentinel-wrapped message ID. If a future
+// change re-inlines any literal, these assertions fail — that is the
+// paired mutation that proves the migration is real (§11.4 anti-bluff).
+
+func TestEditCommand_StatusOutput_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	// nil inspector → handleStatus renders the "unavailable" branch.
+	c := NewEditCommand(nil)
+	res, err := c.Execute(context.Background(), &CommandContext{})
+	assert.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_edit_status_heading>")
+	assert.Contains(t, res.Output, "<TR:internal_commands_edit_status_unavailable>")
+}
+
+func TestGitAutoCommit_StatusOutput_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewGitAutoCommitCommand(newTestInspector(true, true))
+	res, err := cmd.Execute(context.Background(), &CommandContext{})
+	assert.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_git_auto_commit_status>")
+}
+
+func TestGitAutoCommit_OnOffShowOutput_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	cmd := NewGitAutoCommitCommand(newTestInspector(false, true))
+
+	on, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"on"}})
+	assert.NoError(t, err)
+	assert.Contains(t, on.Output, "<TR:internal_commands_git_auto_commit_toggled_on>")
+
+	off, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"off"}})
+	assert.NoError(t, err)
+	assert.Contains(t, off.Output, "<TR:internal_commands_git_auto_commit_toggled_off>")
+
+	show, err := cmd.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
+	assert.NoError(t, err)
+	assert.Contains(t, show.Output, "<TR:internal_commands_git_auto_commit_show>")
 }

@@ -169,9 +169,9 @@ func collectRecentLogs(sessionID string, limit int) string {
 	if !foundLogs {
 		// Fall back to in-memory logging if available
 		logger := logging.NewLoggerWithName("reportbug")
-		logContent.WriteString("Note: No log files found. Log entries may be in memory or stdout.\n")
-		logContent.WriteString(fmt.Sprintf("Logger configured: %s\n", logger.GetName()))
-		logContent.WriteString("To enable file logging, configure log output in helixcode config.\n")
+		logContent.WriteString(trc("builtin_reportbug_no_log_files", nil) + "\n")
+		logContent.WriteString(trc("builtin_reportbug_logger_configured", map[string]any{"Logger": logger.GetName()}) + "\n")
+		logContent.WriteString(trc("builtin_reportbug_enable_file_logging", nil) + "\n")
 	}
 
 	return logContent.String()

@@ -136,13 +136,13 @@ func (c *EditCommand) Execute(ctx context.Context, cc *CommandContext) (*Command
 // the user immediately sees why the other subcommands won't work.
 func (c *EditCommand) handleStatus() *CommandResult {
 	var sb strings.Builder
-	sb.WriteString("Smart-edit status\n")
+	sb.WriteString(trc("internal_commands_edit_status_heading", nil) + "\n")
 	if c.inspector == nil {
-		sb.WriteString("  smart-edit unavailable: tool not initialised\n")
+		sb.WriteString("  " + trc("internal_commands_edit_status_unavailable", nil) + "\n")
 		return &CommandResult{Success: true, Output: sb.String()}
 	}
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  smart-edit:\tavailable\n")
+	fmt.Fprintf(tw, "  smart-edit:\t%s\n", trc("internal_commands_edit_status_available", nil))
 	fmt.Fprintf(tw, "  format:\tSEARCH/REPLACE blocks (markers <<<<<<< SEARCH / ======= / >>>>>>> REPLACE)\n")
 	fmt.Fprintf(tw, "  inspection:\t/edit diff <prompt>\n")
 	fmt.Fprintf(tw, "  dry-run:\t/edit dry-run <prompt> (no disk write)\n")
@@ -171,12 +171,13 @@ func (c *EditCommand) handleDiff(cc *CommandContext) (*CommandResult, error) {
 
 	var sb strings.Builder
 	if plan == nil || len(plan.Blocks) == 0 {
-		sb.WriteString("/edit diff: prompt parsed to 0 blocks (nothing to do).\n")
+		sb.WriteString(trc("internal_commands_edit_diff_no_blocks", nil) + "\n")
 		return &CommandResult{Success: true, Output: sb.String()}, nil
 	}
 
-	fmt.Fprintf(&sb, "Parsed %d blocks across %d files (no changes applied):\n",
-		len(plan.Blocks), len(plan.PerFile))
+	sb.WriteString(trc("internal_commands_edit_diff_parsed", map[string]any{
+		"Blocks": len(plan.Blocks), "Files": len(plan.PerFile),
+	}) + "\n")
 
 	// Stable per-file ordering for reproducible output.
 	files := make([]string, 0, len(plan.PerFile))
@@ -313,10 +314,10 @@ func (c *EditCommand) extractPrompt(cc *CommandContext, sub string) (string, err
 func renderResult(sub string, res *smartedit.SmartEditResult) string {
 	var sb strings.Builder
 	if res == nil {
-		fmt.Fprintf(&sb, "/edit %s: no result returned\n", sub)
+		sb.WriteString(trc("internal_commands_edit_no_result", map[string]any{"Sub": sub}) + "\n")
 		return sb.String()
 	}
-	fmt.Fprintf(&sb, "/edit %s result:\n", sub)
+	sb.WriteString(trc("internal_commands_edit_result_heading", map[string]any{"Sub": sub}) + "\n")
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "  applied:\t%d\n", res.AppliedCount)
 	fmt.Fprintf(tw, "  failed:\t%d\n", res.FailedCount)
@@ -327,7 +328,7 @@ func renderResult(sub string, res *smartedit.SmartEditResult) string {
 	tw.Flush()
 
 	if len(res.Results) > 0 {
-		sb.WriteString("\nPer-block outcomes:\n")
+		sb.WriteString("\n" + trc("internal_commands_edit_per_block_heading", nil) + "\n")
 		btw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
 		fmt.Fprintf(btw, "  PATH\tLINES\tOUTCOME\tERROR\n")
 		for _, br := range res.Results {
@@ -342,7 +343,7 @@ func renderResult(sub string, res *smartedit.SmartEditResult) string {
 	}
 
 	if res.Diff != "" {
-		sb.WriteString("\nUnified diff:\n")
+		sb.WriteString("\n" + trc("internal_commands_edit_unified_diff_heading", nil) + "\n")
 		sb.WriteString(res.Diff)
 		if !strings.HasSuffix(res.Diff, "\n") {
 			sb.WriteByte('\n')

@@ -403,3 +403,40 @@ func TestReportBug_DocumentTemplateRealBundleProduceUserText(t *testing.T) {
 		t.Errorf("bug-report body missing expected localized section heading; got:\n%s", body)
 	}
 }
+
+// TestReportBug_NoLogFilesBranchGoesThroughTranslator is the round-420
+// paired-mutation guard for the collectRecentLogs no-log-files fallback
+// messages. With a session ID that resolves to no on-disk log file the
+// fallback branch fires; with the sentinel translator wired the bug
+// report body MUST embed the sentinel-wrapped fallback message IDs — a
+// re-inlined literal would surface raw English text and fail.
+func TestReportBug_NoLogFilesBranchGoesThroughTranslator(t *testing.T) {
+	SetTranslator(sentinelTranslator{})
+	defer withRealBundleTranslator(t)
+
+	res, err := (&ReportBugCommand{}).Execute(context.Background(), &commands.CommandContext{
+		Args:      []string{"bug", "broken"},
+		SessionID: "round420-no-such-log-session-xyz",
+	})
+	if err != nil || res == nil {
+		t.Fatalf("reportbug: err=%v res=%v", err, res)
+	}
+	var body string
+	for _, a := range res.Actions {
+		if b, ok := a.Data["body"].(string); ok {
+			body = b
+		}
+	}
+	if body == "" {
+		t.Fatal("reportbug: bug-report body not found in result")
+	}
+	for _, id := range []string{
+		"builtin_reportbug_no_log_files",
+		"builtin_reportbug_logger_configured",
+		"builtin_reportbug_enable_file_logging",
+	} {
+		if !strings.Contains(body, "<TR:"+id+">") {
+			t.Errorf("bug-report body missing sentinel-wrapped %q — literal bypassed tr()", id)
+		}
+	}
+}
