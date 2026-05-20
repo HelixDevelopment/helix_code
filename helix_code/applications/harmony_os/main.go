@@ -23,6 +23,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
+	"dev.helix.code/applications/harmony_os/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/hardware"
@@ -170,6 +171,41 @@ type HarmonyApp struct {
 	// Update control
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+
+	// translator resolves CONST-046 user-facing message IDs for the
+	// GUI (round-438 §11.4 anti-bluff sweep, 2026-05-20). Defaults to
+	// i18n.NoopTranslator{} (loud message-ID echo) when nil — set by
+	// helix_code at boot via SetTranslator to a real
+	// *i18nadapter.Translator wired to the active.en.yaml bundle.
+	translator i18n.Translator
+}
+
+// SetTranslator wires a CONST-046-compliant Translator into the GUI
+// app. Passing nil resets to i18n.NoopTranslator{} (loud echo) —
+// never silently swallow translation requests (a §11.4 PASS-bluff at
+// the i18n injection layer).
+func (app *HarmonyApp) SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		app.translator = i18n.NoopTranslator{}
+		return
+	}
+	app.translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in the GUI. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func (app *HarmonyApp) tr(msgID string, data map[string]any) string {
+	if app.translator == nil {
+		app.translator = i18n.NoopTranslator{}
+	}
+	out, err := app.translator.T(context.Background(), msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
 }
 
 // HarmonyIntegration handles Harmony OS-specific native features
@@ -240,6 +276,7 @@ func NewHarmonyApp() *HarmonyApp {
 		sessions:     make([]APISession, 0),
 		llmProviders: make([]string, 0),
 		stopUpdate:   make(chan struct{}),
+		translator:   i18n.NoopTranslator{},
 	}
 }
 
@@ -613,26 +650,26 @@ func (app *HarmonyApp) SetupUI() {
 	app.fyneApp.Settings().SetTheme(app.themeManager.GetCustomTheme())
 
 	// Create main window
-	app.mainWindow = app.fyneApp.NewWindow("HelixCode - Harmony OS Edition")
+	app.mainWindow = app.fyneApp.NewWindow(app.tr("harmony_os_gui_window_title", nil))
 	app.mainWindow.Resize(fyne.NewSize(1200, 800))
 	app.mainWindow.CenterOnScreen()
 
 	// Create status bar
-	app.statusBar = widget.NewLabel("Ready - Harmony OS Initialized")
+	app.statusBar = widget.NewLabel(app.tr("harmony_os_gui_status_ready", nil))
 	app.statusBar.Alignment = fyne.TextAlignCenter
 
 	// Create tabs
 	app.tabs = container.NewAppTabs(
-		container.NewTabItem("Dashboard", app.createDashboardTab()),
-		container.NewTabItem("Tasks", app.createTasksTab()),
-		container.NewTabItem("Workers", app.createWorkersTab()),
-		container.NewTabItem("Projects", app.createProjectsTab()),
-		container.NewTabItem("Sessions", app.createSessionsTab()),
-		container.NewTabItem("LLM", app.createLLMTab()),
-		container.NewTabItem("Harmony System", app.createHarmonySystemTab()),
-		container.NewTabItem("Distributed Services", app.createDistributedServicesTab()),
-		container.NewTabItem("Resource Management", app.createResourceManagementTab()),
-		container.NewTabItem("Settings", app.createSettingsTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_dashboard", nil), app.createDashboardTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_tasks", nil), app.createTasksTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_workers", nil), app.createWorkersTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_projects", nil), app.createProjectsTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_sessions", nil), app.createSessionsTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_llm", nil), app.createLLMTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_harmony_system", nil), app.createHarmonySystemTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_distributed_services", nil), app.createDistributedServicesTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_resource_management", nil), app.createResourceManagementTab()),
+		container.NewTabItem(app.tr("harmony_os_gui_tab_settings", nil), app.createSettingsTab()),
 	)
 
 	// Create main layout
@@ -651,15 +688,15 @@ func (app *HarmonyApp) SetupUI() {
 func (app *HarmonyApp) createDashboardTab() fyne.CanvasObject {
 	// Welcome label
 	welcomeLabel := widget.NewLabelWithStyle(
-		"HelixCode - Harmony OS Edition",
+		app.tr("harmony_os_gui_window_title", nil),
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
 
 	// System info
 	systemInfo := widget.NewCard(
-		"System Information",
-		"Harmony OS Platform Details",
+		app.tr("harmony_os_gui_card_system_info_title", nil),
+		app.tr("harmony_os_gui_card_system_info_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf(
 			"Platform: %s\nVersion: %s\nKernel: %s\nEcosystem: Harmony",
 			app.harmonyIntegration.systemAPI.systemVersion,
@@ -670,15 +707,15 @@ func (app *HarmonyApp) createDashboardTab() fyne.CanvasObject {
 
 	// Quick stats
 	statsCard := widget.NewCard(
-		"Quick Stats",
-		"Current System Status",
-		widget.NewLabel("Loading stats..."),
+		app.tr("harmony_os_gui_card_quick_stats_title", nil),
+		app.tr("harmony_os_gui_card_quick_stats_subtitle", nil),
+		widget.NewLabel(app.tr("harmony_os_gui_loading_stats", nil)),
 	)
 
 	// Harmony features
 	featuresCard := widget.NewCard(
-		"Harmony OS Features",
-		"Advanced Capabilities",
+		app.tr("harmony_os_gui_card_features_title", nil),
+		app.tr("harmony_os_gui_card_features_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf(
 			"• Distributed Computing\n• Cross-Device Sync\n• AI Acceleration\n• Multi-Screen Collaboration\n• Super Device Integration",
 		)),
@@ -1391,8 +1428,8 @@ func (app *HarmonyApp) createHarmonySystemTab() fyne.CanvasObject {
 	powerLabel := widget.NewLabel(fmt.Sprintf("Power Usage: %.1fW", app.systemMonitor.powerUsage))
 
 	metricsCard := widget.NewCard(
-		"System Monitoring",
-		"Real-time Performance Metrics",
+		app.tr("harmony_os_gui_card_monitoring_title", nil),
+		app.tr("harmony_os_gui_card_monitoring_subtitle", nil),
 		container.NewVBox(
 			cpuLabel,
 			memLabel,
@@ -1404,8 +1441,8 @@ func (app *HarmonyApp) createHarmonySystemTab() fyne.CanvasObject {
 
 	// Harmony capabilities
 	capabilitiesCard := widget.NewCard(
-		"Harmony OS Capabilities",
-		"Available Features",
+		app.tr("harmony_os_gui_card_capabilities_title", nil),
+		app.tr("harmony_os_gui_card_capabilities_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf("• %s",
 			fmt.Sprintf("%v", app.harmonyIntegration.systemAPI.capabilities)),
 		),
@@ -1426,8 +1463,8 @@ func (app *HarmonyApp) createDistributedServicesTab() fyne.CanvasObject {
 
 	// Task scheduler info
 	schedulerCard := widget.NewCard(
-		"Task Scheduler",
-		"Distributed Task Scheduling",
+		app.tr("harmony_os_gui_card_scheduler_title", nil),
+		app.tr("harmony_os_gui_card_scheduler_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf(
 			"Policy: %s\nQueue Size: %d",
 			app.harmonyIntegration.distributedEngine.taskScheduler.schedulingPolicy,
@@ -1450,8 +1487,8 @@ func (app *HarmonyApp) createDistributedServicesTab() fyne.CanvasObject {
 		syncStatusText += fmt.Sprintf("\n\nLast Sync Result: FAILED\nError: %v", lastSyncErr)
 	}
 	syncCard := widget.NewCard(
-		"Data Synchronization",
-		"Cross-Device Data Sync",
+		app.tr("harmony_os_gui_card_sync_title", nil),
+		app.tr("harmony_os_gui_card_sync_subtitle", nil),
 		widget.NewLabel(syncStatusText),
 	)
 

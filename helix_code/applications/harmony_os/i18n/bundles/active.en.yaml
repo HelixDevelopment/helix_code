@@ -19,6 +19,12 @@
 # and CRUD confirmation messages that anchor every text-mode
 # interaction with the Harmony OS CLI client (main_nogui.go).
 # Placeholder-bearing entries use go-i18n {{.Name}} interpolation.
+#
+# Round-438 §11.4 anti-bluff sweep (2026-05-20): 24 GUI strings
+# migrated from main_nogui.go's GUI sibling main.go — the main
+# window title, status bar, all ten AppTab labels, and the
+# dashboard / system-monitoring / distributed-services card
+# titles + subtitles that anchor every Fyne-mode interaction.
 
 harmony_os_cli_status_header:
   other: "=== HelixCode Harmony OS Status ==="
@@ -255,3 +261,86 @@ harmony_os_cli_interactive_header:
 
 harmony_os_cli_interactive_hint:
   other: "Type 'help' for commands, 'quit' to exit"
+
+# --- Round-438 GUI (main.go) strings ---
+
+harmony_os_gui_window_title:
+  other: "HelixCode - Harmony OS Edition"
+
+harmony_os_gui_status_ready:
+  other: "Ready - Harmony OS Initialized"
+
+harmony_os_gui_tab_dashboard:
+  other: "Dashboard"
+
+harmony_os_gui_tab_tasks:
+  other: "Tasks"
+
+harmony_os_gui_tab_workers:
+  other: "Workers"
+
+harmony_os_gui_tab_projects:
+  other: "Projects"
+
+harmony_os_gui_tab_sessions:
+  other: "Sessions"
+
+harmony_os_gui_tab_llm:
+  other: "LLM"
+
+harmony_os_gui_tab_harmony_system:
+  other: "Harmony System"
+
+harmony_os_gui_tab_distributed_services:
+  other: "Distributed Services"
+
+harmony_os_gui_tab_resource_management:
+  other: "Resource Management"
+
+harmony_os_gui_tab_settings:
+  other: "Settings"
+
+harmony_os_gui_card_system_info_title:
+  other: "System Information"
+
+harmony_os_gui_card_system_info_subtitle:
+  other: "Harmony OS Platform Details"
+
+harmony_os_gui_card_quick_stats_title:
+  other: "Quick Stats"
+
+harmony_os_gui_card_quick_stats_subtitle:
+  other: "Current System Status"
+
+harmony_os_gui_loading_stats:
+  other: "Loading stats..."
+
+harmony_os_gui_card_features_title:
+  other: "Harmony OS Features"
+
+harmony_os_gui_card_features_subtitle:
+  other: "Advanced Capabilities"
+
+harmony_os_gui_card_monitoring_title:
+  other: "System Monitoring"
+
+harmony_os_gui_card_monitoring_subtitle:
+  other: "Real-time Performance Metrics"
+
+harmony_os_gui_card_capabilities_title:
+  other: "Harmony OS Capabilities"
+
+harmony_os_gui_card_capabilities_subtitle:
+  other: "Available Features"
+
+harmony_os_gui_card_scheduler_title:
+  other: "Task Scheduler"
+
+harmony_os_gui_card_scheduler_subtitle:
+  other: "Distributed Task Scheduling"
+
+harmony_os_gui_card_sync_title:
+  other: "Data Synchronization"
+
+harmony_os_gui_card_sync_subtitle:
+  other: "Cross-Device Data Sync"
