@@ -134,3 +134,129 @@ internal_commands_sandbox_user_denylist_header:
 
 internal_commands_sandbox_user_denylist_empty:
   other: "(empty - add patterns to user_deny_list in ~/.config/helixcode/sandbox.yaml)"
+
+# Round-362 §11.4 anti-bluff sweep (2026-05-20): migrated genuine
+# user-facing literals in telemetry_command.go (/telemetry slash
+# command: description, usage, status table labels + values,
+# unavailable banners, flush messages) and continue_command.go
+# (/continue slash command: description, usage, subcommand usage
+# hints, result messages). LLM prompt strings + wrapped-error tech
+# strings remain out of CONST-046 scope per the round-350
+# classification doc.
+
+internal_commands_telemetry_description:
+  other: "Inspect telemetry status, list blocked attribute keys, or force-flush the exporter."
+
+internal_commands_telemetry_usage:
+  other: "/telemetry [status|show|flush]"
+
+internal_commands_telemetry_unknown_subcommand:
+  other: "/telemetry: unknown subcommand \"{{.Subcommand}}\" (want status|show|flush)"
+
+internal_commands_telemetry_status_header:
+  other: "Telemetry status"
+
+internal_commands_telemetry_label_enabled:
+  other: "Enabled:"
+
+internal_commands_telemetry_label_exporter:
+  other: "Exporter:"
+
+internal_commands_telemetry_label_service_name:
+  other: "Service name:"
+
+internal_commands_telemetry_label_endpoint:
+  other: "Endpoint:"
+
+internal_commands_telemetry_label_resource_attrs:
+  other: "Resource attrs:"
+
+internal_commands_telemetry_label_blocked_attr_keys:
+  other: "Blocked attr keys:"
+
+internal_commands_telemetry_label_batch_timeout:
+  other: "Batch timeout:"
+
+internal_commands_telemetry_label_export_timeout:
+  other: "Export timeout:"
+
+internal_commands_telemetry_label_insecure:
+  other: "Insecure:"
+
+internal_commands_telemetry_blocked_attr_keys_value:
+  other: "{{.Total}} (default {{.Default}} + {{.User}} user)"
+
+internal_commands_telemetry_endpoint_na_stdout:
+  other: "(n/a for stdout)"
+
+internal_commands_telemetry_endpoint_default:
+  other: "(default)"
+
+internal_commands_telemetry_resource_attrs_none:
+  other: "(none)"
+
+internal_commands_telemetry_blocked_keys_default_header:
+  other: "Blocked attribute keys (default-deny CONST-042):"
+
+internal_commands_telemetry_blocked_keys_user_header:
+  other: "User-supplied blocked attribute keys:"
+
+internal_commands_telemetry_unavailable_banner:
+  other: "Telemetry unavailable: {{.Reason}}"
+
+internal_commands_telemetry_reason_provider_not_init:
+  other: "provider not initialised"
+
+internal_commands_telemetry_reason_no_exporter_hint:
+  other: "no exporter configured (set OTEL_EXPORTER_OTLP_PROTOCOL or OTEL_TRACES_EXPORTER=console to enable)"
+
+internal_commands_telemetry_flush_unavailable_provider:
+  other: "telemetry unavailable: provider not initialised"
+
+internal_commands_telemetry_flush_unavailable_no_exporter:
+  other: "telemetry unavailable: no exporter configured"
+
+internal_commands_telemetry_flush_ok:
+  other: "telemetry flushed in {{.Elapsed}}"
+
+internal_commands_continue_description:
+  other: "Continue IDE: completions, editor, chat, diff"
+
+internal_commands_continue_usage:
+  other: "/continue [edit|complete|chat|diff]"
+
+internal_commands_continue_usage_full:
+  other: "/continue edit <open|save> <file> | complete <file> <line> <col> | chat <create|add|list> | diff <old> <new>"
+
+internal_commands_continue_unknown_subcommand:
+  other: "unknown: {{.Subcommand}}"
+
+internal_commands_continue_edit_usage:
+  other: "usage: /continue edit <open> <file>"
+
+internal_commands_continue_edit_opened:
+  other: "Opened {{.File}}: {{.Lines}} lines"
+
+internal_commands_continue_edit_unknown_action:
+  other: "unknown edit action: {{.Action}}"
+
+internal_commands_continue_complete_usage:
+  other: "usage: /continue complete <file> <line> <col>"
+
+internal_commands_continue_chat_usage:
+  other: "usage: /continue chat <create|add|list>"
+
+internal_commands_continue_chat_created:
+  other: "Chat session created: {{.ID}}"
+
+internal_commands_continue_chat_count:
+  other: "{{.Count}} chat session(s)"
+
+internal_commands_continue_chat_add_hint:
+  other: "Use tools to add messages to chat sessions"
+
+internal_commands_continue_diff_usage:
+  other: "usage: /continue diff <file1> <file2>"
+
+internal_commands_continue_diff_hint:
+  other: "Diff: use continue_edit tool to compare file versions"

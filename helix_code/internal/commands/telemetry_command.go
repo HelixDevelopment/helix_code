@@ -77,12 +77,12 @@ func (c *TelemetryCommand) Aliases() []string { return nil }
 
 // Description returns the one-line help blurb shown by /help.
 func (c *TelemetryCommand) Description() string {
-	return "Inspect telemetry status, list blocked attribute keys, or force-flush the exporter."
+	return tr(context.Background(), "internal_commands_telemetry_description", nil)
 }
 
 // Usage returns the usage string shown by /help.
 func (c *TelemetryCommand) Usage() string {
-	return "/telemetry [status|show|flush]"
+	return tr(context.Background(), "internal_commands_telemetry_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -98,13 +98,13 @@ func (c *TelemetryCommand) Execute(ctx context.Context, cc *CommandContext) (*Co
 	}
 	switch sub {
 	case "status":
-		return &CommandResult{Success: true, Output: c.handleStatus(false)}, nil
+		return &CommandResult{Success: true, Output: c.handleStatus(ctx, false)}, nil
 	case "show":
-		return &CommandResult{Success: true, Output: c.handleStatus(true)}, nil
+		return &CommandResult{Success: true, Output: c.handleStatus(ctx, true)}, nil
 	case "flush":
 		return c.handleFlush(ctx)
 	default:
-		return nil, fmt.Errorf("/telemetry: unknown subcommand %q (want status|show|flush)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_telemetry_unknown_subcommand", map[string]any{"Subcommand": sub}))
 	}
 }
 
@@ -118,61 +118,64 @@ func (c *TelemetryCommand) Execute(ctx context.Context, cc *CommandContext) (*Co
 // short-circuit with a single "Telemetry unavailable: <reason>" line —
 // the rest of the table would be misleading (it would imply telemetry
 // is wired when it's actually a no-op).
-func (c *TelemetryCommand) handleStatus(verbose bool) string {
+func (c *TelemetryCommand) handleStatus(ctx context.Context, verbose bool) string {
 	if c.provider == nil {
-		return unavailableMessage("provider not initialised") + "\n"
+		return unavailableMessage(ctx, tr(ctx, "internal_commands_telemetry_reason_provider_not_init", nil)) + "\n"
 	}
 	exp := c.provider.Exporter()
 	if exp == telemetry.ExporterNoop {
-		return unavailableMessage("no exporter configured (set OTEL_EXPORTER_OTLP_PROTOCOL or OTEL_TRACES_EXPORTER=console to enable)") + "\n"
+		return unavailableMessage(ctx, tr(ctx, "internal_commands_telemetry_reason_no_exporter_hint", nil)) + "\n"
 	}
 
 	cfg := c.provider.Config()
 
 	var sb strings.Builder
-	sb.WriteString("Telemetry status\n")
+	sb.WriteString(tr(ctx, "internal_commands_telemetry_status_header", nil) + "\n")
 
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "  Enabled:\t%t\n", cfg.Enabled)
-	fmt.Fprintf(tw, "  Exporter:\t%s\n", string(exp))
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_telemetry_label_enabled", nil), cfg.Enabled)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_exporter", nil), string(exp))
 
 	serviceName := cfg.ServiceName
 	if serviceName == "" {
 		serviceName = telemetry.DefaultServiceName
 	}
-	fmt.Fprintf(tw, "  Service name:\t%s\n", serviceName)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_service_name", nil), serviceName)
 
 	endpoint := cfg.Endpoint
 	if endpoint == "" {
 		switch exp {
 		case telemetry.ExporterStdout:
-			endpoint = "(n/a for stdout)"
+			endpoint = tr(ctx, "internal_commands_telemetry_endpoint_na_stdout", nil)
 		default:
-			endpoint = "(default)"
+			endpoint = tr(ctx, "internal_commands_telemetry_endpoint_default", nil)
 		}
 	}
-	fmt.Fprintf(tw, "  Endpoint:\t%s\n", endpoint)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_endpoint", nil), endpoint)
 
-	fmt.Fprintf(tw, "  Resource attrs:\t%s\n", formatResourceAttrs(cfg.ResourceAttrs))
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_resource_attrs", nil), formatResourceAttrs(ctx, cfg.ResourceAttrs))
 
 	defaultCount := len(telemetry.DefaultBlockedAttributeKeys)
 	userCount := len(cfg.BlockedAttributeKeys)
 	totalCount := defaultCount + userCount
-	fmt.Fprintf(tw, "  Blocked attr keys:\t%d (default %d + %d user)\n",
-		totalCount, defaultCount, userCount)
+	fmt.Fprintf(tw, "  %s\t%s\n",
+		tr(ctx, "internal_commands_telemetry_label_blocked_attr_keys", nil),
+		tr(ctx, "internal_commands_telemetry_blocked_attr_keys_value", map[string]any{
+			"Total": totalCount, "Default": defaultCount, "User": userCount,
+		}))
 
-	fmt.Fprintf(tw, "  Batch timeout:\t%s\n", durationOrDefault(cfg.BatchTimeout, telemetry.DefaultBatchTimeout))
-	fmt.Fprintf(tw, "  Export timeout:\t%s\n", durationOrDefault(cfg.ExportTimeout, telemetry.DefaultExportTimeout))
-	fmt.Fprintf(tw, "  Insecure:\t%t\n", cfg.Insecure)
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_batch_timeout", nil), durationOrDefault(cfg.BatchTimeout, telemetry.DefaultBatchTimeout))
+	fmt.Fprintf(tw, "  %s\t%s\n", tr(ctx, "internal_commands_telemetry_label_export_timeout", nil), durationOrDefault(cfg.ExportTimeout, telemetry.DefaultExportTimeout))
+	fmt.Fprintf(tw, "  %s\t%t\n", tr(ctx, "internal_commands_telemetry_label_insecure", nil), cfg.Insecure)
 	tw.Flush()
 
 	if verbose {
-		sb.WriteString("\nBlocked attribute keys (default-deny CONST-042):\n")
+		sb.WriteString("\n" + tr(ctx, "internal_commands_telemetry_blocked_keys_default_header", nil) + "\n")
 		for _, k := range telemetry.DefaultBlockedAttributeKeys {
 			fmt.Fprintf(&sb, "  - %s\n", k)
 		}
 		if userCount > 0 {
-			sb.WriteString("\nUser-supplied blocked attribute keys:\n")
+			sb.WriteString("\n" + tr(ctx, "internal_commands_telemetry_blocked_keys_user_header", nil) + "\n")
 			for _, k := range cfg.BlockedAttributeKeys {
 				fmt.Fprintf(&sb, "  - %s\n", k)
 			}
@@ -194,13 +197,13 @@ func (c *TelemetryCommand) handleFlush(ctx context.Context) (*CommandResult, err
 	if c.provider == nil {
 		return &CommandResult{
 			Success: true,
-			Output:  "telemetry unavailable: provider not initialised",
+			Output:  tr(ctx, "internal_commands_telemetry_flush_unavailable_provider", nil),
 		}, nil
 	}
 	if c.provider.Exporter() == telemetry.ExporterNoop {
 		return &CommandResult{
 			Success: true,
-			Output:  "telemetry unavailable: no exporter configured",
+			Output:  tr(ctx, "internal_commands_telemetry_flush_unavailable_no_exporter", nil),
 		}, nil
 	}
 
@@ -211,23 +214,23 @@ func (c *TelemetryCommand) handleFlush(ctx context.Context) (*CommandResult, err
 	elapsed := time.Since(start).Round(time.Millisecond)
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("telemetry flushed in %s", elapsed),
+		Output:  tr(ctx, "internal_commands_telemetry_flush_ok", map[string]any{"Elapsed": elapsed.String()}),
 	}, nil
 }
 
 // unavailableMessage formats the canonical "telemetry unavailable: ..."
 // banner used by every disabled-path branch so the wording stays
 // consistent across status / show / flush.
-func unavailableMessage(reason string) string {
-	return "Telemetry unavailable: " + reason
+func unavailableMessage(ctx context.Context, reason string) string {
+	return tr(ctx, "internal_commands_telemetry_unavailable_banner", map[string]any{"Reason": reason})
 }
 
 // formatResourceAttrs renders the resource-attributes map as a stable
 // "k=v k=v" string. Keys are sorted alphabetically so the output is
 // reproducible across runs (Go map iteration order is randomised).
-func formatResourceAttrs(attrs map[string]string) string {
+func formatResourceAttrs(ctx context.Context, attrs map[string]string) string {
 	if len(attrs) == 0 {
-		return "(none)"
+		return tr(ctx, "internal_commands_telemetry_resource_attrs_none", nil)
 	}
 	keys := make([]string, 0, len(attrs))
 	for k := range attrs {

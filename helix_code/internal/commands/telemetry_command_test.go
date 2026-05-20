@@ -66,8 +66,10 @@ func newTelemetryCommand(t *testing.T) (*TelemetryCommand, *fakeTelemetryProvide
 func TestTelemetryCommand_NameDescription(t *testing.T) {
 	c, _ := newTelemetryCommand(t)
 	assert.Equal(t, "telemetry", c.Name())
+	// CONST-046: Description/Usage route through the tr() seam; under the
+	// default NoopTranslator they echo the message ID (non-empty).
 	assert.NotEmpty(t, c.Description())
-	assert.Contains(t, c.Usage(), "/telemetry")
+	assert.NotEmpty(t, c.Usage())
 	assert.Nil(t, c.Aliases())
 }
 
@@ -76,9 +78,10 @@ func TestTelemetryCommand_DefaultIsStatus(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	// status output mentions Telemetry status header + Exporter line.
-	assert.Contains(t, res.Output, "Telemetry status")
-	assert.Contains(t, res.Output, "Exporter")
+	// CONST-046: status header + exporter label are translated message
+	// IDs under the default NoopTranslator (loud echo).
+	assert.Contains(t, res.Output, "internal_commands_telemetry_status_header")
+	assert.Contains(t, res.Output, "internal_commands_telemetry_label_exporter")
 }
 
 func TestTelemetryCommand_StatusShowsExporter(t *testing.T) {
@@ -94,8 +97,9 @@ func TestTelemetryCommand_StatusShowsExporter(t *testing.T) {
 	// Timeouts rendered
 	assert.Contains(t, res.Output, "5s")
 	assert.Contains(t, res.Output, "30s")
-	// Default-deny floor count surfaces (22 in DefaultBlockedAttributeKeys)
-	assert.Contains(t, res.Output, "22")
+	// CONST-046: the blocked-attr-keys count is interpolated into a
+	// translated message; under NoopTranslator the message ID echoes.
+	assert.Contains(t, res.Output, "internal_commands_telemetry_label_blocked_attr_keys")
 }
 
 func TestTelemetryCommand_StatusUnavailableWhenNoop(t *testing.T) {
@@ -106,8 +110,10 @@ func TestTelemetryCommand_StatusUnavailableWhenNoop(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.True(t, strings.HasPrefix(res.Output, "Telemetry unavailable"),
-		"output should start with 'Telemetry unavailable', got %q", res.Output)
+	// CONST-046: the unavailable banner is a translated message ID under
+	// the default NoopTranslator (loud echo).
+	assert.True(t, strings.HasPrefix(res.Output, "internal_commands_telemetry_unavailable_banner"),
+		"output should start with the unavailable-banner message ID, got %q", res.Output)
 }
 
 func TestTelemetryCommand_StatusUnavailableWhenNilProvider(t *testing.T) {
@@ -115,8 +121,8 @@ func TestTelemetryCommand_StatusUnavailableWhenNilProvider(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.True(t, strings.HasPrefix(res.Output, "Telemetry unavailable"),
-		"output should start with 'Telemetry unavailable', got %q", res.Output)
+	assert.True(t, strings.HasPrefix(res.Output, "internal_commands_telemetry_unavailable_banner"),
+		"output should start with the unavailable-banner message ID, got %q", res.Output)
 }
 
 func TestTelemetryCommand_ShowListsBlockedKeys(t *testing.T) {
@@ -131,16 +137,17 @@ func TestTelemetryCommand_ShowListsBlockedKeys(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"show"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	// Status block still present
-	assert.Contains(t, res.Output, "Telemetry status")
-	// All 5 user-supplied keys rendered as bullet points
+	// CONST-046: status block still present (translated message ID).
+	assert.Contains(t, res.Output, "internal_commands_telemetry_status_header")
+	// All 5 user-supplied keys rendered as bullet points (raw data,
+	// not translated).
 	for _, k := range prov.cfg.BlockedAttributeKeys {
 		assert.Contains(t, res.Output, k, "show output missing user-supplied blocked key %q", k)
 	}
 	// Default-deny entries also rendered (sample: api_key)
 	assert.Contains(t, res.Output, "api_key")
-	// Show header for blocked keys list
-	assert.Contains(t, res.Output, "Blocked attribute keys")
+	// CONST-046: blocked-keys list header is a translated message ID.
+	assert.Contains(t, res.Output, "internal_commands_telemetry_blocked_keys_default_header")
 }
 
 func TestTelemetryCommand_FlushCallsProvider(t *testing.T) {
@@ -156,7 +163,9 @@ func TestTelemetryCommand_FlushReportsSuccess(t *testing.T) {
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"flush"}})
 	require.NoError(t, err)
 	assert.True(t, res.Success)
-	assert.Contains(t, res.Output, "flushed")
+	// CONST-046: flush-success message is a translated message ID under
+	// the default NoopTranslator (loud echo).
+	assert.Contains(t, res.Output, "internal_commands_telemetry_flush_ok")
 }
 
 func TestTelemetryCommand_FlushReportsFailure(t *testing.T) {
@@ -192,4 +201,65 @@ func TestTelemetryCommand_UnknownSubcommandErrors(t *testing.T) {
 	c, _ := newTelemetryCommand(t)
 	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"bogus"}})
 	require.Error(t, err)
+}
+
+// --- Round-362 CONST-046 paired-mutation tests -----------------------------
+//
+// Each asserts the migrated user-facing literal now routes through the
+// package tr() seam. With a sentinel translator wired the output MUST
+// contain the sentinel-wrapped message ID; an inlined literal fails it.
+
+func TestTelemetryCommand_StatusHeader_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newTelemetryCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_telemetry_status_header>")
+	assert.Contains(t, res.Output, "<TR:internal_commands_telemetry_label_exporter>")
+}
+
+func TestTelemetryCommand_Description_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newTelemetryCommand(t)
+	assert.Equal(t, "<TR:internal_commands_telemetry_description>", c.Description())
+	assert.Equal(t, "<TR:internal_commands_telemetry_usage>", c.Usage())
+}
+
+func TestTelemetryCommand_UnavailableBanner_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c := NewTelemetryCommand(nil)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"status"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_telemetry_unavailable_banner>")
+}
+
+func TestTelemetryCommand_UnknownSubcommand_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newTelemetryCommand(t)
+	_, err := c.Execute(context.Background(), &CommandContext{Args: []string{"bogus"}})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "<TR:internal_commands_telemetry_unknown_subcommand>")
+}
+
+func TestTelemetryCommand_FlushOK_GoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	c, _ := newTelemetryCommand(t)
+	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"flush"}})
+	require.NoError(t, err)
+	assert.Contains(t, res.Output, "<TR:internal_commands_telemetry_flush_ok>")
 }
