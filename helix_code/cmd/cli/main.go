@@ -341,9 +341,13 @@ func NewCLI() *CLI {
 		BaseURL:      "http://localhost:11434", // Ollama default port
 	})
 
-	// Initialize LLMsVerifier subsystem if config is available
+	// Initialize LLMsVerifier subsystem if config is available.
+	// Speed programme P2-T07: config.Get() loads + caches the config once
+	// per process (sync.Once), so repeated NewCLI() / subagent construction
+	// reuses the same *Config instead of re-reading YAML and re-churning
+	// viper — and is race-free (closes the P0-T02 concurrent-map-write bug).
 	var verifierAdapter *verifier.Adapter
-	cfg, err := config.Load()
+	cfg, err := config.Get()
 	if err == nil && cfg.Verifier != nil && cfg.Verifier.Enabled {
 		vResult, vErr := verifier.Bootstrap(cfg.Verifier)
 		if vErr == nil && vResult != nil {

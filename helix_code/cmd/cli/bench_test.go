@@ -40,15 +40,14 @@ func silenceStdout(b *testing.B) func() {
 // path every short CLI command pays before doing any useful work. This is the
 // number Phase 1's lazy-startup work (P1-T03) must move.
 //
-// Construction is benchmarked SERIALLY only. A `b.RunParallel` variant was
-// trialled and exposed a real concurrency defect — `NewCLI()` calls
-// `config.Load()`, which calls the process-global `viper.SetDefault`; the
-// global Viper singleton is not goroutine-safe and concurrent construction
-// panics with "concurrent map writes" (viper.go:1492). `NewCLI()` is
-// constructed exactly once per process so this is not a supported usage
-// pattern; the defect is noted for the speed programme but a parallel
-// benchmark would only re-trigger an unfixable-without-production-change panic
-// and is therefore deliberately omitted (P0-T02 changes no production code).
+// Construction is benchmarked SERIALLY here. Speed-programme P2-T07 closed the
+// concurrency defect P0-T02 originally surfaced: `NewCLI()` -> `config.Get()`
+// no longer mutates the process-global Viper singleton (`config.Load()` now
+// builds a per-call private `*viper.Viper`), so concurrent construction is
+// race-free. The race-free proof lives in `internal/config/load_once_test.go`
+// (`TestLoad_ConcurrentIsRaceFree`, `-race` clean). NewCLI is still
+// constructed once per process in practice, so a parallel benchmark here adds
+// no signal and is deliberately omitted.
 func BenchmarkNewCLI(b *testing.B) {
 	restore := silenceStdout(b)
 	defer restore()

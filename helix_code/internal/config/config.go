@@ -11,11 +11,73 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"dev.helix.code/internal/database"
 	"github.com/spf13/viper"
 )
+
+// Speed programme P2-T07 — config loaded once, threaded down (R1 B10).
+//
+// Two cooperating mechanisms:
+//
+//  1. Load() builds a *fresh* per-call *viper.Viper instance instead of
+//     mutating the package-global viper singleton. The old code called the
+//     global viper.SetDefault / viper.BindEnv / viper.ReadInConfig, whose
+//     backing maps are NOT goroutine-safe — concurrent NewCLI() construction
+//     panicked with "concurrent map writes" (viper.go internal map). A local
+//     instance is owned by exactly one goroutine for the duration of the call,
+//     so concurrent Load() calls are now race-free (closes the P0-T02 latent
+//     bug). Precedence is unchanged: viper resolves defaults < config-file <
+//     env < explicit overrides exactly as before.
+//
+//  2. Get() loads the process config exactly ONCE via sync.Once and returns
+//     the cached *Config to every subsequent caller. The CLI, server and
+//     subagent paths call Get() so the YAML file is read a single time per
+//     process and the SAME *Config struct is threaded down — no repeat YAML
+//     reads, no repeated viper churn.
+//
+// readInConfigCount is incremented every time a real config file is read off
+// disk. Tests assert it stays at exactly 1 across N Get() calls.
+var readInConfigCount int64
+
+// readInConfigCalls returns how many times a config file has actually been
+// read off disk in this process. Exposed for the load-once unit test.
+func readInConfigCalls() int64 { return atomic.LoadInt64(&readInConfigCount) }
+
+var (
+	loadOnce  sync.Once
+	cachedCfg *Config
+	cachedErr error
+)
+
+// Get returns the process-wide configuration, loading it from disk exactly
+// once (sync.Once-guarded). Every caller — CLI, server, subagent manager —
+// receives the SAME already-loaded *Config rather than re-reading the YAML
+// file and re-churning viper on each invocation.
+//
+// Behaviour is identical to Load() for the values it returns; Get() simply
+// memoises the first successful (or failed) result. Use Get() in production
+// entry points; use Load() only where a deliberately fresh read is required
+// (e.g. config-reload tooling or tests that point HELIX_CONFIG at a
+// per-test temp file).
+func Get() (*Config, error) {
+	loadOnce.Do(func() {
+		cachedCfg, cachedErr = Load()
+	})
+	return cachedCfg, cachedErr
+}
+
+// resetForTest clears the Get() memoisation. Test-only — lets a test that
+// needs Get() to re-read a freshly written temp config start from a clean
+// slate. Not part of the public production surface.
+func resetForTest() {
+	loadOnce = sync.Once{}
+	cachedCfg = nil
+	cachedErr = nil
+}
 
 // AuthConfig represents authentication configuration
 type AuthConfig struct {
@@ -211,74 +273,87 @@ type ContextConfig struct {
 	Compression     bool          `mapstructure:"compression"`
 }
 
-// Load loads configuration from file and environment variables
+// Load reads configuration from file + environment variables into a fresh
+// *Config. Each call builds its own *viper.Viper instance, so concurrent
+// Load() calls never touch shared mutable state and are race-free.
+//
+// Precedence (lowest → highest) is the standard viper order and is unchanged
+// by P2-T07: defaults < config file < environment variables < explicit
+// overrides. Production entry points should call Get() (process-once cached);
+// Load() remains for deliberate fresh reads.
 func Load() (*Config, error) {
-	// Set default values
-	setDefaults()
+	// Per-call local viper instance — replaces the process-global viper
+	// singleton whose backing maps are not goroutine-safe (P2-T07 / P0-T02
+	// race fix). All defaults, bindings and the file read happen here.
+	v := viper.New()
+
+	// Set default values on the local instance.
+	setDefaultsOn(v)
 
 	// Find config file
 	configPath := findConfigFile()
 	if configPath != "" {
-		viper.SetConfigFile(configPath)
+		v.SetConfigFile(configPath)
 	} else {
 		// Use default config locations
-		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath("./config/")
-		viper.AddConfigPath("./")
-		viper.AddConfigPath("$HOME/.config/helixcode/")
-		viper.AddConfigPath("/etc/helixcode/")
+		v.SetConfigName("config")
+		v.SetConfigType("yaml")
+		v.AddConfigPath("./config/")
+		v.AddConfigPath("./")
+		v.AddConfigPath("$HOME/.config/helixcode/")
+		v.AddConfigPath("/etc/helixcode/")
 	}
 
 	// Read in environment variables
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("HELIX")
+	v.AutomaticEnv()
+	v.SetEnvPrefix("HELIX")
 
 	// Explicitly bind environment variables for critical settings
-	viper.BindEnv("auth.jwt_secret", "HELIX_AUTH_JWT_SECRET")
-	viper.BindEnv("database.password", "HELIX_DATABASE_PASSWORD")
-	viper.BindEnv("database.host", "HELIX_DATABASE_HOST")
-	viper.BindEnv("database.port", "HELIX_DATABASE_PORT")
-	viper.BindEnv("database.user", "HELIX_DATABASE_USER")
-	viper.BindEnv("database.dbname", "HELIX_DATABASE_NAME")
-	viper.BindEnv("redis.password", "HELIX_REDIS_PASSWORD")
-	viper.BindEnv("redis.host", "HELIX_REDIS_HOST")
-	viper.BindEnv("redis.port", "HELIX_REDIS_PORT")
+	v.BindEnv("auth.jwt_secret", "HELIX_AUTH_JWT_SECRET")
+	v.BindEnv("database.password", "HELIX_DATABASE_PASSWORD")
+	v.BindEnv("database.host", "HELIX_DATABASE_HOST")
+	v.BindEnv("database.port", "HELIX_DATABASE_PORT")
+	v.BindEnv("database.user", "HELIX_DATABASE_USER")
+	v.BindEnv("database.dbname", "HELIX_DATABASE_NAME")
+	v.BindEnv("redis.password", "HELIX_REDIS_PASSWORD")
+	v.BindEnv("redis.host", "HELIX_REDIS_HOST")
+	v.BindEnv("redis.port", "HELIX_REDIS_PORT")
 
 	// LLMsVerifier env var bindings
-	viper.BindEnv("verifier.enabled", "HELIX_VERIFIER_ENABLED")
-	viper.BindEnv("verifier.endpoint", "HELIX_VERIFIER_ENDPOINT")
-	viper.BindEnv("verifier.api_key", "HELIX_VERIFIER_API_KEY")
-	viper.BindEnv("verifier.timeout", "HELIX_VERIFIER_TIMEOUT")
-	viper.BindEnv("verifier.cache_ttl", "HELIX_VERIFIER_CACHE_TTL")
-	viper.BindEnv("verifier.polling_interval", "HELIX_VERIFIER_POLLING_INTERVAL")
-	viper.BindEnv("verifier.scoring.min_acceptable_score", "HELIX_VERIFIER_MIN_SCORE")
-	viper.BindEnv("verifier.scoring.models_dev_endpoint", "HELIX_MODELS_DEV_ENDPOINT")
+	v.BindEnv("verifier.enabled", "HELIX_VERIFIER_ENABLED")
+	v.BindEnv("verifier.endpoint", "HELIX_VERIFIER_ENDPOINT")
+	v.BindEnv("verifier.api_key", "HELIX_VERIFIER_API_KEY")
+	v.BindEnv("verifier.timeout", "HELIX_VERIFIER_TIMEOUT")
+	v.BindEnv("verifier.cache_ttl", "HELIX_VERIFIER_CACHE_TTL")
+	v.BindEnv("verifier.polling_interval", "HELIX_VERIFIER_POLLING_INTERVAL")
+	v.BindEnv("verifier.scoring.min_acceptable_score", "HELIX_VERIFIER_MIN_SCORE")
+	v.BindEnv("verifier.scoring.models_dev_endpoint", "HELIX_MODELS_DEV_ENDPOINT")
 
 	// Per-provider API key bindings
-	viper.BindEnv("verifier.providers.openai.api_key", "OPENAI_API_KEY")
-	viper.BindEnv("verifier.providers.anthropic.api_key", "ANTHROPIC_API_KEY")
-	viper.BindEnv("verifier.providers.gemini.api_key", "GEMINI_API_KEY")
-	viper.BindEnv("verifier.providers.deepseek.api_key", "DEEPSEEK_API_KEY")
-	viper.BindEnv("verifier.providers.groq.api_key", "GROQ_API_KEY")
-	viper.BindEnv("verifier.providers.mistral.api_key", "MISTRAL_API_KEY")
-	viper.BindEnv("verifier.providers.xai.api_key", "XAI_API_KEY")
-	viper.BindEnv("verifier.providers.openrouter.api_key", "OPENROUTER_API_KEY")
+	v.BindEnv("verifier.providers.openai.api_key", "OPENAI_API_KEY")
+	v.BindEnv("verifier.providers.anthropic.api_key", "ANTHROPIC_API_KEY")
+	v.BindEnv("verifier.providers.gemini.api_key", "GEMINI_API_KEY")
+	v.BindEnv("verifier.providers.deepseek.api_key", "DEEPSEEK_API_KEY")
+	v.BindEnv("verifier.providers.groq.api_key", "GROQ_API_KEY")
+	v.BindEnv("verifier.providers.mistral.api_key", "MISTRAL_API_KEY")
+	v.BindEnv("verifier.providers.xai.api_key", "XAI_API_KEY")
+	v.BindEnv("verifier.providers.openrouter.api_key", "OPENROUTER_API_KEY")
 
 	// Read config file
-	if err := viper.ReadInConfig(); err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("failed to read config file: %v", err)
 		}
 		// Config file not found, but we can continue with defaults
 		fmt.Println(tr(context.Background(), "internal_config_warn_no_config_file_using_defaults", nil))
 	} else {
-		fmt.Println(tr(context.Background(), "internal_config_info_using_config_file", map[string]any{"Path": viper.ConfigFileUsed()}))
+		atomic.AddInt64(&readInConfigCount, 1)
+		fmt.Println(tr(context.Background(), "internal_config_info_using_config_file", map[string]any{"Path": v.ConfigFileUsed()}))
 	}
 
 	// Unmarshal config
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
 
@@ -290,100 +365,103 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
-// setDefaults sets default configuration values
-func setDefaults() {
+// setDefaultsOn sets default configuration values on the given viper
+// instance. P2-T07 moved defaults off the process-global viper singleton —
+// passing the instance explicitly means concurrent Load()/getDefaultConfig()
+// calls each mutate their own private map and are race-free.
+func setDefaultsOn(v *viper.Viper) {
 	// Version defaults
-	viper.SetDefault("version", "1.0.0")
+	v.SetDefault("version", "1.0.0")
 
 	// Application defaults
-	viper.SetDefault("application.name", "HelixCode")
-	viper.SetDefault("application.version", "1.0.0")
-	viper.SetDefault("application.description", "Enterprise AI Development Platform")
-	viper.SetDefault("application.environment", "development")
-	viper.SetDefault("application.workspace.auto_save", true)
-	viper.SetDefault("application.telemetry.enabled", false)
-	viper.SetDefault("application.telemetry.level", "info")
-	viper.SetDefault("application.telemetry.data_retention", 30)
+	v.SetDefault("application.name", "HelixCode")
+	v.SetDefault("application.version", "1.0.0")
+	v.SetDefault("application.description", "Enterprise AI Development Platform")
+	v.SetDefault("application.environment", "development")
+	v.SetDefault("application.workspace.auto_save", true)
+	v.SetDefault("application.telemetry.enabled", false)
+	v.SetDefault("application.telemetry.level", "info")
+	v.SetDefault("application.telemetry.data_retention", 30)
 
 	// Server defaults
-	viper.SetDefault("server.address", "0.0.0.0")
-	viper.SetDefault("server.port", 8080)
-	viper.SetDefault("server.read_timeout", 30)
-	viper.SetDefault("server.write_timeout", 30)
-	viper.SetDefault("server.idle_timeout", 60)
-	viper.SetDefault("server.shutdown_timeout", 30)
+	v.SetDefault("server.address", "0.0.0.0")
+	v.SetDefault("server.port", 8080)
+	v.SetDefault("server.read_timeout", 30)
+	v.SetDefault("server.write_timeout", 30)
+	v.SetDefault("server.idle_timeout", 60)
+	v.SetDefault("server.shutdown_timeout", 30)
 
 	// Database defaults
-	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", 5432)
-	viper.SetDefault("database.user", "helixcode")
-	viper.SetDefault("database.dbname", "helixcode")
-	viper.SetDefault("database.sslmode", "disable")
+	v.SetDefault("database.host", "localhost")
+	v.SetDefault("database.port", 5432)
+	v.SetDefault("database.user", "helixcode")
+	v.SetDefault("database.dbname", "helixcode")
+	v.SetDefault("database.sslmode", "disable")
 
 	// Redis defaults
-	viper.SetDefault("redis.enabled", false)
-	viper.SetDefault("redis.host", "localhost")
-	viper.SetDefault("redis.port", 6379)
-	viper.SetDefault("redis.password", "")
-	viper.SetDefault("redis.db", 0)
+	v.SetDefault("redis.enabled", false)
+	v.SetDefault("redis.host", "localhost")
+	v.SetDefault("redis.port", 6379)
+	v.SetDefault("redis.password", "")
+	v.SetDefault("redis.db", 0)
 
 	// Auth defaults
-	viper.SetDefault("auth.jwt_secret", "default-secret-change-in-production")
-	viper.SetDefault("auth.token_expiry", 60)    // 60 seconds (not hours)
-	viper.SetDefault("auth.session_expiry", 600) // 10 minutes (not days)
-	viper.SetDefault("auth.bcrypt_cost", 12)
+	v.SetDefault("auth.jwt_secret", "default-secret-change-in-production")
+	v.SetDefault("auth.token_expiry", 60)    // 60 seconds (not hours)
+	v.SetDefault("auth.session_expiry", 600) // 10 minutes (not days)
+	v.SetDefault("auth.bcrypt_cost", 12)
 
 	// Workers defaults
-	viper.SetDefault("workers.health_check_interval", 30)
-	viper.SetDefault("workers.health_ttl", 120)
-	viper.SetDefault("workers.max_concurrent_tasks", 10)
+	v.SetDefault("workers.health_check_interval", 30)
+	v.SetDefault("workers.health_ttl", 120)
+	v.SetDefault("workers.max_concurrent_tasks", 10)
 
 	// Tasks defaults
-	viper.SetDefault("tasks.max_retries", 3)
-	viper.SetDefault("tasks.checkpoint_interval", 300)
-	viper.SetDefault("tasks.cleanup_interval", 600)
+	v.SetDefault("tasks.max_retries", 3)
+	v.SetDefault("tasks.checkpoint_interval", 300)
+	v.SetDefault("tasks.cleanup_interval", 600)
 
 	// LLM defaults
-	viper.SetDefault("llm.default_provider", "local")
-	viper.SetDefault("llm.default_model", "llama-3.2-3b")
-	viper.SetDefault("llm.max_tokens", 4096)
-	viper.SetDefault("llm.temperature", 0.7)
+	v.SetDefault("llm.default_provider", "local")
+	v.SetDefault("llm.default_model", "llama-3.2-3b")
+	v.SetDefault("llm.max_tokens", 4096)
+	v.SetDefault("llm.temperature", 0.7)
 
 	// Logging defaults
-	viper.SetDefault("logging.level", "info")
-	viper.SetDefault("logging.format", "text")
-	viper.SetDefault("logging.output", "stdout")
+	v.SetDefault("logging.level", "info")
+	v.SetDefault("logging.format", "text")
+	v.SetDefault("logging.output", "stdout")
 
 	// LLMsVerifier defaults
-	viper.SetDefault("verifier.enabled", false)
-	viper.SetDefault("verifier.mode", "remote")
-	viper.SetDefault("verifier.endpoint", "http://localhost:8081")
-	viper.SetDefault("verifier.timeout", "30s")
-	viper.SetDefault("verifier.cache_ttl", "5m")
-	viper.SetDefault("verifier.polling_interval", "60s")
+	v.SetDefault("verifier.enabled", false)
+	v.SetDefault("verifier.mode", "remote")
+	v.SetDefault("verifier.endpoint", "http://localhost:8081")
+	v.SetDefault("verifier.timeout", "30s")
+	v.SetDefault("verifier.cache_ttl", "5m")
+	v.SetDefault("verifier.polling_interval", "60s")
 
 	// Scoring defaults (match LLMsVerifier weights)
-	viper.SetDefault("verifier.scoring.weights.code_capability", 0.40)
-	viper.SetDefault("verifier.scoring.weights.responsiveness", 0.20)
-	viper.SetDefault("verifier.scoring.weights.reliability", 0.20)
-	viper.SetDefault("verifier.scoring.weights.feature_richness", 0.15)
-	viper.SetDefault("verifier.scoring.weights.value_proposition", 0.05)
-	viper.SetDefault("verifier.scoring.min_acceptable_score", 6.0)
-	viper.SetDefault("verifier.scoring.models_dev_enabled", true)
-	viper.SetDefault("verifier.scoring.models_dev_endpoint", "https://api.models.dev")
+	v.SetDefault("verifier.scoring.weights.code_capability", 0.40)
+	v.SetDefault("verifier.scoring.weights.responsiveness", 0.20)
+	v.SetDefault("verifier.scoring.weights.reliability", 0.20)
+	v.SetDefault("verifier.scoring.weights.feature_richness", 0.15)
+	v.SetDefault("verifier.scoring.weights.value_proposition", 0.05)
+	v.SetDefault("verifier.scoring.min_acceptable_score", 6.0)
+	v.SetDefault("verifier.scoring.models_dev_enabled", true)
+	v.SetDefault("verifier.scoring.models_dev_endpoint", "https://api.models.dev")
 
 	// Health defaults
-	viper.SetDefault("verifier.health.check_interval", "30s")
-	viper.SetDefault("verifier.health.timeout", "10s")
-	viper.SetDefault("verifier.health.failure_threshold", 5)
-	viper.SetDefault("verifier.health.recovery_threshold", 3)
-	viper.SetDefault("verifier.health.circuit_breaker.enabled", true)
-	viper.SetDefault("verifier.health.circuit_breaker.half_open_timeout", "60s")
+	v.SetDefault("verifier.health.check_interval", "30s")
+	v.SetDefault("verifier.health.timeout", "10s")
+	v.SetDefault("verifier.health.failure_threshold", 5)
+	v.SetDefault("verifier.health.recovery_threshold", 3)
+	v.SetDefault("verifier.health.circuit_breaker.enabled", true)
+	v.SetDefault("verifier.health.circuit_breaker.half_open_timeout", "60s")
 
 	// Event defaults
-	viper.SetDefault("verifier.events.enabled", true)
-	viper.SetDefault("verifier.events.websocket", false)
-	viper.SetDefault("verifier.events.websocket_path", "/ws/verifier/events")
+	v.SetDefault("verifier.events.enabled", true)
+	v.SetDefault("verifier.events.websocket", false)
+	v.SetDefault("verifier.events.websocket_path", "/ws/verifier/events")
 }
 
 // findConfigFile searches for config file in various locations
@@ -614,11 +692,14 @@ func GetEnvIntOrDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-// getDefaultConfig returns a default configuration
+// getDefaultConfig returns a default configuration. P2-T07: uses a private
+// viper instance so it shares no mutable state with Load() or other callers
+// — concurrent invocation is race-free.
 func getDefaultConfig() *Config {
-	setDefaults()
+	v := viper.New()
+	setDefaultsOn(v)
 	var cfg Config
-	viper.Unmarshal(&cfg)
+	v.Unmarshal(&cfg)
 	return &cfg
 }
 

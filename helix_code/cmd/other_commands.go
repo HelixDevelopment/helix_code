@@ -23,7 +23,8 @@ var serverCmd = &cobra.Command{
 	Short: trc("cmd_server_short", nil),
 	Long:  trc("cmd_server_long", nil),
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Load()
+		// Speed programme P2-T07: config.Get() caches the process config.
+		cfg, err := config.Get()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
 			return
@@ -103,7 +104,8 @@ var generateCmd = &cobra.Command{
 		}
 		prompt := args[0]
 
-		cfg, err := config.Load()
+		// Speed programme P2-T07: config.Get() caches the process config.
+		cfg, err := config.Get()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
 			return
@@ -179,7 +181,8 @@ var workerCmd = &cobra.Command{
 	Short: "Manage distributed workers",
 	Long:  `Add, remove, and manage distributed computing workers.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Load()
+		// Speed programme P2-T07: config.Get() caches the process config.
+		cfg, err := config.Get()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Config error: %v\n", err)
 			return

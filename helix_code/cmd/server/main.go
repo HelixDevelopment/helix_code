@@ -71,8 +71,11 @@ func main() {
 	fmt.Println(tr(ctx, "server_startup_banner_commit", map[string]any{"GitCommit": gitCommit}))
 	fmt.Println()
 
-	// Load configuration
-	cfg, err := config.Load()
+	// Load configuration.
+	// Speed programme P2-T07: config.Get() loads + caches the config once
+	// per process so any later config consumer reuses the same *Config
+	// instead of re-reading YAML / re-churning viper.
+	cfg, err := config.Get()
 	if err != nil {
 		log.Fatal(tr(ctx, "server_fatal_load_config", map[string]any{"Err": err}))
 	}
