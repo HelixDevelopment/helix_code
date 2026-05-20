@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "description": "Canonical speed-programme scenarios S1-S4 (R4 phased plan P0-T04). Shared manifest consumed by run_speed_scenarios.sh, the Go scenario runner, and later pprof/benchmark tasks. Edit here; runners read this file — do not duplicate scenario definitions.",
+  "fixture": {
+    "default_seed": 20260520,
+    "default_file_count": 2000,
+    "default_languages": ["go", "python", "javascript", "typescript", "java", "rust"]
+  },
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "cold-start",
+      "title": "CLI cold start to ready prompt",
+      "description": "Wall-clock from process spawn to the CLI being ready to accept the first command. Measures startup-path cost (Phase 1 target).",
+      "kind": "process",
+      "needs_fixture": false,
+      "metric": "startup_ms"
+    },
+    {
+      "id": "S2",
+      "name": "llm-dispatch",
+      "title": "Single LLM generate-request dispatch",
+      "description": "Wall-clock to assemble a generate request, dispatch it and receive a first response. Real provider when configured; otherwise a local dispatch-path measurement skipped with SKIP-OK marker.",
+      "kind": "llm",
+      "needs_fixture": false,
+      "metric": "dispatch_ms"
+    },
+    {
+      "id": "S3",
+      "name": "repomap-build",
+      "title": "Repo-map build over the large-repo fixture",
+      "description": "Wall-clock to walk + parse the synthesized fixture tree and build the repo map. Phase 2 context-build target.",
+      "kind": "repomap",
+      "needs_fixture": true,
+      "metric": "repomap_ms"
+    },
+    {
+      "id": "S4",
+      "name": "content-search",
+      "title": "Content search (grep) over the large-repo fixture",
+      "description": "Wall-clock to search the synthesized fixture tree for a known token. Phase 2 SearchContent target.",
+      "kind": "search",
+      "needs_fixture": true,
+      "metric": "search_ms"
+    }
+  ]
+}

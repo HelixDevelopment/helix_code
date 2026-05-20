@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-05-20T13:08:04Z",
+  "runs_per_scenario": 3,
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "cold-start",
+      "runs": 3,
+      "skipped": false,
+      "detail": "timed helixcode binary --version",
+      "mean_ms": 2082.805479666667,
+      "min_ms": 2081.693306,
+      "max_ms": 2083.511261,
+      "cv_pct": 0.04679908383896076,
+      "samples_ms": [
+        2081.693306,
+        2083.211872,
+        2083.511261
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "llm-dispatch",
+      "runs": 3,
+      "skipped": true,
+      "skip_reason": "HELIX_SPEED_LLM_URL unset — SKIP-OK: real provider required (CONST-050)"
+    },
+    {
+      "id": "S3",
+      "name": "repomap-build",
+      "runs": 3,
+      "skipped": false,
+      "detail": "indexed 2000 files",
+      "mean_ms": 17.201566,
+      "min_ms": 17.103398,
+      "max_ms": 17.358563,
+      "cv_pct": 0.7986411986789742,
+      "samples_ms": [
+        17.358563,
+        17.103398,
+        17.142737
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "content-search",
+      "runs": 3,
+      "skipped": false,
+      "detail": "scanned 2000 files, 286 marker hits",
+      "mean_ms": 21.225567666666667,
+      "min_ms": 19.349035,
+      "max_ms": 22.384542,
+      "cv_pct": 7.726736315967354,
+      "samples_ms": [
+        22.384542,
+        19.349035,
+        21.943126
+      ]
+    }
+  ]
+}

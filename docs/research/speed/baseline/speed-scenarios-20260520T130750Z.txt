@@ -1,0 +1,12 @@
+speed-programme canonical scenarios — capture 20260520T130750Z
+repo-root: /run/media/milosvasic/DATA4TB/Projects/HelixCode
+runs-per-scenario: 3
+fixture: /tmp/.private/milosvasic/tmp.4mOBxIuOrc/speed_fixture
+go: go version go1.26.2-X:nodwarf5 linux/amd64
+---
+speed-scenario harness — 3 run(s) per scenario
+ID    name                  mean_ms       min_ms       max_ms       cv_%  status
+S1    cold-start           2084.106     2083.117     2085.227       0.05  ok (timed helixcode binary --version)
+S2    llm-dispatch                -            -            -          -  SKIPPED: HELIX_SPEED_LLM_URL unset — SKIP-OK: real provider required (CONST-050)
+S3    repomap-build          18.897       15.669       22.225      17.35  ok (indexed 2000 files)
+S4    content-search         18.454       16.967       21.306      13.39  ok (scanned 2000 files, 286 marker hits)
