@@ -911,38 +911,8 @@ ok 4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
 Closed in this round.</p>
 <hr />
-<h2
-id="hxq-002-helix_qa-pkgautonomous-visionengine-remote-api-drift-blocks-helix_agent-testsintegration-compile">HXQ-002
-— helix_qa <code>pkg/autonomous</code> ↔︎ VisionEngine
-<code>remote</code> API drift blocks helix_agent
-<code>tests/integration</code> compile</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-20 (round 342 — HXA-002 resolution
-subagent) <strong>Discovered-By:</strong> AI subagent — surfaced as a
-compile failure separate from HXA-002 while verifying the rewritten
-helix_agent integration tests <strong>Evidence:</strong>
-<code>helix_agent</code>’s <code>tests/integration</code> package cannot
-compile because <code>helix_qa/pkg/autonomous</code> (committed helix_qa
-code at <code>7fa674a</code>) consumes a VisionEngine
-<code>remote</code> package API that has since drifted. The failure is
-entirely unrelated to HXA-002’s debate-API drift — it is a distinct
-second drift between the helix_qa autonomous-session package and the
-VisionEngine <code>remote</code> package. Round-342 left it untouched
-per strict scope. <strong>Resolution path:</strong> Dedicated round —
-diff the VisionEngine <code>remote</code> package’s current exported
-surface against what <code>helix_qa/pkg/autonomous</code> (at or after
-<code>7fa674a</code>) imports; classify each mismatch (renamed symbol /
-changed signature / removed type). If mechanical, update the
-<code>helix_qa/pkg/autonomous</code> consumer to the current
-<code>remote</code> API (note: round-340 VEN-002 merge-first made
-VisionEngine <code>remote</code> a strict superset — the
-<code>EnsureReady</code> SSH-probe variant — so the drift may now be
-resolvable by consuming the merged superset). Verify
-<code>helix_agent</code> <code>tests/integration</code> compiles +
-passes afterward.</p>
-<hr />
-<p><em>Last regenerated: 2026-05-20 (round 342 — HXQ-002 added). To
-update Issues_Summary.md mechanically, run
+<p><em>Last regenerated: 2026-05-20 (round 344 — HXQ-002 closed →
+Fixed.md). To update Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
 hand-maintained).</em></p>

@@ -1269,11 +1269,52 @@ original test (<code>DefaultTimeout</code> is <code>30s</code>, not
 <code>70c9e0c</code> (4 remotes) + meta pointer-bump | Round-340
 §11.4.41 / CONST-061 merge-first. (See round-340 row above — duplicate
 header retained intentionally for migration-discipline alignment.)
-|</div>
-<p><em>Last regenerated: 2026-05-20 (round 342 — HXA-002 closure: debate
-API drift resolved, GENUINELY DELETED tier confirmed via git-log +
-tree-wide grep, tests rewritten to slim API). Earlier closures (P0-P5
-phases) tracked via <code>docs/improvements/PROGRESS.md</code> +
+|<br />
+2026-05-20 | HXQ-002: helix_qa <code>pkg/autonomous</code> ↔︎
+VisionEngine <code>remote</code> API drift blocks helix_agent
+<code>tests/integration</code> compile | Bug | Fixed (→ Fixed.md) | 344
+| helix_qa <code>9ef3d95</code> (github+gitlab) + meta pointer-bump |
+Round-344 §11.4 / CONST-035. Drift resolved by consuming the round-340
+VEN-002 merged superset <code>remote</code> API — drift was MECHANICAL
+(three changed signatures, no removed type, no renamed symbol).
+<strong>Per-symbol classification:</strong> <strong>(1)
+<code>ProbeHosts</code></strong> —
+<code>(ctx, hosts []string, user string) []HardwareInfo</code> →
+<code>(ctx, hosts []SSHConfig) ([]HardwareInfo, error)</code>. Fix:
+<code>pipeline.go</code> builds a <code>[]visionremote.SSHConfig</code>
+from <code>VisionHosts</code> + config-injected SSH key / known_hosts /
+port; the joined per-host probe error is surfaced as a warning
+(partial-success is normal). <strong>(2)
+<code>SelectStrongestModel</code></strong> —
+<code>(infos []HardwareInfo) *ModelRecommendation</code> →
+<code>(infos []HardwareInfo, models []ModelSpec) (*ModelRecommendation, error)</code>.
+Fix: a single-entry <code>visionremote.ModelSpec</code> catalogue is
+built from <code>LlamaCppRPCModelPath</code> + config capacity floors;
+error handled with single-host fallback. <strong>(3)
+<code>PlanDistribution</code></strong> —
+<code>(infos []HardwareInfo, path string, serverPort, rpcBasePort int) *DistributionConfig</code>
+→
+<code>(infos []HardwareInfo, models []ModelSpec) (*DistributionConfig, error)</code>.
+Fix: the GGUF model path and server port are no longer call arguments —
+they are set on the returned <code>*DistributionConfig</code> after the
+planner’s best-fit bin-pack; error handled with single-host fallback.
+Added five config-injected pipeline fields
+(<code>VisionSSHKeyPath</code>, <code>VisionSSHKnownHostsPath</code>,
+<code>VisionSSHPort</code>, <code>VisionRPCMinGPUMemMB</code>,
+<code>VisionRPCMinRAMMB</code>) per CONST-045 / CONST-046 — no hardcoded
+secrets or model metadata. VisionEngine submodule pointer was already at
+the round-340 merged HEAD <code>70c9e0c</code> (no bump needed).
+Evidence:
+<code>cd helix_qa &amp;&amp; go build ./pkg/autonomous/...</code> exit
+0; <code>go test -count=1 ./pkg/autonomous/...</code> →
+<code>ok digital.vasic.helixqa/pkg/autonomous 14.270s</code> (PASS);
+<code>cd helix_agent &amp;&amp; go build ./tests/integration/...</code>
+exit 0 — the original HXQ-002 symptom is resolved. |</div>
+<p><em>Last regenerated: 2026-05-20 (round 344 — HXQ-002 closure:
+helix_qa pkg/autonomous updated to the round-340 superset VisionEngine
+remote API; mechanical 3-signature drift; helix_agent tests/integration
+compiles). Earlier closures (P0-P5 phases) tracked via
+<code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>
 </html>

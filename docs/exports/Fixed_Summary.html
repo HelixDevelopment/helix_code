@@ -201,7 +201,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>14</td>
+<td>15</td>
 <td><code>Fixed (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,9 +216,17 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 85 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 86 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 342 added HXA-002
+<code>docs/improvements/PROGRESS.md</code>). Round 344 added HXQ-002
+(helix_qa <code>pkg/autonomous</code> ↔︎ VisionEngine <code>remote</code>
+API drift resolved — mechanical 3-signature drift:
+<code>ProbeHosts</code>/<code>SelectStrongestModel</code>/<code>PlanDistribution</code>
+updated to the round-340 VEN-002 merged superset API, now
+error-returning with <code>[]SSHConfig</code>/<code>[]ModelSpec</code>
+parameters; 5 config-injected pipeline fields added per CONST-045/046;
+<code>pkg/autonomous</code> build+test PASS, helix_agent
+<code>tests/integration</code> compiles). Round 342 added HXA-002
 (helix_agent debate/llmprovider sibling-submodule API drift resolved —
 investigation per operator’s explicit ask found the
 learning/knowledge/recommendations capability tier was GENUINELY

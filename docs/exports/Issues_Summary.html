@@ -371,27 +371,30 @@ tolerance); all <code>tests/...</code> PASS; LLMsVerifier
 <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 <td>Bug</td>
-<td>Queued</td>
+<td>Fixed (→ Fixed.md) round 344</td>
 <td>2026-05-20</td>
-<td>Surfaced round 342; distinct from HXA-002; round-340 VEN-002 merge
-made <code>remote</code> a superset — drift may now be resolvable by
-consuming the merged API</td>
+<td>Closed: mechanical 3-signature drift resolved by consuming the
+round-340 VEN-002 superset <code>remote</code> API
+(ProbeHosts/SelectStrongestModel/PlanDistribution now error-returning +
+<code>[]SSHConfig</code>/<code>[]ModelSpec</code> parameters); 5
+config-injected pipeline fields added per CONST-045/046;
+<code>pkg/autonomous</code> build+test PASS; helix_agent
+<code>tests/integration</code> compiles; helix_qa
+<code>9ef3d95</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 3 open (HXQ-002 added round 342; HXA-002
+<p><strong>Counts</strong>: 2 open (HXQ-002 closed round 344; HXA-002
 closed round 342; VEN-002 closed round 340; HXQ-001 closed round 325;
 HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed round
 302; HXC-004 closed round 200;
-VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 1 Bug open
-(HXQ-002) | 1 Task open (HXC-001 In progress) | 1 Feature open (HXC-003)
-| 0 BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 342 — HXQ-002 added; round
-343 — HXC-001 advanced: CONST-052 rename programme — 13 owned-org leaf
-submodule dirs renamed to snake_case across 3 build-verified batches;
-HXC-001 stays In progress for deferred submodule-entangled + parent-dir
-batches). See <code>docs/Issues.md</code> for full details + prefix
-convention table. PDF/HTML exports auto-regenerated via
+VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
+| 1 Task open (HXC-001 In progress) | 1 Feature open (HXC-003) | 0
+BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 344 — HXQ-002 closed →
+Fixed.md: helix_qa pkg/autonomous updated to the round-340 superset
+VisionEngine remote API). See <code>docs/Issues.md</code> for full
+details + prefix convention table. PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>
