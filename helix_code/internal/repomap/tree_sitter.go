@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/c"
@@ -17,9 +18,20 @@ import (
 	"github.com/smacker/go-tree-sitter/typescript/typescript"
 )
 
-// TreeSitterParser handles parsing of source code using Tree-sitter
+// TreeSitterParser handles parsing of source code using Tree-sitter.
+//
+// R1 B06 / P2-T04: a *sitter.Parser is NOT goroutine-safe — concurrent calls
+// against one parser corrupt its internal state. Allocating a fresh parser per
+// file (the pre-P2-T04 behaviour) is correct but throws away the allocation on
+// every call. The parserPool below recycles parsers: each worker in the
+// repo-map worker pool takes a parser, sets its language, parses, and returns
+// it. Because each goroutine holds exclusive ownership of its borrowed parser
+// for the whole ParseFile call, the parser is never touched by two goroutines
+// at once — the pool is the per-worker isolation the comment in repomap.go's
+// task brief calls for.
 type TreeSitterParser struct {
-	languages map[string]*sitter.Language
+	languages  map[string]*sitter.Language
+	parserPool sync.Pool
 }
 
 // NewTreeSitterParser creates a new Tree-sitter parser
@@ -36,10 +48,22 @@ func NewTreeSitterParser() *TreeSitterParser {
 			"rust":       rust.GetLanguage(),
 			"ruby":       ruby.GetLanguage(),
 		},
+		parserPool: sync.Pool{
+			New: func() interface{} {
+				return sitter.NewParser()
+			},
+		},
 	}
 }
 
-// ParseFile parses a source file and returns its syntax tree
+// ParseFile parses a source file and returns its syntax tree.
+//
+// R1 B06 / P2-T04: the *sitter.Parser is borrowed from parserPool, has its
+// language set fresh for this file (the pool may hand back a parser last used
+// for a different language), and is returned to the pool on the way out. The
+// `oldTree == nil` argument to ParseCtx makes every parse a full parse with no
+// state carried over from the parser's previous use — so a pooled parser yields
+// byte-identical output to the pre-P2-T04 fresh-per-file parser.
 func (tsp *TreeSitterParser) ParseFile(filePath string, language string) (*sitter.Tree, error) {
 	lang, ok := tsp.languages[language]
 	if !ok {
@@ -52,8 +76,14 @@ func (tsp *TreeSitterParser) ParseFile(filePath string, language string) (*sitte
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Create parser
-	parser := sitter.NewParser()
+	// Borrow a parser from the pool. The defer returns it so a panic or an
+	// early error still recycles the parser rather than leaking it.
+	parser := tsp.parserPool.Get().(*sitter.Parser)
+	defer tsp.parserPool.Put(parser)
+
+	// Reset the parser for this file: set the language (the pooled parser may
+	// have been left configured for a different language) and parse with a nil
+	// old tree so no incremental state bleeds in from a prior use.
 	parser.SetLanguage(lang)
 
 	// Parse content

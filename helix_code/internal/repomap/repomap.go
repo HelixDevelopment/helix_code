@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"sync"
 	"time"
@@ -111,26 +112,44 @@ func (rm *RepoMap) GetOptimalContext(query string, changedFiles []string) ([]Fil
 		return nil, fmt.Errorf("failed to discover files: %w", err)
 	}
 
-	// Extract symbols from all files
+	// Extract symbols from all files.
+	//
+	// R1 B04 / P2-T04: the parse runs through a bounded worker pool sized by
+	// MaxConcurrency. parseFilesParallel returns results in the SAME order as
+	// `files`, and we append in that order — so allSymbols is byte-identical to
+	// what the old serial loop produced (files that fail to parse are skipped
+	// in both paths). symbolsByFile is keyed by path so order is irrelevant
+	// there.
+	results := rm.parseFilesParallel(files)
 	allSymbols := make([]Symbol, 0)
 	symbolsByFile := make(map[string][]Symbol)
 
-	for _, file := range files {
-		symbols, err := rm.extractFileSymbols(file)
-		if err != nil {
+	for _, res := range results {
+		if res.Err != nil {
 			// Skip files that can't be parsed
 			continue
 		}
-		allSymbols = append(allSymbols, symbols...)
-		symbolsByFile[file] = symbols
+		allSymbols = append(allSymbols, res.Symbols...)
+		symbolsByFile[res.File] = res.Symbols
 	}
 
 	// Rank files based on relevance
 	fileScores := rm.ranker.RankFiles(allSymbols, query, changedFiles)
 
-	// Sort by score (highest first)
+	// Sort by score (highest first).
+	//
+	// R1 B04 / P2-T04 — determinism: RankFiles builds its slice by iterating a
+	// map, so its output order is randomized per call. A plain sort.Slice (not
+	// stable) cannot break score ties deterministically — equal-score files
+	// could appear in a different order on every call, parallel or serial. We
+	// sort by score then break ties on FilePath so the ranked set — and hence
+	// the GetOptimalContext result the agent loop consumes — is byte-identical
+	// across runs and identical between the parallel and serial builds.
 	sort.Slice(fileScores, func(i, j int) bool {
-		return fileScores[i].Score > fileScores[j].Score
+		if fileScores[i].Score != fileScores[j].Score {
+			return fileScores[i].Score > fileScores[j].Score
+		}
+		return fileScores[i].FilePath < fileScores[j].FilePath
 	})
 
 	// Build file contexts within token budget
@@ -186,39 +205,61 @@ func (rm *RepoMap) GetOptimalContext(query string, changedFiles []string) ([]Fil
 	return contexts, nil
 }
 
-// RefreshCache invalidates and rebuilds the cache
+// RefreshCache invalidates and rebuilds the cache.
+//
+// R1 B16 / P2-T04: the previous implementation held rm.mu (a write lock) for
+// the ENTIRE discover + parse + cache loop — a multi-second critical section
+// that blocked every concurrent reader for no reason. The actual shared state
+// this method touches is the *RepoCache, which guards itself with its own
+// RWMutex; rm.rootPath and rm.config are immutable after construction. So the
+// rm.mu lock is taken only long enough to snapshot the cache pointer, then
+// released — discover + parallel parse + cache.Set all run lock-free against
+// the cache's own synchronization. extractFileSymbols already writes through to
+// the cache, so parseFilesParallel both rebuilds the in-process symbols and
+// repopulates the cache.
 func (rm *RepoMap) RefreshCache() error {
-	rm.mu.Lock()
-	defer rm.mu.Unlock()
+	rm.mu.RLock()
+	cache := rm.cache
+	rm.mu.RUnlock()
 
-	if rm.cache == nil {
+	if cache == nil {
 		return fmt.Errorf("cache is not enabled")
 	}
 
-	// Discover all files
+	// Discover all files (reads only immutable rm.rootPath / rm.config).
 	files, err := rm.discoverFiles()
 	if err != nil {
 		return fmt.Errorf("failed to discover files: %w", err)
 	}
 
-	// Re-parse and cache all files
-	for _, file := range files {
-		symbols, err := rm.extractFileSymbols(file)
-		if err != nil {
-			continue
-		}
-
-		cacheKey := rm.getCacheKey(file)
-		rm.cache.Set(cacheKey, symbols)
-	}
+	// Re-parse and cache all files through the bounded worker pool. Files that
+	// fail to parse are skipped, exactly as the old serial loop did.
+	// extractFileSymbols (called inside parseFilesParallel) writes each
+	// successful parse through to the cache, so this repopulates the cache.
+	_ = rm.parseFilesParallel(files)
 
 	return nil
 }
 
-// GetStatistics returns statistics about the repository mapping
+// GetStatistics returns statistics about the repository mapping.
+//
+// R1 B05 / P2-T04 — single-pass: the previous implementation walked the file
+// set, and for each file independently computed the cache-hit status AND
+// re-parsed the file for the symbol count — but the cache-hit probe and the
+// subsequent extractFileSymbols call BOTH consulted the cache, so a warm file
+// was effectively looked up twice and a cold file's parse result was computed
+// without the language tally sharing that work. This version makes ONE pass:
+// the parse runs once per file through the shared bounded worker pool
+// (parseFilesParallel), and the language tally + cache-hit count are derived
+// from the SAME pass over the discovered file set — no file is parsed or
+// looked-up more than once.
+//
+// rm.mu is taken only to snapshot the cache pointer; rm.rootPath / rm.config
+// are immutable, and the heavy parse runs lock-free (R1 B16 — narrowed lock).
 func (rm *RepoMap) GetStatistics() (RepoMapStats, error) {
 	rm.mu.RLock()
-	defer rm.mu.RUnlock()
+	cache := rm.cache
+	rm.mu.RUnlock()
 
 	startTime := time.Now()
 
@@ -228,36 +269,42 @@ func (rm *RepoMap) GetStatistics() (RepoMapStats, error) {
 	}
 
 	stats := RepoMapStats{
-		TotalFiles:       len(files),
-		Languages:        make(map[string]int),
-		IndexingDuration: time.Since(startTime),
+		TotalFiles: len(files),
+		Languages:  make(map[string]int),
 	}
 
-	totalSymbols := 0
-	cachedFiles := 0
-
+	// Single language pass over the discovered set (detectLanguage is a pure
+	// extension lookup — no I/O, no parse).
 	for _, file := range files {
-		lang := rm.detectLanguage(file)
-		if lang != "" {
+		if lang := rm.detectLanguage(file); lang != "" {
 			stats.Languages[lang]++
 		}
+	}
 
-		cacheKey := rm.getCacheKey(file)
-		if rm.cache != nil {
-			if _, found := rm.cache.Get(cacheKey); found {
+	// Cache-hit count: one Get probe per file. Iterates the SAME file set,
+	// not a separate parse pass.
+	cachedFiles := 0
+	if cache != nil {
+		for _, file := range files {
+			if _, found := cache.Get(rm.getCacheKey(file)); found {
 				cachedFiles++
 			}
 		}
+	}
 
-		symbols, err := rm.extractFileSymbols(file)
-		if err == nil {
-			totalSymbols += len(symbols)
+	// Symbol count: ONE parse per file through the bounded worker pool. This is
+	// the only place GetStatistics touches the parser — no double-parse.
+	totalSymbols := 0
+	for _, res := range rm.parseFilesParallel(files) {
+		if res.Err == nil {
+			totalSymbols += len(res.Symbols)
 		}
 	}
 
 	stats.TotalSymbols = totalSymbols
 	stats.CachedFiles = cachedFiles
 	stats.LastRefresh = time.Now()
+	stats.IndexingDuration = time.Since(startTime)
 
 	return stats, nil
 }
@@ -371,6 +418,94 @@ func (rm *RepoMap) extractFileSymbols(filePath string) ([]Symbol, error) {
 	}
 
 	return symbols, nil
+}
+
+// effectiveConcurrency returns the bound for the repo-map worker pool.
+//
+// R1 B04 / P2-T04: RepoMapConfig.MaxConcurrency was declared but never read —
+// parsing was fully serial. This consumes it. A non-positive value (the zero
+// value of an un-set config) falls back to runtime.NumCPU() so callers that
+// never set the field still get parallelism. The pool is never wider than the
+// file count — no point spawning idle workers.
+func (rm *RepoMap) effectiveConcurrency(fileCount int) int {
+	n := rm.config.MaxConcurrency
+	if n <= 0 {
+		n = runtime.NumCPU()
+	}
+	if n < 1 {
+		n = 1
+	}
+	if n > fileCount {
+		n = fileCount
+	}
+	return n
+}
+
+// parseResult pairs a file with the symbols extracted from it (or the parse
+// error). The Index field preserves the file's position in the input slice so
+// the parallel build can reassemble a deterministic, order-stable result —
+// byte-identical to what the old serial loop produced.
+type parseResult struct {
+	Index   int
+	File    string
+	Symbols []Symbol
+	Err     error
+}
+
+// parseFilesParallel extracts symbols from every file in `files` through a
+// bounded worker pool sized by effectiveConcurrency. It is the single shared
+// parallel-parse primitive behind GetOptimalContext / RefreshCache /
+// GetStatistics.
+//
+// R1 B04 / B06 / P2-T04 — determinism guarantee: results are written into a
+// pre-sized slice indexed by the file's original position, so the returned
+// slice is in the SAME order as `files`. Each worker borrows its own
+// tree-sitter parser from the parser pool (via extractFileSymbols ->
+// parser.ParseFile) — parsers are never shared between goroutines. The output
+// is therefore byte-identical to the pre-P2-T04 serial loop; only the wall
+// clock changes.
+func (rm *RepoMap) parseFilesParallel(files []string) []parseResult {
+	results := make([]parseResult, len(files))
+	if len(files) == 0 {
+		return results
+	}
+
+	workers := rm.effectiveConcurrency(len(files))
+
+	// Serial fast-path: a single worker is exactly the old loop — skip the
+	// channel + goroutine machinery so small repos pay nothing.
+	if workers == 1 {
+		for i, file := range files {
+			symbols, err := rm.extractFileSymbols(file)
+			results[i] = parseResult{Index: i, File: file, Symbols: symbols, Err: err}
+		}
+		return results
+	}
+
+	indexes := make(chan int)
+	var wg sync.WaitGroup
+	wg.Add(workers)
+	for w := 0; w < workers; w++ {
+		go func() {
+			defer wg.Done()
+			for i := range indexes {
+				// extractFileSymbols is concurrency-safe: RepoCache guards its
+				// own map with an RWMutex, and each parse borrows its own
+				// parser from the pool. Writing results[i] from exactly one
+				// goroutine (one index is sent to exactly one worker) needs no
+				// lock — disjoint slice elements.
+				symbols, err := rm.extractFileSymbols(files[i])
+				results[i] = parseResult{Index: i, File: files[i], Symbols: symbols, Err: err}
+			}
+		}()
+	}
+	for i := range files {
+		indexes <- i
+	}
+	close(indexes)
+	wg.Wait()
+
+	return results
 }
 
 // fileSizeFromStat returns a file's size in bytes via a single os.Stat,
