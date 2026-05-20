@@ -760,7 +760,7 @@ func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
 		},
 	)
 
-	taskCard := widget.NewCard("Tasks", "", taskList)
+	taskCard := widget.NewCard(app.tr("harmony_os_gui_card_tasks_title", nil), "", taskList)
 
 	// Task type selector for new tasks
 	taskTypeSelect := widget.NewSelect([]string{"planning", "building", "testing", "refactoring", "debugging"}, nil)
@@ -776,14 +776,14 @@ func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
 
 	// Action buttons
 	actions := container.NewVBox(
-		widget.NewLabel("New Task:"),
+		widget.NewLabel(app.tr("harmony_os_gui_form_new_task_header", nil)),
 		widget.NewLabel("Type:"),
 		taskTypeSelect,
 		widget.NewLabel("Priority:"),
 		prioritySelect,
 		widget.NewLabel("Description:"),
 		taskDescEntry,
-		widget.NewButton("Create Task", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_create_task", nil), func() {
 			if taskDescEntry.Text == "" {
 				dialog.ShowError(fmt.Errorf("description is required"), app.mainWindow)
 				return
@@ -802,14 +802,14 @@ func (app *HarmonyApp) createTasksTab() fyne.CanvasObject {
 				taskDescEntry.SetText("")
 				taskList.Refresh()
 				app.statusBar.SetText(app.tr("harmony_os_gui_status_task_created", map[string]any{"ID": task.ID, "Device": task.DeviceID}))
-				dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_task_scheduled", map[string]any{"ID": task.ID}), app.mainWindow)
+				dialog.ShowInformation(app.tr("harmony_os_gui_dialog_title_success", nil), app.tr("harmony_os_gui_dialog_task_scheduled", map[string]any{"ID": task.ID}), app.mainWindow)
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_refresh", nil), func() {
 			app.refreshData()
 			taskList.Refresh()
-			app.statusBar.SetText("Tasks refreshed")
+			app.statusBar.SetText(app.tr("harmony_os_gui_status_tasks_refreshed", nil))
 		}),
 	)
 
@@ -851,7 +851,7 @@ func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
 		},
 	)
 
-	workerCard := widget.NewCard("Workers", "", workerList)
+	workerCard := widget.NewCard(app.tr("harmony_os_gui_card_workers_title", nil), "", workerList)
 
 	// Worker configuration inputs
 	hostEntry := widget.NewEntry()
@@ -863,14 +863,14 @@ func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
 	userEntry.SetPlaceHolder("username")
 
 	actions := container.NewVBox(
-		widget.NewLabel("Add Worker:"),
+		widget.NewLabel(app.tr("harmony_os_gui_form_add_worker_header", nil)),
 		widget.NewLabel("Host:"),
 		hostEntry,
 		widget.NewLabel("Port:"),
 		portEntry,
 		widget.NewLabel("User:"),
 		userEntry,
-		widget.NewButton("Add Worker", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_add_worker", nil), func() {
 			if hostEntry.Text == "" {
 				dialog.ShowError(fmt.Errorf("host is required"), app.mainWindow)
 				return
@@ -919,7 +919,7 @@ func (app *HarmonyApp) createWorkersTab() fyne.CanvasObject {
 			app.statusBar.SetText(fmt.Sprintf("Worker %s added", device.ID))
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_refresh", nil), func() {
 			app.refreshData()
 			workerList.Refresh()
 			app.statusBar.SetText(app.tr("harmony_os_gui_status_workers_refreshed", nil))
@@ -991,8 +991,8 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 		}
 	}
 
-	projectListCard := widget.NewCard("Projects", "", app.projectList)
-	projectDetailsCard := widget.NewCard("Project Details", "", projectDetailsLabel)
+	projectListCard := widget.NewCard(app.tr("harmony_os_gui_card_projects_title", nil), "", app.projectList)
+	projectDetailsCard := widget.NewCard(app.tr("harmony_os_gui_card_project_details_title", nil), "", projectDetailsLabel)
 
 	// Project creation form
 	nameEntry := widget.NewEntry()
@@ -1014,7 +1014,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 		pathEntry,
 		widget.NewLabel("Type:"),
 		typeSelect,
-		widget.NewButton("Create Project", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_create_project", nil), func() {
 			if app.projectManager != nil && nameEntry.Text != "" && pathEntry.Text != "" {
 				ctx := context.Background()
 				proj, err := app.projectManager.CreateProject(ctx, nameEntry.Text, descEntry.Text, pathEntry.Text, typeSelect.Selected)
@@ -1027,14 +1027,14 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 					app.refreshData()
 					app.projectList.Refresh()
 					app.statusBar.SetText(app.tr("harmony_os_gui_status_project_created", map[string]any{"Name": proj.Name}))
-					dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_project_created", nil), app.mainWindow)
+					dialog.ShowInformation(app.tr("harmony_os_gui_dialog_title_success", nil), app.tr("harmony_os_gui_dialog_project_created", nil), app.mainWindow)
 				}
 			} else {
 				dialog.ShowError(fmt.Errorf("name and path are required"), app.mainWindow)
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Set as Active", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_set_active", nil), func() {
 			if app.projectList.Length() > 0 {
 				// Get selected project
 				app.dataMu.RLock()
@@ -1056,7 +1056,7 @@ func (app *HarmonyApp) createProjectsTab() fyne.CanvasObject {
 				}
 			}
 		}),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_refresh", nil), func() {
 			app.refreshData()
 			app.projectList.Refresh()
 			app.statusBar.SetText(app.tr("harmony_os_gui_status_projects_refreshed", nil))
@@ -1116,8 +1116,8 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 		}
 	}
 
-	sessionListCard := widget.NewCard("Sessions", "", app.sessionList)
-	sessionDetailsCard := widget.NewCard("Session Details", "", sessionDetailsLabel)
+	sessionListCard := widget.NewCard(app.tr("harmony_os_gui_card_sessions_title", nil), "", app.sessionList)
+	sessionDetailsCard := widget.NewCard(app.tr("harmony_os_gui_card_session_details_title", nil), "", sessionDetailsLabel)
 
 	// Session creation form
 	nameEntry := widget.NewEntry()
@@ -1139,7 +1139,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 		projectIDEntry,
 		widget.NewLabel("Mode:"),
 		modeSelect,
-		widget.NewButton("Create Session", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_create_session", nil), func() {
 			if app.sessionManager != nil && nameEntry.Text != "" && projectIDEntry.Text != "" {
 				mode := session.Mode(modeSelect.Selected)
 				sess, err := app.sessionManager.Create(projectIDEntry.Text, nameEntry.Text, descEntry.Text, mode)
@@ -1152,7 +1152,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 					app.refreshData()
 					app.sessionList.Refresh()
 					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_created", map[string]any{"Name": sess.Name}))
-					dialog.ShowInformation("Success", app.tr("harmony_os_gui_dialog_session_created", nil), app.mainWindow)
+					dialog.ShowInformation(app.tr("harmony_os_gui_dialog_title_success", nil), app.tr("harmony_os_gui_dialog_session_created", nil), app.mainWindow)
 				}
 			} else {
 				dialog.ShowError(fmt.Errorf("name and project ID are required"), app.mainWindow)
@@ -1160,7 +1160,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 		}),
 		widget.NewSeparator(),
 		widget.NewLabel(app.tr("harmony_os_gui_session_controls_header", nil)),
-		widget.NewButton("Start Session", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_start_session", nil), func() {
 			if app.sessionManager != nil && selectedSessionID != "" {
 				err := app.sessionManager.Start(selectedSessionID)
 				if err != nil {
@@ -1168,11 +1168,11 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 				} else {
 					app.refreshData()
 					app.sessionList.Refresh()
-					app.statusBar.SetText("Session started")
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_started", nil))
 				}
 			}
 		}),
-		widget.NewButton("Pause Session", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_pause_session", nil), func() {
 			if app.sessionManager != nil && selectedSessionID != "" {
 				err := app.sessionManager.Pause(selectedSessionID)
 				if err != nil {
@@ -1180,11 +1180,11 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 				} else {
 					app.refreshData()
 					app.sessionList.Refresh()
-					app.statusBar.SetText("Session paused")
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_paused", nil))
 				}
 			}
 		}),
-		widget.NewButton("Resume Session", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_resume_session", nil), func() {
 			if app.sessionManager != nil && selectedSessionID != "" {
 				err := app.sessionManager.Resume(selectedSessionID)
 				if err != nil {
@@ -1192,7 +1192,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 				} else {
 					app.refreshData()
 					app.sessionList.Refresh()
-					app.statusBar.SetText("Session resumed")
+					app.statusBar.SetText(app.tr("harmony_os_gui_status_session_resumed", nil))
 				}
 			}
 		}),
@@ -1209,7 +1209,7 @@ func (app *HarmonyApp) createSessionsTab() fyne.CanvasObject {
 			}
 		}),
 		widget.NewSeparator(),
-		widget.NewButton("Refresh", func() {
+		widget.NewButton(app.tr("harmony_os_gui_button_refresh", nil), func() {
 			app.refreshData()
 			app.sessionList.Refresh()
 			app.statusBar.SetText(app.tr("harmony_os_gui_status_sessions_refreshed", nil))
@@ -1269,7 +1269,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 		}
 	}
 
-	modelDetailsCard := widget.NewCard("Model Details", "", modelDetailsLabel)
+	modelDetailsCard := widget.NewCard(app.tr("harmony_os_gui_card_model_details_title", nil), "", modelDetailsLabel)
 
 	// Chat interface
 	app.chatHistory = widget.NewMultiLineEntry()
@@ -1289,7 +1289,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 	modelNameEntry.SetPlaceHolder(app.tr("harmony_os_gui_placeholder_model_name", nil))
 	modelNameEntry.SetText("llama2")
 
-	sendButton := widget.NewButton("Send Message", func() {
+	sendButton := widget.NewButton(app.tr("harmony_os_gui_button_send_message", nil), func() {
 		if app.chatInput.Text == "" {
 			return
 		}
@@ -1349,12 +1349,12 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 		}(userMessage)
 	})
 
-	clearButton := widget.NewButton("Clear Chat", func() {
+	clearButton := widget.NewButton(app.tr("harmony_os_gui_button_clear_chat", nil), func() {
 		app.chatHistory.SetText("")
 	})
 
 	chatControls := container.NewVBox(
-		widget.NewLabel("Chat Settings:"),
+		widget.NewLabel(app.tr("harmony_os_gui_form_chat_settings_header", nil)),
 		widget.NewLabel("Provider:"),
 		app.llmProviderSel,
 		widget.NewLabel("Model:"),
@@ -1365,13 +1365,13 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 	)
 
 	chatPanel := container.NewBorder(
-		widget.NewLabel("Chat with AI"),
+		widget.NewLabel(app.tr("harmony_os_gui_form_chat_with_ai_header", nil)),
 		container.NewBorder(nil, nil, nil, chatControls, app.chatInput),
 		nil, nil,
 		app.chatHistory,
 	)
 
-	chatCard := widget.NewCard("LLM Chat", "", chatPanel)
+	chatCard := widget.NewCard(app.tr("harmony_os_gui_card_llm_chat_title", nil), "", chatPanel)
 
 	// Provider health status
 	healthLabel := widget.NewLabel("Provider Health:\nChecking...")
@@ -1404,7 +1404,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 		}
 	}()
 
-	healthCard := widget.NewCard("Provider Status", "", healthLabel)
+	healthCard := widget.NewCard(app.tr("harmony_os_gui_card_provider_status_title", nil), "", healthLabel)
 
 	// Layout
 	leftPanel := container.NewVSplit(modelListCard, modelDetailsCard)
@@ -1419,7 +1419,7 @@ func (app *HarmonyApp) createLLMTab() fyne.CanvasObject {
 // createHarmonySystemTab creates the Harmony OS system monitoring tab
 func (app *HarmonyApp) createHarmonySystemTab() fyne.CanvasObject {
 	// System metrics
-	metricsLabel := widget.NewLabel("System Metrics")
+	metricsLabel := widget.NewLabel(app.tr("harmony_os_gui_label_system_metrics", nil))
 
 	cpuLabel := widget.NewLabel(fmt.Sprintf("CPU Usage: %.1f%%", app.systemMonitor.cpuUsage))
 	memLabel := widget.NewLabel(fmt.Sprintf("Memory Usage: %.0f MB", app.systemMonitor.memoryUsage))
@@ -1502,11 +1502,11 @@ func (app *HarmonyApp) createDistributedServicesTab() fyne.CanvasObject {
 // createResourceManagementTab creates the resource management tab
 func (app *HarmonyApp) createResourceManagementTab() fyne.CanvasObject {
 	// Resource policies
-	policiesLabel := widget.NewLabel("Resource Optimization Policies")
+	policiesLabel := widget.NewLabel(app.tr("harmony_os_gui_label_resource_policies", nil))
 
 	policiesCard := widget.NewCard(
-		"Active Policies",
-		"Resource Management Configuration",
+		app.tr("harmony_os_gui_card_active_policies_title", nil),
+		app.tr("harmony_os_gui_card_active_policies_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf(
 			"CPU Policy: %s\nMemory Policy: %s\nPower Policy: %s\nOptimization: %v\nAuto-Tuning: %v",
 			app.resourceManager.resourcePolicies["cpu"],
@@ -1519,8 +1519,8 @@ func (app *HarmonyApp) createResourceManagementTab() fyne.CanvasObject {
 
 	// Service coordinator
 	servicesCard := widget.NewCard(
-		"Service Coordinator",
-		"Distributed Service Management",
+		app.tr("harmony_os_gui_card_service_coordinator_title", nil),
+		app.tr("harmony_os_gui_card_service_coordinator_subtitle", nil),
 		widget.NewLabel(fmt.Sprintf(
 			"Active Services: %d\nFailover: %v",
 			len(app.serviceCoordinator.coordinator.activeServices),
@@ -1538,7 +1538,7 @@ func (app *HarmonyApp) createResourceManagementTab() fyne.CanvasObject {
 // createSettingsTab creates the settings tab
 func (app *HarmonyApp) createSettingsTab() fyne.CanvasObject {
 	// Theme selector
-	themeLabel := widget.NewLabel("Theme Selection")
+	themeLabel := widget.NewLabel(app.tr("harmony_os_gui_label_theme_selection", nil))
 	themeSelect := widget.NewSelect(
 		[]string{"Dark", "Light", "Helix", "Harmony"},
 		func(selected string) {
@@ -1550,22 +1550,22 @@ func (app *HarmonyApp) createSettingsTab() fyne.CanvasObject {
 	themeSelect.SetSelected("Harmony")
 
 	// Server controls
-	serverLabel := widget.NewLabel("Server Controls")
-	startServerBtn := widget.NewButton("Start Server", func() {
+	serverLabel := widget.NewLabel(app.tr("harmony_os_gui_label_server_controls", nil))
+	startServerBtn := widget.NewButton(app.tr("harmony_os_gui_button_start_server", nil), func() {
 		go func() {
 			if err := app.server.Start(); err != nil {
 				log.Printf("Server error: %v", err)
 				app.statusBar.SetText(fmt.Sprintf("Server error: %v", err))
 			}
 		}()
-		app.statusBar.SetText("Server started")
+		app.statusBar.SetText(app.tr("harmony_os_gui_status_server_started", nil))
 	})
 
-	stopServerBtn := widget.NewButton("Stop Server", func() {
+	stopServerBtn := widget.NewButton(app.tr("harmony_os_gui_button_stop_server", nil), func() {
 		if err := app.server.Shutdown(context.Background()); err != nil {
 			log.Printf("Server shutdown error: %v", err)
 		}
-		app.statusBar.SetText("Server stopped")
+		app.statusBar.SetText(app.tr("harmony_os_gui_status_server_stopped", nil))
 	})
 
 	serverControls := container.NewHBox(startServerBtn, stopServerBtn)

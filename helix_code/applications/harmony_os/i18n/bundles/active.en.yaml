@@ -429,3 +429,133 @@ harmony_os_gui_placeholder_chat_input:
 
 harmony_os_gui_placeholder_model_name:
   other: "Model name (e.g., llama2)"
+
+# Round-459 §11.4 anti-bluff sweep (2026-05-20): 36 additional GUI
+# strings migrated from main.go — card titles + subtitles, button
+# labels, list-column headers, form-section labels, status-bar
+# confirmations, dialog title, and the provider-health label that
+# anchor every remaining Fyne-mode interaction with the Harmony OS
+# desktop application.
+
+harmony_os_gui_card_tasks_title:
+  other: "Tasks"
+
+harmony_os_gui_card_workers_title:
+  other: "Workers"
+
+harmony_os_gui_card_projects_title:
+  other: "Projects"
+
+harmony_os_gui_card_project_details_title:
+  other: "Project Details"
+
+harmony_os_gui_card_sessions_title:
+  other: "Sessions"
+
+harmony_os_gui_card_session_details_title:
+  other: "Session Details"
+
+harmony_os_gui_card_model_details_title:
+  other: "Model Details"
+
+harmony_os_gui_card_llm_chat_title:
+  other: "LLM Chat"
+
+harmony_os_gui_card_provider_status_title:
+  other: "Provider Status"
+
+harmony_os_gui_card_active_policies_title:
+  other: "Active Policies"
+
+harmony_os_gui_card_active_policies_subtitle:
+  other: "Resource Management Configuration"
+
+harmony_os_gui_card_service_coordinator_title:
+  other: "Service Coordinator"
+
+harmony_os_gui_card_service_coordinator_subtitle:
+  other: "Distributed Service Management"
+
+harmony_os_gui_button_create_task:
+  other: "Create Task"
+
+harmony_os_gui_button_refresh:
+  other: "Refresh"
+
+harmony_os_gui_button_add_worker:
+  other: "Add Worker"
+
+harmony_os_gui_button_create_project:
+  other: "Create Project"
+
+harmony_os_gui_button_set_active:
+  other: "Set as Active"
+
+harmony_os_gui_button_create_session:
+  other: "Create Session"
+
+harmony_os_gui_button_start_session:
+  other: "Start Session"
+
+harmony_os_gui_button_pause_session:
+  other: "Pause Session"
+
+harmony_os_gui_button_resume_session:
+  other: "Resume Session"
+
+harmony_os_gui_button_send_message:
+  other: "Send Message"
+
+harmony_os_gui_button_clear_chat:
+  other: "Clear Chat"
+
+harmony_os_gui_button_start_server:
+  other: "Start Server"
+
+harmony_os_gui_button_stop_server:
+  other: "Stop Server"
+
+harmony_os_gui_form_new_task_header:
+  other: "New Task:"
+
+harmony_os_gui_form_add_worker_header:
+  other: "Add Worker:"
+
+harmony_os_gui_form_chat_settings_header:
+  other: "Chat Settings:"
+
+harmony_os_gui_form_chat_with_ai_header:
+  other: "Chat with AI"
+
+harmony_os_gui_label_system_metrics:
+  other: "System Metrics"
+
+harmony_os_gui_label_resource_policies:
+  other: "Resource Optimization Policies"
+
+harmony_os_gui_label_theme_selection:
+  other: "Theme Selection"
+
+harmony_os_gui_label_server_controls:
+  other: "Server Controls"
+
+harmony_os_gui_dialog_title_success:
+  other: "Success"
+
+harmony_os_gui_status_server_started:
+  other: "Server started"
+
+harmony_os_gui_status_server_stopped:
+  other: "Server stopped"
+
+harmony_os_gui_status_tasks_refreshed:
+  other: "Tasks refreshed"
+
+harmony_os_gui_status_session_started:
+  other: "Session started"
+
+harmony_os_gui_status_session_paused:
+  other: "Session paused"
+
+harmony_os_gui_status_session_resumed:
+  other: "Session resumed"
