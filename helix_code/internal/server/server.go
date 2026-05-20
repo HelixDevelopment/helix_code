@@ -321,6 +321,21 @@ func (s *Server) setupRoutes() {
 		}
 	}
 
+	// P0-T01 (speed programme): opt-in net/http/pprof debug endpoints.
+	//
+	// The runtime profiling endpoints (/debug/pprof/*) are mounted ONLY when
+	// explicitly enabled — either the HELIX_PPROF_HTTP env var is set to a
+	// truthy value, or the logging level is "debug". They are OFF by default
+	// so a production server never exposes the profiler. When enabled, the
+	// endpoints are the standard net/http/pprof surface:
+	//   GET /debug/pprof/         — index
+	//   GET /debug/pprof/profile  — 30s CPU profile (?seconds= to override)
+	//   GET /debug/pprof/heap     — heap profile
+	//   GET /debug/pprof/goroutine, /allocs, /block, /mutex, /cmdline, /trace, /symbol
+	if pprofHTTPEnabled(s.config) {
+		s.mountPprof()
+	}
+
 	// WebSocket routes
 	s.router.GET("/ws", s.handleWebSocket)
 

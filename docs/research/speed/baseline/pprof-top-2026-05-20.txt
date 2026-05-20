@@ -1,0 +1,220 @@
+HelixCode Speed Programme — Phase 0 / P0-T01 — pprof baseline -top output
+Captured: 2026-05-20
+Harness: helix_code/tests/performance/pprof_harness_test.go (TestPprofHarness_CaptureBaseline)
+Scenarios: S1 cold-start | S2 llm-dispatch | S3 repomap-build | S4 content-search
+Fixture: 2000 deterministic files (seed 20260520), 286 carry the search marker.
+
+NOTE: S1 spawns a child process and S2 is SKIP-OK without a real LLM provider
+(HELIX_SPEED_LLM_URL unset, CONST-050) — their parent-process CPU profiles are
+thus light; the genuinely CPU-bound hot paths are S3 and S4 (repo-map walk+parse
+and content-search walk). Heap (alloc_space) -top is captured for every scenario.
+
+################################################################
+# S1 — CPU profile -top (nodecount=20)
+################################################################
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: cpu
+Time: 2026-05-20 16:41:54 MSK
+Duration: 2.11s, Total samples = 110ms ( 5.23%)
+Showing nodes accounting for 110ms, 100% of 110ms total
+Showing top 20 nodes out of 72
+      flat  flat%   sum%        cum   cum%
+      30ms 27.27% 27.27%       30ms 27.27%  internal/runtime/syscall/linux.Syscall6
+      10ms  9.09% 36.36%       10ms  9.09%  internal/runtime/atomic.(*Bool).Load
+      10ms  9.09% 45.45%       10ms  9.09%  runtime.(*semTable).rootFor (inline)
+      10ms  9.09% 54.55%       10ms  9.09%  runtime.findObject
+      10ms  9.09% 63.64%       10ms  9.09%  runtime.futex
+      10ms  9.09% 72.73%       10ms  9.09%  runtime.newproc.func1
+      10ms  9.09% 81.82%       10ms  9.09%  runtime.nextFreeFast (inline)
+      10ms  9.09% 90.91%       10ms  9.09%  runtime.rtsigprocmask
+      10ms  9.09%   100%       20ms 18.18%  runtime.scanObject
+         0     0%   100%       10ms  9.09%  context.WithDeadline (inline)
+         0     0%   100%       10ms  9.09%  context.WithDeadlineCause
+         0     0%   100%       10ms  9.09%  context.WithTimeout
+         0     0%   100%       70ms 63.64%  dev.helix.code/tests/performance.TestPprofHarness_CaptureBaseline.func1
+         0     0%   100%       70ms 63.64%  dev.helix.code/tests/performance.hotPathWork
+         0     0%   100%       60ms 54.55%  dev.helix.code/tests/performance/scenarios.RunScenario
+         0     0%   100%       20ms 18.18%  dev.helix.code/tests/performance/scenarios.findHelixBinary
+         0     0%   100%       60ms 54.55%  dev.helix.code/tests/performance/scenarios.runProcessScenario
+         0     0%   100%       10ms  9.09%  internal/poll.(*FD).Close
+         0     0%   100%       10ms  9.09%  internal/poll.(*FD).decref
+         0     0%   100%       10ms  9.09%  internal/poll.(*FD).destroy
+
+# S1 — heap profile -top (alloc_space, nodecount=15)
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: alloc_space
+Time: 2026-05-20 16:41:57 MSK
+Showing nodes accounting for 91.65MB, 97.34% of 94.15MB total
+Showing top 15 nodes out of 95
+      flat  flat%   sum%        cum   cum%
+   49.24MB 52.30% 52.30%    49.24MB 52.30%  strings.(*Builder).Write
+   19.12MB 20.31% 72.61%    72.36MB 76.86%  dev.helix.code/tests/performance/scenarios.GenerateFixture
+    5.58MB  5.93% 78.54%     5.58MB  5.93%  syscall.SlicePtrFromStrings
+    4.52MB  4.80% 83.34%     4.52MB  4.80%  os/exec.dedupEnvCase
+       3MB  3.19% 86.53%    52.24MB 55.49%  dev.helix.code/tests/performance/scenarios.synthFile
+    2.50MB  2.66% 89.19%     2.50MB  2.66%  runtime.mallocgc
+    1.50MB  1.59% 90.78%     1.50MB  1.59%  os.statNolog
+    1.16MB  1.23% 92.01%     1.16MB  1.23%  runtime/pprof.StartCPUProfile
+       1MB  1.07% 93.08%        1MB  1.07%  syscall.Environ
+       1MB  1.06% 94.14%        1MB  1.06%  regexp/syntax.(*compiler).inst
+    0.88MB  0.94% 95.07%     1.52MB  1.61%  compress/flate.NewWriter
+    0.64MB  0.67% 95.75%     0.64MB  0.67%  compress/flate.(*compressor).init
+    0.50MB  0.53% 96.28%     0.50MB  0.53%  github.com/gdamore/encoding.(*Charmap).initialize
+    0.50MB  0.53% 96.81%     0.50MB  0.53%  os/exec.Command
+    0.50MB  0.53% 97.34%     0.50MB  0.53%  runtime/pprof.elfBuildID
+
+
+################################################################
+# S2 — CPU profile -top (nodecount=20)
+################################################################
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: cpu
+Time: 2026-05-20 16:41:57 MSK
+Duration: 246.35us, Total samples = 0 
+Showing nodes accounting for 0, 0% of 0 total
+      flat  flat%   sum%        cum   cum%
+
+# S2 — heap profile -top (alloc_space, nodecount=15)
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: alloc_space
+Time: 2026-05-20 16:41:57 MSK
+Showing nodes accounting for 93.68MB, 97.40% of 96.19MB total
+Showing top 15 nodes out of 102
+      flat  flat%   sum%        cum   cum%
+   49.24MB 51.19% 51.19%    49.24MB 51.19%  strings.(*Builder).Write
+   19.12MB 19.88% 71.08%    72.36MB 75.23%  dev.helix.code/tests/performance/scenarios.GenerateFixture
+    5.58MB  5.80% 76.88%     5.58MB  5.80%  syscall.SlicePtrFromStrings
+    4.52MB  4.70% 81.58%     4.52MB  4.70%  os/exec.dedupEnvCase
+       3MB  3.12% 84.70%    52.24MB 54.31%  dev.helix.code/tests/performance/scenarios.synthFile
+    2.50MB  2.60% 87.30%     2.50MB  2.60%  runtime.mallocgc
+    2.31MB  2.40% 89.70%     2.31MB  2.40%  runtime/pprof.StartCPUProfile
+    1.76MB  1.83% 91.54%     2.40MB  2.49%  compress/flate.NewWriter
+    1.50MB  1.56% 93.10%     1.50MB  1.56%  os.statNolog
+       1MB  1.04% 94.14%        1MB  1.04%  syscall.Environ
+       1MB  1.04% 95.18%        1MB  1.04%  regexp/syntax.(*compiler).inst
+    0.64MB  0.66% 95.84%     0.64MB  0.66%  compress/flate.(*compressor).init
+    0.50MB  0.52% 96.36%     0.50MB  0.52%  github.com/gdamore/encoding.(*Charmap).initialize
+    0.50MB  0.52% 96.88%     0.50MB  0.52%  os/exec.Command
+    0.50MB  0.52% 97.40%     0.50MB  0.52%  runtime/pprof.elfBuildID
+
+
+################################################################
+# S3 — CPU profile -top (nodecount=20)
+################################################################
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: cpu
+Time: 2026-05-20 16:41:57 MSK
+Duration: 261.94ms, Total samples = 370ms (141.26%)
+Showing nodes accounting for 370ms, 100% of 370ms total
+Showing top 20 nodes out of 108
+      flat  flat%   sum%        cum   cum%
+     180ms 48.65% 48.65%      180ms 48.65%  internal/runtime/syscall/linux.Syscall6
+      40ms 10.81% 59.46%       40ms 10.81%  internal/filepathlite.(*lazybuf).append (inline)
+      30ms  8.11% 67.57%       30ms  8.11%  runtime.tryDeferToSpanScan
+      10ms  2.70% 70.27%       50ms 13.51%  internal/filepathlite.Clean
+      10ms  2.70% 72.97%       10ms  2.70%  internal/runtime/atomic.(*Uint32).CompareAndSwap (inline)
+      10ms  2.70% 75.68%      230ms 62.16%  os.ReadFile
+      10ms  2.70% 78.38%       10ms  2.70%  runtime.(*fixalloc).alloc
+      10ms  2.70% 81.08%       10ms  2.70%  runtime.(*mspan).writeHeapBitsSmall
+      10ms  2.70% 83.78%       10ms  2.70%  runtime.(*randomEnum).next
+      10ms  2.70% 86.49%       10ms  2.70%  runtime.(*scavengeIndex).free
+      10ms  2.70% 89.19%       20ms  5.41%  runtime.makeslice
+      10ms  2.70% 91.89%       40ms 10.81%  runtime.mallocgc
+      10ms  2.70% 94.59%       10ms  2.70%  runtime.mallocgcTiny
+      10ms  2.70% 97.30%       20ms  5.41%  runtime.reentersyscall
+      10ms  2.70%   100%       10ms  2.70%  runtime.unlock2
+         0     0%   100%      320ms 86.49%  dev.helix.code/tests/performance.TestPprofHarness_CaptureBaseline.func1
+         0     0%   100%      320ms 86.49%  dev.helix.code/tests/performance.hotPathWork
+         0     0%   100%      320ms 86.49%  dev.helix.code/tests/performance/scenarios.RunScenario
+         0     0%   100%      320ms 86.49%  dev.helix.code/tests/performance/scenarios.runFixtureWalkScenario
+         0     0%   100%      230ms 62.16%  dev.helix.code/tests/performance/scenarios.runFixtureWalkScenario.func1
+
+# S3 — heap profile -top (alloc_space, nodecount=15)
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: alloc_space
+Time: 2026-05-20 16:41:57 MSK
+Showing nodes accounting for 270.37MB, 97.02% of 278.69MB total
+Dropped 56 nodes (cum <= 1.39MB)
+Showing top 15 nodes out of 78
+      flat  flat%   sum%        cum   cum%
+  156.67MB 56.22% 56.22%   156.67MB 56.22%  os.readFileContents
+   49.24MB 17.67% 73.89%    49.24MB 17.67%  strings.(*Builder).Write
+   19.12MB  6.86% 80.75%    72.36MB 25.97%  dev.helix.code/tests/performance/scenarios.GenerateFixture
+       7MB  2.51% 83.26%        7MB  2.51%  internal/bytealg.MakeNoZero
+    6.50MB  2.33% 85.59%     6.50MB  2.33%  syscall.ByteSliceFromString
+    5.58MB  2.00% 87.60%     5.58MB  2.00%  syscall.SlicePtrFromStrings
+    4.52MB  1.62% 89.22%     4.52MB  1.62%  os/exec.dedupEnvCase
+    4.50MB  1.62% 90.83%     4.50MB  1.62%  os.(*File).Stat
+    3.47MB  1.24% 92.08%     3.47MB  1.24%  runtime/pprof.StartCPUProfile
+       3MB  1.08% 93.15%        3MB  1.08%  os.newFile
+       3MB  1.08% 94.23%    52.24MB 18.75%  dev.helix.code/tests/performance/scenarios.synthFile
+    2.50MB   0.9% 95.13%     2.50MB   0.9%  runtime.mallocgc
+       2MB  0.72% 95.85%        2MB  0.72%  os.newUnixDirent
+    1.76MB  0.63% 96.48%     3.57MB  1.28%  compress/flate.NewWriter
+    1.50MB  0.54% 97.02%     1.50MB  0.54%  os.statNolog
+
+
+################################################################
+# S4 — CPU profile -top (nodecount=20)
+################################################################
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: cpu
+Time: 2026-05-20 16:41:57 MSK
+Duration: 341.05ms, Total samples = 520ms (152.47%)
+Showing nodes accounting for 480ms, 92.31% of 520ms total
+Showing top 20 nodes out of 128
+      flat  flat%   sum%        cum   cum%
+     200ms 38.46% 38.46%      200ms 38.46%  internal/runtime/syscall/linux.Syscall6
+      50ms  9.62% 48.08%       50ms  9.62%  runtime.tryDeferToSpanScan
+      30ms  5.77% 53.85%       30ms  5.77%  internal/filepathlite.(*lazybuf).append (inline)
+      20ms  3.85% 57.69%       20ms  3.85%  runtime.memmove
+      20ms  3.85% 61.54%       40ms  7.69%  runtime.typePointers.next
+      20ms  3.85% 65.38%       20ms  3.85%  runtime.typePointers.nextFast (inline)
+      10ms  1.92% 67.31%      240ms 46.15%  dev.helix.code/tests/performance/scenarios.runFixtureWalkScenario.func1
+      10ms  1.92% 69.23%       40ms  7.69%  internal/filepathlite.Clean
+      10ms  1.92% 71.15%       10ms  1.92%  internal/runtime/atomic.(*Uint32).Add
+      10ms  1.92% 73.08%       10ms  1.92%  internal/runtime/atomic.(*Uint32).CompareAndSwap (inline)
+      10ms  1.92% 75.00%       30ms  5.77%  os.(*File).readdir
+      10ms  1.92% 76.92%      130ms 25.00%  os.openFileNolog
+      10ms  1.92% 78.85%       10ms  1.92%  runtime.(*bucket).mp
+      10ms  1.92% 80.77%       10ms  1.92%  runtime.(*mspan).base (inline)
+      10ms  1.92% 82.69%       30ms  5.77%  runtime.findObject
+      10ms  1.92% 84.62%       10ms  1.92%  runtime.futex
+      10ms  1.92% 86.54%       10ms  1.92%  runtime.goschedIfBusy
+      10ms  1.92% 88.46%       10ms  1.92%  runtime.lock2
+      10ms  1.92% 90.38%       10ms  1.92%  runtime.madvise
+      10ms  1.92% 92.31%       30ms  5.77%  runtime.mallocgc
+
+# S4 — heap profile -top (alloc_space, nodecount=15)
+File: performance.test
+Build ID: 28989997a56553508f21392bbc2a71cb3fdfea97
+Type: alloc_space
+Time: 2026-05-20 16:41:57 MSK
+Showing nodes accounting for 601.20MB, 97.66% of 615.59MB total
+Dropped 77 nodes (cum <= 3.08MB)
+Showing top 15 nodes out of 59
+      flat  flat%   sum%        cum   cum%
+  320.91MB 52.13% 52.13%   320.91MB 52.13%  os.readFileContents
+  143.55MB 23.32% 75.45%   486.46MB 79.02%  dev.helix.code/tests/performance/scenarios.runFixtureWalkScenario.func1
+   49.24MB  8.00% 83.45%    49.24MB  8.00%  strings.(*Builder).Write
+   19.12MB  3.11% 86.55%    72.36MB 11.76%  dev.helix.code/tests/performance/scenarios.GenerateFixture
+      13MB  2.11% 88.67%       13MB  2.11%  internal/bytealg.MakeNoZero
+   12.50MB  2.03% 90.70%    12.50MB  2.03%  syscall.ByteSliceFromString
+       9MB  1.46% 92.16%        9MB  1.46%  os.(*File).Stat
+       7MB  1.14% 93.30%        7MB  1.14%  os.newFile
+    5.58MB  0.91% 94.20%     5.58MB  0.91%  syscall.SlicePtrFromStrings
+    4.63MB  0.75% 94.95%     4.63MB  0.75%  runtime/pprof.StartCPUProfile
+    4.52MB  0.73% 95.69%     4.52MB  0.73%  os/exec.dedupEnvCase
+       4MB  0.65% 96.34%        4MB  0.65%  os.newUnixDirent
+       3MB  0.49% 96.83%    52.24MB  8.49%  dev.helix.code/tests/performance/scenarios.synthFile
+    2.64MB  0.43% 97.26%     5.02MB  0.81%  compress/flate.NewWriter
+    2.50MB  0.41% 97.66%     8.01MB  1.30%  os.(*File).readdir
+
+

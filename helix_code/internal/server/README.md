@@ -140,6 +140,38 @@ GET    /api/v1/workers/:id/health - Worker health
 WS /api/v1/ws                     - WebSocket connection
 ```
 
+### Debug / profiling (opt-in)
+
+The standard `net/http/pprof` runtime-profiling endpoints are mounted **only
+when explicitly enabled** — set the `HELIX_PPROF_HTTP` environment variable to a
+truthy value (`1`, `true`, `yes`, `on`, `enabled`), or run the server with the
+logging level set to `debug`. They are OFF by default so a production server
+never exposes the profiler. When enabled:
+
+```
+GET  /debug/pprof/                - profiling index
+GET  /debug/pprof/profile         - CPU profile (?seconds=N, default 30)
+GET  /debug/pprof/heap            - heap profile
+GET  /debug/pprof/goroutine       - goroutine dump
+GET  /debug/pprof/allocs          - allocation profile
+GET  /debug/pprof/block           - blocking profile
+GET  /debug/pprof/mutex           - mutex-contention profile
+GET  /debug/pprof/threadcreate    - thread-creation profile
+GET  /debug/pprof/cmdline         - process command line
+GET  /debug/pprof/trace           - execution trace (?seconds=N)
+GET/POST /debug/pprof/symbol      - symbol resolution
+```
+
+Capture a 30-second CPU profile with the standard tool:
+
+```bash
+go tool pprof http://localhost:8080/debug/pprof/profile?seconds=30
+```
+
+This is the speed-programme P0-T01 measurement surface (R4 phased plan §3); the
+CLI has a parallel opt-in `--pprof <dir>` flag (and `HELIX_PPROF` env var) that
+writes `cpu.pprof` + `heap.pprof` for a single CLI run.
+
 ## Middleware
 
 ### Authentication Middleware

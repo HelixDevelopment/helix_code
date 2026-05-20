@@ -30,6 +30,7 @@ import (
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/kilocode"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/pprofutil"
 	"dev.helix.code/internal/roocode"
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
@@ -447,8 +448,37 @@ func (c *CLI) Run() error {
 		// Garbage values fall through to the next source; the selector aggregates
 		// parse errors so we can warn the user without losing the runtime mode.
 		approvalFlag = flag.String("approval", "", "F21 approval mode override (suggest|auto-edit|full-auto|dangerously-bypass)")
+
+		// P0-T01 (speed programme): opt-in pprof capture. When --pprof <dir> is
+		// supplied (or the HELIX_PPROF env var is set), the run writes a CPU
+		// profile (<dir>/cpu.pprof) and a heap profile (<dir>/heap.pprof). It is
+		// OFF by default — when neither the flag nor the env var is set there is
+		// zero behaviour change to the CLI's normal path. The captured profiles
+		// are the anti-bluff baseline evidence for the Phase 0 measurement gate.
+		pprofDir = flag.String("pprof", "", "P0-T01 speed programme: write CPU+heap pprof profiles to this directory (off by default; also via HELIX_PPROF env)")
 	)
 	flag.Parse()
+
+	// P0-T01: start opt-in pprof capture immediately after flag parsing so the
+	// profile covers as much of the run as possible. pprofutil.Start returns a
+	// nil *Capture when profiling was not requested — the deferred Stop is then
+	// a safe no-op, so this adds nothing to the unprofiled hot path.
+	if profDir := pprofutil.ResolveDir(*pprofDir, os.Getenv); profDir != "" {
+		pc, perr := pprofutil.Start(profDir, "")
+		if perr != nil {
+			log.Printf("pprof: capture disabled — %v", perr)
+		} else {
+			fmt.Fprintf(os.Stderr, "pprof: capturing CPU profile to %s\n", pc.CPUPath())
+			defer func() {
+				elapsed, heapPath, stopErr := pc.Stop("")
+				if stopErr != nil {
+					log.Printf("pprof: stop failed: %v", stopErr)
+					return
+				}
+				fmt.Fprintf(os.Stderr, "pprof: wrote profiles after %s (heap: %s)\n", elapsed, heapPath)
+			}()
+		}
+	}
 
 	// Debug: print flag values
 	fmt.Fprintln(os.Stderr, trc("cli_debug_flags_parsed", map[string]any{
