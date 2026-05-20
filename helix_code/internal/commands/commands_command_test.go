@@ -25,7 +25,9 @@ func TestSlashCommands_ListEmpty(t *testing.T) {
 	c, _, _, _ := newCommandsCommandWithLoader(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "NAME")
+	// The table header routes through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Contains(t, res.Output, "internal_commands_commands_table_header")
 }
 
 func TestSlashCommands_ListShowsLoadedCommands(t *testing.T) {
@@ -48,7 +50,10 @@ func TestSlashCommands_ShowReturnsBody(t *testing.T) {
 
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"show", "hello"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "Hello {{ARG1}}")
+	// The show-detail template routes through the CONST-046 tr() seam;
+	// the default NoopTranslator echoes the message ID verbatim. Body
+	// interpolation is covered by the i18n_wiring integration test.
+	assert.Contains(t, res.Output, "internal_commands_commands_show_detail")
 }
 
 func TestSlashCommands_ShowUnknownErrors(t *testing.T) {
@@ -94,7 +99,8 @@ func TestSlashCommands_DefaultIsList(t *testing.T) {
 	c, _, _, _ := newCommandsCommandWithLoader(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "NAME")
+	// Default subcommand is list; header routes through the tr() seam.
+	assert.Contains(t, res.Output, "internal_commands_commands_table_header")
 }
 
 func TestSlashCommands_UnknownSubcommandErrors(t *testing.T) {

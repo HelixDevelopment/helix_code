@@ -30,7 +30,9 @@ func TestSlashSkills_ListEmpty(t *testing.T) {
 	c, _, _, _ := newSkillsCommandWithLoader(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"list"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "NAME")
+	// The table header routes through the CONST-046 tr() seam; the
+	// default NoopTranslator echoes the message ID verbatim.
+	assert.Contains(t, res.Output, "internal_commands_skills_table_header")
 }
 
 func TestSlashSkills_ListShowsLoaded(t *testing.T) {
@@ -51,9 +53,11 @@ func TestSlashSkills_ShowReturnsBodyAndTriggers(t *testing.T) {
 	require.NoError(t, loader.Reload())
 	res, err := c.Execute(context.Background(), &CommandContext{Args: []string{"show", "iso"}})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "the-body")
-	assert.Contains(t, res.Output, "^pat$")
-	assert.Contains(t, res.Output, "true") // requires_isolation
+	// The show-detail template routes through the CONST-046 tr() seam;
+	// the default NoopTranslator echoes the message ID verbatim. Body /
+	// trigger interpolation is covered by the i18n_wiring integration
+	// test and TestSkillsCommand_Show_GoesThroughTranslator below.
+	assert.Contains(t, res.Output, "internal_commands_skills_show_detail")
 }
 
 func TestSlashSkills_ShowUnknownErrors(t *testing.T) {
@@ -94,7 +98,8 @@ func TestSlashSkills_DefaultIsList(t *testing.T) {
 	c, _, _, _ := newSkillsCommandWithLoader(t)
 	res, err := c.Execute(context.Background(), &CommandContext{Args: nil})
 	require.NoError(t, err)
-	assert.Contains(t, res.Output, "NAME")
+	// Default subcommand is list; header routes through the tr() seam.
+	assert.Contains(t, res.Output, "internal_commands_skills_table_header")
 }
 
 func TestSlashSkills_UnknownSubcommandErrors(t *testing.T) {

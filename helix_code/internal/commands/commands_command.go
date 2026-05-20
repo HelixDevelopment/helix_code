@@ -23,10 +23,10 @@ func NewCommandsCommand(loader *MarkdownLoader, registry *Registry) *CommandsCom
 func (c *CommandsCommand) Name() string      { return "commands" }
 func (c *CommandsCommand) Aliases() []string { return nil }
 func (c *CommandsCommand) Description() string {
-	return "Inspect, reload, or run user-defined Markdown slash commands."
+	return tr(context.Background(), "internal_commands_commands_description", nil)
 }
 func (c *CommandsCommand) Usage() string {
-	return "/commands [list|show <name>|reload|run <name> [args...]]"
+	return tr(context.Background(), "internal_commands_commands_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -38,29 +38,29 @@ func (c *CommandsCommand) Execute(ctx context.Context, cc *CommandContext) (*Com
 	}
 	switch sub {
 	case "list":
-		return c.list(), nil
+		return c.list(ctx), nil
 	case "show":
 		if len(args) < 2 {
-			return nil, fmt.Errorf("/commands show <name>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_show_usage", nil))
 		}
-		return c.show(args[1])
+		return c.show(ctx, args[1])
 	case "reload":
-		return c.reload()
+		return c.reload(ctx)
 	case "run":
 		if len(args) < 2 {
-			return nil, fmt.Errorf("/commands run <name> [args...]")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_run_usage", nil))
 		}
 		return c.run(ctx, cc, args[1], args[2:])
 	default:
-		return nil, fmt.Errorf("/commands: unknown subcommand %q (want list|show|reload|run)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 
 // list renders a tab-aligned table of all loaded Markdown commands.
-func (c *CommandsCommand) list() *CommandResult {
+func (c *CommandsCommand) list(ctx context.Context) *CommandResult {
 	var sb strings.Builder
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "NAME\tDESCRIPTION\tSOURCE")
+	fmt.Fprintln(tw, tr(ctx, "internal_commands_commands_table_header", nil))
 	for name, source := range c.loader.Loaded() {
 		var desc string
 		if cmd, ok := c.registry.Get(name); ok {
@@ -75,22 +75,26 @@ func (c *CommandsCommand) list() *CommandResult {
 }
 
 // show returns the raw body and metadata of a named Markdown command.
-func (c *CommandsCommand) show(name string) (*CommandResult, error) {
+func (c *CommandsCommand) show(ctx context.Context, name string) (*CommandResult, error) {
 	cmd, ok := c.registry.Get(name)
 	if !ok {
-		return nil, fmt.Errorf("/commands show: command %q not found", name)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_show_not_found", map[string]any{"Name": name}))
 	}
 	mc, ok := cmd.(*MarkdownCommand)
 	if !ok {
-		return nil, fmt.Errorf("/commands show: %q is not a Markdown command", name)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_show_not_markdown", map[string]any{"Name": name}))
 	}
-	out := fmt.Sprintf("Name: %s\nDescription: %s\nSource: %s\n\n--- Body ---\n%s",
-		mc.Name(), mc.Description(), mc.SourcePath(), mc.body)
+	out := tr(ctx, "internal_commands_commands_show_detail", map[string]any{
+		"Name":        mc.Name(),
+		"Description": mc.Description(),
+		"Source":      mc.SourcePath(),
+		"Body":        mc.body,
+	})
 	return &CommandResult{Success: true, Output: out}, nil
 }
 
 // reload re-scans the command directories and reconciles the registry.
-func (c *CommandsCommand) reload() (*CommandResult, error) {
+func (c *CommandsCommand) reload(ctx context.Context) (*CommandResult, error) {
 	before := len(c.loader.Loaded())
 	if err := c.loader.Reload(); err != nil {
 		return nil, err
@@ -98,7 +102,7 @@ func (c *CommandsCommand) reload() (*CommandResult, error) {
 	after := len(c.loader.Loaded())
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("commands reload: %d → %d", before, after),
+		Output:  tr(ctx, "internal_commands_commands_reload_result", map[string]any{"Before": before, "After": after}),
 	}, nil
 }
 
@@ -106,7 +110,7 @@ func (c *CommandsCommand) reload() (*CommandResult, error) {
 func (c *CommandsCommand) run(ctx context.Context, parent *CommandContext, name string, args []string) (*CommandResult, error) {
 	cmd, ok := c.registry.Get(name)
 	if !ok {
-		return nil, fmt.Errorf("/commands run: command %q not found", name)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_commands_run_not_found", map[string]any{"Name": name}))
 	}
 	innerCC := &CommandContext{
 		Args:        args,

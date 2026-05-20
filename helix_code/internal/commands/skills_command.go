@@ -23,10 +23,10 @@ func NewSkillsCommand(loader *SkillLoader, registry *SkillRegistry) *SkillsComma
 func (c *SkillsCommand) Name() string      { return "skills" }
 func (c *SkillsCommand) Aliases() []string { return nil }
 func (c *SkillsCommand) Description() string {
-	return "Inspect, reload, or invoke agent-loaded skills."
+	return tr(context.Background(), "internal_commands_skills_description", nil)
 }
 func (c *SkillsCommand) Usage() string {
-	return "/skills [list|show <name>|reload|invoke <name> [args...]]"
+	return tr(context.Background(), "internal_commands_skills_usage", nil)
 }
 
 // Execute dispatches to the appropriate subcommand handler.
@@ -38,29 +38,29 @@ func (c *SkillsCommand) Execute(ctx context.Context, cc *CommandContext) (*Comma
 	}
 	switch sub {
 	case "list":
-		return c.list(), nil
+		return c.list(ctx), nil
 	case "show":
 		if len(args) < 2 {
-			return nil, fmt.Errorf("/skills show <name>")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_skills_show_usage", nil))
 		}
-		return c.show(args[1])
+		return c.show(ctx, args[1])
 	case "reload":
-		return c.reload()
+		return c.reload(ctx)
 	case "invoke":
 		if len(args) < 2 {
-			return nil, fmt.Errorf("/skills invoke <name> [args...]")
+			return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_skills_invoke_usage", nil))
 		}
 		return c.invoke(ctx, cc, args[1], args[2:])
 	default:
-		return nil, fmt.Errorf("/skills: unknown subcommand %q (want list|show|reload|invoke)", sub)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_skills_unknown_subcommand", map[string]any{"Sub": sub}))
 	}
 }
 
 // list renders a tab-aligned table of all loaded skills.
-func (c *SkillsCommand) list() *CommandResult {
+func (c *SkillsCommand) list(ctx context.Context) *CommandResult {
 	var sb strings.Builder
 	tw := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "NAME\tDESCRIPTION\tTRIGGERS\tSOURCE")
+	fmt.Fprintln(tw, tr(ctx, "internal_commands_skills_table_header", nil))
 	for _, s := range c.registry.List() {
 		patterns := strings.Join(s.TriggerPatterns(), " | ")
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", s.Name(), s.Description(), patterns, s.SourcePath())
@@ -70,20 +70,24 @@ func (c *SkillsCommand) list() *CommandResult {
 }
 
 // show returns the raw body and metadata of a named skill.
-func (c *SkillsCommand) show(name string) (*CommandResult, error) {
+func (c *SkillsCommand) show(ctx context.Context, name string) (*CommandResult, error) {
 	s, ok := c.registry.Get(name)
 	if !ok {
-		return nil, fmt.Errorf("/skills show: skill %q not found", name)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_skills_show_not_found", map[string]any{"Name": name}))
 	}
-	out := fmt.Sprintf(
-		"Name: %s\nDescription: %s\nSource: %s\nRequires isolation: %t\nTriggers:\n  %s\n\n--- Body ---\n%s",
-		s.Name(), s.Description(), s.SourcePath(), s.RequiresIsolation(),
-		strings.Join(s.TriggerPatterns(), "\n  "), s.Body())
+	out := tr(ctx, "internal_commands_skills_show_detail", map[string]any{
+		"Name":              s.Name(),
+		"Description":       s.Description(),
+		"Source":            s.SourcePath(),
+		"RequiresIsolation": s.RequiresIsolation(),
+		"Triggers":          strings.Join(s.TriggerPatterns(), "\n  "),
+		"Body":              s.Body(),
+	})
 	return &CommandResult{Success: true, Output: out}, nil
 }
 
 // reload re-scans the skill directories and reconciles the registry.
-func (c *SkillsCommand) reload() (*CommandResult, error) {
+func (c *SkillsCommand) reload(ctx context.Context) (*CommandResult, error) {
 	before := len(c.loader.Loaded())
 	if err := c.loader.Reload(); err != nil {
 		return nil, err
@@ -91,7 +95,7 @@ func (c *SkillsCommand) reload() (*CommandResult, error) {
 	after := len(c.loader.Loaded())
 	return &CommandResult{
 		Success: true,
-		Output:  fmt.Sprintf("skills reload: %d → %d", before, after),
+		Output:  tr(ctx, "internal_commands_skills_reload_result", map[string]any{"Before": before, "After": after}),
 	}, nil
 }
 
@@ -99,7 +103,7 @@ func (c *SkillsCommand) reload() (*CommandResult, error) {
 func (c *SkillsCommand) invoke(ctx context.Context, parent *CommandContext, name string, args []string) (*CommandResult, error) {
 	s, ok := c.registry.Get(name)
 	if !ok {
-		return nil, fmt.Errorf("/skills invoke: skill %q not found", name)
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_commands_skills_invoke_not_found", map[string]any{"Name": name}))
 	}
 	rendered, err := s.Render(args, parent.Selection, parent.CurrentFile)
 	if err != nil {

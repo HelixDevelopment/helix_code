@@ -518,3 +518,68 @@ internal_commands_subagents_none_running:
 
 internal_commands_subagents_killed:
   other: "killed subagent {{.ID}}"
+
+# --- commands_command.go (round-389) ---
+internal_commands_commands_description:
+  other: "Inspect, reload, or run user-defined Markdown slash commands."
+
+internal_commands_commands_usage:
+  other: "/commands [list|show <name>|reload|run <name> [args...]]"
+
+internal_commands_commands_show_usage:
+  other: "/commands show <name>"
+
+internal_commands_commands_run_usage:
+  other: "/commands run <name> [args...]"
+
+internal_commands_commands_unknown_subcommand:
+  other: "/commands: unknown subcommand {{.Sub}} (want list|show|reload|run)"
+
+internal_commands_commands_table_header:
+  other: "NAME\tDESCRIPTION\tSOURCE"
+
+internal_commands_commands_show_not_found:
+  other: "/commands show: command {{.Name}} not found"
+
+internal_commands_commands_show_not_markdown:
+  other: "/commands show: {{.Name}} is not a Markdown command"
+
+internal_commands_commands_show_detail:
+  other: "Name: {{.Name}}\nDescription: {{.Description}}\nSource: {{.Source}}\n\n--- Body ---\n{{.Body}}"
+
+internal_commands_commands_reload_result:
+  other: "commands reload: {{.Before}} → {{.After}}"
+
+internal_commands_commands_run_not_found:
+  other: "/commands run: command {{.Name}} not found"
+
+# --- skills_command.go (round-389) ---
+internal_commands_skills_description:
+  other: "Inspect, reload, or invoke agent-loaded skills."
+
+internal_commands_skills_usage:
+  other: "/skills [list|show <name>|reload|invoke <name> [args...]]"
+
+internal_commands_skills_show_usage:
+  other: "/skills show <name>"
+
+internal_commands_skills_invoke_usage:
+  other: "/skills invoke <name> [args...]"
+
+internal_commands_skills_unknown_subcommand:
+  other: "/skills: unknown subcommand {{.Sub}} (want list|show|reload|invoke)"
+
+internal_commands_skills_table_header:
+  other: "NAME\tDESCRIPTION\tTRIGGERS\tSOURCE"
+
+internal_commands_skills_show_not_found:
+  other: "/skills show: skill {{.Name}} not found"
+
+internal_commands_skills_show_detail:
+  other: "Name: {{.Name}}\nDescription: {{.Description}}\nSource: {{.Source}}\nRequires isolation: {{.RequiresIsolation}}\nTriggers:\n  {{.Triggers}}\n\n--- Body ---\n{{.Body}}"
+
+internal_commands_skills_reload_result:
+  other: "skills reload: {{.Before}} → {{.After}}"
+
+internal_commands_skills_invoke_not_found:
+  other: "/skills invoke: skill {{.Name}} not found"
