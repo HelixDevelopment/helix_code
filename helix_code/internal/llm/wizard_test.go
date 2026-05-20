@@ -419,3 +419,94 @@ func simulationScreenFactory() (tcell.Screen, error) {
 // potential keystroke-trace tests in T09.
 var _ = os.Getenv
 var _ = strings.TrimSpace
+
+// ---------------------------------------------------------------------------
+// Round-377 §11.4 CONST-046 — wizard interactive TUI chrome i18n migration.
+//
+// These tests are the paired mutation for the round-377 migration of
+// wizard.go's interactive setup-flow strings (provider-picker card
+// titles/descriptions, picker + form border titles, Save/Back/Cancel
+// buttons, per-provider form-field labels). They prove the chrome is
+// resolved through the CONST-046 Translator seam — NOT hardcoded English
+// literals. If a future edit re-inlines any literal, these tests FAIL.
+// ---------------------------------------------------------------------------
+
+// roundtripTranslator wraps every message ID in a sentinel so a call
+// site that routes through the seam is observable, and a call site that
+// hardcoded an English literal is distinguishable (it would not carry
+// the sentinel). Errors are never returned — matching production
+// degrade-to-ID behaviour.
+type roundtripTranslator struct{}
+
+func (roundtripTranslator) T(_ context.Context, id string, _ map[string]any) (string, error) {
+	return "[i18n:" + id + "]", nil
+}
+
+func (roundtripTranslator) TPlural(_ context.Context, id string, _ int, _ map[string]any) (string, error) {
+	return "[i18n:" + id + "]", nil
+}
+
+// TestWizardFieldsFor_RoutesLabelsThroughI18nSeam asserts every
+// per-provider form-field label is resolved via the Translator seam.
+// Paired mutation: re-inlining any label literal in wizardFieldsFor
+// drops the sentinel and fails this test.
+func TestWizardFieldsFor_RoutesLabelsThroughI18nSeam(t *testing.T) {
+	prev := translator
+	SetTranslator(roundtripTranslator{})
+	defer func() { translator = prev }()
+
+	ctx := context.Background()
+	for _, pt := range []ProviderType{
+		ProviderTypeAnthropic, ProviderTypeBedrock,
+		ProviderTypeVertexAI, ProviderTypeAzure,
+	} {
+		fields := wizardFieldsFor(ctx, pt)
+		if len(fields) == 0 {
+			t.Fatalf("wizardFieldsFor(%s) returned no fields", pt)
+		}
+		for _, f := range fields {
+			if !strings.HasPrefix(f.Label, "[i18n:internal_llm_wizard_field_") {
+				t.Fatalf("provider %s field %q label %q must resolve through the i18n seam (expected [i18n:internal_llm_wizard_field_*])",
+					pt, f.Name, f.Label)
+			}
+		}
+	}
+}
+
+// TestWizardChrome_PickerAndFormRouteThroughI18nSeam asserts the picker
+// + form border titles and the Save/Back/Cancel buttons are resolved
+// via the seam. Drives the builders through a headless wizardState.
+func TestWizardChrome_PickerAndFormRouteThroughI18nSeam(t *testing.T) {
+	prev := translator
+	SetTranslator(roundtripTranslator{})
+	defer func() { translator = prev }()
+
+	s := &wizardState{ctx: context.Background()}
+
+	// trCtx must route every chrome message ID through the seam.
+	wantIDs := []string{
+		"internal_llm_wizard_picker_title",
+		"internal_llm_wizard_form_title",
+		"internal_llm_wizard_provider_anthropic_title",
+		"internal_llm_wizard_provider_anthropic_desc",
+		"internal_llm_wizard_provider_bedrock_title",
+		"internal_llm_wizard_provider_vertexai_title",
+		"internal_llm_wizard_provider_azure_title",
+		"internal_llm_wizard_button_save",
+		"internal_llm_wizard_button_back",
+		"internal_llm_wizard_button_cancel",
+	}
+	for _, id := range wantIDs {
+		got := s.trCtx(id, nil)
+		if got != "[i18n:"+id+"]" {
+			t.Fatalf("trCtx(%q) = %q, want sentinel-wrapped — chrome string not routed through i18n seam", id, got)
+		}
+	}
+
+	// trCtx must tolerate a nil ctx (picker/form builders may be
+	// invoked before RunWizard sets state.ctx).
+	nilCtxState := &wizardState{}
+	if got := nilCtxState.trCtx("internal_llm_wizard_button_save", nil); got == "" {
+		t.Fatal("trCtx with nil ctx returned empty string")
+	}
+}

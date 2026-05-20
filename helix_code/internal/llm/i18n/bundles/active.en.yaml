@@ -19,6 +19,15 @@
 # (unsupported provider type, marshal/write/sync/close I/O wrapped
 # errors with %w) are deferred to a future round to stay under the
 # size cap and preserve error-wrap chains.
+#
+# Round-377 §11.4 anti-bluff sweep (2026-05-20): migrated the genuine
+# (C) user-facing TUI chrome emitted by wizard.go's interactive
+# first-run setup flow — the provider-picker card titles/descriptions,
+# the picker + form border titles, the Save/Back/Cancel button labels,
+# and every per-provider form-field label. These strings are typed at
+# the operator through the tview wizard regardless of locale; leaving
+# them hardcoded silently breaks the first-run experience for
+# non-English operators.
 
 internal_llm_wizard_anthropic_apikey_required:
   other: "anthropic: api_key is required"
@@ -49,3 +58,74 @@ internal_llm_writer_overwrite_nil_result:
 
 internal_llm_writer_overwrite_empty_path:
   other: "OverwriteWizardConfig: empty path"
+
+# --- Round-377: wizard.go interactive TUI chrome (genuine user-facing) ---
+
+internal_llm_wizard_picker_title:
+  other: " Choose a cloud provider (Esc to cancel) "
+
+internal_llm_wizard_form_title:
+  other: " Configure {{.Provider}} "
+
+internal_llm_wizard_provider_anthropic_title:
+  other: "Anthropic"
+
+internal_llm_wizard_provider_anthropic_desc:
+  other: "Direct Claude API (api.anthropic.com)"
+
+internal_llm_wizard_provider_bedrock_title:
+  other: "AWS Bedrock"
+
+internal_llm_wizard_provider_bedrock_desc:
+  other: "Claude via AWS Bedrock runtime"
+
+internal_llm_wizard_provider_vertexai_title:
+  other: "Google Vertex AI"
+
+internal_llm_wizard_provider_vertexai_desc:
+  other: "Claude via GCP Vertex AI"
+
+internal_llm_wizard_provider_azure_title:
+  other: "Azure OpenAI"
+
+internal_llm_wizard_provider_azure_desc:
+  other: "OpenAI models via Azure resource"
+
+internal_llm_wizard_button_save:
+  other: "Save"
+
+internal_llm_wizard_button_back:
+  other: "Back"
+
+internal_llm_wizard_button_cancel:
+  other: "Cancel"
+
+internal_llm_wizard_field_api_key:
+  other: "API key"
+
+internal_llm_wizard_field_aws_region:
+  other: "AWS region (e.g. us-west-2)"
+
+internal_llm_wizard_field_aws_access_key:
+  other: "AWS access key ID (optional)"
+
+internal_llm_wizard_field_aws_secret_key:
+  other: "AWS secret access key (optional)"
+
+internal_llm_wizard_field_gcp_project:
+  other: "GCP project ID"
+
+internal_llm_wizard_field_gcp_location:
+  other: "GCP location (e.g. us-central1)"
+
+internal_llm_wizard_field_gcp_credentials:
+  other: "Service-account JSON path (optional)"
+
+internal_llm_wizard_field_azure_endpoint:
+  other: "Azure resource endpoint URL"
+
+internal_llm_wizard_field_azure_api_key:
+  other: "Azure API key"
+
+internal_llm_wizard_field_azure_api_version:
+  other: "API version"

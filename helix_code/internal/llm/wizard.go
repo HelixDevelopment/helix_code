@@ -132,6 +132,7 @@ func RunWizard(ctx context.Context, cfg WizardConfig) (*WizardResult, error) {
 	state := &wizardState{
 		app:        app,
 		configPath: resolvedPath,
+		ctx:        ctx,
 	}
 
 	// Cancellation via context.
@@ -168,10 +169,22 @@ func RunWizard(ctx context.Context, cfg WizardConfig) (*WizardResult, error) {
 type wizardState struct {
 	app        *tview.Application
 	configPath string
+	ctx        context.Context
 
 	mu        sync.Mutex
 	cancelled bool
 	result    *WizardResult
+}
+
+// trCtx resolves a CONST-046 message ID against the wizard's context.
+// Falls back to context.Background() when no context was supplied so
+// the picker/form builders never panic on a nil ctx.
+func (s *wizardState) trCtx(msgID string, data map[string]any) string {
+	ctx := s.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return tr(ctx, msgID, data)
 }
 
 // buildPickerPage constructs the provider-picker tview primitive.
@@ -180,26 +193,26 @@ func (s *wizardState) buildPickerPage() tview.Primitive {
 		ShowSecondaryText(true)
 
 	options := []struct {
-		t            ProviderType
-		title        string
-		description  string
+		t           ProviderType
+		titleID     string
+		descID      string
 	}{
-		{ProviderTypeAnthropic, "Anthropic", "Direct Claude API (api.anthropic.com)"},
-		{ProviderTypeBedrock, "AWS Bedrock", "Claude via AWS Bedrock runtime"},
-		{ProviderTypeVertexAI, "Google Vertex AI", "Claude via GCP Vertex AI"},
-		{ProviderTypeAzure, "Azure OpenAI", "OpenAI models via Azure resource"},
+		{ProviderTypeAnthropic, "internal_llm_wizard_provider_anthropic_title", "internal_llm_wizard_provider_anthropic_desc"},
+		{ProviderTypeBedrock, "internal_llm_wizard_provider_bedrock_title", "internal_llm_wizard_provider_bedrock_desc"},
+		{ProviderTypeVertexAI, "internal_llm_wizard_provider_vertexai_title", "internal_llm_wizard_provider_vertexai_desc"},
+		{ProviderTypeAzure, "internal_llm_wizard_provider_azure_title", "internal_llm_wizard_provider_azure_desc"},
 	}
 
 	for i, opt := range options {
 		shortcut := rune('1' + i)
 		t := opt.t
-		list.AddItem(opt.title, opt.description, shortcut, func() {
+		list.AddItem(s.trCtx(opt.titleID, nil), s.trCtx(opt.descID, nil), shortcut, func() {
 			form := s.buildFormPage(t)
 			s.app.SetRoot(form, true).SetFocus(form)
 		})
 	}
 
-	list.SetBorder(true).SetTitle(" Choose a cloud provider (Esc to cancel) ")
+	list.SetBorder(true).SetTitle(s.trCtx("internal_llm_wizard_picker_title", nil))
 
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
@@ -218,9 +231,9 @@ func (s *wizardState) buildPickerPage() tview.Primitive {
 // buildFormPage builds the per-provider field form.
 func (s *wizardState) buildFormPage(t ProviderType) tview.Primitive {
 	form := tview.NewForm()
-	form.SetBorder(true).SetTitle(fmt.Sprintf(" Configure %s ", t))
+	form.SetBorder(true).SetTitle(s.trCtx("internal_llm_wizard_form_title", map[string]any{"Provider": string(t)}))
 
-	fields := wizardFieldsFor(t)
+	fields := wizardFieldsFor(s.ctx, t)
 	values := make(map[string]string, len(fields))
 	for _, f := range fields {
 		fname := f.Name
@@ -240,7 +253,7 @@ func (s *wizardState) buildFormPage(t ProviderType) tview.Primitive {
 		SetTextColor(tcell.ColorRed).
 		SetDynamicColors(true)
 
-	form.AddButton("Save", func() {
+	form.AddButton(s.trCtx("internal_llm_wizard_button_save", nil), func() {
 		if err := validateWizardForm(t, values); err != nil {
 			errLabel.SetText(fmt.Sprintf("[red]%s[-]", err.Error()))
 			return
@@ -251,10 +264,10 @@ func (s *wizardState) buildFormPage(t ProviderType) tview.Primitive {
 		s.mu.Unlock()
 		s.app.Stop()
 	})
-	form.AddButton("Back", func() {
+	form.AddButton(s.trCtx("internal_llm_wizard_button_back", nil), func() {
 		s.app.SetRoot(s.buildPickerPage(), true).SetFocus(s.buildPickerPage())
 	})
-	form.AddButton("Cancel", func() {
+	form.AddButton(s.trCtx("internal_llm_wizard_button_cancel", nil), func() {
 		s.mu.Lock()
 		s.cancelled = true
 		s.mu.Unlock()
@@ -287,30 +300,36 @@ type wizardField struct {
 	Secret  bool   // render as password field
 }
 
-// wizardFieldsFor returns the fields for a given provider type.
-func wizardFieldsFor(t ProviderType) []wizardField {
+// wizardFieldsFor returns the fields for a given provider type. Field
+// labels are resolved through the CONST-046 i18n seam (tr) so the
+// first-run setup form adapts to the operator's locale; ctx may be
+// nil (falls back to context.Background()).
+func wizardFieldsFor(ctx context.Context, t ProviderType) []wizardField {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	switch t {
 	case ProviderTypeAnthropic:
 		return []wizardField{
-			{Name: "api_key", Label: "API key", Secret: true},
+			{Name: "api_key", Label: tr(ctx, "internal_llm_wizard_field_api_key", nil), Secret: true},
 		}
 	case ProviderTypeBedrock:
 		return []wizardField{
-			{Name: "region", Label: "AWS region (e.g. us-west-2)"},
-			{Name: "aws_access_key_id", Label: "AWS access key ID (optional)"},
-			{Name: "aws_secret_access_key", Label: "AWS secret access key (optional)", Secret: true},
+			{Name: "region", Label: tr(ctx, "internal_llm_wizard_field_aws_region", nil)},
+			{Name: "aws_access_key_id", Label: tr(ctx, "internal_llm_wizard_field_aws_access_key", nil)},
+			{Name: "aws_secret_access_key", Label: tr(ctx, "internal_llm_wizard_field_aws_secret_key", nil), Secret: true},
 		}
 	case ProviderTypeVertexAI:
 		return []wizardField{
-			{Name: "project_id", Label: "GCP project ID"},
-			{Name: "location", Label: "GCP location (e.g. us-central1)"},
-			{Name: "credentials_path", Label: "Service-account JSON path (optional)"},
+			{Name: "project_id", Label: tr(ctx, "internal_llm_wizard_field_gcp_project", nil)},
+			{Name: "location", Label: tr(ctx, "internal_llm_wizard_field_gcp_location", nil)},
+			{Name: "credentials_path", Label: tr(ctx, "internal_llm_wizard_field_gcp_credentials", nil)},
 		}
 	case ProviderTypeAzure:
 		return []wizardField{
-			{Name: "endpoint", Label: "Azure resource endpoint URL"},
-			{Name: "api_key", Label: "Azure API key", Secret: true},
-			{Name: "api_version", Label: "API version", Default: "2024-08-01-preview"},
+			{Name: "endpoint", Label: tr(ctx, "internal_llm_wizard_field_azure_endpoint", nil)},
+			{Name: "api_key", Label: tr(ctx, "internal_llm_wizard_field_azure_api_key", nil), Secret: true},
+			{Name: "api_version", Label: tr(ctx, "internal_llm_wizard_field_azure_api_version", nil), Default: "2024-08-01-preview"},
 		}
 	default:
 		return nil
