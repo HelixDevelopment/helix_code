@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -227,6 +228,105 @@ type CLI struct {
 	browserManager     *browser.BrowserManager        // F23: cline-style single-session browser façade
 	memoryRegistry     *projectmemory.MemoryRegistry  // F24: codex-style project memory + hot-reload
 	hooksLoaded        int                            // count of hooks loaded at startup (for diagnostics)
+
+	// --- Speed programme P1-T03: lazy CLI startup (R1 B01/B13/B14/B18) ---
+	//
+	// The eager monolith in an earlier revision of Run() built ~25 subsystems
+	// (telemetry, permissions, worktree git shell-out, hooks YAML, tool
+	// registry, LSP exec.LookPath sweep, MCP server spawn, sandbox detection,
+	// the F22-F30 tool/slash-command suite, the F15 subagent manager, …)
+	// sequentially BEFORE the first user action — so even `--help`,
+	// `--list-models` and `--command` paid the full bootstrap cost.
+	//
+	// The bootstrap is now split into sync.Once-guarded getters. Each getter
+	// constructs its subsystem exactly once, lazily, on first access; commands
+	// that do not need a subsystem never trigger its construction. Construction
+	// ORDER is preserved inside each getter (getter-calls-getter where there is
+	// a genuine dependency — e.g. the heavy-subsystem getter calls telemetry()
+	// first because the tool-registry instrumentation needs the provider).
+	//
+	// cleanups holds the deferred teardown closures that the eager monolith
+	// registered with `defer` inside Run(). They are drained by runCleanups()
+	// via a single `defer` in Run() so a lazily-constructed subsystem is still
+	// torn down at process exit, regardless of WHICH command triggered it.
+	telemetryOnce  sync.Once
+	telemetryProv  telemetry.TelemetryProvider
+	telemetryCfg   telemetry.TelemetryConfig
+	llmOnce        sync.Once
+	subsystemsOnce sync.Once
+	subsystemsErr  error
+	cleanups       []func()
+	cleanupsMu     sync.Mutex
+
+	// constructionCount records how many times each lazy getter actually ran
+	// its sync.Once body. It exists so integration tests can prove a command
+	// that needs subsystem X triggers exactly one construction of X, and a
+	// command that does NOT need X triggers zero. Key: subsystem name.
+	constructionCount map[string]int
+	constructionMu    sync.Mutex
+
+	// flagState carries the parsed command-line flag values that the lazy
+	// subsystem getters consume. Run() populates it immediately after
+	// flag.Parse(); ensureSubsystems / ensureLLMProvider read it. This keeps
+	// the getters free of a *flag dependency so they can be invoked from any
+	// command handler (e.g. handleInteractive) without a flag receiver.
+	flagState cliFlagState
+}
+
+// cliFlagState is the parsed-flag snapshot the lazy getters need. Populated
+// once by Run() after flag.Parse().
+type cliFlagState struct {
+	approvalFlag      string
+	providerFlag      string
+	resumeFlag        bool
+	continueFlag      bool
+	resumeSessionFlag string
+}
+
+// recordConstruction increments the lazy-construction probe counter for name.
+// It is the anti-bluff seam P1-T03's integration tests assert against: a
+// getter that constructed must show count==1; a subsystem never touched must
+// show count==0.
+func (c *CLI) recordConstruction(name string) {
+	c.constructionMu.Lock()
+	defer c.constructionMu.Unlock()
+	if c.constructionCount == nil {
+		c.constructionCount = make(map[string]int)
+	}
+	c.constructionCount[name]++
+}
+
+// ConstructionCount returns how many times the named lazy getter ran its
+// sync.Once body. Used by P1-T03 tests (same package) to prove laziness.
+func (c *CLI) ConstructionCount(name string) int {
+	c.constructionMu.Lock()
+	defer c.constructionMu.Unlock()
+	return c.constructionCount[name]
+}
+
+// addCleanup registers a teardown closure to run at Run() exit. Safe for
+// concurrent use — the F09/F10 watcher goroutines never call it, but the
+// background subagent / workspace wiring may, so the mutex is cheap insurance.
+func (c *CLI) addCleanup(fn func()) {
+	if fn == nil {
+		return
+	}
+	c.cleanupsMu.Lock()
+	defer c.cleanupsMu.Unlock()
+	c.cleanups = append(c.cleanups, fn)
+}
+
+// runCleanups drains the registered teardown closures in LIFO order — the
+// same order Go's `defer` stack would have unwound them in the old eager
+// monolith. Called exactly once via a single `defer` in Run().
+func (c *CLI) runCleanups() {
+	c.cleanupsMu.Lock()
+	fns := c.cleanups
+	c.cleanups = nil
+	c.cleanupsMu.Unlock()
+	for i := len(fns) - 1; i >= 0; i-- {
+		fns[i]()
+	}
 }
 
 // NewCLI creates a new CLI instance
@@ -392,6 +492,653 @@ func worktreeRevParseToplevel(ctx context.Context, cwd string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
+// telemetry lazily constructs the OTel telemetry provider exactly once.
+//
+// Speed programme P1-T03: in the old eager monolith this ran unconditionally
+// on every CLI start. It is cheap when no OTEL_* env vars are set (the SDK
+// builds a noop provider) but it is still pure overhead for `--help` /
+// `--command` / `--list-models` which never emit a span. It is now lazy:
+// constructed on first access by ensureLLMProvider (the traced-LLM decorator
+// needs it) and ensureSubsystems (the tool-registry instrumentation needs it).
+//
+// Construction never returns an error to the caller — failure degrades to a
+// noop provider, matching the old monolith's behaviour. The telemetry-shutdown
+// teardown is registered via addCleanup so it still runs at Run() exit.
+func (c *CLI) telemetry() telemetry.TelemetryProvider {
+	c.telemetryOnce.Do(func() {
+		c.recordConstruction("telemetry")
+		cfg, cfgErr := telemetry.LoadConfigFromEnv(os.Getenv)
+		if cfgErr != nil {
+			log.Printf("telemetry: config invalid (continuing with noop): %v", cfgErr)
+			cfg = telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop}
+		}
+		c.telemetryCfg = cfg
+		prov, provErr := telemetry.NewTelemetryProvider(cfg, zap.NewNop())
+		if provErr != nil {
+			log.Printf("telemetry: provider construction failed (continuing with noop): %v", provErr)
+		}
+		if prov == nil {
+			// Defence in depth — NewTelemetryProvider should never return nil,
+			// but a nil here would nil-panic the decorators below.
+			prov, _ = telemetry.NewTelemetryProvider(
+				telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop},
+				zap.NewNop(),
+			)
+		}
+		c.telemetryProv = prov
+		c.addCleanup(func() {
+			shutdownTimeout := c.telemetryCfg.ShutdownTimeout
+			if shutdownTimeout <= 0 {
+				shutdownTimeout = telemetry.DefaultShutdownTimeout
+			}
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+			defer cancel()
+			if err := c.telemetryProv.Shutdown(shutdownCtx); err != nil {
+				log.Printf("telemetry: shutdown error: %v", err)
+			}
+		})
+		log.Printf("telemetry: initialised (exporter=%s)", string(prov.Exporter()))
+	})
+	return c.telemetryProv
+}
+
+// ensureLLMProvider lazily resolves the cloud LLM provider override (F12) and
+// wraps the active provider with the telemetry decorator (P1-F16-T10), exactly
+// once.
+//
+// Speed programme P1-T03: this is needed only by commands that actually talk
+// to an LLM — `--prompt` (handleGenerate), `--list-models` (handleListModels)
+// and the interactive REPL. `--command`, `--health`, `--list-workers`,
+// `--notify`, `--qa-*` and `--help` never call it, so they skip the F12
+// config-file read + any cloud-provider construction.
+//
+// providerFlag is the parsed value of the --provider flag. Errors are
+// non-fatal except an explicitly unknown --provider value (a fixable user
+// error), which is returned so Run() can surface a non-zero exit.
+func (c *CLI) ensureLLMProvider(ctx context.Context, providerFlag string) error {
+	var fatal error
+	c.llmOnce.Do(func() {
+		c.recordConstruction("llmProvider")
+		// F12: resolve cloud LLM provider via flag > env > config-file.
+		configProviderName, configEntry, configErr := loadProviderConfigFromDisk(os.Getenv)
+		if configErr != nil && !errors.Is(configErr, os.ErrNotExist) {
+			log.Printf("F12 provider: config load failed (continuing without): %v", configErr)
+		}
+		selectorInput := llm.SelectorInput{
+			Flag:   providerFlag,
+			Env:    os.Getenv("HELIX_LLM_PROVIDER"),
+			Config: configProviderName,
+		}
+		ptype, selErr := llm.Select(selectorInput)
+		switch {
+		case errors.Is(selErr, llm.ErrNoProviderConfigured):
+			// Friendly hint, then keep the default provider.
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_no_cloud_provider", nil))
+		case selErr != nil:
+			// User typed an unknown value -> fail loudly with a non-zero exit.
+			fatal = fmt.Errorf("F12 provider: %w", selErr)
+			return
+		default:
+			entry := configEntry
+			entry.Type = ptype
+			cloud, cErr := llm.NewCloudProvider(ptype, entry)
+			if cErr != nil {
+				fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_construct_failed", map[string]any{
+					"Provider": fmt.Sprintf("%q", ptype),
+					"Error":    fmt.Sprintf("%v", cErr),
+				}))
+			} else if cloud != nil {
+				c.llmProvider = cloud
+				fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
+			}
+		}
+
+		// P1-F16-T10: wrap the resolved provider with the telemetry decorator.
+		// Order anchor preserved from the old monolith — this runs AFTER F12
+		// settles c.llmProvider and BEFORE any caller of c.llmProvider observes
+		// it. When telemetry is in noop mode the decorator is pass-through.
+		if c.llmProvider != nil {
+			tracedLLM, traceErr := telemetry.NewTracedLLMProvider(c.llmProvider, c.telemetry())
+			if traceErr != nil {
+				log.Printf("telemetry: LLM decorator construction failed (using undecorated provider): %v", traceErr)
+			} else {
+				c.llmProvider = tracedLLM
+			}
+		}
+	})
+	return fatal
+}
+
+// ensureSubsystems lazily constructs the heavy interactive-session subsystem
+// cluster exactly once: permissions, persistence, worktree, hooks, the tool
+// registry + the full F07-F30 tool/slash-command suite, LSP, MCP, sandbox,
+// approval, the F15 subagent manager and the F09/F10 markdown-command + skill
+// loaders/watchers.
+//
+// Speed programme P1-T03 (R1 B01/B13/B14/B18): this is the hundreds-of-
+// milliseconds cost the old eager monolith paid on EVERY CLI start. It is now
+// gated behind a sync.Once and is invoked ONLY by the interactive REPL path
+// (handleInteractive) — the only command that genuinely needs the slash-
+// command registry + agent tool surface. Short commands (`--list-models`,
+// `--command`, `--health`, `--qa-*`, `--help`, …) skip the entire cluster:
+// no worktree git shell-out, no hooks YAML read, no LSP exec.LookPath sweep,
+// no MCP server spawn, no sandbox detection.
+//
+// Construction ORDER inside this getter is identical to the old monolith's
+// statement order — every genuine dependency (sessionMgr before hooks,
+// toolReg before the F-feature tool registrations, cmdRegistry before the
+// slash-command registrations, telemetry before tool instrumentation) is
+// preserved. Every `defer` the monolith used is converted to addCleanup so
+// teardown still happens at Run() exit.
+func (c *CLI) ensureSubsystems(ctx context.Context) error {
+	c.subsystemsOnce.Do(func() {
+		c.recordConstruction("subsystems")
+		// The F22 auto-committer and the F15 subagent manager both capture
+		// c.llmProvider by value at construction time, so the F12 cloud
+		// override + telemetry wrapper MUST settle before this getter runs —
+		// getter-calls-getter preserves the old monolith's ordering anchor.
+		if err := c.ensureLLMProvider(ctx, c.flagState.providerFlag); err != nil {
+			c.subsystemsErr = err
+			return
+		}
+		c.subsystemsErr = c.buildSubsystems(ctx)
+	})
+	return c.subsystemsErr
+}
+
+// buildSubsystems constructs the heavy interactive-session subsystem cluster.
+// It is the body of ensureSubsystems' sync.Once — never call it directly; it
+// is unguarded and would double-register tools/slash-commands. See
+// ensureSubsystems for the laziness + ordering contract.
+func (c *CLI) buildSubsystems(ctx context.Context) error {
+	// Bootstrap permissions engine. A locally constructed PolicyEngine is used
+	// here; T10/Phase 3 will thread it into the tool dispatcher so deny rules
+	// actually block execution.
+	policyEngine := confirmation.NewPolicyEngine()
+	if err := c.initPermissions(ctx, policyEngine); err != nil {
+		return fmt.Errorf("permissions bootstrap: %w", err)
+	}
+	if err := c.initPersistence(); err != nil {
+		return fmt.Errorf("persistence init: %w", err)
+	}
+	if err := c.initWorktree(ctx); err != nil {
+		return fmt.Errorf("worktree init: %w", err)
+	}
+
+	// Construct the session manager (carries the hooks.Manager inside it).
+	sessionMgr := session.NewManager()
+	c.sessionMgr = sessionMgr
+
+	// Load hooks from ~/.helixcode/hooks.yaml + <cwd>/.helixcode/hooks.yaml
+	// and register them with the session's hooks manager.
+	if err := c.initHooks(ctx, sessionMgr); err != nil {
+		return fmt.Errorf("hooks init: %w", err)
+	}
+
+	// Construct the tool registry and wire the hooks manager so that
+	// BeforeToolCall / AfterToolCall / BeforeBash / AfterBash actually fire.
+	toolReg, err := tools.NewToolRegistry(tools.DefaultRegistryConfig())
+	if err != nil {
+		return fmt.Errorf("tool registry init: %w", err)
+	}
+	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
+	// Wire F02 permissions engine into the confirmation pipeline.
+	toolReg.GetConfirmation().SetPolicyEngine(policyEngine)
+	c.toolRegistry = toolReg
+
+	// P1-F19-T05: ask_user tool registration.
+	askUserPrompter, askUserErr := askuser.NewStdinPrompter(askuser.StdinPrompterOptions{})
+	if askUserErr != nil {
+		log.Printf("ask_user: stdinPrompter construction failed; tool unavailable: %v", askUserErr)
+	} else {
+		toolReg.Register(askuser.NewAskUserTool(askUserPrompter))
+		log.Printf("ask_user: wired (interactive=auto-detect, max-retries=%d, timeout=%s)",
+			askuser.DefaultMaxRetries, askuser.DefaultTimeout)
+	}
+
+	// F13: LSP manager — curated 5-server allowlist filtered by exec.LookPath
+	// at startup.
+	curatedLSPSpecs := tools.CuratedServerSpecs()
+	detectedLSPSpecs := tools.DetectAvailableServers(curatedLSPSpecs)
+	lspWorkingDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("lsp manager: resolving cwd: %w", err)
+	}
+	lspManager := tools.NewLSPManager(lspWorkingDir, detectedLSPSpecs, zap.NewNop())
+	c.addCleanup(func() {
+		shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutCancel()
+		_ = lspManager.Shutdown(shutCtx)
+	})
+	toolReg.SetLSPManager(lspManager)
+
+	// Construct the MCP Manager, load merged config, start alwaysLoad servers.
+	mcpMgr := mcp.NewManager()
+	{
+		var userMCPPath string
+		if configHome, err := os.UserConfigDir(); err == nil {
+			userMCPPath = filepath.Join(configHome, "helixcode", "mcp.yml")
+		}
+		projMCPPath := ".helixcode/mcp.yml"
+		cfg, cfgErr := mcp.LoadMerged(userMCPPath, projMCPPath)
+		if cfgErr != nil {
+			log.Printf("mcp: config load failed: %v (continuing without MCP)", cfgErr)
+		} else {
+			mcpMgr.SetConfig(cfg)
+			if startErr := mcpMgr.Start(ctx); startErr != nil {
+				log.Printf("mcp: start failed: %v", startErr)
+			}
+		}
+	}
+	c.mcpManager = mcpMgr
+	c.addCleanup(func() { _ = mcpMgr.Close() })
+
+	// Wire MCP-discovered tools into the tool registry as "<server>:<tool>".
+	toolReg.RegisterMCPManager(mcpMgr)
+
+	// Build the commands registry and register all builtin slash commands.
+	cmdRegistry := commands.NewRegistry()
+	if regErr := builtin.RegisterBuiltinCommandsWithMCP(cmdRegistry, mcpMgr); regErr != nil {
+		log.Printf("mcp: register slash command failed: %v", regErr)
+	}
+	c.commandRegistry = cmdRegistry
+
+	// F07: background task manager.
+	bgMgr := workflow.NewBackgroundManager(zap.NewNop(), workflow.ManagerConfig{})
+	c.addCleanup(func() { bgMgr.Close() })
+	toolReg.SetBackgroundManager(bgMgr)
+	toolReg.RegisterTaskTools(bgMgr)
+	if regErr := cmdRegistry.Register(commands.NewTasksCommand(bgMgr)); regErr != nil {
+		log.Printf("tasks: register slash command failed: %v", regErr)
+	}
+
+	// F08: plan-mode gate.
+	modeCtrl := planmode.NewModeController()
+	planner := planmode.NewDefaultPlanner()
+	gate := planmode.NewToolGate(modeCtrl, planner)
+	toolReg.SetPlanModeGate(gate)
+	toolReg.Register(tools.NewEnterPlanModeTool(modeCtrl))
+	toolReg.Register(tools.NewExitPlanModeTool(modeCtrl))
+	if regErr := cmdRegistry.Register(commands.NewPlanCommand(planner, modeCtrl)); regErr != nil {
+		log.Printf("plan: register slash command failed: %v", regErr)
+	}
+
+	// F13: register /lsp slash command.
+	if regErr := cmdRegistry.Register(commands.NewLSPCommand(lspManager, curatedLSPSpecs)); regErr != nil {
+		log.Printf("lsp: register slash command failed: %v", regErr)
+	}
+
+	// F14: sandbox manager + shell_sandboxed tool + /sandbox slash command.
+	sandboxConfigPath := sandbox.DefaultConfigPath(os.Getenv)
+	sandboxConfig, sandboxCfgErr := sandbox.LoadSandboxConfig(sandboxConfigPath)
+	if sandboxCfgErr != nil {
+		log.Printf("sandbox: config load failed (using defaults): %v", sandboxCfgErr)
+		sandboxConfig = sandbox.DefaultSandboxConfig()
+	}
+	sandboxWorkDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("sandbox manager: resolving cwd: %w", err)
+	}
+	sandboxMgr, sandboxCaps, sbErr := sandbox.NewSandboxManagerFromDetector(sandboxWorkDir, sandboxConfig, zap.NewNop())
+	if sbErr != nil {
+		log.Printf("sandbox: manager init failed: %v", sbErr)
+	} else {
+		log.Printf("sandbox: backend=%s reason=%q",
+			sandboxCaps.SelectedBackend.String(), sandboxCaps.UnavailableReason)
+	}
+	if sandboxMgr != nil {
+		toolReg.Register(sandbox.NewSandboxedShellTool(sandboxMgr))
+		if regErr := cmdRegistry.Register(commands.NewSandboxCommand(sandboxMgr)); regErr != nil {
+			log.Printf("sandbox: register slash command failed: %v", regErr)
+		}
+	}
+
+	// F21: approval gate.
+	sandboxAvailable := sandboxMgr != nil && sandboxMgr.SelectedBackend() != sandbox.BackendNone
+	approvalSelectorInput := approval.SelectorInput{
+		Flag:       c.flagState.approvalFlag,
+		Env:        os.Getenv(approval.EnvVarName),
+		ConfigPath: approval.DefaultConfigPath(os.Getenv),
+	}
+	approvalMode, approvalSource, approvalSelErr := approval.Select(approvalSelectorInput)
+	if approvalSelErr != nil {
+		log.Printf("approval: selector reported parse errors (using mode=%s source=%s): %v",
+			approvalMode, approvalSource, approvalSelErr)
+	}
+	approvalMgrOpts := approval.ApprovalManagerOptions{
+		InitialMode:      approvalMode,
+		Source:           approvalSource,
+		SandboxAvailable: sandboxAvailable,
+		PauseDangerous:   2 * time.Second,
+	}
+	if askUserPrompter != nil {
+		approvalMgrOpts.Responder = &approvalwire.AskUserYesNoPrompter{Inner: askUserPrompter}
+	}
+	approvalMgr, approvalMgrErr := approval.NewApprovalManager(approvalMgrOpts)
+	if approvalMgrErr != nil {
+		log.Printf("approval: manager init failed for mode=%s (falling back to suggest): %v",
+			approvalMode, approvalMgrErr)
+		approvalMgrOpts.InitialMode = approval.ModeSuggest
+		approvalMgrOpts.Source = approval.SourceDefault
+		approvalMgr, approvalMgrErr = approval.NewApprovalManager(approvalMgrOpts)
+		if approvalMgrErr != nil {
+			return fmt.Errorf("approval manager init (fallback): %w", approvalMgrErr)
+		}
+	}
+	toolReg.SetApprovalManager(approvalMgr)
+	log.Printf("approval: mode=%s source=%s sandbox_available=%t",
+		approvalMgr.Mode(), approvalMgr.Source(), sandboxAvailable)
+	if regErr := cmdRegistry.Register(commands.NewApprovalCommand(approvalMgr)); regErr != nil {
+		log.Printf("approval: register slash command failed: %v", regErr)
+	}
+
+	// F22: per-edit git auto-commit (Aider-style).
+	acEnabled := os.Getenv(autocommit.EnvVarName) != "off"
+	cwd, _ := os.Getwd()
+	autoCommitter := autocommit.NewAutoCommitter(autocommit.Options{
+		Enabled:    acEnabled,
+		Provider:   c.llmProvider,
+		WorkingDir: cwd,
+		Logger:     zap.NewNop(),
+	})
+	toolReg.SetAutoCommitter(autoCommitter)
+	log.Printf("git_auto_commit: enabled=%t cwd=%s git_repo=%t",
+		autoCommitter.Enabled(), cwd, autoCommitter.IsGitRepo())
+	if regErr := cmdRegistry.Register(commands.NewGitAutoCommitCommand(autoCommitter)); regErr != nil {
+		log.Printf("git_auto_commit: register slash command failed: %v", regErr)
+	}
+
+	// F23: cline-style browser tool suite.
+	browserMgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), zap.NewNop())
+	if err := tools.RegisterBrowserToolsV2(toolReg, browserMgr); err != nil {
+		log.Printf("browser: register tools failed: %v", err)
+	}
+	c.browserManager = browserMgr
+	if regErr := cmdRegistry.Register(commands.NewBrowserCommand(browserMgr)); regErr != nil {
+		log.Printf("browser: register slash command failed: %v", regErr)
+	}
+	c.addCleanup(func() { _ = browserMgr.CloseSession() })
+
+	// F24: codex-style project memory subsystem.
+	memCwd, _ := os.Getwd()
+	memLoader := projectmemory.NewMemoryLoader(zap.NewNop())
+	memRegistry := projectmemory.NewMemoryRegistry(memLoader, memCwd)
+	if _, err := memRegistry.Reload(ctx); err != nil {
+		log.Printf("projectmemory: initial reload failed: %v", err)
+	}
+	memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop())
+	if err := memWatcher.Start(ctx); err != nil {
+		log.Printf("projectmemory: watcher start failed (degrading to slash-only reload): %v", err)
+	}
+	c.addCleanup(func() { _ = memWatcher.Close() })
+	if regErr := cmdRegistry.Register(commands.NewMemoryCommand(memRegistry)); regErr != nil {
+		log.Printf("projectmemory: register slash command failed: %v", regErr)
+	}
+	c.memoryRegistry = memRegistry
+
+	// F25: plandex-style plan tree system.
+	planStore := plantree.NewFileStore(cwd)
+	planSummariser := plantree.DeterministicSummariser{}
+	if err := plantree.RegisterPlanTools(toolReg, planStore); err != nil {
+		log.Printf("plantree: register tools failed: %v", err)
+	}
+	if regErr := cmdRegistry.Register(commands.NewPlanTreeCommand(planStore, planSummariser)); regErr != nil {
+		log.Printf("plantree: register slash command failed: %v", regErr)
+	}
+
+	// F26: Openhands-style workspace + planner system.
+	wsMgr, wsErr := workspace.NewWorkspaceManager()
+	if wsErr != nil {
+		log.Printf("workspace: manager init failed (container runtime not available): %v", wsErr)
+	} else {
+		toolReg.Register(workspace.NewWorkspaceCreateTool(wsMgr))
+		toolReg.Register(workspace.NewWorkspaceListTool(wsMgr))
+		toolReg.Register(workspace.NewWorkspaceCleanupTool(wsMgr))
+		if regErr := cmdRegistry.Register(commands.NewOpenhandsCommand(wsMgr)); regErr != nil {
+			log.Printf("openhands: register slash command failed: %v", regErr)
+		}
+	}
+	plannerExec := taskplanner.NewSequentialExecutor(nil)
+	toolReg.Register(taskplanner.NewTaskPlanTool(plannerExec))
+	toolReg.Register(taskplanner.NewTaskStepTool(plannerExec))
+
+	// F27: aider-style voice input + repo-map.
+	voiceRec := voice.NewVoiceRecorder()
+	voiceTrans := voice.NewVoiceTranscriber(voice.VoiceConfig{
+		WhisperAPIKey: os.Getenv("OPENAI_API_KEY"),
+	})
+	toolReg.Register(voice.NewVoiceStartTool(voiceRec))
+	toolReg.Register(voice.NewVoiceStopTool(voiceRec))
+	toolReg.Register(voice.NewVoiceTranscribeTool(voiceRec, voiceTrans))
+	if regErr := cmdRegistry.Register(commands.NewAiderCommand(voiceRec, voiceTrans)); regErr != nil {
+		log.Printf("aider: register slash failed: %v", regErr)
+	}
+
+	// F28: kilo-code AST-aware refactoring.
+	kcEngine := kilocode.NewRenameEngine(cwd)
+	toolReg.Register(kilocode.NewKiloRenameTool(kcEngine))
+	kcAnalyzer, kcErr := kilocode.NewImpactAnalyzer(cwd)
+	if kcErr == nil {
+		toolReg.Register(kilocode.NewKiloImpactTool(kcAnalyzer))
+	}
+	kcRefactorer := kilocode.NewRefactorer(cwd)
+	toolReg.Register(kilocode.NewKiloMultiEditTool(kcRefactorer))
+	if regErr := cmdRegistry.Register(commands.NewKilocodeCommand(kcEngine, kcAnalyzer, kcRefactorer)); regErr != nil {
+		log.Printf("kilocode: register slash failed: %v", regErr)
+	}
+
+	// F29: Roo-code full port.
+	rooDelegator := roocode.NewTaskDelegator()
+	toolReg.Register(roocode.NewRooDelegateTool(rooDelegator))
+	rooGen := roocode.NewCodeGenerator(cwd)
+	toolReg.Register(roocode.NewRooGenerateTool(rooGen))
+	toolReg.Register(roocode.NewRooBootstrapTool(rooGen))
+	rooReviewer := roocode.NewCodeReviewer()
+	rooConvStore := roocode.NewConversationStore()
+	if regErr := cmdRegistry.Register(commands.NewRooCodeCommand(rooDelegator, rooGen, rooReviewer, rooConvStore)); regErr != nil {
+		log.Printf("roocode: register slash failed: %v", regErr)
+	}
+
+	// F30: Continue.dev IDE integration.
+	contEditor := continua.NewWorkspaceEditor()
+	toolReg.Register(continua.NewContinueEditTool(contEditor))
+	contCompletion := continua.NewCompletionEngine()
+	toolReg.Register(continua.NewContinueCompleteTool(contCompletion))
+	contChat := continua.NewChatManager()
+	if regErr := cmdRegistry.Register(commands.NewContinueCommand(contEditor, contCompletion, contChat)); regErr != nil {
+		log.Printf("continue: register slash failed: %v", regErr)
+	}
+
+	// F09: user-defined Markdown slash commands.
+	projectCmds := filepath.Join(".", ".helix", "commands")
+	var userCmds string
+	if userCfg, err := os.UserConfigDir(); err == nil {
+		userCmds = filepath.Join(userCfg, "helixcode", "commands")
+	}
+	mdLoader := commands.NewMarkdownLoader(cmdRegistry, projectCmds, userCmds)
+	if loadErr := mdLoader.Load(); loadErr != nil {
+		log.Printf("markdown commands: load failed: %v", loadErr)
+	}
+	mdWatcher, mdwErr := commands.NewMarkdownWatcher(mdLoader, []string{projectCmds, userCmds})
+	if mdwErr != nil {
+		log.Printf("markdown commands: watcher init failed: %v", mdwErr)
+	} else {
+		go mdWatcher.Run(ctx)
+		c.addCleanup(func() { _ = mdWatcher.Close() })
+	}
+	if regErr := cmdRegistry.Register(commands.NewCommandsCommand(mdLoader, cmdRegistry)); regErr != nil {
+		log.Printf("commands: register slash failed: %v", regErr)
+	}
+
+	// F10: agent-invoked Skills.
+	skillProjectDir := filepath.Join(".", ".helix", "skills")
+	var skillUserDir string
+	if userCfg, err := os.UserConfigDir(); err == nil {
+		skillUserDir = filepath.Join(userCfg, "helixcode", "skills")
+	}
+	skillReg := commands.NewSkillRegistry()
+	skillLoader := commands.NewSkillLoader(skillReg, skillProjectDir, skillUserDir)
+	if loadErr := skillLoader.Load(); loadErr != nil {
+		log.Printf("skills: load failed: %v", loadErr)
+	}
+	skillWatcher, swErr := commands.NewSkillsWatcher(skillLoader, []string{skillProjectDir, skillUserDir})
+	if swErr != nil {
+		log.Printf("skills: watcher init failed: %v", swErr)
+	} else {
+		go skillWatcher.Run(ctx)
+		c.addCleanup(func() { _ = skillWatcher.Close() })
+	}
+	_ = agent.NewSkillDispatcher(skillReg, nil) // wired into baseAgent in a follow-up
+	if regErr := cmdRegistry.Register(commands.NewSkillsCommand(skillLoader, skillReg)); regErr != nil {
+		log.Printf("skills: register slash failed: %v", regErr)
+	}
+
+	// F11: session transcript persistence + resume.
+	transcriptStore := session.NewTranscriptStore(sessionStoreBaseDir())
+	resumeFinder := session.NewResumeFinder(transcriptStore)
+	resumeMgr := session.NewSessionManager()
+	resumeMgr.SetStore(transcriptStore)
+
+	currentProject, projErr := session.ComputeProjectIdentity()
+	if projErr != nil {
+		log.Printf("session: project identity unresolved: %v (continuing with empty scope)", projErr)
+		currentProject = ""
+	}
+
+	// Process F11 resume flags BEFORE the interactive loop runs.
+	if c.flagState.resumeSessionFlag != "" {
+		if err := resumeMgr.Resume(ctx, c.flagState.resumeSessionFlag); err != nil {
+			return fmt.Errorf("resume session %s: %w", c.flagState.resumeSessionFlag, err)
+		}
+		fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed", map[string]any{
+			"ID":    resumeMgr.CurrentID(),
+			"Count": resumeMgr.LoadedMessageCountForTestF11(),
+		}))
+	} else if c.flagState.resumeFlag || c.flagState.continueFlag {
+		mode := session.ResumeProject
+		scope := currentProject
+		if c.flagState.continueFlag {
+			mode = session.ResumeGlobal
+			scope = ""
+		}
+		target, ferr := resumeFinder.FindResumeTarget(ctx, mode, scope)
+		if ferr != nil {
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_no_resumable",
+				map[string]any{"Error": fmt.Sprintf("%v", ferr)}))
+		} else {
+			if err := resumeMgr.Resume(ctx, target.SessionID); err != nil {
+				return fmt.Errorf("resume session %s: %w", target.SessionID, err)
+			}
+			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed_active", map[string]any{
+				"ID":         resumeMgr.CurrentID(),
+				"Count":      resumeMgr.LoadedMessageCountForTestF11(),
+				"LastActive": target.LastActivity.Format("2006-01-02 15:04:05"),
+			}))
+		}
+	}
+	if regErr := cmdRegistry.Register(commands.NewSessionsCommand(transcriptStore, currentProject)); regErr != nil {
+		log.Printf("sessions: register slash failed: %v", regErr)
+	}
+
+	// P1-F16-T10: Wire telemetry into the tool registry. The provider is the
+	// shared lazy telemetry() instance — also used by the F12 LLM decorator.
+	telemetryProv := c.telemetry()
+	if toolInstr, tiErr := telemetry.NewToolInstrumentation(telemetryProv); tiErr != nil {
+		log.Printf("telemetry: tool instrumentation construction failed: %v", tiErr)
+	} else {
+		toolReg.SetTelemetryInstrumentation(toolInstr)
+	}
+	if regErr := cmdRegistry.Register(commands.NewTelemetryCommand(telemetryProv)); regErr != nil {
+		log.Printf("telemetry: register slash command failed: %v", regErr)
+	}
+
+	// P1-F20-T07: Register the /theme slash command.
+	{
+		slashThemeRegistry := theme.NewThemeRegistry()
+		if path := theme.DefaultThemePath(os.Getenv); path != "" {
+			if err := slashThemeRegistry.LoadFromFile(path); err != nil {
+				log.Printf("theme(slash): yaml load failed (continuing with built-ins): %v", err)
+			}
+		}
+		slashThemeName := theme.DetectThemeName(os.Getenv)
+		slashSelectedTheme, slashErr := slashThemeRegistry.Get(slashThemeName)
+		if slashErr != nil {
+			log.Printf("theme(slash): get %q failed (%v), falling back to dark", slashThemeName, slashErr)
+			slashSelectedTheme, _ = slashThemeRegistry.Get(theme.ThemeDark)
+			slashThemeName = theme.ThemeDark
+		}
+		slashColorDepth := theme.DetectColorDepth(os.Getenv)
+		slashSource := commands.ResolveThemeSource(os.Getenv)
+		slashStyler := theme.NewStyler(slashSelectedTheme, slashColorDepth)
+		if regErr := cmdRegistry.Register(commands.NewThemeCommand(slashThemeRegistry, slashThemeName, slashColorDepth, slashSource, slashStyler)); regErr != nil {
+			log.Printf("theme: register slash command failed: %v", regErr)
+		}
+	}
+
+	// P1-F15-T10: Subagent system wiring. c.llmProvider has already settled
+	// (ensureLLMProvider ran before this getter via ensureSubsystems).
+	{
+		subagentLogger := zap.NewNop()
+		subagentWorkDir, swdErr := os.Getwd()
+		if swdErr != nil {
+			log.Printf("subagent: resolving cwd failed (skipping wire-in): %v", swdErr)
+		} else if c.llmProvider == nil {
+			log.Printf("subagent: no LLM provider available (F12 default failed); skipping wire-in")
+		} else {
+			inProcessSpawner := subagent.NewInProcessSpawner()
+			subprocessSpawner, spErr := subagent.NewSubprocessSpawner(subagentWorkDir)
+			if spErr != nil {
+				log.Printf("subagent: subprocess spawner unavailable (continuing in-process only): %v", spErr)
+			}
+			subagentMgr, smErr := subagent.NewSubagentManager(subagent.SubagentManagerOptions{
+				InProcessSpawner:  inProcessSpawner,
+				SubprocessSpawner: subprocessSpawner,
+				LLMProvider:       c.llmProvider,
+				Logger:            subagentLogger,
+				WorkDir:           subagentWorkDir,
+			})
+			if smErr != nil {
+				log.Printf("subagent: manager construction failed (skipping wire-in): %v", smErr)
+			} else {
+				c.addCleanup(func() {
+					shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer shutCancel()
+					_ = subagentMgr.Shutdown(shutCtx)
+				})
+				toolReg.Register(task.NewTaskTool(subagentMgr))
+				if regErr := cmdRegistry.Register(commands.NewSubagentsCommand(subagentMgr)); regErr != nil {
+					log.Printf("subagent: register slash command failed: %v", regErr)
+				}
+				log.Printf("subagent: manager initialised (max_concurrency=%d)",
+					subagent.DefaultMaxConcurrency)
+			}
+		}
+	}
+
+	// P1-F17-T08: Smart File Editing wiring.
+	{
+		mfe := toolReg.GetMultiEdit()
+		if mfe == nil {
+			log.Printf("smart-edit: multiedit unavailable; smart_edit tool + /edit slash skipped")
+		} else {
+			smartWorkDir, swdErr := os.Getwd()
+			if swdErr != nil {
+				log.Printf("smart-edit: resolving cwd failed (skipping wire-in): %v", swdErr)
+			} else {
+				committer := smartedit.NewMultieditCommitter(mfe)
+				smartTool := smartedit.NewSmartEditTool(committer, smartWorkDir)
+				toolReg.Register(smartTool)
+				if regErr := cmdRegistry.Register(commands.NewEditCommand(smartTool)); regErr != nil {
+					log.Printf("smart-edit: register slash command failed: %v", regErr)
+				}
+				log.Printf("smart-edit: wired (workdir=%s)", smartWorkDir)
+			}
+		}
+	}
+
+	return nil
+}
+
 // Run executes the CLI
 func (c *CLI) Run() error {
 	// Parse command-line flags
@@ -492,798 +1239,54 @@ func (c *CLI) Run() error {
 
 	ctx := context.Background()
 
-	// P1-F16-T10: Telemetry bootstrap.
+	// Speed programme P1-T03: lazy CLI startup.
 	//
-	// Order matters: telemetry MUST be constructed BEFORE the F12 LLM provider
-	// is wrapped, BEFORE the tool registry is instrumented, and BEFORE the
-	// /telemetry slash command is registered. Failure to construct (bad env
-	// vars, exporter init failure) is non-fatal — NewTelemetryProvider returns
-	// a noop provider in that case so the rest of the CLI keeps working. The
-	// returned error is informational; we surface it via log so operators can
-	// debug misconfiguration without losing the binary.
+	// The heavy interactive-session subsystem cluster (telemetry, permissions,
+	// persistence, worktree git shell-out, hooks YAML, the tool registry + the
+	// full F07-F30 tool/slash-command suite, LSP exec.LookPath sweep, MCP
+	// server spawn, sandbox detection, the F15 subagent manager, the F09/F10
+	// markdown-command + skill loaders/watchers) is NO LONGER built eagerly
+	// here. It is constructed on demand by c.ensureSubsystems(), gated by a
+	// sync.Once. Likewise the F12 cloud-provider override + telemetry-wrapped
+	// LLM provider is built on demand by c.ensureLLMProvider().
 	//
-	// Anti-bluff anchor: when HELIXCODE_OTEL_EXPORTER=stdout (or any other
-	// real exporter), the wrapped LLM provider below ACTUALLY emits spans/
-	// metrics through the OTel SDK pipeline. The gated integration tests in
-	// tests/integration/telemetry_test.go prove this end-to-end with the real
-	// stdouttrace + stdoutmetric exporters.
-	telemetryCfg, telemetryCfgErr := telemetry.LoadConfigFromEnv(os.Getenv)
-	if telemetryCfgErr != nil {
-		log.Printf("telemetry: config invalid (continuing with noop): %v", telemetryCfgErr)
-		telemetryCfg = telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop}
-	}
-	telemetryProv, telemetryProvErr := telemetry.NewTelemetryProvider(telemetryCfg, zap.NewNop())
-	if telemetryProvErr != nil {
-		log.Printf("telemetry: provider construction failed (continuing with noop): %v", telemetryProvErr)
-	}
-	if telemetryProv == nil {
-		// Defence in depth — NewTelemetryProvider should never return nil, but
-		// if it ever did we'd nil-panic in the decorators below. Be paranoid.
-		telemetryProv, _ = telemetry.NewTelemetryProvider(
-			telemetry.TelemetryConfig{Enabled: false, Exporter: telemetry.ExporterNoop},
-			zap.NewNop(),
-		)
-	}
-	defer func() {
-		shutdownTimeout := telemetryCfg.ShutdownTimeout
-		if shutdownTimeout <= 0 {
-			shutdownTimeout = telemetry.DefaultShutdownTimeout
-		}
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-		if err := telemetryProv.Shutdown(shutdownCtx); err != nil {
-			log.Printf("telemetry: shutdown error: %v", err)
-		}
-	}()
-	log.Printf("telemetry: initialised (exporter=%s)", string(telemetryProv.Exporter()))
-
-	// Bootstrap permissions engine. A locally constructed PolicyEngine is used
-	// here; T10/Phase 3 will thread it into the tool dispatcher so deny rules
-	// actually block execution. For now the flag is parsed, validated, and the
-	// engine is initialised — ready for wiring.
+	// Snapshot the parsed flag values the lazy getters consume so they need no
+	// *flag receiver (the getters are invoked from command handlers).
 	c.permissionMode = *permissionMode
-	policyEngine := confirmation.NewPolicyEngine()
-	if err := c.initPermissions(ctx, policyEngine); err != nil {
-		return fmt.Errorf("permissions bootstrap: %w", err)
-	}
-	if err := c.initPersistence(); err != nil {
-		return fmt.Errorf("persistence init: %w", err)
-	}
-	if err := c.initWorktree(ctx); err != nil {
-		return fmt.Errorf("worktree init: %w", err)
+	c.flagState = cliFlagState{
+		approvalFlag:      *approvalFlag,
+		providerFlag:      *providerFlag,
+		resumeFlag:        *resumeFlag,
+		continueFlag:      *continueFlag,
+		resumeSessionFlag: *resumeSessionFlag,
 	}
 
-	// Construct the session manager (carries the hooks.Manager inside it).
-	sessionMgr := session.NewManager()
-	c.sessionMgr = sessionMgr
-
-	// Load hooks from ~/.helixcode/hooks.yaml + <cwd>/.helixcode/hooks.yaml
-	// and register them with the session's hooks manager.
-	if err := c.initHooks(ctx, sessionMgr); err != nil {
-		return fmt.Errorf("hooks init: %w", err)
-	}
-
-	// Construct the tool registry and wire the hooks manager so that
-	// BeforeToolCall / AfterToolCall / BeforeBash / AfterBash actually fire.
-	toolReg, err := tools.NewToolRegistry(tools.DefaultRegistryConfig())
-	if err != nil {
-		return fmt.Errorf("tool registry init: %w", err)
-	}
-	toolReg.SetHooksManager(sessionMgr.GetHooksManager())
-	// Wire F02 permissions engine into the confirmation pipeline.
-	// The policyEngine was populated by initPermissions with deny/allow
-	// rules from ~/.helixcode/permissions.yaml and <cwd>/.helixcode/
-	// permissions.yaml. Without this wiring, permission rules validate
-	// but do not block tool execution.
-	toolReg.GetConfirmation().SetPolicyEngine(policyEngine)
-	c.toolRegistry = toolReg
-
-	// P1-F19-T05: ask_user tool registration. The askuser package's
-	// stdinPrompter reads os.Stdin / writes os.Stdout, auto-detects whether
-	// the destination is a TTY, and renders the question through the F18
-	// renderer. Defaults: 3 retries, 5 minute per-line timeout. When the
-	// destination is not a TTY, the prompter returns the question's Default
-	// (if set) with UsedDefault=true, otherwise ErrInteractiveTerminalRequired.
-	//
-	// We use Register (not RegisterTool — no such method) and there is no
-	// error path to handle. The previous in-tree bluff stub was removed in
-	// internal/tools/registry.go::registerAllTools so this registration is
-	// the SOLE wire-in for the "ask_user" name in the CLI.
-	askUserPrompter, askUserErr := askuser.NewStdinPrompter(askuser.StdinPrompterOptions{})
-	if askUserErr != nil {
-		log.Printf("ask_user: stdinPrompter construction failed; tool unavailable: %v", askUserErr)
-	} else {
-		toolReg.Register(askuser.NewAskUserTool(askUserPrompter))
-		log.Printf("ask_user: wired (interactive=auto-detect, max-retries=%d, timeout=%s)",
-			askuser.DefaultMaxRetries, askuser.DefaultTimeout)
-	}
-
-	// F13: LSP manager — curated 5-server allowlist filtered by exec.LookPath
-	// at startup. The manager is wired into the tool registry so successful
-	// Edit-class tool calls (fs_edit / fs_write / multiedit_commit) auto-trigger
-	// a NotifyChange and refresh diagnostics. The /lsp slash command and the
-	// `helixcode lsp` cobra subcommand both consume this same manager.
-	curatedLSPSpecs := tools.CuratedServerSpecs()
-	detectedLSPSpecs := tools.DetectAvailableServers(curatedLSPSpecs)
-	lspWorkingDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("lsp manager: resolving cwd: %w", err)
-	}
-	lspManager := tools.NewLSPManager(lspWorkingDir, detectedLSPSpecs, zap.NewNop())
-	defer func() {
-		shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer shutCancel()
-		_ = lspManager.Shutdown(shutCtx)
-	}()
-	toolReg.SetLSPManager(lspManager)
-
-	// Construct the MCP Manager, load merged config from user + project YAML,
-	// and start alwaysLoad servers. Errors are soft (logged) so a missing or
-	// malformed mcp.yml never prevents the CLI from running.
-	mcpMgr := mcp.NewManager()
-	{
-		var userMCPPath string
-		if configHome, err := os.UserConfigDir(); err == nil {
-			userMCPPath = filepath.Join(configHome, "helixcode", "mcp.yml")
-		}
-		projMCPPath := ".helixcode/mcp.yml"
-		cfg, cfgErr := mcp.LoadMerged(userMCPPath, projMCPPath)
-		if cfgErr != nil {
-			log.Printf("mcp: config load failed: %v (continuing without MCP)", cfgErr)
-		} else {
-			mcpMgr.SetConfig(cfg)
-			if startErr := mcpMgr.Start(ctx); startErr != nil {
-				log.Printf("mcp: start failed: %v", startErr)
-			}
-		}
-	}
-	c.mcpManager = mcpMgr
-	defer mcpMgr.Close() //nolint:errcheck
-
-	// Wire MCP-discovered tools into the tool registry as "<server>:<tool>".
-	toolReg.RegisterMCPManager(mcpMgr)
-
-	// Build the commands registry and register all builtin slash commands,
-	// including the /mcp command that requires an mcp.Manager.
-	cmdRegistry := commands.NewRegistry()
-	if regErr := builtin.RegisterBuiltinCommandsWithMCP(cmdRegistry, mcpMgr); regErr != nil {
-		log.Printf("mcp: register slash command failed: %v", regErr)
-	}
-	c.commandRegistry = cmdRegistry
-
-	// F07: background task manager — runs tools asynchronously when invoked
-	// with run_in_background:true and powers the /tasks slash command.
-	bgMgr := workflow.NewBackgroundManager(zap.NewNop(), workflow.ManagerConfig{})
-	defer bgMgr.Close()
-	toolReg.SetBackgroundManager(bgMgr)
-	toolReg.RegisterTaskTools(bgMgr)
-	// Register /tasks directly (not via RegisterBuiltinCommandsWithTasks which would
-	// re-register the base commands already wired above by RegisterBuiltinCommandsWithMCP).
-	if regErr := cmdRegistry.Register(commands.NewTasksCommand(bgMgr)); regErr != nil {
-		log.Printf("tasks: register slash command failed: %v", regErr)
-	}
-
-	// F08: plan-mode gate — intercepts destructive tool calls when the agent is
-	// operating in plan mode and enforces approval before execution.
-	modeCtrl := planmode.NewModeController()
-	planner := planmode.NewDefaultPlanner()
-	gate := planmode.NewToolGate(modeCtrl, planner)
-	toolReg.SetPlanModeGate(gate)
-
-	// F08: register Enter/Exit plan-mode agent tools.
-	toolReg.Register(tools.NewEnterPlanModeTool(modeCtrl))
-	toolReg.Register(tools.NewExitPlanModeTool(modeCtrl))
-
-	// F08: register /plan slash command directly (avoid double-registering base
-	// commands through RegisterBuiltinCommandsWithPlanMode, which would conflict
-	// with the F06 RegisterBuiltinCommandsWithMCP call already in this function).
-	if regErr := cmdRegistry.Register(commands.NewPlanCommand(planner, modeCtrl)); regErr != nil {
-		log.Printf("plan: register slash command failed: %v", regErr)
-	}
-
-	// F13: register /lsp slash command. Shares the same LSPManager + curated
-	// allowlist constructed earlier in this function so the slash command and
-	// the `helixcode lsp` cobra subcommand observe identical state.
-	if regErr := cmdRegistry.Register(commands.NewLSPCommand(lspManager, curatedLSPSpecs)); regErr != nil {
-		log.Printf("lsp: register slash command failed: %v", regErr)
-	}
-
-	// F14: sandbox manager + shell_sandboxed tool + /sandbox slash command.
-	//
-	// Wire order: load on-disk config (missing-file → defaults; ignore
-	// not-exist), construct a SandboxManager via NewSandboxManagerFromDetector
-	// using the inner Go module's working directory as the project root, then
-	// register the agent-callable tool and the slash command. The detector
-	// runs once at startup; /sandbox status surfaces the resolved capabilities
-	// without re-detecting.
-	//
-	// Anti-bluff anchor: this is the SOLE wire-in for sandbox in the CLI. The
-	// helper-mode dispatch at the top of main() handles the re-exec child;
-	// every host-side command path goes through the manager constructed here.
-	sandboxConfigPath := sandbox.DefaultConfigPath(os.Getenv)
-	sandboxConfig, sandboxCfgErr := sandbox.LoadSandboxConfig(sandboxConfigPath)
-	if sandboxCfgErr != nil {
-		// LoadSandboxConfig already returns DefaultSandboxConfig() for missing
-		// file; a non-nil error here means a bad YAML / negative limit. Log
-		// and continue with safe defaults so a malformed user file does not
-		// block the rest of the CLI.
-		log.Printf("sandbox: config load failed (using defaults): %v", sandboxCfgErr)
-		sandboxConfig = sandbox.DefaultSandboxConfig()
-	}
-	sandboxWorkDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("sandbox manager: resolving cwd: %w", err)
-	}
-	sandboxMgr, sandboxCaps, sbErr := sandbox.NewSandboxManagerFromDetector(sandboxWorkDir, sandboxConfig, zap.NewNop())
-	if sbErr != nil {
-		log.Printf("sandbox: manager init failed: %v", sbErr)
-	} else {
-		log.Printf("sandbox: backend=%s reason=%q",
-			sandboxCaps.SelectedBackend.String(), sandboxCaps.UnavailableReason)
-	}
-
-	// Register the agent-callable tool. Even when SelectedBackend == None the
-	// tool is registered so its Execute path surfaces a friendly fail-closed
-	// error (with install hints) to the agent — better than the agent being
-	// unable to see the tool at all.
-	if sandboxMgr != nil {
-		toolReg.Register(sandbox.NewSandboxedShellTool(sandboxMgr))
-		if regErr := cmdRegistry.Register(commands.NewSandboxCommand(sandboxMgr)); regErr != nil {
-			log.Printf("sandbox: register slash command failed: %v", regErr)
-		}
-	}
-
-	// F21: approval gate. Resolution order is flag > env > config > default
-	// (handled by approval.Select). When the resolved mode is ModeFullAuto,
-	// the manager refuses to construct without an active sandbox — we surface
-	// the error and fall through to the safe-default ModeSuggest so the rest
-	// of the CLI keeps working. The /approval slash command is registered so
-	// users can flip the mode at runtime via SetMode.
-	//
-	// Sandbox availability: SandboxManager.SelectedBackend() != BackendNone is
-	// the canonical "sandbox usable" predicate (the manager surfaces a
-	// FailClosedError on Execute when None). nil sandboxMgr (init failure) is
-	// treated as unavailable.
-	sandboxAvailable := sandboxMgr != nil && sandboxMgr.SelectedBackend() != sandbox.BackendNone
-	approvalSelectorInput := approval.SelectorInput{
-		Flag:       *approvalFlag,
-		Env:        os.Getenv(approval.EnvVarName),
-		ConfigPath: approval.DefaultConfigPath(os.Getenv),
-	}
-	approvalMode, approvalSource, approvalSelErr := approval.Select(approvalSelectorInput)
-	if approvalSelErr != nil {
-		log.Printf("approval: selector reported parse errors (using mode=%s source=%s): %v",
-			approvalMode, approvalSource, approvalSelErr)
-	}
-	approvalMgrOpts := approval.ApprovalManagerOptions{
-		InitialMode:      approvalMode,
-		Source:           approvalSource,
-		SandboxAvailable: sandboxAvailable,
-		PauseDangerous:   2 * time.Second,
-	}
-	if askUserPrompter != nil {
-		approvalMgrOpts.Responder = &approvalwire.AskUserYesNoPrompter{Inner: askUserPrompter}
-	}
-	approvalMgr, approvalMgrErr := approval.NewApprovalManager(approvalMgrOpts)
-	if approvalMgrErr != nil {
-		log.Printf("approval: manager init failed for mode=%s (falling back to suggest): %v",
-			approvalMode, approvalMgrErr)
-		approvalMgrOpts.InitialMode = approval.ModeSuggest
-		approvalMgrOpts.Source = approval.SourceDefault
-		approvalMgr, approvalMgrErr = approval.NewApprovalManager(approvalMgrOpts)
-		if approvalMgrErr != nil {
-			return fmt.Errorf("approval manager init (fallback): %w", approvalMgrErr)
-		}
-	}
-	toolReg.SetApprovalManager(approvalMgr)
-	log.Printf("approval: mode=%s source=%s sandbox_available=%t",
-		approvalMgr.Mode(), approvalMgr.Source(), sandboxAvailable)
-	if regErr := cmdRegistry.Register(commands.NewApprovalCommand(approvalMgr)); regErr != nil {
-		log.Printf("approval: register slash command failed: %v", regErr)
-	}
-
-	// F22: per-edit git auto-commit (Aider-style).
-	// Default-on; opt-out via HELIXCODE_GIT_AUTO_COMMIT=off or
-	// /git_auto_commit off. WorkingDir is the process cwd at startup;
-	// in subagent worktrees that's the worktree path (F04 invariant).
-	acEnabled := os.Getenv(autocommit.EnvVarName) != "off"
-	cwd, _ := os.Getwd()
-	autoCommitter := autocommit.NewAutoCommitter(autocommit.Options{
-		Enabled:    acEnabled,
-		Provider:   c.llmProvider,
-		WorkingDir: cwd,
-		Logger:     zap.NewNop(),
-	})
-	toolReg.SetAutoCommitter(autoCommitter)
-	log.Printf("git_auto_commit: enabled=%t cwd=%s git_repo=%t",
-		autoCommitter.Enabled(), cwd, autoCommitter.IsGitRepo())
-	if regErr := cmdRegistry.Register(commands.NewGitAutoCommitCommand(autoCommitter)); regErr != nil {
-		log.Printf("git_auto_commit: register slash command failed: %v", regErr)
-	}
-
-	// F23: cline-style browser tool suite (browser_navigate, browser_snapshot,
-	// browser_click, browser_type, browser_screenshot, browser_close) plus
-	// the /browser slash command (status / navigate <url> / close).
-	// Headless default; HELIXCODE_BROWSER_HEADED=true opt-in. Lazy-create on
-	// first navigate; idempotent close. Defensive close-on-exit at the end
-	// of main() via defer.
-	browserMgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), zap.NewNop())
-	if err := tools.RegisterBrowserToolsV2(toolReg, browserMgr); err != nil {
-		log.Printf("browser: register tools failed: %v", err)
-	}
-	c.browserManager = browserMgr
-	if regErr := cmdRegistry.Register(commands.NewBrowserCommand(browserMgr)); regErr != nil {
-		log.Printf("browser: register slash command failed: %v", regErr)
-	}
-	// Defensive close-on-exit: tear down chromium subprocess if a session
-	// was lazily created during the run. Idempotent (sync.Once-guarded).
-	defer browserMgr.CloseSession() //nolint:errcheck
-
-	// F24: codex-style project memory subsystem.
-	// Discovers helixcode.md / codex.md / AGENTS.md by parent-walking from
-	// cwd up to a git root or filesystem root. Loads $XDG_CONFIG_HOME/
-	// helixcode/memory.md as a per-user overlay (rendered AFTER project
-	// memory). Hot-reloaded mid-session via fsnotify (200 ms debounce).
-	// /memory slash exposes status/show/edit/reload. BaseAgent prepends
-	// Memory.Render() to the system prompt on every LLM call (lock-free
-	// atomic load — no caching).
-	memCwd, _ := os.Getwd()
-	memLoader := projectmemory.NewMemoryLoader(zap.NewNop())
-	memRegistry := projectmemory.NewMemoryRegistry(memLoader, memCwd)
-	if _, err := memRegistry.Reload(ctx); err != nil {
-		log.Printf("projectmemory: initial reload failed: %v", err)
-	}
-	memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop())
-	if err := memWatcher.Start(ctx); err != nil {
-		log.Printf("projectmemory: watcher start failed (degrading to slash-only reload): %v", err)
-	}
-	defer memWatcher.Close() //nolint:errcheck
-	if regErr := cmdRegistry.Register(commands.NewMemoryCommand(memRegistry)); regErr != nil {
-		log.Printf("projectmemory: register slash command failed: %v", regErr)
-	}
-	c.memoryRegistry = memRegistry
-
-	// F25: plandex-style plan tree system.
-	// Six agent tools (plan_create, plan_branch, plan_merge, plan_list,
-	// plan_show, plan_delete) backed by FileStore at .helixcode/plans/.
-	// /plan slash (list/show/compact/verify) with context compaction via
-	// F01's compression.Summariser. Plan trees are agent-driven — the agent
-	// calls plan_create/plan_branch/plan_merge as part of its task loop.
-	planStore := plantree.NewFileStore(cwd)
-	planSummariser := plantree.DeterministicSummariser{}
-	if err := plantree.RegisterPlanTools(toolReg, planStore); err != nil {
-		log.Printf("plantree: register tools failed: %v", err)
-	}
-	if regErr := cmdRegistry.Register(commands.NewPlanTreeCommand(planStore, planSummariser)); regErr != nil {
-		log.Printf("plantree: register slash command failed: %v", regErr)
-	}
-
-	// F26: Openhands-style workspace + planner system.
-	// Container-based per-task workspaces (Docker/Podman), sequential
-	// step executor with retry, plan-tree-aware task planner. Tools:
-	// workspace_create/list/cleanup + task_plan/task_step. Slash:
-	// /openhands (list/create/cleanup).
-	wsMgr, wsErr := workspace.NewWorkspaceManager()
-	if wsErr != nil {
-		log.Printf("workspace: manager init failed (container runtime not available): %v", wsErr)
-	} else {
-		toolReg.Register(workspace.NewWorkspaceCreateTool(wsMgr))
-		toolReg.Register(workspace.NewWorkspaceListTool(wsMgr))
-		toolReg.Register(workspace.NewWorkspaceCleanupTool(wsMgr))
-		if regErr := cmdRegistry.Register(commands.NewOpenhandsCommand(wsMgr)); regErr != nil {
-			log.Printf("openhands: register slash command failed: %v", regErr)
-		}
-	}
-
-	plannerExec := taskplanner.NewSequentialExecutor(nil)
-	toolReg.Register(taskplanner.NewTaskPlanTool(plannerExec))
-	toolReg.Register(taskplanner.NewTaskStepTool(plannerExec))
-
-	// F27: aider-style voice input + repo-map.
-	// Voice: arecord/sox capture → Whisper API (with whisper.cpp fallback).
-	// Repo-map: tree-sitter AST parsing (extends existing repomap package).
-	// Tools: voice_start, voice_stop, voice_transcribe, repomap.
-	// Slash: /aider (voice/repomap subcommands).
-	voiceRec := voice.NewVoiceRecorder()
-	voiceTrans := voice.NewVoiceTranscriber(voice.VoiceConfig{
-		WhisperAPIKey: os.Getenv("OPENAI_API_KEY"),
-	})
-	toolReg.Register(voice.NewVoiceStartTool(voiceRec))
-	toolReg.Register(voice.NewVoiceStopTool(voiceRec))
-	toolReg.Register(voice.NewVoiceTranscribeTool(voiceRec, voiceTrans))
-	if regErr := cmdRegistry.Register(commands.NewAiderCommand(voiceRec, voiceTrans)); regErr != nil {
-		log.Printf("aider: register slash failed: %v", regErr)
-	}
-
-	// F28: kilo-code AST-aware refactoring.
-	// Cross-file rename via tree-sitter + atomic F17 edits, impact analysis
-	// with call graph + blast radius, refactoring suite (extract method,
-	// inline call). Tools: kilocode_rename, kilocode_impact, kilocode_multi_edit.
-	// Slash: /kilocode (rename/impact/edit subcommands).
-	kcEngine := kilocode.NewRenameEngine(cwd)
-	toolReg.Register(kilocode.NewKiloRenameTool(kcEngine))
-	kcAnalyzer, kcErr := kilocode.NewImpactAnalyzer(cwd)
-	if kcErr == nil {
-		toolReg.Register(kilocode.NewKiloImpactTool(kcAnalyzer))
-	}
-	kcRefactorer := kilocode.NewRefactorer(cwd)
-	toolReg.Register(kilocode.NewKiloMultiEditTool(kcRefactorer))
-	if regErr := cmdRegistry.Register(commands.NewKilocodeCommand(kcEngine, kcAnalyzer, kcRefactorer)); regErr != nil {
-		log.Printf("kilocode: register slash failed: %v", regErr)
-	}
-
-	// F29: Roo-code full port.
-	// Task delegation via F15 subagents, template-based code generation,
-	// diff-based code review, conversation-aware memory.
-	// Tools: roo_delegate, roo_generate, roo_bootstrap. Slash: /roocode.
-	rooDelegator := roocode.NewTaskDelegator()
-	toolReg.Register(roocode.NewRooDelegateTool(rooDelegator))
-	rooGen := roocode.NewCodeGenerator(cwd)
-	toolReg.Register(roocode.NewRooGenerateTool(rooGen))
-	toolReg.Register(roocode.NewRooBootstrapTool(rooGen))
-	rooReviewer := roocode.NewCodeReviewer()
-	rooConvStore := roocode.NewConversationStore()
-	if regErr := cmdRegistry.Register(commands.NewRooCodeCommand(rooDelegator, rooGen, rooReviewer, rooConvStore)); regErr != nil {
-		log.Printf("roocode: register slash failed: %v", regErr)
-	}
-
-	// F30: Continue.dev IDE integration.
-	// Inline completions, workspace editor, multi-turn chat (F11 reuse),
-	// diff viewer, model selector. Tools: continue_edit, continue_complete.
-	// Slash: /continue (edit/complete/chat/diff subcommands).
-	contEditor := continua.NewWorkspaceEditor()
-	toolReg.Register(continua.NewContinueEditTool(contEditor))
-	contCompletion := continua.NewCompletionEngine()
-	toolReg.Register(continua.NewContinueCompleteTool(contCompletion))
-	contChat := continua.NewChatManager()
-	if regErr := cmdRegistry.Register(commands.NewContinueCommand(contEditor, contCompletion, contChat)); regErr != nil {
-		log.Printf("continue: register slash failed: %v", regErr)
-	}
-
-	// F09: user-defined Markdown slash commands.
-	// Project dir: ./.helix/commands; user dir: ~/.config/helixcode/commands (XDG).
-	projectCmds := filepath.Join(".", ".helix", "commands")
-	var userCmds string
-	if userCfg, err := os.UserConfigDir(); err == nil {
-		userCmds = filepath.Join(userCfg, "helixcode", "commands")
-	}
-	mdLoader := commands.NewMarkdownLoader(cmdRegistry, projectCmds, userCmds)
-	if loadErr := mdLoader.Load(); loadErr != nil {
-		log.Printf("markdown commands: load failed: %v", loadErr)
-	}
-	mdWatcher, mdwErr := commands.NewMarkdownWatcher(mdLoader, []string{projectCmds, userCmds})
-	if mdwErr != nil {
-		log.Printf("markdown commands: watcher init failed: %v", mdwErr)
-	} else {
-		go mdWatcher.Run(ctx)
-		defer mdWatcher.Close() //nolint:errcheck
-	}
-	if regErr := cmdRegistry.Register(commands.NewCommandsCommand(mdLoader, cmdRegistry)); regErr != nil {
-		log.Printf("commands: register slash failed: %v", regErr)
-	}
-
-	// F10: agent-invoked Skills.
-	// Project dir: ./.helix/skills; user dir: ~/.config/helixcode/skills (XDG).
-	skillProjectDir := filepath.Join(".", ".helix", "skills")
-	var skillUserDir string
-	if userCfg, err := os.UserConfigDir(); err == nil {
-		skillUserDir = filepath.Join(userCfg, "helixcode", "skills")
-	}
-	skillReg := commands.NewSkillRegistry()
-	skillLoader := commands.NewSkillLoader(skillReg, skillProjectDir, skillUserDir)
-	if loadErr := skillLoader.Load(); loadErr != nil {
-		log.Printf("skills: load failed: %v", loadErr)
-	}
-	skillWatcher, swErr := commands.NewSkillsWatcher(skillLoader, []string{skillProjectDir, skillUserDir})
-	if swErr != nil {
-		log.Printf("skills: watcher init failed: %v", swErr)
-	} else {
-		go skillWatcher.Run(ctx)
-		defer skillWatcher.Close() //nolint:errcheck
-	}
-	// SkillDispatcher: caller can pass nil for wtMgr; isolation routing is
-	// the caller's responsibility. Constructed here so the agent loop can
-	// call .Match before each LLM turn.
-	_ = agent.NewSkillDispatcher(skillReg, nil) // wired into baseAgent in a follow-up
-	if regErr := cmdRegistry.Register(commands.NewSkillsCommand(skillLoader, skillReg)); regErr != nil {
-		log.Printf("skills: register slash failed: %v", regErr)
-	}
-
-	// F11: session transcript persistence + resume.
-	// Construct a TranscriptStore rooted at $XDG_DATA_HOME/helixcode/sessions/
-	// (falling back to ~/.local/share/helixcode/sessions/), the ResumeFinder
-	// that wraps it, and a SessionManager wired to the same store. Both the
-	// /sessions slash command and the `helixcode sessions` cobra subcommand
-	// share this TranscriptStore so they observe the same on-disk state.
-	transcriptStore := session.NewTranscriptStore(sessionStoreBaseDir())
-	resumeFinder := session.NewResumeFinder(transcriptStore)
-	resumeMgr := session.NewSessionManager()
-	resumeMgr.SetStore(transcriptStore)
-
-	currentProject, projErr := session.ComputeProjectIdentity()
-	if projErr != nil {
-		log.Printf("session: project identity unresolved: %v (continuing with empty scope)", projErr)
-		currentProject = ""
-	}
-
-	// Process F11 resume flags BEFORE the main dispatcher. A successful resume
-	// rehydrates the in-memory transcript and sets the session manager's
-	// CurrentID; a "no sessions found" error is downgraded to a friendly
-	// message so the CLI continues with a fresh session.
-	if *resumeSessionFlag != "" {
-		if err := resumeMgr.Resume(ctx, *resumeSessionFlag); err != nil {
-			return fmt.Errorf("resume session %s: %w", *resumeSessionFlag, err)
-		}
-		fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed", map[string]any{
-			"ID":    resumeMgr.CurrentID(),
-			"Count": resumeMgr.LoadedMessageCountForTestF11(),
-		}))
-	} else if *resumeFlag || *continueFlag {
-		mode := session.ResumeProject
-		scope := currentProject
-		if *continueFlag {
-			mode = session.ResumeGlobal
-			scope = ""
-		}
-		target, ferr := resumeFinder.FindResumeTarget(ctx, mode, scope)
-		if ferr != nil {
-			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_no_resumable",
-				map[string]any{"Error": fmt.Sprintf("%v", ferr)}))
-		} else {
-			if err := resumeMgr.Resume(ctx, target.SessionID); err != nil {
-				return fmt.Errorf("resume session %s: %w", target.SessionID, err)
-			}
-			fmt.Fprintln(os.Stderr, tr(ctx, "cli_session_resumed_active", map[string]any{
-				"ID":         resumeMgr.CurrentID(),
-				"Count":      resumeMgr.LoadedMessageCountForTestF11(),
-				"LastActive": target.LastActivity.Format("2006-01-02 15:04:05"),
-			}))
-		}
-	}
-
-	// Register /sessions slash command. It uses the same TranscriptStore so
-	// list/show/resume/delete operate on the live on-disk state.
-	if regErr := cmdRegistry.Register(commands.NewSessionsCommand(transcriptStore, currentProject)); regErr != nil {
-		log.Printf("sessions: register slash failed: %v", regErr)
-	}
-
-	// F12: resolve cloud LLM provider via flag > env > config-file precedence.
-	// Failure modes are friendly: if no source is configured we keep the
-	// existing default (Ollama) and tell the user how to configure cloud.
-	// If construction fails (missing creds for the chosen type), we warn and
-	// keep the default so the rest of the CLI still works for non-LLM paths.
-	configProviderName, configEntry, configErr := loadProviderConfigFromDisk(os.Getenv)
-	if configErr != nil && !errors.Is(configErr, os.ErrNotExist) {
-		log.Printf("F12 provider: config load failed (continuing without): %v", configErr)
-	}
-	selectorInput := llm.SelectorInput{
-		Flag:   *providerFlag,
-		Env:    os.Getenv("HELIX_LLM_PROVIDER"),
-		Config: configProviderName,
-	}
-	ptype, selErr := llm.Select(selectorInput)
-	switch {
-	case errors.Is(selErr, llm.ErrNoProviderConfigured):
-		// Friendly hint, then keep the default provider.
-		fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_no_cloud_provider", nil))
-	case selErr != nil:
-		// User typed an unknown value -> fail loudly. This is non-zero exit
-		// because it's an explicit, fixable user error.
-		return fmt.Errorf("F12 provider: %w", selErr)
-	default:
-		// We have a resolved cloud type. If --provider/--env supplied a value
-		// that's different from the on-disk config, configEntry won't have
-		// matching credentials — try construction anyway and surface failures
-		// as warnings (don't crash).
-		entry := configEntry
-		entry.Type = ptype
-		cloud, cErr := llm.NewCloudProvider(ptype, entry)
-		if cErr != nil {
-			fmt.Fprintln(os.Stderr, tr(ctx, "cli_f12_construct_failed", map[string]any{
-				"Provider": fmt.Sprintf("%q", ptype),
-				"Error":    fmt.Sprintf("%v", cErr),
-			}))
-		} else if cloud != nil {
-			c.llmProvider = cloud
-			fmt.Fprintf(os.Stderr, "F12 provider: using %q\n", ptype)
-		}
-	}
-
-	// P1-F16-T10: Wrap the resolved LLM provider with the telemetry decorator.
-	//
-	// Order anchor: this MUST run AFTER F12 has settled c.llmProvider AND
-	// BEFORE the F15 SubagentManager is constructed below. Wrapping later (e.g.
-	// after F15) would dispatch raw, untraced calls through the SubagentManager
-	// — the manager captures the provider reference at construction time, so
-	// any subsequent reassignment of c.llmProvider would not propagate.
-	//
-	// REPLACE-NOT-DUPLICATE invariant: c.llmProvider IS reassigned to the
-	// traced wrapper. There is no shadow "raw" provider kept on the struct;
-	// every downstream Generate / GenerateStream call now flows through
-	// telemetry.TracedLLMProvider.Generate, which records a span + metrics.
-	// When telemetry is in noop mode (the default when no OTEL_* env vars are
-	// set), the decorator is effectively pass-through — the OTel noop tracer
-	// and noop meter make every span/record operation a stub.
-	//
-	// Failure mode: if the decorator constructor fails (extremely rare; OTel
-	// metric instrument names are static and known-good), we log and keep the
-	// undecorated provider so the CLI still works.
-	if c.llmProvider != nil {
-		tracedLLM, traceErr := telemetry.NewTracedLLMProvider(c.llmProvider, telemetryProv)
-		if traceErr != nil {
-			log.Printf("telemetry: LLM decorator construction failed (using undecorated provider): %v", traceErr)
-		} else {
-			c.llmProvider = tracedLLM
-		}
-	}
-
-	// P1-F16-T10: Wire telemetry into the tool registry. Each successful
-	// ToolRegistry.Execute will now emit a "tool.<name>" span + tool-call
-	// metrics labelled with outcome={success|failure}.
-	if toolInstr, tiErr := telemetry.NewToolInstrumentation(telemetryProv); tiErr != nil {
-		log.Printf("telemetry: tool instrumentation construction failed: %v", tiErr)
-	} else {
-		toolReg.SetTelemetryInstrumentation(toolInstr)
-	}
-
-	// P1-F16-T10: Register the /telemetry slash command. The command queries
-	// the same telemetryProv constructed above so /telemetry status / show /
-	// flush observe identical state.
-	if regErr := cmdRegistry.Register(commands.NewTelemetryCommand(telemetryProv)); regErr != nil {
-		log.Printf("telemetry: register slash command failed: %v", regErr)
-	}
-
-	// P1-F20-T07: Register the /theme slash command.
-	//
-	// The slash command is observation-only: it inspects the active theme
-	// name, depth, and source so the operator can verify F20 detection at
-	// runtime without grepping logs. Registry construction here is parallel
-	// to (not shared with) the per-handleGenerate registry built later — both
-	// pre-load the same built-ins + same optional theme.yaml so /theme list
-	// and the styling code path observe identical state.
-	//
-	// Failure mode: every fallible step degrades gracefully. YAML missing /
-	// malformed -> log + continue with built-ins. Get failure -> log +
-	// fall back to dark. The slash command always registers; worst case is
-	// /theme show <user-theme> errors and /theme list shows the three
-	// built-ins only.
-	{
-		slashThemeRegistry := theme.NewThemeRegistry()
-		if path := theme.DefaultThemePath(os.Getenv); path != "" {
-			if err := slashThemeRegistry.LoadFromFile(path); err != nil {
-				log.Printf("theme(slash): yaml load failed (continuing with built-ins): %v", err)
-			}
-		}
-		slashThemeName := theme.DetectThemeName(os.Getenv)
-		slashSelectedTheme, slashErr := slashThemeRegistry.Get(slashThemeName)
-		if slashErr != nil {
-			log.Printf("theme(slash): get %q failed (%v), falling back to dark", slashThemeName, slashErr)
-			slashSelectedTheme, _ = slashThemeRegistry.Get(theme.ThemeDark)
-			slashThemeName = theme.ThemeDark
-		}
-		slashColorDepth := theme.DetectColorDepth(os.Getenv)
-		slashSource := commands.ResolveThemeSource(os.Getenv)
-		slashStyler := theme.NewStyler(slashSelectedTheme, slashColorDepth)
-		if regErr := cmdRegistry.Register(commands.NewThemeCommand(slashThemeRegistry, slashThemeName, slashColorDepth, slashSource, slashStyler)); regErr != nil {
-			log.Printf("theme: register slash command failed: %v", regErr)
-		}
-	}
-
-	// Note: BaseAgent (telemetry.AgentInstrumentation consumer) is NOT
-	// constructed in this CLI entry point; agent-loop instrumentation is wired
-	// at the call site in callers that own a BaseAgent (e.g. subagent helper
-	// flows have their own dispatch). The AgentInstrumentation factory is
-	// available via telemetry.NewAgentInstrumentation(telemetryProv) for those
-	// callers and is exercised end-to-end by the gated integration tests.
-
-	// P1-F15-T10: Subagent system wiring.
-	//
-	// Helper-mode dispatch (T08) already sits as the very first statement in
-	// main(); that path never reaches here. This block wires the host-side
-	// SubagentManager: spawners, task tool, /subagents slash command.
-	//
-	// Order:
-	//   1. Construct in-process + subprocess spawners.
-	//   2. Construct SubagentManager (requires non-nil LLMProvider).
-	//      If c.llmProvider is nil (F12 default Ollama also failed), skip
-	//      the entire block with a warning — the rest of the CLI keeps
-	//      working for non-subagent paths.
-	//   3. Register the `task` agent tool against the manager.
-	//   4. Register the /subagents slash command.
-	//   5. Defer Shutdown so running subagents are cancelled on CLI exit.
-	//
-	// Anti-bluff anchor: the manager rejects nil LLMProvider at construction
-	// (subagent.NewSubagentManager). We mirror that gate here so a misconfigured
-	// CLI never silently produces dispatchable-but-broken subagents — the
-	// `task` tool is only registered when the manager truly works.
-	{
-		subagentLogger := zap.NewNop()
-		subagentWorkDir, swdErr := os.Getwd()
-		if swdErr != nil {
-			log.Printf("subagent: resolving cwd failed (skipping wire-in): %v", swdErr)
-		} else if c.llmProvider == nil {
-			log.Printf("subagent: no LLM provider available (F12 default failed); skipping wire-in")
-		} else {
-			inProcessSpawner := subagent.NewInProcessSpawner()
-			subprocessSpawner, spErr := subagent.NewSubprocessSpawner(subagentWorkDir)
-			if spErr != nil {
-				log.Printf("subagent: subprocess spawner unavailable (continuing in-process only): %v", spErr)
-			}
-			subagentMgr, smErr := subagent.NewSubagentManager(subagent.SubagentManagerOptions{
-				InProcessSpawner:  inProcessSpawner,
-				SubprocessSpawner: subprocessSpawner,
-				LLMProvider:       c.llmProvider,
-				Logger:            subagentLogger,
-				WorkDir:           subagentWorkDir,
-			})
-			if smErr != nil {
-				log.Printf("subagent: manager construction failed (skipping wire-in): %v", smErr)
-			} else {
-				defer func() {
-					shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
-					defer shutCancel()
-					_ = subagentMgr.Shutdown(shutCtx)
-				}()
-				toolReg.Register(task.NewTaskTool(subagentMgr))
-				if regErr := cmdRegistry.Register(commands.NewSubagentsCommand(subagentMgr)); regErr != nil {
-					log.Printf("subagent: register slash command failed: %v", regErr)
-				}
-				log.Printf("subagent: manager initialised (max_concurrency=%d)",
-					subagent.DefaultMaxConcurrency)
-			}
-		}
-	}
-
-	// P1-F17-T08: Smart File Editing wiring.
-	//
-	// SmartEditTool wraps the existing F08 *multiedit.MultiFileEditor (already
-	// constructed inside the tool registry's NewToolRegistry path and exposed
-	// via toolReg.GetMultiEdit()) — there is NO parallel editor instance, the
-	// transactional rollback semantics are inherited verbatim from multiedit.
-	//
-	// Wire order:
-	//   1. Pull the existing multiedit MultiFileEditor out of the registry.
-	//   2. Build a smartedit.MultiEditCommitter adapter around it.
-	//   3. Resolve the smart-edit workdir to the same cwd everything else uses.
-	//   4. Construct the SmartEditTool and register it under the "smart_edit"
-	//      tool name so agents can call it.
-	//   5. Register the /edit slash command pointing at the same SmartEditTool
-	//      (it satisfies commands.SmartEditInspector via ParsePrompt/DryRun/Commit).
-	//
-	// Anti-bluff anchor: when toolReg.GetMultiEdit() returns nil (multiedit
-	// failed to construct during registry init), we skip the entire block with
-	// a warning rather than register a tool that would explode on first call.
-	{
-		mfe := toolReg.GetMultiEdit()
-		if mfe == nil {
-			log.Printf("smart-edit: multiedit unavailable; smart_edit tool + /edit slash skipped")
-		} else {
-			smartWorkDir, swdErr := os.Getwd()
-			if swdErr != nil {
-				log.Printf("smart-edit: resolving cwd failed (skipping wire-in): %v", swdErr)
-			} else {
-				committer := smartedit.NewMultieditCommitter(mfe)
-				smartTool := smartedit.NewSmartEditTool(committer, smartWorkDir)
-				toolReg.Register(smartTool)
-				if regErr := cmdRegistry.Register(commands.NewEditCommand(smartTool)); regErr != nil {
-					log.Printf("smart-edit: register slash command failed: %v", regErr)
-				}
-				log.Printf("smart-edit: wired (workdir=%s)", smartWorkDir)
-			}
-		}
-	}
+	// Single teardown seam: whatever a lazily-constructed subsystem registered
+	// via addCleanup is drained here at Run() exit (LIFO — the order Go's
+	// `defer` stack used in the old eager monolith).
+	defer c.runCleanups()
 
 	// Handle different commands
 	switch {
 	case *listWorkers:
 		return c.handleListWorkers(ctx)
 	case *listModels:
+		// --list-models needs the resolved LLM provider (F12 + telemetry
+		// wrapper) but NOT the heavy subsystem cluster.
+		if err := c.ensureLLMProvider(ctx, c.flagState.providerFlag); err != nil {
+			return err
+		}
 		return c.handleListModels(ctx)
 	case *healthCheck:
 		return c.handleHealthCheck(ctx)
 	case *workerHost != "":
 		return c.handleAddWorker(ctx, *workerHost, *workerUser, *workerKey)
 	case *prompt != "":
+		// --prompt (generate) needs the resolved LLM provider but NOT the
+		// heavy subsystem cluster.
+		if err := c.ensureLLMProvider(ctx, c.flagState.providerFlag); err != nil {
+			return err
+		}
 		return c.handleGenerate(ctx, *prompt, *model, *maxTokens, *temperature, *stream)
 	case *notify != "":
 		return c.handleNotification(ctx, *notify, *notifyType, *notifyPriority)
@@ -1303,6 +1306,12 @@ func (c *CLI) Run() error {
 		// In non-interactive mode, exit gracefully if no command specified
 		return nil
 	default:
+		// The interactive REPL is the one path that genuinely needs the full
+		// slash-command registry + agent tool surface, so it (and only it)
+		// triggers the heavy subsystem cluster construction.
+		if err := c.ensureSubsystems(ctx); err != nil {
+			return err
+		}
 		return c.handleInteractive(ctx)
 	}
 }
