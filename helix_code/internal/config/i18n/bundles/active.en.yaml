@@ -51,3 +51,53 @@ internal_config_validate_health_check_interval_positive:
 
 internal_config_validate_max_concurrent_tasks_positive:
   other: "max concurrent tasks must be positive"
+
+# Round-444 §11.4 anti-bluff sweep (2026-05-20): genuine-UI residual
+# round-23 — migrated 14 user-facing literals from the
+# platform_ui_adapters.go config-form renderers (rendered config-form
+# title shown on desktop/web/mobile/TUI, the Application section
+# title, app-name + app-version field labels and help-text, the web
+# config save success / failure banners) plus the config_api.go HTTP
+# JSON error responses returned to operators (config update / reload /
+# reset-to-defaults / restore-backup failures + invalid-restore-request
+# 400). LLM prompt templates and wrapped-error tech strings remain
+# OUT of scope per docs/audits/2026-05-20-internal-const046-classification.md.
+
+internal_config_ui_form_title:
+  other: "HelixCode Configuration"
+
+internal_config_ui_section_application:
+  other: "Application"
+
+internal_config_ui_field_app_name_label:
+  other: "Application Name"
+
+internal_config_ui_field_app_name_help:
+  other: "The name of the application"
+
+internal_config_ui_field_app_version_label:
+  other: "Version"
+
+internal_config_ui_field_app_version_help:
+  other: "Application version"
+
+internal_config_ui_save_success:
+  other: "Configuration saved successfully!"
+
+internal_config_ui_save_failure:
+  other: "Failed to save configuration. Please try again."
+
+internal_config_api_update_failed:
+  other: "failed to update config: {{.Error}}"
+
+internal_config_api_reload_failed:
+  other: "failed to reload config: {{.Error}}"
+
+internal_config_api_reset_failed:
+  other: "failed to reset to defaults: {{.Error}}"
+
+internal_config_api_restore_failed:
+  other: "failed to restore backup: {{.Error}}"
+
+internal_config_api_invalid_restore_request:
+  other: "invalid restore request"

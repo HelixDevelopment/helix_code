@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"strings"
 	"sync"
@@ -61,7 +61,7 @@ func (api *ConfigAPI) UpdateConfig(c *gin.Context) {
 	}
 
 	if err := api.manager.UpdateConfigFromMap(updates); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to update config: %v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": tr(context.Background(), "internal_config_api_update_failed", map[string]any{"Error": err.Error()})})
 		return
 	}
 
@@ -74,7 +74,7 @@ func (api *ConfigAPI) UpdateConfig(c *gin.Context) {
 // ReloadConfig reloads configuration from disk
 func (api *ConfigAPI) ReloadConfig(c *gin.Context) {
 	if err := api.manager.loadConfig(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to reload config: %v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": tr(context.Background(), "internal_config_api_reload_failed", map[string]any{"Error": err.Error()})})
 		return
 	}
 
@@ -98,16 +98,16 @@ func (api *ConfigAPI) RestoreConfig(c *gin.Context) {
 
 	if req.Defaults {
 		if err := api.manager.ResetToDefaults(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to reset to defaults: %v", err)})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": tr(context.Background(), "internal_config_api_reset_failed", map[string]any{"Error": err.Error()})})
 			return
 		}
 	} else if req.BackupPath != "" {
 		if err := api.manager.ImportConfig(req.BackupPath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to restore backup: %v", err)})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": tr(context.Background(), "internal_config_api_restore_failed", map[string]any{"Error": err.Error()})})
 			return
 		}
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid restore request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": tr(context.Background(), "internal_config_api_invalid_restore_request", nil)})
 		return
 	}
 

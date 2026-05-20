@@ -1,5 +1,7 @@
 package config
 
+import "context"
+
 // PlatformAdapter represents a platform-specific UI adapter
 type PlatformAdapter struct {
 	platformType string
@@ -370,9 +372,10 @@ type TUIConfigAction struct {
 
 // RenderConfigForm renders configuration form for TUI platform
 func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
+	ctx := context.Background()
 	form := TUIConfigForm{
 		ID:          "helix_config_form",
-		Title:       "HelixCode Configuration",
+		Title:       tr(ctx, "internal_config_ui_form_title", nil),
 		Type:        "tui_screens",
 		Layout:      "menu_driven",
 		BorderStyle: "single",
@@ -396,23 +399,23 @@ func (a *TUIAdapter) RenderConfigForm(formType string) interface{} {
 		Sections: []TUIConfigSection{
 			{
 				ID:       "application",
-				Title:    "Application",
+				Title:    tr(ctx, "internal_config_ui_section_application", nil),
 				Type:     "form",
 				Expanded: true,
 				Fields: []TUIConfigField{
 					{
 						ID:          "app_name",
 						Type:        "text",
-						Label:       "Application Name",
-						HelpText:    "The name of the application",
+						Label:       tr(ctx, "internal_config_ui_field_app_name_label", nil),
+						HelpText:    tr(ctx, "internal_config_ui_field_app_name_help", nil),
 						Required:    true,
 						Placeholder: "My Application",
 					},
 					{
 						ID:          "app_version",
 						Type:        "text",
-						Label:       "Version",
-						HelpText:    "Application version",
+						Label:       tr(ctx, "internal_config_ui_field_app_version_label", nil),
+						HelpText:    tr(ctx, "internal_config_ui_field_app_version_help", nil),
 						Required:    true,
 						Placeholder: "1.0.0",
 					},
@@ -655,7 +658,7 @@ func (a *DesktopPlatformAdapter) GetNativeMenuBarInfo() map[string]interface{} {
 func (a *DesktopPlatformAdapter) RenderConfigForm(formType string) interface{} {
 	form := DesktopConfigForm{
 		ID:            "helix_config_form",
-		Title:         "HelixCode Configuration",
+		Title:         tr(context.Background(), "internal_config_ui_form_title", nil),
 		Type:          "native_window",
 		Layout:        "tabs",
 		Modal:         true,
@@ -688,9 +691,10 @@ func (a *WebPlatformAdapter) GetBrowserInfo() map[string]interface{} {
 
 // RenderConfigForm renders a configuration form for the web platform
 func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
+	ctx := context.Background()
 	form := WebConfigForm{
 		ID:         "helix_config_form",
-		Title:      "HelixCode Configuration",
+		Title:      tr(ctx, "internal_config_ui_form_title", nil),
 		Type:       "spa_component",
 		Layout:     "responsive_tabs",
 		Responsive: true,
@@ -707,8 +711,8 @@ func (a *WebPlatformAdapter) RenderConfigForm(formType string) interface{} {
 			URL:     "/api/config/save",
 			Method:  "POST",
 			Headers: map[string]string{"Content-Type": "application/json"},
-			Success: "Configuration saved successfully!",
-			Error:   "Failed to save configuration. Please try again.",
+			Success: tr(ctx, "internal_config_ui_save_success", nil),
+			Error:   tr(ctx, "internal_config_ui_save_failure", nil),
 		},
 		Sections: []WebConfigSection{},
 		Actions:  []WebConfigAction{},
@@ -734,7 +738,7 @@ func (a *MobilePlatformAdapter) GetMobileInfo() map[string]interface{} {
 func (a *MobilePlatformAdapter) RenderConfigForm(formType string) interface{} {
 	form := MobileConfigForm{
 		ID:         "helix_config_form",
-		Title:      "HelixCode Configuration",
+		Title:      tr(context.Background(), "internal_config_ui_form_title", nil),
 		Type:       "mobile_screens",
 		Layout:     "carousel",
 		Responsive: true,

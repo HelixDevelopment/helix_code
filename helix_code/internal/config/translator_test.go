@@ -221,3 +221,142 @@ func TestSetTranslator_AcceptsNoopExplicit(t *testing.T) {
 		t.Fatalf("tr with explicit NoopTranslator = %q, want raw ID", got)
 	}
 }
+
+// --- Round-444 §11.4 paired-mutation: platform_ui_adapters.go +
+// config_api.go genuine-UI literals (CONST-046 genuine-UI residual
+// round-23). With a sentinel translator wired, every migrated call
+// site MUST emit the sentinel-wrapped message ID; with the default
+// Noop translator it MUST emit the raw message ID. A regression that
+// reintroduces a hardcoded literal fails both halves.
+
+// renderFormTitle extracts the Title field from a RenderConfigForm
+// result regardless of which concrete *ConfigForm type was returned.
+func renderFormTitle(t *testing.T, form interface{}) string {
+	t.Helper()
+	switch f := form.(type) {
+	case TUIConfigForm:
+		return f.Title
+	case DesktopConfigForm:
+		return f.Title
+	case WebConfigForm:
+		return f.Title
+	case MobileConfigForm:
+		return f.Title
+	default:
+		t.Fatalf("renderFormTitle: unexpected form type %T", form)
+		return ""
+	}
+}
+
+func TestRenderConfigForm_Round444_TitleGoesThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	want := "<TR:internal_config_ui_form_title>"
+	adapters := map[string]PlatformAdapterInterface{
+		"tui":     NewTUIAdapter(),
+		"desktop": NewDesktopPlatformAdapter(),
+		"web":     NewWebPlatformAdapter(),
+		"mobile":  NewMobilePlatformAdapter(),
+	}
+	for name, a := range adapters {
+		got := renderFormTitle(t, a.RenderConfigForm(""))
+		if got != want {
+			t.Fatalf("%s RenderConfigForm Title = %q, want %q — call site bypassed translator", name, got, want)
+		}
+	}
+}
+
+func TestRenderConfigForm_Round444_RawTitleByDefault(t *testing.T) {
+	resetTranslator(t)
+
+	got := renderFormTitle(t, NewWebPlatformAdapter().RenderConfigForm(""))
+	if got != "internal_config_ui_form_title" {
+		t.Fatalf("web RenderConfigForm Title = %q, want raw message ID (Noop echo)", got)
+	}
+}
+
+func TestRenderConfigForm_Round444_TUIFieldsGoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	form, ok := NewTUIAdapter().RenderConfigForm("").(TUIConfigForm)
+	if !ok {
+		t.Fatalf("TUI RenderConfigForm did not return TUIConfigForm")
+	}
+	if len(form.Sections) == 0 {
+		t.Fatal("TUI form has no sections")
+	}
+	sec := form.Sections[0]
+	if sec.Title != "<TR:internal_config_ui_section_application>" {
+		t.Fatalf("section Title = %q, want sentinel-wrapped ID", sec.Title)
+	}
+	wantLabels := map[string]string{
+		"<TR:internal_config_ui_field_app_name_label>":    "<TR:internal_config_ui_field_app_name_help>",
+		"<TR:internal_config_ui_field_app_version_label>": "<TR:internal_config_ui_field_app_version_help>",
+	}
+	got := map[string]string{}
+	for _, fld := range sec.Fields {
+		got[fld.Label] = fld.HelpText
+	}
+	for label, help := range wantLabels {
+		if got[label] != help {
+			t.Fatalf("field %q HelpText = %q, want %q — call site bypassed translator", label, got[label], help)
+		}
+	}
+}
+
+func TestRenderConfigForm_Round444_WebSaveMessagesGoThroughTranslator(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	form, ok := NewWebPlatformAdapter().RenderConfigForm("").(WebConfigForm)
+	if !ok {
+		t.Fatalf("web RenderConfigForm did not return WebConfigForm")
+	}
+	if form.SubmitAction.Success != "<TR:internal_config_ui_save_success>" {
+		t.Fatalf("save Success = %q, want sentinel-wrapped ID", form.SubmitAction.Success)
+	}
+	if form.SubmitAction.Error != "<TR:internal_config_ui_save_failure>" {
+		t.Fatalf("save Error = %q, want sentinel-wrapped ID", form.SubmitAction.Error)
+	}
+}
+
+func TestRenderConfigForm_Round444_WebSaveMessagesRawByDefault(t *testing.T) {
+	resetTranslator(t)
+
+	form, ok := NewWebPlatformAdapter().RenderConfigForm("").(WebConfigForm)
+	if !ok {
+		t.Fatalf("web RenderConfigForm did not return WebConfigForm")
+	}
+	if form.SubmitAction.Success != "internal_config_ui_save_success" {
+		t.Fatalf("save Success = %q, want raw message ID (Noop echo)", form.SubmitAction.Success)
+	}
+}
+
+// TestConfigAPI_Round444_ErrorMessageBundleKeys confirms the
+// config_api.go HTTP-error message IDs are wired into the active
+// bundle — paired-mutation: tr() of each migrated ID returns the
+// sentinel wrapper, never a hardcoded English literal.
+func TestConfigAPI_Round444_ErrorMessageBundleKeys(t *testing.T) {
+	resetTranslator(t)
+	SetTranslator(sentinelTranslator{})
+	defer resetTranslator(t)
+
+	ids := []string{
+		"internal_config_api_update_failed",
+		"internal_config_api_reload_failed",
+		"internal_config_api_reset_failed",
+		"internal_config_api_restore_failed",
+		"internal_config_api_invalid_restore_request",
+	}
+	for _, id := range ids {
+		got := tr(context.Background(), id, map[string]any{"Error": "boom"})
+		if got != "<TR:"+id+">" {
+			t.Fatalf("tr(%q) = %q, want sentinel-wrapped ID", id, got)
+		}
+	}
+}
