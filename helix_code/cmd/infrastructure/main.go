@@ -9,11 +9,51 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"dev.helix.code/cmd/infrastructure/i18n"
 	"digital.vasic.containers/pkg/boot"
 	"digital.vasic.containers/pkg/endpoint"
 	"digital.vasic.containers/pkg/logging"
 	"digital.vasic.containers/pkg/runtime"
 )
+
+// translator resolves CONST-046 message IDs for every user-facing
+// string emitted by this CLI. Defaults to i18n.NoopTranslator{} (loud
+// message-ID echo) so unit tests + ad-hoc invocations remain obvious.
+// helix_code wires a real *i18nadapter.Translator at boot via
+// SetTranslator (round-455 §11.4 anti-bluff sweep, 2026-05-20).
+//
+// A package-level variable is the chosen DI seam to keep the
+// migration minimally invasive — main()'s linear call graph does
+// not warrant a constructor-injected struct.
+var translator i18n.Translator = i18n.NoopTranslator{}
+
+// SetTranslator wires a CONST-046-compliant Translator. Passing nil
+// resets to i18n.NoopTranslator{} (loud echo) — never silently
+// disables translation lookup (which would be a §11.4 PASS-bluff at
+// the i18n injection layer).
+func SetTranslator(tr i18n.Translator) {
+	if tr == nil {
+		translator = i18n.NoopTranslator{}
+		return
+	}
+	translator = tr
+}
+
+// tr is the internal CONST-046 resolver used by every user-facing
+// string emission in this file. It NEVER returns an error to the
+// caller — translation failures degrade to the message ID itself
+// (matching NoopTranslator behaviour) so production output remains
+// loud + obvious instead of silently empty.
+func tr(ctx context.Context, msgID string, data map[string]any) string {
+	if translator == nil {
+		translator = i18n.NoopTranslator{}
+	}
+	out, err := translator.T(ctx, msgID, data)
+	if err != nil || out == "" {
+		return msgID
+	}
+	return out
+}
 
 const (
 	banner = `
@@ -49,23 +89,23 @@ type InfrastructureManager struct {
 
 func NewInfrastructureManager(mode InfraMode) (*InfrastructureManager, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to get working directory: %w", err)
 	}
-	
+
 	composeDir := filepath.Join(cwd, "..")
-	
+
 	rt, err := runtime.AutoDetect(ctx)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to detect container runtime: %w", err)
 	}
-	
+
 	logger := logging.NewSlogAdapter(nil)
-	
+
 	return &InfrastructureManager{
 		mode:       mode,
 		composeDir: composeDir,
@@ -214,7 +254,7 @@ func (im *InfrastructureManager) testingEndpoints() map[string]endpoint.ServiceE
 func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndpoint {
 	prod := im.productionEndpoints()
 	test := im.testingEndpoints()
-	
+
 	full := make(map[string]endpoint.ServiceEndpoint)
 	for k, v := range prod {
 		full[k] = v
@@ -222,7 +262,7 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 	for k, v := range test {
 		full[k] = v
 	}
-	
+
 	full["mock-llm"] = endpoint.NewEndpoint().
 		WithHost("localhost").
 		WithPort("8081").
@@ -232,7 +272,7 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 		WithComposeFile(filepath.Join(im.composeDir, "docker-compose.full-test.yml")).
 		WithServiceName("mock-llm").
 		Build()
-	
+
 	full["selenium"] = endpoint.NewEndpoint().
 		WithHost("localhost").
 		WithPort("4444").
@@ -242,35 +282,36 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 		WithComposeFile(filepath.Join(im.composeDir, "docker-compose.full-test.yml")).
 		WithServiceName("selenium").
 		Build()
-	
+
 	return full
 }
 
 func (im *InfrastructureManager) Start() error {
+	ctx := im.ctx
 	fmt.Print(banner)
-	fmt.Printf("Starting HelixCode infrastructure in %s mode...\n", im.mode)
-	fmt.Printf("Using container runtime: %s\n\n", im.runtime.Name())
-	
+	fmt.Println(tr(ctx, "infra_start_starting", map[string]any{"Mode": string(im.mode)}))
+	fmt.Printf("%s\n\n", tr(ctx, "infra_start_runtime", map[string]any{"Runtime": im.runtime.Name()}))
+
 	endpoints := im.defineEndpoints()
-	
+
 	var opts []boot.BootManagerOption
 	opts = append(opts, boot.WithRuntime(im.runtime))
 	opts = append(opts, boot.WithLogger(im.logger))
 
 	im.manager = boot.NewBootManager(endpoints, opts...)
-	
+
 	summary, err := im.manager.BootAll(im.ctx)
 	if err != nil {
 		return fmt.Errorf("failed to boot infrastructure: %w", err)
 	}
-	
-	fmt.Printf("\n✅ Infrastructure started successfully!\n")
-	fmt.Printf("   Started: %d services\n", summary.Started)
-	fmt.Printf("   Failed:  %d services\n", summary.Failed)
-	fmt.Printf("   Skipped: %d services\n", summary.Skipped)
-	
+
+	fmt.Printf("\n%s\n", tr(ctx, "infra_start_success", nil))
+	fmt.Println(tr(ctx, "infra_start_count_started", map[string]any{"Count": summary.Started}))
+	fmt.Println(tr(ctx, "infra_start_count_failed", map[string]any{"Count": summary.Failed}))
+	fmt.Println(tr(ctx, "infra_start_count_skipped", map[string]any{"Count": summary.Skipped}))
+
 	if summary.Failed > 0 {
-		fmt.Printf("\n⚠️  Some services failed to start:\n")
+		fmt.Printf("\n%s\n", tr(ctx, "infra_start_some_failed", nil))
 		for name, result := range summary.Results {
 			if result == nil || result.Status != "failed" {
 				continue
@@ -282,8 +323,8 @@ func (im *InfrastructureManager) Start() error {
 			fmt.Printf("   - %s: %s\n", name, errStr)
 		}
 	}
-	
-	fmt.Printf("\n📊 Service Status:\n")
+
+	fmt.Printf("\n%s\n", tr(ctx, "infra_start_service_status_heading", nil))
 	for name, ep := range endpoints {
 		status := "✓"
 		if !ep.Required {
@@ -291,37 +332,39 @@ func (im *InfrastructureManager) Start() error {
 		}
 		fmt.Printf("   %s %-20s %s (port %s)\n", status, name, ep.ServiceName, ep.Port)
 	}
-	
+
 	return nil
 }
 
 func (im *InfrastructureManager) Stop() error {
-	fmt.Println("\n🛑 Stopping HelixCode infrastructure...")
-	
+	ctx := im.ctx
+	fmt.Printf("\n%s\n", tr(ctx, "infra_stop_stopping", nil))
+
 	if im.manager == nil {
 		return fmt.Errorf("infrastructure not started")
 	}
-	
+
 	if err := im.manager.Shutdown(im.ctx); err != nil {
 		return fmt.Errorf("failed to shutdown infrastructure: %w", err)
 	}
-	
-	fmt.Println("✅ Infrastructure stopped successfully!")
+
+	fmt.Println(tr(ctx, "infra_stop_success", nil))
 	return nil
 }
 
 func (im *InfrastructureManager) Status() error {
-	fmt.Println("\n📊 HelixCode Infrastructure Status")
+	ctx := im.ctx
+	fmt.Printf("\n%s\n", tr(ctx, "infra_status_heading", nil))
 	fmt.Printf("   Mode: %s\n", im.mode)
 	fmt.Printf("   Runtime: %s\n", im.runtime.Name())
-	
+
 	if im.manager == nil {
-		fmt.Println("   Status: NOT STARTED")
+		fmt.Println(tr(ctx, "infra_status_not_started", nil))
 		return nil
 	}
-	
+
 	health := im.manager.HealthCheckAll(im.ctx)
-	fmt.Printf("   Status: RUNNING\n\n")
+	fmt.Printf("%s\n\n", tr(ctx, "infra_status_running", nil))
 
 	for name, healthErr := range health {
 		emoji := "✅"
@@ -332,18 +375,18 @@ func (im *InfrastructureManager) Status() error {
 		}
 		fmt.Printf("   %s %-20s %s\n", emoji, name, status)
 	}
-	
+
 	return nil
 }
 
 func (im *InfrastructureManager) Wait() error {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	
-	fmt.Println("\n⏳ Infrastructure is running. Press Ctrl+C to stop...")
-	
+
+	fmt.Printf("\n%s\n", tr(im.ctx, "infra_wait_running", nil))
+
 	<-sigChan
-	fmt.Println("\n\nReceived shutdown signal...")
+	fmt.Printf("\n\n%s\n", tr(im.ctx, "infra_wait_received_signal", nil))
 	return im.Stop()
 }
 
@@ -354,21 +397,22 @@ func (im *InfrastructureManager) Close() {
 }
 
 func printUsage() {
+	ctx := context.Background()
 	fmt.Print(banner)
-	fmt.Println("Usage:")
-	fmt.Println("  helixcode-infra <command> [mode]")
+	fmt.Println(tr(ctx, "infra_usage_heading", nil))
+	fmt.Println(tr(ctx, "infra_usage_synopsis", nil))
 	fmt.Println()
-	fmt.Println("Commands:")
-	fmt.Println("  start    Start infrastructure")
-	fmt.Println("  stop     Stop infrastructure")
-	fmt.Println("  status   Show infrastructure status")
+	fmt.Println(tr(ctx, "infra_usage_commands_heading", nil))
+	fmt.Println(tr(ctx, "infra_usage_command_start", nil))
+	fmt.Println(tr(ctx, "infra_usage_command_stop", nil))
+	fmt.Println(tr(ctx, "infra_usage_command_status", nil))
 	fmt.Println()
-	fmt.Println("Modes:")
-	fmt.Println("  production  Production services (PostgreSQL, Redis, Server)")
-	fmt.Println("  testing     Testing services (Test DB, Ollama, Vector DBs)")
-	fmt.Println("  full        All services (production + testing + extras)")
+	fmt.Println(tr(ctx, "infra_usage_modes_heading", nil))
+	fmt.Println(tr(ctx, "infra_usage_mode_production", nil))
+	fmt.Println(tr(ctx, "infra_usage_mode_testing", nil))
+	fmt.Println(tr(ctx, "infra_usage_mode_full", nil))
 	fmt.Println()
-	fmt.Println("Examples:")
+	fmt.Println(tr(ctx, "infra_usage_examples_heading", nil))
 	fmt.Println("  helixcode-infra start production")
 	fmt.Println("  helixcode-infra start testing")
 	fmt.Println("  helixcode-infra start full")
@@ -381,9 +425,9 @@ func main() {
 		printUsage()
 		os.Exit(1)
 	}
-	
+
 	command := os.Args[1]
-	
+
 	var mode InfraMode = ModeProduction
 	if len(os.Args) >= 3 {
 		switch os.Args[2] {
@@ -394,23 +438,23 @@ func main() {
 		case "full":
 			mode = ModeFull
 		default:
-			fmt.Printf("Unknown mode: %s\n\n", os.Args[2])
+			fmt.Printf("%s\n\n", tr(context.Background(), "infra_error_unknown_mode", map[string]any{"Mode": os.Args[2]}))
 			printUsage()
 			os.Exit(1)
 		}
 	}
-	
+
 	if command == "help" || command == "--help" || command == "-h" {
 		printUsage()
 		os.Exit(0)
 	}
-	
+
 	manager, err := NewInfrastructureManager(mode)
 	if err != nil {
 		log.Fatalf("Failed to create infrastructure manager: %v", err)
 	}
 	defer manager.Close()
-	
+
 	switch command {
 	case "start":
 		if err := manager.Start(); err != nil {
@@ -428,7 +472,7 @@ func main() {
 			log.Fatalf("Failed to get status: %v", err)
 		}
 	default:
-		fmt.Printf("Unknown command: %s\n\n", command)
+		fmt.Printf("%s\n\n", tr(context.Background(), "infra_error_unknown_command", map[string]any{"Command": command}))
 		printUsage()
 		os.Exit(1)
 	}

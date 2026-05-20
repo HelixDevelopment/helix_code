@@ -100,6 +100,23 @@ func TestTr_AllMigratedMessageIDs(t *testing.T) {
 		"performance_optimization_readiness_not_ready",
 		"performance_optimization_summary_heading",
 		"performance_optimization_summary_excellent",
+		// Round-455 §11.4 additions.
+		"performance_optimization_metrics_comparison_heading",
+		"performance_optimization_metrics_before_heading",
+		"performance_optimization_metrics_after_heading",
+		"performance_optimization_improvements_heading",
+		"performance_optimization_readiness_ready_targets",
+		"performance_optimization_readiness_ready_optimized",
+		"performance_optimization_readiness_ready_security",
+		"performance_optimization_readiness_ready_release",
+		"performance_optimization_readiness_not_ready_targets",
+		"performance_optimization_readiness_not_ready_more",
+		"performance_optimization_readiness_not_ready_review",
+		"performance_optimization_summary_platform_ready",
+		"performance_optimization_summary_security_maintained",
+		"performance_optimization_summary_in_progress",
+		"performance_optimization_summary_tuning_recommended",
+		"performance_optimization_summary_review_results",
 	}
 
 	ctx := context.Background()

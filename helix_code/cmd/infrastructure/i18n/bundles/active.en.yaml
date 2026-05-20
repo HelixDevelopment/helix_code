@@ -1,0 +1,104 @@
+# infrastructure CLI i18n bundle — active English (en) locale.
+#
+# Every entry maps a CONST-046-migrated hardcoded literal in
+# helix_code/cmd/infrastructure/main.go to a message ID resolved at
+# runtime via Translator.T. helix_code wires a real
+# *i18nadapter.Translator at boot; the in-package NoopTranslator
+# echoes the message ID verbatim for unit tests + backward compat.
+#
+# Naming convention: infra_<area>_<short_description>. All IDs
+# prefixed with infra_ to avoid namespace collision with other
+# submodules' bundles when loaded into the same go-i18n.Bundle.
+#
+# Round-455 §11.4 anti-bluff sweep (2026-05-20): established this
+# package-main subdirectory's i18n seam (the cmd/infrastructure CLI
+# previously had no seam at all) and migrated the user-facing
+# lifecycle messages: start/stop/status banners + verdicts, the
+# usage/help text block, and the unknown-mode / unknown-command
+# error lines. Identifier tokens, wrapped-error tech strings, and
+# go-format-spec-only fragments are intentionally excluded per the
+# CONST-046 scoping rules.
+
+infra_start_starting:
+  other: "Starting HelixCode infrastructure in {{.Mode}} mode..."
+
+infra_start_runtime:
+  other: "Using container runtime: {{.Runtime}}"
+
+infra_start_success:
+  other: "✅ Infrastructure started successfully!"
+
+infra_start_count_started:
+  other: "   Started: {{.Count}} services"
+
+infra_start_count_failed:
+  other: "   Failed:  {{.Count}} services"
+
+infra_start_count_skipped:
+  other: "   Skipped: {{.Count}} services"
+
+infra_start_some_failed:
+  other: "⚠️  Some services failed to start:"
+
+infra_start_service_status_heading:
+  other: "📊 Service Status:"
+
+infra_stop_stopping:
+  other: "🛑 Stopping HelixCode infrastructure..."
+
+infra_stop_success:
+  other: "✅ Infrastructure stopped successfully!"
+
+infra_status_heading:
+  other: "📊 HelixCode Infrastructure Status"
+
+infra_status_not_started:
+  other: "   Status: NOT STARTED"
+
+infra_status_running:
+  other: "   Status: RUNNING"
+
+infra_wait_running:
+  other: "⏳ Infrastructure is running. Press Ctrl+C to stop..."
+
+infra_wait_received_signal:
+  other: "Received shutdown signal..."
+
+infra_usage_heading:
+  other: "Usage:"
+
+infra_usage_synopsis:
+  other: "  helixcode-infra <command> [mode]"
+
+infra_usage_commands_heading:
+  other: "Commands:"
+
+infra_usage_command_start:
+  other: "  start    Start infrastructure"
+
+infra_usage_command_stop:
+  other: "  stop     Stop infrastructure"
+
+infra_usage_command_status:
+  other: "  status   Show infrastructure status"
+
+infra_usage_modes_heading:
+  other: "Modes:"
+
+infra_usage_mode_production:
+  other: "  production  Production services (PostgreSQL, Redis, Server)"
+
+infra_usage_mode_testing:
+  other: "  testing     Testing services (Test DB, Ollama, Vector DBs)"
+
+infra_usage_mode_full:
+  other: "  full        All services (production + testing + extras)"
+
+infra_usage_examples_heading:
+  other: "Examples:"
+
+infra_error_unknown_mode:
+  other: "Unknown mode: {{.Mode}}"
+
+infra_error_unknown_command:
+  other: "Unknown command: {{.Command}}"

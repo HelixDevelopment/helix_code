@@ -51,3 +51,59 @@ performance_optimization_summary_heading:
 
 performance_optimization_summary_excellent:
   other: "🎉 EXCELLENT: HelixCode production-ready with optimized performance"
+
+# Round-455 §11.4 anti-bluff sweep (2026-05-20): continued the
+# round-144 migration — picked up the metrics-comparison /
+# improvements section headings and the readiness-verdict +
+# final-summary detail lines that round-144 deferred. Residual
+# literals remain in the fmt.Sprintf'd report body + helper
+# functions inside generateOptimizationSummary, deferred to keep
+# this round under the size cap.
+
+performance_optimization_metrics_comparison_heading:
+  other: "📊 PERFORMANCE METRICS COMPARISON:"
+
+performance_optimization_metrics_before_heading:
+  other: "BEFORE OPTIMIZATION:"
+
+performance_optimization_metrics_after_heading:
+  other: "AFTER OPTIMIZATION:"
+
+performance_optimization_improvements_heading:
+  other: "📈 PERFORMANCE IMPROVEMENTS:"
+
+performance_optimization_readiness_ready_targets:
+  other: "   All performance targets achieved"
+
+performance_optimization_readiness_ready_optimized:
+  other: "   System optimized for production deployment"
+
+performance_optimization_readiness_ready_security:
+  other: "   Zero-tolerance security maintained"
+
+performance_optimization_readiness_ready_release:
+  other: "   Ready for production release"
+
+performance_optimization_readiness_not_ready_targets:
+  other: "   Some performance targets not met"
+
+performance_optimization_readiness_not_ready_more:
+  other: "   Additional optimization recommended"
+
+performance_optimization_readiness_not_ready_review:
+  other: "   Review metrics before production"
+
+performance_optimization_summary_platform_ready:
+  other: "🚀 Platform ready for production deployment"
+
+performance_optimization_summary_security_maintained:
+  other: "✅ Zero-tolerance security policy maintained"
+
+performance_optimization_summary_in_progress:
+  other: "⚠️ OPTIMIZATION IN PROGRESS"
+
+performance_optimization_summary_tuning_recommended:
+  other: "🔧 Additional performance tuning recommended"
+
+performance_optimization_summary_review_results:
+  other: "📊 Review optimization results for further improvements"

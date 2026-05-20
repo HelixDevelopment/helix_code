@@ -121,8 +121,8 @@ func main() {
 
 	// Display baseline vs post-optimization metrics
 	log.Println("")
-	log.Println("📊 PERFORMANCE METRICS COMPARISON:")
-	log.Printf("BEFORE OPTIMIZATION:")
+	log.Println(tr(ctx, "performance_optimization_metrics_comparison_heading", nil))
+	log.Printf("%s", tr(ctx, "performance_optimization_metrics_before_heading", nil))
 	log.Printf("   CPU Utilization: %.1f%%", optimizationResult.Baseline.CPUUtilization)
 	log.Printf("   Memory Usage: %d MB", optimizationResult.Baseline.MemoryUsage/(1024*1024))
 	log.Printf("   Throughput: %d ops/sec", optimizationResult.Baseline.Throughput)
@@ -130,7 +130,7 @@ func main() {
 	log.Printf("   Cache Hit Rate: %.2f%%", optimizationResult.Baseline.CacheHitRate*100)
 	log.Printf("   Error Rate: %.2f%%", optimizationResult.Baseline.ErrorRate*100)
 
-	log.Printf("AFTER OPTIMIZATION:")
+	log.Printf("%s", tr(ctx, "performance_optimization_metrics_after_heading", nil))
 	log.Printf("   CPU Utilization: %.1f%%", optimizationResult.PostOptimization.CPUUtilization)
 	log.Printf("   Memory Usage: %d MB", optimizationResult.PostOptimization.MemoryUsage/(1024*1024))
 	log.Printf("   Throughput: %d ops/sec", optimizationResult.PostOptimization.Throughput)
@@ -140,7 +140,7 @@ func main() {
 
 	// Display improvements
 	log.Println("")
-	log.Println("📈 PERFORMANCE IMPROVEMENTS:")
+	log.Println(tr(ctx, "performance_optimization_improvements_heading", nil))
 	log.Printf("   Throughput: %.1f%% (%d → %d ops/sec)", optimizationResult.OverallImprovement.ThroughputImprovement, optimizationResult.Baseline.Throughput, optimizationResult.PostOptimization.Throughput)
 	log.Printf("   Latency: %.1f%% (%s → %s)", optimizationResult.OverallImprovement.LatencyImprovement, optimizationResult.Baseline.AverageLatency, optimizationResult.PostOptimization.AverageLatency)
 	log.Printf("   Memory: %.1f%% (%d → %d MB)", optimizationResult.OverallImprovement.MemoryImprovement, optimizationResult.Baseline.MemoryUsage/(1024*1024), optimizationResult.PostOptimization.MemoryUsage/(1024*1024))
@@ -154,15 +154,15 @@ func main() {
 	log.Println(tr(ctx, "performance_optimization_readiness_heading", nil))
 	if productionReady {
 		log.Println(tr(ctx, "performance_optimization_readiness_ready", nil))
-		log.Println("   All performance targets achieved")
-		log.Println("   System optimized for production deployment")
-		log.Println("   Zero-tolerance security maintained")
-		log.Println("   Ready for production release")
+		log.Println(tr(ctx, "performance_optimization_readiness_ready_targets", nil))
+		log.Println(tr(ctx, "performance_optimization_readiness_ready_optimized", nil))
+		log.Println(tr(ctx, "performance_optimization_readiness_ready_security", nil))
+		log.Println(tr(ctx, "performance_optimization_readiness_ready_release", nil))
 	} else {
 		log.Println(tr(ctx, "performance_optimization_readiness_not_ready", nil))
-		log.Println("   Some performance targets not met")
-		log.Println("   Additional optimization recommended")
-		log.Println("   Review metrics before production")
+		log.Println(tr(ctx, "performance_optimization_readiness_not_ready_targets", nil))
+		log.Println(tr(ctx, "performance_optimization_readiness_not_ready_more", nil))
+		log.Println(tr(ctx, "performance_optimization_readiness_not_ready_review", nil))
 	}
 
 	// Generate final optimization summary
@@ -178,12 +178,12 @@ func main() {
 
 	if productionReady {
 		log.Println(tr(ctx, "performance_optimization_summary_excellent", nil))
-		log.Println("🚀 Platform ready for production deployment")
-		log.Println("✅ Zero-tolerance security policy maintained")
+		log.Println(tr(ctx, "performance_optimization_summary_platform_ready", nil))
+		log.Println(tr(ctx, "performance_optimization_summary_security_maintained", nil))
 	} else {
-		log.Println("⚠️ OPTIMIZATION IN PROGRESS")
-		log.Println("🔧 Additional performance tuning recommended")
-		log.Println("📊 Review optimization results for further improvements")
+		log.Println(tr(ctx, "performance_optimization_summary_in_progress", nil))
+		log.Println(tr(ctx, "performance_optimization_summary_tuning_recommended", nil))
+		log.Println(tr(ctx, "performance_optimization_summary_review_results", nil))
 	}
 
 	log.Println("========================================")
