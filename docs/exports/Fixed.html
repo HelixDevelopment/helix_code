@@ -223,6 +223,47 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-20</td>
+<td>HXC-003: CONST-046 i18n migration backlog (no user-facing text
+hardcoded as static string literals)</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>463</td>
+<td>~91-462 i18n migration-round commits + this close-out</td>
+<td>CONST-046 i18n migration campaign <strong>concluded</strong>. The
+genuine user-facing (C) string-literal surface — UI text, prompts shown
+to the operator, error messages surfaced to end users, labels, helper
+text — is <strong>exhausted across all 7 CONST-046 scope areas</strong>:
+(1) helix_code <code>internal/</code> + (2) <code>cmd/</code> + (3)
+<code>applications/</code> (confirmed exhausted rounds 461/462 —
+<code>applications</code> final-sweep × 110 literals at meta HEAD
+<code>72389451</code>), (4) <code>LLMsVerifier</code> (round 452), (5)
+<code>helix_qa</code>, (6) all owned <code>vasic-digital/*</code>
+submodules + (7) all owned <code>HelixDevelopment/*</code> submodules
+(rounds 413/441). Across ~91-462 rounds, <strong>tens of thousands of
+literals</strong> were migrated through i18n seams —
+<code>nicksnyder/go-i18n/v2</code> Bundle/Localizer (Option D, design
+<code>f9dc102</code>, <code>pkg/i18n</code> foundation
+<code>e29b075</code>) plus locale-aware
+<code>.toml</code>/<code>.yaml</code> resource files — and <strong>every
+migration round shipped paired-mutation anti-bluff tests</strong> (per
+§1.1) that plant a known un-migrated literal and assert the audit-gate
+reports FAIL, so a PASS certifies real i18n coverage rather than
+absence-of-error. The audit-gate
+<code>scripts/audit-const046-hardcoded-content.sh --fail-on-new</code>
+is enforced; each round re-ran <code>--update-baseline</code> so the
+snapshot shrank monotonically. The remaining ~55k audit-baseline hits
+are <strong>all OUT of CONST-046 scope</strong> — (A) LLM prompt
+templates (strings addressed to a model, not a human), (B) wrapped-error
+developer-facing tech strings, identifier tokens, struct-tag keys,
+format-spec tokens, and test fixtures — classified file-by-file in
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>
+(Revision 2). CONST-046’s invariant is satisfied: no user-facing text is
+hardcoded as a static literal; every such string is LLM-generated,
+i18n-loaded, or metadata-composed. Closed
+<code>Implemented (→ Fixed.md)</code> per CONST-057 (Type Feature).</td>
+</tr>
+<tr>
+<td>2026-05-20</td>
 <td>HXC-008: CONST-055 G1 governance gaps surfaced by
 post-constitution-pull validation sweep</td>
 <td>Bug</td>
@@ -1627,13 +1668,21 @@ pre-existing defects surfaced during the programme filed honestly as
 stat-collector data race under <code>-race</code>). No speed task
 introduced a regression, a new bluff pattern, or new hardcoded content.
 |</div>
-<p><em>Last regenerated: 2026-05-20 (round 400 — HXC-006 closure:
-HelixCode Speed Programme — all 6 phases / 31 tasks landed; CONST-048
-coverage ledger <code>docs/research/speed/05-coverage-ledger.md</code> =
-29 PASS + 2 PARTIAL + 0 DEFERRED; release-gate sweep clean of
-speed-attributable failures; HXC-011 + HXC-012 filed for two
-pre-existing defects surfaced during the programme). Previous round 396
-— HXV-003 closure. Earlier closures (P0-P5 phases) tracked via
+<p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closure:
+CONST-046 i18n migration campaign concluded — the genuine user-facing
+(C) string-literal surface is exhausted across all 7 scope areas
+(helix_code
+<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
+LLMsVerifier, helix_qa, all owned
+<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
+submodules); ~91-462 rounds migrated tens of thousands of literals
+through i18n seams with paired-mutation anti-bluff tests; the remaining
+~55k audit-baseline hits are all out of CONST-046 scope per
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+Closed <code>Implemented (→ Fixed.md)</code> per CONST-057). Previous
+round 403 — HXC-008/HXC-007/HXC-009 closures. Round 400 — HXC-006
+closure (HelixCode Speed Programme — 6 phases / 31 tasks). Earlier
+closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
 <code>docs/improvements/*evidence*.md</code>.</em></p>
 </body>

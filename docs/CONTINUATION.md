@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-20 (close-out¹³⁶ — round 403: HXC-008 closed `Fixed (→ Fixed.md)` (CONST-055 verifier path drift corrected + CONST-047..057 cascaded into `helix_qa/CONSTITUTION.md` + §11.4.69 into `VisionEngine/CONSTITUTION.md` — `verify-governance-cascade.sh` 0 failures, `verify-all-constitution-rules.sh` 6 gates/0 failures), HXC-007 + HXC-009 closed `Completed (→ Fixed.md)` after verification — cascade + mirror-reconciliation genuinely complete; all migrated to `docs/Fixed.md`).**
+**Last updated: 2026-05-20 (close-out¹³⁷ — round 463: HXC-003 closed `Implemented (→ Fixed.md)` — the CONST-046 i18n migration campaign is concluded; the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals through i18n seams with paired-mutation anti-bluff tests; the remaining ~55k audit-baseline hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`; migrated to `docs/Fixed.md`. Open set is now 2 items — HXC-001 (Task, In progress) + HXC-010 (Operator-blocked Task)).**
 
 > **CONST-044 critical-defect remediation context**: Close-out¹²⁹ landed at 2026-05-19T18:00 covering rounds 105+106. Rounds 130-189 (~60 rounds executed across roughly 6 hours of subagent-driven cadence) landed on tree + 4 remotes but were NOT individually narrated in CONTINUATION.md. Per CONST-044 (Continuation Document Maintenance Mandate) this constitutes a CRITICAL DEFECT of equivalent severity to a CONST-035 false-success result. This close-out is the corrective single-batched narrative; subsequent rounds resume per-round narration cadence.
 
@@ -1121,4 +1121,28 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 ### Next
 
 - No open Bug items remain. Open: HXC-001 (Task), HXC-003 (Feature), HXC-010 (Operator-blocked Task — CodeGraph end-to-end verification awaiting LLM-backend credentials).
+
+---
+
+## close-out¹³⁷ — round 463: HXC-003 closed `Implemented (→ Fixed.md)` — CONST-046 i18n migration campaign concluded
+
+### What landed
+
+1. **HXC-003 closed `Implemented (→ Fixed.md)`** (`Type: Feature`, per CONST-057/§11.4.33). The CONST-046 i18n migration campaign — the longest-running Feature in `docs/Issues.md` — is **concluded**. The genuine user-facing (C) string-literal surface (UI text, prompts shown to the operator, error messages surfaced to end users, labels, helper text) is **exhausted across all 7 CONST-046 scope areas**:
+   - (1) helix_code `internal/`, (2) `cmd/`, (3) `applications/` — confirmed exhausted rounds 461/462 (`applications` final-sweep × 110 literals at meta HEAD `72389451`).
+   - (4) `LLMsVerifier` — round 452.
+   - (5) `helix_qa`.
+   - (6) all owned `vasic-digital/*` submodules + (7) all owned `HelixDevelopment/*` submodules — rounds 413/441.
+2. **Scale + anti-bluff posture.** Across ~91-462 rounds, **tens of thousands of literals** were migrated through i18n seams — `nicksnyder/go-i18n/v2` Bundle/Localizer (Option D, design `f9dc102`, `pkg/i18n` foundation `e29b075`) plus locale-aware `.toml`/`.yaml` resource files. **Every migration round shipped paired-mutation anti-bluff tests** (per §1.1): a known un-migrated literal is planted and the test asserts the audit-gate reports FAIL — so a PASS certifies real i18n coverage rather than absence-of-error. The audit-gate `scripts/audit-const046-hardcoded-content.sh --fail-on-new` is enforced; each round re-ran `--update-baseline` so the snapshot shrank monotonically.
+3. **Remaining audit hits are out of scope.** The ~55k audit-baseline hits that remain are **all OUT of CONST-046 scope** — (A) LLM prompt templates (strings addressed to a model, not a human), (B) wrapped-error developer-facing tech strings, identifier tokens, struct-tag keys, format-spec tokens, and test fixtures — classified file-by-file in `docs/audits/2026-05-20-internal-const046-classification.md` (Revision 2). CONST-046's invariant is satisfied: no user-facing text is hardcoded as a static literal; every such string is LLM-generated, i18n-loaded, or metadata-composed.
+
+### State
+
+- HXC-003 migrated to `docs/Fixed.md` per §11.4.19; `docs/Issues.md` section retained as a migration tombstone.
+- `docs/Issues_Summary.md` updated (open count 3→2; Feature open 1→0); `docs/Fixed_Summary.md` updated (Feature count 67→68; total closed 95→96; open snapshot 3→2).
+- All 8 tracker exports (4 HTML + 4 PDF) regenerated via `scripts/regenerate-tracker-exports.sh`.
+
+### Next
+
+- Open set is now exactly 2 items: **HXC-001** (CONST-052 rename programme — Task, In progress; ~37 submodule-entangled leaf renames + parent dirs + 59 Upstreams dirs deferred) and **HXC-010** (Kimi CLI + Qwen Code CodeGraph end-to-end verification — Operator-blocked Task; awaiting LLM-backend credentials). No open Bug or Feature items remain.
 

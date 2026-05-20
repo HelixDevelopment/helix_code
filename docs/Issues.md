@@ -206,14 +206,11 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## HXC-003 (ex-ISSUE-007) — CONST-046 migration backlog (57,329 violations baselined; shrinking)
+## HXC-003 (ex-ISSUE-007) — CONST-046 i18n migration backlog — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** In progress
+**Status:** Implemented (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Feature
-**Discovered:** 2026-05-19 (round 92 — audit script)
-**Discovered-By:** AI subagent ground-truth scan
-**Evidence:** Round-92 scan reported 57,345 violations across 21,937 files. Round 99b baseline collapsed to 54,803 unique `(path, literal_hash)` keys. Phase 4 (rounds 100+) systematically migrating top-concentration files: round 100 (evaluators.go), 101 (challenge_recorded_ai_testgen.go), 102 (challenge_desktop.go) — see CONTINUATION.md close-outs.
-**Resolution path:** Continued Phase 4 cadence; audit-gate `--fail-on-new` already enforced; each migration round MUST re-run `--update-baseline` so snapshot shrinks toward zero.
+The genuine user-facing (C) string-literal surface is exhausted across all 7 CONST-046 scope areas — helix_code `internal/` + `cmd/` + `applications/` (exhausted rounds 461/462), `LLMsVerifier` (round 452), `helix_qa`, and every owned `vasic-digital/*` + `HelixDevelopment/*` submodule (rounds 413/441). Hundreds of rounds (~91-462) migrated tens of thousands of literals through i18n seams with paired-mutation anti-bluff tests. The remaining ~55k audit-baseline hits are all OUT of CONST-046 scope (LLM prompt templates, wrapped-error tech strings, identifier tokens, struct-tag keys, format-spec tokens, test fixtures) — documented in `docs/audits/2026-05-20-internal-const046-classification.md`. Closed by round 463. Section retained as a migration tombstone per §11.4.19 — the authoritative closure narrative is in `docs/Fixed.md`.
 
 ---
 
@@ -327,4 +324,4 @@ This is reported HONESTLY per §11.4.3 — the connect-only fallback is never cl
 
 ---
 
-*Last regenerated: 2026-05-20 (round 402 — HXC-011 closed `Fixed (→ Fixed.md)` and migrated to `docs/Fixed.md`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec` and scores PASS/FAIL on the real exit code — no more hollow sub-µs `PASSED` metadata rows; reproduce-before-fix RED→GREEN, helix_qa commit `6b46df0`). Previous round 401 — HXC-012 closed `Fixed (→ Fixed.md)`: data race in `internal/llm/load_balancer.go` stat-collector path synchronised via reproduce-before-fix `-race` test, commit `9d8c1cdc`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)` after all 31 tasks landed + CONST-048 coverage ledger `docs/research/speed/05-coverage-ledger.md`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+*Last regenerated: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

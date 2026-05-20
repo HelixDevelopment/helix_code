@@ -206,7 +206,7 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 <tr>
 <td>Feature</td>
-<td>67</td>
+<td>68</td>
 <td><code>Implemented (→ Fixed.md)</code></td>
 </tr>
 <tr>
@@ -216,11 +216,35 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 95 (in the round-system tracker;
+<p><strong>Total closed items</strong>: 96 (in the round-system tracker;
 pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 403 added HXC-008
-(CONST-055 G1 governance gaps surfaced by the post-constitution-pull
-validation sweep — two pre-existing cascade-drift defects: (a)
+<code>docs/improvements/PROGRESS.md</code>). Round 463 added HXC-003
+(CONST-046 i18n migration backlog —
+<code>Implemented (→ Fixed.md)</code>: the CONST-046 i18n migration
+campaign is concluded. The genuine user-facing (C) string-literal
+surface — UI text, prompts shown to the operator, error messages
+surfaced to end users, labels, helper text — is exhausted across all 7
+CONST-046 scope areas: helix_code <code>internal/</code> +
+<code>cmd/</code> + <code>applications/</code> (exhausted rounds
+461/462), LLMsVerifier (round 452), helix_qa, and all owned
+<code>vasic-digital/*</code> + <code>HelixDevelopment/*</code>
+submodules (rounds 413/441). Across ~91-462 rounds tens of thousands of
+literals were migrated through <code>nicksnyder/go-i18n/v2</code>
+Bundle/Localizer seams plus locale-aware resource files, and every
+migration round shipped paired-mutation anti-bluff tests that plant a
+known un-migrated literal and assert the audit-gate reports FAIL — so a
+PASS certifies real i18n coverage. The audit-gate
+<code>scripts/audit-const046-hardcoded-content.sh --fail-on-new</code>
+is enforced and each round re-ran <code>--update-baseline</code> so the
+snapshot shrank monotonically. The remaining ~55k audit-baseline hits
+are all OUT of CONST-046 scope — LLM prompt templates, wrapped-error
+developer-facing tech strings, identifier tokens, struct-tag keys,
+format-spec tokens, test fixtures — classified file-by-file in
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+CONST-046’s invariant is satisfied: no user-facing text is hardcoded as
+a static literal). Round 403 added HXC-008 (CONST-055 G1 governance gaps
+surfaced by the post-constitution-pull validation sweep — two
+pre-existing cascade-drift defects: (a)
 <code>docs/improvements/submodule_owned.txt</code> line 10 referenced a
 non-existent <code>dependencies/HelixDevelopment/Models</code> path
 which the CONST-052 batch-1 rename <code>a1ea3c8</code> had lowercased
@@ -405,25 +429,32 @@ audit-gate; 20 strings + audit-gate)</td>
 </tr>
 <tr>
 <td>CONST-046 Phase 4 (rounds 100+)</td>
-<td>5 closed (evaluators + recorded_ai_testgen + desktop + ai_testgen +
-recorded_mobile, ~40 strings)</td>
-<td>Active</td>
+<td>concluded — campaign closed round 463 (HXC-003
+<code>Implemented (→ Fixed.md)</code>); genuine user-facing (C) surface
+exhausted across all 7 scope areas; ~91-462 rounds, tens of thousands of
+literals</td>
+<td>Done</td>
 </tr>
 </tbody>
 </table>
 <h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
 issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>3 open issues: 0 Bug / 1 Task (HXC-001) + 1 Operator-blocked Task
-(HXC-010) / 1 Feature (HXC-003); 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-20 (round 403 — HXC-008 closed
-<code>Fixed (→ Fixed.md)</code> + HXC-007/HXC-009 closed
-<code>Completed (→ Fixed.md)</code>: HXC-008 fixed the CONST-055
-verifier path drift + cascaded the missing CONST-047..057 anchors into
-<code>helix_qa/CONSTITUTION.md</code> and §11.4.69 into
-<code>VisionEngine/CONSTITUTION.md</code>; HXC-007 cascade + HXC-009
-mirror-reconciliation verified genuinely complete. Previous round 402 —
-HXC-011 closed: helix_qa runner now genuinely executes desktop-platform
-bank <code>shell:</code> actions. See <code>docs/Fixed.md</code> for
-full closure entries with commit SHAs.</em></p>
+<p>2 open issues: 0 Bug / 1 Task (HXC-001) + 1 Operator-blocked Task
+(HXC-010) / 0 Feature; 0 BLOCKED.</p>
+<p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closed
+<code>Implemented (→ Fixed.md)</code>: the CONST-046 i18n migration
+campaign is concluded — the genuine user-facing (C) string-literal
+surface is exhausted across all 7 scope areas (helix_code
+<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
+LLMsVerifier, helix_qa, all owned
+<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
+submodules); ~91-462 rounds migrated tens of thousands of literals
+through i18n seams with paired-mutation anti-bluff tests; the remaining
+~55k audit-baseline hits are all out of CONST-046 scope per
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+Previous round 403 — HXC-008 closed <code>Fixed (→ Fixed.md)</code> +
+HXC-007/HXC-009 closed <code>Completed (→ Fixed.md)</code>. See
+<code>docs/Fixed.md</code> for full closure entries with commit
+SHAs.</em></p>
 </body>
 </html>

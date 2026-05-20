@@ -301,13 +301,21 @@ fallback per CONST-035 (220eff0f)</td>
 </tr>
 <tr>
 <td>HXC-003</td>
-<td>CONST-046 migration backlog (57,329 violations, baselined,
-shrinking)</td>
+<td>CONST-046 i18n migration backlog (no user-facing text hardcoded as
+static string literals)</td>
 <td>Feature</td>
-<td>In progress</td>
+<td>Implemented (→ Fixed.md) round 463</td>
 <td>2026-05-19</td>
-<td>Phase 4 (rounds 100+) actively migrating; audit-gate
-<code>--fail-on-new</code> enforced</td>
+<td>Closed: CONST-046 i18n campaign concluded — genuine user-facing (C)
+string-literal surface exhausted across all 7 scope areas (helix_code
+<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
+LLMsVerifier, helix_qa, all owned
+<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
+submodules); ~91-462 rounds migrated tens of thousands of literals
+through i18n seams; every round shipped paired-mutation anti-bluff
+tests; remaining ~55k audit hits all out of CONST-046 scope per
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-004</td>
@@ -506,31 +514,32 @@ Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 3 open (HXC-008/007/009 closed round 403;
-HXC-011 closed round 402; HXC-012 closed round 401; HXC-006 closed round
-400; HXC-010 filed round 399; HXC-007/008/009 filed round 398; HXV-003
-closed round 396; OPS-001 closed round 397; HXV-002 closed round 348;
-HXQ-002 closed round 344; HXA-002 closed round 342; VEN-002 closed round
-340; HXQ-001 closed round 325; HXV-001 closed round 323; HXC-005 closed
-round 318; PAN-001 closed round 302; HXC-004 closed round 200;
+<p><strong>Counts</strong>: 2 open (HXC-003 closed round 463;
+HXC-008/007/009 closed round 403; HXC-011 closed round 402; HXC-012
+closed round 401; HXC-006 closed round 400; HXC-010 filed round 399;
+HXC-007/008/009 filed round 398; HXV-003 closed round 396; OPS-001
+closed round 397; HXV-002 closed round 348; HXQ-002 closed round 344;
+HXA-002 closed round 342; VEN-002 closed round 340; HXQ-001 closed round
+325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed
+round 302; HXC-004 closed round 200;
 VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
-| 1 Task open (HXC-001) + 1 Operator-blocked (HXC-010) | 1 Feature open
-(HXC-003) | 0 BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 403 — HXC-008 closed
-<code>Fixed (→ Fixed.md)</code> + HXC-007/HXC-009 closed
-<code>Completed (→ Fixed.md)</code>: HXC-008 corrected the CONST-055
-verifier path drift (<code>submodule_owned.txt</code>
-<code>HelixDevelopment/Models</code>→lowercase <code>models</code>) and
-cascaded the missing CONST-047..057 anchors into
-<code>helix_qa/CONSTITUTION.md</code> + §11.4.69 into
-<code>VisionEngine/CONSTITUTION.md</code> —
-<code>verify-governance-cascade.sh</code> 0 failures,
-<code>verify-all-constitution-rules.sh</code> 6 gates / 0 failures;
-HXC-007 cascade + HXC-009 mirror-reconciliation verified genuinely
-complete. Previous round 402 — HXC-011 closed
-<code>Fixed (→ Fixed.md)</code>: the helix_qa runner’s <code>run</code>
-path on <code>desktop</code> now genuinely executes a bank case’s
-<code>shell:</code> action via <code>os/exec</code>. See
+| 1 Task open (HXC-001) + 1 Operator-blocked Task (HXC-010) | 0 Feature
+open | 0 BLOCKED</p>
+<p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closed
+<code>Implemented (→ Fixed.md)</code>: the CONST-046 i18n migration
+campaign is concluded — the genuine user-facing (C) string-literal
+surface is exhausted across all 7 scope areas (helix_code
+<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
+LLMsVerifier, helix_qa, all owned
+<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
+submodules); ~91-462 rounds migrated tens of thousands of literals
+through i18n seams with paired-mutation anti-bluff tests per round; the
+remaining ~55k audit-baseline hits are all out of CONST-046 scope per
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+The open set is now 2 items — HXC-001 (CONST-052 renames — Task, In
+progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task).
+Previous round 403 — HXC-008 closed <code>Fixed (→ Fixed.md)</code> +
+HXC-007/HXC-009 closed <code>Completed (→ Fixed.md)</code>. See
 <code>docs/Issues.md</code> for full details + prefix convention table.
 PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
