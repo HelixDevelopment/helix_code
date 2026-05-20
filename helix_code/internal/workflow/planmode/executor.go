@@ -1005,7 +1005,8 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 	}
 
 	var validationOutput strings.Builder
-	validationOutput.WriteString(fmt.Sprintf("# Validation Report: %s\n\n", step.Description))
+	validationOutput.WriteString(fmt.Sprintf("# %s: %s\n\n",
+		tr(ctx, "internal_workflow_planmode_report_validation_title", nil), step.Description))
 
 	projectType := detectProjectType(e.workspaceRoot)
 	validationPassed := true
@@ -1024,7 +1025,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Go build failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Go Build: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_go_build_passed", nil) + "\n")
 			}
 
 		case "node":
@@ -1038,7 +1039,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 					validationPassed = false
 					validationErrors = append(validationErrors, fmt.Sprintf("TypeScript check failed: %s", string(output)))
 				} else {
-					validationOutput.WriteString("## TypeScript Check: PASSED\n")
+					validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_typescript_passed", nil) + "\n")
 				}
 			} else {
 				// Try npm run build
@@ -1085,7 +1086,9 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				}
 			}
 			if validationPassed {
-				validationOutput.WriteString(fmt.Sprintf("## Python Syntax Check: PASSED (%d files)\n", len(pyFiles)))
+				validationOutput.WriteString(fmt.Sprintf("## %s\n",
+					tr(ctx, "internal_workflow_planmode_check_python_syntax_passed",
+						map[string]any{"Count": len(pyFiles)})))
 			}
 
 		case "rust":
@@ -1097,11 +1100,11 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Cargo check failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Cargo Check: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_cargo_passed", nil) + "\n")
 			}
 
 		default:
-			validationOutput.WriteString("## Build Validation: SKIPPED (unknown project type)\n")
+			validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_build_skipped_unknown", nil) + "\n")
 		}
 
 	case "lint":
@@ -1122,7 +1125,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Files need formatting:\n%s", string(output)))
 			} else {
-				validationOutput.WriteString("## Go Format: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_go_format_passed", nil) + "\n")
 			}
 
 		case "node":
@@ -1134,7 +1137,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Format check failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Prettier Check: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_prettier_passed", nil) + "\n")
 			}
 
 		case "python":
@@ -1146,7 +1149,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Format check failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Black Format: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_black_format_passed", nil) + "\n")
 			}
 
 		case "rust":
@@ -1158,7 +1161,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Format check failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Rust Format: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_rust_format_passed", nil) + "\n")
 			}
 		}
 
@@ -1174,7 +1177,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Go mod verify failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Go Mod Verify: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_go_mod_verify_passed", nil) + "\n")
 			}
 
 			// Check for missing/unused dependencies
@@ -1194,7 +1197,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				// npm ls returns non-zero for peer dependency issues, which may not be fatal
 				validationOutput.WriteString(fmt.Sprintf("### NPM Dependencies (with warnings):\n%s\n", string(output)))
 			} else {
-				validationOutput.WriteString("## NPM Dependencies: OK\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_npm_deps_ok", nil) + "\n")
 			}
 
 		case "python":
@@ -1207,7 +1210,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 					validationPassed = false
 					validationErrors = append(validationErrors, fmt.Sprintf("Pip check failed: %s", string(output)))
 				} else {
-					validationOutput.WriteString("## Pip Check: PASSED\n")
+					validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_pip_passed", nil) + "\n")
 				}
 			}
 
@@ -1220,7 +1223,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 				validationPassed = false
 				validationErrors = append(validationErrors, fmt.Sprintf("Cargo verify-project failed: %s", string(output)))
 			} else {
-				validationOutput.WriteString("## Cargo Verify: PASSED\n")
+				validationOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_check_cargo_verify_passed", nil) + "\n")
 			}
 		}
 
@@ -1239,7 +1242,8 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 
 	// Add error summary
 	if !validationPassed {
-		validationOutput.WriteString("\n## Validation FAILED\n\n### Errors:\n")
+		validationOutput.WriteString("\n## " + tr(ctx, "internal_workflow_planmode_validation_failed_heading", nil) + "\n\n### " +
+			tr(ctx, "internal_workflow_planmode_errors_heading", nil) + "\n")
 		for _, errMsg := range validationErrors {
 			validationOutput.WriteString(fmt.Sprintf("- %s\n", errMsg))
 		}
@@ -1249,7 +1253,7 @@ func (e *DefaultExecutor) executeValidation(ctx context.Context, step *PlanStep,
 		return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
 	}
 
-	validationOutput.WriteString("\n## Validation PASSED\n")
+	validationOutput.WriteString("\n## " + tr(ctx, "internal_workflow_planmode_validation_passed_heading", nil) + "\n")
 	result.Output = validationOutput.String()
 	result.Metrics["validation_passed"] = true
 
@@ -1272,7 +1276,8 @@ func (e *DefaultExecutor) executeTesting(ctx context.Context, step *PlanStep, re
 	}
 
 	var testOutput strings.Builder
-	testOutput.WriteString(fmt.Sprintf("# Test Execution Report: %s\n\n", step.Description))
+	testOutput.WriteString(fmt.Sprintf("# %s: %s\n\n",
+		tr(ctx, "internal_workflow_planmode_report_test_execution_title", nil), step.Description))
 
 	projectType := detectProjectType(e.workspaceRoot)
 	var testsPassed bool
@@ -1292,8 +1297,8 @@ func (e *DefaultExecutor) executeTesting(ctx context.Context, step *PlanStep, re
 		testsPassed, testResults = e.runRustTests(ctx, testMode)
 
 	default:
-		testOutput.WriteString("## Warning: Unknown project type\n")
-		testOutput.WriteString("Cannot determine test command. Please specify a custom test command in the step action.\n")
+		testOutput.WriteString("## " + tr(ctx, "internal_workflow_planmode_test_unknown_project_warning", nil) + "\n")
+		testOutput.WriteString(tr(ctx, "internal_workflow_planmode_test_unknown_project_hint", nil) + "\n")
 
 		// Try to run step action as custom command if provided
 		if testMode != "all" && testMode != "" {

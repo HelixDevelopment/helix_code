@@ -48,3 +48,64 @@ internal_workflow_planmode_status_preparing_execution:
 
 internal_workflow_planmode_status_plan_executed_successfully:
   other: "Plan executed successfully"
+
+# --- round-424 §11.4 CONST-046 Phase 4: planmode validation/test report UI ---
+internal_workflow_planmode_report_validation_title:
+  other: "Validation Report"
+
+internal_workflow_planmode_report_test_execution_title:
+  other: "Test Execution Report"
+
+internal_workflow_planmode_check_go_build_passed:
+  other: "Go Build: PASSED"
+
+internal_workflow_planmode_check_typescript_passed:
+  other: "TypeScript Check: PASSED"
+
+internal_workflow_planmode_check_python_syntax_passed:
+  other: "Python Syntax Check: PASSED ({{.Count}} files)"
+
+internal_workflow_planmode_check_cargo_passed:
+  other: "Cargo Check: PASSED"
+
+internal_workflow_planmode_check_build_skipped_unknown:
+  other: "Build Validation: SKIPPED (unknown project type)"
+
+internal_workflow_planmode_check_go_format_passed:
+  other: "Go Format: PASSED"
+
+internal_workflow_planmode_check_prettier_passed:
+  other: "Prettier Check: PASSED"
+
+internal_workflow_planmode_check_black_format_passed:
+  other: "Black Format: PASSED"
+
+internal_workflow_planmode_check_rust_format_passed:
+  other: "Rust Format: PASSED"
+
+internal_workflow_planmode_check_go_mod_verify_passed:
+  other: "Go Mod Verify: PASSED"
+
+internal_workflow_planmode_check_npm_deps_ok:
+  other: "NPM Dependencies: OK"
+
+internal_workflow_planmode_check_pip_passed:
+  other: "Pip Check: PASSED"
+
+internal_workflow_planmode_check_cargo_verify_passed:
+  other: "Cargo Verify: PASSED"
+
+internal_workflow_planmode_validation_failed_heading:
+  other: "Validation FAILED"
+
+internal_workflow_planmode_validation_passed_heading:
+  other: "Validation PASSED"
+
+internal_workflow_planmode_errors_heading:
+  other: "Errors:"
+
+internal_workflow_planmode_test_unknown_project_warning:
+  other: "Warning: Unknown project type"
+
+internal_workflow_planmode_test_unknown_project_hint:
+  other: "Cannot determine test command. Please specify a custom test command in the step action."
