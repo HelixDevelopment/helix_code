@@ -145,7 +145,7 @@ flagged per-platform.
 | dependencies/HelixDevelopment/LLMOrchestrator | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/LLMProvider | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/LLMsVerifier | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/Models | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/models | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/VisionEngine | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Agentic | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Auth | VERIFIED | 0 |  |
