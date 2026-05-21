@@ -209,4 +209,4 @@ replace digital.vasic.debate => ../dependencies/HelixDevelopment/debate_orchestr
 
 replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/HelixSpecifier
 
-replace digital.vasic.lazy => ../dependencies/vasic-digital/Lazy
+replace digital.vasic.lazy => ../dependencies/vasic-digital/lazy

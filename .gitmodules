@@ -223,8 +223,8 @@
 [submodule "panoptic"]
 	path = panoptic
 	url = git@github.com:vasic-digital/Panoptic.git
-[submodule "dependencies/vasic-digital/EventBus"]
-	path = dependencies/vasic-digital/EventBus
+[submodule "dependencies/vasic-digital/event_bus"]
+	path = dependencies/vasic-digital/event_bus
 	url = git@github.com:vasic-digital/EventBus.git
 [submodule "dependencies/vasic-digital/concurrency"]
 	path = dependencies/vasic-digital/concurrency
@@ -241,8 +241,8 @@
 [submodule "dependencies/vasic-digital/VectorDB"]
 	path = dependencies/vasic-digital/VectorDB
 	url = git@github.com:vasic-digital/VectorDB.git
-[submodule "dependencies/vasic-digital/Embeddings"]
-	path = dependencies/vasic-digital/Embeddings
+[submodule "dependencies/vasic-digital/embeddings"]
+	path = dependencies/vasic-digital/embeddings
 	url = git@github.com:vasic-digital/Embeddings.git
 [submodule "dependencies/vasic-digital/database"]
 	path = dependencies/vasic-digital/database
@@ -250,11 +250,11 @@
 [submodule "dependencies/vasic-digital/cache"]
 	path = dependencies/vasic-digital/cache
 	url = git@github.com:vasic-digital/Cache.git
-[submodule "dependencies/vasic-digital/Messaging"]
-	path = dependencies/vasic-digital/Messaging
+[submodule "dependencies/vasic-digital/messaging"]
+	path = dependencies/vasic-digital/messaging
 	url = git@github.com:vasic-digital/Messaging.git
-[submodule "dependencies/vasic-digital/Formatters"]
-	path = dependencies/vasic-digital/Formatters
+[submodule "dependencies/vasic-digital/formatters"]
+	path = dependencies/vasic-digital/formatters
 	url = git@github.com:vasic-digital/Formatters.git
 [submodule "dependencies/vasic-digital/MCP_Module"]
 	path = dependencies/vasic-digital/MCP_Module
@@ -304,8 +304,8 @@
 [submodule "dependencies/vasic-digital/LLMProvider"]
 	path = dependencies/vasic-digital/LLMProvider
 	url = git@github.com:vasic-digital/LLMProvider.git
-[submodule "dependencies/vasic-digital/BackgroundTasks"]
-	path = dependencies/vasic-digital/BackgroundTasks
+[submodule "dependencies/vasic-digital/background_tasks"]
+	path = dependencies/vasic-digital/background_tasks
 	url = git@github.com:vasic-digital/BackgroundTasks.git
 [submodule "dependencies/vasic-digital/doc_processor"]
 	path = dependencies/vasic-digital/doc_processor
@@ -322,8 +322,8 @@
 [submodule "dependencies/HelixDevelopment/HelixLLM"]
 	path = dependencies/HelixDevelopment/HelixLLM
 	url = git@github.com:HelixDevelopment/HelixLLM.git
-[submodule "dependencies/vasic-digital/Normalize"]
-	path = dependencies/vasic-digital/Normalize
+[submodule "dependencies/vasic-digital/normalize"]
+	path = dependencies/vasic-digital/normalize
 	url = git@github.com:vasic-digital/Normalize.git
 [submodule "dependencies/vasic-digital/RedTeam"]
 	path = dependencies/vasic-digital/RedTeam
@@ -361,14 +361,14 @@
 [submodule "dependencies/vasic-digital/config"]
 	path = dependencies/vasic-digital/config
 	url = git@github.com:vasic-digital/Config.git
-[submodule "dependencies/vasic-digital/Lazy"]
-	path = dependencies/vasic-digital/Lazy
+[submodule "dependencies/vasic-digital/lazy"]
+	path = dependencies/vasic-digital/lazy
 	url = git@github.com:vasic-digital/Lazy.git
 [submodule "dependencies/vasic-digital/Watcher"]
 	path = dependencies/vasic-digital/Watcher
 	url = git@github.com:vasic-digital/Watcher.git
-[submodule "dependencies/vasic-digital/Middleware"]
-	path = dependencies/vasic-digital/Middleware
+[submodule "dependencies/vasic-digital/middleware"]
+	path = dependencies/vasic-digital/middleware
 	url = git@github.com:vasic-digital/Middleware.git
 [submodule "dependencies/vasic-digital/RateLimiter"]
 	path = dependencies/vasic-digital/RateLimiter
@@ -382,8 +382,8 @@
 [submodule "dependencies/vasic-digital/document"]
 	path = dependencies/vasic-digital/document
 	url = git@github.com:vasic-digital/Document.git
-[submodule "dependencies/vasic-digital/Filesystem"]
-	path = dependencies/vasic-digital/Filesystem
+[submodule "dependencies/vasic-digital/filesystem"]
+	path = dependencies/vasic-digital/filesystem
 	url = git@github.com:vasic-digital/Filesystem.git
 [submodule "dependencies/vasic-digital/TOON"]
 	path = dependencies/vasic-digital/TOON
