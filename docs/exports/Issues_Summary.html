@@ -483,16 +483,18 @@ Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-010</td>
-<td>End-to-end Kimi CLI + Qwen Code CodeGraph verification blocked by
-LLM backend quota/credentials</td>
+<td>End-to-end Kimi CLI + Qwen Code CodeGraph verification</td>
 <td>Task</td>
-<td>Operator-blocked</td>
+<td>Completed (→ Fixed.md) round 464</td>
 <td>2026-05-20</td>
-<td>Both per-agent Challenges re-driven against the real CodeGraph MCP
-server; neither agent reaches a true end-to-end answer — Kimi backend
-HTTP 429 monthly-quota, Qwen bundled OAuth free tier discontinued
-2026-04-15. Connect-only + tool-discovery PASS captured honestly; closes
-when operator supplies credentials</td>
+<td>Closed: operator supplied OpenAI-compatible router credentials; both
+<code>cg-challenge-05-kimi.sh</code> +
+<code>cg-challenge-07-qwen.sh</code> re-run → true tier-1 PASS (each
+agent invoked <code>codegraph_search</code> and received real graph data
+from the scanned HelixCode graph). Kimi via <code>openai_legacy</code>
+provider, Qwen via <code>--auth-type openai</code>, both against
+SiliconFlow; keys injected via env vars only, never written to any
+tracked file (CONST-042). Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 <tr>
 <td>HXC-011</td>
@@ -514,34 +516,34 @@ Migrated to <code>docs/Fixed.md</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Counts</strong>: 2 open (HXC-003 closed round 463;
-HXC-008/007/009 closed round 403; HXC-011 closed round 402; HXC-012
-closed round 401; HXC-006 closed round 400; HXC-010 filed round 399;
-HXC-007/008/009 filed round 398; HXV-003 closed round 396; OPS-001
-closed round 397; HXV-002 closed round 348; HXQ-002 closed round 344;
-HXA-002 closed round 342; VEN-002 closed round 340; HXQ-001 closed round
-325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001 closed
-round 302; HXC-004 closed round 200;
+<p><strong>Counts</strong>: 1 open (HXC-010 closed round 464; HXC-003
+closed round 463; HXC-008/007/009 closed round 403; HXC-011 closed round
+402; HXC-012 closed round 401; HXC-006 closed round 400; HXC-010 filed
+round 399; HXC-007/008/009 filed round 398; HXV-003 closed round 396;
+OPS-001 closed round 397; HXV-002 closed round 348; HXQ-002 closed round
+344; HXA-002 closed round 342; VEN-002 closed round 340; HXQ-001 closed
+round 325; HXV-001 closed round 323; HXC-005 closed round 318; PAN-001
+closed round 302; HXC-004 closed round 200;
 VEN-001/HXA-001/HXA-003/HXC-002/HXL-001/HXL-002 all closed) | 0 Bug open
-| 1 Task open (HXC-001) + 1 Operator-blocked Task (HXC-010) | 0 Feature
-open | 0 BLOCKED</p>
-<p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closed
-<code>Implemented (→ Fixed.md)</code>: the CONST-046 i18n migration
-campaign is concluded — the genuine user-facing (C) string-literal
-surface is exhausted across all 7 scope areas (helix_code
-<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
-LLMsVerifier, helix_qa, all owned
-<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
-submodules); ~91-462 rounds migrated tens of thousands of literals
-through i18n seams with paired-mutation anti-bluff tests per round; the
-remaining ~55k audit-baseline hits are all out of CONST-046 scope per
-<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
-The open set is now 2 items — HXC-001 (CONST-052 renames — Task, In
-progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task).
-Previous round 403 — HXC-008 closed <code>Fixed (→ Fixed.md)</code> +
-HXC-007/HXC-009 closed <code>Completed (→ Fixed.md)</code>. See
-<code>docs/Issues.md</code> for full details + prefix convention table.
-PDF/HTML exports auto-regenerated via
+| 1 Task open (HXC-001) | 0 Feature open | 0 BLOCKED</p>
+<p><em>Last regenerated: 2026-05-21 (round 464 — HXC-010 closed
+<code>Completed (→ Fixed.md)</code>: operator supplied OpenAI-compatible
+router credentials; both CodeGraph per-agent Challenges
+<code>cg-challenge-05-kimi.sh</code> +
+<code>cg-challenge-07-qwen.sh</code> re-run produce true tier-1 PASS —
+Kimi CLI and Qwen Code each genuinely invoke
+<code>codegraph_search</code> and receive real graph data from the
+scanned HelixCode code-graph. Kimi driven via an
+<code>openai_legacy</code> provider, Qwen via
+<code>--auth-type openai</code>, both against SiliconFlow; API keys
+injected via environment variables only, never written to any tracked
+file (CONST-042 leak-audit CLEAN). All 7 CodeGraph anti-bluff Challenges
+now true-end-to-end verified across Claude Code, OpenCode, Crush, Kimi
+CLI, Qwen Code. The open set is now 1 item — HXC-001 (CONST-052 renames
+— Task, In progress). Previous round 463 — HXC-003 closed
+<code>Implemented (→ Fixed.md)</code> (CONST-046 i18n migration campaign
+concluded). See <code>docs/Issues.md</code> for full details + prefix
+convention table. PDF/HTML exports auto-regenerated via
 <code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>

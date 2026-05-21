@@ -310,18 +310,11 @@ Reconciliation verified complete (round 403): helix_qa, VisionEngine, LLMProvide
 
 ---
 
-## HXC-010 — End-to-end Kimi CLI + Qwen Code CodeGraph verification blocked by LLM backend quota/credentials
+## HXC-010 — End-to-end Kimi CLI + Qwen Code CodeGraph verification — CLOSED (migrated to docs/Fixed.md)
 
-**Status:** Operator-blocked
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
-**Discovered:** 2026-05-20 (CodeGraph incorporation Phase C close-out — caveat 1 re-attempt)
-**Discovered-By:** AI subagent (`tools/codegraph/challenges/cg-challenge-05-kimi.sh` + `cg-challenge-07-qwen.sh` re-run)
-**Evidence:** Both per-agent Challenges were re-driven non-interactively this session against the real CodeGraph MCP server (624,092-node graph of the HelixCode repo). Neither agent could be driven to a true end-to-end answer because their LLM backends are blocked:
-  - **Kimi CLI** — MCP transport works fully: the transcript (`docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-05-kimi-transcript.txt`) shows Kimi's MCP loader connecting to the `codegraph` server and enumerating all 9 `codegraph_*` tools (`codegraph_search`, `codegraph_context`, `codegraph_callers`, `codegraph_callees`, `codegraph_impact`, `codegraph_node`, `codegraph_explore`, `codegraph_status`, `codegraph_files`). The agent step then aborts with `Error code: 429 — You've reached kimi monthly usage limit for this billing cycle.` Connect-only + tool-discovery PASS captured; end-to-end NOT proven.
-  - **Qwen Code** — the transcript (`docs/research/codegraph/evidence/phase-c/CG-CHALLENGE-07-qwen-transcript.txt`) shows `Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.` Connect-only PASS captured (config registers codegraph MCP server + binary reachable); end-to-end NOT proven.
-This is reported HONESTLY per §11.4.3 — the connect-only fallback is never claimed as end-to-end. Claude Code, OpenCode, and Crush remain true-end-to-end verified (Phase C).
-**Operator-Block-Details:** WHAT: true end-to-end CodeGraph verification for Kimi CLI and Qwen Code (each agent invokes a `codegraph_*` tool and returns real graph data in its transcript). WHY: every agent-side self-resolution path is exhausted — Kimi's backend returns HTTP 429 monthly-quota-exceeded, Qwen's bundled OAuth free tier was discontinued upstream on 2026-04-15; neither can be unblocked without paid/credentialed access the agent does not possess. UNBLOCK CONDITION: operator supplies (a) Kimi API quota/credentials with remaining billing-cycle budget AND/OR (b) Qwen Code LLM credentials (Coding Plan, OpenRouter, Fireworks AI, or another supported provider via `qwen /auth`); then re-run `tools/codegraph/challenges/cg-challenge-05-kimi.sh` + `cg-challenge-07-qwen.sh`. WHO: operator.
-**Resolution path:** Closes to `Completed (→ Fixed.md)` once the operator supplies the credentials and the two Challenges are re-run producing tier-1 PASS (a real `.go` symbol path in each transcript). Until then the connect-only + tool-discovery evidence is the strongest honest proof and is captured under `docs/research/codegraph/evidence/phase-c/`.
+Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-challenge-05-kimi.sh` and `cg-challenge-07-qwen.sh` re-run produce **true tier-1 PASS** — each agent genuinely invoked `codegraph_search` and received real graph data from the scanned HelixCode code-graph. Kimi driven via an `openai_legacy` provider, Qwen via `--auth-type openai`, both against SiliconFlow; API keys injected via environment variables only, never written to any tracked file (CONST-042). Section retained as a migration tombstone per §11.4.19.
 
 ---
 

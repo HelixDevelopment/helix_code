@@ -1,6 +1,6 @@
 # HelixCode CLI-Agent Fusion — Programme Continuation Guide
 
-**Last updated: 2026-05-20 (close-out¹³⁷ — round 463: HXC-003 closed `Implemented (→ Fixed.md)` — the CONST-046 i18n migration campaign is concluded; the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals through i18n seams with paired-mutation anti-bluff tests; the remaining ~55k audit-baseline hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`; migrated to `docs/Fixed.md`. Open set is now 2 items — HXC-001 (Task, In progress) + HXC-010 (Operator-blocked Task)).**
+**Last updated: 2026-05-21 (close-out¹³⁸ — round 464: HXC-010 closed `Completed (→ Fixed.md)` — operator supplied OpenAI-compatible router credentials; both CodeGraph per-agent Challenges `cg-challenge-05-kimi.sh` + `cg-challenge-07-qwen.sh` re-run produce true tier-1 PASS — Kimi CLI and Qwen Code each genuinely invoke `codegraph_search` and receive real graph data from the scanned HelixCode code-graph; Kimi driven via an `openai_legacy` provider, Qwen via `--auth-type openai`, both against SiliconFlow; API keys injected via environment variables only, never written to any tracked file (CONST-042 leak-audit CLEAN); all 7 CodeGraph anti-bluff Challenges now true-end-to-end verified across Claude Code, OpenCode, Crush, Kimi CLI, Qwen Code; migrated to `docs/Fixed.md`. Open set is now 1 item — HXC-001 (Task, In progress)).**
 
 > **CONST-044 critical-defect remediation context**: Close-out¹²⁹ landed at 2026-05-19T18:00 covering rounds 105+106. Rounds 130-189 (~60 rounds executed across roughly 6 hours of subagent-driven cadence) landed on tree + 4 remotes but were NOT individually narrated in CONTINUATION.md. Per CONST-044 (Continuation Document Maintenance Mandate) this constitutes a CRITICAL DEFECT of equivalent severity to a CONST-035 false-success result. This close-out is the corrective single-batched narrative; subsequent rounds resume per-round narration cadence.
 
@@ -1145,4 +1145,31 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 ### Next
 
 - Open set is now exactly 2 items: **HXC-001** (CONST-052 rename programme — Task, In progress; ~37 submodule-entangled leaf renames + parent dirs + 59 Upstreams dirs deferred) and **HXC-010** (Kimi CLI + Qwen Code CodeGraph end-to-end verification — Operator-blocked Task; awaiting LLM-backend credentials). No open Bug or Feature items remain.
+
+---
+
+## close-out¹³⁸ — round 464: HXC-010 closed `Completed (→ Fixed.md)` — Kimi/Qwen CodeGraph end-to-end verified with operator-provided credentials
+
+> Verbatim 2026-05-19 operator mandate (preserved per CONST-049 §11.4.17): *"all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product!"*
+
+### What landed
+
+1. **HXC-010 closed `Completed (→ Fixed.md)`** (`Type: Task`, per CONST-057/§11.4.33). The operator supplied OpenAI-compatible router credentials (`/home/milosvasic/api_keys.sh`), unblocking the two CodeGraph per-agent Challenges that had been `Operator-blocked` since round 463.
+2. **§11.4.10.A pre-use leak-audit: CLEAN.** `git grep` + `git log -S` of the three relevant key values (`KIMI_API_KEY`, `OPENROUTER_API_KEY`, `SILICONFLOW_API_KEY`) confirmed none has ever been committed to a tracked file or git history.
+3. **The originally-blocking backends remain blocked.** `KIMI_API_KEY` shares the **same exhausted account-level monthly billing-cycle quota** as Kimi's bundled OAuth (`exceeded_current_quota_error` on `api.kimi.com/coding/v1`); Qwen's bundled OAuth free tier is still discontinued; `OPENROUTER_API_KEY` had insufficient credit (~$0.0007). Resolution: both agents driven against the **SiliconFlow** OpenAI-compatible router, which has credit and serves both target models with working tool-calling.
+4. **Kimi CLI** — driven via an `openai_legacy`-type provider (config-file `~/.kimi/config-codegraph-or.toml` carrying only a placeholder api_key); the real key injected at runtime via the `OPENAI_API_KEY` env var (`kimi_cli/llm.py` `augment_provider_with_env_vars`), model `moonshotai/Kimi-K2.6`. **Qwen Code** — driven via `--auth-type openai` with `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL` env vars (key NEVER written into the tracked `.qwen/settings.json`), model `Qwen/Qwen3-Coder-30B-A3B-Instruct`.
+5. **Both Challenge scripts updated** (`tools/codegraph/challenges/cg-challenge-05-kimi.sh` + `cg-challenge-07-qwen.sh`) to honour `HELIX_CG_OPENAI_API_KEY` + `HELIX_CG_OPENAI_BASE_URL` (+ optional `HELIX_CG_QWEN_MODEL`) for the credentialed path, falling back to the bundled quota-gated provider when those env vars are absent — anti-bluff preserved (the connect-only fallback is still reported honestly when no creds are present).
+6. **Result — both true tier-1 PASS.** `cg-challenge-05-kimi.sh` → `CG-CHALLENGE-05: PASS (true end-to-end — agent invoked codegraph_* and returned real graph data)`; `cg-challenge-07-qwen.sh` → `CG-CHALLENGE-07: PASS (true end-to-end ...)`. Each transcript shows the MCP loader connecting to the `codegraph` server (9 `codegraph_*` tools), the agent invoking `codegraph_search` for symbol `Provider`, the `ToolResult`/`tool_result` returning 10 real `.go` symbol paths from the scanned HelixCode graph (first: `docs/helix_qa/HelixQA_Integration/research/testdata/raw/pkg_llm_provider.go:40`), and the agent answering with a real file path.
+
+### State
+
+- HXC-010 migrated to `docs/Fixed.md` per §11.4.19; `docs/Issues.md` section retained as a migration tombstone.
+- Evidence captured under `docs/research/codegraph/evidence/hxc010/` (both transcripts + README); secret-scan of every transcript confirms **no API-key value present**.
+- `docs/Issues_Summary.md` updated (open count 2→1; Operator-blocked Task 1→0); `docs/Fixed_Summary.md` updated (Task count 7→8; total closed 96→97; open snapshot 2→1).
+- All 8 tracker exports (4 HTML + 4 PDF) regenerated via `scripts/regenerate-tracker-exports.sh`.
+- All 7 CodeGraph anti-bluff Challenges (CG-CHALLENGE-01..07) now true-end-to-end verified across Claude Code, OpenCode, Crush, Kimi CLI, and Qwen Code.
+
+### Next
+
+- Open set is now exactly 1 item: **HXC-001** (CONST-052 rename programme — Task, In progress). No open Bug, Feature, or Operator-blocked items remain.
 
