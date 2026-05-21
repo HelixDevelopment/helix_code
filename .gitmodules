@@ -229,8 +229,8 @@
 [submodule "dependencies/vasic-digital/concurrency"]
 	path = dependencies/vasic-digital/concurrency
 	url = git@github.com:vasic-digital/Concurrency.git
-[submodule "dependencies/vasic-digital/Observability"]
-	path = dependencies/vasic-digital/Observability
+[submodule "dependencies/vasic-digital/observability"]
+	path = dependencies/vasic-digital/observability
 	url = git@github.com:vasic-digital/Observability.git
 [submodule "dependencies/vasic-digital/auth"]
 	path = dependencies/vasic-digital/auth
@@ -265,11 +265,11 @@
 [submodule "dependencies/vasic-digital/Memory"]
 	path = dependencies/vasic-digital/Memory
 	url = git@github.com:vasic-digital/Memory.git
-[submodule "dependencies/vasic-digital/Optimization"]
-	path = dependencies/vasic-digital/Optimization
+[submodule "dependencies/vasic-digital/optimization"]
+	path = dependencies/vasic-digital/optimization
 	url = git@github.com:vasic-digital/Optimization.git
-[submodule "dependencies/vasic-digital/Plugins"]
-	path = dependencies/vasic-digital/Plugins
+[submodule "dependencies/vasic-digital/plugins"]
+	path = dependencies/vasic-digital/plugins
 	url = git@github.com:vasic-digital/Plugins.git
 [submodule "dependencies/HelixDevelopment/HelixMemory"]
 	path = dependencies/HelixDevelopment/HelixMemory
@@ -283,11 +283,11 @@
 [submodule "dependencies/vasic-digital/LLMOps"]
 	path = dependencies/vasic-digital/LLMOps
 	url = git@github.com:vasic-digital/LLMOps.git
-[submodule "dependencies/vasic-digital/SelfImprove"]
-	path = dependencies/vasic-digital/SelfImprove
+[submodule "dependencies/vasic-digital/self_improve"]
+	path = dependencies/vasic-digital/self_improve
 	url = git@github.com:vasic-digital/SelfImprove.git
-[submodule "dependencies/vasic-digital/Planning"]
-	path = dependencies/vasic-digital/Planning
+[submodule "dependencies/vasic-digital/planning"]
+	path = dependencies/vasic-digital/planning
 	url = git@github.com:vasic-digital/Planning.git
 [submodule "dependencies/vasic-digital/benchmark"]
 	path = dependencies/vasic-digital/benchmark
@@ -298,11 +298,11 @@
 [submodule "dependencies/vasic-digital/SkillRegistry"]
 	path = dependencies/vasic-digital/SkillRegistry
 	url = git@github.com:vasic-digital/SkillRegistry.git
-[submodule "dependencies/vasic-digital/Models"]
-	path = dependencies/vasic-digital/Models
+[submodule "dependencies/vasic-digital/models"]
+	path = dependencies/vasic-digital/models
 	url = git@github.com:vasic-digital/Models.git
-[submodule "dependencies/vasic-digital/LLMProvider"]
-	path = dependencies/vasic-digital/LLMProvider
+[submodule "dependencies/vasic-digital/llm_provider"]
+	path = dependencies/vasic-digital/llm_provider
 	url = git@github.com:vasic-digital/LLMProvider.git
 [submodule "dependencies/vasic-digital/background_tasks"]
 	path = dependencies/vasic-digital/background_tasks
@@ -325,8 +325,8 @@
 [submodule "dependencies/vasic-digital/normalize"]
 	path = dependencies/vasic-digital/normalize
 	url = git@github.com:vasic-digital/Normalize.git
-[submodule "dependencies/vasic-digital/RedTeam"]
-	path = dependencies/vasic-digital/RedTeam
+[submodule "dependencies/vasic-digital/red_team"]
+	path = dependencies/vasic-digital/red_team
 	url = git@github.com:vasic-digital/RedTeam.git
 [submodule "dependencies/vasic-digital/plinius_common"]
 	path = dependencies/vasic-digital/plinius_common
@@ -370,14 +370,14 @@
 [submodule "dependencies/vasic-digital/middleware"]
 	path = dependencies/vasic-digital/middleware
 	url = git@github.com:vasic-digital/Middleware.git
-[submodule "dependencies/vasic-digital/RateLimiter"]
-	path = dependencies/vasic-digital/RateLimiter
+[submodule "dependencies/vasic-digital/rate_limiter"]
+	path = dependencies/vasic-digital/rate_limiter
 	url = git@github.com:vasic-digital/RateLimiter.git
 [submodule "dependencies/vasic-digital/I18n"]
 	path = dependencies/vasic-digital/I18n
 	url = git@github.com:vasic-digital/I18n.git
-[submodule "dependencies/vasic-digital/Recovery"]
-	path = dependencies/vasic-digital/Recovery
+[submodule "dependencies/vasic-digital/recovery"]
+	path = dependencies/vasic-digital/recovery
 	url = git@github.com:vasic-digital/Recovery.git
 [submodule "dependencies/vasic-digital/document"]
 	path = dependencies/vasic-digital/document
