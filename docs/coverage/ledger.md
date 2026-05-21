@@ -155,11 +155,11 @@ flagged per-platform.
 | dependencies/vasic-digital/Cache | VERIFIED | 0 |  |
 | dependencies/vasic-digital/claritas | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Concurrency | VERIFIED | 0 |  |
-| dependencies/vasic-digital/Config | VERIFIED | 0 |  |
+| dependencies/vasic-digital/config | VERIFIED | 0 |  |
 | dependencies/vasic-digital/conversation | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Database | VERIFIED | 0 |  |
 | dependencies/vasic-digital/doc_processor | VERIFIED | 0 |  |
-| dependencies/vasic-digital/Document | VERIFIED | 0 |  |
+| dependencies/vasic-digital/document | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Embeddings | VERIFIED | 0 |  |
 | dependencies/vasic-digital/EventBus | VERIFIED | 0 |  |
 | dependencies/vasic-digital/Filesystem | VERIFIED | 0 |  |

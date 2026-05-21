@@ -358,8 +358,8 @@
 [submodule "dependencies/vasic-digital/ouroborous"]
 	path = dependencies/vasic-digital/ouroborous
 	url = git@github.com:vasic-digital/Ouroborous.git
-[submodule "dependencies/vasic-digital/Config"]
-	path = dependencies/vasic-digital/Config
+[submodule "dependencies/vasic-digital/config"]
+	path = dependencies/vasic-digital/config
 	url = git@github.com:vasic-digital/Config.git
 [submodule "dependencies/vasic-digital/Lazy"]
 	path = dependencies/vasic-digital/Lazy
@@ -379,8 +379,8 @@
 [submodule "dependencies/vasic-digital/Recovery"]
 	path = dependencies/vasic-digital/Recovery
 	url = git@github.com:vasic-digital/Recovery.git
-[submodule "dependencies/vasic-digital/Document"]
-	path = dependencies/vasic-digital/Document
+[submodule "dependencies/vasic-digital/document"]
+	path = dependencies/vasic-digital/document
 	url = git@github.com:vasic-digital/Document.git
 [submodule "dependencies/vasic-digital/Filesystem"]
 	path = dependencies/vasic-digital/Filesystem

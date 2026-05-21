@@ -74,11 +74,11 @@ Each of the rows below is a single `whole-module` placeholder. Future rounds spl
 | dependencies/vasic-digital/Cache | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline; Redis backend |
 | dependencies/vasic-digital/claritas | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
 | dependencies/vasic-digital/Concurrency | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
-| dependencies/vasic-digital/Config | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline; Viper config stack |
+| dependencies/vasic-digital/config | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline; Viper config stack |
 | dependencies/vasic-digital/conversation | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
 | dependencies/vasic-digital/Database | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline; PostgreSQL via pgx/v5 |
 | dependencies/vasic-digital/doc_processor | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline (vasic-digital fork) |
-| dependencies/vasic-digital/Document | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
+| dependencies/vasic-digital/document | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
 | dependencies/vasic-digital/Embeddings | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
 | dependencies/vasic-digital/EventBus | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
 | dependencies/vasic-digital/Filesystem | whole-module | all-platforms | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | UNCONFIRMED: | round 68 baseline |
