@@ -663,8 +663,8 @@ below).</p>
 id="hxa-001-ex-issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">HXA-001
 (ex-ISSUE-009) — helix_agent handler tests surfaced after round-109
 fix</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Discovered:</strong> 2026-05-19 (round 109)
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
 <strong>Discovered-By:</strong> AI subagent (helix_agent LOGIC audit)
 <strong>Evidence:</strong> Mid-run panic in
 <code>TestIsProviderAvailable_NotAvailable</code> aborted test binary;
@@ -673,7 +673,13 @@ round 109’s fix unblocked execution, surfacing 4 pre-existing FAILs:
 <code>TestEmbeddingHandler_WithRealManager</code>,
 <code>TestGetTaskResources</code>, <code>TestGetTaskLogs</code>. Out of
 round-109’s 5-fix cap. <strong>Resolution path:</strong> Per-handler
-investigation, similar to round 109’s test-side bluff pattern.</p>
+investigation, similar to round 109’s test-side bluff pattern.
+<strong>Closure:</strong> Fixed round 116 (commit <code>da782d4</code>)
+— all 4 handler tests fixed; closure recorded in
+<code>docs/Fixed.md</code>. This <code>**Status:**</code> line was stale
+(<code>Queued</code>) and is corrected here to match
+<code>Fixed.md</code> + <code>Issues_Summary.md</code> (§11.4.12
+sync).</p>
 <hr />
 <h2
 id="hxa-002-ex-issue-010-helix_agent-debatellmprovider-sibling-submodule-api-drift">HXA-002

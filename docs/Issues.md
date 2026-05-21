@@ -152,12 +152,13 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ## HXA-001 (ex-ISSUE-009) — helix_agent handler tests surfaced after round-109 fix
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Discovered:** 2026-05-19 (round 109)
 **Discovered-By:** AI subagent (helix_agent LOGIC audit)
 **Evidence:** Mid-run panic in `TestIsProviderAvailable_NotAvailable` aborted test binary; round 109's fix unblocked execution, surfacing 4 pre-existing FAILs: `TestFormattersHandler_FormatCode_UnsupportedLanguage`, `TestEmbeddingHandler_WithRealManager`, `TestGetTaskResources`, `TestGetTaskLogs`. Out of round-109's 5-fix cap.
 **Resolution path:** Per-handler investigation, similar to round 109's test-side bluff pattern.
+**Closure:** Fixed round 116 (commit `da782d4`) — all 4 handler tests fixed; closure recorded in `docs/Fixed.md`. This `**Status:**` line was stale (`Queued`) and is corrected here to match `Fixed.md` + `Issues_Summary.md` (§11.4.12 sync).
 
 ---
 
