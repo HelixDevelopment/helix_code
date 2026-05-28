@@ -15,6 +15,38 @@ CONST056_ANCHOR="CONST-056"
 CONST057_ANCHOR="CONST-057"
 CONST058_ANCHOR="CONST-058"
 CONST059_ANCHOR="CONST-059"
+
+# Covenant-114 propagation anchors (§11.4.69, §11.4.75..§11.4.97) — see §11.4.32
+# / CONST-055. Literal form = "§11.4.NN —" (section number + SPACE + EM-DASH +
+# SPACE). The trailing " — " is MANDATORY: it prevents prefix collisions
+# (§11.4.8 vs §11.4.84/87, §11.4.9 vs §11.4.90..97, §11.4.7 vs §11.4.75..78).
+# Grep is fixed-string (-F) so § (U+00A7) and — (U+2014) match literally.
+COVENANT114_ANCHORS=(
+  "§11.4.69 —" "§11.4.75 —" "§11.4.76 —" "§11.4.77 —" "§11.4.78 —"
+  "§11.4.79 —" "§11.4.80 —" "§11.4.81 —" "§11.4.82 —" "§11.4.83 —"
+  "§11.4.84 —" "§11.4.85 —" "§11.4.86 —" "§11.4.87 —" "§11.4.88 —"
+  "§11.4.89 —" "§11.4.90 —" "§11.4.91 —" "§11.4.92 —" "§11.4.93 —"
+  "§11.4.94 —" "§11.4.95 —" "§11.4.96 —" "§11.4.97 —"
+)
+
+# Map "§11.4.NN —" -> CM-COVENANT-114-NN-PROPAGATION (exact gate ID in FAILs).
+covenant114_gate_id() {
+  local lit="$1" nn
+  nn="${lit#§11.4.}"; nn="${nn%% —}"
+  printf 'CM-COVENANT-114-%s-PROPAGATION' "$nn"
+}
+
+# Append every MISSING covenant-114 anchor for one file to $missing_anchors.
+check_covenant114_anchors() {
+  local f="$1" lit gid
+  for lit in "${COVENANT114_ANCHORS[@]}"; do
+    if ! grep -qF -- "$lit" "$f" 2>/dev/null; then
+      gid="$(covenant114_gate_id "$lit")"
+      missing_anchors+=" ${gid}(${lit% —})"
+    fi
+  done
+}
+
 FAILURES=0
 OWNED_FILE="$ROOT/docs/improvements/submodule_owned.txt"
 THIRD_PARTY_FILE="$ROOT/docs/improvements/submodule_third_party.txt"
@@ -30,6 +62,24 @@ for f in CONSTITUTION.md AGENTS.md; do
     echo "PASS: root/$f"
   else
     echo "FAIL: root/$f"; FAILURES=$((FAILURES+1))
+  fi
+done
+
+# 1b. Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97).
+#     All 5 consumer-extension govfiles must carry every cascaded anchor.
+echo ""
+echo "--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97) ---"
+for f in CLAUDE.md AGENTS.md QWEN.md CRUSH.md CONSTITUTION.md; do
+  if [ ! -f "$ROOT/$f" ]; then
+    echo "FAIL: root/$f — file missing (covenant-114 scope)"; FAILURES=$((FAILURES+1))
+    continue
+  fi
+  missing_anchors=""
+  check_covenant114_anchors "$ROOT/$f"
+  if [ -z "$missing_anchors" ]; then
+    echo "PASS: root/$f (all 24 covenant-114 anchors present)"
+  else
+    echo "FAIL: root/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
   fi
 done
 
