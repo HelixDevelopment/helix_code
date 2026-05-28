@@ -77,6 +77,18 @@ func (w *PoolWorker) IsAvailable() bool {
 	return w.Status == StatusAvailable
 }
 
+// GetStatus returns the worker's current status under the worker's own lock.
+// PoolWorker.Status is guarded by w.mu (UpdateStatus writes it under w.mu.Lock);
+// any reader outside the PoolWorker MUST go through this accessor rather than
+// touching the field directly, otherwise it races with UpdateStatus. This race
+// was surfaced by the §11.4.85 concurrent-assign stress test (GetPoolStats read
+// worker.Status directly while ReleaseWorker -> UpdateStatus wrote it).
+func (w *PoolWorker) GetStatus() PoolWorkerStatus {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return w.Status
+}
+
 // CanHandleTask checks if the worker can handle a specific task
 func (w *PoolWorker) CanHandleTask(taskType string, requirements map[string]interface{}) bool {
 	w.mu.RLock()
@@ -235,11 +247,17 @@ func (wp *WorkerPool) GetAvailableWorkers() []*PoolWorker {
 	return available
 }
 
-// AssignTask assigns a task to an appropriate worker
+// AssignTask assigns a task to an appropriate worker.
+//
+// NOTE: GetAvailableWorkers acquires wp.mu (RLock) itself. This method MUST NOT
+// wrap that call in its own RLock — sync.RWMutex is not reentrant, so a same-
+// goroutine double-RLock deadlocks the instant a writer (RegisterWorker /
+// UnregisterWorker via wp.mu.Lock) is pending between the two acquisitions
+// (Go's RWMutex blocks new readers while a writer waits). That deadlock was
+// surfaced by the §11.4.85 register/unregister chaos test; the fix is to let
+// GetAvailableWorkers do its own single locking.
 func (wp *WorkerPool) AssignTask(ctx context.Context, taskType string, requirements map[string]interface{}) (*PoolWorker, error) {
-	wp.mu.RLock()
 	availableWorkers := wp.GetAvailableWorkers()
-	wp.mu.RUnlock()
 
 	if len(availableWorkers) == 0 {
 		return nil, fmt.Errorf("no available workers")
@@ -276,7 +294,9 @@ func (wp *WorkerPool) GetPoolStats() map[string]interface{} {
 	errorWorkers := 0
 
 	for _, worker := range wp.workers {
-		switch worker.Status {
+		// Read each worker's status through its own lock (see GetStatus) — the
+		// pool-level RLock guards the map, NOT each worker's mutable fields.
+		switch worker.GetStatus() {
 		case StatusAvailable:
 			availableWorkers++
 		case StatusBusy:

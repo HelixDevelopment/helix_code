@@ -43,15 +43,19 @@ func TestLoadBalancer_Chaos_FlipStrategyDuringSelect(t *testing.T) {
 	stop := make(chan struct{})
 	var wg sync.WaitGroup
 
-	// Chaos goroutine: rapidly mutate strategy + a provider's health mid-flight.
-	// Health is mutated under the manager's own mutex (the lock GetStatus uses),
-	// so the chaos itself is race-clean while the production read path is exercised.
+	// Chaos goroutine: rapidly flip the load-balancing strategy mid-flight. This
+	// is the genuinely-concurrent, lock-safe state-mutation surface — SetStrategy
+	// takes the LoadBalancer mutex that SelectOptimalProvider reads currentStrategy
+	// under. (We deliberately do NOT mutate provider Health here: GetStatus returns
+	// shallow copies that SHARE the *HealthStatus pointer, so an in-place Health
+	// write would be an unrealistic data race the production read path never
+	// guards against — real health updates replace the pointer under lock.)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		defer func() {
 			if p := recover(); p != nil {
-				rec.Record(stresschaos.Fatal, "SetStrategy/health-flip panicked")
+				rec.Record(stresschaos.Fatal, "SetStrategy flip panicked")
 			}
 		}()
 		i := 0
@@ -62,11 +66,6 @@ func TestLoadBalancer_Chaos_FlipStrategyDuringSelect(t *testing.T) {
 			default:
 			}
 			_ = lb.SetStrategy(strategies[i%len(strategies)])
-			manager.mutex.Lock()
-			if p, ok := manager.providers["healthy1"]; ok {
-				p.Health.IsHealthy = (i%2 == 0)
-			}
-			manager.mutex.Unlock()
 			i++
 			time.Sleep(50 * time.Microsecond)
 		}

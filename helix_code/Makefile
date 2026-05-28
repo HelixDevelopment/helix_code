@@ -1,4 +1,4 @@
-.PHONY: all build test clean logo-assets setup-deps sync-manual manual-html docs release
+.PHONY: all build test stress-chaos stress-chaos-meta clean logo-assets setup-deps sync-manual manual-html docs release
 
 # Build variables
 BINARY_NAME=helixcode
@@ -108,6 +108,20 @@ test:
 	@echo "🧪 Running tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL), build cache enabled)..."
 	$(GO_TEST) -v $(GO_TEST_PARFLAGS) ./...
 	@echo "✅ Tests complete"
+
+# §11.4.85 Stress + Chaos suites — real components, -race, captured evidence in
+# qa-results/<run-id>/ (latency.json / concurrency_report.json / recovery_trace.*)
+stress-chaos: ## Run §11.4.85 stress + chaos suites (real components, -race, captured evidence)
+	@echo "🌪️  Running §11.4.85 stress + chaos suites (under -race)..."
+	$(GO_TEST) -race -run 'Stress|Chaos' ./internal/worker/... ./internal/llm/... ./tests/stresschaos/...
+	@echo "✅ Stress + chaos suites complete (evidence under qa-results/)"
+
+# §1.1 paired-mutation meta-tests — prove the stress/chaos harness itself cannot
+# bluff (planted deadlock/leak/error-rate/below-floor/chaos-panic must be detected)
+stress-chaos-meta: ## Run §1.1 paired-mutation meta-tests for the stress/chaos harness
+	@echo "🔬 Running stress/chaos harness paired-mutation meta-tests..."
+	$(GO_TEST) -race -run 'TestMeta' -v ./tests/stresschaos/...
+	@echo "✅ Harness meta-tests complete"
 
 # Comprehensive test suite
 test-all: test test-coverage test-benchmark test-docs
