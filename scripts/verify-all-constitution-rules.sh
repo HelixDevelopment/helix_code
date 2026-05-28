@@ -34,6 +34,12 @@
 #   G9  §11.4.91 summary clarity     — no anti-pattern one-liners in the
 #                                    summary docs (delegates to
 #                                    summary_clarity_gate.sh; HXC-018)
+#   G10 §11.4.81 cross-platform parity — no uname-dispatch script drops a
+#                                    manifest platform without honest-gap
+#                                    citation (cross_platform_parity_gate.sh; HXC-015)
+#   G11 §11.4.93/95 workable-items   — docs/workable_items.db validates + is
+#                                    byte-identically in sync with Issues.md/
+#                                    Fixed.md (workable_items_sync_gate.sh; HXC-026)
 #
 # Per CONST-055 anti-bluff: this sweep MUST be paired with a meta-test
 # that plants a known violation per gate and asserts the sweep reports
@@ -403,6 +409,20 @@ if want_gate G10; then
     else
         gate_fail G10 "uname-dispatch script(s) omit a manifest platform (see /tmp/g10-cpp.out)" \
             "$(tail -5 /tmp/g10-cpp.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G11 — §11.4.93/95 workable-items md↔db in sync (HXC-013/HXC-026)
+# ---------------------------------------------------------------------------
+if want_gate G11; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G11 — §11.4.93/95 workable-items md↔db sync (HXC-026)"
+    if bash "$ROOT/scripts/gates/workable_items_sync_gate.sh" >/tmp/g11-wi.out 2>&1; then
+        gate_pass G11 "$(tail -1 /tmp/g11-wi.out | sed 's/^CM-WORKABLE-ITEMS-MD-DB-IN-SYNC: //')"
+    else
+        gate_fail G11 "docs/workable_items.db drifted from Issues.md/Fixed.md (see /tmp/g11-wi.out)" \
+            "$(tail -3 /tmp/g11-wi.out)"
     fi
 fi
 

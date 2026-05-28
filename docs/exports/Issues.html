@@ -1438,6 +1438,29 @@ reference ~9 deleted provider constructors + a duplicate MockProvider) —
 filed as <strong>HXC-024</strong>; the ollama integration tests pass in
 isolation and land once HXC-024 restores the package integration build.
 <strong>Session total: 34 real production bugs fixed.</strong></p>
+<h2 id="hxc-026-workable-items-mddb-sync-gate-11.4.9395-follow-up">HXC-026 —
+workable-items md↔︎db sync gate (§11.4.93/95 follow-up)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(HXC-013 follow-up — the binary + tracked DB existed but no gate
+enforced md↔︎db sync) <strong>Closure (2026-05-29):</strong>
+<code>scripts/gates/workable_items_sync_gate.sh</code>
+(CM-WORKABLE-ITEMS-MD-DB-IN-SYNC) builds the constitution
+<code>workable-items</code> binary and asserts three invariants on TEMP
+COPIES (never opening the tracked DB in-place — SQLite WAL-mode dirties
+the header even on read): (1) the committed
+<code>docs/workable_items.db</code> validates; (2) Issues.md/Fixed.md
+round-trip md→db→md byte-identically; (3) the committed DB’s md
+projection matches the live docs (DB not stale). Honest SKIP-OK when the
+CGO/sqlite binary can’t build in-env (never a fake pass). Wired into the
+CONST-055 sweep as <strong>G11</strong> (full sweep G1-G11 → 0
+failures). Paired-mutation meta-test
+<code>scripts/tests/workable_items_sync_meta_test.sh</code> (plant a
+phantom item in Issues.md → gate FAILs → trap-restore byte-identical →
+gate PASSes; 3/3 assertions). <code>bash -n</code> clean. Completes the
+HXC-013 §11.4.93 enforcement loop (the remaining
+auto-invoke-from-commit_all.sh wiring stays a forward note).</p>
+<hr />
 <h2 id="hxc-025-constitution-11.4.9899101-cascade-const-047311.4.26">HXC-025
 — Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
