@@ -80,6 +80,21 @@ type Event struct {
 // EventHandler is a function that handles events
 type EventHandler func(ctx context.Context, event Event) error
 
+// invokeHandler runs a single handler with panic isolation. A subscriber that
+// panics mid-dispatch MUST NOT take down the bus — in async modes the handler
+// runs in its own goroutine, where an unrecovered panic would crash the entire
+// process (every other goroutine included). This converts a panic into a normal
+// error so co-subscribers still run, the publish call returns, and the bus stays
+// usable. (§11.4.85(B) resilience: degrade gracefully, never crash.)
+func (bus *EventBus) invokeHandler(ctx context.Context, handler EventHandler, event Event) (err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf("event handler panic for %s: %v", event.Type, p)
+		}
+	}()
+	return handler(ctx, event)
+}
+
 // EventBus manages event subscriptions and publishing
 type EventBus struct {
 	subscribers map[EventType][]EventHandler
@@ -160,7 +175,7 @@ func (bus *EventBus) Publish(ctx context.Context, event Event) error {
 		for _, handler := range handlers {
 			h := handler // capture for goroutine
 			go func() {
-				if err := h(ctx, event); err != nil {
+				if err := bus.invokeHandler(ctx, h, event); err != nil {
 					bus.logError(fmt.Errorf("%s", tr(ctx, "internal_event_async_handler_error", map[string]any{
 						"EventType": string(event.Type),
 						"Err":       err.Error(),
@@ -178,7 +193,7 @@ func (bus *EventBus) Publish(ctx context.Context, event Event) error {
 	// Sync: wait for all handlers
 	var errors []string
 	for i, handler := range handlers {
-		if err := handler(ctx, event); err != nil {
+		if err := bus.invokeHandler(ctx, handler, event); err != nil {
 			errorMsg := tr(ctx, "internal_event_sync_handler_failed", map[string]any{
 				"Index": i,
 				"Err":   err.Error(),
@@ -240,7 +255,7 @@ func (bus *EventBus) PublishAndWait(ctx context.Context, event Event) error {
 		h := handler // capture for goroutine
 		go func() {
 			defer wg.Done()
-			if err := h(ctx, event); err != nil {
+			if err := bus.invokeHandler(ctx, h, event); err != nil {
 				errorsChan <- fmt.Errorf("%s", tr(ctx, "internal_event_wait_handler_error", map[string]any{
 					"EventType": string(event.Type),
 					"Err":       err.Error(),

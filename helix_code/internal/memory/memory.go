@@ -268,16 +268,29 @@ func (c *Conversation) GetMetadata(key string) (string, bool) {
 	return value, ok
 }
 
-// Clone creates a copy of the conversation
+// Clone creates a deep copy of the conversation.
+//
+// HXC-014 §11.4.85 chaos fix: this clone now copies EVERY field. The previous
+// implementation silently dropped CharacterID, UserID, CharMessages, Version and
+// Status — so a cloned conversation lost its version (breaking optimistic
+// concurrency) and its character-AI identity. Because Clone() is now used on the
+// Manager read path to hand callers a race-free snapshot (see Manager.GetConversation),
+// an incomplete clone would have changed observable behaviour; a full deep copy
+// keeps the snapshot semantically identical to the stored conversation.
 func (c *Conversation) Clone() *Conversation {
 	clone := &Conversation{
 		ID:           c.ID,
 		Title:        c.Title,
 		SessionID:    c.SessionID,
+		CharacterID:  c.CharacterID,
+		UserID:       c.UserID,
 		Messages:     make([]*Message, len(c.Messages)),
+		CharMessages: make([]*CharacterMessage, len(c.CharMessages)),
 		Metadata:     make(map[string]string),
 		CreatedAt:    c.CreatedAt,
 		UpdatedAt:    c.UpdatedAt,
+		Version:      c.Version,
+		Status:       c.Status,
 		Summary:      c.Summary,
 		TokenCount:   c.TokenCount,
 		MessageCount: c.MessageCount,
@@ -286,6 +299,12 @@ func (c *Conversation) Clone() *Conversation {
 	// Deep copy messages
 	for i, msg := range c.Messages {
 		clone.Messages[i] = msg.Clone()
+	}
+
+	// Deep copy character messages (value copy — CharacterMessage has no nested refs)
+	for i, cm := range c.CharMessages {
+		cmCopy := *cm
+		clone.CharMessages[i] = &cmCopy
 	}
 
 	// Copy metadata

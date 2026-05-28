@@ -61,7 +61,17 @@ func (m *Manager) CreateConversation(title string) (*Conversation, error) {
 	return conv, nil
 }
 
-// GetConversation gets a conversation by ID
+// GetConversation gets a conversation by ID.
+//
+// Concurrency contract (HXC-014 §11.4.85 chaos fix): the returned *Conversation
+// is a deep CLONE, never the live stored pointer. Returning the live pointer
+// previously let a caller read conv.Messages / conv.MessageCount concurrently
+// with a writer's AddMessage / ClearConversation (which mutate the same struct
+// under the Manager write lock) — a genuine data race the Manager's RWMutex did
+// NOT protect against, because the mutex only guards the conversations map, not
+// the contents of a pointer that has already escaped the critical section.
+// Cloning under the read lock makes the snapshot immutable from the caller's
+// perspective, so reads and writes can no longer alias the same memory.
 func (m *Manager) GetConversation(id string) (*Conversation, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -71,15 +81,19 @@ func (m *Manager) GetConversation(id string) (*Conversation, error) {
 		return nil, fmt.Errorf("conversation not found: %s", id)
 	}
 
-	return conv, nil
+	return conv.Clone(), nil
 }
 
-// GetActive returns the active conversation
+// GetActive returns a race-free clone of the active conversation (or nil).
+// See Manager.GetConversation for the HXC-014 §11.4.85 cloning rationale.
 func (m *Manager) GetActive() *Conversation {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	return m.activeConv
+	if m.activeConv == nil {
+		return nil
+	}
+	return m.activeConv.Clone()
 }
 
 // SetActive sets the active conversation
@@ -188,7 +202,8 @@ func (m *Manager) GetAll() []*Conversation {
 
 	conversations := make([]*Conversation, 0, len(m.conversations))
 	for _, conv := range m.conversations {
-		conversations = append(conversations, conv)
+		// HXC-014 §11.4.85: hand out race-free clones, not live pointers.
+		conversations = append(conversations, conv.Clone())
 	}
 
 	return conversations
@@ -202,7 +217,8 @@ func (m *Manager) GetBySession(sessionID string) []*Conversation {
 	conversations := make([]*Conversation, 0)
 	for _, conv := range m.conversations {
 		if conv.SessionID == sessionID {
-			conversations = append(conversations, conv)
+			// HXC-014 §11.4.85: hand out race-free clones, not live pointers.
+			conversations = append(conversations, conv.Clone())
 		}
 	}
 
@@ -234,7 +250,12 @@ func (m *Manager) GetRecent(n int) []*Conversation {
 		n = len(all)
 	}
 
-	return all[:n]
+	// HXC-014 §11.4.85: hand out race-free clones, not live pointers.
+	out := make([]*Conversation, n)
+	for i := 0; i < n; i++ {
+		out[i] = all[i].Clone()
+	}
+	return out
 }
 
 // Search searches for conversations containing query
@@ -248,14 +269,15 @@ func (m *Manager) Search(query string) []*Conversation {
 	for _, conv := range m.conversations {
 		// Search in title
 		if strings.Contains(strings.ToLower(conv.Title), query) {
-			conversations = append(conversations, conv)
+			// HXC-014 §11.4.85: hand out race-free clones, not live pointers.
+			conversations = append(conversations, conv.Clone())
 			continue
 		}
 
 		// Search in messages
 		for _, msg := range conv.Messages {
 			if strings.Contains(strings.ToLower(msg.Content), query) {
-				conversations = append(conversations, conv)
+				conversations = append(conversations, conv.Clone())
 				break
 			}
 		}

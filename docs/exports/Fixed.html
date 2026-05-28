@@ -222,6 +222,201 @@ commit history + the <code>docs/improvements/</code> evidence chain
 </thead>
 <tbody>
 <tr>
+<td>2026-05-28</td>
+<td>HXC-017: CodeGraph index excluded all own-org submodules (blanket
+<code>dependencies/**</code>) + config.json was untracked —
+§11.4.79/§11.4.78/§11.4.80</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>176fe07b + 551552f7 + 876b3b36</td>
+<td>§11.4.78/79/80. (1) <code>.codegraph/config.json</code> blanket
+<code>dependencies/**</code> exclude → 3 specific third-party excludes
+(LLama_CPP/Ollama/HuggingFace_Hub); own-org
+<code>dependencies/vasic-digital/**</code> (~55) +
+<code>dependencies/HelixDevelopment/**</code> (~10) now INCLUDED;
+credential excludes
+(<strong>/.env,</strong>/*.key,**/*.pem,<strong>/secrets/</strong>)
+added; valid JSON. (2) §11.4.78 gap fixed: root <code>.gitignore</code>
+blanket-ignored <code>**/.codegraph/</code> so config.json was never
+tracked → now config.json + .codegraph/.gitignore tracked, db/caches
+stay ignored (<code>git check-ignore</code> verified). (3) Re-index
+<code>codegraph index .</code> exit 0: Files
+39,024→<strong>76,044</strong>, Nodes
+624,103→<strong>1,255,974</strong>, Edges 1.64M→<strong>3.96M</strong>.
+<strong>§11.4.79 anti-bluff probe (conductor-independently-verified):
+<code>codegraph query EventBus</code> →
+<code>dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85</code>;
+helix_memory →
+<code>dependencies/HelixDevelopment/helix_memory/...</code>; third-party
+<code>llama</code>→empty.</strong> (4) docs/codegraph/Status.md +
+Status_Summary.md created (§11.4.80; weekly automation
+inherited-by-reference from constitution
+codegraph_update.sh/codegraph_sync.sh, not copied). db gitignored (regen
+per §11.4.77). Closed <code>Completed (→ Fixed.md)</code> per CONST-057
+(Type Task).</td>
+</tr>
+<tr>
+<td>2026-05-28</td>
+<td>HXC-023: literal-true
+<code>Assert(true,…)</code>/<code>AssertTrue(true,…)</code> PASS-bluffs
+across the e2e test banks (report PASS without exercising
+behaviour)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>8e80e0c0 (batch 1) + b514f8bb (batch 2)</td>
+<td>§11.4/§11.4.1/§11.4.3/§11.4.69. ALL literal-true PASS-bluffs across
+the test banks replaced with real assertions or honest skips — batch 1
+core/additional_tests.go (41: 31 real-assert + 1 real-fail + 9
+honest-skip), batch 2
+distributed(12)+integration(11)+platform(5)+core/tests.go(4)+performance(1)=33.
+Pattern: mislabelled “X succeeded” branches firing on non-2xx →
+<code>AssertEqual</code> the expected 2xx; 401/403/429 auth/rate
+branches → assert that exact status; feature-404 branches → honest
+<code>v.Skip(reason)</code>; the 4 legitimate “Running on
+<arch/platform>” positive-platform asserts left untouched.
+<strong>Verification: <code>go build ./...</code> exit 0 +
+<code>go vet ./...</code> clean (independently re-verified by
+conductor); full-tree grep for literal-true bluffs = 0; anti-bluff
+runtime harness against a DOWN server → all 21 representative changed
+cases HONEST-FAIL with real transport errors, 0 green-empty.</strong>
+Closed <code>Fixed (→ Fixed.md)</code> per CONST-057 (Type Bug).</td>
+</tr>
+<tr>
+<td>2026-05-28</td>
+<td>HXC-022: test_bank platform+integration packages did not compile —
+half-written stubs + root package-name collision (anti-bluff: an
+uncompilable test package never runs)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>02b3081c</td>
+<td>§11.4/§11.4.1. ~11 <code>declared and not used</code> half-written
+stubs
+(certID/planID/profileID/quotaID/restoreID/exportID/cpuUsage/memoryUsage/quota/current/available
++ perf stressID/testID×3/keyID) COMPLETED with real assertions
+(created-resource IDs → assert non-empty; metric values → assert
+non-nil); 2 vestigial unsent request bodies removed. Root-dir package
+collision (<code>testbank</code> loader.go vs <code>performance</code>
+performance_security_tests.go) resolved by
+<code>git mv performance_security_tests.go → performance/</code>
+subpackage; un-masked pre-existing core/ defects (duplicate
+<code>GetCoreTests</code>, unused imports, <code>:=</code> no-new-vars)
+fixed. <strong><code>go build ./...</code> exit 0 (whole test_bank
+module) + <code>go vet ./...</code> clean — independently re-verified by
+conductor.</strong> HXC-021 runtime-verified through the now-compiling
+banks: platform SKIP=3 honest (macOS/Windows/ARM “not running on…”),
+integration SKIP=2 honest (Ollama unreachable / OPENAI_API_KEY unset), 0
+fake PASS, 0 green-empty; <code>grep 'Assert(true.*skip'</code> = 0. A
+larger residual sweep (~57 literal-true endpoint/auth bluffs) filed
+separately as HXC-023. Closed <code>Fixed (→ Fixed.md)</code> per
+CONST-057 (Type Bug).</td>
+</tr>
+<tr>
+<td>2026-05-28</td>
+<td>HXC-016: §11.4.69–97 governance cascade into all owned submodules +
+mechanical propagation gate (CONST-047/§3, §11.4.32)</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>root 27929ae1; submodule batches
+ef4b3986/a864039d/e4046668/3adb2e63/464b2401/b4ad4f50/053fd731; gate
+d2165bf7+9031368d; fix-ups 79478ed5/903b9225/a9a1a6a1; branch-repair
+b4b790ea</td>
+<td>All 24 new constitution anchors (§11.4.69 + §11.4.75–97) cascaded
+into the 5 root govfiles AND all ~68 owned-submodule
+CONSTITUTION/CLAUDE/AGENTS/QWEN files. <strong>Anti-bluff
+hardening:</strong> a loose <code>grep -qF "§11.4.95 —"</code> falsely
+matched the §11.4.95 cross-reference inside the §11.4.93 block body,
+skipping the §11.4.95 <em>heading</em> in batch-1-6 submodules — caught
+by tightening the gate to the H2 marker <code>## §11.4.NN —</code>
+(d2165bf7) which then exposed 201 missing-heading files; fix-up A/B/C
+(79478ed5/903b9225/a9a1a6a1) restored them. A second defect: the
+cascade’s <code>reset --hard origin/main</code> regressed 4
+HelixDevelopment submodules
+(doc_processor/llm_orchestrator/llm_provider/vision_engine) off their
+canonical <code>master</code> lineage (which carried
+§11.9+CONST-047..059), losing those anchors — repaired by repointing to
+master with the complete set (b4b790ea). Gate submodule-scope enabled
+(9031368d: <code>check_covenant114_anchors</code> inside the
+owned-submodule loop). <strong>Final
+<code>verify-governance-cascade.sh</code> → 0 failures</strong> (204
+submodule PASS lines carry “+ §11.4 covenant-114”); paired §1.1 mutation
+captured (strip <code>## §11.4.95 —</code> from cache/CLAUDE.md →
+Result: 1 failures → git-checkout restore → 0 failures). Closed
+<code>Completed (→ Fixed.md)</code> per CONST-057 (Type Task).</td>
+</tr>
+<tr>
+<td>2026-05-28</td>
+<td>HXC-001 (ex-ISSUE-005): CONST-052 lowercase-snake_case rename
+programme — all owned-org submodule leaf dirs + 57
+<code>Upstreams/</code> dirs renamed</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>Phase1 1-A..1-D; Phase2 0db40707/5093f757/5b2346fb/bc0bf62d; Phase3
+bbac13f7; Phase4 d28ab0e0; tooling 03e7edcc + drift-fix 8dc0d756</td>
+<td>All owned-org submodule LEAF directories renamed to lowercase
+snake_case across Phases 1–4, plus all 57
+<code>Upstreams/</code>→<code>upstreams/</code> dirs (Phase 1). Tooling
+authored: <code>scripts/const052_rename_leaf.sh</code> (git mv +
+<code>.gitmodules</code> path/section +
+gitdir-pointer/<code>core.worktree</code> + every consumer go.mod
+<code>replace</code> filesystem path + coverage ledgers +
+<code>docs/improvements/submodule_owned.txt</code>) +
+<code>scripts/const052_verify_refs.sh</code> (RESULT: PASS each batch —
+0 active stale refs; PROSE-only residual).
+<code>verify-governance-cascade.sh</code> → 0 failures after the
+submodule_owned.txt drift-fix (<code>8dc0d756</code>). Go module paths
+are abstract (<code>digital.vasic.*</code>) → NO <code>.go</code> import
+edits, only <code>replace</code> filesystem paths. <strong>Phase 5
+(org-grouping dirs <code>dependencies/vasic-digital/</code> +
+<code>dependencies/HelixDevelopment/</code>) resolved as NO-OP per
+operator decision 2026-05-28 (AskUserQuestion): both kept as GitHub-org
+namespace carve-outs — §11.4.28(C) only mandates
+<code>&lt;root&gt;/&lt;submodule&gt;</code> or
+<code>&lt;root&gt;/submodules/&lt;submodule&gt;</code>, org grouping is
+optional and renaming them is the highest-blast-radius op.</strong>
+Closed <code>Completed (→ Fixed.md)</code> per CONST-057 (Type
+Task).</td>
+</tr>
+<tr>
+<td>2026-05-28</td>
+<td>HXC-021 + HXC-014a + HXC-015a: fake-skip
+<code>Assert(true,"...skipped")</code> bluffs (11) + empty
+<code>TestProviderStress</code> stubs report green while exercising
+nothing</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-28 session</td>
+<td>f464adb0</td>
+<td>§11.4/§11.4.1/§11.4.3 anti-bluff. Confirmed firsthand (captured): 11
+<code>return v.Assert(true,"...test skipped...")</code> fake-skips — 7
+in <code>helix_code/tests/e2e/test_bank/platform/tests.go</code>
+(L61/164/622/663/704/745/784), 4 in <code>integration/tests.go</code>
+(L530/535/546/586) — counted as PASS while exercising nothing. Fix: new
+honest-SKIP mechanism
+<code>helix_code/tests/e2e/orchestrator/pkg/skip.go</code>
+(<code>SkipError</code> + <code>Skip</code>/<code>IsSkip</code>),
+<code>Validator.Skip(reason)</code>, executor maps
+<code>*SkipError → pkg.StatusSkipped</code> (counted separately from
+Passed, never inflating green); all 11 fake-skips →
+<code>v.Skip(runtime.GOOS/GOARCH...)</code>; the legitimate
+<code>Assert(true,"Running on...")</code> positive assertions left
+untouched. HXC-014a: <code>TestProviderStress</code>‘s 3 empty
+sub-functions (<code>t.Logf</code>+comment) → route through
+<code>stressProvider(t)</code> (real available+healthy provider OR
+honest <code>t.Skip</code> SKIP-OK:#HXC-014 — never green-empty).
+Verified: orchestrator <code>go build ./...</code> exit 0;
+<code>go vet -tags=integration ./tests/integration/...</code> exit 0;
+<code>grep 'Assert(true,".*skip'</code> in both banks = 0; §11.4.84
+mutation-residue scan clean. Pre-existing test_bank platform/integration
+non-compilation (blocks runtime-verifying those two banks’ honest-skips)
+filed as <strong>HXC-022</strong>. Closed
+<code>Fixed (→ Fixed.md)</code> per CONST-057 (Type Bug).</td>
+</tr>
+<tr>
 <td>2026-05-21</td>
 <td>HXC-010: End-to-end Kimi CLI + Qwen Code CodeGraph verification
 (operator-blocked on LLM backend quota/credentials)</td>

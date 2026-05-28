@@ -535,10 +535,20 @@ middleware). 500 still returned for genuinely unmarshallable values
 (channels). 19 middleware tests now PASS. Mutation verified.</p>
 <hr />
 <h2
-id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase">HXC-001
+id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase-closed-fixed.md">HXC-001
 (ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still
-PascalCase</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
+PascalCase — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Closure (2026-05-28):</strong> all
+owned-org submodule LEAF dirs renamed to lowercase snake_case (Phases
+1–4: 1-A..1-D Upstreams; 2-A..2-D / 3 / 4 leaf dirs) + all 57
+<code>Upstreams/</code>→<code>upstreams/</code> dirs. Phase 5
+(org-grouping dirs <code>dependencies/vasic-digital/</code> +
+<code>dependencies/HelixDevelopment/</code>) resolved as a NO-OP per
+operator decision 2026-05-28 (AskUserQuestion): kept as GitHub-org
+namespace carve-outs. Section retained as a migration tombstone per
+§11.4.19; round-343 detail below preserved for history.
 <strong>Discovered:</strong> 2026-05-15 (CONST-052 cascade landed)
 <strong>Discovered-By:</strong> Constitution <strong>Evidence:</strong>
 Meta-repo top-level dirs already snake_case (round-88 sweep). Remaining
@@ -1114,8 +1124,243 @@ injected via environment variables only, never written to any tracked
 file (CONST-042). Section retained as a migration tombstone per
 §11.4.19.</p>
 <hr />
-<p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closed
-<code>Implemented (→ Fixed.md)</code> and migrated to
+<h2
+id="hxc-013-adopt-sqlite-backed-single-source-of-truth-for-workable-items-11.4.9395">HXC-013
+— Adopt SQLite-backed single-source-of-truth for workable items
+(§11.4.93/95)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
+<strong>Discovered:</strong> 2026-05-28 (constitution pull
+7f738df→15cd4bc) <strong>Discovered-By:</strong> AI (post-pull awareness
+review) <strong>Scope:</strong> §11.4.93 + §11.4.95 require a tracked
+<code>docs/workable_items.db</code> as authoritative, with a Go binary
+doing bidirectional md↔︎db sync. Critical findings: the constitution’s
+<code>constitution/scripts/workable-items/</code> binary is a
+NON-FUNCTIONAL Phase-2 scaffold (every subcommand prints “not yet
+implemented”) — adoption requires building the parser/renderer UPSTREAM
+per §11.4.74 (triggers §11.4.26); <code>.gitignore:162</code> blanket
+<code>*.db</code> must gain <code>!docs/workable_items.db</code>;
+HelixCode lacks
+<code>generate_issues_summary.sh</code>/<code>sync_issues_docs.sh</code>.
+Effort ~5-9 subagent-days. <strong>Operator decisions:</strong> id
+strategy (recommend keep HXC-NNN in free-text atm_id col); .gitignore
+negation; upstream-first vs wait; round-trip tolerance.</p>
+<hr />
+<h2 id="hxc-014-stress-chaos-test-coverage-11.4.85">HXC-014 — Stress +
+chaos test coverage (§11.4.85)</h2>
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-28 (constitution pull)
+<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.85
+requires every fix/improvement to ship stress (sustained-load N≥100/≥30s
+p50/p95/p99 + concurrency N≥10 + boundary) + chaos
+(process-death/network-fault/input-corruption/resource-exhaustion/state-corruption)
+suites with captured evidence. <strong>Batch 1 DONE (2026-05-28, commits
+76586014 + a9f883c6):</strong> Go-native helper
+<code>helix_code/tests/stresschaos/</code> (RunSustainedLoad
+p50/p95/p99→latency.json; RunConcurrent ≥10 goroutines + deadlock/leak
+guards; ChaosKill/CorruptInput/ResourcePressure injectors ≤128MB
+§12.6-safe; evidence→qa-results/ gitignored CONST-053) + 7 paired §1.1
+meta-tests proving the harness can’t bluff
+(deadlock/leak/error-rate/below-floor/panic all DETECTED). First 2
+targets done: internal/worker + internal/llm/load_balancer under -race.
+<strong>The chaos tests SURFACED + FIXED 2 REAL production
+bugs:</strong> (1) WorkerPool.AssignTask RWMutex-reentrancy deadlock
+(double-RLock), (2) GetPoolStats data race on PoolWorker.Status.
+<code>make stress-chaos</code> + <code>make stress-chaos-meta</code>
+added. Conductor independently re-ran meta-tests → PASS. <strong>Batch 2
+DONE (2026-05-28, commit 0505c337):</strong> internal/task
+(TaskManager/TaskQueue — sustained p50=0.21ms, concurrent 16×120
+gDelta=0, state-corruption + input-corruption chaos) + internal/session
+(TranscriptStore/ResumeFinder, real disk I/O — sustained, concurrent
+12×60 no-loss, input-corruption + process-death-mid-append
+crash-consistent recovery). 8 tests PASS under -race, captured evidence.
+No new bugs (components robust). All 4 in-process targets
+(worker/load_balancer/task/session) now covered. <strong>Batch 3 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/event +
+internal/memory + internal/context (3 parallel disjoint-scope
+subagents). <strong>2 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1) <code>internal/event/bus.go</code> — a panicking
+event handler crashed the whole process (in async dispatch the handler
+runs in its own goroutine; an unrecovered panic took down every
+goroutine). Fix: <code>EventBus.invokeHandler</code> recover-wrapper
+routed through all 3 dispatch sites (Publish async/sync +
+PublishAndWait) → graceful degradation. (2)
+<code>internal/memory/manager.go</code> —
+<code>GetConversation</code>/<code>GetActive</code>/<code>GetAll</code>/<code>GetBySession</code>/<code>GetRecent</code>/<code>Search</code>
+returned the LIVE stored <code>*Conversation</code> pointer out from
+under the RLock; callers read
+<code>conv.Messages</code>/<code>MessageCount</code> concurrently with
+<code>AddMessage</code>/<code>Clear</code> writers → genuine
+<code>DATA RACE</code> the map-only RWMutex didn’t cover. Fix: return
+<code>conv.Clone()</code> snapshots + repaired
+<code>Conversation.Clone()</code> which silently dropped
+CharacterID/UserID/CharMessages/Version/Status. internal/context: no bug
+(RWMutex discipline held), full coverage added. All consumers of the
+memory read methods confirmed read-only (context builder / persistence
+snapshot / listing) → no regression. Each fix proven anti-bluff by
+reverting → test FAILs → restore → PASS. <code>make stress-chaos</code>
+target extended to include task/session/event/memory/context; full
+target PASSES under -race. 7 in-process targets now covered.
+<strong>Remaining (infra batch + long-tail):</strong> internal/redis +
+internal/database + internal/persistence (real PG/Redis via
+<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
+load), internal/llm provider endpoints — all need the docker-compose
+stack up; then the long-tail ~40-package sweep. Effort remaining
+multi-week incremental. <strong>HXC-014a</strong> (empty
+TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
+decision deferred:</strong> promoting <code>tests/stresschaos/</code>
+into the constitution submodule for cross-project reuse (triggers
+§11.4.26 cross-project workflow) — interim home is project-local.</p>
+<hr />
+<h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
+parity (§11.4.81)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-28 (constitution pull)
+<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.81
+requires per-OS equivalents (runtime dispatch) for platform-specific
+primitives + honest kernel-gap citations. Gaps: shell scripts rarely
+uname-dispatch, no CM-CROSS-PLATFORM-PARITY gate, no supported-platforms
+manifest, shell/sandbox.go rlimits a never-applied stub. Sub-defect
+<strong>HXC-015a (7 platform <code>Assert(true,"...skipped")</code>
+fake-skips) already FIXED in commit f464adb0</strong> (honest v.Skip on
+runtime.GOOS). This item tracks the remaining parity gate + manifest +
+rlimit work. Open decision: which non-Linux platforms have test hardware
+(else honest OPERATOR-BLOCKED). <strong>Doc-fix:</strong> root CLAUDE.md
+§3.2.1 prose says inner module is <code>helix_code/helix_code/</code>;
+actual is <code>helix_code/</code> — correct the prose.</p>
+<hr />
+<h2
+id="hxc-016-11.4.6997-governance-cascade-into-owned-submodules-const-0473-closed-fixed.md">HXC-016
+— §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) —
+CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI <strong>Closure
+(2026-05-28):</strong> all 24 anchors (§11.4.69 + §11.4.75–97) cascaded
+into the 5 root govfiles (27929ae1) AND all ~68 owned-submodule
+CONSTITUTION/CLAUDE/AGENTS/QWEN files (batches 1-7:
+ef4b3986/a864039d/e4046668/3adb2e63/464b2401/b4ad4f50/053fd731). A
+loose-grep false-match (the §11.4.93 body cites §11.4.95) had skipped
+the §11.4.95 heading in batch-1-6 submodules — repaired by fix-up A/B/C
+(79478ed5/903b9225/a9a1a6a1) + the gate tightened to the
+<code>## §11.4.NN —</code> heading marker (d2165bf7). 4 HelixDevelopment
+submodules regressed to the wrong branch (main vs canonical master) by
+the cascade reset — repaired (b4b790ea). Gate submodule-scope enabled
+(9031368d). Final <code>verify-governance-cascade.sh</code> → <strong>0
+failures</strong>, 204 submodule covenant-114 PASS lines; paired §1.1
+mutation proven (strip §11.4.95 → 1 failure → restore → 0). Section
+retained as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-017-codegraph-own-org-submodule-indexing-update-automation-11.4.7980-closed-fixed.md">HXC-017
+— CodeGraph own-org submodule indexing + update automation (§11.4.79/80)
+— CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI <strong>Closure
+(2026-05-28, commits 176fe07b + 551552f7 + 876b3b36):</strong>
+<code>.codegraph/config.json</code> blanket <code>dependencies/**</code>
+exclude replaced with 3 specific third-party excludes
+(LLama_CPP/Ollama/HuggingFace_Hub) so own-org
+<code>dependencies/vasic-digital/**</code> +
+<code>dependencies/HelixDevelopment/**</code> are now INCLUDED;
+credential excludes (<strong>/.env,<em>.key,</em>.pem,secrets) added.
+Root <code>.gitignore</code> fixed so
+<code>.codegraph/config.json</code> is TRACKED (§11.4.78 — it had been
+blanket-ignored). Re-index (<code>codegraph index .</code> exit 0):
+Files 39,024→76,044, Nodes 624,103→1,255,974, Edges 1.64M→3.96M.
+</strong>§11.4.79 anti-bluff probe (independently re-verified by
+conductor):** <code>codegraph query EventBus</code> →
+<code>dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85</code>;
+helix_memory →
+<code>dependencies/HelixDevelopment/helix_memory/...</code>; third-party
+<code>llama</code> filtered to LLama_CPP → empty.
+docs/codegraph/Status.md + Status_Summary.md created (§11.4.80; weekly
+automation inherited by reference from constitution
+codegraph_update.sh/codegraph_sync.sh). Section retained as a migration
+tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-018-obsolete-status-11.4.90-summary-doc-clarity-11.4.91-tracker-tooling">HXC-018
+— Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker
+tooling</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-28 (constitution pull)
+<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.90 adds
+terminal <code>Obsolete (→ Fixed.md)</code> status + Obsolete-Details
+line + colorizer <code>cell-status-obsolete</code>; §11.4.91 forbids
+anti-pattern summary one-liners (“Composes with” etc.) and requires
+generators to refuse them. Extend HelixCode’s tracker +
+(currently-absent) summary generators + colorizer. Couples with HXC-013
+(DB schema includes Obsolete).</p>
+<hr />
+<h2 id="hxc-019-docsqa-end-user-evidence-tree-11.4.83">HXC-019 —
+docs/qa/ end-user evidence tree (§11.4.83)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-28 (constitution pull)
+<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.83
+requires every shipped feature to carry a recorded e2e transcript +
+materials under <code>docs/qa/&lt;run-id&gt;/</code>; release gate
+refuses feature commits lacking it. Establish the tree + gate.</p>
+<hr />
+<h2
+id="hxc-022-test_bank-platform-integration-packages-do-not-compile-pre-existing-closed-fixed.md">HXC-022
+— test_bank platform + integration packages do not compile
+(pre-existing) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Bug <strong>Discovered:</strong> 2026-05-28
+(anti-bluff sweep during HXC-021 fix) <strong>Discovered-By:</strong> AI
+(captured: <code>go build ./platform/... ./integration/...</code> in
+helix_code/tests/e2e/test_bank) <strong>Closure (2026-05-28, commit
+02b3081c):</strong> all ~11 named <code>declared and not used</code>
+half-written stubs COMPLETED with real assertions (created-resource IDs
+→ assert non-empty; metric values → assert non-nil; 2 vestigial unsent
+request bodies removed); root-dir package collision resolved by
+<code>git mv performance_security_tests.go → performance/</code>
+subpackage; un-masked pre-existing core/ defects (duplicate
+<code>GetCoreTests</code>, unused imports) fixed too.
+<code>go build ./...</code> exit 0 (whole module),
+<code>go vet ./...</code> clean — independently re-verified. HXC-021
+runtime-verified through the now-compiling banks: platform SKIP=3
+(honest “not running on macOS/Windows/ARM”), integration SKIP=2 (honest
+“Ollama not reachable”/“OPENAI_API_KEY not configured”), no fake
+PASS/green-empty. Section retained as a migration tombstone per
+§11.4.19.</p>
+<hr />
+<h2
+id="hxc-023-asserttrue-asserttruetrue-literal-true-bluffs-across-test_bank-closed-fixed.md">HXC-023
+— <code>Assert(true,…)</code> / <code>AssertTrue(true,…)</code>
+literal-true bluffs across test_bank — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Bug <strong>Discovered:</strong> 2026-05-28
+(surfaced while fixing HXC-022) <strong>Discovered-By:</strong> AI
+<strong>Closure (2026-05-28, commits 8e80e0c0 + b514f8bb):</strong> ALL
+literal-true PASS-bluffs across the e2e test banks replaced with real
+assertions or honest skips — batch 1 (core/additional_tests.go, 41
+fixed) + batch 2 (distributed 12, integration 11, platform 5,
+core/tests.go 4, performance 1 = 33). Pattern: mislabelled “X succeeded”
+branches that fired on non-2xx → assert the expected 2xx; 401/403/429
+branches → assert that exact status; feature-404 branches → honest
+<code>v.Skip(reason)</code> (§11.4.3); the 4 legitimate “Running on
+<arch/platform>” positive-platform asserts left untouched. Verification:
+<code>go build ./...</code> + <code>go vet ./...</code> exit 0;
+full-tree grep for literal-true bluffs = 0; runtime harness (down
+server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained
+as a migration tombstone per §11.4.19.</p>
+<hr />
+<p><em>Last updated: 2026-05-28 — constitution submodule pulled
+7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB /
+stress+chaos / cross-platform / submodule-cascade / codegraph-own-org /
+obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 +
+HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip
+Assert(true) bluffs + empty stress stub → honest SKIP);
+CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5
+org-grouping dirs kept as namespace carve-outs per operator decision
+2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003
+closed <code>Implemented (→ Fixed.md)</code> and migrated to
 <code>docs/Fixed.md</code>: the CONST-046 i18n migration campaign is
 concluded — the genuine user-facing (C) string-literal surface is
 exhausted across all 7 scope areas (helix_code
