@@ -162,6 +162,10 @@ helix_qa/qa_evidence/*
 *.db
 *.db-shm
 *.db-wal
+# §11.4.95 (HXC-013): the workable-items SQLite DB is the TRACKED single source of
+# truth — NEVER gitignored (it IS authoritative source data, not a build artefact).
+# Its transient WAL/SHM sidecars stay ignored (WAL-checkpointed before each commit).
+!docs/workable_items.db
 /HelixQA/
 /qa-results/
 

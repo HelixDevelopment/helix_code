@@ -980,14 +980,44 @@ file (CONST-042). Section retained as a migration tombstone per
 <h2 id="hxc-013-adopt-sqlite-backed-single-source-of-truth-for-workable-items-11.4.9395">HXC-013
 — Adopt SQLite-backed single-source-of-truth for workable items
 (§11.4.93/95)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
-<strong>Discovered:</strong> 2026-05-28 (constitution pull
-7f738df→15cd4bc) <strong>Discovered-By:</strong> AI (post-pull awareness
-review) <strong>Scope:</strong> §11.4.93 + §11.4.95 require a tracked
-<code>docs/workable_items.db</code> as authoritative, with a Go binary
-doing bidirectional md↔︎db sync. Critical findings: the constitution’s
-<code>constitution/scripts/workable-items/</code> binary is a
-NON-FUNCTIONAL Phase-2 scaffold (every subcommand prints “not yet
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Closure (2026-05-29,
+subagent-driven §11.4.70 + conductor integration):</strong> the
+constitution submodule’s non-functional <code>workable-items</code>
+scaffold is now a FUNCTIONAL Go binary (built UPSTREAM per §11.4.74 in
+<code>constitution/scripts/workable-items/</code>, pushed to its origin
+at e460a5d): <code>sync md-to-db</code> parses Issues.md+Fixed.md
+(<code>## &lt;atm-id&gt; — &lt;title&gt;</code> blocks →
+<code>items</code> rows: atm_id/type/status/severity/title/description +
+the full raw markdown block in <code>body_md</code>),
+<code>sync db-to-md</code> regenerates both docs
+<strong>byte-identically modulo trailing whitespace</strong> (verified:
+0 diff lines on the real 137-item tracker), <code>validate</code>
+enforces closed-set status/type + §11.4.91 description floor +
+no-dup-atm_id, <code>diff</code> reports md↔︎db drift. go build + go test
+(round-trip + validate paired-mutation) pass. Per §11.4.95 the tracked
+DB lives at <code>docs/workable_items.db</code> (137 items: 31 Issues +
+106 Fixed), WAL-checkpointed before commit, with <code>.gitignore</code>
+gaining <code>!docs/workable_items.db</code> (negating the blanket
+<code>*.db</code> while keeping the transient
+<code>*.db-wal</code>/<code>*.db-shm</code> sidecars ignored).
+HelixCode’s constitution pin bumped 6017af9→e460a5d.
+<strong>Operator-decisions resolved with the scope’s
+stated-recommendation safe-defaults (§11.4.101):</strong> id-strategy =
+keep ATM/HXC-NNN free-text atm_id; round-trip-tolerance =
+byte-identical-via-body_md-blob; upstream-first = built+pushed upstream
+per §11.4.74. <strong>Follow-up (not yet wired):</strong> auto-invoking
+<code>sync md-to-db</code> from a commit hook /
+<code>commit_all.sh</code> + a pre-build
+<code>CM-WORKABLE-ITEMS-MD-DB-IN-SYNC</code> gate (the binary + tracked
+DB foundation is in place; the auto-sync wiring is the remaining
+incremental step). <strong>Discovered:</strong> 2026-05-28 (constitution
+pull 7f738df→15cd4bc) <strong>Discovered-By:</strong> AI (post-pull
+awareness review) <strong>Scope:</strong> §11.4.93 + §11.4.95 require a
+tracked <code>docs/workable_items.db</code> as authoritative, with a Go
+binary doing bidirectional md↔︎db sync. Critical findings: the
+constitution’s <code>constitution/scripts/workable-items/</code> binary
+is a NON-FUNCTIONAL Phase-2 scaffold (every subcommand prints “not yet
 implemented”) — adoption requires building the parser/renderer UPSTREAM
 per §11.4.74 (triggers §11.4.26); <code>.gitignore:162</code> blanket
 <code>*.db</code> must gain <code>!docs/workable_items.db</code>;
