@@ -109,10 +109,11 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## HXC-001 (ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still PascalCase
+## HXC-001 (ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still PascalCase — CLOSED (→ Fixed.md)
 
-**Status:** In progress
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
+**Closure (2026-05-28):** all owned-org submodule LEAF dirs renamed to lowercase snake_case (Phases 1–4: 1-A..1-D Upstreams; 2-A..2-D / 3 / 4 leaf dirs) + all 57 `Upstreams/`→`upstreams/` dirs. Phase 5 (org-grouping dirs `dependencies/vasic-digital/` + `dependencies/HelixDevelopment/`) resolved as a NO-OP per operator decision 2026-05-28 (AskUserQuestion): kept as GitHub-org namespace carve-outs. Section retained as a migration tombstone per §11.4.19; round-343 detail below preserved for history.
 **Discovered:** 2026-05-15 (CONST-052 cascade landed)
 **Discovered-By:** Constitution
 **Evidence:** Meta-repo top-level dirs already snake_case (round-88 sweep). Remaining non-compliance is two layers deeper: `dependencies/HelixDevelopment/*` + `dependencies/vasic-digital/*` owned-org submodule dirs (PascalCase), and 59 `Upstreams/` dirs inside submodule trees.
@@ -318,4 +319,86 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-*Last regenerated: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-013 — Adopt SQLite-backed single-source-of-truth for workable items (§11.4.93/95)
+
+**Status:** Queued
+**Type:** Feature
+**Discovered:** 2026-05-28 (constitution pull 7f738df→15cd4bc)
+**Discovered-By:** AI (post-pull awareness review)
+**Scope:** §11.4.93 + §11.4.95 require a tracked `docs/workable_items.db` as authoritative, with a Go binary doing bidirectional md↔db sync. Critical findings: the constitution's `constitution/scripts/workable-items/` binary is a NON-FUNCTIONAL Phase-2 scaffold (every subcommand prints "not yet implemented") — adoption requires building the parser/renderer UPSTREAM per §11.4.74 (triggers §11.4.26); `.gitignore:162` blanket `*.db` must gain `!docs/workable_items.db`; HelixCode lacks `generate_issues_summary.sh`/`sync_issues_docs.sh`. Effort ~5-9 subagent-days.
+**Operator decisions:** id strategy (recommend keep HXC-NNN in free-text atm_id col); .gitignore negation; upstream-first vs wait; round-trip tolerance.
+
+---
+
+## HXC-014 — Stress + chaos test coverage (§11.4.85)
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** §11.4.85 requires every fix/improvement to ship stress (sustained-load N≥100/≥30s p50/p95/p99 + concurrency N≥10 + boundary) + chaos (process-death/network-fault/input-corruption/resource-exhaustion/state-corruption) suites with captured evidence. Gap: zero dedicated stress/chaos files repo-wide; no `stress_chaos.sh` helper. First targets: worker pool, llm/load_balancer, task, session, redis+database. Sub-defect **HXC-014a (empty `TestProviderStress` stub bluff) already FIXED in commit f464adb0** (now honest SKIP via stressProvider). This item tracks the full reusable suite. Effort: foundation+top-5 ≈7-8 eng-days.
+
+---
+
+## HXC-015 — Cross-platform parity (§11.4.81)
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** §11.4.81 requires per-OS equivalents (runtime dispatch) for platform-specific primitives + honest kernel-gap citations. Gaps: shell scripts rarely uname-dispatch, no CM-CROSS-PLATFORM-PARITY gate, no supported-platforms manifest, shell/sandbox.go rlimits a never-applied stub. Sub-defect **HXC-015a (7 platform `Assert(true,"...skipped")` fake-skips) already FIXED in commit f464adb0** (honest v.Skip on runtime.GOOS). This item tracks the remaining parity gate + manifest + rlimit work. Open decision: which non-Linux platforms have test hardware (else honest OPERATOR-BLOCKED).
+**Doc-fix:** root CLAUDE.md §3.2.1 prose says inner module is `helix_code/helix_code/`; actual is `helix_code/` — correct the prose.
+
+---
+
+## HXC-016 — §11.4.69–97 governance cascade into owned submodules (CONST-047/§3)
+
+**Status:** In progress
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** every owned submodule's CONSTITUTION/CLAUDE/AGENTS/QWEN must carry the 24 new short-form anchors (§11.4.69 + §11.4.75–97). Progress: root-5 govfiles done (27929ae1); propagation gate root-scope applied + paired-mutation proven (0ab5376a); submodule batches 1-4 done (40/~70 submodules: ef4b3986, a864039d, e4046668, 3adb2e63). Remaining: batches 5-7 (~28 submodules), then enable gate submodule-scope (Fragment C of the propagation snippet).
+
+---
+
+## HXC-017 — CodeGraph own-org submodule indexing + update automation (§11.4.79/80)
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** §11.4.79 (own-org submodules INCLUDED in CodeGraph index, third-party excluded) + §11.4.80 (wire constitution's codegraph_update.sh/codegraph_sync.sh weekly; docs/codegraph Status + Status_Summary ledgers). Verify `.codegraph/config.json` excludes third-party + credentials but includes own-org submodule paths.
+
+---
+
+## HXC-018 — Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker tooling
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** §11.4.90 adds terminal `Obsolete (→ Fixed.md)` status + Obsolete-Details line + colorizer `cell-status-obsolete`; §11.4.91 forbids anti-pattern summary one-liners ("Composes with" etc.) and requires generators to refuse them. Extend HelixCode's tracker + (currently-absent) summary generators + colorizer. Couples with HXC-013 (DB schema includes Obsolete).
+
+---
+
+## HXC-019 — docs/qa/ end-user evidence tree (§11.4.83)
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-28 (constitution pull)
+**Discovered-By:** AI
+**Scope:** §11.4.83 requires every shipped feature to carry a recorded e2e transcript + materials under `docs/qa/<run-id>/`; release gate refuses feature commits lacking it. Establish the tree + gate.
+
+---
+
+## HXC-022 — test_bank platform + integration packages do not compile (pre-existing)
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-28 (anti-bluff sweep during HXC-021 fix)
+**Discovered-By:** AI (captured: `go build ./platform/... ./integration/...` in helix_code/tests/e2e/test_bank)
+**Defect:** `dev.helix.code/tests/e2e/test-bank/platform` + `.../integration` fail to compile — `declared and not used` for ~11 vars (certID, planID, profileID, quotaID, restoreID, exportID, available, cpuUsage, memoryUsage, quota, current) in half-written test functions (platform L1169/1704/2122; integration L2034-2568). An uncompilable test-bank package can never run — a §11.4 / §11.4.1 anti-bluff defect (suite reports green while these never execute). Also: test_bank root dir has a pre-existing package-name collision (`testbank` loader.go vs `performance` performance_security_tests.go in one dir). Fix: complete each half-written test with a real assertion OR honest SKIP (NEVER `_ =` to silence — that hides the incomplete test); resolve the root-dir package collision. Blocks runtime-verification of the HXC-021 platform/integration honest-skips.
+
+---
+
+*Last updated: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
