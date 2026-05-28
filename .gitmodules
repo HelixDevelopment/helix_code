@@ -43,8 +43,8 @@
 [submodule "dependencies/HelixDevelopment/LLMOrchestrator"]
 	path = dependencies/HelixDevelopment/LLMOrchestrator
 	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
-[submodule "dependencies/HelixDevelopment/LLMProvider"]
-	path = dependencies/HelixDevelopment/LLMProvider
+[submodule "dependencies/HelixDevelopment/llm_provider"]
+	path = dependencies/HelixDevelopment/llm_provider
 	url = git@github.com:HelixDevelopment/LLMProvider.git
 [submodule "dependencies/HelixDevelopment/VisionEngine"]
 	path = dependencies/HelixDevelopment/VisionEngine
@@ -235,11 +235,11 @@
 [submodule "dependencies/vasic-digital/auth"]
 	path = dependencies/vasic-digital/auth
 	url = git@github.com:vasic-digital/Auth.git
-[submodule "dependencies/vasic-digital/Storage"]
-	path = dependencies/vasic-digital/Storage
+[submodule "dependencies/vasic-digital/storage"]
+	path = dependencies/vasic-digital/storage
 	url = git@github.com:vasic-digital/Storage.git
-[submodule "dependencies/vasic-digital/VectorDB"]
-	path = dependencies/vasic-digital/VectorDB
+[submodule "dependencies/vasic-digital/vector_db"]
+	path = dependencies/vasic-digital/vector_db
 	url = git@github.com:vasic-digital/VectorDB.git
 [submodule "dependencies/vasic-digital/embeddings"]
 	path = dependencies/vasic-digital/embeddings
@@ -271,8 +271,8 @@
 [submodule "dependencies/vasic-digital/plugins"]
 	path = dependencies/vasic-digital/plugins
 	url = git@github.com:vasic-digital/Plugins.git
-[submodule "dependencies/HelixDevelopment/HelixMemory"]
-	path = dependencies/HelixDevelopment/HelixMemory
+[submodule "dependencies/HelixDevelopment/helix_memory"]
+	path = dependencies/HelixDevelopment/helix_memory
 	url = git@github.com:HelixDevelopment/HelixMemory.git
 [submodule "dependencies/HelixDevelopment/HelixSpecifier"]
 	path = dependencies/HelixDevelopment/HelixSpecifier
@@ -292,11 +292,11 @@
 [submodule "dependencies/vasic-digital/benchmark"]
 	path = dependencies/vasic-digital/benchmark
 	url = git@github.com:vasic-digital/Benchmark.git
-[submodule "dependencies/vasic-digital/ToolSchema"]
-	path = dependencies/vasic-digital/ToolSchema
+[submodule "dependencies/vasic-digital/tool_schema"]
+	path = dependencies/vasic-digital/tool_schema
 	url = git@github.com:vasic-digital/ToolSchema.git
-[submodule "dependencies/vasic-digital/SkillRegistry"]
-	path = dependencies/vasic-digital/SkillRegistry
+[submodule "dependencies/vasic-digital/skill_registry"]
+	path = dependencies/vasic-digital/skill_registry
 	url = git@github.com:vasic-digital/SkillRegistry.git
 [submodule "dependencies/vasic-digital/models"]
 	path = dependencies/vasic-digital/models
@@ -319,8 +319,8 @@
 [submodule "dependencies/vasic-digital/vision_engine"]
 	path = dependencies/vasic-digital/vision_engine
 	url = git@github.com:vasic-digital/VisionEngine.git
-[submodule "dependencies/HelixDevelopment/HelixLLM"]
-	path = dependencies/HelixDevelopment/HelixLLM
+[submodule "dependencies/HelixDevelopment/helix_llm"]
+	path = dependencies/HelixDevelopment/helix_llm
 	url = git@github.com:HelixDevelopment/HelixLLM.git
 [submodule "dependencies/vasic-digital/normalize"]
 	path = dependencies/vasic-digital/normalize
@@ -343,8 +343,8 @@
 [submodule "dependencies/vasic-digital/i_llm"]
 	path = dependencies/vasic-digital/i_llm
 	url = git@github.com:vasic-digital/I-LLM.git
-[submodule "dependencies/vasic-digital/Streaming"]
-	path = dependencies/vasic-digital/Streaming
+[submodule "dependencies/vasic-digital/streaming"]
+	path = dependencies/vasic-digital/streaming
 	url = git@github.com:vasic-digital/Streaming.git
 [submodule "dependencies/vasic-digital/veritas"]
 	path = dependencies/vasic-digital/veritas
@@ -364,8 +364,8 @@
 [submodule "dependencies/vasic-digital/lazy"]
 	path = dependencies/vasic-digital/lazy
 	url = git@github.com:vasic-digital/Lazy.git
-[submodule "dependencies/vasic-digital/Watcher"]
-	path = dependencies/vasic-digital/Watcher
+[submodule "dependencies/vasic-digital/watcher"]
+	path = dependencies/vasic-digital/watcher
 	url = git@github.com:vasic-digital/Watcher.git
 [submodule "dependencies/vasic-digital/middleware"]
 	path = dependencies/vasic-digital/middleware

@@ -89,10 +89,10 @@ fi
 
 # P0-T2: Add HelixLLM
 log "Adding HelixLLM submodule..."
-if [ ! -d "dependencies/HelixDevelopment/HelixLLM" ]; then
+if [ ! -d "dependencies/HelixDevelopment/helix_llm" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixLLM.git \
-        dependencies/HelixDevelopment/HelixLLM
+        dependencies/HelixDevelopment/helix_llm
     success "HelixLLM submodule added"
 else
     warn "HelixLLM directory already exists"
@@ -100,10 +100,10 @@ fi
 
 # P0-T2: Add HelixMemory
 log "Adding HelixMemory submodule..."
-if [ ! -d "dependencies/HelixDevelopment/HelixMemory" ]; then
+if [ ! -d "dependencies/HelixDevelopment/helix_memory" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixMemory.git \
-        dependencies/HelixDevelopment/HelixMemory
+        dependencies/HelixDevelopment/helix_memory
     success "HelixMemory submodule added"
 else
     warn "HelixMemory directory already exists"
@@ -196,8 +196,8 @@ use (
 	./HelixCode
 	./dependencies/HelixDevelopment/LLMsVerifier
 	./dependencies/HelixDevelopment/HelixAgent
-	./dependencies/HelixDevelopment/HelixLLM
-	./dependencies/HelixDevelopment/HelixMemory
+	./dependencies/HelixDevelopment/helix_llm
+	./dependencies/HelixDevelopment/helix_memory
 	./dependencies/HelixDevelopment/HelixSpecifier
 	./HelixQA
 	./Challenges

@@ -16,7 +16,7 @@ TARGETS=(
     "dependencies/HelixDevelopment/LLMsVerifier"
     "dependencies/HelixDevelopment/DocProcessor"
     "dependencies/HelixDevelopment/LLMOrchestrator"
-    "dependencies/HelixDevelopment/LLMProvider"
+    "dependencies/HelixDevelopment/llm_provider"
     "dependencies/HelixDevelopment/VisionEngine"
     "Containers"
     "Security"
