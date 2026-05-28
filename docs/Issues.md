@@ -332,8 +332,9 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ## HXC-014 — Stress + chaos test coverage (§11.4.85)
 
-**Status:** In progress
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
+**Closure (2026-05-29):** the retroactive §11.4.85 sweep is complete across every package with a real resilience surface — 31 in-process packages (batches 1-11) + 5 real-infra packages (redis/database/server/verifier against real podman PG+Redis+server, ollama against real local Ollama). **35 packages covered; 34 real production bugs surfaced + fixed** (systemic classes: panic-in-goroutine-no-recover process crashes, non-reentrant-RWMutex deadlocks, unguarded/declared-unused-mutex data races, plus an auth forged-token DoS and the Ollama CONST-035 empty-generation bluff). The harness (`tests/stresschaos/`), `make stress-chaos` (29 in-process targets), `make stress-chaos-meta` (§1.1 harness self-tests), and `make stress-chaos-infra` (integration-tagged real-infra) are all in place — §11.4.85 is now a per-change discipline going forward (every new fix ships its stress+chaos suite). **Honest out-of-scope remainder (NOT bluffed as covered):** (a) cloud LLM provider endpoints (OpenAI/Anthropic/Gemini/…) need real API keys + incur real cost → operator/external-gated, not stress-loopable safely; (b) low-concurrency stateless utility packages (version/logo/hardware-probe/adapters/fix) have NO meaningful resilience surface — a "stress test" of a pure function is a benchmark, not a §11.4.85 resilience test, so forcing tests there would itself be a bluff. The systemic translator i18n hardening is tracked + closed as HXC-014b; the pre-existing llm integration-build breakage surfaced during the infra batch is tracked + closed as HXC-024.
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
 **Scope:** §11.4.85 requires every fix/improvement to ship stress (sustained-load N≥100/≥30s p50/p95/p99 + concurrency N≥10 + boundary) + chaos (process-death/network-fault/input-corruption/resource-exhaustion/state-corruption) suites with captured evidence.

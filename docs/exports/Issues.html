@@ -999,7 +999,32 @@ negation; upstream-first vs wait; round-trip tolerance.</p>
 <hr />
 <h2 id="hxc-014-stress-chaos-test-coverage-11.4.85">HXC-014 — Stress +
 chaos test coverage (§11.4.85)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Closure (2026-05-29):</strong> the
+retroactive §11.4.85 sweep is complete across every package with a real
+resilience surface — 31 in-process packages (batches 1-11) + 5
+real-infra packages (redis/database/server/verifier against real podman
+PG+Redis+server, ollama against real local Ollama). <strong>35 packages
+covered; 34 real production bugs surfaced + fixed</strong> (systemic
+classes: panic-in-goroutine-no-recover process crashes,
+non-reentrant-RWMutex deadlocks, unguarded/declared-unused-mutex data
+races, plus an auth forged-token DoS and the Ollama CONST-035
+empty-generation bluff). The harness (<code>tests/stresschaos/</code>),
+<code>make stress-chaos</code> (29 in-process targets),
+<code>make stress-chaos-meta</code> (§1.1 harness self-tests), and
+<code>make stress-chaos-infra</code> (integration-tagged real-infra) are
+all in place — §11.4.85 is now a per-change discipline going forward
+(every new fix ships its stress+chaos suite). <strong>Honest
+out-of-scope remainder (NOT bluffed as covered):</strong> (a) cloud LLM
+provider endpoints (OpenAI/Anthropic/Gemini/…) need real API keys +
+incur real cost → operator/external-gated, not stress-loopable safely;
+(b) low-concurrency stateless utility packages
+(version/logo/hardware-probe/adapters/fix) have NO meaningful resilience
+surface — a “stress test” of a pure function is a benchmark, not a
+§11.4.85 resilience test, so forcing tests there would itself be a
+bluff. The systemic translator i18n hardening is tracked + closed as
+HXC-014b; the pre-existing llm integration-build breakage surfaced
+during the infra batch is tracked + closed as HXC-024.
 <strong>Discovered:</strong> 2026-05-28 (constitution pull)
 <strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.85
 requires every fix/improvement to ship stress (sustained-load N≥100/≥30s
