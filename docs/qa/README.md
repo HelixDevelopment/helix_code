@@ -1,15 +1,15 @@
 # HelixCode — `docs/qa/` End-User Evidence Tree
 
-**Revision:** 1
+**Revision:** 2
 **Last modified:** 2026-05-28T00:00:00Z
 
 | Field | Value |
 |---|---|
-| Revision | 1 |
+| Revision | 2 |
 | Created | 2026-05-28 |
 | Last modified | 2026-05-28 |
-| Status | active (convention established — advisory enforcement) |
-| Status summary | Establishes the §11.4.83 per-feature end-user evidence convention + seed worked example (HXC-016). Enforcement is ADVISORY (warn-mode) via `scripts/verify_qa_evidence.sh`; promotion to a hard commit/release gate is a future operator decision. |
+| Status | active (convention established — BLOCKING release gate enforced) |
+| Status summary | Establishes the §11.4.83 per-feature end-user evidence convention + seed worked example (HXC-016). `scripts/verify_qa_evidence.sh` runs ADVISORY (warn-mode) by default and ENFORCING (blocking, exit 1) under `--enforce --since <baseline>`; the operator authorised promotion to a blocking release gate on 2026-05-28 (HXC-019), wired into `scripts/release-gate-test.sh` via `scripts/gates/qa_evidence_gate.sh`. Release-gate ONLY — not wired into pre-commit / pre-push hooks. |
 | Authority | constitution submodule `Constitution.md` §11.4.83 (docs/qa/ end-user evidence mandate) |
 
 ---
@@ -22,7 +22,7 @@
 - [Materials are committed in-repo](#materials-are-committed-in-repo)
 - [Bot / agent-driven QA](#bot--agent-driven-qa)
 - [Directory layout](#directory-layout)
-- [Advisory gate](#advisory-gate)
+- [Enforcement gate](#enforcement-gate)
 - [Worked example](#worked-example)
 
 ## What this tree is
@@ -111,18 +111,62 @@ docs/qa/
 └── ...
 ```
 
-## Advisory gate
+## Enforcement gate
 
-`scripts/verify_qa_evidence.sh` scans recent feature-shipping commits
-(those touching non-test code under `helix_code/internal/**`,
-`helix_code/cmd/**`, or `helix_code/applications/**`) and **WARNs** when
-a feature commit has no matching `docs/qa/<run-id>/` directory.
+`scripts/verify_qa_evidence.sh` scans feature-shipping commits (those
+touching non-test code under `helix_code/internal/**`,
+`helix_code/cmd/**`, or `helix_code/applications/**`, excluding
+`*_test.go`) and reports when a feature commit has no matching
+`docs/qa/<run-id>/` directory. It has two modes:
 
-The gate is **ADVISORY (warn-mode)**: it always exits 0 and never blocks
-a commit, push, or build. The operator has NOT yet authorised a hard
-gate; promoting this scanner to a blocking commit/release gate (per
-§11.4.83 operative rule (5)) is a **future operator decision**. Until
-then the gate raises visibility without halting work.
+- **Advisory (default)** — `scripts/verify_qa_evidence.sh [N]`. Scans
+  the last `N` commits (default 20), **WARNs**, and ALWAYS exits 0. For
+  ad-hoc visibility; not wired into any git hook.
+- **Enforcing** — `scripts/verify_qa_evidence.sh --enforce --since <ref>`.
+  Exits **1** if any in-scope feature-shipping commit lacks its
+  `docs/qa/<run-id>/` directory, **0** when clean. This is the §11.4.83
+  operative-rule-(5) release gate. The operator **authorised** promotion
+  to a blocking release gate on **2026-05-28 (HXC-019)**.
+
+### Baseline scoping (`--since` is mandatory in `--enforce`)
+
+The `docs/qa/` convention did not exist before it was introduced, so
+commits predating it cannot be expected to carry evidence. The baseline
+is the commit that **added `docs/qa/README.md`** —
+`ed84f90e` (2026-05-28). Find it with:
+
+```
+git log --diff-filter=A --format='%H %cI %s' -- docs/qa/README.md
+```
+
+`--enforce` evaluates only the range `<baseline>..HEAD` (descendants of
+the baseline, by merge-ancestry — not author-date sorting), so all
+pre-convention legacy history is exempt. `--since` is **mandatory** in
+enforcing mode; running `--enforce` without it is a misuse error (exit
+2) — enforcing over the whole history would block on thousands of legacy
+commits and make `HEAD` un-releasable.
+
+### Per-commit opt-out: `[no-qa-evidence]`
+
+A commit whose message (subject **or** body) contains the literal token
+`[no-qa-evidence]` is **exempt** from the gate. Use it for a change that
+trips the feature-shipping heuristic but ships no user-facing feature —
+a pure refactor, a governance-only edit, or a doc-only change. The token
+is the single documented escape hatch; an untagged feature commit with
+no `docs/qa/<run-id>/` directory always fails the enforcing gate.
+
+### Release-gate wiring (release-gate ONLY)
+
+`scripts/release-gate-test.sh` invokes
+`scripts/gates/qa_evidence_gate.sh`, which runs the scanner with
+`--enforce --since <baseline>` and makes the whole release gate FAIL on
+any violation. Per the §11.4.83 mandate wording ("release gates"), the
+enforcing gate is deliberately **NOT** wired into pre-commit / pre-push
+git hooks — only into the release gate.
+
+The paired-mutation meta-test
+`scripts/tests/verify_qa_evidence_meta_test.sh` (§1.1 anti-bluff) proves
+the gate fails when evidence is missing and passes when present.
 
 See `docs/scripts/verify_qa_evidence.md` for the companion guide.
 

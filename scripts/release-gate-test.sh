@@ -373,6 +373,27 @@ fi
 
 mkdir -p "$LOG_DIR"
 
+# --------- §11.4.83 docs/qa/ end-user-evidence release gate (HXC-019) ---------
+# Operative rule (5): "release gates MUST refuse to tag a version that has any
+# feature-shipping commit without its matching docs/qa/<run-id>/ directory."
+# Operator authorised promotion to a blocking release gate on 2026-05-28.
+# Delegated to scripts/gates/qa_evidence_gate.sh which scopes enforcement to
+# the convention baseline (commit that added docs/qa/README.md) so legacy
+# pre-convention history is exempt. A violation here makes the whole release
+# gate FAIL (exit 1) regardless of the per-submodule Go-test outcome.
+QA_EVIDENCE_GATE="$REPO_ROOT/scripts/gates/qa_evidence_gate.sh"
+QA_EVIDENCE_RC=0
+if [[ -f "$QA_EVIDENCE_GATE" ]]; then
+    if [[ $MODE_JSON -eq 0 ]]; then
+        bash "$QA_EVIDENCE_GATE" || QA_EVIDENCE_RC=$?
+    else
+        # Keep JSON stream clean — gate output goes to the log dir.
+        bash "$QA_EVIDENCE_GATE" >"$LOG_DIR/qa_evidence_gate.log" 2>&1 || QA_EVIDENCE_RC=$?
+    fi
+else
+    echo "WARN: $QA_EVIDENCE_GATE missing — §11.4.83 evidence gate skipped" >&2
+fi
+
 # --------- Match glob helper ---------
 match_only() {
     local sm="$1"
@@ -550,6 +571,13 @@ else
     fi
 fi
 
+# §11.4.83 docs/qa/ evidence gate is always blocking on the release gate
+# (HXC-019): a non-zero result forces the whole gate red regardless of the
+# Go-test outcome. ENV-skip semantics do NOT apply to evidence violations.
+if [[ "$QA_EVIDENCE_RC" -ne 0 ]]; then
+    EXIT_CODE=1
+fi
+
 if [[ $MODE_JSON -eq 1 ]]; then
     # Hand-rolled JSON (no jq dependency). Round 89 adds env/logic split.
     printf '{\n'
@@ -570,6 +598,7 @@ if [[ $MODE_JSON -eq 1 ]]; then
     printf '  "total_skip": %d,\n' "$TOTAL_SKIP"
     printf '  "total_bare_skip": %d,\n' "$TOTAL_BARE"
     printf '  "early_stop": %s,\n' "$([[ $EARLY_STOP -eq 1 ]] && echo true || echo false)"
+    printf '  "qa_evidence_gate_rc": %d,\n' "$QA_EVIDENCE_RC"
     printf '  "log_dir": "%s",\n' "$LOG_DIR"
     printf '  "exit_code": %d,\n' "$EXIT_CODE"
     printf '  "results": [\n'
@@ -600,6 +629,7 @@ else
     echo "  total bare-SKIP:         $TOTAL_BARE"
     echo "  ENV-CLASS total:         $N_ENV_CLASS"
     echo "  LOGIC-CLASS total:       $N_LOGIC_CLASS"
+    echo "  qa-evidence gate (11.4.83): $([[ $QA_EVIDENCE_RC -eq 0 ]] && echo PASS || echo "FAIL (rc=$QA_EVIDENCE_RC)")"
     echo "  log dir:                 $LOG_DIR"
     if [[ $MODE_SKIP_ENV -eq 1 ]]; then
         echo "  --skip-env-failures:     ON (ENV-CLASS reported but non-blocking)"

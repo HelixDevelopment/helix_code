@@ -395,21 +395,23 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ## HXC-018 — Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker tooling
 
-**Status:** Queued
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
-**Scope:** §11.4.90 adds terminal `Obsolete (→ Fixed.md)` status + Obsolete-Details line + colorizer `cell-status-obsolete`; §11.4.91 forbids anti-pattern summary one-liners ("Composes with" etc.) and requires generators to refuse them. Extend HelixCode's tracker + (currently-absent) summary generators + colorizer. Couples with HXC-013 (DB schema includes Obsolete).
+**Scope:** §11.4.90 adds terminal `Obsolete (→ Fixed.md)` status + Obsolete-Details line + colorizer `cell-status-obsolete`; §11.4.91 forbids anti-pattern summary one-liners ("Composes with" etc.) and requires generators to refuse them. Extend HelixCode's tracker + summary generators + colorizer.
+**Closure (2026-05-28, subagent-driven §11.4.70):** §11.4.90 — `docs/_progress-style.css` adds the `tr.cell-status-obsolete` rule (light-gray #E0E0E0 + strikethrough); `scripts/gates/obsolete_colorize.sh` tags Obsolete-status `<tr>`s post-render; `scripts/regenerate-tracker-exports.sh` wires `--css docs/_progress-style.css --embed-resources` + the colorizer into the HTML render; `scripts/gates/obsolete_details_gate.sh` asserts every `Obsolete (→ Fixed.md)` heading carries a valid `**Obsolete-Details:**` line (Since/Reason-from-closed-vocab/Superseding-item/Triple-check). §11.4.91 — `scripts/gates/summary_clarity_gate.sh` FAILs on anti-pattern one-liners + descriptions <6 words AND <40 chars; found + fixed 1 real violation (HXA-001 Issues_Summary row). Both wired into the CONST-055 sweep as G8/G9. Anti-bluff: `scripts/tests/{obsolete_details,summary_clarity}_meta_test.sh` paired-mutation (plant violation → gate FAIL → remove → PASS), both exit 0; gates run clean against real docs (0 violations). `bash -n` clean (CONST-068). The §11.4.90 *terminal-status DB column* couples with HXC-013 (SQLite) and remains future; the MD-tracker gates + colorizer are complete now.
 
 ---
 
 ## HXC-019 — docs/qa/ end-user evidence tree (§11.4.83)
 
-**Status:** Queued
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
 **Scope:** §11.4.83 requires every shipped feature to carry a recorded e2e transcript + materials under `docs/qa/<run-id>/`; release gate refuses feature commits lacking it. Establish the tree + gate.
+**Closure (2026-05-28, subagent-driven §11.4.70 — operator authorised hard-gate promotion):** the tree + advisory scanner already existed; promoted `scripts/verify_qa_evidence.sh` to an ENFORCING release gate with `--enforce` + mandatory `--since <baseline>` (baseline = the `docs/qa/README.md`-introducing commit `ed84f90e`, so pre-convention history is exempt) + a `[no-qa-evidence]` per-commit opt-out for non-feature changes. Wired into `scripts/release-gate-test.sh` via `scripts/gates/qa_evidence_gate.sh` AND into the CONST-055 sweep as G7. Also fixed a latent git-2.50 bug in the original scanner (`git show -s --name-only` matched zero commits → silent false-clean; replaced with `git diff-tree`). The enforcing gate correctly flagged this session's own 10 HXC-014 feature commits as lacking evidence → resolved honestly by adding `docs/qa/HXC-014/transcript.md` (real captured stress/chaos evidence + anti-bluff mutation proofs); gate now PASSES (10/10 matched). Anti-bluff: `scripts/tests/verify_qa_evidence_meta_test.sh` paired-mutation (6 assertions: no-evidence→1, add-evidence→0, opt-out→0, untagged→1, no-since→2, pre-baseline-exempt→0), exit 0. `bash -n` clean (CONST-068). NOT wired into pre-commit/pre-push (release-gate-only per the mandate wording).
 
 ---
 

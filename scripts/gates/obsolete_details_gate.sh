@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# obsolete_details_gate.sh — Constitution §11.4.90 gate.
+#
+# Walks docs/Issues.md + docs/Fixed.md. For every "## " heading whose
+# **Status:** is "Obsolete (→ Fixed.md)", asserts that an
+# "**Obsolete-Details:**" line exists within 8 non-blank lines of the heading,
+# and that it carries all four mandated sub-facts:
+#   - Since:           an ISO date (YYYY-MM-DD)
+#   - Reason:          a value from the closed vocabulary
+#   - Superseding-item: a non-empty reference
+#   - Triple-check:    non-empty evidence
+#
+# Closed Reason vocabulary (§11.4.90):
+#   superseded-by-design-change | superseded-by-later-mandate |
+#   feature-removed | duplicate-of | unsupported-topology
+#
+# Exit: 0 if every Obsolete item is compliant (or none present),
+#       1 on any violation, 2 on usage / environment error.
+set -euo pipefail
+
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+DOCS="${1:-$ROOT/docs}"
+
+FILES=("$DOCS/Issues.md" "$DOCS/Fixed.md")
+
+OBSOLETE_STATUS='Obsolete (→ Fixed.md)'
+# Pipe-separated closed vocabulary for awk regex matching.
+REASON_VOCAB='superseded-by-design-change|superseded-by-later-mandate|feature-removed|duplicate-of|unsupported-topology'
+
+violations=0
+checked=0
+
+for f in "${FILES[@]}"; do
+    if [[ ! -f "$f" ]]; then
+        echo "SKIP $f — not present"
+        continue
+    fi
+
+    # awk walks the file heading-by-heading. For each "## " heading it records
+    # the heading line, then scans the following lines: capturing **Status:**,
+    # and (within 8 non-blank lines) any **Obsolete-Details:** line. At the next
+    # heading / EOF it evaluates the previous block.
+    out="$(awk -v status="$OBSOLETE_STATUS" -v vocab="$REASON_VOCAB" -v file="$f" '
+        function eval_block(   missing) {
+            if (cur_heading == "") return
+            if (cur_status != status) return
+            # This is an Obsolete item — must have a compliant details line.
+            if (details_line == "") {
+                printf("VIOLATION\t%s\t%s\tno **Obsolete-Details:** line within 8 non-blank lines\n", file, cur_heading)
+                viol++
+                return
+            }
+            missing = ""
+            if (details_line !~ /Since:[ ]*[0-9]{4}-[0-9]{2}-[0-9]{2}/)        missing = missing " Since(ISO-date)"
+            if (details_line !~ ("Reason:[ ]*(" vocab ")"))                    missing = missing " Reason(closed-vocab)"
+            if (details_line !~ /Superseding-item:[ ]*[^ ]/)                   missing = missing " Superseding-item"
+            if (details_line !~ /Triple-check:[ ]*[^ ]/)                       missing = missing " Triple-check"
+            if (missing != "") {
+                printf("VIOLATION\t%s\t%s\tmissing/invalid sub-fact(s):%s\n", file, cur_heading, missing)
+                viol++
+            } else {
+                printf("OK\t%s\t%s\n", file, cur_heading)
+                ok++
+            }
+        }
+        /^## / {
+            eval_block()
+            cur_heading = $0
+            cur_status = ""
+            details_line = ""
+            nonblank = 0
+            in_block = 1
+            next
+        }
+        in_block == 1 {
+            # Stop scanning sub-facts after 8 non-blank lines past the heading.
+            if ($0 ~ /[^ \t]/) nonblank++
+            if (cur_status == "" && $0 ~ /^\*\*Status:\*\*/) {
+                cur_status = $0
+                sub(/^\*\*Status:\*\*[ ]*/, "", cur_status)
+            }
+            if (details_line == "" && nonblank <= 8 && $0 ~ /^\*\*Obsolete-Details:\*\*/) {
+                details_line = $0
+            }
+        }
+        END {
+            eval_block()
+            printf("SUMMARY\t%d\t%d\n", ok+0, viol+0)
+        }
+    ' "$f")"
+
+    while IFS=$'\t' read -r kind a b c; do
+        case "$kind" in
+            VIOLATION)
+                echo "FAIL §11.4.90  [$a] $b — $c" >&2
+                violations=$((violations + 1))
+                ;;
+            OK)
+                checked=$((checked + 1))
+                ;;
+            SUMMARY)
+                : # per-file counts folded into globals below
+                ;;
+        esac
+    done <<< "$out"
+done
+
+echo "§11.4.90 obsolete-details gate: ${checked} compliant Obsolete item(s), ${violations} violation(s)"
+if [[ "$violations" -gt 0 ]]; then
+    exit 1
+fi
+exit 0

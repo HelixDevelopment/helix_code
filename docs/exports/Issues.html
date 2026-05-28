@@ -6,170 +6,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Issues</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
 <header id="title-block-header">
@@ -461,8 +333,7 @@ use.</p>
 </tbody>
 </table>
 <hr />
-<h2
-id="ven-001-ex-issue-001-visionengine-helix-gitlab-remote-repo-missing-404-closed-fixed.md">VEN-001
+<h2 id="ven-001-ex-issue-001-visionengine-helix-gitlab-remote-repo-missing-404-closed-fixed.md">VEN-001
 (ex-ISSUE-001) — VisionEngine <code>helix-gitlab</code> remote repo
 missing (404) — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -493,8 +364,7 @@ by name (not URL), so it continues to work unchanged.
 HEAD) - Original broken URL still 404s when probed directly (proves URL
 was the issue, not perms)</p>
 <hr />
-<h2
-id="hxl-001-ex-issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">HXL-001
+<h2 id="hxl-001-ex-issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">HXL-001
 (ex-ISSUE-003) — HelixLLM
 <code>internal/agents/tools/analysis_test.go</code> hardcoded absolute
 path</h2>
@@ -515,8 +385,7 @@ bug-pattern discovered in <code>git_test.go</code> (constant
 <code>gitSandbox()</code> signature. 6 tests now PASS on any host.
 Mutation verified.</p>
 <hr />
-<h2
-id="hxl-002-ex-issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">HXL-002
+<h2 id="hxl-002-ex-issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">HXL-002
 (ex-ISSUE-004) — HelixLLM <code>internal/gateway/middleware</code> TOON
 <code>WriteTOON</code> returns 500</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -534,8 +403,7 @@ back to <code>json.Marshal</code> while preserving
 middleware). 500 still returned for genuinely unmarshallable values
 (channels). 19 middleware tests now PASS. Mutation verified.</p>
 <hr />
-<h2
-id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase-closed-fixed.md">HXC-001
+<h2 id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase-closed-fixed.md">HXC-001
 (ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still
 PascalCase — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -645,8 +513,7 @@ D-10)</td>
 breakage). HXC-001 stays In progress pending the deferred
 submodule-entangled and parent-dir batches.</p>
 <hr />
-<h2
-id="hxc-002-ex-issue-006-round-74-residual-logic-class-fails-closed">HXC-002
+<h2 id="hxc-002-ex-issue-006-round-74-residual-logic-class-fails-closed">HXC-002
 (ex-ISSUE-006) — Round-74 residual LOGIC-class FAILs (CLOSED)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Discovered:</strong> 2026-05-19 (round 74 —
@@ -669,8 +536,7 @@ cross-cutting work (venice CONST-037 model-wiring + compliance CONST-051
 architectural reconciliation). See HXA-001 through HXA-003 (filed
 below).</p>
 <hr />
-<h2
-id="hxa-001-ex-issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">HXA-001
+<h2 id="hxa-001-ex-issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">HXA-001
 (ex-ISSUE-009) — helix_agent handler tests surfaced after round-109
 fix</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -691,8 +557,7 @@ investigation, similar to round 109’s test-side bluff pattern.
 <code>Fixed.md</code> + <code>Issues_Summary.md</code> (§11.4.12
 sync).</p>
 <hr />
-<h2
-id="hxa-002-ex-issue-010-helix_agent-debatellmprovider-sibling-submodule-api-drift">HXA-002
+<h2 id="hxa-002-ex-issue-010-helix_agent-debatellmprovider-sibling-submodule-api-drift">HXA-002
 (ex-ISSUE-010) — helix_agent debate/llmprovider sibling-submodule API
 drift</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -729,8 +594,7 @@ were rewritten down to the slim API. <strong>Resolution:</strong> See
 import swap + Part-2 slim-API rewrite + score-scale + go.mod
 rename-drift fix + captured evidence).</p>
 <hr />
-<h2
-id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003
+<h2 id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003
 (ex-ISSUE-011) — venice <code>TestGetCapabilities</code> model-list
 drift (CONST-037)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -745,16 +609,15 @@ family rotated to <code>venice-uncensored-1-2</code> /
 the single source of truth for model metadata) the assertion violated
 the no-hardcoded-list rule. <strong>Resolution:</strong>
 <code>helix_agent/internal/llm/providers/venice/venice_test.go::TestGetCapabilities</code>
-— replaced <code>assert.Contains(..., "venice-uncensored")</code> and
-<code>assert.Contains(..., "llama-3.3-70b")</code> with structural
+— replaced <code>assert.Contains(..., &quot;venice-uncensored&quot;)</code> and
+<code>assert.Contains(..., &quot;llama-3.3-70b&quot;)</code> with structural
 assertion: <code>NotEmpty(SupportedModels)</code> plus a substring scan
 for the <code>venice-uncensored*</code> family. SKIP-OK marker per
 CONST-035 fires if the entire family disappears (avoids false-positive
 PASS). Mutation-verified (revert → FAIL with the original drift, restore
 → PASS).</p>
 <hr />
-<h2
-id="hxc-004-recovery-batch-under-verification-40-fail-rate-per-round-193-audit">HXC-004
+<h2 id="hxc-004-recovery-batch-under-verification-40-fail-rate-per-round-193-audit">HXC-004
 — Recovery-batch under-verification (40% FAIL rate per round-193
 audit)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -791,8 +654,7 @@ per package: revert to literal → FAIL (production emits the ID), restore
 <code>docs/audits/2026-05-19-recovery-batch-verification.md</code>
 (commit <code>1badef1</code>).</p>
 <hr />
-<h2
-id="hxc-003-ex-issue-007-const-046-i18n-migration-backlog-closed-migrated-to-docsfixed.md">HXC-003
+<h2 id="hxc-003-ex-issue-007-const-046-i18n-migration-backlog-closed-migrated-to-docsfixed.md">HXC-003
 (ex-ISSUE-007) — CONST-046 i18n migration backlog — CLOSED (migrated to
 docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md) — see
@@ -814,8 +676,7 @@ Closed by round 463. Section retained as a migration tombstone per
 §11.4.19 — the authoritative closure narrative is in
 <code>docs/Fixed.md</code>.</p>
 <hr />
-<h2
-id="hxq-001-ex-issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">HXQ-001
+<h2 id="hxq-001-ex-issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">HXQ-001
 (ex-ISSUE-008) — helix_qa intermittent TestPerformance flake
 (host-load-sensitive)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -835,8 +696,8 @@ ceilings (5 ms / 25 ms / 5 ms) are only meaningful on a quiescent host.
 loosening the timing tolerance would weaken the test’s anti-bluff value
 — a genuine perf regression could then pass. Path (b) preserves the
 strict assertions while making the flake deterministic: the three tests
-now check <code>os.Getenv("HOST_LOAD_DEDICATED")</code> and
-<code>t.Skip("SKIP-OK: #HXQ-001 …")</code> honestly when unset, running
+now check <code>os.Getenv(&quot;HOST_LOAD_DEDICATED&quot;)</code> and
+<code>t.Skip(&quot;SKIP-OK: #HXQ-001 …&quot;)</code> honestly when unset, running
 strict only on a quiescent dedicated host
 (<code>HOST_LOAD_DEDICATED=1</code>). This is the CONST-035-compliant
 choice. Landed in helix_qa submodule commit <code>649e2dd</code> + meta
@@ -851,8 +712,7 @@ evidence: <code>go build ./pkg/vision/...</code> exit 0,
 → all 3 <code>--- PASS</code> strict (DHash64 average 741ns, PHash
 average 88.969µs — well under the 5 ms / 25 ms ceilings).</p>
 <hr />
-<h2
-id="hxc-005-cmdperformance_optimization_standalonemain.go-is-a-const-035-simulation-bluff">HXC-005
+<h2 id="hxc-005-cmdperformance_optimization_standalonemain.go-is-a-const-035-simulation-bluff">HXC-005
 — <code>cmd/performance_optimization_standalone/main.go</code> is a
 CONST-035 simulation bluff</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -898,8 +758,7 @@ reading (not an RNG single-digit). Post-fix evidence:
 <code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements, same order of magnitude. No RNG-fabricated improvement percentages.</code>);
 anti-bluff smoke on the deleted path returns N/A (directory gone).</p>
 <hr />
-<h2
-id="pan-001-panoptic-appendjsonstring-truncates-multi-byte-utf-8-runes-to-bytes-testresult.marshaljson-corrupts-non-ascii">PAN-001
+<h2 id="pan-001-panoptic-appendjsonstring-truncates-multi-byte-utf-8-runes-to-bytes-testresult.marshaljson-corrupts-non-ascii">PAN-001
 — panoptic <code>appendJSONString</code> truncates multi-byte UTF-8
 runes to bytes (<code>TestResult.MarshalJSON</code> corrupts
 non-ASCII)</h2>
@@ -932,8 +791,7 @@ ok 4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
 Closed in this round.</p>
 <hr />
-<h2
-id="hxv-002-llmsverifier-verification-package-10-pre-existing-test-failures">HXV-002
+<h2 id="hxv-002-llmsverifier-verification-package-10-pre-existing-test-failures">HXV-002
 — LLMsVerifier <code>verification/</code> package 10 pre-existing test
 failures</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1026,7 +884,7 @@ only</td>
 <td>8</td>
 <td><code>TestVerifier_Verify_MultipleRequests</code></td>
 <td>verification_test.go</td>
-<td><code>NoError</code> + <code>Status=="completed"</code> per
+<td><code>NoError</code> + <code>Status==&quot;completed&quot;</code> per
 request</td>
 <td><code>ErrVerificationNotWired</code> for every request in batch</td>
 </tr>
@@ -1042,8 +900,8 @@ carries <code>Verified=false</code>+<code>Error</code></td>
 <td>10</td>
 <td><code>TestCodeVerificationService_VerifyModelCodeVisibility_ServerError</code></td>
 <td>code_verification_test.go</td>
-<td><code>Status=="verified"</code> + score≥0.7 on HTTP 500</td>
-<td><code>Status=="failed"</code> + non-empty <code>ErrorMessage</code>;
+<td><code>Status==&quot;verified&quot;</code> + score≥0.7 on HTTP 500</td>
+<td><code>Status==&quot;failed&quot;</code> + non-empty <code>ErrorMessage</code>;
 a 500 server never yields a passing verification</td>
 </tr>
 </tbody>
@@ -1055,8 +913,7 @@ error propagation + zero-response→<code>failed</code>) was already
 honest; only the stale test assertions needed re-keying to certify
 it.</p>
 <hr />
-<h2
-id="hxc-006-helixcode-speed-programme-closed-migrated-to-docsfixed.md">HXC-006
+<h2 id="hxc-006-helixcode-speed-programme-closed-migrated-to-docsfixed.md">HXC-006
 — HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md) — see
 <code>docs/Fixed.md</code> for the full closure record.
@@ -1067,8 +924,7 @@ PARTIAL + 0 DEFERRED). Closed by P5-T04 round 400. Section retained as a
 migration tombstone per §11.4.19 — the authoritative closure narrative
 is in <code>docs/Fixed.md</code>.</p>
 <hr />
-<h2
-id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump-closed-migrated-to-docsfixed.md">HXC-007
+<h2 id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump-closed-migrated-to-docsfixed.md">HXC-007
 — Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED
 (migrated to docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -1079,8 +935,7 @@ cascaded to the meta-repo + 67 owned submodules, meta pointer confirmed
 at <code>34a82b3</code>. Section retained as a migration tombstone per
 §11.4.19.</p>
 <hr />
-<h2
-id="hxc-008-const-055-g1-governance-gaps-surfaced-by-post-constitution-pull-validation-sweep-closed-migrated-to-docsfixed.md">HXC-008
+<h2 id="hxc-008-const-055-g1-governance-gaps-surfaced-by-post-constitution-pull-validation-sweep-closed-migrated-to-docsfixed.md">HXC-008
 — CONST-055 G1 governance gaps surfaced by post-constitution-pull
 validation sweep — CLOSED (migrated to docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) — see
@@ -1094,8 +949,7 @@ CONST-047..057 cascaded into <code>helix_qa/CONSTITUTION.md</code>,
 <code>verify-all-constitution-rules.sh</code> → 6 gates / 0 failures.
 Section retained as a migration tombstone per §11.4.19.</p>
 <hr />
-<h2
-id="hxc-009-owned-submodule-github-gitlab-mirror-divergence-reconciliation-closed-migrated-to-docsfixed.md">HXC-009
+<h2 id="hxc-009-owned-submodule-github-gitlab-mirror-divergence-reconciliation-closed-migrated-to-docsfixed.md">HXC-009
 — Owned-submodule GitHub ↔︎ GitLab mirror-divergence reconciliation —
 CLOSED (migrated to docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -1106,8 +960,7 @@ DocProcessor all reconciled via merge-first (CONST-061 / §11.4.71), all
 owned submodules converged + pushed to all upstreams. Section retained
 as a migration tombstone per §11.4.19.</p>
 <hr />
-<h2
-id="hxc-010-end-to-end-kimi-cli-qwen-code-codegraph-verification-closed-migrated-to-docsfixed.md">HXC-010
+<h2 id="hxc-010-end-to-end-kimi-cli-qwen-code-codegraph-verification-closed-migrated-to-docsfixed.md">HXC-010
 — End-to-end Kimi CLI + Qwen Code CodeGraph verification — CLOSED
 (migrated to docs/Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -1124,8 +977,7 @@ injected via environment variables only, never written to any tracked
 file (CONST-042). Section retained as a migration tombstone per
 §11.4.19.</p>
 <hr />
-<h2
-id="hxc-013-adopt-sqlite-backed-single-source-of-truth-for-workable-items-11.4.9395">HXC-013
+<h2 id="hxc-013-adopt-sqlite-backed-single-source-of-truth-for-workable-items-11.4.9395">HXC-013
 — Adopt SQLite-backed single-source-of-truth for workable items
 (§11.4.93/95)</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
@@ -1379,7 +1231,7 @@ subagent-driven §11.4.70):</strong> internal/auth + internal/deployment
 + internal/project. <strong>4 MORE REAL production bugs SURFACED +
 FIXED:</strong> (1) <strong>SECURITY</strong>
 <code>internal/auth/auth.go</code> VerifyJWT — unchecked type assertions
-<code>claims["username"].(string)</code>/<code>claims["email"].(string)</code>;
+<code>claims[&quot;username&quot;].(string)</code>/<code>claims[&quot;email&quot;].(string)</code>;
 a validly-signed token carrying a missing/numeric/null username/email
 claim PANICS the process (crash-on-untrusted-input DoS — a single forged
 request). Fixed with comma-ok assertions → ErrTokenInvalid. (2+3)
@@ -1392,8 +1244,7 @@ under read-lock) → data race; fixed with exclusive Lock + re-check. Each
 anti-bluff-proven: revert → panic / DATA RACE → restore → PASS.
 <strong>31 in-process targets now covered; 29 real production bugs fixed
 this session.</strong></p>
-<h2
-id="hxc-014b-systemic-unguarded-i18n-translator.go-data-race-panic-crash-cross-package">HXC-014b
+<h2 id="hxc-014b-systemic-unguarded-i18n-translator.go-data-race-panic-crash-cross-package">HXC-014b
 — Systemic unguarded i18n translator.go data-race + panic-crash
 (cross-package)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1460,7 +1311,7 @@ requires per-OS equivalents (runtime dispatch) for platform-specific
 primitives + honest kernel-gap citations. Gaps: shell scripts rarely
 uname-dispatch, no CM-CROSS-PLATFORM-PARITY gate, no supported-platforms
 manifest, shell/sandbox.go rlimits a never-applied stub. Sub-defect
-<strong>HXC-015a (7 platform <code>Assert(true,"...skipped")</code>
+<strong>HXC-015a (7 platform <code>Assert(true,&quot;...skipped&quot;)</code>
 fake-skips) already FIXED in commit f464adb0</strong> (honest v.Skip on
 runtime.GOOS). This item tracks the remaining parity gate + manifest +
 rlimit work. Open decision: which non-Linux platforms have test hardware
@@ -1468,8 +1319,7 @@ rlimit work. Open decision: which non-Linux platforms have test hardware
 §3.2.1 prose says inner module is <code>helix_code/helix_code/</code>;
 actual is <code>helix_code/</code> — correct the prose.</p>
 <hr />
-<h2
-id="hxc-016-11.4.6997-governance-cascade-into-owned-submodules-const-0473-closed-fixed.md">HXC-016
+<h2 id="hxc-016-11.4.6997-governance-cascade-into-owned-submodules-const-0473-closed-fixed.md">HXC-016
 — §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) —
 CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -1491,8 +1341,7 @@ failures</strong>, 204 submodule covenant-114 PASS lines; paired §1.1
 mutation proven (strip §11.4.95 → 1 failure → restore → 0). Section
 retained as a migration tombstone per §11.4.19.</p>
 <hr />
-<h2
-id="hxc-017-codegraph-own-org-submodule-indexing-update-automation-11.4.7980-closed-fixed.md">HXC-017
+<h2 id="hxc-017-codegraph-own-org-submodule-indexing-update-automation-11.4.7980-closed-fixed.md">HXC-017
 — CodeGraph own-org submodule indexing + update automation (§11.4.79/80)
 — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
@@ -1521,31 +1370,73 @@ automation inherited by reference from constitution
 codegraph_update.sh/codegraph_sync.sh). Section retained as a migration
 tombstone per §11.4.19.</p>
 <hr />
-<h2
-id="hxc-018-obsolete-status-11.4.90-summary-doc-clarity-11.4.91-tracker-tooling">HXC-018
+<h2 id="hxc-018-obsolete-status-11.4.90-summary-doc-clarity-11.4.91-tracker-tooling">HXC-018
 — Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker
 tooling</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-28 (constitution pull)
-<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.90 adds
-terminal <code>Obsolete (→ Fixed.md)</code> status + Obsolete-Details
-line + colorizer <code>cell-status-obsolete</code>; §11.4.91 forbids
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.90 adds terminal
+<code>Obsolete (→ Fixed.md)</code> status + Obsolete-Details line +
+colorizer <code>cell-status-obsolete</code>; §11.4.91 forbids
 anti-pattern summary one-liners (“Composes with” etc.) and requires
-generators to refuse them. Extend HelixCode’s tracker +
-(currently-absent) summary generators + colorizer. Couples with HXC-013
-(DB schema includes Obsolete).</p>
+generators to refuse them. Extend HelixCode’s tracker + summary
+generators + colorizer. <strong>Closure (2026-05-28, subagent-driven
+§11.4.70):</strong> §11.4.90 — <code>docs/_progress-style.css</code>
+adds the <code>tr.cell-status-obsolete</code> rule (light-gray #E0E0E0 +
+strikethrough); <code>scripts/gates/obsolete_colorize.sh</code> tags
+Obsolete-status <code>&lt;tr&gt;</code>s post-render;
+<code>scripts/regenerate-tracker-exports.sh</code> wires
+<code>--css docs/_progress-style.css --embed-resources</code> + the
+colorizer into the HTML render;
+<code>scripts/gates/obsolete_details_gate.sh</code> asserts every
+<code>Obsolete (→ Fixed.md)</code> heading carries a valid
+<code>**Obsolete-Details:**</code> line
+(Since/Reason-from-closed-vocab/Superseding-item/Triple-check). §11.4.91
+— <code>scripts/gates/summary_clarity_gate.sh</code> FAILs on
+anti-pattern one-liners + descriptions &lt;6 words AND &lt;40 chars;
+found + fixed 1 real violation (HXA-001 Issues_Summary row). Both wired
+into the CONST-055 sweep as G8/G9. Anti-bluff:
+<code>scripts/tests/{obsolete_details,summary_clarity}_meta_test.sh</code>
+paired-mutation (plant violation → gate FAIL → remove → PASS), both exit
+0; gates run clean against real docs (0 violations).
+<code>bash -n</code> clean (CONST-068). The §11.4.90 <em>terminal-status
+DB column</em> couples with HXC-013 (SQLite) and remains future; the
+MD-tracker gates + colorizer are complete now.</p>
 <hr />
 <h2 id="hxc-019-docsqa-end-user-evidence-tree-11.4.83">HXC-019 —
 docs/qa/ end-user evidence tree (§11.4.83)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-28 (constitution pull)
-<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.83
-requires every shipped feature to carry a recorded e2e transcript +
-materials under <code>docs/qa/&lt;run-id&gt;/</code>; release gate
-refuses feature commits lacking it. Establish the tree + gate.</p>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.83 requires every shipped feature to carry
+a recorded e2e transcript + materials under
+<code>docs/qa/&lt;run-id&gt;/</code>; release gate refuses feature
+commits lacking it. Establish the tree + gate. <strong>Closure
+(2026-05-28, subagent-driven §11.4.70 — operator authorised hard-gate
+promotion):</strong> the tree + advisory scanner already existed;
+promoted <code>scripts/verify_qa_evidence.sh</code> to an ENFORCING
+release gate with <code>--enforce</code> + mandatory
+<code>--since &lt;baseline&gt;</code> (baseline = the
+<code>docs/qa/README.md</code>-introducing commit <code>ed84f90e</code>,
+so pre-convention history is exempt) + a <code>[no-qa-evidence]</code>
+per-commit opt-out for non-feature changes. Wired into
+<code>scripts/release-gate-test.sh</code> via
+<code>scripts/gates/qa_evidence_gate.sh</code> AND into the CONST-055
+sweep as G7. Also fixed a latent git-2.50 bug in the original scanner
+(<code>git show -s --name-only</code> matched zero commits → silent
+false-clean; replaced with <code>git diff-tree</code>). The enforcing
+gate correctly flagged this session’s own 10 HXC-014 feature commits as
+lacking evidence → resolved honestly by adding
+<code>docs/qa/HXC-014/transcript.md</code> (real captured stress/chaos
+evidence + anti-bluff mutation proofs); gate now PASSES (10/10 matched).
+Anti-bluff: <code>scripts/tests/verify_qa_evidence_meta_test.sh</code>
+paired-mutation (6 assertions: no-evidence→1, add-evidence→0, opt-out→0,
+untagged→1, no-since→2, pre-baseline-exempt→0), exit 0.
+<code>bash -n</code> clean (CONST-068). NOT wired into
+pre-commit/pre-push (release-gate-only per the mandate wording).</p>
 <hr />
-<h2
-id="hxc-022-test_bank-platform-integration-packages-do-not-compile-pre-existing-closed-fixed.md">HXC-022
+<h2 id="hxc-022-test_bank-platform-integration-packages-do-not-compile-pre-existing-closed-fixed.md">HXC-022
 — test_bank platform + integration packages do not compile
 (pre-existing) — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) — see
@@ -1569,8 +1460,7 @@ runtime-verified through the now-compiling banks: platform SKIP=3
 PASS/green-empty. Section retained as a migration tombstone per
 §11.4.19.</p>
 <hr />
-<h2
-id="hxc-023-asserttrue-asserttruetrue-literal-true-bluffs-across-test_bank-closed-fixed.md">HXC-023
+<h2 id="hxc-023-asserttrue-asserttruetrue-literal-true-bluffs-across-test_bank-closed-fixed.md">HXC-023
 — <code>Assert(true,…)</code> / <code>AssertTrue(true,…)</code>
 literal-true bluffs across test_bank — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) — see
@@ -1585,7 +1475,7 @@ core/tests.go 4, performance 1 = 33). Pattern: mislabelled “X succeeded”
 branches that fired on non-2xx → assert the expected 2xx; 401/403/429
 branches → assert that exact status; feature-404 branches → honest
 <code>v.Skip(reason)</code> (§11.4.3); the 4 legitimate “Running on
-<arch/platform>” positive-platform asserts left untouched. Verification:
+<arch platform>” positive-platform asserts left untouched. Verification:
 <code>go build ./...</code> + <code>go vet ./...</code> exit 0;
 full-tree grep for literal-true bluffs = 0; runtime harness (down
 server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained

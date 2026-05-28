@@ -6,170 +6,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Fixed</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
 <header id="title-block-header">
@@ -275,7 +147,7 @@ Pattern: mislabelled “X succeeded” branches firing on non-2xx →
 <code>AssertEqual</code> the expected 2xx; 401/403/429 auth/rate
 branches → assert that exact status; feature-404 branches → honest
 <code>v.Skip(reason)</code>; the 4 legitimate “Running on
-<arch/platform>” positive-platform asserts left untouched.
+<arch platform>” positive-platform asserts left untouched.
 <strong>Verification: <code>go build ./...</code> exit 0 +
 <code>go vet ./...</code> clean (independently re-verified by
 conductor); full-tree grep for literal-true bluffs = 0; anti-bluff
@@ -308,7 +180,7 @@ module) + <code>go vet ./...</code> clean — independently re-verified by
 conductor.</strong> HXC-021 runtime-verified through the now-compiling
 banks: platform SKIP=3 honest (macOS/Windows/ARM “not running on…”),
 integration SKIP=2 honest (Ollama unreachable / OPENAI_API_KEY unset), 0
-fake PASS, 0 green-empty; <code>grep 'Assert(true.*skip'</code> = 0. A
+fake PASS, 0 green-empty; <code>grep &#39;Assert(true.*skip&#39;</code> = 0. A
 larger residual sweep (~57 literal-true endpoint/auth bluffs) filed
 separately as HXC-023. Closed <code>Fixed (→ Fixed.md)</code> per
 CONST-057 (Type Bug).</td>
@@ -327,7 +199,7 @@ b4b790ea</td>
 <td>All 24 new constitution anchors (§11.4.69 + §11.4.75–97) cascaded
 into the 5 root govfiles AND all ~68 owned-submodule
 CONSTITUTION/CLAUDE/AGENTS/QWEN files. <strong>Anti-bluff
-hardening:</strong> a loose <code>grep -qF "§11.4.95 —"</code> falsely
+hardening:</strong> a loose <code>grep -qF &quot;§11.4.95 —&quot;</code> falsely
 matched the §11.4.95 cross-reference inside the §11.4.93 block body,
 skipping the §11.4.95 <em>heading</em> in batch-1-6 submodules — caught
 by tightening the gate to the H2 marker <code>## §11.4.NN —</code>
@@ -384,7 +256,7 @@ Task).</td>
 <tr>
 <td>2026-05-28</td>
 <td>HXC-021 + HXC-014a + HXC-015a: fake-skip
-<code>Assert(true,"...skipped")</code> bluffs (11) + empty
+<code>Assert(true,&quot;...skipped&quot;)</code> bluffs (11) + empty
 <code>TestProviderStress</code> stubs report green while exercising
 nothing</td>
 <td>Bug</td>
@@ -392,7 +264,7 @@ nothing</td>
 <td>2026-05-28 session</td>
 <td>f464adb0</td>
 <td>§11.4/§11.4.1/§11.4.3 anti-bluff. Confirmed firsthand (captured): 11
-<code>return v.Assert(true,"...test skipped...")</code> fake-skips — 7
+<code>return v.Assert(true,&quot;...test skipped...&quot;)</code> fake-skips — 7
 in <code>helix_code/tests/e2e/test_bank/platform/tests.go</code>
 (L61/164/622/663/704/745/784), 4 in <code>integration/tests.go</code>
 (L530/535/546/586) — counted as PASS while exercising nothing. Fix: new
@@ -403,14 +275,14 @@ honest-SKIP mechanism
 <code>*SkipError → pkg.StatusSkipped</code> (counted separately from
 Passed, never inflating green); all 11 fake-skips →
 <code>v.Skip(runtime.GOOS/GOARCH...)</code>; the legitimate
-<code>Assert(true,"Running on...")</code> positive assertions left
+<code>Assert(true,&quot;Running on...&quot;)</code> positive assertions left
 untouched. HXC-014a: <code>TestProviderStress</code>‘s 3 empty
 sub-functions (<code>t.Logf</code>+comment) → route through
 <code>stressProvider(t)</code> (real available+healthy provider OR
 honest <code>t.Skip</code> SKIP-OK:#HXC-014 — never green-empty).
 Verified: orchestrator <code>go build ./...</code> exit 0;
 <code>go vet -tags=integration ./tests/integration/...</code> exit 0;
-<code>grep 'Assert(true,".*skip'</code> in both banks = 0; §11.4.84
+<code>grep &#39;Assert(true,&quot;.*skip&#39;</code> in both banks = 0; §11.4.84
 mutation-residue scan clean. Pre-existing test_bank platform/integration
 non-compilation (blocks runtime-verifying those two banks’ honest-skips)
 filed as <strong>HXC-022</strong>. Closed
@@ -563,7 +435,7 @@ and 67 owned-submodule
 Meta <code>.gitmodules</code> constitution pointer confirmed at
 <code>34a82b3</code> (<code>git ls-tree HEAD constitution</code> →
 <code>160000 commit 34a82b3859...</code>). Spot-check:
-<code>grep -c "11.4.70\|11.4.74"</code> returns 6 for
+<code>grep -c &quot;11.4.70\|11.4.74&quot;</code> returns 6 for
 <code>helix_qa/CLAUDE.md</code>,
 <code>dependencies/HelixDevelopment/LLMProvider/CLAUDE.md</code>,
 <code>challenges/CLAUDE.md</code> — all carry §11.4.70-74. CONST-049
@@ -682,13 +554,13 @@ asserted pre-idempotency behaviour — they pre-registered a
 same-(name,version) prompt expecting <code>CreatePromptExperiment</code>
 to fail, but commit <code>bb53c38</code> deliberately made prompt
 registration idempotent (duplicates tolerated as no-ops;
-integration.go:233/236 <code>"already exists"</code> tolerance). No
+integration.go:233/236 <code>&quot;already exists&quot;</code> tolerance). No
 production regression; production error-wrap code is correct. Fix:
 re-keyed both tests to exercise the genuine non-tolerated failure path
 (structurally-invalid prompt, empty <code>Content</code> → registry
-<code>"prompt content is required"</code> →
+<code>&quot;prompt content is required&quot;</code> →
 <code>CreatePromptExperiment</code> wraps with
-<code>"control prompt"</code>/<code>"treatment prompt"</code> prefix).
+<code>&quot;control prompt&quot;</code>/<code>&quot;treatment prompt&quot;</code> prefix).
 <code>go test -count=1 ./llmops/...</code> 2 FAIL → 0 FAIL;
 <code>go build ./...</code> clean</td>
 </tr>
@@ -1527,7 +1399,7 @@ clean; <code>go test -race -count=1 ./internal/executor/...</code> → ok
 <code>regression-present</code> → <code>fixed</code> (literal:
 <code>PASS [executor-marshal:utf8-detector:fixed]</code> +
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
-Probe <code>AppName="ü"</code> (UTF-8 <code>0xC3 0xBC</code>) preserved
+Probe <code>AppName=&quot;ü&quot;</code> (UTF-8 <code>0xC3 0xBC</code>) preserved
 end-to-end through MarshalJSON. |<br />
 2026-05-20 | HXC-005:
 <code>cmd/performance_optimization_standalone/main.go</code> is a
@@ -1608,8 +1480,8 @@ tolerance). Rationale: loosening the timing tolerance would weaken the
 test’s anti-bluff value (a genuine perf regression could then pass);
 path (b) preserves the strict assertions while making the flake
 deterministic. The three tests now gate on
-<code>os.Getenv("HOST_LOAD_DEDICATED")</code> —
-<code>t.Skip("SKIP-OK: #HXQ-001 …")</code> honestly when unset
+<code>os.Getenv(&quot;HOST_LOAD_DEDICATED&quot;)</code> —
+<code>t.Skip(&quot;SKIP-OK: #HXQ-001 …&quot;)</code> honestly when unset
 (loaded/shared host), strict run when <code>HOST_LOAD_DEDICATED=1</code>
 (quiescent dedicated host). NO timing tolerance loosened.
 <code>docs/test-coverage.md</code> §6.1 documents the env var. Evidence:
@@ -1645,7 +1517,7 @@ resolution:</strong> (1) 6 challenge scripts — kept HEAD canonical
 testify-v1.11.1 transitive graph, <code>go mod tidy</code> reconciled
 clean; (3) <code>pkg/analyzer/stub.go</code> — took vd anti-bluff
 sentinel bodies: HEAD body had RE-INTRODUCED the fabricated
-<code>ScreenAnalysis{Title:"Unknown Screen"}</code>+<code>err=nil</code>
+<code>ScreenAnalysis{Title:&quot;Unknown Screen&quot;}</code>+<code>err=nil</code>
 PASS-bluff that the file’s own unconflicted doc comments declare removed
 round-27 — per CONST-035/Article XI §11.9 the bluff must not survive;
 removed bluff-only
@@ -1666,7 +1538,7 @@ pure vd additions); (6)
 CONST-001..061 + §11.4.67; vd-unique CONST-030 superseded by CONST-035,
 vd-unique CONST-068 is the ID-form of §11.4.67 HEAD carries by literal).
 Evidence: zero conflict markers
-(<code>grep -rn '&lt;&lt;&lt;&lt;&lt;&lt;&lt;\|=======\|&gt;&gt;&gt;&gt;&gt;&gt;&gt;' --include='*.go'</code>
+(<code>grep -rn &#39;&lt;&lt;&lt;&lt;&lt;&lt;&lt;\|=======\|&gt;&gt;&gt;&gt;&gt;&gt;&gt;&#39; --include=&#39;*.go&#39;</code>
 empty); <code>go build ./...</code> exit 0; <code>go vet ./...</code>
 clean; <code>go test -count=1 ./...</code> → 7 packages PASS
 (<code>analyzer config graph i18n llmvision opencv remote</code>); all 4
@@ -1812,9 +1684,9 @@ callers distinguish API failure from negative verification — re-keyed to
 <code>require.Error</code> + <code>503</code> substring, response still
 carries <code>Verified=false</code>+<code>Error</code>.
 <code>VerifyModelCodeVisibility_ServerError</code> asserted
-<code>Status=="verified"</code>+score≥0.7 on a server returning HTTP 500
+<code>Status==&quot;verified&quot;</code>+score≥0.7 on a server returning HTTP 500
 for every sample (the “relaxed verification” bluff); zero successful
-responses → production correctly returns <code>Status=="failed"</code> —
+responses → production correctly returns <code>Status==&quot;failed&quot;</code> —
 re-keyed to assert <code>failed</code> + non-empty
 <code>ErrorMessage</code>. Evidence: before
 <code>go test ./verification/...</code> = 10 FAIL; after =
@@ -1835,7 +1707,7 @@ code — <code>BenchmarkSystem.Initialize</code> wires it as the runner’s
 <code>benchmark_test.go</code>), so honest deletion was not applicable.
 The bug: <code>Complete(ctx, prompt, systemPrompt)</code> body was
 <code>// Mock implementation - actual would call real provider</code> +
-<code>return "Response", 50, nil</code> — fabricated a hardcoded
+<code>return &quot;Response&quot;, 50, nil</code> — fabricated a hardcoded
 completion for an LLM call it never made (canonical BLUFF-001).
 <strong>Fix:</strong> the adapter’s <code>provider</code> field was an
 untyped <code>interface{}</code> it never used; retyped it to the real
@@ -1863,15 +1735,15 @@ tokens (no fabrication), and <code>_Complete_RealDispatch</code>
 constructs an <code>httptest.NewServer</code> OpenAI shim +
 <code>HTTPBenchmarkProvider</code>, asserts the adapter ACTUALLY hits
 the server (hit-counter == 1) and returns the real server payload
-(<code>"4 is the real answer"</code>, server-reported
+(<code>&quot;4 is the real answer&quot;</code>, server-reported
 <code>total_tokens</code> 19) — explicitly
-<code>NotEqual("Response")</code> / <code>NotEqual(50)</code>. Evidence:
+<code>NotEqual(&quot;Response&quot;)</code> / <code>NotEqual(50)</code>. Evidence:
 <code>go build ./...</code> exit 0;
 <code>go test -count=1 ./internal/benchmark/...</code> →
 <code>ok llmsverifier/internal/benchmark 12.334s</code> (PASS); the 3
 <code>TestProviderAdapterForBenchmark*</code> tests all
 <code>--- PASS</code>; anti-bluff smoke
-<code>grep -rn "Mock implementation\|simulated\|for now" internal/benchmark/*.go</code>
+<code>grep -rn &quot;Mock implementation\|simulated\|for now&quot; internal/benchmark/*.go</code>
 (prod only) = clean. |</div>
 <div class="line-block">2026-05-20 | HXC-006: HelixCode Speed Programme
 — 3-5× faster than competitor AI CLI agents (6-phase / 31-task) |
@@ -1905,7 +1777,7 @@ hoist ~7.4×, P2-T03 repo-map cache ~10.6× warm, P2-T04 parallel repo-map
 cut, P3-T03 fast-apply ~516×, P3-T04 tool parallelism ~5.99×, P4-T01 PGO
 −46% CPU-bound. <strong>Release-gate sweep (P5-T04):</strong> anti-bluff
 smoke
-<code>grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd</code>
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; helix_code/internal helix_code/cmd</code>
 (prod) = clean; <code>scripts/audit-const046-hardcoded-content.sh</code>
 ran exit 0 (speed work added no user-facing strings, no new hardcoded
 content); <code>scripts/verify-governance-cascade.sh</code> = 2

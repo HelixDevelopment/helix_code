@@ -1,0 +1,37 @@
+/* _progress-style.css — tracker HTML export styling (Constitution §11.4.90).
+ *
+ * Applied to docs/exports/{Issues,Fixed,Issues_Summary,Fixed_Summary}.html
+ * by scripts/regenerate-tracker-exports.sh via pandoc --css plus the
+ * post-render colorizer scripts/gates/obsolete_colorize.sh, which tags any
+ * tracker row whose Status cell reads "Obsolete (→ Fixed.md)" with the
+ * .cell-status-obsolete class.
+ *
+ * §11.4.90 mandate: Obsolete items render with a light-gray (#E0E0E0)
+ * background and a strikethrough description so they are visually distinct
+ * from active/closed work.
+ */
+
+table {
+    border-collapse: collapse;
+}
+
+table td,
+table th {
+    border: 1px solid #cccccc;
+    padding: 4px 8px;
+    vertical-align: top;
+}
+
+/* §11.4.90 — Obsolete row styling. */
+tr.cell-status-obsolete > td {
+    background-color: #E0E0E0;
+}
+
+/* Strikethrough the description / notes cells of an obsolete row. The
+ * description is the 2nd column (Title) in the summary tables and the last
+ * column (Notes) carries the elaborated description; strike both so the
+ * "obsolete, do not action" signal is unambiguous. */
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+    text-decoration: line-through;
+}

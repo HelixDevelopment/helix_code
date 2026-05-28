@@ -24,6 +24,16 @@
 #                                    kebab-case (renames are phased per
 #                                    CONST-052; this gate just surfaces
 #                                    candidates, never fails for layout)
+#   G7  §11.4.83 docs/qa evidence    — enforcing, baseline-scoped: every
+#                                    post-baseline feature commit must carry
+#                                    docs/qa/<run-id>/ (delegates to
+#                                    verify_qa_evidence.sh --enforce; HXC-019)
+#   G8  §11.4.90 Obsolete-Details    — every Obsolete-status tracker item
+#                                    carries a valid Obsolete-Details line
+#                                    (delegates to obsolete_details_gate.sh; HXC-018)
+#   G9  §11.4.91 summary clarity     — no anti-pattern one-liners in the
+#                                    summary docs (delegates to
+#                                    summary_clarity_gate.sh; HXC-018)
 #
 # Per CONST-055 anti-bluff: this sweep MUST be paired with a meta-test
 # that plants a known violation per gate and asserts the sweep reports
@@ -332,6 +342,53 @@ if want_gate G6; then
     else
         # NOT a failure — phased rename per CONST-052 + Task #252.
         gate_pass G6 "$candidate_count unprotected rename candidates ($protected_count protected from rename)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G7 — §11.4.83 docs/qa end-user evidence (enforcing, baseline-scoped)
+# ---------------------------------------------------------------------------
+if want_gate G7; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G7 — §11.4.83 docs/qa/ end-user evidence (HXC-019)"
+    # Baseline = the commit that introduced the docs/qa convention. Pre-baseline
+    # history is exempt (the convention did not exist). Resolve dynamically so
+    # the gate survives history edits; fall back to the known SHA.
+    qa_baseline="$(git -C "$ROOT" log --diff-filter=A --format=%H -- docs/qa/README.md 2>/dev/null | tail -1)"
+    [[ -z "$qa_baseline" ]] && qa_baseline="ed84f90e"
+    if bash "$ROOT/scripts/verify_qa_evidence.sh" --enforce --since "$qa_baseline" >/tmp/g7-qa.out 2>&1; then
+        gate_pass G7 "every post-baseline feature commit carries docs/qa/<run-id>/ evidence"
+    else
+        gate_fail G7 "feature commit(s) lack docs/qa/<run-id>/ evidence (see /tmp/g7-qa.out)" \
+            "$(tail -5 /tmp/g7-qa.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G8 — §11.4.90 Obsolete-Details presence on Obsolete-status items
+# ---------------------------------------------------------------------------
+if want_gate G8; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G8 — §11.4.90 Obsolete-Details (HXC-018)"
+    if bash "$ROOT/scripts/gates/obsolete_details_gate.sh" >/tmp/g8-obs.out 2>&1; then
+        gate_pass G8 "every Obsolete-status item carries a valid Obsolete-Details line"
+    else
+        gate_fail G8 "Obsolete item(s) missing/invalid Obsolete-Details (see /tmp/g8-obs.out)" \
+            "$(tail -5 /tmp/g8-obs.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G9 — §11.4.91 summary-doc clarity (no anti-pattern one-liners)
+# ---------------------------------------------------------------------------
+if want_gate G9; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G9 — §11.4.91 summary-doc clarity (HXC-018)"
+    if bash "$ROOT/scripts/gates/summary_clarity_gate.sh" >/tmp/g9-sum.out 2>&1; then
+        gate_pass G9 "every summary one-liner is self-contained (no anti-pattern rows)"
+    else
+        gate_fail G9 "summary anti-pattern one-liner(s) present (see /tmp/g9-sum.out)" \
+            "$(tail -5 /tmp/g9-sum.out)"
     fi
 fi
 

@@ -9,6 +9,8 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$ROOT/docs"
 DST="$SRC/exports"
+CSS="$SRC/_progress-style.css"            # §11.4.90 tracker styling
+COLORIZE="$ROOT/scripts/gates/obsolete_colorize.sh"  # §11.4.90 colorizer
 mkdir -p "$DST"
 
 if ! command -v pandoc >/dev/null 2>&1; then
@@ -40,9 +42,18 @@ for src in "${SOURCES[@]}"; do
         continue
     fi
 
-    # HTML
-    if pandoc "$in" -o "$DST/$base.html" --standalone --metadata title="$base"; then
+    # HTML — embed §11.4.90 tracker stylesheet so the standalone export
+    # carries .cell-status-obsolete (light-gray + strikethrough) styling.
+    css_args=()
+    if [[ -f "$CSS" ]]; then
+        css_args=(--css "$CSS" --embed-resources)
+    fi
+    if pandoc "$in" -o "$DST/$base.html" --standalone "${css_args[@]}" --metadata title="$base"; then
         echo "OK   $base.html"
+        # §11.4.90 colorizer: tag Obsolete rows post-render.
+        if [[ -x "$COLORIZE" ]]; then
+            "$COLORIZE" "$DST/$base.html" || { echo "FAIL $base.html colorize"; EXIT=1; }
+        fi
     else
         echo "FAIL $base.html"
         EXIT=1
