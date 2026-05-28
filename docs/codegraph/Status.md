@@ -92,4 +92,9 @@ the exclude list additionally pins `**/.env`, `**/.env.*`, `**/*.key`,
 - **Config JSON validity**: confirmed via
   `python3 -c "import json;json.load(open('.codegraph/config.json'))"` → VALID.
 - **Index status BEFORE re-index**: Files 39,024 / Nodes 624,103 / Edges 1,643,200 / DB 1609.00 MB.
-- **Index status AFTER re-index**: see ledger entry below (re-index dispatched via `codegraph index .`).
+- **Index status AFTER re-index** (`codegraph index .`, exit 0): Files **76,044** / Nodes **1,255,974** / Edges **3,955,444** / DB 2617.24 MB. The +37,020 files / +631,871 nodes delta is the newly-included own-org submodule trees.
+- **§11.4.79 anti-bluff probe (own-org symbol now resolves)**:
+  - `codegraph query EventBus` → `dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85` ✅ (would NOT have resolved under the old blanket `dependencies/**` exclude).
+  - `codegraph query helix_memory` → `dependencies/HelixDevelopment/helix_memory/pkg/config/config.go` (+more) ✅.
+  - `codegraph query llama` filtered to `dependencies/LLama_CPP` → **empty** ✅ (third-party correctly excluded).
+- **HXC-017 status**: fully done — config fixed, re-index complete, own-org inclusion proven, third-party exclusion proven.
