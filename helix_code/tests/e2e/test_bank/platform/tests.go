@@ -271,13 +271,15 @@ func TC048_WindowsWSLIntegration() *pkg.TestCase {
 					return fmt.Errorf("failed to parse WSL detection response: %w", err)
 				}
 
-				isWSL, _ := wslResult["is_wsl"].(bool)
-				_, _ = wslResult["windows_host"].(bool)
-
-				// Either we're in WSL or not - both are valid test results
-				if err := v.AssertTrue(true, "WSL detection completed"); err != nil {
+				// Real evidence: a 200 from the WSL-detect endpoint MUST carry an
+				// "is_wsl" field. Assert the field is present (whatever its value)
+				// so a malformed/empty detection response FAILs honestly.
+				rawIsWSL, hasIsWSL := wslResult["is_wsl"]
+				if err := v.AssertTrue(hasIsWSL, "WSL detection response contains is_wsl field"); err != nil {
 					return err
 				}
+				isWSL, _ := rawIsWSL.(bool)
+				_, _ = wslResult["windows_host"].(bool)
 
 				if isWSL {
 					// Test WSL-specific features
@@ -365,10 +367,14 @@ func TC049_DockerContainerization() *pkg.TestCase {
 					return fmt.Errorf("failed to parse Docker detection response: %w", err)
 				}
 
-				isContainer, _ := dockerResult["is_container"].(bool)
-				if err := v.AssertTrue(true, "Container detection completed"); err != nil {
+				// Real evidence: a 200 from the Docker-detect endpoint MUST carry an
+				// "is_container" field. Assert the field is present so a malformed
+				// detection response FAILs honestly.
+				rawIsContainer, hasIsContainer := dockerResult["is_container"]
+				if err := v.AssertTrue(hasIsContainer, "Docker detection response contains is_container field"); err != nil {
 					return err
 				}
+				isContainer, _ := rawIsContainer.(bool)
 
 				if isContainer {
 					// Test container-specific features
@@ -452,10 +458,14 @@ func TC050_KubernetesOrchestration() *pkg.TestCase {
 					return fmt.Errorf("failed to parse Kubernetes detection response: %w", err)
 				}
 
-				inCluster, _ := k8sResult["in_cluster"].(bool)
-				if err := v.AssertTrue(true, "Cluster detection completed"); err != nil {
+				// Real evidence: a 200 from the Kubernetes-detect endpoint MUST carry
+				// an "in_cluster" field. Assert the field is present so a malformed
+				// detection response FAILs honestly.
+				rawInCluster, hasInCluster := k8sResult["in_cluster"]
+				if err := v.AssertTrue(hasInCluster, "Kubernetes detection response contains in_cluster field"); err != nil {
 					return err
 				}
+				inCluster, _ := rawInCluster.(bool)
 
 				if inCluster {
 					// Test pod information
@@ -1142,10 +1152,14 @@ func TC051_AuroraOSClient() *pkg.TestCase {
 					return fmt.Errorf("failed to parse Aurora detection response: %w", err)
 				}
 
-				isAurora, _ := auroraResult["is_aurora_os"].(bool)
-				if err := v.AssertTrue(true, "Aurora OS detection completed"); err != nil {
+				// Real evidence: a 200 from the Aurora-detect endpoint MUST carry an
+				// "is_aurora_os" field. Assert the field is present so a malformed
+				// detection response FAILs honestly.
+				rawIsAurora, hasIsAurora := auroraResult["is_aurora_os"]
+				if err := v.AssertTrue(hasIsAurora, "Aurora detection response contains is_aurora_os field"); err != nil {
 					return err
 				}
+				isAurora, _ := rawIsAurora.(bool)
 
 				if isAurora {
 					// Test Aurora-specific features
@@ -1239,10 +1253,14 @@ func TC052_HarmonyOSClient() *pkg.TestCase {
 					return fmt.Errorf("failed to parse Harmony detection response: %w", err)
 				}
 
-				isHarmony, _ := harmonyResult["is_harmony_os"].(bool)
-				if err := v.AssertTrue(true, "Harmony OS detection completed"); err != nil {
+				// Real evidence: a 200 from the Harmony-detect endpoint MUST carry an
+				// "is_harmony_os" field. Assert the field is present so a malformed
+				// detection response FAILs honestly.
+				rawIsHarmony, hasIsHarmony := harmonyResult["is_harmony_os"]
+				if err := v.AssertTrue(hasIsHarmony, "Harmony detection response contains is_harmony_os field"); err != nil {
 					return err
 				}
+				isHarmony, _ := rawIsHarmony.(bool)
 
 				if isHarmony {
 					// Test Harmony-specific ecosystem integration

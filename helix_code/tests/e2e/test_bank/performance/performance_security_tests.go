@@ -944,15 +944,15 @@ func TC067_APIEndpointSecurity() *pkg.TestCase {
 					return fmt.Errorf("validation test failed for %s: %w", test["test_name"], err)
 				}
 
-				// Check if malicious input was properly blocked
+				// Check if malicious input was properly blocked. Real evidence: the
+				// server returned a 400 Bad Request or 403 Forbidden for the
+				// malicious payload. Assert on the observed status so this PASSes
+				// only when the input-validation layer actually rejected the attack.
 				if test["expected_blocked"].(bool) {
-					if resp.StatusCode != http.StatusBadRequest && resp.StatusCode != http.StatusForbidden {
-						return fmt.Errorf("malicious input was not blocked for %s", test["test_name"])
+					blocked := resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusForbidden
+					if err := v.AssertTrue(blocked, fmt.Sprintf("Malicious input blocked for %s (status %d)", test["test_name"], resp.StatusCode)); err != nil {
+						return err
 					}
-				}
-
-				if err := v.AssertTrue(true, fmt.Sprintf("Input validation test completed for %s", test["test_name"])); err != nil {
-					return err
 				}
 			}
 
