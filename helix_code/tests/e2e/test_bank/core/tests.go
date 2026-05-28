@@ -106,21 +106,11 @@ func parseResponse(resp *http.Response) (map[string]interface{}, error) {
 	return result, nil
 }
 
-// GetCoreTests returns all core functionality test cases
-func GetCoreTests() []*pkg.TestCase {
-	return []*pkg.TestCase{
-		TC001_UserAuthentication(),
-		TC002_ProjectCreation(),
-		TC003_SessionManagement(),
-		TC004_SystemHealthCheck(),
-		TC005_DatabaseConnectivity(),
-		TC006_WorkerRegistration(),
-		TC007_TaskCreation(),
-		TC008_LLMProviderConfiguration(),
-		TC009_APIBasicOperations(),
-		TC010_ConfigurationLoading(),
-	}
-}
+// NOTE: GetCoreTests is defined in additional_tests.go, where it aggregates
+// the full TC-001..TC-025 set (the superset that supersedes the original
+// TC-001..TC-010 list that used to live here). Keeping a second definition
+// here caused a compile-time "GetCoreTests redeclared" error, which prevented
+// the entire core test bank from ever building — and therefore from running.
 
 // TC001_UserAuthentication - Verify user can authenticate with valid credentials
 func TC001_UserAuthentication() *pkg.TestCase {

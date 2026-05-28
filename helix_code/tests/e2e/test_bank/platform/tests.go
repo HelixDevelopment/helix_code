@@ -1170,6 +1170,9 @@ func TC051_AuroraOSClient() *pkg.TestCase {
 						if err := v.AssertTrue(hasID, "Aurora certificate created"); err != nil {
 							return err
 						}
+						if err := v.AssertTrue(certID != "", "Aurora certificate ID is non-empty"); err != nil {
+							return err
+						}
 					}
 
 					// Test Aurora localization
@@ -1701,8 +1704,8 @@ func TC056_HardwareAcceleration() *pkg.TestCase {
 						return fmt.Errorf("failed to parse TPU test response: %w", err)
 					}
 
-					available, _ := tpuResult["tpu_available"].(bool)
-					if err := v.AssertTrue(true, "TPU availability checked"); err != nil {
+					_, hasAvail := tpuResult["tpu_available"].(bool)
+					if err := v.AssertTrue(hasAvail, "TPU availability reported by endpoint"); err != nil {
 						return err
 					}
 				}
@@ -2121,6 +2124,9 @@ func TC060_PlatformMigration() *pkg.TestCase {
 
 				planID, hasID := planResult["migration_plan_id"].(string)
 				if err := v.AssertTrue(hasID, "Migration plan created"); err != nil {
+					return err
+				}
+				if err := v.AssertTrue(planID != "", "Migration plan ID is non-empty"); err != nil {
 					return err
 				}
 

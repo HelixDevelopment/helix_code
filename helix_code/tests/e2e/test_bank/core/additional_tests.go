@@ -2,11 +2,10 @@ package core
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	"dev.helix.code/tests/e2e/orchestrator/pkg"
@@ -136,8 +135,8 @@ func TC012_PasswordReset() *pkg.TestCase {
 
 				// Verify reset token is generated
 				token, hasToken := resetResult["reset_token"]
-				if !hasToken {
-					return v.Assert(true, "Reset token should be generated in test mode")
+				if err := v.AssertTrue(hasToken && token != nil, "Reset token is generated for the password-reset request"); err != nil {
+					return err
 				}
 			} else if resp.StatusCode == http.StatusNotFound {
 				// Password reset endpoint should exist
@@ -1046,7 +1045,6 @@ func TC019_BuildAutomation() *pkg.TestCase {
 				} else if progressResp.StatusCode == http.StatusNotFound {
 					// Build endpoint should exist
 					return v.Assert(true, "Build endpoint exists but may need configuration")
-					break
 				}
 			}
 
@@ -1445,7 +1443,7 @@ func TC023_AuditLogging() *pkg.TestCase {
 			}
 
 			// Create project - should generate audit log
-			resp, err := client.doRequest("POST", "/api/v1/projects", projectReq)
+			resp, err = client.doRequest("POST", "/api/v1/projects", projectReq)
 			if err != nil {
 				return fmt.Errorf("project creation failed: %w", err)
 			}

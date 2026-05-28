@@ -2032,13 +2032,13 @@ func TC041_PerformanceMonitoring() *pkg.TestCase {
 
 				// Check key performance indicators
 				if cpuUsage, exists := systemMetrics["cpu_usage_percent"]; exists {
-					if err := v.AssertTrue(true, "CPU usage is monitored"); err != nil {
+					if err := v.AssertTrue(cpuUsage != nil, "CPU usage is monitored (non-nil value reported)"); err != nil {
 						return err
 					}
 				}
 
 				if memoryUsage, exists := systemMetrics["memory_usage_mb"]; exists {
-					if err := v.AssertTrue(true, "Memory usage is monitored"); err != nil {
+					if err := v.AssertTrue(memoryUsage != nil, "Memory usage is monitored (non-nil value reported)"); err != nil {
 						return err
 					}
 				}
@@ -2113,6 +2113,9 @@ func TC041_PerformanceMonitoring() *pkg.TestCase {
 
 				profileID, hasID := profileResult["profile_id"].(string)
 				if err := v.AssertTrue(hasID, "Profile ID is returned"); err != nil {
+					return err
+				}
+				if err := v.AssertTrue(profileID != "", "Profile ID is non-empty"); err != nil {
 					return err
 				}
 			}
@@ -2348,6 +2351,9 @@ func TC043_BackupRecovery() *pkg.TestCase {
 					if err := v.AssertTrue(hasID, "Restore ID is returned"); err != nil {
 						return err
 					}
+					if err := v.AssertTrue(restoreID != "", "Restore ID is non-empty"); err != nil {
+						return err
+					}
 				}
 			}
 
@@ -2493,6 +2499,9 @@ func TC044_AuditLogging() *pkg.TestCase {
 				if err := v.AssertTrue(hasID, "Audit export ID is returned"); err != nil {
 					return err
 				}
+				if err := v.AssertTrue(exportID != "", "Audit export ID is non-empty"); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -2542,6 +2551,9 @@ func TC045_ResourceManagement() *pkg.TestCase {
 				if err := v.AssertTrue(hasID, "Quota ID is returned"); err != nil {
 					return err
 				}
+				if err := v.AssertTrue(quotaID != "", "Quota ID is non-empty"); err != nil {
+					return err
+				}
 			}
 
 			// Test resource usage tracking
@@ -2566,8 +2578,10 @@ func TC045_ResourceManagement() *pkg.TestCase {
 				if hasQuotas {
 					for resource, quota := range quotas {
 						if current, exists := currentUsage[resource]; exists {
-							// Basic validation that usage tracking works
-							if err := v.AssertTrue(true, fmt.Sprintf("Resource %s usage tracked", resource)); err != nil {
+							// Real validation: both the quota limit and the current usage
+							// must be reported as non-nil values for usage tracking to work.
+							if err := v.AssertTrue(quota != nil && current != nil,
+								fmt.Sprintf("Resource %s usage tracked (quota + current both reported)", resource)); err != nil {
 								return err
 							}
 						}

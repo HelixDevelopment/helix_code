@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 
 	"dev.helix.code/tests/e2e/orchestrator/pkg"
@@ -186,19 +185,19 @@ func TC061_LoadTesting() *pkg.TestCase {
 
 					// Check key performance indicators
 					if throughput, exists := metrics["requests_per_second"]; exists {
-						if err := v.AssertTrue(true, "Throughput measured"); err != nil {
+						if err := v.AssertTrue(throughput != nil, "Throughput measured (non-nil value reported)"); err != nil {
 							return err
 						}
 					}
 
 					if avgResponseTime, exists := metrics["avg_response_time_ms"]; exists {
-						if err := v.AssertTrue(true, "Average response time measured"); err != nil {
+						if err := v.AssertTrue(avgResponseTime != nil, "Average response time measured (non-nil value reported)"); err != nil {
 							return err
 						}
 					}
 
 					if errorRate, exists := metrics["error_rate_percent"]; exists {
-						if err := v.AssertTrue(true, "Error rate measured"); err != nil {
+						if err := v.AssertTrue(errorRate != nil, "Error rate measured (non-nil value reported)"); err != nil {
 							return err
 						}
 					}
@@ -248,6 +247,9 @@ func TC062_StressTesting() *pkg.TestCase {
 				if err := v.AssertTrue(hasID, "Memory stress test ID is returned"); err != nil {
 					return err
 				}
+				if err := v.AssertTrue(stressID != "", "Memory stress test ID is non-empty"); err != nil {
+					return err
+				}
 			}
 
 			// Test CPU stress
@@ -271,6 +273,9 @@ func TC062_StressTesting() *pkg.TestCase {
 
 				testID, hasID := cpuResult["stress_test_id"].(string)
 				if err := v.AssertTrue(hasID, "CPU stress test ID is returned"); err != nil {
+					return err
+				}
+				if err := v.AssertTrue(testID != "", "CPU stress test ID is non-empty"); err != nil {
 					return err
 				}
 			}
@@ -298,6 +303,9 @@ func TC062_StressTesting() *pkg.TestCase {
 				if err := v.AssertTrue(hasID, "Disk I/O stress test ID is returned"); err != nil {
 					return err
 				}
+				if err := v.AssertTrue(testID != "", "Disk I/O stress test ID is non-empty"); err != nil {
+					return err
+				}
 			}
 
 			// Test network stress
@@ -321,6 +329,9 @@ func TC062_StressTesting() *pkg.TestCase {
 
 				testID, hasID := networkResult["stress_test_id"].(string)
 				if err := v.AssertTrue(hasID, "Network stress test ID is returned"); err != nil {
+					return err
+				}
+				if err := v.AssertTrue(testID != "", "Network stress test ID is non-empty"); err != nil {
 					return err
 				}
 			}
@@ -671,6 +682,9 @@ func TC065_DataEncryption() *pkg.TestCase {
 				if err := v.AssertTrue(hasID, "Encryption key ID is returned"); err != nil {
 					return err
 				}
+				if err := v.AssertTrue(keyID != "", "Encryption key ID is non-empty"); err != nil {
+					return err
+				}
 			}
 
 			// Test data encryption/decryption
@@ -724,14 +738,7 @@ func TC065_DataEncryption() *pkg.TestCase {
 				}
 			}
 
-			// Test TLS/SSL configuration
-			tlsReq := map[string]interface{}{
-				"check_tls_config": true,
-				"minimum_version": "TLS_1_2",
-				"cipher_suites": []string{"ECDHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256"},
-				"hsts_enabled": true,
-			}
-
+			// Test TLS/SSL configuration via the live TLS status endpoint.
 			resp, err = client.doRequest("GET", "/api/v1/security/encryption/tls-status", nil)
 			if err != nil {
 				return fmt.Errorf("TLS status check failed: %w", err)
@@ -973,13 +980,7 @@ func TC067_APIEndpointSecurity() *pkg.TestCase {
 				}
 			}
 
-			// Test API versioning and deprecation
-			versionReq := map[string]interface{}{
-				"check_deprecated_endpoints": true,
-				"enforce_version_headers": true,
-				"supported_versions": []string{"v1", "v2"},
-			}
-
+			// Test API versioning and deprecation via the live versioning endpoint.
 			resp, err = client.doRequest("GET", "/api/v1/security/api/versioning", nil)
 			if err != nil {
 				return fmt.Errorf("API versioning check failed: %w", err)
