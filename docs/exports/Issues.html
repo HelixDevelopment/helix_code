@@ -1438,6 +1438,32 @@ reference ~9 deleted provider constructors + a duplicate MockProvider) —
 filed as <strong>HXC-024</strong>; the ollama integration tests pass in
 isolation and land once HXC-024 restores the package integration build.
 <strong>Session total: 34 real production bugs fixed.</strong></p>
+<h2 id="hxc-027-11.4.98-live-test-full-automation-compliance-audit">HXC-027
+— §11.4.98 live-test full-automation compliance audit</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(constitution §11.4.98 cascaded in HXC-025 — mandate requires
+classifying every test COMPLIANT vs NON-COMPLIANT) <strong>Closure
+(2026-05-29):</strong> audited HelixCode’s <code>*_test.go</code> suite
+for §11.4.98 manual-action anti-patterns — RESULT:
+<strong>COMPLIANT</strong>. Scans: (a) stdin/manual-input dependency
+(<code>bufio.NewReader(os.Stdin)</code>/<code>fmt.Scan</code>/<code>os.Stdin.Read</code>)
+→ ZERO; (b) operator-prompt waits (“operator must”/“please type”/“press
+enter”/“manually run”) → ZERO; (c) silent <code>t.Skip()</code> without
+a reason/SKIP-OK marker → ZERO (all skips cite a reason per §11.4.3);
+(d) human-response-window waits → the only long <code>time.Sleep</code>s
+(discovery health-timeout 10s, token_budget 61s, e2e propagation 10-15s,
+hardware/load 10-15s) are DETERMINISTIC machine-timing waits (waiting
+for a timeout/budget-window to elapse, then continuing automatically) —
+fully self-driving, NOT human-response windows, so §11.4.98-compliant.
+The suite reports PASS/FAIL/SKIP-with-reason without human action after
+startup. <strong>Forward note (§11.4.82, not a §11.4.98
+violation):</strong> <code>internal/llm/token_budget_test.go:436</code>
+sleeps a real 61s to exercise a 60s budget window — a
+configurable/shorter window would speed iteration; non-blocking. No
+NON-COMPLIANT tests found → no remediation campaign needed (unlike the
+CONST-046 i18n campaign).</p>
+<hr />
 <h2 id="hxc-026-workable-items-mddb-sync-gate-11.4.9395-follow-up">HXC-026 —
 workable-items md↔︎db sync gate (§11.4.93/95 follow-up)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
