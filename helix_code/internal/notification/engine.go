@@ -208,7 +208,7 @@ func (e *NotificationEngine) sendToChannels(ctx context.Context, notification *N
 			continue
 		}
 
-		if err := channel.Send(ctx, notification); err != nil {
+		if err := e.sendOne(ctx, channel, notification); err != nil {
 			errors = append(errors, fmt.Sprintf("%s: %v", channelName, err))
 			log.Printf("Failed to send notification via %s: %v", channelName, err)
 		} else {
@@ -221,6 +221,28 @@ func (e *NotificationEngine) sendToChannels(ctx context.Context, notification *N
 	}
 
 	return nil
+}
+
+// sendOne dispatches a single notification to one channel, isolating any panic
+// the channel's Send may raise.
+//
+// A misbehaving channel (third-party integration, a nil-deref in a custom
+// channel, a formatting panic on hostile Metadata, etc.) MUST NOT take down the
+// engine: under synchronous dispatch an unrecovered panic propagates to the
+// caller and starves every co-channel queued after it; when dispatched from a
+// NotificationQueue worker goroutine it crashes the WHOLE process (the worker
+// has no recover of its own). We convert a panic into a channel-level error so
+// the dispatch loop records it like any other delivery failure, co-channels
+// still receive the notification, and the queue worker survives. The recovered
+// error string is composed from the panic value (CONST-046: no hardcoded
+// user-facing template — this is a diagnostic error, not user-facing copy).
+func (e *NotificationEngine) sendOne(ctx context.Context, channel NotificationChannel, notification *Notification) (err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf("channel %s panicked during send: %v", channel.GetName(), p)
+		}
+	}()
+	return channel.Send(ctx, notification)
 }
 
 // Helper methods

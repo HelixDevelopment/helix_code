@@ -61,5 +61,8 @@ internal_mcp_server_info_name:
 internal_mcp_server_tool_execution_failed:
   other: "Tool execution failed"
 
+internal_mcp_server_tool_handler_panicked:
+  other: "tool handler {{.ToolName}} panicked: {{.Panic}}"
+
 internal_mcp_config_env_vars_unset:
   other: "mcp config {{.Path}}: env var(s) not set, expanded to empty: {{.Keys}}"

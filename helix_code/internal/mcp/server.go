@@ -283,8 +283,12 @@ func (s *MCPServer) handleCallTool(ctx context.Context, session *MCPSession, mes
 		return
 	}
 
-	// Execute tool
-	result, err := tool.Handler(ctx, session, params.Arguments)
+	// Execute tool. The handler is third-party/user-supplied code; a panic in
+	// it MUST NOT crash the server process (handleMessage dispatches each
+	// message in its own goroutine, so an unrecovered panic here would kill the
+	// whole process and every other session). Isolate it and surface a clean
+	// JSON-RPC error instead. (§11.4.85(B) tool-handler-panic isolation.)
+	result, err := s.invokeToolHandler(ctx, tool, session, params.Arguments)
 	if err != nil {
 		s.sendError(session, message.ID, -32000, tr(context.Background(), "internal_mcp_server_tool_execution_failed", nil), err.Error())
 		return
@@ -304,6 +308,22 @@ func (s *MCPServer) handleCallTool(ctx context.Context, session *MCPSession, mes
 	}
 
 	s.sendMessage(session, &response)
+}
+
+// invokeToolHandler runs a tool's handler with panic isolation. A panic in the
+// (third-party / user-supplied) handler is converted into a returned error so
+// the per-message dispatch goroutine — and thus the whole server process —
+// never crashes. The recovered panic is surfaced as a normal tool-execution
+// error so the caller's existing error-response path applies unchanged.
+func (s *MCPServer) invokeToolHandler(ctx context.Context, tool *Tool, session *MCPSession, args map[string]interface{}) (result interface{}, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			result = nil
+			err = fmt.Errorf("%s", tr(context.Background(), "internal_mcp_server_tool_handler_panicked",
+				map[string]any{"ToolName": tool.Name, "Panic": p}))
+		}
+	}()
+	return tool.Handler(ctx, session, args)
 }
 
 // handleCapabilities handles the capabilities notification

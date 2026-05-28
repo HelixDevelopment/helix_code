@@ -421,9 +421,14 @@ func (po *PerformanceOptimizer) StartProductionOptimization(ctx context.Context)
 				continue
 			}
 
-			// Update optimization with results
+			// Update optimization with results. The optimizations map is read
+			// concurrently (getOptimizationsByType), so the write MUST hold the
+			// write-lock — otherwise the runtime aborts with a concurrent
+			// map-read/map-write fatal error (§11.4.85(B) state-corruption).
 			opt.Results = result
+			po.mutex.Lock()
 			po.optimizations[opt.Name] = opt
+			po.mutex.Unlock()
 
 			applied++
 			if result.Success {
@@ -753,6 +758,11 @@ func (po *PerformanceOptimizer) applyLLMOptimization(ctx context.Context, opt *O
 
 // Helper functions
 func (po *PerformanceOptimizer) getOptimizationsByType(optType OptType) []Optimization {
+	// The optimizations map is mutated concurrently by
+	// StartProductionOptimization; reads MUST hold the read-lock so the iteration
+	// is serialised against the writer (§11.4.85(B) state-corruption guard).
+	po.mutex.RLock()
+	defer po.mutex.RUnlock()
 	var opts []Optimization
 	for _, opt := range po.optimizations {
 		if opt.Type == optType {

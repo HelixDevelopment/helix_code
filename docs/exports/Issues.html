@@ -1264,13 +1264,38 @@ concurrent-map-crash / panic → restore → PASS. <strong>16 in-process
 targets now covered; 8 real production bugs fixed this session</strong>
 (worker/load_balancer batch 1; event/memory batch 3; hooks×3 batch 5;
 agent/monitoring/commands batch 6); <code>make stress-chaos</code>
-extended to all 16, full target PASSES under -race. <strong>Remaining
-(infra batch + long-tail):</strong> internal/redis + internal/database +
-internal/persistence (real PG/Redis via
-<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
-load), internal/llm provider endpoints — all need the docker-compose
-stack up; then the long-tail ~40-package sweep. Effort remaining
-multi-week incremental. <strong>HXC-014a</strong> (empty
+extended to all 16, full target PASSES under -race. <strong>Batch 7 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/mcp +
+internal/notification + internal/performance (3 parallel disjoint-scope
+subagents). <strong>4 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1+2) <code>internal/mcp/server.go</code> handleCallTool
+invoked tool.Handler with no recover() (handleSession dispatches each
+message via <code>go handleMessage</code>, so a panicking tool handler
+crashes the process) + <code>internal/mcp/lifecycle.go</code>
+Client.setState called the caller-supplied onEvent callback inline with
+no recover (panic crashes the Connect/Close/recvLoop goroutine); fixed
+via invokeToolHandler recover-wrapper + i18n key
+<code>internal_mcp_server_tool_handler_panicked</code> + callback
+recover. (3) <code>internal/notification/engine.go</code> sendToChannels
+called channel.Send with no recover — a panicking channel crashes the
+process when dispatched from a NotificationQueue worker goroutine; fixed
+via sendOne recover-wrapper. (4)
+<code>internal/performance/optimizer.go</code> declared
+<code>po.mutex</code> but NEVER used it — StartProductionOptimization
+wrote po.optimizations while getOptimizationsByType iterated it
+unsynchronised →
+<code>fatal error: concurrent map iteration and map write</code>; fixed
+with Lock on write + RLock on read. Each anti-bluff-proven: revert →
+panic/FATAL/DATA RACE → restore → PASS. <strong>19 in-process targets
+now covered; 12 real production bugs fixed this session</strong>
+(+mcp×2, notification, performance in batch 7);
+<code>make stress-chaos</code> extended to all 19, full target PASSES
+under -race. <strong>Remaining (infra batch + long-tail):</strong>
+internal/redis + internal/database + internal/persistence (real PG/Redis
+via <code>make test-infra-up</code>), internal/server (HTTP/WS
+DDoS-class load), internal/llm provider endpoints — all need the
+docker-compose stack up; then the long-tail ~40-package sweep. Effort
+remaining multi-week incremental. <strong>HXC-014a</strong> (empty
 TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
 decision deferred:</strong> promoting <code>tests/stresschaos/</code>
 into the constitution submodule for cross-project reuse (triggers

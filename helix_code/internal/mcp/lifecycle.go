@@ -77,7 +77,13 @@ func (c *Client) setState(s ClientState) {
 	fn := c.onEvent
 	c.mu.Unlock()
 	if fn != nil {
-		fn(Event{Server: c.name, State: s})
+		// The event callback is caller-supplied (SetOnEvent); a panic in it MUST
+		// NOT crash the goroutine driving the state transition (Connect / Close /
+		// recvLoop). Isolate it. (§11.4.85(B) callback-panic isolation.)
+		func() {
+			defer func() { _ = recover() }()
+			fn(Event{Server: c.name, State: s})
+		}()
 	}
 }
 
