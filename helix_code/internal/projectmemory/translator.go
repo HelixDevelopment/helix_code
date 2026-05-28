@@ -23,6 +23,7 @@ package projectmemory
 
 import (
 	stdctx "context"
+	"sync"
 
 	pmi18n "dev.helix.code/internal/projectmemory/i18n"
 )
@@ -38,13 +39,24 @@ import (
 // per LLM invocation (hot path) and MemoryWatcher debounce-fires on
 // fsnotify events; threading a struct-scoped translator would inflate
 // every call without behavioural benefit.
-var translator pmi18n.Translator = pmi18n.NoopTranslator{}
+//
+// HXC-014b §11.4.85: both reads (tr) and writes (SetTranslator) of
+// this package-level seam MUST be guarded by translatorMu — Discover
+// runs on the hot LLM path while MemoryWatcher debounce-fires on
+// fsnotify goroutines and SetTranslator may be re-invoked, so an
+// unguarded access is a data race (caught by `go test -race`).
+var (
+	translatorMu sync.RWMutex
+	translator   pmi18n.Translator = pmi18n.NoopTranslator{}
+)
 
 // SetTranslator wires a CONST-046-compliant Translator. Passing nil
 // resets to i18n.NoopTranslator{} (loud echo) — never silently
 // disables translation lookup (which would be a §11.4 PASS-bluff at
 // the i18n injection layer).
 func SetTranslator(tr pmi18n.Translator) {
+	translatorMu.Lock()
+	defer translatorMu.Unlock()
 	if tr == nil {
 		translator = pmi18n.NoopTranslator{}
 		return
@@ -58,12 +70,27 @@ func SetTranslator(tr pmi18n.Translator) {
 // ID itself (matching NoopTranslator behaviour) so production output
 // remains loud + obvious instead of silently empty.
 //
+// HXC-014b §11.4.85(B): a panicking Translator (buggy or hostile
+// injected implementation) MUST NOT crash the emitting goroutine —
+// the recover() below isolates the panic and degrades to the message
+// ID, matching the error/empty fallback behaviour.
+//
 //nolint:unused // reserved for future CONST-046 migrations; see translator_test.go.
-func tr(ctx stdctx.Context, msgID string, data map[string]any) string {
-	if translator == nil {
-		translator = pmi18n.NoopTranslator{}
+func tr(ctx stdctx.Context, msgID string, data map[string]any) (result string) {
+	translatorMu.RLock()
+	active := translator
+	translatorMu.RUnlock()
+	if active == nil {
+		active = pmi18n.NoopTranslator{}
 	}
-	out, err := translator.T(ctx, msgID, data)
+
+	defer func() {
+		if r := recover(); r != nil {
+			result = msgID
+		}
+	}()
+
+	out, err := active.T(ctx, msgID, data)
 	if err != nil || out == "" {
 		return msgID
 	}

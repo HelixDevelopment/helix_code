@@ -1396,7 +1396,23 @@ this session.</strong></p>
 id="hxc-014b-systemic-unguarded-i18n-translator.go-data-race-panic-crash-cross-package">HXC-014b
 — Systemic unguarded i18n translator.go data-race + panic-crash
 (cross-package)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Closure (2026-05-28, subagent-driven §11.4.70):</strong> all
+52 remaining unguarded <code>internal/*/translator.go</code> files fixed
+(3 parallel disjoint-group subagents, 18+17+17) to match the proven
+<code>internal/security</code> + <code>internal/deployment</code>
+guarding pattern — added <code>translatorMu sync.RWMutex</code> (Lock in
+SetTranslator, RLock-snapshot in tr) + a <code>recover()</code> in tr
+(named return) degrading a panicking translator to the message ID, and
+removed the inline <code>if translator==nil { translator = Noop }</code>
+write-on-read-path. 54/54 translator.go files now guarded; whole
+<code>internal/...</code>+<code>cmd/...</code> tree builds clean; gofmt
+clean. Anti-bluff proof: new
+<code>internal/logging/translator_race_test.go</code> hammers
+SetTranslator concurrently with tr (16×300) + a panicking translator;
+§1.1 paired mutation (strip the guard) → <code>WARNING: DATA RACE</code>
++ <code>panic</code> + FAIL → restore → PASS. Behaviour-preserving (only
+thread-safety + panic-isolation; same msgID fallback + nil→Noop reset).
 <strong>Discovered:</strong> 2026-05-28 (HXC-014 batch 8+11 — same
 defect found independently in internal/security AND internal/deployment
 translator.go) <strong>Severity:</strong> Medium (latent: requires

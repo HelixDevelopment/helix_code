@@ -8,6 +8,7 @@ package session
 
 import (
 	stdctx "context"
+	"sync"
 
 	"dev.helix.code/internal/session/i18n"
 )
@@ -23,13 +24,23 @@ import (
 // from many sites and the manager is process-wide; threading a
 // struct-scoped translator would inflate the diff without
 // behavioural benefit.
-var translator i18n.Translator = i18n.NoopTranslator{}
+//
+// HXC-014b §11.4.85 fix: SetTranslator (a write) may run concurrently
+// with tr() (a read), so both accesses MUST be guarded by translatorMu
+// — otherwise the concurrent read/write is a data race (caught by
+// `go test -race`), a §11.4.85(B) state-corruption defect.
+var (
+	translatorMu sync.RWMutex
+	translator   i18n.Translator = i18n.NoopTranslator{}
+)
 
 // SetTranslator wires a CONST-046-compliant Translator. Passing nil
 // resets to i18n.NoopTranslator{} (loud echo) — never silently
 // disables translation lookup (which would be a §11.4 PASS-bluff at
 // the i18n injection layer).
 func SetTranslator(tr i18n.Translator) {
+	translatorMu.Lock()
+	defer translatorMu.Unlock()
 	if tr == nil {
 		translator = i18n.NoopTranslator{}
 		return
@@ -42,11 +53,25 @@ func SetTranslator(tr i18n.Translator) {
 // caller — translation failures degrade to the message ID itself
 // (matching NoopTranslator behaviour) so production output remains
 // loud + obvious instead of silently empty.
-func tr(ctx stdctx.Context, msgID string, data map[string]any) string {
-	if translator == nil {
-		translator = i18n.NoopTranslator{}
+//
+// HXC-014b §11.4.85(B): a panicking Translator MUST NOT crash the
+// emitting goroutine — the recover() below isolates such a panic and
+// degrades to the message ID.
+func tr(ctx stdctx.Context, msgID string, data map[string]any) (result string) {
+	translatorMu.RLock()
+	active := translator
+	translatorMu.RUnlock()
+	if active == nil {
+		active = i18n.NoopTranslator{}
 	}
-	out, err := translator.T(ctx, msgID, data)
+
+	defer func() {
+		if r := recover(); r != nil {
+			result = msgID
+		}
+	}()
+
+	out, err := active.T(ctx, msgID, data)
 	if err != nil || out == "" {
 		return msgID
 	}

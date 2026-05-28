@@ -18,6 +18,7 @@ package verifier
 
 import (
 	stdctx "context"
+	"sync"
 
 	verifieri18n "dev.helix.code/internal/verifier/i18n"
 )
@@ -26,12 +27,22 @@ import (
 // string emitted by this package. Defaults to i18n.NoopTranslator{}
 // (loud message-ID echo). helix_code wires a real
 // *i18nadapter.Translator at boot via SetTranslator.
-var translator verifieri18n.Translator = verifieri18n.NoopTranslator{}
+//
+// HXC-014b §11.4.85 fix: SetTranslator (a write) may run concurrently
+// with tr() (a read), so both accesses MUST be guarded by translatorMu
+// — otherwise the concurrent read/write is a data race (caught by
+// `go test -race`), a §11.4.85(B) state-corruption defect.
+var (
+	translatorMu sync.RWMutex
+	translator   verifieri18n.Translator = verifieri18n.NoopTranslator{}
+)
 
 // SetTranslator wires a CONST-046-compliant Translator. Passing nil
 // resets to i18n.NoopTranslator{} (loud echo) — never silently
 // disables translation lookup.
 func SetTranslator(tr verifieri18n.Translator) {
+	translatorMu.Lock()
+	defer translatorMu.Unlock()
 	if tr == nil {
 		translator = verifieri18n.NoopTranslator{}
 		return
@@ -44,12 +55,26 @@ func SetTranslator(tr verifieri18n.Translator) {
 // itself so production output remains loud + obvious instead of
 // silently empty.
 //
+// HXC-014b §11.4.85(B): a panicking Translator MUST NOT crash the
+// emitting goroutine — the recover() below isolates such a panic and
+// degrades to the message ID.
+//
 //nolint:unused // reserved for future CONST-046 migrations; see translator_test.go.
-func tr(ctx stdctx.Context, msgID string, data map[string]any) string {
-	if translator == nil {
-		translator = verifieri18n.NoopTranslator{}
+func tr(ctx stdctx.Context, msgID string, data map[string]any) (result string) {
+	translatorMu.RLock()
+	active := translator
+	translatorMu.RUnlock()
+	if active == nil {
+		active = verifieri18n.NoopTranslator{}
 	}
-	out, err := translator.T(ctx, msgID, data)
+
+	defer func() {
+		if r := recover(); r != nil {
+			result = msgID
+		}
+	}()
+
+	out, err := active.T(ctx, msgID, data)
 	if err != nil || out == "" {
 		return msgID
 	}
