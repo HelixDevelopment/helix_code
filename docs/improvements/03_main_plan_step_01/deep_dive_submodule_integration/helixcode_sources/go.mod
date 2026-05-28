@@ -148,11 +148,11 @@ replace digital.vasic.containers => ../Containers
 
 replace digital.vasic.helixqa => ../HelixQA
 
-replace digital.vasic.docprocessor => ../dependencies/HelixDevelopment/DocProcessor
+replace digital.vasic.docprocessor => ../dependencies/HelixDevelopment/doc_processor
 
-replace digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/LLMOrchestrator
+replace digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/llm_orchestrator
 
-replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/VisionEngine
+replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/vision_engine
 
 replace digital.vasic.challenges => ../Challenges
 

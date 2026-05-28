@@ -111,10 +111,10 @@ fi
 
 # P0-T2: Add HelixSpecifier
 log "Adding HelixSpecifier submodule..."
-if [ ! -d "dependencies/HelixDevelopment/HelixSpecifier" ]; then
+if [ ! -d "dependencies/HelixDevelopment/helix_specifier" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixSpecifier.git \
-        dependencies/HelixDevelopment/HelixSpecifier
+        dependencies/HelixDevelopment/helix_specifier
     success "HelixSpecifier submodule added"
 else
     warn "HelixSpecifier directory already exists"
@@ -194,11 +194,11 @@ go 1.26
 use (
 	.
 	./HelixCode
-	./dependencies/HelixDevelopment/LLMsVerifier
+	./dependencies/HelixDevelopment/llms_verifier
 	./dependencies/HelixDevelopment/HelixAgent
 	./dependencies/HelixDevelopment/helix_llm
 	./dependencies/HelixDevelopment/helix_memory
-	./dependencies/HelixDevelopment/HelixSpecifier
+	./dependencies/HelixDevelopment/helix_specifier
 	./HelixQA
 	./Challenges
 	./Containers

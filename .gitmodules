@@ -37,17 +37,17 @@
 [submodule "helix_qa"]
 	path = helix_qa
 	url = git@github.com:HelixDevelopment/HelixQA.git
-[submodule "dependencies/HelixDevelopment/DocProcessor"]
-	path = dependencies/HelixDevelopment/DocProcessor
+[submodule "dependencies/HelixDevelopment/doc_processor"]
+	path = dependencies/HelixDevelopment/doc_processor
 	url = git@github.com:HelixDevelopment/DocProcessor.git
-[submodule "dependencies/HelixDevelopment/LLMOrchestrator"]
-	path = dependencies/HelixDevelopment/LLMOrchestrator
+[submodule "dependencies/HelixDevelopment/llm_orchestrator"]
+	path = dependencies/HelixDevelopment/llm_orchestrator
 	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
 [submodule "dependencies/HelixDevelopment/llm_provider"]
 	path = dependencies/HelixDevelopment/llm_provider
 	url = git@github.com:HelixDevelopment/LLMProvider.git
-[submodule "dependencies/HelixDevelopment/VisionEngine"]
-	path = dependencies/HelixDevelopment/VisionEngine
+[submodule "dependencies/HelixDevelopment/vision_engine"]
+	path = dependencies/HelixDevelopment/vision_engine
 	url = git@github.com:HelixDevelopment/VisionEngine.git
 [submodule "security"]
 	path = security
@@ -55,8 +55,8 @@
 [submodule "challenges"]
 	path = challenges
 	url = git@github.com:vasic-digital/Challenges.git
-[submodule "dependencies/HelixDevelopment/LLMsVerifier"]
-	path = dependencies/HelixDevelopment/LLMsVerifier
+[submodule "dependencies/HelixDevelopment/llms_verifier"]
+	path = dependencies/HelixDevelopment/llms_verifier
 	url = git@github.com:vasic-digital/LLMsVerifier.git
 [submodule "helix_agent"]
 	path = helix_agent
@@ -262,8 +262,8 @@
 [submodule "dependencies/vasic-digital/RAG"]
 	path = dependencies/vasic-digital/RAG
 	url = git@github.com:vasic-digital/RAG.git
-[submodule "dependencies/vasic-digital/Memory"]
-	path = dependencies/vasic-digital/Memory
+[submodule "dependencies/vasic-digital/memory"]
+	path = dependencies/vasic-digital/memory
 	url = git@github.com:vasic-digital/Memory.git
 [submodule "dependencies/vasic-digital/optimization"]
 	path = dependencies/vasic-digital/optimization
@@ -274,8 +274,8 @@
 [submodule "dependencies/HelixDevelopment/helix_memory"]
 	path = dependencies/HelixDevelopment/helix_memory
 	url = git@github.com:HelixDevelopment/HelixMemory.git
-[submodule "dependencies/HelixDevelopment/HelixSpecifier"]
-	path = dependencies/HelixDevelopment/HelixSpecifier
+[submodule "dependencies/HelixDevelopment/helix_specifier"]
+	path = dependencies/HelixDevelopment/helix_specifier
 	url = git@github.com:HelixDevelopment/HelixSpecifier.git
 [submodule "dependencies/vasic-digital/agentic"]
 	path = dependencies/vasic-digital/agentic
@@ -313,8 +313,8 @@
 [submodule "dependencies/vasic-digital/conversation"]
 	path = dependencies/vasic-digital/conversation
 	url = git@github.com:vasic-digital/conversation.git
-[submodule "dependencies/vasic-digital/LLMOrchestrator"]
-	path = dependencies/vasic-digital/LLMOrchestrator
+[submodule "dependencies/vasic-digital/llm_orchestrator"]
+	path = dependencies/vasic-digital/llm_orchestrator
 	url = git@github.com:vasic-digital/LLMOrchestrator.git
 [submodule "dependencies/vasic-digital/vision_engine"]
 	path = dependencies/vasic-digital/vision_engine

@@ -195,11 +195,11 @@ replace digital.vasic.containers => ../containers
 
 replace digital.vasic.helixqa => ../helix_qa
 
-replace digital.vasic.docprocessor => ../dependencies/HelixDevelopment/DocProcessor
+replace digital.vasic.docprocessor => ../dependencies/HelixDevelopment/doc_processor
 
-replace digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/LLMOrchestrator
+replace digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/llm_orchestrator
 
-replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/VisionEngine
+replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/vision_engine
 
 replace digital.vasic.challenges => ../challenges
 
@@ -207,6 +207,6 @@ replace digital.vasic.security => ../security
 
 replace digital.vasic.debate => ../dependencies/HelixDevelopment/debate_orchestrator
 
-replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/HelixSpecifier
+replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/helix_specifier
 
 replace digital.vasic.lazy => ../dependencies/vasic-digital/lazy

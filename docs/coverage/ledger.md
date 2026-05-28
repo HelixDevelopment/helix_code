@@ -138,15 +138,15 @@ flagged per-platform.
 |---|---|---|---|
 | Challenges | VERIFIED | 0 |  |
 | containers | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/DocProcessor | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/doc_processor | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/helix_llm | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/helix_memory | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/HelixSpecifier | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/LLMOrchestrator | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/helix_specifier | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/llm_orchestrator | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/llm_provider | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/LLMsVerifier | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/llms_verifier | VERIFIED | 0 |  |
 | dependencies/HelixDevelopment/models | VERIFIED | 0 |  |
-| dependencies/HelixDevelopment/VisionEngine | VERIFIED | 0 |  |
+| dependencies/HelixDevelopment/vision_engine | VERIFIED | 0 |  |
 | dependencies/vasic-digital/agentic | VERIFIED | 0 |  |
 | dependencies/vasic-digital/auth | VERIFIED | 0 |  |
 | dependencies/vasic-digital/auto_temp | VERIFIED | 0 |  |
@@ -171,10 +171,10 @@ flagged per-platform.
 | dependencies/vasic-digital/lazy | VERIFIED | 0 |  |
 | dependencies/vasic-digital/leak_hub | VERIFIED | 0 |  |
 | dependencies/vasic-digital/LLMOps | VERIFIED | 0 |  |
-| dependencies/vasic-digital/LLMOrchestrator | VERIFIED | 0 |  |
+| dependencies/vasic-digital/llm_orchestrator | VERIFIED | 0 |  |
 | dependencies/vasic-digital/llm_provider | VERIFIED | 0 |  |
 | dependencies/vasic-digital/MCP_Module | VERIFIED | 0 |  |
-| dependencies/vasic-digital/Memory | VERIFIED | 0 |  |
+| dependencies/vasic-digital/memory | VERIFIED | 0 |  |
 | dependencies/vasic-digital/messaging | VERIFIED | 0 |  |
 | dependencies/vasic-digital/middleware | VERIFIED | 0 |  |
 | dependencies/vasic-digital/models | VERIFIED | 0 |  |

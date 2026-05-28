@@ -49,7 +49,7 @@ REQUIRED_CHALLENGES=(
 # - HelixAgent: primary surface is the Go application + nested-
 #   submodule consumer, not a service. No challenges/scripts/.
 # - Github-Pages-Website: marketing site, no native test surface.
-# - dependencies/HelixDevelopment/LLMsVerifier: nested subtree
+# - dependencies/HelixDevelopment/llms_verifier: nested subtree
 #   structure (llm-verifier/ subdir holds actual code).
 EXEMPT_SUBMODULES=(
     "HelixAgent"
