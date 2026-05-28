@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +22,14 @@ type OllamaProvider struct {
 	config    OllamaConfig
 	apiClient *http.Client
 	models    []OllamaModel
-	isRunning bool
+
+	// isRunning is read by Generate/GenerateStream/IsAvailable/GetHealth from
+	// arbitrary caller goroutines and flipped to false by Close(); it MUST be
+	// accessed atomically. The prior plain bool was a data race (the -race
+	// detector flagged concurrent IsAvailable read vs the Close write) — a real
+	// defect under any concurrent use of the provider, e.g. a load balancer
+	// health-checking on one goroutine while another Closes it.
+	isRunning atomic.Bool
 
 	// discoverOnce guards lazy model discovery so the blocking HTTP
 	// round-trip to /api/tags runs at most once, on first real use —
@@ -47,6 +55,28 @@ type OllamaModel struct {
 	Details    OllamaModelDetails `json:"details"`
 }
 
+// OllamaChatMsg is the `message` object returned by Ollama's POST /api/chat.
+// Its Content field carries the assistant completion text for chat-style
+// requests (the /api/generate endpoint uses the top-level `response` field
+// instead — see OllamaAPIResponse doc comment).
+type OllamaChatMsg struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+// completionText returns the generated text from an Ollama response,
+// transparently handling BOTH endpoint shapes: /api/chat populates
+// message.content, /api/generate populates the top-level response. Preferring
+// message.content (this provider's actual endpoint) and falling back to
+// response means the provider yields the REAL completion for the end user
+// regardless of which endpoint produced it.
+func (r *OllamaAPIResponse) completionText() string {
+	if r.Message.Content != "" {
+		return r.Message.Content
+	}
+	return r.Response
+}
+
 // OllamaModelDetails contains model-specific details
 type OllamaModelDetails struct {
 	Format            string   `json:"format"`
@@ -65,12 +95,27 @@ type OllamaAPIRequest struct {
 	Options  map[string]interface{} `json:"options"`
 }
 
-// OllamaAPIResponse represents a response from the Ollama API
+// OllamaAPIResponse represents a response from the Ollama API.
+//
+// Ollama has TWO generation endpoints with DIFFERENT response shapes:
+//   - POST /api/generate (prompt-based) puts the completion in `response`.
+//   - POST /api/chat     (messages-based) puts the completion in
+//     `message.content` and leaves `response` EMPTY.
+//
+// This provider posts to /api/chat (it sends Messages), so the completion
+// arrives in Message.Content — NOT in Response. The struct previously only
+// decoded `response`, so every real /api/chat call decoded successfully but
+// produced an EMPTY Content for the end user (a CONST-035 / Article XI §11.9
+// bluff: unit tests mocked the `response` field and passed, while real
+// generation returned nothing). Message is now decoded and consumed via
+// completionText(); `response` is still honoured as a fallback so a future
+// switch to /api/generate keeps working.
 type OllamaAPIResponse struct {
-	Model              string `json:"model"`
-	CreatedAt          string `json:"created_at"`
-	Response           string `json:"response"`
-	Done               bool   `json:"done"`
+	Model     string        `json:"model"`
+	CreatedAt string        `json:"created_at"`
+	Response  string        `json:"response"`
+	Message   OllamaChatMsg `json:"message"`
+	Done      bool          `json:"done"`
 	// DoneReason is set by Ollama 0.1.30+ on the terminal frame and
 	// indicates why generation stopped: "stop" (clean end-of-turn),
 	// "length" (num_predict / max-tokens reached → ErrResponseTruncated),
@@ -115,9 +160,37 @@ func NewOllamaProvider(config OllamaConfig) (*OllamaProvider, error) {
 		config: config,
 		apiClient: &http.Client{
 			Timeout: config.Timeout,
+			// Bounded connection pool. The previous zero-value client used the
+			// shared http.DefaultTransport, which has no per-host idle-connection
+			// cap (DefaultMaxIdleConnsPerHost == 2 but MaxConnsPerHost == 0, i.e.
+			// unbounded), so under concurrent load every in-flight Get opened a
+			// fresh keep-alive connection and each connection's read/write loop
+			// goroutine lingered — a connection/goroutine explosion (≈1 pair per
+			// concurrent request) against a single local Ollama endpoint. A
+			// bounded, provider-owned Transport caps total + per-host connections
+			// so concurrent GetHealth/IsAvailable/Generate reuse a small pool
+			// instead of leaking goroutines.
+			Transport: &http.Transport{
+				MaxIdleConns: 16,
+				// Keep the per-host idle pool small (2) so a burst of concurrent
+				// health/generate calls does not leave a large fleet of idle
+				// keep-alive connections (and their per-connection reader
+				// goroutines) lingering after the burst. Two pooled connections
+				// to a single local Ollama endpoint is ample for reuse.
+				MaxIdleConnsPerHost: 2,
+				// Short idle timeout so pooled connections (and their per-conn
+				// reader goroutines) reap promptly after a burst of concurrent
+				// requests instead of lingering for the default 90s. NOTE:
+				// MaxConnsPerHost is intentionally NOT set — capping live
+				// connections while a caller closes a response body without
+				// draining it can wedge the pool (request goroutines block
+				// forever waiting for a connection that never returns). Bounding
+				// only the IDLE pool gives connection reuse without that hazard.
+				IdleConnTimeout: 2 * time.Second,
+			},
 		},
-		isRunning: true,
 	}
+	provider.isRunning.Store(true)
 
 	return provider, nil
 }
@@ -186,7 +259,7 @@ func (p *OllamaProvider) GetCapabilities() []ModelCapability {
 
 // Generate generates a response using Ollama
 func (p *OllamaProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
-	if !p.isRunning {
+	if !p.isRunning.Load() {
 		return nil, ErrProviderUnavailable
 	}
 
@@ -214,7 +287,10 @@ func (p *OllamaProvider) Generate(ctx context.Context, request *LLMRequest) (*LL
 	return &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: request.ID,
-		Content:   response.Response,
+		// /api/chat puts the completion in message.content (not the top-level
+		// `response` field) — completionText() reads the correct one so the end
+		// user receives the REAL generated text (CONST-035 / Article XI §11.9).
+		Content: response.completionText(),
 		Usage: Usage{
 			PromptTokens:     response.PromptEvalCount,
 			CompletionTokens: response.EvalCount,
@@ -232,7 +308,7 @@ func (p *OllamaProvider) Generate(ctx context.Context, request *LLMRequest) (*LL
 
 // GenerateStream generates a streaming response
 func (p *OllamaProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
-	if !p.isRunning {
+	if !p.isRunning.Load() {
 		return ErrProviderUnavailable
 	}
 
@@ -254,7 +330,7 @@ func (p *OllamaProvider) GenerateStream(ctx context.Context, request *LLMRequest
 
 // IsAvailable checks if the provider is available
 func (p *OllamaProvider) IsAvailable(ctx context.Context) bool {
-	if !p.isRunning {
+	if !p.isRunning.Load() {
 		return false
 	}
 
@@ -263,7 +339,13 @@ func (p *OllamaProvider) IsAvailable(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	defer resp.Body.Close()
+	// Drain then close so the keep-alive connection is returned to the pool for
+	// reuse (an unread body forces net/http to abandon the connection, which
+	// under concurrent health checks causes connection/goroutine churn).
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	return resp.StatusCode == http.StatusOK
 }
@@ -274,7 +356,7 @@ func (p *OllamaProvider) IsAvailable(ctx context.Context) bool {
 func (p *OllamaProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
 	p.ensureModelsDiscovered()
 
-	if !p.isRunning {
+	if !p.isRunning.Load() {
 		return &ProviderHealth{
 			Status:     "unhealthy",
 			LastCheck:  time.Now(),
@@ -286,6 +368,18 @@ func (p *OllamaProvider) GetHealth(ctx context.Context) (*ProviderHealth, error)
 	start := time.Now()
 	resp, err := p.apiClient.Get(p.getAPIURL("/api/tags"))
 	latency := time.Since(start)
+
+	// Drain + close the body when the request succeeded so the keep-alive
+	// connection is returned to the pool. The previous code never closed the
+	// body on EITHER path — a connection/file-descriptor leak that, under
+	// repeated health checks, exhausted the pool and spawned new connections
+	// (and their goroutines) indefinitely. resp is only non-nil when err == nil.
+	if resp != nil {
+		defer func() {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}()
+	}
 
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return &ProviderHealth{
@@ -308,7 +402,7 @@ func (p *OllamaProvider) GetHealth(ctx context.Context) (*ProviderHealth, error)
 
 // Close stops the Ollama provider
 func (p *OllamaProvider) Close() error {
-	p.isRunning = false
+	p.isRunning.Store(false)
 	log.Println("✅ Ollama provider closed")
 	return nil
 }
@@ -471,8 +565,12 @@ func (p *OllamaProvider) makeStreamingRequest(ctx context.Context, request Ollam
 		// it into Err so downstream stream consumers can distinguish a
 		// clean stop from truncation. FinishReason is also preserved.
 		out := LLMResponse{
-			ID:           uuid.New(),
-			Content:      chunk.Response,
+			ID: uuid.New(),
+			// /api/chat streams each token in message.content; completionText()
+			// reads message.content (falling back to response for /api/generate)
+			// so streamed chunks carry the REAL token text, not an empty string
+			// (CONST-035 / Article XI §11.9).
+			Content:      chunk.completionText(),
 			CreatedAt:    time.Now(),
 			FinishReason: chunk.DoneReason,
 		}

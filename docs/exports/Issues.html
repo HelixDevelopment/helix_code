@@ -1354,12 +1354,65 @@ per-subscriber recover guard. Anti-bluff proven. <strong>Remaining
 LLM/Ollama), low-concurrency utility packages
 (version/hardware/adapters/fix/logo — minimal concurrent state).
 internal/persistence confirmed NO live-DB path (file-based, covered
-batch 10). <strong>Session total: 31 real production bugs
-fixed.</strong> <strong>HXC-014a</strong> (empty TestProviderStress
-stub) already FIXED (f464adb0). <strong>Operator decision
-deferred:</strong> promoting <code>tests/stresschaos/</code> into the
-constitution submodule for cross-project reuse (triggers §11.4.26
-cross-project workflow) — interim home is project-local.</p>
+batch 10). <strong>INFRA BATCH (part 3 — Ollama) DONE (2026-05-28, real
+local Ollama qwen2.5:0.5b via podman):</strong> internal/llm Ollama
+provider — 9 integration-tagged stress+chaos tests PASS under -race
+against REAL Ollama (fast-path GetHealth/GetModels sustained+concurrent;
+bounded real-generation concurrency proving non-empty completions
+e.g. “Nonce 64000.”; cancel-mid-generate, hostile-prompt, closed-port
+chaos). <strong>3 REAL production bugs fixed in
+<code>internal/llm/ollama_provider.go</code>:</strong> (1)
+<strong>CONST-035 / Article XI §11.9 GENERATION BLUFF</strong> — the
+provider POSTs <code>/api/chat</code> (completion in
+<code>message.content</code>) but <code>OllamaAPIResponse</code> only
+parsed the top-level <code>response</code> field → real Ollama
+generation returned EMPTY text to the end user; unit tests masked it by
+mocking <code>response</code>. Fixed: decode
+<code>message.content</code> via <code>completionText()</code>
+(preferred, <code>response</code> fallback). (2) data race on
+<code>isRunning</code> plain bool (read by
+Generate/IsAvailable/GetHealth, written by Close) →
+<code>atomic.Bool</code>. (3) connection/goroutine leak (unbounded
+transport + bodies closed-without-drain; GetHealth never closed on
+success) → bounded Transport + drain-then-close (800→2 goroutines). Each
+anti-bluff-proven (revert→empty/FAIL/race→restore→PASS).
+<strong>NOTE:</strong> the <code>internal/llm</code> package’s
+<code>-tags=integration</code> build is PRE-EXISTINGLY BROKEN (stale
+<code>integration_test.go</code>/<code>local_providers_integration_test.go</code>/<code>cloud_providers_integration_test.go</code>/etc.
+reference ~9 deleted provider constructors + a duplicate MockProvider) —
+filed as <strong>HXC-024</strong>; the ollama integration tests pass in
+isolation and land once HXC-024 restores the package integration build.
+<strong>Session total: 34 real production bugs fixed.</strong></p>
+<h2 id="hxc-024-internalllm--tagsintegration-build-broken-stale-tests-reference-deleted-providers">HXC-024
+— internal/llm <code>-tags=integration</code> build broken (stale tests
+reference deleted providers)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-28 (HXC-014 Ollama infra batch —
+surfaced running <code>go test -tags=integration ./internal/llm/</code>)
+<strong>Severity:</strong> Medium (CONST-050(B): the llm integration
+suite cannot compile/run; masks integration regressions + blocks the new
+ollama integration stress/chaos tests from running via the normal path)
+<strong>Scope:</strong> Under <code>-tags=integration</code>,
+<code>internal/llm</code> fails to compile:
+<code>tool_provider_test.go</code>/<code>integration_test.go</code>
+redeclare <code>MockProvider</code>;
+<code>local_providers_integration_test.go</code> +
+<code>cloud_providers_integration_test.go</code> +
+<code>integrated_model_manager_test.go</code> +
+<code>cross_provider_test.go</code> +
+<code>model_download_manager_test.go</code> reference ~9 deleted
+constructors (NewVLLMProvider/NewLocalAIProvider/NewLlamaCppProvider/… +
+a removed <code>ModelPath</code> field). Fix: dedup MockProvider +
+update/remove the stale tests to the current provider API (the providers
+were removed from production, so their dead tests should be deleted or
+rewritten against extant constructors), WITHOUT dropping legitimate
+coverage. Then <code>go test -tags=integration ./internal/llm/</code>
+compiles and the new <code>ollama_provider_{stress,chaos}_test.go</code>
+run live. <strong>HXC-014a</strong> (empty TestProviderStress stub)
+already FIXED (f464adb0). <strong>Operator decision deferred:</strong>
+promoting <code>tests/stresschaos/</code> into the constitution
+submodule for cross-project reuse (triggers §11.4.26 cross-project
+workflow) — interim home is project-local.</p>
 <hr />
 <h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
 parity (§11.4.81)</h2>

@@ -379,5 +379,5 @@ func TestOllamaProvider_Close(t *testing.T) {
 
 	err = provider.Close()
 	assert.NoError(t, err)
-	assert.False(t, provider.isRunning)
+	assert.False(t, provider.isRunning.Load())
 }
