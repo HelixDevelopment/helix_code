@@ -272,6 +272,22 @@ for ledger in "${LEDGERS[@]}"; do
 	fi
 done
 
+# --- (e2) rewrite governance-cascade owned-path list -----------------------
+# docs/improvements/submodule_owned.txt is read by verify-governance-cascade.sh
+# as the canonical owned-submodule path list; its left column MUST track the
+# on-disk dir. Rewrite ONLY the path column (anchored at line start + " |"),
+# leaving the URL column (remote repo name, unchanged by a dir rename) intact.
+OWNED_LIST="docs/improvements/submodule_owned.txt"
+if [ -f "$OWNED_LIST" ] && grep -q "^${OLD_PATH} |" "$OWNED_LIST"; then
+	act "rewrite ${OWNED_LIST}: owned path ${OLD_PATH} -> ${NEW_PATH}"
+	if [ "$DRY_RUN" -eq 0 ]; then
+		tmp="$(mktemp)"
+		sed "s#^${OLD_PATH} |#${NEW_PATH} |#" "$OWNED_LIST" > "$tmp" || { rm -f "$tmp"; fail "sed on ${OWNED_LIST} failed"; }
+		mv "$tmp" "$OWNED_LIST"
+		git add "$OWNED_LIST" || fail "git add ${OWNED_LIST} failed"
+	fi
+fi
+
 # --- caller hand-off: submodule-resident go.mod edits need their own commit
 if [ "${#SUBMODULE_COMMITS_NEEDED[@]}" -gt 0 ]; then
 	for sm in "${SUBMODULE_COMMITS_NEEDED[@]}"; do

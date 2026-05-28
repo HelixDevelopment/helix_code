@@ -40,8 +40,10 @@ done
 #    the canonical on-disk paths matching the current submodule layout.
 #  - Top-level submodules: lowercase snake_case (`challenges`, `containers`,
 #    `github_pages_website`, `helix_agent`, `helix_qa`, `panoptic`, `security`).
-#  - Nested-dependency submodules: `dependencies/<org>/<Name>` per CONST-051(C).
-#    Mixed-case `<Name>` segment retained per CONST-052 vendor-naming exemption.
+#  - Nested-dependency submodules: `dependencies/<org>/<name>` per CONST-051(C).
+#    Own-org `<name>` segment is lowercase snake_case per CONST-052 (§11.4.29);
+#    the path column tracks the on-disk dir, the URL column keeps the (unchanged)
+#    remote repo name. Only genuine third-party submodules keep upstream casing.
 #  - Anti-regression: if a listed path does NOT exist on disk, the verifier now
 #    FAILS loudly (was previously a silent SKIP, which masked the round-56
 #    blemish where 7 stale capitalized entries hid behind "not initialized").
