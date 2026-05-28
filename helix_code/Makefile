@@ -1,4 +1,4 @@
-.PHONY: all build test stress-chaos stress-chaos-meta clean logo-assets setup-deps sync-manual manual-html docs release
+.PHONY: all build test stress-chaos stress-chaos-meta stress-chaos-infra clean logo-assets setup-deps sync-manual manual-html docs release
 
 # Build variables
 BINARY_NAME=helixcode
@@ -122,6 +122,17 @@ stress-chaos-meta: ## Run §1.1 paired-mutation meta-tests for the stress/chaos 
 	@echo "🔬 Running stress/chaos harness paired-mutation meta-tests..."
 	$(GO_TEST) -race -run 'TestMeta' -v ./tests/stresschaos/...
 	@echo "✅ Harness meta-tests complete"
+
+# §11.4.85 stress + chaos against REAL infrastructure (integration-tagged, no mocks
+# per CONST-050). Requires real Postgres + Redis reachable. The new-pool tests read
+# HELIX_TEST_DB_* (default localhost:5432 helix/helix/helix_test); the legacy
+# pool/CRUD tests target localhost:5433 helix_test/test_password_secure_123. Redis
+# defaults to localhost:6379. Bring infra up first (e.g. podman run postgres/redis)
+# or `make test-infra-up`. Honest SKIP-OK when infra is unreachable (§11.4.3).
+stress-chaos-infra: ## Run §11.4.85 stress+chaos against real PG+Redis (integration-tagged, -race)
+	@echo "🌪️  Running §11.4.85 INFRA stress + chaos suites (real PG+Redis, -tags=integration, -race)..."
+	$(GO_TEST) -tags=integration -race -run 'Stress|Chaos' ./internal/redis/... ./internal/database/...
+	@echo "✅ Infra stress + chaos suites complete (evidence under qa-results/)"
 
 # Comprehensive test suite
 test-all: test test-coverage test-benchmark test-docs

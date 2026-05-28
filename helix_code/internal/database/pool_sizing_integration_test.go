@@ -109,9 +109,16 @@ func TestPoolSizing_CLIvsServerProfile_Integration(t *testing.T) {
 	assert.Less(t, cliStats.MaxConns(), serverStats.MaxConns(),
 		"the CLI pool must be strictly smaller than the server pool")
 
-	// CLI profile MinConns is 0 → no connections are eagerly opened.
-	assert.Equal(t, int32(0), cliStats.IdleConns(),
-		"a freshly-opened CLI pool must hold zero eager idle connections")
+	// CLI profile MinConns is 0 → the pool does NOT eagerly pre-warm a pool of
+	// idle connections (unlike the server profile, MinConns=5). New() does a
+	// mandatory connectivity ping, which pgxpool returns to the pool as a single
+	// warm idle connection, so the true invariant is "at most the one ping
+	// connection" (no MinConns pre-warming), AND strictly fewer idle than the
+	// server profile's pre-warmed pool.
+	assert.LessOrEqual(t, cliStats.IdleConns(), int32(1),
+		"a freshly-opened CLI pool must not pre-warm MinConns idle connections (at most the single post-ping connection)")
+	assert.Less(t, cliStats.IdleConns(), serverStats.IdleConns(),
+		"the CLI pool must hold strictly fewer eager idle connections than the pre-warmed server pool")
 	t.Logf("server-profile pool-stat: MaxConns=%d IdleConns=%d | cli-profile pool-stat: MaxConns=%d IdleConns=%d",
 		serverStats.MaxConns(), serverStats.IdleConns(), cliStats.MaxConns(), cliStats.IdleConns())
 

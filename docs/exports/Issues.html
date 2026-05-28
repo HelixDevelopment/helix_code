@@ -1291,16 +1291,40 @@ NOTE: several of those packages’ OTHER concurrency bugs were already
 fixed in batches 3-11, but most still carry the unguarded translator
 seam. <strong>Best fixed as a single carefully-verified mechanical sweep
 (build + -race after) rather than rushed — tracked separately so it is
-not lost.</strong> <strong>Remaining (infra batch + long-tail):</strong>
-internal/redis + internal/database + internal/persistence (real PG/Redis
-via <code>make test-infra-up</code>), internal/server (HTTP/WS
-DDoS-class load), internal/llm provider endpoints — all need the
-docker-compose stack up; then the long-tail ~40-package sweep. Effort
-remaining multi-week incremental. <strong>HXC-014a</strong> (empty
-TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
-decision deferred:</strong> promoting <code>tests/stresschaos/</code>
-into the constitution submodule for cross-project reuse (triggers
-§11.4.26 cross-project workflow) — interim home is project-local.</p>
+not lost.</strong> <strong>INFRA BATCH (partial) DONE (2026-05-28,
+subagent-driven §11.4.70, operator-authorised heavy-infra):</strong>
+brought up real Postgres + Redis via podman (lightweight — only the
+services the tests need, not the full 17-service docker stack).
+<strong>internal/redis</strong> (real Redis localhost:6379) — 13
+integration-tagged stress+chaos tests PASS under -race (sustained
+SET/GET/DEL p50=0.138ms; concurrent INCR atomicity; pub/sub; pipeline;
+cancel/corrupt/pressure/connection-churn chaos; translator-panic
+isolation). <strong>internal/database</strong> (real PG) — 10
+integration-tagged stress+chaos tests PASS under -race (sustained
+p50=3.09ms; 16-goroutine no-lost-writes; tx contention;
+cancel-mid-query; SQL-injection-safe param binding verified;
+pool-exhaustion clean recovery; connection-churn). No new stress/chaos
+bugs (both layers robust; translator already fixed by HXC-014b).
+<strong>Also fixed 2 pre-existing
+<code>database_integration_test.go</code> failures surfaced by running
+the long-dormant integration suite:</strong> (1) TestNew_InvalidHost
+asserted the pre-CONST-046 English “failed to ping database” — updated
+to the i18n message-ID <code>internal_database_ping_failed</code>; (2)
+TestPoolSizing asserted exactly-0 CLI idle conns but New()’s mandatory
+ping legitimately leaves 1 warm idle (CLI MinConns=0 confirmed — no
+pre-warm) — corrected to the true invariant (≤1 post-ping AND strictly
+&lt; server’s pre-warmed pool). New <code>make stress-chaos-infra</code>
+target (integration-tagged, real PG+Redis). Each anti-bluff-proven.
+<strong>Remaining (long-tail):</strong> internal/server (HTTP/WS
+DDoS-class load — needs full app boot + PG+Redis), internal/llm provider
+endpoints (need live LLM/Ollama), low-concurrency long-tail
+(logging/version/hardware/etc.). internal/persistence confirmed has NO
+live-DB path (pure file-based — fully covered in batch 10).
+<strong>HXC-014a</strong> (empty TestProviderStress stub) already FIXED
+(f464adb0). <strong>Operator decision deferred:</strong> promoting
+<code>tests/stresschaos/</code> into the constitution submodule for
+cross-project reuse (triggers §11.4.26 cross-project workflow) — interim
+home is project-local.</p>
 <hr />
 <h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
 parity (§11.4.81)</h2>
