@@ -14,13 +14,13 @@ import (
 // TestLlamaCPPProviderIntegration tests the Llama.cpp provider with integration
 func TestLlamaCPPProviderIntegration(t *testing.T) {
 	config := LlamaConfig{
-		ModelPath:     "test-models/test.gguf",
+		Model:         "test-models/test.gguf",
 		ContextSize:   2048,
 		GPUEnabled:    false,
 		GPULayers:     0,
 		ServerHost:    "localhost",
 		ServerPort:    8081,
-		ServerTimeout: 30,
+		ServerTimeout: 30 * time.Second,
 	}
 
 	provider, err := NewLlamaCPPProvider(config)
@@ -32,7 +32,7 @@ func TestLlamaCPPProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Llama.cpp provider not available for integration test")  // SKIP-OK: #integration-mode-only
+		t.Skip("Llama.cpp provider not available for integration test") // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -68,8 +68,8 @@ func TestOllamaProviderIntegration(t *testing.T) {
 	config := OllamaConfig{
 		BaseURL:       "http://localhost:11434",
 		DefaultModel:  "llama2",
-		Timeout:       30,
-		KeepAlive:     300,
+		Timeout:       30 * time.Second,
+		KeepAlive:     300 * time.Second,
 		StreamEnabled: false,
 	}
 
@@ -82,7 +82,7 @@ func TestOllamaProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Ollama provider not available for integration test")  // SKIP-OK: #integration-mode-only
+		t.Skip("Ollama provider not available for integration test") // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -119,12 +119,12 @@ func TestModelManagerIntegration(t *testing.T) {
 
 	// Test with mock providers
 	llamaConfig := LlamaConfig{
-		ModelPath:     "test-models/test.gguf",
+		Model:         "test-models/test.gguf",
 		ContextSize:   2048,
 		GPUEnabled:    false,
 		ServerHost:    "localhost",
 		ServerPort:    8082,
-		ServerTimeout: 30,
+		ServerTimeout: 30 * time.Second,
 	}
 
 	llamaProvider, err := NewLlamaCPPProvider(llamaConfig)
@@ -194,7 +194,7 @@ func TestQwenProviderIntegration(t *testing.T) {
 	ctx := context.Background()
 	available := provider.IsAvailable(ctx)
 	if !available {
-		t.Skip("Qwen provider not available for integration test")  // SKIP-OK: #integration-mode-only
+		t.Skip("Qwen provider not available for integration test") // SKIP-OK: #integration-mode-only
 	}
 
 	// Test model listing
@@ -254,15 +254,17 @@ func TestProviderHealthIntegration(t *testing.T) {
 
 	// Create test providers
 	providers := []Provider{
-		&MockProvider{
+		&integrationMockProvider{
 			name:         "mock-healthy",
+			providerType: ProviderTypeOllama,
 			available:    true,
 			healthy:      true,
 			models:       []ModelInfo{{Name: "test-model"}},
 			capabilities: []ModelCapability{CapabilityTextGeneration},
 		},
-		&MockProvider{
+		&integrationMockProvider{
 			name:         "mock-unhealthy",
+			providerType: ProviderTypeLlamaCpp,
 			available:    true,
 			healthy:      false,
 			models:       []ModelInfo{{Name: "test-model"}},
@@ -293,32 +295,36 @@ func TestProviderHealthIntegration(t *testing.T) {
 	t.Log("✅ Provider health integration test passed")
 }
 
-// MockProvider is a mock LLM provider for testing
-type MockProvider struct {
+// integrationMockProvider is a mock LLM provider for testing
+type integrationMockProvider struct {
 	name         string
+	providerType ProviderType
 	available    bool
 	healthy      bool
 	models       []ModelInfo
 	capabilities []ModelCapability
 }
 
-func (m *MockProvider) GetType() ProviderType {
+func (m *integrationMockProvider) GetType() ProviderType {
+	if m.providerType != "" {
+		return m.providerType
+	}
 	return ProviderTypeLocal
 }
 
-func (m *MockProvider) GetName() string {
+func (m *integrationMockProvider) GetName() string {
 	return m.name
 }
 
-func (m *MockProvider) GetModels() []ModelInfo {
+func (m *integrationMockProvider) GetModels() []ModelInfo {
 	return m.models
 }
 
-func (m *MockProvider) GetCapabilities() []ModelCapability {
+func (m *integrationMockProvider) GetCapabilities() []ModelCapability {
 	return m.capabilities
 }
 
-func (m *MockProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+func (m *integrationMockProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
 	return &LLMResponse{
 		Content: "Mock response",
 		Usage: Usage{
@@ -329,7 +335,7 @@ func (m *MockProvider) Generate(ctx context.Context, request *LLMRequest) (*LLMR
 	}, nil
 }
 
-func (m *MockProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+func (m *integrationMockProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
 	ch <- LLMResponse{
 		Content: "Mock streaming response",
 	}
@@ -337,11 +343,11 @@ func (m *MockProvider) GenerateStream(ctx context.Context, request *LLMRequest, 
 	return nil
 }
 
-func (m *MockProvider) IsAvailable(ctx context.Context) bool {
+func (m *integrationMockProvider) IsAvailable(ctx context.Context) bool {
 	return m.available
 }
 
-func (m *MockProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+func (m *integrationMockProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
 	status := "healthy"
 	if !m.healthy {
 		status = "unhealthy"
@@ -355,8 +361,16 @@ func (m *MockProvider) GetHealth(ctx context.Context) (*ProviderHealth, error) {
 	}, nil
 }
 
-func (m *MockProvider) Close() error {
+func (m *integrationMockProvider) Close() error {
 	return nil
+}
+
+func (m *integrationMockProvider) GetContextWindow() int {
+	return 200_000
+}
+
+func (m *integrationMockProvider) CountTokens(text string) (int, error) {
+	return CharBasedTokenCount(text)
 }
 
 // Helper functions for integration tests
@@ -365,7 +379,7 @@ func (m *MockProvider) Close() error {
 func getEnvOrSkip(t *testing.T, key, skipMsg string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		t.Skip(skipMsg)  // SKIP-OK: #legacy-untriaged
+		t.Skip(skipMsg) // SKIP-OK: #legacy-untriaged
 	}
 	return value
 }

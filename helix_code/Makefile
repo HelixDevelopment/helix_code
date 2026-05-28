@@ -131,7 +131,7 @@ stress-chaos-meta: ## Run §1.1 paired-mutation meta-tests for the stress/chaos 
 # or `make test-infra-up`. Honest SKIP-OK when infra is unreachable (§11.4.3).
 stress-chaos-infra: ## Run §11.4.85 stress+chaos against real PG+Redis (integration-tagged, -race)
 	@echo "🌪️  Running §11.4.85 INFRA stress + chaos suites (real PG+Redis, -tags=integration, -race)..."
-	$(GO_TEST) -tags=integration -race -run 'Stress|Chaos' ./internal/redis/... ./internal/database/...
+	$(GO_TEST) -tags=integration -race -run 'Stress|Chaos' ./internal/redis/... ./internal/database/... ./internal/server/... ./internal/llm/...
 	@echo "✅ Infra stress + chaos suites complete (evidence under qa-results/)"
 
 # Comprehensive test suite

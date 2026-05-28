@@ -1386,7 +1386,31 @@ isolation and land once HXC-024 restores the package integration build.
 <h2 id="hxc-024-internalllm--tagsintegration-build-broken-stale-tests-reference-deleted-providers">HXC-024
 — internal/llm <code>-tags=integration</code> build broken (stale tests
 reference deleted providers)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Closure (2026-05-29, subagent-driven §11.4.70):</strong>
+<code>go test -tags=integration ./internal/llm/</code> now compiles +
+runs (<code>ok</code> 86s, real PG/Redis/Ollama). Fixes: (1) deduped
+<code>MockProvider</code> — renamed the integration-only field-based one
+→ <code>integrationMockProvider</code> (the func-based
+<code>tool_provider_test.go</code> one is canonical) + added the
+now-required <code>GetContextWindow()</code>/<code>CountTokens()</code>
+interface methods. (2)
+<code>LlamaConfig.ModelPath</code>→<code>Model</code> rename fixed
+(struct + <code>NewLlamaCPPProvider</code> still exist) + corrected
+degenerate 30ns timeouts to <code>*time.Second</code>. (3)
+<code>local_providers_integration_test.go</code>: 10 constructors
+(NewVLLMProvider/NewLocalAIProvider/NewFastChatProvider/NewTextGenProvider/NewLMStudioProvider/NewJanProvider/NewGPT4AllProvider/NewTabbyAPIProvider/NewMLXProvider/NewMistralRSProvider)
+grep-verified DELETED from production → their dead tests removed;
+<code>NewKoboldAIProvider</code> survives →
+<code>TestKoboldAIProviderIntegration</code> + trimmed helper retained
+(honest SKIP, no endpoint). (4) test-only provider-type collision bug
+fixed (TestProviderHealthIntegration registered 2 mocks both keyed
+ProviderTypeLocal → distinct types). The new ollama integration
+stress/chaos tests now run live + PASS;
+<code>make stress-chaos-infra</code> extended to server + llm. Test-only
+changes (no production code touched). Cloud-provider tests honest-SKIP
+when API keys unset (env-dependent failures with keys present are
+pre-existing + out of scope). gofmt + build + vet clean.
 <strong>Discovered:</strong> 2026-05-28 (HXC-014 Ollama infra batch —
 surfaced running <code>go test -tags=integration ./internal/llm/</code>)
 <strong>Severity:</strong> Medium (CONST-050(B): the llm integration
