@@ -351,13 +351,13 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-016 — §11.4.69–97 governance cascade into owned submodules (CONST-047/§3)
+## HXC-016 — §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) — CLOSED (→ Fixed.md)
 
-**Status:** In progress
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
-**Scope:** every owned submodule's CONSTITUTION/CLAUDE/AGENTS/QWEN must carry the 24 new short-form anchors (§11.4.69 + §11.4.75–97). Progress: root-5 govfiles done (27929ae1); propagation gate root-scope applied + paired-mutation proven (0ab5376a); submodule batches 1-4 done (40/~70 submodules: ef4b3986, a864039d, e4046668, 3adb2e63). Remaining: batches 5-7 (~28 submodules), then enable gate submodule-scope (Fragment C of the propagation snippet).
+**Closure (2026-05-28):** all 24 anchors (§11.4.69 + §11.4.75–97) cascaded into the 5 root govfiles (27929ae1) AND all ~68 owned-submodule CONSTITUTION/CLAUDE/AGENTS/QWEN files (batches 1-7: ef4b3986/a864039d/e4046668/3adb2e63/464b2401/b4ad4f50/053fd731). A loose-grep false-match (the §11.4.93 body cites §11.4.95) had skipped the §11.4.95 heading in batch-1-6 submodules — repaired by fix-up A/B/C (79478ed5/903b9225/a9a1a6a1) + the gate tightened to the `## §11.4.NN —` heading marker (d2165bf7). 4 HelixDevelopment submodules regressed to the wrong branch (main vs canonical master) by the cascade reset — repaired (b4b790ea). Gate submodule-scope enabled (9031368d). Final `verify-governance-cascade.sh` → **0 failures**, 204 submodule covenant-114 PASS lines; paired §1.1 mutation proven (strip §11.4.95 → 1 failure → restore → 0). Section retained as a migration tombstone per §11.4.19.
 
 ---
 
