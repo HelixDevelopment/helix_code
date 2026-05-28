@@ -1200,8 +1200,21 @@ snapshot / listing) → no regression. Each fix proven anti-bluff by
 reverting → test FAILs → restore → PASS. <code>make stress-chaos</code>
 target extended to include task/session/event/memory/context; full
 target PASSES under -race. 7 in-process targets now covered.
-<strong>Remaining (infra batch + long-tail):</strong> internal/redis +
-internal/database + internal/persistence (real PG/Redis via
+<strong>Batch 4 DONE (2026-05-28, subagent-driven §11.4.70):</strong>
+internal/rules + internal/repomap + internal/discovery (3 parallel
+disjoint-scope subagents). No new production bugs — all three components
+already correctly RWMutex-guarded and survived concurrent churn +
+Clear/cancel races + malformed/corrupt input + bounded memory pressure
+with no panic/race/deadlock/leak. Each suite proven genuinely
+fail-capable (anti-bluff): rules → strip AddProjectRule lock → DATA RACE
+FAIL; repomap → write results[0] in parseFilesParallel → DATA RACE FAIL;
+discovery → strip port-range check → boundary FAIL; all restored
+byte-identical. discovery deliberately targets in-process
+registry/config/JSON-decode paths (not flaky UDP-multicast/net.Listen).
+10 in-process targets now covered; <code>make stress-chaos</code>
+extended to all 10, full target PASSES under -race. <strong>Remaining
+(infra batch + long-tail):</strong> internal/redis + internal/database +
+internal/persistence (real PG/Redis via
 <code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
 load), internal/llm provider endpoints — all need the docker-compose
 stack up; then the long-tail ~40-package sweep. Effort remaining
