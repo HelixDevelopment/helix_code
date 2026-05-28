@@ -361,13 +361,13 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-017 — CodeGraph own-org submodule indexing + update automation (§11.4.79/80)
+## HXC-017 — CodeGraph own-org submodule indexing + update automation (§11.4.79/80) — CLOSED (→ Fixed.md)
 
-**Status:** Queued
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
-**Scope:** §11.4.79 (own-org submodules INCLUDED in CodeGraph index, third-party excluded) + §11.4.80 (wire constitution's codegraph_update.sh/codegraph_sync.sh weekly; docs/codegraph Status + Status_Summary ledgers). Verify `.codegraph/config.json` excludes third-party + credentials but includes own-org submodule paths.
+**Closure (2026-05-28, commits 176fe07b + 551552f7 + 876b3b36):** `.codegraph/config.json` blanket `dependencies/**` exclude replaced with 3 specific third-party excludes (LLama_CPP/Ollama/HuggingFace_Hub) so own-org `dependencies/vasic-digital/**` + `dependencies/HelixDevelopment/**` are now INCLUDED; credential excludes (**/.env,*.key,*.pem,secrets) added. Root `.gitignore` fixed so `.codegraph/config.json` is TRACKED (§11.4.78 — it had been blanket-ignored). Re-index (`codegraph index .` exit 0): Files 39,024→76,044, Nodes 624,103→1,255,974, Edges 1.64M→3.96M. **§11.4.79 anti-bluff probe (independently re-verified by conductor):** `codegraph query EventBus` → `dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85`; helix_memory → `dependencies/HelixDevelopment/helix_memory/...`; third-party `llama` filtered to LLama_CPP → empty. docs/codegraph/Status.md + Status_Summary.md created (§11.4.80; weekly automation inherited by reference from constitution codegraph_update.sh/codegraph_sync.sh). Section retained as a migration tombstone per §11.4.19.
 
 ---
 
