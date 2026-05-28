@@ -401,13 +401,13 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-023 — ~57 `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank
+## HXC-023 — `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank — CLOSED (→ Fixed.md)
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Bug
 **Discovered:** 2026-05-28 (surfaced while fixing HXC-022)
-**Discovered-By:** AI (captured: 57 hits via `grep -rn 'Assert(true\|AssertTrue(true' helix_code/tests/e2e/test_bank` minus the legitimate skip/Running-on/present cases)
-**Defect:** beyond the HXC-021 fake-skips (fixed) and HXC-022 stubs (fixed), ~57 endpoint-existence / auth / capability branches in the e2e test banks assert a hardcoded `true` — i.e. they report PASS without exercising the behaviour (§11.4 / §11.4.1 PASS-bluff). These were left untouched by HXC-021/022 (those targeted the named compile errors + skip-branches only). Fix: per branch, replace `Assert(true, "...")` with a real assertion on captured runtime evidence (response status/body/state delta), OR an honest SKIP when the precondition is genuinely absent (per §11.4.3) — NEVER a hardcoded true. This is a larger anti-bluff sweep across the test banks; batch it. Composes with §11.4.69 (universal sink-side positive evidence).
+**Discovered-By:** AI
+**Closure (2026-05-28, commits 8e80e0c0 + b514f8bb):** ALL literal-true PASS-bluffs across the e2e test banks replaced with real assertions or honest skips — batch 1 (core/additional_tests.go, 41 fixed) + batch 2 (distributed 12, integration 11, platform 5, core/tests.go 4, performance 1 = 33). Pattern: mislabelled "X succeeded" branches that fired on non-2xx → assert the expected 2xx; 401/403/429 branches → assert that exact status; feature-404 branches → honest `v.Skip(reason)` (§11.4.3); the 4 legitimate "Running on <arch/platform>" positive-platform asserts left untouched. Verification: `go build ./...` + `go vet ./...` exit 0; full-tree grep for literal-true bluffs = 0; runtime harness (down server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained as a migration tombstone per §11.4.19.
 
 ---
 
