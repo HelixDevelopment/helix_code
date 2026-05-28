@@ -16,7 +16,7 @@ CONST057_ANCHOR="CONST-057"
 CONST058_ANCHOR="CONST-058"
 CONST059_ANCHOR="CONST-059"
 
-# Covenant-114 propagation anchors (§11.4.69, §11.4.75..§11.4.97) — see §11.4.32
+# Covenant-114 propagation anchors (§11.4.69, §11.4.75..§11.4.99, §11.4.101) — see §11.4.32
 # / CONST-055. Literal form = "## §11.4.NN —" (the H2 HEADING marker). The
 # leading "## " is MANDATORY: it ensures we match the anchor's own HEADING, not
 # a cross-reference to §11.4.NN inside another anchor's body (e.g. the §11.4.93
@@ -30,6 +30,7 @@ COVENANT114_ANCHORS=(
   "## §11.4.84 —" "## §11.4.85 —" "## §11.4.86 —" "## §11.4.87 —" "## §11.4.88 —"
   "## §11.4.89 —" "## §11.4.90 —" "## §11.4.91 —" "## §11.4.92 —" "## §11.4.93 —"
   "## §11.4.94 —" "## §11.4.95 —" "## §11.4.96 —" "## §11.4.97 —"
+  "## §11.4.98 —" "## §11.4.99 —" "## §11.4.101 —"
 )
 
 # Map "## §11.4.NN —" -> CM-COVENANT-114-NN-PROPAGATION (exact gate ID in FAILs).
@@ -80,7 +81,7 @@ for f in CLAUDE.md AGENTS.md QWEN.md CRUSH.md CONSTITUTION.md; do
   missing_anchors=""
   check_covenant114_anchors "$ROOT/$f"
   if [ -z "$missing_anchors" ]; then
-    echo "PASS: root/$f (all 24 covenant-114 anchors present)"
+    echo "PASS: root/$f (all 27 covenant-114 anchors present)"
   else
     echo "FAIL: root/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
   fi
