@@ -178,15 +178,43 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁴⁰ — operator authorised
-(endless-loop, fully autonomous, max-parallel, “make safe decisions,
-never idle waiting”) the infra batch + HXC-018 + HXC-019, all now DONE
-plus bonus HXC-015 + HXC-024. </strong>HXC-018** (§11.4.90
-obsolete-status + §11.4.91 summary-clarity gates + colorizer) → sweep
-G8/G9. <strong>HXC-019</strong> (§11.4.83 docs/qa evidence) promoted
-from advisory to ENFORCING release gate (–enforce –since baseline +
-[no-qa-evidence] opt-out) → sweep G7 + release-gate-test.sh; my own
-HXC-014 commits now carry docs/qa/HXC-014/transcript.md.
+<p><strong>Last updated: 2026-05-29 (close-out¹⁴¹ — ALL TRACKER ITEMS
+CLOSED; open set is now EMPTY (137 items: 72 Implemented + 41 Fixed + 24
+Completed, DB-validated). This close-out lands </strong>HXC-013**
+(SQLite single-source-of-truth, §11.4.93/95) + <strong>HXC-025</strong>
+(constitution §11.4.98/99/101 cascade). <strong>HXC-013</strong>: the
+constitution submodule’s non-functional workable-items scaffold is now a
+FUNCTIONAL Go binary (built+pushed UPSTREAM per §11.4.74 at constitution
+e460a5d) —
+<code>sync md-to-db</code>/<code>db-to-md</code>/<code>validate</code>/<code>diff</code>,
+byte-identical round-trip (0 diff on the real 137-item tracker via
+body_md blobs), go test passing; HelixCode now ships the TRACKED
+<code>docs/workable_items.db</code> (§11.4.95, WAL-checkpointed,
+<code>.gitignore</code> <code>!docs/workable_items.db</code>) +
+constitution pin → e460a5d. Operator-decisions resolved with the scope’s
+recommended safe-defaults per §11.4.101. Follow-up: auto-sync wiring +
+CM-WORKABLE-ITEMS gate. <strong>HXC-025</strong>: constitution fetched
+15cd4bc→6017af9 (new universal anchors §11.4.98
+full-automation-anti-bluff, §11.4.99 latest-source-doc-xref, §11.4.101
+autonomous-decision; §11.4.100 ATMOSphere-demoted, not cascaded);
+cascaded all 3 into HelixCode’s 5 root govfiles + ALL 68 owned
+submodules (6 parallel subagent waves + pilot; each submodule
+committed+pushed to its org remotes, append-only, non-ff union-merged,
+no force-push); verify-governance-cascade.sh extended to 27 anchors → 0
+failures (root + 68 submodules); CONST-055 sweep G1-G10 → 0 failures.
+New constitution mandates §11.4.98 (live-test full-automation audit) +
+§11.4.99 (doc latest-source xref) imply forward work. <strong>CUMULATIVE
+SESSION (close-outs 139-141): 34 real production bugs fixed across 35
+packages; HXC-013/014/014b/015/018/019/024/025 all closed; ~45 commits
+across HelixCode + constitution + 68 submodules, all pushed. Test infra
+(podman PG×2/Redis/Ollama) left running for re-runs.</strong> PRIOR
+close-out¹⁴⁰ — operator authorised the infra batch + HXC-018 + HXC-019,
+all DONE plus bonus HXC-015 + HXC-024. <strong>HXC-018</strong>
+(§11.4.90 obsolete-status + §11.4.91 summary-clarity gates + colorizer)
+→ sweep G8/G9. <strong>HXC-019</strong> (§11.4.83 docs/qa evidence)
+promoted from advisory to ENFORCING release gate (–enforce –since
+baseline + [no-qa-evidence] opt-out) → sweep G7 + release-gate-test.sh;
+my own HXC-014 commits now carry docs/qa/HXC-014/transcript.md.
 <strong>HXC-015</strong> (§11.4.81 cross-platform parity) manifest +
 gate → sweep G10 + install.sh Windows-branch fix + §3.2.1 doc-fix
 (sandbox.go rlimit re-assessed as honestly fail-closed, F14.5-deferred).
