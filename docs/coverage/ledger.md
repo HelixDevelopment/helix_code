@@ -166,14 +166,14 @@ flagged per-platform.
 | dependencies/vasic-digital/formatters | VERIFIED | 0 |  |
 | dependencies/vasic-digital/gandalf_solutions | VERIFIED | 0 |  |
 | dependencies/vasic-digital/hyper_tune | VERIFIED | 0 |  |
-| dependencies/vasic-digital/I18n | VERIFIED | 0 |  |
+| dependencies/vasic-digital/i18n | VERIFIED | 0 |  |
 | dependencies/vasic-digital/i_llm | VERIFIED | 0 |  |
 | dependencies/vasic-digital/lazy | VERIFIED | 0 |  |
 | dependencies/vasic-digital/leak_hub | VERIFIED | 0 |  |
-| dependencies/vasic-digital/LLMOps | VERIFIED | 0 |  |
+| dependencies/vasic-digital/llm_ops | VERIFIED | 0 |  |
 | dependencies/vasic-digital/llm_orchestrator | VERIFIED | 0 |  |
 | dependencies/vasic-digital/llm_provider | VERIFIED | 0 |  |
-| dependencies/vasic-digital/MCP_Module | VERIFIED | 0 |  |
+| dependencies/vasic-digital/mcp_module | VERIFIED | 0 |  |
 | dependencies/vasic-digital/memory | VERIFIED | 0 |  |
 | dependencies/vasic-digital/messaging | VERIFIED | 0 |  |
 | dependencies/vasic-digital/middleware | VERIFIED | 0 |  |
@@ -185,7 +185,7 @@ flagged per-platform.
 | dependencies/vasic-digital/planning | VERIFIED | 0 |  |
 | dependencies/vasic-digital/plinius_common | VERIFIED | 0 |  |
 | dependencies/vasic-digital/plugins | VERIFIED | 0 |  |
-| dependencies/vasic-digital/RAG | VERIFIED | 0 |  |
+| dependencies/vasic-digital/rag | VERIFIED | 0 |  |
 | dependencies/vasic-digital/rate_limiter | VERIFIED | 0 |  |
 | dependencies/vasic-digital/recovery | VERIFIED | 0 |  |
 | dependencies/vasic-digital/red_team | VERIFIED | 0 |  |
@@ -194,7 +194,7 @@ flagged per-platform.
 | dependencies/vasic-digital/storage | VERIFIED | 0 |  |
 | dependencies/vasic-digital/streaming | VERIFIED | 0 |  |
 | dependencies/vasic-digital/tool_schema | VERIFIED | 0 |  |
-| dependencies/vasic-digital/TOON | VERIFIED | 0 |  |
+| dependencies/vasic-digital/toon | VERIFIED | 0 |  |
 | dependencies/vasic-digital/vector_db | VERIFIED | 0 |  |
 | dependencies/vasic-digital/veritas | VERIFIED | 0 |  |
 | dependencies/vasic-digital/vision_engine | VERIFIED | 0 |  |

@@ -256,11 +256,11 @@
 [submodule "dependencies/vasic-digital/formatters"]
 	path = dependencies/vasic-digital/formatters
 	url = git@github.com:vasic-digital/Formatters.git
-[submodule "dependencies/vasic-digital/MCP_Module"]
-	path = dependencies/vasic-digital/MCP_Module
+[submodule "dependencies/vasic-digital/mcp_module"]
+	path = dependencies/vasic-digital/mcp_module
 	url = git@github.com:vasic-digital/MCP_Module.git
-[submodule "dependencies/vasic-digital/RAG"]
-	path = dependencies/vasic-digital/RAG
+[submodule "dependencies/vasic-digital/rag"]
+	path = dependencies/vasic-digital/rag
 	url = git@github.com:vasic-digital/RAG.git
 [submodule "dependencies/vasic-digital/memory"]
 	path = dependencies/vasic-digital/memory
@@ -280,8 +280,8 @@
 [submodule "dependencies/vasic-digital/agentic"]
 	path = dependencies/vasic-digital/agentic
 	url = git@github.com:vasic-digital/Agentic.git
-[submodule "dependencies/vasic-digital/LLMOps"]
-	path = dependencies/vasic-digital/LLMOps
+[submodule "dependencies/vasic-digital/llm_ops"]
+	path = dependencies/vasic-digital/llm_ops
 	url = git@github.com:vasic-digital/LLMOps.git
 [submodule "dependencies/vasic-digital/self_improve"]
 	path = dependencies/vasic-digital/self_improve
@@ -373,8 +373,8 @@
 [submodule "dependencies/vasic-digital/rate_limiter"]
 	path = dependencies/vasic-digital/rate_limiter
 	url = git@github.com:vasic-digital/RateLimiter.git
-[submodule "dependencies/vasic-digital/I18n"]
-	path = dependencies/vasic-digital/I18n
+[submodule "dependencies/vasic-digital/i18n"]
+	path = dependencies/vasic-digital/i18n
 	url = git@github.com:vasic-digital/I18n.git
 [submodule "dependencies/vasic-digital/recovery"]
 	path = dependencies/vasic-digital/recovery
@@ -385,8 +385,8 @@
 [submodule "dependencies/vasic-digital/filesystem"]
 	path = dependencies/vasic-digital/filesystem
 	url = git@github.com:vasic-digital/Filesystem.git
-[submodule "dependencies/vasic-digital/TOON"]
-	path = dependencies/vasic-digital/TOON
+[submodule "dependencies/vasic-digital/toon"]
+	path = dependencies/vasic-digital/toon
 	url = git@github.com:vasic-digital/TOON.git
 [submodule "dependencies/HelixDevelopment/debate_orchestrator"]
 	path = dependencies/HelixDevelopment/debate_orchestrator

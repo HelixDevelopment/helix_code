@@ -28,14 +28,14 @@ dependencies/vasic-digital/filesystem | git@github.com:vasic-digital/Filesystem.
 dependencies/vasic-digital/formatters | git@github.com:vasic-digital/Formatters.git
 dependencies/vasic-digital/gandalf_solutions | git@github.com:vasic-digital/GandalfSolutions.git
 dependencies/vasic-digital/hyper_tune | git@github.com:vasic-digital/HyperTune.git
-dependencies/vasic-digital/I18n | git@github.com:vasic-digital/I18n.git
+dependencies/vasic-digital/i18n | git@github.com:vasic-digital/I18n.git
 dependencies/vasic-digital/i_llm | git@github.com:vasic-digital/I-LLM.git
 dependencies/vasic-digital/lazy | git@github.com:vasic-digital/Lazy.git
 dependencies/vasic-digital/leak_hub | git@github.com:vasic-digital/LeakHub.git
-dependencies/vasic-digital/LLMOps | git@github.com:vasic-digital/LLMOps.git
+dependencies/vasic-digital/llm_ops | git@github.com:vasic-digital/LLMOps.git
 dependencies/vasic-digital/llm_orchestrator | git@github.com:vasic-digital/LLMOrchestrator.git
 dependencies/vasic-digital/llm_provider | git@github.com:vasic-digital/LLMProvider.git
-dependencies/vasic-digital/MCP_Module | git@github.com:vasic-digital/MCP_Module.git
+dependencies/vasic-digital/mcp_module | git@github.com:vasic-digital/MCP_Module.git
 dependencies/vasic-digital/memory | git@github.com:vasic-digital/Memory.git
 dependencies/vasic-digital/messaging | git@github.com:vasic-digital/Messaging.git
 dependencies/vasic-digital/middleware | git@github.com:vasic-digital/Middleware.git
@@ -47,7 +47,7 @@ dependencies/vasic-digital/ouroborous | git@github.com:vasic-digital/Ouroborous.
 dependencies/vasic-digital/planning | git@github.com:vasic-digital/Planning.git
 dependencies/vasic-digital/plinius_common | git@github.com:vasic-digital/PliniusCommon.git
 dependencies/vasic-digital/plugins | git@github.com:vasic-digital/Plugins.git
-dependencies/vasic-digital/RAG | git@github.com:vasic-digital/RAG.git
+dependencies/vasic-digital/rag | git@github.com:vasic-digital/RAG.git
 dependencies/vasic-digital/rate_limiter | git@github.com:vasic-digital/RateLimiter.git
 dependencies/vasic-digital/recovery | git@github.com:vasic-digital/Recovery.git
 dependencies/vasic-digital/red_team | git@github.com:vasic-digital/RedTeam.git
@@ -56,7 +56,7 @@ dependencies/vasic-digital/skill_registry | git@github.com:vasic-digital/SkillRe
 dependencies/vasic-digital/storage | git@github.com:vasic-digital/Storage.git
 dependencies/vasic-digital/streaming | git@github.com:vasic-digital/Streaming.git
 dependencies/vasic-digital/tool_schema | git@github.com:vasic-digital/ToolSchema.git
-dependencies/vasic-digital/TOON | git@github.com:vasic-digital/TOON.git
+dependencies/vasic-digital/toon | git@github.com:vasic-digital/TOON.git
 dependencies/vasic-digital/vector_db | git@github.com:vasic-digital/VectorDB.git
 dependencies/vasic-digital/veritas | git@github.com:vasic-digital/Veritas.git
 dependencies/vasic-digital/vision_engine | git@github.com:vasic-digital/VisionEngine.git
