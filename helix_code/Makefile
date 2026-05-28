@@ -113,7 +113,7 @@ test:
 # qa-results/<run-id>/ (latency.json / concurrency_report.json / recovery_trace.*)
 stress-chaos: ## Run §11.4.85 stress + chaos suites (real components, -race, captured evidence)
 	@echo "🌪️  Running §11.4.85 stress + chaos suites (under -race)..."
-	$(GO_TEST) -race -run 'Stress|Chaos' ./internal/worker/... ./internal/llm/... ./internal/task/... ./internal/session/... ./internal/event/... ./internal/memory/... ./internal/context/... ./internal/rules/... ./internal/repomap/... ./internal/discovery/... ./internal/tools/... ./internal/workflow/... ./internal/hooks/... ./tests/stresschaos/...
+	$(GO_TEST) -race -run 'Stress|Chaos' ./internal/worker/... ./internal/llm/... ./internal/task/... ./internal/session/... ./internal/event/... ./internal/memory/... ./internal/context/... ./internal/rules/... ./internal/repomap/... ./internal/discovery/... ./internal/tools/... ./internal/workflow/... ./internal/hooks/... ./internal/agent/... ./internal/monitoring/... ./internal/commands/... ./tests/stresschaos/...
 	@echo "✅ Stress + chaos suites complete (evidence under qa-results/)"
 
 # §1.1 paired-mutation meta-tests — prove the stress/chaos harness itself cannot

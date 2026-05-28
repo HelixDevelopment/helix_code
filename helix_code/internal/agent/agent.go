@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"dev.helix.code/internal/agent/task"
@@ -199,8 +200,22 @@ const (
 	ResolutionMethodHighConfidence ResolutionMethod = "high_confidence"
 )
 
-// AgentRegistry maintains a registry of available agents
+// AgentRegistry maintains a registry of available agents.
+//
+// HXC-014 §11.4.85 chaos fix (concurrent-map data race): the registry's
+// agents map is mutated by Register/Unregister and read by Get / List /
+// Count / GetByType / GetByCapability. The owning Coordinator delegates to
+// these methods from RegisterAgent / ListAgents / findSuitableAgent WITHOUT
+// holding its own c.mu (those paths intentionally avoid the coordinator lock
+// to keep registry access cheap), so two goroutines registering agents — or
+// one registering while another lists — was an unsynchronised concurrent map
+// access: a guaranteed -race failure and a real "fatal error: concurrent map
+// read and map write" process crash under load. The registry now guards its
+// own map with an RWMutex; readers take RLock, writers take Lock. The lock is
+// NEVER taken reentrantly (no method that holds it calls another method that
+// also takes it), so a queued writer cannot deadlock the readers.
 type AgentRegistry struct {
+	mu     sync.RWMutex
 	agents map[string]Agent
 }
 
@@ -216,17 +231,23 @@ func (r *AgentRegistry) Register(agent Agent) error {
 	if agent == nil {
 		return ErrNilAgent
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.agents[agent.ID()] = agent
 	return nil
 }
 
 // Unregister removes an agent from the registry
 func (r *AgentRegistry) Unregister(agentID string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	delete(r.agents, agentID)
 }
 
 // Get retrieves an agent by ID
 func (r *AgentRegistry) Get(agentID string) (Agent, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	agent, exists := r.agents[agentID]
 	if !exists {
 		return nil, ErrAgentNotFound
@@ -236,6 +257,8 @@ func (r *AgentRegistry) Get(agentID string) (Agent, error) {
 
 // GetByType retrieves all agents of a specific type
 func (r *AgentRegistry) GetByType(agentType AgentType) []Agent {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	var result []Agent
 	for _, agent := range r.agents {
 		if agent.Type() == agentType {
@@ -247,6 +270,8 @@ func (r *AgentRegistry) GetByType(agentType AgentType) []Agent {
 
 // GetByCapability retrieves all agents with a specific capability
 func (r *AgentRegistry) GetByCapability(capability Capability) []Agent {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	var result []Agent
 	for _, agent := range r.agents {
 		for _, cap := range agent.Capabilities() {
@@ -261,6 +286,8 @@ func (r *AgentRegistry) GetByCapability(capability Capability) []Agent {
 
 // List returns all registered agents
 func (r *AgentRegistry) List() []Agent {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	result := make([]Agent, 0, len(r.agents))
 	for _, agent := range r.agents {
 		result = append(result, agent)
@@ -270,6 +297,8 @@ func (r *AgentRegistry) List() []Agent {
 
 // Count returns the number of registered agents
 func (r *AgentRegistry) Count() int {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	return len(r.agents)
 }
 

@@ -27,3 +27,6 @@ internal_monitoring_failed_collect_metrics:
 
 internal_monitoring_no_collectors_registered:
   other: "no collectors registered"
+
+internal_monitoring_collector_panic:
+  other: "collector {{.Name}} panicked during Collect and was isolated: {{.Panic}}"

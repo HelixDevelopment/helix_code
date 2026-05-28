@@ -53,7 +53,14 @@ func (e *Executor) Execute(ctx context.Context, input string, cmdCtx *CommandCon
 	start := time.Now()
 	log.Printf("Executing command: /%s with args: %v", commandName, args)
 
-	result, err := cmd.Execute(ctx, cmdCtx)
+	// Isolate the command: a slash command may be supplied by user/markdown
+	// definitions or third-party registrations, so a panic inside its Execute
+	// MUST NOT propagate up and crash the host process (CLI / server) along with
+	// every unrelated goroutine. Recover it here and surface it as a controlled
+	// CommandError (graceful degradation), keeping the dispatcher usable for the
+	// next command. CONST-046: the message is resolved through the package
+	// translator, never a hardcoded literal.
+	result, err := e.executeRecovered(ctx, cmd, commandName, cmdCtx)
 
 	duration := time.Since(start)
 	log.Printf("Command /%s completed in %v (success: %t)", commandName, duration, err == nil && result != nil && result.Success)
@@ -67,6 +74,21 @@ func (e *Executor) Execute(ctx context.Context, input string, cmdCtx *CommandCon
 	}
 
 	return result, nil
+}
+
+// executeRecovered invokes cmd.Execute with a panic guard. If the command
+// panics, the panic is recovered and converted into a non-nil error so the
+// dispatcher never crashes the host process. A recovered panic is logged with
+// its value (operator visibility) and returned as a CONST-046-resolved error.
+func (e *Executor) executeRecovered(ctx context.Context, cmd Command, commandName string, cmdCtx *CommandContext) (result *CommandResult, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Printf("Command /%s panicked and was recovered: %v", commandName, p)
+			result = nil
+			err = fmt.Errorf("%s: %v", tr(ctx, "internal_commands_command_panicked", nil), p)
+		}
+	}()
+	return cmd.Execute(ctx, cmdCtx)
 }
 
 // ExecuteWithDefault executes a command with default context

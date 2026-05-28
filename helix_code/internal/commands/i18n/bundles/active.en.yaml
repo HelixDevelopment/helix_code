@@ -31,6 +31,9 @@ internal_commands_project_id_is_required:
 internal_commands_working_dir_is_required:
   other: "working_dir is required"
 
+internal_commands_command_panicked:
+  other: "command panicked during execution and was recovered"
+
 internal_commands_mcp_manager_not_initialised:
   other: "mcp: manager not initialised"
 

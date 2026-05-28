@@ -45,7 +45,7 @@ func (m *Monitor) CollectMetrics(ctx context.Context) error {
 	defer m.mutex.Unlock()
 
 	for _, collector := range m.collectors {
-		metrics, err := collector.Collect()
+		metrics, err := m.safeCollect(ctx, collector)
 		if err != nil {
 			m.logger.Error("%s", tr(ctx, "internal_monitoring_failed_collect_metrics_named", map[string]any{"Name": collector.Name(), "Err": err.Error()}))
 			continue
@@ -57,6 +57,23 @@ func (m *Monitor) CollectMetrics(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// safeCollect invokes a single collector's Collect() with panic isolation. A
+// collector backed by a faulting source (HTTP scrape, /proc read, disk stat)
+// can panic; without isolation that panic would unwind out of CollectMetrics
+// through the locked critical section and crash the entire process, taking down
+// every unrelated goroutine. safeCollect converts a panic into a normal error
+// so the panicking collector is skipped (logged by the caller) while its
+// co-collectors still run and the Monitor stays usable.
+func (m *Monitor) safeCollect(ctx context.Context, collector Collector) (metrics map[string]interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			metrics = nil
+			err = fmt.Errorf("%s", tr(ctx, "internal_monitoring_collector_panic", map[string]any{"Name": collector.Name(), "Panic": fmt.Sprintf("%v", r)}))
+		}
+	}()
+	return collector.Collect()
 }
 
 // GetMetric retrieves a specific metric

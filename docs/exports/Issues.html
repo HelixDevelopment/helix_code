@@ -1237,12 +1237,40 @@ BackgroundManager) had no bugs, full coverage added. Each fix
 anti-bluff-proven: revert → FAIL (panic / 30s deadlock timeout / FATAL)
 → restore → PASS. 13 in-process targets now covered;
 <code>make stress-chaos</code> extended to all 13, full target PASSES
-under -race. <strong>Remaining (infra batch + long-tail):</strong>
-internal/redis + internal/database + internal/persistence (real PG/Redis
-via <code>make test-infra-up</code>), internal/server (HTTP/WS
-DDoS-class load), internal/llm provider endpoints — all need the
-docker-compose stack up; then the long-tail ~40-package sweep. Effort
-remaining multi-week incremental. <strong>HXC-014a</strong> (empty
+under -race. <strong>Batch 6 DONE (2026-05-28, subagent-driven
+§11.4.70):</strong> internal/agent + internal/monitoring +
+internal/commands (3 parallel disjoint-scope subagents). <strong>3 MORE
+REAL production bugs SURFACED + FIXED:</strong> (1)
+<code>internal/agent/agent.go</code> — <code>AgentRegistry.agents</code>
+map had NO mutex; Register/Unregister write it while
+Get/List/Count/GetByType/GetByCapability read it, and the Coordinator
+delegates without holding c.mu → unsynchronised concurrent map access =
+guaranteed <code>fatal error: concurrent map read and map write</code>
+under load. Fix: added <code>sync.RWMutex</code> (writers Lock, readers
+RLock, never reentrant). (2)
+<code>internal/monitoring/monitor.go:48</code> —
+<code>CollectMetrics</code> called <code>collector.Collect()</code>
+under the write lock with no recover(); a panicking collector (HTTP
+scrape / /proc read fault) crashes the process. Fix:
+<code>safeCollect</code> recover-wrapper + i18n key
+<code>internal_monitoring_collector_panic</code>. (3)
+<code>internal/commands/executor.go</code> —
+<code>Executor.Execute</code> called <code>cmd.Execute()</code> with no
+recover(); a panicking slash/markdown/third-party command crashes the
+host CLI/server. Fix: <code>executeRecovered</code> wrapper + i18n key
+<code>internal_commands_command_panicked</code>. All CONST-046-compliant
+(no hardcoded English). Each fix anti-bluff-proven: revert → DATA RACE /
+concurrent-map-crash / panic → restore → PASS. <strong>16 in-process
+targets now covered; 8 real production bugs fixed this session</strong>
+(worker/load_balancer batch 1; event/memory batch 3; hooks×3 batch 5;
+agent/monitoring/commands batch 6); <code>make stress-chaos</code>
+extended to all 16, full target PASSES under -race. <strong>Remaining
+(infra batch + long-tail):</strong> internal/redis + internal/database +
+internal/persistence (real PG/Redis via
+<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
+load), internal/llm provider endpoints — all need the docker-compose
+stack up; then the long-tail ~40-package sweep. Effort remaining
+multi-week incremental. <strong>HXC-014a</strong> (empty
 TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
 decision deferred:</strong> promoting <code>tests/stresschaos/</code>
 into the constitution submodule for cross-project reuse (triggers
