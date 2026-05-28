@@ -83,7 +83,12 @@ func TC011_UserRegistration() *pkg.TestCase {
 				}
 
 				if loginResp.StatusCode != http.StatusOK {
-					return v.Assert(true, "Login requires email verification first")
+					// Login was rejected post-registration: the server is enforcing
+					// email verification before login. Assert on the captured status
+					// so this PASSes only on genuine evidence of that enforcement.
+					if err := v.AssertEqual(http.StatusUnauthorized, loginResp.StatusCode, "Login before email verification is rejected with 401"); err != nil {
+						return err
+					}
 				}
 			} else {
 				if err := v.AssertTrue(verificationRequired.(bool), "Email verification is required"); err != nil {
@@ -139,8 +144,10 @@ func TC012_PasswordReset() *pkg.TestCase {
 					return err
 				}
 			} else if resp.StatusCode == http.StatusNotFound {
-				// Password reset endpoint should exist
-				return v.Assert(true, "Password reset endpoint exists but requires proper configuration")
+				// 404 means the password-reset endpoint is not available on this
+				// deployment. Faking a PASS here would be a §11.4 bluff — the
+				// feature genuinely cannot be exercised, so report an honest SKIP.
+				return v.Skip("password-reset endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -174,8 +181,8 @@ func TC013_MultiFactorAuthentication() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for MFA test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for MFA test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -218,8 +225,8 @@ func TC013_MultiFactorAuthentication() *pkg.TestCase {
 					return err
 				}
 			} else if resp.StatusCode == http.StatusNotFound {
-				// MFA endpoint should exist
-				return v.Assert(true, "MFA endpoint exists but may require configuration")
+				// MFA enable endpoint not available on this deployment — honest SKIP.
+				return v.Skip("MFA enable endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -253,8 +260,8 @@ func TC014_SessionTimeout() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for session timeout test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for session timeout test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -308,8 +315,12 @@ func TC014_SessionTimeout() *pkg.TestCase {
 					return err
 				}
 			} else if refreshResp.StatusCode == http.StatusUnauthorized {
-				// Session may have expired - this is expected behavior
-				return v.Assert(true, "Session expires correctly")
+				// A 401 on refresh is genuine evidence the session/token was
+				// rejected (expired or invalidated). Assert on the captured
+				// status so the PASS rests on real runtime evidence.
+				if err := v.AssertEqual(http.StatusUnauthorized, refreshResp.StatusCode, "Expired session refresh is rejected with 401"); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -343,8 +354,8 @@ func TC015_ProjectLifecycle() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for project lifecycle test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for project lifecycle test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -510,8 +521,8 @@ func TC016_FileOperations() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for file operations test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for file operations test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -538,8 +549,8 @@ func TC016_FileOperations() *pkg.TestCase {
 				return fmt.Errorf("project creation failed: %w", err)
 			}
 
-			if projectResp.StatusCode != http.StatusCreated {
-				return v.Assert(true, "Project creation succeeded for file operations test")
+			if err := v.AssertEqual(http.StatusCreated, projectResp.StatusCode, "Project creation for file operations test returns 201 Created"); err != nil {
+				return err
 			}
 
 			projectResult, err := parseResponse(projectResp)
@@ -548,8 +559,8 @@ func TC016_FileOperations() *pkg.TestCase {
 			}
 
 			project, hasProject := projectResult["project"].(map[string]interface{})
-			if !hasProject {
-				return v.Assert(true, "Project object returned for file operations test")
+			if err := v.AssertTrue(hasProject, "Project object returned for file operations test"); err != nil {
+				return err
 			}
 
 			projectID, _ := project["id"].(string)
@@ -665,8 +676,8 @@ func TC017_WorkspaceManagement() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for workspace test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for workspace test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -732,12 +743,12 @@ func TC017_WorkspaceManagement() *pkg.TestCase {
 						return err
 					}
 				} else if cloneResp.StatusCode == http.StatusNotFound {
-					// Clone endpoint should exist
-					return v.Assert(true, "Workspace cloning endpoint exists but may need configuration")
+					// Workspace clone endpoint not available — honest SKIP.
+					return v.Skip("workspace clone endpoint not available (HTTP 404)")
 				}
 			} else if workspaceResp.StatusCode == http.StatusNotFound {
-				// Workspace endpoint should exist
-				return v.Assert(true, "Workspace endpoint exists but may need configuration")
+				// Workspace endpoint not available on this deployment — honest SKIP.
+				return v.Skip("workspace endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -771,8 +782,8 @@ func TC018_CodeGenerationWorkflow() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for code generation test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for code generation test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -799,8 +810,8 @@ func TC018_CodeGenerationWorkflow() *pkg.TestCase {
 				return fmt.Errorf("project creation failed: %w", err)
 			}
 
-			if projectResp.StatusCode != http.StatusCreated {
-				return v.Assert(true, "Project creation succeeded for code generation test")
+			if err := v.AssertEqual(http.StatusCreated, projectResp.StatusCode, "Project creation for code generation test returns 201 Created"); err != nil {
+				return err
 			}
 
 			projectResult, err := parseResponse(projectResp)
@@ -809,8 +820,8 @@ func TC018_CodeGenerationWorkflow() *pkg.TestCase {
 			}
 
 			project, hasProject := projectResult["project"].(map[string]interface{})
-			if !hasProject {
-				return v.Assert(true, "Project object returned for code generation test")
+			if err := v.AssertTrue(hasProject, "Project object returned for code generation test"); err != nil {
+				return err
 			}
 
 			projectID, _ := project["id"].(string)
@@ -898,8 +909,8 @@ func TC018_CodeGenerationWorkflow() *pkg.TestCase {
 					return err
 				}
 			} else if generateResp.StatusCode == http.StatusNotFound {
-				// Code generation endpoint should exist
-				return v.Assert(true, "Code generation endpoint exists but may need configuration")
+				// Code generation endpoint not available on this deployment — honest SKIP.
+				return v.Skip("code generation endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -933,8 +944,8 @@ func TC019_BuildAutomation() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for build automation test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for build automation test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -961,8 +972,8 @@ func TC019_BuildAutomation() *pkg.TestCase {
 				return fmt.Errorf("project creation failed: %w", err)
 			}
 
-			if projectResp.StatusCode != http.StatusCreated {
-				return v.Assert(true, "Project creation succeeded for build automation test")
+			if err := v.AssertEqual(http.StatusCreated, projectResp.StatusCode, "Project creation for build automation test returns 201 Created"); err != nil {
+				return err
 			}
 
 			projectResult, err := parseResponse(projectResp)
@@ -971,8 +982,8 @@ func TC019_BuildAutomation() *pkg.TestCase {
 			}
 
 			project, hasProject := projectResult["project"].(map[string]interface{})
-			if !hasProject {
-				return v.Assert(true, "Project object returned for build automation test")
+			if err := v.AssertTrue(hasProject, "Project object returned for build automation test"); err != nil {
+				return err
 			}
 
 			projectID, _ := project["id"].(string)
@@ -1035,16 +1046,15 @@ func TC019_BuildAutomation() *pkg.TestCase {
 						}
 						break
 					} else if buildStatus == "failed" {
-						// Check for error information
-						errorMsg, hasError := progressResult["error"].(string)
-						if hasError && len(errorMsg) > 0 {
-							return v.Assert(true, "Build failed with error message: "+errorMsg)
-						}
-						break
+						// A failed build is a genuine failure of the feature under
+						// test. Faking a PASS here would hide a broken build path
+						// (§11.4). Report the real failure with its error message.
+						errorMsg, _ := progressResult["error"].(string)
+						return fmt.Errorf("build automation produced a failed build: %s", errorMsg)
 					}
 				} else if progressResp.StatusCode == http.StatusNotFound {
-					// Build endpoint should exist
-					return v.Assert(true, "Build endpoint exists but may need configuration")
+					// Build progress endpoint not available — honest SKIP.
+					return v.Skip("build progress endpoint not available (HTTP 404)")
 				}
 			}
 
@@ -1079,8 +1089,8 @@ func TC020_DebuggingSession() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for debugging test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for debugging test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -1107,8 +1117,8 @@ func TC020_DebuggingSession() *pkg.TestCase {
 				return fmt.Errorf("project creation failed: %w", err)
 			}
 
-			if projectResp.StatusCode != http.StatusCreated {
-				return v.Assert(true, "Project creation succeeded for debugging test")
+			if err := v.AssertEqual(http.StatusCreated, projectResp.StatusCode, "Project creation for debugging test returns 201 Created"); err != nil {
+				return err
 			}
 
 			projectResult, err := parseResponse(projectResp)
@@ -1117,8 +1127,8 @@ func TC020_DebuggingSession() *pkg.TestCase {
 			}
 
 			project, hasProject := projectResult["project"].(map[string]interface{})
-			if !hasProject {
-				return v.Assert(true, "Project object returned for debugging test")
+			if err := v.AssertTrue(hasProject, "Project object returned for debugging test"); err != nil {
+				return err
 			}
 
 			projectID, _ := project["id"].(string)
@@ -1176,12 +1186,12 @@ func TC020_DebuggingSession() *pkg.TestCase {
 						return err
 					}
 				} else if bpResp.StatusCode == http.StatusNotFound {
-					// Debug endpoint exists but breakpoint may not be supported
-					return v.Assert(true, "Debugging endpoint exists but breakpoints may need configuration")
+					// Breakpoint endpoint not available — honest SKIP.
+					return v.Skip("debug breakpoint endpoint not available (HTTP 404)")
 				}
 			} else if debugResp.StatusCode == http.StatusNotFound {
-				// Debug endpoint should exist
-				return v.Assert(true, "Debugging endpoint exists but may need configuration")
+				// Debug endpoint not available on this deployment — honest SKIP.
+				return v.Skip("debug endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -1215,8 +1225,8 @@ func TC021_ConfigurationManagement() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for configuration management test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for configuration management test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -1273,15 +1283,17 @@ func TC021_ConfigurationManagement() *pkg.TestCase {
 						return err
 					}
 				} else if updateResp.StatusCode == http.StatusNotFound {
-					// Config endpoint exists but may need authentication
-					return v.Assert(true, "Config endpoint exists but may need proper configuration")
+					// Config update endpoint not available — honest SKIP.
+					return v.Skip("config update endpoint not available (HTTP 404)")
 				}
 			} else if getResp.StatusCode == http.StatusUnauthorized {
-				// Config endpoint requires authentication
-				return v.Assert(true, "Config endpoint requires authentication")
+				// A 401 is genuine evidence the config endpoint enforces auth.
+				if err := v.AssertEqual(http.StatusUnauthorized, getResp.StatusCode, "Config endpoint enforces authentication with 401"); err != nil {
+					return err
+				}
 			} else if getResp.StatusCode == http.StatusNotFound {
-				// Config endpoint should exist
-				return v.Assert(true, "Config endpoint should exist")
+				// Config endpoint not available on this deployment — honest SKIP.
+				return v.Skip("config endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -1315,8 +1327,8 @@ func TC022_CacheManagement() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for cache management test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for cache management test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -1337,30 +1349,29 @@ func TC022_CacheManagement() *pkg.TestCase {
 				"type":        "go",
 			}
 
-			// First request - should populate cache
+			// First request - should populate cache. Measure its real latency.
+			start1 := time.Now()
 			resp1, err := client.doRequest("POST", "/api/v1/projects", projectReq)
 			if err != nil {
 				return fmt.Errorf("first project request failed: %w", err)
 			}
+			dur1 := time.Since(start1)
 
-			startTime1 := time.Now()
-
-			// Second request - should use cache
+			// Second (identical) request - should be served from cache if caching
+			// is active. Measure its real latency.
+			start2 := time.Now()
 			resp2, err := client.doRequest("POST", "/api/v1/projects", projectReq)
 			if err != nil {
 				return fmt.Errorf("second project request failed: %w", err)
 			}
+			dur2 := time.Since(start2)
 
-			startTime2 := time.Now()
-
-			// Verify cache is working by comparing response times
+			// Verify cache improves latency using the real measured durations.
+			// This PASSes only on genuine runtime evidence that the second
+			// (cache-eligible) request was at least as fast as the first.
 			if resp1.StatusCode == http.StatusOK && resp2.StatusCode == http.StatusOK {
-				// Second request should be faster due to caching
-				if time.Since(startTime2) < time.Since(startTime1) {
-					// Cache appears to be working
-					if err := v.Assert(true, "Cache is improving response time"); err != nil {
-						return err
-					}
+				if err := v.AssertTrue(dur2 <= dur1, fmt.Sprintf("Cached repeat request not slower than first (first=%s second=%s)", dur1, dur2)); err != nil {
+					return err
 				}
 			}
 
@@ -1386,8 +1397,8 @@ func TC022_CacheManagement() *pkg.TestCase {
 					return err
 				}
 			} else if invalidateResp.StatusCode == http.StatusNotFound {
-				// Cache endpoint exists but may not be fully implemented
-				return v.Assert(true, "Cache invalidation endpoint exists but may need configuration")
+				// Cache invalidation endpoint not available — honest SKIP.
+				return v.Skip("cache invalidation endpoint not available (HTTP 404)")
 			}
 
 			return nil
@@ -1421,8 +1432,8 @@ func TC023_AuditLogging() *pkg.TestCase {
 				return fmt.Errorf("login request failed: %w", err)
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Login succeeded for audit logging test")
+			if err := v.AssertEqual(http.StatusOK, resp.StatusCode, "Login for audit logging test returns 200 OK"); err != nil {
+				return err
 			}
 
 			loginResult, err := parseResponse(resp)
@@ -1477,11 +1488,13 @@ func TC023_AuditLogging() *pkg.TestCase {
 					return err
 				}
 			} else if auditResp.StatusCode == http.StatusNotFound {
-				// Audit endpoint exists but may not be fully implemented
-				return v.Assert(true, "Audit logging endpoint exists but may need configuration")
+				// Audit query endpoint not available — honest SKIP.
+				return v.Skip("audit logging query endpoint not available (HTTP 404)")
 			} else if auditResp.StatusCode == http.StatusUnauthorized {
-				// Audit requires admin privileges
-				return v.Assert(true, "Audit logging requires admin privileges")
+				// A 401 is genuine evidence the audit endpoint enforces admin auth.
+				if err := v.AssertEqual(http.StatusUnauthorized, auditResp.StatusCode, "Audit logging endpoint enforces authorization with 401"); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -1553,11 +1566,13 @@ func TC024_PerformanceMetrics() *pkg.TestCase {
 					}
 				}
 			} else if metricsResp.StatusCode == http.StatusNotFound {
-				// Metrics endpoint should exist
-				return v.Assert(true, "Metrics endpoint should exist")
+				// Metrics endpoint not available on this deployment — honest SKIP.
+				return v.Skip("metrics endpoint not available (HTTP 404)")
 			} else if metricsResp.StatusCode == http.StatusUnauthorized {
-				// Metrics may require authentication
-				return v.Assert(true, "Metrics endpoint requires authentication")
+				// A 401 is genuine evidence the metrics endpoint enforces auth.
+				if err := v.AssertEqual(http.StatusUnauthorized, metricsResp.StatusCode, "Metrics endpoint enforces authentication with 401"); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -1634,33 +1649,30 @@ func TC025_ErrorHandling() *pkg.TestCase {
 				return err
 			}
 
-			// Test 5: Rate limiting
-			startTime := time.Now()
-			rateLimitCount := 0
-
+			// Test 5: Rate limiting. Fire a burst and capture whether the server
+			// ever responds 429. We only assert on genuine 429 evidence; if no
+			// 429 is observed, rate limiting may simply not be configured on this
+			// deployment, so we make no claim (faking a PASS would be a bluff).
+			rateLimited := false
 			for i := 0; i < 20; i++ {
 				testReq := map[string]string{
 					"test": "rate_limit",
 				}
 
-				resp, err := client.doRequest("POST", "/api/v1/test", testReq)
+				rlResp, err := client.doRequest("POST", "/api/v1/test", testReq)
 				if err != nil {
 					continue
 				}
 
-				if resp.StatusCode == http.StatusTooManyRequests {
-					rateLimitCount++
+				if rlResp.StatusCode == http.StatusTooManyRequests {
+					rateLimited = true
 					break
-				} else if resp.StatusCode == http.StatusOK {
-					// Success, continue testing
-					continue
 				}
 			}
 
-			duration := time.Since(startTime)
-			if rateLimitCount > 0 || duration > 5*time.Second {
-				// Rate limiting appears to be working
-				if err := v.Assert(true, "Rate limiting is active"); err != nil {
+			if rateLimited {
+				// Genuine 429 captured — rate limiting is demonstrably active.
+				if err := v.AssertTrue(rateLimited, "Rate limiting returned 429 Too Many Requests under burst load"); err != nil {
 					return err
 				}
 			}
@@ -1676,9 +1688,14 @@ func TC025_ErrorHandling() *pkg.TestCase {
 				return fmt.Errorf("large payload request failed: %w", err)
 			}
 
-			// Should either succeed or return appropriate error for large payload
-			if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusRequestEntityTooLarge {
-				return v.Assert(true, "Large payload handled appropriately")
+			// Should either succeed (200) or reject with 413 Payload Too Large.
+			// Assert on the captured status so an unexpected response (e.g. a
+			// 500 crash on large input) FAILs honestly instead of faking a PASS.
+			if err := v.AssertTrue(
+				resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusRequestEntityTooLarge,
+				fmt.Sprintf("Large payload handled with 200 or 413 (got %d)", resp.StatusCode),
+			); err != nil {
+				return err
 			}
 
 			return nil
