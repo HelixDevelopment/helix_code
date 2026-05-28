@@ -61,6 +61,18 @@ func (e *Executor) Execute(ctx context.Context, test *pkg.TestCase) *pkg.TestRes
 			return result
 		}
 
+		// Honest SKIP (§11.4.3): a genuinely-absent precondition (platform/arch
+		// mismatch, honestly-unavailable real dependency) is NOT a PASS and NOT a
+		// FAIL. Record StatusSkipped so the report counts it separately, never
+		// inflating the green Passed total. Do not retry a skip.
+		if pkg.IsSkip(err) {
+			result.Status = pkg.StatusSkipped
+			result.ErrorMsg = err.Error()
+			result.EndTime = time.Now()
+			result.Duration = result.EndTime.Sub(result.StartTime)
+			return result
+		}
+
 		lastErr = err
 
 		// Check if context was cancelled or timed out

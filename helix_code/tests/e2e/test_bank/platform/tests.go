@@ -58,7 +58,7 @@ func TC046_LinuxDeployment() *pkg.TestCase {
 
 			// Skip if not on Linux
 			if config.Platform != "linux" {
-				return v.Assert(true, "Test skipped: not running on Linux")
+				return v.Skip(fmt.Sprintf("not running on Linux (runtime.GOOS=%s)", runtime.GOOS))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -161,7 +161,7 @@ func TC047_MacOSCompatibility() *pkg.TestCase {
 
 			// Skip if not on macOS
 			if config.Platform != "darwin" {
-				return v.Assert(true, "Test skipped: not running on macOS")
+				return v.Skip(fmt.Sprintf("not running on macOS (runtime.GOOS=%s)", runtime.GOOS))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -619,7 +619,7 @@ func PT001_LinuxCompatibility() *pkg.TestCase {
 			config := GetPlatformTestConfig()
 
 			if config.Platform != "linux" {
-				return v.Assert(true, "Test skipped - not running on Linux")
+				return v.Skip(fmt.Sprintf("not running on Linux (runtime.GOOS=%s)", runtime.GOOS))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -660,7 +660,7 @@ func PT002_MacOSCompatibility() *pkg.TestCase {
 			config := GetPlatformTestConfig()
 
 			if config.Platform != "darwin" {
-				return v.Assert(true, "Test skipped - not running on macOS")
+				return v.Skip(fmt.Sprintf("not running on macOS (runtime.GOOS=%s)", runtime.GOOS))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -701,7 +701,7 @@ func PT003_WindowsCompatibility() *pkg.TestCase {
 			config := GetPlatformTestConfig()
 
 			if config.Platform != "windows" {
-				return v.Assert(true, "Test skipped - not running on Windows")
+				return v.Skip(fmt.Sprintf("not running on Windows (runtime.GOOS=%s)", runtime.GOOS))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -742,7 +742,7 @@ func PT004_ARMCompatibility() *pkg.TestCase {
 			config := GetPlatformTestConfig()
 
 			if !strings.HasPrefix(config.Arch, "arm") {
-				return v.Assert(true, "Test skipped - not running on ARM architecture")
+				return v.Skip(fmt.Sprintf("not running on ARM architecture (runtime.GOARCH=%s)", runtime.GOARCH))
 			}
 
 			client := NewAPIClient(config.BaseURL)
@@ -781,7 +781,7 @@ func PT005_AMD64Compatibility() *pkg.TestCase {
 			config := GetPlatformTestConfig()
 
 			if config.Arch != "amd64" {
-				return v.Assert(true, "Test skipped - not running on AMD64 architecture")
+				return v.Skip(fmt.Sprintf("not running on AMD64 architecture (runtime.GOARCH=%s)", runtime.GOARCH))
 			}
 
 			client := NewAPIClient(config.BaseURL)

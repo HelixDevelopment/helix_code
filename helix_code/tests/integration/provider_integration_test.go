@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -691,19 +692,100 @@ func TestProviderStress(t *testing.T) {
 	testResourceLeakDetection(t)
 }
 
+// stressProvider returns the first available+healthy real provider, or skips
+// the calling test honestly (§11.4.3) when none is reachable. This guarantees
+// the stress assertions below either exercise a real provider or report SKIP —
+// they can NEVER be a green-empty bluff (HXC-014a).
+func stressProvider(t *testing.T) ProviderTest {
+	t.Helper()
+	for _, p := range getTestProviders() {
+		if isProviderAvailable(p) && isProviderHealthy(p.HealthURL) {
+			return p
+		}
+	}
+	t.Skip("no real LLM provider reachable for stress test (full stress suite tracked in HXC-014)") // SKIP-OK: #HXC-014
+	return ProviderTest{}
+}
+
 func testHighRequestVolume(t *testing.T) {
-	t.Logf("Testing high request volume")
-	// Stress test with many concurrent requests
+	provider := stressProvider(t)
+
+	// Fire N concurrent REAL HTTP requests at the provider health endpoint and
+	// assert every one succeeds. Captured success count is positive runtime
+	// evidence (§11.4.5) — a green PASS here means the provider really served
+	// the full burst, not that the function did nothing.
+	const numRequests = 50
+	start := time.Now()
+	results := make(chan bool, numRequests)
+	for i := 0; i < numRequests; i++ {
+		go func() { results <- isProviderHealthy(provider.HealthURL) }()
+	}
+
+	success := 0
+	for i := 0; i < numRequests; i++ {
+		if <-results {
+			success++
+		}
+	}
+	duration := time.Since(start)
+
+	t.Logf("High request volume: %s served %d/%d concurrent requests in %v",
+		provider.Name, success, numRequests, duration)
+	require.Equal(t, numRequests, success,
+		"all %d concurrent requests must succeed against real provider %s", numRequests, provider.Name)
 }
 
 func testLongRunningStability(t *testing.T) {
-	t.Logf("Testing long-running stability")
-	// Test provider stability over extended periods
+	provider := stressProvider(t)
+
+	// Poll the real provider repeatedly over a short sustained window and assert
+	// it stays healthy on every probe. The captured probe count is positive
+	// runtime evidence of sustained availability.
+	const probes = 10
+	const interval = 200 * time.Millisecond
+	healthy := 0
+	for i := 0; i < probes; i++ {
+		if isProviderHealthy(provider.HealthURL) {
+			healthy++
+		}
+		time.Sleep(interval)
+	}
+
+	t.Logf("Long-running stability: %s healthy on %d/%d probes over %v",
+		provider.Name, healthy, probes, time.Duration(probes)*interval)
+	require.Equal(t, probes, healthy,
+		"real provider %s must stay healthy across all %d probes", provider.Name, probes)
 }
 
 func testResourceLeakDetection(t *testing.T) {
-	t.Logf("Testing resource leak detection")
-	// Monitor for memory/file handle leaks
+	provider := stressProvider(t)
+
+	// A request burst against the real provider must not leak goroutines in the
+	// test process. Measure baseline, run the burst, force GC, settle, and assert
+	// the goroutine count returns to (approximately) baseline.
+	runtime.GC()
+	time.Sleep(100 * time.Millisecond)
+	baseline := runtime.NumGoroutine()
+
+	const burst = 30
+	done := make(chan struct{}, burst)
+	for i := 0; i < burst; i++ {
+		go func() { _ = isProviderHealthy(provider.HealthURL); done <- struct{}{} }()
+	}
+	for i := 0; i < burst; i++ {
+		<-done
+	}
+
+	runtime.GC()
+	time.Sleep(300 * time.Millisecond)
+	after := runtime.NumGoroutine()
+
+	t.Logf("Resource leak detection: %s goroutines baseline=%d after-burst=%d",
+		provider.Name, baseline, after)
+	// Allow a small slack for runtime/test-harness goroutines; a genuine leak
+	// scales with the burst size (here +30) and would blow past this bound.
+	require.LessOrEqual(t, after, baseline+5,
+		"goroutine count must return near baseline after burst (no leak); baseline=%d after=%d", baseline, after)
 }
 
 // Cleanup function — also performs F13 fake LSP server build (see lsp_test.go)

@@ -526,13 +526,13 @@ func IT001_LLMProviderOllama() *pkg.TestCase {
 			ollamaClient := NewAPIClient(config.OllamaURL)
 			resp, err := ollamaClient.doRequest("GET", "/api/tags", nil)
 			if err != nil {
-				// Ollama not available - skip test
-				return v.Assert(true, "Ollama not available - test skipped")
+				// Ollama not reachable at config.OllamaURL — honest SKIP, not PASS.
+				return v.Skip(fmt.Sprintf("Ollama not reachable at %s: %v", config.OllamaURL, err))
 			}
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				return v.Assert(true, "Ollama not responding - test skipped")
+				return v.Skip(fmt.Sprintf("Ollama not responding (HTTP %d from %s)", resp.StatusCode, config.OllamaURL))
 			}
 
 			result, err := parseResponse(resp)
@@ -543,7 +543,7 @@ func IT001_LLMProviderOllama() *pkg.TestCase {
 			// Verify Ollama has models
 			models, hasModels := result["models"].([]interface{})
 			if !hasModels || len(models) == 0 {
-				return v.Assert(true, "No Ollama models available - test skipped")
+				return v.Skip("Ollama reachable but no models are pulled")
 			}
 
 			if err := v.AssertTrue(len(models) > 0, "Ollama has at least one model"); err != nil {
@@ -583,7 +583,7 @@ func IT002_LLMProviderOpenAI() *pkg.TestCase {
 			// Check if OpenAI API key is configured
 			apiKey := os.Getenv("OPENAI_API_KEY")
 			if apiKey == "" {
-				return v.Assert(true, "OpenAI API key not configured - test skipped")
+				return v.Skip("OPENAI_API_KEY not configured in environment")
 			}
 
 			// Test that HelixCode server is running

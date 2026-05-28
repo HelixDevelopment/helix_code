@@ -44,6 +44,17 @@ func (v *Validator) Assert(condition bool, description string) error {
 	return nil
 }
 
+// Skip returns an honest SKIP verdict for the test (§11.4.3).
+//
+// Anti-bluff: use this — NEVER Assert(true, "...skipped...") — when a test's
+// precondition is genuinely absent (platform/arch mismatch, an honestly
+// unavailable real dependency). The executor maps the returned *pkg.SkipError
+// to pkg.StatusSkipped, which the report counts separately from Passed, so the
+// case reports SKIP rather than a green PASS while exercising nothing.
+func (v *Validator) Skip(reason string) error {
+	return pkg.Skip(reason)
+}
+
 // AssertEqual checks if two values are equal
 func (v *Validator) AssertEqual(expected, actual interface{}, description string) error {
 	equal := reflect.DeepEqual(expected, actual)
