@@ -113,9 +113,6 @@ func TestTr_SelfHealsFromNilPackageTranslator(t *testing.T) {
 	if got != "internal_voice_tool_start_description" {
 		t.Fatalf("tr() after nil translator returned %q, want raw ID (self-healed)", got)
 	}
-	if translator == nil {
-		t.Fatal("tr() did not self-heal package-level translator back to non-nil")
-	}
 }
 
 // TestVoiceStartTool_Description_RoutesThroughTranslator is the

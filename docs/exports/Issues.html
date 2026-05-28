@@ -1262,8 +1262,26 @@ clean. Anti-bluff proof: new
 <code>internal/logging/translator_race_test.go</code> hammers
 SetTranslator concurrently with tr (16×300) + a panicking translator;
 §1.1 paired mutation (strip the guard) → <code>WARNING: DATA RACE</code>
-+ <code>panic</code> + FAIL → restore → PASS. Behaviour-preserving (only
-thread-safety + panic-isolation; same msgID fallback + nil→Noop reset).
++ <code>panic</code> + FAIL → restore → PASS. <strong>Regression
+follow-up (2026-05-28, same day):</strong> the sweep’s claim of
+“behaviour-preserving” was incomplete — removing the inline
+<code>if translator==nil { translator = Noop }</code> write-on-read-path
+(the race) broke 10 pre-existing
+<code>TestTr_RecoversFromNilPackageTranslator</code> unit tests
+(adapters/kilocode/verifier/plantree/repomap/logging/projectmemory/quality/render/voice)
+that asserted tr() SELF-HEALS the package-level var back to non-nil —
+i.e. they asserted exactly the racy write the sweep correctly removed.
+The HXC-014b verification gap: it ran <code>go build</code> +
+<code>make stress-chaos</code> (<code>-run &#39;Stress|Chaos&#39;</code>
+filtered) but NOT the swept packages’ full unit suites, so these unit
+failures were masked. Fixed by removing the stale self-heal assertion
+from all 10 (the msgID-echo assertion already proves graceful
+degradation via the local Noop snapshot — no package-var mutation, no
+race). All 10 packages’ full unit suites + gofmt now green (verified
+per-package); full <code>go test ./internal/...</code> blast-radius
+sweep re-run → exit 0, 0 FAILs (no other HXC-014b regression). Net
+behaviour: tr() with a nil package translator returns the msgID via a
+race-free local Noop, never mutating shared state.
 <strong>Discovered:</strong> 2026-05-28 (HXC-014 batch 8+11 — same
 defect found independently in internal/security AND internal/deployment
 translator.go) <strong>Severity:</strong> Medium (latent: requires
@@ -1315,16 +1333,33 @@ ping legitimately leaves 1 warm idle (CLI MinConns=0 confirmed — no
 pre-warm) — corrected to the true invariant (≤1 post-ping AND strictly
 &lt; server’s pre-warmed pool). New <code>make stress-chaos-infra</code>
 target (integration-tagged, real PG+Redis). Each anti-bluff-proven.
-<strong>Remaining (long-tail):</strong> internal/server (HTTP/WS
-DDoS-class load — needs full app boot + PG+Redis), internal/llm provider
-endpoints (need live LLM/Ollama), low-concurrency long-tail
-(logging/version/hardware/etc.). internal/persistence confirmed has NO
-live-DB path (pure file-based — fully covered in batch 10).
-<strong>HXC-014a</strong> (empty TestProviderStress stub) already FIXED
-(f464adb0). <strong>Operator decision deferred:</strong> promoting
-<code>tests/stresschaos/</code> into the constitution submodule for
-cross-project reuse (triggers §11.4.26 cross-project workflow) — interim
-home is project-local.</p>
+<strong>INFRA BATCH (part 2) DONE (2026-05-28):</strong>
+<strong>internal/server</strong> — 8 integration-tagged DDoS-class tests
+PASS under -race against the REAL Gin server booted via
+<code>server.New(cfg, real-PG, real-Redis)</code> +
+<code>httptest.NewServer(srv.router)</code> (full middleware chain):
+sustained health p50=0.54ms, 16-goroutine flood, 64KB→8MiB bodies (all
+400, no OOM), malformed-request + handler-panic-isolation + slowloris
+chaos, server stays up (post-chaos /health 200). No new bug; anti-bluff
+proven (remove gin.Recovery → panic escapes → FAIL → restore → pass).
+<strong>internal/verifier</strong> — 14 stress+chaos tests PASS under
+-race (HealthMonitor circuit-breaker 16×4800 concurrent, Cache tiered
+20×4000, EventPublisher pubsub, Poller lifecycle). <strong>1 REAL bug
+fixed:</strong> <code>internal/verifier/adapter.go</code>
+EventPublisher.Publish launched each subscriber via
+<code>go fn(event)</code> with NO recover() → a panicking subscriber
+crashes the process (the Poller publishes to these); fixed with a
+per-subscriber recover guard. Anti-bluff proven. <strong>Remaining
+(long-tail):</strong> internal/llm provider endpoints (need live
+LLM/Ollama), low-concurrency utility packages
+(version/hardware/adapters/fix/logo — minimal concurrent state).
+internal/persistence confirmed NO live-DB path (file-based, covered
+batch 10). <strong>Session total: 31 real production bugs
+fixed.</strong> <strong>HXC-014a</strong> (empty TestProviderStress
+stub) already FIXED (f464adb0). <strong>Operator decision
+deferred:</strong> promoting <code>tests/stresschaos/</code> into the
+constitution submodule for cross-project reuse (triggers §11.4.26
+cross-project workflow) — interim home is project-local.</p>
 <hr />
 <h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
 parity (§11.4.81)</h2>

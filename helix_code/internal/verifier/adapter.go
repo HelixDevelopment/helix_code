@@ -320,11 +320,21 @@ func (ep *EventPublisher) Subscribe(fn func(ChangeEvent)) {
 }
 
 // Publish emits a change event to all subscribers.
+//
+// Each subscriber runs in its own goroutine and is wrapped in a recover() guard:
+// a panic in one subscriber callback (e.g. a faulty third-party handler) must not
+// crash the process or starve sibling subscribers. A panicking subscriber is
+// isolated and dropped for that event; healthy subscribers still receive it.
 func (ep *EventPublisher) Publish(event ChangeEvent) error {
 	ep.mu.RLock()
 	defer ep.mu.RUnlock()
 	for _, fn := range ep.subscribers {
-		go fn(event)
+		go func(handler func(ChangeEvent)) {
+			defer func() {
+				_ = recover() // isolate a panicking subscriber from the process/siblings
+			}()
+			handler(event)
+		}(fn)
 	}
 	return nil
 }

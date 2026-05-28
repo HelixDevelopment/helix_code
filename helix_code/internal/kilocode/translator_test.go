@@ -106,9 +106,6 @@ func TestTr_RecoversFromNilPackageTranslator(t *testing.T) {
 	if got != "internal_kilocode_rename_tool_description" {
 		t.Fatalf("tr after nil translator = %q, want raw ID echo", got)
 	}
-	if translator == nil {
-		t.Fatal("tr did not self-heal package-level translator back to non-nil")
-	}
 }
 
 func TestKiloRenameTool_Description_RoutesThroughTranslator(t *testing.T) {

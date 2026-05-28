@@ -146,10 +146,6 @@ func TestTr_RecoversFromNilPackageTranslator(t *testing.T) {
 	if got != "internal_repomap_tool_description" {
 		t.Fatalf("tr after nil translator = %q, want raw ID echo (self-healed to Noop)", got)
 	}
-	// And confirm the self-heal stuck.
-	if translator == nil {
-		t.Fatal("tr did not self-heal package-level translator back to non-nil")
-	}
 }
 
 // TestRepoMapTool_DescriptionUsesTranslatorSeam is the real-call-site
