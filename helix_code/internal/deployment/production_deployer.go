@@ -1023,8 +1023,18 @@ func (pd *ProductionDeployer) addNotification(eventType, message, recipient stri
 		Status:    "sent",
 	}
 
+	// HXC-014 §11.4.85 data-race fix: addNotification is invoked from every
+	// deployment phase (and is reachable concurrently — e.g. failDeployment ->
+	// triggerRollback while a parallel goroutine also notifies). The shared
+	// pd.status.Notifications slice append + pd.status.Metrics.Notifications
+	// increment were previously performed with no synchronisation despite the
+	// struct already declaring pd.mutex for exactly this purpose, producing a
+	// data race detected under -race (production_deployer.go:1026-1027).
+	// Guard the shared-state mutation with the existing RWMutex.
+	pd.mutex.Lock()
 	pd.status.Notifications = append(pd.status.Notifications, event)
 	pd.status.Metrics.Notifications++
+	pd.mutex.Unlock()
 
 	log.Printf("📢 Notification: %s - %s", eventType, message)
 }

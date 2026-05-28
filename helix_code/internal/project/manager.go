@@ -157,11 +157,31 @@ func (m *Manager) SetActiveProject(ctx context.Context, id string) error {
 	return nil
 }
 
-// GetActiveProject returns the currently active project
+// GetActiveProject returns the currently active project.
+//
+// The fast path (cached m.activeProject set) reads under a shared RLock. The
+// lazy-scan path MUTATES m.activeProject, so it MUST run under the exclusive
+// write Lock — assigning a shared field under a read lock is a data race when
+// two readers reach it concurrently (sync.RWMutex permits parallel RLock
+// holders). We take RLock for the fast read, drop it, then re-acquire the write
+// Lock and re-check before scanning so the lazy assignment is properly
+// serialised against SetActiveProject / DeleteProject and against other
+// GetActiveProject callers.
 func (m *Manager) GetActiveProject(ctx context.Context) (*Project, error) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
+	if m.activeProject != nil {
+		ap := m.activeProject
+		m.mu.RUnlock()
+		return ap, nil
+	}
+	m.mu.RUnlock()
 
+	// Lazy-scan path mutates shared state — take the exclusive write lock.
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Re-check under the write lock: another goroutine may have set the active
+	// project (or it may have been set since we dropped the read lock).
 	if m.activeProject != nil {
 		return m.activeProject, nil
 	}

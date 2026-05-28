@@ -1374,13 +1374,62 @@ final state builds + passes -race, conductor re-verified.)
 internal/focus, config, persistence all CONST-046-compliant. Each
 anti-bluff-proven: revert → panic / deadlock / DATA RACE → restore →
 PASS. <strong>28 in-process targets now covered; 25 real production bugs
-fixed this session.</strong> <strong>Remaining (infra batch +
-long-tail):</strong> internal/redis + internal/database +
-internal/persistence (real PG/Redis via
-<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
-load), internal/llm provider endpoints — all need the docker-compose
-stack up; then the long-tail ~40-package sweep. Effort remaining
-multi-week incremental. <strong>HXC-014a</strong> (empty
+fixed this session.</strong> <strong>Batch 11 DONE (2026-05-28,
+subagent-driven §11.4.70):</strong> internal/auth + internal/deployment
++ internal/project. <strong>4 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1) <strong>SECURITY</strong>
+<code>internal/auth/auth.go</code> VerifyJWT — unchecked type assertions
+<code>claims["username"].(string)</code>/<code>claims["email"].(string)</code>;
+a validly-signed token carrying a missing/numeric/null username/email
+claim PANICS the process (crash-on-untrusted-input DoS — a single forged
+request). Fixed with comma-ok assertions → ErrTokenInvalid. (2+3)
+<code>internal/deployment/production_deployer.go</code> addNotification
+appended to shared status with a declared-but-UNUSED mutex (data race) +
+<code>deployment/translator.go</code> package-var race; fixed with the
+mutex + translatorMu. (4) <code>internal/project/manager.go</code>
+GetActiveProject wrote m.activeProject under only RLock (lazy-scan write
+under read-lock) → data race; fixed with exclusive Lock + re-check. Each
+anti-bluff-proven: revert → panic / DATA RACE → restore → PASS.
+<strong>31 in-process targets now covered; 29 real production bugs fixed
+this session.</strong></p>
+<h2
+id="hxc-014b-systemic-unguarded-i18n-translator.go-data-race-panic-crash-cross-package">HXC-014b
+— Systemic unguarded i18n translator.go data-race + panic-crash
+(cross-package)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Discovered:</strong> 2026-05-28 (HXC-014 batch 8+11 — same
+defect found independently in internal/security AND internal/deployment
+translator.go) <strong>Severity:</strong> Medium (latent: requires
+SetTranslator() concurrent with tr(); existing -race tests pass because
+SetTranslator is boot-only in practice) <strong>Scope:</strong> ~50
+packages under <code>helix_code/internal/*/translator.go</code> share a
+copy-pasted CONST-046 resolver seam with (a) an UNGUARDED package-level
+<code>var translator &lt;pkg&gt;i18n.Translator</code> —
+<code>SetTranslator</code> writes it + <code>tr()</code> reads it (and
+self-heals <code>translator = Noop{}</code> on the read path, a write)
+with NO mutex → data race if SetTranslator is ever called concurrently
+with tr(); (b) NO recover() around <code>translator.T()</code> → a
+panicking injected/buggy Translator crashes the emitting goroutine
+(process-wide). The FIX PATTERN is already proven in
+<code>internal/security/translator.go</code> +
+<code>internal/deployment/translator.go</code>: add
+<code>translatorMu sync.RWMutex</code> (Lock in SetTranslator,
+RLock-snapshot in tr) + a <code>recover()</code> in tr degrading to the
+message ID (named return). Mechanical, identical per file; ~50 files
+remain
+(event/memory/context/rules/repomap/discovery/tools/workflow/hooks/agent/monitoring/commands/mcp/notification/performance/providers/llm/editor/template/cognee/focus/config/persistence/auth/project
++ ~25 more
+incl. approval/clarification/planner/plantree/plugins/quality/redis/render/roocode/secrets/session/verifier/voice/worker/workspace/etc.).
+NOTE: several of those packages’ OTHER concurrency bugs were already
+fixed in batches 3-11, but most still carry the unguarded translator
+seam. <strong>Best fixed as a single carefully-verified mechanical sweep
+(build + -race after) rather than rushed — tracked separately so it is
+not lost.</strong> <strong>Remaining (infra batch + long-tail):</strong>
+internal/redis + internal/database + internal/persistence (real PG/Redis
+via <code>make test-infra-up</code>), internal/server (HTTP/WS
+DDoS-class load), internal/llm provider endpoints — all need the
+docker-compose stack up; then the long-tail ~40-package sweep. Effort
+remaining multi-week incremental. <strong>HXC-014a</strong> (empty
 TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
 decision deferred:</strong> promoting <code>tests/stresschaos/</code>
 into the constitution submodule for cross-project reuse (triggers

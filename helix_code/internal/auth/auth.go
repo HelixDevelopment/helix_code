@@ -296,12 +296,26 @@ func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
 			return nil, ErrTokenInvalid
 		}
 
+		// Extract the remaining claims with checked type assertions. A
+		// validly-signed token may still carry a missing / non-string
+		// username or email claim (forged or corrupted); an unchecked
+		// assertion here would PANIC on attacker-controlled input and crash
+		// the process. Reject such tokens cleanly instead.
+		username, ok := claims["username"].(string)
+		if !ok {
+			return nil, ErrTokenInvalid
+		}
+		email, ok := claims["email"].(string)
+		if !ok {
+			return nil, ErrTokenInvalid
+		}
+
 		// Return minimal user object from JWT claims
 		// For complete user data, use VerifyJWTWithDB
 		return &User{
 			ID:       userID,
-			Username: claims["username"].(string),
-			Email:    claims["email"].(string),
+			Username: username,
+			Email:    email,
 		}, nil
 	}
 

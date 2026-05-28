@@ -9,6 +9,7 @@ package deployment
 
 import (
 	"context"
+	"sync"
 
 	deploymenti18n "dev.helix.code/internal/deployment/i18n"
 )
@@ -23,13 +24,25 @@ import (
 // migration minimally invasive — ProductionDeployer methods are
 // called from many sites and threading a struct-scoped translator
 // would inflate the diff without behavioural benefit.
-var translator deploymenti18n.Translator = deploymenti18n.NoopTranslator{}
+//
+// HXC-014 §11.4.85 data-race fix: SetTranslator (a write) can be called
+// from boot/reconfiguration while tr() (a read) runs concurrently from
+// deployment phases on other goroutines. The package-level var was
+// previously read+written with no synchronisation, producing a data race
+// detected under -race (translator.go:34 write vs :46 read). Guard every
+// access with a RWMutex so the DI seam is concurrency-safe.
+var (
+	translatorMu sync.RWMutex
+	translator   deploymenti18n.Translator = deploymenti18n.NoopTranslator{}
+)
 
 // SetTranslator wires a CONST-046-compliant Translator. Passing nil
 // resets to i18n.NoopTranslator{} (loud echo) — never silently
 // disables translation lookup (which would be a §11.4 PASS-bluff at
 // the i18n injection layer).
 func SetTranslator(tr deploymenti18n.Translator) {
+	translatorMu.Lock()
+	defer translatorMu.Unlock()
 	if tr == nil {
 		translator = deploymenti18n.NoopTranslator{}
 		return
@@ -43,10 +56,19 @@ func SetTranslator(tr deploymenti18n.Translator) {
 // (matching NoopTranslator behaviour) so production output remains
 // loud + obvious instead of silently empty.
 func tr(ctx context.Context, msgID string, data map[string]any) string {
-	if translator == nil {
-		translator = deploymenti18n.NoopTranslator{}
+	translatorMu.RLock()
+	cur := translator
+	translatorMu.RUnlock()
+	if cur == nil {
+		// Repair the nil seam under the write lock, then re-read.
+		translatorMu.Lock()
+		if translator == nil {
+			translator = deploymenti18n.NoopTranslator{}
+		}
+		cur = translator
+		translatorMu.Unlock()
 	}
-	out, err := translator.T(ctx, msgID, data)
+	out, err := cur.T(ctx, msgID, data)
 	if err != nil || out == "" {
 		return msgID
 	}
