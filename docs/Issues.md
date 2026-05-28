@@ -332,11 +332,14 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ## HXC-014 — Stress + chaos test coverage (§11.4.85)
 
-**Status:** Queued
+**Status:** In progress
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
-**Scope:** §11.4.85 requires every fix/improvement to ship stress (sustained-load N≥100/≥30s p50/p95/p99 + concurrency N≥10 + boundary) + chaos (process-death/network-fault/input-corruption/resource-exhaustion/state-corruption) suites with captured evidence. Gap: zero dedicated stress/chaos files repo-wide; no `stress_chaos.sh` helper. First targets: worker pool, llm/load_balancer, task, session, redis+database. Sub-defect **HXC-014a (empty `TestProviderStress` stub bluff) already FIXED in commit f464adb0** (now honest SKIP via stressProvider). This item tracks the full reusable suite. Effort: foundation+top-5 ≈7-8 eng-days.
+**Scope:** §11.4.85 requires every fix/improvement to ship stress (sustained-load N≥100/≥30s p50/p95/p99 + concurrency N≥10 + boundary) + chaos (process-death/network-fault/input-corruption/resource-exhaustion/state-corruption) suites with captured evidence.
+**Batch 1 DONE (2026-05-28, commits 76586014 + a9f883c6):** Go-native helper `helix_code/tests/stresschaos/` (RunSustainedLoad p50/p95/p99→latency.json; RunConcurrent ≥10 goroutines + deadlock/leak guards; ChaosKill/CorruptInput/ResourcePressure injectors ≤128MB §12.6-safe; evidence→qa-results/ gitignored CONST-053) + 7 paired §1.1 meta-tests proving the harness can't bluff (deadlock/leak/error-rate/below-floor/panic all DETECTED). First 2 targets done: internal/worker + internal/llm/load_balancer under -race. **The chaos tests SURFACED + FIXED 2 REAL production bugs:** (1) WorkerPool.AssignTask RWMutex-reentrancy deadlock (double-RLock), (2) GetPoolStats data race on PoolWorker.Status. `make stress-chaos` + `make stress-chaos-meta` added. Conductor independently re-ran meta-tests → PASS.
+**Remaining (batch 2+):** internal/task, internal/session, internal/redis + internal/database (network-fault/FD-exhaustion — needs `make test-infra-up` real PG+Redis); then the long-tail ~40-package sweep. Effort remaining multi-week incremental.
+**HXC-014a** (empty TestProviderStress stub) already FIXED (f464adb0). **Operator decision deferred:** promoting `tests/stresschaos/` into the constitution submodule for cross-project reuse (triggers §11.4.26 cross-project workflow) — interim home is project-local.
 
 ---
 
