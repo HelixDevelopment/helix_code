@@ -40,15 +40,16 @@ func NewManager() *Manager {
 // Register registers a template
 func (m *Manager) Register(template *Template) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	// Validate template
 	if err := template.Validate(); err != nil {
+		m.mu.Unlock()
 		return err
 	}
 
 	// Check for duplicate name
 	if _, exists := m.byName[template.Name]; exists {
+		m.mu.Unlock()
 		return errors.New(tr(stdctx.Background(), "internal_template_manager_duplicate_name", map[string]any{"Name": template.Name}))
 	}
 
@@ -62,10 +63,14 @@ func (m *Manager) Register(template *Template) error {
 	}
 	m.byType[template.Type] = append(m.byType[template.Type], template)
 
-	// Trigger callbacks
-	for _, callback := range m.onCreate {
-		callback(template)
-	}
+	// Snapshot the callbacks under the lock, release the lock, then fire them.
+	// Firing outside the lock means a callback that re-enters the manager will
+	// not deadlock on the held write lock; fireCallbacks isolates each callback's
+	// panic so one bad callback cannot crash the manager or starve its peers.
+	callbacks := snapshotCallbacks(m.onCreate)
+	m.mu.Unlock()
+
+	fireCallbacks(callbacks, template)
 
 	return nil
 }
@@ -128,10 +133,10 @@ func (m *Manager) GetAll() []*Template {
 // Update updates a template
 func (m *Manager) Update(id string, updater func(*Template)) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	template, exists := m.templates[id]
 	if !exists {
+		m.mu.Unlock()
 		return errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": id}))
 	}
 
@@ -140,13 +145,16 @@ func (m *Manager) Update(id string, updater func(*Template)) error {
 
 	// Validate
 	if err := template.Validate(); err != nil {
+		m.mu.Unlock()
 		return err
 	}
 
-	// Trigger callbacks
-	for _, callback := range m.onUpdate {
-		callback(template)
-	}
+	// Snapshot + fire callbacks outside the lock (see Register) so a re-entrant
+	// callback cannot deadlock and a panicking callback cannot crash the manager.
+	callbacks := snapshotCallbacks(m.onUpdate)
+	m.mu.Unlock()
+
+	fireCallbacks(callbacks, template)
 
 	return nil
 }
@@ -154,10 +162,10 @@ func (m *Manager) Update(id string, updater func(*Template)) error {
 // Delete deletes a template
 func (m *Manager) Delete(id string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	template, exists := m.templates[id]
 	if !exists {
+		m.mu.Unlock()
 		return errors.New(tr(stdctx.Background(), "internal_template_manager_not_found", map[string]any{"ID": id}))
 	}
 
@@ -175,10 +183,12 @@ func (m *Manager) Delete(id string) error {
 		}
 	}
 
-	// Trigger callbacks
-	for _, callback := range m.onDelete {
-		callback(template)
-	}
+	// Snapshot + fire callbacks outside the lock (see Register) so a re-entrant
+	// callback cannot deadlock and a panicking callback cannot crash the manager.
+	callbacks := snapshotCallbacks(m.onDelete)
+	m.mu.Unlock()
+
+	fireCallbacks(callbacks, template)
 
 	return nil
 }
@@ -397,19 +407,52 @@ func (m *Manager) RegisterBuiltinTemplates() error {
 	return nil
 }
 
-// OnCreate registers a callback for template creation
+// OnCreate registers a callback for template creation. The mutation is guarded
+// by the same lock that protects callback iteration in Register/Update/Delete,
+// so concurrent registration and dispatch cannot race.
 func (m *Manager) OnCreate(callback TemplateCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onCreate = append(m.onCreate, callback)
 }
 
-// OnUpdate registers a callback for template updates
+// OnUpdate registers a callback for template updates. Lock-guarded — see OnCreate.
 func (m *Manager) OnUpdate(callback TemplateCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onUpdate = append(m.onUpdate, callback)
 }
 
-// OnDelete registers a callback for template deletion
+// OnDelete registers a callback for template deletion. Lock-guarded — see OnCreate.
 func (m *Manager) OnDelete(callback TemplateCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onDelete = append(m.onDelete, callback)
+}
+
+// snapshotCallbacks copies a callback slice so it can be invoked after the
+// manager lock is released without being mutated by a concurrent On* call.
+func snapshotCallbacks(src []TemplateCallback) []TemplateCallback {
+	out := make([]TemplateCallback, len(src))
+	copy(out, src)
+	return out
+}
+
+// fireCallbacks invokes each callback with the given template, isolating every
+// callback's panic so a single misbehaving callback can neither crash the
+// process (callbacks may run on goroutines with no outer recover) nor starve its
+// peers nor leave the manager in a broken state. A failing callback is contained
+// here rather than propagated to the manager's caller.
+func fireCallbacks(callbacks []TemplateCallback, template *Template) {
+	for _, callback := range callbacks {
+		if callback == nil {
+			continue
+		}
+		func(cb TemplateCallback) {
+			defer func() { _ = recover() }()
+			cb(template)
+		}(callback)
+	}
 }
 
 // GetStatistics returns manager statistics

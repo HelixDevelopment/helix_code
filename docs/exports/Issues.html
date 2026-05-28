@@ -1323,8 +1323,27 @@ gate. Full internal/llm package now PASSES under -race with NO skip
 (previously the nil-manager test had to be skipped). Each fix
 anti-bluff-proven: revert → DATA RACE / 15s-deadlock-timeout / SIGSEGV /
 FATAL → restore → PASS. <strong>22 in-process targets now covered; 18
-real production bugs fixed this session.</strong> <strong>Remaining
-(infra batch + long-tail):</strong> internal/redis + internal/database +
+real production bugs fixed this session.</strong> <strong>Batch 9 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/editor +
+internal/template + internal/cognee (3 parallel disjoint-scope
+subagents). <strong>2 MORE REAL production bugs SURFACED + FIXED in
+internal/template/manager.go:</strong> Register/Update/Delete invoked
+user OnCreate/OnUpdate/OnDelete callbacks (a) with no recover() → a
+panicking callback crashes the process (esp. when Register runs on a
+goroutine), and (b) the On* registrars appended to the callback slices
+with NO lock while the trigger paths iterated them under lock → data
+race. Fix: <code>snapshotCallbacks</code> under lock +
+<code>fireCallbacks</code> panic-isolated AFTER unlock (also prevents
+re-entrant-callback deadlock); On* registrars now lock-guarded.
+internal/editor
+(CodeEditor/WholeEditor/SearchReplaceEditor/LineEditor/DiffEditor over
+real t.TempDir files) and internal/cognee
+(ServiceCache/ServiceStatistics/event-handler fan-out in-process;
+network Client paths honestly out of scope) had no bugs, full coverage
+added. Each anti-bluff-proven: revert → panic / DATA RACE → restore →
+PASS. <strong>25 in-process targets now covered; 20 real production bugs
+fixed this session.</strong> <strong>Remaining (infra batch +
+long-tail):</strong> internal/redis + internal/database +
 internal/persistence (real PG/Redis via
 <code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
 load), internal/llm provider endpoints — all need the docker-compose
