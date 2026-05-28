@@ -391,13 +391,23 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-022 — test_bank platform + integration packages do not compile (pre-existing)
+## HXC-022 — test_bank platform + integration packages do not compile (pre-existing) — CLOSED (→ Fixed.md)
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 **Type:** Bug
 **Discovered:** 2026-05-28 (anti-bluff sweep during HXC-021 fix)
 **Discovered-By:** AI (captured: `go build ./platform/... ./integration/...` in helix_code/tests/e2e/test_bank)
-**Defect:** `dev.helix.code/tests/e2e/test-bank/platform` + `.../integration` fail to compile — `declared and not used` for ~11 vars (certID, planID, profileID, quotaID, restoreID, exportID, available, cpuUsage, memoryUsage, quota, current) in half-written test functions (platform L1169/1704/2122; integration L2034-2568). An uncompilable test-bank package can never run — a §11.4 / §11.4.1 anti-bluff defect (suite reports green while these never execute). Also: test_bank root dir has a pre-existing package-name collision (`testbank` loader.go vs `performance` performance_security_tests.go in one dir). Fix: complete each half-written test with a real assertion OR honest SKIP (NEVER `_ =` to silence — that hides the incomplete test); resolve the root-dir package collision. Blocks runtime-verification of the HXC-021 platform/integration honest-skips.
+**Closure (2026-05-28, commit 02b3081c):** all ~11 named `declared and not used` half-written stubs COMPLETED with real assertions (created-resource IDs → assert non-empty; metric values → assert non-nil; 2 vestigial unsent request bodies removed); root-dir package collision resolved by `git mv performance_security_tests.go → performance/` subpackage; un-masked pre-existing core/ defects (duplicate `GetCoreTests`, unused imports) fixed too. `go build ./...` exit 0 (whole module), `go vet ./...` clean — independently re-verified. HXC-021 runtime-verified through the now-compiling banks: platform SKIP=3 (honest "not running on macOS/Windows/ARM"), integration SKIP=2 (honest "Ollama not reachable"/"OPENAI_API_KEY not configured"), no fake PASS/green-empty. Section retained as a migration tombstone per §11.4.19.
+
+---
+
+## HXC-023 — ~57 `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank
+
+**Status:** Queued
+**Type:** Bug
+**Discovered:** 2026-05-28 (surfaced while fixing HXC-022)
+**Discovered-By:** AI (captured: 57 hits via `grep -rn 'Assert(true\|AssertTrue(true' helix_code/tests/e2e/test_bank` minus the legitimate skip/Running-on/present cases)
+**Defect:** beyond the HXC-021 fake-skips (fixed) and HXC-022 stubs (fixed), ~57 endpoint-existence / auth / capability branches in the e2e test banks assert a hardcoded `true` — i.e. they report PASS without exercising the behaviour (§11.4 / §11.4.1 PASS-bluff). These were left untouched by HXC-021/022 (those targeted the named compile errors + skip-branches only). Fix: per branch, replace `Assert(true, "...")` with a real assertion on captured runtime evidence (response status/body/state delta), OR an honest SKIP when the precondition is genuinely absent (per §11.4.3) — NEVER a hardcoded true. This is a larger anti-bluff sweep across the test banks; batch it. Composes with §11.4.69 (universal sink-side positive evidence).
 
 ---
 
