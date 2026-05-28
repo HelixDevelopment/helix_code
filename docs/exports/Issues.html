@@ -1363,13 +1363,50 @@ cross-project workflow) — interim home is project-local.</p>
 <hr />
 <h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
 parity (§11.4.81)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-28 (constitution pull)
-<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.81
-requires per-OS equivalents (runtime dispatch) for platform-specific
-primitives + honest kernel-gap citations. Gaps: shell scripts rarely
-uname-dispatch, no CM-CROSS-PLATFORM-PARITY gate, no supported-platforms
-manifest, shell/sandbox.go rlimits a never-applied stub. Sub-defect
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Closure (2026-05-28, subagent-driven
+§11.4.70):</strong> supported-platforms manifest
+<code>docs/platforms/supported_platforms.yaml</code> (+README) declaring
+linux/macos/windows host-shell targets +
+ios/android/aurora_os/harmony_os cross-compile (macos/windows
+<code>ci_test_hardware: false</code> — honest, no hardware enrolled).
+<code>scripts/gates/cross_platform_parity_gate.sh</code>
+(CM-CROSS-PLATFORM-PARITY) scans for <code>case &quot;$(uname -s)&quot;</code>
+dispatch + asserts no multi-platform script silently drops a manifest
+platform without a <code># PARITY-GAP:</code> honest-kernel-gap
+citation; wired into the CONST-055 sweep as <strong>G10</strong> (PASS).
+Real finding caught+fixed: <code>scripts/install.sh</code> did
+linux+darwin dispatch but silently dropped Windows_NT → added honest gap
+citation. Paired-mutation meta-test
+<code>scripts/tests/cross_platform_parity_meta_test.sh</code> (3
+assertions: missing-Darwin bluff FAILs → add-branch PASS →
+honest-gap-citation PASS), exit 0. <strong>Doc-fix done:</strong> root
+CLAUDE.md §3.2.1 said the inner module is at
+<code>helix_code/helix_code/</code> (nonexistent —
+<code>test -d helix_code/helix_code</code> ABSENT) + mislabelled
+“submodule” — corrected to <code>helix_code/</code> “tracked
+subdirectory” with go.mod evidence inline (inner
+<code>module dev.helix.code</code> go 1.26 at helix_code/go.mod; thin
+root go.mod go 1.25.2). <strong>sandbox.go rlimit re-assessed — NOT the
+“never-applied stub” the original scope claimed:</strong>
+<code>internal/tools/sandbox/native_backend.go</code> (linux) applies
+real <code>syscall.Setrlimit(RLIMIT_AS)</code> (cgroup-v2 preferred,
+rlimit fallback); <code>native_backend_other.go</code> (!linux) is an
+HONEST fail-closed stub (returns “unavailable on non-Linux, deferred to
+F14.5”, not a silent no-op). A real per-OS impl (macOS
+Seatbelt+RLIMIT_CPU/SIGXCPU proxy per the §11.4.81(C) XNU-RLIMIT_AS
+kernel gap; Windows Job Object) is spec-deferred to F14.5 — recommend a
+dedicated F14.5 ticket. bash -n clean. <strong>Operator-gated remainder
+(honest OPERATOR-BLOCKED):</strong> actually running per-OS test
+branches on real macOS/Windows/mobile hardware needs that hardware
+enrolled (none currently); the gate + manifest + honest-gap discipline
+are the enforceable core and are complete. <strong>Discovered:</strong>
+2026-05-28 (constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.81 requires per-OS equivalents (runtime
+dispatch) for platform-specific primitives + honest kernel-gap
+citations. Gaps: shell scripts rarely uname-dispatch, no
+CM-CROSS-PLATFORM-PARITY gate, no supported-platforms manifest,
+shell/sandbox.go rlimits a never-applied stub. Sub-defect
 <strong>HXC-015a (7 platform <code>Assert(true,&quot;...skipped&quot;)</code>
 fake-skips) already FIXED in commit f464adb0</strong> (honest v.Skip on
 runtime.GOOS). This item tracks the remaining parity gate + manifest +

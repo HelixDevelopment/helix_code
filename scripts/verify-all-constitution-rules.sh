@@ -393,6 +393,20 @@ if want_gate G9; then
 fi
 
 # ---------------------------------------------------------------------------
+# G10 — §11.4.81 cross-platform parity (HXC-015)
+# ---------------------------------------------------------------------------
+if want_gate G10; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G10 — §11.4.81 cross-platform parity (HXC-015)"
+    if bash "$ROOT/scripts/gates/cross_platform_parity_gate.sh" >/tmp/g10-cpp.out 2>&1; then
+        gate_pass G10 "no multi-platform script drops a manifest platform without honest-gap citation"
+    else
+        gate_fail G10 "uname-dispatch script(s) omit a manifest platform (see /tmp/g10-cpp.out)" \
+            "$(tail -5 /tmp/g10-cpp.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo

@@ -145,10 +145,15 @@ helix_code/                                # ← repo root (governance + submodu
 └── cli_agents_resources/ ← reference resources (Awesome-AI-Agents, Cheshire-Cat-Ai, …) — formerly Example_Resources/
 ```
 
-#### 3.2.1 Inner Go application — `helix_code/` submodule
+#### 3.2.1 Inner Go application — `helix_code/` tracked subdirectory
+
+(NOT a submodule — see §3.2 line for `helix_code/`. The inner Go module lives
+one level down from the meta-repo root, at `<repo-root>/helix_code/`, whose
+`go.mod` declares `module dev.helix.code` on `go 1.26`. The meta-repo root has
+its own thin `go.mod` — `module dev.helix.code` on `go 1.25.2`.)
 
 ```
-helix_code/helix_code/                      # module dev.helix.code, go 1.26
+helix_code/                                 # module dev.helix.code, go 1.26 (inner app)
 ├── Makefile                              # real build/test targets (see §3.4)
 ├── cmd/
 │   ├── server/                           # HTTP server entry → bin/helixcode

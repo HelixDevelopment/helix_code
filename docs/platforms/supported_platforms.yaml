@@ -1,0 +1,87 @@
+# supported_platforms.yaml — HelixCode supported-platform manifest
+# Constitution §11.4.81 (Cross-Platform-Parity Mandate). Tracker item HXC-015.
+#
+# This file is the SINGLE SOURCE OF TRUTH for which OS targets HelixCode
+# supports. The CM-CROSS-PLATFORM-PARITY gate
+# (scripts/gates/cross_platform_parity_gate.sh) reads this manifest to know
+# which `uname -s` branches a multi-platform-dispatching shell script must
+# cover (or honestly cite a kernel gap for).
+#
+# Evidence for this list (derived 2026-05-28, NOT invented):
+#   - helix_code/Makefile platform targets:
+#       desktop-linux  (GOOS=linux  GOARCH=amd64)            line ~544
+#       desktop-macos  (GOOS=darwin GOARCH=amd64 + arm64)    line ~551
+#       desktop-windows(GOOS=windows GOARCH=amd64)           line ~558
+#       mobile-ios     (gomobile bind -target=ios)           line ~573
+#       mobile-android (gomobile bind -target=android)       line ~578
+#       aurora-os      (./applications/aurora_os)            line ~587
+#       harmony-os     (./applications/harmony_os)           line ~592
+#   - helix_code/applications/ subdirs:
+#       android/ aurora_os/ desktop/ harmony_os/ ios/ terminal_ui/
+#   - runtime.GOOS dispatch in helix_code/internal/{hardware,deployment,...}
+#
+# uname_s values: the string `uname -s` prints on that platform. Mobile and
+# embedded targets (iOS/Android/Aurora/Harmony) are CROSS-COMPILED FROM a
+# desktop host and do not run host shell scripts, so they have no `uname -s`
+# branch obligation — they are recorded here for completeness with
+# host_shell_target: false. The gate only requires uname-dispatch coverage
+# for platforms with host_shell_target: true.
+
+schema_version: 1
+mandate: "§11.4.81"
+tracker_item: "HXC-015"
+
+platforms:
+  - id: linux
+    uname_s: Linux
+    host_shell_target: true       # host shell scripts run here
+    ci_test_hardware: true        # the canonical dev + CI host
+    notes: "Primary development + CI/test host. cgroup-v2, /proc, systemd, namespaces available."
+
+  - id: macos
+    uname_s: Darwin
+    host_shell_target: true
+    ci_test_hardware: false       # OPERATOR-BLOCKED: no macOS CI hardware enrolled (honest)
+    notes: >-
+      Desktop build target (Intel amd64 + arm64). Some Linux kernel primitives
+      have no equivalent (canonical: XNU does not enforce RLIMIT_AS for
+      unprivileged processes). launchd replaces systemd; Seatbelt replaces
+      namespaces. Per-OS branches REQUIRED; honest kernel-gap citation REQUIRED
+      where no equivalent exists. ci_test_hardware=false means SKIP-with-reason
+      (operator_attended / hardware_not_present) is acceptable for now.
+
+  - id: windows
+    uname_s: Windows_NT
+    # NOTE: MSYS/Git-Bash/Cygwin `uname -s` prints Windows_NT; MINGW*/CYGWIN* are accepted families too.
+    host_shell_target: true
+    ci_test_hardware: false       # OPERATOR-BLOCKED: no Windows CI hardware enrolled (honest)
+    notes: >-
+      Desktop build target (amd64). Windows Job Object replaces cgroup limits;
+      no POSIX namespaces. Host shell only via Git-Bash/MSYS/WSL. Per-OS
+      branches REQUIRED where a script targets Windows; SKIP-with-reason
+      acceptable while no CI hardware is enrolled.
+
+  # ---- cross-compiled, NOT host-shell targets (no uname-dispatch obligation) ----
+  - id: ios
+    uname_s: ""             # cross-compiled from a Darwin host; no host shell of its own
+    host_shell_target: false
+    ci_test_hardware: false
+    notes: "Mobile framework (gomobile bind -target=ios). Built FROM a macOS host."
+
+  - id: android
+    uname_s: ""
+    host_shell_target: false
+    ci_test_hardware: false
+    notes: "Mobile AAR (gomobile bind -target=android). Built FROM linux/macos host."
+
+  - id: aurora_os
+    uname_s: ""
+    host_shell_target: false
+    ci_test_hardware: false
+    notes: "Aurora OS client (applications/aurora_os). Cross-compiled."
+
+  - id: harmony_os
+    uname_s: ""
+    host_shell_target: false
+    ci_test_hardware: false
+    notes: "Harmony OS client (applications/harmony_os). Cross-compiled."

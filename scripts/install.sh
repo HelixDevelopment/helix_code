@@ -5,6 +5,11 @@ REPO="helixcode/helixcode"
 VERSION="${1:-latest}"
 INSTALL_DIR="${HELIXCODE_DIR:-/usr/local/bin}"
 
+# PARITY-GAP: Windows_NT — this POSIX curl|sh installer deliberately supports
+#   only Linux + Darwin (binary tarball into /usr/local/bin). Windows is built
+#   and distributed as a .zip package via the Makefile `windows` target and is
+#   installed by a separate mechanism, not by this shell script — there is no
+#   POSIX-shell install path on native Windows. See §11.4.81 / docs/platforms/.
 detect_os() {
     case "$(uname -s)" in
         Linux)   echo "linux" ;;
