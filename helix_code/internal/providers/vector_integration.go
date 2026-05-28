@@ -28,8 +28,19 @@ type VectorIntegration struct {
 	providers map[string]providers.VectorProvider
 }
 
-// NewVectorIntegration creates a new vector integration instance
+// NewVectorIntegration creates a new vector integration instance.
+//
+// A nil config is defaulted to an empty (provider-less) *VectorConfig — mirroring
+// the sibling NewMemoryIntegration constructor. Without this guard, Initialize
+// dereferences vi.config.DefaultProvider and panics with a nil-pointer crash
+// whenever the caller (e.g. NewAIIntegration with no VectorConfig set) supplies
+// nil — a real in-process crash on the default initialization path.
 func NewVectorIntegration(config *VectorConfig) *VectorIntegration {
+	if config == nil {
+		config = &VectorConfig{
+			Providers: make(map[string]*providers.SingleProviderConfig),
+		}
+	}
 	return &VectorIntegration{
 		registry:  providers.GetRegistry(),
 		logger:    logging.NewLogger(logging.INFO),

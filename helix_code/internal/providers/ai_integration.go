@@ -225,17 +225,18 @@ func NewAIIntegration(config *AIConfig) *AIIntegration {
 // Initialize initializes AI integration
 func (ai *AIIntegration) Initialize(ctx context.Context) error {
 	ai.mu.Lock()
-	defer ai.mu.Unlock()
 
 	ai.logger.Info("Initializing AI integration: default_llm=%s, default_memory=%s, providers_count=%d", ai.config.DefaultLLM, ai.config.DefaultMemory, len(ai.config.Providers))
 
 	// Initialize vector integration
 	if err := ai.vector.Initialize(ctx); err != nil {
+		ai.mu.Unlock()
 		return fmt.Errorf("failed to initialize vector integration: %w", err)
 	}
 
 	// Initialize memory integration
 	if err := ai.memory.Initialize(ctx); err != nil {
+		ai.mu.Unlock()
 		return fmt.Errorf("failed to initialize memory integration: %w", err)
 	}
 
@@ -256,11 +257,25 @@ func (ai *AIIntegration) Initialize(ctx context.Context) error {
 		ai.logger.Info("AI provider created: name=%s, type=%s, model=%s", name, providerConfig.Type, providerConfig.Model)
 	}
 
+	// The provider map is now fully populated. Release the write lock BEFORE
+	// constructing the managers: NewConversationManager calls ai.GetProvider,
+	// which takes ai.mu.RLock(). sync.RWMutex is NOT reentrant, so holding the
+	// write lock across that call self-deadlocks the goroutine (the RLock blocks
+	// forever on the Lock the same goroutine holds). The managers only need the
+	// already-written map, so it is safe to build them outside the critical
+	// section and then store the results under a re-acquired lock.
+	ai.mu.Unlock()
+
 	// Initialize conversation manager
-	ai.conversationMgr = NewConversationManager(ai, ai.config)
+	conversationMgr := NewConversationManager(ai, ai.config)
 
 	// Initialize personality manager
-	ai.personalityMgr = NewPersonalityManager(ai, ai.config)
+	personalityMgr := NewPersonalityManager(ai, ai.config)
+
+	ai.mu.Lock()
+	ai.conversationMgr = conversationMgr
+	ai.personalityMgr = personalityMgr
+	ai.mu.Unlock()
 
 	ai.logger.Info("AI integration initialized successfully")
 	return nil

@@ -1,10 +1,11 @@
 package llm
 
 import (
+	cryptorand "crypto/rand"
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
+	"math/big"
 	"sort"
 	"sync"
 	"time"
@@ -19,6 +20,11 @@ type LoadBalancer struct {
 	mutex           sync.RWMutex
 	stats           *LoadBalancingStats
 	requestCount    int64
+	// cancelStats terminates the collectStats goroutine. Stop() MUST cancel it:
+	// the goroutine started by Start only exits on its context's Done, so a
+	// caller that passed context.Background() would leak the goroutine forever —
+	// and its 10s ticker would keep firing collectPerformanceStats after Stop.
+	cancelStats context.CancelFunc
 }
 
 // LoadBalancingStrategy defines load balancing algorithm
@@ -88,8 +94,12 @@ func (lb *LoadBalancer) Start(ctx context.Context) error {
 
 	log.Println("⚖️ Starting intelligent load balancing...")
 
-	// Start statistics collection
-	go lb.collectStats(ctx)
+	// Start statistics collection under a cancellable child context so Stop()
+	// can terminate the goroutine even when the caller passed a non-cancellable
+	// context (e.g. context.Background()).
+	statsCtx, cancel := context.WithCancel(ctx)
+	lb.cancelStats = cancel
+	go lb.collectStats(statsCtx)
 
 	lb.isRunning = true
 	log.Println("✅ Load balancer started")
@@ -171,6 +181,9 @@ func (lb *LoadBalancer) collectStats(ctx context.Context) {
 
 // collectPerformanceStats collects performance statistics from providers
 func (lb *LoadBalancer) collectPerformanceStats() {
+	if lb.manager == nil {
+		return
+	}
 	status := lb.manager.GetStatus()
 
 	for name, provider := range status {
@@ -301,6 +314,10 @@ func (lb *LoadBalancer) Stop() {
 	lb.mutex.Lock()
 	defer lb.mutex.Unlock()
 
+	if lb.cancelStats != nil {
+		lb.cancelStats()
+		lb.cancelStats = nil
+	}
 	lb.isRunning = false
 	log.Println("⏹️ Load balancer stopped")
 }
@@ -397,10 +414,15 @@ func (ws *WeightedStrategy) SelectProvider(providers []*AutoProvider) *AutoProvi
 	// the type. Tracked as a future enhancement; the present behaviour
 	// is honest random distribution, not a "for now" stub returning
 	// fabricated results.
-	rand.Seed(time.Now().UnixNano())
-	index := rand.Intn(len(providers))
+	// crypto/rand for uniform selection (satisfies CWE-338 gate; also avoids the
+	// deprecated math/rand global Seed). On the (practically impossible) entropy
+	// failure we fall back to the first provider rather than crash.
+	n, err := cryptorand.Int(cryptorand.Reader, big.NewInt(int64(len(providers))))
+	if err != nil {
+		return providers[0]
+	}
 
-	return providers[index]
+	return providers[n.Int64()]
 }
 
 func (ws *WeightedStrategy) GetName() string {

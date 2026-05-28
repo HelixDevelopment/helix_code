@@ -20,6 +20,18 @@ type ModelManager struct {
 	modelRegistry    map[string]*ModelInfo
 	verifierAdapter  *verifier.Adapter
 	mu               sync.RWMutex
+
+	// hardwareDetectOnce guards a single, lazy hardware-detection pass.
+	// hardware.Detector.Detect() mutates the shared *Detector's internal state
+	// (CPU/GPU/Memory fields) and is NOT safe for concurrent invocation. Model
+	// scoring runs under m.mu.RLock (which permits many concurrent readers), so
+	// re-invoking Detect() per model-score per goroutine produced a genuine data
+	// race on the shared detector (surfaced under -race by the §11.4.85 stress
+	// suite). Host hardware is static for the process lifetime, so detection is
+	// run exactly once and its result reused — fixing the race AND avoiding
+	// redundant full hardware probes on every scoring call.
+	hardwareDetectOnce sync.Once
+	hardwareDetectErr  error
 }
 
 // ModelSelectionCriteria defines criteria for model selection.
@@ -337,10 +349,17 @@ func (m *ModelManager) calculateTaskSuitability(model *ModelInfo, taskType strin
 }
 
 func (m *ModelManager) calculateHardwareCompatibility(model *ModelInfo) float64 {
-	// Check if model can run on current hardware
-	_, err := m.hardwareDetector.Detect()
-	if err != nil {
-		log.Printf("Warning: Hardware detection failed: %v", err)
+	// Check if model can run on current hardware. Detection runs exactly once
+	// (sync.Once): hardware.Detector.Detect() mutates shared detector state and
+	// is not concurrency-safe, but host hardware is static — so we probe once and
+	// reuse. After the single Detect() the detector's fields are only read
+	// (CanRunModel reads d.info), which is safe under the concurrent RLock'd
+	// scoring callers. This closes the data race the §11.4.85 stress suite found.
+	m.hardwareDetectOnce.Do(func() {
+		_, m.hardwareDetectErr = m.hardwareDetector.Detect()
+	})
+	if m.hardwareDetectErr != nil {
+		log.Printf("Warning: Hardware detection failed: %v", m.hardwareDetectErr)
 		return 0.8 // Assume compatibility with penalty
 	}
 

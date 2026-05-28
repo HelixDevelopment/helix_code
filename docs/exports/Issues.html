@@ -1290,12 +1290,46 @@ panic/FATAL/DATA RACE → restore → PASS. <strong>19 in-process targets
 now covered; 12 real production bugs fixed this session</strong>
 (+mcp×2, notification, performance in batch 7);
 <code>make stress-chaos</code> extended to all 19, full target PASSES
-under -race. <strong>Remaining (infra batch + long-tail):</strong>
-internal/redis + internal/database + internal/persistence (real PG/Redis
-via <code>make test-infra-up</code>), internal/server (HTTP/WS
-DDoS-class load), internal/llm provider endpoints — all need the
-docker-compose stack up; then the long-tail ~40-package sweep. Effort
-remaining multi-week incremental. <strong>HXC-014a</strong> (empty
+under -race. <strong>Batch 8 DONE (2026-05-28, subagent-driven
+§11.4.70):</strong> internal/security + internal/providers +
+internal/llm-manager (3 parallel disjoint-scope subagents). <strong>6
+MORE REAL production bugs SURFACED + FIXED:</strong> (1+2)
+<code>internal/security/translator.go</code> — package-level
+<code>translator</code> var read by tr() + written by SetTranslator()
+with NO mutex (data race; scans run in background goroutines) + tr()
+called translator.T() with no recover (panicking injected translator
+crashes the scan-worker goroutine); fixed with RWMutex + recover. (3+4)
+<code>internal/providers/ai_integration.go</code> — Initialize held
+ai.mu.Lock() then called
+NewConversationManager→GetProvider→ai.mu.RLock() = non-reentrant
+self-deadlock hanging the process (fixed: release write lock before
+building managers, re-acquire to store) +
+<code>vector_integration.go</code> NewVectorIntegration(nil) left config
+nil → Initialize SIGSEGV (fixed: nil-config default mirroring
+NewMemoryIntegration; codifying-the-crash test assertion corrected). (5)
+<code>internal/llm/model_manager.go:341</code> —
+calculateHardwareCompatibility called hardwareDetector.Detect() (mutates
+detector state) under only RLock → data race across concurrent
+SelectOptimalModel callers; fixed with sync.Once (host hardware static).
+(6) <strong>load_balancer follow-up (conductor-fixed, surfaced by the
+llm subagent):</strong> <code>internal/llm/load_balancer.go</code>
+Stop() never cancelled the collectStats goroutine (leak when Start got
+context.Background()) + collectPerformanceStats deref’d lb.manager with
+no nil-guard → nil-pointer panic after the 10s ticker; fixed with a
+cancelStats CancelFunc cancelled in Stop() + nil-guard. Also resolved
+the file’s pre-existing CWE-338 (math/rand→crypto/rand uniform provider
+selection, dropping the deprecated rand.Seed) flagged by the semgrep
+gate. Full internal/llm package now PASSES under -race with NO skip
+(previously the nil-manager test had to be skipped). Each fix
+anti-bluff-proven: revert → DATA RACE / 15s-deadlock-timeout / SIGSEGV /
+FATAL → restore → PASS. <strong>22 in-process targets now covered; 18
+real production bugs fixed this session.</strong> <strong>Remaining
+(infra batch + long-tail):</strong> internal/redis + internal/database +
+internal/persistence (real PG/Redis via
+<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
+load), internal/llm provider endpoints — all need the docker-compose
+stack up; then the long-tail ~40-package sweep. Effort remaining
+multi-week incremental. <strong>HXC-014a</strong> (empty
 TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
 decision deferred:</strong> promoting <code>tests/stresschaos/</code>
 into the constitution submodule for cross-project reuse (triggers

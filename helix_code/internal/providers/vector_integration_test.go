@@ -34,7 +34,13 @@ func TestNewVectorIntegration_NilConfig(t *testing.T) {
 	vi := NewVectorIntegration(nil)
 
 	require.NotNil(t, vi)
-	assert.Nil(t, vi.config)
+	// A nil config MUST be defaulted to a non-nil, empty *VectorConfig: the prior
+	// behaviour (vi.config left nil) crashed with a nil-pointer dereference the
+	// moment Initialize ran (it reads vi.config.DefaultProvider). Asserting nil
+	// here codified that latent crash, so the assertion is tightened to the
+	// correct, non-crashing state (mirrors NewMemoryIntegration's nil-default).
+	require.NotNil(t, vi.config)
+	assert.NotNil(t, vi.config.Providers)
 	assert.NotNil(t, vi.providers)
 }
 
