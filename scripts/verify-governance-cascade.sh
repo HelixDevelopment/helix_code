@@ -132,8 +132,11 @@ if [ -f "$OWNED_FILE" ]; then
       grep -q "$CONST057_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-057"
       grep -q "$CONST058_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-058"
       grep -q "$CONST059_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-059"
+      # §11.4.32/CONST-055: covenant-114 propagation (§11.4.69 + §11.4.75..97)
+      # folds into the same per-file accounting + $FAILURES counter.
+      check_covenant114_anchors "$ROOT/$sm/$f"
       if [ -z "$missing_anchors" ]; then
-        echo "PASS: $sm/$f (§11.9 + CONST-047..059)"
+        echo "PASS: $sm/$f (§11.9 + CONST-047..059 + §11.4 covenant-114)"
       else
         echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
       fi
