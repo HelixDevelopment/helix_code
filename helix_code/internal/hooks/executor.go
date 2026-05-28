@@ -48,7 +48,7 @@ func (e *Executor) Execute(ctx context.Context, hook *Hook, event *Event) *Execu
 
 	// Check if hook should execute
 	if !hook.ShouldExecute(event) {
-		result.Skip()  // SKIP-OK: #legacy-untriaged
+		result.Skip() // SKIP-OK: #legacy-untriaged
 		e.addResult(result)
 		return result
 	}
@@ -105,7 +105,7 @@ func (e *Executor) ExecuteSync(ctx context.Context, hooks []*Hook, event *Event)
 		result := NewExecutionResult(hook)
 
 		if !hook.ShouldExecute(event) {
-			result.Skip()  // SKIP-OK: #legacy-untriaged
+			result.Skip() // SKIP-OK: #legacy-untriaged
 			e.addResult(result)
 			results = append(results, result)
 			continue
@@ -139,8 +139,11 @@ func (e *Executor) Wait() {
 func (e *Executor) executeSync(ctx context.Context, hook *Hook, event *Event, result *ExecutionResult) {
 	result.Status = StatusRunning
 
-	// Execute handler
-	err := hook.Execute(ctx, event)
+	// Execute handler with panic isolation: a panicking hook handler MUST NOT
+	// propagate out of the executor and crash the caller (or the whole process,
+	// in the async path). A panic is converted to a failed ExecutionResult so
+	// co-hooks still run and the manager stays usable (graceful degradation).
+	err := e.runHandler(ctx, hook, event)
 
 	result.Complete(err)
 	e.addResult(result)
@@ -160,13 +163,26 @@ func (e *Executor) executeAsync(ctx context.Context, hook *Hook, event *Event, r
 
 		result.Status = StatusRunning
 
-		// Execute handler
-		err := hook.Execute(ctx, event)
+		// Execute handler with panic isolation. Without recovery an unrecovered
+		// panic in this goroutine would terminate the entire process — every
+		// other goroutine, including unrelated work, dies with it.
+		err := e.runHandler(ctx, hook, event)
 
 		result.Complete(err)
 		e.addResult(result)
 		e.triggerCallbacks(result)
 	}()
+}
+
+// runHandler invokes the hook handler, isolating any panic as an error so a
+// misbehaving handler degrades gracefully instead of crashing the executor.
+func (e *Executor) runHandler(ctx context.Context, hook *Hook, event *Event) (err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf("hook handler %q panicked: %v", hook.Name, p)
+		}
+	}()
+	return hook.Execute(ctx, event)
 }
 
 // sortByPriority sorts hooks by priority (highest first)

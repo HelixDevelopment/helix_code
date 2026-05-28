@@ -31,6 +31,9 @@ internal_hooks_id_already_registered:
 internal_hooks_not_found:
   other: "hook not found: {{.ID}}"
 
+internal_hooks_nil:
+  other: "hook cannot be nil"
+
 internal_hooks_id_empty:
   other: "hook ID cannot be empty"
 

@@ -1212,13 +1212,37 @@ discovery → strip port-range check → boundary FAIL; all restored
 byte-identical. discovery deliberately targets in-process
 registry/config/JSON-decode paths (not flaky UDP-multicast/net.Listen).
 10 in-process targets now covered; <code>make stress-chaos</code>
-extended to all 10, full target PASSES under -race. <strong>Remaining
-(infra batch + long-tail):</strong> internal/redis + internal/database +
-internal/persistence (real PG/Redis via
-<code>make test-infra-up</code>), internal/server (HTTP/WS DDoS-class
-load), internal/llm provider endpoints — all need the docker-compose
-stack up; then the long-tail ~40-package sweep. Effort remaining
-multi-week incremental. <strong>HXC-014a</strong> (empty
+extended to all 10, full target PASSES under -race. <strong>Batch 5 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/tools +
+internal/workflow + internal/hooks (3 parallel disjoint-scope
+subagents). <strong>3 MORE REAL production bugs SURFACED + FIXED, all in
+internal/hooks:</strong> (1) <code>executor.go</code>
+executeSync/executeAsync called hook.Execute with no recover() — a
+panicking async hook handler crashes the whole process (same bug class
+as the event-bus fix); fixed via <code>Executor.runHandler</code>
+recover-wrapper → graceful degradation. (2) <code>manager.go</code>
+TriggerEvent/TriggerEventAndWait/TriggerEventSync held
+<code>m.mu.RLock()</code> then called <code>GetByType()</code> which
+re-locks the non-reentrant RWMutex — a writer (Register/Unregister)
+queuing between the two RLock acquisitions deadlocks both (same bug
+class as the worker batch-1 deadlock); fixed by dropping the redundant
+outer RLock (GetByType already returns a defensive copy under its own
+lock — verified). (3) <code>Register(nil)</code> nil-pointer panic
+(Validate dereferences nil receiver); fixed with a nil guard +
+CONST-046-compliant i18n key <code>internal_hooks_nil</code>.
+internal/tools (ToolRegistry + real fs/shell tools — command-injection +
+CONST-033 power-mgmt commands confirmed REFUSED by the security gate
+before os/exec) and internal/workflow (state-machine + executor +
+BackgroundManager) had no bugs, full coverage added. Each fix
+anti-bluff-proven: revert → FAIL (panic / 30s deadlock timeout / FATAL)
+→ restore → PASS. 13 in-process targets now covered;
+<code>make stress-chaos</code> extended to all 13, full target PASSES
+under -race. <strong>Remaining (infra batch + long-tail):</strong>
+internal/redis + internal/database + internal/persistence (real PG/Redis
+via <code>make test-infra-up</code>), internal/server (HTTP/WS
+DDoS-class load), internal/llm provider endpoints — all need the
+docker-compose stack up; then the long-tail ~40-package sweep. Effort
+remaining multi-week incremental. <strong>HXC-014a</strong> (empty
 TestProviderStress stub) already FIXED (f464adb0). <strong>Operator
 decision deferred:</strong> promoting <code>tests/stresschaos/</code>
 into the constitution submodule for cross-project reuse (triggers

@@ -50,6 +50,12 @@ func NewManagerWithExecutor(executor *Executor) *Manager {
 // caller-supplied context — Background is the canonical fallback
 // per rounds 146..159.
 func (m *Manager) Register(hook *Hook) error {
+	// Reject a nil hook cleanly — Validate dereferences the receiver, so a nil
+	// pointer would panic and (in a caller without recovery) take down the
+	// process. A registry must degrade gracefully on malformed input.
+	if hook == nil {
+		return errors.New(tr(context.Background(), "internal_hooks_nil", nil))
+	}
 	if err := hook.Validate(); err != nil {
 		return fmt.Errorf("%s: %w", tr(context.Background(), "internal_hooks_invalid_hook", map[string]any{"Err": err.Error()}), err)
 	}
@@ -269,9 +275,12 @@ func (m *Manager) Trigger(ctx context.Context, eventType HookType) []*ExecutionR
 
 // TriggerEvent triggers hooks for an event
 func (m *Manager) TriggerEvent(event *Event) []*ExecutionResult {
-	m.mu.RLock()
+	// NOTE: do NOT wrap GetByType in m.mu.RLock here. GetByType takes
+	// m.mu.RLock itself, and sync.RWMutex is not reentrant: a writer
+	// (Register/Unregister) queuing between the two RLock acquisitions
+	// would deadlock the inner RLock behind the writer, which in turn waits
+	// on the outer RLock. GetByType already returns a safe defensive copy.
 	hooks := m.GetByType(event.Type)
-	m.mu.RUnlock()
 
 	// Execute hooks
 	results := m.executor.ExecuteAll(event.Context, hooks, event)
@@ -292,9 +301,9 @@ func (m *Manager) TriggerAndWait(ctx context.Context, eventType HookType) []*Exe
 
 // TriggerEventAndWait triggers hooks for an event and waits for completion
 func (m *Manager) TriggerEventAndWait(event *Event) []*ExecutionResult {
-	m.mu.RLock()
+	// See TriggerEvent: GetByType locks internally; wrapping it in an outer
+	// RLock is non-reentrant and deadlocks against concurrent writers.
 	hooks := m.GetByType(event.Type)
-	m.mu.RUnlock()
 
 	// Execute hooks and wait
 	results := m.executor.ExecuteAndWait(event.Context, hooks, event)
@@ -315,9 +324,9 @@ func (m *Manager) TriggerSync(ctx context.Context, eventType HookType) []*Execut
 
 // TriggerEventSync triggers hooks for an event synchronously
 func (m *Manager) TriggerEventSync(event *Event) []*ExecutionResult {
-	m.mu.RLock()
+	// See TriggerEvent: GetByType locks internally; wrapping it in an outer
+	// RLock is non-reentrant and deadlocks against concurrent writers.
 	hooks := m.GetByType(event.Type)
-	m.mu.RUnlock()
 
 	// Execute hooks synchronously
 	results := m.executor.ExecuteSync(event.Context, hooks, event)
