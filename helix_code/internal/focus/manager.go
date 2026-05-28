@@ -21,6 +21,26 @@ type Manager struct {
 // ChainCallback is a callback function for chain events
 type ChainCallback func(*Chain)
 
+// invokeCallbacks dispatches every callback for a chain event, isolating each
+// invocation so a panicking callback can neither crash the process nor starve
+// its co-callbacks. Callbacks are caller-supplied code of unknown quality; an
+// unrecovered panic here would propagate out of a manager method that may run
+// inside a held lock, taking down the whole process. Each callback runs under
+// its own recover() so a faulty one degrades to a no-op while the rest still
+// fire. Dispatch happens on a snapshot of the slice so a callback that mutates
+// the registration list (or re-enters the manager) does not race the range.
+func invokeCallbacks(callbacks []ChainCallback, chain *Chain) {
+	for _, callback := range callbacks {
+		if callback == nil {
+			continue
+		}
+		func(cb ChainCallback) {
+			defer func() { _ = recover() }()
+			cb(chain)
+		}(callback)
+	}
+}
+
 // NewManager creates a new focus chain manager
 func NewManager() *Manager {
 	return &Manager{
@@ -43,12 +63,12 @@ func NewManagerWithLimit(maxChains int) *Manager {
 // CreateChain creates a new chain and optionally sets it as active
 func (m *Manager) CreateChain(name string, setActive bool) (*Chain, error) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	// Check if we're at max capacity
 	if m.maxChains > 0 && len(m.chains) >= m.maxChains {
 		// Remove oldest chain
 		if err := m.removeOldest(); err != nil {
+			m.mu.Unlock()
 			return nil, fmt.Errorf("failed to make room for new chain: %w", err)
 		}
 	}
@@ -60,21 +80,23 @@ func (m *Manager) CreateChain(name string, setActive bool) (*Chain, error) {
 		m.activeID = chain.ID
 	}
 
-	// Trigger callbacks
-	for _, callback := range m.onCreate {
-		callback(chain)
-	}
+	// Snapshot callbacks, then release the lock BEFORE dispatching so a callback
+	// may safely re-enter the manager (the RWMutex is non-reentrant) and a slow
+	// callback does not block other operations.
+	callbacks := append([]ChainCallback(nil), m.onCreate...)
+	m.mu.Unlock()
 
+	invokeCallbacks(callbacks, chain)
 	return chain, nil
 }
 
 // CreateChainWithSize creates a new chain with a maximum size
 func (m *Manager) CreateChainWithSize(name string, maxSize int, setActive bool) (*Chain, error) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	if m.maxChains > 0 && len(m.chains) >= m.maxChains {
 		if err := m.removeOldest(); err != nil {
+			m.mu.Unlock()
 			return nil, fmt.Errorf("failed to make room for new chain: %w", err)
 		}
 	}
@@ -86,10 +108,10 @@ func (m *Manager) CreateChainWithSize(name string, maxSize int, setActive bool) 
 		m.activeID = chain.ID
 	}
 
-	for _, callback := range m.onCreate {
-		callback(chain)
-	}
+	callbacks := append([]ChainCallback(nil), m.onCreate...)
+	m.mu.Unlock()
 
+	invokeCallbacks(callbacks, chain)
 	return chain, nil
 }
 
@@ -126,30 +148,29 @@ func (m *Manager) GetActiveChain() (*Chain, error) {
 // SetActiveChain sets the active chain by ID
 func (m *Manager) SetActiveChain(id string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	chain, ok := m.chains[id]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("chain not found: %s", id)
 	}
 
 	m.activeID = id
 
-	// Trigger callbacks
-	for _, callback := range m.onActivate {
-		callback(chain)
-	}
+	callbacks := append([]ChainCallback(nil), m.onActivate...)
+	m.mu.Unlock()
 
+	invokeCallbacks(callbacks, chain)
 	return nil
 }
 
 // DeleteChain removes a chain by ID
 func (m *Manager) DeleteChain(id string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	chain, ok := m.chains[id]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("chain not found: %s", id)
 	}
 
@@ -160,11 +181,10 @@ func (m *Manager) DeleteChain(id string) error {
 		m.activeID = ""
 	}
 
-	// Trigger callbacks
-	for _, callback := range m.onDelete {
-		callback(chain)
-	}
+	callbacks := append([]ChainCallback(nil), m.onDelete...)
+	m.mu.Unlock()
 
+	invokeCallbacks(callbacks, chain)
 	return nil
 }
 

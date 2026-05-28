@@ -3,6 +3,7 @@ package persistence
 import (
 	stdctx "context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -164,7 +165,16 @@ func (s *Store) autoSaveLoop() {
 // SaveAll saves all application state
 func (s *Store) SaveAll() error {
 	s.mu.Lock()
-	defer s.mu.Unlock()
+	// NOTE: callbacks are dispatched AFTER the lock is released (see below) so a
+	// callback may safely re-enter the Store (e.g. register another callback or
+	// read state) without a reentrant-deadlock, and so arbitrary user code never
+	// runs under the write lock. §11.4.85.
+	unlocked := false
+	defer func() {
+		if !unlocked {
+			s.mu.Unlock()
+		}
+	}()
 
 	totalSize := int64(0)
 	totalItems := 0
@@ -216,11 +226,33 @@ func (s *Store) SaveAll() error {
 		Items:     totalItems,
 	}
 
-	for _, callback := range s.onSave {
-		callback(metadata)
+	// Snapshot the callback slice under the lock, then release the lock and
+	// dispatch outside it (reentrancy- and race-safe).
+	callbacks := make([]SaveCallback, len(s.onSave))
+	copy(callbacks, s.onSave)
+	s.mu.Unlock()
+	unlocked = true
+
+	for _, callback := range callbacks {
+		invokeSaveCallback(callback, metadata)
 	}
 
 	return nil
+}
+
+// invokeSaveCallback dispatches a single OnSave callback with panic isolation.
+// A user-supplied callback that panics MUST NOT crash the host process nor leave
+// the Store's write lock leaked (the callbacks run while SaveAll holds s.mu);
+// the recovered panic is logged as a CONST-046-compliant message and swallowed
+// so the remaining callbacks and the save itself complete. §11.4.85(B).
+func invokeSaveCallback(callback SaveCallback, metadata *SaveMetadata) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Print(tr(stdctx.Background(), "internal_persistence_save_callback_panicked",
+				map[string]any{"Panic": fmt.Sprintf("%v", p)}))
+		}
+	}()
+	callback(metadata)
 }
 
 // saveSessions saves all sessions (internal, no lock)
@@ -343,7 +375,13 @@ func (s *Store) saveFocusChains() (int64, int, error) {
 // LoadAll loads all application state
 func (s *Store) LoadAll() error {
 	s.mu.Lock()
-	defer s.mu.Unlock()
+	// Callbacks dispatched after the lock is released — see SaveAll's note.
+	unlocked := false
+	defer func() {
+		if !unlocked {
+			s.mu.Unlock()
+		}
+	}()
 
 	totalSize := int64(0)
 	totalItems := 0
@@ -393,11 +431,30 @@ func (s *Store) LoadAll() error {
 		Items:     totalItems,
 	}
 
-	for _, callback := range s.onLoad {
-		callback(metadata)
+	callbacks := make([]LoadCallback, len(s.onLoad))
+	copy(callbacks, s.onLoad)
+	s.mu.Unlock()
+	unlocked = true
+
+	for _, callback := range callbacks {
+		invokeLoadCallback(callback, metadata)
 	}
 
 	return nil
+}
+
+// invokeLoadCallback dispatches a single OnLoad callback with panic isolation.
+// Mirrors invokeSaveCallback: the callbacks run while LoadAll holds s.mu, so a
+// panicking callback would otherwise crash the process and could leak the lock.
+// §11.4.85(B).
+func invokeLoadCallback(callback LoadCallback, metadata *LoadMetadata) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Print(tr(stdctx.Background(), "internal_persistence_load_callback_panicked",
+				map[string]any{"Panic": fmt.Sprintf("%v", p)}))
+		}
+	}()
+	callback(metadata)
 }
 
 // loadSessions loads all sessions (internal, no lock)
@@ -611,18 +668,26 @@ func (s *Store) GetLastSaveTime() time.Time {
 	return s.lastSaveTime
 }
 
-// OnSave registers a save callback
+// OnSave registers a save callback. Guarded by s.mu so callback registration is
+// race-free against the SaveAll path that reads s.onSave (§11.4.85 — concurrent
+// registration + dispatch was a data race before this lock).
 func (s *Store) OnSave(callback SaveCallback) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.onSave = append(s.onSave, callback)
 }
 
-// OnLoad registers a load callback
+// OnLoad registers a load callback. Guarded by s.mu (see OnSave).
 func (s *Store) OnLoad(callback LoadCallback) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.onLoad = append(s.onLoad, callback)
 }
 
-// OnError registers an error callback
+// OnError registers an error callback. Guarded by s.mu (see OnSave).
 func (s *Store) OnError(callback ErrorCallback) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.onError = append(s.onError, callback)
 }
 
@@ -636,11 +701,32 @@ func (s *Store) Save() error {
 	return s.SaveAll()
 }
 
-// triggerError triggers error callbacks
+// triggerError triggers error callbacks. The callback slice is snapshotted under
+// RLock (race-free against concurrent OnError registration) and dispatched
+// outside the lock so a callback may safely re-enter the Store. §11.4.85.
 func (s *Store) triggerError(err error) {
-	for _, callback := range s.onError {
-		callback(err)
+	s.mu.RLock()
+	callbacks := make([]ErrorCallback, len(s.onError))
+	copy(callbacks, s.onError)
+	s.mu.RUnlock()
+
+	for _, callback := range callbacks {
+		invokeErrorCallback(callback, err)
 	}
+}
+
+// invokeErrorCallback dispatches a single OnError callback with panic isolation.
+// triggerError is called from the autoSaveLoop background goroutine; a panicking
+// error callback there would crash the whole process with no caller to recover
+// it. The recovered panic is logged (CONST-046) and swallowed. §11.4.85(B).
+func invokeErrorCallback(callback ErrorCallback, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Print(tr(stdctx.Background(), "internal_persistence_error_callback_panicked",
+				map[string]any{"Panic": fmt.Sprintf("%v", p)}))
+		}
+	}()
+	callback(err)
 }
 
 // writeAtomic writes data atomically (write to temp, then rename)

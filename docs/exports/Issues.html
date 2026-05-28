@@ -1342,6 +1342,38 @@ real t.TempDir files) and internal/cognee
 network Client paths honestly out of scope) had no bugs, full coverage
 added. Each anti-bluff-proven: revert → panic / DATA RACE → restore →
 PASS. <strong>25 in-process targets now covered; 20 real production bugs
+fixed this session.</strong> <strong>Batch 10 DONE (2026-05-28,
+subagent-driven §11.4.70):</strong> internal/focus + internal/config +
+internal/persistence (3 parallel disjoint-scope subagents). <strong>5
+MORE REAL production bugs SURFACED + FIXED:</strong> (1+2)
+<code>internal/focus/manager.go</code> —
+CreateChain/SetActiveChain/DeleteChain invoked
+onCreate/onActivate/onDelete callbacks in a loop with no recover() WHILE
+holding m.mu.Lock() → panicking callback crashes the process + a
+callback re-entering the Manager deadlocks the non-reentrant RWMutex;
+fixed via invokeCallbacks (recover) +
+snapshot-then-release-lock-before-dispatch. (3)
+<code>internal/config/config.go</code> — ConfigManager had NO mutex at
+all;
+GetConfig/loadConfig/ImportConfig/UpdateConfig/ResetToDefaults/saveConfig
+read+wrote m.config unguarded while the ConfigAPI HTTP handlers drive
+GET /config concurrently with POST /config/reload → data race; fixed
+with RWMutex + copy-on-write UpdateConfig + load/save split into
+public(locking)+Locked(caller-holds) helpers (non-reentrant-safe) +
+decode-into-fresh-struct-swap-on-success. (4+5)
+<code>internal/persistence/store.go</code> —
+SaveAll/LoadAll/triggerError invoked user callbacks with no recover
+(process crash) + On* registrars appended to callback slices with no
+lock while Save/Load iterated under lock (data race); fixed with
+invoke*Callback recover-wrappers + lock-guarded registration +
+snapshot-dispatch-outside-lock + 3 i18n keys. (Note: a transient
+build-break appeared mid-batch when config’s in-flight edit referenced
+its not-yet-added Locked helpers; the persistence subagent correctly
+verified in an isolated git worktree per §11.4.84/§11.4.96; combined
+final state builds + passes -race, conductor re-verified.)
+internal/focus, config, persistence all CONST-046-compliant. Each
+anti-bluff-proven: revert → panic / deadlock / DATA RACE → restore →
+PASS. <strong>28 in-process targets now covered; 25 real production bugs
 fixed this session.</strong> <strong>Remaining (infra batch +
 long-tail):</strong> internal/redis + internal/database +
 internal/persistence (real PG/Redis via

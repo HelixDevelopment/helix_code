@@ -716,8 +716,20 @@ func getDefaultConfig() *Config {
 	return &cfg
 }
 
-// ConfigManager manages configuration loading and saving
+// ConfigManager manages configuration loading and saving.
+//
+// HXC-014 (§11.4.85) concurrency fix: the manager is accessed concurrently by
+// the ConfigAPI HTTP handlers (config_api.go) — GetConfig serves the config on
+// every request while POST /config/reload (loadConfig), PUT /config
+// (UpdateConfig/UpdateConfigFromMap), and POST /config/restore (ImportConfig /
+// ResetToDefaults) swap m.config from other goroutines. The shared m.config
+// pointer (and the *Config it points at, which the writers replace and the
+// readers dereference) was previously unguarded — a data race surfaced under
+// -race by config_manager_chaos_test.go. mu serialises all access: readers take
+// RLock, writers take Lock. The exported method surface and behaviour are
+// unchanged.
 type ConfigManager struct {
+	mu         sync.RWMutex
 	configPath string
 	config     *Config
 	watchers   []ConfigWatcher
@@ -746,15 +758,16 @@ func NewHelixConfigManager(configPath string) (*ConfigManager, error) {
 		configPath: configPath,
 	}
 
-	// Try to load existing config
+	// Try to load existing config (constructor — no concurrent access yet, but
+	// use the locked helpers so the field writes are race-detector clean).
 	if _, err := os.Stat(configPath); err == nil {
-		if err := manager.loadConfig(); err != nil {
+		if err := manager.loadConfigLocked(); err != nil {
 			return nil, err
 		}
 	} else {
 		// Create default config
 		manager.config = getDefaultConfig()
-		if err := manager.saveConfig(); err != nil {
+		if err := manager.saveConfigLocked(); err != nil {
 			return nil, err
 		}
 	}
@@ -762,15 +775,26 @@ func NewHelixConfigManager(configPath string) (*ConfigManager, error) {
 	return manager, nil
 }
 
-// GetConfig returns the current configuration
+// GetConfig returns the current configuration. RLock-guarded against concurrent
+// reload/update writers (HXC-014 / §11.4.85).
 func (m *ConfigManager) GetConfig() *Config {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.config
 }
 
-// UpdateConfig updates the configuration with the provided function
+// UpdateConfig updates the configuration with the provided function under the
+// write lock. Copy-on-write: the update is applied to a COPY of the current
+// config and the pointer is swapped, so a concurrent GetConfig caller holding
+// the previous pointer dereferences an immutable snapshot and never races with
+// the mutation (HXC-014 / §11.4.85).
 func (m *ConfigManager) UpdateConfig(updateFunc func(*Config)) error {
-	updateFunc(m.config)
-	return m.saveConfig()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	next := *m.config // shallow copy of the current snapshot
+	updateFunc(&next)
+	m.config = &next
+	return m.saveConfigLocked()
 }
 
 // UpdateConfigFromMap updates the configuration with a map of values
@@ -832,19 +856,41 @@ func (m *ConfigManager) GetConfigPath() string {
 	return m.configPath
 }
 
-// loadConfig loads configuration from file
+// loadConfig loads configuration from file. Write-locked: callable directly by
+// the ConfigAPI reload handler concurrently with GetConfig readers.
 func (m *ConfigManager) loadConfig() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.loadConfigLocked()
+}
+
+// loadConfigLocked performs the load. Caller MUST hold m.mu (write). Internal
+// callers use this to avoid re-locking the non-reentrant RWMutex.
+func (m *ConfigManager) loadConfigLocked() error {
 	data, err := os.ReadFile(m.configPath)
 	if err != nil {
 		return err
 	}
 
-	m.config = &Config{}
-	return json.Unmarshal(data, m.config)
+	// Decode into a fresh struct and only swap m.config on success, so a failed
+	// reload leaves the previous good config intact (no nil/torn read).
+	cfg := &Config{}
+	if err := json.Unmarshal(data, cfg); err != nil {
+		return err
+	}
+	m.config = cfg
+	return nil
 }
 
-// saveConfig saves configuration to file
+// saveConfig saves configuration to file. Write-locked for direct callers.
 func (m *ConfigManager) saveConfig() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.saveConfigLocked()
+}
+
+// saveConfigLocked performs the save. Caller MUST hold m.mu.
+func (m *ConfigManager) saveConfigLocked() error {
 	data, err := json.MarshalIndent(m.config, "", "  ")
 	if err != nil {
 		return err
@@ -853,47 +899,59 @@ func (m *ConfigManager) saveConfig() error {
 	return os.WriteFile(m.configPath, data, 0644)
 }
 
-// AddWatcher adds a configuration change watcher
+// AddWatcher adds a configuration change watcher.
 func (m *ConfigManager) AddWatcher(watcher ConfigWatcher) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.watchers = append(m.watchers, watcher)
 }
 
-// ExportConfig exports the configuration to a file
+// ExportConfig exports the configuration to a file (read-locked snapshot).
 func (m *ConfigManager) ExportConfig(path string) error {
+	m.mu.RLock()
 	data, err := json.MarshalIndent(m.config, "", "  ")
+	m.mu.RUnlock()
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
 }
 
-// ImportConfig imports the configuration from a file
+// ImportConfig imports the configuration from a file. Write-locked: decode into
+// a fresh struct and only swap on success so a failed import keeps the prior
+// good config (no nil/torn read for concurrent GetConfig callers).
 func (m *ConfigManager) ImportConfig(path string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	m.config = &Config{}
-	err = json.Unmarshal(data, m.config)
-	if err != nil {
+	cfg := &Config{}
+	if err := json.Unmarshal(data, cfg); err != nil {
 		return err
 	}
-	return m.saveConfig()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.config = cfg
+	return m.saveConfigLocked()
 }
 
-// BackupConfig backs up the configuration to a file
+// BackupConfig backs up the configuration to a file (read-locked snapshot).
 func (m *ConfigManager) BackupConfig(path string) error {
+	m.mu.RLock()
 	data, err := json.MarshalIndent(m.config, "", "  ")
+	m.mu.RUnlock()
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
 }
 
-// ResetToDefaults resets the configuration to defaults
+// ResetToDefaults resets the configuration to defaults (write-locked).
 func (m *ConfigManager) ResetToDefaults() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.config = getDefaultConfig()
-	return m.saveConfig()
+	return m.saveConfigLocked()
 }
 
 // LoadConfig loads configuration from the default location
@@ -913,8 +971,11 @@ func SaveConfig(config *Config) error {
 	if err != nil {
 		return err
 	}
+	manager.mu.Lock()
 	manager.config = config
-	return manager.saveConfig()
+	err = manager.saveConfigLocked()
+	manager.mu.Unlock()
+	return err
 }
 
 // GetConfigPath returns the default configuration file path

@@ -54,3 +54,12 @@ internal_persistence_binary_data_too_short:
 
 internal_persistence_detect_empty_data:
   other: "empty data"
+
+internal_persistence_save_callback_panicked:
+  other: "save callback panicked (isolated): {{.Panic}}"
+
+internal_persistence_load_callback_panicked:
+  other: "load callback panicked (isolated): {{.Panic}}"
+
+internal_persistence_error_callback_panicked:
+  other: "error callback panicked (isolated): {{.Panic}}"
