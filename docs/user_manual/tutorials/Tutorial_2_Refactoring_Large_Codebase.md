@@ -131,3 +131,6 @@ helixcode commit --auto
 ---
 
 Continue to [Tutorial 3: Using Multiple AI Providers](Tutorial_3_Multiple_AI_Providers.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go) ; project go.mod (inner go 1.26) + CLAUDE.md §3.1. NEGATIVE FINDING — per CONST-036 the model ID shown (`gemini-2.5-pro`) MUST NOT be treated as a hardcoded authority; LLMsVerifier is the single source of truth for provider/model metadata at runtime. Confirm the exact model IDs available to you with `helixcode llm models list` rather than relying on the example string here.

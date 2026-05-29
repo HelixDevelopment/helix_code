@@ -116,3 +116,6 @@ tools:
 ---
 
 Continue to [Tutorial 6: Multi-File Atomic Edits](Tutorial_6_Multi_File_Atomic_Edits.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://developers.openai.com/docs/guides/speech-to-text + https://developers.openai.com/docs/guides/text-to-speech (OpenAI Audio API, via Context7 mirror of developers.openai.com — platform.openai.com itself returns HTTP 403 to automated fetch). CONFIRMED CURRENT: `whisper-1` is still a valid transcription model and `nova` is still a valid TTS voice as of this date. ENHANCEMENT NOTE — OpenAI now also offers higher-quality transcription models `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, and `gpt-4o-transcribe-diarize`; current TTS uses the `gpt-4o-mini-tts` model (the older `tts-1`/`tts-1-hd` still work) with the same `nova` voice. Nothing in this tutorial is stale, but operators wanting best quality may prefer the gpt-4o transcription models. NEGATIVE FINDING — OpenAI's `platform.openai.com` docs are auth-gated (HTTP 403) to direct fetch; verification was performed against the public `developers.openai.com` documentation source.

@@ -147,3 +147,6 @@ helixcode test --browser --headless
 ---
 
 Continue to [Tutorial 5: Voice-to-Code Workflow](Tutorial_5_Voice_to_Code.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://pkg.go.dev/github.com/chromedp/chromedp (chromedp actively maintained, v0.15.x line, Mar 2026; MIT; ~2.1k importers) ; https://go.dev/dl/ (go1.26.3 latest stable Go) ; project go.mod (inner go 1.26) + CLAUDE.md §3.1 (chromedp = headless-browser dependency). The browser-automation snippets use the project's `dev.helix.code/internal/tools/browser` wrapper over chromedp; no chromedp version pin appears in this tutorial, so nothing was stale to fix. NEGATIVE FINDING — `localhost:3000`/`localhost` endpoints are illustrative app targets, not external services to verify.
