@@ -579,3 +579,7 @@ All changes maintain backward compatibility:
 ## Conclusion
 
 The core infrastructure is complete and production-ready. Provider-specific implementations can be rolled out incrementally based on priority and user demand. The Anthropic provider serves as a reference implementation for other providers to follow.
+
+## Sources verified
+
+Sources verified 2026-05-29: https://platform.claude.com/docs/en/docs/about-claude/models/overview (current Anthropic Claude model IDs — `claude-sonnet-4-6`, `claude-haiku-4-5`, plus the Opus family; older API aliases such as `claude-3-5-sonnet-latest` are no longer in the current/legacy model table), https://go.dev/doc/devel/release (Go 1.26.3 latest patch — matches CLAUDE.md §3.1). Confirmed: this summary documents provider-integration code-structure (request/response conversion, reasoning-model handling, capability flags), which per CONST-036 must source live model metadata from LLMsVerifier rather than from any hardcoded list, so the document is not itself an operator-facing model catalogue. Negative finding: the inline `Description` strings and reasoning-model constant names (e.g. `ReasoningModelOpenAI_O1/O3/O4`) are illustrative of historical model generations and are NOT the runtime source of truth — the live provider/model set is verifier-driven; per §11.4.6 no model IDs were invented here, and stale-looking literals are left as code-illustration rather than rewritten to guessed current IDs.

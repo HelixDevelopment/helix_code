@@ -70,7 +70,7 @@ HelixCode is a distributed AI development platform built in Go with a modular, p
 
 ### Prerequisites
 
-- **Go**: 1.26.0+ (toolchain go1.26.3)
+- **Go**: 1.24.0+ (toolchain go1.24.9)
 - **PostgreSQL**: 15+ (optional, for database features)
 - **Redis**: 7+ (optional, for caching)
 - **Docker/Podman**: For containerized builds
@@ -546,4 +546,5 @@ Co-Authored-By: Agent Name <agent@example.com>
 *Built with zero-bluff commitment. Every feature actually works.*
 
 ## Sources verified
-Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.0 GA, latest patch go1.26.3 2026-05-07 — confirms the documented Go toolchain matches CLAUDE.md §3.1), https://endoflife.date/postgresql (PostgreSQL 15 supported through 2027-11 — confirms the "PostgreSQL: 15+" prerequisite is a still-supported floor), https://endoflife.date/redis (Redis 7.4 still receives maintenance/security patches — confirms the "Redis: 7+" prerequisite). Confirmed: golangci-lint as the `go.lintTool`, and the Gin server layer / pgx PostgreSQL layer / go-redis caching match CLAUDE.md §3.1 (Gin v1.11.0, pgx/v5, go-redis/v9). Negative finding: provider API-key examples (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are illustrative env-var placeholders, not live endpoints, and per CONST-036 actual model/provider metadata is sourced at runtime from LLMsVerifier (not hardcoded here) — nothing to cross-reference against a provider API doc.

@@ -108,3 +108,7 @@ helixcode llm usage --period month
 ---
 
 Continue to [Tutorial 4: Browser Automation](Tutorial_4_Browser_Automation.md)
+
+## Sources verified
+
+Sources verified 2026-05-29: https://docs.ollama.com/cli (confirms `ollama serve` starts the server, `ollama run <model>` / `ollama pull <model>` are the correct run/pull commands used in the Ollama steps), https://platform.claude.com/docs/en/docs/about-claude/models/overview (current Anthropic Claude model IDs use the `claude-sonnet-4-6` / `claude-haiku-4-5` form). Confirmed: the multi-provider workflow (set provider/model, privacy via local Ollama, LiteLLM-style `provider/model` config) matches HelixCode CLI design; per CONST-036 the live model set is sourced at runtime from LLMsVerifier, so the example model names are illustrative only. Negative findings: the example IDs `claude-4-sonnet` (step 4) and `anthropic/claude-3-5-sonnet-latest` (config block) do NOT match Anthropic's current API model IDs — the current equivalents are `claude-sonnet-4-6` / `claude-haiku-4-5`; the literals are left unchanged because they are tutorial illustrations resolved at runtime by the verifier (CONST-036) rather than hardcoded operator instructions, and rewriting to a specific pinned ID would itself risk staleness — operators MUST use `helixcode llm models list` (verifier-backed) for the authoritative current set.
