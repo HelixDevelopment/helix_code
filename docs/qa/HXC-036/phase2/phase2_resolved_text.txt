@@ -1,0 +1,13 @@
+=== RUN   TestPhase2_WireAll_Succeeds
+--- PASS: TestPhase2_WireAll_Succeeds (0.02s)
+=== RUN   TestPhase2_Auth_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:48: auth resolved: "failed to hash password: boom"
+--- PASS: TestPhase2_Auth_ResolvesInterpolatedText (0.00s)
+=== RUN   TestPhase2_LLM_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:67: llm resolved: " Configure Anthropic "
+--- PASS: TestPhase2_LLM_ResolvesInterpolatedText (0.00s)
+=== RUN   TestPhase2_Config_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:86: config resolved: "INFO: Using config file: /etc/helix/config.yaml"
+--- PASS: TestPhase2_Config_ResolvesInterpolatedText (0.00s)
+PASS
+ok  	dev.helix.code/internal/i18nwiring	0.028s

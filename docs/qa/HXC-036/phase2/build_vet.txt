@@ -1,0 +1,7 @@
+### HXC-036 Phase 2 build/vet evidence — 2026-05-29T15:14:05Z
+
+$ go build ./internal/... ./cmd/... ./examples/...
+build exit=0
+
+$ go vet ./internal/i18nwiring/...
+vet exit=0
