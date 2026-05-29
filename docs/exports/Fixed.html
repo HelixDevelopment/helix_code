@@ -95,6 +95,42 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-034: Cascade constitution §11.4.102 (mandatory
+systematic-debugging + always-loaded using-superpowers +
+plugin-dependency availability) into every owned submodule + wire the
+CM-COVENANT-114-102-PROPAGATION enforcement gate</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>scripts/verify-governance-cascade.sh (gate array +§11.4.102) + root
+CLAUDE/AGENTS/CONSTITUTION/CRUSH/QWEN.md + 60 owned-submodule pointer
+bumps</td>
+<td>Propagated the §11.4.102 anchor (operator mandate 2026-05-29)
+byte-identical from the canonical constitution source into the 3
+govfiles of every owned submodule: 52
+<code>dependencies/vasic-digital/*</code> (waves 3A/3B/3C via parallel
+subagents; 3 already done by a parallel session), 10
+<code>dependencies/HelixDevelopment/*</code> (wave 1), 5 top-level
+(<code>challenges</code>,<code>containers</code>,<code>security</code>,<code>github_pages_website</code>
++ <code>assets/</code> meta-subdir), <code>helix_agent</code>,
+<code>helix_qa</code>, <code>panoptic</code>; plus the 5 root consumer
+govfiles (a CONST-047 gap — meta had only bumped the constitution
+pointer, never cascaded the anchor into its own govfiles). Gate wired
+data-driven into <code>COVENANT114_ANCHORS</code> (auto-derives
+<code>CM-COVENANT-114-102-PROPAGATION</code>). VERIFIED:
+<code>verify-governance-cascade.sh</code> → <strong>0 failures</strong>
+across root + all owned submodules (was 6 §11.4.102 FAILs before the
+helix_qa/panoptic gaps were caught + closed); §1.1 paired-mutation
+proven (strip §11.4.102 from root CLAUDE.md → gate emits
+<code>CM-COVENANT-114-102-PROPAGATION</code> FAIL; restore → PASS, “all
+27 covenant-114 anchors present”). Each owned submodule committed +
+pushed to its org remotes (github :443 + gitlab where present).
+§11.4.84: explicit per-repo 3-govfile staging, no
+<code>git add -A</code>, residue scans clean. Closed
+<code>Completed (→ Fixed.md)</code> per CONST-057 (Type Task).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-035: <code>POST /api/v1/auth/register</code> returned 400
 <code>internal_auth_failed_create_user</code> on a fresh DB — blocked
 all authenticated flows</td>

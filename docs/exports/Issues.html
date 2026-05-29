@@ -1879,13 +1879,29 @@ skips-with-reason); whole <code>tests/regression</code> package green.
 (2) <code>helix_code/tests/e2e/scripts/clean.sh:59</code> interactive
 <code>read -p</code> → now
 <code>--force</code>/<code>CLEAN_FORCE=1</code>/TTY-gated, keeps results
-non-interactively (no hang); <code>bash -n</code> clean. REMAINING: the
-19 HelixQA <code>manual-review-required</code> banks + ~24 integration
-files NEEDS-MANUAL-REVIEW (the long-tail) — to classify executable vs
-Obsolete per §11.4.98(F). <strong>Closure criteria:</strong> Coverage
-ledger (test × COMPLIANT/NON-COMPLIANT × evidence-path) regenerated;
-zero NON-COMPLIANT live tests OR each migrated to §11.4.90 Obsolete
-citing §11.4.98; <code>-count=3</code> green; evidence captured.
+non-interactively (no hang); <code>bash -n</code> clean. <strong>Bank
+verification (2026-05-29):</strong> 7 banks now self-driving +
+anti-bluff-verified against the live <code>:8080</code> server (3
+deterministic runs + flip-expectation mutation-proof each, evidence
+under <code>docs/qa/HXC-029/</code>): 4 API banks
+(<code>helixcode-full-qa-api</code>, <code>entity-management</code>,
+<code>admin-operations</code>, <code>security-validation</code>) + 3 CLI
+banks (<code>cli-agents-comprehensive</code> 6 real PASS,
+<code>aichat-bash-tools-comprehensive</code> 9 PASS,
+<code>cli-agents-test-helixagent</code> 7 PASS) driving the real
+<code>helix_code/bin/cli</code> via <code>os/exec</code> with asserted
+exit codes/output. <code>grep -c manual-review-required</code>=0 on all
+7. Honest <code>_skip</code> for absent tools (<code>aider</code>
+REPL/<code>:7061</code> ensemble down,
+<code>aichat</code>/<code>openhands</code> not on PATH, Go-API internals
+with no CLI surface) — no fabricated PASS (§11.4.98). helix_qa HEAD
+<code>14be9eb</code>. REMAINING: Playwright/Android banks (need
+browser/emulator drivers) + ~24 integration files NEEDS-MANUAL-REVIEW
+(the long-tail) — to classify executable vs Obsolete per §11.4.98(F).
+<strong>Closure criteria:</strong> Coverage ledger (test ×
+COMPLIANT/NON-COMPLIANT × evidence-path) regenerated; zero NON-COMPLIANT
+live tests OR each migrated to §11.4.90 Obsolete citing §11.4.98;
+<code>-count=3</code> green; evidence captured.
 <strong>Composes-with:</strong> §11.4.98, §11.4.85, §11.4.89, §11.4.87,
 §11.4.94, HXC-027.</p>
 <hr />
@@ -2081,32 +2097,11 @@ this 76k-file repo; whether stability bug / submodule-traversal change /
 config-schema change is undetermined. <strong>Composes-with:</strong>
 §11.4.78, §11.4.79, §11.4.80, §11.4.6, §11.4.101, HXC-017.</p>
 <hr />
-<h2 id="hxc-034-cascade-constitution-11.4.102-mandatory-systematic-debugging-using-superpowers-plugin-availability-into-owned-submodules-implement-cm-covenant-114-102-propagation-gate">HXC-034
-— Cascade constitution §11.4.102 (mandatory systematic-debugging +
-using-superpowers + plugin-availability) into owned submodules +
-implement CM-COVENANT-114-102-PROPAGATION gate</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-29 (operator mandate — added
-§11.4.102 to the constitution submodule <code>656b43a</code>)
-<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
-§11.4.102 — “we ALWAYS trigger / start the
-/superpowers:systematic-debugging skills when any issues happen …
-/using-superpowers skill is ALWAYS loaded … All dependencies (plugins) …
-MUST BE installed”. <strong>Scope:</strong> Constitution submodule
-§11.4.102 added + pushed (HEAD <code>656b43a</code>); HelixCode meta
-pointer bumped to adopt it (this commit). REMAINING: per
-CONST-047/§11.4.26-step-6, cascade the §11.4.102 anchor
-(verbatim/short-form) into all ~68 owned submodules’
-<code>CONSTITUTION.md</code>/<code>CLAUDE.md</code>/<code>AGENTS.md</code>/<code>QWEN.md</code>,
-and implement the <code>CM-COVENANT-114-102-PROPAGATION</code> pre-build
-gate (+ paired §1.1 mutation) that enforces the anchor literal across
-the consumer fleet. Large multi-wave subagent batch (mirrors the prior
-§11.4.69–97 cascade that closed HXC-016/HXC-025). <strong>Closure
-criteria:</strong> <code>verify-governance-cascade.sh</code> extended to
-include §11.4.102 → 0 failures across root + 68 submodules; gate present
-+ paired-mutation-proven; each submodule committed + pushed to its org
-remotes. <strong>Composes-with:</strong> §11.4.102, CONST-047, §11.4.26,
-§11.4.32 (CONST-055 post-pull validation).</p>
+<h2 id="hxc-034-cascade-constitution-11.4.102-into-owned-submodules-implement-cm-covenant-114-102-propagation-gate-closed-fixed.md">HXC-034
+— Cascade constitution §11.4.102 into owned submodules + implement
+CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.</p>
 <hr />
 <h2 id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows-closed-fixed.md">HXC-035
 — <code>POST /api/v1/auth/register</code> returns 400

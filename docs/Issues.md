@@ -558,17 +558,9 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-034 — Cascade constitution §11.4.102 (mandatory systematic-debugging + using-superpowers + plugin-availability) into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate
+## HXC-034 — Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md)
 
-**Status:** In progress
-**Type:** Task
-**Discovered:** 2026-05-29 (operator mandate — added §11.4.102 to the constitution submodule `656b43a`)
-**Discovered-By:** AI
-**Forensic-anchor:** §11.4.102 — "we ALWAYS trigger / start the /superpowers:systematic-debugging skills when any issues happen … /using-superpowers skill is ALWAYS loaded … All dependencies (plugins) … MUST BE installed".
-**Scope:** Constitution submodule §11.4.102 added + pushed (HEAD `656b43a`); HelixCode meta pointer bumped to adopt it (this commit). REMAINING: per CONST-047/§11.4.26-step-6, cascade the §11.4.102 anchor (verbatim/short-form) into all ~68 owned submodules' `CONSTITUTION.md`/`CLAUDE.md`/`AGENTS.md`/`QWEN.md`, and implement the `CM-COVENANT-114-102-PROPAGATION` pre-build gate (+ paired §1.1 mutation) that enforces the anchor literal across the consumer fleet. Large multi-wave subagent batch (mirrors the prior §11.4.69–97 cascade that closed HXC-016/HXC-025).
-**Progress (2026-05-29):** Wave 1 — 10 `dependencies/HelixDevelopment/*` deps cascaded (done earlier this session). Wave 2 — top-level owned submodules `challenges` (→`8ad7764`), `containers` (→`b48fcda`), `security` (→`67720c8`), `github_pages_website` (→`7fbe261`) each got §11.4.102 in CONSTITUTION+CLAUDE+AGENTS, committed + pushed to their org remotes; `assets/` (meta-repo subdirectory, not a submodule) got the same 3 govfile edits committed in the meta-repo (`81ff7ff1`). §11.4.84 clean (explicit staging, no residue). REMAINING: Wave 3 = `dependencies/vasic-digital/*` (~55 submodules) + any remaining `dependencies/HelixDevelopment/*` not in wave 1; then implement the `CM-COVENANT-114-102-PROPAGATION` gate + paired §1.1 mutation + extend `verify-governance-cascade.sh`.
-**Closure criteria:** `verify-governance-cascade.sh` extended to include §11.4.102 → 0 failures across root + 68 submodules; gate present + paired-mutation-proven; each submodule committed + pushed to its org remotes.
-**Composes-with:** §11.4.102, CONST-047, §11.4.26, §11.4.32 (CONST-055 post-pull validation).
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
 
 ---
 
