@@ -1482,8 +1482,23 @@ verified present; added a <code>## Sources verified</code> footer.
 listed
 <code>make container-builder-image/container-build/container-test/container-shell/container-release</code>
 targets do NOT exist in any Makefile — replaced with the real
-<code>./helix</code> facade + a note. The §11.4.99 discipline now binds
-future operator-doc edits.</p>
+<code>./helix</code> facade + a note. <strong>Systemic sweep
+(2026-05-29):</strong> scanned the doc tree for the recurring stale
+defects + fixed: <code>helix_code/docs/general/ARCHITECTURE.md</code>
+(“Go 1.24+”→“Go 1.26+”), <code>USER_MANUAL.md</code> (“Go 1.24.0+”→“Go
+1.26+”), <code>USER_GUIDE.md</code> (Docker-install
+<code>docker run</code>/<code>docker-compose</code> →
+<code>./helix</code> facade + SSH clone + <code>cd helix_code</code>
+build path), <code>COMPLETE_CLI_REFERENCE.md</code> (“Docker Commands”
+recommending non-existent
+<code>helixcode-security-scanner</code>/<code>-performance-optimizer</code>/<code>-config-validator</code>
+images → real <code>make scan-all</code> +
+<code>go run ./cmd/performance_optimization</code> +
+<code>go run ./cmd/config_test</code>). Every replacement command was
+verified to exist before citing (the point of §11.4.99). Total §11.4.99
+pass: 7 operator-facing docs corrected, all systemic stale-Go-version +
+Rule-4-docker + broken-path/link + non-existent-command defects fixed.
+The §11.4.99 discipline now binds future operator-doc edits.</p>
 <hr />
 <h2 id="hxc-027-11.4.98-live-test-full-automation-compliance-audit">HXC-027
 — §11.4.98 live-test full-automation compliance audit</h2>

@@ -712,17 +712,21 @@ docker-compose down
 docker-compose up -d --build
 ```
 
-### Docker Commands
+### Security / performance / config tooling
+
+These tools are NOT distributed as the `helixcode-*` Docker images previously listed
+here (no such images exist; §11.4.99 correction 2026-05-29) and direct `docker` runs are
+not a supported workflow (Rule 4). Use the real entry points:
 
 ```bash
-# Run security scan
-docker run --rm -v $(pwd):/project helixcode-security-scanner
+# Run security scanners (root Makefile)
+make scan-all          # all scanners; or scan-gosec / scan-trivy / scan-secrets
 
-# Run performance optimization
-docker run --rm -v $(pwd):/project helixcode-performance-optimizer
+# Run performance optimization (inner Go cmd)
+cd helix_code && go run ./cmd/performance_optimization
 
-# Run configuration validation
-docker run --rm -v $(pwd):/config helixcode-config-validator
+# Run configuration validation (inner Go cmd)
+cd helix_code && go run ./cmd/config_test
 ```
 
 ## Script Commands

@@ -13,23 +13,25 @@ curl -fsSL https://helixcode.dev/install.sh | bash
 helixcode --version
 ```
 
-#### Docker Installation
+#### Containerized install (via the `./helix` facade)
+Per Constitution Rule 4 + §11.4.76, run the containerized stack through the repo-root
+`./helix` facade (the host uses podman; direct `docker`/`docker-compose` commands are not
+a supported workflow):
 ```bash
-# Run with Docker
-docker run -p 8080:8080 helixcode/server:latest
-
-# Or use Docker Compose
-curl -O https://raw.githubusercontent.com/helixcode/helixcode/main/docker-compose.yml
-docker-compose up -d
+./helix start      # boot the containerized stack
+./helix status     # check status
+./helix logs       # tail logs
+./helix stop       # tear down
 ```
 
 #### Manual Installation
 ```bash
-# Clone repository
-git clone https://github.com/helixcode/helixcode.git
-cd helixcode
+# Clone repository (SSH only — Rule 3 / CONST-038)
+git clone git@github.com:HelixDevelopment/HelixCode.git
+cd HelixCode
 
-# Build from source
+# Build from source (the build target lives in the inner Go module)
+cd helix_code
 make build
 
 # Install globally

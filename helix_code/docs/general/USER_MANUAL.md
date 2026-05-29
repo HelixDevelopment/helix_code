@@ -61,7 +61,7 @@ HelixCode is an enterprise-grade distributed AI development platform that enable
 
 ### Prerequisites
 
-- **Go 1.24.0+**
+- **Go 1.26+**
 - **PostgreSQL 14+**
 - **Redis 7+** (optional, recommended for production)
 - **Git**

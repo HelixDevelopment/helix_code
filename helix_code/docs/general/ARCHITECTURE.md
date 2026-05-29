@@ -290,7 +290,7 @@ services:
 
 **Architecture Version**: 1.1.0
 **Last Updated**: 2025-11-05
-**Compatibility**: Go 1.24+, PostgreSQL 15+, Redis 7+
+**Compatibility**: Go 1.26+, PostgreSQL 15+, Redis 7+
 
 ## 🆕 Recent Architecture Changes (v1.1.0)
 
