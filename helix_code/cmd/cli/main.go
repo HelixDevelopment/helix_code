@@ -27,6 +27,7 @@ import (
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/continua"
 	"dev.helix.code/internal/hooks"
+	"dev.helix.code/internal/i18nwiring"
 	"dev.helix.code/internal/kilocode"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
@@ -655,6 +656,18 @@ func (c *CLI) ensureSubsystems(ctx context.Context) error {
 // is unguarded and would double-register tools/slash-commands. See
 // ensureSubsystems for the laziness + ordering contract.
 func (c *CLI) buildSubsystems(ctx context.Context) error {
+	// HXC-036: wire the CONST-046 boot-time translators BEFORE any subsystem
+	// that emits user-facing prompts is constructed (the ask_user prompter and
+	// the approval gate below both render localized text). Without this, those
+	// packages run on their NoopTranslator{} default and users see raw
+	// message-ID keys (e.g. "askuser_prompt_invalid_choice_hint") instead of
+	// resolved + interpolated text — a CONST-046 / §11.4 regression. A failed
+	// translator build is logged but non-fatal: the loud message-ID echo is a
+	// degraded-but-honest fallback, never a silent swallow.
+	if err := i18nwiring.WireAll(); err != nil {
+		log.Printf("i18n: boot-time translator wiring failed (prompts degrade to message-ID echo): %v", err)
+	}
+
 	// Bootstrap permissions engine. A locally constructed PolicyEngine is used
 	// here; T10/Phase 3 will thread it into the tool dispatcher so deny rules
 	// actually block execution.

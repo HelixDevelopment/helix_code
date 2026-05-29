@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"dev.helix.code/internal/i18nwiring"
 	"dev.helix.code/internal/llm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -802,6 +803,19 @@ func TestMain(m *testing.M) {
 	}
 	defer cleanup()
 	_ = tmpDir // anchor usage; cleanup() owns the dir
+
+	// HXC-036 (Option A — boot-time wiring exercised by tests): wire the
+	// CONST-046 boot-time translators so the askuser/approval integration
+	// tests run against the REAL *i18nadapter.Translator (resolved +
+	// interpolated text), not the NoopTranslator{} raw-key-echo default.
+	// This mirrors the production boot path (cmd/cli buildSubsystems calls
+	// i18nwiring.WireAll). A failure here is fatal for the test binary — a
+	// silent NoopTranslator fallback would let the i18n tests PASS against
+	// raw keys, a §11.4 PASS-bluff.
+	if err := i18nwiring.WireAll(); err != nil {
+		_, _ = os.Stderr.WriteString("TestMain: i18nwiring.WireAll: " + err.Error() + "\n")
+		os.Exit(2)
+	}
 
 	code := m.Run()
 	os.Exit(code)

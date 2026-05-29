@@ -1,0 +1,106 @@
+HXC-036 Phase 1 — CONST-046 boot-time translator wiring (Option A) — QA evidence transcript
+Captured: 2026-05-29   Module: helix_code (inner Go app)
+
+================ ACCEPTANCE (3 target tests) ================
+=== RUN   TestApproval_AutoEdit_PromptsRun_UserAllows
+--- PASS: TestApproval_AutoEdit_PromptsRun_UserAllows (0.00s)
+=== RUN   TestAskUser_PreviewVisibleInOutput
+--- PASS: TestAskUser_PreviewVisibleInOutput (0.00s)
+=== RUN   TestAskUser_InvalidInputThenValid
+--- PASS: TestAskUser_InvalidInputThenValid (0.00s)
+PASS
+ok  	dev.helix.code/tests/integration	3.482s
+?   	dev.helix.code/tests/integration/cmd/p1_5_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f07_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f08_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f09_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f10_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f11_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f12_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f13_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f14_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f15_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f17_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f18_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f19_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p1f20_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f21_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f22_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f23_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f24_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f25_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f26_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f27_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f28_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f29_challenge	[no test files]
+?   	dev.helix.code/tests/integration/cmd/p2f30_challenge	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	dev.helix.code/tests/integration/hooks	0.005s [no tests to run]
+testing: warning: no tests to run
+PASS
+ok  	dev.helix.code/tests/integration/permissions	0.003s [no tests to run]
+testing: warning: no tests to run
+PASS
+ok  	dev.helix.code/tests/integration/persistence	0.003s [no tests to run]
+testing: warning: no tests to run
+PASS
+ok  	dev.helix.code/tests/integration/worktree	0.005s [no tests to run]
+
+================ RESOLVED TEXT EVIDENCE (wiring active) ================
+=== RUN   TestHXC036_Evidence_ResolvedText
+    hxc036_evidence_test.go:43: ASKUSER RESOLVED RENDER:
+        Pick a fruit:
+        
+        1. Apple
+        2. Banana
+        3. Cherry
+        
+        Enter choice [1-3]: 
+        Please enter a number 1-3.
+        Pick a fruit:
+        
+        1. Apple
+        2. Banana
+        3. Cherry
+        
+        Enter choice [1-3]: 
+    hxc036_evidence_test.go:53: APPROVAL RESOLVED PROMPT QUESTION:
+        Allow tool "stub_run_for_approval" (level=run)? args=map[cmd:echo]
+--- PASS: TestHXC036_Evidence_ResolvedText (0.00s)
+PASS
+ok  	dev.helix.code/tests/integration	1.960s
+
+================ PAIRED MUTATION (WireAll NOT invoked -> FAIL with raw keys) ================
+=== RUN   TestApproval_AutoEdit_PromptsRun_UserAllows
+    approval_test.go:188: 
+        	Error Trace:	/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code/tests/integration/approval_test.go:188
+        	Error:      	"internal_approval_prompt_allow_toolinternal_approval_prompt_args_suffix" does not contain "stub_run_for_approval"
+        	Test:       	TestApproval_AutoEdit_PromptsRun_UserAllows
+--- FAIL: TestApproval_AutoEdit_PromptsRun_UserAllows (0.00s)
+=== RUN   TestAskUser_InvalidInputThenValid
+    askuser_test.go:164: 
+        	Error Trace:	/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code/tests/integration/askuser_test.go:164
+        	Error:      	"Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n" does not contain "1-3"
+        	Test:       	TestAskUser_InvalidInputThenValid
+        	Messages:   	writer must contain retry hint mentioning valid range — got "Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n"
+--- FAIL: TestAskUser_InvalidInputThenValid (0.00s)
+FAIL
+FAIL	dev.helix.code/tests/integration	1.703s
+FAIL
+
+================ RE-RUNNABILITY (-count=3) ================
+ok  	dev.helix.code/tests/integration	1.682s
+
+================ UNIT TESTS (askuser/approval/i18nwiring) ================
+ok  	dev.helix.code/internal/tools/askuser	0.108s
+ok  	dev.helix.code/internal/tools/askuser/i18n	0.002s
+ok  	dev.helix.code/internal/approval	0.003s
+?   	dev.helix.code/internal/approval/i18n	[no test files]
+?   	dev.helix.code/internal/i18nwiring	[no test files]
+
+================ go vet (scoped) ================
+# github.com/smacker/go-tree-sitter/lua [dev.helix.code/cmd/cli.test]
+parser.c:254:17: warning: null character(s) preserved in literal
+  254 |   [anon_sym_] = " ",
+      |                 ^
