@@ -344,7 +344,7 @@ jobs:
 
 ```dockerfile
 # Dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -776,3 +776,5 @@ helix performance test --compare-baseline
 
 This examples and tutorials guide provides practical, hands-on guidance for using HelixCode in various development scenarios. Each tutorial builds on real-world use cases and demonstrates best practices for enterprise AI development.</content>
 <parameter name="filePath">docs/COMPLETE_EXAMPLES_TUTORIALS.md
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.3 confirmed latest stable; Dockerfile base image corrected golang:1.21-alpine → golang:1.26-alpine to match inner go.mod go 1.26 / CLAUDE.md §3.1) ; https://www.postgresql.org/support/versioning/ (PostgreSQL 15 supported, latest minor 15.18) ; https://github.com/redis/redis/releases (Redis 7+ valid; latest GA 8.8.0) — tutorial build/deploy version references cross-checked against official sources. Project version authority is go.mod + CLAUDE.md §3.1.

@@ -987,7 +987,7 @@ Get detailed system information.
   "application": {
     "version": "1.0.0",
     "build_date": "2024-01-01T00:00:00Z",
-    "go_version": "go1.21.5",
+    "go_version": "go1.26.3",
     "git_commit": "abc123def456"
   },
   "runtime": {
@@ -1361,3 +1361,5 @@ For API support and questions:
 
 *Last updated: December 2024*</content>
 <parameter name="filePath">docs/COMPLETE_API_REFERENCE.md
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.3 confirmed latest stable; the illustrative `go_version` field in the health-endpoint JSON example corrected go1.21.5 → go1.26.3 to match inner go.mod go 1.26 / CLAUDE.md §3.1) — this is primarily an internal HelixCode HTTP API reference (endpoints, request/response shapes) rather than third-party-service instructions; the only external version claim was the Go build-info example, now current. Project version authority is go.mod (inner module go 1.26) + CLAUDE.md §3.1.

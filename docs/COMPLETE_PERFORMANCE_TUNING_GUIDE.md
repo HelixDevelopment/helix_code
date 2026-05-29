@@ -869,7 +869,7 @@ curl http://localhost:8080/debug/vars
 #### Container Optimization
 ```dockerfile
 # Multi-stage build for minimal image
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 # Build stage
 
 FROM alpine:3.18
@@ -986,3 +986,5 @@ HelixCode's comprehensive performance optimization system enables enterprise-gra
 
 For additional performance information, see the [Security Guide](../docs/COMPLETE_SECURITY_GUIDE.md) and [Deployment Guide](../docs/COMPLETE_DEPLOYMENT_GUIDE.md).</content>
 <parameter name="filePath">docs/COMPLETE_PERFORMANCE_TUNING_GUIDE.md
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.3 confirmed latest stable; Dockerfile base image corrected golang:1.21-alpine → golang:1.26-alpine to match inner go.mod go 1.26 / CLAUDE.md §3.1) ; https://www.postgresql.org/support/versioning/ (PostgreSQL 15 supported, latest minor 15.18) ; https://github.com/redis/redis/releases (Redis 7+ requirement valid; latest GA 8.8.0) — build/runtime version references cross-checked against official sources. Project version authority is go.mod + CLAUDE.md §3.1.

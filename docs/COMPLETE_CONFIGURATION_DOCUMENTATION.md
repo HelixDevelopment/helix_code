@@ -1149,3 +1149,5 @@ helix-config set conflicting.key resolved-value
 
 This comprehensive configuration documentation covers all aspects of HelixCode configuration management, from basic setup to advanced enterprise deployments. The configuration system is designed to be flexible, secure, and production-ready.</content>
 <parameter name="filePath">docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md
+## Sources verified
+Sources verified 2026-05-29: https://www.postgresql.org/support/versioning/ (PostgreSQL 15 supported, latest minor 15.18, EOL 2027-11-11) ; https://github.com/redis/redis/releases (Redis 7+ requirement valid; latest GA 8.8.0) ; https://github.com/ollama/ollama/blob/main/docs/api.md (Ollama default endpoint http://localhost:11434 confirmed) ; https://go.dev/doc/devel/release (Go 1.26.3 latest stable) — PostgreSQL/Redis hostnames in cluster examples (postgres-prod, redis-1/2/3) are illustrative host labels, not version pins; no stale version claims found. Project version authority is go.mod + CLAUDE.md §3.1.
