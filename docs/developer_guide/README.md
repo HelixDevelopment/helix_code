@@ -222,3 +222,7 @@ Last verified at 39/39 governance files (Phase 4 close-out, commit `21e6686`).
 - LLMs verifier integration: `docs/llms_verifier/`
 - helix_qa integration: `docs/helix_qa/`
 - Phase-by-phase evidence: `docs/improvements/PROGRESS.md`
+
+## Sources verified
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.0 GA 2026-02-10, latest patch go1.26.3 2026-05-07 — confirms CLAUDE.md §3.1 inner-module Go 1.26), https://endoflife.date/postgresql (PostgreSQL 15 supported through 2027-11 — confirms the "PostgreSQL with Redis caching" stack), https://endoflife.date/redis (Redis 7.4 still receives maintenance/security patches — confirms the real-Redis test stack). Confirmed: golangci-lint, `make test-infra-up` real-stack guidance, and four-remote push (CONST-043) match project authority (CLAUDE.md §3.1/§3.4). Negative finding: no public external service endpoints are documented in this developer-guide README — the only URL is the operator-local OTEL collector `http://localhost:4317` (illustrative localhost, not a public endpoint, nothing to cross-reference).

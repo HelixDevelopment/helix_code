@@ -306,3 +306,7 @@ type Tool interface {
 ## 20. `internal/commands`
 
 Slash command registry. Loads built-in commands plus user-defined ones from `~/.config/helixcode/commands/*.md`. See [`docs/developer_guide/README.md`](../developer_guide/README.md) §4.
+
+## Sources verified
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.0 GA 2026-02-10, latest patch go1.26.3 — confirms the documented `go 1.26` inner module and `Go 1.25.2` thin root module match CLAUDE.md §3.1; no stale pin to fix). Negative finding: this API reference documents internal package signatures only — no external service endpoints, third-party API URLs, or downloadable-dependency versions are present to cross-reference; the version authority is the project's own `go.mod` files and CLAUDE.md §3.1.

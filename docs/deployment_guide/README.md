@@ -310,3 +310,7 @@ CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any power-state tra
 | `dependencies/` | LLama_CPP, Ollama, HuggingFace_Hub | as needed |
 
 Update all submodules deepest-first when releasing; never force-push (CONST-043).
+
+## Sources verified
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26 GA, latest patch go1.26.3 — matches project module authority CLAUDE.md §3.1), https://endoflife.date/postgresql (PostgreSQL 15 supported through 2027-11 — confirms the backup/restore guidance targets a still-supported major), https://endoflife.date/redis (Redis 7.4 still receives maintenance patches). Confirmed: OpenTelemetry OTLP default transport is gRPC with `http/protobuf` as the HTTP alternative (matches `HELIXCODE_OTEL_PROTOCOL` guidance); Rule-4 orchestrator-only container workflow (no direct `docker`/`docker-compose`) matches CLAUDE.md §3.4. Negative finding: OTEL endpoints shown (`http://localhost:4317`, `http://otel-collector:4317`) are operator-local / in-cluster addresses, not public service endpoints — nothing external to verify against.

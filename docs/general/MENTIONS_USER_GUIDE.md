@@ -766,3 +766,7 @@ A: Minimal. HelixCode uses caching and efficient file I/O. Even 10+ mentions pro
 **Document Version:** 1.0
 **Last Updated:** November 7, 2025
 **Feedback:** [GitHub Issues](https://github.com/user/helixcode/issues)
+
+## Sources verified
+
+Sources verified 2026-05-29: https://pkg.go.dev/github.com/gin-gonic/gin (the `@url[https://pkg.go.dev/github.com/gin-gonic/gin]` example resolves to a live, current pkg.go.dev page — the documented `@url` fetcher target is valid), https://github.com/spf13/viper (live repository — the documentation-mention example resolves). Confirmed: the `@url`, `@file`, and terminal-history mention syntaxes are HelixCode-internal CLI features documented against the product itself, not against an external service contract. Negative findings: (1) the example URLs `https://docs.example.com`, `https://example.com/page`, `https://api.example.com/docs` are intentional RFC-2606 example.com placeholders, not real endpoints — correctly illustrative; (2) the Feedback link `https://github.com/user/helixcode/issues` is a placeholder `user/` org (the real HelixCode repos live under `vasic-digital/*` and `HelixDevelopment/*` per CLAUDE.md project-tightening note) — flagged as a stale placeholder, left unchanged to avoid guessing the canonical issues URL (§11.4.6 no-guessing).
