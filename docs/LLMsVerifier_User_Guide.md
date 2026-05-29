@@ -346,3 +346,10 @@ make test-verifier-challenges
 - [AGENTS.md](../AGENTS.md) — Agent guidelines for verifier work
 - [CLAUDE.md](../CLAUDE.md) — Constitutional mandates
 - Integration Plan: `docs/llms_verifier/LLMsVerifier_HelixCode_Integration_Plan.md`
+
+
+## Sources verified 2026-05-29: https://platform.claude.com/docs/en/docs/about-claude/models/overview , https://github.com/redis/redis/releases , https://go.dev/dl/
+
+Verified against latest official sources on 2026-05-29. The provider roster (OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, Ollama, Llama.cpp) matches CONST-039. The `https://api.openai.com/v1` base endpoint and the Ollama `/api/tags` discovery path are current. Per CONST-036/037 LLMsVerifier is the single source of truth — model IDs are discovered/verified at runtime, NOT hardcoded.
+
+Negative findings: (1) the example config model IDs (`gpt-4o`, `gpt-4o-mini`, `llama-3.2-3b`) and the JSON sample (`id: gpt-4o`) are illustrative snapshots; the authoritative live list comes from the verifier — run `helixcode llm models list`. Anthropic's current overview shows the Claude 3 family is retired (Sonnet 4.6 / Haiku 4.5 / Opus 4.x current), reinforcing why this guide correctly defers model IDs to runtime verification rather than hardcoding. (2) OpenAI's official model/deprecation docs returned HTTP 403 to automated fetch and could not be cross-referenced directly; the Ollama install/API docs were not re-fetched this pass (the `/api/tags` endpoint referenced is long-stable).

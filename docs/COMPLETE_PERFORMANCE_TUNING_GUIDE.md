@@ -869,7 +869,7 @@ curl http://localhost:8080/debug/vars
 #### Container Optimization
 ```dockerfile
 # Multi-stage build for minimal image
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 # Build stage
 
 FROM alpine:3.18
@@ -986,3 +986,9 @@ HelixCode's comprehensive performance optimization system enables enterprise-gra
 
 For additional performance information, see the [Security Guide](../docs/COMPLETE_SECURITY_GUIDE.md) and [Deployment Guide](../docs/COMPLETE_DEPLOYMENT_GUIDE.md).</content>
 <parameter name="filePath">docs/COMPLETE_PERFORMANCE_TUNING_GUIDE.md
+
+## Sources verified 2026-05-29: https://go.dev/dl/ , https://hub.docker.com/_/golang , https://github.com/redis/redis/releases
+
+Verified against latest official sources on 2026-05-29. Stale container-optimization Dockerfile base `golang:1.21-alpine` corrected to `golang:1.26-alpine` (Docker Hub official golang image confirms the `1.26-alpine` tag; latest go1.26.3) per CLAUDE.md §3.1. Redis tuning guidance is compatible with Redis 7+ (latest stable 8.8.0 per redis/redis releases). The accompanying `FROM alpine:3.18` runtime stage is a deliberate minimal-runtime pin and was left as-is (alpine base choice is independent of the Go toolchain version).
+
+Negative findings: none affecting correctness — this is a performance/tuning guide with no provider/model API instructions requiring live model-ID verification.

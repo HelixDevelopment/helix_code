@@ -1149,3 +1149,9 @@ helix-config set conflicting.key resolved-value
 
 This comprehensive configuration documentation covers all aspects of HelixCode configuration management, from basic setup to advanced enterprise deployments. The configuration system is designed to be flexible, secure, and production-ready.</content>
 <parameter name="filePath">docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md
+
+## Sources verified 2026-05-29: https://www.postgresql.org/support/versioning/ , https://github.com/redis/redis/releases , https://go.dev/dl/ , https://platform.claude.com/docs/en/docs/about-claude/models/overview
+
+Verified against latest official sources on 2026-05-29. PostgreSQL 15 remains a supported major (latest minor 15.18; PG 18 newest) — the doc's PostgreSQL connection settings are version-agnostic and compatible with the project's 15+ pin (CLAUDE.md §3.1). Redis config examples are compatible with Redis 7+ (latest stable 8.8.0). Default Redis port 6379 and database-number semantics confirmed current.
+
+Negative findings: the `llm.providers` example config IDs (`default_model: claude-3-sonnet`, `models: [claude-3-sonnet, claude-3-haiku]`, `models: [llama-3.2-3b, codellama]`) reference the now-retired Claude 3 family per Anthropic's current model overview. Per CONST-036 these are placeholders only — model/provider metadata is LLMsVerifier-sourced at runtime, never hardcoded. Operators should populate from `helixcode llm models list`. Left unmodified to avoid guessing live IDs. OpenAI docs returned HTTP 403 to automated fetch.

@@ -82,3 +82,10 @@ You don't, in this workspace. If a future legitimate use case arises
 not the host), add the specific file path to `EXCLUDE_PATHS` at the
 top of `check-no-suspend-calls.sh` with a comment explaining the
 non-host context.
+
+
+## Sources verified 2026-05-29: https://www.freedesktop.org/software/systemd/man/latest/logind.conf.html , https://www.freedesktop.org/software/systemd/man/latest/org.freedesktop.login1.html
+
+Verified against latest official systemd/logind documentation on 2026-05-29. The logind.conf drop-in mechanism (`/etc/systemd/logind.conf.d/*.conf`), the inhibitor/power-state surface (`loginctl suspend|hibernate|hybrid-sleep|suspend-then-hibernate|poweroff|halt|reboot`), and the D-Bus `org.freedesktop.login1.Manager` Suspend/Hibernate/HybridSleep/PowerOff/Reboot methods all match the current freedesktop.org systemd manuals. This doc enumerates the FORBIDDEN host-power-management surface per CONST-033 (hard ban) and is descriptive of the ban, not an instruction to invoke any of these — it correctly does NOT instruct any power-state transition.
+
+Negative findings: none — the document is a constitutional ban reference, not an operational guide, and the cited systemd interfaces remain accurate.

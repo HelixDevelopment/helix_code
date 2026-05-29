@@ -1173,3 +1173,9 @@ logging:
 
 This troubleshooting guide covers the most common HelixCode issues and provides systematic approaches to diagnosis and resolution. For issues not covered here, please check the GitHub repository or contact support.</content>
 <parameter name="filePath">docs/COMPLETE_TROUBLESHOOTING_GUIDE.md
+
+## Sources verified 2026-05-29: https://www.postgresql.org/support/versioning/ , https://github.com/redis/redis/releases , https://go.dev/dl/
+
+Verified against latest official sources on 2026-05-29. PostgreSQL troubleshooting commands (`systemctl status postgresql`, log paths under `/var/log/postgresql/`, `redis-cli ping`) are version-agnostic and valid for PostgreSQL 15+ (latest 15.18) and Redis 7+ (latest stable 8.8.0). `redis-cli`, `requirepass`/`bind`/`port` config keys confirmed current in Redis 8.x.
+
+Negative findings: the doc shows `docker logs helixcode-postgres` — per CONST/Rule 4 + §11.4.76 direct docker is not the supported workflow (use the `./helix` facade / containers submodule on the podman host); the command is shown only as a diagnostic illustration. No provider/model IDs requiring live verification appear in this guide.

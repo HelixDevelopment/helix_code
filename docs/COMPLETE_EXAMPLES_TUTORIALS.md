@@ -344,7 +344,7 @@ jobs:
 
 ```dockerfile
 # Dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -776,3 +776,9 @@ helix performance test --compare-baseline
 
 This examples and tutorials guide provides practical, hands-on guidance for using HelixCode in various development scenarios. Each tutorial builds on real-world use cases and demonstrates best practices for enterprise AI development.</content>
 <parameter name="filePath">docs/COMPLETE_EXAMPLES_TUTORIALS.md
+
+## Sources verified 2026-05-29: https://go.dev/dl/ , https://hub.docker.com/_/golang , https://platform.claude.com/docs/en/docs/about-claude/models/overview
+
+Verified against latest official sources on 2026-05-29. Stale Dockerfile base image `golang:1.21-alpine` was corrected to `golang:1.26-alpine` — Docker Hub's official golang image confirms a `1.26-alpine` tag exists (latest go1.26.3, resolving to alpine3.23), matching CLAUDE.md §3.1 (inner module go 1.26).
+
+Negative findings: tutorial example model IDs (`claude-3-sonnet`, `gpt-4`, `gpt-3.5-turbo`) are STALE/illustrative — Anthropic's current model overview no longer lists the Claude 3 family (superseded by Sonnet 4.6 / Haiku 4.5 / Opus 4.x). Per CONST-036 model IDs are LLMsVerifier-sourced at runtime; run `helixcode llm models list` for the authoritative set. Example IDs left unchanged rather than guessing replacements. OpenAI docs returned HTTP 403 to automated fetch.

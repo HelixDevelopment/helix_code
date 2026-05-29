@@ -987,7 +987,7 @@ Get detailed system information.
   "application": {
     "version": "1.0.0",
     "build_date": "2024-01-01T00:00:00Z",
-    "go_version": "go1.21.5",
+    "go_version": "go1.26.3",
     "git_commit": "abc123def456"
   },
   "runtime": {
@@ -1361,3 +1361,9 @@ For API support and questions:
 
 *Last updated: December 2024*</content>
 <parameter name="filePath">docs/COMPLETE_API_REFERENCE.md
+
+## Sources verified 2026-05-29: https://go.dev/dl/ , https://www.postgresql.org/support/versioning/ , https://github.com/redis/redis/releases , https://platform.claude.com/docs/en/docs/about-claude/models/overview
+
+Verified against latest official sources on 2026-05-29. Go runtime authority per CLAUDE.md §3.1 — latest stable go1.26.3 (go.dev/dl confirms); the example /health response `go_version` was corrected from the stale `go1.21.5` to `go1.26.3`. PostgreSQL 15 remains supported (latest 15.18; PG 18 is newest major) — project pins 15+. Redis latest stable is 8.8.0 (Redis 8.x supersedes 7.x); project pins Redis 7+ which still holds.
+
+Negative findings: (1) The example provider/model IDs in this reference (`openai` → `gpt-4`/`gpt-3.5-turbo`/`gpt-4-turbo`; `anthropic` → `claude-3-opus`/`claude-3-sonnet`/`claude-3-haiku`) are STALE — Anthropic's current model overview lists NO Claude 3 family (superseded by Sonnet 4.6 / Haiku 4.5 / Opus 4.x; Claude 3.x retired), and OpenAI's `gpt-3.5-turbo`/`gpt-4` are legacy. Per CONST-036 model/provider IDs are LLMsVerifier-sourced at runtime and MUST NOT be hardcoded; these literals are illustrative only. For the live, authoritative model list run `helixcode llm models list` (or query the verifier). They were left as-is rather than guessing replacement IDs. (2) OpenAI's official model/deprecation pages (platform.openai.com/docs/models, /docs/deprecations) returned HTTP 403 to automated fetch and could not be cross-referenced directly.
