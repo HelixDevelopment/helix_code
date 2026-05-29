@@ -2108,11 +2108,29 @@ include §11.4.102 → 0 failures across root + 68 submodules; gate present
 remotes. <strong>Composes-with:</strong> §11.4.102, CONST-047, §11.4.26,
 §11.4.32 (CONST-055 post-pull validation).</p>
 <hr />
-<h2 id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows">HXC-035
+<h2 id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows-closed-fixed.md">HXC-035
 — <code>POST /api/v1/auth/register</code> returns 400
 <code>internal_auth_failed_create_user</code> on the live server (blocks
-all authenticated flows)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
+all authenticated flows) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29, systematic-debugging per §11.4.102):</strong> ROOT CAUSE
+(confirmed via direct psql INSERT →
+<code>ERROR: column &quot;display_name&quot; of relation &quot;users&quot; does not exist</code>):
+<code>createSchemaSQL</code>‘s <code>CREATE TABLE users</code> omitted
+<code>display_name</code>, while the compensating
+<code>ALTER TABLE … ADD display_name</code> migration in
+<code>InitializeSchema()</code> runs ONLY in the
+<code>if schemaExists</code> branch — so a FRESH DB takes the
+<code>else</code> path, creates <code>users</code> without
+<code>display_name</code>, and <code>auth_db.CreateUser</code>’s INSERT
+fails (error swallowed by the i18n translator into the generic 400).
+FIX: added <code>display_name VARCHAR(255)</code> to
+<code>helix_code/internal/database/database.go</code>
+<code>createSchemaSQL</code>. VERIFIED: fixed server → register
+<code>HTTP 201</code> (was 400) + login → valid session token (evidence
+docs/qa/HXC-035/fix-verification.txt). Unblocks the HXC-029 banks’
+authenticated-positive paths. <strong>Type:</strong> Bug
 <strong>Severity:</strong> High (no user can register → no JWT mintable
 → every authenticated API path is undrivable; blocks the positive-path
 coverage of all 4 HXC-029 API banks) <strong>Discovered:</strong>

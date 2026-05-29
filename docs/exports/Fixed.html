@@ -95,6 +95,33 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-035: <code>POST /api/v1/auth/register</code> returned 400
+<code>internal_auth_failed_create_user</code> on a fresh DB — blocked
+all authenticated flows</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>helix_code/internal/database/database.go (+ evidence
+docs/qa/HXC-035/)</td>
+<td>systematic-debugging per §11.4.102 (Iron Law — root cause before
+fix). ROOT CAUSE (confirmed by direct psql INSERT →
+<code>ERROR: column &quot;display_name&quot; of relation &quot;users&quot; does not exist</code>,
+the swallowed error behind the i18n-generic 400):
+<code>createSchemaSQL</code>’s <code>CREATE TABLE users</code> omitted
+<code>display_name</code>; the compensating
+<code>ALTER TABLE … ADD display_name</code> migration in
+<code>InitializeSchema()</code> lives ONLY inside the
+<code>if schemaExists</code> branch, so a FRESH DB (else branch) creates
+<code>users</code> without the column → <code>auth_db.CreateUser</code>
+INSERT fails. FIX: 1 line — added <code>display_name VARCHAR(255)</code>
+to <code>createSchemaSQL</code>. VERIFIED: rebuilt + restarted server →
+register <code>HTTP 201</code> with real user (display_name set) where
+it was 400; login → valid session token (full auth flow). Unblocks
+HXC-029’s authenticated-positive bank paths. Closed
+<code>Fixed (→ Fixed.md)</code> per CONST-057 (Type Bug).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-030: §11.4.99 latest-source documentation cross-reference sweep
 across all operator-facing docs</td>
 <td>Task</td>

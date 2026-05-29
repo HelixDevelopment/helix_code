@@ -571,9 +571,10 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-035 — `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows)
+## HXC-035 — `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) — CLOSED (→ Fixed.md)
 
-**Status:** In progress
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
+**Closure (2026-05-29, systematic-debugging per §11.4.102):** ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users` omitted `display_name`, while the compensating `ALTER TABLE … ADD display_name` migration in `InitializeSchema()` runs ONLY in the `if schemaExists` branch — so a FRESH DB takes the `else` path, creates `users` without `display_name`, and `auth_db.CreateUser`'s INSERT fails (error swallowed by the i18n translator into the generic 400). FIX: added `display_name VARCHAR(255)` to `helix_code/internal/database/database.go` `createSchemaSQL`. VERIFIED: fixed server → register `HTTP 201` (was 400) + login → valid session token (evidence docs/qa/HXC-035/fix-verification.txt). Unblocks the HXC-029 banks' authenticated-positive paths.
 **Type:** Bug
 **Severity:** High (no user can register → no JWT mintable → every authenticated API path is undrivable; blocks the positive-path coverage of all 4 HXC-029 API banks)
 **Discovered:** 2026-05-29 (surfaced by HXC-029 bank verification against the live server)

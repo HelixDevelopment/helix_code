@@ -329,6 +329,7 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255),
     avatar_url TEXT,
     is_active BOOLEAN NOT NULL DEFAULT true,
     is_verified BOOLEAN NOT NULL DEFAULT false,
