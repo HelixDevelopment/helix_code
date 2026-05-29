@@ -7,12 +7,12 @@ This document provides a comprehensive overview of which advanced features are s
 | Provider | Prompt Caching | Reasoning/Thinking | Token Budgets | Notes |
 |----------|---------------|-------------------|---------------|-------|
 | **Anthropic** | ✅ Full | ✅ Extended Thinking | ✅ Full | Supports ephemeral cache, thinking budgets |
-| **OpenAI** | ⚠️ Planned | ✅ O-series (o1/o3) | ✅ Full | Reasoning on o1/o3/o4 models |
-| **Azure** | ⚠️ Planned | ✅ O-series support | ✅ Full | Azure OpenAI Service compatibility |
-| **Gemini** | ⚠️ Context caching | ✅ Native reasoning | ✅ Full | Google's context caching |
+| **OpenAI** | ✅ Automatic | ✅ O-series (o1/o3) | ✅ Full | Prompt caching auto-enabled since Oct 2024; reasoning on o-series |
+| **Azure** | ✅ Automatic | ✅ O-series support | ✅ Full | Prompt caching enabled by default on GPT-4o+ (Azure OpenAI / Foundry) |
+| **Gemini** | ✅ Context caching | ✅ Native reasoning | ✅ Full | Implicit caching default on Gemini 2.5+; explicit caching available |
 | **VertexAI** | ⚠️ Via Gemini | ✅ Via Gemini | ✅ Full | GCP-hosted AI models |
 | **Bedrock** | ⚠️ Via provider | ✅ Model-dependent | ✅ Full | AWS-hosted models (Claude, etc.) |
-| **Groq** | ❌ Not supported | ✅ Model-dependent | ✅ Full | Fast inference, limited caching |
+| **Groq** | ⚠️ Automatic (subset) | ✅ Model-dependent | ✅ Full | Prompt caching auto on GPT-OSS models (50% cached discount) |
 | **Qwen** | ❌ Not supported | ✅ QwQ-32B | ✅ Full | Alibaba Cloud models |
 | **xAI** | ❌ Not supported | ✅ Model-dependent | ✅ Full | Grok models |
 | **OpenRouter** | ⚠️ Via upstream | ✅ Via upstream | ✅ Full | Aggregator, feature depends on model |
@@ -44,21 +44,21 @@ Prompt caching reduces costs by caching frequently used context (system prompts,
       CacheTTL: 300, // 5 minutes
   }
   ```
-- **Minimum tokens**: 1024 tokens for efficient caching
-- **TTL**: 5 minutes default (configurable)
+- **Minimum tokens**: model-dependent per Anthropic's official docs — 1,024 tokens for Claude Sonnet 4.x / Opus 4.1 / earlier; 4,096 tokens for the newest Opus and Haiku 4.5 models. The `MinTokensForCache: 1024` example above is the lower bound and may be rejected by the newest models.
+- **TTL**: 5 minutes default; an optional 1-hour TTL is available at 2x base input-token price (`{"cache_control":{"type":"ephemeral","ttl":"1h"}}`)
 
 #### OpenAI
-- **Support**: Planned (not yet in public API)
-- **Workaround**: Manual context management to reduce redundant tokens
+- **Support**: Automatic prompt caching (enabled by default, no opt-out) for prompts ≥ 1,024 tokens with an identical leading prefix; cache hits reported as `cached_tokens` under `prompt_tokens_details`. Released October 2024.
+- **Note**: Caching is automatic — no `cache_control` directive is required (unlike Anthropic). The HelixCode `CacheConfig` integration is therefore advisory for OpenAI (prefix structuring) rather than an explicit cache directive.
 
 #### Gemini/VertexAI
-- **Support**: Context caching available
-- **Configuration**: Via GCP console or API
+- **Support**: Two mechanisms per Google's official docs — *implicit caching* (enabled by default on Gemini 2.5 and newer, no developer action) and *explicit caching* (developer-managed cached content with a configurable TTL, default 1 hour)
+- **Configuration**: Explicit caching via API; implicit caching automatic
 - **Cost**: Reduced pricing for cached context
 
 #### Azure OpenAI
-- **Support**: Following OpenAI roadmap
-- **Status**: Monitoring for official release
+- **Support**: Prompt caching enabled by default (no opt-out) for all GPT-4o-or-newer models; minimum 1,024 tokens with identical first-1,024-token prefix. In-memory retention cleared within 5–10 min of inactivity (≤1h); extended retention (up to 24h) available on GPT-5.x / GPT-4.1 family.
+- **Status**: Generally available (Microsoft Foundry / Azure OpenAI)
 
 ### 2. Reasoning/Thinking Mode
 
@@ -327,7 +327,27 @@ For issues or questions about provider features:
 
 ## References
 
-- [Anthropic Prompt Caching](https://docs.anthropic.com/claude/docs/prompt-caching)
+- [Anthropic Prompt Caching](https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching)
 - [OpenAI O-Series Models](https://openai.com/research/learning-to-reason)
-- [Google Gemini Context Caching](https://ai.google.dev/docs/caching)
+- [Google Gemini Context Caching](https://ai.google.dev/gemini-api/docs/caching)
 - [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+
+## Sources verified
+
+Sources verified 2026-05-29:
+https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching ;
+https://ai.google.dev/gemini-api/docs/caching ;
+https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/prompt-caching ;
+https://console.groq.com/docs/prompt-caching ;
+https://api-docs.deepseek.com/guides/reasoning_model ;
+https://github.com/ollama/ollama/blob/main/docs/api.md ;
+https://docs.x.ai/docs/models
+— Confirmed against official sources on 2026-05-29: (1) Anthropic `cache_control` prompt caching with model-dependent minimum (1,024 tokens for Sonnet 4.x/Opus 4.1/earlier; 4,096 for newest Opus and Haiku 4.5), default 5-min TTL + optional 1-h TTL at 2x price — the prior blanket "1024 minimum" was corrected. (2) Gemini implicit caching default on 2.5+ and explicit caching (default 1-h TTL). (3) Azure OpenAI prompt caching is enabled-by-default on GPT-4o+ (was wrongly listed "Planned"). (4) DeepSeek `deepseek-reasoner` exposes `reasoning_content` CoT — matches doc. (5) Ollama `/api/tags` + `think` parameter confirmed. (6) xAI Grok reasoning + 1M-token context confirmed.
+
+**Negative findings / could-not-verify (§11.4.99(B)):**
+- **OpenAI official prompt-caching docs unreachable** — both `https://platform.openai.com/docs/guides/prompt-caching` and `https://openai.com/index/api-prompt-caching/` returned HTTP 403 to the fetcher. The OpenAI/Azure automatic-caching claims here are corroborated from the official **Azure OpenAI** (Microsoft Learn) page (`prompt_cache_retention`, `cached_tokens`, "enabled by default", 1,024-token minimum) and Anthropic's own multi-cloud doc, NOT from a directly-fetched openai.com page. Treat the OpenAI-platform-specific wording as cross-corroborated, not first-party-confirmed in this session.
+- **Groq prompt caching is model-scoped** — Groq's official docs confirm automatic caching ONLY on GPT-OSS 20B/120B + GPT-OSS-Safeguard 20B (50% cached-token discount, ~2-h volatile retention), NOT on all Groq models. The prior matrix entry "❌ Not supported" was stale; corrected to "⚠️ Automatic (subset)".
+- **xAI prompt caching: not documented** — `docs.x.ai/docs/models` does not address prompt caching, so the matrix "❌ Not supported" for xAI is unconfirmed-either-way (absence of documentation, not a confirmed negative).
+- **AWS Bedrock page body not extractable** — `https://docs.aws.amazon.com/bedrock/latest/userguide/inference-prompt-caching.html` returned only the page title to the fetcher (JS-rendered body not captured); Bedrock-as-a-caching-surface is corroborated only indirectly via Anthropic's multi-cloud doc.
+
+**CONST-036/037 caveat:** This matrix hardcodes per-provider capability claims. Per CONST-036/037, capability flags MUST be sourced at runtime from LLMsVerifier (`VerificationResult`), not from a static doc. This file is descriptive/operator-facing reference only and MUST NOT be used as the runtime source of truth for capability gating; treat any divergence between this matrix and LLMsVerifier as LLMsVerifier-wins.
