@@ -1849,7 +1849,80 @@ full-tree grep for literal-true bluffs = 0; runtime harness (down
 server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained
 as a migration tombstone per §11.4.19.</p>
 <hr />
-<p><em>Last updated: 2026-05-28 — constitution submodule pulled
+<h2 id="hxc-029-11.4.98-forward-full-automation-compliance-sweep-of-every-liveintegratione2echallenge-test">HXC-029
+— §11.4.98 forward: full-automation compliance sweep of every
+live/integration/e2e/Challenge test</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-29 (constitution §11.4.98 cascaded
+via HXC-025; forward work implied by the HXC-027 audit)
+<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
+§11.4.98 — “full automation testing of all scenarios … without any
+manual intervention … no false positives … real proofs … no bluff”.
+<strong>Scope:</strong> Audit every
+live/integration/e2e/Challenge/stress/chaos test for human-in-the-loop
+dependence; classify each COMPLIANT vs NON-COMPLIANT per §11.4.98(C);
+rewrite manual-dependency tests to drive programmatically
+(second-account / webhook-fixture / loopback) with self-cleaning state;
+prove re-runnability at <code>-count=3</code>; capture per-test wire
+evidence under <code>docs/qa/HXC-029/</code>. <strong>Closure
+criteria:</strong> Coverage ledger (test × COMPLIANT/NON-COMPLIANT ×
+evidence-path) regenerated; zero NON-COMPLIANT live tests OR each
+migrated to §11.4.90 Obsolete citing §11.4.98; <code>-count=3</code>
+green; evidence captured. <strong>Composes-with:</strong> §11.4.98,
+§11.4.85, §11.4.89, §11.4.87, §11.4.94, HXC-027.</p>
+<hr />
+<h2 id="hxc-030-11.4.99-forward-latest-source-documentation-cross-reference-sweep-across-all-operator-facing-docs">HXC-030
+— §11.4.99 forward: latest-source documentation cross-reference sweep
+across all operator-facing docs</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-29 (constitution §11.4.99 cascaded
+via HXC-025; HXC-028 applied it to README only)
+<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
+§11.4.99 — “ALWAYS check against latest versions of services we use web
+/ online docs before creating instructions”. <strong>Scope:</strong>
+Extend the HXC-028 README treatment to every operator-facing
+guide/manual/setup/troubleshooting doc under <code>docs/</code>; for
+each, WebFetch the latest official source of every referenced
+service/library, cross-reference each instruction, add a
+<code>## Sources verified &lt;date&gt;</code> footer + commit-message
+footer; flag negative findings; classify docs &gt;6 months stale (&gt;90
+days for risk-classified services) for re-verify or §11.4.90 Obsolete
+(<code>Reason=stale-documentation</code>). <strong>Closure
+criteria:</strong> Every operator-facing doc carries a
+<code>## Sources verified</code> footer with URLs+date; release-gate
+check for the footer added; stale-beyond-grace docs triaged.
+<strong>Composes-with:</strong> §11.4.99, §11.4.92, HXC-028.</p>
+<hr />
+<h2 id="hxc-031-deferred-long-tail-build-breaking-snake_case-renames-const-052-codexcline-reference-agent-ports">HXC-031
+— Deferred long-tail: build-breaking snake_case renames (CONST-052) +
+Codex/Cline reference-agent ports</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-29 (carried forward from HXC-001
+deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
+<strong>Discovered-By:</strong> AI <strong>Execution-held:</strong> per
+operator decision 2026-05-29 (AskUserQuestion “do it all”) — the
+build-breaking renames + reference-agent ports are HIGH-BLAST-RADIUS
+(per-submodule <code>go.mod</code> surgery, mass pushes to many
+owned-org remotes); §11.4.101 forbids autonomous execution of
+irreversible high-blast-radius work whose safe path is not
+evidence-determinable. Awaiting explicit per-batch operator go-ahead
+before any execution. <strong>Scope:</strong> (a) ~37
+submodule-entangled owned-org leaf-dir renames + parent-dir
+<code>HelixDevelopment/</code>→<code>helix_development/</code> (D-2) +
+59 <code>Upstreams/</code>→<code>upstreams/</code> deferred from HXC-001
+round-343; (b) port “Codex Multimodal” + “Cline Computer Use” reference
+agents (docs/CONTINUATION.md Phase-3 backlog). <strong>Closure
+criteria:</strong> Per-batch operator approval obtained; each rename
+batch ships the CONST-052 reference-integrity regression test + full
+post-rename test-matrix; each agent port covered by tests + Challenge;
+all pushed per §11.4.71. <strong>Composes-with:</strong> CONST-052,
+HXC-001, §11.4.81, §11.4.101.</p>
+<hr />
+<p>*Last updated: 2026-05-29 — filed HXC-029 (§11.4.98 forward sweep),
+HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port
+long-tail, EXECUTION HELD per §11.4.101) per operator “do it all”; added
+scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate
+(§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled
 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB /
 stress+chaos / cross-platform / submodule-cascade / codegraph-own-org /
 obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 +
@@ -1879,6 +1952,6 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).</em></p>
+hand-maintained).*</p>
 </body>
 </html>

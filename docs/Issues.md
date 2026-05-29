@@ -486,4 +486,43 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-*Last updated: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-029 — §11.4.98 forward: full-automation compliance sweep of every live/integration/e2e/Challenge test
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-29 (constitution §11.4.98 cascaded via HXC-025; forward work implied by the HXC-027 audit)
+**Discovered-By:** AI
+**Forensic-anchor:** §11.4.98 — "full automation testing of all scenarios … without any manual intervention … no false positives … real proofs … no bluff".
+**Scope:** Audit every live/integration/e2e/Challenge/stress/chaos test for human-in-the-loop dependence; classify each COMPLIANT vs NON-COMPLIANT per §11.4.98(C); rewrite manual-dependency tests to drive programmatically (second-account / webhook-fixture / loopback) with self-cleaning state; prove re-runnability at `-count=3`; capture per-test wire evidence under `docs/qa/HXC-029/`.
+**Closure criteria:** Coverage ledger (test × COMPLIANT/NON-COMPLIANT × evidence-path) regenerated; zero NON-COMPLIANT live tests OR each migrated to §11.4.90 Obsolete citing §11.4.98; `-count=3` green; evidence captured.
+**Composes-with:** §11.4.98, §11.4.85, §11.4.89, §11.4.87, §11.4.94, HXC-027.
+
+---
+
+## HXC-030 — §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-29 (constitution §11.4.99 cascaded via HXC-025; HXC-028 applied it to README only)
+**Discovered-By:** AI
+**Forensic-anchor:** §11.4.99 — "ALWAYS check against latest versions of services we use web / online docs before creating instructions".
+**Scope:** Extend the HXC-028 README treatment to every operator-facing guide/manual/setup/troubleshooting doc under `docs/`; for each, WebFetch the latest official source of every referenced service/library, cross-reference each instruction, add a `## Sources verified <date>` footer + commit-message footer; flag negative findings; classify docs >6 months stale (>90 days for risk-classified services) for re-verify or §11.4.90 Obsolete (`Reason=stale-documentation`).
+**Closure criteria:** Every operator-facing doc carries a `## Sources verified` footer with URLs+date; release-gate check for the footer added; stale-beyond-grace docs triaged.
+**Composes-with:** §11.4.99, §11.4.92, HXC-028.
+
+---
+
+## HXC-031 — Deferred long-tail: build-breaking snake_case renames (CONST-052) + Codex/Cline reference-agent ports
+
+**Status:** Queued
+**Type:** Task
+**Discovered:** 2026-05-29 (carried forward from HXC-001 deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
+**Discovered-By:** AI
+**Execution-held:** per operator decision 2026-05-29 (AskUserQuestion "do it all") — the build-breaking renames + reference-agent ports are HIGH-BLAST-RADIUS (per-submodule `go.mod` surgery, mass pushes to many owned-org remotes); §11.4.101 forbids autonomous execution of irreversible high-blast-radius work whose safe path is not evidence-determinable. Awaiting explicit per-batch operator go-ahead before any execution.
+**Scope:** (a) ~37 submodule-entangled owned-org leaf-dir renames + parent-dir `HelixDevelopment/`→`helix_development/` (D-2) + 59 `Upstreams/`→`upstreams/` deferred from HXC-001 round-343; (b) port "Codex Multimodal" + "Cline Computer Use" reference agents (docs/CONTINUATION.md Phase-3 backlog).
+**Closure criteria:** Per-batch operator approval obtained; each rename batch ships the CONST-052 reference-integrity regression test + full post-rename test-matrix; each agent port covered by tests + Challenge; all pushed per §11.4.71.
+**Composes-with:** CONST-052, HXC-001, §11.4.81, §11.4.101.
+
+---
+
+*Last updated: 2026-05-29 — filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port long-tail, EXECUTION HELD per §11.4.101) per operator "do it all"; added scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*

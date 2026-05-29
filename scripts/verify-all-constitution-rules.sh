@@ -40,6 +40,10 @@
 #   G11 §11.4.93/95 workable-items   — docs/workable_items.db validates + is
 #                                    byte-identically in sync with Issues.md/
 #                                    Fixed.md (workable_items_sync_gate.sh; HXC-026)
+#   G12 §11.4.12/91 summary freshness — docs/Issues_Summary.md + Fixed_Summary.md
+#                                    are a fresh mechanical projection of the
+#                                    trackers (summary_sync_gate.sh → the
+#                                    generate_{issues,fixed}_summary.sh --check)
 #
 # Per CONST-055 anti-bluff: this sweep MUST be paired with a meta-test
 # that plants a known violation per gate and asserts the sweep reports
@@ -423,6 +427,20 @@ if want_gate G11; then
     else
         gate_fail G11 "docs/workable_items.db drifted from Issues.md/Fixed.md (see /tmp/g11-wi.out)" \
             "$(tail -3 /tmp/g11-wi.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G12 — §11.4.12/91 summary freshness (Issues_Summary/Fixed_Summary vs trackers)
+# ---------------------------------------------------------------------------
+if want_gate G12; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G12 — §11.4.12/91 summary-doc freshness (CM-{ISSUES,FIXED}-SUMMARY-SYNC)"
+    if bash "$ROOT/scripts/gates/summary_sync_gate.sh" >/tmp/g12-summary.out 2>&1; then
+        gate_pass G12 "$(tail -1 /tmp/g12-summary.out | sed 's/^CM-SUMMARY-SYNC: //')"
+    else
+        gate_fail G12 "summary docs stale vs Issues.md/Fixed.md — re-run scripts/generate_{issues,fixed}_summary.sh (see /tmp/g12-summary.out)" \
+            "$(tail -6 /tmp/g12-summary.out)"
     fi
 fi
 

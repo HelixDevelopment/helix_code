@@ -178,14 +178,46 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁴¹ — ALL TRACKER ITEMS
-CLOSED; open set is now EMPTY (137 items: 72 Implemented + 41 Fixed + 24
-Completed, DB-validated). This close-out lands </strong>HXC-013**
-(SQLite single-source-of-truth, §11.4.93/95) + <strong>HXC-025</strong>
-(constitution §11.4.98/99/101 cascade). <strong>HXC-013</strong>: the
-constitution submodule’s non-functional workable-items scaffold is now a
-FUNCTIONAL Go binary (built+pushed UPSTREAM per §11.4.74 at constitution
-e460a5d) —
+<p><strong>Last updated: 2026-05-29 (close-out¹⁴² — DOC-SYNC +
+FORWARD-WORK FILING (operator “do it all”, local-only, no push).
+</strong>Items 1-3 (safe):** (1) closed the long-standing §11.4.91 gap —
+the previously hand-maintained summaries had a “TODO: create” generator;
+built <code>scripts/generate_issues_summary.sh</code> +
+<code>scripts/generate_fixed_summary.sh</code> (mechanical, parse
+Issues.md/Fixed.md headings + Status/Type/Discovered,
+<code>--check</code> mode) and regenerated the stale summaries (were “1
+open / round-464”; now <strong>3 open / 34 closed</strong>,
+Fixed_Summary Bug=25/Feature=69/Task=12/total=106); added
+<code>scripts/gates/summary_sync_gate.sh</code> wired as
+<strong>G12</strong> in <code>verify-all-constitution-rules.sh</code>
+(CM-{ISSUES,FIXED}-SUMMARY-SYNC freshness; paired §1.1 mutation proven
+PASS→stale→FAIL→restore→PASS) — this is the HXC-013-follow-up auto-sync
+seam; existing G11 (CM-WORKABLE-ITEMS-MD-DB-IN-SYNC) + §11.4.91 clarity
+gate both re-confirmed PASS (clarity 36/0). (2) resolved the
+<code>helix_qa</code> working-tree drift — 8 third-party
+<code>tools/opensource/*</code> nested-submodule gitlinks restored to
+recorded SHAs (stale <code>index.lock</code> cleared per §11.4.82(H));
+meta tree clean. (3) confirmed
+<code>Issues.md</code>/<code>Fixed.md</code> are byte-identical to the
+DB (no tracker drift — earlier “drift” was a stale <em>summary</em>, now
+fixed). <strong>Items 4-6 (filed per operator):</strong> HXC-029
+(§11.4.98 forward — full-automation compliance sweep of every
+live/integration/e2e/Challenge test), HXC-030 (§11.4.99 forward —
+latest-source doc cross-reference sweep across all operator docs)
+<strong>dispatched as background subagents</strong> (§11.4.70/89) to
+produce first-deliverable audit ledgers under
+<code>docs/qa/HXC-029|030/</code>; HXC-031 (deferred build-breaking
+CONST-052 renames + Codex/Cline ports) filed <strong>EXECUTION
+HELD</strong> per §11.4.101 (high-blast-radius, awaiting per-batch
+operator go-ahead). DB resynced 140→143 items, <code>validate</code> OK,
+byte-identical round-trip, WAL-checkpointed (§11.4.95). PRIOR
+close-out¹⁴¹ — ALL TRACKER ITEMS CLOSED; open set was EMPTY (137 items:
+72 Implemented + 41 Fixed + 24 Completed, DB-validated). This close-out
+lands <strong>HXC-013</strong> (SQLite single-source-of-truth,
+§11.4.93/95) + <strong>HXC-025</strong> (constitution §11.4.98/99/101
+cascade). <strong>HXC-013</strong>: the constitution submodule’s
+non-functional workable-items scaffold is now a FUNCTIONAL Go binary
+(built+pushed UPSTREAM per §11.4.74 at constitution e460a5d) —
 <code>sync md-to-db</code>/<code>db-to-md</code>/<code>validate</code>/<code>diff</code>,
 byte-identical round-trip (0 diff on the real 137-item tracker via
 body_md blobs), go test passing; HelixCode now ships the TRACKED

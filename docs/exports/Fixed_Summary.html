@@ -50,17 +50,13 @@ text-decoration: line-through;
 <h1 id="helixcode-fixed-items-summary">HelixCode — Fixed Items
 Summary</h1>
 <blockquote>
-<p>Generated from <code>docs/Fixed.md</code> per Constitution §11.4.19.
-Counts only.</p>
-<p><strong>Round 189 prefix convention:</strong> Open- and closed-item
-IDs are now scope-prefixed (<code>HXC</code>, <code>HXA</code>,
-<code>HXL</code>, <code>HXQ</code>, <code>VEN</code>, …). See
-<code>docs/Issues.md</code> “Prefix convention” section for the full
-table + legacy <code>ISSUE-NNN</code> mapping. The aggregate counts
-below are unaffected by the rename — only labels change.</p>
+<p>Generated <strong>mechanically</strong> from
+<code>docs/Fixed.md</code> by
+<code>scripts/generate_fixed_summary.sh</code> per Constitution §11.4.19
++ §11.4.57 (Type-aware closure vocabulary). Counts only — do not
+hand-edit, re-run the generator.</p>
 </blockquote>
-<h2 id="aggregate-counts-post-round-system-rebaseline-2026-05-19">Aggregate
-counts (post round-system rebaseline 2026-05-19)</h2>
+<h2 id="aggregate-counts">Aggregate counts</h2>
 <table>
 <thead>
 <tr>
@@ -72,281 +68,25 @@ counts (post round-system rebaseline 2026-05-19)</h2>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>19</td>
+<td>25</td>
 <td><code>Fixed (→ Fixed.md)</code></td>
 </tr>
 <tr>
 <td>Feature</td>
-<td>68</td>
+<td>69</td>
 <td><code>Implemented (→ Fixed.md)</code></td>
 </tr>
 <tr>
 <td>Task</td>
-<td>8</td>
+<td>12</td>
 <td><code>Completed (→ Fixed.md)</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 97 (in the round-system tracker;
-pre-round closures tracked separately in
-<code>docs/improvements/PROGRESS.md</code>). Round 464 added HXC-010
-(End-to-end Kimi CLI + Qwen Code CodeGraph verification — previously
-operator-blocked on LLM backend quota/credentials, now
-<code>Completed (→ Fixed.md)</code>: operator supplied OpenAI-compatible
-router credentials; §11.4.10.A pre-use leak-audit CLEAN —
-<code>git grep</code> + <code>git log -S</code> confirmed no key value
-ever committed; the originally-blocking backends remain blocked —
-<code>KIMI_API_KEY</code> shares the same exhausted account-level
-monthly quota as Kimi’s bundled OAuth, Qwen’s OAuth free tier still
-discontinued, OpenRouter credit insufficient — so both agents were
-driven against the SiliconFlow OpenAI-compatible router: Kimi CLI via an
-<code>openai_legacy</code> provider whose api_key is env-overridden by
-<code>OPENAI_API_KEY</code> (config-file carries only a placeholder),
-Qwen Code via <code>--auth-type openai</code> with env vars never
-written into the tracked <code>.qwen/settings.json</code>; both
-Challenge scripts updated to honour <code>HELIX_CG_OPENAI_*</code> env
-vars for the credentialed path; result both true tier-1 PASS — each
-transcript shows the MCP loader connecting to the <code>codegraph</code>
-server with 9 <code>codegraph_*</code> tools, the agent invoking
-<code>codegraph_search</code> and the tool returning 10 real
-<code>.go</code> symbol paths from the scanned HelixCode graph; evidence
-under <code>docs/research/codegraph/evidence/hxc010/</code>, secret-scan
-confirms no key value present; all 7 CodeGraph anti-bluff Challenges now
-true-end-to-end verified across Claude Code, OpenCode, Crush, Kimi CLI,
-Qwen Code). Round 463 added HXC-003 (CONST-046 i18n migration backlog —
-<code>Implemented (→ Fixed.md)</code>: the CONST-046 i18n migration
-campaign is concluded. The genuine user-facing (C) string-literal
-surface — UI text, prompts shown to the operator, error messages
-surfaced to end users, labels, helper text — is exhausted across all 7
-CONST-046 scope areas: helix_code <code>internal/</code> +
-<code>cmd/</code> + <code>applications/</code> (exhausted rounds
-461/462), LLMsVerifier (round 452), helix_qa, and all owned
-<code>vasic-digital/*</code> + <code>HelixDevelopment/*</code>
-submodules (rounds 413/441). Across ~91-462 rounds tens of thousands of
-literals were migrated through <code>nicksnyder/go-i18n/v2</code>
-Bundle/Localizer seams plus locale-aware resource files, and every
-migration round shipped paired-mutation anti-bluff tests that plant a
-known un-migrated literal and assert the audit-gate reports FAIL — so a
-PASS certifies real i18n coverage. The audit-gate
-<code>scripts/audit-const046-hardcoded-content.sh --fail-on-new</code>
-is enforced and each round re-ran <code>--update-baseline</code> so the
-snapshot shrank monotonically. The remaining ~55k audit-baseline hits
-are all OUT of CONST-046 scope — LLM prompt templates, wrapped-error
-developer-facing tech strings, identifier tokens, struct-tag keys,
-format-spec tokens, test fixtures — classified file-by-file in
-<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
-CONST-046’s invariant is satisfied: no user-facing text is hardcoded as
-a static literal). Round 403 added HXC-008 (CONST-055 G1 governance gaps
-surfaced by the post-constitution-pull validation sweep — two
-pre-existing cascade-drift defects: (a)
-<code>docs/improvements/submodule_owned.txt</code> line 10 referenced a
-non-existent <code>dependencies/HelixDevelopment/Models</code> path
-which the CONST-052 batch-1 rename <code>a1ea3c8</code> had lowercased
-to <code>models</code>, corrected to
-<code>dependencies/HelixDevelopment/models</code> —
-<code>verify-governance-cascade.sh</code> re-run dropped the false
-<code>path does not exist on disk</code> FAIL; (b)
-<code>helix_qa/CONSTITUTION.md</code> was missing anchors CONST-047..057
-and <code>VisionEngine/CONSTITUTION.md</code> was missing §11.4.69 —
-both CLAUDE.md/AGENTS.md already carried them, so the CONST-047..057
-block was cascaded into <code>helix_qa/CONSTITUTION.md</code> from the
-meta CONSTITUTION.md and §11.4.69 into
-<code>VisionEngine/CONSTITUTION.md</code>;
-<code>verify-governance-cascade.sh</code> → 0 failures,
-<code>verify-all-constitution-rules.sh</code> → 6 gates / 0 failures;
-helix_qa <code>1364d23</code> + VisionEngine <code>b3a13d8</code> pushed
-to all upstreams), HXC-007 (Constitution §11.4.68/70-74 cascade verified
-genuinely complete — constitution
-<code>584b3ee</code>→<code>34a82b3</code>, 6 rules cascaded to the
-meta-repo + 67 owned submodules, meta <code>.gitmodules</code> pointer
-confirmed at <code>34a82b3</code>), and HXC-009 (owned-submodule
-GitHub↔︎GitLab mirror-divergence reconciliation verified complete —
-helix_qa, VisionEngine, LLMProvider, challenges, containers,
-DocProcessor all reconciled via merge-first per CONST-061/§11.4.71, all
-converged + pushed to all upstreams, meta pointers bumped
-<code>68309b8e</code>). Round 402 added HXC-011 (helix_qa runner emitted
-hollow sub-microsecond <code>PASSED</code> rows for desktop-platform
-bank cases instead of executing the case’s <code>action:</code> — §11.4
-/ CONST-035 PASS-bluff in the QA runner itself; reproduce-before-fix
-Rule 7 / §11.4.43 TDD-fix; root cause:
-<code>definitionChallenge.Execute</code> unconditionally returned
-<code>Status=Skipped</code> and never shelled out, and the generic
-<code>challenges/pkg/bank</code> loader drops each case’s
-<code>steps</code> array so executable action data never reached the
-orchestrator; RED-with-fix-reverted captured the bluff — a desktop
-<code>shell:</code> sentinel-write action ran through
-<code>helixqa run -platform desktop</code> and the sentinel was never
-written + a <code>shell: exit 17</code> case produced 0 failures; fix
-all in <code>helix_qa</code> keeping the challenges submodule decoupled
-per CONST-051(B) — new <code>testbank.ActionTypeShell</code> runs a host
-command via <code>os/exec</code>, <code>loadExecutableCases()</code>
-re-parses banks through <code>pkg/testbank</code> which preserves
-<code>steps</code>, <code>runPlatform</code> builds a per-platform
-registry of <code>definitionChallenge</code> wrappers carrying the
-executable case + target platform, and <code>Execute</code> on
-<code>desktop</code> runs each <code>shell:</code> step capturing the
-real exit code + output and scores PASS only when every step exits 0 —
-non-zero scores FAIL, no-executable-action cases emit an honest SKIP
-with explicit reason per §11.4.3; GREEN: 3 HXC-011 tests PASS, full
-<code>pkg/...</code> suite 122 ok / 0 FAIL,
-<code>go build</code>/<code>go vet</code> clean, codegraph bank through
-the fixed runner 2/2 PASSED real durations + failing case 0/1 FAIL;
-helix_qa commit <code>6b46df0</code>). Round 401 added HXC-012 (data
-race in <code>helix_code/internal/llm/load_balancer.go</code> background
-stat-collector goroutine resolved via reproduce-before-fix
-<code>-race</code> test — Rule 7 / §11.4.43 TDD-fix;
-<code>SelectOptimalProvider</code> read <code>lb.currentStrategy</code>
-/ <code>lb.strategies</code> on the hot path without holding
-<code>lb.mutex</code> while <code>SetStrategy</code> writes under the
-mutex and the background <code>collectStats</code> goroutine mutates
-<code>lb.stats</code>; fix snapshots the strategy under
-<code>lb.mutex.RLock()</code> then releases before invoking the strategy
-and <code>updateStats</code>, observable behaviour unchanged; new
-<code>internal/llm/load_balancer_race_test.go</code> FAILed RED then
-PASSes GREEN, full-package <code>go test -race ./internal/llm/...</code>
-PASS, commit <code>9d8c1cdc</code>). Round 400 added HXC-006 (HelixCode
-Speed Programme — all 6 phases / 31 tasks landed making HelixCode 3-5×
-faster than competitor AI CLI agents; CONST-048 coverage ledger
-<code>docs/research/speed/05-coverage-ledger.md</code> = 29 PASS + 2
-honestly-bounded PARTIAL [P5-T01 build/test parallelism tuning landed
-but suite-wall-time delta not captured as a pasted benchmark; P5-T02
-partial single-provider <code>internal/llm</code> split — Cerebras
-extracted, full 18-provider split infeasible without an import cycle] +
-0 DEFERRED; headline measured wins P1-T02 lazy Ollama 67µs→2.7ns /
-P1-T03 lazy CLI startup ~8.85× / P2-T03 repo-map cache ~10.6× warm /
-P2-T06 incremental tree-sitter ~21× / P3-T03 fast-apply ~516× / P4-T01
-PGO −46% CPU-bound, every number carrying pasted in-session captured
-evidence per CONST-035; release-gate sweep — anti-bluff smoke clean,
-CONST-046 audit no new hardcoded content, governance-cascade verifier’s
-2 failures are the pre-existing HXC-008 drift not speed regressions; two
-pre-existing defects surfaced filed honestly as HXC-011 + HXC-012).
-Round 396 added HXV-003 (LLMsVerifier
-<code>ProviderAdapterForBenchmark.Complete</code> CONST-050(A)
-production mock-bluff resolved — WIRE-not-delete decision: the adapter
-is live code wired by <code>BenchmarkSystem.Initialize</code>, so honest
-deletion was not applicable; the <code>provider</code> field was retyped
-from an unused <code>interface{}</code> to the real
-<code>benchmark.LLMProvider</code> interface, <code>Complete</code> now
-dispatches to <code>a.provider.Complete</code> returning genuine
-response text / token count / error, and an honest
-<code>ErrProviderAdapterNotWired</code> sentinel is returned when no
-real provider is wired — the hardcoded
-<code>return &quot;Response&quot;, 50, nil</code> BLUFF-001 fabrication is
-removed; reproduce-before-fix <code>httptest</code> real-dispatch test
-asserts the adapter actually hits an OpenAI-shim server and returns the
-real payload; <code>go test ./internal/benchmark/...</code> PASS,
-<code>go build ./...</code> clean). Round 397 added OPS-001 (LLMOps 2
-pre-existing <code>CreatePromptExperiment</code> test failures resolved
-— both classified (A) test-assertion drift:
-<code>ControlPromptCreateFails</code>/<code>TreatmentPromptCreateFails</code>
-asserted pre-idempotency behaviour, expecting a same-(name,version)
-duplicate to fail <code>CreatePromptExperiment</code>, but commit
-<code>bb53c38</code> deliberately made prompt registration idempotent so
-duplicates are tolerated as no-ops; no production regression; tests
-re-keyed to the genuine non-tolerated failure path —
-structurally-invalid prompt with empty <code>Content</code> → registry
-<code>&quot;prompt content is required&quot;</code> → wrapped with
-<code>&quot;control prompt&quot;</code>/<code>&quot;treatment prompt&quot;</code> prefix;
-<code>go test -count=1 ./llmops/...</code> 2 FAIL → 0 FAIL,
-<code>go build ./...</code> clean). Round 348 added HXV-002
-(LLMsVerifier <code>verification/</code> package 10 pre-existing test
-failures resolved — all 10 classified (A) test-assertion drift: 8
-<code>verification_test.go</code> Verify tests re-keyed to the round-17
-honest <code>ErrVerificationNotWired</code> contract, 2
-<code>code_verification_test.go</code> tests re-keyed to honest
-API-error-propagation / zero-response→<code>failed</code> contracts; no
-production code changed; <code>go test ./verification/...</code> 10 FAIL
-→ 0 FAIL, <code>go build ./...</code> clean). Round 344 added HXQ-002
-(helix_qa <code>pkg/autonomous</code> ↔︎ VisionEngine <code>remote</code>
-API drift resolved — mechanical 3-signature drift:
-<code>ProbeHosts</code>/<code>SelectStrongestModel</code>/<code>PlanDistribution</code>
-updated to the round-340 VEN-002 merged superset API, now
-error-returning with <code>[]SSHConfig</code>/<code>[]ModelSpec</code>
-parameters; 5 config-injected pipeline fields added per CONST-045/046;
-<code>pkg/autonomous</code> build+test PASS, helix_agent
-<code>tests/integration</code> compiles). Round 342 added HXA-002
-(helix_agent debate/llmprovider sibling-submodule API drift resolved —
-investigation per operator’s explicit ask found the
-learning/knowledge/recommendations capability tier was GENUINELY
-DELETED, not moved: <code>digital.vasic.debate</code> was rebuilt from
-scratch at commit <code>196d0ea</code> and the slim
-<code>CreateDebate</code>/<code>GetStatistics</code> API is the
-first+only version, with zero surviving copies anywhere in
-<code>dependencies/</code>; Part-1 import swap + Part-2 slim-API test
-rewrite + score-scale fix; <code>debate_integration</code> tests PASS,
-anti-bluff per CONST-035). Round 340 added VEN-002 (VisionEngine
-<code>vasic-digital-github</code> divergent fork lineage resolved via
-CONST-061 §11.4.41 merge-first — real 2-parent merge commit
-<code>70c9e0c</code>, NO force-push, 16-file conflict surface resolved
-preserving the anti-bluff truth per CONST-035; 7 packages build+test
-PASS; 4 remotes fast-forwarded). Round 325 added HXQ-001 (helix_qa
-<code>TestPerformance</code> flake resolved — 3 <code>pkg/vision/</code>
-perf tests gated behind <code>HOST_LOAD_DEDICATED</code> env var;
-resolution path (b), timing tolerance NOT loosened, anti-bluff
-strictness preserved per CONST-035).</p>
-<h2 id="coverage-by-round-system-phase">Coverage by round-system
-phase</h2>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Phase</th>
-<th>Closed items</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Round 37-89 (governance + stabilization + LLM wiring)</td>
-<td>6 batched closures</td>
-<td>Done</td>
-</tr>
-<tr>
-<td>CONST-046 Phase 1 (rounds 91-93)</td>
-<td>3 (pkg/i18n core + audit script + injection wiring)</td>
-<td>Done</td>
-</tr>
-<tr>
-<td>CONST-046 Phase 2 (rounds 94-96)</td>
-<td>3 (SelfImprove + HelixLLM + harmony_os, 15 strings)</td>
-<td>Done</td>
-</tr>
-<tr>
-<td>CONST-046 Phase 3 (rounds 97-99)</td>
-<td>4 closed (DocProcessor + Planning + VisionEngine + panoptic +
-audit-gate; 20 strings + audit-gate)</td>
-<td>DONE</td>
-</tr>
-<tr>
-<td>CONST-046 Phase 4 (rounds 100+)</td>
-<td>concluded — campaign closed round 463 (HXC-003
-<code>Implemented (→ Fixed.md)</code>); genuine user-facing (C) surface
-exhausted across all 7 scope areas; ~91-462 rounds, tens of thousands of
-literals</td>
-<td>Done</td>
-</tr>
-</tbody>
-</table>
-<h2 id="open-issues-snapshot-cross-ref-docsissues_summary.md">Open
-issues snapshot (cross-ref <code>docs/Issues_Summary.md</code>)</h2>
-<p>1 open issue: 0 Bug / 1 Task (HXC-001) / 0 Feature; 0 BLOCKED.</p>
-<p><em>Last regenerated: 2026-05-21 (round 464 — HXC-010 closed
-<code>Completed (→ Fixed.md)</code>: operator supplied OpenAI-compatible
-router credentials; both CodeGraph per-agent Challenges
-<code>cg-challenge-05-kimi.sh</code> +
-<code>cg-challenge-07-qwen.sh</code> re-run produce true tier-1 PASS —
-Kimi CLI and Qwen Code each genuinely invoke
-<code>codegraph_search</code> and receive real graph data from the
-scanned HelixCode code-graph; API keys injected via environment
-variables only, never written to any tracked file; all 7 CodeGraph
-anti-bluff Challenges now true-end-to-end verified across Claude Code,
-OpenCode, Crush, Kimi CLI, Qwen Code. Previous round 463 — HXC-003
-closed <code>Implemented (→ Fixed.md)</code> (CONST-046 i18n migration
-campaign concluded). See <code>docs/Fixed.md</code> for full closure
-entries with commit SHAs.</em></p>
+<p><strong>Total closed items</strong>: 106 (counted directly from the
+<code>docs/Fixed.md</code> closure table).</p>
+<p><em>Last regenerated: 2026-05-29 by
+<code>scripts/generate_fixed_summary.sh</code>. HTML/PDF exports via
+<code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>
