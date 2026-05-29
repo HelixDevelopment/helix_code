@@ -45,7 +45,8 @@
 | HXC-031 | Deferred long-tail: CONST-052 renames (RESOLVED — none remain) + Codex/Cline reference-agent ports | Task | In progress | 2026-05-29 | each agent port covered by tests + Challenge with captured evidence; all pushed per §11.4.71. |
 | HXC-032 | LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build | Bug | Fixed (→ Fixed.md) | 2026-05-29 | all 26 conflict hunks across 5 LLMOrchestrator Go files resolved to the HEAD (i18n-migrated) side; `bundle.go` `BundleTranslator` gained an honest `TPlural`;… |
 | HXC-033 | codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operator'… |
+| HXC-034 | Cascade constitution §11.4.102 (mandatory systematic-debugging + using-superpowers + plugin-availability) into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate | Task | Queued | 2026-05-29 | `verify-governance-cascade.sh` extended to include §11.4.102 → 0 failures across root + 68 submodules; gate present + paired-mutation-proven; each submodule … |
 
-**Counts**: 39 tracked item-sections in `docs/Issues.md` — **2 open** (non-terminal status) / **37 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 40 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **37 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-05-29 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
