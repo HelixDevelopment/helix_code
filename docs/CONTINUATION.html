@@ -34,14 +34,45 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁵⁴ — HXC-029 CLOSED
-Completed + HelixCode test infra shut down (operator request). §11.4.98
+<p><strong>Last updated: 2026-05-29 (close-out¹⁵⁵ — END-OF-DAY WRAP-UP.
+HXC-031 SCOPED (operator chose “scope first, plan no code”):
+implementation plan at
+<code>docs/plans/HXC-031-codex-cline-port.md</code> (committed d57165fe,
++.html/.pdf). Findings: “Codex Multimodal” = per-message text|image
+content blocks (base64 data-URL); “Cline Computer Use” = the
+browser_action screenshot-feedback loop (NOT OS-level). Verdict
+REUSE+EXTEND not build-fresh — Cline actuation already exists (P2-F23
+chromedp browser suite); vision = extend owned
+<code>vasic-digital/vision_engine</code>; the ONE new piece = multimodal
+request carriage (llm.Message is text-only + screenshot tool returns
+path not bytes). ~7-9 subagent sessions. </strong>3 OPERATOR DECISIONS
+PENDING before build** (resume here tomorrow): FORK-1 browser-only
+(recommended) vs OS-level computer-use; FORK-2 Claude-only-first
+(recommended) vs all-providers; FORK-3 VisionEngine reuse depth
+(encode-helpers-only recommended). Capability A (multimodal pipe) must
+land before Capability B (loop depends on it). <strong>RESUME
+TOMORROW</strong>: answer the 3 forks → start build Capability A first,
+subagent-driven. <strong>WRAP-UP STATE</strong>: tracker <strong>1 open
+(HXC-031) / 41 closed</strong>, DB 155 items validate-OK; meta HEAD
+<code>32fc6144</code> (theme cosmetic-color drift committed; theme.go
+only — assets/colors gitignored derivatives); ALL owned submodules
+committed+pushed to their org remotes (the 6 cli_agents_resources/*
+“ahead” are third-party read-only refs, not ours); main repo pushed to
+gitlab + (github/origin/upstream via detached :443 catch-up —
+qa-results/wrapup_push.log); infra DOWN (8080/5432/6379 closed;
+atmosphere-qa-tesseract left running — diff project). Pre-existing
+untracked docs/audits/const046-baseline.txt left per CONST-053.
+<strong>SESSION TALLY: 4 issues closed — HXC-034 (§11.4.102 cascade 74
+submodules+root+gate), HXC-035 (register-400 bug), HXC-036 (systemic
+i18n boot-wiring 74/74), HXC-029 (§11.4.98 sweep 0 manual
+violations).</strong> PRIOR close-out¹⁵⁴ — HXC-029 CLOSED Completed +
+HelixCode test infra shut down (operator request). §11.4.98
 full-automation compliance sweep COMPLETE — 0 remaining
 human-in-the-loop violations: the static audit found exactly 2
 NON-COMPLIANT (server_timeout_test.go manual-skip, clean.sh interactive
-read), both already FIXED; all </strong>7 HelixCode-scope HelixQA
-banks** verified self-driving vs the live :8080 server (4 API + 3 CLI,
-3× + flip-mutation each, real bin/cli via os/exec, 0
+read), both already FIXED; all <strong>7 HelixCode-scope HelixQA
+banks</strong> verified self-driving vs the live :8080 server (4 API + 3
+CLI, 3× + flip-mutation each, real bin/cli via os/exec, 0
 manual-review-required, honest skips); <strong>31/31 integration
 files</strong> runtime-verified self-driving; the <strong>20
 browser/Android/capture banks are OUT of scope</strong> (HelixQA is
