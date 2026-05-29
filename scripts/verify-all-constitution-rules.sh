@@ -44,6 +44,10 @@
 #                                    are a fresh mechanical projection of the
 #                                    trackers (summary_sync_gate.sh → the
 #                                    generate_{issues,fixed}_summary.sh --check)
+#   G13 §11.4.99 sources-verified    — operator-facing docs carry a
+#                                    `## Sources verified` footer (advisory
+#                                    coverage report; sources_verified_gate.sh;
+#                                    --enforce blocks at 100% per HXC-030)
 #
 # Per CONST-055 anti-bluff: this sweep MUST be paired with a meta-test
 # that plants a known violation per gate and asserts the sweep reports
@@ -442,6 +446,19 @@ if want_gate G12; then
         gate_fail G12 "summary docs stale vs Issues.md/Fixed.md — re-run scripts/generate_{issues,fixed}_summary.sh (see /tmp/g12-summary.out)" \
             "$(tail -6 /tmp/g12-summary.out)"
     fi
+fi
+
+# ---------------------------------------------------------------------------
+# G13 — §11.4.99 Sources-verified footer coverage (ADVISORY until HXC-030 sweep done)
+# ---------------------------------------------------------------------------
+if want_gate G13; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G13 — §11.4.99 Sources-verified footer coverage (advisory; HXC-030)"
+    # Advisory: reports operator-doc footer coverage but does NOT fail the sweep
+    # while the HXC-030 §11.4.99 verification campaign is in progress. Flip to
+    # --enforce here once coverage reaches 100% (HXC-030 closure criterion).
+    bash "$ROOT/scripts/gates/sources_verified_gate.sh" >/tmp/g13-sv.out 2>&1 || true
+    gate_pass G13 "$(grep -oE '[0-9]+/[0-9]+ operator-facing docs footered \([0-9]+%\)' /tmp/g13-sv.out | head -1) — advisory (run sources_verified_gate.sh --enforce to block at 100%)"
 fi
 
 # ---------------------------------------------------------------------------
