@@ -1173,3 +1173,5 @@ logging:
 
 This troubleshooting guide covers the most common HelixCode issues and provides systematic approaches to diagnosis and resolution. For issues not covered here, please check the GitHub repository or contact support.</content>
 <parameter name="filePath">docs/COMPLETE_TROUBLESHOOTING_GUIDE.md
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go 1.26.3 confirmed latest stable, 2026-05-07) ; https://www.postgresql.org/support/versioning/ (PostgreSQL 15 supported, latest minor 15.18, EOL 2027-11-11) ; https://github.com/ollama/ollama/blob/main/docs/api.md (Ollama default endpoint http://localhost:11434 confirmed) ; https://github.com/redis/redis/releases (Redis 7+ requirement valid; latest GA 8.8.0) — all version/endpoint references for Go, PostgreSQL, Redis, and Ollama in this troubleshooting guide cross-checked against official sources and found current; project version authority is go.mod (inner module go 1.26) + CLAUDE.md §3.1. Negative finding: OpenAI's hosted API-reference page (platform.openai.com) returned HTTP 403 to automated fetch and could not be machine-verified this run.

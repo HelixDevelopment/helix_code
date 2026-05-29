@@ -346,3 +346,6 @@ make test-verifier-challenges
 - [AGENTS.md](../AGENTS.md) — Agent guidelines for verifier work
 - [CLAUDE.md](../CLAUDE.md) — Constitutional mandates
 - Integration Plan: `docs/llms_verifier/LLMsVerifier_HelixCode_Integration_Plan.md`
+
+## Sources verified
+Sources verified 2026-05-29: https://github.com/ollama/ollama/blob/main/docs/api.md (Ollama default endpoint http://localhost:11434 confirmed — matches the guide's example) ; https://go.dev/doc/devel/release (Go 1.26.3 latest stable; matches inner go.mod go 1.26) — the provider roster (OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp) and the per-provider `*_API_KEY` env vars are sourced at runtime from LLMsVerifier per CONST-036/039 and are NOT hardcoded version-bearing instructions, so no static endpoint pins required correction. Project version authority is go.mod + CLAUDE.md §3.1. Negative findings: OpenAI's hosted API-reference page (platform.openai.com) returned HTTP 403 to automated fetch and the openai-openapi spec file on GitHub is too large to render via fetch, so the `https://api.openai.com/v1` base URL shown in the guide could not be machine-confirmed this run (it is a long-stable, widely-used endpoint; flagged here for honesty, not corrected).
