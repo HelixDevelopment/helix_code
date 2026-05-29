@@ -143,7 +143,7 @@ sudo systemctl start helixcode
 ### Single Container Setup
 
 ```dockerfile
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -242,7 +242,7 @@ networks:
 
 ```dockerfile
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
@@ -777,8 +777,8 @@ apt update && apt upgrade -y
 apt install -y curl wget gnupg2 software-properties-common
 
 # Install Go
-wget -q https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
-rm -rf /usr/local/go && tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+wget -q https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
 
@@ -1781,3 +1781,5 @@ systemctl start postgresql redis-server helixcode
 
 *This deployment guide covers production-ready setups for HelixCode. For additional support, visit our documentation site or contact enterprise support.*</content>
 <parameter name="filePath">docs/DEPLOYMENT_GUIDE.md
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

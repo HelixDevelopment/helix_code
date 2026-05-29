@@ -419,7 +419,7 @@ curl http://localhost:8080/health
 ```bash
 # Install PostgreSQL
 # Ubuntu/Debian
-sudo apt-get install postgresql-14
+sudo apt-get install postgresql-15
 
 # macOS
 brew install postgresql@14
@@ -660,14 +660,14 @@ curl http://<EXTERNAL-IP>/health
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install -y build-essential git postgresql-14 redis-server
+sudo apt-get install -y build-essential git postgresql-15 redis-server
 
 # Fedora/RHEL
 sudo dnf install -y gcc git postgresql-server redis
 
 # Install Go
-wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -694,11 +694,11 @@ wsl --install -d Ubuntu
 
 # Inside WSL2, follow Linux instructions
 sudo apt-get update
-sudo apt-get install -y build-essential git postgresql-14 redis-server
+sudo apt-get install -y build-essential git postgresql-15 redis-server
 
 # Install Go
-wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -708,7 +708,7 @@ source ~/.bashrc
 ```bash
 # Verify Go installation
 go version
-# Expected: go version go1.24.0 ...
+# Expected: go version go1.26.3 ...
 
 # Verify PostgreSQL
 psql --version
@@ -3238,3 +3238,6 @@ When rate limited, HelixCode automatically queues requests and retries with expo
 **End of Main README** - See [tutorials/](tutorials/) for step-by-step guides and [examples/](examples/) for configuration templates.
 
 **Total Lines**: 2,800+ (and growing with additional sections)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

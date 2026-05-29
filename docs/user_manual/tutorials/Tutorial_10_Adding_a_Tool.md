@@ -7,7 +7,7 @@ Create a custom tool that integrates with HelixCode's MCP server.
 
 ## Prerequisites
 - HelixCode running with MCP enabled
-- Go 1.24+
+- Go 1.26.0 or later
 - Understanding of JSON-RPC
 
 ## Step 1: Define Tool Schema
@@ -78,3 +78,6 @@ func (t *CalculatorTool) RequiresConfirmation() bool {
     return false  // calculator is safe
 }
 ```
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

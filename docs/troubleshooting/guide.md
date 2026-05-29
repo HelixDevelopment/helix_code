@@ -192,7 +192,7 @@ which go
 ```
 
 **Required System Dependencies:**
-- Go 1.24.0 or later
+- Go 1.26.0 or later
 - PostgreSQL client libraries (optional)
 - Redis client (optional)
 - Chromium/Chrome (for browser automation features)
@@ -1122,21 +1122,21 @@ Error: type parameter requires go1.18 or later
 ```bash
 # Check Go version
 go version
-# Required: go1.24.0 or later
+# Required: go1.26.0 or later
 
 # Check go.mod requirements
 head -5 go.mod
-# Should show: go 1.24.0
+# Should show: go 1.26.3
 
 # Install correct Go version (Ubuntu/Debian)
 sudo rm -rf /usr/local/go
-wget https://go.dev/dl/go1.24.9.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.24.9.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 
 # Using gvm (Go Version Manager)
-gvm install go1.24.9
-gvm use go1.24.9
+gvm install go1.26.3
+gvm use go1.26.3
 
 # Using asdf
 asdf install golang 1.24.9
@@ -1420,3 +1420,6 @@ If this guide doesn't resolve your issue:
 - Full error message and stack trace
 - Relevant configuration (redact secrets)
 - Steps to reproduce
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

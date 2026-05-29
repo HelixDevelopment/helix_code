@@ -377,7 +377,7 @@ LLM timeout error when processing large files
 
 ## System Information
 ```
-go_version: go1.24.0
+go_version: go1.26.3
 os: darwin
 arch: arm64
 num_cpu: 8
@@ -949,3 +949,6 @@ A: Yes, via CLI mode. See [CLI Scripting Guide](./CLI_SCRIPTING.md).
 **Document Version:** 1.0
 **Last Updated:** November 7, 2025
 **Feedback:** [GitHub Issues](https://github.com/user/helixcode/issues)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

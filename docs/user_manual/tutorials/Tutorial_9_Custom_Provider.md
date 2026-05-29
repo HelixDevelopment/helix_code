@@ -6,7 +6,7 @@
 Extend HelixCode with your own LLM provider by implementing the `Provider` interface.
 
 ## Prerequisites
-- Go 1.24+
+- Go 1.26.0 or later
 - Running HelixCode development environment
 - Access to your LLM API
 
@@ -77,3 +77,6 @@ func init() {
 ```
 
 Build: `go build ./...` — should succeed.
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

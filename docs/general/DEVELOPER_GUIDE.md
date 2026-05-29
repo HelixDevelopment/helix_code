@@ -70,7 +70,7 @@ HelixCode is a distributed AI development platform built in Go with a modular, p
 
 ### Prerequisites
 
-- **Go**: 1.24.0+ (toolchain go1.24.9)
+- **Go**: 1.26.0+ (toolchain go1.26.3)
 - **PostgreSQL**: 15+ (optional, for database features)
 - **Redis**: 7+ (optional, for caching)
 - **Docker/Podman**: For containerized builds
@@ -544,3 +544,6 @@ Co-Authored-By: Agent Name <agent@example.com>
 ---
 
 *Built with zero-bluff commitment. Every feature actually works.*
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).

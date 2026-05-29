@@ -174,7 +174,7 @@ $ go mod tidy
 ```go
 module task-api
 
-go 1.24
+go 1.26
 
 require (
     github.com/gin-gonic/gin v1.9.1
@@ -1243,3 +1243,6 @@ curl -X PUT http://localhost:8080/api/tasks/550e8400-e29b-41d4-a716-446655440000
 **Tutorial Complete!** 🎉
 
 Continue to [Tutorial 2: Refactoring a Large Codebase](Tutorial_2_Refactoring_Large_Codebase.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go 1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).
