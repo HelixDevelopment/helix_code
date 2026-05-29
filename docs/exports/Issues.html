@@ -1911,34 +1911,100 @@ criteria:</strong> Every operator-facing doc carries a
 check for the footer added; stale-beyond-grace docs triaged.
 <strong>Composes-with:</strong> §11.4.99, §11.4.92, HXC-028.</p>
 <hr />
-<h2 id="hxc-031-deferred-long-tail-build-breaking-snake_case-renames-const-052-codexcline-reference-agent-ports">HXC-031
-— Deferred long-tail: build-breaking snake_case renames (CONST-052) +
+<h2 id="hxc-031-deferred-long-tail-const-052-renames-resolved-none-remain-codexcline-reference-agent-ports">HXC-031
+— Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
 Codex/Cline reference-agent ports</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
 <strong>Discovered:</strong> 2026-05-29 (carried forward from HXC-001
 deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
-<strong>Discovered-By:</strong> AI <strong>Execution-held:</strong> per
-operator decision 2026-05-29 (AskUserQuestion “do it all”) — the
-build-breaking renames + reference-agent ports are HIGH-BLAST-RADIUS
-(per-submodule <code>go.mod</code> surgery, mass pushes to many
-owned-org remotes); §11.4.101 forbids autonomous execution of
-irreversible high-blast-radius work whose safe path is not
-evidence-determinable. Awaiting explicit per-batch operator go-ahead
-before any execution. <strong>Scope:</strong> (a) ~37
-submodule-entangled owned-org leaf-dir renames + parent-dir
-<code>HelixDevelopment/</code>→<code>helix_development/</code> (D-2) +
-59 <code>Upstreams/</code>→<code>upstreams/</code> deferred from HXC-001
-round-343; (b) port “Codex Multimodal” + “Cline Computer Use” reference
-agents (docs/CONTINUATION.md Phase-3 backlog). <strong>Closure
-criteria:</strong> Per-batch operator approval obtained; each rename
-batch ships the CONST-052 reference-integrity regression test + full
-post-rename test-matrix; each agent port covered by tests + Challenge;
-all pushed per §11.4.71. <strong>Composes-with:</strong> CONST-052,
-HXC-001, §11.4.81, §11.4.101.</p>
+<strong>Discovered-By:</strong> AI <strong>Rename-component RESOLVED
+(2026-05-29 — investigation, no guessing per §11.4.6):</strong> the
+“deferred build-breaking renames” were stale CONTINUATION prose. On
+inspection there are NO owned-org renames genuinely left:
+<code>dependencies/HelixDevelopment/*</code> leaves are already
+lowercase snake_case (debate_orchestrator, doc_processor, helix_llm,
+helix_memory, helix_specifier, llm_orchestrator, llm_provider,
+llms_verifier, models, vision_engine);
+<code>dependencies/vasic-digital/*</code> has no PascalCase leaves; the
+only remaining PascalCase dirs (<code>HuggingFace_Hub</code>,
+<code>LLama_CPP</code>, <code>Ollama</code>) + the single remaining
+<code>Upstreams/</code> (<code>cli_agents/claude-code-source/</code>)
+are THIRD-PARTY (CONST-052-exempt vendor names); the parent org-grouping
+dirs <code>HelixDevelopment/</code> + <code>vasic-digital/</code> were
+intentionally kept as namespace carve-outs per HXC-001’s operator
+decision. <code>scripts/const052_verify_refs.sh</code> CHECK 1/2 PASS
+(217 gitlinks resolve, no conflict gitlinks). HXC-001 leaf-rename
+programme is genuinely complete; nothing to do here. <strong>Remaining
+scope:</strong> port “Codex Multimodal” + “Cline Computer Use” reference
+agents (docs/CONTINUATION.md Phase-3 backlog) — genuine feature work,
+not started. <strong>Closure criteria:</strong> each agent port covered
+by tests + Challenge with captured evidence; all pushed per §11.4.71.
+<strong>Composes-with:</strong> CONST-052, HXC-001, §11.4.81,
+§11.4.101.</p>
 <hr />
-<p>*Last updated: 2026-05-29 — filed HXC-029 (§11.4.98 forward sweep),
-HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port
-long-tail, EXECUTION HELD per §11.4.101) per operator “do it all”; added
+<h2 id="hxc-032-llmorchestrator-submodule-committed-merge-conflict-markers-break-helix_agent-build">HXC-032
+— LLMOrchestrator submodule: committed merge-conflict markers break
+<code>helix_agent</code> build</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Severity:</strong> High (breaks <code>helix_agent</code>
+<code>go build ./...</code>; a §11.4 PASS-bluff at the build layer —
+tracked source does not compile) <strong>Discovered:</strong> 2026-05-29
+(surfaced by <code>scripts/const052_verify_refs.sh</code> CHECK 3 while
+investigating HXC-031) <strong>Discovered-By:</strong> AI
+<strong>Evidence:</strong>
+<code>dependencies/HelixDevelopment/llm_orchestrator</code>
+(digital.vasic.llmorchestrator) has UNRESOLVED git conflict markers
+committed into 5 tracked Go files — <code>pkg/i18n/translator.go</code>
+(1 hunk), <code>pkg/i18n/translator_test.go</code> (2),
+<code>pkg/agent/multi_pool.go</code> (1),
+<code>cmd/orchestrator/main.go</code> (7),
+<code>challenges/runner/main.go</code> (16) = 26 hunks.
+<code>go build ./...</code> fails
+<code>expected &#39;package&#39;, found &#39;&lt;&lt;&#39;</code>. The markers are
+present in commit <code>5d9f5fc</code> and the current HEAD merge
+<code>1e198e3 &quot;Merge branch &#39;master&#39;&quot;</code>, and are <strong>already
+pushed to <code>origin/master</code></strong>. <strong>Root cause
+(forensic, no guessing per §11.4.6):</strong> a merge between the
+i18n-migration lineage (clean at <code>8032035</code> /
+<code>a7fda2a</code> round-383 CONST-046) and the CONST-052 rename
+commit
+<code>4350384 &quot;fix(const052): rename Upstreams/→upstreams/ (HXC-001)&quot;</code>
+was committed with conflict markers unresolved. <strong>Resolution
+direction (verified-correct side):</strong> the
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> side is the canonical one
+— consumer analysis proves it:
+<code>cmd/orchestrator/i18n_msg.go</code>,
+<code>pkg/agent/claudecode_agent.go</code>, and the package tests call
+<code>i18n.Pkg().T()</code>, <code>i18n.SetPkgTranslator()</code>, and
+<code>Translator.TPlural</code>, which ONLY the HEAD (i18n-migrated)
+side defines; the <code>4350384</code> side is the older
+pre-<code>TPlural</code>/pre-<code>Pkg()</code> variant.
+<code>Tr()</code>/<code>Trf()</code>/<code>Global()</code> live in
+<code>bundle.go</code> (no collision). Fix recipe: restore the 5 files
+from the last-clean i18n-lineage commit (<code>8032035</code> for
+translator.go; locate equivalents per file), <code>go build ./...</code>
++ <code>go test ./...</code> GREEN as the verifier, then
+<code>go build ./...</code> in <code>helix_agent</code> GREEN, commit to
+the submodule, push <code>origin/master</code> per §11.4.71 (merge-first
+per §11.4.41 since the broken state is already on the remote), bump the
+meta <code>.gitmodules</code> pointer in the same meta commit.
+<strong>Why not fixed in the discovering session:</strong> 26 hunks
+across 5 files on an already-pushed branch is irreversible
+high-blast-radius work whose per-hunk safe path needs build+test
+verification (§11.4.101) — deferred to a dedicated verified pass rather
+than rush-pushed. <code>translator.go</code> resolution was proven
+correct but reverted to keep the submodule in a single coherent
+committed state until all 5 are fixed together.
+<strong>Composes-with:</strong> §11.4 (build-layer bluff), §11.4.41
+(merge-first), §11.4.71, HXC-001, CONST-046, CONST-052.</p>
+<hr />
+<p>*Last updated: 2026-05-29 — filed HXC-032 (LLMOrchestrator committed
+conflict markers break helix_agent build — High); reclassified HXC-031
+(CONST-052 renames RESOLVED/none-remain, only Codex/Cline ports remain);
+HXC-029 §11.4.98 2 confirmed violations fixed; HXC-030 §11.4.99 Go
+1.24→1.26.3 + PG 14→15 doc reconciliation. Prior: filed HXC-029
+(§11.4.98 forward sweep), HXC-030 (§11.4.99 forward sweep), HXC-031
+(deferred rename/port long-tail) per operator “do it all”; added
 scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate
 (§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled
 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB /

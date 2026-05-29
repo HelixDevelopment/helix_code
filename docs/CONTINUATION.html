@@ -178,7 +178,35 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁴³ — HXC-029 §11.4.98
+<p><strong>Last updated: 2026-05-29 (close-out¹⁴⁴ — §11.4.99 DOC
+RECONCILIATION + HXC-031 RECLASSIFIED + HXC-032 FILED (operator “do it
+all”). (1) HXC-030 §11.4.99 increment (commit 68443b8c): reconciled
+stale <code>Go 1.24</code>→<code>1.26.3</code> (verified vs go.dev/dl:
+go1.26.3 latest stable; 1.24 past support) +
+<code>PostgreSQL 14</code>→<code>15</code> across 8 operator-facing docs
+(DEPLOYMENT_GUIDE, troubleshooting/guide, user_manual/README,
+general/DEVELOPER_GUIDE + SLASH_COMMANDS, 3 tutorials), each with a
+<code>## Sources verified 2026-05-29</code> footer; README already done
+in HXC-028; full §11.4.99 30-doc sweep continues. (2) HXC-031
+RECLASSIFIED: the “deferred build-breaking CONST-052 renames” were stale
+prose — investigation found NO owned-org renames remain
+(HelixDevelopment/* leaves already lowercase; only third-party
+HuggingFace_Hub/LLama_CPP/Ollama + 1 third-party Upstreams/ remain, all
+CONST-052-exempt; parent org-dirs are intentional carve-outs per
+HXC-001). Only the Codex/Cline reference-agent ports genuinely remain.
+(3) HXC-032 FILED (Bug, High):
+<code>scripts/const052_verify_refs.sh</code> surfaced committed git
+conflict markers in 5 LLMOrchestrator Go files (26 hunks:
+translator.go/translator_test.go/multi_pool.go/cmd/orchestrator/main.go/challenges/runner/main.go)
+breaking <code>helix_agent</code> build — a §11.4 build-layer bluff,
+ALREADY on origin/master; root cause = i18n-migration lineage (8032035)
+merged with CONST-052 rename <code>4350384</code> markers-unresolved;
+verified-correct side = HEAD (i18n-migrated — consumers need
+Pkg()/SetPkgTranslator()/TPlural); deferred to a dedicated
+build+test-verified pass per §11.4.101 rather than rush-push 26 hunks to
+the remote (submodule left at its coherent committed state). DB 144
+items validate OK + WAL-checkpointed; G11/G12/clarity PASS; tracker
+exports regenerated. PRIOR close-out¹⁴³ — HXC-029 §11.4.98
 CONFIRMED-VIOLATION FIXES (operator “do it all now, yes”, local-only).
 Fixed both hard findings from the HXC-029 audit: (1)
 <code>helix_code/tests/regression/server_timeout_test.go</code>

@@ -42,8 +42,9 @@
 | HXC-023 | `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank | Bug | Fixed (→ Fixed.md) | 2026-05-28 | ALL literal-true PASS-bluffs across the e2e test banks replaced with real assertions or honest skips — batch 1 (core/additional_tests.go, 41 fixed) + batch 2… |
 | HXC-029 | §11.4.98 forward: full-automation compliance sweep of every live/integration/e2e/Challenge test | Task | In progress | 2026-05-29 | Coverage ledger (test × COMPLIANT/NON-COMPLIANT × evidence-path) regenerated; zero NON-COMPLIANT live tests OR each migrated to §11.4.90 Obsolete citing §11.… |
 | HXC-030 | §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs | Task | Queued | 2026-05-29 | Every operator-facing doc carries a `## Sources verified` footer with URLs+date; release-gate check for the footer added; stale-beyond-grace docs triaged. |
-| HXC-031 | Deferred long-tail: build-breaking snake_case renames (CONST-052) + Codex/Cline reference-agent ports | Task | Queued | 2026-05-29 | Per-batch operator approval obtained; each rename batch ships the CONST-052 reference-integrity regression test + full post-rename test-matrix; each agent po… |
+| HXC-031 | Deferred long-tail: CONST-052 renames (RESOLVED — none remain) + Codex/Cline reference-agent ports | Task | In progress | 2026-05-29 | each agent port covered by tests + Challenge with captured evidence; all pushed per §11.4.71. |
+| HXC-032 | LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build | Bug | Queued | 2026-05-29 | `dependencies/HelixDevelopment/llm_orchestrator` (digital.vasic.llmorchestrator) has UNRESOLVED git conflict markers committed into 5 tracked Go files — `pkg… |
 
-**Counts**: 37 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **34 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 38 tracked item-sections in `docs/Issues.md` — **4 open** (non-terminal status) / **34 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-05-29 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
