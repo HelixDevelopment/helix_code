@@ -1942,10 +1942,21 @@ by tests + Challenge with captured evidence; all pushed per §11.4.71.
 <strong>Composes-with:</strong> CONST-052, HXC-001, §11.4.81,
 §11.4.101.</p>
 <hr />
-<h2 id="hxc-032-llmorchestrator-submodule-committed-merge-conflict-markers-break-helix_agent-build">HXC-032
+<h2 id="hxc-032-llmorchestrator-submodule-committed-merge-conflict-markers-break-helix_agent-build-closed-fixed.md">HXC-032
 — LLMOrchestrator submodule: committed merge-conflict markers break
-<code>helix_agent</code> build</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<code>helix_agent</code> build — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> all 26 conflict hunks across 5 LLMOrchestrator Go
+files resolved to the HEAD (i18n-migrated) side; <code>bundle.go</code>
+<code>BundleTranslator</code> gained an honest <code>TPlural</code>;
+<code>automation_test.go</code> aligned to the lowercase
+<code>upstreams/</code> rename.
+<code>go build</code>/<code>go vet</code>/<code>go test ./...</code>
+(10/10 pkgs) PASS; downstream <code>helix_agent</code>
+<code>go build ./...</code> exit 0. Submodule <code>d3956ad</code>
+pushed origin/master (FF); meta pointer bumped. Section retained as a
+§11.4.19 migration tombstone. <strong>Type:</strong> Bug
 <strong>Severity:</strong> High (breaks <code>helix_agent</code>
 <code>go build ./...</code>; a §11.4 PASS-bluff at the build layer —
 tracked source does not compile) <strong>Discovered:</strong> 2026-05-29

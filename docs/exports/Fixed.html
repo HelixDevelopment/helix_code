@@ -94,6 +94,37 @@ commit history + the <code>docs/improvements/</code> evidence chain
 </thead>
 <tbody>
 <tr>
+<td>2026-05-29</td>
+<td>HXC-032: LLMOrchestrator submodule had committed git conflict
+markers in 5 Go files (26 hunks) breaking <code>helix_agent</code> build
+— a §11.4 build-layer PASS-bluff already on origin/master</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>llm_orchestrator <code>d3956ad</code> + meta pointer bump</td>
+<td>Root cause: the i18n-migration lineage (round-383 CONST-046) merged
+with the CONST-052 <code>Upstreams/</code>→<code>upstreams/</code>
+rename (<code>4350384</code>) markers-unresolved. Resolution: took the
+HEAD (i18n-migrated) side of every hunk — the consumer-consistent
+lineage (<code>cmd/orchestrator/i18n_msg.go</code>,
+<code>pkg/agent/claudecode_agent.go</code>, package tests require
+<code>Pkg()</code>/<code>SetPkgTranslator()</code>/<code>TPlural</code>,
+only HEAD defines them). Made the package coherent:
+<code>bundle.go</code> <code>BundleTranslator</code> gained an honest
+<code>TPlural</code> (interpolates count; no CLDR plural-form selection
+claimed per §11.9) so <code>SetGlobal(*BundleTranslator)</code>
+compiles; <code>automation_test.go</code> now accepts renamed lowercase
+<code>upstreams/</code> (preferred) or legacy <code>Upstreams/</code>.
+<strong>Verification (this session): <code>go build ./...</code> exit 0
++ <code>go vet ./...</code> exit 0 + <code>go test ./...</code> 10/10
+packages PASS (was build failure) + zero conflict markers (grep) +
+downstream <code>helix_agent</code> <code>go build ./...</code> exit 0,
+zero llm_orchestrator/conflict errors (was broken).</strong> Submodule
+pushed origin/master <code>1e198e3..d3956ad</code> (FF, no force); meta
+pointer bumped same commit. Closed <code>Fixed (→ Fixed.md)</code> per
+CONST-057 (Type Bug).</td>
+</tr>
+<tr>
 <td>2026-05-28</td>
 <td>HXC-017: CodeGraph index excluded all own-org submodules (blanket
 <code>dependencies/**</code>) + config.json was untracked —

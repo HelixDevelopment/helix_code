@@ -526,9 +526,10 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-032 — LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build
+## HXC-032 — LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build — CLOSED (→ Fixed.md)
 
-**Status:** Queued
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
+**Closure (2026-05-29):** all 26 conflict hunks across 5 LLMOrchestrator Go files resolved to the HEAD (i18n-migrated) side; `bundle.go` `BundleTranslator` gained an honest `TPlural`; `automation_test.go` aligned to the lowercase `upstreams/` rename. `go build`/`go vet`/`go test ./...` (10/10 pkgs) PASS; downstream `helix_agent` `go build ./...` exit 0. Submodule `d3956ad` pushed origin/master (FF); meta pointer bumped. Section retained as a §11.4.19 migration tombstone.
 **Type:** Bug
 **Severity:** High (breaks `helix_agent` `go build ./...`; a §11.4 PASS-bluff at the build layer — tracked source does not compile)
 **Discovered:** 2026-05-29 (surfaced by `scripts/const052_verify_refs.sh` CHECK 3 while investigating HXC-031)
