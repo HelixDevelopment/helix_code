@@ -115,3 +115,5 @@ layer.
 | Date | Author | Round | Notes |
 |---|---|---|---|
 | 2026-05-15 | Claude Opus 4.7 | close-out²⁴ | Document created in response to operator's 2026-05-15 safety mandate. Mechanically backed by G6 gate's `NEVER_RENAME_PATTERNS` allow-list (~50 entries covering build systems, languages, AOSP top-level dirs, build artefacts, VCS state, and coordinated owned-project names). |
+
+## Sources verified 2026-05-29: internal-governance doc — no third-party-service operator instructions to cross-reference. This document enumerates CONST-052 rename-safety exemptions; its references are to build/package-manager FILENAMES (`Makefile`, `Cargo.toml`, `package.json`, `go.mod`, `Dockerfile`, `Android.bp`, etc.) and AOSP top-level directory NAMES — these are stable naming conventions, not version-pinned instructions, so no vendor-docs check applies (a filename like `package.json` does not go stale). No external service or version pin appears. Version authority per CLAUDE.md §3.1 (confirmed in-tree): inner module `go 1.26`, root `go 1.25.2`. Reviewed against the live tree on this date; no corrections required.

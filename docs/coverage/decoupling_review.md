@@ -182,3 +182,5 @@ violation (containers/apply_caps.py) + 1 cosmetic batch (4 × load_api_keys.sh)
 |---|---|---|---|
 | 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁶ | First pass. Per-file decisions documented. Inline edits deferred to Tasks #262/#263/#264. |
 | 2026-05-15 | Claude Opus 4.7 | round 41 close-out¹⁷ | Task #262 cosmetic-only fix landed (root + helix_qa + Security + Containers). Task #264 sub-audit complete: 1 carry-over load_api_keys.sh cosmetic fix in github_pages_website, 11 other files classified legitimate-cross-project (THIS site's content + tooling). |
+
+## Sources verified 2026-05-29: internal-governance doc — no third-party-service operator instructions to cross-reference. This is a per-file CONST-051(B) decoupling audit of HelixCode-owned submodules; every reference is to internal paths, scripts (`load_api_keys.sh`, `apply_caps.py`), and HelixCode's own submodules. No external service, library, or version pin appears, so there is nothing to WebFetch against vendor docs. Version authority per CLAUDE.md §3.1 (confirmed in-tree): inner module `go 1.26`, root `go 1.25.2`. Reviewed against the live tree on this date; no corrections required.

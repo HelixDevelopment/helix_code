@@ -113,3 +113,5 @@ Schema changes append a row to `COVERAGE_LEDGER.md`'s audit-trail table with:
 - One-line rationale
 
 Initial schema (round 68) entry: see `COVERAGE_LEDGER.md` audit trail.
+
+## Sources verified 2026-05-29: internal-governance doc — no third-party-service operator instructions to cross-reference. This document defines the row/column schema and status vocabulary for HelixCode's own `COVERAGE_LEDGER.md`; it references only internal constitutional anchors (CONST-035/048, §11.4.x) and HelixCode's own generator scripts. No external service, library, or version pin appears, so there is nothing to WebFetch against vendor docs. Version authority per CLAUDE.md §3.1 (confirmed in-tree): inner module `go 1.26`, root `go 1.25.2`. Reviewed against the live tree on this date; no corrections required.
