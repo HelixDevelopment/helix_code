@@ -1,0 +1,30 @@
+=== HXC-029 security-validation: raw curl endpoint probes vs live http://localhost:8080 ===
+=== captured 2026-05-29T11:58:32Z ===
+
+--- token / header rejection paths (body shown) ---
+no header           : 401  {"message":"Authorization header required","status":"error"}
+Basic scheme        : 401  {"message":"Invalid authorization header format","status":"error"}
+empty bearer        : 401  {"message":"Invalid authorization header format","status":"error"}
+single-segment      : 401  {"error":"token contains an invalid number of segments","message":"Invalid or expired token","status":"error"}
+3-seg non-base64    : 401  {"error":"invalid character '~' looking for beginning of value","message":"Invalid or expired token","status":"error"}
+2-segment           : 401  {"error":"token contains an invalid number of segments","message":"Invalid or expired token","status":"error"}
+SQLi token          : 401  {"error":"token contains an invalid number of segments","message":"Invalid or expired token","status":"error"}
+
+--- auth login/logout/refresh ---
+login bad creds     : 401  {"error":"invalid credentials","message":"Login failed","status":"error"}
+login empty body    : 400  {"error":"Key: 'Username' Error:Field validation for 'Username' failed on the 'required' tag\nKey: 'Password' Error:Field validation for 'Password' failed on the 'required' tag","message":"internal_server_invalid_request","status":"error"}
+login malformed json: 400  {"error":"invalid character 'o' in literal null (expecting 'u')","message":"internal_server_invalid_request","status":"error"}
+logout no header    : 400  {"message":"internal_server_invalid_authorization_header","status":"error"}
+refresh no header   : 401  {"message":"internal_server_authorization_header_required","status":"error"}
+
+--- cross-group forged-token rejection (HXC-SEC-013) ---
+projects              : 401  {"error":"invalid character '~' looking for beginning of value","message":"Invalid or expired token","status":"error"}
+sessions              : 401  {"error":"invalid character '~' looking for beginning of value","message":"Invalid or expired token","status":"error"}
+system/stats          : 401  {"error":"invalid character '~' looking for beginning of value","message":"Invalid or expired token","status":"error"}
+users/me              : 401  {"error":"invalid character '~' looking for beginning of value","message":"Invalid or expired token","status":"error"}
+
+--- SecurityMiddleware response headers (HXC-SEC-014 evidence; runner cannot assert headers) ---
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block

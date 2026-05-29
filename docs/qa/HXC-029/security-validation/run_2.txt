@@ -1,0 +1,24 @@
+=== HXC-029 bank run: HelixCode Security Validation - API (1.0) vs http://localhost:8080 ===
+=== started 2026-05-29T11:58:15Z ===
+
+PASS [HXC-SEC-001] GET /api/v1/tasks no header — GET /api/v1/tasks
+PASS [HXC-SEC-002] GET /api/v1/tasks with non-Bearer scheme — GET /api/v1/tasks
+PASS [HXC-SEC-003] GET /api/v1/tasks with 'Bearer ' empty — GET /api/v1/tasks
+PASS [HXC-SEC-004] GET /api/v1/tasks with single-segment token — GET /api/v1/tasks
+PASS [HXC-SEC-005] GET /api/v1/tasks with a forged 3-segment token — GET /api/v1/tasks
+PASS [HXC-SEC-006] GET /api/v1/tasks with a 2-segment token — GET /api/v1/tasks
+PASS [HXC-SEC-007] GET /api/v1/tasks with SQLi as bearer token — GET /api/v1/tasks
+PASS [HXC-SEC-008] POST /api/v1/auth/login wrong creds — POST /api/v1/auth/login
+PASS [HXC-SEC-009] POST /api/v1/auth/login empty body — POST /api/v1/auth/login
+PASS [HXC-SEC-010] POST /api/v1/auth/login non-JSON body — POST /api/v1/auth/login
+PASS [HXC-SEC-011] POST /api/v1/auth/logout no header — POST /api/v1/auth/logout
+PASS [HXC-SEC-012] POST /api/v1/auth/refresh no header — POST /api/v1/auth/refresh
+PASS [HXC-SEC-013] GET /api/v1/projects forged token — GET /api/v1/projects
+PASS [HXC-SEC-013] GET /api/v1/sessions forged token — GET /api/v1/sessions
+PASS [HXC-SEC-013] GET /api/v1/system/stats forged token — GET /api/v1/system/stats
+PASS [HXC-SEC-013] GET /api/v1/users/me forged token — GET /api/v1/users/me
+SKIP [HXC-SEC-014] Assert X-Content-Type-Options / X-Frame-Options / HSTS headers — #HXC-029-NO-HEADER-ASSERT — the stdlib HelixQA http:+assert runner (mirroring helix_qa/pkg/autonomous/http_executor.go) supports expect_status/expect_json_path/expect_body_contains but NOT response-header assertion, so the SecurityMiddleware headers cannot be asserted by this bank. Honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS; the headers ARE present (captured by raw curl in endpoint-probes.txt) and asserting them needs an expect_header extension to the executor.
+SKIP [HXC-SEC-015] GET /api/v1/users/me with a freshly-minted valid token -> 200 — #HXC-029-REGISTER-BROKEN — POST /api/v1/auth/register returns 400 internal_auth_failed_create_user on this live DB and there is no seeded credential, so no valid token can be minted in-test to prove the positive accepted path. Honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS; same live register defect HXC-API-029 records. The negative rejection paths are fully proven by HXC-SEC-001..013.
+
+=== summary: 16 PASS, 0 FAIL, 2 SKIP (of 18 steps) ===
+=== RESULT: all executed steps PASS, no FAIL ===

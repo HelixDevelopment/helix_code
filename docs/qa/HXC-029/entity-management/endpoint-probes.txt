@@ -1,0 +1,23 @@
+=== HXC-029 entity-management: raw curl endpoint probes vs live http://localhost:8080 ===
+=== captured 2026-05-29T11:52:15Z ===
+
+GET     /api/v1/tasks                                                -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/tasks                                                -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/tasks/00000000-0000-0000-0000-000000000000           -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/tasks/00000000-0000-0000-0000-000000000000/start     -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/tasks/00000000-0000-0000-0000-000000000000/checkpoints -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/projects                                             -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/projects                                             -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/projects/00000000-0000-0000-0000-000000000000/sessions -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/sessions                                             -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/workers                                              -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/workers/00000000-0000-0000-0000-000000000000/heartbeat -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/workers/00000000-0000-0000-0000-000000000000/metrics -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/users/me                                             -> 401  {"message":"Authorization header required","status":"error"}
+PUT     /api/v1/users/me                                             -> 401  {"message":"Authorization header required","status":"error"}
+DELETE  /api/v1/users/me                                             -> 401  {"message":"Authorization header required","status":"error"}
+OPTIONS /api/v1/tasks                                                -> 204  
+OPTIONS /api/v1/projects                                             -> 204  
+GET     /api/v1/tasks_nonexistent_hxc029                             -> 404  404 page not found
+GET     /api/v1/entities                                             -> 404  404 page not found
+GET     /api/v1/collections                                          -> 404  404 page not found

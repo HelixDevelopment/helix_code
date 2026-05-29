@@ -1,0 +1,23 @@
+=== HXC-029 admin-operations: raw curl endpoint probes vs live http://localhost:8080 ===
+=== captured 2026-05-29T11:54:22Z ===
+
+GET     /api/v1/server/info                                                -> 200  {"info":{"database":{"connected":true,"enabled":true},"features":{"auth_enabled":true,"mcp
+GET     /api/v1/metrics                                                    -> 200  {"metrics":{"database":{"connections_active":5,"connections_idle":5,"max_connections":20},
+GET     /api/v1/system/stats                                               -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/system/status                                              -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/qa/session                                                 -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/qa/sessions                                                -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/qa/session/00000000-0000-0000-0000-000000000000/status     -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/qa/session/00000000-0000-0000-0000-000000000000/report     -> 401  {"message":"Authorization header required","status":"error"}
+DELETE  /api/v1/qa/session/00000000-0000-0000-0000-000000000000            -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/screenshot/engines                                         -> 401  {"message":"Authorization header required","status":"error"}
+GET     /api/v1/screenshot/linux                                           -> 401  {"message":"Authorization header required","status":"error"}
+POST    /api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/planning -> 401  {"message":"Authorization header required","status":"error"}
+OPTIONS /api/v1/system/stats                                               -> 204  
+OPTIONS /api/v1/qa/sessions                                                -> 204  
+GET     /api/v1/admin/this_admin_route_does_not_exist_hxc029               -> 404  404 page not found
+GET     /api/v1/scans                                                      -> 404  404 page not found
+POST    /api/v1/backup                                                     -> 404  404 page not found
+
+--- garbage-bearer rejection (HXC-ADM-010) ---
+GET /api/v1/system/stats [Bearer garbage.token.xyz] -> 401  {"error":"invalid character '\\u0081' looking for beginning of value","message":"Invalid or expired token","status":"error"}

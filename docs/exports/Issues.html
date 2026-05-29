@@ -2108,30 +2108,61 @@ include §11.4.102 → 0 failures across root + 68 submodules; gate present
 remotes. <strong>Composes-with:</strong> §11.4.102, CONST-047, §11.4.26,
 §11.4.32 (CONST-055 post-pull validation).</p>
 <hr />
-<p>*Last updated: 2026-05-29 — filed HXC-034 (cascade constitution
-§11.4.102 mandatory-systematic-debugging into 68 owned submodules + gate
-— Task); constitution submodule §11.4.102 added+pushed (656b43a), meta
-pointer bumped; HXC-029 full-qa-api bank verified (§11.4.98); HXC-030
-§11.4.99 sweep COMPLETE (38/38). Prior: filed HXC-033 (codegraph 0.9.7
-index/sync crash + §11.4.79 own-org regression — Operator-blocked);
-HXC-032 FIXED+closed (LLMOrchestrator conflict markers; submodule
-d3956ad, helix_agent builds); reclassified HXC-031 (CONST-052 renames
-RESOLVED/none-remain, only Codex/Cline ports remain); HXC-029 §11.4.98 2
-confirmed violations fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15
-doc reconciliation. Prior: filed HXC-029 (§11.4.98 forward sweep),
-HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port
-long-tail) per operator “do it all”; added
-scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate
-(§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled
-7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB /
-stress+chaos / cross-platform / submodule-cascade / codegraph-own-org /
-obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 +
-HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip
-Assert(true) bluffs + empty stress stub → honest SKIP);
-CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5
-org-grouping dirs kept as namespace carve-outs per operator decision
-2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003
-closed <code>Implemented (→ Fixed.md)</code> and migrated to
+<h2 id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows">HXC-035
+— <code>POST /api/v1/auth/register</code> returns 400
+<code>internal_auth_failed_create_user</code> on the live server (blocks
+all authenticated flows)</h2>
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
+<strong>Severity:</strong> High (no user can register → no JWT mintable
+→ every authenticated API path is undrivable; blocks the positive-path
+coverage of all 4 HXC-029 API banks) <strong>Discovered:</strong>
+2026-05-29 (surfaced by HXC-029 bank verification against the live
+server) <strong>Discovered-By:</strong> AI <strong>Evidence:</strong>
+Against the live HelixCode server (real PG+Redis on :8080, schema
+freshly created), <code>POST /api/v1/auth/register</code> with a
+well-formed body returns HTTP 400
+<code>internal_auth_failed_create_user</code>. Reproduced across all 4
+HXC-029 API-bank verification runs
+(entity-management/admin-operations/security-validation/full-qa-api each
+had to <code>_skip</code> their authenticated-positive paths with
+<code>#HXC-029-REGISTER-BROKEN</code>). Captured in
+docs/qa/HXC-029/*/endpoint-probes.txt. <strong>Root cause:</strong>
+PENDING_FORENSICS — being root-caused now via
+<code>superpowers:systematic-debugging</code> per §11.4.102 (the
+create-user DB write fails; need the auth handler + DB-layer forensic to
+determine why: schema mismatch / constraint / missing migration /
+password-hash error). <strong>Composes-with:</strong> §11.4.102
+(mandatory systematic-debugging), §11.4.98 (it blocks live-test positive
+paths), HXC-029.</p>
+<hr />
+<p>*Last updated: 2026-05-29 — filed HXC-035 (POST /auth/register 400
+internal_auth_failed_create_user — High, systematic-debugging in
+progress per §11.4.102); HXC-029 now 4/18 banks verified (full-qa-api +
+entity-management + admin-operations + security-validation, each
+3×+mutation vs live server); filed HXC-034 (cascade constitution
+§11.4.102 into 68 owned submodules + gate — Task); constitution
+submodule §11.4.102 added+pushed (656b43a), meta pointer bumped; HXC-029
+full-qa-api bank verified (§11.4.98); HXC-030 §11.4.99 sweep COMPLETE
+(38/38). Prior: filed HXC-033 (codegraph 0.9.7 index/sync crash +
+§11.4.79 own-org regression — Operator-blocked); HXC-032 FIXED+closed
+(LLMOrchestrator conflict markers; submodule d3956ad, helix_agent
+builds); reclassified HXC-031 (CONST-052 renames RESOLVED/none-remain,
+only Codex/Cline ports remain); HXC-029 §11.4.98 2 confirmed violations
+fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15 doc reconciliation.
+Prior: filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward
+sweep), HXC-031 (deferred rename/port long-tail) per operator “do it
+all”; added scripts/generate_{issues,fixed}_summary.sh + G12
+summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 —
+constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97);
+HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform
+/ submodule-cascade / codegraph-own-org / obsolete+summary-tooling /
+docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a
+FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty
+stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme
+COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace
+carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior:
+2026-05-20 (round 463 — HXC-003 closed
+<code>Implemented (→ Fixed.md)</code> and migrated to
 <code>docs/Fixed.md</code>: the CONST-046 i18n migration campaign is
 concluded — the genuine user-facing (C) string-literal surface is
 exhausted across all 7 scope areas (helix_code

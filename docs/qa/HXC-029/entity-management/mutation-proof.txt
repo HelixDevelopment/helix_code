@@ -1,0 +1,49 @@
+=== HXC-029 entity-management ANTI-BLUFF MUTATION PROOF ===
+Mutation: first occurrence of expect_status 401 -> 200 (HXC-ENT-001 GET /api/v1/tasks).
+Reality: server returns 401 (auth required). The run MUST FAIL on that step.
+
+=== HXC-029 bank run: HelixCode Entity Management - API (1.0) vs http://localhost:8080 ===
+=== started 2026-05-29T11:52:05Z ===
+
+FAIL [HXC-ENT-001] GET /api/v1/tasks no auth — GET /api/v1/tasks -> status 401, expected 200 (body: {"message":"Authorization header required","status":"error"})
+PASS [HXC-ENT-002] POST /api/v1/tasks no auth — POST /api/v1/tasks
+PASS [HXC-ENT-003] GET /api/v1/tasks/:id no auth — GET /api/v1/tasks/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-004] PUT /api/v1/tasks/:id no auth — PUT /api/v1/tasks/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-005] DELETE /api/v1/tasks/:id no auth — DELETE /api/v1/tasks/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-006] POST /api/v1/tasks/:id/assign no auth — POST /api/v1/tasks/00000000-0000-0000-0000-000000000000/assign
+PASS [HXC-ENT-006] POST /api/v1/tasks/:id/start no auth — POST /api/v1/tasks/00000000-0000-0000-0000-000000000000/start
+PASS [HXC-ENT-006] POST /api/v1/tasks/:id/complete no auth — POST /api/v1/tasks/00000000-0000-0000-0000-000000000000/complete
+PASS [HXC-ENT-006] POST /api/v1/tasks/:id/fail no auth — POST /api/v1/tasks/00000000-0000-0000-0000-000000000000/fail
+PASS [HXC-ENT-006] POST /api/v1/tasks/:id/retry no auth — POST /api/v1/tasks/00000000-0000-0000-0000-000000000000/retry
+PASS [HXC-ENT-006] GET /api/v1/tasks/:id/checkpoints no auth — GET /api/v1/tasks/00000000-0000-0000-0000-000000000000/checkpoints
+PASS [HXC-ENT-007] GET /api/v1/projects no auth — GET /api/v1/projects
+PASS [HXC-ENT-008] POST /api/v1/projects no auth — POST /api/v1/projects
+PASS [HXC-ENT-008] GET /api/v1/projects/:id no auth — GET /api/v1/projects/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-008] PUT /api/v1/projects/:id no auth — PUT /api/v1/projects/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-008] DELETE /api/v1/projects/:id no auth — DELETE /api/v1/projects/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-008] GET /api/v1/projects/:id/sessions no auth — GET /api/v1/projects/00000000-0000-0000-0000-000000000000/sessions
+PASS [HXC-ENT-009] GET /api/v1/sessions no auth — GET /api/v1/sessions
+PASS [HXC-ENT-009] POST /api/v1/sessions no auth — POST /api/v1/sessions
+PASS [HXC-ENT-009] GET /api/v1/sessions/:id no auth — GET /api/v1/sessions/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-009] PUT /api/v1/sessions/:id no auth — PUT /api/v1/sessions/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-009] DELETE /api/v1/sessions/:id no auth — DELETE /api/v1/sessions/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-010] GET /api/v1/workers no auth — GET /api/v1/workers
+PASS [HXC-ENT-010] POST /api/v1/workers no auth — POST /api/v1/workers
+PASS [HXC-ENT-010] GET /api/v1/workers/:id no auth — GET /api/v1/workers/00000000-0000-0000-0000-000000000000
+PASS [HXC-ENT-010] POST /api/v1/workers/:id/heartbeat no auth — POST /api/v1/workers/00000000-0000-0000-0000-000000000000/heartbeat
+PASS [HXC-ENT-010] GET /api/v1/workers/:id/metrics no auth — GET /api/v1/workers/00000000-0000-0000-0000-000000000000/metrics
+PASS [HXC-ENT-011] GET /api/v1/users/me no auth — GET /api/v1/users/me
+PASS [HXC-ENT-011] PUT /api/v1/users/me no auth — PUT /api/v1/users/me
+PASS [HXC-ENT-011] DELETE /api/v1/users/me no auth — DELETE /api/v1/users/me
+PASS [HXC-ENT-012] OPTIONS /api/v1/tasks — OPTIONS /api/v1/tasks
+PASS [HXC-ENT-012] OPTIONS /api/v1/projects — OPTIONS /api/v1/projects
+PASS [HXC-ENT-013] GET unknown entity route — GET /api/v1/tasks_nonexistent_hxc029
+PASS [HXC-ENT-014] GET /api/v1/entities (Catalogizer) -> 404 — GET /api/v1/entities
+PASS [HXC-ENT-014] GET /api/v1/collections (Catalogizer) -> 404 — GET /api/v1/collections
+SKIP [HXC-ENT-015] Authenticated CRUD round-trip on a created entity — #HXC-029-REGISTER-BROKEN — POST /api/v1/auth/register returns 400 internal_auth_failed_create_user on this live DB and there is no seeded credential, so no JWT can be minted in-test to drive an authenticated create→read→update→delete round-trip (or the Catalogizer episode/season parent_id hierarchy). Honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS; this is the same live register defect HXC-API-029 records.
+
+=== summary: 34 PASS, 1 FAIL, 1 SKIP (of 36 steps) ===
+=== 1 failure(s): ===
+  - [HXC-ENT-001] GET /api/v1/tasks no auth — GET /api/v1/tasks -> status 401, expected 200 (body: {"message":"Authorization header required","status":"error"})
+
+=== runner exit code: 1 (1 == FAIL detected -> anti-bluff proof valid) ===

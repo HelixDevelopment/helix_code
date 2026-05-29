@@ -1,0 +1,38 @@
+=== HXC-029 admin-operations ANTI-BLUFF MUTATION PROOF ===
+Mutation: first expect_status 200 -> 999 (HXC-ADM-001 GET /api/v1/server/info).
+Reality: server returns 200. The run MUST FAIL on that step.
+
+=== HXC-029 bank run: HelixCode Admin Operations - API (1.0) vs http://localhost:8080 ===
+=== started 2026-05-29T11:54:11Z ===
+
+FAIL [HXC-ADM-001] GET /api/v1/server/info — GET /api/v1/server/info -> status 200, expected 999 (body: {"info":{"database":{"connected":true,"enabled":true},"features":{"auth_enabled":true,"mcp_enabled":true,"notifications_enabled":true},"go_version":"1.24","name...)
+PASS [HXC-ADM-002] GET /api/v1/metrics — GET /api/v1/metrics
+PASS [HXC-ADM-003] GET /api/v1/system/stats no auth — GET /api/v1/system/stats
+PASS [HXC-ADM-004] GET /api/v1/system/status no auth — GET /api/v1/system/status
+PASS [HXC-ADM-005] POST /api/v1/qa/session no auth — POST /api/v1/qa/session
+PASS [HXC-ADM-005] GET /api/v1/qa/sessions no auth — GET /api/v1/qa/sessions
+PASS [HXC-ADM-006] GET /api/v1/qa/session/:id/status no auth — GET /api/v1/qa/session/00000000-0000-0000-0000-000000000000/status
+PASS [HXC-ADM-006] GET /api/v1/qa/session/:id/report no auth — GET /api/v1/qa/session/00000000-0000-0000-0000-000000000000/report
+PASS [HXC-ADM-006] DELETE /api/v1/qa/session/:id no auth — DELETE /api/v1/qa/session/00000000-0000-0000-0000-000000000000
+PASS [HXC-ADM-007] GET /api/v1/screenshot/engines no auth — GET /api/v1/screenshot/engines
+PASS [HXC-ADM-007] GET /api/v1/screenshot/:platform no auth — GET /api/v1/screenshot/linux
+PASS [HXC-ADM-008] GET /api/v1/workers no auth — GET /api/v1/workers
+PASS [HXC-ADM-008] POST /api/v1/workers no auth (enroll worker) — POST /api/v1/workers
+PASS [HXC-ADM-008] DELETE /api/v1/workers/:id no auth (decommission) — DELETE /api/v1/workers/00000000-0000-0000-0000-000000000000
+PASS [HXC-ADM-009] POST .../workflows/planning no auth — POST /api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/planning
+PASS [HXC-ADM-009] POST .../workflows/building no auth — POST /api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/building
+PASS [HXC-ADM-009] POST .../workflows/testing no auth — POST /api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/testing
+PASS [HXC-ADM-009] POST .../workflows/refactoring no auth — POST /api/v1/projects/00000000-0000-0000-0000-000000000000/workflows/refactoring
+PASS [HXC-ADM-010] GET system/stats with garbage bearer — GET /api/v1/system/stats
+PASS [HXC-ADM-011] OPTIONS /api/v1/system/stats — OPTIONS /api/v1/system/stats
+PASS [HXC-ADM-011] OPTIONS /api/v1/qa/sessions — OPTIONS /api/v1/qa/sessions
+PASS [HXC-ADM-012] GET unknown admin route — GET /api/v1/admin/this_admin_route_does_not_exist_hxc029
+SKIP [HXC-ADM-013] Poll scan status until complete — #HXC-029-NO-SCAN-ROUTE — HelixCode's internal/server route table registers no /api/v1/scans endpoint (probed -> 404 page not found). Scan-status polling is a Catalogizer admin operation, not a HelixCode capability; honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS. The absence is itself asserted by HXC-ENT-014's 404 negative path.
+SKIP [HXC-ADM-014] Check backup file exists and has non-zero size — #HXC-029-NO-BACKUP-ROUTE — HelixCode's internal/server route table registers no /api/v1/backup endpoint and the HelixQA http: action type cannot inspect server-side filesystem artefacts. Backup-file verification is a Catalogizer admin operation with no HelixCode HTTP equivalent; honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS.
+SKIP [HXC-ADM-015] GET system/stats authenticated -> 200 — #HXC-029-REGISTER-BROKEN — POST /api/v1/auth/register returns 400 internal_auth_failed_create_user on this live DB and there is no seeded credential, so no valid JWT can be minted in-test to drive the authenticated-200 admin read path. Honest SKIP per Article XI §11.2.2 / §11.4.98 rather than a fabricated PASS; same live register defect HXC-API-029 records. The auth-gating itself is positively proven by HXC-ADM-003/004/010.
+
+=== summary: 21 PASS, 1 FAIL, 3 SKIP (of 25 steps) ===
+=== 1 failure(s): ===
+  - [HXC-ADM-001] GET /api/v1/server/info — GET /api/v1/server/info -> status 200, expected 999 (body: {"info":{"database":{"connected":true,"enabled":true},"features":{"auth_enabled":true,"mcp_enabled":true,"notifications_enabled":true},"go_version":"1.24","name...)
+
+=== runner exit code: 1 (1 == FAIL detected -> anti-bluff proof valid) ===
