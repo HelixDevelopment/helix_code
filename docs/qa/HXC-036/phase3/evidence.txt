@@ -1,0 +1,18 @@
+HXC-036 Phase 3 — cmd/* main-package self-wiring evidence (2026-05-29T15:20:50Z)
+===========================================================================
+
+9 package-main entry points cannot be wired by internal/i18nwiring (Go forbids
+importing 'package main'), so each self-wires its CONST-046 translator via an
+init() in cmd/<m>/i18n_boot_wire.go calling <m>i18n.NewTranslator() + SetTranslator.
+
+--- build: all 9 mains compile with the wiring ---
+go build (9 mains) => exit 0
+
+--- runtime proof (cmd/cli, the primary user-facing main): init() resolves a real key ---
+=== RUN   TestI18nBootWire_ResolvesRealText
+--- PASS: TestI18nBootWire_ResolvesRealText (0.00s)
+PASS
+ok  	dev.helix.code/cmd/cli	0.010s
+
+trc("cli_commands_root_short") => "Inspect or run user-defined Markdown slash commands"
+(raw-key echo would be "cli_commands_root_short" — the HXC-036 defect; init() wiring eliminates it)
