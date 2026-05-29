@@ -9,151 +9,6 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -170,6 +25,7 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <link rel="stylesheet" href="docs/_progress-style.css" />
 </head>
 <body>
 <header id="title-block-header">
@@ -178,14 +34,53 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁵¹ — HXC-035 FIXED via
-§11.4.102 systematic-debugging (the new rule’s first real use). The
-/auth/register 400 (surfaced by HXC-029) root-caused INLINE (subagent
-dispatch was crashing on an Anthropic API-500 storm — A2/B2/D all
-crashed early, left clean state, no salvage lost): confirmed via direct
-psql INSERT → <code>column "display_name" does not exist</code> (the
-error swallowed by the i18n translator into the generic 400). ROOT
-CAUSE: <code>createSchemaSQL</code> CREATE TABLE users omitted
+<p><strong>Last updated: 2026-05-29 (close-out¹⁵² — HXC-034 COMPLETE +
+HXC-029 7/18 (Anthropic API recovered → parallel subagent streams
+resumed). The API-500 storm that crashed the prior window’s 5 subagents
+cleared; re-dispatched streams ran clean. </strong>HXC-034 (§11.4.102
+cascade) CLOSED Completed<strong>: the anchor (mandatory
+systematic-debugging + always-loaded using-superpowers +
+plugin-availability) now lives in the 3 govfiles of EVERY owned
+submodule — 52 <code>dependencies/vasic-digital/*</code> (3 parallel
+subagent waves 3A/3B/3C; 3 pre-done by a parallel session), 10
+<code>dependencies/HelixDevelopment/*</code> (wave 1), 5 top-level
+(challenges/containers/security/github_pages_website + assets/
+meta-subdir), helix_agent, helix_qa, panoptic — PLUS the 5 root consumer
+govfiles (a real CONST-047 gap: the meta had bumped the constitution
+pointer at adoption but NEVER cascaded §11.4.102 into its own
+CLAUDE/AGENTS/CONSTITUTION/CRUSH/QWEN.md). Gate wired data-driven into
+<code>COVENANT114_ANCHORS</code> (auto-derives
+CM-COVENANT-114-102-PROPAGATION); §1.1 paired-mutation PROVEN
+(strip→FAIL, restore→PASS “all 27 anchors present”);
+<code>verify-governance-cascade.sh</code> → </strong>0 failures** (was 6
+— the helix_qa/panoptic gaps were caught BY the verifier mid-close and
+fixed inline, the §11.4.102 discipline working on itself). 60
+owned-submodule pointer bumps + govfiles + gate + tracker close landed
+atomically in meta <code>74788438</code> (gitlab; github via detached
+:443 catch-up — connectivity recovered, attempt-1 successes).
+<strong>HXC-029</strong>: +3 CLI banks self-driving +
+anti-bluff-verified vs the live :8080 server driving the real
+<code>helix_code/bin/cli</code> via os/exec (cli-agents-comprehensive 6
+PASS / aichat-bash-tools 9 / cli-agents-test-helixagent 7), each 3×
+deterministic + flip-mutation-proof, honest <code>_skip</code> for
+absent tools — <code>grep -c manual-review-required</code>=0;
+<strong>7/18 banks now verified</strong> (4 API + 3 CLI); helix_qa
+<code>14be9eb</code>→<code>92787bf</code>; evidence docs/qa/HXC-029/. DB
+synced 152 items validate-OK + WAL-checkpointed; summaries (2 open/39
+closed; Fixed Task=14) + exports regenerated. Minor follow-up: A2’s
+helix_qa bank commit used <code>--no-verify</code> without a §11.4.75
+bypass footer (bypassed hook was .md sibling-export on a .json commit —
+no export skipped). Open set now <strong>2</strong>: HXC-029
+(Playwright/Android banks need browser/emulator drivers + ~24
+integration long-tail), HXC-031 (Codex/Cline reference-agent ports).
+PRIOR close-out¹⁵¹ — HXC-035 FIXED via §11.4.102 systematic-debugging
+(the new rule’s first real use). The /auth/register 400 (surfaced by
+HXC-029) root-caused INLINE (subagent dispatch was crashing on an
+Anthropic API-500 storm — A2/B2/D all crashed early, left clean state,
+no salvage lost): confirmed via direct psql INSERT →
+<code>column "display_name" does not exist</code> (the error swallowed
+by the i18n translator into the generic 400). ROOT CAUSE:
+<code>createSchemaSQL</code> CREATE TABLE users omitted
 <code>display_name</code>, and the ADD-column migration in
 InitializeSchema() runs only in the <code>if schemaExists</code> branch,
 so a FRESH DB never gets it. FIX: +1 line
@@ -198,18 +93,18 @@ main-stream inline work continued unaffected; resume parallel subagent
 waves (HXC-029 CLI banks, HXC-034 wave 2) when the API stabilizes. Open
 set 3: HXC-029 (CLI/Playwright/Android banks remain), HXC-031, HXC-034.
 PRIOR close-out¹⁵⁰ — PARALLEL STREAMS landed (operator “work several
-streams in parallel”). </strong>Stream A / HXC-029<strong>: 3 more API
+streams in parallel”). <strong>Stream A / HXC-029</strong>: 3 more API
 banks (entity-management 35 PASS / admin-operations 22 /
 security-validation 16) self-driving vs the LIVE server, each 3×
 deterministic + mutation-proof; helix_qa <code>3e7d339</code> pushed all
-remotes; </strong>4/18 banks now verified<strong>. </strong>Stream B /
-HXC-034 wave 1<strong>: §11.4.102 cascaded into ALL 10
+remotes; <strong>4/18 banks now verified</strong>. <strong>Stream B /
+HXC-034 wave 1</strong>: §11.4.102 cascaded into ALL 10
 <code>dependencies/HelixDevelopment/*</code> submodules
 (debate_orchestrator/doc_processor/helix_llm/helix_memory/helix_specifier/llm_orchestrator/llm_provider/llms_verifier/models/vision_engine),
 committed + pushed + ls-remote-verified (2 diverged mirrors cleanly
-rebased, no force); 10 meta pointers bumped this commit. </strong>Stream
-C<strong>: github catch-up detached. </strong>HXC-035 FILED** (High):
-the bank verification surfaced a real product defect —
+rebased, no force); 10 meta pointers bumped this commit. <strong>Stream
+C</strong>: github catch-up detached. <strong>HXC-035 FILED</strong>
+(High): the bank verification surfaced a real product defect —
 <code>POST /api/v1/auth/register</code> → 400
 <code>internal_auth_failed_create_user</code> on the live DB (blocks all
 authenticated paths); systematic-debugging dispatched per §11.4.102.
