@@ -299,3 +299,6 @@ helixcode plan create --template microservice \
 **All Tutorials Complete!** 🎉
 
 Return to [Main User Manual](../README.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go) ; https://www.postgresql.org/support/versioning/ (PostgreSQL 15+ in active support) ; https://redis.io/docs/latest/ (Redis 7+) ; project go.mod (inner go 1.26) + CLAUDE.md §3.1 (gin v1.11.0, gorilla/websocket v1.5.3, pgx/v5, go-redis/v9, PostgreSQL 15+, Redis 7+). The Plan-Mode example scaffolds a Go + gin + gorilla/websocket + PostgreSQL + Redis + Docker stack; all named technologies match the project's stack authority and no version pin in this tutorial was stale. NEGATIVE FINDING — `--set "database=postgresql"` / `--set "cache=redis"` are generic stack selectors, not pinned versions; the orchestrator (Rule 4) supplies PostgreSQL 15+/Redis 7+ per §3.1.

@@ -163,3 +163,6 @@ workers:
 ---
 
 Continue to [Tutorial 8: Using Plan Mode](Tutorial_8_Using_Plan_Mode.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://ollama.com/library (Ollama model library) ; https://go.dev/dl/ (go1.26.3 latest stable Go) ; project go.mod (inner go 1.26) + CLAUDE.md §3.1. NEGATIVE FINDING — the example tag `ollama/llama3:70b` references Meta Llama 3 70B, which is still present in the Ollama library but is no longer the latest; newer tags `llama3.1` (8B/70B/405B), `llama3.2` (1B/3B), and `llama3.3` (70B, ~Llama-3.1-405B-class quality) are now available. Per CONST-036 model IDs are LLMsVerifier-sourced at runtime — confirm available tags with `ollama list` / `helixcode llm models list` rather than relying on the example string. Left as-is (illustrative, still valid) but flagged.

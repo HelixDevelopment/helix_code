@@ -132,3 +132,6 @@ tx.Commit()
 ---
 
 Continue to [Tutorial 7: Distributed Development](Tutorial_7_Distributed_Development.md)
+
+## Sources verified
+Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest stable Go) ; project go.mod (inner go 1.26) + CLAUDE.md §3.1. NEGATIVE FINDING — this tutorial documents HelixCode's own atomic multi-file edit workflow and references no external third-party service or versioned dependency; nothing stale to fix. Reviewed against project version authority only.
