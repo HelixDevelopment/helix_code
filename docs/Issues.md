@@ -542,9 +542,10 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-033 — codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression)
+## HXC-033 — codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md)
 
-**Status:** Operator-blocked
+**Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
+**Closure (2026-05-29):** ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operator's hypothesis. Fix (operator-directed): full wipe of the gitignored DB + `codegraph init` (tracked config.json preserved) + `codegraph index .`. Result Files 75,663 / Nodes 1,272,492 (edges finalize async). §11.4.79 probe PASSES via `codegraph query`: `NewBundleTranslator`→`dependencies/HelixDevelopment/llm_orchestrator/...`+`vasic-digital/...` (10 own-org hits), third-party `LLama_CPP` excluded. Two earlier mis-diagnoses corrected per §11.4.6 (the "crash" was a faulty pgrep pattern; "own-org unreachable" used the wrong verb `search` vs `query` + a stale MCP DB). Also cleaned Status.md 3.66 MB→8 KB (ANSI-spinner bloat from codegraph_sync.sh). Follow-ups (non-blocking, noted in Status.md): restart the codegraph MCP server to serve the fresh DB; fix codegraph_sync.sh to strip ANSI. Section retained as §11.4.19 tombstone.
 **Type:** Bug
 **Severity:** High (§11.4.79 release-blocker — AI agents querying the code-graph get NO own-org submodule symbols; index also unbuildable)
 **Discovered:** 2026-05-29 (operator installed codegraph 0.9.7; surfaced during §11.4.80 post-update sync)

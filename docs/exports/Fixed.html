@@ -95,6 +95,41 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-033: codegraph 0.9.7 update dropped own-org submodules from the
+index + full index/sync appeared to crash (§11.4.79 regression)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>docs/codegraph/Status.md 2026-05-29 entries + Issues/tracker</td>
+<td>ROOT CAUSE (operator’s data-compat hypothesis, CONFIRMED): codegraph
+0.9.7 requires explicit <code>codegraph init</code> before
+<code>index</code>; the pre-0.9.7 DB was incompatible. Fix: full wipe of
+gitignored DB
+(<code>codegraph.db</code>/<code>-wal</code>/<code>-shm</code>; 1.7 GB
+stale WAL) + <code>codegraph init</code> (tracked
+<code>.codegraph/config.json</code> preserved — own-org includes +
+§11.4.10 credential excludes intact) + <code>codegraph index .</code>.
+<strong>Result: Files 75,663 / Nodes 1,272,492</strong> (≈ HXC-017’s
+76,044/1.26M baseline; edges finalize async). <strong>§11.4.79
+anti-bluff probe PASS (<code>codegraph query</code>):</strong>
+<code>NewBundleTranslator</code>→<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go:34</code>
++ <code>dependencies/vasic-digital/...</code> (10 own-org hits);
+<code>EventBus</code> resolves; third-party
+<code>llama_model_load</code>@<code>LLama_CPP</code> empty (excluded).
+<strong>Two earlier mis-diagnoses corrected per §11.4.6:</strong> (1)
+“index crashes/killed” = faulty <code>pgrep</code> pattern (real
+<code>ps</code> showed the <code>node…codegraph.js index</code> process
+alive+healthy, just slow on 76k files); (2) “own-org unreachable” =
+wrong CLI verb (<code>search</code>→<code>query</code> in 0.9.7) + stale
+MCP-server DB queried before re-index. Bonus: Status.md de-bloated 3.66
+MB→8 KB (ANSI-spinner garbage from <code>codegraph_sync.sh</code>).
+Non-blocking follow-ups noted in Status.md (restart codegraph MCP server
+to serve fresh DB; fix <code>codegraph_sync.sh</code> ANSI dump per
+§11.4.26). Closed <code>Fixed (→ Fixed.md)</code> per CONST-057 (Type
+Bug).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-032: LLMOrchestrator submodule had committed git conflict
 markers in 5 Go files (26 hunks) breaking <code>helix_agent</code> build
 — a §11.4 build-layer PASS-bluff already on origin/master</td>

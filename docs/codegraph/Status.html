@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CodeGraph Status</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CodeGraph Status</h1>
+</header>
+<h1 id="codegraph-status">CodeGraph — Status</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-05-28T12:03:15Z</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-28</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-28T12:03:15Z</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>Append-only ledger of every CodeGraph-related event for HelixCode
+(config changes, index regenerations, sync runs, validation probes). Per
+§11.4.78 (CodeGraph parent), §11.4.79 (own-org submodule inclusion),
+§11.4.80 (regular-update + sync automation), §11.4.45 / §11.4.56
+(Status-doc shape). The weekly update + sync automation is INHERITED BY
+REFERENCE from the constitution submodule — invoke
+<code>constitution/scripts/codegraph_update.sh</code> and
+<code>constitution/scripts/codegraph_sync.sh</code> (never copied).</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Issues summary</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>HXC-017 (own-org submodule inclusion in index)</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>sibling <code>Status_Summary.md</code> carries the operator-readable
+digest per §11.4.56.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#cadence--automation-1148">Cadence + automation
+(§11.4.80)</a></li>
+<li><a href="#index-configuration-11479">Index configuration
+(§11.4.79)</a></li>
+<li><a href="#event-ledger">Event ledger</a></li>
+</ul>
+<h2 id="cadence-automation-11.4.80">Cadence + automation (§11.4.80)</h2>
+<p>Per §11.4.80, HelixCode MUST run the CodeGraph update + sync
+automation at least weekly (cadence floor per §11.4.45 status-digest
+cadence). The two canonical scripts are <strong>inherited by
+reference</strong> from the constitution submodule (per §3 submodule
+inheritance) and MUST be invoked at their constitution-submodule paths —
+never copied into HelixCode:</p>
+<ul>
+<li><code>constitution/scripts/codegraph_update.sh</code> — npm-installs
+the latest <code>@colbymchenry/codegraph</code>, verifies
+<code>codegraph --version</code> reflects the new version (anti-bluff:
+npm exit 0 is not proof of a working binary), and appends old/new
+version to this ledger.</li>
+<li><code>constitution/scripts/codegraph_sync.sh</code> — after a
+successful update runs <code>codegraph status</code> →
+<code>codegraph sync .</code> → <code>codegraph status</code> →
+validation, appending every step’s output to this ledger.</li>
+</ul>
+<p>Regeneration mechanism (per §11.4.77):
+<code>.codegraph/codegraph.db</code> is gitignored;
+<code>codegraph index .</code> (full) or <code>codegraph sync .</code>
+(incremental) regenerates it from <code>.codegraph/config.json</code>
+(tracked).</p>
+<h2 id="index-configuration-11.4.79">Index configuration (§11.4.79)</h2>
+<p><code>.codegraph/config.json</code> (tracked) controls which paths
+enter the index. Per §11.4.79 the <code>dependencies/</code> tree is
+split by submodule ownership:</p>
+<p><strong>INCLUDED — own-org submodules (full CLI access via
+vasic-digital + HelixDevelopment):</strong></p>
+<ul>
+<li><code>dependencies/vasic-digital/**</code> — ~55 own-org submodules
+(EventBus, Concurrency, Observability, Auth, Storage, VectorDB,
+Embeddings, Database, Cache, Messaging, Formatters, MCP_Module, RAG,
+Memory, Optimization, Plugins, Agentic, LLMOps, SelfImprove, Planning,
+Benchmark, ToolSchema, SkillRegistry, Models, LLMProvider,
+BackgroundTasks, DocProcessor, conversation, LLMOrchestrator,
+VisionEngine, Normalize, RedTeam, PliniusCommon, GandalfSolutions,
+AutoTemp, HyperTune, I-LLM, Streaming, Veritas, LeakHub, Claritas,
+Ouroborous, Config, Lazy, Watcher, Middleware, RateLimiter, I18n,
+Recovery, Document, Filesystem, TOON, …).</li>
+<li><code>dependencies/HelixDevelopment/**</code> — own-org submodules
+(DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine, LLMsVerifier,
+Models, HelixMemory, HelixSpecifier, HelixLLM, DebateOrchestrator,
+…).</li>
+</ul>
+<p><strong>EXCLUDED — third-party vendored submodules (per §11.4.74
+<code>no-match → vendor</code>):</strong></p>
+<ul>
+<li><code>dependencies/LLama_CPP/**</code> —
+<code>git@github.com:ggml-org/llama.cpp.git</code></li>
+<li><code>dependencies/Ollama/**</code> —
+<code>git@github.com:ollama/ollama.git</code></li>
+<li><code>dependencies/HuggingFace_Hub/**</code> —
+<code>git@github.com:huggingface/huggingface_hub.git</code></li>
+</ul>
+<p><strong>Credential/secret exclusions (per §11.4.10,
+belt-and-suspenders):</strong> the <code>include</code> list is
+code-extensions only (no <code>.env</code> / <code>.key</code> /
+<code>.pem</code>), and the exclude list additionally pins
+<code>**/.env</code>, <code>**/.env.*</code>, <code>**/*.key</code>,
+<code>**/*.pem</code>, <code>**/secrets/**</code> so no credential path
+can ever be indexed.</p>
+<h2 id="event-ledger">Event ledger</h2>
+<p>(events appended below by the automation; newest at the bottom)</p>
+<h2
+id="t120315z-hxc-017-config-fix-include-own-org-submodules-exclude-only-third-party-11.4.79">2026-05-28T12:03:15Z
+— HXC-017 config fix: include own-org submodules, exclude only
+third-party (§11.4.79)</h2>
+<ul>
+<li><strong>Defect</strong>: <code>.codegraph/config.json</code> carried
+a blanket <code>dependencies/**</code> exclude that wrongly removed ALL
+own-org submodules (<code>dependencies/vasic-digital/**</code> +
+<code>dependencies/HelixDevelopment/**</code>) from the index — a
+§11.4.79 violation (own-org submodules MUST be INCLUDED; only
+third-party submodules excluded).</li>
+<li><strong>Fix</strong>: replaced the blanket
+<code>dependencies/**</code> exclude with three specific third-party
+excludes (<code>dependencies/LLama_CPP/**</code>,
+<code>dependencies/Ollama/**</code>,
+<code>dependencies/HuggingFace_Hub/**</code>); added explicit credential
+excludes (<code>**/.env</code>, <code>**/.env.*</code>,
+<code>**/*.key</code>, <code>**/*.pem</code>,
+<code>**/secrets/**</code>) per §11.4.10.</li>
+<li><strong>Config JSON validity</strong>: confirmed via
+<code>python3 -c "import json;json.load(open('.codegraph/config.json'))"</code>
+→ VALID.</li>
+<li><strong>Index status BEFORE re-index</strong>: Files 39,024 / Nodes
+624,103 / Edges 1,643,200 / DB 1609.00 MB.</li>
+<li><strong>Index status AFTER re-index</strong>
+(<code>codegraph index .</code>, exit 0): Files <strong>76,044</strong>
+/ Nodes <strong>1,255,974</strong> / Edges <strong>3,955,444</strong> /
+DB 2617.24 MB. The +37,020 files / +631,871 nodes delta is the
+newly-included own-org submodule trees.</li>
+<li><strong>§11.4.79 anti-bluff probe (own-org symbol now
+resolves)</strong>:
+<ul>
+<li><code>codegraph query EventBus</code> →
+<code>dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85</code> ✅
+(would NOT have resolved under the old blanket
+<code>dependencies/**</code> exclude).</li>
+<li><code>codegraph query helix_memory</code> →
+<code>dependencies/HelixDevelopment/helix_memory/pkg/config/config.go</code>
+(+more) ✅.</li>
+<li><code>codegraph query llama</code> filtered to
+<code>dependencies/LLama_CPP</code> → <strong>empty</strong> ✅
+(third-party correctly excluded).</li>
+</ul></li>
+<li><strong>HXC-017 status</strong>: fully done — config fixed, re-index
+complete, own-org inclusion proven, third-party exclusion proven.</li>
+</ul>
+<h2
+id="t063700z-codegraph_sync.sh-runmediamilosvasicdata4tbprojectshelixcode">2026-05-29T06:37:00Z
+— codegraph_sync.sh @
+/run/media/milosvasic/DATA4TB/Projects/HelixCode</h2>
+<p><strong>FAIL</strong> — codegraph sync exited non-zero. Tail of
+log:```┌ Syncing CodeGraph [2m│[0m <em>(raw progress-spinner log line
+removed — was 25387 chars of ANSI noise from codegraph_sync.sh; see
+qa-results/ logs)</em> <em>(raw progress-spinner log line removed — was
+3007584 chars of ANSI noise from codegraph_sync.sh; see qa-results/
+logs)</em></p>
+<h2
+id="codegraph-0.9.7-update-indexsync-fail-11.4.79-own-org-regression-hxc-033">2026-05-29
+— codegraph 0.9.7 update: index/sync FAIL + §11.4.79 own-org regression
+(HXC-033)</h2>
+<p><strong>Event</strong>: operator installed codegraph
+<strong>0.9.7</strong> on the host (<code>codegraph --version</code> →
+<code>0.9.7</code>).</p>
+<p><strong>§11.4.80 post-update sync — FAILED (honest ledger, no
+bluff):</strong> - The 0.9.7 install reset the gitignored index DB (was
+76,044 files / 1,255,974 nodes at HXC-017; dropped to 39,203). -
+<code>constitution/scripts/codegraph_sync.sh</code> ran
+<code>codegraph sync .</code> → exited before completing its 4 steps
+(index reached 43,073 files). - Full re-index
+<code>codegraph index .</code> → process <strong>KILLED mid-run, no
+diagnostic / no exit code</strong> (terminated by signal); index left at
+54,207 files. Reproduced. -
+<code>codegraph index . --force --quiet</code> → <strong>KILLED again,
+no diagnostic</strong>; <code>--force</code> wiped + left only 4,630
+files. - <code>codegraph sync . --quiet</code> → <strong>exit 1</strong>
+at 8,461 files. - Host memory ample (51 GiB free) — not an obvious §12.6
+OOM.</p>
+<p><strong>§11.4.79 anti-bluff probe — FAILS:</strong>
+<code>codegraph_search BundleTranslator</code> (MCP) returns ONLY
+<code>helix_code/internal/tools/askuser/...</code> — the own-org
+<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go</code>
+symbol does NOT resolve. Own-org submodules are NOT reachable in the
+0.9.7 index. <strong>This is a §11.4.79 regression introduced by the
+0.9.7 update.</strong></p>
+<p><strong>Not a config regression:</strong> tracked
+<code>.codegraph/config.json</code> is intact (git-clean) — own-org
+includes + §11.4.10 credential excludes (<code>**/.env</code>,
+<code>**/*.key</code>, <code>**/secrets/**</code>) all present.</p>
+<p><strong>Root cause: UNCONFIRMED</strong> (§11.4.6) — codegraph 0.9.7
+<code>index</code>/<code>sync</code> terminate without an actionable
+diagnostic on this 76k-file repo. Not determinable from captured
+evidence whether it is a 0.9.7 stability bug, a submodule-traversal
+change, or a config-schema change. Filed as <strong>HXC-033</strong>;
+needs operator decision (downgrade to prior working version / upstream
+bug report / accept degraded index). Evidence:
+<code>qa-results/codegraph_index_*.log</code>,
+<code>codegraph_recover_*.log</code>.</p>
+<h2
+id="codegraph-0.9.7-resolved-wipe-init-re-index-restored-own-org-index-hxc-033-fixed">2026-05-29
+— codegraph 0.9.7 RESOLVED: wipe + init + re-index restored own-org
+index (HXC-033 → Fixed)</h2>
+<p><strong>Resolution (operator-directed: “clear all indexed data fully
+and re-index — it MUST be a data-compatibility problem; ALWAYS index
+main + HelixDevelopment + vasic-digital”).</strong> Confirmed
+correct.</p>
+<p><strong>Root cause (now CONFIRMED, was UNCONFIRMED):</strong>
+codegraph <strong>0.9.7 requires an explicit
+<code>codegraph init</code></strong> before <code>index</code>
+(behavioral change vs the prior version). The pre-0.9.7 index DB was
+incompatible; operating on it produced the failures. After a full wipe
+of the gitignored DB
+(<code>codegraph.db</code>/<code>-wal</code>/<code>-shm</code>; the 1.7
+GB stale WAL was a tell) + <code>codegraph init</code> (tracked
+<code>config.json</code> preserved — own-org includes + §11.4.10
+credential excludes intact) + <code>codegraph index .</code>, the index
+rebuilt cleanly.</p>
+<p><strong>Two earlier mis-diagnoses corrected (per §11.4.6 — stated
+here as the record):</strong> (1) “index crashes/killed mid-run” was a
+FAULTY <code>pgrep</code> pattern (<code>codegraph index</code> vs the
+real <code>node … codegraph.js index .</code>) giving false “ENDED”
+reads — the process was simply slow (76k files); real <code>ps</code>
+showed it alive (~600 MB RSS, healthy, climbing). (2) “own-org symbols
+do not resolve” used the WRONG CLI verb (<code>codegraph search</code> —
+removed in 0.9.7; the verb is <code>codegraph query</code>) AND queried
+a stale MCP-server DB handle from before the re-index.</p>
+<p><strong>Result (CLI <code>codegraph status</code> on fresh 0.9.7
+DB):</strong> Files <strong>75,663</strong> / Nodes
+<strong>1,272,492</strong> / Edges finalizing (1.7M→ toward ~3.95M;
+edge-enrichment phase runs async after node indexing).</p>
+<p><strong>§11.4.79 anti-bluff probe — PASS
+(<code>codegraph query</code>, fresh DB):</strong> -
+<code>NewBundleTranslator</code> →
+<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go:34</code>
+(+ <code>dependencies/vasic-digital/...</code>,
+<code>doc_processor</code>) — 10 own-org hits. ✅ HelixDevelopment +
+vasic-digital both reachable. - <code>EventBus</code> → resolves. ✅ -
+<code>llama_model_load</code> under <code>dependencies/LLama_CPP</code>
+→ empty. ✅ third-party correctly excluded.</p>
+<p><strong>Status.md hygiene fix:</strong> this ledger had bloated to
+3.66 MB — a single 3,007,584-char line of raw ANSI progress-spinner
+output that <code>constitution/scripts/codegraph_sync.sh</code> dumped
+verbatim on its earlier FAIL. Stripped to 8 KB (all 7 real ledger
+entries preserved). FOLLOW-UP: <code>codegraph_sync.sh</code> should
+strip ANSI / not dump raw spinner logs into Status.md
+(constitution-submodule fix per §11.4.26).</p>
+<p><strong>Operational follow-up:</strong> the agent-facing codegraph
+<strong>MCP server</strong>
+(<code>tools/codegraph/...serve --mcp</code>, a separate install) holds
+the pre-wipe DB inode — it must be <strong>restarted</strong> to serve
+the fresh index to AI agents; the CLI <code>query</code> already
+reflects it.</p>
+</body>
+</html>

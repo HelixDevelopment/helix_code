@@ -2009,15 +2009,33 @@ committed state until all 5 are fixed together.
 <strong>Composes-with:</strong> §11.4 (build-layer bluff), §11.4.41
 (merge-first), §11.4.71, HXC-001, CONST-046, CONST-052.</p>
 <hr />
-<h2 id="hxc-033-codegraph-0.9.7-update-full-indexsync-crashes-own-org-submodules-dropped-from-the-index-11.4.79-regression">HXC-033
+<h2 id="hxc-033-codegraph-0.9.7-update-full-indexsync-crashes-own-org-submodules-dropped-from-the-index-11.4.79-regression-closed-fixed.md">HXC-033
 — codegraph 0.9.7 update: full index/sync crashes + own-org submodules
-dropped from the index (§11.4.79 regression)</h2>
-<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
-<strong>Severity:</strong> High (§11.4.79 release-blocker — AI agents
-querying the code-graph get NO own-org submodule symbols; index also
-unbuildable) <strong>Discovered:</strong> 2026-05-29 (operator installed
-codegraph 0.9.7; surfaced during §11.4.80 post-update sync)
-<strong>Discovered-By:</strong> AI
+dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> ROOT CAUSE confirmed = codegraph 0.9.7 requires
+an explicit <code>codegraph init</code> before <code>index</code>
+(data-compat change; old DB incompatible) — exactly the operator’s
+hypothesis. Fix (operator-directed): full wipe of the gitignored DB +
+<code>codegraph init</code> (tracked config.json preserved) +
+<code>codegraph index .</code>. Result Files 75,663 / Nodes 1,272,492
+(edges finalize async). §11.4.79 probe PASSES via
+<code>codegraph query</code>:
+<code>NewBundleTranslator</code>→<code>dependencies/HelixDevelopment/llm_orchestrator/...</code>+<code>vasic-digital/...</code>
+(10 own-org hits), third-party <code>LLama_CPP</code> excluded. Two
+earlier mis-diagnoses corrected per §11.4.6 (the “crash” was a faulty
+pgrep pattern; “own-org unreachable” used the wrong verb
+<code>search</code> vs <code>query</code> + a stale MCP DB). Also
+cleaned Status.md 3.66 MB→8 KB (ANSI-spinner bloat from
+codegraph_sync.sh). Follow-ups (non-blocking, noted in Status.md):
+restart the codegraph MCP server to serve the fresh DB; fix
+codegraph_sync.sh to strip ANSI. Section retained as §11.4.19 tombstone.
+<strong>Type:</strong> Bug <strong>Severity:</strong> High (§11.4.79
+release-blocker — AI agents querying the code-graph get NO own-org
+submodule symbols; index also unbuildable) <strong>Discovered:</strong>
+2026-05-29 (operator installed codegraph 0.9.7; surfaced during §11.4.80
+post-update sync) <strong>Discovered-By:</strong> AI
 <strong>Operator-Blocked-Details:</strong> By: AI; Since: 2026-05-29;
 Reason: external-tool-state (operator-installed codegraph 0.9.7 crashes
 with no actionable diagnostic — not determinable/fixable from captured
