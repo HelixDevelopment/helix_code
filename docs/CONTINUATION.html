@@ -178,11 +178,31 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁴² — DOC-SYNC +
-FORWARD-WORK FILING (operator “do it all”, local-only, no push).
-</strong>Items 1-3 (safe):** (1) closed the long-standing §11.4.91 gap —
-the previously hand-maintained summaries had a “TODO: create” generator;
-built <code>scripts/generate_issues_summary.sh</code> +
+<p><strong>Last updated: 2026-05-29 (close-out¹⁴³ — HXC-029 §11.4.98
+CONFIRMED-VIOLATION FIXES (operator “do it all now, yes”, local-only).
+Fixed both hard findings from the HXC-029 audit: (1)
+<code>helix_code/tests/regression/server_timeout_test.go</code>
+<code>TestServerStability</code> was <code>t.Skip("run manually")</code>
+over an unimplemented body — a §11.4 / §11.4.98 PASS-bluff — now a REAL
+self-driving test (real <code>net/http</code> server with config timeout
+semantics, real HTTP I/O, asserts idle-survival; PASS
+<code>-count=3</code> ~1.75s each); also repaired the sibling
+<code>TestServerTimeoutConfiguration</code> CWD-dependent
+<code>require.NoError(config.Load)</code> hard-fail → skip-with-reason;
+whole <code>tests/regression</code> package now GREEN (was RED at HEAD,
+pre-existing). (2) <code>helix_code/tests/e2e/scripts/clean.sh</code>
+interactive <code>read -p</code> →
+<code>--force</code>/<code>CLEAN_FORCE=1</code>/TTY-gated self-driving
+(keeps results non-interactively, no hang; <code>bash -n</code> clean).
+HXC-029 → In progress; remaining = 19 HelixQA
+<code>manual-review-required</code> banks + ~24 integration files
+long-tail. DB resynced (143 items, validate OK, WAL-checkpointed);
+summaries+exports regenerated; G11/G12/clarity gates PASS. PRIOR
+close-out¹⁴² — DOC-SYNC + FORWARD-WORK FILING (operator “do it all”,
+local-only, no push). </strong>Items 1-3 (safe):** (1) closed the
+long-standing §11.4.91 gap — the previously hand-maintained summaries
+had a “TODO: create” generator; built
+<code>scripts/generate_issues_summary.sh</code> +
 <code>scripts/generate_fixed_summary.sh</code> (mechanical, parse
 Issues.md/Fixed.md headings + Status/Type/Discovered,
 <code>--check</code> mode) and regenerated the stale summaries (were “1

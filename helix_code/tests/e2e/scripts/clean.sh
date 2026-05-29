@@ -8,6 +8,21 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 E2E_ROOT="$(dirname "$SCRIPT_DIR")"
 
+# §11.4.98 self-driving: clean.sh must never block on interactive input in
+# automated / CI / pipeline runs. --force / -f (or CLEAN_FORCE=1) removes
+# test-results non-interactively; otherwise an interactive TTY is prompted and a
+# non-interactive run KEEPS results (safe default) instead of hanging on `read`.
+FORCE="${CLEAN_FORCE:-0}"
+for arg in "$@"; do
+    case "$arg" in
+        -f|--force) FORCE=1 ;;
+        -h|--help)
+            echo "Usage: clean.sh [--force|-f]"
+            echo "  --force / -f   remove test-results non-interactively (CLEAN_FORCE=1 env equivalent)"
+            exit 0 ;;
+    esac
+done
+
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -54,14 +69,24 @@ if [ -d "$E2E_ROOT/.pids" ]; then
     echo -e "${GREEN}✓ PID files cleaned${NC}"
 fi
 
-# Clean test results (optional - ask user)
+# Clean test results (destructive — gated; self-driving per §11.4.98)
 if [ -d "$E2E_ROOT/test-results" ]; then
-    read -p "Remove test results? (y/N) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    remove=0
+    if [ "$FORCE" = "1" ]; then
+        remove=1
+    elif [ -t 0 ]; then
+        # Interactive TTY: ask the human.
+        read -p "Remove test results? (y/N) " -n 1 -r
+        echo
+        [[ $REPLY =~ ^[Yy]$ ]] && remove=1
+    else
+        # Non-interactive (CI/pipeline): keep results; pass --force to remove.
+        echo -e "${YELLOW}✓ Test results kept (non-interactive; pass --force to remove)${NC}"
+    fi
+    if [ "$remove" = "1" ]; then
         rm -rf "$E2E_ROOT/test-results"
         echo -e "${GREEN}✓ Test results cleaned${NC}"
-    else
+    elif [ "$FORCE" != "1" ] && [ -t 0 ]; then
         echo -e "${YELLOW}✓ Test results kept${NC}"
     fi
 fi
