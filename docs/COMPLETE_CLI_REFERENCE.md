@@ -1078,3 +1078,9 @@ Full detail: `tools/codegraph/README.md` and the incorporation plan at
 ---
 
 This CLI reference provides comprehensive coverage of all HelixCode command-line tools and their usage patterns. For additional help, use `--help` flag with any command or refer to the specific documentation sections.
+
+## Sources verified 2026-05-29: https://go.dev/dl/ , https://www.postgresql.org/support/versioning/ , https://github.com/redis/redis/releases , https://platform.claude.com/docs/en/docs/about-claude/models/overview
+
+Verified against latest official sources on 2026-05-29. Go go1.26.3 latest (go.dev/dl) per CLAUDE.md §3.1. PostgreSQL 15 still supported (latest 15.18); Redis latest stable 8.8.0 (7+ pin still valid). The `docker-compose` command examples here are illustrative of the underlying stack only; per CONST/Rule 4 + §11.4.76 the supported workflow is the `./helix` facade (podman host) / the containers submodule, not hand-run docker — the doc already carries the §11.4.99 correction note that the `helixcode-*` Docker images do not exist.
+
+Negative findings: example model IDs (`gpt-4`, `llama-3-8b`) are illustrative; per CONST-036 the authoritative model list is LLMsVerifier-sourced at runtime — run `helixcode llm models list`. `claude-3-*` / `gpt-3.5-turbo` style IDs are legacy per Anthropic's current model overview (Claude 3 family retired) and not re-pinned here to avoid guessing. OpenAI docs returned HTTP 403 to automated fetch.
