@@ -210,6 +210,9 @@ import (
 	workeri18n "dev.helix.code/internal/worker/i18n"
 	workspacepkg "dev.helix.code/internal/workspace"
 	workspacei18n "dev.helix.code/internal/workspace/i18n"
+	autonomypkg "dev.helix.code/internal/workflow/autonomy"
+	planmodepkg "dev.helix.code/internal/workflow/planmode"
+	workflowi18n "dev.helix.code/internal/workflow/i18n"
 )
 
 // WireAll constructs a real translator for every CONST-046-migrated
@@ -665,6 +668,18 @@ func WireAll(langs ...string) error {
 		errs = append(errs, fmt.Errorf("internal/workspace: %w", err))
 	} else {
 		workspacepkg.SetTranslator(tr)
+	}
+
+	// internal/workflow/{autonomy,planmode} — autonomy-mode display
+	// labels + plan-mode execution-progress / validation-report /
+	// option-presenter narrative. Both packages share the single
+	// internal/workflow/i18n Translator type and bundle, so one
+	// translator is constructed and injected into both seams.
+	if tr, err := workflowi18n.NewTranslator(langs...); err != nil {
+		errs = append(errs, fmt.Errorf("internal/workflow: %w", err))
+	} else {
+		autonomypkg.SetTranslator(tr)
+		planmodepkg.SetTranslator(tr)
 	}
 
 	if len(errs) > 0 {

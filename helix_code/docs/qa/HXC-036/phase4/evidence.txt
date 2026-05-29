@@ -1,0 +1,71 @@
+==============================================================
+HXC-036 Phase 4 — author+wire autonomy/planmode i18n (final 2/74)
+Captured: 2026-05-29T15:31:52Z
+Host: Linux 6.12.61-6.12-alt1 x86_64
+Go: go version go1.26.2-X:nodwarf5 linux/amd64
+==============================================================
+
+### 1. go build (workflow + i18nwiring) ###
+BUILD OK
+
+### 2. go vet (workflow + i18nwiring) ###
+VET OK
+
+### 3. NEW Phase-4 acceptance tests — autonomy (resolved label capture) ###
+=== RUN   TestAutonomyMode_String_ResolvesRealBundleText
+    i18n_wire_test.go:52: RESOLVED autonomy label: ModeFullAuto.String() = "Full Auto (Fully Autonomous)"
+--- PASS: TestAutonomyMode_String_ResolvesRealBundleText (0.00s)
+PASS
+ok  	dev.helix.code/internal/workflow/autonomy	0.003s
+
+### 4. NEW Phase-4 acceptance tests — planmode (resolved interpolated capture) ###
+=== RUN   TestPlanmode_PresentOptions_ResolvesRealBundleText
+    i18n_wire_test.go:86: RESOLVED planmode option-presenter output:
+        
+        === Implementation Options ===
+        Option 1: Incremental refactor [RECOMMENDED]
+        Score: 87.5/100
+        Description: Refactor in small reviewable steps.
+        
+        Pros:
+          + low risk
+        
+        Cons:
+          - slower
+        
+        Estimated Duration: 30m0s
+        Complexity: Low
+        Confidence: 90%
+        
+        ---
+        Select an option (1-1): 
+--- PASS: TestPlanmode_PresentOptions_ResolvesRealBundleText (0.00s)
+PASS
+ok  	dev.helix.code/internal/workflow/planmode	0.005s
+
+### 5. NEW Phase-4 i18nwiring suite — WireAll covers 74/74 + workflow resolved ###
+=== RUN   TestPhase4_WireAll_Succeeds
+--- PASS: TestPhase4_WireAll_Succeeds (0.02s)
+=== RUN   TestPhase4_Workflow_ResolvesAutonomyLabel
+    wire_phase4_workflow_test.go:46: workflow autonomy label resolved: "Full Auto (Fully Autonomous)"
+--- PASS: TestPhase4_Workflow_ResolvesAutonomyLabel (0.00s)
+=== RUN   TestPhase4_Workflow_ResolvesPlanmodeInterpolated
+    wire_phase4_workflow_test.go:65: workflow planmode interpolated resolved: "Select an option (1-3): "
+--- PASS: TestPhase4_Workflow_ResolvesPlanmodeInterpolated (0.00s)
+PASS
+ok  	dev.helix.code/internal/i18nwiring	0.031s
+
+### 6. Phase-1/2 acceptance tests STILL PASS (regression) ###
+=== RUN   TestPhase2_WireAll_Succeeds
+--- PASS: TestPhase2_WireAll_Succeeds (0.02s)
+=== RUN   TestPhase2_Auth_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:48: auth resolved: "failed to hash password: boom"
+--- PASS: TestPhase2_Auth_ResolvesInterpolatedText (0.00s)
+=== RUN   TestPhase2_LLM_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:67: llm resolved: " Configure Anthropic "
+--- PASS: TestPhase2_LLM_ResolvesInterpolatedText (0.00s)
+=== RUN   TestPhase2_Config_ResolvesInterpolatedText
+    wire_phase2_resolved_test.go:86: config resolved: "INFO: Using config file: /etc/helix/config.yaml"
+--- PASS: TestPhase2_Config_ResolvesInterpolatedText (0.00s)
+PASS
+ok  	dev.helix.code/internal/i18nwiring	0.028s
