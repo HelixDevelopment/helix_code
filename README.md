@@ -252,10 +252,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Documentation
 
-- [Architecture Overview](helix_code/docs/ARCHITECTURE.md)
-- [Development Guide](helix_code/docs/DEVELOPMENT.md)
-- [User Guide](helix_code/docs/USER_GUIDE.md)
-- [API Documentation](helix_code/docs/API.md)
+- [Architecture Overview](helix_code/docs/general/ARCHITECTURE.md)
+- [Development Guide](helix_code/docs/general/DEVELOPMENT.md)
+- [User Guide](helix_code/docs/general/USER_GUIDE.md)
+- [API Documentation](helix_code/docs/general/API_DOCUMENTATION.md)
 
 ## 🆘 Support
 
