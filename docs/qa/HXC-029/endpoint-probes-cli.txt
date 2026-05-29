@@ -1,0 +1,17 @@
+HXC-029 CLI-class banks — real endpoint/tool probes (2026-05-29)
+host server /health:
+{"status":"healthy","timestamp":"2026-05-29T12:53:09.382562097Z","version":"1.0.0"}
+helixagent :7061/health:
+curl: (7) Failed to connect to localhost port 7061 after 0 ms: Could not connect to server
+which aider/aichat/openhands:
+which: (not on PATH)
+which: (not on PATH)
+/home/milosvasic/.local/bin/aider
+  none found
+./bin/helixagent present:
+ls: cannot access '/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code/bin/helixagent': No such file or directory
+  absent
+./bin/cli -health exit:
+  0
+/v1/mcp/tools/list on :8080:
+  404

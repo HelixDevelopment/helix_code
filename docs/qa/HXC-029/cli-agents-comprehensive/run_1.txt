@@ -1,0 +1,93 @@
+=== HXC-029 CLI bank run: HelixAgent CLI Agents Comprehensive Test Bank (1.0) ===
+=== base="http://localhost:8080" workdir="/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code" started 2026-05-29T12:54:16Z ===
+
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -health
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -list-models
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -list-workers
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -command 'echo hxc029_cli_exec_probe'
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli --help 2>&1 | grep -q -- -list-workers; echo cli_help_ok
+PASS [HXC029-CLI-PROBE]  — shell: D=$(mktemp -d); echo hxc029_fs_roundtrip > "$D/f.txt"; cat "$D/f.txt"; rm -rf "$...
+SKIP [CLI-REG-001] Initialize agent registry — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-001] Check initial stats — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-002] Get global registry — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-002] Register each agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-002] Verify registration count — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-003] Register agent first time — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-REG-003] Register same agent again — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-001] Create Aider instance — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-001] Get agent info — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-001] Initialize with config — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-002] Create Claude Code instance — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-002] Get agent info — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-002] Verify MCP integration — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-003] Create OpenHands instance — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-003] Check Docker capabilities — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-004] Register all agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-INIT-004] Check Execute method — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-001] Create and initialize agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-001] Start agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-001] Check health — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-001] Stop agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-002] Register multiple agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-002] Start all agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-002] Verify started status — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-003] Start all registered agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-003] Stop all agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-LIFE-003] Verify stopped status — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-001] Initialize and start Aider — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-001] Execute chat command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-002] Initialize Claude Code — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-002] Execute chat command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-003] Initialize Claude Code — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-003] Execute bash command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-004] Initialize Claude Code — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-004] Execute git status — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-005] Execute unknown command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-006] Initialize OpenHands — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EXEC-006] Execute edit command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-MCP-001] Create MCP integration — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-MCP-001] Load default config — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-MCP-001] List MCP servers — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-MCP-002] Initialize MCP — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-MCP-002] List tools — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-001] Create session — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-001] Add messages — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-001] Verify messages — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-002] Create session — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-002] Check not expired — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-002] Set old activity — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-002] Check expired — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-003] Create manager — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-003] Create multiple sessions — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-003] List sessions — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-SESS-003] Delete session — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-001] Create executor — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-001] Write file — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-001] Read file — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-002] Create test file — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-002] Edit file — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-002] Verify edit — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-003] Execute bash — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-TOOL-004] Try dangerous command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONF-001] Create config — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONF-001] Initialize with config — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONF-001] Verify config — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-HEALTH-001] Check health before start — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-HEALTH-001] Start agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-HEALTH-001] Check health after start — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-HEALTH-002] Register and start agents — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-HEALTH-002] Health check all — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONC-001] Register agents concurrently — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONC-001] Verify registry state — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONC-002] Start agent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CONC-002] Execute commands concurrently — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EDGE-001] Execute with nil params — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EDGE-002] Create cancelled context — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-EDGE-002] Execute with cancelled context — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-AIDER-001] Initialize Aider — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-AIDER-001] Check repo map — Playwright CDP runtime not wired in this standalone runner (SKIP-OK: #PLAYWRIGHT-RUNTIME-PENDING). Honest skip per §11.4.98.
+SKIP [CLI-OPEN-001] Check sandbox capability — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [CLI-CODEX-001] Check agent mode — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+
+=== summary: 6 PASS, 0 FAIL, 81 SKIP (of 87 steps) ===
+=== RESULT: all executed steps PASS, no FAIL ===

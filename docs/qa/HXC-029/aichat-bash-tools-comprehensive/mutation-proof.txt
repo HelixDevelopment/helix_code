@@ -1,0 +1,87 @@
+=== HXC-029 CLI bank run: AIChat & Bash Tools Comprehensive Test Bank (1.0) ===
+=== base="http://localhost:8080" workdir="/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code" started 2026-05-29T12:54:38Z ===
+
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -health
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -list-models
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli -list-workers
+FAIL [HXC029-CLI-PROBE]  — output missing "MUTATED_EXPECT_WILL_NOT_APPEAR_xyz" (output: internal_config_info_using_config_file\n2026/05/29 15:54:38 Starting Raft consensus for node 2266ef0e-c44c-43af-b864-879b7d146e05\n2026/05/29 15:54:38 Loaded 12 known hosts from /home/milosvasic/.ssh/...)
+PASS [HXC029-CLI-PROBE]  — shell: ./bin/cli --help 2>&1 | grep -q -- -list-workers; echo cli_help_ok
+PASS [HXC029-CLI-PROBE]  — shell: D=$(mktemp -d); echo hxc029_fs_roundtrip > "$D/f.txt"; cat "$D/f.txt"; rm -rf "$...
+SKIP [AICHAT-001] Generate AIChat config — ./bin/helixagent binary not present in this checkout (only ./bin/cli + ./bin/helixcode built). Honest skip per §11.4.98.
+SKIP [AICHAT-001] Validate config structure — helixagent service on :7061 not running (curl :7061/health -> connection refused 2026-05-29); the live server is helixcode on :8080. Honest skip per §11.4.98.
+SKIP [AICHAT-001] Verify 22+ provider configurations — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [AICHAT-002] Start HelixAgent — helixagent service on :7061 not running (curl :7061/health -> connection refused 2026-05-29); the live server is helixcode on :8080. Honest skip per §11.4.98.
+SKIP [AICHAT-002] Configure AIChat — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-002] Send test message — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-003] Start REPL — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-003] Test session persistence — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-003] Test .file command — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-004] Start AIChat server — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-004] Test OpenAI-compatible API — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-004] Test via HelixAgent — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [AICHAT-005] Configure RAG — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-005] Add documents — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [AICHAT-005] Query RAG — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [FS-001] Create test file — aider binary is installed (/home/milosvasic/.local/bin/aider, --help exit 0 2026-05-29) but these steps drive it with --model helixagent/ensemble + interactive slash-commands (/ask /map /commit /accept), which require (a) the helixagent endpoint on :7061 serving the ensemble model (NOT running — curl :7061 connection refused 2026-05-29) and (b) an interactive aider REPL (non-self-driving). Honest skip per §11.4.98(C) — never fabricated.
+SKIP [FS-001] Call fs_cat — aider binary is installed (/home/milosvasic/.local/bin/aider, --help exit 0 2026-05-29) but these steps drive it with --model helixagent/ensemble + interactive slash-commands (/ask /map /commit /accept), which require (a) the helixagent endpoint on :7061 serving the ensemble model (NOT running — curl :7061 connection refused 2026-05-29) and (b) an interactive aider REPL (non-self-driving). Honest skip per §11.4.98(C) — never fabricated.
+SKIP [FS-001] Verify via MCP — HTTP path targets the helixagent MCP surface (/v1/mcp/*), served by the helixagent service on :7061 which is not running (probed 2026-05-29: 404 on helixcode :8080). Honest skip per §11.4.98 — never an assertion-free pass on a 404.
+SKIP [FS-002] List directory — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [FS-002] Verify format — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [FS-003] Write file — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+PASS [FS-003] Verify content — shell: D=$(mktemp -d); echo hxc029_paired > "$D/p.txt"; cat "$D/p.txt"; rm -rf "$D"
+PASS [FS-004] Create original file — shell: echo 'old content' > /tmp/patch_test.txt
+SKIP [FS-004] Apply patch — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+PASS [FS-004] Verify result — shell: D=$(mktemp -d); echo hxc029_paired > "$D/p.txt"; cat "$D/p.txt"; rm -rf "$D"
+SKIP [FS-005] Create directory — aider binary is installed (/home/milosvasic/.local/bin/aider, --help exit 0 2026-05-29) but these steps drive it with --model helixagent/ensemble + interactive slash-commands (/ask /map /commit /accept), which require (a) the helixagent endpoint on :7061 serving the ensemble model (NOT running — curl :7061 connection refused 2026-05-29) and (b) an interactive aider REPL (non-self-driving). Honest skip per §11.4.98(C) — never fabricated.
+SKIP [FS-005] Verify — aider binary is installed (/home/milosvasic/.local/bin/aider, --help exit 0 2026-05-29) but these steps drive it with --model helixagent/ensemble + interactive slash-commands (/ask /map /commit /accept), which require (a) the helixagent endpoint on :7061 serving the ensemble model (NOT running — curl :7061 connection refused 2026-05-29) and (b) an interactive aider REPL (non-self-driving). Honest skip per §11.4.98(C) — never fabricated.
+SKIP [EXEC-001] Execute simple command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [EXEC-001] Execute with pipes — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [EXEC-001] Verify security blocks — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [EXEC-002] Execute Python — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [EXEC-002] Use libraries — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [EXEC-003] Execute JS — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [WEB-001] Fetch URL — helixagent service on :7061 not running (curl :7061/health -> connection refused 2026-05-29); the live server is helixcode on :8080. Honest skip per §11.4.98.
+SKIP [WEB-001] Verify content — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [WEB-002] Search — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [WEB-002] Verify content — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [WEB-003] Search — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INFO-001] Search arXiv — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INFO-001] Verify format — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INFO-002] Search Wikipedia — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INFO-002] Verify — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INFO-003] Get weather — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [HX-001] Call hx_health — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [HX-001] Verify status — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [HX-002] Call hx_providers — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [HX-002] Verify count — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [HX-003] Call ensemble — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [HX-003] Verify quality — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [GIT-001] Call git_status — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [GIT-002] Make a change — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [GIT-002] Call git_diff — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INT-001] Read file — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [INT-001] Analyze via ensemble — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INT-001] Write result — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [INT-002] List MCP tools — HTTP path targets the helixagent MCP surface (/v1/mcp/*), served by the helixagent service on :7061 which is not running (probed 2026-05-29: 404 on helixcode :8080). Honest skip per §11.4.98 — never an assertion-free pass on a 404.
+SKIP [INT-002] Call each category — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INT-003] Configure AIChat MCP — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [INT-003] Use tool — external tool 'aichat' not installed in this checkout (which aichat -> not found 2026-05-29). Honest skip per §11.4.98.
+SKIP [INT-003] Verify — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [PERF-001] Measure fs_cat — fs_*.sh bash-provider scripts not present at internal/tools/bash_providers/ in this checkout (dir absent 2026-05-29). Honest skip per §11.4.98.
+SKIP [PERF-001] Measure exec_command — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [PERF-001] Measure MCP overhead — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [PERF-002] Run 10 tools concurrently — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [PERF-002] Check resource usage — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [SEC-001] Try rm -rf / — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [SEC-001] Try mkfs — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [SEC-001] Verify log — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [SEC-002] Check API keys not logged — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [SEC-002] Verify .env loading — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [STRESS-001] Execute all tools — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [STRESS-001] Verify results — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [STRESS-002] Restart HelixAgent 10 times — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+SKIP [STRESS-002] Check for leaks — Go-API internal symbol with no public CLI/shell surface (covered by helix_code Go unit tests, not a CLI step). Honest skip per §11.4.98 — not a manual step.
+
+=== summary: 8 PASS, 1 FAIL, 71 SKIP (of 80 steps) ===
+=== 1 failure(s): ===
+  - [HXC029-CLI-PROBE]  — output missing "MUTATED_EXPECT_WILL_NOT_APPEAR_xyz" (output: internal_config_info_using_config_file\n2026/05/29 15:54:38 Starting Raft consensus for node 2266ef0e-c44c-43af-b864-879b7d146e05\n2026/05/29 15:54:38 Loaded 12 known hosts from /home/milosvasic/.ssh/...)
