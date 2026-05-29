@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-031 Plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="docs/_progress-style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-031 Plan</h1>
+</header>
+<h1
+id="hxc-031-implementation-plan-codex-multimodal-cline-computer-use-port">HXC-031
+— Implementation Plan: Codex Multimodal + Cline Computer Use Port</h1>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>DRAFT — scoping/plan only, NO code (operator decision pending)</td>
+</tr>
+<tr>
+<td>Tracker item</td>
+<td>HXC-031 (Type: Feature)</td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Research subagent (read-only analysis)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>§11.4.70 subagent-driven, §11.4.74 catalogue-first,
+§11.4.50/§11.4.98 anti-bluff test plan</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-scope--method">Scope &amp; Method</a></li>
+<li><a href="#2-capability-summary">Capability Summary (evidenced from
+reference source)</a>
+<ul>
+<li>2.1 <a href="#21-codex-multimodal">Codex Multimodal</a></li>
+<li>2.2 <a href="#22-cline-computer-use">Cline Computer Use</a></li>
+</ul></li>
+<li><a href="#3-helixcode-integration-surface">HelixCode Integration
+Surface (what exists vs missing)</a></li>
+<li><a href="#4-catalogue-check-result-1174">Catalogue-Check Result
+(§11.4.74)</a></li>
+<li><a href="#5-architecture--design">Architecture / Design</a>
+<ul>
+<li>5.1 <a href="#51-capability-a">Capability A — Multimodal LLM request
+surface</a></li>
+<li>5.2 <a href="#52-capability-b">Capability B — Computer-use feedback
+loop</a></li>
+</ul></li>
+<li><a href="#6-build-sequence">Build Sequence (subagent-friendly,
+≤~300-line units)</a></li>
+<li><a href="#7-test--challenge-plan">Test + Challenge Plan (§11.4.50 /
+§11.4.98 / §11.4.69)</a></li>
+<li><a href="#8-effort-estimate-risks-design-forks">Effort Estimate,
+Risks, Design Forks</a></li>
+<li><a href="#9-1174999-sources-note">§11.4.99 Sources note</a></li>
+</ol>
+<hr />
+<h2 id="scope-method">1. Scope &amp; Method</h2>
+<p>Read-only analysis of the in-repo reference sources and the HelixCode
+integration surface. No source modified; this document is the sole
+output. All capability characterisations below cite the exact files read
+(§11.4.6 no-guessing).</p>
+<p>Files read for characterisation: -
+<code>cli_agents/codex/codex-rs/protocol/src/models.rs</code> (lines
+695–723, 1053–1090) — Codex content-item model + local-image → data-URL
+construction. -
+<code>cli_agents/codex/codex-rs/protocol/src/items.rs</code> (lines
+289–303) — <code>image_urls()</code> / <code>local_image_paths()</code>
+/ <code>UserInput::LocalImage{path}</code>. -
+<code>cli_agents/codex/codex-rs/protocol/src/dynamic_tools.rs</code>
+(line 47) — <code>InputImage { image_url }</code>. -
+<code>cli_agents/cline/src/core/prompts/system-prompt/tools/browser_action.ts</code>
+(whole file) — the <code>browser_action</code> tool spec
+(launch/click/type/scroll/close, coordinate-based,
+screenshot-per-action). -
+<code>cli_agents/cline/src/services/browser/BrowserSession.ts</code>
+(lines 1–90) — Puppeteer-driven session, screenshot capture. -
+<code>helix_code/internal/llm/missing_types.go</code> (lines 122–165) —
+<code>Message{Role,Content string}</code> (TEXT-ONLY) +
+<code>LLMRequest</code>. -
+<code>helix_code/internal/llm/anthropic_provider.go</code> (lines 61–90,
+326, 430–520, <code>convertMessages</code>) — wire-level
+<code>anthropicContentBlock</code>+<code>anthropicImageSource</code>
+exist, but <code>convertMessages</code> is text-only. -
+<code>helix_code/internal/llm/vision/{doc.go,*}</code> — existing vision
+detection + model-switch package. -
+<code>helix_code/internal/tools/browser/</code> +
+<code>helix_code/internal/tools/browser_*_v2.go</code> — the P2-F23
+chromedp browser suite. -
+<code>helix_code/internal/tools/browser_screenshot_v2.go</code> —
+screenshot tool returns an <strong>absolute file path, NOT
+base64</strong>. -
+<code>dependencies/vasic-digital/vision_engine/</code>
+(<code>pkg/llmvision/</code>, <code>pkg/analyzer/</code>) — owned
+VisionEngine submodule, already wired in <code>.gitmodules</code> +
+<code>helix_code/go.mod</code> replace
+<code>digital.vasic.visionengine</code>. -
+<code>docs/CONTINUATION.md</code> — Phase-2 port precedent (P2-F23 Cline
+Browser Tool CLOSED, P2-F29 Roo-code CLOSED).</p>
+<hr />
+<h2 id="capability-summary">2. Capability Summary</h2>
+<h3 id="codex-multimodal">2.1 Codex Multimodal</h3>
+<p><strong>What it is (evidenced):</strong> Codex ingests images
+(screenshots, pasted images, file paths) and routes them to the model as
+structured content. The model (<code>protocol/src/models.rs</code>) is a
+content-item union:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">enum</span> ContentItem <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    InputText  <span class="op">{</span> text<span class="op">:</span> <span class="dt">String</span> <span class="op">},</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    InputImage <span class="op">{</span> image_url<span class="op">:</span> <span class="dt">String</span><span class="op">,</span> detail<span class="op">:</span> <span class="dt">Option</span><span class="op">&lt;</span>ImageDetail<span class="op">&gt;</span> <span class="op">},</span> <span class="co">// image_url is a data: URL</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    OutputText <span class="op">{</span> text<span class="op">:</span> <span class="dt">String</span> <span class="op">},</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">enum</span> ImageDetail <span class="op">{</span> Auto<span class="op">,</span> Low<span class="op">,</span> High<span class="op">,</span> Original <span class="op">}</span>   <span class="co">// DEFAULT = High</span></span></code></pre></div>
+<p>A user-supplied local image
+(<code>UserInput::LocalImage { path }</code>, <code>items.rs:303</code>)
+is read, validated (MIME, decode), and converted to a base64
+<strong>data URL</strong> via
+<code>local_image_content_items_with_label_number</code>
+(<code>models.rs:1053</code>), then pushed as
+<code>ContentItem::InputImage { image_url: image.into_data_url(), detail: High }</code>,
+optionally bracketed by <code>InputText</code> label tags.
+Unsupported/oversized/corrupt images become a placeholder
+<code>InputText</code> error item (graceful degradation — never a
+crash). A turn’s content is <code>Vec&lt;ContentItem&gt;</code> (mixed
+text + images).</p>
+<p><strong>So “Codex Multimodal” = a per-message list of content blocks
+where each block is text OR an image, the image carried as a base64 data
+URL with a detail hint, with robust local-file → data-URL ingestion and
+graceful error placeholders.</strong></p>
+<p><strong>“Done” for HelixCode users:</strong> a HelixCode user can
+attach an image (file path, <code>data:</code> URI, or a tool-produced
+screenshot) to a prompt; that image actually reaches a vision-capable
+provider (Anthropic/OpenAI/Gemini/Ollama-vision) as an image content
+block; the model’s response demonstrably depends on the image content
+(captured runtime evidence — not “image was attached” metadata).</p>
+<h3 id="cline-computer-use">2.2 Cline Computer Use</h3>
+<p><strong>What it is (evidenced):</strong> Cline’s “computer use” is
+its <code>browser_action</code> tool (<code>browser_action.ts</code>) —
+NOT OS-level mouse/keyboard control. It drives a
+<strong>Puppeteer-controlled browser</strong>
+(<code>BrowserSession.ts</code>, <code>puppeteer-core</code> +
+<code>chrome-launcher</code>) with a fixed action set:</p>
+<ul>
+<li><code>launch &lt;url&gt;</code> (must be first),
+<code>click &lt;x,y&gt;</code>, <code>type &lt;text&gt;</code>,
+<code>scroll_down</code>, <code>scroll_up</code>, <code>close</code>
+(must be last).</li>
+<li>Viewport is a fixed resolution; clicks are
+<strong>coordinate-based</strong>, derived by the model from a
+<strong>screenshot</strong>.</li>
+<li><strong>Every action (except <code>close</code>) returns a
+screenshot of the new browser state + new console logs</strong>, which
+is fed back to the model to decide the next action. Only
+<code>browser_action</code> may be used while the browser is open.</li>
+</ul>
+<p>So the loop is: action → screenshot → (image fed to model) → next
+action. The “computer use” intelligence lives entirely in that
+<strong>screenshot-feedback loop</strong>; the actuation is browser
+automation, not raw screen control.</p>
+<p><strong>“Done” for HelixCode users:</strong> a HelixCode user (or the
+agent autonomously) can issue a high-level UI goal (“open localhost:3000
+and click the Login button”); HelixCode drives a real headless browser,
+captures a screenshot after each step, feeds that screenshot back to a
+vision model, and the model issues the next coordinate-based action —
+closing the loop end-to-end with captured visual evidence at each
+step.</p>
+<hr />
+<h2 id="helixcode-integration-surface">3. HelixCode Integration
+Surface</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Status in HelixCode</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser automation (launch/click/type/scroll/screenshot/close)</td>
+<td><strong>ALREADY EXISTS</strong> — P2-F23 chromedp suite</td>
+<td><code>internal/tools/browser/</code>,
+<code>browser_{navigate,click_type,screenshot,close,snapshot}_v2.go</code>,
+<code>browser_register_v2.go</code></td>
+</tr>
+<tr>
+<td>Coordinate-based click + type</td>
+<td>EXISTS (<code>browser_click_type_v2.go</code>)</td>
+<td>tools dir listing</td>
+</tr>
+<tr>
+<td>Screenshot capture</td>
+<td>EXISTS but returns <strong>file path, not base64</strong></td>
+<td><code>browser_screenshot_v2.go:30</code> “Returns an absolute file
+path (NOT base64) per spec §3.4”</td>
+</tr>
+<tr>
+<td>Vision detection + auto model-switch</td>
+<td>EXISTS</td>
+<td><code>internal/llm/vision/</code> (detector, registry,
+switcher)</td>
+</tr>
+<tr>
+<td>Wire-level image content block (Anthropic)</td>
+<td>EXISTS in serializer</td>
+<td><code>anthropic_provider.go:66-90</code>
+<code>anthropicContentBlock</code>/<code>anthropicImageSource{Type:base64,MediaType,...}</code></td>
+</tr>
+<tr>
+<td><strong>Request-level image carriage</strong>
+(<code>llm.Message</code>)</td>
+<td><strong>MISSING</strong> — <code>Message{Role,Content string}</code>
+is text-only</td>
+<td><code>missing_types.go:122</code></td>
+</tr>
+<tr>
+<td><strong><code>convertMessages</code> image mapping</strong></td>
+<td><strong>MISSING</strong> — drops everything but
+<code>msg.Content</code> string</td>
+<td><code>anthropic_provider.go</code> <code>convertMessages</code></td>
+</tr>
+<tr>
+<td>Multimodal carriage for OpenAI/Gemini/Ollama/Bedrock providers</td>
+<td><strong>MISSING</strong> at request level</td>
+<td>provider files map <code>Content</code> string only</td>
+</tr>
+<tr>
+<td>CLI image/attach input</td>
+<td>partial: text <code>&lt;attached_files&gt;</code> block only (file
+contents inlined as text)</td>
+<td><code>cmd/cli/main.go:1694-1730</code></td>
+</tr>
+<tr>
+<td>Agent tool dispatch</td>
+<td>EXISTS (<code>agent/tool_dispatch.go</code>) — where a new tool/loop
+plugs in</td>
+<td>agent dir listing</td>
+</tr>
+<tr>
+<td>VisionEngine owned submodule (LLM-vision + screen analyzer)</td>
+<td><strong>WIRED</strong> (submodule + go.mod replace) but <strong>not
+consumed</strong> by helix_code</td>
+<td><code>.gitmodules:319-321</code>,
+<code>helix_code/go.mod:202</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> The dominant gap is a
+<strong>request-level multimodal pipe</strong>: images can be
+<em>detected</em> (<code>vision/</code>) and <em>serialized at the
+wire</em> (anthropic block), but the canonical
+<code>llm.Message.Content string</code> has no slot to carry an image,
+so an attached image cannot travel from CLI/agent → provider.
+Cline-computer-use actuation is essentially done; what is missing for a
+real autonomous loop is the
+<strong>screenshot-as-image-feedback</strong> — which itself depends on
+the multimodal pipe and on the screenshot tool being able to hand back
+image bytes (currently path-only).</p>
+<hr />
+<h2 id="catalogue-check-result-11.4.74">4. Catalogue-Check Result
+(§11.4.74)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Verdict</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cline Computer Use (browser actuation)</td>
+<td><strong>reuse (in-repo)</strong> —
+<code>helix_code/internal/tools/browser</code> @ P2-F23</td>
+<td>The 6-tool chromedp suite already exists. No new browser engine.
+Extend only: screenshot bytes + feedback loop.</td>
+</tr>
+<tr>
+<td>Codex Multimodal (vision/LLM-vision)</td>
+<td><strong>extend <code>vasic-digital/VisionEngine</code></strong>
+(<code>dependencies/vasic-digital/vision_engine</code>, module
+<code>digital.vasic.visionengine</code>)</td>
+<td><code>pkg/llmvision/</code> already has
+anthropic/openai/gemini/ollama/qwen/kimi/astica vision providers +
+<code>pkg/analyzer/</code> (AnalyzeScreen, CompareScreens, ScreenDiff).
+It is <strong>owned, wired in go.mod</strong>, but <strong>not yet
+consumed</strong>. Reuse its image-encode + LLM-vision providers; extend
+with any missing pieces upstream (PR to VisionEngine), never duplicate
+in-project (CONST-051(B)/§11.4.74).</td>
+</tr>
+<tr>
+<td>Screen capture / UI recording</td>
+<td><strong>reuse <code>vasic-digital/Panoptic</code></strong> (already
+submodule, <code>.gitmodules:225</code>) if a record-the-session
+evidence artefact is wanted for the computer-use Challenge</td>
+<td>optional, evidence-layer only</td>
+</tr>
+<tr>
+<td>Visual diffing of screenshots</td>
+<td><strong>reuse <code>vasic-digital/ScreenDiff</code></strong> if
+step-to-step visual assertion is desired</td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Net catalogue verdict: REUSE + EXTEND, do NOT build
+fresh.</strong> Browser actuation = reuse in-repo P2-F23.
+Vision/LLM-vision = extend the owned VisionEngine submodule. The only
+genuinely new HelixCode code is the <strong>request-level multimodal
+carriage</strong> (the <code>llm.Message</code> content-block change +
+per-provider mapping) and the <strong>wiring</strong> that connects
+screenshot → VisionEngine/provider → agent loop.</p>
+<hr />
+<h2 id="architecture-design">5. Architecture / Design</h2>
+<h3 id="capability-a-multimodal-llm-request-surface">5.1 Capability A —
+Multimodal LLM request surface</h3>
+<p><strong>Design goal:</strong> add an image-bearing content-block
+representation to the canonical request type and map it through every
+provider, mirroring Codex’s <code>ContentItem</code> union. Keep
+<code>Message.Content string</code> working (back-compat) by adding an
+OPTIONAL parallel field rather than changing its type.</p>
+<p><strong>New/changed types
+(<code>helix_code/internal/llm/</code>):</strong> - MODIFY
+<code>missing_types.go</code>: - Add
+<code>type ContentPart struct { Type string; Text string; ImageURL string; Detail string }</code>
+(Type ∈ <code>text</code>|<code>image</code>), mirroring Codex
+<code>ContentItem</code> (data-URL in <code>ImageURL</code>,
+<code>Detail</code> ∈ auto/low/high). - Add
+<code>Parts []ContentPart</code>json:“parts,omitempty”`<code>to</code>Message<code>(optional; when empty, fall back to</code>Content
+string<code>— zero behaviour change for text-only callers). - NEW</code>helix_code/internal/llm/multimodal.go<code>(~200 lines):</code>func
+BuildImagePart(pathOrURI string, detail string) (ContentPart,
+error)<code>— Codex-equivalent local-file→data-URL: read bytes, sniff MIME (magic numbers, reuse</code>vision/detector.go<code>), base64-encode to</code>data:<mime>;base64,…<code>, enforce a max-size + supported-format set, return a graceful text placeholder part on unsupported/oversized (NOT an error to the turn) — matching</code>models.rs<code>placeholder behaviour. Prefer delegating the encode/MIME logic to</code>digital.vasic.visionengine`
+if it exposes it (extend VisionEngine to export it if not).</p>
+<p><strong>Per-provider mapping (MODIFY, each its own ≤300-line
+task):</strong> - <code>anthropic_provider.go</code>
+<code>convertMessages</code>: when <code>msg.Parts</code> non-empty,
+emit <code>[]anthropicContentBlock</code> with
+<code>Type:"image"</code>,
+<code>Source:{Type:"base64",MediaType,Data}</code> (the wire structs
+already exist — just stop dropping them). -
+<code>openai_compatible_provider*.go</code> /
+<code>openai</code>-family: map to OpenAI
+<code>content: [{type:"image_url", image_url:{url, detail}}]</code>
+(Codex’s exact shape). - <code>gemini_provider.go</code>: map to
+<code>inlineData{mimeType,data}</code> parts. -
+<code>bedrock_provider.go</code> (Anthropic-on-Bedrock): same as
+anthropic block. -
+<code>ollama_provider</code>/<code>llamacpp_provider</code>: map to
+<code>images: [base64]</code> array. - Providers whose configured model
+is NOT vision-capable: route through existing
+<code>internal/llm/vision/switcher.go</code> to auto-switch (or surface
+a CONST-046 i18n message), reusing the EXISTING vision package.</p>
+<p><strong>CLI surface (MODIFY
+<code>helix_code/cmd/cli/main.go</code>):</strong> - Add
+<code>-image &lt;path|uri&gt;</code> (repeatable) flag → builds
+<code>ContentPart</code> image parts on the user <code>Message</code>
+(distinct from the existing text-only
+<code>&lt;attached_files&gt;</code> path).</p>
+<p><strong>Data flow (A):</strong></p>
+<pre><code>CLI -image / agent screenshot
+   → BuildImagePart() [VisionEngine encode] → ContentPart{image, data-URL}
+   → llm.Message.Parts
+   → provider.convertMessages() maps to provider-native image block
+   → real HTTP call to vision model
+   → response depends on image content (captured evidence)</code></pre>
+<h3 id="capability-b-computer-use-feedback-loop">5.2 Capability B —
+Computer-use feedback loop</h3>
+<p><strong>Design goal:</strong> close Cline’s screenshot→model→action
+loop on top of the already-ported browser suite, using Capability A as
+the transport for the screenshot image.</p>
+<p><strong>New/changed (mostly wiring, browser engine is
+reused):</strong> - MODIFY <code>browser_screenshot_v2.go</code> (or add
+a sibling <code>browser_screenshot_bytes</code>): return
+base64/<code>data:</code> bytes in addition to the file path, so the
+agent can feed the screenshot back to the model as a
+<code>ContentPart</code> image. (Today it is path-only — this is the
+load-bearing gap for the loop.) - NEW
+<code>helix_code/internal/agent/computer_use.go</code> (~250 lines): a
+loop driver that, given a high-level goal, iterates: send model turn →
+parse a <code>browser_action</code>-style tool call (reuse existing v2
+tools: navigate/click_type/scroll/screenshot/close) → execute via the
+existing browser tool registry → capture screenshot bytes → append as
+<code>ContentPart</code> image to the next turn → repeat until model
+emits a completion or a step budget is hit. Mirrors Cline’s “only
+browser_action while open; must launch first, close last” discipline. -
+NEW <code>/computer-use</code> (or <code>/browse-goal</code>) slash
+command in the CLI, paralleling the existing <code>/browser</code> slash
+from P2-F23. - OPTIONAL evidence: wrap the session with
+<code>vasic-digital/Panoptic</code> recording and/or
+<code>ScreenDiff</code> per-step visual assertions (evidence layer only;
+reuse, not build).</p>
+<p><strong>Data flow (B):</strong></p>
+<pre><code>goal → agent loop turn (vision model)
+   → model returns coordinate action (click 450,300 / type / scroll)
+   → existing browser_*_v2 tool executes via chromedp
+   → browser_screenshot returns bytes → BuildImagePart (Cap. A)
+   → screenshot ContentPart appended → next turn
+   → ... until model &#39;close&#39; + attempt_completion</code></pre>
+<p><strong>Why B mostly depends on A:</strong> without the multimodal
+request surface, the screenshot cannot be fed back to the model and the
+loop degenerates to blind coordinate guessing. Therefore <strong>A must
+land before B</strong>.</p>
+<hr />
+<h2 id="build-sequence">6. Build Sequence</h2>
+<p>Subagent-friendly, each unit ≤~300 lines per §11.4.70/§11.4.82(G).
+Worktree isolation default. Tasks T01–T05 are Capability A (must precede
+B).</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Title</th>
+<th>Files</th>
+<th>Est. LoC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>T01</strong></td>
+<td><code>ContentPart</code> + <code>Message.Parts</code> types + unit
+tests</td>
+<td><code>internal/llm/missing_types.go</code>,
+<code>_test.go</code></td>
+<td>~120</td>
+</tr>
+<tr>
+<td><strong>T02</strong></td>
+<td><code>multimodal.go</code> local-file/URI → data-URL encoder
+(delegate to VisionEngine encode; extend VisionEngine upstream if it
+lacks an exported encoder) + graceful placeholder + unit tests</td>
+<td><code>internal/llm/multimodal.go</code>,
+<code>dependencies/vasic-digital/vision_engine/pkg/llmvision/*</code>
+(extend)</td>
+<td>~250</td>
+</tr>
+<tr>
+<td><strong>T03</strong></td>
+<td>Anthropic + Bedrock <code>convertMessages</code> image mapping +
+tests</td>
+<td><code>anthropic_provider.go</code>,
+<code>bedrock_provider.go</code></td>
+<td>~200</td>
+</tr>
+<tr>
+<td><strong>T04</strong></td>
+<td>OpenAI-compatible + Gemini + Ollama/llamacpp image mapping +
+tests</td>
+<td><code>openai_compatible_provider*.go</code>,
+<code>gemini_provider.go</code>,
+<code>ollama</code>/<code>llamacpp</code></td>
+<td>~280</td>
+</tr>
+<tr>
+<td><strong>T05</strong></td>
+<td>CLI <code>-image</code> flag + non-vision-model auto-switch wiring
+(reuse <code>vision/switcher.go</code>) + tests</td>
+<td><code>cmd/cli/main.go</code></td>
+<td>~150</td>
+</tr>
+<tr>
+<td><strong>T06</strong></td>
+<td><code>browser_screenshot</code> returns image bytes/data-URL
+(sibling tool or option) + tests</td>
+<td><code>internal/tools/browser_screenshot_v2.go</code>,
+<code>browser/screenshot.go</code></td>
+<td>~150</td>
+</tr>
+<tr>
+<td><strong>T07</strong></td>
+<td><code>computer_use.go</code> agent loop driver
+(action→screenshot→feedback) + unit tests</td>
+<td><code>internal/agent/computer_use.go</code></td>
+<td>~280</td>
+</tr>
+<tr>
+<td><strong>T08</strong></td>
+<td><code>/computer-use</code> CLI slash command + dispatch wiring</td>
+<td><code>cmd/cli/main.go</code>, agent dispatch</td>
+<td>~120</td>
+</tr>
+<tr>
+<td><strong>T09</strong></td>
+<td>Integration tests (real provider + real chromedp) — see §7</td>
+<td><code>tests/integration/</code></td>
+<td>~250</td>
+</tr>
+<tr>
+<td><strong>T10</strong></td>
+<td>E2E + HelixQA bank/Challenge + docs + CONTINUATION/tracker
+close-out</td>
+<td><code>tests/e2e/</code>, HelixQA bank, <code>docs/</code></td>
+<td>~250</td>
+</tr>
+</tbody>
+</table>
+<p>Sequencing: T01→T02→{T03,T04 parallel}→T05 (Cap. A complete) →
+T06→T07→T08 (Cap. B) → T09→T10. T03/T04 are disjoint-file and
+PWU-parallelisable (§11.4.58).</p>
+<hr />
+<h2 id="test-challenge-plan">7. Test + Challenge Plan</h2>
+<p>All non-unit tests use real infrastructure (CONST-050(A)/Rule 5) and
+must be fully self-driving with no human-in-loop (§11.4.98). Each PASS
+carries captured positive evidence (§11.4.5/§11.4.69) — never
+config/metadata-only.</p>
+<h3 id="capability-a-multimodal">Capability A — Multimodal</h3>
+<ul>
+<li><strong>Unit</strong> (mocks OK here only): <code>ContentPart</code>
+round-trip; <code>BuildImagePart</code> on a fixture PNG → asserts a
+valid <code>data:image/png;base64,</code> URL with correct MIME;
+oversized/corrupt fixture → asserts graceful text placeholder (not
+error); per-provider <code>convertMessages</code> emits the
+provider-native image block.</li>
+<li><strong>Integration</strong> (real HTTP, real vision model):
+construct a turn with a <strong>known, distinctive fixture
+image</strong> (e.g. a PNG containing the text “HELIX-4F2A” or a red
+square in a known quadrant). Call a real vision provider.
+<strong>Anti-bluff evidence shape:</strong> the response text MUST
+contain the unforgeable token rendered in the image (e.g. asserts
+response contains <code>4F2A</code>) — proving the model actually saw
+the image, not the filename/prompt. Capture request+response JSON under
+<code>docs/qa/HXC-031/&lt;run-id&gt;/</code>. Re-runnable:
+<code>-count=3</code> consecutive PASS.</li>
+<li><strong>E2E</strong>:
+<code>bin/cli generate --model &lt;vision&gt; --image fixtures/helix-token.png "What 4-char code is in this image?"</code>
+→ stdout contains the token. Captured terminal transcript.</li>
+</ul>
+<h3 id="capability-b-computer-use-loop">Capability B — Computer-use
+loop</h3>
+<ul>
+<li><strong>Integration</strong> (real chromedp + real vision model):
+serve a local fixture page with a uniquely-labelled button at a known
+coordinate; give the agent the goal “click the GREEN button”.
+<strong>Sink-side evidence (§11.4.69, taxonomy
+<code>gpu_render</code>/UI-action proxy):</strong> the fixture page’s
+button onclick writes a sentinel to the DOM / a local file; the test
+asserts that sentinel is present AFTER the loop — proving the click
+physically landed where the screenshot-driven model aimed. Plus per-step
+screenshot artefacts saved under the run-id dir. Re-runnable ×3.</li>
+<li><strong>E2E / HelixQA bank</strong>: a new self-driving bank
+<code>helixqa/banks/computer_use/</code> driving <code>bin/cli</code>
+via <code>os/exec</code> against the local fixture server + headless
+chromium, asserting the DOM sentinel + capturing the screenshot
+sequence. No manual review required (§11.4.98). Pair with a
+flip-mutation (break the coordinate mapping → bank must FAIL).</li>
+<li><strong>Stress/Chaos (§11.4.85)</strong>: ≥10 concurrent browser
+sessions (resource contention, no FD leak / no orphan chromium); chaos —
+kill the chromium PID mid-loop → driver must degrade cleanly (close +
+error), never crash.</li>
+</ul>
+<h3 id="self-driving-operator-attended-flag-11.4.98">Self-driving /
+operator-attended flag (§11.4.98)</h3>
+<ul>
+<li><strong>Capability A is fully self-driving</strong> (fixtures + real
+provider, no human).</li>
+<li><strong>Capability B is self-driving for the BROWSER
+variant</strong> (headless chromium + fixture server) — this is exactly
+why Cline’s “computer use” is browser-scoped, and why the in-repo P2-F23
+chromedp port is the right substrate. <strong>It is NOT real OS-level
+screen/mouse control.</strong> If the operator later wants true OS-level
+computer-use (X11/Wayland/<code>xdotool</code>/CGEvent), that is
+<strong>inherently operator-attended / sandbox-required</strong> (a real
+desktop session) — flag it as out-of-scope here and a separate design
+fork (see §8). Sink-side evidence for any OS-level variant would be the
+§11.4.69 <code>gpu_render</code>/<code>touch_input</code> taxonomy
+(screencap diff + the actuated app’s own state change), and the test
+would be SKIP-with-reason
+<code>operator_attended</code>/<code>hardware_not_present</code> on
+headless CI rather than a faked PASS.</li>
+</ul>
+<hr />
+<h2 id="effort-estimate-risks-design-forks">8. Effort Estimate, Risks,
+Design Forks</h2>
+<p><strong>Effort estimate (engineering, excluding review/QA
+latency):</strong> - Capability A (T01–T05): ~3–4 focused subagent
+sessions. The wire structs already exist for Anthropic; the work is
+type-plumbing + per-provider mapping + the encoder (mostly reused from
+VisionEngine). - Capability B (T06–T08): ~2–3 sessions; browser engine
+reused, so this is loop + feedback wiring. - Tests + Challenge + docs
+(T09–T10): ~2 sessions. - <strong>Total: ~7–9 subagent sessions /
+roughly 1.5–2 engineering-days of focused work</strong>, assuming
+VisionEngine already exposes (or is cheaply extended to expose) an image
+encoder. Lower than a from-scratch port because actuation + vision
+detection + wire serialization already exist.</p>
+<p><strong>Risks:</strong> 1. <strong>Provider image-format
+divergence</strong> — each provider wants a different JSON shape
+(Anthropic base64 source vs OpenAI image_url vs Gemini inlineData vs
+Ollama images-array). Mitigation: one mapping function per provider,
+table-tested against fixtures; do NOT leak a single provider’s shape
+into the canonical type (keep <code>ContentPart</code> provider-neutral,
+Codex-style). 2. <strong>CONST-036/037 model capability</strong> — only
+vision-capable models may receive images; routing a non-vision model an
+image is a hard error. Mitigation: reuse the existing
+<code>vision/switcher.go</code> + verifier capability flags (CONST-040),
+never hardcode a vision-model list. 3. <strong>VisionEngine coupling
+(CONST-051(B))</strong> — must extend VisionEngine in a project-unaware
+way (no HelixCode-specific context injected); consume via its public
+<code>pkg/llmvision</code>/<code>pkg/analyzer</code> API. Any missing
+encoder → PR upstream, bump pointer. 4. <strong>Screenshot size / token
+cost</strong> — full-page screenshots can be large; enforce
+viewport-size + max-bytes + <code>detail:low</code> default for loop
+steps (Codex uses <code>detail:High</code> default for user images but a
+loop should economise). 5. <strong>Chromium availability in
+CI/headless</strong> — the P2-F23 suite already solved discovery; reuse
+<code>browser/discovery.go</code>. Integration tests gate on real
+chromium presence (honest SKIP if absent, never faked PASS). 6.
+<strong>CONST-046 (no hardcoded content)</strong> — every new
+user-facing string (CLI flag help, loop status, errors) must be i18n via
+the existing <code>tools/i18n</code>/<code>trc(...)</code> pattern
+already used in <code>cmd/cli/main.go</code> and the browser tools. No
+raw English literals.</p>
+<p><strong>Genuine design forks the operator must decide:</strong> -
+<strong>FORK-1 (scope of “computer use”): browser-only vs real OS-level
+screen control.</strong> The evidenced Cline capability is
+<strong>browser-only</strong> (Puppeteer), and HelixCode already has
+that substrate. Recommendation: ship browser-scoped computer-use
+(self-driving, anti-bluff-clean). Real OS-level screen/mouse control is
+a separate, inherently operator-attended, sandbox-and-safety-heavy
+effort — decide whether it is even in HXC-031’s scope. <strong>This is
+the biggest fork.</strong> - <strong>FORK-2 (which multimodal models /
+providers first).</strong> Anthropic Claude is the cheapest first target
+(wire structs already exist). Decide the launch provider set (Claude
+only vs Claude+OpenAI+Gemini+Ollama-vision at once). Affects T04 size. -
+<strong>FORK-3 (VisionEngine reuse depth).</strong> Either (a) consume
+VisionEngine’s <code>pkg/llmvision</code> providers directly as the
+vision path (heavier integration, more reuse, possibly duplicates the
+existing <code>internal/llm/vision</code> switching), or (b) use only
+VisionEngine’s image-encode/analyzer helpers and keep image transport in
+<code>internal/llm</code> providers (lighter, recommended). Operator
+should pick (b) unless they want to consolidate all vision onto
+VisionEngine.</p>
+<hr />
+<h2 id="sources-note">9. §11.4.99 Sources note</h2>
+<p>This plan’s capability characterisations are derived <strong>entirely
+from the in-repo reference source</strong> (the
+<code>cli_agents/codex/</code> and <code>cli_agents/cline/</code>
+checkouts) and the HelixCode tree as listed in §1 — NOT from
+external/online documentation or training memory. No operator-facing
+setup instructions for the live Codex/Cline products are emitted here,
+so the §11.4.99 latest-online-docs cross-reference obligation does not
+bind this scoping document. <strong>If implementation (HXC-031 build
+phase) adds any operator-facing guide that cites live OpenAI Codex
+multimodal API shapes or Anthropic/Gemini/OpenAI vision request schemas,
+that guide MUST fetch and cross-reference the latest official provider
+docs and carry a
+<code>## Sources verified &lt;date&gt;: &lt;urls&gt;</code> footer per
+§11.4.99 before commit.</strong></p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li>In-repo reference source only (no external fetch):
+<code>cli_agents/codex/codex-rs/protocol/src/{models.rs,items.rs,dynamic_tools.rs}</code>,
+<code>cli_agents/cline/src/core/prompts/system-prompt/tools/browser_action.ts</code>,
+<code>cli_agents/cline/src/services/browser/BrowserSession.ts</code>,
+HelixCode <code>internal/llm/*</code>,
+<code>internal/tools/browser*</code>,
+<code>dependencies/vasic-digital/vision_engine/*</code>,
+<code>docs/CONTINUATION.md</code>. Date: 2026-05-29.</li>
+</ul>
+</body>
+</html>
