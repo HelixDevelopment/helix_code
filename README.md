@@ -114,7 +114,7 @@ helix_code/
 ## 🛠️ Quick Start
 
 ### Prerequisites
-- Go 1.24.0+
+- Go 1.26+ (the inner `helix_code/` module declares `go 1.26`; the meta-repo root is `go 1.25.2`)
 - PostgreSQL 15+
 - Redis 7+ (optional)
 
@@ -122,8 +122,8 @@ helix_code/
 
 1. **Clone the repository and setup environment**:
    ```bash
-   git clone https://github.com/your-org/helixcode.git
-   cd helixcode
+   git clone git@github.com:HelixDevelopment/HelixCode.git
+   cd HelixCode
    ./setup.sh
    ```
 
@@ -140,8 +140,8 @@ helix_code/
    # Install dependencies (Ubuntu/Debian)
    ./install_missing_libs.sh
 
-   # Build the application
-   cd HelixCode
+   # Build the application (inner Go module — lowercase per CONST-052)
+   cd helix_code
    make build
    ```
 
@@ -259,12 +259,44 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-org/helixcode/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/helixcode/discussions)
-- **Documentation**: See `/docs` directory
+- **Issues**: tracked in-repo at `docs/Issues.md` (+ `docs/Fixed.md`), the SQLite-backed single source of truth `docs/workable_items.db` (§11.4.93/95)
+- **Documentation**: See the Documentation section above + `docs/`
 
 ---
 
 **Built with ❤️ using Go, PostgreSQL, and distributed computing principles**
 
 *HelixCode - Empowering distributed AI development workflows*
+
+---
+
+## Sources verified
+
+Per constitution §11.4.99 (Latest-Source Documentation Cross-Reference), the operator-facing
+instructions in this README were cross-referenced against the latest official sources and the
+repository's actual state on **2026-05-29**:
+
+- **Go version** — README now requires **Go 1.26+**, matching `helix_code/go.mod` (`go 1.26`)
+  and the meta-repo root `go.mod` (`go 1.25.2`). Verified against the official Go release
+  history (https://go.dev/doc/devel/release): Go 1.26.0 released 2026-02-10 (latest 1.26.3,
+  2026-05-07); Go 1.24 is now past its support window. The prior "Go 1.24.0+" was incorrect —
+  the inner module does not build below Go 1.26.
+- **Clone URL** — corrected to the real SSH remote `git@github.com:HelixDevelopment/HelixCode.git`
+  (was a `https://…/your-org/…` placeholder), satisfying the SSH-only Git rule (Constitution
+  Rule 3 / CONST-038, GitHub+GitLab only).
+- **Inner-module path** — corrected `cd HelixCode` → `cd helix_code` (lowercase per CONST-052;
+  verified the on-disk directory is `helix_code/`).
+- **Referenced scripts** — `setup.sh`, `scripts/init-submodules.sh`, `install_missing_libs.sh`
+  all confirmed present in the tree.
+- **PostgreSQL 15+ / Redis 7+** — consistent with the authoritative tech stack in `CLAUDE.md`
+  §3.1 (pgx/v5 on PostgreSQL 15+, go-redis/v9 on Redis 7+); both minimums remain valid against
+  current upstream (PostgreSQL 17 / Redis 7.x are the current GA lines, backward-compatible).
+- **Negative finding** — this README still uses the legacy §11.4.44 bold-line header
+  (Version/Package/License) rather than the §11.4.61 metadata table; migration is deferred to a
+  dedicated docs pass (does not affect instruction correctness).
+
+Re-verify before the next release boundary or if any tool above ships a breaking change
+(§11.4.99(C) — instructions older than 6 months are stale).
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release ; repo cross-reference
+(`helix_code/go.mod`, `go.mod`, on-disk paths, `git remote`, `CLAUDE.md` §3.1).

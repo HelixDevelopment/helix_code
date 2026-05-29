@@ -1438,6 +1438,35 @@ reference ~9 deleted provider constructors + a duplicate MockProvider) —
 filed as <strong>HXC-024</strong>; the ollama integration tests pass in
 isolation and land once HXC-024 restores the package integration build.
 <strong>Session total: 34 real production bugs fixed.</strong></p>
+<h2 id="hxc-028-11.4.99-latest-source-documentation-cross-reference-readme">HXC-028
+— §11.4.99 latest-source documentation cross-reference (README)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(constitution §11.4.99 cascaded in HXC-025 — operator-facing instruction
+docs MUST be verified vs latest official sources) <strong>Closure
+(2026-05-29):</strong> applied §11.4.99 to the primary operator-facing
+doc <code>README.md</code> — cross-referenced its setup/build
+instructions against the latest official sources (WebFetch
+https://go.dev/doc/devel/release) + the repo’s actual state. <strong>3
+real instruction defects found + fixed:</strong> (1) prerequisite “Go
+1.24.0+” → <strong>“Go 1.26+”</strong> (the inner
+<code>helix_code/go.mod</code> is <code>go 1.26</code> — it does NOT
+build below 1.26; verified Go 1.26.0 released 2026-02-10 / latest
+1.26.3, and Go 1.24 is now past support per go.dev’s two-newer-majors
+policy); (2) clone URL
+<code>https://github.com/your-org/helixcode.git</code> → SSH
+<code>git@github.com:HelixDevelopment/HelixCode.git</code> (Rule 3
+SSH-only / CONST-038); (3) build step <code>cd HelixCode</code> →
+<code>cd helix_code</code> (lowercase per CONST-052; on-disk dir
+verified). Also fixed the Support section’s <code>your-org</code>
+placeholder links → in-repo tracker pointers. Added a
+<code>## Sources verified</code> footer (date + go.dev URL + repo
+cross-ref + a negative finding: README still uses the legacy §11.4.44
+bold header, §11.4.61 table migration deferred). PostgreSQL 15+/Redis 7+
+confirmed consistent with CLAUDE.md §3.1. README.html + README.pdf
+regenerated (CONST-062/066 sync). The §11.4.99 discipline now binds
+future operator-doc edits.</p>
+<hr />
 <h2 id="hxc-027-11.4.98-live-test-full-automation-compliance-audit">HXC-027
 — §11.4.98 live-test full-automation compliance audit</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
