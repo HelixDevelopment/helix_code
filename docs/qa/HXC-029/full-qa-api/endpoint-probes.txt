@@ -1,0 +1,74 @@
+# HXC-029 endpoint-reality curl probes vs live HelixCode server
+# Captured: 2026-05-29T11:03:22Z
+# Server: http://localhost:8080 (real PostgreSQL:5432 + Redis:6379 backed)
+
+$ curl -sS -X GET http://localhost:8080/health
+HTTP 200 | {"status":"healthy","timestamp":"2026-05-29T11:03:22.944058681Z","version":"1.0.0"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/health
+HTTP 200 | {"status":"healthy","timestamp":"2026-05-29T11:03:22.951581422Z","version":"1.0.0"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/server/info
+HTTP 200 | {"info":{"database":{"connected":true,"enabled":true},"features":{"auth_enabled":true,"mcp_enabled":true,"notifications_enabled":true},"go_version":"1.24","name":"HelixCode Server","redis":{"connected
+
+$ curl -sS -X GET http://localhost:8080/api/v1/metrics
+HTTP 200 | {"metrics":{"database":{"connections_active":6,"connections_idle":6,"max_connections":20},"requests":{"active":0,"total":0},"resources":{"gc_count":4,"goroutines":6,"memory_mb":2.6094589233398438,"mem
+
+$ curl -sS -X GET http://localhost:8080/api/v1/llm/providers
+HTTP 200 | {"count":7,"last_updated":"2026-05-29T11:03:22.973706025Z","providers":[{"id":"ollama","model_count":1,"models":["llama-3.2-3b"],"name":"Ollama","status":"available","type":"local"},{"id":"openai","mo
+
+$ curl -sS -X GET http://localhost:8080/api/v1/llm/models
+HTTP 200 | {"count":7,"last_updated":"2026-05-29T11:03:22.985715598Z","models":[{"context_length":131072,"id":"llama-3.2-3b","max_tokens":0,"name":"Llama 3.2 3B","open_source":true,"provider":"ollama","score":6,
+
+$ curl -sS -X GET http://localhost:8080/api/v1/llm/providers/ollama
+HTTP 200 | {"provider":{"configured":true,"description":"LLM Provider","id":"ollama","model_count":1,"models":[{"context_length":131072,"id":"llama-3.2-3b","max_tokens":0,"name":"Llama 3.2 3B","open_source":true
+
+$ curl -sS -X GET http://localhost:8080/api/v1/llm/providers/nonexistent_provider_xyz
+HTTP 404 | {"error":"unknown LLM provider: nonexistent_provider_xyz","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/memory/systems
+HTTP 200 | {"count":6,"status":"success","systems":[{"description":"AI-powered knowledge graph for memory management","features":["semantic_search","context_retrieval","optimization"],"id":"cognee","name":"Cogne
+
+$ curl -sS -X GET http://localhost:8080/api/v1/memory/stats
+HTTP 200 | {"stats":{"active_sessions":0,"avg_retrieval_ms":0,"cache_hit_rate":0,"storage_used_mb":0,"systems_connected":0,"total_embeddings":0,"total_memories":0},"status":"success"}
+
+$ curl -sS -X POST http://localhost:8080/api/v1/auth/login
+HTTP 400 | {"error":"Key: 'Username' Error:Field validation for 'Username' failed on the 'required' tag\nKey: 'Password' Error:Field validation for 'Password' failed on the 'required' tag","message":"internal_se
+
+$ curl -sS -X POST http://localhost:8080/api/v1/auth/login
+HTTP 401 | {"error":"invalid credentials","message":"Login failed","status":"error"}
+
+$ curl -sS -X POST http://localhost:8080/api/v1/auth/logout
+HTTP 400 | {"message":"internal_server_invalid_authorization_header","status":"error"}
+
+$ curl -sS -X POST http://localhost:8080/api/v1/auth/refresh
+HTTP 401 | {"message":"internal_server_authorization_header_required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/tasks
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/projects
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/users/me
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/system/stats
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/qa/sessions
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/screenshot/engines
+HTTP 401 | {"message":"Authorization header required","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/tasks
+HTTP 401 | {"error":"token contains an invalid number of segments","message":"Invalid or expired token","status":"error"}
+
+$ curl -sS -X GET http://localhost:8080/api/v1/this_route_does_not_exist_hxc029
+HTTP 404 | 404 page not found
+
+# register probe (shows why JWT-mint step is honestly skipped):
+$ curl -sS -X POST http://localhost:8080/api/v1/auth/register
+HTTP 400 | {"error":"internal_auth_failed_create_user","message":"internal_server_registration_failed","status":"error"}
+

@@ -1,0 +1,41 @@
+=== HXC-029 bank run: HelixCode Full QA - API (1.0) vs http://localhost:8080 ===
+=== started 2026-05-29T11:03:08Z ===
+
+FAIL [HXC-API-001] GET /health — GET /health -> status 200, expected 999 (body: {"status":"healthy","timestamp":"2026-05-29T11:03:08.376556628Z","version":"1.0.0"})
+PASS [HXC-API-002] GET /api/v1/health — GET /api/v1/health
+PASS [HXC-API-003] GET /health — GET /health
+PASS [HXC-API-004] GET /api/v1/server/info — GET /api/v1/server/info
+PASS [HXC-API-005] GET /api/v1/metrics — GET /api/v1/metrics
+PASS [HXC-API-006] GET /api/v1/llm/providers — GET /api/v1/llm/providers
+PASS [HXC-API-007] GET /api/v1/llm/models — GET /api/v1/llm/models
+PASS [HXC-API-008] GET /api/v1/llm/providers/ollama — GET /api/v1/llm/providers/ollama
+PASS [HXC-API-009] GET unknown provider — GET /api/v1/llm/providers/nonexistent_provider_xyz
+PASS [HXC-API-010] GET /api/v1/memory/systems — GET /api/v1/memory/systems
+PASS [HXC-API-011] GET /api/v1/memory/stats — GET /api/v1/memory/stats
+PASS [HXC-API-012] POST login empty body — POST /api/v1/auth/login
+PASS [HXC-API-013] POST login wrong password — POST /api/v1/auth/login
+PASS [HXC-API-014] POST logout no header — POST /api/v1/auth/logout
+PASS [HXC-API-015] POST refresh no header — POST /api/v1/auth/refresh
+PASS [HXC-API-016] GET /api/v1/tasks without auth — GET /api/v1/tasks
+PASS [HXC-API-017] GET /api/v1/projects without auth — GET /api/v1/projects
+PASS [HXC-API-018] GET /api/v1/workers without auth — GET /api/v1/workers
+PASS [HXC-API-019] GET /api/v1/sessions without auth — GET /api/v1/sessions
+PASS [HXC-API-020] GET /api/v1/users/me without auth — GET /api/v1/users/me
+PASS [HXC-API-021] GET /api/v1/system/stats without auth — GET /api/v1/system/stats
+PASS [HXC-API-022] GET /api/v1/system/status without auth — GET /api/v1/system/status
+PASS [HXC-API-023] GET /api/v1/qa/sessions without auth — GET /api/v1/qa/sessions
+PASS [HXC-API-024] GET /api/v1/screenshot/engines without auth — GET /api/v1/screenshot/engines
+PASS [HXC-API-025] GET tasks with garbage token — GET /api/v1/tasks
+PASS [HXC-API-026] GET unknown route — GET /api/v1/this_route_does_not_exist_hxc029
+PASS [HXC-API-027] OPTIONS /api/v1/tasks — OPTIONS /api/v1/tasks
+PASS [HXC-API-028] GET /health #1 — GET /health
+PASS [HXC-API-028] GET /health #2 — GET /health
+PASS [HXC-API-028] GET /health #3 — GET /health
+PASS [HXC-API-028] GET /health #4 — GET /health
+PASS [HXC-API-028] GET /health #5 — GET /health
+SKIP [HXC-API-029] Mint + decode JWT — #HXC-029-REGISTER-BROKEN — /api/v1/auth/register returns 400 internal_auth_failed_create_user on this live DB, so no JWT can be minted in-test to decode; honest SKIP per Article XI §11.2.2 rather than a fabricated PASS
+SKIP [HXC-API-030] WebSocket lifecycle — #HXC-029-NO-WS-DRIVER — the HelixQA http: action type drives HTTP only; HelixCode internal/server registers no WebSocket upgrade route (verified against server.go route table). WebSocket coverage needs a dedicated ws: driver; honest SKIP rather than a fabricated PASS
+
+=== summary: 31 PASS, 1 FAIL, 2 SKIP (of 34 steps) ===
+=== 1 failure(s): ===
+  - [HXC-API-001] GET /health — GET /health -> status 200, expected 999 (body: {"status":"healthy","timestamp":"2026-05-29T11:03:08.376556628Z","version":"1.0.0"})
