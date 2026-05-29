@@ -423,3 +423,27 @@ helixcode worker list
 **Documentation Version**: 2.1
 **Total Lines**: 7,549
 **Status**: Complete ✅
+
+---
+
+## Sources verified 2026-05-29: project go.mod + CLAUDE.md §3.1 (navigation index; no third-party operator instructions)
+
+Reviewed against Constitution §11.4.99. This is a navigation/quick-index for the
+User Manual — it is a table of contents into `README.md`, the tutorials, and the
+example configs; it carries **no standalone third-party service setup steps** to
+cross-reference against a vendor doc. Notes:
+
+- **Provider / model references** in the coverage tables and the
+  `helixcode llm provider set …` examples (e.g. `gemini-2.5-flash`, context-window
+  figures, free-tier flags) are **LLMsVerifier-runtime-sourced per CONST-036** —
+  illustrative only and may be stale; the authoritative live list is
+  `helixcode llm models list`. Not re-pinned here (LLMsVerifier is the single
+  source of truth).
+- **External links** in the Support Resources section
+  (`github.com/your-org/helixcode`, `docs.helixcode.dev`, `community.helixcode.dev`)
+  are **placeholder URLs**, not live HelixDevelopment endpoints. Negative finding:
+  left as-is (out of scope for this §11.4.99 batch; flagged for a future docs
+  pass).
+- **Version authority**: `go.mod` + CLAUDE.md §3.1 (Go 1.26 / go1.26.3 latest,
+  PostgreSQL 15+, Redis 7+ — all confirmed current this run). No version pins in
+  this file required a vendor fetch.

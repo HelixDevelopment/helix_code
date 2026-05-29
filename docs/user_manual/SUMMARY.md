@@ -660,4 +660,27 @@ Create a custom tool for HelixCode's MCP server:
 
 ---
 
-**End of Summary**
+## Sources verified 2026-05-29: project go.mod + CLAUDE.md §3.1 (creation-summary doc; no third-party operator instructions)
+
+Reviewed against Constitution §11.4.99. This is a meta "creation summary" of the
+User Manual — it inventories line counts, tutorial titles, and config files; it
+contains **no standalone third-party setup instructions** to cross-reference
+against a vendor doc. Notes:
+
+- **Provider / model references** (e.g. "Claude 3.5 Sonnet", "Gemini 2.5 Pro",
+  "GPT-4.1, O1/O3", "Groq 500+ tok/s", per-provider model counts) are
+  **LLMsVerifier-runtime-sourced per CONST-036** — descriptive/illustrative and
+  may be stale. Authoritative live list: `helixcode llm models list`. Not
+  re-pinned (LLMsVerifier is the single source of truth).
+- **Frameworks/tools named** (Gin, pgx, JWT, Docker, Kubernetes, PostgreSQL,
+  Redis, Prometheus, Grafana, MCP) appear as acknowledgements only, with **no
+  version pins** in this file. Repo version authority is `go.mod` + CLAUDE.md
+  §3.1 (Go 1.26 / go1.26.3 latest, PostgreSQL 15+, Redis 7+ — all confirmed
+  current this run).
+- **External links** (`github.com/your-org/helixcode`, `community.helixcode.dev`,
+  `discord.gg/helixcode`, `docs@helixcode.dev`) are **placeholder URLs**, not
+  live HelixDevelopment endpoints. Negative finding: left as-is, flagged for a
+  future docs pass (out of scope for this §11.4.99 batch).
+- The hardcoded macOS path in "Directory Structure Created"
+  (`/Users/milosvasic/Projects/helix_code/...`) is a stale absolute path;
+  flagged, not in scope for this footer batch.

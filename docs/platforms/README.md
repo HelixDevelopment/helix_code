@@ -51,3 +51,19 @@ platform-dependent test may `SKIP`-with-reason (`hardware_not_present` /
 `operator_attended`) on those platforms until hardware is enrolled — that is
 not a bluff, it is a documented gap. Linux is the canonical dev + CI host
 (`ci_test_hardware: true`).
+
+---
+
+## Sources verified 2026-05-29: project go.mod + CLAUDE.md §3.1 (no third-party operator instructions)
+
+Reviewed against Constitution §11.4.99. This is an internal supported-platforms
+manifest README: it documents the `supported_platforms.yaml` schema, the
+`CM-CROSS-PLATFORM-PARITY` gate behaviour, and the §11.4.81 `uname -s` dispatch
+policy. It contains **no third-party service setup instructions, no external API
+guidance, and no externally-pinned version numbers** to cross-reference against
+an online source — the OS targets and their `uname -s` strings (Linux/Darwin/
+Windows, plus cross-compiled iOS/Android/Aurora OS/Harmony OS) live in
+`supported_platforms.yaml`, not here. Toolchain/version authority for this repo
+is `go.mod` + CLAUDE.md §3.1 (Go 1.26 / go1.26.3 latest, root 1.25.2). Negative
+finding: nothing in this file required (or could be) verified against a vendor
+doc this run.

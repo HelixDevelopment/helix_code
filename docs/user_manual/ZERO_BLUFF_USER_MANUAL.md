@@ -323,3 +323,49 @@ Every visible feature is backed by:
 - An evidence trail in `docs/improvements/PROGRESS.md`.
 
 If a feature does not behave as documented, file an issue with the failing command — per CONST-035 documentation mismatches are critical defects.
+
+---
+
+## Sources verified 2026-05-29: https://go.dev/doc/devel/release, https://www.postgresql.org/support/versioning/, https://github.com/redis/redis/releases, https://docs.ollama.com/faq, https://opentelemetry.io/docs/specs/otlp/, https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching
+
+Cross-referenced every external version pin / port / service reference in this
+operator manual against the latest official docs per Constitution §11.4.99:
+
+- **Go 1.26** (§1.1, §1.2) — **CONFIRMED current.** go.dev release history shows
+  Go 1.26.0 (2026-02-10), latest patch **go1.26.3** (2026-05-07). Matches CLAUDE.md
+  §3.1. No change.
+- **PostgreSQL 15+** (§1.1) — **CONFIRMED valid.** postgresql.org versioning page:
+  15 is supported until 2027-11; 18 is the latest major (18.4). The `15+` floor
+  correctly admits 15–18. No change.
+- **Redis 7+** (§1.1) — **CONFIRMED valid.** github.com/redis/redis/releases: 7.4.x
+  and 7.2.x still receive security updates and Redis 8.x is GA; the `7+` floor is
+  correct. No change.
+- **Ollama default `:11434`** (§2.4, F12 local path) — **CONFIRMED.** docs.ollama.com/faq:
+  "Ollama binds 127.0.0.1 port 11434 by default" (overridable via `OLLAMA_HOST`).
+  No change.
+- **OpenTelemetry OTLP gRPC `:4317`** (§2.10, §3.2) — **CONFIRMED.** opentelemetry.io
+  OTLP spec: default OTLP/gRPC port is 4317 (HTTP is 4318). No change.
+- **macOS ≥ 12 / Windows 10+ via WSL2 / Linux kernel ≥ 5.10** (§1.1) — these are
+  HelixCode's own declared minimum-support floors (see `docs/platforms/`), not a
+  single vendor's "latest" claim; the supported-platforms manifest
+  (`docs/platforms/supported_platforms.yaml`) is the source of truth. No
+  third-party-doc contradiction found.
+
+**CONST-036 model-ID notes (flagged, NOT re-pinned):** the §2.4 / §5 example model
+identifiers (`claude-3-5-sonnet`, `gemini-1.5-pro`, `gpt-4o`,
+`llama-3.3-70b-versatile`, `grok-3-fast-beta`, `qwen-max`, `mistral-small-latest`,
+`deepseek-chat`, `llama3.2`, `openai/gpt-oss-20b:free`) and the `anthropic.model:
+claude-3-5-sonnet` config snippet are **LLMsVerifier-runtime-sourced** — they are
+illustrative `--provider/--model` invocation examples and may be stale. The
+authoritative live list is `./bin/cli --list-models` / `helixcode llm models list`,
+which queries every configured provider per CONST-036. Not re-pinned per
+CONST-036 (LLMsVerifier is the single source of truth). The provider-count claims
+("15 providers", "Path B — remaining 3") describe HelixCode's own integration
+surface, not a vendor figure, and were not externally verifiable.
+
+**Negative findings:** no Anthropic/OpenAI/etc. account-safety or login-flow
+instructions are present in this manual that would carry a ban-risk under
+§11.4.99(D); the only credential guidance is local `.env` / `api_keys.sh` (mode
+0600) handling, which contradicts no vendor policy. OpenAI's reasoning-guide page
+was not fetched here (it returns HTTP 403 to automated fetch — see the
+FEATURE_IMPLEMENTATION_COMPLETE footer); this manual cites no OpenAI URL.

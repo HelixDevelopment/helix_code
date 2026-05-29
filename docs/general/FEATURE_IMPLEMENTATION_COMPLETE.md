@@ -448,8 +448,8 @@ The core infrastructure for prompt caching, reasoning, and token budgets is **pr
 
 ## References
 
-- [Anthropic Prompt Caching Docs](https://docs.anthropic.com/claude/docs/prompt-caching)
-- [OpenAI O-Series Models](https://openai.com/research/learning-to-reason)
+- [Anthropic Prompt Caching Docs](https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching)
+- [OpenAI Reasoning Models Guide](https://platform.openai.com/docs/guides/reasoning)
 - [HelixCode Provider Features Matrix](./PROVIDER_FEATURES.md)
 - [Provider Update Summary](./PROVIDER_UPDATE_SUMMARY.md)
 
@@ -466,3 +466,14 @@ For questions or issues:
 **Implementation Date**: 2025-01-14
 **Status**: ✅ Production Ready
 **Version**: 1.0.0
+
+---
+
+## Sources verified 2026-05-29: https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching, https://github.com/redis/redis/releases, https://www.postgresql.org/support/versioning/, https://go.dev/doc/devel/release
+
+Cross-referenced against latest official docs per Constitution §11.4.99:
+
+- **Anthropic prompt caching** — fetched the live official page. **Stale-URL fix applied**: the old `docs.anthropic.com/claude/docs/prompt-caching` link now 301-redirects to `platform.claude.com/docs/en/docs/build-with-claude/prompt-caching`; the References section was updated to the canonical URL. The official page confirms the caching mechanism (`cache_control`, 5-min default TTL, optional 1-hour TTL, per-model minimum cacheable length 1,024–4,096 tokens, `cache_creation_input_tokens` / `cache_read_input_tokens` usage fields). The official **pricing is now stated as percentages** (cache write +25% of base input for 5-min / 2× for 1-hour; cache read = 10% of base input), which differs from the absolute `$3.75 / $0.30 per 1M` figures and the worked cost examples in this doc.
+- **OpenAI O-series** — the `openai.com/research/learning-to-reason` link was replaced with the current `platform.openai.com/docs/guides/reasoning` guide. **Negative finding:** both OpenAI URLs return HTTP 403 to automated fetch (anti-bot), so the page content could NOT be machine-verified this run; the URL is the documented canonical location and must be re-checked manually.
+- **Model IDs and pricing (CONST-036):** the example model identifiers (`claude-3-5-sonnet-20241022`, `o1-preview`, `claude-4-sonnet`) and all per-token pricing in the Cost Estimation section are **LLMsVerifier-runtime-sourced**, not authored constants — they may be stale. They are illustrative only; the authoritative live list is `helixcode llm models list`. Not re-pinned here per CONST-036 (LLMsVerifier is the single source of truth).
+- **Versions:** no Go/PostgreSQL/Redis version pins appear in this doc; project version authority is `go.mod` + CLAUDE.md §3.1 (Go 1.26 / go1.26.3 latest, PostgreSQL 15+, Redis 7+ — all confirmed current).
