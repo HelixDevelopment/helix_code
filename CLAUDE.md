@@ -254,14 +254,19 @@ make test-verifier-unit / test-verifier-integration / test-verifier-challenges
 make test-infra-down                         # tear down stack + volumes
 ```
 
-**Containerized builds** (no host Go required):
+**Containerized run** (via the repo-root `./helix` facade — Rule 4 / §11.4.76; the
+host uses podman, not docker; direct `docker`/`docker-compose` commands are NOT a
+supported workflow):
 ```bash
-make container-builder-image    # build the builder image once
-make container-build            # build inside container
-make container-test             # test inside container
-make container-shell            # interactive shell in builder
-make container-release          # full release in container
+./helix start      # boot the containerized stack
+./helix status     # stack status
+./helix logs       # tail logs
+./helix restart    # restart the stack
+./helix stop       # tear down
 ```
+(§11.4.99 note 2026-05-29: the previously-listed `make container-*` targets do not
+exist in any Makefile and were removed; containerized builds are driven through the
+orchestrator / the `containers` submodule per §11.4.76, not hand-run make targets.)
 
 **Single-test invocation** (inner module):
 ```bash

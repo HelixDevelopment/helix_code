@@ -1469,8 +1469,21 @@ confirmed consistent with CLAUDE.md §3.1. <strong>4th finding
 were ALL broken — the canonical docs live under
 <code>helix_code/docs/general/</code> (and API →
 <code>API_DOCUMENTATION.md</code>); all 4 links repointed + verified to
-resolve. README.html + README.pdf regenerated (CONST-062/066 sync). The
-§11.4.99 discipline now binds future operator-doc edits.</p>
+resolve. README.html + README.pdf regenerated (CONST-062/066 sync).
+<strong>Extended to
+<code>helix_code/docs/general/DEVELOPMENT.md</code>:</strong> fixed “Go
+1.21+” → “Go 1.26+” (verified vs go.dev + go.mod); replaced the
+<code>docker build</code>/<code>docker run</code> section (Rule 4
+violation — host uses podman) with the real repo-root
+<code>./helix</code> facade (subcommands start/status/logs/restart/stop,
+verified against the script); all 8 cited <code>make</code> targets
+verified present; added a <code>## Sources verified</code> footer.
+<strong>§11.4.99 negative finding fixed in CLAUDE.md §3.4:</strong> the
+listed
+<code>make container-builder-image/container-build/container-test/container-shell/container-release</code>
+targets do NOT exist in any Makefile — replaced with the real
+<code>./helix</code> facade + a note. The §11.4.99 discipline now binds
+future operator-doc edits.</p>
 <hr />
 <h2 id="hxc-027-11.4.98-live-test-full-automation-compliance-audit">HXC-027
 — §11.4.98 live-test full-automation compliance audit</h2>

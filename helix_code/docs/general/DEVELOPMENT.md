@@ -3,7 +3,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Go 1.21+
+- Go 1.26+ (this inner module declares `go 1.26` — it will not build on older toolchains)
 - PostgreSQL 15+
 - Redis 7+
 - Git
@@ -224,15 +224,25 @@ make prod
 ./bin/helixcode --config config/prod/config.yaml
 ```
 
-### Docker Deployment
+### Containerized deployment
+
+Per Constitution Rule 4 (No Manual Container Commands) + §11.4.76, container
+workflows go through the orchestrator — direct `docker`/`docker-compose` commands
+are NOT a supported workflow (and the host uses podman, not docker). Run the
+platform standalone via the repo-root `./helix` facade script (it drives the
+containerized stack, delegating to the containers submodule per §11.4.76):
 
 ```bash
-# Build Docker image
-docker build -t helixcode .
-
-# Run container
-docker run -p 8080:8080 helixcode
+./helix start      # boot the containerized stack
+./helix status     # show stack status
+./helix logs       # tail logs
+./helix restart    # restart the stack
+./helix stop       # tear down
 ```
+
+The host application binary itself is built with `make build` → `./bin/helixcode`
+(see Build Commands above); CI-style container builds/tests are driven by the
+orchestrator, never by hand-run `docker` commands.
 
 ## 🔍 Debugging
 
@@ -343,3 +353,25 @@ curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users/me
 ---
 
 **Happy coding! 🚀**
+
+---
+
+## Sources verified
+
+Per constitution §11.4.99, these development instructions were cross-referenced against
+the latest official sources + the repository's actual state on **2026-05-29**:
+
+- **Go version** — corrected "Go 1.21+" → **"Go 1.26+"** to match `helix_code/go.mod`
+  (`go 1.26`; won't build below it). Verified against https://go.dev/doc/devel/release
+  (Go 1.26.0 released 2026-02-10, latest 1.26.3; Go 1.21/1.24 are past support).
+- **make targets** — `setup-deps`, `logo-assets`, `build`, `dev`, `test`, `fmt`, `lint`,
+  `prod` all verified present in `helix_code/Makefile`.
+- **Container workflow** — removed the `docker build`/`docker run` instructions (violate
+  Constitution Rule 4 + the host uses podman, not docker) and replaced them with the
+  real repo-root `./helix` facade (subcommands verified: start/status/logs/restart/stop).
+  Negative finding: the `make container-*` targets referenced in CLAUDE.md §3.4 do NOT
+  exist in either Makefile — flagged for a separate CLAUDE.md correction (not cited here).
+- **PostgreSQL 15+ / Redis 7+** — consistent with CLAUDE.md §3.1.
+
+Sources verified 2026-05-29: https://go.dev/doc/devel/release ; repo cross-reference
+(`helix_code/go.mod`, `helix_code/Makefile`, `./helix`, CLAUDE.md §3.1/§3.4).
