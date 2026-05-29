@@ -237,3 +237,19 @@
 ---
 
 *This comprehensive deployment guide provides enterprise-grade instructions for deploying HelixCode in production environments with security, monitoring, and scalability considerations.*
+
+---
+
+## Sources verified
+
+Sources verified 2026-05-29:
+https://docs.podman.io/en/latest/markdown/podman-compose.1.html ;
+https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/prompt-caching ;
+https://docs.aws.amazon.com/bedrock/latest/userguide/inference-prompt-caching.html
+— Cross-reference performed on 2026-05-29 against the container/cloud services this guide names. Confirmed: (1) **Podman** provides `podman compose` as a thin wrapper over an external provider (`docker-compose` takes precedence; configurable via `compose_providers` / `PODMAN_COMPOSE_PROVIDER`) — consistent with HelixCode Rule 4 / §11.4.76 driving containers through the `./helix` facade + `containers` submodule on a podman host. (2) **Azure OpenAI** prompt caching is enabled-by-default on GPT-4o+ (Microsoft Learn, doc dated 2026-05-13).
+
+**Negative findings / scope notes (§11.4.99(B)):**
+- **This file is currently a documentation-status / table-of-contents meta-document, not a step-by-step runbook.** Its body lists section *titles* (Docker Compose Setup, Kubernetes Architecture, AWS/Azure/GCP Integration, etc.) plus a phase/maintenance schedule — it contains **no concrete container/cloud commands, image tags, API endpoints, or version-pinned steps** to cross-reference against current vendor docs. There were therefore no stale operator instructions to correct in the body; the §11.4.99 obligation is satisfied by recording that the deployable detail is not yet present here.
+- **AWS Bedrock official page body not extractable** — `https://docs.aws.amazon.com/bedrock/latest/userguide/inference-prompt-caching.html` returned only the page title to the fetcher (JS-rendered content not captured). Any future Bedrock setup steps added to this guide MUST be re-verified directly against the live AWS console/docs before commit.
+- **Rule-1 (No CI/CD) note:** the TOC references a "CI/CD Pipeline" deliverable under Cloud Platforms; per HelixCode Rule 1 any concrete pipeline content added later must conform to the manual/Makefile-driven model (no `.github/workflows`). Flagged for the author when this guide is fleshed out.
+- When the concrete AWS/Azure/GCP/K8s/podman steps are authored, each MUST carry its own §11.4.99 latest-source verification against the live vendor docs at that time.

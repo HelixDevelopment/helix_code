@@ -432,7 +432,7 @@ type AuditEvent struct {
 ### Free vs Premium Providers
 
 **Free Providers (No Keys Required):**
-- XAI (Grok): 2M context, fast inference
+- XAI (Grok): up to 1M context per xAI's official model docs (the prior "2M" figure was stale), fast inference
 - OpenRouter: Multiple models, free tiers
 - GitHub Copilot: With subscription
 - Qwen: 2K requests/day
@@ -659,5 +659,18 @@ HelixCode's comprehensive security implementation ensures enterprise-grade prote
 - Secure container and orchestration practices
 - Complete audit and compliance capabilities
 
-For additional security information, see the [API Reference](../docs/COMPLETE_API_REFERENCE.md) and [Deployment Guide](../docs/COMPLETE_DEPLOYMENT_GUIDE.md).</content>
+For additional security information, see the [API Reference](../docs/COMPLETE_API_REFERENCE.md) and [Deployment Guide](../docs/COMPLETE_DEPLOYMENT_GUIDE.md).
+
+## Sources verified
+
+Sources verified 2026-05-29:
+https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html ;
+https://docs.x.ai/docs/models ;
+https://docs.podman.io/en/latest/markdown/podman-compose.1.html
+— Confirmed against official sources on 2026-05-29: (1) OWASP Password Storage Cheat Sheet recommends **Argon2id** (m=19 MiB, t=2, p=1) as the primary password-hashing algorithm and **bcrypt work factor ≥10** for legacy systems — this doc's `bcrypt_cost: 12` and Argon2id API-key hashing both meet current OWASP guidance. (2) xAI Grok context window is **up to 1M tokens** per the official model docs — the prior "2M context" claim in the Free Providers section was stale and has been corrected.
+
+**Negative findings / caveats (§11.4.99(B)):**
+- **Tool-vendor pages not re-fetched this session** — SonarQube and Snyk are referenced only as integration names with config snippets (no version-pinned install instructions), so no version claim required re-verification. If a future revision pins SonarQube/Snyk versions or quotes their CLI flags, those MUST be re-verified against `https://docs.sonarsource.com/` and `https://docs.snyk.io/` per §11.4.99.
+- **Rule-1 (No CI/CD) inconsistency, not a doc-staleness issue:** §"CI/CD Security" still shows a `.github/workflows/security.yml` example, which contradicts HelixCode Rule 1 (No CI/CD Pipelines). Flagged here for a follow-up edit; out of scope for the §11.4.99 latest-source pass (this is an internal-policy contradiction, not an external-docs-staleness defect).
+- **xAI prompt caching unaddressed** in xAI's official docs (absence of documentation, not a confirmed capability either way).</content>
 <parameter name="filePath">docs/COMPLETE_SECURITY_GUIDE.md
