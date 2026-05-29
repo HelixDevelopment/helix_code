@@ -95,6 +95,50 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-036: Systemic CONST-046 i18n defect — 74 packages emitted raw
+message-ID keys to users because the boot-time translator wiring was
+never implemented (a §11.9 tests-green-feature-broken defect)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>helix_code/internal/i18nwiring/wire.go (new) + 72 per-package
+i18n/bundle.go (new) + 9 cmd/*/i18n_boot_wire.go (new) + cmd/cli/main.go
++ tests/integration TestMain</td>
+<td>Surfaced by HXC-029 §11.4.98(F) integration-classification (3
+self-driving tests caught the raw-key output). ROOT CAUSE (§11.4.102
+systematic-debugging, module-wide grep): the CONST-046 migration created
+74 <code>SetTranslator</code> DI seams + <code>NoopTranslator{}</code>
+defaults + <code>active.en.yaml</code> bundles but the documented
+boot-time wiring was NEVER written — 0 <code>.SetTranslator(</code> call
+sites module-wide, <code>i18nadapter</code> never constructed, bundles
+not <code>go:embed</code>’d → every package ran on NoopTranslator →
+users saw raw keys (<code>askuser_prompt_invalid_choice_hint</code>
+instead of “Enter choice [1-3]:”); unit tests passed because they assert
+the Noop echo. FIX (operator chose Option A — boot-time wiring, 4
+phases): per-package <code>bundle.go</code> embeds
+<code>active.en.yaml</code> →
+<code>i18n.NewBundle</code>/<code>Localizer</code> →
+<code>i18nadapter.New</code>; central
+<code>internal/i18nwiring.WireAll()</code> wires 63 internal packages
+(incl. the shared <code>internal/workflow/i18n</code> serving
+autonomy+planmode), called at boot (cmd/cli buildSubsystems) + in
+integration <code>TestMain</code>; the 9 <code>package main</code>
+binaries self-wire via <code>cmd/&lt;m&gt;/i18n_boot_wire.go</code>
+init() (Go forbids importing main). VERIFIED: the 3 originally-failing
+integration tests PASS with resolved interpolated text;
+<code>WireAll()</code> returns nil at <strong>74/74</strong>;
+resolved-text captured for
+askuser/approval/auth/llm/config/cli/autonomy/planmode (e.g. “Full Auto
+(Fully Autonomous)”, “Score: 87.5/100”, “Inspect or run user-defined
+Markdown slash commands”); paired-mutation proven (without WireAll → raw
+keys → FAIL, proving the wiring is load-bearing). Evidence
+docs/qa/HXC-036/phase{1,2,3,4}/. Commits
+f3b864f4+31c57a2a+1ea79fd2+d570b05e. §11.4.84 explicit staging
+throughout. Closed <code>Fixed (→ Fixed.md)</code> per CONST-057 (Type
+Bug).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-034: Cascade constitution §11.4.102 (mandatory
 systematic-debugging + always-loaded using-superpowers +
 plugin-dependency availability) into every owned submodule + wire the

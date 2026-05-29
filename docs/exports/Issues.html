@@ -2112,66 +2112,32 @@ CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md) — see
 <code>docs/Fixed.md</code> for the full closure record.</p>
 <hr />
-<h2 id="hxc-036-systemic-const-046-i18n-defect-74-packages-emit-raw-message-id-keys-to-users-because-boot-time-translator-wiring-was-never-implemented">HXC-036
-— Systemic CONST-046 i18n defect: 74 packages emit raw message-ID keys
-to users because boot-time translator wiring was never implemented</h2>
-<p><strong>Status:</strong> Open <strong>Type:</strong> Bug
-<strong>Severity:</strong> High (every CONST-046-migrated user-facing
-CLI string renders as a raw key like
-<code>askuser_prompt_invalid_choice_hint</code> instead of the
-resolved+interpolated text — a §11.9
-“tests-green-but-feature-broken-for-users” defect class)
-<strong>Discovered:</strong> 2026-05-29 (surfaced by the HXC-029
-§11.4.98(F) integration-classification: 3 self-driving tests
-<code>TestAskUser_InvalidInputThenValid</code> /
-<code>TestAskUser_PreviewVisibleInOutput</code> /
-<code>TestApproval_AutoEdit_PromptsRun_UserAllows</code> correctly FAIL
-because the prompter output contains raw keys, not “1-3”)
-<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
-§11.9 / CONST-046 — user-facing text must be resolved at runtime, not
-shown as a literal key. <strong>Root cause (CONFIRMED via §11.4.102
-systematic-debugging, module-wide grep evidence):</strong> the CONST-046
-i18n migration (rounds 93–455) created <strong>74</strong> per-package
-<code>SetTranslator(...)</code> DI seams, per-package <code>i18n/</code>
-subpackages (<code>Translator</code> interface +
-<code>NoopTranslator{}</code> loud-echo default), and
-<code>active.en.yaml</code> bundles — but the documented “consuming
-binary builds an <code>*i18n.Localizer</code> from the bundle, wraps it
-in <code>*i18nadapter.Translator</code>, and calls
-<code>&lt;pkg&gt;.SetTranslator(...)</code> at boot” step was
-<strong>NEVER WRITTEN</strong>:
-<code>grep -rn &#39;\.SetTranslator(&#39; --include=&#39;*.go&#39;</code> (non-test)
-across the whole module returns <strong>0 call sites</strong>;
-<code>i18nadapter</code> is never constructed at boot; the bundles are
-not even <code>go:embed</code>’d. So every one of the 74 packages runs
-with <code>NoopTranslator{}</code> → <code>tr()</code> returns the
-message ID verbatim → users see raw keys. Unit tests passed because they
-assert the NoopTranslator echo; the defect only shows in end-user-facing
-rendering (exactly the §11.9 scenario). <strong>Reproduction:</strong>
-<code>cd helix_code &amp;&amp; go test -tags=integration -run &#39;TestAskUser_InvalidInputThenValid&#39; ./tests/integration/...</code>
-→ FAIL (“does not contain 1-3”; output shows
-<code>askuser_prompt_invalid_choice_hint</code>). Evidence:
-<code>docs/qa/HXC-029/integration-classification/i18n-regression-evidence.txt</code>.
-<strong>Fix direction (design fork — needs decision):</strong> (A)
-implement boot-time wiring — a central helper that, per package, loads
-its <code>active.en.yaml</code> (add <code>go:embed</code>), builds an
-<code>*i18n.Localizer</code>, wraps via <code>i18nadapter.New</code>,
-and calls <code>&lt;pkg&gt;.SetTranslator</code>, invoked from every
-entry point (cmd/server, cmd/cli, cmd/infrastructure, applications/*);
-the integration tests must exercise that wiring; OR (B) change each
-package’s default from <code>NoopTranslator{}</code> to a
-self-initializing real translator (lazy-load its own embedded bundle),
-keeping NoopTranslator only for explicit unit-test opt-in — more robust
-(impossible to forget) but departs from the documented inject-at-boot
-design. Either way: per-package resolved-text tests + the 3 failing
-integration tests must pass. <strong>Closure criteria:</strong> the 3
-failing integration tests PASS with resolved interpolated text; a
-representative sample (≥askuser + approval + 3 others) proven to render
-real text not keys via captured <code>go test</code> evidence;
-anti-bluff per §11.4/§11.9; no NoopTranslator in production render
-paths. <strong>Composes-with:</strong> §11.9, CONST-046, §11.4.98
-(caught by the live-test full-automation sweep), §11.4.102
-(systematic-debugging root-caused it), HXC-029.</p>
+<h2 id="hxc-036-systemic-const-046-i18n-defect-74-packages-emitted-raw-message-id-keys-because-boot-time-translator-wiring-was-never-implemented-closed-fixed.md">HXC-036
+— Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID
+keys because boot-time translator wiring was never implemented — CLOSED
+(→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29, Option A boot-wiring, 4 phases):</strong> the CONST-046
+migration built 74 <code>SetTranslator</code> seams + bundles but never
+wired a real translator at boot (0 <code>.SetTranslator(</code> call
+sites module-wide). Fix: per-package <code>bundle.go</code>
+(<code>//go:embed active.en.yaml</code> →
+<code>i18n.NewBundle</code>/<code>Localizer</code> →
+<code>i18nadapter.New</code>) + central
+<code>internal/i18nwiring.WireAll()</code> (63 internal pkgs
+incl. shared <code>internal/workflow/i18n</code>) called at boot + in
+integration <code>TestMain</code>; 9 <code>package main</code> binaries
+self-wire via <code>cmd/&lt;m&gt;/i18n_boot_wire.go</code> init().
+VERIFIED: the 3 originally-failing integration tests PASS with resolved
+interpolated text; <code>WireAll()</code> returns nil at
+<strong>74/74</strong>; resolved-text captured for askuser (“Enter
+choice [1-3]:”), approval, auth, llm, config, cli (“Inspect or run
+user-defined Markdown slash commands”), autonomy (“Full Auto (Fully
+Autonomous)”), planmode (“Score: 87.5/100”); paired-mutation proven (no
+WireAll → raw keys → FAIL). Evidence docs/qa/HXC-036/phase{1,2,3,4}/.
+Commits f3b864f4 (P1) + 31c57a2a (P2, 70 pkgs) + 1ea79fd2 (P3, 9 mains)
++ d570b05e (P4, autonomy/planmode).</p>
 <hr />
 <h2 id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows-closed-fixed.md">HXC-035
 — <code>POST /api/v1/auth/register</code> returns 400

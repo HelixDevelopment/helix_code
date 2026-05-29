@@ -46,9 +46,9 @@
 | HXC-032 | LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build | Bug | Fixed (→ Fixed.md) | 2026-05-29 | all 26 conflict hunks across 5 LLMOrchestrator Go files resolved to the HEAD (i18n-migrated) side; `bundle.go` `BundleTranslator` gained an honest `TPlural`;… |
 | HXC-033 | codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operator'… |
 | HXC-034 | Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate |  | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
-| HXC-036 | Systemic CONST-046 i18n defect: 74 packages emit raw message-ID keys to users because boot-time translator wiring was never implemented | Bug | Open | 2026-05-29 | the 3 failing integration tests PASS with resolved interpolated text; a representative sample (≥askuser + approval + 3 others) proven to render real text not… |
+| HXC-036 | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented |  | Fixed (→ Fixed.md) |  | the CONST-046 migration built 74 `SetTranslator` seams + bundles but never wired a real translator at boot (0 `.SetTranslator(` call sites module-wide). Fix:… |
 | HXC-035 | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users` o… |
 
-**Counts**: 42 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **39 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 42 tracked item-sections in `docs/Issues.md` — **2 open** (non-terminal status) / **40 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-05-29 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
