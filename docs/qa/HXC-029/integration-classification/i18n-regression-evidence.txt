@@ -1,0 +1,45 @@
+--- FAIL: TestApproval_AutoEdit_PromptsRun_UserAllows (0.00s)
+=== RUN   TestApproval_AutoEdit_PromptsRun_UserDenies
+--- PASS: TestApproval_AutoEdit_PromptsRun_UserDenies (0.00s)
+=== RUN   TestApproval_FullAuto_InjectsSandboxMarker
+--- PASS: TestApproval_FullAuto_InjectsSandboxMarker (0.00s)
+=== RUN   TestApproval_FullAuto_NetworkAllowedFalse
+--- PASS: TestApproval_FullAuto_NetworkAllowedFalse (0.00s)
+--
+--- FAIL: TestAskUser_PreviewVisibleInOutput (0.00s)
+=== RUN   TestAskUser_InvalidInputThenValid
+    askuser_test.go:164: 
+        	Error Trace:	/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code/tests/integration/askuser_test.go:164
+        	Error:      	"Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n" does not contain "1-3"
+        	Test:       	TestAskUser_InvalidInputThenValid
+        	Messages:   	writer must contain retry hint mentioning valid range — got "Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n"
+--- FAIL: TestAskUser_InvalidInputThenValid (0.00s)
+=== RUN   TestAskUser_RegisteredInRegistry_ReturnsRealTool
+--- PASS: TestAskUser_RegisteredInRegistry_ReturnsRealTool (0.00s)
+=== RUN   TestAutoCompaction_IntegrationLargeConversation
+    auto_compaction_integration_test.go:36: SKIP-OK: #P1-F01-INT — HELIX_LLM_ANTHROPIC_KEY not set; integration test requires real Anthropic credentials
+--- SKIP: TestAutoCompaction_IntegrationLargeConversation (0.00s)
+=== RUN   TestAutoCommit_Integration_DefaultOn_RealEdit_RealCommit
+=== TestAskUser_PreviewVisibleInOutput + TestAskUser_InvalidInputThenValid (from askuser_run.log) ===
+--- FAIL: TestAskUser_PreviewVisibleInOutput (0.00s)
+=== RUN   TestAskUser_InvalidInputThenValid
+    askuser_test.go:164: 
+        	Error Trace:	/run/media/milosvasic/DATA4TB/Projects/HelixCode/helix_code/tests/integration/askuser_test.go:164
+        	Error:      	"Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n" does not contain "1-3"
+        	Test:       	TestAskUser_InvalidInputThenValid
+        	Messages:   	writer must contain retry hint mentioning valid range — got "Pick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\naskuser_prompt_invalid_choice_hint\nPick a fruit:\n\n1. Apple\n2. Banana\n3. Cherry\n\naskuser_prompt_enter_choice_no_default\n"
+--- FAIL: TestAskUser_InvalidInputThenValid (0.00s)
+=== RUN   TestAskUser_RegisteredInRegistry_ReturnsRealTool
+--- PASS: TestAskUser_RegisteredInRegistry_ReturnsRealTool (0.00s)
+FAIL
+FAIL	dev.helix.code/tests/integration	2.023s
+FAIL
+
+=== TestApproval_AutoEdit_PromptsRun_UserAllows (from approval_run.log) ===
+--- FAIL: TestApproval_AutoEdit_PromptsRun_UserAllows (0.00s)
+=== RUN   TestApproval_AutoEdit_PromptsRun_UserDenies
+--- PASS: TestApproval_AutoEdit_PromptsRun_UserDenies (0.00s)
+=== RUN   TestApproval_FullAuto_InjectsSandboxMarker
+--- PASS: TestApproval_FullAuto_InjectsSandboxMarker (0.00s)
+=== RUN   TestApproval_FullAuto_NetworkAllowedFalse
+--- PASS: TestApproval_FullAuto_NetworkAllowedFalse (0.00s)
