@@ -95,6 +95,44 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-029: §11.4.98 full-automation compliance sweep — verify every
+live/integration/e2e/Challenge test is self-driving with no
+human-in-the-loop</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>helix_code/tests/regression/server_timeout_test.go +
+tests/e2e/scripts/clean.sh + 7 verified helix_qa banks +
+docs/qa/HXC-029/ evidence</td>
+<td>§11.4.98 manual-intervention sweep COMPLETE — 0 remaining
+human-in-the-loop violations. Static audit
+(docs/qa/HXC-029/compliance-ledger.md) found exactly 2 NON-COMPLIANT,
+both FIXED: server_timeout_test.go <code>TestServerStability</code>
+(manual-skip over an unimplemented body — a §11.4 PASS-bluff) → real
+self-driving net/http test (<code>-count=3</code> green); clean.sh
+interactive <code>read -p</code> →
+<code>--force</code>/<code>CLEAN_FORCE</code>/TTY-gated. All 7
+HelixCode-scope HelixQA banks verified self-driving vs the live :8080
+server (4 API:
+full-qa-api/entity-management/admin-operations/security-validation + 3
+CLI:
+cli-agents-comprehensive/aichat-bash-tools/cli-agents-test-helixagent),
+each 3× deterministic + flip-mutation-proof, driving the real bin/cli
+via os/exec, grep -c manual-review-required=0, honest _skip for absent
+tools (no fabricated PASS). 31/31 integration files runtime-verified
+self-driving (0 manual deps; the 3 FAILs were a real i18n product defect
+→ HXC-036, fixed). The 20 browser/Android/capture banks are OUT of scope
+per §11.4.79/§11.4.51 (HelixQA is shared — they target
+Catalogizer/Yole/HelixQA-engine; HelixCode has no web UI (API-only) + no
+Android app; the 2 connected devices are ATMOSphere hardware). e2e
+suites static-clean (only config-bootstrap skips = permitted §11.4.98(B)
+exception). Evidence
+docs/qa/HXC-029/{compliance-ledger,integration-classification,playwright-android,<em>/run_</em>+mutation-proof}.
+Closed <code>Completed (→ Fixed.md)</code> per CONST-057 (Type
+Task).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-036: Systemic CONST-046 i18n defect — 74 packages emitted raw
 message-ID keys to users because the boot-time translator wiring was
 never implemented (a §11.9 tests-green-feature-broken defect)</td>

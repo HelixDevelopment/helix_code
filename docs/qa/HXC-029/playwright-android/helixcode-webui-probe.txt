@@ -1,0 +1,20 @@
+# HXC-029 §11.4.98 — Playwright/Android batch: HelixCode web-UI surface probe
+# Captured: 2026-05-29T15:43:11Z
+# Live server: http://localhost:8080 (real PG+Redis per HXC-029 infra)
+# Purpose: determine whether HelixCode serves any HTML/dashboard for in-scope Playwright banks
+
+GET / -> HTTP 404  content-type=[text/plain; charset=utf-8]
+GET /api/v1/health -> HTTP 200  content-type=[application/json; charset=utf-8]
+GET /health -> HTTP 200  content-type=[application/json; charset=utf-8]
+GET /dashboard -> HTTP 404  content-type=[text/plain]
+GET /ui -> HTTP 404  content-type=[text/plain]
+GET /login -> HTTP 404  content-type=[text/plain]
+GET /index.html -> HTTP 404  content-type=[text/plain]
+GET /static/ -> HTTP 404  content-type=[]
+GET /web -> HTTP 404  content-type=[text/plain]
+GET /api/v1/ -> HTTP 404  content-type=[text/plain]
+GET /metrics -> HTTP 404  content-type=[text/plain]
+
+# CONCLUSION: only /health and /api/v1/health return 200 application/json.
+# Every HTML/UI/dashboard/login route returns 404 text/plain.
+# HelixCode serves NO browser-facing web UI -> NO in-scope Playwright target exists.

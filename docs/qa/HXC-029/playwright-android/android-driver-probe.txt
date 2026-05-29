@@ -1,0 +1,20 @@
+# HXC-029 §11.4.98 — Android batch: read-only driver/device probe (classification only)
+# Captured: 2026-05-29T15:43:35Z
+# SAFETY: read-only only (adb devices). NO install / am start / settings put / input issued.
+# Operator's 2 physical devices must NOT be auto-driven (side-effecting, hard to reverse).
+
+$ adb version
+Android Debug Bridge version 1.0.41
+Version 37.0.0-14910828
+Installed as /home/milosvasic/Android/Sdk/platform-tools/adb
+Running on Linux 6.12.61-6.12-alt1 (x86_64)
+
+$ adb devices -l
+List of devices attached
+66ff9c4f51f00ee7       device usb:4-3.2 product:shiba model:ATMOSphere device:shiba transport_id:2
+998fd36615e99484       device usb:4-3.1 product:shiba model:ATMOSphere device:shiba transport_id:3
+
+
+# CONCLUSION: adb driver present + 2 devices reachable, but EVERY Android bank in this batch
+# targets Catalogizer (phone/TV) or Yole — OTHER projects, OUT of HXC-029 scope.
+# No HelixCode Android app exists. Driving real devices = operator_attended (§11.4.69 closed-set).

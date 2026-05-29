@@ -1,0 +1,45 @@
+# HXC-029 §11.4.98 — Playwright/Android batch: per-bank SCOPE classification evidence
+# Captured: 2026-05-29T15:43:23Z
+# Method: read each bank's metadata app/feature + grep target app-ids/URLs/package-names.
+# Rule: a bank is HELIXCODE-scope only if it targets the HelixCode platform itself.
+
+[full-qa-web.yaml] meta={app: "Catalogizer"}
+    targets:       8 Catalogizer      22 localhost:3000 
+[full-qa-android.yaml] meta={app: "Catalogizer"}
+    targets:      14 Catalogizer 
+[full-qa-androidtv.yaml] meta={app: "Catalogizer"}
+    targets:     315 androidtv      70 catalogizer      25 Catalogizer       2 CATALOGIZER       4 localhost:8080       2 Mi Box       2 Xiaomi 
+[full-qa-androidtv-challenges.json] meta={}
+    targets:      12 Catalogizer       1 Mi Box       1 Xiaomi 
+[validation-androidtv-focus.json] meta={"app": "Catalogizer"}
+    targets:      11 androidtv       8 catalogizer       8 Catalogizer 
+[file-browser.yaml] meta={app: "Yole"}
+    targets:       6 Yole 
+[app-navigation.yaml] meta={app: "Yole"}
+    targets:      11 Yole 
+[editor-operations.yaml] meta={app: "Yole"}
+    targets:       5 Yole 
+[all-formats.yaml] meta={app: "Yole"}
+    targets:       3 Yole 
+[cloud-storage-operations.yaml] meta={app: "Yole"}
+    targets:       6 Yole 
+[storage-configuration.yaml] meta={app: "Yole"}
+    targets:       3 Yole 
+[edge-cases-stress.yaml] meta={app: "Yole"}
+    targets:      24 Yole 
+[fixes-validation-browser.yaml] meta={}
+    targets:       6 pkg/nexus 
+[nexus-browser.yaml] meta={feature: "helix-nexus-browser"}
+    targets:       3 catalogizer       1 helix-nexus       3 pkg/nexus 
+[nexus-mobile-android.yaml] meta={feature: "helix-nexus-mobile-android"}
+    targets:       1 catalogizer       1 helix-nexus 
+[fixes-validation-mobile.yaml] meta={}
+    targets:       4 pkg/nexus 
+[image-quality-gate.yaml] meta={app: "Catalogizer"}
+    targets:       5 androidtv       2 ANDROIDTV       1 catalogizer       2 Catalogizer       2 CATALOGIZER 
+[full-qa-cross-platform.yaml] meta={app: "Catalogizer"}
+    targets:      17 androidtv       6 Catalogizer 
+[capture-android.yaml] meta={app: "HelixQA"}
+    targets:      11 pkg/capture 
+[capture-linux.yaml] meta={app: "HelixQA"}
+    targets:      11 pkg/capture 

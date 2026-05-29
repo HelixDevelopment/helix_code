@@ -1849,70 +1849,34 @@ full-tree grep for literal-true bluffs = 0; runtime harness (down
 server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained
 as a migration tombstone per §11.4.19.</p>
 <hr />
-<h2 id="hxc-029-11.4.98-forward-full-automation-compliance-sweep-of-every-liveintegratione2echallenge-test">HXC-029
-— §11.4.98 forward: full-automation compliance sweep of every
-live/integration/e2e/Challenge test</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-29 (constitution §11.4.98 cascaded
-via HXC-025; forward work implied by the HXC-027 audit)
-<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
-§11.4.98 — “full automation testing of all scenarios … without any
-manual intervention … no false positives … real proofs … no bluff”.
-<strong>Scope:</strong> Audit every
-live/integration/e2e/Challenge/stress/chaos test for human-in-the-loop
-dependence; classify each COMPLIANT vs NON-COMPLIANT per §11.4.98(C);
-rewrite manual-dependency tests to drive programmatically
-(second-account / webhook-fixture / loopback) with self-cleaning state;
-prove re-runnability at <code>-count=3</code>; capture per-test wire
-evidence under <code>docs/qa/HXC-029/</code>. <strong>Progress
-(2026-05-29):</strong> Static audit ledger produced
-(<code>docs/qa/HXC-029/compliance-ledger.md</code>). Both CONFIRMED
-code-level violations FIXED: (1)
-<code>helix_code/tests/regression/server_timeout_test.go</code>
-<code>TestServerStability</code> was <code>t.Skip(&quot;run manually&quot;)</code>
-over an unimplemented body (a §11.4 PASS-bluff) — now a real
-self-driving test that stands up a <code>net/http</code> server with the
-config’s timeout semantics and asserts idle-survival with real HTTP I/O;
-PASS <code>-count=3</code> (~1.75s each); also fixed the sibling
-<code>TestServerTimeoutConfiguration</code> CWD-dependent hard-fail (now
-skips-with-reason); whole <code>tests/regression</code> package green.
-(2) <code>helix_code/tests/e2e/scripts/clean.sh:59</code> interactive
-<code>read -p</code> → now
-<code>--force</code>/<code>CLEAN_FORCE=1</code>/TTY-gated, keeps results
-non-interactively (no hang); <code>bash -n</code> clean. <strong>Bank
-verification (2026-05-29):</strong> 7 banks now self-driving +
-anti-bluff-verified against the live <code>:8080</code> server (3
-deterministic runs + flip-expectation mutation-proof each, evidence
-under <code>docs/qa/HXC-029/</code>): 4 API banks
-(<code>helixcode-full-qa-api</code>, <code>entity-management</code>,
-<code>admin-operations</code>, <code>security-validation</code>) + 3 CLI
-banks (<code>cli-agents-comprehensive</code> 6 real PASS,
-<code>aichat-bash-tools-comprehensive</code> 9 PASS,
-<code>cli-agents-test-helixagent</code> 7 PASS) driving the real
-<code>helix_code/bin/cli</code> via <code>os/exec</code> with asserted
-exit codes/output. <code>grep -c manual-review-required</code>=0 on all
-7. Honest <code>_skip</code> for absent tools (<code>aider</code>
-REPL/<code>:7061</code> ensemble down,
-<code>aichat</code>/<code>openhands</code> not on PATH, Go-API internals
-with no CLI surface) — no fabricated PASS (§11.4.98). helix_qa HEAD
-<code>14be9eb</code>. <strong>Integration long-tail
-(2026-05-29):</strong> RESOLVED — classified all 31
-<code>helix_code/tests/integration/**</code> files: <strong>31/31 are
-already self-driving</strong> (0 require human action during execution;
-gated only by build-tags / <code>testing.Short</code> / infra-presence),
-0 needed conversion, 0 obsolete. Real captured evidence
-(<code>docs/qa/HXC-029/integration-classification/</code>):
-<code>go test -tags=integration ./tests/integration/</code> → 110 PASS /
-20 SKIP (honest infra/cred-unavailable) / 3 FAIL. The 3 FAILs are NOT
-manual deps — they are a real i18n-render regression the self-driving
-tests correctly catch (filed as <strong>HXC-036</strong>). REMAINING:
-Playwright/Android banks only (need real browser/emulator drivers).
-<strong>Closure criteria:</strong> Coverage ledger (test ×
-COMPLIANT/NON-COMPLIANT × evidence-path) regenerated; zero NON-COMPLIANT
-live tests OR each migrated to §11.4.90 Obsolete citing §11.4.98;
-<code>-count=3</code> green; evidence captured.
-<strong>Composes-with:</strong> §11.4.98, §11.4.85, §11.4.89, §11.4.87,
-§11.4.94, HXC-027.</p>
+<h2 id="hxc-029-11.4.98-full-automation-compliance-sweep-of-every-liveintegratione2echallenge-test-no-human-in-the-loop-closed-fixed.md">HXC-029
+— §11.4.98 full-automation compliance sweep of every
+live/integration/e2e/Challenge test (no human-in-the-loop) — CLOSED (→
+Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> §11.4.98 manual-intervention sweep COMPLETE — 0
+remaining human-in-the-loop violations. Static audit
+(<code>docs/qa/HXC-029/compliance-ledger.md</code>) found exactly 2
+NON-COMPLIANT → both FIXED (server_timeout_test.go manual-skip → real
+self-driving net/http test <code>-count=3</code> green; clean.sh
+interactive <code>read -p</code> → <code>--force</code>/TTY-gated). All
+<strong>7 HelixCode-scope HelixQA banks</strong> verified self-driving
+vs the live :8080 server (4 API + 3 CLI, each 3× deterministic +
+flip-mutation-proof, real <code>bin/cli</code> via os/exec,
+<code>grep -c manual-review-required</code>=0, honest <code>_skip</code>
+for absent tools). <strong>31/31 integration files</strong>
+runtime-verified self-driving (0 manual deps; the 3 FAILs were a real
+product defect → HXC-036, now fixed). The <strong>20
+browser/Android/capture banks are OUT of scope</strong> (HelixQA is
+shared — they target Catalogizer/Yole/HelixQA-engine; HelixCode has no
+web UI (API-only) + no Android app; the 2 connected devices are
+ATMOSphere hardware) — per §11.4.79/§11.4.51 not converted. e2e suites
+static-clean (only config-bootstrap skips = permitted §11.4.98(B)
+exception; no manual signal). Evidence
+docs/qa/HXC-029/{compliance-ledger,<em>/run_</em>,integration-classification,playwright-android}.
+Closed <code>Completed (→ Fixed.md)</code> per CONST-057 (Type
+Task).</p>
 <hr />
 <h2 id="hxc-030-11.4.99-forward-latest-source-documentation-cross-reference-sweep-across-all-operator-facing-docs-closed-fixed.md">HXC-030
 — §11.4.99 forward: latest-source documentation cross-reference sweep
