@@ -8,8 +8,8 @@
 |---|---|---|
 | Bug | 27 | `Fixed (→ Fixed.md)` |
 | Feature | 69 | `Implemented (→ Fixed.md)` |
-| Task | 12 | `Completed (→ Fixed.md)` |
+| Task | 13 | `Completed (→ Fixed.md)` |
 
-**Total closed items**: 108 (counted directly from the `docs/Fixed.md` closure table).
+**Total closed items**: 109 (counted directly from the `docs/Fixed.md` closure table).
 
 *Last regenerated: 2026-05-29 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

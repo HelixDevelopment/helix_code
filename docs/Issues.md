@@ -500,9 +500,10 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-030 — §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs
+## HXC-030 — §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs — CLOSED (→ Fixed.md)
 
-**Status:** Queued
+**Status:** Completed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
+**Closure (2026-05-29):** §11.4.99 operator-instruction sweep COMPLETE — **38/38 (100%)** operator-facing instruction/guide/manual/setup/troubleshooting/tutorial docs now carry a WebFetch-verified `## Sources verified` footer (8 batches: Go 1.24→1.26.3, golang:1.21→1.26 Dockerfiles, go1.21.5→1.26.3, postgres 14→15, stale Anthropic/OpenAI doc-redirect URLs all corrected against live official sources; honest negative findings recorded where sources were 403/unreachable; per CONST-036 model IDs flagged-not-guessed). New `scripts/gates/sources_verified_gate.sh` wired as **G13 (now ENFORCING)** in verify-all-constitution-rules.sh — any future operator doc lacking a footer FAILs the sweep. Out of §11.4.99 scope (evidence/internal, not operator instructions): docs/qa_evidence/ (93 QA reports), docs/helix_qa/, docs/architecture/, docs/coverage/, docs/materials/. Ongoing 90-day staleness re-verification is steady-state discipline (gate `--check-stale`), not an open task. Section retained as §11.4.19 tombstone.
 **Type:** Task
 **Discovered:** 2026-05-29 (constitution §11.4.99 cascaded via HXC-025; HXC-028 applied it to README only)
 **Discovered-By:** AI

@@ -95,6 +95,40 @@ commit history + the <code>docs/improvements/</code> evidence chain
 <tbody>
 <tr>
 <td>2026-05-29</td>
+<td>HXC-030: §11.4.99 latest-source documentation cross-reference sweep
+across all operator-facing docs</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-29 session</td>
+<td>batches 1-8 (68443b8c, f23585b7, bf2ae47a, 666e4c3e, 2b1b4331,
+b3056c02, 000ae0a7, 6ad0f42b) + gate 2736bb79/2f2577eb</td>
+<td>§11.4.99 operator-instruction sweep COMPLETE: <strong>38/38
+(100%)</strong> operator-facing
+instruction/guide/manual/setup/troubleshooting/tutorial docs carry a
+<code>## Sources verified</code> footer, each produced by live WebFetch
+of the official source (go.dev, postgresql.org, redis releases, ollama,
+opentelemetry, platform.claude.com, etc.) — NEVER training data. Real
+stale fixes across batches: <code>Go 1.24</code>→<code>1.26.3</code>,
+<code>golang:1.21-alpine</code>→<code>1.26-alpine</code> (Dockerfiles),
+<code>go1.21.5</code>→<code>go1.26.3</code> (health JSON),
+<code>postgresql-14</code>→<code>15</code>, stale Anthropic
+(<code>docs.anthropic.com</code>→<code>platform.claude.com</code>) +
+OpenAI doc-redirect URLs. Honest negative findings recorded in-doc where
+official sources returned 403/too-large (OpenAI platform docs) per
+§11.4.99(B); per CONST-036 model IDs/pricing flagged-as-stale but NOT
+re-pinned (LLMsVerifier is runtime source-of-truth), pointing operators
+to <code>helixcode llm models list</code>. New
+<code>scripts/gates/sources_verified_gate.sh</code> wired as <strong>G13
+ENFORCING</strong> (CM-SOURCES-VERIFIED) — a future operator doc without
+a footer FAILs the sweep; paired §1.1 check (–enforce exits 1 while
+&lt;100%, exit 0 at 100%). Out of §11.4.99 scope (evidence/internal):
+qa_evidence (93)/helix_qa/architecture/coverage/materials. 90-day
+staleness re-verification is steady-state (gate
+<code>--check-stale</code>). Closed <code>Completed (→ Fixed.md)</code>
+per CONST-057 (Type Task).</td>
+</tr>
+<tr>
+<td>2026-05-29</td>
 <td>HXC-033: codegraph 0.9.7 update dropped own-org submodules from the
 index + full index/sync appeared to crash (§11.4.79 regression)</td>
 <td>Bug</td>

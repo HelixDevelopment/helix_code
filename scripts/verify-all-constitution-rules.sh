@@ -449,16 +449,20 @@ if want_gate G12; then
 fi
 
 # ---------------------------------------------------------------------------
-# G13 — §11.4.99 Sources-verified footer coverage (ADVISORY until HXC-030 sweep done)
+# G13 — §11.4.99 Sources-verified footer coverage (ENFORCING since HXC-030 closed)
 # ---------------------------------------------------------------------------
 if want_gate G13; then
     GATES_RUN=$((GATES_RUN + 1))
-    gate_header "G13 — §11.4.99 Sources-verified footer coverage (advisory; HXC-030)"
-    # Advisory: reports operator-doc footer coverage but does NOT fail the sweep
-    # while the HXC-030 §11.4.99 verification campaign is in progress. Flip to
-    # --enforce here once coverage reaches 100% (HXC-030 closure criterion).
-    bash "$ROOT/scripts/gates/sources_verified_gate.sh" >/tmp/g13-sv.out 2>&1 || true
-    gate_pass G13 "$(grep -oE '[0-9]+/[0-9]+ operator-facing docs footered \([0-9]+%\)' /tmp/g13-sv.out | head -1) — advisory (run sources_verified_gate.sh --enforce to block at 100%)"
+    gate_header "G13 — §11.4.99 Sources-verified footers (CM-SOURCES-VERIFIED; HXC-030)"
+    # HXC-030 reached 100% operator-instruction coverage (2026-05-29), so this is
+    # now ENFORCING: any operator-facing doc lacking a `## Sources verified`
+    # footer FAILs the sweep (a new/un-verified operator doc must be §11.4.99-verified).
+    if bash "$ROOT/scripts/gates/sources_verified_gate.sh" --enforce >/tmp/g13-sv.out 2>&1; then
+        gate_pass G13 "$(grep -oE '[0-9]+/[0-9]+ operator-facing docs footered \([0-9]+%\)' /tmp/g13-sv.out | head -1)"
+    else
+        gate_fail G13 "operator-facing doc(s) lack a §11.4.99 Sources-verified footer (see /tmp/g13-sv.out)" \
+            "$(grep -E '    - |FAIL' /tmp/g13-sv.out | head -8)"
+    fi
 fi
 
 # ---------------------------------------------------------------------------

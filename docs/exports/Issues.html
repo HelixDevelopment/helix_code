@@ -1889,12 +1889,29 @@ citing §11.4.98; <code>-count=3</code> green; evidence captured.
 <strong>Composes-with:</strong> §11.4.98, §11.4.85, §11.4.89, §11.4.87,
 §11.4.94, HXC-027.</p>
 <hr />
-<h2 id="hxc-030-11.4.99-forward-latest-source-documentation-cross-reference-sweep-across-all-operator-facing-docs">HXC-030
+<h2 id="hxc-030-11.4.99-forward-latest-source-documentation-cross-reference-sweep-across-all-operator-facing-docs-closed-fixed.md">HXC-030
 — §11.4.99 forward: latest-source documentation cross-reference sweep
-across all operator-facing docs</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-29 (constitution §11.4.99 cascaded
-via HXC-025; HXC-028 applied it to README only)
+across all operator-facing docs — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> §11.4.99 operator-instruction sweep COMPLETE —
+<strong>38/38 (100%)</strong> operator-facing
+instruction/guide/manual/setup/troubleshooting/tutorial docs now carry a
+WebFetch-verified <code>## Sources verified</code> footer (8 batches: Go
+1.24→1.26.3, golang:1.21→1.26 Dockerfiles, go1.21.5→1.26.3, postgres
+14→15, stale Anthropic/OpenAI doc-redirect URLs all corrected against
+live official sources; honest negative findings recorded where sources
+were 403/unreachable; per CONST-036 model IDs flagged-not-guessed). New
+<code>scripts/gates/sources_verified_gate.sh</code> wired as <strong>G13
+(now ENFORCING)</strong> in verify-all-constitution-rules.sh — any
+future operator doc lacking a footer FAILs the sweep. Out of §11.4.99
+scope (evidence/internal, not operator instructions): docs/qa_evidence/
+(93 QA reports), docs/helix_qa/, docs/architecture/, docs/coverage/,
+docs/materials/. Ongoing 90-day staleness re-verification is
+steady-state discipline (gate <code>--check-stale</code>), not an open
+task. Section retained as §11.4.19 tombstone. <strong>Type:</strong>
+Task <strong>Discovered:</strong> 2026-05-29 (constitution §11.4.99
+cascaded via HXC-025; HXC-028 applied it to README only)
 <strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
 §11.4.99 — “ALWAYS check against latest versions of services we use web
 / online docs before creating instructions”. <strong>Scope:</strong>

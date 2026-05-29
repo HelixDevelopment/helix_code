@@ -178,16 +178,35 @@
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁴⁷ — HXC-033 RESOLVED +
-CLOSED: codegraph 0.9.7 own-org index restored. ROOT CAUSE (operator’s
-data-compat hypothesis CONFIRMED): 0.9.7 requires explicit
+<p><strong>Last updated: 2026-05-29 (close-out¹⁴⁸ — HXC-030 §11.4.99
+OPERATOR-DOC SWEEP COMPLETE + CLOSED. 8 doc batches (subagent-driven per
+§11.4.70 — worktree then serial-non-worktree once worktree stale-base
+re-work surfaced) footered </strong>38/38 (100%)** operator-facing
+instruction/guide/manual/setup/troubleshooting/tutorial docs, each via
+LIVE WebFetch of official sources
+(go.dev/postgresql.org/redis/ollama/opentelemetry/platform.claude.com) —
+never training data. Real stale fixes: Go 1.24→1.26.3, golang:1.21→1.26
+Dockerfiles, go1.21.5→1.26.3, postgres 14→15, Anthropic/OpenAI
+doc-redirect URLs; honest §11.4.99(B) negative findings where sources
+403’d; CONST-036 model IDs flagged-not-guessed. New
+<code>scripts/gates/sources_verified_gate.sh</code> wired <strong>G13
+ENFORCING</strong> (was advisory; flipped at 100%) — future operator doc
+without a footer FAILs the sweep; scope correctly excludes
+qa_evidence/helix_qa/architecture/coverage/materials (evidence/internal,
+not instructions). git push: gitlab reliable; github intermittently
+broken-pipes (host↔︎github) but a DETACHED persistent-retry loop
+converges it every time (caught up at attempt 7) — all commits on BOTH
+remotes. Open set now 2: HXC-029 (18 auto-executable bank rewrites,
+needs infra), HXC-031 (Codex/Cline ports). PRIOR close-out¹⁴⁷ — HXC-033
+RESOLVED + CLOSED: codegraph 0.9.7 own-org index restored. ROOT CAUSE
+(operator’s data-compat hypothesis CONFIRMED): 0.9.7 requires explicit
 <code>codegraph init</code> before <code>index</code>; the pre-0.9.7 DB
 was incompatible. Fix (operator-directed wipe+reindex): wiped gitignored
 DB (codegraph.db/-wal/-shm; 1.7 GB stale WAL) +
 <code>codegraph init</code> (tracked config.json preserved) +
 <code>codegraph index .</code>. Result Files 75,663 / Nodes 1,272,492 (≈
-HXC-017 baseline; edges finalize async). </strong>§11.4.79 probe PASS
-via <code>codegraph query</code>:**
+HXC-017 baseline; edges finalize async). <strong>§11.4.79 probe PASS via
+<code>codegraph query</code>:</strong>
 NewBundleTranslator→dependencies/HelixDevelopment/llm_orchestrator +
 vasic-digital (10 own-org hits); third-party LLama_CPP excluded.
 Corrected two of my own mis-diagnoses per §11.4.6: the “crash” was a
