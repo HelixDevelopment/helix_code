@@ -18,7 +18,6 @@ is_owned() {
     case "$p" in
         Challenges|Security|Containers|HelixQA) return 0 ;;
         HelixAgent|helix_agent/HelixLLM|helix_agent/HelixMemory|helix_agent/HelixSpecifier) return 0 ;;
-        dependencies/HelixDevelopment/*) return 0 ;;
         submodules/*) return 0 ;;
         *) return 1 ;;
     esac

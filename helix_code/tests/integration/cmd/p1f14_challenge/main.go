@@ -1,7 +1,13 @@
+//go:build linux
+
 // p1f14_challenge runs the F14 Sandboxed Shell Execution pipeline end-to-end
 // against the real Detector, real bubblewrap subprocesses (when selected),
-// and real on-disk YAML round-trips. Runtime-evidence harness for the F14
-// Challenge.
+// and real on-disk YAML round-trips. It exercises the Linux native sandbox
+// backend's HostBinary re-exec + user-namespace isolation, which exist only
+// on Linux (the non-Linux NativeBackend is a no-op stub), so this harness is
+// Linux-only per §11.4.81(C) — there is no darwin/BSD/Windows equivalent
+// native-namespace primitive to challenge. Runtime-evidence harness for the
+// F14 Challenge.
 //
 // Phases:
 //

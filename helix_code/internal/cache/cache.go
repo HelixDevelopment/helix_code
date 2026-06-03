@@ -2,7 +2,7 @@
 // programme Phase 4) for context-build and embedding hot paths.
 //
 // §11.4.74 Catalogue-Check (no-match, 2026-05-20): the owned submodule
-// dependencies/vasic-digital/cache provides a generic cache.Cache
+// submodules/cache provides a generic cache.Cache
 // interface and a 2-tier distributed.TwoLevel (L1 memory + L2 remote),
 // but NO disk tier — so it does not supply the memory→disk→Redis 3-tier
 // this task requires (<80% fit). Rather than add a cross-module go.mod

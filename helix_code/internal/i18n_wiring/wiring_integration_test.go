@@ -3,7 +3,7 @@
 //
 //	helix_code/pkg/i18n (real go-i18n bundle)
 //	  → helix_code/pkg/i18nadapter (Translator wrapper)
-//	    → dependencies/vasic-digital/lazy/pkg/i18n.Translator interface
+//	    → submodules/lazy/pkg/i18n.Translator interface
 //	      → digital.vasic.lazy/pkg/lazy.Service.Describe()
 //
 // The submodule (Lazy) declares its OWN Translator interface and never
