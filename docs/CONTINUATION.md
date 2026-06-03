@@ -1193,3 +1193,20 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 
 - Phase 1: per own-org submodule — `git fetch --all` → checkout main/master → pull latest → carefully merge local work (e.g. `filesystem` `docs/ARCHITECTURE.md`) → `install_upstreams` → commit + push to all upstreams. Subagent-parallel across the 70 own-org repos, with working-tree quiescence (§11.4.84) + per-repo fetch-investigate-integrate (§11.4.71).
 
+## close-out¹⁴⁰ — round 466: Phase 1 complete — own-org submodule sync-to-latest + install_upstreams + push-to-all-mirrors
+
+### What landed
+
+1. **`dependencies/vasic-digital/filesystem`** — the only own-org repo with real local content (a 232/-138 `docs/ARCHITECTURE.md` rewrite). Staged via `git add --renormalize` (a `.gitattributes` text-normalization quirk made plain `git add` a silent no-op), committed `1d8f3f9`, pushed + verified on GitHub + GitLab.
+2. **All 69 checked-out own-org submodules processed** (6 concurrent subagent batches; conductor sandbox shell was unstable for git loops, subagent shells stable). Each: safety-checked clean, `install_upstreams` run from its root, current branch pushed to every configured remote. **Result: 67 OK / 2 PARTIAL / 0 SKIP-dirty.** The 2 PARTIAL are both `models` repos — failures confined to unreachable gitflic.ru/gitverse.ru mirrors; their GitHub+GitLab are current. Several lagging GitLab mirrors were resynced (UPDATED).
+3. **Known defects logged** (for Phase 2 config-cleanup): (a) `HelixDevelopment/doc_processor` + `HelixDevelopment/llm_provider` carry unresolved `<<<<<<< HEAD` conflict markers in `upstreams/GitHub.sh` (breaks their install_upstreams); (b) `github_pages_website` configured remote (`HelixDevelopment-s-Code/Website.git`) disagrees with the owned roster (`HelixDevelopment-Code/Welcome.git`); (c) `models` gitflic/gitverse mirrors unreachable.
+
+### State
+
+- Meta-repo `dependencies/vasic-digital/filesystem` gitlink bumped to `1d8f3f9` in this commit. `helix_agent`/`helix_qa` third-party nested drift deliberately left uncommitted (not our work).
+- **Phase 2 collision blocker discovered:** 5 own-org submodules are mounted under BOTH `dependencies/vasic-digital/` and `dependencies/HelixDevelopment/` pointing at the SAME upstream (`models`, `doc_processor`, `llm_orchestrator`, `llm_provider`, `vision_engine`). Flattening to `submodules/<leaf>` collides 5× → requires a de-dup/disambiguation decision before the move.
+
+### Next
+
+- Phase 2 (flatten + rewrite-refs): resolve the 5 collisions, handle `constitution` specially (huge `@constitution/` reference surface + `find_constitution.sh`), then `git mv` own-org submodules to `submodules/<snake_case>`, rewrite all refs (go.mod `replace`, `.gitmodules`, scripts, docs, imports), clean git configs, reference-integrity tests. Discovery (read-only ref map) runs first.
+
