@@ -94,8 +94,8 @@ the exclude list additionally pins `**/.env`, `**/.env.*`, `**/*.key`,
 - **Index status BEFORE re-index**: Files 39,024 / Nodes 624,103 / Edges 1,643,200 / DB 1609.00 MB.
 - **Index status AFTER re-index** (`codegraph index .`, exit 0): Files **76,044** / Nodes **1,255,974** / Edges **3,955,444** / DB 2617.24 MB. The +37,020 files / +631,871 nodes delta is the newly-included own-org submodule trees.
 - **§11.4.79 anti-bluff probe (own-org symbol now resolves)**:
-  - `codegraph query EventBus` → `dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85` ✅ (would NOT have resolved under the old blanket `dependencies/**` exclude).
-  - `codegraph query helix_memory` → `dependencies/HelixDevelopment/helix_memory/pkg/config/config.go` (+more) ✅.
+  - `codegraph query EventBus` → `submodules/event_bus/pkg/bus/bus.go:85` ✅ (would NOT have resolved under the old blanket `dependencies/**` exclude).
+  - `codegraph query helix_memory` → `submodules/helix_memory/pkg/config/config.go` (+more) ✅.
   - `codegraph query llama` filtered to `dependencies/LLama_CPP` → **empty** ✅ (third-party correctly excluded).
 - **HXC-017 status**: fully done — config fixed, re-index complete, own-org inclusion proven, third-party exclusion proven.
 
@@ -118,7 +118,7 @@ the exclude list additionally pins `**/.env`, `**/.env.*`, `**/*.key`,
 - `codegraph sync . --quiet` → **exit 1** at 8,461 files.
 - Host memory ample (51 GiB free) — not an obvious §12.6 OOM.
 
-**§11.4.79 anti-bluff probe — FAILS:** `codegraph_search BundleTranslator` (MCP) returns ONLY `helix_code/internal/tools/askuser/...` — the own-org `dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go` symbol does NOT resolve. Own-org submodules are NOT reachable in the 0.9.7 index. **This is a §11.4.79 regression introduced by the 0.9.7 update.**
+**§11.4.79 anti-bluff probe — FAILS:** `codegraph_search BundleTranslator` (MCP) returns ONLY `helix_code/internal/tools/askuser/...` — the own-org `submodules/llm_orchestrator/pkg/i18n/bundle.go` symbol does NOT resolve. Own-org submodules are NOT reachable in the 0.9.7 index. **This is a §11.4.79 regression introduced by the 0.9.7 update.**
 
 **Not a config regression:** tracked `.codegraph/config.json` is intact (git-clean) — own-org includes + §11.4.10 credential excludes (`**/.env`, `**/*.key`, `**/secrets/**`) all present.
 
@@ -135,7 +135,7 @@ the exclude list additionally pins `**/.env`, `**/.env.*`, `**/*.key`,
 **Result (CLI `codegraph status` on fresh 0.9.7 DB):** Files **75,663** / Nodes **1,272,492** / Edges finalizing (1.7M→ toward ~3.95M; edge-enrichment phase runs async after node indexing).
 
 **§11.4.79 anti-bluff probe — PASS (`codegraph query`, fresh DB):**
-- `NewBundleTranslator` → `dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go:34` (+ `dependencies/vasic-digital/...`, `doc_processor`) — 10 own-org hits. ✅ HelixDevelopment + vasic-digital both reachable.
+- `NewBundleTranslator` → `submodules/llm_orchestrator/pkg/i18n/bundle.go:34` (+ `dependencies/vasic-digital/...`, `doc_processor`) — 10 own-org hits. ✅ HelixDevelopment + vasic-digital both reachable.
 - `EventBus` → resolves. ✅
 - `llama_model_load` under `dependencies/LLama_CPP` → empty. ✅ third-party correctly excluded.
 

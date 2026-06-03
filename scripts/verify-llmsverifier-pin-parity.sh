@@ -3,7 +3,7 @@
 #
 # Historical note (P1.5-WP2): the duplicate transitive submodule
 # helix_agent/LLMsVerifier was eliminated in WP2 — there is now exactly
-# ONE LLMsVerifier checkout (dependencies/HelixDevelopment/llms_verifier).
+# ONE LLMsVerifier checkout (submodules/llms_verifier).
 # The pin-parity gate is therefore degenerate. We retain this script as
 # a no-op pass so the make ci-validate-all wiring stays intact and any
 # future re-introduction of a duplicate is immediately visible.
@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-CANONICAL_PATH="dependencies/HelixDevelopment/llms_verifier"
+CANONICAL_PATH="submodules/llms_verifier"
 LEGACY_TRANSITIVE_PATH="helix_agent/LLMsVerifier"
 
 if [ ! -d "$CANONICAL_PATH/.git" ] && [ ! -f "$CANONICAL_PATH/.git" ]; then

@@ -130,7 +130,7 @@ submodules (run 2026-05-20):
 | **Total dependency submodules** | **1 of 62** | **62 of 62** |
 
 Finding: **QWEN.md is effectively absent fleet-wide.** Only one of 67 owned
-submodules (`dependencies/HelixDevelopment/LLMsVerifier`) ships a `QWEN.md`;
+submodules (`submodules/llms_verifier`) ships a `QWEN.md`;
 every owned submodule already carries a full `CLAUDE.md` with the anti-bluff
 covenant + CONST-035 / §11.4 anchors.
 

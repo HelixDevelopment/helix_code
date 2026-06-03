@@ -82,7 +82,7 @@ supplied by the consuming project. containers commit `400ccbb`.
 HelixCode-side concrete list at `scripts/containers/resource-
 policy-skip-paths.list`.
 
-### dependencies/HelixDevelopment/LLMsVerifier (6 files)
+### submodules/llms_verifier (6 files)
 
 - `scripts/load_api_keys.sh` — same shared utility as containers above.
   Classification: cosmetic-only. Tracked under Task #262.

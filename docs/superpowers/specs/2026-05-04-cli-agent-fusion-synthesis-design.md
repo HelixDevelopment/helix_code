@@ -59,7 +59,7 @@ helix_code/                              # meta-repo (this repo)
 │   ├── HelixLLM/                       # nested submodule (canonical)
 │   ├── HelixMemory/                    # nested submodule (canonical)
 │   ├── HelixSpecifier/                 # nested submodule (canonical)
-│   ├── LLMsVerifier/                   # nested submodule (overlaps dependencies/HelixDevelopment/LLMsVerifier)
+│   ├── LLMsVerifier/                   # nested submodule (overlaps submodules/llms_verifier)
 │   └── cli_agents/                     # 39 CLI-agent submodules — canonical source
 │       ├── claude-code/  aider/  cline/  codex/  continue/  ...
 │
@@ -83,7 +83,7 @@ helix_code/                              # meta-repo (this repo)
 - **Protocol: SSH only.** `git@github.com:…` or `git@gitlab.com:…`. Constitution Rule 3 already prohibits HTTPS — re-affirmed.
 - **Recursion: deep.** `git submodule update --init --recursive --jobs 8`. `setup.sh` wraps this; we add a verifier that fails if any submodule is uninitialised.
 - **`helix_code/helix_code/` stays a tracked subdirectory.** Promoting it to a submodule would create a circular reference (this repo *is* `HelixDevelopment/HelixCode`). Documented explicitly in `helix_code/helix_code/CLAUDE.md`.
-- **LLMsVerifier dual-pinning.** `dependencies/HelixDevelopment/LLMsVerifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
+- **LLMsVerifier dual-pinning.** `submodules/llms_verifier` is the canonical pin used by Go imports; `helix_agent/LLMsVerifier` is HelixAgent's transitive view. `scripts/verify-llmsverifier-pin-parity.sh` fails if pointers diverge.
 - **Agent-Deck nested-worktree fix.** `Example_Projects/Agent-Deck/.claude/worktrees/agent-*` paths are git worktrees, not submodules. Add to `.git/info/exclude` (local) and document.
 
 ### 2.3 Secret handling
@@ -128,7 +128,7 @@ Phase 0 is **the gate**. Nothing in Phases 1-5 begins until P0 is verified done.
 |---|---|---|---|
 | **P0-01** | Resolve `Example_Projects/Agent-Deck/.claude/worktrees/` recursion error: add path to `.git/info/exclude` (local); document fix in `helix_agent/cli_agents/agent-deck/CLAUDE.md` (after P0-02) | `git submodule foreach --recursive 'echo OK' \| grep -c OK` returns ≥87 with no `fatal:` | P0-02 |
 | **P0-02** | Add HelixAgent submodule: `git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent && git submodule update --init --recursive HelixAgent` | `ls helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}` all exist | P0-03, P1+ |
-| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `dependencies/HelixDevelopment/LLMsVerifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
+| **P0-03** | `scripts/verify-llmsverifier-pin-parity.sh` — fails if `submodules/llms_verifier` SHA differs from `helix_agent/LLMsVerifier` SHA | Script exits 0 when pins match, 1 with diff output otherwise; included in `make ci-validate-all` | P0-04 |
 | **P0-04** | Migrate API keys: `cp -p ../helix_agent/.env helix_code/helix_code/.env && chmod 600 helix_code/helix_code/.env` | `ls -la` shows `-rw-------`; `git check-ignore` exits 0 | P0-05 |
 | **P0-05** | Update `.gitignore` (root + `helix_code/helix_code/`): `.env`, `.env.local`, `.env.*` with `!.env.example`, plus `*.pem *.key *.crt id_rsa*` | `git status --ignored \| grep -F .env` lists `.env`; `git ls-files \| grep -E '\.env$\|\.pem$\|\.key$'` empty | P0-06 |
 | **P0-06** | Refresh `helix_code/helix_code/.env.example`: every key from `../helix_agent/.env` with placeholder values; no real values | `diff <(grep -oE '^[A-Z_]+=' ../helix_agent/.env\|sort) <(grep -oE '^[A-Z_]+=' helix_code/helix_code/.env.example\|sort)` empty | P0-07 |

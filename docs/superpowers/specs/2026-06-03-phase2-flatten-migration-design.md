@@ -12,11 +12,11 @@
 Every own-org submodule EXCEPT `constitution` (and except third-party, which stay nested) lives at `submodules/<snake_case_leaf>`. Inner Go app `helix_code/` stays put (it is a tracked subdir, NOT a submodule).
 
 ### DROP (5 mounts — `git submodule deinit -f` + `git rm` + delete `.git/modules/<path>` + remove `.gitmodules` stanza)
-- `dependencies/HelixDevelopment/models`   (dup of vd/models)
-- `dependencies/vasic-digital/doc_processor`
-- `dependencies/vasic-digital/llm_orchestrator`
-- `dependencies/vasic-digital/llm_provider`
-- `dependencies/vasic-digital/vision_engine`
+- `submodules/models`   (dup of vd/models)
+- `submodules/doc_processor`
+- `submodules/llm_orchestrator`
+- `submodules/llm_provider`
+- `submodules/vision_engine`
 
 ### MOVE → `submodules/<leaf>` (65 total)
 - **Top-level (8):** challenges, containers, security, panoptic, github_pages_website, helix_agent, helix_qa, mcp_servers
@@ -28,9 +28,9 @@ Canonical winners for the 5 collision leaves: `submodules/models` ← vd; `submo
 ## go.mod replace rewrites (62 lines / build-critical) — rule by consumer location
 Relative `replace` targets recompute by where the CONSUMING go.mod sits after the move:
 - **`helix_code/go.mod`** (stays at `helix_code/`, depth-1): `../dependencies/{org}/X` → `../submodules/X`. (6 lines: docprocessor, llmorchestrator, visionengine, debate→debate_orchestrator, helixspecifier, lazy.)
-- **`helix_agent/go.mod`** (moves to `submodules/helix_agent/`): siblings under `submodules/` → `../dependencies/{org}/X` → `../X`; `../dependencies/HelixDevelopment/llms_verifier/llm-verifier` → `../llms_verifier/llm-verifier`. (37 lines.)
-- **`helix_qa/go.mod`** (moves to `submodules/helix_qa/`): its existing sibling-form `../X` block already resolves correctly once both it and X are siblings under `submodules/`. Normalize the dual capital/lowercase blocks to ONE lowercase block; fix the `LLMsVerifier`→`llms_verifier` casing mismatch (line 130). Net: `../Challenges`→`../challenges`, `../DocProcessor`→`../doc_processor`, etc.; `../dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`→`../llms_verifier/llm-verifier`.
-- **`dependencies/HelixDevelopment/llms_verifier/go.mod`** (moves to `submodules/llms_verifier/`): `../challenges` → `../challenges` (still sibling — OK; verify).
+- **`helix_agent/go.mod`** (moves to `submodules/helix_agent/`): siblings under `submodules/` → `../dependencies/{org}/X` → `../X`; `../submodules/llms_verifier/llm-verifier` → `../llms_verifier/llm-verifier`. (37 lines.)
+- **`helix_qa/go.mod`** (moves to `submodules/helix_qa/`): its existing sibling-form `../X` block already resolves correctly once both it and X are siblings under `submodules/`. Normalize the dual capital/lowercase blocks to ONE lowercase block; fix the `LLMsVerifier`→`llms_verifier` casing mismatch (line 130). Net: `../Challenges`→`../challenges`, `../DocProcessor`→`../doc_processor`, etc.; `../submodules/llms_verifier/llm-verifier`→`../llms_verifier/llm-verifier`.
+- **`submodules/llms_verifier/go.mod`** (moves to `submodules/llms_verifier/`): `../challenges` → `../challenges` (still sibling — OK; verify).
 - **Archived copies under `docs/improvements/**/helixcode_sources/go.mod`** — not part of active build; leave (or update for tidiness, L-risk).
 
 ## Other reference rewrites

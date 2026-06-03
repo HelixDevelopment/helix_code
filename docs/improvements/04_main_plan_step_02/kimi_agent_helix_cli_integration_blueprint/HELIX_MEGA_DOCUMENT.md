@@ -196,10 +196,10 @@ This mega-document is the master index. All detailed porting plans are in separa
 ### 6.2 Manual Commands
 ```bash
 # Add missing submodules via SSH (NOT HTTPS)
-git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git dependencies/HelixDevelopment/HelixAgent
-git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git dependencies/HelixDevelopment/HelixLLM
-git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git dependencies/HelixDevelopment/HelixMemory
-git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git dependencies/HelixDevelopment/HelixSpecifier
+git submodule add --force git@github.com:HelixDevelopment/HelixAgent.git submodules/helix_agent
+git submodule add --force git@github.com:HelixDevelopment/HelixLLM.git submodules/helix_llm
+git submodule add --force git@github.com:HelixDevelopment/HelixMemory.git submodules/helix_memory
+git submodule add --force git@github.com:HelixDevelopment/HelixSpecifier.git submodules/helix_specifier
 git submodule update --init --recursive
 ```
 

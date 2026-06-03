@@ -78,10 +78,10 @@ log "=== PHASE 0A: Adding 4 Missing Submodules via SSH ==="
 # P0-T2: Add HelixAgent
 # NOTE: HelixCode is actually a child of HelixAgent, so we use a read-only reference
 log "Adding HelixAgent submodule..."
-if [ ! -d "dependencies/HelixDevelopment/HelixAgent" ]; then
+if [ ! -d "submodules/helix_agent" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixAgent.git \
-        dependencies/HelixDevelopment/HelixAgent
+        submodules/helix_agent
     success "HelixAgent submodule added"
 else
     warn "HelixAgent directory already exists"
@@ -89,10 +89,10 @@ fi
 
 # P0-T2: Add HelixLLM
 log "Adding HelixLLM submodule..."
-if [ ! -d "dependencies/HelixDevelopment/helix_llm" ]; then
+if [ ! -d "submodules/helix_llm" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixLLM.git \
-        dependencies/HelixDevelopment/helix_llm
+        submodules/helix_llm
     success "HelixLLM submodule added"
 else
     warn "HelixLLM directory already exists"
@@ -100,10 +100,10 @@ fi
 
 # P0-T2: Add HelixMemory
 log "Adding HelixMemory submodule..."
-if [ ! -d "dependencies/HelixDevelopment/helix_memory" ]; then
+if [ ! -d "submodules/helix_memory" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixMemory.git \
-        dependencies/HelixDevelopment/helix_memory
+        submodules/helix_memory
     success "HelixMemory submodule added"
 else
     warn "HelixMemory directory already exists"
@@ -111,10 +111,10 @@ fi
 
 # P0-T2: Add HelixSpecifier
 log "Adding HelixSpecifier submodule..."
-if [ ! -d "dependencies/HelixDevelopment/helix_specifier" ]; then
+if [ ! -d "submodules/helix_specifier" ]; then
     git submodule add --force \
         git@github.com:HelixDevelopment/HelixSpecifier.git \
-        dependencies/HelixDevelopment/helix_specifier
+        submodules/helix_specifier
     success "HelixSpecifier submodule added"
 else
     warn "HelixSpecifier directory already exists"
@@ -194,11 +194,11 @@ go 1.26
 use (
 	.
 	./HelixCode
-	./dependencies/HelixDevelopment/llms_verifier
-	./dependencies/HelixDevelopment/HelixAgent
-	./dependencies/HelixDevelopment/helix_llm
-	./dependencies/HelixDevelopment/helix_memory
-	./dependencies/HelixDevelopment/helix_specifier
+	./submodules/llms_verifier
+	./submodules/helix_agent
+	./submodules/helix_llm
+	./submodules/helix_memory
+	./submodules/helix_specifier
 	./HelixQA
 	./Challenges
 	./Containers

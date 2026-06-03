@@ -19,13 +19,13 @@
 | Phase 4 | Systematic backlog migration starting at top-5 `challenges/pkg/userflow/` concentrations | IN PROGRESS — 5 files landed | 100, 101, 102, 103, 104 |
 
 **Consuming submodules with implemented i18n surface (9):**
-`dependencies/vasic-digital/Lazy/` (round 93 — first consumer + bilingual EN+SR seed) ·
-`dependencies/vasic-digital/SelfImprove/` (round 94 — 8 prompts) ·
-`dependencies/HelixDevelopment/HelixLLM/` (round 95 — pattern B variation; existing i18n package extended) ·
+`submodules/lazy/` (round 93 — first consumer + bilingual EN+SR seed) ·
+`submodules/self_improve/` (round 94 — 8 prompts) ·
+`submodules/helix_llm/` (round 95 — pattern B variation; existing i18n package extended) ·
 `helix_code/applications/harmony_os/` (round 96 — 5 CLI headers; in-module application) ·
-`dependencies/HelixDevelopment/DocProcessor/` (round 97 — 8 CLI strings) ·
-`dependencies/vasic-digital/Planning/` (round 98 — 3 prompt strings) ·
-`dependencies/HelixDevelopment/VisionEngine/` (round 98 — 4 analyzer strings) ·
+`submodules/doc_processor/` (round 97 — 8 CLI strings) ·
+`submodules/planning/` (round 98 — 3 prompt strings) ·
+`submodules/vision_engine/` (round 98 — 4 analyzer strings) ·
 `panoptic/` (round 99a — 5 cobra `Short:` descriptions; package-level seam variation) ·
 `challenges/` (rounds 100–104 — userflow systematic migration in flight)
 
@@ -45,7 +45,7 @@ The pattern that emerged across 14 rounds is **strictly tighter** than the round
 
 ### Layer 1 — Consumer-defined `Translator` interface (in each owned submodule)
 
-Each owned submodule declares its **own** `Translator` interface at its **own** `pkg/i18n/translator.go`. Reference implementation: `dependencies/vasic-digital/Lazy/pkg/i18n/translator.go:18-27`:
+Each owned submodule declares its **own** `Translator` interface at its **own** `pkg/i18n/translator.go`. Reference implementation: `submodules/lazy/pkg/i18n/translator.go:18-27`:
 
 ```go
 type Translator interface {
@@ -54,9 +54,9 @@ type Translator interface {
 }
 ```
 
-The interface is **structurally identical** across consumers (so a single adapter can satisfy them all), but each interface is declared inside its own submodule — no `import "dev.helix.code/..."` line anywhere in submodule production code. Verified per-round: round-93 verified Lazy via `grep -rn "helix_code\|dev.helix.code" dependencies/vasic-digital/Lazy/` returning zero matches; rounds 94/95/96/97/98/99a repeated the same verification.
+The interface is **structurally identical** across consumers (so a single adapter can satisfy them all), but each interface is declared inside its own submodule — no `import "dev.helix.code/..."` line anywhere in submodule production code. Verified per-round: round-93 verified Lazy via `grep -rn "helix_code\|dev.helix.code" submodules/lazy/` returning zero matches; rounds 94/95/96/97/98/99a repeated the same verification.
 
-Every package also ships a `NoopTranslator` struct (returns the `messageID` verbatim) — used as a safety default for standalone-test runs of the submodule and as the seed value for global-seam variants (Layer 1.B below). Reference: `dependencies/vasic-digital/Lazy/pkg/i18n/translator.go:35-45`.
+Every package also ships a `NoopTranslator` struct (returns the `messageID` verbatim) — used as a safety default for standalone-test runs of the submodule and as the seed value for global-seam variants (Layer 1.B below). Reference: `submodules/lazy/pkg/i18n/translator.go:35-45`.
 
 ### Layer 2 — `helix_code/pkg/i18nadapter` (thin structural bridge)
 
@@ -131,13 +131,13 @@ The round-90 design proposed one pattern; 14 rounds of implementation revealed t
 
 Used in rounds 93, 94, 96, 97, 98, 100–104. The consumer receiver gains a `tr i18n.Translator` field plus a `SetTranslator(t i18n.Translator)` setter; call sites invoke `r.tr.T(...)`. Constructor signatures stay backward-compatible (existing code paths still compile without injecting a translator — the default `NoopTranslator` makes the method calls safe).
 
-**Use when:** the consumer is a struct-based service (most cases). Reference: `dependencies/vasic-digital/SelfImprove/selfimprove/optimizer.go` (round-94, commit `a39d855`); `helix_code/applications/harmony_os/main_nogui.go` (round-96, commit `1eb1851`).
+**Use when:** the consumer is a struct-based service (most cases). Reference: `submodules/self_improve/selfimprove/optimizer.go` (round-94, commit `a39d855`); `helix_code/applications/harmony_os/main_nogui.go` (round-96, commit `1eb1851`).
 
 ### Option B — existing i18n package extended
 
 Used in round 95 only. **HelixLLM** already had an `internal/shared/i18n/i18n.go` package from earlier work. Round 95 chose to extend that package (added 2 message IDs, 2 templates, and a `TranslatorAPI` interface — `+19 LOC`) rather than create a new `pkg/i18n/`. Equally valid; agent's judgement call.
 
-**Use when:** the submodule already has its own i18n surface and grafting onto it is cheaper than introducing a parallel one. Reference: `dependencies/HelixDevelopment/HelixLLM/internal/shared/i18n/i18n.go` (round-95, commit `abe0319`).
+**Use when:** the submodule already has its own i18n surface and grafting onto it is cheaper than introducing a parallel one. Reference: `submodules/helix_llm/internal/shared/i18n/i18n.go` (round-95, commit `abe0319`).
 
 ### Option C — package-level seam (`SetTranslator` + `ActiveTranslator` + `T`)
 
@@ -197,7 +197,7 @@ Every migration round MUST satisfy three runtime-evidence invariants. These emer
 
 ### Invariant 1 — sentinel-output test (loud failure is observable)
 
-Every migration round ships at least one **fakeTranslator** that returns the deterministic string `"<TRANSLATED:msg_id>"` and a paired test asserting the user-facing output **contains the sentinel** (i.e. the call site routed through the translator) and **does not contain the original English literal** (i.e. the literal was not silently retained in a parallel code path). Reference patterns: `dependencies/HelixDevelopment/DocProcessor/cmd/docprocessor/main_test.go` (round 97, commit `e584e4b`); `dependencies/vasic-digital/SelfImprove/selfimprove/optimizer_i18n_test.go` (round 94).
+Every migration round ships at least one **fakeTranslator** that returns the deterministic string `"<TRANSLATED:msg_id>"` and a paired test asserting the user-facing output **contains the sentinel** (i.e. the call site routed through the translator) and **does not contain the original English literal** (i.e. the literal was not silently retained in a parallel code path). Reference patterns: `submodules/doc_processor/cmd/docprocessor/main_test.go` (round 97, commit `e584e4b`); `submodules/self_improve/selfimprove/optimizer_i18n_test.go` (round 94).
 
 ### Invariant 2 — mutation verification before close-out
 

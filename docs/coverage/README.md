@@ -157,7 +157,7 @@ bash scripts/release-gate-test.sh
 bash scripts/release-gate-test.sh --skip-env-failures
 
 # Targeted re-run after operator runs `go mod tidy` to clear ENV-CLASS:
-bash scripts/release-gate-test.sh --only='dependencies/vasic-digital/Cache'
+bash scripts/release-gate-test.sh --only='submodules/cache'
 
 # Sanity check that the script + classifier are healthy (no real test runs):
 bash scripts/release-gate-test.sh --check

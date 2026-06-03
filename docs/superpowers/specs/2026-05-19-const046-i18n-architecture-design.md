@@ -220,7 +220,7 @@ fmt.Printf("Loaded %d documents\n", len(docs))
 fmt.Println(r.t.T(ctx, "docprocessor.cli.loaded", map[string]any{"Count": len(docs)}))
 ```
 
-Bundle entry (`dependencies/HelixDevelopment/DocProcessor/i18n/en.yaml`):
+Bundle entry (`submodules/doc_processor/i18n/en.yaml`):
 
 ```yaml
 docprocessor:

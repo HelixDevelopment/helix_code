@@ -18,7 +18,7 @@
 | Path | Responsibility |
 |---|---|
 | `scripts/scan-secrets.sh` | Scan working tree + diff for credentials; gitleaks if installed, else regex fallback (sk-, gho_, glpat-, xoxb-, AKIA, eyJ) |
-| `scripts/verify-llmsverifier-pin-parity.sh` | Compare `dependencies/HelixDevelopment/LLMsVerifier` SHA vs. `helix_agent/LLMsVerifier` SHA; fail on divergence |
+| `scripts/verify-llmsverifier-pin-parity.sh` | Compare `submodules/llms_verifier` SHA vs. `helix_agent/LLMsVerifier` SHA; fail on divergence |
 | `scripts/bluff-detector.sh` | Composite bluff scanner: skip-audit + assertion-density + challenge-evidence + integration-purity + simulation-string + print-and-sleep |
 | `scripts/git_hooks/pre-push` | Reject `git push --force` / `--force-with-lease` unless `HELIX_FORCE_PUSH_APPROVED=1` |
 | `scripts/install-git-hooks.sh` | Idempotent hook installer; called by `setup.sh` |
@@ -388,13 +388,13 @@ Expected: all four remotes converge.
 cat > scripts/verify-llmsverifier-pin-parity.sh <<'BASH'
 #!/usr/bin/env bash
 # scripts/verify-llmsverifier-pin-parity.sh
-# Fail if dependencies/HelixDevelopment/LLMsVerifier and helix_agent/LLMsVerifier
+# Fail if submodules/llms_verifier and helix_agent/LLMsVerifier
 # point at different SHAs. Wired into make ci-validate-all.
 
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-CANONICAL_PATH="dependencies/HelixDevelopment/LLMsVerifier"
+CANONICAL_PATH="submodules/llms_verifier"
 TRANSITIVE_PATH="helix_agent/LLMsVerifier"
 
 if [ ! -d "$CANONICAL_PATH/.git" ] && [ ! -f "$CANONICAL_PATH/.git" ]; then
@@ -432,14 +432,14 @@ chmod +x scripts/verify-llmsverifier-pin-parity.sh
 echo "exit=$?"
 ```
 
-Expected: `OK: LLMsVerifier pin parity — both at <sha>` and `exit=0`. If pins diverge (possible since `dependencies/HelixDevelopment/LLMsVerifier` was last bumped independently), the script exits 1 with the diff. In that case, decide which SHA to converge on and bump the divergent one to match before continuing — see Step 4.3.
+Expected: `OK: LLMsVerifier pin parity — both at <sha>` and `exit=0`. If pins diverge (possible since `submodules/llms_verifier` was last bumped independently), the script exits 1 with the diff. In that case, decide which SHA to converge on and bump the divergent one to match before continuing — see Step 4.3.
 
 - [ ] **Step 4.3: Resolve divergence if any (only if Step 4.2 returned exit=1)**
 
 ```bash
 # Inspect both commits to decide which is canonical (usually the newer one)
-echo "dependencies/HelixDevelopment/LLMsVerifier:"
-git -C dependencies/HelixDevelopment/LLMsVerifier log -1 --format='%H %ci %s'
+echo "submodules/llms_verifier:"
+git -C submodules/llms_verifier log -1 --format='%H %ci %s'
 echo "helix_agent/LLMsVerifier:"
 git -C helix_agent/LLMsVerifier log -1 --format='%H %ci %s'
 # (no automated bump — defer to user; abort the task and ask which to converge on)
@@ -452,7 +452,7 @@ If divergence exists: STOP, ask the user which SHA wins. Once decided, bump the 
 ```bash
 # Create a fake state that should make the script exit 1
 # We do this in a throwaway way that we revert immediately
-cd dependencies/HelixDevelopment/LLMsVerifier
+cd submodules/llms_verifier
 PARENT_SHA=$(git rev-parse HEAD)
 PARENT_PARENT_SHA=$(git rev-parse HEAD^)
 git checkout "$PARENT_PARENT_SHA"
@@ -460,7 +460,7 @@ cd "$(git rev-parse --show-toplevel)"
 ./scripts/verify-llmsverifier-pin-parity.sh
 echo "exit=$?"
 # Restore
-git -C dependencies/HelixDevelopment/LLMsVerifier checkout "$PARENT_SHA"
+git -C submodules/llms_verifier checkout "$PARENT_SHA"
 ./scripts/verify-llmsverifier-pin-parity.sh
 echo "exit=$?"
 ```
@@ -487,7 +487,7 @@ git add scripts/verify-llmsverifier-pin-parity.sh docs/improvements/05_phase_0_e
 git commit -m "$(cat <<'EOF'
 feat(P0-04): add LLMsVerifier dual-pin parity verifier
 
-Fails if dependencies/HelixDevelopment/LLMsVerifier (canonical Go-import pin)
+Fails if submodules/llms_verifier (canonical Go-import pin)
 and helix_agent/LLMsVerifier (HelixAgent's transitive view) point at
 different SHAs. Will be wired into make ci-validate-all in P0-15.
 
@@ -1795,11 +1795,11 @@ This is the critical multi-submodule push step. Per spec §7.3 cascade order —
 ```bash
 # Owned-by-us submodules; for each, push to every configured remote
 OWNED=(HelixQA Challenges containers Security \
-       dependencies/HelixDevelopment/LLMsVerifier \
-       dependencies/HelixDevelopment/DocProcessor \
-       dependencies/HelixDevelopment/LLMOrchestrator \
-       dependencies/HelixDevelopment/LLMProvider \
-       dependencies/HelixDevelopment/VisionEngine \
+       submodules/llms_verifier \
+       submodules/doc_processor \
+       submodules/llm_orchestrator \
+       submodules/llm_provider \
+       submodules/vision_engine \
        HelixAgent \
        helix_agent/HelixLLM helix_agent/HelixMemory helix_agent/HelixSpecifier)
 
@@ -2051,7 +2051,7 @@ modules:
       pin: helix_agent/HelixSpecifier
     - name: LLMsVerifier
       url: git@github.com:vasic-digital/LLMsVerifier.git
-      pin: dependencies/HelixDevelopment/LLMsVerifier (canonical) + helix_agent/LLMsVerifier (transitive)
+      pin: submodules/llms_verifier (canonical) + helix_agent/LLMsVerifier (transitive)
 
   helix_apps:
     - name: HelixQA

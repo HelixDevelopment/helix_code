@@ -167,8 +167,8 @@ services:
   # helix_qa runner for autonomous QA sessions
   helixqa-runner:
     build:
-      context: ./HelixQA
-      dockerfile: ../docker/Dockerfile.helixqa
+      context: ./submodules/helix_qa
+      dockerfile: ../../docker/Dockerfile.helixqa
     container_name: helixqa-runner
     mem_limit: 2g
     memswap_limit: 2g
@@ -192,7 +192,7 @@ services:
       HELIX_VERIFIER_URL: "http://llmsverifier:9090"
     volumes:
       - ./qa-results:/qa-results
-      - ./helix_qa/banks:/qa-banks:ro
+      - ./submodules/helix_qa/banks:/qa-banks:ro
     networks:
       - helixcode-network
     profiles:

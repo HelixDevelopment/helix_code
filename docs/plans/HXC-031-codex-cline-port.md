@@ -47,7 +47,7 @@ Files read for characterisation:
 - `helix_code/internal/llm/vision/{doc.go,*}` — existing vision detection + model-switch package.
 - `helix_code/internal/tools/browser/` + `helix_code/internal/tools/browser_*_v2.go` — the P2-F23 chromedp browser suite.
 - `helix_code/internal/tools/browser_screenshot_v2.go` — screenshot tool returns an **absolute file path, NOT base64**.
-- `dependencies/vasic-digital/vision_engine/` (`pkg/llmvision/`, `pkg/analyzer/`) — owned VisionEngine submodule, already wired in `.gitmodules` + `helix_code/go.mod` replace `digital.vasic.visionengine`.
+- `submodules/vision_engine/` (`pkg/llmvision/`, `pkg/analyzer/`) — owned VisionEngine submodule, already wired in `.gitmodules` + `helix_code/go.mod` replace `digital.vasic.visionengine`.
 - `docs/CONTINUATION.md` — Phase-2 port precedent (P2-F23 Cline Browser Tool CLOSED, P2-F29 Roo-code CLOSED).
 
 ---
@@ -146,7 +146,7 @@ on the screenshot tool being able to hand back image bytes (currently path-only)
 | Capability | Verdict | Detail |
 |---|---|---|
 | Cline Computer Use (browser actuation) | **reuse (in-repo)** — `helix_code/internal/tools/browser` @ P2-F23 | The 6-tool chromedp suite already exists. No new browser engine. Extend only: screenshot bytes + feedback loop. |
-| Codex Multimodal (vision/LLM-vision) | **extend `vasic-digital/VisionEngine`** (`dependencies/vasic-digital/vision_engine`, module `digital.vasic.visionengine`) | `pkg/llmvision/` already has anthropic/openai/gemini/ollama/qwen/kimi/astica vision providers + `pkg/analyzer/` (AnalyzeScreen, CompareScreens, ScreenDiff). It is **owned, wired in go.mod**, but **not yet consumed**. Reuse its image-encode + LLM-vision providers; extend with any missing pieces upstream (PR to VisionEngine), never duplicate in-project (CONST-051(B)/§11.4.74). |
+| Codex Multimodal (vision/LLM-vision) | **extend `vasic-digital/VisionEngine`** (`submodules/vision_engine`, module `digital.vasic.visionengine`) | `pkg/llmvision/` already has anthropic/openai/gemini/ollama/qwen/kimi/astica vision providers + `pkg/analyzer/` (AnalyzeScreen, CompareScreens, ScreenDiff). It is **owned, wired in go.mod**, but **not yet consumed**. Reuse its image-encode + LLM-vision providers; extend with any missing pieces upstream (PR to VisionEngine), never duplicate in-project (CONST-051(B)/§11.4.74). |
 | Screen capture / UI recording | **reuse `vasic-digital/Panoptic`** (already submodule, `.gitmodules:225`) if a record-the-session evidence artefact is wanted for the computer-use Challenge | optional, evidence-layer only |
 | Visual diffing of screenshots | **reuse `vasic-digital/ScreenDiff`** if step-to-step visual assertion is desired | optional |
 
@@ -230,7 +230,7 @@ isolation default. Tasks T01–T05 are Capability A (must precede B).
 | Task | Title | Files | Est. LoC |
 |---|---|---|---|
 | **T01** | `ContentPart` + `Message.Parts` types + unit tests | `internal/llm/missing_types.go`, `_test.go` | ~120 |
-| **T02** | `multimodal.go` local-file/URI → data-URL encoder (delegate to VisionEngine encode; extend VisionEngine upstream if it lacks an exported encoder) + graceful placeholder + unit tests | `internal/llm/multimodal.go`, `dependencies/vasic-digital/vision_engine/pkg/llmvision/*` (extend) | ~250 |
+| **T02** | `multimodal.go` local-file/URI → data-URL encoder (delegate to VisionEngine encode; extend VisionEngine upstream if it lacks an exported encoder) + graceful placeholder + unit tests | `internal/llm/multimodal.go`, `submodules/vision_engine/pkg/llmvision/*` (extend) | ~250 |
 | **T03** | Anthropic + Bedrock `convertMessages` image mapping + tests | `anthropic_provider.go`, `bedrock_provider.go` | ~200 |
 | **T04** | OpenAI-compatible + Gemini + Ollama/llamacpp image mapping + tests | `openai_compatible_provider*.go`, `gemini_provider.go`, `ollama`/`llamacpp` | ~280 |
 | **T05** | CLI `-image` flag + non-vision-model auto-switch wiring (reuse `vision/switcher.go`) + tests | `cmd/cli/main.go` | ~150 |
@@ -319,4 +319,4 @@ and cross-reference the latest official provider docs and carry a
 
 ## Sources verified
 
-- In-repo reference source only (no external fetch): `cli_agents/codex/codex-rs/protocol/src/{models.rs,items.rs,dynamic_tools.rs}`, `cli_agents/cline/src/core/prompts/system-prompt/tools/browser_action.ts`, `cli_agents/cline/src/services/browser/BrowserSession.ts`, HelixCode `internal/llm/*`, `internal/tools/browser*`, `dependencies/vasic-digital/vision_engine/*`, `docs/CONTINUATION.md`. Date: 2026-05-29.
+- In-repo reference source only (no external fetch): `cli_agents/codex/codex-rs/protocol/src/{models.rs,items.rs,dynamic_tools.rs}`, `cli_agents/cline/src/core/prompts/system-prompt/tools/browser_action.ts`, `cli_agents/cline/src/services/browser/BrowserSession.ts`, HelixCode `internal/llm/*`, `internal/tools/browser*`, `submodules/vision_engine/*`, `docs/CONTINUATION.md`. Date: 2026-05-29.

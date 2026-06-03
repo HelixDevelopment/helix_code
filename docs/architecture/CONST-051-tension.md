@@ -17,7 +17,7 @@ Task #274 (DebateOrchestrator) — the long-blocked sibling of this
 tension — was resolved in the same close-out by reconstruction from
 import surface; the new repo at
 `github.com/HelixDevelopment/DebateOrchestrator` is added as a
-submodule at `dependencies/HelixDevelopment/debate_orchestrator`.
+submodule at `submodules/debate_orchestrator`.
 
 **Historical analysis preserved below for posterity.** Original
 "operator decision required" section retained verbatim so the
@@ -50,7 +50,7 @@ chain).
 ### After Tasks #254 / #273 (CONST-051(B) violation)
 ```go
 // helix_agent/go.mod
-replace digital.vasic.eventbus => ../dependencies/vasic-digital/EventBus
+replace digital.vasic.eventbus => ../submodules/event_bus
 // helix_agent/.gitmodules
 (no EventBus entry — moved to parent root)
 ```
@@ -70,8 +70,8 @@ was attempted (this round). It surfaced a SECOND conflict:
 
 ```
 go: conflicting replacements for digital.vasic.docprocessor:
-    .../dependencies/HelixDevelopment/DocProcessor
-    .../dependencies/vasic-digital/doc_processor
+    .../submodules/doc_processor
+    .../submodules/doc_processor
 ```
 
 Both repos declare `module digital.vasic.docprocessor` even though
@@ -103,9 +103,9 @@ parent-build coexistence is incidental.
 
 **Finding 3 — The two consumers split on which fork they consume.**
 - `helix_code/go.mod` → `replace digital.vasic.docprocessor =>
-  ../dependencies/HelixDevelopment/DocProcessor`
+  ../submodules/doc_processor`
 - `helix_agent/go.mod` → `replace digital.vasic.docprocessor =>
-  ../dependencies/vasic-digital/doc_processor`
+  ../submodules/doc_processor`
 
 The previous `go.work` attempt failed because it tried to register
 **both** sides under one workspace. But neither consumer needs both;
@@ -117,7 +117,7 @@ each picks one fork.
 Distinguish the colliding modules by org-prefix in their module path:
 
 ```go
-// dependencies/HelixDevelopment/DocProcessor/go.mod
+// submodules/doc_processor/go.mod
 module dev.helix.docprocessor   // distinguish from digital.vasic.docprocessor
 ```
 

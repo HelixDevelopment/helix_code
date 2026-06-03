@@ -159,7 +159,7 @@ Write `docs/improvements/p1-5-dedup-decisions.md`:
 
 | Submodule | Canonical path | Removed paths | Consumers to update |
 |---|---|---|---|
-| LLMsVerifier | `dependencies/HelixDevelopment/LLMsVerifier` | `helix_agent/LLMsVerifier` | helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal references |
+| LLMsVerifier | `submodules/llms_verifier` | `helix_agent/LLMsVerifier` | helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal references |
 | containers | `containers/` | 3 nested copies (TBD enumerate) | TBD per consumer |
 | Security | `security/` | 2 nested copies (TBD enumerate) | TBD per consumer |
 | helix_qa | `helix_qa/` | `helix_agent/HelixQA` | helix_agent/Makefile, HelixAgent test wiring |
@@ -322,9 +322,9 @@ Commit: `chore(P1.5-WP2-T02.67): push HelixAgent post-restructure to all remotes
 
 ## P1.5-WP3-T03.01 — LLMsVerifier dedup
 
-Keep `dependencies/HelixDevelopment/LLMsVerifier`. Remove `helix_agent/LLMsVerifier`.
+Keep `submodules/llms_verifier`. Remove `helix_agent/LLMsVerifier`.
 
-Pre-flight: `rg "helix_agent/LLMsVerifier" -l helix_agent/` lists every consumer. Update each to `../../dependencies/HelixDevelopment/LLMsVerifier` (relative from `helix_agent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
+Pre-flight: `rg "helix_agent/LLMsVerifier" -l helix_agent/` lists every consumer. Update each to `../../submodules/llms_verifier` (relative from `helix_agent/<consumer>` to root). Build-test HelixAgent after the rewrite. Then:
 
 ```bash
 cd HelixAgent

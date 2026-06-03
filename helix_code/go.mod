@@ -191,22 +191,22 @@ require (
 	gopkg.in/neurosnap/sentences.v1 v1.0.6 // indirect
 )
 
-replace digital.vasic.containers => ../containers
+replace digital.vasic.containers => ../submodules/containers
 
-replace digital.vasic.helixqa => ../helix_qa
+replace digital.vasic.helixqa => ../submodules/helix_qa
 
-replace digital.vasic.docprocessor => ../dependencies/HelixDevelopment/doc_processor
+replace digital.vasic.docprocessor => ../submodules/doc_processor
 
-replace digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/llm_orchestrator
+replace digital.vasic.llmorchestrator => ../submodules/llm_orchestrator
 
-replace digital.vasic.visionengine => ../dependencies/HelixDevelopment/vision_engine
+replace digital.vasic.visionengine => ../submodules/vision_engine
 
-replace digital.vasic.challenges => ../challenges
+replace digital.vasic.challenges => ../submodules/challenges
 
-replace digital.vasic.security => ../security
+replace digital.vasic.security => ../submodules/security
 
-replace digital.vasic.debate => ../dependencies/HelixDevelopment/debate_orchestrator
+replace digital.vasic.debate => ../submodules/debate_orchestrator
 
-replace digital.vasic.helixspecifier => ../dependencies/HelixDevelopment/helix_specifier
+replace digital.vasic.helixspecifier => ../submodules/helix_specifier
 
-replace digital.vasic.lazy => ../dependencies/vasic-digital/lazy
+replace digital.vasic.lazy => ../submodules/lazy

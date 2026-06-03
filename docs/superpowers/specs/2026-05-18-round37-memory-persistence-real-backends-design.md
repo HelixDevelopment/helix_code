@@ -15,8 +15,8 @@
 
 **Three submodules touched, all decoupled per CONST-051(B)**:
 1. `helix_code/internal/memory/` — RedisMemoryProvider + MemcachedMemoryProvider get real clients
-2. `dependencies/vasic-digital/Storage/` — `SyncRecording` wires real S3 `PutObject`
-3. `dependencies/vasic-digital/VectorDB/` — pgvector `Search` + `Get` use real pgxpool
+2. `submodules/storage/` — `SyncRecording` wires real S3 `PutObject`
+3. `submodules/vector_db/` — pgvector `Search` + `Get` use real pgxpool
 
 **Config flow**: Each provider's constructor takes a typed config struct sourced from the parent application's `.env` (CONST-042). Absent/invalid config → constructor returns the sentinel; provider is created in a "stub" state where every data method returns the sentinel. Preserves the round-31 invariant that an unconfigured provider is safe to hold and surfaces the gap loudly on first use.
 
@@ -60,7 +60,7 @@
 - Health → existing real Ping (round-31)
 - Close → `p.client.Close()` (or no-op if not supported)
 
-### 2.2 `dependencies/vasic-digital/Storage/` SyncRecording
+### 2.2 `submodules/storage/` SyncRecording
 
 **Current state** (per round 21 close-out): `SyncRecording` returns `ErrS3UploadNotWired` sentinel.
 
@@ -79,7 +79,7 @@
 
 **CloudFront RSA-SHA1 signing** (round-21 sibling fix `ErrCloudFrontSigningNotWired`) — **out of scope for round 37**; deferred to round 38 candidate.
 
-### 2.3 `dependencies/vasic-digital/VectorDB/` pgvector
+### 2.3 `submodules/vector_db/` pgvector
 
 **Current state** (per round 22 close-out): `Search` + `Get` return `ErrPgvectorSearchNotWired` / `ErrPgvectorGetNotWired`.
 
@@ -155,13 +155,13 @@ Build tag: `//go:build integration`. Run via `make test-integration-full` per ex
 
 **Unit tests** (CONST-050(A) allows mocks here): use `redis/v9`'s `redismock` package or hand-rolled fake satisfying the minimal interface; assert nil-client sentinel path + method dispatch.
 
-### 5.2 `dependencies/vasic-digital/Storage/` — SKIP-OK integration test
+### 5.2 `submodules/storage/` — SKIP-OK integration test
 
 `TestSyncRecording_RealS3Upload` marked `t.Skip("SKIP-OK: #STORAGE-S3-REAL-ROUND37 — requires real S3 bucket; set STORAGE_TEST_BUCKET + AWS creds in env to enable")` per CONST-035 loud-skip taxonomy.
 
 **Unit tests**: assert nil-client returns `ErrS3UploadNotWired`; assert `RecordingStatusSynced` only set on success path (use mock S3 client satisfying minimal `PutObject` interface).
 
-### 5.3 `dependencies/vasic-digital/VectorDB/` — SKIP-OK integration test
+### 5.3 `submodules/vector_db/` — SKIP-OK integration test
 
 `TestPgvectorClient_Search_Real` marked `t.Skip("SKIP-OK: #VECTORDB-PG-REAL-ROUND37 — requires Postgres+pgvector; set VECTORDB_TEST_DSN to enable")`.
 

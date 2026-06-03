@@ -24,20 +24,13 @@ BASELINE="${AUDITOR_DIR}/.baseline.json"
 # are excluded by the walker's directory-prune list.
 DEFAULT_ROOTS=(
   "${REPO_ROOT}/helix_code"
-  "${REPO_ROOT}/helix_agent"
-  "${REPO_ROOT}/helix_qa"
-  "${REPO_ROOT}/challenges"
-  "${REPO_ROOT}/panoptic"
 )
 
-# Add every dependencies/<org>/<project> directory that exists.
-if [[ -d "${REPO_ROOT}/dependencies/HelixDevelopment" ]]; then
-  for d in "${REPO_ROOT}"/dependencies/HelixDevelopment/*/; do
-    [[ -d "${d}" ]] && DEFAULT_ROOTS+=("${d%/}")
-  done
-fi
-if [[ -d "${REPO_ROOT}/dependencies/vasic-digital" ]]; then
-  for d in "${REPO_ROOT}"/dependencies/vasic-digital/*/; do
+# Add every own-org submodule under the flat submodules/<project> layout
+# (post-CONST-052/Phase-2 flatten: helix_agent, helix_qa, challenges, panoptic,
+# and all former dependencies/<org>/* now live at submodules/<leaf>).
+if [[ -d "${REPO_ROOT}/submodules" ]]; then
+  for d in "${REPO_ROOT}"/submodules/*/; do
     [[ -d "${d}" ]] && DEFAULT_ROOTS+=("${d%/}")
   done
 fi

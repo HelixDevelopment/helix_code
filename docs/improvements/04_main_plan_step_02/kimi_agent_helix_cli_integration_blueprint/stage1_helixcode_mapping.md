@@ -607,11 +607,11 @@ helix_code/
 | 75 | Example_Projects/Codex-Skills | Example_Projects/Codex-Skills | git@github.com:anthropics/codex-skills.git | SSH |
 | 76 | Example_Projects/GitHub-Spec-Kit | Example_Projects/GitHub-Spec-Kit | git@github.com:github/spec-kit.git | SSH |
 | 77 | Example_Projects/Get-Shit-Done | Example_Projects/Get-Shit-Done | git@github.com:holasoymalva/get-shit-done-cli.git | SSH |
-| 78 | dependencies/HelixDevelopment/DocProcessor | dependencies/HelixDevelopment/DocProcessor | git@github.com:HelixDevelopment/DocProcessor.git | SSH |
-| 79 | dependencies/HelixDevelopment/LLMOrchestrator | dependencies/HelixDevelopment/LLMOrchestrator | git@github.com:HelixDevelopment/LLMOrchestrator.git | SSH |
-| 80 | dependencies/HelixDevelopment/LLMProvider | dependencies/HelixDevelopment/LLMProvider | git@github.com:HelixDevelopment/LLMProvider.git | SSH |
-| 81 | dependencies/HelixDevelopment/LLMsVerifier | dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
-| 82 | dependencies/HelixDevelopment/VisionEngine | dependencies/HelixDevelopment/VisionEngine | git@github.com:HelixDevelopment/VisionEngine.git | SSH |
+| 78 | submodules/doc_processor | submodules/doc_processor | git@github.com:HelixDevelopment/DocProcessor.git | SSH |
+| 79 | submodules/llm_orchestrator | submodules/llm_orchestrator | git@github.com:HelixDevelopment/LLMOrchestrator.git | SSH |
+| 80 | submodules/llm_provider | submodules/llm_provider | git@github.com:HelixDevelopment/LLMProvider.git | SSH |
+| 81 | submodules/llms_verifier | submodules/llms_verifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
+| 82 | submodules/vision_engine | submodules/vision_engine | git@github.com:HelixDevelopment/VisionEngine.git | SSH |
 | 83 | Challenges | Challenges | git@github.com:vasic-digital/Challenges.git | SSH |
 | 84 | containers | containers | git@github.com:vasic-digital/Containers.git | SSH |
 | 85 | Example_Resources/Taches-CC-Resources | Example_Resources/Taches-CC-Resources | git@github.com:tachescode/resources.git | SSH |
@@ -631,7 +631,7 @@ helix_code/
 
 | Required Submodule | Status | Path | Actual URL | Protocol |
 |--------------------|--------|------|------------|----------|
-| **LLMsVerifier** | PRESENT ✓ | dependencies/HelixDevelopment/LLMsVerifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
+| **LLMsVerifier** | PRESENT ✓ | submodules/llms_verifier | git@github.com:vasic-digital/LLMsVerifier.git | SSH |
 | **HelixQA** | PRESENT ✓ | helix_qa (root) | git@github.com:HelixDevelopment/HelixQA.git | SSH |
 | **Challenges** | PRESENT ✓ | Challenges (root) | git@github.com:vasic-digital/Challenges.git | SSH |
 | **Containers** | PRESENT ✓ | containers (root) | git@github.com:vasic-digital/Containers.git | SSH |
@@ -824,10 +824,10 @@ HelixCode (root)
 1. **Configure SSH keys** or set HTTPS rewrite before running `git submodule update --init --recursive`
 2. **Add missing submodules** if they are required:
    ```bash
-   git submodule add git@github.com:HelixDevelopment/HelixAgent.git dependencies/HelixDevelopment/HelixAgent
-   git submodule add git@github.com:HelixDevelopment/HelixLLM.git dependencies/HelixDevelopment/HelixLLM
-   git submodule add git@github.com:HelixDevelopment/HelixMemory.git dependencies/HelixDevelopment/HelixMemory
-   git submodule add git@github.com:HelixDevelopment/HelixSpecifier.git dependencies/HelixDevelopment/HelixSpecifier
+   git submodule add git@github.com:HelixDevelopment/HelixAgent.git submodules/helix_agent
+   git submodule add git@github.com:HelixDevelopment/HelixLLM.git submodules/helix_llm
+   git submodule add git@github.com:HelixDevelopment/HelixMemory.git submodules/helix_memory
+   git submodule add git@github.com:HelixDevelopment/HelixSpecifier.git submodules/helix_specifier
    ```
 3. **Investigate HelixAgent relationship** - Determine if HelixAgent functionality was intentionally merged into HelixCode or if it's a missing dependency
 

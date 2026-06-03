@@ -17,33 +17,33 @@ Round 189 (2026-05-19) introduced per-project / per-submodule ID prefixes replac
 | Prefix | Scope | Source |
 |--------|-------|--------|
 | HXC | HelixCode root project (project-wide, multi-submodule, governance, infrastructure) | this repo |
-| HXA | HelixAgent submodule | `dependencies/HelixDevelopment/HelixAgent` (when present) / `helix_agent/` tree |
-| HXM | HelixMemory submodule | `dependencies/HelixDevelopment/HelixMemory` |
-| HXL | HelixLLM submodule | `dependencies/HelixDevelopment/HelixLLM` |
-| HXQ | HelixQA submodule | `dependencies/HelixDevelopment/HelixQA` (`helix_qa/`) |
-| HXS | HelixSpecifier submodule | `dependencies/HelixDevelopment/HelixSpecifier` |
-| HXO | HelixOrchestrator (= LLMOrchestrator) submodule | `dependencies/HelixDevelopment/LLMOrchestrator` |
-| HXV | HelixVerifier (= LLMsVerifier) submodule | `dependencies/HelixDevelopment/LLMsVerifier` |
-| HXD | HelixDocProcessor (= DocProcessor) submodule | `dependencies/HelixDevelopment/DocProcessor` |
+| HXA | HelixAgent submodule | `submodules/helix_agent` (when present) / `helix_agent/` tree |
+| HXM | HelixMemory submodule | `submodules/helix_memory` |
+| HXL | HelixLLM submodule | `submodules/helix_llm` |
+| HXQ | HelixQA submodule | `submodules/helix_qa` (`helix_qa/`) |
+| HXS | HelixSpecifier submodule | `submodules/helix_specifier` |
+| HXO | HelixOrchestrator (= LLMOrchestrator) submodule | `submodules/llm_orchestrator` |
+| HXV | HelixVerifier (= LLMsVerifier) submodule | `submodules/llms_verifier` |
+| HXD | HelixDocProcessor (= DocProcessor) submodule | `submodules/doc_processor` |
 | HXI | HelixI18n (when added) | tba |
-| PLN | Planning submodule (vasic-digital) | `dependencies/vasic-digital/Planning` |
-| VEN | VisionEngine submodule (HelixDevelopment) | `dependencies/HelixDevelopment/VisionEngine` |
-| SLF | SelfImprove submodule (vasic-digital) | `dependencies/vasic-digital/SelfImprove` |
-| STO | Storage submodule (vasic-digital) | `dependencies/vasic-digital/Storage` |
-| OPS | LLMOps submodule (vasic-digital) | `dependencies/vasic-digital/LLMOps` |
-| VDB | VectorDB submodule (vasic-digital) | `dependencies/vasic-digital/VectorDB` |
-| OBS | Observability submodule (vasic-digital) | `dependencies/vasic-digital/Observability` |
-| MCP | MCP_Module submodule (vasic-digital) | `dependencies/vasic-digital/MCP_Module` |
-| MSG | Messaging submodule (vasic-digital) | `dependencies/vasic-digital/Messaging` |
-| MDW | Middleware submodule (vasic-digital) | `dependencies/vasic-digital/Middleware` |
-| PLG | Plugins submodule (vasic-digital) | `dependencies/vasic-digital/Plugins` |
-| STR | Streaming submodule (vasic-digital) | `dependencies/vasic-digital/Streaming` |
-| WAT | Watcher submodule (vasic-digital) | `dependencies/vasic-digital/Watcher` |
-| CNV | conversation submodule (vasic-digital) | `dependencies/vasic-digital/conversation` |
-| AUT | Auth submodule (vasic-digital) | `dependencies/vasic-digital/Auth` |
-| LZY | Lazy submodule (vasic-digital) | `dependencies/vasic-digital/Lazy` |
-| ATP | AutoTemp submodule (vasic-digital) | `dependencies/vasic-digital/auto_temp` |
-| PLI | PliniusCommon submodule (vasic-digital) | `dependencies/vasic-digital/plinius_common` |
+| PLN | Planning submodule (vasic-digital) | `submodules/planning` |
+| VEN | VisionEngine submodule (HelixDevelopment) | `submodules/vision_engine` |
+| SLF | SelfImprove submodule (vasic-digital) | `submodules/self_improve` |
+| STO | Storage submodule (vasic-digital) | `submodules/storage` |
+| OPS | LLMOps submodule (vasic-digital) | `submodules/llm_ops` |
+| VDB | VectorDB submodule (vasic-digital) | `submodules/vector_db` |
+| OBS | Observability submodule (vasic-digital) | `submodules/observability` |
+| MCP | MCP_Module submodule (vasic-digital) | `submodules/mcp_module` |
+| MSG | Messaging submodule (vasic-digital) | `submodules/messaging` |
+| MDW | Middleware submodule (vasic-digital) | `submodules/middleware` |
+| PLG | Plugins submodule (vasic-digital) | `submodules/plugins` |
+| STR | Streaming submodule (vasic-digital) | `submodules/streaming` |
+| WAT | Watcher submodule (vasic-digital) | `submodules/watcher` |
+| CNV | conversation submodule (vasic-digital) | `submodules/conversation` |
+| AUT | Auth submodule (vasic-digital) | `submodules/auth` |
+| LZY | Lazy submodule (vasic-digital) | `submodules/lazy` |
+| ATP | AutoTemp submodule (vasic-digital) | `submodules/auto_temp` |
+| PLI | PliniusCommon submodule (vasic-digital) | `submodules/plinius_common` |
 | CHL | challenges submodule (vasic-digital) | `challenges/` |
 | CNT | containers submodule | `containers/` |
 | SEC | security submodule | `security/` |
@@ -76,7 +76,7 @@ For submodules not listed above, default to the first 3 letters of the submodule
 **Discovered:** 2026-05-19 (round 98 — Planning + VisionEngine i18n migration)
 **Discovered-By:** AI subagent during 4-remote push attempt
 **Closed-By:** Round 188 (subagent repo-inventory sweep)
-**Root cause:** The `helix-gitlab` remote URL in `dependencies/HelixDevelopment/VisionEngine/.git/config` pointed at `git@gitlab.com:HelixDevelopment/visionengine.git` — a non-existent group path. The actual GitLab group is `helixdevelopment1` (path) / `HelixDevelopment` (display name). The repository `helixdevelopment1/VisionEngine` (id 80411994) already existed since 2026-03-19. NOT a missing-repo issue — a URL-misconfiguration issue.
+**Root cause:** The `helix-gitlab` remote URL in `submodules/vision_engine/.git/config` pointed at `git@gitlab.com:HelixDevelopment/visionengine.git` — a non-existent group path. The actual GitLab group is `helixdevelopment1` (path) / `HelixDevelopment` (display name). The repository `helixdevelopment1/VisionEngine` (id 80411994) already existed since 2026-03-19. NOT a missing-repo issue — a URL-misconfiguration issue.
 **Fix:** `git remote set-url helix-gitlab git@gitlab.com:helixdevelopment1/VisionEngine.git` in the VisionEngine submodule, then `git push helix-gitlab master` (FF-safe: local was 46 commits ahead, remote 0 ahead). Push landed at SHA `2d0c35b` (verified via `git ls-remote helix-gitlab master`). The Upstreams recipe `push-helix-gitlab.sh` references the remote by name (not URL), so it continues to work unchanged.
 **Evidence:**
 - `glab api projects/helixdevelopment1%2Fvisionengine` → id 80411994 OK
@@ -92,7 +92,7 @@ For submodules not listed above, default to the first 3 letters of the submodule
 **Discovered:** 2026-05-19 (round 95 — HelixLLM migration; surfaced as pre-existing failure)
 **Discovered-By:** AI subagent during HelixLLM standalone test run
 **Closed-By:** Round 105 (commit `a5e56d4` in HelixLLM; meta pointer `fedd152`)
-**Attribution correction:** Originally documented as helix_agent; actual location is HelixLLM submodule (`dependencies/HelixDevelopment/HelixLLM/internal/agents/tools/`). Commit SHAs `0a84310` resolved there.
+**Attribution correction:** Originally documented as helix_agent; actual location is HelixLLM submodule (`submodules/helix_llm/internal/agents/tools/`). Commit SHAs `0a84310` resolved there.
 **Resolution:** Replaced hardcoded path with `t.TempDir()` + 2 synthesised fixture files. Bonus: same bug-pattern discovered in `git_test.go` (constant `helixLLMRoot` + 7 tests) — refactored `gitSandbox()` signature. 6 tests now PASS on any host. Mutation verified.
 
 ---
@@ -172,7 +172,7 @@ For submodules not listed above, default to the first 3 letters of the submodule
 **Investigated:** 2026-05-20 (round 324) — split into a mechanical part and a design-decision part.
 **Closed:** 2026-05-20 (round 342)
 **Closure-Ref:** helix_agent commit (round-342 HXA-002 debate API drift) + meta-repo `.gitmodules` pointer-bump
-**Investigation finding (operator's explicit ask — moved vs deleted):** The learning/knowledge/recommendations capability tier was **genuinely DELETED, not moved**. `git log` on the `digital.vasic.debate` submodule (`dependencies/HelixDevelopment/debate_orchestrator`, renamed from `DebateOrchestrator` per CONST-052) shows the orchestrator was rebuilt from scratch — commit `196d0ea` "feat: initial DebateOrchestrator reconstruction (Phase 1)". `orchestrator/api.go` has carried only the slim `CreateDebate`/`GetStatistics` surface since that very first commit (`git log --follow orchestrator/api.go` = single entry). A tree-wide `grep` of `dependencies/` for `KnowledgeRepository`, `GetRecommendations`, `ConvertAPIRequest`, `GetDebateStatus`, `DefaultMinConsensus`, `MaxAgentsPerDebate`, `EnableAgentDiversity` found **zero** surviving copies in any `digital.vasic.*` package or in HelixSpecifier/HelixMemory. The slim API is the first and only version — the richer tier was a pre-reconstruction artifact that no longer exists anywhere. Per the operator's chosen direction for the deleted case, the helix_agent tests were rewritten down to the slim API.
+**Investigation finding (operator's explicit ask — moved vs deleted):** The learning/knowledge/recommendations capability tier was **genuinely DELETED, not moved**. `git log` on the `digital.vasic.debate` submodule (`submodules/debate_orchestrator`, renamed from `DebateOrchestrator` per CONST-052) shows the orchestrator was rebuilt from scratch — commit `196d0ea` "feat: initial DebateOrchestrator reconstruction (Phase 1)". `orchestrator/api.go` has carried only the slim `CreateDebate`/`GetStatistics` surface since that very first commit (`git log --follow orchestrator/api.go` = single entry). A tree-wide `grep` of `dependencies/` for `KnowledgeRepository`, `GetRecommendations`, `ConvertAPIRequest`, `GetDebateStatus`, `DefaultMinConsensus`, `MaxAgentsPerDebate`, `EnableAgentDiversity` found **zero** surviving copies in any `digital.vasic.*` package or in HelixSpecifier/HelixMemory. The slim API is the first and only version — the richer tier was a pre-reconstruction artifact that no longer exists anywhere. Per the operator's chosen direction for the deleted case, the helix_agent tests were rewritten down to the slim API.
 **Resolution:** See `docs/Fixed.md` row for the full closure narrative (Part-1 import swap + Part-2 slim-API rewrite + score-scale + go.mod rename-drift fix + captured evidence).
 
 ---
@@ -259,7 +259,7 @@ The genuine user-facing (C) string-literal surface is exhausted across all 7 CON
 **Discovered:** 2026-05-20 (round 345 — LLMsVerifier i18n round-12 subagent)
 **Discovered-By:** AI subagent — `git stash` test confirmed the 10 failures reproduce at submodule HEAD `582ae9c7` (round-336) *without* the round-345 i18n change, proving pre-existing and unrelated
 **Resolved:** 2026-05-20 (round 348)
-**Evidence:** `go test ./verification/...` in `dependencies/HelixDevelopment/LLMsVerifier/llm-verifier/` reported 10 failures; after round-348 fix `ok digital.vasic.llmsverifier/verification (1.635s)`, 0 failures, `go build ./...` clean.
+**Evidence:** `go test ./verification/...` in `submodules/llms_verifier/llm-verifier/` reported 10 failures; after round-348 fix `ok digital.vasic.llmsverifier/verification (1.635s)`, 0 failures, `go build ./...` clean.
 **Resolution:** All 10 failures classified **(A) test-assertion drift** — every failing test asserted pre-honesty fabricated behaviour that round-17 commit `a6328629` correctly removed. **No production code changed.** Per-failure classification table:
 
 | # | Test | File | Drifted assertion | Re-keyed to honest contract |
@@ -440,7 +440,7 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 **Type:** Task
 **Discovered:** 2026-05-28 (constitution pull)
 **Discovered-By:** AI
-**Closure (2026-05-28, commits 176fe07b + 551552f7 + 876b3b36):** `.codegraph/config.json` blanket `dependencies/**` exclude replaced with 3 specific third-party excludes (LLama_CPP/Ollama/HuggingFace_Hub) so own-org `dependencies/vasic-digital/**` + `dependencies/HelixDevelopment/**` are now INCLUDED; credential excludes (**/.env,*.key,*.pem,secrets) added. Root `.gitignore` fixed so `.codegraph/config.json` is TRACKED (§11.4.78 — it had been blanket-ignored). Re-index (`codegraph index .` exit 0): Files 39,024→76,044, Nodes 624,103→1,255,974, Edges 1.64M→3.96M. **§11.4.79 anti-bluff probe (independently re-verified by conductor):** `codegraph query EventBus` → `dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85`; helix_memory → `dependencies/HelixDevelopment/helix_memory/...`; third-party `llama` filtered to LLama_CPP → empty. docs/codegraph/Status.md + Status_Summary.md created (§11.4.80; weekly automation inherited by reference from constitution codegraph_update.sh/codegraph_sync.sh). Section retained as a migration tombstone per §11.4.19.
+**Closure (2026-05-28, commits 176fe07b + 551552f7 + 876b3b36):** `.codegraph/config.json` blanket `dependencies/**` exclude replaced with 3 specific third-party excludes (LLama_CPP/Ollama/HuggingFace_Hub) so own-org `dependencies/vasic-digital/**` + `dependencies/HelixDevelopment/**` are now INCLUDED; credential excludes (**/.env,*.key,*.pem,secrets) added. Root `.gitignore` fixed so `.codegraph/config.json` is TRACKED (§11.4.78 — it had been blanket-ignored). Re-index (`codegraph index .` exit 0): Files 39,024→76,044, Nodes 624,103→1,255,974, Edges 1.64M→3.96M. **§11.4.79 anti-bluff probe (independently re-verified by conductor):** `codegraph query EventBus` → `submodules/event_bus/pkg/bus/bus.go:85`; helix_memory → `submodules/helix_memory/...`; third-party `llama` filtered to LLama_CPP → empty. docs/codegraph/Status.md + Status_Summary.md created (§11.4.80; weekly automation inherited by reference from constitution codegraph_update.sh/codegraph_sync.sh). Section retained as a migration tombstone per §11.4.19.
 
 ---
 
@@ -528,7 +528,7 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 **Severity:** High (breaks `helix_agent` `go build ./...`; a §11.4 PASS-bluff at the build layer — tracked source does not compile)
 **Discovered:** 2026-05-29 (surfaced by `scripts/const052_verify_refs.sh` CHECK 3 while investigating HXC-031)
 **Discovered-By:** AI
-**Evidence:** `dependencies/HelixDevelopment/llm_orchestrator` (digital.vasic.llmorchestrator) has UNRESOLVED git conflict markers committed into 5 tracked Go files — `pkg/i18n/translator.go` (1 hunk), `pkg/i18n/translator_test.go` (2), `pkg/agent/multi_pool.go` (1), `cmd/orchestrator/main.go` (7), `challenges/runner/main.go` (16) = 26 hunks. `go build ./...` fails `expected 'package', found '<<'`. The markers are present in commit `5d9f5fc` and the current HEAD merge `1e198e3 "Merge branch 'master'"`, and are **already pushed to `origin/master`**.
+**Evidence:** `submodules/llm_orchestrator` (digital.vasic.llmorchestrator) has UNRESOLVED git conflict markers committed into 5 tracked Go files — `pkg/i18n/translator.go` (1 hunk), `pkg/i18n/translator_test.go` (2), `pkg/agent/multi_pool.go` (1), `cmd/orchestrator/main.go` (7), `challenges/runner/main.go` (16) = 26 hunks. `go build ./...` fails `expected 'package', found '<<'`. The markers are present in commit `5d9f5fc` and the current HEAD merge `1e198e3 "Merge branch 'master'"`, and are **already pushed to `origin/master`**.
 **Root cause (forensic, no guessing per §11.4.6):** a merge between the i18n-migration lineage (clean at `8032035` / `a7fda2a` round-383 CONST-046) and the CONST-052 rename commit `4350384 "fix(const052): rename Upstreams/→upstreams/ (HXC-001)"` was committed with conflict markers unresolved.
 **Resolution direction (verified-correct side):** the `<<<<<<< HEAD` side is the canonical one — consumer analysis proves it: `cmd/orchestrator/i18n_msg.go`, `pkg/agent/claudecode_agent.go`, and the package tests call `i18n.Pkg().T()`, `i18n.SetPkgTranslator()`, and `Translator.TPlural`, which ONLY the HEAD (i18n-migrated) side defines; the `4350384` side is the older pre-`TPlural`/pre-`Pkg()` variant. `Tr()`/`Trf()`/`Global()` live in `bundle.go` (no collision). Fix recipe: restore the 5 files from the last-clean i18n-lineage commit (`8032035` for translator.go; locate equivalents per file), `go build ./...` + `go test ./...` GREEN as the verifier, then `go build ./...` in `helix_agent` GREEN, commit to the submodule, push `origin/master` per §11.4.71 (merge-first per §11.4.41 since the broken state is already on the remote), bump the meta `.gitmodules` pointer in the same meta commit.
 **Why not fixed in the discovering session:** 26 hunks across 5 files on an already-pushed branch is irreversible high-blast-radius work whose per-hunk safe path needs build+test verification (§11.4.101) — deferred to a dedicated verified pass rather than rush-pushed. `translator.go` resolution was proven correct but reverted to keep the submodule in a single coherent committed state until all 5 are fixed together.
@@ -539,13 +539,13 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 ## HXC-033 — codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md)
 
 **Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
-**Closure (2026-05-29):** ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operator's hypothesis. Fix (operator-directed): full wipe of the gitignored DB + `codegraph init` (tracked config.json preserved) + `codegraph index .`. Result Files 75,663 / Nodes 1,272,492 (edges finalize async). §11.4.79 probe PASSES via `codegraph query`: `NewBundleTranslator`→`dependencies/HelixDevelopment/llm_orchestrator/...`+`vasic-digital/...` (10 own-org hits), third-party `LLama_CPP` excluded. Two earlier mis-diagnoses corrected per §11.4.6 (the "crash" was a faulty pgrep pattern; "own-org unreachable" used the wrong verb `search` vs `query` + a stale MCP DB). Also cleaned Status.md 3.66 MB→8 KB (ANSI-spinner bloat from codegraph_sync.sh). Follow-ups (non-blocking, noted in Status.md): restart the codegraph MCP server to serve the fresh DB; fix codegraph_sync.sh to strip ANSI. Section retained as §11.4.19 tombstone.
+**Closure (2026-05-29):** ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operator's hypothesis. Fix (operator-directed): full wipe of the gitignored DB + `codegraph init` (tracked config.json preserved) + `codegraph index .`. Result Files 75,663 / Nodes 1,272,492 (edges finalize async). §11.4.79 probe PASSES via `codegraph query`: `NewBundleTranslator`→`submodules/llm_orchestrator/...`+`vasic-digital/...` (10 own-org hits), third-party `LLama_CPP` excluded. Two earlier mis-diagnoses corrected per §11.4.6 (the "crash" was a faulty pgrep pattern; "own-org unreachable" used the wrong verb `search` vs `query` + a stale MCP DB). Also cleaned Status.md 3.66 MB→8 KB (ANSI-spinner bloat from codegraph_sync.sh). Follow-ups (non-blocking, noted in Status.md): restart the codegraph MCP server to serve the fresh DB; fix codegraph_sync.sh to strip ANSI. Section retained as §11.4.19 tombstone.
 **Type:** Bug
 **Severity:** High (§11.4.79 release-blocker — AI agents querying the code-graph get NO own-org submodule symbols; index also unbuildable)
 **Discovered:** 2026-05-29 (operator installed codegraph 0.9.7; surfaced during §11.4.80 post-update sync)
 **Discovered-By:** AI
 **Operator-Blocked-Details:** By: AI; Since: 2026-05-29; Reason: external-tool-state (operator-installed codegraph 0.9.7 crashes with no actionable diagnostic — not determinable/fixable from captured evidence per §11.4.6); Unblock: operator decision required — (a) downgrade codegraph to the last version that indexed this repo cleanly, (b) file an upstream bug with the maintainer, or (c) accept a degraded/partial index temporarily. §11.4.80 mandates latest-installed, so an autonomous downgrade would itself violate it — hence operator-gated.
-**Evidence:** `codegraph --version`→`0.9.7`. Full `codegraph index .` KILLED mid-run twice (no exit code/diagnostic; left 54,207 then `--force` 4,630 files vs HXC-017's 76,044 baseline); `codegraph sync .` exit 1 (8,461 files). MCP `codegraph_search BundleTranslator` resolves ONLY `helix_code/...`, NOT the own-org `dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go` → own-org unreachable. Host memory ample (51 GiB free — not §12.6 OOM). Tracked `.codegraph/config.json` intact (own-org includes + §11.4.10 credential excludes present — NOT a config regression). Logs: `qa-results/codegraph_index_*.log`, `codegraph_recover_*.log`; `docs/codegraph/Status.md` 2026-05-29 entry.
+**Evidence:** `codegraph --version`→`0.9.7`. Full `codegraph index .` KILLED mid-run twice (no exit code/diagnostic; left 54,207 then `--force` 4,630 files vs HXC-017's 76,044 baseline); `codegraph sync .` exit 1 (8,461 files). MCP `codegraph_search BundleTranslator` resolves ONLY `helix_code/...`, NOT the own-org `submodules/llm_orchestrator/pkg/i18n/bundle.go` → own-org unreachable. Host memory ample (51 GiB free — not §12.6 OOM). Tracked `.codegraph/config.json` intact (own-org includes + §11.4.10 credential excludes present — NOT a config regression). Logs: `qa-results/codegraph_index_*.log`, `codegraph_recover_*.log`; `docs/codegraph/Status.md` 2026-05-29 entry.
 **Root cause:** UNCONFIRMED (§11.4.6) — 0.9.7 `index`/`sync` terminate without diagnostic on this 76k-file repo; whether stability bug / submodule-traversal change / config-schema change is undetermined.
 **Composes-with:** §11.4.78, §11.4.79, §11.4.80, §11.4.6, §11.4.101, HXC-017.
 

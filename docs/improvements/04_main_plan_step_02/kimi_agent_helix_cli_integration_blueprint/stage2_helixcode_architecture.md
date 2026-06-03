@@ -937,9 +937,9 @@ internal/llm/factory.go
 ```
 digital.vasic.containers => ../Containers
 digital.vasic.helixqa => ../HelixQA
-digital.vasic.docprocessor => ../dependencies/HelixDevelopment/DocProcessor
-digital.vasic.llmorchestrator => ../dependencies/HelixDevelopment/LLMOrchestrator
-digital.vasic.visionengine => ../dependencies/HelixDevelopment/VisionEngine
+digital.vasic.docprocessor => ../submodules/doc_processor
+digital.vasic.llmorchestrator => ../submodules/llm_orchestrator
+digital.vasic.visionengine => ../submodules/vision_engine
 digital.vasic.challenges => ../Challenges
 digital.vasic.security => ../Security
 ```

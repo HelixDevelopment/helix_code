@@ -48,13 +48,13 @@ The rule has four explicit carve-outs. Applied here:
 1. **Language-mandated case** (Java/Kotlin/Android/Apple/C#/Swift inside language roots). Affects: paths inside `cli_agents/junie`, `cli_agents/swe-agent`, `helix_code/applications/{ios,android,aurora-os,harmony-os}`. **Exempt** — language convention wins inside the language root.
 2. **Vendor / upstream third-party submodules.** Affects cluster (B): `LLama_CPP`, `Ollama`, `HuggingFace_Hub`, `cli_agents_resources/*`, `cli_agents/*` (third-party agent forks). **Exempt** — renaming would break upstream merge alignment.
 3. **Build artefacts** (`node_modules`, `__pycache__`, `.git`, `target`, `build`, `bin`). Already ignored, irrelevant.
-4. **Common-sense test** ("does renaming break the technology?"). Special case for `dependencies/HelixDevelopment/LLMsVerifier/Assets/` and `Website/` — these are language-neutral but ship as fixed-name asset roots wired into deployment manifests; the **decision is operator-side** (deferred to §8 decision-points).
+4. **Common-sense test** ("does renaming break the technology?"). Special case for `submodules/llms_verifier/Assets/` and `Website/` — these are language-neutral but ship as fixed-name asset roots wired into deployment manifests; the **decision is operator-side** (deferred to §8 decision-points).
 
 ### 1.4 Why this was deferred
 
 Three coupled cascades historically blocked execution:
 
-1. **Documentation-path encoding.** A literal string `dependencies/HelixDevelopment/HelixLLM/...` appears in 244 .md files (verified count); each is a working anchor that breaks if the directory moves.
+1. **Documentation-path encoding.** A literal string `submodules/helix_llm/...` appears in 244 .md files (verified count); each is a working anchor that breaks if the directory moves.
 2. **Go module replace directives.** 8 `go.mod` files (verified `grep -l "HelixDevelopment\|vasic-digital" --include="go.mod" -r .`) carry `replace` lines that map a module-id to a relative directory; rename without paired `replace` update silently breaks `go build`.
 3. **Submodule registration.** `.gitmodules` carries 70 PascalCase `path = ...` entries; renaming requires `git mv` + `.gitmodules` rewrite + `git submodule sync` + re-init across all clones.
 
@@ -134,16 +134,16 @@ These dirs are compliant at the meta-root path. The **remote GitHub repo URLs** 
 
 | OLD | NEW |
 |---|---|
-| `dependencies/HelixDevelopment/DebateOrchestrator/` | `dependencies/helix_development/debate_orchestrator/` |
-| `dependencies/HelixDevelopment/DocProcessor/` | `dependencies/helix_development/doc_processor/` |
-| `dependencies/HelixDevelopment/HelixLLM/` | `dependencies/helix_development/helix_llm/` |
-| `dependencies/HelixDevelopment/HelixMemory/` | `dependencies/helix_development/helix_memory/` |
-| `dependencies/HelixDevelopment/HelixSpecifier/` | `dependencies/helix_development/helix_specifier/` |
-| `dependencies/HelixDevelopment/LLMOrchestrator/` | `dependencies/helix_development/llm_orchestrator/` |
-| `dependencies/HelixDevelopment/LLMProvider/` | `dependencies/helix_development/llm_provider/` |
-| `dependencies/HelixDevelopment/LLMsVerifier/` | `dependencies/helix_development/llms_verifier/` |
-| `dependencies/HelixDevelopment/Models/` | `dependencies/helix_development/models/` |
-| `dependencies/HelixDevelopment/VisionEngine/` | `dependencies/helix_development/vision_engine/` |
+| `submodules/debate_orchestrator/` | `dependencies/helix_development/debate_orchestrator/` |
+| `submodules/doc_processor/` | `dependencies/helix_development/doc_processor/` |
+| `submodules/helix_llm/` | `dependencies/helix_development/helix_llm/` |
+| `submodules/helix_memory/` | `dependencies/helix_development/helix_memory/` |
+| `submodules/helix_specifier/` | `dependencies/helix_development/helix_specifier/` |
+| `submodules/llm_orchestrator/` | `dependencies/helix_development/llm_orchestrator/` |
+| `submodules/llm_provider/` | `dependencies/helix_development/llm_provider/` |
+| `submodules/llms_verifier/` | `dependencies/helix_development/llms_verifier/` |
+| `submodules/models/` | `dependencies/helix_development/models/` |
+| `submodules/vision_engine/` | `dependencies/helix_development/vision_engine/` |
 
 **Parent dir `HelixDevelopment/` → `helix_development/`** is part of cluster A (renamed once before/after the leaf renames per operator preference).
 
@@ -158,58 +158,58 @@ Plan adopts Option 1 (defer org-dir rename pending operator decision, §8). The 
 
 | OLD (sample — full list applied to all 48) | NEW |
 |---|---|
-| `dependencies/vasic-digital/Agentic/` | `dependencies/vasic-digital/agentic/` |
-| `dependencies/vasic-digital/Auth/` | `dependencies/vasic-digital/auth/` |
-| `dependencies/vasic-digital/AutoTemp/` | `dependencies/vasic-digital/auto_temp/` |
-| `dependencies/vasic-digital/BackgroundTasks/` | `dependencies/vasic-digital/background_tasks/` |
-| `dependencies/vasic-digital/Benchmark/` | `dependencies/vasic-digital/benchmark/` |
-| `dependencies/vasic-digital/Cache/` | `dependencies/vasic-digital/cache/` |
-| `dependencies/vasic-digital/Claritas/` | `dependencies/vasic-digital/claritas/` |
-| `dependencies/vasic-digital/Concurrency/` | `dependencies/vasic-digital/concurrency/` |
-| `dependencies/vasic-digital/Config/` | `dependencies/vasic-digital/config/` |
-| `dependencies/vasic-digital/conversation/` | `dependencies/vasic-digital/conversation/` (NO-OP — already compliant) |
-| `dependencies/vasic-digital/Database/` | `dependencies/vasic-digital/database/` |
-| `dependencies/vasic-digital/DocProcessor/` | `dependencies/vasic-digital/doc_processor/` |
-| `dependencies/vasic-digital/Document/` | `dependencies/vasic-digital/document/` |
-| `dependencies/vasic-digital/Embeddings/` | `dependencies/vasic-digital/embeddings/` |
-| `dependencies/vasic-digital/EventBus/` | `dependencies/vasic-digital/event_bus/` |
-| `dependencies/vasic-digital/Filesystem/` | `dependencies/vasic-digital/filesystem/` |
-| `dependencies/vasic-digital/Formatters/` | `dependencies/vasic-digital/formatters/` |
-| `dependencies/vasic-digital/GandalfSolutions/` | `dependencies/vasic-digital/gandalf_solutions/` |
-| `dependencies/vasic-digital/HyperTune/` | `dependencies/vasic-digital/hyper_tune/` |
-| `dependencies/vasic-digital/I-LLM/` | `dependencies/vasic-digital/i_llm/` |
-| `dependencies/vasic-digital/I18n/` | `dependencies/vasic-digital/i18n/` |
-| `dependencies/vasic-digital/Lazy/` | `dependencies/vasic-digital/lazy/` |
-| `dependencies/vasic-digital/LeakHub/` | `dependencies/vasic-digital/leak_hub/` |
-| `dependencies/vasic-digital/LLMOps/` | `dependencies/vasic-digital/llm_ops/` |
-| `dependencies/vasic-digital/LLMOrchestrator/` | `dependencies/vasic-digital/llm_orchestrator/` |
-| `dependencies/vasic-digital/LLMProvider/` | `dependencies/vasic-digital/llm_provider/` |
-| `dependencies/vasic-digital/MCP_Module/` | `dependencies/vasic-digital/mcp_module/` |
-| `dependencies/vasic-digital/Memory/` | `dependencies/vasic-digital/memory/` |
-| `dependencies/vasic-digital/Messaging/` | `dependencies/vasic-digital/messaging/` |
-| `dependencies/vasic-digital/Middleware/` | `dependencies/vasic-digital/middleware/` |
-| `dependencies/vasic-digital/Models/` | `dependencies/vasic-digital/models/` |
-| `dependencies/vasic-digital/Normalize/` | `dependencies/vasic-digital/normalize/` |
-| `dependencies/vasic-digital/Observability/` | `dependencies/vasic-digital/observability/` |
-| `dependencies/vasic-digital/Optimization/` | `dependencies/vasic-digital/optimization/` |
-| `dependencies/vasic-digital/Ouroborous/` | `dependencies/vasic-digital/ouroborous/` |
-| `dependencies/vasic-digital/Planning/` | `dependencies/vasic-digital/planning/` |
-| `dependencies/vasic-digital/PliniusCommon/` | `dependencies/vasic-digital/plinius_common/` |
-| `dependencies/vasic-digital/Plugins/` | `dependencies/vasic-digital/plugins/` |
-| `dependencies/vasic-digital/RAG/` | `dependencies/vasic-digital/rag/` |
-| `dependencies/vasic-digital/RateLimiter/` | `dependencies/vasic-digital/rate_limiter/` |
-| `dependencies/vasic-digital/Recovery/` | `dependencies/vasic-digital/recovery/` |
-| `dependencies/vasic-digital/RedTeam/` | `dependencies/vasic-digital/red_team/` |
-| `dependencies/vasic-digital/SelfImprove/` | `dependencies/vasic-digital/self_improve/` |
-| `dependencies/vasic-digital/SkillRegistry/` | `dependencies/vasic-digital/skill_registry/` |
-| `dependencies/vasic-digital/Storage/` | `dependencies/vasic-digital/storage/` |
-| `dependencies/vasic-digital/Streaming/` | `dependencies/vasic-digital/streaming/` |
-| `dependencies/vasic-digital/ToolSchema/` | `dependencies/vasic-digital/tool_schema/` |
-| `dependencies/vasic-digital/TOON/` | `dependencies/vasic-digital/toon/` |
-| `dependencies/vasic-digital/VectorDB/` | `dependencies/vasic-digital/vector_db/` |
-| `dependencies/vasic-digital/Veritas/` | `dependencies/vasic-digital/veritas/` |
-| `dependencies/vasic-digital/VisionEngine/` | `dependencies/vasic-digital/vision_engine/` |
-| `dependencies/vasic-digital/Watcher/` | `dependencies/vasic-digital/watcher/` |
+| `submodules/agentic/` | `submodules/agentic/` |
+| `submodules/auth/` | `submodules/auth/` |
+| `submodules/auto_temp/` | `submodules/auto_temp/` |
+| `submodules/background_tasks/` | `submodules/background_tasks/` |
+| `submodules/benchmark/` | `submodules/benchmark/` |
+| `submodules/cache/` | `submodules/cache/` |
+| `submodules/claritas/` | `submodules/claritas/` |
+| `submodules/concurrency/` | `submodules/concurrency/` |
+| `submodules/config/` | `submodules/config/` |
+| `submodules/conversation/` | `submodules/conversation/` (NO-OP — already compliant) |
+| `submodules/database/` | `submodules/database/` |
+| `submodules/doc_processor/` | `submodules/doc_processor/` |
+| `submodules/document/` | `submodules/document/` |
+| `submodules/embeddings/` | `submodules/embeddings/` |
+| `submodules/event_bus/` | `submodules/event_bus/` |
+| `submodules/filesystem/` | `submodules/filesystem/` |
+| `submodules/formatters/` | `submodules/formatters/` |
+| `submodules/gandalf_solutions/` | `submodules/gandalf_solutions/` |
+| `submodules/hyper_tune/` | `submodules/hyper_tune/` |
+| `submodules/i_llm/` | `submodules/i_llm/` |
+| `submodules/i18n/` | `submodules/i18n/` |
+| `submodules/lazy/` | `submodules/lazy/` |
+| `submodules/leak_hub/` | `submodules/leak_hub/` |
+| `submodules/llm_ops/` | `submodules/llm_ops/` |
+| `submodules/llm_orchestrator/` | `submodules/llm_orchestrator/` |
+| `submodules/llm_provider/` | `submodules/llm_provider/` |
+| `submodules/mcp_module/` | `submodules/mcp_module/` |
+| `submodules/memory/` | `submodules/memory/` |
+| `submodules/messaging/` | `submodules/messaging/` |
+| `submodules/middleware/` | `submodules/middleware/` |
+| `submodules/models/` | `submodules/models/` |
+| `submodules/normalize/` | `submodules/normalize/` |
+| `submodules/observability/` | `submodules/observability/` |
+| `submodules/optimization/` | `submodules/optimization/` |
+| `submodules/ouroborous/` | `submodules/ouroborous/` |
+| `submodules/planning/` | `submodules/planning/` |
+| `submodules/plinius_common/` | `submodules/plinius_common/` |
+| `submodules/plugins/` | `submodules/plugins/` |
+| `submodules/rag/` | `submodules/rag/` |
+| `submodules/rate_limiter/` | `submodules/rate_limiter/` |
+| `submodules/recovery/` | `submodules/recovery/` |
+| `submodules/red_team/` | `submodules/red_team/` |
+| `submodules/self_improve/` | `submodules/self_improve/` |
+| `submodules/skill_registry/` | `submodules/skill_registry/` |
+| `submodules/storage/` | `submodules/storage/` |
+| `submodules/streaming/` | `submodules/streaming/` |
+| `submodules/tool_schema/` | `submodules/tool_schema/` |
+| `submodules/toon/` | `submodules/toon/` |
+| `submodules/vector_db/` | `submodules/vector_db/` |
+| `submodules/veritas/` | `submodules/veritas/` |
+| `submodules/vision_engine/` | `submodules/vision_engine/` |
+| `submodules/watcher/` | `submodules/watcher/` |
 
 Total cluster A: **10 + 48 = 58 leaf renames** (+1 parent rename = 59 if `HelixDevelopment` → `helix_development` executes).
 

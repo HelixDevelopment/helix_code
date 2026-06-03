@@ -120,7 +120,7 @@ clean
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -202,7 +202,7 @@ clean
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -275,7 +275,7 @@ clean
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -346,7 +346,7 @@ clean
 (warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
 OK: no credential patterns found in .
 FAIL: LLMsVerifier pin divergence
-  dependencies/HelixDevelopment/LLMsVerifier  → d473231d27196e2151405f37936151a386b590e3
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
   helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
 
 Resolution: pick the canonical SHA, bump the other to match, commit, push.
@@ -2898,7 +2898,7 @@ already (DebateOrchestrator, kiro-cli, ollama-code).
 
 `docs/improvements/p1-5-dedup-canonical.md` — 5 canonical paths recorded:
 
-1. LLMsVerifier → `dependencies/HelixDevelopment/LLMsVerifier/`
+1. LLMsVerifier → `submodules/llms_verifier/`
 2. containers   → `containers/`
 3. Security     → `security/`
 4. helix_qa      → `helix_qa/`
@@ -3074,7 +3074,7 @@ Anti-divergence canonicalisation per `docs/improvements/p1-5-dedup-canonical.md`
 
 ### T03.01 — LLMsVerifier dedup
 
-Canonical: `dependencies/HelixDevelopment/LLMsVerifier` (kept).
+Canonical: `submodules/llms_verifier` (kept).
 Removed: `helix_agent/LLMsVerifier` (1 copy).
 
 | commit  | scope                                                         |
@@ -3083,9 +3083,9 @@ Removed: `helix_agent/LLMsVerifier` (1 copy).
 | `cb6fd9c` | meta-repo: bump HelixAgent gitlink                          |
 
 Consumer updates (HelixAgent):
-- `helix_agent/Makefile` `verifier-init` / `verifier-update` / `verifier-build` targets retargeted to `../dependencies/HelixDevelopment/LLMsVerifier`.
+- `helix_agent/Makefile` `verifier-init` / `verifier-update` / `verifier-build` targets retargeted to `../submodules/llms_verifier`.
 - `helix_agent/.trivy.yaml` `skip-dirs` updated to canonical relative path.
-- `helix_agent/go.mod` `replace digital.vasic.llmsverifier => ../dependencies/HelixDevelopment/LLMsVerifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
+- `helix_agent/go.mod` `replace digital.vasic.llmsverifier => ../submodules/llms_verifier/llm-verifier` (committed in T03.03 with the rest of the replace directives).
 - `helix_agent/challenges/scripts/challenge_framework.sh` `get_verifier_binary()` retargeted (committed in T03.03).
 
 ### T03.02 — containers dedup (3 nested copies)
@@ -3119,7 +3119,7 @@ Removed: `helix_agent/Security`, `helix_agent/HelixLLM/submodules/Security` (2 c
 | `3a50b79` | meta-repo: bump HelixAgent gitlink                            |
 
 Consumer updates (HelixAgent):
-- `helix_agent/go.mod`: `replace` directives pointed to canonical paths for `digital.vasic.security` (`../Security`), `digital.vasic.containers` (`../Containers`), `digital.vasic.llmsverifier` (`../dependencies/HelixDevelopment/LLMsVerifier/llm-verifier`), `digital.vasic.helixqa` (`../HelixQA`).
+- `helix_agent/go.mod`: `replace` directives pointed to canonical paths for `digital.vasic.security` (`../Security`), `digital.vasic.containers` (`../Containers`), `digital.vasic.llmsverifier` (`../submodules/llms_verifier/llm-verifier`), `digital.vasic.helixqa` (`../HelixQA`).
 - `helix_agent/setup_module_upstreams.sh`, `add_makefiles.sh`, `add_makefiles_fixed.sh`: drop `Security` loop entry.
 - `helix_agent/challenges/scripts/security_module_challenge.sh`: `$PROJECT_ROOT/Security` → `$PROJECT_ROOT/../Security`; replace-directive grep updated.
 - `helix_agent/challenges/scripts/challenge_framework.sh`: `get_verifier_binary()` retargets canonical LLMsVerifier path.
@@ -3157,7 +3157,7 @@ Consumer updates: none required — the remaining HelixAgent references in `Make
 ```
 $ git submodule status --recursive | grep -E "Containers|Security|LLMsVerifier|HelixQA|MCP-Servers" | head -5
  2ba3e56c... containers (1.0.2-dev-0.0.2-126-g2ba3e56)
- d473231d... dependencies/HelixDevelopment/LLMsVerifier (heads/main)
+ d473231d... submodules/llms_verifier (heads/main)
  ecebe9a5... helix_qa (v4.0.0-210-gecebe9a)
  4503e2d1... mcp_servers (typescript-servers-0.6.2-3796-g4503e2d)
  e7c09c15... Security (heads/main)
@@ -3231,7 +3231,7 @@ clean
 | HelixAgent                                | yes | `test:` | `d5ab478` |
 | helix_qa                                   | yes | `build:` + `test:` | `d6e7a3e` |
 | containers                                | yes | `build:` + `test:` | `9c2bb3e` |
-| dependencies/HelixDevelopment/LLMsVerifier | yes | `build:` + `test:` | `b4db2f9` |
+| submodules/llms_verifier | yes | `build:` + `test:` | `b4db2f9` |
 
 Decision: copy (not symlink) across submodule repo boundaries — symlinks across separate git repos break standalone checkouts.
 
@@ -3484,11 +3484,11 @@ Confirm CONST-035 / Article XI §11.9 verbatim user mandate is present in every 
 | . (root meta-repo) | PRESENT | PRESENT | PRESENT |
 | HelixAgent | PRESENT | PRESENT | PRESENT |
 | helix_qa | PRESENT | PRESENT | PRESENT |
-| dependencies/HelixDevelopment/LLMsVerifier | PRESENT | PRESENT | PRESENT |
-| dependencies/HelixDevelopment/DocProcessor | PRESENT | PRESENT | PRESENT |
-| dependencies/HelixDevelopment/LLMOrchestrator | PRESENT | PRESENT | PRESENT |
-| dependencies/HelixDevelopment/LLMProvider | PRESENT | PRESENT | PRESENT |
-| dependencies/HelixDevelopment/VisionEngine | PRESENT | PRESENT | PRESENT |
+| submodules/llms_verifier | PRESENT | PRESENT | PRESENT |
+| submodules/doc_processor | PRESENT | PRESENT | PRESENT |
+| submodules/llm_orchestrator | PRESENT | PRESENT | PRESENT |
+| submodules/llm_provider | PRESENT | PRESENT | PRESENT |
+| submodules/vision_engine | PRESENT | PRESENT | PRESENT |
 | **Containers** | **MISSING** | PRESENT | PRESENT |
 | Security | PRESENT | PRESENT | PRESENT |
 | helix_agent/HelixLLM | PRESENT | PRESENT | PRESENT |
@@ -3679,7 +3679,7 @@ None. All updates are mechanical sed-driven substitutions on real-world paths. R
 | HelixCode inner (`dev.helix.code`, `go 1.26`) | PASS for `internal/...` and `cmd/...`. `examples/multi_agent_system` failed pre-fix on same MockLLMProvider drift; `applications/desktop` Fyne-GLFW fails because host lacks X11/Xcursor.h headers. | **78 packages PASS, 0 FAIL** (after T10.03 fix; was 1 FAIL in `internal/tools/git` before fix) | Real-deal coverage. Auth, llm, tools/*, server, verifier, workflow all green. |
 | HelixAgent (`dev.helix.agent`) | FAIL (replace `digital.vasic.agentic => ./Agentic` but `Agentic/go.mod` missing — empty submodule). Many `internal/adapters/...` and `cmd/...` fail on this. | 79 packages PASS, 302 FAIL (almost all `[setup failed]` cascading from the same missing-Agentic-go.mod). | Pre-existing submodule init issue. Out of P1.5 scope. |
 | helix_qa (`digital.vasic.helixqa`) | FAIL (replace `digital.vasic.{visionengine,llmorchestrator,llmsverifier}` point at sibling dirs `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` that don't exist; missing go.sum entries for `golang.org/x/{sys,text}`, `nats-io`). | 100 packages PASS, 35 FAIL (all `[setup failed]` from the same replace-dir-missing issue). | Pre-existing dependency-graph wiring issue. Out of P1.5 scope. |
-| LLMsVerifier (`dependencies/HelixDevelopment/LLMsVerifier`, module `llmsverifier`) | FAIL (`make build` fails — Makefile points at `cmd/` which doesn't exist; `go build ./...` fails on missing go.sum entries for kafka-go, rabbitmq, etc.). | All 5 `tests/...` fail `[setup failed]` on missing go.sum + replace-dir issues. | Pre-existing. |
+| LLMsVerifier (`submodules/llms_verifier`, module `llmsverifier`) | FAIL (`make build` fails — Makefile points at `cmd/` which doesn't exist; `go build ./...` fails on missing go.sum entries for kafka-go, rabbitmq, etc.). | All 5 `tests/...` fail `[setup failed]` on missing go.sum + replace-dir issues. | Pre-existing. |
 | containers | `make build` FAIL (pre-existing missing go.sum entries for `golang.org/x/{sys,crypto,term}`, prometheus/procfs). | Not run (build precondition fails). | Pre-existing. |
 | Security | `make build` PASS (single line: `go build ./...` returned successfully). | Not exercised in this WP. | Clean. |
 
@@ -3705,7 +3705,7 @@ Logs captured: `/tmp/wp10-meta-build.log`, `/tmp/wp10-meta-test.log`, `/tmp/wp10
 | `Agentic/go.mod` missing | HelixAgent | `replace digital.vasic.agentic => ./Agentic` but submodule init never populated `Agentic/`. Fix is `git submodule update --init --recursive` plus probably committing the missing `Agentic` submodule pointer at HelixAgent root. |
 | `../VisionEngine`, `../LLMOrchestrator`, `../LLMsVerifier/llm-verifier` dirs missing | helix_qa | Replace-dir paths assume sibling layout that doesn't exist in current repo. Same class as HelixAgent issue. |
 | Missing go.sum entries (kafka-go, rabbitmq/amqp091-go, golang.org/x/{sys,text,crypto,term}) | LLMsVerifier, HelixQA, containers | `go mod tidy` not run after recent dep changes. Mechanical fix once submodule wiring above is resolved. |
-| LLMsVerifier `make build` references `./cmd` which doesn't exist | dependencies/HelixDevelopment/LLMsVerifier | Makefile target out of date with current package layout. |
+| LLMsVerifier `make build` references `./cmd` which doesn't exist | submodules/llms_verifier | Makefile target out of date with current package layout. |
 | `applications/desktop` Fyne-GLFW build needs `libxcursor-dev` headers | HelixCode inner | Host environment issue; not a code defect. |
 | `examples/multi_agent_system` MockLLMProvider drift (same root cause as T10.03) | HelixCode inner | Same fix can be applied; deferred because `examples/` is not on the WP10 scope critical path and the demo isn't shipped to end users. Captured for a future cleanup ticket. |
 
@@ -3747,7 +3747,7 @@ $ cd HelixCode && go build -o /tmp/p1_5_challenge ./tests/integration/cmd/p1_5_c
 ==> meta-repo root: /run/media/milosvasic/DATA4TB/Projects/HelixCode
 ==> Phase A — NO-DUPLICATE-SUBMODULES
 phaseA: scanned 1 meta-repo-tracked .gitmodules file(s)
-phaseA: LLMsVerifier at dependencies/HelixDevelopment/LLMsVerifier (1 location, no duplicates)
+phaseA: LLMsVerifier at submodules/llms_verifier (1 location, no duplicates)
 phaseA: containers at containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: helix_qa at helix_qa (1 location, no duplicates)
@@ -3834,7 +3834,7 @@ $ cd HelixCode && go build -o /tmp/p1_5_challenge ./tests/integration/cmd/p1_5_c
 ==> meta-repo root: /run/media/milosvasic/DATA4TB/Projects/HelixCode
 ==> Phase A — NO-DUPLICATE-SUBMODULES
 phaseA: scanned 1 meta-repo-tracked .gitmodules file(s)
-phaseA: LLMsVerifier at dependencies/HelixDevelopment/LLMsVerifier (1 location, no duplicates)
+phaseA: LLMsVerifier at submodules/llms_verifier (1 location, no duplicates)
 phaseA: containers at containers (1 location, no duplicates)
 phaseA: Security at Security (1 location, no duplicates)
 phaseA: helix_qa at helix_qa (1 location, no duplicates)

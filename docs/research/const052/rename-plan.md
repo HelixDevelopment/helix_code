@@ -57,8 +57,8 @@ All three confirmed present at new paths on disk and in `.gitmodules`:
 
 | Commit | Renamed | Count |
 |---|---|---|
-| `a1ea3c8` | `dependencies/HelixDevelopment/Models` → `models` | 1 |
-| `416fe8e` | `dependencies/HelixDevelopment/DebateOrchestrator` → `debate_orchestrator` | 1 |
+| `a1ea3c8` | `submodules/models` → `models` | 1 |
+| `416fe8e` | `submodules/debate_orchestrator` → `debate_orchestrator` | 1 |
 | `e813b5c` | 11 `vasic-digital/*` leaves: `auto_temp`, `claritas`, `doc_processor`, `gandalf_solutions`, `hyper_tune`, `i_llm`, `leak_hub`, `ouroborous`, `plinius_common`, `veritas`, `vision_engine` | 11 |
 
 **Total already done by round-343: 13 owned-org leaf directory renames.**
@@ -222,8 +222,8 @@ The §1.3(A) `replace`-count showed most `vasic-digital/*` leaves have a
 single consumer `replace` directive. Batch ~8–10 per round.
 
 - **Task 2.x (per dir)** — e.g. `vasic-digital/Cache`→`cache`:
-  `git mv dependencies/vasic-digital/Cache dependencies/vasic-digital/cache`;
-  rewrite the ONE `replace digital.vasic.cache => ../dependencies/vasic-digital/Cache`
+  `git mv submodules/cache submodules/cache`;
+  rewrite the ONE `replace digital.vasic.cache => ../submodules/cache`
   line in `helix_agent/go.mod`; rewrite `.gitmodules` path + section name;
   fix `.git/modules/...` pointer; update coverage ledgers; sweep
   governance docs (`CLAUDE.md` §3.2 prose, `docs/` references) — active

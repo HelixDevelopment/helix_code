@@ -24,8 +24,8 @@ into sequenced phases; this spec covers **Phase 0** only.
   `CONSTITUTION.md`, `CLAUDE.md`, `AGENTS.md`, `QWEN.md` **and** in the
   HelixConstitution submodule's own files. No insertion required — verify only.
 - Four submodules carry forbidden GitFlic/GitVerse push remotes:
-  `constitution`, `dependencies/HelixDevelopment/models`,
-  `dependencies/vasic-digital/models` (own-org), and `cli_agents/claude-code-source`
+  `constitution`, `submodules/models`,
+  `submodules/models` (own-org), and `cli_agents/claude-code-source`
   (third-party, not pushed).
 - Operator decision: **push to ALL upstreams including GitFlic + GitVerse.** This
   contradicts CONST-038 as written → reconcile the rule (item 2).
