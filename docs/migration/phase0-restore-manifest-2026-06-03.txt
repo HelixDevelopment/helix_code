@@ -1,0 +1,1912 @@
+# Phase-0 Reversibility / Restore Manifest
+# Repo: /Users/milosvasic/Projects/HelixCode
+# Captured: Wed Jun  3 19:51:35 +05 2026
+# Purpose: rollback anchor for the planned 70-repo mutation phase (records pre-mutation HEAD SHAs + remotes)
+
+## MAIN REPO HEAD
+
+HEAD SHA: 34bc865e5e666f5c2d083b9a7742fc70afcf3168
+
+Main repo remotes (git remote -v):
+github	git@github.com:HelixDevelopment/Helix-CLI.git (fetch)
+github	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/HelixCode.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/HelixCode.git (push)
+origin	git@github.com:HelixDevelopment/HelixCode.git (fetch)
+origin	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+origin	git@gitlab.com:helixdevelopment1/HelixCode.git (push)
+upstream	git@github.com:HelixDevelopment/Helix-CLI.git (fetch)
+upstream	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+
+## .gitmodules SNAPSHOT
+
+[submodule "dependencies/LLama_CPP"]
+	path = dependencies/LLama_CPP
+	url = git@github.com:ggml-org/llama.cpp.git
+[submodule "dependencies/Ollama"]
+	path = dependencies/Ollama
+	url = git@github.com:ollama/ollama.git
+[submodule "dependencies/HuggingFace_Hub"]
+	path = dependencies/HuggingFace_Hub
+	url = git@github.com:huggingface/huggingface_hub.git
+[submodule "github_pages_website"]
+	path = github_pages_website
+	url = git@github.com:HelixDevelopment-Code/Welcome.git
+[submodule "awesome-ai-memory"]
+	path = awesome-ai-memory
+	url = git@github.com:topoteretes/awesome-ai-memory.git
+[submodule "cli_agents_resources/GitHub-Awesome-Copilot"]
+	path = cli_agents_resources/GitHub-Awesome-Copilot
+	url = git@github.com:github/awesome-copilot.git
+[submodule "cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs"]
+	path = cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs
+	url = git@github.com:cheshire-cat-ai/docs.git
+[submodule "cli_agents_resources/Awesome-AI-GPTs"]
+	path = cli_agents_resources/Awesome-AI-GPTs
+	url = git@github.com:EmbraceAGI/Awesome-AI-GPTs.git
+[submodule "cli_agents_resources/OpenAI-Cookbook"]
+	path = cli_agents_resources/OpenAI-Cookbook
+	url = org-14957082@github.com:openai/openai-cookbook.git
+[submodule "cli_agents_resources/Awesome-AI-Agents"]
+	path = cli_agents_resources/Awesome-AI-Agents
+	url = git@github.com:e2b-dev/awesome-ai-agents.git
+[submodule "cli_agents_resources/Taches-CC-Resources"]
+	path = cli_agents_resources/Taches-CC-Resources
+	url = git@github.com:glittercowboy/taches-cc-resources.git
+[submodule "containers"]
+	path = containers
+	url = git@github.com:vasic-digital/Containers.git
+[submodule "helix_qa"]
+	path = helix_qa
+	url = git@github.com:HelixDevelopment/HelixQA.git
+[submodule "dependencies/HelixDevelopment/doc_processor"]
+	path = dependencies/HelixDevelopment/doc_processor
+	url = git@github.com:HelixDevelopment/DocProcessor.git
+[submodule "dependencies/HelixDevelopment/llm_orchestrator"]
+	path = dependencies/HelixDevelopment/llm_orchestrator
+	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
+[submodule "dependencies/HelixDevelopment/llm_provider"]
+	path = dependencies/HelixDevelopment/llm_provider
+	url = git@github.com:HelixDevelopment/LLMProvider.git
+[submodule "dependencies/HelixDevelopment/vision_engine"]
+	path = dependencies/HelixDevelopment/vision_engine
+	url = git@github.com:HelixDevelopment/VisionEngine.git
+[submodule "security"]
+	path = security
+	url = git@github.com:vasic-digital/Security.git
+[submodule "challenges"]
+	path = challenges
+	url = git@github.com:vasic-digital/Challenges.git
+[submodule "dependencies/HelixDevelopment/llms_verifier"]
+	path = dependencies/HelixDevelopment/llms_verifier
+	url = git@github.com:vasic-digital/LLMsVerifier.git
+[submodule "helix_agent"]
+	path = helix_agent
+	url = git@github.com:HelixDevelopment/HelixAgent.git
+[submodule "cli_agents/agent-deck"]
+	path = cli_agents/agent-deck
+	url = git@github.com:asheshgoplani/agent-deck.git
+[submodule "cli_agents/aiagent"]
+	path = cli_agents/aiagent
+	url = git@github.com:Xiaoccer/AIAgent.git
+[submodule "cli_agents/aichat"]
+	path = cli_agents/aichat
+	url = git@github.com:sigoden/aichat.git
+[submodule "cli_agents/aichat-llm-functions"]
+	path = cli_agents/aichat-llm-functions
+	url = git@github.com:sigoden/llm-functions.git
+[submodule "cli_agents/aider"]
+	path = cli_agents/aider
+	url = git@github.com:Aider-AI/aider.git
+[submodule "cli_agents/amazon-q"]
+	path = cli_agents/amazon-q
+	url = git@github.com:aws/amazon-q-developer-cli.git
+[submodule "cli_agents/bridle"]
+	path = cli_agents/bridle
+	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+[submodule "cli_agents/claude-code"]
+	path = cli_agents/claude-code
+	url = git@github.com:anthropics/claude-code.git
+[submodule "cli_agents/claude-code-source"]
+	path = cli_agents/claude-code-source
+	url = git@gitlab.com:milos85vasic/ccode-private.git
+[submodule "cli_agents/claude-squad"]
+	path = cli_agents/claude-squad
+	url = git@github.com:smtg-ai/claude-squad.git
+[submodule "cli_agents/cli-agent"]
+	path = cli_agents/cli-agent
+	url = git@github.com:NathanGr33n/CLI_Tool.git
+[submodule "cli_agents/codai"]
+	path = cli_agents/codai
+	url = git@github.com:meysamhadeli/codai.git
+[submodule "cli_agents/codename-goose"]
+	path = cli_agents/codename-goose
+	url = git@github.com:jgenerali/codename-goose.git
+[submodule "cli_agents/codex-skills"]
+	path = cli_agents/codex-skills
+	url = git@github.com:openai/skills.git
+[submodule "cli_agents/conduit"]
+	path = cli_agents/conduit
+	url = git@github.com:lostintangent/conduit-release.git
+[submodule "cli_agents/copilot-cli"]
+	path = cli_agents/copilot-cli
+	url = git@github.com:github/copilot-cli.git
+[submodule "cli_agents/crush"]
+	path = cli_agents/crush
+	url = git@github.com:charmbracelet/crush.git
+[submodule "cli_agents/deepseek-cli"]
+	path = cli_agents/deepseek-cli
+	url = git@github.com:holasoymalva/deepseek-cli.git
+[submodule "cli_agents/deepseek-cli-youkpan"]
+	path = cli_agents/deepseek-cli-youkpan
+	url = git@github.com:youkpan/deepseek-cli.git
+[submodule "cli_agents/fauxpilot"]
+	path = cli_agents/fauxpilot
+	url = git@github.com:fauxpilot/fauxpilot.git
+[submodule "cli_agents/forge"]
+	path = cli_agents/forge
+	url = git@github.com:antinomyhq/forge.git
+[submodule "cli_agents/gemini-cli"]
+	path = cli_agents/gemini-cli
+	url = git@github.com:google-gemini/gemini-cli.git
+[submodule "cli_agents/get-shit-done"]
+	path = cli_agents/get-shit-done
+	url = git@github.com:glittercowboy/get-shit-done.git
+[submodule "cli_agents/git-mcp"]
+	path = cli_agents/git-mcp
+	url = git@github.com:idosal/git-mcp.git
+[submodule "cli_agents/gpt-engineer"]
+	path = cli_agents/gpt-engineer
+	url = git@github.com:AntonOsika/gpt-engineer.git
+[submodule "cli_agents/gptme"]
+	path = cli_agents/gptme
+	url = git@github.com:ErikBjare/gptme.git
+[submodule "cli_agents/junie"]
+	path = cli_agents/junie
+	url = git@github.com:JetBrains/junie.git
+[submodule "cli_agents/mistral-code"]
+	path = cli_agents/mistral-code
+	url = git@github.com:Wylgrif/Mistral-code.git
+[submodule "cli_agents/multiagent-coding"]
+	path = cli_agents/multiagent-coding
+	url = git@github.com:Danau5tin/multi-agent-coding-system.git
+[submodule "cli_agents/nanocoder"]
+	path = cli_agents/nanocoder
+	url = git@github.com:Nano-Collective/nanocoder.git
+[submodule "cli_agents/noi"]
+	path = cli_agents/noi
+	url = git@github.com:lencx/Noi.git
+[submodule "cli_agents/octogen"]
+	path = cli_agents/octogen
+	url = git@github.com:dbpunk-labs/octogen.git
+[submodule "cli_agents/open-interpreter"]
+	path = cli_agents/open-interpreter
+	url = git@github.com:KillianLucas/open-interpreter.git
+[submodule "cli_agents/plandex"]
+	path = cli_agents/plandex
+	url = git@github.com:plandex-ai/plandex.git
+[submodule "cli_agents/postgres-mcp"]
+	path = cli_agents/postgres-mcp
+	url = git@github.com:timescale/pg-aiguide.git
+[submodule "cli_agents/qwen-code"]
+	path = cli_agents/qwen-code
+	url = git@github.com:QwenLM/qwen-code.git
+[submodule "cli_agents/shai"]
+	path = cli_agents/shai
+	url = git@github.com:ovh/shai.git
+[submodule "cli_agents/snow-cli"]
+	path = cli_agents/snow-cli
+	url = git@github.com:MayDay-wpf/snow-cli.git
+[submodule "cli_agents/swe-agent"]
+	path = cli_agents/swe-agent
+	url = git@github.com:princeton-nlp/SWE-agent.git
+[submodule "cli_agents/taskweaver"]
+	path = cli_agents/taskweaver
+	url = git@github.com:microsoft/TaskWeaver.git
+[submodule "cli_agents/ui-ux-pro-max"]
+	path = cli_agents/ui-ux-pro-max
+	url = git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git
+[submodule "cli_agents/vtcode"]
+	path = cli_agents/vtcode
+	url = git@github.com:vinhnx/vtcode.git
+[submodule "cli_agents/warp"]
+	path = cli_agents/warp
+	url = git@github.com:warpdotdev/Warp.git
+[submodule "cli_agents/x-cmd"]
+	path = cli_agents/x-cmd
+	url = git@github.com:x-cmd/x-cmd.git
+[submodule "cli_agents/xela-cli"]
+	path = cli_agents/xela-cli
+	url = git@github.com:xelauvas/codeclau.git
+[submodule "cli_agents/zeroshot"]
+	path = cli_agents/zeroshot
+	url = git@github.com:covibes/zeroshot.git
+[submodule "cli_agents/cline"]
+	path = cli_agents/cline
+	url = git@github.com:cline/cline.git
+[submodule "cli_agents/codex"]
+	path = cli_agents/codex
+	url = git@github.com:openai/codex.git
+[submodule "cli_agents/spec-kit"]
+	path = cli_agents/spec-kit
+	url = git@github.com:github/spec-kit.git
+[submodule "cli_agents/superset"]
+	path = cli_agents/superset
+	url = git@github.com:superset-sh/superset.git
+[submodule "mcp_servers"]
+	path = mcp_servers
+	url = git@github.com:modelcontextprotocol/servers.git
+[submodule "dependencies/HelixDevelopment/models"]
+	path = dependencies/HelixDevelopment/models
+	url = git@github.com:vasic-digital/Models.git
+[submodule "constitution"]
+	path = constitution
+	url = git@github.com:HelixDevelopment/HelixConstitution.git
+[submodule "panoptic"]
+	path = panoptic
+	url = git@github.com:vasic-digital/Panoptic.git
+[submodule "dependencies/vasic-digital/event_bus"]
+	path = dependencies/vasic-digital/event_bus
+	url = git@github.com:vasic-digital/EventBus.git
+[submodule "dependencies/vasic-digital/concurrency"]
+	path = dependencies/vasic-digital/concurrency
+	url = git@github.com:vasic-digital/Concurrency.git
+[submodule "dependencies/vasic-digital/observability"]
+	path = dependencies/vasic-digital/observability
+	url = git@github.com:vasic-digital/Observability.git
+[submodule "dependencies/vasic-digital/auth"]
+	path = dependencies/vasic-digital/auth
+	url = git@github.com:vasic-digital/Auth.git
+[submodule "dependencies/vasic-digital/storage"]
+	path = dependencies/vasic-digital/storage
+	url = git@github.com:vasic-digital/Storage.git
+[submodule "dependencies/vasic-digital/vector_db"]
+	path = dependencies/vasic-digital/vector_db
+	url = git@github.com:vasic-digital/VectorDB.git
+[submodule "dependencies/vasic-digital/embeddings"]
+	path = dependencies/vasic-digital/embeddings
+	url = git@github.com:vasic-digital/Embeddings.git
+[submodule "dependencies/vasic-digital/database"]
+	path = dependencies/vasic-digital/database
+	url = git@github.com:vasic-digital/Database.git
+[submodule "dependencies/vasic-digital/cache"]
+	path = dependencies/vasic-digital/cache
+	url = git@github.com:vasic-digital/Cache.git
+[submodule "dependencies/vasic-digital/messaging"]
+	path = dependencies/vasic-digital/messaging
+	url = git@github.com:vasic-digital/Messaging.git
+[submodule "dependencies/vasic-digital/formatters"]
+	path = dependencies/vasic-digital/formatters
+	url = git@github.com:vasic-digital/Formatters.git
+[submodule "dependencies/vasic-digital/mcp_module"]
+	path = dependencies/vasic-digital/mcp_module
+	url = git@github.com:vasic-digital/MCP_Module.git
+[submodule "dependencies/vasic-digital/rag"]
+	path = dependencies/vasic-digital/rag
+	url = git@github.com:vasic-digital/RAG.git
+[submodule "dependencies/vasic-digital/memory"]
+	path = dependencies/vasic-digital/memory
+	url = git@github.com:vasic-digital/Memory.git
+[submodule "dependencies/vasic-digital/optimization"]
+	path = dependencies/vasic-digital/optimization
+	url = git@github.com:vasic-digital/Optimization.git
+[submodule "dependencies/vasic-digital/plugins"]
+	path = dependencies/vasic-digital/plugins
+	url = git@github.com:vasic-digital/Plugins.git
+[submodule "dependencies/HelixDevelopment/helix_memory"]
+	path = dependencies/HelixDevelopment/helix_memory
+	url = git@github.com:HelixDevelopment/HelixMemory.git
+[submodule "dependencies/HelixDevelopment/helix_specifier"]
+	path = dependencies/HelixDevelopment/helix_specifier
+	url = git@github.com:HelixDevelopment/HelixSpecifier.git
+[submodule "dependencies/vasic-digital/agentic"]
+	path = dependencies/vasic-digital/agentic
+	url = git@github.com:vasic-digital/Agentic.git
+[submodule "dependencies/vasic-digital/llm_ops"]
+	path = dependencies/vasic-digital/llm_ops
+	url = git@github.com:vasic-digital/LLMOps.git
+[submodule "dependencies/vasic-digital/self_improve"]
+	path = dependencies/vasic-digital/self_improve
+	url = git@github.com:vasic-digital/SelfImprove.git
+[submodule "dependencies/vasic-digital/planning"]
+	path = dependencies/vasic-digital/planning
+	url = git@github.com:vasic-digital/Planning.git
+[submodule "dependencies/vasic-digital/benchmark"]
+	path = dependencies/vasic-digital/benchmark
+	url = git@github.com:vasic-digital/Benchmark.git
+[submodule "dependencies/vasic-digital/tool_schema"]
+	path = dependencies/vasic-digital/tool_schema
+	url = git@github.com:vasic-digital/ToolSchema.git
+[submodule "dependencies/vasic-digital/skill_registry"]
+	path = dependencies/vasic-digital/skill_registry
+	url = git@github.com:vasic-digital/SkillRegistry.git
+[submodule "dependencies/vasic-digital/models"]
+	path = dependencies/vasic-digital/models
+	url = git@github.com:vasic-digital/Models.git
+[submodule "dependencies/vasic-digital/llm_provider"]
+	path = dependencies/vasic-digital/llm_provider
+	url = git@github.com:vasic-digital/LLMProvider.git
+[submodule "dependencies/vasic-digital/background_tasks"]
+	path = dependencies/vasic-digital/background_tasks
+	url = git@github.com:vasic-digital/BackgroundTasks.git
+[submodule "dependencies/vasic-digital/doc_processor"]
+	path = dependencies/vasic-digital/doc_processor
+	url = git@github.com:vasic-digital/DocProcessor.git
+[submodule "dependencies/vasic-digital/conversation"]
+	path = dependencies/vasic-digital/conversation
+	url = git@github.com:vasic-digital/conversation.git
+[submodule "dependencies/vasic-digital/llm_orchestrator"]
+	path = dependencies/vasic-digital/llm_orchestrator
+	url = git@github.com:vasic-digital/LLMOrchestrator.git
+[submodule "dependencies/vasic-digital/vision_engine"]
+	path = dependencies/vasic-digital/vision_engine
+	url = git@github.com:vasic-digital/VisionEngine.git
+[submodule "dependencies/HelixDevelopment/helix_llm"]
+	path = dependencies/HelixDevelopment/helix_llm
+	url = git@github.com:HelixDevelopment/HelixLLM.git
+[submodule "dependencies/vasic-digital/normalize"]
+	path = dependencies/vasic-digital/normalize
+	url = git@github.com:vasic-digital/Normalize.git
+[submodule "dependencies/vasic-digital/red_team"]
+	path = dependencies/vasic-digital/red_team
+	url = git@github.com:vasic-digital/RedTeam.git
+[submodule "dependencies/vasic-digital/plinius_common"]
+	path = dependencies/vasic-digital/plinius_common
+	url = git@github.com:vasic-digital/PliniusCommon.git
+[submodule "dependencies/vasic-digital/gandalf_solutions"]
+	path = dependencies/vasic-digital/gandalf_solutions
+	url = git@github.com:vasic-digital/GandalfSolutions.git
+[submodule "dependencies/vasic-digital/auto_temp"]
+	path = dependencies/vasic-digital/auto_temp
+	url = git@github.com:vasic-digital/AutoTemp.git
+[submodule "dependencies/vasic-digital/hyper_tune"]
+	path = dependencies/vasic-digital/hyper_tune
+	url = git@github.com:vasic-digital/HyperTune.git
+[submodule "dependencies/vasic-digital/i_llm"]
+	path = dependencies/vasic-digital/i_llm
+	url = git@github.com:vasic-digital/I-LLM.git
+[submodule "dependencies/vasic-digital/streaming"]
+	path = dependencies/vasic-digital/streaming
+	url = git@github.com:vasic-digital/Streaming.git
+[submodule "dependencies/vasic-digital/veritas"]
+	path = dependencies/vasic-digital/veritas
+	url = git@github.com:vasic-digital/Veritas.git
+[submodule "dependencies/vasic-digital/leak_hub"]
+	path = dependencies/vasic-digital/leak_hub
+	url = git@github.com:vasic-digital/LeakHub.git
+[submodule "dependencies/vasic-digital/claritas"]
+	path = dependencies/vasic-digital/claritas
+	url = git@github.com:vasic-digital/Claritas.git
+[submodule "dependencies/vasic-digital/ouroborous"]
+	path = dependencies/vasic-digital/ouroborous
+	url = git@github.com:vasic-digital/Ouroborous.git
+[submodule "dependencies/vasic-digital/config"]
+	path = dependencies/vasic-digital/config
+	url = git@github.com:vasic-digital/Config.git
+[submodule "dependencies/vasic-digital/lazy"]
+	path = dependencies/vasic-digital/lazy
+	url = git@github.com:vasic-digital/Lazy.git
+[submodule "dependencies/vasic-digital/watcher"]
+	path = dependencies/vasic-digital/watcher
+	url = git@github.com:vasic-digital/Watcher.git
+[submodule "dependencies/vasic-digital/middleware"]
+	path = dependencies/vasic-digital/middleware
+	url = git@github.com:vasic-digital/Middleware.git
+[submodule "dependencies/vasic-digital/rate_limiter"]
+	path = dependencies/vasic-digital/rate_limiter
+	url = git@github.com:vasic-digital/RateLimiter.git
+[submodule "dependencies/vasic-digital/i18n"]
+	path = dependencies/vasic-digital/i18n
+	url = git@github.com:vasic-digital/I18n.git
+[submodule "dependencies/vasic-digital/recovery"]
+	path = dependencies/vasic-digital/recovery
+	url = git@github.com:vasic-digital/Recovery.git
+[submodule "dependencies/vasic-digital/document"]
+	path = dependencies/vasic-digital/document
+	url = git@github.com:vasic-digital/Document.git
+[submodule "dependencies/vasic-digital/filesystem"]
+	path = dependencies/vasic-digital/filesystem
+	url = git@github.com:vasic-digital/Filesystem.git
+[submodule "dependencies/vasic-digital/toon"]
+	path = dependencies/vasic-digital/toon
+	url = git@github.com:vasic-digital/TOON.git
+[submodule "dependencies/HelixDevelopment/debate_orchestrator"]
+	path = dependencies/HelixDevelopment/debate_orchestrator
+	url = git@github.com:HelixDevelopment/DebateOrchestrator.git
+
+## SUBMODULE SHAS (recursive)
+# Format: <SHA> <path> (<describe>); leading '+' = checked-out SHA differs from gitlink
+
+ 101571f7ed5ce34e7823b061d5ec7ca2e2a5139f awesome-ai-memory (heads/main)
+ dfb5f9c896b2b361b42925d79721aed767fb0a1a challenges (1.0.2-dev-0.0.2-260-gdfb5f9c)
+ ff67b77c3eee6194bcb601036257a96f26ef854d cli_agents/agent-deck (v1.9.46-27-gff67b77c)
+ eb49aa5d3f8aeb56ead32f42e8e567713ec3c13e cli_agents/aiagent (heads/main)
+ 82976d349ad97ac9aae0655ad631dace5e2a6385 cli_agents/aichat (v0.30.0-28-g82976d3)
+ 616d8d84c5565fdb66d8782ae5ba56d994bfa82a cli_agents/aichat-llm-functions (heads/main)
+ 5dc9490bb35f9729ef2c95d00a19ccd30c26339c cli_agents/aider (v0.86.3.dev-53-g5dc9490bb)
+ 15cc8f3cd18c4272925ce1c7053268eedff1ea0a cli_agents/amazon-q (v1.19.7-2-g15cc8f3c)
+ 6e9558f0d0222938d88e725e2954c54617ce1e9a cli_agents/bridle (v4.33.0-28-g6e9558f0d)
+ 625c04c3350378c3d74662505aae3e9dcf3fa1b4 cli_agents/claude-code (v2.1.161)
+ c3a97942a19fdc7a548634a783cb144919313317 cli_agents/claude-code-source (heads/main)
+ 4a02a308be98053130223e7d80f7316a9264fb97 cli_agents/claude-squad (v1.0.10-29-g4a02a30)
+ fe5bec632417411d7d8701a25f4481902e9cfcb8 cli_agents/cli-agent (heads/Master)
+ 444a9be6ec12080a895926cbfcb342b5f5a21955 cli_agents/cline (cli-v3.0.15-26-g444a9be6e)
+ d1085569fb0ae3f9613957e6fc2706c6e2f7da9b cli_agents/cline/evals/cline-bench (heads/main)
+ 4949b5ccfab7312d0527235ceb4b45ca39d437df cli_agents/codai (v1.9.0-6-g4949b5c)
+ 3d4574dfe4240225c6dbad8c81afe133e8facd51 cli_agents/codename-goose (heads/main)
+ 3389fa554e953d07a12a34f5681aae46f17958f8 cli_agents/codex (python-v0.1.0b2-204-g3389fa554e)
+ a8924c2a35cfa290458852c4fad17c9133054c2e cli_agents/codex-skills (heads/main)
+ 25766dcc59eebdb74059f90ad1df38838e58c865 cli_agents/conduit (v0.2.6)
+ 3e316bbd750d398b56b20f346cb6a9c4bf429441 cli_agents/copilot-cli (v1.0.59-1-g3e316bb)
+ 123087ab88bcc647c874608f83243b77ff62f112 cli_agents/crush (v0.75.0)
+ db2733f7457fad42c2e819a81fb0e595b3834d33 cli_agents/deepseek-cli (fix-8-gdb2733f)
+ fe52d00645c73f5961b871efd66a944d9dc53fea cli_agents/deepseek-cli-youkpan (heads/master)
+ 788edd44f29b3a3c33136f956c8c20d055604438 cli_agents/fauxpilot (heads/main)
+ 29c7596383a3761893db7abd24b92f98765ac554 cli_agents/forge (v0.89.0-1484-g29c759638)
+ d2cd12a7cbdd149a4bd6140be89b312f781cd907 cli_agents/gemini-cli (MK_TAG_TEST-5090-gd2cd12a7c)
+ bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815 cli_agents/get-shit-done (v1.38.2-990-gbdcaab2c)
+ c487a29895dcfcb5b672247e646426a56e2051c1 cli_agents/git-mcp (heads/main)
+ a90fcd543eedcc0ff2c34561bc0785d2ba83c47e cli_agents/gpt-engineer (v0.3.1-60-ga90fcd5)
+ 8f15739c6f3070e82163896956c9844b7ec8c9b7 cli_agents/gptme (v0.28.2-2200-g8f15739c6)
+ 13ba1c1de50a1d811cdfe2a6aaa7fe19a672834a cli_agents/junie (1911.1-7-g13ba1c1)
+ 0a459ab5de9b06d12609b6d888cb816d9674b27f cli_agents/mistral-code (heads/main)
+ e71b80329eb9ae718ec20500a3e932ffea5fc9ac cli_agents/multiagent-coding (v0.1-7-ge71b803)
+ 26b73523a7dfa71ebb4c9bfbad727968fc70c1d2 cli_agents/nanocoder (v1.27.0-23-g26b73523)
+ 48f641ea8be5f0117e360dbf1f7285e06cdcf1a5 cli_agents/noi (v1.1.0-6-g48f641e)
+ 39cc2de9430969c0995a21e89e0af9c841a1dbed cli_agents/octogen (v0.5.3-26-g39cc2de)
+ e00f08e2ed54e97a530326cc2b1a93389bbe5f7c cli_agents/open-interpreter (v0.4.2-64-ge00f08e2)
+ e2d772072efadbe41d2946d97d79be55532dbab5 cli_agents/plandex (cli/v2.2.1-3-ge2d77207)
+ c61d613e7842096e9aaa7d9b8b6fddbdaa9ec5be cli_agents/postgres-mcp (v0.4.0-10-gc61d613)
+ 53d3d7f6ff374ad888bf17f8a3b149c099ecc326 cli_agents/qwen-code (sdk-typescript-v0.1.5-2066-g53d3d7f6f)
+ c9cb88d0f16326dce20d84eba6586fabe7e51176 cli_agents/shai (v0.1.10-7-gc9cb88d)
+ 11e91105b45ff09c88a0a51173df25aadf8bb5e0 cli_agents/snow-cli (v0.7.35-2-g11e9110)
+ 06c76533cb970cba208b22e3f56e675a15a44e74 cli_agents/spec-kit (v0.1.10-497-g06c7653)
+ 30ff989d376eca0743408e0427c4ae0b194e87af cli_agents/superset (cli-v0.2.21-6-g30ff989d3)
+ da31587839406e114556505ed494e1fe49e47a42 cli_agents/swe-agent (v1.1.0-154-gda315878)
+ d44ddef23f90059fb17999d3095db4240e98f955 cli_agents/taskweaver (v0.0.2-alpha-162-gd44ddef2)
+ b7e3af80f6e331f6fb456667b82b12cade7c9d35 cli_agents/ui-ux-pro-max (v2.5.0-22-gb7e3af8)
+ 8b39258bf92e18034f57cc3050ea8356a18e9f8c cli_agents/vtcode (0.119.0-4-g8b39258bf)
+ 2249469e5d24e472cee6ce97d3d324293f67db71 cli_agents/warp (v0.2026.06.03.09.49.dev_00)
+ d0855321b9b180bc0d12939b9bb5d1134306709a cli_agents/x-cmd (alpha-198-gd0855321)
+ 8251b4f214545702fe91d577cd3d38a8e1af724f cli_agents/xela-cli (heads/main)
+ 0edf0680b61c346af1960e88a6587e5460ac74fa cli_agents/zeroshot (v5.5.0)
+ 6af02e9230dae8a155fe6e49526dd309c04120b7 cli_agents_resources/Awesome-AI-Agents (v1.6-297-g6af02e9)
+ 320ce6f34ca5cfee6d7a2655b844f43700f14150 cli_agents_resources/Awesome-AI-GPTs (heads/main)
+ 9b6baba594df7bcc3d40b2f478f1d2683da6df65 cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs (heads/main)
+ 776d84143238cb91f7242665f188887b9e8d2aa9 cli_agents_resources/GitHub-Awesome-Copilot (heads/main)
+ 026f7e66c258750a053047eee129978714da4712 cli_agents_resources/OpenAI-Cookbook (heads/main)
+ 1757615b99ab789a72ff2d02e9f6112af2a15c04 cli_agents_resources/Taches-CC-Resources (heads/main)
+ d90ab873513605537040617d8d7508bdda01f25c constitution (heads/main)
+ 6f4f415903fd22031cc35267ea3c9840a366520e containers (1.0.2-dev-0.0.2-282-g6f4f415)
+ 833b08ffb7402ceae36f5ba369e34da25672c3fa dependencies/HelixDevelopment/debate_orchestrator (heads/main)
+ 7750140c907a402e23e898192fb88b5c7cbf39ed dependencies/HelixDevelopment/doc_processor (1.0.2-dev-0.0.2-116-g7750140)
+ ed159d73dca1cafd8b54fc7cd3c8448cfac0fba8 dependencies/HelixDevelopment/helix_llm (heads/main)
+ b4d2f5b5c6d66e62351f2493ca4561a07ebed4bb dependencies/HelixDevelopment/helix_memory (heads/main)
+ 251a11b3ab67409148f92dcf7f8bac869343a2b5 dependencies/HelixDevelopment/helix_specifier (heads/main)
+ d2a2151efa9b8e691100e432e6e57b9506f8118f dependencies/HelixDevelopment/llm_orchestrator (1.0.2-dev-0.0.2-126-gd2a2151)
+ d3da070c92d8f46f74454f8ac16f667447ed9df4 dependencies/HelixDevelopment/llm_provider (1.0.2-dev-0.0.2-139-gd3da070)
+ 043c34b287b8448f819e020c564215651967f032 dependencies/HelixDevelopment/llms_verifier (heads/main)
+ c22cae34dd2aba710cd249f8b2485297c9cf09b4 dependencies/HelixDevelopment/models (heads/master)
+ 71b911e4bd715096829672fbf82f4a647531eba4 dependencies/HelixDevelopment/vision_engine (1.0.2-dev-0.0.2-121-g71b911e)
+ 26a6df1abfdca37ddd380a1e3c926db20ee35477 dependencies/HuggingFace_Hub (v0.9.0.rc1-1772-g26a6df1a)
+ 3571fa5435ac9ff243662b1caabc407e8d433c9d dependencies/LLama_CPP (gguf-v0.19.0-444-g3571fa543)
+ 4b5bdd3b25118dc6904c01b01b47abcf5cbd8b92 dependencies/Ollama (v0.13.4-rc2-527-g4b5bdd3b)
+ c9c885166e0e4bdd1563380a0a39946ddd97f410 dependencies/vasic-digital/agentic (heads/main)
+ a3fc97d60468e97fa39ba225c0e313ed2a8f1ba6 dependencies/vasic-digital/auth (heads/main)
+ 5f9eccef4b9e1ce3207bb538281bd00210b999e1 dependencies/vasic-digital/auto_temp (heads/main)
+ ddcc0405ed97c4620a30daa4fcd29a14726afafc dependencies/vasic-digital/background_tasks (heads/master)
+ e27227f46fa877be1dd3a6cade2eaedcf8a6f74b dependencies/vasic-digital/benchmark (heads/main)
+ 785336867056d6ddd1e248779903e91b36e0b0fd dependencies/vasic-digital/cache (heads/main)
+ 3abf7a8b2f97ce9341105cfb4e216dff66883b76 dependencies/vasic-digital/claritas (heads/main)
+ 711499e08d13f80cf2a852879f93f65a2279973d dependencies/vasic-digital/concurrency (heads/main)
+ 344073f7a56ac078baca9e7c64dae82d12016ae4 dependencies/vasic-digital/config (heads/main)
+ 42eec0c6e056ff15490172b5517ccf2059f9474d dependencies/vasic-digital/conversation (heads/main)
+ d822b33a461fd2cfc772e4b43409a62daccbd268 dependencies/vasic-digital/database (heads/main)
+ 7750140c907a402e23e898192fb88b5c7cbf39ed dependencies/vasic-digital/doc_processor (1.0.2-dev-0.0.2-116-g7750140)
+ 3ed56d69848a9dad29a49241644ad219be817d33 dependencies/vasic-digital/document (heads/main)
+ 258020225277779e7e5e19c9871a74f8eb5c18cf dependencies/vasic-digital/embeddings (heads/main)
+ 7026e356f5747b97dd848ba72b526fe5c9f13207 dependencies/vasic-digital/event_bus (heads/main)
+ 3495a3e6c4446a40244bf46a84f4d9733ff5d5c5 dependencies/vasic-digital/filesystem (heads/main)
+ ceb646211e7824e9ac7126ec62320d2899a2ef8f dependencies/vasic-digital/formatters (heads/main)
+ 5ed4994a3d3b1702a95d443168be111f4ad73f4e dependencies/vasic-digital/gandalf_solutions (heads/main)
+ 3a9b88856d6cb514d127d55df23bd5d063454cb0 dependencies/vasic-digital/hyper_tune (heads/main)
+ 7e7758b23389c100f377840a9da266b1bd7353cd dependencies/vasic-digital/i18n (heads/main)
+ a512dea5a6a337876cef6a3bb3994197cb14e311 dependencies/vasic-digital/i_llm (heads/main)
+ 8685b5a511e396f9807e763e78f9087848dc66e8 dependencies/vasic-digital/lazy (heads/main)
+ 3d9f6678313101996adf6ec75f3674872f4376aa dependencies/vasic-digital/leak_hub (heads/main)
+ 8ff458b3065ff93e66222d8a6638f5509753e7d3 dependencies/vasic-digital/llm_ops (heads/main)
+ d2a2151efa9b8e691100e432e6e57b9506f8118f dependencies/vasic-digital/llm_orchestrator (1.0.2-dev-0.0.2-126-gd2a2151)
+ d3da070c92d8f46f74454f8ac16f667447ed9df4 dependencies/vasic-digital/llm_provider (1.0.2-dev-0.0.2-139-gd3da070)
+ 1619d31dbd65382eba6a352469d377d65d4ad14f dependencies/vasic-digital/mcp_module (heads/main)
+ c33f29d6e3b49b4a256aac5daf3a2c1a94e8fabd dependencies/vasic-digital/memory (heads/main)
+ 7b2a3e05a67cce85a9558440b3e6cbb83775635e dependencies/vasic-digital/messaging (heads/main)
+ ccf237aeff4b5cdc19fb42de38e8424f9b1c8269 dependencies/vasic-digital/middleware (heads/main)
+ c22cae34dd2aba710cd249f8b2485297c9cf09b4 dependencies/vasic-digital/models (heads/master)
+ 72c139f1cb739a7ed18720be28e1d65cba5228b1 dependencies/vasic-digital/normalize (heads/main)
+ 73bbd1b42f8bf2eac82f48a7059428d4bf1be995 dependencies/vasic-digital/observability (heads/main)
+ 4c98c76f1517db2f8d0f0e114cbe386bbc69c510 dependencies/vasic-digital/optimization (heads/main)
+ 448fce39ffff5ba9101917c9008fca9f4dacf6c9 dependencies/vasic-digital/ouroborous (heads/main)
+ 72d508bcdbe4bbf92de0f1777a5a0fc6bec14b69 dependencies/vasic-digital/planning (heads/main)
+ d6010122a7d6b665c8f71dd5dcfecf83c6421fb8 dependencies/vasic-digital/plinius_common (heads/main)
+ 36bbaedefe96b407323d171d3829e579bc67a2e3 dependencies/vasic-digital/plugins (heads/main)
+ 3a6a2963c520844e9c80f0d093c0cc84d233f275 dependencies/vasic-digital/rag (heads/main)
+ 92b01ea966fb3ea702035cbd45883d58d43c9dcc dependencies/vasic-digital/rate_limiter (heads/main)
+ 0eb87cf275885f3dad2476534322bf01248128af dependencies/vasic-digital/recovery (heads/main)
+ 37379bb8d5d44669534844d5aac4fa0d3f8f62fb dependencies/vasic-digital/red_team (heads/main)
+ b7489eccb56322fdc930ffd206cfcc35aa6771df dependencies/vasic-digital/self_improve (heads/main)
+ f6e22690bb1416289665e8b99a9ec93c438dbcb4 dependencies/vasic-digital/skill_registry (heads/main)
+ 5a279e5f805b2e65d4f0e3c3224f210d617d4fe2 dependencies/vasic-digital/storage (heads/main)
+ fd7ef65b17188e24a07e9861a77f114dc2c74c30 dependencies/vasic-digital/streaming (heads/main)
+ c18f61c9a36fc143147a654637ba202d1cfe9e71 dependencies/vasic-digital/tool_schema (heads/main)
+ a633134ea9c3bed7127af249659c29a6d98b7499 dependencies/vasic-digital/toon (heads/main)
+ 46cd6abfdd6b876b3607db121068d13b84f1a0df dependencies/vasic-digital/vector_db (heads/main)
+ 49c1ebc6037ef2423a7d235a3b18ed171679ac1a dependencies/vasic-digital/veritas (heads/main)
+ 71b911e4bd715096829672fbf82f4a647531eba4 dependencies/vasic-digital/vision_engine (1.0.2-dev-0.0.2-121-g71b911e)
+ e95a43e11146c1bcdcbf202d8faf94bdbb0f514c dependencies/vasic-digital/watcher (heads/main)
+ 7fbe2619c81910f5ac7f432ddca5bdf96114f2b1 github_pages_website (heads/main)
+ 5f50e616a687d251f145a0bbe8b3b2125f93f3c2 helix_agent (heads/main)
+ ee5e8554028f2e3b40a0f666f269000d2440e923 helix_agent/BuildCheck (heads/main)
++7a53fe6e58fd278b179d240596f25090b00d2b87 helix_agent/MCP/submodules/airtable-mcp (v1.13.0-14-g7a53fe6)
+ 9363f6adb7f4d2f9bcd033161a13b8c19d718781 helix_agent/MCP/submodules/all-in-one-mcp (v1.0.1-1-g9363f6a)
++280218b4bba97a49facf929f8012dec5e30384b6 helix_agent/MCP/submodules/appcypher-awesome-mcp (heads/main)
+ d8bc78698a63cb6b321c7ca796d6329d448f7f6d helix_agent/MCP/submodules/atlassian-mcp (v0.12.0-193-gd8bc786)
++ee409672e9141b566acb94bb5b52dc2a93cbb91a helix_agent/MCP/submodules/awesome-devops-mcp (heads/main)
++70acc2194806cd47878737bb41a958f6958b388c helix_agent/MCP/submodules/awesome-mcp-servers (heads/main)
++e2802c7a6824f4b78aac554492063a4f4810c650 helix_agent/MCP/submodules/aws-mcp (2026.06.20260602223738-1-ge2802c7a)
++d915fade87c28d09c0338dd7a5d05d2dc41104c1 helix_agent/MCP/submodules/brave-search (v2.0.83)
++1e196b3d3c4dc70944e0d19038dd9eb3608b207a helix_agent/MCP/submodules/browserbase-mcp (v3.0.0-1-g1e196b3)
++767e701c9dcad956a944cfaf062519f265144e21 helix_agent/MCP/submodules/cloudflare-mcp (graphql-mcp-server@0.2.1)
++c436700959bf0c277aa02c57195b5a24778cf8aa helix_agent/MCP/submodules/context7-mcp (ctx7@0.4.5)
+ b07744de4f10e92cfd1a98b51f7aac8ee5805d69 helix_agent/MCP/submodules/create-python-server (v1.0.5-3-gb07744d)
+ 3115f395cebe7c3ca631ba4becd4cbdf46cd6291 helix_agent/MCP/submodules/create-typescript-server (0.3.1)
+ b11b9d7f545ba0dd74ae30f272edeacfc9f0949a helix_agent/MCP/submodules/docs-mcp (heads/master)
+ a2b050d07c1e0af19974f63efa20f4553cb43b2b helix_agent/MCP/submodules/elasticsearch-mcp (v0.1.1-106-ga2b050d)
++ad49a566f8318b1b1f285a0f2475de01a20cbc4d helix_agent/MCP/submodules/ever-works-awesome-mcp (heads/master)
++01e3b8a28ced61b4b10ab27bcbf9e59b904f887f helix_agent/MCP/submodules/firecrawl-mcp (v1.2.4-264-g01e3b8a)
++2a5d38a2825519e109bcbd3ccfd13a459582a455 helix_agent/MCP/submodules/github-mcp-server (v1.1.2-19-g2a5d38a)
++3b4b6f9d2e15d66fd0c841f2b6aa0e6a75979e4b helix_agent/MCP/submodules/habito-awesome-mcp (heads/main)
++905d2dfc6d196c34a36014da326cfb9b5b67c012 helix_agent/MCP/submodules/heroku-mcp (v0.0.1-86-g905d2df)
++10f429759f191349785c0ac1707e8ce1e9bceb83 helix_agent/MCP/submodules/inspector (0.21.2-hotfix-3-4-g10f42975)
+ 1794ac932b5ff75c60a6d9c117ee57a81b95678a helix_agent/MCP/submodules/k8s-mcp-server (1.3.0-14-g1794ac9)
++b6957d1ac7bd067cdf3891d0e59e46a980edbb70 helix_agent/MCP/submodules/kubernetes-mcp (v0.0.62-30-gb6957d1)
++4f9f7ea9b23364925009173b15ebcf44b87036e8 helix_agent/MCP/submodules/langchain-mcp (langchain-mcp-adapters==0.2.2-32-g4f9f7ea)
++e57bd2ac73b39218dca9b3b885806c9c474d84c9 helix_agent/MCP/submodules/llamaindex-mcp (heads/main)
+ 2349c2891e7c499c8c07b7d78c7f3fb4c797a1da helix_agent/MCP/submodules/mcp-playwright-ea (heads/main)
++4e2e4334c4380292b56ec71ffc44f88be89a2b49 helix_agent/MCP/submodules/microsoft-mcp (Azure.Mcp.Server-3.0.0-beta.16-16-g4e2e4334c)
++5fa583c503e5000ab21c2c4ddfe6865851bf8c9f helix_agent/MCP/submodules/mongodb-mcp (v1.11.0-10-g5fa583c5)
++e79f35fd64cc5db726fbba1beebaa84c80760c17 helix_agent/MCP/submodules/notion-mcp-server (v2.1.0-10-ge79f35f)
++230cd813777f360b545d766cca5fbde3e7e65e7e helix_agent/MCP/submodules/obsidian-mcp (v3.2.4-1-g230cd81)
++60871c6e0b08bfc70bec2076f06d09df64347433 helix_agent/MCP/submodules/omnisearch-mcp (v0.0.28-2-g60871c6)
+ dd5e0785520833ebc95d5e97c8fa68971dcae07b helix_agent/MCP/submodules/perplexity-mcp (heads/main)
++32017187a0f044b2b5cbc97c20a78a3878e00ac2 helix_agent/MCP/submodules/playwright-mcp (v0.0.75-2-g3201718)
++19fe9faec82cd2b901ecdc5d45300f2ac9189ec6 helix_agent/MCP/submodules/python-sdk (v1.2.0-646-g19fe9fa)
++5821d196f2e97eee4cb120df8fd5d9c82ebc2d85 helix_agent/MCP/submodules/qdrant-mcp (v0.8.0-7-g5821d19)
++cf0939e1aa7a0179c0ed781e94a48e38cf25dba1 helix_agent/MCP/submodules/redis-mcp (0.5.0-74-gcf0939e)
++5d91ce7c2e83942435db8df818aa6ae924ed5d3c helix_agent/MCP/submodules/registry (v1.1.0-348-g5d91ce7)
++31f686b387d88afc670c24996011d27ce91872e2 helix_agent/MCP/submodules/sentry-mcp (0.35.0-31-g31f686b)
++b88c0de3f706f4f07337c9eda7133c736d1c9524 helix_agent/MCP/submodules/slack-mcp (v1.3.0-3-gb88c0de)
++da182d6633f7ae5144abfdb9a9b168d882bfc03f helix_agent/MCP/submodules/supabase-mcp (mcp-server-supabase-v0.8.1-3-gda182d6)
++c64cece33807eccc0055153be35b11f31513e77b helix_agent/MCP/submodules/telegram-mcp (v3.1.13)
++980a50f983191a529950ec6c5c8d3babbfc64d59 helix_agent/MCP/submodules/trello-mcp (v1.6.0-119-g980a50f)
++ab552c30d5499b5e0aaa1ab47ee2481028910c3d helix_agent/MCP/submodules/typescript-sdk (@modelcontextprotocol/client@2.0.0-alpha.2-44-gab552c30)
+ e22d7c46c49f34e3f825d750c0c316f7aa9728dd helix_agent/MCP/submodules/workers-mcp (v0.0.13-7-ge22d7c4)
++cb273098d968906d25ee737b454f0b5f13ea2482 helix_agent/cli_agents/continue (v0.9.194-vscode-15847-gcb273098d)
++e0f9bae4f028b376228c08712129069fd9626787 helix_agent/cli_agents/kilo-code (v7.3.22-55-ge0f9bae4f0)
++0e5065e9e7acf8f5bc8ee2971fe8b41539da0935 helix_agent/cli_agents/mobile-agent (heads/main)
++0c31beb6377da514e326f754e89dff94e1782403 helix_agent/cli_agents/opencode-cli (latest-3173-g0c31beb63)
++b867ec9145750d0ae1ff7f02d35406e9bf2a0b16 helix_agent/cli_agents/roo-code (v3.18.1-2645-gb867ec914)
+ 16290cde213418b5e5a7c50bfe654b373d6f7d55 helix_agent/docs/research/AutoRedTeam (heads/main)
+ 1a55b8a36d47c86e8d774acef83306d56fb0b302 helix_agent/docs/research/CL4R1T4S (heads/main)
+ 46b18962a605e71e17eeb29d85060dd1323c7de6 helix_agent/docs/research/CLAUDE-CODE-SYSTEM-PROMPT (heads/main)
+ 54769a5f3aeb361d2cb376c851782216d9cd9e1d helix_agent/docs/research/Gandalf-Solutions (heads/main)
+ 3d7f350a5c437ae78ff067d07eb5f0f6a7295c10 helix_agent/docs/research/LEAKHUB (heads/main)
++cfb0aa4d0b3ae0154cf9f24e5908263d565341f4 helix_agent/external/cognee (v0.5.0.dev0-3447-gcfb0aa4d0)
+ 9be4674d1ddf8c469e6461a27a337eeb65f76c2e helix_agent/external/mcp-servers/servers-archived (heads/main)
++11e91105b45ff09c88a0a51173df25aadf8bb5e0 helix_agent/tools/snow-cli (v0.7.35-2-g11e9110)
+ 5112906b94a080884046954c1f157ecbe44338a1 helix_qa (v4.0.0-363-g5112906)
++1710bc18027bfb38170d089063f32fd9be09d517 helix_qa/tools/opensource/allure2 (2.13.6-845-g1710bc18)
+ f37f1685e256d61b2982b8ae69c857b51efe11bf helix_qa/tools/opensource/anthropic-quickstarts (heads/main)
+ c1f4af109a778e758fa67cc9a49a9e0484e7afc5 helix_qa/tools/opensource/appcrawler (heads/master)
++f18fc39de30041536ec1b27cf7d6f589f96a3105 helix_qa/tools/opensource/appium (@appium/base-driver@10.6.0-10-gf18fc39de)
++4931a7e0217cf9c64450348b96511733263c9268 helix_qa/tools/opensource/browser-use (0.12.9-11-g4931a7e0)
++debbd22da630c780fb837559b2513bfd0d32392e helix_qa/tools/opensource/chroma (0.0.2-4405-gdebbd22da)
++34656ff759e35aed57e3d723e9231303e2404ac8 helix_qa/tools/opensource/docker-android (v3.4.2-p0)
++d9c71cb172ac2aa844e3ca7141e9673da41ae700 helix_qa/tools/opensource/docling (v2.90.1-80-gd9c71cb)
++e1d1b154e6839327f9603de91cf67faf56845f3b helix_qa/tools/opensource/kiwi-tcms (v3.8.18-7362-ge1d1b154e)
+ 0f9b924b4834ba63343253aca7240d6e521ac5cf helix_qa/tools/opensource/leakcanary (v3.0-alpha-8-56-g0f9b924b4)
++9aa5ee5cd2a1ecff6ffa2a8cd6af46b87af674b9 helix_qa/tools/opensource/llama-index (v0.14.4-681-g9aa5ee5cd)
+ 6ae38895d6e11cbc8fb4a60a0750b3bac479e304 helix_qa/tools/opensource/marker (v1.10.2-13-g6ae3889)
++74771b4e76213da77d048ab1a13b926b4cb2cf4c helix_qa/tools/opensource/mem0 (cli-node-v0.2.8-1-g74771b4e)
++4f1527f84072a865deeea9d143a385c62632bcac helix_qa/tools/opensource/midscene (v1.0.0-694-g4f1527f8)
++6eccfceaf1aaff804a67cd157193a6f744fa2bdc helix_qa/tools/opensource/moondream (heads/main)
++3314501b2fe837c50165996d24739b7f6c3ea0ce helix_qa/tools/opensource/perfetto (v54.0-886-g3314501b2f)
++eba9a489990f3f558b7115f25fdc782d610ee8ad helix_qa/tools/opensource/redroid (heads/master)
++2322868e9e256eb5fce0b3d659ab2a409f29bae1 helix_qa/tools/opensource/scrcpy (v4.0)
++45a8dcfe89992b37ed2dfb1f76618048cff0f45c helix_qa/tools/opensource/shortest (v0.4.1-128-g45a8dcf)
++a0b14e08353c5e3ebb9e35997153f01871f9bee4 helix_qa/tools/opensource/signoz (v0.108.0-rc.1-816-ga0b14e083)
++1704b3fdba43545441535f56fe5866a6dd0fa0e9 helix_qa/tools/opensource/skyvern (v1.0.37-42-g1704b3fd)
++31c48080fbe70096610a625f5a5847bed3b94e12 helix_qa/tools/opensource/skyvern/integrations/n8n (heads/main)
++dc1445df805cd3ad1f577278f978932244023a2e helix_qa/tools/opensource/stagehand (stagehand-server-v3/v3.7.1-2-gdc1445df)
+ 42d2bc8004df903d56577e30ea955cd1b99bccae helix_qa/tools/opensource/testdriverai (v6.1.8-469-g42d2bc80)
+ 582f3a7ea5d285ee8ed9e2e84048d1ab01453c49 helix_qa/tools/opensource/ui-tars (heads/main)
++e9f3387288da4af2ad99972da2ac916cdabce093 helix_qa/tools/opensource/ui-tars-desktop (@agent-infra/mcp-client@1.0.1-beta.10-793-ge9f33872)
++7c8f6752b5aafeaee940b2c3cf9fccb22531d407 helix_qa/tools/opensource/unstructured (0.16.9-272-g7c8f6752)
+ e5cf556ee3b4e01e21e22313066b0466973989fe helix_qa/tools/test-apps/rest-demo (heads/master)
+ 64b1cb0208cc49a4f5ae55fa71df5cf67a3cdc3d mcp_servers (typescript-servers-0.6.2-3818-g64b1cb0)
+ 2f8e7c249431df91f6f8f7f140eb3b975afb2daf panoptic (heads/main)
+ fbdab5167a9616a641fcf8c218b33296628e32c7 security (heads/main)
+
+## SUBMODULE REMOTES (recursive)
+# Per-submodule 'git remote -v' (### <sm_path> headers)
+
+Entering 'awesome-ai-memory'
+### awesome-ai-memory
+origin	git@github.com:topoteretes/awesome-ai-memory.git (fetch)
+origin	git@github.com:topoteretes/awesome-ai-memory.git (push)
+Entering 'challenges'
+### challenges
+github	git@github.com:vasic-digital/Challenges.git (fetch)
+github	git@github.com:vasic-digital/Challenges.git (push)
+gitlab	git@gitlab.com:vasic-digital/challenges.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/challenges.git (push)
+origin	git@github.com:vasic-digital/Challenges.git (fetch)
+origin	git@github.com:vasic-digital/Challenges.git (push)
+origin	git@gitlab.com:vasic-digital/challenges.git (push)
+origin	git@github.com:vasic-digital/challenges.git (push)
+upstream	git@github.com:vasic-digital/Challenges.git (fetch)
+upstream	git@github.com:vasic-digital/Challenges.git (push)
+vasicdigitalgithub	git@github.com:vasic-digital/challenges.git (fetch)
+vasicdigitalgithub	git@github.com:vasic-digital/challenges.git (push)
+Entering 'cli_agents/agent-deck'
+### cli_agents/agent-deck
+origin	git@github.com:asheshgoplani/agent-deck.git (fetch)
+origin	git@github.com:asheshgoplani/agent-deck.git (push)
+Entering 'cli_agents/aiagent'
+### cli_agents/aiagent
+origin	git@github.com:Xiaoccer/AIAgent.git (fetch)
+origin	git@github.com:Xiaoccer/AIAgent.git (push)
+Entering 'cli_agents/aichat'
+### cli_agents/aichat
+origin	git@github.com:sigoden/aichat.git (fetch)
+origin	git@github.com:sigoden/aichat.git (push)
+Entering 'cli_agents/aichat-llm-functions'
+### cli_agents/aichat-llm-functions
+origin	git@github.com:sigoden/llm-functions.git (fetch)
+origin	git@github.com:sigoden/llm-functions.git (push)
+Entering 'cli_agents/aider'
+### cli_agents/aider
+origin	git@github.com:Aider-AI/aider.git (fetch)
+origin	git@github.com:Aider-AI/aider.git (push)
+Entering 'cli_agents/amazon-q'
+### cli_agents/amazon-q
+origin	git@github.com:aws/amazon-q-developer-cli.git (fetch)
+origin	git@github.com:aws/amazon-q-developer-cli.git (push)
+Entering 'cli_agents/bridle'
+### cli_agents/bridle
+origin	git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git (fetch)
+origin	git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git (push)
+Entering 'cli_agents/claude-code'
+### cli_agents/claude-code
+origin	git@github.com:anthropics/claude-code.git (fetch)
+origin	git@github.com:anthropics/claude-code.git (push)
+Entering 'cli_agents/claude-code-source'
+### cli_agents/claude-code-source
+gitflic	git@gitflic.ru:milosvasic/claude-code-rip.git (fetch)
+gitflic	git@gitflic.ru:milosvasic/claude-code-rip.git (push)
+github	git@github.com:milos85vasic/CCode-Private.git (fetch)
+github	git@github.com:milos85vasic/CCode-Private.git (push)
+gitlab	git@gitlab.com:milos85vasic/ccode-private.git (fetch)
+gitlab	git@gitlab.com:milos85vasic/ccode-private.git (push)
+gitverse	git@gitverse.ru:milosvasic/Claude-Code-RIP.git (fetch)
+gitverse	git@gitverse.ru:milosvasic/Claude-Code-RIP.git (push)
+origin	git@gitlab.com:milos85vasic/ccode-private.git (fetch)
+origin	git@gitflic.ru:milosvasic/claude-code-rip.git (push)
+origin	git@github.com:milos85vasic/CCode-Private.git (push)
+origin	git@gitlab.com:milos85vasic/ccode-private.git (push)
+origin	git@gitverse.ru:milosvasic/Claude-Code-RIP.git (push)
+upstream	git@gitflic.ru:milosvasic/claude-code-rip.git (fetch)
+upstream	git@gitflic.ru:milosvasic/claude-code-rip.git (push)
+Entering 'cli_agents/claude-squad'
+### cli_agents/claude-squad
+origin	git@github.com:smtg-ai/claude-squad.git (fetch)
+origin	git@github.com:smtg-ai/claude-squad.git (push)
+Entering 'cli_agents/cli-agent'
+### cli_agents/cli-agent
+origin	git@github.com:NathanGr33n/CLI_Tool.git (fetch)
+origin	git@github.com:NathanGr33n/CLI_Tool.git (push)
+Entering 'cli_agents/cline'
+### cli_agents/cline
+origin	git@github.com:cline/cline.git (fetch)
+origin	git@github.com:cline/cline.git (push)
+Entering 'cli_agents/cline/evals/cline-bench'
+### evals/cline-bench
+origin	https://github.com/cline/cline-bench.git (fetch)
+origin	https://github.com/cline/cline-bench.git (push)
+Entering 'cli_agents/codai'
+### cli_agents/codai
+origin	git@github.com:meysamhadeli/codai.git (fetch)
+origin	git@github.com:meysamhadeli/codai.git (push)
+Entering 'cli_agents/codename-goose'
+### cli_agents/codename-goose
+origin	git@github.com:jgenerali/codename-goose.git (fetch)
+origin	git@github.com:jgenerali/codename-goose.git (push)
+Entering 'cli_agents/codex'
+### cli_agents/codex
+origin	git@github.com:openai/codex.git (fetch)
+origin	git@github.com:openai/codex.git (push)
+Entering 'cli_agents/codex-skills'
+### cli_agents/codex-skills
+origin	git@github.com:openai/skills.git (fetch)
+origin	git@github.com:openai/skills.git (push)
+Entering 'cli_agents/conduit'
+### cli_agents/conduit
+origin	git@github.com:lostintangent/conduit-release.git (fetch)
+origin	git@github.com:lostintangent/conduit-release.git (push)
+Entering 'cli_agents/copilot-cli'
+### cli_agents/copilot-cli
+origin	git@github.com:github/copilot-cli.git (fetch)
+origin	git@github.com:github/copilot-cli.git (push)
+Entering 'cli_agents/crush'
+### cli_agents/crush
+origin	git@github.com:charmbracelet/crush.git (fetch)
+origin	git@github.com:charmbracelet/crush.git (push)
+Entering 'cli_agents/deepseek-cli'
+### cli_agents/deepseek-cli
+origin	git@github.com:holasoymalva/deepseek-cli.git (fetch)
+origin	git@github.com:holasoymalva/deepseek-cli.git (push)
+Entering 'cli_agents/deepseek-cli-youkpan'
+### cli_agents/deepseek-cli-youkpan
+origin	git@github.com:youkpan/deepseek-cli.git (fetch)
+origin	git@github.com:youkpan/deepseek-cli.git (push)
+Entering 'cli_agents/fauxpilot'
+### cli_agents/fauxpilot
+origin	git@github.com:fauxpilot/fauxpilot.git (fetch)
+origin	git@github.com:fauxpilot/fauxpilot.git (push)
+Entering 'cli_agents/forge'
+### cli_agents/forge
+origin	git@github.com:antinomyhq/forge.git (fetch)
+origin	git@github.com:antinomyhq/forge.git (push)
+Entering 'cli_agents/gemini-cli'
+### cli_agents/gemini-cli
+origin	git@github.com:google-gemini/gemini-cli.git (fetch)
+origin	git@github.com:google-gemini/gemini-cli.git (push)
+Entering 'cli_agents/get-shit-done'
+### cli_agents/get-shit-done
+origin	git@github.com:glittercowboy/get-shit-done.git (fetch)
+origin	git@github.com:glittercowboy/get-shit-done.git (push)
+Entering 'cli_agents/git-mcp'
+### cli_agents/git-mcp
+origin	git@github.com:idosal/git-mcp.git (fetch)
+origin	git@github.com:idosal/git-mcp.git (push)
+Entering 'cli_agents/gpt-engineer'
+### cli_agents/gpt-engineer
+origin	git@github.com:AntonOsika/gpt-engineer.git (fetch)
+origin	git@github.com:AntonOsika/gpt-engineer.git (push)
+Entering 'cli_agents/gptme'
+### cli_agents/gptme
+origin	git@github.com:ErikBjare/gptme.git (fetch)
+origin	git@github.com:ErikBjare/gptme.git (push)
+Entering 'cli_agents/junie'
+### cli_agents/junie
+origin	git@github.com:JetBrains/junie.git (fetch)
+origin	git@github.com:JetBrains/junie.git (push)
+Entering 'cli_agents/mistral-code'
+### cli_agents/mistral-code
+origin	git@github.com:Wylgrif/Mistral-code.git (fetch)
+origin	git@github.com:Wylgrif/Mistral-code.git (push)
+Entering 'cli_agents/multiagent-coding'
+### cli_agents/multiagent-coding
+origin	git@github.com:Danau5tin/multi-agent-coding-system.git (fetch)
+origin	git@github.com:Danau5tin/multi-agent-coding-system.git (push)
+Entering 'cli_agents/nanocoder'
+### cli_agents/nanocoder
+origin	git@github.com:Nano-Collective/nanocoder.git (fetch)
+origin	git@github.com:Nano-Collective/nanocoder.git (push)
+Entering 'cli_agents/noi'
+### cli_agents/noi
+origin	git@github.com:lencx/Noi.git (fetch)
+origin	git@github.com:lencx/Noi.git (push)
+Entering 'cli_agents/octogen'
+### cli_agents/octogen
+origin	git@github.com:dbpunk-labs/octogen.git (fetch)
+origin	git@github.com:dbpunk-labs/octogen.git (push)
+Entering 'cli_agents/open-interpreter'
+### cli_agents/open-interpreter
+origin	git@github.com:KillianLucas/open-interpreter.git (fetch)
+origin	git@github.com:KillianLucas/open-interpreter.git (push)
+Entering 'cli_agents/plandex'
+### cli_agents/plandex
+origin	git@github.com:plandex-ai/plandex.git (fetch)
+origin	git@github.com:plandex-ai/plandex.git (push)
+Entering 'cli_agents/postgres-mcp'
+### cli_agents/postgres-mcp
+origin	git@github.com:timescale/pg-aiguide.git (fetch)
+origin	git@github.com:timescale/pg-aiguide.git (push)
+Entering 'cli_agents/qwen-code'
+### cli_agents/qwen-code
+origin	git@github.com:QwenLM/qwen-code.git (fetch)
+origin	git@github.com:QwenLM/qwen-code.git (push)
+Entering 'cli_agents/shai'
+### cli_agents/shai
+origin	git@github.com:ovh/shai.git (fetch)
+origin	git@github.com:ovh/shai.git (push)
+Entering 'cli_agents/snow-cli'
+### cli_agents/snow-cli
+origin	git@github.com:MayDay-wpf/snow-cli.git (fetch)
+origin	git@github.com:MayDay-wpf/snow-cli.git (push)
+Entering 'cli_agents/spec-kit'
+### cli_agents/spec-kit
+origin	git@github.com:github/spec-kit.git (fetch)
+origin	git@github.com:github/spec-kit.git (push)
+Entering 'cli_agents/superset'
+### cli_agents/superset
+origin	git@github.com:superset-sh/superset.git (fetch)
+origin	git@github.com:superset-sh/superset.git (push)
+Entering 'cli_agents/swe-agent'
+### cli_agents/swe-agent
+origin	git@github.com:princeton-nlp/SWE-agent.git (fetch)
+origin	git@github.com:princeton-nlp/SWE-agent.git (push)
+Entering 'cli_agents/taskweaver'
+### cli_agents/taskweaver
+origin	git@github.com:microsoft/TaskWeaver.git (fetch)
+origin	git@github.com:microsoft/TaskWeaver.git (push)
+Entering 'cli_agents/ui-ux-pro-max'
+### cli_agents/ui-ux-pro-max
+origin	git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git (fetch)
+origin	git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git (push)
+Entering 'cli_agents/vtcode'
+### cli_agents/vtcode
+origin	git@github.com:vinhnx/vtcode.git (fetch)
+origin	git@github.com:vinhnx/vtcode.git (push)
+Entering 'cli_agents/warp'
+### cli_agents/warp
+origin	git@github.com:warpdotdev/Warp.git (fetch)
+origin	git@github.com:warpdotdev/Warp.git (push)
+Entering 'cli_agents/x-cmd'
+### cli_agents/x-cmd
+origin	git@github.com:x-cmd/x-cmd.git (fetch)
+origin	git@github.com:x-cmd/x-cmd.git (push)
+Entering 'cli_agents/xela-cli'
+### cli_agents/xela-cli
+origin	git@github.com:xelauvas/codeclau.git (fetch)
+origin	git@github.com:xelauvas/codeclau.git (push)
+Entering 'cli_agents/zeroshot'
+### cli_agents/zeroshot
+origin	git@github.com:covibes/zeroshot.git (fetch)
+origin	git@github.com:covibes/zeroshot.git (push)
+Entering 'cli_agents_resources/Awesome-AI-Agents'
+### cli_agents_resources/Awesome-AI-Agents
+origin	git@github.com:e2b-dev/awesome-ai-agents.git (fetch)
+origin	git@github.com:e2b-dev/awesome-ai-agents.git (push)
+Entering 'cli_agents_resources/Awesome-AI-GPTs'
+### cli_agents_resources/Awesome-AI-GPTs
+origin	git@github.com:EmbraceAGI/Awesome-AI-GPTs.git (fetch)
+origin	git@github.com:EmbraceAGI/Awesome-AI-GPTs.git (push)
+Entering 'cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs'
+### cli_agents_resources/Cheshire-Cat-Ai/CC-AI-Docs
+origin	git@github.com:cheshire-cat-ai/docs.git (fetch)
+origin	git@github.com:cheshire-cat-ai/docs.git (push)
+Entering 'cli_agents_resources/GitHub-Awesome-Copilot'
+### cli_agents_resources/GitHub-Awesome-Copilot
+origin	git@github.com:github/awesome-copilot.git (fetch)
+origin	git@github.com:github/awesome-copilot.git (push)
+Entering 'cli_agents_resources/OpenAI-Cookbook'
+### cli_agents_resources/OpenAI-Cookbook
+origin	org-14957082@github.com:openai/openai-cookbook.git (fetch)
+origin	org-14957082@github.com:openai/openai-cookbook.git (push)
+Entering 'cli_agents_resources/Taches-CC-Resources'
+### cli_agents_resources/Taches-CC-Resources
+origin	git@github.com:glittercowboy/taches-cc-resources.git (fetch)
+origin	git@github.com:glittercowboy/taches-cc-resources.git (push)
+Entering 'constitution'
+### constitution
+gitflic	git@gitflic.ru:helixdevelopment/helixconstitution.git (fetch)
+gitflic	git@gitflic.ru:helixdevelopment/helixconstitution.git (push)
+github	git@github.com:HelixDevelopment/HelixConstitution.git (fetch)
+github	git@github.com:HelixDevelopment/HelixConstitution.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/helixconstitution.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/helixconstitution.git (push)
+gitverse	git@gitverse.ru:helixdevelopment/HelixConstitution.git (fetch)
+gitverse	git@gitverse.ru:helixdevelopment/HelixConstitution.git (push)
+origin	git@github.com:HelixDevelopment/HelixConstitution.git (fetch)
+origin	git@gitflic.ru:helixdevelopment/helixconstitution.git (push)
+origin	git@github.com:HelixDevelopment/HelixConstitution.git (push)
+origin	git@gitlab.com:helixdevelopment1/helixconstitution.git (push)
+origin	git@gitverse.ru:helixdevelopment/HelixConstitution.git (push)
+origin	git@github.com:vasic-digital/HelixConstitution.git (push)
+origin	git@gitlab.com:vasic-digital/HelixConstitution.git (push)
+upstream	git@gitflic.ru:helixdevelopment/helixconstitution.git (fetch)
+upstream	git@gitflic.ru:helixdevelopment/helixconstitution.git (push)
+vasicdigitalgithub	git@github.com:vasic-digital/HelixConstitution.git (fetch)
+vasicdigitalgithub	git@github.com:vasic-digital/HelixConstitution.git (push)
+vasicdigitalgitlab	git@gitlab.com:vasic-digital/HelixConstitution.git (fetch)
+vasicdigitalgitlab	git@gitlab.com:vasic-digital/HelixConstitution.git (push)
+Entering 'containers'
+### containers
+github	git@github.com:vasic-digital/Containers.git (fetch)
+github	git@github.com:vasic-digital/Containers.git (push)
+gitlab	git@gitlab.com:vasic-digital/containers.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/containers.git (push)
+origin	git@github.com:vasic-digital/Containers.git (fetch)
+origin	git@github.com:vasic-digital/Containers.git (push)
+origin	git@gitlab.com:vasic-digital/containers.git (push)
+origin	git@gitlab.com:vasic-digital/Containers.git (push)
+upstream	git@github.com:vasic-digital/Containers.git (fetch)
+upstream	git@github.com:vasic-digital/Containers.git (push)
+vasicdigitalgitlab	git@gitlab.com:vasic-digital/Containers.git (fetch)
+vasicdigitalgitlab	git@gitlab.com:vasic-digital/Containers.git (push)
+Entering 'dependencies/HelixDevelopment/debate_orchestrator'
+### dependencies/HelixDevelopment/debate_orchestrator
+origin	git@github.com:HelixDevelopment/DebateOrchestrator.git (fetch)
+origin	git@github.com:HelixDevelopment/DebateOrchestrator.git (push)
+Entering 'dependencies/HelixDevelopment/doc_processor'
+### dependencies/HelixDevelopment/doc_processor
+origin	git@github.com:HelixDevelopment/DocProcessor.git (fetch)
+origin	git@github.com:HelixDevelopment/DocProcessor.git (push)
+Entering 'dependencies/HelixDevelopment/helix_llm'
+### dependencies/HelixDevelopment/helix_llm
+github	git@github.com:HelixDevelopment/HelixLLM.git (fetch)
+github	git@github.com:HelixDevelopment/HelixLLM.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/helixllm.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/helixllm.git (push)
+origin	git@github.com:HelixDevelopment/HelixLLM.git (fetch)
+origin	git@github.com:HelixDevelopment/HelixLLM.git (push)
+origin	git@gitlab.com:helixdevelopment1/helixllm.git (push)
+upstream	git@github.com:HelixDevelopment/HelixLLM.git (fetch)
+upstream	git@github.com:HelixDevelopment/HelixLLM.git (push)
+Entering 'dependencies/HelixDevelopment/helix_memory'
+### dependencies/HelixDevelopment/helix_memory
+github	git@github.com:HelixDevelopment/HelixMemory.git (fetch)
+github	git@github.com:HelixDevelopment/HelixMemory.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/HelixMemory.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/HelixMemory.git (push)
+origin	git@github.com:HelixDevelopment/HelixMemory.git (fetch)
+origin	git@github.com:HelixDevelopment/HelixMemory.git (push)
+origin	git@gitlab.com:helixdevelopment1/HelixMemory.git (push)
+upstream	git@github.com:HelixDevelopment/HelixMemory.git (fetch)
+upstream	git@github.com:HelixDevelopment/HelixMemory.git (push)
+Entering 'dependencies/HelixDevelopment/helix_specifier'
+### dependencies/HelixDevelopment/helix_specifier
+github	git@github.com:HelixDevelopment/HelixSpecifier.git (fetch)
+github	git@github.com:HelixDevelopment/HelixSpecifier.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/HelixSpecifier.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/HelixSpecifier.git (push)
+origin	git@github.com:HelixDevelopment/HelixSpecifier.git (fetch)
+origin	git@github.com:HelixDevelopment/HelixSpecifier.git (push)
+origin	git@gitlab.com:helixdevelopment1/HelixSpecifier.git (push)
+upstream	git@github.com:HelixDevelopment/HelixSpecifier.git (fetch)
+upstream	git@github.com:HelixDevelopment/HelixSpecifier.git (push)
+Entering 'dependencies/HelixDevelopment/llm_orchestrator'
+### dependencies/HelixDevelopment/llm_orchestrator
+github	git@github.com:HelixDevelopment/LLMOrchestrator.git (fetch)
+github	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+origin	git@github.com:HelixDevelopment/LLMOrchestrator.git (fetch)
+origin	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+upstream	git@github.com:HelixDevelopment/LLMOrchestrator.git (fetch)
+upstream	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+Entering 'dependencies/HelixDevelopment/llm_provider'
+### dependencies/HelixDevelopment/llm_provider
+origin	git@github.com:HelixDevelopment/LLMProvider.git (fetch)
+origin	git@github.com:HelixDevelopment/LLMProvider.git (push)
+Entering 'dependencies/HelixDevelopment/llms_verifier'
+### dependencies/HelixDevelopment/llms_verifier
+github	git@github.com:vasic-digital/LLMsVerifier.git (fetch)
+github	git@github.com:vasic-digital/LLMsVerifier.git (push)
+gitlab	git@gitlab.com:vasic-digital/LLMsVerifier.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/LLMsVerifier.git (push)
+origin	git@github.com:vasic-digital/LLMsVerifier.git (fetch)
+origin	git@github.com:vasic-digital/LLMsVerifier.git (push)
+origin	git@gitlab.com:vasic-digital/LLMsVerifier.git (push)
+upstream	git@github.com:vasic-digital/LLMsVerifier.git (fetch)
+upstream	git@github.com:vasic-digital/LLMsVerifier.git (push)
+Entering 'dependencies/HelixDevelopment/models'
+### dependencies/HelixDevelopment/models
+gitflic	git@gitflic.ru:vasic-digital/Models.git (fetch)
+gitflic	git@gitflic.ru:vasic-digital/Models.git (push)
+github	git@github.com:vasic-digital/Models.git (fetch)
+github	git@github.com:vasic-digital/Models.git (push)
+gitlab	git@gitlab.com:vasic-digital/Models.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Models.git (push)
+gitverse	git@gitverse.ru:vasic-digital/Models.git (fetch)
+gitverse	git@gitverse.ru:vasic-digital/Models.git (push)
+origin	git@github.com:vasic-digital/Models.git (fetch)
+origin	git@gitflic.ru:vasic-digital/Models.git (push)
+origin	git@github.com:vasic-digital/Models.git (push)
+origin	git@gitlab.com:vasic-digital/Models.git (push)
+origin	git@gitverse.ru:vasic-digital/Models.git (push)
+upstream	git@gitflic.ru:vasic-digital/Models.git (fetch)
+upstream	git@gitflic.ru:vasic-digital/Models.git (push)
+Entering 'dependencies/HelixDevelopment/vision_engine'
+### dependencies/HelixDevelopment/vision_engine
+github	git@github.com:HelixDevelopment/VisionEngine.git (fetch)
+github	git@github.com:HelixDevelopment/VisionEngine.git (push)
+origin	git@github.com:HelixDevelopment/VisionEngine.git (fetch)
+origin	git@github.com:HelixDevelopment/VisionEngine.git (push)
+upstream	git@github.com:HelixDevelopment/VisionEngine.git (fetch)
+upstream	git@github.com:HelixDevelopment/VisionEngine.git (push)
+Entering 'dependencies/HuggingFace_Hub'
+### dependencies/HuggingFace_Hub
+origin	git@github.com:huggingface/huggingface_hub.git (fetch)
+origin	git@github.com:huggingface/huggingface_hub.git (push)
+Entering 'dependencies/LLama_CPP'
+### dependencies/LLama_CPP
+origin	git@github.com:ggml-org/llama.cpp.git (fetch)
+origin	git@github.com:ggml-org/llama.cpp.git (push)
+Entering 'dependencies/Ollama'
+### dependencies/Ollama
+origin	git@github.com:ollama/ollama.git (fetch)
+origin	git@github.com:ollama/ollama.git (push)
+Entering 'dependencies/vasic-digital/agentic'
+### dependencies/vasic-digital/agentic
+github	git@github.com:vasic-digital/Agentic.git (fetch)
+github	git@github.com:vasic-digital/Agentic.git (push)
+gitlab	git@gitlab.com:vasic-digital/agentic.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/agentic.git (push)
+origin	git@github.com:vasic-digital/Agentic.git (fetch)
+origin	git@github.com:vasic-digital/Agentic.git (push)
+origin	git@gitlab.com:vasic-digital/agentic.git (push)
+upstream	git@github.com:vasic-digital/Agentic.git (fetch)
+upstream	git@github.com:vasic-digital/Agentic.git (push)
+Entering 'dependencies/vasic-digital/auth'
+### dependencies/vasic-digital/auth
+github	git@github.com:vasic-digital/Auth.git (fetch)
+github	git@github.com:vasic-digital/Auth.git (push)
+gitlab	git@gitlab.com:vasic-digital/Auth.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Auth.git (push)
+origin	git@github.com:vasic-digital/Auth.git (fetch)
+origin	git@github.com:vasic-digital/Auth.git (push)
+origin	git@gitlab.com:vasic-digital/Auth.git (push)
+upstream	git@github.com:vasic-digital/Auth.git (fetch)
+upstream	git@github.com:vasic-digital/Auth.git (push)
+Entering 'dependencies/vasic-digital/auto_temp'
+### dependencies/vasic-digital/auto_temp
+origin	git@github.com:vasic-digital/AutoTemp.git (fetch)
+origin	git@github.com:vasic-digital/AutoTemp.git (push)
+Entering 'dependencies/vasic-digital/background_tasks'
+### dependencies/vasic-digital/background_tasks
+github	git@github.com:vasic-digital/BackgroundTasks.git (fetch)
+github	git@github.com:vasic-digital/BackgroundTasks.git (push)
+gitlab	git@gitlab.com:vasic-digital/BackgroundTasks.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/BackgroundTasks.git (push)
+origin	git@github.com:vasic-digital/BackgroundTasks.git (fetch)
+origin	git@github.com:vasic-digital/BackgroundTasks.git (push)
+origin	git@gitlab.com:vasic-digital/BackgroundTasks.git (push)
+upstream	git@github.com:vasic-digital/BackgroundTasks.git (fetch)
+upstream	git@github.com:vasic-digital/BackgroundTasks.git (push)
+Entering 'dependencies/vasic-digital/benchmark'
+### dependencies/vasic-digital/benchmark
+github	git@github.com:vasic-digital/Benchmark.git (fetch)
+github	git@github.com:vasic-digital/Benchmark.git (push)
+gitlab	git@gitlab.com:vasic-digital/benchmark.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/benchmark.git (push)
+origin	git@github.com:vasic-digital/Benchmark.git (fetch)
+origin	git@github.com:vasic-digital/Benchmark.git (push)
+origin	git@gitlab.com:vasic-digital/benchmark.git (push)
+upstream	git@github.com:vasic-digital/Benchmark.git (fetch)
+upstream	git@github.com:vasic-digital/Benchmark.git (push)
+Entering 'dependencies/vasic-digital/cache'
+### dependencies/vasic-digital/cache
+github	git@github.com:vasic-digital/Cache.git (fetch)
+github	git@github.com:vasic-digital/Cache.git (push)
+gitlab	git@gitlab.com:vasic-digital/Cache.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Cache.git (push)
+origin	git@github.com:vasic-digital/Cache.git (fetch)
+origin	git@github.com:vasic-digital/Cache.git (push)
+origin	git@gitlab.com:vasic-digital/Cache.git (push)
+upstream	git@github.com:vasic-digital/Cache.git (fetch)
+upstream	git@github.com:vasic-digital/Cache.git (push)
+Entering 'dependencies/vasic-digital/claritas'
+### dependencies/vasic-digital/claritas
+origin	git@github.com:vasic-digital/Claritas.git (fetch)
+origin	git@github.com:vasic-digital/Claritas.git (push)
+Entering 'dependencies/vasic-digital/concurrency'
+### dependencies/vasic-digital/concurrency
+github	git@github.com:vasic-digital/Concurrency.git (fetch)
+github	git@github.com:vasic-digital/Concurrency.git (push)
+gitlab	git@gitlab.com:vasic-digital/Concurrency.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Concurrency.git (push)
+origin	git@github.com:vasic-digital/Concurrency.git (fetch)
+origin	git@github.com:vasic-digital/Concurrency.git (push)
+origin	git@gitlab.com:vasic-digital/Concurrency.git (push)
+upstream	git@github.com:vasic-digital/Concurrency.git (fetch)
+upstream	git@github.com:vasic-digital/Concurrency.git (push)
+Entering 'dependencies/vasic-digital/config'
+### dependencies/vasic-digital/config
+github	git@github.com:vasic-digital/Config.git (fetch)
+github	git@github.com:vasic-digital/Config.git (push)
+gitlab	git@gitlab.com:vasic-digital/config.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/config.git (push)
+origin	git@github.com:vasic-digital/Config.git (fetch)
+origin	git@github.com:vasic-digital/Config.git (push)
+origin	git@gitlab.com:vasic-digital/config.git (push)
+upstream	git@github.com:vasic-digital/Config.git (fetch)
+upstream	git@github.com:vasic-digital/Config.git (push)
+Entering 'dependencies/vasic-digital/conversation'
+### dependencies/vasic-digital/conversation
+github	git@github.com:vasic-digital/conversation.git (fetch)
+github	git@github.com:vasic-digital/conversation.git (push)
+gitlab	git@gitlab.com:vasic-digital/conversation.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/conversation.git (push)
+origin	git@github.com:vasic-digital/conversation.git (fetch)
+origin	git@github.com:vasic-digital/conversation.git (push)
+origin	git@gitlab.com:vasic-digital/conversation.git (push)
+upstream	git@github.com:vasic-digital/conversation.git (fetch)
+upstream	git@github.com:vasic-digital/conversation.git (push)
+Entering 'dependencies/vasic-digital/database'
+### dependencies/vasic-digital/database
+github	git@github.com:vasic-digital/Database.git (fetch)
+github	git@github.com:vasic-digital/Database.git (push)
+gitlab	git@gitlab.com:vasic-digital/Database.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Database.git (push)
+origin	git@github.com:vasic-digital/Database.git (fetch)
+origin	git@github.com:vasic-digital/Database.git (push)
+origin	git@gitlab.com:vasic-digital/Database.git (push)
+upstream	git@github.com:vasic-digital/Database.git (fetch)
+upstream	git@github.com:vasic-digital/Database.git (push)
+Entering 'dependencies/vasic-digital/doc_processor'
+### dependencies/vasic-digital/doc_processor
+origin	git@github.com:vasic-digital/DocProcessor.git (fetch)
+origin	git@github.com:vasic-digital/DocProcessor.git (push)
+Entering 'dependencies/vasic-digital/document'
+### dependencies/vasic-digital/document
+github	git@github.com:vasic-digital/Document.git (fetch)
+github	git@github.com:vasic-digital/Document.git (push)
+gitlab	git@gitlab.com:vasic-digital/document.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/document.git (push)
+origin	git@github.com:vasic-digital/Document.git (fetch)
+origin	git@github.com:vasic-digital/Document.git (push)
+origin	git@gitlab.com:vasic-digital/document.git (push)
+upstream	git@github.com:vasic-digital/Document.git (fetch)
+upstream	git@github.com:vasic-digital/Document.git (push)
+Entering 'dependencies/vasic-digital/embeddings'
+### dependencies/vasic-digital/embeddings
+github	git@github.com:vasic-digital/Embeddings.git (fetch)
+github	git@github.com:vasic-digital/Embeddings.git (push)
+gitlab	git@gitlab.com:vasic-digital/Embeddings.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Embeddings.git (push)
+origin	git@github.com:vasic-digital/Embeddings.git (fetch)
+origin	git@github.com:vasic-digital/Embeddings.git (push)
+origin	git@gitlab.com:vasic-digital/Embeddings.git (push)
+upstream	git@github.com:vasic-digital/Embeddings.git (fetch)
+upstream	git@github.com:vasic-digital/Embeddings.git (push)
+Entering 'dependencies/vasic-digital/event_bus'
+### dependencies/vasic-digital/event_bus
+github	git@github.com:vasic-digital/EventBus.git (fetch)
+github	git@github.com:vasic-digital/EventBus.git (push)
+gitlab	git@gitlab.com:vasic-digital/EventBus.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/EventBus.git (push)
+origin	git@github.com:vasic-digital/EventBus.git (fetch)
+origin	git@github.com:vasic-digital/EventBus.git (push)
+origin	git@gitlab.com:vasic-digital/EventBus.git (push)
+upstream	git@github.com:vasic-digital/EventBus.git (fetch)
+upstream	git@github.com:vasic-digital/EventBus.git (push)
+Entering 'dependencies/vasic-digital/filesystem'
+### dependencies/vasic-digital/filesystem
+github	git@github.com:vasic-digital/Filesystem.git (fetch)
+github	git@github.com:vasic-digital/Filesystem.git (push)
+gitlab	git@gitlab.com:vasic-digital/filesystem.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/filesystem.git (push)
+origin	git@github.com:vasic-digital/Filesystem.git (fetch)
+origin	git@github.com:vasic-digital/Filesystem.git (push)
+origin	git@gitlab.com:vasic-digital/filesystem.git (push)
+upstream	git@github.com:vasic-digital/Filesystem.git (fetch)
+upstream	git@github.com:vasic-digital/Filesystem.git (push)
+Entering 'dependencies/vasic-digital/formatters'
+### dependencies/vasic-digital/formatters
+github	git@github.com:vasic-digital/Formatters.git (fetch)
+github	git@github.com:vasic-digital/Formatters.git (push)
+gitlab	git@gitlab.com:vasic-digital/Formatters.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Formatters.git (push)
+origin	git@github.com:vasic-digital/Formatters.git (fetch)
+origin	git@github.com:vasic-digital/Formatters.git (push)
+origin	git@gitlab.com:vasic-digital/Formatters.git (push)
+upstream	git@github.com:vasic-digital/Formatters.git (fetch)
+upstream	git@github.com:vasic-digital/Formatters.git (push)
+Entering 'dependencies/vasic-digital/gandalf_solutions'
+### dependencies/vasic-digital/gandalf_solutions
+origin	git@github.com:vasic-digital/GandalfSolutions.git (fetch)
+origin	git@github.com:vasic-digital/GandalfSolutions.git (push)
+Entering 'dependencies/vasic-digital/hyper_tune'
+### dependencies/vasic-digital/hyper_tune
+origin	git@github.com:vasic-digital/HyperTune.git (fetch)
+origin	git@github.com:vasic-digital/HyperTune.git (push)
+Entering 'dependencies/vasic-digital/i18n'
+### dependencies/vasic-digital/i18n
+github	git@github.com:vasic-digital/I18n.git (fetch)
+github	git@github.com:vasic-digital/I18n.git (push)
+gitlab	git@gitlab.com:vasic-digital/i18n.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/i18n.git (push)
+origin	git@github.com:vasic-digital/I18n.git (fetch)
+origin	git@github.com:vasic-digital/I18n.git (push)
+origin	git@gitlab.com:vasic-digital/i18n.git (push)
+upstream	git@github.com:vasic-digital/I18n.git (fetch)
+upstream	git@github.com:vasic-digital/I18n.git (push)
+Entering 'dependencies/vasic-digital/i_llm'
+### dependencies/vasic-digital/i_llm
+origin	git@github.com:vasic-digital/I-LLM.git (fetch)
+origin	git@github.com:vasic-digital/I-LLM.git (push)
+Entering 'dependencies/vasic-digital/lazy'
+### dependencies/vasic-digital/lazy
+github	git@github.com:vasic-digital/Lazy.git (fetch)
+github	git@github.com:vasic-digital/Lazy.git (push)
+gitlab	git@gitlab.com:vasic-digital/lazy.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/lazy.git (push)
+origin	git@github.com:vasic-digital/Lazy.git (fetch)
+origin	git@github.com:vasic-digital/Lazy.git (push)
+origin	git@gitlab.com:vasic-digital/lazy.git (push)
+upstream	git@github.com:vasic-digital/Lazy.git (fetch)
+upstream	git@github.com:vasic-digital/Lazy.git (push)
+Entering 'dependencies/vasic-digital/leak_hub'
+### dependencies/vasic-digital/leak_hub
+origin	git@github.com:vasic-digital/LeakHub.git (fetch)
+origin	git@github.com:vasic-digital/LeakHub.git (push)
+Entering 'dependencies/vasic-digital/llm_ops'
+### dependencies/vasic-digital/llm_ops
+github	git@github.com:vasic-digital/LLMOps.git (fetch)
+github	git@github.com:vasic-digital/LLMOps.git (push)
+gitlab	git@gitlab.com:vasic-digital/llmops.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/llmops.git (push)
+origin	git@github.com:vasic-digital/LLMOps.git (fetch)
+origin	git@github.com:vasic-digital/LLMOps.git (push)
+origin	git@gitlab.com:vasic-digital/llmops.git (push)
+upstream	git@github.com:vasic-digital/LLMOps.git (fetch)
+upstream	git@github.com:vasic-digital/LLMOps.git (push)
+Entering 'dependencies/vasic-digital/llm_orchestrator'
+### dependencies/vasic-digital/llm_orchestrator
+github	git@github.com:HelixDevelopment/LLMOrchestrator.git (fetch)
+github	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+origin	git@github.com:vasic-digital/LLMOrchestrator.git (fetch)
+origin	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+upstream	git@github.com:HelixDevelopment/LLMOrchestrator.git (fetch)
+upstream	git@github.com:HelixDevelopment/LLMOrchestrator.git (push)
+Entering 'dependencies/vasic-digital/llm_provider'
+### dependencies/vasic-digital/llm_provider
+origin	git@github.com:vasic-digital/LLMProvider.git (fetch)
+origin	git@github.com:vasic-digital/LLMProvider.git (push)
+Entering 'dependencies/vasic-digital/mcp_module'
+### dependencies/vasic-digital/mcp_module
+github	git@github.com:vasic-digital/MCP_Module.git (fetch)
+github	git@github.com:vasic-digital/MCP_Module.git (push)
+gitlab	git@gitlab.com:vasic-digital/MCP_Module.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/MCP_Module.git (push)
+origin	git@github.com:vasic-digital/MCP_Module.git (fetch)
+origin	git@github.com:vasic-digital/MCP_Module.git (push)
+origin	git@gitlab.com:vasic-digital/MCP_Module.git (push)
+upstream	git@github.com:vasic-digital/MCP_Module.git (fetch)
+upstream	git@github.com:vasic-digital/MCP_Module.git (push)
+Entering 'dependencies/vasic-digital/memory'
+### dependencies/vasic-digital/memory
+github	git@github.com:vasic-digital/Memory.git (fetch)
+github	git@github.com:vasic-digital/Memory.git (push)
+gitlab	git@gitlab.com:vasic-digital/memory.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/memory.git (push)
+origin	git@github.com:vasic-digital/Memory.git (fetch)
+origin	git@github.com:vasic-digital/Memory.git (push)
+origin	git@gitlab.com:vasic-digital/memory.git (push)
+upstream	git@github.com:vasic-digital/Memory.git (fetch)
+upstream	git@github.com:vasic-digital/Memory.git (push)
+Entering 'dependencies/vasic-digital/messaging'
+### dependencies/vasic-digital/messaging
+github	git@github.com:vasic-digital/Messaging.git (fetch)
+github	git@github.com:vasic-digital/Messaging.git (push)
+gitlab	git@gitlab.com:vasic-digital/Messaging.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Messaging.git (push)
+origin	git@github.com:vasic-digital/Messaging.git (fetch)
+origin	git@github.com:vasic-digital/Messaging.git (push)
+origin	git@gitlab.com:vasic-digital/Messaging.git (push)
+upstream	git@github.com:vasic-digital/Messaging.git (fetch)
+upstream	git@github.com:vasic-digital/Messaging.git (push)
+Entering 'dependencies/vasic-digital/middleware'
+### dependencies/vasic-digital/middleware
+github	git@github.com:vasic-digital/Middleware.git (fetch)
+github	git@github.com:vasic-digital/Middleware.git (push)
+gitlab	git@gitlab.com:vasic-digital/middleware.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/middleware.git (push)
+origin	git@github.com:vasic-digital/Middleware.git (fetch)
+origin	git@github.com:vasic-digital/Middleware.git (push)
+origin	git@gitlab.com:vasic-digital/middleware.git (push)
+upstream	git@github.com:vasic-digital/Middleware.git (fetch)
+upstream	git@github.com:vasic-digital/Middleware.git (push)
+Entering 'dependencies/vasic-digital/models'
+### dependencies/vasic-digital/models
+gitflic	git@gitflic.ru:vasic-digital/Models.git (fetch)
+gitflic	git@gitflic.ru:vasic-digital/Models.git (push)
+github	git@github.com:vasic-digital/Models.git (fetch)
+github	git@github.com:vasic-digital/Models.git (push)
+gitlab	git@gitlab.com:vasic-digital/Models.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Models.git (push)
+gitverse	git@gitverse.ru:vasic-digital/Models.git (fetch)
+gitverse	git@gitverse.ru:vasic-digital/Models.git (push)
+origin	git@github.com:vasic-digital/Models.git (fetch)
+origin	git@gitflic.ru:vasic-digital/Models.git (push)
+origin	git@github.com:vasic-digital/Models.git (push)
+origin	git@gitlab.com:vasic-digital/Models.git (push)
+origin	git@gitverse.ru:vasic-digital/Models.git (push)
+upstream	git@gitflic.ru:vasic-digital/Models.git (fetch)
+upstream	git@gitflic.ru:vasic-digital/Models.git (push)
+Entering 'dependencies/vasic-digital/normalize'
+### dependencies/vasic-digital/normalize
+origin	git@github.com:vasic-digital/Normalize.git (fetch)
+origin	git@github.com:vasic-digital/Normalize.git (push)
+Entering 'dependencies/vasic-digital/observability'
+### dependencies/vasic-digital/observability
+github	git@github.com:vasic-digital/Observability.git (fetch)
+github	git@github.com:vasic-digital/Observability.git (push)
+gitlab	git@gitlab.com:vasic-digital/Observability.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Observability.git (push)
+origin	git@github.com:vasic-digital/Observability.git (fetch)
+origin	git@github.com:vasic-digital/Observability.git (push)
+origin	git@gitlab.com:vasic-digital/Observability.git (push)
+upstream	git@github.com:vasic-digital/Observability.git (fetch)
+upstream	git@github.com:vasic-digital/Observability.git (push)
+Entering 'dependencies/vasic-digital/optimization'
+### dependencies/vasic-digital/optimization
+github	git@github.com:vasic-digital/Optimization.git (fetch)
+github	git@github.com:vasic-digital/Optimization.git (push)
+gitlab	git@gitlab.com:vasic-digital/Optimization.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Optimization.git (push)
+origin	git@github.com:vasic-digital/Optimization.git (fetch)
+origin	git@github.com:vasic-digital/Optimization.git (push)
+origin	git@gitlab.com:vasic-digital/Optimization.git (push)
+upstream	git@github.com:vasic-digital/Optimization.git (fetch)
+upstream	git@github.com:vasic-digital/Optimization.git (push)
+Entering 'dependencies/vasic-digital/ouroborous'
+### dependencies/vasic-digital/ouroborous
+origin	git@github.com:vasic-digital/Ouroborous.git (fetch)
+origin	git@github.com:vasic-digital/Ouroborous.git (push)
+Entering 'dependencies/vasic-digital/planning'
+### dependencies/vasic-digital/planning
+github	git@github.com:vasic-digital/Planning.git (fetch)
+github	git@github.com:vasic-digital/Planning.git (push)
+gitlab	git@gitlab.com:vasic-digital/planning.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/planning.git (push)
+origin	git@github.com:vasic-digital/Planning.git (fetch)
+origin	git@github.com:vasic-digital/Planning.git (push)
+origin	git@gitlab.com:vasic-digital/planning.git (push)
+upstream	git@github.com:vasic-digital/Planning.git (fetch)
+upstream	git@github.com:vasic-digital/Planning.git (push)
+Entering 'dependencies/vasic-digital/plinius_common'
+### dependencies/vasic-digital/plinius_common
+origin	git@github.com:vasic-digital/PliniusCommon.git (fetch)
+origin	git@github.com:vasic-digital/PliniusCommon.git (push)
+Entering 'dependencies/vasic-digital/plugins'
+### dependencies/vasic-digital/plugins
+github	git@github.com:vasic-digital/Plugins.git (fetch)
+github	git@github.com:vasic-digital/Plugins.git (push)
+gitlab	git@gitlab.com:vasic-digital/plugins.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/plugins.git (push)
+origin	git@github.com:vasic-digital/Plugins.git (fetch)
+origin	git@github.com:vasic-digital/Plugins.git (push)
+origin	git@gitlab.com:vasic-digital/plugins.git (push)
+upstream	git@github.com:vasic-digital/Plugins.git (fetch)
+upstream	git@github.com:vasic-digital/Plugins.git (push)
+Entering 'dependencies/vasic-digital/rag'
+### dependencies/vasic-digital/rag
+github	git@github.com:vasic-digital/RAG.git (fetch)
+github	git@github.com:vasic-digital/RAG.git (push)
+gitlab	git@gitlab.com:vasic-digital/RAG.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/RAG.git (push)
+origin	git@github.com:vasic-digital/RAG.git (fetch)
+origin	git@github.com:vasic-digital/RAG.git (push)
+origin	git@gitlab.com:vasic-digital/RAG.git (push)
+upstream	git@github.com:vasic-digital/RAG.git (fetch)
+upstream	git@github.com:vasic-digital/RAG.git (push)
+Entering 'dependencies/vasic-digital/rate_limiter'
+### dependencies/vasic-digital/rate_limiter
+github	git@github.com:vasic-digital/RateLimiter.git (fetch)
+github	git@github.com:vasic-digital/RateLimiter.git (push)
+gitlab	git@gitlab.com:vasic-digital/ratelimiter.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/ratelimiter.git (push)
+origin	git@github.com:vasic-digital/RateLimiter.git (fetch)
+origin	git@github.com:vasic-digital/RateLimiter.git (push)
+origin	git@gitlab.com:vasic-digital/ratelimiter.git (push)
+upstream	git@github.com:vasic-digital/RateLimiter.git (fetch)
+upstream	git@github.com:vasic-digital/RateLimiter.git (push)
+Entering 'dependencies/vasic-digital/recovery'
+### dependencies/vasic-digital/recovery
+github	git@github.com:vasic-digital/Recovery.git (fetch)
+github	git@github.com:vasic-digital/Recovery.git (push)
+gitlab	git@gitlab.com:vasic-digital/recovery.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/recovery.git (push)
+origin	git@github.com:vasic-digital/Recovery.git (fetch)
+origin	git@github.com:vasic-digital/Recovery.git (push)
+origin	git@gitlab.com:vasic-digital/recovery.git (push)
+upstream	git@github.com:vasic-digital/Recovery.git (fetch)
+upstream	git@github.com:vasic-digital/Recovery.git (push)
+Entering 'dependencies/vasic-digital/red_team'
+### dependencies/vasic-digital/red_team
+origin	git@github.com:vasic-digital/RedTeam.git (fetch)
+origin	git@github.com:vasic-digital/RedTeam.git (push)
+Entering 'dependencies/vasic-digital/self_improve'
+### dependencies/vasic-digital/self_improve
+github	git@github.com:vasic-digital/SelfImprove.git (fetch)
+github	git@github.com:vasic-digital/SelfImprove.git (push)
+gitlab	git@gitlab.com:vasic-digital/selfimprove.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/selfimprove.git (push)
+origin	git@github.com:vasic-digital/SelfImprove.git (fetch)
+origin	git@github.com:vasic-digital/SelfImprove.git (push)
+origin	git@gitlab.com:vasic-digital/selfimprove.git (push)
+upstream	git@github.com:vasic-digital/SelfImprove.git (fetch)
+upstream	git@github.com:vasic-digital/SelfImprove.git (push)
+Entering 'dependencies/vasic-digital/skill_registry'
+### dependencies/vasic-digital/skill_registry
+github	git@github.com:vasic-digital/SkillRegistry.git (fetch)
+github	git@github.com:vasic-digital/SkillRegistry.git (push)
+gitlab	git@gitlab.com:vasic-digital/SkillRegistry.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/SkillRegistry.git (push)
+origin	git@github.com:vasic-digital/SkillRegistry.git (fetch)
+origin	git@github.com:vasic-digital/SkillRegistry.git (push)
+origin	git@gitlab.com:vasic-digital/SkillRegistry.git (push)
+upstream	git@github.com:vasic-digital/SkillRegistry.git (fetch)
+upstream	git@github.com:vasic-digital/SkillRegistry.git (push)
+Entering 'dependencies/vasic-digital/storage'
+### dependencies/vasic-digital/storage
+github	git@github.com:vasic-digital/Storage.git (fetch)
+github	git@github.com:vasic-digital/Storage.git (push)
+gitlab	git@gitlab.com:vasic-digital/Storage.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Storage.git (push)
+origin	git@github.com:vasic-digital/Storage.git (fetch)
+origin	git@github.com:vasic-digital/Storage.git (push)
+origin	git@gitlab.com:vasic-digital/Storage.git (push)
+upstream	git@github.com:vasic-digital/Storage.git (fetch)
+upstream	git@github.com:vasic-digital/Storage.git (push)
+Entering 'dependencies/vasic-digital/streaming'
+### dependencies/vasic-digital/streaming
+github	git@github.com:vasic-digital/Streaming.git (fetch)
+github	git@github.com:vasic-digital/Streaming.git (push)
+gitlab	git@gitlab.com:vasic-digital/Streaming.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Streaming.git (push)
+origin	git@github.com:vasic-digital/Streaming.git (fetch)
+origin	git@github.com:vasic-digital/Streaming.git (push)
+origin	git@gitlab.com:vasic-digital/Streaming.git (push)
+upstream	git@github.com:vasic-digital/Streaming.git (fetch)
+upstream	git@github.com:vasic-digital/Streaming.git (push)
+Entering 'dependencies/vasic-digital/tool_schema'
+### dependencies/vasic-digital/tool_schema
+github	git@github.com:vasic-digital/ToolSchema.git (fetch)
+github	git@github.com:vasic-digital/ToolSchema.git (push)
+gitlab	git@gitlab.com:vasic-digital/ToolSchema.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/ToolSchema.git (push)
+origin	git@github.com:vasic-digital/ToolSchema.git (fetch)
+origin	git@github.com:vasic-digital/ToolSchema.git (push)
+origin	git@gitlab.com:vasic-digital/ToolSchema.git (push)
+upstream	git@github.com:vasic-digital/ToolSchema.git (fetch)
+upstream	git@github.com:vasic-digital/ToolSchema.git (push)
+Entering 'dependencies/vasic-digital/toon'
+### dependencies/vasic-digital/toon
+origin	git@github.com:vasic-digital/TOON.git (fetch)
+origin	git@github.com:vasic-digital/TOON.git (push)
+Entering 'dependencies/vasic-digital/vector_db'
+### dependencies/vasic-digital/vector_db
+github	git@github.com:vasic-digital/VectorDB.git (fetch)
+github	git@github.com:vasic-digital/VectorDB.git (push)
+gitlab	git@gitlab.com:vasic-digital/VectorDB.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/VectorDB.git (push)
+origin	git@github.com:vasic-digital/VectorDB.git (fetch)
+origin	git@github.com:vasic-digital/VectorDB.git (push)
+origin	git@gitlab.com:vasic-digital/VectorDB.git (push)
+upstream	git@github.com:vasic-digital/VectorDB.git (fetch)
+upstream	git@github.com:vasic-digital/VectorDB.git (push)
+Entering 'dependencies/vasic-digital/veritas'
+### dependencies/vasic-digital/veritas
+origin	git@github.com:vasic-digital/Veritas.git (fetch)
+origin	git@github.com:vasic-digital/Veritas.git (push)
+Entering 'dependencies/vasic-digital/vision_engine'
+### dependencies/vasic-digital/vision_engine
+github	git@github.com:HelixDevelopment/VisionEngine.git (fetch)
+github	git@github.com:HelixDevelopment/VisionEngine.git (push)
+origin	git@github.com:vasic-digital/VisionEngine.git (fetch)
+origin	git@github.com:HelixDevelopment/VisionEngine.git (push)
+upstream	git@github.com:HelixDevelopment/VisionEngine.git (fetch)
+upstream	git@github.com:HelixDevelopment/VisionEngine.git (push)
+Entering 'dependencies/vasic-digital/watcher'
+### dependencies/vasic-digital/watcher
+github	git@github.com:vasic-digital/Watcher.git (fetch)
+github	git@github.com:vasic-digital/Watcher.git (push)
+gitlab	git@gitlab.com:vasic-digital/watcher.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/watcher.git (push)
+origin	git@github.com:vasic-digital/Watcher.git (fetch)
+origin	git@github.com:vasic-digital/Watcher.git (push)
+origin	git@gitlab.com:vasic-digital/watcher.git (push)
+upstream	git@github.com:vasic-digital/Watcher.git (fetch)
+upstream	git@github.com:vasic-digital/Watcher.git (push)
+Entering 'github_pages_website'
+### github_pages_website
+github	git@github.com:HelixDevelopment-s-Code/Website.git (fetch)
+github	git@github.com:HelixDevelopment-s-Code/Website.git (push)
+origin	git@github.com:HelixDevelopment-Code/Welcome.git (fetch)
+origin	git@github.com:HelixDevelopment-s-Code/Website.git (push)
+upstream	git@github.com:HelixDevelopment-s-Code/Website.git (fetch)
+upstream	git@github.com:HelixDevelopment-s-Code/Website.git (push)
+Entering 'helix_agent'
+### helix_agent
+github	git@github.com:vasic-digital/HelixAgent.git (fetch)
+github	git@github.com:vasic-digital/HelixAgent.git (push)
+githubhelixdevelopment	git@github.com:HelixDevelopment/HelixAgent.git (fetch)
+githubhelixdevelopment	git@github.com:HelixDevelopment/HelixAgent.git (push)
+origin	git@github.com:HelixDevelopment/HelixAgent.git (fetch)
+origin	git@github.com:vasic-digital/HelixAgent.git (push)
+origin	git@github.com:HelixDevelopment/HelixAgent.git (push)
+upstream	git@github.com:vasic-digital/HelixAgent.git (fetch)
+upstream	git@github.com:vasic-digital/HelixAgent.git (push)
+Entering 'helix_agent/BuildCheck'
+### BuildCheck
+origin	git@github.com:milos85vasic/BuildCheck.git (fetch)
+origin	git@github.com:milos85vasic/BuildCheck.git (push)
+Entering 'helix_agent/MCP/submodules/airtable-mcp'
+### MCP/submodules/airtable-mcp
+origin	git@github.com:domdomegg/airtable-mcp-server.git (fetch)
+origin	git@github.com:domdomegg/airtable-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/all-in-one-mcp'
+### MCP/submodules/all-in-one-mcp
+origin	git@github.com:athapong/aio-mcp.git (fetch)
+origin	git@github.com:athapong/aio-mcp.git (push)
+Entering 'helix_agent/MCP/submodules/appcypher-awesome-mcp'
+### MCP/submodules/appcypher-awesome-mcp
+origin	git@github.com:appcypher/awesome-mcp-servers.git (fetch)
+origin	git@github.com:appcypher/awesome-mcp-servers.git (push)
+Entering 'helix_agent/MCP/submodules/atlassian-mcp'
+### MCP/submodules/atlassian-mcp
+origin	git@github.com:sooperset/mcp-atlassian.git (fetch)
+origin	git@github.com:sooperset/mcp-atlassian.git (push)
+Entering 'helix_agent/MCP/submodules/awesome-devops-mcp'
+### MCP/submodules/awesome-devops-mcp
+origin	git@github.com:rohitg00/awesome-devops-mcp-servers.git (fetch)
+origin	git@github.com:rohitg00/awesome-devops-mcp-servers.git (push)
+Entering 'helix_agent/MCP/submodules/awesome-mcp-servers'
+### MCP/submodules/awesome-mcp-servers
+origin	git@github.com:punkpeye/awesome-mcp-servers.git (fetch)
+origin	git@github.com:punkpeye/awesome-mcp-servers.git (push)
+Entering 'helix_agent/MCP/submodules/aws-mcp'
+### MCP/submodules/aws-mcp
+origin	git@github.com:awslabs/mcp.git (fetch)
+origin	git@github.com:awslabs/mcp.git (push)
+Entering 'helix_agent/MCP/submodules/brave-search'
+### MCP/submodules/brave-search
+origin	git@github.com:brave/brave-search-mcp-server.git (fetch)
+origin	git@github.com:brave/brave-search-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/browserbase-mcp'
+### MCP/submodules/browserbase-mcp
+origin	git@github.com:browserbase/mcp-server-browserbase.git (fetch)
+origin	git@github.com:browserbase/mcp-server-browserbase.git (push)
+Entering 'helix_agent/MCP/submodules/cloudflare-mcp'
+### MCP/submodules/cloudflare-mcp
+origin	git@github.com:cloudflare/mcp-server-cloudflare.git (fetch)
+origin	git@github.com:cloudflare/mcp-server-cloudflare.git (push)
+Entering 'helix_agent/MCP/submodules/context7-mcp'
+### MCP/submodules/context7-mcp
+origin	git@github.com:upstash/context7.git (fetch)
+origin	git@github.com:upstash/context7.git (push)
+Entering 'helix_agent/MCP/submodules/create-python-server'
+### MCP/submodules/create-python-server
+origin	git@github.com:modelcontextprotocol/create-python-server.git (fetch)
+origin	git@github.com:modelcontextprotocol/create-python-server.git (push)
+Entering 'helix_agent/MCP/submodules/create-typescript-server'
+### MCP/submodules/create-typescript-server
+origin	git@github.com:modelcontextprotocol/create-typescript-server.git (fetch)
+origin	git@github.com:modelcontextprotocol/create-typescript-server.git (push)
+Entering 'helix_agent/MCP/submodules/docs-mcp'
+### MCP/submodules/docs-mcp
+origin	git@github.com:RohitKrish46/docs-mcp-server.git (fetch)
+origin	git@github.com:RohitKrish46/docs-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/elasticsearch-mcp'
+### MCP/submodules/elasticsearch-mcp
+origin	git@github.com:elastic/mcp-server-elasticsearch.git (fetch)
+origin	git@github.com:elastic/mcp-server-elasticsearch.git (push)
+Entering 'helix_agent/MCP/submodules/ever-works-awesome-mcp'
+### MCP/submodules/ever-works-awesome-mcp
+origin	git@github.com:ever-works/awesome-mcp-servers.git (fetch)
+origin	git@github.com:ever-works/awesome-mcp-servers.git (push)
+Entering 'helix_agent/MCP/submodules/firecrawl-mcp'
+### MCP/submodules/firecrawl-mcp
+origin	git@github.com:mendableai/firecrawl-mcp-server.git (fetch)
+origin	git@github.com:mendableai/firecrawl-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/github-mcp-server'
+### MCP/submodules/github-mcp-server
+origin	git@github.com:github/github-mcp-server.git (fetch)
+origin	git@github.com:github/github-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/habito-awesome-mcp'
+### MCP/submodules/habito-awesome-mcp
+origin	git@github.com:habitoai/awesome-mcp-servers.git (fetch)
+origin	git@github.com:habitoai/awesome-mcp-servers.git (push)
+Entering 'helix_agent/MCP/submodules/heroku-mcp'
+### MCP/submodules/heroku-mcp
+origin	git@github.com:heroku/heroku-mcp-server.git (fetch)
+origin	git@github.com:heroku/heroku-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/inspector'
+### MCP/submodules/inspector
+origin	git@github.com:modelcontextprotocol/inspector.git (fetch)
+origin	git@github.com:modelcontextprotocol/inspector.git (push)
+Entering 'helix_agent/MCP/submodules/k8s-mcp-server'
+### MCP/submodules/k8s-mcp-server
+origin	git@github.com:alexei-led/k8s-mcp-server.git (fetch)
+origin	git@github.com:alexei-led/k8s-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/kubernetes-mcp'
+### MCP/submodules/kubernetes-mcp
+origin	git@github.com:manusa/kubernetes-mcp-server.git (fetch)
+origin	git@github.com:manusa/kubernetes-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/langchain-mcp'
+### MCP/submodules/langchain-mcp
+origin	git@github.com:langchain-ai/langchain-mcp-adapters.git (fetch)
+origin	git@github.com:langchain-ai/langchain-mcp-adapters.git (push)
+Entering 'helix_agent/MCP/submodules/llamaindex-mcp'
+### MCP/submodules/llamaindex-mcp
+origin	git@github.com:run-llama/mcp-llamaindex-ai.git (fetch)
+origin	git@github.com:run-llama/mcp-llamaindex-ai.git (push)
+Entering 'helix_agent/MCP/submodules/mcp-playwright-ea'
+### MCP/submodules/mcp-playwright-ea
+origin	git@github.com:executeautomation/mcp-playwright.git (fetch)
+origin	git@github.com:executeautomation/mcp-playwright.git (push)
+Entering 'helix_agent/MCP/submodules/microsoft-mcp'
+### MCP/submodules/microsoft-mcp
+origin	git@github.com:microsoft/mcp.git (fetch)
+origin	git@github.com:microsoft/mcp.git (push)
+Entering 'helix_agent/MCP/submodules/mongodb-mcp'
+### MCP/submodules/mongodb-mcp
+origin	git@github.com:mongodb-js/mongodb-mcp-server.git (fetch)
+origin	git@github.com:mongodb-js/mongodb-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/notion-mcp-server'
+### MCP/submodules/notion-mcp-server
+origin	git@github.com:makenotion/notion-mcp-server.git (fetch)
+origin	git@github.com:makenotion/notion-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/obsidian-mcp'
+### MCP/submodules/obsidian-mcp
+origin	git@github.com:cyanheads/obsidian-mcp-server.git (fetch)
+origin	git@github.com:cyanheads/obsidian-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/omnisearch-mcp'
+### MCP/submodules/omnisearch-mcp
+origin	git@github.com:spences10/mcp-omnisearch.git (fetch)
+origin	git@github.com:spences10/mcp-omnisearch.git (push)
+Entering 'helix_agent/MCP/submodules/perplexity-mcp'
+### MCP/submodules/perplexity-mcp
+origin	git@github.com:perplexityai/modelcontextprotocol.git (fetch)
+origin	git@github.com:perplexityai/modelcontextprotocol.git (push)
+Entering 'helix_agent/MCP/submodules/playwright-mcp'
+### MCP/submodules/playwright-mcp
+origin	git@github.com:microsoft/playwright-mcp.git (fetch)
+origin	git@github.com:microsoft/playwright-mcp.git (push)
+Entering 'helix_agent/MCP/submodules/python-sdk'
+### MCP/submodules/python-sdk
+origin	git@github.com:modelcontextprotocol/python-sdk.git (fetch)
+origin	git@github.com:modelcontextprotocol/python-sdk.git (push)
+Entering 'helix_agent/MCP/submodules/qdrant-mcp'
+### MCP/submodules/qdrant-mcp
+origin	git@github.com:qdrant/mcp-server-qdrant.git (fetch)
+origin	git@github.com:qdrant/mcp-server-qdrant.git (push)
+Entering 'helix_agent/MCP/submodules/redis-mcp'
+### MCP/submodules/redis-mcp
+origin	git@github.com:redis/mcp-redis.git (fetch)
+origin	git@github.com:redis/mcp-redis.git (push)
+Entering 'helix_agent/MCP/submodules/registry'
+### MCP/submodules/registry
+origin	git@github.com:modelcontextprotocol/registry.git (fetch)
+origin	git@github.com:modelcontextprotocol/registry.git (push)
+Entering 'helix_agent/MCP/submodules/sentry-mcp'
+### MCP/submodules/sentry-mcp
+origin	git@github.com:getsentry/sentry-mcp.git (fetch)
+origin	git@github.com:getsentry/sentry-mcp.git (push)
+Entering 'helix_agent/MCP/submodules/slack-mcp'
+### MCP/submodules/slack-mcp
+origin	git@github.com:korotovsky/slack-mcp-server.git (fetch)
+origin	git@github.com:korotovsky/slack-mcp-server.git (push)
+Entering 'helix_agent/MCP/submodules/supabase-mcp'
+### MCP/submodules/supabase-mcp
+origin	git@github.com:supabase-community/supabase-mcp.git (fetch)
+origin	git@github.com:supabase-community/supabase-mcp.git (push)
+Entering 'helix_agent/MCP/submodules/telegram-mcp'
+### MCP/submodules/telegram-mcp
+origin	git@github.com:chigwell/telegram-mcp.git (fetch)
+origin	git@github.com:chigwell/telegram-mcp.git (push)
+Entering 'helix_agent/MCP/submodules/trello-mcp'
+### MCP/submodules/trello-mcp
+origin	git@github.com:delorenj/mcp-server-trello.git (fetch)
+origin	git@github.com:delorenj/mcp-server-trello.git (push)
+Entering 'helix_agent/MCP/submodules/typescript-sdk'
+### MCP/submodules/typescript-sdk
+origin	git@github.com:modelcontextprotocol/typescript-sdk.git (fetch)
+origin	git@github.com:modelcontextprotocol/typescript-sdk.git (push)
+Entering 'helix_agent/MCP/submodules/workers-mcp'
+### MCP/submodules/workers-mcp
+origin	git@github.com:cloudflare/workers-mcp.git (fetch)
+origin	git@github.com:cloudflare/workers-mcp.git (push)
+Entering 'helix_agent/cli_agents/continue'
+### cli_agents/continue
+origin	git@github.com:continuedev/continue.git (fetch)
+origin	git@github.com:continuedev/continue.git (push)
+Entering 'helix_agent/cli_agents/kilo-code'
+### cli_agents/kilo-code
+origin	git@github.com:Kilo-Org/kilocode.git (fetch)
+origin	git@github.com:Kilo-Org/kilocode.git (push)
+Entering 'helix_agent/cli_agents/mobile-agent'
+### cli_agents/mobile-agent
+origin	git@github.com:X-PLUG/MobileAgent.git (fetch)
+origin	git@github.com:X-PLUG/MobileAgent.git (push)
+Entering 'helix_agent/cli_agents/opencode-cli'
+### cli_agents/opencode-cli
+origin	git@github.com:anomalyco/opencode.git (fetch)
+origin	git@github.com:anomalyco/opencode.git (push)
+Entering 'helix_agent/cli_agents/roo-code'
+### cli_agents/roo-code
+origin	git@github.com:RooVetGit/Roo-Code.git (fetch)
+origin	git@github.com:RooVetGit/Roo-Code.git (push)
+Entering 'helix_agent/docs/research/AutoRedTeam'
+### docs/research/AutoRedTeam
+origin	git@github.com:elder-plinius/AutoRedTeam.git (fetch)
+origin	git@github.com:elder-plinius/AutoRedTeam.git (push)
+Entering 'helix_agent/docs/research/CL4R1T4S'
+### docs/research/CL4R1T4S
+origin	git@github.com:elder-plinius/CL4R1T4S.git (fetch)
+origin	git@github.com:elder-plinius/CL4R1T4S.git (push)
+Entering 'helix_agent/docs/research/CLAUDE-CODE-SYSTEM-PROMPT'
+### docs/research/CLAUDE-CODE-SYSTEM-PROMPT
+origin	git@github.com:elder-plinius/CLAUDE-CODE-SYSTEM-PROMPT.git (fetch)
+origin	git@github.com:elder-plinius/CLAUDE-CODE-SYSTEM-PROMPT.git (push)
+Entering 'helix_agent/docs/research/Gandalf-Solutions'
+### docs/research/Gandalf-Solutions
+origin	git@github.com:elder-plinius/Gandalf-Solutions.git (fetch)
+origin	git@github.com:elder-plinius/Gandalf-Solutions.git (push)
+Entering 'helix_agent/docs/research/LEAKHUB'
+### docs/research/LEAKHUB
+origin	git@github.com:elder-plinius/LEAKHUB.git (fetch)
+origin	git@github.com:elder-plinius/LEAKHUB.git (push)
+Entering 'helix_agent/external/cognee'
+### external/cognee
+origin	git@github.com:topoteretes/cognee.git (fetch)
+origin	git@github.com:topoteretes/cognee.git (push)
+Entering 'helix_agent/external/mcp-servers/servers-archived'
+### external/mcp-servers/servers-archived
+origin	git@github.com:modelcontextprotocol/servers-archived.git (fetch)
+origin	git@github.com:modelcontextprotocol/servers-archived.git (push)
+Entering 'helix_agent/tools/snow-cli'
+### tools/snow-cli
+origin	git@github.com:MayDay-wpf/snow-cli.git (fetch)
+origin	git@github.com:MayDay-wpf/snow-cli.git (push)
+Entering 'helix_qa'
+### helix_qa
+github	git@github.com:HelixDevelopment/helixqa.git (fetch)
+github	git@github.com:HelixDevelopment/helixqa.git (push)
+gitlab	git@gitlab.com:vasic-digital/HelixQA.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/HelixQA.git (push)
+origin	git@github.com:HelixDevelopment/HelixQA.git (fetch)
+origin	git@github.com:HelixDevelopment/helixqa.git (push)
+origin	git@gitlab.com:vasic-digital/HelixQA.git (push)
+origin	git@github.com:vasic-digital/HelixQA.git (push)
+upstream	git@github.com:HelixDevelopment/helixqa.git (fetch)
+upstream	git@github.com:HelixDevelopment/helixqa.git (push)
+vasicdigitalgithub	git@github.com:vasic-digital/HelixQA.git (fetch)
+vasicdigitalgithub	git@github.com:vasic-digital/HelixQA.git (push)
+Entering 'helix_qa/tools/opensource/allure2'
+### tools/opensource/allure2
+origin	git@github.com:allure-framework/allure2.git (fetch)
+origin	git@github.com:allure-framework/allure2.git (push)
+Entering 'helix_qa/tools/opensource/anthropic-quickstarts'
+### tools/opensource/anthropic-quickstarts
+origin	git@github.com:anthropics/anthropic-quickstarts.git (fetch)
+origin	git@github.com:anthropics/anthropic-quickstarts.git (push)
+Entering 'helix_qa/tools/opensource/appcrawler'
+### tools/opensource/appcrawler
+origin	git@github.com:nicetester/AppCrawler.git (fetch)
+origin	git@github.com:nicetester/AppCrawler.git (push)
+Entering 'helix_qa/tools/opensource/appium'
+### tools/opensource/appium
+origin	git@github.com:appium/appium.git (fetch)
+origin	git@github.com:appium/appium.git (push)
+Entering 'helix_qa/tools/opensource/browser-use'
+### tools/opensource/browser-use
+origin	git@github.com:browser-use/browser-use.git (fetch)
+origin	git@github.com:browser-use/browser-use.git (push)
+Entering 'helix_qa/tools/opensource/chroma'
+### tools/opensource/chroma
+origin	git@github.com:chroma-core/chroma.git (fetch)
+origin	git@github.com:chroma-core/chroma.git (push)
+Entering 'helix_qa/tools/opensource/docker-android'
+### tools/opensource/docker-android
+origin	git@github.com:budtmo/docker-android.git (fetch)
+origin	git@github.com:budtmo/docker-android.git (push)
+Entering 'helix_qa/tools/opensource/docling'
+### tools/opensource/docling
+origin	git@github.com:DS4SD/docling.git (fetch)
+origin	git@github.com:DS4SD/docling.git (push)
+Entering 'helix_qa/tools/opensource/kiwi-tcms'
+### tools/opensource/kiwi-tcms
+origin	git@github.com:kiwitcms/Kiwi.git (fetch)
+origin	git@github.com:kiwitcms/Kiwi.git (push)
+Entering 'helix_qa/tools/opensource/leakcanary'
+### tools/opensource/leakcanary
+origin	git@github.com:square/leakcanary.git (fetch)
+origin	git@github.com:square/leakcanary.git (push)
+Entering 'helix_qa/tools/opensource/llama-index'
+### tools/opensource/llama-index
+origin	git@github.com:run-llama/llama_index.git (fetch)
+origin	git@github.com:run-llama/llama_index.git (push)
+Entering 'helix_qa/tools/opensource/marker'
+### tools/opensource/marker
+origin	git@github.com:VikParuchuri/marker.git (fetch)
+origin	git@github.com:VikParuchuri/marker.git (push)
+Entering 'helix_qa/tools/opensource/mem0'
+### tools/opensource/mem0
+origin	git@github.com:mem0ai/mem0.git (fetch)
+origin	git@github.com:mem0ai/mem0.git (push)
+Entering 'helix_qa/tools/opensource/midscene'
+### tools/opensource/midscene
+origin	git@github.com:web-infra-dev/midscene.git (fetch)
+origin	git@github.com:web-infra-dev/midscene.git (push)
+Entering 'helix_qa/tools/opensource/moondream'
+### tools/opensource/moondream
+origin	git@github.com:vikhyat/moondream.git (fetch)
+origin	git@github.com:vikhyat/moondream.git (push)
+Entering 'helix_qa/tools/opensource/perfetto'
+### tools/opensource/perfetto
+origin	git@github.com:google/perfetto.git (fetch)
+origin	git@github.com:google/perfetto.git (push)
+Entering 'helix_qa/tools/opensource/redroid'
+### tools/opensource/redroid
+origin	git@github.com:remote-android/redroid-doc.git (fetch)
+origin	git@github.com:remote-android/redroid-doc.git (push)
+Entering 'helix_qa/tools/opensource/scrcpy'
+### tools/opensource/scrcpy
+origin	git@github.com:Genymobile/scrcpy.git (fetch)
+origin	git@github.com:Genymobile/scrcpy.git (push)
+Entering 'helix_qa/tools/opensource/shortest'
+### tools/opensource/shortest
+origin	git@github.com:antiwork/shortest.git (fetch)
+origin	git@github.com:antiwork/shortest.git (push)
+Entering 'helix_qa/tools/opensource/signoz'
+### tools/opensource/signoz
+origin	git@github.com:SigNoz/signoz.git (fetch)
+origin	git@github.com:SigNoz/signoz.git (push)
+Entering 'helix_qa/tools/opensource/skyvern'
+### tools/opensource/skyvern
+origin	git@github.com:Skyvern-AI/skyvern.git (fetch)
+origin	git@github.com:Skyvern-AI/skyvern.git (push)
+Entering 'helix_qa/tools/opensource/skyvern/integrations/n8n'
+### integrations/n8n
+origin	https://github.com/Skyvern-AI/skyvern-n8n (fetch)
+origin	https://github.com/Skyvern-AI/skyvern-n8n (push)
+Entering 'helix_qa/tools/opensource/stagehand'
+### tools/opensource/stagehand
+origin	git@github.com:browserbase/stagehand.git (fetch)
+origin	git@github.com:browserbase/stagehand.git (push)
+Entering 'helix_qa/tools/opensource/testdriverai'
+### tools/opensource/testdriverai
+origin	git@github.com:testdriverai/testdriverai.git (fetch)
+origin	git@github.com:testdriverai/testdriverai.git (push)
+Entering 'helix_qa/tools/opensource/ui-tars'
+### tools/opensource/ui-tars
+origin	git@github.com:bytedance/UI-TARS.git (fetch)
+origin	git@github.com:bytedance/UI-TARS.git (push)
+Entering 'helix_qa/tools/opensource/ui-tars-desktop'
+### tools/opensource/ui-tars-desktop
+origin	git@github.com:bytedance/UI-TARS-desktop.git (fetch)
+origin	git@github.com:bytedance/UI-TARS-desktop.git (push)
+Entering 'helix_qa/tools/opensource/unstructured'
+### tools/opensource/unstructured
+origin	git@github.com:Unstructured-IO/unstructured.git (fetch)
+origin	git@github.com:Unstructured-IO/unstructured.git (push)
+Entering 'helix_qa/tools/test-apps/rest-demo'
+### tools/test-apps/rest-demo
+origin	git@github.com:nicehash/rest-clients-demo.git (fetch)
+origin	git@github.com:nicehash/rest-clients-demo.git (push)
+Entering 'mcp_servers'
+### mcp_servers
+origin	git@github.com:modelcontextprotocol/servers.git (fetch)
+origin	git@github.com:modelcontextprotocol/servers.git (push)
+Entering 'panoptic'
+### panoptic
+github	git@github.com:vasic-digital/Panoptic.git (fetch)
+github	git@github.com:vasic-digital/Panoptic.git (push)
+origin	git@github.com:vasic-digital/Panoptic.git (fetch)
+origin	git@github.com:vasic-digital/Panoptic.git (push)
+upstream	git@github.com:vasic-digital/Panoptic.git (fetch)
+upstream	git@github.com:vasic-digital/Panoptic.git (push)
+Entering 'security'
+### security
+github	git@github.com:vasic-digital/Security.git (fetch)
+github	git@github.com:vasic-digital/Security.git (push)
+gitlab	git@gitlab.com:vasic-digital/Security.git (fetch)
+gitlab	git@gitlab.com:vasic-digital/Security.git (push)
+origin	git@github.com:vasic-digital/Security.git (fetch)
+origin	git@github.com:vasic-digital/Security.git (push)
+origin	git@gitlab.com:vasic-digital/Security.git (push)
+upstream	git@github.com:vasic-digital/Security.git (fetch)
+upstream	git@github.com:vasic-digital/Security.git (push)

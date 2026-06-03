@@ -1,5 +1,6 @@
 challenges | git@github.com:vasic-digital/Challenges.git
 containers | git@github.com:vasic-digital/Containers.git
+dependencies/HelixDevelopment/debate_orchestrator | git@github.com:HelixDevelopment/DebateOrchestrator.git
 dependencies/HelixDevelopment/doc_processor | git@github.com:HelixDevelopment/DocProcessor.git
 dependencies/HelixDevelopment/helix_llm | git@github.com:HelixDevelopment/HelixLLM.git
 dependencies/HelixDevelopment/helix_memory | git@github.com:HelixDevelopment/HelixMemory.git

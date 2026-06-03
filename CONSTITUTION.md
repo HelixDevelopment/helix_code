@@ -23,13 +23,15 @@ per user mandate, pinned at the upstream `HelixDevelopment/HelixConstitution`
 HEAD). To locate it from nested submodules at arbitrary depth, source
 `constitution/find_constitution.sh` from the parent project tree.
 
-**Project-specific scope** — HelixCode does NOT inherit those parts of
-the universal Constitution that describe other-project specifics (e.g.
-multi-upstream Git push to GitFlic/GitVerse providers). Per this
-project's existing `CLAUDE.md` §6.W: "Only GitHub (`vasic-digital/*`,
-`HelixDevelopment/*`) and GitLab (`vasic-digital/*`, `HelixDevelopment/*`)
-are permitted as Git remotes. GitFlic, GitVerse, and all other providers
-are forbidden." §6.W is a project-level tightening that survives.
+**Project remote-policy scope (revised 2026-06-03)** — Per operator
+decision 2026-06-03, HelixCode aligns with the universal Constitution's
+multi-upstream Git-push allowance: GitHub (`vasic-digital/*`,
+`HelixDevelopment/*`), GitLab (same), GitFlic, and GitVerse are ALL
+permitted as Git remotes, and pushes target every configured upstream.
+This **SUPERSEDES** the earlier `CLAUDE.md` §6.W tightening that forbade
+GitFlic/GitVerse — that remote-provider restriction is **LIFTED**. Project
+tightenings unrelated to remote providers (host power management, anti-bluff,
+secret-leak, etc.) remain in force.
 
 ---
 

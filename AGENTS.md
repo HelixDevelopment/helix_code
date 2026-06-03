@@ -22,9 +22,11 @@ Continue, Gemini CLI, future LLMs — MUST read both
 `constitution/AGENTS.md` AND this project AGENTS.md, treating the
 project file as a tightening overlay (never a weakening).
 
-**Project-tightening note** — HelixCode forbids GitFlic + GitVerse
-Git remotes per `CLAUDE.md` §6.W; the universal AGENTS.md's broader
-"multi-upstream" guidance is narrowed here. Other tightenings (e.g.
+**Project remote-policy note (revised 2026-06-03)** — Per operator
+decision 2026-06-03, HelixCode permits GitFlic + GitVerse Git remotes in
+addition to GitHub + GitLab; the prior §6.W tightening forbidding
+GitFlic/GitVerse is **LIFTED** and pushes target all configured upstreams
+across all four providers. Other tightenings (e.g.
 CONST-033 host power management hard-ban, CONST-035 anti-bluff
 covenant, CONST-042 secret-leak policy, CONST-045 distribution-host
 config policy, CONST-046 no-hardcoded-content, CONST-047 recursive

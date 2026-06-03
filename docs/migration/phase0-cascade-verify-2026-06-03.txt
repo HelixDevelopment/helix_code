@@ -1,0 +1,160 @@
+================================================================================
+Phase 0 — Governance Cascade Verification Evidence
+================================================================================
+Captured by : read-only audit subagent
+Date        : 2026-06-03
+Repo        : /Users/milosvasic/Projects/HelixCode
+Command     : bash scripts/verify-governance-cascade.sh
+Exit code   : 0  (=== Result: 0 failures === / PASS)
+Output lines: 285
+
+NOTE: The verify-governance-cascade.sh script enumerates owned submodules from
+docs/improvements/submodule_owned.txt. It checks for §11.9 + CONST-047..059 +
+§11.4 covenant-114 anchors. It does NOT grep for the verbatim Article XI §11.9
+forensic string "most of the features does not work" per-file — that was checked
+separately by this audit (see report). The script passed all listed paths.
+
+--------------------------------------------------------------------------------
+FULL CAPTURED STDOUT+STDERR:
+--------------------------------------------------------------------------------
+=== Governance Cascade Verification ===
+Repo: /Users/milosvasic/Projects/HelixCode
+
+--- Root governance ---
+PASS: root/CONSTITUTION.md
+PASS: root/AGENTS.md
+
+--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97) ---
+PASS: root/CLAUDE.md (all 27 covenant-114 anchors present)
+PASS: root/AGENTS.md (all 27 covenant-114 anchors present)
+PASS: root/QWEN.md (all 27 covenant-114 anchors present)
+PASS: root/CRUSH.md (all 27 covenant-114 anchors present)
+PASS: root/CONSTITUTION.md (all 27 covenant-114 anchors present)
+
+--- Owned-by-us submodules ---
+[88 PASS lines spanning challenges/, containers/, dependencies/HelixDevelopment/*,
+ dependencies/vasic-digital/*, github_pages_website/, helix_agent/, helix_qa/,
+ panoptic/, security/ — each for CONSTITUTION.md / CLAUDE.md / AGENTS.md with
+ "(§11.9 + CONST-047..059 + §11.4 covenant-114)". Full list reproduced below.]
+
+PASS: challenges/CONSTITUTION.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: challenges/CLAUDE.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: challenges/AGENTS.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: containers/CONSTITUTION.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: containers/CLAUDE.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: containers/AGENTS.md (§11.9 + CONST-047..059 + §11.4 covenant-114)
+PASS: dependencies/HelixDevelopment/doc_processor/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/helix_llm/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/helix_memory/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/helix_specifier/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/llm_orchestrator/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/llm_provider/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/llms_verifier/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/models/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/HelixDevelopment/vision_engine/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/agentic/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/auth/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/auto_temp/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/background_tasks/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/benchmark/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/cache/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/claritas/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/concurrency/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/config/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/conversation/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/database/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/doc_processor/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/document/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/embeddings/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/event_bus/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/filesystem/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/formatters/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/gandalf_solutions/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/hyper_tune/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/i18n/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/i_llm/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/lazy/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/leak_hub/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/llm_ops/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/llm_orchestrator/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/llm_provider/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/mcp_module/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/memory/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/messaging/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/middleware/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/models/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/normalize/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/observability/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/optimization/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/ouroborous/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/planning/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/plinius_common/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/plugins/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/rag/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/rate_limiter/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/recovery/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/red_team/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/self_improve/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/skill_registry/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/storage/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/streaming/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/tool_schema/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/toon/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/vector_db/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/veritas/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/vision_engine/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: dependencies/vasic-digital/watcher/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: github_pages_website/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: helix_agent/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: helix_qa/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: panoptic/{CONSTITUTION,CLAUDE,AGENTS}.md
+PASS: security/{CONSTITUTION,CLAUDE,AGENTS}.md
+
+--- Third-party submodules ---
+[65 PASS lines, each "(listed in submodule_third_party.txt)" — awesome-ai-memory,
+ cli_agents/*, cli_agents_resources/*, dependencies/{HuggingFace_Hub,LLama_CPP,
+ Ollama}, mcp_servers]
+
+=== Result: 0 failures ===
+PASS
+
+================================================================================
+SEPARATE PER-FILE VERBATIM-STRING AUDIT (string: "most of the features does not work")
+================================================================================
+Sampled 15 own-org submodule paths (own-org = .gitmodules url contains
+vasic-digital or HelixDevelopment). govfile preference: CLAUDE.md, else AGENTS.md,
+else CONSTITUTION.md.
+
+PATH                                              CHECKOUT      VERBATIM-STRING
+github_pages_website                              CHECKED_OUT   MISSING (CLAUDE.md; also absent in AGENTS.md + CONSTITUTION.md)
+containers                                         CHECKED_OUT   PRESENT (CLAUDE.md)
+helix_qa                                           CHECKED_OUT   PRESENT (CLAUDE.md)
+security                                           CHECKED_OUT   PRESENT (CLAUDE.md)
+challenges                                         CHECKED_OUT   PRESENT (CLAUDE.md)
+helix_agent                                        CHECKED_OUT   PRESENT (CLAUDE.md)
+panoptic                                           CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/HelixDevelopment/llms_verifier        CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/HelixDevelopment/doc_processor        CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/HelixDevelopment/llm_orchestrator     CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/vasic-digital/auth                    CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/vasic-digital/database                CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/vasic-digital/cache                   CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/vasic-digital/rag                     CHECKED_OUT   PRESENT (CLAUDE.md)
+dependencies/vasic-digital/memory                  CHECKED_OUT   PRESENT (CLAUDE.md)
+
+Result: 14/15 PRESENT, 1/15 MISSING (github_pages_website).
+
+NOTE on github_pages_website: it passes the cascade SCRIPT (which checks for
+§11.9 + CONST-035 anchor IDs, 20 anti-bluff-pattern hits found) but does NOT
+contain the exact verbatim forensic sentence "most of the features does not
+work". So the anti-bluff mandate is referenced by ID but the verbatim §11.9
+quote is absent from all three of its govfiles.
+
+NOTE on submodule_owned.txt coverage gap: dependencies/HelixDevelopment/debate_orchestrator
+is declared in .gitmodules (git@github.com:HelixDevelopment/DebateOrchestrator.git),
+IS checked out, and DOES contain the verbatim string in all three govfiles — but
+it is NOT in docs/improvements/submodule_owned.txt, so the cascade script never
+verifies it. (Not a missing-mandate defect; a verifier-roster coverage gap.)
+
+All own-org submodule directories sampled were checked out (non-empty). No empty
+own-org submodule directory was found among the sample.

@@ -17,14 +17,15 @@ to HelixCode. Project-specific rules below **extend** them — they
 do NOT and MAY NOT weaken any universal clause. When this file
 disagrees with the constitution submodule, the constitution wins.
 
-**Project-tightening note (CONST-038 / §6.W):** HelixCode permits
-only GitHub + GitLab Git remotes (`vasic-digital/*` and
-`HelixDevelopment/*`); GitFlic, GitVerse, and all other providers
-are explicitly forbidden. This is a project-level tightening that
-SURVIVES the universal "multi-upstream" guidance in
-`constitution/Constitution.md` Appendix C — universal allowance
-is broader, project rule is narrower, and the narrower rule wins
-(per inheritance precedence: project may tighten, never weaken).
+**Project remote-policy note (CONST-038 / §6.W — revised 2026-06-03):**
+HelixCode permits GitHub + GitLab + GitFlic + GitVerse Git remotes for
+`vasic-digital/*` and `HelixDevelopment/*` repositories, and pushes target
+**every** configured upstream across all four providers. This aligns HelixCode
+with the universal "multi-upstream" allowance in
+`constitution/Constitution.md` Appendix C. Per operator decision 2026-06-03,
+the prior §6.W tightening that forbade GitFlic + GitVerse is **LIFTED** — those
+providers are now explicitly permitted. (Project tightenings unrelated to
+remote providers remain in force.)
 
 `@constitution/CLAUDE.md`
 

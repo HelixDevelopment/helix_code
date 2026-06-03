@@ -1173,3 +1173,23 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 
 - Open set is now exactly 1 item: **HXC-001** (CONST-052 rename programme — Task, In progress). No open Bug, Feature, or Operator-blocked items remain.
 
+## close-out¹³⁹ — round 465: Phase 0 of the own-org submodule sync→flatten→rebuild→test programme (governance baseline)
+
+> Verbatim 2026-06-03 operator mandate (preserved per CONST-049 §11.4.17): *"first we go to the latest main (or master) commit … Then on top of this we merge carefully all changes … all existing Submodules that are coming from vasic-digital and HelixDevelopment organizations into the root of the project … Everything MUST BE flat … HelixCode/submodules/SUBMODULE_NAME … rebuild EVERYTHING … bootup all containers … execute all existing tests and Challenges … all tests MUST PRODUCE real evidence … No false results or bluff(s)."*
+
+### What landed
+
+1. **Programme decomposed into 6 phases** (0 governance baseline → 1 sync-to-latest+merge → 2 flatten+rewrite-refs → 3 rebuild → 4 boot-infra+run-all-tests/Challenges → 5 fix-every-issue). Design spec written + committed: `docs/superpowers/specs/2026-06-03-phase0-governance-baseline-design.md`. Each phase: design→approval→subagent execution→evidence-backed verification. Operator approved Phase 0 + "one phase at a time" + autonomous subagent-driven loop.
+2. **Governance verification (subagent, read-only): PASS.** `scripts/verify-governance-cascade.sh` → 0 failures (evidence: `docs/migration/phase0-cascade-verify-2026-06-03.txt`). Anti-bluff mandate present fleet-wide by anchor ID. Minor gaps logged: `github_pages_website` lacks the verbatim §11.9 sentence (covered by anchor; verbatim insertion deferred to Phase 1 when it is pushed); `debate_orchestrator` was absent from the owned roster → **fixed** (added to `docs/improvements/submodule_owned.txt`).
+3. **CONST-038 / §6.W reconciled** (operator decision 2026-06-03): the GitFlic/GitVerse remote ban is **LIFTED** — pushes now target all four providers (GitHub + GitLab + GitFlic + GitVerse). Edited in root `CLAUDE.md`, `CONSTITUTION.md`, `AGENTS.md` (QWEN.md/CRUSH.md did not carry the ban). Resolves the doc-vs-practice contradiction created by the "push to all upstreams incl. GitFlic/GitVerse" decision.
+4. **Safety backup (subagent, read-only):** reversibility restore manifest written + round-trip validated (218 recursive submodules; main HEAD `34bc865e`) → `docs/migration/phase0-restore-manifest-2026-06-03.txt`. This is the rollback anchor for the higher-risk Phases 1–2.
+
+### State
+
+- Phase 0 mutations limited to documentation + evidence/manifest files in the **main repo** (no submodule content touched — pre-existing dirty submodules `helix_agent`/`helix_qa`/`filesystem` are explicitly left for Phase 1's careful sync).
+- **HXC-001** (CONST-052 rename programme) is subsumed by Phase 2 (flatten + snake_case + rewrite-refs).
+
+### Next
+
+- Phase 1: per own-org submodule — `git fetch --all` → checkout main/master → pull latest → carefully merge local work (e.g. `filesystem` `docs/ARCHITECTURE.md`) → `install_upstreams` → commit + push to all upstreams. Subagent-parallel across the 70 own-org repos, with working-tree quiescence (§11.4.84) + per-repo fetch-investigate-integrate (§11.4.71).
+
