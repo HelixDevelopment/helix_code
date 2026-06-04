@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DOC_RECONCILIATION_PLAN.2026-06-04</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="documentation-reconciliation-plan-root-.md-sprawl-rule-9-over-claims">Documentation
+Reconciliation Plan — Root <code>*.md</code> Sprawl &amp; Rule-9
+Over-Claims</h1>
+<p><strong>Date:</strong> 2026-06-04 <strong>Author:</strong>
+Comprehensive-completion programme, round 468 W6E (conductor
+main-stream, read-only discovery) <strong>Status:</strong> DISCOVERY +
+PLAN ONLY — no files deleted/moved by this stream. Execution (mass
+retirement) is decision-heavy and requires operator sign-off + proper
+§11.4.90 <code>Obsolete</code> classification. <strong>Method:</strong>
+read-only filesystem inventory + grep evidence captured this session.
+Supersedes the stale handoff note “No .mmd/.puml diagram sources” (false
+— see F5).</p>
+<hr />
+<h2 id="findings-evidence-cited">1. Findings (evidence-cited)</h2>
+<h3 id="f1-root-markdown-sprawl-106-.md-at-repo-root">F1 — Root markdown
+sprawl: 106 <code>*.md</code> at repo root</h3>
+<p><code>ls *.md | wc -l</code> = <strong>106</strong> (vs 18 in
+<code>docs/</code>). Buckets:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>~count</th>
+<th>Examples</th>
+<th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Governance (canonical — KEEP)</strong></td>
+<td>6</td>
+<td><code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CONSTITUTION.md</code>, <code>CRUSH.md</code>,
+<code>QWEN.md</code>, <code>README.md</code></td>
+<td>Keep; peer-sync per §1.1 of CLAUDE.md</td>
+</tr>
+<tr>
+<td><strong>Entry/nav (KEEP, reconcile)</strong></td>
+<td>~6</td>
+<td><code>START_HERE.md</code>, <code>CONTINUE_HERE.md</code>,
+<code>README_DOCKER.md</code>, <code>HELIX_SCRIPT_GUIDE.md</code>,
+<code>DOCKER_SETUP.md</code>, <code>QUICK_START_TOMORROW.md</code></td>
+<td>Keep; point at <code>docs/CONTINUATION.md</code> as the single
+resumption record (CONST-044)</td>
+</tr>
+<tr>
+<td><strong>Completion/Success reports (Rule-9 — RETIRE)</strong></td>
+<td>~22</td>
+<td>see F2</td>
+<td>Archive → <code>docs/archive/</code> + §11.4.90
+<code>Obsolete</code></td>
+</tr>
+<tr>
+<td><strong>Phase/session churn (CONSOLIDATE)</strong></td>
+<td>~24</td>
+<td><code>PHASE_0_*</code>(5), <code>PHASE_1_*</code>(7),
+<code>PHASE_2_*</code>(3), <code>PHASE_3_*</code>(3),
+<code>Phase{2,4,5}_Implementation_Summary</code>,
+<code>SESSION_*</code></td>
+<td>Fold into <code>CONTINUATION.md</code> history; archive
+originals</td>
+</tr>
+<tr>
+<td><strong>Plans (OVERLAP — consolidate to 1)</strong></td>
+<td>~13</td>
+<td><code>*IMPLEMENTATION_PLAN*</code>, <code>*ROADMAP*</code>,
+<code>MASTER_IMPLEMENTATION_PLAN</code>,
+<code>COMPREHENSIVE_COMPLETION_PLAN</code></td>
+<td>Consolidate into the 2026-06-04 <code>docs/CONSOLIDATED_*</code>
+reports already produced</td>
+</tr>
+<tr>
+<td><strong>Analysis/Audit (OVERLAP)</strong></td>
+<td>~14</td>
+<td><code>COMPREHENSIVE_{ANALYSIS,AUDIT}_REPORT</code>,
+<code>*GAP_ANALYSIS*</code>, <code>AUDIT_TRACKER_2026</code>,
+<code>SKIPPED_TESTS_ANALYSIS</code></td>
+<td>Consolidate; keep the newest as reference</td>
+</tr>
+<tr>
+<td><strong>Trackers (SUPERSEDED by SQLite SSOT — RETIRE)</strong></td>
+<td>~6</td>
+<td><code>IMPLEMENTATION_TRACKER</code>,
+<code>DETAILED_IMPLEMENTATION_TRACKER</code>,
+<code>COMPLETE_IMPLEMENTATION_TRACKER</code>,
+<code>AUDIT_IMPLEMENTATION_TRACKER</code>,
+<code>APPLICATION_CHALLENGE_STATUS</code></td>
+<td>See F3 — replaced by <code>docs/workable_items.db</code> +
+<code>docs/Issues.md</code>/<code>Fixed.md</code></td>
+</tr>
+<tr>
+<td><strong>Reference (cli_agents — KEEP)</strong></td>
+<td>~10</td>
+<td><code>EXAMPLE_PROJECTS_*</code>, <code>PLANDEX_*</code>,
+<code>FEATURE_COMPARISON_MATRIX</code>,
+<code>HELIXCODE_QUICK_REFERENCE</code></td>
+<td>Keep; legit reference material</td>
+</tr>
+<tr>
+<td><strong>Design/spec (KEEP, assess accuracy)</strong></td>
+<td>~5</td>
+<td><code>E2E_TEST_SPECIFICATION</code>, <code>TESTING_PLAN</code>,
+<code>SECURITY_IMPLEMENTATION</code>, <code>PENPOT_INTEGRATION</code>,
+<code>TEAM_DEVELOPMENT_BREAKDOWN</code></td>
+<td>Keep; verify claims vs reality</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="f2-rule-9-article-xi-11.9-false-success-artifacts-high-severity">F2
+— Rule-9 / Article XI §11.9 false-success artifacts (HIGH severity)</h3>
+<p><code>grep -icE "100% complete|all tests pass|fully working|production[- ]ready|fully functional|all.*passing|mission accomplished"</code>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>over-claim phrase hits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FINAL_COMPLETION_SUCCESS_REPORT.md</code></td>
+<td><strong>29</strong></td>
+</tr>
+<tr>
+<td><code>PRODUCTION_DEPLOYMENT_READINESS_REPORT.md</code></td>
+<td><strong>24</strong></td>
+</tr>
+<tr>
+<td><code>IMPLEMENTATION_COMPLETE.md</code></td>
+<td><strong>16</strong></td>
+</tr>
+<tr>
+<td><code>FINAL_COMPLETION_REPORT.md</code></td>
+<td><strong>13</strong></td>
+</tr>
+<tr>
+<td><code>HELIXCODE_COMPLETION_REPORT.md</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>IMPLEMENTATION_SUCCESS.md</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>FINAL_COMPLETION.md</code>,
+<code>PROJECT_COMPLETION_ANALYSIS.md</code></td>
+<td>1 each</td>
+</tr>
+</tbody>
+</table>
+<p>These assert “complete / production-ready / all passing” while
+<code>docs/CONTINUATION.md</code> (the CONST-044 authoritative record)
+shows the comprehensive-completion programme still has W6+ open work,
+and rounds 468b–468d were fixing <strong>broken-build</strong> modules
+(doc_processor conflict markers, challenges missing-dep, llms_verifier
+go.sum) and a committed <strong>secret leak</strong>. They are textbook
+false-success surface (Rule 9 / §11.4.1).</p>
+<h3
+id="f3-tracker-docs-superseded-by-the-sqlite-single-source-of-truth">F3
+— Tracker docs superseded by the SQLite single-source-of-truth</h3>
+<p><code>docs/workable_items.db</code> <strong>exists</strong> (356 KB)
+— the §11.4.93/§11.4.95 mandated single source of truth — alongside its
+generated <code>docs/Issues.md</code> (99 KB) +
+<code>docs/Fixed.md</code> (76 KB). The ~6 root
+<code>*_TRACKER.md</code> / <code>*_STATUS.md</code> files predate and
+duplicate this; per §11.4.95 the DB is authoritative. They are retire
+candidates (risk: drift — a human reads a stale tracker that contradicts
+the DB).</p>
+<h3 id="f4-missing-docsarchitecture.md-gap">F4 — Missing
+<code>docs/ARCHITECTURE.md</code> (gap)</h3>
+<p><code>ls docs/ARCHITECTURE.md ARCHITECTURE.md</code> → <strong>No
+such file</strong>. Yet <code>CLAUDE.md</code> §11 cites
+<code>docs/ARCHITECTURE.md</code> as the architecture-question authority
+and §3.4-area docs reference it.
+<code>HELIXCODE_ARCHITECTURE_CONSISTENCY_REPORT.md</code> exists but is
+a <em>report</em>, not the architecture doc. <strong>Action: author
+<code>docs/ARCHITECTURE.md</code></strong> (the meta-repo + inner
+<code>helix_code/</code> module + submodule topology, sourced from §3.2
+of CLAUDE.md and verified against the live tree).</p>
+<h3 id="f5-diagram-sources-do-exist-corrects-stale-handoff">F5 — Diagram
+sources DO exist (corrects stale handoff)</h3>
+<p><code>find … -name '*.mmd' -o -name '*.puml' -o -name '*.drawio'</code>
+= <strong>128</strong> (excluding cli_agents/resources/deps).
+Distribution: <code>helix_agent</code> 40, <code>helix_llm</code> 14,
+<code>llms_verifier</code> 6, <code>helix_qa</code> 6, plus 3–4 each
+across ~30 functional submodules. The handoff’s “No .mmd/.puml diagram
+sources” is <strong>false</strong>. Real gap is narrower: <strong>root +
+inner <code>helix_code/</code> architecture diagrams</strong> appear
+thin — to be quantified when <code>docs/ARCHITECTURE.md</code> is
+authored.</p>
+<h3 id="f6-aspirationalstub-docs-that-over-claim-by-title">F6 —
+Aspirational/stub docs that over-claim by title</h3>
+<ul>
+<li><code>SONARQUBE_SNYK_IMPLEMENTATION.md</code> — aspirational only
+(no working containerized Snyk/Sonar yet; that’s a queued LARGE phase).
+Title implies implemented.</li>
+<li><code>VIDEO_COURSE_CURRICULUM.md</code> — stub; real course material
+lives in <code>github_pages_website/docs/courses</code>. Both should be
+relabeled <code>…_PLAN.md</code> / carry a <code>Status: PLANNED</code>
+header (§11.4.73 spec-versioning posture) until backed by reality.</li>
+</ul>
+<hr />
+<h2 id="prioritized-reconciliation-plan">2. Prioritized reconciliation
+plan</h2>
+<blockquote>
+<p>Each retirement = move to <code>docs/archive/&lt;name&gt;</code>
+(preserve history, §9 no-loss) + a one-line
+<code>docs/archive/INDEX.md</code> pointer + §11.4.90
+<code>Obsolete (→ Fixed.md)</code> ledger entry with
+<code>Reason: superseded-by-later-mandate</code> (SSOT/CONTINUATION) or
+<code>stale-documentation</code>. <strong>No
+<code>rm</code>.</strong></p>
+</blockquote>
+<ul>
+<li><strong>P1 (HIGH, anti-bluff) — Neutralize F2 false-success
+reports.</strong> Archive the ~22 completion/success reports; add a
+one-line banner redirect to <code>docs/CONTINUATION.md</code>. Removes
+the worst Rule-9 surface. <em>Decision-gated (operator).</em></li>
+<li><strong>P2 (HIGH) — Author <code>docs/ARCHITECTURE.md</code>
+(F4).</strong> Fills a cited-but-missing authority doc. Net-new content,
+low risk — can proceed without retirement sign-off. <em>Good candidate
+for a dedicated subagent stream.</em></li>
+<li><strong>P3 (MED) — Retire F3 tracker docs</strong> in favor of
+<code>workable_items.db</code>/<code>Issues.md</code>/<code>Fixed.md</code>.
+<em>Decision-gated.</em></li>
+<li><strong>P4 (MED) — Consolidate F1 plan/analysis/phase churn</strong>
+into the existing <code>docs/CONSOLIDATED_*</code> +
+<code>CONTINUATION.md</code>; archive originals.
+<em>Decision-gated.</em></li>
+<li><strong>P5 (LOW) — Relabel F6 aspirational docs</strong> with
+<code>Status: PLANNED</code>. Low risk.</li>
+</ul>
+<h2 id="decision-points-for-operator">3. Decision points for
+operator</h2>
+<ol type="1">
+<li><strong>Approve mass archive</strong> of P1/P3/P4 (~50 root docs →
+<code>docs/archive/</code>)? Default safe action = archive-not-delete
+(reversible per §9.2), so this is low-blast-radius and a candidate for
+autonomous proceed under §11.4.101 — but volume warrants explicit
+sign-off.</li>
+<li>Confirm <code>docs/CONTINUATION.md</code> +
+<code>docs/workable_items.db</code> as the <strong>two</strong>
+canonical live records, with everything else either reference or
+archived.</li>
+</ol>
+<h2 id="honest-boundary-11.4.6">4. Honest boundary (§11.4.6)</h2>
+<p>This is a read-only inventory + plan. It does <strong>not</strong>
+verify the <em>content accuracy</em> of the KEEP-bucket design/spec docs
+(F1 row 9) — that is per-doc follow-up work. Submodule-internal doc
+sprawl (helix_code 84, llms_verifier 159 per handoff) is
+<strong>not</strong> re-counted here and remains a separate per-module
+sweep.</p>
+</body>
+</html>

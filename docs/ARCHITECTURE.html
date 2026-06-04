@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ARCHITECTURE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="helixcode-architecture">HelixCode Architecture</h1>
+<p><strong>Scope:</strong> Factual, verified architecture map of the
+HelixCode repository. This document is the authority referenced by
+<code>CLAUDE.md</code> §11 for architecture questions. It describes what
+EXISTS in the live tree (verified by inspecting
+<code>.gitmodules</code>, both <code>go.mod</code> files, and directory
+listings); it is a structural map, not a status report. Known-incomplete
+areas are flagged honestly in the final section.</p>
+<blockquote>
+<p><strong>Note on CLAUDE.md drift:</strong> <code>CLAUDE.md</code> §3.2
+describes an older, partly flat submodule layout
+(e.g. <code>challenges/</code>, <code>containers/</code>,
+<code>security/</code>, <code>helix_qa/</code>,
+<code>helix_agent/</code> at repo root, and a <code>dependencies/</code>
+group for the HelixDevelopment modules). The live tree has moved nearly
+all owned submodules under <code>submodules/&lt;name&gt;/</code>. Where
+§3.2 and the live tree disagree, this document follows the live tree and
+notes the discrepancy inline.</p>
+</blockquote>
+<hr />
+<h2 id="repository-topology">1. Repository topology</h2>
+<p>HelixCode is a <strong>governance / meta-repository</strong> that
+contains a thin root Go module, a tracked inner Go application, and a
+large set of Git submodules.</p>
+<h3 id="two-go-modules-both-module-dev.helix.code">1.1 Two Go modules —
+both <code>module dev.helix.code</code></h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 13%" />
+<col style="width: 23%" />
+<col style="width: 32%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Path</th>
+<th><code>module</code></th>
+<th><code>go</code> version</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root (thin)</td>
+<td><code>go.mod</code></td>
+<td><code>dev.helix.code</code></td>
+<td><code>1.25.2</code></td>
+<td>Governance/meta module. Only 3 require lines
+(<code>google/uuid</code>, <code>pkg/errors</code>,
+<code>yaml.v2</code>), all <code>// indirect</code>. Hosts root-level
+helpers (<code>internal/</code>, <code>cmd/</code>) and governance
+gates.</td>
+</tr>
+<tr>
+<td>Inner (full app)</td>
+<td><code>helix_code/go.mod</code></td>
+<td><code>dev.helix.code</code></td>
+<td><code>1.26</code></td>
+<td>The real HelixCode Go application: server, CLI, internal domain
+packages, applications, tests, and all transitive third-party + own-org
+dependencies.</td>
+</tr>
+</tbody>
+</table>
+<p>Both modules declare the same module path
+<code>dev.helix.code</code>. They are distinct modules living one
+directory apart.</p>
+<h3 id="helix_code-is-a-tracked-subdirectory-not-a-submodule">1.2
+<code>helix_code/</code> is a tracked subdirectory, NOT a submodule</h3>
+<p>Verified: <code>.gitmodules</code> contains <strong>zero</strong>
+entries for <code>helix_code</code>
+(<code>grep -c helix_code .gitmodules</code> → <code>0</code>). The
+inner application is a normal tracked subdirectory of the meta-repo,
+consistent with CLAUDE.md §3.2.1’s “circular reference if promoted”
+note. Instructions that reference <code>internal/auth</code>,
+<code>cmd/cli</code>, etc. almost always mean
+<code>helix_code/internal/...</code> /
+<code>helix_code/cmd/...</code>.</p>
+<h3
+id="submodule-layout-submodulesname-live-tree-differs-from-claude.md-3.2">1.3
+Submodule layout — <code>submodules/&lt;name&gt;/</code> (live tree),
+differs from CLAUDE.md §3.2</h3>
+<p><code>.gitmodules</code> defines submodules across several path
+families:</p>
+<ul>
+<li><strong><code>submodules/&lt;name&gt;/</code></strong> — the grouped
+layout for owned modules. 63 directories present under
+<code>submodules/</code>. NOTE the <code>.gitmodules</code> <em>section
+names</em> are inconsistent with the <em>paths</em>: e.g. the section
+<code>[submodule "containers"]</code> has
+<code>path = submodules/containers</code>, and
+<code>[submodule "dependencies/HelixDevelopment/llm_orchestrator"]</code>
+has <code>path = submodules/llm_orchestrator</code>. The
+<strong>path</strong> is authoritative; the live checkout puts these
+under <code>submodules/</code>. This is the principal divergence from
+CLAUDE.md §3.2, which still lists <code>challenges/</code>,
+<code>containers/</code>, <code>security/</code>,
+<code>helix_qa/</code>, <code>helix_agent/</code> as flat repo-root
+entries.</li>
+<li><strong><code>dependencies/&lt;name&gt;/</code></strong> —
+third-party upstream mirrors: <code>dependencies/LLama_CPP</code>
+(ggml-org/llama.cpp), <code>dependencies/Ollama</code> (ollama/ollama),
+<code>dependencies/HuggingFace_Hub</code>
+(huggingface/huggingface_hub).</li>
+<li><strong><code>cli_agents/&lt;name&gt;/</code></strong> — 50
+third-party reference CLI-agent repos (aider, crush, gemini-cli,
+qwen-code, plandex, open-interpreter, swe-agent, gpt-engineer,
+claude-code, etc.).</li>
+<li><strong><code>cli_agents_resources/&lt;name&gt;/</code></strong> —
+reference resource repos (Awesome-AI-Agents, Awesome-AI-GPTs,
+OpenAI-Cookbook, Cheshire-Cat-Ai docs, GitHub-Awesome-Copilot,
+Taches-CC-Resources).</li>
+<li><strong>Repo-root single submodules</strong> —
+<code>github_pages_website</code> (HelixDevelopment-Code/Welcome
+marketing site) and <code>awesome-ai-memory</code>
+(topoteretes/awesome-ai-memory).</li>
+</ul>
+<p>Only a subset of the 63 <code>submodules/*</code> directories are
+wired as formal <code>.gitmodules</code> entries; the remainder are
+present in the working tree (see §7 for the honest gap on this).</p>
+<h3 id="inner-module-wiring-via-replace-directives">1.4 Inner module
+wiring via <code>replace</code> directives</h3>
+<p><code>helix_code/go.mod</code> consumes own-org submodules through
+local <code>replace</code> directives pointing at
+<code>../submodules/&lt;name&gt;</code> — e.g.:</p>
+<pre><code>replace digital.vasic.containers     =&gt; ../submodules/containers
+replace digital.vasic.helixqa        =&gt; ../submodules/helix_qa
+replace digital.vasic.docprocessor   =&gt; ../submodules/doc_processor
+replace digital.vasic.llmorchestrator =&gt; ../submodules/llm_orchestrator
+replace digital.vasic.visionengine   =&gt; ../submodules/vision_engine
+replace digital.vasic.challenges     =&gt; ../submodules/challenges
+replace digital.vasic.security       =&gt; ../submodules/security
+replace digital.vasic.debate         =&gt; ../submodules/debate_orchestrator
+replace digital.vasic.helixspecifier =&gt; ../submodules/helix_specifier
+replace digital.vasic.lazy           =&gt; ../submodules/lazy</code></pre>
+<p>The inner <code>require</code> block lists own-org modules
+<code>digital.vasic.containers</code>,
+<code>digital.vasic.debate</code>, <code>digital.vasic.helixqa</code>,
+<code>digital.vasic.helixspecifier</code>,
+<code>digital.vasic.lazy</code> (versions <code>v0.0.0-...</code>
+resolved via the local <code>replace</code>).</p>
+<hr />
+<h2 id="inner-application-structure-helix_code">2. Inner application
+structure (<code>helix_code/</code>)</h2>
+<h3 id="helix_codecmd-entry-points-and-command-surfaces">2.1
+<code>helix_code/cmd/*</code> — entry points and command surfaces</h3>
+<p>Verified contents (mix of subdirectories and root-level
+<code>.go</code> files):</p>
+<ul>
+<li><code>cli/</code> — CLI client entry.</li>
+<li><code>server/</code> — HTTP server entry.</li>
+<li><code>helix_config/</code>, <code>config_test/</code> — config tool
+and config validator.</li>
+<li><code>security_fix/</code>, <code>security_fix_standalone/</code>,
+<code>security_scan/</code>, <code>security_test/</code> — security
+tooling.</li>
+<li><code>performance_optimization/</code> — performance tools.</li>
+<li><code>infrastructure/</code>, <code>i18n/</code> — infrastructure
+and i18n command surfaces.</li>
+<li>Root-level <code>.go</code> files: <code>root.go</code>,
+<code>main_commands.go</code>, <code>other_commands.go</code>,
+<code>local_llm.go</code>, <code>local_llm_advanced.go</code>,
+<code>i18n_seam.go</code>, plus <code>*_test.go</code> files
+(e.g. <code>local_llm_i18n_test.go</code>,
+<code>cmd_residual_i18n_round453_test.go</code>).</li>
+</ul>
+<h3 id="helix_codeinternal-domain-packages-74-verified">2.2
+<code>helix_code/internal/*</code> — domain packages (74 verified)</h3>
+<p>Each is the real domain implementation (the
+<code>internal/mocks/</code> package is unit-test-only):</p>
+<pre><code>adapters     agent        approval     approvalwire   auth
+autocommit   cache        clarification cognee        commands
+config       context      continua     database       deployment
+discovery    editor       event        fix            focus
+hardware     helixqa      hooks        i18n_wiring    i18nwiring
+kilocode     llm          logging      logo           mcp
+memory       mocks        monitoring   notification   performance
+persistence  planner      plantree     plugins        pprofutil
+project      projectmemory provider    providers      quality
+redis        render       repomap      roocode        rules
+secrets      security     server       session        task
+telemetry    template     testutil     theme          tools
+verifier     version      voice        worker         workflow
+workspace</code></pre>
+<p>Role groupings: - <strong>LLM / providers:</strong> <code>llm</code>,
+<code>provider</code>, <code>providers</code>, <code>verifier</code>
+(LLMsVerifier integration, CONST-036–040), <code>cognee</code>. -
+<strong>Agent / orchestration:</strong> <code>agent</code>,
+<code>commands</code>, <code>task</code>, <code>worker</code>,
+<code>workflow</code>, <code>planner</code>, <code>plantree</code>,
+<code>continua</code>, <code>self</code>-improvement-adjacent
+<code>quality</code>. - <strong>Context / code intel:</strong>
+<code>context</code>, <code>repomap</code>, <code>discovery</code>,
+<code>project</code>, <code>projectmemory</code>, <code>memory</code>,
+<code>editor</code>. - <strong>IO / integration surfaces:</strong>
+<code>mcp</code>, <code>hooks</code>, <code>plugins</code>,
+<code>tools</code>, <code>voice</code>, <code>render</code>. -
+<strong>Platform / infra:</strong> <code>database</code>,
+<code>redis</code>, <code>persistence</code>, <code>cache</code>,
+<code>server</code>, <code>deployment</code>, <code>hardware</code>,
+<code>monitoring</code>, <code>telemetry</code>,
+<code>performance</code>, <code>pprofutil</code>, <code>logging</code>,
+<code>event</code>. - <strong>Security / auth:</strong>
+<code>auth</code>, <code>security</code>, <code>secrets</code>,
+<code>approval</code>, <code>approvalwire</code>. - <strong>i18n /
+theming / branding:</strong> <code>i18n_wiring</code>,
+<code>i18nwiring</code>, <code>theme</code>, <code>logo</code>. -
+<strong>Adapter shims for ported agents:</strong> <code>kilocode</code>,
+<code>roocode</code>, <code>adapters</code>, <code>focus</code>,
+<code>clarification</code>, <code>autocommit</code>. -
+<strong>Test-only:</strong> <code>mocks</code>,
+<code>testutil</code>.</p>
+<h3 id="helix_codeapplications-platform-front-ends">2.3
+<code>helix_code/applications/*</code> — platform front-ends</h3>
+<p><code>android</code>, <code>aurora_os</code>, <code>desktop</code>
+(Fyne GUI), <code>harmony_os</code>, <code>ios</code>,
+<code>terminal_ui</code> (tview/tcell TUI), plus a
+<code>README.md</code>. NOTE the directory names use snake_case
+(<code>aurora_os</code>, <code>harmony_os</code>,
+<code>terminal_ui</code>) per CONST-052, differing from CLAUDE.md
+§3.2.1’s hyphenated <code>terminal-ui</code> / <code>aurora-os</code> /
+<code>harmony-os</code> listing.</p>
+<h3 id="helix_codetests-test-layers">2.4 <code>helix_code/tests/*</code>
+— test layers</h3>
+<p><code>unit</code> (mocks allowed here only), <code>integration</code>
+(<code>-tags=integration</code>), <code>e2e</code>,
+<code>automation</code>, <code>regression</code>, <code>security</code>,
+<code>performance</code>, <code>stresschaos</code>, <code>memory</code>,
+<code>qa</code>, <code>infrastructure</code>, <code>testinfra</code>,
+plus <code>COVERAGE_REPORT.md</code>,
+<code>TEST_COVERAGE_REPORT.md</code>,
+<code>TESTING_INFRASTRUCTURE.md</code>, <code>README.md</code>.</p>
+<h3 id="other-inner-directories">2.5 Other inner directories</h3>
+<p><code>api/</code>, <code>pkg/</code>, <code>shared/</code>,
+<code>config/</code>, <code>docker/</code>, <code>scripts/</code>,
+<code>security/</code>, <code>assets/</code>, <code>examples/</code>,
+<code>benchmarks/</code>, <code>packaging/</code>. Several
+<code>docker-compose.*.yml</code> files exist at the inner root,
+including <code>docker-compose.full-test.yml</code> (the zero-skip
+integration stack referenced by the test targets).</p>
+<hr />
+<h2 id="submodule-catalogue-submodules">3. Submodule catalogue
+(<code>submodules/*</code>)</h2>
+<p>The grouped owned-module layout. Roles inferred from each submodule’s
+own <code>README.md</code> first heading and directory name (verified
+live). Modules whose README opens with a <code>digital.vasic.*</code> /
+<code>Helix*</code> identifier are owned-org reusable libraries.</p>
+<table>
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Role (one-line)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_qa</code></td>
+<td>QA / Challenge-orchestration platform
+(HelixDevelopment/HelixQA).</td>
+</tr>
+<tr>
+<td><code>challenges</code></td>
+<td>Cross-cutting Challenge bank (vasic-digital/Challenges).</td>
+</tr>
+<tr>
+<td><code>containers</code></td>
+<td>Container/runtime abstraction (Docker/Podman/Qemu) —
+vasic-digital/Containers.</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td>Security tooling (vasic-digital/Security).</td>
+</tr>
+<tr>
+<td><code>helix_agent</code></td>
+<td>AI-powered ensemble LLM service (HelixDevelopment/HelixAgent).</td>
+</tr>
+<tr>
+<td><code>llms_verifier</code></td>
+<td>Enterprise LLM verification platform — single source of truth for
+model metadata.</td>
+</tr>
+<tr>
+<td><code>doc_processor</code></td>
+<td>Document processing module (HelixDevelopment/DocProcessor).</td>
+</tr>
+<tr>
+<td><code>llm_orchestrator</code></td>
+<td>LLM orchestration module.</td>
+</tr>
+<tr>
+<td><code>llm_provider</code></td>
+<td>LLM provider abstraction module.</td>
+</tr>
+<tr>
+<td><code>vision_engine</code></td>
+<td>Vision / image-analysis engine.</td>
+</tr>
+<tr>
+<td><code>debate_orchestrator</code></td>
+<td>Multi-agent debate orchestration.</td>
+</tr>
+<tr>
+<td><code>helix_specifier</code></td>
+<td>Specification-handling module.</td>
+</tr>
+<tr>
+<td><code>helix_memory</code></td>
+<td>Memory subsystem.</td>
+</tr>
+<tr>
+<td><code>helix_llm</code></td>
+<td>LLM helper module.</td>
+</tr>
+<tr>
+<td><code>rag</code></td>
+<td>Retrieval-Augmented Generation module.</td>
+</tr>
+<tr>
+<td><code>vector_db</code></td>
+<td>Vector database abstraction.</td>
+</tr>
+<tr>
+<td><code>embeddings</code></td>
+<td>Embeddings generation/handling.</td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td>Generic memory store.</td>
+</tr>
+<tr>
+<td><code>agentic</code></td>
+<td>Agentic-workflow primitives.</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td>Authentication module.</td>
+</tr>
+<tr>
+<td><code>auto_temp</code></td>
+<td>Auto-temperature tuning for LLM calls.</td>
+</tr>
+<tr>
+<td><code>background_tasks</code></td>
+<td>Background task execution (digital.vasic.background).</td>
+</tr>
+<tr>
+<td><code>benchmark</code></td>
+<td>Benchmarking utilities.</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td>Caching abstraction.</td>
+</tr>
+<tr>
+<td><code>claritas</code></td>
+<td>digital.vasic.claritas (clarity/analysis utility).</td>
+</tr>
+<tr>
+<td><code>concurrency</code></td>
+<td>Concurrency primitives (digital.vasic.concurrency).</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>Configuration module (digital.vasic.config).</td>
+</tr>
+<tr>
+<td><code>conversation</code></td>
+<td>Conversation handling (digital.vasic.conversation).</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td>Database abstraction (digital.vasic.database).</td>
+</tr>
+<tr>
+<td><code>document</code></td>
+<td>Document model (digital.vasic.document).</td>
+</tr>
+<tr>
+<td><code>event_bus</code></td>
+<td>Event bus (digital.vasic.eventbus).</td>
+</tr>
+<tr>
+<td><code>filesystem</code></td>
+<td>Filesystem abstraction (digital.vasic.filesystem).</td>
+</tr>
+<tr>
+<td><code>formatters</code></td>
+<td>Output/text formatters.</td>
+</tr>
+<tr>
+<td><code>gandalf_solutions</code></td>
+<td>GandalfSolutions utility module.</td>
+</tr>
+<tr>
+<td><code>hyper_tune</code></td>
+<td>Hyperparameter tuning.</td>
+</tr>
+<tr>
+<td><code>i_llm</code></td>
+<td>I-LLM interface module.</td>
+</tr>
+<tr>
+<td><code>i18n</code></td>
+<td>Internationalization (digital.vasic.i18n).</td>
+</tr>
+<tr>
+<td><code>lazy</code></td>
+<td>Lazy-evaluation utilities.</td>
+</tr>
+<tr>
+<td><code>leak_hub</code></td>
+<td>Leak/secret detection hub.</td>
+</tr>
+<tr>
+<td><code>llm_ops</code></td>
+<td>LLM operations module.</td>
+</tr>
+<tr>
+<td><code>mcp_module</code></td>
+<td>Model Context Protocol module.</td>
+</tr>
+<tr>
+<td><code>messaging</code></td>
+<td>Messaging module.</td>
+</tr>
+<tr>
+<td><code>middleware</code></td>
+<td>Middleware (digital.vasic.middleware).</td>
+</tr>
+<tr>
+<td><code>models</code></td>
+<td>Models module.</td>
+</tr>
+<tr>
+<td><code>normalize</code></td>
+<td>Normalization utilities (digital.vasic.normalize).</td>
+</tr>
+<tr>
+<td><code>observability</code></td>
+<td>Observability (digital.vasic.observability).</td>
+</tr>
+<tr>
+<td><code>optimization</code></td>
+<td>Optimization utilities.</td>
+</tr>
+<tr>
+<td><code>ouroborous</code></td>
+<td>Self-referential/loop orchestration module.</td>
+</tr>
+<tr>
+<td><code>panoptic</code></td>
+<td>Panoptic monitoring/observation module.</td>
+</tr>
+<tr>
+<td><code>planning</code></td>
+<td>Planning module.</td>
+</tr>
+<tr>
+<td><code>plinius_common</code></td>
+<td>PliniusCommon shared utilities.</td>
+</tr>
+<tr>
+<td><code>plugins</code></td>
+<td>Plugin framework.</td>
+</tr>
+<tr>
+<td><code>rate_limiter</code></td>
+<td>Rate limiting (digital.vasic.ratelimiter).</td>
+</tr>
+<tr>
+<td><code>recovery</code></td>
+<td>Application-level fault tolerance for Go.</td>
+</tr>
+<tr>
+<td><code>red_team</code></td>
+<td>Red-team / adversarial testing (digital.vasic.redteam).</td>
+</tr>
+<tr>
+<td><code>self_improve</code></td>
+<td>Self-improvement module.</td>
+</tr>
+<tr>
+<td><code>skill_registry</code></td>
+<td>Skill registry module.</td>
+</tr>
+<tr>
+<td><code>storage</code></td>
+<td>Storage abstraction (digital.vasic.storage).</td>
+</tr>
+<tr>
+<td><code>streaming</code></td>
+<td>Streaming module.</td>
+</tr>
+<tr>
+<td><code>tool_schema</code></td>
+<td>Tool schema definitions (digital.vasic.toolschema).</td>
+</tr>
+<tr>
+<td><code>toon</code></td>
+<td>digital.vasic.toon utility module.</td>
+</tr>
+<tr>
+<td><code>veritas</code></td>
+<td>Veritas verification/truth module.</td>
+</tr>
+<tr>
+<td><code>watcher</code></td>
+<td>File/resource watcher (digital.vasic.watcher).</td>
+</tr>
+</tbody>
+</table>
+<p>Third-party upstream mirrors live under <code>dependencies/</code>
+(LLama_CPP, Ollama, HuggingFace_Hub). Reference agents/resources live
+under <code>cli_agents/</code> (50) and
+<code>cli_agents_resources/</code>.</p>
+<hr />
+<h2 id="technology-stack">4. Technology stack</h2>
+<p>Verified from <code>helix_code/go.mod</code> (inner module is the
+real dependency owner; cross-checked against CLAUDE.md §3.1). Actual
+versions found:</p>
+<ul>
+<li><strong>Language:</strong> Go <code>1.26</code> (inner), Go
+<code>1.25.2</code> (root meta module).</li>
+<li><strong>HTTP / API / RPC:</strong>
+<code>gin-gonic/gin v1.11.0</code>,
+<code>gorilla/websocket v1.5.3</code>,
+<code>google.golang.org/grpc v1.80.0</code>,
+<code>grpc-ecosystem/grpc-gateway/v2 v2.28.0</code> (indirect).</li>
+<li><strong>Persistence:</strong> <code>jackc/pgx/v5 v5.7.6</code> +
+<code>lib/pq v1.10.9</code> (PostgreSQL);
+<code>redis/go-redis/v9 v9.17.2</code> (Redis);
+<code>bradfitz/gomemcache</code>;
+<code>hashicorp/golang-lru/v2 v2.0.7</code>.</li>
+<li><strong>AuthN/Z:</strong> <code>golang-jwt/jwt/v4 v4.5.2</code>,
+<code>golang.org/x/crypto v0.49.0</code> (bcrypt/argon2),
+<code>golang.org/x/oauth2 v0.36.0</code>.</li>
+<li><strong>Config / CLI:</strong> <code>spf13/viper v1.21.0</code>,
+<code>spf13/cobra v1.8.0</code>, <code>spf13/pflag v1.0.10</code>,
+<code>fsnotify/fsnotify v1.9.0</code>.</li>
+<li><strong>LLM / cloud:</strong> <code>aws-sdk-go-v2</code>
+(<code>v1.32.7</code>)
+incl. <code>service/bedrockruntime v1.23.1</code>,
+<code>aws/smithy-go v1.22.1</code>; <code>Azure azcore v1.16.0</code> +
+<code>azidentity v1.8.0</code>; <code>getzep/zep-go/v3 v3.10.0</code>;
+<code>smacker/go-tree-sitter</code> (tree-sitter parsing).</li>
+<li><strong>UI:</strong> <code>fyne.io/fyne/v2 v2.7.0</code> (desktop
+GUI); <code>rivo/tview v0.42.0</code> +
+<code>gdamore/tcell/v2 v2.8.1</code> (terminal UI);
+<code>chromedp/chromedp v0.15.1</code> + <code>chromedp/cdproto</code>
+(headless browser).</li>
+<li><strong>LSP:</strong> <code>go.lsp.dev/protocol v0.12.0</code>,
+<code>go.lsp.dev/jsonrpc2 v0.10.0</code>,
+<code>go.lsp.dev/uri v0.3.0</code>.</li>
+<li><strong>i18n / NLP:</strong>
+<code>nicksnyder/go-i18n/v2 v2.5.1</code>,
+<code>jdkato/prose/v2 v2.0.0</code>.</li>
+<li><strong>Observability:</strong> OpenTelemetry
+<code>otel v1.43.0</code> family (OTLP gRPC/HTTP exporters, stdout
+exporters, SDK, metric, trace);
+<code>go.uber.org/zap v1.28.0</code>.</li>
+<li><strong>Testing:</strong>
+<code>stretchr/testify v1.11.1</code>.</li>
+<li><strong>Own-org (via <code>replace</code>):</strong>
+<code>digital.vasic.containers</code>,
+<code>digital.vasic.helixqa</code>, <code>digital.vasic.debate</code>,
+<code>digital.vasic.helixspecifier</code>,
+<code>digital.vasic.lazy</code> (and others wired through
+<code>replace</code> to <code>../submodules/*</code>).</li>
+</ul>
+<p>Versions found in go.mod match the CLAUDE.md §3.1 stated versions
+where both list a number (Gin v1.11.0, gorilla/websocket v1.5.3, gRPC
+v1.80.0, JWT v4.5.2, Viper v1.21.0, Cobra v1.8.0, pflag v1.0.10,
+fsnotify v1.9.0, Fyne v2.7.0, testify v1.11.1).</p>
+<hr />
+<h2 id="build-test-entry-points">5. Build &amp; test entry points</h2>
+<p>Two Makefiles. The <strong>root</strong> Makefile runs governance
+gates only; the <strong>inner</strong> <code>helix_code/Makefile</code>
+does real builds/tests.</p>
+<h3 id="root-governance-makefile-verified-targets">5.1 Root governance
+Makefile (verified targets)</h3>
+<p><code>bluff-detector</code>, <code>no-silent-skips</code> (+
+<code>-warn</code>), <code>demo-all</code> (+ <code>-warn</code>),
+<code>demo-one</code>, <code>ci-validate-all</code>,
+<code>verify-foundation</code>, <code>verify-governance-cascade</code>,
+<code>verify-llmsverifier-pin-parity</code>, <code>scan-all</code>,
+<code>scan-gosec</code>, <code>scan-secrets</code> (+
+<code>-root</code>), <code>scan-snyk</code>,
+<code>scan-sonarqube</code>, <code>scan-trivy</code>.</p>
+<h3 id="inner-helix_codemakefile-verified-targets">5.2 Inner
+<code>helix_code/Makefile</code> (verified targets)</h3>
+<ul>
+<li><strong>Build:</strong> <code>all</code>, <code>build</code>,
+<code>verify-compile</code>, <code>clean</code>, <code>clean-all</code>,
+<code>dev</code>, <code>dev-setup</code>, <code>prod</code>,
+<code>release</code>, <code>deps-scan</code>, <code>setup-deps</code>,
+<code>pgo-refresh</code>.</li>
+<li><strong>Quality:</strong> <code>fmt</code>, <code>lint</code>.</li>
+<li><strong>Test:</strong> <code>test</code>, <code>test-all</code>,
+<code>test-complete</code>, <code>test-coverage</code>,
+<code>coverage-full</code>, <code>test-benchmark</code>,
+<code>test-full</code>, <code>test-unit-full</code>,
+<code>test-integration-full</code>, <code>test-e2e-full</code>,
+<code>test-security-full</code>, <code>test-load-full</code>,
+<code>test-docs</code>.</li>
+<li><strong>Test infra:</strong> <code>test-infra-up</code>,
+<code>test-infra-status</code>, <code>test-infra-down</code>.</li>
+<li><strong>Verifier:</strong> <code>test-verifier-unit</code>,
+<code>test-verifier-integration</code>,
+<code>test-verifier-challenges</code>,
+<code>test-verifier-capability</code>,
+<code>test-verifier-hardcode</code>.</li>
+<li><strong>Stress/chaos:</strong> <code>stress-chaos</code>,
+<code>stress-chaos-infra</code>, <code>stress-chaos-meta</code>.</li>
+<li><strong>HelixQA:</strong> <code>helixqa-build</code>,
+<code>helixqa-test</code>, <code>helixqa-challenge</code>,
+<code>helixqa-bump-submodules</code>.</li>
+<li><strong>Platforms:</strong> <code>desktop</code> (+
+<code>-all</code>/<code>-linux</code>/<code>-macos</code>/<code>-windows</code>/<code>-nogui</code>),
+<code>mobile</code> (+
+<code>-init</code>/<code>-ios</code>/<code>-android</code>),
+<code>aurora-os</code>, <code>harmony-os</code>,
+<code>aurora-harmony</code>, <code>windows</code>.</li>
+<li><strong>Packaging:</strong> <code>installers</code>,
+<code>deb</code>, <code>rpm</code>, <code>homebrew</code>,
+<code>assets</code>, <code>logo-assets</code>, <code>logo-deps</code>,
+<code>docs</code>, <code>manual-html</code>,
+<code>sync-manual</code>.</li>
+<li><strong>Containers (inner Makefile):</strong>
+<code>container-build</code>, <code>container-builder-image</code>,
+<code>container-clean</code>, <code>container-dev-up</code>,
+<code>container-dev-down</code>, <code>container-lint</code>,
+<code>container-release</code>, <code>container-shell</code>,
+<code>container-test</code>, <code>container-test-full</code>. NOTE
+CLAUDE.md §3.4 (note 2026-05-29) states <code>make container-*</code>
+targets do not exist; the live inner Makefile DOES define them.
+Discrepancy flagged for reconciliation — per project policy
+containerized workflows go through the <code>./helix</code> facade /
+<code>containers</code> submodule, but the targets are present in the
+file.</li>
+<li><strong>Security scans:</strong> <code>security-scan</code> (+
+<code>-all</code>/<code>-gosec</code>/<code>-grype</code>/<code>-kics</code>/<code>-semgrep</code>/<code>-snyk</code>/<code>-sonarqube</code>/<code>-trivy</code>),
+<code>secrets-scan</code>, <code>scan-start-sonar</code>,
+<code>scan-stop</code>.</li>
+</ul>
+<h3 id="helix-container-facade">5.3 <code>./helix</code> container
+facade</h3>
+<p>A repo-root bash script (<code>helix</code>) providing a unified
+interface to the containerized stack
+(<code>start</code>/<code>stop</code>/<code>status</code>/<code>logs</code>/<code>restart</code>/<code>shell</code>).
+NOTE the script’s own header says “Docker Facade” and its
+<code>check_docker()</code> invokes <code>docker</code>; CLAUDE.md
+states the host uses podman, not docker. The script as written checks
+for <code>docker</code> on PATH — discrepancy flagged (the documented
+podman workflow and the script’s <code>docker</code> invocation are not
+aligned in the inspected header).</p>
+<hr />
+<h2 id="governance-constitution-cascade">6. Governance / constitution
+cascade</h2>
+<p>The <strong>constitution submodule</strong> at
+<code>constitution/</code> is the canonical root of governance (per
+CONST-059 / §11.4.35). Verified present:
+<code>constitution/Constitution.md</code>,
+<code>constitution/CLAUDE.md</code>, <code>constitution/AGENTS.md</code>
+(each with <code>.html</code>/<code>.pdf</code>/<code>.docx</code>
+sibling exports).</p>
+<p>The consumer-side repo-root files — <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>CONSTITUTION.md</code>, plus sibling agent
+manuals <code>CRUSH.md</code>, <code>QWEN.md</code> — are
+<strong>extensions</strong> that inherit from the canonical root.
+<code>CLAUDE.md</code> opens with <code>@constitution/CLAUDE.md</code> /
+an <code>## INHERITED FROM constitution/CLAUDE.md</code> pointer.
+Project-specific rules live consumer-side; universal rules live in the
+constitution submodule. Cascade is verified via
+<code>./scripts/verify-governance-cascade.sh</code> (root governance
+gate <code>verify-governance-cascade</code>).</p>
+<hr />
+<h2 id="known-incomplete-honest-gaps">7. Known-incomplete / honest
+gaps</h2>
+<p>This section records areas the live tree shows as in-progress or
+inconsistent. It does NOT claim any feature works; it records observable
+structural facts.</p>
+<ol type="1">
+<li><strong>CLAUDE.md §3.2 vs live submodule layout.</strong> §3.2
+documents a flat repo-root layout for several owned submodules; the live
+tree uses <code>submodules/&lt;name&gt;/</code>. CLAUDE.md §3.2 is stale
+relative to the tree and should be reconciled.</li>
+<li><strong><code>.gitmodules</code> section-name vs path
+mismatch.</strong> Several entries have section names like
+<code>[submodule "dependencies/HelixDevelopment/llm_orchestrator"]</code>
+but <code>path = submodules/llm_orchestrator</code>. The naming is
+inconsistent (legacy section labels not updated after the relayout).
+Paths are authoritative.</li>
+<li><strong><code>submodules/*</code> directories not all in
+<code>.gitmodules</code>.</strong> 63 directories exist under
+<code>submodules/</code>, but only a subset have formal
+<code>.gitmodules</code> entries (e.g. <code>containers</code>,
+<code>helix_qa</code>, <code>challenges</code>, <code>security</code>,
+<code>llms_verifier</code>, <code>helix_agent</code>,
+<code>doc_processor</code>, <code>llm_orchestrator</code>,
+<code>llm_provider</code>, <code>vision_engine</code>). The remainder
+are present in the working tree without verified
+<code>.gitmodules</code> wiring in the file inspected — the submodule
+registry and the on-disk tree are not fully in sync.</li>
+<li><strong>Inner <code>container-*</code> Makefile targets vs CLAUDE.md
+§3.4.</strong> CLAUDE.md says these targets were removed and do not
+exist; the inner Makefile still defines them. One of the two is out of
+date.</li>
+<li><strong><code>./helix</code> facade uses <code>docker</code>, policy
+mandates podman.</strong> The script header and
+<code>check_docker()</code> invoke <code>docker</code>; project rules
+(Rule 4 / §11.4.76) mandate podman via the orchestrator. The facade
+script is not aligned with the stated podman workflow.</li>
+<li><strong>Applications directory naming.</strong> Live dirs use
+snake_case (<code>aurora_os</code>, <code>harmony_os</code>,
+<code>terminal_ui</code>); CLAUDE.md §3.2.1 lists hyphenated names.
+CLAUDE.md is stale here (the live tree is the CONST-052-compliant
+form).</li>
+<li><strong>Large volume of root-level status/report <code>.md</code>
+files.</strong> The repo root holds many <code>*_COMPLETION_*</code>,
+<code>*_REPORT.md</code>, <code>PHASE_*</code> documents. These are
+historical narrative artifacts; they are NOT authoritative for current
+architecture (this document is). Their accuracy is not verified
+here.</li>
+<li><strong>Duplicate-looking internal packages.</strong>
+<code>internal/i18n_wiring</code> and <code>internal/i18nwiring</code>
+both exist; <code>internal/provider</code> and
+<code>internal/providers</code> both exist. Whether this is intentional
+layering or in-progress consolidation was not determined from directory
+listing alone.</li>
+</ol>
+<hr />
+<h2
+id="sources-verified-2026-06-04-usersmilosvasicprojectshelixcode.gitmodules-usersmilosvasicprojectshelixcodego.mod-usersmilosvasicprojectshelixcodehelix_codego.mod-usersmilosvasicprojectshelixcodemakefile-usersmilosvasicprojectshelixcodehelix_codemakefile-usersmilosvasicprojectshelixcodehelix-facade-script-header-ls-of-repo-root-ls-of-submodules-ls-of-helix_codecmdinternalapplicationstests-ls-of-cli_agents-submodules-counts-readme.md-first-headings-of-submodules-for-the-catalogue-ls-of-constitution.">Sources
+verified 2026-06-04: /Users/milosvasic/Projects/HelixCode/.gitmodules,
+/Users/milosvasic/Projects/HelixCode/go.mod,
+/Users/milosvasic/Projects/HelixCode/helix_code/go.mod,
+/Users/milosvasic/Projects/HelixCode/Makefile,
+/Users/milosvasic/Projects/HelixCode/helix_code/Makefile,
+/Users/milosvasic/Projects/HelixCode/helix (facade script header), ls of
+repo root, ls of submodules/, ls of
+helix_code/{cmd,internal,applications,tests}, ls of cli_agents/ +
+submodules/ (counts), README.md first headings of submodules/* for the
+catalogue, ls of constitution/.</h2>
+</body>
+</html>
