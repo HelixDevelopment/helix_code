@@ -62,3 +62,33 @@ func TestExportConfig_CreatesMissingDir(t *testing.T) {
 		t.Fatalf("exported file must exist, stat err=%v", err)
 	}
 }
+
+// TestBackupConfig_CreatesMissingDir guards the sibling writer BackupConfig,
+// which had the same missing-MkdirAll gap (flagged by W4C) when handed a backup
+// path in a non-existent directory tree.
+//
+// RED (pre-fix, BackupConfig lacks os.MkdirAll): os.WriteFile returns
+// "no such file or directory" and no backup file is created.
+// GREEN (post-fix): the nested dir tree is created and the backup file written.
+func TestBackupConfig_CreatesMissingDir(t *testing.T) {
+	base := t.TempDir()
+	mgr := &ConfigManager{configPath: filepath.Join(base, "config.json")}
+	mgr.config = getDefaultConfig()
+
+	backupPath := filepath.Join(base, "backups", "nested", "config.bak.json")
+	if _, err := os.Stat(filepath.Dir(backupPath)); !os.IsNotExist(err) {
+		t.Fatalf("precondition: backup parent dir must not exist, stat err=%v", err)
+	}
+
+	if err := mgr.BackupConfig(backupPath); err != nil {
+		t.Fatalf("BackupConfig must create the missing dir and succeed, got: %v", err)
+	}
+
+	info, err := os.Stat(backupPath)
+	if err != nil {
+		t.Fatalf("backup file must exist after BackupConfig, stat err=%v", err)
+	}
+	if info.Size() == 0 {
+		t.Fatalf("backup file must be non-empty after BackupConfig, size=0")
+	}
+}

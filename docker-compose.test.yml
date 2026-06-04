@@ -10,7 +10,9 @@ services:
     environment:
       POSTGRES_DB: helixcode_test
       POSTGRES_USER: helixcode
-      POSTGRES_PASSWORD: helixcode123
+      # CONST-042: sourced from .env (gitignored). Non-secret throwaway default
+      # for local test bring-up only; populate HELIX_DATABASE_PASSWORD in .env.
+      POSTGRES_PASSWORD: ${HELIX_DATABASE_PASSWORD:-helixtestpass}
     ports:
       - "5432:5432"
     volumes:
@@ -53,7 +55,7 @@ services:
       - "8000:8000"
     environment:
       - COGNEE_ENV=test
-      - COGNEE_DATABASE_URL=postgresql://helixcode:helixcode123@postgres:5432/helixcode_test
+      - COGNEE_DATABASE_URL=postgresql://helixcode:${HELIX_DATABASE_PASSWORD:-helixtestpass}@postgres:5432/helixcode_test
       - COGNEE_REDIS_URL=redis://redis:6379
     depends_on:
       postgres:
@@ -83,8 +85,9 @@ services:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       SSH_PORT: 2222
-      HELIX_AUTH_JWT_SECRET: test-jwt-secret-key-for-development-only
-      DATABASE_URL: postgres://helixcode:helixcode123@postgres:5432/helixcode_test?sslmode=disable
+      # CONST-042: JWT secret is a true secret — REQUIRED from .env, no default.
+      HELIX_AUTH_JWT_SECRET: ${HELIX_AUTH_JWT_SECRET:?HELIX_AUTH_JWT_SECRET must be set in .env}
+      DATABASE_URL: postgres://helixcode:${HELIX_DATABASE_PASSWORD:-helixtestpass}@postgres:5432/helixcode_test?sslmode=disable
       REDIS_URL: redis://redis:6379
     ports:
       - "2222:22"
@@ -115,8 +118,9 @@ services:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       SSH_PORT: 2223
-      HELIX_AUTH_JWT_SECRET: test-jwt-secret-key-for-development-only
-      DATABASE_URL: postgres://helixcode:helixcode123@postgres:5432/helixcode_test?sslmode=disable
+      # CONST-042: JWT secret is a true secret — REQUIRED from .env, no default.
+      HELIX_AUTH_JWT_SECRET: ${HELIX_AUTH_JWT_SECRET:?HELIX_AUTH_JWT_SECRET must be set in .env}
+      DATABASE_URL: postgres://helixcode:${HELIX_DATABASE_PASSWORD:-helixtestpass}@postgres:5432/helixcode_test?sslmode=disable
       REDIS_URL: redis://redis:6379
     ports:
       - "2223:22"
@@ -147,8 +151,9 @@ services:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       SSH_PORT: 2224
-      HELIX_AUTH_JWT_SECRET: test-jwt-secret-key-for-development-only
-      DATABASE_URL: postgres://helixcode:helixcode123@postgres:5432/helixcode_test?sslmode=disable
+      # CONST-042: JWT secret is a true secret — REQUIRED from .env, no default.
+      HELIX_AUTH_JWT_SECRET: ${HELIX_AUTH_JWT_SECRET:?HELIX_AUTH_JWT_SECRET must be set in .env}
+      DATABASE_URL: postgres://helixcode:${HELIX_DATABASE_PASSWORD:-helixtestpass}@postgres:5432/helixcode_test?sslmode=disable
       REDIS_URL: redis://redis:6379
     ports:
       - "2224:22"

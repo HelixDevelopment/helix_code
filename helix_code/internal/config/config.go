@@ -959,6 +959,14 @@ func (m *ConfigManager) BackupConfig(path string) error {
 	if err != nil {
 		return err
 	}
+	// Create the destination directory tree if the caller-supplied backup path
+	// points into a non-existent directory (same fresh-install gap as
+	// saveConfigLocked / ExportConfig).
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create backup directory %q: %w", dir, err)
+		}
+	}
 	return os.WriteFile(path, data, 0644)
 }
 
