@@ -27,22 +27,22 @@ ci-validate-all: no-silent-skips-warn demo-all-warn verify-foundation
 # ---------------------------------------------------------------------------
 
 scan-sonarqube: ## Run SonarQube analysis (requires SONAR_TOKEN in helix_code/.env)
-	$(MAKE) -C HelixCode security-scan-sonarqube
+	$(MAKE) -C helix_code security-scan-sonarqube
 
 scan-snyk: ## Run Snyk vulnerability scan (requires SNYK_TOKEN in helix_code/.env)
-	$(MAKE) -C HelixCode security-scan-snyk
+	$(MAKE) -C helix_code security-scan-snyk
 
 scan-all: ## Run all HelixCode security scanners
-	$(MAKE) -C HelixCode security-scan-all
+	$(MAKE) -C helix_code security-scan-all
 
 scan-gosec: ## Run gosec on HelixCode
-	$(MAKE) -C HelixCode security-scan-gosec
+	$(MAKE) -C helix_code security-scan-gosec
 
 scan-trivy: ## Run trivy on HelixCode
-	$(MAKE) -C HelixCode security-scan-trivy
+	$(MAKE) -C helix_code security-scan-trivy
 
 scan-secrets: ## Run scan-secrets.sh credential scanner
-	$(MAKE) -C HelixCode secrets-scan
+	$(MAKE) -C helix_code secrets-scan
 
 # ---------------------------------------------------------------------------
 # Phase-0 Foundation Gates (P0-15)
@@ -73,8 +73,10 @@ scan-secrets-root: ## Run root scripts/scan-secrets.sh (whole-repo credential sc
 # Depends on: no-silent-skips-warn, scan-secrets-root, verify-llmsverifier-pin-parity,
 #             verify-governance-cascade, bluff-detector.
 #
-# NOTE: As of P0-15, this gate exits 1 because verify-llmsverifier-pin-parity
-# reports the known LLMsVerifier dual-pin divergence (documented parking-lot item
-# in docs/improvements/PROGRESS.md). Resolution is a P0-16 close-out dependency.
+# NOTE: The historical P0-15 LLMsVerifier dual-pin divergence was RESOLVED in
+# P1.5-WP2 (the duplicate transitive submodule was eliminated; the single
+# canonical pin lives at submodules/llms_verifier). verify-llmsverifier-pin-parity.sh
+# now passes (exit 0), so this composite no longer carries that known failure.
+# bluff-detector is now a real gate (scripts/bluff-detector.sh), not a stub.
 verify-foundation: no-silent-skips-warn scan-secrets-root verify-llmsverifier-pin-parity verify-governance-cascade bluff-detector
 	@echo "verify-foundation: all gates passed"

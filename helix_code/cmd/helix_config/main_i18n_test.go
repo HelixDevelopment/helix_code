@@ -130,6 +130,13 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 // without flags.
 func TestShowCommand_TranslatesViperBackedLines(t *testing.T) {
 	withFakeTranslator(t)
+	// Point config.LoadHelixConfig at a writable temp path so getConfig
+	// genuinely succeeds (NewHelixConfigManager creates a default config
+	// in the temp dir) and runShowCommand reaches the default branch.
+	// Previously this test t.Skipf'd when getConfig failed against a
+	// non-existent $HOME/.config/helixcode dir — masking a real load
+	// failure as a skip (§11.4 PASS-bluff).
+	withTempHelixConfigPath(t)
 
 	// Build a stand-in cobra.Command exposing the same flags the real
 	// show command does. format absent → default branch in
@@ -137,31 +144,23 @@ func TestShowCommand_TranslatesViperBackedLines(t *testing.T) {
 	cmd := createShowCommand()
 	cmd.SetArgs([]string{})
 
+	var runErr error
 	out := captureStdout(t, func() {
-		// runShowCommand may return error (e.g. getConfig fails when no
-		// config file exists), but the printf lines fire BEFORE any
-		// failure path can short-circuit them. We accept either outcome
-		// and assert on captured stdout.
-		_ = runShowCommand(cmd, nil)
+		runErr = runShowCommand(cmd, nil)
 	})
 
-	// If getConfig succeeded, all four sentinels should appear. If
-	// getConfig failed we never reach the printf block, so the test
-	// is vacuously satisfied. To make the test meaningful we require
-	// AT LEAST ONE sentinel — otherwise the migration is silently
-	// dead. We pick the first line (loaded_from) which fires
-	// unconditionally inside the default branch.
-	if !strings.Contains(out, "<TRANSLATED:helix_config_show_loaded_from>") &&
-		!strings.Contains(out, "Configuration loaded from:") {
-		// Neither sentinel nor literal — getConfig failed and the
-		// default branch never ran. Skip with a diagnostic so the
-		// failure mode is obvious to maintainers.
-		t.Skipf("runShowCommand did not reach the default branch — getConfig likely failed; output=%q", out)
+	// Hard assertion: getConfig MUST succeed against the temp config path,
+	// so runShowCommand MUST reach the default branch and print all four
+	// migrated lines. A non-nil error is a real load defect, no longer
+	// silently skipped.
+	if runErr != nil {
+		t.Fatalf("runShowCommand returned error (getConfig failed?): %v\noutput=%q", runErr, out)
 	}
-	// If we reached the default branch, all four MUST be translated.
-	if strings.Contains(out, "Configuration loaded from:") {
-		assertTranslated(t, out, "helix_config_show_loaded_from", "Configuration loaded from:")
+	// The default branch was reached — all four lines MUST be translated.
+	if !strings.Contains(out, "<TRANSLATED:helix_config_show_loaded_from>") {
+		t.Fatalf("runShowCommand did not reach the default branch (loaded_from sentinel absent); output=%q", out)
 	}
+	assertTranslated(t, out, "helix_config_show_loaded_from", "Configuration loaded from:")
 	if strings.Contains(out, "Server Port:") || strings.Contains(out, "<TRANSLATED:helix_config_show_server_port>") {
 		assertTranslated(t, out, "helix_config_show_server_port", "Server Port:")
 	}
@@ -225,6 +224,21 @@ func TestResetCommand_NoForce_TranslatesConfirmRequired(t *testing.T) {
 
 	assertTranslated(t, out, "helix_config_reset_confirm_required",
 		"This will reset configuration to defaults. Use --force to confirm.")
+}
+
+// withTempHelixConfigPath points config.GetConfigPath at a writable
+// file inside t.TempDir() via the HELIX_CONFIG_PATH env var, so
+// config.SaveHelixConfig genuinely succeeds in-test instead of failing
+// against a non-existent $HOME/.config/helixcode directory. Without
+// this, SaveHelixConfig fails and the command short-circuits before
+// printing — which the cited tests used to mask with t.Skipf (a §11.4
+// PASS-bluff: a real save failure hidden as a skip). Returns the path.
+func withTempHelixConfigPath(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	cfgPath := dir + "/config.json"
+	t.Setenv("HELIX_CONFIG_PATH", cfgPath)
+	return cfgPath
 }
 
 // seedViperWithTempConfig seeds viper with a temp config file so
@@ -305,13 +319,17 @@ func TestMigrateCommand_TranslatesCopied(t *testing.T) {
 		t.Fatalf("set to: %v", err)
 	}
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runMigrateCommand(cmd, nil)
+		runErr = runMigrateCommand(cmd, nil)
 	})
 
-	if !strings.Contains(out, "<TRANSLATED:helix_config_migrate_copied>") &&
-		!strings.Contains(out, "Configuration copied") {
-		t.Skipf("runMigrateCommand short-circuited before printing; output=%q", out)
+	// Hard assertion: src has version=v1 and dst is absent (→ dstVer
+	// defaults to srcVer), so versions match and the copy MUST succeed
+	// and print the migrated line. A non-nil error is a real defect, no
+	// longer silently skipped (§11.4 PASS-bluff removed).
+	if runErr != nil {
+		t.Fatalf("runMigrateCommand returned error (copy failed?): %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_migrate_copied", "Configuration copied")
 }
@@ -345,14 +363,16 @@ func TestHistoryListCommand_TranslatesHistoryLines(t *testing.T) {
 	cmd := createHistoryListCommand()
 	cmd.SetArgs([]string{})
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runHistoryListCommand(cmd, nil)
+		runErr = runHistoryListCommand(cmd, nil)
 	})
 
-	// Backup present → header sentinel expected.
-	if !strings.Contains(out, "<TRANSLATED:helix_config_history_header>") &&
-		!strings.Contains(out, "Configuration history:") {
-		t.Skipf("runHistoryListCommand short-circuited (no config file in use); output=%q", out)
+	// Hard assertion: viper has a config file set and a backup file
+	// exists, so the command MUST succeed and print the header line. A
+	// non-nil error is a real defect, no longer silently skipped.
+	if runErr != nil {
+		t.Fatalf("runHistoryListCommand returned error: %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_history_header", "Configuration history:")
 	// The "none" literal must never appear when backups exist.
@@ -376,13 +396,17 @@ func TestTemplateApplyCommand_TranslatesApplied(t *testing.T) {
 	cmd := createTemplateApplyCommand()
 	cmd.SetArgs([]string{"minimal"})
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runTemplateApplyCommand(cmd, []string{"minimal"})
+		runErr = runTemplateApplyCommand(cmd, []string{"minimal"})
 	})
 
-	if !strings.Contains(out, "<TRANSLATED:helix_config_template_applied>") &&
-		!strings.Contains(out, "applied successfully") {
-		t.Skipf("runTemplateApplyCommand short-circuited before printing; output=%q", out)
+	// Hard assertion: viper config file points into an existing temp dir,
+	// so WriteConfig/SafeWriteConfig MUST succeed and the migrated line
+	// MUST print. A non-nil error is a real save defect, no longer
+	// silently skipped (§11.4 PASS-bluff removed).
+	if runErr != nil {
+		t.Fatalf("runTemplateApplyCommand returned error (config save failed?): %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_template_applied", "applied successfully")
 }
@@ -432,6 +456,11 @@ func TestWatchCommand_TranslatesViaTr(t *testing.T) {
 // skip cleanly on short-circuit.
 func TestResetCommand_ForceBranch_TranslatesResetDone(t *testing.T) {
 	withFakeTranslator(t)
+	// Point config.SaveHelixConfig at a writable temp path so the force
+	// branch genuinely saves the default config and reaches the migrated
+	// print line. Previously this test t.Skipf'd when SaveHelixConfig
+	// failed — masking a real save failure as a skip (§11.4 PASS-bluff).
+	withTempHelixConfigPath(t)
 	cmd := createResetCommand()
 	// runResetCommand reads --force via Flags().GetBool. createResetCommand
 	// only registers other flags; we add --force here so the test can drive
@@ -442,13 +471,16 @@ func TestResetCommand_ForceBranch_TranslatesResetDone(t *testing.T) {
 		t.Fatalf("set force: %v", err)
 	}
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runResetCommand(cmd, nil)
+		runErr = runResetCommand(cmd, nil)
 	})
 
-	if !strings.Contains(out, "<TRANSLATED:helix_config_reset_done>") &&
-		!strings.Contains(out, "Configuration reset to defaults") {
-		t.Skipf("runResetCommand short-circuited before printing — config.SaveHelixConfig likely failed; output=%q", out)
+	// Hard assertion: the force branch MUST succeed and print the migrated
+	// line. A non-nil error here is a real defect (e.g. SaveHelixConfig
+	// failing), no longer silently skipped.
+	if runErr != nil {
+		t.Fatalf("runResetCommand returned error (config.SaveHelixConfig failed?): %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_reset_done", "Configuration reset to defaults")
 }
@@ -472,13 +504,16 @@ func TestHistoryListCommand_NoBackups_TranslatesNone(t *testing.T) {
 	cmd := createHistoryListCommand()
 	cmd.SetArgs([]string{})
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runHistoryListCommand(cmd, nil)
+		runErr = runHistoryListCommand(cmd, nil)
 	})
 
-	if !strings.Contains(out, "<TRANSLATED:helix_config_history_none>") &&
-		!strings.Contains(out, "No backup history found") {
-		t.Skipf("runHistoryListCommand short-circuited; output=%q", out)
+	// Hard assertion: viper has a config file set and NO backup siblings
+	// exist, so the command MUST succeed and print the "none" line. A
+	// non-nil error is a real defect, no longer silently skipped.
+	if runErr != nil {
+		t.Fatalf("runHistoryListCommand returned error: %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_history_none", "No backup history found")
 }
@@ -601,13 +636,17 @@ func TestMergeCommand_TranslatesWritten(t *testing.T) {
 	}
 	cmd.SetArgs([]string{src1, src2})
 
+	var runErr error
 	out := captureStdout(t, func() {
-		_ = runMergeCommand(cmd, []string{src1, src2})
+		runErr = runMergeCommand(cmd, []string{src1, src2})
 	})
 
-	if !strings.Contains(out, "<TRANSLATED:helix_config_merge_written>") &&
-		!strings.Contains(out, "Merged configuration written to:") {
-		t.Skipf("runMergeCommand short-circuited before printing; output=%q", out)
+	// Hard assertion: both source files exist and the output points into
+	// an existing temp dir, so the merge MUST succeed and print the
+	// migrated line. A non-nil error is a real defect, no longer
+	// silently skipped.
+	if runErr != nil {
+		t.Fatalf("runMergeCommand returned error: %v\noutput=%q", runErr, out)
 	}
 	assertTranslated(t, out, "helix_config_merge_written", "Merged configuration written to:")
 }

@@ -1227,3 +1227,24 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 ### Next (Phases 3–5 — best run in a fresh full-context session, subagent-parallel)
 - Phase 3: rebuild everything (Linux/containers via the `containers` submodule — the macOS sandbox-syscall blocker means real builds run in-container). Phase 4: boot all infra + run all tests + Challenges with real evidence (anti-bluff). Phase 5: fix every issue found, validated. Periodic: fetch+pull `constitution` and re-process on any new rule (constitution currently up-to-date @ d90ab87).
 
+## close-out¹⁴² — round 468: Comprehensive-completion programme kickoff — grounded discovery + Wave 1 fix-first (subagent-parallel, anti-bluff)
+
+> Operator mandate 2026-06-04: complete everything (no module/test broken/disabled, 100% coverage, leak/deadlock/race fixes, Snyk+SonarQube, lazy-init/semaphores/non-blocking, full docs/courses/website), running 3–5 parallel subagent-driven streams, no interactive/sudo processes.
+
+### What landed (conductor-committed; streams implement+prove, conductor integrates per §11.4.84)
+1. **Grounded discovery** (read-only, 16-agent fan-out → `docs/CONSOLIDATED_UNFINISHED_WORK_AND_PLAN.2026-06-04.md`). HONESTY: only **4/16 modules verified** (helix_code, root meta, helix_qa, containers); the other 12 were **rate-limited** (16 concurrent heavy agents trips the account token-rate limit → safe band ≈5–10). All 4 assessed Go modules **build+vet clean**. Supersedes the ~95 stale root planning `.md` (Phase 2 retires them). Wave 2 (remaining-12 discovery) launched concurrently.
+2. **Wave 1 fix-first (4 streams, RED→GREEN + §1.1 mutation-proven, re-verified by conductor on integrated tree):**
+   - **S1B helix_qa** — 7 `title:`→`name:` in `banks/atmosphere.yaml` (was hard-failing `helixqa list --banks banks` by aborting the whole dir) + new `pkg/testbank/loader_test.go` regression guard.
+   - **S1C root** — 6 `$(MAKE) -C HelixCode`→`-C helix_code` (case-sensitive-FS breakage) + new real non-tautological `scripts/bluff-detector.sh` (Checks 4+5, exit 0 clean). Finding: the "known LLMsVerifier dual-pin divergence" is **already resolved** (verify-llmsverifier-pin-parity exits 0) — stale Makefile/report note corrected.
+   - **S1D root** — removed 2 no-assertion PASS-bluff e2e stubs (`tests/e2e/core/{simple,auth_simple}_test.go`) + `doc.go` pointing to real challenge coverage.
+   - **S2C helix_code** — 7 i18n silent skips → hard deterministic assertions (`cmd/helix_config/main_i18n_test.go`).
+
+### New defects surfaced (tracked for next waves — NOT yet fixed)
+- **helix_qa**: duplicate test-case id `CLI-CODEX-001` across `banks/cli-agents-comprehensive.yaml` + `banks/cli-agents-test-helixagent.yaml` (was masked by the S1B abort; now the next `list --banks banks` blocker).
+- **helix_code product bug**: `internal/config` `saveConfigLocked` lacks `os.MkdirAll(filepath.Dir(path))` → fresh-install `helix-config reset --force` errors "no such file or directory". Real end-user defect; needs a scoped fix + RED test.
+- helix_qa loader resilience (collect-all-errors vs abort-on-first) — recommended follow-up.
+
+### State / Next
+- Verified GREEN on integrated tree: i18n test ok; e2e core stubs gone; `make bluff-detector` PASS exit 0; helix_qa S1B 3 PASS.
+- **Next waves:** Wave 2 (12-module discovery, running) → completes the report (§11.4.118). Then: helix_qa duplicate-id + saveConfigLocked MkdirAll fixes; root `internal/{security,fix,testing}` dead-code disposition + `cmd/security-test` re-enable; containerized Snyk/SonarQube/`govulncheck`/`-race`; FAISS/consensus/capture stub completion; coverage-to-max; doc/course/website reconciliation.
+
