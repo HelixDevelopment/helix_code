@@ -203,6 +203,57 @@ func (cm *ConsensusManager) GetCurrentTerm() int {
 	return cm.currentTerm
 }
 
+// GetNodeID returns this node's stable consensus identity. It is the value a
+// peer uses as the peerID when canvassing this node for a vote, so a transport
+// (e.g. InProcessCluster) can route RequestVote / SendAppendEntries here.
+func (cm *ConsensusManager) GetNodeID() string {
+	cm.mutex.RLock()
+	defer cm.mutex.RUnlock()
+	return cm.nodeID
+}
+
+// Reconfigure injects a new peer set + VoteTransport into a running
+// ConsensusManager and resets it to a clean Follower so the next election round
+// canvasses the new peers over the new transport. It is the seam the SSH worker
+// pool uses to promote a single-node (empty-peer, no-transport) manager into a
+// genuine multi-node cluster member without tearing down + recreating the run
+// loop: startElection() / sendHeartbeats() read cm.peers + cm.transport under
+// the lock on every tick, so a locked swap takes effect on the next round.
+//
+// Resetting to Follower (rather than leaving a possibly-self-elected single
+// node as Leader) is required: a node that became leader of its own
+// single-node cluster MUST relinquish that stale leadership when it learns it
+// is actually one member of a larger cluster, otherwise the cluster would have
+// multiple leaders. The election timer is re-armed so a fresh, contested
+// election runs over the real transport.
+func (cm *ConsensusManager) Reconfigure(peers []string, transport VoteTransport) {
+	cm.mutex.Lock()
+	defer cm.mutex.Unlock()
+
+	cm.peers = append([]string(nil), peers...)
+	cm.transport = transport
+
+	// Relinquish any stale single-node leadership / candidacy: become a clean
+	// Follower so the real multi-node election decides leadership.
+	cm.state = Follower
+	cm.votedFor = ""
+	cm.leaderID = ""
+	cm.votes = make(map[string]bool)
+
+	// Re-arm the election timer so this follower starts a contested election
+	// promptly over the freshly-injected transport.
+	if cm.electionTimer != nil {
+		timeout := cm.electionTimeout
+		if timeout <= 0 {
+			timeout = 500 * time.Millisecond
+		}
+		cm.electionTimer.Reset(timeout)
+	}
+	if cm.onStateChanged != nil {
+		cm.onStateChanged(Follower)
+	}
+}
+
 // run is the main consensus loop
 func (cm *ConsensusManager) run(ctx context.Context) {
 	for {
