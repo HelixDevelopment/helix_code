@@ -1248,3 +1248,17 @@ All 6 phases / 31 tasks landed across rounds — P0 (baseline harness), P1 (LLM 
 - Verified GREEN on integrated tree: i18n test ok; e2e core stubs gone; `make bluff-detector` PASS exit 0; helix_qa S1B 3 PASS.
 - **Next waves:** Wave 2 (12-module discovery, running) → completes the report (§11.4.118). Then: helix_qa duplicate-id + saveConfigLocked MkdirAll fixes; root `internal/{security,fix,testing}` dead-code disposition + `cmd/security-test` re-enable; containerized Snyk/SonarQube/`govulncheck`/`-race`; FAISS/consensus/capture stub completion; coverage-to-max; doc/course/website reconciliation.
 
+### close-out¹⁴²ᵇ — round 468b: Wave 2 complete + Wave 3 (5 broken-build fixes) + Wave 4 partial — committed + PUSHED
+
+- **Wave 2 discovery complete** (12 modules) → `docs/CONSOLIDATED_REPORT_ADDENDUM.wave2.2026-06-04.md`. Confirmed-broken builds found: doc_processor (committed conflict markers), challenges (missing containers dep), llms_verifier outer (go.sum gitignored). Plus secret leak (postgres-init.sql), website soft-skip, helix_code FAISS-sim + consensus-stub.
+- **Wave 3 — 5 fixes committed + PUSHED to all upstreams** (each RED→GREEN, conductor-re-verified, fast-forward):
+  - doc_processor `c1b9b85` (i18n conflict-marker resolution + bundle.go embed fix) → github.
+  - challenges `8b423e3` (wire `digital.vasic.containers` replace + helix-deps.yaml) → github+gitlab.
+  - llms_verifier `9302b5c5` (un-ignore+track go.sum, dead replace + cruft removal; offline build proven) → github+gitlab.
+  - github_pages_website `edbca6c` (HTML soft-skip→honest exit-3 SKIP, podman script reconcile, untrack nginx logs) → github.
+  - root `25d41351` (postgres-init.sql CONST-042 secret removal + .env.example sanitize).
+- **helix_qa re-merge resolved + PUSHED** `84dac47`: merged origin/main (conduit/4K/subtitles work, was 2 commits ahead) on top of the S1B fix, then corrected 8 pre-flatten CamelCase go.mod replace paths → flat-layout (CONST-052). `4aaacd4..84dac47` → all 3 URLs. Builds clean.
+- **Wave 4 partial:** W4C (helix_code `internal/config` saveConfigLocked+ExportConfig `os.MkdirAll` — fresh-install fix, RED→GREEN+§1.1) committed into root; W4E (llm_orchestrator `80ead87` dead-replace + artifact removal) PUSHED → github. **W4A (FAISS), W4B (consensus), W4D (llm_provider fallback) were RATE-LIMITED mid-work → their unverified edits REVERTED** (no evidence report; re-run pending in Wave 4b).
+- **New defects queued** (not yet fixed): helix_qa duplicate-id `CLI-CODEX-001`; doc_processor `cmd/docprocessor` `runCLI` undefined + CLAUDE.md conflict markers; docker-compose.test.yml hardcoded test creds (CONST-042); helix_code FAISS-sim relabel + consensus bounded-timeout (W4A/W4B re-run); helix_code `internal/config` BackupConfig same MkdirAll gap.
+- **Lesson:** safe concurrent heavy-agent ceiling ≈5; 16 trips the account rate limit. Run mutating waves at ≤5, revert any rate-limited mid-flight edits (no evidence = no commit).
+

@@ -896,6 +896,15 @@ func (m *ConfigManager) saveConfigLocked() error {
 		return err
 	}
 
+	// Fresh-install safety: the config dir (e.g. ~/.config/helixcode/) may not
+	// exist yet on a clean machine. Create the parent tree before writing so
+	// SaveHelixConfig / `helix-config reset --force` succeed on first run.
+	if dir := filepath.Dir(m.configPath); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create config directory %q: %w", dir, err)
+		}
+	}
+
 	return os.WriteFile(m.configPath, data, 0644)
 }
 
@@ -913,6 +922,13 @@ func (m *ConfigManager) ExportConfig(path string) error {
 	m.mu.RUnlock()
 	if err != nil {
 		return err
+	}
+	// Create the destination directory tree if the caller-supplied path points
+	// into a non-existent directory (same fresh-install gap as saveConfigLocked).
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create export directory %q: %w", dir, err)
+		}
 	}
 	return os.WriteFile(path, data, 0644)
 }
