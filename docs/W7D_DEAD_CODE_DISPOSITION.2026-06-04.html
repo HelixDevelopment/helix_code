@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>W7D_DEAD_CODE_DISPOSITION.2026-06-04</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="w7d-root-level-dead-code-disposition-forensic-verdict-deletion-plan">W7D
+— Root-Level Dead-Code Disposition: Forensic Verdict + Deletion
+Plan</h1>
+<p><strong>Date:</strong> 2026-06-04 <strong>Status:</strong>
+INVESTIGATED + OPERATOR-APPROVED FOR DELETION — execution deferred to
+next session (<code>continue</code>). <strong>Operator decision
+(2026-06-04):</strong> “Delete all 5, HOWEVER double-check via git
+history how we got to these being unused — if we deliberately applied an
+alternative and left these, OK; but we MUST be careful it is NOT the
+other way around (that these are the real ones and the alternative is
+the mistake).”</p>
+<h2 id="targets-root-meta-repo-go-helpers-2978-loc">1. Targets (root
+meta-repo Go helpers, ~2978 LOC)</h2>
+<ul>
+<li><code>internal/security/</code> (1526 LOC — manager.go +
+scanners.go)</li>
+<li><code>internal/fix/</code> (885 LOC — security_fixer.go)</li>
+<li><code>internal/testing/</code> (567 LOC —
+security_integration.go)</li>
+<li><code>internal/theme/</code> (9 LOC — 5 hex color consts)</li>
+<li><code>cmd/security-test/</code> (23 LOC — runtime-disabled logging
+stub)</li>
+</ul>
+<h2
+id="supersession-direction-forensic-the-operators-huge-mistake-check-conclusive-safe-to-delete-root">2.
+Supersession-direction forensic (the operator’s “huge mistake” check) —
+CONCLUSIVE: SAFE TO DELETE ROOT</h2>
+<p><strong>(A) Live-wiring proves the INNER copies are the real/running
+code, root has zero live consumers.</strong> Both the root meta-repo and
+inner <code>helix_code/</code> declare
+<code>module dev.helix.code</code> (two modules, same path), so inner
+<code>dev.helix.code/internal/...</code> imports resolve to the INNER
+packages. Evidence (<code>grep</code> of <code>helix_code/cmd/</code>):
+- <code>helix_code/cmd/security_test/main.go:10</code> imports
+<code>dev.helix.code/internal/security</code> → INNER. -
+<code>helix_code/cmd/security_fix/main.go:9</code> imports
+<code>dev.helix.code/internal/fix</code> → INNER. -
+<code>helix_code/cmd/cli/main.go:44</code> (the <strong>main
+CLI</strong>) imports <code>dev.helix.code/internal/theme</code> →
+INNER. - ROOT <code>cmd/security-test/main.go</code> imports NOTHING
+(<code>go list -deps ./cmd/security-test</code> = only itself; it is the
+disabled stub). The root <code>internal/{security,fix,testing}</code>
+form a closed <code>testing→security←fix</code> cluster with <strong>no
+root <code>cmd/</code> entry point</strong> reaching them.</p>
+<p><strong>(B) Recency confirms inner is forward, root is
+abandoned.</strong> - ROOT <code>internal/security</code>: last touched
+<code>062e11f8</code> 2026-05-12 (a compile-fix, NOT a deprecation). -
+INNER <code>helix_code/internal/security</code>: last touched
+<code>31c57a2a</code> 2026-05-29. - ROOT <code>internal/fix</code> +
+<code>cmd/security-test</code>: stuck at <code>5fcc5a49</code>
+2025-12-11 (“Auto-commit”) — ~6 months abandoned. - INNER
+<code>helix_code/internal/fix</code> + <code>cmd/security_test</code>:
+2026-05-29. - <code>submodules/security</code>
+(<code>digital.vasic.security</code>, canonical own-org):
+2026-06-03.</p>
+<p><strong>(C) The 062e11f8 commit message itself distinguishes
+them.</strong> It repaired root <code>internal/security</code> to make
+<code>go build ./...</code> pass, explicitly noting it is <em>“separate
+from Zero-Bluff P2-T01’s <code>HelixCode/internal/security/</code>”</em>
+— i.e. the INNER one is the planned/canonical implementation; the root
+one is the older (2025-11-08-created) separate artifact merely kept
+compiling.</p>
+<p><strong>Conclusion:</strong> We are NOT at risk of deleting the real
+implementation. The real, live, actively-maintained code is the inner
+(<code>helix_code/internal/*</code>, wired to live entry points
+incl. the main CLI) + the own-org <code>submodules/security</code>. The
+root copies are the genuinely-superseded, zero-consumer remnant.
+Deleting root is the correct direction and removes a CONST-051(B)/(C)
+own-org-code-duplicated-at-root violation. It is git-reversible
+(§9.2).</p>
+<p><strong>Honest residual (§11.4.6):</strong> No
+<code>go run ./cmd/security-test</code>-by-path invocation found in
+Makefile/scripts. Execution step below re-runs that sweep once more
+immediately before <code>git rm</code>.</p>
+<h2 id="deletion-plan-for-next-session-continue-execute-in-order">3.
+Deletion plan (for next-session <code>continue</code> — execute in
+order)</h2>
+<ol type="1">
+<li>Final ref-sweep:
+<code>grep -rn "internal/security\|internal/fix\|internal/testing\|cmd/security-test\|cmd/security_test" Makefile scripts/ .github 2&gt;/dev/null</code>
+(root-scope only; ignore <code>helix_code/**</code> matches which are
+the inner module) + <code>grep -rn "go run ./cmd/security-test"</code>.
+Any hit → STOP + re-evaluate.</li>
+<li><code>git rm -r internal/security internal/fix internal/testing internal/theme cmd/security-test</code>
+(root paths only).</li>
+<li><code>go build ./...</code> (root module) must still exit 0;
+<code>go vet ./...</code> clean.</li>
+<li>Commit + push (github + gitlab). Message cites this doc + the
+forensic verdict.</li>
+<li>Update CONTINUATION close-out + this doc’s Status →
+<code>Completed (deleted)</code>.</li>
+</ol>
+<h2 id="sources-verified-2026-06-04">Sources verified 2026-06-04</h2>
+<p>git show 062e11f8; git log –reverse/-1 on internal/{security,fix} +
+cmd/security-test + helix_code/internal/{security,fix} +
+helix_code/cmd/security_test; grep of helix_code/cmd/ imports; W7D agent
+<code>go list -deps ./cmd/security-test</code>.</p>
+</body>
+</html>
