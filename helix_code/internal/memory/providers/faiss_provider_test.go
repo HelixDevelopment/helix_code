@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -796,7 +797,7 @@ func TestFAISSProvider_ListIndexes(t *testing.T) {
 	indexes, err := provider.ListIndexes(ctx, "test")
 	require.NoError(t, err)
 	assert.Len(t, indexes, 1)
-	assert.Equal(t, "flat_simulation", indexes[0].Name)
+	assert.Equal(t, "flat_brute_force", indexes[0].Name)
 	assert.Equal(t, "Flat", indexes[0].Type)
 }
 
@@ -813,7 +814,7 @@ func TestFAISSProvider_CreateIndex_LogsMessage(t *testing.T) {
 	err := provider.Store(ctx, vectors)
 	require.NoError(t, err)
 
-	// CreateIndex should succeed but log a message about simulation
+	// CreateIndex should succeed but log a message about the pure-Go brute-force backend
 	config := &IndexConfig{Name: "test-index", Type: "IVF_FLAT"}
 	err = provider.CreateIndex(ctx, "test", config)
 	require.NoError(t, err) // Should not error
@@ -1246,6 +1247,57 @@ func TestFAISSProvider_PureGoNotice(t *testing.T) {
 	assert.NotContains(t, PureGoNotice, "simulated")
 	assert.Contains(t, PureGoNotice, "pure Go")
 	assert.Contains(t, PureGoNotice, "FAISSProvider")
+}
+
+// TestFAISSProvider_NoSimulationMisnomer is the GREEN regression guard for the
+// CONST-050(A) / Rule-2 fix: the FAISS provider is PRODUCTION-reachable (registered
+// in registry.go), and a production vector store that self-describes as a
+// "simulation" is a Rule-2 bluff — "simulation" implies fake/non-working while the
+// backend in fact performs real pure-Go brute-force vector search with real on-disk
+// JSON persistence. This test asserts the production source carries no
+// "simulation"/"simulate" misnomer. RED on the pre-fix artifact (17 hits); GREEN
+// after the rename to honest "pure-Go brute-force" language.
+//
+// §1.1 mutation proof: reintroducing the word "simulation" into faiss_provider.go
+// (e.g. renaming the index back to "flat_simulation") makes this test FAIL.
+func TestFAISSProvider_NoSimulationMisnomer(t *testing.T) {
+	src, err := os.ReadFile("faiss_provider.go")
+	require.NoError(t, err, "must be able to read the production source file")
+
+	lower := strings.ToLower(string(src))
+	assert.NotContains(t, lower, "simulation",
+		"production faiss_provider.go must not self-describe as a 'simulation' (Rule-2 / CONST-050(A) misnomer)")
+	assert.NotContains(t, lower, "simulate",
+		"production faiss_provider.go must not self-describe as 'simulate' (Rule-2 / CONST-050(A) misnomer)")
+}
+
+// TestFAISSProvider_HonestIndexNameAndMetadata is the runtime GREEN guard: the
+// listed index reports the honest "flat_brute_force" name and a "backend" metadata
+// key (not a "simulation" key), confirming the user-visible surface no longer claims
+// to be a simulation.
+//
+// §1.1 mutation proof: changing the runtime index name back to "flat_simulation" or
+// reintroducing a Metadata["simulation"] key makes this test FAIL.
+func TestFAISSProvider_HonestIndexNameAndMetadata(t *testing.T) {
+	provider, _, cleanup := setupFAISSProvider(t)
+	defer cleanup()
+
+	ctx := context.Background()
+	vectors := []*VectorData{
+		{ID: "vec-1", Vector: generateTestVector(128, 1.0), Collection: "test"},
+	}
+	require.NoError(t, provider.Store(ctx, vectors))
+
+	indexes, err := provider.ListIndexes(ctx, "test")
+	require.NoError(t, err)
+	require.Len(t, indexes, 1)
+
+	assert.Equal(t, "flat_brute_force", indexes[0].Name,
+		"index name must be the honest 'flat_brute_force', not 'flat_simulation'")
+	_, hasSimKey := indexes[0].Metadata["simulation"]
+	assert.False(t, hasSimKey, "index metadata must not carry a 'simulation' key")
+	assert.Equal(t, "pure-go-brute-force", indexes[0].Metadata["backend"],
+		"index metadata must honestly report the pure-Go brute-force backend")
 }
 
 // ========================================

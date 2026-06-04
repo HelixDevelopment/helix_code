@@ -40,15 +40,15 @@ type FAISSProvider struct {
 // compatibility but have limited or no effect in this pure-go implementation.
 type FAISSConfig struct {
 	IndexPath      string `json:"index_path"`      // Path for index files (used for persistence)
-	IndexType      string `json:"index_type"`      // Index type (accepted but not used - simulation uses brute force)
+	IndexType      string `json:"index_type"`      // Index type (accepted but not used - pure-Go backend uses brute force)
 	Dimension      int    `json:"dimension"`       // Vector dimension (validated on insert)
 	Metric         string `json:"metric"`          // Distance metric: "cosine", "euclidean", "dot" (cosine by default)
-	NList          int    `json:"nlist"`           // IVF parameter (accepted but not used in simulation)
-	NProbe         int    `json:"nprobe"`          // IVF search parameter (accepted but not used in simulation)
-	MemoryIndex    bool   `json:"memory_index"`    // Keep index in memory (always true in simulation)
-	GPUDevice      int    `json:"gpu_device"`      // GPU device ID (GPU not available in simulation)
+	NList          int    `json:"nlist"`           // IVF parameter (accepted but not used in pure-Go brute-force backend)
+	NProbe         int    `json:"nprobe"`          // IVF search parameter (accepted but not used in pure-Go brute-force backend)
+	MemoryIndex    bool   `json:"memory_index"`    // Keep index in memory (always true in pure-Go backend)
+	GPUDevice      int    `json:"gpu_device"`      // GPU device ID (GPU acceleration not available in pure-Go backend)
 	StoragePath    string `json:"storage_path"`    // Path for persistent storage
-	Compression    bool   `json:"compression"`     // Enable compression (not implemented in simulation)
+	Compression    bool   `json:"compression"`     // Enable compression (not implemented in pure-Go backend)
 	BatchSize      int    `json:"batch_size"`      // Batch size for operations
 	MaxConnections int    `json:"max_connections"` // Max concurrent connections (informational only)
 }
@@ -85,7 +85,7 @@ type indexPersistenceData struct {
 func NewFAISSProvider(config map[string]interface{}) (VectorProvider, error) {
 	faissConfig := &FAISSConfig{
 		IndexPath:      "./data/faiss/index",
-		IndexType:      "flat", // Default to flat (brute force) since that's what simulation does
+		IndexType:      "flat", // Default to flat (brute force) — the only index type this pure-Go backend implements
 		Dimension:      1536,
 		Metric:         "cosine",
 		NList:          100,
@@ -174,7 +174,7 @@ func NewFAISSProvider(config map[string]interface{}) (VectorProvider, error) {
 }
 
 // Initialize initializes the pure-go FAISS provider.
-// Note: This is a simulation - no native FAISS library is loaded.
+// Note: No native FAISS library is loaded; this is a real pure-Go brute-force vector store.
 func (p *FAISSProvider) Initialize(ctx context.Context, config interface{}) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -220,7 +220,7 @@ func (p *FAISSProvider) Start(ctx context.Context) error {
 		return nil
 	}
 
-	// Log GPU configuration notice (GPU not available in simulation)
+	// Log GPU configuration notice (GPU acceleration not available in pure-Go backend)
 	if p.config.GPUDevice >= 0 {
 		p.logger.Info("GPU device %d requested but not available in pure-go FAISS provider. "+
 			"Using CPU-based vector search. For GPU acceleration, integrate native FAISS via CGO.", p.config.GPUDevice)
@@ -576,7 +576,7 @@ func (p *FAISSProvider) GetCollection(ctx context.Context, name string) (*Collec
 	}, nil
 }
 
-// CreateIndex creates an index. In this simulation, indices are automatically created.
+// CreateIndex creates an index. In this pure-Go backend, indices are automatically created.
 // This method logs that IVF/HNSW optimizations are not available.
 func (p *FAISSProvider) CreateIndex(ctx context.Context, collection string, config *IndexConfig) error {
 	p.mu.RLock()
@@ -593,7 +593,7 @@ func (p *FAISSProvider) CreateIndex(ctx context.Context, collection string, conf
 	return nil
 }
 
-// DeleteIndex deletes an index. In this simulation, this is a no-op.
+// DeleteIndex deletes an index. In this pure-Go backend, this is a no-op (single brute-force index per collection).
 func (p *FAISSProvider) DeleteIndex(ctx context.Context, collection, name string) error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -620,14 +620,14 @@ func (p *FAISSProvider) ListIndexes(ctx context.Context, collection string) ([]*
 
 	return []*IndexInfo{
 		{
-			Name:      "flat_simulation",
+			Name:      "flat_brute_force",
 			Type:      "Flat",
 			State:     "ready",
 			CreatedAt: index.createdAt,
 			UpdatedAt: index.updatedAt,
 			Metadata: map[string]interface{}{
-				"simulation": true,
-				"note":       "This is a pure-go brute-force index, not native FAISS",
+				"backend": "pure-go-brute-force",
+				"note":    "This is a pure-go brute-force index, not native FAISS",
 			},
 		},
 	}, nil
@@ -723,7 +723,7 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 		ErrorCount:       errorCount,
 		Uptime:           uptime,
 		Metadata: map[string]interface{}{
-			"simulation":    true,
+			"backend":       "pure-go-brute-force",
 			"gpu_available": false,
 			"index_type":    "flat",
 			"note":          PureGoNotice,
@@ -731,7 +731,7 @@ func (p *FAISSProvider) GetStats(ctx context.Context) (*ProviderStats, error) {
 	}, nil
 }
 
-// Optimize triggers index optimization. In this simulation, it persists data to disk.
+// Optimize triggers index optimization. In this pure-Go backend, it persists data to disk.
 func (p *FAISSProvider) Optimize(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -832,7 +832,7 @@ func (p *FAISSProvider) Health(ctx context.Context) (*HealthStatus, error) {
 			"compute": "cpu",
 		},
 		Details: map[string]interface{}{
-			"simulation":    true,
+			"backend":       "pure-go-brute-force",
 			"gpu_available": false,
 			"native_faiss":  false,
 		},
@@ -860,7 +860,7 @@ func (p *FAISSProvider) GetCapabilities() []string {
 		"collection_management",
 		"backup_restore",
 		"persistence",
-		// Listed for API compatibility but not functional in simulation:
+		// Listed for API compatibility but not functional in pure-Go brute-force backend:
 		// "gpu_acceleration", "ivf_indexing", "hnsw_indexing", "compression"
 	}
 }

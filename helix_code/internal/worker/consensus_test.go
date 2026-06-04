@@ -210,23 +210,40 @@ func TestConsensusManager_GetQuorumSize(t *testing.T) {
 }
 
 func TestConsensusManager_StateTransitions(t *testing.T) {
+	// §11.4.120 reconciliation: this test previously asserted that
+	// startElection() with peers but no transport LEFT the node Candidate.
+	// That was the pre-fix LIVELOCK behaviour (a node stuck Candidate
+	// forever). The bounded-safety fix now steps such a node DOWN to
+	// Follower, so the test is reconciled to assert the NEW correct
+	// mechanism while still exercising the full Follower→Candidate→Leader
+	// transition via the candidacy + becomeLeader path.
 	cm := NewConsensusManager(ConsensusConfig{
 		NodeID: "node-1",
-		Peers:  []string{"node-2"}, // Add peer to prevent immediate leader election
+		Peers:  []string{"node-2"},
 	})
 
 	// Start as follower
 	assert.Equal(t, Follower, cm.state)
 
-	// Become candidate during election
+	// A multi-peer election with NO transport cannot gather a quorum, so
+	// the round MUST end with a clean step-down to Follower — NEVER leave
+	// the node stuck as Candidate (the old livelock).
 	cm.startElection()
+	assert.Equal(t, Follower, cm.state, "bounded-safety: no-transport multi-peer election steps down, never stuck Candidate")
+	assert.Equal(t, 1, cm.currentTerm, "election round still bumped the term")
+
+	// The candidate→leader transition itself is exercised directly: mark
+	// candidate, then win.
+	cm.mutex.Lock()
+	cm.state = Candidate
+	cm.mutex.Unlock()
 	assert.Equal(t, Candidate, cm.state)
 
-	// Become leader
+	cm.mutex.Lock()
 	cm.becomeLeader()
+	cm.mutex.Unlock()
 	assert.Equal(t, Leader, cm.state)
 	assert.True(t, cm.IsLeader())
-	assert.Equal(t, 1, cm.currentTerm)
 }
 
 func TestConsensusManager_HeartbeatMechanism(t *testing.T) {
@@ -300,18 +317,26 @@ func TestConsensusManager_VoteResponseHigherTerm(t *testing.T) {
 }
 
 func TestConsensusManager_BecomeLeader_WithPeers(t *testing.T) {
+	// §11.4.120 reconciliation: previously asserted startElection() left the
+	// node Candidate (the pre-fix livelock). The bounded-safety fix steps a
+	// no-transport multi-peer candidate down to Follower. The test now
+	// asserts that NEW correct behaviour, then exercises becomeLeader().
 	cm := NewConsensusManager(ConsensusConfig{
 		NodeID:            "node-1",
 		Peers:             []string{"node-2", "node-3"},
 		HeartbeatInterval: 10 * time.Millisecond,
+		ElectionTimeout:   50 * time.Millisecond,
 	})
 
-	// Start election
+	// No-transport multi-peer election → clean step-down to Follower.
 	cm.startElection()
-	assert.Equal(t, Candidate, cm.state)
+	assert.Equal(t, Follower, cm.state, "bounded-safety: steps down, not stuck Candidate")
 
-	// Simulate receiving enough votes
+	// Drive the winning transition explicitly.
+	cm.mutex.Lock()
+	cm.state = Candidate
 	cm.becomeLeader()
+	cm.mutex.Unlock()
 
 	assert.Equal(t, Leader, cm.state)
 	// GetLeader() returns nodeID when state is Leader
