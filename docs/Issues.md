@@ -589,29 +589,27 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-051 — helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout)
+## HXC-056 — 7 submodules: CONST-052 capitalised replace => ../PliniusCommon (dir is plinius_common)
 
 **Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-**Assigned-To:** Claude
+**Type:** Bug
+**Severity:** Medium
 
-Owned-submodule health sweep (D-2): helix_llm (internal/knowledge/embedding_providers.go) + helix_memory (pkg/provider/adapter.go) fail to build standalone because their go.mod 'replace' directives target ../../vasic-digital/<Module> sibling dirs not materialized in the HelixCode layout. CONST-051(C) requires deps resolvable from the project root (submodules/<name>). The other 8/24 packages build+test ok; only the replace-dep-needing packages fail. Investigation: confirm whether HelixCode's build actually compiles these (vs reference/standalone), then rewire replace paths to the root submodule layout OR document the standalone-build requirement. Not breaking helix_code's own build. Found by D-2 health sweep.
+auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub, ouroborous, veritas each have go.mod line replace digital.vasic.pliniuscommon => ../PliniusCommon; capitalised dir absent, lowercase sibling plinius_common exists; go build ./... fails on all 7.
 
-## HXC-054 — leak_detector parallel test flake — §11.4.50 determinism
+## HXC-057 — recovery go.mod missing require+replace for digital.vasic.concurrency (pkg/breaker import unwired)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+
+recovery/pkg/breaker/breaker.go imports digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no require/replace for the concurrency sibling; go build ./... fails: no required module provides package. Sibling submodules/concurrency provides pkg/breaker.
+
+## HXC-058 — helix_agent go build fails on vendored third-party cli_agents/continue test fixture (quarantine)
 
 **Status:** Queued
 **Type:** Bug
 **Severity:** Low
 
-Discovery sweep: leak_detector test exhibits non-deterministic PASS/FAIL under parallel execution (timing-sensitive), violating §11.4.50 determinism; needs forensic root-cause before a deterministic fix. Open.
-
-## HXC-055 — formatters brittle cat --version probe + go_hello fixtures break go build
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Low
-
-Discovery sweep: formatters test relies on brittle 'cat --version' (§11.4.81 cross-platform), and committed go_hello fixture sources break a tree-wide go build; both need isolation/fixing. Open.
+helix_agent go build ./... fails ONLY in vendored third-party cli_agents/continue/ subtree (upstream continue project test fixture with bogus relative import); no owned dev.helix.agent package fails; needs build-exclusion/quarantine of the vendored fixture subtree, not an owned-code fix.
 

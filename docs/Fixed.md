@@ -292,3 +292,32 @@ submodules/conversation/go.mod line 24 replace digital.vasic.messaging pointed a
 
 verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.yaml fixed_summary node perpetually STALE because generate_fixed_summary.sh writes the file as a side-effect and prints a 'wrote ...' status line to stdout, while docs_chain captures stdout as content — content is correct+deterministic, the node I/O contract needs a stdout mode or a writes-file declaration; (2) issues context reports a §11.4.6 CONFLICT (both issues_md + items_db dirty vs stale state.json baseline) though MD⇄DB are verified byte-identical via db-to-md — needs a baseline refresh. governance context already in-sync this session.
 
+## HXC-051 — helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-051/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Owned-submodule health sweep (D-2): helix_llm (internal/knowledge/embedding_providers.go) + helix_memory (pkg/provider/adapter.go) fail to build standalone because their go.mod 'replace' directives target ../../vasic-digital/<Module> sibling dirs not materialized in the HelixCode layout. CONST-051(C) requires deps resolvable from the project root (submodules/<name>). The other 8/24 packages build+test ok; only the replace-dep-needing packages fail. Investigation: confirm whether HelixCode's build actually compiles these (vs reference/standalone), then rewire replace paths to the root submodule layout OR document the standalone-build requirement. Not breaking helix_code's own build. Found by D-2 health sweep.
+
+## HXC-054 — leak_detector parallel test flake — §11.4.50 determinism
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-054/evidence.md
+**Severity:** Low
+
+Discovery sweep: leak_detector test exhibits non-deterministic PASS/FAIL under parallel execution (timing-sensitive), violating §11.4.50 determinism; needs forensic root-cause before a deterministic fix. Open.
+
+## HXC-055 — formatters brittle cat --version probe + go_hello fixtures break go build
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-055/evidence.md
+**Severity:** Low
+
+Discovery sweep: formatters test relies on brittle 'cat --version' (§11.4.81 cross-platform), and committed go_hello fixture sources break a tree-wide go build; both need isolation/fixing. Open.
+
