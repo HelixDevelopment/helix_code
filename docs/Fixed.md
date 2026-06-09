@@ -241,3 +241,25 @@ Hermetic unit run found this test silently depends on a live Redis at 127.0.0.1:
 
 Authored + parse-validated a new LLM-free http: bank (banks/helixcode-system.yaml, 11 cases) covering /health, /api/v1/server/info, /api/v1/system/status(401), /api/v1/llm/providers + 404/405 negatives, using only helixqa-http runner-consumed fields. helixqa list → 11 cases; dry run fired real requests. Confident body asserts from captured responses; status-only/_skip where unverified (§11.4.6). helix_qa f18a5d3b. Live-run vs booted server queued.
 
+## HXC-049 — doc_processor TestAutomation_UpstreamsExist reads capital 'Upstreams' but canonical dir is lowercase 'upstreams' (CONST-052 case drift, deterministic FAIL)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-049/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Owned-submodule health sweep found internal automation_test.go:140 os.ReadDir("Upstreams") failing every run because the on-disk dir is lowercase 'upstreams' per CONST-052. Test-side fix '"Upstreams"→"upstreams"'. GREEN: ok digital.vasic.docprocessor. Commit ecb384f.
+
+## HXC-050 — event_bus NATS env-gated integration skips lack SKIP-OK markers required by the no-silent-skips gate (§11.4.98)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-050/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Owned-submodule health sweep found pkg/nats/integration_test.go:23,120 env-gated t.Skip (legitimately runs vs real NATS when NATS_URL is set) without literal SKIP-OK markers. Added 'SKIP-OK: #HXC-050 ...' to both; build+skip clean. Commit 1cae683.
+
