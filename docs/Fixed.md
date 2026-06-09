@@ -367,3 +367,48 @@ verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits si
 
 Deferred long-tail: CONST-052 renames (RESOLVED — none remain) + Codex/Cline reference-agent ports
 
+## HXC-059 — debate_orchestrator sandbox: ctx-cancel/timeout fails to kill child process tree on non-Linux (§11.4.81)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-059/evidence.md
+**Severity:** Medium
+
+testing/sandbox_other.go (!linux) killProcessGroup is a no-op so Setpgid is never set; on macOS cmd.Cancel SIGKILLs only the direct child and the sleep-30 grandchild survives. TestSandboxExecute_CtxCancel + TestSandboxExecute_TimeoutEnforced FAIL deterministically (elapsed ~30s vs 100ms cap). Linux process-group kill has no functioning non-Linux equivalent (§11.4.81 parity gap).
+
+## HXC-060 — debate_orchestrator challenges/runner/main.go:516 context cancel not called on all return paths (vet leak)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-060/evidence.md
+**Severity:** Low
+
+go vet: challenges/runner/main.go:516 the cancel function is not used on all paths (possible context leak); 571 return may be reached without using the cancel var defined on line 516. Owned-code vet finding.
+
+## HXC-061 — helix_agent legacy unit-test calls memory.GetRelevant with stale 2-arg signature (won't compile)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-061/evidence.md
+**Severity:** Medium
+
+tests/unit/debate_security_legacy/debate_security_test.go:335 calls memory.GetRelevant(string, number) but the current signature is (context.Context, string, int); go vet of the owned test tree fails to compile. Stale API call in test code.
+
+## HXC-062 — helix_specifier pkg/metrics copies sync.RWMutex by value (vet lock-copy, concurrency hazard)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-062/evidence.md
+**Severity:** Medium
+
+go vet: pkg/metrics/metrics.go:143 assignment copies lock value to cp; :163 return copies lock value — Metrics struct contains sync.RWMutex copied by value. Genuine owned-code concurrency hazard; build+tests pass but the copied mutex does not protect the original.
+
+## HXC-063 — panoptic StartRecording: unreachable recording-bootstrap after early return nil — recorder never starts
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-063/evidence.md
+**Severity:** Medium
+
+internal/platforms/desktop.go:304 unconditional return nil makes lines 305+ dead (go vet: 305:2 unreachable code): os.MkdirAll video-dir creation + background recorder process startup never execute, so StartRecording returns success without recording. Latent correctness defect; investigate per §11.4.124 (likely restore by removing the early return, not delete the block).
+
