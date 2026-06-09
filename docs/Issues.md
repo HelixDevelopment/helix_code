@@ -599,3 +599,13 @@ verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
+## HXC-051 — helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout)
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Owned-submodule health sweep (D-2): helix_llm (internal/knowledge/embedding_providers.go) + helix_memory (pkg/provider/adapter.go) fail to build standalone because their go.mod 'replace' directives target ../../vasic-digital/<Module> sibling dirs not materialized in the HelixCode layout. CONST-051(C) requires deps resolvable from the project root (submodules/<name>). The other 8/24 packages build+test ok; only the replace-dep-needing packages fail. Investigation: confirm whether HelixCode's build actually compiles these (vs reference/standalone), then rewire replace paths to the root submodule layout OR document the standalone-build requirement. Not breaking helix_code's own build. Found by D-2 health sweep.
+
