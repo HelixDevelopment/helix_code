@@ -6,8 +6,39 @@
 # Fixed.md is a pipe table:  | Closure | Title | Type | Status | Round | Commit(s) | Evidence |
 # This generator counts closures by Type and emits the aggregate-counts block.
 #
-# Idempotent. Usage: scripts/generate_fixed_summary.sh [--check]
+# Idempotent.
+#
+# Usage:
+#   scripts/generate_fixed_summary.sh                 # write docs/Fixed_Summary.md (+status line)
+#   scripts/generate_fixed_summary.sh --check         # verify docs/Fixed_Summary.md is in sync
+#   scripts/generate_fixed_summary.sh --stdout        # emit ONLY the summary content to stdout
+#                                                     #   (no status line, no file write)
+#   scripts/generate_fixed_summary.sh --stdout <in...> <outfile> [extra...]
+#                                                     #   docs_chain derive-node contract: write
+#                                                     #   canonical content to <outfile> (the last
+#                                                     #   positional), no status line, no side-effect
+#                                                     #   write to docs/Fixed_Summary.md (§11.4.106).
+#
+# The docs_chain engine (internal/runner.execTransform) invokes an exec
+# transform as `script <input_files...> <output_file> <extra_args...>` and reads
+# the produced <output_file> back as the node content (it does NOT capture
+# stdout). The default (no-flag) behavior — writing docs/Fixed_Summary.md and
+# printing a "wrote ..." status line to stdout — is UNCHANGED for the existing
+# script/gate callers; the docs_chain contract is honored only under --stdout.
 set -euo pipefail
+
+# --- Argument mode parsing -------------------------------------------------
+# Recognize --check / --stdout anywhere in the args; collect the remaining
+# positional args (docs_chain passes <input_files...> <output_file> [extra]).
+MODE="file"          # file | check | stdout
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    --check)  MODE="check"  ;;
+    --stdout) MODE="stdout" ;;
+    *)        POSITIONAL+=("$arg") ;;
+  esac
+done
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$ROOT/docs/Fixed.md"
@@ -49,15 +80,34 @@ NEW="$(cat <<EOF
 EOF
 )"
 
-if [[ "${1:-}" == "--check" ]]; then
-  if ! diff -u <(printf '%s\n' "$NEW") "$OUT" >/tmp/fixed_summary.diff 2>/dev/null; then
-    echo "CM-FIXED-SUMMARY-SYNC: FAIL — docs/Fixed_Summary.md is stale; run scripts/generate_fixed_summary.sh" >&2
-    cat /tmp/fixed_summary.diff >&2
-    exit 1
-  fi
-  echo "CM-FIXED-SUMMARY-SYNC: PASS — summary in sync with Fixed.md"
-  exit 0
-fi
-
-printf '%s\n' "$NEW" > "$OUT"
-echo "wrote $OUT (Bug=$BUG Feature=$FEAT Task=$TASK total=$TOTAL)"
+case "$MODE" in
+  check)
+    if ! diff -u <(printf '%s\n' "$NEW") "$OUT" >/tmp/fixed_summary.diff 2>/dev/null; then
+      echo "CM-FIXED-SUMMARY-SYNC: FAIL — docs/Fixed_Summary.md is stale; run scripts/generate_fixed_summary.sh" >&2
+      cat /tmp/fixed_summary.diff >&2
+      exit 1
+    fi
+    echo "CM-FIXED-SUMMARY-SYNC: PASS — summary in sync with Fixed.md"
+    exit 0
+    ;;
+  stdout)
+    # docs_chain derive-node contract: the LAST positional arg (if any) is the
+    # engine-supplied output file the node content is read back from; the
+    # preceding positionals are staged input files we don't need (SRC is read
+    # directly above). Write canonical content there — NO status line, NO write
+    # to docs/Fixed_Summary.md (so verify never mutates the live artefact and is
+    # not polluted by a "wrote ..." status line). With no positionals, emit to
+    # real stdout for ad-hoc inspection.
+    if [[ ${#POSITIONAL[@]} -gt 0 ]]; then
+      OUTFILE="${POSITIONAL[${#POSITIONAL[@]}-1]}"
+      printf '%s\n' "$NEW" > "$OUTFILE"
+    else
+      printf '%s\n' "$NEW"
+    fi
+    exit 0
+    ;;
+  *)
+    printf '%s\n' "$NEW" > "$OUT"
+    echo "wrote $OUT (Bug=$BUG Feature=$FEAT Task=$TASK total=$TOTAL)"
+    ;;
+esac

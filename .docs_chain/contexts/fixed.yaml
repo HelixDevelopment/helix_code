@@ -18,6 +18,6 @@ edges:
   - { type: derive-from, from: fixed_summary, to: fsum_html,     transform: md-to-html }
   - { type: derive-from, from: fsum_html,     to: fsum_pdf,      transform: html-to-pdf }
 transforms:
-  gen-fixed-summary: { exec: "scripts/generate_fixed_summary.sh" }
+  gen-fixed-summary: { exec: "scripts/generate_fixed_summary.sh", args: ["--stdout"] }
   md-to-html:        { builtin: pandoc-html }
   html-to-pdf:       { builtin: weasyprint-pdf }
