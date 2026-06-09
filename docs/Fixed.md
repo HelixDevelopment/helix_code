@@ -208,3 +208,14 @@ Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
+## HXC-044 — internal/cognee: AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of parsed GPU-use value
+
+**Status:** Obsolete (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-044/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
+

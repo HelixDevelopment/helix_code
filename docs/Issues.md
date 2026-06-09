@@ -599,16 +599,6 @@ verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-044 — internal/cognee: AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of parsed GPU-use value
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
-
 ## HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis
 
 **Status:** Queued
