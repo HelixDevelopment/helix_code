@@ -566,3 +566,43 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 ---
 
 *Last updated: 2026-05-29 — filed HXC-035 (POST /auth/register 400 internal_auth_failed_create_user — High, systematic-debugging in progress per §11.4.102); HXC-029 now 4/18 banks verified (full-qa-api + entity-management + admin-operations + security-validation, each 3×+mutation vs live server); filed HXC-034 (cascade constitution §11.4.102 into 68 owned submodules + gate — Task); constitution submodule §11.4.102 added+pushed (656b43a), meta pointer bumped; HXC-029 full-qa-api bank verified (§11.4.98); HXC-030 §11.4.99 sweep COMPLETE (38/38). Prior: filed HXC-033 (codegraph 0.9.7 index/sync crash + §11.4.79 own-org regression — Operator-blocked); HXC-032 FIXED+closed (LLMOrchestrator conflict markers; submodule d3956ad, helix_agent builds); reclassified HXC-031 (CONST-052 renames RESOLVED/none-remain, only Codex/Cline ports remain); HXC-029 §11.4.98 2 confirmed violations fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15 doc reconciliation. Prior: filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port long-tail) per operator "do it all"; added scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-059 — debate_orchestrator sandbox: ctx-cancel/timeout fails to kill child process tree on non-Linux (§11.4.81)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+
+testing/sandbox_other.go (!linux) killProcessGroup is a no-op so Setpgid is never set; on macOS cmd.Cancel SIGKILLs only the direct child and the sleep-30 grandchild survives. TestSandboxExecute_CtxCancel + TestSandboxExecute_TimeoutEnforced FAIL deterministically (elapsed ~30s vs 100ms cap). Linux process-group kill has no functioning non-Linux equivalent (§11.4.81 parity gap).
+
+## HXC-060 — debate_orchestrator challenges/runner/main.go:516 context cancel not called on all return paths (vet leak)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Low
+
+go vet: challenges/runner/main.go:516 the cancel function is not used on all paths (possible context leak); 571 return may be reached without using the cancel var defined on line 516. Owned-code vet finding.
+
+## HXC-061 — helix_agent legacy unit-test calls memory.GetRelevant with stale 2-arg signature (won't compile)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+
+tests/unit/debate_security_legacy/debate_security_test.go:335 calls memory.GetRelevant(string, number) but the current signature is (context.Context, string, int); go vet of the owned test tree fails to compile. Stale API call in test code.
+
+## HXC-062 — helix_specifier pkg/metrics copies sync.RWMutex by value (vet lock-copy, concurrency hazard)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+
+go vet: pkg/metrics/metrics.go:143 assignment copies lock value to cp; :163 return copies lock value — Metrics struct contains sync.RWMutex copied by value. Genuine owned-code concurrency hazard; build+tests pass but the copied mutex does not protect the original.
+
+## HXC-063 — panoptic StartRecording: unreachable recording-bootstrap after early return nil — recorder never starts
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+
+internal/platforms/desktop.go:304 unconditional return nil makes lines 305+ dead (go vet: 305:2 unreachable code): os.MkdirAll video-dir creation + background recorder process startup never execute, so StartRecording returns success without recording. Latent correctness defect; investigate per §11.4.124 (likely restore by removing the early return, not delete the block).
+
