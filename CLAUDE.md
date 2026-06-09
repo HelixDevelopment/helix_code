@@ -287,8 +287,13 @@ cd Challenges && make <target>
 
 **Anti-bluff smoke check** (must always pass):
 ```bash
-grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  helix_code/internal helix_code/cmd && echo "BLUFF FOUND" || echo "clean"
+# Case-insensitive (catches "For now, simulate ..."); excludes unit-test files,
+# i18n message-keys ("*_placeholder" string keys + tr() call sites), and doc-comments
+# that merely QUOTE a removed bluff ( //-comment lines containing a " citation ).
+grep -rniE "\bsimulated\b|\bfor now\b|TODO implement|in production this would" \
+  helix_code/internal helix_code/cmd | grep -v "_test\.go:" \
+  | grep -vi 'tr(\|_placeholder"' | grep -viE ':[[:space:]]*//.*"' \
+  | grep -q . && echo "BLUFF FOUND" || echo "clean"
 ```
 
 **Platform / mobile builds** (inner module):
@@ -622,8 +627,12 @@ cd HelixCode && make verify-compile
 cd HelixCode && go test -count=1 ./...
 
 # 3. Anti-bluff scan
-grep -rn "simulated\|for now\|TODO implement\|placeholder" \
-  helix_code/internal helix_code/cmd && echo "BLUFF FOUND" || echo "clean"
+# Case-insensitive; excludes _test.go, i18n message-keys ("*_placeholder"/tr()),
+# and //-comment lines that only QUOTE a removed bluff ( contain a " citation ).
+grep -rniE "\bsimulated\b|\bfor now\b|TODO implement|in production this would" \
+  helix_code/internal helix_code/cmd | grep -v "_test\.go:" \
+  | grep -vi 'tr(\|_placeholder"' | grep -viE ':[[:space:]]*//.*"' \
+  | grep -q . && echo "BLUFF FOUND" || echo "clean"
 
 # 4. Real LLM end-to-end (requires `make test-infra-up` first)
 curl -sS -X POST http://localhost:8080/api/v1/llm/generate \

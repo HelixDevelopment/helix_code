@@ -131,3 +131,36 @@
 | 2026-05-20 | HXC-006: HelixCode Speed Programme — 3-5× faster than competitor AI CLI agents (6-phase / 31-task) | Feature | Implemented (→ Fixed.md) | 400 | P5-T04 (this commit) + 30 prior task commits | Round-400 / CONST-048 / CONST-035. Operator mandate 2026-05-20: make HelixCode + owned-submodule code 3-5× faster than competitor AI CLI agents without breaking any feature or weakening anti-bluff posture. **All 6 phases / 31 tasks landed** — P0-T01..04 (baseline harness: pprof + benchmarks + competitor wall-clock + scenario runner), P1-T01..07 (LLM & startup wins), P2-T01..07 (context-build speed), P3-T01..05 (interactive & agent-loop levers), P4-T01..04 (profile-gated tuning), P5-T01..04 (dev-experience + submodule cascade + this close-out). **CONST-048 coverage ledger** committed at `docs/research/speed/05-coverage-ledger.md`: **29 PASS + 2 honestly-bounded PARTIAL + 0 DEFERRED**. PARTIALs reported truthfully — P5-T01 (`98315a14`) build/test parallelism tuning is landed and correct but the suite-wall-time before/after delta was not captured as a pasted benchmark; P5-T02 (`4ee771d7`) is a partial single-provider `internal/llm` split (Cerebras extracted to `internal/llm/providers/cerebras/`) — a full 18-provider extraction is genuinely infeasible without an import cycle (`factory.go` in `package llm` constructs every provider). **Headline measured wins** (each carries pasted in-session evidence per CONST-035, transcribed in the ledger): P1-T01 HTTP/2 transport ~2×, P1-T02 lazy Ollama discovery 67µs→2.7ns, P1-T03 lazy CLI startup ~8.85×, P1-T06 cache pre-warm ~7.6×, P2-T02 regexp hoist ~7.4×, P2-T03 repo-map cache ~10.6× warm, P2-T04 parallel repo-map ~1.67×, P2-T05 parallel search ~4.39×, P2-T06 incremental tree-sitter ~21×, P3-T01 small-model routing ~5.87×, P3-T02 diff edits 94-99% token cut, P3-T03 fast-apply ~516×, P3-T04 tool parallelism ~5.99×, P4-T01 PGO −46% CPU-bound. **Release-gate sweep (P5-T04):** anti-bluff smoke `grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd` (prod) = clean; `scripts/audit-const046-hardcoded-content.sh` ran exit 0 (speed work added no user-facing strings, no new hardcoded content); `scripts/verify-governance-cascade.sh` = 2 pre-existing failures = the already-tracked HXC-008 drift (verifier stale `Models` path + `helix_qa/CONSTITUTION.md` missing CONST-047..057), NOT speed-programme regressions. Two pre-existing defects surfaced during the programme filed honestly as **HXC-011** (helix_qa runner hollow sub-µs `PASSED` rows on desktop platform — §11.4 PASS-bluff) + **HXC-012** (`internal/llm/load_balancer.go` stat-collector data race under `-race`). No speed task introduced a regression, a new bluff pattern, or new hardcoded content. |
 
 *Last regenerated: 2026-05-20 (round 463 — HXC-003 closure: CONST-046 i18n migration campaign concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals through i18n seams with paired-mutation anti-bluff tests; the remaining ~55k audit-baseline hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Closed `Implemented (→ Fixed.md)` per CONST-057). Previous round 403 — HXC-008/HXC-007/HXC-009 closures. Round 400 — HXC-006 closure (HelixCode Speed Programme — 6 phases / 31 tasks). Earlier closures (P0-P5 phases) tracked via `docs/improvements/PROGRESS.md` + `docs/improvements/*evidence*.md`.*
+## HXC-037 — §11.4.103-141 + CONST-048..060 anchor-cascade backfill into 7 owned submodules (verify-governance-cascade.sh 30→0)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-037/evidence.md
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+verify-governance-cascade.sh reported 30 FAIL: debate_orchestrator/doc_processor/event_bus/helix_agent/llm_ops/llm_orchestrator/llm_provider each missing §11.9 + CONST-048..060 + §11.4.103-121 heading anchors in CONSTITUTION/CLAUDE/AGENTS.md. Authored deterministic additive scripts/backfill_anchor_cascade.sh (verbatim golden helix_qa cascade, idempotent, §11.4.122 no-removal); backfilled+committed+pushed all 7 to origin; verifier now 0 FAIL PASS.
+
+## HXC-040 — CLAUDE.md §9/§3.4 anti-bluff smoke command false-alarm (527 i18n/test hits) + case-sensitivity miss of BLUFF-001
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-040/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+The documented anti-bluff grep one-liner prints BLUFF FOUND on a clean codebase (527 hits = 218 _test.go + 123 i18n message-keys + 306 placeholder/template infra; 0 real production bluffs) AND was case-sensitive so it would miss the canonical '// For now, simulate generation' (capital F). Refined to word-bounded case-insensitive markers with _test.go/i18n/comment-citation exclusions; clean on real tree; §1.1 mutation-proven (planted 3 bluffs caught then reverted byte-identical). Both §3.4 and §9 updated.
+
+## HXC-041 — helixqa standalone HTTP bank-runner subcommand (helixqa http) drives http: banks vs live server without Playwright or LLM
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** docs/qa/HXC-041/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+HelixQA could only run banks via Playwright (absent) or Ollama LLM (absent); the LLM-free HTTPExecutor that drives helixcode-auth.yaml's 16 http: cases against the live server was wired only internally. Built 'helixqa http -bank <yaml> -base-url <url>' (cmd/helixqa/http.go +281, http_test.go +285, 2 mutation tests); build+tests green; live run vs booted helixcode = 15/16 PASS exit 1. helix_qa commit d6c084d6.
+
