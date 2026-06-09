@@ -175,22 +175,63 @@
 <h1
 id="helixcode-cli-agent-fusion--programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><em><em>Last updated: 2026-06-09 (close-out¹⁵⁹ — [EXT 2026-06-09e —
-D-8 DISCOVERY+FIX ROUND, QUEUE→ZERO (3rd time). After 09d cleared the
-tracked queue, ran D-8 discovery (32 more submodules vet+test, 4
-subagents) + inner helix_code app unit-test sweep (3 subagents, all 60
-internal/ packages + tests/unit). Surfaced + FIXED 6 NEW owned-code
-defects, all RED→GREEN with captured evidence + ff multi-mirror pushes:
-<strong>HXC-059</strong> debate_orchestrator non-Linux sandbox
-process-tree kill — implemented Setpgid+syscall.Kill(-pid,SIGKILL) macOS
-equivalent (was no-op); 2 tests 30s→5/5 PASS @0.10s (c82af2f).
-<strong>HXC-060</strong> debate_orchestrator runner ctx-leak vet (cancel
-on all paths). <strong>HXC-061</strong> helix_agent legacy test
-memory.GetRelevant 2→3-arg signature (25052066).
-<strong>HXC-062</strong> helix_specifier Snapshot() mutex-free
-MetricsSnapshot — vet copylocks clean, -race ok (57035ab).
-<strong>HXC-063</strong> panoptic StartRecording dead-duplicate removed
-+ recordingCmd restored (§11.4.124 — recorder was
+<p><em><em>Last updated: 2026-06-09 (close-out¹⁶⁰ — [EXT 2026-06-09f —
+REAL-INFRA DEEP SWEEP (operator chose "boot infra + deep sweep"). Booted
+host-safe minimal infra inside the running podman VM:
+<strong>postgres:16-alpine on REMAPPED 15432</strong> +
+<strong>redis:7-alpine on 16379</strong>
+(helixcode/helixcode_test_password/helixcode creds) — remapped because
+host 5432 is the operator's NATIVE postgres (PID 773, untouched
+§11.4.101) + 6379 a foreign QEMU VM (untouched). Containers
+<code>helixcode-pg-deepsweep</code> +
+<code>helixcode-redis-deepsweep</code> LEFT RUNNING for re-runs. Ran 3
+parallel sweeps: (A) inner-app integration vs real PG+Redis, (B)
+submodule DB/Redis integration, (C) -race on 40+ concurrency pkgs.
+<strong>-race: ALL CLEAN</strong>
+(worker/session/event/cache/agent/concurrency/rate_limiter/streaming — 0
+data races). Found+FIXED 3 real defects: <strong>HXC-065</strong> (REAL
+product bug) cache/pkg/postgres finite-TTL Set invisible to immediate
+Get — root-caused via live psql probe to a clock-DOMAIN skew
+(containerised PG ~671ms AHEAD of host Go clock; Set used Go-clock
+expires_at, Get filtered PG now()); fix=server-side
+<code>now()+make_interval</code>; RED×3→GREEN×3 + permanent §11.4.135
+guard w/ RED_MODE switch (cache 68a44ac). <strong>HXC-066</strong> inner
+internal/database integration hardcoded localhost:5433 → testDBConfig()
+reads DB_<em>/HELIX_DATABASE_</em> (ok vs 15432).
+<strong>HXC-067</strong> inner internal/redis stress read
+TEST_REDIS_</em> → now prefers HELIX_REDIS_</em> (ok vs 16379). cache
+pointer→68a44ac. meta HEAD <strong>5f98eae9</strong> (4 mirrors).
+<strong>TRACKER: 186 items, 0 OPEN, validate-OK.</strong> HONEST
+TERMINAL (host-safety §12.6): the remaining integration layer (LLM via
+Ollama, helixcode server :8080, browser via selenium/chromedp, SSH
+workers) needs HEAVY services booted, but host memory is pressured (404M
+unused / 6238M compressor) → booting Ollama+server+selenium would breach
+§12.6 host-safety, which the loop yields to unconditionally. That layer
+is memory-gated (external-dependency block per §11.4.94(A)). SESSION
+TOTAL: <strong>20 tickets closed (HXC-031, 038, 039, 051-067)</strong>,
+20+ submodules + inner app, full discovery
+(build+vet+unit+integration+race), 1 real product bug, all rock-solid
+evidence, no bluff. RESUME-NEXT: PG(15432)+Redis(16379) still up → run
+LLM/server/browser integration ONLY after freeing host memory (or on a
+higher-memory host) — boot Ollama+mock-LLM+helixcode-server+selenium,
+run the remaining integration/e2e + a helix_qa autonomous session. To
+tear down infra:
+<code>podman rm -f helixcode-pg-deepsweep helixcode-redis-deepsweep</code>.]
+PRIOR: [EXT 2026-06-09e — D-8 DISCOVERY+FIX ROUND, QUEUE→ZERO (3rd
+time). After 09d cleared the tracked queue, ran D-8 discovery (32 more
+submodules vet+test, 4 subagents) + inner helix_code app unit-test sweep
+(3 subagents, all 60 internal/ packages + tests/unit). Surfaced + FIXED
+6 NEW owned-code defects, all RED→GREEN with captured evidence + ff
+multi-mirror pushes: <strong>HXC-059</strong> debate_orchestrator
+non-Linux sandbox process-tree kill — implemented
+Setpgid+syscall.Kill(-pid,SIGKILL) macOS equivalent (was no-op); 2 tests
+30s→5/5 PASS @0.10s (c82af2f). <strong>HXC-060</strong>
+debate_orchestrator runner ctx-leak vet (cancel on all paths).
+<strong>HXC-061</strong> helix_agent legacy test memory.GetRelevant
+2→3-arg signature (25052066). <strong>HXC-062</strong> helix_specifier
+Snapshot() mutex-free MetricsSnapshot — vet copylocks clean, -race ok
+(57035ab). <strong>HXC-063</strong> panoptic StartRecording
+dead-duplicate removed + recordingCmd restored (§11.4.124 — recorder was
 silent-success-without-recording; cd61864). <strong>HXC-064</strong>
 cognee AMD-GPU parser tests load-flake — rocmSmiQueryTimeout const→var +
 2 parser tests raise to 30s; 10× -parallel 16 ok (§11.4.50). 4 submodule
@@ -408,7 +449,7 @@ subagent-driven. <strong>WRAP-UP STATE</strong>: tracker <strong>1 open
 (HXC-031) / 41 closed</strong>, DB 155 items validate-OK; meta HEAD
 <code>32fc6144</code> (theme cosmetic-color drift committed; theme.go
 only — assets/colors gitignored derivatives); ALL owned submodules
-committed+pushed to their org remotes (the 6 cli_agents_resources/</em>
+committed+pushed to their org remotes (the 6 cli_agents_resources/*
 "ahead" are third-party read-only refs, not ours); main repo pushed to
 gitlab + (github/origin/upstream via detached :443 catch-up —
 qa-results/wrapup_push.log); infra DOWN (8080/5432/6379 closed;
@@ -555,7 +596,7 @@ C</strong>: github catch-up detached. <strong>HXC-035 FILED</strong>
 <code>internal_auth_failed_create_user</code> on the live DB (blocks all
 authenticated paths); systematic-debugging dispatched per §11.4.102.
 Open set 5: HXC-029 (14 banks left), HXC-031, HXC-034 (waves 2+:
-vasic-digital/</em> + top-level), HXC-035 (debugging), + note
+vasic-digital/* + top-level), HXC-035 (debugging), + note
 debate_orchestrator needs §11.4.98/99/101 backfill. PRIOR close-out¹⁴⁹ —
 CONSTITUTION §11.4.102 ADDED + HXC-029 first bank verified +
 github-throughput root-caused. (1) <strong>§11.4.102</strong> (operator
@@ -575,9 +616,9 @@ vs the LIVE server (PG+Redis+helixcode :8080 stood up) — 3 deterministic
 runs 32 PASS/0 FAIL/2 honest-SKIP + mutation-proof; committed 26acc959,
 pushed. (3) <strong>github-push root cause FOUND</strong> via
 instrumented push (systematic-debugging per the new §11.4.102): upload
-throughput to github collapsed to <strong>~173 B/s</strong> (gitlab
-fast; reachability+MTU+auth+port all fine) → large binary-export packs
-time out = the broken-pipe; environmental (ISP/route), handled via
+throughput to github collapsed to **~173 B/s** (gitlab fast;
+reachability+MTU+auth+port all fine) → large binary-export packs time
+out = the broken-pipe; environmental (ISP/route), handled via
 gitlab-primary + detached-retry. Open set 3: HXC-029 (17 banks remain),
 HXC-031, HXC-034. PRIOR close-out¹⁴⁸ — HXC-030 §11.4.99 OPERATOR-DOC
 SWEEP COMPLETE + CLOSED. 8 doc batches (subagent-driven per §11.4.70 —
