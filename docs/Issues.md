@@ -609,16 +609,6 @@ verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits si
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
-## HXC-045 — internal/hooks: cancelled hook ExecutionResult leaves duration unset (should always be populated)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
-
 ## HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis
 
 **Status:** Queued

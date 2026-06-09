@@ -197,3 +197,14 @@ Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got 500 empty 
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-046/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
+## HXC-045 — internal/hooks: cancelled hook ExecutionResult leaves duration unset (should always be populated)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-045/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
+

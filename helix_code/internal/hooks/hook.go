@@ -324,6 +324,12 @@ func NewExecutionResult(hook *Hook) *ExecutionResult {
 func (r *ExecutionResult) Complete(err error) {
 	r.CompletedAt = time.Now()
 	r.Duration = r.CompletedAt.Sub(r.StartedAt)
+	if r.Duration <= 0 {
+		// HXC-045: a completed execution genuinely took a positive time; on fast
+		// hardware the monotonic clock delta can round to 0. Floor to the smallest
+		// representable unit so Duration is always a meaningful positive value.
+		r.Duration = time.Nanosecond
+	}
 
 	if err != nil {
 		r.Status = StatusFailed
@@ -337,6 +343,10 @@ func (r *ExecutionResult) Complete(err error) {
 func (r *ExecutionResult) Cancel() {
 	r.CompletedAt = time.Now()
 	r.Duration = r.CompletedAt.Sub(r.StartedAt)
+	if r.Duration <= 0 {
+		// HXC-045: see Complete — floor an instant cancel to a measurable positive duration.
+		r.Duration = time.Nanosecond
+	}
 	r.Status = StatusCanceled
 }
 
