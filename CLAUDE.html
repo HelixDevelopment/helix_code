@@ -590,8 +590,13 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> Challenges <span class="kw">&amp;&amp;</span> <span class="fu">make</span> <span class="op">&lt;</span>target<span class="op">&gt;</span></span></code></pre></div>
 <p><strong>Anti-bluff smoke check</strong> (must always pass):</p>
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Case-insensitive (catches &quot;For now, simulate ...&quot;); excludes unit-test files,</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># i18n message-keys (&quot;*_placeholder&quot; string keys + tr() call sites), and doc-comments</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># that merely QUOTE a removed bluff ( //-comment lines containing a &quot; citation ).</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rniE</span> <span class="st">&quot;\bsimulated\b|\bfor now\b|TODO implement|in production this would&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test\.go:&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-vi</span> <span class="st">&#39;tr(\|_placeholder&quot;&#39;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-viE</span> <span class="st">&#39;:[[:space:]]*//.*&quot;&#39;</span> <span class="dt">\</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> . <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
 <p><strong>Platform / mobile builds</strong> (inner module):</p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> desktop / desktop-nogui / desktop-linux / desktop-macos / desktop-windows</span>
@@ -929,17 +934,21 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href=
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./...</span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Anti-bluff scan</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Real LLM end-to-end (requires `make test-infra-up` first)</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is 2+2?&quot;,&quot;model&quot;:&quot;llama3.2&quot;}&#39;</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Must return real AI output, not &quot;simulated response&quot;.</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Governance still cascading?</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/verify-governance-cascade.sh</span></span></code></pre></div>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Case-insensitive; excludes _test.go, i18n message-keys (&quot;*_placeholder&quot;/tr()),</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># and //-comment lines that only QUOTE a removed bluff ( contain a &quot; citation ).</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rniE</span> <span class="st">&quot;\bsimulated\b|\bfor now\b|TODO implement|in production this would&quot;</span> <span class="dt">\</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test\.go:&quot;</span> <span class="dt">\</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-vi</span> <span class="st">&#39;tr(\|_placeholder&quot;&#39;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-viE</span> <span class="st">&#39;:[[:space:]]*//.*&quot;&#39;</span> <span class="dt">\</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> . <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Real LLM end-to-end (requires `make test-infra-up` first)</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is 2+2?&quot;,&quot;model&quot;:&quot;llama3.2&quot;}&#39;</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Must return real AI output, not &quot;simulated response&quot;.</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Governance still cascading?</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/verify-governance-cascade.sh</span></span></code></pre></div>
 <hr />
 <h2
 id="llmsverifier-constitutional-mandates-const-036-through-const-040">10.
