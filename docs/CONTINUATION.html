@@ -1,183 +1,98 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CONTINUATION</title>
-  <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
-</head>
-<body>
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-05-29 (close-out¹⁵⁵ — END-OF-DAY WRAP-UP.
-HXC-031 SCOPED (operator chose “scope first, plan no code”):
-implementation plan at
+<p><strong>Last updated: 2026-06-09 (close-out¹⁵⁶ — [EXT 2026-06-09b —
+ALL-3-OPTIONS PASS w/ 6 parallel streams: (1) 64-owned-submodule
+§11.4.122-139 cascade COMMITTED+PUSHED to mirrors (meta pointers bumped,
+commit cee5cdae); (2) CONST-055 gates G2/G11/G12/G13 → GREEN (G2
+false-positive comment reworded; G11 DB md-to-db re-sync 155 items; G12
+summaries regen; G13 3 footers→44/44) — G1 revealed DEEPER pre-existing
+gap (owned-submodule govfiles lack full §11.4.69-102 anchor chain —
+large backfill TODO), G7 (5 past commits no docs/qa) needs operator (no
+history-rewrite §11.4.113); (3) Option-1 clean-slate container boot
+ROOT-CAUSED + fixed: no .dockerignore → 20G context (.git 16G+.codegraph
+4.1G+helix_qa/tools/opensource) &gt; VM /var 9.3G; added .dockerignore
+(keeps the ~15 go.mod replace-dep submodules) — full containerized
+helixcode build STILL VM-disk-blocked (documented; needs bigger podman
+VM disk or operator); bin/helixcode rebuilt 44M + verify-compile GREEN;
+(4) +6 HelixQA banks=49 cases
+(memory/cors/static/worker/qa-screenshot/protected-subresources)
+authored vs real server.go routes, load-clean, pushed (helix_qa
+4934030); (5) docs_chain issues/docs_tree context drafts
+runtime-validated in /tmp (apply pending). RESUME: G1 anchor-backfill
+cascade; Option-3 boot PG+Redis+bin/helixcode → run 11 HelixCode banks +
+e2e challenge runner live; apply docs_chain docs_tree context; integrate
+inline secrets finding in docker-compose.helix.yml (CONST-042).]
+MULTI-PHASE SYNC + DOCS_CHAIN/HELIXQA INCORPORATION (operator:
+“fetch+pull all submodules recursively → constitution compliance →
+incorporate docs_chain + HelixQA → rebuild+boot+test; many parallel
+agents”). </strong>PHASE 1 DONE** — recursive sync of all 126
+submodules; restored 5 stray uncommitted working-tree deletions
+(filesystem/docs/ARCHITECTURE.md, helix_agent xss Challenge script,
+llms_verifier website sources, bridle plugin README — no stash/no
+commits-ahead, pure cruft); 65 owned subs → latest main (6 moved:
+<strong>constitution e1c0a66→9e96f6b</strong>, challenges, containers,
+helix_qa, llms_verifier, vision_engine), 61 third-party pins respected
+(§11.4.79); meta commit <code>4cd9dbec</code>. KNOWN ISSUE (third-party
+nested): <code>helix_agent/cli_agents/continue</code> pinned to dead
+upstream commit <code>3d264768</code> (‘not our ref’, force-pushed/GC’d
+upstream) — does not affect helix_agent’s recorded pointer.
+<strong>PHASE 2 — cascade DONE, gates+downstream PENDING</strong>:
+constitution advanced <strong>§11.4.121→139</strong> (+18 anchors incl
+§11.4.126 default-autonomous-loop, §11.4.131 session-resumption-file,
+§11.4.133 target-system+hardware-safety, §11.4.125/134 code-review-gate,
+§11.4.122 no-silent-removal, §11.4.135-139 audio batch); cascaded
+§11.4.122-139 into the 4 root manuals CLAUDE/AGENTS/QWEN/CRUSH (+580
+lines, commit <code>2f5ccc5d</code>). CONST-055 sweep baseline =
+<strong>6 gate FAILs</strong>: G1 cascade-verifier (pre-existing
+path-drift, 69 uninit-submodule paths, == with/without my edit), G2
+bluff-markers-in-prod, G7 docs/qa-evidence, G11 DB⇄MD drift, G12
+stale-summaries, G13 sources-verified-footers (3 docs). STILL TODO:
+cascade §11.4.122-139 DOWN into the 65 owned submodules (CONST-047) +
+per-anchor propagation gates; CONSTITUTION.md root mirror is at
+§11.4.102 (further behind). <strong>PHASE 3 — core DONE</strong>:
+incorporated <strong>vasic-digital/docs_chain @
+submodules/docs_chain</strong> (commit <code>2c8cf16</code>, flat
+§11.4.51, owned-reuse §11.4.74, leaf deps:[]); built bin/docs_chain
+(gitignored); registered the <code>governance</code> context
+(.docs_chain/contexts/governance.yaml) = 5 root manuals .md→.html→.pdf
+(pandoc-html + weasyprint-pdf); <strong>doctor OK (15 nodes/10 edges) /
+sync committed 10 siblings atomically / verify in-sync exit 0</strong>
+(evidence qa-results/docs_chain/20260609T055352Z); closed the §11.4.65
+missing-sibling gap (NONE of the 5 root manuals had html/pdf before);
+meta commit <code>02e302c0</code>. FOLLOW-UP: register docs_tree +
+issues(DB⇄MD) + per-submodule contexts; wire
+<code>docs_chain verify --all</code> into pre-build gate (the
+always-in-sync trigger) → mechanizes G11/G12. <strong>PHASE 4 —
+bridge+banks DONE, live-exec PENDING infra</strong>: helix_qa fixed (a)
+a CONST-052 go.mod <code>replace</code>-path drift (CamelCase→snake_case
+siblings; build now green) and (b) a REAL bridge defect — the Claude CLI
+dropped <code>--json</code> for <code>--output-format json</code>; fixed
+<code>pkg/llm/bridge_provider.go</code>, reconciled the 2 tests per
+§11.4.120, proven live (<code>claude --output-format json --print</code>
+→ <code>result:BRIDGE_OK</code>); authored 5 HelixCode self-driving
+banks (61 cases: health 12 / providers-verifier 13 / mcp 6 / auth 16 /
+task-workflow 14) against REAL server.go routes, all load-clean via
+<code>helixqa list</code> (offline parse-proof; live HTTP exec needs
+booted server). Honest gaps: no HTTP <code>/api/v1/llm/generate</code>
+(LLM is CLI-only), MCP is over <code>/ws</code> not HTTP, authed flows
+need a seeded+booted server. helix_qa <code>1ed8abf</code> PUSHED to all
+3 origins (github HelixDevelopment + gitlab + github vasic-digital);
+meta helix_qa pointer bumped to 1ed8abf this round. <strong>PHASE 5 —
+NOT STARTED</strong>: clean-slate rebuild of ALL containers + boot
+HelixCode system+deps + execute all tests/Challenges/HelixQA autonomous
+sessions with §11.4.5/69/107/108 physical evidence — the large remaining
+infra effort. <strong>RESUME PRIORITIES</strong>: (a) cascade
+§11.4.122-139 DOWN to 65 owned submodules + gates; (b) clear the 6
+CONST-055 gates (G11/G12 via a docs_chain <code>issues</code> context,
+G13 footers, G2 investigate prod bluff-markers, G7 docs/qa/<run-id>, G1
+fix verifier path-list drift); (c) docs_chain
+docs_tree+issues+per-submodule contexts + pre-build gate wiring; (d)
+more HelixQA banks + boot infra + run autonomous session + signoff; (e)
+Phase 5 full rebuild+boot+test. All 4 meta commits this round are
+LOCAL→being pushed to upstreams (no-force, fetch-first §11.4.113). PRIOR
+close-out¹⁵⁵ — END-OF-DAY WRAP-UP. HXC-031 SCOPED (operator chose “scope
+first, plan no code”): implementation plan at
 <code>docs/plans/HXC-031-codex-cline-port.md</code> (committed d57165fe,
 +.html/.pdf). Findings: “Codex Multimodal” = per-message text|image
 content blocks (base64 data-URL); “Cline Computer Use” = the
@@ -186,12 +101,12 @@ REUSE+EXTEND not build-fresh — Cline actuation already exists (P2-F23
 chromedp browser suite); vision = extend owned
 <code>vasic-digital/vision_engine</code>; the ONE new piece = multimodal
 request carriage (llm.Message is text-only + screenshot tool returns
-path not bytes). ~7-9 subagent sessions. </strong>3 OPERATOR DECISIONS
-PENDING before build** (resume here tomorrow): FORK-1 browser-only
-(recommended) vs OS-level computer-use; FORK-2 Claude-only-first
-(recommended) vs all-providers; FORK-3 VisionEngine reuse depth
-(encode-helpers-only recommended). Capability A (multimodal pipe) must
-land before Capability B (loop depends on it). <strong>RESUME
+path not bytes). ~7-9 subagent sessions. <strong>3 OPERATOR DECISIONS
+PENDING before build</strong> (resume here tomorrow): FORK-1
+browser-only (recommended) vs OS-level computer-use; FORK-2
+Claude-only-first (recommended) vs all-providers; FORK-3 VisionEngine
+reuse depth (encode-helpers-only recommended). Capability A (multimodal
+pipe) must land before Capability B (loop depends on it). <strong>RESUME
 TOMORROW</strong>: answer the 3 forks → start build Capability A first,
 subagent-driven. <strong>WRAP-UP STATE</strong>: tracker <strong>1 open
 (HXC-031) / 41 closed</strong>, DB 155 items validate-OK; meta HEAD
@@ -7117,5 +7032,102 @@ operator-gated mass doc-archival per
 <code>docs/DOC_RECONCILIATION_PLAN.2026-06-04.md</code>;
 submodule-internal doc sprawl.</li>
 </ul>
-</body>
-</html>
+<h3
+id="close-out¹⁴²ᵍ-round-468g-w7d-deletion-live-infra-proof-11.4.140141-cascade-complete-real-bug-fixes-committed-pushed">close-out¹⁴²ᵍ
+— round 468g: W7D deletion + LIVE infra proof + §11.4.140/141 cascade
+COMPLETE + real bug fixes — committed + PUSHED</h3>
+<p>Operator directive: resume under constitution <code>60e2d66</code>
+per §11.4.140/141 + §11.4.126 default autonomous loop; multi-wave
+subagent-driven (§11.4.70/103). All evidence under
+<code>qa-results/*-evidence.txt</code> (gitignored, CONST-053).
+Conductor re-verified every subagent claim (§11.4.108) — caught one “3/2
+vs 3/3” miscount + one branch-mismatch false-alarm + one incomplete (C1)
++ stray theme-regen artifacts.</p>
+<ul>
+<li><strong>W7D deletion</strong> <code>437714ac</code> (→
+github+gitlab): <code>git rm</code> of the entire superseded
+zero-consumer root Go cluster (~2978 LOC:
+<code>internal/{security,fix,testing,theme}</code> +
+<code>cmd/security-test</code>). Proven SAFE: baseline
+<code>go build</code>+<code>vet</code> GREEN → zero importers
+(<code>go list</code> reverse-dep) → post-deletion build names none of
+the deleted pkgs. (Root
+<code>./internal/...</code>+<code>./cmd/...</code> WAS exactly these 5
+pkgs — root is a thin governance module; all live code is inner
+<code>helix_code/</code> + submodules.)</li>
+<li><strong>LIVE RUNTIME PROOF</strong> (marquee,
+<code>qa-results/W2-INFRA-evidence.txt</code>): PG+Redis booted via
+podman (machine 5.8.2), <code>bin/helixcode</code> (make build, 43.6 MB
+arm64) connected to real PG+Redis, <code>GET /health</code>→<strong>HTTP
+200</strong> <code>{"status":"healthy"}</code>,
+<code>/api/v1/health</code>→200, auth→401. Gotcha: host port 6379 held
+by qemu (Android emulator) → used 6380.</li>
+<li><strong>§11.4.140/141 cascade COMPLETE</strong> — batches 1-6 across
+<strong>65 owned governance targets</strong> (52
+<code>submodules/*</code> + 13 already in batch1-2 +
+<code>github_pages_website</code>), each 3/3 governance files, every
+commit ls-remote-confirmed on its own branch (master|main), root
+pointers bumped in
+<code>e710ddb1</code>(4)+<code>b18b549f</code>(8)+<code>b3475890</code>(53).
+Verifier (F1) confirms 140/141 ALL-PASS fleet-wide. Excluded:
+<code>constitution</code> (had them), <code>mcp_servers</code>
+(THIRD-PARTY modelcontextprotocol/servers — reset, §11.4.51 exempt),
+<code>cli_agents/bridle</code> (unrelated drift).</li>
+<li><strong>G14 docs_chain pre-build gate</strong>
+<code>a9ccc1c6</code>: <code>verify-all-constitution-rules.sh</code>
+runs <code>docs_chain verify</code> (§11.4.106),
+exit0=PASS/non0=FAIL/engine-absent=honest-SKIP; §1.1-proven
+(marker→STALE FAIL→restore→PASS). Same commit:
+<code>verify-governance-cascade.sh</code> COVENANT114_ANCHORS extended
+→§11.4.103-141; voice <code>errors.Is</code> SKIP fix (real bug —
+<code>==</code> bypassed the no-mic SKIP).</li>
+<li><strong>Real bug fixes</strong> (all RED→GREEN + §1.1,
+conductor-verified <code>ok</code>): config <code>${VAR:default}</code>
+expansion (<code>81f3c482</code>/C1 — root-caused: Viper does no shell
+expansion → redis.host literal → “too many colons”); deployment
+<code>generateDeploymentID</code> nanosecond-collision → atomic counter;
+deployment perf-check <code>numCPU*10=110%</code> + throughput=0 → real
+micro-benchmark + timed CPU spin (<code>81f3c482</code>). helixqa banks:
+<strong>2761 cases, <code>list -banks</code> exit 0</strong>.</li>
+</ul>
+<p>Root commits this round (all → github+gitlab): <code>437714ac</code>
+(W7D), <code>e710ddb1</code> (batch1 ptrs), <code>a9ccc1c6</code>
+(voice+G14+verifier-ext), <code>b18b549f</code> (batch2 ptrs),
+<code>b3475890</code> (batch3-6 ptrs / cascade COMPLETE),
+<code>81f3c482</code> (config+deployment fixes),
+<code>&lt;this&gt;</code> (CONTINUATION 468g).</p>
+<ul>
+<li><strong>READY-BUT-UNCOMMITTED (next <code>continue</code>):</strong>
+<code>.docs_chain/contexts/{issues,fixed}.yaml</code> authored (doctor
+exit0; verify=STALE until <code>docs_chain sync</code> generates exports
+— activate by running sync then commit).
+<code>helix_code/internal/config/redis_host_expansion_test.go</code> RED
+guard is committed.</li>
+<li><strong>NEXT SESSION — execute in order:</strong> (1)
+<strong>§11.4.103–121 backfill</strong> (19 H2 anchors) into all 66
+targets ×3 governance files = 198 files (same mechanical cascade as
+140/141; anchor text in <code>constitution/Constitution.md</code>) +
+root <code>CONSTITUTION.md</code> §11.4.103-141 (39 anchors). (2)
+<strong>verifier defects</strong> (F1): add <code>exit $FAILURES</code>
+to <code>verify-governance-cascade.sh</code> + rewrite stale
+<code>docs/improvements/submodule_owned.txt</code> paths →
+<code>submodules/&lt;name&gt;</code> (69 false-failures). (3)
+<strong>docs_chain sync</strong> → activate issues/fixed contexts →
+commit. (4) <strong>§11.4.65 export-regen</strong> of the cascaded
+submodule <code>.md</code> (the 6 cascade waves added §-anchors to
+CLAUDE/AGENTS/CONSTITUTION but did NOT regen
+<code>.html</code>/<code>.pdf</code> siblings — CONST-066 follow-on).
+(5) <strong>live e2e challenge runner</strong>
+(<code>helix_code/tests/e2e/challenges</code>, owns PG/Redis). (6) Then
+W6D <code>ModelsEndpoint</code>-baseURL sweep; W6B
+<code>RemoteVoteTransport</code> cross-host.</li>
+<li><strong>OPERATOR DECISIONS NEEDED (§11.4.122 — did NOT
+auto-act):</strong> pre-existing uncommitted <strong>deletions</strong>
+of XSS security content — <code>cli_agents/bridle</code> deleted
+xss-scanner README (425 lines); <code>submodules/helix_agent</code>
+deleted <code>xss_prevention_challenge.sh</code> (445 lines) + edited
+<code>cli_agents/continue</code>. Restore (<code>git checkout</code>)
+unless intentional. Also: non-deterministic theme-color regen writes to
+the W7D-deleted root <code>internal/theme/</code> path (latent — a
+generator has a stale relative output path).</li>
+</ul>
