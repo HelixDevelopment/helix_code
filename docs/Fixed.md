@@ -175,3 +175,14 @@ HelixQA could only run banks via Playwright (absent) or Ollama LLM (absent); the
 
 verify-cascade-coverage.sh required 6 challenge scripts each in debate_orchestrator + helix_agent. Authored 12 REAL scripts (no stubs): concurrent flood w/ p50/p95, sustained-load degradation budget, /dev/tcp malformed+slowloris chaos, multi-replica sha256 body-identity, CLI panic/leak detection; honest SKIP-OK when no env target. bash -n 12/12 PASS; real DDoS run 200/200 ok. Committed debate_orchestrator 19bd8e5b + helix_agent 6eee57e1.
 
+## HXC-043 — auth Login nil-DB panic causes HTTP 500: server advertises graceful no-DB operation but first /api/v1/auth/login dereferences nil s.db
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-043/evidence.md
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got 500 empty body). With db=nil (server's graceful no-DB path), helix_code/internal/auth/auth.go:156 (*AuthService).Login calls s.db.GetUserByUsername on nil s.db then nil-pointer panic then Gin Recovery then HTTP 500. Fix: guard nil s.db in Login and sibling db-touching auth paths, return clean 401/503. RED test exists: helixcode-auth.yaml HXC-AUTH-003 via helixqa http.
+

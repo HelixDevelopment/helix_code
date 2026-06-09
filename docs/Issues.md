@@ -599,16 +599,6 @@ verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-043 — auth Login nil-DB panic causes HTTP 500: server advertises graceful no-DB operation but first /api/v1/auth/login dereferences nil s.db
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** High
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got 500 empty body). With db=nil (server's graceful no-DB path), helix_code/internal/auth/auth.go:156 (*AuthService).Login calls s.db.GetUserByUsername on nil s.db then nil-pointer panic then Gin Recovery then HTTP 500. Fix: guard nil s.db in Login and sibling db-touching auth paths, return clean 401/503. RED test exists: helixcode-auth.yaml HXC-AUTH-003 via helixqa http.
-
 ## HXC-044 — internal/cognee: AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of parsed GPU-use value
 
 **Status:** Queued
@@ -648,14 +638,4 @@ Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95
 **Assigned-To:** Claude
 
 Hermetic unit run found this test silently depends on a live Redis at 127.0.0.1:6379 (no SKIP-OK §11.4.3/§11.4.98) AND asserts the error contains literal 'Redis' which the i18n-keyed error (internal_redis_failed_connect) no longer contains. Fix: SKIP-OK guard when no Redis + reconcile assertion. Evidence docs/qa/HXC-047/evidence.md (HEAD 54ab4e95).
-
-## HXC-048 — helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives)
-
-**Status:** Queued
-**Type:** Feature
-**Severity:** Low
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Authored + parse-validated a new LLM-free http: bank (banks/helixcode-system.yaml, 11 cases) covering /health, /api/v1/server/info, /api/v1/system/status(401), /api/v1/llm/providers + 404/405 negatives, using only helixqa-http runner-consumed fields. helixqa list → 11 cases; dry run fired real requests. Confident body asserts from captured responses; status-only/_skip where unverified (§11.4.6). helix_qa f18a5d3b. Live-run vs booted server queued.
 
