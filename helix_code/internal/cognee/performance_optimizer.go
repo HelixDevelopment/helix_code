@@ -1256,7 +1256,7 @@ func resetGPUUsageCacheForTest() {
 // rocmSmiQueryTimeout caps the rocm-smi shell-out. Same 2-second
 // budget as nvidia-smi — typical rocm-smi completion is 30-100ms,
 // 2s covers ROCm driver warmup on first invocation.
-const rocmSmiQueryTimeout = 2 * time.Second
+var rocmSmiQueryTimeout = 2 * time.Second // var (not const) so tests can raise it for load-robustness — HXC-064; prod default unchanged
 
 // rocmSmiCommand is overridable for tests. Production code MUST use
 // the exec.CommandContext factory; tests inject a fake via PATH

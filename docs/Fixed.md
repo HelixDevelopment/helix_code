@@ -412,3 +412,12 @@ go vet: pkg/metrics/metrics.go:143 assignment copies lock value to cp; :163 retu
 
 internal/platforms/desktop.go:304 unconditional return nil makes lines 305+ dead (go vet: 305:2 unreachable code): os.MkdirAll video-dir creation + background recorder process startup never execute, so StartRecording returns success without recording. Latent correctness defect; investigate per §11.4.124 (likely restore by removing the early return, not delete the block).
 
+## HXC-064 — cognee AMD-GPU parser tests flake under parallel load (rocm-smi fake subprocess signal-killed before 2s timeout, §11.4.50)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-064/evidence.md
+**Severity:** Low
+
+internal/cognee TestProbeAMDGPU_HandlesAltKeyName + _GpuUtilization call queryAMDGPUUsage() which execs a fake rocm-smi via a 2s const timeout; under heavy batch/parallel host load the echo subprocess is signal-killed before completing → product correctly returns sentinel -1 but the parser tests assert 33/77 → non-deterministic FAIL. Product correct; test timeout load-fragile. Fix: make rocmSmiQueryTimeout an overridable var (prod default unchanged) + parser tests raise it.
+
