@@ -175,7 +175,39 @@
 <h1
 id="helixcode-cli-agent-fusion--programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><em><em>Last updated: 2026-06-09 (close-out¹⁵⁸ — [EXT 2026-06-09d —
+<p><em><em>Last updated: 2026-06-09 (close-out¹⁵⁹ — [EXT 2026-06-09e —
+D-8 DISCOVERY+FIX ROUND, QUEUE→ZERO (3rd time). After 09d cleared the
+tracked queue, ran D-8 discovery (32 more submodules vet+test, 4
+subagents) + inner helix_code app unit-test sweep (3 subagents, all 60
+internal/ packages + tests/unit). Surfaced + FIXED 6 NEW owned-code
+defects, all RED→GREEN with captured evidence + ff multi-mirror pushes:
+<strong>HXC-059</strong> debate_orchestrator non-Linux sandbox
+process-tree kill — implemented Setpgid+syscall.Kill(-pid,SIGKILL) macOS
+equivalent (was no-op); 2 tests 30s→5/5 PASS @0.10s (c82af2f).
+<strong>HXC-060</strong> debate_orchestrator runner ctx-leak vet (cancel
+on all paths). <strong>HXC-061</strong> helix_agent legacy test
+memory.GetRelevant 2→3-arg signature (25052066).
+<strong>HXC-062</strong> helix_specifier Snapshot() mutex-free
+MetricsSnapshot — vet copylocks clean, -race ok (57035ab).
+<strong>HXC-063</strong> panoptic StartRecording dead-duplicate removed
++ recordingCmd restored (§11.4.124 — recorder was
+silent-success-without-recording; cd61864). <strong>HXC-064</strong>
+cognee AMD-GPU parser tests load-flake — rocmSmiQueryTimeout const→var +
+2 parser tests raise to 30s; 10× -parallel 16 ok (§11.4.50). 4 submodule
+pointers bumped. <strong>DISCOVERY COVERAGE NOW: D-6 all 63 submodules
+build + D-7 18 core vet+test + D-8 32 more vet+test + inner app
+build/vet/all-60-internal-pkgs+tests/unit — essentially complete at
+build/vet/unit-test layer; 27+ submodules confirmed fully
+clean.</strong> Honest remaining gaps (next scope, infra-gated): deep
+-race/integration/stress sweeps need booted PG/Redis/Ollama; helix_qa
+full suite &gt;8min. meta HEAD <strong>43521764</strong> (all 4
+mirrors). <strong>TRACKER: 183 items, 0 OPEN, validate-OK.</strong>
+SESSION TOTAL: <strong>17 tickets closed (HXC-031, 038, 039, 051-064),
+19 submodules + inner app fixed/verified</strong>, all rock-solid
+evidence, no bluff. RESUME-NEXT: queue empty + discovery thorough →
+await operator's next scope OR (if continuing) boot infra
+(PG+Redis+Ollama+bin/helixcode) for deep integration/-race/stress sweeps
++ helix_qa full autonomous session.] PRIOR: [EXT 2026-06-09d —
 AUTONOMOUS-LOOP, QUEUE→ZERO. Closed the ENTIRE workable-items queue this
 session with rock-solid captured evidence + ff-only multi-mirror pushes
 (no force §11.4.113): <strong>HXC-038</strong> docs_chain rebaseline
