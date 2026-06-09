@@ -186,3 +186,14 @@ verify-cascade-coverage.sh required 6 challenge scripts each in debate_orchestra
 
 Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got 500 empty body). With db=nil (server's graceful no-DB path), helix_code/internal/auth/auth.go:156 (*AuthService).Login calls s.db.GetUserByUsername on nil s.db then nil-pointer panic then Gin Recovery then HTTP 500. Fix: guard nil s.db in Login and sibling db-touching auth paths, return clean 401/503. RED test exists: helixcode-auth.yaml HXC-AUTH-003 via helixqa http.
 
+## HXC-046 — internal/memory/providers: generateThreadID() non-unique under fast back-to-back calls (timestamp-only, same-nanosecond collision)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-046/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-046/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
+

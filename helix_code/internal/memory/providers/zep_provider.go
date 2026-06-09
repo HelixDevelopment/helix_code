@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"dev.helix.code/internal/logging"
@@ -1323,8 +1324,13 @@ func containsAt(s, substr string) bool {
 	return false
 }
 
+// threadIDCounter guarantees uniqueness when generateThreadID is called
+// multiple times within the same nanosecond (HXC-046: on fast hardware two
+// back-to-back time.Now().UnixNano() reads can return the identical value).
+var threadIDCounter atomic.Uint64
+
 func generateThreadID() string {
-	return fmt.Sprintf("thread-%d", time.Now().UnixNano())
+	return fmt.Sprintf("thread-%d-%d", time.Now().UnixNano(), threadIDCounter.Add(1))
 }
 
 // safeString returns the string value or empty string if pointer is nil
