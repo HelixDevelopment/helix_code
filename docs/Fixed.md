@@ -164,3 +164,14 @@ The documented anti-bluff grep one-liner prints BLUFF FOUND on a clean codebase 
 
 HelixQA could only run banks via Playwright (absent) or Ollama LLM (absent); the LLM-free HTTPExecutor that drives helixcode-auth.yaml's 16 http: cases against the live server was wired only internally. Built 'helixqa http -bank <yaml> -base-url <url>' (cmd/helixqa/http.go +281, http_test.go +285, 2 mutation tests); build+tests green; live run vs booted helixcode = 15/16 PASS exit 1. helix_qa commit d6c084d6.
 
+## HXC-042 — CONST-050(B) challenge-coverage gap: 12 missing challenge scripts in debate_orchestrator + helix_agent (ddos/stress/chaos/scaling/ui/ux)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-042/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+verify-cascade-coverage.sh required 6 challenge scripts each in debate_orchestrator + helix_agent. Authored 12 REAL scripts (no stubs): concurrent flood w/ p50/p95, sustained-load degradation budget, /dev/tcp malformed+slowloris chaos, multi-replica sha256 body-identity, CLI panic/leak detection; honest SKIP-OK when no env target. bash -n 12/12 PASS; real DDoS run 200/200 ok. Committed debate_orchestrator 19bd8e5b + helix_agent 6eee57e1.
+
